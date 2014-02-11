@@ -177,7 +177,12 @@ namespace Mantid
       loadDeadTimes(root);
 
       // Try to load detector grouping info
-      loadDetectorGrouping(root);
+      Workspace_sptr loadedGrouping;
+      if ( ! getPropertyValue("DetectorGroupingTable").empty() )
+      {
+        if ( loadedGrouping = loadDetectorGrouping(root) )
+          setProperty("DetectorGroupingTable", loadedGrouping);
+      }
 
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
@@ -396,11 +401,8 @@ namespace Mantid
      * Loads detector grouping.
      * @param root :: Root entry of the Nexus file to read from 
      */
-    void LoadMuonNexus1::loadDetectorGrouping(NXRoot& root)
+    Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot& root)
     {
-      if ( getPropertyValue("DetectorGroupingTable").empty() )
-        return;
-
       NXEntry dataEntry = root.openEntry("run/histogram_data_1");
 
       NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
@@ -428,7 +430,7 @@ namespace Mantid
           TableWorkspace_sptr table = createDetectorGroupingTable( grouping.begin(), grouping.end() );
 
           if ( table->rowCount() != 0 )
-            setProperty("DetectorGroupingTable", table);
+            return table;
         }
         else
         {
@@ -455,10 +457,12 @@ namespace Mantid
             if ( tableGroup->size() != static_cast<size_t>(m_numberOfPeriods) )
               throw Exception::FileError("Zero grouping for some of the periods", m_filename);
 
-            setProperty("DetectorGroupingTable", tableGroup);
+            return tableGroup;
           }
         }
       }
+
+      return Workspace_sptr();
     }
 
     /**
