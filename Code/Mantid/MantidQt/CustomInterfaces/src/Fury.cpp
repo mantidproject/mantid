@@ -166,7 +166,7 @@ namespace IDA
         m_furRange->setRange(range.first, range.second);
       }
       //set default value for width
-      m_furDblMng->setValue(m_furProp["EWidth"], 0.01);
+      m_furDblMng->setValue(m_furProp["EWidth"], 0.005);
       m_furPlot->replot();
     }
     catch(std::invalid_argument & exc)
