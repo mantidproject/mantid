@@ -80,7 +80,7 @@ namespace Kernel
   //---------------------------------------------------------------------------
 
   ///@cond TEMPLATE
-  template DLLExport class Mantid::Kernel::MaskedProperty<std::string>;
+  template MANTID_KERNEL_DLL class Mantid::Kernel::MaskedProperty<std::string>;
   ///@endcond TEMPLATE
 
 } // namespace API
