@@ -622,6 +622,104 @@ public:
     AnalysisDataService::Instance().deepRemoveGroup(detectorGroupingWSName);
   }
 
+  void test_autoGroup_singlePeriod()
+  {
+    ScopedWorkspace outWsEntry;
+
+    try
+    {
+      LoadMuonNexus1 alg;
+      alg.initialize();
+      alg.setPropertyValue("Filename", "emu00006473.nxs");
+      alg.setProperty("AutoGroup", true);
+      alg.setPropertyValue("OutputWorkspace", outWsEntry.name());
+      alg.execute();
+    }
+    catch(std::runtime_error& e)
+    {
+      TS_FAIL(e.what());
+      return;
+    }
+
+    auto outWs = boost::dynamic_pointer_cast<MatrixWorkspace>( outWsEntry.retrieve() );
+    TS_ASSERT(outWs);
+
+    if ( ! outWs )
+      return; // Nothing to check
+
+    TS_ASSERT_EQUALS( outWs->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS( outWs->blocksize(), 2000);
+
+    TS_ASSERT_EQUALS( outWs->readY(0)[0], 461 );
+    TS_ASSERT_EQUALS( outWs->readY(0)[1000], 192 );
+    TS_ASSERT_EQUALS( outWs->readY(0)[1998], 1 );
+
+    TS_ASSERT_EQUALS( outWs->readY(1)[0], 252 );
+    TS_ASSERT_EQUALS( outWs->readY(1)[1000], 87 );
+    TS_ASSERT_EQUALS( outWs->readY(1)[1998], 2 );
+  }
+
+  void test_autoGroup_multiPeriod()
+  {
+    ScopedWorkspace outWsEntry;
+
+    try
+    {
+      LoadMuonNexus1 alg;
+      alg.initialize();
+      alg.setPropertyValue("Filename", "MUSR00015189.nxs");
+      alg.setProperty("AutoGroup", true);
+      alg.setPropertyValue("OutputWorkspace", outWsEntry.name());
+      alg.execute();
+    }
+    catch(std::runtime_error& e)
+    {
+      TS_FAIL(e.what());
+      return;
+    }
+
+    auto outWs = boost::dynamic_pointer_cast<WorkspaceGroup>( outWsEntry.retrieve() );
+    TS_ASSERT(outWs);
+
+    if ( ! outWs )
+      return; // Nothing to check
+
+    TS_ASSERT_EQUALS( outWs->size(), 2 );
+
+    auto outWs1 = boost::dynamic_pointer_cast<MatrixWorkspace>( outWs->getItem(0) );
+    TS_ASSERT(outWs1);
+
+    if (outWs1)
+    {
+      TS_ASSERT_EQUALS( outWs1->getNumberHistograms(), 2);
+      TS_ASSERT_EQUALS( outWs1->blocksize(), 2000);
+
+      TS_ASSERT_EQUALS( outWs1->readY(0)[0], 82 );
+      TS_ASSERT_EQUALS( outWs1->readY(0)[458], 115 );
+      TS_ASSERT_EQUALS( outWs1->readY(0)[1997], 1 );
+
+      TS_ASSERT_EQUALS( outWs1->readY(1)[0], 6 );
+      TS_ASSERT_EQUALS( outWs1->readY(1)[458], 91 );
+      TS_ASSERT_EQUALS( outWs1->readY(1)[1997], 0 );
+    }
+
+    auto outWs2 = boost::dynamic_pointer_cast<MatrixWorkspace>( outWs->getItem(0) );
+    TS_ASSERT(outWs2);
+
+    if (outWs2) {
+      TS_ASSERT_EQUALS( outWs2->getNumberHistograms(), 2);
+      TS_ASSERT_EQUALS( outWs2->blocksize(), 2000);
+
+      TS_ASSERT_EQUALS( outWs2->readY(0)[0], 16 );
+      TS_ASSERT_EQUALS( outWs2->readY(0)[458], 132 );
+      TS_ASSERT_EQUALS( outWs2->readY(0)[1930], 0 );
+
+      TS_ASSERT_EQUALS( outWs2->readY(1)[0], 17 );
+      TS_ASSERT_EQUALS( outWs2->readY(1)[458], 81 );
+      TS_ASSERT_EQUALS( outWs2->readY(1)[1930], 1 );
+    }
+  }
+
   void test_loadRunInformation()
   {
     ScopedWorkspace outWsEntry;
