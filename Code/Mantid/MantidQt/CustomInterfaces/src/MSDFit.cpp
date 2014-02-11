@@ -1,11 +1,14 @@
+#include "MantidAPI/WorkspaceGroup.h"
+
 #include "MantidQtCustomInterfaces/MSDFit.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
-
 #include "MantidQtMantidWidgets/RangeSelector.h"
+
 
 #include <QFileInfo>
 
 #include <qwt_plot.h>
+#include <qwt_plot_curve.h>
 
 namespace MantidQt
 {
@@ -13,7 +16,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  MSDFit::MSDFit(QWidget * parent) : IDATab(parent), m_msdPlot(NULL), m_msdRange(NULL), m_msdDataCurve(NULL), 
+  MSDFit::MSDFit(QWidget * parent) : IDATab(parent), m_msdPlot(NULL), m_msdRange(NULL), m_msdDataCurve(NULL), m_msdFitCurve(NULL), 
     m_msdTree(NULL), m_msdProp(), m_msdDblMng(NULL)
   {}
   
@@ -52,7 +55,8 @@ namespace IDA
     connect(uiForm().msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
     connect(uiForm().msd_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
     connect(uiForm().msd_pbSequential, SIGNAL(clicked()), this, SLOT(sequential()));
-
+    connect(uiForm().msd_leSpectraMin, SIGNAL(editingFinished()), this, SLOT(plotInput()));
+    
     uiForm().msd_leSpectraMin->setValidator(m_intVal);
     uiForm().msd_leSpectraMax->setValidator(m_intVal);
   }
@@ -70,16 +74,15 @@ namespace IDA
     if ( uiForm().msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
 
-    if ( uiForm().msd_ckPlot->isChecked() ) pyInput += "plot = True\n";
-    else pyInput += "plot = False\n";
-
     if ( uiForm().msd_ckSave->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
 
     pyInput +=
-      "msdfit(inputs, startX, endX, spec_min=specMin, spec_max=specMax, Save=save, Verbose=verbose, Plot=plot)\n";
+      "output = msdfit(inputs, startX, endX, spec_min=specMin, spec_max=specMax, Save=save, Verbose=verbose, Plot=False)\n"
+      "print output \n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
+    plotFit(pyOutput);
   }
 
   void MSDFit::sequential()
@@ -139,6 +142,21 @@ namespace IDA
     uiForm().msd_inputFile->readSettings(settings.group());
   }
 
+  void MSDFit::plotFit(QString wsName)
+  {
+    QString resultWorkspace = wsName + "_Result";
+    if(Mantid::API::AnalysisDataService::Instance().doesExist(resultWorkspace.toStdString()))
+    {
+      //read the fit from the workspace
+      auto groupWs = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::WorkspaceGroup>(resultWorkspace.toStdString());
+      auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(groupWs->getItem(0));
+      m_msdFitCurve = plotMiniplot(m_msdPlot, m_msdFitCurve, ws, 1);
+      QPen fitPen(Qt::red, Qt::SolidLine);
+      m_msdFitCurve->setPen(fitPen);
+      m_msdPlot->replot();
+    }
+  }
+
   void MSDFit::plotInput()
   {
     if ( uiForm().msd_inputFile->isValid() )
@@ -151,17 +169,33 @@ namespace IDA
       {
         return;
       }
+      
+      QString specMin = uiForm().msd_leSpectraMin->text();
+      int wsIndex = 0;
+      int nHist = static_cast<int>(ws->getNumberHistograms());
+      
+      if (!specMin.isEmpty() && specMin.toInt() < nHist-1)
+      {
+        wsIndex = specMin.toInt();
+      }
 
-      m_msdDataCurve = plotMiniplot(m_msdPlot, m_msdDataCurve, ws, 0);
+      m_msdDataCurve = plotMiniplot(m_msdPlot, m_msdDataCurve, ws, wsIndex);
       try
       {
         const std::pair<double, double> range = getCurveRange(m_msdDataCurve);
         m_msdRange->setRange(range.first, range.second);
         
-        int nHist = static_cast<int>(ws->getNumberHistograms());
-        uiForm().msd_leSpectraMin->setText("0");
+        uiForm().msd_leSpectraMin->setText(QString::number(wsIndex));
         uiForm().msd_leSpectraMax->setText(QString::number(nHist-1));
         m_intVal->setRange(0, nHist-1);
+
+        //delete reference to fitting.
+        if (m_msdFitCurve != NULL)
+        {
+          m_msdFitCurve->attach(0);
+          delete m_msdFitCurve;
+          m_msdFitCurve = 0;
+        }
 
         // Replot
         m_msdPlot->replot();

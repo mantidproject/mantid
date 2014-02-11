@@ -25,6 +25,7 @@ namespace IDA
 
   private slots:
     void sequential();
+    void plotFit(QString wsName);
     void plotInput();
     void minChanged(double val);
     void maxChanged(double val);
@@ -35,6 +36,7 @@ namespace IDA
     QwtPlot* m_msdPlot;
     MantidWidgets::RangeSelector* m_msdRange;
     QwtPlotCurve* m_msdDataCurve;
+    QwtPlotCurve* m_msdFitCurve;
     QtTreePropertyBrowser* m_msdTree;
     QMap<QString, QtProperty*> m_msdProp;
     QtDoublePropertyManager* m_msdDblMng;
