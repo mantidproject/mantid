@@ -414,8 +414,8 @@ class CanSubtraction(ReductionStep):
         if reducer.to_Q.output_type == '1D':
             rem_nans = sans_reduction_steps.StripEndNans()
 
-        DeleteWorkspace(tmp_smp)
-        DeleteWorkspace(tmp_can)
+        self._keep_partial_results(tmp_smp, tmp_can)
+
 
     def get_wksp_name(self):
         return self.workspace.wksp_name
@@ -424,6 +424,16 @@ class CanSubtraction(ReductionStep):
     
     def get_periods_in_file(self):
         return self.workspace.periods_in_file
+
+    def _keep_partial_results(self, sample_name, can_name):
+        # user asked to keep these results 8970
+        gp_name = 'sample_can_reductions'
+        if mtd.doesExist(gp_name):
+            gpr = mtd[gp_name]
+            gpr.add(sample_name)
+            gpr.add(can_name)
+        else:
+            GroupWorkspaces([sample_name, can_name], OutputWorkspace=gp_name)
 
     periods_in_file = property(get_periods_in_file, None, None, None)
 
