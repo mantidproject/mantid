@@ -21,6 +21,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument/Detector.h"
 
 namespace Mantid
 {

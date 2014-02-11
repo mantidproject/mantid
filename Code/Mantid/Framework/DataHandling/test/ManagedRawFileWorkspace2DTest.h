@@ -5,6 +5,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <cxxtest/TestSuite.h>

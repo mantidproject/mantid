@@ -9,6 +9,7 @@
 #include "MantidKernel/ConfigService.h"
 #include <stdexcept>
 #include <vector>
+#include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
 
 using namespace Mantid::API;
