@@ -61,12 +61,12 @@ namespace Crystal
    */
   void LoadIsawSpectrum::init()
   {
+	declareProperty(new FileProperty("SpectraFile", "", API::FileProperty::Load, ".dat"),
+		"Incident spectrum and detector efficiency correction file.");
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
         "An output Workspace containing spectra for each detector bank.");
-    declareProperty(new FileProperty("InstrumentFilename", "", FileProperty::Load, ".xml"),
-        "Path to the instrument definition file on which to base the workspace.");
-    declareProperty(new FileProperty("SpectraFile", "", API::FileProperty::Load, ".dat"),
-        "Incident spectrum and detector efficiency correction file.");
+    // 3 properties for getting the right instrument
+   getInstrument3WaysInit(this);
 
   }
 
@@ -75,14 +75,7 @@ namespace Crystal
    */
   void LoadIsawSpectrum::exec()
   {
-    std::string InstrumentFilename = getPropertyValue("InstrumentFilename");
-    Algorithm_sptr childAlg = createChildAlgorithm("LoadInstrument",0.0,0.2);
-    MatrixWorkspace_sptr tempWS(new Workspace2D());
-    childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
-    childAlg->setPropertyValue("Filename", InstrumentFilename);
-    childAlg->setProperty("RewriteSpectraMap", false);
-    childAlg->executeAsChildAlg();
-	Instrument_const_sptr inst = tempWS->getInstrument();
+	Instrument_const_sptr inst = getInstrument3Ways(this);
 
     // If sample not at origin, shift cached positions.
     const V3D samplePos = inst->getSample()->getPos();
@@ -282,6 +275,71 @@ namespace Crystal
 	  }
 
       return spect;
+  }
+  //----------------------------------------------------------------------------------------------
+  /** For use by getInstrument3Ways, initializes the properties
+   * @param alg :: algorithm to which to add the properties.
+   * */
+  void LoadIsawSpectrum::getInstrument3WaysInit(Algorithm * alg)
+  {
+    std::string grpName("Specify the Instrument");
+
+    alg->declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, PropertyMode::Optional),
+        "Optional: An input workspace with the instrument we want to use.");
+
+    alg->declareProperty(new PropertyWithValue<std::string>("InstrumentName","",Direction::Input),
+        "Optional: Name of the instrument to base the GroupingWorkspace on which to base the GroupingWorkspace.");
+
+    alg->declareProperty(new FileProperty("InstrumentFilename", "", FileProperty::OptionalLoad, ".xml"),
+        "Optional: Path to the instrument definition file on which to base the GroupingWorkspace.");
+
+    alg->setPropertyGroup("InputWorkspace", grpName);
+    alg->setPropertyGroup("InstrumentName", grpName);
+    alg->setPropertyGroup("InstrumentFilename", grpName);
+
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Get a pointer to an instrument in one of 3 ways: InputWorkspace, InstrumentName, InstrumentFilename
+   * @param alg :: algorithm from which to get the property values.
+   * */
+  Geometry::Instrument_const_sptr LoadIsawSpectrum::getInstrument3Ways(Algorithm * alg)
+  {
+    MatrixWorkspace_sptr inWS = alg->getProperty("InputWorkspace");
+    std::string InstrumentName = alg->getPropertyValue("InstrumentName");
+    std::string InstrumentFilename = alg->getPropertyValue("InstrumentFilename");
+
+    // Some validation
+    int numParams = 0;
+    if (inWS) numParams++;
+    if (!InstrumentName.empty()) numParams++;
+    if (!InstrumentFilename.empty()) numParams++;
+
+    if (numParams > 1)
+      throw std::invalid_argument("You must specify exactly ONE way to get an instrument (workspace, instrument name, or IDF file). You specified more than one.");
+    if (numParams == 0)
+      throw std::invalid_argument("You must specify exactly ONE way to get an instrument (workspace, instrument name, or IDF file). You specified none.");
+
+    // ---------- Get the instrument one of 3 ways ---------------------------
+    Instrument_const_sptr inst;
+    if (inWS)
+    {
+      inst = inWS->getInstrument();
+    }
+    else
+    {
+      Algorithm_sptr childAlg = alg->createChildAlgorithm("LoadInstrument",0.0,0.2);
+      MatrixWorkspace_sptr tempWS(new Workspace2D());
+      childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
+      childAlg->setPropertyValue("Filename", InstrumentFilename);
+      childAlg->setPropertyValue("InstrumentName", InstrumentName);
+      childAlg->setProperty("RewriteSpectraMap", false);
+      childAlg->executeAsChildAlg();
+      inst = tempWS->getInstrument();
+    }
+
+    return inst;
   }
 
 
