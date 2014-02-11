@@ -1058,7 +1058,6 @@ def msdfitPlotFits(calcWS, n):
     mfit_layer.setAxisTitle(mp.Layer.Left,'log(Elastic Intensity)')
 
 def msdfit(inputs, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=False, Plot=True):
-    print startX, endX
     StartTime('msdFit')
     workdir = config['defaultsave.directory']
     log_type = 'sample'
