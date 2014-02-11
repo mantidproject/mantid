@@ -300,7 +300,7 @@ protected:
   void interruption_point();
 
   /// Return a reference to the algorithm's notification dispatcher
-  Poco::NotificationCenter & notificationCenter();
+  Poco::NotificationCenter & notificationCenter() const;
 
   ///Observation slot for child algorithm progress notification messages, these are scaled and then signalled for this algorithm.
   void handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf);
@@ -363,7 +363,7 @@ private:
   /// using Poco::NotificationCenter::addObserver(...);
   mutable Poco::NotificationCenter *m_notificationCenter;
   ///Child algorithm progress observer
-  Poco::NObserver<Algorithm, ProgressNotification> *m_progressObserver;
+  mutable Poco::NObserver<Algorithm, ProgressNotification> *m_progressObserver;
 
   bool m_isInitialized; ///< Algorithm has been initialized flag
   bool m_isExecuted; ///< Algorithm is executed flag

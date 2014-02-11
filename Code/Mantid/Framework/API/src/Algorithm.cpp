@@ -78,9 +78,9 @@ namespace Mantid
     Algorithm::Algorithm() :
     PropertyManagerOwner(),
       m_cancel(false),m_parallelException(false),g_log(Kernel::Logger::get("Algorithm")),
-      m_executeAsync(new Poco::ActiveMethod<bool, Poco::Void, Algorithm>(this,&Algorithm::executeAsyncImpl)),
-      m_notificationCenter(new Poco::NotificationCenter),
-      m_progressObserver(new Poco::NObserver<Algorithm, ProgressNotification>(*this, &Algorithm::handleChildProgressNotification)),
+      m_executeAsync(NULL),
+      m_notificationCenter(NULL),
+      m_progressObserver(NULL),
       m_isInitialized(false), m_isExecuted(false),m_isChildAlgorithm(false), m_recordHistoryForChild(false),
       m_alwaysStoreInADS(false),m_runningAsync(false),
       m_running(false),m_rethrow(false),m_algorithmID(this),
@@ -196,7 +196,7 @@ namespace Mantid
     */
     void Algorithm::addObserver(const Poco::AbstractObserver& observer)const
     {
-      m_notificationCenter->addObserver(observer);
+      notificationCenter().addObserver(observer);
     }
 
     /**  Remove an observer
@@ -204,7 +204,7 @@ namespace Mantid
     */
     void Algorithm::removeObserver(const Poco::AbstractObserver& observer)const
     {
-      m_notificationCenter->removeObserver(observer);
+      notificationCenter().removeObserver(observer);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -216,7 +216,7 @@ namespace Mantid
     */
     void Algorithm::progress(double p, const std::string& msg, double estimatedTime, int progressPrecision)
     {
-      m_notificationCenter->postNotification(new ProgressNotification(this,p,msg, estimatedTime, progressPrecision));
+      notificationCenter().postNotification(new ProgressNotification(this,p,msg, estimatedTime, progressPrecision));
     }
 
     //---------------------------------------------------------------------------------------------
@@ -490,7 +490,7 @@ namespace Mantid
       // Start by freeing up any memory available.
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 
-      m_notificationCenter->postNotification(new StartedNotification(this));
+      notificationCenter().postNotification(new StartedNotification(this));
       Mantid::Kernel::DateAndTime start_time;
 
       // Return a failure if the algorithm hasn't been initialized
@@ -523,7 +523,7 @@ namespace Mantid
         // Try the validation again
         if ( !validateProperties() )
         {
-           m_notificationCenter->postNotification(new ErrorNotification(this,"Some invalid Properties found"));
+           notificationCenter().postNotification(new ErrorNotification(this,"Some invalid Properties found"));
            throw std::runtime_error("Some invalid Properties found");
         }
       }
@@ -536,7 +536,7 @@ namespace Mantid
         for (auto it = errors.begin(); it != errors.end(); it++)
           g_log.error() << "Invalid value for " << it->first << ": " << it->second << std::endl;
         // Throw because something was invalid
-        m_notificationCenter->postNotification(new ErrorNotification(this,"Some invalid Properties found"));
+        notificationCenter().postNotification(new ErrorNotification(this,"Some invalid Properties found"));
         throw std::runtime_error("Some invalid Properties found");
       }
 
@@ -557,7 +557,7 @@ namespace Mantid
       {
         g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
         g_log.error()<<ex.what()<<std::endl;
-        m_notificationCenter->postNotification(new ErrorNotification(this,ex.what()));
+        notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
         m_running = false;
         if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         {
@@ -629,7 +629,7 @@ namespace Mantid
             g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
             g_log.error()<< ex.what()<<std::endl;
           }
-          m_notificationCenter->postNotification(new ErrorNotification(this,ex.what()));
+          notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
           m_running = false;
         }
         catch(std::logic_error& ex)
@@ -641,7 +641,7 @@ namespace Mantid
             g_log.error()<< "Logic Error in execution of algorithm "<< this->name()<<std::endl;
             g_log.error()<< ex.what()<<std::endl;
           }
-          m_notificationCenter->postNotification(new ErrorNotification(this,ex.what()));
+          notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
           m_running = false;
         }
       }
@@ -650,7 +650,7 @@ namespace Mantid
         m_runningAsync = false;
         m_running = false;
         g_log.error() << this->name() << ": Execution terminated by user.\n";
-        m_notificationCenter->postNotification(new ErrorNotification(this,ex.what()));
+        notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
         this->unlockWorkspaces();
         throw;
       }
@@ -661,7 +661,7 @@ namespace Mantid
         m_runningAsync = false;
         m_running = false;
 
-        m_notificationCenter->postNotification(new ErrorNotification(this,ex.what()));
+        notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
         g_log.error() << "Error in execution of algorithm " << this->name() << ":\n";
         g_log.error(ex.what());
         this->unlockWorkspaces();
@@ -675,7 +675,7 @@ namespace Mantid
         m_runningAsync = false;
         m_running = false;
 
-        m_notificationCenter->postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught in exec()"));
+        notificationCenter().postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught in exec()"));
         g_log.error() << this->name() << ": UNKNOWN Exception is caught in exec()\n";
         this->unlockWorkspaces();
         throw;
@@ -684,7 +684,7 @@ namespace Mantid
       // Unlock the locked workspaces
       this->unlockWorkspaces();
 
-      m_notificationCenter->postNotification(new FinishedNotification(this,isExecuted()));
+      notificationCenter().postNotification(new FinishedNotification(this,isExecuted()));
       // Only gets to here if algorithm ended normally
       // Free up any memory available.
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
@@ -816,7 +816,9 @@ namespace Mantid
 
       if (startProgress >= 0 && endProgress > startProgress && endProgress <= 1.)
       {
-        alg->addObserver(*m_progressObserver);
+        std::cerr << "progress observer=" << m_progressObserver << "\n";
+        alg->addObserver(this->progressObserver());
+        std::cerr << "progress observer=" << m_progressObserver << "\n";
         m_startChildProgress = startProgress;
         m_endChildProgress = endProgress;
       }
@@ -1307,7 +1309,7 @@ namespace Mantid
 
       // We finished successfully.
       setExecuted(true);
-      m_notificationCenter->postNotification(new FinishedNotification(this,isExecuted()));
+      notificationCenter().postNotification(new FinishedNotification(this,isExecuted()));
 
       return true;
     }
@@ -1404,6 +1406,7 @@ namespace Mantid
     */
     Poco::ActiveResult<bool> Algorithm::executeAsync()
     {
+      m_executeAsync = new Poco::ActiveMethod<bool, Poco::Void, Algorithm>(this,&Algorithm::executeAsyncImpl);
       return (*m_executeAsync)(Poco::Void());
     }
 
@@ -1420,8 +1423,9 @@ namespace Mantid
     /**
      * @return A reference to the Poco::NotificationCenter object that dispatches notifications
      */
-    Poco::NotificationCenter & Algorithm::notificationCenter()
+    Poco::NotificationCenter & Algorithm::notificationCenter() const
     {
+      if(!m_notificationCenter) m_notificationCenter = new Poco::NotificationCenter;
       return *m_notificationCenter;
     }
 
@@ -1441,6 +1445,11 @@ namespace Mantid
      */
     const Poco::AbstractObserver & Algorithm::progressObserver() const
     {
+      if(!m_progressObserver)
+        m_progressObserver = \
+          new Poco::NObserver<Algorithm, ProgressNotification>(*const_cast<Algorithm*>(this),
+                                                               &Algorithm::handleChildProgressNotification);
+
       return *m_progressObserver;
     }
 
