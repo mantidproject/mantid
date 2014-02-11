@@ -13,13 +13,14 @@ Details:
   S_i=S(Q,E,T_i) is interpolated with a cubic spline which then can be invoked to obtain
   S(Q,E,T).
   
-  Previous to the construction of the cubic spline, a local regression is performed
-  in the window {S_{i-D/2},..,S_{i+D/2}}, with i running from D/2 to N-D/2.
-  The local regression provides estimation of the structure factor S(Q,E,T_i) which replaces
-  the actual S_i value. The local regression is also used to obtain an estimation of the
-  error of S(Q,E,T_i). This error is employed if the original sequence of scalars {S_i}
-  had no associated errors. This lack of errors arises when the structure factors are derived
-  from simulations.
+  Previous to the construction of the cubic spline, a running local regression may be performed
+  for the sets {S_{i-D/2},..,S_{i+D/2}}, with i running from D/2 to N-D/2, for windows of
+  length D.
+  The local regression provides an estimation of the structure factor S(Q,E,T_i) which replaces
+  the input S_i values. The local regression is also used to obtain an estimation of the
+  errors of S(Q,E,T_i). These error are employed if the original sequence of scalars {S_i}
+  had no associated errors or if no error data is loaded.
+  Typically, the lack of errors arises when the structure factors are derived from simulations.
  
 *WIKI*"""
 
@@ -114,5 +115,5 @@ try:
   import dsfinterp
   AlgorithmFactory.subscribe(DSFinterp)
 except:
-  logger.error('Failed to subscribe algorithm DSFinterp')
+  logger.error('Failed to subscribe algorithm DSFinterp; Python package dsfinterp may be missing (https://pypi.python.org/pypi/dsfinterp)')
   pass
