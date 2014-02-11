@@ -129,6 +129,13 @@ def load_run(inst_name, run_number, calibration=None, force=False):
         if (not force) and (output_name in mtd):
             logger.notice("%s already loaded" % filename)
             return mtd[output_name]
+
+        args={};
+        ext = os.path.splitext(filename)[1].lower();
+        if ext.endswith("raw"):
+            args['Monitors']='Separate'
+        elif ext.endswith('nxs'):
+            args['LoadMonitors'] = '1'
     
         loaded_ws = Load(Filename=filename, OutputWorkspace=output_name)
         logger.notice("Loaded %s" % filename)

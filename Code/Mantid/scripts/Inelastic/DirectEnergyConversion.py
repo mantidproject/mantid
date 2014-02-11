@@ -549,30 +549,35 @@ class DirectEnergyConversion(object):
             raise TypeError('Unknown option passed to get_ei "%s"' % fix_ei)
 
         self.incident_energy= ei_guess
+        #-------------------------------------------------------------
+        # check if monitors are in the main workspace or provided separately
         monitor_ws = input_ws;
         monitors_from_separate_ws=False;
         if type(monitor_ws) is str:
             monitor_ws = mtd[monitor_ws]
-
         try: 
             nsp = monitor_ws.getSpectrum(int(self.ei_mon_spectra[0]));
         except:
             monitors_from_separate_ws = True
             mon_ws = monitor_ws.getName()+'_monitors'
             monitor_ws = mtd[mon_ws];
+        #-------------------------------------------------------------
             
         # Calculate the incident energy
         ei,mon1_peak,mon1_index,tzero = \
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]), 
                   EnergyEstimate=ei_guess,FixEi=self.fix_ei)
 
-
         self.incident_energy = ei
+        # copy incident energy obtained on monitor workspace to detectors workspace
         if monitors_from_separate_ws:
             AddSampleLog(Workspace=input_ws,LogName='Ei',LogText=str(ei),LogType='Number')
             
-        # Adjust the TOF such that the first monitor peak is at t=0        ScaleX(InputWorkspace=input_ws,OutputWorkspace=resultws_name,Operation="Add",Factor=-mon1_peak,
-               InstrumentParameter="DelayTime",Combine=True)        mon1_det = monitor_ws.getDetector(mon1_index)
+        # Adjust the TOF such that the first monitor peak is at t=0  
+        ScaleX(InputWorkspace=input_ws,OutputWorkspace=resultws_name,Operation="Add",Factor=-mon1_peak,
+               InstrumentParameter="DelayTime",Combine=True)
+
+        mon1_det = monitor_ws.getDetector(mon1_index)
         mon1_pos = mon1_det.getPos()
         src_name = input_ws.getInstrument().getSource().getName()
         MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
@@ -775,6 +780,22 @@ class DirectEnergyConversion(object):
 
         self.setup_mtd_instrument(result_ws)
         return result_ws
+
+    def copy_spectrum2monitors(wsName,monWSName,spectra_id):
+       """
+         this routine copies a spectrum form workspace to monitor workspace and rebins it according to monitor workspace binning
+    
+        @param wsName -- the name of event workspace which detector is considered as monitor
+        @param monWSName -- the name of histogram workspace with monitors where one needs to place the detector's spectra
+        @param spectra_num -- the number of the spectra to move
+       """
+       ws = mtd[wsName];
+       monWS = mtd[monWSName];
+       x_param = monWS.readX(0);
+       bins = [x_param[0],x_param[1]-x_param[0],x_param[-1]];
+       ExtractSingleSpectrum(InputWorkspace=ws,OutputWorkspace='tmp_mon',WorkspaceIndex=spectra_id)
+       Rebin(InputWorkspace='tmp_mon',OutputWorkspace='tmp_mon',Params=bins,PreserveEvents='0')
+       ConjoinWorkspaces(InputWorkspace1=monWS,InputWorkspace2='tmp_mon')
 
     #---------------------------------------------------------------------------
     # Behind the scenes stuff
@@ -1433,6 +1454,6 @@ class DirectEnergyConversion(object):
 
 
 #-----------------------------------------------------------------
-if __name__=="__main__":   
+if __name__=="__main__":  
     pass
     #unittest.main()

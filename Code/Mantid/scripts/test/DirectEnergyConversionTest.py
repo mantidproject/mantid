@@ -309,6 +309,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEquals(file_long_name,tReducer.test_name)
 
 
+    def test_process_copy_spectra_to_monitors(self):
+        pass
         #self.assertEqual(tReducer.save_results(pws,'my_path'),ws_name+
 
 
