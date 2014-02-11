@@ -1027,7 +1027,7 @@ class NormalizeToMonitor(ReductionStep):
         sanslog.notice('Normalizing to monitor ' + str(normalization_spectrum))
 
         self.output_wksp = str(workspace) + '_monitors'
-        mon = reducer.get_monitor(normalization_spectrum-1)
+        mon = reducer.get_sample().get_monitor(normalization_spectrum-1)
         if str(mon) != self.output_wksp:
             RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
         
