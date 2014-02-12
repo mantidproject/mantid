@@ -254,10 +254,6 @@ namespace Mantid
       localWorkspace->setYUnit("Counts");
 
       WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
-      if(m_numberOfPeriods>1)
-      {
-        setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
-      }
 
       API::Progress progress(this,0.,1.,m_numberOfPeriods * total_specs);
       // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
@@ -286,22 +282,6 @@ namespace Mantid
             (WorkspaceFactory::Instance().create(localWorkspace));
           localWorkspace->setTitle(title);
           localWorkspace->setComment(notes);
-          //localWorkspace->newInstrumentParameters(); ???
-
-        }
-
-
-        std::string outws("OutputWorkspace");
-        if(m_numberOfPeriods>1)
-        {
-          auto suffix = boost::lexical_cast<std::string>(period+1);
-          outws += "_" + suffix;
-          std::string WSName = localWSName + "_" + suffix;
-          declareProperty(new WorkspaceProperty<Workspace>(outws,WSName,Direction::Output));
-          if (wsGrpSptr)
-          {
-            wsGrpSptr->addWorkspace( localWorkspace );
-          }
         }
 
         size_t counter = 0;
@@ -326,6 +306,8 @@ namespace Mantid
         // Just a sanity check
         assert(counter == size_t(total_specs) );
 
+        Workspace_sptr outWs;
+
         if (autoGroup && loadedGrouping)
         {
           TableWorkspace_sptr groupingTable;
@@ -346,14 +328,26 @@ namespace Mantid
 
           MatrixWorkspace_sptr groupedWs = groupDet->getProperty("OutputWorkspace");
 
-          setProperty(outws, boost::dynamic_pointer_cast<Workspace>(groupedWs));
+          outWs = groupedWs;
         }
         else
         {
-          setProperty(outws, boost::dynamic_pointer_cast<Workspace>(localWorkspace));
+          outWs = localWorkspace;
         }
 
+        if ( m_numberOfPeriods == 1 )
+          setProperty("OutputWorkspace", outWs);
+        else
+          // In case of multiple periods, just add workspace to the group, and we will return the
+          // group later
+          wsGrpSptr->addWorkspace(outWs);
+
       } // loop over periods
+
+      if(m_numberOfPeriods>1)
+      {
+        setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+      }
 
       // Clean up
       delete[] timeChannels;
