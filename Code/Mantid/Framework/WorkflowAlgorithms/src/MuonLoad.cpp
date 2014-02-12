@@ -185,6 +185,7 @@ namespace WorkflowAlgorithms
         }
         else if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedDeadTimes) )
         {
+          // XXX: using first table only for now. Can use the one for appropriate period if necessary.
           deadTimes = boost::dynamic_pointer_cast<TableWorkspace>( group->getItem(0) );
         }
 
@@ -210,6 +211,7 @@ namespace WorkflowAlgorithms
       }
       else if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedGrouping) )
       {
+        // XXX: using first table only for now. Can use the one for appropriate period if necessary.
         grouping = boost::dynamic_pointer_cast<TableWorkspace>( group->getItem(0) );
       }
 
