@@ -59,6 +59,7 @@ public:
 
 private:
   /// Initialisation code
+  void initDocs();
   void init();
   ///Execution code
   void exec();
