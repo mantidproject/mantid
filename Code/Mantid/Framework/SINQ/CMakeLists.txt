@@ -6,7 +6,8 @@ set ( SRC_FILES
 	src/PoldiAutoCorrelationCore.cpp
 	src/PoldiBasicChopper.cpp
 	src/PoldiChopperFactory.cpp
-	src/PoldiDetectorFactory.cpp
+        src/PoldiDetectorDecorator.cpp
+        src/PoldiDetectorFactory.cpp
 	src/PoldiHeliumDetector.cpp
 	src/PoldiLoadChopperSlits.cpp
 	src/PoldiLoadIPP.cpp
@@ -31,7 +32,8 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiAutoCorrelationCore.h
 	inc/MantidSINQ/PoldiBasicChopper.h
 	inc/MantidSINQ/PoldiChopperFactory.h
-	inc/MantidSINQ/PoldiDetectorFactory.h
+        inc/MantidSINQ/PoldiDetectorDecorator.h
+        inc/MantidSINQ/PoldiDetectorFactory.h
 	inc/MantidSINQ/PoldiHeliumDetector.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
 	inc/MantidSINQ/PoldiLoadIPP.h
@@ -53,7 +55,8 @@ set ( TEST_FILES
 	PoldiAutoCorrelationCoreTest.h
 	PoldiBasicChopperTest.h
 	PoldiChopperFactoryTest.h
-	PoldiDetectorFactoryTest.h
+        PoldiDetectorDecoratorTest.h
+        PoldiDetectorFactoryTest.h
 	PoldiDetectorTest.h
 	ProjectMDTest.h
 	SliceMDHistoTest.h
