@@ -34,7 +34,7 @@ public:
     {
         std::vector<int> availableElements(400);
 
-        int n = -1;
+        int n = 0;
         std::generate(availableElements.begin(), availableElements.end(), [&n] { return n++; });
 
         return availableElements;
