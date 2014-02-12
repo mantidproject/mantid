@@ -176,12 +176,28 @@ namespace Mantid
       // Try to load dead time info
       loadDeadTimes(root);
 
-      // Try to load detector grouping info
+      bool autoGroup = getProperty("AutoGroup");
+
+      // Grouping info should be returned if user has set the property
+      bool returnGrouping = !getPropertyValue("DetectorGroupingTable").empty();
+
       Workspace_sptr loadedGrouping;
-      if ( ! getPropertyValue("DetectorGroupingTable").empty() )
+
+      // Try to load detector grouping info, if needed for auto-grouping or user requested it
+      if ( autoGroup || returnGrouping )
       {
-        if ( loadedGrouping = loadDetectorGrouping(root) )
-          setProperty("DetectorGroupingTable", loadedGrouping);
+        loadedGrouping = loadDetectorGrouping(root);
+
+        if ( loadedGrouping )
+        {
+          // Return loaded grouping, if requested
+          if ( returnGrouping )
+            setProperty("DetectorGroupingTable", loadedGrouping);
+        }
+        else
+        {
+          g_log.warning("Unable to load grouping from the file. Grouping not applied.");
+        }
       }
 
       // Need to extract the user-defined output workspace name
@@ -310,16 +326,27 @@ namespace Mantid
         // Just a sanity check
         assert(counter == size_t(total_specs) );
 
-        bool autogroup = getProperty("AutoGroup");
-
-        if (autogroup)
+        if (autoGroup && loadedGrouping)
         {
-          //Create a workspace with only two spectra for forward and back
-          DataObjects::Workspace2D_sptr  groupedWS;
+          TableWorkspace_sptr groupingTable;
 
-          // TODO: group the workpace using MuonGroupDetectors
+          if ( auto table = boost::dynamic_pointer_cast<TableWorkspace>(loadedGrouping) )
+          {
+            groupingTable = table;
+          }
+          else if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedGrouping) )
+          {
+            groupingTable = boost::dynamic_pointer_cast<TableWorkspace>( group->getItem(period) );
+          }
 
-          setProperty(outws, boost::dynamic_pointer_cast<Workspace>(groupedWS));
+          Algorithm_sptr groupDet = createChildAlgorithm("MuonGroupDetectors");
+          groupDet->setProperty("InputWorkspace", localWorkspace);
+          groupDet->setProperty("DetectorGroupingTable", groupingTable);
+          groupDet->execute();
+
+          MatrixWorkspace_sptr groupedWs = groupDet->getProperty("OutputWorkspace");
+
+          setProperty(outws, boost::dynamic_pointer_cast<Workspace>(groupedWs));
         }
         else
         {
