@@ -133,11 +133,11 @@ def load_run(inst_name, run_number, calibration=None, force=False):
         args={};
         ext = os.path.splitext(filename)[1].lower();
         if ext.endswith("raw"):
-            args['Monitors']='Separate'
+            args['Monitors']='Include'
         elif ext.endswith('nxs'):
             args['LoadMonitors'] = '1'
     
-        loaded_ws = Load(Filename=filename, OutputWorkspace=output_name)
+        loaded_ws = Load(Filename=filename, OutputWorkspace=output_name,**args)
         logger.notice("Loaded %s" % filename)
 
     ######## Now we have the workspace

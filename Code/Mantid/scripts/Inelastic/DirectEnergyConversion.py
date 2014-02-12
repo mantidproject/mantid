@@ -779,6 +779,10 @@ class DirectEnergyConversion(object):
                 result_ws = RenameWorkspace(InputWorkspace=result_ws,OutputWorkspace=new_ws_name)
 
         self.setup_mtd_instrument(result_ws)
+        if not(self.copy_spectra_to_monitors is None):
+            for specID in self.copy_spectra_to_monitors:
+                copy_spectrum2monitors(result_ws,result_ws.getName()+'_monitors',specID);
+
         return result_ws
 
     def copy_spectrum2monitors(wsName,monWSName,spectra_id):
@@ -789,8 +793,14 @@ class DirectEnergyConversion(object):
         @param monWSName -- the name of histogram workspace with monitors where one needs to place the detector's spectra
         @param spectra_num -- the number of the spectra to move
        """
-       ws = mtd[wsName];
-       monWS = mtd[monWSName];
+       if isinstance(wsName,str):
+            ws = mtd[wsName];
+       else:
+           ws = wsName;
+       if isinstance(monWSName,str):
+            monWS = mtd[monWSName];
+       else:
+           monWS = monWS;
        x_param = monWS.readX(0);
        bins = [x_param[0],x_param[1]-x_param[0],x_param[-1]];
        ExtractSingleSpectrum(InputWorkspace=ws,OutputWorkspace='tmp_mon',WorkspaceIndex=spectra_id)
@@ -821,35 +831,35 @@ class DirectEnergyConversion(object):
 #              Complex setters/getters
 #----------------------------------------------------------------------------------
     @property
-    def copy_spectra_to_monitors(self):
-        return self._copy_spectra_to_monitors;
-    @copy_spectra_to_monitors.setter
-    def copy_spectra_to_monitors(self,spectra_list):
+    def spectra_to_monitors_list(self):
+        return self._spectra_to_monitors_list;
+    @spectra_to_monitors_list.setter
+    def spectra_to_monitors_list(self,spectra_list):
         """ Sets copy spectra to monitors variable as a list of monitors using different forms of input
 
         """
         if spectra_list is None:
-            self._copy_spectra_to_monitors=None;
+            self._spectra_to_monitors_list=None;
             return;
 
         if isinstance(spectra_list,str):
             if spectra_list is 'None':
-                self._copy_spectra_to_monitors=None;
+                self._spectra_to_monitors_list=None;
             else:
                 spectra = spectra_list.split(',');
-                self._copy_spectra_to_monitors = [];
+                self._spectra_to_monitors_list = [];
                 for spectum in spectra :
-                    self._copy_spectra_to_monitors.append(int(spectum));
+                    self._spectra_to_monitors_list.append(int(spectum));
         else:
             if isinstance(spectra_list,list):
                 if len(spectra_list) == 0:
-                    self._copy_spectra_to_monitors=None;
+                    self._spectra_to_monitors_list=None;
                 else:
-                    self._copy_spectra_to_monitors=[];
+                    self._spectra_to_monitors_list=[];
                     for i in range(0,len(spectra_list)):
-                        self._copy_spectra_to_monitors.append(int(spectra_list[i]));
+                        self._spectra_to_monitors_list.append(int(spectra_list[i]));
             else:
-                self._copy_spectra_to_monitors =[int(spectra_list)];
+                self._spectra_to_monitors_list =[int(spectra_list)];
         return;
     @property
     def instr_name(self):

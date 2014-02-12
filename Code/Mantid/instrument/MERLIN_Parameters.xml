@@ -84,7 +84,7 @@
     to copy detectors spectra to monitors spectra collected in histogram mode. If no such monitors are used "None" 
     (with brackets) has to be specified as the value
 -->
-  <parameter name="copy_spectra_to_monitors"  type="string">
+  <parameter name="spectra_to_monitors_list"  type="string">
     <value val="None"/>
   </parameter>
 

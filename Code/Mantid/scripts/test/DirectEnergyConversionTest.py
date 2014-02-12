@@ -311,27 +311,27 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_set_spectra_to_mon(self):
         tReducer = self.reducer;
 
-        tReducer.copy_spectra_to_monitors = 35;
-        self.assertTrue(isinstance(tReducer.copy_spectra_to_monitors,list));
-        self.assertEquals(35,tReducer.copy_spectra_to_monitors[0]);
+        tReducer.spectra_to_monitors_list = 35;
+        self.assertTrue(isinstance(tReducer.spectra_to_monitors_list,list));
+        self.assertEquals(35,tReducer.spectra_to_monitors_list[0]);
 
-        tReducer.copy_spectra_to_monitors = None;
-        self.assertTrue(tReducer.copy_spectra_to_monitors is None);
-        tReducer.copy_spectra_to_monitors = 'None';
-        self.assertTrue(tReducer.copy_spectra_to_monitors is None);
-        tReducer.copy_spectra_to_monitors = [];
-        self.assertTrue(tReducer.copy_spectra_to_monitors is None);
+        tReducer.spectra_to_monitors_list = None;
+        self.assertTrue(tReducer.spectra_to_monitors_list is None);
+        tReducer.spectra_to_monitors_list = 'None';
+        self.assertTrue(tReducer.spectra_to_monitors_list is None);
+        tReducer.spectra_to_monitors_list = [];
+        self.assertTrue(tReducer.spectra_to_monitors_list is None);
 
-        tReducer.copy_spectra_to_monitors = '467';
-        self.assertEquals(467,tReducer.copy_spectra_to_monitors[0]);
+        tReducer.spectra_to_monitors_list = '467';
+        self.assertEquals(467,tReducer.spectra_to_monitors_list[0]);
 
-        tReducer.copy_spectra_to_monitors = '467,444';
-        self.assertEquals(467,tReducer.copy_spectra_to_monitors[0]);
-        self.assertEquals(444,tReducer.copy_spectra_to_monitors[1]);
+        tReducer.spectra_to_monitors_list = '467,444';
+        self.assertEquals(467,tReducer.spectra_to_monitors_list[0]);
+        self.assertEquals(444,tReducer.spectra_to_monitors_list[1]);
 
-        tReducer.copy_spectra_to_monitors = ['467','444'];
-        self.assertEquals(467,tReducer.copy_spectra_to_monitors[0]);
-        self.assertEquals(444,tReducer.copy_spectra_to_monitors[1]);
+        tReducer.spectra_to_monitors_list = ['467','444'];
+        self.assertEquals(467,tReducer.spectra_to_monitors_list[0]);
+        self.assertEquals(444,tReducer.spectra_to_monitors_list[1]);
 
 
 
