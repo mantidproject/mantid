@@ -16682,6 +16682,7 @@ void ApplicationWindow::scriptsDirPathChanged(const QString& path)
 }
 
 void ApplicationWindow::makeToolbarsMenu()
+// cppcheck-suppress publicAllocationError
 {
   actionFileTools = new QAction(standardTools->windowTitle(), toolbarsMenu);
   actionFileTools->setCheckable(true);
