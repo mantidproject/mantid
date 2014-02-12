@@ -122,8 +122,11 @@ class LoadRun(object):
             workspace = self._get_workspace_name()
 
         extra_options['OutputWorkspace'] = workspace
-        extra_options['LoadMonitors'] = True
+        
         result = Load(self._data_file, **extra_options)
+
+        if isinstance(result, IEventWorkspace):
+            LoadNexusMonitors(self._data_file, OutputWorkspace=workspace + "_monitors")
 
         try:
             outWs = result[0]
