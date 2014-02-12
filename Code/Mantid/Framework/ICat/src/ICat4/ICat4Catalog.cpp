@@ -85,7 +85,7 @@ namespace Mantid
       }
       else
       {
-        throw std::runtime_error("Username or password supplied is invalid.");
+        throwErrorMessage(icat);
       }
     }
 
@@ -111,7 +111,7 @@ namespace Mantid
       }
       else
       {
-        throw std::runtime_error("You are not currently logged into the cataloging system.");
+        throwErrorMessage(icat);
       }
     }
 
