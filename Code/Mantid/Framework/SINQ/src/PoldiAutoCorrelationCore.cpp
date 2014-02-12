@@ -48,16 +48,14 @@ std::pair<std::vector<double>, std::vector<double> > PoldiAutoCorrelationCore::c
 
     // Time of flight for neutrons with a wavelength of 1 Angstrom for each element
     std::vector<double> tofFor1Angstrom(detectorElements.size());
-    std::transform(distances.begin(), distances.end(), sinThetas.begin(), tofFor1Angstrom.begin(), boost::bind<double>(&PoldiAutoCorrelationCore::getTOFForD1, this, _1, _2));
+    std::transform(distances.begin(), distances.end(), sinThetas.begin(), tofFor1Angstrom.begin(), boost::bind<double>(&PoldiAutoCorrelationCore::dtoTOF, 1.0, _1, _2));
 
 }
 
 double PoldiAutoCorrelationCore::getDeltaD(double deltaT)
 {
     size_t centralElement = m_detector->centralElement();
-    return   (PhysicalConstants::h / PhysicalConstants::NeutronMass / 1e-10)
-           / (2.0 * (m_chopper->distanceFromSample() + m_detector->distanceFromSample(centralElement)) * sin(m_detector->twoTheta(centralElement) / 2.0))
-            * deltaT * 1e-3;
+    return TOFtod(deltaT, m_chopper->distanceFromSample() + m_detector->distanceFromSample(centralElement), sin(m_detector->twoTheta(centralElement) / 2.0));
 }
 
 std::pair<int, int> PoldiAutoCorrelationCore::getDRangeAsDeltaMultiples(double deltaD)
@@ -83,10 +81,17 @@ std::vector<double> PoldiAutoCorrelationCore::getDGrid(double deltaT)
     return dGrid;
 }
 
-double PoldiAutoCorrelationCore::getTOFForD1(double distance, double sinTheta)
+double PoldiAutoCorrelationCore::dtoTOF(double d, double distance, double sinTheta)
 {
-    return 2./(PhysicalConstants::h / PhysicalConstants::NeutronMass / 1e-10) *1.e-7 * (m_chopper->distanceFromSample() + distance) * sinTheta;
+    return 2.0 * distance * sinTheta * d * PhysicalConstants::NeutronMass / (PhysicalConstants::h * 1e7);
 }
+
+double PoldiAutoCorrelationCore::TOFtod(double tof, double distance, double sinTheta)
+{
+    return PhysicalConstants::h * 1e7 * tof / (2.0 * distance * sinTheta * PhysicalConstants::NeutronMass);
+}
+
+
 
 } // namespace Poldi
 } // namespace Mantid

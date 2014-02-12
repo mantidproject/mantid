@@ -52,13 +52,16 @@ public:
     void setWavelengthRange(double lambdaMin, double lambdaMax);
 
     std::pair<std::vector<double>, std::vector<double> > calculate(std::vector<double> timeData, std::vector<double> countData);
-    
+
+    // conversion between TOF (in musec) and d (in Angstrom), related through distance in mm and sin(theta)
+    static double dtoTOF(double d, double distance, double sinTheta);
+    static double TOFtod(double tof, double distance, double sinTheta);
+
 protected:
     virtual double getDeltaD(double deltaT);
     virtual std::pair<int, int> getDRangeAsDeltaMultiples(double getDeltaD);
     virtual std::vector<double> getDGrid(double deltaT);
 
-    virtual double getTOFForD1(double distance, double sinTheta);
 
     boost::shared_ptr<PoldiAbstractDetector> m_detector;
     boost::shared_ptr<PoldiAbstractChopper> m_chopper;
