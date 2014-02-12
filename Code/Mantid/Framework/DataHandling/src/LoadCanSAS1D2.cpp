@@ -148,8 +148,7 @@ MatrixWorkspace_sptr LoadCanSAS1D2::loadEntry(Poco::XML::Node * const workspaceD
   Element *workspaceElem = dynamic_cast<Element*>(workspaceData);
   //  check(workspaceElem, "<SASentry>"); // already done at LoadCanSAS1D::loadEntry
   Poco::AutoPtr<NodeList> sasTransList = workspaceElem->getElementsByTagName("SAStransmission_spectrum");
-  if (!sasTransList->length()){
-    //sasTransList->release(); 
+  if (!sasTransList->length()){ 
     g_log.warning() << "There is no transmission data for this file " << getPropertyValue("Filename") << std::endl; 
     return main_out; 
   }
