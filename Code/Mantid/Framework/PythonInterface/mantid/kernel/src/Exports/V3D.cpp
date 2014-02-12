@@ -36,6 +36,7 @@ void export_V3D()
     .def(self *= int())
     .def(self * double())
     .def(self *= double())
+    // cppcheck-suppress duplicateExpression
     .def(self < self)
     .def(self == self)
     .def(self_ns::str(self))
