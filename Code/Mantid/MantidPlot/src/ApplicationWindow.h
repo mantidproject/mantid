@@ -1029,8 +1029,8 @@ public slots:
 
   void scriptsDirPathChanged(const QString& path);
   //@}
-
-  void showToolBarsMenu();
+  
+  void makeToolbarsMenu();
   void savetoNexusFile();
 
   //Slot for writing to log window
@@ -1095,6 +1095,9 @@ private:
   private slots:
   //! \name Initialization
   //@{
+  
+  void setToolbars();
+  void displayToolbars();
   void insertTranslatedStrings();
   void translateActionsStrings();
   void init(bool factorySettings, const QStringList& args);
@@ -1395,8 +1398,9 @@ private:
   
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
-  QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu;
+  QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu, *toolbarsMenu;
 
+  QAction *actionFileTools,*actionPlotTools,*actionDisplayBar,*actionFormatToolBar;
   QAction *actionEditCurveRange, *actionCurveFullRange, *actionShowAllCurves, *actionHideCurve, *actionHideOtherCurves;
   QAction *actionEditFunction, *actionRemoveCurve, *actionShowCurveWorksheet, *actionShowCurvePlotDialog;
   QAction *actionNewProject, *actionNewNote, *actionNewTable, *actionNewFunctionPlot,*actionSaveFile;
@@ -1458,7 +1462,7 @@ private:
   QAction *actionFlipMatrixVertically, *actionFlipMatrixHorizontally, *actionRotateMatrix;
   QAction *actionViewMatrixImage, *actionViewMatrix, *actionExportMatrix;
   QAction *actionMatrixGrayScale, *actionMatrixRainbowScale, *actionMatrixCustomScale, *actionRotateMatrixMinus;
-  QAction *actionMatrixXY, *actionMatrixColumnRow, *actionImagePlot, *actionToolBars;
+  QAction *actionMatrixXY, *actionMatrixColumnRow, *actionImagePlot;
   QAction *actionMatrixFFTDirect, *actionMatrixFFTInverse;
   QAction *actionFontBold, *actionFontItalic, *actionFontBox, *actionFontSize;
   QAction *actionSuperscript, *actionSubscript, *actionUnderline, *actionGreekSymbol, *actionCustomActionDialog, *actionManageDirs, *actionFirstTimeSetup, *actionSetupParaview;
