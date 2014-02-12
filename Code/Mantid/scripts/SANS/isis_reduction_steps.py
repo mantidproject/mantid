@@ -1630,7 +1630,7 @@ class SliceEvent(ReductionStep):
             return
         start, stop = reducer.getCurrSliceLimit()
         
-        _monitor = getMonitor4event(ws_pointer)
+        _monitor = reducer.get_sample().get_monitor()
 
         hist, others = slice2histogram(ws_pointer, start, stop, _monitor)
         
