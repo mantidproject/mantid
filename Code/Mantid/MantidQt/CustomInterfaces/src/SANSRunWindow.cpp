@@ -2093,7 +2093,8 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   addUserMaskStrings(exec_reduce,"i.Mask",DefaultMask);
 
   // add slicing definition
-  exec_reduce += "i.SetEventSlices('"+m_uiForm.sliceEvent->text().trimmed()+"')\n";
+  if (!m_uiForm.sliceEvent->isHidden())
+    exec_reduce += "i.SetEventSlices('"+m_uiForm.sliceEvent->text().trimmed()+"')\n";
 
   return exec_reduce;
 }
