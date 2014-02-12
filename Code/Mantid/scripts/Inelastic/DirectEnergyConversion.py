@@ -733,7 +733,7 @@ class DirectEnergyConversion(object):
             pass
 
         if formats is None:
-            formats = self.save_format
+            formats = self.save_format 
         if type(formats) == str:
             formats = [formats]
 
@@ -759,39 +759,48 @@ class DirectEnergyConversion(object):
         Load a run or list of runs. If a list of runs is given then
         they are summed into one.
         """
-        #
-        calibration = None
-        if self.relocate_dets:
-            if self.__det_cal_file_ws:
-                calibration = self.__det_cal_file_ws
-            else:
-                calibration = self.det_cal_file
-        #}
+
+        # this can be a workspace too
+        calibration = self.det_cal_file;
+
         result_ws = common.load_runs(self.instr_name, runs, calibration=calibration, sum=True)
-        event_mode = False;
-        if hasattr(self, 'nexus_in_event_mode') and self.nexus_in_event_mode:
-            event_mode = True;
-        
+
+        mon_WsName = result_ws.getName()+'_monitors'
+        if mon_WsName in mtd:
+            monitor_ws = mtd[mon_WsName];
+        else:
+            monitor_ws = None;
+
+       
         if new_ws_name != None :
+            mon_WsName = new_ws_name+'_monitors'
             if keep_previous_ws:
                 result_ws = CloneWorkspace(InputWorkspace = result_ws,OutputWorkspace = new_ws_name)
+                if monitor_ws:
+                    monitor_ws = CloneWorkspace(InputWorkspace = monitor_ws,OutputWorkspace = mon_WsName)
             else:
                 result_ws = RenameWorkspace(InputWorkspace=result_ws,OutputWorkspace=new_ws_name)
+                if monitor_ws:
+                    monitor_ws=RenameWorkspace(InputWorkspace=monitor_ws,OutputWorkspace=mon_WsName)
 
         self.setup_mtd_instrument(result_ws)
-        if not(self.copy_spectra_to_monitors is None):
-            for specID in self.copy_spectra_to_monitors:
-                copy_spectrum2monitors(result_ws,result_ws.getName()+'_monitors',specID);
+        if self.spectra_to_monitors_list and monitor_ws:
+            for specID in self.spectra_to_monitors_list:
+                self.copy_spectrum2monitors(result_ws,monitor_ws,specID);
 
         return result_ws
 
-    def copy_spectrum2monitors(wsName,monWSName,spectra_id):
+    @staticmethod
+    def copy_spectrum2monitors(wsName,monWSName,spectraID):
        """
-         this routine copies a spectrum form workspace to monitor workspace and rebins it according to monitor workspace binning
+        this routine copies a spectrum form workspace to monitor workspace and rebins it according to monitor workspace binning
     
-        @param wsName -- the name of event workspace which detector is considered as monitor
-        @param monWSName -- the name of histogram workspace with monitors where one needs to place the detector's spectra
-        @param spectra_num -- the number of the spectra to move
+        @param wsName    -- the name of event workspace which detector is considered as monitor or Mantid pointer to this workspace
+        @param monWSName -- the name of histogram workspace with monitors where one needs to place the detector's spectra or Mantid pointer to this workspace
+        @param spectraID -- the ID of the spectra to copy. 
+
+         TODO: As extract sinele spectrum works only with WorkspaceIndex, we have to assume that WorkspaceIndex=spectraID-1;
+         this does not always correct, so it is better to change ExtractSingleSpectrum to accept workspaceID
        """
        if isinstance(wsName,str):
             ws = mtd[wsName];
@@ -800,12 +809,23 @@ class DirectEnergyConversion(object):
        if isinstance(monWSName,str):
             monWS = mtd[monWSName];
        else:
-           monWS = monWS;
+           monWS = monWSName;
+       # ----------------------------
+       ws_index = spectraID-1;
+       done_log_name = 'Copied_mon:'+str(ws_index);
+       if done_log_name in monWS.getRun():
+           return;
+       #
        x_param = monWS.readX(0);
        bins = [x_param[0],x_param[1]-x_param[0],x_param[-1]];
-       ExtractSingleSpectrum(InputWorkspace=ws,OutputWorkspace='tmp_mon',WorkspaceIndex=spectra_id)
+       ExtractSingleSpectrum(InputWorkspace=ws,OutputWorkspace='tmp_mon',WorkspaceIndex=ws_index)
        Rebin(InputWorkspace='tmp_mon',OutputWorkspace='tmp_mon',Params=bins,PreserveEvents='0')
+       # should be vice versa but Conjoin invalidate ws pointers and hopefully nothing could happen with workspace during conjoining
+       AddSampleLog(Workspace=monWS,LogName=done_log_name,LogText=str(ws_index),LogType='Number');
        ConjoinWorkspaces(InputWorkspace1=monWS,InputWorkspace2='tmp_mon')
+
+       if 'tmp_mon' in mtd:
+           DeleteWorkspace(WorkspaceName='tmp_mon');
 
     #---------------------------------------------------------------------------
     # Behind the scenes stuff
@@ -830,6 +850,50 @@ class DirectEnergyConversion(object):
 #----------------------------------------------------------------------------------
 #              Complex setters/getters
 #----------------------------------------------------------------------------------
+    @property
+    def det_cal_file(self):
+        if hasattr(self,'_det_cal_file_ws') and self._det_cal_file_ws:
+            return self._det_cal_file_ws
+        if hasattr(self,'_det_cal_file'):
+            return self._det_cal_file
+        return None;
+
+    @det_cal_file.setter    
+    def det_cal_file(self,val):
+
+       if val is None:
+           self._det_cal_file_ws = None;
+           self._det_cal_file = None;
+           return;
+
+       if isinstance(val,api.Workspace):
+          # workspace provided
+          self._det_cal_file_ws = val;
+          self._det_cal_file    = None;
+          return;
+
+       if isinstance(val,str):
+           # workspace name
+           if val in mtd:
+              self._det_cal_file_ws = mtd[val];
+              self._det_cal_file    = None;
+              return;
+
+           # file name probably provided
+           if val is 'None':
+               val = None;
+           self._det_cal_file = val;
+           self._det_cal_file_ws = None;
+           return;
+
+
+       if isinstance(val,list) and len(val)==0:
+          self._det_cal_file = None;
+          self._det_cal_file_ws = None;
+          return;
+      
+       raise NameError('Detector calibration file name can be a workspace name present in Mantid or string describing file name');
+
     @property
     def spectra_to_monitors_list(self):
         return self._spectra_to_monitors_list;
@@ -1039,7 +1103,7 @@ class DirectEnergyConversion(object):
         self._monovan_mapfile = value
     @property
     def relocate_dets(self) :
-        if self.det_cal_file != None or self.__det_cal_file_ws != None:
+        if self.det_cal_file != None:
             return True
         else:
             return False
@@ -1098,7 +1162,7 @@ class DirectEnergyConversion(object):
                               'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
                               'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask_file','diag_use_hard_mask_only','diag_background_test_range']
 
-        # before starting long run, makes sence to verify if all files requested for the run are in fact availible. Here we specify the properties which describe files
+        # before starting long run, makes sence to verify if all files requested for the run are in fact availible. Here we specify the properties which describe these files
         self.__file_properties = ['det_cal_file','map_file','hard_mask_file']
         self.__abs_norm_file_properties = ['monovan_mapfile']
 
@@ -1135,7 +1199,7 @@ class DirectEnergyConversion(object):
         self.energy_bins = None
 
         #TODO Non yet implemented. make property USE_Det_CalFile_WS or something similar
-        self.__det_cal_file_ws = None
+        self._det_cal_file_ws = None
         
         # should come from Mantid
         # Motor names-- SNS stuff -- psi used by nxspe file
@@ -1259,7 +1323,7 @@ class DirectEnergyConversion(object):
                 par_name = self.__synonims[par_name]
 
             # may be a problem, one tries to set up non-existing value
-            if not hasattr(self,par_name) :
+            if not (hasattr(self,par_name) or hasattr(self,'_'+par_name)):
                 # it still can be a composite key which sets parts of the composite property
                 if par_name in self.composite_keys_subst :
                     composite_prop_name,index,nc = self.composite_keys_subst[par_name]

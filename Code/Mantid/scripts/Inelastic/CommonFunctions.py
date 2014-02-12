@@ -133,11 +133,15 @@ def load_run(inst_name, run_number, calibration=None, force=False):
         args={};
         ext = os.path.splitext(filename)[1].lower();
         if ext.endswith("raw"):
-            args['Monitors']='Include'
+            args['LoadMonitors']='Include'
         elif ext.endswith('nxs'):
             args['LoadMonitors'] = '1'
     
         loaded_ws = Load(Filename=filename, OutputWorkspace=output_name,**args)
+        if isinstance(loaded_ws,tuple) and len(loaded_ws)>1:
+            mon_ws = loaded_ws[1];
+            loaded_ws=loaded_ws[0];
+        
         logger.notice("Loaded %s" % filename)
 
     ######## Now we have the workspace
@@ -145,8 +149,11 @@ def load_run(inst_name, run_number, calibration=None, force=False):
     return loaded_ws
 
 def apply_calibration(inst_name, loaded_ws, calibration):
+    """
+    """
     if loaded_ws.run().hasProperty("calibrated"):
         return
+
     if type(calibration) == str or type(calibration) == int:
         logger.debug('load_data: Moving detectors to positions specified in cal file "%s"' % str(calibration))
         filename = calibration
