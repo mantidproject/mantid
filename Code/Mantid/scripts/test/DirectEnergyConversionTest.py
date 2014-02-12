@@ -308,6 +308,33 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.save_results(pws,'ofn')
         self.assertEquals(file_long_name,tReducer.test_name)
 
+    def test_set_spectra_to_mon(self):
+        tReducer = self.reducer;
+
+        tReducer.copy_spectra_to_monitors = 35;
+        self.assertTrue(isinstance(tReducer.copy_spectra_to_monitors,list));
+        self.assertEquals(35,tReducer.copy_spectra_to_monitors[0]);
+
+        tReducer.copy_spectra_to_monitors = None;
+        self.assertTrue(tReducer.copy_spectra_to_monitors is None);
+        tReducer.copy_spectra_to_monitors = 'None';
+        self.assertTrue(tReducer.copy_spectra_to_monitors is None);
+        tReducer.copy_spectra_to_monitors = [];
+        self.assertTrue(tReducer.copy_spectra_to_monitors is None);
+
+        tReducer.copy_spectra_to_monitors = '467';
+        self.assertEquals(467,tReducer.copy_spectra_to_monitors[0]);
+
+        tReducer.copy_spectra_to_monitors = '467,444';
+        self.assertEquals(467,tReducer.copy_spectra_to_monitors[0]);
+        self.assertEquals(444,tReducer.copy_spectra_to_monitors[1]);
+
+        tReducer.copy_spectra_to_monitors = ['467','444'];
+        self.assertEquals(467,tReducer.copy_spectra_to_monitors[0]);
+        self.assertEquals(444,tReducer.copy_spectra_to_monitors[1]);
+
+
+
 
     def test_process_copy_spectra_to_monitors(self):
         pass

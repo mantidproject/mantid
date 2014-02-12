@@ -69,8 +69,8 @@
   <value val="5506"/>
 </parameter>
   
-<!--if you use some detectors as monitors and work in event mode, one needs to specify the list of these detectors here 
-    to copy detectors spectra to monitors spectra collected in histohram mode. If no such monitors is used "None" 
+<!--if you use some detectors as monitors and work in event mode, one needs to specify the comma separated list of these detectors here 
+    to copy detectors spectra to monitors spectra collected in histogram mode. If no such monitors are used "None" 
     (with brackets) has to be specified as the value
 -->
 <parameter name="copy_spectra_to_monitors"  type="string">

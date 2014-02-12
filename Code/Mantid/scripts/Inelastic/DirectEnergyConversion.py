@@ -821,6 +821,37 @@ class DirectEnergyConversion(object):
 #              Complex setters/getters
 #----------------------------------------------------------------------------------
     @property
+    def copy_spectra_to_monitors(self):
+        return self._copy_spectra_to_monitors;
+    @copy_spectra_to_monitors.setter
+    def copy_spectra_to_monitors(self,spectra_list):
+        """ Sets copy spectra to monitors variable as a list of monitors using different forms of input
+
+        """
+        if spectra_list is None:
+            self._copy_spectra_to_monitors=None;
+            return;
+
+        if isinstance(spectra_list,str):
+            if spectra_list is 'None':
+                self._copy_spectra_to_monitors=None;
+            else:
+                spectra = spectra_list.split(',');
+                self._copy_spectra_to_monitors = [];
+                for spectum in spectra :
+                    self._copy_spectra_to_monitors.append(int(spectum));
+        else:
+            if isinstance(spectra_list,list):
+                if len(spectra_list) == 0:
+                    self._copy_spectra_to_monitors=None;
+                else:
+                    self._copy_spectra_to_monitors=[];
+                    for i in range(0,len(spectra_list)):
+                        self._copy_spectra_to_monitors.append(int(spectra_list[i]));
+            else:
+                self._copy_spectra_to_monitors =[int(spectra_list)];
+        return;
+    @property
     def instr_name(self):
         return self._instr_name
     @instr_name.setter
