@@ -549,12 +549,13 @@ public:
     {
       LoadMuonNexus1 alg;
       alg.initialize();
+      alg.setRethrows(true);
       alg.setPropertyValue("Filename", "emu00006473.nxs");
       alg.setProperty("AutoGroup", true);
       alg.setPropertyValue("OutputWorkspace", outWsEntry.name());
       alg.execute();
     }
-    catch(std::runtime_error& e)
+    catch(std::exception& e)
     {
       TS_FAIL(e.what());
       return;
@@ -586,12 +587,13 @@ public:
     {
       LoadMuonNexus1 alg;
       alg.initialize();
+      alg.setRethrows(true);
       alg.setPropertyValue("Filename", "MUSR00015189.nxs");
       alg.setProperty("AutoGroup", true);
       alg.setPropertyValue("OutputWorkspace", outWsEntry.name());
       alg.execute();
     }
-    catch(std::runtime_error& e)
+    catch(std::exception& e)
     {
       TS_FAIL(e.what());
       return;
@@ -622,7 +624,7 @@ public:
       TS_ASSERT_EQUALS( outWs1->readY(1)[1997], 0 );
     }
 
-    auto outWs2 = boost::dynamic_pointer_cast<MatrixWorkspace>( outWs->getItem(0) );
+    auto outWs2 = boost::dynamic_pointer_cast<MatrixWorkspace>( outWs->getItem(1) );
     TS_ASSERT(outWs2);
 
     if (outWs2) {
