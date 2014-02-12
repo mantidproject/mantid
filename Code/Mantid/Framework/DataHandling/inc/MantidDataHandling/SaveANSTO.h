@@ -34,8 +34,7 @@ namespace Mantid
       ///static reference to the logger class
       static Kernel::Logger& g_log;
 
-      /// Map the separator options to their string equivalents
-      std::map<std::string,std::string> m_separatorIndex;
+      API::MatrixWorkspace_const_sptr m_ws;
     };
 
   } // namespace DataHandling
