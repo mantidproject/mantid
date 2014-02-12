@@ -26,6 +26,7 @@
 #include "MantidAPI/ICostFunction.h"
 
 #include "MantidQtMantidWidgets/UserFunctionDialog.h"
+#include "MantidQtMantidWidgets/FilenameDialogEditorFactory.h"
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
@@ -40,7 +41,6 @@
 #endif
 #include "qteditorfactory.h"
 #include "StringEditorFactory.h"
-#include "StringDialogEditorFactory.h"
 #include "DoubleEditorFactory.h"
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1125
@@ -431,7 +431,7 @@ void FitPropertyBrowser::createEditors(QWidget *w)
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(w);
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(w);
   StringEditorFactory* stringEditFactory = new StringEditorFactory(w);
-  StringDialogEditorFactory* stringDialogEditFactory = new StringDialogEditorFactory(w);
+  StringDialogEditorFactory* stringDialogEditFactory = new FilenameDialogEditorFactory(w);
   FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(w);
 
   m_browser = new QtTreePropertyBrowser();

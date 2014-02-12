@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/CheckboxHeader.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
+	src/FilenameDialogEditorFactory.cpp
 	src/FindDialog.cpp
 	src/FindReplaceDialog.cpp
 	src/FitPropertyBrowser.cpp
@@ -37,6 +38,7 @@ set ( MOC_FILES
 	  inc/MantidQtMantidWidgets/CheckboxHeader.h
 	  inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
+	inc/MantidQtMantidWidgets/FilenameDialogEditorFactory.h
     inc/MantidQtMantidWidgets/FindReplaceDialog.h
     inc/MantidQtMantidWidgets/FindDialog.h
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h

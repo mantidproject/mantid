@@ -15,11 +15,11 @@ void StringDialogEditorFactory::connectPropertyManager(QtStringPropertyManager *
     (void) manager;
 }
 
-QWidget* StringDialogEditorFactory::createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent)
-{
-    (void) manager;
-  return new StringDialogEditor(property,parent);
-}
+//QWidget* StringDialogEditorFactory::createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent)
+//{
+//    (void) manager;
+//  return new StringDialogEditor(property,parent);
+//}
 
 void StringDialogEditorFactory::disconnectPropertyManager(QtStringPropertyManager *manager)
 {
@@ -49,17 +49,17 @@ StringDialogEditor::StringDialogEditor(QtProperty *property, QWidget *parent):QW
   this->setLayout(layout);
 }
 
-void StringDialogEditor::runDialog()
-{
-  QSettings settings;
-  QString dir = settings.value("Mantid/FitBrowser/ResolutionDir").toString();
-  QString StringDialog = QFileDialog::getOpenFileName(this, tr("Open File"),dir);
-  if (!StringDialog.isEmpty())
-  {
-    m_lineEdit->setText(StringDialog);
-    updateProperty();
-  }
-}
+//void StringDialogEditor::runDialog()
+//{
+//  QSettings settings;
+//  QString dir = settings.value("Mantid/FitBrowser/ResolutionDir").toString();
+//  QString StringDialog = QFileDialog::getOpenFileName(this, tr("Open File"),dir);
+//  if (!StringDialog.isEmpty())
+//  {
+//    m_lineEdit->setText(StringDialog);
+//    updateProperty();
+//  }
+//}
 
 void StringDialogEditor::setText(const QString& txt)
 {

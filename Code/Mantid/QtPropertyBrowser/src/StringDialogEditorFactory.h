@@ -12,7 +12,7 @@ public:
   StringDialogEditorFactory(QObject *parent = 0): QtAbstractEditorFactory<QtStringPropertyManager>(parent){}
 protected:
   void connectPropertyManager(QtStringPropertyManager *manager);
-  QWidget *createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent);
+  //QWidget *createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent);
   void disconnectPropertyManager(QtStringPropertyManager *manager);
 };
 
@@ -23,7 +23,7 @@ public:
   StringDialogEditor(QtProperty *property, QWidget *parent);
   ~StringDialogEditor();
 protected slots:
-  virtual void runDialog();
+  virtual void runDialog() = 0;
   void updateProperty();
   void setText(const QString& txt);
   QString getText()const;
