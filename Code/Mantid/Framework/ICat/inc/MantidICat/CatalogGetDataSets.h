@@ -14,10 +14,11 @@ namespace Mantid
       This algorithm obtains the datasets for a given investigation record using the related ID.
 
       Required Properties:
+
       <UL>
-        <LI> InvestigationId - The id of the investigation to display</LI>
-        <LI> InputWorkspace -  Input workspace which saved last search</LI>
-        <LI> OutputWorkspace - The putput workspace to store  </LI>
+       <LI> InvestigationId - The id of the investigation to display</LI>
+       <LI> InputWorkspace -  Input workspace which saved last search</LI>
+       <LI> OutputWorkspace - The putput workspace to store  </LI>
       </UL>
 
       @author Sofia Antony, ISIS Rutherford Appleton Laboratory

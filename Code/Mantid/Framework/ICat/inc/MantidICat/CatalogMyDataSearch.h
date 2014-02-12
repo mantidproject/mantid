@@ -9,8 +9,8 @@ namespace Mantid
   namespace ICat
   {
 
-    /** CatalogMyDataSearch is a class responsible for searching investigations of the logged in user.
-     * This algorithm does Icat search and returns the investigations record
+    /**
+    This algorithm obtains all of the information for the investigations the logged in user is an investigator of.
 
     Required Properties:
     <UL>

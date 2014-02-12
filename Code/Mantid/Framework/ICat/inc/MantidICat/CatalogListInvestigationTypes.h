@@ -10,7 +10,7 @@ namespace Mantid
   {
 
     /**
-     This algorithm is responsible for obtaining a list of investigation types from the catalog.
+     This algorithm obtains a list of investigation types from the catalog.
 
      @author Sofia Antony, STFC Rutherford Appleton Laboratory
      @date 12/08/2010

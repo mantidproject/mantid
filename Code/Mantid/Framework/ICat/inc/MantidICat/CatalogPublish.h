@@ -11,6 +11,14 @@ namespace Mantid
     /**
      CatalogPublish is responsible for publishing user data to the data archive.
 
+     Required Properties:
+
+     <UL>
+      <LI> InvestigationNumber - The number/id of the investigation in the archives to publish the data to.</LI>
+      <LI> FileName - The path to the datafile to publish to the archives.</LI>
+      <LI> InputWorkspace - The name of the workspace to publish to the archives.</LI>
+     </UL>
+
      @author Jay Rainey, ISIS Rutherford Appleton Laboratory
      @date 06/12/2013
      Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
