@@ -6,8 +6,9 @@ set ( SRC_FILES
 	src/PoldiAutoCorrelationCore.cpp
 	src/PoldiBasicChopper.cpp
 	src/PoldiChopperFactory.cpp
-        src/PoldiDetectorDecorator.cpp
-        src/PoldiDetectorFactory.cpp
+	src/PoldiDeadWireDecorator.cpp
+	src/PoldiDetectorDecorator.cpp
+	src/PoldiDetectorFactory.cpp
 	src/PoldiHeliumDetector.cpp
 	src/PoldiLoadChopperSlits.cpp
 	src/PoldiLoadIPP.cpp
@@ -32,20 +33,21 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiAutoCorrelationCore.h
 	inc/MantidSINQ/PoldiBasicChopper.h
 	inc/MantidSINQ/PoldiChopperFactory.h
-        inc/MantidSINQ/PoldiDetectorDecorator.h
-        inc/MantidSINQ/PoldiDetectorFactory.h
+	inc/MantidSINQ/PoldiDeadWireDecorator.h
+	inc/MantidSINQ/PoldiDetectorDecorator.h
+	inc/MantidSINQ/PoldiDetectorFactory.h
 	inc/MantidSINQ/PoldiHeliumDetector.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
 	inc/MantidSINQ/PoldiLoadIPP.h
 	inc/MantidSINQ/PoldiLoadLog.h
 	inc/MantidSINQ/PoldiLoadSpectra.h
+	inc/MantidSINQ/PoldiMockInstrumentHelpers.h
 	inc/MantidSINQ/PoldiPeakDetection2.h
 	inc/MantidSINQ/PoldiRemoveDeadWires.h
 	inc/MantidSINQ/ProjectMD.h
 	inc/MantidSINQ/SINQHMListener.h
 	inc/MantidSINQ/SINQTranspose3D.h
 	inc/MantidSINQ/SliceMDHisto.h
-        inc/MantidSINQ/PoldiMockInstrumentHelpers.h
 )
 
 set ( TEST_FILES
@@ -55,8 +57,9 @@ set ( TEST_FILES
 	PoldiAutoCorrelationCoreTest.h
 	PoldiBasicChopperTest.h
 	PoldiChopperFactoryTest.h
-        PoldiDetectorDecoratorTest.h
-        PoldiDetectorFactoryTest.h
+	PoldiDeadWireDecoratorTest.h
+	PoldiDetectorDecoratorTest.h
+	PoldiDetectorFactoryTest.h
 	PoldiDetectorTest.h
 	ProjectMDTest.h
 	SliceMDHistoTest.h
