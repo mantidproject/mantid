@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 
+#include "MantidSINQ/DllConfig.h"
+
 #include "MantidSINQ/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiAbstractChopper.h"
 
@@ -40,7 +42,7 @@ namespace Poldi
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport PoldiAutoCorrelationCore
+class MANTID_SINQ_DLL PoldiAutoCorrelationCore
 {
 public:
     PoldiAutoCorrelationCore();
@@ -60,8 +62,6 @@ protected:
 
     boost::shared_ptr<PoldiAbstractDetector> m_detector;
     boost::shared_ptr<PoldiAbstractChopper> m_chopper;
-
-    std::set<int> m_deadWires;
 
     std::pair<double, double> m_wavelengthRange;
 
