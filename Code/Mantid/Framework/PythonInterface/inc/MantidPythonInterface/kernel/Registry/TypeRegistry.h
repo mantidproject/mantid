@@ -44,8 +44,6 @@ namespace Mantid
       DLLExport void registerHandler(const std::type_info& typeObject, PropertyValueHandler* handler);
       /// Get a TypeHandler, throws if one does not exist
       DLLExport PropertyValueHandler *getHandler(const std::type_info&  typeObject);
-      /// Attempts to find a derived type for the given object
-      DLLExport const PyTypeObject * findDerivedType(const boost::python::object & value);
     }
   }
 }
