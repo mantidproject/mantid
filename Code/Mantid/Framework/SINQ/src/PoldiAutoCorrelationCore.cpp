@@ -22,11 +22,6 @@ void PoldiAutoCorrelationCore::setInstrument(boost::shared_ptr<PoldiAbstractDete
     m_chopper = chopper;
 }
 
-void PoldiAutoCorrelationCore::setDeadWires(std::set<int> deadWireSet)
-{
-    m_deadWires = deadWireSet;
-}
-
 void PoldiAutoCorrelationCore::setWavelengthRange(double lambdaMin, double lambdaMax)
 {
     m_wavelengthRange = std::make_pair(lambdaMin, lambdaMax);
@@ -37,23 +32,23 @@ std::pair<std::vector<double>, std::vector<double> > PoldiAutoCorrelationCore::c
     m_deltaT = timeData[1] - timeData[0];
     m_timeElements = timeData.size();
 
-    // Create detector elements
-    std::vector<int> rawElements = getRawElements();
-
-    // filter out dead wires
-    std::vector<int> goodElements = getGoodElements(rawElements);
+    std::vector<int> detectorElements = m_detector->availableElements();
 
     // Map element indices to 2Theta-Values
-    std::vector<double> twoThetas(goodElements.size());
-    std::transform(goodElements.begin(), goodElements.end(), twoThetas.begin(), boost::bind<double>(&PoldiAbstractDetector::twoTheta, m_detector, _1));
+    std::vector<double> twoThetas(detectorElements.size());
+    std::transform(detectorElements.begin(), detectorElements.end(), twoThetas.begin(), boost::bind<double>(&PoldiAbstractDetector::twoTheta, m_detector, _1));
 
     // We will need sin(Theta) anyway, so we might just calculate those as well
-    std::vector<double> sinThetas(goodElements.size());
+    std::vector<double> sinThetas(detectorElements.size());
     std::transform(twoThetas.begin(), twoThetas.end(), sinThetas.begin(), [](double twoTheta) { return sin(twoTheta / 2.0); });
 
     // Same goes for distances - map element index to distance, using detector object
-    std::vector<double> distances(goodElements.size());
-    std::transform(goodElements.begin(), goodElements.end(), distances.begin(), boost::bind<double>(&PoldiAbstractDetector::distanceFromSample, m_detector, _1));
+    std::vector<double> distances(detectorElements.size());
+    std::transform(detectorElements.begin(), detectorElements.end(), distances.begin(), boost::bind<double>(&PoldiAbstractDetector::distanceFromSample, m_detector, _1));
+
+    // Time of flight for neutrons with a wavelength of 1 Angstrom for each element
+    std::vector<double> tofFor1Angstrom(detectorElements.size());
+    std::transform(distances.begin(), distances.end(), sinThetas.begin(), tofFor1Angstrom.begin(), boost::bind<double>(&PoldiAutoCorrelationCore::getTOFForD1, this, _1, _2));
 
 }
 
@@ -88,33 +83,9 @@ std::vector<double> PoldiAutoCorrelationCore::getDGrid(double deltaT)
     return dGrid;
 }
 
-std::vector<int> PoldiAutoCorrelationCore::getRawElements()
+double PoldiAutoCorrelationCore::getTOFForD1(double distance, double sinTheta)
 {
-    size_t elementCount = m_detector->elementCount();
-
-    std::vector<int> rawElements(elementCount);
-
-    int i = 0;
-    std::generate(rawElements.begin(), rawElements.end(), [&i] { return i++; });
-
-    return rawElements;
-}
-
-std::vector<int> PoldiAutoCorrelationCore::getGoodElements(std::vector<int> rawElements)
-{
-    if(m_deadWires.size() > 0) {
-        if(*m_deadWires.rbegin() > rawElements.back() + 1) {
-            throw std::runtime_error(std::string("Deadwires set contains illegal index."));
-        }
-        size_t newElementCount = rawElements.size() - m_deadWires.size();
-
-        std::vector<int> goodElements(newElementCount);
-        std::remove_copy_if(rawElements.begin(), rawElements.end(), goodElements.begin(), [this](int index) { return m_deadWires.count(index + 1) != 0; });
-
-        return goodElements;
-    }
-
-    return rawElements;
+    return 2./(PhysicalConstants::h / PhysicalConstants::NeutronMass / 1e-10) *1.e-7 * (m_chopper->distanceFromSample() + distance) * sinTheta;
 }
 
 } // namespace Poldi

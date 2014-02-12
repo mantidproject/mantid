@@ -47,7 +47,6 @@ public:
     virtual ~PoldiAutoCorrelationCore() { }
 
     void setInstrument(boost::shared_ptr<PoldiAbstractDetector> detector, boost::shared_ptr<PoldiAbstractChopper> chopper);
-    void setDeadWires(std::set<int> deadWireSet);
     void setWavelengthRange(double lambdaMin, double lambdaMax);
 
     std::pair<std::vector<double>, std::vector<double> > calculate(std::vector<double> timeData, std::vector<double> countData);
@@ -57,8 +56,7 @@ protected:
     virtual std::pair<int, int> getDRangeAsDeltaMultiples(double getDeltaD);
     virtual std::vector<double> getDGrid(double deltaT);
 
-    virtual std::vector<int> getRawElements();
-    virtual std::vector<int> getGoodElements(std::vector<int> rawElements);
+    virtual double getTOFForD1(double distance, double sinTheta);
 
     boost::shared_ptr<PoldiAbstractDetector> m_detector;
     boost::shared_ptr<PoldiAbstractChopper> m_chopper;

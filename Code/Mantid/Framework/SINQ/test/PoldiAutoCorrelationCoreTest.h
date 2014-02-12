@@ -102,57 +102,6 @@ public:
 
         TS_ASSERT_EQUALS(dgrid.size(), 5531);
     }
-
-    void testgetRawElements()
-    {
-        boost::shared_ptr<MockDetector> mockDetector(new MockDetector);
-        boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
-
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
-        autoCorrelationCore.setInstrument(mockDetector, mockChopper);
-
-        EXPECT_CALL(*mockDetector, elementCount())
-                .WillOnce(Return(400));
-
-        std::vector<int> rawElements = autoCorrelationCore.getRawElements();
-
-        TS_ASSERT_EQUALS(rawElements.size(), 400);
-        TS_ASSERT_EQUALS(rawElements.front(), 0);
-        TS_ASSERT_EQUALS(rawElements.back(), 399);
-    }
-
-    void testgetGoodElements()
-    {
-        boost::shared_ptr<MockDetector> mockDetector(new MockDetector);
-        boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
-
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
-        autoCorrelationCore.setInstrument(mockDetector, mockChopper);
-
-        EXPECT_CALL(*mockDetector, elementCount())
-                .WillOnce(Return(400));
-
-        std::vector<int> rawElements = autoCorrelationCore.getRawElements();
-
-        std::vector<int> goodElementsNoOp = autoCorrelationCore.getGoodElements(rawElements);
-
-        TS_ASSERT_EQUALS(rawElements.size(), goodElementsNoOp.size());
-
-        int rawDeadWires[] = {1, 2, 3, 6, 100, 300, 400};
-        std::set<int> deadWires(rawDeadWires, rawDeadWires + 7);
-        autoCorrelationCore.setDeadWires(deadWires);
-        std::vector<int> goodElements = autoCorrelationCore.getGoodElements(rawElements);
-
-        TS_ASSERT_EQUALS(goodElements.size(), 393);
-        TS_ASSERT_EQUALS(goodElements.front(), 3);
-        TS_ASSERT_EQUALS(goodElements.back(), 398);
-
-        int rawDeadWiresOutOfRange[] = {1, 2, 401};
-        std::set<int> deadWiresOutOfRange(rawDeadWiresOutOfRange, rawDeadWiresOutOfRange + 3);
-        autoCorrelationCore.setDeadWires(deadWiresOutOfRange);
-
-        TS_ASSERT_THROWS(autoCorrelationCore.getGoodElements(rawElements), std::runtime_error);
-    }
 };
 
 
