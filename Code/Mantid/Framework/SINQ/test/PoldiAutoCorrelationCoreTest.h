@@ -12,7 +12,7 @@
 
 #include "MantidDataObjects/TableWorkspace.h"
 
-typedef std::pair<double, double> DoublePair;
+#include "MantidSINQ/PoldiMockInstrumentHelpers.h"
 
 using ::testing::Return;
 
@@ -27,53 +27,7 @@ class TestablePoldiAutoCorrelationCore : public PoldiAutoCorrelationCore
 class PoldiAutoCorrelationCoreTest : public CxxTest::TestSuite
 {
 private:
-    class MockDetector : public PoldiAbstractDetector
-    {
-    public:
-        ~MockDetector() { }
 
-        void loadConfiguration(DataObjects::TableWorkspace_sptr detectorConfigurationWorkspace)
-        {
-            UNUSED_ARG(detectorConfigurationWorkspace);
-        }
-
-        MOCK_METHOD1(twoTheta, double(int elementIndex));
-        MOCK_METHOD1(distanceFromSample, double(int elementIndex));
-        MOCK_METHOD0(elementCount, size_t());
-        MOCK_METHOD0(centralElement, size_t());
-        MOCK_METHOD2(qLimits, DoublePair(double lambdaMin, double lambdaMax));
-    };
-
-    class MockChopper : public PoldiAbstractChopper
-    {
-    public:
-        ~MockChopper() { }
-
-        void loadConfiguration(DataObjects::TableWorkspace_sptr chopperConfigurationWorkspace, DataObjects::TableWorkspace_sptr chopperSlitWorkspace, DataObjects::TableWorkspace_sptr chopperSpeedWorkspace)
-        {
-            UNUSED_ARG(chopperConfigurationWorkspace);
-            UNUSED_ARG(chopperSlitWorkspace);
-            UNUSED_ARG(chopperSpeedWorkspace);
-        }
-
-        MOCK_METHOD0(rotationSpeed, double());
-        MOCK_METHOD0(cycleTime, double());
-        MOCK_METHOD0(zeroOffset, double());
-        MOCK_METHOD0(distanceFromSample, double());
-
-        MOCK_METHOD1(setRotationSpeed, void(double rotationSpeed));
-
-        std::vector<double> slitPositions() {
-            double slits [] = {0.000000, 0.162156};
-
-            return std::vector<double>(slits, slits + sizeof(slits) / sizeof(slits[0]));
-        }
-        std::vector<double> slitTimes() {
-            double slits [] = {0.000000, 243.234};
-
-            return std::vector<double>(slits, slits + sizeof(slits) / sizeof(slits[0]));
-        }
-    };
 
 public:
     // This pair of boilerplate methods prevent the suite being created statically

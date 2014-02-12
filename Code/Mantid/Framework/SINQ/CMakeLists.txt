@@ -43,6 +43,7 @@ set ( INC_FILES
 	inc/MantidSINQ/SINQHMListener.h
 	inc/MantidSINQ/SINQTranspose3D.h
 	inc/MantidSINQ/SliceMDHisto.h
+        inc/MantidSINQ/PoldiMockInstrumentHelpers.h
 )
 
 set ( TEST_FILES
