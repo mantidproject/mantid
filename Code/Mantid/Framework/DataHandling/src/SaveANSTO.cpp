@@ -62,6 +62,11 @@ namespace Mantid
     {
       std::string filename = getProperty("Filename");
       std::ofstream file(filename.c_str());
+      if (!file)
+      {
+        g_log.error("Unable to create file: " + filename);
+        throw Exception::FileError("Unable to create file: " , filename);
+      }
       m_ws = getProperty("InputWorkspace");
       g_log.information("FILENAME: " + filename);
       auto title ='#'+ m_ws->getTitle();
