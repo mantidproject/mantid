@@ -128,6 +128,18 @@ public:
         TS_ASSERT_DELTA(heliumDetector.distanceFromSample(199), 1996.017578125, 1e-3);
     }
 
+    void testAvailableElements()
+    {
+        Mantid::Poldi::PoldiHeliumDetector heliumDetector;
+        heliumDetector.loadConfiguration(m_configurationTestData);
+
+        std::vector<int> availableElements = heliumDetector.availableElements();
+
+        TS_ASSERT_EQUALS(availableElements.size(), 400);
+        TS_ASSERT_EQUALS(availableElements.front(), 0);
+        TS_ASSERT_EQUALS(availableElements.back(), 399);
+    }
+
 };
 
 #endif // POLDIDETECTORTEST_H

@@ -13,6 +13,7 @@ PoldiHeliumDetector::PoldiHeliumDetector() :
     m_elementWidth(0.0),
     m_angularResolution(0.0),
     m_totalOpeningAngle(0.0),
+    m_availableElements(),
     m_calibratedPosition(0.0, 0.0),
     m_vectorAngle(0.0),
     m_distanceFromSample(0.0),
@@ -76,6 +77,11 @@ size_t PoldiHeliumDetector::centralElement()
     return m_centralElement;
 }
 
+std::vector<int> PoldiHeliumDetector::availableElements()
+{
+    return m_availableElements;
+}
+
 std::pair<double, double> PoldiHeliumDetector::qLimits(double lambdaMin, double lambdaMax)
 {
     return std::pair<double, double>(4.0 * M_PI / lambdaMax * sin(twoTheta(0) / 2.0),
@@ -98,6 +104,11 @@ void PoldiHeliumDetector::initializeFixedParameters(double radius, size_t elemen
     m_elementCount = elementCount;
     m_centralElement = (elementCount - 1) / 2;
     m_elementWidth = elementWidth;
+
+    m_availableElements.resize(m_elementCount);
+
+    int n = 0;
+    std::generate(m_availableElements.begin(), m_availableElements.end(), [&n] { return n++; });
 
     m_angularResolution = m_elementWidth / m_radius;
     m_totalOpeningAngle = static_cast<double>(m_elementCount) * m_angularResolution;

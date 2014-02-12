@@ -52,6 +52,8 @@ public:
     size_t elementCount();
     size_t centralElement();
 
+    std::vector<int> availableElements();
+
     std::pair<double, double> qLimits(double lambdaMin, double lambdaMax);
 
 protected:
@@ -68,6 +70,7 @@ protected:
     double m_elementWidth;
     double m_angularResolution;
     double m_totalOpeningAngle;
+    std::vector<int> m_availableElements;
 
     /* Parameters that are calibrated or depend on calibrated parameters */
     V2D m_calibratedPosition;

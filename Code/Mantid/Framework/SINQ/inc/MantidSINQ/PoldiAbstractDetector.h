@@ -24,6 +24,8 @@ namespace Poldi
 
     Copyright © 2014 PSI-MSS
 
+  This file is part of Mantid.
+
   Mantid is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
@@ -56,6 +58,8 @@ public:
 
     virtual size_t elementCount() = 0;
     virtual size_t centralElement() = 0;
+
+    virtual std::vector<int> availableElements() = 0;
 
     virtual std::pair<double, double> qLimits(double lambdaMin, double lambdaMax) = 0;
 
