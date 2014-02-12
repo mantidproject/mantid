@@ -57,7 +57,7 @@ namespace WorkflowAlgorithms
     MatrixWorkspace_sptr getSecondPeriodWS(WorkspaceGroup_sptr ws);
 
     /// Groups specified workspace according to specified DetectorGroupingTable.
-    MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_sptr ws);
+    MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_sptr ws, TableWorkspace_sptr grouping);
 
     /// Applies dead time correction to the workspace.
     MatrixWorkspace_sptr applyDTC(MatrixWorkspace_sptr ws, TableWorkspace_sptr dt);

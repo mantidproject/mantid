@@ -85,10 +85,13 @@ namespace WorkflowAlgorithms
     declareProperty("ApplyDeadTimeCorrection", false, 
         "Whether dead time correction should be applied to loaded workspace");
     declareProperty(new WorkspaceProperty<TableWorkspace>("CustomDeadTimeTable", "",Direction::Input,
-        PropertyMode::Optional), "Table with dead time information. See LoadMuonNexus for format expected.");
-
-    declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorGroupingTable","",Direction::Input), 
-        "Table with detector grouping information. See LoadMuonNexus for format expected.");
+                                                          PropertyMode::Optional),
+                    "Table with dead time information. See LoadMuonNexus for format expected."
+                    "If not specified -- algorithm tries to use dead times stored in the data file.");
+    declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorGroupingTable","",Direction::Input,
+                                                          PropertyMode::Optional),
+                    "Table with detector grouping information. See LoadMuonNexus for format expected. "
+                    "If not specified -- algorithm tries to get grouping information from the data file.");
 
     declareProperty("TimeZero", EMPTY_DBL(), "Value used for Time Zero correction.");
     declareProperty(new ArrayProperty<double>("RebinParams"),
@@ -121,10 +124,22 @@ namespace WorkflowAlgorithms
   {
     const std::string filename = getProperty("Filename");
 
+    // Whether Dead Time Correction should be applied
+    bool applyDtc = getProperty("ApplyDeadTimeCorrection");
+
+    // If DetectorGropingTable not specified - use auto-grouping
+    bool autoGroup = ! static_cast<TableWorkspace_sptr>( getProperty("DetectorGroupingTable") );
+
     // Load the file
     IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
     load->setProperty("Filename", filename);
-    load->setProperty("DeadTimeTable", "__YouDontSeeMeIAmNinja"); // Name is not used (child alg.)
+
+    if ( applyDtc ) // Load dead times as well, if needed
+      load->setProperty("DeadTimeTable", "__NotUsed");
+
+    if ( autoGroup ) // Load grouping as well, if needed
+      load->setProperty("DetectorGroupingTable", "__NotUsed");
+
     load->execute();
 
     Workspace_sptr loadedWS = load->getProperty("OutputWorkspace");
@@ -154,9 +169,7 @@ namespace WorkflowAlgorithms
       throw std::runtime_error("Loaded workspace is of invalid type");
     }
 
-
-    // Deal with dead time correction (if required
-    bool applyDtc = getProperty("ApplyDeadTimeCorrection");
+    // Deal with dead time correction (if required)
     if ( applyDtc )
     {
       TableWorkspace_sptr deadTimes = getProperty("CustomDeadTimeTable");
@@ -185,11 +198,34 @@ namespace WorkflowAlgorithms
         secondPeriodWS = applyDTC(secondPeriodWS, deadTimes);
     }
 
+    TableWorkspace_sptr grouping;
+
+    if ( autoGroup )
+    {
+      Workspace_sptr loadedGrouping = load->getProperty("DetectorGroupingTable");
+
+      if ( auto table = boost::dynamic_pointer_cast<TableWorkspace>(loadedGrouping) )
+      {
+        grouping = table;
+      }
+      else if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedGrouping) )
+      {
+        grouping = boost::dynamic_pointer_cast<TableWorkspace>( group->getItem(0) );
+      }
+
+      if ( ! grouping )
+        throw std::runtime_error("File doesn't contain grouping information");
+    }
+    else
+    {
+      grouping = getProperty("DetectorGroupingTable");
+    }
+
     // Deal with grouping
-    firstPeriodWS = groupWorkspace(firstPeriodWS);
+    firstPeriodWS = groupWorkspace(firstPeriodWS, grouping);
 
     if ( secondPeriodWS )
-      secondPeriodWS = groupWorkspace(secondPeriodWS);
+      secondPeriodWS = groupWorkspace(secondPeriodWS, grouping);
 
     // Correct bin values
     double loadedTimeZero = load->getProperty("TimeZero");
@@ -278,12 +314,11 @@ namespace WorkflowAlgorithms
   /**
    * Groups specified workspace according to specified DetectorGroupingTable.
    * @param ws :: Workspace to group
+   * @param grouping :: Detector grouping table to use
    * @return Grouped workspace
    */
-  MatrixWorkspace_sptr MuonLoad::groupWorkspace(MatrixWorkspace_sptr ws)
+  MatrixWorkspace_sptr MuonLoad::groupWorkspace(MatrixWorkspace_sptr ws, TableWorkspace_sptr grouping)
   {
-    TableWorkspace_sptr grouping = getProperty("DetectorGroupingTable");
-
     IAlgorithm_sptr group = createChildAlgorithm("MuonGroupDetectors");
     group->setProperty("InputWorkspace", ws);
     group->setProperty("DetectorGroupingTable", grouping);
