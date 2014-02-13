@@ -893,7 +893,7 @@ class DirectEnergyConversion(object):
 
     @property
     def spectra_to_monitors_list(self):
-        if not hasattr(self,'spectra_to_monitors_list'):
+        if not hasattr(self,'_spectra_to_monitors_list'):
            return None;            
         return self._spectra_to_monitors_list;
     @spectra_to_monitors_list.setter
