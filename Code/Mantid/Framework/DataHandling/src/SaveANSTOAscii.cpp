@@ -53,6 +53,7 @@ namespace Mantid
       exts.push_back(".txt");
       declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
         "The filename of the output ANSTO file.");
+      m_sep = '\t';
     }
 
     /** 
@@ -80,16 +81,79 @@ namespace Mantid
       }
       const std::vector<double> & y1 = m_ws->readY(0);
       const std::vector<double> & e1 = m_ws->readE(0);
-      char sep = '\t';
       double qres = (X1[1]-X1[0])/X1[1];
       g_log.information("Constant dq/q from file: " + boost::lexical_cast<std::string>(qres));
       file << std::scientific;
       for (size_t i = 0; i < xlength; ++i)
       {
         double dq = X1[i]*qres;
-        file << X1[i] << sep << y1[i] << sep << e1[i] << sep << dq << std::endl;
+        outputval(X1[i], file, false);
+        outputval(y1[i], file);
+        outputval(e1[i], file);
+        outputval(dq, file);
+        file << std::endl;
       }
       file.close();
+    }
+
+    void SaveANSTOAscii::outputval (double val, std::ofstream & file, bool leadingSep)
+    {
+      bool nancheck = checkIfNan(val);
+      bool infcheck = checkIfInfinite(val);
+      if (leadingSep)
+      {
+        if (!nancheck && !infcheck)
+        {
+          file << m_sep << val;
+        }
+        else if (nancheck)
+        {
+          //not a number - output nan
+          file << m_sep << "nan";
+        }
+        else if (infcheck)
+        {
+          //infinite - output 'inf'
+          file << m_sep << "inf";
+        }
+        else
+        {
+          //not valid, nan or inf - so output 'und'
+          file << m_sep << "und";
+        }
+      }
+      else
+      {
+        if (!nancheck && !infcheck)
+        {
+          file << val;
+        }
+        else if (nancheck)
+        {
+          //not a number - output nan
+          file << "nan";
+        }
+        else if (infcheck)
+        {
+          //infinite - output 'inf'
+          file << "inf";
+        }
+        else
+        {
+          //not valid, nan or inf - so output 'und'
+          file << "und";
+        }
+      }
+    }
+
+    bool SaveANSTOAscii::checkIfNan(const double& value) const
+    {
+      return (boost::math::isnan(value));
+    }
+
+    bool SaveANSTOAscii::checkIfInfinite(const double& value) const
+    {
+      return (std::abs(value) == std::numeric_limits<double>::infinity());
     }
   } // namespace DataHandling
 } // namespace Mantid

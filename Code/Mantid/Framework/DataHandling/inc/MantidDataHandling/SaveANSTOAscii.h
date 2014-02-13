@@ -31,9 +31,15 @@ namespace Mantid
       void init();
       /// Overwrites Algorithm method
       void exec();
+      /// returns true if the value is NaN
+      bool checkIfNan(const double& value) const;
+      /// returns true if the value if + or - infinity
+      bool checkIfInfinite(const double& value) const;
+      /// print the appropriate value to file
+      void outputval (double val, std::ofstream & file, bool leadingSep = true);
       ///static reference to the logger class
       static Kernel::Logger& g_log;
-
+      char m_sep;
       API::MatrixWorkspace_const_sptr m_ws;
     };
 
