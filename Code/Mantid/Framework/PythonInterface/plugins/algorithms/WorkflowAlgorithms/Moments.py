@@ -98,17 +98,22 @@ class Moments(PythonAlgorithm):
 		    yM4.append(m4)
 
 		output_workspace = output_workspace + '_Moments'
-		Q = np.arange(num_spectra)
-		CreateWorkspace(OutputWorkspace=output_workspace+'_M0', DataX=Q, DataY=yM0,
-		    Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=output_workspace+'_M1', DataX=Q, DataY=yM1,
-		    Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=output_workspace+'_M2', DataX=Q, DataY=yM2,
-		    Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=output_workspace+'_M4', DataX=Q, DataY=yM4,
-		    Nspec=1, UnitX='MomentumTransfer')
 		
-		group_workspaces = output_workspace+'_M0,'+output_workspace+'_M1,'+output_workspace+'_M2,'+output_workspace+'_M4'
+		#create output workspace
+		Q = np.arange(num_spectra)
+		extensions = ['_M0', '_M1', '_M2', '_M4']
+		y_data = [yM0, yM1, yM2, yM4]
+
+		for ext, data in zip(extensions, y_data):
+			CreateWorkspace(OutputWorkspace=output_workspace+ext, DataX=Q, DataY=data,
+		  	  Nspec=1, UnitX='MomentumTransfer')
+			CopyLogs(InputWorkspace=sample_workspace, OutputWorkspace=output_workspace+ext)
+			AddSampleLog(Workspace=output_workspace+ext, LogName="energy_min", LogType="Number", LogText=str(emin))
+			AddSampleLog(Workspace=output_workspace+ext, LogName="energy_max", LogType="Number", LogText=str(emax))
+			AddSampleLog(Workspace=output_workspace+ext, LogName="scale_factor", LogType="Number", LogText=str(factor))
+		
+		#group ouput workspace
+		group_workspaces = ','.join([output_workspace+ext for ext in extensions])
 		GroupWorkspaces(InputWorkspaces=group_workspaces,OutputWorkspace=output_workspace)
 		DeleteWorkspace(samWS)
 
