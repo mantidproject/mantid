@@ -50,6 +50,9 @@ namespace WorkflowAlgorithms
     void init();
     void exec();
 
+    // We dont' want processGroups to be called
+    virtual bool checkGroups() { return false; }
+
     /// Returns a workspace for the first period as specified using FirstPeriod property.
     MatrixWorkspace_sptr getFirstPeriodWS(WorkspaceGroup_sptr ws);
 
