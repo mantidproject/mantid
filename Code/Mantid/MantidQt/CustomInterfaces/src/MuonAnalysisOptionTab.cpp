@@ -82,17 +82,22 @@ void MuonAnalysisOptionTab::initLayout()
   setDoubleValidator(m_uiForm.yAxisMaximumInput);
   setDoubleValidator(m_uiForm.optionStepSizeText);
 
+  // Load saved values
+  m_autoSaver.loadWidgetValues();
+
+  // Run slots manually, because default values might not have been changed
+  onTimeAxisChanged(m_uiForm.timeComboBox->currentIndex());
+  onAutoscaleToggled(m_uiForm.yAxisAutoscale->isChecked());
+  m_uiForm.rebinEntryState->setCurrentIndex(m_uiForm.rebinComboBox->currentIndex());
+
+  // Enable auto-saving
+  m_autoSaver.setAutoSaveEnabled(true);
+
   // Connect various sync stuff
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onTimeAxisChanged(int)));
   connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, SLOT(onAutoscaleToggled(bool)));
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), m_uiForm.rebinEntryState,
           SLOT(setCurrentIndex(int)));
-
-  // Load saved values
-  m_autoSaver.loadWidgetValues();
-
-  // Enable auto-saving
-  m_autoSaver.setAutoSaveEnabled(true);
 
   // Connect help clicked
   connect(m_uiForm.muonAnalysisHelpPlotting, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpSettingsClicked()));
