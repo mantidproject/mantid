@@ -62,8 +62,28 @@ class Stitch1DMany(PythonAlgorithm):
        
     def __do_stitch_workspace(self, lhs_ws, rhs_ws, start_overlap, end_overlap, params, scale_rhs_ws, use_manual_scale_factor, manual_scale_factor):     
         out_name = lhs_ws.name() + rhs_ws.name()
-        out_ws, scale_factor = Stitch1D(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, StartOverlap=start_overlap, EndOverlap=end_overlap, 
-                                        Params=params, ScaleRHSWorkspace=scale_rhs_ws, UseManualScaleFactor=use_manual_scale_factor, ManualScaleFactor=manual_scale_factor, OutputWorkspace=out_name)
+        
+        alg = self.createChildAlgorithm("Stitch1D")
+        alg.initialize()
+        alg.setProperty("LHSWorkspace", lhs_ws)
+        alg.setProperty("RHSWorkspace", rhs_ws)
+        if start_overlap:
+            alg.setProperty("StartOverlap", start_overlap)
+        if end_overlap:
+            alg.setProperty("EndOverlap", end_overlap)
+        alg.setProperty("Params", params)
+        alg.setProperty("ScaleRHSWorkspace", scale_rhs_ws)
+        alg.setProperty("UseManualScaleFactor", use_manual_scale_factor)
+        if manual_scale_factor:
+            alg.setProperty("ManualScaleFactor", manual_scale_factor)
+        alg.setProperty("OutputWorkspace", "from_sub_alg" + out_name)
+        alg.execute()
+        out_ws = alg.getProperty("OutputWorkspace").value
+        scale_factor = alg.getProperty("OutScaleFactor").value
+        
+       
+        #out_ws, scale_factor = Stitch1D(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, StartOverlap=start_overlap, EndOverlap=end_overlap, 
+        #                                Params=params, ScaleRHSWorkspace=scale_rhs_ws, UseManualScaleFactor=use_manual_scale_factor, ManualScaleFactor=manual_scale_factor, OutputWorkspace=out_name)
         return (out_ws, scale_factor)
     
     def __check_workspaces_are_common(self, input_workspace_names):
@@ -131,17 +151,21 @@ class Stitch1DMany(PythonAlgorithm):
                 
                 out_name += ("_" + str(i+1))
                         
+                
                 startOverlaps = self.getProperty("StartOverlaps").value
                 endOverlaps = self.getProperty("EndOverlaps").value
+                
+                
                 stitched, scaleFactor = Stitch1DMany(InputWorkspaces=to_process, OutputWorkspace=out_name, StartOverlaps=startOverlaps, EndOverlaps=endOverlaps, 
                                                          Params=params, ScaleRHSWorkspace=scaleRHSWorkspace, UseManualScaleFactor=useManualScaleFactor,  
                                                          ManualScaleFactor=manualScaleFactor)
-                        
+                       
                 out_group_workspaces += out_group_separator + out_name
                 out_group_separator = comma_separator
-                    
-            out_group = GroupWorkspaces(InputWorkspaces=out_group_workspaces)
-            self.setProperty('OutputWorkspace', out_group)   
+             
+            out_workspace_name = self.getPropertyValue("OutputWorkspace")        
+            out_group = GroupWorkspaces(InputWorkspaces=out_group_workspaces, OutputWorkspace=out_workspace_name)
+            self.setProperty("OutputWorkspace", out_group)   
     
         else:
                 
@@ -153,7 +177,6 @@ class Stitch1DMany(PythonAlgorithm):
                     rhsWS = self.__workspace_from_split_name(inputWorkspaces, i)
                     lhsWS, scaleFactor = self.__do_stitch_workspace(lhsWS, rhsWS, startOverlaps[i-1], endOverlaps[i-1], params, scaleRHSWorkspace,  useManualScaleFactor, manualScaleFactor)
                 self.setProperty('OutputWorkspace', lhsWS)
-                DeleteWorkspace(lhsWS)
                 
             # Iterate backwards through the workspaces.
             else:
@@ -162,7 +185,6 @@ class Stitch1DMany(PythonAlgorithm):
                     lhsWS = self.__workspace_from_split_name(inputWorkspaces, i)
                     rhsWS, scaleFactor = Stitch1D(LHSWorkspace=lhsWS, RHSWorkspace=rhsWS, StartOverlap=startOverlaps[i-1], EndOverlap=endOverlaps[i-1], Params=params, ScaleRHSWorkspace=scaleRHSWorkspace, UseManualScaleFactor=useManualScaleFactor,  ManualScaleFactor=manualScaleFactor)            
                 self.setProperty('OutputWorkspace', rhsWS)
-                DeleteWorkspace(rhsWS)
         
         self.setProperty('OutScaleFactor', scaleFactor)
         return None
