@@ -212,6 +212,9 @@ private slots:
   /// Update front
   void updateFront();
 
+  /// Opens the managed directory dialog for easier access for the user.
+  void openDirectoryDialog();
+
 private:
  
   // Types of entities we are dealing with
@@ -469,6 +472,12 @@ private:
 
   /// Updates UI grouping table using default grouping of the instrument
   void setGroupingFromIDF(Instrument_const_sptr instrument, const std::string& mainFieldDirection);
+
+  /// When no data loaded set various buttons etc to inactive
+  void noDataAvailable();
+
+  /// When data loaded set various buttons etc to active
+  void nowDataAvailable();
 
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;

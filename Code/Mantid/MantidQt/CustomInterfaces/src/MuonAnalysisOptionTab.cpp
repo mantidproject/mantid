@@ -117,9 +117,6 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.optionStepSizeText, SIGNAL(returnPressed()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.binBoundaries, SIGNAL(returnPressed()), this, SIGNAL(settingsTabUpdatePlot()));
-
-  // Manage User Directories
-  connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this, SLOT(openDirectoryDialog() ) );
 }
 
 /**
@@ -215,37 +212,6 @@ void MuonAnalysisOptionTab::onTimeAxisChanged(int index)
     disconnect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)),
                startInput, SLOT(setText(const QString&)));
   }
-}
-
-/**
- * When no data loaded set various buttons etc to inactive
- */
-void MuonAnalysisOptionTab::noDataAvailable()
-{
-  m_uiForm.frontPlotButton->setEnabled(false);
-  m_uiForm.groupTablePlotButton->setEnabled(false);
-  m_uiForm.pairTablePlotButton->setEnabled(false);
-  m_uiForm.guessAlphaButton->setEnabled(false);
-}
-
-
-/**
- * When data loaded set various buttons etc to active
- */
-void MuonAnalysisOptionTab::nowDataAvailable()
-{
-  m_uiForm.frontPlotButton->setEnabled(true);
-  m_uiForm.groupTablePlotButton->setEnabled(true);
-  m_uiForm.pairTablePlotButton->setEnabled(true);
-  m_uiForm.guessAlphaButton->setEnabled(true);
-}
-
-
-void MuonAnalysisOptionTab::openDirectoryDialog()
-{
-  MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
 }
 
 /**

@@ -21,6 +21,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
 #include "MantidQtCustomInterfaces/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h"
@@ -266,6 +267,9 @@ void MuonAnalysis::initLayout()
 
   connect(this, SIGNAL( setToolbarsHidden(bool) ), this, SLOT( doSetToolbarsHidden(bool) ), 
     Qt::QueuedConnection ); // We dont' neet this to happen instantly, prefer safer way
+
+  // Manage User Directories
+  connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this, SLOT(openDirectoryDialog() ) );
 }
 
 /**
@@ -977,12 +981,12 @@ void MuonAnalysis::runLoadCurrent()
   // if output is none empty something has gone wrong
   if ( !pyOutput.toStdString().empty() )
   {
-    m_optionTab->noDataAvailable();
+    noDataAvailable();
     QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from " + daename + ". Plotting disabled");
     return;
   }
 
-  m_optionTab->nowDataAvailable();
+  nowDataAvailable();
 
   // Get hold of a pointer to a matrix workspace and apply grouping if applicatable
   Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
@@ -1634,7 +1638,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     }
 
     // Make the options available
-    m_optionTab->nowDataAvailable();
+    nowDataAvailable();
 
     // Populate instrument fields
     std::stringstream str;
@@ -3695,6 +3699,38 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
 
   return loadAlg;
 }
+
+/**
+ * When no data loaded set various buttons etc to inactive
+ */
+void MuonAnalysis::noDataAvailable()
+{
+  m_uiForm.frontPlotButton->setEnabled(false);
+  m_uiForm.groupTablePlotButton->setEnabled(false);
+  m_uiForm.pairTablePlotButton->setEnabled(false);
+  m_uiForm.guessAlphaButton->setEnabled(false);
+}
+
+
+/**
+ * When data loaded set various buttons etc to active
+ */
+void MuonAnalysis::nowDataAvailable()
+{
+  m_uiForm.frontPlotButton->setEnabled(true);
+  m_uiForm.groupTablePlotButton->setEnabled(true);
+  m_uiForm.pairTablePlotButton->setEnabled(true);
+  m_uiForm.guessAlphaButton->setEnabled(true);
+}
+
+
+void MuonAnalysis::openDirectoryDialog()
+{
+  MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
+  ad->show();
+  ad->setFocus();
+}
+
 
 }//namespace MantidQT
 }//namespace CustomInterfaces

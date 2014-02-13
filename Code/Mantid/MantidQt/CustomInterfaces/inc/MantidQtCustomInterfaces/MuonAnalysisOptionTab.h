@@ -64,11 +64,6 @@ public:
   /// Initialise the layout of Muon Analysis.
   void initLayout();
 
-  /// When no data loaded set various buttons etc to inactive
-  void noDataAvailable();
-
-  /// When data loaded set various buttons etc to active
-  void nowDataAvailable();
 
   /// Get plot style parameters from widgets
   QMap<QString, QString> parsePlotStyleParams() const;
@@ -92,9 +87,6 @@ private slots:
 
   /// Open the Muon Analysis Settings help and navigate to rebin section. (Wiki)
   void rebinHelpClicked();
-  
-  /// Opens the managed directory dialog for easier access for the user.
-  void openDirectoryDialog();
 
   /// Run when time axis combo-box is changed
   void onTimeAxisChanged(int index);
