@@ -92,7 +92,6 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/IsNone.h
   ${HEADER_DIR}/kernel/PropertyWithValue.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
-  ${HEADER_DIR}/kernel/SharedPtrToPythonMacro.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h
   ${HEADER_DIR}/kernel/TypedValidatorExportMacro.h
 )
