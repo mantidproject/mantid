@@ -10,10 +10,6 @@ from mantid.kernel import Direction
 from mantid import config, logger
 import sys, os.path, numpy as np
 
-from IndirectCommon import *
-from IndirectImport import import_mantidplot
-mp = import_mantidplot()
-
 class Moments(PythonAlgorithm):
  
 	def category(self):
@@ -27,14 +23,14 @@ class Moments(PythonAlgorithm):
 		self.declareProperty(name='EnergyMin', defaultValue=-0.5, doc='Minimum energy for fit. Default=-0.5')
 		self.declareProperty(name='EnergyMax', defaultValue=0.5, doc='Maximum energy for fit. Default=0.5')
 		self.declareProperty(name='Scale', defaultValue=1.0, doc='Scale factor to multiply y(Q,w). Default=1.0')
-		self.declareProperty(name='Verbose',defaultValue=False, doc='Switch Verbose Off/On')
-		self.declareProperty(name='Plot',defaultValue=False, doc='Switch Plot Off/On')
-		self.declareProperty(name='Save',defaultValue=False, doc='Switch Save result to nxs file Off/On')
+		self.declareProperty(name='Verbose', defaultValue=False, doc='Switch Verbose Off/On')
+		self.declareProperty(name='Plot', defaultValue=False, doc='Switch Plot Off/On')
+		self.declareProperty(name='Save', defaultValue=False, doc='Switch Save result to nxs file Off/On')
 
 		self.declareProperty(WorkspaceGroupProperty("OutputWorkspace", "", Direction.Output), doc="group_workspace workspace that includes all calculated moments.")
  
 	def PyExec(self):
-		from IndirectEnergyConversion import SqwMoments
+		from IndirectCommon import CheckHistZero, CheckElimits, StartTime, EndTime, getDefaultWorkingDirectory
 		
 		sample_workspace = self.getPropertyValue('Sample')
 		output_workspace = self.getPropertyValue('OutputWorkspace')
@@ -61,7 +57,7 @@ class Moments(PythonAlgorithm):
 		CropWorkspace(InputWorkspace=sample_workspace, OutputWorkspace=samWS, XMin=erange[0], XMax=erange[1])
 
 		if Verbose:
-		    logger.notice('Energy range is %f to %f' % erange)
+		    logger.notice('Energy range is %f to %f' % (erange[0], erange[1]))
 
 		if factor > 0.0:
 		    Scale(InputWorkspace=samWS, OutputWorkspace=samWS, Factor=factor, Operation='Multiply')
@@ -101,39 +97,41 @@ class Moments(PythonAlgorithm):
 		    yM2.append(m2)
 		    yM4.append(m4)
 
-		fname = output_workspace + '_Moments'
+		output_workspace = output_workspace + '_Moments'
 		Q = np.arange(num_spectra)
-		CreateWorkspace(OutputWorkspace=fname+'_M0', DataX=Q, DataY=yM0,
+		CreateWorkspace(OutputWorkspace=output_workspace+'_M0', DataX=Q, DataY=yM0,
 		    Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=fname+'_M1', DataX=Q, DataY=yM1,
+		CreateWorkspace(OutputWorkspace=output_workspace+'_M1', DataX=Q, DataY=yM1,
 		    Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=fname+'_M2', DataX=Q, DataY=yM2,
+		CreateWorkspace(OutputWorkspace=output_workspace+'_M2', DataX=Q, DataY=yM2,
 		    Nspec=1, UnitX='MomentumTransfer')
-		CreateWorkspace(OutputWorkspace=fname+'_M4', DataX=Q, DataY=yM4,
+		CreateWorkspace(OutputWorkspace=output_workspace+'_M4', DataX=Q, DataY=yM4,
 		    Nspec=1, UnitX='MomentumTransfer')
 		
-		group_workspaces = fname+'_M0,'+fname+'_M1,'+fname+'_M2,'+fname+'_M4'
-		GroupWorkspaces(InputWorkspaces=group_workspaces,OutputWorkspace=fname)
+		group_workspaces = output_workspace+'_M0,'+output_workspace+'_M1,'+output_workspace+'_M2,'+output_workspace+'_M4'
+		GroupWorkspaces(InputWorkspaces=group_workspaces,OutputWorkspace=output_workspace)
 		DeleteWorkspace(samWS)
 
-		self.setProperty("OutputWorkspace", fname)
-
 		if Save:
-		    workdir = config['defaultsave.directory']
-		    opath = os.path.join(workdir,fname+'.nxs')
-		    SaveNexusProcessed(InputWorkspace=fname, Filename=opath)
-		    
-		    if Verbose:
-			logger.notice('Output file : ' + opath)
+			workdir = getDefaultWorkingDirectory()
+			opath = os.path.join(workdir,output_workspace+'.nxs')
+			SaveNexusProcessed(InputWorkspace=output_workspace, Filename=opath)
+
+			if Verbose:
+				logger.notice('Output file : ' + opath)
 
 		if Plot:
-		    SqwMomentsPlot(fname,Plot)
+		    self._plot_moments(output_workspace)
 
+		self.setProperty("OutputWorkspace", output_workspace)
+		
 		EndTime('Moments')
 	
-	def SqwMomentsPlot(inputWS,Plot):
+	def _plot_moments(self, inputWS):
+		from IndirectImport import import_mantidplot
+		mp = import_mantidplot()
+		
 		m0_plot=mp.plotSpectrum(inputWS+'_M0',0)
 		m2_plot=mp.plotSpectrum([inputWS+'_M2',inputWS+'_M4'],0)
-		SqwMoments(sample_workspace,erange,factor,verbOp,plotOp,saveOp)
 
 AlgorithmFactory.subscribe(Moments)         # Register algorithm with Mantid
