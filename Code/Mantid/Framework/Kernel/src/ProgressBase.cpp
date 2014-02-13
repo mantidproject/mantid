@@ -47,10 +47,12 @@ namespace Kernel
   }
   //----------------------------------------------------------------------------------------------
   /**
-   * Copy constructor that builds a new Timer object
+   * Copy constructor that builds a new ProgressBase object. The timer state is copied
+   * from the other object
    * @param source The source of the copy
    */
-  ProgressBase::ProgressBase(const ProgressBase & source)
+  ProgressBase::ProgressBase(const ProgressBase & source) 
+    : m_timeElapsed(new Timer) // new object, new timer
   {
     *this = source;
   }
@@ -68,7 +70,8 @@ namespace Kernel
       m_step = rhs.m_step;
       m_i = rhs.m_i;
       m_last_reported = rhs.m_last_reported;
-      m_timeElapsed = new Timer(*rhs.m_timeElapsed);
+      // copy the timer state, being careful only to copy state & not the actual pointer
+      *m_timeElapsed = *rhs.m_timeElapsed;
       m_notifyStepPrecision = rhs.m_notifyStepPrecision;
     }
     return *this;
