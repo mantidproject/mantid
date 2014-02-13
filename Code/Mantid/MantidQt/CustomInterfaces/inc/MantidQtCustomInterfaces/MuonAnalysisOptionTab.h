@@ -5,18 +5,8 @@
 // Includes
 //----------------------
 #include "ui_MuonAnalysis.h"
-#include "MantidQtAPI/UserSubWindow.h"
-
-#include "MantidQtMantidWidgets/pythonCalc.h"
-#include "MantidQtMantidWidgets/MWRunFiles.h"
-#include "MantidQtMantidWidgets/MWDiag.h"
 
 #include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
-
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
-
-#include <QTableWidget>
 
 namespace MantidQt
 {
