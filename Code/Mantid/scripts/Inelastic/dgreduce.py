@@ -173,7 +173,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     abs_units_defaults_check = False
     if monovan_run != None :
        # check if mono-vanadium is provided as multiple files list or just put in brackets ocasionally
-        Reducer.log(' Output will be in absolute units of mb/str/mev/fu')
+        Reducer.log("****************************************************************");
+        Reducer.log('*** Output will be in absolute units of mb/str/mev/fu')
         if isinstance(monovan_run,list):
                 if len(monovan_run)>1:
                     raise IOError(' Can currently work only with single monovan file but list supplied')
@@ -207,10 +208,15 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     changed_Keys=Reducer.set_input_parameters(**program_args);
 
     # inform user about changed parameters
+    Reducer.log("****************************************************************");
     for key in changed_Keys:
         val = getattr(Reducer,key);
         Reducer.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val))
 
+    save_dir = config.getString('defaultsave.directory') 
+    Reducer.log("****************************************************************");
+    Reducer.log("*** By default data are saved into: {0}".format(save_dir));
+    Reducer.log("****************************************************************");
     #do we run absolute units normalization and need to warn users if the parameters needed for that have not changed from defaults
     if abs_units_defaults_check :
         Reducer.check_abs_norm_defaults_changed(changed_Keys);
