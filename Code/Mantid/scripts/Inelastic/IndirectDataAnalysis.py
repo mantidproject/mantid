@@ -1124,12 +1124,12 @@ def msdfit(inputs, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=
         dataE = np.append(dataE,np.array(ed))
         fout = calcWS +'_'+ str(nr)
         CreateWorkspace(OutputWorkspace=fout, DataX=dataX, DataY=dataY, DataE=dataE,
-            Nspec=2, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues='Data,Calc')
+            Nspec=2, UnitX='QSquared', VerticalAxisUnit='Text', VerticalAxisValues='Data,Calc')
 
         group_workspace_list += fout + ','
         DeleteWorkspace(input_workspace)
         DeleteWorkspace('__data')
-
+    
     GroupWorkspaces(InputWorkspaces=group_workspace_list,OutputWorkspace=calcWS)
 
     #add sample logs to output workspace
