@@ -46,7 +46,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 	return
 
 
-    def Xtest_exportFileAndHeader(self):
+    def test_exportFileAndHeader(self):
 	""" Test to export logs without header file
 	"""
 	# Generate the matrix workspace with some logs
@@ -56,7 +56,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 	# Test algorithm
 	alg_test = run_algorithm("ExportVulcanSampleLogs", 
 	    InputWorkspace = "TestMatrixWS",
-	    OutputFilename = "furnace20333.txt",
+	    OutputFilename = "/tmp/furnace20333.txt",
 	    SampleLogNames = ["SensorA", "SensorB", "SensorC"],
 	    WriteHeaderFile = True, 
 	    Header = "SensorA[K]\t SensorB[K]\t SensorC[K]")
@@ -66,7 +66,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
 	# Locate file
 	try:
-	    ifile = open("furnace20333_header.txt")
+	    ifile = open("/tmp/furnace20333_header.txt")
 	    lines = ifile.readlines()
 	    ifile.close()
 	except IOError as err:
@@ -131,6 +131,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         """ Create a workspace for testing against
         """
 	from mantid.simpleapi import CreateWorkspace
+	from mantid.simpleapi import AddSampleLog
         from time import gmtime, strftime,mktime 
         import numpy as np
       
@@ -142,7 +143,8 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 	wksp = CreateWorkspace(DataX=x, DataY=y,DataE=e,NSpec=1,UnitX='TOF')
 
 	# Add run_start 
-	# AddSampleLog(Workspace=self.__ws,LogName='run_start',LogText='2013-Jan-01 00:00:01')
+	tmptime = strftime("%Y-%m-%d %H:%M:%S", gmtime(mktime(gmtime())))
+	AddSampleLog(Workspace=wksp,LogName='run_start',LogText=str(tmptime))
 
         tsp_a=kernel.FloatTimeSeriesProperty("SensorA") 
         tsp_b=kernel.FloatTimeSeriesProperty("SensorB") 
