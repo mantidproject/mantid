@@ -79,12 +79,14 @@ class DSFinterp(PythonAlgorithm):
     workspaces = self.getProperty('Workspaces').value
     fvalues = self.getProperty('ParameterValues').value
     if len(workspaces) != len(fvalues):
-      logger.error('Number of workspaces and fvalues should be the same')
-      return None
+      mesg = 'Number of workspaces and fvalues should be the same'
+      logger.error(mesg)
+      raise ValueError(mesg)
     for workspace in workspaces[1:]:
       if not self.areWorkspacesCompatible(mtd[workspaces[0]],mtd[workspace]):
-        logger.error('Workspace {0} incompatible with {1}'.format(workspace, workspaces[0]))
-        return None
+        mesg = 'Workspace {0} incompatible with {1}'.format(workspace, workspaces[0])
+        logger.error(mesg)
+        raise ValueError(mesg)
     # Load the workspaces into a group of dynamic structure factors
     from dsfinterp.dsf import Dsf
     from dsfinterp.dsfgroup import DsfGroup
@@ -112,12 +114,14 @@ class DSFinterp(PythonAlgorithm):
     targetfvalues = self.getProperty('TargetParameters').value
     for targetfvalue in targetfvalues:
       if targetfvalue < min(fvalues) or targetfvalue > max(fvalues):
-        logger.error('Target parameters should lie in [{0}, {1}]'.format(min(fvalues),max(fvalues)))
-        return None
+        mesg = 'Target parameters should lie in [{0}, {1}]'.format(min(fvalues),max(fvalues))
+        logger.error(mesg)
+        raise ValueError(mesg)
     outworkspaces = self.getProperty('OutputWorkspaces').value
     if len(targetfvalues) != len(outworkspaces):
-      logger.error('Number of workspaces and fvalues should be the same')
-      return None
+      mesg = 'Number of workspaces and fvalues should be the same'
+      logger.error(mesg)
+      raise IndexError(mesg)
     for i in range(len(targetfvalues)):
       outworkspace = outworkspaces[i]
       dsf = self.channelgroup( targetfvalues[i] )
@@ -130,5 +134,5 @@ try:
   import dsfinterp
   AlgorithmFactory.subscribe(DSFinterp)
 except:
-  logger.error('Failed to subscribe algorithm DSFinterp; Python package dsfinterp may be missing (https://pypi.python.org/pypi/dsfinterp)')
+  logger.debug('Failed to subscribe algorithm DSFinterp; Python package dsfinterp may be missing (https://pypi.python.org/pypi/dsfinterp)')
   pass
