@@ -1311,17 +1311,13 @@ void Indirect::mappingOptionSelected(const QString& groupType)
   {
     m_uiForm.swMapping->setCurrentIndex(0);
   }
-  else if ( groupType == "All" )
-  {
-    m_uiForm.swMapping->setCurrentIndex(2);
-  }
-  else if ( groupType == "Individual" )
-  {
-    m_uiForm.swMapping->setCurrentIndex(2);
-  }
   else if ( groupType == "Groups" )
   {
     m_uiForm.swMapping->setCurrentIndex(1);
+  }
+  else if ( groupType == "All" || groupType == "Individual" || groupType == "Default" )
+  {
+    m_uiForm.swMapping->setCurrentIndex(2);
   }
 }
 
