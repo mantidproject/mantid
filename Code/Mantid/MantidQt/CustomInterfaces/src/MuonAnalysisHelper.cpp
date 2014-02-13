@@ -94,7 +94,7 @@ void WidgetAutoSaver::saveWidgetValue()
   }
   else if ( auto w = qobject_cast<QCheckBox*>(sender) )
   {
-    settings.setValue(senderName, static_cast<int>(w->checkState()));
+    settings.setValue(senderName, w->isChecked());
   }
   else if ( auto w = qobject_cast<QComboBox*>(sender) )
   {
@@ -120,7 +120,7 @@ void WidgetAutoSaver::loadWidgetValue(QWidget *widget)
   }
   else if ( auto w = qobject_cast<QCheckBox*>(widget) )
   {
-    w->setCheckState(static_cast<Qt::CheckState>(value.toInt()));
+    w->setChecked(value.toBool());
   }
   else if ( auto w = qobject_cast<QComboBox*>(widget) )
   {

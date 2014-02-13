@@ -59,7 +59,7 @@ void MuonAnalysisOptionTab::initLayout()
   m_autoSaver.registerWidget(m_uiForm.timeComboBox, "timeComboBoxIndex", 0);
   m_autoSaver.registerWidget(m_uiForm.yAxisMinimumInput, "yAxisStart", "");
   m_autoSaver.registerWidget(m_uiForm.yAxisMaximumInput, "yAxisFinish", "");
-  m_autoSaver.registerWidget(m_uiForm.yAxisAutoscale, "axisAutoScaleOnOff", 1);
+  m_autoSaver.registerWidget(m_uiForm.yAxisAutoscale, "axisAutoScaleOnOff", true);
   m_autoSaver.registerWidget(m_uiForm.showErrorBars, "errorBars", 0);
   m_autoSaver.endGroup();
 
@@ -71,8 +71,8 @@ void MuonAnalysisOptionTab::initLayout()
 
   m_autoSaver.beginGroup("SettingOptions");
   m_autoSaver.registerWidget(m_uiForm.plotCreation, "plotCreation", 0);
-  m_autoSaver.registerWidget(m_uiForm.hideToolbars, "toolbars", 1);
-  m_autoSaver.registerWidget(m_uiForm.hideGraphs, "hiddenGraphs", 1);
+  m_autoSaver.registerWidget(m_uiForm.hideToolbars, "toolbars", true);
+  m_autoSaver.registerWidget(m_uiForm.hideGraphs, "hiddenGraphs", true);
   m_autoSaver.endGroup();
 
   // Set validators for double fields
