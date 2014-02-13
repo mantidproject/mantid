@@ -85,6 +85,8 @@ void MuonAnalysisOptionTab::initLayout()
   // Connect various sync stuff
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(runTimeComboBox(int)));
   connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, SLOT(runyAxisAutoscale(bool)));
+  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), m_uiForm.rebinEntryState,
+          SLOT(setCurrentIndex(int)));
 
   // Help
   connect(m_uiForm.muonAnalysisHelpPlotting, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpSettingsClicked()));
@@ -126,20 +128,6 @@ void MuonAnalysisOptionTab::rebinHelpClicked()
 {
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
             "MuonAnalysisSettings#Variable_Rebin"));
-}
-
-
-////////////// Data Binning slots ///////////////
-
-/**
-* When clicking Rebin combobox (slot)
-*/
-void MuonAnalysisOptionTab::runRebinComboBox(int index)
-{
-  // Set which rebin entry to display.
-  m_uiForm.rebinEntryState->setCurrentIndex(index);
-
-  emit settingsTabUpdatePlot();
 }
 
 ////////////// Default Plot Style slots ///////////////

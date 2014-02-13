@@ -89,10 +89,6 @@ public slots:
   /// Enable/Disable editing of Y axis and save the setting.
   void runyAxisAutoscale(bool state);
 
-  /// Set whether the user can see and edit the rebin steps. Also saves setting.
-  void runRebinComboBox(int index);
-
-
 signals:
   /// Update the plot because something has changed.
   void settingsTabUpdatePlot();
