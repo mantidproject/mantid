@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Indirect.h"
 #include "MantidQtCustomInterfaces/Transmission.h"
+#include "MantidQtCustomInterfaces/IndirectMoments.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtCustomInterfaces/Background.h"
 
@@ -55,7 +56,9 @@ Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) :
   m_calCalCurve(NULL), m_calResCurve(NULL),
   // Null pointers - Diagnostics Tab
   m_sltPlot(NULL), m_sltR1(NULL), m_sltR2(NULL), m_sltDataCurve(NULL),
-  m_tab_trans(new Transmission(m_uiForm,this))
+  // Additional tab interfaces
+  m_tab_trans(new Transmission(m_uiForm,this)),
+  m_tab_moments(new IndirectMoments(m_uiForm,this))
 {
   // Constructor
 }
@@ -114,8 +117,12 @@ void Indirect::initLayout()
   connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
   connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
 
-  // "Transmission" tab
+  // additional tabs
   connect(m_tab_trans, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+  connect(m_tab_moments, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+  
+  connect(m_tab_trans, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
+  connect(m_tab_moments, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
 
   // create validators
   m_valInt = new QIntValidator(this);
@@ -189,6 +196,8 @@ void Indirect::helpClicked()
     url += "SofQW";
   else if (tabName == "Transmission")
     url += "Transmission";
+  else if (tabName == "Moments")
+    url += "Moments";
   QDesktopServices::openUrl(QUrl(url));
 }
 /**
@@ -218,6 +227,10 @@ void Indirect::runClicked()
   else if (tabName == "Transmission")
   {
     m_tab_trans->runTab();
+  }
+  else if(tabName == "Moments")
+  {
+    m_tab_moments->runTab();
   }
 }
 
@@ -2051,4 +2064,15 @@ void Indirect::sliceUpdateRS(QtProperty* prop, double val)
   else if ( prop == m_sltProp["R1E"] ) m_sltR1->setMaximum(val);
   else if ( prop == m_sltProp["R2S"] ) m_sltR2->setMinimum(val);
   else if ( prop == m_sltProp["R2E"] ) m_sltR2->setMaximum(val);
+}
+
+/**
+ * Slot to wrap the protected showInformationBox method defined
+ * in UserSubWindow and provide access to composed tabs.
+ * 
+ * @param message :: The message to display in the message box
+ */
+void Indirect::showMessageBox(const QString& message)
+{
+  showInformationBox(message);
 }

@@ -22,6 +22,7 @@ set ( SRC_FILES
   src/IndirectLoadAsciiTab.cpp
   src/IndirectNeutron.cpp
   src/IndirectMolDyn.cpp
+  src/IndirectMoments.cpp
   src/JumpFit.cpp
     src/MSDFit.cpp
 	src/MuonAnalysis.cpp
@@ -76,6 +77,7 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
   inc/MantidQtCustomInterfaces/IndirectNeutron.h
   inc/MantidQtCustomInterfaces/IndirectMolDyn.h
+  inc/MantidQtCustomInterfaces/IndirectMoments.h
   inc/MantidQtCustomInterfaces/JumpFit.h
     inc/MantidQtCustomInterfaces/MSDFit.h
 	inc/MantidQtCustomInterfaces/MuonAnalysis.h
@@ -127,6 +129,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
                 inc/MantidQtCustomInterfaces/IndirectNeutron.h
                 inc/MantidQtCustomInterfaces/IndirectMolDyn.h
+                inc/MantidQtCustomInterfaces/IndirectMoments.h
                 inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
