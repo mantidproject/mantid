@@ -11,23 +11,21 @@
 #include "MantidQtMantidWidgets/MWRunFiles.h"
 #include "MantidQtMantidWidgets/MWDiag.h"
 
+#include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <QTableWidget>
 
-namespace Ui
-{
-  class MuonAnalysis;
-}
-
 namespace MantidQt
 {
 namespace CustomInterfaces
 {
+  using namespace MuonAnalysisHelper;
+
 namespace Muon
 {
-
 
 /** 
 This is a Helper class for MuonAnalysis. In particular this helper class deals
@@ -61,7 +59,7 @@ class MuonAnalysisOptionTab : public QWidget
  Q_OBJECT
 public:
   /// Constructor
-  MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& group) : m_uiForm(uiForm), m_settingsGroup(group), m_yAxisMinimum(), m_yAxisMaximum(), m_customTimeValue() {}
+  MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& settingsGroup);
 
   /// Initialise the layout of Muon Analysis.
   void initLayout();
@@ -117,6 +115,8 @@ private:
 
   /// Store the user's custom time value.
   QString m_customTimeValue;
+
+  WidgetAutoSaver m_autoSaver;
 
 private slots:  
   /// Save the settings for time axis start and validate the entry.

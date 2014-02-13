@@ -1,8 +1,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidQtCustomInterfaces/MuonAnalysisOptionTab.h"
 #include "MantidKernel/ConfigService.h"
+
+#include "MantidQtCustomInterfaces/MuonAnalysisOptionTab.h"
+#include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
 
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
@@ -28,17 +30,26 @@
 #include <QUrl>
 
 //-----------------------------------------------------------------------------
-
+using namespace Mantid::Kernel;
 
 namespace MantidQt
 {
+  using namespace API;
+  using namespace MantidWidgets;
+
 namespace CustomInterfaces
 {
+  using namespace MuonAnalysisHelper;
+
 namespace Muon
 {
-  using namespace MantidQt::API;
-  using namespace Mantid::Kernel;
-  using namespace MantidQt::MantidWidgets;
+
+MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm, const QString &settingsGroup)
+  : m_uiForm(uiForm), m_settingsGroup(settingsGroup), m_yAxisMinimum(), m_yAxisMaximum(),
+    m_customTimeValue(), m_autoSaver(settingsGroup)
+{
+}
+
 
 void MuonAnalysisOptionTab::initLayout()
 {
