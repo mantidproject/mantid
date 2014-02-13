@@ -57,6 +57,7 @@ namespace IDA
     connect(uiForm().msd_pbSequential, SIGNAL(clicked()), this, SLOT(sequential()));
     connect(uiForm().msd_lePlotSpectrum, SIGNAL(editingFinished()), this, SLOT(plotInput()));
     connect(uiForm().msd_leSpectraMin, SIGNAL(editingFinished()), this, SLOT(plotInput()));
+    connect(uiForm().msd_leSpectraMax, SIGNAL(editingFinished()), this, SLOT(plotInput()));
     
     uiForm().msd_leSpectraMin->setValidator(m_intVal);
     uiForm().msd_leSpectraMax->setValidator(m_intVal);
@@ -179,13 +180,17 @@ namespace IDA
         return;
       }
       
-      QString plotSpec =uiForm().msd_lePlotSpectrum->text();
-      QString specMin = uiForm().msd_leSpectraMin->text();
-      int wsIndex = 0;
-      int minIndex = 0;
       int nHist = static_cast<int>(ws->getNumberHistograms());
       
-      if (!plotSpec.isEmpty() && plotSpec.toInt() < nHist-1)
+      QString plotSpec =uiForm().msd_lePlotSpectrum->text();
+      QString specMin = uiForm().msd_leSpectraMin->text();
+      QString specMax = uiForm().msd_leSpectraMax->text();
+      
+      int wsIndex = 0;
+      int minIndex = 0;
+      int maxIndex = nHist-1;
+      
+      if (!plotSpec.isEmpty() && plotSpec.toInt() < nHist)
       {
         wsIndex = plotSpec.toInt();
       }
@@ -195,9 +200,18 @@ namespace IDA
         minIndex = specMin.toInt();
       }
 
+      if (!specMax.isEmpty())
+      {
+        maxIndex = specMax.toInt();
+      }
+
       if (wsIndex < minIndex)
       {
         wsIndex = minIndex;
+      }
+      else if( wsIndex > maxIndex)
+      {
+        wsIndex = maxIndex;
       }
 
       m_msdDataCurve = plotMiniplot(m_msdPlot, m_msdDataCurve, ws, wsIndex);
@@ -207,7 +221,7 @@ namespace IDA
         m_msdRange->setRange(range.first, range.second);
         
         uiForm().msd_leSpectraMin->setText(QString::number(minIndex));
-        uiForm().msd_leSpectraMax->setText(QString::number(nHist-1));
+        uiForm().msd_leSpectraMax->setText(QString::number(maxIndex));
         uiForm().msd_lePlotSpectrum->setText(QString::number(wsIndex));
 
         m_intVal->setRange(0, nHist-1);
