@@ -74,11 +74,8 @@ namespace IDA
     if ( uiForm().msd_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
 
-    if ( uiForm().msd_ckSave->isChecked() ) pyInput += "save = True\n";
-    else pyInput += "save = False\n";
-
     pyInput +=
-      "output = msdfit(inputs, startX, endX, spec_min=specMin, spec_max=specMax, Save=save, Verbose=verbose, Plot=False)\n"
+      "output = msdfit(inputs, startX, endX, spec_min=specMin, spec_max=specMax, Save=False, Verbose=verbose, Plot=False)\n"
       "print output \n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
