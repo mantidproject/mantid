@@ -42,7 +42,7 @@ class Stitch1D(PythonAlgorithm):
         return count > 0
     
     
-    def __run_algorithm(self, name, **kwargs):
+    def __run_as_child(self, name, **kwargs):
         """Run a named algorithm and return the
         algorithm handle
     
@@ -62,12 +62,11 @@ class Stitch1D(PythonAlgorithm):
             alg.setProperty(key, value)
         
         alg.execute()
-        return alg
+        return alg.getProperty("OutputWorkspace").value
     
     def __to_single_value_ws(self, value):
-        alg = self.__run_algorithm("CreateSingleValuedWorkspace", DataValue=value)
-        ws = alg.getProperty("OutputWorkspace").value
-        return ws
+        value_ws = self.__run_as_child("CreateSingleValuedWorkspace", DataValue=value)
+        return value_ws
         
     
     def __find_indexes_start_end(self, startOverlap, endOverlap, workspace):
@@ -133,10 +132,8 @@ class Stitch1D(PythonAlgorithm):
         
         params = self.__create_rebin_parameters()
         print params
-        alg = self.__run_algorithm("Rebin", InputWorkspace=self.getProperty("LHSWorkspace").value, Params=params)
-        lhs_rebinned = alg.getProperty("OutputWorkspace").value
-        alg = self.__run_algorithm("Rebin", InputWorkspace=self.getProperty("RHSWorkspace").value, Params=params)
-        rhs_rebinned = alg.getProperty("OutputWorkspace").value
+        lhs_rebinned = self.__run_as_child("Rebin", InputWorkspace=self.getProperty("LHSWorkspace").value, Params=params)
+        rhs_rebinned = self.__run_as_child("Rebin", InputWorkspace=self.getProperty("RHSWorkspace").value, Params=params)
         
         xRange = lhs_rebinned.readX(0)
         minX = xRange[0]
@@ -153,75 +150,56 @@ class Stitch1D(PythonAlgorithm):
         
         if not useManualScaleFactor:
             
-            alg = self.__run_algorithm("Integration", InputWorkspace=lhs_rebinned, RangeLower=startOverlap, RangeUpper=endOverlap)
-            lhsOverlapIntegrated = alg.getProperty("OutputWorkspace").value
-            alg = self.__run_algorithm("Integration", InputWorkspace=rhs_rebinned, RangeLower=startOverlap, RangeUpper=endOverlap)
-            rhsOverlapIntegrated = alg.getProperty("OutputWorkspace").value
+            lhsOverlapIntegrated = self.__run_as_child("Integration", InputWorkspace=lhs_rebinned, RangeLower=startOverlap, RangeUpper=endOverlap)
+            rhsOverlapIntegrated = self.__run_as_child("Integration", InputWorkspace=rhs_rebinned, RangeLower=startOverlap, RangeUpper=endOverlap)
             
             y1=lhsOverlapIntegrated.readY(0)
             y2=rhsOverlapIntegrated.readY(0)
             if scaleRHSWorkspace:
-                alg = self.__run_algorithm("Divide", LHSWorkspace=lhsOverlapIntegrated, RHSWorkspace=rhsOverlapIntegrated)
-                ratio = alg.getProperty("OutputWorkspace").value
-                alg = self.__run_algorithm("Multiply", LHSWorkspace=rhs_rebinned, RHSWorkspace=ratio)
-                rhs_rebinned = alg.getProperty("OutputWorkspace").value
+                ratio = self.__run_as_child("Divide", LHSWorkspace=lhsOverlapIntegrated, RHSWorkspace=rhsOverlapIntegrated)
+                rhs_rebinned = self.__run_as_child("Multiply", LHSWorkspace=rhs_rebinned, RHSWorkspace=ratio)
                 scalefactor = y1[0]/y2[0]
             else: 
                 
-                alg = self.__run_algorithm("Divide", RHSWorkspace=lhsOverlapIntegrated, LHSWorkspace=rhsOverlapIntegrated)
-                ratio = alg.getProperty("OutputWorkspace").value
-                alg = self.__run_algorithm("Multiply", LHSWorkspace=lhs_rebinned, RHSWorkspace=ratio)
-                lhs_rebinned = alg.getProperty("OutputWorkspace").value
+                ratio = self.__run_as_child("Divide", RHSWorkspace=lhsOverlapIntegrated, LHSWorkspace=rhsOverlapIntegrated)
+                lhs_rebinned = self.__run_as_child("Multiply", LHSWorkspace=lhs_rebinned, RHSWorkspace=ratio)
                 scalefactor = y2[0]/y1[0]   
         else:
             manualScaleFactorWS = self.__to_single_value_ws(manualScaleFactor)
             if scaleRHSWorkspace:
-                alg = self.__run_algorithm("Multiply", LHSWorkspace=rhs_rebinned, RHSWorkspace=manualScaleFactorWS)
-                rhs_rebinned = alg.getProperty("OutputWorkspace").value
+                rhs_rebinned = self.__run_as_child("Multiply", LHSWorkspace=rhs_rebinned, RHSWorkspace=manualScaleFactorWS)
             else:
-                alg = self.__run_algorithm("Multiply", LHSWorkspace=lhs_rebinned, RHSWorkspace=manualScaleFactorWS)
-                lhs_rebinned = alg.getProperty("OutputWorkspace").value
+                lhs_rebinned = self.__run_as_child("Multiply", LHSWorkspace=lhs_rebinned, RHSWorkspace=manualScaleFactorWS)
             scalefactor = manualScaleFactor
         
         # Mask out everything BUT the overlap region as a new workspace.
-        alg = self.__run_algorithm("MultiplyRange", InputWorkspace=lhs_rebinned, StartBin=0,EndBin=a1,Factor=0)
-        overlap1 = alg.getProperty("OutputWorkspace").value
-        alg = self.__run_algorithm("MultiplyRange", InputWorkspace=overlap1,StartBin=a2,Factor=0)
-        overlap1 = alg.getProperty("OutputWorkspace").value
+        overlap1 = self.__run_as_child("MultiplyRange", InputWorkspace=lhs_rebinned, StartBin=0,EndBin=a1,Factor=0)
+        overlap1 = self.__run_as_child("MultiplyRange", InputWorkspace=overlap1,StartBin=a2,Factor=0)
+
         # Mask out everything BUT the overlap region as a new workspace.
-        alg = self.__run_algorithm("MultiplyRange", InputWorkspace=rhs_rebinned,StartBin=0,EndBin=a1,Factor=0)
-        overlap2 = alg.getProperty("OutputWorkspace").value
-        alg = self.__run_algorithm("MultiplyRange", InputWorkspace=overlap2,StartBin=a2,Factor=0)
-        overlap2 = alg.getProperty("OutputWorkspace").value
+        overlap2 = self.__run_as_child("MultiplyRange", InputWorkspace=rhs_rebinned,StartBin=0,EndBin=a1,Factor=0)
+        overlap2 = self.__run_as_child("MultiplyRange", InputWorkspace=overlap2,StartBin=a2,Factor=0)
     
         # Mask out everything AFTER the start of the overlap region
-        alg = self.__run_algorithm("MultiplyRange", InputWorkspace=lhs_rebinned, StartBin=a1+1, Factor=0)
-        lhs_rebinned = alg.getProperty("OutputWorkspace").value
+        lhs_rebinned = self.__run_as_child("MultiplyRange", InputWorkspace=lhs_rebinned, StartBin=a1+1, Factor=0)
         
         # Mask out everything BEFORE the end of the overlap region
-        alg = self.__run_algorithm("MultiplyRange",InputWorkspace=rhs_rebinned,StartBin=0,EndBin=a2-1,Factor=0)
-        rhs_rebinned = alg.getProperty("OutputWorkspace").value
+        rhs_rebinned = self.__run_as_child("MultiplyRange",InputWorkspace=rhs_rebinned,StartBin=0,EndBin=a2-1,Factor=0)
         
         # Calculate a weighted mean for the overlap region
         overlapave = None
         if self.has_non_zero_errors(overlap1) and self.has_non_zero_errors(overlap2):
-            alg = self.__run_algorithm("WeightedMean", InputWorkspace1=overlap1,InputWorkspace2=overlap2)
-            overlapave = alg.getProperty("OutputWorkspace").value
+            overlapave = self.__run_as_child("WeightedMean", InputWorkspace1=overlap1,InputWorkspace2=overlap2)
         else:
             self.log().information("Using un-weighted mean for Stitch1D overlap mean")
             # Calculate the mean.
-            alg = self.__run_algorithm("Plus", LHSWorkspace=overlap1, RHSWorkspace=overlap2)
-            sum = alg.getProperty("OutputWorkspace").value
+            sum = self.__run_as_child("Plus", LHSWorkspace=overlap1, RHSWorkspace=overlap2)
             denominator = self.__to_single_value_ws(2.0)
-            alg = self.__run_algorithm("Divide", LHSWorkspace=sum, RHSWorkspace=denominator)
-            
-            overlapave = alg.getProperty("OutputWorkspace").value
+            overlapave = self.__run_as_child("Divide", LHSWorkspace=sum, RHSWorkspace=denominator)
             
         # Add the Three masked workspaces together to create a complete x-range
-        alg = self.__run_algorithm("Plus", LHSWorkspace=lhs_rebinned, RHSWorkspace=overlapave)
-        result = alg.getProperty("OutputWorkspace").value
-        alg = self.__run_algorithm("Plus", LHSWorkspace=rhs_rebinned, RHSWorkspace=result)
-        result = alg.getProperty("OutputWorkspace").value
+        result = self.__run_as_child("Plus", LHSWorkspace=lhs_rebinned, RHSWorkspace=overlapave)
+        result = self.__run_as_child("Plus", LHSWorkspace=rhs_rebinned, RHSWorkspace=result)
         #RenameWorkspace(InputWorkspace=result, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
         
         self.setProperty('OutputWorkspace', result)
