@@ -784,7 +784,7 @@ class DirectEnergyConversion(object):
                     monitor_ws=RenameWorkspace(InputWorkspace=monitor_ws,OutputWorkspace=mon_WsName)
 
         self.setup_mtd_instrument(result_ws)
-        if self.spectra_to_monitors_list and monitor_ws:
+        if monitor_ws and self.spectra_to_monitors_list:
             for specID in self.spectra_to_monitors_list:
                 self.copy_spectrum2monitors(result_ws,monitor_ws,specID);
 
@@ -852,8 +852,6 @@ class DirectEnergyConversion(object):
 #----------------------------------------------------------------------------------
     @property
     def det_cal_file(self):
-        if hasattr(self,'_det_cal_file_ws') and self._det_cal_file_ws:
-            return self._det_cal_file_ws
         if hasattr(self,'_det_cal_file'):
             return self._det_cal_file
         return None;
@@ -862,40 +860,41 @@ class DirectEnergyConversion(object):
     def det_cal_file(self,val):
 
        if val is None:
-           self._det_cal_file_ws = None;
            self._det_cal_file = None;
            return;
 
        if isinstance(val,api.Workspace):
           # workspace provided
-          self._det_cal_file_ws = val;
-          self._det_cal_file    = None;
+          self._det_cal_file = val;
           return;
 
+        # workspace name
+       if str(val) in mtd:
+          self._det_cal_file = mtd[str(val)];
+          return;
+
+       # file name probably provided
        if isinstance(val,str):
-           # workspace name
-           if val in mtd:
-              self._det_cal_file_ws = mtd[val];
-              self._det_cal_file    = None;
-              return;
-
-           # file name probably provided
-           if val is 'None':
-               val = None;
-           self._det_cal_file = val;
-           self._det_cal_file_ws = None;
-           return;
-
+          if val is 'None':
+              val = None;
+          self._det_cal_file = val;
+          return;
 
        if isinstance(val,list) and len(val)==0:
-          self._det_cal_file = None;
-          self._det_cal_file_ws = None;
+           self._det_cal_file = None;
+           return;
+
+       if isinstance(val,int):
+          self._det_cal_file = common.find_file(val);
           return;
+
       
        raise NameError('Detector calibration file name can be a workspace name present in Mantid or string describing file name');
 
     @property
     def spectra_to_monitors_list(self):
+        if not hasattr(self,'spectra_to_monitors_list'):
+           return None;            
         return self._spectra_to_monitors_list;
     @spectra_to_monitors_list.setter
     def spectra_to_monitors_list(self,spectra_list):
@@ -1198,10 +1197,7 @@ class DirectEnergyConversion(object):
         # mandatrory command line parameter
         self.energy_bins = None
 
-        #TODO Non yet implemented. make property USE_Det_CalFile_WS or something similar
-        self._det_cal_file_ws = None
-        
-        # should come from Mantid
+          # should come from Mantid
         # Motor names-- SNS stuff -- psi used by nxspe file
         # These should be reconsidered on moving into _Parameters.xml
         self.monitor_workspace = None  # looks like unused parameter                  
