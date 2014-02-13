@@ -45,7 +45,7 @@ namespace Muon
 {
 
 MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm, const QString &settingsGroup)
-  : m_uiForm(uiForm), m_yAxisMinimum(), m_yAxisMaximum(), m_customTimeValue(), m_autoSaver(settingsGroup)
+  : m_uiForm(uiForm), m_autoSaver(settingsGroup)
 {}
 
 
@@ -241,24 +241,6 @@ void MuonAnalysisOptionTab::openDirectoryDialog()
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();
-}
-
-/// Set the *stored" yAxisMinimum value.
-void MuonAnalysisOptionTab::setStoredYAxisMinimum(const QString & yAxisMinimum)
-{
-  m_yAxisMinimum = yAxisMinimum;
-}
-
-/// Set the *stored" yAxisMaximum value.
-void MuonAnalysisOptionTab::setStoredYAxisMaximum(const QString & yAxisMaximum)
-{
-  m_yAxisMaximum = yAxisMaximum;
-}
-
-/// Set the stored custom time value.
-void MuonAnalysisOptionTab::setStoredCustomTimeValue(const QString & storedCustomTimeValue)
-{
-  m_customTimeValue = storedCustomTimeValue;
 }
 
 /**

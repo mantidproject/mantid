@@ -70,15 +70,6 @@ public:
   /// When data loaded set various buttons etc to active
   void nowDataAvailable();
 
-  /// Set the stored yAxisMinimum value.
-  void setStoredYAxisMinimum(const QString & yAxisMinimum);
-
-  /// Set the stored yAxisMaximum value.
-  void setStoredYAxisMaximum(const QString & yAxisMaximum);
-
-  /// Set the stored custom time value.
-  void setStoredCustomTimeValue(const QString & storedCustomTimeValue);
-
   /// Get plot style parameters from widgets
   QMap<QString, QString> parsePlotStyleParams() const;
 
@@ -93,15 +84,6 @@ private:
   /// The Muon Analysis UI file.
   Ui::MuonAnalysis& m_uiForm;
   
-  /// Store value when autoscale has been selected, for when it is deselected again.
-  QString m_yAxisMinimum;
-
-  /// Store value when autoscale has been selected, for when it is deselected again.
-  QString m_yAxisMaximum;
-
-  /// Store the user's custom time value.
-  QString m_customTimeValue;
-
   WidgetAutoSaver m_autoSaver;
 
 private slots:  
