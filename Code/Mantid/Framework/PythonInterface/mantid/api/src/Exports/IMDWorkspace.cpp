@@ -1,14 +1,11 @@
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include <boost/python/class.hpp>
-#include <boost/python/self.hpp>
 #include <boost/python/enum.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/self.hpp>
 
-using Mantid::API::IMDWorkspace;
-using Mantid::API::IMDWorkspace_sptr;
-using Mantid::API::MDGeometry;
-using Mantid::API::Workspace;
+using namespace Mantid::API;
 using namespace boost::python;
 
 void export_IMDWorkspace()
@@ -18,7 +15,7 @@ void export_IMDWorkspace()
           .value("VolumeNormalization", Mantid::API::VolumeNormalization)
           .value("NumEventsNormalization", Mantid::API::NumEventsNormalization);
 
-  REGISTER_SHARED_PTR_TO_PYTHON(IMDWorkspace);
+  register_ptr_to_python<boost::shared_ptr<IMDWorkspace>>();
 
   // EventWorkspace class
   class_< IMDWorkspace, bases<Workspace, MDGeometry>, boost::noncopyable >("IMDWorkspace", no_init)

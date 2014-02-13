@@ -1,7 +1,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/DataItem.h"
 
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
 
 #include <boost/python/class.hpp>

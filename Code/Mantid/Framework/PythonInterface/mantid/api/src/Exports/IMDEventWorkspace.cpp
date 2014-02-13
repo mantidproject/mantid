@@ -1,19 +1,15 @@
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
+
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include <boost/python/class.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
-using Mantid::API::IMDEventWorkspace;
-using Mantid::API::IMDEventWorkspace_sptr;
-using Mantid::API::BoxController_sptr;
-using Mantid::API::IMDWorkspace;
-using Mantid::API::MultipleExperimentInfos;
-using Mantid::Kernel::DataItem_sptr;
+using namespace Mantid::API;
 using namespace boost::python;
 
 void export_IMDEventWorkspace()
 {
-  REGISTER_SHARED_PTR_TO_PYTHON(IMDEventWorkspace);
+  register_ptr_to_python<boost::shared_ptr<IMDEventWorkspace>>();
 
   // MDEventWorkspace class
   class_< IMDEventWorkspace, bases<IMDWorkspace, MultipleExperimentInfos>, boost::noncopyable >("IMDEventWorkspace", no_init)

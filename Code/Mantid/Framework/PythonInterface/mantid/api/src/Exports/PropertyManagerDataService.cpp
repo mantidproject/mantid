@@ -1,18 +1,17 @@
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
 
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/reference_existing_object.hpp>
 #include <boost/python/list.hpp>
 
-using Mantid::API::PropertyManagerDataServiceImpl;
-using Mantid::API::PropertyManagerDataService;
-using Mantid::Kernel::PropertyManager;
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace boost::python;
 
 /// Weak pointer to DataItem typedef
