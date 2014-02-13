@@ -144,21 +144,27 @@ void MuonAnalysisOptionTab::rebinHelpClicked()
  */
 void MuonAnalysisOptionTab::onAutoscaleToggled(bool state)
 {
-  m_uiForm.yAxisMinimumInput->setEnabled(!state);
-  m_uiForm.yAxisMaximumInput->setEnabled(!state);
+  // Max and min input widgets
+  auto maxInput = m_uiForm.yAxisMaximumInput;
+  auto minInput = m_uiForm.yAxisMinimumInput;
+
+  // Disable if autoscale
+  maxInput->setEnabled(!state);
+  minInput->setEnabled(!state);
+
+  // Disable auto-save if autoscale
+  m_autoSaver.setAutoSaveEnabled(maxInput, !state);
+  m_autoSaver.setAutoSaveEnabled(minInput, !state);
 
   if(state)
   {
-    m_yAxisMinimum = m_uiForm.yAxisMinimumInput->text();
-    m_yAxisMaximum = m_uiForm.yAxisMaximumInput->text();
-
-    m_uiForm.yAxisMinimumInput->setText("N/A");
-    m_uiForm.yAxisMaximumInput->setText("N/A");
+    maxInput->setText("N/A");
+    minInput->setText("N/A");
   }
   else
   {
-    m_uiForm.yAxisMinimumInput->setText(m_yAxisMinimum);
-    m_uiForm.yAxisMaximumInput->setText(m_yAxisMaximum);
+    m_autoSaver.loadWidgetValue(maxInput);
+    m_autoSaver.loadWidgetValue(minInput);
   }
 }
 
