@@ -31,6 +31,7 @@ public:
   void endGroup();
 
   void setAutoSaveEnabled(bool enabled);
+  void setAutoSaveEnabled(QWidget& widget, bool enabled);
 
   void loadWidgetValues();
   void loadWidgetValue(QWidget* widget);

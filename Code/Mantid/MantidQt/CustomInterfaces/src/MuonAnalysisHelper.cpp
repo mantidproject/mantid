@@ -60,22 +60,18 @@ const char* WidgetAutoSaver::changedSignal(QWidget *widget)
 
 void WidgetAutoSaver::setAutoSaveEnabled(bool enabled)
 {
+  foreach (QWidget* w, registeredWidgets)
+  {
+    setAutoSaveEnabled(w, enabled);
+  }
+}
+
+void WidgetAutoSaver::setAutoSaveEnabled(QWidget &widget, bool enabled)
+{
   if (enabled)
-  {
-    // Connect all the widgets
-    foreach (QWidget* w, registeredWidgets)
-    {
-      connect(w, changedSignal(w), this, SLOT(saveWidgetValue()));
-    }
-  }
+    connect(widget, changedSignal(widget), this, SLOT(saveWidgetValue()));
   else
-  {
-    // Disconnect all the widgets
-    foreach (QWidget* w, registeredWidgets)
-    {
-      disconnect(w, changedSignal(w), this, SLOT(saveWidgetValue()));
-    }
-  }
+    disconnect(widget, changedSignal(widget), this, SLOT(saveWidgetValue()));
 }
 
 void WidgetAutoSaver::saveWidgetValue()
