@@ -1,14 +1,17 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_FILENAMEDIALOGEDITFACTORY_H
 #define MANTIDQT_MANTIDWIDGETS_FILENAMEDIALOGEDITFACTORY_H
 
-#include "StringDialogEditorFactory.h"
+#include "MantidQtMantidWidgets\StringDialogEditor.h"
 
 namespace MantidQt
 {
 namespace MantidWidgets
 {
 
-class QT_QTPROPERTYBROWSER_EXPORT FilenameDialogEditor: public StringDialogEditor
+/**
+ * A stringDialogEditor for editing file names.
+ */
+class FilenameDialogEditor: public StringDialogEditor
 {
   Q_OBJECT
 public:
@@ -18,8 +21,10 @@ protected slots:
   void runDialog();
 };
 
-
-class QT_QTPROPERTYBROWSER_EXPORT FilenameDialogEditorFactory: public StringDialogEditorFactory
+/**
+ * The factory for the FilenameDialogEditor.
+ */
+class FilenameDialogEditorFactory: public StringDialogEditorFactory
 {
   Q_OBJECT
 public:

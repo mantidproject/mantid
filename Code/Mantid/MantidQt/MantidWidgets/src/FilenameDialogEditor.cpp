@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/FilenameDialogEditorFactory.h"
+#include "MantidQtMantidWidgets/FilenameDialogEditor.h"
 
 #include <QFileDialog>
 #include <QSettings>
@@ -8,6 +8,9 @@ namespace MantidQt
 namespace MantidWidgets
 {
 
+/**
+ * Open a file dialog to choose a file. Update the property if a file was selected.
+ */
 void FilenameDialogEditor::runDialog()
 {
   QSettings settings;

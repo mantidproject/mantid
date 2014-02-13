@@ -216,6 +216,8 @@ protected:
   QtStringPropertyManager *m_tieManager;
   /// Manager for parameter constraint properties
   QtStringPropertyManager *m_constraintManager;
+  /// Manager for file name attributes
+  QtStringPropertyManager *m_filenameManager;
   /// Manager for Formula attributes
   QtStringPropertyManager *m_formulaManager;
   /// Manager for vector attribute properties

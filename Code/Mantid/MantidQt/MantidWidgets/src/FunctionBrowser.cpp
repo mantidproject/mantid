@@ -23,6 +23,8 @@
 #include "MantidAPI/ICostFunction.h"
 
 #include "MantidQtMantidWidgets/UserFunctionDialog.h"
+#include "MantidQtMantidWidgets/FilenameDialogEditor.h"
+#include "MantidQtMantidWidgets/FormulaDialogEditor.h"
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
@@ -36,7 +38,6 @@
   #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
 #include "qteditorfactory.h"
-#include "StringDialogEditorFactory.h"
 #include "DoubleEditorFactory.h"
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1125
@@ -68,41 +69,6 @@ namespace MantidQt
 {
 namespace MantidWidgets
 {
-
-namespace
-{
-
-class FormulaDialogEditor: public StringDialogEditor
-{
-public:
-  FormulaDialogEditor(QtProperty *property, QWidget *parent)
-    :StringDialogEditor(property,parent){}
-protected slots:
-  void runDialog()
-  {
-    MantidQt::MantidWidgets::UserFunctionDialog *dlg = new MantidQt::MantidWidgets::UserFunctionDialog((QWidget*)parent(),getText());
-    if (dlg->exec() == QDialog::Accepted)
-    {
-      setText(dlg->getFormula());
-      updateProperty();
-    };
-  }
-};
-
-class FormulaDialogEditorFactory: public StringDialogEditorFactory
-{
-public:
-  FormulaDialogEditorFactory(QObject* parent):StringDialogEditorFactory(parent){}
-protected:
-  using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler warning
-  QWidget *createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent)
-  {
-    (void) manager; //Avoid unused warning
-    return new FormulaDialogEditor(property,parent);
-  }
-};
-
-}
 
 /**
  * Constructor
@@ -144,6 +110,7 @@ void FunctionBrowser::createBrowser()
   m_indexManager = new QtStringPropertyManager(this);
   m_tieManager = new QtStringPropertyManager(this);
   m_constraintManager = new QtStringPropertyManager(this);
+  m_filenameManager = new QtStringPropertyManager(this);
   m_formulaManager = new QtStringPropertyManager(this);
   m_attributeVectorManager = new QtGroupPropertyManager(this);
   m_attributeSizeManager = new QtIntPropertyManager(this);
@@ -154,7 +121,7 @@ void FunctionBrowser::createBrowser()
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(this);
   QtLineEditFactory *lineEditFactory = new QtLineEditFactory(this);
   QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
-  //StringDialogEditorFactory* stringDialogEditFactory = new StringDialogEditorFactory(this);
+  FilenameDialogEditorFactory* filenameDialogEditorFactory = new FilenameDialogEditorFactory(this);
   FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(this);
 
   m_browser = new QtTreePropertyBrowser();
@@ -167,6 +134,7 @@ void FunctionBrowser::createBrowser()
   m_browser->setFactoryForManager(m_indexManager, lineEditFactory);
   m_browser->setFactoryForManager(m_tieManager, lineEditFactory);
   m_browser->setFactoryForManager(m_constraintManager, lineEditFactory);
+  m_browser->setFactoryForManager(m_filenameManager, filenameDialogEditorFactory);
   m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
   m_browser->setFactoryForManager(m_attributeSizeManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_attributeVectorDoubleManager, doubleEditorFactory);
@@ -467,7 +435,12 @@ protected:
   FunctionBrowser::AProperty apply(const std::string& str)const
   {
     QtProperty* prop = NULL;
-    if ( m_attName == "Formula" )
+    if (m_attName == "FileName")
+    {
+      prop = m_browser->m_filenameManager->addProperty(m_attName);
+      m_browser->m_filenameManager->setValue(prop, QString::fromStdString(str));
+    }
+    else if ( m_attName == "Formula" )
     {
       prop = m_browser->m_formulaManager->addProperty(m_attName);
       m_browser->m_formulaManager->setValue(prop, QString::fromStdString(str));
@@ -546,7 +519,11 @@ protected:
   void apply(std::string& str)const
   {
     QString attName = m_prop->propertyName();
-    if ( attName == "Formula" )
+    if ( attName == "FileName" )
+    {
+      str = m_browser->m_filenameManager->value(m_prop).toStdString();
+    }
+    else if ( attName == "Formula" )
     {
       str = m_browser->m_formulaManager->value(m_prop).toStdString();
     }

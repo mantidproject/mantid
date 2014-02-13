@@ -1,4 +1,4 @@
-#include "StringEditorFactory.h"
+#include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 void StringEditorFactory::connectPropertyManager(QtStringPropertyManager *)
 {

@@ -21,8 +21,6 @@ set( QTPROPERTYBROWSER_SRCS
 	src/qtgroupboxpropertybrowser.cpp
 	src/qtpropertybrowserutils.cpp
         src/DoubleEditorFactory.cpp
-        src/StringDialogEditorFactory.cpp
-        src/StringEditorFactory.cpp
 )
 
 # moc'd files will end up in build directory, so add to include path
@@ -104,8 +102,6 @@ set (
 )
 
 qt4_wrap_cpp ( EXTRA_MOCS src/DoubleEditorFactory.h 
-                          src/StringDialogEditorFactory.h
-                          src/StringEditorFactory.h
 )
 
 set (

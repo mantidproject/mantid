@@ -1,6 +1,7 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -13,7 +14,6 @@
 #endif
 #include "DoubleEditorFactory.h"
 #include "qteditorfactory.h"
-#include "StringDialogEditorFactory.h"
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1125
 #elif defined(__GNUC__)

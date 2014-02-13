@@ -4,7 +4,7 @@
 #include "qtpropertymanager.h"
 #include <QLineEdit>
 
-class QT_QTPROPERTYBROWSER_EXPORT StringEditorFactory : public QtAbstractEditorFactory<QtStringPropertyManager>
+class StringEditorFactory : public QtAbstractEditorFactory<QtStringPropertyManager>
 {
     Q_OBJECT
 public:
@@ -15,7 +15,7 @@ protected:
   void disconnectPropertyManager(QtStringPropertyManager *manager);
 };
 
-class QT_QTPROPERTYBROWSER_EXPORT StringEditor: public QLineEdit
+class StringEditor: public QLineEdit
 {
   Q_OBJECT
 public:
