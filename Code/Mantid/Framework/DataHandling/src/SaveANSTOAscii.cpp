@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/SaveANSTO.h"
+#include "MantidDataHandling/SaveANSTOAscii.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
@@ -23,10 +23,10 @@ namespace Mantid
   namespace DataHandling
   {
     // Register the algorithm into the algorithm factory
-    DECLARE_ALGORITHM(SaveANSTO)
+    DECLARE_ALGORITHM(SaveANSTOAscii)
 
     /// Sets documentation strings for this algorithm
-    void SaveANSTO::initDocs()
+    void SaveANSTOAscii::initDocs()
     {
       this->setWikiSummary("Saves a 2D [[workspace]] to a comma separated ascii file. ");
       this->setOptionalMessage("Saves a 2D workspace to a ascii file.");
@@ -36,15 +36,15 @@ namespace Mantid
     using namespace API;
 
     // Initialise the logger
-    Logger& SaveANSTO::g_log = Logger::get("SaveANSTO");
+    Logger& SaveANSTOAscii::g_log = Logger::get("SaveANSTOAscii");
 
     /// Empty constructor
-    SaveANSTO::SaveANSTO()
+    SaveANSTOAscii::SaveANSTOAscii()
     {
     }
 
     /// Initialisation method.
-    void SaveANSTO::init()
+    void SaveANSTOAscii::init()
     {
       declareProperty(new WorkspaceProperty<>("InputWorkspace",
         "",Direction::Input), "The name of the workspace containing the data you want to save to a ANSTO file.");
@@ -58,7 +58,7 @@ namespace Mantid
     /** 
     *   Executes the algorithm.
     */
-    void SaveANSTO::exec()
+    void SaveANSTOAscii::exec()
     {
       std::string filename = getProperty("Filename");
       std::ofstream file(filename.c_str());

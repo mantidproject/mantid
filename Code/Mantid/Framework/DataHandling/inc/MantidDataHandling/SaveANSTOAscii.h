@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_SAVEANSTO_H_
-#define MANTID_DATAHANDLING_SAVEANSTO_H_
+#ifndef MANTID_DATAHANDLING_SAVEANSTOASCII_H_
+#define MANTID_DATAHANDLING_SAVEANSTOASCII_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -10,15 +10,15 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    class DLLExport SaveANSTO : public API::Algorithm
+    class DLLExport SaveANSTOAscii : public API::Algorithm
     {
     public:
       /// Default constructor
-      SaveANSTO();
+      SaveANSTOAscii();
       /// Destructor
-      ~SaveANSTO() {}
+      ~SaveANSTOAscii() {}
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "SaveANSTO"; }
+      virtual const std::string name() const { return "SaveANSTOAscii"; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
