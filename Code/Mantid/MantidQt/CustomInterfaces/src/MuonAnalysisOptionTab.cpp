@@ -56,6 +56,11 @@ MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm, const QSt
   m_autoSaver.registerWidget(m_uiForm.yAxisMaximumInput, "yAxisFinish", "");
   m_autoSaver.registerWidget(m_uiForm.showErrorBars, "errorBars", 0);
   m_autoSaver.endGroup();
+  m_autoSaver.beginGroup("BinningOptions");
+  m_autoSaver.registerWidget(m_uiForm.optionStepSizeText, "rebinFixed", "1");
+  m_autoSaver.registerWidget(m_uiForm.binBoundaries, "rebinVariable", "1");
+  m_autoSaver.endGroup();
+
   m_autoSaver.beginGroup("SettingOptions");
   m_autoSaver.registerWidget(m_uiForm.plotCreation, "plotCreation", 0);
   m_autoSaver.registerWidget(m_uiForm.hideToolbars, "toolbars", 1);
@@ -83,11 +88,6 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this,  
            SLOT(runyAxisAutoscale(bool)));
 
-  ////////////// Data Binning slots ///////////////
-  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(runRebinComboBox(int)));
-  connect(m_uiForm.optionStepSizeText, SIGNAL(returnPressed()), this, SLOT(runOptionStepSizeText()));
-  connect(m_uiForm.binBoundaries, SIGNAL(returnPressed()), this, SLOT(runBinBoundaries()));
-
   ////////////// Auto-update plot style //////////////
   connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(plotStyleChanged()));
   connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SIGNAL(plotStyleChanged()));
@@ -99,7 +99,10 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisStartAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
-  
+  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.optionStepSizeText, SIGNAL(returnPressed()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.binBoundaries, SIGNAL(returnPressed()), this, SIGNAL(settingsTabUpdatePlot()));
+
   // Manage User Directories
   connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this, SLOT(openDirectoryDialog() ) );
 }
@@ -140,33 +143,6 @@ void MuonAnalysisOptionTab::runRebinComboBox(int index)
 
   emit settingsTabUpdatePlot();
 }
-
-
-/**
-* When clicking Rebin step size text box (slot)
-*/  
-void MuonAnalysisOptionTab::runOptionStepSizeText()
-{
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "BinningOptions");
-  group.setValue("constStepSize", m_uiForm.optionStepSizeText->text());
-
-  emit settingsTabUpdatePlot();
-}
-
-
-/**
-*
-*/
-void MuonAnalysisOptionTab::runBinBoundaries()
-{
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "BinningOptions");
-  group.setValue("rebinVariable", m_uiForm.binBoundaries->text());
-
-  emit settingsTabUpdatePlot();
-}
-
 
 ////////////// Default Plot Style slots ///////////////
 
