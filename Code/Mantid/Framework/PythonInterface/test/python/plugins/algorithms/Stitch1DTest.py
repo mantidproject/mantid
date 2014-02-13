@@ -104,8 +104,8 @@ class Stitch1DTest(unittest.TestCase):
         step_size = out_x_values[1] - out_x_values[0] 
         
         self.assertEqual(x_min, -1)
-        self.assertAlmostEqual(x_max-demanded_step_size, 1.4, delta=1e-6)
-        self.assertAlmostEqual(step_size, demanded_step_size, delta=1e-6)
+        self.assertAlmostEqual(x_max-demanded_step_size, 1.4, places=6)
+        self.assertAlmostEqual(step_size, demanded_step_size, places=6)
         
         DeleteWorkspace(stitched)
         DeleteWorkspace(ws1)
@@ -130,8 +130,8 @@ class Stitch1DTest(unittest.TestCase):
         print start_overlap_determined, end_overlap_determined
         
         
-        self.assertAlmostEqual(start_overlap_determined, -0.4, delta=1e-9)
-        self.assertAlmostEqual(end_overlap_determined, 0.2, delta=1e-9) 
+        self.assertAlmostEqual(start_overlap_determined, -0.4, places=9)
+        self.assertAlmostEqual(end_overlap_determined, 0.2, places=9) 
         
     def test_stitching_scale_right(self):
         stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=-0.4, EndOverlap=0.4, Params='0.2')    
