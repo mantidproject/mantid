@@ -18,8 +18,9 @@ namespace MuonAnalysisHelper
 /// Sets double validator for specified field
 DLLExport void setDoubleValidator(QLineEdit* field);
 
-class DLLExport WidgetAutoSaver : QObject
+class Q_DECL_EXPORT WidgetAutoSaver : QObject
 {
+  Q_OBJECT
 
 public:
   WidgetAutoSaver(const QString& groupName);

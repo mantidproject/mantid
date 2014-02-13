@@ -133,6 +133,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
+                inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h
                 inc/MantidQtCustomInterfaces/Quasi.h
