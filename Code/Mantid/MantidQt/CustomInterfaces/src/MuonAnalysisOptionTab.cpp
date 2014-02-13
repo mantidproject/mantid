@@ -49,7 +49,7 @@ void MuonAnalysisOptionTab::initLayout()
   m_autoSaver.registerWidget(m_uiForm.rebinComboBox, "rebinComboBoxIndex", 0);
   m_autoSaver.endGroup();
 
-  m_autoSaver.beginGroup("SettingOptions");
+  m_autoSaver.beginGroup("GeneralOptions");
   m_autoSaver.registerWidget(m_uiForm.plotCreation, "plotCreation", 0);
   m_autoSaver.registerWidget(m_uiForm.hideToolbars, "toolbars", true);
   m_autoSaver.registerWidget(m_uiForm.hideGraphs, "hiddenGraphs", true);
