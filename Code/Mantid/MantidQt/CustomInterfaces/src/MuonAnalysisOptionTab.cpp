@@ -88,7 +88,8 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), m_uiForm.rebinEntryState,
           SLOT(setCurrentIndex(int)));
 
-  // TODO: load saved values here
+  // Load saved values
+  m_autoSaver.loadWidgetValues();
 
   // Enable auto-saving
   m_autoSaver.setAutoSaveEnabled(true);

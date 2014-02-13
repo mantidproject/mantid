@@ -2783,81 +2783,6 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   QString instrumentName = prevInstrumentValues.value("name", "MUSR").toString();
   m_uiForm.instrSelector->setCurrentIndex(m_uiForm.instrSelector->findText(instrumentName));
 
-  // load Plot Style options
-  QSettings prevPlotStyle;
-  prevPlotStyle.beginGroup(group + "plotStyleOptions");
-
-  double timeAxisStart = prevPlotStyle.value("timeAxisStart", 0.3).toDouble();
-  double timeAxisFinish = prevPlotStyle.value("timeAxisFinish", 16.0).toDouble();
-
-  m_uiForm.timeAxisStartAtInput->setText(QString::number(timeAxisStart));
-  m_uiForm.timeAxisFinishAtInput->setText(QString::number(timeAxisFinish));
-
-  m_optionTab->setStoredCustomTimeValue(prevPlotStyle.value("customTimeValue").toString());
-  
-  int timeComboBoxIndex = prevPlotStyle.value("timeComboBoxIndex", 0).toInt();
-  m_uiForm.timeComboBox->setCurrentIndex(timeComboBoxIndex);
-  m_optionTab->runTimeComboBox(timeComboBoxIndex);
-
-  bool axisAutoScaleOnOff = prevPlotStyle.value("axisAutoScaleOnOff", 1).toBool();
-  m_uiForm.yAxisAutoscale->setChecked(axisAutoScaleOnOff);
-  m_optionTab->runyAxisAutoscale(axisAutoScaleOnOff);
-
-  QStringList kusse = prevPlotStyle.childKeys();
-  if ( kusse.contains("yAxisStart") )
-  {
-    if( ! m_uiForm.yAxisAutoscale->isChecked() )
-    {
-      double yAxisStart = prevPlotStyle.value("yAxisStart").toDouble();
-      m_uiForm.yAxisMinimumInput->setText(QString::number(yAxisStart));
-    }
-    else
-    {
-      m_optionTab->setStoredYAxisMinimum(prevPlotStyle.value("yAxisStart").toString());
-    }
-  }
-  if ( kusse.contains("yAxisFinish") )
-  {
-    if( ! m_uiForm.yAxisAutoscale->isChecked() )
-    {
-      double yAxisFinish = prevPlotStyle.value("yAxisFinish").toDouble();
-      m_uiForm.yAxisMaximumInput->setText(QString::number(yAxisFinish));
-    }
-    else
-    {
-      m_optionTab->setStoredYAxisMaximum(prevPlotStyle.value("yAxisFinish").toString());
-    }
-  }
-
-  // Load Plot Binning Options
-  QSettings prevPlotBinning;
-  prevPlotBinning.beginGroup(group + "BinningOptions");
-  int rebinFixed = prevPlotBinning.value("rebinFixed", 1).toInt();
-  m_uiForm.optionStepSizeText->setText(QString::number(rebinFixed));
-  m_uiForm.binBoundaries->setText(prevPlotBinning.value("rebinVariable", 1).toString());
-
-  int rebinComboBoxIndex = prevPlotBinning.value("rebinComboBoxIndex", 0).toInt();
-  m_uiForm.rebinComboBox->setCurrentIndex(rebinComboBoxIndex);
-  m_optionTab->runRebinComboBox(rebinComboBoxIndex);
-
-  // Load Setting tab options
-  QSettings prevSettingTabOptions;
-  prevSettingTabOptions.beginGroup(group + "SettingOptions");
-
-  int plotCreationIndex = prevSettingTabOptions.value("plotCreation", 0).toInt();
-  m_uiForm.plotCreation->setCurrentIndex(plotCreationIndex);
-
-  int connectPlotStyleIndex = prevSettingTabOptions.value("connectPlotStyle", 0).toInt();
-  m_uiForm.connectPlotType->setCurrentIndex(connectPlotStyleIndex);
-
-  bool errorBars = prevSettingTabOptions.value("errorBars", 1).toBool();
-  m_uiForm.showErrorBars->setChecked(errorBars);
-
-  bool hideTools = prevSettingTabOptions.value("toolbars", 1).toBool();
-  m_uiForm.hideToolbars->setChecked(hideTools);
-
-  bool hideGraphs = prevSettingTabOptions.value("hiddenGraphs", 1).toBool();
-  m_uiForm.hideGraphs->setChecked(hideGraphs);
 
   // Load dead time options.
   QSettings deadTimeOptions;
@@ -3264,7 +3189,6 @@ void MuonAnalysis::loadWidgetValue(QWidget* target, const QVariant& defaultValue
 
   QSettings settings;
   settings.beginGroup(m_settingsGroup + "SavedWidgetValues");
-
 
   // Load value for QLineEdit
   if(QLineEdit* w = qobject_cast<QLineEdit*>(target))

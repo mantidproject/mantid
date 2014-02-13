@@ -107,6 +107,40 @@ void WidgetAutoSaver::saveWidgetValue()
   // ... add more as neccessary
 }
 
+void WidgetAutoSaver::loadWidgetValue(QWidget *widget)
+{
+  const QString& name = widgetNames[widget];
+  const QString& group = widgetGroups[widget];
+  QVariant defaultValue = widgetDefaultValues[widget];
+
+  QSettings settings;
+  settings.beginGroup(group);
+
+  QVariant value = settings.value(name, defaultValue);
+
+  if ( auto w = qobject_cast<QLineEdit*>(widget) )
+  {
+    w->setText(value.toString());
+  }
+  else if ( auto w = qobject_cast<QCheckBox*>(widget) )
+  {
+    w->setCheckState(static_cast<Qt::CheckState>(value.toInt()));
+  }
+  else if ( auto w = qobject_cast<QComboBox*>(widget) )
+  {
+    w->setCurrentIndex(value.toInt());
+  }
+  // ... add more as neccessary
+}
+
+void WidgetAutoSaver::loadWidgetValues()
+{
+  foreach (QWidget* w, registeredWidgets)
+  {
+    loadWidgetValue(w);
+  }
+}
+
 void WidgetAutoSaver::beginGroup(const QString &name)
 {
   m_settings.beginGroup(name);

@@ -32,6 +32,9 @@ public:
 
   void setAutoSaveEnabled(bool enabled);
 
+  void loadWidgetValues();
+  void loadWidgetValue(QWidget* widget);
+
 private slots:
   void saveWidgetValue();
 
