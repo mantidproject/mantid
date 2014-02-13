@@ -1,5 +1,5 @@
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-
 #include "MantidQtCustomInterfaces/MSDFit.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
@@ -55,6 +55,7 @@ namespace IDA
     connect(uiForm().msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
     connect(uiForm().msd_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
     connect(uiForm().msd_pbSequential, SIGNAL(clicked()), this, SLOT(sequential()));
+    connect(uiForm().msd_lePlotSpectrum, SIGNAL(editingFinished()), this, SLOT(plotInput()));
     connect(uiForm().msd_leSpectraMin, SIGNAL(editingFinished()), this, SLOT(plotInput()));
     
     uiForm().msd_leSpectraMin->setValidator(m_intVal);
@@ -156,24 +157,47 @@ namespace IDA
 
   void MSDFit::plotInput()
   {
+    using namespace Mantid::API;
     if ( uiForm().msd_inputFile->isValid() )
     {
       QString filename = uiForm().msd_inputFile->getFirstFilename();
       QFileInfo fi(filename);
       QString wsname = fi.baseName();
-      auto ws = runLoadNexus(filename, wsname);
+
+      MatrixWorkspace_const_sptr ws;
+      if(!AnalysisDataService::Instance().doesExist(wsname.toStdString()))
+      {
+        ws = runLoadNexus(filename, wsname);
+      }
+      else
+      {
+        ws = AnalysisDataService::Instance().retrieveWS<const Mantid::API::MatrixWorkspace>(wsname.toStdString());
+      }
+
       if(!ws)
       {
         return;
       }
       
+      QString plotSpec =uiForm().msd_lePlotSpectrum->text();
       QString specMin = uiForm().msd_leSpectraMin->text();
       int wsIndex = 0;
+      int minIndex = 0;
       int nHist = static_cast<int>(ws->getNumberHistograms());
       
-      if (!specMin.isEmpty() && specMin.toInt() < nHist-1)
+      if (!plotSpec.isEmpty() && plotSpec.toInt() < nHist-1)
       {
-        wsIndex = specMin.toInt();
+        wsIndex = plotSpec.toInt();
+      }
+
+      if (!specMin.isEmpty())
+      {
+        minIndex = specMin.toInt();
+      }
+
+      if (wsIndex < minIndex)
+      {
+        wsIndex = minIndex;
       }
 
       m_msdDataCurve = plotMiniplot(m_msdPlot, m_msdDataCurve, ws, wsIndex);
@@ -182,8 +206,10 @@ namespace IDA
         const std::pair<double, double> range = getCurveRange(m_msdDataCurve);
         m_msdRange->setRange(range.first, range.second);
         
-        uiForm().msd_leSpectraMin->setText(QString::number(wsIndex));
+        uiForm().msd_leSpectraMin->setText(QString::number(minIndex));
         uiForm().msd_leSpectraMax->setText(QString::number(nHist-1));
+        uiForm().msd_lePlotSpectrum->setText(QString::number(wsIndex));
+
         m_intVal->setRange(0, nHist-1);
 
         //delete reference to fitting.
