@@ -56,7 +56,6 @@ public:
     }
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveANSTO");
-    alg->initialize();
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -104,7 +103,6 @@ public:
     }
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveANSTO");
-    alg->initialize();
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -152,7 +150,6 @@ public:
     }
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveANSTO");
-    alg->initialize();
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -200,7 +197,6 @@ public:
     }
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveANSTO");
-    alg->initialize();
     alg->setPropertyValue("InputWorkspace", m_name);
     alg->setPropertyValue("Filename", m_filename);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -231,6 +227,21 @@ public:
     Poco::File(filename).remove();
     AnalysisDataService::Instance().remove(m_name);
   }
+
+  void test_fail_invalid_workspace()
+  {
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveANSTO");
+    alg->setRethrows(true);
+    TS_ASSERT(alg->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", m_filename));
+    std::string filename = alg->getPropertyValue("Filename"); //Get absolute path
+    TS_ASSERT_THROWS_ANYTHING(alg->setPropertyValue("InputWorkspace", "NotARealWS"));
+    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+
+    // the algorithm shouldn't have written a file to disk
+    TS_ASSERT( !Poco::File(filename).exists() );
+  }
+
   std::string m_filename, m_name;
   std::vector<double> m_dataX, m_dataY, m_dataE, m_data0;
 };
