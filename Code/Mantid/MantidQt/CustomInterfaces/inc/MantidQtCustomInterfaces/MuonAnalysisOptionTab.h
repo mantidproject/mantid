@@ -104,9 +104,6 @@ private:
   /// The Muon Analysis UI file.
   Ui::MuonAnalysis& m_uiForm;
   
-  /// group defaults are saved to
-  const QString& m_settingsGroup;
-
   /// Store value when autoscale has been selected, for when it is deselected again.
   QString m_yAxisMinimum;
 

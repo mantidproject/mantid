@@ -45,20 +45,24 @@ namespace Muon
 {
 
 MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm, const QString &settingsGroup)
-  : m_uiForm(uiForm), m_settingsGroup(settingsGroup), m_yAxisMinimum(), m_yAxisMaximum(),
+  : m_uiForm(uiForm), m_yAxisMinimum(), m_yAxisMaximum(),
     m_customTimeValue(), m_autoSaver(settingsGroup)
 {
   m_autoSaver.beginGroup("PlotStyleOptions");
   m_autoSaver.registerWidget(m_uiForm.connectPlotType, "connectPlotStyle", 0);
   m_autoSaver.registerWidget(m_uiForm.timeAxisStartAtInput, "timeAxisStart", "0.3");
   m_autoSaver.registerWidget(m_uiForm.timeAxisFinishAtInput, "timeAxisFinish", "16.0");
+  m_autoSaver.registerWidget(m_uiForm.timeComboBox, "timeComboBoxIndex", 0);
   m_autoSaver.registerWidget(m_uiForm.yAxisMinimumInput, "yAxisStart", "");
   m_autoSaver.registerWidget(m_uiForm.yAxisMaximumInput, "yAxisFinish", "");
+  m_autoSaver.registerWidget(m_uiForm.yAxisAutoscale, "axisAutoScaleOnOff", 1);
   m_autoSaver.registerWidget(m_uiForm.showErrorBars, "errorBars", 0);
   m_autoSaver.endGroup();
+
   m_autoSaver.beginGroup("BinningOptions");
   m_autoSaver.registerWidget(m_uiForm.optionStepSizeText, "rebinFixed", "1");
   m_autoSaver.registerWidget(m_uiForm.binBoundaries, "rebinVariable", "1");
+  m_autoSaver.registerWidget(m_uiForm.rebinComboBox, "rebinComboBoxIndex", 0);
   m_autoSaver.endGroup();
 
   m_autoSaver.beginGroup("SettingOptions");
@@ -78,15 +82,13 @@ void MuonAnalysisOptionTab::initLayout()
   setDoubleValidator(m_uiForm.yAxisMaximumInput);
   setDoubleValidator(m_uiForm.optionStepSizeText);
 
+  // Connect various sync stuff
+  connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(runTimeComboBox(int)));
+  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, SLOT(runyAxisAutoscale(bool)));
+
   // Help
   connect(m_uiForm.muonAnalysisHelpPlotting, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpSettingsClicked()));
   connect(m_uiForm.binBoundariesHelp, SIGNAL(clicked()), this, SLOT(rebinHelpClicked()));
-
-  ////////////// Default Plot Style slots ///////////////
-  connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, 
-           SLOT(runTimeComboBox(int)));
-  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this,  
-           SLOT(runyAxisAutoscale(bool)));
 
   ////////////// Auto-update plot style //////////////
   connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(plotStyleChanged()));
@@ -137,10 +139,6 @@ void MuonAnalysisOptionTab::runRebinComboBox(int index)
   // Set which rebin entry to display.
   m_uiForm.rebinEntryState->setCurrentIndex(index);
 
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "BinningOptions");
-  group.setValue("rebinComboBoxIndex", index); 
-
   emit settingsTabUpdatePlot();
 }
 
@@ -167,10 +165,6 @@ void MuonAnalysisOptionTab::runyAxisAutoscale(bool state)
     m_uiForm.yAxisMinimumInput->setText(m_yAxisMinimum);
     m_uiForm.yAxisMaximumInput->setText(m_yAxisMaximum);
   }
-
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "plotStyleOptions");
-  group.setValue("axisAutoScaleOnOff", state);   
 }
 
 /**
@@ -209,11 +203,6 @@ void MuonAnalysisOptionTab::runTimeComboBox(int index)
     disconnect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)),
       m_uiForm.timeAxisStartAtInput, SLOT(setText(const QString&)));
   }
-
-  // save this new choice
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "plotStyleOptions");
-  group.setValue("timeComboBoxIndex", index); 
 }
 
 /**
