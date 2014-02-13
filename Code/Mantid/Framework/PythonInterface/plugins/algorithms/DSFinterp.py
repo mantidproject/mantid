@@ -79,9 +79,9 @@ class DSFinterp(PythonAlgorithm):
     workspaces = self.getProperty('Workspaces').value
     fvalues = self.getProperty('ParameterValues').value
     if len(workspaces) != len(fvalues):
-      mesg = 'Number of workspaces and fvalues should be the same'
-      logger.error(mesg)
-      raise ValueError(mesg)
+      mesg = 'Number of Workspaces and ParameterValues should be the same'
+      #logger.error(mesg)
+      raise IndexError(mesg)
     for workspace in workspaces[1:]:
       if not self.areWorkspacesCompatible(mtd[workspaces[0]],mtd[workspace]):
         mesg = 'Workspace {0} incompatible with {1}'.format(workspace, workspaces[0])
@@ -119,7 +119,7 @@ class DSFinterp(PythonAlgorithm):
         raise ValueError(mesg)
     outworkspaces = self.getProperty('OutputWorkspaces').value
     if len(targetfvalues) != len(outworkspaces):
-      mesg = 'Number of workspaces and fvalues should be the same'
+      mesg = 'Number of OutputWorkspaces and TargetParameters should be the same'
       logger.error(mesg)
       raise IndexError(mesg)
     for i in range(len(targetfvalues)):
