@@ -986,6 +986,9 @@ void Indirect::loadSettings()
   m_uiForm.ind_mapFile->readSettings(settings.group());
   m_uiForm.slice_calibFile->readSettings(settings.group());
   m_uiForm.sqw_inputFile->readSettings(settings.group());
+  m_uiForm.moment_dsInput->readSettings(settings.group());
+  m_uiForm.transInputFile->readSettings(settings.group());
+  m_uiForm.transCanFile->readSettings(settings.group());
   settings.endGroup();
 }
 
