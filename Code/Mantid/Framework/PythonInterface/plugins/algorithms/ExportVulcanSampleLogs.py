@@ -42,8 +42,8 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 	    "Name of the output sample environment log file name.")
 
 	# Sample log names 
-	self.declareProperty(StringArrayProperty("SampleLogNames", values=[], validator=arrvalidator,
-                             direction=Direction.Input), "Names of sample logs to be exported in a same file.")
+	self.declareProperty(StringArrayProperty("SampleLogNames", values=[], direction=Direction.Input), 
+                "Names of sample logs to be exported in a same file.")
 
 	# Header
 	self.declareProperty("WriteHeaderFile", False, "Flag to generate a sample log header file.")
@@ -64,10 +64,10 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 	self._getProperties()
 
 	# Read in logs
-	logtimesdict, logvaluesdict, loglength = self._readSampleLogs()
+	logtimesdict, logvaluedict, loglength = self._readSampleLogs()
 
 	# Local time difference
-	localtimediff = self._calLocalTimeDiff(logtimesdict)
+	localtimediff = self._calLocalTimeDiff(logtimesdict, loglength)
 
 	# Write log file
 	self._writeLogFile(logtimesdict, logvaluedict, loglength, localtimediff)
@@ -101,12 +101,12 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 	    self.log().warning("Header is empty. Thus WriteHeaderFile is forced to be False.")
 	    self._writeheader = False
 
-	self._timezone = self.getProperty("TimeZon").value
+	self._timezone = self.getProperty("TimeZone").value
 
 	return
 	
 
-    def _calLocalTimeDiff(self, logtimesdict):
+    def _calLocalTimeDiff(self, logtimesdict, loglength):
 	""" Calcualte the time difference between local time and UTC in seconds
 	"""
 	# Find out local time
@@ -118,7 +118,7 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 		    time0 = logtimesdict[key][0]
 		    break
 	    # Local time difference
-	    localtimediff = getLocalTimeShiftInSecond(time0)
+	    localtimediff = getLocalTimeShiftInSecond(time0, self._timezone)
 	else: 
 	    localtimediff = 0
 
@@ -146,7 +146,7 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 	    # Write absoute time and relative time 
 	    wbuf += "%.6f\t %.6f\t " % (abstime, reltime) 
 	    # Write each log value 
-	    for samplelog in lognames: 
+            for samplelog in self._sampleloglist:
 		if logvaluedict[samplelog] is not None:
 		    logvalue = logvaluedict[samplelog][i]
 		else:
@@ -161,8 +161,7 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
     	    ofile.close()
     	except IOError as err:
     	    print err
-	    raise NotImplementedError("Unable to write file %s. Check permission." % (self._outputfilename)
-
+	    raise NotImplementedError("Unable to write file %s. Check permission." % (self._outputfilename))
 
 	return
 
@@ -170,12 +169,14 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
     def _readSampleLogs(self):
 	""" Read sample logs
 	""" 
+        import sys
+
 	# Get all properties' times and value and check whether all the logs are in workspaces 
-	samplerun = wksp.getRun()
+	samplerun = self._wksp.getRun()
 
 	logtimesdict = {}
     	logvaluedict = {}
-    	for samplename in lognames:
+        for samplename in self._sampleloglist:
     	    # Check existence
     	    logexist = samplerun.hasProperty(samplename)
 
@@ -196,9 +197,9 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 	
 	# Check properties' size 
 	loglength = sys.maxint
-	for i in xrange(len(lognames)):
-	    if logtimesdict[lognames[i]] is not None: 
-		tmplength = len(logtimesdict[lognames[i]])
+	for i in xrange(len(self._sampleloglist)):
+	    if logtimesdict[self._sampleloglist[i]] is not None: 
+		tmplength = len(logtimesdict[self._sampleloglist[i]])
 		if loglength != tmplength:
 		    if loglength != sys.maxint:
 			self.log().warning("Log %s has different length from previous ones. " % (lognames[i]))
@@ -214,8 +215,6 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 	    self.log().information("Final Log length = %d" % (loglength))
 
 	return (logtimesdict, logvaluedict, loglength)
-
-
 
     
     def _writeHeaderFile(self, testdatetime, description):
@@ -238,11 +237,11 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 	except OSError as err:
 	    self.log().error(str(err))
 
-    return
+        return
    
 
 
-def getLocalTimeShiftInSecond(utctime):
+def getLocalTimeShiftInSecond(utctime, localtimezone):
     """ Calculate the difference between UTC time and local time of given 
     DataAndTime
     """
@@ -252,10 +251,15 @@ def getLocalTimeShiftInSecond(utctime):
     print "Input UTC time = %s" % (str(utctime))
 
     from_zone = tz.gettz('UTC')
-    to_zone = tz.gettz(LOCAL_TIME_ZONE)
+    to_zone = tz.gettz(localtimezone)
 
-    t1str = (str(utctime)).split('.')[0]
-    utc = datetime.strptime(t1str, '%Y-%m-%dT%H:%M:%S')
+    t1str = (str(utctime)).split('.')[0].strip()
+    print "About to convert time string: ", t1str
+    try: 
+        utc = datetime.strptime(t1str, '%Y-%m-%dT%H:%M:%S')
+    except ValueError as err:
+        print "Unable to convert time string %s. Error message: %s" % (t1str, str(err))
+        raise err
 
     utc = utc.replace(tzinfo=from_zone)
     sns = utc.astimezone(to_zone)
@@ -267,7 +271,7 @@ def getLocalTimeShiftInSecond(utctime):
     return shift_in_sec
 
 
-def convertToLocalTime(utctimestr):
+def convertToLocalTime(utctimestr, localtimezone):
     """ Convert UTC time in string to local time
     """
     from datetime import datetime
@@ -276,7 +280,7 @@ def convertToLocalTime(utctimestr):
     print "Input UTC time = %s" % (utctimestr)
 
     from_zone = tz.gettz('UTC')
-    to_zone = tz.gettz(LOCAL_TIME_ZONE)
+    to_zone = tz.gettz(localtimezone)
 
     t1str = (utctimestr).split('.')[0]
     utc = datetime.strptime(t1str, '%Y-%m-%dT%H:%M:%S')
