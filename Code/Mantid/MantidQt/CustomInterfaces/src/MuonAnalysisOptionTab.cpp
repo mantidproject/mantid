@@ -50,6 +50,10 @@ MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm, const QSt
 {
   m_autoSaver.beginGroup("PlotStyleOptions");
   m_autoSaver.registerWidget(m_uiForm.connectPlotType, "connectPlotStyle", 0);
+  m_autoSaver.registerWidget(m_uiForm.timeAxisStartAtInput, "timeAxisStart", "0.3");
+  m_autoSaver.registerWidget(m_uiForm.timeAxisFinishAtInput, "timeAxisFinish", "16.0");
+  m_autoSaver.registerWidget(m_uiForm.yAxisMinimumInput, "yAxisStart", "");
+  m_autoSaver.registerWidget(m_uiForm.yAxisMaximumInput, "yAxisFinish", "");
   m_autoSaver.registerWidget(m_uiForm.showErrorBars, "errorBars", 0);
   m_autoSaver.endGroup();
   m_autoSaver.beginGroup("SettingOptions");
@@ -76,14 +80,6 @@ void MuonAnalysisOptionTab::initLayout()
   ////////////// Default Plot Style slots ///////////////
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, 
            SLOT(runTimeComboBox(int)));
-  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(lostFocus()), this, 
-           SLOT(runTimeAxisStartAtInput()));
-  connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(lostFocus()), this, 
-           SLOT(runTimeAxisFinishAtInput()));
-  connect(m_uiForm.yAxisMinimumInput, SIGNAL(lostFocus()), this, 
-           SLOT(runyAxisMinimumInput()));
-  connect(m_uiForm.yAxisMaximumInput, SIGNAL(lostFocus()), this, 
-           SLOT(runyAxisMaximumInput()));
   connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this,  
            SLOT(runyAxisAutoscale(bool)));
 
@@ -96,19 +92,14 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(plotStyleChanged()));
   connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SIGNAL(plotStyleChanged()));
   connect(m_uiForm.yAxisAutoscale, SIGNAL(clicked()), this, SIGNAL(plotStyleChanged()));
-  connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed ()), this, SIGNAL(plotStyleChanged());
-  connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed ()), this, SIGNAL(plotStyleChanged());
+  connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed ()), this, SIGNAL(plotStyleChanged()));
+  connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed ()), this, SIGNAL(plotStyleChanged()));
   
   ////////////// Auto Update  /////////////////
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisStartAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   
-  // Save settings
-  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(editingFinished()), this, SLOT(storeCustomTimeValue()));
-  connect(m_uiForm.yAxisMinimumInput, SIGNAL(editingFinished ()), this, SLOT(runyAxisMinimumInput()));
-  connect(m_uiForm.yAxisMaximumInput, SIGNAL(editingFinished ()), this, SLOT(runyAxisMaximumInput()));
-
   // Manage User Directories
   connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this, SLOT(openDirectoryDialog() ) );
 }
@@ -158,7 +149,7 @@ void MuonAnalysisOptionTab::runOptionStepSizeText()
 {
   QSettings group;
   group.beginGroup(m_settingsGroup + "BinningOptions");
-  group.setValue("constStepSize", boevs);
+  group.setValue("constStepSize", m_uiForm.optionStepSizeText->text());
 
   emit settingsTabUpdatePlot();
 }
@@ -250,58 +241,6 @@ void MuonAnalysisOptionTab::runTimeComboBox(int index)
 }
 
 /**
-* Check input is valid in input box (slot)
-*/
-void MuonAnalysisOptionTab::runTimeAxisStartAtInput()
-{
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "plotStyleOptions");
-  group.setValue("timeAxisStart", boevs);
-}
-
-
-/**
-* Check input is valid in input box (slot)
-*/
-void MuonAnalysisOptionTab::runTimeAxisFinishAtInput()
-{
-  if (m_uiForm.timeAxisFinishAtInput->text().isEmpty())
-    return;
-
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "plotStyleOptions");
-  group.setValue("timeAxisFinish", boevs);
-}
-
-
-/**
-* Check input is valid in input box (slot)
-*/
-void MuonAnalysisOptionTab::runyAxisMinimumInput()
-{
-  if (m_uiForm.yAxisMinimumInput->text().isEmpty())
-    return;
-
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "plotStyleOptions");
-  group.setValue("yAxisStart", boevs);
-}
-
-
-/**
-* Check input is valid in input box (slot)
-*/
-void MuonAnalysisOptionTab::runyAxisMaximumInput()
-{
-  if (m_uiForm.yAxisMaximumInput->text().isEmpty())
-    return;
-
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "plotStyleOptions");
-  group.setValue("yAxisFinish", boevs);
-}
-
-/**
  * When no data loaded set various buttons etc to inactive
  */
 void MuonAnalysisOptionTab::noDataAvailable()
@@ -348,18 +287,6 @@ void MuonAnalysisOptionTab::setStoredYAxisMaximum(const QString & yAxisMaximum)
 void MuonAnalysisOptionTab::setStoredCustomTimeValue(const QString & storedCustomTimeValue)
 {
   m_customTimeValue = storedCustomTimeValue;
-}
-
-///
-void MuonAnalysisOptionTab::storeCustomTimeValue()
-{
-  if( m_uiForm.timeComboBox->currentIndex() == 2 )
-  {
-    m_customTimeValue = m_uiForm.timeAxisStartAtInput->text();
-    QSettings group;
-    group.beginGroup(m_settingsGroup + "plotStyleOptions");
-    group.setValue("customTimeValue", m_customTimeValue);
-  }
 }
 
 /**

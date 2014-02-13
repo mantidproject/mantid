@@ -119,18 +119,6 @@ private:
   WidgetAutoSaver m_autoSaver;
 
 private slots:  
-  /// Save the settings for time axis start and validate the entry.
-  void runTimeAxisStartAtInput();
-
-  /// Save the settings for time axis end and validate the entry.
-  void runTimeAxisFinishAtInput();
-
-  /// Save the settings for Y axis min and validate the entry.
-  void runyAxisMinimumInput();
-
-  /// Save the settings for Y axis max and validate the entry.
-  void runyAxisMaximumInput();
-
   /// Save the settings for rebin steps and validate the entry.
   void runOptionStepSizeText();
 
@@ -145,9 +133,6 @@ private slots:
   
   /// Opens the managed directory dialog for easier access for the user.
   void openDirectoryDialog();
-
-  /// Stores the custom time value.
-  void storeCustomTimeValue();
 };
 
 }
