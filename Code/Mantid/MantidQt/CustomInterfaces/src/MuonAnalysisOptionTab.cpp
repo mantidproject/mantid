@@ -48,6 +48,15 @@ MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm, const QSt
   : m_uiForm(uiForm), m_settingsGroup(settingsGroup), m_yAxisMinimum(), m_yAxisMaximum(),
     m_customTimeValue(), m_autoSaver(settingsGroup)
 {
+  m_autoSaver.beginGroup("PlotStyleOptions");
+  m_autoSaver.registerWidget(m_uiForm.connectPlotType, "connectPlotStyle", 0);
+  m_autoSaver.registerWidget(m_uiForm.showErrorBars, "errorBars", 0);
+  m_autoSaver.endGroup();
+  m_autoSaver.beginGroup("SettingOptions");
+  m_autoSaver.registerWidget(m_uiForm.plotCreation, "plotCreation", 0);
+  m_autoSaver.registerWidget(m_uiForm.hideToolbars, "toolbars", 1);
+  m_autoSaver.registerWidget(m_uiForm.hideGraphs, "hiddenGraphs", 1);
+  m_autoSaver.endGroup();
 }
 
 
@@ -71,11 +80,6 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this,  
            SLOT(runyAxisAutoscale(bool)));
 
-  connect(m_uiForm.plotCreation, SIGNAL(currentIndexChanged(int)), this, SLOT(plotCreationChanged(int)));
-  connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotTypeChanged(int)));
-  connect(m_uiForm.showErrorBars, SIGNAL(toggled(bool)), this, SLOT(errorBarsChanged(bool)));
-  connect(m_uiForm.hideToolbars, SIGNAL(toggled(bool)), this, SLOT(toolbarsChanged(bool)));
-  connect(m_uiForm.hideGraphs, SIGNAL(toggled(bool)), this, SLOT(hideGraphsChanged(bool)));
   ////////////// Data Binning slots ///////////////
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(runRebinComboBox(int)));
   connect(m_uiForm.optionStepSizeText, SIGNAL(returnPressed()), this, SLOT(runOptionStepSizeText()));
@@ -101,7 +105,6 @@ void MuonAnalysisOptionTab::initLayout()
   // Manage User Directories
   connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this, SLOT(openDirectoryDialog() ) );
 }
-
 
 /**
 * Muon Analysis Settings help.
@@ -340,73 +343,6 @@ void MuonAnalysisOptionTab::runyAxisMaximumInput()
     m_uiForm.yAxisMaximumInput->setText("0");
   }
 }
-
-
-/**
-* Save the settings of plot creation.
-*
-* @param index :: The new index of plot creation combo box.
-*/
-void MuonAnalysisOptionTab::plotCreationChanged(int index)
-{
-  // save this new choice
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "SettingOptions");
-  group.setValue("plotCreation", index);
-}
-
-
-/**
-* Save the settings of plot type.
-*
-* @param index :: The new index of plot type combo box.
-*/
-void MuonAnalysisOptionTab::plotTypeChanged(int index)
-{
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "SettingOptions");
-  group.setValue("connectPlotStyle", index);
-}
-
-
-/**
-* Save the settings of whether to show error bars.
-*
-* @param state :: The new state for the error bar check box.
-*/
-void MuonAnalysisOptionTab::errorBarsChanged(bool state)
-{
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "SettingOptions");
-  group.setValue("errorBars", state);
-}
-
-
-/**
-* Save the settings of whether to show the toolbars.
-*
-* @param state :: The new state for the toolbar check box.
-*/
-void MuonAnalysisOptionTab::toolbarsChanged(bool state)
-{
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "SettingOptions");
-  group.setValue("toolbars", state);
-}
-
-
-/**
-* Save the settings of whether to show the previous graphs.
-*
-* @param state :: The new state for the hide graphs check box.
-*/
-void MuonAnalysisOptionTab::hideGraphsChanged(bool state)
-{
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "SettingOptions");
-  group.setValue("hiddenGraphs", state);
-}
-
 
 /**
 * Validate the Y Min.

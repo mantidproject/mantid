@@ -143,21 +143,6 @@ private slots:
   /// Open the Muon Analysis Settings help and navigate to rebin section. (Wiki)
   void rebinHelpClicked();
   
-  /// Save the settings of plot creation.
-  void plotCreationChanged(int);
-  
-  /// Save the settings of plot type.
-  void plotTypeChanged(int);
-  
-  /// Save the settings of whether to show error bars.
-  void errorBarsChanged(bool);
-  
-  /// Save the settings of whether to show the toolbars.
-  void toolbarsChanged(bool);
-
-  /// Save the settings of whether to show the previous graphs.
-  void hideGraphsChanged(bool);
-
   /// Validate the Y minimum.
   void validateYMin();
   
