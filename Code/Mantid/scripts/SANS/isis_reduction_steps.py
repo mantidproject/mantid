@@ -123,15 +123,10 @@ class LoadRun(object):
 
         extra_options['OutputWorkspace'] = workspace
         
-        result = Load(self._data_file, **extra_options)
+        outWs = Load(self._data_file, **extra_options)
 
-        if isinstance(result, IEventWorkspace):
+        if isinstance(outWs, IEventWorkspace):
             LoadNexusMonitors(self._data_file, OutputWorkspace=workspace + "_monitors")
-
-        try:
-            outWs = result[0]
-        except:
-            outWs = result
         
         loader_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
         
@@ -1018,8 +1013,10 @@ class NormalizeToMonitor(ReductionStep):
         
         sanslog.notice('Normalizing to monitor ' + str(normalization_spectrum))
 
-        self.output_wksp = str(workspace) + '_monitors'
+        self.output_wksp = str(workspace) + '_incident_monitor'
         mon = reducer.get_sample().get_monitor(normalization_spectrum-1)
+        mon *= reducer.event2hist.scale
+
         if str(mon) != self.output_wksp:
             RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
         
@@ -1612,23 +1609,21 @@ class SliceEvent(ReductionStep):
     
     def __init__(self):
         super(SliceEvent, self).__init__()
-        self.monitor = ""
+        self.scale = 1
 
     def execute(self, reducer, workspace):
         ws_pointer = getWorkspaceReference(workspace)
 
         # it applies only for event workspace
         if not isinstance(ws_pointer, IEventWorkspace):
+            self.scale = 1
             return
         start, stop = reducer.getCurrSliceLimit()
         
         _monitor = reducer.get_sample().get_monitor()
 
-        hist, others = slice2histogram(ws_pointer, start, stop, _monitor)
-        
-        # get the monitors scaled for the sliced event
-        self.monitor = str(workspace) + '_scaled_monitors'
-        CropWorkspace(hist, EndWorkspaceIndex=_monitor.getNumberHistograms()-1, OutputWorkspace=self.monitor)
+        hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor)
+        self.scale = part_c / tot_c
 
 class UserFile(ReductionStep):
     """
