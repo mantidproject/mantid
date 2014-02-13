@@ -62,6 +62,13 @@ MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm, const QSt
 
 void MuonAnalysisOptionTab::initLayout()
 {
+  // Set validators for double fields
+  setDoubleValidator(m_uiForm.timeAxisStartAtInput);
+  setDoubleValidator(m_uiForm.timeAxisFinishAtInput);
+  setDoubleValidator(m_uiForm.yAxisMinimumInput);
+  setDoubleValidator(m_uiForm.yAxisMaximumInput);
+  setDoubleValidator(m_uiForm.optionStepSizeText);
+
   // Help
   connect(m_uiForm.muonAnalysisHelpPlotting, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpSettingsClicked()));
   connect(m_uiForm.binBoundariesHelp, SIGNAL(clicked()), this, SLOT(rebinHelpClicked()));
@@ -89,8 +96,8 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(plotStyleChanged()));
   connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SIGNAL(plotStyleChanged()));
   connect(m_uiForm.yAxisAutoscale, SIGNAL(clicked()), this, SIGNAL(plotStyleChanged()));
-  connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed ()), this, SLOT(validateYMin()));
-  connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed ()), this, SLOT(validateYMax()));
+  connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed ()), this, SIGNAL(plotStyleChanged());
+  connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed ()), this, SIGNAL(plotStyleChanged());
   
   ////////////// Auto Update  /////////////////
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
@@ -149,21 +156,11 @@ void MuonAnalysisOptionTab::runRebinComboBox(int index)
 */  
 void MuonAnalysisOptionTab::runOptionStepSizeText()
 {
-  try 
-  {
-    int boevs = boost::lexical_cast<int>(m_uiForm.optionStepSizeText->text().toStdString());
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "BinningOptions");
+  group.setValue("constStepSize", boevs);
 
-    QSettings group;
-    group.beginGroup(m_settingsGroup + "BinningOptions");
-    group.setValue("constStepSize", boevs); 
-
-    emit settingsTabUpdatePlot();
-  }
-  catch (...)
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Integer not recognised in Binning Option 'Step' input box. Reset to 1.");
-    m_uiForm.optionStepSizeText->setText("1");
-  }
+  emit settingsTabUpdatePlot();
 }
 
 
@@ -172,11 +169,11 @@ void MuonAnalysisOptionTab::runOptionStepSizeText()
 */
 void MuonAnalysisOptionTab::runBinBoundaries()
 {
-    QSettings group;
-    group.beginGroup(m_settingsGroup + "BinningOptions");
-    group.setValue("rebinVariable", m_uiForm.binBoundaries->text());
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "BinningOptions");
+  group.setValue("rebinVariable", m_uiForm.binBoundaries->text());
 
-    emit settingsTabUpdatePlot();
+  emit settingsTabUpdatePlot();
 }
 
 
@@ -257,19 +254,9 @@ void MuonAnalysisOptionTab::runTimeComboBox(int index)
 */
 void MuonAnalysisOptionTab::runTimeAxisStartAtInput()
 {
-  try 
-  {
-    double boevs = boost::lexical_cast<double>(m_uiForm.timeAxisStartAtInput->text().toStdString());
-
-    QSettings group;
-    group.beginGroup(m_settingsGroup + "plotStyleOptions");
-    group.setValue("timeAxisStart", boevs); 
-  }
-  catch (...)
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Start (ms):' input box. Reset to zero.");
-    m_uiForm.timeAxisStartAtInput->setText("0");
-  }
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "plotStyleOptions");
+  group.setValue("timeAxisStart", boevs);
 }
 
 
@@ -281,19 +268,9 @@ void MuonAnalysisOptionTab::runTimeAxisFinishAtInput()
   if (m_uiForm.timeAxisFinishAtInput->text().isEmpty())
     return;
 
-  try 
-  {
-    double boevs = boost::lexical_cast<double>(m_uiForm.timeAxisFinishAtInput->text().toStdString());
-
-    QSettings group;
-    group.beginGroup(m_settingsGroup + "plotStyleOptions");
-    group.setValue("timeAxisFinish", boevs); 
-  }
-  catch (...)
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Finish (ms):' input box. Reset to 0.");
-    m_uiForm.timeAxisFinishAtInput->setText("0");
-  }
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "plotStyleOptions");
+  group.setValue("timeAxisFinish", boevs);
 }
 
 
@@ -305,19 +282,9 @@ void MuonAnalysisOptionTab::runyAxisMinimumInput()
   if (m_uiForm.yAxisMinimumInput->text().isEmpty())
     return;
 
-  try 
-  {
-    double boevs = boost::lexical_cast<double>(m_uiForm.yAxisMinimumInput->text().toStdString());
-
-    QSettings group;
-    group.beginGroup(m_settingsGroup + "plotStyleOptions");
-    group.setValue("yAxisStart", boevs); 
-  }
-  catch (...)
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Minimum:' input box. Reset to 0");
-    m_uiForm.yAxisMinimumInput->setText("0");
-  }
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "plotStyleOptions");
+  group.setValue("yAxisStart", boevs);
 }
 
 
@@ -329,48 +296,10 @@ void MuonAnalysisOptionTab::runyAxisMaximumInput()
   if (m_uiForm.yAxisMaximumInput->text().isEmpty())
     return;
 
-  try 
-  {
-    double boevs = boost::lexical_cast<double>(m_uiForm.yAxisMaximumInput->text().toStdString());
-
-    QSettings group;
-    group.beginGroup(m_settingsGroup + "plotStyleOptions");
-    group.setValue("yAxisFinish", boevs); 
-  }
-  catch (...)
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Maximum:' input box. Reset to 0");
-    m_uiForm.yAxisMaximumInput->setText("0");
-  }
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "plotStyleOptions");
+  group.setValue("yAxisFinish", boevs);
 }
-
-/**
-* Validate the Y Min.
-*/
-void MuonAnalysisOptionTab::validateYMin()
-{
-  QString tempValue = m_uiForm.yAxisMinimumInput->text();
-  runyAxisMinimumInput();
-  if(tempValue == m_uiForm.yAxisMinimumInput->text())
-  {
-    emit plotStyleChanged();
-  }
-}
-
-
-/**
-* Validate the Y Max.
-*/
-void MuonAnalysisOptionTab::validateYMax()
-{
-  QString tempValue = m_uiForm.yAxisMaximumInput->text();
-  runyAxisMaximumInput();
-  if(tempValue == m_uiForm.yAxisMaximumInput->text())
-  {
-    emit plotStyleChanged();
-  }
-}
-
 
 /**
  * When no data loaded set various buttons etc to inactive

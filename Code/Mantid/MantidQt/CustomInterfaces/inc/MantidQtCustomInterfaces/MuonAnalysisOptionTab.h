@@ -143,12 +143,6 @@ private slots:
   /// Open the Muon Analysis Settings help and navigate to rebin section. (Wiki)
   void rebinHelpClicked();
   
-  /// Validate the Y minimum.
-  void validateYMin();
-  
-  /// Validate the Y maximum.
-  void validateYMax();
-  
   /// Opens the managed directory dialog for easier access for the user.
   void openDirectoryDialog();
 
