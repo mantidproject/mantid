@@ -149,12 +149,8 @@ class Stitch1DMany(PythonAlgorithm):
                     out_name += workspace_groups[j][i].name()
                     separator=comma_separator
                 
-                out_name += ("_" + str(i+1))
-                        
-                
                 startOverlaps = self.getProperty("StartOverlaps").value
                 endOverlaps = self.getProperty("EndOverlaps").value
-                
                 
                 stitched, scaleFactor = Stitch1DMany(InputWorkspaces=to_process, OutputWorkspace=out_name, StartOverlaps=startOverlaps, EndOverlaps=endOverlaps, 
                                                          Params=params, ScaleRHSWorkspace=scaleRHSWorkspace, UseManualScaleFactor=useManualScaleFactor,  
