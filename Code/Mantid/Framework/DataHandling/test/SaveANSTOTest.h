@@ -86,7 +86,7 @@ public:
     Poco::File(filename).remove();
     AnalysisDataService::Instance().remove(m_name);
   }
-  void testNoX()
+  void xtestNoX()
   {
     //create a new workspace and then delete it later on
     Mantid::API::IAlgorithm_sptr makews = Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace",1);
