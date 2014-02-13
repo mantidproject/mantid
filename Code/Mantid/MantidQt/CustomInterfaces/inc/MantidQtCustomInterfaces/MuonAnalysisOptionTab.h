@@ -82,13 +82,6 @@ public:
   /// Get plot style parameters from widgets
   QMap<QString, QString> parsePlotStyleParams() const;
 
-public slots:
-  /// Set the run time in muon analysis and save into settings.
-  void runTimeComboBox(int index);
-
-  /// Enable/Disable editing of Y axis and save the setting.
-  void runyAxisAutoscale(bool state);
-
 signals:
   /// Update the plot because something has changed.
   void settingsTabUpdatePlot();
@@ -120,6 +113,12 @@ private slots:
   
   /// Opens the managed directory dialog for easier access for the user.
   void openDirectoryDialog();
+
+  /// Run when time axis combo-box is changed
+  void onTimeAxisChanged(int index);
+
+  /// Run when autoscale check-box state is changed
+  void onAutoscaleToggled(bool state);
 };
 
 }

@@ -83,23 +83,23 @@ void MuonAnalysisOptionTab::initLayout()
   setDoubleValidator(m_uiForm.optionStepSizeText);
 
   // Connect various sync stuff
-  connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(runTimeComboBox(int)));
-  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, SLOT(runyAxisAutoscale(bool)));
+  connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onTimeAxisChanged(int)));
+  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, SLOT(onAutoscaleToggled(bool)));
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), m_uiForm.rebinEntryState,
           SLOT(setCurrentIndex(int)));
 
-  // Help
+  // Connect help clicked
   connect(m_uiForm.muonAnalysisHelpPlotting, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpSettingsClicked()));
   connect(m_uiForm.binBoundariesHelp, SIGNAL(clicked()), this, SLOT(rebinHelpClicked()));
 
-  ////////////// Auto-update plot style //////////////
+  // Connect auto-updates for plot style
   connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(plotStyleChanged()));
   connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SIGNAL(plotStyleChanged()));
   connect(m_uiForm.yAxisAutoscale, SIGNAL(clicked()), this, SIGNAL(plotStyleChanged()));
   connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed ()), this, SIGNAL(plotStyleChanged()));
   connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed ()), this, SIGNAL(plotStyleChanged()));
   
-  ////////////// Auto Update  /////////////////
+  // Connect auto updates of plot data
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisStartAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
@@ -133,9 +133,10 @@ void MuonAnalysisOptionTab::rebinHelpClicked()
 ////////////// Default Plot Style slots ///////////////
 
 /**
-* When clicking autoscale (slot)
-*/
-void MuonAnalysisOptionTab::runyAxisAutoscale(bool state)
+ * Run when autoscale check-box state is changed
+ * @param state :: New state of the check-box
+ */
+void MuonAnalysisOptionTab::onAutoscaleToggled(bool state)
 {
   m_uiForm.yAxisMinimumInput->setEnabled(!state);
   m_uiForm.yAxisMaximumInput->setEnabled(!state);
@@ -156,9 +157,10 @@ void MuonAnalysisOptionTab::runyAxisAutoscale(bool state)
 }
 
 /**
-* Plot option time combo box (slot)
-*/
-void MuonAnalysisOptionTab::runTimeComboBox(int index)
+ * Run when time axis combo-box is changed
+ * @param index :: New index selected in the combo box
+ */
+void MuonAnalysisOptionTab::onTimeAxisChanged(int index)
 {
   switch(index)
   {
