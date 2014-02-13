@@ -35,7 +35,7 @@ Our example system is a simulation of a small crystal of octa-methyl [http://www
 
 There are as many splines as dynamical channels. The algorithm gathers the interpolations for each channel and aggregates them into an inpolated structure factor.
 
-[[Image:DSFinterp_fig4.png|thumb|center|600px|Interpolated structure factor <math>S(K,E|Q)</math> at fixed <math>Q=0.9A^{-1}</math>.]]
+[[Image:DSFinterp_fig4.png|thumb|center|600px|Interpolated structure factor <math>S(K,E|Q)</math>, in logarithm scaling, at fixed <math>Q=0.9A^{-1}</math>.]]
  
 *WIKI*"""
 
