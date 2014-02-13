@@ -2,7 +2,7 @@
 
 Query a remote compute resource for all jobs the user has submitted.
 
-For more details, see the [[Remote_Job_Subission_API|remote job submission API docs]].
+For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
 
 *WIKI*/
 
