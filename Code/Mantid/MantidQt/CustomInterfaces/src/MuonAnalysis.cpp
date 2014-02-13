@@ -2500,8 +2500,8 @@ void MuonAnalysis::startUpLook()
   m_uiForm.homePeriodBox2->setEnabled(false);
 
   // Set validators for number-only boxes
-  m_uiForm.timeZeroFront->setValidator(createDoubleValidator(m_uiForm.timeZeroFront));
-  m_uiForm.firstGoodBinFront->setValidator(createDoubleValidator(m_uiForm.firstGoodBinFront));
+  setDoubleValidator(m_uiForm.timeZeroFront);
+  setDoubleValidator(m_uiForm.firstGoodBinFront);
 
   // set various properties of the group table
   m_uiForm.groupTable->setColumnWidth(0, 100);
@@ -3450,18 +3450,6 @@ void MuonAnalysis::deadTimeFileSelected()
 
   m_deadTimesChanged = true;
   homeTabUpdatePlot();
-}
-
-/**
- * Creates new double validator which accepts numbers in standard notation only.
- * @param parent :: Parent of the new validator
- * @return New created validator
- */
-QDoubleValidator* MuonAnalysis::createDoubleValidator(QObject* parent)
-{
-  QDoubleValidator* newValidator = new QDoubleValidator(parent);
-  newValidator->setNotation(QDoubleValidator::StandardNotation);
-  return newValidator;
 }
 
 /**

@@ -5,6 +5,8 @@
 
 #include <QSettings>
 #include <QVector>
+#include <QDoubleValidator>
+#include <QLineEdit>
 
 namespace MantidQt
 {
@@ -12,6 +14,9 @@ namespace CustomInterfaces
 {
 namespace MuonAnalysisHelper
 {
+
+/// Sets double validator for specified field
+DLLExport void setDoubleValidator(QLineEdit* field);
 
 class DLLExport WidgetAutoSaver : QObject
 {

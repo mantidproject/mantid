@@ -13,6 +13,17 @@ namespace CustomInterfaces
 namespace MuonAnalysisHelper
 {
 
+/**
+ * Sets double validator for specified field.
+ * @param field :: Field to set validator for
+ */
+void setDoubleValidator(QLineEdit* field)
+{
+  QDoubleValidator* newValidator = new QDoubleValidator(field);
+  newValidator->setNotation(QDoubleValidator::StandardNotation);
+  field->setValidator(newValidator);
+}
+
 WidgetAutoSaver::WidgetAutoSaver(const QString& groupName)
 {
   m_settings.beginGroup(groupName);
