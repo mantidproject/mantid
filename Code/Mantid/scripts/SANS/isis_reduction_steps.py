@@ -1026,7 +1026,8 @@ class NormalizeToMonitor(ReductionStep):
 
         self.output_wksp = str(workspace) + '_incident_monitor'
         mon = reducer.get_sample().get_monitor(normalization_spectrum-1)
-        mon *= reducer.event2hist.scale
+        if reducer.event2hist.scale != 1:
+            mon *= reducer.event2hist.scale
 
         if str(mon) != self.output_wksp:
             RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
