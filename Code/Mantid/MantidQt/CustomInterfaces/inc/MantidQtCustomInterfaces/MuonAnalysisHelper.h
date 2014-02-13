@@ -30,11 +30,13 @@ public:
   void beginGroup(const QString& name);
   void endGroup();
 
+  void setAutoSaveEnabled(bool enabled);
+
 private slots:
   void saveWidgetValue();
 
 private:
-  void connectWidget(QWidget* widget);
+  const char* changedSignal(QWidget* widget);
 
   QVector<QWidget*> registeredWidgets;
 

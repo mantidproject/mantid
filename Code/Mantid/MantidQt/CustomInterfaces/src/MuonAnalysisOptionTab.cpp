@@ -45,9 +45,13 @@ namespace Muon
 {
 
 MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm, const QString &settingsGroup)
-  : m_uiForm(uiForm), m_yAxisMinimum(), m_yAxisMaximum(),
-    m_customTimeValue(), m_autoSaver(settingsGroup)
+  : m_uiForm(uiForm), m_yAxisMinimum(), m_yAxisMaximum(), m_customTimeValue(), m_autoSaver(settingsGroup)
+{}
+
+
+void MuonAnalysisOptionTab::initLayout()
 {
+  // Register all the widgets for auto-saving
   m_autoSaver.beginGroup("PlotStyleOptions");
   m_autoSaver.registerWidget(m_uiForm.connectPlotType, "connectPlotStyle", 0);
   m_autoSaver.registerWidget(m_uiForm.timeAxisStartAtInput, "timeAxisStart", "0.3");
@@ -70,11 +74,7 @@ MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm, const QSt
   m_autoSaver.registerWidget(m_uiForm.hideToolbars, "toolbars", 1);
   m_autoSaver.registerWidget(m_uiForm.hideGraphs, "hiddenGraphs", 1);
   m_autoSaver.endGroup();
-}
 
-
-void MuonAnalysisOptionTab::initLayout()
-{
   // Set validators for double fields
   setDoubleValidator(m_uiForm.timeAxisStartAtInput);
   setDoubleValidator(m_uiForm.timeAxisFinishAtInput);
@@ -87,6 +87,11 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, SLOT(onAutoscaleToggled(bool)));
   connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), m_uiForm.rebinEntryState,
           SLOT(setCurrentIndex(int)));
+
+  // TODO: load saved values here
+
+  // Enable auto-saving
+  m_autoSaver.setAutoSaveEnabled(true);
 
   // Connect help clicked
   connect(m_uiForm.muonAnalysisHelpPlotting, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpSettingsClicked()));

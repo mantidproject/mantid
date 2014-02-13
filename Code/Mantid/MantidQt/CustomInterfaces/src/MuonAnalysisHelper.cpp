@@ -35,28 +35,46 @@ void WidgetAutoSaver::registerWidget(QWidget *widget, const QString& name, QVari
   widgetNames[widget] = name;
   widgetDefaultValues[widget] = defaultValue;
   widgetGroups[widget] = m_settings.group(); // Current group set up using beginGroup and endGroup
-
-  connectWidget(widget);
 }
 
-void WidgetAutoSaver::connectWidget(QWidget *widget)
+const char* WidgetAutoSaver::changedSignal(QWidget *widget)
 {
-  if ( auto w = qobject_cast<QLineEdit*>(widget) )
+  if ( qobject_cast<QLineEdit*>(widget) )
   {
-    connect(w, SIGNAL(textChanged(QString)), this, SLOT(saveWidgetValue()));
+    return SIGNAL(textChanged(QString));
   }
-  else if ( auto w = qobject_cast<QCheckBox*>(widget) )
+  else if ( qobject_cast<QCheckBox*>(widget) )
   {
-    connect(w, SIGNAL(stateChanged(int)), this, SLOT(saveWidgetValue()));
+    return SIGNAL(stateChanged(int));
   }
-  else if ( auto w = qobject_cast<QComboBox*>(widget) )
+  else if ( qobject_cast<QComboBox*>(widget) )
   {
-    connect(w, SIGNAL(currentIndexChanged(int)), this, SLOT(saveWidgetValue()));
+    return SIGNAL(currentIndexChanged(int));
   }
   // ... add more as neccessary
   else
   {
     throw std::runtime_error("Unsupported widget type");
+  }
+}
+
+void WidgetAutoSaver::setAutoSaveEnabled(bool enabled)
+{
+  if (enabled)
+  {
+    // Connect all the widgets
+    foreach (QWidget* w, registeredWidgets)
+    {
+      connect(w, changedSignal(w), this, SLOT(saveWidgetValue()));
+    }
+  }
+  else
+  {
+    // Disconnect all the widgets
+    foreach (QWidget* w, registeredWidgets)
+    {
+      disconnect(w, changedSignal(w), this, SLOT(saveWidgetValue()));
+    }
   }
 }
 
