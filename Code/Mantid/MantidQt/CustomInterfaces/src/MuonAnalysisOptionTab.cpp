@@ -168,22 +168,27 @@ void MuonAnalysisOptionTab::onAutoscaleToggled(bool state)
  */
 void MuonAnalysisOptionTab::onTimeAxisChanged(int index)
 {
+  // Start input widget
+  auto startInput = m_uiForm.timeAxisStartAtInput;
+
+  // Start input enabled only if Custom value selected
+  startInput->setEnabled(index == 2);
+
+  // Auto-save enabled only for Custom value
+  m_autoSaver.setAutoSaveEnabled(startInput, index == 2);
+
+  // Get new value of the Start input
   switch(index)
   {
   case(0): // Start at First Good Data
-    m_uiForm.timeAxisStartAtInput->setEnabled(false);
-    m_uiForm.timeAxisStartAtInput->setText(m_uiForm.firstGoodBinFront->text());
+    startInput->setText(m_uiForm.firstGoodBinFront->text());
     break;
   case(1): // Start at Time Zero
-    m_uiForm.timeAxisStartAtInput->setEnabled(false);
-    m_uiForm.timeAxisStartAtInput->setText("0");
+    startInput->setText("0.0");
     break;
   case(2): // Custom Value
-    m_uiForm.timeAxisStartAtInput->setEnabled(true);
-    if(m_customTimeValue.isEmpty())
-      m_uiForm.timeAxisStartAtInput->setText("0.0");
-    else
-      m_uiForm.timeAxisStartAtInput->setText(m_customTimeValue);
+    m_autoSaver.loadWidgetValue(startInput);
+    break;
   }
 
   if(index == 0)
@@ -191,13 +196,13 @@ void MuonAnalysisOptionTab::onTimeAxisChanged(int index)
     // Synchronize First Good Data box on Home tab with the one on this tab, if Start at First Good
     // Data is enabled.
     connect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)),
-      m_uiForm.timeAxisStartAtInput, SLOT(setText(const QString&)));
+            startInput, SLOT(setText(const QString&)));
   }
   else
   {
     // Disable synchronization otherwise
     disconnect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)),
-      m_uiForm.timeAxisStartAtInput, SLOT(setText(const QString&)));
+               startInput, SLOT(setText(const QString&)));
   }
 }
 

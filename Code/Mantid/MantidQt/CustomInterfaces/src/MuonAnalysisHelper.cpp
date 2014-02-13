@@ -66,7 +66,7 @@ void WidgetAutoSaver::setAutoSaveEnabled(bool enabled)
   }
 }
 
-void WidgetAutoSaver::setAutoSaveEnabled(QWidget &widget, bool enabled)
+void WidgetAutoSaver::setAutoSaveEnabled(QWidget* widget, bool enabled)
 {
   if (enabled)
     connect(widget, changedSignal(widget), this, SLOT(saveWidgetValue()));
