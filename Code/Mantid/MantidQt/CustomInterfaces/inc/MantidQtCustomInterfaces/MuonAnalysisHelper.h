@@ -18,36 +18,60 @@ namespace MuonAnalysisHelper
 /// Sets double validator for specified field
 DLLExport void setDoubleValidator(QLineEdit* field);
 
+/**
+ * A class which deals with auto-saving the widget values. Widgets are registered and then on any
+ * change, their value is stored using QSettings.
+ */
 class Q_DECL_EXPORT WidgetAutoSaver : QObject
 {
   Q_OBJECT
 
 public:
+  /// Constructor
   WidgetAutoSaver(const QString& groupName);
 
+  /// Register new widget for auto-saving
   void registerWidget(QWidget* widget, const QString& name, QVariant defaultValue);
 
+  /// Begin new auto-save group
   void beginGroup(const QString& name);
+
+  /// End current auto-save group
   void endGroup();
 
+  /// Enable/disable auto-saving of all the registered widgets
   void setAutoSaveEnabled(bool enabled);
+
+  /// Enable/disable auto-saving of the given widget
   void setAutoSaveEnabled(QWidget* widget, bool enabled);
 
+  /// Load the auto-saved (or default) value of all the registered widgets
   void loadWidgetValues();
+
+  /// Load the auto-saved (or default) value of the given widget
   void loadWidgetValue(QWidget* widget);
 
 private slots:
+  /// Save the caller value
   void saveWidgetValue();
 
 private:
+  /// Return a signal (which can be used instead of SIGNAL()) which is emmited when given widget is changed
   const char* changedSignal(QWidget* widget);
 
-  QVector<QWidget*> registeredWidgets;
+  /// A list of all the registered widgets
+  QVector<QWidget*> m_registeredWidgets;
 
-  QMap<QWidget*, QString> widgetNames;
-  QMap<QWidget*, QVariant> widgetDefaultValues;
-  QMap<QWidget*, QString> widgetGroups;
+  /// Names of registered widgets
+  QMap<QWidget*, QString> m_widgetNames;
 
+  /// Default values of registered widgets
+  QMap<QWidget*, QVariant> m_widgetDefaultValues;
+
+  /// Groups of registered widgets
+  QMap<QWidget*, QString> m_widgetGroups;
+
+  /// Settings used to keep track of the groups
   QSettings m_settings;
 };
 

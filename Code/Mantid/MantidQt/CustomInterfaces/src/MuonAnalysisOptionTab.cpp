@@ -28,7 +28,9 @@ MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm, const QSt
   : m_uiForm(uiForm), m_autoSaver(settingsGroup)
 {}
 
-
+/**
+ * Initialise the layout of the tab
+ */
 void MuonAnalysisOptionTab::initLayout()
 {
   // Register all the widgets for auto-saving
@@ -117,8 +119,6 @@ void MuonAnalysisOptionTab::rebinHelpClicked()
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
             "MuonAnalysisSettings#Variable_Rebin"));
 }
-
-////////////// Default Plot Style slots ///////////////
 
 /**
  * Run when autoscale check-box state is changed

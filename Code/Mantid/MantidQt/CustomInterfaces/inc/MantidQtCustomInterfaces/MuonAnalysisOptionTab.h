@@ -51,9 +51,8 @@ public:
   /// Constructor
   MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& settingsGroup);
 
-  /// Initialise the layout of Muon Analysis.
+  /// Initialise the layout of the tab
   void initLayout();
-
 
   /// Get plot style parameters from widgets
   QMap<QString, QString> parsePlotStyleParams() const;
@@ -68,7 +67,8 @@ signals:
 private:
   /// The Muon Analysis UI file.
   Ui::MuonAnalysis& m_uiForm;
-  
+
+  /// Auto-saver for all the widgets
   WidgetAutoSaver m_autoSaver;
 
 private slots:  

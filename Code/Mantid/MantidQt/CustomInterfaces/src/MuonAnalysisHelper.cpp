@@ -24,19 +24,35 @@ void setDoubleValidator(QLineEdit* field)
   field->setValidator(newValidator);
 }
 
+/**
+ * Constructor
+ * @param groupName :: The top-level group to use for all the widgets
+ */
 WidgetAutoSaver::WidgetAutoSaver(const QString& groupName)
 {
   m_settings.beginGroup(groupName);
 }
 
+/**
+ * Register new widget for auto-saving.
+ * @param widget :: A pointer to the widget
+ * @param name :: A name to use when saving/loading
+ * @param defaultValue :: A value to load when the widget has not been saved yet
+ */
 void WidgetAutoSaver::registerWidget(QWidget *widget, const QString& name, QVariant defaultValue)
 {
-  registeredWidgets.push_back(widget);
-  widgetNames[widget] = name;
-  widgetDefaultValues[widget] = defaultValue;
-  widgetGroups[widget] = m_settings.group(); // Current group set up using beginGroup and endGroup
+  m_registeredWidgets.push_back(widget);
+  m_widgetNames[widget] = name;
+  m_widgetDefaultValues[widget] = defaultValue;
+  m_widgetGroups[widget] = m_settings.group(); // Current group set up using beginGroup and endGroup
 }
 
+/**
+ * Return a signal (which can be used instead of SIGNAL()) which is emmited when given widget is
+ * changed.
+ * @param widget
+ * @return A signal you can use instead of SIGNAL() to determine when widget value was changed
+ */
 const char* WidgetAutoSaver::changedSignal(QWidget *widget)
 {
   if ( qobject_cast<QLineEdit*>(widget) )
@@ -58,14 +74,23 @@ const char* WidgetAutoSaver::changedSignal(QWidget *widget)
   }
 }
 
+/**
+ * Enable/disable auto-saving of all the registered widgets.
+ * @param enabled :: Whether auto-saving should be enabled or disabled
+ */
 void WidgetAutoSaver::setAutoSaveEnabled(bool enabled)
 {
-  foreach (QWidget* w, registeredWidgets)
+  foreach (QWidget* w, m_registeredWidgets)
   {
     setAutoSaveEnabled(w, enabled);
   }
 }
 
+/**
+ * Enable/disable auto-saving of all the registered widgets.
+ * @param widget :: Registered widget for which to enable/disable auto-saving
+ * @param enabled :: Whether auto-saving should be enabled or disabled
+ */
 void WidgetAutoSaver::setAutoSaveEnabled(QWidget* widget, bool enabled)
 {
   if (enabled)
@@ -74,6 +99,9 @@ void WidgetAutoSaver::setAutoSaveEnabled(QWidget* widget, bool enabled)
     disconnect(widget, changedSignal(widget), this, SLOT(saveWidgetValue()));
 }
 
+/**
+ * Saves the value of the registered widget which signalled the slot
+ */
 void WidgetAutoSaver::saveWidgetValue()
 {
   // Get the widget which called the slot
@@ -82,8 +110,8 @@ void WidgetAutoSaver::saveWidgetValue()
   if(!sender)
     throw std::runtime_error("Unable to save value of non-widget QObject");
 
-  const QString& senderName = widgetNames[sender];
-  const QString& senderGroup = widgetGroups[sender];
+  const QString& senderName = m_widgetNames[sender];
+  const QString& senderGroup = m_widgetGroups[sender];
 
   QSettings settings;
   settings.beginGroup(senderGroup);
@@ -103,11 +131,15 @@ void WidgetAutoSaver::saveWidgetValue()
   // ... add more as neccessary
 }
 
+/**
+ * Load the auto-saved (or default) value of the given widget.
+ * @param widget :: Widget to load saved value for
+ */
 void WidgetAutoSaver::loadWidgetValue(QWidget *widget)
 {
-  const QString& name = widgetNames[widget];
-  const QString& group = widgetGroups[widget];
-  QVariant defaultValue = widgetDefaultValues[widget];
+  const QString& name = m_widgetNames[widget];
+  const QString& group = m_widgetGroups[widget];
+  QVariant defaultValue = m_widgetDefaultValues[widget];
 
   QSettings settings;
   settings.beginGroup(group);
@@ -129,19 +161,30 @@ void WidgetAutoSaver::loadWidgetValue(QWidget *widget)
   // ... add more as neccessary
 }
 
+/**
+ * Load the auto-saved (or default) value of all the registered widgets.
+ */
 void WidgetAutoSaver::loadWidgetValues()
 {
-  foreach (QWidget* w, registeredWidgets)
+  foreach (QWidget* w, m_registeredWidgets)
   {
     loadWidgetValue(w);
   }
 }
 
+/**
+ * Begin new-auto save group. All the registerWidget calls between this and next beginGroup will be
+ * put in the given group.
+ * @param name :: The name of the group
+ */
 void WidgetAutoSaver::beginGroup(const QString &name)
 {
   m_settings.beginGroup(name);
 }
 
+/**
+ * Ends the scope of the previous begin group.
+ */
 void WidgetAutoSaver::endGroup()
 {
   m_settings.endGroup();
