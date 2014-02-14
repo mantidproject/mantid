@@ -26,7 +26,6 @@
 
 /// Registration macro user-defined single-value Python types.
 #define REGISTER_SINGLEVALUE_HANDLER(TYPE) \
-  Mantid::PythonInterface::Registry::registerHandler(typeid(TYPE), \
-               new Mantid::PythonInterface::Registry::SingleValueTypeHandler<TYPE>);\
+  Mantid::PythonInterface::Registry::TypeRegistry::subscribe<TYPE>(new Mantid::PythonInterface::Registry::SingleValueTypeHandler<TYPE>);
 
 #endif /* MANTID_PYTHONINTERFACE_REGISTERSINGLEVALUEHANDLER_H_ */

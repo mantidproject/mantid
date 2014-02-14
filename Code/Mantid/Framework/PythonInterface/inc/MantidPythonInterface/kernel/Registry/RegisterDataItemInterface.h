@@ -54,8 +54,8 @@ namespace Mantid { namespace PythonInterface
 
         register_ptr_to_python<IType_sptr>();
         register_ptr_to_python<IType_wptr>();
-        registerHandler(typeid(IType), 
-                        new SingleValueTypeHandler<IType_sptr>);
+        //properties can only ever store pointers to these
+        TypeRegistry::subscribe<IType>(new SingleValueTypeHandler<IType_sptr>);
       }
       /// Register a downcast for this ID
       RegisterDataItemInterface & insertDowncast(const std::string &id)

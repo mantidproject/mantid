@@ -50,7 +50,7 @@ namespace Mantid
          * @param name :: The name of the property
          * @param value :: A boost python object that stores the value
          */
-        void set(Kernel::IPropertyManager* alg, const std::string &name, const boost::python::object & value)
+        void set(Kernel::IPropertyManager* alg, const std::string &name, const boost::python::object & value) const
         {
           alg->setProperty<ValueType>(name, boost::python::extract<ValueType>(value));
         }
@@ -105,7 +105,7 @@ namespace Mantid
          * @param name :: The name of the property
          * @param value :: A boost python object that stores the value
          */
-        void set(Kernel::IPropertyManager* alg, const std::string &name, const boost::python::object & value)
+        void set(Kernel::IPropertyManager* alg, const std::string &name, const boost::python::object & value) const
         {
           using namespace boost::python;
           typedef boost::weak_ptr<Kernel::DataItem> DataItem_wptr;

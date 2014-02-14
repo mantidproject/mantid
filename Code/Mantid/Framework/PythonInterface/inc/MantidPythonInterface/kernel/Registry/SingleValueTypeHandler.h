@@ -54,6 +54,9 @@ namespace Mantid
       template<typename PropertyType>
       struct DLLExport SingleValueTypeHandler : public TypedPropertyValueHandler<PropertyType>
       {
+        /// Required by TypeRegistry framework
+        typedef PropertyType HeldType;
+
         /**
          * Return the PyTypeObject of the DerivedType
          * @returns A PyTypeObject for the given DerivedType
