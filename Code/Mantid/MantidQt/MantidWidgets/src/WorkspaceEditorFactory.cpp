@@ -12,7 +12,9 @@ QWidget* WorkspaceEditorFactory::createEditor(QtStringPropertyManager *, QtPrope
 
 WorkspaceEditor::WorkspaceEditor(QtProperty *property, QWidget *parent):WorkspaceSelector(parent),m_property(property)
 {
+  this->insertItem("",0);
   updateProperty(this->text(0));
+  this->setCurrentIndex(0);
   connect(this,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(updateProperty(const QString&)));
 }
 

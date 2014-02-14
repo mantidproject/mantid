@@ -157,11 +157,11 @@ void TabulatedFunction::setAttribute(const std::string& attName,const IFunction:
   }
   else if (attName == "Workspace")
   {
-    storeAttributeValue( attName, value );
-    storeAttributeValue( "FileName", Attribute("",true));
     std::string wsName = value.asString();
     if ( !wsName.empty() )
     {
+      storeAttributeValue( attName, value );
+      storeAttributeValue( "FileName", Attribute("",true));
       loadWorkspace( wsName );
     }
   }
