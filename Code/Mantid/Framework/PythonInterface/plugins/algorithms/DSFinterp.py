@@ -1,8 +1,91 @@
 """*WIKI* 
+
 == Summary == 
 
 Given a set of parameter values {<math>T_i</math>} and corresponding structure factors {<math>S(Q,E,T_i)</math>}, this
 algorithm interpolates <math>S(Q,E,T)</math> for any value of parameter T within the range spanned by the {<math>T_i</math>} set.
+
+== Usage ==
+
+DSFinterp(Workspaces,OutputWorkspaces,[LoadErrors],[ParameterValues],
+ [LocalRegression],[RegressionWindow],[RegressionType],[TargetParameters],
+ [Version])
+ 
+<br clear=all>
+ 
+== Properties ==
+ 
+{| border="1" cellpadding="5" cellspacing="0" 
+!Order
+!Name
+!Direction
+!Type
+!Default
+!Description
+|-
+|colspan=6 align=center|'''Input'''
+|-
+|1
+|Workspaces
+|Input
+|str list
+|Mandatory
+|list of input workspaces
+|-
+|2
+|LoadErrors
+|Input
+|boolean
+| True
+|Do we load error data contained in the workspaces?
+|-
+|3
+|ParameterValues
+|Input
+|dbl list
+|Mandatory
+|list of input parameter values
+|-
+|colspan=6 align=center|'''Running Local Regression Options'''
+|-
+|4
+|LocalRegression
+|Input
+|boolean
+| True
+|Perform running local-regression?
+|-
+|5
+|RegressionWindow
+|Input
+|number
+| 6
+|window size for the running local-regression
+|-
+|6
+|RegressionType
+|Input
+|string
+| quadratic
+|type of local-regression; linear and quadratic are available
+|-
+|colspan=6 align=center|'''Output'''
+|-
+|7
+|TargetParameters
+|Input
+|dbl list
+|Mandatory
+|Parameters to interpolate the structure factor
+|-
+|8
+|OutputWorkspaces
+|Input
+|str list
+|Mandatory
+|list of output workspaces to save the interpolated structure factors
+|-
+|}
 
 == Required ==
 
@@ -36,19 +119,26 @@ Our example system is a simulation of a small crystal of octa-methyl [http://www
 There are as many splines as dynamical channels. The algorithm gathers the interpolations for each channel and aggregates them into an inpolated structure factor.
 
 [[Image:DSFinterp_fig4.png|thumb|center|600px|Interpolated structure factor <math>S(K,E|Q)</math>, in logarithm scaling, at fixed <math>Q=0.9A^{-1}</math>.]]
- 
+
+[[Category:Algorithms]]
+[[Category:Utility]]
+[[Category:PythonAlgorithms]]
+[[Category:Transforms]]
+[[Category:Smoothing]]
+{{AlgorithmLinks|DSFinterp}}
+
 *WIKI*"""
 
 from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory
 from mantid.simpleapi import CloneWorkspace, mtd
-from mantid.kernel import StringListValidator, FloatArrayProperty, FloatArrayLengthValidator, StringArrayProperty, StringArrayMandatoryValidator, Direction, FloatBoundedValidator, logger
+from mantid.kernel import StringListValidator, FloatArrayProperty, FloatArrayLengthValidator, FloatArrayMandatoryValidator, StringArrayProperty, StringArrayMandatoryValidator, Direction, FloatBoundedValidator, logger
 
 from pdb import set_trace as tr
 
 class DSFinterp(PythonAlgorithm):
 
   def category(self):
-    return "Arithmetic"
+    return "Transforms\\Smoothing;Utility;PythonAlgorithms"
 
   def name(self):
     return 'DSFinterp'
@@ -58,14 +148,14 @@ class DSFinterp(PythonAlgorithm):
     lrg='Input'
     self.declareProperty(StringArrayProperty('Workspaces', values=[], validator=arrvalidator, direction=Direction.Input), doc='list of input workspaces')
     self.declareProperty('LoadErrors', True, direction=Direction.Input, doc='Do we load error data contained in the workspaces?')
-    self.declareProperty(FloatArrayProperty('ParameterValues', values=[], direction=Direction.Input), doc='list of input parameter values')
+    self.declareProperty(FloatArrayProperty('ParameterValues', values=[], validator=FloatArrayMandatoryValidator(),direction=Direction.Input), doc='list of input parameter values')
     self.setPropertyGroup('Workspaces', lrg)
     self.setPropertyGroup('LoadErrors', lrg)
     self.setPropertyGroup('ParameterValues', lrg)
     self.declareProperty('LocalRegression', True, direction=Direction.Input, doc='Perform running local-regression?')
-    self.declareProperty('RegressionWindow', 3, direction=Direction.Input, doc='window size for the running local-regression')
+    self.declareProperty('RegressionWindow', 6, direction=Direction.Input, doc='window size for the running local-regression')
     regtypes = [ 'linear', 'quadratic']
-    self.declareProperty('RegressionType', 'linear', StringListValidator(regtypes), direction=Direction.Input, doc='type of local-regression; linear and quadratic are available')
+    self.declareProperty('RegressionType', 'quadratic', StringListValidator(regtypes), direction=Direction.Input, doc='type of local-regression; linear and quadratic are available')
     lrg = 'Running Local Regression Options'
     self.setPropertyGroup('LocalRegression', lrg)
     self.setPropertyGroup('RegressionWindow', lrg)
