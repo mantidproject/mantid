@@ -75,7 +75,7 @@ namespace Mantid
         boost::python::type_info typeInfo(typeObject);
         if(typeHandlers.find(typeInfo) == typeHandlers.end())
         {
-          typeHandlers.insert(std::make_pair(typeInfo, handler));
+          typeHandlers.insert(std::make_pair(typeInfo, boost::shared_ptr<PropertyValueHandler>(handler)));
         }
         else
         {
