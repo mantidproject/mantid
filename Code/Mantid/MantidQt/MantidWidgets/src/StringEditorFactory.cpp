@@ -1,16 +1,8 @@
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
 
-void StringEditorFactory::connectPropertyManager(QtStringPropertyManager *)
-{
-}
-
 QWidget* StringEditorFactory::createEditor(QtStringPropertyManager *, QtProperty *property,QWidget *parent)
 {
   return new StringEditor(property,parent);
-}
-
-void StringEditorFactory::disconnectPropertyManager(QtStringPropertyManager *)
-{
 }
 
 StringEditor::StringEditor(QtProperty *property, QWidget *parent):QLineEdit(parent),m_property(property)
