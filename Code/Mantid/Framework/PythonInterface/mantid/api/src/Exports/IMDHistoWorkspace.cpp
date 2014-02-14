@@ -1,16 +1,15 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidPythonInterface/kernel/Converters/CArrayToNDArray.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterDataItemInterface.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
 #include <boost/python/numeric.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 
 
 using namespace Mantid::API;
+using Mantid::PythonInterface::Registry::RegisterDataItemInterface;
 namespace Converters = Mantid::PythonInterface::Converters;
-
 using namespace boost::python;
 
 namespace
@@ -143,9 +142,7 @@ namespace
 
 void export_IMDHistoWorkspace()
 {
-  register_ptr_to_python<boost::shared_ptr<IMDHistoWorkspace>>();
-
-  // EventWorkspace class
+  // IMDHistoWorkspace class
   class_< IMDHistoWorkspace, bases<IMDWorkspace,MultipleExperimentInfos>, boost::noncopyable >("IMDHistoWorkspace", no_init)
     .def("getSignalArray", &getSignalArrayAsNumpyArray,
          "Returns a read-only numpy array containing the signal values")
@@ -190,7 +187,10 @@ void export_IMDHistoWorkspace()
          "Return the position of the center of a bin at a given position")
   ;
 
-  REGISTER_SINGLEVALUE_HANDLER(IMDHistoWorkspace_sptr);
+  //-------------------------------------------------------------------------------------------------
 
+  RegisterDataItemInterface<IMDHistoWorkspace>()
+    .castFromID("MDHistoWorkspace")
+  ;
 }
 

@@ -1,16 +1,13 @@
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidPythonInterface/kernel/PropertyWithValue.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterDataItemInterface.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/copy_const_reference.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 
 using namespace Mantid::API;
-using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::DataItem;
+using Mantid::PythonInterface::Registry::RegisterDataItemInterface;
 using namespace boost::python;
 
 namespace
@@ -22,8 +19,6 @@ namespace
 
 void export_Workspace()
 {
-  register_ptr_to_python<boost::shared_ptr<Workspace>>();
-
   class_<Workspace, bases<DataItem>, boost::noncopyable>("Workspace", no_init)
     .def("getName", &Workspace::getName, return_value_policy<copy_const_reference>(), 
          args("self"), "Returns the name of the workspace. This could be an empty string")
@@ -36,5 +31,7 @@ void export_Workspace()
          args("self"), "Return read-only access to the workspace history")
     ;
 
-  REGISTER_SINGLEVALUE_HANDLER(Workspace_sptr);
+  //-------------------------------------------------------------------------------------------------
+
+  RegisterDataItemInterface<Workspace>();
 }

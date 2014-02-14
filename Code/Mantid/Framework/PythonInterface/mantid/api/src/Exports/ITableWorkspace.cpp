@@ -5,14 +5,12 @@
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
-#include "MantidPythonInterface/kernel/PropertyWithValue.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterDataItemInterface.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/converter/builtin_converters.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/preprocessor/list/for_each.hpp>
 #include <boost/preprocessor/tuple/to_list.hpp>
 #include <vector>
@@ -23,6 +21,7 @@
 #include <numpy/arrayobject.h>
 
 using namespace Mantid::API;
+using Mantid::PythonInterface::Registry::RegisterDataItemInterface;
 using namespace boost::python;
 
 namespace
@@ -342,7 +341,6 @@ namespace
 
 void export_ITableWorkspace()
 {
-  register_ptr_to_python<boost::shared_ptr<ITableWorkspace>>();
   std::string iTableWorkspace_docstring = "Most of the information from a table workspace is returned ";
   iTableWorkspace_docstring += "as native copies. All of the column accessors return lists while the ";
   iTableWorkspace_docstring += "rows return dicts. This object does support the idom 'for row in ";
@@ -390,6 +388,10 @@ void export_ITableWorkspace()
          "number then it is interpreted as a row otherwise it is interpreted as a column name")
       ;
 
-  REGISTER_SINGLEVALUE_HANDLER(ITableWorkspace_sptr);
+  //-------------------------------------------------------------------------------------------------
+
+  RegisterDataItemInterface<ITableWorkspace>()
+    .castFromID("TableWorkspace")
+  ;
 }
 

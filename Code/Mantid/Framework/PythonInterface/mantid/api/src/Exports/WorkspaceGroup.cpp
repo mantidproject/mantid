@@ -1,20 +1,17 @@
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterDataItemInterface.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_value_policy.hpp>
-#include <boost/weak_ptr.hpp>
 
 using namespace Mantid::API;
+using Mantid::PythonInterface::Registry::RegisterDataItemInterface;
 using namespace boost::python;
 namespace Policies = Mantid::PythonInterface::Policies;
 
 void export_WorkspaceGroup() 
 {
-  register_ptr_to_python<boost::shared_ptr<WorkspaceGroup>>();
-
   class_< WorkspaceGroup, bases<Workspace>, boost::noncopyable >("WorkspaceGroup", no_init)
     .def("getNumberOfEntries", &WorkspaceGroup::getNumberOfEntries, "Returns the number of entries in the group")
     .def("getNames", &WorkspaceGroup::getNames, "Returns the names of the entries in the group")
@@ -32,6 +29,10 @@ void export_WorkspaceGroup()
          return_value_policy<Policies::ToWeakPtrWithDowncast>())
   ;
 
-  REGISTER_SINGLEVALUE_HANDLER(WorkspaceGroup_sptr);
+  //-----------------------------------------------------------------------------------------------
+
+  RegisterDataItemInterface<WorkspaceGroup>()
+    .castFromID("WorkspaceGroup")
+  ;
 }
 

@@ -3,11 +3,9 @@
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
-#include "MantidPythonInterface/kernel/PropertyWithValue.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterDataItemInterface.h"
-
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterDataItemInterface.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
@@ -19,6 +17,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace boost::python;
+
 namespace Converters = Mantid::PythonInterface::Converters;
 namespace Policies = Mantid::PythonInterface::Policies;
 namespace Registry = Mantid::PythonInterface::Registry;
@@ -238,7 +237,19 @@ void export_MatrixWorkspace()
          "CheckWorkspacesMatch algorithm")
     ;
   
-  // Do the registration required for a Workspace
-  Registry::RegisterDataItemInterface<MatrixWorkspace> reg;
-  reg.insertDowncast("Workspace2D");
+  //-------------------------------------------------------------------------------------------------
+
+  static const int NUM_IDS = 10;
+  static const char * WORKSPACE_IDS[NUM_IDS] = {\
+      "CompressedWorkspace2D", "GroupingWorkspace", "ManagedWorkspace2D",
+      "ManagedRawFileWorkspace2D", "MaskWorkspace", "OffsetsWorkspace",
+      "RebinnedOutput", "SpecialWorkspace2D", "Workspace2D", "WorkspaceSingleValue"
+  };
+
+  Registry::RegisterDataItemInterface<MatrixWorkspace> entry;
+  for(int i = 0; i < NUM_IDS; ++i)
+  {
+    entry.castFromID(WORKSPACE_IDS[i]);
+  }
+  ;
 }
