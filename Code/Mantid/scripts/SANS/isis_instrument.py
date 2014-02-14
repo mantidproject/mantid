@@ -739,7 +739,11 @@ class SANS2D(ISISInstrument):
             #this is the default case
             first.set_first_spec_num(9)
             first.set_orien('Horizontal')
-            second.set_orien('Horizontal')
+            # empty instrument number spectra differently.
+            if base_runno == 'emptyInstrument':
+                second.set_orien('HorizontalFlipped')
+            else:
+                second.set_orien('Horizontal')
 
         #as spectrum numbers of the first detector have changed we'll move those in the second too  
         second.place_after(first)
