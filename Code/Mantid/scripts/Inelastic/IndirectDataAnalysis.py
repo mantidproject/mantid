@@ -784,23 +784,11 @@ def getFurySeqResult(inputWS, outNm, option, Verbose):
     
     GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS[:-1])
 
-def furyfitPlotSeq(inputWS, Plot):
-    nHist = mtd[inputWS].getNumberHistograms()
-    if ( Plot == 'All' ):
-        mp.plotSpectrum(inputWS, range(0, nHist), True)
-        return
-    plotSpecs = []
-    if ( Plot == 'Intensity' ):
-        res = 'Intensity$'
-    if ( Plot == 'Tau' ):
-        res = 'Tau$'
-    elif ( Plot == 'Beta' ):
-        res = 'Beta$'    
-    for i in range(0, nHist):
-        title = mtd[inputWS].getAxis(1).label(i)
-        if ( re.search(res, title) ):
-            plotSpecs.append(i)
-    mp.plotSpectrum(inputWS, plotSpecs, True)
+def furyfitPlotSeq(ws, plot):
+    param_names = [plot]
+    if plot == 'All':
+        param_names = ['Intensity', 'Tau', 'Beta']
+    plotParameters(ws, param_names)
 
 def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False): 
     StartTime('FuryFit')
@@ -911,20 +899,6 @@ def furyfitMultParsToWS(Table, Data):
         VerticalAxisValues=names)
     return wsname
 
-def furyfitPlotMult(inputWS, Plot):
-    nHist = mtd[inputWS].getNumberHistograms()
-    if ( Plot == 'All' ):
-        mp.plotSpectrum(inputWS, range(0, nHist))
-        return
-    plotSpecs = []
-    if ( Plot == 'Intensity' ):
-        mp.plotSpectrum(inputWS, 1, True)
-    if ( Plot == 'Tau' ):
-        mp.plotSpectrum(inputWS, 2, True)
-    elif ( Plot == 'Beta' ):
-        mp.plotSpectrum(inputWS, 3, True)   
-
-
 def createFuryMultFun(ties = True, function = ''):
     fun =  '(composite=CompositeFunction,$domains=i;'
     fun += function
@@ -1012,7 +986,7 @@ def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=Fals
             logger.notice('Output file : '+opath)  
             logger.notice('Output file : '+rpath)  
     if ( Plot != 'None' ):
-        furyfitPlotMult(outWS, Plot)
+        furyfitPlotSeq(outWS, Plot)
     EndTime('FuryFit')
 
 ##############################################################################
