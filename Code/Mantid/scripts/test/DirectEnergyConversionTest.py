@@ -311,7 +311,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_set_spectra_to_mon(self):
         tReducer = self.reducer;
 
-        self.assertFalse(tReducer.spectra_to_monitors_list);
+        self.assertTrue(tReducer.spectra_to_monitors_list is None);
 
         tReducer.spectra_to_monitors_list = 35;
         self.assertTrue(isinstance(tReducer.spectra_to_monitors_list,list));
