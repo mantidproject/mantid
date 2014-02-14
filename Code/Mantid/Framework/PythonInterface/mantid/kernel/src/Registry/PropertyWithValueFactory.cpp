@@ -2,7 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
-#include "MantidPythonInterface/kernel/Registry/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include <cassert>
 
@@ -24,7 +24,7 @@ namespace Mantid
           assert(index.empty());
 
 #define REGISTER_MAPPING(PyType, CppType)\
-    index.insert(std::make_pair(&PyType, new Registry::SingleValueTypeHandler<CppType>()));
+    index.insert(std::make_pair(&PyType, new Registry::TypedPropertyValueHandler<CppType>()));
 
           // Map the Python types to the best match in C++
           REGISTER_MAPPING(PyFloat_Type, double);
@@ -32,6 +32,7 @@ namespace Mantid
           REGISTER_MAPPING(PyBool_Type, bool);
           REGISTER_MAPPING(PyString_Type, std::string);
         }
+#undef REGISTER_MAPPING
 
         /**
          * Returns a reference to the static lookup map

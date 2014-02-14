@@ -44,6 +44,9 @@ namespace Mantid
       template<typename ValueType>
       struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler
       {
+        /// Type required by TypeRegistry framework
+        typedef ValueType HeldType;
+
         /**
          * Set function to handle Python -> C++ calls and get the correct type
          * @param alg :: A pointer to an IPropertyManager
@@ -80,12 +83,7 @@ namespace Mantid
           }
           return valueProp;
         }
-        /// Is the given object a derived type of this objects Type
-        bool checkExtract(const boost::python::object & value) const
-        {
-          boost::python::extract<ValueType> extractor(value);
-          return extractor.check();
-        }
+
       };
 
       //
@@ -94,6 +92,9 @@ namespace Mantid
       template<typename T>
       struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T> > : public PropertyValueHandler
       {
+        /// Type required by TypeRegistry framework
+        typedef boost::shared_ptr<T> HeldType;
+
         /// Convenience typedef
         typedef T PointeeType;
         /// Convenience typedef
@@ -141,7 +142,7 @@ namespace Mantid
                                   const boost::python::object & validator, const unsigned int direction) const
         {
           using boost::python::extract;
-          const boost::shared_ptr<T> valueInC = extract<PropertyValueType>(defaultValue)();
+          const PropertyValueType valueInC = extract<PropertyValueType>(defaultValue)();
           Kernel::Property *valueProp(NULL);
           if( isNone(validator) )
           {
@@ -153,12 +154,6 @@ namespace Mantid
             valueProp = new Kernel::PropertyWithValue<PropertyValueType>(name, valueInC, propValidator->clone(), direction);
           }
           return valueProp;
-        }
-        /// Is the given object a derived type of this objects Type
-        bool checkExtract(const boost::python::object & value) const
-        {
-          boost::python::extract<PropertyValueType> extractor(value);
-          return extractor.check();
         }
       };
 

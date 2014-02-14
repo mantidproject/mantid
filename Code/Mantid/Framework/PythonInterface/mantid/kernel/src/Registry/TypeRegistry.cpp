@@ -2,7 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
-#include "MantidPythonInterface/kernel/Registry/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include <map>
 #include <boost/python/type_id.hpp>
@@ -42,7 +42,7 @@ namespace Mantid
         // -- Register a handler for each basic type and vector of each basic type + std::string --
         // macro helps with keeping information in one place
         #define SUBSCRIBE_HANDLER(Type) \
-          subscribe< SingleValueTypeHandler<Type> >(); \
+          subscribe< TypedPropertyValueHandler<Type> >(); \
           subscribe< SequenceTypeHandler<std::vector<Type>> >();
 
         // unsigned ints

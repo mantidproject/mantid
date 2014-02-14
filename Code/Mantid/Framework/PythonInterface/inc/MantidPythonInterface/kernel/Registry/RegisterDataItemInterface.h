@@ -21,7 +21,7 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidPythonInterface/kernel/Registry/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/DowncastRegistry.h"
 #include <boost/python/register_ptr_to_python.hpp>
@@ -55,7 +55,7 @@ namespace Mantid { namespace PythonInterface
         register_ptr_to_python<IType_sptr>();
         register_ptr_to_python<IType_wptr>();
         //properties can only ever store pointers to these
-        TypeRegistry::subscribe< SingleValueTypeHandler<IType_sptr> >();
+        TypeRegistry::subscribe< TypedPropertyValueHandler<IType_sptr> >();
       }
       /// Register a downcast for this ID
       RegisterDataItemInterface & castFromID(const std::string &id)

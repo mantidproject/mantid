@@ -53,10 +53,6 @@ namespace Mantid
         /// Overload to create a Property type from the given value with no validation
         virtual Kernel::Property * create(const std::string & name, const boost::python::object & value, 
                                           const boost::python::object & validator, const unsigned int direction) const = 0;
-        /// Is the given object a derived type of this objects Type
-        virtual bool checkExtract(const boost::python::object & value) const = 0;
-        /// Return the Python type corresponding to this object. May return NULL
-        virtual const PyTypeObject * pythonType() const = 0;
       };
     }
   }

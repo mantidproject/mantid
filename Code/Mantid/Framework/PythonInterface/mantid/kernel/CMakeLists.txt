@@ -84,7 +84,6 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
   ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h
-  ${HEADER_DIR}/kernel/Registry/SingleValueTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/TypeRegistry.h  
   ${HEADER_DIR}/kernel/Registry/DowncastRegistry.h
