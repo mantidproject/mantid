@@ -31,6 +31,7 @@ set ( SRC_FILES
     src/StringDialogEditor.cpp
     src/StringEditorFactory.cpp
 	src/UserFunctionDialog.cpp
+    src/WorkspaceEditorFactory.cpp
 	src/WorkspaceSelector.cpp
 	src/pythonCalc.cpp
 )
@@ -69,6 +70,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/StringDialogEditor.h
     inc/MantidQtMantidWidgets/StringEditorFactory.h
     inc/MantidQtMantidWidgets/UserFunctionDialog.h
+    inc/MantidQtMantidWidgets/WorkspaceEditorFactory.h
     inc/MantidQtMantidWidgets/WorkspaceSelector.h
 )
 

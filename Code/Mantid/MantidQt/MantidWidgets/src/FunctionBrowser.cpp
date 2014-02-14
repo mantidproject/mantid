@@ -25,6 +25,7 @@
 #include "MantidQtMantidWidgets/UserFunctionDialog.h"
 #include "MantidQtMantidWidgets/FilenameDialogEditor.h"
 #include "MantidQtMantidWidgets/FormulaDialogEditor.h"
+#include "MantidQtMantidWidgets/WorkspaceEditorFactory.h"
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
@@ -112,6 +113,7 @@ void FunctionBrowser::createBrowser()
   m_constraintManager = new QtStringPropertyManager(this);
   m_filenameManager = new QtStringPropertyManager(this);
   m_formulaManager = new QtStringPropertyManager(this);
+  m_workspaceManager = new QtStringPropertyManager(this);
   m_attributeVectorManager = new QtGroupPropertyManager(this);
   m_attributeSizeManager = new QtIntPropertyManager(this);
   m_attributeVectorDoubleManager = new QtDoublePropertyManager(this);
@@ -123,6 +125,7 @@ void FunctionBrowser::createBrowser()
   QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
   FilenameDialogEditorFactory* filenameDialogEditorFactory = new FilenameDialogEditorFactory(this);
   FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(this);
+  WorkspaceEditorFactory* workspaceEditorFactory = new WorkspaceEditorFactory(this);
 
   m_browser = new QtTreePropertyBrowser();
   // assign factories to property managers
@@ -136,6 +139,7 @@ void FunctionBrowser::createBrowser()
   m_browser->setFactoryForManager(m_constraintManager, lineEditFactory);
   m_browser->setFactoryForManager(m_filenameManager, filenameDialogEditorFactory);
   m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
+  m_browser->setFactoryForManager(m_workspaceManager, workspaceEditorFactory);
   m_browser->setFactoryForManager(m_attributeSizeManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_attributeVectorDoubleManager, doubleEditorFactory);
 
@@ -445,6 +449,11 @@ protected:
       prop = m_browser->m_formulaManager->addProperty(m_attName);
       m_browser->m_formulaManager->setValue(prop, QString::fromStdString(str));
     }
+    else if ( m_attName == "Workspace" )
+    {
+      prop = m_browser->m_workspaceManager->addProperty(m_attName);
+      m_browser->m_workspaceManager->setValue(prop, QString::fromStdString(str));
+    }
     else
     {
       prop = m_browser->m_attributeStringManager->addProperty(m_attName);
@@ -526,6 +535,10 @@ protected:
     else if ( attName == "Formula" )
     {
       str = m_browser->m_formulaManager->value(m_prop).toStdString();
+    }
+    else if ( attName == "Workspace" )
+    {
+      str = m_browser->m_workspaceManager->value(m_prop).toStdString();
     }
     else
     {
@@ -724,7 +737,9 @@ bool FunctionBrowser::isStringAttribute(QtProperty* prop) const
 {
   return prop && (
     dynamic_cast<QtAbstractPropertyManager*>(m_attributeStringManager) == prop->propertyManager() ||
-    dynamic_cast<QtAbstractPropertyManager*>(m_formulaManager) == prop->propertyManager()
+    dynamic_cast<QtAbstractPropertyManager*>(m_formulaManager) == prop->propertyManager() ||
+    dynamic_cast<QtAbstractPropertyManager*>(m_filenameManager) == prop->propertyManager() ||
+    dynamic_cast<QtAbstractPropertyManager*>(m_workspaceManager) == prop->propertyManager()
     );
 }
 

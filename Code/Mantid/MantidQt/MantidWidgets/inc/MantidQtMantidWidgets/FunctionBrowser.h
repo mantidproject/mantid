@@ -220,6 +220,8 @@ protected:
   QtStringPropertyManager *m_filenameManager;
   /// Manager for Formula attributes
   QtStringPropertyManager *m_formulaManager;
+  /// Manager for Workspace attributes
+  QtStringPropertyManager *m_workspaceManager;
   /// Manager for vector attribute properties
   QtGroupPropertyManager *m_attributeVectorManager;
   /// Manager for vector attribute member properties
