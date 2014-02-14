@@ -73,14 +73,14 @@ DSFinterp(Workspaces,OutputWorkspaces,[LoadErrors],[ParameterValues],
 |-
 |7
 |TargetParameters
-|Input
+|Output
 |dbl list
 |Mandatory
 |Parameters to interpolate the structure factor
 |-
 |8
 |OutputWorkspaces
-|Input
+|Output
 |str list
 |Mandatory
 |list of output workspaces to save the interpolated structure factors
@@ -161,8 +161,8 @@ class DSFinterp(PythonAlgorithm):
     self.setPropertyGroup('RegressionWindow', lrg)
     self.setPropertyGroup('RegressionType', lrg)
     lrg='Output'
-    self.declareProperty(FloatArrayProperty('TargetParameters', values=[], direction=Direction.Input), doc="Parameters to interpolate the structure factor")
-    self.declareProperty(StringArrayProperty('OutputWorkspaces', values=[], validator=arrvalidator, direction=Direction.Input), doc='list of output workspaces to save the interpolated structure factors')
+    self.declareProperty(FloatArrayProperty('TargetParameters', values=[], ), doc="Parameters to interpolate the structure factor")
+    self.declareProperty(StringArrayProperty('OutputWorkspaces', values=[], validator=arrvalidator), doc='list of output workspaces to save the interpolated structure factors')
     self.setPropertyGroup('TargetParameters', lrg)
     self.setPropertyGroup('OutputWorkspaces', lrg)
     self.channelgroup = None
