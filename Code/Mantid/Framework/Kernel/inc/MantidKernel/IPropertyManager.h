@@ -89,6 +89,8 @@ public:
 
     /// Get the list of managed properties.
     virtual const std::vector< Property*>& getProperties() const = 0;
+    /// checks if the property exists
+    bool hasProperty(const std::string &name) const;
 
     /** Templated method to set the value of a PropertyWithValue
      *  @param name :: The name of the property (case insensitive)
