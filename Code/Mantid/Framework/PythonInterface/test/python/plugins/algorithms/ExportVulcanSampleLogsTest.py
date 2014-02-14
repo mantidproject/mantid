@@ -1,4 +1,5 @@
 import unittest
+import os
 import numpy 
 from numpy import * 
 from mantid.kernel import *
@@ -19,16 +20,20 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 	# Test algorithm
 	alg_test = run_algorithm("ExportVulcanSampleLogs", 
 	    InputWorkspace = "TestMatrixWS",
-	    OutputFilename = "/tmp/furnace20333.txt",
+	    OutputFilename = "furnace20333.txt",
 	    SampleLogNames = ["SensorA", "SensorB", "SensorC"],
 	    WriteHeaderFile = False)
 
 	# Validate
 	self.assertTrue(alg_test.isExecuted())
+        if (alg_test.isExecuted() is False):
+            return
+
+        opfilename = alg_test.getProperty("OutputFilename").value
 
 	# Locate file
 	try:
-	    ifile = open("/tmp/furnace20333.txt")
+	    ifile = open(opfilename)
 	    lines = ifile.readlines()
 	    ifile.close()
 	except IOError as err:
@@ -43,6 +48,9 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 		goodlines += 1
 	self.assertEquals(goodlines, 25)
 
+        # Remove output files 
+        os.remove(opfilename)
+
 	return
 
 
@@ -56,17 +64,22 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 	# Test algorithm
 	alg_test = run_algorithm("ExportVulcanSampleLogs", 
 	    InputWorkspace = "TestMatrixWS",
-	    OutputFilename = "/tmp/furnace20333.txt",
+	    OutputFilename = "furnace20333.txt",
 	    SampleLogNames = ["SensorA", "SensorB", "SensorC"],
 	    WriteHeaderFile = True, 
 	    Header = "SensorA[K]\t SensorB[K]\t SensorC[K]")
 
 	# Validate
 	self.assertTrue(alg_test.isExecuted())
+        if (alg_test.isExecuted() is False):
+            return
+
+        opfilename = alg_test.getProperty("OutputFilename").value
+        opheadername = opfilename.split(".")[0] + "_header.txt"
 
 	# Locate file
 	try:
-	    ifile = open("/tmp/furnace20333_header.txt")
+	    ifile = open(opheadername)
 	    lines = ifile.readlines()
 	    ifile.close()
 	except IOError as err:
@@ -81,6 +94,10 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 		goodlines += 1
 	self.assertEquals(goodlines, 3)
 
+        # Remove output files 
+        os.remove(opfilename)
+        os.remove(opheadername)
+
 	return
 
 
@@ -94,16 +111,20 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 	# Test algorithm
 	alg_test = run_algorithm("ExportVulcanSampleLogs", 
 	    InputWorkspace = "TestMatrixWS",
-	    OutputFilename = "/tmp/furnace20333.txt",
+	    OutputFilename = "furnace20333.txt",
 	    SampleLogNames = ["SensorA", "SensorB", "SensorX", "SensorC"],
 	    WriteHeaderFile = False)
 
 	# Validate
 	self.assertTrue(alg_test.isExecuted())
+        if (alg_test.isExecuted() is False):
+            return
+
+        opfilename = alg_test.getProperty("OutputFilename").value
 
 	# Locate file
 	try:
-	    ifile = open("/tmp/furnace20333.txt")
+	    ifile = open(opfilename)
 	    lines = ifile.readlines()
 	    ifile.close()
 	except IOError as err:
@@ -124,6 +145,9 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 	self.assertEquals(len(terms), 6)
 	value2 = float(terms[4])
 	self.assertEquals(value2, 0.)
+
+        # Remove generated files
+        os.remove(opfilename)
 
 	return
 
