@@ -202,7 +202,7 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 		tmplength = len(logtimesdict[self._sampleloglist[i]])
 		if loglength != tmplength:
 		    if loglength != sys.maxint:
-			self.log().warning("Log %s has different length from previous ones. " % (lognames[i]))
+			self.log().warning("Log %s has different length from previous ones. " % (self._sampleloglist[i]))
 		    loglength = min(loglength, tmplength)
 		# ENDIF
 	    # ENDIF
