@@ -120,7 +120,7 @@ namespace Mantid
             // If we can extract a weak pointer then we must construct the shared pointer
             // from the weak pointer itself to ensure the new shared_ptr has the correct
             // use count
-            sharedItem = boost::static_pointer_cast<PointeeType>(weakPtrExtractor().lock());
+            sharedItem = boost::dynamic_pointer_cast<PointeeType>(weakPtrExtractor().lock());
           }
           else
           {
