@@ -548,7 +548,7 @@ namespace Mantid
         // Throw because something was invalid
         if (numErrors > 0)
         {
-          m_notificationCenter.postNotification(new ErrorNotification(this,"Some invalid Properties found"));
+          notificationCenter().postNotification(new ErrorNotification(this,"Some invalid Properties found"));
           throw std::runtime_error("Some invalid Properties found");
         }
       }
