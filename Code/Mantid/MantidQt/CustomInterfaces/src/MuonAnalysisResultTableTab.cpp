@@ -36,6 +36,7 @@ namespace Muon
   using namespace MantidQt::MantidWidgets;
 
   const std::string MuonAnalysisResultTableTab::WORKSPACE_POSTFIX("_Workspace");
+  const std::string MuonAnalysisResultTableTab::PARAMS_POSTFIX("_Parameters");
 
   const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS = \
       QStringList() << "run_number" << "sample_temp" << "sample_magn_field";
@@ -649,7 +650,8 @@ QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList&
     {
       std::vector<std::string> firstParams;
       // Find the first parameter table and use this as a comparison for all the other tables.
-      Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsList[posCount].toStdString() + "_Parameters") );
+      auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            wsList[posCount].toStdString() + PARAMS_POSTFIX);
 
       Mantid::API::TableRow paramRow = paramWs->getFirstRow();
       do
@@ -668,7 +670,8 @@ QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList&
         if (!colors.contains(i))
         {
           std::vector<std::string> nextParams;
-          Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsList[i].toStdString() + "_Parameters") );
+          auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+                wsList[i].toStdString() + PARAMS_POSTFIX);
 
           Mantid::API::TableRow paramRow = paramWs->getFirstRow();
           do
@@ -752,7 +755,8 @@ void MuonAnalysisResultTableTab::createTable()
     for(int i=0; i<wsSelected.size(); ++i)
     {
       QMap<QString, double> paramsList;
-      Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsSelected[i].toStdString() + "_Parameters") );
+      auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            wsSelected[i].toStdString() + PARAMS_POSTFIX);
 
       Mantid::API::TableRow paramRow = paramWs->getFirstRow();
     
@@ -851,7 +855,8 @@ bool MuonAnalysisResultTableTab::haveSameParameters(const QStringList& wsList)
   std::vector<std::string> firstParams;
 
   // Find the first parameter table and use this as a comparison for all the other tables.
-  Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsList[0].toStdString() + "_Parameters") );
+  auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+        wsList[0].toStdString() + PARAMS_POSTFIX);
 
   Mantid::API::TableRow paramRow = paramWs->getFirstRow();
   do
@@ -866,7 +871,8 @@ bool MuonAnalysisResultTableTab::haveSameParameters(const QStringList& wsList)
   for (int i=1; i<wsList.size(); ++i)
   {
     std::vector<std::string> nextParams;
-    Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsList[i].toStdString() + "_Parameters") );
+    auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+          wsList[i].toStdString() + PARAMS_POSTFIX);
 
     Mantid::API::TableRow paramRow = paramWs->getFirstRow();
     do
