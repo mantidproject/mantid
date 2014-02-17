@@ -315,6 +315,23 @@ QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces()
     if ( boost::starts_with(*it, MuonSequentialFitDialog::SEQUENTIAL_PREFIX))
       continue;
 
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(*it);
+
+    // Should have the right type
+    if ( ! ws )
+      continue;
+
+    // Should have start/end time set
+    try
+    {
+      ws->run().startTime();
+      ws->run().endTime();
+    }
+    catch(...)
+    {
+      continue;
+    }
+
     std::string baseName = (*it).substr(0, (*it).size() - WORKSPACE_POSTFIX.size());
 
     workspaces << QString::fromStdString(baseName);
