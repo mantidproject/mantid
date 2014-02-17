@@ -70,6 +70,7 @@ namespace Mantid
       {
         inline PyObject* operator()(const ArgType & p) const
         {
+          if(!p) Py_RETURN_NONE;
           return CasterType::apply(Registry::DowncastRegistry::retrieve(p->id()), p);
         }
 
