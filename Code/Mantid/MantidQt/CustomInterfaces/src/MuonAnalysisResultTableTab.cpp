@@ -335,6 +335,10 @@ QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces()
 
     std::string baseName = (*it).substr(0, (*it).size() - WORKSPACE_POSTFIX.size());
 
+    // Should have corresponding parameters table
+    if ( ! AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(baseName + PARAMS_POSTFIX) )
+      continue;
+
     workspaces << QString::fromStdString(baseName);
   }
 
