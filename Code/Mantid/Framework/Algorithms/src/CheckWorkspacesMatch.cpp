@@ -39,7 +39,7 @@ void CheckWorkspacesMatch::initDocs()
 }
 
 /// Constructor
-CheckWorkspacesMatch::CheckWorkspacesMatch() : API::Algorithm(), result(), prog(NULL)
+CheckWorkspacesMatch::CheckWorkspacesMatch() : API::Algorithm(), result(), prog(NULL),m_ParallelComparison(true)
 {}
 
 /// Virtual destructor
@@ -169,13 +169,15 @@ void CheckWorkspacesMatch::init()
   declareProperty("CheckAllData",false, "Usually checking data ends when first mismatch occurs. This forces algorithm to check all data and print mismatch to the debug log.\n"\
                                         "Very often such logs are huge so making it true should be the last option.");    // Have this one false by default - it can be a lot of printing. 
 
-  
-
 }
 
 void CheckWorkspacesMatch::exec()
 {
   result.clear();
+
+  if (g_log.isLevelHighOrEqual("debug"))
+      m_ParallelComparison = false;
+
 
   this->doComparison();
   
@@ -344,7 +346,9 @@ bool CheckWorkspacesMatch::checkEventLists(DataObjects::EventWorkspace_const_spt
 
   bool mismatchedEvent = false;
   int mismatchedEventWI = 0;
-  PARALLEL_FOR2(ews1, ews2)
+
+  bool condition = m_ParallelComparison && ews1->threadSafe()  &&  ews2->threadSafe() ;
+  PARALLEL_FOR_IF(condition)
   for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
