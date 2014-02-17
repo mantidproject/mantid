@@ -4,20 +4,20 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/ITimeSeriesProperty.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidKernel/TimeSplitter.h"
+#include <utility>
 
 namespace Mantid
 {
   namespace Kernel
   {
 
-    //================================================================================================
+    //=========================================================================
     /** Struct holding some useful statistics for a TimeSeriesProperty
      *
      */
@@ -38,10 +38,9 @@ namespace Mantid
     };
 
     //================================================================================================
-    /** Class to hold unit value (DateAndTime, T)
-     *
+    /**
+     * Class to hold unit value (DateAndTime, T)
      */
-
     template<class TYPE>
     class TimeValueUnit
     {
@@ -50,7 +49,7 @@ namespace Mantid
       TYPE mvalue;
 
     public:
-      TimeValueUnit(Kernel::DateAndTime time, TYPE value)
+      TimeValueUnit(const Kernel::DateAndTime & time, TYPE value)
       {
         mtime = time;
         mvalue = value;
@@ -110,8 +109,8 @@ namespace Mantid
         return ( lhs.mvalue < rhs.mvalue );
       }
     };
+    //========================================================================================================
 
-    //================================================================================================
     /**
        A specialised Property class for holding a series of time-value pairs.
 
@@ -163,18 +162,18 @@ namespace Mantid
       void setName(const std::string name);
 
       /// Filter out a run by time.
-      void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
+      void filterByTime(const Kernel::DateAndTime & start, const Kernel::DateAndTime & stop);
       /// Filter by a range of times
-      void filterByTimes(const Kernel::TimeSplitterType & splittervec);
+      void filterByTimes(const std::vector<SplittingInterval> & splittervec);
 
       /// Split out a time series property by time intervals.
-      void splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const;
+      void splitByTime(std::vector<SplittingInterval>& splitter, std::vector< Property * > outputs) const;
       /// Fill a TimeSplitterType that will filter the events by matching
-      void makeFilterByValue(TimeSplitterType& split, double min, double max, double TimeTolerance = 0.0, bool centre = false) const;
+      void makeFilterByValue(std::vector<SplittingInterval>& split, double min, double max, double TimeTolerance = 0.0, bool centre = false) const;
       /// Make sure an existing filter covers the full time range given
-      void expandFilterToRange(TimeSplitterType& split, double min, double max, const TimeInterval & range) const;
+      void expandFilterToRange(std::vector<SplittingInterval>& split, double min, double max, const TimeInterval & range) const;
       /// Calculate the time-weighted average of a property in a filtered range
-      double averageValueInFilter(const TimeSplitterType& filter) const;
+      double averageValueInFilter(const std::vector<SplittingInterval>& filter) const;
       /// Calculate the time-weighted average of a property
       double timeAverageValue() const;
 

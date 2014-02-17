@@ -62,7 +62,7 @@ class IndirectTransmission(PythonAlgorithm):
 		absorptionXSection = result[5]*wave/1.7982
 		coherentXSection = result[4]
 		incoherentXSection = result[3]
-		scatteringXSection = result[3]
+		scatteringXSection = incoherentXSection+coherentXSection
 
 		thickness = float(thickness)
 		density = float(density)

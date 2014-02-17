@@ -4,20 +4,29 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/PropertyHistory.h"
-#include "MantidKernel/TimeSplitter.h"
+#include <boost/shared_ptr.hpp>
 #include <set>
 #include <string>
-#include <typeinfo>
+#include <vector>
 
+namespace std
+{
+  class typeinfo;
+}
 
 namespace Mantid
 {
 namespace Kernel
 {
+//-----------------------------------------------------------------------------
+// Forward declarations
+//-----------------------------------------------------------------------------
+class DataItem;
+class DateAndTime;
+class IPropertySettings;
+class PropertyHistory;
+class SplittingInterval;
 
 /// Describes the direction (within an algorithm) of a Property. Used by WorkspaceProperty.
 struct Direction
@@ -54,10 +63,6 @@ struct Direction
   
 };
 
-//-----------------------------------------------------------------------------
-// Forward declarations
-//-----------------------------------------------------------------------------
-class DataItem;
 
 /** Base class for properties. Allows access without reference to templated concrete type.
 
@@ -106,12 +111,10 @@ public:
   void setSettings(IPropertySettings * settings);
  
   /** @return the PropertySettings for this property */
-  IPropertySettings * getSettings()
-  { return m_settings; }
+  IPropertySettings * getSettings();
 
   /** Deletes the PropertySettings object contained */
-  void deleteSettings()
-  { delete m_settings; m_settings = NULL; }
+  void deleteSettings();
 
 
   ///Overriden function that returns if property has the same value that it was initialised with, if applicable
@@ -148,8 +151,8 @@ public:
 
   /// Add to this
   virtual Property& operator+=( Property const * rhs ) = 0;
-  virtual void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
-  virtual void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Property * > outputs) const;
+  virtual void filterByTime(const Kernel::DateAndTime & start, const Kernel::DateAndTime & stop);
+  virtual void splitByTime(std::vector< SplittingInterval >& splitter, std::vector< Property * > outputs) const;
 
   virtual int size() const;
 

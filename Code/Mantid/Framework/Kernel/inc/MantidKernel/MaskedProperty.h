@@ -2,7 +2,7 @@
 #define MANTID_KERNEL_MASKEDPROPERTY_H_
 
 #include "MantidKernel/PropertyWithValue.h"
-
+#include <string>
 
 /** A property class for masking the properties. It inherits from PropertyWithValue.
      This class masks the properties and useful when the property value is not to be
@@ -38,69 +38,32 @@ namespace Mantid
   namespace Kernel
   {
     template <typename TYPE = std::string>
-    class MaskedProperty: public Kernel::PropertyWithValue<TYPE >
+    class MANTID_KERNEL_DLL MaskedProperty: public Kernel::PropertyWithValue<TYPE >
     {
     public:
-      /** Constructor  for Maskedproperty class
-       * @param name :: name of the property
-       * @param defaultvalue :: defaultvalue of the property
-       * @param validator :: property validator
-       * @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
-       */
+      /// Constructor with a validator
       MaskedProperty(const std::string& name,TYPE defaultvalue,IValidator_sptr validator = IValidator_sptr(new NullValidator),
-                     const unsigned int direction = Direction::Input):
-        Kernel::PropertyWithValue<TYPE>(name,defaultvalue , validator, direction ),m_maskedValue("")
-        {
-          this->setRemember(false);
-        }
+                     const unsigned int direction = Direction::Input);
+      /// Constructor with a validator without validation
+      MaskedProperty( const std::string& name, const TYPE& defaultvalue, const unsigned int direction);
+      /// "virtual" copy constructor
+      MaskedProperty * clone() const;
 
-      /** Constructor  for Maskedproperty class
-       * @param name :: name of the property
-       * @param defaultvalue :: defaultvalue of the property
-       * @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
-       */
-      MaskedProperty( const std::string& name, const TYPE& defaultvalue, const unsigned int direction):
-        Kernel::PropertyWithValue <TYPE>(name,defaultvalue,direction ),m_maskedValue("")
-        {
-          this->setRemember(false);
-        }
-
-      /**
-       * Virtual copy
-       */
-      MaskedProperty * clone() const { return new MaskedProperty(*this); }
-
-      /** This method creates History
-       */
-      virtual const Kernel::PropertyHistory createHistory() const
-      {
-        return Kernel::PropertyHistory(this->name(),this->getMaskedValue(),this->type(),this->isDefault(),Kernel::PropertyWithValue<TYPE >::direction());
-      }
+      /// Mask out the out the value in the history
+      virtual const Kernel::PropertyHistory createHistory() const;
 
       /** This method returns the masked property value
        */
-      TYPE getMaskedValue() const
-      {
-        doMasking();
-        return m_maskedValue;
-      }
+      TYPE getMaskedValue() const;
 
       // Unhide the PropertyWithValue assignment operator
       using Kernel::PropertyWithValue<TYPE>::operator=;
 
     private:
 
-      /** This method creates masked value for a property
-       * Useful for masking for properties like password in mantid
-       */
-      void doMasking()const
-      {
-        TYPE value(this->value());
-        m_maskedValue=std::string(value.size(),'*');
-      }
+      /// Perform the actual masking
+      void doMasking() const;
 
-
-    private:
       mutable TYPE m_maskedValue; ///< the masked value
 
     };

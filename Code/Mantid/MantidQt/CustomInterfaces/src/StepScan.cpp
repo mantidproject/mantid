@@ -12,6 +12,9 @@
 #include <QDesktopServices>
 #include <QUrl>
 
+#include <Poco/ActiveResult.h>
+#include <Poco/Thread.h>
+
 namespace MantidQt
 {
 namespace CustomInterfaces

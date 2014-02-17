@@ -269,7 +269,7 @@ inline void addingOperator(boost::shared_ptr<T>& lhs, const boost::shared_ptr<T>
 //------------------------------------------------------------------------------------------------
 
 template <typename TYPE>
-class PropertyWithValue : public Property
+class DLLExport PropertyWithValue : public Property
 {
 public:
   /** Constructor

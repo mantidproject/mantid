@@ -50,6 +50,8 @@
   #endif
 #endif
 
+#include <Poco/ActiveResult.h>
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGridLayout>

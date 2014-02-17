@@ -12,6 +12,8 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 
+#include <Poco/ActiveResult.h>
+
 #include <QInputDialog>
 #include <QFileDialog>
 #include <QMessageBox>

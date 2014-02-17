@@ -8,10 +8,10 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include <algorithm>
-#include <iostream>
-#include <sstream>
+
 #include <Poco/Path.h>
+#include <algorithm>
+#include <sstream>
 #include <queue>
 
 using namespace Mantid::Kernel;
@@ -758,7 +758,7 @@ namespace Mantid
      *  The object is deleted.
      *  @param det The detector to remove
      */
-    void Instrument::removeDetector(Detector* det)
+    void Instrument::removeDetector(IDetector* det)
     {
       if (m_isParametrized)
         throw std::runtime_error("Instrument::removeDetector() called on a parameterized Instrument object.");
@@ -1236,7 +1236,7 @@ namespace Mantid
     /// Set the date from which the instrument definition begins to be valid.
     /// @param val :: date and time
     /// @throw InstrumentDefinitionError Thrown if date is earlier than 1900-01-31 23:59:01
-    void Instrument::setValidFromDate(const Kernel::DateAndTime val)
+    void Instrument::setValidFromDate(const Kernel::DateAndTime & val)
     { 
       Kernel::DateAndTime earliestAllowedDate("1900-01-31 23:59:01");
       if ( val < earliestAllowedDate )

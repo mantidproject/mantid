@@ -1,15 +1,19 @@
 #ifndef MANTID_KERNEL_ITIMESERIESPROPERTY_H_
 #define MANTID_KERNEL_ITIMESERIESPROPERTY_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidKernel/TimeSplitter.h"
+#include <vector>
 
 namespace Mantid
 {
 namespace Kernel
 {
+  //---------------------------------------------------------------------------
+  // Forward Declarations
+  //---------------------------------------------------------------------------
+  class DateAndTime;
+  class SplittingInterval;
+  class TimeInterval;
+
 /** A non-templated interface to a TimeSeriesProperty.
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -33,11 +37,11 @@ class ITimeSeriesProperty
 {
 public:
   /// Fill a TimeSplitterType that will filter the events by matching
-  virtual void makeFilterByValue(TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre=true) const = 0;
+  virtual void makeFilterByValue(std::vector<SplittingInterval>& split, double min, double max, double TimeTolerance, bool centre=true) const = 0;
   /// Make sure an existing filter covers the full time range given
-  virtual void expandFilterToRange(TimeSplitterType& split, double min, double max, const TimeInterval & range) const = 0;
+  virtual void expandFilterToRange(std::vector<SplittingInterval>& split, double min, double max, const TimeInterval & range) const = 0;
   /// Calculate the time-weighted average of a property in a filtered range
-  virtual double averageValueInFilter(const TimeSplitterType& filter) const = 0;
+  virtual double averageValueInFilter(const std::vector<SplittingInterval>& filter) const = 0;
   /// Return the time series's times as a vector<DateAndTime>
   virtual std::vector<DateAndTime> timesAsVector() const = 0;
   /// Returns the real size of the time series property map:
