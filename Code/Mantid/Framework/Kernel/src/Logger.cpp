@@ -221,7 +221,7 @@ namespace Kernel
     if (m_log)
     {
       auto lev_requested = m_log->parseLevel(level);
-      if (lev_requested>=m_log->getLevel())
+      if (m_log->getLevel()>=lev_requested)
       {
         return true;
       }
