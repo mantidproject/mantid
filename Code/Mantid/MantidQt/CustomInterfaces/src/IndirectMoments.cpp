@@ -95,7 +95,8 @@ namespace CustomInterfaces
     }
     catch(const std::runtime_error& e)
     {
-      emit showMessageBox("Error running Moments. See results log for details.");
+      QString msg(e.what());
+      emit showMessageBox("Error running Moments. " + msg + ".\nSee results log for details.");
     }
   }
 
