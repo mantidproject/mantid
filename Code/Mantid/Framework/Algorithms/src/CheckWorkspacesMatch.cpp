@@ -412,7 +412,8 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   bool resultBool = true;
 
   // Now check the data itself
-  PARALLEL_FOR2(ws1, ws2)
+  bool condition = m_ParallelComparison && ws1->threadSafe()  &&  ws2->threadSafe() ;
+  PARALLEL_FOR_IF(condition)
   for ( int i = 0; i < static_cast<int>(numHists); ++i )
   {
     PARALLEL_START_INTERUPT_REGION
