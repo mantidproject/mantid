@@ -7,8 +7,6 @@ Algorithm to load an NXSPE file into a workspace2D. It will create a new instrum
 
 *WIKI*/
 #include "MantidDataHandling/LoadNXSPE.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -16,14 +14,17 @@ Algorithm to load an NXSPE file into a workspace2D. It will create a new instrum
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 #include "MantidNexus/NexusClasses.h"
-#include <vector>
-#include <map>
 
 #include "MantidGeometry/Instrument.h"
-#include <sstream>
-#include <string>
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
+
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
+
 namespace Mantid
 {
 namespace DataHandling

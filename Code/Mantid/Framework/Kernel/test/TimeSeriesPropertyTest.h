@@ -2,16 +2,16 @@
 #define TIMESERIESPROPERTYTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <ctime>
-#include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSplitter.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
-#include <vector>
 #include <boost/scoped_ptr.hpp>
+#include <vector>
 
 using namespace Mantid::Kernel;
 
@@ -161,7 +161,6 @@ public:
       times.push_back( first + double(i) );
       values.push_back( double(i) );
     }
-    CPUTimer tim;
     TimeSeriesProperty<double> tsp("test");
     tsp.addValues(times, values);
     TS_ASSERT_EQUALS( tsp.size(), 1000);

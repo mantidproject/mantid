@@ -91,8 +91,8 @@ public:
     /// The argument is the property name. Default - do nothing.
     virtual void afterPropertySet(const std::string&);
 
-    virtual void filterByTime(const DateAndTime /*start*/, const DateAndTime /*stop*/){throw(std::runtime_error("Not yet implmented"));}
-    virtual void splitByTime(TimeSplitterType& /*splitter*/, std::vector< PropertyManager * >/* outputs*/) const{throw(std::runtime_error("Not yet implmented"));}
+    virtual void filterByTime(const DateAndTime &/*start*/, const DateAndTime &/*stop*/){throw(std::runtime_error("Not yet implmented"));}
+    virtual void splitByTime(std::vector<SplittingInterval>& /*splitter*/, std::vector< PropertyManager * >/* outputs*/) const{throw(std::runtime_error("Not yet implmented"));}
     virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filte*/){throw(std::runtime_error("Not yet implmented"));}
 
 

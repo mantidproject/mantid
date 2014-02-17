@@ -64,6 +64,8 @@
 
 #include <boost/tokenizer.hpp>
 
+#include <Poco/ActiveResult.h>
+
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
