@@ -268,7 +268,7 @@ namespace Mantid
       query.insert(0, "SELECT DISTINCT inves");
       query.append(" LIMIT " + boost::lexical_cast<std::string>(offset) + "," + boost::lexical_cast<std::string>(limit));
 
-      g_log.debug() << "The search query is: \n" << query << std::endl;
+      g_log.debug() << "The search query in ICat4Catalog::search is: \n" << query << std::endl;
 
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
@@ -314,7 +314,7 @@ namespace Mantid
       query.insert(0, "SELECT COUNT(DISTINCT inves)");
       request.query         = &query;
 
-      g_log.debug() << "The paging search query is: \n" << query << std::endl;
+      g_log.debug() << "The paging search query in ICat4Catalog::getNumberOfSearchResults is: \n" << query << std::endl;
 
       int result = icat.search(&request, &response);
 
@@ -330,7 +330,7 @@ namespace Mantid
         throwErrorMessage(icat);
       }
 
-      g_log.debug() << "The number of paging results returned is: " << numOfResults << std::endl;
+      g_log.debug() << "The number of paging results returned in ICat4Catalog::getNumberOfSearchResults is: " << numOfResults << std::endl;
 
       return numOfResults;
     }
