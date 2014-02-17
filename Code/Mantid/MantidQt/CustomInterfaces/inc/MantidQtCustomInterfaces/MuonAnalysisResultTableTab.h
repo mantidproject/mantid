@@ -70,7 +70,7 @@ private slots:
   void populateTables();
 
 private:
-  /// Postfix used by Fit fot result workspaces
+  /// Postfix used by Fit for result workspaces
   static const std::string WORKSPACE_POSTFIX;
 
   /// Postfix used by Fit for tables with fitted parameters

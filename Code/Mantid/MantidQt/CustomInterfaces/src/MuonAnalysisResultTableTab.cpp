@@ -309,11 +309,12 @@ QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces()
 
   for(auto it = allWorkspaces.begin(); it != allWorkspaces.end(); it++)
   {
+    // Should end with WORKSPACE_POSTFIX
     if ( !boost::ends_with(*it, WORKSPACE_POSTFIX) )
       continue;
 
     // Ignore sequential fit results
-    if ( boost::starts_with(*it, MuonSequentialFitDialog::SEQUENTIAL_PREFIX))
+    if ( boost::starts_with(*it, MuonSequentialFitDialog::SEQUENTIAL_PREFIX) )
       continue;
 
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(*it);
@@ -419,8 +420,8 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
     QMap<QString, QVariant> wsLogValues;
 
     // Get log information
-    Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(
-      AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString() + "_Workspace"));
+    auto ws = AnalysisDataService::Instance().retrieveWS<ExperimentInfo>(fittedWsList[i].toStdString()
+                                                                         + WORKSPACE_POSTFIX);
     if (!ws)
     {
       throw std::runtime_error("Wrong type of Workspace");
