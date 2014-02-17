@@ -18,8 +18,6 @@ void export_MatrixWorkspaceValidator()
          boost::noncopyable>("MatrixWorkspaceValidator", no_init)
     ;
 }
-namespace
-{
 /// Export a validator derived from a MatrixWorkspaceValidator that has a no-arg constructor
 #define EXPORT_WKSP_VALIDATOR_NO_ARG(ValidatorType, DocString) \
   class_<ValidatorType, \
@@ -45,8 +43,6 @@ namespace
          >(#ValidatorType, \
           init<ArgType>(arg(ArgName)=DefaultValue, DocString))\
    ;
-
-}
 
 void export_WorkspaceValidators()
 {
