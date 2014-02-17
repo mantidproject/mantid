@@ -73,6 +73,9 @@ private:
   /// Postfix used by Fit fot result workspaces
   static const std::string WORKSPACE_POSTFIX;
 
+  /// Postfix used by Fit for tables with fitted parameters
+  static const std::string PARAMS_POSTFIX;
+
   /// Names of the non-timeseries logs we should display
   static const QStringList NON_TIMESERIES_LOGS;
 
