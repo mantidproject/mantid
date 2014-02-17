@@ -1,8 +1,9 @@
 #include "MantidAPI/WorkspaceValidators.h" // They are all defined in one file so export them in one
-#include "MantidPythonInterface/kernel/TypedValidatorExportMacro.h"
+#include "MantidPythonInterface/kernel/TypedValidatorExporter.h"
 #include <boost/python/class.hpp>
 
 using Mantid::Kernel::TypedValidator;
+using Mantid::PythonInterface::TypedValidatorExporter;
 using namespace boost::python;
 
 /// This is the base TypedValidator for most of the WorkspaceValidators
@@ -10,7 +11,8 @@ void export_MatrixWorkspaceValidator()
 {
   using Mantid::API::MatrixWorkspace_sptr;
   using Mantid::API::MatrixWorkspaceValidator;
-  EXPORT_TYPEDVALIDATOR(MatrixWorkspace_sptr);
+  TypedValidatorExporter<MatrixWorkspace_sptr>::define("MatrixWorkspaceValidator");
+
   class_<MatrixWorkspaceValidator, 
          bases<TypedValidator<MatrixWorkspace_sptr> >,
          boost::noncopyable>("MatrixWorkspaceValidator", no_init)
