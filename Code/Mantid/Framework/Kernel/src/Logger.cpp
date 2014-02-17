@@ -210,29 +210,7 @@ namespace Kernel
       std::cerr << e.what();
     }
   }
-  /** Method returns true if the current level is higher then the one, specified by the request string
-    *@param level -- string representation of one of recognized poco log levels namely:
-                none (turns off logging), fatal, critical, error, warning,notice,,information,debug,trace
-                The level is not case sensitive. 
-    *@return true if the level is higher or equal to the the level, specified by the input level string.
-  */
-  bool Logger::isLevelHighOrEqual(const std::string & level)const
-  {
-    if (m_log)
-    {
-      auto lev_requested = m_log->parseLevel(level);
-      if (m_log->getLevel()>=lev_requested)
-      {
-        return true;
-      }
-      else
-      {
-        return false;
-      }
-    }
-    else // no log level is set, return false
-      return false;
-  }
+
 
   int Logger::getLevel() const
   {

@@ -141,8 +141,7 @@ class ThreadSafeLogStream;
     /// Shuts down the logging framework and releases all Loggers.
     static void shutdown();
 
-    /// returns true if the current level is higher or equal to one, specified by the request string
-    bool isLevelHighOrEqual(const std::string & level)const;
+
   protected:
     /// Protected constructor called by static get method
     Logger(const std::string& name);

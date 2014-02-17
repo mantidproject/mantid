@@ -76,23 +76,9 @@ public:
   void test_basics()
   {
     log.information() << "Information Message" << std::endl;
-    TS_ASSERT(!log.isLevelHighOrEqual("debug"));
-    TS_ASSERT(log.isLevelHighOrEqual("information"));
-    TS_ASSERT(log.isLevelHighOrEqual("warning"));
   }
 
-  void test_level_error()
-  {
-    int curLevel = log.getLevel();
-    log.setLevel("error");
-    TS_ASSERT(!log.isLevelHighOrEqual("debug"));
-    TS_ASSERT(!log.isLevelHighOrEqual("information"));
-    TS_ASSERT(!log.isLevelHighOrEqual("warning"));
-    TS_ASSERT(log.isLevelHighOrEqual("error"));
-
-    log.setLevel(curLevel);
-  }
-
+ 
   //---------------------------------------------------------------------------
   /** Log very quickly from a lot of OpenMP threads*/
   void test_OpenMP_ParallelLogging()

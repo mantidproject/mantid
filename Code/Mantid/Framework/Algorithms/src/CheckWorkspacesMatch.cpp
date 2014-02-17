@@ -175,7 +175,7 @@ void CheckWorkspacesMatch::exec()
 {
   result.clear();
 
-  if (g_log.isLevelHighOrEqual("debug"))
+  if (g_log.is(Logger::Priority::PRIO_DEBUG) )
       m_ParallelComparison = false;
 
 
