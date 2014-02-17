@@ -100,11 +100,11 @@ namespace Mantid
           extract<PythonType_wptr> weakPtr(data);
           if(weakPtr.check())
           {
-            return weakPtr().lock();
+            return boost::dynamic_pointer_cast<Kernel::DataItem>(weakPtr().lock());
           }
           else
           {
-            return extract<PythonType_sptr>(data)();
+            return boost::dynamic_pointer_cast<Kernel::DataItem>(extract<PythonType_sptr>(data)());
           }
         }
 
