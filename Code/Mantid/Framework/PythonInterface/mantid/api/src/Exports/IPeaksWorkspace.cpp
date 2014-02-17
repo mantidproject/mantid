@@ -1,11 +1,11 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterDataItemInterface.h"
+#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
 #include <boost/python/class.hpp>
 #include <boost/python/return_internal_reference.hpp>
 
 using namespace Mantid::API;
-using Mantid::PythonInterface::Registry::RegisterDataItemInterface;
+using Mantid::PythonInterface::Registry::DataItemInterface;
 using namespace boost::python;
 
 void export_IPeaksWorkspace()
@@ -25,7 +25,7 @@ void export_IPeaksWorkspace()
 
   //-------------------------------------------------------------------------------------------------
 
-  RegisterDataItemInterface<IPeaksWorkspace>()
+  DataItemInterface<IPeaksWorkspace>()
     .castFromID("PeaksWorkspace")
   ;
 }

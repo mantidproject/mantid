@@ -1,5 +1,5 @@
 #include "MantidAPI/Workspace.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterDataItemInterface.h"
+#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
@@ -7,7 +7,7 @@
 
 using namespace Mantid::API;
 using Mantid::Kernel::DataItem;
-using Mantid::PythonInterface::Registry::RegisterDataItemInterface;
+using Mantid::PythonInterface::Registry::DataItemInterface;
 using namespace boost::python;
 
 namespace
@@ -33,5 +33,5 @@ void export_Workspace()
 
   //-------------------------------------------------------------------------------------------------
 
-  RegisterDataItemInterface<Workspace>();
+  DataItemInterface<Workspace>();
 }

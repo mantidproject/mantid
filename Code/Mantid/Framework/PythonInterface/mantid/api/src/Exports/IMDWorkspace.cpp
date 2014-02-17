@@ -1,12 +1,12 @@
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterDataItemInterface.h"
+#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/self.hpp>
 
 using namespace Mantid::API;
-using Mantid::PythonInterface::Registry::RegisterDataItemInterface;
+using Mantid::PythonInterface::Registry::DataItemInterface;
 using namespace boost::python;
 
 void export_IMDWorkspace()
@@ -22,6 +22,6 @@ void export_IMDWorkspace()
     .def("getNEvents", &IMDWorkspace::getNEvents, args("self"), "Returns the total number of events, contributed to the workspace")
     ;
 
-  RegisterDataItemInterface<IMDWorkspace>();
+  DataItemInterface<IMDWorkspace>();
 }
 

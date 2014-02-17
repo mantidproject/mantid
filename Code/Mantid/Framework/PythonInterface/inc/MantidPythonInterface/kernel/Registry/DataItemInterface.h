@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_REGISTERDATEITEMINTERFACE_H_
-#define MANTID_PYTHONINTERFACE_REGISTERDATEITEMINTERFACE_H_
+#ifndef MANTID_PYTHONINTERFACE_DATEITEMINTERFACE_H_
+#define MANTID_PYTHONINTERFACE_DATEITEMINTERFACE_H_
 /**
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -42,12 +42,12 @@ namespace Mantid { namespace PythonInterface
      * insert method.
      */
     template<typename IType>
-    struct DLLExport RegisterDataItemInterface
+    struct DLLExport DataItemInterface
     {
       typedef boost::shared_ptr<IType> IType_sptr;
       typedef boost::weak_ptr<IType> IType_wptr;
       /// Constructor
-      RegisterDataItemInterface() 
+      DataItemInterface() 
       {
         using namespace boost::python;
         using namespace Registry;
@@ -58,7 +58,7 @@ namespace Mantid { namespace PythonInterface
         TypeRegistry::subscribe< TypedPropertyValueHandler<IType_sptr> >();
       }
       /// Register a downcast for this ID
-      RegisterDataItemInterface & castFromID(const std::string &id)
+      DataItemInterface & castFromID(const std::string &id)
       {
         using namespace Registry;
         DowncastRegistry::subscribe<IType>(id);
@@ -69,4 +69,4 @@ namespace Mantid { namespace PythonInterface
   }
 }}
 
-#endif /* MANTID_PYTHONINTERFACE_REGISTERDATEITEMINTERFACE_H_ */
+#endif /* MANTID_PYTHONINTERFACE_DATEITEMINTERFACE_H_ */

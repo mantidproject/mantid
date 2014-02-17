@@ -1,12 +1,12 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterDataItemInterface.h"
+#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/return_value_policy.hpp>
 
 using namespace Mantid::API;
-using Mantid::PythonInterface::Registry::RegisterDataItemInterface;
+using Mantid::PythonInterface::Registry::DataItemInterface;
 using namespace boost::python;
 namespace Policies = Mantid::PythonInterface::Policies;
 
@@ -31,7 +31,7 @@ void export_WorkspaceGroup()
 
   //-----------------------------------------------------------------------------------------------
 
-  RegisterDataItemInterface<WorkspaceGroup>()
+  DataItemInterface<WorkspaceGroup>()
     .castFromID("WorkspaceGroup")
   ;
 }

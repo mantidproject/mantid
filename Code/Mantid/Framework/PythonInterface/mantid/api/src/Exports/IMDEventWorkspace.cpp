@@ -1,11 +1,11 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 
-#include "MantidPythonInterface/kernel/Registry/RegisterDataItemInterface.h"
+#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using namespace Mantid::API;
-using Mantid::PythonInterface::Registry::RegisterDataItemInterface;
+using Mantid::PythonInterface::Registry::DataItemInterface;
 using namespace boost::python;
 
 namespace
@@ -31,7 +31,7 @@ void export_IMDEventWorkspace()
   ;
 
   //-----------------------------------------------------------------------------------------------
-  RegisterDataItemInterface<IMDEventWorkspace> entry;
+  DataItemInterface<IMDEventWorkspace> entry;
   // The IDs for the MDEventWorkpaces are constructed from the event types and number of dimensions
   const char *eventTypes[NUM_EVENT_TYPES]= { "MDEvent", "MDLeanEvent" };
 

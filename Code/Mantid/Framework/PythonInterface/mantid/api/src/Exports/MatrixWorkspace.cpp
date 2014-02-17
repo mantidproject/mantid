@@ -5,7 +5,7 @@
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterDataItemInterface.h"
+#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
@@ -246,7 +246,7 @@ void export_MatrixWorkspace()
       "RebinnedOutput", "SpecialWorkspace2D", "Workspace2D", "WorkspaceSingleValue"
   };
 
-  Registry::RegisterDataItemInterface<MatrixWorkspace> entry;
+  Registry::DataItemInterface<MatrixWorkspace> entry;
   for(int i = 0; i < NUM_IDS; ++i)
   {
     entry.castFromID(WORKSPACE_IDS[i]);
