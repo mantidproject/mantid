@@ -1,8 +1,10 @@
-#include "MantidPythonInterface/api/WorkspacePropertyMacro.h"
+#include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
 #include "MantidAPI/IEventWorkspace.h"
 
 void export_IEventWorkspaceProperty()
 {
   using Mantid::API::IEventWorkspace;
-  EXPORT_WORKSPACE_PROPERTY(IEventWorkspace, "IEventWorkspaceProperty");
+  using Mantid::PythonInterface::WorkspacePropertyExporter;
+
+  WorkspacePropertyExporter<IEventWorkspace>::define("IEventWorkspaceProperty");
 }

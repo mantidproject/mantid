@@ -133,13 +133,4 @@ namespace Mantid
   }
 }
 
-/**
- * Defines a macro for exporting new WorkspaceProperty types.
- * This automatically exports a new PropertyWithValue class for the given type.
- * @param Type :: The workspace type (not the shared_ptr wrapped type)
- * @param ClassName :: A string defining the final class name in Python
- */
-#define EXPORT_WORKSPACE_PROPERTY(Type, ClassName) \
-  Mantid::PythonInterface::WorkspacePropertyExporter<Type>::define(ClassName);
-
 #endif /* MANTID_PYTHONINTERFACE_WORKSPACEPROPERTYMACRO_H_ */
