@@ -114,7 +114,7 @@ doxylink = { 'mantidcpp' : ('@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/../Framework/Doxyg
 
 # -- Options for breathe output ------------------------------------------------
 breathe_projects = { 
-		 "mantid" : "/home/pf9/builds/mantid-release/doxygen/xml/"
+		 "mantid" : "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/../doxygen/xml/"
 		  }
 breathe_default_project = "mantid"
 

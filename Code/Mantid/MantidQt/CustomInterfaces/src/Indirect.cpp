@@ -603,6 +603,12 @@ void Indirect::createRESfile(const QString& file)
   if ( m_uiForm.cal_ckPlotResult->isChecked() ) { pyInput +=	"plot = True\n"; }
   else { pyInput += "plot = False\n"; }
 
+  if ( m_uiForm.cal_ckVerbose->isChecked() ) { pyInput +=  "verbose = True\n"; }
+  else { pyInput += "verbose = False\n"; }
+
+  if ( m_uiForm.cal_ckSave->isChecked() ) { pyInput +=  "save = True\n"; }
+  else { pyInput += "save = False\n"; }
+
   QString rebinParam = QString::number(m_calDblMng->value(m_calResProp["ELow"])) + "," +
     QString::number(m_calDblMng->value(m_calResProp["EWidth"])) + "," +
     QString::number(m_calDblMng->value(m_calResProp["EHigh"]));
@@ -614,7 +620,7 @@ void Indirect::createRESfile(const QString& file)
     "background = " + background + "\n"
     "rebinParam = '" + rebinParam + "'\n"
     "file = " + file + "\n"
-    "ws = resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, plotOpt = plot, factor="+scaleFactor+")\n"
+    "ws = resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, Verbose=verbose, Plot=plot, Save=save, factor="+scaleFactor+")\n"
     "scaled = "+ scaled +"\n"
     "scaleFactor = "+m_uiForm.cal_leIntensityScaleMultiplier->text()+"\n"
     "backStart = "+QString::number(m_calDblMng->value(m_calCalProp["BackMin"]))+"\n"
@@ -1299,17 +1305,13 @@ void Indirect::mappingOptionSelected(const QString& groupType)
   {
     m_uiForm.swMapping->setCurrentIndex(0);
   }
-  else if ( groupType == "All" )
-  {
-    m_uiForm.swMapping->setCurrentIndex(2);
-  }
-  else if ( groupType == "Individual" )
-  {
-    m_uiForm.swMapping->setCurrentIndex(2);
-  }
   else if ( groupType == "Groups" )
   {
     m_uiForm.swMapping->setCurrentIndex(1);
+  }
+  else if ( groupType == "All" || groupType == "Individual" || groupType == "Default" )
+  {
+    m_uiForm.swMapping->setCurrentIndex(2);
   }
 }
 
@@ -1537,8 +1539,13 @@ void Indirect::calibCreate()
 
     reducer += "calib.execute(None, None)\n"
       "result = calib.result_workspace()\n"
-      "print result\n"
-      "SaveNexus(InputWorkspace=result, Filename=result+'.nxs')\n";
+      "print result\n";
+
+    if( m_uiForm.cal_ckSave->isChecked() )
+    {
+      reducer +=
+        "SaveNexus(InputWorkspace=result, Filename=result+'.nxs')\n";
+    }
 
     if ( m_uiForm.cal_ckPlotResult->isChecked() )
     {
@@ -1810,6 +1817,11 @@ void Indirect::sOfQwClicked()
     if ( m_uiForm.sqw_ckSave->isChecked() )
     {
       pyInput += "SaveNexus(InputWorkspace=sqwOutput, Filename=sqwOutput+'.nxs')\n";
+
+      if (m_uiForm.sqw_ckVerbose->isChecked())
+      {
+        pyInput += "logger.notice(\"Resolution file saved to default save directory.\")\n";
+      }
     }
 
     if ( m_uiForm.sqw_cbPlotType->currentText() == "Contour" )
