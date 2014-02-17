@@ -71,6 +71,18 @@ class Sample(object):
         
     def get_wksp_name(self):
         return self.loader.wksp_name
+
+    def get_monitor(self, index=None):
+        try:
+            _ws = mtd[self.loader.wksp_name + "_monitors"]
+        except:
+            _ws = mtd[self.loader.wksp_name]
+
+        if index is not None:
+            __monitor = ExtractSingleSpectrum(_ws, index)
+            return __monitor
+        else:
+            return _ws
     
     def get_periods_in_file(self):
         return self.loader.periods_in_file
@@ -247,13 +259,6 @@ class ISISReducer(SANSReducer):
             return self._sample_run
         else:
             return self.get_can()
-
-    def get_monitor(self, index):
-        _ws = mtd[self.get_sample().wksp_name]
-        if isinstance(_ws, IEventWorkspace):
-            _ws = mtd[self.event2hist.monitor]
-        __MonitorWs = ExtractSingleSpectrum(_ws, index)
-        return __MonitorWs
 
     def get_transmissions(self):
         """ Get the transmission and direct workspace if they were given
