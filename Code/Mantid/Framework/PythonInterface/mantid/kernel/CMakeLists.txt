@@ -88,7 +88,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Registry/TypeRegistry.h  
   ${HEADER_DIR}/kernel/Registry/DowncastRegistry.h
   ${HEADER_DIR}/kernel/IsNone.h
-  ${HEADER_DIR}/kernel/PropertyWithValue.h
+  ${HEADER_DIR}/kernel/PropertyWithValueExporter.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h
   ${HEADER_DIR}/kernel/TypedValidatorExportMacro.h

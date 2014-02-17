@@ -30,15 +30,30 @@
 #include <boost/python/bases.hpp>
 #include <boost/python/return_value_policy.hpp>
 
-/**
- * Define a macro to export PropertyWithValue template types
- */
-#define EXPORT_PROP_W_VALUE(type,suffix)   \
-  boost::python::class_<Mantid::Kernel::PropertyWithValue< type >, \
-     boost::python::bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_"#suffix, boost::python::no_init) \
-     .add_property("value", \
-                    make_function(&Mantid::Kernel::PropertyWithValue<type>::operator(),\
-                                  boost::python::return_value_policy<Mantid::PythonInterface::Policies::ToSharedPtrWithDowncast>())) \
-   ;
+namespace Mantid
+{
+  namespace PythonInterface
+  {
+    /**
+     * A helper struct to export PropertyWithValue<> types to Python.
+     */
+    template<typename HeldType>
+    struct PropertyWithValueExporter
+    {
+      static void define(const char * pythonClassName)
+      {
+        using namespace boost::python;
+        using namespace Mantid::Kernel;
+
+        class_<PropertyWithValue<HeldType>, bases<Property>, boost::noncopyable>(pythonClassName, no_init)
+          .add_property("value",
+                        make_function(&PropertyWithValue<HeldType>::operator(),
+                                       return_value_policy<Policies::ToSharedPtrWithDowncast>()))
+         ;
+      }
+
+    };
+  }
+}
 
 #endif /* MANTID_PYTHONINTERFACE_PROPERTY_HPP_ */

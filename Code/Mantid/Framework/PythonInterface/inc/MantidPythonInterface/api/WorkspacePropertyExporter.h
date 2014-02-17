@@ -21,7 +21,7 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidPythonInterface/kernel/PropertyWithValue.h"
+#include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/make_constructor.hpp>
@@ -96,7 +96,9 @@ namespace Mantid
       }
 
       /**
-       * Defines the necessary exports for a WorkspaceProperty<WorkspaceType>
+       * Defines the necessary exports for a WorkspaceProperty<WorkspaceType>. This includes a
+       * PropertyWithValue<WorkspaceType_sptr> whose name is formed by appending "PropertyWithValue"
+       * to the given class name
        * @param pythonClassName :: The name of the class in python
        */
       static void define(const char * pythonClassName)
@@ -105,7 +107,8 @@ namespace Mantid
         using Mantid::API::IWorkspaceProperty;
         using Mantid::Kernel::PropertyWithValue;
 
-        EXPORT_PROP_W_VALUE(WorkspaceType_sptr, WorkspaceType);
+        std::string basePropName = std::string(pythonClassName) + "PropertyWithValue";
+        PropertyWithValueExporter<WorkspaceType_sptr>::define(basePropName.c_str());
         register_ptr_to_python<TypedWorkspaceProperty*>();
 
         class_<TypedWorkspaceProperty, bases<PropertyWithValue<WorkspaceType_sptr>, IWorkspaceProperty>,
