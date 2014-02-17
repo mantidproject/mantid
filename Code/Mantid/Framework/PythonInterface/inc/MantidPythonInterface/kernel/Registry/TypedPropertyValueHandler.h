@@ -22,13 +22,14 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/DowncastRegistry.h"
+
 #include "MantidPythonInterface/kernel/IsNone.h" // includes object.hpp
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/IPropertyManager.h"
 
-#include <boost/python/extract.hpp>
 #include <boost/python/converter/arg_from_python.hpp>
-#include <boost/weak_ptr.hpp>
+#include <boost/python/call_method.hpp>
 #include <string>
 
 namespace Mantid
@@ -109,24 +110,10 @@ namespace Mantid
         void set(Kernel::IPropertyManager* alg, const std::string &name, const boost::python::object & value) const
         {
           using namespace boost::python;
-          typedef boost::weak_ptr<Kernel::DataItem> DataItem_wptr;
+          using Registry::DowncastRegistry;
 
-          PropertyValueType sharedItem;
-          extract<DataItem_wptr> weakPtrExtractor(value);
-          if(weakPtrExtractor.check())
-          {
-            // NOTE: The type here must be DataItem not T as if it came from the ADS
-            // then that's what it was originally
-            // If we can extract a weak pointer then we must construct the shared pointer
-            // from the weak pointer itself to ensure the new shared_ptr has the correct
-            // use count
-            sharedItem = boost::dynamic_pointer_cast<PointeeType>(weakPtrExtractor().lock());
-          }
-          else
-          {
-            sharedItem = extract<PropertyValueType>(value)();
-          }
-          alg->setProperty<PropertyValueType>(name, sharedItem);
+          const auto & entry = DowncastRegistry::retrieve(call_method<std::string>(value.ptr(), "id"));
+          alg->setProperty<HeldType>(name, boost::dynamic_pointer_cast<T>(entry.fromPythonAsSharedPtr(value)));
         }
 
         /**

@@ -24,10 +24,9 @@
 #include "MantidKernel/DataItem.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"
 
-#include <boost/python/detail/prefix.hpp> // for PyObject
+#include <boost/python/extract.hpp>
+#include <boost/python/object.hpp> // for PyObject
 #include <boost/python/to_python_value.hpp>
-
-#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -47,17 +46,19 @@ namespace Mantid
         virtual PyObject* toPythonAsSharedPtr(const Kernel::DataItem_sptr & data) const = 0;
         /// Convert a shared_ptr<DataItem> to a python object that holds a weak_ptr
         virtual PyObject* toPythonAsWeakPtr(const Kernel::DataItem_sptr & data) const = 0;
+        /// Convert a Python object to a DataItem_sptr
+        virtual Kernel::DataItem_sptr fromPythonAsSharedPtr(const boost::python::object & data) const = 0;
       };
 
       /**
        * Implementation of DowncastDataItem interface
-       * @tparam CastedType The final type that the input item should be cast to
+       * @tparam CastedType The final type that the input item should be cast to when going to Python
        */
-      template<typename CastedType>
+      template<typename PythonType>
       struct DLLExport DowncastToType : public DowncastDataItem
       {
-        typedef boost::shared_ptr<CastedType> CastedType_sptr;
-        typedef boost::weak_ptr<CastedType> CastedType_wptr;
+        typedef boost::shared_ptr<PythonType> PythonType_sptr;
+        typedef boost::weak_ptr<PythonType> PythonType_wptr;
 
         /**
          * Convert a shared_ptr<DataItem> to a python object that holds a shared_ptr<CastedType>
@@ -67,9 +68,9 @@ namespace Mantid
         PyObject* toPythonAsSharedPtr(const Kernel::DataItem_sptr & data) const
         {
           using namespace boost::python;
-          typedef to_python_value<CastedType_sptr> ToSharedValue;
+          typedef to_python_value<PythonType_sptr> ToSharedValue;
           // boost python handles NULL pointers by converting them to None objects
-          return ToSharedValue()(boost::dynamic_pointer_cast<CastedType>(data));
+          return ToSharedValue()(boost::dynamic_pointer_cast<PythonType>(data));
         }
         /**
          * Convert a shared_ptr<DataItem> to a python object that holds a weak_ptr<CastedType>
@@ -79,9 +80,35 @@ namespace Mantid
         PyObject* toPythonAsWeakPtr(const Kernel::DataItem_sptr & data) const
         {
           using namespace boost::python;
-          typedef to_python_value<CastedType_wptr> ToWeakValue;
-          return ToWeakValue()(CastedType_wptr(boost::dynamic_pointer_cast<CastedType>(data)));
+          typedef to_python_value<PythonType_wptr> ToWeakValue;
+          return ToWeakValue()(PythonType_wptr(boost::dynamic_pointer_cast<PythonType>(data)));
         }
+        /**
+         * Convert a Python object to a boost::shared_ptr<DataItem>
+         * @param data A Python object that should be holding either a boost::shared_ptr<CastedType>
+         *             or a boost::weak_ptr<CastedType>
+         */
+         Kernel::DataItem_sptr fromPythonAsSharedPtr(const boost::python::object & data) const
+        {
+          using namespace boost::python;
+          // If we can extract a weak pointer then we must construct the shared pointer
+          // from the weak pointer itself to ensure the new shared_ptr has the correct
+          // use count.
+          // The order is important as if we try the shared_ptr first then boost::python will
+          // just construct a brand new shared pointer for the object rather than converting from the
+          // stored weak one.
+          extract<PythonType_wptr> weakPtr(data);
+          if(weakPtr.check())
+          {
+            return weakPtr().lock();
+          }
+          else
+          {
+            return extract<PythonType_sptr>(data)();
+          }
+        }
+
+
       };
 
     } //namespace Registry
