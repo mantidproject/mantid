@@ -76,7 +76,7 @@ namespace CustomInterfaces
 
     if (!scaleString.isEmpty())
     {
-      scale = scaleString.toInt();
+      scale = scaleString.toDouble();
     }
 
     Algorithm_sptr momentsAlg = AlgorithmManager::Instance().createUnmanaged("Moments", -1);
