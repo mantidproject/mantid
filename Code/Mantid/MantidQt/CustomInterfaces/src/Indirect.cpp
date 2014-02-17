@@ -39,6 +39,7 @@
 #include <QtCheckBoxFactory>
 
 using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt;
 using Mantid::MantidVec;
 
 /**
