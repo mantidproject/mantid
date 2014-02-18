@@ -28,7 +28,7 @@ void PoldiBasicChopper::loadConfiguration(DataObjects::TableWorkspace_sptr chopp
     try {
         size_t rowIndex = -1;
 
-        chopperConfigurationWorkspace->find(std::string("dist_chopper_sample"), rowIndex, 0);
+        chopperConfigurationWorkspace->find(std::string("dist-chopper-sample"), rowIndex, 0);
         double chopperDistance = chopperConfigurationWorkspace->cell<double>(rowIndex, 2);
 
         chopperConfigurationWorkspace->find(std::string("t0"), rowIndex, 0);
