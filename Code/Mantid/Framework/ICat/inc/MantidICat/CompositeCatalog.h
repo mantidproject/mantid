@@ -18,20 +18,20 @@ namespace Mantid
         void add(API::ICatalog_sptr catalog);
 
         /// Log the user into the catalog system.
-        virtual void login(const std::string& username,const std::string& password,const std::string& url);
+        virtual void login(const std::string& username,const std::string& password,const std::string& endpoint);
         /// Log the user out of the catalog system.
         virtual void logout();
         /// Search the catalog for data.
-        virtual void search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws,
+        virtual void search(const CatalogSearchParam& inputs,API::ITableWorkspace_sptr& outputws,
             const int &offset, const int &limit);
         /// Obtain the number of results returned by the search method.
         virtual int64_t getNumberOfSearchResults(const CatalogSearchParam& inputs);
         /// Show the logged in user's investigations search results.
-        virtual void myData(Mantid::API::ITableWorkspace_sptr& outputws);
+        virtual void myData(API::ITableWorkspace_sptr& outputws);
         /// Get datasets.
-        virtual void getDataSets(const std::string&investigationId,Mantid::API::ITableWorkspace_sptr& outputws);
+        virtual void getDataSets(const std::string&investigationId,API::ITableWorkspace_sptr& outputws);
         /// Get datafiles
-        virtual void getDataFiles(const std::string&investigationId,Mantid::API::ITableWorkspace_sptr& outputws);
+        virtual void getDataFiles(const std::string&investigationId,API::ITableWorkspace_sptr& outputws);
         /// Get instruments list
         virtual void listInstruments(std::vector<std::string>& instruments);
         /// Get investigationtypes list
