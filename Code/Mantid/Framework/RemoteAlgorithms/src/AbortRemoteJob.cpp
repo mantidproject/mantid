@@ -47,10 +47,10 @@ void AbortRemoteJob::init()
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
-  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "The remote computer where the job is running", Direction::Input);
 
   // The ID of the job we want to Abort
-  declareProperty( "JobID", "", requireValue, "", Direction::Input);
+  declareProperty( "JobID", "", requireValue, "The ID of the job to abort", Direction::Input);
 }
 
 void AbortRemoteJob::exec()

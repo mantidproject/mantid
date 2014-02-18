@@ -41,10 +41,10 @@ void StopRemoteTransaction::init()
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
-  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "The name of the remote computer where the transaction was created", Direction::Input);
 
   // The transaction ID comes from the StartRemoteTransaction algortithm
-  declareProperty( "TransactionID", "", requireValue, "", Mantid::Kernel::Direction::Input);
+  declareProperty( "TransactionID", "", requireValue, "The ID string returned when the transaction was created", Mantid::Kernel::Direction::Input);
 }
 
 void StopRemoteTransaction::exec()

@@ -47,12 +47,12 @@ void QueryRemoteFile::init()
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
-  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "The name of the remote computer to query", Direction::Input);
 
   // The transaction ID comes from the StartRemoteTransaction algortithm
-  declareProperty( "TransactionID", "", requireValue, "", Direction::Input);
+  declareProperty( "TransactionID", "", requireValue, "The ID of the transaction who's files we want to list", Direction::Input);
 
-  declareProperty(new ArrayProperty<std::string>( "FileNames", Direction::Output));
+  declareProperty(new ArrayProperty<std::string>( "FileNames", Direction::Output), "The names of all the files that were found");
 
 }
 
