@@ -4,7 +4,7 @@ The algorithm rebins data with new bin boundaries. The 'params' property defines
 
 This algorithms is useful both in data reduction, but also in remapping [[Ragged Workspace|ragged workspaces]] to a regular set of bin boundaries.
 
-Unless the [[#FullBinsOnly_option|FullBinsOnly option]] is enabled, the bin immediately before the specified boundaries <math>x_2</math>, <math>x_3</math>, ... <math>x_i</math> is likely to have a different width from its neighbours because there can be no gaps between bins. Rebin ensures that any of these space filling bins cannot be less than 25% or more than 125% of the width that was specified.
+Unless the FullBinsOnly option is enabled, the bin immediately before the specified boundaries <math>x_2</math>, <math>x_3</math>, ... <math>x_i</math> is likely to have a different width from its neighbours because there can be no gaps between bins. Rebin ensures that any of these space filling bins cannot be less than 25% or more than 125% of the width that was specified.
 
 === Example Rebin param strings ===
 ;-0.0001
