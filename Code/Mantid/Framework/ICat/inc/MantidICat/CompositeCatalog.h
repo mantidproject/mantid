@@ -1,7 +1,7 @@
 #ifndef MANTID_ICAT_COMPOSITECATALOG_H_
 #define MANTID_ICAT_COMPOSITECATALOG_H_
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ICatalog.h"
 
 namespace Mantid
 {
