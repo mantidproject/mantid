@@ -4,7 +4,7 @@ The algorithm rebins data with new bin boundaries. The 'params' property defines
 
 This algorithms is useful both in data reduction, but also in remapping [[Ragged Workspace|ragged workspaces]] to a regular set of bin boundaries.
 
-The bin immediately before the specified boundaries <math>x_2</math>, <math>x_3</math>, ... <math>x_i</math> is likely to have a different width from its neighbours because there can be no gaps between bins. Rebin ensures that any of these space filling bins cannot be less than 25% or more than 125% of the width that was specified.
+Unless the [[#FullBinsOnly_option|FullBinsOnly option]] is enabled, the bin immediately before the specified boundaries <math>x_2</math>, <math>x_3</math>, ... <math>x_i</math> is likely to have a different width from its neighbours because there can be no gaps between bins. Rebin ensures that any of these space filling bins cannot be less than 25% or more than 125% of the width that was specified.
 
 === Example Rebin param strings ===
 ;-0.0001
@@ -26,6 +26,14 @@ If "Preserve Events" is false., then the output workspace will be created as a [
 
 If the input workspace contains data points, rather than histograms, then Rebin will automatically use the [[ConvertToHistogram]] and [[ConvertToPointData]] algorithms before and after the rebinning has taken place.
 
+=== FullBinsOnly option ===
+
+If FullBinsOnly option is enabled, each range will only contain bins of the size equal to the step specified. In other words, the will be no space filling bins which are bigger or smaller than the other ones.
+
+This, however, means that specified bin boundaries might get amended in the process of binning. For example, if rebin ''Param'' sttring is specified as "0 2 4.5 3 11" and FullBinsOnly is enabled, the following will happen:
+* From 0 rebin in bins of size 2 '''up to 4'''. 4.5 is ignored, because otherwise we would need to create a filling bin of size 0.5.
+* '''From 4''' rebin in bins of size 3 '''up to 10'''.
+Hence the actual ''Param'' string used is "0 2 4 3 10".
 
 *WIKI*/
 /*WIKI_USAGE*
