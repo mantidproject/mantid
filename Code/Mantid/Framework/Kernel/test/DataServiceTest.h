@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_DATASERVICETEST_H_
 #define MANTID_KERNEL_DATASERVICETEST_H_
 
-#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/DataService.h"
+#include "MantidKernel/MultiThreaded.h"
 #include <cxxtest/TestSuite.h>
 #include <Poco/NObserver.h>
 #include <boost/make_shared.hpp>
@@ -268,7 +268,6 @@ public:
     svc.add("object1", boost::make_shared<int>(12345));
 
     int num = 5000;
-    CPUTimer tim;
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i=0; i<num; i++)
     {

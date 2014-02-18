@@ -38,7 +38,7 @@
   </component>
   <type name="monitors">
     <component type="monitor">
-      <location z="-4.45" name="monitor1"/>
+      <location z="-2.488" name="monitor1"/>
     </component>
     <component type="monitor">
       <location z="1.049" name="monitor2"/>

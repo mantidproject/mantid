@@ -1486,7 +1486,7 @@ void ConfigServiceImpl::updateFacilities(const std::string& fName)
 
   // Set up the DOM parser and parse xml file
   Poco::XML::DOMParser pParser;
-  Poco::XML::Document* pDoc;
+  Poco::AutoPtr<Poco::XML::Document> pDoc;
 
   try
   {
@@ -1501,11 +1501,10 @@ void ConfigServiceImpl::updateFacilities(const std::string& fName)
     Poco::XML::Element* pRootElem = pDoc->documentElement();
     if (!pRootElem->hasChildNodes())
     {
-      pDoc->release();
       throw std::runtime_error("No root element in Facilities.xml file");
     }
 
-    Poco::XML::NodeList* pNL_facility = pRootElem->getElementsByTagName("facility");
+    Poco::AutoPtr<Poco::XML::NodeList> pNL_facility = pRootElem->getElementsByTagName("facility");
     unsigned long n = pNL_facility->length();
 
     for (unsigned long i = 0; i < n; ++i)
@@ -1519,13 +1518,9 @@ void ConfigServiceImpl::updateFacilities(const std::string& fName)
 
     if (m_facilities.empty())
     {
-      pNL_facility->release();
-      pDoc->release();
       throw std::runtime_error("The facility definition file " + fileName + " defines no facilities");
     }
 
-    pNL_facility->release();
-    pDoc->release();
   } catch (std::exception& e)
   {
     g_log.error(e.what());

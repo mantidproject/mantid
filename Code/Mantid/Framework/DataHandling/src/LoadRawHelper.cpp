@@ -524,7 +524,7 @@ namespace Mantid
 
       IAlgorithm_sptr loadInst= createChildAlgorithm("LoadInstrument");
       // Enable progress reporting by Child Algorithm - 
-      loadInst->addObserver(m_progressObserver);
+      loadInst->addObserver(this->progressObserver());
       setChildStartProgress(progStart);
       setChildEndProgress((progStart+progEnd)/2);
       // Now execute the Child Algorithm. Catch and log any error, but don't stop.
@@ -566,7 +566,7 @@ namespace Mantid
             IAlgorithm_sptr updateInst = createChildAlgorithm("UpdateInstrumentFromFile");
             updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
             updateInst->setPropertyValue("Filename", fileName);
-            updateInst->addObserver(m_progressObserver); // Enable progress reporting by ChildAlgorithm
+            updateInst->addObserver(this->progressObserver()); // Enable progress reporting by ChildAlgorithm
             setChildStartProgress((progStart+progEnd)/2);
             setChildEndProgress(progEnd);
             if(value  == "datafile-ignore-phi" )
@@ -705,7 +705,7 @@ namespace Mantid
         // Enable progress reporting by Child Algorithm - if progress range has duration
         if ( progStart < progEnd )
         {
-          loadLog->addObserver(m_progressObserver);
+          loadLog->addObserver(this->progressObserver());
           setChildStartProgress(progStart);
           setChildEndProgress(progEnd);
         }

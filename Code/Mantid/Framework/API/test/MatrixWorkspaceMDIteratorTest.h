@@ -2,13 +2,11 @@
 #define MANTID_API_MATRIXWORKSPACEMDITERATORTEST_H_
 
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidTestHelpers/FakeObjects.h"
+
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::API;

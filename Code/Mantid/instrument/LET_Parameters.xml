@@ -5,10 +5,6 @@
 
 <!-- files properties : -->
 
-<!-- Specify that the detector positions should be taken from the data file -->
-<parameter name="det-pos-source" type="string">
-  <value val="datafile"/>
-</parameter>
 <!-- The file which defines proper (calibrated) detector positions 
      if None - it is undefined -->
 <parameter name="det_cal_file" type="string">
@@ -28,11 +24,6 @@
 <parameter name="hard_mask_file" type="string">
     <value val="hard.msk"/>
 </parameter>
-<!-- Parameter specifies if one wants to run diagnostics (which include applying hard mask file) or not-->
-<parameter name="run_diagnostics" type="bool">
-  <value val="True"/>
-</parameter>
-
 <!-- The map file used when calculating absolute units conversion integrals 
      This map usually groups together large areas of detectors to obtain proper vanadium statistics  -->
 <parameter name="monovan_mapfile" type="string">
@@ -330,8 +321,15 @@
 <parameter name="use_hard_mask_only" type="bool">
     <value val="False"/>
 </parameter>
+  
+<!-- Parameter specifies if one wants to run diagnostics (which include applying hard mask file) or not-->
+<parameter name="run_diagnostics" type="bool">
+    <value val="True"/>
+</parameter>
 
-<!-- If this parameter is set to true, dgreduce will try to load mask from the mask file
+
+
+  <!-- If this parameter is set to true, dgreduce will try to load mask from the mask file
      correspondent to the run if finds it and uses this mask as hard mask only (does not run diagnostics). 
      If such file has not been found, it will run diagnostics and save the masks into mask file for reuse 
      Hard Mask file, provided separately or as additional hard mask file is ignored in this case -->

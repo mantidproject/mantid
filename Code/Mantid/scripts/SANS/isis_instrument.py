@@ -739,7 +739,11 @@ class SANS2D(ISISInstrument):
             #this is the default case
             first.set_first_spec_num(9)
             first.set_orien('Horizontal')
-            second.set_orien('Horizontal')
+            # empty instrument number spectra differently.
+            if base_runno == 'emptyInstrument':
+                second.set_orien('HorizontalFlipped')
+            else:
+                second.set_orien('Horizontal')
 
         #as spectrum numbers of the first detector have changed we'll move those in the second too  
         second.place_after(first)
@@ -763,7 +767,7 @@ class SANS2D(ISISInstrument):
         for name in ('Front_Det_Z', 'Front_Det_X', 'Front_Det_Rot',
                      'Rear_Det_Z','Rear_Det_X'):
             try:
-                var = run_info.get(name).value[0]
+                var = run_info.get(name).value[-1]
                 values[ind] = float(var)
             except:
                 pass # ignore, because we do have a default value            
@@ -1099,7 +1103,7 @@ class LARMOR(ISISInstrument):
         second.place_after(first)
 
     def move_components(self, ws, xbeam, ybeam):
-        super(LARMOR,self).move_components(ws)
+        self.move_all_components(ws)
         
         detBanch = self.getDetector('rear')
 
@@ -1114,7 +1118,7 @@ class LARMOR(ISISInstrument):
         # beam centre, translation
         return [0.0, 0.0], [-xbeam, -ybeam]
 
-    def load_transmission_inst(self, workspace):
+    def load_transmission_inst(self, ws_trans, ws_direct, beamcentre):
         """
             Not required for SANS2D
         """

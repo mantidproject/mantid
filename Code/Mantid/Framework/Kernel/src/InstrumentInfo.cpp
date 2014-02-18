@@ -9,6 +9,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
+#include <Poco/DOM/AutoPtr.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -164,7 +165,7 @@ namespace Mantid
     /// Called from constructor to fill zero padding
     void InstrumentInfo::fillZeroPadding(const Poco::XML::Element* elem)
     {
-      Poco::XML::NodeList* pNL_zeropadding = elem->getElementsByTagName("zeropadding");
+      Poco::AutoPtr<Poco::XML::NodeList> pNL_zeropadding = elem->getElementsByTagName("zeropadding");
       unsigned long n = pNL_zeropadding->length();
 
       for (unsigned long i = 0; i < n; ++i)
@@ -215,7 +216,6 @@ namespace Mantid
         }
         m_zeroPadding[startRunNumber] = std::make_pair(prefix,size);
       }
-      pNL_zeropadding->release();
 
       if (m_zeroPadding.empty())
       {
@@ -226,12 +226,12 @@ namespace Mantid
     /// Called from constructor to fill live listener name
     void InstrumentInfo::fillTechniques(const Poco::XML::Element* elem)
     {
-      Poco::XML::NodeList* pNL_technique = elem->getElementsByTagName("technique");
+      Poco::AutoPtr<Poco::XML::NodeList> pNL_technique = elem->getElementsByTagName("technique");
       unsigned long n = pNL_technique->length();
 
       for (unsigned long i = 0; i < n; ++i)
       {
-        Poco::XML::NodeList* pNL = pNL_technique->item(i)->childNodes();
+        Poco::AutoPtr<Poco::XML::NodeList> pNL = pNL_technique->item(i)->childNodes();
         if (pNL->length() > 0)
         {
           Poco::XML::Text* txt = dynamic_cast<Poco::XML::Text*>(pNL->item(0));
@@ -244,9 +244,7 @@ namespace Mantid
             }
           }
         }
-        pNL->release();
       }
-      pNL_technique->release();
 
       if (m_technique.empty())
       {

@@ -7,7 +7,6 @@ set ( SRC_FILES
     src/PoldiAutoCorrelation5.cpp
     src/PoldiLoadLog.cpp
     src/PoldiPeakDetection2.cpp
-#   src/PoldiPeakFit.cpp
     src/InvertMDDim.cpp
     src/MDHistoToWorkspace2D.cpp
     src/ProjectMD.cpp
@@ -26,7 +25,6 @@ set ( INC_FILES
     inc/MantidSINQ/PoldiAutoCorrelation5.h
     inc/MantidSINQ/PoldiLoadLog.h
     inc/MantidSINQ/PoldiPeakDetection2.h
-#   inc/MantidSINQ/PoldiPeakFit.h
     inc/MantidSINQ/InvertMDDim.h
     inc/MantidSINQ/MDHistoToWorkspace2D.h
     inc/MantidSINQ/ProjectMD.h

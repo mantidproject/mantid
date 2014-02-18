@@ -64,6 +64,8 @@
 
 #include <boost/tokenizer.hpp>
 
+#include <Poco/ActiveResult.h>
+
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
@@ -600,7 +602,6 @@ MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis,
       {
         g->setXAxisTitle(QString::fromStdString(data->getXAxisLabel()));
         g->setYAxisTitle(QString::fromStdString(data->getYAxisLabel()));
-        g->setAntialiasing(false);
         g->setAutoScale();
       }
     }
@@ -1899,13 +1900,13 @@ void MantidUI::handleConfigServiceUpdate(Mantid::Kernel::ConfigValChangeNotifica
     // at #7097 of letting python scripts usable when downloaded from Script Repository. 
     // This code was added because changing the pythonscripts.directories update the 
     // python path just after restarting MantidPlot.
-    QString code = QString("import sys\n\
-                           paths = '%1'\n\
-                           list_of_path = paths.split(';')\n\
-                           if isinstance(list_of_path,str):\n\
-                           list_of_path = [list_of_path,]\n\
-                           for value in list_of_path:\n\
-                           if value not in sys.path: sys.path.append(value)\n").arg(QString::fromStdString(pNf->curValue()));
+    QString code = QString("import sys\n"
+                           "paths = '%1'\n"
+                           "list_of_path = paths.split(';')\n"
+                           "if isinstance(list_of_path,str):\n"
+                           "  list_of_path = [list_of_path,]\n"
+                           "for value in list_of_path:\n"
+                           "  if value not in sys.path: sys.path.append(value)\n").arg(QString::fromStdString(pNf->curValue()));
     // run this code silently
     appWindow()->runPythonScript(code, false, true, true);
   }
@@ -2989,7 +2990,6 @@ void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
   }
   g->setXAxisTitle(tr(s.c_str()));
   g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
-  g->setAntialiasing(false);
   g->setAutoScale();
 }
 
@@ -3011,7 +3011,6 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
   }
   g->setXAxisTitle(tr(xtitle.c_str()));
   g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
-  g->setAntialiasing(false);
 }
 
 /**
@@ -3189,7 +3188,6 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     }
     g->setYAxisTitle(tr(yTitle.c_str()));
 
-    g->setAntialiasing(false);
     g->setAutoScale();
     /* The 'setAutoScale' above is needed to make sure that the plot initially encompasses all the
      * data points. However, this has the side-effect suggested by its name: all the axes become

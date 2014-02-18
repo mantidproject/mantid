@@ -1,4 +1,5 @@
 from PyQt4 import QtCore, QtGui
+import os
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 import xml.etree.ElementTree as xml
@@ -6,7 +7,7 @@ from isis_reflectometry.quick import *
 from isis_reflectometry.procedures import *
 from isis_reflectometry.combineMulti import *
 from isis_reflectometry.saveModule import *
-from isis_reflgui.settings import *
+from isis_reflectometry.settings import MissingSettings, Settings
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -18,8 +19,8 @@ class Ui_SaveWindow(object):
         
         self.__instrument = config['default.instrument'].strip().upper()
         
-        usersettings = Settings() # This will throw a missing config exception if no config file is available.
         try:
+            usersettings = Settings() # This will throw a missing config exception if no config file is available.
             self.__mountpoint = usersettings.get_named_setting("DataMountPoint")
         except KeyError:
             print "DataMountPoint is missing from the config.xml file."

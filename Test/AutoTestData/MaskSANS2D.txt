@@ -9,6 +9,7 @@ L/Q 0.005,0.001,0.008,-0.08,1.0
 L/QXY 0 0.15 .002/lin
 ! note increase lower time limit here
 !BACK/MON/TIMES 85000 98000
+BACK/M1 35000 65000
 BACK/M2 85000 98000
 !check BACK/M4
 DET/REAR

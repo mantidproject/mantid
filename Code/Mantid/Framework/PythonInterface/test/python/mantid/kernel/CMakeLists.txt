@@ -22,6 +22,7 @@ set ( TEST_PY_FILES
   ProgressBaseTest.py
   PropertyWithValueTest.py
   PythonPluginsTest.py
+  StatisticsTest.py
   TimeSeriesPropertyTest.py
   QuatTest.py
   UnitConversionTest.py

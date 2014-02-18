@@ -255,8 +255,11 @@ void MuonAnalysis::initLayout()
   // Muon scientists never fits peaks, hence they want the following parameter, set to a high number
   ConfigService::Instance().setString("curvefitting.peakRadius","99");
 
-  connect(m_uiForm.deadTimeType, SIGNAL(activated(int)), this, SLOT(changeDeadTimeType(int) ) );
-  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );
+  connect(m_uiForm.deadTimeType, SIGNAL( currentIndexChanged(int) ),
+          this, SLOT( onDeadTimeTypeChanged(int) ));
+
+  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL( fileFindingFinished() ),
+          this, SLOT( deadTimeFileSelected() ));
 
   m_currentTab = m_uiForm.tabWidget->currentWidget();
 
@@ -1048,6 +1051,12 @@ void MuonAnalysis::groupTableClicked(int row)
 */
 void MuonAnalysis::groupTableChanged(int row, int column)
 {
+  if ( column == 2 )
+  {
+    // Ignore changes to Ndet column, as they will only be made programmatically
+    return;
+  }
+
   // changes to the IDs
   if ( column == 1 )
   {
@@ -1063,6 +1072,7 @@ void MuonAnalysis::groupTableChanged(int row, int column)
     else
     {
       int numDet = numOfDetectors(item->text().toStdString());
+
       std::stringstream detNumRead;
       if (numDet > 0 )
       {
@@ -1113,6 +1123,7 @@ void MuonAnalysis::groupTableChanged(int row, int column)
       }
     }
   }
+
   whichGroupToWhichRow(m_uiForm, m_groupToRow);
   updatePairTable();
   updateFrontAndCombo();
@@ -1596,14 +1607,17 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     setTimeZeroState();
     setFirstGoodDataState();
 
-    std::string infoStr("");
+    std::ostringstream infoStr;
+
+    // Set display style for floating point values
+    infoStr << std::fixed << std::setprecision(12);
     
     // Populate run information with the run number
     QString run(getGroupName());
     if (m_previousFilenames.size() > 1)
-      infoStr += "Runs: ";
+      infoStr << "Runs: ";
     else
-      infoStr += "Run: ";
+      infoStr << "Run: ";
 
     // Remove instrument and leading zeros
     int zeroCount(0);
@@ -1619,39 +1633,39 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     }
 
     // Add to run information.
-    infoStr += run.toStdString();
+    infoStr << run.toStdString();
 
     // Populate run information text field
     m_title = matrix_workspace->getTitle();
-    infoStr += "\nTitle: ";
-    infoStr += m_title;
+    infoStr << "\nTitle: ";
+    infoStr << m_title;
     
     // Add the comment to run information
-    infoStr += "\nComment: ";
-    infoStr += matrix_workspace->getComment();
+    infoStr << "\nComment: ";
+    infoStr << matrix_workspace->getComment();
     
     const Run& runDetails = matrix_workspace->run();
 
     Mantid::Kernel::DateAndTime start, end;
 
     // Add the start time for the run
-    infoStr += "\nStart: ";
+    infoStr << "\nStart: ";
     if ( runDetails.hasProperty("run_start") )
     {
       start = runDetails.getProperty("run_start")->value();
-      infoStr += start.toSimpleString();
+      infoStr << start.toSimpleString();
     }
 
     // Add the end time for the run
-    infoStr += "\nEnd: ";
+    infoStr << "\nEnd: ";
     if ( runDetails.hasProperty("run_end") )
     {
       end = runDetails.getProperty("run_end")->value();
-      infoStr += end.toSimpleString();
+      infoStr << end.toSimpleString();
     }
 
     // Add counts to run information
-    infoStr += "\nCounts: ";
+    infoStr << "\nCounts: ";
     double counts(0.0);
     for (size_t i=0; i<matrix_workspace->getNumberHistograms(); ++i)
     {
@@ -1660,49 +1674,58 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
         counts += matrix_workspace->dataY(i)[j];
       }
     }
-    std::ostringstream ss;
-    ss << std::fixed << std::setprecision(12) << counts/1000000;
-    infoStr += ss.str();
-    infoStr += " MEv";
+    infoStr << counts/1000000 << " MEv";
 
     // Add average temperature.
-    infoStr += "\nAverage Temperature: ";
+    infoStr << "\nAverage Temperature: ";
     if ( runDetails.hasProperty("Temp_Sample") )
     {
       // Filter the temperatures by the start and end times for the run.
       runDetails.getProperty("Temp_Sample")->filterByTime(start, end);
-      QString allRuns = QString::fromStdString(runDetails.getProperty("Temp_Sample")->value() );
-      QStringList runTemp = allRuns.split("\n");
-      int tempCount(0);
-      double total(0.0);
 
-      // Go through each temperature entry, remove the date and time, and total the temperatures.
-      for (int i=0; i<runTemp.size(); ++i)
-      {
-        if (runTemp[i].contains("  ") )
-        {
-          QStringList dateTimeTemperature = runTemp[i].split("  ");
-          total += dateTimeTemperature[dateTimeTemperature.size() - 1].toDouble();
-          ++tempCount;
-        }
-      }
+      // Get average of the values
+      double average = runDetails.getPropertyAsSingleValue("Temp_Sample");
 
-      // Find the average and display it.
-      double average(total/tempCount);
       if (average != 0.0)
       {
-        std::ostringstream ss;
-        ss << std::fixed << std::setprecision(12) << average;
-        infoStr += ss.str();
+        infoStr << average;
       }
-      else // Show appropriate error message.
-        infoStr += "Error - Not set in data file.";
+      else
+      {
+        infoStr << "Not set";
+      }
     }
-    else // Show appropriate error message.
-      infoStr += "Error - Not found in data file.";
+    else
+    {
+      infoStr << "Not found";
+    }
+
+    // Add sample temperature
+    infoStr << "\nSample Temperature: ";
+    if ( runDetails.hasProperty("sample_temp") )
+    {
+      auto temp = runDetails.getPropertyValueAsType<double>("sample_temp");
+      infoStr << temp;
+    }
+    else
+    {
+      infoStr << "Not found";
+    }
+
+    // Add sample magnetic field
+    infoStr << "\nSample Magnetic Field: ";
+    if ( runDetails.hasProperty("sample_magn_field") )
+    {
+      auto temp = runDetails.getPropertyValueAsType<double>("sample_magn_field");
+      infoStr << temp;
+    }
+    else
+    {
+      infoStr << "Not found";
+    }
 
     // Include all the run information.
-    m_uiForm.infoBrowser->setText(infoStr.c_str());
+    m_uiForm.infoBrowser->setText( QString::fromStdString(infoStr.str()) );
 
     // If instrument or number of periods has changed -> update period widgets
     if(instrumentChanged || numPeriods != m_uiForm.homePeriodBox1->count())
@@ -1733,9 +1756,9 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   catch(std::exception& e)
   {
     QMessageBox::warning(this,"Mantid - MuonAnalysis", e.what());
-    m_updating = false;
-    m_uiForm.tabWidget->setTabEnabled(3, true);
   }
+  m_updating = false;
+  m_uiForm.tabWidget->setTabEnabled(3, true);
 }
 
 /**
@@ -1981,8 +2004,8 @@ void MuonAnalysis::updateFrontAndCombo()
 }
 
 /**
- * Updates widgets related to period algebra
- * @param newNumPeriods Number of periods available
+ * Updates widgets related to period algebra.
+ * @param numPeriods Number of periods available
  */
 void MuonAnalysis::updatePeriodWidgets(int numPeriods)
 {
@@ -2304,7 +2327,18 @@ bool MuonAnalysis::isGroupingSet()
  */
 int MuonAnalysis::numOfDetectors(const std::string& str) const
 {
-  return static_cast<int>(Strings::parseRange(str).size());
+  size_t rangeSize;
+
+  try
+  {
+    rangeSize = Strings::parseRange(str).size();
+  }
+  catch(...)
+  {
+    rangeSize = 0;
+  }
+
+  return static_cast<int>(rangeSize);
 }
 
 /**
@@ -2648,6 +2682,7 @@ std::string MuonAnalysis::isGroupingAndDataConsistent()
 
 /**
 * Check if dublicate ID between different rows
+* FIXME: this function doesn't seem to be used anywhere
 */
 void MuonAnalysis::checkIf_ID_dublicatesInTable(const int row)
 {
@@ -2773,7 +2808,7 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   int deadTimeTypeIndex = deadTimeOptions.value("deadTimes", 0).toInt();
   m_uiForm.deadTimeType->setCurrentIndex(deadTimeTypeIndex);
 
-  changeDeadTimeType(deadTimeTypeIndex);
+  onDeadTimeTypeChanged(deadTimeTypeIndex);
 
   QString savedDeadTimeFile = deadTimeOptions.value("deadTimeFile").toString();
   m_uiForm.mwRunDeadTimeFile->setUserInput(savedDeadTimeFile);
@@ -3038,11 +3073,11 @@ void MuonAnalysis::getFullCode(int originalSize, QString & run)
 /**
  * Is called every time when tab gets changed
  *
- * @param tabNumber The index value of the current tab
+ * @param newTabIndex :: The index of the tab we switch to
  */
-void MuonAnalysis::changeTab(int newTabNumber)
+void MuonAnalysis::changeTab(int newTabIndex)
 {
-  QWidget* newTab = m_uiForm.tabWidget->widget(newTabNumber);
+  QWidget* newTab = m_uiForm.tabWidget->widget(newTabIndex);
 
   // Make sure all toolbars are still not visible. May have brought them back to do a plot.
   if (m_uiForm.hideToolbars->isChecked())
@@ -3079,7 +3114,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
   }
   else if(newTab == m_uiForm.ResultsTable)
   {
-    m_resultTableTab->populateTables();
+    m_resultTableTab->refresh();
   }
 
   m_currentTab = newTab;
@@ -3102,6 +3137,8 @@ void MuonAnalysis::connectAutoUpdate()
   connect(m_uiForm.homePeriodBox1, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
   connect(m_uiForm.homePeriodBoxMath, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
   connect(m_uiForm.homePeriodBox2, SIGNAL( activated(int) ), this, SLOT( homeTabUpdatePlot() ));
+
+  connect(m_uiForm.deadTimeType, SIGNAL( activated(int) ), this, SLOT( deadTimeTypeAutoUpdate(int) ));
 
   // Grouping tab Auto Updates
   connect(m_uiForm.groupTablePlotChoice, SIGNAL(activated(int)), this, SLOT(groupTabUpdatePlot()));
@@ -3300,11 +3337,10 @@ void MuonAnalysis::doSetToolbarsHidden(bool hidden)
 
 
 /**
-* Change what type of deadtime to use and the options available for the user's choice.
-*
-* @param choice :: The current index of dead time type combo box.
-*/
-void MuonAnalysis::changeDeadTimeType(int choice)
+ * Called when dead time correction type is changed.
+ * @param choice :: New index of dead time correction type combo box
+ */
+void MuonAnalysis::onDeadTimeTypeChanged(int choice)
 {
   m_deadTimesChanged = true;
 
@@ -3312,7 +3348,6 @@ void MuonAnalysis::changeDeadTimeType(int choice)
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
     m_uiForm.dtcFileLabel->setVisible(false);
-    homeTabUpdatePlot();
   }
   else // choice must be from workspace
   {
@@ -3326,6 +3361,19 @@ void MuonAnalysis::changeDeadTimeType(int choice)
   group.setValue("deadTimes", choice);
 }
 
+/**
+ * Auto-update the plot after user has changed dead time correction type.
+ * @param choice :: User selected index of the dead time correction combox box
+ */
+void MuonAnalysis::deadTimeTypeAutoUpdate(int choice)
+{
+  // We update the plot only if user switches to "None" or "From Data File" correction type, because
+  // in case of "From Disk" the file should be specified first.
+  if ( choice == 0 || choice == 1 )
+  {
+    homeTabUpdatePlot();
+  }
+}
 
 /**
 * If the user selects/changes the file to be used to apply the dead times then 

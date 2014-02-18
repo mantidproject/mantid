@@ -6,7 +6,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
-#include <cfloat>
+
 
 namespace Mantid
 {
@@ -161,6 +161,13 @@ double Unit::convertSingleFromTOF(const double xvalue, const double& l1, const d
   return this->singleFromTOF(xvalue);
 }
 
+std::pair<double,double> Unit::conversionRange()const
+{
+  double u1=this->singleFromTOF(this->conversionTOFMin());
+  double u2=this->singleFromTOF(this->conversionTOFMax());
+  //
+  return std::pair<double,double>(std::min(u1,u2),std::max(u1,u2));
+}
 
 namespace Units
 {
@@ -253,6 +260,15 @@ Unit * TOF::clone() const
 {
   return new TOF(*this);
 }
+double TOF::conversionTOFMin()const
+{
+  return -DBL_MAX; 
+}
+ ///@return DBL_MAX as ToF convetanble to TOF for in any time range
+double TOF::conversionTOFMax()const
+{
+  return DBL_MAX; 
+}
 
 
 
@@ -339,7 +355,6 @@ void Wavelength::init()
   factorFrom *= toAngstroms / TOFisinMicroseconds;
 }
 
-
 double Wavelength::singleToTOF(const double x) const
 {
   double tof = x * factorTo;
@@ -348,7 +363,6 @@ double Wavelength::singleToTOF(const double x) const
     tof += sfpTo;
   return tof;
 }
-
 double Wavelength::singleFromTOF(const double tof) const
 {
   double x = tof;
@@ -357,6 +371,30 @@ double Wavelength::singleFromTOF(const double tof) const
   x *= factorFrom;
   return x;
 }
+///@return  Minimal time of flight, which can be reversively converted into wavelength
+double Wavelength::conversionTOFMin()const
+{
+  double min_tof(0);
+  if( emode == 1 || emode == 2 )
+    min_tof=sfpTo;
+  return min_tof;
+}
+///@return  Maximal time of flight, which can be reversively converted into wavelength
+double Wavelength::conversionTOFMax()const
+{
+  double max_tof;
+  if(factorTo>1)
+  {
+    max_tof = (DBL_MAX-sfpTo)/factorTo;
+  }
+  else
+  {
+    max_tof = DBL_MAX-sfpTo/factorTo;
+  }
+  return max_tof;
+}
+
+
 
 Unit * Wavelength::clone() const
 {
@@ -404,6 +442,16 @@ double Energy::singleToTOF(const double x) const
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorTo / sqrt(temp);
 }
+///@return  Minimal time of flight which can be reversibly converted into energy
+double Energy::conversionTOFMin()const
+{
+  return factorTo/sqrt(DBL_MAX);
+}
+double Energy::conversionTOFMax()const
+{
+  return sqrt(DBL_MAX);
+}
+
 
 double Energy::singleFromTOF(const double tof) const
 {
@@ -457,9 +505,19 @@ void Energy_inWavenumber::init()
 double Energy_inWavenumber::singleToTOF(const double x) const
 {
   double temp = x;
-  if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
+  if (temp <= DBL_MIN) temp = DBL_MIN; // Protect against divide by zero and define conversion range
   return factorTo / sqrt(temp);
 }
+///@return  Minimal time which can be reversibly converted into energy in wavenumner units
+double Energy_inWavenumber::conversionTOFMin()const
+{
+  return factorTo / sqrt(std::numeric_limits<double>::max());
+}
+double Energy_inWavenumber::conversionTOFMax()const
+{
+  return factorTo / sqrt(std::numeric_limits<double>::max());
+}
+
 
 double Energy_inWavenumber::singleFromTOF(const double tof) const
 {
@@ -508,11 +566,20 @@ double dSpacing::singleToTOF(const double x) const
 {
   return x*factorTo;
 }
-
 double dSpacing::singleFromTOF(const double tof) const
 {
   return tof/factorFrom;
 }
+double dSpacing::conversionTOFMin()const
+{
+  return 0;
+}
+double dSpacing::conversionTOFMax()const
+{
+  return DBL_MAX/factorTo;
+}
+
+
 
 Unit * dSpacing::clone() const
 {
@@ -559,13 +626,28 @@ double MomentumTransfer::singleToTOF(const double x) const
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorTo / temp;
 }
-
+//
 double MomentumTransfer::singleFromTOF(const double tof) const
 {
   double temp = tof;
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorFrom / temp;
 }
+
+
+double MomentumTransfer::conversionTOFMin()const
+{
+  return factorFrom/DBL_MAX;
+}
+double MomentumTransfer::conversionTOFMax()const
+{
+  return DBL_MAX;
+}
+
+
+
+
+
 
 Unit * MomentumTransfer::clone() const
 {
@@ -611,13 +693,30 @@ double QSquared::singleToTOF(const double x) const
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorTo / sqrt(temp);
 }
-
 double QSquared::singleFromTOF(const double tof) const
 {
   double temp = tof;
   if (temp == 0.0) temp = DBL_MIN; // Protect against divide by zero
   return factorFrom / (temp*temp);
 }
+
+double QSquared::conversionTOFMin()const
+{
+  if (factorTo > 0)
+    return factorTo/sqrt(DBL_MAX);
+  else
+    return -sqrt(DBL_MAX);
+
+
+}
+double QSquared::conversionTOFMax()const
+{
+    if (factorTo > 0)
+      return  sqrt(DBL_MAX);
+    else
+      return factorTo/sqrt(DBL_MAX);
+}
+
 
 Unit * QSquared::clone() const
 {
@@ -678,9 +777,9 @@ double DeltaE::singleToTOF(const double x) const
 {
   if (emode == 1)
   {
-    const double e2 = (efixed - x) / unitScaling;
+    const double e2 = efixed - x/unitScaling;
     if (e2<=0.0)  // This shouldn't ever happen (unless the efixed value is wrong)
-      return DBL_MAX;
+      return  DeltaE::conversionTOFMax();
     else
     {
       // this_t = t2;
@@ -690,9 +789,9 @@ double DeltaE::singleToTOF(const double x) const
   }
   else if (emode == 2)
   {
-    const double e1 = (efixed + x) / unitScaling;
+    const double e1 = efixed + x/unitScaling;
     if (e1<=0.0)  // This shouldn't ever happen (unless the efixed value is wrong)
-      return -DBL_MAX;
+      return DeltaE::conversionTOFMax();
     else
     {
       // this_t = t1;
@@ -702,7 +801,7 @@ double DeltaE::singleToTOF(const double x) const
   }
   else
   {
-    return DBL_MAX;
+    return DeltaE::conversionTOFMax();
   }
 }
 
@@ -735,6 +834,24 @@ double DeltaE::singleFromTOF(const double tof) const
   else
     return DBL_MAX;
 }
+
+double DeltaE::conversionTOFMin()const
+{
+  double time(DBL_MAX); // impossible for elastic, this units do not work for elastic
+  if (emode == 1 || emode == 2)
+    time = t_otherFrom*(1+DBL_EPSILON);
+  return time;
+}
+double DeltaE::conversionTOFMax()const
+{
+  // 0.1 here to provide at least two significant units to conversion range as this conversion range comes from 1-epsilon
+  if (efixed>1)
+    return t_otherFrom+sqrt(factorFrom/efixed)/sqrt(DBL_MIN);
+  else
+    return t_otherFrom+sqrt(factorFrom)/sqrt(DBL_MIN);
+}
+
+
 
 Unit * DeltaE::clone() const
 {
@@ -770,6 +887,17 @@ DeltaE_inWavenumber::DeltaE_inWavenumber() : DeltaE()
 {
   addConversion("DeltaE",1/PhysicalConstants::meVtoWavenumber,1.);
 }
+
+double DeltaE_inWavenumber::conversionTOFMin()const
+{
+  return DeltaE::conversionTOFMin();
+}
+
+double DeltaE_inWavenumber::conversionTOFMax()const
+{
+  return DeltaE::conversionTOFMax();
+}
+
 
 // =====================================================================================================
 /* Momentum in Angstrom^-1. It is 2*Pi/wavelength
@@ -866,6 +994,23 @@ double Momentum::singleToTOF(const double ki) const
     tof += sfpTo;
   return tof;
 }
+double Momentum::conversionTOFMin()const
+{
+  double range = DBL_MIN*factorFrom;
+  if (emode == 1 || emode == 2)
+    range = sfpFrom*(1+DBL_EPSILON*factorFrom);
+  return range;
+}
+double Momentum::conversionTOFMax()const
+{
+  double range =DBL_MAX/factorTo; 
+  if (emode == 1 || emode == 2)
+  {
+    range = 1+DBL_MAX/factorTo+sfpFrom;
+  }
+  return range;
+}
+
 
 double Momentum::singleFromTOF(const double tof) const
 {
@@ -915,6 +1060,23 @@ double SpinEchoLength::singleToTOF(const double x) const
   return tof;
 }
 
+double SpinEchoLength::conversionTOFMin()const
+{
+  double wl = Wavelength::conversionTOFMin();
+  return efixed*wl*wl;
+}
+double SpinEchoLength::conversionTOFMax()const
+{
+  double sel = sqrt(DBL_MAX);
+  if( efixed>1)
+  {
+    sel/=efixed;
+  }
+
+  return sel;
+}
+
+
 double SpinEchoLength::singleFromTOF(const double tof) const
 {
   double wavelength = Wavelength::singleFromTOF(tof);
@@ -957,6 +1119,19 @@ double SpinEchoTime::singleToTOF(const double x) const
   double tof = Wavelength::singleToTOF(wavelength);
   return tof;
 }
+double SpinEchoTime::conversionTOFMin()const
+{
+  return 0;
+}
+double SpinEchoTime::conversionTOFMax()const
+{
+  double tm = std::pow(DBL_MAX,1./3.);
+  if (efixed > 1)
+    tm /=efixed;
+  return tm;
+}
+
+
 
 double SpinEchoTime::singleFromTOF(const double tof) const
 {
@@ -1000,6 +1175,16 @@ double Time::singleFromTOF(const double tof) const
     throw std::runtime_error("Time is not allwed to be converted from TOF. ");
     return 0.0;
 }
+
+double Time::conversionTOFMax()const
+{
+  return std::numeric_limits<double>::quiet_NaN();
+};
+double Time::conversionTOFMin()const
+{
+  return std::numeric_limits<double>::quiet_NaN();
+};
+
 
 Unit * Time::clone() const
 {

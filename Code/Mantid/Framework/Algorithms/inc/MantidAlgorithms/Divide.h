@@ -59,6 +59,8 @@ namespace Mantid
     private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
+      virtual void init();
+      virtual void exec();
       // Overridden BinaryOperation methods
       void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                   const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);
@@ -79,6 +81,8 @@ namespace Mantid
       void checkRequirements();
 
       std::string checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
+
+      bool m_warnOnZeroDivide;
 
     };
 

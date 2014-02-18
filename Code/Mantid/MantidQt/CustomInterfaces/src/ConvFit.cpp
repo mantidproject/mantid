@@ -251,12 +251,28 @@ namespace IDA
    */
   QString ConvFit::validate()
   {
+    using Mantid::API::AnalysisDataService;
+    
     UserInputValidator uiv;
 
     switch( uiForm().confit_cbInputType->currentIndex() )
     {
     case 0:
-      uiv.checkMWRunFilesIsValid("Reduction", uiForm().confit_inputFile); break;
+      uiv.checkMWRunFilesIsValid("Reduction", uiForm().confit_inputFile); 
+      
+      //file should already be loaded by this point, but attempt to recover if not.
+      if(!AnalysisDataService::Instance().doesExist(m_cfInputWSName.toStdString()))
+      {
+        //attempt to reload the nexus file.
+        QString filename = uiForm().confit_inputFile->getFirstFilename();
+        QFileInfo fi(filename);
+        QString wsname = fi.baseName();
+
+        m_cfInputWS = runLoadNexus(filename, wsname);
+        m_cfInputWSName = wsname;
+      }
+
+      break;
     case 1:
       uiv.checkWorkspaceSelectorIsNotEmpty("Reduction", uiForm().confit_wsSample); break;
     }
@@ -651,7 +667,7 @@ namespace IDA
           QString wsname = fi.baseName();
 
           // Load the file if it has not already been loaded.
-          if ( (m_cfInputWS == NULL) || ( wsname != m_cfInputWSName ))
+          if ( (m_cfInputWS == NULL) || ( wsname != m_cfInputWSName ) )
           {
             m_cfInputWSName = wsname;
             m_cfInputWS = runLoadNexus(filename, wsname);
@@ -878,8 +894,16 @@ namespace IDA
     // Add/remove some properties to display only relevant options
     if ( prop == m_cfProp["UseDeltaFunc"] )
     {
-      if ( checked ) { m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["DeltaHeight"]); }
-      else { m_cfProp["DeltaFunction"]->removeSubProperty(m_cfProp["DeltaHeight"]); }
+      if ( checked ) 
+      { 
+        m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["DeltaHeight"]);
+        uiForm().confit_cbPlotOutput->addItem("Height");
+      }
+      else 
+      { 
+        m_cfProp["DeltaFunction"]->removeSubProperty(m_cfProp["DeltaHeight"]);
+        uiForm().confit_cbPlotOutput->removeItem(uiForm().confit_cbPlotOutput->count()-1);
+      }
     }
   }
 

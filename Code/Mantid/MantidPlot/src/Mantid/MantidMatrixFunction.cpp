@@ -20,7 +20,9 @@ MantidMatrixFunction::MantidMatrixFunction(MantidMatrix &matrix):
 
 MantidMatrixFunction::~MantidMatrixFunction()
 {
-    //std::cerr << "MantidMatrixFunction deleted." << std::endl;
+  m_observer->observeADSClear(false);
+  m_observer->observePreDelete(false);
+  m_observer->observeAfterReplace(false);
 }
 
 /**

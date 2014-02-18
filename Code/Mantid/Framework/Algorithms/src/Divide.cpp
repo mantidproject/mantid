@@ -47,6 +47,17 @@ namespace Mantid
       this->getPointerToProperty("OutputWorkspace")->setDocumentation("The name of the workspace to be created as the output of the algorithm.  A workspace of this name will be created and stored in the Analysis Data Service.");
     }
     
+    void Divide::init()
+    {
+      BinaryOperation::init();
+      declareProperty("WarnOnZeroDivide",true, "Algorithm usually warns if division by 0 occurs. Set this value to false if one does not want this message appearing ");
+    }
+
+    void Divide::exec()
+    {
+       m_warnOnZeroDivide = getProperty("WarnOnZeroDivide");
+       BinaryOperation::exec();
+    }
 
     void Divide::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                        const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
@@ -78,8 +89,8 @@ namespace Mantid
     {
       (void) lhsX; //Avoid compiler warning
 
-      if (rhsY == 0)
-        g_log.warning() << "Division by zero: the RHS workspace is a single-valued workspace with value zero."
+      if (rhsY == 0 && m_warnOnZeroDivide)
+        g_log.warning() << "Division by zero: the RHS is a single-valued vector with value zero."
                         << "\n";
 
       // Do the right-hand part of the error calculation just once
