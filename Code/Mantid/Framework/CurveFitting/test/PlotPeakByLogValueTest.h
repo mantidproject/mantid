@@ -13,6 +13,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -316,6 +317,76 @@ public:
     while( row.next() );
 
     AnalysisDataService::Instance().clear();
+  }
+
+  void test_createOutputOption()
+  {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(Fun(),3,-5.0,5.0,0.1,false);
+    AnalysisDataService::Instance().add( "PLOTPEAKBYLOGVALUETEST_WS", ws );
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input","PLOTPEAKBYLOGVALUETEST_WS,v1:3");
+    alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
+    alg.setProperty("PassWSIndexToFunction",true);
+    alg.setProperty("CreateOutput", true);
+    alg.setPropertyValue("Function","name=FlatBackground,ties=(A0=0.5);name=PLOTPEAKBYLOGVALUETEST_Fun");
+    alg.execute();
+
+    TS_ASSERT( alg.isExecuted() );
+
+    TWS_type result =  WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TS_ASSERT( result );
+
+    // each spectrum contains values equal to its spectrum number (from 1 to 3)
+    TableRow row = result->getFirstRow();
+    do{
+        TS_ASSERT_DELTA( row.Double(1), 0.5, 1e-15 );
+    }
+    while( row.next() );
+
+    auto matrices = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_NormalisedCovarianceMatrices");
+    auto params = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_Parameters");
+    auto fits = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_Workspaces");
+
+    TS_ASSERT( matrices );
+    TS_ASSERT( params );
+    TS_ASSERT( fits );
+
+    TS_ASSERT( matrices->getNames().size() == 3 );
+    TS_ASSERT( params->getNames().size() == 3 );
+    TS_ASSERT( fits->getNames().size() == 3 );
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_createOutputOptionMultipleWorkspaces()
+  {
+    createData();
+    
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input","PlotPeakGroup_0;PlotPeakGroup_1;PlotPeakGroup_2");
+    alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
+    alg.setPropertyValue("WorkspaceIndex","1");
+    alg.setPropertyValue("LogValue","var");
+    alg.setProperty("CreateOutput", true);
+    alg.setPropertyValue("Function","name=LinearBackground,A0=1,A1=0.3;name=Gaussian,PeakCentre=5,Height=2,Sigma=0.1");
+    TS_ASSERT( alg.execute() );
+
+    TWS_type result = WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TS_ASSERT_EQUALS(result->columnCount(),12);
+
+    auto matrices = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_NormalisedCovarianceMatrices");
+    auto params = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_Parameters");
+    auto fits = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_Workspaces");
+
+    TS_ASSERT( matrices );
+    TS_ASSERT( params );
+    TS_ASSERT( fits );
+
+    TS_ASSERT( matrices->getNames().size() == 3 );
+    TS_ASSERT( params->getNames().size() == 3 );
+    TS_ASSERT( fits->getNames().size() == 3 );
   }
 
 private:
