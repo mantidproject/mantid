@@ -106,24 +106,35 @@ namespace Algorithms
     */
   void FindPeakBackground::exec()
   {
-    // 1. Get input and validate
+    // Get input and validate
     MatrixWorkspace_const_sptr inpWS = getProperty("InputWorkspace");
     int inpwsindex = getProperty("WorkspaceIndex");
     std::vector<double> m_vecFitWindows = getProperty("FitWindow");
     m_backgroundType = getPropertyValue("BackgroundType");
     double k = getProperty("SigmaConstant");
 
-    if (inpwsindex < 0 || inpwsindex >= static_cast<int>(inpWS->getNumberHistograms()))
+    if (isEmpty(inpwsindex))
+    {
+      // Default
+      if (inpWS->getNumberHistograms() == 1)
+      {
+        inpwsindex = 0;
+      }
+      else
+      {
+        throw runtime_error("WorkspaceIndex must be given. ");
+      }
+    }
+    else if (inpwsindex < 0 || inpwsindex >= static_cast<int>(inpWS->getNumberHistograms()))
     {
       stringstream errss;
       errss << "Input workspace " << inpWS->name() << " has " << inpWS->getNumberHistograms()
             << " spectra.  Input workspace index " << inpwsindex << " is out of boundary. ";
       throw runtime_error(errss.str());
     }
-    if (isEmpty(inpwsindex))
-      throw runtime_error("WorkspaceIndex must be given. ");
 
-    // 2. Generate output
+
+    // Generate output
     const MantidVec& inpX = inpWS->readX(inpwsindex);
     size_t sizex = inpWS->readX(inpwsindex).size();
     size_t sizey = inpWS->readY(inpwsindex).size();
