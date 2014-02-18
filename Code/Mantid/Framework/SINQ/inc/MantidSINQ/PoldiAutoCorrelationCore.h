@@ -8,6 +8,8 @@
 #include "MantidSINQ/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiAbstractChopper.h"
 
+#include "MantidDataObjects/Workspace2D.h"
+
 
 namespace Mantid
 {
@@ -51,16 +53,36 @@ public:
     void setInstrument(boost::shared_ptr<PoldiAbstractDetector> detector, boost::shared_ptr<PoldiAbstractChopper> chopper);
     void setWavelengthRange(double lambdaMin, double lambdaMax);
 
-    std::pair<std::vector<double>, std::vector<double> > calculate(std::vector<double> timeData, std::vector<double> countData);
+    void calculate(DataObjects::Workspace2D_sptr countData, DataObjects::Workspace2D_sptr outputWorkspace);
 
     // conversion between TOF (in musec) and d (in Angstrom), related through distance in mm and sin(theta)
     static double dtoTOF(double d, double distance, double sinTheta);
     static double TOFtod(double tof, double distance, double sinTheta);
 
 protected:
-    virtual double getDeltaD(double deltaT);
-    virtual std::pair<int, int> getDRangeAsDeltaMultiples(double getDeltaD);
-    virtual std::vector<double> getDGrid(double deltaT);
+    double getDeltaD(double deltaT);
+    std::pair<int, int> getDRangeAsDeltaMultiples(double getDeltaD);
+    std::vector<double> getDGrid(double deltaT);
+
+    double getNormalizedTOFSum(std::vector<double> tofsForD1, double deltaT, size_t nd);
+    void calculateDWeights(std::vector<double> tofsForD1, double deltaT, size_t nd);
+    double getNormalizedTOFSumAlternative(std::vector<double> tofsForD1, double deltaT, size_t nd);
+
+    double getRawCorrelatedIntensity(double dValue, double weight);
+    std::pair<double, double> getCMessAndCSigma(double dValue, double slitTimeOffset, int index);
+    double reduceChopperSlitList(std::vector<std::pair<double, double> > valuesWithSigma, double weight);
+
+    std::vector<double> getDistances(std::vector<int> elements);
+    std::vector<double> getTofsForD1(std::vector<int> elements);
+
+    double getCounts(int x, int y);
+    double getNormCounts(int x, int y);
+
+    int getElement(int index);
+    double getTof(int index);
+    double getSumOfCounts(int timeElements, std::vector<int> detectorElements);
+
+    int cleanIndex(int index, int maximum);
 
 
     boost::shared_ptr<PoldiAbstractDetector> m_detector;
@@ -69,8 +91,18 @@ protected:
     std::pair<double, double> m_wavelengthRange;
 
     double m_deltaT;
-    size_t m_timeElements;
-    size_t m_detectorElements;
+    double m_deltaD;
+    int m_timeElements;
+    std::vector<int> m_detectorElements;
+
+    std::vector<double> m_weightsForD;
+    std::vector<double> m_tofsFor1Angstrom;
+
+    std::vector<int> m_indices;
+
+    DataObjects::Workspace2D_sptr m_countData;
+
+    double m_damp;
 };
 
 

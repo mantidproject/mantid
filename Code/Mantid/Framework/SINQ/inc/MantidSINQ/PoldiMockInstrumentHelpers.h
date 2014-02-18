@@ -6,6 +6,8 @@
 #include "MantidSINQ/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiAbstractChopper.h"
 
+#include "MantidSINQ/PoldiHeliumDetector.h"
+
 using namespace Mantid;
 using namespace Mantid::Poldi;
 
@@ -40,6 +42,25 @@ public:
         return availableElements;
     }
 };
+
+class MANTID_SINQ_DLL ConfiguredHeliumDetector : public PoldiHeliumDetector
+{
+public:
+    ConfiguredHeliumDetector() :
+        PoldiHeliumDetector()
+    {
+        loadConfiguration(DataObjects::TableWorkspace_sptr(0));
+    }
+
+    void loadConfiguration(DataObjects::TableWorkspace_sptr detectorConfigurationWorkspace)
+    {
+        UNUSED_ARG(detectorConfigurationWorkspace);
+
+        initializeFixedParameters(3000.0, static_cast<size_t>(400), 2.5);
+        initializeCalibratedParameters(Mantid::Kernel::V2D(-931.47, -860.0), 90.41 / 180.0 * M_PI);
+    }
+};
+
 
 class MANTID_SINQ_DLL MockChopper : public PoldiAbstractChopper
 {
