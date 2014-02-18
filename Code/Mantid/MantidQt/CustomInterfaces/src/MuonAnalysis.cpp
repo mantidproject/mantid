@@ -955,74 +955,8 @@ void MuonAnalysis::runLoadCurrent()
     return;
   }
 
-  QString daename = "NDX" + instname;
-
-  // Load dae file
-  AnalysisDataService::Instance().remove(m_workspace_name);
-
-   //   "  " +  QString(m_workspace_name.c_str()) + "LoadDAE('" + daename + "')\n"
-
-  QString pyString =
-      "import sys\n"
-      "try:\n"
-      "  " +  QString(m_workspace_name.c_str()) + "LoadDAE('" + daename + "')\n"
-      "except SystemExit, message:\n"
-      "  print str(message)";
-  QString pyOutput = runPythonCode( pyString ).trimmed();
-
-  // if output is none empty something has gone wrong
-  if ( !pyOutput.toStdString().empty() )
-  {
-    m_optionTab->noDataAvailable();
-    QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from " + daename + ". Plotting disabled");
-    return;
-  }
-
-  m_optionTab->nowDataAvailable();
-
-  // Get hold of a pointer to a matrix workspace and apply grouping if applicatable
-  Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
-  WorkspaceGroup_sptr wsPeriods = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace_ptr);
-  MatrixWorkspace_sptr matrix_workspace;
-  int numPeriods = 1;   // 1 may mean either a group with one period or simply just 1 normal matrix workspace
-  if (wsPeriods)
-  {
-    numPeriods = wsPeriods->getNumberOfEntries();
-
-    Workspace_sptr workspace_ptr1 = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
-    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr1);
-  }
-  else
-  {
-    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
-  }
-
-  if ( !isGroupingSet() )
-    setDummyGrouping( matrix_workspace->getInstrument() );
-
-  groupLoadedWorkspace();
-
-  // Populate instrument fields
-  std::stringstream str;
-  str << "Description: ";
-  int nDet = static_cast<int>(matrix_workspace->getInstrument()->getDetectorIDs().size());
-  str << nDet;
-  str << " detector spectrometer, main field ";
-  str << "unknown"; 
-  str << " to muon polarisation";
-  m_uiForm.instrumentDescription->setText(str.str().c_str());
-
-  // Populate run information text field
-  std::string infoStr = "Number of spectra in data = ";
-  infoStr += boost::lexical_cast<std::string>(matrix_workspace->getNumberHistograms()) + "\n";
-  infoStr += "Title: ";
-  infoStr += matrix_workspace->getTitle() + "\n" + "Comment: "
-    + matrix_workspace->getComment();
-  m_uiForm.infoBrowser->setText(infoStr.c_str());
-
-  // If number of periods has changed -> update period widgets
-  if(numPeriods != m_uiForm.homePeriodBox1->count())
-    updatePeriodWidgets(numPeriods);
+  QMessageBox::critical(this, "Unsupported instrument",
+                        "Current run loading is not supported for the selected instrument.");
 }
 
 /**
