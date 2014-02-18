@@ -356,7 +356,7 @@ namespace MantidQt
         }
       } catch (Mantid::Kernel::Exception::NotFoundError&)
       {
-        /// Can't find the instrument IDF via the
+        // Unable to fetch instrument info, so continue without it.
       }
 
       return result;
