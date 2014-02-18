@@ -4,6 +4,7 @@
 #include "MantidKernel/DateAndTime.h"
 
 #include <boost/algorithm/string/regex.hpp>
+#include <Poco/ActiveResult.h>
 #include <QCoreApplication>
 
 namespace MantidQt

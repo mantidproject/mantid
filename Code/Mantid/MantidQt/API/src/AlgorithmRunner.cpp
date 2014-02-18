@@ -1,5 +1,6 @@
 #include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidKernel/System.h"
+
+#include <Poco/ActiveResult.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

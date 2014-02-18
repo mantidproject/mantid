@@ -1,15 +1,17 @@
 #include "MantidAPI/MatrixWorkspace.h"
-#include <numeric>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceIteratorCode.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <numeric>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;

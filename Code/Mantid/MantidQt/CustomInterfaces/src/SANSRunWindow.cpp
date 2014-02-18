@@ -2093,7 +2093,8 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   addUserMaskStrings(exec_reduce,"i.Mask",DefaultMask);
 
   // add slicing definition
-  exec_reduce += "i.SetEventSlices('"+m_uiForm.sliceEvent->text().trimmed()+"')\n";
+  if (!m_uiForm.sliceEvent->isHidden())
+    exec_reduce += "i.SetEventSlices('"+m_uiForm.sliceEvent->text().trimmed()+"')\n";
 
   return exec_reduce;
 }
@@ -2774,6 +2775,14 @@ void SANSRunWindow::handleInstrumentChange()
   m_uiForm.front_radio->setText("&Front");
     m_uiForm.rear_radio->setText("&Rear"); 
   }
+
+  // LOQ does not have event mode collection
+  // hence, hide the widgets related to slice event mode data.
+  bool hide_events_gui = loq_selected; 
+  m_uiForm.slicePb->setHidden(hide_events_gui);
+  m_uiForm.sliceEvent->setHidden(hide_events_gui);
+  
+
 }
 /** Record if the user has changed the default filename, because then we don't
 *  change it

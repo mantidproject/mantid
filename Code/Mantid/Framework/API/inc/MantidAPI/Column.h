@@ -135,21 +135,7 @@ public:
     }
 
     /// Set plot type where 
-    /// None = 0 (means it has specifically been set to 'no plot type')
-    /// NotSet = -1000 (this is the default and means plot style has not been set)
-    /// X = 1, Y = 2, Z = 3, xErr = 4, yErr = 5, Label = 6
-    /// @param t plot type as defined above
-    void setPlotType(int t)
-    {
-      if ( t == -1000 || t == 0 || t == 1 || t == 2 || t == 3 || t == 4 ||
-           t == 5 || t == 6 )
-        m_plotType = t;
-      else 
-      {
-        g_log.error() << "Cannot set plot of column to " << t 
-          << " . Ignore this attempt." << std::endl;
-      }
-    }
+    void setPlotType(int t);
 
     /**
      * Fills a std vector with values from the column if the types are compatible.
