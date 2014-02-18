@@ -436,20 +436,20 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
         {
             double s1=0.5*(X1[j]+X2[j]);
             if (s1>tolerance)
-                err = (std::fabs(X1[j] - X2[j]) > tolerance*s1);
+                err = (std::fabs((X1[j] - X2[j])/s1) > tolerance);
             else
                 err = (std::fabs(X1[j] - X2[j]) > tolerance);
 
             double s2=0.5*(Y1[j]+Y2[j]);
             if (s2>tolerance)
-               err = ((std::fabs(Y1[j] - Y2[j]) > tolerance*s2)||err);
+               err = ((std::fabs((Y1[j] - Y2[j])/s2) > tolerance)||err);
             else
                err = ((std::fabs(Y1[j] - Y2[j]) > tolerance)||err);
 
 
             double s3=0.5*(E1[j]+E2[j]);
             if (s3>tolerance)
-               err = ((std::fabs(E1[j] - E2[j]) > tolerance*s3)||err);
+               err = ((std::fabs((E1[j] - E2[j])/s3) > tolerance)||err);
             else
                err = ((std::fabs(E1[j] - E2[j]) > tolerance)||err);
         }
