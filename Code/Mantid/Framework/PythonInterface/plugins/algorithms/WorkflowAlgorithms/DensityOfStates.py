@@ -50,7 +50,10 @@ class DensityOfStates(PythonAlgorithm):
 			self.declareProperty(StringArrayProperty('Ions', Direction.Input), 
 				doc="List of Ions to use to calculate partial density of states. If left blank, total density of states will be calculated")
 			
-			self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output), 
+			self.declareProperty(name='SumContributions', defaultValue=False,
+				doc="Sum the partial density of states into a single workspace.")
+
+			self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output), 
 				doc="Name to give the output workspace.")
 			
 			#regex pattern for a floating point number
@@ -70,9 +73,26 @@ class DensityOfStates(PythonAlgorithm):
 			if self._calc_partial:
 				eigenvectors = file_data[4]
 				prog_reporter.report("Calculating partial density of states")
-				self._compute_partial(frequencies, eigenvectors, weights)
-				mtd[self._ws_name].setYUnit('(D/A)^2/amu')
-				mtd[self._ws_name].setYUnitLabel('Intensity')
+				
+				if self._sum_contributions:
+					#sum each of the contributions
+					self._compute_partial(self._partial_ion_numbers, frequencies, eigenvectors, weights)				
+					mtd[self._ws_name].setYUnit('(D/A)^2/amu')
+					mtd[self._ws_name].setYUnitLabel('Intensity')
+				else:
+					#output each contribution to it's own workspace
+					partial_workspaces = []
+					for ion_name, ions in self._ion_dict.items():
+						self._compute_partial(ions, frequencies, eigenvectors, weights)
+						mtd[self._ws_name].setYUnit('(D/A)^2/amu')
+						mtd[self._ws_name].setYUnitLabel('Intensity')
+						
+						partial_ws_name = self._ws_name + '_' + ion_name
+						partial_workspaces.append(partial_ws_name)
+						RenameWorkspace(self._ws_name, OutputWorkspace=partial_ws_name)
+
+					group = ','.join(partial_workspaces)
+					GroupWorkspaces(group, OutputWorkspace=self._ws_name)
 
 			elif self._spec_type == 'DOS':
 				prog_reporter.report("Calculating density of states")
@@ -98,7 +118,6 @@ class DensityOfStates(PythonAlgorithm):
 				mtd[self._ws_name].setYUnit('A^4')
 				mtd[self._ws_name].setYUnitLabel('Intensity')
 
-
 			self.setProperty("OutputWorkspace", self._ws_name)
 
 #----------------------------------------------------------------------------------------
@@ -116,6 +135,7 @@ class DensityOfStates(PythonAlgorithm):
 			self._scale = self.getProperty('Scale').value
 			self._zero_threshold = self.getProperty('ZeroThreshold').value
 			self._ions = self.getProperty('Ions').value
+			self._sum_contributions = self.getProperty('SumContributions').value
 			self._calc_partial = (len(self._ions) > 0)
 
 #----------------------------------------------------------------------------------------
@@ -155,7 +175,7 @@ class DensityOfStates(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
-		def _compute_partial(self, frequencies, eigenvectors, weights):
+		def _compute_partial(self, ion_numbers, frequencies, eigenvectors, weights):
 			"""
 			Compute partial Density Of States.
 
@@ -174,7 +194,7 @@ class DensityOfStates(PythonAlgorithm):
 					#only select vectors for the ions we're interested in
 					lower, upper = mode*self._num_ions, (mode+1)*self._num_ions
 					vectors = block_vectors[lower:upper] 
-					vectors = vectors[self._partial_ion_numbers]
+					vectors = vectors[ion_numbers]
 					
 					#compute intensity
 					exponent = np.empty(vectors.shape)
@@ -295,6 +315,9 @@ class DensityOfStates(PythonAlgorithm):
 			if ext == '.phonon':
 				file_data = self._parse_phonon_file(file_name)
 			elif ext == '.castep':
+				if len(self._ions) > 0:
+					raise ValueError("Cannot compute partial density of states from .castep files.")
+
 				file_data = self._parse_castep_file(file_name)
 
 			frequencies = file_data[0]
@@ -341,7 +364,7 @@ class DensityOfStates(PythonAlgorithm):
 					self._num_branches = int(line.strip().split()[-1])
 				elif self._calc_partial and 'Fractional Co-ordinates' in line:
 					#we're calculating partial density of states
-					ion_dict = dict( (ion, []) for ion in self._ions)
+					self._ion_dict = dict( (ion, []) for ion in self._ions)
 					
 					if self._num_ions == None:
 						raise IOError("Failed to parse file. Invalid file header.")
@@ -354,10 +377,10 @@ class DensityOfStates(PythonAlgorithm):
 						
 						if ion in self._ions:
 							mode = int(line_data[0])-1 #-1 to convert to zero based indexing
-							ion_dict[ion].append(mode)
+							self._ion_dict[ion].append(mode)
 
 					self._partial_ion_numbers = []
-					for ion, ion_nums in ion_dict.items():
+					for ion, ion_nums in self._ion_dict.items():
 						if len(ion_nums) == 0:
 							logger.warning("Could not find any ions of type %s" % ion)		
 						self._partial_ion_numbers += ion_nums
