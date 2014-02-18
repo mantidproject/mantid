@@ -97,7 +97,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 0, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    //TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), -1, 0.01);
+    TS_ASSERT((columns.at(3) == "nan") || (columns.at(3) == "inf"));
     in.close();
 
     cleanupafterwards();
@@ -183,6 +183,7 @@ private:
   {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(1,10);
     AnalysisDataService::Instance().addOrReplace(m_name, ws);
+    //Check if any of X, Y or E should be zeroed to check for divide by zero or similiar
     if (zeroX)
     {
       ws->dataX(0) = m_data0;
@@ -191,6 +192,7 @@ private:
     {
       ws->dataX(0) = m_dataX;
     }
+
     if (zeroY)
     {
       ws->dataY(0) = m_data0;
@@ -199,6 +201,7 @@ private:
     {
       ws->dataY(0) = m_dataY;
     }
+
     if (zeroE)
     {
       ws->dataE(0) = m_data0;
