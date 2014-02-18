@@ -60,6 +60,7 @@ public:
 	  TS_ASSERT_DELTA( peaklist->Double(0,4), 0.04, 0.01 );
 	  TS_ASSERT_DELTA( peaklist->Double(0,5), 0.0, 0.01 );
 
+	  // Clean
 	  AnalysisDataService::Instance().remove("Signal");
 
 	  return;
@@ -146,6 +147,10 @@ public:
 	  int ipeakmax = outws->Int(0, 2);
 	  TS_ASSERT(ipeakmin >= ipeakmax);
 
+	  // Clean
+	  AnalysisDataService::Instance().remove("Signal3");
+	  AnalysisDataService::Instance().remove("Test2Workspace");
+
 	  return;
 	}
 
@@ -189,6 +194,10 @@ public:
 	  TS_ASSERT_DELTA( outws->Double(0,3), 1.2, 0.01 );
 	  TS_ASSERT_DELTA( outws->Double(0,4), 0.04, 0.01 );
 	  TS_ASSERT_DELTA( outws->Double(0,5), 0.0, 0.01 );
+
+	  // Clean
+	  AnalysisDataService::Instance().remove("Signal2");
+	  AnalysisDataService::Instance().remove("Test2Workspace");
 
 	  return;
 	}
