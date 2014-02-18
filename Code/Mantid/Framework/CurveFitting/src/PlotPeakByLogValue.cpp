@@ -285,8 +285,8 @@ namespace Mantid
             if (createFitOutput)
             {
               covariance_workspaces.push_back(wsBaseName + "_NormalisedCovarianceMatrix");
-              fit_workspaces.push_back(wsBaseName + "_Parameters");
-              parameter_workspaces.push_back(wsBaseName + "_Workspace");
+              parameter_workspaces.push_back(wsBaseName + "_Parameters");
+              fit_workspaces.push_back(wsBaseName + "_Workspace");
             }
 
             g_log.debug() << "Fit result " << fit->getPropertyValue("OutputStatus") << ' ' << chi2 << std::endl;
