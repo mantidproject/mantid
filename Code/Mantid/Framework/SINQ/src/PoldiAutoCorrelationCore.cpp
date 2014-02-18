@@ -4,7 +4,7 @@
 #include "boost/range/irange.hpp"
 #include "boost/bind.hpp"
 #include "MantidKernel/PhysicalConstants.h"
-
+#include "MantidAPI/WorkspaceFactory.h"
 #include <iostream>
 #include <fstream>
 
@@ -38,8 +38,7 @@ void PoldiAutoCorrelationCore::setWavelengthRange(double lambdaMin, double lambd
     m_wavelengthRange = std::make_pair(lambdaMin, lambdaMax);
 }
 
-void PoldiAutoCorrelationCore::calculate(DataObjects::Workspace2D_sptr countData,
-                                         DataObjects::Workspace2D_sptr outputWorkspace)
+DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::Workspace2D_sptr countData)
 {
     m_countData = countData;
 
@@ -80,11 +79,16 @@ void PoldiAutoCorrelationCore::calculate(DataObjects::Workspace2D_sptr countData
     std::vector<double> qValues(dValues.size());
     std::transform(dValues.crbegin(), dValues.crend(), qValues.begin(), [] (double d) { return 2.0 * M_PI / d; });
 
+    DataObjects::Workspace2D_sptr outputWorkspace = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
+        (WorkspaceFactory::Instance().create("Workspace2D", 3, dValues.size(), dValues.size()));
+
     outputWorkspace->dataY(0) = correctedCorrelatedIntensities;
 
     outputWorkspace->setX(0, qValues);
     outputWorkspace->setX(1, qValues);
     outputWorkspace->setX(2, qValues);
+
+    return outputWorkspace;
 }
 
 double PoldiAutoCorrelationCore::getDeltaD(double deltaT)

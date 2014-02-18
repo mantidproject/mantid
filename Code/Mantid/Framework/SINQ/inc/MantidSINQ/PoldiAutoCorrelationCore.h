@@ -53,7 +53,7 @@ public:
     void setInstrument(boost::shared_ptr<PoldiAbstractDetector> detector, boost::shared_ptr<PoldiAbstractChopper> chopper);
     void setWavelengthRange(double lambdaMin, double lambdaMax);
 
-    void calculate(DataObjects::Workspace2D_sptr countData, DataObjects::Workspace2D_sptr outputWorkspace);
+    DataObjects::Workspace2D_sptr calculate(DataObjects::Workspace2D_sptr countData);
 
     // conversion between TOF (in musec) and d (in Angstrom), related through distance in mm and sin(theta)
     static double dtoTOF(double d, double distance, double sinTheta);
