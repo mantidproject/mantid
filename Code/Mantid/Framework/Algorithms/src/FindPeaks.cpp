@@ -1017,9 +1017,9 @@ namespace Algorithms
     IAlgorithm_sptr estimate = createChildAlgorithm("FindPeakBackground");
     estimate->setProperty("InputWorkspace", input);
     // The workspace index
-    std::vector<int> wivec;
-    wivec.push_back(spectrum);
-    estimate->setProperty("WorkspaceIndices", wivec);
+    // std::vector<int> wivec;
+    // wivec.push_back(spectrum);
+    estimate->setProperty("WorkspaceIndex", spectrum);
     //estimate->setProperty("SigmaConstant", 1.0);
     // The workspace index
     std::vector<double> fwvec;
