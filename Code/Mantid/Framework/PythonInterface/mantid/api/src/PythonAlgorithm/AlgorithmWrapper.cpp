@@ -105,7 +105,7 @@ namespace Mantid
             std::string value = boost::python::extract<std::string>(resultDict[keys[i]]);
             resultMap[key] = value;
           }
-          catch(boost::python::error_already_set & e)
+          catch(boost::python::error_already_set &)
           {
             this->getLogger().error() << "In validateInputs(self): Invalid type for key/value pair "
                                       << "detected in dict.\n"
