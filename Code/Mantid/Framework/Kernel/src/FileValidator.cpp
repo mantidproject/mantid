@@ -144,6 +144,9 @@ std::string FileValidator::checkValidity(const std::string &value) const
       {
         g_log.information() << "Encountered exception while checking for writable: " << e.what();
       }
+      catch (...) {
+    	g_log.information() << "Unknown exception while checking for writable";
+      }
     }
   }
 
