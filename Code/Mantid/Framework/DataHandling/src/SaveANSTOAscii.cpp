@@ -17,6 +17,7 @@
 #include <fstream>
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid
 {
