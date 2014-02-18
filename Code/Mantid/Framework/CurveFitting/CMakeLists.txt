@@ -18,7 +18,7 @@ set ( SRC_FILES
 	src/ComptonScatteringCountRate.cpp
 	src/ConvertToYSpace.cpp
 	src/Convolution.cpp
-	#src/ConvolveWorkspaces.cpp
+	src/ConvolveWorkspaces.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
 	src/CostFuncRwp.cpp
@@ -78,7 +78,6 @@ set ( SRC_FILES
 	src/SplineBackground.cpp
 	src/SplineInterpolation.cpp
 	src/SplineSmoothing.cpp
-	#src/SplineWorkspace.cpp
 	src/StaticKuboToyabe.cpp
 	src/StaticKuboToyabeTimesExpDecay.cpp
 	src/StaticKuboToyabeTimesGausDecay.cpp
@@ -119,7 +118,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/ConvertToYSpace.h
 	inc/MantidCurveFitting/Convolution.h
-	#inc/MantidCurveFitting/ConvolveWorkspaces.h
+	inc/MantidCurveFitting/ConvolveWorkspaces.h
 	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
 	inc/MantidCurveFitting/CostFuncRwp.h
@@ -184,7 +183,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/SplineBackground.h
 	inc/MantidCurveFitting/SplineInterpolation.h
 	inc/MantidCurveFitting/SplineSmoothing.h
-	#inc/MantidCurveFitting/SplineWorkspace.h
 	inc/MantidCurveFitting/StaticKuboToyabe.h
 	inc/MantidCurveFitting/StaticKuboToyabeTimesExpDecay.h
 	inc/MantidCurveFitting/StaticKuboToyabeTimesGausDecay.h
@@ -222,7 +220,7 @@ set ( TEST_FILES
 	ComptonScatteringCountRateTest.h
 	ConvertToYSpaceTest.h
 	ConvolutionTest.h
-	#ConvolveWorkspacesTest.h
+	ConvolveWorkspacesTest.h
 	CubicSplineTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h

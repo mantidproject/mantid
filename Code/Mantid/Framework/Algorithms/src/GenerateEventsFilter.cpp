@@ -1163,7 +1163,7 @@ namespace Algorithms
         g_log.debug() << "[DB] Entry[" << i << "] = " << currvalue << ": out of range. " << ".\n";
       }
       else if ((i == 0) || (i >= 1 && ((filterIncrease && values[i] >= values[i-1]) ||
-                                       (filterDecrease && values[i] <= values[i]))))
+                                       (filterDecrease && values[i] <= values[i-1]))))
       {
         // First entry (regardless direction) and other entries considering change of value
         if (singlemode)

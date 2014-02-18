@@ -90,7 +90,7 @@ bool CheckWorkspacesMatch::processGroups()
   }
   setProperty("Result", this->result);
   setExecuted(true);
-  m_notificationCenter.postNotification(new FinishedNotification(this,this->isExecuted()));
+  notificationCenter().postNotification(new FinishedNotification(this,this->isExecuted()));
   return true;
 }
 

@@ -8,6 +8,7 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <cxxtest/TestSuite.h>
