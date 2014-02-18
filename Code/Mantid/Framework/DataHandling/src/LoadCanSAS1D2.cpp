@@ -163,7 +163,7 @@ MatrixWorkspace_sptr LoadCanSAS1D2::loadEntry(Poco::XML::Node * const workspaceD
     std::vector<API::MatrixWorkspace_sptr> & group = (sasTrasElem->getAttribute("name") == "sample")? trans_gp : trans_can_gp;
 
     // getting number of Tdata elements in the xml file
-    NodeList* tdataElemList = sasTrasElem->getElementsByTagName("Tdata");
+    Poco::AutoPtr<NodeList> tdataElemList = sasTrasElem->getElementsByTagName("Tdata");
     size_t nBins = tdataElemList->length();  
 
     MatrixWorkspace_sptr dataWS =
