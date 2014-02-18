@@ -2005,8 +2005,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
            </layout>
           </item>
          </layout>
-         <zorder></zorder>
-         <zorder></zorder>
         </widget>
        </item>
       </layout>
@@ -2913,8 +2911,6 @@ p, li { white-space: pre-wrap; }
            </layout>
           </item>
          </layout>
-         <zorder></zorder>
-         <zorder></zorder>
         </widget>
        </item>
       </layout>
