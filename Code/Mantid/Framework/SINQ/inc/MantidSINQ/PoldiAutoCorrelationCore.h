@@ -60,29 +60,28 @@ public:
     static double TOFtod(double tof, double distance, double sinTheta);
 
 protected:
-    double getDeltaD(double deltaT);
+    virtual double getDeltaD(double deltaT);
     std::pair<int, int> getDRangeAsDeltaMultiples(double getDeltaD);
-    std::vector<double> getDGrid(double deltaT);
+    virtual std::vector<double> getDGrid(double deltaD);
 
-    double getNormalizedTOFSum(std::vector<double> tofsForD1, double deltaT, size_t nd);
-    void calculateDWeights(std::vector<double> tofsForD1, double deltaT, size_t nd);
-    double getNormalizedTOFSumAlternative(std::vector<double> tofsForD1, double deltaT, size_t nd);
+    double getNormalizedTOFSum(std::vector<double> normalizedTofs);
+    std::vector<double> calculateDWeights(std::vector<double> tofsFor1Angstrom, double deltaT, double deltaD, size_t nd);
 
     double getRawCorrelatedIntensity(double dValue, double weight);
-    std::pair<double, double> getCMessAndCSigma(double dValue, double slitTimeOffset, int index);
+    virtual std::pair<double, double> getCMessAndCSigma(double dValue, double slitTimeOffset, int index);
     double reduceChopperSlitList(std::vector<std::pair<double, double> > valuesWithSigma, double weight);
 
     std::vector<double> getDistances(std::vector<int> elements);
-    std::vector<double> getTofsForD1(std::vector<int> elements);
+    std::vector<double> getTofsFor1Angstrom(std::vector<int> elements);
 
-    double getCounts(int x, int y);
-    double getNormCounts(int x, int y);
+    virtual double getCounts(int x, int y);
+    virtual double getNormCounts(int x, int y);
 
-    int getElement(int index);
-    double getTof(int index);
-    double getSumOfCounts(int timeElements, std::vector<int> detectorElements);
+    virtual int getElementFromIndex(int index);
+    virtual double getTofFromIndex(int index);
+    double getSumOfCounts(int timeBinCount, std::vector<int> detectorElements);
 
-    int cleanIndex(int index, int maximum);
+    virtual int cleanIndex(int index, int maximum);
 
 
     boost::shared_ptr<PoldiAbstractDetector> m_detector;
@@ -92,7 +91,7 @@ protected:
 
     double m_deltaT;
     double m_deltaD;
-    int m_timeElements;
+    int m_timeBinCount;
     std::vector<int> m_detectorElements;
 
     std::vector<double> m_weightsForD;

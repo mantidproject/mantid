@@ -28,7 +28,21 @@ class TestablePoldiAutoCorrelationCore : public PoldiAutoCorrelationCore
 class PoldiAutoCorrelationCoreTest : public CxxTest::TestSuite
 {
 private:
+    TestablePoldiAutoCorrelationCore getCorrelationCoreWithInstrument()
+    {
+        boost::shared_ptr<PoldiAbstractDetector> detector(new ConfiguredHeliumDetector);
 
+        int deadWires [] = {1, 2, 3, 4, 5, 6, 395, 396, 397, 398, 399, 400 };
+        boost::shared_ptr<PoldiDeadWireDecorator> deadWireDecorator(
+                    new PoldiDeadWireDecorator(std::set<int>(deadWires, deadWires + 12), detector));
+
+        boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
+
+        TestablePoldiAutoCorrelationCore autoCorrelationCore;
+        autoCorrelationCore.setInstrument(deadWireDecorator, mockChopper);
+
+        return autoCorrelationCore;
+    }
 
 public:
     // This pair of boilerplate methods prevent the suite being created statically
@@ -95,7 +109,9 @@ public:
         EXPECT_CALL(*mockDetector, qLimits(1.1, 5.0))
                 .WillOnce(Return(std::make_pair(1.549564, 8.960878)));
 
-        std::vector<double> dgrid = autoCorrelationCore.getDGrid(3.0);
+        double deltaD = autoCorrelationCore.getDeltaD(3.0);
+
+        std::vector<double> dgrid = autoCorrelationCore.getDGrid(deltaD);
 
         TS_ASSERT_DELTA(dgrid[0], 0.700890601 + 0.000606307, 1e-7);
         TS_ASSERT_DELTA(dgrid[1] - dgrid[0], 0.000606307, 1e-9);
@@ -129,7 +145,7 @@ public:
                 .Times(1)
                 .WillRepeatedly(Return(11800.0));
 
-        std::vector<double> tofsForD1 = autoCorrelationCore.getTofsForD1(detector->availableElements());
+        std::vector<double> tofsForD1 = autoCorrelationCore.getTofsFor1Angstrom(detector->availableElements());
 
         TS_ASSERT_DELTA(tofsForD1[0], 4257.66624637, 1e-4);
         TS_ASSERT_DELTA(tofsForD1[399], 5538.73486007, 1e-4);
@@ -156,55 +172,26 @@ public:
 
     void testgetNormalizedTOFSum()
     {
-        boost::shared_ptr<PoldiAbstractDetector> detector(new ConfiguredHeliumDetector);
-
-        int deadWires [] = {1, 2, 3, 4, 5, 6, 395, 396, 397, 398, 399, 400 };
-        boost::shared_ptr<PoldiDeadWireDecorator> deadWireDecorator(
-                    new PoldiDeadWireDecorator(std::set<int>(deadWires, deadWires + 12), detector));
-
-        boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
-
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
-        autoCorrelationCore.setInstrument(deadWireDecorator, mockChopper);
-
+        TestablePoldiAutoCorrelationCore autoCorrelationCore = getCorrelationCoreWithInstrument();
+        boost::shared_ptr<MockChopper> mockChopper = boost::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
         EXPECT_CALL(*mockChopper, distanceFromSample())
                 .Times(2)
                 .WillRepeatedly(Return(11800.0));
-        std::vector<double> tofsD1 = autoCorrelationCore.getTofsForD1(deadWireDecorator->availableElements());
+
+        std::vector<double> tofsD1 = autoCorrelationCore.getTofsFor1Angstrom(autoCorrelationCore.m_detector->availableElements());
 
         TS_ASSERT_EQUALS(tofsD1.size(), 388);
 
-        double sum = autoCorrelationCore.getNormalizedTOFSum(tofsD1, 3.0, 5531);
+        double deltaT = 3.0;
+        double deltaD = autoCorrelationCore.getDeltaD(deltaT);
+        size_t nd = 5531;
 
-        TS_ASSERT_DELTA(1.0 / 5531.0, autoCorrelationCore.m_weightsForD[0] / sum, 1e-15);
+        std::vector<double> weights = autoCorrelationCore.calculateDWeights(tofsD1, deltaT, deltaD, nd);
+        double sum = autoCorrelationCore.getNormalizedTOFSum(weights);
+
+        TS_ASSERT_DELTA(1.0 / 5531.0, weights[0] / sum, 1e-15);
 
         TS_ASSERT_DELTA(sum, 2139673.0, 1e-1);
-    }
-
-    void testgetNormalizedTOFSumAlternative()
-    {
-        boost::shared_ptr<PoldiAbstractDetector> detector(new ConfiguredHeliumDetector);
-
-        int deadWires [] = {1, 2, 3, 4, 5, 6, 395, 396, 397, 398, 399, 400 };
-        boost::shared_ptr<PoldiDeadWireDecorator> deadWireDecorator(
-                    new PoldiDeadWireDecorator(std::set<int>(deadWires, deadWires + 12), detector));
-
-        boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
-
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
-        autoCorrelationCore.setInstrument(deadWireDecorator, mockChopper);
-
-        EXPECT_CALL(*mockChopper, distanceFromSample())
-                .Times(2)
-                .WillRepeatedly(Return(11800.0));
-        std::vector<double> tofsD1 = autoCorrelationCore.getTofsForD1(deadWireDecorator->availableElements());
-
-        TS_ASSERT_EQUALS(tofsD1.size(), 388);
-
-        double sum = autoCorrelationCore.getNormalizedTOFSumAlternative(tofsD1, 3.0, 5531);
-
-        TS_ASSERT_DELTA(sum, 2139673., 1e2);
-
     }
 };
 
