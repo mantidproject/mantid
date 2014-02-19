@@ -18,6 +18,15 @@ Creates a single spectrum Workspace2D with X,Y, and E copied from an first non-i
 #include <boost/type_traits.hpp>
 #include <sstream>
 
+namespace
+{
+  struct null_deleter
+  {
+      void operator()(void const *) const
+      { // Do nothing
+      }
+  };
+}
 
 namespace Mantid
 {
@@ -124,13 +133,13 @@ void ConvertMDHistoToMatrixWorkspace::exec()
   outputWorkspace->dataY(0).assign(Y.begin(),Y.end());
   outputWorkspace->dataE(0).assign(E.begin(),E.end());
 
-  const size_t numberOriginal = inputWorkspace->numOriginalWorkspaces();
-  NullCoordTransform nullTransform(inputWorkspace->getNumDims());
-  CoordTransform* transform = &nullTransform;
-  if(numberOriginal > 0)
+  const size_t numberTransformsToOriginal = inputWorkspace->getNumberTransformsToOriginal();
+
+  boost::shared_ptr<CoordTransform> transform = boost::make_shared<NullCoordTransform>(inputWorkspace->getNumDims());
+  if(numberTransformsToOriginal > 0)
   {
-    const size_t index = numberOriginal -1;
-    transform = inputWorkspace->getTransformToOriginal(index);
+    const size_t indexToLastTransform = numberTransformsToOriginal - 1 ;
+    transform = boost::shared_ptr<CoordTransform>(inputWorkspace->getTransformToOriginal(indexToLastTransform), null_deleter());
   }
 
   assert(X.size() == outputWorkspace->dataX(0).size());
