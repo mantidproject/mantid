@@ -4,13 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/DllConfig.h"
-#include <exception>
-#include <ostream>
+
 #include <Poco/Message.h>
+
+#include <iosfwd>
 #include <set>
-#include <streambuf>
 #include <string>
 
 //----------------------------------------------------------------------
@@ -19,6 +18,7 @@
 /// @cond Exclude from doxygen documentation
 namespace Poco
 {
+  class FastMutex;
   class Logger;
   class NullOutputStream;
 }
@@ -72,7 +72,7 @@ class ThreadSafeLogStream;
     typedef Poco::Message::Priority Priority;
 
     /// Sets the Loggername to a new value.
-    void setName(std::string newName);
+    void setName(const std::string & newName);
     /// Logs at Fatal level     
     void fatal(const std::string& msg);
     /// Logs at error level
@@ -88,16 +88,16 @@ class ThreadSafeLogStream;
 
     /// Logs at Fatal level
     std::ostream& fatal();
-    /// Logs at error level                     
+    /// Logs at error level
     std::ostream& error();
-    /// Logs at warning level                   
+    /// Logs at warning level
     std::ostream& warning();
-    /// Logs at notice level            
-    std::ostream& notice();                     
+    /// Logs at notice level
+    std::ostream& notice();
     /// Logs at information level
     std::ostream& information();
     /// Logs at debug level
-    std::ostream& debug();                      
+    std::ostream& debug();
 
     /// Logs the given message at debug level, followed by the data in buffer.
     void dump(const std::string& msg, const void* buffer, std::size_t length);
@@ -106,7 +106,7 @@ class ThreadSafeLogStream;
     void setLevel(int level);
            
     /// Sets the Logger's log offset level.
-    void setLevelOffset(int level);     
+    void setLevelOffset(int level);
 
     /// Gets the Logger's log offset level.
     int getLevelOffset();
@@ -154,8 +154,8 @@ class ThreadSafeLogStream;
     /// Overload of = operator
     Logger& operator= (const Logger&);
 
-    /// Return a log stream set with the given priority
-    void log(const std::string message, Logger::Priority priority);
+    /// Log a message at a given priority
+    void log(const std::string & message, Logger::Priority priority);
 
     /// gets the correct log stream for a priority
     std::ostream& getLogStream(Logger::Priority priority);
@@ -180,7 +180,7 @@ class ThreadSafeLogStream;
     /// The null stream that is used when logging is disabled
     static Poco::NullOutputStream* m_nullStream;
     /// Mutex to make changing the static logger list threadsafe.
-    static Mutex *mutexLoggerList;
+    static Poco::FastMutex *mutexLoggerList;
   };
 
 } // namespace Kernel

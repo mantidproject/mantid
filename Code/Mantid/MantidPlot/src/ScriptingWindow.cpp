@@ -160,7 +160,6 @@ void ScriptingWindow::showEvent(QShowEvent *event)
  */
 void ScriptingWindow::open(const QString & filename, bool newtab)
 {
-  std::string file = filename.toStdString();
   m_manager->open(newtab, filename);
 }
 

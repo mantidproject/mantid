@@ -5,11 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/cow_ptr.h"
-#include <vector>
-#include <functional>
 #include <cmath>
+#include <functional>
 #include <stdexcept>
+#include <vector>
 
 namespace Mantid
 {
@@ -59,7 +58,7 @@ namespace VectorHelper
   /// Convert an array of bin centers to bin boundary values.
   void MANTID_KERNEL_DLL convertToBinBoundary(const std::vector<double> & bin_centers, std::vector<double> & bin_edges);
 
-  bool MANTID_KERNEL_DLL isConstantValue(const MantidVec &arra);
+  bool MANTID_KERNEL_DLL isConstantValue(const std::vector<double> &arra);
 
   template <typename NumT>
   MANTID_KERNEL_DLL std::vector<NumT> splitStringIntoVector(std::string listString);
@@ -142,7 +141,10 @@ namespace VectorHelper
     }
   };
 
-  /// Functor to deal with the increase in the error when adding (or substracting) a number of counts. More generally add errors in quadrature using the square of one of the errors (variance = error^2)
+  /**
+   * Functor to deal with the increase in the error when adding (or substracting) a number of counts.
+   * More generally add errors in quadrature using the square of one of the errors (variance = error^2)
+   */
   template <class T> struct AddVariance: public std::binary_function<T,T,T>
   {
     AddVariance(){}

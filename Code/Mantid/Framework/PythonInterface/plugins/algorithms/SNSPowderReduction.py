@@ -239,9 +239,8 @@ class SNSPowderReduction(PythonAlgorithm):
                              "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
         self.declareProperty("FilterBadPulses", True, "Filter out events measured while proton charge is more than 5% below average")
-        outfiletypes = ['gsas', 'fullprof', 'gsas and fullprof', 'gsas and fullprof and pdfgetn', 'NeXus',
-                            'gsas and NeXus', 'fullprof and NeXus', 'gsas and fullprof and NeXus', 'gsas and fullprof and pdfgetn and NeXus']
-        self.declareProperty("SaveAs", "gsas", StringListValidator(outfiletypes))
+        self.declareProperty("SaveAs", "gsas",
+                             "List of all output file types. Allowed values are 'fullprof', 'gsas', 'nexus', 'pdfgetn', and 'topas'")
         self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
         self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.Directory))
         self.declareProperty("NormalizeByCurrent", True, "Normalized by Current")
@@ -287,7 +286,7 @@ class SNSPowderReduction(PythonAlgorithm):
         calib = self.getProperty("CalibrationFile").value
         self._outDir = self.getProperty("OutputDirectory").value
         self._outPrefix = self.getProperty("OutputFilePrefix").value
-        self._outTypes = self.getProperty("SaveAs").value
+        self._outTypes = self.getProperty("SaveAs").value.lower()
         samRuns = self.getProperty("RunNumber").value
         preserveEvents = self.getProperty("PreserveEvents").value
         if HAVE_MPI and preserveEvents == True:
@@ -948,7 +947,10 @@ class SNSPowderReduction(PythonAlgorithm):
                     MultiplyByBinWidth=normalized, Bank=info.bank, Format="SLOG", ExtendedHeader=True)
         if "fullprof" in self._outTypes:
             api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info.bank, Filename=filename+".dat")          
-        if "NeXus" in self._outTypes:
+        if "topas" in self._outTypes:
+            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info.bank, Filename=filename+".xye",
+                               Format="TOPAS")
+        if "nexus" in self._outTypes:
             api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits").value)
             #api.Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning) # crop edges
             api.SaveNexus(InputWorkspace=wksp, Filename=filename+".nxs")

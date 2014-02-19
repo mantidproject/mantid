@@ -7,7 +7,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCurveFitting/ConvolveWorkspaces.h"
 #include "MantidCurveFitting/Fit.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/TableRow.h"
@@ -28,7 +27,7 @@ class ConvolveWorkspacesTest : public CxxTest::TestSuite
 {
 public:
 	  //Functor to generate spline values
-	  struct SplineFunc1
+	  struct NormGaussianFunc1
 	  {
 	    double operator()(double x, int)
 	    {
@@ -37,7 +36,7 @@ public:
 	    }
 	  };
 	  //Functor to generate spline values
-	  struct SplineFunc2
+	  struct NormGaussianFunc2
 	  {
 	    double operator()(double x, int)
 	    {
@@ -50,20 +49,23 @@ public:
     ConvolveWorkspaces alg;
 
     //Convolution of normalized Gaussians should have sigma = sqrt(sig1^2+sig2^2)
-    MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc1(), 1, -2.0, 2.0, 0.01, false);
-    MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc2(), 1, -2.0, 2.0, 0.01, false);
+    Workspace2D_sptr ws1 = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(NormGaussianFunc1(), 1, -2.0, 2.0, 0.01, false);
+    Workspace2D_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(NormGaussianFunc2(), 1, -2.0, 2.0, 0.01, false);
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace("wksp1", ws1));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace("wksp2", ws2));
+
 
     alg.initialize();
     alg.isInitialized();
     alg.setChild(true);
     alg.setPropertyValue("OutputWorkspace", "Conv");
-    alg.setProperty("Workspace1", ws1);
-    alg.setProperty("Workspace2", ws1);
+    alg.setProperty("Workspace1", "wksp1");
+    alg.setProperty("Workspace2", "wksp1");
 
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
 
-    Workspace2D_const_sptr ows = alg.getProperty("OutputWorkspace");
+    Workspace2D_sptr ows = alg.getProperty("OutputWorkspace");
 
 
     for (size_t i = 0; i < ows->getNumberHistograms(); ++i)
@@ -80,6 +82,8 @@ public:
         TS_ASSERT_DELTA(ys[j], ys2[j], 1e-8);
       }
     }
+    AnalysisDataService::Instance().remove("wksp1");
+    AnalysisDataService::Instance().remove("wksp2");
 
   }
 

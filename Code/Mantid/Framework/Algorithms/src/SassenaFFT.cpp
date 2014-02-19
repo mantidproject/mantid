@@ -27,6 +27,7 @@ Below are plots after application of SassenaFFT to <math>I(Q,t) = e^{-t^2/(2\sig
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SassenaFFT.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -72,7 +73,7 @@ void SassenaFFT::init()
   this->declareProperty(new Kernel::PropertyWithValue<bool>("FFTonlyRealPart", false, Kernel::Direction::Input),"Do we FFT only the real part of I(Q,t)? (optional, default is False)");
   this->declareProperty(new Kernel::PropertyWithValue<bool>("DetailedBalance", false, Kernel::Direction::Input),"Do we apply detailed balance condition? (optional, default is False)");
   this->declareProperty("Temp",300.0,"Multiply structure factor by exp(E/(2*kT)");
-  this->setPropertySettings("Temp", new Kernel::VisibleWhenProperty("Detailed Balance", Kernel::IS_EQUAL_TO, "1"));
+  this->setPropertySettings("Temp", new Kernel::EnabledWhenProperty("DetailedBalance", Kernel::IS_EQUAL_TO, "1"));
 }
 
 /// Execute the algorithm
