@@ -238,6 +238,7 @@ namespace Algorithms
       double a0,a1,a2;
       if(peaks.size()> 0)
       {
+        g_log.information() << "Peaks' size = " << peaks.size() << " -> esitmate background. \n";
         if(peaks[peaks.size()-1].stop == 0) peaks[peaks.size()-1].stop = n-1;
         std::sort(peaks.begin(), peaks.end(), by_len());
 
@@ -251,9 +252,12 @@ namespace Algorithms
       else
       {
         // assume background is 12 first and last points
+        g_log.information("Peaks' size = 0 -> zero background.");
         min_peak = l0+12;
         max_peak = n-13;
         if (min_peak > sizey)min_peak = sizey-1;
+        // FIXME : as it is assumed that background is 12 first and 12 last, then
+        //         why not do a simple fit here!
         a0 = 0.0;
         a1 = 0.0;
         a2 = 0.0;
