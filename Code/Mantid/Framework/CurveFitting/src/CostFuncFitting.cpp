@@ -177,6 +177,7 @@ void CostFuncFitting::calCovarianceMatrix( GSLMatrix& covar, double epsrel )
 void CostFuncFitting::calFittingErrors(const GSLMatrix& covar)
 {
   size_t np = m_function->nParams();
+  auto covarMatrix = boost::shared_ptr<Kernel::Matrix<double>>(new Kernel::Matrix<double>(np,np));
   size_t ia = 0;
   for(size_t i = 0; i < np; ++i)
   {
@@ -186,11 +187,21 @@ void CostFuncFitting::calFittingErrors(const GSLMatrix& covar)
     }
     else
     {
+      size_t ja = 0;
+      for(size_t j = 0; j < np; ++j)
+      {
+        if (!m_function->isFixed(j))
+        {
+          (*covarMatrix)[i][j] = covar.get(ia,ja);
+          ++ja;
+        }
+      }
       double err = sqrt(covar.get(ia,ia));
       m_function->setError(i,err);
       ++ia;
     }
   }
+  m_function->setCovarianceMatrix(covarMatrix);
 }
 
 /**

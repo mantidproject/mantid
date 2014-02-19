@@ -16,6 +16,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Matrix.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <algorithm>
@@ -283,8 +284,7 @@ namespace
         const std::string& baseName,
         API::IFunction_sptr function,
         boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::FunctionValues> values
-    )
+        boost::shared_ptr<API::FunctionValues> values)
   {
     if (!values)
     {
@@ -540,7 +540,7 @@ namespace
   }
 
   /**
-   * Add the calculated function values to the workspace
+   * Add the calculated function values to the workspace. Estimate an error for each calculated value.
    * @param function The function to evaluate
    * @param ws A workspace to fill
    * @param wsIndex The index to store the values
@@ -555,8 +555,10 @@ namespace
 
     // Function value
     function->function(*domain,*resultValues);
+
+    size_t nParams = function->nParams();
     // and errors
-    SimpleJacobian J(nData, function->nParams());
+    SimpleJacobian J(nData, nParams);
     try
     {
       function->functionDeriv(*domain,J);
@@ -566,19 +568,57 @@ namespace
       function->calNumericalDeriv(*domain,J);
     }
 
+    // the function should contain the parameter's covariance matrix
+    auto covar = function->getCovarianceMatrix();
 
-    MantidVec& yValues = ws->dataY(wsIndex);
-    MantidVec& eValues = ws->dataE(wsIndex);
-    for(size_t i=0; i < nData; i++)
+    if (covar)
     {
-      yValues[i] = resultValues->getCalculated(i);
-      double err = 0.0;
-      for(size_t j=0; j< function->nParams();++j)
+      // if the function has a covariance matrix attached - use it for the errors
+      Kernel::Matrix<double> &C = *covar;
+      // The formula is E = J * C * J^T 
+      // We don't do full 3-matrix multiplication because we only need the diagonals of E
+      std::vector<double> E(nData);
+      for(size_t k = 0; k < nData; ++k)
       {
-        double d = J.get(i,j) * function->getError(j);
-        err += d*d;
+        double s = 0.0;
+        for(size_t i=0; i<nParams;++i)
+        {
+          double tmp = J.get(k,i);
+          s += C[i][i] * tmp * tmp;
+          for(size_t j=i+1; j<nParams;++j)
+          {
+            s += J.get(k,i) * C[i][j] * J.get(k,j) * 2;
+          }
+        }
+        E[k] = s;
       }
-      eValues[i] = std::sqrt(err);
+
+      MantidVec& yValues = ws->dataY(wsIndex);
+      MantidVec& eValues = ws->dataE(wsIndex);
+      for(size_t i=0; i < nData; i++)
+      {
+        yValues[i] = resultValues->getCalculated(i);
+        eValues[i] = std::sqrt( E[i] );
+      }
+
+    }
+    else
+    {
+      // otherwise use the parameter errors which is OK for uncorrelated parameters
+      MantidVec& yValues = ws->dataY(wsIndex);
+      MantidVec& eValues = ws->dataE(wsIndex);
+      for(size_t i=0; i < nData; i++)
+      {
+        yValues[i] = resultValues->getCalculated(i);
+        double err = 0.0;
+        for(size_t j=0; j< nParams;++j)
+        {
+          double d = J.get(i,j) * function->getError(j);
+          err += d*d;
+        }
+        eValues[i] = std::sqrt(err);
+
+      }
     }
 
   }

@@ -431,6 +431,10 @@ public:
 
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain& domain, Jacobian& out);
+  /// Set the covariance matrix
+  void setCovarianceMatrix(boost::shared_ptr<Kernel::Matrix<double>> covar);
+  /// Get the covariance matrix
+  boost::shared_ptr<Kernel::Matrix<double>> getCovarianceMatrix()const{return m_covar;}
 
   /// Set the parallel hint
   void setParallel(bool on) {m_isParallel = on;}
@@ -489,6 +493,8 @@ protected:
 private:
   /// The declared attributes
   std::map<std::string, API::IFunction::Attribute> m_attrs;
+  /// The covariance matrix of the fitting parameters
+  boost::shared_ptr<Kernel::Matrix<double>> m_covar;
 };
 
 ///shared pointer to the function base class
