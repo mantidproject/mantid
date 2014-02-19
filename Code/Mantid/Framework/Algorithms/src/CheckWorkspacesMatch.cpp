@@ -390,7 +390,7 @@ inline bool TOL_ERR(const double &x1,const double &x2,const double &ERROR_VAL)
 {
 
   double num= std::fabs(x1-x2);
-  // how to treat x1<0 and x2 > 0 ? 
+  // how to treat x1<0 and x2 > 0 ?  probably this way
   double den=0.5*(std::fabs(x1)+std::fabs(x2));
   if (den<ERROR_VAL) 
     return (num>ERROR_VAL);
