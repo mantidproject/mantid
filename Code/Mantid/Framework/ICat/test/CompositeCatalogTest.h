@@ -113,7 +113,8 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
       // This will attempt to login to each catalog that has been added.
-      compositeCatalog->login("","","");
+      std::string temp = "";
+      compositeCatalog->login(temp,temp,temp);
       // Verify that the composite catalog login method works as expected.
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
       // Delete the objects that were manually created.
@@ -143,7 +144,8 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
 
-      compositeCatalog->myData(ITableWorkspace_sptr());
+      ITableWorkspace_sptr ws;
+      compositeCatalog->myData(ws);
 
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
 
@@ -158,7 +160,9 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
 
-      compositeCatalog->getDataSets("",ITableWorkspace_sptr());
+      ITableWorkspace_sptr ws;
+      std::string id = "";
+      compositeCatalog->getDataSets(id,ws);
 
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
 
@@ -173,7 +177,9 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
 
-      compositeCatalog->getDataFiles("",ITableWorkspace_sptr());
+      ITableWorkspace_sptr ws;
+      std::string id = "";
+      compositeCatalog->getDataFiles(id,ws);
 
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
 
@@ -188,7 +194,8 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
 
-      compositeCatalog->listInstruments(std::vector<std::string>());
+      std::vector<std::string> vector;
+      compositeCatalog->listInstruments(vector);
 
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
 
@@ -203,7 +210,8 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
 
-      compositeCatalog->listInvestigationTypes(std::vector<std::string>());
+      std::vector<std::string> vector;
+      compositeCatalog->listInvestigationTypes(vector);
 
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
 
@@ -218,7 +226,9 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
 
-      compositeCatalog->getFileLocation(0, std::string(""));
+      const long long temp = 0;
+      std::string fileLocation = "";
+      compositeCatalog->getFileLocation(temp,fileLocation);
 
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
 
@@ -233,7 +243,9 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
 
-      compositeCatalog->getDownloadURL(0, std::string(""));
+      const long long temp = 0;
+      std::string url = "";
+      compositeCatalog->getDownloadURL(temp, url);
 
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
 
@@ -248,7 +260,8 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
 
-      compositeCatalog->getUploadURL("","","");
+      std::string temp = "";
+      compositeCatalog->getUploadURL(temp,temp,temp);
 
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
 
