@@ -90,6 +90,13 @@ void export_MDGeometry()
     .def("getOrigin", (const Mantid::Kernel::VMD & (MDGeometry::*)() const)&MDGeometry::getOrigin,
          return_value_policy<copy_const_reference>(),
          "Returns the vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace")
+
+    .def("getNumberTransformsFromOriginal", &MDGeometry::getNumberTransformsFromOriginal,
+        "Returns the number of transformations from original workspace coordinate systems")
+
+    .def("getNumberTransformsToOriginal", &MDGeometry::getNumberTransformsToOriginal,
+        "Returns the number of transformations to original workspace coordinate systems")
+
     ;
 }
 
