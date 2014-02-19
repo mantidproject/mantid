@@ -72,25 +72,24 @@ namespace Mantid
       m_ws = getProperty("InputWorkspace");
       g_log.information("FILENAME: " + filename);
       auto title ='#'+ m_ws->getTitle();
-      const std::vector<double> & x1 = m_ws->readX(0);
-      const size_t xlength = x1.size() - 1;
-      std::vector<double> X1;
-      X1.resize(xlength, 0);
+      const std::vector<double> & xTemp = m_ws->readX(0);
+      const size_t xlength = xTemp.size() - 1;
+      std::vector<double> XData(xlength, 0);
       for (size_t i = 0; i < xlength; ++i)
       {
-        X1[i]=(x1[i]+x1[i+1])/2.0;
+        XData[i]=(xTemp[i]+xTemp[i+1])/2.0;
       }
-      const std::vector<double> & y1 = m_ws->readY(0);
-      const std::vector<double> & e1 = m_ws->readE(0);
-      double qres = (X1[1]-X1[0])/X1[1];
+      const std::vector<double> & yData = m_ws->readY(0);
+      const std::vector<double> & eData = m_ws->readE(0);
+      double qres = (XData[1]-XData[0])/XData[1];
       g_log.information("Constant dq/q from file: " + boost::lexical_cast<std::string>(qres));
       file << std::scientific;
       for (size_t i = 0; i < xlength; ++i)
       {
-        double dq = X1[i]*qres;
-        outputval(X1[i], file, false);
-        outputval(y1[i], file);
-        outputval(e1[i], file);
+        double dq = XData[i]*qres;
+        outputval(XData[i], file, false);
+        outputval(yData[i], file);
+        outputval(eData[i], file);
         outputval(dq, file);
         file << std::endl;
       }
