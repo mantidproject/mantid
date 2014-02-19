@@ -63,6 +63,7 @@ set ( TEST_FILES
 	CatalogLoginTest.h
 	CatalogMyDataSearchTest.h
 	CatalogSearchTest.h
+	CompositeCatalogTest.h
 )
 
 if(UNITY_BUILD)
