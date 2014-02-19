@@ -594,7 +594,6 @@ class ReflGui(refl_window.Ui_windowRefl):
 Get a representative workspace from the input workspace.
 '''        
 def get_representative_workspace(run):
-    print type(run)
     if isinstance(run, WorkspaceGroup):
         run_number = groupGet(run[0], "samp", "run_number")
         _runno = Load(Filename=str(run_number))
@@ -629,12 +628,9 @@ def calcRes(run):
     s2vg = inst.getComponentByName('slit2')
     s2vg = s2vg.getNumberParameter('vertical gap')[0]
     import numpy
-    if isinstance(theta, numpy.float64):
-        th = theta.size
-    elif not isinstance(theta, float):
-        th = theta[len(theta) - 1]
-    else:
-        th = theta
+    th = theta
+    if isinstance(theta, numpy.ndarray):
+        th = theta[-1]
     print "s1vg=", s1vg, "s2vg=", s2vg, "theta=", theta
     #1500.0 is the S1-S2 distance in mm for SURF!!!
     resolution = math.atan((s1vg + s2vg) / (2 * (s2z - s1z))) * 180 / math.pi / th
