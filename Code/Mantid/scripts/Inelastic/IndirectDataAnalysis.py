@@ -3,7 +3,7 @@ from IndirectImport import import_mantidplot
 mp = import_mantidplot()
 from IndirectCommon import *
 from mantid import config, logger
-import math, re, os.path, numpy as np
+import math, os.path, numpy as np
 
 ##############################################################################
 # Misc. Helper Functions
@@ -993,133 +993,96 @@ def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=Fals
 # MSDFit
 ##############################################################################
 
-def msdfitParsToWS(Table, xData):
-    ws = mtd[Table+'_Table']
-    dataX = ws.column("axis-1")
-    yA0 = ws.column("A0")
-    eA0 = ws.column("A0_Err")
-    yA1 = ws.column("A1")  
-    eA1 = ws.column("A1_Err")
-    dataY1 = map(lambda x : -x, yA1) 
-    wsname = Table
-
-    #check if temp was increasing or decreasing
-    if(dataX[0] > dataX[-1]):
-        # if so reverse data to follow natural ordering
-        dataX = dataX[::-1]
-        dataY1 = dataY1[::-1]
-        eA1 = eA1[::-1]
-
-    CreateWorkspace(OutputWorkspace=wsname+'_a0', DataX=dataX, DataY=yA0, DataE=eA0,
-        Nspec=1, UnitX='')
-    CreateWorkspace(OutputWorkspace=wsname+'_a1', DataX=dataX, DataY=dataY1, DataE=eA1,
-        Nspec=1, UnitX='')
-    group = wsname+'_a0,'+wsname+'_a1'
-    GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=wsname)
-    return wsname
-
 def msdfitPlotSeq(inputWS, xlabel):
-    ws = mtd[inputWS+'_a1']
+    ws = mtd[inputWS+'_A1']
     if len(ws.readX(0)) > 1:
-        msd_plot = mp.plotSpectrum(inputWS+'_a1',0,True)
+        msd_plot = mp.plotSpectrum(inputWS+'_A1',0,True)
         msd_layer = msd_plot.activeLayer()
         msd_layer.setAxisTitle(mp.Layer.Bottom,xlabel)
         msd_layer.setAxisTitle(mp.Layer.Left,'<u2>')
 
+def msdfitCreateParamWorkspace(ws_name, param_name, table_workspace):
+    #create workspaces for each of the parameters
+    ws = mtd[table_workspace]
+    x = ws.column("axis-1")
+    y = ws.column(param_name)
+    e = ws.column(param_name + "_Err")
+
+    #check if temp was increasing or decreasing
+    if(x[0] > x[-1]):
+        # if so reverse data to follow natural ordering
+        x = x[::-1]
+        y = y[::-1]
+        e = e[::-1]
+
+    output_name = ws_name+'_'+param_name
+    CreateWorkspace(OutputWorkspace=output_name, DataX=x, DataY=y, DataE=e,
+                    Nspec=1, UnitX='')
+
+    return output_name
+
 def msdfit(inputs, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=False, Plot=True):
     StartTime('msdFit')
-    workdir = config['defaultsave.directory']
-    log_type = 'sample'
-    file = inputs[0]
-    (direct, filename) = os.path.split(file)
-    (root, ext) = os.path.splitext(filename)
-    (instr, first) = getInstrRun(filename)
+    workdir = getDefaultWorkingDirectory()
+
+    file_path = inputs[0]
+    file_path = FileFinder.getFullPath(file_path)
+    (direct, filename) = os.path.split(file_path)
+    (ws, ext) = os.path.splitext(filename)
+
     if Verbose:
-        logger.notice('Reading Run : '+file)
-    LoadNexusProcessed(FileName=file, OutputWorkspace=root)
-    nHist = mtd[root].getNumberHistograms()
-    file_list = []
-    run_list = []
-    ws = mtd[root]
-    ws_run = ws.getRun()
-    vertAxisValues = ws.getAxis(1).extractValues()
-    x_list = vertAxisValues
+        logger.notice('Reading Run : '+ file_path)
+
+    LoadNexusProcessed(FileName=file_path, OutputWorkspace=ws)
+
+    num_spectra = mtd[ws].getNumberHistograms()
+    if spec_min < 0 or spec_max >= num_spectra:
+        raise ValueError("Invalid spectrum range: %d - %d" % (spec_min, spec_max))
+
+    xlabel = ''
+    ws_run = mtd[ws].getRun()
     if 'vert_axis' in ws_run:
         xlabel = ws_run.getLogData('vert_axis').value
 
-    if spec_max == None:
-        spec_max = nHist-1
-
-    if spec_min < 0 or spec_max > nHist-1 or spec_min > spec_max:
-        raise ValueError("The range %d - %d is not a valid spectrum range" % (spec_min, spec_max))
-    
-    run_list = ''
-    for nr in range(spec_min, spec_max+1):
-        nsam,ntc = CheckHistZero(root)
-        lnWS = '__lnI_'+str(nr)
-        ExtractSingleSpectrum(InputWorkspace=root, OutputWorkspace=lnWS, WorkspaceIndex=nr)
-        file_list.append(lnWS)
-        run_list += lnWS+';'
-
-    mname = root[:-4]
+    mname = ws[:-4]
     msdWS = mname+'_msd'
-    if Verbose:
-       logger.notice('Fitting Runs '+mname)
-       logger.notice('Q-range from '+str(startX)+' to '+str(endX))
+
+    #fit line to each of the spectra
     function = 'name=LinearBackground, A0=0, A1=0'
-    PlotPeakByLogValue(Input=run_list, OutputWorkspace=msdWS+'_Table', Function=function,
-        StartX=startX, EndX=endX, FitType = 'Sequential')
-    msdfitParsToWS(msdWS, x_list)
-    nr = 0
-    fitWS = mname+'_Fit'
-    calcWS = mname+'_msd_Result'
-    a0 = mtd[msdWS+'_a0'].readY(0)
-    a1 = mtd[msdWS+'_a1'].readY(0)
+    input_params = [ ws+',i%d' % i for i in xrange(spec_min, spec_max+1)]
+    input_params = ';'.join(input_params)
+    PlotPeakByLogValue(Input=input_params, OutputWorkspace=msdWS, Function=function,
+                       StartX=startX, EndX=endX, FitType='Sequential', CreateOutput=True)
 
-    group_workspace_list = ''
-    for nr, input_workspace in enumerate(file_list):
-        CropWorkspace(InputWorkspace=input_workspace,OutputWorkspace='__data',XMin=0.95*startX,XMax=1.05*endX)
-        dataX = mtd['__data'].readX(0)
-        nxd = len(dataX)
-        dataX = np.append(dataX,2*dataX[nxd-1]-dataX[nxd-2])
-        dataY = np.array(mtd['__data'].readY(0))
-        dataE = np.array(mtd['__data'].readE(0))
-        xd = []
-        yd = []
-        ed = []
-        for n in range(0,nxd):
-            line = a0[nr] - a1[nr]*dataX[n]
-            xd.append(dataX[n])
-            yd.append(line)
-            ed.append(0.0)
-        xd.append(dataX[nxd])
-        dataX = np.append(dataX,np.array(xd))
-        dataY = np.append(dataY,np.array(yd))
-        dataE = np.append(dataE,np.array(ed))
-        fout = calcWS +'_'+ str(nr)
-        CreateWorkspace(OutputWorkspace=fout, DataX=dataX, DataY=dataY, DataE=dataE,
-            Nspec=2, UnitX='QSquared', VerticalAxisUnit='Text', VerticalAxisValues='Data,Calc')
+    DeleteWorkspace(msdWS + '_NormalisedCovarianceMatrices')
+    DeleteWorkspace(msdWS + '_Parameters')
+    msd_parameters = msdWS+'_Table'
+    RenameWorkspace(msdWS, OutputWorkspace=msd_parameters)
 
-        group_workspace_list += fout + ','
-        DeleteWorkspace(input_workspace)
-        DeleteWorkspace('__data')
-    
-    GroupWorkspaces(InputWorkspaces=group_workspace_list,OutputWorkspace=calcWS)
+    #create workspaces for each of the parameters
+    group = []
+    ws_name = msdfitCreateParamWorkspace(msdWS, "A0", msd_parameters)
+    group.append(ws_name)
+    ws_name = msdfitCreateParamWorkspace(msdWS, "A1", msd_parameters)
+    group.append(ws_name)
+
+    GroupWorkspaces(InputWorkspaces=','.join(group),OutputWorkspace=msdWS)
 
     #add sample logs to output workspace
-    CopyLogs(InputWorkspace=root, OutputWorkspace=msdWS)
+    CopyLogs(InputWorkspace=ws, OutputWorkspace=msdWS)
     AddSampleLog(Workspace=msdWS, LogName="start_x", LogType="Number", LogText=str(startX))
     AddSampleLog(Workspace=msdWS, LogName="end_x", LogType="Number", LogText=str(endX))
-    
+
     if Plot:
         msdfitPlotSeq(msdWS, xlabel)
     if Save:
-        msd_path = os.path.join(workdir, msdWS+'.nxs')					# path name for nxs file
+        msd_path = os.path.join(workdir, msdWS+'.nxs')                  # path name for nxs file
         SaveNexusProcessed(InputWorkspace=msdWS, Filename=msd_path, Title=msdWS)
         if Verbose:
-            logger.notice('Output msd file : '+msd_path)  
+            logger.notice('Output msd file : '+msd_path)
+
     EndTime('msdFit')
-    return msdWS
+    return msdWS + '_Workspaces'
 
 def plotInput(inputfiles,spectra=[]):
     OneSpectra = False

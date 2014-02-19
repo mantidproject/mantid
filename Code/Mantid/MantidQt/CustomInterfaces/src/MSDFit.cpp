@@ -143,11 +143,10 @@ namespace IDA
 
   void MSDFit::plotFit(QString wsName)
   {
-    QString resultWorkspace = wsName + "_Result";
-    if(Mantid::API::AnalysisDataService::Instance().doesExist(resultWorkspace.toStdString()))
+    if(Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()))
     {
       //read the fit from the workspace
-      auto groupWs = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::WorkspaceGroup>(resultWorkspace.toStdString());
+      auto groupWs = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::WorkspaceGroup>(wsName.toStdString());
       auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(groupWs->getItem(0));
       m_msdFitCurve = plotMiniplot(m_msdPlot, m_msdFitCurve, ws, 1);
       QPen fitPen(Qt::red, Qt::SolidLine);
