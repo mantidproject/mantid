@@ -12,6 +12,7 @@ Creates a single spectrum Workspace2D with X,Y, and E copied from an first non-i
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/NullCoordTransform.h"
 
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits.hpp>
@@ -123,16 +124,23 @@ void ConvertMDHistoToMatrixWorkspace::exec()
   outputWorkspace->dataY(0).assign(Y.begin(),Y.end());
   outputWorkspace->dataE(0).assign(E.begin(),E.end());
 
+  const size_t numberOriginal = inputWorkspace->numOriginalWorkspaces();
+  NullCoordTransform nullTransform(inputWorkspace->getNumDims());
+  CoordTransform* transform = &nullTransform;
+  if(numberOriginal > 0)
+  {
+    const size_t index = numberOriginal -1;
+    transform = inputWorkspace->getTransformToOriginal(index);
+  }
+
   assert(X.size() == outputWorkspace->dataX(0).size());
   for(size_t i = 0; i < X.size(); ++i)
   {
     // Coordinates in the workspace being plotted
     VMD wsCoord = start + dir * X[i];
-    // Transform to the original workspace's coordinates
-    //VMD originalCoord = m_transform->applyVMD(wsCoord);
-    // And pick only that coordinate
-    //x = originalCoord[m_currentPlotAxis];
-    outputWorkspace->dataX(0)[i] = wsCoord[id];
+
+    VMD inTargetCoord = transform->applyVMD(wsCoord);
+    outputWorkspace->dataX(0)[i] = inTargetCoord[id];
   }
 
   boost::shared_ptr<Kernel::Units::Label> labelX = boost::dynamic_pointer_cast<Kernel::Units::Label>(
