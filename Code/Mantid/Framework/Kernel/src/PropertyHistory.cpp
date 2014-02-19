@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/Property.h"
+#include <iostream>
 
 namespace Mantid
 {

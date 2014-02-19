@@ -3,7 +3,12 @@
 This algorithm allows a user (who is logged into the information catalog) to publish
 datafiles or workspaces to investigations of which they are an investigator.
 
-'''Parameters Note:''' A file or workspace can be published, but not both at the same time.
+Datafiles and workspaces that are published are automatically made private. This means only investigators of that investigation can view them.
+
+'''Parameters Note'''
+
+* A file or workspace can be published, but not both at the same time.
+* When uploading a workspace, it is saved to the default save directory as a nexus file. The history of of the workspace is generated and saved into a Python script, which is also uploaded alongside the datafile of the workspace.
 
 *WIKI*/
 
@@ -30,8 +35,6 @@ datafiles or workspaces to investigations of which they are an investigator.
 
 #include <fstream>
 #include <boost/regex.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 
 namespace Mantid
 {
@@ -56,6 +59,7 @@ namespace Mantid
       declareProperty("NameInCatalog","","The name to give to the file being saved. The file name or workspace name is used by default. "
           "This can only contain alphanumerics, underscores or periods.");
       declareProperty("InvestigationNumber","","The investigation number where the published file will be saved to.");
+      declareProperty("DataFileDescription","","A short description of the datafile you are publishing to the catalog.");
     }
 
     /// Execute the algorithm
@@ -115,7 +119,8 @@ namespace Mantid
       // Verify that the file can be opened correctly.
       if (fileStream.rdstate() & std::ios::failbit) throw Mantid::Kernel::Exception::FileError("Error on opening file at: ", filePath);
       // Publish the contents of the file to the server.
-      publish(fileStream,catalog->getUploadURL(getPropertyValue("InvestigationNumber"), getPropertyValue("NameInCatalog")));
+      publish(fileStream,catalog->getUploadURL(
+          getPropertyValue("InvestigationNumber"), getPropertyValue("NameInCatalog"), getPropertyValue("DataFileDescription")));
       // If a workspace was published, then we want to also publish the history of a workspace.
       if (!ws.empty()) publishWorkspaceHistory(catalog, workspace);
     }
@@ -144,7 +149,6 @@ namespace Mantid
         // Sets the encoding type of the request. This enables us to stream data to the server.
         request.setChunkedTransferEncoding(true);
         std::ostream& os = session.sendRequest(request);
-
         // Copy data from the input stream to the server (request) output stream.
         Poco::StreamCopier::copyStream(fileContents, os);
         
@@ -152,23 +156,20 @@ namespace Mantid
         Poco::Net::HTTPResponse response;
         // Store the response for use IF an error occurs (e.g. 404).
         std::istream& responseStream = session.receiveResponse(response);
+
         // Obtain the status returned by the server to verify if it was a success.
-        std::string HTTPStatus = boost::lexical_cast<std::string>(response.getStatus());
-
-        // Throw an error if publishing was not successful.
-        // (Note: The IDS does not currently return any meta-data related to the errors caused.)
-        if (HTTPStatus.find("20") == std::string::npos)
+        Poco::Net::HTTPResponse::HTTPStatus HTTPStatus = response.getStatus();
+        // The error message returned by the IDS (if one exists).
+        std::string IDSError = CatalogAlgorithmHelper().getIDSError(HTTPStatus, responseStream);
+        // Cancel the algorithm and display the message if it exists.
+        if(!IDSError.empty())
         {
-          std::string jsonResponseData;
-          // Copy the input stream to a string.
-          Poco::StreamCopier::copyToString(responseStream, jsonResponseData);
-
           // As an error occurred we must cancel the algorithm.
           // We cannot throw an exception here otherwise it is caught below as Poco::Exception catches runtimes,
           // and then the I/O error is thrown as it is generated above first.
           this->cancel();
           // Output an appropriate error message from the JSON object returned by the IDS.
-          g_log.error(getIDSError(jsonResponseData));
+          g_log.error(IDSError);
         }
       }
       catch(Poco::Net::SSLException& error)
@@ -221,7 +222,7 @@ namespace Mantid
       // Use the name the use wants to save the file to the server as and append .py
       std::string fileName = Poco::Path(Poco::Path(getPropertyValue("NameInCatalog")).getFileName()).getBaseName() + ".py";
       // Publish the workspace history to the server.
-      publish(ss, catalog->getUploadURL(getPropertyValue("InvestigationNumber"), fileName));
+      publish(ss, catalog->getUploadURL(getPropertyValue("InvestigationNumber"), fileName, getPropertyValue("DataFileDescription")));
     }
 
     /**
@@ -238,21 +239,5 @@ namespace Mantid
       return wsHistory->getPropertyValue("ScriptText");
     }
 
-
-    /**
-     * Obtain the error message returned by the IDS.
-     * @param jsonResponseData :: The contents of the JSON object returned from the IDS.
-     * @returns An appropriate error message for the user.
-     */
-    const std::string CatalogPublish::getIDSError(const std::string& jsonResponseData)
-    {
-      std::istringstream is(jsonResponseData);
-      // Stores the contents of `jsonResponseData` as a json property tree.
-      boost::property_tree::ptree json;
-      // Convert the stream to a JSON tree.
-      boost::property_tree::read_json(is, json);
-      // Return the message returned by the server.
-      return json.get<std::string>("code") + ": " + json.get<std::string>("message");
-    }
   }
 }

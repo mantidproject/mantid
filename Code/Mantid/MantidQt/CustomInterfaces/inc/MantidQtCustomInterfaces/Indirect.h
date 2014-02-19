@@ -140,6 +140,9 @@ namespace MantidQt
     private:
       /// set and show an instrument-specific widget
       void setInstSpecificWidget(const std::string & parameterName, QCheckBox * checkBox, QCheckBox::ToggleState defaultState);
+      // set the upper and lower bounds of the plot range
+      void setPlotRange(MantidWidgets::RangeSelector* rangeSelector, QtDoublePropertyManager* dblManager, 
+        const std::pair<QtProperty*, QtProperty*> props, const std::pair<double, double>& bounds);
 
       Ui::ConvertToEnergy m_uiForm; ///< user interface form object
       Background *m_backgroundDialog; ///< background removal dialog

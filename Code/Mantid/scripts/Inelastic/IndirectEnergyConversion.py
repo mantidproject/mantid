@@ -52,7 +52,7 @@ def createMappingFile(groupFile, ngroup, nspec, first):
 
 def resolution(files, iconOpt, rebinParam, bground, 
         instrument, analyser, reflection,
-        plotOpt=False, Res=True, factor=None):
+        Res=True, factor=None, Plot=False, Verbose=False, Save=False):
     reducer = inelastic_indirect_reducer.IndirectReducer()
     reducer.set_instrument_name(instrument)
     reducer.set_detector_range(iconOpt['first']-1,iconOpt['last']-1)
@@ -80,14 +80,17 @@ def resolution(files, iconOpt, rebinParam, bground,
         CalculateFlatBackground(InputWorkspace=iconWS, OutputWorkspace=name, StartX=bground[0], EndX=bground[1], 
             Mode='Mean', OutputMode='Subtract Background')
         Rebin(InputWorkspace=name, OutputWorkspace=name, Params=rebinParam)
+        
+        if Save:
+            if Verbose:
+                logger.notice("Resolution file saved to default save directory.")
+            SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
             
-        SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
-            
-        if plotOpt:
+        if Plot:
             graph = mp.plotSpectrum(name, 0)
         return name
     else:
-        if plotOpt:
+        if Plot:
             graph = mp.plotSpectrum(iconWS, 0)
         return iconWS
 
@@ -194,7 +197,7 @@ def sliceProcessRawFile(rawFile, calibWsName, useCalib, xRange, useTwoRanges, sp
 
     return sfile
 
-def slice(inputfiles, calib, xRange, spec, suffix, Save=False, Verbose=True, Plot=False):
+def slice(inputfiles, calib, xRange, spec, suffix, Save=False, Verbose=False, Plot=False):
 
     StartTime('Slice')
 

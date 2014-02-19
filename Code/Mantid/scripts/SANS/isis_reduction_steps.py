@@ -122,7 +122,11 @@ class LoadRun(object):
             workspace = self._get_workspace_name()
 
         extra_options['OutputWorkspace'] = workspace
+        
         outWs = Load(self._data_file, **extra_options)
+
+        if isinstance(outWs, IEventWorkspace):
+            LoadNexusMonitors(self._data_file, OutputWorkspace=workspace + "_monitors")
         
         loader_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
         
@@ -414,8 +418,8 @@ class CanSubtraction(ReductionStep):
         if reducer.to_Q.output_type == '1D':
             rem_nans = sans_reduction_steps.StripEndNans()
 
-        DeleteWorkspace(tmp_smp)
-        DeleteWorkspace(tmp_can)
+        self._keep_partial_results(tmp_smp, tmp_can)
+
 
     def get_wksp_name(self):
         return self.workspace.wksp_name
@@ -424,6 +428,16 @@ class CanSubtraction(ReductionStep):
     
     def get_periods_in_file(self):
         return self.workspace.periods_in_file
+
+    def _keep_partial_results(self, sample_name, can_name):
+        # user asked to keep these results 8970
+        gp_name = 'sample_can_reductions'
+        if mtd.doesExist(gp_name):
+            gpr = mtd[gp_name]
+            gpr.add(sample_name)
+            gpr.add(can_name)
+        else:
+            GroupWorkspaces([sample_name, can_name], OutputWorkspace=gp_name)
 
     periods_in_file = property(get_periods_in_file, None, None, None)
 
@@ -986,7 +1000,7 @@ class CropDetBank(ReductionStep):
         # Get the detector bank that is to be used in this analysis leave the complete workspace
         reducer.instrument.cur_detector().crop_to_detector(in_wksp, workspace)
 
-class NormalizeToMonitor(sans_reduction_steps.Normalize):
+class NormalizeToMonitor(ReductionStep):
     """
         Before normalisation the monitor spectrum's background is removed 
         and for LOQ runs also the prompt peak. The input workspace is copied
@@ -995,11 +1009,8 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
     NORMALISATION_SPEC_NUMBER = 1
     NORMALISATION_SPEC_INDEX = 0
     def __init__(self, spectrum_number=None):
-        if not spectrum_number is None:
-            index_num = spectrum_number
-        else:
-            index_num = None
-        super(NormalizeToMonitor, self).__init__(index_num)
+        super(NormalizeToMonitor, self).__init__()
+        self._normalization_spectrum = spectrum_number
 
         #the result of this calculation that will be used by CalculateNorm() and the ConvertToQ
         self.output_wksp = None
@@ -1012,8 +1023,11 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
         
         sanslog.notice('Normalizing to monitor ' + str(normalization_spectrum))
 
-        self.output_wksp = 'Monitor'
-        mon = reducer.get_monitor(normalization_spectrum-1)
+        self.output_wksp = str(workspace) + '_incident_monitor'
+        mon = reducer.get_sample().get_monitor(normalization_spectrum-1)
+        if reducer.event2hist.scale != 1:
+            mon *= reducer.event2hist.scale
+
         if str(mon) != self.output_wksp:
             RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
         
@@ -1022,11 +1036,10 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
                        reducer.transmission_calculator.loq_removePromptPeakMax, Interpolation="Linear")
         
         # Remove flat background
-        TOF_start, TOF_end = reducer.inst.get_TOFs(
-                                    self.NORMALISATION_SPEC_NUMBER)
+        TOF_start, TOF_end = reducer.inst.get_TOFs(normalization_spectrum)
+
         if TOF_start and TOF_end:
-            CalculateFlatBackground(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp, StartX=TOF_start, EndX=TOF_end,
-                WorkspaceIndexList=self.NORMALISATION_SPEC_INDEX, Mode='Mean')
+            CalculateFlatBackground(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp, StartX=TOF_start, EndX=TOF_end, Mode='Mean')
 
         #perform the same conversion on the monitor spectrum as was applied to the workspace but with a possibly different rebin
         if reducer.instrument.is_interpolating_norm():
@@ -1607,23 +1620,21 @@ class SliceEvent(ReductionStep):
     
     def __init__(self):
         super(SliceEvent, self).__init__()
-        self.monitor = ""
+        self.scale = 1
 
     def execute(self, reducer, workspace):
         ws_pointer = getWorkspaceReference(workspace)
 
         # it applies only for event workspace
         if not isinstance(ws_pointer, IEventWorkspace):
+            self.scale = 1
             return
         start, stop = reducer.getCurrSliceLimit()
         
-        _monitor = getMonitor4event(ws_pointer)
+        _monitor = reducer.get_sample().get_monitor()
 
-        hist, others = slice2histogram(ws_pointer, start, stop, _monitor)
-        
-        # get the monitors scaled for the sliced event
-        self.monitor = '_scaled_monitor'
-        CropWorkspace(hist, EndWorkspaceIndex=_monitor.getNumberHistograms()-1, OutputWorkspace=self.monitor)
+        hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor)
+        self.scale = part_c / tot_c
 
 class UserFile(ReductionStep):
     """
@@ -2132,8 +2143,8 @@ class UserFile(ReductionStep):
                 reducer.inst.set_TOFs(None, None, int(parts[0]))
                 return ''
 
-            # assume a line of the form BACK/M1/TIME 
-            parts = arguments.split('/TIME')
+            # assume a line of the form BACK/M1/TIMES 
+            parts = arguments.split('/TIMES')
             if len(parts) == 2:
                 times = parts[1].split()
             else:

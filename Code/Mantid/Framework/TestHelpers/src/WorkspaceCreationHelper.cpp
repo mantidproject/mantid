@@ -1264,4 +1264,24 @@ namespace WorkspaceCreationHelper
 
     return DetPos;
   }
+  void create2DAngles(std::vector<double> &L2,std::vector<double> &polar,std::vector<double> &azim,
+                      size_t nPolar,size_t nAzim,double polStart,double polEnd,double azimStart,double azimEnd)
+  {
+    size_t nDet = nPolar*nAzim;
+    L2.resize(nDet,10);
+    polar.resize(nDet);
+    azim.resize(nDet);
+
+    double dPolar=(polEnd-polStart)/static_cast<double>(nDet-1);
+    double dAzim =(azimEnd-azimEnd)/static_cast<double>(nDet-1);
+    for( size_t i=0;i<nPolar;i++)
+    {
+      for( size_t j=0;j<nAzim;j++)
+      {
+        polar[i*nPolar+j]=polStart+dPolar*static_cast<double>(i);
+        azim[i*nPolar+j] =azimStart+dAzim*static_cast<double>(j);
+      }
+    }
+  }
+
 }

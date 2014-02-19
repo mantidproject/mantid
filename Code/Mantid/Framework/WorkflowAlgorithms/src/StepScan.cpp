@@ -67,22 +67,29 @@ namespace WorkflowAlgorithms
 
   void StepScan::exec()
   {
+    using DataObjects::EventWorkspace_sptr;
     // Get hold of the input workspace
-    DataObjects::EventWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+    EventWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
     // Get hold of the related monitors workspace, if it exists
     // TODO: How will this work for live data???
-    DataObjects::EventWorkspace_sptr monitorWorkspace = getMonitorWorkspace(inputWorkspace);
+    EventWorkspace_sptr monitorWorkspace = getMonitorWorkspace(inputWorkspace);
+
+    // If any of the filtering properties have been set, clone the input workspace
+    MatrixWorkspace_sptr maskWS = getProperty("MaskWorkspace");
+    const double xmin = getProperty("XMin");
+    const double xmax = getProperty("XMax");
+    if ( maskWS || !isEmpty(xmin) || !isEmpty(xmax) )
+    {
+      inputWorkspace = cloneInputWorkspace(inputWorkspace);
+    }
 
     // If the MaskWorkspace property has been set, run the MaskDetectors algorithm
-    MatrixWorkspace_sptr maskWS = getProperty("MaskWorkspace");
     if ( maskWS )
     {
       runMaskDetectors(inputWorkspace, maskWS);
     }
 
     // If a restricted X range has been set, handle that
-    const double xmin = getProperty("XMin");
-    const double xmax = getProperty("XMax");
     if ( !isEmpty(xmin) || !isEmpty(xmax) )
     {
       runFilterByXValue(inputWorkspace, xmin, xmax);
@@ -92,7 +99,11 @@ namespace WorkflowAlgorithms
 
     // Run the SumEventsByLogValue algorithm with the log fixed to 'scan_index'
     IAlgorithm_sptr sumEvents = createChildAlgorithm("SumEventsByLogValue");
-    sumEvents->setProperty<DataObjects::EventWorkspace_sptr>("InputWorkspace", inputWorkspace);
+    sumEvents->setProperty<EventWorkspace_sptr>("InputWorkspace", inputWorkspace);
+    if ( monitorWorkspace )
+    {
+      sumEvents->setProperty<EventWorkspace_sptr>("MonitorWorkspace",monitorWorkspace);
+    }
     sumEvents->setProperty("LogName", "scan_index");
     sumEvents->executeAsChildAlg();
 
@@ -131,6 +142,16 @@ namespace WorkflowAlgorithms
     }
 
     return monitorWorkspace;
+  }
+
+  DataObjects::EventWorkspace_sptr StepScan::cloneInputWorkspace(API::Workspace_sptr inputWS)
+  {
+    IAlgorithm_sptr clone = createChildAlgorithm("CloneWorkspace");
+    clone->setProperty("InputWorkspace",inputWS);
+    clone->executeAsChildAlg();
+
+    Workspace_sptr temp = clone->getProperty("OutputWorkspace");
+    return boost::static_pointer_cast<DataObjects::EventWorkspace>(temp);
   }
 
   /** Runs MaskDetectors as a child algorithm on the input workspace.

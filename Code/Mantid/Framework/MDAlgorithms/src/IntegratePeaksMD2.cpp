@@ -262,7 +262,18 @@ namespace MDAlgorithms
     }
     double backgroundCylinder = cylinderLength;
     double percentBackground = getProperty("PercentBackground");
-    cylinderLength *= 1.0 - (percentBackground/100.);
+    size_t peakMin = 0;
+    size_t peakMax = numSteps;
+    double ratio = 0.0;
+    if (cylinderBool)
+    {
+      peakMin = static_cast<size_t>(static_cast<double>(numSteps) * percentBackground/100.);
+      peakMax = numSteps - peakMin - 1;
+      size_t numPeakCh = peakMax - peakMin + 1;            //number of peak channels
+      size_t numBkgCh = numSteps - numPeakCh;  //number of background channels
+      ratio = static_cast<double>(numPeakCh)/static_cast<double>(numBkgCh);
+    }
+    //cylinderLength *= 1.0 - (percentBackground/100.);
     /// Replace intensity with 0
     bool replaceIntensity = getProperty("ReplaceIntensity");
     bool integrateEdge = getProperty("IntegrateIfOnEdge");
@@ -587,8 +598,9 @@ namespace MDAlgorithms
 				// Get background counts
 				for (size_t j = 0; j < numSteps; j++)
 				{
-					double background = paramsValue[numcols-2] * x[j] * x[j] + paramsValue[numcols-3] * x[j] + paramsValue[numcols-4];
-					if (yy[j] > background)
+					//paramsValue[numcols-2] is chisq
+					double background = paramsValue[numcols-3] * x[j] * x[j] + paramsValue[numcols-4] * x[j] + paramsValue[numcols-5];
+					if (j < peakMin || j > peakMax)
 						background_total = background_total + background;
 				}
 			}
@@ -598,8 +610,8 @@ namespace MDAlgorithms
 		  // Save it back in the peak object.
 		  if (signal != 0. || replaceIntensity)
 		  {
-			p.setIntensity(signal);
-			p.setSigmaIntensity( sqrt(errorSquared + std::fabs(background_total)) );
+			p.setIntensity(signal - ratio * background_total);
+			p.setSigmaIntensity( sqrt(errorSquared + ratio * ratio * std::fabs(background_total)) );
 		  }
 
 		  g_log.information() << "Peak " << i << " at " << pos << ": signal "

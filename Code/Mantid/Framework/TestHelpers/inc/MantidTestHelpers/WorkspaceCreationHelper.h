@@ -21,6 +21,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument/Detector.h"
 
 namespace Mantid
 {
@@ -247,6 +248,9 @@ namespace WorkspaceCreationHelper
   boost::shared_ptr<Mantid::DataObjects::PeaksWorkspace> createPeaksWorkspace(const int numPeaks = 2);
   /**Build table workspace with preprocessed detectors for existign worksapce with instrument */
   boost::shared_ptr<Mantid::DataObjects::TableWorkspace> buildPreprocessedDetectorsWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+  // create range of angular detectors positions
+  void create2DAngles(std::vector<double> &L2,std::vector<double> &polar,std::vector<double> &azim,
+                      size_t nPolar=10,size_t nAzim=10,double polStart=0,double polEnd=90,double azimStart=-30,double azimEnd=30);
 }
 
 #endif /*WORKSPACECREATIONHELPER_H_*/

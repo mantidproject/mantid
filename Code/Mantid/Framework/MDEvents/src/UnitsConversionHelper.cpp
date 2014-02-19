@@ -28,16 +28,10 @@ CnvrtToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const std:
 
   // check if unit conversion is possible at all:
   if(Kernel::Strings::isMember(AllKnownUnits,UnitsFrom)<0)
-  {
-    std::string ERR=" Can not initate conversion from unknown unit: "+UnitsFrom;
-    throw(std::invalid_argument(ERR));
-  }
-  if(Kernel::Strings::isMember(AllKnownUnits,UnitsFrom)<0)
-  {
-    std::string ERR=" Can not initate conversion to unknown unit: "+UnitsTo;
-    throw(std::invalid_argument(ERR));
-  }
+    throw(std::invalid_argument(" Can not initate conversion from unknown unit: "+UnitsFrom));
 
+  if(Kernel::Strings::isMember(AllKnownUnits,UnitsFrom)<0)
+    throw(std::invalid_argument(" Can not initate conversion to unknown unit: "+UnitsTo));
 
 
   // is a quick conversion availible?
@@ -62,45 +56,52 @@ CnvrtToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const std:
 
 }
 
-void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr, const std::string &units_to)
+void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr, const std::string &unitsTo)
 {   
   // obtain input workspace units
   API::MatrixWorkspace_const_sptr inWS2D = targetWSDescr.getInWS();
-  if(!inWS2D)throw(std::logic_error("UnitsConversionHelper::initialize Should not be able to call this function when workpsace is undefined"));
+  if(!inWS2D)throw(std::runtime_error("UnitsConversionHelper::initialize Should not be able to call this function when workpsace is undefined"));
 
   API::NumericAxis *pAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(0));
   if(!pAxis)
-  {
-    std::string ERR = "can not retrieve numeric X axis from the input workspace: "+inWS2D->name();
-    throw(std::invalid_argument(ERR));
-  }
+     throw(std::invalid_argument("Cannot retrieve numeric X axis from the input workspace: "+inWS2D->name()));
 
-  m_SourceWSUnit = inWS2D->getAxis(0)->unit();
-  if(!m_SourceWSUnit)throw(std::logic_error(" can not retrieve source workspace units from the source workspace's numeric axis"));
-
-  // Check how input workspace units relate to the units requested
-  m_UnitCnvrsn = analyzeUnitsConversion(m_SourceWSUnit->unitID(),units_to);
-
-
-  // get units class, requested by ChildAlgorithm
-  m_TargetUnit = Kernel::UnitFactory::Instance().create(units_to);
-  if(!m_TargetUnit)throw(std::logic_error(" can not retrieve target unit from the units factory"));
-
+  std::string unitsFrom = inWS2D->getAxis(0)->unit()->unitID();
 
   // get detectors positions and other data needed for units conversion:
   if(!(targetWSDescr.m_PreprDetTable))
     throw std::runtime_error("MDWSDescription does not have a detector table");
-  m_pTwoThetas =  &(targetWSDescr.m_PreprDetTable->getColVector<double>("TwoTheta"));
-  m_pL2s       =  &(targetWSDescr.m_PreprDetTable->getColVector<double>("L2"));
 
-  m_L1        =  targetWSDescr.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>("L1");
-  
-  m_Emode     =  (int)targetWSDescr.getEMode();
+  int Emode     =  (int)targetWSDescr.getEMode();
+
+  this->initialize(unitsFrom,unitsTo,targetWSDescr.m_PreprDetTable,Emode);
+
+
+}
+void UnitsConversionHelper::initialize(const std::string &unitsFrom,const std::string &unitsTo,const DataObjects::TableWorkspace_const_sptr &DetWS,int Emode)
+{
+  m_Emode     =  Emode;
+
+  if(!DetWS)throw std::runtime_error("UnitsConversionHelper::initialize called with empty preprocessed detectors table");
+
+  // Check how the source units relate to the units requested and create source units
+  m_UnitCnvrsn = analyzeUnitsConversion(unitsFrom,unitsTo);
+
+  // create target units class
+  m_TargetUnit = Kernel::UnitFactory::Instance().create(unitsTo);
+  if(!m_TargetUnit)throw(std::runtime_error(" Cannot retrieve target unit from the units factory"));
+
+  // get access to all values used by unit conversion. 
+  m_pTwoThetas =  &(DetWS->getColVector<double>("TwoTheta"));
+  m_pL2s       =  &(DetWS->getColVector<double>("L2"));
+
+  m_L1        =  DetWS->getLogs()->getPropertyValueAsType<double>("L1");
 
   // get efix
-  m_Efix      =  targetWSDescr.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>("Ei");
+  m_Efix      =  DetWS->getLogs()->getPropertyValueAsType<double>("Ei");
   m_pEfixedArray=NULL;
-  if(m_Emode==(int)Kernel::DeltaEMode::Indirect) m_pEfixedArray = targetWSDescr.m_PreprDetTable->getColDataArray<float>("eFixed");
+  if(m_Emode==(int)Kernel::DeltaEMode::Indirect) m_pEfixedArray = DetWS->getColDataArray<float>("eFixed");
+
 }
 /** Method updates unit conversion given the index of detector parameters in the array of detectors */
 void UnitsConversionHelper::updateConversion(size_t i)

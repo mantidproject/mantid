@@ -4,6 +4,7 @@
 #include "MantidKernel/DateAndTime.h"
 
 #include <boost/algorithm/string/regex.hpp>
+#include <Poco/ActiveResult.h>
 #include <QCoreApplication>
 
 namespace MantidQt
@@ -77,7 +78,7 @@ namespace MantidQt
      * Search the archives for all dataFiles related to an "investigation id" then save results to workspace ("dataFileResults").
      * @param investigationId :: The investigation id to use for the search.
      */
-    void CatalogHelper::executeGetDataFiles(const int64_t &investigationId)
+    void CatalogHelper::executeGetDataFiles(const std::string &investigationId)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogGetDataFiles");
 

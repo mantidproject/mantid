@@ -8,14 +8,20 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/PropertyManagerOwner.h"
 #include <boost/shared_ptr.hpp>
-#include <Poco/ActiveMethod.h>
+
 
 #ifdef _MSC_VER
   #pragma warning( disable: 4250 ) // Disable warning regarding inheritance via dominance, we have no way around it with the design
 #endif
 
+
+//----------------------------------------------------------------------
+// Forward Declaration
+//----------------------------------------------------------------------
 namespace Poco
 {
+  template <class R, class A, class O, class S> class ActiveMethod;
+  template <class O> class ActiveStarter;
   class Void;
 }
 
@@ -156,7 +162,8 @@ namespace Mantid
       void dropWorkspaceReferences();
 
       /// Poco::ActiveMethod used to implement asynchronous execution.
-      Poco::ActiveMethod<bool, Poco::Void, AlgorithmProxy> _executeAsync;
+      Poco::ActiveMethod<bool, Poco::Void, AlgorithmProxy,
+                         Poco::ActiveStarter<AlgorithmProxy>> *m_executeAsync;
       /// Execute asynchronous implementation
       bool executeAsyncImpl(const Poco::Void & dummy);
 

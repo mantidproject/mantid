@@ -11,8 +11,7 @@ namespace Mantid
   {
 
     /**
-      CatalogSearch is a class responsible for SearchByRunNumber algorithm.
-      This algorithm does the basic search and returns the investigations record
+      This class is responsible for searching the catalog using the properties specified.
 
       Required Properties:
       <UL>
@@ -22,6 +21,7 @@ namespace Mantid
         <LI> StartDate - The start date used for search </LI>
         <LI> EndDate - The end date used for search </LI>
         <LI> Keywords - The keywords used for search </LI>
+        <LI> Investigation id - The id of an investigation to search for </LI>
         <LI> Investigators name - Search for all investigations this investigator is in </LI>
         <LI> Sample - The name of the sample used in an investigation <LI>
         <LI> Investigation Abstract - The abstract of the investigation to be searched <LI>

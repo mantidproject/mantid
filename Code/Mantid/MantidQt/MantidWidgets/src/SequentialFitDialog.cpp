@@ -12,6 +12,8 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 
+#include <Poco/ActiveResult.h>
+
 #include <QInputDialog>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -334,6 +336,7 @@ void SequentialFitDialog::accept()
   alg->setProperty("EndX",m_fitBrowser->endX());
   alg->setPropertyValue("OutputWorkspace",m_fitBrowser->outputName());
   alg->setPropertyValue("Function",funStr);
+  alg->setProperty("CreateOutput", ui.ckCreateOutput->isChecked());
   if (ui.ckbLogPlot->isChecked())
   {
     std::string logName = ui.cbLogValue->currentText().toStdString();

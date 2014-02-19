@@ -78,6 +78,12 @@ namespace MantidQt
 				case 1:
 					fitFunction = "SS"; // Use Singwi-Sjolander
 					break;
+				case 2:
+					fitFunction = "Fick";
+					break;
+				case 3:
+					fitFunction = "Teixeira";
+					break;
 			}
 
 			std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
@@ -208,7 +214,7 @@ namespace MantidQt
 		/**
 		 * Plots the loaded file to the miniplot when the selected spectrum changes
 		 * 
-		 * @param index :: The name spectrum index to plot
+		 * @param text :: The name spectrum index to plot
 		 */
 		void JumpFit::handleWidthChange(const QString& text)
 		{

@@ -3,18 +3,18 @@
 
 #include "MantidAPI/Algorithm.h"
 
-
 namespace Mantid
 {
   namespace ICat
   {
-    /**  CatalogLogin class for logging into ICat DB .This class written as a Mantid algorithm.
-     This class uses Gsoap generated ProxyObject to connect to ICat and uses CatalogLogin API .
+    /**
+     This class is responsible for authentication of credentials against the catalog.
 
 	   Required Properties:
      <UL>
-     <LI> Username - The logged in user name </LI>
-     <LI> Password - The password of the logged in user </LI>
+      <LI> Username - The logged in user name </LI>
+      <LI> Password - The password of the logged in user </LI>
+      <LI> Facility name - The name of the facility to log in to </LI>
      </UL>
 
      @author Sofia Antony, ISIS Rutherford Appleton Laboratory 

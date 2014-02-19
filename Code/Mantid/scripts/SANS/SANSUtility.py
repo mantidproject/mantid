@@ -438,7 +438,7 @@ def getMonitor4event(ws_event):
     if not isEventWorkspace(ws_event):
         raise RuntimeError("The workspace "+str(ws_event)+ " is not a valid Event workspace")
     file_path = getFilePathFromWorkspace(ws_event)
-    ws_monitor = loadMonitorsFromFile(file_path)
+    ws_monitor = loadMonitorsFromFile(file_path, str(ws_event) + "_monitors")
     return ws_monitor
 
 def fromEvent2Histogram(ws_event, ws_monitor = None):

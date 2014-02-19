@@ -1,9 +1,9 @@
 #ifndef MANTID_KERNEL_CPUTIMER_H_
 #define MANTID_KERNEL_CPUTIMER_H_
-    
+
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Timer.h"
-
+#include <ctime>
 
 namespace Mantid
 {

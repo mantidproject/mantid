@@ -27,6 +27,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindPeaks.h"
+#include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
@@ -1014,9 +1017,9 @@ namespace Algorithms
     IAlgorithm_sptr estimate = createChildAlgorithm("FindPeakBackground");
     estimate->setProperty("InputWorkspace", input);
     // The workspace index
-    std::vector<int> wivec;
-    wivec.push_back(spectrum);
-    estimate->setProperty("WorkspaceIndices", wivec);
+    // std::vector<int> wivec;
+    // wivec.push_back(spectrum);
+    estimate->setProperty("WorkspaceIndex", spectrum);
     //estimate->setProperty("SigmaConstant", 1.0);
     // The workspace index
     std::vector<double> fwvec;
@@ -2480,6 +2483,7 @@ namespace Algorithms
     chi2 = bkgdchi2;
 
     return true;
+
   }
 
   //----------------------------------------------------------------------------------------------

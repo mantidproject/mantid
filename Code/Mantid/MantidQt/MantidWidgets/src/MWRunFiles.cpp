@@ -12,6 +12,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QHash>
+#include <QtConcurrentRun>
 #include <Poco/File.h>
 
 #include <boost/algorithm/string.hpp>
@@ -224,6 +225,8 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   doButtonOpt(m_buttonOpt);
 
   liveButtonState(m_liveButtonState);
+  connect(this, SIGNAL(liveButtonSetEnabledSignal(bool)), m_uiForm.liveButton, SLOT(setEnabled(bool)));
+  connect(this, SIGNAL(liveButtonSetEnabledSignal(bool)), m_uiForm.liveButton, SLOT(show()));
   connect(m_uiForm.liveButton, SIGNAL(toggled(bool)), this, SIGNAL(liveButtonPressed(bool)));
 
   setFocusPolicy(Qt::StrongFocus);
@@ -455,13 +458,22 @@ void MWRunFiles::liveButtonState(const LiveButtonOpts option)
   }
   else
   {
-    // Checks whether it's possible to connect to the user's default instrument
-    const bool canConnect = LiveListenerFactory::Instance().checkConnection(ConfigService::Instance().getInstrument().name());
-    if ( m_liveButtonState == AlwaysShow || canConnect )
+    liveButtonSetEnabled(false); // This setting ensures right outcome if the connection check fails
+    // Checks (asynchronously) whether it's possible to connect to the user's default instrument
+    QtConcurrent::run(this, &MWRunFiles::checkLiveConnection);
+    if ( m_liveButtonState == AlwaysShow )
     {
-      m_uiForm.liveButton->setEnabled(canConnect);
       m_uiForm.liveButton->show();
     }
+  }
+}
+
+void MWRunFiles::checkLiveConnection()
+{
+  // Checks whether it's possible to connect to the user's default instrument
+  if ( LiveListenerFactory::Instance().checkConnection(ConfigService::Instance().getInstrument().name()) )
+  {
+    emit liveButtonSetEnabledSignal(true);
   }
 }
 

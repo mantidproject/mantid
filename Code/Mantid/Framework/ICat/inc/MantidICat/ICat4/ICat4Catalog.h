@@ -53,9 +53,9 @@ namespace Mantid
         /// Show the logged in user's investigations search results.
         virtual void myData(Mantid::API::ITableWorkspace_sptr& outputws);
         /// Get datasets.
-        virtual void getDataSets(const long long&investigationId,Mantid::API::ITableWorkspace_sptr& outputws);
+        virtual void getDataSets(const std::string&investigationId,Mantid::API::ITableWorkspace_sptr& outputws);
         /// Get datafiles
-        virtual void getDataFiles(const long long&investigationId,Mantid::API::ITableWorkspace_sptr& outputws);
+        virtual void getDataFiles(const std::string&investigationId,Mantid::API::ITableWorkspace_sptr& outputws);
         /// Get instruments list
         virtual void listInstruments(std::vector<std::string>& instruments);
         /// Get investigationtypes list
@@ -65,7 +65,8 @@ namespace Mantid
         /// Get the url(s) based on the fileID.
         virtual void getDownloadURL(const long long& fileID,std::string & url);
         /// get URL of where to PUT (publish) files.
-        virtual const std::string getUploadURL(const std::string &investigationID, const std::string &createFileName);
+        virtual const std::string getUploadURL(
+            const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription);
         /// Keep current session alive
         virtual void keepAlive();
         /// Keep alive in minutes

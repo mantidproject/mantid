@@ -46,7 +46,7 @@ void MDWSDescription::setDimUnit(unsigned int nDim,const std::string &Unit)
 *@param  dimPropertyNames -- the vector of names for additional ws properties, which will be used as dimensions.
 
 */
-void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,
+void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_sptr &pWS,const std::string &QMode,const std::string dEMode,
   const std::vector<std::string> &dimPropertyNames)
 {
   m_InWS = pWS;
@@ -94,9 +94,11 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
   }
 
 
+}
 
-
-
+void MDWSDescription::setWS(API::MatrixWorkspace_sptr otherMatrixWS)
+{
+  m_InWS = otherMatrixWS;
 }
 /// Method checks if input workspace has defined goniometer
 bool MDWSDescription::hasGoniometer()const
