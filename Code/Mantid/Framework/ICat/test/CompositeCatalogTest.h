@@ -6,7 +6,7 @@
 #include "MantidICat/CatalogSearchParam.h"
 #include "MantidICat/CompositeCatalog.h"
 
-#include <boost\make_shared.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::ICat;
@@ -28,7 +28,7 @@ class DummyCatalog : public ICatalog
       m_counter++;
     }
 
-    void search(const CatalogSearchParam&,ITableWorkspace_sptr&, const int &,const int &)
+    void search(const CatalogSearchParam&,ITableWorkspace_sptr&,const int &,const int &)
     {
       m_counter++;
     }
@@ -39,7 +39,7 @@ class DummyCatalog : public ICatalog
       return 0;
     }
 
-    void myData(ITableWorkspace_sptr &)
+    void myData(ITableWorkspace_sptr&)
     {
       m_counter++;
     }
@@ -49,7 +49,7 @@ class DummyCatalog : public ICatalog
       m_counter++;
     }
 
-    void getDataFiles(const std::string&,ITableWorkspace_sptr &)
+    void getDataFiles(const std::string&,ITableWorkspace_sptr&)
     {
       m_counter++;
     }
@@ -129,23 +129,6 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
 
       compositeCatalog->logout();
-
-      TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
-
-      delete compositeCatalog;
-    }
-
-    void testGetNumberOfSearchResults()
-    {
-      CompositeCatalog* compositeCatalog = new CompositeCatalog();
-      DummyCatalog::m_counter = 0;
-
-      compositeCatalog->add(boost::make_shared<DummyCatalog>());
-      compositeCatalog->add(boost::make_shared<DummyCatalog>());
-
-      // Obtains the inputs from the search interface.
-      CatalogSearchParam* params = new CatalogSearchParam();
-      compositeCatalog->getNumberOfSearchResults(*(params));
 
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
 
