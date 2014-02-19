@@ -14,7 +14,7 @@ namespace Mantid
   namespace API
   {
     class FunctionDomain;
-    class IFunctionValues;
+    class FunctionValues;
   }
 
   namespace API
@@ -81,7 +81,7 @@ namespace Mantid
       ///   for the data from index i0 to the end of the container.
       virtual void createDomain(
         boost::shared_ptr<API::FunctionDomain>& domain, 
-        boost::shared_ptr<API::IFunctionValues>& values,
+        boost::shared_ptr<API::FunctionValues>& values,
         size_t i0 = 0) = 0;
 
        /// Create an output workspace filled with data simulated with the fitting function.
@@ -93,7 +93,7 @@ namespace Mantid
         const std::string& baseName,
         API::IFunction_sptr function,
         boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::IFunctionValues> values) 
+        boost::shared_ptr<API::FunctionValues> values) 
       {UNUSED_ARG(baseName);UNUSED_ARG(function);UNUSED_ARG(domain);UNUSED_ARG(values);}
 
       /// Initialize the function

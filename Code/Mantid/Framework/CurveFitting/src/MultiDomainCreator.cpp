@@ -26,7 +26,7 @@ namespace CurveFitting
   /// Create a domain from the input workspace
   void MultiDomainCreator::createDomain(
     boost::shared_ptr<API::FunctionDomain>& domain, 
-    boost::shared_ptr<API::IFunctionValues>& ivalues, size_t i0)
+    boost::shared_ptr<API::FunctionValues>& ivalues, size_t i0)
   {
     if (m_workspacePropertyNames.size() != m_creators.size())
     {
@@ -34,7 +34,7 @@ namespace CurveFitting
         "the number of creators");
     }
     auto jointDomain = new API::JointDomain;
-    API::IFunctionValues_sptr values;
+    API::FunctionValues_sptr values;
     i0 = 0;
     for(auto c = m_creators.begin(); c != m_creators.end(); ++c)
     {

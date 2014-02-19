@@ -225,7 +225,7 @@ public:
     }
 
     FunctionDomain_sptr domain;
-    IFunctionValues_sptr values;
+    FunctionValues_sptr values;
 
     FitMW fitmw(FitMW::Sequential);
     fitmw.setWorkspace( ws2 );
@@ -239,7 +239,7 @@ public:
     TS_ASSERT_EQUALS(seq->size(), 10);
 
     FunctionDomain_sptr d;
-    IFunctionValues_sptr v;
+    FunctionValues_sptr v;
     seq->getDomainAndValues( 0, d, v );
     TS_ASSERT_EQUALS( d->size(), 3 );
     TS_ASSERT_EQUALS( v->size(), 3 );
@@ -312,7 +312,7 @@ public:
     composite->addFunction(expDecay);
 
     FunctionDomain_sptr domain;
-    IFunctionValues_sptr values;
+    FunctionValues_sptr values;
 
     // Requires a property manager to make a workspce
     auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
@@ -376,7 +376,7 @@ public:
       ws->dataE(0)[11] = log(-one);
 
       FunctionDomain_sptr domain;
-      IFunctionValues_sptr values;
+      FunctionValues_sptr values;
 
       // Requires a property manager to make a workspce
       auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
@@ -470,7 +470,7 @@ public:
 
       API::IFunction_sptr expDecay(new ExpDecay);
       FunctionDomain_sptr domain;
-      IFunctionValues_sptr values;
+      FunctionValues_sptr values;
 
       // Requires a property manager to make a workspce
       auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
@@ -519,7 +519,7 @@ public:
       }
 
       FunctionDomain_sptr domain;
-      IFunctionValues_sptr values;
+      FunctionValues_sptr values;
 
       // Requires a property manager to make a workspce
       auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();

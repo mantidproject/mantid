@@ -2,7 +2,6 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/SeqDomain.h"
-#include "MantidCurveFitting/EmptyValues.h"
 #include "MantidCurveFitting/Convolution.h"
 
 #include "MantidAPI/CompositeFunction.h"
@@ -163,7 +162,7 @@ namespace
   /// Create a domain from the input workspace
   void FitMW::createDomain(
     boost::shared_ptr<API::FunctionDomain>& domain, 
-    boost::shared_ptr<API::IFunctionValues>& ivalues, size_t i0)
+    boost::shared_ptr<API::FunctionValues>& values, size_t i0)
   {
     setParameters();
 
@@ -199,7 +198,7 @@ namespace
           seqDomain->addCreator( API::IDomainCreator_sptr( creator ) );
           m = k;
         }
-        ivalues.reset( new EmptyValues( n ) );
+        values.reset();
         return;
       }
       // else continue with simple domain
@@ -222,10 +221,9 @@ namespace
       domain.reset(new API::FunctionDomain1DVector(from,to));
     }
 
-    auto values = ivalues ? dynamic_cast<API::FunctionValues*>(ivalues.get()) : new API::FunctionValues(*domain);
-    if (!ivalues)
+    if (!values)
     {
-      ivalues.reset(values);
+      values.reset(new API::FunctionValues(*domain));
     }
     else
     {
@@ -279,16 +277,15 @@ namespace
    * @param baseName :: Specifies the name of the output workspace
    * @param function :: A Pointer to the fitting function
    * @param domain :: The domain containing x-values for the function
-   * @param ivalues :: A API::FunctionValues instance containing the fitting data
+   * @param values :: A API::FunctionValues instance containing the fitting data
    */
   void FitMW::createOutputWorkspace(
         const std::string& baseName,
         API::IFunction_sptr function,
         boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::IFunctionValues> ivalues
+        boost::shared_ptr<API::FunctionValues> values
     )
   {
-    auto values = boost::dynamic_pointer_cast<API::FunctionValues>(ivalues);
     if (!values)
     {
       return;
@@ -303,7 +300,7 @@ namespace
 
     // Nhist = Data histogram, Difference Histogram + nfunctions
     const size_t nhistograms = functionsToDisplay.size() + 2;
-    const size_t nyvalues = ivalues->size();
+    const size_t nyvalues = values->size();
     auto ws = createEmptyResultWS(nhistograms, nyvalues);
     // The workspace was constructed with a TextAxis
     API::TextAxis *textAxis = static_cast<API::TextAxis*>(ws->getAxis(1));
@@ -325,7 +322,7 @@ namespace
     // Set the difference spectrum
     const MantidVec& Ycal = ws->readY(1);
     MantidVec& Diff = ws->dataY(2);
-    const size_t nData = ivalues->size();
+    const size_t nData = values->size();
     for(size_t i = 0; i < nData; ++i)
     {
       Diff[i] = values->getFitData(i) - Ycal[i];

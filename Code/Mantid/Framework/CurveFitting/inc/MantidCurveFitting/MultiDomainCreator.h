@@ -52,7 +52,7 @@ namespace Mantid
       /// Create a domain from the input workspace
       virtual void createDomain(
         boost::shared_ptr<API::FunctionDomain>& domain, 
-        boost::shared_ptr<API::IFunctionValues>& values, size_t i0 = 0);
+        boost::shared_ptr<API::FunctionValues>& values, size_t i0 = 0);
 
       /// Return the size of the domain to be created.
       virtual size_t getDomainSize() const{return 0;}

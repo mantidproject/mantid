@@ -113,7 +113,7 @@ public:
     manager.setProperty("WorkspaceIndex3", 0);
 
     FunctionDomain_sptr domain;
-    IFunctionValues_sptr values;
+    FunctionValues_sptr values;
 
     multi.createDomain( domain, values );
     
