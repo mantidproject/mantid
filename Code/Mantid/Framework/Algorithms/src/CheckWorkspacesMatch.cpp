@@ -164,7 +164,7 @@ void CheckWorkspacesMatch::init()
   
   declareProperty("Result","",Direction::Output);
 
-  declareProperty("ToleranceRelErr",false, "Treat tolerance as relative error rather then the absolute error.\n"\
+  declareProperty("ToleranceRelErr",false, "Assume that tolerance is satisfied by minumal value of absolute and relative error rather then the absolute error.\n"\
                                            "This is only applicable to Matrix workspaces.");
   declareProperty("CheckAllData",false, "Usually checking data ends when first mismatch occurs. This forces algorithm to check all data and print mismatch to the debug log.\n"\
                                         "Very often such logs are huge so making it true should be the last option.");    // Have this one false by default - it can be a lot of printing. 
@@ -378,6 +378,29 @@ bool CheckWorkspacesMatch::checkEventLists(DataObjects::EventWorkspace_const_spt
 
   return true;
 }
+/** Function which calculates relative and absolute errors between two values and checks 
+    if the differnse is less then the minimal of two
+*
+@param x1 -- first value to check difference
+@param x2 -- second value to check difference
+@param ERROR_VAL -- the value of the error, to check against. Should  be positive != 0
+
+@returns true if error or false if the value is within the limits requested
+*/
+inline bool TOL_ERR(const double &x1,const double &x2,const double &ERROR_VAL)
+{
+  double num= std::fabs(x1-x2);
+  if (num<=ERROR_VAL) // condition satisfied by abserr
+    return false;
+
+  // how to treat x1<0 and x2 > 0 ? 
+  double den=0.5*(std::fabs(x1)+std::fabs(x2));
+  if (den<ERROR_VAL) // difference above is already bigger then the error but sum is smaller
+    return true;
+
+  return (num/den>ERROR_VAL);
+
+}
 
 /** Checks that the data matches
  *  @param ws1 :: the first workspace
@@ -414,7 +437,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   // Now check the data itself
   bool condition = m_ParallelComparison && ws1->threadSafe()  &&  ws2->threadSafe() ;
   PARALLEL_FOR_IF(condition)
-  for ( int i = 0; i < static_cast<int>(numHists); ++i )
+  for ( long i = 0; i < static_cast<long>(numHists); ++i )
   {
     PARALLEL_START_INTERUPT_REGION
     prog->report();
@@ -434,27 +457,10 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
         bool err;
         if (RelErr)
         {
-            double s1=0.5*std::fabs(X1[j]+X2[j]);
-            if (s1>tolerance)
-                err = (std::fabs((X1[j] - X2[j])) > tolerance*s1);
-            else
-                err = (std::fabs(X1[j] - X2[j]) > tolerance);
-
-            double s2=0.5*std::fabs(Y1[j]+Y2[j]);
-            if (s2>tolerance)
-               err = ((std::fabs((Y1[j] - Y2[j])) > tolerance*s2)||err);
-            else
-               err = ((std::fabs(Y1[j] - Y2[j]) > tolerance)||err);
-
-
-            double s3=0.5*std::fabs(E1[j]+E2[j]);
-            if (s3>tolerance)
-               err = ((std::fabs((E1[j] - E2[j])) > tolerance*s3)||err);
-            else
-               err = ((std::fabs(E1[j] - E2[j]) > tolerance)||err);
+           err = (TOL_ERR(X1[j],X2[j],tolerance) || TOL_ERR(Y1[j],Y2[j],tolerance) || TOL_ERR(E1[j],E2[j],tolerance));
         }
         else
-            err = (std::fabs(X1[j] - X2[j]) > tolerance || std::fabs(Y1[j] - Y2[j]) > tolerance
+           err = (std::fabs(X1[j] - X2[j]) > tolerance || std::fabs(Y1[j] - Y2[j]) > tolerance
                    || std::fabs(E1[j] - E2[j]) > tolerance);
 
         if (err)
@@ -472,6 +478,8 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
       // Extra one for histogram data
       if ( histogram && std::fabs(X1.back() - X2.back()) > tolerance )
       {
+        g_log.debug() << " Data ranges mismatch for spectra N: (" << i <<  ")\n";
+        g_log.debug() << " Last bin ranges (X1_end vs X2_end) = (" << X1.back() << "," <<X2.back() << ")\n";
         PARALLEL_CRITICAL(resultBool)
         resultBool = false;
       }
