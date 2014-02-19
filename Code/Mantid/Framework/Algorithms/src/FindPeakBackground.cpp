@@ -238,7 +238,7 @@ namespace Algorithms
       double a0,a1,a2;
       if(peaks.size()> 0)
       {
-        g_log.information() << "Peaks' size = " << peaks.size() << " -> esitmate background. \n";
+        g_log.debug() << "Peaks' size = " << peaks.size() << " -> esitmate background. \n";
         if(peaks[peaks.size()-1].stop == 0) peaks[peaks.size()-1].stop = n-1;
         std::sort(peaks.begin(), peaks.end(), by_len());
 
@@ -252,7 +252,7 @@ namespace Algorithms
       else
       {
         // assume background is 12 first and last points
-        g_log.information("Peaks' size = 0 -> zero background.");
+        g_log.debug("Peaks' size = 0 -> zero background.");
         min_peak = l0+12;
         max_peak = n-13;
         if (min_peak > sizey)min_peak = sizey-1;
