@@ -164,7 +164,7 @@ void CheckWorkspacesMatch::init()
   
   declareProperty("Result","",Direction::Output);
 
-  declareProperty("ToleranceRelErr",false, "Assume that tolerance is satisfied by minumal value of absolute and relative error rather then the absolute error.\n"\
+  declareProperty("ToleranceRelErr",false, "Treat tolerance as relative error rather then the absolute error.\n"\
                                            "This is only applicable to Matrix workspaces.");
   declareProperty("CheckAllData",false, "Usually checking data ends when first mismatch occurs. This forces algorithm to check all data and print mismatch to the debug log.\n"\
                                         "Very often such logs are huge so making it true should be the last option.");    // Have this one false by default - it can be a lot of printing. 
@@ -378,9 +378,8 @@ bool CheckWorkspacesMatch::checkEventLists(DataObjects::EventWorkspace_const_spt
 
   return true;
 }
-/** Function which calculates relative and absolute errors between two values and checks 
-    if the differnse is less then the minimal of two
-*
+/** Function which calculates relative error between two values and analyses if this error is within the limits
+* requested
 @param x1 -- first value to check difference
 @param x2 -- second value to check difference
 @param ERROR_VAL -- the value of the error, to check against. Should  be positive != 0
@@ -389,14 +388,12 @@ bool CheckWorkspacesMatch::checkEventLists(DataObjects::EventWorkspace_const_spt
 */
 inline bool TOL_ERR(const double &x1,const double &x2,const double &ERROR_VAL)
 {
-  double num= std::fabs(x1-x2);
-  if (num<=ERROR_VAL) // condition satisfied by abserr
-    return false;
 
+  double num= std::fabs(x1-x2);
   // how to treat x1<0 and x2 > 0 ? 
   double den=0.5*(std::fabs(x1)+std::fabs(x2));
-  if (den<ERROR_VAL) // difference above is already bigger then the error but sum is smaller
-    return true;
+  if (den<ERROR_VAL) 
+    return (num>ERROR_VAL);
 
   return (num/den>ERROR_VAL);
 
