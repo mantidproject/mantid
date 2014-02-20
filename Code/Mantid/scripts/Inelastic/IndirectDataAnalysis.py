@@ -1,9 +1,13 @@
-from mantid.simpleapi import *
 from IndirectImport import import_mantidplot
 mp = import_mantidplot()
 from IndirectCommon import *
-from mantid import config, logger
+
 import math, re, os.path, numpy as np
+import itertools
+
+from mantid.simpleapi import *
+from mantid.api import TextAxis
+from mantid import *
 
 ##############################################################################
 # Misc. Helper Functions
@@ -35,260 +39,171 @@ def trimData(nSpec, vals, min, max):
 # ConvFit
 ##############################################################################
 
-def getConvFitOption(ftype, bgd, Verbose):
-    if ftype[:5] == 'Delta':
-        delta = True
-        lor = ftype[5:6]
-    else:
-        delta = False
-        lor = ftype[:1]
-    options = [bgd, delta, int(lor)]
-    if Verbose:
-        logger.notice('Fit type : Delta = ' + str(options[1]) + ' ; Lorentzians = ' + str(options[2]))
-        logger.notice('Background type : ' + options[0])
-    return options
-
-##############################################################################
-
-def createConvFitFun(options, par, file_name, temperature, ties):
-    background_fix = options[0]
-    use_delta_func = options[1]
-    num_peaks = options[2]
-    a0 = par[0]
-    
-    bgd_fun = 'name=LinearBackground,'
-    #append background parameters
-    if background_fix == 'FixF':
-        bgd_fun += 'A0=%f,A1=0,ties=(A0=%f,A1=0.0);' % (a0, a0)
-    elif background_fix == 'FitF':
-        bgd_fun += 'A0=%f,A1=0,ties=(A1=0.0);' % a0
-    elif background_fix == 'FitL':
-        a1 = par[1]
-        bgd_fun += 'A0%f,A1=%f;' % (a0, a1)
-    
-    if use_delta_func: 
-        offset = 3
-    else:
-        offset = 2
-
-    #create peak model
-    res_func = 'name=Resolution, FileName=\"%s\";' % file_name
-    
-    #add a delta function if required
-    delta_func = ''
-    if use_delta_func:
-        delta_height = par[2]
-        delta_func = 'name=DeltaFunction,Height=%f;' % delta_height
-    
-    #create product of lorentzian and temperature factor
-    lor_func = '(composite=ProductFunction;'
-    if temperature != None:
-        lor_func += 'name=UserFunction, Formula=((x*11.606)/temp) / (1 - exp(-((x*11.606)/temp))), temp=%f;' % temperature
-    lor_func += 'name=Lorentzian,Amplitude=%f,PeakCentre=%f,FWHM=%f;' % (par[offset], par[offset+1], par[offset+2])   
-    lor_func += ');'
-
-    #add another peak if we require two lorentzians
-    if num_peaks == 2:
-        #create product of lorentzian and temperature factor
-        lor_func += '(composite=ProductFunction;'
-        if temperature != None:
-            lor_func += 'name=UserFunction, Formula=((x*11.606)/temp) / (1 - exp(-((x*11.606)/temp))), temp=%f;' % temperature
-        lor_func += 'name=Lorentzian,Amplitude=%f,PeakCentre=%f,FWHM=%f;' % (par[offset+3], par[offset+4], par[offset+5])
-        lor_func += ');'
-        
-        if ties:
-            funcIndex = 1 if use_delta_func else 0
-            lor_fun += 'ties=(f%d.PeakCentre=f%d.PeakCentre)' % (funcIndex, funcIndex+1)
-    
-    model ='(composite=Convolution;' + res_func + delta_func + lor_func + ');'
-    func = bgd_fun + model 
-
-    return func
-
-##############################################################################
-
-def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties, Verbose, temperature):
-    options = getConvFitOption(ftype, bgd[:-2], Verbose)   
-    params_table = mtd[outNm+'_Parameters']
-    parameter_names = ['A0', 'A1', 'Height']
-
-    def search_for_params(suffix): 
-        """
-        function to search through column names for any name containg suffix.
-        """
-        return [params_table.column(name) for name in params_table.getColumnNames() if name[-len(suffix):] == suffix]
-
-    #collect top level parameters from table
-    global_params = {}
-    for parameter in parameter_names:
-       global_params[parameter] = search_for_params(parameter)
-
-    heights = search_for_params('Amplitude')
-    widths = search_for_params('FWHM')
-    peak_centres = search_for_params('PeakCentre')
-
-    for i in range(0,(specMax-specMin)+1):
-        fit_params = [global_params['A0'][0][i], global_params['A1'][0][i]]
-        
-        #append delta height if present
-        if len(global_params['Height']) > 0 :
-            fit_params.append(global_params['Height'][0][i])
-
-        #append amplitude, peak centre and FWHM
-        for height, centre, width in zip(heights, peak_centres, widths):
-            fit_params.append(height[i])
-            fit_params.append(centre[i])
-            fit_params.append(width[i])
-
-        func = createConvFitFun(options, fit_params, resFile, temperature, ties)
-        if Verbose:
-            logger.notice('Fit func : '+func)      
-        fitWS = outNm + '_Result_'
-        fout = fitWS + str(i)
-        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i+specMin,Output=fout,
-            CreateOutput=True, MaxIterations=0,OutputCompositeMembers=True, ConvolveMembers=True)
-        unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
-        unitx.setLabel('Time' , 'ns')
-        RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
-        CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fout)
-        AddSampleLog(Workspace=fout, LogName="fit_program", LogType="String", LogText='ConvFit')
-        AddSampleLog(Workspace=fout, LogName='background', LogType='String', LogText=str(options[0]))
-        AddSampleLog(Workspace=fout, LogName='delta_function', LogType='String', LogText=str(options[1]))
-        AddSampleLog(Workspace=fout, LogName='lorentzians', LogType='String', LogText=str(options[2]))
-        DeleteWorkspace(fitWS+str(i)+'_NormalisedCovarianceMatrix')
-        DeleteWorkspace(fitWS+str(i)+'_Parameters')
-        if i == 0:
-            group = fout
-        else:
-            group += ',' + fout
-    GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS[:-1])
-
-##############################################################################
-
 def search_for_fit_params(suffix, table_ws):
     """
     Find all fit parameters in a table workspace with the given suffix.
     """
-    return [table_ws.column(name) for name in table_ws.getColumnNames() if suffix in name], [name for name in table_ws.getColumnNames() if suffix in name]
-
-def confitParsToWS(table_name, Data, specMin=0, specMax=-1):
-    
-    if ( specMax == -1 ):
-        specMax = mtd[Data].getNumberHistograms() - 1
-
-    ws = mtd[table_name]
-    x = createQaxis(Data)
-    dataY, dataE = [], []
-    v_axis_names = []
-
-    #get data and error values for each of the parameters
-    height, height_names = search_for_fit_params('Height', ws)
-    amplitude, amplitude_names = search_for_fit_params('Amplitude', ws)
-    FWHM, FWHM_names = search_for_fit_params('FWHM', ws)
-
-    if len(amplitude) == 0 or len(FWHM) == 0:
-        raise RuntimeError("Could not find expected fitting parameters!")
-
-    if len(height) > 0:
-        #append height data first
-        dataY += height[0]
-        dataE += height[1]
-        v_axis_names.append(height_names[0])
-
-    # append amplitude and width data & error
-    for i in xrange(0, len(amplitude), 2):
-        amp, amp_error = amplitude[i], amplitude[i+1]
-        width, width_error = FWHM[i], FWHM[i+1]
-        
-        dataY += amp 
-        dataY += width
-
-        dataE += amp_error
-        dataE += width_error
-
-        v_axis_names.append(amplitude_names[i])
-        v_axis_names.append(FWHM_names[i])
-
-        #if we have height data, then calculate the EISF
-        if len(height) > 0:
-            height_y, height_e = np.asarray(height) 
-            
-            total = height_y+amp
-            EISF = height_y/total
-
-            total_error = height_e**2 + np.asarray(amp_error)**2
-            EISF_error = EISF * np.sqrt((height_e**2/height_y**2) + (total_error/total**2))
-
-            dataY += EISF.tolist()
-            dataE += EISF_error.tolist()
-
-            v_axis_names.append('f1.f1.f%d.EISF' % (math.log(i+1,2)+1))
-
-    num_spectra = len(v_axis_names)
-    dataX = np.tile(x, num_spectra)
-
-    outputName = table_name + "_Workspace"
-    dataX = trimData(num_spectra, dataX, specMin, specMax)
-    CreateWorkspace(OutputWorkspace=outputName, DataX=dataX, DataY=dataY, DataE=dataE, NSpec=num_spectra,
-        UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=v_axis_names)
-    
-    return outputName
+    return [name for name in mtd[table_ws].getColumnNames() if name.endswith(suffix)]
 
 ##############################################################################
 
-def confitPlotSeq(inputWS, Plot):
-    ws = mtd[inputWS]
-    nhist = ws.getNumberHistograms()
-    
-    if ( Plot == 'Amplitude' or Plot == 'All' ):
-        plotSpecs = [i for i in range(0,nhist) if 'Amplitude' in ws.getAxis(1).label(i)]
-        plotSpectra(inputWS, 'Amplitude', indicies=plotSpecs)
+def convertParametersToWorkspace(params_table, x_column, param_names, output_name):
+    #search for any parameters in the table with the given parameter names,
+    #ignoring their function index and output them to a workspace
+    workspace_names = []
+    for param_name in param_names:
+        column_names = search_for_fit_params(param_name, params_table)
+        column_error_names = search_for_fit_params(param_name+'_Err', params_table)
+        param_workspaces = []
+        for name, error_name in zip(column_names, column_error_names):
+            ConvertTableToMatrixWorkspace(params_table, x_column, name, error_name, OutputWorkspace=name)
+            param_workspaces.append(name)
+        workspace_names.append(param_workspaces)
 
-    if ( Plot == 'FWHM' or Plot == 'All' ):
-        plotSpecs = [i for i in range(0,nhist) if 'FWHM' in ws.getAxis(1).label(i)]
-        plotSpectra(inputWS, 'FWHM', indicies=plotSpecs)
+    #transpose list of workspaces, ignoring unequal length of lists
+    #this handles the case where a parameter occurs only once in the whole workspace
+    workspace_names = map(list, itertools.izip_longest(*workspace_names))
+    workspace_names = [filter(None, sublist) for sublist in workspace_names]
+
+    #join all the parameters for each peak into a single workspace per peak
+    temp_workspaces = []
+    for peak_params in workspace_names:
+        temp_peak_ws = peak_params[0]
+        for param_ws in peak_params[1:]:
+            ConjoinWorkspaces(temp_peak_ws, param_ws, False)
+        temp_workspaces.append(temp_peak_ws)
+
+    #join all peaks into a single workspace
+    temp_workspace = temp_workspaces[0]
+    for temp_ws in temp_workspaces[1:]:
+        ConjoinWorkspaces(temp_workspace, temp_peak_ws, False)
+
+    RenameWorkspace(temp_workspace, OutputWorkspace=output_name)
+
+    #replace axis on workspaces with text axis
+    axis = TextAxis.create(mtd[output_name].getNumberHistograms())
+    workspace_names = [name for sublist in workspace_names for name in sublist]
+    for i, name in enumerate(workspace_names):
+        axis.setLabel(i, name)
+    mtd[output_name].replaceAxis(1, axis)
 
 ##############################################################################
 
-def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, specMax, ties, temperature=None, Verbose=False):
+def calculateEISF(params_table):
+    #get height data from parameter table
+    height = search_for_fit_params('Height', params_table)[0]
+    height_error = search_for_fit_params('Height_Err', params_table)[0]
+    height_y = np.asarray(mtd[params_table].column(height))
+    height_e = np.asarray(mtd[params_table].column(height_error))
+
+    #get amplitude column names
+    amp_names = search_for_fit_params('Amplitude', params_table)
+    amp_error_names = search_for_fit_params('Amplitude_Err', params_table)
+
+    #for each lorentzian, calculate EISF
+    for amp_name, amp_error_name in zip(amp_names, amp_error_names):
+        #get amplitude from column in table workspace
+        amp_y = np.asarray(mtd[params_table].column(amp_name))
+        amp_e = np.asarray(mtd[params_table].column(amp_error_name))
+
+        #calculate EISF and EISF error
+        total = height_y+amp_y
+        EISF_y = height_y/total
+
+        total_error = height_e**2 + np.asarray(amp_e)**2
+        EISF_e = EISF_y * np.sqrt((height_e**2/height_y**2) + (total_error/total**2))
+
+        #append the calculated values to the table workspace
+        col_name = amp_name[:-len('Amplitude')] + 'EISF'
+        error_col_name = amp_error_name[:-len('Amplitude_Err')] + 'EISF_Err'
+
+        mtd[params_table].addColumn('double', col_name)
+        mtd[params_table].addColumn('double', error_col_name)
+
+        for i, (value, error) in enumerate(zip(EISF_y, EISF_e)):
+            mtd[params_table].setCell(col_name, i, value)
+            mtd[params_table].setCell(error_col_name, i, error)
+
+##############################################################################
+
+def confitSeq(inputWS, func, startX, endX, ftype, bgd, specMin=0, specMax=None, Verbose=False, Plot='None', Save=False):
     StartTime('ConvFit')
-    workdir = config['defaultsave.directory']
-    elements = func.split('"')
-    resFile = elements[1]  
-    if Verbose:
-        logger.notice('Input files : '+str(inputWS))  
-    input = inputWS+',i' + str(specMin)
-    if (specMax == -1):
-        specMax = mtd[inputWS].getNumberHistograms() - 1
-    for i in range(specMin + 1, specMax + 1):
-        input += ';'+inputWS+',i'+str(i)
-    (instr, run) = getInstrRun(inputWS)
-    run_name = instr + run
-    outNm = getWSprefix(inputWS) + 'conv_' + ftype + bgd + str(specMin) + "_to_" + str(specMax)
-    if Verbose:
-        logger.notice(func)
 
-    PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
-        StartX=startX, EndX=endX, FitType='Sequential')
-    wsname = confitParsToWS(outNm, inputWS, specMin, specMax)
+    num_spectra = mtd[inputWS].getNumberHistograms()
+    if specMin < 0 or specMax >= num_spectra:
+        raise ValueError("Invalid spectrum range: %d - %d" % (specMin, specMax))
 
-    # Add some information about convfit to the output workspace
-    options = getConvFitOption(ftype, bgd[:-2], Verbose)
+    using_delta_func = ftype[:5] == 'Delta'
+    lorentzians = ftype[5:6] if using_delta_func else ftype[:1]
+
+    if Verbose:
+        logger.notice('Input files : '+str(inputWS))
+        logger.notice('Fit type : Delta = ' + str(using_delta_func) + ' ; Lorentzians = ' + str(lorentzians))
+        logger.notice('Background type : ' + bgd)
+
+    output_workspace = getWSprefix(inputWS) + 'conv_' + ftype + bgd + str(specMin) + "_to_" + str(specMax)
+
+    #convert input workspace to get Q axis
+    temp_fit_workspace = "__convfit_fit_ws"
+    try:
+        e_fixed = getEfixed(inputWS)
+        ConvertSpectrumAxis(inputWS,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=temp_fit_workspace)
+    except RuntimeError:
+        #try to fall back to using whatever is currently there
+        axis = mtd[inputWS].getAxis(1)
+        if not axis.isNumeric():
+            logger.error('Input workspace must have either spectra or numeric axis.')
+            sys.exit()
+
+        if axis.getUnit().unitID() != 'MomentumTransfer':
+            logger.error('Input must have axis values of Q')
+            sys.exit()
+
+        temp_fit_workspace = inputWS
+
+    #fit all spectra in workspace
+    input_params = [temp_fit_workspace+',i%d' % i for i in xrange(specMin, specMax+1)]
+    PlotPeakByLogValue(Input=';'.join(input_params), OutputWorkspace=output_workspace, Function=func,
+                       StartX=startX, EndX=endX, FitType='Sequential', CreateOutput=True)
+
+    DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
+    DeleteWorkspace(output_workspace + '_Parameters')
+    DeleteWorkspace(temp_fit_workspace)
+
+    wsname = output_workspace + "_Workspace"
+    parameter_names = ['Height', 'Amplitude', 'FWHM', 'EISF']
+    if using_delta_func:
+        calculateEISF(output_workspace)
+    convertParametersToWorkspace(output_workspace, "axis-1", parameter_names, wsname)
+
+    #set x units to be momentum transfer
+    axis = mtd[wsname].getAxis(0)
+    axis.setUnit("MomentumTransfer")
+
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=wsname)
     AddSampleLog(Workspace=wsname, LogName="fit_program", LogType="String", LogText='ConvFit')
-    AddSampleLog(Workspace=wsname, LogName='background', LogType='String', LogText=str(options[0]))
-    AddSampleLog(Workspace=wsname, LogName='delta_function', LogType='String', LogText=str(options[1]))
-    AddSampleLog(Workspace=wsname, LogName='lorentzians', LogType='String', LogText=str(options[2]))
+    AddSampleLog(Workspace=wsname, LogName='background', LogType='String', LogText=str(bgd))
+    AddSampleLog(Workspace=wsname, LogName='delta_function', LogType='String', LogText=str(using_delta_func))
+    AddSampleLog(Workspace=wsname, LogName='lorentzians', LogType='String', LogText=str(lorentzians))
 
-    RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm + "_Parameters")
-    getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, ties, Verbose, temperature)
+    RenameWorkspace(InputWorkspace=output_workspace, OutputWorkspace=output_workspace + "_Parameters")
+    fit_workspaces = mtd[output_workspace + '_Workspaces'].getNames()
+    for i, ws in enumerate(fit_workspaces):
+        RenameWorkspace(ws, OutputWorkspace=output_workspace + str(i+specMin) + '_Workspace')
+
     if Save:
-        o_path = os.path.join(workdir, wsname+'.nxs')                    # path name for nxs file
+        # path name for nxs file
+        workdir = getDefaultWorkingDirectory()
+        o_path = os.path.join(workdir, wsname+'.nxs')
         if Verbose:
-            logger.notice('Creating file : '+o_path)
+            logger.notice('Creating file : '+ o_path)
         SaveNexusProcessed(InputWorkspace=wsname, Filename=o_path)
-    if Plot != 'None':
-        confitPlotSeq(wsname, Plot)
+
+    if Plot == 'All':
+        plotParameters(wsname, *parameter_names)
+    elif Plot != 'None':
+        plotParameters(wsname, Plot)
+
     EndTime('ConvFit')
 
 ##############################################################################
