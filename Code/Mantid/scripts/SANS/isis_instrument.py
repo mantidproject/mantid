@@ -942,6 +942,7 @@ class SANS2D(ISISInstrument):
             @return the values that were read as a dictionary
         """
         self._marked_dets = []
+        wksp = su.getWorkspaceReference(wksp)
         #assume complete log information is stored in the first entry, it isn't stored in the group workspace itself
         if isinstance(wksp, WorkspaceGroup):
             wksp = wksp[0]
