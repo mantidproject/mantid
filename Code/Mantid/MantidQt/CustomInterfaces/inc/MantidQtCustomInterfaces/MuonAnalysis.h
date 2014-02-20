@@ -293,7 +293,7 @@ private:
   void updateFrontAndCombo();
 
   /// Updates widgets related to period algebra
-  void updatePeriodWidgets(int numPeriods);
+  void updatePeriodWidgets(size_t numPeriods);
 
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
   int numOfDetectors(const std::string& str) const;
@@ -519,6 +519,10 @@ private:
   /// Returns a first period MatrixWorkspace in a run workspace
   /// TODO: Move to MuonAnalysisHelper
   static MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws);
+
+  /// Returns a number of periods in a run workspace
+  /// TODO: Move to MuonAnalysisHelper
+  static size_t numPeriods(Workspace_sptr ws);
 };
 
 }

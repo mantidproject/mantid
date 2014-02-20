@@ -1459,19 +1459,8 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     Workspace_sptr loadedWorkspace = loadResult->loadedWorkspace;
 
     // Get hold of a pointer to a matrix workspace
-    MatrixWorkspace_sptr matrix_workspace;
-    int numPeriods;
-
-    if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWorkspace) )
-    {
-      numPeriods = static_cast<int>( group->size() );
-      matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(0) );
-    }
-    else 
-    {
-      numPeriods = 1;
-      matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWorkspace);
-    }
+    MatrixWorkspace_sptr matrix_workspace = firstPeriod(loadedWorkspace);
+    size_t numPeriods = MuonAnalysis::numPeriods(loadedWorkspace);
 
     int newInstrIndex = m_uiForm.instrSelector->findText(
           QString::fromStdString( matrix_workspace->getInstrument()->getName() ));
@@ -1682,7 +1671,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     m_uiForm.infoBrowser->setText( QString::fromStdString(infoStr.str()) );
 
     // If instrument or number of periods has changed -> update period widgets
-    if(instrumentChanged || numPeriods != m_uiForm.homePeriodBox1->count())
+    if(instrumentChanged || static_cast<int>(numPeriods) != m_uiForm.homePeriodBox1->count())
       updatePeriodWidgets(numPeriods);
 
     // Populate bin width info in Plot options
@@ -1958,7 +1947,7 @@ void MuonAnalysis::updateFrontAndCombo()
  * Updates widgets related to period algebra.
  * @param numPeriods Number of periods available
  */
-void MuonAnalysis::updatePeriodWidgets(int numPeriods)
+void MuonAnalysis::updatePeriodWidgets(size_t numPeriods)
 {
   QString periodLabel = "Data collected in " + QString::number(numPeriods)
                         + " periods. Plot/analyse period: ";
@@ -1970,7 +1959,7 @@ void MuonAnalysis::updatePeriodWidgets(int numPeriods)
 
   m_uiForm.homePeriodBox2->addItem("None");
 
-  for ( int i = 1; i <= numPeriods; i++ )
+  for ( size_t i = 1; i <= numPeriods; i++ )
   {
     m_uiForm.homePeriodBox1->addItem(QString::number(i));
     m_uiForm.homePeriodBox2->addItem(QString::number(i));
@@ -3759,6 +3748,23 @@ MatrixWorkspace_sptr MuonAnalysis::firstPeriod(Workspace_sptr ws)
   else
   {
     return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  }
+}
+
+/**
+ * Returns a number of periods in a run workspace
+ * @param ws :: Run wokspace
+ * @return Number of periods
+ */
+size_t MuonAnalysis::numPeriods(Workspace_sptr ws)
+{
+  if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws) )
+  {
+    return group->size();
+  }
+  else
+  {
+    return 1;
   }
 }
 
