@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidICat/CatalogSearchParam.h"
 #include "MantidICat/CompositeCatalog.h"
 
 #include <boost/make_shared.hpp>

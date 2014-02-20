@@ -4,6 +4,7 @@
 #include "MantidAPI/ICatalog.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/Logger.h"
+#include "MantidICat/CatalogSearchParam.h"
 
 namespace Mantid
 {

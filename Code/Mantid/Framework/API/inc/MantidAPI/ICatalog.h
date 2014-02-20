@@ -1,10 +1,16 @@
 #ifndef MANTID_API_ICATLOG_H_
 #define MANTID_API_ICATLOG_H_
+
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidICat/CatalogSearchParam.h"
 
 namespace Mantid
 {
+
+//forward declarations
+namespace ICat
+{
+  class CatalogSearchParam;
+}
 
 namespace API
 {

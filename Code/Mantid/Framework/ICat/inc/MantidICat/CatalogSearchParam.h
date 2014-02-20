@@ -4,6 +4,8 @@
 #include <string>
 #include <stdexcept>
 
+#include "MantidAPI/DllConfig.h"
+
 namespace Mantid
 {
   namespace ICat
