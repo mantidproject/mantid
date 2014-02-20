@@ -434,7 +434,7 @@ public:
   /// Set the covariance matrix
   void setCovarianceMatrix(boost::shared_ptr<Kernel::Matrix<double>> covar);
   /// Get the covariance matrix
-  boost::shared_ptr<Kernel::Matrix<double>> getCovarianceMatrix()const{return m_covar;}
+  boost::shared_ptr<const Kernel::Matrix<double>> getCovarianceMatrix()const{return m_covar;}
 
   /// Set the parallel hint
   void setParallel(bool on) {m_isParallel = on;}

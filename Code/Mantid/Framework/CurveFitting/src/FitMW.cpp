@@ -574,7 +574,7 @@ namespace
     if (covar)
     {
       // if the function has a covariance matrix attached - use it for the errors
-      Kernel::Matrix<double> &C = *covar;
+      const Kernel::Matrix<double> &C = *covar;
       // The formula is E = J * C * J^T 
       // We don't do full 3-matrix multiplication because we only need the diagonals of E
       std::vector<double> E(nData);
