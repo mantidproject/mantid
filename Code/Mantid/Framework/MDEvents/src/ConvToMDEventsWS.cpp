@@ -1,11 +1,5 @@
 #include "MantidMDEvents/ConvToMDEventsWS.h"
 #include "MantidMDEvents/UnitsConversionHelper.h"
-//
-#if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 || defined(_WIN32)// libstdc++-4.4.3
- typedef std::unique_ptr<Mantid::Kernel::ThreadScheduler > thread_sheduler_holder ;
-#else
- typedef std::auto_ptr<Mantid::Kernel::ThreadScheduler>  thread_sheduler_holder;
-#endif
 
 
 

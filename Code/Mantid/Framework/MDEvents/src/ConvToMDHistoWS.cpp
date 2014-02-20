@@ -148,7 +148,7 @@ namespace Mantid
 
   
       //--->>> Thread control stuff
-      Kernel::ThreadScheduler * ts = new Kernel::ThreadSchedulerFIFO();
+      thread_sheduler_holder pTs;
       int nThreads(m_NumThreads);
       if(nThreads<0)nThreads= 0; // negative m_NumThreads correspond to all cores used, 0 no threads and positive number -- nThreads requested;
       bool runMultithreaded = false;
@@ -156,11 +156,11 @@ namespace Mantid
       {
         runMultithreaded  = true;
         // Create the thread pool that will run all of these.
-        ts = new Kernel::ThreadSchedulerFIFO();     
+        pTs.reset(new Kernel::ThreadSchedulerFIFO());
         // it will initiate thread pool with number threads or machine's cores (0 in tp constructor)
         pProgress->resetNumSteps(nValidSpectra,0,1);
       }
-      Kernel::ThreadPool tp(ts,nThreads, new API::Progress(*pProgress));  
+      Kernel::ThreadPool tp(pTs.get(),nThreads, new API::Progress(*pProgress));  
       //<<<--  Thread control stuff
 
       if (runMultithreaded )
@@ -188,8 +188,8 @@ namespace Mantid
             // Do all the adding tasks
             tp.joinAll();    
             // Now do all the splitting tasks
-            m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
-            if (ts->size() > 0)       tp.joinAll();
+            m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(pTs.get());
+            if (pTs->size() > 0)       tp.joinAll();
           }else{
             m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(NULL); // it is done this way as it is possible trying to do single threaded split more efficiently
           }
@@ -216,7 +216,7 @@ namespace Mantid
       if(runMultithreaded)
       {
         tp.joinAll();
-        m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
+        m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(pTs.get());
         tp.joinAll();
       }else{
         m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
