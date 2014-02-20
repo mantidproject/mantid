@@ -4,8 +4,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 
-
-
 namespace Mantid
 {
   namespace ICat

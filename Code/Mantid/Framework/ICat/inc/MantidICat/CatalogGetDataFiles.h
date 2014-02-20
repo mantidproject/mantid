@@ -1,9 +1,8 @@
-#ifndef MANTID_ICAT_GETINVESTIGATION_H_
-#define MANTID_ICAT_GETINVESTIGATION_H_
+#ifndef MANTID_ICAT_CATALOGGETDATAFILES_H_
+#define MANTID_ICAT_CATALOGGETDATAFILES_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
-
 
 namespace Mantid
 {

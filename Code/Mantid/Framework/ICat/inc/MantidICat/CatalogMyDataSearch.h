@@ -1,5 +1,5 @@
-#ifndef MANTID_ICAT_CMYDATASEARCH_H_
-#define MANTID_ICAT_CMYDATASEARCH_H_
+#ifndef MANTID_ICAT_CATALOGMYDATASEARCH_H_
+#define MANTID_ICAT_CATALOGMYDATASEARCH_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
