@@ -1674,7 +1674,7 @@ namespace Mantid
     template<typename TYPE>
     std::string TimeSeriesProperty<TYPE>::getDefault() const
     {
-      throw Exception::NotImplementedError("TimeSeries properties don't have defaults");
+      return ""; // No defaults can be provided=empty string
     }
 
     /**
