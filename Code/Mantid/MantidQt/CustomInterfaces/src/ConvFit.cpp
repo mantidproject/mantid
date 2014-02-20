@@ -959,10 +959,12 @@ namespace IDA
       { 
         m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["DeltaHeight"]);
         uiForm().confit_cbPlotOutput->addItem("Height");
+        uiForm().confit_cbPlotOutput->addItem("EISF");
       }
       else 
       { 
         m_cfProp["DeltaFunction"]->removeSubProperty(m_cfProp["DeltaHeight"]);
+        uiForm().confit_cbPlotOutput->removeItem(uiForm().confit_cbPlotOutput->count()-1);
         uiForm().confit_cbPlotOutput->removeItem(uiForm().confit_cbPlotOutput->count()-1);
       }
     }
