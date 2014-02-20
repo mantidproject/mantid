@@ -593,12 +593,13 @@ namespace
         E[k] = s;
       }
 
+      double chi2 = function->getChiSquared();
       MantidVec& yValues = ws->dataY(wsIndex);
       MantidVec& eValues = ws->dataE(wsIndex);
       for(size_t i=0; i < nData; i++)
       {
         yValues[i] = resultValues->getCalculated(i);
-        eValues[i] = std::sqrt( E[i] );
+        eValues[i] = std::sqrt( E[i] * chi2 );
       }
 
     }

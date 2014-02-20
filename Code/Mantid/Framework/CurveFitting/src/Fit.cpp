@@ -695,7 +695,7 @@ namespace CurveFitting
     {
       // Calculate the covariance matrix and the errors.
       costFunc->calCovarianceMatrix(covar);
-      costFunc->calFittingErrors(covar);
+      costFunc->calFittingErrors( covar, rawcostfuncval );
     }
 
     if (doCreateOutput)

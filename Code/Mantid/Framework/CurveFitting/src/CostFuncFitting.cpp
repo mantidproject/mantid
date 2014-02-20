@@ -173,8 +173,9 @@ void CostFuncFitting::calCovarianceMatrix( GSLMatrix& covar, double epsrel )
  * Calculate the fitting errors and assign them to the fitting function.
  * @param covar :: A covariance matrix to use for error calculations.
  *   It can be calculated with calCovarianceMatrix().
+ * @param chi2 :: The final chi-squared of the fit.
  */
-void CostFuncFitting::calFittingErrors(const GSLMatrix& covar)
+void CostFuncFitting::calFittingErrors(const GSLMatrix& covar, double chi2)
 {
   size_t np = m_function->nParams();
   auto covarMatrix = boost::shared_ptr<Kernel::Matrix<double>>(new Kernel::Matrix<double>(np,np));
@@ -202,6 +203,7 @@ void CostFuncFitting::calFittingErrors(const GSLMatrix& covar)
     }
   }
   m_function->setCovarianceMatrix(covarMatrix);
+  m_function->setChiSquared(chi2);
 }
 
 /**

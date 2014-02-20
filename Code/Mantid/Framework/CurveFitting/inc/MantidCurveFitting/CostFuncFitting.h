@@ -69,7 +69,7 @@ public:
   virtual void calCovarianceMatrix(GSLMatrix& covar, double epsrel = 1e-8);
 
   /// Calculate fitting errors
-  virtual void calFittingErrors(const GSLMatrix& covar);
+  virtual void calFittingErrors(const GSLMatrix& covar, double chi2);
   /// Get the domain the fitting function is applied to
   API::FunctionDomain_sptr getDomain() const {return m_domain;}
   /// Get FunctionValues where function values are stored.
