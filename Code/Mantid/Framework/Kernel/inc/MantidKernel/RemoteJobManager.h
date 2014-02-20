@@ -2,16 +2,24 @@
 #define REMOTEJOBMANAGER_H
 
 #include <string>
-#include <ostream>
 #include <vector>
+#include <map>
+#include <istream>
 
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
 #include <Poco/Net/HTTPClientSession.h>
-#include <Poco/Net/HTTPCookie.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
-#include <Poco/Net/NameValueCollection.h>
+
+// Forward declarations
+namespace Poco {
+  namespace XML {
+    class Element;
+  }
+  namespace Net {
+    class HTTPCookie;
+    class NameValueCollection;
+  }
+}
 
 namespace Mantid
 {
