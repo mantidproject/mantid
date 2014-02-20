@@ -21,6 +21,7 @@ import SANSUtility as su
 try:
     import mantidplot
 except:
+    mantidplot = None
     #this should happen when this is called from outside Mantidplot and only then, the result is that attempting to plot will raise an exception
     pass
 
@@ -741,7 +742,7 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
     if resetSetup:
         _refresh_singleton()
 
-    if plot:
+    if plot and mantidplot:
         mantidplot.plotSpectrum(calculated, 0)
     
     #return just the workspace name of the full range
@@ -774,7 +775,7 @@ def PhiRanges(phis, plot=True):
     finally:
         _refresh_singleton()
     
-    if plot:
+    if plot and mantidplot:
         mantidplot.plotSpectrum(calculated, 0)
     
     #return just the workspace name of the full range
@@ -949,6 +950,10 @@ def PlotResult(workspace, canvas=None):
         @param canvas: optional handle to an existing graph to write the plot to
         @return: a handle to the graph that was written to
     """ 
+    if not mantidplot:
+        issueWarning('Plot functions are not available, is this being run from outside Mantidplot?')
+        return
+
     #ensure that we are dealing with a workspace handle rather than its name
     workspace = mtd[str(workspace)]
     if isinstance(workspace, WorkspaceGroup):
@@ -956,14 +961,10 @@ def PlotResult(workspace, canvas=None):
     else:
         numSpecs = workspace.getNumberHistograms()
 
-    try:
-        if numSpecs == 1:
-            graph = mantidplot.plotSpectrum(workspace,0)
-        else:        
-            graph = mantidplot.importMatrixWorkspace(workspace.getName()).plotGraph2D()
-
-    except NameError:
-        issueWarning('Plot functions are not available, is this being run from outside Mantidplot?')
+    if numSpecs == 1:
+        graph = mantidplot.plotSpectrum(workspace,0)
+    else:        
+        graph = mantidplot.importMatrixWorkspace(workspace.getName()).plotGraph2D()
         
     if not canvas is None:
         #we were given a handle to an existing graph, use it
@@ -1135,15 +1136,16 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
         centre.logger.notice(centre.status_str(it, resX, resY))
         
-        try :
-            if not graph_handle:
-                #once we have a plot it will be updated automatically when the workspaces are updated
-                graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
-            graph_handle.activeLayer().setTitle(
+        if mantidplot:
+            try :
+                if not graph_handle:
+                    #once we have a plot it will be updated automatically when the workspaces are updated
+                    graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
+                graph_handle.activeLayer().setTitle(
                         centre.status_str(it, resX, resY))
-        except :
-            #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
-            pass
+            except :
+                #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
+                pass
 
         #have we stepped across the y-axis that goes through the beam center?  
         if resX > resX_old:
