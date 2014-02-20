@@ -11,6 +11,7 @@
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidCurveFitting/Convolution.h"
 #include "MantidCurveFitting/Gaussian.h"
+#include "MantidCurveFitting/Polynomial.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -18,6 +19,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include "MantidKernel/PropertyManager.h"
 #include "MantidGeometry/Instrument.h"
@@ -188,6 +190,40 @@ public:
 
     TS_ASSERT_DELTA( fun->getParameter("Height"), 11.0, 1e-3);
     TS_ASSERT_DELTA( fun->getParameter("Lifetime"), 1.0, 1e-4);
+
+  }
+
+  // test that errors of the calculated output are reasonable
+  void test_output_errors()
+  {
+    const bool histogram(true);
+    auto ws2 = createTestWorkspace(histogram);
+
+    API::IFunction_sptr fun(new Polynomial);
+    fun->setAttributeValue("n",5);
+
+    Fit fit;
+    fit.initialize();
+
+    fit.setProperty("Function",fun);
+    fit.setProperty("InputWorkspace",ws2);
+    fit.setProperty("WorkspaceIndex",0);
+    fit.setProperty("Output","out");
+
+    fit.execute();
+
+    TS_ASSERT(fit.isExecuted());
+
+    Mantid::API::MatrixWorkspace_sptr out_ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("out_Workspace");
+    TS_ASSERT(out_ws);
+    TS_ASSERT_EQUALS(out_ws->getNumberHistograms(), 3);
+    auto &e = out_ws->readE(1);
+    for(size_t i = 0; i < e.size(); ++i)
+    {
+      TS_ASSERT( e[i] < 1.0 );
+    }
+
+    Mantid::API::AnalysisDataService::Instance().clear();
 
   }
 
