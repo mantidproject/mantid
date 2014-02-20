@@ -110,5 +110,74 @@ public:
 };
 
 
+//================================= Performance Tests =======================================
+class LoggerTestPerformance : public CxxTest::TestSuite
+{
+public:
+
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoggerTestPerformance *createSuite() { return new LoggerTestPerformance(); }
+  static void destroySuite( LoggerTestPerformance *suite ) { delete suite; }
+
+  void test_Logging_At_High_Frequency_At_Equal_Level_To_Current_Level()
+  {
+    auto & logger = Logger::get("LoggerTestPerformance");
+    logger.setLevel(Logger::Priority::PRIO_INFORMATION);
+
+    for (int i = 0; i < 100000; i++)
+    {
+      logger.information() << "Information Message " << i << std::endl;
+    }
+
+    logger.release();
+  }
+
+
+  void test_Logging_At_High_Frequency_In_Parallel_At_Equal_Level_To_Current_Level()
+  {
+    auto & logger = Logger::get("LoggerTestPerformance");
+    logger.setLevel(Logger::Priority::PRIO_INFORMATION);
+
+    PRAGMA_OMP(parallel for)
+    for (int i = 0; i < 100000; i++)
+    {
+      logger.information() << "Information Message " << i << std::endl;
+    }
+
+    logger.release();
+  }
+
+  void test_Logging_At_High_Frequency_At_Lower_Than_Current_Level()
+  {
+    auto & logger = Logger::get("LoggerTestPerformance");
+    logger.setLevel(Logger::Priority::PRIO_INFORMATION);
+
+    for (int i = 0; i < 100000; i++)
+    {
+      logger.debug() << "Debug Message " << i << std::endl;
+    }
+
+    logger.release();
+  }
+
+
+  void test_Logging_At_High_Frequency_In_Parallel_At_Lower_Than_Current_Level()
+  {
+    auto & logger = Logger::get("LoggerTestPerformance");
+    logger.setLevel(Logger::Priority::PRIO_INFORMATION);
+
+    PRAGMA_OMP(parallel for)
+    for (int i = 0; i < 100000; i++)
+    {
+      logger.debug() << "Debug Message " << i << std::endl;
+    }
+
+    logger.release();
+  }
+
+
+};
+
 #endif /* MANTID_KERNEL_LOGGERTEST_H_ */
 
