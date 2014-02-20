@@ -3,9 +3,9 @@
     be run
 """
 import isis_instrument
-from reduction.command_interface import ReductionSingleton  
-import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
-sanslog = sans_reduction_steps.sanslog
+from reducer_singleton import ReductionSingleton
+from mantid.kernel import Logger
+sanslog = Logger.get("SANS")
 
 import isis_reduction_steps
 import isis_reducer
@@ -326,7 +326,7 @@ def SetCentre(xcoord, ycoord, bank = 'rear'):
     """
     _printMessage('SetCentre(' + str(xcoord) + ', ' + str(ycoord) + ')')
 
-    ReductionSingleton().set_beam_finder(sans_reduction_steps.BaseBeamFinder(
+    ReductionSingleton().set_beam_finder(isis_reduction_steps.BaseBeamFinder(
                                 float(xcoord)/1000.0, float(ycoord)/1000.0), bank)
 
 def GetMismatchedDetList():
@@ -1095,7 +1095,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
     if xstart or ystart:
         ReductionSingleton().set_beam_finder(
-            sans_reduction_steps.BaseBeamFinder(
+            isis_reduction_steps.BaseBeamFinder(
             float(xstart), float(ystart)),det_bank)
 
     beamcoords = ReductionSingleton().get_beam_center()
@@ -1127,7 +1127,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         it = i
         
         centre_reduction.set_beam_finder(
-            sans_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
+            isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
 
         resX, resY = centre.SeekCentre(centre_reduction, [XNEW, YNEW])
         centre_reduction = copy.deepcopy(ReductionSingleton().reference())
@@ -1167,7 +1167,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         YNEW -= YSTEP
     
     ReductionSingleton().set_beam_finder(
-        sans_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
+        isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
     centre.logger.notice("Centre coordinates updated: [" + str(XNEW)+ ", "+ str(YNEW) + ']')
     
     return XNEW, YNEW
