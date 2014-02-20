@@ -1432,153 +1432,19 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
   try
   {
-    // Whether the instrument in the file is different from the one used
-    bool instrumentChanged = false;
+    boost::shared_ptr<LoadResult> loadResult = load(files);
 
-    std::string mainFieldDirection;
-    double timeZero;
-    double firstGoodData;
-
-    std::vector<Workspace_sptr> loadedWorkspaces;
-
-    Workspace_sptr loadedDeadTimes;
-    Workspace_sptr loadedDetGrouping;
-
-    for (int i=0; i<files.size(); ++i)
+    try // to apply dead time correction
     {
-      QString filename = files[i];
-      Poco::File l_path( filename.toStdString() );
-
-      // and check if file is from a recognised instrument and update instrument combo box
-      QString filenamePart = (Poco::Path(l_path.path()).getFileName()).c_str();
-      filenamePart = filenamePart.toLower();
-      bool foundInst = false;
-      for (int j=0; j < m_uiForm.instrSelector->count(); j++)
-      {
-        QString instName = m_uiForm.instrSelector->itemText(j).toLower();
-      
-        std::string sfilename = filenamePart.toStdString();
-        std::string sinstName = instName.toStdString();
-        size_t found;
-        found = sfilename.find(sinstName);
-        if ( found != std::string::npos )
-        {
-          foundInst = true;
-
-          // If currently used instrument has changed
-          if(j != m_uiForm.instrSelector->currentIndex())
-          {
-            m_uiForm.instrSelector->setCurrentIndex(j);
-            instrumentChanged = true;
-          }
-          
-          break;
-        }
-      }
-
-      if ( !foundInst )
-        throw std::runtime_error("Muon file " + filename.toStdString() + " not recognised.");
-
-      // Setup Load Nexus Algorithm
-      IAlgorithm_sptr loadMuonAlg = AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
-      loadMuonAlg->initialize();
-      loadMuonAlg->setChild(true);
-      loadMuonAlg->setPropertyValue("Filename", filename.toStdString() );
-
-      // Set up ws names. They are not actually used as the algorithm is set up as a child,
-      // but they are needed to pass validation.
-      loadMuonAlg->setPropertyValue("OutputWorkspace", "__NotUsed");
-
-      if ( i == 0 )
-      {
-        // These are only needed for the first file
-        loadMuonAlg->setPropertyValue("DeadTimeTable", "__NotUsed");
-        loadMuonAlg->setPropertyValue("DetectorGroupingTable", "__NotUsed");
-      }
-
-      loadMuonAlg->execute();
-
-      loadedWorkspaces.push_back( loadMuonAlg->getProperty("OutputWorkspace") );
-
-      if ( i == 0 )
-      {
-        // Load some additional information from the first file in the list
-
-        loadedDeadTimes = loadMuonAlg->getProperty("DeadTimeTable");
-        loadedDetGrouping = loadMuonAlg->getProperty("DetectorGroupingTable");
-
-        timeZero = loadMuonAlg->getProperty("TimeZero");
-        firstGoodData = loadMuonAlg->getProperty("FirstGoodData");
-        mainFieldDirection = loadMuonAlg->getPropertyValue("MainFieldDirection");
-      }
-
+      applyDeadTimeCorrection(loadResult);
+    }
+    catch(std::exception& e)
+    {
+      // If dead correction wasn't applied we can still continue, though should make user be aware of that
+      g_log.warning() << "No dead time correction applied: " << e.what();
     }
 
-    Workspace_sptr loadedWorkspace;
-
-    if ( loadedWorkspaces.size() == 1 )
-      loadedWorkspace = loadedWorkspaces.front();
-    else
-      loadedWorkspace = sumWorkspaces(loadedWorkspaces);
-
-    if (m_uiForm.instrSelector->currentText().toUpper() == "ARGUS")
-    {
-      // Some of the ARGUS data files contain wrong information about the instrument main field
-      // direction. It is alway longitudinal.
-      mainFieldDirection = "longitudinal";
-    }
-
-    if (m_uiForm.deadTimeType->currentIndex() != 0)
-    {
-      try // ... to apply dead time correction
-      {
-        // ARGUS does not support dead time corr.
-        if (m_uiForm.instrSelector->currentText().toUpper() == "ARGUS") 
-            throw std::runtime_error("Dead times are currently not implemented in ARGUS files.");
-
-        // Dead time table which will be used
-        Workspace_sptr deadTimes;
-
-        if (m_uiForm.deadTimeType->currentIndex() == 1) // From Run Data
-        {
-          if( ! loadedDeadTimes )
-            throw std::runtime_error("Data file doesn't appear to contain dead time values");
-
-          deadTimes = loadedDeadTimes;
-        }
-        else if (m_uiForm.deadTimeType->currentIndex() == 2) // From Specified File
-        {
-          deadTimes = loadDeadTimes( deadTimeFilename() );
-        }
-
-        // Add workspaces to ADS so that they can be processed correctly in case they are groups
-        ScopedWorkspace loadedWsEntry(loadedWorkspace);
-        ScopedWorkspace deadTimesEntry(deadTimes);
-
-        ScopedWorkspace correctedWsEntry;
-
-        IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
-        applyCorrAlg->initialize();
-        applyCorrAlg->setRethrows(true);
-        applyCorrAlg->setLogging(false);
-        applyCorrAlg->setPropertyValue("InputWorkspace", loadedWsEntry.name());
-        applyCorrAlg->setPropertyValue("DeadTimeTable", deadTimesEntry.name());
-        applyCorrAlg->setPropertyValue("OutputWorkspace", correctedWsEntry.name());
-        applyCorrAlg->execute();
-
-        loadedWorkspace = correctedWsEntry.retrieve();
-      }
-      catch(std::exception& e)
-      {
-        QString errorMsg(e.what());
-        errorMsg += "\n\nNo Dead Time correction applied.\n\nReset to None.";
-
-        // Set DTC type to None
-        m_uiForm.deadTimeType->setCurrentIndex(0);
-
-        QMessageBox::warning(this, "Mantid - MuonAnalysis", errorMsg);
-      }
-    }
+    Workspace_sptr loadedWorkspace = loadResult->loadedWorkspace;
 
     // Get hold of a pointer to a matrix workspace
     MatrixWorkspace_sptr matrix_workspace;
@@ -1595,6 +1461,14 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWorkspace);
     }
 
+    int newInstrIndex = m_uiForm.instrSelector->findText(
+          QString::fromStdString( matrix_workspace->getInstrument()->getName() ));
+    assert(newInstrIndex != -1); // Should be checked in load()
+
+    bool instrumentChanged = newInstrIndex != m_uiForm.instrSelector->currentIndex();
+
+    m_uiForm.instrSelector->setCurrentIndex(newInstrIndex);
+
     Workspace_sptr grouping;
 
     if ( isGroupingSet() )
@@ -1605,23 +1479,23 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     }
     else
     {
-      setGroupingFromIDF( matrix_workspace->getInstrument(), mainFieldDirection );
+      setGroupingFromIDF( matrix_workspace->getInstrument(), loadResult->mainFieldDirection );
 
       if ( isGroupingSet() )
       {
         g_log.information("Using grouping loaded from IDF");
         grouping = parseGrouping();
       }
-      else if ( loadedDetGrouping )
+      else if ( loadResult->loadedGrouping )
       {
         g_log.information("Using grouping loaded from Nexus file");
 
         ITableWorkspace_sptr groupingTable;
 
-        if ( !( groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>(loadedDetGrouping) ) )
+        if ( !( groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>(loadResult->loadedGrouping) ) )
         {
           g_log.information("Multi-period grouping loaded from the Nexus file. Using the first one.");
-          auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedDetGrouping);
+          auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadResult->loadedGrouping);
           groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>( group->getItem(0) );
         }
 
@@ -1656,13 +1530,13 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     str << "Description: ";
     str << matrix_workspace->getInstrument()->getDetectorIDs().size();
     str << " detector spectrometer, main field ";
-    str << QString(mainFieldDirection.c_str()).toLower().toStdString();
+    str << QString(loadResult->mainFieldDirection.c_str()).toLower().toStdString();
     str << " to muon polarisation";
     m_uiForm.instrumentDescription->setText(str.str().c_str());
 
     // Save loaded values
-    m_dataTimeZero = timeZero;
-    m_dataFirstGoodData = firstGoodData - timeZero;
+    m_dataTimeZero = loadResult->timeZero;
+    m_dataFirstGoodData = loadResult->firstGoodData - loadResult->timeZero;
 
     if(instrumentChanged)
     {
