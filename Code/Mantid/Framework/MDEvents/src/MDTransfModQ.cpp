@@ -370,5 +370,9 @@ namespace Mantid
       m_pDetMasks(NULL)
     {}    
 
+    std::vector<std::string> MDTransfModQ::getEmodes()const
+    {
+      return Kernel::DeltaEMode().availableTypes();
+    }
   } // End MDAlgorighms namespace
 } // End Mantid namespace
