@@ -118,6 +118,8 @@ namespace Mantid
 
       /// Pointer to progress reporting
       API::Progress *m_progress;
+      // internal method called within the loop to avoid true-catch operations which broke Microsoft compiler compiling in parallel
+      bool calculateBackground(size_t inputIndex, size_t ouptutIndex);
     };
 
 
