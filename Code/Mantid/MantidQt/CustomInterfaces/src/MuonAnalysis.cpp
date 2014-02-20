@@ -1348,6 +1348,75 @@ void MuonAnalysis::handleInputFileChanges()
 }
 
 /**
+ * Loads the given list of files
+ * @param files :: A list of files to load
+ * @return Struct with various loaded parameters
+ */
+boost::shared_ptr<LoadResult> MuonAnalysis::load(const QStringList& files) const
+{
+  if ( files.empty() )
+    throw std::invalid_argument("Supplied list of files is empty");
+
+  auto result = boost::make_shared<LoadResult>();
+
+  std::vector<Workspace_sptr> loadedWorkspaces;
+
+  // TODO: get instrument and check if is a valid Muon instrument
+
+  // Go through all the files and try to load them
+  for ( auto f = files.constBegin(); f != files.constEnd(); ++f )
+  {
+    std::string file = (*f).toStdString();
+
+    // Setup Load Nexus Algorithm
+    IAlgorithm_sptr load = AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
+    load->initialize();
+    load->setChild(true);
+    load->setPropertyValue("Filename", file );
+
+    // Just to pass validation
+    load->setPropertyValue("OutputWorkspace", "__NotUsed");
+
+    if ( f == files.constBegin() )
+    {
+      // These are only needed for the first file
+      load->setPropertyValue("DeadTimeTable", "__NotUsed");
+      load->setPropertyValue("DetectorGroupingTable", "__NotUsed");
+    }
+
+    load->execute();
+
+    loadedWorkspaces.push_back( load->getProperty("OutputWorkspace") );
+
+    if ( f == files.constBegin() )
+    {
+      result->loadedDeadTimes = load->getProperty("DeadTimeTable");
+      result->loadedGrouping = load->getProperty("DetectorGroupingTable");
+      result->mainFieldDirection = static_cast<std::string>(load->getProperty("MainFieldDirection"));
+      result->timeZero = load->getProperty("TimeZero");
+      result->firstGoodData = load->getProperty("FirstGoodData");
+    }
+  }
+
+  /* TODO:
+  if (instrument == "ARGUS")
+  {
+    // Some of the ARGUS data files contain wrong information about the instrument main field
+    // direction. It is alway longitudinal.
+    result->setProperty("MainFieldDirection", "longitudinal");
+  }
+  */
+
+  // Acquire a single loaded worksace to work with. If multiple loaded - sum them to get one
+  if ( loadedWorkspaces.size() == 1 )
+    result->loadedWorkspace = loadedWorkspaces.front();
+  else
+    result->loadedWorkspace = sumWorkspaces(loadedWorkspaces);
+
+  return result;
+}
+
+/**
  * Input file changed. Update GUI accordingly. Note this method does no check of input filename assumed
  * done elsewhere depending on e.g. whether filename came from MWRunFiles or 'get current run' button.
  *
@@ -3624,6 +3693,48 @@ Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string& filename) const
   catch(...)
   {
     throw std::runtime_error("Unable to load dead times from the specified file");
+  }
+}
+
+/**
+ * Applies dead time correction to the loaded workspace. Updates loadedWorkspace in loadResult.
+ * @param loadResult :: Struct with loaded parameters
+ */
+void MuonAnalysis::applyDeadTimeCorrection(boost::shared_ptr<LoadResult> loadResult) const
+{
+  if (m_uiForm.deadTimeType->currentText() != "None")
+  {
+    // Dead time table which will be used
+    Workspace_sptr deadTimes;
+
+    if (m_uiForm.deadTimeType->currentText() == "From Data File")
+    {
+      if( ! loadResult->loadedDeadTimes )
+        throw std::runtime_error("Data file doesn't appear to contain dead time values");
+
+      deadTimes = loadResult->loadedDeadTimes;
+    }
+    else if (m_uiForm.deadTimeType->currentText() == "From Disk")
+    {
+      deadTimes = loadDeadTimes( deadTimeFilename() );
+    }
+
+    // Add workspaces to ADS so that they can be processed correctly in case they are groups
+    ScopedWorkspace loadedWsEntry(loadResult->loadedWorkspace);
+    ScopedWorkspace deadTimesEntry(deadTimes);
+
+    ScopedWorkspace correctedWsEntry;
+
+    IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
+    applyCorrAlg->initialize();
+    applyCorrAlg->setRethrows(true);
+    applyCorrAlg->setLogging(false);
+    applyCorrAlg->setPropertyValue("InputWorkspace", loadedWsEntry.name());
+    applyCorrAlg->setPropertyValue("DeadTimeTable", deadTimesEntry.name());
+    applyCorrAlg->setPropertyValue("OutputWorkspace", correctedWsEntry.name());
+    applyCorrAlg->execute();
+
+    loadResult->loadedWorkspace = correctedWsEntry.retrieve();
   }
 }
 
