@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidICat/CatalogSearchParam.h"
 #include "MantidICat/CompositeCatalog.h"
 
 #include <boost/make_shared.hpp>
@@ -130,6 +129,41 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       compositeCatalog->add(boost::make_shared<DummyCatalog>());
 
       compositeCatalog->logout();
+
+      TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
+
+      delete compositeCatalog;
+    }
+
+    void testSearch()
+    {
+      CompositeCatalog* compositeCatalog = new CompositeCatalog();
+      DummyCatalog::m_counter = 0;
+
+      compositeCatalog->add(boost::make_shared<DummyCatalog>());
+      compositeCatalog->add(boost::make_shared<DummyCatalog>());
+
+      CatalogSearchParam params;
+      ITableWorkspace_sptr ws;
+      int limit = 0;
+      int offset = 0;
+      compositeCatalog->search(params,ws,offset,limit);
+
+      TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
+
+      delete compositeCatalog;
+    }
+
+    void testGetNumberOfSearchResults()
+    {
+      CompositeCatalog* compositeCatalog = new CompositeCatalog();
+      DummyCatalog::m_counter = 0;
+
+      compositeCatalog->add(boost::make_shared<DummyCatalog>());
+      compositeCatalog->add(boost::make_shared<DummyCatalog>());
+
+      CatalogSearchParam params;
+      compositeCatalog->getNumberOfSearchResults(params);
 
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
 

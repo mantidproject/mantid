@@ -2,7 +2,6 @@
 #define MANTID_ICAT_ICAT3CATALOG_H_
 
 #include "MantidAPI/ICatalog.h"
-#include "MantidICat/CatalogSearchParam.h"
 #include "MantidICat/ICat3/ICat3ErrorHandling.h"
 #include "MantidICat/ICat3/ICat3Helper.h"
 
