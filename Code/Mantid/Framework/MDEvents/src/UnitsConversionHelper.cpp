@@ -112,7 +112,7 @@ void UnitsConversionHelper::updateConversion(size_t i)
   case(CnvrtToMD::ConvertFast):      return;
   case(CnvrtToMD::ConvertFromTOF):
     {
-      double delta;
+      double delta(std::numeric_limits<double>::quiet_NaN());
       m_TwoTheta = (*m_pTwoThetas)[i];
       m_L2       = (*m_pL2s)[i];
       double    Efix = m_Efix;
@@ -123,7 +123,7 @@ void UnitsConversionHelper::updateConversion(size_t i)
     }
   case(CnvrtToMD::ConvertByTOF):
     {
-      double delta;
+      double delta(std::numeric_limits<double>::quiet_NaN());
       m_TwoTheta = (*m_pTwoThetas)[i];
       m_L2       = (*m_pL2s)[i];
       double  Efix = m_Efix;
