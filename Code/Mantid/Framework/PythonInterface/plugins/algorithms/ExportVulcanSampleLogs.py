@@ -14,7 +14,7 @@ import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 import os
-
+import datetime
 
 class ExportVulcanSampleLogs(PythonAlgorithm):
     """ Python algorithm to export sample logs to spread sheet file 
@@ -54,6 +54,10 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 	timezones = ["America/New_York"]
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
 
+	# Log time tolerance
+	self.declareProperty("TimeTolerance", 0.01, 
+	    "If any 2 log entries with log times within the time tolerance, they will be recorded in one line. Unit is second. ")
+
 	return
 
 
@@ -70,7 +74,13 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 	localtimediff = self._calLocalTimeDiff(logtimesdict, loglength)
 
 	# Write log file
-	self._writeLogFile(logtimesdict, logvaluedict, loglength, localtimediff)
+	# self._writeLogFile(logtimesdict, logvaluedict, loglength, localtimediff)
+	logtimeslist = []
+	logvaluelist = []
+	for logname in self._sampleloglist:
+	    logtimeslist.append(logtimesdict[logname])
+	    logvaluelist.append(logvaluedict[logname])
+	self._writeAscynLogFile(logtimeslist, logvaluelist, localtimediff, self._timeTolerance)
 
 	# Write header file
 	if self._writeheader is True:
@@ -102,6 +112,10 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 	    self._writeheader = False
 
 	self._timezone = self.getProperty("TimeZone").value
+
+	self._timeTolerance = self.getProperty("TimeTolerance").value
+	if (self._timeTolerance) <= 0.:
+	    raise NotImplementedError("TimeTolerance must be larger than zero.")
 
 	return
 	
@@ -162,6 +176,183 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
     	except IOError as err:
     	    print err
 	    raise NotImplementedError("Unable to write file %s. Check permission." % (self._outputfilename))
+
+	return
+
+    def _getLogsInfo(self, logtimeslist):
+        """ Get maximum number of lines, staring time and ending time in the output log file
+        """
+        maxnumlines = 0
+        first = True
+        for logtimes in logtimeslist:
+            # skip NONE 
+            if logtimes is None:
+                continue
+
+            # count on lines
+            tmplines = len(logtimes)
+            maxnumlines +=  tmplines
+            
+            # start and max time
+            tmpstarttime = logtimes[0]
+            tmpmaxtime = logtimes[-1]
+            if first is True:
+                starttime = tmpstarttime
+                maxtime = tmpmaxtime
+                first = False
+            else:
+                if tmpmaxtime > maxtime: 
+                    maxtime = tmpmaxtime
+                if tmpstarttime < starttime:
+                    starttime = tmpstarttime
+            # ENDIFELSE
+
+        return maxnumlines, starttime, maxtime
+
+
+    def _writeAscynLogFile(self, logtimeslist, logvaluelist, localtimediff, timetol):
+	""" Logs are recorded upon the change of the data
+	time tolerance : two log entries within time tolerance will be recorded as one
+	Arguments 
+	 - timetol  : tolerance of time (in second) 
+	"""
+        # Check input
+        if logtimeslist.__class__.__name__ != "list":
+            raise NotImplementedError("Input log times is not list")
+        if logvaluelist.__class__.__name__ != "list":
+            raise NotImplementedError("Input log value is not list")
+
+	wbuf = ""
+	currtimeindexes = []
+        for i in xrange(len(logtimeslist)):
+            currtimeindexes.append(0)
+        nextlogindexes = []
+
+	continuewrite = True
+	linecount = 0
+	maxcount, mintime, maxtime = self._getLogsInfo(logtimeslist)
+	self._maxtimestamp = maxcount
+        self._maxtime = maxtime
+        self._starttime = mintime
+
+        self._localtimediff = localtimediff
+	while continuewrite: 
+	    self._findNextTimeStamps(logtimeslist, currtimeindexes, timetol, nextlogindexes)
+            self.log().information("Next time stamp log indexes: %s" % (str(nextlogindexes)))
+	    if len(nextlogindexes) == 0:
+		# No new indexes that can be found
+		continuewrite = False	
+	    else:
+		# 
+		templine = self._writeNewLine(logtimeslist, logvaluelist, currtimeindexes, nextlogindexes)
+                self.log().information("Write new line %d: %s" % (linecount, templine))
+		self._progressTimeIndexes(currtimeindexes, nextlogindexes) 
+		wbuf += templine + "\n"
+		linecount += 1
+	    # ENDIF
+
+	    if linecount > maxcount:
+		raise NotImplementedError("Logic error.")
+	# ENDWHILE
+
+	try:
+    	    ofile = open(self._outputfilename, "w")
+    	    ofile.write(wbuf)
+    	    ofile.close()
+    	except IOError as err:
+    	    print err
+	    raise NotImplementedError("Unable to write file %s. Check permission." % (self._outputfilename))
+
+	return
+
+    def _findNextTimeStamps(self, logtimeslist, currtimeindexes, timetol, nexttimelogindexes):
+	"""
+        Arguments:
+         - nexttimelogindexes : (output) indexes of logs for next time stamp
+	"""
+        # clear output
+        nexttimelogindexes[:] = []
+
+	# Initialize
+	nexttime = self._maxtime
+
+	for i in xrange(0, len(logtimeslist)): 
+            # skip the None log
+            if logtimeslist[i] is None:
+                continue
+
+	    timeindex = currtimeindexes[i]
+	    if timeindex >= len(logtimeslist[i]):
+		# skip as out of boundary of log
+		continue
+	    tmptime = logtimeslist[i][timeindex]
+            self.log().debug("tmptime type = %s " % ( type(tmptime)))
+
+	    # difftime = calTimeDiff(tmptime, nexttime)
+            difftime = (tmptime.totalNanoseconds() - nexttime.totalNanoseconds())*1.0E-9
+
+	    if abs(difftime) < timetol:
+		# same ...
+		nexttimelogindexes.append(i)
+	    elif difftime < 0:
+		# new smaller time
+		nexttime = tmptime
+                nexttimelogindexes[:] = []
+		nexttimelogindexes.append(i)
+	    # ENDIF
+	# ENDIF
+
+	return
+
+    def _writeNewLine(self, logtimeslist, logvaluelist, currtimeindexes, nexttimelogindexes):
+	""" Write a new line
+	"""
+	# Check
+	if len(nexttimelogindexes) == 0:
+	    raise NotImplementedError("Logic error")
+
+	# Log time
+        self.log().information("logtimelist of type %s." % (type(logtimeslist)))
+	#logtime = logtimeslist[currtimeindexes[nexttimelogindexes[0]]]
+        logindex = nexttimelogindexes[0]
+        logtimes = logtimeslist[logindex]
+        thislogtime = logtimes[currtimeindexes[logindex]]
+        # self.log().information("Log time = %s of type %s." % (str(logtime), type(logtime)))
+        # FIXME : refactor the following to increase efficiency
+	abstime = thislogtime.totalNanoseconds() * 1.E-9 - self._localtimediff 
+	reltime = thislogtime.totalNanoseconds() * 1.E-9 - self._starttime.totalNanoseconds() * 1.0E-9 
+	wbuf = "%.6f\t %.6f\t " % (abstime, reltime) 
+
+	# Log valuess
+	tmplogvalues = []
+	for i in xrange(len(logvaluelist)):
+	    timeindex = currtimeindexes[i]
+	    if not i in nexttimelogindexes:
+		timeindex -= 1
+		if timeindex < 0:
+		    timeindex = 0
+            if logvaluelist[i] is None:
+                logvalue = 0.
+            else:
+	        logvalue = logvaluelist[i][timeindex]
+
+	    # FIXME - This case is not considered yet
+	    # if logvaluedict[samplelog] is not None:
+	    #     logvalue = logvaluedict[samplelog][i]
+	    # else:
+	    #     logvalue = 0.
+	    wbuf += "%.6f\t " % (logvalue)
+	# ENDFOR
+
+	return wbuf
+
+
+    def _progressTimeIndexes(self, currtimeindexes, nexttimelogindexes):
+	""" Progress index
+	"""
+	for i in xrange(len(currtimeindexes)):
+	    if i in nexttimelogindexes:
+		currtimeindexes[i] += 1
 
 	return
 
@@ -239,8 +430,6 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 
         return
    
-
-
 def getLocalTimeShiftInSecond(utctime, localtimezone):
     """ Calculate the difference between UTC time and local time of given 
     DataAndTime
