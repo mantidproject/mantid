@@ -1585,8 +1585,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     // Populate instrument fields
     std::stringstream str;
     str << "Description: ";
-    int nDet = static_cast<int>(matrix_workspace->getInstrument()->getDetectorIDs().size());
-    str << nDet;
+    str << matrix_workspace->getInstrument()->getDetectorIDs().size();
     str << " detector spectrometer, main field ";
     str << QString(mainFieldDirection.c_str()).toLower().toStdString();
     str << " to muon polarisation";
@@ -1736,9 +1735,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     static const QChar MU_SYM(956);
     m_uiForm.optionLabelBinWidth->setText(QString("Data collected with histogram bins of ") + QString::number(binWidth) + QString(" %1s").arg(MU_SYM));
 
-    m_uiForm.tabWidget->setTabEnabled(3, true);
-
-    m_updating = false;
     m_deadTimesChanged = false;
 
     m_loaded = true;
@@ -1766,7 +1762,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
  * @param workspaces :: List of workspaces
  * @return Result workspace
  */
-Workspace_sptr MuonAnalysis::sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
+Workspace_sptr MuonAnalysis::sumWorkspaces(const std::vector<Workspace_sptr>& workspaces) const
 {
   if (workspaces.size() < 1)
     throw std::invalid_argument("Couldn't sum an empty list of workspaces");
@@ -3600,7 +3596,7 @@ void MuonAnalysis::openSequentialFitDialog()
  * Returns custom dead time table file name as set on the interface.
  * @return The filename
  */
-std::string MuonAnalysis::deadTimeFilename()
+std::string MuonAnalysis::deadTimeFilename() const
 {
   if(!m_uiForm.mwRunDeadTimeFile->isValid())
     throw std::runtime_error("Specified Dead Time file is not valid.");
@@ -3613,7 +3609,7 @@ std::string MuonAnalysis::deadTimeFilename()
  * @param filename :: File to load dead times from
  * @return Table (group of tables) with dead times
  */
-Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string& filename)
+Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string& filename) const
 {
   try
   {
@@ -3627,7 +3623,7 @@ Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string& filename)
   }
   catch(...)
   {
-    throw std::runtime_error("Unable to load dead times from the spefied file");
+    throw std::runtime_error("Unable to load dead times from the specified file");
   }
 }
 

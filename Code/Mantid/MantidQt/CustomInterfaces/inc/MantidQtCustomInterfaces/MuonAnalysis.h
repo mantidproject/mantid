@@ -23,16 +23,20 @@ namespace MantidQt
 namespace CustomInterfaces
 {
 
+using namespace Mantid;
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
+
 namespace Muon
 {
+  // Tab classes
   class MuonAnalysisOptionTab;
   class MuonAnalysisFitDataTab;
   class MuonAnalysisResultTableTab;
 }
 
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
-using namespace Mantid::Geometry;
+using namespace Muon;
 
 /** 
 This is the main class for the MuonAnalysis interface
@@ -291,7 +295,7 @@ private:
   void clearTablesAndCombo();
 
   /// Sums a given list of workspaces
-  Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces);
+  Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces) const;
 
   /// Deletes a workspace _or_ a workspace group with the given name, if one exists
   void deleteWorkspaceIfExists(const std::string& wsName);
@@ -315,10 +319,10 @@ private:
   int numGroups();
 
   /// Returns custom dead time table file name as set on the interface
-  std::string deadTimeFilename();
+  std::string deadTimeFilename() const;
 
   /// Loads dead time table (group of tables) from the file.
-  Workspace_sptr loadDeadTimes(const std::string& filename);
+  Workspace_sptr loadDeadTimes(const std::string& filename) const;
 
   /// Creates and algorithm with all the properties set according to widget values on the interface
   Algorithm_sptr createLoadAlgorithm();
