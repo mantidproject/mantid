@@ -1361,7 +1361,7 @@ boost::shared_ptr<LoadResult> MuonAnalysis::load(const QStringList& files) const
 
   std::vector<Workspace_sptr> loadedWorkspaces;
 
-  // TODO: get instrument and check if is a valid Muon instrument
+  std::string instrName; // Instrument name all the run files should belong to
 
   // Go through all the files and try to load them
   for ( auto f = files.constBegin(); f != files.constEnd(); ++f )
@@ -1386,26 +1386,37 @@ boost::shared_ptr<LoadResult> MuonAnalysis::load(const QStringList& files) const
 
     load->execute();
 
-    loadedWorkspaces.push_back( load->getProperty("OutputWorkspace") );
+    Workspace_sptr loadedWorkspace = load->getProperty("OutputWorkspace");
 
     if ( f == files.constBegin() )
     {
+      instrName = firstPeriod(loadedWorkspace)->getInstrument()->getName();
+
+      // Check that is a valid Muon instrument
+      if ( m_uiForm.instrSelector->findText( QString::fromStdString(instrName)) == -1 )
+        throw std::runtime_error("Instrument is not recongnized");
+
       result->loadedDeadTimes = load->getProperty("DeadTimeTable");
       result->loadedGrouping = load->getProperty("DetectorGroupingTable");
       result->mainFieldDirection = static_cast<std::string>(load->getProperty("MainFieldDirection"));
       result->timeZero = load->getProperty("TimeZero");
       result->firstGoodData = load->getProperty("FirstGoodData");
     }
+    else
+    {
+      if ( firstPeriod(loadedWorkspace)->getInstrument()->getName() != instrName )
+        throw std::runtime_error("All the files should be produced by the same instrument");
+    }
+
+    loadedWorkspaces.push_back(loadedWorkspace);
   }
 
-  /* TODO:
-  if (instrument == "ARGUS")
+  if (instrName == "ARGUS")
   {
     // Some of the ARGUS data files contain wrong information about the instrument main field
     // direction. It is alway longitudinal.
-    result->setProperty("MainFieldDirection", "longitudinal");
+    result->mainFieldDirection = "longitudinal";
   }
-  */
 
   // Acquire a single loaded worksace to work with. If multiple loaded - sum them to get one
   if ( loadedWorkspaces.size() == 1 )
@@ -3732,6 +3743,23 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
   }
 
   return loadAlg;
+}
+
+/**
+ * Return a first period MatrixWorkspace in a run workspace. If the run workspace has one period
+ * only - it is returned.
+ * @param ws :: Run workspace
+ */
+MatrixWorkspace_sptr MuonAnalysis::firstPeriod(Workspace_sptr ws)
+{
+  if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws) )
+  {
+    return boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(0) );
+  }
+  else
+  {
+    return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  }
 }
 
 }//namespace MantidQT

@@ -515,6 +515,10 @@ private:
 
   /// Creates new double validator which accepts numbers in standard notation only.
   static QDoubleValidator* createDoubleValidator(QObject* parent);
+
+  /// Returns a first period MatrixWorkspace in a run workspace
+  /// TODO: Move to MuonAnalysisHelper
+  static MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws);
 };
 
 }
