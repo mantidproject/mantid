@@ -900,7 +900,7 @@ namespace IDA
     pyInput +=    
       "bg = '" + bg + "'\n"
       "ftype = '" + ftype + "'\n"
-      "confitSeq(input, func, startx, endx, save, plot, ftype, bg, specMin, specMax, ties, Verbose=verbose, temperature=temp)\n";
+      "confitSeq(input, func, startx, endx, ftype, bg, specMin, specMax, Verbose=verbose, Plot=plot, Save=save)\n";
 
     QString pyOutput = runPythonCode(pyInput);
   }
