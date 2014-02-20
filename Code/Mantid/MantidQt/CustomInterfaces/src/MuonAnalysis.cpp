@@ -1440,8 +1440,9 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     }
     catch(std::exception& e)
     {
-      // If dead correction wasn't applied we can still continue, though should make user be aware of that
-      g_log.warning() << "No dead time correction applied: " << e.what();
+      // If dead correction wasn't applied we can still continue, though should make user be aware
+      // of that
+      g_log.warning() << "No dead time correction applied: " << e.what() << "\n";
     }
 
     Workspace_sptr loadedWorkspace = loadResult->loadedWorkspace;
