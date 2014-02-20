@@ -839,7 +839,9 @@ class SANS2D(ISISInstrument):
         for name in ('Front_Det_Z', 'Front_Det_X', 'Front_Det_Rot',
                      'Rear_Det_Z','Rear_Det_X'):
             try:
-                var = run_info.get(name).value[-1]
+                var = run_info.get(name).value
+                if hasattr(var, '__iter__'):
+                    var = var[-1]
                 values[ind] = float(var)
             except:
                 pass # ignore, because we do have a default value            
