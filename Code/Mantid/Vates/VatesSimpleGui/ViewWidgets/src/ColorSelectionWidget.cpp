@@ -1,5 +1,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 
+#include "MantidKernel/ConfigService.h"
+
 #include <pqBuiltinColorMaps.h>
 #include <pqChartValue.h>
 #include <pqColorMapModel.h>
@@ -8,7 +10,10 @@
 #include <vtkPVXMLElement.h>
 #include <vtkPVXMLParser.h>
 
+#include <QDir>
 #include <QDoubleValidator>
+#include <QFile>
+#include <QFileInfo>
 
 #include <iostream>
 
@@ -68,7 +73,7 @@ void ColorSelectionWidget::setEditorStatus(bool status)
  */
 void ColorSelectionWidget::loadBuiltinColorPresets()
 {
-  pqColorPresetModel *model = this->presets->getModel();
+  pqColorPresetModel *presetModel = this->presets->getModel();
 
   // get builtin color maps xml
   const char *xml = pqComponentsGetColorMapsXML();
@@ -79,8 +84,52 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
   xmlParser->ParseChunk(xml, static_cast<unsigned>(strlen(xml)));
   xmlParser->CleanupParser();
 
+  this->addColorMapsFromXML(xmlParser, presetModel);
+
+  // Add color maps from IDL and Matplotlib
+  this->addColorMapsFromFile("All_idl_cmaps.xml", xmlParser, presetModel);
+  this->addColorMapsFromFile("All_mpl_cmaps.xml", xmlParser, presetModel);
+
+  // cleanup parser
+  xmlParser->Delete();
+}
+
+/**
+ * This function takes color maps from a XML file, parses them and loads and
+ * adds them to the color preset model.
+ * @param fileName : The file with color maps to parse.
+ * @param parser : The XML parser with the color maps.
+ * @param model : The color preset model to add the maps too.
+ */
+void ColorSelectionWidget::addColorMapsFromFile(std::string fileName,
+                                                vtkPVXMLParser *parser,
+                                                pqColorPresetModel *model)
+{
+  std::string colorMapDir = Kernel::ConfigService::Instance().getString("colormaps.directory");
+  if (!colorMapDir.empty())
+  {
+    QFileInfo cmaps(QDir(QString::fromStdString(colorMapDir)),
+                    QString::fromStdString(fileName));
+    if (cmaps.exists())
+    {
+      parser->SetFileName(cmaps.absoluteFilePath().toStdString().c_str());
+      parser->Parse();
+      this->addColorMapsFromXML(parser, model);
+    }
+  }
+}
+
+/**
+ * This function takes a XML parser and loads and adds color maps to the color
+ * preset model.
+ * @param parser : The XML parser with the color maps.
+ * @param model : The color preset model to add the maps too.
+ */
+void ColorSelectionWidget::addColorMapsFromXML(vtkPVXMLParser *parser,
+                                               pqColorPresetModel *model)
+{
   // parse each color map element
-  vtkPVXMLElement *root = xmlParser->GetRootElement();
+  vtkPVXMLElement *root = parser->GetRootElement();
   for(unsigned int i = 0; i < root->GetNumberOfNestedElements(); i++)
   {
     vtkPVXMLElement *colorMapElement = root->GetNestedElement(i);
@@ -97,9 +146,6 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
     // add color map to the model
     model->addBuiltinColorMap(colorMap, name);
   }
-
-  // cleanup parser
-  xmlParser->Delete();
 }
 
 /**
