@@ -10,7 +10,7 @@ import os
 
 class ExportVulcanSampleLogTest(unittest.TestCase):
 
-    def Ptest_exportFileOnly(self):
+    def test_exportFileOnly(self):
         """ Test to export logs without header file
         """
         # Generate the matrix workspace with some logs
@@ -48,13 +48,13 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         self.assertEquals(goodlines, 25)
         
         # Remove generated files        
-        os.remove(opfilename)
+        os.remove(outfilename)
         AnalysisDataService.remove("TestMatrixWS")
         
         return
 
 
-    def Ntest_exportFile2(self):
+    def test_exportFile2(self):
         """ Get a partial of real load frame log values, and set them to 
         different logs
         """
@@ -66,8 +66,9 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         alg_test = run_algorithm("ExportVulcanSampleLogs", 
             InputWorkspace = "TestMatrixWS2",
             OutputFilename = "furnace20334.txt",
-            SampleLogNames = ["SensorA", "SensorB", "SensorC", "SensorC"],
-            WriteHeaderFile = False)
+            SampleLogNames = ["SensorA", "SensorB", "SensorC", "SensorD"],
+            WriteHeaderFile = False, 
+            TimeTolerance = 1.0)
 
         # Validate
         self.assertTrue(alg_test.isExecuted())
@@ -88,15 +89,16 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             line = line.strip()
             if len(line) > 0:
                 goodlines += 1
-        self.assertEquals(goodlines, 25)
+        self.assertEquals(goodlines, 64)
 
         # Remove generated files        
-        os.remove(opfilename)
+        os.remove(outfilename)
         AnalysisDataService.remove("TestMatrixWS2")
+
         return
 
 
-    def Ptest_exportFileAndHeader(self):
+    def test_exportFileAndHeader(self):
         """ Test to export logs without header file
         """
         # Generate the matrix workspace with some logs
@@ -118,7 +120,6 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         outfilename = alg_test.getProperty("OutputFilename").value
         headerfilename = outfilename.split(".txt")[0] + "_header.txt"
         try:
-            # ifile = open("/tmp/furnace20333_header.txt")
             ifile = open(headerfilename)
             lines = ifile.readlines()
             ifile.close()
@@ -142,7 +143,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         return
 
 
-    def Ptest_exportFileMissingLog(self):
+    def test_exportFileMissingLog(self):
         """ Test to export logs without header file
         """
         # Generate the matrix workspace with some logs
@@ -246,9 +247,9 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         hour = 13
         minute = 34
         second = 3
-        dtimesec = 5
+        dtimesec = 0.0010
 
-        timefluc = 1.
+        timefluc = 0.0001
 
         #tmptime = strftime("%Y-%m-%d %H:%M:%S", gmtime(mktime(gmtime())))
         runstart = datetime(year, month, day, hour, minute, second)
@@ -294,7 +295,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
                 deltatime = timedelta(i*dtimesec + timeshift)
                 tmptime = str(runstart + deltatime)
-                tmpvalue = float(j)*i*i
+                tmpvalue = float(i*i*6)+j
                 logs[j].addValue(tmptime, tmpvalue)
                 
                 dbbuf += "%s: %s = %d\n" % (logs[j].name, tmptime, tmpvalue)
@@ -302,7 +303,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             # ENDFOR (j)
         # ENDFOR (i)
         
-        print dbbuf 
+        # print dbbuf 
 
         wksp.mutableRun()['SensorA']=tsp_a
         wksp.mutableRun()['SensorB']=tsp_b
@@ -311,52 +312,6 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
         return wksp
         
-    def test_VulcanFile1(self):
-        """ Test vulcan run XXXX
-        """
-        from mantid.simpleapi import Load
-        
-        # Create input workspace
-        Load(Filename = "/home/wzz/Projects/MantidTests/Tickets/8994/Data/VULCAN_41703_event.nxs", 
-                OutputWorkspace = "VULCAN_41703_event", 
-                MetaDataOnly = True, LoadLogs = True)
-            
-        inpws = AnalysisDataService.retrieve("VULCAN_41703_event")
-        self.assertTrue(inpws)
-        
-        # Run the algorithm
-        alg_test = run_algorithm("ExportVulcanSampleLogs", 
-            InputWorkspace = "VULCAN_41703_event",
-            OutputFilename = "furnace41703.txt",
-            SampleLogNames = ["furnace.temp1", "furnace.temp2", "furnace.power"],
-            WriteHeaderFile = False)
-
-        # Validate
-        self.assertTrue(alg_test.isExecuted())    
-        
-        
-    def test_VulcanFile2(self):
-        """ Test vulcan run XXXX
-        """
-        from mantid.simpleapi import Load
-        
-        # Create input workspace
-        Load(Filename = "/home/wzz/Projects/MantidTests/Tickets/8994/Data/VULCAN_41739_event.nxs", 
-                OutputWorkspace = "VULCAN_41739_event", 
-                MetaDataOnly = True, LoadLogs = True)
-            
-        inpws = AnalysisDataService.retrieve("VULCAN_41739_event")
-        self.assertTrue(inpws)
-        
-        # Run the algorithm
-        alg_test = run_algorithm("ExportVulcanSampleLogs", 
-            InputWorkspace = "VULCAN_41739_event",
-            OutputFilename = "furnace41739.txt",
-            SampleLogNames = ["furnace.temp1", "furnace.temp2", "furnace.power"],
-            WriteHeaderFile = False)
-
-        # Validate
-        self.assertTrue(alg_test.isExecuted())    
 
 if __name__ == '__main__':
     unittest.main()

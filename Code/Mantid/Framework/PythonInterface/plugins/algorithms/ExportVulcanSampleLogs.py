@@ -1,5 +1,7 @@
 """*WIKI*
 
+Relative time (to first log value or run_start value)? 
+
 == Assumption ==
 1. All logs specified by user should be synchronized. 
 
@@ -238,14 +240,14 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
         self._localtimediff = localtimediff
 	while continuewrite: 
 	    self._findNextTimeStamps(logtimeslist, currtimeindexes, timetol, nextlogindexes)
-            self.log().information("Next time stamp log indexes: %s" % (str(nextlogindexes)))
+            self.log().debug("Next time stamp log indexes: %s" % (str(nextlogindexes)))
 	    if len(nextlogindexes) == 0:
 		# No new indexes that can be found
 		continuewrite = False	
 	    else:
 		# 
 		templine = self._writeNewLine(logtimeslist, logvaluelist, currtimeindexes, nextlogindexes)
-                self.log().information("Write new line %d: %s" % (linecount, templine))
+                self.log().debug("Write new line %d: %s" % (linecount, templine))
 		self._progressTimeIndexes(currtimeindexes, nextlogindexes) 
 		wbuf += templine + "\n"
 		linecount += 1
@@ -290,7 +292,7 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 
 	    # difftime = calTimeDiff(tmptime, nexttime)
             difftime = (tmptime.totalNanoseconds() - nexttime.totalNanoseconds())*1.0E-9
-
+            
 	    if abs(difftime) < timetol:
 		# same ...
 		nexttimelogindexes.append(i)
@@ -312,7 +314,7 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 	    raise NotImplementedError("Logic error")
 
 	# Log time
-        self.log().information("logtimelist of type %s." % (type(logtimeslist)))
+        # self.log().information("logtimelist of type %s." % (type(logtimeslist)))
 	#logtime = logtimeslist[currtimeindexes[nexttimelogindexes[0]]]
         logindex = nexttimelogindexes[0]
         logtimes = logtimeslist[logindex]
