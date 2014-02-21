@@ -80,6 +80,18 @@ namespace IDA
   
     m_ffProp["StretchedExp"] = createStretchedExp("Stretched Exponential");
 
+    m_ffRangeManager->setMinimum(m_ffProp["BackgroundA0"], 0);
+    m_ffRangeManager->setMaximum(m_ffProp["BackgroundA0"], 1);
+
+    m_ffDblMng->setMinimum(m_ffProp["Exponential 1.Intensity"], 0);
+    m_ffDblMng->setMaximum(m_ffProp["Exponential 1.Intensity"], 1);
+
+    m_ffDblMng->setMinimum(m_ffProp["Exponential 2.Intensity"], 0);
+    m_ffDblMng->setMaximum(m_ffProp["Exponential 2.Intensity"], 1);
+
+    m_ffDblMng->setMinimum(m_ffProp["Stretched Exponential.Intensity"], 0);
+    m_ffDblMng->setMaximum(m_ffProp["Stretched Exponential.Intensity"], 1);
+
     typeSelection(uiForm().furyfit_cbFitType->currentIndex());
 
     // Connect to PlotGuess checkbox
