@@ -3409,15 +3409,18 @@ Workspace_sptr MuonAnalysis::loadDeadTimes(const std::string& filename) const
   {
     IAlgorithm_sptr loadDeadTimes = AlgorithmManager::Instance().create("LoadNexusProcessed");
     loadDeadTimes->setChild(true);
+    loadDeadTimes->setLogging(false); // We'll take care of logging ourself
     loadDeadTimes->setPropertyValue("Filename", filename);
     loadDeadTimes->setPropertyValue("OutputWorkspace", "__NotUsed");
     loadDeadTimes->execute();
 
     return loadDeadTimes->getProperty("OutputWorkspace");
   }
-  catch(...)
+  catch(std::exception& e)
   {
-    throw std::runtime_error("Unable to load dead times from the specified file");
+    std::ostringstream errorMsg;
+    errorMsg << "Unable to load dead times from the specified file: " << e.what();
+    throw std::runtime_error(errorMsg.str());
   }
 }
 
