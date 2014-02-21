@@ -35,7 +35,7 @@ namespace Mantid
       setICATProxySettings(icat);
 
       // Output the soap end-point in use for debugging purposes.
-      g_log.debug() << "The ICAT soap end-point is: " << icat.soap_endpoint << "\n";
+      g_log.debug() << "The ICAT soap end-point is: " << icat.soap_endpoint << std::endl;
 
       // Used to authenticate the user.
       ns1__login login;
@@ -46,6 +46,7 @@ namespace Mantid
        
       // Name of the authentication plugin in use.
       std::string plugin;
+
       if (url.find("sns") != std::string::npos) {
         plugin = std::string("ldap");
       } else {
@@ -74,7 +75,6 @@ namespace Mantid
       entry.value = &passWord;
       entries.push_back(entry);
 
-      // Is the login successful? (0 if yes, 12 if no).
       int result = icat.login(&login, &loginResponse);
 
       if (result == 0)
@@ -85,7 +85,7 @@ namespace Mantid
       }
       else
       {
-        throw std::runtime_error("Username or password supplied is invalid.");
+        throwErrorMessage(icat);
       }
     }
 
@@ -105,14 +105,13 @@ namespace Mantid
 
       int result = icat.logout(&request,&response);
 
-      // If session is set and valid.
       if(result == 0)
       {
         Session::Instance().setSessionId("");
       }
       else
       {
-        throw std::runtime_error("You are not currently logged into the cataloging system.");
+        throwErrorMessage(icat);
       }
     }
 
@@ -262,14 +261,14 @@ namespace Mantid
     {
       std::string query = buildSearchQuery(inputs);
 
-      // Check if the query built was valid (e.g. if they user has input any search terms).
+      // Check if the query built was valid.
       if (query.empty()) throw std::runtime_error("You have not input any terms to search for.");
 
       // Modify the query to include correct SELECT and LIMIT clauses.
       query.insert(0, "SELECT DISTINCT inves");
       query.append(" LIMIT " + boost::lexical_cast<std::string>(offset) + "," + boost::lexical_cast<std::string>(limit));
 
-      g_log.debug() << "ICat4Catalog::search -> Query is: { " << query << " }" << std::endl;
+      g_log.debug() << "The search query in ICat4Catalog::search is: \n" << query << std::endl;
 
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
@@ -315,7 +314,7 @@ namespace Mantid
       query.insert(0, "SELECT COUNT(DISTINCT inves)");
       request.query         = &query;
 
-      g_log.debug() << "ICat4Catalog::getNumberOfSearchResults -> Query is: { " << query << " }" << std::endl;
+      g_log.debug() << "The paging search query in ICat4Catalog::getNumberOfSearchResults is: \n" << query << std::endl;
 
       int result = icat.search(&request, &response);
 
@@ -331,7 +330,7 @@ namespace Mantid
         throwErrorMessage(icat);
       }
 
-      g_log.debug() << "ICat4Catalog::getNumberOfSearchResults -> Number of results returned is: { " << numOfResults << " }" << std::endl;
+      g_log.debug() << "The number of paging results returned in ICat4Catalog::getNumberOfSearchResults is: " << numOfResults << std::endl;
 
       return numOfResults;
     }
@@ -531,7 +530,7 @@ namespace Mantid
       std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + investigationId + "']";
       request.query     = &query;
 
-      g_log.debug() << "ICat4Catalog::getDataSets -> { " << query << " }" << std::endl;
+      g_log.debug() << "The query for ICat4Catalog::getDataSets is:\n" << query << std::endl;
 
       int result = icat.search(&request, &response);
 
@@ -741,7 +740,7 @@ namespace Mantid
       // Add all the REST pieces to the URL.
       urlToBuild += ("getData?" + session + datafile + outname + "&zip=false");
 
-      g_log.debug() << "ICat4Catalog::getDownloadURL -> { " << urlToBuild << " }" << std::endl;
+      g_log.debug() << "The download URL in ICat4Catalog::getDownloadURL is: " << urlToBuild << std::endl;
 
       url = urlToBuild;
     }
@@ -769,7 +768,7 @@ namespace Mantid
 
       // Add pieces of URL together.
       url += ("put?" + session + name + datasetId + description + "&datafileFormatId=1");
-      g_log.debug() << "ICat4Catalog::getUploadURL url is: " << url << std::endl;
+      g_log.debug() << "The upload URL in ICat4Catalog::getUploadURL is: " << url << std::endl;
       return url;
     }
 
@@ -793,7 +792,8 @@ namespace Mantid
       std::string query = "Dataset <-> Investigation[name = '" + investigationID + "']";
       request.query     = &query;
 
-      g_log.debug() << "ICat4Catalog::getDatasetIdFromFileName -> { " << query << " }" << std::endl;
+      g_log.debug() << "The query performed to obtain a dataset from an investigation" <<
+          " id in ICat4Catalog::getDatasetIdFromFileName is:\n" << query << std::endl;
       
       int64_t datasetID = 0;
       
@@ -891,8 +891,8 @@ namespace Mantid
 
       while (fileSize >= 1024 && order + 1 < units.size())
       {
-          order++;
-          fileSize = fileSize / 1024;
+        order++;
+        fileSize = fileSize / 1024;
       }
 
       return boost::lexical_cast<std::string>(fileSize) + units.at(order);
