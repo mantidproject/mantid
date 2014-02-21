@@ -3431,26 +3431,9 @@ void MuonAnalysis::groupLoadedWorkspace()
  */
 ITableWorkspace_sptr MuonAnalysis::parseGrouping()
 {
-  std::vector<int> groupRows;
-  whichGroupToWhichRow(m_uiForm, groupRows); 
-
-  if ( groupRows.size() == 0 )
-    return ITableWorkspace_sptr();
-
-  auto newTable = boost::dynamic_pointer_cast<ITableWorkspace>(
-      WorkspaceFactory::Instance().createTable("TableWorkspace") );
-
-  newTable->addColumn("vector_int", "Detectors");
-
-  for ( auto it = groupRows.begin(); it != groupRows.end(); ++it )
-  {
-    const std::string detectorsString = m_uiForm.groupTable->item(*it,1)->text().toStdString();
-
-    TableRow newRow = newTable->appendRow(); 
-    newRow << Strings::parseRange(detectorsString);
-  }
-
-  return newTable;
+  auto grouping = boost::make_shared<Grouping>();
+  parseGroupingTable(m_uiForm, *grouping);
+  return groupingToTable(grouping);
 }
 
 /**
