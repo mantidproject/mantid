@@ -119,6 +119,23 @@ namespace Mantid
        * @returns A list of size 0 as this is not a parameterized component
        */
       std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const;
+
+      /**
+       * Get a parameter defined as an integer
+       * @param pname :: The name of the parameter
+       * @param recursive :: If true the search will walk up through the parent components
+       * @returns A list of size 0 as this is not a parameterized component
+       */
+      std::vector<int> getIntParameter(const std::string& pname, bool recursive = true) const;
+
+      /**
+       * Get a parameter defined as an integer
+       * @param pname :: The name of the parameter
+       * @param recursive :: If true the search will walk up through the parent components
+       * @returns A list of size 0 as this is not a parameterized component
+       */
+      std::vector<bool> getBoolParameter(const std::string& pname, bool recursive = true) const;
+
       /** returns the detector's group topology if it has been calculated before or invokes the procedure of
       calculating such topology if it was not */
       det_topology getTopology(Kernel::V3D &center)const;
