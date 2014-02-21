@@ -35,6 +35,16 @@ int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::
   int isteps = ibounds - 1; // highest index in params array containing a step
   xnew.clear();
 
+  // This coefficitent represents the maximum difference between the size of the last bin and all
+  // the other bins.
+  double lastBinCoef(0.25);
+
+  if ( full_bins_only )
+  {
+    // For full_bin_only, we want it so that last bin couldn't be smaller then the pervious bin
+    lastBinCoef = 1.0;
+  }
+
   double xcurr = params[0];
   if(resize_xnew) xnew.push_back(xcurr);
 
@@ -52,17 +62,6 @@ int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::
       throw std::runtime_error("Invalid binning step provided! Can't creating binning axis.");
     }
 
-    // This coefficitent represents the maximum difference between the size of the last bin and all
-    // the other bins.
-    double lastBinCoef;
-
-    if ( full_bins_only )
-      // For full_bin_only, we want it so that last bin couldn't be smaller then the pervious bin
-      lastBinCoef = 1.0;
-    else
-      // In general, we want the last bin not to be smaler than 25% of previous bin
-      lastBinCoef = 0.25;
-
     if ( (xcurr + xs * (1.0 + lastBinCoef)) <= params[ibound] )
     {
       // If we can still fit current bin _plus_ specified portion of a last bin, continue
@@ -73,7 +72,7 @@ int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::
       // If this is the start of the last bin, finish this range
       if ( full_bins_only )
         // For full_bins_only, finish the range by adding one more full bin, so that last bin is not
-        // bigget than the previous one
+        // bigger than the previous one
         xcurr += xs;
       else
         // For non full_bins_only, finish by adding as mush as is left from the range
