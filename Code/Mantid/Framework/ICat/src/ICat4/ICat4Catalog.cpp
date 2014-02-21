@@ -171,7 +171,7 @@ namespace Mantid
       {
         joinClause.push_back("JOIN inves.investigationInstruments invInst");
         joinClause.push_back("JOIN invInst.instrument inst");
-        whereClause.push_back("inst.name = '" + inputs.getInstrument() + "'");
+        whereClause.push_back("inst.fullName = '" + inputs.getInstrument() + "'");
       }
 
       // Keywords
@@ -611,7 +611,7 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::string query = "Instrument.name ORDER BY name";
+      std::string query = "Instrument.fullName ORDER BY fullName";
       request.query     = &query;
 
       int result = icat.search(&request, &response);
