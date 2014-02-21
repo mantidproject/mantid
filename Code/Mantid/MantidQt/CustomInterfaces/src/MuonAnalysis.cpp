@@ -1462,23 +1462,25 @@ boost::shared_ptr<GroupResult> MuonAnalysis::group(boost::shared_ptr<LoadResult>
     {
       g_log.warning() << "Unable to apply grouping from the IDF: " << e.what() << "\n";
 
-    }
-
-    if ( !groupingToUse && loadResult->loadedGrouping )
-    {
-      ITableWorkspace_sptr groupingTable;
-
-      if ( !( groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>(loadResult->loadedGrouping) ) )
+      if ( loadResult->loadedGrouping )
       {
-        auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadResult->loadedGrouping);
-        groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>( group->getItem(0) );
+        ITableWorkspace_sptr groupingTable;
+
+        if ( !( groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>(loadResult->loadedGrouping) ) )
+        {
+          auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadResult->loadedGrouping);
+          groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>( group->getItem(0) );
+        }
+
+        groupingToUse = tableToGrouping(groupingTable);
+        groupingToUse->description = "Grouping from Nexus file";
       }
-
-      groupingToUse = tableToGrouping(groupingTable);
+      else
+      {
+        g_log.warning("No grouping set in the Nexus file. Using dummy grouping");
+        groupingToUse = getDummyGrouping(instr);
+      }
     }
-
-    if ( !groupingToUse )
-      groupingToUse = getDummyGrouping(instr);
   }
 
   result->groupingUsed = groupingToUse;

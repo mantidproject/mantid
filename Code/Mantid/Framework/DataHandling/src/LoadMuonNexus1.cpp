@@ -188,14 +188,15 @@ namespace Mantid
       {
         loadedGrouping = loadDetectorGrouping(root);
 
-        if ( loadedGrouping )
+        if ( loadedGrouping && returnGrouping)
         {
           // Return loaded grouping, if requested
-          if ( returnGrouping )
-            setProperty("DetectorGroupingTable", loadedGrouping);
+          setProperty("DetectorGroupingTable", loadedGrouping);
         }
-        else
+
+        if ( !loadedGrouping && autoGroup )
         {
+          // If autoGroup requested and no grouping in the file - show a warning
           g_log.warning("Unable to load grouping from the file. Grouping not applied.");
         }
       }
