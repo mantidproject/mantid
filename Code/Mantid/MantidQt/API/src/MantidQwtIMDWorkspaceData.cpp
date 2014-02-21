@@ -325,21 +325,32 @@ void MantidQwtIMDWorkspaceData::setPreviewMode(bool preview)
 {
   m_preview = preview;
   // If the workspace has no original, then we MUST be in preview mode.
-  if (preview || (m_workspace->numOriginalWorkspaces() == 0))
+  const size_t nOriginalWorkspaces = m_workspace->numOriginalWorkspaces();
+  if (preview || (nOriginalWorkspaces == 0))
   {
     // Preview mode. No transformation.
     m_originalWorkspace = m_workspace;
-    m_transform = new NullCoordTransform(m_workspace->getNumDims());
   }
   else
   {
     // Refer to the last workspace = the intermediate in the case of MDHisto binning
-    size_t index = m_workspace->numOriginalWorkspaces()-1;
-    m_originalWorkspace = boost::dynamic_pointer_cast<IMDWorkspace>(m_workspace->getOriginalWorkspace(index));
-    CoordTransform * temp = m_workspace->getTransformToOriginal(index);
-    if (temp)
-      m_transform = temp->clone();
+    const size_t indexOfWS = nOriginalWorkspaces-1; // Get the last workspace
+    m_originalWorkspace = boost::dynamic_pointer_cast<IMDWorkspace>(m_workspace->getOriginalWorkspace(indexOfWS));
   }
+
+  const size_t nTransformsToOriginal = m_workspace->getNumberTransformsToOriginal();
+  if (preview || (nTransformsToOriginal == 0))
+  {
+    m_transform = new NullCoordTransform(m_workspace->getNumDims());
+  }
+  else
+  {
+    const size_t indexOfTransform = nTransformsToOriginal-1; // Get the last transform
+    CoordTransform * temp = m_workspace->getTransformToOriginal(indexOfTransform);
+    if (temp)
+          m_transform = temp->clone();
+  }
+
   this->choosePlotAxis();
 }
 
