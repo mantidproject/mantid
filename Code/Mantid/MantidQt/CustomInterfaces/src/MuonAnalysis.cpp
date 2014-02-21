@@ -1525,7 +1525,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
     groupResult = group(loadResult);
   }
-  catch(std::runtime_error& e)
+  catch(std::exception& e)
   {
     g_log.error(e.what());
     QMessageBox::critical(this, "Loading failed", "Unable to load the file[s]. See log for details.");
