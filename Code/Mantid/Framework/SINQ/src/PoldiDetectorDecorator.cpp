@@ -65,7 +65,7 @@ size_t PoldiDetectorDecorator::centralElement()
     }
 }
 
-std::vector<int> PoldiDetectorDecorator::availableElements()
+const std::vector<int> &PoldiDetectorDecorator::availableElements()
 {
     if(m_decoratedDetector) {
         return m_decoratedDetector->availableElements();

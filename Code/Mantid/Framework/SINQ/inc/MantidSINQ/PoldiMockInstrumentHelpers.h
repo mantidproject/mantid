@@ -18,7 +18,17 @@ typedef std::pair<double, double> DoublePair;
 
 class MANTID_SINQ_DLL MockDetector : public PoldiAbstractDetector
 {
+protected:
+    std::vector<int> m_availableElements;
+
 public:
+    MockDetector() : PoldiAbstractDetector()
+    {
+        m_availableElements.resize(400);
+        int n = 0;
+        std::generate(m_availableElements.begin(), m_availableElements.end(), [&n] { return n++; });
+    }
+
     ~MockDetector() { }
 
     void loadConfiguration(DataObjects::TableWorkspace_sptr detectorConfigurationWorkspace)
@@ -32,14 +42,9 @@ public:
     MOCK_METHOD0(centralElement, size_t());
     MOCK_METHOD2(qLimits, DoublePair(double lambdaMin, double lambdaMax));
 
-    std::vector<int> availableElements()
+    const std::vector<int> &availableElements()
     {
-        std::vector<int> availableElements(400);
-
-        int n = 0;
-        std::generate(availableElements.begin(), availableElements.end(), [&n] { return n++; });
-
-        return availableElements;
+        return m_availableElements;
     }
 };
 
@@ -64,7 +69,20 @@ public:
 
 class MANTID_SINQ_DLL MockChopper : public PoldiAbstractChopper
 {
+protected:
+    std::vector<double> m_slitPositions;
+    std::vector<double> m_slitTimes;
+
 public:
+    MockChopper() : PoldiAbstractChopper()
+    {
+        double slits [] = {0.000000, 0.162156};
+        m_slitPositions = std::vector<double>(slits, slits + sizeof(slits) / sizeof(slits[0]));
+
+        double times [] = {0.000000, 243.234};
+        m_slitTimes = std::vector<double>(times, times + sizeof(times) / sizeof(times[0]));
+    }
+
     ~MockChopper() { }
 
     void loadConfiguration(DataObjects::TableWorkspace_sptr chopperConfigurationWorkspace, DataObjects::TableWorkspace_sptr chopperSlitWorkspace, DataObjects::TableWorkspace_sptr chopperSpeedWorkspace)
@@ -81,15 +99,11 @@ public:
 
     MOCK_METHOD1(setRotationSpeed, void(double rotationSpeed));
 
-    std::vector<double> slitPositions() {
-        double slits [] = {0.000000, 0.162156};
-
-        return std::vector<double>(slits, slits + sizeof(slits) / sizeof(slits[0]));
+    const std::vector<double>& slitPositions() {
+        return m_slitPositions;
     }
-    std::vector<double> slitTimes() {
-        double slits [] = {0.000000, 243.234};
-
-        return std::vector<double>(slits, slits + sizeof(slits) / sizeof(slits[0]));
+    const std::vector<double>& slitTimes() {
+        return m_slitTimes;
     }
 };
 }

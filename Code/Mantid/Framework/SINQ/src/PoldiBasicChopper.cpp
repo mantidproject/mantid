@@ -56,12 +56,12 @@ void PoldiBasicChopper::setRotationSpeed(double rotationSpeed)
     initializeVariableParameters(rotationSpeed);
 }
 
-std::vector<double> PoldiBasicChopper::slitPositions()
+const std::vector<double> &PoldiBasicChopper::slitPositions()
 {
     return m_slitPositions;
 }
 
-std::vector<double> PoldiBasicChopper::slitTimes()
+const std::vector<double> &PoldiBasicChopper::slitTimes()
 {
     return m_slitTimes;
 }

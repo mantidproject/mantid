@@ -57,7 +57,7 @@ public:
     virtual size_t elementCount();
     virtual size_t centralElement();
 
-    virtual std::vector<int> availableElements();
+    virtual const std::vector<int>& availableElements();
 
     virtual std::pair<double, double> qLimits(double lambdaMin, double lambdaMax);
 

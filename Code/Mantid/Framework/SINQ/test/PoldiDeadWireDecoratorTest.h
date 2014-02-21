@@ -62,7 +62,7 @@ public:
   {
       PoldiDeadWireDecorator decorator(m_validDeadWires, m_detector);
 
-      std::vector<int> goodElements = decorator.availableElements();
+      const std::vector<int> goodElements = decorator.availableElements();
 
       TS_ASSERT_EQUALS(goodElements.front(), 3);
       TS_ASSERT_EQUALS(goodElements.back(), 398);

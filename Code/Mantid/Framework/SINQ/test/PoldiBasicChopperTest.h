@@ -31,7 +31,7 @@ public:
         m_chopperConfigurationWorkspace->addColumn(std::string("double"), std::string("value"));
 
         TableRow chopperDistance(m_chopperConfigurationWorkspace->getRow(0));
-        chopperDistance << "dist_chopper_sample" << "mm" << 11800.0;
+        chopperDistance << "dist-chopper-sample" << "mm" << 11800.0;
 
         TableRow t0(m_chopperConfigurationWorkspace->getRow(1));
         t0 << "t0" << "mysec" << 0.0005;

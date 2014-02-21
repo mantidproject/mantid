@@ -52,8 +52,8 @@ public:
 
     void setRotationSpeed(double rotationSpeed);
 
-    std::vector<double> slitPositions();
-    std::vector<double> slitTimes();
+    const std::vector<double>& slitPositions();
+    const std::vector<double>& slitTimes();
 
     double rotationSpeed();
     double cycleTime();

@@ -56,8 +56,8 @@ public:
 
     virtual void setRotationSpeed(double rotationSpeed) = 0;
 
-    virtual std::vector<double> slitPositions() = 0;
-    virtual std::vector<double> slitTimes() = 0;
+    virtual const std::vector<double>& slitPositions() = 0;
+    virtual const std::vector<double>& slitTimes() = 0;
 
     virtual double rotationSpeed() = 0;
     virtual double cycleTime() = 0;

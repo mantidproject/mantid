@@ -77,7 +77,7 @@ size_t PoldiHeliumDetector::centralElement()
     return m_centralElement;
 }
 
-std::vector<int> PoldiHeliumDetector::availableElements()
+const std::vector<int> &PoldiHeliumDetector::availableElements()
 {
     return m_availableElements;
 }

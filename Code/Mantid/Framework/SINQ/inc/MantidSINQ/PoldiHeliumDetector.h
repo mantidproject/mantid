@@ -52,7 +52,7 @@ public:
     size_t elementCount();
     size_t centralElement();
 
-    std::vector<int> availableElements();
+    const std::vector<int>& availableElements();
 
     std::pair<double, double> qLimits(double lambdaMin, double lambdaMax);
 

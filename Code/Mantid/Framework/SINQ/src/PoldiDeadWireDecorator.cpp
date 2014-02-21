@@ -30,7 +30,7 @@ size_t PoldiDeadWireDecorator::elementCount()
     return m_goodElements.size();
 }
 
-std::vector<int> PoldiDeadWireDecorator::availableElements()
+const std::vector<int> &PoldiDeadWireDecorator::availableElements()
 {
     return m_goodElements;
 }

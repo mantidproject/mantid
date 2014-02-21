@@ -49,7 +49,7 @@ public:
     std::set<int> deadWires();
 
     size_t elementCount();
-    std::vector<int> availableElements();
+    const std::vector<int>& availableElements();
     
 protected:
     void detectorSetHook();
