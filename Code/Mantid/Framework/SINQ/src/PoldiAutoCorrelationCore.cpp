@@ -12,7 +12,7 @@ namespace Mantid
 namespace Poldi
 {
 
-PoldiAutoCorrelationCore::PoldiAutoCorrelationCore() :
+PoldiAutoCorrelationCore::PoldiAutoCorrelationCore(Kernel::Logger &g_log) :
     m_detector(),
     m_chopper(),
     m_wavelengthRange(),
@@ -22,7 +22,8 @@ PoldiAutoCorrelationCore::PoldiAutoCorrelationCore() :
     m_weightsForD(),
     m_tofsFor1Angstrom(),
     m_countData(),
-    m_damp(0.0)
+    m_damp(0.0),
+    m_logger(g_log)
 {
 }
 
@@ -35,6 +36,8 @@ void PoldiAutoCorrelationCore::setInstrument(boost::shared_ptr<PoldiAbstractDete
 {
     m_detector = detector;
     m_chopper = chopper;
+
+    m_logger.information() << "Detector and chopper assigned..." << std::endl;
 }
 
 /** Takes wavelength limits to be considered for the calculation.
@@ -54,89 +57,103 @@ void PoldiAutoCorrelationCore::setWavelengthRange(double lambdaMin, double lambd
   */
 DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::Workspace2D_sptr countData)
 {
-    m_countData = countData;
+    m_logger.information() << "Starting Autocorrelation method..." << std::endl;
 
-    /* Calculations related to experiment timings
-     *  - width of time bins (deltaT)
-     *  - d-resolution deltaD, which results directly from deltaT
-     *  - number of time bins for each copper cycle
-     */
-    std::vector<double> timeData = countData->dataX(0);
+    if(m_detector && m_chopper) {
+        m_logger.information() << "  Assigning count data..." << std::endl;
+        m_countData = countData;
 
-    m_deltaT = timeData[1] - timeData[0];
-    m_deltaD = getDeltaD(m_deltaT);
-    m_timeBinCount = static_cast<int>(m_chopper->cycleTime() / m_deltaT);
+        /* Calculations related to experiment timings
+         *  - width of time bins (deltaT)
+         *  - d-resolution deltaD, which results directly from deltaT
+         *  - number of time bins for each copper cycle
+         */
+        std::vector<double> timeData = countData->dataX(0);
 
-    /* Data related to detector geometry
-     *  - vector with available detector element-indices (wires, cells, ...)
-     *  - vector that contains the TOF/Angstrom for each detector element
-     *  - vector with indices on interval [0, number of detector elements) for help with access in algorithm
-     */
-    m_detectorElements = m_detector->availableElements();
-    m_tofsFor1Angstrom = getTofsFor1Angstrom(m_detectorElements);
+        m_logger.information() << "  Setting time data..." << std::endl;
+        m_deltaT = timeData[1] - timeData[0];
+        m_deltaD = getDeltaD(m_deltaT);
+        m_timeBinCount = static_cast<int>(m_chopper->cycleTime() / m_deltaT);
 
-    int n = 0;
-    m_indices.resize(m_detectorElements.size());
-    std::generate(m_indices.begin(), m_indices.end(), [&n] { return n++; });
+        /* Data related to detector geometry
+         *  - vector with available detector element-indices (wires, cells, ...)
+         *  - vector that contains the TOF/Angstrom for each detector element
+         *  - vector with indices on interval [0, number of detector elements) for help with access in algorithm
+         */
+        m_detectorElements = m_detector->availableElements();
+        m_tofsFor1Angstrom = getTofsFor1Angstrom(m_detectorElements);
 
-    /* The auto-correlation algorithm works by probing a list of d-Values, which
-     * is created at this point. The spacing used is the maximum resolution of the instrument,
-     * which was calculated before.
-     */
-    std::vector<double> dValues = getDGrid(m_deltaD);
+        int n = 0;
+        m_indices.resize(m_detectorElements.size());
+        std::generate(m_indices.begin(), m_indices.end(), [&n] { return n++; });
 
-    /* When the correlation background is subtracted from the correlation spectrum, it is done for each d-Value
-     * according to a certain weight. The calculation method corresponds closely to the original fortran program,
-     * although it simply leads to unit weights.
-     */
-    m_weightsForD = calculateDWeights(m_tofsFor1Angstrom, m_deltaT, m_deltaD, dValues.size());
-    double sumOfWeights = getNormalizedTOFSum(m_weightsForD);
+        /* The auto-correlation algorithm works by probing a list of d-Values, which
+         * is created at this point. The spacing used is the maximum resolution of the instrument,
+         * which was calculated before.
+         */
+        m_logger.information() << "  Generating d-grid..." << std::endl;
+        std::vector<double> dValues = getDGrid(m_deltaD);
 
-    /* Calculation of the raw correlation spectrum. Each d-Value is mapped to an intensity value through,
-     * taking into account the d-Value and the weight. Since the calculations for different d-Values do not
-     * depend on eachother, the for-loop is marked as a candidate for parallelization. Since the calculation
-     * of the intensity is rather complex and typical d-grids consist of ~5000 elements, the parallelization
-     * pays off quite well.
-     */
-    std::vector<double> rawCorrelatedIntensities(dValues.size());
-    PARALLEL_FOR_NO_WSP_CHECK()
-    for(size_t i = 0; i < dValues.size(); ++i) {
-        rawCorrelatedIntensities[i] = getRawCorrelatedIntensity(dValues[i], m_weightsForD[i]);
+        /* When the correlation background is subtracted from the correlation spectrum, it is done for each d-Value
+         * according to a certain weight. The calculation method corresponds closely to the original fortran program,
+         * although it simply leads to unit weights.
+         */
+        m_logger.information() << "  Calculating weights (" << dValues.size() << ")..." << std::endl;
+        m_weightsForD = calculateDWeights(m_tofsFor1Angstrom, m_deltaT, m_deltaD, dValues.size());
+        double sumOfWeights = getNormalizedTOFSum(m_weightsForD);
+
+        /* Calculation of the raw correlation spectrum. Each d-Value is mapped to an intensity value through,
+         * taking into account the d-Value and the weight. Since the calculations for different d-Values do not
+         * depend on eachother, the for-loop is marked as a candidate for parallelization. Since the calculation
+         * of the intensity is rather complex and typical d-grids consist of ~5000 elements, the parallelization
+         * pays off quite well.
+         */
+        m_logger.information() << "  Calculating intensities..." << std::endl;
+        std::vector<double> rawCorrelatedIntensities(dValues.size());
+        PARALLEL_FOR_NO_WSP_CHECK()
+        for(size_t i = 0; i < dValues.size(); ++i) {
+            rawCorrelatedIntensities[i] = getRawCorrelatedIntensity(dValues[i], m_weightsForD[i]);
+        }
+
+        /* As detailed in the original POLDI-paper, the sum of all correlation intensities is much higher than the
+         * sum of counts in the recorded spectrum. The difference is called "correlation background" and is subtracted
+         * from the raw intensities, using the weights calculated before.
+         *
+         * After this procedure, the sum of correlated intensities should be equal to the sum of counts in the spectrum.
+         * In the fortran program there seems to be a small difference, possibly due to numerical inaccuracies connected
+         * to floating point precision.
+         */
+        m_logger.information() << "  Summing intensities..." << std::endl;
+        double sumOfCorrelatedIntensities = std::accumulate(rawCorrelatedIntensities.cbegin(), rawCorrelatedIntensities.cend(), 0.0);
+        double sumOfCounts = getSumOfCounts(m_timeBinCount, m_detectorElements);
+
+        double correlationBackground = sumOfCorrelatedIntensities - sumOfCounts;
+
+        m_logger.information() << "  Correcting intensities..." << std::endl;
+        std::vector<double> correctedCorrelatedIntensities(dValues.size());
+        std::transform(rawCorrelatedIntensities.cbegin(), rawCorrelatedIntensities.cend(),
+                       m_weightsForD.cbegin(),
+                       correctedCorrelatedIntensities.rbegin(),
+                       [&correlationBackground, &sumOfWeights] (double intensity, double weight) { return intensity - correlationBackground * weight / sumOfWeights; });
+
+        /* Finally, the d-Values are converted to q-Values for plotting etc. and inserted into the output workspace. */
+        std::vector<double> qValues(dValues.size());
+        std::transform(dValues.crbegin(), dValues.crend(), qValues.begin(), [] (double d) { return 2.0 * M_PI / d; });
+
+        m_logger.information() << "  Setting result..." << std::endl;
+        DataObjects::Workspace2D_sptr outputWorkspace = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
+                (WorkspaceFactory::Instance().create("Workspace2D", 3, dValues.size(), dValues.size()));
+
+        outputWorkspace->dataY(0) = correctedCorrelatedIntensities;
+
+        outputWorkspace->setX(0, qValues);
+        outputWorkspace->setX(1, qValues);
+        outputWorkspace->setX(2, qValues);
+
+        return outputWorkspace;
+    } else {
+        throw std::runtime_error("PoldiAutoCorrelationCore was run without specifying detector and chopper.");
     }
-
-    /* As detailed in the original POLDI-paper, the sum of all correlation intensities is much higher than the
-     * sum of counts in the recorded spectrum. The difference is called "correlation background" and is subtracted
-     * from the raw intensities, using the weights calculated before.
-     *
-     * After this procedure, the sum of correlated intensities should be equal to the sum of counts in the spectrum.
-     * In the fortran program there seems to be a small difference, possibly due to numerical inaccuracies connected
-     * to floating point precision.
-     */
-    double sumOfCorrelatedIntensities = std::accumulate(rawCorrelatedIntensities.cbegin(), rawCorrelatedIntensities.cend(), 0.0);
-    double sumOfCounts = getSumOfCounts(m_timeBinCount, m_detectorElements);
-
-    double correlationBackground = sumOfCorrelatedIntensities - sumOfCounts;
-
-    std::vector<double> correctedCorrelatedIntensities(dValues.size());
-    std::transform(rawCorrelatedIntensities.cbegin(), rawCorrelatedIntensities.cend(),
-                   m_weightsForD.cbegin(),
-                   correctedCorrelatedIntensities.rbegin(),
-                   [&correlationBackground, &sumOfWeights] (double intensity, double weight) { return intensity - correlationBackground * weight / sumOfWeights; });
-
-    /* Finally, the d-Values are converted to q-Values for plotting etc. and inserted into the output workspace. */
-    std::vector<double> qValues(dValues.size());
-    std::transform(dValues.crbegin(), dValues.crend(), qValues.begin(), [] (double d) { return 2.0 * M_PI / d; });
-
-    DataObjects::Workspace2D_sptr outputWorkspace = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
-        (WorkspaceFactory::Instance().create("Workspace2D", 3, dValues.size(), dValues.size()));
-
-    outputWorkspace->dataY(0) = correctedCorrelatedIntensities;
-
-    outputWorkspace->setX(0, qValues);
-    outputWorkspace->setX(1, qValues);
-    outputWorkspace->setX(2, qValues);
-
-    return outputWorkspace;
 }
 /** Computes the resolution limit of the POLDI experiment defined by the current instrument, in Angstrom, given the size of one time bin.
   *

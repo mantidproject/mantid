@@ -78,7 +78,7 @@ void PoldiAutoCorrelation5::init()
 
 
 
-    m_core = boost::shared_ptr<PoldiAutoCorrelationCore>(new PoldiAutoCorrelationCore);
+    m_core = boost::shared_ptr<PoldiAutoCorrelationCore>(new PoldiAutoCorrelationCore(g_log));
 
 }
 
@@ -120,13 +120,12 @@ void PoldiAutoCorrelation5::exec()
     g_log.information() << "_Poldi -     Chopper speed:   " << chopper->rotationSpeed() << " rpm" << std::endl;
     g_log.information() << "_Poldi -     Number of slits: " << chopper->slitPositions().size() << std::endl;
     g_log.information() << "_Poldi -     Cycle time:      " << chopper->cycleTime() << " µs" << std::endl;
-    g_log.information() << "_Poldi -     Conf(t0):        " << chopper->zeroOffset() << " µs" << std::endl;
+    g_log.information() << "_Poldi -     Zero offset:     " << chopper->zeroOffset() << " µs" << std::endl;
     g_log.information() << "_Poldi -     Distance:        " << chopper->distanceFromSample()  << " mm" << std::endl;
-
 
     if(g_log.is(Poco::Message::PRIO_DEBUG)) {
         for(size_t i = 0; i < chopper->slitPositions().size(); ++i) {
-            g_log.debug()   << "_Poldi -     Slits: " << i
+            g_log.information()   << "_Poldi -     Slits: " << i
                             << ": Position = " << chopper->slitPositions()[i]
                                << "\t Time = " << chopper->slitTimes()[i] << " µs" << std::endl;
         }
@@ -137,10 +136,15 @@ void PoldiAutoCorrelation5::exec()
     boost::shared_ptr<PoldiAbstractDetector> detector(detectorFactory.createDetector(std::string("helium3-detector")));
     detector->loadConfiguration(ws_poldi_IPP);
 
+    g_log.information() << "_Poldi  detector conf ------------------------------  "  << std::endl;
+    g_log.information() << "_Poldi -     Element count:     " << detector->elementCount() << std::endl;
+    g_log.information() << "_Poldi -     Central element:   " << detector->centralElement() << std::endl;
+    g_log.information() << "_Poldi -     2Theta(central):   " << detector->twoTheta(199) / M_PI * 180.0 << "°" << std::endl;
+    g_log.information() << "_Poldi -     Distance(central): " << detector->distanceFromSample(199) << " mm" << std::endl;
+
     // Removing dead wires with decorator
     std::vector<int> deadWireVector = ws_poldi_dead_wires->getColVector<int>(std::string("DeadWires"));
     std::set<int> deadWireSet(deadWireVector.begin(), deadWireVector.end());
-
     boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector(new PoldiDeadWireDecorator(deadWireSet, detector));
 
     // putting together POLDI instrument for calculations
