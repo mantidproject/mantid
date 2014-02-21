@@ -1012,7 +1012,7 @@ namespace MantidQt
       Mantid::Kernel::CatalogInfo catalogInfo = Mantid::Kernel::ConfigService::Instance().getFacility().catalogInfo();
       std::string fileLocation = catalogInfo.transformArchivePath(location);
 
-      std::ifstream hasAccessToArchives(fileLocation);
+      std::ifstream hasAccessToArchives(fileLocation.c_str());
       if (hasAccessToArchives)
       {
         m_icatUiForm.dataFileDownloadBtn->setEnabled(false);
