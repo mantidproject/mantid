@@ -73,7 +73,7 @@ namespace Mantid
       int64_t numberOfSearchResults = 0;
       for(auto catalog = m_catalogs.begin(); catalog != m_catalogs.end(); ++catalog)
       {
-        numberOfSearchResults = (*catalog)->getNumberOfSearchResults(inputs);
+        numberOfSearchResults += (*catalog)->getNumberOfSearchResults(inputs);
       }
       return numberOfSearchResults;
     }
