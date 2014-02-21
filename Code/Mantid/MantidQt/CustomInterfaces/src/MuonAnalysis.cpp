@@ -1366,8 +1366,10 @@ boost::shared_ptr<LoadResult> MuonAnalysis::load(const QStringList& files) const
 
     // Setup Load Nexus Algorithm
     IAlgorithm_sptr load = AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
+
     load->initialize();
     load->setChild(true);
+    load->setLogging(false); // We'll take care of print messages ourself
     load->setPropertyValue("Filename", file );
 
     // Just to pass validation
@@ -1390,7 +1392,7 @@ boost::shared_ptr<LoadResult> MuonAnalysis::load(const QStringList& files) const
 
       // Check that is a valid Muon instrument
       if ( m_uiForm.instrSelector->findText( QString::fromStdString(instrName)) == -1 )
-        throw std::runtime_error("Instrument is not recongnized");
+        throw std::runtime_error("Instrument is not recognized: " + instrName);
 
       result->loadedDeadTimes = load->getProperty("DeadTimeTable");
       result->loadedGrouping = load->getProperty("DetectorGroupingTable");
@@ -1681,6 +1683,7 @@ void MuonAnalysis::deleteWorkspaceIfExists(const std::string &wsName)
   if ( AnalysisDataService::Instance().doesExist(wsName) )
   {
     IAlgorithm_sptr deleteAlg = AlgorithmManager::Instance().create("DeleteWorkspace");
+    deleteAlg->setLogging(false);
     deleteAlg->setPropertyValue("Workspace", wsName);
     deleteAlg->execute();
   }
