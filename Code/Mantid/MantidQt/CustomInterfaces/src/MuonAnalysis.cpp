@@ -1428,6 +1428,70 @@ boost::shared_ptr<LoadResult> MuonAnalysis::load(const QStringList& files) const
 }
 
 /**
+ * Groups the loaded workspace
+ * @param loadResult :: Various loaded parameters as returned by load()
+ * @return Grouped workspace and used grouping for populating grouping table
+ */
+boost::shared_ptr<GroupResult> MuonAnalysis::group(boost::shared_ptr<LoadResult> loadResult) const
+{
+  auto result = boost::make_shared<GroupResult>();
+
+  boost::shared_ptr<Grouping> groupingToUse;
+
+  Instrument_const_sptr instr = firstPeriod(loadResult->loadedWorkspace)->getInstrument();
+
+  // Check whether the instrument was changed
+  int instrIndex = m_uiForm.instrSelector->findText( QString::fromStdString(instr->getName()) );
+  bool instrChanged = m_uiForm.instrSelector->currentIndex() != instrIndex;
+
+  if ( !instrChanged && isGroupingSet() )
+  {
+    // Use grouping currently set
+    result->usedExistGrouping = true;
+    groupingToUse = boost::make_shared<Grouping>();
+    parseGroupingTable(m_uiForm, *groupingToUse);
+  }
+  else
+  {
+    // Need to load a new grouping
+    result->usedExistGrouping = false;
+
+    try // to get grouping from IDF
+    {
+      groupingToUse = getGroupingFromIDF(instr, loadResult->mainFieldDirection);
+    }
+    catch(std::runtime_error& e)
+    {
+      g_log.warning() << "Unable to apply grouping from the IDF: " << e.what() << "\n";
+
+    }
+
+    if ( !groupingToUse && loadResult->loadedGrouping )
+    {
+      ITableWorkspace_sptr groupingTable;
+
+      if ( !( groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>(loadResult->loadedGrouping) ) )
+      {
+        auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadResult->loadedGrouping);
+        groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>( group->getItem(0) );
+      }
+
+      groupingToUse = tableToGrouping(groupingTable);
+    }
+
+    if ( !groupingToUse )
+      groupingToUse = getDummyGrouping(instr);
+  }
+
+  result->groupingUsed = groupingToUse;
+
+  ITableWorkspace_sptr groupingTableToUse = groupingToTable(groupingToUse);
+  result->groupedWorkspace = groupWorkspace(loadResult->loadedWorkspace, groupingTableToUse);
+
+  return result;
+}
+
+/**
  * Input file changed. Update GUI accordingly. Note this method does no check of input filename assumed
  * done elsewhere depending on e.g. whether filename came from MWRunFiles or 'get current run' button.
  *
@@ -1456,62 +1520,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       g_log.warning() << "No dead time correction applied: " << e.what() << "\n";
     }
 
-    Workspace_sptr loadedWorkspace = loadResult->loadedWorkspace;
-
-    // Get hold of a pointer to a matrix workspace
-    MatrixWorkspace_sptr matrix_workspace = firstPeriod(loadedWorkspace);
-    size_t numPeriods = MuonAnalysis::numPeriods(loadedWorkspace);
-
-    int newInstrIndex = m_uiForm.instrSelector->findText(
-          QString::fromStdString( matrix_workspace->getInstrument()->getName() ));
-    assert(newInstrIndex != -1); // Should be checked in load()
-
-    bool instrumentChanged = newInstrIndex != m_uiForm.instrSelector->currentIndex();
-
-    m_uiForm.instrSelector->setCurrentIndex(newInstrIndex);
-
-    Workspace_sptr grouping;
-
-    if ( isGroupingSet() )
-    {
-      // If grouping set already - it means it wasn't reset and we can use it
-      g_log.information("Using custom grouping");
-      grouping = parseGrouping();
-    }
-    else
-    {
-      setGroupingFromIDF( matrix_workspace->getInstrument(), loadResult->mainFieldDirection );
-
-      if ( isGroupingSet() )
-      {
-        g_log.information("Using grouping loaded from IDF");
-        grouping = parseGrouping();
-      }
-      else if ( loadResult->loadedGrouping )
-      {
-        g_log.information("Using grouping loaded from Nexus file");
-
-        ITableWorkspace_sptr groupingTable;
-
-        if ( !( groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>(loadResult->loadedGrouping) ) )
-        {
-          g_log.information("Multi-period grouping loaded from the Nexus file. Using the first one.");
-          auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadResult->loadedGrouping);
-          groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>( group->getItem(0) );
-        }
-
-        setGrouping(groupingTable);
-        grouping = groupingTable;
-      }
-      else 
-      {
-        g_log.information("Using dummy grouping");
-        setDummyGrouping( matrix_workspace->getInstrument() );
-        grouping = parseGrouping();
-      }
-    }
-
-    Workspace_sptr groupedWorkspace = groupWorkspace(loadedWorkspace, grouping);
+    boost::shared_ptr<GroupResult> groupResult = group(loadResult);
 
     // At this point we are sure that all the possible problems with the loaded workspace has been
     // checked, so we can safely overwrite previous data.
@@ -1520,8 +1529,24 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     deleteWorkspaceIfExists(m_workspace_name);
     deleteWorkspaceIfExists(m_grouped_name);
 
-    AnalysisDataService::Instance().add(m_workspace_name, loadedWorkspace);
-    AnalysisDataService::Instance().add(m_grouped_name, groupedWorkspace);
+    AnalysisDataService::Instance().add(m_workspace_name, loadResult->loadedWorkspace);
+    AnalysisDataService::Instance().add(m_grouped_name, groupResult->groupedWorkspace);
+
+    // Update the grouping table with the used grouping, if new grouping was loaded
+    if ( ! groupResult->usedExistGrouping )
+      fillGroupingTable(*(groupResult->groupingUsed), m_uiForm);
+
+    Workspace_sptr loadedWorkspace = loadResult->loadedWorkspace;
+
+    // Get hold of a pointer to a matrix workspace
+    MatrixWorkspace_sptr matrix_workspace = firstPeriod(loadedWorkspace);
+
+    int newInstrIndex = m_uiForm.instrSelector->findText(
+          QString::fromStdString( matrix_workspace->getInstrument()->getName() ));
+
+    bool instrumentChanged = newInstrIndex != m_uiForm.instrSelector->currentIndex();
+
+    m_uiForm.instrSelector->setCurrentIndex(newInstrIndex);
 
     // Make the options available
     m_optionTab->nowDataAvailable();
@@ -1671,6 +1696,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     m_uiForm.infoBrowser->setText( QString::fromStdString(infoStr.str()) );
 
     // If instrument or number of periods has changed -> update period widgets
+    size_t numPeriods = MuonAnalysis::numPeriods(loadedWorkspace);
     if(instrumentChanged || static_cast<int>(numPeriods) != m_uiForm.homePeriodBox1->count())
       updatePeriodWidgets(numPeriods);
 
@@ -2248,7 +2274,7 @@ void MuonAnalysis::showAllPlotWindows()
  *
  * @return true if set
  */
-bool MuonAnalysis::isGroupingSet()
+bool MuonAnalysis::isGroupingSet() const
 {
   std::vector<int> dummy;
   whichGroupToWhichRow(m_uiForm, dummy);
@@ -2409,57 +2435,6 @@ void MuonAnalysis::startUpLook()
     }
   }
 }
-
-/**
- * If nothing else work set dummy grouping and display comment to user
- */
-void MuonAnalysis::setDummyGrouping(Instrument_const_sptr instrument)
-{
-  // if no grouping in nexus then set dummy grouping and display warning to user
-  std::stringstream idstr;
-  idstr << "1-" << instrument->getNumberDetectors();
-  m_uiForm.groupTable->setItem( 0, 0, new QTableWidgetItem("NoGroupingDetected") );
-  m_uiForm.groupTable->setItem( 0, 1, new QTableWidgetItem( QString::fromStdString(idstr.str()) ) );
-
-  updateFrontAndCombo();
-}
-
-
-/**
- * Try to load default grouping file specified in IDF
- */
-void MuonAnalysis::setGroupingFromIDF(Instrument_const_sptr instrument, const std::string& mainFieldDirection) 
-{
-  std::string parameterName = "Default grouping file";
-
-  // Special case for MUSR, because it has two possible groupings
-  if (instrument->getName() == "MUSR")
-  {
-    parameterName.append(" - " + mainFieldDirection);
-  }
-
-  std::vector<std::string> groupingFiles = instrument->getStringParameter(parameterName);
-
-  // Get search directory for XML instrument definition files (IDFs)
-  std::string directoryName = ConfigService::Instance().getInstrumentDirectory();
-
-  if ( groupingFiles.size() == 1 )
-  {
-    const std::string groupingFile = groupingFiles[0];
-
-    try
-    {
-      Grouping loadedGrouping;
-      loadGroupingFromXML(directoryName + groupingFile, loadedGrouping);
-      fillGroupingTable(loadedGrouping, m_uiForm);
-    }
-    catch (...)
-    {
-      g_log.error("Can't load default grouping file:  " + groupingFile);
-    }
-  }
-}
-
 
  /**
  * Time zero returend in ms
@@ -3394,7 +3369,7 @@ void MuonAnalysis::setFirstGoodDataState(int checkBoxState)
  * @param grouping :: Grouping table to use
  * @return Grouped workspace
  */
-Workspace_sptr MuonAnalysis::groupWorkspace(Workspace_sptr ws, Workspace_sptr grouping)
+Workspace_sptr MuonAnalysis::groupWorkspace(Workspace_sptr ws, Workspace_sptr grouping) const
 {
    ScopedWorkspace wsEntry(ws);
    ScopedWorkspace groupingEntry(grouping);
@@ -3408,7 +3383,7 @@ Workspace_sptr MuonAnalysis::groupWorkspace(Workspace_sptr ws, Workspace_sptr gr
  * @param grouping :: ADS name of the grouping table to use
  * @return Grouped workspace
  */
-Workspace_sptr MuonAnalysis::groupWorkspace(const std::string& wsName, const std::string& groupingName)
+Workspace_sptr MuonAnalysis::groupWorkspace(const std::string& wsName, const std::string& groupingName) const
 {
   ScopedWorkspace outputEntry;
 
@@ -3476,39 +3451,6 @@ ITableWorkspace_sptr MuonAnalysis::parseGrouping()
   }
 
   return newTable;
-}
-
-/**
- * Updated UI table using the grouping information provided.
- * @param detGroupingTable :: Grouping information in the format as returned by LoadMuonNexus
- */
-void MuonAnalysis::setGrouping(ITableWorkspace_sptr detGroupingTable)
-{
-  for ( size_t row = 0; row < detGroupingTable->rowCount(); ++row )
-  {
-    std::vector<int> detectors = detGroupingTable->cell< std::vector<int> >(row,0);
-
-    // toString() expects the sequence to be sorted
-    std::sort( detectors.begin(), detectors.end() );
-
-    // Convert to a range string, i.e. 1-5,6-8,9
-    const std::string& detectorRange = Strings::toString(detectors);
-
-    m_uiForm.groupTable->setItem( static_cast<int>(row), 0, 
-        new QTableWidgetItem( QString::number(row + 1) ) );
-
-    m_uiForm.groupTable->setItem( static_cast<int>(row), 1, 
-        new QTableWidgetItem( QString::fromStdString(detectorRange) ) );
-  }
-
-  if ( numGroups() == 2 && numPairs() <= 0 )
-  {
-    m_uiForm.pairTable->setItem( 0, 0, new QTableWidgetItem("long") );
-    m_uiForm.pairTable->setItem( 0, 3, new QTableWidgetItem("1.0") );
-  }
-
-  updatePairTable();
-  updateFrontAndCombo();
 }
 
 /**
