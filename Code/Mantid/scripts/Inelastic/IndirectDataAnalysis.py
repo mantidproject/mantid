@@ -1001,26 +1001,6 @@ def msdfitPlotSeq(inputWS, xlabel):
         msd_layer.setAxisTitle(mp.Layer.Bottom,xlabel)
         msd_layer.setAxisTitle(mp.Layer.Left,'<u2>')
 
-def msdfitCreateParamWorkspace(ws_name, param_name, table_workspace):
-    #create workspaces for each of the parameters
-    ws = mtd[table_workspace]
-    x = ws.column("axis-1")
-    y = ws.column(param_name)
-    e = ws.column(param_name + "_Err")
-
-    #check if temp was increasing or decreasing
-    if(x[0] > x[-1]):
-        # if so reverse data to follow natural ordering
-        x = x[::-1]
-        y = y[::-1]
-        e = e[::-1]
-
-    output_name = ws_name+'_'+param_name
-    CreateWorkspace(OutputWorkspace=output_name, DataX=x, DataY=y, DataE=e,
-                    Nspec=1, UnitX='')
-
-    return output_name
-
 def msdfit(inputs, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=False, Plot=True):
     StartTime('msdFit')
     workdir = getDefaultWorkingDirectory()
@@ -1061,10 +1041,20 @@ def msdfit(inputs, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=
 
     #create workspaces for each of the parameters
     group = []
-    ws_name = msdfitCreateParamWorkspace(msdWS, "A0", msd_parameters)
+
+    ws_name = msdWS + '_A0'
     group.append(ws_name)
-    ws_name = msdfitCreateParamWorkspace(msdWS, "A1", msd_parameters)
+    ConvertTableToMatrixWorkspace(msd_parameters, OutputWorkspace=ws_name,
+                                  ColumnX='axis-1', ColumnY='A0', ColumnE='A0_Err')
+    xunit = mtd[ws_name].getAxis(0).setUnit('Label')
+    xunit.setLabel('Temperature', 'K')
+
+    ws_name = msdWS + '_A1'
     group.append(ws_name)
+    ConvertTableToMatrixWorkspace(msd_parameters, OutputWorkspace=ws_name,
+                                  ColumnX='axis-1', ColumnY='A1', ColumnE='A1_Err')
+    xunit = mtd[ws_name].getAxis(0).setUnit('Label')
+    xunit.setLabel('Temperature', 'K')
 
     GroupWorkspaces(InputWorkspaces=','.join(group),OutputWorkspace=msdWS)
 
@@ -1093,13 +1083,12 @@ def plotInput(inputfiles,spectra=[]):
     for file in inputfiles:
         root = LoadNexus(Filename=file)
         if not OneSpectra:
-            GroupDetectors(root, root,
-                DetectorList=range(spectra[0],spectra[1]+1) )
+            GroupDetectors(root, root, DetectorList=range(spectra[0],spectra[1]+1) )
         workspaces.append(root)
     if len(workspaces) > 0:
         graph = mp.plotSpectrum(workspaces,0)
-        layer = graph.activeLayer().setTitle(", ".join(workspaces))
-        
+        graph.activeLayer().setTitle(", ".join(workspaces))
+
 ##############################################################################
 # Corrections
 ##############################################################################
