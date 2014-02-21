@@ -50,9 +50,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.populateList()
         self.current_instrument = self.instrument_list[instrument]
         self.comboPolarCorrect.setEnabled(self.current_instrument  in self.polarisation_instruments) # Enable as appropriate
-        self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None')) # Reset to None
-            
-            
+        self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None')) # Reset to None    
     def on_actionOpen_Table_triggered(self):
         self.loadTable()
     def on_actionReload_from_Disk_triggered(self):
@@ -70,6 +68,9 @@ class ReflGui(refl_window.Ui_windowRefl):
     def on_tableMain_modified(self):
         if not self.loading:
             self.windowRefl.modFlag = True
+    def on_plotButton_clicked(self):
+        plotbutton = self.windowRefl.sender()
+        self.plot(plotbutton)
             
     '''
     Event handler for polarisation correction selection.
@@ -150,6 +151,22 @@ class ReflGui(refl_window.Ui_windowRefl):
                     item.setLayout(layout)
                     item.setContentsMargins(0, 0, 0, 0)
                     self.tableMain.setCellWidget(row, 17, item)
+                elif (column == 18):
+                    button = QtGui.QPushButton('Plot')
+                    button.setDisabled(True)
+                    button.setProperty("row", row)
+                    button.setProperty("workspacePlot", [])
+                    button.setToolTip('Plot the workspaces produced by processing this row.')
+                    button.clicked.connect(self.on_plotButton_clicked)
+                    item = QtGui.QWidget()
+                    layout = QtGui.QHBoxLayout(item)
+                    layout.addWidget(button)
+                    layout.setAlignment(QtCore.Qt.AlignCenter)
+                    layout.setSpacing(0)
+                    layout.setContentsMargins(0, 0, 0, 0)
+                    item.setLayout(layout)
+                    item.setContentsMargins(0, 0, 0, 0)
+                    self.tableMain.setCellWidget(row, 18, item)
                 else:
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
@@ -317,10 +334,8 @@ class ReflGui(refl_window.Ui_windowRefl):
                 runno = []
                 loadedRuns = []
                 wksp = []
-                wkspBinned = []
                 overlapLow = []
                 overlapHigh = []
-                g = ['g1', 'g2', 'g3']
                 theta = [0, 0, 0]
                 if (self.tableMain.item(row, 0).text() != ''):
                     for i in range(3):
@@ -385,68 +400,86 @@ class ReflGui(refl_window.Ui_windowRefl):
                             self.tableMain.setItem(row, i * 5 + 4, item)
                             overlapHigh.append(qmax)
                         if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
-                            runlist = []
-                            l1 = wksp[i].split(',')
-                            for subs in l1:
-                                l2 = subs.split(':')
-                                for l3 in l2:
-                                    runlist.append(l3)
                             wksp[i] = first_wq.name()
-                                
-                        ws_name_binned = wksp[i] + '_binned'
-                        ws = getWorkspace(wksp[i])
-                        w1 = getWorkspace(wksp[0])
-                        w2 = getWorkspace(wksp[len(wksp) - 1])
-                        if len(overlapLow):
-                            Qmin = overlapLow[0]
-                        else:
-                            Qmin = w1.readX(0)[0]
-                        if len(overlapHigh):
-                            Qmax = overlapHigh[len(overlapHigh) - 1]
-                        else:
-                            Qmax = max(w2.readX(0))
-                        Rebin(InputWorkspace=wksp[i], Params=str(overlapLow[i]) + ',' + str(-dqq) + ',' + str(overlapHigh[i]), OutputWorkspace=ws_name_binned)
-                        wkspBinned.append(ws_name_binned)
-                        wsb = getWorkspace(ws_name_binned)
-                        Imin = min(wsb.readY(0))
-                        Imax = max(wsb.readY(0))
-                        if canMantidPlot:
-                            g[i] = plotSpectrum(ws_name_binned, 0, True)
-                            titl = groupGet(ws_name_binned, 'samp', 'run_title')
-                            if (i > 0):
-                                mergePlots(g[0], g[i])
-                            if (type(titl) == str):
-                                g[0].activeLayer().setTitle(titl)
-                            g[0].activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
-                            g[0].activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
-                            g[0].activeLayer().setAutoScale()
-                    if (self.tableMain.cellWidget(row, 17).children()[1].checkState() > 0):
-                        if (len(runno) == 1):
-                            print "Nothing to combine!"
-                        elif (len(runno) == 2):
-                            outputwksp = runno[0] + '_' + runno[1][3:5]
-                        else:
-                            outputwksp = runno[0] + '_' + runno[2][3:5]
-                        print runno
-                        w1 = getWorkspace(wksp[0])
-                        w2 = getWorkspace(wksp[len(wksp) - 1])
-                        begoverlap = w2.readX(0)[0]
-                        # get Qmax
-                        if (self.tableMain.item(row, i * 5 + 4).text() == ''):
-                            overlapHigh = 0.3 * max(w1.readX(0))
-                        print overlapLow, overlapHigh
-                        wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1)
-                        if (self.tableMain.item(row, 16).text() != ''):
-                            Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, 16).text()))
-                        Qmin = getWorkspace(outputwksp).readX(0)[0]
-                        Qmax = max(getWorkspace(outputwksp).readX(0))
-                        if canMantidPlot:
-                            gcomb = plotSpectrum(outputwksp, 0, True)
-                            titl = groupGet(outputwksp, 'samp', 'run_title')
-                            gcomb.activeLayer().setTitle(titl)
-                            gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
-                            gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
+                plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
+                plotbutton.setProperty('runno',runno)
+                plotbutton.setProperty('overlapLow', overlapLow)
+                plotbutton.setProperty('overlapHigh', overlapHigh)
+                plotbutton.setProperty('wksp', wksp)
+                plotbutton.setEnabled(True)
         self.accMethod = None
+    def plot(self, plotbutton):
+        if not isinstance(plotbutton, QtGui.QPushButton):
+            print "problem with plotbutton"
+            return
+        import unicodedata
+        runno_u = plotbutton.property('runno')
+        runno = []
+        for uni in runno_u:
+            runno.append(unicodedata.normalize('NFKD', uni).encode('ascii','ignore'))
+        wksp_u = plotbutton.property('wksp')
+        wksp = []
+        for uni in wksp_u:
+            wksp.append(unicodedata.normalize('NFKD', uni).encode('ascii','ignore'))
+        overlapLow = plotbutton.property('overlapLow')
+        overlapHigh = plotbutton.property('overlapHigh')
+        row = plotbutton.property('row')
+        g = ['g1', 'g2', 'g3']
+        wkspBinned = []
+        w1 = getWorkspace(wksp[0])
+        w2 = getWorkspace(wksp[len(wksp) - 1])
+        print "w2", type(w2)
+        dqq = float(self.tableMain.item(row, 15).text())
+        for i in range(len(runno)):
+            ws_name_binned = wksp[i] + '_binned'
+            ws = getWorkspace(wksp[i])
+            if len(overlapLow):
+                Qmin = overlapLow[0]
+            else:
+                Qmin = w1.readX(0)[0]
+            if len(overlapHigh):
+                Qmax = overlapHigh[len(overlapHigh) - 1]
+            else:
+                Qmax = max(w2.readX(0))
+            Rebin(InputWorkspace=str(wksp[i]), Params=str(overlapLow[i]) + ',' + str(-dqq) + ',' + str(overlapHigh[i]), OutputWorkspace=ws_name_binned)
+            wkspBinned.append(ws_name_binned)
+            wsb = getWorkspace(ws_name_binned)
+            Imin = min(wsb.readY(0))
+            Imax = max(wsb.readY(0))
+            if canMantidPlot:
+                g[i] = plotSpectrum(ws_name_binned, 0, True)
+                titl = groupGet(ws_name_binned, 'samp', 'run_title')
+                if (i > 0):
+                    mergePlots(g[0], g[i])
+                if (type(titl) == str):
+                    g[0].activeLayer().setTitle(titl)
+                g[0].activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
+                g[0].activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
+                g[0].activeLayer().setAutoScale()
+        if (self.tableMain.cellWidget(row, 17).children()[1].checkState() > 0):
+            if (len(runno) == 1):
+                print "Nothing to combine!"
+            elif (len(runno) == 2):
+                outputwksp = runno[0] + '_' + runno[1][3:5]
+            else:
+                outputwksp = runno[0] + '_' + runno[2][3:5]
+            print "w2", type(w2)
+            begoverlap = w2.readX(0)[0]
+            # get Qmax
+            if (self.tableMain.item(row, i * 5 + 4).text() == ''):
+                overlapHigh = 0.3 * max(w1.readX(0))
+            print overlapLow, overlapHigh
+            wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1)
+            if (self.tableMain.item(row, 16).text() != ''):
+                Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, 16).text()))
+            Qmin = getWorkspace(outputwksp).readX(0)[0]
+            Qmax = max(getWorkspace(outputwksp).readX(0))
+            if canMantidPlot:
+                gcomb = plotSpectrum(outputwksp, 0, True)
+                titl = groupGet(outputwksp, 'samp', 'run_title')
+                gcomb.activeLayer().setTitle(titl)
+                gcomb.activeLayer().setAxisScale(Layer.Left, 1e-8, 100.0, Layer.Log10)
+                gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
     def dorun(self, runno, row, which):
         g = ['g1', 'g2', 'g3']
         transrun = str(self.tableMain.item(row, which * 5 + 2).text())
@@ -469,13 +502,12 @@ class ReflGui(refl_window.Ui_windowRefl):
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
         return th, qmin, qmax, wlam, wq
-    
     def saveTable(self, filename):
         try:
             writer = csv.writer(open(filename, "wb"))
             for row in range(self.tableMain.rowCount()):
                 rowtext = []
-                for column in range(self.tableMain.columnCount() - 1):
+                for column in range(self.tableMain.columnCount() - 2):
                     rowtext.append(self.tableMain.item(row, column).text())
                 if (len(rowtext) > 0):
                     writer.writerow(rowtext)
@@ -547,7 +579,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                 row = 0
                 for line in reader:
                     if (row < 100):
-                        for column in range(self.tableMain.columnCount() - 1):
+                        for column in range(self.tableMain.columnCount() - 2):
                             item = QtGui.QTableWidgetItem()
                             item.setText(line[column])
                             self.tableMain.setItem(row, column, item)
