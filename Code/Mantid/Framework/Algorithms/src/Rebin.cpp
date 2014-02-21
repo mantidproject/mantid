@@ -30,10 +30,10 @@ If the input workspace contains data points, rather than histograms, then Rebin 
 
 If FullBinsOnly option is enabled, each range will only contain bins of the size equal to the step specified. In other words, the will be no space filling bins which are bigger or smaller than the other ones.
 
-This, however, means that specified bin boundaries might get amended in the process of binning. For example, if rebin ''Param'' sttring is specified as "0 2 4.5 3 11" and FullBinsOnly is enabled, the following will happen:
+This, however, means that specified bin boundaries might get amended in the process of binning. For example, if rebin ''Param'' string is specified as "0, 2, 4.5, 3, 11" and FullBinsOnly is enabled, the following will happen:
 * From 0 rebin in bins of size 2 '''up to 4'''. 4.5 is ignored, because otherwise we would need to create a filling bin of size 0.5.
 * '''From 4''' rebin in bins of size 3 '''up to 10'''.
-Hence the actual ''Param'' string used is "0 2 4 3 10".
+Hence the actual ''Param'' string used is "0, 2, 4, 3, 10".
 
 *WIKI*/
 /*WIKI_USAGE*
