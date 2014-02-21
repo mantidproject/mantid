@@ -1555,16 +1555,18 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   m_title = matrix_workspace->getTitle();
   m_previousFilenames = files;
 
-  // Update the grouping table with the used grouping, if new grouping was loaded
-  if ( ! groupResult->usedExistGrouping )
-    fillGroupingTable(*(groupResult->groupingUsed), m_uiForm);
-
   int newInstrIndex = m_uiForm.instrSelector->findText(
         QString::fromStdString( matrix_workspace->getInstrument()->getName() ));
 
   bool instrumentChanged = newInstrIndex != m_uiForm.instrSelector->currentIndex();
 
   m_uiForm.instrSelector->setCurrentIndex(newInstrIndex);
+
+  // Update the grouping table with the used grouping, if new grouping was loaded
+  // XXX: this should be done after the instrument was changed, because changing the instrument will
+  //      clear the grouping
+  if ( ! groupResult->usedExistGrouping )
+    fillGroupingTable(*(groupResult->groupingUsed), m_uiForm);
 
   // Populate instrument fields
   std::stringstream str;
