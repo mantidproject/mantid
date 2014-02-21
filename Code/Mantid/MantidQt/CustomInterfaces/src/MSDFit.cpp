@@ -188,29 +188,32 @@ namespace IDA
       int wsIndex = 0;
       int minIndex = 0;
       int maxIndex = nHist-1;
-      
-      if (!plotSpec.isEmpty() && plotSpec.toInt() < nHist)
-      {
-        wsIndex = plotSpec.toInt();
-      }
 
-      if (!specMin.isEmpty())
+      if (currentWsName == wsname)
       {
-        minIndex = specMin.toInt();
-      }
+        if (!plotSpec.isEmpty() && plotSpec.toInt() < nHist)
+        {
+          wsIndex = plotSpec.toInt();
+        }
 
-      if (!specMax.isEmpty())
-      {
-        maxIndex = specMax.toInt();
-      }
+        if (!specMin.isEmpty())
+        {
+          minIndex = specMin.toInt();
+        }
 
-      if (wsIndex < minIndex)
-      {
-        wsIndex = minIndex;
-      }
-      else if( wsIndex > maxIndex)
-      {
-        wsIndex = maxIndex;
+        if (!specMax.isEmpty() && specMax.toInt() < nHist)
+        {
+          maxIndex = specMax.toInt();
+        }
+
+        if (wsIndex < minIndex)
+        {
+          wsIndex = minIndex;
+        }
+        else if( wsIndex > maxIndex)
+        {
+          wsIndex = maxIndex;
+        }
       }
 
       m_msdDataCurve = plotMiniplot(m_msdPlot, m_msdDataCurve, ws, wsIndex);
@@ -240,6 +243,8 @@ namespace IDA
       {
         showInformationBox(exc.what());
       }
+
+      currentWsName = wsname;
     }
     else
     {
