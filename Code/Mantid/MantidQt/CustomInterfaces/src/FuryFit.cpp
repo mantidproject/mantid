@@ -418,6 +418,8 @@ namespace IDA
 
       break;
     }
+
+    plotGuess(NULL);
   }
 
   void FuryFit::plotInput()
