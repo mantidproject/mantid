@@ -1,6 +1,6 @@
 /*WIKI*
-This algorithm retrieves the instrument names from the information
-catalog and saves instrument lists to a mantid internal data structure.
+
+This algorithm retrieves the instrument names from a catalog and stores them in a vector.
 
 *WIKI*/
 
@@ -29,7 +29,6 @@ namespace Mantid
                                                       boost::make_shared<Kernel::NullValidator>(),
                                                       Kernel::Direction::Output),
                        "A list containing instrument names");
-      declareProperty("IsValid",true,"Boolean option used to check the validity of login session", Kernel::Direction::Output);
     }
 
     /// exec method

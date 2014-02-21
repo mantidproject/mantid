@@ -390,49 +390,41 @@ namespace Mantid
         ns1__investigation * investigation = dynamic_cast<ns1__investigation*>(*iter);
         if (investigation)
         {
-          // Now attempt to add the relevant data to the output workspace.
-          try
+          API::TableRow table = outputws->appendRow();
+          // Used to insert an empty string into the cell if value does not exist.
+          std::string emptyCell("");
+
+          // Now add the relevant investigation data to the table (They always exist).
+          savetoTableWorkspace(investigation->name, table);
+          savetoTableWorkspace(investigation->title, table);
+          savetoTableWorkspace(investigation->investigationInstruments.at(0)->instrument->name, table);
+
+          // Verify that the run parameters vector exist prior to doing anything.
+          // Since some investigations may not have run parameters.
+          if (!investigation->parameters.empty())
           {
-            API::TableRow table = outputws->appendRow();
-            // Used to insert an empty string into the cell if value does not exist.
-            std::string emptyCell("");
-
-            // Now add the relevant investigation data to the table (They always exist).
-            savetoTableWorkspace(investigation->name, table);
-            savetoTableWorkspace(investigation->title, table);
-            savetoTableWorkspace(investigation->investigationInstruments.at(0)->instrument->name, table);
-
-            // Verify that the run parameters vector exist prior to doing anything.
-            // Since some investigations may not have run parameters.
-            if (!investigation->parameters.empty())
-            {
-              savetoTableWorkspace(investigation->parameters[0]->stringValue, table);
-            }
-            else
-            {
-              savetoTableWorkspace(&emptyCell, table);
-            }
-
-            // Again, we need to check first if start and end date exist prior to insertion.
-            if (investigation->startDate)
-            {
-              std::string startDate = formatDateTime(*investigation->startDate, "%Y-%m-%d");
-              savetoTableWorkspace(&startDate, table);
-            }
-            else
-            {
-              savetoTableWorkspace(&emptyCell, table);
-            }
-
-            if (investigation->endDate)
-            {
-              std::string endDate = formatDateTime(*investigation->endDate, "%Y-%m-%d");
-              savetoTableWorkspace(&endDate, table);
-            }
+            savetoTableWorkspace(investigation->parameters[0]->stringValue, table);
           }
-          catch(std::runtime_error&)
+          else
           {
-            throw;
+            savetoTableWorkspace(&emptyCell, table);
+          }
+
+          // Again, we need to check first if start and end date exist prior to insertion.
+          if (investigation->startDate)
+          {
+            std::string startDate = formatDateTime(*investigation->startDate, "%Y-%m-%d");
+            savetoTableWorkspace(&startDate, table);
+          }
+          else
+          {
+            savetoTableWorkspace(&emptyCell, table);
+          }
+
+          if (investigation->endDate)
+          {
+            std::string endDate = formatDateTime(*investigation->endDate, "%Y-%m-%d");
+            savetoTableWorkspace(&endDate, table);
           }
         }
         else
@@ -493,21 +485,14 @@ namespace Mantid
       std::vector<xsd__anyType*>::const_iterator iter;
       for(iter = response.begin(); iter != response.end(); ++iter)
       {
-        try
-        {
-          API::TableRow table = outputws->appendRow();
-          // These are just temporary values in order for the GUI to not die.
-          // These along with related GUI aspects will be removed in another ticket.
-          savetoTableWorkspace(&temp, table);
-          savetoTableWorkspace(&temp, table);
-          savetoTableWorkspace(&temp, table);
-          savetoTableWorkspace(&temp, table);
-          savetoTableWorkspace(&temp, table);
-        }
-        catch(std::runtime_error&)
-        {
-          throw;
-        }
+        API::TableRow table = outputws->appendRow();
+        // These are just temporary values in order for the GUI to not die.
+        // These along with related GUI aspects will be removed in another ticket.
+        savetoTableWorkspace(&temp, table);
+        savetoTableWorkspace(&temp, table);
+        savetoTableWorkspace(&temp, table);
+        savetoTableWorkspace(&temp, table);
+        savetoTableWorkspace(&temp, table);
       }
     }
 
@@ -566,28 +551,21 @@ namespace Mantid
         ns1__datafile * datafile = dynamic_cast<ns1__datafile*>(*iter);
         if (datafile)
         {
-          try
-          {
-            API::TableRow table = outputws->appendRow();
-            // Now add the relevant investigation data to the table.
-            savetoTableWorkspace(datafile->name, table);
-            savetoTableWorkspace(datafile->location, table);
+          API::TableRow table = outputws->appendRow();
+          // Now add the relevant investigation data to the table.
+          savetoTableWorkspace(datafile->name, table);
+          savetoTableWorkspace(datafile->location, table);
 
-            std::string createDate = formatDateTime(*datafile->createTime, "%Y-%m-%d %H:%M:%S");
-            savetoTableWorkspace(&createDate, table);
+          std::string createDate = formatDateTime(*datafile->createTime, "%Y-%m-%d %H:%M:%S");
+          savetoTableWorkspace(&createDate, table);
 
-            savetoTableWorkspace(datafile->id, table);
-            savetoTableWorkspace(datafile->fileSize, table);
+          savetoTableWorkspace(datafile->id, table);
+          savetoTableWorkspace(datafile->fileSize, table);
 
-            std::string fileSize = bytesToString(*datafile->fileSize);
-            savetoTableWorkspace(&fileSize, table);
+          std::string fileSize = bytesToString(*datafile->fileSize);
+          savetoTableWorkspace(&fileSize, table);
 
-            if (datafile->description) savetoTableWorkspace(datafile->description, table);
-          }
-          catch(std::runtime_error&)
-          {
-            throw;
-          }
+          if (datafile->description) savetoTableWorkspace(datafile->description, table);
         }
         else
         {
@@ -704,12 +682,9 @@ namespace Mantid
       {
         ns1__datafile * datafile = dynamic_cast<ns1__datafile*>(response.return_);
 
-        if (datafile)
+        if (datafile && datafile->location)
         {
-          if(datafile->location)
-          {
-            fileLocation = *(datafile->location);
-          }
+          fileLocation = *(datafile->location);
         }
         else
         {
@@ -761,7 +736,6 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       // Set the elements of the URL.
       std::string session   = "sessionId="  + sessionID;
-      if (sessionID.empty()) throw std::runtime_error("You are not currently logged into the cataloging system.");
       std::string name      = "&name="      + createFileName;
       std::string datasetId = "&datasetId=" + boost::lexical_cast<std::string>(getDatasetId(investigationID));
       std::string description = "&description=" + dataFileDescription;
