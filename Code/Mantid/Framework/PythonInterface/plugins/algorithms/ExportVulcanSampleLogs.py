@@ -420,7 +420,12 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 
 	# Write file
     	wbuf = line0 + "\n" + line1 + "\n" + line2 + "\n"
-    	headerfilename = self._outputfilename.split(".")[0] + "_header.txt" 
+    	# headerfilename = self._outputfilename.split(".")[0] + "_header.txt" 
+        filepath = os.path.dirname(self._outputfilename)
+        basename = os.path.basename(self._outputfilename)
+        baseheadername = basename.split(".txt")[0] + "_header.txt"
+        headerfilename = os.path.join(filepath, baseheadername)
+
 	self.log().information("Writing header file %s ... " % (headerfilename))
    
 	try: 
