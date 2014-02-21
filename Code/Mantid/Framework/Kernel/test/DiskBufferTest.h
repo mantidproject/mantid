@@ -658,7 +658,10 @@ public:
     TS_ASSERT_EQUALS( dbuf.getFileLength(), 21);
     TSM_ASSERT_EQUALS( "Nothing left one freed block", map.size(), 1);
 
-
+    delete blockA;
+    delete blockB;
+    delete blockC;
+    delete blockD;
     //std::cout <<  ISaveableTesterWithFile::fakeFile << "!" << std::endl;
   }
 
