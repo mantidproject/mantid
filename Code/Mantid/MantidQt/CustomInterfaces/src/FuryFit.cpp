@@ -502,7 +502,12 @@ namespace IDA
     m_ffDblMng->setValue(m_ffProp[name+".Intensity"], 1.0-background);
     auto x = m_ffInputWS->readX(0);
     auto y = m_ffInputWS->readY(0);
-    double tau = -x[0] / log(y[0]);
+    double tau = 0;
+
+    if (x.size() > 4)
+    {
+      tau = -x[4] / log(y[4]);
+    }
 
     m_ffDblMng->setValue(m_ffProp[name+".Tau"], tau);
     m_ffDblMng->setValue(m_ffProp[name+".Beta"], 1.0);
