@@ -103,6 +103,8 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
     def test_exportFileAndHeader(self):
         """ Test to export logs without header file
         """
+        import os
+        import os.path
         # Generate the matrix workspace with some logs
         ws = self.createTestWorkspace()
         AnalysisDataService.addOrReplace("TestMatrixWS", ws)
@@ -120,14 +122,17 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
         # Locate file
         outfilename = alg_test.getProperty("OutputFilename").value
-        headerfilename = outfilename.split(".txt")[0] + "_header.txt"
+        filepath = os.path.dirname(outfilename)
+        basename = os.path.basename(outfilename)
+        baseheadername = basename.split(".")[0] + "_header.txt"
+        headerfilename = os.path.join(filepath, baseheadername)
         try:
             ifile = open(headerfilename)
             lines = ifile.readlines()
             ifile.close()
         except IOError as err:
-            print "Unable to open header file %s. " % (headerfilename)
-            self.assertTrue(False)
+            errmsg = "Unable to open header file %s. " % (headerfilename)
+            self.assertEquals(errmsg, "")
             return
 
         # Count lines in the file
