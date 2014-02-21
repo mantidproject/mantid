@@ -62,7 +62,6 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
 
     if(m_detector && m_chopper) {
         m_logger.information() << "  Assigning count data..." << std::endl;
-
         setCountData(countData);
 
         /* Calculations related to experiment timings
@@ -394,6 +393,10 @@ int PoldiAutoCorrelationCore::cleanIndex(int index, int maximum)
     return cleanIndex;
 }
 
+/** Assigns workspace pointer containing count data to class member, stores maximum histogram index
+  *
+  * @param countData :: Workspace containing count data
+  */
 void PoldiAutoCorrelationCore::setCountData(DataObjects::Workspace2D_sptr countData)
 {
     m_countData = countData;
