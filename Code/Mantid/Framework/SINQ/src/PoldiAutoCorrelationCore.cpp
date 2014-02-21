@@ -22,6 +22,7 @@ PoldiAutoCorrelationCore::PoldiAutoCorrelationCore(Kernel::Logger &g_log) :
     m_weightsForD(),
     m_tofsFor1Angstrom(),
     m_countData(),
+    m_elementsMaxIndex(0),
     m_damp(0.0),
     m_logger(g_log)
 {
@@ -61,14 +62,15 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
 
     if(m_detector && m_chopper) {
         m_logger.information() << "  Assigning count data..." << std::endl;
-        m_countData = countData;
+
+        setCountData(countData);
 
         /* Calculations related to experiment timings
          *  - width of time bins (deltaT)
          *  - d-resolution deltaD, which results directly from deltaT
          *  - number of time bins for each copper cycle
          */
-        std::vector<double> timeData = countData->dataX(0);
+        std::vector<double> timeData = m_countData->dataX(0);
 
         m_logger.information() << "  Setting time data..." << std::endl;
         m_deltaT = timeData[1] - timeData[0];
@@ -392,6 +394,12 @@ int PoldiAutoCorrelationCore::cleanIndex(int index, int maximum)
     return cleanIndex;
 }
 
+void PoldiAutoCorrelationCore::setCountData(DataObjects::Workspace2D_sptr countData)
+{
+    m_countData = countData;
+    m_elementsMaxIndex = static_cast<int>(countData->getNumberHistograms()) - 1;
+}
+
 /** Reduces list of I/sigma-pairs for N chopper slits to correlation intensity by checking for negative I/sigma-ratios and summing their inverse values.
   *
   * @param valuesWithSigma :: Vector of I/sigma-pairs.
@@ -461,7 +469,7 @@ std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(std::vector<in
   */
 double PoldiAutoCorrelationCore::getCounts(int x, int y)
 {
-    return static_cast<double>(m_countData->dataY(399 - x)[y]);
+    return static_cast<double>(m_countData->dataY(m_elementsMaxIndex - x)[y]);
 }
 
 /** Returns normalized counts for correlation method at given position - these may come from a different source than the counts
@@ -472,7 +480,7 @@ double PoldiAutoCorrelationCore::getCounts(int x, int y)
   */
 double PoldiAutoCorrelationCore::getNormCounts(int x, int y)
 {
-    return std::max(1.0, static_cast<double>(m_countData->dataY(399 - x)[y]));
+    return std::max(1.0, static_cast<double>(m_countData->dataY(m_elementsMaxIndex - x)[y]));
 }
 
 /** Returns detector element index for given index
@@ -484,6 +492,10 @@ double PoldiAutoCorrelationCore::getNormCounts(int x, int y)
   */
 int PoldiAutoCorrelationCore::getElementFromIndex(int index)
 {
+    if(index < 0 || index >= static_cast<int>(m_detectorElements.size())) {
+        throw(std::range_error("Index out of bounds on accessing m_detectorElements."));
+    }
+
     return m_detectorElements[index];
 }
 
@@ -494,6 +506,10 @@ int PoldiAutoCorrelationCore::getElementFromIndex(int index)
   */
 double PoldiAutoCorrelationCore::getTofFromIndex(int index)
 {
+    if(index < 0 || index >= static_cast<int>(m_tofsFor1Angstrom.size())) {
+        throw(std::range_error("Index out of bounds on accessing m_tofsFor1Angstrom."));
+    }
+
     return m_tofsFor1Angstrom[index];
 }
 

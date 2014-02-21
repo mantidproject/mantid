@@ -83,6 +83,8 @@ protected:
 
     virtual int cleanIndex(int index, int maximum);
 
+    void setCountData(DataObjects::Workspace2D_sptr countData);
+
 
     boost::shared_ptr<PoldiAbstractDetector> m_detector;
     boost::shared_ptr<PoldiAbstractChopper> m_chopper;
@@ -100,6 +102,7 @@ protected:
     std::vector<int> m_indices;
 
     DataObjects::Workspace2D_sptr m_countData;
+    int m_elementsMaxIndex;
 
     double m_damp;
     Kernel::Logger& m_logger;
