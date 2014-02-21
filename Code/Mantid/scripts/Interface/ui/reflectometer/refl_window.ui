@@ -338,7 +338,7 @@
            <number>100</number>
           </property>
           <property name="columnCount">
-           <number>18</number>
+           <number>19</number>
           </property>
           <attribute name="horizontalHeaderCascadingSectionResizes">
            <bool>true</bool>
@@ -540,6 +540,11 @@
           <column>
            <property name="text">
             <string>Stitch?</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Plot?</string>
            </property>
           </column>
          </widget>
