@@ -57,6 +57,8 @@ protected slots:
 
   void onRebuildDimensions();
   
+  void onCalculateChanged(bool checked);
+
 private:
 
   enum History{Remember, Forget};
@@ -95,6 +97,13 @@ private:
 
   /// Give base classes the opportunity to do any custom overriding.
   virtual void customiseInitLayout() = 0;
+
+  /// Load settings
+  void loadSettings();
+
+  /// Save settings
+  void saveSettings();
+
 };
 
 /*
