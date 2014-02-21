@@ -496,7 +496,6 @@ private:
   /// Parses grouping information from the UI table.
   ITableWorkspace_sptr parseGrouping();  
 
-
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
   /// handles fit data work
@@ -525,6 +524,10 @@ private:
   /// Returns a number of periods in a run workspace
   /// TODO: Move to MuonAnalysisHelper
   static size_t numPeriods(Workspace_sptr ws);
+
+  /// Print various information about the run
+  /// TODO: Move to MuonAnalysisHelper
+  static void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out);
 };
 
 }

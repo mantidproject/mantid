@@ -1334,16 +1334,12 @@ void MuonAnalysis::handleInputFileChanges()
 
   if (!m_updating)
   {
-    QStringList runFiles = m_uiForm.mwRunFiles->getFilenames();
-  
-    m_previousFilenames.clear();
-    m_previousFilenames = runFiles;
+    inputFileChanged(m_uiForm.mwRunFiles->getFilenames());
+
     m_textToDisplay =  m_uiForm.mwRunFiles->getText();
 
     // save selected browse file directory to be reused next time interface is started up
     m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
-
-    inputFileChanged(m_previousFilenames);
   }
 }
 
@@ -1505,9 +1501,12 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   m_updating = true;
   m_uiForm.tabWidget->setTabEnabled(3, false);
 
+  boost::shared_ptr<LoadResult> loadResult;
+  boost::shared_ptr<GroupResult> groupResult;
+
   try
   {
-    boost::shared_ptr<LoadResult> loadResult = load(files);
+    loadResult = load(files);
 
     try // to apply dead time correction
     {
@@ -1520,211 +1519,130 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       g_log.warning() << "No dead time correction applied: " << e.what() << "\n";
     }
 
-    boost::shared_ptr<GroupResult> groupResult = group(loadResult);
-
-    // At this point we are sure that all the possible problems with the loaded workspace has been
-    // checked, so we can safely overwrite previous data.
-
-    // This is done explicitly because addOrReplace is not replacing groups properly.
-    deleteWorkspaceIfExists(m_workspace_name);
-    deleteWorkspaceIfExists(m_grouped_name);
-
-    AnalysisDataService::Instance().add(m_workspace_name, loadResult->loadedWorkspace);
-    AnalysisDataService::Instance().add(m_grouped_name, groupResult->groupedWorkspace);
-
-    // Update the grouping table with the used grouping, if new grouping was loaded
-    if ( ! groupResult->usedExistGrouping )
-      fillGroupingTable(*(groupResult->groupingUsed), m_uiForm);
-
-    Workspace_sptr loadedWorkspace = loadResult->loadedWorkspace;
-
-    // Get hold of a pointer to a matrix workspace
-    MatrixWorkspace_sptr matrix_workspace = firstPeriod(loadedWorkspace);
-
-    int newInstrIndex = m_uiForm.instrSelector->findText(
-          QString::fromStdString( matrix_workspace->getInstrument()->getName() ));
-
-    bool instrumentChanged = newInstrIndex != m_uiForm.instrSelector->currentIndex();
-
-    m_uiForm.instrSelector->setCurrentIndex(newInstrIndex);
-
-    // Make the options available
-    m_optionTab->nowDataAvailable();
-
-    // Populate instrument fields
-    std::stringstream str;
-    str << "Description: ";
-    str << matrix_workspace->getInstrument()->getDetectorIDs().size();
-    str << " detector spectrometer, main field ";
-    str << QString(loadResult->mainFieldDirection.c_str()).toLower().toStdString();
-    str << " to muon polarisation";
-    m_uiForm.instrumentDescription->setText(str.str().c_str());
-
-    // Save loaded values
-    m_dataTimeZero = loadResult->timeZero;
-    m_dataFirstGoodData = loadResult->firstGoodData - loadResult->timeZero;
-
-    if(instrumentChanged)
-    {
-      // When instrument changes we use information from data no matter what user has chosen before
-      m_uiForm.timeZeroAuto->setCheckState(Qt::Checked);
-      m_uiForm.firstGoodDataAuto->setCheckState(Qt::Checked);
-    }
-
-    // Update boxes, as values have been changed
-    setTimeZeroState();
-    setFirstGoodDataState();
-
-    std::ostringstream infoStr;
-
-    // Set display style for floating point values
-    infoStr << std::fixed << std::setprecision(12);
-    
-    // Populate run information with the run number
-    QString run(getGroupName());
-    if (m_previousFilenames.size() > 1)
-      infoStr << "Runs: ";
-    else
-      infoStr << "Run: ";
-
-    // Remove instrument and leading zeros
-    int zeroCount(0);
-    for (int i=0; i<run.size(); ++i)
-    {
-      if ( (run[i] == '0') || (run[i].isLetter() ) )
-        ++zeroCount;
-      else
-      {
-        run = run.right(run.size() - zeroCount);
-        break;
-      }
-    }
-
-    // Add to run information.
-    infoStr << run.toStdString();
-
-    // Populate run information text field
-    m_title = matrix_workspace->getTitle();
-    infoStr << "\nTitle: ";
-    infoStr << m_title;
-    
-    // Add the comment to run information
-    infoStr << "\nComment: ";
-    infoStr << matrix_workspace->getComment();
-    
-    const Run& runDetails = matrix_workspace->run();
-
-    Mantid::Kernel::DateAndTime start, end;
-
-    // Add the start time for the run
-    infoStr << "\nStart: ";
-    if ( runDetails.hasProperty("run_start") )
-    {
-      start = runDetails.getProperty("run_start")->value();
-      infoStr << start.toSimpleString();
-    }
-
-    // Add the end time for the run
-    infoStr << "\nEnd: ";
-    if ( runDetails.hasProperty("run_end") )
-    {
-      end = runDetails.getProperty("run_end")->value();
-      infoStr << end.toSimpleString();
-    }
-
-    // Add counts to run information
-    infoStr << "\nCounts: ";
-    double counts(0.0);
-    for (size_t i=0; i<matrix_workspace->getNumberHistograms(); ++i)
-    {
-      for (size_t j=0; j<matrix_workspace->blocksize(); ++j)
-      {
-        counts += matrix_workspace->dataY(i)[j];
-      }
-    }
-    infoStr << counts/1000000 << " MEv";
-
-    // Add average temperature.
-    infoStr << "\nAverage Temperature: ";
-    if ( runDetails.hasProperty("Temp_Sample") )
-    {
-      // Filter the temperatures by the start and end times for the run.
-      runDetails.getProperty("Temp_Sample")->filterByTime(start, end);
-
-      // Get average of the values
-      double average = runDetails.getPropertyAsSingleValue("Temp_Sample");
-
-      if (average != 0.0)
-      {
-        infoStr << average;
-      }
-      else
-      {
-        infoStr << "Not set";
-      }
-    }
-    else
-    {
-      infoStr << "Not found";
-    }
-
-    // Add sample temperature
-    infoStr << "\nSample Temperature: ";
-    if ( runDetails.hasProperty("sample_temp") )
-    {
-      auto temp = runDetails.getPropertyValueAsType<double>("sample_temp");
-      infoStr << temp;
-    }
-    else
-    {
-      infoStr << "Not found";
-    }
-
-    // Add sample magnetic field
-    infoStr << "\nSample Magnetic Field: ";
-    if ( runDetails.hasProperty("sample_magn_field") )
-    {
-      auto temp = runDetails.getPropertyValueAsType<double>("sample_magn_field");
-      infoStr << temp;
-    }
-    else
-    {
-      infoStr << "Not found";
-    }
-
-    // Include all the run information.
-    m_uiForm.infoBrowser->setText( QString::fromStdString(infoStr.str()) );
-
-    // If instrument or number of periods has changed -> update period widgets
-    size_t numPeriods = MuonAnalysis::numPeriods(loadedWorkspace);
-    if(instrumentChanged || static_cast<int>(numPeriods) != m_uiForm.homePeriodBox1->count())
-      updatePeriodWidgets(numPeriods);
-
-    // Populate bin width info in Plot options
-    double binWidth = matrix_workspace->dataX(0)[1]-matrix_workspace->dataX(0)[0];
-    static const QChar MU_SYM(956);
-    m_uiForm.optionLabelBinWidth->setText(QString("Data collected with histogram bins of ") + QString::number(binWidth) + QString(" %1s").arg(MU_SYM));
-
-    m_deadTimesChanged = false;
-
-    m_loaded = true;
-
-    // Create a group for new data, if it doesn't exist
-    const std::string groupName = getGroupName().toStdString();
-    if ( ! AnalysisDataService::Instance().doesExist(groupName) )
-    {
-      AnalysisDataService::Instance().add( groupName, boost::make_shared<WorkspaceGroup>() );
-    }
-
-    if(m_uiForm.frontPlotButton->isEnabled())
-      plotSelectedItem();
+    groupResult = group(loadResult);
   }
-  catch(std::exception& e)
+  catch(std::runtime_error& e)
   {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", e.what());
+    g_log.error(e.what());
+    QMessageBox::critical(this, "Loading failed", "Unable to load the file[s]. See log for details.");
+
+    m_updating = false;
+    m_uiForm.tabWidget->setTabEnabled(3, true);
+
+    return;
   }
+
+  // At this point we are sure that new data was loaded successfully, so we can safely overwrite
+  // previous one.
+
+  // This is done explicitly because addOrReplace is not replacing groups properly.
+  deleteWorkspaceIfExists(m_workspace_name);
+  deleteWorkspaceIfExists(m_grouped_name);
+
+  AnalysisDataService::Instance().add(m_workspace_name, loadResult->loadedWorkspace);
+  AnalysisDataService::Instance().add(m_grouped_name, groupResult->groupedWorkspace);
+
+  // Get hold of a pointer to a matrix workspace
+  MatrixWorkspace_sptr matrix_workspace = firstPeriod(loadResult->loadedWorkspace);
+
+  // Set various instance variables
+  m_dataTimeZero = loadResult->timeZero;
+  m_dataFirstGoodData = loadResult->firstGoodData - loadResult->timeZero;
+  m_title = matrix_workspace->getTitle();
+  m_previousFilenames = files;
+
+  // Update the grouping table with the used grouping, if new grouping was loaded
+  if ( ! groupResult->usedExistGrouping )
+    fillGroupingTable(*(groupResult->groupingUsed), m_uiForm);
+
+  int newInstrIndex = m_uiForm.instrSelector->findText(
+        QString::fromStdString( matrix_workspace->getInstrument()->getName() ));
+
+  bool instrumentChanged = newInstrIndex != m_uiForm.instrSelector->currentIndex();
+
+  m_uiForm.instrSelector->setCurrentIndex(newInstrIndex);
+
+  // Populate instrument fields
+  std::stringstream str;
+  str << "Description: ";
+  str << matrix_workspace->getInstrument()->getDetectorIDs().size();
+  str << " detector spectrometer, main field ";
+  str << QString(loadResult->mainFieldDirection.c_str()).toLower().toStdString();
+  str << " to muon polarisation";
+  m_uiForm.instrumentDescription->setText(str.str().c_str());
+
+  if(instrumentChanged)
+  {
+    // When instrument changes we use information from data no matter what user has chosen before
+    m_uiForm.timeZeroAuto->setCheckState(Qt::Checked);
+    m_uiForm.firstGoodDataAuto->setCheckState(Qt::Checked);
+  }
+
+  // Update boxes, as values have been changed
+  setTimeZeroState();
+  setFirstGoodDataState();
+
+  std::ostringstream infoStr;
+
+  // Populate run information with the run number
+  QString run(getGroupName());
+  if (m_previousFilenames.size() > 1)
+    infoStr << "Runs: ";
+  else
+    infoStr << "Run: ";
+
+  // Remove instrument and leading zeros
+  // TODO: this should be moved to a separate method
+  int zeroCount(0);
+  for (int i=0; i<run.size(); ++i)
+  {
+    if ( (run[i] == '0') || (run[i].isLetter() ) )
+      ++zeroCount;
+    else
+    {
+      run = run.right(run.size() - zeroCount);
+      break;
+    }
+  }
+
+  infoStr << run.toStdString();
+
+  // Add other information about the run
+  printRunInfo(matrix_workspace, infoStr);
+
+  m_uiForm.infoBrowser->setText( QString::fromStdString(infoStr.str()) );
+
+  // If instrument or number of periods has changed -> update period widgets
+  size_t numPeriods = MuonAnalysis::numPeriods(loadResult->loadedWorkspace);
+  if(instrumentChanged || static_cast<int>(numPeriods) != m_uiForm.homePeriodBox1->count())
+  {
+    updatePeriodWidgets(numPeriods);
+  }
+
+  // Populate bin width info in Plot options
+  double binWidth = matrix_workspace->dataX(0)[1] - matrix_workspace->dataX(0)[0];
+  m_uiForm.optionLabelBinWidth->setText(
+        QString("Data collected with histogram bins of %1 µs").arg(binWidth));
+
+  m_deadTimesChanged = false;
+
+  m_loaded = true;
+
   m_updating = false;
   m_uiForm.tabWidget->setTabEnabled(3, true);
+
+  // Make the options available
+  m_optionTab->nowDataAvailable();
+
+  // Create a group for new data, if it doesn't exist
+  const std::string groupName = getGroupName().toStdString();
+  if ( ! AnalysisDataService::Instance().doesExist(groupName) )
+  {
+    AnalysisDataService::Instance().add( groupName, boost::make_shared<WorkspaceGroup>() );
+  }
+
+  if(m_uiForm.frontPlotButton->isEnabled())
+    plotSelectedItem();
 }
 
 /**
@@ -3690,6 +3608,98 @@ size_t MuonAnalysis::numPeriods(Workspace_sptr ws)
   else
   {
     return 1;
+  }
+}
+
+/**
+ * Print various informaion about the run
+ * @param runWs :: Run workspace to retrieve information from
+ * @param out :: Stream to print to
+ */
+void MuonAnalysis::printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out)
+{
+  // Set display style for floating point values
+  out << std::fixed << std::setprecision(12);
+
+  out << "\nTitle: " << runWs->getTitle();
+  out << "\nComment: " << runWs->getComment();
+
+  const Run& run = runWs->run();
+
+  Mantid::Kernel::DateAndTime start, end;
+
+  // Add the start time for the run
+  out << "\nStart: ";
+  if ( run.hasProperty("run_start") )
+  {
+    start = run.getProperty("run_start")->value();
+    out << start.toSimpleString();
+  }
+
+  // Add the end time for the run
+  out << "\nEnd: ";
+  if ( run.hasProperty("run_end") )
+  {
+    end = run.getProperty("run_end")->value();
+    out << end.toSimpleString();
+  }
+
+  // Add counts to run information
+  out << "\nCounts: ";
+  double counts(0.0);
+  for (size_t i=0; i<runWs->getNumberHistograms(); ++i)
+  {
+    for (size_t j=0; j<runWs->blocksize(); ++j)
+    {
+      counts += runWs->dataY(i)[j];
+    }
+  }
+  out << counts/1000000 << " MEv";
+
+  // Add average temperature.
+  out << "\nAverage Temperature: ";
+  if ( run.hasProperty("Temp_Sample") )
+  {
+    // Filter the temperatures by the start and end times for the run.
+    run.getProperty("Temp_Sample")->filterByTime(start, end);
+
+    // Get average of the values
+    double average = run.getPropertyAsSingleValue("Temp_Sample");
+
+    if (average != 0.0)
+    {
+      out << average;
+    }
+    else
+    {
+      out << "Not set";
+    }
+  }
+  else
+  {
+    out << "Not found";
+  }
+
+  // Add sample temperature
+  out << "\nSample Temperature: ";
+  if ( run.hasProperty("sample_temp") )
+  {
+    out << run.getPropertyValueAsType<double>("sample_temp");
+  }
+  else
+  {
+    out << "Not found";
+  }
+
+  // Add sample magnetic field
+  out << "\nSample Magnetic Field: ";
+  if ( run.hasProperty("sample_magn_field") )
+  {
+    out << run.getPropertyValueAsType<double>("sample_magn_field");
+  }
+  else
+  {
+    out << "Not found";
   }
 }
 
