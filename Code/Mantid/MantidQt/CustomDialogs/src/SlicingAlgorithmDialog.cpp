@@ -223,6 +223,25 @@ namespace MantidQt
       return result;
     }
 
+    /**
+     * Determine if history should be used.
+     * @param criticalChange : Indicates that the inputs are different in some critical fashion
+     * @return decision about what to do with history, keep it or ignore it.
+     */
+    SlicingAlgorithmDialog::History SlicingAlgorithmDialog::useHistory(const HistoryChanged& criticalChange, const bool bForceForget)
+    {
+      History history;
+      if (criticalChange == HasChanged || bForceForget)
+      {
+        history = Forget;
+      }
+      else
+      {
+        history = Remember;
+      }
+      return history;
+    }
+
     /*
     Decide and command the type of dimension inputs to provide.
     @bForceForget : Force the use of inputworkspace dimensions when configuring the dialog.
@@ -233,36 +252,28 @@ namespace MantidQt
       const bool axisAligned = doAxisAligned();
       ui.non_axis_aligned_layout->setEnabled(!axisAligned);
 
-      HistoryChanged changedStatus = hasDimensionHistoryChanged();
-      History history;
-      if(changedStatus == HasChanged ||  bForceForget)
-      {
-        history = Forget;
-      }
-      else
-      {
-        history = Remember;
-      }
+      HistoryChanged criticalChange = this->hasDimensionHistoryChanged();
+      History useHistory = this->useHistory(criticalChange, bForceForget);
 
       if(axisAligned)
       {
-        buildDimensionInputs("AlignedDim", this->ui.axis_aligned_layout->layout(), formattedAlignedDimensionInput, history);
+        makeDimensionInputs("AlignedDim", this->ui.axis_aligned_layout->layout(), formattedAlignedDimensionInput, useHistory);
       }
       else
       {
-        buildDimensionInputs("BasisVector", this->ui.non_axis_aligned_layout->layout(), formatNonAlignedDimensionInput, history);
+        makeDimensionInputs("BasisVector", this->ui.non_axis_aligned_layout->layout(), formatNonAlignedDimensionInput, useHistory);
       }
     }
 
     /**
-    Build dimensions from the currently selected input workspace. Also fills
+    Make dimensions from the currently selected input workspace. Also fills
     the inputs with default values.
     @param propertyPrefix: The prefix for the property in the algorithm, i.e. AxisAligned.
     @param owningLayout: The layout that will take ownership of the widgets once generated.
     @param format: function pointer to the formatting function
     @param history : Whether to remember of forget property history.
     */
-    void SlicingAlgorithmDialog::buildDimensionInputs(const QString& propertyPrefix,
+    void SlicingAlgorithmDialog::makeDimensionInputs(const QString& propertyPrefix,
         QLayout* owningLayout, QString (*format)(IMDDimension_const_sptr), History history)
     {
 
