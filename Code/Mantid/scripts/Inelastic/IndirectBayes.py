@@ -844,7 +844,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 			logger.notice('Output file for Fit : ' + fpath)
 			logger.notice('Output file for Contours : ' + cpath)
 
-	if (Plot != 'None'):
+	if (Plot != 'None' and Loop == True):
 		QuestPlot(fname,Plot)
 	EndTime('Quest')
 
