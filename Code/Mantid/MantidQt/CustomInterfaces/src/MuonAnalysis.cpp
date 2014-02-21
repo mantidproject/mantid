@@ -1628,7 +1628,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   // Populate bin width info in Plot options
   double binWidth = matrix_workspace->dataX(0)[1] - matrix_workspace->dataX(0)[0];
   m_uiForm.optionLabelBinWidth->setText(
-        QString("Data collected with histogram bins of %1 µs").arg(binWidth));
+        QString("Data collected with histogram bins of %1 %2s").arg(binWidth).arg(QChar(956)));
 
   m_deadTimesChanged = false;
 
