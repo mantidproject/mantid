@@ -4,6 +4,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include <gsl/gsl_blas.h>
@@ -15,6 +16,28 @@ namespace Mantid
 {
 namespace Algorithms
 {
+
+struct FitPeakOffsetResult
+{
+	double mask;
+	double offset;
+	double chi2;
+	/// ???
+	double fitSum;
+	/// summation of chi-square
+	double chisqSum;
+	/// Number of peaks with successful fitting
+	double peakPosFittedSize;
+	int numpeakstofit;
+	int numpeaksfitted;
+	int numpeaksindrange;
+	std::string fitoffsetstatus;
+	/// Highest peak position
+	double highestpeakpos;
+	/// Highest peak deviation after calibrated by offset
+	double highestpeakdev;
+};
+
 /**
  Find the offsets for each detector
 
@@ -57,7 +80,8 @@ public:
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
   int fitSpectra(const int64_t wi, API::MatrixWorkspace_sptr inputW, const std::vector<double> &peakPositions, const std::vector<double> &fitWindows, size_t &nparams,
                   double &minD, double &maxD,
-                  std::vector<double>&peakPosToFit, std::vector<double> &peakPosFitted, std::vector<double> &chisq);
+                  std::vector<double>&peakPosToFit, std::vector<double> &peakPosFitted, std::vector<double> &chisq,
+                 int &i_highestpeak);
 
 private:
   /// Sets documentation strings for this algorithm
@@ -65,10 +89,40 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+
+  void processProperties();
+
+  /// Generate output information table workspace
+  Mantid::DataObjects::TableWorkspace_sptr createOutputInfoTable();
+
+  /// Generate output peak information table workspace
+  Mantid::DataObjects::TableWorkspace_sptr createOutputPeakOffsetTable();
+
+  FitPeakOffsetResult calculatePeakOffset(const int wi, std::vector<double>& fittedpeakpositions, std::vector<double>& tofitpeakpositions);
+
+  void makeFitSummary();
+
+  API::MatrixWorkspace_sptr inputW;
+  DataObjects::EventWorkspace_const_sptr eventW;
+  bool isEvent;
+
   std::string m_backType;
   std::string m_peakType;
   double m_maxChiSq;
   double m_minPeakHeight;
+
+  double maxOffset;
+
+  std::vector<double> peakPositions;
+  std::vector<double> fitWindows;
+
+  DataObjects::TableWorkspace_sptr m_infoTableWS;
+  DataObjects::TableWorkspace_sptr m_peakOffsetTableWS;
+
+  DataObjects::OffsetsWorkspace_sptr outputW;
+  DataObjects::OffsetsWorkspace_sptr outputNP;
+  API::MatrixWorkspace_sptr maskWS;
+
 };
 
 } // namespace Algorithm
