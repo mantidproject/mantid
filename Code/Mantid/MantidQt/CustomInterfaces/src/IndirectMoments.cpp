@@ -88,7 +88,7 @@ namespace CustomInterfaces
     momentsAlg->setProperty("Plot", plot);
     momentsAlg->setProperty("Verbose", verbose);
     momentsAlg->setProperty("Save", save);
-    momentsAlg->setProperty("OutputWorkspace", outputName.toStdString());
+    momentsAlg->setProperty("OutputWorkspace", outputName.toStdString() + "_Moments");
     try
     {
       momentsAlg->execute();

@@ -99,8 +99,6 @@ class Moments(PythonAlgorithm):
 		    yM2.append(m2)
 		    yM4.append(m4)
 
-		output_workspace = output_workspace + '_Moments'
-
 		#create output workspace
 		Q = np.arange(num_spectra)
 		extensions = ['_M0', '_M1', '_M2', '_M4']
