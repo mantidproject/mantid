@@ -388,9 +388,18 @@ set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling )
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
-IF (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+#TODO: Put this OSX version detection in it's own module
+# Set the system name (and remove the space)
+execute_process(
+      COMMAND /usr/bin/sw_vers -productVersion
+      OUTPUT_VARIABLE OSX_VERSION
+      RESULT_VARIABLE OSX_VERSION_STATUS
+  )
+# Strip off any /CR or /LF
+string(STRIP ${OSX_VERSION} OSX_VERSION)
+
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR OSX_VERSION VERSION_LESS 10.9)
 	SET (HDF5_DIR "${CMAKE_MODULE_PATH}")
-	#SET (HDF5_CONFIG "${CMAKE_MODULE_PATH}/hdf5-config.cmake" )
 	find_package ( HDF5 COMPONENTS HL REQUIRED
 				        CONFIGS hdf5-config.cmake )
 ELSE()
