@@ -342,28 +342,27 @@ bool MuonAnalysisResultTableTab::isFittedWs(const std::string& wsName)
     return false; // Doesn't end with WORKSPACE_POSTFIX
   }
 
-  if ( auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName) )
+  try
   {
-    try
-    {
-      ws->run().startTime();
-      ws->run().endTime();
-    }
-    catch(...)
-    {
-      return false; // Doesn't have start/end time set
-    }
+    auto ws = retrieveWSChecked<MatrixWorkspace>(wsName);
+
+    ws->run().startTime();
+    ws->run().endTime();
   }
-  else
+  catch(...)
   {
-    return false; // Incorrect type / not exists
+    return false; // Not found / incorrect type / doesn't have start/end time
   }
 
   std::string baseName = wsBaseName(wsName);
 
-  if ( ! AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(baseName + PARAMS_POSTFIX) )
+  try
   {
-    return false; // Doesn't have corresponding _Parameters table
+    retrieveWSChecked<ITableWorkspace>(baseName + PARAMS_POSTFIX);
+  }
+  catch(...)
+  {
+    return false; // _Parameters workspace not found / has incorrect type
   }
 
   return true; // All OK
