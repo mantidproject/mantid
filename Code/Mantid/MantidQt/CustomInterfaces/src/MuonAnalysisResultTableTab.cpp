@@ -726,6 +726,7 @@ void MuonAnalysisResultTableTab::onCreateTableClicked()
     std::ostringstream errorMsg;
     errorMsg << "Workspace required to create a table was not found:\n\n" << e.what();
     QMessageBox::critical(this, "Workspace not found", QString::fromStdString(errorMsg.str()));
+    refresh(); // As something was probably deleted, refresh the tables
     return;
   }
   catch(std::exception& e)
