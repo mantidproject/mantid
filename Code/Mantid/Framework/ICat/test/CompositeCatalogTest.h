@@ -185,7 +185,7 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
     }
 
-    void testGetDownloadURL()
+    void xtestGetDownloadURL()
     {
       const long long temp = 0;
       std::string url = "";
@@ -193,7 +193,7 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
     }
 
-    void testGetUploadURL()
+    void xtestGetUploadURL()
     {
       std::string temp = "";
       createCompositeCatalog()->getUploadURL(temp,temp,temp);
