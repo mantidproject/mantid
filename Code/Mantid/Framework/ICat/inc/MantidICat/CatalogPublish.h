@@ -2,6 +2,7 @@
 #define MATIND_ICAT_CATALOGPUBLISH_H
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ICatalogInfoService.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
 
 namespace Mantid
@@ -71,7 +72,7 @@ namespace Mantid
         /// Saves the workspace as a nexus file to the user's default directory.
         void saveWorkspaceToNexus(Mantid::API::Workspace_sptr &workspace);
         /// Publish the history of a given workspace.
-        void publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace);
+        void publishWorkspaceHistory(Mantid::API::ICatalogInfoService_sptr &catalogInfoService, Mantid::API::Workspace_sptr &workspace);
         /// Generate the history of a given workspace.
         const std::string generateWorkspaceHistory(Mantid::API::Workspace_sptr &workspace);
     };
