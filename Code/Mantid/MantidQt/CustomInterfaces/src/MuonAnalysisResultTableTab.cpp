@@ -420,12 +420,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
     QMap<QString, QVariant> wsLogValues;
 
     // Get log information
-    auto ws = AnalysisDataService::Instance().retrieveWS<ExperimentInfo>(fittedWsList[i].toStdString()
-                                                                         + WORKSPACE_POSTFIX);
-    if (!ws)
-    {
-      throw std::runtime_error("Wrong type of Workspace");
-    }
+    auto ws = retrieveWSChecked<ExperimentInfo>(fittedWsList[i].toStdString() + WORKSPACE_POSTFIX);
 
     Mantid::Kernel::DateAndTime start = ws->run().startTime();
     Mantid::Kernel::DateAndTime end = ws->run().endTime();
@@ -655,8 +650,7 @@ QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList&
     {
       std::vector<std::string> firstParams;
       // Find the first parameter table and use this as a comparison for all the other tables.
-      auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            wsList[posCount].toStdString() + PARAMS_POSTFIX);
+      auto paramWs = retrieveWSChecked<ITableWorkspace>(wsList[posCount].toStdString() + PARAMS_POSTFIX);
 
       Mantid::API::TableRow paramRow = paramWs->getFirstRow();
       do
@@ -675,8 +669,7 @@ QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList&
         if (!colors.contains(i))
         {
           std::vector<std::string> nextParams;
-          auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-                wsList[i].toStdString() + PARAMS_POSTFIX);
+          auto paramWs = retrieveWSChecked<ITableWorkspace>(wsList[i].toStdString() + PARAMS_POSTFIX);
 
           Mantid::API::TableRow paramRow = paramWs->getFirstRow();
           do
@@ -760,8 +753,7 @@ void MuonAnalysisResultTableTab::createTable()
     for(int i=0; i<wsSelected.size(); ++i)
     {
       QMap<QString, double> paramsList;
-      auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            wsSelected[i].toStdString() + PARAMS_POSTFIX);
+      auto paramWs = retrieveWSChecked<ITableWorkspace>(wsSelected[i].toStdString() + PARAMS_POSTFIX);
 
       Mantid::API::TableRow paramRow = paramWs->getFirstRow();
     
@@ -860,8 +852,7 @@ bool MuonAnalysisResultTableTab::haveSameParameters(const QStringList& wsList)
   std::vector<std::string> firstParams;
 
   // Find the first parameter table and use this as a comparison for all the other tables.
-  auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-        wsList[0].toStdString() + PARAMS_POSTFIX);
+  auto paramWs = retrieveWSChecked<ITableWorkspace>(wsList[0].toStdString() + PARAMS_POSTFIX);
 
   Mantid::API::TableRow paramRow = paramWs->getFirstRow();
   do
@@ -876,8 +867,7 @@ bool MuonAnalysisResultTableTab::haveSameParameters(const QStringList& wsList)
   for (int i=1; i<wsList.size(); ++i)
   {
     std::vector<std::string> nextParams;
-    auto paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-          wsList[i].toStdString() + PARAMS_POSTFIX);
+    auto paramWs = retrieveWSChecked<ITableWorkspace>(wsList[i].toStdString() + PARAMS_POSTFIX);
 
     Mantid::API::TableRow paramRow = paramWs->getFirstRow();
     do
@@ -965,7 +955,6 @@ std::string MuonAnalysisResultTableTab::getFileName()
   }
   return fileName;
 }
-
 
 }
 }

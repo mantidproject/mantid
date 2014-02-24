@@ -82,6 +82,23 @@ private:
   /// LessThan function used to sort log names
   static bool logNameLessThan(const QString& logName1, const QString& logName2);
 
+  /**
+   * Retrieve the workspace, checking if it is of the expected type. If workspace with given and name
+   * and type is not found in the ADS - NotFoundError is thrown.
+   * @param wsName :: Name of the workspace to retrieve
+   * @return Retrieved workspace
+   */
+  template <typename T>
+  static boost::shared_ptr<T> retrieveWSChecked(const std::string& wsName)
+  {
+    auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(wsName);
+
+    if ( ! ws )
+      throw Mantid::Kernel::Exception::NotFoundError("Incorrect type", wsName);
+
+    return ws;
+  }
+
   void storeUserSettings();
   void applyUserSettings();
   void populateLogsAndValues(const QStringList& fittedWsList);
