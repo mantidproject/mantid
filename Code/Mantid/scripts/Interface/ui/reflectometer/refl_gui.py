@@ -116,20 +116,23 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.initTable()
         self.populateList()
         self.connectSlots()
-        
+    
+    def savecheck(self):
+        msgBox = QtGui.QMessageBox()
+        msgBox.setText("The table has been modified. Do you want to save your changes?")
+        msgBox.setStandardButtons(QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel)
+        msgBox.setIcon(QtGui.QMessageBox.Question)
+        msgBox.setDefaultButton(QtGui.QMessageBox.Save)
+        msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
+        ret = msgBox.exec_()
+        if ret == QtGui.QMessageBox.Save:
+            self.save()
+        return ret
+    
     def initTable(self):
         #first check if the table has been changed before clearing it
         if self.windowRefl.modFlag:
-            msgBox = QtGui.QMessageBox()
-            msgBox.setText("The table has been modified. Do you want to save your changes?")
-            msgBox.setStandardButtons(QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel)
-            msgBox.setIcon(QtGui.QMessageBox.Question)
-            msgBox.setDefaultButton(QtGui.QMessageBox.Save)
-            msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
-            ret = msgBox.exec_()
-            if ret == QtGui.QMessageBox.Save:
-                self.save()
-            elif ret == QtGui.QMessageBox.Cancel:
+            if self.savecheck() == QtGui.QMessageBox.Cancel:
                 return
         self.currentTable = None
         self.accMethod = None
@@ -553,16 +556,7 @@ class ReflGui(refl_window.Ui_windowRefl):
             try:
                 #before loading make sure you give them a chance to save
                 if self.windowRefl.modFlag:
-                    msgBox = QtGui.QMessageBox()
-                    msgBox.setText("The table has been modified. Do you want to save your changes?")
-                    msgBox.setStandardButtons(QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel)
-                    msgBox.setIcon(QtGui.QMessageBox.Question)
-                    msgBox.setDefaultButton(QtGui.QMessageBox.Save)
-                    msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
-                    ret = msgBox.exec_()
-                    if ret == QtGui.QMessageBox.Save:
-                        self.save()
-                    elif ret == QtGui.QMessageBox.Cancel:
+                    if self.savecheck() == QtGui.QMessageBox.Cancel:
                         #if they hit cancel abort the load
                         self.loading = False
                         return
