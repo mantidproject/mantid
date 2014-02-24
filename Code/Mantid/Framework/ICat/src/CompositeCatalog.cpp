@@ -154,33 +154,6 @@ namespace Mantid
     }
 
     /**
-     * Obtain a download url for a file from each catalog in the container.
-     * @param fileID :: The id of the file to download.
-     * @param url    :: The url to download the file from.
-     */
-    void CompositeCatalog::getDownloadURL(const long long& fileID,std::string& url)
-    {
-      UNUSED_ARG(fileID);
-      UNUSED_ARG(url);
-    }
-
-    /**
-     * Obtain an upload url for a file from each catalog in the container.
-     * @param investigationID :: The investigation used to obtain the related dataset ID.
-     * @param createFileName  :: The name to give to the file being saved.
-     * @param dataFileDescription :: The description of the data file being saved.
-     * @return The url to PUT datafiles to.
-     */
-    const std::string CompositeCatalog::getUploadURL(const std::string &investigationID,
-        const std::string &createFileName, const std::string &dataFileDescription)
-    {
-      UNUSED_ARG(investigationID);
-      UNUSED_ARG(createFileName);
-      UNUSED_ARG(dataFileDescription);
-      return "";
-    }
-
-    /**
      * Keep each catalog session alive in the container.
      */
     void CompositeCatalog::keepAlive()

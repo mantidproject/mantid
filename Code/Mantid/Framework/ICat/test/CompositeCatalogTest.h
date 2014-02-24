@@ -70,17 +70,6 @@ class DummyCatalog : public ICatalog
       m_counter++;
     }
 
-    void getDownloadURL(const long long&,std::string&)
-    {
-      m_counter++;
-    }
-
-    const std::string getUploadURL(const std::string&,const std::string&,const std::string&)
-    {
-      m_counter++;
-      return "";
-    }
-
     void keepAlive()
     {
       m_counter++;
@@ -142,7 +131,6 @@ class CompositeCatalogTest : public CxxTest::TestSuite
     {
       ITableWorkspace_sptr ws;
       createCompositeCatalog()->myData(ws);
-
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
     }
 
@@ -182,21 +170,6 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       const long long temp = 0;
       std::string fileLocation = "";
       createCompositeCatalog()->getFileLocation(temp,fileLocation);
-      TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
-    }
-
-    void xtestGetDownloadURL()
-    {
-      const long long temp = 0;
-      std::string url = "";
-      createCompositeCatalog()->getDownloadURL(temp, url);
-      TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
-    }
-
-    void xtestGetUploadURL()
-    {
-      std::string temp = "";
-      createCompositeCatalog()->getUploadURL(temp,temp,temp);
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
     }
 
