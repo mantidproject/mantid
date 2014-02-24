@@ -850,6 +850,35 @@ class DirectEnergyConversion(object):
 #----------------------------------------------------------------------------------
 #              Complex setters/getters
 #----------------------------------------------------------------------------------
+    @property 
+    def ei_mon_spectra(self):
+
+        if hasattr(self,'_ei_mon1_spectra'):
+            s1 = self._ei_mon1_spectra;
+        else:
+            s1 = self.get_default_parameter('ei-mon1-spec');
+        if hasattr(self,'_ei_mon2_spectra'):
+            s2 = self._ei_mon2_spectra;
+        else:
+            s2 = self.get_default_parameter('ei-mon2-spec');
+        spectra = [s1,s2]
+        return spectra;
+    @ei_mon_spectra.setter
+    def ei_mon_spectra(self,val):
+        if val is None:
+            if hasattr(self,'_ei_mon1_spectra'):
+                delattr(self,'_ei_mon1_spectra')
+            if hasattr(self,'_ei_mon2_spectra'):
+                delattr(self,'_ei_mon2_spectra')
+            return;
+        if not isinstance(val,list) or len(val) != 2:
+            raise SyntaxError(' shoud assign list of two integers numbers here')
+        if not math.isnan(val[0]):
+            setattr(self,'_ei_mon1_spectra',val[0])
+        if not math.isnan(val[1]):
+            setattr(self,'_ei_mon2_spectra',val[1])
+
+
     @property
     def det_cal_file(self):
         if hasattr(self,'_det_cal_file'):
@@ -1169,6 +1198,8 @@ class DirectEnergyConversion(object):
 
         # list of the parameters which should usually be changed by user and if not, user should be warn about it. 
         self.__abs_units_par_to_change=['sample_mass','sample_rmm']
+        # list of the parameters which should always be taken from IDF unless explicitly set from elsewhere. These parameters MUST have setters and getters
+        self.__instr_par_located =['ei_mon_spectra']
 
         # set/reset instument name in case if this function is called separately. May call lengthy procedure of changing instrument
         self.instr_name = instr_name
@@ -1228,7 +1259,12 @@ class DirectEnergyConversion(object):
 
         # Add IDF parameters as properties to the reducer 
         self.build_idf_parameters(par_names)
-                
+
+        if reinitialize_parameters:
+            # clear Instrument Parameters defined fields:
+            for name in self.__instr_par_located:
+                setattr(self,name,None);
+
 
         # Mark IDF files as read
         self._idf_values_read = True
@@ -1317,7 +1353,6 @@ class DirectEnergyConversion(object):
 
             if par_name in self.__synonims :
                 par_name = self.__synonims[par_name]
-
             # may be a problem, one tries to set up non-existing value
             if not (hasattr(self,par_name) or hasattr(self,'_'+par_name)):
                 # it still can be a composite key which sets parts of the composite property
@@ -1425,18 +1460,23 @@ class DirectEnergyConversion(object):
 
             if key_name in self.__synonims: # replace name with its equivalent
                 key_name = self.__synonims[name]
+            # this key has to be always in IDF
+            if key_name in self.__instr_par_located:
+                continue;
 
             # redefine compostie keys set through synonims names for the future usage
-            if name in self.composite_keys_set:
+            if name in self.composite_keys_set and not(name in self.__instr_par_located):
                 new_comp_name_set.add(key_name)
                 continue # komposite names are created through their values
 
              # create or fill in additional values to the composite key
             if key_name in self.composite_keys_subst : 
                 composite_prop_name,index,nc = self.composite_keys_subst[key_name]
+                if composite_prop_name in self.__instr_par_located:
+                    continue;
 
                 if not hasattr(self,composite_prop_name): # create new attribute value
-                    val = [0]*nc;  
+                    val = [float('nan')]*nc;  
                 else:              # key is already created, get its value
                     val = getattr(self,composite_prop_name)
                     if val is None: # some composie property names were set to none. leave them this way. 
