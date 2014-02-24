@@ -417,7 +417,7 @@ namespace Mantid
     /// Algorithm's category for identification. @see Algorithm::category
     const std::string PerformIndexOperations::category() const
     {
-      return "Algorithms;Transforms;Splitting";
+      return "Transforms\\Grouping";
     }
 
     //----------------------------------------------------------------------------------------------

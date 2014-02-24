@@ -2,6 +2,7 @@
 #define MATIND_ICAT_CATALOGPUBLISH_H
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ICatalogInfoService.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
 
 namespace Mantid
@@ -10,6 +11,14 @@ namespace Mantid
   {
     /**
      CatalogPublish is responsible for publishing user data to the data archive.
+
+     Required Properties:
+
+     <UL>
+      <LI> InvestigationNumber - The number/id of the investigation in the archives to publish the data to.</LI>
+      <LI> FileName - The path to the datafile to publish to the archives.</LI>
+      <LI> InputWorkspace - The name of the workspace to publish to the archives.</LI>
+     </UL>
 
      @author Jay Rainey, ISIS Rutherford Appleton Laboratory
      @date 06/12/2013
@@ -63,7 +72,7 @@ namespace Mantid
         /// Saves the workspace as a nexus file to the user's default directory.
         void saveWorkspaceToNexus(Mantid::API::Workspace_sptr &workspace);
         /// Publish the history of a given workspace.
-        void publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace);
+        void publishWorkspaceHistory(Mantid::API::ICatalogInfoService_sptr &catalogInfoService, Mantid::API::Workspace_sptr &workspace);
         /// Generate the history of a given workspace.
         const std::string generateWorkspaceHistory(Mantid::API::Workspace_sptr &workspace);
     };

@@ -10,7 +10,7 @@ names 'input' & 'output' respectively.
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "MantidPythonInterface/kernel/Environment/Threading.h"
-#include "MantidPythonInterface/kernel/Policies/DowncastReturnedValue.h"
+#include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 #include <boost/python/exec.hpp>
@@ -175,10 +175,10 @@ namespace Mantid
       {
         // We have a generic workspace ptr but the Python needs to see the derived type so
         // that it can access the appropriate methods for that instance
-        // The DowncastReturnedValue policy is already in place for this and is used in many
+        // The ToSharedPtrWithDowncast policy is already in place for this and is used in many
         // method exports as part of a return_value_policy struct.
         // It is called manually here.
-        typedef Policies::DowncastReturnedValue::apply<API::Workspace_sptr>::type WorkspaceDowncaster;
+        typedef Policies::ToSharedPtrWithDowncast::apply<API::Workspace_sptr>::type WorkspaceDowncaster;
         locals["input"] = object(handle<>(WorkspaceDowncaster()(inputWS)));
       }
       std::string outputWSName = getPropertyValue("OutputWorkspace");

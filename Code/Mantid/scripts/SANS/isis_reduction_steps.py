@@ -434,8 +434,9 @@ class CanSubtraction(ReductionStep):
         gp_name = 'sample_can_reductions'
         if mtd.doesExist(gp_name):
             gpr = mtd[gp_name]
-            gpr.add(sample_name)
-            gpr.add(can_name)
+            for wsname in [sample_name, can_name]:
+                if not gpr.contains(wsname):
+                    gpr.add(wsname)
         else:
             GroupWorkspaces([sample_name, can_name], OutputWorkspace=gp_name)
 

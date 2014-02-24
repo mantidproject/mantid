@@ -21,6 +21,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
 #include "MantidQtCustomInterfaces/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h"
@@ -266,6 +267,9 @@ void MuonAnalysis::initLayout()
 
   connect(this, SIGNAL( setToolbarsHidden(bool) ), this, SLOT( doSetToolbarsHidden(bool) ), 
     Qt::QueuedConnection ); // We dont' neet this to happen instantly, prefer safer way
+
+  // Manage User Directories
+  connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this, SLOT(openDirectoryDialog() ) );
 }
 
 /**
@@ -977,12 +981,12 @@ void MuonAnalysis::runLoadCurrent()
   // if output is none empty something has gone wrong
   if ( !pyOutput.toStdString().empty() )
   {
-    m_optionTab->noDataAvailable();
+    noDataAvailable();
     QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't read from " + daename + ". Plotting disabled");
     return;
   }
 
-  m_optionTab->nowDataAvailable();
+  nowDataAvailable();
 
   // Get hold of a pointer to a matrix workspace and apply grouping if applicatable
   Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
@@ -1634,7 +1638,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     }
 
     // Make the options available
-    m_optionTab->nowDataAvailable();
+    nowDataAvailable();
 
     // Populate instrument fields
     std::stringstream str;
@@ -2500,8 +2504,8 @@ void MuonAnalysis::startUpLook()
   m_uiForm.homePeriodBox2->setEnabled(false);
 
   // Set validators for number-only boxes
-  m_uiForm.timeZeroFront->setValidator(createDoubleValidator(m_uiForm.timeZeroFront));
-  m_uiForm.firstGoodBinFront->setValidator(createDoubleValidator(m_uiForm.firstGoodBinFront));
+  setDoubleValidator(m_uiForm.timeZeroFront);
+  setDoubleValidator(m_uiForm.firstGoodBinFront);
 
   // set various properties of the group table
   m_uiForm.groupTable->setColumnWidth(0, 100);
@@ -2783,81 +2787,6 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   QString instrumentName = prevInstrumentValues.value("name", "MUSR").toString();
   m_uiForm.instrSelector->setCurrentIndex(m_uiForm.instrSelector->findText(instrumentName));
 
-  // load Plot Style options
-  QSettings prevPlotStyle;
-  prevPlotStyle.beginGroup(group + "plotStyleOptions");
-
-  double timeAxisStart = prevPlotStyle.value("timeAxisStart", 0.3).toDouble();
-  double timeAxisFinish = prevPlotStyle.value("timeAxisFinish", 16.0).toDouble();
-
-  m_uiForm.timeAxisStartAtInput->setText(QString::number(timeAxisStart));
-  m_uiForm.timeAxisFinishAtInput->setText(QString::number(timeAxisFinish));
-
-  m_optionTab->setStoredCustomTimeValue(prevPlotStyle.value("customTimeValue").toString());
-  
-  int timeComboBoxIndex = prevPlotStyle.value("timeComboBoxIndex", 0).toInt();
-  m_uiForm.timeComboBox->setCurrentIndex(timeComboBoxIndex);
-  m_optionTab->runTimeComboBox(timeComboBoxIndex);
-
-  bool axisAutoScaleOnOff = prevPlotStyle.value("axisAutoScaleOnOff", 1).toBool();
-  m_uiForm.yAxisAutoscale->setChecked(axisAutoScaleOnOff);
-  m_optionTab->runyAxisAutoscale(axisAutoScaleOnOff);
-
-  QStringList kusse = prevPlotStyle.childKeys();
-  if ( kusse.contains("yAxisStart") )
-  {
-    if( ! m_uiForm.yAxisAutoscale->isChecked() )
-    {
-      double yAxisStart = prevPlotStyle.value("yAxisStart").toDouble();
-      m_uiForm.yAxisMinimumInput->setText(QString::number(yAxisStart));
-    }
-    else
-    {
-      m_optionTab->setStoredYAxisMinimum(prevPlotStyle.value("yAxisStart").toString());
-    }
-  }
-  if ( kusse.contains("yAxisFinish") )
-  {
-    if( ! m_uiForm.yAxisAutoscale->isChecked() )
-    {
-      double yAxisFinish = prevPlotStyle.value("yAxisFinish").toDouble();
-      m_uiForm.yAxisMaximumInput->setText(QString::number(yAxisFinish));
-    }
-    else
-    {
-      m_optionTab->setStoredYAxisMaximum(prevPlotStyle.value("yAxisFinish").toString());
-    }
-  }
-
-  // Load Plot Binning Options
-  QSettings prevPlotBinning;
-  prevPlotBinning.beginGroup(group + "BinningOptions");
-  int rebinFixed = prevPlotBinning.value("rebinFixed", 1).toInt();
-  m_uiForm.optionStepSizeText->setText(QString::number(rebinFixed));
-  m_uiForm.binBoundaries->setText(prevPlotBinning.value("rebinVariable", 1).toString());
-
-  int rebinComboBoxIndex = prevPlotBinning.value("rebinComboBoxIndex", 0).toInt();
-  m_uiForm.rebinComboBox->setCurrentIndex(rebinComboBoxIndex);
-  m_optionTab->runRebinComboBox(rebinComboBoxIndex);
-
-  // Load Setting tab options
-  QSettings prevSettingTabOptions;
-  prevSettingTabOptions.beginGroup(group + "SettingOptions");
-
-  int plotCreationIndex = prevSettingTabOptions.value("plotCreation", 0).toInt();
-  m_uiForm.plotCreation->setCurrentIndex(plotCreationIndex);
-
-  int connectPlotStyleIndex = prevSettingTabOptions.value("connectPlotStyle", 0).toInt();
-  m_uiForm.connectPlotType->setCurrentIndex(connectPlotStyleIndex);
-
-  bool errorBars = prevSettingTabOptions.value("errorBars", 1).toBool();
-  m_uiForm.showErrorBars->setChecked(errorBars);
-
-  bool hideTools = prevSettingTabOptions.value("toolbars", 1).toBool();
-  m_uiForm.hideToolbars->setChecked(hideTools);
-
-  bool hideGraphs = prevSettingTabOptions.value("hiddenGraphs", 1).toBool();
-  m_uiForm.hideGraphs->setChecked(hideGraphs);
 
   // Load dead time options.
   QSettings deadTimeOptions;
@@ -3265,7 +3194,6 @@ void MuonAnalysis::loadWidgetValue(QWidget* target, const QVariant& defaultValue
   QSettings settings;
   settings.beginGroup(m_settingsGroup + "SavedWidgetValues");
 
-
   // Load value for QLineEdit
   if(QLineEdit* w = qobject_cast<QLineEdit*>(target))
   {
@@ -3450,18 +3378,6 @@ void MuonAnalysis::deadTimeFileSelected()
 
   m_deadTimesChanged = true;
   homeTabUpdatePlot();
-}
-
-/**
- * Creates new double validator which accepts numbers in standard notation only.
- * @param parent :: Parent of the new validator
- * @return New created validator
- */
-QDoubleValidator* MuonAnalysis::createDoubleValidator(QObject* parent)
-{
-  QDoubleValidator* newValidator = new QDoubleValidator(parent);
-  newValidator->setNotation(QDoubleValidator::StandardNotation);
-  return newValidator;
 }
 
 /**
@@ -3783,6 +3699,38 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
 
   return loadAlg;
 }
+
+/**
+ * When no data loaded set various buttons etc to inactive
+ */
+void MuonAnalysis::noDataAvailable()
+{
+  m_uiForm.frontPlotButton->setEnabled(false);
+  m_uiForm.groupTablePlotButton->setEnabled(false);
+  m_uiForm.pairTablePlotButton->setEnabled(false);
+  m_uiForm.guessAlphaButton->setEnabled(false);
+}
+
+
+/**
+ * When data loaded set various buttons etc to active
+ */
+void MuonAnalysis::nowDataAvailable()
+{
+  m_uiForm.frontPlotButton->setEnabled(true);
+  m_uiForm.groupTablePlotButton->setEnabled(true);
+  m_uiForm.pairTablePlotButton->setEnabled(true);
+  m_uiForm.guessAlphaButton->setEnabled(true);
+}
+
+
+void MuonAnalysis::openDirectoryDialog()
+{
+  MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
+  ad->show();
+  ad->setFocus();
+}
+
 
 }//namespace MantidQT
 }//namespace CustomInterfaces

@@ -816,9 +816,7 @@ namespace Mantid
 
       if (startProgress >= 0 && endProgress > startProgress && endProgress <= 1.)
       {
-        std::cerr << "progress observer=" << m_progressObserver << "\n";
         alg->addObserver(this->progressObserver());
-        std::cerr << "progress observer=" << m_progressObserver << "\n";
         m_startChildProgress = startProgress;
         m_endChildProgress = endProgress;
       }

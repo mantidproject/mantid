@@ -120,6 +120,7 @@ class SANSCatalogWidget(BaseWidget):
         # Stretch the columns evenly
         h = self._content.data_set_table.horizontalHeader()
         h.setResizeMode(1)
+        h.setResizeMode(1,0)
         
         if self._catalog_cls is not None:
             dc = self._catalog_cls()

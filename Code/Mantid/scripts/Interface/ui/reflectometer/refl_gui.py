@@ -594,7 +594,6 @@ class ReflGui(refl_window.Ui_windowRefl):
 Get a representative workspace from the input workspace.
 '''        
 def get_representative_workspace(run):
-    print type(run)
     if isinstance(run, WorkspaceGroup):
         run_number = groupGet(run[0], "samp", "run_number")
         _runno = Load(Filename=str(run_number))
@@ -620,7 +619,7 @@ def calcRes(run):
     
     runno = get_representative_workspace(run)
     # Get slits and detector angle theta from NeXuS
-    theta = groupGet(runno, 'samp', 'THETA')
+    th = groupGet(runno, 'samp', 'THETA')
     inst = groupGet(runno, 'inst')
     s1z = inst.getComponentByName('slit1').getPos().getZ() * 1000.0  # distance in mm
     s2z = inst.getComponentByName('slit2').getPos().getZ() * 1000.0  # distance in mm
@@ -628,14 +627,7 @@ def calcRes(run):
     s1vg = s1vg.getNumberParameter('vertical gap')[0]
     s2vg = inst.getComponentByName('slit2')
     s2vg = s2vg.getNumberParameter('vertical gap')[0]
-    import numpy
-    if isinstance(theta, numpy.float64):
-        th = theta.size
-    elif not isinstance(theta, float):
-        th = theta[len(theta) - 1]
-    else:
-        th = theta
-    print "s1vg=", s1vg, "s2vg=", s2vg, "theta=", theta
+    print "s1vg=", s1vg, "s2vg=", s2vg, "theta=", th
     #1500.0 is the S1-S2 distance in mm for SURF!!!
     resolution = math.atan((s1vg + s2vg) / (2 * (s2z - s1z))) * 180 / math.pi / th
     print "dq/q=", resolution
@@ -672,7 +664,7 @@ def groupGet(wksp, whattoget, field=''):
                     if (type(log) is int or type(log) is str):
                         res = log
                     else:
-                        res = log[len(log) - 1]
+                        res = log[-1]
                 except RuntimeError:
                     res = 0
                     print "Block " + field + " not found."
@@ -682,7 +674,7 @@ def groupGet(wksp, whattoget, field=''):
                     if (type(log) is int or type(log) is str):
                         res = log
                     else:
-                        res = log[len(log) - 1]
+                        res = log[-1]
                 except RuntimeError:
                     res = 0
                     print "Block " + field + " not found."
@@ -694,7 +686,7 @@ def groupGet(wksp, whattoget, field=''):
                     if (type(log) is int or type(log) is str):
                         res = log
                     else:
-                        res = log[len(log) - 1]
+                        res = log[-1]
                 except RuntimeError:
                     res = 0
                     print "Block " + field + " not found."
@@ -704,7 +696,7 @@ def groupGet(wksp, whattoget, field=''):
                     if (type(log) is int or type(log) is str):
                         res = log
                     else:
-                        res = log[len(log) - 1]
+                        res = log[-1]
                 except RuntimeError:
                     res = 0
                     print "Block " + field + " not found."
