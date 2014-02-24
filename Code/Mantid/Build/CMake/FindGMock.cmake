@@ -3,8 +3,8 @@
 # GMOCK_FOUND If false, do not try to use Google Mock
 
 find_path ( GMOCK_INCLUDE_DIR gmock/gmock.h
-            PATHS ${PROJECT_SOURCE_DIR}/TestingTools/gmock-1.6.0/include
-                  ${PROJECT_SOURCE_DIR}/../TestingTools/gmock-1.6.0/include
+            PATHS ${PROJECT_SOURCE_DIR}/TestingTools/gmock-1.7.0/include
+                  ${PROJECT_SOURCE_DIR}/../TestingTools/gmock-1.7.0/include
             NO_DEFAULT_PATH )
 
 SET(GMOCK_LIB gmock)

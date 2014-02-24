@@ -3,7 +3,7 @@ if( MSVC )
   # the to C/C++ runtime or we get duplicate library warnings
   set ( gtest_force_shared_crt ON )
 endif()
-add_subdirectory( gmock-1.6.0 )
+add_subdirectory( gmock-1.7.0 )
 
 # Put the targets in the UnitTests folder
 foreach( target_var 
