@@ -486,6 +486,20 @@ namespace IDA
     }
 
     int specNo = uiForm().furyfit_leSpecNo->text().toInt();
+    int nHist = static_cast<int>(m_ffInputWS->getNumberHistograms());
+
+    if( specNo < 0 || specNo >= nHist )
+    {
+      if (specNo < 0)
+      {
+        specNo = 0;
+      }
+      else
+      {
+        specNo = nHist-1;
+      }
+      uiForm().furyfit_leSpecNo->setText(QString::number(specNo));
+    }
 
     m_ffDataCurve = plotMiniplot(m_ffPlot, m_ffDataCurve, m_ffInputWS, specNo);
     try
