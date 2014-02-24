@@ -71,9 +71,10 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
                 t2=m2.distance(so)*1e6/v
                 t1f=int(t1*60e-6) #frame number for monitor 1
                 t2f=int(t2*60e-6) #frame number for monitor 2
-                wtemp=mantid.simpleapi.ChangeBinOffset(wm,t1f*16667,0,0)
-                wtemp=mantid.simpleapi.ChangeBinOffset(wtemp,t2f*16667,1,1)
+                wtemp=mantid.simpleapi.ChangeBinOffset(wm,t1f*16667,sp1,sp1)
+                wtemp=mantid.simpleapi.ChangeBinOffset(wtemp,t2f*16667,sp2,sp2)
                 wtemp=mantid.simpleapi.Rebin(InputWorkspace=wtemp,Params="1",PreserveEvents=True)        
+                
                 alg=mantid.simpleapi.GetEi(InputWorkspace=wtemp,Monitor1Spec=sp1+1,Monitor2Spec=sp2+1,EnergyEstimate=EGuess)   #Run GetEi algorithm
                 Ei=alg[0]
                 Tzero=alg[3]                                        #Extract incident energy and T0
