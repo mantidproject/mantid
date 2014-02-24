@@ -717,15 +717,12 @@ bool Indirect::validateInput()
 
 
   // SpectraMin/SpectraMax
-  if (
-    m_uiForm.leSpectraMin->text() == ""
-    ||
-    m_uiForm.leSpectraMax->text() == ""
-    ||
-    (
-    m_uiForm.leSpectraMin->text().toDouble() > m_uiForm.leSpectraMax->text().toDouble()
-    )
-    )
+  const QString specMin = m_uiForm.leSpectraMin->text();
+  const QString specMax = m_uiForm.leSpectraMax->text();
+
+  if (specMin.isEmpty() || specMax.isEmpty() ||
+      (specMin.toDouble() < 1 || specMax.toDouble() < 1) ||  
+      (specMin.toDouble() > specMax.toDouble()))
   {
     valid = false;
     m_uiForm.valSpectraMin->setText("*");

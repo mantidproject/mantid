@@ -112,8 +112,6 @@ namespace MantidQt
       void populateDataFileType(const std::set<std::string> &extensions);
 
     private slots:
-      /// Selects/deselects ALL rows in dataFile table.
-      void selectAllDataFiles(const bool &toggled);
       /// When the facility login button is clicked
       void onFacilityLogin();
       /// When the help button is clicked.
@@ -168,6 +166,8 @@ namespace MantidQt
       void downloadDataFiles();
       /// Loads the selected dataFiles into workspaces.
       void loadDataFiles();
+      /// Selects/deselects ALL rows in dataFile table.
+      void selectAllDataFiles(const bool &toggled);
       /// Select/Deselect row when a checkbox is selected
       void dataFileCheckboxSelected(QTableWidgetItem* item);
       /// Select/Deselect row & check-box when a row is selected.

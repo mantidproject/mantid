@@ -2,6 +2,7 @@
 #define MANTID_ICAT_ICAT3CATALOG_H_
 
 #include "MantidAPI/ICatalog.h"
+#include "MantidAPI/ICatalogInfoService.h"
 #include "MantidICat/ICat3/ICat3ErrorHandling.h"
 #include "MantidICat/ICat3/ICat3Helper.h"
 #include "MantidICat/CatalogSearchParam.h"
@@ -34,7 +35,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class  ICat3Catalog : public Mantid::API::ICatalog
+    class ICat3Catalog : public Mantid::API::ICatalog, public Mantid::API::ICatalogInfoService
     {
     public:
       /// constructor

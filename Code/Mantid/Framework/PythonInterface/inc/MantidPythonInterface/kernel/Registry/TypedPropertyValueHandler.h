@@ -22,13 +22,14 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/DowncastRegistry.h"
+
 #include "MantidPythonInterface/kernel/IsNone.h" // includes object.hpp
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/IPropertyManager.h"
 
-#include <boost/python/extract.hpp>
 #include <boost/python/converter/arg_from_python.hpp>
-#include <boost/weak_ptr.hpp>
+#include <boost/python/call_method.hpp>
 #include <string>
 
 namespace Mantid
@@ -44,13 +45,16 @@ namespace Mantid
       template<typename ValueType>
       struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler
       {
+        /// Type required by TypeRegistry framework
+        typedef ValueType HeldType;
+
         /**
          * Set function to handle Python -> C++ calls and get the correct type
          * @param alg :: A pointer to an IPropertyManager
          * @param name :: The name of the property
          * @param value :: A boost python object that stores the value
          */
-        void set(Kernel::IPropertyManager* alg, const std::string &name, const boost::python::object & value)
+        void set(Kernel::IPropertyManager* alg, const std::string &name, const boost::python::object & value) const
         {
           alg->setProperty<ValueType>(name, boost::python::extract<ValueType>(value));
         }
@@ -80,12 +84,7 @@ namespace Mantid
           }
           return valueProp;
         }
-        /// Is the given object a derived type of this objects Type
-        bool checkExtract(const boost::python::object & value) const
-        {
-          boost::python::extract<ValueType> extractor(value);
-          return extractor.check();
-        }
+
       };
 
       //
@@ -94,6 +93,9 @@ namespace Mantid
       template<typename T>
       struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T> > : public PropertyValueHandler
       {
+        /// Type required by TypeRegistry framework
+        typedef boost::shared_ptr<T> HeldType;
+
         /// Convenience typedef
         typedef T PointeeType;
         /// Convenience typedef
@@ -105,27 +107,13 @@ namespace Mantid
          * @param name :: The name of the property
          * @param value :: A boost python object that stores the value
          */
-        void set(Kernel::IPropertyManager* alg, const std::string &name, const boost::python::object & value)
+        void set(Kernel::IPropertyManager* alg, const std::string &name, const boost::python::object & value) const
         {
           using namespace boost::python;
-          typedef boost::weak_ptr<Kernel::DataItem> DataItem_wptr;
+          using Registry::DowncastRegistry;
 
-          PropertyValueType sharedItem;
-          extract<DataItem_wptr> weakPtrExtractor(value);
-          if(weakPtrExtractor.check())
-          {
-            // NOTE: The type here must be DataItem not T as if it came from the ADS
-            // then that's what it was originally
-            // If we can extract a weak pointer then we must construct the shared pointer
-            // from the weak pointer itself to ensure the new shared_ptr has the correct
-            // use count
-            sharedItem = boost::static_pointer_cast<PointeeType>(weakPtrExtractor().lock());
-          }
-          else
-          {
-            sharedItem = extract<PropertyValueType>(value)();
-          }
-          alg->setProperty<PropertyValueType>(name, sharedItem);
+          const auto & entry = DowncastRegistry::retrieve(call_method<std::string>(value.ptr(), "id"));
+          alg->setProperty<HeldType>(name, boost::dynamic_pointer_cast<T>(entry.fromPythonAsSharedPtr(value)));
         }
 
         /**
@@ -141,7 +129,7 @@ namespace Mantid
                                   const boost::python::object & validator, const unsigned int direction) const
         {
           using boost::python::extract;
-          const boost::shared_ptr<T> valueInC = extract<PropertyValueType>(defaultValue)();
+          const PropertyValueType valueInC = extract<PropertyValueType>(defaultValue)();
           Kernel::Property *valueProp(NULL);
           if( isNone(validator) )
           {
@@ -153,12 +141,6 @@ namespace Mantid
             valueProp = new Kernel::PropertyWithValue<PropertyValueType>(name, valueInC, propValidator->clone(), direction);
           }
           return valueProp;
-        }
-        /// Is the given object a derived type of this objects Type
-        bool checkExtract(const boost::python::object & value) const
-        {
-          boost::python::extract<PropertyValueType> extractor(value);
-          return extractor.check();
         }
       };
 

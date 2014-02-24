@@ -1,7 +1,6 @@
 /*WIKI*
 
-This algorithm retrieves the investigation types from the information
-catalog and saves investigation types lists to a mantid internal data structure.
+This algorithm is responsible for obtaining a list of investigation types from the catalog.
 
 *WIKI*/
 
@@ -29,7 +28,6 @@ namespace Mantid
                                                       boost::make_shared<Kernel::NullValidator>(),
                                                       Kernel::Direction::Output),
                        "List of investigation types obtained from Catalog");
-      declareProperty("IsValid",true,"Boolean option used to check the validity of login session", Kernel::Direction::Output);
     }
 
     /// exec method

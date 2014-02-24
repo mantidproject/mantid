@@ -1,5 +1,5 @@
-#ifndef MANTID_ICAT_SAERCHPARAM_H_
-#define MANTID_ICAT_SAERCHPARAM_H_
+#ifndef MANTID_ICAT_CATALOGSEARCHPARAM_H_
+#define MANTID_ICAT_CATALOGSEARCHPARAM_H_
 
 #include <string>
 #include <stdexcept>

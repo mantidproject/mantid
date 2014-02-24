@@ -6,6 +6,7 @@ if the data archive is not accessible, it downloads the files from the data serv
 *WIKI*/
 
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/ICatalogInfoService.h"
 #include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/Session.h"
@@ -61,7 +62,11 @@ namespace Mantid
     void CatalogDownloadDataFiles::exec()
     {
       // Create and use the catalog the user has specified in Facilities.xml
-      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
+      auto catalog = CatalogAlgorithmHelper().createCatalog();
+      // Cast a catalog to a catalogInfoService to access downloading functionality.
+      auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(catalog);
+      // Check if the catalog created supports publishing functionality.
+      if (!catalogInfoService) throw std::runtime_error("The catalog that you are using does not support external downloading.");
 
       // Used in order to transform the archive path to the user's operating system.
       CatalogInfo catalogInfo = ConfigService::Instance().getFacility().catalogInfo();
@@ -111,7 +116,7 @@ namespace Mantid
 
           // Obtain URL for related file to download from net.
           std::string url;
-          catalog->getDownloadURL(*fileID,url);
+          catalogInfoService->getDownloadURL(*fileID,url);
 
           progress(prog,"downloading over internet...");
 
@@ -134,38 +139,26 @@ namespace Mantid
     {
       std::string extension = Poco::Path(fileName).getExtension();
       std::transform(extension.begin(),extension.end(),extension.begin(),tolower);
-
-      if (extension.compare("raw") == 0 || extension.compare("nxs") == 0)
-      {
-        return true;
-      }
-      else
-      {
-        return false;
-      }
+      return (extension.compare("raw") == 0 || extension.compare("nxs") == 0);
     }
 
     /**
-     * Downloads file over Internet using Poco HTTPClientSession
-     * @param URL- URL of the file to down load
-     * @param fileName ::  file name
-     * @return Full path of where file is saved to
+     * Downloads datafiles from the archives, and saves to the users save default directory.
+     * @param URL :: The URL of the file to download.
+     * @param fileName :: The name of the file to save to disk.
+     * @return The full path to the saved file.
      */
     std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName)
     {
-      std::string retVal_FullPath;
+      std::string pathToDownloadedDatafile;
 
       clock_t start;
-      //use HTTP  Get method to download the data file from the server to local disk
+
       try
       {
         Poco::URI uri(URL);
 
         std::string path(uri.getPathAndQuery());
-        if (path.empty())
-        {
-          throw std::runtime_error("URL string is empty,ICat interface can not download the file"+fileName);
-        }
         start=clock();
 
         Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> certificateHandler = new Poco::Net::AcceptCertificateHandler(true);
@@ -198,7 +191,7 @@ namespace Mantid
         }
 
         // Save the file to local disk if no errors occurred on the IDS.
-        retVal_FullPath = saveFiletoDisk(responseStream,fileName);
+        pathToDownloadedDatafile = saveFiletoDisk(responseStream,fileName);
 
         clock_t end=clock();
         float diff = float(end - start)/CLOCKS_PER_SEC;
@@ -215,30 +208,22 @@ namespace Mantid
       // However, the port the user used to download the file will be left open.
       catch(Poco::Exception&) {}
 
-      return retVal_FullPath;
+      return pathToDownloadedDatafile;
     }
 
     /**
      * Saves the input stream to a file
-     * @param rs :: input stream
+     * @param rs :: The response stream from the server, which contains the file's content.
      * @param fileName :: name of the output file
      * @return Full path of where file is saved to
      */
     std::string CatalogDownloadDataFiles::saveFiletoDisk(std::istream& rs,const std::string& fileName)
     {
-      std::string downloadPath = getProperty("DownloadPath");
-      Poco::Path defaultSaveDir(downloadPath);
-      Poco::Path path(downloadPath, fileName);
-      std::string filepath = path.toString();
-
+      std::string filepath = Poco::Path(getPropertyValue("DownloadPath"), fileName).toString();
       std::ios_base::openmode mode = isDataFile(fileName) ? std::ios_base::binary : std::ios_base::out;
 
       std::ofstream ofs(filepath.c_str(), mode);
-      if ( ofs.rdstate() & std::ios::failbit )
-      {
-        throw Mantid::Kernel::Exception::FileError("Error on creating File",fileName);
-      }
-
+      if ( ofs.rdstate() & std::ios::failbit ) throw Exception::FileError("Error on creating File",fileName);
       //copy the input stream to a file.
       Poco::StreamCopier::copyStream(rs, ofs);
 
@@ -258,7 +243,6 @@ namespace Mantid
     std::string CatalogDownloadDataFiles::testDownload(const std::string& URL,const std::string& fileName)
     {
       return doDownloadandSavetoLocalDrive(URL,fileName);
-
     }
 
   }

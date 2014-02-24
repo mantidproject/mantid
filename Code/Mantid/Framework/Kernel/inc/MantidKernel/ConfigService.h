@@ -252,7 +252,8 @@ namespace Mantid
       void cacheUserSearchPaths();
       /// Returns true if the path is in the data search list
       bool isInDataSearchList(const std::string & path) const;
-
+      /// Empty the list of facilities, deleting the FacilityInfo objects in the process
+      void clearFacilities();
       /// Set the PV_PLUGIN_PATH to point at this version of Mantid.
       void setParaViewPluginPath() const;
 

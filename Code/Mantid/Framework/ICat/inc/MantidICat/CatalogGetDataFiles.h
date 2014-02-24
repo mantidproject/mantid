@@ -1,21 +1,21 @@
-#ifndef MANTID_ICAT_GETINVESTIGATION_H_
-#define MANTID_ICAT_GETINVESTIGATION_H_
+#ifndef MANTID_ICAT_CATALOGGETDATAFILES_H_
+#define MANTID_ICAT_CATALOGGETDATAFILES_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
-
 
 namespace Mantid
 {
   namespace ICat
   {
-    /**CatalogGetDataFiles is a class responsible for GetInvestigation algorithm.
-    This algorithm does the basic search and returns the investigations record
+    /**
+     CatalogGetDataFiles obtains a list of datafiles and related information for an investigation.
+
     Required Properties:
+
     <UL>
-    <LI> InvestigationId - The id of the investigation to display</LI>
-    <LI> InputWorkspace -  Input workspace which saved last search</LI>
-	  <LI> OutputWorkspace - The putput workspace to store  </LI>
+     <LI> InvestigationId - The id of the investigation to use for searching.</LI>
+     <LI> OutputWorkspace - The workspace to store the datafile information.</LI>
     </UL>
 
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
