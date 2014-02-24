@@ -60,9 +60,8 @@ namespace Mantid
         virtual void listInstruments(std::vector<std::string>& instruments);
         /// Get investigationtypes list
         virtual void listInvestigationTypes(std::vector<std::string>& invstTypes);
-        /// get URL of where to PUT (publish) files.
-        virtual const std::string getUploadURL(
-            const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription);
+        /// Get the file location string(s) from archive.
+        virtual void getFileLocation(const long long&fileID,std::string& fileLocation);
         /// Keep current session alive
         virtual void keepAlive();
         /// Keep alive in minutes
