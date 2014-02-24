@@ -160,6 +160,8 @@ namespace Mantid
      */
     void CompositeCatalog::getDownloadURL(const long long& fileID,std::string& url)
     {
+      UNUSED_ARG(fileID);
+      UNUSED_ARG(url);
     }
 
     /**
@@ -172,6 +174,10 @@ namespace Mantid
     const std::string CompositeCatalog::getUploadURL(const std::string &investigationID,
         const std::string &createFileName, const std::string &dataFileDescription)
     {
+      UNUSED_ARG(investigationID);
+      UNUSED_ARG(createFileName);
+      UNUSED_ARG(dataFileDescription);
+      return "";
     }
 
     /**
