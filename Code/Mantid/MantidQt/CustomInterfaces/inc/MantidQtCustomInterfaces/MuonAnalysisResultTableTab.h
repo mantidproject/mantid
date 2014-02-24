@@ -107,9 +107,6 @@ private:
   /// Does a few basic checks for whether the workspace is a fitted workspace
   static bool isFittedWs(const std::string& wsName);
 
-  /// Generates a results table
-  Mantid::API::ITableWorkspace_sptr generateTable(QStringList wsNames, QStringList logNames) const;
-
   void storeUserSettings();
   void applyUserSettings();
   void populateLogsAndValues(const QStringList& fittedWsList);
