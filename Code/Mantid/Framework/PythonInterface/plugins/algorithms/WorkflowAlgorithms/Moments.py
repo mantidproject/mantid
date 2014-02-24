@@ -68,53 +68,55 @@ class Moments(PythonAlgorithm):
 
 		#calculate delta x
 		x = np.asarray(mtd[samWS].readX(0))
-		delta_x = x[1:] - x[:-1]
-		x = x[:-1]
-		#calculate moments for workspace
-		yM0, yM1, yM2, yM3, yM4 = [],[],[],[],[]
-		for index in range(num_spectra):
-		    if Verbose:
-		        logger.notice('group_workspace %d at Q = %d' % (index+1, index))
+		dx = x[1:] - x[:-1]
 
-		    y = np.asarray(mtd[samWS].readY(index))
+		delta_x = CreateWorkspace(OutputWorkspace="__delta_x", DataX=x, DataY=dx, UnitX="DeltaE")
+		x_workspace = CreateWorkspace(OutputWorkspace="__moments_x", DataX=x, DataY=x[:-1], UnitX="DeltaE")
 
-		    S0 = y * delta_x
-		    m0 = np.sum(S0)
+		#calculate moments
+		m0 = output_workspace + '_M0'
+		m1 = output_workspace + '_M1'
+		m2 = output_workspace + '_M2'
+		m3 = output_workspace + '_M3'
+		m4 = output_workspace + '_M4'
 
-		    S1 = (x * S0)
-		    m1 = np.sum(S1) / m0
-		    S2 = x * S1
-		    m2 = np.sum(S2) / m0
-		    S3 = x * S2
-		    m3 = np.sum(S3) / m0
-		    S4 = x * S3
-		    m4 = np.sum(S4) / m0
+		Multiply(samWS, delta_x, OutputWorkspace=m0)
+		Multiply(x_workspace, m0, OutputWorkspace=m1)
+		Multiply(x_workspace, m1, OutputWorkspace=m2)
+		Multiply(x_workspace, m2, OutputWorkspace=m3)
+		Multiply(x_workspace, m3, OutputWorkspace=m4)
+		DeleteWorkspace(m3)
 
-		    if Verbose:
-			    text = 'M0 = %f ; M2 = %f ; M4 = %f' % (m0, m2, m4)
-			    logger.notice(text)
+		Integration(m0, OutputWorkspace=m0)
+		Integration(m1, OutputWorkspace=m1)
+		Integration(m2, OutputWorkspace=m2)
+		Integration(m4, OutputWorkspace=m4)
 
-		    yM0.append(m0)
-		    yM1.append(m1)
-		    yM2.append(m2)
-		    yM4.append(m4)
+		Divide(m1, m0, OutputWorkspace=m1)
+		Divide(m2, m0, OutputWorkspace=m2)
+		Divide(m4, m0, OutputWorkspace=m4)
+
+		DeleteWorkspace(samWS)
+		DeleteWorkspace(delta_x)
+		DeleteWorkspace(x_workspace)
 
 		#create output workspace
-		Q = np.arange(num_spectra)
 		extensions = ['_M0', '_M1', '_M2', '_M4']
-		y_data = [yM0, yM1, yM2, yM4]
 
-		for ext, data in zip(extensions, y_data):
-			CreateWorkspace(OutputWorkspace=output_workspace+ext, DataX=Q, DataY=data,Nspec=1, UnitX='MomentumTransfer')
-			CopyLogs(InputWorkspace=sample_workspace, OutputWorkspace=output_workspace+ext)
-			AddSampleLog(Workspace=output_workspace+ext, LogName="energy_min", LogType="Number", LogText=str(emin))
-			AddSampleLog(Workspace=output_workspace+ext, LogName="energy_max", LogType="Number", LogText=str(emax))
-			AddSampleLog(Workspace=output_workspace+ext, LogName="scale_factor", LogType="Number", LogText=str(factor))
+		for ext in extensions:
+			ws_name = output_workspace+ext
+			Transpose(InputWorkspace=ws_name, OutputWorkspace=ws_name)
+			ConvertToHistogram(InputWorkspace=ws_name, OutputWorkspace=ws_name)
+			ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='MomentumTransfer', EMode='Indirect')
+
+			CopyLogs(InputWorkspace=sample_workspace, OutputWorkspace=ws_name)
+			AddSampleLog(Workspace=ws_name, LogName="energy_min", LogType="Number", LogText=str(emin))
+			AddSampleLog(Workspace=ws_name, LogName="energy_max", LogType="Number", LogText=str(emax))
+			AddSampleLog(Workspace=ws_name, LogName="scale_factor", LogType="Number", LogText=str(factor))
 
 		#group ouput workspace
 		group_workspaces = ','.join([output_workspace+ext for ext in extensions])
 		GroupWorkspaces(InputWorkspaces=group_workspaces,OutputWorkspace=output_workspace)
-		DeleteWorkspace(samWS)
 
 		if Save:
 			workdir = getDefaultWorkingDirectory()
