@@ -126,7 +126,6 @@ namespace IDA
     uiForm().furyfit_ckPlotGuess->setChecked(false);
     
     const int fitType = uiForm().furyfit_cbFitType->currentIndex();
-
     if ( uiForm().furyfit_ckConstrainIntensities->isChecked() )
     {
       switch ( fitType )
@@ -591,7 +590,8 @@ namespace IDA
 
     // Function Ties
     func->tie("f0.A1", "0");
-    if ( uiForm().furyfit_ckConstrainIntensities->isChecked() )
+    const bool constrainIntensities = uiForm().furyfit_ckConstrainIntensities->isChecked();
+    if ( constrainIntensities )
     {
       switch ( uiForm().furyfit_cbFitType->currentIndex() )
       {
@@ -615,8 +615,10 @@ namespace IDA
       "ftype = '" + fitTypeString() + "'\n"
       "startx = " + m_ffProp["StartX"]->valueText() + "\n"
       "endx = " + m_ffProp["EndX"]->valueText() + "\n"
-      "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n"
-      "save = ";
+      "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n";
+    
+    if (constrainIntensities) pyInput += "constrain_intens = True \n";
+    else pyInput += "constrain_intens = False \n";
 
     if ( uiForm().furyfit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
@@ -626,11 +628,11 @@ namespace IDA
 
     if (!constrainBeta)
     {
-      pyInput += "furyfitSeq(input, func, ftype, startx, endx, save, plot, verbose)\n";
+      pyInput += "furyfitSeq(input, func, ftype, startx, endx, constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
     }
     else
     {
-      pyInput += "furyfitMult(input, func, ftype, startx, endx, save, plot, verbose)\n";
+      pyInput += "furyfitMult(input, func, ftype, startx, endx, constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
     }
   
     QString pyOutput = runPythonCode(pyInput);
