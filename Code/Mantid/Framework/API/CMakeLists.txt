@@ -171,6 +171,7 @@ set ( INC_FILES
 	inc/MantidAPI/IBackgroundFunction.h
 	inc/MantidAPI/IBoxControllerIO.h
 	inc/MantidAPI/ICatalog.h
+	inc/MantidAPI/ICatalogInfoService.h
 	inc/MantidAPI/IConstraint.h
 	inc/MantidAPI/ICostFunction.h
 	inc/MantidAPI/IDataItem.h
