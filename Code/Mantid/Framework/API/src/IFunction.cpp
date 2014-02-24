@@ -987,7 +987,6 @@ double IFunction::convertValue(double value, Kernel::Unit_sptr& outUnit,
     }
     else
     {
-      double l1,l2,twoTheta;
 
       // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
       Instrument_const_sptr instrument = ws->getInstrument();
@@ -998,8 +997,9 @@ double IFunction::convertValue(double value, Kernel::Unit_sptr& outUnit,
                       << "Ignore convertion."; 
         return value; 
       }
-      l1 = instrument->getSource()->getDistance(*sample);
+      double l1 = instrument->getSource()->getDistance(*sample);
       Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
+      double l2(-1.0), twoTheta(-1.0);
       if ( ! det->isMonitor() )
       {
         l2 = det->getDistance(*sample);
@@ -1011,12 +1011,24 @@ double IFunction::convertValue(double value, Kernel::Unit_sptr& outUnit,
         l2 = l2 - l1;
         twoTheta = 0.0;
       }
+      int emode = static_cast<int>(ws->getEMode());
+      double efixed(0.0);
+      try
+      {
+        efixed = ws->getEFixed(det);
+      }
+      catch(std::exception &)
+      {
+        // assume elastic
+        efixed = 0.0;
+        emode = 0;
+      }
 
       std::vector<double> endPoint;
       endPoint.push_back(retVal);
       std::vector<double> emptyVec;
-      wsUnit->toTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-      outUnit->fromTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+      wsUnit->toTOF(endPoint, emptyVec, l1, l2, twoTheta, emode, efixed, 0.0);
+      outUnit->fromTOF(endPoint, emptyVec,l1, l2, twoTheta, emode, efixed, 0.0);
       retVal = endPoint[0];
     }
   }  
@@ -1073,10 +1085,22 @@ void IFunction::convertValue(std::vector<double>& values, Kernel::Unit_sptr& out
         l2 = l2 - l1;
         twoTheta = 0.0;
       }
+      int emode = static_cast<int>(ws->getEMode());
+      double efixed(0.0);
+      try
+      {
+        efixed = ws->getEFixed(det);
+      }
+      catch(std::exception &)
+      {
+        // assume elastic
+        efixed = 0.0;
+        emode = 0;
+      }
 
       std::vector<double> emptyVec;
-      wsUnit->toTOF(values,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-      outUnit->fromTOF(values,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+      wsUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, efixed, 0.0);
+      outUnit->fromTOF(values,emptyVec,l1,l2,twoTheta, emode, efixed, 0.0);
     }
   }  
 }
