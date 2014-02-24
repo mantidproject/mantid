@@ -44,6 +44,9 @@ namespace Mantid
         /// Obtain the url to upload a file to.
         virtual const std::string getUploadURL(const std::string&,const std::string&,const std::string&) = 0;
     };
+
+    typedef boost::shared_ptr<ICatalogInfoService> ICatalogInfoService_sptr;
+    typedef boost::shared_ptr<const ICatalogInfoService> ICatalogInfoService_const_sptr;
   }
 }
 

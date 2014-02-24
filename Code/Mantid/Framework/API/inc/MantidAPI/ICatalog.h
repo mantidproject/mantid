@@ -63,10 +63,6 @@ namespace Mantid
         virtual void listInvestigationTypes(std::vector<std::string>&)=0;
         /// get file locations
         virtual void getFileLocation(const long long&,std::string&)=0;
-        /// get URLs of the files
-        virtual void getDownloadURL(const long long&,std::string&)=0;
-        /// get URL of where to PUT (publish) files.
-        virtual const std::string getUploadURL(const std::string&,const std::string&,const std::string&)=0;
         /// keep alive
         virtual void keepAlive()=0;
         ///keep alive in minutes
