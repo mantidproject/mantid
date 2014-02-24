@@ -18,7 +18,7 @@ namespace Mantid
      * Add a catalog to the catalog container.
      * @param catalog :: The catalog to add to the container.
      */
-    void CompositeCatalog::add(API::ICatalog_sptr catalog)
+    void CompositeCatalog::add(const API::ICatalog_sptr catalog)
     {
       m_catalogs.push_back(catalog);
     }
@@ -160,10 +160,6 @@ namespace Mantid
      */
     void CompositeCatalog::getDownloadURL(const long long& fileID,std::string& url)
     {
-      for(auto catalog = m_catalogs.begin(); catalog != m_catalogs.end(); ++catalog)
-      {
-        (*catalog)->getDownloadURL(fileID, url);
-      }
     }
 
     /**
@@ -176,12 +172,6 @@ namespace Mantid
     const std::string CompositeCatalog::getUploadURL(const std::string &investigationID,
         const std::string &createFileName, const std::string &dataFileDescription)
     {
-      std::string uploadURL;
-      for(auto catalog = m_catalogs.begin(); catalog != m_catalogs.end(); ++catalog)
-      {
-        uploadURL = (*catalog)->getUploadURL(investigationID, createFileName, dataFileDescription);
-      }
-      return uploadURL;
     }
 
     /**

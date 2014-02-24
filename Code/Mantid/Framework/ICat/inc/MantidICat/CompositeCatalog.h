@@ -40,7 +40,7 @@ namespace Mantid
         /// Destructor
         ~CompositeCatalog();
         /// Adds a catalog to the list of catalogs (m_catalogs)
-        void add(API::ICatalog_sptr catalog);
+        void add(const API::ICatalog_sptr catalog);
 
         /// Log the user into the catalog system.
         virtual void login(const std::string& username,const std::string& password,const std::string& endpoint);
