@@ -58,7 +58,7 @@ MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm)
   connect(m_uiForm.selectAllFittingResults, SIGNAL(toggled(bool)), this, SLOT(selectAllFittings(bool)));
 
   // Connect the create table button
-  connect(m_uiForm.createTableBtn, SIGNAL(clicked()), this, SLOT(createTable()));
+  connect(m_uiForm.createTableBtn, SIGNAL(clicked()), this, SLOT(onCreateTableClicked()));
 
   // Enable label combox-box only when sequential fit type selected
   connect(m_uiForm.sequentialFit, SIGNAL( toggled(bool) ), 
@@ -714,6 +714,28 @@ QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList&
     posCount++;
   }
   return colors;
+}
+
+void MuonAnalysisResultTableTab::onCreateTableClicked()
+{
+  try
+  {
+    createTable();
+  }
+  catch(Exception::NotFoundError& e)
+  {
+    std::ostringstream errorMsg;
+    errorMsg << "Workspace required to create a table was not found:\n\n" << e.what();
+    QMessageBox::critical(this, "Workspace not found", QString::fromStdString(errorMsg.str()));
+    return;
+  }
+  catch(std::exception& e)
+  {
+    std::ostringstream errorMsg;
+    errorMsg << "Error occured when trying to create the table:\n\n" << e.what();
+    QMessageBox::critical(this, "Error", QString::fromStdString(errorMsg.str()));
+    return;
+  }
 }
 
 /**

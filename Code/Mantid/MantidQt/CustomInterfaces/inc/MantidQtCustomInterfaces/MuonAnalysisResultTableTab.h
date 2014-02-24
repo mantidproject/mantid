@@ -64,7 +64,9 @@ private slots:
   void helpResultsClicked();
   void selectAllLogs(bool);
   void selectAllFittings(bool);
-  void createTable();
+
+  /// Executed when "Create table" button is clicked
+  void onCreateTableClicked();
 
   /// Clear and populate both tables
   void populateTables();
@@ -112,6 +114,9 @@ private:
   void applyUserSettings();
   void populateLogsAndValues(const QStringList& fittedWsList);
   void populateFittings(const QStringList& fittedWsList);
+
+  /// Creates the results table
+  void createTable();
 
   /// Returns a list of workspaces which should be displayed in the table
   QStringList getFittedWorkspaces();
