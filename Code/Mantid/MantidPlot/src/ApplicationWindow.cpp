@@ -8797,6 +8797,14 @@ void ApplicationWindow::setActiveWindow(MdiSubWindow* w)
   {
     d_active_window = NULL;
   }
+  else if ( d_active_window->getFloatingWindow() )
+  {
+    // If floating window is activated, we set MdiArea to not have any active sub-window. This makes
+    // sure that we don't have two versions of current active window (d_active_window and active
+    // window of MdiArea) and they are either equal (when docked window is active> or the latter one
+    // is NULL (when floating window is active).
+    d_workspace->setActiveSubWindow(NULL);
+  }
 }
 
 
