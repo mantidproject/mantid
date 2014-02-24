@@ -1016,6 +1016,9 @@ def msdfit(inputs, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=
     LoadNexusProcessed(FileName=file_path, OutputWorkspace=ws)
 
     num_spectra = mtd[ws].getNumberHistograms()
+    if spec_max is None:
+        spec_max = num_spectra-1
+
     if spec_min < 0 or spec_max >= num_spectra:
         raise ValueError("Invalid spectrum range: %d - %d" % (spec_min, spec_max))
 
