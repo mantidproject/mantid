@@ -86,7 +86,7 @@ namespace MantidQt
       customiseInitLayout();
 
       //Dynamically create the input dimensions.
-      buildDimensionInputs(ui.ck_calculate->isChecked());
+      buildDimensionInputs(this->doAutoFillDimensions());
     }
 
     /// Destructor
@@ -122,7 +122,7 @@ namespace MantidQt
     */
     QString formatNonAlignedDimensionInput(Mantid::Geometry::IMDDimension_const_sptr)
     {
-      //Deliberately return an empty string here, because it's not obveious how the basis vectors could be automatically formed.
+      //Deliberately return an empty string here, because it's not obvious how the basis vectors could be automatically formed.
       return QString("");
     }
 
@@ -320,7 +320,7 @@ namespace MantidQt
     {
       QSettings settings;
       settings.beginGroup("Mantid/SlicingAlgorithm");
-      settings.setValue("AlwaysCalculateExtents", (ui.ck_calculate->isChecked() ? 1 : 0));
+      settings.setValue("AlwaysCalculateExtents", (this->doAutoFillDimensions()? 1 : 0));
       settings.endGroup();
     }
 
@@ -344,7 +344,7 @@ namespace MantidQt
     /// Event handler for the workspace changed event.
     void SlicingAlgorithmDialog::onWorkspaceChanged()
     {
-      buildDimensionInputs(ui.ck_calculate->isChecked());
+      buildDimensionInputs(this->doAutoFillDimensions());
     }
 
     /** 
@@ -353,7 +353,7 @@ namespace MantidQt
     */
     void SlicingAlgorithmDialog::onAxisAlignedChanged(bool)
     {
-      buildDimensionInputs(ui.ck_calculate->isChecked());
+      buildDimensionInputs(this->doAutoFillDimensions());
     }
 
     /**
@@ -375,9 +375,9 @@ namespace MantidQt
       buildDimensionInputs(true);
     }
 
-    void SlicingAlgorithmDialog::onCalculateChanged(bool checked)
+    void SlicingAlgorithmDialog::onCalculateChanged(bool)
     {
-      if(checked)
+      if(ui.ck_axis_aligned->isChecked())
         buildDimensionInputs(true);
     }
 
@@ -406,6 +406,15 @@ namespace MantidQt
       ui.lbl_resursion_depth->setVisible(isSliceMD);
       ui.txt_resursion_depth->setVisible(isSliceMD);
       ui.ck_parallel->setVisible(!isSliceMD);
+    }
+
+    /**
+     * Do auto fill dimension inputs on changes.
+     * @return True if do auto repair.
+     */
+    bool SlicingAlgorithmDialog::doAutoFillDimensions() const
+    {
+      return ui.ck_calculate->isChecked();
     }
 
     /*---------------------------------------------------------------------------------------------

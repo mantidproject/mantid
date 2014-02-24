@@ -107,6 +107,9 @@ private:
   /// Save settings
   void saveSettings();
 
+  /// Do auto fill dimension inputs on changes.
+  bool doAutoFillDimensions() const;
+
 };
 
 /*
