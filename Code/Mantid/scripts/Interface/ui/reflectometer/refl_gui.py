@@ -62,12 +62,14 @@ class ReflGui(refl_window.Ui_windowRefl):
     def on_actionSave_Workspaces_triggered(self):
         self.saveWorkspaces()
     def actionClose_Refl_Gui_triggered(self):
-        self.showHelp()
+        self.windowRefl.close()
     def on_actionMantid_Help_triggered(self):
         self.showHelp()
-    def on_tableMain_modified(self):
+    def on_tableMain_modified(self, row, column):
         if not self.loading:
             self.windowRefl.modFlag = True
+            plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
+            self.resetPlotButton(plotbutton)
     def on_plotButton_clicked(self):
         plotbutton = self.windowRefl.sender()
         self.plot(plotbutton)
@@ -104,30 +106,55 @@ class ReflGui(refl_window.Ui_windowRefl):
         '''
         Setup polarisation options with default assigned
         '''
+        self.windowRefl = windowRefl
         self.polarisation_options = {'None' : PolarisationCorrection.NONE, '1-PNR' : PolarisationCorrection.PNR, '2-PA' : PolarisationCorrection.PA }
         self.comboPolarCorrect.clear()
         self.comboPolarCorrect.addItems(self.polarisation_options.keys())
         self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None'))
         self.current_polarisation_method = self.polarisation_options['None']
         self.comboPolarCorrect.setEnabled(self.current_instrument in self.polarisation_instruments)
-        
         self.labelStatus = QtGui.QLabel("Ready")
         self.statusMain.addWidget(self.labelStatus)
         self.initTable()
         self.populateList()
-        self.windowRefl = windowRefl
         self.connectSlots()
         
+    def resetTable(self):
+        #switches from current to true, to false to make sure stateChanged fires
+        self.checkTickAll.setCheckState(2)
+        self.checkTickAll.setCheckState(0)
+        for row in range(self.tableMain.rowCount()):
+            plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
+            self.resetPlotButton(plotbutton)
+            #self.tableMain.cellWidget(row, 17).children()[1].setCheckState(False)
+                
+    def resetPlotButton(self, plotbutton):
+        plotbutton.setDisabled(True)
+        plotbutton.setProperty('runno', None)
+        plotbutton.setProperty('overlapLow', None)
+        plotbutton.setProperty('overlapHigh', None)
+        plotbutton.setProperty('wksp', None)
+            
     def initTable(self):
-
+        #first check if the table has been changed before clearing it
+        if self.windowRefl.modFlag:
+            msgBox = QtGui.QMessageBox()
+            msgBox.setText("The table has been modified. Do you want to save your changes?")
+            msgBox.setStandardButtons(QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel)
+            msgBox.setIcon(QtGui.QMessageBox.Question)
+            msgBox.setDefaultButton(QtGui.QMessageBox.Save)
+            msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
+            ret = msgBox.exec_()
+            if ret == QtGui.QMessageBox.Save:
+                self.save()
+            elif ret == QtGui.QMessageBox.Cancel:
+                return
+            
         self.currentTable = None
         self.accMethod = None
-
-        self.tableMain.resizeColumnsToContents()
         
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
-                
                 if (column == 0) or (column == 5) or (column == 10):
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
@@ -153,9 +180,8 @@ class ReflGui(refl_window.Ui_windowRefl):
                     self.tableMain.setCellWidget(row, 17, item)
                 elif (column == 18):
                     button = QtGui.QPushButton('Plot')
-                    button.setDisabled(True)
                     button.setProperty("row", row)
-                    button.setProperty("workspacePlot", [])
+                    self.resetPlotButton(button)
                     button.setToolTip('Plot the workspaces produced by processing this row.')
                     button.clicked.connect(self.on_plotButton_clicked)
                     item = QtGui.QWidget()
@@ -171,6 +197,8 @@ class ReflGui(refl_window.Ui_windowRefl):
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
                     self.tableMain.setItem(row, column, item)
+        self.tableMain.resizeColumnsToContents()
+        self.windowRefl.modFlag = False
     def connectSlots(self):
         self.checkTickAll.stateChanged.connect(self.on_checkTickAll_stateChanged)
         self.comboInstrument.activated.connect(self.on_comboInstrument_activated)
@@ -194,7 +222,6 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.actionProcess.triggered.connect(self.on_buttonProcess_clicked)
         self.actionTransfer.triggered.connect(self.on_buttonTransfer_clicked)
         self.tableMain.cellChanged.connect(self.on_tableMain_modified)
-        
     def populateList(self):
         # Clear existing
         self.listMain.clear()
@@ -247,7 +274,6 @@ class ReflGui(refl_window.Ui_windowRefl):
                         item.setText(txt)
                         self.tableMain.setItem(row, self.tableMain.column(cell), item)
                         row = row + 1
-
                         filled = filled + 1
                 if not filled:
                     QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"No target cells to autofill. Rows to be filled should contain a run number in their first cell, and start from directly below the selected line.")
@@ -265,8 +291,6 @@ class ReflGui(refl_window.Ui_windowRefl):
         else:
             todisplay = groupGet(mtd[candidate], "samp", "run_number")
         return todisplay
-
-
     def transfer(self):
         col = 0
         row = 0
@@ -401,35 +425,43 @@ class ReflGui(refl_window.Ui_windowRefl):
                             overlapHigh.append(qmax)
                         if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
                             wksp[i] = first_wq.name()
-                plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
-                plotbutton.setProperty('runno',runno)
-                plotbutton.setProperty('overlapLow', overlapLow)
-                plotbutton.setProperty('overlapHigh', overlapHigh)
-                plotbutton.setProperty('wksp', wksp)
-                plotbutton.setEnabled(True)
+                    plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
+                    plotbutton.setProperty('runno',runno)
+                    plotbutton.setProperty('overlapLow', overlapLow)
+                    plotbutton.setProperty('overlapHigh', overlapHigh)
+                    plotbutton.setProperty('wksp', wksp)
+                    plotbutton.setEnabled(True)
         self.accMethod = None
     def plot(self, plotbutton):
         if not isinstance(plotbutton, QtGui.QPushButton):
             print "problem with plotbutton"
             return
         import unicodedata
-        runno_u = plotbutton.property('runno')
-        runno = []
-        for uni in runno_u:
-            runno.append(unicodedata.normalize('NFKD', uni).encode('ascii','ignore'))
-        wksp_u = plotbutton.property('wksp')
-        wksp = []
-        for uni in wksp_u:
-            wksp.append(unicodedata.normalize('NFKD', uni).encode('ascii','ignore'))
-        overlapLow = plotbutton.property('overlapLow')
-        overlapHigh = plotbutton.property('overlapHigh')
-        row = plotbutton.property('row')
-        g = ['g1', 'g2', 'g3']
-        wkspBinned = []
-        w1 = getWorkspace(wksp[0])
-        w2 = getWorkspace(wksp[len(wksp) - 1])
-        print "w2", type(w2)
-        dqq = float(self.tableMain.item(row, 15).text())
+        
+        #make sure the required data can be retrieved properly
+        try:
+            runno_u = plotbutton.property('runno')
+            runno = []
+            for uni in runno_u:
+                runno.append(unicodedata.normalize('NFKD', uni).encode('ascii','ignore'))
+            wksp_u = plotbutton.property('wksp')
+            wksp = []
+            for uni in wksp_u:
+                wksp.append(unicodedata.normalize('NFKD', uni).encode('ascii','ignore'))
+            overlapLow = plotbutton.property('overlapLow')
+            overlapHigh = plotbutton.property('overlapHigh')
+            row = plotbutton.property('row')
+            g = ['g1', 'g2', 'g3']
+            wkspBinned = []
+            w1 = getWorkspace(wksp[0])
+            w2 = getWorkspace(wksp[len(wksp) - 1])
+            print "w2", type(w2)
+            dqq = float(self.tableMain.item(row, 15).text())
+        except:
+            print "Unable to plot row, required data couldn't be retrieved"
+            resetPlotButton(plotbutton)
+            return
+        
         for i in range(len(runno)):
             ws_name_binned = wksp[i] + '_binned'
             ws = getWorkspace(wksp[i])
@@ -573,6 +605,22 @@ class ReflGui(refl_window.Ui_windowRefl):
         loadDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
         if loadDialog.exec_():
             try:
+                #before loading make sure you give them a chance to save
+                if self.windowRefl.modFlag:
+                    msgBox = QtGui.QMessageBox()
+                    msgBox.setText("The table has been modified. Do you want to save your changes?")
+                    msgBox.setStandardButtons(QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel)
+                    msgBox.setIcon(QtGui.QMessageBox.Question)
+                    msgBox.setDefaultButton(QtGui.QMessageBox.Save)
+                    msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
+                    ret = msgBox.exec_()
+                    if ret == QtGui.QMessageBox.Save:
+                        self.save()
+                    elif ret == QtGui.QMessageBox.Cancel:
+                        #if they hit cancel abort the load
+                        self.loading = False
+                        return
+                self.resetTable()
                 filename = loadDialog.selectedFiles()[0]
                 self.current_table = filename
                 reader = csv.reader(open(filename, "rb"))
@@ -590,9 +638,22 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.windowRefl.modFlag = False
     def reloadTable(self):
         self.loading = True
+        if self.windowRefl.modFlag:
+            msgBox = QtGui.QMessageBox()
+            msgBox.setText("The table has been modified. Are you sure you want to reload the table and lose your changes?")
+            msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+            msgBox.setIcon(QtGui.QMessageBox.Question)
+            msgBox.setDefaultButton(QtGui.QMessageBox.Yes)
+            msgBox.setEscapeButton(QtGui.QMessageBox.No)
+            ret = msgBox.exec_()
+            if ret == QtGui.QMessageBox.No:
+                #if they hit No abort the reload
+                self.loading = False
+                return
         filename = self.current_table
         if filename:
             try:
+                self.resetTable()
                 reader = csv.reader(open(filename, "rb"))
                 row = 0
                 for line in reader:
