@@ -1620,13 +1620,6 @@ p, li { white-space: pre-wrap; }
                  </widget>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="ckCreateInfoTable">
-                  <property name="text">
-                   <string>Create Info Table</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_23">
                   <item>
                    <widget class="QLabel" name="ind_lbPlotOutput">
