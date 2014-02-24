@@ -286,12 +286,10 @@ QStringList MuonAnalysisResultTableTab::getSequentialFitWorkspaces(const QString
 
   for (auto it = wsNames.begin(); it != wsNames.end(); it++)
   {
-    if( !boost::ends_with(*it, WORKSPACE_POSTFIX) )
-      continue;
+    if( ! isFittedWs(*it) )
+      continue; // Doesn't pass basic checks
 
-    std::string baseName = (*it).substr(0, (*it).size() - WORKSPACE_POSTFIX.size());
-
-    workspaces << QString::fromStdString(baseName);
+    workspaces << QString::fromStdString( wsBaseName(*it) );
   }
 
   return workspaces;
@@ -309,21 +307,43 @@ QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces()
 
   for(auto it = allWorkspaces.begin(); it != allWorkspaces.end(); it++)
   {
-    // Should end with WORKSPACE_POSTFIX
-    if ( !boost::ends_with(*it, WORKSPACE_POSTFIX) )
-      continue;
+    if ( ! isFittedWs(*it) )
+      continue; // Doesn't pass basic checks
 
     // Ignore sequential fit results
     if ( boost::starts_with(*it, MuonSequentialFitDialog::SEQUENTIAL_PREFIX) )
       continue;
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(*it);
+    workspaces << QString::fromStdString( wsBaseName(*it) );
+  }
 
-    // Should have the right type
-    if ( ! ws )
-      continue;
+  return workspaces;
+}
 
-    // Should have start/end time set
+/**
+ * Returns name of the fitted workspace with WORKSPACE_POSTFIX removed.
+ * @param wsName :: Name of the fitted workspace. Shoud end with WORKSPACE_POSTFIX.
+ * @return wsName without WORKSPACE_POSTFIX
+ */
+std::string MuonAnalysisResultTableTab::wsBaseName(const std::string& wsName)
+{
+  return wsName.substr(0, wsName.size() - WORKSPACE_POSTFIX.size());
+}
+
+/**
+ * Does a few basic checks for whether the workspace is a fitted workspace.
+ * @param wsName :: Name of the workspace to check for
+ * @return True if seems to be fitted ws, false if doesn't
+ */
+bool MuonAnalysisResultTableTab::isFittedWs(const std::string& wsName)
+{
+  if ( ! boost::ends_with(wsName, WORKSPACE_POSTFIX) )
+  {
+    return false; // Doesn't end with WORKSPACE_POSTFIX
+  }
+
+  if ( auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName) )
+  {
     try
     {
       ws->run().startTime();
@@ -331,19 +351,22 @@ QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces()
     }
     catch(...)
     {
-      continue;
+      return false; // Doesn't have start/end time set
     }
-
-    std::string baseName = (*it).substr(0, (*it).size() - WORKSPACE_POSTFIX.size());
-
-    // Should have corresponding parameters table
-    if ( ! AnalysisDataService::Instance().doesExist(baseName + PARAMS_POSTFIX) )
-      continue;
-
-    workspaces << QString::fromStdString(baseName);
+  }
+  else
+  {
+    return false; // Incorrect type / not exists
   }
 
-  return workspaces;
+  std::string baseName = wsBaseName(wsName);
+
+  if ( ! AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(baseName + PARAMS_POSTFIX) )
+  {
+    return false; // Doesn't have corresponding _Parameters table
+  }
+
+  return true; // All OK
 }
 
 /**
@@ -692,7 +715,6 @@ QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList&
   }
   return colors;
 }
-
 
 /**
 * Creates the table using the information selected by the user in the tables
