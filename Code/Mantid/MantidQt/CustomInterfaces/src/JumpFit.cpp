@@ -214,7 +214,7 @@ namespace MantidQt
 		/**
 		 * Plots the loaded file to the miniplot when the selected spectrum changes
 		 * 
-		 * @param index :: The name spectrum index to plot
+		 * @param text :: The name spectrum index to plot
 		 */
 		void JumpFit::handleWidthChange(const QString& text)
 		{

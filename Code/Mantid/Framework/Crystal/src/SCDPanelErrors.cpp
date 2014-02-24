@@ -701,8 +701,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
   if (!m_unitCell)
     throw runtime_error("Cannot evaluate function without setting the lattice constants");
 
-  size_t StartPos = 2;
-
   size_t L0param = parameterIndex("l0");
   size_t T0param = parameterIndex("t0");
 
@@ -900,7 +898,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
     Unrot_dQ[2].clear();
 
     //-------- xyz offset parameters ----------------------
-    StartPos = parameterIndex("f" + boost::lexical_cast<string>(gr) + "_Xoffset");
+    size_t StartPos = parameterIndex("f" + boost::lexical_cast<string>(gr) + "_Xoffset");
 
     for (size_t param = StartPos; param <= StartPos + (size_t) 2; ++param)
 
@@ -1323,7 +1321,7 @@ DataObjects::Workspace2D_sptr SCDPanelErrors::calcWorkspace(DataObjects::PeaksWo
     {
       API::IPeak& peak = pwks->getPeak( (int)j);
       if (peak.getBankName().compare(bankNames[k]) == 0)
-        if (peak.getH() != 0 || peak.getK() != 0 || peak.getK() != 0)
+        if (peak.getH() != 0 || peak.getK() != 0 || peak.getL() != 0)
           if (peak.getH() - floor(peak.getH()) < tolerance || floor(peak.getH() + 1) - peak.getH()
               < tolerance)
             if (peak.getK() - floor(peak.getK()) < tolerance || floor(peak.getK() + 1) - peak.getK()
