@@ -285,6 +285,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 # --------------------------------------------------------------------------------------------------------    
      # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
     if not   masks_done:
+        print '########### Run diagnose for sample run ##############################'
         masking = Reducer.diagnose(wb_run,sample = mask_run,
                                     second_white = None,print_results=True)
         header = "Diag Processed workspace with {0:d} spectra and masked {1:d} bad spectra"
@@ -296,10 +297,10 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
                 if Reducer.use_sam_msk_on_monovan == True:
                     Reducer.log('  Applying sample run mask to mono van')
                 else:
-                    print '########### Run diagnose for monochromatic vanadium run ##############'
-                    masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
-                                         second_white = None,rint_results=True)
                     if not Reducer.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better soulution for that. 
+                        print '########### Run diagnose for monochromatic vanadium run ##############'
+                        masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
+                                         second_white = None,rint_results=True)
                         masking +=  masking2
                         DeleteWorkspace(masking2)
     
@@ -325,6 +326,11 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     # calculate absolute units integral and apply it to the workspace
     if monovan_run != None or Reducer.mono_correction_factor != None :
         deltaE_wkspace_sample = apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_guess,wb_run)
+        # Hack for multirep
+        #if isinstance(monovan_run,int):
+        #    filename = common.find_file(monovan_run)
+        #    output_name = common.create_dataname(filename);
+       #     DeleteWorkspace(output_name);
 
 
     results_name = deltaE_wkspace_sample.name();
@@ -340,7 +346,9 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
     if mtd.doesExist('_wksp.spe-white')==True:
         DeleteWorkspace(Workspace='_wksp.spe-white')
-
+    # Hack for multirep mode?
+    if mtd.doesExist('hard_mask_ws') == True:
+        DeleteWorkspace(Workspace='hard_mask_ws')
     
     return deltaE_wkspace_sample
 
