@@ -85,9 +85,9 @@ namespace Mantid
      * @param fileID :: The id of the file to search for.
      * @return The location of the datafile stored on the archives.
      */
-    const std::string ICat3Catalog::getFileLocation(const long long &fileid)
+    const std::string ICat3Catalog::getFileLocation(const long long &fileID)
     {
-      return m_helper->getlocationString(fileid);
+      return m_helper->getlocationString(fileID);
     }
 
     /**
@@ -95,9 +95,9 @@ namespace Mantid
      * @param fileID :: The id of the file to search for.
      * @return A URL to download the datafile from.
      */
-    const std::string ICat3Catalog::getDownloadURL(const long long &fileid)
+    const std::string ICat3Catalog::getDownloadURL(const long long &fileID)
     {
-      return m_helper->getdownloadURL(fileid);
+      return m_helper->getdownloadURL(fileID);
     }
 
     /**
