@@ -64,7 +64,7 @@ class ReflGui(refl_window.Ui_windowRefl):
     def on_actionSave_Workspaces_triggered(self):
         self.saveWorkspaces()
     def actionClose_Refl_Gui_triggered(self):
-        self.showHelp()
+        self.windowRefl.close()
     def on_actionMantid_Help_triggered(self):
         self.showHelp()
     def on_tableMain_modified(self):
@@ -89,6 +89,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         '''
         Setup instrument options with defaults assigned.
         '''
+        self.windowRefl = windowRefl
         self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF']
         self.polarisation_instruments = ['CRISP', 'POLREF'] 
         self.comboInstrument.addItems(self.instrument_list)
@@ -114,19 +115,29 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.statusMain.addWidget(self.labelStatus)
         self.initTable()
         self.populateList()
-        self.windowRefl = windowRefl
         self.connectSlots()
-        
+    
+    def savecheck(self):
+        msgBox = QtGui.QMessageBox()
+        msgBox.setText("The table has been modified. Do you want to save your changes?")
+        msgBox.setStandardButtons(QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel)
+        msgBox.setIcon(QtGui.QMessageBox.Question)
+        msgBox.setDefaultButton(QtGui.QMessageBox.Save)
+        msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
+        ret = msgBox.exec_()
+        if ret == QtGui.QMessageBox.Save:
+            self.save()
+        return ret
+    
     def initTable(self):
-
+        #first check if the table has been changed before clearing it
+        if self.windowRefl.modFlag:
+            if self.savecheck() == QtGui.QMessageBox.Cancel:
+                return
         self.currentTable = None
         self.accMethod = None
-
-        self.tableMain.resizeColumnsToContents()
-        
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
-                
                 if (column == 0) or (column == 5) or (column == 10):
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
@@ -154,6 +165,9 @@ class ReflGui(refl_window.Ui_windowRefl):
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
                     self.tableMain.setItem(row, column, item)
+        self.tableMain.resizeColumnsToContents()
+        self.windowRefl.modFlag = False
+        
     def connectSlots(self):
         self.checkTickAll.stateChanged.connect(self.on_checkTickAll_stateChanged)
         self.comboInstrument.activated.connect(self.on_comboInstrument_activated)
@@ -248,7 +262,6 @@ class ReflGui(refl_window.Ui_windowRefl):
         else:
             todisplay = groupGet(mtd[candidate], "samp", "run_number")
         return todisplay
-
 
     def transfer(self):
         col = 0
@@ -541,6 +554,12 @@ class ReflGui(refl_window.Ui_windowRefl):
         loadDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
         if loadDialog.exec_():
             try:
+                #before loading make sure you give them a chance to save
+                if self.windowRefl.modFlag:
+                    if self.savecheck() == QtGui.QMessageBox.Cancel:
+                        #if they hit cancel abort the load
+                        self.loading = False
+                        return
                 filename = loadDialog.selectedFiles()[0]
                 self.current_table = filename
                 reader = csv.reader(open(filename, "rb"))
@@ -558,6 +577,18 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.windowRefl.modFlag = False
     def reloadTable(self):
         self.loading = True
+        if self.windowRefl.modFlag:
+            msgBox = QtGui.QMessageBox()
+            msgBox.setText("The table has been modified. Are you sure you want to reload the table and lose your changes?")
+            msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+            msgBox.setIcon(QtGui.QMessageBox.Question)
+            msgBox.setDefaultButton(QtGui.QMessageBox.Yes)
+            msgBox.setEscapeButton(QtGui.QMessageBox.No)
+            ret = msgBox.exec_()
+            if ret == QtGui.QMessageBox.No:
+                #if they hit No abort the reload
+                self.loading = False
+                return
         filename = self.current_table
         if filename:
             try:
