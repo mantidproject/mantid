@@ -3220,8 +3220,8 @@ Workspace_sptr MuonAnalysis::groupWorkspace(Workspace_sptr ws, Workspace_sptr gr
 
 /**
  * Groups detectors in the workspace
- * @param ws :: ADS name of the workspace to group
- * @param grouping :: ADS name of the grouping table to use
+ * @param wsName :: ADS name of the workspace to group
+ * @param groupingName :: ADS name of the grouping table to use
  * @return Grouped workspace
  */
 Workspace_sptr MuonAnalysis::groupWorkspace(const std::string& wsName, const std::string& groupingName) const
