@@ -5,9 +5,7 @@
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
-#include "MantidPythonInterface/kernel/PropertyWithValue.h"
+#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
@@ -22,13 +20,8 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
-using Mantid::API::ITableWorkspace;
-using Mantid::API::ITableWorkspace_sptr;
-using Mantid::API::TableRow;
-using Mantid::API::Column_sptr;
-using Mantid::API::Column_const_sptr;
-using Mantid::API::Workspace;
-using Mantid::Kernel::DataItem_sptr;
+using namespace Mantid::API;
+using Mantid::PythonInterface::Registry::DataItemInterface;
 using namespace boost::python;
 
 namespace
@@ -348,7 +341,6 @@ namespace
 
 void export_ITableWorkspace()
 {
-  REGISTER_SHARED_PTR_TO_PYTHON(ITableWorkspace);
   std::string iTableWorkspace_docstring = "Most of the information from a table workspace is returned ";
   iTableWorkspace_docstring += "as native copies. All of the column accessors return lists while the ";
   iTableWorkspace_docstring += "rows return dicts. This object does support the idom 'for row in ";
@@ -396,6 +388,10 @@ void export_ITableWorkspace()
          "number then it is interpreted as a row otherwise it is interpreted as a column name")
       ;
 
-  REGISTER_SINGLEVALUE_HANDLER(ITableWorkspace_sptr);
+  //-------------------------------------------------------------------------------------------------
+
+  DataItemInterface<ITableWorkspace>()
+    .castFromID("TableWorkspace")
+  ;
 }
 

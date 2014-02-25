@@ -1,13 +1,12 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/overloads.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::ExperimentInfo;
-using Mantid::API::ExperimentInfo_sptr;
 using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
 using namespace boost::python;
 
@@ -16,7 +15,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrumentFilename_Overload, ExperimentInfo::
 
 void export_ExperimentInfo()
 {
-  REGISTER_SHARED_PTR_TO_PYTHON(ExperimentInfo);
+  register_ptr_to_python<boost::shared_ptr<ExperimentInfo>>();
 
   class_<ExperimentInfo, boost::noncopyable>("ExperimentInfo", no_init)
           .def("getInstrument", &ExperimentInfo::getInstrument, return_value_policy<RemoveConstSharedPtr>(),

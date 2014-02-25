@@ -262,6 +262,42 @@ public:
     TS_ASSERT( ! alg.isExecuted() );
   }
 
+  void test_autoGrouping()
+  {
+    ScopedWorkspace output;
+
+    try
+    {
+      MuonLoad alg;
+      alg.setRethrows(true);
+      alg.initialize();
+      alg.setPropertyValue("Filename", "emu00006473.nxs");
+      alg.setProperty("OutputType", "GroupCounts");
+      alg.setProperty("GroupIndex", 0);
+      alg.setPropertyValue("OutputWorkspace", output.name());
+      alg.execute();
+    }
+    catch(std::exception& e)
+    {
+      TS_FAIL(e.what());
+      return;
+    }
+
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( output.retrieve() );
+
+    TS_ASSERT(ws);
+    if ( ! ws )
+      return; // Nothing to check
+
+    TS_ASSERT_EQUALS( ws->getNumberHistograms(), 1 );
+
+    TS_ASSERT_EQUALS( ws->readY(0)[0], 461 );
+    TS_ASSERT_EQUALS( ws->readY(0)[1000], 192 );
+    TS_ASSERT_EQUALS( ws->readY(0)[1998], 1 );
+  }
+
+private:
+
   TableWorkspace_sptr createGroupingTable(const std::vector<int>& group1, const std::vector<int>& group2)
   {
     auto t = boost::make_shared<TableWorkspace>();

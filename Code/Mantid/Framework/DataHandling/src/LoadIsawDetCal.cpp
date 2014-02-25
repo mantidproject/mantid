@@ -31,6 +31,7 @@ Moves the detectors in an instrument using the origin and 2 vectors of the rotat
 #include "MantidKernel/V3D.h"
 #include <Poco/File.h>
 #include <sstream>
+#include <fstream>
 #include <numeric>
 #include <cmath>
 #include <iomanip>

@@ -232,6 +232,9 @@ private slots:
   /// Update front
   void updateFront();
 
+  /// Opens the managed directory dialog for easier access for the user.
+  void openDirectoryDialog();
+
 private:
  
   // Types of entities we are dealing with
@@ -496,6 +499,12 @@ private:
   /// Parses grouping information from the UI table.
   ITableWorkspace_sptr parseGrouping();  
 
+  /// When no data loaded set various buttons etc to inactive
+  void noDataAvailable();
+
+  /// When data loaded set various buttons etc to active
+  void nowDataAvailable();
+
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
   /// handles fit data work
@@ -513,9 +522,6 @@ private:
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
-
-  /// Creates new double validator which accepts numbers in standard notation only.
-  static QDoubleValidator* createDoubleValidator(QObject* parent);
 
   /// Returns a first period MatrixWorkspace in a run workspace
   /// TODO: Move to MuonAnalysisHelper

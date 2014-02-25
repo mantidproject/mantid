@@ -790,7 +790,7 @@ def furyfitPlotSeq(ws, plot):
         param_names = ['Intensity', 'Tau', 'Beta']
     plotParameters(ws, param_names)
 
-def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False): 
+def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False, Save=False, Plot='None', Verbose=False): 
     StartTime('FuryFit')
     
     workdir = config['defaultsave.directory']
@@ -821,7 +821,7 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False):
     wsnames = [fitWS, outNm+'_Result']
     params = [startx, endx, fitType]
     for ws in wsnames:
-        furyAddSampleLogs(inputWS, ws, params)
+        furyAddSampleLogs(inputWS, ws, params, intensities_constrained=intensities_constrained)
 
         if Save:
             #save workspace to default directory
@@ -831,6 +831,7 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False):
             if Verbose:
                 logger.notice(ws + ' output to file : '+fpath)
 
+    print Plot
     if ( Plot != 'None' ):
         furyfitPlotSeq(fitWS, Plot)
 
@@ -839,13 +840,14 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False):
     return mtd[fitWS]
 
 #Copy logs from sample and add some addtional ones
-def furyAddSampleLogs(inputWs, ws, params, intensities_constrained=False):
+def furyAddSampleLogs(inputWs, ws, params, intensities_constrained=False, beta_constrained=False):
     startx, endx, fitType = params
     CopyLogs(InputWorkspace=inputWs, OutputWorkspace=ws)
     AddSampleLog(Workspace=ws, LogName="start_x", LogType="Number", LogText=str(startx))
     AddSampleLog(Workspace=ws, LogName="end_x", LogType="Number", LogText=str(endx))
     AddSampleLog(Workspace=ws, LogName="fit_type", LogType="String", LogText=fitType)
     AddSampleLog(Workspace=ws, LogName="intensities_constrained", LogType="String", LogText=str(intensities_constrained))
+    AddSampleLog(Workspace=ws, LogName="beta_constrained", LogType="String", LogText=str(beta_constrained))
 
 def furyfitMultParsToWS(Table, Data):
 #   Q = createQaxis(Data)
@@ -944,7 +946,7 @@ def getFuryMultResult(inputWS, outNm, function, Verbose):
             group += ',' + fout
     GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS[:-1])
 
-def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=False):
+def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=False, Save=False, Plot='None', Verbose=False):
     StartTime('FuryFit Mult')
     workdir = config['defaultsave.directory']
     option = ftype[:-2]
@@ -974,8 +976,8 @@ def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=Fals
     getFuryMultResult(inputWS, outNm, function, Verbose)
 
     params = [startx, endx, ftype]
-    furyAddSampleLogs(inputWS, outWS, params, True)
-    furyAddSampleLogs(inputWS, result_workspace, params, True)
+    furyAddSampleLogs(inputWS, outWS, params, intensities_constrained=intensities_constrained, beta_constrained=True)
+    furyAddSampleLogs(inputWS, result_workspace, params, intensities_constrained=intensities_constrained, beta_constrained=True)
 
     if Save:
         opath = os.path.join(workdir, outWS+'.nxs')					# path name for nxs file

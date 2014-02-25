@@ -92,6 +92,9 @@ namespace API
 
     void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
 
+    size_t getNumberTransformsToOriginal() const;
+    size_t getNumberTransformsFromOriginal() const;
+
     // --------------------------------------------------------------------------------------------
     ///@return the vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace
     Mantid::Kernel::VMD & getOrigin()

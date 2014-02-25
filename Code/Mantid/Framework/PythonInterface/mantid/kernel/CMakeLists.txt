@@ -81,21 +81,17 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Environment/WrapperHelpers.h
   ${HEADER_DIR}/kernel/Policies/MatrixToNumpy.h
   ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
-  ${HEADER_DIR}/kernel/Policies/DowncastReturnedValue.h
   ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
-  ${HEADER_DIR}/kernel/Registry/RegisterSingleValueHandler.h
   ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h
-  ${HEADER_DIR}/kernel/Registry/SingleValueTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/TypeRegistry.h  
   ${HEADER_DIR}/kernel/Registry/DowncastRegistry.h
   ${HEADER_DIR}/kernel/IsNone.h
-  ${HEADER_DIR}/kernel/PropertyWithValue.h
+  ${HEADER_DIR}/kernel/PropertyWithValueExporter.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
-  ${HEADER_DIR}/kernel/SharedPtrToPythonMacro.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h
-  ${HEADER_DIR}/kernel/TypedValidatorExportMacro.h
+  ${HEADER_DIR}/kernel/TypedValidatorExporter.h
 )
 
 set ( PY_FILES 

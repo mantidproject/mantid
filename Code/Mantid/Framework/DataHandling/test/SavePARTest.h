@@ -2,7 +2,7 @@
 #define SAVEPARTEST_H_
 
 #include <cxxtest/TestSuite.h>
-
+#include <fstream>
 
 #include "MantidDataHandling/SavePAR.h"
 // to generate test workspaces

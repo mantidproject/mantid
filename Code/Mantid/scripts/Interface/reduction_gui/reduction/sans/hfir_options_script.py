@@ -111,8 +111,7 @@ class ReductionOptions(BaseScriptElement):
             script += "SetDirectBeamAbsoluteScale(\"%s\", attenuator_trans=%g%s)\n" % \
              (self.scaling_direct_file, self.scaling_att_trans, scaling_params)
         else:
-            if self.scaling_factor != 1:
-                script += "SetAbsoluteScale(%g)\n" % self.scaling_factor
+            script += "SetAbsoluteScale(%g)\n" % self.scaling_factor
                 
         # Q binning
         script += "AzimuthalAverage(n_bins=%g, n_subpix=%g, log_binning=%s)\n" % (self.n_q_bins, self.n_sub_pix, str(self.log_binning))        

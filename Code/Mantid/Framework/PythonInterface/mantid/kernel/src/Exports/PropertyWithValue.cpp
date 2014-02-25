@@ -1,25 +1,38 @@
-#include "MantidPythonInterface/kernel/PropertyWithValue.h"
+#include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
+
+using Mantid::PythonInterface::PropertyWithValueExporter;
 
 void export_BasicPropertyWithValueTypes()
 {
-  #define EXPORT_BASIC_INTEGER_TYPE(ctype, export_name)\
-    EXPORT_PROP_W_VALUE(ctype, export_name);\
-    EXPORT_PROP_W_VALUE(std::vector<ctype>, export_name);\
-    EXPORT_PROP_W_VALUE(unsigned ctype, unsigned ## _export_name);\
-    EXPORT_PROP_W_VALUE(std::vector<unsigned ctype>, vector_ ## export_name);
+  // cut down copy-and-paste code
+#define EXPORT_PROP(CType, ExportName) \
+  PropertyWithValueExporter<CType>::define(ExportName);
 
-  #define EXPORT_BASIC_TYPE(ctype, export_name)\
-    EXPORT_PROP_W_VALUE(ctype, export_name);\
-    EXPORT_PROP_W_VALUE(std::vector<ctype>, vector_ ## export_name);
+  //ints & vectors
+  EXPORT_PROP(int, "IntPropertyWithValue");
+  EXPORT_PROP(std::vector<int>, "VectorIntPropertyWithValue");
+  EXPORT_PROP(unsigned int, "UIntPropertyWithValue");
+  EXPORT_PROP(std::vector<unsigned int>, "VectorUIntPropertyWithValue");
+  // longs & vectors
+  EXPORT_PROP(long, "LongPropertyWithValue");
+  EXPORT_PROP(std::vector<long>, "VectorLongPropertyWithValue");
+  EXPORT_PROP(unsigned long, "ULongPropertyWithValue");
+  EXPORT_PROP(std::vector<unsigned long>, "VectorULongPropertyWithValue");
+  // long long long longs & vectors
+  EXPORT_PROP(long long, "LongLongPropertyWithValue");
+  EXPORT_PROP(std::vector<long long>, "VectorLongLongPropertyWithValue");
+  EXPORT_PROP(unsigned long long, "ULongLongPropertyWithValue");
+  EXPORT_PROP(std::vector<unsigned long long>, "VectorULongLongPropertyWithValue");
+  // double
+  EXPORT_PROP(double, "FloatPropertyWithValue");
+  EXPORT_PROP(std::vector<double>, "VectorFloatPropertyWithValue");
+  // boolean
+  EXPORT_PROP(bool, "BoolPropertyWithValue");
+  EXPORT_PROP(std::vector<bool>, "VectorBoolPropertyWithValue");
+  // std::string
+  EXPORT_PROP(std::string, "StringPropertyWithValue");
+  EXPORT_PROP(std::vector<std::string>, "VectorStringPropertyWithValue");
 
-  // -- PropertyWithValueTypes
-  EXPORT_BASIC_INTEGER_TYPE(int, int);
-  EXPORT_BASIC_INTEGER_TYPE(long, long);
-  EXPORT_BASIC_INTEGER_TYPE(long long, long_long);
 
-  EXPORT_BASIC_TYPE(double, double);
-  EXPORT_BASIC_TYPE(bool, bool);
-  EXPORT_BASIC_TYPE(std::string, string);
+#undef EXPORT_PROP
 }
-
-
