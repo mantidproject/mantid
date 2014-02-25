@@ -55,7 +55,7 @@ class SofQWMoments(PythonAlgorithm):
 		x = np.asarray(mtd[sample_workspace].readX(0))
 		CheckElimits(erange,x)
 
-		samWS = '__moments_cropped_ws'
+		samWS = '__temp_sqw_moments_cropped'
 		CropWorkspace(InputWorkspace=sample_workspace, OutputWorkspace=samWS, XMin=erange[0], XMax=erange[1])
 
 		if Verbose:
@@ -67,11 +67,9 @@ class SofQWMoments(PythonAlgorithm):
 		        logger.notice('y(q,w) scaled by %f' % factor)
 
 		#calculate delta x
+		ConvertToPointData(InputWorkspace=samWS, OutputWorkspace=samWS)
 		x = np.asarray(mtd[samWS].readX(0))
-		dx = x[1:] - x[:-1]
-
-		delta_x = CreateWorkspace(OutputWorkspace="__delta_x", DataX=x, DataY=dx, UnitX="DeltaE")
-		x_workspace = CreateWorkspace(OutputWorkspace="__moments_x", DataX=x, DataY=x[:-1], UnitX="DeltaE")
+		x_workspace = CreateWorkspace(OutputWorkspace="__temp_sqw_moments_x", DataX=x, DataY=x, UnitX="DeltaE")
 
 		#calculate moments
 		m0 = output_workspace + '_M0'
@@ -80,29 +78,26 @@ class SofQWMoments(PythonAlgorithm):
 		m3 = output_workspace + '_M3'
 		m4 = output_workspace + '_M4'
 
-		Multiply(samWS, delta_x, OutputWorkspace=m0)
-		Multiply(x_workspace, m0, OutputWorkspace=m1)
+		Multiply(x_workspace, samWS, OutputWorkspace=m1)
 		Multiply(x_workspace, m1, OutputWorkspace=m2)
 		Multiply(x_workspace, m2, OutputWorkspace=m3)
 		Multiply(x_workspace, m3, OutputWorkspace=m4)
 		DeleteWorkspace(m3)
 
-		Integration(m0, OutputWorkspace=m0)
-		Integration(m1, OutputWorkspace=m1)
-		Integration(m2, OutputWorkspace=m2)
-		Integration(m4, OutputWorkspace=m4)
+		ConvertToHistogram(InputWorkspace=samWS, OutputWorkspace=samWS)
+		Integration(samWS, OutputWorkspace=m0)
 
-		Divide(m1, m0, OutputWorkspace=m1)
-		Divide(m2, m0, OutputWorkspace=m2)
-		Divide(m4, m0, OutputWorkspace=m4)
+		moments = [m1, m2, m4]
+		for moment_ws in moments:
+			ConvertToHistogram(InputWorkspace=moment_ws, OutputWorkspace=moment_ws)
+			Integration(moment_ws, OutputWorkspace=moment_ws)
+			Divide(moment_ws, m0, OutputWorkspace=moment_ws)
 
 		DeleteWorkspace(samWS)
-		DeleteWorkspace(delta_x)
 		DeleteWorkspace(x_workspace)
 
 		#create output workspace
 		extensions = ['_M0', '_M1', '_M2', '_M4']
-
 		for ext in extensions:
 			ws_name = output_workspace+ext
 			Transpose(InputWorkspace=ws_name, OutputWorkspace=ws_name)
