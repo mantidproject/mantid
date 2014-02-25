@@ -130,21 +130,11 @@ std::string FileValidator::checkValidity(const std::string &value) const
         Poco::Path direc(value);
         if (direc.isAbsolute())
         {
-          // look for an existing parent
-          while (!Poco::File(direc).exists())
-          {
-            direc = direc.parent();
-          }
-
-          // see if the directory exists
-          Poco::File direcFile(direc);
-          if (direcFile.exists() && direcFile.isDirectory())
-          {
-            if (direcFile.canWrite())
-              return "";
-            else
-              return "Cannot write to directory \"" + direc.toString() + "\"";
-          }
+          // see if file is writable
+          if (Poco::File(direc).canWrite())
+            return "";
+          else
+            return "Cannot write to file \"" + direc.toString() + "\"";
         }
 
         g_log.debug() << "Do not have enough information to validate \""
@@ -153,6 +143,9 @@ std::string FileValidator::checkValidity(const std::string &value) const
       catch (std::exception &e)
       {
         g_log.information() << "Encountered exception while checking for writable: " << e.what();
+      }
+      catch (...) {
+    	g_log.information() << "Unknown exception while checking for writable";
       }
     }
   }
