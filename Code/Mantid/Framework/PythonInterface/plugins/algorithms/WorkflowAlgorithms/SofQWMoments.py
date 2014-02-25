@@ -12,7 +12,7 @@ from mantid import logger
 import os.path
 import numpy as np
 
-class Moments(PythonAlgorithm):
+class SofQWMoments(PythonAlgorithm):
 
 	def category(self):
 		return "Workflow\\MIDAS;PythonAlgorithms"
@@ -45,7 +45,7 @@ class Moments(PythonAlgorithm):
 		Plot = self.getProperty('Plot').value
 		Save = self.getProperty('Save').value
 
-		StartTime('Moments')
+		StartTime('SofQWMoments')
 		num_spectra,num_w = CheckHistZero(sample_workspace)
 
 		if Verbose:
@@ -131,7 +131,7 @@ class Moments(PythonAlgorithm):
 
 		self.setProperty("OutputWorkspace", output_workspace)
 
-		EndTime('Moments')
+		EndTime('SofQWMoments')
 
 	def _plot_moments(self, inputWS):
 		from IndirectImport import import_mantidplot
@@ -140,4 +140,5 @@ class Moments(PythonAlgorithm):
 		mp.plotSpectrum(inputWS+'_M0',0)
 		mp.plotSpectrum([inputWS+'_M2',inputWS+'_M4'],0)
 
-AlgorithmFactory.subscribe(Moments)         # Register algorithm with Mantid
+# Register algorithm with Mantid
+AlgorithmFactory.subscribe(SofQWMoments)
