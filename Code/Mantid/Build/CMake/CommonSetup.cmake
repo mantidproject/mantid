@@ -252,7 +252,7 @@ endif ()
 find_package ( GMock )
 
 if ( GMOCK_FOUND AND GTEST_FOUND )
-  message ( STATUS "GMock/GTest is available for unit tests." )
+  message ( STATUS "GMock/GTest (${GMOCK_VERSION}) is available for unit tests." )
 else ()
   message ( STATUS "GMock/GTest is not available. Some unit tests will not run." ) 
 endif()
