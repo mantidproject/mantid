@@ -89,9 +89,8 @@ namespace Mantid
 
         progress(prog,"getting location string...");
 
-        // The location of the file on the ICAT server (E.g. in the archives).
-        std::string fileLocation;
-        catalogInfoService->getFileLocation(*fileID,fileLocation);
+        // The location of the file (on the server) stored in the archives.
+        std::string fileLocation = catalogInfoService->getFileLocation(*fileID);
 
         g_log.debug() << "CatalogDownloadDataFiles -> File location before transform is: " << fileLocation << std::endl;
         // Transform the archive path to the path of the user's operating system.
@@ -103,23 +102,16 @@ namespace Mantid
         if(hasAccessToArchives)
         {
           g_log.information() << "File (" << *fileName << ") located in archives (" << fileLocation << ")." << std::endl;
-
           fileLocations.push_back(fileLocation);
         }
         else
         {
           g_log.information() << "Unable to open file (" << *fileName << ") from archive. Beginning to download over Internet." << std::endl;
-
           progress(prog/2,"getting the url ....");
-
           // Obtain URL for related file to download from net.
-          std::string url;
-          catalogInfoService->getDownloadURL(*fileID,url);
-
+          const std::string url = catalogInfoService->getDownloadURL(*fileID);
           progress(prog,"downloading over internet...");
-
-          std::string fullPathDownloadedFile = doDownloadandSavetoLocalDrive(url,*fileName);
-
+          const std::string fullPathDownloadedFile = doDownloadandSavetoLocalDrive(url,*fileName);
           fileLocations.push_back(fullPathDownloadedFile);
         }
       }
