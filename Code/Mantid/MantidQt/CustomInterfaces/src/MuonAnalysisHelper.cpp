@@ -1,5 +1,8 @@
 #include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
@@ -13,6 +16,8 @@ namespace CustomInterfaces
 namespace MuonAnalysisHelper
 {
 
+using namespace Mantid::API;
+
 /**
  * Sets double validator for specified field.
  * @param field :: Field to set validator for
@@ -22,6 +27,133 @@ void setDoubleValidator(QLineEdit* field)
   QDoubleValidator* newValidator = new QDoubleValidator(field);
   newValidator->setNotation(QDoubleValidator::StandardNotation);
   field->setValidator(newValidator);
+}
+
+
+/**
+ * Return a first period MatrixWorkspace in a run workspace. If the run workspace has one period
+ * only - it is returned.
+ * @param ws :: Run workspace
+ */
+MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws)
+{
+  if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws) )
+  {
+    return boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(0) );
+  }
+  else
+  {
+    return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  }
+}
+
+/**
+ * Returns a number of periods in a run workspace
+ * @param ws :: Run wokspace
+ * @return Number of periods
+ */
+size_t numPeriods(Workspace_sptr ws)
+{
+  if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws) )
+  {
+    return group->size();
+  }
+  else
+  {
+    return 1;
+  }
+}
+
+/**
+ * Print various informaion about the run
+ * @param runWs :: Run workspace to retrieve information from
+ * @param out :: Stream to print to
+ */
+void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out)
+{
+  // Set display style for floating point values
+  out << std::fixed << std::setprecision(12);
+
+  out << "\nTitle: " << runWs->getTitle();
+  out << "\nComment: " << runWs->getComment();
+
+  const Run& run = runWs->run();
+
+  Mantid::Kernel::DateAndTime start, end;
+
+  // Add the start time for the run
+  out << "\nStart: ";
+  if ( run.hasProperty("run_start") )
+  {
+    start = run.getProperty("run_start")->value();
+    out << start.toSimpleString();
+  }
+
+  // Add the end time for the run
+  out << "\nEnd: ";
+  if ( run.hasProperty("run_end") )
+  {
+    end = run.getProperty("run_end")->value();
+    out << end.toSimpleString();
+  }
+
+  // Add counts to run information
+  out << "\nCounts: ";
+  double counts(0.0);
+  for (size_t i=0; i<runWs->getNumberHistograms(); ++i)
+  {
+    for (size_t j=0; j<runWs->blocksize(); ++j)
+    {
+      counts += runWs->dataY(i)[j];
+    }
+  }
+  out << counts/1000000 << " MEv";
+
+  // Add average temperature.
+  out << "\nAverage Temperature: ";
+  if ( run.hasProperty("Temp_Sample") )
+  {
+    // Filter the temperatures by the start and end times for the run.
+    run.getProperty("Temp_Sample")->filterByTime(start, end);
+
+    // Get average of the values
+    double average = run.getPropertyAsSingleValue("Temp_Sample");
+
+    if (average != 0.0)
+    {
+      out << average;
+    }
+    else
+    {
+      out << "Not set";
+    }
+  }
+  else
+  {
+    out << "Not found";
+  }
+
+  // Add sample temperature
+  out << "\nSample Temperature: ";
+  if ( run.hasProperty("sample_temp") )
+  {
+    out << run.getPropertyValueAsType<double>("sample_temp");
+  }
+  else
+  {
+    out << "Not found";
+  }
+
+  // Add sample magnetic field
+  out << "\nSample Magnetic Field: ";
+  if ( run.hasProperty("sample_magn_field") )
+  {
+    out << run.getPropertyValueAsType<double>("sample_magn_field");
+  }
+  else
+  {
+    out << "Not found";
+  }
 }
 
 /**
