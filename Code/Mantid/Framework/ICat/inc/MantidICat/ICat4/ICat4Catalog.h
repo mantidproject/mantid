@@ -70,8 +70,6 @@ namespace Mantid
             const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription);
         /// Keep current session alive
         virtual void keepAlive();
-        /// Keep alive in minutes
-        virtual int keepAliveinminutes();
 
       private:
         // Ensures human friendly error messages are provided to the user.

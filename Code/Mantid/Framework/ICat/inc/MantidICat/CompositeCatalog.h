@@ -64,8 +64,6 @@ namespace Mantid
         virtual void getFileLocation(const long long&fileID,std::string& fileLocation);
         /// Keep current session alive
         virtual void keepAlive();
-        /// Keep alive in minutes
-        virtual int keepAliveinminutes();
 
       private:
         std::list<API::ICatalog_sptr> m_catalogs;

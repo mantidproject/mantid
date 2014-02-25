@@ -70,8 +70,6 @@ namespace Mantid
           const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription);
       /// keep alive
       virtual void keepAlive();
-      /// keep alive in minutes
-      virtual int keepAliveinminutes();
 
     private:
       /// The helper class that accesses ICAT functionality.

@@ -799,15 +799,6 @@ namespace Mantid
     }
 
     /**
-     * Keep the current session alive in minutes.
-     * @return The number of minutes to keep session alive for.
-     */
-    int ICat4Catalog::keepAliveinminutes()
-    {
-      return (0);
-    }
-
-    /**
      * Defines the SSL authentication scheme.
      * @param icat :: ICATPortBindingProxy object.
      */

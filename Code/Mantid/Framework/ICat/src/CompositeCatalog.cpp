@@ -164,18 +164,5 @@ namespace Mantid
       }
     }
 
-    /**
-     * Keep each catalog alive in the container in minutes.
-     */
-    int CompositeCatalog::keepAliveinminutes()
-    {
-      int numberOfMinutes = 0;
-      for(auto catalog = m_catalogs.begin(); catalog != m_catalogs.end(); ++catalog)
-      {
-        numberOfMinutes = (*catalog)->keepAliveinminutes();
-      }
-      return numberOfMinutes;
-    }
-
   }
 }

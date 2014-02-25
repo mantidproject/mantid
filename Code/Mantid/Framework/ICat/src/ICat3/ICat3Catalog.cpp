@@ -140,12 +140,6 @@ namespace Mantid
     void ICat3Catalog::keepAlive()
     {
     }
-    //keep alive in minutes
-    int ICat3Catalog::keepAliveinminutes()
-    {
-      return 0;
-    }
-
 
   }
 }
