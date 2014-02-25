@@ -72,10 +72,6 @@ class ICatalog;
 */
 class MANTID_API_DLL CatalogFactoryImpl : public Kernel::DynamicFactory<ICatalog>
 {
-public:
-        /// create an instance of the catalog specified by the calssName
-  virtual boost::shared_ptr<ICatalog> create(const std::string& className) const;
-
 private:
   friend struct Kernel::CreateUsingNew<CatalogFactoryImpl>;
 
