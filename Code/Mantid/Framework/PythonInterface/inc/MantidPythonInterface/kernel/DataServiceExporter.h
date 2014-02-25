@@ -63,9 +63,9 @@ namespace Mantid
         namespace Policies = Mantid::PythonInterface::Policies;
 
         auto classType = PythonType(pythonClassName, no_init)
-          .def("add", &DataServiceExporter::addItem,
+          .def("add", &SvcType::add,
                "Adds the given object to the service with the given name. If the name/object exists it will raise an error.")
-          .def("addOrReplace", &DataServiceExporter::addOrReplaceItem,
+          .def("addOrReplace", &SvcType::addOrReplace,
                "Adds the given object to the service with the given name. The the name exists the object is replaced.")
           .def("doesExist", &SvcType::doesExist,
                "Returns True if the object is found in the service.")
@@ -85,7 +85,7 @@ namespace Mantid
           .def("__len__", &SvcType::size)
           .def("__getitem__", &DataServiceExporter::retrieveOrKeyError,
                return_value_policy<Policies::ToWeakPtrWithDowncast>())
-          .def("__setitem__", &DataServiceExporter::addOrReplaceItem)
+          .def("__setitem__", &SvcType::addOrReplace)
           .def("__contains__", &SvcType::doesExist)
           .def("__delitem__", &SvcType::remove)
           ;
@@ -137,52 +137,6 @@ namespace Mantid
         }
         assert(names.attr("__len__")() == keys.size());
         return names;
-      }
-
-      /**
-       * Add an item into the service, if it exists then an error is raised
-       * @param self A reference to the calling object
-       * @param name The name to assign to this in the service
-       * @param item A boost.python wrapped SvcHeldType object
-       */
-      static void addItem(SvcType& self, const std::string & name, const boost::python::object& item)
-      {
-        using namespace boost::python;
-
-        try
-        {
-          // It is VERY important that the extract type be a reference to SvcHeldType so that
-          // boost.python doesn't create a new shared_ptr and instead simply extracts the embedded one.
-          self.add(name, extract<SvcHeldType&>(item)());
-        }
-        catch(std::exception& exc)
-        {
-          PyErr_SetString(PyExc_ReferenceError, exc.what());
-          throw boost::python::error_already_set();
-        }
-      }
-
-      /**
-       * Add or replace an item into the service, if it exists then an error is raised
-       * @param self A reference to the calling object
-       * @param name The name to assign to this in the service
-       * @param item A boost.python wrapped SvcHeldType object
-       */
-      static void addOrReplaceItem(SvcType& self, const std::string & name, const boost::python::object& item)
-      {
-        using namespace boost::python;
-
-        try
-        {
-          // It is VERY important that the extract type be a reference to SvcHeldType so that
-          // boost.python doesn't create a new shared_ptr and instead simply extracts the embedded one.
-          self.addOrReplace(name, extract<SvcHeldType&>(item)());
-        }
-        catch(std::exception& exc)
-        {
-          PyErr_SetString(PyExc_ReferenceError, exc.what());
-          throw boost::python::error_already_set();
-        }
       }
 
     };
