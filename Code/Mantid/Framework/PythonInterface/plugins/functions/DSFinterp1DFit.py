@@ -115,13 +115,27 @@ class DSFinterp1DFit(IFunction1D):
     p=self.validateParams()
     if not p:
       return np.zeros(len(xvals), dtype=float) # return zeros if parameters not valid
-
+      '''
+        gd=mantid.api.AlgorithmManager.createUnmanaged('GroupDetectors')        
+        gd.setChild(True)
+        gd.initialize()
+        gd.setAlwaysStoreInADS(True)
+        gd.setLogging(False)
+        gd.setProperty("InputWorkspace",__w.getName())
+        gd.setProperty("OutputWorkspace",'__sum')
+        gd.setProperty("WorkspaceIndexList",inds[0])
+        gd.setProperty("PreserveEvents",'1')
+        gd.execute()
+      '''
     # The first time the function is called requires initialization of the channel group
     if self._channelgroup == None:
-      pass
+      # Create the interpolator
+      nf = len(self._ParameterValues)
+      for i in range(nf):
+        
     else:
       dsf = self._channelgroup(p['TargetParameter'])
-
+      return dsf.intensities  # can we pass by reference?
 
 # Required to have Mantid recognise the new function
 try:
