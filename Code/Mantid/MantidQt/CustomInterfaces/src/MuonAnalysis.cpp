@@ -656,33 +656,11 @@ MatrixWorkspace_sptr MuonAnalysis::prepareAnalysisWorkspace(MatrixWorkspace_sptr
     rebinAlg->setChild(true);
     rebinAlg->setProperty("InputWorkspace", ws);
     rebinAlg->setProperty("Params", rebinParams);
+    rebinAlg->setProperty("FullBinsOnly", true);
     rebinAlg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
     rebinAlg->execute();
 
     ws = rebinAlg->getProperty("OutputWorkspace");
-
-    // TODO: The following should be moved to Rebin as additional option
-
-    // However muon group don't want last bin if shorter than previous bins
-    binSize = ws->dataX(0)[1] - ws->dataX(0)[0]; 
-    double firstX = ws->dataX(0)[0];
-    double lastX = ws->dataX(0)[ws->dataX(0).size()-1];
-    double numberOfFullBunchedBins =  std::floor((lastX - firstX) / binSize );
-
-    if ( numberOfFullBunchedBins )
-    {
-      lastX = firstX + numberOfFullBunchedBins * binSize;
-
-      IAlgorithm_sptr cropAlg = AlgorithmManager::Instance().createUnmanaged("CropWorkspace");
-      cropAlg->initialize();
-      cropAlg->setChild(true);
-      cropAlg->setProperty("InputWorkspace", ws);
-      cropAlg->setProperty("Xmax", lastX);
-      cropAlg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
-      cropAlg->execute();
-
-      ws = cropAlg->getProperty("OutputWorkspace");
-    }
   }
 
   return ws;
