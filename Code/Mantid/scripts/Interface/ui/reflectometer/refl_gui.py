@@ -27,7 +27,6 @@ except ImportError:
 
 class ReflGui(refl_window.Ui_windowRefl):
     __instrumentRuns = None
-
     def __del__(self):
         if self.windowRefl.modFlag:
             self.save(true)
@@ -45,7 +44,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.process()
     def on_comboInstrument_activated(self, instrument):
         config['default.instrument'] = self.instrument_list[instrument]
-        print "Instrument is now: ", config['default.instrument']
+        logger.notice( "Instrument is now: " + config['default.instrument'])
         self.textRB.clear()
         self.populateList()
         self.current_instrument = self.instrument_list[instrument]
@@ -73,7 +72,6 @@ class ReflGui(refl_window.Ui_windowRefl):
     def on_plotButton_clicked(self):
         plotbutton = self.windowRefl.sender()
         self.plot(plotbutton)
-            
     '''
     Event handler for polarisation correction selection.
     '''
@@ -83,8 +81,6 @@ class ReflGui(refl_window.Ui_windowRefl):
             self.current_polarisation_method = self.polarisation_options[chosen_method]
         else:
             logger.notice("Polarisation correction is not supported on " + self.current_instrument)
-        
-    #Further UI setup
     def setupUi(self, windowRefl):
         super(ReflGui,self).setupUi(windowRefl)
         self.loading = False
@@ -118,7 +114,6 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.initTable()
         self.populateList()
         self.connectSlots()
-        
     def resetTable(self):
         #switches from current to true, to false to make sure stateChanged fires
         self.checkTickAll.setCheckState(2)
@@ -126,15 +121,12 @@ class ReflGui(refl_window.Ui_windowRefl):
         for row in range(self.tableMain.rowCount()):
             plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
             self.resetPlotButton(plotbutton)
-            #self.tableMain.cellWidget(row, 17).children()[1].setCheckState(False)
-                
     def resetPlotButton(self, plotbutton):
         plotbutton.setDisabled(True)
         plotbutton.setProperty('runno', None)
         plotbutton.setProperty('overlapLow', None)
         plotbutton.setProperty('overlapHigh', None)
         plotbutton.setProperty('wksp', None)
-            
     def initTable(self):
         #first check if the table has been changed before clearing it
         if self.windowRefl.modFlag:
@@ -232,7 +224,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                 try:
                     runs = self.__instrumentRuns.getJournalRuns(self.textRB.text(),self.spinDepth.value())
                 except:
-                    print "Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives."
+                    logger.error( "Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
                     QtGui.QMessageBox.critical(self.tableMain, 'Error Retrieving Archive Runs',"Problem encountered when listing archive runs. Please check your network connection and that you have access to the journal archives.")
                     runs = []
                 self.statusMain.clearMessage()
@@ -272,7 +264,6 @@ class ReflGui(refl_window.Ui_windowRefl):
                 QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"Selected cells must all be in the same row.")
         else:
             QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"There are no source cells selected.")
-
     '''
     Create a display name from a workspace.
     '''
@@ -299,7 +290,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                     runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
                     DeleteWorkspace(temp)
                 except:
-                    print "Unable to load file. Please check your managed user directories."
+                    logger.error("Unable to load file. Please check your managed user directories.")
                     QtGui.QMessageBox.critical(self.tableMain, 'Error Loading File',"Unable to load file. Please check your managed user directories.")
             item = QtGui.QTableWidgetItem()
             item.setText(runnumber)
@@ -340,7 +331,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         if not len(rowIndexes):
             reply = QtGui.QMessageBox.question(self.tableMain, 'Process all rows?',"This will process all rows in the table. Continue?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
             if reply == QtGui.QMessageBox.No:
-                print "Cancelled!"
+                logger.notice("Cancelled!")
                 willProcess = False
             else:
                 rowIndexes = range(self.tableMain.rowCount())
@@ -363,10 +354,8 @@ class ReflGui(refl_window.Ui_windowRefl):
                         ovHigh = str(self.tableMain.item(row, i * 5 + 4).text())
                         if (ovHigh != ''):
                             overlapHigh.append(float(ovHigh))
-                    print len(runno), "runs: ", runno
                     # Determine resolution
                     if (self.tableMain.item(row, 15).text() == ''):
-
                         loadedRun = None
                         if load_live_runs.is_live_run(runno[0]):
                             if not self.accMethod:
@@ -381,7 +370,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                             item = QtGui.QTableWidgetItem()
                             item.setText(str(dqq))
                             self.tableMain.setItem(row, 15, item)
-                            print "Calculated resolution: ", dqq
+                            logger.notice("Calculated resolution: " + str(dqq))
                         except IndexError:
                             logger.error("Cannot calculate resolution owing to unknown log properties. dq/q will need to be manually entered.")
                             return
@@ -425,7 +414,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.accMethod = None
     def plot(self, plotbutton):
         if not isinstance(plotbutton, QtGui.QPushButton):
-            print "problem with plotbutton"
+            logger.error("Problem accessing cached data: Wrong data type passed, expected QtGui.QPushbutton")
             return
         import unicodedata
         
@@ -446,13 +435,11 @@ class ReflGui(refl_window.Ui_windowRefl):
             wkspBinned = []
             w1 = getWorkspace(wksp[0])
             w2 = getWorkspace(wksp[len(wksp) - 1])
-            print "w2", type(w2)
             dqq = float(self.tableMain.item(row, 15).text())
         except:
-            print "Unable to plot row, required data couldn't be retrieved"
+            logger.error("Unable to plot row, required data couldn't be retrieved")
             resetPlotButton(plotbutton)
             return
-        
         for i in range(len(runno)):
             ws_name_binned = wksp[i] + '_binned'
             ws = getWorkspace(wksp[i])
@@ -481,17 +468,15 @@ class ReflGui(refl_window.Ui_windowRefl):
                 g[0].activeLayer().setAutoScale()
         if (self.tableMain.cellWidget(row, 17).children()[1].checkState() > 0):
             if (len(runno) == 1):
-                print "Nothing to combine!"
+                logger.notice("Nothing to combine!")
             elif (len(runno) == 2):
                 outputwksp = runno[0] + '_' + runno[1][3:5]
             else:
                 outputwksp = runno[0] + '_' + runno[2][3:5]
-            print "w2", type(w2)
             begoverlap = w2.readX(0)[0]
             # get Qmax
             if (self.tableMain.item(row, i * 5 + 4).text() == ''):
                 overlapHigh = 0.3 * max(w1.readX(0))
-            print overlapLow, overlapHigh
             wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1)
             if (self.tableMain.item(row, 16).text() != ''):
                 Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, 16).text()))
@@ -513,12 +498,10 @@ class ReflGui(refl_window.Ui_windowRefl):
                 self.accMethod = self.getAccMethod()
             loadedRun = load_live_runs.get_live_data(InstrumentName = config['default.instrument'], Accumulation = self.accMethod)
         wlam, wq, th = quick(loadedRun, trans=transrun, theta=angle)
-
         if ':' in runno:
             runno = runno.split(':')[0]
         if ',' in runno:
             runno = runno.split(',')[0]
-      
         inst = groupGet(wq, 'inst')
         lmin = inst.getNumberParameter('LambdaMin')[0] + 1
         lmax = inst.getNumberParameter('LambdaMax')[0] - 2
@@ -535,7 +518,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                 if (len(rowtext) > 0):
                     writer.writerow(rowtext)
             self.current_table = filename
-            print "Saved file to " + filename
+            logger.notice("Saved file to " + filename)
             self.windowRefl.modFlag = False
         except:
             return False
@@ -545,7 +528,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         filename = ''
         if failsave:
             #this is an emergency autosave as the program is failing
-            print "The ISIS Reflectonomy GUI has encountered an error, it will now attempt to save a copy of your work."
+            logger.error("The ISIS Reflectonomy GUI has encountered an error, it will now attempt to save a copy of your work.")
             msgBox = QtGui.QMessageBox()
             msgBox.setText("The ISIS Reflectonomy GUI has encountered an error, it will now attempt to save a copy of your work.\nPlease check the log for details.")
             msgBox.setStandardButtons(QtGui.QMessageBox.Ok)
@@ -616,7 +599,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                             self.tableMain.setItem(row, column, item)
                         row = row + 1
             except:
-                print 'Could not load file: ' + filename + '. File not found or unable to read from file.'
+                logger.error('Could not load file: ' + filename + '. File not found or unable to read from file.')
         self.loading = False
         self.windowRefl.modFlag = False
     def reloadTable(self):
@@ -647,9 +630,9 @@ class ReflGui(refl_window.Ui_windowRefl):
                             self.tableMain.setItem(row, column, item)
                         row = row + 1
             except:
-                print 'Could not load file: ' + filename + '. File not found or unable to read from file.'
+                logger.error('Could not load file: ' + filename + '. File not found or unable to read from file.')
         else:
-            print 'No file in table to reload.'
+            logger.notice('No file in table to reload.')
         self.loading = False
         self.windowRefl.modFlag = False
     def saveWorkspaces(self):
@@ -664,13 +647,10 @@ class ReflGui(refl_window.Ui_windowRefl):
     def showHelp(self):
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
-
-        
 '''
 Get a representative workspace from the input workspace.
 '''        
 def get_representative_workspace(run):
-    print type(run)
     if isinstance(run, WorkspaceGroup):
         run_number = groupGet(run[0], "samp", "run_number")
         _runno = Load(Filename=str(run_number))
@@ -688,12 +668,10 @@ def get_representative_workspace(run):
     else:
         raise TypeError("Must be a workspace, int or str")
     return _runno
-
 '''
 Calculate the resolution from the slits.
 '''
 def calcRes(run):
-    
     runno = get_representative_workspace(run)
     # Get slits and detector angle theta from NeXuS
     theta = groupGet(runno, 'samp', 'THETA')
@@ -711,14 +689,13 @@ def calcRes(run):
         th = theta[len(theta) - 1]
     else:
         th = theta
-    print "s1vg=", s1vg, "s2vg=", s2vg, "theta=", theta
+    logger.notice( "s1vg=" + str(s1vg) + " s2vg=" + str(s2vg) + " theta=" + str(theta))
     #1500.0 is the S1-S2 distance in mm for SURF!!!
     resolution = math.atan((s1vg + s2vg) / (2 * (s2z - s1z))) * 180 / math.pi / th
-    print "dq/q=", resolution
+    logger.notice( "dq/q=" + str(resolution))
     if not type(run) == type(Workspace):
         DeleteWorkspace(runno)
     return resolution
-
 def groupGet(wksp, whattoget, field=''):
     '''
     returns information about instrument or sample details for a given workspace wksp,
@@ -751,7 +728,7 @@ def groupGet(wksp, whattoget, field=''):
                         res = log[len(log) - 1]
                 except RuntimeError:
                     res = 0
-                    print "Block " + field + " not found."
+                    logger.error( "Block " + field + " not found.")
             else:
                 try:
                     log = mtd[wksp].getRun().getLogData(field).value
@@ -761,7 +738,7 @@ def groupGet(wksp, whattoget, field=''):
                         res = log[len(log) - 1]
                 except RuntimeError:
                     res = 0
-                    print "Block " + field + " not found."
+                    logger.error( "Block " + field + " not found.")
         elif isinstance(wksp, Workspace):
             at = getattr(wksp,'size',None)
             if callable(at):
@@ -773,7 +750,7 @@ def groupGet(wksp, whattoget, field=''):
                         res = log[len(log) - 1]
                 except RuntimeError:
                     res = 0
-                    print "Block " + field + " not found."
+                    logger.error( "Block " + field + " not found.")
             else:
                 try:
                     log = wksp.getRun().getLogData(field).value
@@ -783,7 +760,7 @@ def groupGet(wksp, whattoget, field=''):
                         res = log[len(log) - 1]
                 except RuntimeError:
                     res = 0
-                    print "Block " + field + " not found."
+                    logger.error( "Block " + field + " not found.")
         else:
             res = 0
         return res
@@ -812,5 +789,5 @@ def getWorkspace(wksp):
             wout = mtd[wksp]
         return wout
     else:
-        print "Unable to get workspace: " + wksp
+        logger.error( "Unable to get workspace: " + wksp)
         return 0
