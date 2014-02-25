@@ -141,19 +141,6 @@ namespace Mantid
     }
 
     /**
-     * Gets the datafile location string from the archives from each catalog in the container.
-     * @param fileID       :: The id of the file to obtain.
-     * @param fileLocation :: A reference to store the location of the datafile in the archives.
-     */
-    void CompositeCatalog::getFileLocation(const long long&fileID,std::string& fileLocation)
-    {
-      for(auto catalog = m_catalogs.begin(); catalog != m_catalogs.end(); ++catalog)
-      {
-        (*catalog)->getFileLocation(fileID, fileLocation);
-      }
-    }
-
-    /**
      * Keep each catalog session alive in the container.
      */
     void CompositeCatalog::keepAlive()

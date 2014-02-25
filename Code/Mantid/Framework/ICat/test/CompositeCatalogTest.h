@@ -74,11 +74,6 @@ class DummyCatalog : public ICatalog
       m_counter++;
     }
 
-    void getFileLocation(const long long&,std::string&)
-    {
-      m_counter++;
-    }
-
     void keepAlive()
     {
       m_counter++;
@@ -172,14 +167,6 @@ class CompositeCatalogTest : public CxxTest::TestSuite
       std::vector<std::string> investigations;
       createCompositeCatalog()->listInvestigationTypes(investigations);
       TS_ASSERT_EQUALS(investigations.size(),2);
-      TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
-    }
-
-    void testGetFileLocation()
-    {
-      const long long temp = 0;
-      std::string fileLocation = "";
-      createCompositeCatalog()->getFileLocation(temp,fileLocation);
       TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
     }
 

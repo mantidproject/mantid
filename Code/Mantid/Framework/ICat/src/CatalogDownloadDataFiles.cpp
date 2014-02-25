@@ -61,10 +61,8 @@ namespace Mantid
     /// Execute the algorithm
     void CatalogDownloadDataFiles::exec()
     {
-      // Create and use the catalog the user has specified in Facilities.xml
-      auto catalog = CatalogAlgorithmHelper().createCatalog();
       // Cast a catalog to a catalogInfoService to access downloading functionality.
-      auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(catalog);
+      auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(CatalogAlgorithmHelper().createCatalog());
       // Check if the catalog created supports publishing functionality.
       if (!catalogInfoService) throw std::runtime_error("The catalog that you are using does not support external downloading.");
 
@@ -93,7 +91,7 @@ namespace Mantid
 
         // The location of the file on the ICAT server (E.g. in the archives).
         std::string fileLocation;
-        catalog->getFileLocation(*fileID,fileLocation);
+        catalogInfoService->getFileLocation(*fileID,fileLocation);
 
         g_log.debug() << "CatalogDownloadDataFiles -> File location before transform is: " << fileLocation << std::endl;
         // Transform the archive path to the path of the user's operating system.

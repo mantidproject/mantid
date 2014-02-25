@@ -40,9 +40,11 @@ namespace Mantid
         // Virtual destructor
         virtual ~ICatalogInfoService(){};
         /// Obtain url to download a file from.
-        virtual void getDownloadURL(const long long&,std::string&) = 0;
+        virtual void getDownloadURL(const long long&,std::string&)=0;
         /// Obtain the url to upload a file to.
-        virtual const std::string getUploadURL(const std::string&,const std::string&,const std::string&) = 0;
+        virtual const std::string getUploadURL(const std::string&,const std::string&,const std::string&)=0;
+        /// Obtain the datafile location string from the archives.
+        virtual void getFileLocation(const long long&,std::string&)=0;
     };
 
     typedef boost::shared_ptr<ICatalogInfoService> ICatalogInfoService_sptr;

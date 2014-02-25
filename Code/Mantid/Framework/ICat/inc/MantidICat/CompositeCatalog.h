@@ -60,8 +60,6 @@ namespace Mantid
         virtual void listInstruments(std::vector<std::string>& instruments);
         /// Get investigationtypes list
         virtual void listInvestigationTypes(std::vector<std::string>& invstTypes);
-        /// Get the file location string(s) from archive.
-        virtual void getFileLocation(const long long&fileID,std::string& fileLocation);
         /// Keep current session alive
         virtual void keepAlive();
 
