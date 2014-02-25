@@ -3,19 +3,12 @@
 
 namespace Mantid
 {
-namespace API
-{
-
-/// Constructor
-CatalogFactoryImpl::CatalogFactoryImpl() :
-  Kernel::DynamicFactory<ICatalog>(), m_createdCatalogs(), m_log(Kernel::Logger::get("CatalogFactory"))
-{
+  namespace API
+  {
+    /// Constructor
+    CatalogFactoryImpl::CatalogFactoryImpl() :
+        Kernel::DynamicFactory<ICatalog>(), m_createdCatalogs(), m_log(Kernel::Logger::get("CatalogFactory")) {}
+    /// Destructor
+    CatalogFactoryImpl::~CatalogFactoryImpl(){}
+  }
 }
-
- /// Destructor
-CatalogFactoryImpl::~CatalogFactoryImpl()
-{
-}
-
-} // namespace Kernel
-} // namespace Mantid
