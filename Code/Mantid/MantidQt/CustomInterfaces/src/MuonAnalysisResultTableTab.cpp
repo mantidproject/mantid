@@ -36,6 +36,7 @@ namespace Muon
   using namespace MantidQt::MantidWidgets;
 
   const std::string MuonAnalysisResultTableTab::WORKSPACE_POSTFIX("_Workspace");
+  const std::string MuonAnalysisResultTableTab::PARAMS_POSTFIX("_Parameters");
 
   const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS = \
       QStringList() << "run_number" << "sample_temp" << "sample_magn_field";
@@ -57,7 +58,7 @@ MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm)
   connect(m_uiForm.selectAllFittingResults, SIGNAL(toggled(bool)), this, SLOT(selectAllFittings(bool)));
 
   // Connect the create table button
-  connect(m_uiForm.createTableBtn, SIGNAL(clicked()), this, SLOT(createTable()));
+  connect(m_uiForm.createTableBtn, SIGNAL(clicked()), this, SLOT(onCreateTableClicked()));
 
   // Enable label combox-box only when sequential fit type selected
   connect(m_uiForm.sequentialFit, SIGNAL( toggled(bool) ), 
@@ -285,12 +286,10 @@ QStringList MuonAnalysisResultTableTab::getSequentialFitWorkspaces(const QString
 
   for (auto it = wsNames.begin(); it != wsNames.end(); it++)
   {
-    if( !boost::ends_with(*it, WORKSPACE_POSTFIX) )
-      continue;
+    if( ! isFittedWs(*it) )
+      continue; // Doesn't pass basic checks
 
-    std::string baseName = (*it).substr(0, (*it).size() - WORKSPACE_POSTFIX.size());
-
-    workspaces << QString::fromStdString(baseName);
+    workspaces << QString::fromStdString( wsBaseName(*it) );
   }
 
   return workspaces;
@@ -308,19 +307,65 @@ QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces()
 
   for(auto it = allWorkspaces.begin(); it != allWorkspaces.end(); it++)
   {
-    if ( !boost::ends_with(*it, WORKSPACE_POSTFIX) )
-      continue;
+    if ( ! isFittedWs(*it) )
+      continue; // Doesn't pass basic checks
 
     // Ignore sequential fit results
-    if ( boost::starts_with(*it, MuonSequentialFitDialog::SEQUENTIAL_PREFIX))
+    if ( boost::starts_with(*it, MuonSequentialFitDialog::SEQUENTIAL_PREFIX) )
       continue;
 
-    std::string baseName = (*it).substr(0, (*it).size() - WORKSPACE_POSTFIX.size());
-
-    workspaces << QString::fromStdString(baseName);
+    workspaces << QString::fromStdString( wsBaseName(*it) );
   }
 
   return workspaces;
+}
+
+/**
+ * Returns name of the fitted workspace with WORKSPACE_POSTFIX removed.
+ * @param wsName :: Name of the fitted workspace. Shoud end with WORKSPACE_POSTFIX.
+ * @return wsName without WORKSPACE_POSTFIX
+ */
+std::string MuonAnalysisResultTableTab::wsBaseName(const std::string& wsName)
+{
+  return wsName.substr(0, wsName.size() - WORKSPACE_POSTFIX.size());
+}
+
+/**
+ * Does a few basic checks for whether the workspace is a fitted workspace.
+ * @param wsName :: Name of the workspace to check for
+ * @return True if seems to be fitted ws, false if doesn't
+ */
+bool MuonAnalysisResultTableTab::isFittedWs(const std::string& wsName)
+{
+  if ( ! boost::ends_with(wsName, WORKSPACE_POSTFIX) )
+  {
+    return false; // Doesn't end with WORKSPACE_POSTFIX
+  }
+
+  try
+  {
+    auto ws = retrieveWSChecked<MatrixWorkspace>(wsName);
+
+    ws->run().startTime();
+    ws->run().endTime();
+  }
+  catch(...)
+  {
+    return false; // Not found / incorrect type / doesn't have start/end time
+  }
+
+  std::string baseName = wsBaseName(wsName);
+
+  try
+  {
+    retrieveWSChecked<ITableWorkspace>(baseName + PARAMS_POSTFIX);
+  }
+  catch(...)
+  {
+    return false; // _Parameters workspace not found / has incorrect type
+  }
+
+  return true; // All OK
 }
 
 /**
@@ -397,12 +442,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(const QStringList& fitted
     QMap<QString, QVariant> wsLogValues;
 
     // Get log information
-    Mantid::API::ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ExperimentInfo>(
-      AnalysisDataService::Instance().retrieve(fittedWsList[i].toStdString() + "_Workspace"));
-    if (!ws)
-    {
-      throw std::runtime_error("Wrong type of Workspace");
-    }
+    auto ws = retrieveWSChecked<ExperimentInfo>(fittedWsList[i].toStdString() + WORKSPACE_POSTFIX);
 
     Mantid::Kernel::DateAndTime start = ws->run().startTime();
     Mantid::Kernel::DateAndTime end = ws->run().endTime();
@@ -632,7 +672,7 @@ QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList&
     {
       std::vector<std::string> firstParams;
       // Find the first parameter table and use this as a comparison for all the other tables.
-      Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsList[posCount].toStdString() + "_Parameters") );
+      auto paramWs = retrieveWSChecked<ITableWorkspace>(wsList[posCount].toStdString() + PARAMS_POSTFIX);
 
       Mantid::API::TableRow paramRow = paramWs->getFirstRow();
       do
@@ -651,7 +691,7 @@ QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList&
         if (!colors.contains(i))
         {
           std::vector<std::string> nextParams;
-          Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsList[i].toStdString() + "_Parameters") );
+          auto paramWs = retrieveWSChecked<ITableWorkspace>(wsList[i].toStdString() + PARAMS_POSTFIX);
 
           Mantid::API::TableRow paramRow = paramWs->getFirstRow();
           do
@@ -675,6 +715,28 @@ QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList&
   return colors;
 }
 
+void MuonAnalysisResultTableTab::onCreateTableClicked()
+{
+  try
+  {
+    createTable();
+  }
+  catch(Exception::NotFoundError& e)
+  {
+    std::ostringstream errorMsg;
+    errorMsg << "Workspace required to create a table was not found:\n\n" << e.what();
+    QMessageBox::critical(this, "Workspace not found", QString::fromStdString(errorMsg.str()));
+    refresh(); // As something was probably deleted, refresh the tables
+    return;
+  }
+  catch(std::exception& e)
+  {
+    std::ostringstream errorMsg;
+    errorMsg << "Error occured when trying to create the table:\n\n" << e.what();
+    QMessageBox::critical(this, "Error", QString::fromStdString(errorMsg.str()));
+    return;
+  }
+}
 
 /**
 * Creates the table using the information selected by the user in the tables
@@ -735,7 +797,7 @@ void MuonAnalysisResultTableTab::createTable()
     for(int i=0; i<wsSelected.size(); ++i)
     {
       QMap<QString, double> paramsList;
-      Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsSelected[i].toStdString() + "_Parameters") );
+      auto paramWs = retrieveWSChecked<ITableWorkspace>(wsSelected[i].toStdString() + PARAMS_POSTFIX);
 
       Mantid::API::TableRow paramRow = paramWs->getFirstRow();
     
@@ -834,7 +896,7 @@ bool MuonAnalysisResultTableTab::haveSameParameters(const QStringList& wsList)
   std::vector<std::string> firstParams;
 
   // Find the first parameter table and use this as a comparison for all the other tables.
-  Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsList[0].toStdString() + "_Parameters") );
+  auto paramWs = retrieveWSChecked<ITableWorkspace>(wsList[0].toStdString() + PARAMS_POSTFIX);
 
   Mantid::API::TableRow paramRow = paramWs->getFirstRow();
   do
@@ -849,7 +911,7 @@ bool MuonAnalysisResultTableTab::haveSameParameters(const QStringList& wsList)
   for (int i=1; i<wsList.size(); ++i)
   {
     std::vector<std::string> nextParams;
-    Mantid::API::ITableWorkspace_sptr paramWs = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsList[i].toStdString() + "_Parameters") );
+    auto paramWs = retrieveWSChecked<ITableWorkspace>(wsList[i].toStdString() + PARAMS_POSTFIX);
 
     Mantid::API::TableRow paramRow = paramWs->getFirstRow();
     do
@@ -937,7 +999,6 @@ std::string MuonAnalysisResultTableTab::getFileName()
   }
   return fileName;
 }
-
 
 }
 }
