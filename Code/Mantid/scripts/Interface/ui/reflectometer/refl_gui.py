@@ -344,6 +344,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                 overlapHigh = []
                 theta = [0, 0, 0]
                 if (self.tableMain.item(row, 0).text() != ''):
+                    self.statusMain.showMessage("Processing row: " + str(row + 1))
                     for i in range(3):
                         r = str(self.tableMain.item(row, i * 5).text())
                         if (r != ''):
@@ -411,6 +412,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                     plotbutton.setProperty('overlapHigh', overlapHigh)
                     plotbutton.setProperty('wksp', wksp)
                     plotbutton.setEnabled(True)
+                    self.statusMain.clearMessage()
         self.accMethod = None
     def plot(self, plotbutton):
         if not isinstance(plotbutton, QtGui.QPushButton):

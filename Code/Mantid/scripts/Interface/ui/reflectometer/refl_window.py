@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_window.ui'
 #
-# Created: Thu Feb 20 09:50:27 2014
+# Created: Tue Feb 25 11:55:14 2014
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -211,6 +211,9 @@ class Ui_windowRefl(object):
         self.menuFunction.setObjectName(_fromUtf8("menuFunction"))
         windowRefl.setMenuBar(self.menuBar)
         self.statusMain = QtGui.QStatusBar(windowRefl)
+        font = QtGui.QFont()
+        font.setPointSize(11)
+        self.statusMain.setFont(font)
         self.statusMain.setObjectName(_fromUtf8("statusMain"))
         windowRefl.setStatusBar(self.statusMain)
         self.actionSave_As = QtGui.QAction(windowRefl)
