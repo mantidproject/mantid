@@ -10,19 +10,25 @@ class ConfirmQMainWindow(QtGui.QMainWindow):
         super(ConfirmQMainWindow, self).__init__()
         self.modFlag = False
         self.gui = ui
+    def savecheck(self):
+        msgBox = QtGui.QMessageBox()
+        msgBox.setText("The table has been modified. Do you want to save your changes?")
+        msgBox.setStandardButtons(QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel)
+        msgBox.setIcon(QtGui.QMessageBox.Question)
+        msgBox.setDefaultButton(QtGui.QMessageBox.Save)
+        msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
+        ret = msgBox.exec_()
+        saved = None
+        if ret == QtGui.QMessageBox.Save:
+            saved = self.gui.save()
+        return ret, saved
     def closeEvent(self, event):
         self.gui.buttonProcess.setFocus()
         if self.modFlag:
             event.ignore()
-            msgBox = QtGui.QMessageBox()
-            msgBox.setText("The table has been modified. Do you want to save your changes?")
-            msgBox.setStandardButtons(QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel)
-            msgBox.setIcon(QtGui.QMessageBox.Question)
-            msgBox.setDefaultButton(QtGui.QMessageBox.Save)
-            msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
-            ret = msgBox.exec_()
+            ret, saved = savecheck()
             if ret == QtGui.QMessageBox.Save:
-                if self.gui.save():
+                if saved:
                     event.accept()
             elif ret == QtGui.QMessageBox.Discard:
                 event.accept()
