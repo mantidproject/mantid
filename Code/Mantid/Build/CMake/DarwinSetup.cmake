@@ -8,7 +8,6 @@ execute_process(
       OUTPUT_VARIABLE OSX_VERSION
       RESULT_VARIABLE OSX_VERSION_STATUS
   )
-
 # Strip off any /CR or /LF
 string(STRIP ${OSX_VERSION} OSX_VERSION)
 
@@ -30,7 +29,12 @@ endif()
 
 if (OSX_VERSION VERSION_GREATER 10.9 OR OSX_VERSION VERSION_EQUAL 10.9)
   set ( OSX_CODENAME "Mavericks")
+
 endif()
+
+# Export variables globally
+set(OSX_VERSION ${OSX_VERSION} CACHE INTERNAL "")
+set(OSX_CODENAME ${OSX_CODENAME} CACHE INTERNAL "")
 
 message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
 
