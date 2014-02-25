@@ -53,16 +53,24 @@ class DSFinterp1DFit(IFunction1D):
 
     self.declareAttribute('Workspaces','')
     self.declareAttribute('LoadErrors', False)
+    self.declareAttribute('WorkspaceIndex', 0)
     self.declareAttribute('ParameterValues')
     self.declareAttribute('LocalRegression', True)
     self.declareAttribute('RegressionType', 'quadratic')
     self.declareAttribute('RegressionWindow', 6)
+
+    self._channelgroup = None
+
 
   def setAttributeValue(self, name, value):
     if name == "Workspaces":
       self._Workspaces = value.split()
       if ',' in value:
         self._Workspaces = [x.strip() for x in value.split(',')]
+    elif name == 'LoadErrors':
+      self._LoadErrors= bool(value)
+    elif name == 'WorkspaceIndex':
+      self._WorkspaceIndex = int(value)
     elif name == 'ParameterValues':
       self._ParameterValues = [ float(f) for f in value.split() ]
       if len(self._ParameterValues) != len(self._Workspaces):
@@ -85,6 +93,7 @@ class DSFinterp1DFit(IFunction1D):
         logger.error(message)
         raise ValueError
 
+
   def validateParams(self):
     '''Check parameters are positive'''
     height = self.getParameterValue('height')
@@ -97,51 +106,27 @@ class DSFinterp1DFit(IFunction1D):
       message = 'TargetParameter is out of bounds [{0}, {1}]'.format(self._fmin, self._fmax)
       logger.error(message)
       return None
-    return {'height':h, 'f':f}
+    return {'height':h, 'TargetParameter':f}
 
-  def function1D(self, xvals, **optparms):
+
+  def function1D(self, xvals):
     ''' Does something :)
     '''
-        import scipy.fftpack
-        import scipy.interpolate
+    p=self.validateParams()
+    if not p:
+      return np.zeros(len(xvals), dtype=float) # return zeros if parameters not valid
 
-        p=self.validateParams()
-        if not p:
-            return np.zeros(len(xvals), dtype=float) # return zeros if parameters not valid
-        # override parameter values with optparms (used for the numerical derivative)
-        if optparms:
-            if self._parmset.issubset( set(optparms.keys()) ):
-                for name in self._parmset: p[name] = optparms[name]
+    # The first time the function is called requires initialization of the channel group
+    if self._channelgroup == None:
+      pass
+    else:
+      dsf = self._channelgroup(p['TargetParameter'])
 
-        de = (xvals[1]-xvals[0]) / 2 # increase the long-time range, increase the low-frequency resolution
-        emax = max( abs(xvals) )
-        Nmax = 16000 # increase short-times resolution, increase the resolution of the structure factor tail
-        while ( emax / de ) < Nmax:
-            emax = 2 * emax
-        N = int( emax / de )
-        dt = ( float(N) / ( 2 * N + 1 ) ) * (self._h / emax)  # extent to negative times and t==0
-        sampled_times = dt * np.arange(-N, N+1) # len( sampled_times ) < 64000
-        exponent = -(np.abs(sampled_times)/p['tau'])**p['beta']
-        freqs = de * np.arange(-N, N+1)
-        fourier = p['height']*np.abs( scipy.fftpack.fft( np.exp(exponent) ).real )
-        fourier = np.concatenate( (fourier[N+1:],fourier[0:N+1]) )
-        interpolator = scipy.interpolate.interp1d(freqs, fourier)
-        fourier = interpolator(xvals)
-        return fourier
-    
-    def functionDeriv1D(self, xvals, jacobian):
-        '''Numerical derivative'''
-        p = self.validateParams()
-        f0 = self.function1D(xvals)
-        dp = {}
-        for (key,val) in p.items(): dp[key] = 0.1 * val #modify by ten percent
-        for name in self._parmset:
-            pp = copy.copy(p)
-            pp[name] += dp[name]
-            df = (self.function1D(xvals, **pp) - f0) / dp[name]
-            ip = self._parm2index[name]
-            for ix in range(len(xvals)):
-                jacobian.set(ix, ip, df[ix])  
 
 # Required to have Mantid recognise the new function
-FunctionFactory.subscribe(DSFinterp1DFit)
+try:
+  import dsfinterp
+  FunctionFactory.subscribe(DSFinterp1DFit)
+except:
+  logger.debug('Failed to subscribe fit function DSFinterp1DFit; Python package dsfinterp may be missing (https://pypi.python.org/pypi/dsfinterp)')
+  pass
