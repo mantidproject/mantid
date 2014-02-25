@@ -8,6 +8,11 @@ ELSE()
 	set (GMOCK_VERSION "1.7.0")
 ENDIF()
 
+# Additional Check for Intel Compiler
+if( ${CMAKE_CXX_COMPILER} MATCHES "icpc.*$" )
+	set (GMOCK_VERSION "1.6.0")
+ENDIF()
+
 find_path ( GMOCK_INCLUDE_DIR gmock/gmock.h
             PATHS ${PROJECT_SOURCE_DIR}/TestingTools/gmock-${GMOCK_VERSION}/include
                   ${PROJECT_SOURCE_DIR}/../TestingTools/gmock-${GMOCK_VERSION}/include
