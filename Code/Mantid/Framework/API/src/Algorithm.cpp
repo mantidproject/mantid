@@ -536,7 +536,7 @@ namespace Mantid
         // Log each issue
         for (auto it = errors.begin(); it != errors.end(); it++)
         {
-          if (this->hasProperty(it->first))
+          if (this->existsProperty(it->first))
             g_log.error() << "Invalid value for " << it->first << ": " << it->second << "\n";
           else
           {

@@ -351,7 +351,7 @@ bool AlgorithmDialog::setPropertyValues(const QStringList & skipList)
     for (auto it = errs.begin(); it != errs.end(); it++)
     {
       // only count as an error if the named property exists
-      if (m_algorithm->hasProperty(it->first))
+      if (m_algorithm->existsProperty(it->first))
       {
         const QString pName = QString::fromStdString(it->first);
         const QString value = QString::fromStdString(it->second);

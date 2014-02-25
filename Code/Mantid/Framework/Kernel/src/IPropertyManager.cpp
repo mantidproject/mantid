@@ -57,7 +57,7 @@ namespace Mantid
      * @param name The name of the property being looked for.
      * @return True if the property is managed by this.
      */
-    bool IPropertyManager::hasProperty(const std::string &name) const
+    bool IPropertyManager::existsProperty(const std::string &name) const
     {
       auto props = this->getProperties();
       for (std::vector< Property*>::const_iterator prop = props.begin(); prop != props.end(); ++prop)
