@@ -11,6 +11,7 @@ set ( TEST_PY_FILES
   CreateTransmissionWorkspaceTest.py
   CreateTransmissionWorkspaceAutoTest.py
   DakotaChiSquaredTest.py
+  DSFinterpTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   GetEiT0atSNSTest.py

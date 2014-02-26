@@ -1,8 +1,10 @@
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmWrapper.h"
 #include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
+#include "MantidPythonInterface/kernel/Environment/Threading.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/dict.hpp>
 
 //-----------------------------------------------------------------------------
 // AlgorithmWrapper definition
@@ -61,6 +63,57 @@ namespace Mantid
     std::string AlgorithmWrapper::defaultCategory() const
     {
       return "PythonAlgorithms";
+    }
+
+    /**
+     * @copydoc Mantid::API::Algorithm::validateInputs
+     */
+    std::map<std::string, std::string> AlgorithmWrapper::validateInputs()
+    {
+      // variables that are needed further down
+      boost::python::dict resultDict;
+      std::map<std::string, std::string> resultMap;
+
+      // this is a modified version of CallMethod0::dispatchWithDefaultReturn
+      Environment::GlobalInterpreterLock gil;
+      if(Environment::typeHasAttribute(getSelf(), "validateInputs"))
+      {
+        try
+        {
+          resultDict = boost::python::call_method<boost::python::dict>(getSelf(),"validateInputs");
+
+          if (!bool(resultDict))
+            return resultMap;
+        }
+        catch(boost::python::error_already_set&)
+        {
+          Environment::throwRuntimeError();
+        }
+      }
+
+      // convert to a map<string,string>
+      boost::python::list keys = resultDict.keys();
+      size_t numItems = boost::python::len(keys);
+      for (size_t i = 0; i < numItems; ++i)
+      {
+        boost::python::object value = resultDict[keys[i]];
+        if (value)
+        {
+          try
+          {
+            std::string key = boost::python::extract<std::string>(keys[i]);
+            std::string value = boost::python::extract<std::string>(resultDict[keys[i]]);
+            resultMap[key] = value;
+          }
+          catch(boost::python::error_already_set &)
+          {
+            this->getLogger().error() << "In validateInputs(self): Invalid type for key/value pair "
+                                      << "detected in dict.\n"
+                                      << "All keys and values must be strings\n";
+          }
+        }
+      }
+      return resultMap;
     }
 
     /**

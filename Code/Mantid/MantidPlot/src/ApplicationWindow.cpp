@@ -416,6 +416,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   createActions();
   initToolBars();
   initMainMenu();
+  makeToolbarsMenu();
 
   d_workspace = new QMdiArea();
   d_workspace->setOption(QMdiArea::DontMaximizeSubWindowOnActivation);
@@ -497,7 +498,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   createLanguagesList();
   insertTranslatedStrings();
   disableToolbars();
-
+  displayToolbars();
   actionNextWindow = new QAction(QIcon(getQPixmap("next_xpm")), tr("&Next","next window"), this);
   actionNextWindow->setShortcut( tr("F5","next window shortcut") );
   connect(actionNextWindow, SIGNAL(activated()), d_workspace, SLOT(activateNextSubWindow()));
@@ -1158,7 +1159,7 @@ void ApplicationWindow::initMainMenu()
   mantidUI->addMenuItems(view);
 
   view->insertSeparator();
-  view->addAction(actionToolBars);
+  toolbarsMenu = view->addMenu(tr("&Toolbars"));
   view->addAction(actionShowConfigureDialog);
   view->insertSeparator();
   view->addAction(actionCustomActionDialog);
@@ -8796,6 +8797,22 @@ void ApplicationWindow::setActiveWindow(MdiSubWindow* w)
   {
     d_active_window = NULL;
   }
+  else
+  {
+    // This make sure that we don't have two versions of current active window (d_active_window and
+    // active window of MdiArea) and they are either equal (when docked window is active> or the
+    // latter one is NULL (when floating window is active).
+    if ( d_active_window->getFloatingWindow() )
+    {
+      // If floating window is activated, we set MdiArea to not have any active sub-window.
+      d_workspace->setActiveSubWindow(NULL);
+    }
+    else if ( QMdiSubWindow* w = d_active_window->getDockedWindow() )
+    {
+      // If docked window activated, activate it in MdiArea as well.
+      d_workspace->setActiveSubWindow(w);
+    }
+  }
 }
 
 
@@ -13348,11 +13365,7 @@ void ApplicationWindow::createActions()
 
   actionEditFunction = new QAction(tr("&Edit Function..."), this);
   connect(actionEditFunction, SIGNAL(activated()), this, SLOT(showFunctionDialog()));
-
-  actionToolBars = new QAction(tr("&Toolbars..."), this);
-  actionToolBars->setShortcut(tr("Ctrl+Shift+T"));
-  connect(actionToolBars, SIGNAL(activated()), this, SLOT(showToolBarsMenu()));
-
+  
   actionFontBold = new QAction("B", this);
   actionFontBold->setToolTip(tr("Bold"));
   QFont font = appFont;
@@ -13586,10 +13599,6 @@ void ApplicationWindow::translateActionsStrings()
   actionCloseAllWindows->setShortcut(tr("Ctrl+Q"));
 
   actionDeleteFitTables->setMenuText(tr("Delete &Fit Tables"));
-
-  actionToolBars->setMenuText(tr("&Toolbars..."));
-  actionToolBars->setShortcut(tr("Ctrl+Shift+T"));
-
   actionShowPlotWizard->setMenuText(tr("Plot &Wizard"));
   actionShowPlotWizard->setShortcut(tr("Ctrl+Alt+W"));
 
@@ -14945,7 +14954,6 @@ Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder
 
   if (fn.contains(".opj", Qt::CaseInsensitive) || fn.contains(".ogm", Qt::CaseInsensitive) ||
       fn.contains(".ogw", Qt::CaseInsensitive) || fn.contains(".ogg", Qt::CaseInsensitive))
-    // cppcheck-suppress unusedScopedObject
     ImportOPJ(this, fn);
   else{
     QFile f(fname);
@@ -16688,51 +16696,52 @@ void ApplicationWindow::scriptsDirPathChanged(const QString& path)
 //  }
 }
 
-void ApplicationWindow::showToolBarsMenu()
+void ApplicationWindow::makeToolbarsMenu()
+// cppcheck-suppress publicAllocationError
 {
-  QMenu toolBarsMenu;
-
-  QAction *actionFileTools = new QAction(standardTools->windowTitle(), this);
+  actionFileTools = new QAction(standardTools->windowTitle(), toolbarsMenu);
   actionFileTools->setCheckable(true);
-  actionFileTools->setChecked(standardTools->isVisible());
-  connect(actionFileTools, SIGNAL(toggled(bool)), standardTools, SLOT(setVisible(bool)));
-  toolBarsMenu.addAction(actionFileTools);
+  toolbarsMenu->addAction(actionFileTools);
 
-  QAction *actionPlotTools = new QAction(plotTools->windowTitle(), this);
+  actionPlotTools = new QAction(plotTools->windowTitle(), toolbarsMenu);
   actionPlotTools->setCheckable(true);
-  actionPlotTools->setChecked(plotTools->isVisible());
-  connect(actionPlotTools, SIGNAL(toggled(bool)), plotTools, SLOT(setVisible(bool)));
-  toolBarsMenu.addAction(actionPlotTools);
+  toolbarsMenu->addAction(actionPlotTools);
 
-  QAction *actionDisplayBar = new QAction(displayBar->windowTitle(), this);
+  actionDisplayBar = new QAction(displayBar->windowTitle(), toolbarsMenu);
   actionDisplayBar->setCheckable(true);
-  actionDisplayBar->setChecked(displayBar->isVisible());
-  connect(actionDisplayBar, SIGNAL(toggled(bool)), displayBar, SLOT(setVisible(bool)));
-  toolBarsMenu.addAction(actionDisplayBar);
+  toolbarsMenu->addAction(actionDisplayBar);
 
-  QAction *actionFormatToolBar = new QAction(formatToolBar->windowTitle(), this);
+  actionFormatToolBar = new QAction(formatToolBar->windowTitle(), toolbarsMenu);
   actionFormatToolBar->setCheckable(true);
-  actionFormatToolBar->setChecked(formatToolBar->isVisible());
-  connect(actionFormatToolBar, SIGNAL(toggled(bool)), formatToolBar, SLOT(setVisible(bool)));
-  toolBarsMenu.addAction(actionFormatToolBar);
+  toolbarsMenu->addAction(actionFormatToolBar);
+}
 
-  QAction *action = toolBarsMenu.exec(QCursor::pos());
-  if (!action)
-    return;
+void ApplicationWindow::displayToolbars()
+{
+  actionFileTools->setChecked(d_standard_tool_bar);
+  actionPlotTools->setChecked(d_plot_tool_bar);
+  actionDisplayBar->setChecked(d_display_tool_bar);
+  actionFormatToolBar->setChecked(d_format_tool_bar);
+  connect(actionFileTools, SIGNAL(toggled(bool)), this, SLOT(setToolbars()));
+  connect(actionPlotTools, SIGNAL(toggled(bool)), this, SLOT(setToolbars()));
+  connect(actionDisplayBar, SIGNAL(toggled(bool)), this, SLOT(setToolbars()));
+  connect(actionFormatToolBar, SIGNAL(toggled(bool)), this, SLOT(setToolbars()));
+  setToolbars();
+}
+void ApplicationWindow::setToolbars()
+{
+  d_standard_tool_bar = actionFileTools->isChecked();
+  d_plot_tool_bar = actionPlotTools->isChecked();
+  d_display_tool_bar = actionDisplayBar->isChecked();
+  d_format_tool_bar = actionFormatToolBar->isChecked();
 
   MdiSubWindow *w = activeWindow();
 
-  if (action->text() == plotTools->windowTitle()){
-    d_plot_tool_bar = action->isChecked();
-    plotTools->setEnabled(w && w->isA("MultiLayer"));
-  }
-  else if (action->text() == standardTools->windowTitle()){
-    d_standard_tool_bar = action->isChecked();
-  } else if (action->text() == displayBar->windowTitle()){
-    d_display_tool_bar = action->isChecked();
-  } else if (action->text() == formatToolBar->windowTitle()){
-    d_format_tool_bar = action->isChecked();
-  }
+  standardTools->setVisible(d_standard_tool_bar);
+  plotTools->setVisible(d_plot_tool_bar);
+  displayBar->setVisible(d_display_tool_bar);
+  formatToolBar->setVisible(d_format_tool_bar);
+  plotTools->setEnabled(w && w->isA("MultiLayer"));
 }
 
 void ApplicationWindow::saveFitFunctions(const QStringList& lst)

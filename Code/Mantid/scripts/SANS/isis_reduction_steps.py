@@ -122,7 +122,11 @@ class LoadRun(object):
             workspace = self._get_workspace_name()
 
         extra_options['OutputWorkspace'] = workspace
+        
         outWs = Load(self._data_file, **extra_options)
+
+        if isinstance(outWs, IEventWorkspace):
+            LoadNexusMonitors(self._data_file, OutputWorkspace=workspace + "_monitors")
         
         loader_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
         
@@ -414,8 +418,8 @@ class CanSubtraction(ReductionStep):
         if reducer.to_Q.output_type == '1D':
             rem_nans = sans_reduction_steps.StripEndNans()
 
-        DeleteWorkspace(tmp_smp)
-        DeleteWorkspace(tmp_can)
+        self._keep_partial_results(tmp_smp, tmp_can)
+
 
     def get_wksp_name(self):
         return self.workspace.wksp_name
@@ -424,6 +428,17 @@ class CanSubtraction(ReductionStep):
     
     def get_periods_in_file(self):
         return self.workspace.periods_in_file
+
+    def _keep_partial_results(self, sample_name, can_name):
+        # user asked to keep these results 8970
+        gp_name = 'sample_can_reductions'
+        if mtd.doesExist(gp_name):
+            gpr = mtd[gp_name]
+            for wsname in [sample_name, can_name]:
+                if not gpr.contains(wsname):
+                    gpr.add(wsname)
+        else:
+            GroupWorkspaces([sample_name, can_name], OutputWorkspace=gp_name)
 
     periods_in_file = property(get_periods_in_file, None, None, None)
 
@@ -1009,8 +1024,11 @@ class NormalizeToMonitor(ReductionStep):
         
         sanslog.notice('Normalizing to monitor ' + str(normalization_spectrum))
 
-        self.output_wksp = 'Monitor'
-        mon = reducer.get_monitor(normalization_spectrum-1)
+        self.output_wksp = str(workspace) + '_incident_monitor'
+        mon = reducer.get_sample().get_monitor(normalization_spectrum-1)
+        if reducer.event2hist.scale != 1:
+            mon *= reducer.event2hist.scale
+
         if str(mon) != self.output_wksp:
             RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
         
@@ -1603,23 +1621,21 @@ class SliceEvent(ReductionStep):
     
     def __init__(self):
         super(SliceEvent, self).__init__()
-        self.monitor = ""
+        self.scale = 1
 
     def execute(self, reducer, workspace):
         ws_pointer = getWorkspaceReference(workspace)
 
         # it applies only for event workspace
         if not isinstance(ws_pointer, IEventWorkspace):
+            self.scale = 1
             return
         start, stop = reducer.getCurrSliceLimit()
         
-        _monitor = getMonitor4event(ws_pointer)
+        _monitor = reducer.get_sample().get_monitor()
 
-        hist, others = slice2histogram(ws_pointer, start, stop, _monitor)
-        
-        # get the monitors scaled for the sliced event
-        self.monitor = '_scaled_monitor'
-        CropWorkspace(hist, EndWorkspaceIndex=_monitor.getNumberHistograms()-1, OutputWorkspace=self.monitor)
+        hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor)
+        self.scale = part_c / tot_c
 
 class UserFile(ReductionStep):
     """

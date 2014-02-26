@@ -176,12 +176,31 @@ namespace Mantid
       // Try to load dead time info
       loadDeadTimes(root);
 
-      // Try to load detector grouping info
-      loadDetectorGrouping(root);
+      bool autoGroup = getProperty("AutoGroup");
 
-      // Need to extract the user-defined output workspace name
-      Property *ws = getProperty("OutputWorkspace");
-      std::string localWSName = ws->value();
+      // Grouping info should be returned if user has set the property
+      bool returnGrouping = !getPropertyValue("DetectorGroupingTable").empty();
+
+      Workspace_sptr loadedGrouping;
+
+      // Try to load detector grouping info, if needed for auto-grouping or user requested it
+      if ( autoGroup || returnGrouping )
+      {
+        loadedGrouping = loadDetectorGrouping(root);
+
+        if ( loadedGrouping && returnGrouping)
+        {
+          // Return loaded grouping, if requested
+          setProperty("DetectorGroupingTable", loadedGrouping);
+        }
+
+        if ( !loadedGrouping && autoGroup )
+        {
+          // If autoGroup requested and no grouping in the file - show a warning
+          g_log.warning("Unable to load grouping from the file. Grouping not applied.");
+        }
+      }
+
       // If multiperiod, will need to hold the Instrument & Sample for copying
       boost::shared_ptr<Instrument> instrument;
       boost::shared_ptr<Sample> sample;
@@ -233,10 +252,6 @@ namespace Mantid
       localWorkspace->setYUnit("Counts");
 
       WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
-      if(m_numberOfPeriods>1)
-      {
-        setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
-      }
 
       API::Progress progress(this,0.,1.,m_numberOfPeriods * total_specs);
       // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
@@ -265,24 +280,6 @@ namespace Mantid
             (WorkspaceFactory::Instance().create(localWorkspace));
           localWorkspace->setTitle(title);
           localWorkspace->setComment(notes);
-          //localWorkspace->newInstrumentParameters(); ???
-
-        }
-
-
-        std::string outws("");
-        if(m_numberOfPeriods>1)
-        {
-          std::string outputWorkspace = "OutputWorkspace";
-          std::stringstream suffix;
-          suffix << (period+1);
-          outws =outputWorkspace+"_"+suffix.str();
-          std::string WSName = localWSName + "_" + suffix.str();
-          declareProperty(new WorkspaceProperty<Workspace>(outws,WSName,Direction::Output));
-          if (wsGrpSptr)
-          {
-            wsGrpSptr->addWorkspace( localWorkspace );
-          }
         }
 
         size_t counter = 0;
@@ -307,155 +304,48 @@ namespace Mantid
         // Just a sanity check
         assert(counter == size_t(total_specs) );
 
-        bool autogroup = getProperty("AutoGroup");
+        Workspace_sptr outWs;
 
-        if (autogroup)
+        if (autoGroup && loadedGrouping)
         {
+          TableWorkspace_sptr groupingTable;
 
-          //Get the groupings
-          int64_t max_group = 0;
-          // use a map for mapping group number and output workspace index in case 
-          // there are group numbers > number of groups
-          std::map<int64_t,int64_t> groups;
-          m_groupings.resize(nxload.numDetectors);
-          bool thereAreZeroes = false;
-          for (int64_t i =0; i < static_cast<int64_t>(nxload.numDetectors); ++i)
+          if ( auto table = boost::dynamic_pointer_cast<TableWorkspace>(loadedGrouping) )
           {
-            int64_t ig = static_cast<int64_t>(nxload.detectorGroupings[i]);
-            if (ig == 0)
-            {
-              thereAreZeroes = true;
-              continue;
-            }
-            m_groupings[i] = static_cast<specid_t>(ig);
-            if (groups.find(ig) == groups.end())
-              groups[ig] = static_cast<int64_t>(groups.size());
-            if (ig > max_group) max_group = ig;
+            groupingTable = table;
+          }
+          else if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedGrouping) )
+          {
+            groupingTable = boost::dynamic_pointer_cast<TableWorkspace>( group->getItem(period) );
           }
 
-          if (thereAreZeroes)
-            for (int64_t i =0; i < static_cast<int64_t>(nxload.numDetectors); ++i)
-            {
-              int64_t ig = static_cast<int64_t>(nxload.detectorGroupings[i]);
-              if (ig == 0)
-              {
-                ig = ++max_group;
-                m_groupings[i] = static_cast<specid_t>(ig);
-                groups[ig] = groups.size();
-              }
-            }
+          Algorithm_sptr groupDet = createChildAlgorithm("MuonGroupDetectors");
+          groupDet->setProperty("InputWorkspace", localWorkspace);
+          groupDet->setProperty("DetectorGroupingTable", groupingTable);
+          groupDet->execute();
 
-            int numHists = static_cast<int>(localWorkspace->getNumberHistograms());
-            size_t ngroups = groups.size(); // number of groups
+          MatrixWorkspace_sptr groupedWs = groupDet->getProperty("OutputWorkspace");
 
-            // to output groups in ascending order
-            {
-              int64_t i=0;
-              for(std::map<int64_t,int64_t>::iterator it=groups.begin();it!=groups.end();++it,++i)
-              {
-                it->second = i;
-                g_log.information()<<"group "<<it->first<<": ";
-                bool first = true;
-                int64_t first_i = -1 * std::numeric_limits<int64_t>::max();
-                int64_t last_i = -1 * std::numeric_limits<int64_t>::max();
-                for(int64_t i=0;i<static_cast<int64_t>(numHists);i++)
-                  if (m_groupings[i] == it->first)
-                  {
-                    if (first) 
-                    {
-                      first = false;
-                      g_log.information()<<i;
-                      first_i = i;
-                    }
-                    else
-                    {
-                      if (first_i >= 0)
-                      {
-                        if (i > last_i + 1)
-                        {
-                          g_log.information()<<'-'<<i;
-                          first_i = -1;
-                        }
-                      }
-                      else
-                      {
-                        g_log.information()<<','<<i;
-                        first_i = i;
-                      }
-                    }
-                    last_i = i;
-                  }
-                  else
-                  {
-                    if (!first && first_i >= 0)
-                    {
-                      if (last_i > first_i)
-                        g_log.information()<<'-'<<last_i;
-                      first_i = -1;
-                    }
-                  }
-                  if (first_i >= 0 && last_i > first_i)
-                    g_log.information()<<'-'<<last_i;
-                  g_log.information()<<'\n';
-              }
-            }
-
-            //Create a workspace with only two spectra for forward and back
-            DataObjects::Workspace2D_sptr  groupedWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (API::WorkspaceFactory::Instance().create(localWorkspace, ngroups, localWorkspace->dataX(0).size(), localWorkspace->blocksize()));
-
-            //Compile the groups
-            for (int i = 0; i < numHists; ++i)
-            {    
-              specid_t k = static_cast<specid_t>(groups[ m_groupings[numHists*period + i] ]);
-
-              for (detid_t j = 0; j < static_cast<detid_t>(localWorkspace->blocksize()); ++j)
-              {
-                groupedWS->dataY(k)[j] = groupedWS->dataY(k)[j] + localWorkspace->dataY(i)[j];
-
-                //Add the errors in quadrature
-                groupedWS->dataE(k)[j] 
-                = sqrt(pow(groupedWS->dataE(k)[j], 2) + pow(localWorkspace->dataE(i)[j], 2));
-              }
-
-              //Copy all the X data
-              groupedWS->dataX(k) = localWorkspace->dataX(i);
-              ISpectrum * spec = groupedWS->getSpectrum(k);
-              spec->setSpectrumNo(k+1);
-              spec->setDetectorID(i+1);
-            }
-
-            m_groupings.clear();
-
-            // All two spectra
-            for(detid_t k=0; k<static_cast<detid_t>(ngroups); k++)
-            {
-              groupedWS->getAxis(1)->setValue(k, k + 1);
-            }
-
-            // Assign the result to the output workspace property
-            if(m_numberOfPeriods>1)
-              setProperty(outws, boost::dynamic_pointer_cast<Workspace>(groupedWS));
-            else
-            {
-              setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(groupedWS));
-
-            }
-
+          outWs = groupedWs;
         }
         else
         {
-          // Assign the result to the output workspace property
-          if(m_numberOfPeriods>1)
-            setProperty(outws,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-          else
-          {
-            setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-          }
-
+          outWs = localWorkspace;
         }
 
+        if ( m_numberOfPeriods == 1 )
+          setProperty("OutputWorkspace", outWs);
+        else
+          // In case of multiple periods, just add workspace to the group, and we will return the
+          // group later
+          wsGrpSptr->addWorkspace(outWs);
+
       } // loop over periods
+
+      if(m_numberOfPeriods>1)
+      {
+        setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+      }
 
       // Clean up
       delete[] timeChannels;
@@ -530,11 +420,8 @@ namespace Mantid
      * Loads detector grouping.
      * @param root :: Root entry of the Nexus file to read from 
      */
-    void LoadMuonNexus1::loadDetectorGrouping(NXRoot& root)
+    Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot& root)
     {
-      if ( getPropertyValue("DetectorGroupingTable").empty() )
-        return;
-
       NXEntry dataEntry = root.openEntry("run/histogram_data_1");
 
       NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
@@ -562,7 +449,7 @@ namespace Mantid
           TableWorkspace_sptr table = createDetectorGroupingTable( grouping.begin(), grouping.end() );
 
           if ( table->rowCount() != 0 )
-            setProperty("DetectorGroupingTable", table);
+            return table;
         }
         else
         {
@@ -589,10 +476,12 @@ namespace Mantid
             if ( tableGroup->size() != static_cast<size_t>(m_numberOfPeriods) )
               throw Exception::FileError("Zero grouping for some of the periods", m_filename);
 
-            setProperty("DetectorGroupingTable", tableGroup);
+            return tableGroup;
           }
         }
       }
+
+      return Workspace_sptr();
     }
 
     /**

@@ -21,6 +21,7 @@
 
 #include "MantidKernel/PropertyManager.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
 
 #include <sstream>
 

@@ -1,18 +1,12 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IEventList.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
-#include "MantidPythonInterface/kernel/PropertyWithValue.h"
+#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/object.hpp>
 
-using Mantid::API::IEventWorkspace;
-using Mantid::API::IEventWorkspace_sptr;
-using Mantid::API::IEventList;
-using Mantid::API::WorkspaceProperty;
-using Mantid::API::IWorkspaceProperty;
-using Mantid::Kernel::PropertyWithValue;
+using namespace Mantid::API;
+using Mantid::PythonInterface::Registry::DataItemInterface;
 using namespace boost::python;
 
 /**
@@ -20,10 +14,8 @@ using namespace boost::python;
  */
 void export_IEventWorkspace()
 {
-  REGISTER_SHARED_PTR_TO_PYTHON(IEventWorkspace);
-
   class_<IEventWorkspace, bases<Mantid::API::MatrixWorkspace>, boost::noncopyable>("IEventWorkspace", no_init)
-      .def("getNumberEvents", &IEventWorkspace::getNumberEvents, args("self"),
+    .def("getNumberEvents", &IEventWorkspace::getNumberEvents, args("self"),
          "Returns the number of events in the workspace")
     .def("getTofMin", &IEventWorkspace::getTofMin, args("self"),
          "Returns the minimum TOF value (in microseconds) held by the workspace")
@@ -34,6 +26,9 @@ void export_IEventWorkspace()
     .def("clearMRU", &IEventWorkspace::clearMRU, args("self"), "Clear the most-recently-used lists")
     ;
 
-  REGISTER_SINGLEVALUE_HANDLER(IEventWorkspace_sptr);
+  DataItemInterface<IEventWorkspace>()
+    // map IDs to this interface
+    .castFromID("EventWorkspace")
+  ;
 }
 

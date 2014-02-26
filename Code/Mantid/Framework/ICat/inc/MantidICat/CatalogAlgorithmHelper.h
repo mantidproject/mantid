@@ -1,5 +1,5 @@
-#ifndef MANTID_CATALOGALGORITHMHELPER_H_
-#define MANTID_CATALOGALGORITHMHELPER_H_
+#ifndef MANTID_ICAT_CATALOGALGORITHMHELPER_H_
+#define MANTID_ICAT_CATALOGALGORITHMHELPER_H_
 
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidKernel/ConfigService.h"

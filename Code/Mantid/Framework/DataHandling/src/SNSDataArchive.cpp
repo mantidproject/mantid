@@ -20,6 +20,7 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <boost/algorithm/string/predicate.hpp>
+#include "Poco/DOM/AutoPtr.h"
 
 #include <iostream>
 
@@ -75,7 +76,7 @@ std::string SNSDataArchive::getArchivePath(const std::set<std::string>& filename
   // Create a DOM document from the response.
   Poco::XML::DOMParser parser;
   Poco::XML::InputSource source(rs);
-  Poco::XML::Document* pDoc = parser.parse(&source);
+  Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parse(&source);
 
   std::vector<std::string> locations;
 
@@ -84,7 +85,7 @@ std::string SNSDataArchive::getArchivePath(const std::set<std::string>& filename
   if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
   {
     std::string location;
-    Poco::XML::NodeList* pList = pDoc->getElementsByTagName("location");
+    Poco::AutoPtr<Poco::XML::NodeList> pList = pDoc->getElementsByTagName("location");
     for(unsigned long i = 0 ; i < pList->length(); i++)
     {
       location = pList->item(i)->innerText();

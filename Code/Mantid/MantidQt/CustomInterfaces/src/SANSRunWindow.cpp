@@ -15,6 +15,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/V3D.h"
@@ -1146,7 +1147,7 @@ void SANSRunWindow::addTimeMasksToTable(const QString & mask_string, const QStri
  * @param lsda :: The result of the sample-detector bank 1 distance
  * @param lsdb :: The result of the sample-detector bank 2 distance
  */
-void SANSRunWindow::componentLOQDistances(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, double & lms, double & lsda, double & lsdb)
+void SANSRunWindow::componentLOQDistances(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, double & lms, double & lsda, double & lsdb)
 {
   Instrument_const_sptr instr = workspace->getInstrument();
   if( !instr ) return;
@@ -1430,33 +1431,68 @@ void SANSRunWindow::setGeometryDetails()
 {
   resetGeometryDetailsBox();
     
-  QString workspace_name = m_experWksp;
-  if( workspace_name.isEmpty() ) return;
-  Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(workspace_name.toStdString());
-  MatrixWorkspace_sptr sample_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
-  if ( !sample_workspace )
-  {//assume all geometry information is in the first member of the group and it is constant for all group members
-    //function throws if a fisrt member can't be retrieved
-    sample_workspace = getGroupMember(workspace_ptr, 1);
+  const std::string wsName = m_experWksp.toStdString();
+  if( wsName.empty() )
+    return;
+
+  const auto & ADS = AnalysisDataService::Instance();
+  
+  assert( ADS.doesExist(wsName) );
+  auto ws = ADS.retrieveWS<const Workspace>(wsName);
+
+  const bool isGroupWs = boost::dynamic_pointer_cast<const WorkspaceGroup>(ws);
+  if( isGroupWs )
+    // Assume all geometry information is in the first member of the group and it is
+    // constant for all group members.
+    ws = getGroupMember(ws, 1);
+
+  const bool isEventWs = boost::dynamic_pointer_cast<const IEventWorkspace>(ws);
+
+  MatrixWorkspace_const_sptr monitorWs;
+
+  if( isEventWs )
+  {
+    // EventWorkspaces have their monitors loaded into a separate workspace.
+    const std::string monitorWsName = ws->name() + "_monitors";
+
+    if( !ADS.doesExist(monitorWsName) )
+    {
+      g_log.error() << "Expected a sister monitor workspace called \"" << monitorWsName << "\" "
+                    << "for the EventWorkspace \"" << ws->name() << "\", but could not find one "
+                    << "so unable to set geometry details.\n";
+      return;
+    }
+
+    monitorWs = ADS.retrieveWS<const MatrixWorkspace>(monitorWsName);
   }
+  else
+  {
+    // MatrixWorkspaces have their monitors loaded in the same workspace.
+    monitorWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+    assert( monitorWs );
+  }
+  
+  const auto sampleWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
-  Instrument_const_sptr instr = sample_workspace->getInstrument();
-  boost::shared_ptr<const Mantid::Geometry::IComponent> source = instr->getSource();
+  Instrument_const_sptr instr = sampleWs->getInstrument();
+  const auto source = instr->getSource();
 
-  // Moderator-monitor distance is common to LOQ and S2D
-  size_t monitorWorkspaceIndex=0;
-  specid_t monitor_spectrum = m_uiForm.monitor_spec->text().toInt();
+  // Moderator-monitor distance is common to LOQ and SANS2D.
+  size_t monitorWsIndex = 0;
+  const specid_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
   try
   {
-    monitorWorkspaceIndex = sample_workspace->getIndexFromSpectrumNumber(monitor_spectrum);
+    monitorWsIndex = monitorWs->getIndexFromSpectrumNumber(monitorSpectrum);
   }
-  catch (...)
+  catch (std::runtime_error &)
   {
-    // Spectrum number not found. Return;
+    g_log.error() << "The reported incident monitor spectrum number \"" << monitorSpectrum
+                  << "\" does not have a corresponding workspace index in \""
+                  << monitorWs->name() << "\", so unable to set geometry details.\n";
     return;
   }
 
-  const std::set<detid_t> & dets = sample_workspace->getSpectrum(monitorWorkspaceIndex)->getDetectorIDs();
+  const std::set<detid_t> & dets = monitorWs->getSpectrum(monitorWsIndex)->getDetectorIDs();
   if( dets.empty() ) return;
 
   double dist_mm(0.0);
@@ -1483,7 +1519,7 @@ void SANSRunWindow::setGeometryDetails()
     {
       m_uiForm.dist_mod_mon->setText(formatDouble(dist_mm, colour));
     }
-    setLOQGeometry(sample_workspace, 0);
+    setLOQGeometry(sampleWs, 0);
     QString can = m_experCan;
     if( !can.isEmpty() )
     {
@@ -1510,7 +1546,7 @@ void SANSRunWindow::setGeometryDetails()
     }
 
     //SANS2D - Sample
-    setSANS2DGeometry(sample_workspace, 0);
+    setSANS2DGeometry(sampleWs, 0);
     //Get the can workspace if there is one
     QString can = m_experCan;
     if( can.isEmpty() ) 
@@ -1575,7 +1611,7 @@ void SANSRunWindow::setGeometryDetails()
  * @param workspace :: The workspace
  * @param wscode :: 0 for sample, 1 for can, others not defined
 */
-void SANSRunWindow::setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, int wscode)
+void SANSRunWindow::setSANS2DGeometry(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, int wscode)
 {  
   double unitconv = 1000.;
 
@@ -1631,7 +1667,7 @@ void SANSRunWindow::setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorks
  * @param workspace :: The workspace to operate on
  * @param wscode :: ?????
  */
-void SANSRunWindow::setLOQGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, int wscode)
+void SANSRunWindow::setLOQGeometry(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, int wscode)
 {
   double dist_ms(0.0), dist_mdb(0.0), dist_hab(0.0);
   //Sample
@@ -2093,7 +2129,8 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   addUserMaskStrings(exec_reduce,"i.Mask",DefaultMask);
 
   // add slicing definition
-  exec_reduce += "i.SetEventSlices('"+m_uiForm.sliceEvent->text().trimmed()+"')\n";
+  if (!m_uiForm.sliceEvent->isHidden())
+    exec_reduce += "i.SetEventSlices('"+m_uiForm.sliceEvent->text().trimmed()+"')\n";
 
   return exec_reduce;
 }
@@ -2774,6 +2811,14 @@ void SANSRunWindow::handleInstrumentChange()
   m_uiForm.front_radio->setText("&Front");
     m_uiForm.rear_radio->setText("&Rear"); 
   }
+
+  // LOQ does not have event mode collection
+  // hence, hide the widgets related to slice event mode data.
+  bool hide_events_gui = loq_selected; 
+  m_uiForm.slicePb->setHidden(hide_events_gui);
+  m_uiForm.sliceEvent->setHidden(hide_events_gui);
+  
+
 }
 /** Record if the user has changed the default filename, because then we don't
 *  change it

@@ -784,25 +784,13 @@ def getFurySeqResult(inputWS, outNm, option, Verbose):
     
     GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS[:-1])
 
-def furyfitPlotSeq(inputWS, Plot):
-    nHist = mtd[inputWS].getNumberHistograms()
-    if ( Plot == 'All' ):
-        mp.plotSpectrum(inputWS, range(0, nHist), True)
-        return
-    plotSpecs = []
-    if ( Plot == 'Intensity' ):
-        res = 'Intensity$'
-    if ( Plot == 'Tau' ):
-        res = 'Tau$'
-    elif ( Plot == 'Beta' ):
-        res = 'Beta$'    
-    for i in range(0, nHist):
-        title = mtd[inputWS].getAxis(1).label(i)
-        if ( re.search(res, title) ):
-            plotSpecs.append(i)
-    mp.plotSpectrum(inputWS, plotSpecs, True)
+def furyfitPlotSeq(ws, plot):
+    param_names = [plot]
+    if plot == 'All':
+        param_names = ['Intensity', 'Tau', 'Beta']
+    plotParameters(ws, param_names)
 
-def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False): 
+def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False, Save=False, Plot='None', Verbose=False): 
     StartTime('FuryFit')
     
     workdir = config['defaultsave.directory']
@@ -833,7 +821,7 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False):
     wsnames = [fitWS, outNm+'_Result']
     params = [startx, endx, fitType]
     for ws in wsnames:
-        furyAddSampleLogs(inputWS, ws, params)
+        furyAddSampleLogs(inputWS, ws, params, intensities_constrained=intensities_constrained)
 
         if Save:
             #save workspace to default directory
@@ -843,6 +831,7 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False):
             if Verbose:
                 logger.notice(ws + ' output to file : '+fpath)
 
+    print Plot
     if ( Plot != 'None' ):
         furyfitPlotSeq(fitWS, Plot)
 
@@ -851,13 +840,14 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False):
     return mtd[fitWS]
 
 #Copy logs from sample and add some addtional ones
-def furyAddSampleLogs(inputWs, ws, params, intensities_constrained=False):
+def furyAddSampleLogs(inputWs, ws, params, intensities_constrained=False, beta_constrained=False):
     startx, endx, fitType = params
     CopyLogs(InputWorkspace=inputWs, OutputWorkspace=ws)
     AddSampleLog(Workspace=ws, LogName="start_x", LogType="Number", LogText=str(startx))
     AddSampleLog(Workspace=ws, LogName="end_x", LogType="Number", LogText=str(endx))
     AddSampleLog(Workspace=ws, LogName="fit_type", LogType="String", LogText=fitType)
     AddSampleLog(Workspace=ws, LogName="intensities_constrained", LogType="String", LogText=str(intensities_constrained))
+    AddSampleLog(Workspace=ws, LogName="beta_constrained", LogType="String", LogText=str(beta_constrained))
 
 def furyfitMultParsToWS(Table, Data):
 #   Q = createQaxis(Data)
@@ -911,20 +901,6 @@ def furyfitMultParsToWS(Table, Data):
         VerticalAxisValues=names)
     return wsname
 
-def furyfitPlotMult(inputWS, Plot):
-    nHist = mtd[inputWS].getNumberHistograms()
-    if ( Plot == 'All' ):
-        mp.plotSpectrum(inputWS, range(0, nHist))
-        return
-    plotSpecs = []
-    if ( Plot == 'Intensity' ):
-        mp.plotSpectrum(inputWS, 1, True)
-    if ( Plot == 'Tau' ):
-        mp.plotSpectrum(inputWS, 2, True)
-    elif ( Plot == 'Beta' ):
-        mp.plotSpectrum(inputWS, 3, True)   
-
-
 def createFuryMultFun(ties = True, function = ''):
     fun =  '(composite=CompositeFunction,$domains=i;'
     fun += function
@@ -970,7 +946,7 @@ def getFuryMultResult(inputWS, outNm, function, Verbose):
             group += ',' + fout
     GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS[:-1])
 
-def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=False):
+def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=False, Save=False, Plot='None', Verbose=False):
     StartTime('FuryFit Mult')
     workdir = config['defaultsave.directory']
     option = ftype[:-2]
@@ -1000,8 +976,8 @@ def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=Fals
     getFuryMultResult(inputWS, outNm, function, Verbose)
 
     params = [startx, endx, ftype]
-    furyAddSampleLogs(inputWS, outWS, params, True)
-    furyAddSampleLogs(inputWS, result_workspace, params, True)
+    furyAddSampleLogs(inputWS, outWS, params, intensities_constrained=intensities_constrained, beta_constrained=True)
+    furyAddSampleLogs(inputWS, result_workspace, params, intensities_constrained=intensities_constrained, beta_constrained=True)
 
     if Save:
         opath = os.path.join(workdir, outWS+'.nxs')					# path name for nxs file
@@ -1012,7 +988,7 @@ def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=Fals
             logger.notice('Output file : '+opath)  
             logger.notice('Output file : '+rpath)  
     if ( Plot != 'None' ):
-        furyfitPlotMult(outWS, Plot)
+        furyfitPlotSeq(outWS, Plot)
     EndTime('FuryFit')
 
 ##############################################################################

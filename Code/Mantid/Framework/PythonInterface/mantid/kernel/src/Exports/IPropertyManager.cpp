@@ -31,8 +31,8 @@ namespace
     {
       try {
         Mantid::Kernel::Property *p = self.getProperty(name);
-        Registry::PropertyValueHandler *entry = Registry::getHandler(*(p->type_info()));
-        entry->set(&self, name, value);
+        const auto &entry  = Registry::TypeRegistry::retrieve(*(p->type_info()));
+        entry.set(&self, name, value);
       }
       catch (std::invalid_argument &e)
       {
@@ -57,6 +57,7 @@ void export_IPropertyManager()
     .def("setPropertyValue", &IPropertyManager::setPropertyValue, 
          "Set the value of the named property via a string")
     .def("setProperty", &setProperty, "Set the value of the named property")
+    .def("setPropertyGroup", &IPropertyManager::setPropertyGroup, "Set the group for a given property")
     .def("existsProperty", &IPropertyManager::existsProperty,
         "Returns whether a property exists")
     // Special methods so that IPropertyManager acts like a dictionary

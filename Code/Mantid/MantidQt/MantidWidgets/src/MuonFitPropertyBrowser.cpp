@@ -32,6 +32,8 @@
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
 
+#include <Poco/ActiveResult.h>
+
 #include <QSettings>
 #include <QMessageBox>
 #include <QAction>

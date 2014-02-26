@@ -435,9 +435,9 @@ namespace Algorithms
         if (x_center > datax.front() && x_center < datax.back())
         {
           if (useWindows)
-            fitPeakInWindow(m_dataWS, spec, x_center, fitwindows[2 * i], fitwindows[2 * i + 1]);
+            fitPeakGivenWindow(m_dataWS, spec, x_center, fitwindows[2 * i], fitwindows[2 * i + 1]);
           else
-            fitPeak(m_dataWS, spec, x_center, m_inputPeakFWHM);
+            fitPeakGuessWindow(m_dataWS, spec, x_center, m_inputPeakFWHM);
         }
 
       } // loop through the peaks specified
@@ -889,8 +889,8 @@ namespace Algorithms
     *  @param center_guess :: A guess of the X-value of the center of the peak, in whatever units of the X-axis of the workspace.
     *  @param FWHM_guess :: A guess of the full-width-half-max of the peak, in # of bins.
     */
-  void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum,
-                          const double center_guess, const int FWHM_guess)
+  void FindPeaks::fitPeakGuessWindow(const API::MatrixWorkspace_sptr &input, const int spectrum,
+                                     const double center_guess, const int FWHM_guess)
   {
     g_log.information() << "Fit peak with guessed FWHM:  starting center = " << center_guess
                         << ", FWHM = " << FWHM_guess << ".\n";
@@ -940,7 +940,7 @@ namespace Algorithms
     *  @param xmin    Minimum x value to find the peak
     *  @param xmax    Maximum x value to find the peak
     */
-  void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input, const int spectrum,
+  void FindPeaks::fitPeakGivenWindow(const API::MatrixWorkspace_sptr &input, const int spectrum,
                                   const double centre_guess, const double xmin, const double xmax)
   {
     // Check
@@ -986,6 +986,70 @@ namespace Algorithms
     return;
   }
 
+
+  bool FindPeaks::findPeakBackground(const API::MatrixWorkspace_sptr& input, const int spectrum, const double xmin,
+                                     const double xmax, const std::string bkgdtype,
+                                     double& bg0, double& bg1,double& bg2, int& ipeakmin, int& ipeakmax)
+  {
+    // Initialze to a wrong case
+    bg0 = 0;
+    bg1 = 0;
+    bg2 = 0;
+    ipeakmin = -1;
+    ipeakmax = -2;
+
+    // Create algorithm FindPeakBackground to call
+    IAlgorithm_sptr estimate = createChildAlgorithm("FindPeakBackground");
+
+    g_log.information() << "[DB FindPeakBkgd] FitWindow = " << xmin << ", " << xmax << "\n";
+
+    // Set properties
+    estimate->setProperty("InputWorkspace", input);
+    estimate->setProperty("WorkspaceIndex", spectrum);
+    //estimate->setProperty("SigmaConstant", 1.0);
+    estimate->setProperty("BackgroundType", bkgdtype);
+    std::vector<double> fwvec;
+    fwvec.push_back(xmin);
+    fwvec.push_back(xmax);
+    estimate->setProperty("FitWindow", fwvec);
+
+    // Execute
+    estimate->executeAsChildAlg();
+    if (!estimate->isExecuted())
+    {
+      return false;
+    }
+
+    // Get back the result
+    Mantid::API::ITableWorkspace_sptr peaklist = estimate->getProperty("OutputWorkspace");
+    if (peaklist->rowCount() > 0)
+    {
+      ipeakmin = peaklist->Int(0,1);
+      ipeakmax = peaklist->Int(0,2);
+      bg0 = peaklist->Double(0,3);
+      bg1 = peaklist->Double(0,4);
+      bg2 = peaklist->Double(0,5);
+    }
+
+    // Check
+    if (ipeakmin >= ipeakmax)
+      return false;
+
+    const MantidVec& vecX = input->readX(spectrum);
+    if (ipeakmin < 0 || ipeakmin >= static_cast<int>(vecX.size()))
+      return false;
+    if (ipeakmax < 0 || ipeakmax >= static_cast<int>(vecX.size()))
+      return false;
+
+    if (vecX[ipeakmin] <= xmin || vecX[ipeakmax] >= xmax)
+      return false;
+
+    if (fabs(bg0) < DBL_MIN && fabs(bg1) < DBL_MIN &&fabs(bg2) < DBL_MIN)
+      return false;
+
+    return true;
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Attempts to fit a candidate peak
     *  This is the core fitPeak() to call in the fitPeak hierarchy
@@ -999,8 +1063,6 @@ namespace Algorithms
   void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min,
                           const int i_max, const int i_centre)
   {
-	int i_peakmin = 0;
-	int i_peakmax = i_max - i_min;
     const MantidVec &vecX = input->readX(spectrum);
     const MantidVec &vecY = input->readY(spectrum);
 
@@ -1008,53 +1070,46 @@ namespace Algorithms
                         << vecX[i_min] << ", " << vecX[i_max] << "  i_min = " << i_min << ", i_max = "
                         << i_max << ", i_centre = " << i_centre << ".\n";
 
+
     // Estimate background: output-> m_backgroundFunction
-    double in_bg0;
-    double in_bg1;
-    double in_bg2;
+    double in_bg0, in_bg1, in_bg2;
     estimateBackground(vecX, vecY, i_min, i_max, in_bg0, in_bg1, in_bg2);
+    int i_peakmin = i_min;
+    int i_peakmax = i_max;
 
-    IAlgorithm_sptr estimate = createChildAlgorithm("FindPeakBackground");
-    estimate->setProperty("InputWorkspace", input);
-    // The workspace index
-    std::vector<int> wivec;
-    wivec.push_back(spectrum);
-    estimate->setProperty("WorkspaceIndices", wivec);
-    //estimate->setProperty("SigmaConstant", 1.0);
-    // The workspace index
-    std::vector<double> fwvec;
-    fwvec.push_back(vecX[i_min]);
-    fwvec.push_back(vecX[i_max]);
-    estimate->setProperty("BackgroundType", m_backgroundType);
-    estimate->setProperty("FitWindow", fwvec);
-    estimate->executeAsChildAlg();
-    // Get back the result
-    Mantid::API::ITableWorkspace_sptr peaklist = estimate->getProperty("OutputWorkspace");
-    if (peaklist->rowCount() > 0)
+    double in_bg0x, in_bg1x, in_bg2x;
+    int iminpeakx, imaxpeakx;
+    bool findsuccess = findPeakBackground(input, spectrum, vecX[i_min], vecX[i_max], m_backgroundType, in_bg0x, in_bg1x, in_bg2x,
+                                          iminpeakx, imaxpeakx);
+    if (findsuccess)
     {
-    	if(peaklist->Int(0,1) >= i_min)i_peakmin = peaklist->Int(0,1) - i_min;
-    	if(peaklist->Int(0,2) >= i_min)i_peakmax = peaklist->Int(0,2) - i_min - 1;
-    	in_bg0 = peaklist->Double(0,3);
-    	in_bg1 = peaklist->Double(0,4);
-    	in_bg2 = peaklist->Double(0,5);
-    }
-
-    if (!m_highBackground)
-    {
-      // Not high background.  Fit background and peak together (The original Method)
-      //  fitPeakOneStep(input, spectrum, i0, i2, i4, in_bg0, in_bg1, in_bg2);
-      fitPeakOneStep(input, spectrum, i_min, i_max, i_centre, in_bg0, in_bg1, in_bg2);
+      in_bg0 = in_bg0x;
+      in_bg1 = in_bg1x;
+      in_bg2 = in_bg2x;
+      i_peakmin = iminpeakx;
+      i_peakmax = imaxpeakx;
+      g_log.information("[DB FindPeaks] Using FindPeakBackground's result. ");
+      g_log.information() << "imin = " << i_min << ", ipeakmin = " << iminpeakx << "; ipeakmax = " << imaxpeakx
+                          << ", imax = " << i_max << "\n";
     }
     else
     {
+      g_log.information("[DB FindPeaks] Using Rough-Estimation's result. ");
+    }
+
+    if (m_highBackground)
+    {
       // High background
       fitPeakHighBackground(input, spectrum, i_centre, i_min, i_max, in_bg0, in_bg1, in_bg2, i_peakmin, i_peakmax);
-
+    }
+    else
+    {
+      // Not high background.  Fit background and peak together (The original Method)
+      fitPeakOneStep(input, spectrum, i_min, i_max, i_centre, in_bg0, in_bg1, in_bg2);
     } // if high background
 
-    g_log.debug() << "Fit Peak Over" << std::endl;
+    g_log.debug() << "Fit Peak Over" <<  "\n";
 
-    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -1237,6 +1292,7 @@ namespace Algorithms
       dataY[i] = rawY[i_min+i] - backgroundvalues[i];
       if (dataY[i] < 0)
         dataY[i] = 0.;
+      g_log.notice() << "[SuperDB] " << dataX[i] << "\t " << dataY[i] << "\t " << backgroundvalues[i] << "\n";
     }
     MantidVec& dataE = peakws->dataE(0);
     dataE.assign(numpts, 1.);
@@ -1315,8 +1371,13 @@ namespace Algorithms
     }
 
     in_centre = g_centre;
-    peakleftbound = peakX[i_peakmin]; //g_centre - 3*g_fwhm;
-    peakrightbound = peakX[i_peakmax]; //g_centre + 3*g_fwhm;
+    int ipeakleft = i_peakmin - i_min;
+    int ipeakright = i_peakmax - i_min;
+    int maxsize = static_cast<int>(peakX.size());
+    if (ipeakleft < 0 || ipeakleft >= maxsize || ipeakright < 0 || ipeakright >= maxsize)
+      throw std::runtime_error("i_peakmin and i_peakright are not given correctly. ");
+    peakleftbound = peakX[ipeakleft]; //g_centre - 3*g_fwhm;
+    peakrightbound = peakX[ipeakright]; //g_centre + 3*g_fwhm;
     vec_FWHM.clear();
     vec_FWHM.push_back(g_fwhm);
     PeakFittingRecord fitresult2 = multiFitPeakBackground(peakws, 0, input, spectrum, peakfunc, in_centre, g_height,vec_FWHM,
@@ -1456,7 +1517,9 @@ namespace Algorithms
     g_log.information() << "Best fit result is No. " << bestindex << " with guess sigma = "
                         << in_fwhms[bestindex] << ".\n";
 
+    //============================================================================
     // Fit background with better esitmation on peak (: m_backgroundFunction)
+    //============================================================================
     //   Unfix background parameters
     g_log.information("\tFit background from fitted peak.");
     size_t numbkgdparams = m_backgroundFunction->nParams();
@@ -1655,6 +1718,7 @@ namespace Algorithms
 
     // Set outpout information
     addInfoRow(spectrum, params, rawparams, finalrwp, fitfail);
+    g_log.information() << "[DB FitPeak] Peak FWHM = " << peak->fwhm() << "\n";
 
     // Add function to list
     if (!fitfail)
@@ -1907,8 +1971,8 @@ namespace Algorithms
     xf = xf / static_cast<double>(numavg);
     yf = yf / static_cast<double>(numavg);
 
-    // g_log.debug() << "[F1145] Spec = " << specdb << "(X0, Y0) = " << x0 << ", " << y0 << "; (Xf, Yf) = "
-    //              << xf << ", " << yf << ". (Averaged from " << numavg << " background points.)" << "\n";
+    g_log.debug() << "[F1145] (X0, Y0) = " << x0 << ", " << y0 << "; (Xf, Yf) = "
+                  << xf << ", " << yf << ". (Averaged from " << numavg << " background points.)" << "\n";
 
     // Esitmate
     out_bg2 = 0.;
@@ -2373,7 +2437,7 @@ namespace Algorithms
     if (numparams >= 3)
       in_bg2 = m_backgroundFunction->getParameter("A2");
 
-    g_log.debug() << "F1120 Fit background Input: " << "A0 = " << in_bg0 << ", A1 = " << in_bg1
+    g_log.debug() << "[F1120] FitBackground's Input: " << "A0 = " << in_bg0 << ", A1 = " << in_bg1
                   << ", A2 = " << in_bg2 << ".  Range = " << X[ileft] << ", " << X[iright] << ".\n";
 
     // Construct a workspace to fit for background.  The region within fit window is removed
@@ -2391,12 +2455,16 @@ namespace Algorithms
 
     if (numpts < 3)
     {
-      g_log.warning() << "Size of workspace to fit for background = " << newX.size()
-                      << ". It is too small to proceed. ";
-      g_log.warning() << "Input i_min = " << imin << ",i_max = " << imax << ", i_left = " << ileft
-                      << ", i_right = " << iright;
+      g_log.information() << "Size of workspace to fit for background = " << newX.size()
+                          << "., which is too small to proceed. "
+                          << "Input i_min = " << imin << ",i_max = " << imax << ", i_peak_left = " << ileft
+                          << ", i_peak_right = " << iright << "\n";
 
       return false;
+    }
+    else
+    {
+      g_log.information() << "[DB FitBackground] Size Background WS = " << newX.size() << "\n";
     }
 
     // Construct a background data workspace for fit

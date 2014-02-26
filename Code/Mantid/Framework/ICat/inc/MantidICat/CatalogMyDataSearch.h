@@ -1,5 +1,5 @@
-#ifndef MANTID_ICAT_CMYDATASEARCH_H_
-#define MANTID_ICAT_CMYDATASEARCH_H_
+#ifndef MANTID_ICAT_CATALOGMYDATASEARCH_H_
+#define MANTID_ICAT_CATALOGMYDATASEARCH_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -9,13 +9,12 @@ namespace Mantid
   namespace ICat
   {
 
-    /** CatalogMyDataSearch is a class responsible for searching investigations of the logged in user.
-     * This algorithm does Icat search and returns the investigations record
+    /**
+    This algorithm obtains all of the information for the investigations the logged in user is an investigator of.
 
     Required Properties:
     <UL>
-    <LI>  OutputWorkspace - name of the OutputWorkspace which contains my investigations search
-    <LI>  isValid         - Boolean option used to check the validity of login session
+     <LI>  OutputWorkspace - name of the OutputWorkspace which contains my investigations search
     </UL>
 
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 

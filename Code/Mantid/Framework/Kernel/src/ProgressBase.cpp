@@ -1,5 +1,5 @@
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 
 namespace Mantid
 {
@@ -17,9 +17,10 @@ namespace Kernel
    m_notifyStepPct(1),
    m_step(1), m_i(0),
    m_last_reported(-1),
+   m_timeElapsed(new Timer),
    m_notifyStepPrecision(0)
   {
-    m_timeElapsed.reset();
+    m_timeElapsed->reset();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -30,22 +31,58 @@ namespace Kernel
       @param numSteps :: Number of times report(...) method will be called.
   */
   ProgressBase::ProgressBase(double start,double end, int64_t numSteps)
-    : m_start(start),m_end(end),
-      m_ifirst(0),
-      m_notifyStepPct(1),
-      m_i(0),
-      m_notifyStepPrecision(0)
+    : 
+    m_start(start), m_end(end),
+    m_ifirst(0), m_numSteps(numSteps),
+    m_notifyStep(1),
+    m_notifyStepPct(1),
+    m_step(1), m_i(0),
+    m_last_reported(-1),
+    m_timeElapsed(new Timer),
+    m_notifyStepPrecision(0)
   {
     this->setNumSteps(numSteps);
     m_last_reported = -m_notifyStep;
-    m_timeElapsed.reset();
+    m_timeElapsed->reset();
   }
-    
+  //----------------------------------------------------------------------------------------------
+  /**
+   * Copy constructor that builds a new ProgressBase object. The timer state is copied
+   * from the other object
+   * @param source The source of the copy
+   */
+  ProgressBase::ProgressBase(const ProgressBase & source) 
+    : m_timeElapsed(new Timer) // new object, new timer
+  {
+    *this = source;
+  }
+
+  ProgressBase & ProgressBase::operator=(const ProgressBase & rhs)
+  {
+    if(this != &rhs)
+    {
+      m_start = rhs.m_start;
+      m_end = rhs.m_end;
+      m_ifirst = rhs.m_ifirst;
+      m_numSteps = rhs.m_numSteps;
+      m_notifyStep = rhs.m_notifyStep;
+      m_notifyStepPct = rhs.m_notifyStepPct;
+      m_step = rhs.m_step;
+      m_i = rhs.m_i;
+      m_last_reported = rhs.m_last_reported;
+      // copy the timer state, being careful only to copy state & not the actual pointer
+      *m_timeElapsed = *rhs.m_timeElapsed;
+      m_notifyStepPrecision = rhs.m_notifyStepPrecision;
+    }
+    return *this;
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   ProgressBase::~ProgressBase()
   {
+    delete m_timeElapsed;
   }
 
 
@@ -165,7 +202,7 @@ namespace Kernel
    * @return seconds estimated to remain. 0 if it cannot calculate it */
   double ProgressBase::getEstimatedTime() const
   {
-    double elapsed = double(m_timeElapsed.elapsed_no_reset());
+    double elapsed = double(m_timeElapsed->elapsed_no_reset());
     double prog = double(m_i) * m_step;
     if (prog <= 1e-4)
       return 0.0; // unknown

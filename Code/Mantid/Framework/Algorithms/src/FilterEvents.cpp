@@ -29,6 +29,9 @@ and splitByFullTime considers both pulse time and TOF.
 
 Therefore, FilterByLogValue is not suitable for fast log filtering.
 
+=== Comparing with other event filtering algorithms ===
+Wiki page [[EventFiltering]] has a detailed introduction on event filtering in MantidPlot. 
+
 *WIKI*/
 
 #include "MantidAlgorithms/FilterEvents.h"

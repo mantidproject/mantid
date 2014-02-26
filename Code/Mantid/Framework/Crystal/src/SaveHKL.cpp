@@ -382,7 +382,6 @@ namespace Crystal
       out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) <<
     		  std::sqrt(std::pow(correc*p.getSigmaIntensity(),2)+std::pow(relSigSpect*correc*p.getIntensity(),2));
       if(type.compare(0,2,"Ba")==0) out << std::setw( 4 ) << bankSequence;
-      else if(type.compare(0,2,"Ru")==0) out << std::setw( 4 ) << runSequence;
       else out << std::setw( 4 ) << runSequence;
 
       out << std::setw( 8 ) << std::fixed << std::setprecision( 4 ) << lambda;

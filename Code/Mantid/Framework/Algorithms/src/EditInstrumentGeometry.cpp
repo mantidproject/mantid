@@ -30,11 +30,8 @@ There are some limitations of this algorithm.
 *WIKI*/
 
 #include "MantidAlgorithms/EditInstrumentGeometry.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/ISpectrum.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 

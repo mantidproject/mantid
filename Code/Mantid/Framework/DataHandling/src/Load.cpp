@@ -561,7 +561,7 @@ namespace Mantid
       }
       if (startProgress >= 0. && endProgress > startProgress && endProgress <= 1.)
       {
-        loader->addObserver(m_progressObserver);
+        loader->addObserver(this->progressObserver());
         setChildStartProgress(startProgress);
         setChildEndProgress(endProgress);
       }
