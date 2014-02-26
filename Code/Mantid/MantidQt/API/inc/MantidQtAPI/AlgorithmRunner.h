@@ -1,12 +1,11 @@
 #ifndef MANTID_API_ALGORITHMRUNNER_H_
 #define MANTID_API_ALGORITHMRUNNER_H_
 
-#include "MantidKernel/System.h"
 #include "DllOption.h"
-#include <QtCore/qobject.h>
-#include <Poco/NObserver.h>
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IAlgorithm.h"
+
+#include <QObject>
+#include <Poco/NObserver.h>
 
 namespace MantidQt
 {

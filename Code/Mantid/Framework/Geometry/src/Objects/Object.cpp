@@ -2,6 +2,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Objects/BoundingBox.h"

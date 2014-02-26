@@ -129,6 +129,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="ckCreateOutput">
+       <property name="toolTip">
+        <string>If check, the output of the fitting will be created for each spectrum.</string>
+       </property>
+       <property name="text">
+        <string>Create Output</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_4">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

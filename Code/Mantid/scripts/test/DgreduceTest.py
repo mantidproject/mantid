@@ -26,7 +26,7 @@ class DgreduceTest(unittest.TestCase):
         kw["someKeyword"] ="aaaa"
         kw["normalise_method"] ="Monitor-1"
         params = process_legacy_parameters(**kw);
-        self.assertEqual(len(params),5)
+        self.assertEqual(len(params),4)
         self.assertTrue("someKeyword" in params);
         self.assertTrue("hard_mask_file" in params); 
         self.assertTrue("use_hard_mask_only" in params)

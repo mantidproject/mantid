@@ -2,6 +2,7 @@
 #define MANTID_ICAT_ICAT4CATALOG_H_
 
 #include "MantidAPI/ICatalog.h"
+#include "MantidAPI/ICatalogInfoService.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/Logger.h"
 #include "MantidICat/CatalogSearchParam.h"
@@ -34,7 +35,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class  ICat4Catalog : public Mantid::API::ICatalog
+    class ICat4Catalog : public Mantid::API::ICatalog, public Mantid::API::ICatalogInfoService
     {
       public:
         /// Constructor
@@ -61,16 +62,14 @@ namespace Mantid
         /// Get investigationtypes list
         virtual void listInvestigationTypes(std::vector<std::string>& invstTypes);
         /// Get the file location string(s) from archive.
-        virtual void getFileLocation(const long long&fileID,std::string& fileLocation);
+        virtual const std::string getFileLocation(const long long&fileID);
         /// Get the url(s) based on the fileID.
-        virtual void getDownloadURL(const long long& fileID,std::string & url);
+        virtual const std::string getDownloadURL(const long long& fileID);
         /// get URL of where to PUT (publish) files.
         virtual const std::string getUploadURL(
             const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription);
         /// Keep current session alive
         virtual void keepAlive();
-        /// Keep alive in minutes
-        virtual int keepAliveinminutes();
 
       private:
         // Ensures human friendly error messages are provided to the user.

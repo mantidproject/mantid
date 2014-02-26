@@ -33,6 +33,9 @@ pulses:
 
  FilterByLogValue(InputWorkspace="ws", OutputWorkspace="ws", LogName="veto_pulse_time", PulseFilter="1")
 
+=== Comparing with other event filtering algorithms ===
+Wiki page [[EventFiltering]] has a detailed introduction on event filtering in MantidPlot. 
+
 *WIKI*/
 
 //----------------------------------------------------------------------

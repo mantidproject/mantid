@@ -44,6 +44,7 @@ namespace MantidQt
 
 			//Connect the data selector for the sample to the mini plot
 			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
+			connect(m_uiForm.chkSequentialFit, SIGNAL(toggled(bool)), m_uiForm.cbPlot, SLOT(setEnabled(bool)));
 		}
 
 		/**

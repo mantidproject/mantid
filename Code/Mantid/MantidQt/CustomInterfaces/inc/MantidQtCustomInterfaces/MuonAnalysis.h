@@ -23,16 +23,36 @@ namespace MantidQt
 namespace CustomInterfaces
 {
 
-namespace Muon
-{
-  class MuonAnalysisOptionTab;
-  class MuonAnalysisFitDataTab;
-  class MuonAnalysisResultTableTab;
-}
-
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+
+namespace Muon
+{
+  // Tab classes
+  class MuonAnalysisOptionTab;
+  class MuonAnalysisFitDataTab;
+  class MuonAnalysisResultTableTab;
+  struct Grouping;
+
+  struct LoadResult {
+    Workspace_sptr loadedWorkspace;
+    Workspace_sptr loadedGrouping;
+    Workspace_sptr loadedDeadTimes;
+    std::string mainFieldDirection;
+    double timeZero;
+    double firstGoodData;
+  };
+
+  struct GroupResult {
+    bool usedExistGrouping;
+    boost::shared_ptr<Grouping> groupingUsed;
+    Workspace_sptr groupedWorkspace;
+  };
+}
+
+using namespace Muon;
 
 /** 
 This is the main class for the MuonAnalysis interface
@@ -212,6 +232,9 @@ private slots:
   /// Update front
   void updateFront();
 
+  /// Opens the managed directory dialog for easier access for the user.
+  void openDirectoryDialog();
+
 private:
  
   // Types of entities we are dealing with
@@ -244,6 +267,12 @@ private:
   /// Input file changed - update GUI accordingly
   void inputFileChanged(const QStringList& filenames);
 
+  /// Loads the given list of files
+  boost::shared_ptr<LoadResult> load(const QStringList& files) const;
+
+  /// Groups the loaded workspace
+  boost::shared_ptr<GroupResult> group(boost::shared_ptr<LoadResult> loadResult) const;
+
   /// Set whether the loading buttons and MWRunFiles widget are enabled.
   void allowLoading(bool enabled);
 
@@ -251,7 +280,7 @@ private:
   int pairInFocus();
 
   /// is grouping set
-  bool isGroupingSet();
+  bool isGroupingSet() const;
 
   /// Crop/rebins/offsets the workspace according to interface settings. 
   MatrixWorkspace_sptr prepareAnalysisWorkspace(MatrixWorkspace_sptr ws, bool isRaw);
@@ -277,7 +306,7 @@ private:
   void updateFrontAndCombo();
 
   /// Updates widgets related to period algebra
-  void updatePeriodWidgets(int numPeriods);
+  void updatePeriodWidgets(size_t numPeriods);
 
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
   int numOfDetectors(const std::string& str) const;
@@ -290,11 +319,11 @@ private:
   /// Clear tables and front combo box
   void clearTablesAndCombo();
 
-  /// Adds the workspaces in a range.
-  void plusRangeWorkspaces();
+  /// Sums a given list of workspaces
+  Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces) const;
 
-  /// Delete ranged workspaces.
-  void deleteRangedWorkspaces();
+  /// Deletes a workspace _or_ a workspace group with the given name, if one exists
+  void deleteWorkspaceIfExists(const std::string& wsName);
 
   /// Get group workspace name
   QString getGroupName();
@@ -315,10 +344,13 @@ private:
   int numGroups();
 
   /// Returns custom dead time table file name as set on the interface
-  std::string deadTimeFilename();
+  std::string deadTimeFilename() const;
 
   /// Loads dead time table (group of tables) from the file.
-  Workspace_sptr loadDeadTimes(const std::string& filename);
+  Workspace_sptr loadDeadTimes(const std::string& filename) const;
+
+  /// Applies dead time correction to the loaded workspace
+  void applyDeadTimeCorrection(boost::shared_ptr<LoadResult> loadResult) const;
 
   /// Creates and algorithm with all the properties set according to widget values on the interface
   Algorithm_sptr createLoadAlgorithm();
@@ -455,20 +487,23 @@ private:
   /// Saves the value of the widget which called the slot
   void loadWidgetValue(QWidget* target, const QVariant& defaultValue);
 
-  // Groups loaded workspace (m_workspace_name)
-  void groupLoadedWorkspace(ITableWorkspace_sptr detGroupingTable = ITableWorkspace_sptr());
+  /// Groups the workspace
+  Workspace_sptr groupWorkspace(Workspace_sptr ws, Workspace_sptr grouping) const;
+
+  /// Groups the workspace
+  Workspace_sptr groupWorkspace(const std::string& wsName, const std::string& groupingName) const;
+
+  /// Groups loaded workspace using information from Grouping Options tab
+  void groupLoadedWorkspace();
 
   /// Parses grouping information from the UI table.
   ITableWorkspace_sptr parseGrouping();  
 
-  /// Updated UI table using the grouping information provided.
-  void setGrouping(ITableWorkspace_sptr detGroupingTable);
+  /// When no data loaded set various buttons etc to inactive
+  void noDataAvailable();
 
-  /// Updates UI grouping table - creates dummy grouping 
-  void setDummyGrouping(Instrument_const_sptr instrument);
-
-  /// Updates UI grouping table using default grouping of the instrument
-  void setGroupingFromIDF(Instrument_const_sptr instrument, const std::string& mainFieldDirection);
+  /// When data loaded set various buttons etc to active
+  void nowDataAvailable();
 
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
@@ -488,8 +523,6 @@ private:
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
 
-  /// Creates new double validator which accepts numbers in standard notation only.
-  static QDoubleValidator* createDoubleValidator(QObject* parent);
 };
 
 }

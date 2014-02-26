@@ -2,6 +2,7 @@
 #include "MantidKernel/ThreadSafeLogStream.h"
 #include <Poco/Logger.h>
 #include <Poco/Message.h>
+#include <Poco/Mutex.h>
 
 #ifdef _MSC_VER
   // Disable a flood of warnings about inheriting from std streams
@@ -24,7 +25,7 @@ namespace Kernel
 {
   // Initialize the static members
   Logger::LoggerList* Logger::m_loggerList = NULL;
-  Mutex* Logger::mutexLoggerList = NULL;
+  Poco::FastMutex* Logger::mutexLoggerList = NULL;
   Poco::NullOutputStream* Logger::m_nullStream = NULL;
 
   /** Constructor
@@ -43,7 +44,7 @@ namespace Kernel
   }
 
   /// Sets the Loggername to a new value.
-  void Logger::setName(std::string newName)
+  void Logger::setName(const std::string & newName)
   {
     //delete the log stream
     delete (m_logStream);
@@ -380,7 +381,7 @@ namespace Kernel
     // MG: This method can be called to initialize static logger which means
     // it may get called before mutexLoggerList has been initialized, i.e. the
     // usual static initialization order problem.
-    if( mutexLoggerList == NULL ) mutexLoggerList = new Mutex();
+    if( mutexLoggerList == NULL ) mutexLoggerList = new Poco::FastMutex();
     try
     { mutexLoggerList->lock(); }
     catch(Poco::SystemException &)
@@ -409,11 +410,10 @@ namespace Kernel
   }
 
   /**
-   * Log a given message at a given priority
    * @param message :: The message to log
    * @param priority :: The priority level
    */
-  void Logger::log(const std::string message, Logger::Priority priority)
+  void Logger::log(const std::string & message, Logger::Priority priority)
   {
     if( !m_enabled ) return;
 

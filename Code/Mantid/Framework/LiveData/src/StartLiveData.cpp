@@ -102,6 +102,8 @@ plotSpectrum('live', [0,1])
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmProperty.h"
 
+#include <Poco/ActiveResult.h>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 

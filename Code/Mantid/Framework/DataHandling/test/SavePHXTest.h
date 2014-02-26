@@ -2,7 +2,7 @@
 #define SAVEPHXTEST_H_
 
 #include <cxxtest/TestSuite.h>
-
+#include <fstream>
 
 #include "MantidDataHandling/SavePHX.h"
 // to generate test workspaces
