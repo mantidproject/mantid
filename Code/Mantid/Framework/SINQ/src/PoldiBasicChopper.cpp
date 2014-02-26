@@ -1,10 +1,11 @@
 #include "MantidSINQ/PoldiBasicChopper.h"
 
+#include "MantidGeometry/ICompAssembly.h"
+
 namespace Mantid
 {
 namespace Poldi
 {
-
 
 PoldiBasicChopper::PoldiBasicChopper() :
     m_slitPositions(),
@@ -21,34 +22,24 @@ PoldiBasicChopper::PoldiBasicChopper() :
 {
 }
 
-void PoldiBasicChopper::loadConfiguration(DataObjects::TableWorkspace_sptr chopperConfigurationWorkspace,
-                                          DataObjects::TableWorkspace_sptr chopperSlitWorkspace,
-                                          DataObjects::TableWorkspace_sptr chopperSpeedWorkspace)
+void PoldiBasicChopper::loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument)
 {
-    try {
-        size_t rowIndex = -1;
+    Geometry::ICompAssembly_const_sptr chopperGroup = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(poldiInstrument->getComponentByName(std::string("chopper")));
 
-        chopperConfigurationWorkspace->find(std::string("dist-chopper-sample"), rowIndex, 0);
-        double chopperDistance = chopperConfigurationWorkspace->cell<double>(rowIndex, 2);
+    size_t numberOfSlits = chopperGroup->nelements();
 
-        chopperConfigurationWorkspace->find(std::string("t0"), rowIndex, 0);
-        double rawt0 = chopperConfigurationWorkspace->cell<double>(rowIndex, 2);
-
-        chopperConfigurationWorkspace->find(std::string("tconst"), rowIndex, 0);
-        double rawt0const = chopperConfigurationWorkspace->cell<double>(rowIndex, 2);
-
-        std::vector<double> chopperSlitVector = chopperSlitWorkspace->getColVector<double>(std::string("position"));
-
-        chopperSpeedWorkspace->find(std::string("ChopperSpeed"), rowIndex, 0);
-        double chopperSpeed = boost::lexical_cast<double>(chopperSpeedWorkspace->cell<std::string>(rowIndex, 2));
-
-        initializeFixedParameters(chopperSlitVector, chopperDistance, rawt0, rawt0const);
-        initializeVariableParameters(chopperSpeed);
+    std::vector<double> slitPositions(numberOfSlits);
+    for(size_t i = 0; i < numberOfSlits; ++i) {
+        slitPositions[i] = chopperGroup->getChild(i)->getPos().X();
     }
-    catch(std::out_of_range&)
-    {
-        throw std::runtime_error("Missing configuration item for PoldiBasicChopper.");
-    }
+
+    double distance = chopperGroup->getPos().norm() * 1000.0;
+    double t0 = chopperGroup->getNumberParameter("t0").front();
+    double t0const = chopperGroup->getNumberParameter("t0_const").front();
+    //double speed = chopperGroup->getNumberParameter("rotation_speed").front();
+
+    initializeFixedParameters(slitPositions, distance, t0, t0const);
+    //initializeVariableParameters(speed);
 }
 
 void PoldiBasicChopper::setRotationSpeed(double rotationSpeed)

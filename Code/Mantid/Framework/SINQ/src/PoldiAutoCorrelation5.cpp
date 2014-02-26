@@ -14,12 +14,18 @@ wiki page of [[PoldiProjectRun]].
 #include "MantidSINQ/PoldiAutoCorrelation5.h"
 
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
 #include "MantidSINQ/PoldiDetectorFactory.h"
 #include "MantidSINQ/PoldiDeadWireDecorator.h"
 #include "MantidSINQ/PoldiAutoCorrelationCore.h"
 #include "MantidSINQ/PoldiChopperFactory.h"
+
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -41,6 +47,7 @@ void PoldiAutoCorrelation5::initDocs()
 using namespace Kernel;
 using namespace API;
 using namespace PhysicalConstants;
+using namespace Geometry;
 
 /// Initialisation method.
 void PoldiAutoCorrelation5::init()
@@ -49,21 +56,6 @@ void PoldiAutoCorrelation5::init()
 	// Input workspace containing the raw data.
 	declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("InputWorkspace", "", Direction::InOut),
 			"Input workspace containing the raw data.");
-	// Input workspace containing the log data.
-	declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>("PoldiSampleLogs", "PoldiSampleLogs", Direction::InOut),
-			"Input workspace containing the log data.");
-	// Input workspace containing the dead wires data.
-	declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>("PoldiDeadWires", "PoldiDeadWires", Direction::InOut),
-			"Input workspace containing the dead wires data.");
-	// Input workspace containing the choppers' slits data.
-	declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>("PoldiChopperSlits", "PoldiChopperSlits", Direction::InOut),
-			"Input workspace containing the choppers' slits data.");
-	// Input workspace containing the Poldi caracteristic spectra.
-	declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>("PoldiSpectra", "PoldiSpectra", Direction::InOut),
-			"Input workspace containing the Poldi caracteristic spectra.");
-	// Input workspace containing the Poldi setup data.
-	declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>("PoldiIPP", "PoldiIPP", Direction::InOut),
-			"Input workspace containing the Poldi setup data.");
 
 	// the minimal value of the wavelength to consider
 	declareProperty("wlenmin", 1.1, "minimal wavelength considered" , Direction::Input);
@@ -94,26 +86,36 @@ void PoldiAutoCorrelation5::init()
  */
 void PoldiAutoCorrelation5::exec()
 {
-
 	g_log.information() << "_Poldi  start conf --------------  "  << std::endl;
 
-    // Loading workspaces containing configuration and meta-data
+    /* From localWorkspace three things are used:
+     *      - Count data from POLDI experiment
+     *      - POLDI instrument definition
+     *      - Some data from the "Log" (for example chopper-speed)
+     */
     DataObjects::Workspace2D_sptr localWorkspace = this->getProperty("InputWorkspace");
-	DataObjects::TableWorkspace_sptr ws_sample_logs = this->getProperty("PoldiSampleLogs");
-	DataObjects::TableWorkspace_sptr ws_poldi_chopper_slits = this->getProperty("PoldiChopperSlits");
-	DataObjects::TableWorkspace_sptr ws_poldi_dead_wires = this->getProperty("PoldiDeadWires");
-	DataObjects::TableWorkspace_sptr ws_poldi_IPP = this->getProperty("PoldiIPP");
 
+    g_log.information() << "_Poldi ws loaded --------------  " << std::endl;
 
-	g_log.information() << "_Poldi ws loaded --------------  "  << std::endl;
+    double wlen_min = this->getProperty("wlenmin");
+    double wlen_max = this->getProperty("wlenmax");
 
-	double wlen_min = this->getProperty("wlenmin");
-	double wlen_max = this->getProperty("wlenmax");
+    double chopperSpeed = 0.0;
+
+    try {
+        chopperSpeed = localWorkspace->run().getPropertyValueAsType<std::vector<double> >("chopperspeed").front();
+    } catch(std::invalid_argument&) {
+        throw(std::runtime_error("Chopper speed could not be extracted from Workspace '" + localWorkspace->name() + "'. Aborting."));
+    }
+
+    // Instrument definition
+    Instrument_const_sptr poldiInstrument = localWorkspace->getInstrument();
 
 	// Chopper configuration
     PoldiChopperFactory chopperFactory;
     boost::shared_ptr<PoldiAbstractChopper> chopper(chopperFactory.createChopper(std::string("default-chopper")));
-    chopper->loadConfiguration(ws_poldi_IPP, ws_poldi_chopper_slits, ws_sample_logs);
+    chopper->loadConfiguration(poldiInstrument);
+    chopper->setRotationSpeed(chopperSpeed);
 
 	g_log.information() << "____________________________________________________ "  << std::endl;
 	g_log.information() << "_Poldi  chopper conf ------------------------------  "  << std::endl;
@@ -134,7 +136,7 @@ void PoldiAutoCorrelation5::exec()
 	// Detector configuration
     PoldiDetectorFactory detectorFactory;
     boost::shared_ptr<PoldiAbstractDetector> detector(detectorFactory.createDetector(std::string("helium3-detector")));
-    detector->loadConfiguration(ws_poldi_IPP);
+    detector->loadConfiguration(poldiInstrument);
 
     g_log.information() << "_Poldi  detector conf ------------------------------  "  << std::endl;
     g_log.information() << "_Poldi -     Element count:     " << detector->elementCount() << std::endl;
@@ -142,10 +144,23 @@ void PoldiAutoCorrelation5::exec()
     g_log.information() << "_Poldi -     2Theta(central):   " << detector->twoTheta(199) / M_PI * 180.0 << "°" << std::endl;
     g_log.information() << "_Poldi -     Distance(central): " << detector->distanceFromSample(199) << " mm" << std::endl;
 
-    // Removing dead wires with decorator
-    std::vector<int> deadWireVector = ws_poldi_dead_wires->getColVector<int>(std::string("DeadWires"));
-    std::set<int> deadWireSet(deadWireVector.begin(), deadWireVector.end());
+    // Removing dead wires with decorator    
+    std::vector<detid_t> allDetectorIds = poldiInstrument->getDetectorIDs();
+    std::vector<detid_t> deadDetectorIds(allDetectorIds.size());
+
+    auto endIterator = std::copy_if(allDetectorIds.cbegin(), allDetectorIds.cend(), deadDetectorIds.begin(), [&poldiInstrument](detid_t detectorId) { return poldiInstrument->isDetectorMasked(detectorId); });
+    deadDetectorIds.resize(std::distance(deadDetectorIds.begin(), endIterator));
+
+    g_log.information() << "Dead wires: " << deadDetectorIds.size() << std::endl;
+
+    for(int i = 0; i < deadDetectorIds.size(); ++i) {
+        g_log.information() << "Wire " << i << ": " << deadDetectorIds[i] << std::endl;
+    }
+
+    std::set<int> deadWireSet(deadDetectorIds.cbegin(), deadDetectorIds.cend());
     boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector(new PoldiDeadWireDecorator(deadWireSet, detector));
+
+    g_log.information() << cleanDetector->availableElements().size() << " " << cleanDetector->availableElements().front() << std::endl;
 
     // putting together POLDI instrument for calculations
     m_core->setInstrument(cleanDetector, chopper);

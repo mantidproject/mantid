@@ -36,7 +36,7 @@ private:
     {
         boost::shared_ptr<PoldiAbstractDetector> detector(new ConfiguredHeliumDetector);
 
-        int deadWires [] = {1, 2, 3, 4, 5, 6, 395, 396, 397, 398, 399, 400 };
+        int deadWires [] = {0, 1, 2, 3, 4, 5, 394, 395, 396, 397, 398, 399 };
         boost::shared_ptr<PoldiDeadWireDecorator> deadWireDecorator(
                     new PoldiDeadWireDecorator(std::set<int>(deadWires, deadWires + 12), detector));
 

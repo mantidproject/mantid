@@ -46,9 +46,7 @@ public:
     PoldiBasicChopper();
     ~PoldiBasicChopper() { }
 
-    void loadConfiguration(DataObjects::TableWorkspace_sptr chopperConfigurationWorkspace,
-                           DataObjects::TableWorkspace_sptr chopperSlitWorkspace,
-                           DataObjects::TableWorkspace_sptr chopperSpeedWorkspace);
+    void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument);
 
     void setRotationSpeed(double rotationSpeed);
 

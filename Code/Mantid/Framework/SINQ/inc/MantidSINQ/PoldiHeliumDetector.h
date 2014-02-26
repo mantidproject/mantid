@@ -37,6 +37,7 @@ namespace Poldi {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+using namespace Kernel;
 
 class MANTID_SINQ_DLL PoldiHeliumDetector : public PoldiAbstractDetector
 {
@@ -44,7 +45,7 @@ public:
     PoldiHeliumDetector();
     ~PoldiHeliumDetector() {}
 
-    void loadConfiguration(DataObjects::TableWorkspace_sptr detectorConfigurationWorkspace);
+    void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument);
 
     double twoTheta(int elementIndex);
     double distanceFromSample(int elementIndex);
@@ -61,7 +62,7 @@ protected:
     double phi(double twoTheta);
 
     void initializeFixedParameters(double radius, size_t elementCount, double elementWidth);
-    void initializeCalibratedParameters(V2D position, double centerTwoTheta);
+    void initializeCalibratedParameters(Kernel::V2D position, double centerTwoTheta);
 
     /* These detector parameters are fixed and specific to the geometry or result from it directly */
     double m_radius;

@@ -31,9 +31,9 @@ public:
 
     ~MockDetector() { }
 
-    void loadConfiguration(DataObjects::TableWorkspace_sptr detectorConfigurationWorkspace)
+    void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument)
     {
-        UNUSED_ARG(detectorConfigurationWorkspace);
+        UNUSED_ARG(poldiInstrument);
     }
 
     MOCK_METHOD1(twoTheta, double(int elementIndex));
@@ -54,12 +54,12 @@ public:
     ConfiguredHeliumDetector() :
         PoldiHeliumDetector()
     {
-        loadConfiguration(DataObjects::TableWorkspace_sptr(0));
+        loadConfiguration(Geometry::Instrument_const_sptr(0));
     }
 
-    void loadConfiguration(DataObjects::TableWorkspace_sptr detectorConfigurationWorkspace)
+    void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument)
     {
-        UNUSED_ARG(detectorConfigurationWorkspace);
+        UNUSED_ARG(poldiInstrument);
 
         initializeFixedParameters(3000.0, static_cast<size_t>(400), 2.5);
         initializeCalibratedParameters(Mantid::Kernel::V2D(-931.47, -860.0), 90.41 / 180.0 * M_PI);
@@ -85,11 +85,9 @@ public:
 
     ~MockChopper() { }
 
-    void loadConfiguration(DataObjects::TableWorkspace_sptr chopperConfigurationWorkspace, DataObjects::TableWorkspace_sptr chopperSlitWorkspace, DataObjects::TableWorkspace_sptr chopperSpeedWorkspace)
+    void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument)
     {
-        UNUSED_ARG(chopperConfigurationWorkspace);
-        UNUSED_ARG(chopperSlitWorkspace);
-        UNUSED_ARG(chopperSpeedWorkspace);
+        UNUSED_ARG(poldiInstrument)
     }
 
     MOCK_METHOD0(rotationSpeed, double());

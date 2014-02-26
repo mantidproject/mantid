@@ -3,7 +3,7 @@
 
 #include "MantidSINQ/DllConfig.h"
 
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 
 #include "MantidKernel/V2D.h"
 
@@ -43,15 +43,14 @@ namespace Poldi
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-using namespace Kernel;
-using namespace API;
+using namespace Geometry;
 
 class MANTID_SINQ_DLL PoldiAbstractDetector
 {
 public:
     virtual ~PoldiAbstractDetector() {}
 
-    virtual void loadConfiguration(DataObjects::TableWorkspace_sptr detectorConfigurationWorkspace) = 0;
+    virtual void loadConfiguration(Instrument_const_sptr poldiInstrument) = 0;
 
     virtual double twoTheta(int elementIndex) = 0;
     virtual double distanceFromSample(int elementIndex) = 0;

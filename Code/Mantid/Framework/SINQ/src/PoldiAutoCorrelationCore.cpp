@@ -12,6 +12,8 @@ namespace Mantid
 namespace Poldi
 {
 
+using namespace API;
+
 PoldiAutoCorrelationCore::PoldiAutoCorrelationCore(Kernel::Logger &g_log) :
     m_detector(),
     m_chopper(),
@@ -124,9 +126,9 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
          * In the fortran program there seems to be a small difference, possibly due to numerical inaccuracies connected
          * to floating point precision.
          */
-        m_logger.information() << "  Summing intensities..." << std::endl;
         double sumOfCorrelatedIntensities = std::accumulate(rawCorrelatedIntensities.cbegin(), rawCorrelatedIntensities.cend(), 0.0);
         double sumOfCounts = getSumOfCounts(m_timeBinCount, m_detectorElements);
+        m_logger.information() << "  Summing intensities (" << sumOfCounts << ")..." << std::endl;
 
         double correlationBackground = sumOfCorrelatedIntensities - sumOfCounts;
 

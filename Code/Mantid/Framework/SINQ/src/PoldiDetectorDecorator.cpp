@@ -24,9 +24,9 @@ boost::shared_ptr<PoldiAbstractDetector> PoldiDetectorDecorator::decoratedDetect
     return m_decoratedDetector;
 }
 
-void PoldiDetectorDecorator::loadConfiguration(DataObjects::TableWorkspace_sptr detectorConfigurationWorkspace)
+void PoldiDetectorDecorator::loadConfiguration(Instrument_const_sptr poldiInstrument)
 {
-    UNUSED_ARG(detectorConfigurationWorkspace)
+    UNUSED_ARG(poldiInstrument)
 }
 
 double PoldiDetectorDecorator::twoTheta(int elementIndex)

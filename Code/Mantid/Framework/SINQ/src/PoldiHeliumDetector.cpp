@@ -1,6 +1,9 @@
 #include "MantidSINQ/PoldiHeliumDetector.h"
 
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IComponent.h"
+
+#include "MantidKernel/V3D.h"
+
 
 namespace Mantid {
 namespace Poldi {
@@ -23,36 +26,16 @@ PoldiHeliumDetector::PoldiHeliumDetector() :
 {
 }
 
-void PoldiHeliumDetector::loadConfiguration(DataObjects::TableWorkspace_sptr detectorConfigurationWorkspace)
+void PoldiHeliumDetector::loadConfiguration(Instrument_const_sptr poldiInstrument)
 {
-    try {
-        size_t rowIndex = -1;
+    IComponent_const_sptr detector = poldiInstrument->getComponentByName("detector");
+    double radius = detector->getNumberParameter("radius").front() * 1000.0;
+    double elementWidth = detector->getNumberParameter("element_separation").front() * 1000.0;
+    initializeFixedParameters(radius, poldiInstrument->getNumberDetectors(), elementWidth);
 
-        detectorConfigurationWorkspace->find(std::string("det_radius"), rowIndex, 0);
-        double radius = detectorConfigurationWorkspace->cell<double>(rowIndex, 2);
-
-        detectorConfigurationWorkspace->find(std::string("det_nb_channel"), rowIndex, 0);
-        size_t elementCount = static_cast<size_t>(detectorConfigurationWorkspace->cell<double>(rowIndex, 2));
-
-        detectorConfigurationWorkspace->find(std::string("det_channel_resolution"), rowIndex, 0);
-        double elementWidth = detectorConfigurationWorkspace->cell<double>(rowIndex, 2);
-
-        detectorConfigurationWorkspace->find(std::string("x0det"), rowIndex, 0);
-        double x0det = detectorConfigurationWorkspace->cell<double>(rowIndex, 2);
-
-        detectorConfigurationWorkspace->find(std::string("y0det"), rowIndex, 0);
-        double y0det = detectorConfigurationWorkspace->cell<double>(rowIndex, 2);
-
-        detectorConfigurationWorkspace->find(std::string("twothet"), rowIndex, 0);
-        double twoTheta = detectorConfigurationWorkspace->cell<double>(rowIndex, 2) / 180.0 * M_PI;
-
-        initializeFixedParameters(radius, elementCount, elementWidth);
-        initializeCalibratedParameters(V2D(x0det, y0det), twoTheta);
-    }
-    catch(std::out_of_range& )
-    {
-        throw std::runtime_error("Missing configuration item for PoldiHeliumDetector");
-    }
+    Kernel::V3D pos = detector->getPos() * 1000.0;
+    double twoTheta = detector->getNumberParameter("two_theta").front() / 180.0 * M_PI;
+    initializeCalibratedParameters(Kernel::V2D(pos.X(), pos.Y()), twoTheta);
 }
 
 double PoldiHeliumDetector::twoTheta(int elementIndex)
@@ -85,7 +68,7 @@ const std::vector<int> &PoldiHeliumDetector::availableElements()
 std::pair<double, double> PoldiHeliumDetector::qLimits(double lambdaMin, double lambdaMax)
 {
     return std::pair<double, double>(4.0 * M_PI / lambdaMax * sin(twoTheta(0) / 2.0),
-                                     4.0 * M_PI / lambdaMin * sin(twoTheta(m_elementCount - 1) / 2.0));
+                                     4.0 * M_PI / lambdaMin * sin(twoTheta(static_cast<int>(m_elementCount) - 1) / 2.0));
 }
 
 double PoldiHeliumDetector::phi(int elementIndex)
@@ -114,7 +97,7 @@ void PoldiHeliumDetector::initializeFixedParameters(double radius, size_t elemen
     m_totalOpeningAngle = static_cast<double>(m_elementCount) * m_angularResolution;
 }
 
-void PoldiHeliumDetector::initializeCalibratedParameters(Mantid::Kernel::V2D position, double centerTwoTheta)
+void PoldiHeliumDetector::initializeCalibratedParameters(Kernel::V2D position, double centerTwoTheta)
 {
     m_calibratedPosition = position;
     m_vectorAngle = atan(m_calibratedPosition.Y() / m_calibratedPosition.X());

@@ -49,7 +49,7 @@ public:
     void setDecoratedDetector(boost::shared_ptr<PoldiAbstractDetector> detector);
     boost::shared_ptr<PoldiAbstractDetector> decoratedDetector();
 
-    virtual void loadConfiguration(DataObjects::TableWorkspace_sptr detectorConfigurationWorkspace);
+    virtual void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument);
 
     virtual double twoTheta(int elementIndex);
     virtual double distanceFromSample(int elementIndex);

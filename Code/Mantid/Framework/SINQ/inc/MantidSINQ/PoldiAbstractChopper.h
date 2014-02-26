@@ -3,9 +3,7 @@
 
 #include "MantidSINQ/DllConfig.h"
 
-#include "MantidDataObjects/TableWorkspace.h"
-
-#include "MantidKernel/V2D.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <utility>
 
@@ -43,16 +41,13 @@ namespace Poldi
 */
 
 using namespace Kernel;
-using namespace API;
 
 class MANTID_SINQ_DLL PoldiAbstractChopper
 {
 public:
     virtual ~PoldiAbstractChopper() {}
 
-    virtual void loadConfiguration(DataObjects::TableWorkspace_sptr chopperConfigurationWorkspace,
-                                   DataObjects::TableWorkspace_sptr chopperSlitWorkspace,
-                                   DataObjects::TableWorkspace_sptr chopperSpeedWorkspace) = 0;
+    virtual void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) = 0;
 
     virtual void setRotationSpeed(double rotationSpeed) = 0;
 

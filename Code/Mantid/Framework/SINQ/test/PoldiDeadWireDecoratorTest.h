@@ -28,8 +28,8 @@ public:
   {
       m_detector = boost::shared_ptr<MockDetector>(new MockDetector);
 
-      int valid[] = {1, 2, 3, 6, 100, 300, 400};
-      int invalid[] = {1, 2, 401};
+      int valid[] = {0, 1, 2, 5, 99, 299, 399};
+      int invalid[] = {0, 1, 400};
 
       m_validDeadWires = std::set<int>(valid, valid + 7);
       m_invalidDeadWires = std::set<int>(invalid, invalid + 3);
