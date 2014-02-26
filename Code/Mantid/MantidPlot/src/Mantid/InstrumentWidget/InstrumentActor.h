@@ -253,6 +253,7 @@ public:
   /// Constructor
   /// @param on :: If true then all non-detectors will be made visible or invisible if false.
   SetVisibleNonDetectorVisitor(bool on):m_on(on){}
+  using GLActorVisitor::visit;
   bool visit(GLActor*);
 private:
   bool m_on;
@@ -265,6 +266,7 @@ class FindComponentVisitor: public GLActorVisitor
 {
 public:
   FindComponentVisitor(const Mantid::Geometry::ComponentID id):m_id(id),m_actor(NULL){}
+  using GLActorVisitor::visit;
   bool visit(GLActor*);
   ComponentActor* getActor()const{return m_actor;}
 private:
