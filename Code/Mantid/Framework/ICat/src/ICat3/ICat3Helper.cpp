@@ -940,12 +940,15 @@ namespace Mantid
 
     }
 
-    void CICatHelper::getdownloadURL(const long long& fileId,std::string& url)
+    const std::string CICatHelper::getdownloadURL(const long long& fileId)
     {
       ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       ns1__downloadDatafile request;
+      ns1__downloadDatafileResponse response;
+      
+      std::string downloadURL;
 
       boost::shared_ptr<std::string >sessionId_sptr(new std::string);
       request.sessionId = sessionId_sptr.get();
@@ -955,29 +958,28 @@ namespace Mantid
       request.datafileId=fileId_sptr.get();
       *request.datafileId= fileId;
 
-      //set request parameters
-
-      ns1__downloadDatafileResponse response;
       // get the URL using ICAT API
       int ret=icat.downloadDatafile(&request,&response);
-      if(ret!=0)
+      if(ret == 0 && !response.URL)
+      {
+        downloadURL = *response.URL;
+      }
+      else
       {
         CErrorHandling::throwErrorMessages(icat);
       }
-      if(!response.URL)
-      {
-        throw std::runtime_error("Empty URL returned from ICat3 Catalog");
-      }
-      url=*response.URL;
-
+      return downloadURL;
     }
 
-    void CICatHelper::getlocationString(const long long& fileid,std::string& filelocation)
+    const std::string CICatHelper::getlocationString(const long long& fileid)
     {
       ICATPortBindingProxy icat;
       setICATProxySettings(icat);
-      
+
       ns1__getDatafile request;
+      ns1__getDatafileResponse response;
+      
+      std::string filelocation;
 
       boost::shared_ptr<std::string >sessionId_sptr(new std::string);
       request.sessionId=sessionId_sptr.get();
@@ -987,15 +989,16 @@ namespace Mantid
       request.datafileId=fileId_sptr.get();
       *request.datafileId=fileid;
 
-      ns1__getDatafileResponse response;
       int ret=icat.getDatafile(&request,&response);
+
       if(ret==0)
       {
         if(response.return_->location)
         {
-          filelocation=*response.return_->location;
+          filelocation = *response.return_->location;
         }
       }
+      return filelocation;
     }
 
     /**

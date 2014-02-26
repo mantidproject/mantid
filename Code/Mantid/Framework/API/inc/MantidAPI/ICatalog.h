@@ -61,12 +61,8 @@ namespace Mantid
         virtual void listInstruments(std::vector<std::string>&)=0;
         /// get investigationtype lists
         virtual void listInvestigationTypes(std::vector<std::string>&)=0;
-        /// get file locations
-        virtual void getFileLocation(const long long&,std::string&)=0;
         /// keep alive
         virtual void keepAlive()=0;
-        ///keep alive in minutes
-        virtual int keepAliveinminutes()=0;
     };
 
     typedef boost::shared_ptr<ICatalog> ICatalog_sptr;
