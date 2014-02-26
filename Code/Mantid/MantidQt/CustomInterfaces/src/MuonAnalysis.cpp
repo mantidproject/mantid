@@ -76,6 +76,7 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 
 // Static constants
 const QString MuonAnalysis::NOT_AVAILABLE("N/A");
+const double MuonAnalysis::FIRST_GOOD_BIN_DEFAULT(0.3);
 
 //----------------------
 // Public member functions
@@ -1937,7 +1938,7 @@ void MuonAnalysis::guessAlphaClicked()
     alphaAlg->setPropertyValue("InputWorkspace", inputWS.toStdString());
     alphaAlg->setPropertyValue("ForwardSpectra", idsF->text().toStdString());
     alphaAlg->setPropertyValue("BackwardSpectra", idsB->text().toStdString());
-    alphaAlg->setPropertyValue("FirstGoodValue", firstGoodBin().toStdString());
+    alphaAlg->setProperty("FirstGoodValue", firstGoodBin());
     alphaAlg->execute();  
 
     const QString alpha(alphaAlg->getPropertyValue("Alpha").c_str());
@@ -2580,13 +2581,24 @@ double MuonAnalysis::timeZero()
   return timeZero;
 }
 
- /**
- * first good bin returend in ms
- * returned as the absolute value of first-good-bin minus time zero
+/**
+ * Return first good bin as set on the interface.
  */
-QString MuonAnalysis::firstGoodBin()
+double MuonAnalysis::firstGoodBin() const
 {
-  return m_uiForm.firstGoodBinFront->text();
+  QString text = m_uiForm.firstGoodBinFront->text();
+
+  bool ok;
+  double value = text.toDouble(&ok);
+
+  if ( ! ok )
+  {
+    g_log.warning("First Good Data is empty or invalid. Reset to default value");
+    m_uiForm.firstGoodBinFront->setText(QString::number(FIRST_GOOD_BIN_DEFAULT));
+    value = FIRST_GOOD_BIN_DEFAULT;
+  }
+
+  return value;
 }
 
  /**
@@ -2780,7 +2792,7 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
 
   // Load values saved using saveWidgetValue()
   loadWidgetValue(m_uiForm.timeZeroFront, 0.2);
-  loadWidgetValue(m_uiForm.firstGoodBinFront, 0.3);
+  loadWidgetValue(m_uiForm.firstGoodBinFront, FIRST_GOOD_BIN_DEFAULT);
   loadWidgetValue(m_uiForm.timeZeroAuto, Qt::Checked);
   loadWidgetValue(m_uiForm.firstGoodDataAuto, Qt::Checked);
 }
