@@ -144,8 +144,10 @@ namespace Mantid
           setProperty("FirstGoodData", bin*bin_size);
         }
       }
-      catch (...)
-      {}
+      catch (std::exception& e)
+      {
+        g_log.warning() << "Error while loading the FirstGoodData value: " << e.what() << "\n";
+      }
 
       NXEntry nxRun = root.openEntry("run");
       std::string title;
