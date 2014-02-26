@@ -1,6 +1,6 @@
-#include "MantidSINQ/PoldiDetectorFactory.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h"
 
-#include "MantidSINQ/PoldiHeliumDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
 
 namespace Mantid
 {
@@ -14,6 +14,8 @@ PoldiDetectorFactory::PoldiDetectorFactory() :
 
 PoldiAbstractDetector *PoldiDetectorFactory::createDetector(std::string detectorType)
 {
+    UNUSED_ARG(detectorType);
+
     return new PoldiHeliumDetector();
 }
 

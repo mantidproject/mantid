@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/TableRow.h"
-#include "MantidSINQ/PoldiBasicChopper.h"
-#include "MantidSINQ/PoldiMockInstrumentHelpers.h"
+#include "MantidSINQ/PoldiUtilities/PoldiBasicChopper.h"
+#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

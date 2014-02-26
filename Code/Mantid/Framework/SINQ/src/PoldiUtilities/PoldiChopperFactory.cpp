@@ -1,6 +1,6 @@
-#include "MantidSINQ/PoldiChopperFactory.h"
+#include "MantidSINQ/PoldiUtilities/PoldiChopperFactory.h"
 
-#include "MantidSINQ/PoldiBasicChopper.h"
+#include "MantidSINQ/PoldiUtilities/PoldiBasicChopper.h"
 
 namespace Mantid
 {

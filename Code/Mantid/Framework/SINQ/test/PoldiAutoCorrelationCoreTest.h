@@ -5,15 +5,15 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidSINQ/PoldiAutoCorrelationCore.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
 
-#include "MantidSINQ/PoldiAbstractDetector.h"
-#include "MantidSINQ/PoldiAbstractChopper.h"
-#include "MantidSINQ/PoldiDeadWireDecorator.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 
 #include "MantidDataObjects/TableWorkspace.h"
 
-#include "MantidSINQ/PoldiMockInstrumentHelpers.h"
+#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

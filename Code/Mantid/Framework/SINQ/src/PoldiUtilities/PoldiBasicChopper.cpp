@@ -1,4 +1,4 @@
-#include "MantidSINQ/PoldiBasicChopper.h"
+#include "MantidSINQ/PoldiUtilities/PoldiBasicChopper.h"
 
 #include "MantidGeometry/ICompAssembly.h"
 

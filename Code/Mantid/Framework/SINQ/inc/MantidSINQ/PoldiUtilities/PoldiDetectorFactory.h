@@ -3,7 +3,7 @@
 
 #include "MantidSINQ/DllConfig.h"
 
-#include "MantidSINQ/PoldiAbstractDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "boost/date_time/gregorian/gregorian.hpp"
 
 namespace Mantid

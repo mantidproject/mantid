@@ -1,4 +1,4 @@
-#include "MantidSINQ/PoldiDetectorDecorator.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h"
 
 namespace Mantid
 {

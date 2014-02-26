@@ -3,10 +3,10 @@
 
 #include "MantidSINQ/DllConfig.h"
 #include <gmock/gmock.h>
-#include "MantidSINQ/PoldiAbstractDetector.h"
-#include "MantidSINQ/PoldiAbstractChopper.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
 
-#include "MantidSINQ/PoldiHeliumDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
 
 using namespace Mantid;
 using namespace Mantid::Poldi;

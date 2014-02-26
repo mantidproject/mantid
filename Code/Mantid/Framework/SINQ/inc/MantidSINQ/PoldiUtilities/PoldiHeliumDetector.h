@@ -2,7 +2,7 @@
 #define POLDIHELIUMDETECTOR_H
 
 #include "MantidSINQ/DllConfig.h"
-#include "MantidSINQ/PoldiAbstractDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 
 #include "MantidKernel/V2D.h"
 

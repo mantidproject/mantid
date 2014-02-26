@@ -1,4 +1,4 @@
-#include "MantidSINQ/PoldiAutoCorrelationCore.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
 
 #include <utility>
 #include "boost/range/irange.hpp"

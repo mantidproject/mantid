@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidSINQ/DllConfig.h"
 
-#include "MantidSINQ/PoldiAbstractDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 
 namespace Mantid
 {

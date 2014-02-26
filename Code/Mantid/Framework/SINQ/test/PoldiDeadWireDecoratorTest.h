@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidSINQ/PoldiDeadWireDecorator.h"
-#include "MantidSINQ/PoldiMockInstrumentHelpers.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
+#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 
 using namespace Mantid::Poldi;
 

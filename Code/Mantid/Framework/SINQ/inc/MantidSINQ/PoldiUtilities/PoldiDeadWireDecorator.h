@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidSINQ/DllConfig.h"
-#include "MantidSINQ/PoldiDetectorDecorator.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h"
 
 namespace Mantid
 {

@@ -1,4 +1,4 @@
-#include "MantidSINQ/PoldiDeadWireDecorator.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 
 namespace Mantid
 {

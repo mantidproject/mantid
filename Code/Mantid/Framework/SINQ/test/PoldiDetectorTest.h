@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/TableRow.h"
-#include "MantidSINQ/PoldiAbstractDetector.h"
-#include "MantidSINQ/PoldiHeliumDetector.h"
-#include "MantidSINQ/PoldiMockInstrumentHelpers.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

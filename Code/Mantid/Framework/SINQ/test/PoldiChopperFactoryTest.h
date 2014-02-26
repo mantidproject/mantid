@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidSINQ/PoldiChopperFactory.h"
+#include "MantidSINQ/PoldiUtilities/PoldiChopperFactory.h"
 
-#include "MantidSINQ/PoldiAbstractChopper.h"
-#include "MantidSINQ/PoldiBasicChopper.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
+#include "MantidSINQ/PoldiUtilities/PoldiBasicChopper.h"
 
 using namespace Mantid::Poldi;
 

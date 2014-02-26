@@ -5,8 +5,8 @@
 
 #include "MantidSINQ/DllConfig.h"
 
-#include "MantidSINQ/PoldiAbstractDetector.h"
-#include "MantidSINQ/PoldiAbstractChopper.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 

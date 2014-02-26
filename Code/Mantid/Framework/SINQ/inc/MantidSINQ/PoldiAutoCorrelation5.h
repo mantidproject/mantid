@@ -11,7 +11,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidSINQ/PoldiAutoCorrelationCore.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
 
 
 

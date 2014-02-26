@@ -17,10 +17,10 @@ wiki page of [[PoldiProjectRun]].
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-#include "MantidSINQ/PoldiDetectorFactory.h"
-#include "MantidSINQ/PoldiDeadWireDecorator.h"
-#include "MantidSINQ/PoldiAutoCorrelationCore.h"
-#include "MantidSINQ/PoldiChopperFactory.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
+#include "MantidSINQ/PoldiUtilities/PoldiChopperFactory.h"
 
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"

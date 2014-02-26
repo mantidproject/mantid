@@ -1,4 +1,4 @@
-#include "MantidSINQ/PoldiHeliumDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
 
 #include "MantidGeometry/IComponent.h"
 

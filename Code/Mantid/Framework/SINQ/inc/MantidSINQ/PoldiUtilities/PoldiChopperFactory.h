@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 
 #include "MantidSINQ/DllConfig.h"
-#include "MantidSINQ/PoldiAbstractChopper.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
 
 namespace Mantid
 {
