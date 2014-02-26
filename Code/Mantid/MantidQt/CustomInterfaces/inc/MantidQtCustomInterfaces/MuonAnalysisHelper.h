@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_MUONANALYSISHELPER_H_
 
 #include "MantidKernel/System.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QSettings>
 #include <QVector>
@@ -15,8 +16,19 @@ namespace CustomInterfaces
 namespace MuonAnalysisHelper
 {
 
+using namespace Mantid::API;
+
 /// Sets double validator for specified field
 DLLExport void setDoubleValidator(QLineEdit* field);
+
+/// Returns a first period MatrixWorkspace in a run workspace
+DLLExport MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws);
+
+/// Returns a number of periods in a run workspace
+DLLExport size_t numPeriods(Workspace_sptr ws);
+
+/// Print various information about the run
+DLLExport void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out);
 
 /**
  * A class which deals with auto-saving the widget values. Widgets are registered and then on any
