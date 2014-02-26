@@ -39,6 +39,11 @@ namespace Mantid
         CompositeCatalog();
         /// Adds a catalog to the list of catalogs (m_catalogs)
         void add(const API::ICatalog_sptr catalog);
+        /// Remove a specific catalog from the list of catalogs.
+        void removeCatalogFromComposite(API::ICatalog_sptr& catalog);
+        /// Clear the list of catalogs.
+        void clearCompositeCatalog();
+
         /// Log the user into the catalog system.
         virtual void login(const std::string& username,const std::string& password,const std::string& endpoint);
         /// Log the user out of the catalog system.
@@ -51,9 +56,9 @@ namespace Mantid
         /// Show the logged in user's investigations search results.
         virtual void myData(API::ITableWorkspace_sptr& outputws);
         /// Get datasets.
-        virtual void getDataSets(const std::string&investigationId,API::ITableWorkspace_sptr& outputws);
+        virtual void getDataSets(const std::string& investigationId,API::ITableWorkspace_sptr& outputws);
         /// Get datafiles
-        virtual void getDataFiles(const std::string&investigationId,API::ITableWorkspace_sptr& outputws);
+        virtual void getDataFiles(const std::string& investigationId,API::ITableWorkspace_sptr& outputws);
         /// Get instruments list
         virtual void listInstruments(std::vector<std::string>& instruments);
         /// Get investigationtypes list

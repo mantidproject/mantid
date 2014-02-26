@@ -49,7 +49,14 @@ namespace Mantid
      */
     void CatalogManagerImpl::destroyCatalog(const std::string sessionID)
     {
+      auto pos = m_activeCatalogs.find(sessionID);
 
+      if (pos != m_activeCatalogs.end())
+      {
+        pos->second->logout();
+        m_compositeCatalog->removeCatalogFromComposite((pos->second));
+        m_activeCatalogs.erase(pos);
+      }
     }
 
     /**
@@ -57,7 +64,9 @@ namespace Mantid
      */
     void CatalogManagerImpl::destroyCatalogs()
     {
-
+      m_compositeCatalog->logout();
+      m_compositeCatalog->clearCompositeCatalog();
+      m_activeCatalogs.clear();
     }
 
   }

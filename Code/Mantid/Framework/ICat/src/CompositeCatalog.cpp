@@ -16,6 +16,23 @@ namespace Mantid
     }
 
     /**
+     * Remove a specific catalog from the catalog container.
+     * @param catalog :: The catalog to remove from the catlaog container.
+     */
+    void CompositeCatalog::removeCatalogFromComposite(API::ICatalog_sptr& catalog)
+    {
+      std::remove(m_catalogs.begin(),m_catalogs.end(),catalog);
+    }
+
+    /**
+     * Clear the catalog container.
+     */
+    void CompositeCatalog::clearCompositeCatalog()
+    {
+      m_catalogs.clear();
+    }
+
+    /**
      * Authenticate the user against all catalogues in the container.
      * @param username :: The login name of the user.
      * @param password :: The password of the user.
