@@ -32,6 +32,7 @@ namespace Mantid
       auto pos = m_activeCatalogs.find(sessionID);
       // If the key element exists in the map we want the related catalog.
       if (pos != m_activeCatalogs.end()) return pos->second;
+      else throw std::runtime_error("The session ID you have provided is invalid");
     }
 
     /**
