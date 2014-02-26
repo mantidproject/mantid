@@ -6,6 +6,7 @@ This algorithm retrieves logged in users investigations data from the informatio
 
 #include "MantidICat/CatalogMyDataSearch.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
+#include "MantidICat/CatalogManager.h"
 
 namespace Mantid
 {
@@ -30,9 +31,8 @@ namespace Mantid
     /// Execution method.
     void CatalogMyDataSearch::exec()
     {
-      // Create and use the catalog the user has specified in Facilities.xml
       auto outputws = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      CatalogAlgorithmHelper().createCatalog()->myData(outputws);
+      CatalogManager::Instance().getCatalogs()->myData(outputws);
       setProperty("OutputWorkspace",outputws);
     }
   }

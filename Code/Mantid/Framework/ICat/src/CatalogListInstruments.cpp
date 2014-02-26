@@ -6,6 +6,7 @@ This algorithm retrieves the instrument names from a catalog and stores them in 
 
 #include "MantidICat/CatalogListInstruments.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
+#include "MantidICat/CatalogManager.h"
 #include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid
@@ -34,9 +35,9 @@ namespace Mantid
     /// exec method
     void CatalogListInstruments::exec()
     {
-      std::vector<std::string> intruments;
-      CatalogAlgorithmHelper().createCatalog()->listInstruments(intruments);
-      setProperty("InstrumentList",intruments);
+      std::vector<std::string> instruments;
+      CatalogManager::Instance().getCatalogs()->listInstruments(instruments);
+      setProperty("InstrumentList",instruments);
     }
 
   }

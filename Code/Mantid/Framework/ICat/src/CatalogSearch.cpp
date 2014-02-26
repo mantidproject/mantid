@@ -17,6 +17,7 @@ This algorithm searches for the investigations and stores the search results in 
 #include "MantidKernel/DateValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
+#include "MantidICat/CatalogManager.h"
 
 #include <boost/algorithm/string/regex.hpp>
 #include <limits>
@@ -72,19 +73,19 @@ namespace Mantid
       getInputProperties(params);
       // Create output workspace.
       auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      // Create a catalog since we use it twice on execution.
-      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
+      // Obtain all the active catalogs.
+      auto catalogs = CatalogManager::Instance().getCatalogs();
       // Search for investigations with user specific search inputs.
       setProperty("OutputWorkspace",workspace);
       // Do not perform a full search if we only want a COUNT search.
       if (getProperty("CountOnly"))
       {
         // Set the related property needed for paging.
-        setProperty("NumberOfSearchResults", catalog->getNumberOfSearchResults(params));
+        setProperty("NumberOfSearchResults", catalogs->getNumberOfSearchResults(params));
         return;
       }
       // Search for investigations in the archives.
-      catalog->search(params,workspace,getProperty("Offset"),getProperty("Limit"));
+      catalogs->search(params,workspace,getProperty("Offset"),getProperty("Limit"));
     }
 
     /**

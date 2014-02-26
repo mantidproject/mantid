@@ -6,6 +6,7 @@ This algorithm is responsible for obtaining a list of investigation types from t
 
 #include "MantidICat/CatalogListInvestigationTypes.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
+#include "MantidICat/CatalogManager.h"
 #include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid
@@ -25,17 +26,16 @@ namespace Mantid
     void CatalogListInvestigationTypes::init()
     {
       declareProperty( new Kernel::ArrayProperty<std::string>("InvestigationTypes",std::vector<std::string>(),
-                                                      boost::make_shared<Kernel::NullValidator>(),
-                                                      Kernel::Direction::Output),
-                       "List of investigation types obtained from Catalog");
+          boost::make_shared<Kernel::NullValidator>(), Kernel::Direction::Output),
+          "List of investigation types obtained from Catalog");
     }
 
     /// exec method
     void CatalogListInvestigationTypes::exec()
     {
-      std::vector<std::string> investTypes;
-      CatalogAlgorithmHelper().createCatalog()->listInvestigationTypes(investTypes);
-      setProperty("InvestigationTypes",investTypes);
+      std::vector<std::string> investigationTypes;
+      CatalogManager::Instance().getCatalogs()->listInvestigationTypes(investigationTypes);
+      setProperty("InvestigationTypes",investigationTypes);
     }
 
   }

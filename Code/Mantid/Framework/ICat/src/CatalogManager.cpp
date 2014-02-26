@@ -1,5 +1,7 @@
 #include "MantidICat/CatalogManager.h"
 #include "MantidAPI/CatalogFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 
 namespace Mantid
 {
@@ -11,15 +13,16 @@ namespace Mantid
 
     /**
      * Creates a new catalog and adds it to the compositeCatalog and activeCatalog list.
-     * @param facilityName :: The name of the facility to create a catalog for.
+     * @param facilityName :: The name of the facility to obtain the catalog name from.
      * @return A catalog for the facility specified.
      */
     API::ICatalog_sptr CatalogManagerImpl::create(const std::string facilityName)
     {
-       auto catalog = API::CatalogFactory::Instance().create(facilityName);
-       m_compositeCatalog->add(catalog);
-       m_activeCatalogs.insert(std::make_pair("",catalog));
-       return catalog;
+      std::string className = Kernel::ConfigService::Instance().getFacility(facilityName).catalogInfo().catalogName();
+      auto catalog = API::CatalogFactory::Instance().create(className);
+      m_compositeCatalog->add(catalog);
+      m_activeCatalogs.insert(std::make_pair("",catalog));
+      return catalog;
     }
 
     /**
