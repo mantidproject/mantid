@@ -61,10 +61,8 @@ namespace Mantid
     /// Execute the algorithm
     void CatalogDownloadDataFiles::exec()
     {
-      // Create and use the catalog the user has specified in Facilities.xml
-      auto catalog = CatalogAlgorithmHelper().createCatalog();
       // Cast a catalog to a catalogInfoService to access downloading functionality.
-      auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(catalog);
+      auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(CatalogAlgorithmHelper().createCatalog());
       // Check if the catalog created supports publishing functionality.
       if (!catalogInfoService) throw std::runtime_error("The catalog that you are using does not support external downloading.");
 
@@ -91,9 +89,8 @@ namespace Mantid
 
         progress(prog,"getting location string...");
 
-        // The location of the file on the ICAT server (E.g. in the archives).
-        std::string fileLocation;
-        catalog->getFileLocation(*fileID,fileLocation);
+        // The location of the file (on the server) stored in the archives.
+        std::string fileLocation = catalogInfoService->getFileLocation(*fileID);
 
         g_log.debug() << "CatalogDownloadDataFiles -> File location before transform is: " << fileLocation << std::endl;
         // Transform the archive path to the path of the user's operating system.
@@ -105,23 +102,16 @@ namespace Mantid
         if(hasAccessToArchives)
         {
           g_log.information() << "File (" << *fileName << ") located in archives (" << fileLocation << ")." << std::endl;
-
           fileLocations.push_back(fileLocation);
         }
         else
         {
           g_log.information() << "Unable to open file (" << *fileName << ") from archive. Beginning to download over Internet." << std::endl;
-
           progress(prog/2,"getting the url ....");
-
           // Obtain URL for related file to download from net.
-          std::string url;
-          catalogInfoService->getDownloadURL(*fileID,url);
-
+          const std::string url = catalogInfoService->getDownloadURL(*fileID);
           progress(prog,"downloading over internet...");
-
-          std::string fullPathDownloadedFile = doDownloadandSavetoLocalDrive(url,*fileName);
-
+          const std::string fullPathDownloadedFile = doDownloadandSavetoLocalDrive(url,*fileName);
           fileLocations.push_back(fullPathDownloadedFile);
         }
       }

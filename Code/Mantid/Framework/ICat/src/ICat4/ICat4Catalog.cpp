@@ -658,10 +658,10 @@ namespace Mantid
 
     /**
      * Gets the file location string from the archives.
-     * @param fileID       :: id of the file
-     * @param fileLocation :: location string  of the file
+     * @param fileID :: The id of the file to search for.
+     * @return The location of the datafile stored on the archives.
      */
-    void ICat4Catalog::getFileLocation(const long long & fileID, std::string & fileLocation)
+    const std::string ICat4Catalog::getFileLocation(const long long & fileID)
     {
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
@@ -678,6 +678,7 @@ namespace Mantid
 
       int result = icat.get(&request, &response);
 
+      std::string fileLocation;
       if (result == 0)
       {
         ns1__datafile * datafile = dynamic_cast<ns1__datafile*>(response.return_);
@@ -695,17 +696,18 @@ namespace Mantid
       {
         throwErrorMessage(icat);
       }
+      return fileLocation;
     }
 
     /**
      * Downloads a file from the given url if not downloaded from archive.
-     * @param fileID :: id of the file
-     * @param url    :: url of the file
+     * @param fileID :: The id of the file to search for.
+     * @return A URL to download the datafile from.
      */
-    void ICat4Catalog::getDownloadURL(const long long & fileID, std::string& url)
+    const std::string ICat4Catalog::getDownloadURL(const long long & fileID)
     {
       // Obtain the URL from the Facilities.xml file.
-      std::string urlToBuild = ConfigService::Instance().getFacility().catalogInfo().externalDownloadURL();
+      std::string url = ConfigService::Instance().getFacility().catalogInfo().externalDownloadURL();
 
       // Set the REST features of the URL.
       std::string session  = "sessionId="    + Session::Instance().getSessionId();
@@ -713,11 +715,9 @@ namespace Mantid
       std::string outname  = "&outname="     + boost::lexical_cast<std::string>(fileID);
 
       // Add all the REST pieces to the URL.
-      urlToBuild += ("getData?" + session + datafile + outname + "&zip=false");
-
-      g_log.debug() << "The download URL in ICat4Catalog::getDownloadURL is: " << urlToBuild << std::endl;
-
-      url = urlToBuild;
+      url += ("getData?" + session + datafile + outname + "&zip=false");
+      g_log.debug() << "The download URL in ICat4Catalog::getDownloadURL is: " << url << std::endl;
+      return url;
     }
 
     /**
@@ -796,15 +796,6 @@ namespace Mantid
      */
     void ICat4Catalog::keepAlive()
     {
-    }
-
-    /**
-     * Keep the current session alive in minutes.
-     * @return The number of minutes to keep session alive for.
-     */
-    int ICat4Catalog::keepAliveinminutes()
-    {
-      return (0);
     }
 
     /**

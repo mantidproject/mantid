@@ -4,6 +4,8 @@
 #include <string>
 #include <stdexcept>
 
+#include "MantidAPI/DllConfig.h"
+
 namespace Mantid
 {
   namespace ICat
@@ -31,7 +33,7 @@ namespace Mantid
       File change history is stored at: <https://github.com/mantidproject/mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class CatalogSearchParam
+    class DLLExport CatalogSearchParam
     {
     public:
       /// constructor
