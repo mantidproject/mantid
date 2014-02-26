@@ -34,6 +34,19 @@ namespace Mantid
      */
     class DLLExport MullerAnsatz : public ForegroundModel
     {
+      enum ChainDirection
+      {
+        AlongA,
+        AlongB,
+        AlongC
+      };
+      enum MagneticFFDirection
+      {
+        Isotropic,
+        NormalToA,
+        NormalToB,
+        NormalToC
+      };
     private:
       /// String name of the model
       std::string name() const { return "MullerAnsatz"; }
@@ -48,10 +61,9 @@ namespace Mantid
       /// Calculates the intensity for the model for the current parameters.
       double scatteringIntensity(const API::ExperimentInfo & exptDescr, const std::vector<double> & point) const;
 
-      /// Twin type attribute
-      int m_twinType;
-      /// MultEps attribute
-      bool m_multEps;
+      ChainDirection m_ChainDirection;
+      MagneticFFDirection m_FFDirection;
+
     };
 
   }
