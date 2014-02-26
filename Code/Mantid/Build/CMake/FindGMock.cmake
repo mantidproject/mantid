@@ -13,6 +13,12 @@ if( ${CMAKE_CXX_COMPILER} MATCHES "icpc.*$" )
 	set (GMOCK_VERSION "1.6.0")
 ENDIF()
 
+# Nasty hack for Windows to get build working!
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	set (GMOCK_VERSION "1.6.0")
+ENDIF()
+
+
 find_path ( GMOCK_INCLUDE_DIR gmock/gmock.h
             PATHS ${PROJECT_SOURCE_DIR}/TestingTools/gmock-${GMOCK_VERSION}/include
                   ${PROJECT_SOURCE_DIR}/../TestingTools/gmock-${GMOCK_VERSION}/include
