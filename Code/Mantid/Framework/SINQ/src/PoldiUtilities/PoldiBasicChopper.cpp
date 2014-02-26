@@ -30,16 +30,14 @@ void PoldiBasicChopper::loadConfiguration(Geometry::Instrument_const_sptr poldiI
 
     std::vector<double> slitPositions(numberOfSlits);
     for(size_t i = 0; i < numberOfSlits; ++i) {
-        slitPositions[i] = chopperGroup->getChild(i)->getPos().X();
+        slitPositions[i] = chopperGroup->getChild(static_cast<const int>(i))->getPos().X();
     }
 
     double distance = chopperGroup->getPos().norm() * 1000.0;
     double t0 = chopperGroup->getNumberParameter("t0").front();
     double t0const = chopperGroup->getNumberParameter("t0_const").front();
-    //double speed = chopperGroup->getNumberParameter("rotation_speed").front();
 
     initializeFixedParameters(slitPositions, distance, t0, t0const);
-    //initializeVariableParameters(speed);
 }
 
 void PoldiBasicChopper::setRotationSpeed(double rotationSpeed)

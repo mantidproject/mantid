@@ -58,18 +58,20 @@ void PoldiAutoCorrelation5::init()
 			"Input workspace containing the raw data.");
 
 	// the minimal value of the wavelength to consider
-	declareProperty("wlenmin", 1.1, "minimal wavelength considered" , Direction::Input);
+    declareProperty("wlenmin", 1.1, "Minimum wavelength considered" , Direction::Input);
 	// the maximal value of the wavelength to consider
-	declareProperty("wlenmax", 5.0, "maximal wavelength considered" , Direction::Input);
+    declareProperty("wlenmax", 5.0, "Maximum wavelength considered" , Direction::Input);
 
 	// The output Workspace2D containing the Poldi data autocorrelation function.
 	declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
 			"The output Workspace2D"
-			"containing the Poldi data autocorrelation function."
-			"Index 1 and 2 ws will be used later by the peak detection algorithm.");
+			"containing the Poldi data autocorrelation function.");
 
-
-
+    /* Auto correlation core object which performs the actual calculation.
+     * In future versions this will be replaced by a factory to cater for
+     * slightly different variants of the algorithm as they are implemented
+     * in the original fortran analysis software.
+     */
     m_core = boost::shared_ptr<PoldiAutoCorrelationCore>(new PoldiAutoCorrelationCore(g_log));
 
 }
@@ -144,23 +146,23 @@ void PoldiAutoCorrelation5::exec()
     g_log.information() << "_Poldi -     2Theta(central):   " << detector->twoTheta(199) / M_PI * 180.0 << "°" << std::endl;
     g_log.information() << "_Poldi -     Distance(central): " << detector->distanceFromSample(199) << " mm" << std::endl;
 
-    // Removing dead wires with decorator    
+    // Removing dead wires with decorator - this should ideally go into the decorator itself
     std::vector<detid_t> allDetectorIds = poldiInstrument->getDetectorIDs();
     std::vector<detid_t> deadDetectorIds(allDetectorIds.size());
 
     auto endIterator = std::copy_if(allDetectorIds.cbegin(), allDetectorIds.cend(), deadDetectorIds.begin(), [&poldiInstrument](detid_t detectorId) { return poldiInstrument->isDetectorMasked(detectorId); });
     deadDetectorIds.resize(std::distance(deadDetectorIds.begin(), endIterator));
 
-    g_log.information() << "Dead wires: " << deadDetectorIds.size() << std::endl;
+    g_log.information() << "_Poldi -     Number of dead wires: " << deadDetectorIds.size() << std::endl;
+    g_log.information() << "_Poldi -     Wire indices: ";
 
-    for(int i = 0; i < deadDetectorIds.size(); ++i) {
-        g_log.information() << "Wire " << i << ": " << deadDetectorIds[i] << std::endl;
+    for(size_t i = 0; i < deadDetectorIds.size(); ++i) {
+        g_log.information() << deadDetectorIds[i] << " ";
     }
+    g_log.information() << std::endl;
 
     std::set<int> deadWireSet(deadDetectorIds.cbegin(), deadDetectorIds.cend());
     boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector(new PoldiDeadWireDecorator(deadWireSet, detector));
-
-    g_log.information() << cleanDetector->availableElements().size() << " " << cleanDetector->availableElements().front() << std::endl;
 
     // putting together POLDI instrument for calculations
     m_core->setInstrument(cleanDetector, chopper);
