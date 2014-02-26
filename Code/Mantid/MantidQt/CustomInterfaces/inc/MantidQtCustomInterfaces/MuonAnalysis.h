@@ -402,10 +402,10 @@ private:
   double firstGoodBin() const;
 
   /// According to Plot Options what is the time to plot from in ms
-  double plotFromTime();
+  double plotFromTime() const;
 
   /// According to Plot Options what is the time to plot to in ms
-  double plotToTime();
+  double plotToTime() const;
 
   /// time zero returned in ms
   double timeZero();
