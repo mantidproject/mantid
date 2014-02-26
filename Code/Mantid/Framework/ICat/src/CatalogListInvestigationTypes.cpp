@@ -5,7 +5,6 @@ This algorithm is responsible for obtaining a list of investigation types from t
 *WIKI*/
 
 #include "MantidICat/CatalogListInvestigationTypes.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/CatalogManager.h"
 #include "MantidKernel/ArrayProperty.h"
 

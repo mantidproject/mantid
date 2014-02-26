@@ -5,7 +5,6 @@ from the information catalog and saves the search results to mantid workspace.
 
 #include "MantidICat/CatalogGetDataSets.h"
 #include "MantidICat/CatalogManager.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
 

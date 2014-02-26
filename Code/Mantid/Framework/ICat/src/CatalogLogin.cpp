@@ -5,11 +5,12 @@ This algorithm connects the logged in user to the information catalog.
 *WIKI*/
 
 #include "MantidICat/CatalogLogin.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/CatalogManager.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MaskedProperty.h"
-#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {

@@ -5,7 +5,6 @@ This algorithm disconnects the logged in user from the information catalog.
 *WIKI*/
 
 #include "MantidICat/CatalogLogout.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/CatalogManager.h"
 
 namespace Mantid

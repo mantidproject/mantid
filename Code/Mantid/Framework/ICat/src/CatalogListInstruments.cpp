@@ -5,7 +5,6 @@ This algorithm retrieves the instrument names from a catalog and stores them in 
 *WIKI*/
 
 #include "MantidICat/CatalogListInstruments.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/CatalogManager.h"
 #include "MantidKernel/ArrayProperty.h"
 

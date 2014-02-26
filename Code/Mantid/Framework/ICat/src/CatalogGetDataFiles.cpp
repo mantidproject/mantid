@@ -6,7 +6,6 @@ This algorithm retrieves the files associated to selected investigation from the
 
 #include "MantidICat/CatalogGetDataFiles.h"
 #include "MantidICat/CatalogManager.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
 

@@ -5,7 +5,6 @@ This algorithm retrieves logged in users investigations data from the informatio
 *WIKI*/
 
 #include "MantidICat/CatalogMyDataSearch.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/CatalogManager.h"
 
 namespace Mantid

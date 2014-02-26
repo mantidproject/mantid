@@ -16,7 +16,6 @@ This algorithm searches for the investigations and stores the search results in 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/CatalogManager.h"
 
 #include <boost/algorithm/string/regex.hpp>
