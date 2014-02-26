@@ -146,23 +146,16 @@ void PoldiAutoCorrelation5::exec()
     g_log.information() << "_Poldi -     2Theta(central):   " << detector->twoTheta(199) / M_PI * 180.0 << "°" << std::endl;
     g_log.information() << "_Poldi -     Distance(central): " << detector->distanceFromSample(199) << " mm" << std::endl;
 
-    // Removing dead wires with decorator - this should ideally go into the decorator itself
-    std::vector<detid_t> allDetectorIds = poldiInstrument->getDetectorIDs();
-    std::vector<detid_t> deadDetectorIds(allDetectorIds.size());
+    boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector(new PoldiDeadWireDecorator(poldiInstrument, detector));
 
-    auto endIterator = std::copy_if(allDetectorIds.cbegin(), allDetectorIds.cend(), deadDetectorIds.begin(), [&poldiInstrument](detid_t detectorId) { return poldiInstrument->isDetectorMasked(detectorId); });
-    deadDetectorIds.resize(std::distance(deadDetectorIds.begin(), endIterator));
-
-    g_log.information() << "_Poldi -     Number of dead wires: " << deadDetectorIds.size() << std::endl;
+    std::set<int> deadWires = cleanDetector->deadWires();
+    g_log.information() << "_Poldi -     Number of dead wires: " << deadWires.size() << std::endl;
     g_log.information() << "_Poldi -     Wire indices: ";
-
-    for(size_t i = 0; i < deadDetectorIds.size(); ++i) {
-        g_log.information() << deadDetectorIds[i] << " ";
+    for(std::set<int>::const_iterator dw = deadWires.cbegin(); dw != deadWires.cend(); ++dw) {
+        g_log.information() << *dw << " ";
     }
     g_log.information() << std::endl;
 
-    std::set<int> deadWireSet(deadDetectorIds.cbegin(), deadDetectorIds.cend());
-    boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector(new PoldiDeadWireDecorator(deadWireSet, detector));
 
     // putting together POLDI instrument for calculations
     m_core->setInstrument(cleanDetector, chopper);
