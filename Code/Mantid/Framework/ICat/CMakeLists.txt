@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/CatalogSearch.cpp
 	src/CatalogSearchParam.cpp
 	src/CompositeCatalog.cpp
+	src/CatalogManager.cpp
 	src/GSoap.cpp
 	src/ICat3/ICat3GSoapGenerated.cpp
 	src/ICat3/ICat3ErrorHandling.cpp
@@ -39,6 +40,7 @@ set ( INC_FILES
 	inc/MantidICat/ICatExport.h
 	inc/MantidICat/Session.h
 	inc/MantidICat/CompositeCatalog.h
+	inc/MantidICat/CatalogManager.h
 	inc/MantidICat/GSoap/soapserializersH.h
 	inc/MantidICat/GSoap/soapserializersStub.h
 	inc/MantidICat/GSoap/stdsoap2.h
