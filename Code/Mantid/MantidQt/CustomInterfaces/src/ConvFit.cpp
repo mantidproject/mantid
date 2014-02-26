@@ -388,7 +388,7 @@ namespace IDA
     // --- Composite / Linear Background ---
     // -------------------------------------
     func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
-    index = comp->addFunction(func); 
+    comp->addFunction(func); 
 
     const int bgType = uiForm().confit_cbBackground->currentIndex(); // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
   
@@ -418,7 +418,7 @@ namespace IDA
     // --- Composite / Convolution / Resolution ---
     // --------------------------------------------
     func = Mantid::API::FunctionFactory::Instance().createFunction("Resolution");
-    index = conv->addFunction(func);
+    conv->addFunction(func);
     std::string resfilename = uiForm().confit_resInput->getFirstFilename().toStdString();
     Mantid::API::IFunction::Attribute attr(resfilename);
     func->setAttribute("FileName", attr);
@@ -426,27 +426,102 @@ namespace IDA
     // --------------------------------------------------------
     // --- Composite / Convolution / Model / Delta Function ---
     // --------------------------------------------------------
+    Mantid::API::CompositeFunction_sptr model( new Mantid::API::CompositeFunction );
+
+    bool useDeltaFunc = m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]);
+
     size_t subIndex = 0;
 
-    if ( m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
+    if ( useDeltaFunc )
     {
       func = Mantid::API::FunctionFactory::Instance().createFunction("DeltaFunction");
-      index = conv->addFunction(func);
+      index = model->addFunction(func);
 
-      if ( /*tie  ||*/ ! m_cfProp["DeltaHeight"]->subProperties().isEmpty() )
+      if ( !m_cfProp["DeltaHeight"]->subProperties().isEmpty() )
       {
         std::string parName = createParName(index, "Height");
-        conv->tie(parName, m_cfProp["DeltaHeight"]->valueText().toStdString() );
+        model->tie(parName, m_cfProp["DeltaHeight"]->valueText().toStdString() );
       }
-
-      else { func->setParameter("Height", m_cfProp["DeltaHeight"]->valueText().toDouble()); }
-      subIndex++;
+      else
+      {
+        func->setParameter("Height", m_cfProp["DeltaHeight"]->valueText().toDouble());
+      }
     }
 
     // ------------------------------------------------------------
     // --- Composite / Convolution / Model / Temperature Factor ---
     // ------------------------------------------------------------
 
+    //create temperature correction function to multiply with the lorentzians
+    Mantid::API::IFunction_sptr tempFunc;
+    QString temperature = uiForm().confit_leTempCorrection->text();
+    bool useTempCorrection = (!temperature.isEmpty() && uiForm().confit_ckTempCorrection->isChecked());
+
+    // -----------------------------------------------------
+    // --- Composite / Convolution / Model / Lorentzians ---
+    // -----------------------------------------------------
+    std::string prefix1;
+    std::string prefix2;
+
+    int fitTypeIndex = uiForm().confit_cbFitType->currentIndex();  
+
+    // Add 1st Lorentzian
+    if(fitTypeIndex > 0)
+    {
+      //if temperature not included then product is lorentzian * 1
+      //create product function for temp * lorentzian
+      auto product = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("ProductFunction"));
+      
+      if(useTempCorrection)
+      {
+        product->addFunction(createTemperatureCorrection());
+      }
+
+      func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
+      subIndex = product->addFunction(func);
+      index = model->addFunction(product);
+      prefix1 = createParName(index, subIndex);
+
+      populateFunction(func, product, m_cfProp["Lorentzian1"], prefix1, false);
+    }
+
+    // Add 2nd Lorentzian
+    if(fitTypeIndex == 2)
+    {
+      //if temperature not included then product is lorentzian * 1
+      //create product function for temp * lorentzian
+      auto product = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("ProductFunction"));
+    
+      if(useTempCorrection)
+      {
+        product->addFunction(createTemperatureCorrection());
+      }
+
+      func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
+      subIndex = product->addFunction(func);
+      index = model->addFunction(product);
+      prefix2 = createParName(index, subIndex);
+      
+      populateFunction(func, product, m_cfProp["Lorentzian2"], prefix2, false);
+    }
+
+    conv->addFunction(model);
+    comp->addFunction(conv);
+
+    // Tie PeakCentres together
+    if ( tieCentres )
+    {
+      std::string tieL = prefix1 + "PeakCentre";
+      std::string tieR = prefix2 + "PeakCentre";
+      model->tie(tieL, tieR);
+    }
+
+    comp->applyTies();
+    return comp;
+  }
+
+  Mantid::API::IFunction_sptr ConvFit::createTemperatureCorrection()
+  {
     //create temperature correction function to multiply with the lorentzians
     Mantid::API::IFunction_sptr tempFunc;
     QString temperature = uiForm().confit_leTempCorrection->text();
@@ -458,99 +533,13 @@ namespace IDA
       // (x*temp) / 1-exp(-(x*temp))
       tempFunc = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
       //11.606 is the conversion factor from meV to K
-      std::string formula = "((x*11.606)/temp) / (1 - exp(-((x*11.606)/temp)))";
+      std::string formula = "((x*11.606)/Temp) / (1 - exp(-((x*11.606)/Temp)))";
       Mantid::API::IFunction::Attribute att(formula);
       tempFunc->setAttribute("Formula", att);
-      tempFunc->setParameter("temp", temperature.toDouble());
+      tempFunc->setParameter("Temp", temperature.toDouble());
     }
 
-    // -----------------------------------------------------
-    // --- Composite / Convolution / Model / Lorentzians ---
-    // -----------------------------------------------------
-    std::string prefix1;
-    std::string prefix2;
-
-    //create product function for temp * lorentzian
-    //if temperature not included then product is lorentzian * 1
-    auto product = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("ProductFunction"));
-    index = conv->addFunction(product);
-
-    switch ( uiForm().confit_cbFitType->currentIndex() )
-    {
-    case 0: // No Lorentzians
-
-      break;
-
-    case 1: // 1 Lorentzian
-     
-      if(tempFunc)
-      {
-        product->addFunction(tempFunc);
-      }
-
-      func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-      index = product->addFunction(func);
-
-      // If it's the first "sub" function of model, then it wont be nested inside Convolution ...
-      if( subIndex == 0 ) { prefix1 = createParName(index); }
-      // ... else it's part of a composite function inside Convolution.
-      else { prefix1 = createParName(index, subIndex); }
-
-      populateFunction(func, product, m_cfProp["Lorentzian1"], prefix1, false);
-      subIndex++;
-      break;
-
-    case 2: // 2 Lorentzians
-
-      //Lorentzian #1
-      if(tempFunc)
-      {
-        product->addFunction(tempFunc);
-      }
-
-      func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-      index = product->addFunction(func);
-
-      // If it's the first "sub" function of model, then it wont be nested inside Convolution ...
-      if( subIndex == 0 ) { prefix1 = createParName(index); }
-      // ... else it's part of a composite function inside Convolution.
-      else { prefix1 = createParName(index, subIndex); }
-
-      populateFunction(func, product, m_cfProp["Lorentzian1"], prefix1, false);
-      subIndex++;
-
-      //Lorentzian #2
-      product = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(Mantid::API::FunctionFactory::Instance().createFunction("ProductFunction"));
-      index = conv->addFunction(product);
-    
-      if(tempFunc)
-      {
-        product->addFunction(tempFunc);
-      }
-
-      func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
-      index = product->addFunction(func);
-
-      prefix2 = createParName(index, subIndex); // (Part of a composite.)
-      populateFunction(func, product, m_cfProp["Lorentzian2"], prefix2, false);
-
-      // Now prefix1 should be changed to reflect the fact that it is now part of a composite function inside Convolution.
-      prefix1 = createParName(index, subIndex-1);
-
-      // Tie PeakCentres together
-      if ( tieCentres )
-      {
-        QString tieL = QString::fromStdString(prefix1 + "PeakCentre");
-        QString tieR = QString::fromStdString(prefix2 + "PeakCentre");
-        product->tie(tieL.toStdString(), tieR.toStdString());
-      }
-      break;
-    }
-
-    comp->addFunction(conv);
-    comp->applyTies();
-
-    return comp;
+    return tempFunc;
   }
 
   QtProperty* ConvFit::createLorentzian(const QString & name)
@@ -581,7 +570,7 @@ namespace IDA
       {
         std::string name = pref + props[i]->propertyName().toStdString();
         std::string value = props[i]->valueText().toStdString();
-        comp->tie(name, value );
+        comp->tie(name, value);
       }
       else
       {
@@ -992,7 +981,7 @@ namespace IDA
       return;
 
     // Create the menu
-    QMenu* menu = new QMenu("FuryFit", m_cfTree);
+    QMenu* menu = new QMenu("ConvFit", m_cfTree);
     QAction* action;
 
     if ( ! fixed )
