@@ -1934,14 +1934,29 @@ void MuonAnalysis::guessAlphaClicked()
     if ( m_uiForm.homePeriodBox2->isEnabled() )
       inputWS += "_" + m_uiForm.homePeriodBox1->currentText();
 
-    Mantid::API::IAlgorithm_sptr alphaAlg = Mantid::API::AlgorithmManager::Instance().create("AlphaCalc");
-    alphaAlg->setPropertyValue("InputWorkspace", inputWS.toStdString());
-    alphaAlg->setPropertyValue("ForwardSpectra", idsF->text().toStdString());
-    alphaAlg->setPropertyValue("BackwardSpectra", idsB->text().toStdString());
-    alphaAlg->setProperty("FirstGoodValue", firstGoodBin());
-    alphaAlg->execute();  
+    double alphaValue;
 
-    const QString alpha(alphaAlg->getPropertyValue("Alpha").c_str());
+    try
+    {
+      IAlgorithm_sptr alphaAlg = AlgorithmManager::Instance().create("AlphaCalc");
+      alphaAlg->setPropertyValue("InputWorkspace", inputWS.toStdString());
+      alphaAlg->setPropertyValue("ForwardSpectra", idsF->text().toStdString());
+      alphaAlg->setPropertyValue("BackwardSpectra", idsB->text().toStdString());
+      alphaAlg->setProperty("FirstGoodValue", firstGoodBin());
+      alphaAlg->execute();
+
+      alphaValue = alphaAlg->getProperty("Alpha");
+    }
+    catch(std::exception& e)
+    {
+      g_log.error() << "Error when running AlphaCalc: " << e.what() << "\n";
+      QMessageBox::critical(this, "Guess alpha error",
+                            "Unable to guess alpha value. AlphaCalc failed. See log for details.");
+      m_updating = false;
+      return;
+    }
+
+    const QString alpha = QString::number(alphaValue);
 
     QComboBox* qwAlpha = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,3));
     if (qwAlpha)
