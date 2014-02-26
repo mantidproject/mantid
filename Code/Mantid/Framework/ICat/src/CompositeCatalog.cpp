@@ -7,14 +7,6 @@ namespace Mantid
     CompositeCatalog::CompositeCatalog() : m_catalogs() {}
 
     /**
-     * When the object is deleted we want to clear the catalog container.
-     */
-    CompositeCatalog::~CompositeCatalog()
-    {
-      m_catalogs.clear();
-    }
-
-    /**
      * Add a catalog to the catalog container.
      * @param catalog :: The catalog to add to the container.
      */

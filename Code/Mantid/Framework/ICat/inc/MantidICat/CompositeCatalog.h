@@ -37,8 +37,6 @@ namespace Mantid
       public:
         /// Constructor
         CompositeCatalog();
-        /// Destructor
-        ~CompositeCatalog();
         /// Adds a catalog to the list of catalogs (m_catalogs)
         void add(const API::ICatalog_sptr catalog);
         /// Log the user into the catalog system.
