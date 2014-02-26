@@ -189,7 +189,7 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, specMin=0, specMax=None, 
     RenameWorkspace(InputWorkspace=output_workspace, OutputWorkspace=output_workspace + "_Parameters")
     fit_workspaces = mtd[output_workspace + '_Workspaces'].getNames()
     for i, ws in enumerate(fit_workspaces):
-        RenameWorkspace(ws, OutputWorkspace=output_workspace + str(i+specMin) + '_Workspace')
+        RenameWorkspace(ws, OutputWorkspace=output_workspace + '_' + str(i+specMin) + '_Workspace')
 
     if Save:
         # path name for nxs file
