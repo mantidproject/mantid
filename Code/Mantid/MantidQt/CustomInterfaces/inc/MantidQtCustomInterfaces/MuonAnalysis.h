@@ -321,9 +321,6 @@ private:
   /// Deletes a workspace _or_ a workspace group with the given name, if one exists
   void deleteWorkspaceIfExists(const std::string& wsName);
 
-  /// Check if grouping in table is consistent with data file
-  std::string isGroupingAndDataConsistent();
-
   ///Return true if data are loaded
   bool areDataLoaded();
 

@@ -2283,7 +2283,6 @@ double MuonAnalysis::plotFromTime()
   return returnValue;
 }
 
-
  /**
  * According to Plot Options what time should we plot to in ms
  * @return time to plot to in ms
@@ -2302,80 +2301,6 @@ double MuonAnalysis::plotToTime()
   }
   return retVal;
 }
-
-
-/**
-* Check if grouping in table is consistent with data file
-*
-* @return empty string if OK otherwise a complaint
-*/
-std::string MuonAnalysis::isGroupingAndDataConsistent()
-{
-  std::string complaint = "Grouping inconsistent with data file. Plotting disabled.\n";
-
-  // should probably farm the getting of matrix workspace out into separate method or store
-  // as attribute assigned in inputFileChanged
-  Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
-  WorkspaceGroup_sptr wsPeriods = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace_ptr);
-  MatrixWorkspace_sptr matrix_workspace;
-  if (wsPeriods)
-  {
-    Workspace_sptr workspace_ptr1 = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
-    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr1);
-  }
-  else
-  {
-    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
-  }
-
-  int nDet = static_cast<int>(matrix_workspace->getNumberHistograms());
-
-  complaint += "Number of spectra in data = " + boost::lexical_cast<std::string>(nDet) + ". ";
-
-  int numG = numGroups();
-  bool returnComplaint = false;
-  for (int iG = 0; iG < numG; iG++)
-  {
-    typedef Poco::StringTokenizer tokenizer;
-    tokenizer values(m_uiForm.groupTable->item(m_groupToRow[iG],1)->text().toStdString(), ",", tokenizer::TOK_TRIM);
-
-    for (int i = 0; i < static_cast<int>(values.count()); i++)
-    {
-      std::size_t found= values[i].find("-");
-      if (found!=std::string::npos)
-      {
-        tokenizer aPart(values[i], "-", tokenizer::TOK_TRIM);
-
-        int rightInt;
-        std::stringstream rightRead(aPart[1]);
-        rightRead >> rightInt;
-
-        if ( rightInt > nDet )
-        {
-          complaint += " Group-table row " + boost::lexical_cast<std::string>(m_groupToRow[iG]+1) + " refers to spectrum "
-            + boost::lexical_cast<std::string>(rightInt) + ".";
-          returnComplaint = true;
-          break;
-        }
-      }
-      else
-      {
-        if ( (boost::lexical_cast<int>(values[i].c_str()) > nDet) || (boost::lexical_cast<int>(values[i].c_str()) < 1) )
-        {
-          complaint += " Group-table row " + boost::lexical_cast<std::string>(m_groupToRow[iG]+1) + " refers to spectrum "
-            + values[i] + ".";
-          returnComplaint = true;
-          break;
-        }
-      }
-    }
-  }
-  if ( returnComplaint )
-    return complaint;
-  else
-    return std::string("");
-}
-
 
 /**
  * Load auto saved values
