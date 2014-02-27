@@ -337,9 +337,16 @@ std::string getRunLabel(const Workspace_sptr& ws)
   int runNumber = firstPrd->getRunNumber();
   std::string instrName = firstPrd->getInstrument()->getName();
 
+  int width(8);
+
+  if ( instrName == "ARGUS" )
+  {
+    width = 7;
+  }
+
   std::ostringstream label;
   label << instrName;
-  label << std::setw(8) << std::setfill('0') << std::right << runNumber;
+  label << std::setw(width) << std::setfill('0') << std::right << runNumber;
   return label.str();
 }
 

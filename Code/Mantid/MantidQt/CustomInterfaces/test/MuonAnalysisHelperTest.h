@@ -35,10 +35,16 @@ public:
     TS_ASSERT_EQUALS(label, "MUSR00015189");
   }
 
+  void test_getRunLabel_argus()
+  {
+    std::string label = getRunLabel(createWs("ARGUS", 26577));
+    TS_ASSERT_EQUALS(label, "ARGUS0026577");
+  }
+
   void test_getRunLabel_singleWs_tooBigRunNumber()
   {
-    std::string label = getRunLabel(createWs("ARGUS", 999999999));
-    TS_ASSERT_EQUALS(label, "ARGUS999999999");
+    std::string label = getRunLabel(createWs("EMU", 999999999));
+    TS_ASSERT_EQUALS(label, "EMU999999999");
   }
 
   void test_getRunLabel_wsList()
