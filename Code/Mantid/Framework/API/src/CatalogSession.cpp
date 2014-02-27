@@ -24,6 +24,15 @@ namespace Mantid
     }
 
     /**
+     * Used to clear the session ID on logout.
+     * @param sessionID :: The value to set the session id.
+     */
+    void CatalogSession::setSessionId(const std::string &sessionID)
+    {
+      m_sessionID = sessionID;
+    }
+
+    /**
      * Obtains the soap end-point of the catalog created.
      * @return The soap end-point used to create the catalog.
      */
