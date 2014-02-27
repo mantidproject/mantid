@@ -62,6 +62,9 @@ class LoadSINQFile(PythonAlgorithm):
         ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,OutputWorkspace=wname)
 
         if inst == "POLDI":
+            if ws.getNumberHistograms() == 800:
+               ws.maskDetectors(SpectraList=range(0,800)[::2])
+
             config.appendDataSearchDir(config['groupingFiles.directory'])
             grp_file = "POLDI_Grouping_800to400.xml"
             ws = mantid.simpleapi.GroupDetectors(InputWorkspace=ws,

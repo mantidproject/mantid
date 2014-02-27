@@ -3,7 +3,7 @@
 
 #include "MantidSINQ/DllConfig.h"
 
-#include "MantidSINQ/PoldiAbstractDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "boost/date_time/gregorian/gregorian.hpp"
 
 namespace Mantid
@@ -55,7 +55,7 @@ namespace Poldi
   };
 
 
-} // namespace SINQ
+} // namespace Poldi
 } // namespace Mantid
 
 #endif  /* MANTID_SINQ_POLDIDETECTORFACTORY_H_ */

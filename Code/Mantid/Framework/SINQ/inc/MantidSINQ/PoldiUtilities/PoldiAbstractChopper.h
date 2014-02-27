@@ -1,11 +1,9 @@
-#ifndef POLDIABSTRACTDETECTOR_H
-#define POLDIABSTRACTDETECTOR_H
+#ifndef POLDIABSTRACTCHOPPER_H
+#define POLDIABSTRACTCHOPPER_H
 
 #include "MantidSINQ/DllConfig.h"
 
-#include "MantidDataObjects/TableWorkspace.h"
-
-#include "MantidKernel/V2D.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <utility>
 
@@ -14,15 +12,16 @@ namespace Mantid
 namespace Poldi
 {
 
-/** PoldiAbstractDetector :
+/** PoldiAbstractChopper :
  *
-  Abstract representation of detector, used for POLDI related calculations. Calculation
-  methods are the repsonsibility of concrete implementations.
+  Abstract representation of the POLDI chopper
 
     @author Michael Wedel, Paul Scherrer Institut - SINQ
-    @date 07/02/2014
+    @date 10/02/2014
 
     Copyright © 2014 PSI-MSS
+
+  This file is part of Mantid.
 
   Mantid is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -42,27 +41,30 @@ namespace Poldi
 */
 
 using namespace Kernel;
-using namespace API;
 
-class MANTID_SINQ_DLL PoldiAbstractDetector
+class MANTID_SINQ_DLL PoldiAbstractChopper
 {
 public:
-    virtual ~PoldiAbstractDetector() {}
+    virtual ~PoldiAbstractChopper() {}
 
-    virtual void loadConfiguration(DataObjects::TableWorkspace_sptr detectorConfigurationWorkspace) = 0;
+    virtual void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) = 0;
 
-    virtual double twoTheta(int elementIndex) = 0;
-    virtual double distanceFromSample(int elementIndex) = 0;
+    virtual void setRotationSpeed(double rotationSpeed) = 0;
 
-    virtual size_t elementCount() = 0;
-    virtual size_t centralElement() = 0;
+    virtual const std::vector<double>& slitPositions() = 0;
+    virtual const std::vector<double>& slitTimes() = 0;
 
-    virtual std::pair<double, double> qLimits(double lambdaMin, double lambdaMax) = 0;
+    virtual double rotationSpeed() = 0;
+    virtual double cycleTime() = 0;
+    virtual double zeroOffset() = 0;
+
+    virtual double distanceFromSample() = 0;
 
 protected:
-    PoldiAbstractDetector() {}
+    PoldiAbstractChopper() {}
 
 };
 }
 }
-#endif // POLDIABSTRACTDETECTOR_H
+
+#endif // POLDIABSTRACTCHOPPER_H

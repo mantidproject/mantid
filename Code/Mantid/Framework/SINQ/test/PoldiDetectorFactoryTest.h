@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidSINQ/PoldiDetectorFactory.h"
-#include "MantidSINQ/PoldiHeliumDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h"
+#include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
 
 #include "boost/date_time/gregorian/gregorian.hpp"
 

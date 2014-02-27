@@ -2,7 +2,7 @@
 #define POLDIHELIUMDETECTOR_H
 
 #include "MantidSINQ/DllConfig.h"
-#include "MantidSINQ/PoldiAbstractDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 
 #include "MantidKernel/V2D.h"
 
@@ -18,6 +18,8 @@ namespace Poldi {
     @date 07/02/2014
 
     Copyright © 2014 PSI-MSS
+
+  This file is part of Mantid.
 
   Mantid is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -35,6 +37,7 @@ namespace Poldi {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+using namespace Kernel;
 
 class MANTID_SINQ_DLL PoldiHeliumDetector : public PoldiAbstractDetector
 {
@@ -42,13 +45,15 @@ public:
     PoldiHeliumDetector();
     ~PoldiHeliumDetector() {}
 
-    void loadConfiguration(DataObjects::TableWorkspace_sptr detectorConfigurationWorkspace);
+    void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument);
 
     double twoTheta(int elementIndex);
     double distanceFromSample(int elementIndex);
 
     size_t elementCount();
     size_t centralElement();
+
+    const std::vector<int>& availableElements();
 
     std::pair<double, double> qLimits(double lambdaMin, double lambdaMax);
 
@@ -57,7 +62,7 @@ protected:
     double phi(double twoTheta);
 
     void initializeFixedParameters(double radius, size_t elementCount, double elementWidth);
-    void initializeCalibratedParameters(V2D position, double centerTwoTheta);
+    void initializeCalibratedParameters(Kernel::V2D position, double centerTwoTheta);
 
     /* These detector parameters are fixed and specific to the geometry or result from it directly */
     double m_radius;
@@ -66,6 +71,7 @@ protected:
     double m_elementWidth;
     double m_angularResolution;
     double m_totalOpeningAngle;
+    std::vector<int> m_availableElements;
 
     /* Parameters that are calibrated or depend on calibrated parameters */
     V2D m_calibratedPosition;
