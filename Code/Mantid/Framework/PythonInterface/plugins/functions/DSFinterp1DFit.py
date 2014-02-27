@@ -116,22 +116,22 @@ class DSFinterp1DFit(IFunction1D):
         if mtd[w].getNumberHistograms() <= self._WorkspaceIndex:
           message = 'Numer of histograms in Workspace {0} does not allow for workspace index {1}'.format(w,self._WorkspaceIndex)
           logger.error(message)
-          raise IndexError
+          raise IndexError(message)
       # check number of input workspaces and parameters is the same
       if len(self._ParameterValues) != len(self._Workspaces):
         message = 'Number of Workspaces and ParameterValues should be the same. Found {0} and {1}, respectively'.format(len(self._ParameterValues), len(self._Workspaces))
         logger.error(message)
-        raise ValueError
+        raise ValueError(message)
       # check the regression type is valid
       if self._RegressionType not in self._RegressionTypes:
-        message = 'Regression type {0} not implemented. choose one of {1}'.format(value, ', '.join(self._RegressionTypes))
+        message = 'Regression type {0} not implemented. choose one of {1}'.format(self._RegressionType, ', '.join(self._RegressionTypes))
         logger.error(message)
-        raise NotImplementedError
+        raise NotImplementedError(message)
       # check the regression window is appropriate for the regression type selected
       if self._RegressionWindow < self._minWindow[self._RegressionType]:
         message = 'RegressionWindow must be equal or bigger than {0} for regression type {1}'.format(self._minWindow[self._RegressionType], self._RegressionType)
         logger.error(message)
-        raise ValueError
+        raise ValueError(message)
       # Initialize the channel group
       nf = len(self._ParameterValues)
       # We need to Rebin the input workspaces to agree with the passed xvals
