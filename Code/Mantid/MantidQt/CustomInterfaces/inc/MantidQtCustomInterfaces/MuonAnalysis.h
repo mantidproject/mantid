@@ -43,6 +43,7 @@ namespace Muon
     std::string mainFieldDirection;
     double timeZero;
     double firstGoodData;
+    std::string label;
   };
 
   struct GroupResult {

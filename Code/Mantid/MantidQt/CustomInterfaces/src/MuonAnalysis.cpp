@@ -1398,11 +1398,22 @@ boost::shared_ptr<LoadResult> MuonAnalysis::load(const QStringList& files) const
     result->mainFieldDirection = "longitudinal";
   }
 
-  // Acquire a single loaded worksace to work with. If multiple loaded - sum them to get one
   if ( loadedWorkspaces.size() == 1 )
-    result->loadedWorkspace = loadedWorkspaces.front();
+  {
+
+    // If single workspace loaded - use it
+    Workspace_sptr ws = loadedWorkspaces.front();
+    result->loadedWorkspace = ws;
+
+    result->label = getRunLabel(ws);
+  }
   else
+  {
+    // If multiple workspaces loaded - sum them to get the one to work with
     result->loadedWorkspace = sumWorkspaces(loadedWorkspaces);
+
+    result->label = getRunLabel(loadedWorkspaces);
+  }
 
   return result;
 }
