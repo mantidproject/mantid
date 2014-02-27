@@ -1634,33 +1634,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 }
 
 /**
- * Sums a given list of workspaces
- * @param workspaces :: List of workspaces
- * @return Result workspace
- */
-Workspace_sptr MuonAnalysis::sumWorkspaces(const std::vector<Workspace_sptr>& workspaces) const
-{
-  if (workspaces.size() < 1)
-    throw std::invalid_argument("Couldn't sum an empty list of workspaces");
-
-  ScopedWorkspace accumulatorEntry(workspaces.front());
-
-  for ( auto it = (workspaces.begin() + 1); it != workspaces.end(); ++it )
-  {
-    ScopedWorkspace wsEntry(*it);
-
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");
-    alg->setPropertyValue("LHSWorkspace", accumulatorEntry.name());
-    alg->setPropertyValue("RHSWorkspace", wsEntry.name());
-    alg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
-    if (!alg->execute())
-      throw std::runtime_error("Error in adding range together.");
-  }
-
-  return accumulatorEntry.retrieve();
-}
-
-/**
  * Deletes a workspace _or_ a workspace group with the given name, if one exists
  * @param wsName :: Name of the workspace to delete
  */

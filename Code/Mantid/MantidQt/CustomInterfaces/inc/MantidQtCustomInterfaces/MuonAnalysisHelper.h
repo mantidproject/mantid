@@ -36,6 +36,9 @@ DLLExport std::string getRunLabel(const Workspace_sptr& ws);
 /// Get a run label for a list of workspaces
 DLLExport std::string getRunLabel(const std::vector<Workspace_sptr>& wsList);
 
+/// Sums a list of workspaces together
+DLLExport Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces);
+
 /**
  * A class which deals with auto-saving the widget values. Widgets are registered and then on any
  * change, their value is stored using QSettings.

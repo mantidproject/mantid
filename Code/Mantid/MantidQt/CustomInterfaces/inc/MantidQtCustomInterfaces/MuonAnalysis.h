@@ -319,9 +319,6 @@ private:
   /// Clear tables and front combo box
   void clearTablesAndCombo();
 
-  /// Sums a given list of workspaces
-  Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces) const;
-
   /// Deletes a workspace _or_ a workspace group with the given name, if one exists
   void deleteWorkspaceIfExists(const std::string& wsName);
 

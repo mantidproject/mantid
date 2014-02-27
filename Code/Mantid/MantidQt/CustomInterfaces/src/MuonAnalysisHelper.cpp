@@ -2,6 +2,8 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ScopedWorkspace.h"
 
 #include <QLineEdit>
 #include <QCheckBox>
@@ -385,6 +387,40 @@ std::string getRunLabel(const std::vector<Workspace_sptr>& wsList)
   label << std::setw(8) << std::setfill('0') << std::right << firstRun;
   label << '-' << lastRun;
   return label.str();
+}
+
+/**
+ * Sums a given list of workspaces
+ * @param workspaces :: List of workspaces
+ * @return Result workspace
+ */
+Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
+{
+  if (workspaces.size() < 1)
+    throw std::invalid_argument("Couldn't sum an empty list of workspaces");
+
+  ScopedWorkspace firstEntry(workspaces.front());
+  ScopedWorkspace accumulatorEntry;
+
+  // Create accumulator workspace, by cloning the first one from the list
+  IAlgorithm_sptr cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
+  cloneAlg->setPropertyValue("InputWorkspace", firstEntry.name());
+  cloneAlg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
+  cloneAlg->execute();
+
+  for ( auto it = (workspaces.begin() + 1); it != workspaces.end(); ++it )
+  {
+    ScopedWorkspace wsEntry(*it);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");
+    alg->setPropertyValue("LHSWorkspace", accumulatorEntry.name());
+    alg->setPropertyValue("RHSWorkspace", wsEntry.name());
+    alg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
+    if (!alg->execute())
+      throw std::runtime_error("Error in adding range together.");
+  }
+
+  return accumulatorEntry.retrieve();
 }
 
 } // namespace MuonAnalysisHelper

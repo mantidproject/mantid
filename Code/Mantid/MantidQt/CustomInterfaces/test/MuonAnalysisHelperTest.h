@@ -5,7 +5,10 @@
 
 #include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <boost/assign/list_of.hpp>
 
 using namespace MantidQt::CustomInterfaces::MuonAnalysisHelper;
@@ -20,6 +23,11 @@ public:
   // This means the constructor isn't called when running other tests
   static MuonAnalysisHelperTest *createSuite() { return new MuonAnalysisHelperTest(); }
   static void destroySuite( MuonAnalysisHelperTest *suite ) { delete suite; }
+
+  MuonAnalysisHelperTest()
+  {
+    FrameworkManager::Instance(); // So that framework is initialized
+  }
 
   void test_getRunLabel_singleWs()
   {
@@ -58,6 +66,32 @@ public:
 
     std::string label = getRunLabel(list);
     TS_ASSERT_EQUALS(label, "EMU00000001-10");
+  }
+
+  void test_sumWorkspaces()
+  {
+    MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+    MatrixWorkspace_sptr ws3 = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
+
+    std::vector<Workspace_sptr> wsList = boost::assign::list_of(ws1)(ws2)(ws3);
+
+    auto result = boost::dynamic_pointer_cast<MatrixWorkspace>(sumWorkspaces(wsList));
+
+    TS_ASSERT(result);
+    if (!result)
+      return; // Nothing to check
+
+    TS_ASSERT_EQUALS(result->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(result->blocksize(), 3);
+
+    TS_ASSERT_EQUALS(result->readY(0)[0], 6);
+    TS_ASSERT_EQUALS(result->readY(0)[1], 6);
+    TS_ASSERT_EQUALS(result->readY(0)[2], 6);
+
+    // Original workspaces shouldn't be touched
+    TS_ASSERT_EQUALS(ws1->readY(0)[0], 2);
+    TS_ASSERT_EQUALS(ws3->readY(0)[2], 2);
   }
 
 private:
