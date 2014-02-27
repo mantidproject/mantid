@@ -356,25 +356,23 @@ std::string getRunLabel(const Workspace_sptr& ws)
  * @param wsList
  * @return
  */
-std::string getRunLabel(const std::vector<Workspace_sptr>& wsList)
+std::string getRunLabel(std::vector<Workspace_sptr> wsList)
 {
   if (wsList.empty())
     throw std::invalid_argument("Unable to run on an empty list");
 
-  std::vector<int> runNumbers;
-  runNumbers.reserve(wsList.size());
+  struct {
+     bool operator() (Workspace_sptr ws1, Workspace_sptr ws2) {
+       return firstPeriod(ws1)->getRunNumber() < firstPeriod(ws2)->getRunNumber();
+     }
+  } compareByRunNumber;
 
-  for (auto it = wsList.begin(); it != wsList.end(); ++it)
-  {
-    runNumbers.push_back( firstPeriod(*it)->getRunNumber() );
-  }
-
-  // Sort run numbers, in case of non-sequential list of runs
-  std::sort(runNumbers.begin(), runNumbers.end());
+  // Sort by run numbers, in case of non-sequential list of runs
+  std::sort(wsList.begin(), wsList.end(), compareByRunNumber);
 
   // Get string representation of the first and last run numbers
-  auto firstRun = boost::lexical_cast<std::string>(runNumbers.front());
-  auto lastRun = boost::lexical_cast<std::string>(runNumbers.back());
+  auto firstRun = boost::lexical_cast<std::string>(firstPeriod(wsList.front())->getRunNumber());
+  auto lastRun = boost::lexical_cast<std::string>(firstPeriod(wsList.back())->getRunNumber());
 
   // Remove the common part of the first and last run, so we get e.g. "12345-56" instead of "12345-12356"
   for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i)
@@ -386,12 +384,8 @@ std::string getRunLabel(const std::vector<Workspace_sptr>& wsList)
     }
   }
 
-  // Use the first workspace to get instrument from
-  std::string instrName = firstPeriod(wsList[0])->getInstrument()->getName();
-
   std::ostringstream label;
-  label << instrName;
-  label << std::setw(8) << std::setfill('0') << std::right << firstRun;
+  label << getRunLabel(wsList.front());
   label << '-' << lastRun;
   return label.str();
 }
