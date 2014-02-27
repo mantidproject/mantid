@@ -130,7 +130,7 @@ public:
   /// Get the integrated counts of a detector by its detector ID.
   double getIntegratedCounts(Mantid::detid_t id)const;
   /// Sum the counts in detectors
-  void sumDetectors(QList<int>& dets, std::vector<double>&x, std::vector<double>&y, std::vector<double>* err = NULL) const;
+  void sumDetectors(QList<int>& dets, std::vector<double>&x, std::vector<double>&y, size_t size = 0) const;
   /// Calc indexes for min and max bin values
   void getBinMinMaxIndex(size_t wi,size_t& imin, size_t& imax) const;
 
@@ -170,6 +170,10 @@ private:
   void saveSettings();
   void setDataMinMaxRange(double vmin, double vmax);
   void setDataIntegrationRange(const double& xmin,const double& xmax);
+  /// Sum the counts in detectors if the workspace has equal bins for all spectra
+  void sumDetectorsUniform(QList<int>& dets, std::vector<double>&x, std::vector<double>&y) const;
+  /// Sum the counts in detectors if the workspace is ragged
+  void sumDetectorsRagged(QList<int>& dets, std::vector<double>&x, std::vector<double>&y, size_t size) const;
 
   size_t push_back_detid(Mantid::detid_t)const;
   boost::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspaceIfExists() const;

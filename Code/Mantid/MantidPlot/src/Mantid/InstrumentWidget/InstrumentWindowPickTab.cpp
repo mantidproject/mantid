@@ -1418,7 +1418,7 @@ void InstrumentWindowPickTab::updatePlotMultipleDetectors()
     surface.getMaskedDetectors( dets );
     std::vector<double> x,y;
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    m_instrWindow->getInstrumentActor()->sumDetectors( dets, x, y );
+    m_instrWindow->getInstrumentActor()->sumDetectors( dets, x, y, static_cast<size_t>(m_plot->width()) );
     QApplication::restoreOverrideCursor();
     if ( !x.empty() )
     {
