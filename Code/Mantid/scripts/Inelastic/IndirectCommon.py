@@ -1,8 +1,8 @@
 from mantid.simpleapi import *
 from mantid import config, logger
 from IndirectImport import import_mantidplot
-import sys, platform, os.path, math, datetime, re
-    
+import sys, os.path, math, datetime
+
 def StartTime(prog):
     logger.notice('----------')
     message = 'Program ' + prog +' started @ ' + str(datetime.datetime.now())
@@ -21,50 +21,51 @@ def loadInst(instrument):
         LoadEmptyInstrument(Filename=idf, OutputWorkspace=ws)
 
 def loadNexus(filename):
-    '''Loads a Nexus file into a workspace with the name based on the
+    '''
+    Loads a Nexus file into a workspace with the name based on the
     filename. Convenience function for not having to play around with paths
-    in every function.'''
+    in every function.
+    '''
     name = os.path.splitext( os.path.split(filename)[1] )[0]
     LoadNexus(Filename=filename, OutputWorkspace=name)
     return name
-    
-def getInstrRun(file):
-    mo = re.match('([a-zA-Z]+)([0-9]+)',file)
-    instr_and_run = mo.group(0)          # instr name + run number
-    instr = mo.group(1)                  # instrument prefix
-    run = mo.group(2)                    # run number as string
-    return instr,run
 
-def getWSprefix(wsname,runfile=None):
-    '''Returns a string of the form '<ins><run>_<analyser><refl>_' on which
-    all of our other naming conventions are built.
-    The workspace is used to get the instrument parameters. If the runfile
-    string is given it is expected to be a string with instrument prefix
-    and run number. If it is empty then the workspace name is assumed to
-    contain this information
+def getInstrRun(ws_name):
+    ws = mtd[ws_name]
+    instrument = ws.getInstrument().getName()
+    run_number = ws.getRun()['run_number'].value
+    instrument = config.getFacility().instrument(instrument).shortName().lower()
+    return instrument,run_number
+
+def getWSprefix(wsname):
+    '''
+    Returns a string of the form '<ins><run>_<analyser><refl>_' on which
+    all of our other naming conventions are built. The workspace is used to get the
+    instrument parameters.
     '''
     if wsname == '':
         return ''
-    if runfile is None:
-        runfile = wsname
+
     ws = mtd[wsname]
     facility = config['default.facility']
+
     ws_run = ws.getRun()
     if 'facility' in ws_run:
         facility = ws_run.getLogData('facility').value
-    if facility == 'ILL':		
-        inst = ws.getInstrument().getName()
-        runNo = ws.getRun()['run_number'].value
-        run_name = inst + '_'+ runNo
+
+    (instrument, run_number) = getInstrRun(wsname)
+    if facility == 'ILL':
+        run_name = instrument + '_'+ run_number
     else:
-        (instr, run) = getInstrRun(runfile)
-        run_name = instr + run
+        run_name = instrument + run_number
+
     try:
         analyser = ws.getInstrument().getStringParameter('analyser')[0]
         reflection = ws.getInstrument().getStringParameter('reflection')[0]
     except IndexError:
         analyser = ''
         reflection = ''
+
     prefix = run_name + '_' + analyser + reflection + '_'
     return prefix
 
