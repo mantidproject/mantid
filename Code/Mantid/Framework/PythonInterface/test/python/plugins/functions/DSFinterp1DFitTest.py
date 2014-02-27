@@ -14,14 +14,14 @@ class DSFinterp1DTestTest(unittest.TestCase):
     generate a target lorentzian agains which we will fit
     
     Arguments:
-      nf: number of workspaces
+      nf: number of InputWorkspaces
       startf: first theoretical HWHM
       df: separation between consecutive theoretical HWHM
       [e]: if true, the theoretical HWHM and the actual HWHM used to construct
         the lorentzian are different by a random amount.
     Returns:
       fvalues: list of theoretical HWHM
-      workspaces: names of the generated workspaces
+      InputWorkspaces: names of the generated InputWorkspaces
       xvalues: energy domains
       HWHM: the HWHM of the target lorentzian against which we fit, stored
         in workspace of name "targetW"
@@ -31,29 +31,30 @@ class DSFinterp1DTestTest(unittest.TestCase):
     dE = 0.004 #typical spacing for QENS experiments in BASIS, in meV
     xvalues = dE * numpy.arange(-n, n)
     fvalues = ''
-    workspaces = ''
+    InputWorkspaces = ''
     for iif in range(nf):
       f = startf + iif*df
       HWHM = f# half-width at half maximum
       # Impose uncertainty in the Lorentzian by making its actual HWHM different than the theoretical one
       if e:
         HWHM += 2*df*(0.5-random()) # add uncertainty as big as twice the step between consecutive HWHM!!!
-        if HWHM < 0: HWHM = startf
+        if HWHM < 0: HWHM = f
       yvalues = 1/numpy.pi * HWHM / (HWHM*HWHM + xvalues*xvalues)
       evalues = yvalues*0.1*numpy.random.rand(2*n) # errors
-      CreateWorkspace(OutputWorkspace='sim{0}'.format(iif), DataX=xvalues, DataY=yvalues, DataE=evalues)
+      dataX = numpy.append(xvalues-dE/2.0, n*dE-dE/2.0) # histogram bins
+      CreateWorkspace(OutputWorkspace='sim{0}'.format(iif), DataX=dataX, DataY=yvalues, DataE=evalues)
       #SaveNexus(InputWorkspace='sim{0}'.format(iif), Filename='/tmp/sim{0}.nxs'.format(iif))  #only for debugging purposes
       #print iif, f, HWHM
       fvalues += ' {0}'.format(f) # theoretical HWHM, only coincides with real HWHM when no uncertainty
-      workspaces += ' sim{0}'.format(iif)
+      InputWorkspaces += ' sim{0}'.format(iif)
     # Target workspace against which we will fit
     HWHM = startf + (nf/2)*df
     yvalues = 1/numpy.pi * HWHM / (HWHM*HWHM + xvalues*xvalues)
     evalues = yvalues*0.1*numpy.random.rand(2*n) # errors
-    CreateWorkspace(OutputWorkspace='targetW', DataX=xvalues, DataY=yvalues, DataE=evalues)
+    CreateWorkspace(OutputWorkspace='targetW', DataX=dataX, DataY=yvalues, DataE=evalues)
     #SaveNexus(InputWorkspace='targetW', Filename='/tmp/targetW.nxs') #only for debugging purposes
     #print HWHM
-    return fvalues, workspaces, xvalues, HWHM
+    return fvalues, InputWorkspaces, xvalues, HWHM
 
   def cleanup(self, nf):
     for iif in range(nf):
@@ -78,21 +79,21 @@ class DSFinterp1DTestTest(unittest.TestCase):
       return
     import dsfinterp
     nf = 9
-    fvalues, workspaces, xvalues, HWHM = self.generateWorkspaces(nf, 0.01, 0.01) # workspaces sim0 to sim8 (nine workpaces)
-    # Try passing different number of workspaces and parameter values
+    fvalues, InputWorkspaces, xvalues, HWHM = self.generateWorkspaces(nf, 0.01, 0.01) # workspaces sim0 to sim8 (nine workpaces)
+    # Try passing different number of InputWorkspaces and parameter values
     try:
       fvalueswrong = ' '.join(fvalues.split()[:-1]) # one less value
-      func_string = 'name=DSFinterp1DFit,Workspaces="{0}",ParameterValues="{1}",'.format(workspaces,fvalueswrong) +\
+      func_string = 'name=DSFinterp1DFit,InputWorkspaces="{0}",ParameterValues="{1}",'.format(InputWorkspaces,fvalueswrong) +\
       'LoadErrors=0,LocalRegression=1,RegressionType=quadratic,RegressionWindow=6,' +\
       'WorkspaceIndex=0,Intensity=1.0,TargetParameter=0.01;'
       Fit( Function=func_string, InputWorkspace= 'targetW', WorkspaceIndex=0, StartX=xvalues[0], EndX=xvalues[-1], CreateOutput=1, MaxIterations=0 )
     except Exception as e:
-      self.assertTrue('Number of Workspaces and ParameterValues should be the same' in str(e))
+      self.assertTrue('Number of InputWorkspaces and ParameterValues should be the same' in str(e))
     else:
       assert False, 'Did not raise any exception'
     # Try passing the wrong workspace index
     try:
-      func_string = 'name=DSFinterp1DFit,Workspaces="{0}",ParameterValues="{1}",'.format(workspaces,fvalues) +\
+      func_string = 'name=DSFinterp1DFit,InputWorkspaces="{0}",ParameterValues="{1}",'.format(InputWorkspaces,fvalues) +\
       'LoadErrors=0,LocalRegression=1,RegressionType=quadratic,RegressionWindow=6,' +\
       'WorkspaceIndex=1,Intensity=1.0,TargetParameter=0.01;'
       Fit( Function=func_string, InputWorkspace= 'targetW', WorkspaceIndex=0, StartX=xvalues[0], EndX=xvalues[-1], CreateOutput=1, MaxIterations=0 )
@@ -102,7 +103,7 @@ class DSFinterp1DTestTest(unittest.TestCase):
       assert False, 'Did not raise any exception'
     #Try passing the wrong type of regression
     try:
-      func_string = 'name=DSFinterp1DFit,Workspaces="{0}",ParameterValues="{1}",'.format(workspaces,fvalues) +\
+      func_string = 'name=DSFinterp1DFit,InputWorkspaces="{0}",ParameterValues="{1}",'.format(InputWorkspaces,fvalues) +\
       'LoadErrors=0,LocalRegression=1,RegressionType=baloney,RegressionWindow=6,' +\
       'WorkspaceIndex=0,Intensity=1.0,TargetParameter=0.01;'
       Fit( Function=func_string, InputWorkspace= 'targetW', WorkspaceIndex=0, StartX=xvalues[0], EndX=xvalues[-1], CreateOutput=1, MaxIterations=0 )
@@ -112,7 +113,7 @@ class DSFinterp1DTestTest(unittest.TestCase):
       assert False, 'Did not raise any exception'
     # Try passing an unappropriate regression window for the regression type selected
     try:
-      func_string = 'name=DSFinterp1DFit,Workspaces="{0}",ParameterValues="{1}",'.format(workspaces,fvalues) +\
+      func_string = 'name=DSFinterp1DFit,InputWorkspaces="{0}",ParameterValues="{1}",'.format(InputWorkspaces,fvalues) +\
       'LoadErrors=0,LocalRegression=1,RegressionType=quadratic,RegressionWindow=3,' +\
       'WorkspaceIndex=0,Intensity=1.0,TargetParameter=0.01;'
       Fit( Function=func_string, InputWorkspace= 'targetW', WorkspaceIndex=0, StartX=xvalues[0], EndX=xvalues[-1], CreateOutput=1, MaxIterations=0 )
@@ -130,11 +131,11 @@ class DSFinterp1DTestTest(unittest.TestCase):
     nf=20
     startf=0.01
     df=0.01
-    fvalues, workspaces, xvalues, HWHM = self.generateWorkspaces(nf, startf, df, e=True)
+    fvalues, InputWorkspaces, xvalues, HWHM = self.generateWorkspaces(nf, startf, df, e=True)
     # Do the fit starting from different initial guesses
     for iif in range(0,nf,6):
       guess = startf + iif*df
-      func_string = 'name=DSFinterp1DFit,Workspaces="{0}",ParameterValues="{1}",'.format(workspaces,fvalues) +\
+      func_string = 'name=DSFinterp1DFit,InputWorkspaces="{0}",ParameterValues="{1}",'.format(InputWorkspaces,fvalues) +\
       'LoadErrors=0,LocalRegression=1,RegressionType=quadratic,RegressionWindow=6,' +\
       'WorkspaceIndex=0,Intensity=1.0,TargetParameter={0};'.format(guess)
       Fit( Function=func_string, InputWorkspace= 'targetW', WorkspaceIndex=0, StartX=xvalues[0], EndX=xvalues[-1], CreateOutput=1, MaxIterations=20 )

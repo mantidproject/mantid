@@ -45,7 +45,7 @@ class DSFinterp1DFit(IFunction1D):
     self.declareParameter('Intensity', 1.0, 'Intensity')
     self.declareParameter('TargetParameter', 1.0, 'Target value of the structure factor parameter')
 
-    self.declareAttribute('Workspaces','')
+    self.declareAttribute('InputWorkspaces','')
     self.declareAttribute('LoadErrors', False)
     self.declareAttribute('WorkspaceIndex', 0)
     self.declareAttribute('ParameterValues', '')
@@ -53,7 +53,7 @@ class DSFinterp1DFit(IFunction1D):
     self.declareAttribute('RegressionType', 'quadratic')
     self.declareAttribute('RegressionWindow', 6)
     # "private" attributes associated to the declare function attributes
-    self._Workspaces = None
+    self._InputWorkspaces = None
     self._LoadErrors = None
     self._WorkspaceIndex = None
     self._ParameterValues = None
@@ -68,10 +68,10 @@ class DSFinterp1DFit(IFunction1D):
     self._channelgroup = None
 
   def setAttributeValue(self, name, value):
-    if name == "Workspaces":
-      self._Workspaces = value.split()
+    if name == "InputWorkspaces":
+      self._InputWorkspaces = value.split()
       if ',' in value:
-        self._Workspaces = [x.strip() for x in value.split(',')]
+        self._InputWorkspaces = [x.strip() for x in value.split(',')]
     elif name == 'LoadErrors':
       self._LoadErrors= bool(value)
     elif name == 'WorkspaceIndex':
@@ -111,15 +111,15 @@ class DSFinterp1DFit(IFunction1D):
     # The first time the function is called requires some initialization
     if self._channelgroup == None:
       # Check consistency of the input
-      # check workspaces have at least the workspace index
-      for w in self._Workspaces:
+      # check InputWorkspaces have at least the workspace index
+      for w in self._InputWorkspaces:
         if mtd[w].getNumberHistograms() <= self._WorkspaceIndex:
           message = 'Numer of histograms in Workspace {0} does not allow for workspace index {1}'.format(w,self._WorkspaceIndex)
           logger.error(message)
           raise IndexError(message)
       # check number of input workspaces and parameters is the same
-      if len(self._ParameterValues) != len(self._Workspaces):
-        message = 'Number of Workspaces and ParameterValues should be the same. Found {0} and {1}, respectively'.format(len(self._ParameterValues), len(self._Workspaces))
+      if len(self._ParameterValues) != len(self._InputWorkspaces):
+        message = 'Number of InputWorkspaces and ParameterValues should be the same. Found {0} and {1}, respectively'.format(len(self._ParameterValues), len(self._InputWorkspaces))
         logger.error(message)
         raise ValueError(message)
       # check the regression type is valid
@@ -144,12 +144,12 @@ class DSFinterp1DFit(IFunction1D):
       rebinner.initialize()
       rebinner.setAlwaysStoreInADS(True)
       rebinner.setProperty("Params",[xstart, dX, xfinal])
-      # Load the workspaces into a group of dynamic structure factors
+      # Load the InputWorkspaces into a group of dynamic structure factors
       from dsfinterp.dsf import Dsf
       from dsfinterp.dsfgroup import DsfGroup
       dsfgroup = DsfGroup()
       for idsf in range(nf):
-        rebinner.setProperty('InputWorkspace', self._Workspaces[idsf])
+        rebinner.setProperty('InputWorkspace', self._InputWorkspaces[idsf])
         rebinner.setProperty('OutputWorkspace', 'rebinned')
         rebinner.execute()
         dsf = Dsf()
