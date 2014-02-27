@@ -1,7 +1,7 @@
 from reduction import instrument
 import math
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, Workspace
 from mantid.kernel import Logger
 import re
 sanslog = Logger.get("SANS")
@@ -399,7 +399,8 @@ class ISISInstrument(instrument.Instrument):
         self._back_end = None 
         #if the user moves a monitor to this z coordinate (with MON/LENGTH ...) this will be recorded here. These are overridden lines like TRANS/TRANSPEC=4/SHIFT=-100
         self.monitor_zs = {}
-
+        # Used when new calibration required.
+        self._newCalibrationWS = None
 
     def get_incident_mon(self):
         """
@@ -598,6 +599,9 @@ class ISISInstrument(instrument.Instrument):
         if isSample:
             self.set_up_for_run(run_num)
         
+        if self._newCalibrationWS:
+            self.changeCalibration(ws_name)
+
         # centralize the bank to the centre
         self.move_components(ws_name, beamcentre[0], beamcentre[1])
 
@@ -606,6 +610,16 @@ class ISISInstrument(instrument.Instrument):
         Called on loading of transmissions
         """
         pass
+
+    def changeCalibration(self, ws_name):
+        assert(isinstance(self._newCalibrationWS, Workspace))
+        sanslog.notice("Applying new calibration for the detectors from " + str(self._newCalibrationWS.name()))
+        CopyInstrumentParameters(self._newCalibrationWS, ws_name)
+
+    def setCalibrationWorkspace(self, ws_reference):
+        assert(isinstance(ws_reference, Workspace))
+        self._newCalibrationWS = ws_reference
+              
 
 
 class LOQ(ISISInstrument):
