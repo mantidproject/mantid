@@ -1041,9 +1041,7 @@ namespace IDA
 
     // Determine what the property is.
     QtProperty* prop = item->property();
-
-		std::string name = prop->propertyName();
-		QtProperty* fixedProp = m_stringManager->addProperty( QString(name.c_str()) );
+		QtProperty* fixedProp = m_stringManager->addProperty( prop->propertyName() );
     QtProperty* fprlbl = m_stringManager->addProperty("Fixed");
     fixedProp->addSubProperty(fprlbl);
     m_stringManager->setValue(fixedProp, prop->valueText());
