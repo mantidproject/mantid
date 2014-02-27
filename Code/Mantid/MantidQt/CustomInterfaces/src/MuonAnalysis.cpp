@@ -1651,71 +1651,6 @@ void MuonAnalysis::deleteWorkspaceIfExists(const std::string &wsName)
 }
 
 /**
-* Get the group name for the workspace.
-*
-* @return wsGroupName :: The name of the group workspace.
-*/
-QString MuonAnalysis::getGroupName()
-{
-  std::string workspaceGroupName("");
-
-  // Decide on name for workspaceGroup
-  if (m_previousFilenames.size() == 1)
-  {
-    Poco::File l_path( m_previousFilenames[0].toStdString() );
-    workspaceGroupName = Poco::Path(l_path.path()).getFileName();
-    changeCurrentRun(workspaceGroupName);
-  }
-  else
-  {
-    workspaceGroupName = getRangedName();
-  }
-
-  std::size_t extPos = workspaceGroupName.find(".");
-  if ( extPos!=std::string::npos)
-    workspaceGroupName = workspaceGroupName.substr(0,extPos);
-
-  QString wsGroupName(workspaceGroupName.c_str());
-  wsGroupName = wsGroupName.toUpper();
-  return wsGroupName;
-}
-
-/**
-* Get ranged name.
-*
-* @return rangedName :: The name to be used to identify the workspace.
-*/
-std::string MuonAnalysis::getRangedName()
-{
-  QString filePath("");
-  QString firstFile(m_previousFilenames[0]);
-  QString lastFile(m_previousFilenames[m_previousFilenames.size()-1]);
-
-  QString firstRun("");
-  QString lastRun("");
-  int runSize(-1);
-  
-  separateMuonFile(filePath, firstFile, firstRun, runSize);
-
-  separateMuonFile(filePath, lastFile, lastRun, runSize);
-  
-  for (int i=0; i<lastRun.size(); ++i)
-  {
-    if (firstRun[i] != lastRun[i])
-    {
-      lastRun = lastRun.right(lastRun.size() - i);
-      break;
-    }
-  }
-
-  if (firstFile.contains('.') )
-    firstFile.chop(firstFile.size()-firstFile.indexOf('.') );
-
-  return (firstFile.toStdString() + '-' + lastRun.toStdString());
-}
-
-
-/**
  * Guess Alpha (slot). For now include all data from first good data(bin)
  */
 void MuonAnalysis::guessAlphaClicked()
@@ -2189,51 +2124,6 @@ int MuonAnalysis::numOfDetectors(const std::string& str) const
   return static_cast<int>(rangeSize);
 }
 
-/**
-* Change the workspace group name to the instrument and run number if load current run was pressed.
-*
-* @param workspaceGroupName :: The name of the group that needs to be changed or is already in correct format.
-*/
-void MuonAnalysis::changeCurrentRun(std::string & workspaceGroupName)
-{
-  QString tempGroupName(QString::fromStdString(workspaceGroupName) );
-
-  if ( (tempGroupName.contains("auto") ) || (tempGroupName.contains("argus0000000") ) )
-  {
-    Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
-    MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
-    if(!matrix_workspace) // Data collected in periods.
-    {
-      // Get run number from first period data.
-      workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
-      matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
-      if(!matrix_workspace)
-      {
-        QMessageBox::information(this, "Mantid - Muon Analysis", "Mantid expected period data but no periods were found.\n"
-                      "Default plot name will be used insead of run number.");
-        return;
-      }
-    }
-    const Run& runDetails = matrix_workspace->run();
-    
-    std::string runNumber = runDetails.getProperty("run_number")->value();
-    QString instname = m_uiForm.instrSelector->currentText().toUpper();
-
-    size_t zeroPadding(8);
-
-    if (instname == "ARGUS")
-      zeroPadding = 7;  
-
-    for (size_t i=runNumber.size(); i<zeroPadding; ++i)
-    {
-      runNumber = '0' + runNumber;
-    }
-
-    workspaceGroupName = instname.toStdString() + runNumber;
-  }
-}
-
-
 /** Is input string a number?
  *
  *  @param s :: The input string
@@ -2474,41 +2364,6 @@ std::string MuonAnalysis::isGroupingAndDataConsistent()
     return complaint;
   else
     return std::string("");
-}
-
-
-/**
-* Check if dublicate ID between different rows
-* FIXME: this function doesn't seem to be used anywhere
-*/
-void MuonAnalysis::checkIf_ID_dublicatesInTable(const int row)
-{
-  QTableWidgetItem *item = m_uiForm.groupTable->item(row,1);
-
-  // row of IDs to compare against
-  std::vector<int> idsNew = Strings::parseRange(item->text().toStdString());
-
-  int numG = numGroups();
-  int rowInFocus = getGroupNumberFromRow(row);
-  for (int iG = 0; iG < numG; iG++)
-  {
-    if (iG != rowInFocus)
-    {
-      std::vector<int> ids = Strings::parseRange(m_uiForm.groupTable->item(m_groupToRow[iG],1)->text().toStdString());
-
-      for (unsigned int i = 0; i < ids.size(); i++)
-      {
-        for (unsigned int j = 0; j < idsNew.size(); j++)
-        {
-          if ( ids[i] == idsNew[j] )
-          {
-            item->setText(QString("Dublicate ID: " + item->text()));
-            return;
-          }
-        }
-      }
-    }
-  }
 }
 
 

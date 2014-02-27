@@ -312,8 +312,6 @@ private:
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
   int numOfDetectors(const std::string& str) const;
 
-  void changeCurrentRun(std::string& workspaceGroupName);
-
   /// is string a number?
   bool isNumber(const std::string& s) const;
 
@@ -322,12 +320,6 @@ private:
 
   /// Deletes a workspace _or_ a workspace group with the given name, if one exists
   void deleteWorkspaceIfExists(const std::string& wsName);
-
-  /// Get group workspace name
-  QString getGroupName();
-
-  /// Get a name for the ranged workspace.
-  std::string getRangedName();
 
   /// Check if grouping in table is consistent with data file
   std::string isGroupingAndDataConsistent();
@@ -413,9 +405,6 @@ private:
 
   /// tell which group is in which row
   std::vector<int> m_groupToRow;
-
-  ///
-  void checkIf_ID_dublicatesInTable(const int row);
 
   /// Return the group-number for the group in a row. 
   /// Return -1 if invalid group in row
