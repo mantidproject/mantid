@@ -5,6 +5,37 @@ import mantid
 
 from isis_instrument import BaseInstrument
 
+
+class ReductionStep(object):
+    """
+        Base class for reduction steps
+    """ 
+    @classmethod
+    def delete_workspaces(cls, workspace):
+        """
+            Delete all workspace created by this reduction step related
+            to the given workspace
+            @param workspace: workspace to delete 
+        """
+        return
+
+    @classmethod
+    def _create_unique_name(cls, filepath, descriptor):
+        """
+            Generate a unique name for an internal workspace
+        """
+        random_str = ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
+        return "__"+descriptor+"_"+extract_workspace_name(filepath)+"_"+random_str
+    
+    def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
+        """
+            Implemented the reduction step.
+            @param reducer: Reducer object for which the step is executed
+            @param inputworkspace: Name of the workspace to apply this step to
+            @param outputworkspace: Name of the workspace to have as an output. If this is None it will be set to inputworkspace
+        """
+        raise NotImplemented
+
 class Reducer(object):
     """
         Base reducer class. Instrument-specific reduction processes should be
