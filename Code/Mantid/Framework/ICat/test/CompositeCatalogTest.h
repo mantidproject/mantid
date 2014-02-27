@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/CompositeCatalog.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidICat/CatalogSearchParam.h"
-#include "MantidICat/CompositeCatalog.h"
 
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>

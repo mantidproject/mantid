@@ -4,8 +4,8 @@ from the information catalog and saves the search results to mantid workspace.
 *WIKI*/
 
 #include "MantidICat/CatalogGetDataSets.h"
-#include "MantidICat/CatalogManager.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 namespace Mantid
@@ -34,7 +34,7 @@ namespace Mantid
     void CatalogGetDataSets::exec()
     {
       auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      CatalogManager::Instance().getCatalog("")->getDataSets(getProperty("InvestigationId"),workspace);
+      API::CatalogManager::Instance().getCatalog("")->getDataSets(getProperty("InvestigationId"),workspace);
       setProperty("OutputWorkspace",workspace);
     }
 

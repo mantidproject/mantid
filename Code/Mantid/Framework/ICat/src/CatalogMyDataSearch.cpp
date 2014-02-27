@@ -5,7 +5,7 @@ This algorithm retrieves logged in users investigations data from the informatio
 *WIKI*/
 
 #include "MantidICat/CatalogMyDataSearch.h"
-#include "MantidICat/CatalogManager.h"
+#include "MantidAPI/CatalogManager.h"
 
 namespace Mantid
 {
@@ -31,7 +31,7 @@ namespace Mantid
     void CatalogMyDataSearch::exec()
     {
       auto outputws = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      CatalogManager::Instance().getCatalog("")->myData(outputws);
+      API::CatalogManager::Instance().getCatalog("")->myData(outputws);
       setProperty("OutputWorkspace",outputws);
     }
   }

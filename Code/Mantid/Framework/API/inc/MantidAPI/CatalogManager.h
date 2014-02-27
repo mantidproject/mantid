@@ -6,7 +6,7 @@
 
 namespace Mantid
 {
-  namespace ICat
+  namespace API
   {
     /**
      This class is a singleton and is responsible for creating, destroying, and managing catalogs.
@@ -37,9 +37,9 @@ namespace Mantid
     {
       public:
         /// Create a new catalog, and add it to the list of active catalogs.
-        API::ICatalog_sptr create(const std::string facilityName);
+        ICatalog_sptr create(const std::string facilityName);
         /// Get a specific catalog using the sessionID.
-        API::ICatalog_sptr getCatalog(const std::string sessionID);
+        ICatalog_sptr getCatalog(const std::string sessionID);
         /// Destroy and remove a specific catalog from the active catalogs list.
         void destroyCatalog(const std::string sessionID);
         /// Destroy all active catalogs.
@@ -54,7 +54,7 @@ namespace Mantid
         virtual ~CatalogManagerImpl();
 
         // Holds a list of active catalogs and uses their sessionId as unique identifier.
-        std::map<std::string, API::ICatalog_sptr> m_activeCatalogs;
+        std::map<std::string, ICatalog_sptr> m_activeCatalogs;
     };
 
     #ifdef _WIN32

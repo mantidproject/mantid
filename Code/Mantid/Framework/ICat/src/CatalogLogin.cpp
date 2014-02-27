@@ -5,7 +5,7 @@ This algorithm connects the logged in user to the information catalog.
 *WIKI*/
 
 #include "MantidICat/CatalogLogin.h"
-#include "MantidICat/CatalogManager.h"
+#include "MantidAPI/CatalogManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
@@ -44,7 +44,7 @@ namespace Mantid
       if (catalogInfo.soapEndPoint().empty()) throw std::runtime_error("There is no soap end-point for the facility you have selected.");
       g_log.notice() << "Attempting to verify user credentials against " << catalogInfo.catalogName() << std::endl;
       progress(0.5, "Verifying user credentials...");
-      auto catalogManager = CatalogManager::Instance().create(getProperty("FacilityName"));
+      auto catalogManager = API::CatalogManager::Instance().create(getProperty("FacilityName"));
       catalogManager->login(getProperty("Username"), getProperty("Password"), catalogInfo.soapEndPoint());
     }
 

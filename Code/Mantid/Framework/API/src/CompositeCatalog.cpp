@@ -1,8 +1,8 @@
-#include "MantidICat/CompositeCatalog.h"
+#include "MantidAPI/CompositeCatalog.h"
 
 namespace Mantid
 {
-  namespace ICat
+  namespace API
   {
     CompositeCatalog::CompositeCatalog() : m_catalogs() {}
 
@@ -10,7 +10,7 @@ namespace Mantid
      * Add a catalog to the catalog container.
      * @param catalog :: The catalog to add to the container.
      */
-    void CompositeCatalog::add(const API::ICatalog_sptr catalog)
+    void CompositeCatalog::add(const ICatalog_sptr catalog)
     {
       m_catalogs.push_back(catalog);
     }
@@ -47,7 +47,7 @@ namespace Mantid
      * @param offset   :: Skip this many rows and start returning rows from this point.
      * @param limit    :: The limit of the number of rows returned by the query.
      */
-    void CompositeCatalog::search(const CatalogSearchParam& inputs,API::ITableWorkspace_sptr& outputws,
+    void CompositeCatalog::search(const ICat::CatalogSearchParam& inputs,ITableWorkspace_sptr& outputws,
         const int &offset, const int &limit)
     {
       for(auto catalog = m_catalogs.begin(); catalog != m_catalogs.end(); ++catalog)
@@ -60,7 +60,7 @@ namespace Mantid
      * Obtain the number of investigations to be returned by the catalog.
      * @return The number of investigations from the search performed.
      */
-    int64_t CompositeCatalog::getNumberOfSearchResults(const CatalogSearchParam& inputs)
+    int64_t CompositeCatalog::getNumberOfSearchResults(const ICat::CatalogSearchParam& inputs)
     {
       int64_t numberOfSearchResults = 0;
       for(auto catalog = m_catalogs.begin(); catalog != m_catalogs.end(); ++catalog)
@@ -74,7 +74,7 @@ namespace Mantid
      * Obtain and save the investigations that the user is an investigator of within each catalog.
      * @param outputws :: The workspace to store the results.
      */
-    void CompositeCatalog::myData(API::ITableWorkspace_sptr& outputws)
+    void CompositeCatalog::myData(ITableWorkspace_sptr& outputws)
     {
       for(auto catalog = m_catalogs.begin(); catalog != m_catalogs.end(); ++catalog)
       {
@@ -87,7 +87,7 @@ namespace Mantid
      * @param investigationId :: A unique identifier of the investigation.
      * @param outputws        :: The workspace to store the results.
      */
-    void CompositeCatalog::getDataSets(const std::string&investigationId,API::ITableWorkspace_sptr& outputws)
+    void CompositeCatalog::getDataSets(const std::string&investigationId,ITableWorkspace_sptr& outputws)
     {
       for(auto catalog = m_catalogs.begin(); catalog != m_catalogs.end(); ++catalog)
       {
@@ -100,7 +100,7 @@ namespace Mantid
      * @param investigationId :: A unique identifier of the investigation.
      * @param outputws        :: The workspace to store the results.
      */
-    void CompositeCatalog::getDataFiles(const std::string&investigationId,API::ITableWorkspace_sptr& outputws)
+    void CompositeCatalog::getDataFiles(const std::string&investigationId,ITableWorkspace_sptr& outputws)
     {
       for(auto catalog = m_catalogs.begin(); catalog != m_catalogs.end(); ++catalog)
       {

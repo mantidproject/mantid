@@ -12,11 +12,11 @@ This algorithm searches for the investigations and stores the search results in 
     GCC_DIAG_ON(literal-suffix)
 #endif
 
+#include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidICat/CatalogManager.h"
 
 #include <boost/algorithm/string/regex.hpp>
 #include <limits>
@@ -73,7 +73,7 @@ namespace Mantid
       // Create output workspace.
       auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       // Obtain all the active catalogs.
-      auto catalogs = CatalogManager::Instance().getCatalog("");
+      auto catalogs = API::CatalogManager::Instance().getCatalog("");
       // Search for investigations with user specific search inputs.
       setProperty("OutputWorkspace",workspace);
       // Do not perform a full search if we only want a COUNT search.

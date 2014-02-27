@@ -5,7 +5,7 @@ This algorithm is responsible for obtaining a list of investigation types from t
 *WIKI*/
 
 #include "MantidICat/CatalogListInvestigationTypes.h"
-#include "MantidICat/CatalogManager.h"
+#include "MantidAPI/CatalogManager.h"
 #include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid
@@ -33,7 +33,7 @@ namespace Mantid
     void CatalogListInvestigationTypes::exec()
     {
       std::vector<std::string> investigationTypes;
-      CatalogManager::Instance().getCatalog("")->listInvestigationTypes(investigationTypes);
+      API::CatalogManager::Instance().getCatalog("")->listInvestigationTypes(investigationTypes);
       setProperty("InvestigationTypes",investigationTypes);
     }
 

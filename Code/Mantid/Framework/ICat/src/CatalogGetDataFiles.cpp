@@ -5,8 +5,8 @@ This algorithm retrieves the files associated to selected investigation from the
 *WIKI*/
 
 #include "MantidICat/CatalogGetDataFiles.h"
-#include "MantidICat/CatalogManager.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 namespace Mantid
@@ -35,7 +35,7 @@ namespace Mantid
     void CatalogGetDataFiles::exec()
     {
       auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      CatalogManager::Instance().getCatalog("")->getDataFiles(getProperty("InvestigationId"),workspace);
+      API::CatalogManager::Instance().getCatalog("")->getDataFiles(getProperty("InvestigationId"),workspace);
       setProperty("OutputWorkspace",workspace);
     }
 

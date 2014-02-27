@@ -1,12 +1,12 @@
-#include "MantidICat/CatalogManager.h"
-#include "MantidICat/CompositeCatalog.h"
 #include "MantidAPI/CatalogFactory.h"
+#include "MantidAPI/CatalogManager.h"
+#include "MantidAPI/CompositeCatalog.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 
 namespace Mantid
 {
-  namespace ICat
+  namespace API
   {
     CatalogManagerImpl::CatalogManagerImpl() : m_activeCatalogs() {}
 
@@ -17,11 +17,11 @@ namespace Mantid
      * @param facilityName :: The name of the facility to obtain the catalog name from.
      * @return A catalog for the facility specified.
      */
-    API::ICatalog_sptr CatalogManagerImpl::create(const std::string facilityName)
+    ICatalog_sptr CatalogManagerImpl::create(const std::string facilityName)
     {
       std::string className = Kernel::ConfigService::Instance().getFacility(facilityName).catalogInfo().catalogName();
-      auto catalog = API::CatalogFactory::Instance().create(className);
-      m_activeCatalogs.insert(std::make_pair("",catalog));
+      auto catalog = CatalogFactory::Instance().create(className);
+      m_activeCatalogs.insert(std::make_pair(boost::lexical_cast<std::string>(rand() + 10),catalog));
       return catalog;
     }
 
@@ -30,7 +30,7 @@ namespace Mantid
      * @param sessionID :: The session to search for in the active catalogs list.
      * @return A specific catalog using the sessionID, otherwise returns all active catalogs
      */
-    API::ICatalog_sptr CatalogManagerImpl::getCatalog(const std::string sessionID)
+    ICatalog_sptr CatalogManagerImpl::getCatalog(const std::string sessionID)
     {
       if(sessionID.empty())
       {
