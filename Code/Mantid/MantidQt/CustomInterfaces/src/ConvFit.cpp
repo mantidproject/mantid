@@ -809,22 +809,19 @@ namespace IDA
       return;
     }
 
-    Mantid::API::CompositeFunction_sptr function = createFunction(true);
+    bool tieCentres = (uiForm().confit_cbFitType->currentIndex() > 1);
+    Mantid::API::CompositeFunction_sptr function = createFunction(tieCentres);
 
     if ( m_cfInputWS == NULL )
     {
       plotInput();
     }
 
-    // std::string inputName = m_cfInputWS->getName();  // Unused
-
     const size_t binIndexLow = m_cfInputWS->binIndexOf(m_cfDblMng->value(m_cfProp["StartX"]));
     const size_t binIndexHigh = m_cfInputWS->binIndexOf(m_cfDblMng->value(m_cfProp["EndX"]));
     const size_t nData = binIndexHigh - binIndexLow;
 
     std::vector<double> inputXData(nData);
-    //double* outputData = new double[nData];
-
     const Mantid::MantidVec& XValues = m_cfInputWS->readX(0);
     const bool isHistogram = m_cfInputWS->isHistogramData();
 
