@@ -126,7 +126,7 @@ def calculateEISF(params_table):
 
 ##############################################################################
 
-def confitSeq(inputWS, func, startX, endX, ftype, bgd, specMin=0, specMax=None, Verbose=False, Plot='None', Save=False):
+def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin=0, specMax=None, Verbose=False, Plot='None', Save=False):
     StartTime('ConvFit')
 
     num_spectra = mtd[inputWS].getNumberHistograms()
@@ -170,7 +170,7 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, specMin=0, specMax=None, 
     DeleteWorkspace(output_workspace + '_Parameters')
     DeleteWorkspace(temp_fit_workspace)
 
-    wsname = output_workspace + "_Workspace"
+    wsname = output_workspace + "_Result"
     parameter_names = ['Height', 'Amplitude', 'FWHM', 'EISF']
     if using_delta_func:
         calculateEISF(output_workspace)
@@ -185,6 +185,11 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, specMin=0, specMax=None, 
     AddSampleLog(Workspace=wsname, LogName='background', LogType='String', LogText=str(bgd))
     AddSampleLog(Workspace=wsname, LogName='delta_function', LogType='String', LogText=str(using_delta_func))
     AddSampleLog(Workspace=wsname, LogName='lorentzians', LogType='String', LogText=str(lorentzians))
+
+    temp_correction = temperature is not None
+    AddSampleLog(Workspace=wsname, LogName='temperature_correction', LogType='String', LogText=str(temp_correction))
+    if temp_correction:
+        AddSampleLog(Workspace=wsname, LogName='temperature_value', LogType='String', LogText=str(temperature))
 
     RenameWorkspace(InputWorkspace=output_workspace, OutputWorkspace=output_workspace + "_Parameters")
     fit_workspaces = mtd[output_workspace + '_Workspaces'].getNames()

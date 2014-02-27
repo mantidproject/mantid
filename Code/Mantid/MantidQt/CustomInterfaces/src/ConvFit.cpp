@@ -888,7 +888,6 @@ namespace IDA
     QString stX = m_cfProp["StartX"]->valueText();
     QString enX = m_cfProp["EndX"]->valueText();
 
-
     QString pyInput =
       "from IndirectDataAnalysis import confitSeq\n"
       "input = '" + m_cfInputWSName + "'\n"
@@ -920,7 +919,7 @@ namespace IDA
     pyInput +=    
       "bg = '" + bg + "'\n"
       "ftype = '" + ftype + "'\n"
-      "confitSeq(input, func, startx, endx, ftype, bg, specMin, specMax, Verbose=verbose, Plot=plot, Save=save)\n";
+      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, Verbose=verbose, Plot=plot, Save=save)\n";
 
     QString pyOutput = runPythonCode(pyInput);
   }
