@@ -44,7 +44,7 @@ namespace Mantid
         /// Virtual destructor
         virtual ~ICatalog(){};
         /// method to login to a catalog
-        virtual void login(const std::string&,const std::string&,const std::string&)=0;
+        virtual void login(const std::string&,const std::string&,const std::string&,const std::string&)=0;
         /// logout from catalog
         virtual void logout()=0;
         ///Search investigations

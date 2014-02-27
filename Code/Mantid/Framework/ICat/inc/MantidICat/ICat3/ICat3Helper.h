@@ -78,7 +78,8 @@ namespace Mantid
       int64_t getNumberOfSearchResults(const CatalogSearchParam& inputs);
 
       // do login
-      void doLogin(const std::string& name,const std::string& password,const std::string& url);
+      void doLogin(const std::string& username,const std::string& password,
+          const std::string& endpoint,const std::string& facility);
 
       /// thsi method returns true if the  session id is valid
       bool isvalidSession();

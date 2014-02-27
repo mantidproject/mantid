@@ -12,22 +12,24 @@ namespace Mantid
     DECLARE_CATALOG(ICat3Catalog)
 
     /// constructor
-    ICat3Catalog::ICat3Catalog() : m_helper(new CICatHelper())
-    {
-    }
+    ICat3Catalog::ICat3Catalog() : m_helper(new CICatHelper()) {}
+
     /// destructor
-    ICat3Catalog::~ICat3Catalog()
-    {
-    }
-    /**This method is responsible for connecting the client application to ICat3 based catalog services
-     *@param username :: login name(eg. federal id) of the user
-     *@param password :: passowrd of the user
-     *@param url :: url of the user
+    ICat3Catalog::~ICat3Catalog() {}
+
+    /**
+     * Authenticate the user against all catalogues in the container.
+     * @param username :: The login name of the user.
+     * @param password :: The password of the user.
+     * @param endpoint :: The endpoint url of the catalog to log in to.
+     * @param facility :: The facility of the catalog to log in to.
      */
-    void ICat3Catalog::login(const std::string& username,const std::string& password,const std::string& url)
+    void ICat3Catalog::login(const std::string& username,const std::string& password,
+        const std::string& endpoint, const std::string& facility)
     {
-      m_helper->doLogin(username,password,url);
+      m_helper->doLogin(username,password,endpoint,facility);
     }
+
     /// This method disconnects the client application from ICat3 based catalog services
     void ICat3Catalog::logout()
     {

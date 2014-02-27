@@ -20,12 +20,14 @@ namespace Mantid
      * @param username :: The login name of the user.
      * @param password :: The password of the user.
      * @param endpoint :: The endpoint url of the catalog to log in to.
+     * @param facility :: The facility of the catalog to log in to.
      */
-    void CompositeCatalog::login(const std::string& username,const std::string& password,const std::string& endpoint)
+    void CompositeCatalog::login(const std::string& username,const std::string& password,
+        const std::string& endpoint, const std::string& facility)
     {
       for(auto catalog = m_catalogs.begin(); catalog != m_catalogs.end(); ++catalog)
       {
-        (*catalog)->login(username, password, endpoint);
+        (*catalog)->login(username, password, endpoint, facility);
       }
     }
 

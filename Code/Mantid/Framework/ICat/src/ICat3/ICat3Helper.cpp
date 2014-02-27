@@ -896,15 +896,18 @@ namespace Mantid
 
     }
 
-    /**This method uses ICat API login to connect to catalog
-     *@param name :: login name of the user
-     *@param password :: of the user
-     *@param url :: endpoint url of the catalog
+    /**
+     * Authenticate the user against all catalogues in the container.
+     * @param username :: The login name of the user.
+     * @param password :: The password of the user.
+     * @param endpoint :: The endpoint url of the catalog to log in to.
+     * @param facility :: The facility of the catalog to log in to.
      */
-    void CICatHelper::doLogin(const std::string& name,const std::string& password,const std::string & url)
+    void CICatHelper::doLogin(const std::string& username,const std::string& password,
+        const std::string& endpoint, const std::string& facility)
     {
       // Store the soap end-point in the session for use later.
-      ICat::Session::Instance().setSoapEndPoint(url);
+      ICat::Session::Instance().setSoapEndPoint(endpoint);
       
       // Obtain the ICAT proxy that has been securely set, including soap-endpoint.
       ICATPortBindingProxy icat;
@@ -917,7 +920,7 @@ namespace Mantid
       ns1__login login;
       ns1__loginResponse loginResponse;
 
-      std::string userName(name);
+      std::string userName(username);
       std::string passWord(password);
       login.username = &userName;
       login.password = &passWord;

@@ -43,7 +43,8 @@ namespace Mantid
         /// Destructor
         virtual ~ICat4Catalog();
         /// Log the user into the catalog system.
-        virtual void login(const std::string& username,const std::string& password,const std::string& url);
+        virtual void login(const std::string& username,const std::string& password,
+            const std::string& endpoint,const std::string& facility);
         /// Log the user out of the catalog system.
         virtual void logout();
         /// Search the catalog for data.

@@ -43,7 +43,8 @@ namespace Mantid
       /// destructor
       virtual ~ICat3Catalog();
       /// login to isis catalog
-      virtual void login(const std::string& username,const std::string& password,const std::string& url);
+      virtual void login(const std::string& username,const std::string& password,
+          const std::string& endpoint,const std::string& facility);
       /// logout from isis catalog
       virtual void logout();
       /// search isis data

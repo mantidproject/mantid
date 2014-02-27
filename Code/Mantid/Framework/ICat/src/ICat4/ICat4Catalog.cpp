@@ -21,15 +21,17 @@ namespace Mantid
     ICat4Catalog::~ICat4Catalog() { }
 
     /**
-     * Uses ICat API login to connect to catalog.
-     * @param username :: login name(E.g. federal id) of the user
-     * @param password :: password of the user
-     * @param url      :: endpoint url of the catalog
+     * Authenticate the user against all catalogues in the container.
+     * @param username :: The login name of the user.
+     * @param password :: The password of the user.
+     * @param endpoint :: The endpoint url of the catalog to log in to.
+     * @param facility :: The facility of the catalog to log in to.
      */
-    void ICat4Catalog::login(const std::string& username, const std::string& password, const std::string& url)
+    void ICat4Catalog::login(const std::string& username,const std::string& password,
+        const std::string& endpoint, const std::string& facility)
     {
       // Store the soap end-point in the session for use later.
-      ICat::Session::Instance().setSoapEndPoint(url);
+      ICat::Session::Instance().setSoapEndPoint(endpoint);
       // Securely set, including soap-endpoint.
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
@@ -47,7 +49,7 @@ namespace Mantid
       // Name of the authentication plugin in use.
       std::string plugin;
 
-      if (url.find("sns") != std::string::npos) {
+      if (endpoint.find("sns") != std::string::npos) {
         plugin = std::string("ldap");
       } else {
         plugin = std::string("uows");
