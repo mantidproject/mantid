@@ -323,97 +323,102 @@ class ReflGui(refl_window.Ui_windowRefl):
             return "Add"
     def process(self):
 #--------- If "Process" button pressed, convert raw files to IvsLam and IvsQ and combine if checkbox ticked -------------
-        willProcess = True
-        rows = self.tableMain.selectionModel().selectedRows()
-        rowIndexes=[]
-        for idx in rows:
-            rowIndexes.append(idx.row())
-        if not len(rowIndexes):
-            reply = QtGui.QMessageBox.question(self.tableMain, 'Process all rows?',"This will process all rows in the table. Continue?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-            if reply == QtGui.QMessageBox.No:
-                logger.notice("Cancelled!")
-                willProcess = False
-            else:
-                rowIndexes = range(self.tableMain.rowCount())
-        if willProcess:
-            for row in rowIndexes:  # range(self.tableMain.rowCount()):
-                runno = []
-                loadedRuns = []
-                wksp = []
-                overlapLow = []
-                overlapHigh = []
-                theta = [0, 0, 0]
-                if (self.tableMain.item(row, 0).text() != ''):
-                    self.statusMain.showMessage("Processing row: " + str(row + 1))
-                    for i in range(3):
-                        r = str(self.tableMain.item(row, i * 5).text())
-                        if (r != ''):
-                            runno.append(r)
-                        ovLow = str(self.tableMain.item(row, i * 5 + 3).text())
-                        if (ovLow != ''):
-                            overlapLow.append(float(ovLow))
-                        ovHigh = str(self.tableMain.item(row, i * 5 + 4).text())
-                        if (ovHigh != ''):
-                            overlapHigh.append(float(ovHigh))
-                    # Determine resolution
-                    if (self.tableMain.item(row, 15).text() == ''):
-                        loadedRun = None
-                        if load_live_runs.is_live_run(runno[0]):
-                            if not self.accMethod:
-                            #reply = QtGui.QMessageBox.question(self.tableMain, 'Accumulation Method?',"The Data to be processed required that a Live Data service be started. What accumulation method would you like it to use?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-                                self.accMethod = self.getAccMethod()
-                            loadedRun = load_live_runs.get_live_data(config['default.instrument'], Accumulation = self.accMethod)
+        try:
+            willProcess = True
+            rows = self.tableMain.selectionModel().selectedRows()
+            rowIndexes=[]
+            for idx in rows:
+                rowIndexes.append(idx.row())
+            if not len(rowIndexes):
+                reply = QtGui.QMessageBox.question(self.tableMain, 'Process all rows?',"This will process all rows in the table. Continue?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+                if reply == QtGui.QMessageBox.No:
+                    logger.notice("Cancelled!")
+                    willProcess = False
+                else:
+                    rowIndexes = range(self.tableMain.rowCount())
+            if willProcess:
+                for row in rowIndexes:  # range(self.tableMain.rowCount()):
+                    runno = []
+                    loadedRuns = []
+                    wksp = []
+                    overlapLow = []
+                    overlapHigh = []
+                    theta = [0, 0, 0]
+                    if (self.tableMain.item(row, 0).text() != ''):
+                        self.statusMain.showMessage("Processing row: " + str(row + 1))
+                        for i in range(3):
+                            r = str(self.tableMain.item(row, i * 5).text())
+                            if (r != ''):
+                                runno.append(r)
+                            ovLow = str(self.tableMain.item(row, i * 5 + 3).text())
+                            if (ovLow != ''):
+                                overlapLow.append(float(ovLow))
+                            ovHigh = str(self.tableMain.item(row, i * 5 + 4).text())
+                            if (ovHigh != ''):
+                                overlapHigh.append(float(ovHigh))
+                        # Determine resolution
+                        if (self.tableMain.item(row, 15).text() == ''):
+                            loadedRun = None
+                            if load_live_runs.is_live_run(runno[0]):
+                                if not self.accMethod:
+                                #reply = QtGui.QMessageBox.question(self.tableMain, 'Accumulation Method?',"The Data to be processed required that a Live Data service be started. What accumulation method would you like it to use?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+                                    self.accMethod = self.getAccMethod()
+                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], Accumulation = self.accMethod)
+                            else:
+                                Load(Filename=runno[0], OutputWorkspace="run")
+                                loadedRun = mtd["run"]
+                            try:
+                                dqq = calcRes(loadedRun)
+                                item = QtGui.QTableWidgetItem()
+                                item.setText(str(dqq))
+                                self.tableMain.setItem(row, 15, item)
+                                logger.notice("Calculated resolution: " + str(dqq))
+                            except IndexError:
+                                self.statusMain.clearMessage()
+                                logger.error("Cannot calculate resolution owing to unknown log properties. dq/q will need to be manually entered.")
+                                return
                         else:
-                            Load(Filename=runno[0], OutputWorkspace="run")
-                            loadedRun = mtd["run"]
-                        try:
-                            dqq = calcRes(loadedRun)
-                            item = QtGui.QTableWidgetItem()
-                            item.setText(str(dqq))
-                            self.tableMain.setItem(row, 15, item)
-                            logger.notice("Calculated resolution: " + str(dqq))
-                        except IndexError:
-                            logger.error("Cannot calculate resolution owing to unknown log properties. dq/q will need to be manually entered.")
-                            return
-                    else:
-                        dqq = float(self.tableMain.item(row, 15).text())
-                    # Populate runlist
-                    first_wq = None
-                    for i in range(len(runno)):
-                        theta, qmin, qmax, wlam, wq = self.dorun(runno[i], row, i)
-                        if not first_wq:
-                            first_wq = wq # Cache the first Q workspace
-                        theta = round(theta, 3)
-                        qmin = round(qmin, 3)
-                        qmax = round(qmax, 3)
-                        wksp.append(wq.name())
-                        if (self.tableMain.item(row, i * 5 + 1).text() == ''):
-                            item = QtGui.QTableWidgetItem()
-                            item.setText(str(theta))
-                            self.tableMain.setItem(row, i * 5 + 1, item)
-                        if (self.tableMain.item(row, i * 5 + 3).text() == ''):
-                            item = QtGui.QTableWidgetItem()
-                            item.setText(str(qmin))
-                            self.tableMain.setItem(row, i * 5 + 3, item)
-                            overlapLow.append(qmin)
-                        if (self.tableMain.item(row, i * 5 + 4).text() == ''):
-                            item = QtGui.QTableWidgetItem()
-                            if i == len(runno) - 1:
-                            # allow full high q-range for last angle
-                                qmax = 4 * math.pi / ((4 * math.pi / qmax * math.sin(theta * math.pi / 180)) - 0.5) * math.sin(theta * math.pi / 180)
-                            item.setText(str(qmax))
-                            self.tableMain.setItem(row, i * 5 + 4, item)
-                            overlapHigh.append(qmax)
-                        if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
-                            wksp[i] = first_wq.name()
-                    plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
-                    plotbutton.setProperty('runno',runno)
-                    plotbutton.setProperty('overlapLow', overlapLow)
-                    plotbutton.setProperty('overlapHigh', overlapHigh)
-                    plotbutton.setProperty('wksp', wksp)
-                    plotbutton.setEnabled(True)
-                    self.statusMain.clearMessage()
-        self.accMethod = None
+                            dqq = float(self.tableMain.item(row, 15).text())
+                        # Populate runlist
+                        first_wq = None
+                        for i in range(len(runno)):
+                            theta, qmin, qmax, wlam, wq = self.dorun(runno[i], row, i)
+                            if not first_wq:
+                                first_wq = wq # Cache the first Q workspace
+                            theta = round(theta, 3)
+                            qmin = round(qmin, 3)
+                            qmax = round(qmax, 3)
+                            wksp.append(wq.name())
+                            if (self.tableMain.item(row, i * 5 + 1).text() == ''):
+                                item = QtGui.QTableWidgetItem()
+                                item.setText(str(theta))
+                                self.tableMain.setItem(row, i * 5 + 1, item)
+                            if (self.tableMain.item(row, i * 5 + 3).text() == ''):
+                                item = QtGui.QTableWidgetItem()
+                                item.setText(str(qmin))
+                                self.tableMain.setItem(row, i * 5 + 3, item)
+                                overlapLow.append(qmin)
+                            if (self.tableMain.item(row, i * 5 + 4).text() == ''):
+                                item = QtGui.QTableWidgetItem()
+                                if i == len(runno) - 1:
+                                # allow full high q-range for last angle
+                                    qmax = 4 * math.pi / ((4 * math.pi / qmax * math.sin(theta * math.pi / 180)) - 0.5) * math.sin(theta * math.pi / 180)
+                                item.setText(str(qmax))
+                                self.tableMain.setItem(row, i * 5 + 4, item)
+                                overlapHigh.append(qmax)
+                            if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
+                                wksp[i] = first_wq.name()
+                        plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
+                        plotbutton.setProperty('runno',runno)
+                        plotbutton.setProperty('overlapLow', overlapLow)
+                        plotbutton.setProperty('overlapHigh', overlapHigh)
+                        plotbutton.setProperty('wksp', wksp)
+                        plotbutton.setEnabled(True)
+                        self.statusMain.clearMessage()
+            self.accMethod = None
+            self.statusMain.clearMessage()
+        except:
+            self.statusMain.clearMessage()
     def plot(self, plotbutton):
         if not isinstance(plotbutton, QtGui.QPushButton):
             logger.error("Problem accessing cached data: Wrong data type passed, expected QtGui.QPushbutton")
