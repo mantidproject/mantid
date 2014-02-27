@@ -1,11 +1,15 @@
 /*WIKI*
+PoldiAutoCorrelation belongs to the family of algorithms used to analyze POLDI data. It performs
+the auto-correlation method described in the POLDI concept paper.
 
+It's possible to apply it to a workspace containing raw data from a single run or a workspace with merged data
+from several measurements. The only requirement is that a correctly configured POLDI instrument is present
+in the workspace and that its parameters (detector definition, chopper parameters, etc.) are in accordance with
+data dimensions.
 
 == How to use algorithm with other algorithms ==
 This algorithm is designed to work with other algorithms to
-proceed POLDI data. The introductions can be found in the
-wiki page of [[PoldiProjectRun]].
-
+proceed POLDI data.
 
  *WIKI*/
 //----------------------------------------------------------------------
@@ -39,7 +43,7 @@ DECLARE_ALGORITHM(PoldiAutoCorrelation5)
 /// Sets documentation strings for this algorithm
 void PoldiAutoCorrelation5::initDocs()
 {
-	this->setWikiSummary("Proceed to autocorrelation on Poldi data.");
+	this->setWikiSummary("Calculates auto-correlation function for POLDI data.");
 	this->setOptionalMessage("Proceed to autocorrelation on Poldi data.");
 }
 
