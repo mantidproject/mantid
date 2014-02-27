@@ -203,17 +203,30 @@ namespace IDA
 
     int noLorentz = uiForm().confit_cbFitType->currentIndex();
 
-    int funcIndex = 1;
-    QString prefBase = "f1.f";
-    if ( noLorentz > 1 || ( noLorentz > 0 && m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) ) )
-    {
-      prefBase += "1.f";
-      funcIndex--;
-    }
+    int funcIndex = 0;
+		int subIndex = 0;
 
-    if ( m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
+		//check if we're using a temperature correction
+		if (uiForm().confit_ckTempCorrection->isChecked() && 
+				!uiForm().confit_leTempCorrection->text().isEmpty())
+		{
+				subIndex++;
+		}
+
+		bool usingDeltaFunc = m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]);
+		bool usingCompositeFunc = ((usingDeltaFunc && noLorentz > 0) || noLorentz > 1);
+    QString prefBase = "f1.f1.";
+
+		if ( usingDeltaFunc )
     {
-      QString key = prefBase+QString::number(funcIndex)+".Height";
+      QString key = prefBase;
+			if (usingCompositeFunc)
+			{
+				key += "f0.";
+			}
+			
+			key += "Height";
+
       m_cfDblMng->setValue(m_cfProp["DeltaHeight"], parameters[key]);
       funcIndex++;
     }
@@ -221,7 +234,17 @@ namespace IDA
     if ( noLorentz > 0 )
     {
       // One Lorentz
-      QString pref = prefBase + QString::number(funcIndex) + ".";
+			QString pref = prefBase;
+
+			if ( usingCompositeFunc )
+			{
+				pref += "f" + QString::number(funcIndex) + ".f" + QString::number(subIndex) + ".";
+			}
+			else
+			{
+				pref += "f" + QString::number(subIndex) + ".";
+			}
+
       m_cfDblMng->setValue(m_cfProp["Lorentzian 1.Amplitude"], parameters[pref+"Amplitude"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 1.PeakCentre"], parameters[pref+"PeakCentre"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 1.FWHM"], parameters[pref+"FWHM"]);
@@ -231,7 +254,17 @@ namespace IDA
     if ( noLorentz > 1 )
     {
       // Two Lorentz
-      QString pref = prefBase + QString::number(funcIndex) + ".";
+			QString pref = prefBase;
+
+			if ( usingCompositeFunc )
+			{
+				pref += "f" + QString::number(funcIndex) + ".f" + QString::number(subIndex) + ".";
+			}
+			else
+			{
+				pref += "f" + QString::number(subIndex) + ".";
+			}
+
       m_cfDblMng->setValue(m_cfProp["Lorentzian 2.Amplitude"], parameters[pref+"Amplitude"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 2.FWHM"], parameters[pref+"FWHM"]);
