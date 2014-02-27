@@ -405,6 +405,7 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
 
   // Create accumulator workspace, by cloning the first one from the list
   IAlgorithm_sptr cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
+  cloneAlg->setLogging(false);
   cloneAlg->setPropertyValue("InputWorkspace", firstEntry.name());
   cloneAlg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
   cloneAlg->execute();
@@ -414,6 +415,7 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
     ScopedWorkspace wsEntry(*it);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");
+    alg->setLogging(false);
     alg->setPropertyValue("LHSWorkspace", accumulatorEntry.name());
     alg->setPropertyValue("RHSWorkspace", wsEntry.name());
     alg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
