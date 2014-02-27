@@ -40,7 +40,7 @@ namespace Mantid
         /// Adds a catalog to the list of catalogs (m_catalogs)
         void add(const ICatalog_sptr catalog);
         /// Log the user into the catalog system.
-        virtual void login(const std::string& username,const std::string& password,
+        virtual CatalogSession_sptr login(const std::string& username,const std::string& password,
             const std::string& endpoint,const std::string& facility);
         /// Log the user out of the catalog system.
         virtual void logout();

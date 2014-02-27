@@ -24,7 +24,7 @@ namespace Mantid
      * @param endpoint :: The endpoint url of the catalog to log in to.
      * @param facility :: The facility of the catalog to log in to.
      */
-    void ICat3Catalog::login(const std::string& username,const std::string& password,
+    API::CatalogSession_sptr ICat3Catalog::login(const std::string& username,const std::string& password,
         const std::string& endpoint, const std::string& facility)
     {
       m_helper->doLogin(username,password,endpoint,facility);

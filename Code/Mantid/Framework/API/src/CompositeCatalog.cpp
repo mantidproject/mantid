@@ -22,13 +22,14 @@ namespace Mantid
      * @param endpoint :: The endpoint url of the catalog to log in to.
      * @param facility :: The facility of the catalog to log in to.
      */
-    void CompositeCatalog::login(const std::string& username,const std::string& password,
+    CatalogSession_sptr CompositeCatalog::login(const std::string& username,const std::string& password,
         const std::string& endpoint, const std::string& facility)
     {
-      for(auto catalog = m_catalogs.begin(); catalog != m_catalogs.end(); ++catalog)
-      {
-        (*catalog)->login(username, password, endpoint, facility);
-      }
+      UNUSED_ARG(username);
+      UNUSED_ARG(password);
+      UNUSED_ARG(endpoint);
+      UNUSED_ARG(facility);
+      throw std::runtime_error("You cannot log into multiple catalogs at the same time.");
     }
 
     /**

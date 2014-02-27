@@ -2,6 +2,7 @@
 #define MANTID_API_ICATLOG_H_
 
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/CatalogSession.h"
 
 namespace Mantid
 {
@@ -44,7 +45,7 @@ namespace Mantid
         /// Virtual destructor
         virtual ~ICatalog(){};
         /// method to login to a catalog
-        virtual void login(const std::string&,const std::string&,const std::string&,const std::string&)=0;
+        virtual CatalogSession_sptr login(const std::string&,const std::string&,const std::string&,const std::string&)=0;
         /// logout from catalog
         virtual void logout()=0;
         ///Search investigations
