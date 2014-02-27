@@ -334,8 +334,8 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 			prob2.append(yprob[2])
 
 		# create result workspace
-		fitWS = fname+'_Result'
-		fout = fitWS +'_'+ str(m)
+		fitWS = fname+'_Workspaces'
+		fout = fname+'_Workspace_'+ str(m)
 
 		CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,
 			Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
