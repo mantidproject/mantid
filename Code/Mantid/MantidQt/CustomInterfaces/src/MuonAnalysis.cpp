@@ -364,27 +364,25 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
 
   try 
   {
-    // Name of the group currently used to store plot workspaces. Depends on loaded data.
-    const std::string groupName = getGroupName().toStdString();
-
     // Create workspace and a raw (unbinned) version of it
     MatrixWorkspace_sptr ws = createAnalysisWorkspace(itemType, tableRow, plotType);
     MatrixWorkspace_sptr wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
 
+    // Make sure they are in the current group
+    if ( ! m_currentGroup->contains(ws) )
+    {
+      m_currentGroup->addWorkspace(ws);
+      m_currentGroup->addWorkspace(wsRaw);
+    }
+
     // Find names for new workspaces
-    const std::string wsName = getNewAnalysisWSName(groupName, itemType, tableRow, plotType); 
+    const std::string wsName = getNewAnalysisWSName(m_currentGroup->getName(), itemType, tableRow,
+                                                    plotType);
     const std::string wsRawName = wsName + "_Raw"; 
 
     // Make sure they end up in the ADS
     ads.addOrReplace(wsName, ws);
     ads.addOrReplace(wsRawName, wsRaw);
-
-    // Make sure they are in the right group
-    if ( ! ads.retrieveWS<WorkspaceGroup>(groupName)->contains(wsName) )
-    {
-      ads.addToGroup(groupName, wsName);
-      ads.addToGroup(groupName, wsRawName);
-    }
 
     QString wsNameQ = QString::fromStdString(wsName);
 
@@ -1583,28 +1581,25 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
   std::ostringstream infoStr;
 
-  // Populate run information with the run number
-  QString run(getGroupName());
-  if (m_previousFilenames.size() > 1)
-    infoStr << "Runs: ";
-  else
-    infoStr << "Run: ";
+  std::string label = loadResult->label;
 
   // Remove instrument and leading zeros
-  // TODO: this should be moved to a separate method
-  int zeroCount(0);
-  for (int i=0; i<run.size(); ++i)
+  for (auto it = label.begin(); it != label.end(); ++it)
   {
-    if ( (run[i] == '0') || (run[i].isLetter() ) )
-      ++zeroCount;
-    else
+    if ( !(isalpha(*it) || *it == '0') )
     {
-      run = run.right(run.size() - zeroCount);
+      // When non-letter and non-zero met - delete everything up to it
+      label.erase(label.begin(), it);
       break;
     }
   }
 
-  infoStr << run.toStdString();
+  if (files.size() > 1)
+    infoStr << "Runs: ";
+  else
+    infoStr << "Run: ";
+
+  infoStr << label;
 
   // Add other information about the run
   printRunInfo(matrix_workspace, infoStr);
@@ -1633,12 +1628,8 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   // Make the options available
   nowDataAvailable();
 
-  // Create a group for new data, if it doesn't exist
-  const std::string groupName = getGroupName().toStdString();
-  if ( ! AnalysisDataService::Instance().doesExist(groupName) )
-  {
-    AnalysisDataService::Instance().add( groupName, boost::make_shared<WorkspaceGroup>() );
-  }
+  // Use label as a name for the group we will place plots to
+  updateCurrentGroup(loadResult->label);
 
   if(m_uiForm.frontPlotButton->isEnabled())
     plotSelectedItem();
@@ -2707,7 +2698,7 @@ void MuonAnalysis::changeRun(int amountToChange)
   if (currentFile.contains("auto") || currentFile.contains("argus0000000"))
   {
     separateMuonFile(filePath, currentFile, run, runSize);
-    currentFile = filePath + getGroupName() + ".nxs";
+    currentFile = filePath + QString::fromStdString(m_currentGroup->getName()) + ".nxs";
   }
     
   separateMuonFile(filePath, currentFile, run, runSize);
@@ -3486,6 +3477,32 @@ void MuonAnalysis::nowDataAvailable()
   m_uiForm.groupTablePlotButton->setEnabled(true);
   m_uiForm.pairTablePlotButton->setEnabled(true);
   m_uiForm.guessAlphaButton->setEnabled(true);
+}
+
+/**
+ * Updates the m_currentGroup given the name of the new group we want to store plot workspace to.
+ * @param newGroupName :: Name of the group m_currentGroup should have
+ */
+void MuonAnalysis::updateCurrentGroup(const std::string& newGroupName)
+{
+  if ( AnalysisDataService::Instance().doesExist(newGroupName) )
+  {
+    auto existingGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(newGroupName);
+
+    if (existingGroup)
+    {
+      m_currentGroup = existingGroup;
+      return;
+    }
+    else
+    {
+      g_log.warning() << "Workspace with name '" << newGroupName << "' ";
+      g_log.warning() << "was replaced with the group used by MuonAnalysis.";
+    }
+  }
+
+  m_currentGroup = boost::make_shared<WorkspaceGroup>();
+  AnalysisDataService::Instance().addOrReplace(newGroupName, m_currentGroup);
 }
 
 

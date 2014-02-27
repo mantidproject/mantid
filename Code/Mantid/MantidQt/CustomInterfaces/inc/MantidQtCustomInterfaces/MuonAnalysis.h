@@ -503,6 +503,9 @@ private:
   /// When data loaded set various buttons etc to active
   void nowDataAvailable();
 
+  /// Updates m_currentGroup given the new loaded label
+  void updateCurrentGroup(const std::string& newGroupName);
+
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
   /// handles fit data work
@@ -515,6 +518,9 @@ private:
 
   /// First Good Data time as loaded from Data file
   double m_dataFirstGoodData;
+
+  /// The group we should add new plot workspaces to
+  WorkspaceGroup_sptr m_currentGroup;
 
   static const QString NOT_AVAILABLE;
 
