@@ -16,7 +16,7 @@ from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
                          isEventWorkspace, fromEvent2Histogram, 
                          getFilePathFromWorkspace, getWorkspaceReference,
-                         getMonitor4event, slice2histogram)
+                         getMonitor4event, slice2histogram, getFileAndName)
 import isis_instrument
 import os
 import math
@@ -1654,7 +1654,8 @@ class UserFile(ReductionStep):
         self.key_functions = {
             'BACK/' : self._read_back_line,
             'TRANS/': self._read_trans_line,
-            'MON/' : self._read_mon_line}
+            'MON/' : self._read_mon_line,
+            'TUBECALIBFILE': self._read_calibfile_line}
 
     def __deepcopy__(self, memo):
         """Called when a deep copy is requested                    
@@ -1665,7 +1666,8 @@ class UserFile(ReductionStep):
         fresh.key_functions = {
             'BACK/' : fresh._read_back_line,
             'TRANS/': fresh._read_trans_line,
-            'MON/' : fresh._read_mon_line
+            'MON/' : fresh._read_mon_line,
+            'TUBECALIBFILE': self._read_calibfile_line
             }
         return fresh
 
@@ -2255,6 +2257,21 @@ class UserFile(ReductionStep):
         reducer._corr_and_scale.rescale = 100.  # percent
         
         reducer.inst.reset_TOFs()
+
+    def _read_calibfile_line(self, arguments, reducer):
+        # remove the equals from the beggining and any space around. 
+        parts = re.split("\s?=\s?", arguments)
+        if len(parts) != 2: 
+            return "Invalid input for TUBECALIBFILE" + str(arguments)+ ". Expected TUBECALIBFILE = file_path"
+        path2file = parts[1]
+
+        try:
+          file_path, suggested_name = getFileAndName(path2file)
+          __calibrationWs = Load(file_path, OutputWorkspace=suggested_name)
+          reducer.instrument.setCalibrationWorkspace(__calibrationWs)
+        except:
+            import traceback
+            return "Invalid input for tube calibration file. Path = "+path2file+".\nReason=" + traceback.format_exc()
 
 class GetOutputName(ReductionStep):
     def __init__(self):
