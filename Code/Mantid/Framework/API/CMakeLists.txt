@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/BoxController.cpp
 	src/CatalogFactory.cpp
 	src/CatalogManager.cpp
+	src/CatalogSession.cpp
 	src/ChopperModel.cpp
 	src/Column.cpp
 	src/ColumnFactory.cpp
@@ -138,6 +139,7 @@ set ( INC_FILES
 	inc/MantidAPI/BoxController.h
 	inc/MantidAPI/CatalogFactory.h
 	inc/MantidAPI/CatalogManager.h
+	inc/MantidAPI/CatalogSession.h
 	inc/MantidAPI/ChopperModel.h
 	inc/MantidAPI/Column.h
 	inc/MantidAPI/ColumnFactory.h
