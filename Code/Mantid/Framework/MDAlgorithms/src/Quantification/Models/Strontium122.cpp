@@ -82,41 +82,12 @@ namespace Mantid
       const double qsqr = qx*qx + qy*qy + qz*qz;
       const double epssqr = eps*eps;
 
-      // Transform the HKL only requires B matrix & goniometer (R) as ConvertToMD should have already
-      // handled addition of U matrix
-      // qhkl = (1/2pi)(RB)^-1(qxyz)
+
+      double qh,qk,ql;
+
+      ForegroundModel::convertToHKL(exptSetup,qx,qy,qz,qh,qk,ql);
+
       const Geometry::OrientedLattice & lattice = exptSetup.sample().getOrientedLattice();
-      const Kernel::DblMatrix & gr = exptSetup.run().getGoniometerMatrix();
-      const Kernel::DblMatrix & bmat = lattice.getB();
-
-      // Avoid doing inversion with Matrix class as it forces memory allocations
-      // M^-1 = (1/|M|)*M^T
-      double rb00(0.0), rb01(0.0), rb02(0.0),
-             rb10(0.0), rb11(0.0), rb12(0.0),
-             rb20(0.0), rb21(0.0), rb22(0.0);
-      for(unsigned int i = 0; i < 3; ++i)
-      {
-        rb00 += gr[0][i]*bmat[i][0];
-        rb01 += gr[0][i]*bmat[i][1];
-        rb02 += gr[0][i]*bmat[i][2];
-
-        rb10 += gr[1][i]*bmat[i][0];
-        rb11 += gr[1][i]*bmat[i][1];
-        rb12 += gr[1][i]*bmat[i][2];
-
-        rb20 += gr[2][i]*bmat[i][0];
-        rb21 += gr[2][i]*bmat[i][1];
-        rb22 += gr[2][i]*bmat[i][2];
-      }
-      // 2pi*determinant. The tobyFit definition of rl vector has extra 2pi factor in it
-      const double twoPiDet= TWO_PI*(rb00*(rb11*rb22 - rb12*rb21) -
-                                     rb01*(rb10*rb22 - rb12*rb20) +
-                                     rb02*(rb10*rb21 - rb11*rb20));
-
-      const double qh = ((rb11*rb22 - rb12*rb21)*qx + (rb02*rb21 - rb01*rb22)*qy + (rb01*rb12 - rb02*rb11)*qz)/twoPiDet;
-      const double qk = ((rb12*rb20 - rb10*rb22)*qx + (rb00*rb22 - rb02*rb20)*qy + (rb02*rb10 - rb00*rb12)*qz)/twoPiDet;
-      const double ql = ((rb10*rb21 - rb11*rb20)*qx + (rb01*rb20 - rb00*rb21)*qy + (rb00*rb11 - rb01*rb10)*qz)/twoPiDet;
-
       // Lattice parameters
       double ca1 = std::cos(lattice.beta1());
       double ca2 = std::cos(lattice.beta2());

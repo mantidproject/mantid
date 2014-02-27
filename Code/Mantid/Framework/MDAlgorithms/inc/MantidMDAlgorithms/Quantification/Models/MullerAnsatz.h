@@ -36,16 +36,16 @@ namespace Mantid
     {
       enum ChainDirection
       {
-        AlongA,
-        AlongB,
-        AlongC
+        Along_a,
+        Along_b,
+        Along_c
       };
       enum MagneticFFDirection
       {
-        Isotropic,
-        NormalToA,
-        NormalToB,
-        NormalToC
+        NormalTo_a,
+        NormalTo_b,
+        NormalTo_c,
+        Isotropic
       };
     private:
       /// String name of the model

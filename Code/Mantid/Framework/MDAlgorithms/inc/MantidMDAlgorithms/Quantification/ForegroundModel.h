@@ -97,6 +97,9 @@ namespace Mantid
       /// Returns the form factor for the given q^2 value
       double formFactor(const double qsqr) const;
 
+      /// helper function used for fast convertion from qx,qy,qz coordinate system into hkl coordinate system
+      static inline void convertToHKL(const API::ExperimentInfo & exptSetup,const double &qx,const double &qy, const double &qz,
+                                      double &qh,double &qk,double &ql);
     private:
       DISABLE_COPY_AND_ASSIGN(ForegroundModel);
 
@@ -121,6 +124,7 @@ namespace Mantid
     typedef boost::shared_ptr<ForegroundModel> ForegroundModel_sptr;
     /// boost::shared_ptr to const typedef
     typedef boost::shared_ptr<const ForegroundModel> ForegroundModel_const_sptr;
+
 
   }
 }
