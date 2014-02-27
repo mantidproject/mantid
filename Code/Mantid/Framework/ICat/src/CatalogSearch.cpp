@@ -73,7 +73,7 @@ namespace Mantid
       // Create output workspace.
       auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       // Obtain all the active catalogs.
-      auto catalogs = CatalogManager::Instance().getCatalogs();
+      auto catalogs = CatalogManager::Instance().getCatalog("");
       // Search for investigations with user specific search inputs.
       setProperty("OutputWorkspace",workspace);
       // Do not perform a full search if we only want a COUNT search.

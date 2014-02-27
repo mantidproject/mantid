@@ -33,7 +33,7 @@ namespace Mantid
     void CatalogListInvestigationTypes::exec()
     {
       std::vector<std::string> investigationTypes;
-      CatalogManager::Instance().getCatalogs()->listInvestigationTypes(investigationTypes);
+      CatalogManager::Instance().getCatalog("")->listInvestigationTypes(investigationTypes);
       setProperty("InvestigationTypes",investigationTypes);
     }
 

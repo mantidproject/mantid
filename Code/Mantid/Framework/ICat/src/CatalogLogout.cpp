@@ -26,7 +26,6 @@ namespace Mantid
     /// execute the algorithm
     void CatalogLogout::exec()
     {
-      CatalogManager::Instance().getCatalogs()->logout();
       CatalogManager::Instance().destroyCatalogs();
     }
   }

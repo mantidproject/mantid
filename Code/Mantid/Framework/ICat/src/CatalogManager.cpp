@@ -1,4 +1,5 @@
 #include "MantidICat/CatalogManager.h"
+#include "MantidICat/CompositeCatalog.h"
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -7,7 +8,7 @@ namespace Mantid
 {
   namespace ICat
   {
-    CatalogManagerImpl::CatalogManagerImpl() : m_activeCatalogs(), m_compositeCatalog(new CompositeCatalog()) {}
+    CatalogManagerImpl::CatalogManagerImpl() : m_activeCatalogs() {}
 
     CatalogManagerImpl::~CatalogManagerImpl(){}
 
@@ -20,31 +21,31 @@ namespace Mantid
     {
       std::string className = Kernel::ConfigService::Instance().getFacility(facilityName).catalogInfo().catalogName();
       auto catalog = API::CatalogFactory::Instance().create(className);
-      m_compositeCatalog->add(catalog);
       m_activeCatalogs.insert(std::make_pair("",catalog));
       return catalog;
     }
 
     /**
-     * Obtain a specific catalog using the sessionID.
+     * Obtain a specific catalog using the sessionID, otherwise return all active catalogs.
      * @param sessionID :: The session to search for in the active catalogs list.
-     * @return A specific catalog using the sessionID.
+     * @return A specific catalog using the sessionID, otherwise returns all active catalogs
      */
     API::ICatalog_sptr CatalogManagerImpl::getCatalog(const std::string sessionID)
     {
+      if(sessionID.empty())
+      {
+        auto composite = boost::make_shared<CompositeCatalog>();
+        for (auto item = m_activeCatalogs.begin(); item != m_activeCatalogs.end(); ++item)
+        {
+          composite->add(item->second);
+        }
+        return composite;
+      }
+
       auto pos = m_activeCatalogs.find(sessionID);
       // If the key element exists in the map we want the related catalog.
       if (pos != m_activeCatalogs.end()) return pos->second;
       else throw std::runtime_error("The session ID you have provided is invalid");
-    }
-
-    /**
-     * Obtain a list of all active catalogs.
-     * @return A composite catalog object as it holds and performs operations on all catalogs.
-     */
-    boost::shared_ptr<CompositeCatalog> CatalogManagerImpl::getCatalogs()
-    {
-      return m_compositeCatalog;
     }
 
     /**
@@ -58,7 +59,6 @@ namespace Mantid
       if (pos != m_activeCatalogs.end())
       {
         pos->second->logout();
-        m_compositeCatalog->removeCatalogFromComposite((pos->second));
         m_activeCatalogs.erase(pos);
       }
     }
@@ -68,8 +68,11 @@ namespace Mantid
      */
     void CatalogManagerImpl::destroyCatalogs()
     {
-      m_compositeCatalog->logout();
-      m_compositeCatalog->clearCompositeCatalog();
+      for (auto item = m_activeCatalogs.begin(); item != m_activeCatalogs.end(); ++item)
+      {
+        item->second->logout();
+      }
+
       m_activeCatalogs.clear();
     }
 

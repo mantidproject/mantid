@@ -2,7 +2,7 @@
 #define MANTID_ICAT_CATALOGMANAGERIMPL_H_
 
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidICat/CompositeCatalog.h"
+#include "MantidAPI/ICatalog.h"
 
 namespace Mantid
 {
@@ -40,8 +40,6 @@ namespace Mantid
         API::ICatalog_sptr create(const std::string facilityName);
         /// Get a specific catalog using the sessionID.
         API::ICatalog_sptr getCatalog(const std::string sessionID);
-        /// Get a list of all active catalogs.
-        boost::shared_ptr<CompositeCatalog> getCatalogs();
         /// Destroy and remove a specific catalog from the active catalogs list.
         void destroyCatalog(const std::string sessionID);
         /// Destroy all active catalogs.
@@ -57,8 +55,6 @@ namespace Mantid
 
         // Holds a list of active catalogs and uses their sessionId as unique identifier.
         std::map<std::string, API::ICatalog_sptr> m_activeCatalogs;
-        // Used to return the compositeCatalog that holds the created catalogs.
-        boost::shared_ptr<CompositeCatalog> m_compositeCatalog;
     };
 
     #ifdef _WIN32

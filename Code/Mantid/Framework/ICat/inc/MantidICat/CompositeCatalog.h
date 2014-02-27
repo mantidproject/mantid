@@ -39,11 +39,6 @@ namespace Mantid
         CompositeCatalog();
         /// Adds a catalog to the list of catalogs (m_catalogs)
         void add(const API::ICatalog_sptr catalog);
-        /// Remove a specific catalog from the list of catalogs.
-        void removeCatalogFromComposite(API::ICatalog_sptr& catalog);
-        /// Clear the list of catalogs.
-        void clearCompositeCatalog();
-
         /// Log the user into the catalog system.
         virtual void login(const std::string& username,const std::string& password,const std::string& endpoint);
         /// Log the user out of the catalog system.

@@ -31,7 +31,7 @@ namespace Mantid
     void CatalogMyDataSearch::exec()
     {
       auto outputws = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      CatalogManager::Instance().getCatalogs()->myData(outputws);
+      CatalogManager::Instance().getCatalog("")->myData(outputws);
       setProperty("OutputWorkspace",outputws);
     }
   }

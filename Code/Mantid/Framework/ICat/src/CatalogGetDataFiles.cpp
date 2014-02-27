@@ -35,7 +35,7 @@ namespace Mantid
     void CatalogGetDataFiles::exec()
     {
       auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      CatalogManager::Instance().getCatalogs()->getDataFiles(getProperty("InvestigationId"),workspace);
+      CatalogManager::Instance().getCatalog("")->getDataFiles(getProperty("InvestigationId"),workspace);
       setProperty("OutputWorkspace",workspace);
     }
 

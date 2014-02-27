@@ -35,7 +35,7 @@ namespace Mantid
     void CatalogListInstruments::exec()
     {
       std::vector<std::string> instruments;
-      CatalogManager::Instance().getCatalogs()->listInstruments(instruments);
+      CatalogManager::Instance().getCatalog("")->listInstruments(instruments);
       setProperty("InstrumentList",instruments);
     }
 
