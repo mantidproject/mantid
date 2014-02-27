@@ -160,14 +160,14 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 	    abstime = times[i].totalNanoseconds() * 1.E-9 - localtimediff 
 	    reltime = abstime - abstime_init 
 	    # Write absoute time and relative time 
-	    wbuf += "%.6f\t %.6f\t " % (abstime, reltime) 
+	    wbuf += "%.6f\t%.6f\t" % (abstime, reltime) 
 	    # Write each log value 
             for samplelog in self._sampleloglist:
 		if logvaluedict[samplelog] is not None:
 		    logvalue = logvaluedict[samplelog][i]
 		else:
 		    logvalue = 0.
-		wbuf += "%.6f\t " % (logvalue)
+		wbuf += "%.6f\t" % (logvalue)
 	    wbuf += "\n"
 	# ENDFOR
 
@@ -323,7 +323,7 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
         # FIXME : refactor the following to increase efficiency
 	abstime = thislogtime.totalNanoseconds() * 1.E-9 - self._localtimediff 
 	reltime = thislogtime.totalNanoseconds() * 1.E-9 - self._starttime.totalNanoseconds() * 1.0E-9 
-	wbuf = "%.6f\t %.6f\t " % (abstime, reltime) 
+	wbuf = "%.6f\t%.6f\t" % (abstime, reltime) 
 
 	# Log valuess
 	tmplogvalues = []
@@ -343,7 +343,7 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 	    #     logvalue = logvaluedict[samplelog][i]
 	    # else:
 	    #     logvalue = 0.
-	    wbuf += "%.6f\t " % (logvalue)
+	    wbuf += "%.6f\t" % (logvalue)
 	# ENDFOR
 
 	return wbuf
