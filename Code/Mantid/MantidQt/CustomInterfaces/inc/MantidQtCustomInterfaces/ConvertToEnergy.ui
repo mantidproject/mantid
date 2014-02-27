@@ -2006,7 +2006,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
           </item>
          </layout>
          <zorder></zorder>
-         <zorder></zorder>
         </widget>
        </item>
       </layout>
@@ -2369,47 +2368,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_45">
             <item>
-             <layout class="QGridLayout" name="gridLayout_9">
-              <item row="0" column="1">
-               <widget class="QComboBox" name="sqw_cbRebinType">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Maximum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>150</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="currentIndex">
-                 <number>0</number>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>Centre (SofQW)</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Parallelepiped (SofQW2)</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Parallelepiped/Fractional Area (SofQW3)</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
+             <layout class="QGridLayout" name="gridLayout_9" columnstretch="0,10,0,0,10,0" columnminimumwidth="0,0,0,0,0,0">
               <item row="1" column="4">
                <widget class="QLineEdit" name="sqw_leELow">
                 <property name="enabled">
@@ -2423,19 +2382,9 @@ Later steps in the process (saving, renaming) will not be done.</string>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>60</width>
+                  <width>200</width>
                   <height>16777215</height>
                  </size>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QLineEdit" name="sqw_leQWidth">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
                 </property>
                </widget>
               </item>
@@ -2487,7 +2436,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>60</width>
+                  <width>200</width>
                   <height>16777215</height>
                  </size>
                 </property>
@@ -2550,18 +2499,14 @@ Later steps in the process (saving, renaming) will not be done.</string>
               </item>
               <item row="0" column="0">
                <widget class="QLabel" name="sqw_lbRebinType">
+                <property name="minimumSize">
+                 <size>
+                  <width>43</width>
+                  <height>0</height>
+                 </size>
+                </property>
                 <property name="text">
                  <string>Rebin Type:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QLineEdit" name="sqw_leQLow">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
                 </property>
                </widget>
               </item>
@@ -2595,16 +2540,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
                 </property>
                 <property name="text">
                  <string>Q Low:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QLineEdit" name="sqw_leQHigh">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
                 </property>
                </widget>
               </item>
@@ -2644,7 +2579,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>60</width>
+                  <width>200</width>
                   <height>16777215</height>
                  </size>
                 </property>
@@ -2671,6 +2606,76 @@ Later steps in the process (saving, renaming) will not be done.</string>
                 <property name="text">
                  <string>E Low:</string>
                 </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="sqw_leQLow">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="sqw_leQWidth">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QLineEdit" name="sqw_leQHigh">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QComboBox" name="sqw_cbRebinType">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="currentIndex">
+                 <number>0</number>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Centre (SofQW)</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Parallelepiped (SofQW2)</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Parallelepiped/Fractional Area (SofQW3)</string>
+                 </property>
+                </item>
                </widget>
               </item>
              </layout>
@@ -2782,7 +2787,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
            </layout>
           </item>
          </layout>
-         <zorder></zorder>
          <zorder></zorder>
         </widget>
        </item>
@@ -3356,19 +3360,22 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>trans_ckPlot</tabstop>
   <tabstop>trans_ckSave</tabstop>
   <tabstop>sqw_cbRebinType</tabstop>
-  <tabstop>sqw_leELow</tabstop>
-  <tabstop>sqw_leEWidth</tabstop>
-  <tabstop>sqw_leEHigh</tabstop>
   <tabstop>sqw_leQLow</tabstop>
   <tabstop>sqw_leQWidth</tabstop>
   <tabstop>sqw_leQHigh</tabstop>
   <tabstop>sqw_ckRebinE</tabstop>
+  <tabstop>sqw_leELow</tabstop>
+  <tabstop>sqw_leEWidth</tabstop>
+  <tabstop>sqw_leEHigh</tabstop>
+  <tabstop>sqw_ckVerbose</tabstop>
   <tabstop>sqw_cbPlotType</tabstop>
   <tabstop>sqw_ckSave</tabstop>
   <tabstop>absRunFiles</tabstop>
   <tabstop>absMapFile</tabstop>
   <tabstop>absWhiteFile</tabstop>
   <tabstop>pbManageDirectories</tabstop>
+  <tabstop>cal_ckVerbose</tabstop>
+  <tabstop>cal_ckSave</tabstop>
  </tabstops>
  <resources/>
  <connections/>
