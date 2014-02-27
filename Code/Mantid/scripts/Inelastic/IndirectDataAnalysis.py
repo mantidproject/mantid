@@ -265,7 +265,7 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, spec
 ##############################################################################
 
 def GetTemperature(root,tempWS,log_type,Verbose):
-    (instr, run) = getInstrRun(root)
+    (instr, run) = getInstrRun(tempWS)
     run_name = instr+run
     log_name = run_name+'_'+log_type
     run = mtd[tempWS].getRun()
@@ -328,7 +328,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         elif ( len(eRange) == 2 ):
             ElasticWindow(InputWorkspace=tempWS, Range1Start=eRange[0], Range1End=eRange[1],
                 OutputInQ='__eq1', OutputInQSquared='__eq2')
-        (instr, last) = getInstrRun(root)
+        (instr, last) = getInstrRun(tempWS)
         q1 = np.array(mtd['__eq1'].readX(0))
         i1 = np.array(mtd['__eq1'].readY(0))
         e1 = np.array(mtd['__eq1'].readE(0))
@@ -338,7 +338,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         e2 = np.array(mtd['__eq2'].readE(0))
         if (nr == 0):
             CloneWorkspace(InputWorkspace='__eq1', OutputWorkspace='__elf')
-            first = getWSprefix(tempWS,root)
+            first = getWSprefix(tempWS)
             datX1 = q1
             datY1 = i1
             datE1 = e1
@@ -602,7 +602,7 @@ def fury(samWorkspaces, res_file, rebinParam, RES=True, Save=False, Verbose=Fals
         ExtractFFTSpectrum(InputWorkspace='sam_data', OutputWorkspace='sam_fft', FFTPart=2)
         Divide(LHSWorkspace='sam_fft', RHSWorkspace='sam_int', OutputWorkspace='sam')
         # Create save file name
-        savefile = getWSprefix('sam_data', root) + 'iqt'
+        savefile = getWSprefix(samWs, root) + 'iqt'
         outWSlist.append(savefile)
         Divide(LHSWorkspace='sam', RHSWorkspace='res', OutputWorkspace=savefile)
         #Cleanup Sample Files
