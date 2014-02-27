@@ -1039,7 +1039,7 @@ def msdfit(inputs, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=
 
     DeleteWorkspace(msdWS + '_NormalisedCovarianceMatrices')
     DeleteWorkspace(msdWS + '_Parameters')
-    msd_parameters = msdWS+'_Table'
+    msd_parameters = msdWS+'_Parameters'
     RenameWorkspace(msdWS, OutputWorkspace=msd_parameters)
 
     #create workspaces for each of the parameters
