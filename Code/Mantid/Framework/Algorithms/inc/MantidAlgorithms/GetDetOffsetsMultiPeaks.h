@@ -92,15 +92,20 @@ private:
 
   void processProperties();
 
+  void addInfoToReportWS(int wi, FitPeakOffsetResult offsetresult, const std::vector<double> &tofitpeakpositions,
+                         const std::vector<double> &fittedpeakpositions);
+
   /// Generate output information table workspace
-  Mantid::DataObjects::TableWorkspace_sptr createOutputInfoTable();
+  Mantid::DataObjects::TableWorkspace_sptr createOutputInfoTable(size_t numspec);
 
   /// Generate output peak information table workspace
-  Mantid::DataObjects::TableWorkspace_sptr createOutputPeakOffsetTable();
+  Mantid::DataObjects::TableWorkspace_sptr createOutputPeakOffsetTable(size_t numspec);
 
   FitPeakOffsetResult calculatePeakOffset(const int wi, std::vector<double>& fittedpeakpositions, std::vector<double>& tofitpeakpositions);
 
   void makeFitSummary();
+
+  void removeEmptyRowsFromPeakOffsetTable();
 
   API::MatrixWorkspace_sptr inputW;
   DataObjects::EventWorkspace_const_sptr eventW;
