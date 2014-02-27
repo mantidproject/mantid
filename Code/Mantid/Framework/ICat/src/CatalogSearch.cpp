@@ -73,7 +73,8 @@ namespace Mantid
       // Create output workspace.
       auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       // Obtain all the active catalogs.
-      auto catalogs = API::CatalogManager::Instance().getCatalog("");
+      const std::string sessionID = "";
+      auto catalogs = API::CatalogManager::Instance().getCatalog(sessionID);
       // Search for investigations with user specific search inputs.
       setProperty("OutputWorkspace",workspace);
       // Do not perform a full search if we only want a COUNT search.

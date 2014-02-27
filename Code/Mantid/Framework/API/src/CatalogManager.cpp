@@ -17,7 +17,7 @@ namespace Mantid
      * @param facilityName :: The name of the facility to obtain the catalog name from.
      * @return A catalog for the facility specified.
      */
-    ICatalog_sptr CatalogManagerImpl::create(const std::string facilityName)
+    ICatalog_sptr CatalogManagerImpl::create(const std::string &facilityName)
     {
       std::string className = Kernel::ConfigService::Instance().getFacility(facilityName).catalogInfo().catalogName();
       auto catalog = CatalogFactory::Instance().create(className);
@@ -30,7 +30,7 @@ namespace Mantid
      * @param sessionID :: The session to search for in the active catalogs list.
      * @return A specific catalog using the sessionID, otherwise returns all active catalogs
      */
-    ICatalog_sptr CatalogManagerImpl::getCatalog(const std::string sessionID)
+    ICatalog_sptr CatalogManagerImpl::getCatalog(const std::string &sessionID)
     {
       if(sessionID.empty())
       {
@@ -52,7 +52,7 @@ namespace Mantid
      * Destroy and remove a specific catalog from the active catalogs list and the composite catalog.
      * @param sessionID :: The session to search for in the active catalogs list.
      */
-    void CatalogManagerImpl::destroyCatalog(const std::string sessionID)
+    void CatalogManagerImpl::destroyCatalog(const std::string& sessionID)
     {
       auto pos = m_activeCatalogs.find(sessionID);
 

@@ -33,15 +33,15 @@ namespace Mantid
      File change history is stored at: <https://github.com/mantidproject/mantid>.
      Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport CatalogManagerImpl
+    class MANTID_API_DLL CatalogManagerImpl
     {
       public:
         /// Create a new catalog, and add it to the list of active catalogs.
-        ICatalog_sptr create(const std::string facilityName);
+        ICatalog_sptr create(const std::string &facilityName);
         /// Get a specific catalog using the sessionID.
-        ICatalog_sptr getCatalog(const std::string sessionID);
+        ICatalog_sptr getCatalog(const std::string &sessionID);
         /// Destroy and remove a specific catalog from the active catalogs list.
-        void destroyCatalog(const std::string sessionID);
+        void destroyCatalog(const std::string &sessionID);
         /// Destroy all active catalogs.
         void destroyCatalogs();
 
