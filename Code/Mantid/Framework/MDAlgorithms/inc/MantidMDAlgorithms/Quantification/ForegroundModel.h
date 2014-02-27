@@ -98,8 +98,8 @@ namespace Mantid
       double formFactor(const double qsqr) const;
 
       /// helper function used for fast convertion from qx,qy,qz coordinate system into hkl coordinate system
-      static inline void convertToHKL(const API::ExperimentInfo & exptSetup,const double &qx,const double &qy, const double &qz,
-                                      double &qh,double &qk,double &ql);
+      static void convertToHKL(const API::ExperimentInfo & exptSetup,const double &qx,const double &qy, const double &qz,
+                                      double &qh,double &qk,double &ql,double &arlu1,double &arlu2,double &arlu3);
     private:
       DISABLE_COPY_AND_ASSIGN(ForegroundModel);
 

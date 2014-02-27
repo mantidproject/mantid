@@ -176,7 +176,7 @@ namespace Mantid
 
     const double TWO_PI = 2.*M_PI;
     inline void ForegroundModel::convertToHKL(const API::ExperimentInfo & exptSetup, const double &qx,const double &qy, const double &qz,
-                                              double &qh,double &qk,double &ql)
+                                              double &qh,double &qk,double &ql,double &arlu1,double &arlu2,double &arlu3)
     {
       // Transform the HKL only requires B matrix & goniometer (R) as ConvertToMD should have already
       // handled addition of U matrix
@@ -212,6 +212,19 @@ namespace Mantid
       qh = ((rb11*rb22 - rb12*rb21)*qx + (rb02*rb21 - rb01*rb22)*qy + (rb01*rb12 - rb02*rb11)*qz)/twoPiDet;
       qk = ((rb12*rb20 - rb10*rb22)*qx + (rb00*rb22 - rb02*rb20)*qy + (rb02*rb10 - rb00*rb12)*qz)/twoPiDet;
       ql = ((rb10*rb21 - rb11*rb20)*qx + (rb01*rb20 - rb00*rb21)*qy + (rb00*rb11 - rb01*rb10)*qz)/twoPiDet;
+
+      // Lattice parameters
+      double ca1 = std::cos(lattice.beta1());
+      double ca2 = std::cos(lattice.beta2());
+      double ca3 = std::cos(lattice.beta3());
+      double sa1 = std::abs(std::sin(lattice.beta1()));
+      double sa2 = std::abs(std::sin(lattice.beta2()));
+      double sa3 = std::abs(std::sin(lattice.beta3()));
+
+      const double factor = std::sqrt(1.0 + 2.0*(ca1*ca2*ca3) - (ca1*ca1 + ca2*ca2 + ca3*ca3));
+      arlu1 = (TWO_PI/lattice.a())*(sa1/factor); // Lattice parameters in r.l.u
+      arlu2 = (TWO_PI/lattice.b())*(sa2/factor);
+      arlu3 = (TWO_PI/lattice.c())*(sa3/factor);
 
 
     }

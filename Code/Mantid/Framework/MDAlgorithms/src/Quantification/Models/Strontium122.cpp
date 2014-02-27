@@ -83,23 +83,9 @@ namespace Mantid
       const double epssqr = eps*eps;
 
 
-      double qh,qk,ql;
+      double qh,qk,ql,arlu1,arlu2,arlu3;
+      ForegroundModel::convertToHKL(exptSetup,qx,qy,qz,qh,qk,ql,arlu1,arlu2,arlu3);
 
-      ForegroundModel::convertToHKL(exptSetup,qx,qy,qz,qh,qk,ql);
-
-      const Geometry::OrientedLattice & lattice = exptSetup.sample().getOrientedLattice();
-      // Lattice parameters
-      double ca1 = std::cos(lattice.beta1());
-      double ca2 = std::cos(lattice.beta2());
-      double ca3 = std::cos(lattice.beta3());
-      double sa1 = std::abs(std::sin(lattice.beta1()));
-      double sa2 = std::abs(std::sin(lattice.beta2()));
-      double sa3 = std::abs(std::sin(lattice.beta3()));
-
-      const double factor = std::sqrt(1.0 + 2.0*(ca1*ca2*ca3) - (ca1*ca1 + ca2*ca2 + ca3*ca3));
-      const double arlu1 = (TWO_PI/lattice.a())*(sa1/factor); // Lattice parameters in r.l.u
-      const double arlu2 = (TWO_PI/lattice.b())*(sa2/factor);
-      const double arlu3 = (TWO_PI/lattice.c())*(sa3/factor);
 
       const double tempInK = exptSetup.getLogAsSingleValue("temperature_log");
       const double boseFactor = BoseEinsteinDistribution::np1Eps(eps,tempInK);
