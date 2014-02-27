@@ -1408,7 +1408,17 @@ boost::shared_ptr<LoadResult> MuonAnalysis::load(const QStringList& files) const
   else
   {
     // If multiple workspaces loaded - sum them to get the one to work with
-    result->loadedWorkspace = sumWorkspaces(loadedWorkspaces);
+    try
+    {
+      result->loadedWorkspace = sumWorkspaces(loadedWorkspaces);
+    }
+    catch(std::exception& e)
+    {
+      std::ostringstream error;
+      error << "Unable to sum workspaces together: " << e.what() << "\n";
+      error << "Make sure they have equal dimensions and number of periods.";
+      throw std::runtime_error(error.str());
+    }
 
     result->label = getRunLabel(loadedWorkspaces);
   }
@@ -3352,7 +3362,7 @@ void MuonAnalysis::updateCurrentGroup(const std::string& newGroupName)
     else
     {
       g_log.warning() << "Workspace with name '" << newGroupName << "' ";
-      g_log.warning() << "was replaced with the group used by MuonAnalysis.";
+      g_log.warning() << "was replaced with the group used by MuonAnalysis." << "\n";
     }
   }
 
