@@ -39,7 +39,7 @@ class DSFinterp1DTestTest(unittest.TestCase):
       if e:
         HWHM += 2*df*(0.5-random()) # add uncertainty as big as twice the step between consecutive HWHM!!!
         if HWHM < 0: HWHM = f
-      yvalues = 1/numpy.pi * HWHM / (HWHM*HWHM + xvalues*xvalues)
+      yvalues = 1/numpy.pi * HWHM / (HWHM*HWHM + xvalues*xvalues) * (1.1 - 0.2*numpy.random.rand(2*n)) #10% random noise
       evalues = yvalues*0.1*numpy.random.rand(2*n) # errors
       dataX = numpy.append(xvalues-dE/2.0, n*dE-dE/2.0) # histogram bins
       CreateWorkspace(OutputWorkspace='sim{0}'.format(iif), DataX=dataX, DataY=yvalues, DataE=evalues)
@@ -111,7 +111,7 @@ class DSFinterp1DTestTest(unittest.TestCase):
       self.assertTrue('Regression type baloney not implemented' in str(e))
     else:
       assert False, 'Did not raise any exception'
-    # Try passing an unappropriate regression window for the regression type selected
+    # Try passing an inappropriate regression window for the regression type selected
     try:
       func_string = 'name=DSFinterp1DFit,InputWorkspaces="{0}",ParameterValues="{1}",'.format(InputWorkspaces,fvalues) +\
       'LoadErrors=0,LocalRegression=1,RegressionType=quadratic,RegressionWindow=3,' +\
@@ -145,4 +145,4 @@ class DSFinterp1DTestTest(unittest.TestCase):
     self.cleanup(nf)
 
 if __name__=="__main__":
-	unittest.main()
+  unittest.main()
