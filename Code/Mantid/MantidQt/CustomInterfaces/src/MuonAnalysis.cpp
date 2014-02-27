@@ -368,17 +368,17 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
     MatrixWorkspace_sptr ws = createAnalysisWorkspace(itemType, tableRow, plotType);
     MatrixWorkspace_sptr wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
 
-    // Make sure they are in the current group
-    if ( ! m_currentGroup->contains(ws) )
-    {
-      m_currentGroup->addWorkspace(ws);
-      m_currentGroup->addWorkspace(wsRaw);
-    }
-
     // Find names for new workspaces
     const std::string wsName = getNewAnalysisWSName(m_currentGroup->getName(), itemType, tableRow,
                                                     plotType);
     const std::string wsRawName = wsName + "_Raw"; 
+
+    // Make sure they are in the current group
+    if ( ! m_currentGroup->contains(wsName) )
+    {
+      m_currentGroup->addWorkspace(ws);
+      m_currentGroup->addWorkspace(wsRaw);
+    }
 
     // Make sure they end up in the ADS
     ads.addOrReplace(wsName, ws);
