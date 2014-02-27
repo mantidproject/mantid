@@ -37,11 +37,13 @@ class DSFinterp1DTestTest(unittest.TestCase):
       HWHM = f# half-width at half maximum
       # Impose uncertainty in the Lorentzian by making its actual HWHM different than the theoretical one
       if e:
-        HWHM += 4*df*(0.5-random()) # add uncertainty as big as twice the step between consecutive HWHM!!!
+        HWHM += 2*df*(0.5-random()) # add uncertainty as big as twice the step between consecutive HWHM!!!
+        if HWHM < 0: HWHM = startf
       yvalues = 1/numpy.pi * HWHM / (HWHM*HWHM + xvalues*xvalues)
       evalues = yvalues*0.1*numpy.random.rand(2*n) # errors
       CreateWorkspace(OutputWorkspace='sim{0}'.format(iif), DataX=xvalues, DataY=yvalues, DataE=evalues)
-      SaveNexus(InputWorkspace='sim{0}'.format(iif), Filename='/tmp/sim{0}.nxs'.format(iif))  #only for debugging purposes
+      #SaveNexus(InputWorkspace='sim{0}'.format(iif), Filename='/tmp/sim{0}.nxs'.format(iif))  #only for debugging purposes
+      #print iif, f, HWHM
       fvalues += ' {0}'.format(f) # theoretical HWHM, only coincides with real HWHM when no uncertainty
       workspaces += ' sim{0}'.format(iif)
     # Target workspace against which we will fit
@@ -50,6 +52,7 @@ class DSFinterp1DTestTest(unittest.TestCase):
     evalues = yvalues*0.1*numpy.random.rand(2*n) # errors
     CreateWorkspace(OutputWorkspace='targetW', DataX=xvalues, DataY=yvalues, DataE=evalues)
     #SaveNexus(InputWorkspace='targetW', Filename='/tmp/targetW.nxs') #only for debugging purposes
+    #print HWHM
     return fvalues, workspaces, xvalues, HWHM
 
   def cleanup(self, nf):

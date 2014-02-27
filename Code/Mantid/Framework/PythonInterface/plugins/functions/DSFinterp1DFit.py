@@ -32,7 +32,7 @@ from mantid.simpleapi import mtd
 from mantid import logger
 import numpy
 
-from pdb import set_trace as tr
+#from pdb import set_trace as tr
 
 class DSFinterp1DFit(IFunction1D):
 
@@ -168,7 +168,6 @@ class DSFinterp1DFit(IFunction1D):
       else:
         self._channelgroup.InitializeInterpolator(windowlength=0)
     # channel group has been initialized, so just evaluate the interpolator
-    #tr()
     dsf = self._channelgroup(p['TargetParameter'])
     return p['Intensity']*dsf.intensities  # can we pass by reference?
 
