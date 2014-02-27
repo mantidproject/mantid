@@ -346,6 +346,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                     theta = [0, 0, 0]
                     if (self.tableMain.item(row, 0).text() != ''):
                         self.statusMain.showMessage("Processing row: " + str(row + 1))
+                        logger.debug("Processing row: " + str(row + 1))
                         for i in range(3):
                             r = str(self.tableMain.item(row, i * 5).text())
                             if (r != ''):
@@ -361,7 +362,6 @@ class ReflGui(refl_window.Ui_windowRefl):
                             loadedRun = None
                             if load_live_runs.is_live_run(runno[0]):
                                 if not self.accMethod:
-                                #reply = QtGui.QMessageBox.question(self.tableMain, 'Accumulation Method?',"The Data to be processed required that a Live Data service be started. What accumulation method would you like it to use?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
                                     self.accMethod = self.getAccMethod()
                                 loadedRun = load_live_runs.get_live_data(config['default.instrument'], Accumulation = self.accMethod)
                             else:
