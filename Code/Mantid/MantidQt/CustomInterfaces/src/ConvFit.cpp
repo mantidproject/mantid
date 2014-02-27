@@ -399,11 +399,17 @@ namespace IDA
    *  +-- Convolution
    *      |
    *      +-- Resolution
-   *      +-- Model (AT LEAST one of the following. Composite if more than one.)
+   *      +-- Model (AT LEAST one delta function or one/two lorentzians.)
    *          |
    *          +-- DeltaFunction (yes/no)
-   *          +-- Lorentzian 1 (yes/no)
-   *          +-- Lorentzian 2 (yes/no)
+	 *					+-- ProductFunction
+	 *							|
+   *							+-- Lorentzian 1 (yes/no)
+	 *							+-- Temperature Correction (yes/no)
+	 *					+-- ProductFunction
+	 *							|
+   *							+-- Lorentzian 2 (yes/no)
+	 *							+-- Temperature Correction (yes/no)
    *
    * @param tieCentres :: whether to tie centres of the two lorentzians.
    *
@@ -468,17 +474,9 @@ namespace IDA
     if ( useDeltaFunc )
     {
       func = Mantid::API::FunctionFactory::Instance().createFunction("DeltaFunction");
-      index = model->addFunction(func);
-
-      if ( !m_cfProp["DeltaHeight"]->subProperties().isEmpty() )
-      {
-        std::string parName = createParName(index, "Height");
-        model->tie(parName, m_cfProp["DeltaHeight"]->valueText().toStdString() );
-      }
-      else
-      {
-        func->setParameter("Height", m_cfProp["DeltaHeight"]->valueText().toDouble());
-      }
+			index = model->addFunction(func);
+			std::string parName = createParName(index);
+			populateFunction(func, model, m_cfProp["DeltaFunction"], parName, false);
     }
 
     // ------------------------------------------------------------
@@ -515,7 +513,7 @@ namespace IDA
       index = model->addFunction(product);
       prefix1 = createParName(index, subIndex);
 
-      populateFunction(func, product, m_cfProp["Lorentzian1"], prefix1, false);
+      populateFunction(func, model, m_cfProp["Lorentzian1"], prefix1, false);
     }
 
     // Add 2nd Lorentzian
@@ -535,7 +533,7 @@ namespace IDA
       index = model->addFunction(product);
       prefix2 = createParName(index, subIndex);
       
-      populateFunction(func, product, m_cfProp["Lorentzian2"], prefix2, false);
+      populateFunction(func, model, m_cfProp["Lorentzian2"], prefix2, false);
     }
 
     conv->addFunction(model);
@@ -609,7 +607,10 @@ namespace IDA
       {
         std::string propName = props[i]->propertyName().toStdString();
         double propValue = props[i]->valueText().toDouble();
-        func->setParameter(propName, propValue);
+				if ( propValue )
+				{
+					func->setParameter(propName, propValue);
+				}
       }
     }
   }
@@ -1041,7 +1042,8 @@ namespace IDA
     // Determine what the property is.
     QtProperty* prop = item->property();
 
-    QtProperty* fixedProp = m_stringManager->addProperty( prop->propertyName() );
+		std::string name = prop->propertyName();
+		QtProperty* fixedProp = m_stringManager->addProperty( QString(name.c_str()) );
     QtProperty* fprlbl = m_stringManager->addProperty("Fixed");
     fixedProp->addSubProperty(fprlbl);
     m_stringManager->setValue(fixedProp, prop->valueText());
