@@ -84,10 +84,10 @@ namespace Mantid
       bool isvalidSession();
 
       /// get the url of the given file id
-      void getdownloadURL(const long long& fileId,std::string& url);
+      const std::string getdownloadURL(const long long& fileId);
 
       /// get location of data file  or download method
-      void  getlocationString(const long long& fileid,std::string& filelocation);
+      const std::string getlocationString(const long long& fileid);
 
 
     private:

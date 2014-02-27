@@ -21,9 +21,9 @@ namespace Mantid
                                const TimeSeriesProperty<bool> &filterProp,
                                const bool transferOwnership)
       : TimeSeriesProperty<HeldType>(*seriesProp),
-        m_unfiltered(NULL), m_deleteUnfiltered(transferOwnership)
+        m_unfiltered(NULL)
     {
-      if(transferOwnership) m_unfiltered = seriesProp;
+      if (transferOwnership) m_unfiltered = seriesProp;
       else m_unfiltered = seriesProp->clone();
 
       // Now filter us with the filter
@@ -36,7 +36,7 @@ namespace Mantid
     template<typename HeldType>
     FilteredTimeSeriesProperty<HeldType>::~FilteredTimeSeriesProperty()
     {
-      if(m_deleteUnfiltered) delete m_unfiltered;
+      delete m_unfiltered;
     }
 
     /**

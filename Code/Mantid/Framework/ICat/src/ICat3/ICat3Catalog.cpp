@@ -80,22 +80,24 @@ namespace Mantid
       m_helper->listInvestigationTypes(invstTypes);
     }
 
-    /**This method method gets the file location strings from isis archive
-     *@param fileid :: id of the file
-     *@param filelocation :: location string  of the file
+    /**
+     * Gets the file location string from the archives.
+     * @param fileID :: The id of the file to search for.
+     * @return The location of the datafile stored on the archives.
      */
-    void ICat3Catalog::getFileLocation(const long long & fileid,std::string & filelocation)
+    const std::string ICat3Catalog::getFileLocation(const long long &fileID)
     {
-      m_helper->getlocationString(fileid,filelocation);
+      return m_helper->getlocationString(fileID);
     }
 
-    /**This method method gets the url for downloading the file from isis server
-     *@param fileid :: id of the file
-     *@param url :: url  of the file
+    /**
+     * Downloads a file from the given url if not downloaded from archive.
+     * @param fileID :: The id of the file to search for.
+     * @return A URL to download the datafile from.
      */
-    void ICat3Catalog::getDownloadURL(const long long & fileid,std::string& url)
+    const std::string ICat3Catalog::getDownloadURL(const long long &fileID)
     {
-      m_helper->getdownloadURL(fileid,url);
+      return m_helper->getdownloadURL(fileID);
     }
 
     /**
@@ -140,12 +142,6 @@ namespace Mantid
     void ICat3Catalog::keepAlive()
     {
     }
-    //keep alive in minutes
-    int ICat3Catalog::keepAliveinminutes()
-    {
-      return 0;
-    }
-
 
   }
 }
