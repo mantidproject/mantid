@@ -173,6 +173,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
 set( TEST_FILES CreateMDWorkspaceAlgDialogTest.h
                 EventNexusFileMementoTest.h
                 WorkspaceMementoTest.h
+                MuonAnalysisHelperTest.h
                 WorkspaceInADSTest.h
                 RawFileMementoTest.h
                 IO_MuonGroupingTest.h

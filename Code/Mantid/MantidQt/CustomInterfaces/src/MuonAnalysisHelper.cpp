@@ -322,6 +322,71 @@ void WidgetAutoSaver::endGroup()
   m_settings.endGroup();
 }
 
+/**
+ * Get a run label for the workspace.
+ * E.g. for MUSR data of run 15189 it will look like MUSR00015189.
+ * @param ws :: Workspace to get label for.
+ * @return
+ */
+std::string getRunLabel(const Workspace_sptr& ws)
+{
+  MatrixWorkspace_const_sptr firstPrd = firstPeriod(ws);
+
+  int runNumber = firstPrd->getRunNumber();
+  std::string instrName = firstPrd->getInstrument()->getName();
+
+  std::ostringstream label;
+  label << instrName;
+  label << std::setw(8) << std::setfill('0') << std::right << runNumber;
+  return label.str();
+}
+
+/**
+ * Get a run label for a list of workspaces.
+ * E.g. for MUSR data of runs 15189, 15190, 15191 it will look like MUSR00015189-91.
+ * @param wsList
+ * @return
+ */
+std::string getRunLabel(const std::vector<Workspace_sptr>& wsList)
+{
+  if (wsList.empty())
+    throw std::invalid_argument("Unable to run on an empty list");
+
+  std::vector<int> runNumbers;
+  runNumbers.reserve(wsList.size());
+
+  for (auto it = wsList.begin(); it != wsList.end(); ++it)
+  {
+    runNumbers.push_back( firstPeriod(*it)->getRunNumber() );
+  }
+
+  // Sort run numbers, in case of non-sequential list of runs
+  std::sort(runNumbers.begin(), runNumbers.end());
+
+  // Get string representation of the first and last run numbers
+  auto firstRun = boost::lexical_cast<std::string>(runNumbers.front());
+  auto lastRun = boost::lexical_cast<std::string>(runNumbers.back());
+
+  // Remove the common part of the first and last run, so we get e.g. "12345-56" instead of "12345-12356"
+  for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i)
+  {
+    if (firstRun[i] != lastRun[i])
+    {
+      lastRun.erase(0,i);
+      break;
+    }
+  }
+
+  // Use the first workspace to get instrument from
+  std::string instrName = firstPeriod(wsList[0])->getInstrument()->getName();
+
+  std::ostringstream label;
+  label << instrName;
+  label << std::setw(8) << std::setfill('0') << std::right << firstRun;
+  label << '-' << lastRun;
+  return label.str();
+}
+
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces
 } // namespace Mantid

@@ -30,6 +30,12 @@ DLLExport size_t numPeriods(Workspace_sptr ws);
 /// Print various information about the run
 DLLExport void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out);
 
+/// Get a run label for the workspace
+DLLExport std::string getRunLabel(const Workspace_sptr& ws);
+
+/// Get a run label for a list of workspaces
+DLLExport std::string getRunLabel(const std::vector<Workspace_sptr>& wsList);
+
 /**
  * A class which deals with auto-saving the widget values. Widgets are registered and then on any
  * change, their value is stored using QSettings.
