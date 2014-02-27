@@ -153,6 +153,7 @@ set ( SRC_FILES
 	src/Plus.cpp
 	src/PointByPointVCorrection.cpp
 	src/PoissonErrors.cpp
+	src/PolarisationCorrection.cpp
 	src/PolynomialCorrection.cpp
 	src/Power.cpp
 	src/PowerLawCorrection.cpp
@@ -379,6 +380,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Plus.h
 	inc/MantidAlgorithms/PointByPointVCorrection.h
 	inc/MantidAlgorithms/PoissonErrors.h
+	inc/MantidAlgorithms/PolarisationCorrection.h
 	inc/MantidAlgorithms/PolynomialCorrection.h
 	inc/MantidAlgorithms/Power.h
 	inc/MantidAlgorithms/PowerLawCorrection.h
@@ -498,10 +500,10 @@ set ( TEST_FILES
 	ConjoinWorkspacesTest.h
 	ConvertAxisByFormulaTest.h
 	ConvertFromDistributionTest.h
+	ConvertMDHistoToMatrixWorkspaceTest.h
 	ConvertSpectrumAxis2Test.h
 	ConvertSpectrumAxisTest.h
 	ConvertTableToMatrixWorkspaceTest.h
-	ConvertMDHistoToMatrixWorkspaceTest.h
 	ConvertToDistributionTest.h
 	ConvertToEventWorkspaceTest.h
 	ConvertToHistogramTest.h
@@ -602,6 +604,7 @@ set ( TEST_FILES
 	PlusTest.h
 	PointByPointVCorrectionTest.h
 	PoissonErrorsTest.h
+	PolarisationCorrectionTest.h
 	PolynomialCorrectionTest.h
 	PowerLawCorrectionTest.h
 	PowerTest.h
