@@ -35,9 +35,7 @@ set ( TEST_PY_FILES
   SuggestTibHYSPECTest.py
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
-  #ExportVulcanSampleLogsTest.py
   ExportSampleLogsToCSVFileTest.py
-  #FixGSASInstrumentFileTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
