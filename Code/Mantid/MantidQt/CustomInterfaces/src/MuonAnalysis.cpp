@@ -76,6 +76,8 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 
 // Static constants
 const QString MuonAnalysis::NOT_AVAILABLE("N/A");
+const double MuonAnalysis::FIRST_GOOD_BIN_DEFAULT(0.3);
+
 //----------------------
 // Public member functions
 //----------------------
@@ -1766,14 +1768,29 @@ void MuonAnalysis::guessAlphaClicked()
     if ( m_uiForm.homePeriodBox2->isEnabled() )
       inputWS += "_" + m_uiForm.homePeriodBox1->currentText();
 
-    Mantid::API::IAlgorithm_sptr alphaAlg = Mantid::API::AlgorithmManager::Instance().create("AlphaCalc");
-    alphaAlg->setPropertyValue("InputWorkspace", inputWS.toStdString());
-    alphaAlg->setPropertyValue("ForwardSpectra", idsF->text().toStdString());
-    alphaAlg->setPropertyValue("BackwardSpectra", idsB->text().toStdString());
-    alphaAlg->setPropertyValue("FirstGoodValue", firstGoodBin().toStdString());
-    alphaAlg->execute();  
+    double alphaValue;
 
-    const QString alpha(alphaAlg->getPropertyValue("Alpha").c_str());
+    try
+    {
+      IAlgorithm_sptr alphaAlg = AlgorithmManager::Instance().create("AlphaCalc");
+      alphaAlg->setPropertyValue("InputWorkspace", inputWS.toStdString());
+      alphaAlg->setPropertyValue("ForwardSpectra", idsF->text().toStdString());
+      alphaAlg->setPropertyValue("BackwardSpectra", idsB->text().toStdString());
+      alphaAlg->setProperty("FirstGoodValue", firstGoodBin());
+      alphaAlg->execute();
+
+      alphaValue = alphaAlg->getProperty("Alpha");
+    }
+    catch(std::exception& e)
+    {
+      g_log.error() << "Error when running AlphaCalc: " << e.what() << "\n";
+      QMessageBox::critical(this, "Guess alpha error",
+                            "Unable to guess alpha value. AlphaCalc failed. See log for details.");
+      m_updating = false;
+      return;
+    }
+
+    const QString alpha = QString::number(alphaValue);
 
     QComboBox* qwAlpha = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,3));
     if (qwAlpha)
@@ -2362,50 +2379,59 @@ double MuonAnalysis::timeZero()
   return timeZero;
 }
 
- /**
- * first good bin returend in ms
- * returned as the absolute value of first-good-bin minus time zero
+/**
+ * Return first good bin as set on the interface.
  */
-QString MuonAnalysis::firstGoodBin()
+double MuonAnalysis::firstGoodBin() const
 {
-  return m_uiForm.firstGoodBinFront->text();
+  QString text = m_uiForm.firstGoodBinFront->text();
+
+  bool ok;
+  double value = text.toDouble(&ok);
+
+  if (!ok)
+  {
+    g_log.warning("First Good Data is empty or invalid. Reset to default value.");
+    m_uiForm.firstGoodBinFront->setText(QString::number(FIRST_GOOD_BIN_DEFAULT));
+    value = FIRST_GOOD_BIN_DEFAULT;
+  }
+
+  return value;
 }
 
  /**
  * According to Plot Options what time should we plot from in ms
  * @return time to plot from in ms
  */
-double MuonAnalysis::plotFromTime()
+double MuonAnalysis::plotFromTime() const
 {
-  QLineEdit* startTimeBox;
-  double defaultValue;
+  QString startTimeType = m_uiForm.timeComboBox->currentText();
 
-  // If is first good bin used - we use a different box
-  if(m_uiForm.timeComboBox->currentIndex() == 0)
+  if (startTimeType == "Start at First Good Data")
   {
-    startTimeBox = m_uiForm.firstGoodBinFront;
-    defaultValue = 0.3;
+    return firstGoodBin();
   }
-  else
+  else if (startTimeType == "Start at Time Zero")
   {
-    startTimeBox = m_uiForm.timeAxisStartAtInput;
-    defaultValue = 0.0;
+    return 0;
   }
-
-  bool ok;
-  double returnValue = startTimeBox->text().toDouble(&ok);
-
-  if(!ok)
+  else if (startTimeType == "Custom Value")
   {
-    returnValue = defaultValue;
+    bool ok;
+    double customValue = m_uiForm.timeAxisStartAtInput->text().toDouble(&ok);
 
-    startTimeBox->setText(QString::number(defaultValue));
+    if (!ok)
+    {
+      g_log.warning("Custom start time value is empty or invalid. Reset to zero.");
+      customValue = 0;
+      m_uiForm.timeAxisStartAtInput->setText("0.0");
+    }
 
-    QMessageBox::warning(this, "Mantid - MuonAnalysis", 
-      QString("Start time number not recognized. Reset to default of %1").arg(defaultValue));
+    return customValue;
   }
-  
-  return returnValue;
+
+  // Just in case misspelled type or added a new one
+  throw std::runtime_error("Unknown start time type.");
 }
 
 
@@ -2413,19 +2439,19 @@ double MuonAnalysis::plotFromTime()
  * According to Plot Options what time should we plot to in ms
  * @return time to plot to in ms
  */
-double MuonAnalysis::plotToTime()
+double MuonAnalysis::plotToTime() const
 {
-  double retVal;
-  try
+  bool ok;
+  double value = m_uiForm.timeAxisFinishAtInput->text().toDouble(&ok);
+
+  if (!ok)
   {
-    retVal = boost::lexical_cast<double>(m_uiForm.timeAxisFinishAtInput->text().toStdString());
+    g_log.warning("Custom finish time value is empty or invalid. Reset to default.");
+    value = plotFromTime() + 1.0;
+    m_uiForm.timeAxisFinishAtInput->setText(QString::number(value));
   }
-  catch (...)
-  {
-    retVal = 1.0;
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Finish at (ms)' input box. Plot to time=1.0.");
-  }
-  return retVal;
+
+  return value;
 }
 
 
@@ -2562,7 +2588,7 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
 
   // Load values saved using saveWidgetValue()
   loadWidgetValue(m_uiForm.timeZeroFront, 0.2);
-  loadWidgetValue(m_uiForm.firstGoodBinFront, 0.3);
+  loadWidgetValue(m_uiForm.firstGoodBinFront, FIRST_GOOD_BIN_DEFAULT);
   loadWidgetValue(m_uiForm.timeZeroAuto, Qt::Checked);
   loadWidgetValue(m_uiForm.firstGoodDataAuto, Qt::Checked);
 }
