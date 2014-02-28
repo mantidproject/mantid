@@ -612,13 +612,15 @@ class ISISInstrument(instrument.Instrument):
         pass
 
     def changeCalibration(self, ws_name):
-        assert(isinstance(self._newCalibrationWS, Workspace))
-        sanslog.notice("Applying new calibration for the detectors from " + str(self._newCalibrationWS.name()))
-        CopyInstrumentParameters(self._newCalibrationWS, ws_name)
+        calib = mtd[self._newCalibrationWS]
+        sanslog.notice("Applying new calibration for the detectors from " + str(calib.name()))
+        CopyInstrumentParameters(calib, ws_name)
 
     def setCalibrationWorkspace(self, ws_reference):
         assert(isinstance(ws_reference, Workspace))
-        self._newCalibrationWS = ws_reference
+        # we do deep copy of singleton - to be removed in 8470
+        # this forces us to have 'copyable' objects. 
+        self._newCalibrationWS = str(ws_reference)
               
 
 
