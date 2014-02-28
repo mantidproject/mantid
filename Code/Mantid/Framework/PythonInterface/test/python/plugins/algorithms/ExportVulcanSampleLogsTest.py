@@ -321,6 +321,29 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
 
         return wksp
         
+    def Untest_exportVulcanFile(self):
+        """ Test to export logs without header file
+        File 2: VULCAN_41739_event
+        """
+        from mantid.simpleapi import Load
+
+        # Generate the matrix workspace with some logs
+        Load(Filename="/home/wzz/Projects/MantidProjects/Mantid2/Code/debug/VULCAN_41703_event.nxs", 
+                OutputWorkspace="VULCAN_41703",
+                MetaDataOnly = True,
+                LoadLog = True)
+
+        # Test algorithm
+        alg_test = run_algorithm("ExportVulcanSampleLogs", 
+            InputWorkspace = "VULCAN_41703",
+            OutputFilename = "/tmp/furnace41703.txt",
+            SampleLogNames = ["furnace.temp1", "furnace.temp2", "furnace.power"],
+            WriteHeaderFile = False)
+
+        # Validate
+        self.assertTrue(alg_test.isExecuted())
+
+        return
 
 if __name__ == '__main__':
     unittest.main()

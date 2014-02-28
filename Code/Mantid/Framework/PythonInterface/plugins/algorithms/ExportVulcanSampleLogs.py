@@ -257,6 +257,10 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
 		raise NotImplementedError("Logic error.")
 	# ENDWHILE
 
+        # Remove last "\n"
+        if wbuf[-1] == "\n":     
+            wbuf = wbuf[:-1]
+
 	try:
     	    ofile = open(self._outputfilename, "w")
     	    ofile.write(wbuf)
