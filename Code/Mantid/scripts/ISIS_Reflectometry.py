@@ -26,7 +26,7 @@ class ConfirmQMainWindow(QtGui.QMainWindow):
         self.gui.buttonProcess.setFocus()
         if self.modFlag:
             event.ignore()
-            ret, saved = savecheck()
+            ret, saved = self.savecheck()
             if ret == QtGui.QMessageBox.Save:
                 if saved:
                     event.accept()
