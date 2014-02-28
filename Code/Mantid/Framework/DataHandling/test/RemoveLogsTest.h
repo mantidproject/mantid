@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/RemoveLogs.h"
 #include "MantidDataHandling/LoadLog.h"
+#include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -172,6 +173,39 @@ public:
     do_test_SNSTextFile("Temp1,Temp2,Temp3,Yadda", "C,K,F,Fortnights", false, false);
   }
 
+  void test_KeepLogs()
+  {
+      // Create an empty workspace and put it in the AnalysisDataService
+      Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+      outputSpace = "PartiallyRemoveLogs";
+      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));
+
+      LoadNexusLogs lnl;
+      if ( !lnl.isInitialized() ) lnl.initialize();
+
+      TS_ASSERT_THROWS_NOTHING(lnl.setPropertyValue("Filename", "CNCS_7860") );
+      TS_ASSERT_THROWS_NOTHING(lnl.setPropertyValue("Workspace",outputSpace) );
+      TS_ASSERT_THROWS_NOTHING(lnl.execute());
+      TS_ASSERT( lnl.isExecuted() );
+
+      // Get back the saved workspace
+      MatrixWorkspace_sptr output;
+      TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
+
+      if ( !remover.isInitialized() ) remover.initialize();
+      TS_ASSERT_THROWS_NOTHING(remover.setPropertyValue("Workspace", outputSpace));
+      TS_ASSERT_THROWS_NOTHING(remover.setPropertyValue("KeepLogs", "Speed5, gd_prtn_chrg"));
+      TS_ASSERT_THROWS_NOTHING(remover.execute());
+
+
+      TS_ASSERT( remover.isExecuted() );
+
+      // log should have been removed
+      TS_ASSERT_THROWS( output->run().getLogData("Speed4"), std::runtime_error);
+      TS_ASSERT_THROWS_NOTHING( output->run().getLogData("Speed5"));
+      TS_ASSERT_THROWS_NOTHING( output->run().getLogData("gd_prtn_chrg"));
+      AnalysisDataService::Instance().remove(outputSpace);
+  }
 
 private:
   LoadLog loader;
