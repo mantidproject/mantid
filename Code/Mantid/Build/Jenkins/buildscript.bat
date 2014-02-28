@@ -12,9 +12,10 @@
 :: Test what architecture we are building for
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if "%NODE_LABELS%"=="%NODE_LABELS:win32=%" (
-    set GENERATOR=" Win64"
+    set GENERATOR="Visual Studio 11 Win64"
 ) ELSE (
     set WIN32=win32
+    set GENERATOR="Visual Studio 11"
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -35,7 +36,7 @@ cd %WORKSPACE%\build
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G "Visual Studio 11"%GENERATOR% -D CONSOLE=OFF -D ENABLE_CPACK=ON -D USE_PRECOMPILED_HEADERS=ON ..\Code\Mantid
+"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G %GENERATOR% -D CONSOLE=OFF -D ENABLE_CPACK=ON -D USE_PRECOMPILED_HEADERS=ON ..\Code\Mantid
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
