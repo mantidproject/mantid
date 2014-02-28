@@ -12,9 +12,10 @@
 :: Test what architecture we are building for
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if "%NODE_LABELS%"=="%NODE_LABELS:win32=%" (
+    set ARCH=win64
     set GENERATOR="Visual Studio 11 Win64"
 ) ELSE (
-    set WIN32=win32
+    set ARCH=win32
     set GENERATOR="Visual Studio 11"
 )
 
@@ -22,10 +23,10 @@ if "%NODE_LABELS%"=="%NODE_LABELS:win32=%" (
 :: Get or update the third party dependencies
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 cd %WORKSPACE%\Code
-call fetch_Third_Party %win32%
+call fetch_Third_Party %ARCH%
 cd %WORKSPACE%
 
-set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib\win64\Python27;%PATH%
+set PATH=%WORKSPACE%\Code\Third_Party\lib\%ARCH%;%WORKSPACE%\Code\Third_Party\lib\%ARCH%\Python27;%PATH%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the build directory if it doesn't exist
