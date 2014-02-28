@@ -12,9 +12,9 @@
 :: Test what architecture we are building for
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if "%NODE_LABELS%"=="%NODE_LABELS:win32=%" (
-    set WIN32=win32
-) ELSE (
     set GENERATOR=Win64
+) ELSE (
+    set WIN32=win32
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
