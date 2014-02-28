@@ -787,8 +787,9 @@ void MuonAnalysisResultTableTab::createTable()
       else
         throw std::runtime_error("Couldn't find appropriate column type for value with type " + typeName.toStdString());
         
-      Mantid::API::Column_sptr newColumn = table->addColumn(columnTypeName, log.toStdString());
+      Column_sptr newColumn = table->addColumn(columnTypeName, log.toStdString());
       newColumn->setPlotType(columnPlotType);
+      newColumn->setReadOnly(false);
     }
 
     // Get param information
@@ -810,10 +811,14 @@ void MuonAnalysisResultTableTab::createTable()
         paramRow >> key >> value >> error;
         if (i == 0)
         {
-          table->addColumn("double", key);
-          table->getColumn(table->columnCount()-1)->setPlotType(2);
-          table->addColumn("double", key + "Error");
-          table->getColumn(table->columnCount()-1)->setPlotType(5);
+          Column_sptr newValCol = table->addColumn("double", key);
+          newValCol->setPlotType(2);
+          newValCol->setReadOnly(false);
+
+          Column_sptr newErrorCol = table->addColumn("double", key + "Error");
+          newErrorCol->setPlotType(5);
+          newErrorCol->setReadOnly(false);
+
           paramsToDisplay.append(QString::fromStdString(key));
           paramsToDisplay.append(QString::fromStdString(key) + "Error");
         }
