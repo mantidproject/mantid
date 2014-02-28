@@ -48,7 +48,6 @@ namespace Mantid
      */
     void  CICatHelper::saveSearchRessults(const ns1__searchByAdvancedPaginationResponse& response,API::ITableWorkspace_sptr& outputws)
     {
-      //API::ITableWorkspace_sptr outputws =createTableWorkspace();
       if (outputws->getColumnNames().empty())
       {
         outputws->addColumn("long64","InvestigationId");
@@ -94,156 +93,6 @@ namespace Mantid
       {
         throw std::runtime_error("Error when saving  the ICat Search Results data to Workspace");
       }
-    }
-
-    /** This method saves investigations  to a table workspace
-     *  @param investigation :: pointer to a single investigation data
-     *  @param t :: reference to a row in a table workspace
-     */
-    void CICatHelper::saveInvestigatorsNameandSample(ns1__investigation* investigation,API::TableRow& t)
-    {
-
-      try
-      {
-
-        //   abstract
-        savetoTableWorkspace(investigation->invAbstract,t);
-
-        std::vector<ns1__investigator*>investigators;
-        investigators.assign(investigation->investigatorCollection.begin(),investigation->investigatorCollection.end());
-
-        std::string fullname; std::string* facilityUser=NULL;
-        //for loop for getting invetigator's first and last name
-        std::vector<ns1__investigator*>::const_iterator invstrItr;
-        for(invstrItr=investigators.begin();invstrItr!=investigators.end();++invstrItr)
-        {
-          std::string firstname;std::string lastname;std::string name;
-          if((*invstrItr)->ns1__facilityUser_)
-          {
-
-            if((*invstrItr)->ns1__facilityUser_->firstName)
-            {
-              firstname = *(*invstrItr)->ns1__facilityUser_->firstName;
-            }
-            if((*invstrItr)->ns1__facilityUser_->lastName)
-            {
-              lastname = *(*invstrItr)->ns1__facilityUser_->lastName;
-            }
-            name = firstname+" "+ lastname;
-          }
-          if(!fullname.empty())
-          {
-            fullname+=",";
-          }
-          fullname+=name;
-        }//end of for loop for investigator's name.
-
-        if(!fullname.empty())
-        {
-          facilityUser = new std::string;
-          facilityUser->assign(fullname);
-        }
-
-        //invetigator name
-        savetoTableWorkspace(facilityUser,t);
-
-        std::vector<ns1__sample*>samples;
-        std::string *samplenames =NULL;
-        samples.assign(investigation->sampleCollection.begin(),investigation->sampleCollection.end());
-        std::string sNames;
-        //for loop for samples name.
-        std::vector<ns1__sample*>::const_iterator sItr;
-        for(sItr=samples.begin();sItr!=samples.end();++sItr)
-        {
-          std::string sName;
-          if((*sItr)->name)
-          {
-            sName=*((*sItr)->name);
-          }
-          if(!sNames.empty())
-          {
-            sNames+=",";
-          }
-          sNames+=sName;
-        }
-        if(!sNames.empty())
-        {
-          samplenames = new std::string;
-          samplenames->assign(sNames);
-        }
-        savetoTableWorkspace(samplenames,t);
-      }
-      catch(std::runtime_error& )
-      {
-        throw std::runtime_error("Error when saving  the ICat Search Results data to Workspace");
-      }
-    }
-
-    /** This method loops through the response return_vector and saves the datafile details to a table workspace
-     * @param response :: const reference to response object
-     * @returns shared pointer to table workspace which stores the data
-     */
-    API::ITableWorkspace_sptr CICatHelper::saveFileSearchResponse(const ns1__searchByAdvancedResponse& response)
-    {
-      //create table workspace
-      API::ITableWorkspace_sptr outputws =createTableWorkspace();
-      if (outputws->getColumnNames().empty())
-      {
-        outputws->addColumn("str","Name");
-        outputws->addColumn("str","Location");
-        outputws->addColumn("str","Create Time");
-        outputws->addColumn("long64","Id");
-      }
-      std::vector<ns1__investigation*> investVec;
-      investVec.assign(response.return_.begin(),response.return_.end());
-
-      try
-      {
-        std::vector<ns1__investigation*>::const_iterator inv_citr;
-        for (inv_citr=investVec.begin();inv_citr!=investVec.end();++inv_citr)
-        {
-          std::vector<ns1__dataset*> datasetVec;
-          datasetVec.assign((*inv_citr)->datasetCollection.begin(),(*inv_citr)->datasetCollection.end());
-
-          std::vector<ns1__dataset*>::const_iterator dataset_citr;
-          for(dataset_citr=datasetVec.begin();dataset_citr!=datasetVec.end();++dataset_citr)
-          {
-            std::vector<ns1__datafile * >datafileVec;
-            datafileVec.assign((*dataset_citr)->datafileCollection.begin(),(*dataset_citr)->datafileCollection.end());
-
-            std::vector<ns1__datafile * >::const_iterator datafile_citr;
-            for(datafile_citr=datafileVec.begin();datafile_citr!=datafileVec.end();++datafile_citr)
-            {
-
-              API::TableRow t = outputws->appendRow();
-              savetoTableWorkspace((*datafile_citr)->name,t);
-              savetoTableWorkspace((*datafile_citr)->location,t);
-
-              if((*datafile_citr)->datafileCreateTime!=NULL)
-              {
-                time_t  crtime=*(*datafile_citr)->datafileCreateTime;
-                char temp [25];
-                strftime (temp,25,"%Y-%b-%d %H:%M:%S",localtime(&crtime));
-                std::string ftime(temp);
-                std::string *creationtime=new std::string ;
-                creationtime->assign(ftime);
-                savetoTableWorkspace(creationtime,t);
-                savetoTableWorkspace((*datafile_citr)->id,t);
-              }
-
-            }//end of for loop for data files iteration
-
-          }//end of for loop for datasets iteration
-
-
-        }// end of for loop investigations iteration.
-      }
-      catch(std::runtime_error& )
-      {
-        throw;
-      }
-
-      return outputws;
     }
 
     /**
@@ -347,26 +196,6 @@ namespace Mantid
         throw ;
       }
 
-    }
-
-    /**This checks the datafile boolean  selected
-     * @param fileName :: pointer to file name
-     * @return bool - returns true if it's a raw file or nexus file
-     */
-
-    bool CICatHelper::isDataFile(const std::string* fileName)
-    {
-      if(!fileName)
-      {
-        return false;
-      }
-      std::basic_string <char>::size_type dotIndex;
-      //find the position of '.' in raw/nexus file name
-      dotIndex = (*fileName).find_last_of (".");
-      std::string fextn=(*fileName).substr(dotIndex+1,(*fileName).size()-dotIndex);
-      std::transform(fextn.begin(),fextn.end(),fextn.begin(),tolower);
-
-      return((!fextn.compare("raw")|| !fextn.compare("nxs")) ? true :  false);
     }
 
     /**This method calls ICat API getInvestigationIncludes and returns datasets details for a given investigation Id
@@ -508,30 +337,6 @@ namespace Mantid
         CErrorHandling::throwErrorMessages(icat);
       }
     }
-
-
-    /** This method creates table workspace
-     * @returns the table workspace created
-     */
-    API::ITableWorkspace_sptr CICatHelper::createTableWorkspace()
-    {
-      //create table workspace
-      API::ITableWorkspace_sptr outputws ;
-      try
-      {
-        outputws=WorkspaceFactory::Instance().createTable("TableWorkspace");
-      }
-      catch(Mantid::Kernel::Exception::NotFoundError& )
-      {
-        throw std::runtime_error("Error when saving  the ICat Search Results data to Workspace");
-      }
-      catch(std::runtime_error &)
-      {
-        throw std::runtime_error("Error when saving  the ICat Search Results data to Workspace");
-      }
-      return outputws;
-    }
-
 
     /** 
      *This method calls ICat api logout and disconnects from ICat DB

@@ -86,9 +86,6 @@ namespace Mantid
 
     private:
 
-      ///This method saves the file search response to table workspace
-      API::ITableWorkspace_sptr saveFileSearchResponse(const ICat3::ns1__searchByAdvancedResponse& response);
-
       /// This method saves the response data of search by run number to table workspace
       void saveSearchRessults(const ICat3::ns1__searchByAdvancedPaginationResponse& response,API::ITableWorkspace_sptr& outputws);
 
@@ -100,20 +97,11 @@ namespace Mantid
       /// This method saves Datasets to a table workspace
       void  saveDataSets(const ICat3::ns1__getInvestigationIncludesResponse& response,API::ITableWorkspace_sptr& outputws);
 
-      /// This method creates table workspace
-      API::ITableWorkspace_sptr createTableWorkspace();
-
-      /// This method checks the given file name is raw file or nexus file
-      bool isDataFile(const std::string* fileName);
-
       /// This method saves the myinvestigations data to a table workspace
       void saveMyInvestigations(const ICat3::ns1__getMyInvestigationsIncludesResponse& response,API::ITableWorkspace_sptr& outputws);
 
       ///save investigations
       void saveInvestigations(const std::vector<ICat3::ns1__investigation*>& investigations,API::ITableWorkspace_sptr& outputws);
-
-      ///saves
-      void saveInvestigatorsNameandSample(ICat3::ns1__investigation* investigation,API::TableRow& t);
 
       /// Builds search query based on user input and stores query in related ICAT class.
       ICat3::ns1__advancedSearchDetails* buildSearchQuery(const CatalogSearchParam& inputs);
