@@ -36,7 +36,7 @@ set ( TEST_PY_FILES
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
   #ExportVulcanSampleLogsTest.py
-  ExportSampleLogsToCSVFile.py
+  ExportSampleLogsToCSVFileTest.py
   #FixGSASInstrumentFileTest.py
 )
 
