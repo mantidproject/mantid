@@ -35,7 +35,7 @@ cd %WORKSPACE%\build
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-cmake -G "Visual Studio 11 "%GENERATOR% -D CONSOLE=OFF -D ENABLE_CPACK=ON -D USE_PRECOMPILED_HEADERS=ON ..\Code\Mantid
+"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G "Visual Studio 11 "%GENERATOR% -D CONSOLE=OFF -D ENABLE_CPACK=ON -D USE_PRECOMPILED_HEADERS=ON ..\Code\Mantid
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
@@ -46,7 +46,7 @@ if ERRORLEVEL 1 EXIT /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the tests
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-ctest -C Release -j%BUILD_THREADS% --output-on-failure -R KernelTest_
+"C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C Release -j%BUILD_THREADS% --output-on-failure -R KernelTest_
 ::ctest -C Release -j%BUILD_THREADS% --timeout 30 --output-on-failure -E MantidPlot
 :: Run GUI tests serially
 ::ctest -C Release --timeout 30 --output-on-failure -R MantidPlot
