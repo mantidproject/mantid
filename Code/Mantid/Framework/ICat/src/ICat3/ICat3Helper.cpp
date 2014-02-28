@@ -4,8 +4,8 @@
     GCC_DIAG_OFF(literal-suffix)
 #endif
 #include "MantidICat/ICat3/ICat3Helper.h"
-#include "MantidICat/Session.h"
 #include "MantidICat/ICat3/ICat3ErrorHandling.h"
+#include "MantidKernel/Logger.h"
 #include <iomanip>
 #include <time.h>
 #include <boost/lexical_cast.hpp>
@@ -17,6 +17,8 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
     using namespace ICat3;
+
+    CICatHelper::CICatHelper() : g_log(Kernel::Logger::get("CICatHelper")), m_session() {}
 
     /* This method calls ICat API searchbydavanced and do the basic run search
      * @param icat :: Proxy object for ICat
@@ -252,67 +254,36 @@ namespace Mantid
     }
 
     /**
-     * This method sets the request parameters for the investigations includes
-     * @param invstId :: investigation id
-     * @param include :: enum parameter to retrieve dat from DB
-     * @param request :: request object
-     */
-    void CICatHelper::setReqParamforInvestigationIncludes(long long invstId,ns1__investigationInclude include,ns1__getInvestigationIncludes& request)
-    {
-      //get the sessionid which is cached in session class during login
-      *request.sessionId=Session::Instance().getSessionId();;
-      *request.investigationInclude=include;
-      *request.investigationId=invstId;
-
-    }
-    /**
      * This method calls ICat API getInvestigationIncludes and returns investigation details for a given investigation Id
      * @param invstId :: investigation id
      * @param include :: enum parameter for selecting the response data from the db.
      * @param responsews_sptr :: table workspace to save the response data
      * @returns zero if success otherwise error code
      */
-    int CICatHelper::getDataFiles(long long invstId,ns1__investigationInclude include,
+    void CICatHelper::getDataFiles(long long invstId,ns1__investigationInclude include,
         API::ITableWorkspace_sptr& responsews_sptr)
     {
-      //ICAt proxy object
       ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       ns1__getInvestigationIncludes request;
-      //get the sessionid which is cached in session class during login
-      boost::shared_ptr<std::string >sessionId_sptr(new std::string);
-      request.sessionId=sessionId_sptr.get();
-
-      // enum include
-      boost::shared_ptr<ns1__investigationInclude>invstInculde_sptr(new ns1__investigationInclude);
-      request.investigationInclude=invstInculde_sptr.get();
-
-      request.investigationId=new LONG64;
-      setReqParamforInvestigationIncludes(invstId,include,request);
-
       ns1__getInvestigationIncludesResponse response;
-      int ret_advsearch=icat.getInvestigationIncludes(&request,&response);
-      if(ret_advsearch!=0)
-      {
-        CErrorHandling::throwErrorMessages(icat);
-      }
-      std::stringstream stream;
-      stream<<invstId;
-      if(!response.return_)
-      {
-        g_log.information()<<"No data files exists in the ICat database for the selected investigation"<<std::endl;
-        return -1;
-      }
-      try
+
+      std::string sessionID  = m_session->getSessionId();
+      request.sessionId      = &sessionID;
+      LONG64 investigationID = invstId;
+      request.investigationId= &investigationID;
+      request.investigationInclude = &include;
+
+      int result = icat.getInvestigationIncludes(&request,&response);
+      if(result == 0)
       {
         saveInvestigationIncludesResponse(response,responsews_sptr);
       }
-      catch(std::runtime_error &)
+      else
       {
-        throw std::runtime_error("Error when selecting the investigation data with inestigation id "+ stream.str());
+        CErrorHandling::throwErrorMessages(icat);
       }
-      return ret_advsearch;
     }
 
     /**
@@ -409,52 +380,30 @@ namespace Mantid
      * @param responsews_sptr :: table workspace to save the response data
      * @returns an integer zero if success if not an error number.
      */
-    int CICatHelper::doDataSetsSearch(long long invstId,ns1__investigationInclude include,
+    void CICatHelper::doDataSetsSearch(long long invstId,ns1__investigationInclude include,
         API::ITableWorkspace_sptr& responsews_sptr)
     {
-      //ICAt proxy object
       ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
-      // request object
       ns1__getInvestigationIncludes request;
-      //get the sessionid which is cached in session class during login
-      boost::shared_ptr<std::string >sessionId_sptr(new std::string);
-      request.sessionId=sessionId_sptr.get();
-
-      // enum include
-      boost::shared_ptr<ns1__investigationInclude>invstInculde_sptr(new ns1__investigationInclude);
-      request.investigationInclude=invstInculde_sptr.get();
-
-      request.investigationId=new LONG64;
-      setReqParamforInvestigationIncludes(invstId,include,request);
-
-      //response object
       ns1__getInvestigationIncludesResponse response;
-      // Calling Icat api
-      int ret_advsearch=icat.getInvestigationIncludes(&request,&response);
-      if(ret_advsearch!=0)
-      {
-        CErrorHandling::throwErrorMessages(icat);
-      }
-      std::stringstream stream;
-      stream<<invstId;
-      if(!(response.return_)|| (response.return_)->datasetCollection.empty())
-      {
-        g_log.information()<<"No datasets  exists in the ICat database for the inevstigation id "+ stream.str()<<std::endl;
-        return -1 ;
-      }
-      try
+
+      std::string sessionID        = m_session->getSessionId();
+      request.sessionId            = &sessionID;
+      request.investigationInclude = &include;
+      LONG64 investigationID  = invstId;
+      request.investigationId = &investigationID;
+
+      int result = icat.getInvestigationIncludes(&request,&response);
+      if(result == 0)
       {
         saveDataSets(response,responsews_sptr);
       }
-      catch(std::runtime_error &)
+      else
       {
-
-        throw std::runtime_error("Error when loading the datasets for the investigation id "+ stream.str());
+        CErrorHandling::throwErrorMessages(icat);
       }
-
-      return ret_advsearch;
     }
 
     /** This method loops through the response return_vector and saves the datasets details to a table workspace
@@ -504,95 +453,64 @@ namespace Mantid
       //return outputws;
     }
 
-    /**This method calls ICat api listruments and returns the list of instruments a table workspace
-     *@param instruments ::  list of instruments
+    /**
+     * Updates the list of instruments.
+     * @param instruments :: instruments list
      */
     void CICatHelper::listInstruments(std::vector<std::string>& instruments)
     {
-      //ICAt proxy object
       ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       ns1__listInstruments request;
-      //get the sessionid which is cached in session class during login
-      boost::shared_ptr<std::string >sessionId_sptr(new std::string);
-      request.sessionId=sessionId_sptr.get();
-      //setting the request parameters
-      setReqparamforlistInstruments(request);
-
-      // response object
       ns1__listInstrumentsResponse response;
 
-      int ret=icat.listInstruments(&request,&response);
-      if(ret!=0)
+      std::string sessionID = m_session->getSessionId();
+      request.sessionId     = &sessionID;
+
+      int result = icat.listInstruments(&request,&response);
+
+      if (result == 0)
       {
-        //
-        if(isvalidSession())
+        for(unsigned i = 0; i < response.return_.size(); ++i)
         {
-          CErrorHandling::throwErrorMessages(icat);
+          instruments.push_back(response.return_[i]);
         }
-        else
-        {
-          throw SessionException("Please login to the information catalog using the login dialog provided.");
-        }
-
       }
-      if(response.return_.empty())
+      else
       {
-        g_log.error()<<"Instruments List is empty"<<std::endl;
-        return ;
+        CErrorHandling::throwErrorMessages(icat);
       }
-
-      instruments.assign(response.return_.begin(),response.return_.end());
-
     }
 
-    /**This method sets the request parameter for ICat api list isnturments
-     * @param request :: reference to request object
+    /**
+     * Updates the list of investigation types.
+     * @param investTypes :: The list of investigation types.
      */
-    void CICatHelper::setReqparamforlistInstruments(ns1__listInstruments& request)
+    void CICatHelper::listInvestigationTypes(std::vector<std::string>& investTypes)
     {
-      *request.sessionId=Session::Instance().getSessionId();
-    }
-
-
-    /**This method calls ICat api listruments and returns the list of instruments a table workspace
-     *@param investTypes ::  list of investigationtypes
-     */
-    void  CICatHelper::listInvestigationTypes(std::vector<std::string>& investTypes)
-    {
-      //ICAt proxy object
       ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       ns1__listInvestigationTypes request;
-      //get the sessionid which is cached in session class during login
-      boost::shared_ptr<std::string >sessionId_sptr(new std::string);
-      request.sessionId=sessionId_sptr.get();
-      *request.sessionId=Session::Instance().getSessionId();
-
-      // response object
       ns1__listInvestigationTypesResponse response;
 
-      int ret=icat.listInvestigationTypes(&request,&response);
-      if(ret!=0)
+      std::string sessionID = m_session->getSessionId();
+      request.sessionId     = &sessionID;
+
+      int result = icat.listInvestigationTypes(&request,&response);
+
+      if (result == 0)
       {
-        //
-        if(isvalidSession())
+        for(unsigned i = 0; i < response.return_.size(); ++i)
         {
-          CErrorHandling::throwErrorMessages(icat);
-        }
-        else
-        {
-          throw SessionException("Please login to the information catalog using the login dialog provided.");
+          investTypes.push_back(response.return_[i]);
         }
       }
-      if(response.return_.empty())
+      else
       {
-        g_log.information()<<"Investigation types is empty"<<std::endl;
-        return ;
+        CErrorHandling::throwErrorMessages(icat);
       }
-      investTypes.assign(response.return_.begin(),response.return_.end());
     }
 
 
@@ -630,15 +548,14 @@ namespace Mantid
 
       ns1__logout request;
       ns1__logoutResponse response;
-      boost::shared_ptr<std::string > sessionId_sptr(new std::string);
-      *sessionId_sptr=Session::Instance().getSessionId();
-      request.sessionId=sessionId_sptr.get();
+      std::string sessionID = m_session->getSessionId();
+      request.sessionId     = &sessionID;
       int ret=icat.logout(&request,&response);
       if(ret!=0)
       {
         throw std::runtime_error("You are not currently logged into the cataloging system.");
       }
-
+      m_session->setSessionId("");
       return ret;
     }
 
@@ -653,9 +570,8 @@ namespace Mantid
 
       ns1__getMyInvestigationsIncludes request;
       ns1__getMyInvestigationsIncludesResponse response;
-      boost::shared_ptr<std::string > sessionId_sptr(new std::string);
-      *sessionId_sptr=Session::Instance().getSessionId();
-      request.sessionId=sessionId_sptr.get();
+      std::string sessionID = m_session->getSessionId();
+      request.sessionId     = &sessionID;
       // investigation include
       boost::shared_ptr<ns1__investigationInclude>invstInculde_sptr(new ns1__investigationInclude);
       request.investigationInclude=invstInculde_sptr.get();
@@ -664,14 +580,7 @@ namespace Mantid
       int ret=icat.getMyInvestigationsIncludes(&request,&response);
       if(ret!=0)
       {
-        if(isvalidSession())
-        {
-          CErrorHandling::throwErrorMessages(icat);
-        }
-        else
-        {
-          throw SessionException("Please login to the information catalog using the login dialog provided.");
-        }
+        CErrorHandling::throwErrorMessages(icat);
       }
       if(response.return_.empty())
       {
@@ -723,8 +632,8 @@ namespace Mantid
       // we just wanted to perform the getSearchQuery to build our COUNT query.
       if (offset == -1 || limit == -1) return;
 
-      std::string ses = Session::Instance().getSessionId();
-      request.sessionId = &ses;
+      std::string sessionID = m_session->getSessionId();
+      request.sessionId     = &sessionID;
       // Setup paging information to search with paging enabled.
       request.numberOfResults = limit;
       request.startIndex      = offset;
@@ -856,8 +765,8 @@ namespace Mantid
       ns1__searchByAdvanced request;
       ns1__searchByAdvancedResponse response;
 
-      std::string session = Session::Instance().getSessionId();
-      request.sessionId = &session;
+      std::string sessionID = m_session->getSessionId();
+      request.sessionId     = &sessionID;
       request.advancedSearchDetails = buildSearchQuery(inputs);
 
       int result = icat.searchByAdvanced(&request, &response);
@@ -878,24 +787,6 @@ namespace Mantid
       return numOfResults;
     }
 
-    /**This method checks the given session is valid
-     *@return returns true if the session id is valid,otherwise false;
-     */
-    bool CICatHelper::isvalidSession()
-    {
-      ICATPortBindingProxy icat;
-      setICATProxySettings(icat);
-
-      ns1__isSessionValid request;
-      ns1__isSessionValidResponse response;
-      std::string sessionId=Session::Instance().getSessionId();
-      request.sessionId = &sessionId;
-
-      return (response.return_? true: false);
-
-
-    }
-
     /**
      * Authenticate the user against all catalogues in the container.
      * @param username :: The login name of the user.
@@ -903,12 +794,11 @@ namespace Mantid
      * @param endpoint :: The endpoint url of the catalog to log in to.
      * @param facility :: The facility of the catalog to log in to.
      */
-    void CICatHelper::doLogin(const std::string& username,const std::string& password,
+    API::CatalogSession_sptr CICatHelper::doLogin(const std::string& username,const std::string& password,
         const std::string& endpoint, const std::string& facility)
     {
-      // Store the soap end-point in the session for use later.
-      ICat::Session::Instance().setSoapEndPoint(endpoint);
-      
+      m_session = boost::make_shared<API::CatalogSession>("",facility,endpoint);
+
       // Obtain the ICAT proxy that has been securely set, including soap-endpoint.
       ICATPortBindingProxy icat;
       setICATProxySettings(icat);
@@ -922,25 +812,20 @@ namespace Mantid
 
       std::string userName(username);
       std::string passWord(password);
+
       login.username = &userName;
       login.password = &passWord;
-
-      std::string session_id;
 
       int query_id = icat.login(&login, &loginResponse);
       if( query_id == 0 )
       {
-        session_id = *(loginResponse.return_);
-        //save session id
-        ICat::Session::Instance().setSessionId(session_id);
-        //save user name
-        ICat::Session::Instance().setUserName(userName);
+        m_session->setSessionId(*(loginResponse.return_));
       }
       else
       {
         throw std::runtime_error("Username or password supplied is invalid.");
       }
-
+      return m_session;
     }
 
     const std::string CICatHelper::getdownloadURL(const long long& fileId)
@@ -953,13 +838,10 @@ namespace Mantid
       
       std::string downloadURL;
 
-      boost::shared_ptr<std::string >sessionId_sptr(new std::string);
-      request.sessionId = sessionId_sptr.get();
-      *request.sessionId = Session::Instance().getSessionId();
-
-      boost::shared_ptr<LONG64>fileId_sptr(new LONG64 );
-      request.datafileId=fileId_sptr.get();
-      *request.datafileId= fileId;
+      std::string sessionID = m_session->getSessionId();
+      request.sessionId     = &sessionID;
+      LONG64 fileID = fileId;
+      request.datafileId    = &fileID;
 
       // get the URL using ICAT API
       int ret=icat.downloadDatafile(&request,&response);
@@ -984,13 +866,10 @@ namespace Mantid
       
       std::string filelocation;
 
-      boost::shared_ptr<std::string >sessionId_sptr(new std::string);
-      request.sessionId=sessionId_sptr.get();
-      *request.sessionId = Session::Instance().getSessionId();
-
-      boost::shared_ptr<LONG64>fileId_sptr(new LONG64 );
-      request.datafileId=fileId_sptr.get();
-      *request.datafileId=fileid;
+      std::string sessionID = m_session->getSessionId();
+      request.sessionId     = &sessionID;
+      LONG64 fileID = fileid;
+      request.datafileId    = &fileID;
 
       int ret=icat.getDatafile(&request,&response);
 
@@ -1010,7 +889,7 @@ namespace Mantid
     void CICatHelper::setICATProxySettings(ICat3::ICATPortBindingProxy& icat)
     {
       // Set the soap-endpoint of the catalog we want to use.
-      icat.soap_endpoint = ICat::Session::Instance().getSoapEndPoint().c_str();
+      icat.soap_endpoint = m_session->getSoapEndpoint().c_str();
       // Sets SSL authentication scheme
       setSSLContext(icat);
     }

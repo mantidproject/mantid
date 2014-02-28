@@ -3,11 +3,10 @@
 
 
 #include "MantidICat/ICat3/GSoapGenerated/ICat3ICATPortBindingProxy.h"
+#include "MantidICat/CatalogSearchParam.h"
+#include "MantidAPI/CatalogSession.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidKernel/Logger.h"
-#include "MantidICat/CatalogSearchParam.h"
-
 
 namespace Mantid
 {
@@ -44,19 +43,16 @@ namespace Mantid
     public:
 
       /// constructor
-      CICatHelper() : g_log(Kernel::Logger::get("CICatHelper"))
-      {}
-      /// destructor
-      ~CICatHelper(){}
+      CICatHelper();
 
       /// search method
       int doSearch(ICat3::ICATPortBindingProxy& icat,boost::shared_ptr<ICat3::ns1__searchByAdvanced>& request,ICat3::ns1__searchByAdvancedResponse& response);
 
       /// calls getInvestigationIncludes api's
-      int getDataFiles(long long invId,ICat3::ns1__investigationInclude include,API::ITableWorkspace_sptr& responsews_sptr);
+      void getDataFiles(long long invId,ICat3::ns1__investigationInclude include,API::ITableWorkspace_sptr& responsews_sptr);
 
       /// this method calls Icat api getInvestigationIncludes and returns datasets for the given investigation id.
-      int doDataSetsSearch(long long invId,ICat3::ns1__investigationInclude include,API::ITableWorkspace_sptr& responsews_sptr);
+      void doDataSetsSearch(long long invId,ICat3::ns1__investigationInclude include,API::ITableWorkspace_sptr& responsews_sptr);
 
       /// This method lists the isntruments
       void  listInstruments(std::vector<std::string>& instruments);
@@ -78,11 +74,8 @@ namespace Mantid
       int64_t getNumberOfSearchResults(const CatalogSearchParam& inputs);
 
       // do login
-      void doLogin(const std::string& username,const std::string& password,
+      API::CatalogSession_sptr doLogin(const std::string& username,const std::string& password,
           const std::string& endpoint,const std::string& facility);
-
-      /// thsi method returns true if the  session id is valid
-      bool isvalidSession();
 
       /// get the url of the given file id
       const std::string getdownloadURL(const long long& fileId);
@@ -92,10 +85,6 @@ namespace Mantid
 
 
     private:
-
-      /// This method sets the request parameters for investigation includes.
-      void setReqParamforInvestigationIncludes(long long invstId,ICat3::ns1__investigationInclude include,
-          ICat3::ns1__getInvestigationIncludes& request);
 
       ///This method saves the file search response to table workspace
       API::ITableWorkspace_sptr saveFileSearchResponse(const ICat3::ns1__searchByAdvancedResponse& response);
@@ -110,10 +99,6 @@ namespace Mantid
 
       /// This method saves Datasets to a table workspace
       void  saveDataSets(const ICat3::ns1__getInvestigationIncludesResponse& response,API::ITableWorkspace_sptr& outputws);
-
-      /// This method sets the request parameters
-      void setReqparamforlistInstruments(ICat3::ns1__listInstruments& request);
-
 
       /// This method creates table workspace
       API::ITableWorkspace_sptr createTableWorkspace();
@@ -158,6 +143,8 @@ namespace Mantid
       }
     private:
       Kernel::Logger& g_log;    ///< reference to the logger class
+      // Stores the session details for a specific catalog.
+      API::CatalogSession_sptr m_session;
 
     };
 

@@ -1,6 +1,5 @@
 #include "MantidICat/ICat3/ICat3Catalog.h"
 #include "MantidAPI/CatalogFactory.h"
-#include "MantidICat/Session.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -27,14 +26,13 @@ namespace Mantid
     API::CatalogSession_sptr ICat3Catalog::login(const std::string& username,const std::string& password,
         const std::string& endpoint, const std::string& facility)
     {
-      m_helper->doLogin(username,password,endpoint,facility);
+      return m_helper->doLogin(username,password,endpoint,facility);
     }
 
     /// This method disconnects the client application from ICat3 based catalog services
     void ICat3Catalog::logout()
     {
       m_helper->doLogout();
-      Session::Instance().setSessionId("");//clearing the session id saved to Mantid after log out
     }
 
     /*This method returns the logged in user's investigations data .
