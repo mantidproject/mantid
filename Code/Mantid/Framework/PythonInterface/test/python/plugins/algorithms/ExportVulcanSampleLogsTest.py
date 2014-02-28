@@ -18,7 +18,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         AnalysisDataService.addOrReplace("TestMatrixWS", ws)
 
         # Test algorithm
-        alg_test = run_algorithm("ExportVulcanSampleLogs", 
+        alg_test = run_algorithm("ExportSampleLogsToCSVFile", 
             InputWorkspace = "TestMatrixWS",
             OutputFilename = "furnace20333.txt",
             SampleLogNames = ["SensorA", "SensorB", "SensorC"],
@@ -64,7 +64,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         AnalysisDataService.addOrReplace("TestMatrixWS2", ws)
 
         # Test algorithm
-        alg_test = run_algorithm("ExportVulcanSampleLogs", 
+        alg_test = run_algorithm("ExportSampleLogsToCSVFile", 
             InputWorkspace = "TestMatrixWS2",
             OutputFilename = "furnace20334.txt",
             SampleLogNames = ["SensorA", "SensorB", "SensorC", "SensorD"],
@@ -110,7 +110,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         AnalysisDataService.addOrReplace("TestMatrixWS", ws)
 
         # Test algorithm
-        alg_test = run_algorithm("ExportVulcanSampleLogs", 
+        alg_test = run_algorithm("ExportSampleLogsToCSVFile", 
             InputWorkspace = "TestMatrixWS",
             OutputFilename = "furnace20339.txt",
             SampleLogNames = ["SensorA", "SensorB", "SensorC"],
@@ -159,7 +159,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         AnalysisDataService.addOrReplace("TestMatrixWS", ws)
 
         # Test algorithm
-        alg_test = run_algorithm("ExportVulcanSampleLogs", 
+        alg_test = run_algorithm("ExportSampleLogsToCSVFile", 
             InputWorkspace = "TestMatrixWS",
             OutputFilename = "furnace20335.txt",
             SampleLogNames = ["SensorA", "SensorB", "SensorX", "SensorC"],
@@ -334,7 +334,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
                 LoadLog = True)
 
         # Test algorithm
-        alg_test = run_algorithm("ExportVulcanSampleLogs", 
+        alg_test = run_algorithm("ExportSampleLogsToCSVFile", 
             InputWorkspace = "VULCAN_41703",
             OutputFilename = "/tmp/furnace41703.txt",
             SampleLogNames = ["furnace.temp1", "furnace.temp2", "furnace.power"],

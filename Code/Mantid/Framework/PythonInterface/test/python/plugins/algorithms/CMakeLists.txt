@@ -35,7 +35,8 @@ set ( TEST_PY_FILES
   SuggestTibHYSPECTest.py
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
-  ExportVulcanSampleLogsTest.py
+  #ExportVulcanSampleLogsTest.py
+  ExportSampleLogsToCSVFile.py
   #FixGSASInstrumentFileTest.py
 )
 

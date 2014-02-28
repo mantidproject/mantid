@@ -18,7 +18,7 @@ from mantid.kernel import *
 import os
 import datetime
 
-class ExportVulcanSampleLogs(PythonAlgorithm):
+class ExportSampleLogsToCSVFile(PythonAlgorithm):
     """ Python algorithm to export sample logs to spread sheet file 
     for VULCAN
     """
@@ -30,7 +30,7 @@ class ExportVulcanSampleLogs(PythonAlgorithm):
     def name(self):
 	""" Algorithm name
 	"""
-        return "ExportVulcanSampleLogs"
+        return "ExportSampleLogsToCSVFile"
 
     def PyInit(self):
 	""" Declare properties
@@ -492,4 +492,4 @@ def convertToLocalTime(utctimestr, localtimezone):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(ExportVulcanSampleLogs)
+AlgorithmFactory.subscribe(ExportSampleLogsToCSVFile)
