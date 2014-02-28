@@ -1,12 +1,88 @@
-from reduction import instrument
 import math
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 from mantid.kernel import Logger
+import SANSUtility as su
 import re
 sanslog = Logger.get("SANS")
 
 import sys
+
+class BaseInstrument(object):
+    def __init__(self, instr_filen=None):
+        """
+            Reads the instrument definition xml file
+            @param instr_filen: the name of the instrument definition file to read 
+            @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
+        """
+        if instr_filen is None:
+            instr_filen = self._NAME+'_Definition.xml'
+            
+        config = ConfigService.Instance()
+        self._definition_file = config["instrumentDefinition.directory"]+'/'+instr_filen
+                
+        self.definition = self.load_instrument() 
+
+    def load_instrument(self):
+        """
+            Runs LoadInstrument get the parameters for the instrument
+            @return the instrument parameter data
+        """
+        wrksp = '__'+self._NAME+'instrument_definition'
+        if not AnalysisDataService.doesExist(wrksp):
+          CreateWorkspace(OutputWorkspace=wrksp,DataX="1",DataY="1",DataE="1")
+          #read the information about the instrument that stored in its xml
+          LoadInstrument(Workspace=wrksp, InstrumentName=self._NAME)
+
+        return AnalysisDataService.retrieve(wrksp).getInstrument() 
+
+    def get_default_beam_center(self):
+        """
+            Returns the default beam center position, or the pixel location
+            of real-space coordinates (0,0).
+        """
+        return [0, 0]
+
+    def name(self):
+        """
+            Return the name of the instrument
+        """
+        return self._NAME
+    
+    def view(self, workspace_name = None):
+        """
+            Opens Mantidplot's InstrumentView displaying the current instrument. This
+            empty instrument created contained in the named workspace (a default name
+            is generated if this the argument is left blank) unless the workspace already
+            exists and then it's contents are displayed
+            @param workspace_name: the name of the workspace to create and/or display
+        """
+        if workspace_name is None:
+            workspace_name = self._NAME+'_instrument_view'
+            self.load_empty(workspace_name)
+        elif not AnalysisDataService.doesExist(workspace_name):
+            self.load_empty(workspace_name)
+
+        import mantidplot
+        instrument_win = mantidplot.getInstrumentView(workspace_name)
+        instrument_win.show()
+
+        return workspace_name
+
+    def load_empty(self, workspace_name = None):
+        """
+            Loads the instrument definition file into a workspace with the given name.
+            If no name is given a hidden workspace is used
+            @param workspace_name: the name of the workspace to create and/or display
+            @return the name of the workspace that was created
+        """
+        if workspace_name is None:
+            workspace_name = '__'+self._NAME+'_empty'
+
+        LoadEmptyInstrument(Filename=self._definition_file, OutputWorkspace=workspace_name)
+
+        return workspace_name
+   
 
 class DetectorBank:
     class _DectShape:
@@ -328,14 +404,14 @@ class DetectorBank:
                              %(self.name(), input_name,self.get_first_spec_num(),self.last_spec_num) 
                              + str(sys.exc_info()))
 
-class ISISInstrument(instrument.Instrument):
+class ISISInstrument(BaseInstrument):
     def __init__(self, filename=None):
         """
             Reads the instrument definition xml file
             @param filename: the name of the instrument definition file to read 
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
-        instrument.Instrument.__init__(self, instr_filen=filename)
+        super(ISISInstrument, self).__init__(instr_filen=filename)
 
         #the spectrum with this number is used to normalize the workspace data
         self._incid_monitor = int(self.definition.getNumberParameter(
@@ -767,7 +843,9 @@ class SANS2D(ISISInstrument):
         for name in ('Front_Det_Z', 'Front_Det_X', 'Front_Det_Rot',
                      'Rear_Det_Z','Rear_Det_X'):
             try:
-                var = run_info.get(name).value[-1]
+                var = run_info.get(name).value
+                if hasattr(var, '__iter__'):
+                    var = var[-1]
                 values[ind] = float(var)
             except:
                 pass # ignore, because we do have a default value            
@@ -868,6 +946,7 @@ class SANS2D(ISISInstrument):
             @return the values that were read as a dictionary
         """
         self._marked_dets = []
+        wksp = su.getWorkspaceReference(wksp)
         #assume complete log information is stored in the first entry, it isn't stored in the group workspace itself
         if isinstance(wksp, WorkspaceGroup):
             wksp = wksp[0]
