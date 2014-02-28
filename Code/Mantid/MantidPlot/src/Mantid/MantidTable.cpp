@@ -98,6 +98,9 @@ void MantidTable::fillTable()
   // temporarily allow resizing
   d_table->blockResizing(false);
 
+  setNumRows(0);
+  setNumCols(0);
+
   // Resize to fit the new workspace
   setNumRows(static_cast<int>(m_ws->rowCount()));
   setNumCols(static_cast<int>(m_ws->columnCount()));
