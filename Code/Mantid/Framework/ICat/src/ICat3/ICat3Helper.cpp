@@ -48,26 +48,18 @@ namespace Mantid
      */
     void  CICatHelper::saveSearchRessults(const ns1__searchByAdvancedPaginationResponse& response,API::ITableWorkspace_sptr& outputws)
     {
-      //create table workspace
-
       //API::ITableWorkspace_sptr outputws =createTableWorkspace();
-
-      outputws->addColumn("long64","InvestigationId");
-      outputws->addColumn("str","Proposal");
-      outputws->addColumn("str","Title");
-      outputws->addColumn("str","Instrument");
-      outputws->addColumn("str","Run Range");
-
-      try
+      if (outputws->getColumnNames().empty())
       {
-        saveInvestigations(response.return_,outputws);
+        outputws->addColumn("long64","InvestigationId");
+        outputws->addColumn("str","Proposal");
+        outputws->addColumn("str","Title");
+        outputws->addColumn("str","Instrument");
+        outputws->addColumn("str","Run Range");
       }
-      catch(std::runtime_error& )
-      {
-        throw std::runtime_error("Error when saving  the ICat Search Results data to Workspace");
-      }
-
+      saveInvestigations(response.return_,outputws);
     }
+
     /** This method saves investigations  to a table workspace
      *  @param investigations :: a vector containing investigation data
      *  @param outputws :: shared pointer to output workspace
@@ -195,12 +187,13 @@ namespace Mantid
     {
       //create table workspace
       API::ITableWorkspace_sptr outputws =createTableWorkspace();
-      //add columns
-      outputws->addColumn("str","Name");
-      outputws->addColumn("str","Location");
-      outputws->addColumn("str","Create Time");
-      outputws->addColumn("long64","Id");
-
+      if (outputws->getColumnNames().empty())
+      {
+        outputws->addColumn("str","Name");
+        outputws->addColumn("str","Location");
+        outputws->addColumn("str","Create Time");
+        outputws->addColumn("long64","Id");
+      }
       std::vector<ns1__investigation*> investVec;
       investVec.assign(response.return_.begin(),response.return_.end());
 
@@ -294,11 +287,13 @@ namespace Mantid
     void  CICatHelper::saveInvestigationIncludesResponse(const ns1__getInvestigationIncludesResponse& response,
         API::ITableWorkspace_sptr& outputws)
     {
-
-      outputws->addColumn("str","Name");
-      outputws->addColumn("str","Location");
-      outputws->addColumn("str","Create Time");
-      outputws->addColumn("long64","Id");
+      if (outputws->getColumnNames().empty())
+      {
+        outputws->addColumn("str","Name");
+        outputws->addColumn("str","Location");
+        outputws->addColumn("str","Create Time");
+        outputws->addColumn("long64","Id");
+      }
 
       try
       {		std::vector<ns1__dataset*> datasetVec;
@@ -414,13 +409,14 @@ namespace Mantid
     void  CICatHelper::saveDataSets(const ns1__getInvestigationIncludesResponse& response,API::ITableWorkspace_sptr& outputws)
     {
       //create table workspace
-      //adding columns
-      outputws->addColumn("str","Name");//File name
-      outputws->addColumn("str","Status");
-      outputws->addColumn("str","Type");
-      outputws->addColumn("str","Description");
-      outputws->addColumn("long64","Sample Id");
-
+      if (outputws->getColumnNames().empty())
+      {
+        outputws->addColumn("str","Name");//File name
+        outputws->addColumn("str","Status");
+        outputws->addColumn("str","Type");
+        outputws->addColumn("str","Description");
+        outputws->addColumn("long64","Sample Id");
+      }
       try
       {
 
@@ -598,12 +594,14 @@ namespace Mantid
      */
     void CICatHelper::saveMyInvestigations( const ns1__getMyInvestigationsIncludesResponse& response,API::ITableWorkspace_sptr& outputws)
     {
-      outputws->addColumn("long64","InvestigationId");
-      outputws->addColumn("str","Proposal");
-      outputws->addColumn("str","Title");
-      outputws->addColumn("str","Instrument");
-      outputws->addColumn("str","Run Range");
-
+      if(outputws->getColumnNames().empty())
+      {
+        outputws->addColumn("long64","InvestigationId");
+        outputws->addColumn("str","Proposal");
+        outputws->addColumn("str","Title");
+        outputws->addColumn("str","Instrument");
+        outputws->addColumn("str","Run Range");
+      }
       saveInvestigations(response.return_,outputws);
 
     }

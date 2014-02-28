@@ -375,13 +375,16 @@ namespace Mantid
      */
     void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
-      // Add rows headers to the output workspace.
-      outputws->addColumn("str","Investigation id");
-      outputws->addColumn("str","Title");
-      outputws->addColumn("str","Instrument");
-      outputws->addColumn("str","Run range");
-      outputws->addColumn("str","Start date");
-      outputws->addColumn("str","End date");
+      if (outputws->getColumnNames().empty())
+      {
+        // Add rows headers to the output workspace.
+        outputws->addColumn("str","Investigation id");
+        outputws->addColumn("str","Title");
+        outputws->addColumn("str","Instrument");
+        outputws->addColumn("str","Run range");
+        outputws->addColumn("str","Start date");
+        outputws->addColumn("str","End date");
+      }
 
       // Add data to each row in the output workspace.
       std::vector<xsd__anyType*>::const_iterator iter;
@@ -475,12 +478,16 @@ namespace Mantid
      */
     void ICat4Catalog::saveDataSets(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
-      // Add rows headers to the output workspace.
-      outputws->addColumn("str","Name");
-      outputws->addColumn("str","Status");
-      outputws->addColumn("str","Type");
-      outputws->addColumn("str","Description");
-      outputws->addColumn("str","Sample Id");
+      if (outputws->getColumnNames().empty())
+      {
+        // Add rows headers to the output workspace.
+        outputws->addColumn("str","Name");
+        outputws->addColumn("str","Status");
+        outputws->addColumn("str","Type");
+        outputws->addColumn("str","Description");
+        outputws->addColumn("str","Sample Id");
+      }
+
       std::string temp("");
 
       std::vector<xsd__anyType*>::const_iterator iter;
@@ -537,14 +544,17 @@ namespace Mantid
      */
     void ICat4Catalog::saveDataFiles(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
-      // Add rows headers to the output workspace.
-      outputws->addColumn("str","Name");
-      outputws->addColumn("str","Location");
-      outputws->addColumn("str","Create Time");
-      outputws->addColumn("long64","Id");
-      outputws->addColumn("long64","File size(bytes)");
-      outputws->addColumn("str","File size");
-      outputws->addColumn("str","Description");
+      if (outputws->getColumnNames().empty())
+      {
+        // Add rows headers to the output workspace.
+        outputws->addColumn("str","Name");
+        outputws->addColumn("str","Location");
+        outputws->addColumn("str","Create Time");
+        outputws->addColumn("long64","Id");
+        outputws->addColumn("long64","File size(bytes)");
+        outputws->addColumn("str","File size");
+        outputws->addColumn("str","Description");
+      }
 
       std::vector<xsd__anyType*>::const_iterator iter;
       for(iter = response.begin(); iter != response.end(); ++iter)
