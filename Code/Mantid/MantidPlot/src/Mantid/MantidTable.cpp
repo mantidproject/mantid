@@ -106,12 +106,12 @@ void MantidTable::fillTable()
     // Make columns of ITableWorkspaces read only, if specified
     setReadOnlyColumn(i, c->getReadOnly() );
 
-    // if plot types is set in ws then update Table with that information
-    int pt = m_ws->getColumn(i)->getPlotType();
+    // If plot type is set in ws then update Table with that information
+    int plotType = m_ws->getColumn(i)->getPlotType();
 
-    if ( pt != -1000 )
+    if ( plotType != -1000 )
     {
-      setColPlotDesignation(static_cast<int>(i), pt);
+      setColPlotDesignation(i, plotType);
     }
 
     // Special for errors?
