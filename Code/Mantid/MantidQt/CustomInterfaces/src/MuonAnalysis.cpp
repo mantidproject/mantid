@@ -1426,7 +1426,20 @@ boost::shared_ptr<GroupResult> MuonAnalysis::group(boost::shared_ptr<LoadResult>
   int instrIndex = m_uiForm.instrSelector->findText( QString::fromStdString(instr->getName()) );
   bool instrChanged = m_uiForm.instrSelector->currentIndex() != instrIndex;
 
-  if ( !instrChanged && isGroupingSet() )
+  // Check whether the number of spectra was changed
+  bool noSpectraChanged(true);
+
+  if ( AnalysisDataService::Instance().doesExist(m_workspace_name) )
+  {
+    auto currentWs = AnalysisDataService::Instance().retrieveWS<Workspace>(m_workspace_name);
+    size_t currentNoSpectra = firstPeriod(currentWs)->getNumberHistograms();
+
+    size_t loadedNoSpectra = firstPeriod(loadResult->loadedWorkspace)->getNumberHistograms();
+
+    noSpectraChanged = (currentNoSpectra != loadedNoSpectra);
+  }
+
+  if ( !noSpectraChanged && !instrChanged && isGroupingSet() )
   {
     // Use grouping currently set
     result->usedExistGrouping = true;
@@ -1550,7 +1563,10 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   // XXX: this should be done after the instrument was changed, because changing the instrument will
   //      clear the grouping
   if ( ! groupResult->usedExistGrouping )
+  {
+    runClearGroupingButton();
     fillGroupingTable(*(groupResult->groupingUsed), m_uiForm);
+  }
 
   // Populate instrument fields
   std::stringstream str;
