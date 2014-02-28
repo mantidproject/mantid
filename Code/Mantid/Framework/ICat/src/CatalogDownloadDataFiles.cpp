@@ -9,7 +9,6 @@ if the data archive is not accessible, it downloads the files from the data serv
 #include "MantidAPI/ICatalogInfoService.h"
 #include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
-#include "MantidICat/Session.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
