@@ -33,8 +33,7 @@ namespace Mantid
     void CatalogListInvestigationTypes::exec()
     {
       std::vector<std::string> investigationTypes;
-      const std::string sessionID = "";
-      API::CatalogManager::Instance().getCatalog(sessionID)->listInvestigationTypes(investigationTypes);
+      API::CatalogManager::Instance().getCatalog("")->listInvestigationTypes(investigationTypes);
       setProperty("InvestigationTypes",investigationTypes);
     }
 

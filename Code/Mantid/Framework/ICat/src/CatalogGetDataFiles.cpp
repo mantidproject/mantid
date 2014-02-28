@@ -35,8 +35,7 @@ namespace Mantid
     void CatalogGetDataFiles::exec()
     {
       auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      const std::string sessionID = "";
-      API::CatalogManager::Instance().getCatalog(sessionID)->getDataFiles(getProperty("InvestigationId"),workspace);
+      API::CatalogManager::Instance().getCatalog("")->getDataFiles(getProperty("InvestigationId"),workspace);
       setProperty("OutputWorkspace",workspace);
     }
 
