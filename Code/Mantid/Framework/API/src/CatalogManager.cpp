@@ -13,16 +13,23 @@ namespace Mantid
     CatalogManagerImpl::~CatalogManagerImpl(){}
 
     /**
-     * Creates a new catalog and adds it to the compositeCatalog and activeCatalog list.
-     * @param facilityName :: The name of the facility to obtain the catalog name from.
-     * @return A catalog for the facility specified.
+     * Logs the user into the catalog if session details are valid.
+     * This is used here as we need to obtain the session for a specific catalog (e.g. the one created on login).
+     * @param username :: The login name of the user.
+     * @param password :: The password of the user.
+     * @param endpoint :: The endpoint url of the catalog to log in to.
+     * @param facility :: The facility of the catalog to log in to.
+     * @return The session created if login was successful.
      */
-    ICatalog_sptr CatalogManagerImpl::create(const std::string &facilityName)
+    CatalogSession_sptr CatalogManagerImpl::login(const std::string& username,const std::string& password,
+        const std::string& endpoint,const std::string& facility)
     {
-      std::string className = Kernel::ConfigService::Instance().getFacility(facilityName).catalogInfo().catalogName();
+      std::string className = Kernel::ConfigService::Instance().getFacility(facility).catalogInfo().catalogName();
       auto catalog = CatalogFactory::Instance().create(className);
-      m_activeCatalogs.insert(std::make_pair(boost::lexical_cast<std::string>(rand() + 10),catalog));
-      return catalog;
+      CatalogSession_sptr session = catalog->login(username,password,endpoint,facility);
+      // Creates a new catalog and adds it to the compositeCatalog and activeCatalog list.
+      m_activeCatalogs.insert(std::make_pair(session,catalog));
+      return session;
     }
 
     /**

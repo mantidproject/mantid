@@ -44,9 +44,10 @@ namespace Mantid
       if (catalogInfo.soapEndPoint().empty()) throw std::runtime_error("There is no soap end-point for the facility you have selected.");
       g_log.notice() << "Attempting to verify user credentials against " << catalogInfo.catalogName() << std::endl;
       progress(0.5, "Verifying user credentials...");
-      std::string facility = getProperty("FacilityName");
-      auto catalogManager = API::CatalogManager::Instance().create(facility);
-      catalogManager->login(getProperty("Username"), getProperty("Password"), catalogInfo.soapEndPoint(),facility);
+      // Creates a new catalog and related session if the authentication is a success.
+      // This allows us to easily manage sessions alongside catalogs in the catalogmanager.
+      API::CatalogManager::Instance().login(getProperty("Username"), getProperty("Password"),
+          catalogInfo.soapEndPoint(),getProperty("FacilityName"));
     }
 
   }

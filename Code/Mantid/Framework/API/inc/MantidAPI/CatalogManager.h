@@ -36,8 +36,9 @@ namespace Mantid
     class MANTID_API_DLL CatalogManagerImpl
     {
       public:
-        /// Create a new catalog, and add it to the list of active catalogs.
-        ICatalog_sptr create(const std::string &facilityName);
+        /// Creates a new catalog and session, and adds it to the activeCatalogs container.
+        CatalogSession_sptr login(const std::string& username,const std::string& password,
+            const std::string& endpoint,const std::string& facility);
         /// Get a specific catalog using the sessionID.
         ICatalog_sptr getCatalog(const std::string &sessionID);
         /// Destroy and remove a specific catalog from the active catalogs list.
