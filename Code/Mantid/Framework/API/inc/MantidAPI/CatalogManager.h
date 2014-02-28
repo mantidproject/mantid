@@ -54,7 +54,7 @@ namespace Mantid
         virtual ~CatalogManagerImpl();
 
         // Holds a list of active catalogs and uses their sessionId as unique identifier.
-        std::map<std::string, ICatalog_sptr> m_activeCatalogs;
+        std::map<CatalogSession_sptr, ICatalog_sptr> m_activeCatalogs;
     };
 
     #ifdef _WIN32

@@ -42,10 +42,13 @@ namespace Mantid
         return composite;
       }
 
-      auto pos = m_activeCatalogs.find(sessionID);
-      // If the key element exists in the map we want the related catalog.
-      if (pos != m_activeCatalogs.end()) return pos->second;
-      else throw std::runtime_error("The session ID you have provided is invalid");
+      for(auto iter = m_activeCatalogs.begin(); iter != m_activeCatalogs.end(); ++iter)
+      {
+        if (sessionID == iter->first->getSessionId()) return iter->second;
+      }
+
+      // If we reached this point then the session is corrupt/invalid.
+      throw std::runtime_error("The session ID you have provided is invalid");
     }
 
     /**
@@ -54,12 +57,13 @@ namespace Mantid
      */
     void CatalogManagerImpl::destroyCatalog(const std::string& sessionID)
     {
-      auto pos = m_activeCatalogs.find(sessionID);
-
-      if (pos != m_activeCatalogs.end())
+      for(auto iter = m_activeCatalogs.begin(); iter != m_activeCatalogs.end(); ++iter)
       {
-        pos->second->logout();
-        m_activeCatalogs.erase(pos);
+        if (sessionID == iter->first->getSessionId())
+        {
+          iter->second->logout();
+          m_activeCatalogs.erase(iter);
+        }
       }
     }
 
@@ -68,11 +72,10 @@ namespace Mantid
      */
     void CatalogManagerImpl::destroyCatalogs()
     {
-      for (auto item = m_activeCatalogs.begin(); item != m_activeCatalogs.end(); ++item)
+      for(auto item = m_activeCatalogs.begin(); item != m_activeCatalogs.end(); ++item)
       {
         item->second->logout();
       }
-
       m_activeCatalogs.clear();
     }
 
