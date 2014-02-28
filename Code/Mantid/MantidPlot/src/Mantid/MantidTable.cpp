@@ -32,14 +32,6 @@ m_wsName(ws->getName()),
 m_transposed(transpose)
 {
   d_table->blockResizing(true);
-  // if plot types is set in ws then update Table with that information
-  for ( size_t i = 0; i < ws->columnCount(); i++ )
-  {
-    int pt = ws->getColumn(i)->getPlotType();
-    if ( pt != -1000 )
-      setColPlotDesignation(static_cast<int>(i), pt);
-  }
-  setHeaderColType();
 
   // Filling can take a while, so process any pending events and set appropriate cursor
   QApplication::processEvents();
@@ -113,12 +105,23 @@ void MantidTable::fillTable()
     setColName(i,colName);
     // Make columns of ITableWorkspaces read only, if specified
     setReadOnlyColumn(i, c->getReadOnly() );
+
+    // if plot types is set in ws then update Table with that information
+    int pt = m_ws->getColumn(i)->getPlotType();
+
+    if ( pt != -1000 )
+    {
+      setColPlotDesignation(static_cast<int>(i), pt);
+    }
+
     // Special for errors?
     if (colName.endsWith("_err",Qt::CaseInsensitive) ||
         colName.endsWith("_error",Qt::CaseInsensitive))
     {
       setColPlotDesignation(i,Table::yErr);
     }
+
+    setHeaderColType();
 
     // Track the column width. All text should fit in.
     int maxWidth = 60;
