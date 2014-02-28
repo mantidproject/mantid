@@ -101,7 +101,7 @@ class Can(Sample):
             self.loader.move2ws(period)
             name = self.loader.wksp_name
             if su.isEventWorkspace(name):
-                su.fromEvent2Histogram(mtd[name])
+                su.fromEvent2Histogram(mtd[name], self.get_monitor())
 
 class ISISReducer(SANSReducer):
     """
