@@ -118,6 +118,9 @@ const string X_END("endX");
 const string PEAKS_WKSP("PeakWorkspaceName");
 const string ROTATE_CEN("RotateCenters");
 const string SAMPLE_OFF("SampleOffsets");
+const string SAMPLE_X("SampleX");
+const string SAMPLE_Y("SampleY");
+const string SAMPLE_Z("SampleZ");
 }
 
 void initializeAttributeList(vector<string> &attrs)
@@ -136,6 +139,9 @@ void initializeAttributeList(vector<string> &attrs)
   attrs.push_back(NUM_GROUPS);
   attrs.push_back(ROTATE_CEN);
   attrs.push_back(SAMPLE_OFF);
+  attrs.push_back(SAMPLE_X);
+  attrs.push_back(SAMPLE_Y);
+  attrs.push_back(SAMPLE_Z);
 }
 
 SCDPanelErrors::SCDPanelErrors() :
@@ -147,7 +153,7 @@ SCDPanelErrors::SCDPanelErrors() :
   initializeAttributeList(m_attrNames);
 
   a_set = b_set = c_set = alpha_set = beta_set = gamma_set = PeakName_set = BankNames_set = endX_set
-      = startX_set = NGroups_set  = false;
+      = startX_set = NGroups_set  = sampleX_set = sampleY_set = sampleZ_set = false;
 
   // g_log.setLevel(7);
 
@@ -219,6 +225,12 @@ IFunction::Attribute SCDPanelErrors::getAttribute(const std::string &attName) co
     return Attribute(static_cast<int>(m_startX));
   else if (attName == X_END)
     return Attribute(static_cast<int>(m_endX));
+  else if (attName == SAMPLE_X)
+    return Attribute(SampleX);
+  else if (attName == SAMPLE_Y)
+    return Attribute(SampleY);
+  else if (attName == SAMPLE_Z)
+    return Attribute(SampleZ);
 
 
   throw std::invalid_argument("Not a valid attribute name \"" + attName + "\"");
@@ -1450,6 +1462,21 @@ void SCDPanelErrors::setAttribute(const std::string &attName, const Attribute & 
       declareParameter("SampleZ", 0.0, "Sample z offset");
       SampOffsetDeclareStatus =2;
     }
+  }
+  else if (attName == SAMPLE_X)
+  {
+    SampleX = value.asDouble();
+    sampleX_set = true;
+  }
+  else if (attName == SAMPLE_Y)
+  {
+    SampleY = value.asDouble();
+    sampleY_set = true;
+  }
+  else if (attName == SAMPLE_Z)
+  {
+    SampleZ = value.asDouble();
+    sampleZ_set = true;
   }
   else if (attName == X_START)
   {

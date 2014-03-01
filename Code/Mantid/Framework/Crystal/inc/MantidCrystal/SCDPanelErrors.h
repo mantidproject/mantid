@@ -166,11 +166,12 @@ private:
   double a,b,c,alpha,beta,gamma;
   int NGroups;
   bool RotateCenters, SampleOffsets;
+  double SampleX, SampleY, SampleZ;
 
   std::string PeakName;//< SCDPanelErrors{PeakName} is name in the Analysis Data Service where the PeaksWorkspace is stored
 
   bool a_set,b_set,c_set,alpha_set,beta_set,gamma_set,PeakName_set, BankNames_set,
-  startX_set,endX_set, NGroups_set;
+  startX_set,endX_set, NGroups_set, sampleX_set, sampleY_set, sampleZ_set;
 
   /**
    * 0 - no action
