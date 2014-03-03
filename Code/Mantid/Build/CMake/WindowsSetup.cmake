@@ -30,6 +30,11 @@ endif()
 # /w34389 - Treat warning C4389, about equality comparison on unsigned 
 #           and signed, as a level 3 warning
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389" )
+if ( NOT CMAKE_CL_64 )
+  # On 32 bit build, disable warning related to loss of precision when converting to a size_t
+  set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244" )
+endif()
+
 # As discussed here: http://code.google.com/p/googletest/issues/detail?id=412
 # gtest requires changing the _VARAIDIC_MAX value for VS2012 as it defaults to 5
 if ( MSVC_VERSION EQUAL 1700 )
