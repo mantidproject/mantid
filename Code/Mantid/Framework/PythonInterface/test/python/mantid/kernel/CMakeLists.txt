@@ -13,6 +13,7 @@ set ( TEST_PY_FILES
   FacilityInfoTest.py
   FilteredTimeSeriesPropertyTest.py
   InstrumentInfoTest.py
+  IPropertySettingsTest.py
   ListValidatorTest.py
   LogFilterTest.py
   LoggerTest.py
