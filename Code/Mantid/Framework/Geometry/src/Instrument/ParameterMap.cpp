@@ -207,7 +207,7 @@ namespace Mantid
       if( !m_map.empty() )
       {
         const ComponentID id = comp->getComponentID();
-        pmap_cit it_found = m_map.find(id);
+        pmap_it it_found = m_map.find(id);
         if (it_found != m_map.end())
         {
           if(it_found->second->name() == name)
