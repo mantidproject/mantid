@@ -25,13 +25,14 @@ namespace Mantid
     {
       declareProperty(new API::WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Kernel::Direction::Output),
           "The name of the workspace to store the search results.");
+      declareProperty("Session","","The session information of the catalog to use.");
     }
 
     /// Execution method.
     void CatalogMyDataSearch::exec()
     {
       auto outputws = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      API::CatalogManager::Instance().getCatalog("")->myData(outputws);
+      API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->myData(outputws);
       setProperty("OutputWorkspace",outputws);
     }
   }

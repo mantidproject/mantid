@@ -5,8 +5,9 @@ if the data archive is not accessible, it downloads the files from the data serv
 
 *WIKI*/
 
-#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ICatalogInfoService.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -55,13 +56,15 @@ namespace Mantid
                                                      boost::make_shared<NullValidator>(),
                                                      Direction::Output),
                       "A list of file locations to the catalog datafiles.");
+      declareProperty("Session","","The session information of the catalog to use.");
     }
 
     /// Execute the algorithm
     void CatalogDownloadDataFiles::exec()
     {
       // Cast a catalog to a catalogInfoService to access downloading functionality.
-      auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(CatalogAlgorithmHelper().createCatalog());
+      auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(
+          API::CatalogManager::Instance().getCatalog(getPropertyValue("Session")));
       // Check if the catalog created supports publishing functionality.
       if (!catalogInfoService) throw std::runtime_error("The catalog that you are using does not support external downloading.");
 

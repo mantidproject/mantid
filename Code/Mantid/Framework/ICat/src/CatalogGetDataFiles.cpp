@@ -29,13 +29,14 @@ namespace Mantid
           "ID of the selected investigation");
       declareProperty(new API::WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Kernel::Direction::Output),
           "The name of the workspace to store the data file search details");
+      declareProperty("Session","","The session information of the catalog to use.");
     }
 
     //execute the algorithm
     void CatalogGetDataFiles::exec()
     {
       auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      API::CatalogManager::Instance().getCatalog("")->getDataFiles(getProperty("InvestigationId"),workspace);
+      API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->getDataFiles(getProperty("InvestigationId"),workspace);
       setProperty("OutputWorkspace",workspace);
     }
 

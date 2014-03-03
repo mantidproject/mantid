@@ -25,17 +25,16 @@ namespace Mantid
     /// Init method
     void CatalogListInstruments::init()
     {
-      declareProperty( new Kernel::ArrayProperty<std::string>("InstrumentList",std::vector<std::string>(),
-                                                      boost::make_shared<Kernel::NullValidator>(),
-                                                      Kernel::Direction::Output),
-                       "A list containing instrument names");
+      declareProperty(new Kernel::ArrayProperty<std::string>("InstrumentList",std::vector<std::string>(),
+          boost::make_shared<Kernel::NullValidator>(),Kernel::Direction::Output), "A list containing instrument names.");
+      declareProperty("Session","","The session information of the catalog to use.");
     }
 
     /// exec method
     void CatalogListInstruments::exec()
     {
       std::vector<std::string> instruments;
-      API::CatalogManager::Instance().getCatalog("")->listInstruments(instruments);
+      API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->listInstruments(instruments);
       setProperty("InstrumentList",instruments);
     }
 

@@ -61,6 +61,8 @@ namespace Mantid
       declareProperty(new API::WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Kernel::Direction::Output),
           "The name of the workspace that will be created to store the ICat investigations search result.");
       declareProperty<int64_t>("NumberOfSearchResults", 0, "", Kernel::Direction::Output);
+
+      declareProperty("Session","","The session information of the catalog to use.");
     }
 
     /// Execution method.
@@ -73,7 +75,7 @@ namespace Mantid
       // Create output workspace.
       auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       // Obtain all the active catalogs.
-      auto catalogs = API::CatalogManager::Instance().getCatalog("");
+      auto catalogs = API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"));
       // Search for investigations with user specific search inputs.
       setProperty("OutputWorkspace",workspace);
       // Do not perform a full search if we only want a COUNT search.
