@@ -206,7 +206,7 @@ public:
     double algFactor(2.0);
     bool combine(true);
     auto result = runScaleX(inputWS, "Add", algFactor, parname, combine);
-    testScaleFactorApplied(inputWS, result, algFactor*instFactor, false); //multiply=true
+    testScaleFactorApplied(inputWS, result, algFactor+instFactor, false); //multiply=true
   }
 
 

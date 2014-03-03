@@ -95,7 +95,7 @@ private:
         TS_ASSERT_DELTA(outputWS->readX(i)[j], inputWS->readX(i)[j], 1e-12);
         double resultY = (multiply) ? factor*inputWS->readY(i)[j] : factor + inputWS->readY(i)[j];
         TS_ASSERT_DELTA(outputWS->readY(i)[j], resultY, 1e-12);
-        double resultE = (multiply) ? factor*inputWS->readE(i)[j] : factor + inputWS->readE(i)[j];
+        double resultE = (multiply) ? factor*inputWS->readE(i)[j] : inputWS->readE(i)[j];
         TS_ASSERT_DELTA(outputWS->readE(i)[j], resultE, 1e-12);
       }
     }
