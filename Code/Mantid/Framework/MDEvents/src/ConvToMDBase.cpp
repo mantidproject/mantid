@@ -89,7 +89,12 @@ namespace Mantid
     };  
 
     /** empty default constructor */
-    ConvToMDBase::ConvToMDBase():m_NumThreads(-1), m_coordinateSystem(Mantid::API::None)
+    ConvToMDBase::ConvToMDBase():m_NDims(0), // wrong non-initialized
+      m_RunIndex(0), // defauld run index is 0
+      m_NSpectra(0), // no valid spectra by default.
+      m_NumThreads(-1), // run with all cores availible
+      m_ignoreZeros(false), // 0-s added to workspace
+      m_coordinateSystem(Mantid::API::None)
     { }
 
 

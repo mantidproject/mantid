@@ -1224,13 +1224,11 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
         Target='ElasticQ', EMode='Indirect', EFixed=efixed)
     RenameWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_red')
     if canWS != '':
-        DeleteWorkspace(CorrectedCanWS)
         ConvertUnits(InputWorkspace=canWS, OutputWorkspace=canWS, Target='DeltaE',
             EMode='Indirect', EFixed=efixed)
     DeleteWorkspace('Fit_NormalisedCovarianceMatrix')
     DeleteWorkspace('Fit_Parameters')
     DeleteWorkspace('Fit_Workspace')
-    DeleteWorkspace(corr)
     return CorrectedWS
                 
 def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, ScaleOrNotToScale=False, factor=1, Save=False,
@@ -1287,8 +1285,10 @@ def abscorFeeder(sample, container, geom, useCor, corrections, Verbose=False, Sc
                 if Verbose:
                     logger.notice('Output file created : '+sred_path)
             res_plot = sub_result+'_rqw'
+    
     if (PlotResult != 'None'):
         plotCorrResult(res_plot,PlotResult)
+
     if ( container != '' ):
         sws = mtd[sample]
         cws = mtd[container]

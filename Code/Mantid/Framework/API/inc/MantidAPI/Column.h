@@ -57,7 +57,8 @@ namespace API
 class MANTID_API_DLL Column
 {
 public:
-    Column() : m_type("int"), m_plotType(-1000){};
+    Column() : m_type("int"), m_plotType(-1000), m_isReadOnly(true) {};
+
     /// Virtual destructor
     virtual ~Column() {}
 
@@ -79,9 +80,18 @@ public:
 
     /// Returns typeid for the pointer type to the data element in the column
     virtual const std::type_info& get_pointer_type_info()const = 0;
-    /// Is the column to be read-only? @return true by default.
+
+    /// Returns column read-only flag
     virtual bool getReadOnly() const
-    { return true; }
+    {
+      return m_isReadOnly;
+    }
+
+    /// Sets column read-only flag
+    void setReadOnly(bool isReadOnly)
+    {
+      m_isReadOnly = isReadOnly;
+    }
 
     /// Prints out the value to a stream
     virtual void print(size_t index, std::ostream& s) const = 0;
@@ -171,6 +181,9 @@ protected:
     /// NotSet = -1000 (this is the default and means plot style has not been set)
     /// X = 1, Y = 2, Z = 3, xErr = 4, yErr = 5, Label = 6
     int m_plotType;
+
+    /// Column read-only flag
+    bool m_isReadOnly;
 
     friend class ColumnFactoryImpl;
     friend class ITableWorkspace;

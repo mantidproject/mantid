@@ -11,8 +11,10 @@ names 'input' & 'output' respectively.
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "MantidPythonInterface/kernel/Environment/Threading.h"
 #include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
+#include "MantidPythonInterface/kernel/Registry/DowncastDataItem.h"
 #include "MantidKernel/MandatoryValidator.h"
 
+#include <boost/python/call_method.hpp>
 #include <boost/python/exec.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/import.hpp>
@@ -124,6 +126,8 @@ namespace Mantid
       using namespace API;
       using namespace boost::python;
 
+      // Execution
+      Environment::GlobalInterpreterLock gil;
       auto locals = doExecuteScript(script);
       return extractOutputWorkspace(locals);
     }
@@ -136,8 +140,6 @@ namespace Mantid
      */
     boost::python::dict RunPythonScript::doExecuteScript(const std::string & script) const
     {
-      // Execution
-      Environment::GlobalInterpreterLock gil;
       // Retrieve the main module.
       auto main = boost::python::import("__main__");
       // Retrieve the main module's namespace
@@ -204,10 +206,10 @@ namespace Mantid
       object pyoutput = locals["output"];
       if(pyoutput.ptr() == Py_None) return Workspace_sptr();
 
-      extract<Workspace_sptr> workspaceExtractor(pyoutput);
-      if(workspaceExtractor.check())
+      if(PyObject_HasAttrString(pyoutput.ptr(), "id"))
       {
-        return workspaceExtractor();
+	const auto & entry = Registry::DowncastRegistry::retrieve(call_method<std::string>(pyoutput.ptr(), "id"));
+	return boost::dynamic_pointer_cast<API::Workspace>(entry.fromPythonAsSharedPtr(pyoutput));
       }
       else
       {
