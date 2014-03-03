@@ -10,7 +10,6 @@ from isis_reflectometry.quick import *
 from isis_reflectometry import load_live_runs
 from isis_reflectometry.combineMulti import *
 from latest_isis_runs import *
-
 from mantid.api import Workspace, WorkspaceGroup
 
 try:
@@ -51,8 +50,6 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.current_instrument = self.instrument_list[instrument]
         self.comboPolarCorrect.setEnabled(self.current_instrument  in self.polarisation_instruments) # Enable as appropriate
         self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None')) # Reset to None
-            
-            
     def on_actionOpen_Table_triggered(self):
         self.loadTable()
     def on_actionReload_from_Disk_triggered(self):
@@ -70,7 +67,26 @@ class ReflGui(refl_window.Ui_windowRefl):
     def on_tableMain_modified(self):
         if not self.loading:
             self.windowRefl.modFlag = True
-            
+    def actionCopy_triggered(self):
+        print "copy trigger"
+    def actionCut_triggered(self):
+        print "cut trigger"
+    def actionPaste_triggered(self):
+        print "paste trigger"
+        self.paste_from_clipboard()
+    def actionClear_triggered(self):
+        cells = self.tableMain.selectedItems()
+        for cell in cells:
+            column = cell.column()
+            if not (column == 17 or column == 18):
+                cell.setText('')
+
+    def copy_to_clipboard(self,text):
+        self.clip.setText(str(text))
+
+    def paste_from_clipboard(self):
+        pass
+        #print self.clip.text()
     '''
     Event handler for polarisation correction selection.
     '''
@@ -85,7 +101,7 @@ class ReflGui(refl_window.Ui_windowRefl):
     def setupUi(self, windowRefl):
         super(ReflGui,self).setupUi(windowRefl)
         self.loading = False
-        
+        self.clip = QtGui.QApplication.clipboard()
         '''
         Setup instrument options with defaults assigned.
         '''
@@ -176,6 +192,10 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.actionClear_Table.triggered.connect(self.on_buttonClear_clicked)
         self.actionProcess.triggered.connect(self.on_buttonProcess_clicked)
         self.actionTransfer.triggered.connect(self.on_buttonTransfer_clicked)
+        self.actionClear.triggered.connect(self.actionClear_triggered)
+        self.actionPaste.triggered.connect(self.actionPaste_triggered)
+        self.actionCut.triggered.connect(self.actionCut_triggered)
+        self.actionCopy.triggered.connect(self.actionCopy_triggered)
         self.tableMain.cellChanged.connect(self.on_tableMain_modified)
         
     def populateList(self):
