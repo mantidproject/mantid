@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_window.ui'
 #
-# Created: Tue Jan 28 18:18:03 2014
+# Created: Fri Feb 28 10:16:43 2014
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -176,10 +176,13 @@ class Ui_windowRefl(object):
         self.tableMain.setHorizontalHeaderItem(16, item)
         item = QtGui.QTableWidgetItem()
         self.tableMain.setHorizontalHeaderItem(17, item)
-        self.tableMain.horizontalHeader().setCascadingSectionResizes(True)
+        self.tableMain.horizontalHeader().setCascadingSectionResizes(False)
         self.tableMain.horizontalHeader().setDefaultSectionSize(60)
         self.tableMain.horizontalHeader().setMinimumSectionSize(20)
+        self.tableMain.horizontalHeader().setStretchLastSection(True)
+        self.tableMain.verticalHeader().setCascadingSectionResizes(False)
         self.tableMain.verticalHeader().setDefaultSectionSize(20)
+        self.tableMain.verticalHeader().setStretchLastSection(True)
         self.layoutTableColumn.addWidget(self.tableMain)
         self.layoutTableButton = QtGui.QHBoxLayout()
         self.layoutTableButton.setObjectName(_fromUtf8("layoutTableButton"))
@@ -207,6 +210,8 @@ class Ui_windowRefl(object):
         self.menuHelp.setObjectName(_fromUtf8("menuHelp"))
         self.menuFunction = QtGui.QMenu(self.menuBar)
         self.menuFunction.setObjectName(_fromUtf8("menuFunction"))
+        self.menuEdit = QtGui.QMenu(self.menuBar)
+        self.menuEdit.setObjectName(_fromUtf8("menuEdit"))
         windowRefl.setMenuBar(self.menuBar)
         self.statusMain = QtGui.QStatusBar(windowRefl)
         self.statusMain.setObjectName(_fromUtf8("statusMain"))
@@ -235,6 +240,14 @@ class Ui_windowRefl(object):
         self.actionClear_Table.setObjectName(_fromUtf8("actionClear_Table"))
         self.actionSearch_RB = QtGui.QAction(windowRefl)
         self.actionSearch_RB.setObjectName(_fromUtf8("actionSearch_RB"))
+        self.actionCopy = QtGui.QAction(windowRefl)
+        self.actionCopy.setObjectName(_fromUtf8("actionCopy"))
+        self.actionPaste = QtGui.QAction(windowRefl)
+        self.actionPaste.setObjectName(_fromUtf8("actionPaste"))
+        self.actionCut = QtGui.QAction(windowRefl)
+        self.actionCut.setObjectName(_fromUtf8("actionCut"))
+        self.actionClear = QtGui.QAction(windowRefl)
+        self.actionClear.setObjectName(_fromUtf8("actionClear"))
         self.menuFile.addAction(self.actionOpen_Table)
         self.menuFile.addAction(self.actionReload_from_Disk)
         self.menuFile.addSeparator()
@@ -251,7 +264,12 @@ class Ui_windowRefl(object):
         self.menuFunction.addAction(self.actionClear_Table)
         self.menuFunction.addSeparator()
         self.menuFunction.addAction(self.actionSearch_RB)
+        self.menuEdit.addAction(self.actionCopy)
+        self.menuEdit.addAction(self.actionCut)
+        self.menuEdit.addAction(self.actionPaste)
+        self.menuEdit.addAction(self.actionClear)
         self.menuBar.addAction(self.menuFile.menuAction())
+        self.menuBar.addAction(self.menuEdit.menuAction())
         self.menuBar.addAction(self.menuFunction.menuAction())
         self.menuBar.addAction(self.menuHelp.menuAction())
         self.labelInstrument.setBuddy(self.comboInstrument)
@@ -318,6 +336,7 @@ class Ui_windowRefl(object):
         self.menuFile.setTitle(QtGui.QApplication.translate("windowRefl", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelp.setTitle(QtGui.QApplication.translate("windowRefl", "Help", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFunction.setTitle(QtGui.QApplication.translate("windowRefl", "Function", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuEdit.setTitle(QtGui.QApplication.translate("windowRefl", "Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSave_As.setText(QtGui.QApplication.translate("windowRefl", "Save As...", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSave_As.setShortcut(QtGui.QApplication.translate("windowRefl", "Ctrl+Alt+S", None, QtGui.QApplication.UnicodeUTF8))
         self.actionOpen_Table.setText(QtGui.QApplication.translate("windowRefl", "Open Table...", None, QtGui.QApplication.UnicodeUTF8))
@@ -342,4 +361,12 @@ class Ui_windowRefl(object):
         self.actionClear_Table.setShortcut(QtGui.QApplication.translate("windowRefl", "Alt+C", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSearch_RB.setText(QtGui.QApplication.translate("windowRefl", "Search RB", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSearch_RB.setShortcut(QtGui.QApplication.translate("windowRefl", "Alt+R", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionCopy.setText(QtGui.QApplication.translate("windowRefl", "Copy", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionCopy.setShortcut(QtGui.QApplication.translate("windowRefl", "Ctrl+C", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionPaste.setText(QtGui.QApplication.translate("windowRefl", "Paste", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionPaste.setShortcut(QtGui.QApplication.translate("windowRefl", "Ctrl+V", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionCut.setText(QtGui.QApplication.translate("windowRefl", "Cut", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionCut.setShortcut(QtGui.QApplication.translate("windowRefl", "Ctrl+X", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionClear.setText(QtGui.QApplication.translate("windowRefl", "Clear", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionClear.setShortcut(QtGui.QApplication.translate("windowRefl", "Del", None, QtGui.QApplication.UnicodeUTF8))
 
