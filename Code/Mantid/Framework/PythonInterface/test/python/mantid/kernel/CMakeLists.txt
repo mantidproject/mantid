@@ -31,6 +31,7 @@ set ( TEST_PY_FILES
   UnitFactoryTest.py
   UnitsTest.py
   V3DTest.py
+  VisibleWhenPropertyTest.py
   VMDTest.py
 )
 
