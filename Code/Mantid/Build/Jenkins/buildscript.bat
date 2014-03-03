@@ -48,7 +48,7 @@ if ERRORLEVEL 1 EXIT /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the tests
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-"C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C Release -j%BUILD_THREADS% --timeout 30 --output-on-failure -E MantidPlot
+"C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C Release -j%BUILD_THREADS% --timeout 60 --output-on-failure -E MantidPlot
 :: Run GUI tests serially
 ::ctest -C Release --timeout 30 --output-on-failure -R MantidPlot
 
