@@ -147,6 +147,9 @@ namespace Algorithms
     const std::string& paramType, const std::string& paramValue) const
   {
     
+    // remove existing parameters first
+    pmap.clearParametersByName(paramName, cmptId);
+    //then add the new one
     if (paramType == "String")
     {
       pmap.addString(cmptId,paramName,paramValue);

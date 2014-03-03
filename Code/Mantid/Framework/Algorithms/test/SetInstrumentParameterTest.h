@@ -101,6 +101,49 @@ public:
     auto cmpt = ws->getInstrument()->getComponentByName(cmptName);
     TS_ASSERT_EQUALS(1.12,cmpt->getNumberParameter(paramName)[0]);
   }
+  
+  void test_overwrite_dbl_value()
+  {
+    std::string cmptName = "samplePos";
+    std::string detList = "";
+    std::string paramName = "TestParam";
+    std::string paramType = "Number";
+    std::string paramValue = "1.12";
+    std::string paramValue2 = "3.22";
+
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3,3);
+    ExecuteAlgorithm(ws, cmptName, detList, paramName, paramValue, paramType);
+
+    auto cmpt = ws->getInstrument()->getComponentByName(cmptName);
+    TS_ASSERT_EQUALS(1.12,cmpt->getNumberParameter(paramName)[0]);
+
+    ExecuteAlgorithm(ws, cmptName, detList, paramName, paramValue2, paramType);
+
+    cmpt = ws->getInstrument()->getComponentByName(cmptName);
+    TS_ASSERT_EQUALS(3.22,cmpt->getNumberParameter(paramName)[0]);
+  }
+
+  void test_overwrite_diff_type()
+  {
+    std::string cmptName = "samplePos";
+    std::string detList = "";
+    std::string paramName = "TestParam";
+    std::string paramType = "Number";
+    std::string paramValue = "1.12";
+    std::string paramType2 = "String";
+    std::string paramValue2 = "A String";
+
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3,3);
+    ExecuteAlgorithm(ws, cmptName, detList, paramName, paramValue, paramType);
+
+    auto cmpt = ws->getInstrument()->getComponentByName(cmptName);
+    TS_ASSERT_EQUALS(1.12,cmpt->getNumberParameter(paramName)[0]);
+
+    ExecuteAlgorithm(ws, cmptName, detList, paramName, paramValue2, paramType2);
+
+    cmpt = ws->getInstrument()->getComponentByName(cmptName);
+    TS_ASSERT_EQUALS(paramValue2,cmpt->getStringParameter(paramName)[0]);
+  }
 
 MatrixWorkspace_sptr ExecuteAlgorithm(MatrixWorkspace_sptr testWS, std::string cmptName, std::string detList, std::string paramName, std::string paramValue, std::string paramType = "", bool fails=false)
   {
