@@ -84,5 +84,20 @@ namespace Mantid
       }
     }
 
+    /**
+     * Obtains a list of the current active catalog sessions.
+     * @return A list of active catalog sessions.
+     */
+    std::list<CatalogSession_sptr> CatalogManagerImpl::getActiveSessions()
+    {
+      std::list<CatalogSession_sptr> sessions;
+
+      for(auto item = m_activeCatalogs.begin(); item != m_activeCatalogs.end(); ++item)
+      {
+        sessions.push_back(item->first);
+      }
+
+      return sessions;
+    }
   }
 }

@@ -43,6 +43,8 @@ namespace Mantid
         ICatalog_sptr getCatalog(const std::string &sessionID);
         /// Destroy a specific catalog (if session provided), otherwise destroys all active catalogs.
         void destroyCatalog(const std::string &sessionID);
+        /// Obtains a list of the current active catalog sessions.
+        std::list<CatalogSession_sptr> getActiveSessions();
 
       private:
         /// These methods are required to create a singleton.
@@ -53,7 +55,7 @@ namespace Mantid
         virtual ~CatalogManagerImpl();
 
         // Holds a list of active catalogs and uses their sessionId as unique identifier.
-        std::map<CatalogSession_sptr, ICatalog_sptr> m_activeCatalogs;
+        std::map<CatalogSession_sptr,ICatalog_sptr> m_activeCatalogs;
     };
 
     #ifdef _WIN32
