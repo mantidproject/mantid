@@ -166,7 +166,6 @@ SCDPanelErrors::SCDPanelErrors() :
   NGroups =1;
   RotateCenters= false;
   SampleOffsets=false;
-  SampOffsetDeclareStatus=0;
 }
 
 SCDPanelErrors::~SCDPanelErrors()
@@ -288,14 +287,9 @@ void SCDPanelErrors::init()
 
   declareParameter("l0", 0.0, "Initial Flight Path");
   declareParameter("t0", 0.0, "Time offset");
-  SampOffsetDeclareStatus=1;
-  if( SampleOffsets)
-  {
-    declareParameter("SampleX", 0.0, "Sample x offset");
-    declareParameter("SampleY", 0.0, "Sample y offset");
-    declareParameter("SampleZ", 0.0, "Sample z offset");
-    SampOffsetDeclareStatus = 2;
-  }
+  declareParameter("SampleX", 0.0, "Sample x offset");
+  declareParameter("SampleY", 0.0, "Sample y offset");
+  declareParameter("SampleZ", 0.0, "Sample z offset");
 }
 
 void SCDPanelErrors::getPeaks() const
@@ -431,13 +425,12 @@ Instrument_sptr SCDPanelErrors::getNewInstrument(const API::IPeak & peak) const
                                                 pmapSv,RotateCenters);
 
   }//for each group
+
   V3D SampPos= instChange->getSample()->getPos();
-  if( SampleOffsets)
-  {
-    SampPos[0]+=getParameter("SampleX");
-    SampPos[1]+=getParameter("SampleY");
-    SampPos[2]+=getParameter("SampleZ");
-  }
+  SampPos[0]+=getParameter("SampleX")+SampleX;
+  SampPos[1]+=getParameter("SampleY")+SampleY;
+  SampPos[2]+=getParameter("SampleZ")+SampleZ;
+
   SCDCalibratePanels::FixUpSourceParameterMap( instChange, getParameter("l0"),SampPos, pmapSv) ;
 
   return instChange;
@@ -1455,13 +1448,7 @@ void SCDPanelErrors::setAttribute(const std::string &attName, const Attribute & 
       SampleOffsets= false;
     else
       SampleOffsets=true;
-    if(SampOffsetDeclareStatus== 1 && SampleOffsets)
-    {
-      declareParameter("SampleX", 0.0, "Sample x offset");
-      declareParameter("SampleY", 0.0, "Sample y offset");
-      declareParameter("SampleZ", 0.0, "Sample z offset");
-      SampOffsetDeclareStatus =2;
-    }
+
   }
   else if (attName == SAMPLE_X)
   {
