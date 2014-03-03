@@ -10,6 +10,7 @@ set ( TEST_PY_FILES
   ConfigServiceTest.py
   DateAndTimeTest.py
   DeltaEModeTest.py
+  EnabledWhenPropertyTest.py
   FacilityInfoTest.py
   FilteredTimeSeriesPropertyTest.py
   InstrumentInfoTest.py
