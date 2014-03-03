@@ -6,8 +6,6 @@
 #include <map>
 #include <istream>
 
-#include <Poco/Net/HTTPClientSession.h>
-#include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 
 // Forward declarations
@@ -18,6 +16,8 @@ namespace Poco {
   namespace Net {
     class HTTPCookie;
     class NameValueCollection;
+    class HTTPClientSession;
+    class HTTPRequest;
   }
 }
 
@@ -31,11 +31,7 @@ class MANTID_KERNEL_DLL RemoteJobManager
 {
 public:
   RemoteJobManager( const Poco::XML::Element* elem);
-
-  virtual ~RemoteJobManager()
-  {
-    delete m_session;  // Ensure m_session is either valid or NULL!!
-  }
+  virtual ~RemoteJobManager();
 
   // Name/Value pairs for POST data.  Note that the second string might be binary, and might be
   // fairly large.  (If it were a JPG image for example...)
@@ -64,10 +60,8 @@ public:
 
 private:
   // Wraps up some of the boilerplate code needed to execute HTTP GET and POST requests
-  void initGetRequest( Poco::Net::HTTPRequest &req, std::string extraPath, std::string queryString)
-  { return initHTTPRequest( req, Poco::Net::HTTPRequest::HTTP_GET, extraPath, queryString); }
-  void initPostRequest( Poco::Net::HTTPRequest &req, std::string extraPath)
-  { return initHTTPRequest( req, Poco::Net::HTTPRequest::HTTP_POST, extraPath); }
+  void initGetRequest( Poco::Net::HTTPRequest &req, std::string extraPath, std::string queryString);
+  void initPostRequest( Poco::Net::HTTPRequest &req, std::string extraPath);
   void initHTTPRequest( Poco::Net::HTTPRequest &req, const std::string &method,
                                        std::string extraPath, std::string queryString="");
 
