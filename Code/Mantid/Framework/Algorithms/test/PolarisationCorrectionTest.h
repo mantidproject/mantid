@@ -79,6 +79,11 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("PolarisationAnalysis", "PA");
+    alg.setPropertyValue("crho", "1,1,1,1");
+    alg.setPropertyValue("calpha", "1,1,1,1");
+    alg.setPropertyValue("cAp", "1,1,1,1");
+    alg.setPropertyValue("cPp", "1,1,1,1");
+
     alg.setPropertyValue("OutputWorkspace", outWSName);
     TSM_ASSERT_THROWS("Wrong number of grouped workspaces, should throw", alg.execute(),
         std::invalid_argument&);
@@ -98,6 +103,10 @@ public:
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("PolarisationAnalysis", "PNR");
     alg.setPropertyValue("OutputWorkspace", outWSName);
+    alg.setPropertyValue("crho", "1,1,1,1");
+    alg.setPropertyValue("calpha", "1,1,1,1");
+    alg.setPropertyValue("cAp", "1,1,1,1");
+    alg.setPropertyValue("cPp", "1,1,1,1");
     TSM_ASSERT_THROWS("Wrong number of grouped workspaces, should throw", alg.execute(),
         std::invalid_argument&);
   }
