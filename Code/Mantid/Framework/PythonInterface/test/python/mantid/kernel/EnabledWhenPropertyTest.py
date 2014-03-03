@@ -9,6 +9,11 @@ class EnabledWhenPropertyTest(unittest.TestCase):
     def test_construction_with_name_criterion_value_succeeds(self):
         p = EnabledWhenProperty("OtherProperty", PropertyCriterion.IsEqualTo, "value")
 
+    def test_Property_Criterion_Has_Expected_Attrs(self):
+        attrs = ["IsNotDefault", "IsEqualTo", "IsNotEqualTo", "IsMoreOrEqual"]
+        for att in attrs:
+            self.assertTrue(hasattr(PropertyCriterion, att))
+
     #------------ Failure cases ------------------
     
     def test_default_construction_raises_error(self):
