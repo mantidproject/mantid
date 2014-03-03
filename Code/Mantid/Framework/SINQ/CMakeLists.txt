@@ -3,19 +3,20 @@ set ( SRC_FILES
 	src/LoadFlexiNexus.cpp
 	src/MDHistoToWorkspace2D.cpp
 	src/PoldiAutoCorrelation5.cpp
-        src/PoldiUtilities/PoldiAutoCorrelationCore.cpp
-        src/PoldiUtilities/PoldiBasicChopper.cpp
-        src/PoldiUtilities/PoldiChopperFactory.cpp
-        src/PoldiUtilities/PoldiDeadWireDecorator.cpp
-        src/PoldiUtilities/PoldiDetectorDecorator.cpp
-        src/PoldiUtilities/PoldiDetectorFactory.cpp
-        src/PoldiUtilities/PoldiHeliumDetector.cpp
 	src/PoldiLoadChopperSlits.cpp
 	src/PoldiLoadIPP.cpp
 	src/PoldiLoadLog.cpp
 	src/PoldiLoadSpectra.cpp
 	src/PoldiPeakDetection2.cpp
+	src/PoldiPeakSearch.cpp
 	src/PoldiRemoveDeadWires.cpp
+	src/PoldiUtilities/PoldiAutoCorrelationCore.cpp
+	src/PoldiUtilities/PoldiBasicChopper.cpp
+	src/PoldiUtilities/PoldiChopperFactory.cpp
+	src/PoldiUtilities/PoldiDeadWireDecorator.cpp
+	src/PoldiUtilities/PoldiDetectorDecorator.cpp
+	src/PoldiUtilities/PoldiDetectorFactory.cpp
+	src/PoldiUtilities/PoldiHeliumDetector.cpp
 	src/ProjectMD.cpp
 	src/SINQHMListener.cpp
 	src/SINQTranspose3D.cpp
@@ -27,23 +28,24 @@ set ( INC_FILES
 	inc/MantidSINQ/InvertMDDim.h
 	inc/MantidSINQ/LoadFlexiNexus.h
 	inc/MantidSINQ/MDHistoToWorkspace2D.h
-        inc/MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h
-        inc/MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h
-        inc/MantidSINQ/PoldiAutoCorrelation5.h
-        inc/MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h
-        inc/MantidSINQ/PoldiUtilities/PoldiBasicChopper.h
-        inc/MantidSINQ/PoldiUtilities/PoldiChopperFactory.h
-        inc/MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h
-        inc/MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h
-        inc/MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h
-        inc/MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h
+	inc/MantidSINQ/PoldiAutoCorrelation5.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
 	inc/MantidSINQ/PoldiLoadIPP.h
 	inc/MantidSINQ/PoldiLoadLog.h
 	inc/MantidSINQ/PoldiLoadSpectra.h
-        inc/MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h
 	inc/MantidSINQ/PoldiPeakDetection2.h
+	inc/MantidSINQ/PoldiPeakSearch.h
 	inc/MantidSINQ/PoldiRemoveDeadWires.h
+	inc/MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h
+	inc/MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h
+	inc/MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h
+	inc/MantidSINQ/PoldiUtilities/PoldiBasicChopper.h
+	inc/MantidSINQ/PoldiUtilities/PoldiChopperFactory.h
+	inc/MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h
+	inc/MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h
+	inc/MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h
+	inc/MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h
+	inc/MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h
 	inc/MantidSINQ/ProjectMD.h
 	inc/MantidSINQ/SINQHMListener.h
 	inc/MantidSINQ/SINQTranspose3D.h
@@ -61,6 +63,7 @@ set ( TEST_FILES
 	PoldiDetectorDecoratorTest.h
 	PoldiDetectorFactoryTest.h
 	PoldiDetectorTest.h
+	PoldiPeakSearchTest.h
 	ProjectMDTest.h
 	SliceMDHistoTest.h
 )

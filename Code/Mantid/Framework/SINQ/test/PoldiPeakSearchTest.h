@@ -1,0 +1,163 @@
+#ifndef MANTID_SINQ_POLDIPEAKSEARCHTEST_H_
+#define MANTID_SINQ_POLDIPEAKSEARCHTEST_H_
+
+#include <cxxtest/TestSuite.h>
+
+#include "MantidSINQ/PoldiPeakSearch.h"
+
+using Mantid::Poldi::PoldiPeakSearch;
+using namespace Mantid::Kernel;
+
+class TestablePoldiPeakSearch : public PoldiPeakSearch
+{
+    friend class PoldiPeakSearchTest;
+};
+
+class PoldiPeakSearchTest : public CxxTest::TestSuite
+{
+public:
+    // This pair of boilerplate methods prevent the suite being created statically
+    // This means the constructor isn't called when running other tests
+    static PoldiPeakSearchTest *createSuite() { return new PoldiPeakSearchTest(); }
+    static void destroySuite( PoldiPeakSearchTest *suite ) { delete suite; }
+
+
+    void testgetNeighborSums()
+    {
+        double raw[] = {1.0, 2.0, 3.0, 4.0};
+        std::vector<double> input(raw, raw + 4);
+
+        TestablePoldiPeakSearch poldiPeakSearch;
+
+        std::vector<double> sum = poldiPeakSearch.getNeighborSums(input);
+
+        TS_ASSERT_EQUALS(sum.size(), 2);
+        TS_ASSERT_EQUALS(sum[0], 6.0);
+        TS_ASSERT_EQUALS(sum[1], 9.0);
+
+        input.pop_back();
+        input.pop_back();
+
+        TS_ASSERT_THROWS(poldiPeakSearch.getNeighborSums(input), std::runtime_error);
+    }
+
+    void testSetMinimumDistance()
+    {
+        TestablePoldiPeakSearch poldiPeakSearch;
+
+        TS_ASSERT_THROWS(poldiPeakSearch.setMinimumDistance(0), std::runtime_error);
+
+        poldiPeakSearch.setMinimumDistance(2);
+        TS_ASSERT_EQUALS(poldiPeakSearch.m_minimumDistance, 2);
+        TS_ASSERT_EQUALS(poldiPeakSearch.m_doubleMinimumDistance, 4);
+    }
+
+    void testsetMaximumPeakNumber()
+    {
+        TestablePoldiPeakSearch poldiPeakSearch;
+
+        poldiPeakSearch.setMaximumPeakNumber(2);
+        TS_ASSERT_EQUALS(poldiPeakSearch.m_maximumPeakNumber, 2);
+    }
+
+    void testfindPeaksRecursive()
+    {
+        TestablePoldiPeakSearch poldiPeakSearch;
+        poldiPeakSearch.setMinimumDistance(2);
+
+        double testListRaw[] = {-3.0, -2.0, 12.0, 3.0, 5.0, 7.0, 12.0, 34.0, 13.0, 18.0, 1.0, -10.0, 12.0, 3.0, 4.0, 6.0, 7.0};
+        std::vector<double> testList(testListRaw, testListRaw + 17);
+
+        std::list<std::vector<double>::iterator> maxima = poldiPeakSearch.findPeaksRecursive(testList.begin(), testList.end());
+        TS_ASSERT_EQUALS(maxima.size(), 3);
+
+        maxima.sort();
+
+        double shouldGiveMaxima[] = {12.0, 34.0, 12.0};
+
+        for(size_t i = 0; i < 3; ++i) {
+            TS_ASSERT_EQUALS(*maxima.front(), shouldGiveMaxima[i]);
+            maxima.pop_front();
+        }
+    }
+
+    void testfindPeaks()
+    {
+        int maxPeakNum = 2;
+
+        TestablePoldiPeakSearch poldiPeakSearch;
+        poldiPeakSearch.setMinimumDistance(2);
+        poldiPeakSearch.setMaximumPeakNumber(maxPeakNum);
+
+        double testListRaw[] = {-3.0, -2.0, 12.0, 3.0, 5.0, 7.0, 12.0, 34.0, 13.0, 18.0, 1.0, -10.0, 12.0, 3.0, 4.0, 6.0, 7.0};
+        std::vector<double> testList(testListRaw, testListRaw + 17);
+
+        std::list<std::vector<double>::iterator> maxima = poldiPeakSearch.findPeaks(testList.begin(), testList.end());
+        TS_ASSERT_EQUALS(maxima.size(), maxPeakNum);
+        TS_ASSERT_EQUALS(*maxima.front(), 34.0);        
+        TS_ASSERT_EQUALS(*maxima.back(), 12.0);
+
+    }
+
+    void testgetPeakCoordinates()
+    {
+        TestablePoldiPeakSearch poldiPeakSearch;
+        poldiPeakSearch.setMinimumDistance(2);
+        poldiPeakSearch.setMaximumPeakNumber(3);
+
+        double testListRaw[] = {2.0, -3.0, -2.0, 12.0, 3.0, 5.0, 7.0, 12.0, 34.0, 13.0, 18.0, 1.0, -10.0, 12.0, 3.0, 4.0, 6.0, 7.0, 3.0};
+        std::vector<double> baseData(testListRaw + 1, testListRaw + 17);
+
+        std::vector<double> testYData(testListRaw, testListRaw + 19);
+        std::vector<double> testXData(testYData.size());
+        double x = 0.0;
+        std::generate(testXData.begin(), testXData.end(), [&x]() { return x += 1.0; });
+
+        std::list<std::vector<double>::iterator> maxima = poldiPeakSearch.findPeaksRecursive(baseData.begin(), baseData.end());
+
+        maxima.sort();
+
+        std::vector<V2D> peakCoordinates = poldiPeakSearch.getPeakCoordinates(baseData.begin(), maxima, testXData);
+
+        TS_ASSERT_EQUALS(peakCoordinates.size(), 3);
+
+        V2D peak0 = peakCoordinates[0];
+        TS_ASSERT_EQUALS(peak0.X(), 4.0);
+        TS_ASSERT_EQUALS(peak0.Y(), 12.0 / 3.0);
+
+        V2D peak1 = peakCoordinates[1];
+        TS_ASSERT_EQUALS(peak1.X(), 9.0);
+        TS_ASSERT_EQUALS(peak1.Y(), 34.0 / 3.0);
+    }
+
+    void testgetOriginalDataPeakIterators()
+    {
+        TestablePoldiPeakSearch poldiPeakSearch;
+
+        std::vector<double> firstVector;
+        firstVector.push_back(2.0);
+        firstVector.push_back(3.0);
+        firstVector.push_back(4.0);
+        firstVector.push_back(5.0);
+
+        std::vector<double> secondVector;
+        secondVector.push_back(1.5);
+        secondVector.push_back(2.5);
+        secondVector.push_back(3.5);
+        secondVector.push_back(4.5);
+        secondVector.push_back(5.5);
+        secondVector.push_back(6.5);
+
+        std::list<std::vector<double>::iterator> firstIterators;
+        firstIterators.push_back(firstVector.begin() + 2);
+        firstIterators.push_back(firstVector.begin() + 3);
+
+        std::list<std::vector<double>::iterator> secondIterators = poldiPeakSearch.getOriginalDataPeakIterators(firstIterators, firstVector.begin(), secondVector.begin());
+
+        TS_ASSERT_EQUALS(*secondIterators.front(), 4.5);
+        TS_ASSERT_EQUALS(*secondIterators.back(), 5.5);
+    }
+};
+
+
+#endif /* MANTID_SINQ_POLDIPEAKSEARCHTEST_H_ */
