@@ -24,6 +24,10 @@ namespace Mantid
     CatalogSession_sptr CatalogManagerImpl::login(const std::string& username,const std::string& password,
         const std::string& endpoint,const std::string& facility)
     {
+      // This is a temporary measure to ensure the user does not attempt to log into several facilities
+      // as that functionality is not quite supported.
+      if (m_activeCatalogs.size() >= 1) throw std::runtime_error("Multiple facility functionality is not yet supported.");
+
       std::string className = Kernel::ConfigService::Instance().getFacility(facility).catalogInfo().catalogName();
       auto catalog = CatalogFactory::Instance().create(className);
       CatalogSession_sptr session = catalog->login(username,password,endpoint,facility);
