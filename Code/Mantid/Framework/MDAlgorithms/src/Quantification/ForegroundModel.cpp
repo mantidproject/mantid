@@ -175,7 +175,7 @@ namespace Mantid
     }
 
     const double TWO_PI = 2.*M_PI;
-    inline void ForegroundModel::convertToHKL(const API::ExperimentInfo & exptSetup, const double &qx,const double &qy, const double &qz,
+    void ForegroundModel::convertToHKL(const API::ExperimentInfo & exptSetup, const double &qx,const double &qy, const double &qz,
                                               double &qh,double &qk,double &ql,double &arlu1,double &arlu2,double &arlu3)
     {
       // Transform the HKL only requires B matrix & goniometer (R) as ConvertToMD should have already

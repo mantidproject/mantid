@@ -141,7 +141,6 @@ namespace Mantid
 
         double weight,qchain;
         double qh,qk,ql,arlu1,arlu2,arlu3;
-
         ForegroundModel::convertToHKL(exptSetup,qx,qy,qz,qh,qk,ql,arlu1,arlu2,arlu3);
 
         //	Orientation of the chain:
