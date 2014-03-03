@@ -219,6 +219,7 @@ void export_ialgorithm()
     .def("name", &IAlgorithm::name, "Returns the name of the algorithm")
     .def("alias", &IAlgorithm::alias, "Return the aliases for the algorithm")
     .def("version", &IAlgorithm::version, "Returns the version number of the algorithm")
+    .def("cancel", &IAlgorithm::cancel, "Request that the algorithm stop running")
     .def("category", &IAlgorithm::category, "Returns the category containing the algorithm")
     .def("categories", &IAlgorithm::categories, "Returns the list of categories this algorithm belongs to")
     .def("workspaceMethodName",&IAlgorithm::workspaceMethodName, 
@@ -237,7 +238,8 @@ void export_ialgorithm()
           "such that the mandatory properties are first followed by the optional ones.")
     .def("outputProperties",&getOutputProperties, "Returns a list of the output properties on the algorithm")
     .def("isInitialized", &IAlgorithm::isInitialized, "Returns True if the algorithm is initialized, False otherwise")
-    .def("isExecuted", &IAlgorithm::isExecuted, "Returns true if the algorithm has been executed successfully, false otherwise")
+    .def("isExecuted", &IAlgorithm::isExecuted, "Returns True if the algorithm has been executed successfully, False otherwise")
+    .def("isRunning", &IAlgorithm::isRunning, "Returns True if the algorithm is considered to be running, False otherwise")
     .def("setChild", &IAlgorithm::setChild,
         "If true this algorithm is run as a child algorithm. There will be no logging and nothing is stored in the Analysis Data Service")
     .def("setAlwaysStoreInADS", &IAlgorithm::setAlwaysStoreInADS,

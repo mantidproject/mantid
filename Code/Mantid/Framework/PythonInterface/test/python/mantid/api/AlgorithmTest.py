@@ -2,6 +2,28 @@ import unittest
 from mantid.api import AlgorithmManager
 from testhelpers import run_algorithm
 
+############### Test class for cancellation ################
+from mantid.api import Progress, PythonAlgorithm
+
+class CancellableAlg(PythonAlgorithm):
+    
+    timeout = 10 #seconds
+    timeout_reached = False
+    
+    def PyInit(self):
+        pass
+    
+    def PyExec(self):
+        prog = Progress(self,0.0,1.0,100000)
+        import time
+        start = time.time()
+        while (time.time() - start) < self.timeout:
+            prog.report()
+        # end while
+        self.timeout_reached = True
+
+###########################################################
+
 class AlgorithmTest(unittest.TestCase):
   
     _load = None
@@ -39,6 +61,7 @@ class AlgorithmTest(unittest.TestCase):
         data = [1.0,2.0,3.0]
         alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength',child=True)
         self.assertEquals(alg.isExecuted(), True)
+        self.assertEquals(alg.isRunning(), False)
         self.assertEquals(alg.getProperty('NSpec').value, 1)
         self.assertEquals(type(alg.getProperty('NSpec').value), int)
         self.assertEquals(alg.getProperty('NSpec').name, 'NSpec')
@@ -48,6 +71,36 @@ class AlgorithmTest(unittest.TestCase):
         as_str = str(alg)
         self.assertEquals(as_str, "CreateWorkspace.1(OutputWorkspace=UNUSED_NAME_FOR_CHILD,DataX=1,2,3,DataY=1,2,3,UnitX=Wavelength)")
         
+        
+    def test_cancel_does_nothing_to_executed_algorithm(self):
+        data = [1.0]
+        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength',child=True)
+        self.assertEquals(alg.isExecuted(), True)
+        self.assertEquals(alg.isRunning(), False)
+        alg.cancel()
+        self.assertEquals(alg.isExecuted(), True)
+        self.assertEquals(alg.isRunning(), False)
+
+    def test_running_alg_can_be_cancelled(self):
+        import threading
+        class AlgThread(threading.Thread):
+            def __init__(self, alg_obj):
+                threading.Thread.__init__(self)
+                self.algorithm = alg_obj
+                self.algorithm.initialize()
+                
+            def run(self):
+                self.algorithm.execute()
+        ####################################
+        test_alg = CancellableAlg()
+        exec_thread = AlgThread(test_alg)
+        exec_thread.start()
+        self.assertTrue(test_alg.isRunning())
+        test_alg.cancel()
+        exec_thread.join() # maximum time to way set by CancellableAlg.timeout
+        self.assertEquals(False, test_alg.timeout_reached)
+        
+
     def test_createChildAlgorithm_creates_new_algorithm_that_is_set_as_child(self):
         parent_alg = AlgorithmManager.createUnmanaged('Load')
         child_alg = parent_alg.createChildAlgorithm('Rebin')
