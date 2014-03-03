@@ -22,9 +22,6 @@ namespace MantidQt
      */
     CatalogPublishDialog::CatalogPublishDialog(QWidget *parent) : MantidQt::API::AlgorithmDialog(parent), m_uiForm() {}
 
-    /// Destructor
-    CatalogPublishDialog::~CatalogPublishDialog() {}
-
     /// Initialise the layout
     void CatalogPublishDialog::initLayout()
     {
