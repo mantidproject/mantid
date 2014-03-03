@@ -169,7 +169,7 @@ namespace Mantid
         if (eps > (wl+FLT_EPSILON) && eps <= wu)
         {
           //	Orientation of the hole orbital
-          double formfactor;
+          double formfactor(1);
           switch(m_FFDirection)
           {
           case(NormalTo_a):
@@ -193,7 +193,7 @@ namespace Mantid
           case(Isotropic): 
           default:
             {
-              double formfactor = this->formFactor(qsqr);
+              formfactor = this->formFactor(qsqr);
             }
           }
 
