@@ -54,9 +54,8 @@ make -j$BUILD_THREADS AllTests
 # Run the tests
 ###############################################################################
 # Remove any Mantid.user.properties file
-#rm ~/.mantid/Mantid.user.properties
-ctest -j$BUILD_THREADS --output-on-failure --timeout 30 -R KernelTest
-#ctest -j$BUILD_THREADS --output-on-failure --timeout 30 -E MantidPlot
+rm ~/.mantid/Mantid.user.properties
+ctest -j$BUILD_THREADS --output-on-failure --timeout 30 -E MantidPlot
 # Run GUI tests serially
 #ctest --output-on-failure --timeout 30 -R MantidPlot
 
