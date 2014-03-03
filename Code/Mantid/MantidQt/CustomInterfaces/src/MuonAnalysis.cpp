@@ -2381,18 +2381,7 @@ void MuonAnalysis::startUpLook()
  */
 double MuonAnalysis::timeZero()
 {
-  QString boxText = m_uiForm.timeZeroFront->text();
-  double timeZero = 0.0;
-  try
-  {
-    timeZero = boost::lexical_cast<double>(boxText.toStdString());
-  }
-  catch(boost::bad_lexical_cast&)
-  {
-    QMessageBox::warning(this, "MantidPlot - Muon Analysis", "Unable to interpret time zero as number, setting to 0.0");
-    m_uiForm.timeZeroFront->setText("0.0");
-  }
-  return timeZero;
+  return getValidatedDouble(m_uiForm.timeZeroFront, 0, "time zero", g_log);
 }
 
 /**
@@ -2400,19 +2389,8 @@ double MuonAnalysis::timeZero()
  */
 double MuonAnalysis::firstGoodBin() const
 {
-  QString text = m_uiForm.firstGoodBinFront->text();
-
-  bool ok;
-  double value = text.toDouble(&ok);
-
-  if (!ok)
-  {
-    g_log.warning("First Good Data is empty or invalid. Reset to default value.");
-    m_uiForm.firstGoodBinFront->setText(QString::number(FIRST_GOOD_BIN_DEFAULT));
-    value = FIRST_GOOD_BIN_DEFAULT;
-  }
-
-  return value;
+  return getValidatedDouble(m_uiForm.firstGoodBinFront, FIRST_GOOD_BIN_DEFAULT, "first good bin",
+                            g_log);
 }
 
  /**
@@ -2433,17 +2411,7 @@ double MuonAnalysis::plotFromTime() const
   }
   else if (startTimeType == "Custom Value")
   {
-    bool ok;
-    double customValue = m_uiForm.timeAxisStartAtInput->text().toDouble(&ok);
-
-    if (!ok)
-    {
-      g_log.warning("Custom start time value is empty or invalid. Reset to zero.");
-      customValue = 0;
-      m_uiForm.timeAxisStartAtInput->setText("0.0");
-    }
-
-    return customValue;
+    return getValidatedDouble(m_uiForm.timeAxisStartAtInput, 0, "custom start time", g_log);
   }
 
   // Just in case misspelled type or added a new one
@@ -2457,17 +2425,9 @@ double MuonAnalysis::plotFromTime() const
  */
 double MuonAnalysis::plotToTime() const
 {
-  bool ok;
-  double value = m_uiForm.timeAxisFinishAtInput->text().toDouble(&ok);
-
-  if (!ok)
-  {
-    g_log.warning("Custom finish time value is empty or invalid. Reset to default.");
-    value = plotFromTime() + 1.0;
-    m_uiForm.timeAxisFinishAtInput->setText(QString::number(value));
-  }
-
-  return value;
+  double defaultValue = plotFromTime() + 1.0;
+  return getValidatedDouble(m_uiForm.timeAxisFinishAtInput, defaultValue, "custom finish time",
+                            g_log);
 }
 
 

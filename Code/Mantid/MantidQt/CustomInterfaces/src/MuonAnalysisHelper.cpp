@@ -17,6 +17,7 @@ namespace MuonAnalysisHelper
 {
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 /**
  * Sets double validator for specified field.
@@ -320,6 +321,31 @@ void WidgetAutoSaver::beginGroup(const QString &name)
 void WidgetAutoSaver::endGroup()
 {
   m_settings.endGroup();
+}
+
+/**
+ * Validates and returns a double value. If it is not invalid, the widget is set to default value,
+ * appropriate warning is printed and default value is returned.
+ * @param field :: Field to get value from
+ * @param defaultValue :: Default value to return/set if field value is invalid
+ * @param valueDescr :: Description of the value
+ * @param log :: Log to print warning to in case value is invalid
+ * @return Value if field is valid, default value otherwise
+ */
+double getValidatedDouble(QLineEdit* field, double defaultValue, const QString& valueDescr, Logger& log)
+{
+  bool ok;
+  double value = field->text().toDouble(&ok);
+
+  if (!ok)
+  {
+    log.warning() << "The value of " << valueDescr.toStdString() << " is empty or invalid. ";
+    log.warning() << "Reset to default of " << defaultValue << ".\n";
+    value = defaultValue;
+    field->setText(QString::number(defaultValue));
+  }
+
+  return value;
 }
 
 } // namespace MuonAnalysisHelper

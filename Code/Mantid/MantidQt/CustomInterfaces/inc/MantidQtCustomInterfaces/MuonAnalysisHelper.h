@@ -17,12 +17,17 @@ namespace MuonAnalysisHelper
 {
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 /// Sets double validator for specified field
 DLLExport void setDoubleValidator(QLineEdit* field);
 
 /// Returns a first period MatrixWorkspace in a run workspace
 DLLExport MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws);
+
+/// Validates the field and returns the value
+DLLExport double getValidatedDouble(QLineEdit* field, double defaultValue,
+                                    const QString& valueDescr, Logger& log);
 
 /// Returns a number of periods in a run workspace
 DLLExport size_t numPeriods(Workspace_sptr ws);
