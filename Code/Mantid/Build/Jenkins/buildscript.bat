@@ -42,7 +42,7 @@ cd %WORKSPACE%\build
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=Release Framework\Kernel\test\KernelTest.vcxproj
+msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=Release Mantid.sln
 if ERRORLEVEL 1 EXIT /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

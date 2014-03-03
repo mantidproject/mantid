@@ -47,7 +47,8 @@ $SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CPACK=ON ../Code/Mantid
 ###############################################################################
 # Build step
 ###############################################################################
-make -j$BUILD_THREADS KernelTest
+make -j$BUILD_THREADS
+make -j$BUILD_THREADS AllTests
 
 ###############################################################################
 # Run the tests
