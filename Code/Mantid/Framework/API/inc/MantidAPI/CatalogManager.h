@@ -41,10 +41,8 @@ namespace Mantid
             const std::string& endpoint,const std::string& facility);
         /// Get a specific catalog using the sessionID.
         ICatalog_sptr getCatalog(const std::string &sessionID);
-        /// Destroy and remove a specific catalog from the active catalogs list.
+        /// Destroy a specific catalog (if session provided), otherwise destroys all active catalogs.
         void destroyCatalog(const std::string &sessionID);
-        /// Destroy all active catalogs.
-        void destroyCatalogs();
 
       private:
         /// These methods are required to create a singleton.

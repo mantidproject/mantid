@@ -60,10 +60,20 @@ namespace Mantid
 
     /**
      * Destroy and remove a specific catalog from the active catalogs list and the composite catalog.
+     * If sessionID is empty then all catalogs are removed from the active catalogs list.
      * @param sessionID :: The session to search for in the active catalogs list.
      */
     void CatalogManagerImpl::destroyCatalog(const std::string& sessionID)
     {
+      if(sessionID.empty())
+      {
+        for(auto item = m_activeCatalogs.begin(); item != m_activeCatalogs.end(); ++item)
+        {
+          item->second->logout();
+        }
+        m_activeCatalogs.clear();
+      }
+
       for(auto iter = m_activeCatalogs.begin(); iter != m_activeCatalogs.end(); ++iter)
       {
         if (sessionID == iter->first->getSessionId())
@@ -72,18 +82,6 @@ namespace Mantid
           m_activeCatalogs.erase(iter);
         }
       }
-    }
-
-    /**
-     * Destroy all active catalogs.
-     */
-    void CatalogManagerImpl::destroyCatalogs()
-    {
-      for(auto item = m_activeCatalogs.begin(); item != m_activeCatalogs.end(); ++item)
-      {
-        item->second->logout();
-      }
-      m_activeCatalogs.clear();
     }
 
   }

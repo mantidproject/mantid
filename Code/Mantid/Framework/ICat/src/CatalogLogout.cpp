@@ -21,12 +21,15 @@ namespace Mantid
     }
 
     /// Init method to declare algorithm properties
-    void CatalogLogout::init() {}
+    void CatalogLogout::init()
+    {
+      declareProperty("Session","","The session information of the catalog to use.");
+    }
 
     /// execute the algorithm
     void CatalogLogout::exec()
     {
-      API::CatalogManager::Instance().destroyCatalogs();
+      API::CatalogManager::Instance().destroyCatalog(getPropertyValue("Session"));
     }
   }
 }
