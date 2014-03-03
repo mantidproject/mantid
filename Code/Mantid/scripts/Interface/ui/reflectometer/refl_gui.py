@@ -44,7 +44,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.process()
     def on_comboInstrument_activated(self, instrument):
         config['default.instrument'] = self.instrument_list[instrument]
-        logger.notice( "Instrument is now: " + config['default.instrument'])
+        logger.notice( "Instrument is now: " + str(config['default.instrument']))
         self.textRB.clear()
         self.populateList()
         self.current_instrument = self.instrument_list[instrument]
@@ -80,7 +80,7 @@ class ReflGui(refl_window.Ui_windowRefl):
             chosen_method = self.comboPolarCorrect.currentText()
             self.current_polarisation_method = self.polarisation_options[chosen_method]
         else:
-            logger.notice("Polarisation correction is not supported on " + self.current_instrument)
+            logger.notice("Polarisation correction is not supported on " + str(self.current_instrument))
     def setupUi(self, windowRefl):
         super(ReflGui,self).setupUi(windowRefl)
         self.loading = False
@@ -133,7 +133,7 @@ class ReflGui(refl_window.Ui_windowRefl):
             ret, saved = self.windowRefl.savecheck()
             if ret == QtGui.QMessageBox.Cancel:
                 return
-        self.currentTable = None
+        self.current_table = None
         self.accMethod = None
         
         for column in range(self.tableMain.columnCount()):
@@ -606,42 +606,42 @@ class ReflGui(refl_window.Ui_windowRefl):
                             self.tableMain.setItem(row, column, item)
                         row = row + 1
             except:
-                logger.error('Could not load file: ' + filename + '. File not found or unable to read from file.')
+                logger.error('Could not load file: ' + str(filename) + '. File not found or unable to read from file.')
         self.loading = False
         self.windowRefl.modFlag = False
     def reloadTable(self):
         self.loading = True
-        if self.windowRefl.modFlag:
-            msgBox = QtGui.QMessageBox()
-            msgBox.setText("The table has been modified. Are you sure you want to reload the table and lose your changes?")
-            msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-            msgBox.setIcon(QtGui.QMessageBox.Question)
-            msgBox.setDefaultButton(QtGui.QMessageBox.Yes)
-            msgBox.setEscapeButton(QtGui.QMessageBox.No)
-            ret = msgBox.exec_()
-            if ret == QtGui.QMessageBox.No:
-                #if they hit No abort the reload
-                self.loading = False
-                return
         filename = self.current_table
         if filename:
+            if self.windowRefl.modFlag:
+                msgBox = QtGui.QMessageBox()
+                msgBox.setText("The table has been modified. Are you sure you want to reload the table and lose your changes?")
+                msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+                msgBox.setIcon(QtGui.QMessageBox.Question)
+                msgBox.setDefaultButton(QtGui.QMessageBox.Yes)
+                msgBox.setEscapeButton(QtGui.QMessageBox.No)
+                ret = msgBox.exec_()
+                if ret == QtGui.QMessageBox.No:
+                    #if they hit No abort the reload
+                    self.loading = False
+                    return
             try:
                 self.resetTable()
                 reader = csv.reader(open(filename, "rb"))
                 row = 0
                 for line in reader:
                     if (row < 100):
-                        for column in range(self.tableMain.columnCount() - 1):
+                        for column in range(self.tableMain.columnCount() - 2):
                             item = QtGui.QTableWidgetItem()
                             item.setText(line[column])
                             self.tableMain.setItem(row, column, item)
                         row = row + 1
+                self.windowRefl.modFlag = False
             except:
-                logger.error('Could not load file: ' + filename + '. File not found or unable to read from file.')
+                logger.error('Could not load file: ' + str(filename) + '. File not found or unable to read from file.')
         else:
             logger.notice('No file in table to reload.')
         self.loading = False
-        self.windowRefl.modFlag = False
     def saveWorkspaces(self):
         try:
             Dialog = QtGui.QDialog()
@@ -728,7 +728,7 @@ def groupGet(wksp, whattoget, field=''):
                         res = log[-1]
                 except RuntimeError:
                     res = 0
-                    logger.error( "Block " + field + " not found.")
+                    logger.error( "Block " + str(field) + " not found.")
             else:
                 try:
                     log = mtd[wksp].getRun().getLogData(field).value
@@ -738,7 +738,7 @@ def groupGet(wksp, whattoget, field=''):
                         res = log[-1]
                 except RuntimeError:
                     res = 0
-                    logger.error( "Block " + field + " not found.")
+                    logger.error( "Block " + str(field) + " not found.")
         elif isinstance(wksp, Workspace):
             at = getattr(wksp,'size',None)
             if callable(at):
@@ -750,7 +750,7 @@ def groupGet(wksp, whattoget, field=''):
                         res = log[-1]
                 except RuntimeError:
                     res = 0
-                    logger.error( "Block " + field + " not found.")
+                    logger.error( "Block " + str(field) + " not found.")
             else:
                 try:
                     log = wksp.getRun().getLogData(field).value
@@ -760,7 +760,7 @@ def groupGet(wksp, whattoget, field=''):
                         res = log[-1]
                 except RuntimeError:
                     res = 0
-                    logger.error( "Block " + field + " not found.")
+                    logger.error( "Block " + str(field) + " not found.")
         else:
             res = 0
         return res
@@ -789,5 +789,5 @@ def getWorkspace(wksp):
             wout = mtd[wksp]
         return wout
     else:
-        logger.error( "Unable to get workspace: " + wksp)
+        logger.error( "Unable to get workspace: " + str(wksp))
         return 0
