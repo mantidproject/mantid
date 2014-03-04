@@ -646,9 +646,9 @@ namespace Mantid
       LONG64 fileID = fileId;
       request.datafileId    = &fileID;
 
-      // get the URL using ICAT API
-      int ret=icat.downloadDatafile(&request,&response);
-      if(ret == 0 && !response.URL)
+      int ret = icat.downloadDatafile(&request,&response);
+
+      if(ret == 0)
       {
         downloadURL = *response.URL;
       }
