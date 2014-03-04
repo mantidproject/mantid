@@ -124,7 +124,7 @@ namespace MantidQt
 
       // This is temporary to ensure catalogdowndatafiles works as expected with one catalog.
       auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
-      catalogAlgorithm->setProperty("Session",session.front()->getSessionId());
+      if (!session.empty()) catalogAlgorithm->setProperty("Session",session.front()->getSessionId());
 
       executeAsynchronously(catalogAlgorithm);
       // Return a vector containing the file paths to the files to download.

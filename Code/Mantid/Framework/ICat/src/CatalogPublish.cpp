@@ -88,7 +88,7 @@ namespace Mantid
 
       // This again is a temporary measure to ensure publishing functionality will work with one catalog.
       auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
-      setPropertyValue("Session", session.front()->getSessionId());
+      if (!session.empty()) setPropertyValue("Session", session.front()->getSessionId());
 
       // Cast a catalog to a catalogInfoService to access publishing functionality.
       auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(
