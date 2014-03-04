@@ -6,7 +6,7 @@
 #
 # WORKSPACE & NODE_LABEL are environment variables that are set by Jenkins.
 #   The latter corresponds to any labels set on a slave.
-# BUILD_THREADS should be set in the configuration of each slave.
+# BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
 ###############################################################################
 
 ###############################################################################
@@ -42,7 +42,7 @@ cd $WORKSPACE/build
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CPACK=ON ../Code/Mantid"
+$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} ../Code/Mantid"
 
 ###############################################################################
 # Build step
