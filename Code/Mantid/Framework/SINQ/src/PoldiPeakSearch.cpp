@@ -31,13 +31,13 @@ PoldiPeakSearch::PoldiPeakSearch() :
 {
 }
 
-MantidVec PoldiPeakSearch::getNeighborSums(MantidVec correlatedCounts)
+MantidVec PoldiPeakSearch::getNeighborSums(MantidVec correlationCounts)
 {
     /* Since the first and last element in a list don't have two neighbors, they are excluded from the calculation
      * and the result vector's size is reduced by two. Also, the algorithm does not work on vectors with fewer
      * than three elements.
      **/
-    size_t counts = correlatedCounts.size();
+    size_t counts = correlationCounts.size();
 
     if(counts < 3) {
         throw std::runtime_error("A vector with less than three elements can not be processed.");
@@ -50,7 +50,7 @@ MantidVec PoldiPeakSearch::getNeighborSums(MantidVec correlatedCounts)
     std::generate(validIndices.begin(), validIndices.end(), [&n] () { return n++; });
 
     MantidVec summedNeighborCounts(validCounts);
-    std::transform(validIndices.cbegin(), validIndices.cend(), summedNeighborCounts.begin(), [&correlatedCounts](size_t i) { return correlatedCounts[i - 1] + correlatedCounts[i] + correlatedCounts[i + 1]; });
+    std::transform(validIndices.cbegin(), validIndices.cend(), summedNeighborCounts.begin(), [&correlationCounts](size_t i) { return correlationCounts[i - 1] + correlationCounts[i] + correlationCounts[i + 1]; });
 
     return summedNeighborCounts;
 }
@@ -100,6 +100,12 @@ std::list<MantidVec::iterator> PoldiPeakSearch::findPeaksRecursive(MantidVec::it
 
 MantidVec::iterator PoldiPeakSearch::getLeftRangeBegin(MantidVec::iterator begin)
 {
+    /* The edges of the searched range require special treatment. Without this sanitation,
+     * each recursion step that includes the leftmost sublist would chop off m_minimumDistance
+     * elements from the beginning, so the index is compared to the range's absolute start.
+     *
+     * Exactly the same considerations are valid for the rightmost sublist.
+     */
     if(begin != m_recursionAbsoluteBegin) {
         return begin + m_minimumDistance;
     }
@@ -116,7 +122,7 @@ MantidVec::iterator PoldiPeakSearch::getRightRangeEnd(MantidVec::iterator end)
     return end;
 }
 
-std::list<MantidVec::iterator> PoldiPeakSearch::getOriginalDataPeakIterators(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator baseDataStart, MantidVec::iterator originalDataStart)
+std::list<MantidVec::iterator> PoldiPeakSearch::mapPeakPositionsToCorrelationData(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator baseDataStart, MantidVec::iterator originalDataStart)
 {
     std::list<MantidVec::iterator> transformedIndices(peakPositions.size());
     std::transform(peakPositions.cbegin(), peakPositions.cend(), transformedIndices.begin(), [baseDataStart, originalDataStart](MantidVec::iterator summedDataIterator) { return originalDataStart + std::distance(baseDataStart, summedDataIterator) + 1; });
@@ -138,18 +144,6 @@ std::vector<V2D> PoldiPeakSearch::getPeakCoordinates(MantidVec::iterator baseLis
     }
 
     return peakData;
-}
-
-size_t PoldiPeakSearch::getNumberOfBackgroundPoints(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
-{
-    size_t totalDataPoints = correlationCounts.size() - 2;
-    size_t occupiedByPeaks = peakPositions.size() * (m_doubleMinimumDistance - 1);
-
-    if(occupiedByPeaks > totalDataPoints) {
-        throw(std::runtime_error("More data points occupied by peaks than existing data points - not possible."));
-    }
-
-    return totalDataPoints - occupiedByPeaks;
 }
 
 std::pair<double, double> PoldiPeakSearch::getBackgroundWithSigma(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
@@ -179,7 +173,19 @@ std::pair<double, double> PoldiPeakSearch::getBackgroundWithSigma(std::list<Mant
     return std::make_pair(sumBackground / static_cast<double>(background.size()), sumSigma / static_cast<double>(sigma.size()));
 }
 
-double PoldiPeakSearch::defaultMinimumPeakHeight(std::pair<double, double> backgroundWithSigma)
+size_t PoldiPeakSearch::getNumberOfBackgroundPoints(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
+{
+    size_t totalDataPoints = correlationCounts.size() - 2;
+    size_t occupiedByPeaks = peakPositions.size() * (m_doubleMinimumDistance - 1);
+
+    if(occupiedByPeaks > totalDataPoints) {
+        throw(std::runtime_error("More data points occupied by peaks than existing data points - not possible."));
+    }
+
+    return totalDataPoints - occupiedByPeaks;
+}
+
+double PoldiPeakSearch::minimumPeakHeightFromBackground(std::pair<double, double> backgroundWithSigma)
 {
     return 2.75 * backgroundWithSigma.second + backgroundWithSigma.first;
 }
@@ -234,12 +240,14 @@ void PoldiPeakSearch::exec()
     g_log.information() << "PoldiPeakSearch:" << std::endl;
 
     Workspace2D_const_sptr correlationWorkspace = getProperty("InputWorkspace");
+    MantidVec correlationQValues = correlationWorkspace->dataX(0);
+    MantidVec correlatedCounts = correlationWorkspace->dataY(0);
+    g_log.information() << "   Auto-correlation data read.";
+
     setMinimumDistance(getProperty("MinimumPeakSeparation"));
     setMinimumPeakHeight(getProperty("MinimumPeakHeight"));
     setMaximumPeakNumber(getProperty("MaximumPeakNumber"));
     g_log.information() << "   Parameters set." << std::endl;
-
-    MantidVec correlatedCounts = correlationWorkspace->dataY(0);
 
     MantidVec summedNeighborCounts = getNeighborSums(correlatedCounts);
     g_log.information() << "   Neighboring counts summed, contains " << summedNeighborCounts.size() << " data points." << std::endl;
@@ -247,35 +255,42 @@ void PoldiPeakSearch::exec()
     std::list<MantidVec::iterator> peakPositionsSummed = findPeaks(summedNeighborCounts.begin(), summedNeighborCounts.end());
     g_log.information() << "   Peaks detected in summed spectrum: " << peakPositionsSummed.size() << std::endl;
 
-    std::list<MantidVec::iterator> peakPositionsCorrelation = getOriginalDataPeakIterators(peakPositionsSummed, summedNeighborCounts.begin(), correlatedCounts.begin());
+    /* This step is required because peaks are actually searched in the "sum-of-neighbors"-spectrum.
+     * The mapping removes the offset from the peak position which results from different beginning
+     * of this vector compared to the original correlation counts.
+     */
+    std::list<MantidVec::iterator> peakPositionsCorrelation = mapPeakPositionsToCorrelationData(peakPositionsSummed, summedNeighborCounts.begin(), correlatedCounts.begin());
     g_log.information() << "   Peak positions transformed to original spectrum." << std::endl;
 
-    std::vector<V2D> peakCoordinates = getPeakCoordinates(summedNeighborCounts.begin(), peakPositionsSummed, correlationWorkspace->dataX(0));
+    /* Since intensities are required for filtering, they are extracted from the original count data,
+     * along with the Q-values, forming "coordinates" (hence the use of V2D).
+     */
+    std::vector<V2D> peakCoordinates = getPeakCoordinates(summedNeighborCounts.begin(), peakPositionsSummed, correlationQValues);
     g_log.information() << "   Extracted peak positions in Q and intensity guesses." << std::endl;
 
     double realMinimumPeakHeight = m_minimumPeakHeight;
 
     if(realMinimumPeakHeight == 0.0) {
         std::pair<double, double> backgroundWithSigma = getBackgroundWithSigma(peakPositionsCorrelation, correlatedCounts);
-        realMinimumPeakHeight = defaultMinimumPeakHeight(backgroundWithSigma);
+        realMinimumPeakHeight = minimumPeakHeightFromBackground(backgroundWithSigma);
     }
 
-    std::vector<V2D> properPeaks(peakCoordinates.size());
-    auto newEnd = std::copy_if(peakCoordinates.cbegin(), peakCoordinates.cend(), properPeaks.begin(), [&realMinimumPeakHeight] (V2D peak) { return peak.Y() > realMinimumPeakHeight; });
-    properPeaks.resize(std::distance(properPeaks.begin(), newEnd));
+    std::vector<V2D> intensityFilteredPeaks(peakCoordinates.size());
+    auto newEnd = std::copy_if(peakCoordinates.cbegin(), peakCoordinates.cend(), intensityFilteredPeaks.begin(), [&realMinimumPeakHeight] (V2D peak) { return peak.Y() > realMinimumPeakHeight; });
+    intensityFilteredPeaks.resize(std::distance(intensityFilteredPeaks.begin(), newEnd));
 
-    g_log.information() << "   Peaks above minimum intensity (" << realMinimumPeakHeight << "): " << properPeaks.size() << std::endl;
+    g_log.information() << "   Peaks above minimum intensity (" << realMinimumPeakHeight << "): " << intensityFilteredPeaks.size() << std::endl;
 
-    std::sort(properPeaks.begin(), properPeaks.end(), [](V2D first, V2D second) { return first.Y() > second.Y(); });
+    std::sort(intensityFilteredPeaks.begin(), intensityFilteredPeaks.end(), [](V2D first, V2D second) { return first.Y() > second.Y(); });
 
 
     ITableWorkspace_sptr peaks = boost::dynamic_pointer_cast<ITableWorkspace>(WorkspaceFactory::Instance().createTable());
 
     peaks->addColumn("double", "Q");
-    peaks->addColumn("double", "estimated Intensity");
+    peaks->addColumn("double", "Counts (estimated)");
 
-    for(std::vector<V2D>::const_iterator peak = properPeaks.cbegin();
-        peak != properPeaks.cend();
+    for(std::vector<V2D>::const_iterator peak = intensityFilteredPeaks.cbegin();
+        peak != intensityFilteredPeaks.cend();
         ++peak)
     {
         TableRow newRow = peaks->appendRow();

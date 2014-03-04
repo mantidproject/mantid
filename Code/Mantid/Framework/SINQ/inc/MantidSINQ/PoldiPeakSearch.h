@@ -53,19 +53,20 @@ namespace Poldi
     virtual const std::string name() const { return "PoldiPeakSearch"; }
     virtual const std::string category() const { return "SINQ\\Poldi"; }
     
-    size_t getNumberOfBackgroundPoints(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
   protected:
-    MantidVec getNeighborSums(MantidVec correlatedCounts);
+    MantidVec getNeighborSums(MantidVec correlationCounts);
 
     std::list<MantidVec::iterator> findPeaks(MantidVec::iterator begin, MantidVec::iterator end);
     std::list<MantidVec::iterator> findPeaksRecursive(MantidVec::iterator begin, MantidVec::iterator end);
     MantidVec::iterator getLeftRangeBegin(MantidVec::iterator begin);
     MantidVec::iterator getRightRangeEnd(MantidVec::iterator end);
 
-    std::list<MantidVec::iterator> getOriginalDataPeakIterators(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator baseDataStart, MantidVec::iterator originalDataStart);
+    std::list<MantidVec::iterator> mapPeakPositionsToCorrelationData(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator baseDataStart, MantidVec::iterator originalDataStart);
 
     std::pair<double, double> getBackgroundWithSigma(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
-    double defaultMinimumPeakHeight(std::pair<double, double> backgroundWithSigma);
+    size_t getNumberOfBackgroundPoints(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
+
+    double minimumPeakHeightFromBackground(std::pair<double, double> backgroundWithSigma);
     std::vector<V2D> getPeakCoordinates(MantidVec::iterator baseListStart, std::list<MantidVec::iterator> peakPositions, MantidVec xData);
 
     void setMinimumDistance(int newMinimumDistance);

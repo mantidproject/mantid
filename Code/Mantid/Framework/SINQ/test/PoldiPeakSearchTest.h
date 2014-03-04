@@ -202,7 +202,7 @@ public:
         TS_ASSERT_EQUALS(peak1.Y(), 34.0 / 3.0);
     }
 
-    void testgetOriginalDataPeakIterators()
+    void testmapPeakPositionsToCorrelationData()
     {
         TestablePoldiPeakSearch poldiPeakSearch;
 
@@ -224,7 +224,7 @@ public:
         firstIterators.push_back(firstVector.begin() + 2);
         firstIterators.push_back(firstVector.begin() + 3);
 
-        std::list<std::vector<double>::iterator> secondIterators = poldiPeakSearch.getOriginalDataPeakIterators(firstIterators, firstVector.begin(), secondVector.begin());
+        std::list<std::vector<double>::iterator> secondIterators = poldiPeakSearch.mapPeakPositionsToCorrelationData(firstIterators, firstVector.begin(), secondVector.begin());
 
         TS_ASSERT_EQUALS(*secondIterators.front(), 4.5);
         TS_ASSERT_EQUALS(*secondIterators.back(), 5.5);
@@ -262,11 +262,11 @@ public:
         TS_ASSERT_EQUALS(bgSigma.second, 2.0);
     }
 
-    void testDefaultMinimumPeakHeight()
+    void testminimumPeakHeightFromBackground()
     {
         TestablePoldiPeakSearch poldiPeakSearch;
 
-        TS_ASSERT_EQUALS(poldiPeakSearch.defaultMinimumPeakHeight(std::make_pair(3.0, 3.5)), 12.625);
+        TS_ASSERT_EQUALS(poldiPeakSearch.minimumPeakHeightFromBackground(std::make_pair(3.0, 3.5)), 12.625);
     }
 };
 
