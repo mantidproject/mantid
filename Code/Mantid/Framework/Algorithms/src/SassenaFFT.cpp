@@ -26,7 +26,6 @@ Below are plots after application of SassenaFFT to <math>I(Q,t) = e^{-t^2/(2\sig
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SassenaFFT.h"
-#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"

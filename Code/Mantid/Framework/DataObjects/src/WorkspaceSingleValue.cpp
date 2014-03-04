@@ -1,7 +1,4 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidAPI/LocatedDataRef.h"
-#include "MantidAPI/WorkspaceIterator.h"
-#include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
@@ -73,8 +70,6 @@ namespace Mantid
 } // namespace Mantid
 
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef, Mantid::DataObjects::WorkspaceSingleValue>;
-template DLLExport class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::DataObjects::WorkspaceSingleValue>;
 
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::WorkspaceSingleValue>;
 
