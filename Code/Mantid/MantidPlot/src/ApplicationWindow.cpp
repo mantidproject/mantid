@@ -12783,7 +12783,7 @@ void ApplicationWindow::createActions()
   actionAddErrorBars->setShortcut( tr("Ctrl+B") );
   connect(actionAddErrorBars, SIGNAL(activated()), this, SLOT(addErrorBars()));
 
-  actionRemoveErrorBars = new QAction(QIcon(getQPixmap("errors_xpm")), tr("Remove Error Bars..."), this);
+  actionRemoveErrorBars = new QAction(QIcon(getQPixmap("errors_remove_xpm")), tr("Remove Error Bars..."), this);
   //actionRemoveErrorBars->setShortcut( tr("Ctrl+B") );
   connect(actionRemoveErrorBars, SIGNAL(activated()), this, SLOT(removeErrorBars()));
 
