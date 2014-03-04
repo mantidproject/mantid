@@ -83,7 +83,7 @@ namespace Mantid
         Kernel::Logger& m_log;
     };
 
-    ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) .
+    ///Forward declaration of a specialisation of SingletonHolder for CatalogFactoryImpl (needed for dllexport/dllimport) .
     #ifdef _WIN32
     // this breaks new namespace declaraion rules; need to find a better fix
       template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<CatalogFactoryImpl>;

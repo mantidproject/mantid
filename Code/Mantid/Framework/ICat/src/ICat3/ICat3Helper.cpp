@@ -113,7 +113,7 @@ namespace Mantid
 
       std::string sessionID  = m_session->getSessionId();
       request.sessionId      = &sessionID;
-      LONG64 investigationID = invstId;
+      int64_t investigationID = invstId;
       request.investigationId= &investigationID;
       request.investigationInclude = &include;
 
@@ -216,7 +216,7 @@ namespace Mantid
       std::string sessionID        = m_session->getSessionId();
       request.sessionId            = &sessionID;
       request.investigationInclude = &include;
-      LONG64 investigationID  = invstId;
+      int64_t investigationID  = invstId;
       request.investigationId = &investigationID;
 
       int result = icat.getInvestigationIncludes(&request,&response);
@@ -643,7 +643,7 @@ namespace Mantid
 
       std::string sessionID = m_session->getSessionId();
       request.sessionId     = &sessionID;
-      LONG64 fileID = fileId;
+      int64_t fileID = fileId;
       request.datafileId    = &fileID;
 
       int ret = icat.downloadDatafile(&request,&response);
@@ -671,7 +671,7 @@ namespace Mantid
 
       std::string sessionID = m_session->getSessionId();
       request.sessionId     = &sessionID;
-      LONG64 fileID = fileid;
+      int64_t fileID = fileid;
       request.datafileId    = &fileID;
 
       int ret=icat.getDatafile(&request,&response);
