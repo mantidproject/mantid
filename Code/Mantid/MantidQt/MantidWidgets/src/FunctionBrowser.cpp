@@ -152,6 +152,7 @@ void FunctionBrowser::createBrowser()
   connect(m_attributeIntManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_attributeBoolManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
+  connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_attributeVectorDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeVectorDoubleChanged(QtProperty*)));
 }
 
@@ -1299,7 +1300,15 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop, bool 
         SetAttributeFromProperty setter(this,child);
         Mantid::API::IFunction::Attribute attr = fun->getAttribute(attName);
         attr.apply(setter);
-        fun->setAttribute(attName,attr);
+        try
+        {
+          fun->setAttribute(attName,attr);
+        }
+        catch(std::exception& expt)
+        {
+          QMessageBox::critical(this,"MantidPlot - Error", "Cannot set attribute " + QString::fromStdString(attName) + 
+            " of function " + prop->propertyName() + ":\n\n" + QString::fromStdString(expt.what()));
+        }
       }
       else if (!attributesOnly && isParameter(child))
       {
