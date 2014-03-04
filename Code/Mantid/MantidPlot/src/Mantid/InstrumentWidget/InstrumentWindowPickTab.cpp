@@ -479,6 +479,10 @@ void InstrumentWindowPickTab::setPlotCaption()
   {
     caption = "Plotting detector spectra";
   }
+  else if (m_edit->isChecked())
+  {
+    caption = "Plotting multiple detector sum";
+  }
   else if (m_plotSum)
   {
     caption = "Plotting sum";
@@ -710,8 +714,8 @@ void InstrumentWindowPickTab::setSelectionType()
     {
         m_plot->clearAll();
         m_plot->replot();
-        setPlotCaption();
     }
+    setPlotCaption();
   }
   m_instrWindow->updateInfoText();
 }
