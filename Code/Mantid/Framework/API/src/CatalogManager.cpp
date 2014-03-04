@@ -78,12 +78,13 @@ namespace Mantid
         m_activeCatalogs.clear();
       }
 
-      for(auto iter = m_activeCatalogs.begin(); iter != m_activeCatalogs.end(); ++iter)
+      for(auto iter = m_activeCatalogs.begin(); iter != m_activeCatalogs.end();)
       {
         if (sessionID == iter->first->getSessionId())
         {
           iter->second->logout();
           m_activeCatalogs.erase(iter);
+          return;
         }
       }
     }
