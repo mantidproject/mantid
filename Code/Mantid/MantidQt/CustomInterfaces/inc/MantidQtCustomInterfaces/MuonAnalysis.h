@@ -518,10 +518,11 @@ private:
   /// First Good Data time as loaded from Data file
   double m_dataFirstGoodData;
 
-  static const QString NOT_AVAILABLE;
+  /// Default widget values
+  static const QString TIME_ZERO_DEFAULT;
+  static const QString FIRST_GOOD_BIN_DEFAULT;
 
-  // Default value used for first good bin
-  static const double FIRST_GOOD_BIN_DEFAULT;
+  static const QString NOT_AVAILABLE;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

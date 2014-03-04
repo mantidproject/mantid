@@ -26,7 +26,7 @@ DLLExport void setDoubleValidator(QLineEdit* field);
 DLLExport MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws);
 
 /// Validates the field and returns the value
-DLLExport double getValidatedDouble(QLineEdit* field, double defaultValue,
+DLLExport double getValidatedDouble(QLineEdit* field, const QString& defaultValue,
                                     const QString& valueDescr, Logger& log);
 
 /// Returns a number of periods in a run workspace

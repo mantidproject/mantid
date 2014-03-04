@@ -332,17 +332,22 @@ void WidgetAutoSaver::endGroup()
  * @param log :: Log to print warning to in case value is invalid
  * @return Value if field is valid, default value otherwise
  */
-double getValidatedDouble(QLineEdit* field, double defaultValue, const QString& valueDescr, Logger& log)
+double getValidatedDouble(QLineEdit* field, const QString& defaultValue,
+                          const QString& valueDescr, Logger& log)
 {
   bool ok;
   double value = field->text().toDouble(&ok);
 
   if (!ok)
   {
-    log.warning() << "The value of " << valueDescr.toStdString() << " is empty or invalid. ";
-    log.warning() << "Reset to default of " << defaultValue << ".\n";
-    value = defaultValue;
-    field->setText(QString::number(defaultValue));
+    log.warning() << "The value of " << valueDescr.toStdString() << " is invalid. ";
+    log.warning() << "Reset to default of '" << defaultValue.toStdString() << "'.\n";
+    field->setText(defaultValue);
+
+    value = field->text().toDouble(&ok);
+
+    if (!ok) // Just in case
+      throw std::invalid_argument("Default value provided is not a double.");
   }
 
   return value;

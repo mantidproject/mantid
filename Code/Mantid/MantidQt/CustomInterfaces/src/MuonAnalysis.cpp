@@ -76,7 +76,8 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 
 // Static constants
 const QString MuonAnalysis::NOT_AVAILABLE("N/A");
-const double MuonAnalysis::FIRST_GOOD_BIN_DEFAULT(0.3);
+const QString MuonAnalysis::TIME_ZERO_DEFAULT("0.2");
+const QString MuonAnalysis::FIRST_GOOD_BIN_DEFAULT("0.3");
 
 //----------------------
 // Public member functions
@@ -2381,7 +2382,7 @@ void MuonAnalysis::startUpLook()
  */
 double MuonAnalysis::timeZero()
 {
-  return getValidatedDouble(m_uiForm.timeZeroFront, 0, "time zero", g_log);
+  return getValidatedDouble(m_uiForm.timeZeroFront, TIME_ZERO_DEFAULT, "time zero", g_log);
 }
 
 /**
@@ -2411,7 +2412,7 @@ double MuonAnalysis::plotFromTime() const
   }
   else if (startTimeType == "Custom Value")
   {
-    return getValidatedDouble(m_uiForm.timeAxisStartAtInput, 0, "custom start time", g_log);
+    return getValidatedDouble(m_uiForm.timeAxisStartAtInput, "0.0", "custom start time", g_log);
   }
 
   // Just in case misspelled type or added a new one
@@ -2425,9 +2426,7 @@ double MuonAnalysis::plotFromTime() const
  */
 double MuonAnalysis::plotToTime() const
 {
-  double defaultValue = plotFromTime() + 1.0;
-  return getValidatedDouble(m_uiForm.timeAxisFinishAtInput, defaultValue, "custom finish time",
-                            g_log);
+  return getValidatedDouble(m_uiForm.timeAxisFinishAtInput, "16.0", "custom finish time", g_log);
 }
 
 
@@ -2563,7 +2562,7 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   m_uiForm.mwRunDeadTimeFile->setUserInput(savedDeadTimeFile);
 
   // Load values saved using saveWidgetValue()
-  loadWidgetValue(m_uiForm.timeZeroFront, 0.2);
+  loadWidgetValue(m_uiForm.timeZeroFront, TIME_ZERO_DEFAULT);
   loadWidgetValue(m_uiForm.firstGoodBinFront, FIRST_GOOD_BIN_DEFAULT);
   loadWidgetValue(m_uiForm.timeZeroAuto, Qt::Checked);
   loadWidgetValue(m_uiForm.firstGoodDataAuto, Qt::Checked);
@@ -2913,6 +2912,7 @@ void MuonAnalysis::connectAutoSave()
 
 /**
  * Saves the value of the widget which called the slot.
+ * TODO: should be done using MuonAnalysisHelper::WidgetAutoSaver
  */
 void MuonAnalysis::saveWidgetValue()
 {
@@ -2946,6 +2946,7 @@ void MuonAnalysis::saveWidgetValue()
 
 /**
  * Load previously saved value for the widget.
+ * TODO: should be done using MuonAnalysisHelper::WidgetAutoSaver
  * @param       target :: Widget where the value will be loaded to
  * @param defaultValue :: Values which will be set if there is no saved value
  */
