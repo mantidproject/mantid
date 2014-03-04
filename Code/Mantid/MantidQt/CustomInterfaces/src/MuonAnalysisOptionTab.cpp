@@ -217,9 +217,48 @@ QMap<QString, QString> MuonAnalysisOptionTab::parsePlotStyleParams() const
 
   params["ShowErrors"] = m_uiForm.showErrorBars->isChecked() ? "True" : "False";
 
-  params["YAxisAuto"] = m_uiForm.yAxisAutoscale->isChecked() ? "True" : "False";
-  params["YAxisMin"] = m_uiForm.yAxisMinimumInput->text();
-  params["YAxisMax"] = m_uiForm.yAxisMaximumInput->text();
+  bool isAutoScaleEnabled = m_uiForm.yAxisAutoscale->isChecked();
+
+  params["YAxisAuto"] = isAutoScaleEnabled ? "True" : "False";
+
+  params["YAxisMin"] = params["YAxisMax"] = "";
+
+  if ( ! isAutoScaleEnabled )
+  {
+    // If auto-scale not enabled, retrieve start/end values
+
+    QLineEdit* minY = m_uiForm.yAxisMinimumInput;
+    QLineEdit* maxY = m_uiForm.yAxisMaximumInput;
+
+    double minYVal(Mantid::EMPTY_DBL());
+    double maxYVal(Mantid::EMPTY_DBL());
+
+    if ( ! minY->text().isEmpty() )
+    {
+      minYVal = getValidatedDouble(minY, MIN_Y_DEFAULT, "Y axis minimum", g_log);
+    }
+
+    if ( ! maxY->text().isEmpty() )
+    {
+      maxYVal = getValidatedDouble(maxY, MAX_Y_DEFAULT, "Y axis maximum", g_log);
+    }
+
+    // If both specified, check if min is less than max
+    if ( minYVal != Mantid::EMPTY_DBL() && maxYVal != Mantid::EMPTY_DBL() && minYVal >= maxYVal )
+    {
+      g_log.warning("Y min should be less than Y max. Reset to default.");
+      minY->setText(MIN_Y_DEFAULT);
+      maxY->setText(MAX_Y_DEFAULT);
+    }
+    else
+    {
+      if ( minYVal != Mantid::EMPTY_DBL() )
+        params["YAxisMin"] = QString::number(minYVal);
+
+      if ( maxYVal != Mantid::EMPTY_DBL() )
+        params["YAxisMax"] = QString::number(maxYVal);
+    }
+  }
 
   return(params);
 }

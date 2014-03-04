@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
 
+#include "MantidKernel/EmptyValues.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -330,7 +331,7 @@ void WidgetAutoSaver::endGroup()
  * @param defaultValue :: Default value to return/set if field value is invalid
  * @param valueDescr :: Description of the value
  * @param log :: Log to print warning to in case value is invalid
- * @return Value if field is valid, default value otherwise
+ * @return Value if field is valid, default value otherwise. If default value is empty, EMPTY_DBL() is returned
  */
 double getValidatedDouble(QLineEdit* field, const QString& defaultValue,
                           const QString& valueDescr, Logger& log)
@@ -341,13 +342,17 @@ double getValidatedDouble(QLineEdit* field, const QString& defaultValue,
   if (!ok)
   {
     log.warning() << "The value of " << valueDescr.toStdString() << " is invalid. ";
-    log.warning() << "Reset to default of '" << defaultValue.toStdString() << "'.\n";
+    log.warning() << "Reset to default.\n";
     field->setText(defaultValue);
 
-    value = field->text().toDouble(&ok);
-
-    if (!ok) // Just in case
-      throw std::invalid_argument("Default value provided is not a double.");
+    if(defaultValue.isEmpty())
+    {
+      return Mantid::EMPTY_DBL();
+    }
+    else
+    {
+      return defaultValue.toDouble();
+    }
   }
 
   return value;
