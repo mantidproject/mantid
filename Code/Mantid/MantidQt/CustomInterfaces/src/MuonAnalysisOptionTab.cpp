@@ -28,6 +28,8 @@ const QString MuonAnalysisOptionTab::START_TIME_DEFAULT("0.3");
 const QString MuonAnalysisOptionTab::FINISH_TIME_DEFAULT("16.0");
 const QString MuonAnalysisOptionTab::MIN_Y_DEFAULT("");
 const QString MuonAnalysisOptionTab::MAX_Y_DEFAULT("");
+const QString MuonAnalysisOptionTab::FIXED_REBIN_DEFAULT("2");
+const QString MuonAnalysisOptionTab::VARIABLE_REBIN_DEFAULT("0.032");
 
 // Acquire logger instance
 Logger& MuonAnalysisOptionTab::g_log(Logger::get("MuonAnalysis"));
@@ -54,8 +56,8 @@ void MuonAnalysisOptionTab::initLayout()
   m_autoSaver.endGroup();
 
   m_autoSaver.beginGroup("BinningOptions");
-  m_autoSaver.registerWidget(m_uiForm.optionStepSizeText, "rebinFixed", "1");
-  m_autoSaver.registerWidget(m_uiForm.binBoundaries, "rebinVariable", "1");
+  m_autoSaver.registerWidget(m_uiForm.optionStepSizeText, "rebinFixed", FIXED_REBIN_DEFAULT);
+  m_autoSaver.registerWidget(m_uiForm.binBoundaries, "rebinVariable", VARIABLE_REBIN_DEFAULT);
   m_autoSaver.registerWidget(m_uiForm.rebinComboBox, "rebinComboBoxIndex", 0);
   m_autoSaver.endGroup();
 
@@ -269,29 +271,25 @@ QMap<QString, QString> MuonAnalysisOptionTab::parsePlotStyleParams() const
  */
 MuonAnalysisOptionTab::StartTimeType MuonAnalysisOptionTab::getStartTimeType()
 {
-  StartTimeType type;
-
   QString selectedType = m_uiForm.timeComboBox->currentText();
 
   if (selectedType == "Start at First Good Data")
   {
-    type = FirstGoodData;
+    return FirstGoodData;
   }
   else if (selectedType == "Start at Time Zero")
   {
-    type = TimeZero;
+    return TimeZero;
   }
   else if (selectedType == "Custom Value")
   {
-    type = Custom;
+    return Custom;
   }
   else
   {
     // Just in case misspelled type or added a new one
     throw std::runtime_error("Unknown start time type selection");
   }
-
-  return type;
 }
 
 /**
@@ -321,6 +319,61 @@ double MuonAnalysisOptionTab::getCustomFinishTime()
   {
     return getValidatedDouble(w, FINISH_TIME_DEFAULT, "custom finish time", g_log);
   }
+}
+
+/**
+ * Returns rebin type as selected by user
+ * @return Rebin type
+ */
+MuonAnalysisOptionTab::RebinType MuonAnalysisOptionTab::getRebinType()
+{
+  QString selectedType = m_uiForm.rebinComboBox->currentText();
+
+  if (selectedType == "None")
+  {
+    return NoRebin;
+  }
+  else if (selectedType == "Fixed")
+  {
+    return FixedRebin;
+  }
+  else if (selectedType == "Variable")
+  {
+    return VariableRebin;
+  }
+  else
+  {
+    throw std::runtime_error("Unknow rebin type selection");
+  }
+}
+
+/**
+ * Returns variable rebing params as set by user. Makes sense only if getRebinType() is VariableRebin
+ * @return Rebin params string
+ */
+std::string MuonAnalysisOptionTab::getRebinParams()
+{
+  QLineEdit* w = m_uiForm.binBoundaries;
+
+  if (w->text().isEmpty())
+  {
+    g_log.warning("Binning parameters are empty. Reset to default value.");
+    w->setText(VARIABLE_REBIN_DEFAULT);
+    return VARIABLE_REBIN_DEFAULT.toStdString();
+  }
+  else
+  {
+    return w->text().toStdString();
+  }
+}
+
+/**
+ * Returns rebin step size as set by user. Make sense only if getRebinType() is FixedRebin
+ * @return Rebin step size
+ */
+double MuonAnalysisOptionTab::getRebinStep()
+{
+  return getValidatedDouble(m_uiForm.optionStepSizeText, FIXED_REBIN_DEFAULT, "binning step", g_log);
 }
 
 }

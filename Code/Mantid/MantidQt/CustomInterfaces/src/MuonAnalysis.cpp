@@ -641,28 +641,17 @@ MatrixWorkspace_sptr MuonAnalysis::prepareAnalysisWorkspace(MatrixWorkspace_sptr
 
   ws = cropAlg->getProperty("OutputWorkspace");
 
+  std::string params = rebinParams(ws);
+
   // Rebin data if option set in Plot Options and we don't want raw workspace
-  if ( !isRaw && m_uiForm.rebinComboBox->currentIndex() != 0)
+  if ( !isRaw && !params.empty())
   {
-    std::string rebinParams;
-    double binSize = ws->dataX(0)[1] - ws->dataX(0)[0];
-
-    if(m_uiForm.rebinComboBox->currentIndex() == 1) // Fixed
-    {
-      double bunchedBinSize = binSize * m_uiForm.optionStepSizeText->text().toDouble();
-      rebinParams = boost::lexical_cast<std::string>(bunchedBinSize);
-    }
-    else // Variable
-    {
-      rebinParams = m_uiForm.binBoundaries->text().toStdString();
-    }
-
     // Rebin data
     IAlgorithm_sptr rebinAlg = AlgorithmManager::Instance().createUnmanaged("Rebin");
     rebinAlg->initialize();
     rebinAlg->setChild(true);
     rebinAlg->setProperty("InputWorkspace", ws);
-    rebinAlg->setProperty("Params", rebinParams);
+    rebinAlg->setProperty("Params", params);
     rebinAlg->setProperty("FullBinsOnly", true);
     rebinAlg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
     rebinAlg->execute();
@@ -2391,6 +2380,39 @@ double MuonAnalysis::timeZero()
 }
 
 /**
+ * Returns params string which can be passed to Rebin, according to what user specified. If no rebin
+ * requested by user, returns an empty string.
+ * @param wsForRebin :: Workspace we are going to rebin. Use to determine bin size
+ * @return Params string to pass to rebin
+ */
+std::string MuonAnalysis::rebinParams(Workspace_sptr wsForRebin)
+{
+  MuonAnalysisOptionTab::RebinType rebinType = m_optionTab->getRebinType();
+
+  if ( rebinType == MuonAnalysisOptionTab::NoRebin )
+  {
+    return "";
+  }
+  else if ( rebinType == MuonAnalysisOptionTab::FixedRebin )
+  {
+    MatrixWorkspace_sptr ws = firstPeriod(wsForRebin);
+    double binSize = ws->dataX(0)[1] - ws->dataX(0)[0];
+
+    double stepSize = m_optionTab->getRebinStep();
+
+    return boost::lexical_cast<std::string>(binSize * stepSize);
+  }
+  else if ( rebinType == MuonAnalysisOptionTab::VariableRebin )
+  {
+    return m_optionTab->getRebinParams();
+  }
+  else
+  {
+    throw std::runtime_error("Unknown rebin type");
+  }
+}
+
+/**
  * Return first good bin as set on the interface.
  */
 double MuonAnalysis::firstGoodBin() const
@@ -3411,34 +3433,11 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
   loadAlg->setProperty("TimeZero", timeZero);
 
   // -- Rebin options ---------------------------------------------------------
+  std::string params = rebinParams(AnalysisDataService::Instance().retrieve(m_grouped_name));
 
-  if ( m_uiForm.rebinComboBox->currentIndex() != 0)
+  if (!params.empty())
   {
-    std::string rebinParams;
-
-    if(m_uiForm.rebinComboBox->currentIndex() == 1) // Fixed
-    {
-      auto loadedWS = AnalysisDataService::Instance().retrieveWS<Workspace>(m_grouped_name);
-      MatrixWorkspace_sptr ws;
-
-      if ( ! ( ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS) ) )
-      {
-        auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS);
-        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
-      }
-
-      double binSize = ws->dataX(0)[1] - ws->dataX(0)[0];
-
-      double bunchedBinSize = binSize * m_uiForm.optionStepSizeText->text().toDouble();
-
-      rebinParams = boost::lexical_cast<std::string>(bunchedBinSize);
-    }
-    else // Variable
-    {
-      rebinParams = m_uiForm.binBoundaries->text().toStdString();
-    }
-
-    loadAlg->setPropertyValue("RebinParams", rebinParams);
+    loadAlg->setPropertyValue("RebinParams", params);
   }
 
   // -- Group/pair properties -------------------------------------------------

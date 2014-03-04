@@ -51,6 +51,9 @@ public:
   /// Types of the start time
   enum StartTimeType { FirstGoodData, TimeZero, Custom };
 
+  /// Type of rebin
+  enum RebinType { NoRebin, FixedRebin, VariableRebin };
+
   /// Constructor
   MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& settingsGroup);
 
@@ -69,6 +72,15 @@ public:
   /// Retrieve custom finish time value
   double getCustomFinishTime();
 
+  /// Retrieve a type of rebin user has selected
+  RebinType getRebinType();
+
+  /// Retrieve a vairable rebin params string as specified by user
+  std::string getRebinParams();
+
+  /// Retrieve a binning step as specified by user
+  double getRebinStep();
+
 signals:
   /// Update the plot because something has changed.
   void settingsTabUpdatePlot();
@@ -85,6 +97,8 @@ private:
   static const QString FINISH_TIME_DEFAULT;
   static const QString MIN_Y_DEFAULT;
   static const QString MAX_Y_DEFAULT;
+  static const QString FIXED_REBIN_DEFAULT;
+  static const QString VARIABLE_REBIN_DEFAULT;
 
   /// The Muon Analysis UI file.
   Ui::MuonAnalysis& m_uiForm;

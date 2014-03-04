@@ -439,6 +439,9 @@ private:
   /// time zero returned in ms
   double timeZero();
 
+  /// Returns params string which can be passed to Rebin, according to what user specified
+  std::string rebinParams(Workspace_sptr wsForRebin);
+
   /// title of run
   std::string m_title;
 
