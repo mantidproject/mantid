@@ -2919,15 +2919,15 @@ p, li { white-space: pre-wrap; }
       <attribute name="title">
        <string>Moments</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_27">
+      <layout class="QVBoxLayout" name="moment_verticalLayout_27">
        <item>
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
           <string>Input</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_29">
+         <layout class="QVBoxLayout" name="moment_verticalLayout_29">
           <item>
-           <layout class="QGridLayout" name="gridLayout_9">
+           <layout class="QGridLayout" name="moment_gridLayout_9">
             <item row="0" column="0" colspan="2">
              <widget class="MantidQt::MantidWidgets::DataSelector" name="moment_dsInput">
               <property name="sizePolicy">
@@ -3026,7 +3026,7 @@ p, li { white-space: pre-wrap; }
         </layout>
        </item>
        <item>
-        <spacer name="verticalSpacer_4">
+        <spacer name="moment_verticalSpacer_4">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -3043,7 +3043,7 @@ p, li { white-space: pre-wrap; }
          <property name="title">
           <string>Output Options</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_26">
+         <layout class="QVBoxLayout" name="moment_verticalLayout_26">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_42">
             <item>
