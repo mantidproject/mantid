@@ -2400,26 +2400,25 @@ double MuonAnalysis::firstGoodBin() const
  */
 void MuonAnalysis::setXMin(IAlgorithm_sptr alg, const std::string& propName) const
 {
-  QString startTimeType = m_uiForm.timeComboBox->currentText();
+  auto startTimeType = m_optionTab->getStartTimeType();
   double value(0);
 
-  if (startTimeType == "Start at First Good Data")
+  switch(startTimeType)
   {
-    value = firstGoodBin();
+    case MuonAnalysisOptionTab::FirstGoodData:
+      value = firstGoodBin(); break;
+
+    case MuonAnalysisOptionTab::TimeZero:
+      value = 0; break;
+
+    case MuonAnalysisOptionTab::Custom:
+      value = m_optionTab->getCustomStartTime(); break;
+
+    default:
+      // Just in case added a new one
+      throw std::runtime_error("Unknown start time type");
   }
-  else if (startTimeType == "Start at Time Zero")
-  {
-    value = 0;
-  }
-  else if (startTimeType == "Custom Value")
-  {
-    value = getValidatedDouble(m_uiForm.timeAxisStartAtInput, "0.0", "custom start time", g_log);
-  }
-  else
-  {
-    // Just in case misspelled type or added a new one
-    throw std::runtime_error("Unknown start time type.");
-  }
+
   alg->setProperty(propName, value);
 }
 
@@ -2431,14 +2430,13 @@ void MuonAnalysis::setXMin(IAlgorithm_sptr alg, const std::string& propName) con
  */
 void MuonAnalysis::setXMax(IAlgorithm_sptr alg, const std::string& propName) const
 {
-  if ( !m_uiForm.timeAxisFinishAtInput->text().isEmpty() )
+  double value = m_optionTab->getCustomFinishTime();
+
+  if ( value != EMPTY_DBL() )
   {
-    double value = getValidatedDouble(m_uiForm.timeAxisFinishAtInput, "16.0", "custom finish time",
-                                      g_log);
     alg->setProperty(propName, value);
   }
 }
-
 
 /**
 * Check if grouping in table is consistent with data file

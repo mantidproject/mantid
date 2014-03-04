@@ -48,6 +48,9 @@ class MuonAnalysisOptionTab : public QWidget
 {
  Q_OBJECT
 public:
+  /// Types of the start time
+  enum StartTimeType { FirstGoodData, TimeZero, Custom };
+
   /// Constructor
   MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& settingsGroup);
 
@@ -57,6 +60,15 @@ public:
   /// Get plot style parameters from widgets
   QMap<QString, QString> parsePlotStyleParams() const;
 
+  /// Retrieve selected type of the start time
+  StartTimeType getStartTimeType();
+
+  /// Retrieve custom start time value
+  double getCustomStartTime();
+
+  /// Retrieve custom finish time value
+  double getCustomFinishTime();
+
 signals:
   /// Update the plot because something has changed.
   void settingsTabUpdatePlot();
@@ -65,6 +77,9 @@ signals:
   void plotStyleChanged();
 
 private:
+  /// Logger to use
+  static Logger& g_log;
+
   /// The Muon Analysis UI file.
   Ui::MuonAnalysis& m_uiForm;
 

@@ -24,6 +24,9 @@ namespace CustomInterfaces
 namespace Muon
 {
 
+// Acquire logger instance
+Logger& MuonAnalysisOptionTab::g_log(Logger::get("MuonAnalysis"));
+
 MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm, const QString &settingsGroup)
   : m_uiForm(uiForm), m_autoSaver(settingsGroup)
 {}
@@ -214,6 +217,66 @@ QMap<QString, QString> MuonAnalysisOptionTab::parsePlotStyleParams() const
   params["YAxisMax"] = m_uiForm.yAxisMaximumInput->text();
 
   return(params);
+}
+
+/**
+ * Retrieve selected type of the start time
+ * @return Type of the start time as selected by user
+ */
+MuonAnalysisOptionTab::StartTimeType MuonAnalysisOptionTab::getStartTimeType()
+{
+  StartTimeType type;
+
+  QString selectedType = m_uiForm.timeComboBox->currentText();
+
+  if (selectedType == "Start at First Good Data")
+  {
+    type = FirstGoodData;
+  }
+  else if (selectedType == "Start at Time Zero")
+  {
+    type = TimeZero;
+  }
+  else if (selectedType == "Custom Value")
+  {
+    type = Custom;
+  }
+  else
+  {
+    // Just in case misspelled type or added a new one
+    throw std::runtime_error("Unknown start time type selection");
+  }
+
+  return type;
+}
+
+/**
+ * Retrieve custom start time value. This only makes sense when getStartTimeType() is Custom.
+ * @return Value in the custom start time field
+ */
+double MuonAnalysisOptionTab::getCustomStartTime()
+{
+  QLineEdit* w = m_uiForm.timeAxisStartAtInput;
+
+  return getValidatedDouble(w, "0.0", "custom start time", g_log);
+}
+
+/**
+ * Retrieve custom finish time value. If the value is not specified - returns EMPTY_DBL().
+ * @return Value in the custom finish field or EMPTY_DBL()
+ */
+double MuonAnalysisOptionTab::getCustomFinishTime()
+{
+  QLineEdit* w = m_uiForm.timeAxisFinishAtInput;
+
+  if (w->text().isEmpty())
+  {
+    return Mantid::EMPTY_DBL();
+  }
+  else
+  {
+    return getValidatedDouble(w, "16.0", "custom finish time", g_log);
+  }
 }
 
 }
