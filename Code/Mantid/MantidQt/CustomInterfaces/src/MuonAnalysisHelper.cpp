@@ -24,9 +24,19 @@ using namespace Mantid::Kernel;
  * Sets double validator for specified field.
  * @param field :: Field to set validator for
  */
-void setDoubleValidator(QLineEdit* field)
+void setDoubleValidator(QLineEdit* field, bool allowEmpty)
 {
-  QDoubleValidator* newValidator = new QDoubleValidator(field);
+  QDoubleValidator* newValidator;
+
+  if (allowEmpty)
+  {
+    newValidator = new DoubleOrEmptyValidator(field);
+  }
+  else
+  {
+    newValidator = new QDoubleValidator(field);
+  }
+
   newValidator->setNotation(QDoubleValidator::StandardNotation);
   field->setValidator(newValidator);
 }

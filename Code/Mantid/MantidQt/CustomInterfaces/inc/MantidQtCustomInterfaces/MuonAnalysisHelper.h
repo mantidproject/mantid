@@ -20,7 +20,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 /// Sets double validator for specified field
-DLLExport void setDoubleValidator(QLineEdit* field);
+DLLExport void setDoubleValidator(QLineEdit* field, bool allowEmpty = false);
 
 /// Returns a first period MatrixWorkspace in a run workspace
 DLLExport MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws);
@@ -90,6 +90,27 @@ private:
 
   /// Settings used to keep track of the groups
   QSettings m_settings;
+};
+
+/// Validator which accepts valid doubles OR empty strings
+class Q_DECL_EXPORT DoubleOrEmptyValidator : public QDoubleValidator
+{
+  Q_OBJECT
+
+public:
+
+  DoubleOrEmptyValidator(QObject* parent = NULL)
+    : QDoubleValidator(parent)
+  {}
+
+  // See QValidator
+  virtual QValidator::State validate(QString& input, int& pos) const
+  {
+    if (input.isEmpty())
+      return QValidator::Acceptable;
+    else
+      return QDoubleValidator::validate(input,pos);
+  }
 };
 
 } // namespace MuonAnalysisHelper

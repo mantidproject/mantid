@@ -69,9 +69,9 @@ void MuonAnalysisOptionTab::initLayout()
 
   // Set validators for double fields
   setDoubleValidator(m_uiForm.timeAxisStartAtInput);
-  setDoubleValidator(m_uiForm.timeAxisFinishAtInput);
-  setDoubleValidator(m_uiForm.yAxisMinimumInput);
-  setDoubleValidator(m_uiForm.yAxisMaximumInput);
+  setDoubleValidator(m_uiForm.timeAxisFinishAtInput, true);
+  setDoubleValidator(m_uiForm.yAxisMinimumInput, true);
+  setDoubleValidator(m_uiForm.yAxisMaximumInput, true);
   setDoubleValidator(m_uiForm.optionStepSizeText);
 
   // Load saved values
