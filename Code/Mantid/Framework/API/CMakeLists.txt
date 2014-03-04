@@ -69,8 +69,6 @@ set ( SRC_FILES
 	src/JointDomain.cpp
 	src/LinearScale.cpp
 	src/LiveListenerFactory.cpp
-	src/LocatedDataRef.cpp
-	src/LocatedDataValue.cpp
 	src/LogManager.cpp
 	src/LogarithmScale.cpp
 	src/MDGeometry.cpp
@@ -171,9 +169,9 @@ set ( INC_FILES
 	inc/MantidAPI/IBackgroundFunction.h
 	inc/MantidAPI/IBoxControllerIO.h
 	inc/MantidAPI/ICatalog.h
+	inc/MantidAPI/ICatalogInfoService.h
 	inc/MantidAPI/IConstraint.h
 	inc/MantidAPI/ICostFunction.h
-	inc/MantidAPI/IDataItem.h
 	inc/MantidAPI/IDomainCreator.h
 	inc/MantidAPI/IEventList.h
 	inc/MantidAPI/IEventWorkspace.h
@@ -186,7 +184,6 @@ set ( INC_FILES
 	inc/MantidAPI/IFunctionValues.h
 	inc/MantidAPI/IFunctionWithLocation.h
 	inc/MantidAPI/ILiveListener.h
-	inc/MantidAPI/ILocatedData.h
 	inc/MantidAPI/IMDEventWorkspace.h
 	inc/MantidAPI/IMDHistoWorkspace.h
 	inc/MantidAPI/IMDIterator.h
@@ -216,8 +213,6 @@ set ( INC_FILES
 	inc/MantidAPI/JointDomain.h
 	inc/MantidAPI/LinearScale.h
 	inc/MantidAPI/LiveListenerFactory.h
-	inc/MantidAPI/LocatedDataRef.h
-	inc/MantidAPI/LocatedDataValue.h
 	inc/MantidAPI/LogManager.h
 	inc/MantidAPI/LogarithmScale.h
 	inc/MantidAPI/MDGeometry.h
@@ -259,8 +254,6 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceFactory.h
 	inc/MantidAPI/WorkspaceGroup.h
 	inc/MantidAPI/WorkspaceHistory.h
-	inc/MantidAPI/WorkspaceIterator.h
-	inc/MantidAPI/WorkspaceIteratorCode.h
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
 	inc/MantidAPI/WorkspaceValidators.h

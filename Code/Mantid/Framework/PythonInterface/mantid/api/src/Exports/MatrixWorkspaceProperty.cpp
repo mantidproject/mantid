@@ -1,8 +1,9 @@
-#include "MantidPythonInterface/api/WorkspacePropertyMacro.h"
+#include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 void export_MatrixWorkspaceProperty()
 {
   using Mantid::API::MatrixWorkspace;
-  EXPORT_WORKSPACE_PROPERTY(MatrixWorkspace, "MatrixWorkspaceProperty");
+  using Mantid::PythonInterface::WorkspacePropertyExporter;
+  WorkspacePropertyExporter<MatrixWorkspace>::define("MatrixWorkspaceProperty");
 }

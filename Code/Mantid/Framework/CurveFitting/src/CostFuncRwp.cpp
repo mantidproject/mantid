@@ -8,6 +8,7 @@
 #include "MantidAPI/CompositeDomain.h"
 #include "MantidAPI/FunctionValues.h"
 
+#include <cmath>
 #include <iomanip>
 
 namespace Mantid

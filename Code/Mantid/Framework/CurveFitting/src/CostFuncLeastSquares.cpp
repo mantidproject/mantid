@@ -7,13 +7,9 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/CompositeDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidKernel/MultiThreaded.h"
 
 #include <iomanip>
-
-namespace
-{
-  const bool debug = false;
-}
 
 namespace Mantid
 {
@@ -280,17 +276,17 @@ void CostFuncLeastSquares::addValDerivHessian(
 
   size_t iActiveP = 0;
   double fVal = 0.0;
-  if (debug)
+  if (m_log.is(Kernel::Logger::Priority::PRIO_DEBUG))
   {
-    std::cerr << "Jacobian:\n";
+    m_log.debug() << "Jacobian:\n";
     for(size_t i = 0; i < ny; ++i)
     {
       for(size_t ip = 0; ip < np; ++ip)
       {
         if ( !m_function->isActive(ip) ) continue;
-        std::cerr << jacobian.get(i,ip) << ' ';
+        m_log.debug() << jacobian.get(i,ip) << ' ';
       }
-      std::cerr << std::endl;
+      m_log.debug() << "\n";
     }
   }
   double sqrtw = calSqrtW(values);

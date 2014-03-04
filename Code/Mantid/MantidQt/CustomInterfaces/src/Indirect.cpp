@@ -39,6 +39,7 @@
 #include <QtCheckBoxFactory>
 
 using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt;
 using Mantid::MantidVec;
 
 /**
@@ -307,11 +308,6 @@ void Indirect::runConvertToEnergy()
     pyInput += "reducer.set_save_to_cm_1(True)\n";
   }
   
-  if ( m_uiForm.ckCreateInfoTable->isChecked() )
-  {
-    pyInput += "reducer.create_info_table()\n";
-  }
-
   pyInput += "reducer.set_save_formats([" + savePyCode() + "])\n";
 
   pyInput +=
@@ -713,15 +709,12 @@ bool Indirect::validateInput()
 
 
   // SpectraMin/SpectraMax
-  if (
-    m_uiForm.leSpectraMin->text() == ""
-    ||
-    m_uiForm.leSpectraMax->text() == ""
-    ||
-    (
-    m_uiForm.leSpectraMin->text().toDouble() > m_uiForm.leSpectraMax->text().toDouble()
-    )
-    )
+  const QString specMin = m_uiForm.leSpectraMin->text();
+  const QString specMax = m_uiForm.leSpectraMax->text();
+
+  if (specMin.isEmpty() || specMax.isEmpty() ||
+      (specMin.toDouble() < 1 || specMax.toDouble() < 1) ||  
+      (specMin.toDouble() > specMax.toDouble()))
   {
     valid = false;
     m_uiForm.valSpectraMin->setText("*");
@@ -1629,11 +1622,11 @@ void Indirect::calPlotRaw()
   m_calCalCurve = new QwtPlotCurve();
   m_calCalCurve->setData(&dataX[0], &dataY[0], static_cast<int>(input->blocksize()));
   m_calCalCurve->attach(m_calCalPlot);
-  
-  m_calCalPlot->setAxisScale(QwtPlot::xBottom, dataX.front(), dataX.back());
 
-  m_calCalR1->setRange(dataX.front(), dataX.back());
-  m_calCalR2->setRange(dataX.front(), dataX.back());
+  std::pair<double, double> range(dataX.front(), dataX.back());
+  m_calCalPlot->setAxisScale(QwtPlot::xBottom, range.first, range.second);
+  setPlotRange(m_calCalR1, m_calDblMng, std::pair<QtProperty*,QtProperty*>(m_calCalProp["PeakMin"], m_calCalProp["PeakMax"]), range);
+  setPlotRange(m_calCalR2, m_calDblMng, std::pair<QtProperty*,QtProperty*>(m_calCalProp["BackMin"], m_calCalProp["BackMax"]), range);
 
   // Replot
   m_calCalPlot->replot();
@@ -1686,11 +1679,11 @@ void Indirect::calPlotEnergy()
   m_calResCurve->setData(&dataX[0], &dataY[0], static_cast<int>(input->blocksize()));
   m_calResCurve->attach(m_calResPlot);
   
-  m_calResPlot->setAxisScale(QwtPlot::xBottom, dataX.front(), dataX.back());
-  m_calResR1->setRange(dataX.front(), dataX.back());
+  std::pair<double, double> range(dataX.front(), dataX.back());
+  m_calResPlot->setAxisScale(QwtPlot::xBottom, range.first, range.second);
 
-  m_calResR2->setMinimum(m_calDblMng->value(m_calResProp["ELow"]));
-  m_calResR2->setMaximum(m_calDblMng->value(m_calResProp["EHigh"]));
+  setPlotRange(m_calResR1, m_calDblMng, std::pair<QtProperty*,QtProperty*>(m_calResProp["ELow"], m_calResProp["EHigh"]), range);
+  setPlotRange(m_calResR2, m_calDblMng, std::pair<QtProperty*,QtProperty*>(m_calResProp["Start"], m_calResProp["End"]), range);
 
   calSetDefaultResolution(input);
 
@@ -1993,9 +1986,10 @@ void Indirect::slicePlotRaw()
     m_sltDataCurve->setData(&dataX[0], &dataY[0], static_cast<int>(input->blocksize()));
     m_sltDataCurve->attach(m_sltPlot);
 
-    m_sltPlot->setAxisScale(QwtPlot::xBottom, dataX.front(), dataX.back());
-
-    m_sltR1->setRange(dataX.front(), dataX.back());
+    std::pair<double, double> range(dataX.front(), dataX.back());
+    m_calResPlot->setAxisScale(QwtPlot::xBottom, range.first, range.second);
+    setPlotRange(m_sltR1, m_sltDblMng, std::pair<QtProperty*,QtProperty*>(m_sltProp["R1S"], m_sltProp["R1E"]), range);
+    setPlotRange(m_sltR2, m_sltDblMng, std::pair<QtProperty*,QtProperty*>(m_sltProp["R2S"], m_sltProp["R2E"]), range);
 
     // Replot
     m_sltPlot->replot();
@@ -2051,3 +2045,16 @@ void Indirect::sliceUpdateRS(QtProperty* prop, double val)
   else if ( prop == m_sltProp["R2S"] ) m_sltR2->setMinimum(val);
   else if ( prop == m_sltProp["R2E"] ) m_sltR2->setMaximum(val);
 }
+
+
+void Indirect::setPlotRange(MantidWidgets::RangeSelector* rangeSelector, QtDoublePropertyManager* dblManager, 
+  const std::pair<QtProperty*, QtProperty*> props, const std::pair<double, double>& bounds)
+{
+  dblManager->setMinimum(props.first, bounds.first);
+  dblManager->setMaximum(props.first, bounds.second);
+  dblManager->setMinimum(props.second, bounds.first);
+  dblManager->setMaximum(props.second, bounds.second);
+  rangeSelector->setRange(bounds.first, bounds.second);
+}
+
+  

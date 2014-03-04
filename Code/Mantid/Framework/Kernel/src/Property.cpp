@@ -1,8 +1,11 @@
 #include "MantidKernel/Property.h"
+
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
-#include <string>
-#include <sstream>
-#include <utility>
+#include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/PropertyHistory.h"
+
+#include <map>
 
 namespace Mantid
 {
@@ -50,12 +53,6 @@ Property::~Property()
   if (m_settings)
     delete m_settings;
 }
-
-//Property& Property::operator=( const Property& right )
-//{
-//  UNUSED_ARG(right);
-//  return *this;
-//}
 
 /** Get the property's name
  *  @return The name of the property
@@ -109,6 +106,24 @@ void Property::setSettings(IPropertySettings * settings)
 { 
   if(m_settings) delete m_settings;
   m_settings = settings;
+}
+
+/**
+ *
+ * @return the PropertySettings for this property
+ */
+IPropertySettings * Property::getSettings()
+{
+  return m_settings;
+}
+
+/**
+ * Deletes the PropertySettings object contained
+ */
+void Property::deleteSettings()
+{
+  delete m_settings;
+  m_settings = NULL;
 }
 
 /**
@@ -189,7 +204,7 @@ void Property::setUnits(const std::string & unit)
  * @param start :: the beginning time to filter from
  * @param stop :: the ending time to filter to
  * */
-void Property::filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
+void Property::filterByTime(const Kernel::DateAndTime &start, const Kernel::DateAndTime &stop)
 {
   UNUSED_ARG(start);
   UNUSED_ARG(stop);
@@ -204,7 +219,7 @@ void Property::filterByTime(const Kernel::DateAndTime start, const Kernel::DateA
  * @param splitter :: time splitter
  * @param outputs :: holder for splitter output
  */
-void Property::splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const
+void Property::splitByTime(std::vector< SplittingInterval >& splitter, std::vector< Property * > outputs) const
 {
   UNUSED_ARG(splitter);
   UNUSED_ARG(outputs);

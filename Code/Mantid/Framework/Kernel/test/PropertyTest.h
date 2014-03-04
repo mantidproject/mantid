@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyHistory.h"
 
 using namespace Mantid::Kernel;
 
@@ -102,23 +103,23 @@ public:
 
   void testUnits()
   {
-    Property * p2;
-    p2 = new PropertyHelper;
+    Property * p2 = new PropertyHelper;
     //No unit at first
     TS_ASSERT_EQUALS(p2->units(), "");
     p2->setUnits("furlongs/fortnight");
     TS_ASSERT_EQUALS(p2->units(), "furlongs/fortnight");
+    delete p2;
   }
 
   void testRemember()
   {
-      Property * p3;
-      p3 = new PropertyHelper;
-      TS_ASSERT(p3->remember());
-      p3->setRemember(false);
-      TS_ASSERT(!p3->remember());
-      p3->setRemember(true);
-      TS_ASSERT(p3->remember());
+    Property * p3 = new PropertyHelper;
+    TS_ASSERT(p3->remember());
+    p3->setRemember(false);
+    TS_ASSERT(!p3->remember());
+    p3->setRemember(true);
+    TS_ASSERT(p3->remember());
+    delete p3;
   }
 
 private:

@@ -25,6 +25,7 @@ If the file contains mulitple SASentry elements a workspace group will be create
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
 #include <Poco/SAX/InputSource.h>
+#include <Poco/DOM/AutoPtr.h>
 
 #include <boost/lexical_cast.hpp>
 //-----------------------------------------------------------------------
@@ -80,7 +81,7 @@ int LoadCanSAS1D::confidence(Kernel::FileDescriptor & descriptor) const
     Poco::XML::InputSource src(is);
     // Set up the DOM parser and parse xml file
     DOMParser pParser;
-    Document* pDoc;
+    Poco::AutoPtr<Document> pDoc;
     try
     {
       pDoc = pParser.parse(&src);
@@ -98,7 +99,6 @@ int LoadCanSAS1D::confidence(Kernel::FileDescriptor & descriptor) const
         confidence = 80;
       }
     }
-    pDoc->release();
   }// end of inner scope
 
   return confidence;
@@ -123,7 +123,7 @@ void LoadCanSAS1D::exec()
   const std::string fileName = getPropertyValue("Filename");
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
-  Document* pDoc;
+  Poco::AutoPtr<Document> pDoc;
   try
   {
     pDoc = pParser.parse(fileName);
@@ -138,7 +138,7 @@ void LoadCanSAS1D::exec()
     throw Kernel::Exception::NotFoundError("No root element in CanSAS1D XML file", fileName);
   }
   // there can be multiple <SASentry> elements, each one contains a period which will go into a workspace group if there are more than one of them
-  NodeList* entryList = pRootElem->getElementsByTagName("SASentry");
+  Poco::AutoPtr<NodeList> entryList = pRootElem->getElementsByTagName("SASentry");
   size_t numEntries = entryList->length();
   Workspace_sptr outputWork;
   MatrixWorkspace_sptr WS;
@@ -164,8 +164,6 @@ void LoadCanSAS1D::exec()
       }
       outputWork = group;
   }
-  entryList->release();
-  pDoc->release();
   setProperty("OutputWorkspace", outputWork);
 }
 /** Load an individual "<SASentry>" element into a new workspace
@@ -181,7 +179,7 @@ MatrixWorkspace_sptr LoadCanSAS1D::loadEntry(Poco::XML::Node * const workspaceDa
   check(workspaceElem, "<SASentry>");
   runName = workspaceElem->getAttribute("name");
 
-  NodeList* runs = workspaceElem->getElementsByTagName("Run");
+  Poco::AutoPtr<NodeList> runs = workspaceElem->getElementsByTagName("Run");
   if ( runs->length() != 1 )
   {
     throw Exception::NotImplementedError("<SASentry>s containing multiple runs, or no runs, are not currently supported");
@@ -190,7 +188,7 @@ MatrixWorkspace_sptr LoadCanSAS1D::loadEntry(Poco::XML::Node * const workspaceDa
   Element* sasDataElem = workspaceElem->getChildElement("SASdata");
   check(sasDataElem, "<SASdata>");
   // getting number of Idata elements in the xml file
-  NodeList* idataElemList = sasDataElem->getElementsByTagName("Idata");
+  Poco::AutoPtr<NodeList> idataElemList = sasDataElem->getElementsByTagName("Idata");
   size_t nBins = idataElemList->length();
 
   MatrixWorkspace_sptr dataWS =
@@ -266,7 +264,6 @@ MatrixWorkspace_sptr LoadCanSAS1D::loadEntry(Poco::XML::Node * const workspaceDa
   // run load instrument
   runLoadInstrument(instname, dataWS);
 
-  idataElemList->release();
   dataWS->getAxis(0)->setUnit("MomentumTransfer");
   return dataWS;
 }
@@ -336,12 +333,12 @@ void LoadCanSAS1D::createLogs(const Poco::XML::Element * const sasEntry, API::Ma
   Element * runText = sasEntry->getChildElement("Run");
   check(runText, "Run");
   run.addLogData(new PropertyWithValue<std::string>(
-                                      "run_number", runText->innerText()));
+    "run_number", runText->innerText()));
 
   Element * process = sasEntry->getChildElement("SASprocess");
   if (process)
   {
-    NodeList* terms = process->getElementsByTagName("term");
+    Poco::AutoPtr<NodeList> terms = process->getElementsByTagName("term");
     for ( unsigned int i = 0; i < terms->length(); ++i )
     {
       Node* term = terms->item(i);

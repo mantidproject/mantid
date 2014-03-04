@@ -31,6 +31,7 @@ m_ws(ws),
 m_wsName(ws->getName()),
 m_transposed(transpose)
 {
+  d_table->blockResizing(true);
   // if plot types is set in ws then update Table with that information
   for ( size_t i = 0; i < ws->columnCount(); i++ )
   {
@@ -54,6 +55,7 @@ m_transposed(transpose)
 
   connect(this,SIGNAL(needToClose()),this,SLOT(closeTable()));
   connect(this,SIGNAL(needToUpdate()),this,SLOT(updateTable()));
+  connect(d_table,SIGNAL(unwantedResize()),this,SLOT(dealWithUnwantedResize()));
   observePreDelete();
   observeAfterReplace();
 }
@@ -67,14 +69,21 @@ void MantidTable::updateTable()
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  // Delete old data
-  setNumRows(0);
-  setNumCols(0);
-
   // Fill with the new data
   fillTable();
 
   QApplication::restoreOverrideCursor();
+}
+
+/**
+ * Respond to cellsAdded signal from d_table. 
+ */
+void MantidTable::dealWithUnwantedResize()
+{
+  if (static_cast<int>(m_ws->rowCount()) != d_table->numRows() || static_cast<int>(m_ws->columnCount()) != d_table->numCols())
+  {
+    updateTable();
+  }
 }
 
 /** Refresh the table by filling it */
@@ -85,6 +94,9 @@ void MantidTable::fillTable()
     fillTableTransposed();
     return;
   }
+
+  // temporarily allow resizing
+  d_table->blockResizing(false);
 
   // Resize to fit the new workspace
   setNumRows(static_cast<int>(m_ws->rowCount()));
@@ -139,6 +151,10 @@ void MantidTable::fillTable()
     for(int j=0; j < static_cast<int>(m_ws->rowCount()); j++)
       d_table->verticalHeader()->setLabel(j,QString::number(j));
   }
+
+  // block resizing
+  d_table->blockResizing(true);
+
 }
 
 /**
@@ -264,7 +280,6 @@ void MantidTable::cellEdited(int row,int col)
   c->print(index, s);
   d_table->setText(row, col, QString(s.str().c_str()));
 }
-
 
 //------------------------------------------------------------------------------------------------
 /** Call an algorithm in order to delete table rows

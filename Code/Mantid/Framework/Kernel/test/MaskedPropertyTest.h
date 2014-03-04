@@ -2,8 +2,8 @@
 #define MASKEDPROPERTYTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/MaskedProperty.h"
+#include "MantidKernel/PropertyHistory.h"
 
 using namespace Mantid::Kernel;
 

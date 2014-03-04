@@ -290,7 +290,7 @@ void test_EventNoUnitsConv()
     pTargWS->createEmptyMDWS(WSD);
 
     ConvToMDSelector AlgoSelector;
-    pConvMethods = AlgoSelector.convSelector(inWsEv);
+    pConvMethods = AlgoSelector.convSelector(inWsEv,pConvMethods);
     TS_ASSERT_THROWS_NOTHING(pConvMethods->initialize(WSD,pTargWS,false));
 
     pMockAlgorithm->resetProgress(numHist);
@@ -326,7 +326,7 @@ void test_EventFromTOFConv()
 
 
     ConvToMDSelector AlgoSelector;
-    pConvMethods = AlgoSelector.convSelector(inWsEv);
+    pConvMethods = AlgoSelector.convSelector(inWsEv,pConvMethods);
     pConvMethods->initialize(WSD,pTargWS,false);
 
     pMockAlgorithm->resetProgress(numHist);
@@ -364,7 +364,7 @@ void test_HistoFromTOFConv()
     pTargWS->createEmptyMDWS(WSD);
 
     ConvToMDSelector AlgoSelector;
-    pConvMethods = AlgoSelector.convSelector(inWs2D);
+    pConvMethods = AlgoSelector.convSelector(inWs2D,pConvMethods);
     pConvMethods->initialize(WSD,pTargWS,false);
 
     pMockAlgorithm->resetProgress(numHist);
@@ -405,7 +405,7 @@ void test_HistoNoUnitsConv()
     pTargWS->createEmptyMDWS(WSD);
 
     ConvToMDSelector AlgoSelector;
-    pConvMethods = AlgoSelector.convSelector(inWs2D);
+    pConvMethods = AlgoSelector.convSelector(inWs2D,pConvMethods);
     pConvMethods->initialize(WSD,pTargWS,false);
 
     pMockAlgorithm->resetProgress(numHist);

@@ -3,11 +3,9 @@
 
 *WIKI*/
 #include "MantidAlgorithms/RecordPythonScript.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmHistory.h"
-#include "MantidAPI/AlgorithmProxy.h"
+
+#include <Poco/Thread.h>
 
 #include <fstream>
 

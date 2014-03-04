@@ -287,7 +287,7 @@
   </type>
 
   <component type="slit" name="slit1">
-    <location z="15.200"/> <!-- x= 23.0 - 4.710 -->
+    <location z="14.801"/> 
      <!-- This log file stores the vertical opening of slit -->
     <parameter name="vertical gap"> 
       <logfile id="S1_VG" extract-single-value-as="last_value" />
@@ -303,7 +303,7 @@
     </component>
   
   <component type="slit" name="slit2">  
-    <location z="16.700"/>  <!-- x=23.0 - 0.590   -->
+    <location z="16.724"/>
     <!-- This log file stores the vertical opening of this. Note this
      slit can also be translated in the z. However this info not stored
      in log file since it is not used in the data analysis process. -->

@@ -14,6 +14,9 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 
+#include <Poco/ActiveResult.h>
+#include <Poco/Thread.h>
+
 using namespace Mantid;
 using namespace Mantid::LiveData;
 using namespace Mantid::DataObjects;

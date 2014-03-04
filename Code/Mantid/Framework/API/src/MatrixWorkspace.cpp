@@ -1,15 +1,16 @@
 #include "MantidAPI/MatrixWorkspace.h"
-#include <numeric>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidAPI/WorkspaceIteratorCode.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <numeric>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
@@ -1627,11 +1628,6 @@ namespace Mantid
 
   } // namespace API
 } // Namespace Mantid
-
-
-///\cond TEMPLATE
-template MANTID_API_DLL class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef,Mantid::API::MatrixWorkspace>;
-template MANTID_API_DLL class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::API::MatrixWorkspace>;
 
 namespace Mantid
 {

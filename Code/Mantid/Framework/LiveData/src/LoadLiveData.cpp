@@ -57,17 +57,17 @@ This could cause Mantid to run very slowly or to crash due to lack of memory.
 
 #include "MantidLiveData/LoadLiveData.h"
 #include "MantidLiveData/Exception.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/WriteLock.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/SingletonHolder.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/CPUTimer.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <Poco/Thread.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

@@ -2,6 +2,7 @@
 #include "MantidAPI/ICostFunction.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/LibraryManager.h"
+#include <iostream>
 
 namespace Mantid
 {

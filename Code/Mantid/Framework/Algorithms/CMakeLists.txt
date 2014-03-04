@@ -501,6 +501,7 @@ set ( TEST_FILES
 	ConvertSpectrumAxis2Test.h
 	ConvertSpectrumAxisTest.h
 	ConvertTableToMatrixWorkspaceTest.h
+	ConvertMDHistoToMatrixWorkspaceTest.h
 	ConvertToDistributionTest.h
 	ConvertToEventWorkspaceTest.h
 	ConvertToHistogramTest.h

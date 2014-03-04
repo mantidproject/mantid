@@ -117,7 +117,7 @@ bool RenameWorkspace::processGroups()
 
   // We finished successfully.
   setExecuted(true);
-  m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
+  notificationCenter().postNotification(new FinishedNotification(this,isExecuted()));
   g_log.notice() << name() << " successful\n";
 
   return true;

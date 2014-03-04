@@ -35,7 +35,7 @@ namespace Mantid
       setICATProxySettings(icat);
 
       // Output the soap end-point in use for debugging purposes.
-      g_log.debug() << "The ICAT soap end-point is: " << icat.soap_endpoint << "\n";
+      g_log.debug() << "The ICAT soap end-point is: " << icat.soap_endpoint << std::endl;
 
       // Used to authenticate the user.
       ns1__login login;
@@ -46,6 +46,7 @@ namespace Mantid
        
       // Name of the authentication plugin in use.
       std::string plugin;
+
       if (url.find("sns") != std::string::npos) {
         plugin = std::string("ldap");
       } else {
@@ -74,7 +75,6 @@ namespace Mantid
       entry.value = &passWord;
       entries.push_back(entry);
 
-      // Is the login successful? (0 if yes, 12 if no).
       int result = icat.login(&login, &loginResponse);
 
       if (result == 0)
@@ -85,7 +85,7 @@ namespace Mantid
       }
       else
       {
-        throw std::runtime_error("Username or password supplied is invalid.");
+        throwErrorMessage(icat);
       }
     }
 
@@ -105,14 +105,13 @@ namespace Mantid
 
       int result = icat.logout(&request,&response);
 
-      // If session is set and valid.
       if(result == 0)
       {
         Session::Instance().setSessionId("");
       }
       else
       {
-        throw std::runtime_error("You are not currently logged into the cataloging system.");
+        throwErrorMessage(icat);
       }
     }
 
@@ -172,7 +171,7 @@ namespace Mantid
       {
         joinClause.push_back("JOIN inves.investigationInstruments invInst");
         joinClause.push_back("JOIN invInst.instrument inst");
-        whereClause.push_back("inst.name = '" + inputs.getInstrument() + "'");
+        whereClause.push_back("inst.fullName = '" + inputs.getInstrument() + "'");
       }
 
       // Keywords
@@ -262,14 +261,14 @@ namespace Mantid
     {
       std::string query = buildSearchQuery(inputs);
 
-      // Check if the query built was valid (e.g. if they user has input any search terms).
+      // Check if the query built was valid.
       if (query.empty()) throw std::runtime_error("You have not input any terms to search for.");
 
       // Modify the query to include correct SELECT and LIMIT clauses.
       query.insert(0, "SELECT DISTINCT inves");
       query.append(" LIMIT " + boost::lexical_cast<std::string>(offset) + "," + boost::lexical_cast<std::string>(limit));
 
-      g_log.debug() << "ICat4Catalog::search -> Query is: { " << query << " }" << std::endl;
+      g_log.debug() << "The search query in ICat4Catalog::search is: \n" << query << std::endl;
 
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
@@ -315,7 +314,7 @@ namespace Mantid
       query.insert(0, "SELECT COUNT(DISTINCT inves)");
       request.query         = &query;
 
-      g_log.debug() << "ICat4Catalog::getNumberOfSearchResults -> Query is: { " << query << " }" << std::endl;
+      g_log.debug() << "The paging search query in ICat4Catalog::getNumberOfSearchResults is: \n" << query << std::endl;
 
       int result = icat.search(&request, &response);
 
@@ -331,7 +330,7 @@ namespace Mantid
         throwErrorMessage(icat);
       }
 
-      g_log.debug() << "ICat4Catalog::getNumberOfSearchResults -> Number of results returned is: { " << numOfResults << " }" << std::endl;
+      g_log.debug() << "The number of paging results returned in ICat4Catalog::getNumberOfSearchResults is: " << numOfResults << std::endl;
 
       return numOfResults;
     }
@@ -391,49 +390,41 @@ namespace Mantid
         ns1__investigation * investigation = dynamic_cast<ns1__investigation*>(*iter);
         if (investigation)
         {
-          // Now attempt to add the relevant data to the output workspace.
-          try
+          API::TableRow table = outputws->appendRow();
+          // Used to insert an empty string into the cell if value does not exist.
+          std::string emptyCell("");
+
+          // Now add the relevant investigation data to the table (They always exist).
+          savetoTableWorkspace(investigation->name, table);
+          savetoTableWorkspace(investigation->title, table);
+          savetoTableWorkspace(investigation->investigationInstruments.at(0)->instrument->name, table);
+
+          // Verify that the run parameters vector exist prior to doing anything.
+          // Since some investigations may not have run parameters.
+          if (!investigation->parameters.empty())
           {
-            API::TableRow table = outputws->appendRow();
-            // Used to insert an empty string into the cell if value does not exist.
-            std::string emptyCell("");
-
-            // Now add the relevant investigation data to the table (They always exist).
-            savetoTableWorkspace(investigation->name, table);
-            savetoTableWorkspace(investigation->title, table);
-            savetoTableWorkspace(investigation->investigationInstruments.at(0)->instrument->name, table);
-
-            // Verify that the run parameters vector exist prior to doing anything.
-            // Since some investigations may not have run parameters.
-            if (!investigation->parameters.empty())
-            {
-              savetoTableWorkspace(investigation->parameters[0]->stringValue, table);
-            }
-            else
-            {
-              savetoTableWorkspace(&emptyCell, table);
-            }
-
-            // Again, we need to check first if start and end date exist prior to insertion.
-            if (investigation->startDate)
-            {
-              std::string startDate = formatDateTime(*investigation->startDate, "%Y-%m-%d");
-              savetoTableWorkspace(&startDate, table);
-            }
-            else
-            {
-              savetoTableWorkspace(&emptyCell, table);
-            }
-
-            if (investigation->endDate)
-            {
-              std::string endDate = formatDateTime(*investigation->endDate, "%Y-%m-%d");
-              savetoTableWorkspace(&endDate, table);
-            }
+            savetoTableWorkspace(investigation->parameters[0]->stringValue, table);
           }
-          catch(std::runtime_error&)
+          else
           {
-            throw;
+            savetoTableWorkspace(&emptyCell, table);
+          }
+
+          // Again, we need to check first if start and end date exist prior to insertion.
+          if (investigation->startDate)
+          {
+            std::string startDate = formatDateTime(*investigation->startDate, "%Y-%m-%d");
+            savetoTableWorkspace(&startDate, table);
+          }
+          else
+          {
+            savetoTableWorkspace(&emptyCell, table);
+          }
+
+          if (investigation->endDate)
+          {
+            std::string endDate = formatDateTime(*investigation->endDate, "%Y-%m-%d");
+            savetoTableWorkspace(&endDate, table);
           }
         }
         else
@@ -494,21 +485,14 @@ namespace Mantid
       std::vector<xsd__anyType*>::const_iterator iter;
       for(iter = response.begin(); iter != response.end(); ++iter)
       {
-        try
-        {
-          API::TableRow table = outputws->appendRow();
-          // These are just temporary values in order for the GUI to not die.
-          // These along with related GUI aspects will be removed in another ticket.
-          savetoTableWorkspace(&temp, table);
-          savetoTableWorkspace(&temp, table);
-          savetoTableWorkspace(&temp, table);
-          savetoTableWorkspace(&temp, table);
-          savetoTableWorkspace(&temp, table);
-        }
-        catch(std::runtime_error&)
-        {
-          throw;
-        }
+        API::TableRow table = outputws->appendRow();
+        // These are just temporary values in order for the GUI to not die.
+        // These along with related GUI aspects will be removed in another ticket.
+        savetoTableWorkspace(&temp, table);
+        savetoTableWorkspace(&temp, table);
+        savetoTableWorkspace(&temp, table);
+        savetoTableWorkspace(&temp, table);
+        savetoTableWorkspace(&temp, table);
       }
     }
 
@@ -531,7 +515,7 @@ namespace Mantid
       std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + investigationId + "']";
       request.query     = &query;
 
-      g_log.debug() << "ICat4Catalog::getDataSets -> { " << query << " }" << std::endl;
+      g_log.debug() << "The query for ICat4Catalog::getDataSets is:\n" << query << std::endl;
 
       int result = icat.search(&request, &response);
 
@@ -567,28 +551,21 @@ namespace Mantid
         ns1__datafile * datafile = dynamic_cast<ns1__datafile*>(*iter);
         if (datafile)
         {
-          try
-          {
-            API::TableRow table = outputws->appendRow();
-            // Now add the relevant investigation data to the table.
-            savetoTableWorkspace(datafile->name, table);
-            savetoTableWorkspace(datafile->location, table);
+          API::TableRow table = outputws->appendRow();
+          // Now add the relevant investigation data to the table.
+          savetoTableWorkspace(datafile->name, table);
+          savetoTableWorkspace(datafile->location, table);
 
-            std::string createDate = formatDateTime(*datafile->createTime, "%Y-%m-%d %H:%M:%S");
-            savetoTableWorkspace(&createDate, table);
+          std::string createDate = formatDateTime(*datafile->createTime, "%Y-%m-%d %H:%M:%S");
+          savetoTableWorkspace(&createDate, table);
 
-            savetoTableWorkspace(datafile->id, table);
-            savetoTableWorkspace(datafile->fileSize, table);
+          savetoTableWorkspace(datafile->id, table);
+          savetoTableWorkspace(datafile->fileSize, table);
 
-            std::string fileSize = bytesToString(*datafile->fileSize);
-            savetoTableWorkspace(&fileSize, table);
+          std::string fileSize = bytesToString(*datafile->fileSize);
+          savetoTableWorkspace(&fileSize, table);
 
-            if (datafile->description) savetoTableWorkspace(datafile->description, table);
-          }
-          catch(std::runtime_error&)
-          {
-            throw;
-          }
+          if (datafile->description) savetoTableWorkspace(datafile->description, table);
         }
         else
         {
@@ -612,7 +589,7 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      std::string query = "Instrument.name ORDER BY name";
+      std::string query = "Instrument.fullName ORDER BY fullName";
       request.query     = &query;
 
       int result = icat.search(&request, &response);
@@ -681,10 +658,10 @@ namespace Mantid
 
     /**
      * Gets the file location string from the archives.
-     * @param fileID       :: id of the file
-     * @param fileLocation :: location string  of the file
+     * @param fileID :: The id of the file to search for.
+     * @return The location of the datafile stored on the archives.
      */
-    void ICat4Catalog::getFileLocation(const long long & fileID, std::string & fileLocation)
+    const std::string ICat4Catalog::getFileLocation(const long long & fileID)
     {
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
@@ -701,16 +678,14 @@ namespace Mantid
 
       int result = icat.get(&request, &response);
 
+      std::string fileLocation;
       if (result == 0)
       {
         ns1__datafile * datafile = dynamic_cast<ns1__datafile*>(response.return_);
 
-        if (datafile)
+        if (datafile && datafile->location)
         {
-          if(datafile->location)
-          {
-            fileLocation = *(datafile->location);
-          }
+          fileLocation = *(datafile->location);
         }
         else
         {
@@ -721,17 +696,18 @@ namespace Mantid
       {
         throwErrorMessage(icat);
       }
+      return fileLocation;
     }
 
     /**
      * Downloads a file from the given url if not downloaded from archive.
-     * @param fileID :: id of the file
-     * @param url    :: url of the file
+     * @param fileID :: The id of the file to search for.
+     * @return A URL to download the datafile from.
      */
-    void ICat4Catalog::getDownloadURL(const long long & fileID, std::string& url)
+    const std::string ICat4Catalog::getDownloadURL(const long long & fileID)
     {
       // Obtain the URL from the Facilities.xml file.
-      std::string urlToBuild = ConfigService::Instance().getFacility().catalogInfo().externalDownloadURL();
+      std::string url = ConfigService::Instance().getFacility().catalogInfo().externalDownloadURL();
 
       // Set the REST features of the URL.
       std::string session  = "sessionId="    + Session::Instance().getSessionId();
@@ -739,11 +715,9 @@ namespace Mantid
       std::string outname  = "&outname="     + boost::lexical_cast<std::string>(fileID);
 
       // Add all the REST pieces to the URL.
-      urlToBuild += ("getData?" + session + datafile + outname + "&zip=false");
-
-      g_log.debug() << "ICat4Catalog::getDownloadURL -> { " << urlToBuild << " }" << std::endl;
-
-      url = urlToBuild;
+      url += ("getData?" + session + datafile + outname + "&zip=false");
+      g_log.debug() << "The download URL in ICat4Catalog::getDownloadURL is: " << url << std::endl;
+      return url;
     }
 
     /**
@@ -762,14 +736,13 @@ namespace Mantid
       std::string sessionID = Session::Instance().getSessionId();
       // Set the elements of the URL.
       std::string session   = "sessionId="  + sessionID;
-      if (sessionID.empty()) throw std::runtime_error("You are not currently logged into the cataloging system.");
       std::string name      = "&name="      + createFileName;
       std::string datasetId = "&datasetId=" + boost::lexical_cast<std::string>(getDatasetId(investigationID));
       std::string description = "&description=" + dataFileDescription;
 
       // Add pieces of URL together.
       url += ("put?" + session + name + datasetId + description + "&datafileFormatId=1");
-      g_log.debug() << "ICat4Catalog::getUploadURL url is: " << url << std::endl;
+      g_log.debug() << "The upload URL in ICat4Catalog::getUploadURL is: " << url << std::endl;
       return url;
     }
 
@@ -793,7 +766,8 @@ namespace Mantid
       std::string query = "Dataset <-> Investigation[name = '" + investigationID + "']";
       request.query     = &query;
 
-      g_log.debug() << "ICat4Catalog::getDatasetIdFromFileName -> { " << query << " }" << std::endl;
+      g_log.debug() << "The query performed to obtain a dataset from an investigation" <<
+          " id in ICat4Catalog::getDatasetIdFromFileName is:\n" << query << std::endl;
       
       int64_t datasetID = 0;
       
@@ -822,15 +796,6 @@ namespace Mantid
      */
     void ICat4Catalog::keepAlive()
     {
-    }
-
-    /**
-     * Keep the current session alive in minutes.
-     * @return The number of minutes to keep session alive for.
-     */
-    int ICat4Catalog::keepAliveinminutes()
-    {
-      return (0);
     }
 
     /**
@@ -891,8 +856,8 @@ namespace Mantid
 
       while (fileSize >= 1024 && order + 1 < units.size())
       {
-          order++;
-          fileSize = fileSize / 1024;
+        order++;
+        fileSize = fileSize / 1024;
       }
 
       return boost::lexical_cast<std::string>(fileSize) + units.at(order);
