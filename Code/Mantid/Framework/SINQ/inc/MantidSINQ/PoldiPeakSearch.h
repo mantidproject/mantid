@@ -53,11 +53,14 @@ namespace Poldi
     virtual const std::string name() const { return "PoldiPeakSearch"; }
     virtual const std::string category() const { return "SINQ\\Poldi"; }
     
+    size_t getNumberOfBackgroundPoints(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
   protected:
     MantidVec getNeighborSums(MantidVec correlatedCounts);
 
     std::list<MantidVec::iterator> findPeaks(MantidVec::iterator begin, MantidVec::iterator end);
     std::list<MantidVec::iterator> findPeaksRecursive(MantidVec::iterator begin, MantidVec::iterator end);
+    MantidVec::iterator getLeftRangeBegin(MantidVec::iterator begin);
+    MantidVec::iterator getRightRangeEnd(MantidVec::iterator end);
 
     std::list<MantidVec::iterator> getOriginalDataPeakIterators(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator baseDataStart, MantidVec::iterator originalDataStart);
 
@@ -69,10 +72,15 @@ namespace Poldi
     void setMinimumPeakHeight(double newMinimumPeakHeight);
     void setMaximumPeakNumber(int newMaximumPeakNumber);
 
+    void setRecursionAbsoluteBorders(MantidVec::iterator begin, MantidVec::iterator end);
+
     int m_minimumDistance;
     int m_doubleMinimumDistance;
     double m_minimumPeakHeight;
     int m_maximumPeakNumber;
+
+    MantidVec::iterator m_recursionAbsoluteBegin;
+    MantidVec::iterator m_recursionAbsoluteEnd;
 
   private:
     void init();

@@ -60,6 +60,15 @@ public:
         TS_ASSERT_EQUALS(poldiPeakSearch.m_maximumPeakNumber, 2);
     }
 
+    void testsetMinimumPeakHeight()
+    {
+        TestablePoldiPeakSearch poldiPeakSearch;
+
+        poldiPeakSearch.setMinimumPeakHeight(200.0);
+
+        TS_ASSERT_EQUALS(poldiPeakSearch.m_minimumPeakHeight, 200.0);
+    }
+
     void testfindPeaksRecursive()
     {
         TestablePoldiPeakSearch poldiPeakSearch;
@@ -79,6 +88,69 @@ public:
             TS_ASSERT_EQUALS(*maxima.front(), shouldGiveMaxima[i]);
             maxima.pop_front();
         }
+
+        // Same test with absolute recursion borders gives one additional peak at the right edge
+        poldiPeakSearch.setRecursionAbsoluteBorders(testList.begin(), testList.end());
+        std::list<std::vector<double>::iterator> edgeCasesMaxima = poldiPeakSearch.findPeaksRecursive(testList.begin(), testList.end());
+        TS_ASSERT_EQUALS(edgeCasesMaxima.size(), 4);
+
+        edgeCasesMaxima.sort();
+
+        double shouldGiveAbsoluteBordersMaxima[] = {12.0, 34.0, 12.0, 7.0};
+
+        for(size_t i = 0; i < 4; ++i) {
+            TS_ASSERT_EQUALS(*edgeCasesMaxima.front(), shouldGiveAbsoluteBordersMaxima[i]);
+            edgeCasesMaxima.pop_front();
+        }
+    }
+
+    void testsetRecursionAbsoluteBorders()
+    {
+        TestablePoldiPeakSearch poldiPeakSearch;
+
+        double testListRaw[] = {2.0, -3.0, -2.0, 12.0, 3.0 };
+        std::vector<double> baseData(testListRaw, testListRaw + 5);
+
+        poldiPeakSearch.setRecursionAbsoluteBorders(baseData.begin(), baseData.end());
+
+        TS_ASSERT_EQUALS(poldiPeakSearch.m_recursionAbsoluteBegin, baseData.begin());
+        TS_ASSERT_EQUALS(poldiPeakSearch.m_recursionAbsoluteEnd, baseData.end());
+    }
+
+    void testgetLeftRangeBegin()
+    {
+        int minimumDistance = 2;
+
+        TestablePoldiPeakSearch poldiPeakSearch;
+        poldiPeakSearch.setMinimumDistance(minimumDistance);
+
+        double testListRaw[] = {2.0, -3.0, -2.0, 12.0, 3.0 };
+        std::vector<double> baseData(testListRaw, testListRaw + 5);
+
+        TS_ASSERT_EQUALS(poldiPeakSearch.getLeftRangeBegin(baseData.begin()), baseData.begin() + minimumDistance);
+
+        poldiPeakSearch.setRecursionAbsoluteBorders(baseData.begin(), baseData.end());
+
+        TS_ASSERT_EQUALS(poldiPeakSearch.getLeftRangeBegin(baseData.begin()), baseData.begin());
+        TS_ASSERT_EQUALS(poldiPeakSearch.getLeftRangeBegin(baseData.end() - minimumDistance), baseData.end());
+    }
+
+    void testgetRightRangeEnd()
+    {
+        int minimumDistance = 2;
+
+        TestablePoldiPeakSearch poldiPeakSearch;
+        poldiPeakSearch.setMinimumDistance(minimumDistance);
+
+        double testListRaw[] = {2.0, -3.0, -2.0, 12.0, 3.0 };
+        std::vector<double> baseData(testListRaw, testListRaw + 5);
+
+        TS_ASSERT_EQUALS(poldiPeakSearch.getRightRangeEnd(baseData.end()), baseData.end() - minimumDistance);
+
+        poldiPeakSearch.setRecursionAbsoluteBorders(baseData.begin(), baseData.end());
+
+        TS_ASSERT_EQUALS(poldiPeakSearch.getRightRangeEnd(baseData.end()), baseData.end());
+        TS_ASSERT_EQUALS(poldiPeakSearch.getRightRangeEnd(baseData.begin() + minimumDistance), baseData.begin());
     }
 
     void testfindPeaks()
@@ -156,6 +228,45 @@ public:
 
         TS_ASSERT_EQUALS(*secondIterators.front(), 4.5);
         TS_ASSERT_EQUALS(*secondIterators.back(), 5.5);
+    }
+
+    void testgetNumberOfBackgroundPoints()
+    {
+        TestablePoldiPeakSearch poldiPeakSearch;
+        poldiPeakSearch.setMinimumDistance(2);
+
+        std::list<std::vector<double>::iterator> peakPositions(4);
+        std::vector<double> correlationCounts(30);
+
+        TS_ASSERT_EQUALS(poldiPeakSearch.getNumberOfBackgroundPoints(peakPositions, correlationCounts), 16);
+
+        std::list<std::vector<double>::iterator> tooManyPeaks(40);
+        TS_ASSERT_THROWS(poldiPeakSearch.getNumberOfBackgroundPoints(tooManyPeaks, correlationCounts), std::runtime_error);
+    }
+
+    void getBackgroundWithSigma()
+    {
+        TestablePoldiPeakSearch poldiPeakSearch;
+        poldiPeakSearch.setMinimumDistance(2);
+
+        double rawTestList[] = { 1.0, 2.0, 1.0, 2.0, 1.0, 0.0, 4.0, 0.0, 1.0, 2.0, 1.0, 2.0, 1.0};
+        std::vector<double> testList(rawTestList, rawTestList + 13);
+
+        std::list<std::vector<double>::iterator> peaks;
+        peaks.push_front(testList.begin() + 6);
+
+        TS_ASSERT_EQUALS(poldiPeakSearch.getNumberOfBackgroundPoints(peaks, testList), 8);
+
+        std::pair<double, double> bgSigma = poldiPeakSearch.getBackgroundWithSigma(peaks, testList);
+        TS_ASSERT_EQUALS(bgSigma.first, 1.5);
+        TS_ASSERT_EQUALS(bgSigma.second, 2.0);
+    }
+
+    void testDefaultMinimumPeakHeight()
+    {
+        TestablePoldiPeakSearch poldiPeakSearch;
+
+        TS_ASSERT_EQUALS(poldiPeakSearch.defaultMinimumPeakHeight(std::make_pair(3.0, 3.5)), 12.625);
     }
 };
 
