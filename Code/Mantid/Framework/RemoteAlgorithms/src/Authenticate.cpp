@@ -3,6 +3,8 @@
 Authenticate to the remote compute resource.  This must be executed before calling any
 other remote algorithms.
 
+For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
+
 *WIKI*/
 
 #include "MantidRemoteAlgorithms/Authenticate.h"
@@ -34,6 +36,13 @@ using namespace Mantid::Kernel;
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
+/// Sets documentation strings for this algorithm
+void Authenticate::initDocs()
+{
+  this->setWikiSummary("Authenticate to the remote compute resource.");
+  this->setOptionalMessage("Authenticate to the remote compute resource.");
+}
+
 void Authenticate::init()
 {
   // Unlike most algorithms, this wone doesn't deal with workspaces....
@@ -42,13 +51,13 @@ void Authenticate::init()
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
-  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "The remote computer to authenticate to", Direction::Input);
 
   // Say who we are (or at least, who we want to execute the remote python code)
-  declareProperty( "UserName", "", requireValue, "", Direction::Input);
+  declareProperty( "UserName", "", requireValue, "Name of the user to authenticate as", Direction::Input);
 
   // Password doesn't get echoed to the screen...
-  declareProperty( new MaskedProperty<std::string>( "Password", "", requireValue, Direction::Input), "");
+  declareProperty( new MaskedProperty<std::string>( "Password", "", requireValue, Direction::Input), "The password associated with the specified user");
 
 }
 
