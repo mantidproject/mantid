@@ -430,11 +430,11 @@ private:
   /// first good bin returned in ms
   double firstGoodBin() const;
 
-  /// According to Plot Options what is the time to plot from in ms
-  double plotFromTime() const;
+  /// Sets specified option of the algorithm to minimum X value selected by user
+  void setXMin(IAlgorithm_sptr alg, const std::string& propName) const;
 
-  /// According to Plot Options what is the time to plot to in ms
-  double plotToTime() const;
+  /// Sets specified option of the algorithm to max X value selected by user
+  void setXMax(IAlgorithm_sptr alg, const std::string& propName) const;
 
   /// time zero returned in ms
   double timeZero();

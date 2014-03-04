@@ -628,9 +628,8 @@ MatrixWorkspace_sptr MuonAnalysis::prepareAnalysisWorkspace(MatrixWorkspace_sptr
   cropAlg->initialize();
   cropAlg->setChild(true);
   cropAlg->setProperty("InputWorkspace", ws);
-  cropAlg->setProperty("Xmin", plotFromTime());
-  if ( !m_uiForm.timeAxisFinishAtInput->text().isEmpty() )
-    cropAlg->setProperty("Xmax", plotToTime());
+  setXMin(cropAlg, "Xmin");
+  setXMax(cropAlg, "Xmax");
   cropAlg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
   cropAlg->execute();
 
@@ -2394,39 +2393,50 @@ double MuonAnalysis::firstGoodBin() const
                             g_log);
 }
 
- /**
- * According to Plot Options what time should we plot from in ms
- * @return time to plot from in ms
+/**
+ * Sets specified option of the algorithm to minimum X value selected by user
+ * @param alg :: Algorithm to set property for
+ * @param propName :: Name of the property to set
  */
-double MuonAnalysis::plotFromTime() const
+void MuonAnalysis::setXMin(IAlgorithm_sptr alg, const std::string& propName) const
 {
   QString startTimeType = m_uiForm.timeComboBox->currentText();
+  double value(0);
 
   if (startTimeType == "Start at First Good Data")
   {
-    return firstGoodBin();
+    value = firstGoodBin();
   }
   else if (startTimeType == "Start at Time Zero")
   {
-    return 0;
+    value = 0;
   }
   else if (startTimeType == "Custom Value")
   {
-    return getValidatedDouble(m_uiForm.timeAxisStartAtInput, "0.0", "custom start time", g_log);
+    value = getValidatedDouble(m_uiForm.timeAxisStartAtInput, "0.0", "custom start time", g_log);
   }
-
-  // Just in case misspelled type or added a new one
-  throw std::runtime_error("Unknown start time type.");
+  else
+  {
+    // Just in case misspelled type or added a new one
+    throw std::runtime_error("Unknown start time type.");
+  }
+  alg->setProperty(propName, value);
 }
 
-
- /**
- * According to Plot Options what time should we plot to in ms
- * @return time to plot to in ms
+/**
+ * Sets specified option of the algorithm to max X value selected by user. If use doesn't specify
+ * the value - the option is not set.
+ * @param alg :: Algorithm to set property for
+ * @param propName :: Name of the property to set
  */
-double MuonAnalysis::plotToTime() const
+void MuonAnalysis::setXMax(IAlgorithm_sptr alg, const std::string& propName) const
 {
-  return getValidatedDouble(m_uiForm.timeAxisFinishAtInput, "16.0", "custom finish time", g_log);
+  if ( !m_uiForm.timeAxisFinishAtInput->text().isEmpty() )
+  {
+    double value = getValidatedDouble(m_uiForm.timeAxisFinishAtInput, "16.0", "custom finish time",
+                                      g_log);
+    alg->setProperty(propName, value);
+  }
 }
 
 
@@ -3393,12 +3403,8 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
   loadAlg->setProperty("DetectorGroupingTable", grouping);
 
   // -- X axis options --------------------------------------------------------
-
-  double Xmin = m_uiForm.timeAxisStartAtInput->text().toDouble();
-  loadAlg->setProperty("Xmin", Xmin);
-
-  double Xmax = m_uiForm.timeAxisFinishAtInput->text().toDouble();
-  loadAlg->setProperty("Xmax", Xmax);
+  setXMin(loadAlg, "Xmin");
+  setXMax(loadAlg, "Xmax");
 
   double timeZero = m_uiForm.timeZeroFront->text().toDouble(); 
   loadAlg->setProperty("TimeZero", timeZero);
