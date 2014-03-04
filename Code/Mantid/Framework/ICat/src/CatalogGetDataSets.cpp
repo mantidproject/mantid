@@ -26,9 +26,9 @@ namespace Mantid
     {
       declareProperty("InvestigationId","",boost::make_shared<Kernel::MandatoryValidator<std::string>>(),
           "ID of the selected investigation");
+      declareProperty("Session","","The session information of the catalog to use.");
       declareProperty(new API::WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Kernel::Direction::Output),
           "The name of the workspace to store the result of datasets search ");
-      declareProperty("Session","","The session information of the catalog to use.");
     }
 
     /// exec methods

@@ -24,9 +24,9 @@ namespace Mantid
     /// Init method
     void CatalogListInvestigationTypes::init()
     {
+      declareProperty("Session","","The session information of the catalog to use.");
       declareProperty(new Kernel::ArrayProperty<std::string>("InvestigationTypes",std::vector<std::string>(),
           boost::make_shared<Kernel::NullValidator>(), Kernel::Direction::Output), "A list containing investigation types.");
-      declareProperty("Session","","The session information of the catalog to use.");
     }
 
     /// exec method

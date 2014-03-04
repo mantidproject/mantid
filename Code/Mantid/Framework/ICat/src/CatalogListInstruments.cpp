@@ -25,9 +25,9 @@ namespace Mantid
     /// Init method
     void CatalogListInstruments::init()
     {
+      declareProperty("Session","","The session information of the catalog to use.");
       declareProperty(new Kernel::ArrayProperty<std::string>("InstrumentList",std::vector<std::string>(),
           boost::make_shared<Kernel::NullValidator>(),Kernel::Direction::Output), "A list containing instrument names.");
-      declareProperty("Session","","The session information of the catalog to use.");
     }
 
     /// exec method

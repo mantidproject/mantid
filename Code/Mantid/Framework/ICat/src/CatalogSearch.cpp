@@ -58,11 +58,11 @@ namespace Mantid
       declareProperty<int>("Limit", 0, "");
       declareProperty<int>("Offset",0, "");
 
+      declareProperty("Session","","The session information of the catalog to use.");
+
       declareProperty(new API::WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Kernel::Direction::Output),
           "The name of the workspace that will be created to store the ICat investigations search result.");
       declareProperty<int64_t>("NumberOfSearchResults", 0, "", Kernel::Direction::Output);
-
-      declareProperty("Session","","The session information of the catalog to use.");
     }
 
     /// Execution method.
