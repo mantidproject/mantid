@@ -78,7 +78,7 @@ namespace WorkflowAlgorithms
         "The name of the Nexus file to load" );
 
     declareProperty("FirstPeriod", 0, "Group index of the first period workspace to use");
-    declareProperty("SecondPeriod", EMPTY_INT(), "Group index of the first period workspace to use");
+    declareProperty("SecondPeriod", EMPTY_INT(), "Group index of the second period workspace to use");
 
     std::vector<std::string> allowedOperations;
     allowedOperations.push_back("+"); 
