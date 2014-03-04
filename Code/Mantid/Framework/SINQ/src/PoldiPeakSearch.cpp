@@ -247,6 +247,11 @@ void PoldiPeakSearch::exec()
     setMinimumDistance(getProperty("MinimumPeakSeparation"));
     setMinimumPeakHeight(getProperty("MinimumPeakHeight"));
     setMaximumPeakNumber(getProperty("MaximumPeakNumber"));
+
+    if(m_doubleMinimumDistance > static_cast<int>(correlatedCounts.size())) {
+        throw(std::runtime_error("MinimumPeakSeparation is smaller than number of spectrum points - no peaks possible."));
+    }
+
     g_log.information() << "   Parameters set." << std::endl;
 
     MantidVec summedNeighborCounts = getNeighborSums(correlatedCounts);
