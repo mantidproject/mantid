@@ -87,9 +87,7 @@ namespace Mantid
         for (size_t i = 0; i < nDimensions; i++)
         {
           Poco::XML::Element* dimensionXML = static_cast<Poco::XML::Element*> (dimensionsXML->item(static_cast<unsigned long>(i)));
-          Mantid::Geometry::IMDDimensionFactory factory(dimensionXML);
-          Mantid::Geometry::IMDDimension* dimension = factory.create();
-          vecAllDims[i] = boost::shared_ptr<Mantid::Geometry::IMDDimension>(dimension);
+          vecAllDims[i] = createDimension(*dimensionXML);
         }
         VecIMDDimension_sptr vecNonMappedDims = vecAllDims;
         Poco::XML::Element* xDimensionElement = geometryXMLElement->getChildElement(MDGeometryXMLDefinitions::workspaceXDimensionElementName());

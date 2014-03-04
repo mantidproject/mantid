@@ -52,7 +52,7 @@ public:
 
   void testCorrectGeneration()
   {
-    IMDDimension_const_sptr dimension = IMDDimensionFactory::create(constructDimensionWithUnitsXMLString());
+    IMDDimension_const_sptr dimension = createDimension(constructDimensionWithUnitsXMLString());
     TS_ASSERT_EQUALS("Cubits", dimension->getUnits());
     TS_ASSERT_EQUALS("Qz", dimension->getName());
     TS_ASSERT_EQUALS("qz", dimension->getDimensionId());
@@ -63,7 +63,7 @@ public:
 
   void testCorrectGenerationWithoutUnits()
   {
-    IMDDimension_const_sptr dimension = IMDDimensionFactory::create(constructDimensionWithoutUnits());
+    IMDDimension_const_sptr dimension = createDimension(constructDimensionWithoutUnitsXMLString());
     TS_ASSERT_EQUALS("None", dimension->getUnits());
     TS_ASSERT_EQUALS("Qz", dimension->getName());
     TS_ASSERT_EQUALS("qz", dimension->getDimensionId());
@@ -72,16 +72,26 @@ public:
     TS_ASSERT_EQUALS(8, dimension->getNBins());
   }
 
-  void testStaticCreation()
+  void testCreationViaStringVsElement()
   {
     std::string xmlToParse = constructNonReciprocalDimensionXMLString();
-    IMDDimension_const_sptr viaString = IMDDimensionFactory::create(xmlToParse);
+    IMDDimension_const_sptr viaString = createDimension(xmlToParse);
     auto document = constructNonReciprocalDimensionXML();
-    IMDDimension_const_sptr viaXML = IMDDimensionFactory::create(document->documentElement());
+    IMDDimension_const_sptr viaXML = createDimension(*document->documentElement());
 
     //Constructed either way, the products should be equivalent
     TSM_ASSERT_EQUALS("Created through either route, the products should be equal", viaString->getDimensionId(), viaXML->getDimensionId());
+  }
 
+  void testOverrideMethod()
+  {
+    IMDDimension_const_sptr dimension = createDimension(constructDimensionWithUnitsXMLString(),10,-9.0,8.5);
+    TS_ASSERT_EQUALS("Cubits", dimension->getUnits());
+    TS_ASSERT_EQUALS("Qz", dimension->getName());
+    TS_ASSERT_EQUALS("qz", dimension->getDimensionId());
+    TS_ASSERT_EQUALS(-9.0, dimension->getMinimum());
+    TS_ASSERT_EQUALS(8.5, dimension->getMaximum());
+    TS_ASSERT_EQUALS(10, dimension->getNBins());
   }
 };
 #endif
