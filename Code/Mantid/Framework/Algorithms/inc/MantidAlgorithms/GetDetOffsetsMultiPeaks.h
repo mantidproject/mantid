@@ -77,11 +77,6 @@ public:
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction"; }
-  /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-  int fitSpectra(const int64_t wi, API::MatrixWorkspace_sptr inputW, const std::vector<double> &m_peakPositions, const std::vector<double> &m_fitWindows, size_t &nparams,
-                  double &minD, double &maxD,
-                  std::vector<double>&peakPosToFit, std::vector<double> &peakPosFitted, std::vector<double> &chisq,
-                 int &i_highestpeak);
 
 private:
   /// Sets documentation strings for this algorithm
@@ -92,6 +87,13 @@ private:
 
   void processProperties();
 
+  /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
+  int fitSpectra(const int64_t wi, API::MatrixWorkspace_sptr inputW, const std::vector<double> &m_peakPositions,
+                 const std::vector<double> &m_fitWindows, size_t &nparams, double &minD, double &maxD,
+                 std::vector<double>&peakPosToFit, std::vector<double> &peakPosFitted, std::vector<double> &chisq,
+                 int &i_highestpeak);
+
+  /// Add peak fitting and offset calculation information to information table workspaces per spectrum
   void addInfoToReportWS(int wi, FitPeakOffsetResult offsetresult, const std::vector<double> &tofitpeakpositions,
                          const std::vector<double> &fittedpeakpositions);
 
@@ -111,14 +113,17 @@ private:
 
   FitPeakOffsetResult calculatePeakOffset(const int wi, std::vector<double>& fittedpeakpositions, std::vector<double>& vec_peakPosRef);
 
+  /// Calculate a spectrum's offset by optimizing offset
   void fitPeaksOffset(const size_t inpnparams, const double minD, const double maxD,
                       const std::vector<double>& vec_peakPosRef,
                       const std::vector<double>& vec_peakPosFitted,
                       const std::vector<double>& vec_fitChi2,
                       FitPeakOffsetResult& fitresult);
 
+  /// Make a summary on all fit
   void makeFitSummary();
 
+  /// Remove rows without offset calculated from offset table workspace
   void removeEmptyRowsFromPeakOffsetTable();
 
   API::MatrixWorkspace_sptr inputW;
@@ -135,12 +140,14 @@ private:
   std::vector<double> m_peakPositions;
   std::vector<double> m_fitWindows;
 
+  DataObjects::OffsetsWorkspace_sptr outputW;
+  /// Output workspace for debugging purpose
+  DataObjects::OffsetsWorkspace_sptr outputNP;
+  /// Output Mask workspace
+  API::MatrixWorkspace_sptr maskWS;
+
   DataObjects::TableWorkspace_sptr m_infoTableWS;
   DataObjects::TableWorkspace_sptr m_peakOffsetTableWS;
-
-  DataObjects::OffsetsWorkspace_sptr outputW;
-  DataObjects::OffsetsWorkspace_sptr outputNP;
-  API::MatrixWorkspace_sptr maskWS;
 
 };
 
