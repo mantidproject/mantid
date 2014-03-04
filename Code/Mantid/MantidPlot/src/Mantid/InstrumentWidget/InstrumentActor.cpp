@@ -495,7 +495,7 @@ void InstrumentActor::sumDetectorsUniform(QList<int>& dets, std::vector<double>&
  */
 void InstrumentActor::sumDetectorsRagged(QList<int> &dets, std::vector<double> &x, std::vector<double> &y, size_t size) const
 {
-  if ( dets.isEmpty() )
+  if ( dets.isEmpty() || size == 0 )
   {
       x.clear();
       y.clear();
@@ -553,7 +553,7 @@ void InstrumentActor::sumDetectorsRagged(QList<int> &dets, std::vector<double> &
     xEnd = maxBinValue();
   }
 
-  double dx = (xEnd - xStart) / (size - 1);
+  double dx = (xEnd - xStart) / static_cast<double>(size - 1);
   std::string params = QString("%1,%2,%3").arg(xStart).arg(dx).arg(xEnd).toStdString();
   std::string outName = "_TMP_sumDetectorsRagged";
 
