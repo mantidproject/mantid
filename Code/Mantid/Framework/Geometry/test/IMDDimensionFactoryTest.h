@@ -37,30 +37,6 @@ private:
     return pDoc->documentElement();
   }
 
-  static Poco::XML::Element* constructReciprocalDimensionXML()
-  {
-    std::string xmlToParse = std::string("<Dimension ID=\"qz\">") + "<Name>Qz</Name>"
-        + "<UpperBounds>6.6</UpperBounds>" + "<LowerBounds>-6.6</LowerBounds>"
-        + "<NumberOfBins>6</NumberOfBins>"
-        + "<ReciprocalDimensionMapping>q3</ReciprocalDimensionMapping>" + "</Dimension>";
-
-    Poco::XML::DOMParser pParser;
-    Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
-    return pDoc->documentElement();
-  }
-
-  static Poco::XML::Element* constructUnknownReciprocalDimensionXML()
-  {
-    std::string xmlToParse = std::string("<Dimension ID=\"unknown\">") + "<Name>Qz</Name>"
-      + "<UpperBounds>6.6</UpperBounds>" + "<LowerBounds>-6.6</LowerBounds>"
-      + "<NumberOfBins>6</NumberOfBins>"
-      + "<ReciprocalDimensionMapping>unknown</ReciprocalDimensionMapping>" + "</Dimension>";
-
-    Poco::XML::DOMParser pParser;
-    Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
-    return pDoc->documentElement();
-  }
-
   static std::string constructNonReciprocalDimensionXMLString()
   {
     return std::string("<Dimension ID=\"en\">") + "<Name>Energy</Name>"
