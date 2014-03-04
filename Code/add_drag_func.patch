@@ -1,0 +1,223 @@
+diff --git a/Code/Mantid/MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/DataSelector.h b/Code/Mantid/MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/DataSelector.h
+index 1ac3e9c..39e4dd7 100644
+--- a/Code/Mantid/MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/DataSelector.h
++++ b/Code/Mantid/MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/DataSelector.h
+@@ -122,6 +122,10 @@ namespace MantidQt
+       bool m_autoLoad;
+       /// Flag to show or hide the load button. By default this is set to true.
+       bool m_showLoad;
++
++    protected:
++      void dropEvent(QDropEvent *);
++      void dragEnterEvent(QDragEnterEvent *);
+     };
+ 
+   } /* namespace MantidWidgets */
+diff --git a/Code/Mantid/MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/MWRunFiles.h b/Code/Mantid/MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/MWRunFiles.h
+index be5e810..613ca1f 100644
+--- a/Code/Mantid/MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/MWRunFiles.h
++++ b/Code/Mantid/MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/MWRunFiles.h
+@@ -106,7 +106,7 @@ namespace MantidQt
+       Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
+       Q_ENUMS(ButtonOpts)
+       Q_ENUMS(LiveButtonOpts)
+-
++      friend class DataSelector;
+     public:
+       /// options for bringing up the load file dialog
+       enum ButtonOpts
+@@ -275,6 +275,10 @@ namespace MantidQt
+       QString m_fileFilter;
+       /// Thread to allow asynchronous finding of files.
+       FindFilesThread * m_thread;
++
++    protected:
++      void dropEvent(QDropEvent *);
++      void dragEnterEvent(QDragEnterEvent *);
+     };
+   }
+ }
+diff --git a/Code/Mantid/MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/WorkspaceSelector.h b/Code/Mantid/MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/WorkspaceSelector.h
+index 1b51904..e584339 100644
+--- a/Code/Mantid/MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/WorkspaceSelector.h
++++ b/Code/Mantid/MantidQt/MantidWidgets/inc/MantidQtMantidWidgets/WorkspaceSelector.h
+@@ -67,7 +67,7 @@ namespace MantidWidgets
+     Q_PROPERTY(bool Optional READ isOptional WRITE setOptional)
+     Q_PROPERTY(QStringList Suffix READ getSuffixes WRITE setSuffixes)
+     Q_PROPERTY(QString Algorithm READ getValidatingAlgorithm WRITE setValidatingAlgorithm)
+-
++    friend class DataSelector;
+   public:
+     /// Default Constructor
+     WorkspaceSelector(QWidget *parent = NULL, bool init = true);
+@@ -121,6 +121,9 @@ namespace MantidWidgets
+     // Algorithm to validate against
+     boost::shared_ptr<Mantid::API::Algorithm> m_algorithm;
+ 
++  protected:
++    void dragEnterEvent(QDragEnterEvent*);
++    void dropEvent(QDropEvent*);
+   };
+ 
+ }
+diff --git a/Code/Mantid/MantidQt/MantidWidgets/src/DataSelector.cpp b/Code/Mantid/MantidQt/MantidWidgets/src/DataSelector.cpp
+index c75598f..7e9a13b 100644
+--- a/Code/Mantid/MantidQt/MantidWidgets/src/DataSelector.cpp
++++ b/Code/Mantid/MantidQt/MantidWidgets/src/DataSelector.cpp
+@@ -6,6 +6,11 @@
+ 
+ #include <QFileInfo>
+ 
++#include <QDropEvent>
++#include <QMimeData>
++#include <QDebug>
++#include <QUrl>
++
+ namespace MantidQt
+ {
+   namespace MantidWidgets
+@@ -24,6 +29,7 @@ namespace MantidQt
+       connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SLOT(handleFileInput()));
+ 
+       connect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(handleAutoLoadComplete(bool)));
++      m_uiForm.rfFileInput->setAcceptDrops(false);
+     }
+ 
+     DataSelector::~DataSelector()
+@@ -351,5 +357,34 @@ namespace MantidQt
+       m_showLoad = load;
+     }
+ 
++
++void DataSelector::dropEvent(QDropEvent *de)
++{
++  const QMimeData *mimeData = de->mimeData();  
++  auto before_action = de->dropAction();
++
++  if (de->mimeData() && mimeData->text().contains(" = mtd[\"")){
++    m_uiForm.wsWorkspaceInput->dropEvent(de);
++    if (de->dropAction() == before_action){    
++      m_uiForm.cbInputType->setCurrentIndex(1);
++      return;
++    }
++    de->setDropAction(before_action);    
++  }
++  
++  m_uiForm.rfFileInput->dropEvent(de);
++  if (de->dropAction() == before_action){
++    m_uiForm.cbInputType->setCurrentIndex(0);
++  }
++}
++
++  void DataSelector::dragEnterEvent(QDragEnterEvent *de)
++{
++  const QMimeData *mimeData = de->mimeData();
++  if (mimeData->hasText() || mimeData->hasUrls())
++    de->acceptProposedAction();
++}
++
++
+   } /* namespace MantidWidgets */
+ } /* namespace MantidQt */
+diff --git a/Code/Mantid/MantidQt/MantidWidgets/src/MWRunFiles.cpp b/Code/Mantid/MantidQt/MantidWidgets/src/MWRunFiles.cpp
+index 42d0b80..95ed011 100644
+--- a/Code/Mantid/MantidQt/MantidWidgets/src/MWRunFiles.cpp
++++ b/Code/Mantid/MantidQt/MantidWidgets/src/MWRunFiles.cpp
+@@ -12,6 +12,10 @@
+ #include <QFileDialog>
+ #include <QFileInfo>
+ #include <QHash>
++#include <QDropEvent>
++#include <QDragEnterEvent>
++#include <QMimeData>
++#include <QUrl>
+ #include <QtConcurrentRun>
+ #include <Poco/File.h>
+ 
+@@ -1064,3 +1068,38 @@ void MWRunFiles::checkEntry()
+ 
+   setEntryNumProblem("");
+ }
++
++
++void MWRunFiles::dropEvent(QDropEvent *de)
++{
++  const QMimeData *mimeData = de->mimeData(); 
++  if (mimeData->hasUrls()){
++    auto url_list = mimeData->urls(); 
++    m_uiForm.fileEditor->setText(url_list[0].toLocalFile());
++    de->acceptProposedAction();
++  }else if (mimeData->hasText()){
++    QString text = mimeData->text();
++    if (text.contains(" = mtd[\""))
++      return;
++    m_uiForm.fileEditor->setText(text); 
++    de->acceptProposedAction();
++  }
++  
++}
++
++  void MWRunFiles::dragEnterEvent(QDragEnterEvent *de)
++{
++  const QMimeData *mimeData = de->mimeData();  
++  if (mimeData->hasUrls()){
++    auto listurl = mimeData->urls(); 
++    if (listurl.empty())
++      return;
++    if (!listurl[0].isLocalFile())
++      return;
++    de->acceptProposedAction();
++  }
++  else if(mimeData->hasText()) 
++  {
++    de->acceptProposedAction();
++  }
++}
+diff --git a/Code/Mantid/MantidQt/MantidWidgets/src/WorkspaceSelector.cpp b/Code/Mantid/MantidQt/MantidWidgets/src/WorkspaceSelector.cpp
+index dbdebe8..170fbd1 100644
+--- a/Code/Mantid/MantidQt/MantidWidgets/src/WorkspaceSelector.cpp
++++ b/Code/Mantid/MantidQt/MantidWidgets/src/WorkspaceSelector.cpp
+@@ -10,6 +10,10 @@
+ 
+ #include "MantidAPI/AlgorithmManager.h"
+ 
++#include <QDropEvent>
++#include <QMimeData>
++#include <QUrl>
++#include <QDebug>
+ using namespace MantidQt::MantidWidgets;
+ 
+ /**
+@@ -313,3 +317,32 @@ void WorkspaceSelector::refresh()
+     }
+   }
+ }
++
++void WorkspaceSelector::dropEvent(QDropEvent *de)
++{
++  const QMimeData *mimeData = de->mimeData(); 
++  QString text =  mimeData->text();
++  int equal_pos = text.indexOf("=");
++  QString ws_name = text.left(equal_pos-1);
++  QString ws_name_test = text.mid(equal_pos + 7, equal_pos-1);
++  
++  if (ws_name == ws_name_test){
++    int index = findText(ws_name);
++    if (index >= 0){
++      setCurrentIndex(index);
++      de->acceptProposedAction();
++    }
++  }
++  
++}
++
++void WorkspaceSelector::dragEnterEvent(QDragEnterEvent *de)
++{
++  const QMimeData *mimeData = de->mimeData();  
++  if(mimeData->hasText()) 
++  {
++    QString text = mimeData->text();
++    if (text.contains(" = mtd[\""))
++      de->acceptProposedAction();
++  }
++}
