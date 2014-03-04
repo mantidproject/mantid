@@ -1160,10 +1160,19 @@ void InstrumentWindowPickTab::savePlotToWorkspace()
     QStringList parts = label.split(QRegExp("[()]"));
     if ( label == "multiple" )
     {
+      if ( X.empty() )
+      {
+        // label doesn't have any info on how to reproduce the curve:
+        // only the current curve can be saved
         QList<int> dets;
         getSurface()->getMaskedDetectors( dets );
         m_instrWindow->getInstrumentActor()->sumDetectors( dets, x, y );
         unitX = parentWorkspace->getAxis(0)->unit()->unitID();
+      }
+      else
+      {
+        QMessageBox::warning(this,"MantidPlot - Warning","Cannot save the stored curves.\nOnly the current curve will be saved.");
+      }
     }
     else if (parts.size() == 3)
     {
@@ -1193,7 +1202,7 @@ void InstrumentWindowPickTab::savePlotToWorkspace()
     {
       continue;
     }
-    if (!x.empty() && x.size() == y.size())
+    if (!x.empty())
     {
       if (nbins > 0 && x.size() != nbins)
       {
@@ -1212,7 +1221,7 @@ void InstrumentWindowPickTab::savePlotToWorkspace()
   // call CreateWorkspace algorithm. Created worksapce will have name "Curves"
   if (!X.empty())
   {
-    E.resize(X.size(),1.0);
+    E.resize(Y.size(),1.0);
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmFactory::Instance().create("CreateWorkspace",-1);
     alg->initialize();
     alg->setPropertyValue("OutputWorkspace","Curves");
@@ -1408,7 +1417,8 @@ void InstrumentWindowPickTab::updatePlotMultipleDetectors()
 {
     if ( !isVisible() ) return;
     ProjectionSurface &surface = *getSurface();
-    m_plot->clearAll();
+    m_plot->clearCurve();
+    m_plot->clearPeakLabels();
     if ( !surface.hasMasks() )
     {
         m_plot->replot();
