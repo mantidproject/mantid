@@ -24,6 +24,11 @@ namespace CustomInterfaces
 namespace Muon
 {
 
+const QString MuonAnalysisOptionTab::START_TIME_DEFAULT("0.3");
+const QString MuonAnalysisOptionTab::FINISH_TIME_DEFAULT("16.0");
+const QString MuonAnalysisOptionTab::MIN_Y_DEFAULT("");
+const QString MuonAnalysisOptionTab::MAX_Y_DEFAULT("");
+
 // Acquire logger instance
 Logger& MuonAnalysisOptionTab::g_log(Logger::get("MuonAnalysis"));
 
@@ -39,11 +44,11 @@ void MuonAnalysisOptionTab::initLayout()
   // Register all the widgets for auto-saving
   m_autoSaver.beginGroup("PlotStyleOptions");
   m_autoSaver.registerWidget(m_uiForm.connectPlotType, "connectPlotStyle", 0);
-  m_autoSaver.registerWidget(m_uiForm.timeAxisStartAtInput, "timeAxisStart", "0.3");
-  m_autoSaver.registerWidget(m_uiForm.timeAxisFinishAtInput, "timeAxisFinish", "16.0");
+  m_autoSaver.registerWidget(m_uiForm.timeAxisStartAtInput, "timeAxisStart", START_TIME_DEFAULT);
+  m_autoSaver.registerWidget(m_uiForm.timeAxisFinishAtInput, "timeAxisFinish", FINISH_TIME_DEFAULT);
   m_autoSaver.registerWidget(m_uiForm.timeComboBox, "timeComboBoxIndex", 0);
-  m_autoSaver.registerWidget(m_uiForm.yAxisMinimumInput, "yAxisStart", "");
-  m_autoSaver.registerWidget(m_uiForm.yAxisMaximumInput, "yAxisFinish", "");
+  m_autoSaver.registerWidget(m_uiForm.yAxisMinimumInput, "yAxisStart", MIN_Y_DEFAULT);
+  m_autoSaver.registerWidget(m_uiForm.yAxisMaximumInput, "yAxisFinish", MAX_Y_DEFAULT);
   m_autoSaver.registerWidget(m_uiForm.yAxisAutoscale, "axisAutoScaleOnOff", true);
   m_autoSaver.registerWidget(m_uiForm.showErrorBars, "errorBars", 0);
   m_autoSaver.endGroup();
@@ -258,7 +263,7 @@ double MuonAnalysisOptionTab::getCustomStartTime()
 {
   QLineEdit* w = m_uiForm.timeAxisStartAtInput;
 
-  return getValidatedDouble(w, "0.0", "custom start time", g_log);
+  return getValidatedDouble(w, START_TIME_DEFAULT, "custom start time", g_log);
 }
 
 /**
@@ -275,7 +280,7 @@ double MuonAnalysisOptionTab::getCustomFinishTime()
   }
   else
   {
-    return getValidatedDouble(w, "16.0", "custom finish time", g_log);
+    return getValidatedDouble(w, FINISH_TIME_DEFAULT, "custom finish time", g_log);
   }
 }
 

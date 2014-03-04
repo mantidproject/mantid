@@ -80,6 +80,12 @@ private:
   /// Logger to use
   static Logger& g_log;
 
+  /// Default widget values
+  static const QString START_TIME_DEFAULT;
+  static const QString FINISH_TIME_DEFAULT;
+  static const QString MIN_Y_DEFAULT;
+  static const QString MAX_Y_DEFAULT;
+
   /// The Muon Analysis UI file.
   Ui::MuonAnalysis& m_uiForm;
 
