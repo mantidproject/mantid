@@ -628,8 +628,14 @@ MatrixWorkspace_sptr MuonAnalysis::prepareAnalysisWorkspace(MatrixWorkspace_sptr
   cropAlg->initialize();
   cropAlg->setChild(true);
   cropAlg->setProperty("InputWorkspace", ws);
-  setXMin(cropAlg, "Xmin");
-  setXMax(cropAlg, "Xmax");
+  cropAlg->setProperty("Xmin", startTime());
+
+  double Xmax = finishTime();
+  if(Xmax != EMPTY_DBL())
+  {
+    cropAlg->setProperty("Xmax", Xmax);
+  }
+
   cropAlg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
   cropAlg->execute();
 
@@ -2394,11 +2400,10 @@ double MuonAnalysis::firstGoodBin() const
 }
 
 /**
- * Sets specified option of the algorithm to minimum X value selected by user
- * @param alg :: Algorithm to set property for
- * @param propName :: Name of the property to set
+ * Returns min X value as specified by user.
+ * @return Min X value
  */
-void MuonAnalysis::setXMin(IAlgorithm_sptr alg, const std::string& propName) const
+double MuonAnalysis::startTime() const
 {
   auto startTimeType = m_optionTab->getStartTimeType();
   double value(0);
@@ -2419,23 +2424,16 @@ void MuonAnalysis::setXMin(IAlgorithm_sptr alg, const std::string& propName) con
       throw std::runtime_error("Unknown start time type");
   }
 
-  alg->setProperty(propName, value);
+  return value;
 }
 
 /**
- * Sets specified option of the algorithm to max X value selected by user. If use doesn't specify
- * the value - the option is not set.
- * @param alg :: Algorithm to set property for
- * @param propName :: Name of the property to set
+ * Returns max X value as specified by user.
+ * @return Max X value, or EMPTY_DBL() if not set
  */
-void MuonAnalysis::setXMax(IAlgorithm_sptr alg, const std::string& propName) const
+double MuonAnalysis::finishTime() const
 {
-  double value = m_optionTab->getCustomFinishTime();
-
-  if ( value != EMPTY_DBL() )
-  {
-    alg->setProperty(propName, value);
-  }
+  return m_optionTab->getCustomFinishTime();
 }
 
 /**
@@ -3401,8 +3399,13 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
   loadAlg->setProperty("DetectorGroupingTable", grouping);
 
   // -- X axis options --------------------------------------------------------
-  setXMin(loadAlg, "Xmin");
-  setXMax(loadAlg, "Xmax");
+  loadAlg->setProperty("Xmin", startTime());
+
+  double Xmax = finishTime();
+  if (Xmax != EMPTY_DBL())
+  {
+    loadAlg->setProperty("Xmax", Xmax);
+  }
 
   double timeZero = m_uiForm.timeZeroFront->text().toDouble(); 
   loadAlg->setProperty("TimeZero", timeZero);

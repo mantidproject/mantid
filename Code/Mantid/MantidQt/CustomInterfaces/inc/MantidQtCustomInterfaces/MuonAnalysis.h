@@ -430,11 +430,11 @@ private:
   /// first good bin returned in ms
   double firstGoodBin() const;
 
-  /// Sets specified option of the algorithm to minimum X value selected by user
-  void setXMin(IAlgorithm_sptr alg, const std::string& propName) const;
+  /// Returns start X value as specified by user
+  double startTime() const;
 
-  /// Sets specified option of the algorithm to max X value selected by user
-  void setXMax(IAlgorithm_sptr alg, const std::string& propName) const;
+  /// Return finish X value as specified by user
+  double finishTime() const;
 
   /// time zero returned in ms
   double timeZero();
