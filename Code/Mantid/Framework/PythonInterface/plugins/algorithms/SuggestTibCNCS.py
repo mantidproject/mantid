@@ -49,7 +49,7 @@ class SuggestTibCNCS(PythonAlgorithm):
         tinf=1e6*(36.262)/self.e2v(energy)
         if tinf<tmin:
             tinf+=1e6/60.
-        tpulse=1e6/60*floor(tmax*60e-60)
+        tpulse=1e6/60*floor(tmax*60e-6)
 
         #check for TIB
         dtib=3500. # default length of TIB range
@@ -64,8 +64,14 @@ class SuggestTibCNCS(PythonAlgorithm):
             tibmin+=1000.       #reduce TIB range if at large TOFs, to be far from elastic line        
         
         if (tibmin-tpulse)*(tibmax-tpulse)<0 and tpulse<tel: # prompt pulse inside TIB range at low TOFs
-            tibmin=tmax-dtibreduced 
-            tibmax=tmax
+            #try to move to lower times
+            tibmax=tpulse-0.1*dtinf
+            tibmin=tibmax-dtib
+            if tibmin<tmin:
+                tibmin=tibmax-dtibreduced
+            if tibmin<tmin:
+                tibmin=tmax-dtibreduced 
+                tibmax=tmax
 
         if (tibmin-tpulse)*(tibmax-tpulse)<0 and tpulse>tel: # prompt pulse inside TIB range at high TOFs
             tibmin=tmin
@@ -74,7 +80,7 @@ class SuggestTibCNCS(PythonAlgorithm):
         if tibmin<tmin:     # bring tibmin inside the frame
             tibmin=tmin        
 
-        #if we have more space at lareg TOFs move either above or below the prompt pulse
+        #if we have more space at large TOFs move either above or below the prompt pulse
         if (tibmax-tibmin)<2000 and (tmax-tpulse)>2000:
             tibmax=tmax
             tibmin=max(tmax-dtibreduced,tpulse)
