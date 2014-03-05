@@ -74,8 +74,52 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         char = self.getProperty("Characterizations").value
         if char.rowCount() <= 0:
             return
-        print char.rowCount()
         wksp = self.getProperty("InputWorkspace").value
+        frequency = self.getFrequency(wksp.getRun())
+        wavelength = self.getWavelength(wksp.getRun())
+        self.log().information("Determined frequency: " + str(frequency) \
+                                   + " Hz, center wavelength:" \
+                                   + str(wavelength) + " Angstrom")
+
+    def getFrequency(self, logs):
+        for name in ["SpeedRequest1", "Speed1", "frequency"]:
+            if name in logs.keys():
+                frequency = logs[name]
+                if frequency.units != "Hz":
+                    msg = "When looking at %s log encountered unknown units" \
+                        + " for frequency. Only know how to deal with " \
+                        + "frequency in Hz, not %s" % (name, frequency.units)
+                    self.log().information(msg)
+                else:
+                    frequency = frequency.getStatistics().mean
+                    if frequency == 0.: 
+                        self.log().information("'%s' mean value is zero" % name)
+                    else:
+                        self.log().information("Found frequency in %s log" \
+                                                   % name)
+                        return frequency
+        self.log().warning("Failed to determine frequency in \"%s\"" \
+                               % str(wksp))
+        return None
+
+    def getWavelength(self, logs):
+        name = "LambdaRequest"
+        if name in logs.keys():
+            wavelength = logs[name]
+            if wavelength.units != "Angstrom":
+                msg = "Only know how to deal with LambdaRequest in "\
+                    "Angstrom, not $s" % wavelength
+                self.log().information(msg)
+            else:
+                wavelength = wavelength.getStatistics().mean
+                if wavelength == 0.:
+                    self.log().information("'%s' mean value is zero" % name)
+                else:
+                    return wavelength
+
+        self.log().warning("Failed to determine wavelength in \"%s\"" \
+                               % str(wksp))
+        return None
 
 # Register algorthm with Mantid.
 AlgorithmFactory.subscribe(PDDetermineCharacterizations)
