@@ -559,7 +559,7 @@ class DirectEnergyConversion(object):
             nsp = monitor_ws.getSpectrum(int(self.ei_mon_spectra[0]));
         except:
             monitors_from_separate_ws = True
-            mon_ws = monitor_ws.getName()+'_monitors'
+            mon_ws = monitor_ws.getName()+'_Monitors'
             monitor_ws = mtd[mon_ws];
         #-------------------------------------------------------------
             
