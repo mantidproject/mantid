@@ -5,7 +5,7 @@ set ( SRC_FILES
 	src/CalculateUMatrix.cpp
 	src/CentroidPeaks.cpp
 	src/ClearUB.cpp
-	src/ClusterItem.cpp
+	src/DisjointElement.cpp
 	src/CombinePeaksWorkspaces.cpp
 	src/DiffPeaksWorkspaces.cpp
 	src/FilterPeaks.cpp
@@ -62,7 +62,7 @@ set ( INC_FILES
 	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/ClearUB.h
-	inc/MantidCrystal/ClusterItem.h
+	inc/MantidCrystal/DisjointElement.h
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/FilterPeaks.h
@@ -119,7 +119,7 @@ set ( TEST_FILES
 	CalculateUMatrixTest.h
 	CentroidPeaksTest.h
 	ClearUBTest.h
-	ClusterItemTest.h
+	DisjointElementTest.h
 	CombinePeaksWorkspacesTest.h
 	DiffPeaksWorkspacesTest.h
 	FilterPeaksTest.h

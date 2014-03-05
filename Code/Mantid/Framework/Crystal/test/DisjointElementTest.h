@@ -1,9 +1,9 @@
-#ifndef MANTID_CRYSTAL_CLUSTERITEMTEST_H_
-#define MANTID_CRYSTAL_CLUSTERITEMTEST_H_
+#ifndef MANTID_CRYSTAL_DISJOINTELEMENTTEST_H_
+#define MANTID_CRYSTAL_DISJOINTELEMENTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCrystal/ClusterItem.h"
+#include "MantidCrystal/DisjointElement.h"
 
 using Mantid::Crystal::ClusterItem;
 
@@ -186,4 +186,4 @@ public:
 };
 
 
-#endif /* MANTID_CRYSTAL_CLUSTERITEMTEST_H_ */
+#endif /* MANTID_CRYSTAL_DISJOINTELEMENTTEST_H_ */

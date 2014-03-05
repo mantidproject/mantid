@@ -1,5 +1,5 @@
-#ifndef MANTID_CRYSTAL_CLUSTERITEM_H_
-#define MANTID_CRYSTAL_CLUSTERITEM_H_
+#ifndef MANTID_CRYSTAL_DISJOINTELEMENT_H_
+#define MANTID_CRYSTAL_DISJOINTELEMENT_H_
 
 #include "MantidKernel/System.h"
 
@@ -64,4 +64,4 @@ namespace Crystal
 } // namespace Crystal
 } // namespace Mantid
 
-#endif  /* MANTID_CRYSTAL_CLUSTERITEM_H_ */
+#endif  /* MANTID_CRYSTAL_DISJOINTELEMENT_H_ */

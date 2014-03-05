@@ -1,4 +1,4 @@
-#include "MantidCrystal/ClusterItem.h"
+#include "MantidCrystal/DisjointElement.h"
 
 namespace Mantid
 {
