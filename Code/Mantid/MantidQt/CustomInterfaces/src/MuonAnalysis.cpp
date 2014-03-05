@@ -91,8 +91,9 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
   m_currentTab(NULL),
   m_groupNames(), 
   m_settingsGroup("CustomInterfaces/MuonAnalysis/"),
-  m_updating(false), m_loaded(false), m_deadTimesChanged(false), 
+  m_updating(false), m_updatingGrouping(false), m_loaded(false), m_deadTimesChanged(false),
   m_textToDisplay(""), 
+  m_optionTab(NULL), m_fitDataTab(NULL), m_resultTableTab(NULL), // Will be created in initLayout()
   m_dataTimeZero(0.0), m_dataFirstGoodData(0.0)
 {}
 
