@@ -2,62 +2,31 @@
 #define MANTID_CRYSTAL_DISJOINTELEMENTTEST_H_
 
 #include <cxxtest/TestSuite.h>
-
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include "MantidCrystal/DisjointElement.h"
 
-using Mantid::Crystal::ClusterItem;
+using Mantid::Crystal::DisjointElement;
 
-class ClusterItemTest : public CxxTest::TestSuite
+class DisjointElementTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ClusterItemTest *createSuite() { return new ClusterItemTest(); }
-  static void destroySuite( ClusterItemTest *suite ) { delete suite; }
-
+  static DisjointElementTest *createSuite() { return new DisjointElementTest(); }
+  static void destroySuite( DisjointElementTest *suite ) { delete suite; }
 
   void test_make_first_of_cluster()
   {
-    ClusterItem item(12);
+    DisjointElement item(12);
     TS_ASSERT_EQUALS(12, item.getId());
-    TS_ASSERT_EQUALS(0, item.getDepth());
     TS_ASSERT_EQUALS(0, item.getRank());
     TS_ASSERT_EQUALS(&item, item.getParent());
   }
 
-  void test_make_with_parent()
-  {
-    ClusterItem parent(0);
-    ClusterItem item(1, &parent);
-    TS_ASSERT_EQUALS(1, item.getId());
-    TS_ASSERT_EQUALS(1, item.getDepth());
-    TS_ASSERT_EQUALS(0, item.getRank());
-    TSM_ASSERT_EQUALS("Parent rank should be incremented", 1, parent.getRank())
-    TS_ASSERT_EQUALS(&parent, item.getParent());
-  }
-
-  void test_copy()
-  {
-    ClusterItem a(1);
-    ClusterItem b = a;
-    TS_ASSERT_EQUALS(a.getId(), b.getId());
-    TS_ASSERT_EQUALS(a.getRoot(), b.getRoot());
-    TS_ASSERT_EQUALS(a.getDepth(), b.getDepth());
-    TS_ASSERT_EQUALS(a.getRank(), b.getRank());
-  }
-
-  void test_assign()
-  {
-    ClusterItem a(1);
-    ClusterItem b(2);
-
-    b=a;
-    TS_ASSERT_DIFFERS(a.getId(), b.getId());
-  }
-
   void test_increment_rank()
   {
-    ClusterItem item(0);
+    DisjointElement item(0);
     TS_ASSERT_EQUALS(0, item.getRank());
     item.incrementRank();
     TS_ASSERT_EQUALS(1, item.getRank());
@@ -65,123 +34,130 @@ public:
     TS_ASSERT_EQUALS(2, item.getRank());
   }
 
-  void test_decrement_rank()
+  void test_union_same_id_throws()
   {
-    ClusterItem item(0);
-    item.incrementRank();
-    item.incrementRank();
-
-    TS_ASSERT_EQUALS(2, item.getRank());
-    item.decrementRank();
-    TS_ASSERT_EQUALS(1, item.getRank());
+    DisjointElement item1(0);
+    DisjointElement item2(0);
+    TS_ASSERT_THROWS(item1.unionWith(&item2), std::logic_error&);
   }
 
-  void test_decrement_parent_rank_on_death()
+  void test_union_two_singleton_sets()
   {
-    ClusterItem parent(0);
-    TS_ASSERT_EQUALS(0, parent.getRank());
+    DisjointElement item1(0);
+    DisjointElement item2(1);
+
+    // We now have two singletons. Diagram shows parents are selves.
+    /*
+     *   item1  item2
+     *    |       |
+     *   item1  item2
+     */
+
+    item1.unionWith(&item2);
+    TS_ASSERT_EQUALS(0, item1.getRank());
+    TSM_ASSERT_EQUALS("Same rank, but different parents, so item2, should take ownership", 1, item2.getRank());
+    TSM_ASSERT_EQUALS("item2 should be parent", item1.getParent(), &item2);
+  }
+
+  void test_union_with_same_root()
+  {
+    DisjointElement child1(0);
+    DisjointElement child2(1);
+    DisjointElement base(2);
+    child1.unionWith(&base);
+    child2.unionWith(&base);
+    TS_ASSERT_EQUALS(1, base.getRank());
+
+    // We now have
+    /*
+     *       base
+     *      /    \
+     *   child1  child2
+     */
+
+    //Try to union child1 and child2. Nothing should change.
+
+    child1.unionWith(&child2);
+    TS_ASSERT_EQUALS(0, child1.getRank());
+    TS_ASSERT_EQUALS(0, child2.getRank());
+    TSM_ASSERT_EQUALS("base should be parent", child1.getParent(), &base);
+    TSM_ASSERT_EQUALS("base should be parent", child2.getParent(), &base);
+  }
+
+  void test_union_with_different_roots()
+  {
+    DisjointElement a(0);
+    DisjointElement b(1);
+    DisjointElement c(2);
+    b.unionWith(&a);
+    TS_ASSERT_EQUALS(1, a.getRank());
+
+    // We now have two trees. One is singleton.
+    /*
+     *     a    c
+     *     |    |
+     *     b    c
+     */
+
+    c.unionWith(&b);
+
+    // We should get
+    /*
+     *       a
+     *      / \
+     *     b   c
+     *
+     */
+
+    TS_ASSERT_EQUALS(0, b.getRank());
+    TS_ASSERT_EQUALS(0, c.getRank());
+    TSM_ASSERT_EQUALS("b should be parent of a", c.getParent(), &a);
+    TSM_ASSERT_EQUALS("a should be parent of b", b.getParent(), &a);
+    TSM_ASSERT_EQUALS("b and c should have a common root", b.getRoot(), c.getRoot());
+  }
+
+  void test_complex()
+  {
+    typedef boost::shared_ptr<DisjointElement> DisjointElement_sptr;
+    typedef std::vector<DisjointElement_sptr> VecDisjointElement;
+
+    // Create elements from 0-9
+    VecDisjointElement vecElements;
+    for(int i=0; i < 10; ++i)
     {
-      ClusterItem child(1, &parent);
-      TS_ASSERT_EQUALS(1, parent.getRank());
+      vecElements.push_back(boost::make_shared<DisjointElement>(i));
     }
-    TSM_ASSERT_EQUALS("Parent rank should be reduced as child item destroyed", 0, parent.getRank());
+
+    // Merge selected sets.
+    vecElements[3]->unionWith(vecElements[1].get());
+    vecElements[1]->unionWith(vecElements[2].get());
+    vecElements[2]->unionWith(vecElements[4].get());
+    vecElements[0]->unionWith(vecElements[7].get());
+    vecElements[8]->unionWith(vecElements[9].get());
+
+    // Should get this.
+    /*
+     *       7     1       5    6   9
+     *      /    / | \              |
+     *     0    2  3  4             8
+     *
+     */
+
+
+    TS_ASSERT_EQUALS(7, vecElements[0]->getRoot());
+
+    TS_ASSERT_EQUALS(1, vecElements[2]->getRoot());
+    TS_ASSERT_EQUALS(1, vecElements[3]->getRoot());
+    TS_ASSERT_EQUALS(1, vecElements[4]->getRoot());
+
+    TS_ASSERT_EQUALS(9, vecElements[8]->getRoot());
+
+    TS_ASSERT_EQUALS(7, vecElements[7]->getRoot());
+    TS_ASSERT_EQUALS(1, vecElements[1]->getRoot());
+    TS_ASSERT_EQUALS(5, vecElements[5]->getRoot());
+    TS_ASSERT_EQUALS(6, vecElements[6]->getRoot());
+    TS_ASSERT_EQUALS(9, vecElements[9]->getRoot());
   }
-
-  void test_find_root()
-  {
-    ClusterItem a(0);
-    ClusterItem b(1, &a);
-    ClusterItem c(2, &b);
-    ClusterItem d(3, &c);
-
-    //All have a common root.
-    TS_ASSERT_EQUALS(a.getId(), a.getRoot());
-    TS_ASSERT_EQUALS(a.getId(), b.getRoot());
-    TS_ASSERT_EQUALS(a.getId(), c.getRoot());
-    TS_ASSERT_EQUALS(a.getId(), d.getRoot());
-  }
-
-  void test_make_compressed()
-  {
-    ClusterItem a(0);
-    ClusterItem b(1, &a);
-    ClusterItem c(2, &b);
-
-    TSM_ASSERT_EQUALS("Relationship prior to compression", a.getId(), c.getRoot());
-
-    ClusterItem compressed = c;
-    compressed.compress();
-
-    TSM_ASSERT_EQUALS("Relationship after compression", a.getId(), c.getRoot());
-    TSM_ASSERT_EQUALS("Depth should be collapsed", 1, compressed.getDepth());
-    TSM_ASSERT_EQUALS("Id should be the same", c.getId(), compressed.getId());
-
-  }
-
-  void test_union_with_simple_shared_root()
-  {
-    ClusterItem a(0);
-    ClusterItem b(1, &a);
-    ClusterItem c(2, &a);
-
-    //Everything should be the same before and after.
-    c.unionWith(b);
-
-    TS_ASSERT_EQUALS( b.getRoot(), a.getId() );
-    TS_ASSERT_EQUALS( c.getRoot(), a.getId() );
-
-
-    TS_ASSERT_EQUALS( 2, a.getRank());
-    TS_ASSERT_EQUALS( 0, b.getRank());
-    TS_ASSERT_EQUALS( 0, c.getRank());
-  }
-
-  void test_union_with_complex_shared_root()
-  {
-    ClusterItem a(0);
-    ClusterItem b(1, &a);
-    ClusterItem c(2, &a);
-    ClusterItem d(3, &c);
-
-    TSM_ASSERT_EQUALS("Intermediate parent has non-zero rank", 1, c.getRank());
-
-    c.unionWith(d);
-
-    TSM_ASSERT_EQUALS("Intermediate parent unlinked so has zero rank", 0, c.getRank());
-
-    TS_ASSERT_EQUALS( c.getRoot(), a.getId() );
-    TS_ASSERT_EQUALS( b.getRoot(), a.getId() );
-    TS_ASSERT_EQUALS( d.getRoot(), a.getId() );
-  }
-
-  void xtest_union_with_when_no_shared_parent()
-  {
-    //Taken from example here: http://www.users.csbsju.edu/~lziegler/CS162/UnionFind.html
-
-    // Branch 1
-    ClusterItem zero(0);
-    ClusterItem three(3, &zero);
-    ClusterItem two(2, &zero);
-    ClusterItem one(1, &zero);
-    ClusterItem four(4, &one);
-
-    //Branch 2
-    ClusterItem five(5);
-    ClusterItem six(6, &five);
-    ClusterItem eight(8, &five);
-    ClusterItem seven(7, &eight);
-
-    TS_ASSERT_EQUALS(3, zero.getRank());
-    TS_ASSERT_EQUALS(2, five.getRank());
-    TS_ASSERT_EQUALS(1, eight.getRank());
-
-    four.unionWith(five);
-
-    TS_ASSERT_EQUALS(4, zero.getRank());
-    TS_ASSERT_EQUALS(3, five.getRank());
-  }
-
-
 
 };
 

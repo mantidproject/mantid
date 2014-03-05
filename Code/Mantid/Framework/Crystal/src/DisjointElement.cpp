@@ -1,91 +1,76 @@
 #include "MantidCrystal/DisjointElement.h"
-
+#include <stdexcept>
+#include <iostream>
 namespace Mantid
 {
   namespace Crystal
   {
 
-    //----------------------------------------------------------------------------------------------
-    /** Constructor
+    /**
+     * Constructor
+     * @param id : Element id
      */
-    ClusterItem::ClusterItem(const int id) :
-        m_parent(this), m_depth(0), m_rank(0), m_id(id)
+    DisjointElement::DisjointElement(const int id) :
+        m_parent(this), m_rank(0), m_id(id)
     {
-    }
-
-    ClusterItem::ClusterItem(const int id, ClusterItem * const parent) :
-        m_parent(parent), m_depth(parent->getDepth() + 1), m_rank(0), m_id(id)
-    {
-      m_parent->incrementRank();
     }
 
     //----------------------------------------------------------------------------------------------
     /** Destructor
      */
-    ClusterItem::~ClusterItem()
+    DisjointElement::~DisjointElement()
     {
-      m_parent->decrementRank();
     }
 
-    int ClusterItem::getId() const
+    /**
+     * Getter for the id
+     * @return return the numeric id.
+     */
+    int DisjointElement::getId() const
     {
       return m_id;
     }
 
-    int ClusterItem::getDepth() const
-    {
-      return m_depth;
-    }
-
-    ClusterItem * ClusterItem::getParent() const
+    /**
+     * Getter for the parent element.
+     * @return pointer to parent element
+     */
+    DisjointElement * DisjointElement::getParent() const
     {
       return m_parent;
     }
 
-    ClusterItem::ClusterItem(const ClusterItem& other) :
-        m_parent(other.m_parent), m_depth(other.m_depth), m_rank(other.m_rank), m_id(other.m_id)
+    /**
+     * Compress the tree such that element's parent becomes it's root parent.
+     *
+     * Note that compression does NOT alter ranks.
+     * @return root id of new parent.
+     */
+    int DisjointElement::compress()
     {
-      if(other.hasParent())
-      {
-        m_parent->incrementRank();
-      }
-      else // If the cluster item we are copying from is a root node, then this one is too.
-      {
-        m_parent = this;
-      }
-    }
-
-    ClusterItem& ClusterItem::operator=(const ClusterItem& other)
-    {
-      if (this != &other)
-      {
-        setParent(other.m_parent);
-        m_depth = other.m_depth;
-        m_rank = other.m_rank;
-        // Note. Cannot change id once set.
-      }
-      return *this;
-    }
-
-    int ClusterItem::compress()
-    {
-      ClusterItem * temp = m_parent;
+      DisjointElement * temp = m_parent;
       while (temp->hasParent())
       {
-        temp->decrementRank(); // Decrease the rank (a.k.a unlink this parent), but don't delete it.
         temp = temp->getParent();
       }
       m_parent = temp;
-      m_depth = m_parent->getDepth() + 1;
       return m_parent->getRoot();
     }
 
-    bool ClusterItem::hasParent() const
+    /**
+     * Determine if this instance really has a parent or whether it is a singleton
+     * @return False if singleton, otherwise true.
+     */
+    bool DisjointElement::hasParent() const
     {
       return m_parent != this;
     }
 
-    int ClusterItem::getRoot() const
+    /**
+     * Getter for the root id.
+     * @return Root element id.
+     */
+    int DisjointElement::getRoot() const
     {
       if (m_parent == this)
       {
@@ -97,48 +82,70 @@ namespace Mantid
       }
     }
 
-    void ClusterItem::setParent(ClusterItem * other)
+    /**
+     * Setter for the parent element.
+     * @param other : New parent
+     */
+    void DisjointElement::setParent(DisjointElement * other)
     {
-      m_parent->decrementRank();
       m_parent = other;
-      m_parent->incrementRank();
     }
 
-    void ClusterItem::incrementRank()
+    /**
+     * Increment the rank.
+     * @return the new rank.
+     */
+    int DisjointElement::incrementRank()
     {
-      ++m_rank;
+      return ++m_rank;
     }
 
-    void ClusterItem::decrementRank()
-    {
-      --m_rank;
-    }
-
-    int ClusterItem::getRank() const
+    /**
+     * Getter for the rank
+     * @return the current rank
+     */
+    int DisjointElement::getRank() const
     {
       return m_rank;
     }
 
-    void ClusterItem::unionWith(ClusterItem& other)
+    /**
+     * Union disjoint sets. Union happens w.r.t the parent of on or the other sets.
+     * Early exit if both have the same root node already.
+     * Generally, the set with the highest rank becomes the parent.
+     * If ranks are equal, then one is chosen to be the parent, and that's sets rank is incremented.
+     * @param other
+     */
+    void DisjointElement::unionWith(DisjointElement* other)
     {
-      const auto rootA = this->compress();
-      const auto rootB = other.compress();
-      if (rootA != rootB)
-      {
-        if (other.getDepth() < this->getDepth()) //is the rank of Root2 less than that of Root1 ?
-        {
-          other.setParent(this);
-        }
-        else //rank of Root2 is greater than or equal to that of Root1
-        {
-          this->setParent(&other);
 
-           if (this->getDepth() == other.getDepth())
-           {
-             other.incrementRank();
-           }
+      if (this->getId() == other->getId())
+      {
+        throw std::logic_error("Trying to union two elements with the same Id");
+      }
+
+      if (other->getRoot() != this->getRoot()) // Check sets do not already have the same root before continuing
+      {
+        this->compress();
+        other->compress();
+
+        DisjointElement* x = this->getParent();
+        DisjointElement* y = other->getParent();
+
+        if (x->getRank() > y->getRank())
+        {
+          y->setParent(x);
+        }
+        else
+        {
+          x->setParent(y);
+          if (x->getRank() == y->getRank())
+          {
+            y->incrementRank();
+          }
         }
       }
+
     }
 
   } // namespace Crystal

@@ -8,7 +8,7 @@ namespace Mantid
 namespace Crystal
 {
 
-  /** ClusterItem : Cluster item used in a disjoint-set data structure.
+  /** DisjointElement : Cluster item used in a disjoint-set data structure.
     
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -30,31 +30,41 @@ namespace Crystal
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ClusterItem 
+  class DLLExport DisjointElement
   {
   public:
-    ClusterItem(const int id);
-    ClusterItem(const int id, ClusterItem * const parent);
-    ClusterItem(const ClusterItem& other);
-    ClusterItem& operator=(const ClusterItem& other);
-    virtual ~ClusterItem();
+    /// Constructor
+    DisjointElement(const int id);
+    /// Destructor
+    virtual ~DisjointElement();
+    /// Get Id
     int getId() const;
-    int getDepth() const; // TODO -review
-    ClusterItem * getParent() const;
+    /// Get parent element
+    DisjointElement * getParent() const;
+    /// Get root id
     int getRoot() const;
-    int compress(); // TODO -review access
-    bool hasParent() const; // TODO -review access
-    void unionWith(ClusterItem& other);
-    void setParent(ClusterItem * other); //TODO -review access
-    void decrementRank(); // TODO - review access
-    void incrementRank(); //TODO -review access
+    /// Union with other
+    void unionWith(DisjointElement* other);
+    /// Get the current rank
     int getRank() const;
+    /// Increment the rank
+    int incrementRank();
   private:
-    ClusterItem * m_parent;
-    int m_depth;
-    int m_rank;
-    const int m_id;
+    // Disabled copy and assignment.
+    DisjointElement(const DisjointElement& other);
+    DisjointElement& operator=(const DisjointElement& other);
 
+    bool hasParent() const;
+    int compress();
+    void setParent(DisjointElement * other);
+
+    // Data members
+    /// Parent element
+    DisjointElement * m_parent;
+    /// Current rank
+    int m_rank;
+    /// Identifier
+    const int m_id;
     
   };
 
