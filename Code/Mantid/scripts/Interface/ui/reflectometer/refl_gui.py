@@ -68,25 +68,14 @@ class ReflGui(refl_window.Ui_windowRefl):
         if not self.loading:
             self.windowRefl.modFlag = True
     def actionCopy_triggered(self):
-        print "copy trigger"
+        self.copy_cells()
     def actionCut_triggered(self):
-        print "cut trigger"
+        self.copy_cells()
+        self.clear_cells()
     def actionPaste_triggered(self):
-        print "paste trigger"
-        self.paste_from_clipboard()
+        self.paste_cells()
     def actionClear_triggered(self):
-        cells = self.tableMain.selectedItems()
-        for cell in cells:
-            column = cell.column()
-            if not (column == 17 or column == 18):
-                cell.setText('')
-
-    def copy_to_clipboard(self,text):
-        self.clip.setText(str(text))
-
-    def paste_from_clipboard(self):
-        pass
-        #print self.clip.text()
+        self.clear_cells()
     '''
     Event handler for polarisation correction selection.
     '''
@@ -268,8 +257,113 @@ class ReflGui(refl_window.Ui_windowRefl):
         else:
             todisplay = groupGet(mtd[candidate], "samp", "run_number")
         return todisplay
-
-
+    def clear_cells(self):
+        cells = self.tableMain.selectedItems()
+        for cell in cells:
+            column = cell.column()
+            if not (column == 17 or column == 18):
+                cell.setText('')
+    def copy_cells(self):
+        cells = self.tableMain.selectedItems()
+        if not cells:
+            print 'nothing to copy'
+            return
+        #first discover the size of the selection and initialise a list
+        mincol = cells[0].column()
+        if mincol == 17 or mincol == 18:
+            return
+            logger.error("Cannot copy, all cells out of range")
+        maxrow = -1
+        maxcol = -1
+        minrow = cells[0].row()
+        for cell in reversed(range(len(cells))):
+            col = cells[cell].column()
+            if col != 17 and col != 18:
+                maxcol = col
+                maxrow = cells[cell].row()
+                break
+        colsize = maxcol - mincol + 1
+        rowsize = maxrow - minrow + 1
+        selection = [['' for x in range(colsize)] for y in range(rowsize)]
+        #now fill that list
+        for cell in cells:
+            row = cell.row()
+            col = cell.column()
+            if col != 17 and col != 18:
+                selection[row - minrow][col - mincol] = str(cell.text())
+        tocopy = ''
+        for y in range(rowsize):
+            for x in range(colsize):
+                if x > 0:
+                    tocopy += '\t'
+                tocopy += selection[y][x]
+            if y < (rowsize - 1):
+                tocopy += '\n'
+        self.copy_to_clipboard(tocopy)
+    def paste_cells(self):
+        pastedtext = self.clip.text()
+        if not pastedtext:
+            logger.warning("Nothing to Paste")
+            return
+        selected = self.tableMain.selectedItems()
+        if not selected:
+            logger.warning("Cannot paste, no editable cells selected")
+            return
+        '''
+        quickly check if the last row is a single cell and blank
+        MS excel adds a line break at the end of copied cells which can mess with this a bit
+        I'd like this to be compatible both ways
+        '''
+        if pastedtext[-1] == '\n':
+            pastedtext = pastedtext[:-1]
+        #if the string is now empty the only thing on the clipboard as a line break
+        if not pastedtext:
+            logger.warning("Nothing to Paste")
+            return
+        pasted = pastedtext.split('\n')
+        pastedcells = []
+        for row in pasted:
+            pastedcells.append(row.split('\t'))
+        pastedcols = len(pastedcells[0])
+        pastedrows = len(pastedcells)
+        if len(selected) > 1:
+            #discover the size of the selection
+            mincol = selected[0].column()
+            if mincol == 17 or mincol == 18:
+                return
+                logger.error("Cannot copy, all cells out of range")
+            minrow = selected[0].row()
+            #now fill that list
+            for cell in selected:
+                row = cell.row()
+                col = cell.column()
+                if col != 17 and col != 18 and (col - mincol) < pastedcols and (row - minrow) < pastedrows:
+                    cell.setText(pastedcells[row - minrow][col - mincol])
+        elif selected:
+            #when only a single cell is selected, paste all the copied item up until the table limits
+            cell = selected[0]
+            currow = cell.row()
+            homecol = cell.column()
+            tablerows = self.tableMain.rowCount()
+            for row in pastedcells:
+                curcol = homecol
+                if currow < tablerows:
+                    for col in row:
+                        if curcol != 17 and curcol != 18:
+                            curcell = self.tableMain.item(currow, curcol)
+                            curcell.setText(col)
+                            curcol += 1
+                        else:
+                            #the row has hit the end of the editable cells
+                            break
+                    currow += 1
+                else:
+                    #it's dropped off the bottom of the table
+                    break
+        else:
+            logger.warning("Cannot paste, no editable cells selected")
+    def copy_to_clipboard(self,text):
+        self.clip.setText(str(text))
     def transfer(self):
         col = 0
         row = 0
