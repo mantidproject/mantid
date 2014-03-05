@@ -61,10 +61,10 @@ namespace MantidQt
     void CatalogPublishDialog::populateUserInvestigations()
     {
       auto workspace = Mantid::API::WorkspaceFactory::Instance().createTable();
+
       // This again is a temporary measure to ensure publishing functionality will work with one catalog.
       auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
-      if (!session.empty())
-        Mantid::API::CatalogManager::Instance().getCatalog(session.front()->getSessionId())->myData(workspace);
+      if (!session.empty()) Mantid::API::CatalogManager::Instance().getCatalog(session.front()->getSessionId())->myData(workspace);
 
       // The user is not an investigator on any investigations and cannot publish
       // or they are not logged into the catalog then update the related message..

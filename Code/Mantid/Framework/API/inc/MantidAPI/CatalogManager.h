@@ -59,9 +59,9 @@ namespace Mantid
     };
 
     #ifdef _WIN32
-        template class DLLExport Kernel::SingletonHolder<CatalogManagerImpl>;
+        template class MANTID_API_DLL Kernel::SingletonHolder<CatalogManagerImpl>;
     #endif
-        typedef Kernel::SingletonHolder<CatalogManagerImpl> CatalogManager;
+        typedef MANTID_API_DLL Kernel::SingletonHolder<CatalogManagerImpl> CatalogManager;
 
   }
 }

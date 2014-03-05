@@ -89,9 +89,9 @@ namespace Mantid
       template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<CatalogFactoryImpl>;
     #endif /* _WIN32 */
     /// The specialisation of the SingletonHolder class that holds the CatalogFactory
-    typedef Mantid::Kernel::SingletonHolder<CatalogFactoryImpl> CatalogFactory;
+    typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<CatalogFactoryImpl> CatalogFactory;
 
   } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_CatalogFACTORYIMPL_H_*/
+#endif /*MANTID_API_CATALOGFACTORYIMPL_H_*/
