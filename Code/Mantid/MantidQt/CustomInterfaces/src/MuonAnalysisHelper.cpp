@@ -23,6 +23,7 @@ using namespace Mantid::Kernel;
 /**
  * Sets double validator for specified field.
  * @param field :: Field to set validator for
+ * @param allowEmpty :: Whether the validator should accept empty inputs as well
  */
 void setDoubleValidator(QLineEdit* field, bool allowEmpty)
 {
