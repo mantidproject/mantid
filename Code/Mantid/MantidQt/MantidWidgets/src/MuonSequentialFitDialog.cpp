@@ -297,8 +297,11 @@ namespace MantidWidgets
     // Wait for file search to finish.
     while ( m_ui.runs->isSearching() )
     {
-      QApplication::instance()->processEvents();
+      QApplication::processEvents();
     }
+
+    // To process events from the finished thread
+    QApplication::processEvents();
 
     // Validate input fields
     if ( ! isInputValid() )
