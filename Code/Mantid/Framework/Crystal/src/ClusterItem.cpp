@@ -9,7 +9,7 @@ namespace Mantid
     /** Constructor
      */
     ClusterItem::ClusterItem(const int id) :
-        m_parent(this), m_depth(0), m_rank(1), m_id(id)
+        m_parent(this), m_depth(0), m_rank(0), m_id(id)
     {
     }
 
@@ -131,13 +131,12 @@ namespace Mantid
         }
         else //rank of Root2 is greater than or equal to that of Root1
         {
-          this->m_parent = &other;
-          /*TODO
-           if (this.Rank == root2.Rank)//both ranks are equal ?
+          this->setParent(&other);
+
+           if (this->getDepth() == other.getDepth())
            {
-           root2.Rank++;//increment Root2, we need to reach a single root for the whole tree
+             other.incrementRank();
            }
-           */
         }
       }
     }

@@ -21,6 +21,7 @@ public:
     ClusterItem item(12);
     TS_ASSERT_EQUALS(12, item.getId());
     TS_ASSERT_EQUALS(0, item.getDepth());
+    TS_ASSERT_EQUALS(0, item.getRank());
     TS_ASSERT_EQUALS(&item, item.getParent());
   }
 
@@ -31,7 +32,7 @@ public:
     TS_ASSERT_EQUALS(1, item.getId());
     TS_ASSERT_EQUALS(1, item.getDepth());
     TS_ASSERT_EQUALS(0, item.getRank());
-    TSM_ASSERT_EQUALS("Parent rank should be incremented", 2, parent.getRank())
+    TSM_ASSERT_EQUALS("Parent rank should be incremented", 1, parent.getRank())
     TS_ASSERT_EQUALS(&parent, item.getParent());
   }
 
@@ -57,11 +58,11 @@ public:
   void test_increment_rank()
   {
     ClusterItem item(0);
+    TS_ASSERT_EQUALS(0, item.getRank());
+    item.incrementRank();
     TS_ASSERT_EQUALS(1, item.getRank());
     item.incrementRank();
     TS_ASSERT_EQUALS(2, item.getRank());
-    item.incrementRank();
-    TS_ASSERT_EQUALS(3, item.getRank());
   }
 
   void test_decrement_rank()
@@ -70,20 +71,20 @@ public:
     item.incrementRank();
     item.incrementRank();
 
-    TS_ASSERT_EQUALS(3, item.getRank());
-    item.decrementRank();
     TS_ASSERT_EQUALS(2, item.getRank());
+    item.decrementRank();
+    TS_ASSERT_EQUALS(1, item.getRank());
   }
 
   void test_decrement_parent_rank_on_death()
   {
     ClusterItem parent(0);
-    TS_ASSERT_EQUALS(1, parent.getRank());
+    TS_ASSERT_EQUALS(0, parent.getRank());
     {
       ClusterItem child(1, &parent);
-      TS_ASSERT_EQUALS(2, parent.getRank());
+      TS_ASSERT_EQUALS(1, parent.getRank());
     }
-    TSM_ASSERT_EQUALS("Parent rank should be reduced as child item destroyed", 1, parent.getRank());
+    TSM_ASSERT_EQUALS("Parent rank should be reduced as child item destroyed", 0, parent.getRank());
   }
 
   void test_find_root()
@@ -126,10 +127,13 @@ public:
     //Everything should be the same before and after.
     c.unionWith(b);
 
-    TS_ASSERT_EQUALS( c.getRoot(), a.getId() );
     TS_ASSERT_EQUALS( b.getRoot(), a.getId() );
-    TS_ASSERT_EQUALS( 1, c.getDepth());
-    TS_ASSERT_EQUALS( 1, c.getDepth());
+    TS_ASSERT_EQUALS( c.getRoot(), a.getId() );
+
+
+    TS_ASSERT_EQUALS( 2, a.getRank());
+    TS_ASSERT_EQUALS( 0, b.getRank());
+    TS_ASSERT_EQUALS( 0, c.getRank());
   }
 
   void test_union_with_complex_shared_root()
@@ -139,13 +143,42 @@ public:
     ClusterItem c(2, &a);
     ClusterItem d(3, &c);
 
-    //Everything should be the same before and after.
+    TSM_ASSERT_EQUALS("Intermediate parent has non-zero rank", 1, c.getRank());
+
     c.unionWith(d);
+
+    TSM_ASSERT_EQUALS("Intermediate parent unlinked so has zero rank", 0, c.getRank());
 
     TS_ASSERT_EQUALS( c.getRoot(), a.getId() );
     TS_ASSERT_EQUALS( b.getRoot(), a.getId() );
-    TS_ASSERT_EQUALS( 1, c.getDepth());
-    TSM_ASSERT_EQUALS("Depth should have been reduced", 1, d.getDepth());
+    TS_ASSERT_EQUALS( d.getRoot(), a.getId() );
+  }
+
+  void xtest_union_with_when_no_shared_parent()
+  {
+    //Taken from example here: http://www.users.csbsju.edu/~lziegler/CS162/UnionFind.html
+
+    // Branch 1
+    ClusterItem zero(0);
+    ClusterItem three(3, &zero);
+    ClusterItem two(2, &zero);
+    ClusterItem one(1, &zero);
+    ClusterItem four(4, &one);
+
+    //Branch 2
+    ClusterItem five(5);
+    ClusterItem six(6, &five);
+    ClusterItem eight(8, &five);
+    ClusterItem seven(7, &eight);
+
+    TS_ASSERT_EQUALS(3, zero.getRank());
+    TS_ASSERT_EQUALS(2, five.getRank());
+    TS_ASSERT_EQUALS(1, eight.getRank());
+
+    four.unionWith(five);
+
+    TS_ASSERT_EQUALS(4, zero.getRank());
+    TS_ASSERT_EQUALS(3, five.getRank());
   }
 
 
