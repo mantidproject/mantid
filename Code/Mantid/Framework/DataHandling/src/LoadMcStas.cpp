@@ -123,6 +123,9 @@ namespace DataHandling
 	 */
 	void LoadMcStas::exec()
 	{
+
+
+
 		std::string filename = getPropertyValue("Filename");
 		g_log.debug() << "Opening file " << filename << std::endl;
         
@@ -556,7 +559,7 @@ namespace DataHandling
 			  file.openGroup("simulation", "NXnote");
 			  std::string nameAttrValue;
         file.readData("name", nameAttrValue);
-			  if(boost::iequals(nameAttrValue, "mcstas")) confidence = 98;
+              if(boost::iequals(nameAttrValue, "mccode")) confidence = 98;
 			  file.closeGroup();
 			  file.closeGroup();
 		  }
