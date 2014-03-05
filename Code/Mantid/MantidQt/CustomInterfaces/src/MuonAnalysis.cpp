@@ -1083,8 +1083,11 @@ void MuonAnalysis::groupTableChanged(int row, int column)
   {
     QTableWidgetItem *itemName = m_uiForm.groupTable->item(row,0);
 
-    if ( itemName == NULL )  // this should never happen
-      m_uiForm.groupTable->setItem(row,0, new QTableWidgetItem(""));
+    if ( itemName == NULL ) // Just in case it wasn't assigned
+    {
+      itemName = new QTableWidgetItem("");
+      m_uiForm.groupTable->setItem(row, 0, itemName);
+    }
       
     if ( itemName->text() != "" )
     {
@@ -1166,8 +1169,11 @@ void MuonAnalysis::pairTableChanged(int row, int column)
   {
     QTableWidgetItem *itemName = m_uiForm.pairTable->item(row,0);
 
-    if ( itemName == NULL )  // this should never happen
-      m_uiForm.pairTable->setItem(row,0, new QTableWidgetItem(""));
+    if ( itemName == NULL ) // Just in case it wasn't assigned
+    {
+      itemName = new QTableWidgetItem("");
+      m_uiForm.pairTable->setItem(row, 0, itemName);
+    }
       
     if ( itemName->text() != "" )
     {
