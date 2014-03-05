@@ -2,7 +2,9 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NamedNodeMap.h>
+#include <Poco/XML/XMLException.h>
 #include <Poco/AutoPtr.h>
+#include <Poco/NumberParser.h>
 #include <boost/make_shared.hpp>
 
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -13,11 +15,22 @@ namespace Mantid
 namespace Geometry
 {
 
-/// Create a dimension object from the provided XML string.
+/** Create a dimension object from the provided XML string.
+ *  @param dimensionXMLString The XML string
+ *  @throw Poco::XML::SAXParseException If the provided string is not valid XML
+ *  @return The created dimension.
+ */
 IMDDimension_sptr createDimension(const std::string& dimensionXMLString)
 {
   Poco::XML::DOMParser pParser;
-  Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(dimensionXMLString);
+  Poco::AutoPtr<Poco::XML::Document> pDoc;
+  try {
+    pDoc = pParser.parseString(dimensionXMLString);
+
+  } catch (Poco::XML::XMLException& ex) {
+    // Transform into std::invalid_argument
+    throw std::invalid_argument(std::string("Invalid string passed to createDimension: ") + ex.what());
+  }
   return createDimension(*pDoc->documentElement());
 }
 
@@ -27,23 +40,62 @@ IMDDimension_sptr createDimension(const Poco::XML::Element& dimensionXML)
   Poco::AutoPtr<Poco::XML::NamedNodeMap> attributes = dimensionXML.attributes();
 
   //First and only attribute is the dimension id.
-  Poco::XML::Node* dimensionId = attributes->item(0);
-  std::string id = dimensionId->innerText();
+  //Poco::XML::Node* dimensionId = attributes->item(0);
+  const std::string id = dimensionXML.getAttribute("ID");// dimensionId->innerText();
+  if ( id.empty() )
+  {
+    throw std::invalid_argument("Invalid string passed to createDimension: No ID attribute");
+  }
 
-  std::string name = dimensionXML.getChildElement("Name")->innerText();
+  Poco::XML::Element* nameElement = dimensionXML.getChildElement("Name");
+  if ( NULL == nameElement )
+  {
+    throw std::invalid_argument("Invalid string passed to createDimension: No Name element");
+  }
+  const std::string name = nameElement->innerText();
+
   Poco::XML::Element* unitsElement = dimensionXML.getChildElement("Units");
   std::string units = "None";
-  if(NULL != unitsElement)
+  if( NULL != unitsElement )
   {
    //Set units if they exist.
    units = unitsElement->innerText();
   }
-  double upperBounds = atof(dimensionXML.getChildElement("UpperBounds")->innerText().c_str());
-  double lowerBounds = atof(dimensionXML.getChildElement("LowerBounds")->innerText().c_str());
-  unsigned int nBins = atoi(dimensionXML.getChildElement("NumberOfBins")->innerText().c_str());
-  Poco::XML::Element* integrationXML = dimensionXML.getChildElement("Integrated");
 
-  if (NULL != integrationXML)
+  Poco::XML::Element* upperBoundsElement = dimensionXML.getChildElement("UpperBounds");
+  if ( NULL == upperBoundsElement )
+  {
+    throw std::invalid_argument("Invalid string passed to createDimension: No UpperBounds element");
+  }
+  Poco::XML::Element* lowerBoundsElement = dimensionXML.getChildElement("LowerBounds");
+  if ( NULL == lowerBoundsElement )
+  {
+    throw std::invalid_argument("Invalid string passed to createDimension: No LowerBounds element");
+  }
+
+  double upperBounds, lowerBounds;
+  try {
+    upperBounds = Poco::NumberParser::parseFloat( upperBoundsElement->innerText() );
+    lowerBounds = Poco::NumberParser::parseFloat( lowerBoundsElement->innerText() );
+  }
+  catch (Poco::SyntaxException& ex) {
+    throw std::invalid_argument(std::string("Invalid string passed to createDimension: ") + ex.what() );
+  }
+
+  Poco::XML::Element* numBinsElement = dimensionXML.getChildElement("NumberOfBins");
+  if ( NULL == numBinsElement )
+  {
+    throw std::invalid_argument("Invalid string passed to createDimension: No NumberOfBins element");
+  }
+  unsigned int nBins;
+  try {
+    nBins = Poco::NumberParser::parseUnsigned(numBinsElement->innerText());
+  } catch (Poco::SyntaxException& ex) {
+    throw std::invalid_argument(std::string("Invalid string passed to createDimension: ") + ex.what() );
+  }
+
+  Poco::XML::Element* integrationXML = dimensionXML.getChildElement("Integrated");
+  if ( NULL != integrationXML )
   {
     double upperLimit = atof(integrationXML->getChildElement("UpperLimit")->innerText().c_str());
     double lowerLimit = atof(integrationXML->getChildElement("LowerLimit")->innerText().c_str());

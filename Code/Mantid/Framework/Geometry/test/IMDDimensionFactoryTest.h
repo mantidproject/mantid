@@ -5,6 +5,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/XML/XMLException.h>
 #include <Poco/AutoPtr.h>
 
 using namespace Mantid::Geometry;
@@ -92,6 +93,33 @@ public:
     TS_ASSERT_EQUALS(-9.0, dimension->getMinimum());
     TS_ASSERT_EQUALS(8.5, dimension->getMaximum());
     TS_ASSERT_EQUALS(10, dimension->getNBins());
+  }
+
+  void testPassInvalidString()
+  {
+    TS_ASSERT_THROWS( createDimension(""), std::invalid_argument );
+    TS_ASSERT_THROWS( createDimension("garbage"), std::invalid_argument );
+
+    std::string xmlString = constructNonReciprocalDimensionXMLString();
+    xmlString.erase(96,30);
+    std::cout << xmlString << std::endl;
+
+    std::string missingID = constructNonReciprocalDimensionXMLString().erase(10,8);
+    TS_ASSERT_THROWS( createDimension(missingID), std::invalid_argument );
+    std::string missingName = constructNonReciprocalDimensionXMLString().erase(19,19);
+    TS_ASSERT_THROWS( createDimension(missingName), std::invalid_argument );
+    std::string missingUpperBounds = constructNonReciprocalDimensionXMLString().erase(38,30);
+    TS_ASSERT_THROWS( createDimension(missingUpperBounds), std::invalid_argument );
+    std::string missingUpperBoundsValue = constructNonReciprocalDimensionXMLString().erase(51,3);
+    TS_ASSERT_THROWS( createDimension(missingUpperBoundsValue), std::invalid_argument );
+    std::string missingLowerBounds = constructNonReciprocalDimensionXMLString().erase(68,28);
+    TS_ASSERT_THROWS( createDimension(missingLowerBounds), std::invalid_argument );
+    std::string missingLowerBoundsValue = constructNonReciprocalDimensionXMLString().erase(81,1);
+    TS_ASSERT_THROWS( createDimension(missingLowerBoundsValue), std::invalid_argument );
+    std::string missingNumberOfBins = constructNonReciprocalDimensionXMLString().erase(96,30);
+    TS_ASSERT_THROWS( createDimension(missingNumberOfBins), std::invalid_argument );
+    std::string missingNumberOfBinsValue = constructNonReciprocalDimensionXMLString().erase(110,1);
+    TS_ASSERT_THROWS( createDimension(missingNumberOfBins), std::invalid_argument );
   }
 };
 #endif
