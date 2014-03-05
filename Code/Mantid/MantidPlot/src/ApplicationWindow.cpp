@@ -337,6 +337,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   resultsLog = new MessageDisplay(MessageDisplay::EnableLogLevelControl, logWindow);
   logWindow->setWidget(resultsLog);
   connect(resultsLog, SIGNAL(errorReceived(const QString &)), logWindow, SLOT(show()));
+  
 
   // Start Mantid
   // Set the Paraview path BEFORE libaries are loaded. Doing it here prevents
@@ -495,6 +496,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   renamedTables = QStringList();
   if (!factorySettings)
     readSettings();
+
   createLanguagesList();
   insertTranslatedStrings();
   disableToolbars();
@@ -4997,6 +4999,10 @@ void ApplicationWindow::readSettings()
   changeAppStyle(settings.value("/Style", appStyle).toString());
   autoSave = settings.value("/AutoSave", false).toBool();
   autoSaveTime = settings.value("/AutoSaveTime",15).toInt();
+  //set logging level to the last saved level
+  int lastLoggingLevel = settings.value("/LastLoggingLevel", Mantid::Kernel::Logger::Priority::PRIO_NOTICE).toInt();
+  Mantid::Kernel::Logger::setLevelForAll(lastLoggingLevel);
+
   d_backup_files = settings.value("/BackupProjects", true).toBool();
   d_init_window_type = (WindowType)settings.value("/InitWindow", NoWindow).toInt();
   defaultScriptingLang = settings.value("/ScriptingLang","Python").toString();    //Mantid M. Gigg
@@ -5456,6 +5462,10 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/Style", appStyle);
   settings.setValue("/AutoSave", autoSave);
   settings.setValue("/AutoSaveTime", autoSaveTime);
+  //save current logger level from the root logger ""
+  int lastLoggingLevel = Mantid::Kernel::Logger::get("").getLevel();
+  settings.setValue("/LastLoggingLevel", lastLoggingLevel);
+
   settings.setValue("/BackupProjects", d_backup_files);
   settings.setValue("/InitWindow", static_cast<int>(d_init_window_type));
 
