@@ -30,6 +30,7 @@ class RefLReduction(PythonAlgorithm):
         return 1
 
     def PyInit(self):
+        self.setWikiSummary("Liquids Reflectometer (REFL) reduction")
         self.declareProperty(IntArrayProperty("RunNumbers"), "List of run numbers to process")
         self.declareProperty("NormalizationRunNumber", 0, "Run number of the normalization run to use")
         self.declareProperty(IntArrayProperty("SignalPeakPixelRange"), "Pixel range defining the data peak")
