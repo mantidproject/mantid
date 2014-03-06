@@ -399,8 +399,9 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
 
     setCurrentDataName( wsNameQ );
   }
-  catch(...)
+  catch(std::exception& e)
   { 
+    g_log.error(e.what());
     QMessageBox::critical( this, "MuonAnalysis - Error", "Unable to plot the item. Check log for details." ); 
   }
 
@@ -3544,6 +3545,26 @@ void MuonAnalysis::nowDataAvailable()
   m_uiForm.groupTablePlotButton->setEnabled(true);
   m_uiForm.pairTablePlotButton->setEnabled(true);
   m_uiForm.guessAlphaButton->setEnabled(true);
+}
+
+/**
+ * @return Currently selected new plot policy
+ */
+MuonAnalysis::NewPlotPolicy MuonAnalysis::newPlotPolicy()
+{
+  QMap<QString, NewPlotPolicy> policyMap;
+  policyMap["Create new window"] = NewWindow;
+  policyMap["Use previous window"] = PreviousWindow;
+
+  QString selectedPolicy = m_uiForm.newPlotPolicy->currentText();
+  if ( !policyMap.contains(selectedPolicy) )
+  {
+    throw std::runtime_error("Unknown new plot policy selection");
+  }
+  else
+  {
+    return policyMap[selectedPolicy];
+  }
 }
 
 

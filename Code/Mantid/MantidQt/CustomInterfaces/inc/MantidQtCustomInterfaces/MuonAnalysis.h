@@ -237,14 +237,17 @@ private slots:
 
 private:
  
-  // Types of entities we are dealing with
+  /// Types of entities we are dealing with
   enum ItemType { Pair, Group };
   
-  // Possible plot types users might request
+  /// Possible plot types users might request
   enum PlotType { Asymmetry, Counts, Logorithm };
 
-  // Types of periods
+  /// Types of periods
   enum PeriodType { First, Second };
+
+  /// Types of new plot policies
+  enum NewPlotPolicy { NewWindow, PreviousWindow };
 
   /// Initialize local Python environment
   void initLocalPython();
@@ -504,6 +507,9 @@ private:
 
   /// When data loaded set various buttons etc to active
   void nowDataAvailable();
+
+  /// Return currently selected new plot policy
+  NewPlotPolicy newPlotPolicy();
 
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
