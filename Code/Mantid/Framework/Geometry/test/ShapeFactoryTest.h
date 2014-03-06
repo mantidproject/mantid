@@ -10,6 +10,7 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
+#include <Poco/AutoPtr.h>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
@@ -566,9 +567,7 @@ public:
 
 	  // Set up the DOM parser and parse xml string
 		DOMParser pParser;
-		Document* pDoc;
-
-  	pDoc = pParser.parseString(shapeXML);
+		Poco::AutoPtr<Document> pDoc = pParser.parseString(shapeXML);
 
 		// Get pointer to root element
 		Element* pRootElem = pDoc->documentElement();
@@ -576,7 +575,6 @@ public:
 		//convert into a Geometry object
 		ShapeFactory sFactory;
 		boost::shared_ptr<Object> shape_sptr = sFactory.createShape(pRootElem);
-		pDoc->release();
     return shape_sptr;
   }
 
