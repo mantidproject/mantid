@@ -1,6 +1,4 @@
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -9,17 +7,10 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Interpolation.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/UnitFactory.h"
 #include <fstream>
-#include <iostream>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -27,13 +18,7 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/Exception.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/make_shared.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <sstream>
-#include <cstdlib>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
