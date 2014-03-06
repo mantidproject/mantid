@@ -556,10 +556,11 @@ class DirectEnergyConversion(object):
         if type(monitor_ws) is str:
             monitor_ws = mtd[monitor_ws]
         try: 
-            nsp = monitor_ws.getSpectrum(int(self.ei_mon_spectra[0]));
+            # check if the spectra with correspondent number is present in the worksace
+            nsp = monitor_ws.getIndexFromSpectrumNumber(int(self.ei_mon_spectra[0]));
         except:
             monitors_from_separate_ws = True
-            mon_ws = monitor_ws.getName()+'_Monitors'
+            mon_ws = monitor_ws.getName()+'_monitors'
             monitor_ws = mtd[mon_ws];
         #-------------------------------------------------------------
             
@@ -618,8 +619,14 @@ class DirectEnergyConversion(object):
                 mon_spectr_num=int(self.mon1_norm_spec)
             else:
                 mon_spectr_num=mon_number
-            NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorSpectrum=mon_spectr_num, 
-                               IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
+
+            monWS_name = data_ws.getName()+'_monitors'
+            if monWS_name in mtd:
+                NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=monWS_name, 
+                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
+            else:
+                NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorSpectrum=mon_spectr_num, 
+                                   IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
             output = mtd[result_name]
         elif method == 'current':
             NormaliseByCurrent(InputWorkspace=data_ws, OutputWorkspace=result_name)
