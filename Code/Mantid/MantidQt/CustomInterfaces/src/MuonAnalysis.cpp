@@ -390,10 +390,6 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
 
     QString wsNameQ = QString::fromStdString(wsName);
 
-    // Hide all the previous plot windows, if requested by user
-    if (m_uiForm.hideGraphs->isChecked())
-      hideAllPlotWindows();
-
     // Plot the workspace
     plotSpectrum( wsNameQ, (plotType == Logorithm) );
 
@@ -2048,6 +2044,12 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
     QStringList acquireWindowScript;
 
     NewPlotPolicy policy = newPlotPolicy();
+
+    // Hide all the previous plot windows, if creating a new one
+    if ( policy == NewWindow && m_uiForm.hideGraphs->isChecked())
+    {
+      hideAllPlotWindows();
+    }
 
     if ( policy == PreviousWindow )
     {
