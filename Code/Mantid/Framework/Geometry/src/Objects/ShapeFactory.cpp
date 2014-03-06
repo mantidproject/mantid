@@ -62,28 +62,28 @@ ShapeFactory::ShapeFactory()
  */
 boost::shared_ptr<Object> ShapeFactory::createShape(std::string shapeXML, bool addTypeTag)
 {
-	//wrap in a type tag
+  //wrap in a type tag
   if (addTypeTag)
     shapeXML = "<type name=\"userShape\"> " + shapeXML + " </type>";
 
-	// Set up the DOM parser and parse xml string
-	DOMParser pParser;
-	Poco::AutoPtr<Document> pDoc;
-	try
-	{
-		pDoc = pParser.parseString(shapeXML);
-	}
-	catch(...)
-	{
-		g_log.warning("Unable to parse XML string " + shapeXML + " . Empty geometry Object is returned.");
+  // Set up the DOM parser and parse xml string
+  DOMParser pParser;
+  Poco::AutoPtr<Document> pDoc;
+  try
+  {
+    pDoc = pParser.parseString(shapeXML);
+  }
+  catch(...)
+  {
+    g_log.warning("Unable to parse XML string " + shapeXML + " . Empty geometry Object is returned.");
     boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
     return retVal;
-	}
-	// Get pointer to root element
-	Element* pRootElem = pDoc->documentElement();
+  }
+  // Get pointer to root element
+  Element* pRootElem = pDoc->documentElement();
 
-	//convert into a Geometry object
-	boost::shared_ptr<Object> retVal = createShape(pRootElem);
+  //convert into a Geometry object
+  boost::shared_ptr<Object> retVal = createShape(pRootElem);
 
   return retVal;
 }
@@ -237,14 +237,14 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
             g_log.warning(primitiveName + " not a recognised geometric shape. This shape is ignored.");
           }
         }
-		    catch (std::invalid_argument& e)
-		    {
-			    g_log.warning() << e.what() << " <" << primitiveName << "> shape is ignored.";
-		    }
-		    catch (...)
-		    {
-			    g_log.warning() << " Problem with parsing XML string for <" << primitiveName << ">. This shape is ignored.";
-		    }
+        catch (std::invalid_argument& e)
+        {
+          g_log.warning() << e.what() << " <" << primitiveName << "> shape is ignored.";
+        }
+        catch (...)
+        {
+          g_log.warning() << " Problem with parsing XML string for <" << primitiveName << ">. This shape is ignored.";
+        }
       }
     }
   }
