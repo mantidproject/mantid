@@ -3,6 +3,7 @@
 #for the time being this also includes non-GUI behaviour
 import refl_window
 import refl_save
+import refl_choose_col
 import csv
 from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
@@ -76,6 +77,8 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.paste_cells()
     def actionClear_triggered(self):
         self.clear_cells()
+    def actionChoose_Columns_triggered(self):
+        self.chooseColumns()
     '''
     Event handler for polarisation correction selection.
     '''
@@ -89,6 +92,7 @@ class ReflGui(refl_window.Ui_windowRefl):
     #Further UI setup
     def setupUi(self, windowRefl):
         super(ReflGui,self).setupUi(windowRefl)
+        self.shownCols = {}
         self.loading = False
         self.clip = QtGui.QApplication.clipboard()
         '''
@@ -128,10 +132,10 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.accMethod = None
 
         self.tableMain.resizeColumnsToContents()
-        
+        settings = QtCore.QSettings()
+        settings.beginGroup("Mantid/ISISReflGui/Columns")
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
-                
                 if (column == 0) or (column == 5) or (column == 10):
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
@@ -159,6 +163,14 @@ class ReflGui(refl_window.Ui_windowRefl):
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
                     self.tableMain.setItem(row, column, item)
+            vis_state = settings.value(str(column), True, type=bool)
+            self.shownCols[column] = vis_state
+            if vis_state:
+                self.tableMain.showColumn(column)
+            else:
+                self.tableMain.hideColumn(column)
+        settings.endGroup()
+        del settings
     def connectSlots(self):
         self.checkTickAll.stateChanged.connect(self.on_checkTickAll_stateChanged)
         self.comboInstrument.activated.connect(self.on_comboInstrument_activated)
@@ -185,6 +197,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.actionPaste.triggered.connect(self.actionPaste_triggered)
         self.actionCut.triggered.connect(self.actionCut_triggered)
         self.actionCopy.triggered.connect(self.actionCopy_triggered)
+        self.actionChoose_Columns.triggered.connect(self.actionChoose_Columns_triggered)
         self.tableMain.cellChanged.connect(self.on_tableMain_modified)
         
     def populateList(self):
@@ -698,6 +711,26 @@ class ReflGui(refl_window.Ui_windowRefl):
             Dialog.exec_()
         except Exception as ex:
             logger.notice("Could not open save workspace dialog")
+            logger.notice(str(ex))
+    def chooseColumns(self):
+        try:
+            Dialog = QtGui.QDialog()
+            u = refl_choose_col.ReflChoose()
+            u.setupUi(Dialog, self.shownCols, self.tableMain)
+            if Dialog.exec_():
+                settings = QtCore.QSettings()
+                settings.beginGroup("Mantid/ISISReflGui/Columns")
+                for key, value in u.visiblestates.iteritems():
+                    self.shownCols[key] = value
+                    settings.setValue(str(key), value)
+                    if value:
+                        self.tableMain.showColumn(key)
+                    else:
+                        self.tableMain.hideColumn(key)
+                settings.endGroup()
+                del settings
+        except Exception as ex:
+            logger.notice("Could not open choose columns dialog")
             logger.notice(str(ex))
     def showHelp(self):
         import webbrowser
