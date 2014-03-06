@@ -2,7 +2,6 @@
 #define MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <Poco/DOM/Document.h>
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"

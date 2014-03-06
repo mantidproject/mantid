@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <Poco/AutoPtr.h>
+#include <Poco/DOM/Document.h>
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
@@ -14,7 +15,6 @@ namespace Poco
 {
 namespace XML
 {
-  class Document;
   class Element;
 }
 }
