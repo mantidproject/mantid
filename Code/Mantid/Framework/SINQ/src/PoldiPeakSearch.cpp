@@ -148,7 +148,6 @@ std::vector<V2D> PoldiPeakSearch::getPeakCoordinates(MantidVec::iterator baseLis
 
 std::pair<double, double> PoldiPeakSearch::getBackgroundWithSigma(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
 {
-    // subtracting 2, to match original algorithm
     size_t backgroundPoints = getNumberOfBackgroundPoints(peakPositions, correlationCounts);
 
     MantidVec sigma;
@@ -175,6 +174,10 @@ std::pair<double, double> PoldiPeakSearch::getBackgroundWithSigma(std::list<Mant
 
 size_t PoldiPeakSearch::getNumberOfBackgroundPoints(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
 {
+    /* subtracting 2, to match original algorithm, where
+     * the first and the last point of the spectrum are not
+     * considered in this calculation.
+     */
     size_t totalDataPoints = correlationCounts.size() - 2;
     size_t occupiedByPeaks = peakPositions.size() * (m_doubleMinimumDistance - 1);
 
