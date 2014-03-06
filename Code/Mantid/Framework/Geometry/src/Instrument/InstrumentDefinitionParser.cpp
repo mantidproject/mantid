@@ -70,11 +70,6 @@ namespace Geometry
    */
   InstrumentDefinitionParser::~InstrumentDefinitionParser()
   {
-    if (pDoc)
-    {
-      // release XML document
-      pDoc->release();
-    }
   }
 
   //----------------------------------------------------------------------------------------------
@@ -170,7 +165,7 @@ namespace Geometry
     {
       return m_xmlFile->getMangledName();
     }
-    else if (pDoc != NULL)
+    else if ( ! pDoc.isNull() )
     {
       std::string lastModified = pRootElem->getAttribute("last-modified");
       if (lastModified.empty())

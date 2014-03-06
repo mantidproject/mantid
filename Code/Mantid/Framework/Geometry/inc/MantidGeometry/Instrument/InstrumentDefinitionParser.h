@@ -208,7 +208,7 @@ private:
     std::string m_instName;
 
     /// XML document loaded
-    Poco::XML::Document* pDoc;
+    Poco::AutoPtr<Poco::XML::Document> pDoc;
     /// Root element of the parsed XML
     Poco::XML::Element* pRootElem;
 
