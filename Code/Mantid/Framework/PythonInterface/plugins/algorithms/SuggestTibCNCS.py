@@ -24,6 +24,7 @@ class SuggestTibCNCS(PythonAlgorithm):
     
     def PyInit(self):
         self.setWikiSummary("Suggest possible time independent background range for CNCS.")
+        self.setOptionalMessage("Suggest possible time independent background range for CNCS.")
         """ Declare properties
         """
         val=mantid.kernel.FloatBoundedValidator()

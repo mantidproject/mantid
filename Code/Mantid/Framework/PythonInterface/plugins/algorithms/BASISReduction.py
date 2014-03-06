@@ -35,6 +35,9 @@ class BASISReduction(PythonAlgorithm):
         self._short_inst = "BSS"
         self._long_inst = "BASIS"
         self._extension = "_event.nxs"
+        
+        self.setWikiSummary("This algorithm is meant to temporarily deal with letting BASIS reduce lots of files via Mantid.")
+        self.setOptionalMessage("This algorithm is meant to temporarily deal with letting BASIS reduce lots of files via Mantid.")
 
         self.declareProperty("RunNumbers", "", "Sample run numbers")
         self.declareProperty("DoIndividual", False, "Do each run individually")

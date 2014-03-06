@@ -21,6 +21,7 @@ class TestWorkspaceGroupProperty(PythonAlgorithm):
 
     def PyInit(self):
         self.setWikiSummary("Use only for testing")
+        self.setOptionalMessage("Use only for testing")
         self.declareProperty(WorkspaceGroupProperty("InputWorkspace", "", Direction.Input), doc="Group workspace that automatically includes all members.")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace2", "", Direction.Input), doc="asd")
    
