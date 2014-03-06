@@ -57,5 +57,5 @@ make -j$BUILD_THREADS AllTests
 rm ~/.mantid/Mantid.user.properties
 ctest -j$BUILD_THREADS --schedule-random --output-on-failure -E MantidPlot
 # Run GUI tests serially
-#ctest --output-on-failure --timeout 30 -R MantidPlot
+ctest --output-on-failure -R MantidPlot
 
