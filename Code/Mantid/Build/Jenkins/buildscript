@@ -55,7 +55,7 @@ make -j$BUILD_THREADS AllTests
 ###############################################################################
 # Remove any Mantid.user.properties file
 rm ~/.mantid/Mantid.user.properties
-ctest -j$BUILD_THREADS --output-on-failure -E MantidPlot
+ctest -j$BUILD_THREADS --schedule-random --output-on-failure -E MantidPlot
 # Run GUI tests serially
 #ctest --output-on-failure --timeout 30 -R MantidPlot
 
