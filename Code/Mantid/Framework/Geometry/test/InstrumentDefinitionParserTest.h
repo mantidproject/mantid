@@ -17,6 +17,7 @@
 
 #include <gmock/gmock.h>
 #include <boost/tuple/tuple.hpp>
+#include <Poco/DOM/Document.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
