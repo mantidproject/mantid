@@ -184,7 +184,7 @@ namespace Geometry
 
     const std::string filename = m_xmlFile->getFileFullPathStr();
 
-    NodeList* pNL_type = pRootElem->getElementsByTagName("type");
+    Poco::AutoPtr<NodeList> pNL_type = pRootElem->getElementsByTagName("type");
     if ( pNL_type->length() == 0 )
     {
       g_log.error("XML file: " + filename + "contains no type elements.");
@@ -249,9 +249,8 @@ namespace Geometry
       std::string typeName = pTypeElem->getAttribute("name");
 
       // In this loop only interested in types containing <combine-components-into-one-shape>
-      NodeList* pNL_type_combine_into_one_shape = pTypeElem->getElementsByTagName("combine-components-into-one-shape");
+      Poco::AutoPtr<NodeList> pNL_type_combine_into_one_shape = pTypeElem->getElementsByTagName("combine-components-into-one-shape");
       const unsigned long nelements = pNL_type_combine_into_one_shape->length();
-      pNL_type_combine_into_one_shape->release();
       if ( nelements == 0 )
         continue;
 
@@ -272,10 +271,9 @@ namespace Geometry
       mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
       mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
     }
-    pNL_type->release(); // finished with handling <combine-components-into-one-shape>
 
     // create hasParameterElement
-    NodeList* pNL_parameter = pRootElem->getElementsByTagName("parameter");
+    Poco::AutoPtr<NodeList> pNL_parameter = pRootElem->getElementsByTagName("parameter");
 
     unsigned long numParameter = pNL_parameter->length();
     hasParameterElement.reserve(numParameter);
@@ -294,7 +292,6 @@ namespace Geometry
         pNode = it.nextNode();
     }
 
-    pNL_parameter->release();
     hasParameterElement_beenSet = true;
 
     // See if any parameters set at instrument level
@@ -435,7 +432,7 @@ namespace Geometry
 
       // parse converted <locations> output
       DOMParser pLocationsParser;
-      Document* pLocationsDoc;
+      Poco::AutoPtr<Document> pLocationsDoc;
       try
       {
         pLocationsDoc = pLocationsParser.parseString(xmlLocation);
@@ -450,9 +447,9 @@ namespace Geometry
       if ( !pRootLocationsElem->hasChildNodes() )
       {
         throw Kernel::Exception::InstrumentDefinitionError("No root element in XML string", xmlLocation);
-      }              
+      }
 
-      NodeList* pNL_locInLocs = pRootLocationsElem->getElementsByTagName("location");
+      Poco::AutoPtr<NodeList> pNL_locInLocs = pRootLocationsElem->getElementsByTagName("location");
       unsigned long pNL_locInLocs_length = pNL_locInLocs->length();
       for (unsigned long iInLocs = 0; iInLocs < pNL_locInLocs_length; iInLocs++)
       {
@@ -466,8 +463,6 @@ namespace Geometry
           appendLeaf(parent, pLocInLocsElem, pCompElem, idList);
         }
       }
-      pNL_locInLocs->release();
-      pLocationsDoc->release();
   }
 
 
@@ -930,7 +925,7 @@ namespace Geometry
   std::vector<std::string> InstrumentDefinitionParser::buildExcludeList(const Poco::XML::Element* const location)
   {
     // check if <exclude> sub-elements for this location and create new exclude list to pass on
-    NodeList* pNLexclude = location->getElementsByTagName("exclude");
+    Poco::AutoPtr<NodeList> pNLexclude = location->getElementsByTagName("exclude");
     unsigned long numberExcludeEle = pNLexclude->length();
     std::vector<std::string> newExcludeList;
     for (unsigned long i = 0; i < numberExcludeEle; i++)
@@ -939,7 +934,6 @@ namespace Geometry
       if ( pExElem->hasAttribute("sub-part") )
         newExcludeList.push_back(pExElem->getAttribute("sub-part"));
     }
-    pNLexclude->release();
 
     return newExcludeList;
   }
@@ -1381,14 +1375,12 @@ namespace Geometry
     {
       // test first if any <id> elements
 
-      NodeList* pNL = pE->getElementsByTagName("id");
+      Poco::AutoPtr<NodeList> pNL = pE->getElementsByTagName("id");
 
       if ( pNL->length() == 0 )
       {
         throw Kernel::Exception::InstrumentDefinitionError("No id subelement of idlist element in XML instrument file", filename);
       }
-      pNL->release();
-
 
       // get id numbers
 
@@ -1891,7 +1883,7 @@ namespace Geometry
   */
   void InstrumentDefinitionParser::setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pRootElem)
   {
-    NodeList* pNL_link = pRootElem->getElementsByTagName("component-link");
+    Poco::AutoPtr<NodeList> pNL_link = pRootElem->getElementsByTagName("component-link");
     unsigned long numberLinks = pNL_link->length();
 
 
@@ -1937,7 +1929,6 @@ namespace Geometry
         }
       }
     }
-    pNL_link->release();
   }
 
 
@@ -2106,25 +2097,23 @@ namespace Geometry
       throw Exception::InstrumentDefinitionError( "Argument to function adjust() must be a pointer to an XML element with tag name type." );
 
     // check that there is a <combine-components-into-one-shape> element in type
-    NodeList* pNLccioh = pElem->getElementsByTagName("combine-components-into-one-shape");
+    Poco::AutoPtr<NodeList> pNLccioh = pElem->getElementsByTagName("combine-components-into-one-shape");
     if ( pNLccioh->length() == 0 )
     {
       throw Exception::InstrumentDefinitionError( std::string("Argument to function adjust() must be a pointer to an XML element with tag name type,")
             + " which contain a <combine-components-into-one-shape> element.");
     }
-    pNLccioh->release();
 
     // check that there is a <algebra> element in type
-    NodeList* pNLalg = pElem->getElementsByTagName("algebra");
+    Poco::AutoPtr<NodeList> pNLalg = pElem->getElementsByTagName("algebra");
     if ( pNLalg->length() == 0 )
     {
       throw Exception::InstrumentDefinitionError( std::string("An <algebra> element must be part of a <type>, which")
             + " includes a <combine-components-into-one-shape> element. See www.mantidproject.org/IDF." );
     }
-    pNLalg->release();
 
     // check that there is a <location> element in type
-    NodeList* pNL = pElem->getElementsByTagName("location");
+    Poco::AutoPtr<NodeList> pNL = pElem->getElementsByTagName("location");
     unsigned long numLocation = pNL->length();
     if ( numLocation == 0 )
     {
@@ -2133,13 +2122,12 @@ namespace Geometry
     }
 
     // check if a <translate-rotate-combined-shape-to> is defined
-    NodeList* pNL_TransRot = pElem->getElementsByTagName("translate-rotate-combined-shape-to");
+    Poco::AutoPtr<NodeList> pNL_TransRot = pElem->getElementsByTagName("translate-rotate-combined-shape-to");
     Element* pTransRot = 0; 
     if ( pNL_TransRot->length() == 1 )
     {
        pTransRot = static_cast<Element*>(pNL_TransRot->item(0));
     }
-    pNL_TransRot->release();
 
     // to convert all <component>'s in type into <cuboid> elements, which are added
     // to pElem, and these <component>'s are deleted after loop
@@ -2191,7 +2179,7 @@ namespace Geometry
       }
       
       DOMParser pParser;
-      Document* pDoc;
+      Poco::AutoPtr<Document> pDoc;
       try
       {
         pDoc = pParser.parseString(cuboidStr);
@@ -2206,10 +2194,8 @@ namespace Geometry
       Poco::AutoPtr<Node> fisse = (pElem->ownerDocument())->importNode(pCuboid, true);
       pElem->appendChild(fisse);
 
-      pDoc->release();
       allComponentInType.insert(pCompElem);
     }
-    pNL->release();
 
     // delete all <component> found in pElem
     std::set<Element*>::iterator it;
@@ -2297,7 +2283,7 @@ namespace Geometry
                                                                   const std::string& cuboidName)
   {
       DOMParser pParser;
-      Document* pDoc;
+      Poco::AutoPtr<Document> pDoc;
       try
       {
         pDoc = pParser.parseString(cuboidXML);
@@ -2311,8 +2297,6 @@ namespace Geometry
       Element* pCuboid = pDoc->documentElement();
 
       std::string retVal = translateRotateXMLcuboid(comp, pCuboid,cuboidName);
-
-      pDoc->release();
 
       return retVal;
   }
@@ -2688,21 +2672,18 @@ namespace Geometry
     setLocation(ass, pLocElem, m_angleConvertConst);
 
 
-    NodeList* pNL = pType->getElementsByTagName("location");
+    Poco::AutoPtr<NodeList> pNL = pType->getElementsByTagName("location");
     if ( pNL->length() == 0 )
     {
-      pNL->release();
       return pType->getAttribute("name");
     }
     else if ( pNL->length() == 1 )
     {
       Element* pElem = static_cast<Element*>(pNL->item(0));
-      pNL->release();
       return getShapeCoorSysComp(ass, pElem, getTypeElement, endAssembly);
     }
     else
     {
-      pNL->release();
       throw Exception::InstrumentDefinitionError( std::string("When using <combine-components-into-one-shape> ")
           + " the containing component elements are not allowed to contain multiple nested components. See www.mantidproject.org/IDF." );
     }
