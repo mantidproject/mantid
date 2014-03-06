@@ -19,10 +19,22 @@ COL_NAMES = [
     "tof_min",     # double
     "tof_max"      # double
     ]
+DEF_INFO = {
+    "frequency":"",
+    "wavelength":"",
+    "bank":1,
+    "vanadium":0,
+    "container":0,
+    "empty":0,
+    "d_min":"",
+    "d_max":"",
+    "tof_min":0.,
+    "tof_max":0.
+    }
 
 class PDDetermineCharacterizations(PythonAlgorithm):
     def category(self):
-        return "Workflow/Diffraction"
+        return "Workflow\\Diffraction\\UsesPropertyManager"
 
     def name(self):
         return "PDDetermineCharacterizations"
@@ -37,13 +49,17 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                                                      Direction.Input),
                              "Table of characterization information")
 
-        # output parameters
-        defaultMsg = " run to use. 0 for if it couldn't be determined."
-        self.declareProperty("BackRun", 0, direction=Direction.Output,
+        self.declareProperty("ReductionProperties",
+                             "__pd_reduction_properties", 
+                             validator=StringMandatoryValidator(),
+                             doc="Property manager name for the reduction")
+
+        defaultMsg = " run to use. 0 to use value in table, -1 to not use."
+        self.declareProperty("BackRun", 0, 
                              doc="The background" + defaultMsg)
-        self.declareProperty("NormRun", 0, direction=Direction.Output,
+        self.declareProperty("NormRun", 0, 
                              doc="The background" + defaultMsg)
-        self.declareProperty("NormBackRun", 0, direction=Direction.Output,
+        self.declareProperty("NormBackRun", 0, 
                              doc="The background" + defaultMsg)
 
     def validateInputs(self):
@@ -75,11 +91,61 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         if char.rowCount() <= 0:
             return
         wksp = self.getProperty("InputWorkspace").value
+
+        # determine wavelength and frequency
         frequency = self.getFrequency(wksp.getRun())
         wavelength = self.getWavelength(wksp.getRun())
         self.log().information("Determined frequency: " + str(frequency) \
                                    + " Hz, center wavelength:" \
                                    + str(wavelength) + " Angstrom")
+        
+        # get a row of the table
+        info = self.getLine(char, frequency, wavelength)
+
+        # update the characterization runs as necessary
+        propNames = ("BackRun",   "NormRun",  "NormBackRun")
+        dictNames = ("container", "vanadium", "empty")
+        for (propName, dictName) in zip(propNames, dictNames):
+            runNum = self.getProperty(propName).value
+            if runNum < 0: # reset value
+                info[dictName] = 0
+            elif runNum > 0: # override value
+                info[dictName] = runNum
+
+        # convert to a property manager
+        manager_name = self.getProperty("ReductionProperties").value
+        if PropertyManagerDataService.doesExist(manager_name):
+            manager = PropertyManagerDataService.retrieve(manager_name)
+        else:
+            manager = PropertyManager()
+        for key in COL_NAMES:
+            manager[key] = info[key]
+        PropertyManagerDataService.addOrReplace(manager_name, manager)
+
+    def closeEnough(self, left, right):
+        left = float(left)
+        right = float(right)
+        if abs(left-right) == 0.:
+            return True
+        if 100. * abs(left-right)/left < 5.:
+            return True
+        return False
+
+    def getLine(self, char, frequency, wavelength):
+        # empty dictionary if things are wrong
+        if frequency is None or wavelength is None:
+            return dict(DEF_INFO)
+
+        # go through every row looking for a match
+        result = dict(DEF_INFO)
+        for i in xrange(char.rowCount()):
+            row = char.row(i)
+            if not self.closeEnough(frequency, row['frequency']):
+                continue
+            if not self.closeEnough(wavelength, row['wavelength']):
+                continue
+            result = dict(row)
+        return result
 
     def getFrequency(self, logs):
         for name in ["SpeedRequest1", "Speed1", "frequency"]:
