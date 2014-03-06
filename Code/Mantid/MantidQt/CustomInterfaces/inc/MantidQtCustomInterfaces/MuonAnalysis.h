@@ -246,9 +246,6 @@ private:
   /// Types of periods
   enum PeriodType { First, Second };
 
-  /// Types of new plot policies
-  enum NewPlotPolicy { NewWindow, PreviousWindow };
-
   /// Initialize local Python environment
   void initLocalPython();
 
@@ -507,9 +504,6 @@ private:
 
   /// When data loaded set various buttons etc to active
   void nowDataAvailable();
-
-  /// Return currently selected new plot policy
-  NewPlotPolicy newPlotPolicy();
 
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;

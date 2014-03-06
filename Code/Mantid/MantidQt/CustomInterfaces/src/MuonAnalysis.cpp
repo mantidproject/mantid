@@ -2043,15 +2043,15 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
     // variable named 'w';'
     QStringList acquireWindowScript;
 
-    NewPlotPolicy policy = newPlotPolicy();
+    MuonAnalysisOptionTab::NewPlotPolicy policy = m_optionTab->newPlotPolicy();
 
     // Hide all the previous plot windows, if creating a new one
-    if ( policy == NewWindow && m_uiForm.hideGraphs->isChecked())
+    if ( policy == MuonAnalysisOptionTab::NewWindow && m_uiForm.hideGraphs->isChecked())
     {
       hideAllPlotWindows();
     }
 
-    if ( policy == PreviousWindow )
+    if ( policy == MuonAnalysisOptionTab::PreviousWindow )
     {
       QStringList& s = acquireWindowScript; // To keep short
 
@@ -2069,7 +2069,7 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
       s << "w.show()";
       s << "w.setFocus()";
     }
-    else if ( policy == NewWindow )
+    else if ( policy == MuonAnalysisOptionTab::NewWindow )
     {
       QStringList& s = acquireWindowScript; // To keep short
 
@@ -3578,27 +3578,6 @@ void MuonAnalysis::nowDataAvailable()
   m_uiForm.pairTablePlotButton->setEnabled(true);
   m_uiForm.guessAlphaButton->setEnabled(true);
 }
-
-/**
- * @return Currently selected new plot policy
- */
-MuonAnalysis::NewPlotPolicy MuonAnalysis::newPlotPolicy()
-{
-  QMap<QString, NewPlotPolicy> policyMap;
-  policyMap["Create new window"] = NewWindow;
-  policyMap["Use previous window"] = PreviousWindow;
-
-  QString selectedPolicy = m_uiForm.newPlotPolicy->currentText();
-  if ( !policyMap.contains(selectedPolicy) )
-  {
-    throw std::runtime_error("Unknown new plot policy selection");
-  }
-  else
-  {
-    return policyMap[selectedPolicy];
-  }
-}
-
 
 void MuonAnalysis::openDirectoryDialog()
 {
