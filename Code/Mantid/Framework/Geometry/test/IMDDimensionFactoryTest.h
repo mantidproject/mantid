@@ -100,10 +100,6 @@ public:
     TS_ASSERT_THROWS( createDimension(""), std::invalid_argument );
     TS_ASSERT_THROWS( createDimension("garbage"), std::invalid_argument );
 
-    std::string xmlString = constructNonReciprocalDimensionXMLString();
-    xmlString.erase(96,30);
-    std::cout << xmlString << std::endl;
-
     std::string missingID = constructNonReciprocalDimensionXMLString().erase(10,8);
     TS_ASSERT_THROWS( createDimension(missingID), std::invalid_argument );
     std::string missingName = constructNonReciprocalDimensionXMLString().erase(19,19);
