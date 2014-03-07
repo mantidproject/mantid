@@ -53,6 +53,7 @@ void MuonAnalysisOptionTab::initLayout()
 
   m_autoSaver.beginGroup("GeneralOptions");
   m_autoSaver.registerWidget(m_uiForm.plotCreation, "plotCreation", 0);
+  m_autoSaver.registerWidget(m_uiForm.newPlotPolicy, "newPlotPolicy", 0);
   m_autoSaver.registerWidget(m_uiForm.hideToolbars, "toolbars", true);
   m_autoSaver.registerWidget(m_uiForm.hideGraphs, "hiddenGraphs", true);
   m_autoSaver.endGroup();
@@ -215,6 +216,28 @@ QMap<QString, QString> MuonAnalysisOptionTab::parsePlotStyleParams() const
 
   return(params);
 }
+
+/**
+ * @return Currently selected new plot policy
+ */
+MuonAnalysisOptionTab::NewPlotPolicy MuonAnalysisOptionTab::newPlotPolicy()
+{
+  QMap<QString, NewPlotPolicy> policyMap;
+  policyMap["Create new window"] = NewWindow;
+  policyMap["Use previous window"] = PreviousWindow;
+
+  QString selectedPolicy = m_uiForm.newPlotPolicy->currentText();
+  if ( !policyMap.contains(selectedPolicy) )
+  {
+    throw std::runtime_error("Unknown new plot policy selection");
+  }
+  else
+  {
+    return policyMap[selectedPolicy];
+  }
+}
+
+
 
 }
 }
