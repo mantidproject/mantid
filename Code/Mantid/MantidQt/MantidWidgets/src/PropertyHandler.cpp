@@ -928,9 +928,14 @@ void PropertyHandler::updateParameters()
   for(int i=0;i<m_parameters.size();i++)
   {
     QtProperty* prop = m_parameters[i];
-    std::string parName = prop->propertyName().toStdString();
-    double parValue = function()->getParameter(parName);
-    m_browser->m_parameterManager->setValue(prop,parValue);
+
+    size_t parIndex = function()->parameterIndex(prop->propertyName().toStdString());
+
+    double parValue = function()->getParameter(parIndex);
+    m_browser->m_parameterManager->setValue(prop, parValue);
+
+    double parError = function()->getError(parIndex);
+    m_browser->m_parameterManager->setError(prop, parError);
   }
   if (m_cf)
   {

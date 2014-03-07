@@ -3,6 +3,8 @@
 
 #include "qtpropertymanager.h"
 
+#include <QMap>
+
 /** ParameterPropertyManager : specialized version of QtDoublePropertyManager for fitting parameters.
 
     Is capable to store/display parameter errors in addition to value.
@@ -34,9 +36,23 @@ class ParameterPropertyManager : public QtDoublePropertyManager
 public:
   ParameterPropertyManager(QObject *parent = 0);
 
+  /// Get property error
+  double error(const QtProperty* property) const;
+
+  /// Checks if given property has error value set
+  bool isErrorSet(const QtProperty* property) const;
+
+public Q_SLOTS:
+  /// Set property error
+  void setError(const QtProperty* property, double error);
+
 protected:
   /// Text representation of the property
-  virtual QString valueText(const QtProperty *property) const;
+  virtual QString valueText(const QtProperty* property) const;
+
+private:
+  /// Property error values
+  QMap<const QtProperty*, double> m_errors;
 };
 
 #endif // PARAMETERPROPERTYMANAGER_H

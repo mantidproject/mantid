@@ -1868,14 +1868,19 @@ void FitPropertyBrowser::getFitResults()
       try
       {
         std::string name;
-        double value;
-        row >> name >> value;
+        double value, error;
+        row >> name >> value >> error;
+
         // In case of a single function Fit doesn't create a CompositeFunction
         if (count() == 1)
         {
           name.insert(0,"f0.");
         }
-        compositeFunction()->setParameter(name,value);
+
+        size_t paramIndex = compositeFunction()->parameterIndex(name);
+
+        compositeFunction()->setParameter(paramIndex,value);
+        compositeFunction()->setError(paramIndex, error);
       }
       catch(...)
       {
