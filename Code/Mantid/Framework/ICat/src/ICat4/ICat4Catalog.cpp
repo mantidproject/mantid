@@ -353,7 +353,13 @@ namespace Mantid
       std::string sessionID = m_session->getSessionId();
       request.sessionId = &sessionID;
 
-      std::string query = "Investigation INCLUDE InvestigationInstrument, Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user]";
+      std::string query = "SELECT DISTINCT inves "
+        "FROM Investigation inves "
+        "JOIN inves.investigationUsers users "
+        "JOIN users.user user "
+        "WHERE user.name = :user "
+        "ORDER BY inves.id DESC "
+        "INCLUDE inves.facility, inves.investigationInstruments.instrument, inves.parameters";
       request.query     = &query;
 
       int result = icat.search(&request, &response);
