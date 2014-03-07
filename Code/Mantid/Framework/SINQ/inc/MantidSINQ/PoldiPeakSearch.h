@@ -7,6 +7,8 @@
 #include "MantidKernel/V2D.h"
 #include "MantidAPI/Algorithm.h"
 
+#include "MantidDataObjects/Workspace2D.h"
+
 
 namespace Mantid
 {
@@ -42,6 +44,7 @@ namespace Poldi
   */
 
   using namespace Kernel;
+  using namespace DataObjects;
 
   class MANTID_SINQ_DLL PoldiPeakSearch : public API::Algorithm
   {
@@ -68,6 +71,8 @@ namespace Poldi
 
     double minimumPeakHeightFromBackground(std::pair<double, double> backgroundWithSigma);
     std::vector<V2D> getPeakCoordinates(MantidVec::iterator baseListStart, std::list<MantidVec::iterator> peakPositions, MantidVec xData);
+
+    void setErrorsOnWorkspace(Workspace2D_sptr correlationWorkspace, double error);
 
     void setMinimumDistance(int newMinimumDistance);
     void setMinimumPeakHeight(double newMinimumPeakHeight);

@@ -146,6 +146,13 @@ std::vector<V2D> PoldiPeakSearch::getPeakCoordinates(MantidVec::iterator baseLis
     return peakData;
 }
 
+void PoldiPeakSearch::setErrorsOnWorkspace(Workspace2D_sptr correlationWorkspace, double error)
+{
+    MantidVec &errors = correlationWorkspace->dataE(0);
+
+    std::fill(errors.begin(), errors.end(), error);
+}
+
 std::pair<double, double> PoldiPeakSearch::getBackgroundWithSigma(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
 {
     size_t backgroundPoints = getNumberOfBackgroundPoints(peakPositions, correlationCounts);
@@ -160,9 +167,9 @@ std::pair<double, double> PoldiPeakSearch::getBackgroundWithSigma(std::list<Mant
         point != correlationCounts.end() - 1;
         ++point)
     {
-        if(std::all_of(peakPositions.cbegin(), peakPositions.cend(), [point, this] (MantidVec::iterator peakPos) { return std::abs(std::distance(point, peakPos)) >= m_minimumDistance; })) {
+        if(std::all_of(peakPositions.cbegin(), peakPositions.cend(), [point, this] (MantidVec::iterator peakPos) { return std::abs(std::distance(point, peakPos)) > m_minimumDistance; })) {
             background.push_back(*point);
-            sigma.push_back(std::abs(*(point - 1) - *point));
+            sigma.push_back(std::abs(*(point) - *(point + 1)));
         }
     }
 
@@ -179,7 +186,7 @@ size_t PoldiPeakSearch::getNumberOfBackgroundPoints(std::list<MantidVec::iterato
      * considered in this calculation.
      */
     size_t totalDataPoints = correlationCounts.size() - 2;
-    size_t occupiedByPeaks = peakPositions.size() * (m_doubleMinimumDistance - 1);
+    size_t occupiedByPeaks = peakPositions.size() * (m_doubleMinimumDistance + 1);
 
     if(occupiedByPeaks > totalDataPoints) {
         throw(std::runtime_error("More data points occupied by peaks than existing data points - not possible."));
@@ -221,7 +228,7 @@ void PoldiPeakSearch::setRecursionAbsoluteBorders(MantidVec::iterator begin, Man
 
 void PoldiPeakSearch::init()
 {
-    declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace", "", Direction::Input),
+    declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace", "", Direction::InOut),
                     "Workspace containing a POLDI auto-correlation spectrum.");
 
     boost::shared_ptr<BoundedValidator<int> > minPeakSeparationValidator = boost::make_shared<BoundedValidator<int> >();
@@ -242,10 +249,10 @@ void PoldiPeakSearch::exec()
 {
     g_log.information() << "PoldiPeakSearch:" << std::endl;
 
-    Workspace2D_const_sptr correlationWorkspace = getProperty("InputWorkspace");
-    MantidVec correlationQValues = correlationWorkspace->dataX(0);
-    MantidVec correlatedCounts = correlationWorkspace->dataY(0);
-    g_log.information() << "   Auto-correlation data read.";
+    Workspace2D_sptr correlationWorkspace = getProperty("InputWorkspace");
+    MantidVec correlationQValues = correlationWorkspace->readX(0);
+    MantidVec correlatedCounts = correlationWorkspace->readY(0);
+    g_log.information() << "   Auto-correlation data read." << std::endl;
 
     setMinimumDistance(getProperty("MinimumPeakSeparation"));
     setMinimumPeakHeight(getProperty("MinimumPeakHeight"));
@@ -276,10 +283,11 @@ void PoldiPeakSearch::exec()
     std::vector<V2D> peakCoordinates = getPeakCoordinates(summedNeighborCounts.begin(), peakPositionsSummed, correlationQValues);
     g_log.information() << "   Extracted peak positions in Q and intensity guesses." << std::endl;
 
-    double realMinimumPeakHeight = m_minimumPeakHeight;
+    std::pair<double, double> backgroundWithSigma = getBackgroundWithSigma(peakPositionsCorrelation, correlatedCounts);
+    g_log.information() << "   Calculated average background and deviation: " << backgroundWithSigma.first << ", " << backgroundWithSigma.second << std::endl;
 
+    double realMinimumPeakHeight = m_minimumPeakHeight;
     if(realMinimumPeakHeight == 0.0) {
-        std::pair<double, double> backgroundWithSigma = getBackgroundWithSigma(peakPositionsCorrelation, correlatedCounts);
         realMinimumPeakHeight = minimumPeakHeightFromBackground(backgroundWithSigma);
     }
 
@@ -304,6 +312,8 @@ void PoldiPeakSearch::exec()
         TableRow newRow = peaks->appendRow();
         newRow << (*peak).X() << (*peak).Y();
     }
+
+    setErrorsOnWorkspace(correlationWorkspace, backgroundWithSigma.second);
 
     setProperty("OutputWorkspace", peaks);
 }

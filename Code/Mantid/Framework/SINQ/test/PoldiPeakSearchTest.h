@@ -238,7 +238,7 @@ public:
         std::list<std::vector<double>::iterator> peakPositions(4);
         std::vector<double> correlationCounts(30);
 
-        TS_ASSERT_EQUALS(poldiPeakSearch.getNumberOfBackgroundPoints(peakPositions, correlationCounts), 16);
+        TS_ASSERT_EQUALS(poldiPeakSearch.getNumberOfBackgroundPoints(peakPositions, correlationCounts), 8);
 
         std::list<std::vector<double>::iterator> tooManyPeaks(40);
         TS_ASSERT_THROWS(poldiPeakSearch.getNumberOfBackgroundPoints(tooManyPeaks, correlationCounts), std::runtime_error);
