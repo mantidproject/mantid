@@ -308,10 +308,10 @@ class TubeSpec:
         It assumes that all the pixels along the tube have consecutive detector IDs 
         
         :param tubeIx:  index of Tube in specified set 
-	
-	:rtype: list of indices
-        """
-	firstDet, numDet, step = self.getDetectorInfoFromTube( tubeIx )			   
+
+        :rtype: list of indices
+            """
+        firstDet, numDet, step = self.getDetectorInfoFromTube( tubeIx )			   
         wkIds = []
         # print " First dectector", firstDet," Last detector", firstDet+numDet-1, "Number of detectors", numDet
         # print "Histograms", self.ws.getNumberHistograms()
@@ -332,21 +332,29 @@ class TubeSpec:
         else:
             startDet = firstDet
         if( numDet > 0):
+            skipped_histograms = []
             for i in range (0, self.ws.getNumberHistograms(), numDet):
-	         deti = self.ws.getDetector(i)
-	         detID = deti.getID()
-	         if (detID  >= startDet and detID < startDet+numDet):
-	             iPixel = detID - firstDet
-	             wkIds = range( i - iPixel, i - iPixel + step*numDet, step)
-	             # print "Workspace indices",i-iPixel,"to",i-iPixel+numDet-1
+                try:
+                    deti = self.ws.getDetector(i)
+                except:
+                    skipped_histograms.append(i)
+                    continue
+                detID = deti.getID()
+                if (detID  >= startDet and detID < startDet+numDet):
+                    iPixel = detID - firstDet
+                    wkIds = range( i - iPixel, i - iPixel + step*numDet, step)
+                    # print "Workspace indices",i-iPixel,"to",i-iPixel+numDet-1
+            if len(skipped_histograms) > 0:
+                print "The following histogram(s) were skipped since they did not " \
+                      "have an assigned detector:\n" + str(skipped_histograms)
 
         #print  firstDet, numDet
         if (numDet > 0):
-	    return wkIds
+            return wkIds
         else:
             print "specified tube has no detectors."
             self.numTubes = 0
-	    return wkIds
+        return wkIds
 
 	
     def getTube(self, tubeIx):
