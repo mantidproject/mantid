@@ -42,7 +42,7 @@ namespace Poldi
 class MANTID_SINQ_DLL PoldiDetectorDecorator : public PoldiAbstractDetector
 {
 public:
-    PoldiDetectorDecorator(boost::shared_ptr<PoldiAbstractDetector> decoratedDetector = boost::shared_ptr<PoldiAbstractDetector>(0));
+    PoldiDetectorDecorator(boost::shared_ptr<PoldiAbstractDetector> decoratedDetector = boost::shared_ptr<PoldiAbstractDetector>());
 
     virtual ~PoldiDetectorDecorator() { }
 

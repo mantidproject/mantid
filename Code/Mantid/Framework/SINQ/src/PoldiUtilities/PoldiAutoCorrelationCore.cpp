@@ -1,6 +1,8 @@
 #include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
 
 #include <utility>
+#include <numeric>
+#include <algorithm>
 #include "boost/range/irange.hpp"
 #include "boost/bind.hpp"
 #include "MantidKernel/PhysicalConstants.h"
@@ -126,7 +128,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
          * In the fortran program there seems to be a small difference, possibly due to numerical inaccuracies connected
          * to floating point precision.
          */
-        double sumOfCorrelatedIntensities = std::accumulate(rawCorrelatedIntensities.cbegin(), rawCorrelatedIntensities.cend(), 0.0);
+        double sumOfCorrelatedIntensities = std::accumulate(rawCorrelatedIntensities.begin(), rawCorrelatedIntensities.end(), 0.0);
         double sumOfCounts = getSumOfCounts(m_timeBinCount, m_detectorElements);
         m_logger.information() << "  Summing intensities (" << sumOfCounts << ")..." << std::endl;
 
@@ -134,8 +136,8 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
 
         m_logger.information() << "  Correcting intensities..." << std::endl;
         std::vector<double> correctedCorrelatedIntensities(dValues.size());
-        std::transform(rawCorrelatedIntensities.cbegin(), rawCorrelatedIntensities.cend(),
-                       m_weightsForD.cbegin(),
+        std::transform(rawCorrelatedIntensities.begin(), rawCorrelatedIntensities.end(),
+                       m_weightsForD.begin(),
                        correctedCorrelatedIntensities.rbegin(),
                        [&correlationBackground, &sumOfWeights] (double intensity, double weight) { return intensity - correlationBackground * weight / sumOfWeights; });
 
@@ -222,7 +224,7 @@ double PoldiAutoCorrelationCore::getNormalizedTOFSum(std::vector<double> normali
      * to handle dead wires.
      */
 
-    return std::accumulate(normalizedTofs.cbegin(), normalizedTofs.cend(), 0.0);
+    return std::accumulate(normalizedTofs.begin(), normalizedTofs.end(), 0.0);
 }
 
 /** Calculates weights used for correction of correlation background.
@@ -240,7 +242,7 @@ std::vector<double> PoldiAutoCorrelationCore::calculateDWeights(std::vector<doub
      * to the original implementation, this is kept.
      */
     std::vector<double> tofs(tofsFor1Angstrom.size());
-    std::transform(tofsFor1Angstrom.cbegin(), tofsFor1Angstrom.cend(), tofs.begin(), [&deltaD](double tofForD1) { return tofForD1 * deltaD; });
+    std::transform(tofsFor1Angstrom.begin(), tofsFor1Angstrom.end(), tofs.begin(), [&deltaD](double tofForD1) { return tofForD1 * deltaD; });
     double sum = std::accumulate(tofs.begin(), tofs.end(), 0.0);
 
     return std::vector<double>(nd, sum / deltaT);
@@ -264,8 +266,8 @@ double PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue, double
     std::vector<std::pair<double, double> > current;
     current.reserve(m_chopper->slitTimes().size());
 
-    for(std::vector<double>::const_iterator slitOffset = m_chopper->slitTimes().cbegin();
-        slitOffset != m_chopper->slitTimes().cend();
+    for(std::vector<double>::const_iterator slitOffset = m_chopper->slitTimes().begin();
+        slitOffset != m_chopper->slitTimes().end();
         ++slitOffset) {
         /* For each offset, the sum of correlation intensity and error (for each detector element)
          * is computed from the counts in the space/time location possible for this d-value (by getCMessAndCSigma).
@@ -273,15 +275,15 @@ double PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue, double
          * is equal to the number of chopper slits.
          */
         std::vector<std::pair<double, double> > cmess(m_detector->elementCount());
-        std::transform(m_indices.cbegin(), m_indices.cend(),
+        std::transform(m_indices.begin(), m_indices.end(),
                        cmess.begin(),
                        boost::bind<std::pair<double, double> >(&PoldiAutoCorrelationCore::getCMessAndCSigma, this, dValue, *slitOffset, _1));
 
-        current.push_back(std::accumulate(cmess.cbegin(), cmess.cend(), std::make_pair(0.0, 0.0), [] (std::pair<double, double> sum, std::pair<double, double> current) { return std::make_pair(sum.first + current.first, sum.second + current.second); } ));
+        current.push_back(std::accumulate(cmess.begin(), cmess.end(), std::make_pair(0.0, 0.0), [] (std::pair<double, double> sum, std::pair<double, double> current) { return std::make_pair(sum.first + current.first, sum.second + current.second); } ));
     }
 
     /* This check ensures that all sigmas are non-zero. If not, a correlation intensity of 0.0 is returned. */
-    double sigma = (*std::min_element(current.cbegin(), current.cend(), [] (std::pair<double, double> first, std::pair<double, double> second) { return first.second < second.second; })).second;
+    double sigma = (*std::min_element(current.begin(), current.end(), [] (std::pair<double, double> first, std::pair<double, double> second) { return first.second < second.second; })).second;
 
     if(sigma <= 0) {
         return 0.0;
@@ -414,9 +416,9 @@ void PoldiAutoCorrelationCore::setCountData(DataObjects::Workspace2D_sptr countD
 double PoldiAutoCorrelationCore::reduceChopperSlitList(std::vector<std::pair<double, double> > valuesWithSigma, double weight)
 {
     std::vector<double> iOverSigma(valuesWithSigma.size());
-    std::transform(valuesWithSigma.cbegin(), valuesWithSigma.cend(), iOverSigma.begin(), [] (std::pair<double, double> iAndSigma) { return iAndSigma.first / iAndSigma.second; });
+    std::transform(valuesWithSigma.begin(), valuesWithSigma.end(), iOverSigma.begin(), [] (std::pair<double, double> iAndSigma) { return iAndSigma.first / iAndSigma.second; });
 
-    if(std::any_of(iOverSigma.cbegin(), iOverSigma.cend(), [] (double iOverS) { return iOverS < 0; })) {
+    if(std::any_of(iOverSigma.begin(), iOverSigma.end(), [] (double iOverS) { return iOverS < 0; })) {
         return 0.0;
     }
 
@@ -529,8 +531,8 @@ double PoldiAutoCorrelationCore::getSumOfCounts(int timeBinCount, std::vector<in
     double sum = 0.0;
 
     for(int t = 0; t < timeBinCount; ++t) {
-        for(std::vector<int>::const_iterator e = detectorElements.cbegin();
-            e != detectorElements.cend();
+        for(std::vector<int>::const_iterator e = detectorElements.begin();
+            e != detectorElements.end();
             ++e) {
             sum += getCounts(*e, t);
         }

@@ -23,10 +23,10 @@ PoldiDeadWireDecorator::PoldiDeadWireDecorator(Instrument_const_sptr poldiInstru
     std::vector<detid_t> allDetectorIds = poldiInstrument->getDetectorIDs();
     std::vector<detid_t> deadDetectorIds(allDetectorIds.size());
 
-    auto endIterator = std::copy_if(allDetectorIds.cbegin(), allDetectorIds.cend(), deadDetectorIds.begin(), [&poldiInstrument](detid_t detectorId) { return poldiInstrument->isDetectorMasked(detectorId); });
+    auto endIterator = std::copy_if(allDetectorIds.begin(), allDetectorIds.end(), deadDetectorIds.begin(), [&poldiInstrument](detid_t detectorId) { return poldiInstrument->isDetectorMasked(detectorId); });
     deadDetectorIds.resize(std::distance(deadDetectorIds.begin(), endIterator));
 
-    setDeadWires(std::set<int>(deadDetectorIds.cbegin(), deadDetectorIds.cend()));
+    setDeadWires(std::set<int>(deadDetectorIds.begin(), deadDetectorIds.end()));
 }
 
 void PoldiDeadWireDecorator::setDeadWires(std::set<int> deadWires)

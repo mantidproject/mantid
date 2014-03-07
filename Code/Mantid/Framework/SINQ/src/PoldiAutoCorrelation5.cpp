@@ -155,7 +155,7 @@ void PoldiAutoCorrelation5::exec()
     std::set<int> deadWires = cleanDetector->deadWires();
     g_log.information() << "_Poldi -     Number of dead wires: " << deadWires.size() << std::endl;
     g_log.information() << "_Poldi -     Wire indices: ";
-    for(std::set<int>::const_iterator dw = deadWires.cbegin(); dw != deadWires.cend(); ++dw) {
+    for(std::set<int>::const_iterator dw = deadWires.begin(); dw != deadWires.end(); ++dw) {
         g_log.information() << *dw << " ";
     }
     g_log.information() << std::endl;
