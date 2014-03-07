@@ -622,7 +622,9 @@ class DirectEnergyConversion(object):
 
             monWS_name = data_ws.getName()+'_monitors'
             if monWS_name in mtd:
-                NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=monWS_name, 
+                mon_ws = mtd[monWS_name];
+                mon_index = mon_ws.getIndexFromSpectrumNumber(mon_spectr_num);
+                NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorWorkspace=mon_ws, MonitorWorkspaceIndex=mon_index,
                                    IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
             else:
                 NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorSpectrum=mon_spectr_num, 
