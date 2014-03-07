@@ -27,17 +27,18 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
 
-from mantid.api import IFunction1D, FunctionFactory, AlgorithmManager
+from mantid.api import IFunction1D, FunctionFactory
 from mantid.simpleapi import mtd
 from mantid import logger
 import numpy
+from scipy.interpolate import interp1d
 
 #from pdb import set_trace as tr
 
 class DSFinterp1DFit(IFunction1D):
 
   def category(self):
-    return 'QENS'
+    return 'QuasiElastic'
 
   def init(self):
     '''Declare parameters and attributes that participate in the fitting'''
@@ -66,6 +67,7 @@ class DSFinterp1DFit(IFunction1D):
     self._minWindow = { 'linear':3, 'quadratic':4 }
     # channelgroup to interpolate values
     self._channelgroup = None
+    self._xvalues = None #energies of the channels
 
   def setAttributeValue(self, name, value):
     if name == "InputWorkspaces":
@@ -132,31 +134,20 @@ class DSFinterp1DFit(IFunction1D):
         message = 'RegressionWindow must be equal or bigger than {0} for regression type {1}'.format(self._minWindow[self._RegressionType], self._RegressionType)
         logger.error(message)
         raise ValueError(message)
+      # Initialize the energies of the channels with the first of the input workspaces
+      self._xvalues = numpy.copy( mtd[ self._InputWorkspaces[0] ].dataX(self._WorkspaceIndex) )
       # Initialize the channel group
       nf = len(self._ParameterValues)
-      # We need to Rebin the input workspaces to agree with the passed xvals
-      dX = (xvals[-1]-xvals[0])/(len(xvals)-1)  # bin width. We assume here xvals equally spaced!
-      xstart = xvals[0] - dX/2.0   # First bin boundary lies dX/2.0 less than first xvals value
-      xfinal = xvals[-1] + dX/2.0  # Last bin boundary lies dX/2.0 above last xvals value
-      rebinner = AlgorithmManager.createUnmanaged('Rebin')
-      rebinner.setChild(True)
-      rebinner.setLogging(False)
-      rebinner.initialize()
-      rebinner.setAlwaysStoreInADS(True)
-      rebinner.setProperty("Params",[xstart, dX, xfinal])
       # Load the InputWorkspaces into a group of dynamic structure factors
       from dsfinterp.dsf import Dsf
       from dsfinterp.dsfgroup import DsfGroup
       dsfgroup = DsfGroup()
       for idsf in range(nf):
-        rebinner.setProperty('InputWorkspace', self._InputWorkspaces[idsf])
-        rebinner.setProperty('OutputWorkspace', 'rebinned')
-        rebinner.execute()
         dsf = Dsf()
-        dsf.SetIntensities( mtd['rebinned'].dataY(self._WorkspaceIndex) )
+        dsf.SetIntensities( mtd[ self._InputWorkspaces[idsf] ].dataY(self._WorkspaceIndex) )
         dsf.errors = None # do not incorporate error data
         if self._LoadErrors:
-          dsf.SetErrors(mtd['rebinned'].dataE(self._WorkspaceIndex))
+          dsf.SetErrors(mtd[ self._InputWorkspaces[idsf] ].dataE(self._WorkspaceIndex))
         dsf.SetFvalue( self._ParameterValues[idsf] )
         dsfgroup.InsertDsf(dsf)
       # Create the interpolator
@@ -167,9 +158,12 @@ class DSFinterp1DFit(IFunction1D):
         self._channelgroup.InitializeInterpolator(running_regr_type=self._RegressionType, windowlength=self._RegressionWindow)
       else:
         self._channelgroup.InitializeInterpolator(windowlength=0)
-    # channel group has been initialized, so just evaluate the interpolator
+    # channel group has been initialized, so evaluate the interpolator
     dsf = self._channelgroup(p['TargetParameter'])
-    return p['Intensity']*dsf.intensities  # can we pass by reference?
+    # Linear interpolation between the energies of the channels and the xvalues we require
+    # NOTE: interpolator evaluates to zero for any of the xvals outside of the domain defined by self._xvalues
+    intensities_interpolator = interp1d(self._xvalues, p['Intensity']*dsf.intensities, kind='linear')
+    return intensities_interpolator(xvals)  # can we pass by reference?
 
 # Required to have Mantid recognize the new function
 try:
