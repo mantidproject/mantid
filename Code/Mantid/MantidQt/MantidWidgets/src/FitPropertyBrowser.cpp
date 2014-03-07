@@ -185,6 +185,7 @@ m_mantidui(mantidui)
   m_vectorManager = new QtGroupPropertyManager(w);
   m_vectorSizeManager = new QtIntPropertyManager(w);
   m_vectorDoubleManager = new QtDoublePropertyManager(w);
+  m_parameterManager = new QtDoublePropertyManager(w);
 }
 
 
@@ -298,6 +299,7 @@ void FitPropertyBrowser::initLayout(QWidget *w)
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
   connect(m_columnManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(columnChanged(QtProperty*)));
   connect(m_vectorDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(vectorDoubleChanged(QtProperty*)));
+  connect(m_parameterManager,SIGNAL(propertyChanged(QtProperty*)), this, SLOT(doubleChanged(QtProperty*)));
 
   QVBoxLayout* layout = new QVBoxLayout(w);
   QGridLayout* buttonsLayout = new QGridLayout();
@@ -447,6 +449,7 @@ void FitPropertyBrowser::createEditors(QWidget *w)
   m_browser->setFactoryForManager(m_columnManager, comboBoxFactory);
   m_browser->setFactoryForManager(m_vectorSizeManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_vectorDoubleManager, doubleEditorFactory);
+  m_browser->setFactoryForManager(m_parameterManager, doubleEditorFactory);
 }
 
 

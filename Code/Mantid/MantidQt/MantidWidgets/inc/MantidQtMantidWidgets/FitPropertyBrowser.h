@@ -360,6 +360,7 @@ protected:
   QtGroupPropertyManager  *m_vectorManager;
   QtIntPropertyManager *m_vectorSizeManager;
   QtDoublePropertyManager *m_vectorDoubleManager;
+  QtDoublePropertyManager *m_parameterManager;
 
   QtProperty *m_workspace;
   QtProperty *m_workspaceIndex;

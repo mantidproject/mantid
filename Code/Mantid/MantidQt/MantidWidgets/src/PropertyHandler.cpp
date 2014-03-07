@@ -247,13 +247,13 @@ void PropertyHandler::initParameters()
   {
     QString parName = QString::fromStdString(function()->parameterName(i));
     if (parName.contains('.')) continue;
-    QtProperty* prop = m_browser->addDoubleProperty(parName);
+    QtProperty* prop = m_browser->addDoubleProperty(parName, m_browser->m_parameterManager);
     QString toolTip = QString::fromStdString(function()->parameterDescription(i));
     if (!toolTip.isEmpty())
     {
       prop->setToolTip(toolTip);
     }
-    m_browser->m_doubleManager->setValue(prop,function()->getParameter(i));
+    m_browser->m_parameterManager->setValue(prop,function()->getParameter(i));
     m_item->property()->addSubProperty(prop);
     m_parameters << prop;
     // add tie property if this parameter has a tie
@@ -682,7 +682,7 @@ bool PropertyHandler::setParameter(QtProperty* prop)
   if (m_parameters.contains(prop))
   {
     std::string parName = prop->propertyName().toStdString();
-    double parValue = m_browser->m_doubleManager->value(prop);
+    double parValue = m_browser->m_parameterManager->value(prop);
     m_fun->setParameter(parName,parValue);
     m_browser->sendParameterChanged(m_fun.get());
     return true;
@@ -929,7 +929,7 @@ void PropertyHandler::updateParameters()
     QtProperty* prop = m_parameters[i];
     std::string parName = prop->propertyName().toStdString();
     double parValue = function()->getParameter(parName);
-    m_browser->m_doubleManager->setValue(prop,parValue);
+    m_browser->m_parameterManager->setValue(prop,parValue);
   }
   if (m_cf)
   {
@@ -1117,7 +1117,7 @@ void PropertyHandler::fix(const QString& parName)
 {
   QtProperty* parProp = getParameterProperty(parName);
   if (!parProp) return;
-  QString parValue = QString::number(m_browser->m_doubleManager->value(parProp));
+  QString parValue = QString::number(m_browser->m_parameterManager->value(parProp));
   try
   {
     m_fun->tie(parName.toStdString(),parValue.toStdString());
