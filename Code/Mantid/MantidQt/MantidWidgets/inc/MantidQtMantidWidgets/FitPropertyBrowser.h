@@ -26,6 +26,8 @@ class QtIntPropertyManager;
 class QtBoolPropertyManager;
 class QtStringPropertyManager;
 class QtEnumPropertyManager;
+class ParameterPropertyManager;
+
 class QtProperty;
 class QtBrowserItem;
 
@@ -360,7 +362,7 @@ protected:
   QtGroupPropertyManager  *m_vectorManager;
   QtIntPropertyManager *m_vectorSizeManager;
   QtDoublePropertyManager *m_vectorDoubleManager;
-  QtDoublePropertyManager *m_parameterManager;
+  ParameterPropertyManager *m_parameterManager;
 
   QtProperty *m_workspace;
   QtProperty *m_workspaceIndex;

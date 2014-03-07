@@ -18,6 +18,7 @@
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
+#include "ParameterPropertyManager.h"
 
 #include <QMessageBox>
 #include <QMenu>

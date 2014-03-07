@@ -29,6 +29,8 @@
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
+#include "ParameterPropertyManager.h"
+
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1125
@@ -185,7 +187,7 @@ m_mantidui(mantidui)
   m_vectorManager = new QtGroupPropertyManager(w);
   m_vectorSizeManager = new QtIntPropertyManager(w);
   m_vectorDoubleManager = new QtDoublePropertyManager(w);
-  m_parameterManager = new QtDoublePropertyManager(w);
+  m_parameterManager = new ParameterPropertyManager(w);
 }
 
 
@@ -449,7 +451,7 @@ void FitPropertyBrowser::createEditors(QWidget *w)
   m_browser->setFactoryForManager(m_columnManager, comboBoxFactory);
   m_browser->setFactoryForManager(m_vectorSizeManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_vectorDoubleManager, doubleEditorFactory);
-  m_browser->setFactoryForManager(m_parameterManager, doubleEditorFactory);
+  m_browser->setFactoryForManager(static_cast<QtDoublePropertyManager*>(m_parameterManager), doubleEditorFactory);
 }
 
 
