@@ -167,10 +167,6 @@ void MuonFitPropertyBrowser::doubleChanged(QtProperty* prop)
     emit xRangeChanged(startX(), endX());
     return;
   }
-  else if(getHandler()->setParameter(prop))
-  {
-    return;
-  }
   else
   {// check if it is a constraint
     MantidQt::MantidWidgets::PropertyHandler* h = getHandler()->findHandler(prop);

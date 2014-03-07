@@ -274,6 +274,8 @@ private slots:
   void boolChanged(QtProperty* prop);
   void intChanged(QtProperty* prop);
   virtual void doubleChanged(QtProperty* prop);
+  /// Called when one of the parameter values gets changed
+  void parameterChanged(QtProperty* prop);
   void stringChanged(QtProperty* prop);
   void filenameChanged(QtProperty* prop);
   void columnChanged(QtProperty* prop);

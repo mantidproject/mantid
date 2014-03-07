@@ -301,7 +301,7 @@ void FitPropertyBrowser::initLayout(QWidget *w)
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
   connect(m_columnManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(columnChanged(QtProperty*)));
   connect(m_vectorDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(vectorDoubleChanged(QtProperty*)));
-  connect(m_parameterManager,SIGNAL(propertyChanged(QtProperty*)), this, SLOT(doubleChanged(QtProperty*)));
+  connect(m_parameterManager,SIGNAL(propertyChanged(QtProperty*)), this, SLOT(parameterChanged(QtProperty*)));
 
   QVBoxLayout* layout = new QVBoxLayout(w);
   QGridLayout* buttonsLayout = new QGridLayout();
@@ -1309,10 +1309,6 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
     emit xRangeChanged(startX(), endX());
     return;
   }
-  else if(getHandler()->setParameter(prop))
-  {
-    return;
-  }
   else
   {// check if it is a constraint
     PropertyHandler* h = getHandler()->findHandler(prop);
@@ -1338,6 +1334,19 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
     }
   }
 }
+
+/**
+ * Called when one of the parameter values gets changed. This could be caused either by user setting
+ * the value or programmatically.
+ * @param prop :: Parameter property which value got changed
+ */
+void FitPropertyBrowser::parameterChanged(QtProperty* prop)
+{
+  if ( ! m_changeSlotsEnabled ) return;
+
+  getHandler()->setParameter(prop);
+}
+
 /** Called when a string property changed
  * @param prop :: A pointer to the property 
  */
