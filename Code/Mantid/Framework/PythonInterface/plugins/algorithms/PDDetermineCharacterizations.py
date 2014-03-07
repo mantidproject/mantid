@@ -20,8 +20,8 @@ COL_NAMES = [
     "tof_max"      # double
     ]
 DEF_INFO = {
-    "frequency":"",
-    "wavelength":"",
+    "frequency":0.,
+    "wavelength":0.,
     "bank":1,
     "vanadium":0,
     "container":0,
@@ -159,9 +159,10 @@ class PDDetermineCharacterizations(PythonAlgorithm):
             if name in logs.keys():
                 frequency = logs[name]
                 if frequency.units != "Hz":
-                    msg = "When looking at %s log encountered unknown units" \
-                        + " for frequency. Only know how to deal with " \
-                        + "frequency in Hz, not %s" % (name, frequency.units)
+                    msg = "When looking at " + name \
+                        + " log encountered unknown units for frequency. " \
+                        + "Only know how to deal with " \
+                        + "frequency in Hz, not " + frequency.units
                     self.log().information(msg)
                 else:
                     frequency = frequency.getStatistics().mean
