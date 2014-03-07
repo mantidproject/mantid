@@ -9,8 +9,9 @@
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NamedNodeMap.h>
+#include <Poco/AutoPtr.h>
 
-#include<algorithm>
+#include <algorithm>
 
 namespace Mantid
 {
@@ -58,7 +59,7 @@ namespace Mantid
         typedef std::vector<Mantid::Geometry::IMDDimension_sptr>::iterator Iterator;
 
         Poco::XML::DOMParser pParser;
-        Poco::XML::Document* pDoc = pParser.parseString(m_xmlToProcess);
+        Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(m_xmlToProcess);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
         //Apply root node checking if supplied.
         Poco::XML::Element* geometryXMLElement = NULL;
@@ -79,7 +80,7 @@ namespace Mantid
         }
 
 
-        Poco::XML::NodeList* dimensionsXML = geometryXMLElement-> getElementsByTagName(MDGeometryXMLDefinitions::workspaceDimensionElementName());
+        Poco::AutoPtr<Poco::XML::NodeList> dimensionsXML = geometryXMLElement-> getElementsByTagName(MDGeometryXMLDefinitions::workspaceDimensionElementName());
         size_t nDimensions = dimensionsXML->length();
         VecIMDDimension_sptr vecAllDims(nDimensions);
         
