@@ -87,14 +87,26 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         return {}
 
     def PyExec(self):
+        # setup property manager to return
+        manager_name = self.getProperty("ReductionProperties").value
+        if PropertyManagerDataService.doesExist(manager_name):
+            manager = PropertyManagerDataService.retrieve(manager_name)
+        else:
+            manager = PropertyManager()
+
+        # empty characterizations table means return the default values
         char = self.getProperty("Characterizations").value
         if char.rowCount() <= 0:
+            for key in COL_NAMES:
+                if not manager.existsProperty(key):
+                    manager[key] = DEF_INFO[key]
+            PropertyManagerDataService.addOrReplace(manager_name, manager)
             return
         wksp = self.getProperty("InputWorkspace").value
 
         # determine wavelength and frequency
-        frequency = self.getFrequency(wksp.getRun())
-        wavelength = self.getWavelength(wksp.getRun())
+        frequency = self.getFrequency(wksp.getRun(), str(wksp))
+        wavelength = self.getWavelength(wksp.getRun(), str(wksp))
         self.log().information("Determined frequency: " + str(frequency) \
                                    + " Hz, center wavelength:" \
                                    + str(wavelength) + " Angstrom")
@@ -113,11 +125,6 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                 info[dictName] = runNum
 
         # convert to a property manager
-        manager_name = self.getProperty("ReductionProperties").value
-        if PropertyManagerDataService.doesExist(manager_name):
-            manager = PropertyManagerDataService.retrieve(manager_name)
-        else:
-            manager = PropertyManager()
         for key in COL_NAMES:
             manager[key] = info[key]
         PropertyManagerDataService.addOrReplace(manager_name, manager)
@@ -147,7 +154,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
             result = dict(row)
         return result
 
-    def getFrequency(self, logs):
+    def getFrequency(self, logs, wkspName):
         for name in ["SpeedRequest1", "Speed1", "frequency"]:
             if name in logs.keys():
                 frequency = logs[name]
@@ -165,10 +172,10 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                                                    % name)
                         return frequency
         self.log().warning("Failed to determine frequency in \"%s\"" \
-                               % str(wksp))
+                               % wkspName)
         return None
 
-    def getWavelength(self, logs):
+    def getWavelength(self, logs, wkspName):
         name = "LambdaRequest"
         if name in logs.keys():
             wavelength = logs[name]
@@ -184,7 +191,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                     return wavelength
 
         self.log().warning("Failed to determine wavelength in \"%s\"" \
-                               % str(wksp))
+                               % wkspName)
         return None
 
 # Register algorthm with Mantid.
