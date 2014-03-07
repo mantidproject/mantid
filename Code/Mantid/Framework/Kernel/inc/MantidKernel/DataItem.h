@@ -7,8 +7,12 @@
 #include "MantidKernel/DllConfig.h"
 #include <boost/shared_ptr.hpp>
 #include <string>
-#include <Poco/RWLock.h>
 
+// Poco forward declarations
+namespace Poco
+{
+  class RWLock;
+}
 
 // Forward declaration to allow Friend class.
 namespace Mantid

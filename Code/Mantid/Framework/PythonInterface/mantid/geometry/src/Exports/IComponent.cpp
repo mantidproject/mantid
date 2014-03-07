@@ -1,7 +1,7 @@
 #include "MantidGeometry/IComponent.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Geometry::IComponent;
 using namespace boost::python;
@@ -27,7 +27,7 @@ namespace
 
 void export_IComponent()
 {
-  REGISTER_SHARED_PTR_TO_PYTHON(IComponent);
+  register_ptr_to_python<boost::shared_ptr<IComponent>>();
 
   class_<IComponent, boost::noncopyable>("IComponent", no_init)
     .def("getPos", &IComponent::getPos, "Returns the absolute position of the component")

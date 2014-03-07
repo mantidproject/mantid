@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+ name="SANS2D" valid-from   ="2014-02-01 23:59:59"
+                          valid-to     ="2100-01-31 23:59:59"
+		          last-modified="2014-02-02 00:00:00">
+
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>  
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view axis-view="z-"/>
+  </defaults>
+
+  
+  <!-- BRIEF DESCRIPTION OF SANS2d INSTRUMENT: 
+  
+      Data provided by Richard Heenan (and Freddie) for the SANS2D instrument
+      12/06/09 this version has X & Y coords detector swapped so orientation
+      is correct for temporary wiring table.
+      18/06/09 better distances for detectors and both at L2=4m, front at X=-1.1m
+      26/06/09 swap front & rear as names wrong, translate front in opposite direction
+	  21/07/09 remove the 150mm sideways shift (i.e. back to symmetrical detector coords)
+	  to simplify manipulations in Mantid and help allow for detector mapping not quite 
+	  as expected.
+	  01/02/10 very small change to pixel size 191*5.1=974.2=2*487.05 (was 487.4)
+	  - note have to swap x= and y= in Anders output list !
+      02/04/12 Put in 'no shape monitors' for possible in the future monitors
+      with ID 5-8
+	  04/02/14 start again with gas tube arrays
+  -->
+  
+  
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+  
+  <!-- source and sample-position components -->
+
+  <component type="source">
+    <location />
+  </component>
+  <type name="source" is="Source" />
+  
+  <component type="some-sample-holder">
+    <location z="19.281"/>
+  </component>
+  <type name="some-sample-holder" is="SamplePos" />
+  
+  
+  <!-- detector components (including monitors) -->
+  
+  <component type="monitors" idlist="monitors">
+    <location />
+  </component>
+  
+  <type name="monitors">
+    <component type="monitor-tbd">
+      <!-- better positions and shapes will be defined later -->
+      <location z="7.217" name="monitor1"/>
+      <location z="17.937" name="monitor2"/>
+    </component>
+    <component type="Moderator-Monitor3">
+      <!-- transmisssion detector, either in or out of beam -->
+      <location z="19.497" name="monitor3"/>
+    </component>
+    <component type="monitor-tbd">
+      <!-- better positions and shapes will be defined later -->
+      <location z="30.0" name="monitor4"/>
+    </component>    
+    
+    <!-- Putting in monitors, which are defined in raw/nexus
+         files, and have detector IDs, but currently not physically present 
+         on the instrument. Defined with no geometric shape, as they do not 
+         physically exist, and with a dummy position -->
+    <component type="no shape monitor">
+      <location z="0" name="placeholder monitor"/>
+      <location z="0" name="placeholder monitor"/>
+      <location z="0" name="placeholder monitor"/>
+      <location z="0" name="placeholder monitor"/>      
+    </component>  
+    
+  </type>
+  
+  <type name="monitor-tbd" is="monitor">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" /> 
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder>   
+  </type>
+  
+  <type name="Moderator-Monitor3" is="monitor">
+    <percent-transparency val="99.9" />
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.0125" y="-0.0125" z="0.0"  />
+      <left-front-top-point  x="0.0125" y="-0.0125" z="0.005"  />
+      <left-back-bottom-point  x="-0.0125" y="-0.0125" z="0.0"  />
+      <right-front-bottom-point  x="0.0125" y="0.0125" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>  
+
+  <type name="no shape monitor" is="monitor" />   
+
+<!-- default position is at 4m with rear detector exactly centred on beam and fron detector 1.1m sideways -->
+   <component type="detector-bank" idlist="FrontDetector" name="front-detector">
+     <location x="1.1" z="23.281" />
+   </component>   
+
+   <component type="detector-bank" idlist="RearDetector" name="rear-detector">
+     <location z="23.281" />
+   </component>   
+
+    
+ <type name="detector-bank">
+ <!-- the horizontal tubes are spaced vertically at 8.1mm intervals, with left and right sets ~30mm displaced -->
+ <component type="SANSLeftTube">
+    <locations y="-0.48195" y-end="0.47385" n-elements="60" name="left" />
+ </component>
+
+<component type="SANSRightTube">
+    <locations y="-0.473855" y-end="0.48195" n-elements="60" name="right" />
+</component>
+ </type>
+ 
+ <type name="SANSLeftTube" outline="yes">
+ <component type="pixel">
+   <locations x="-0.484023475" x-end="0.5140234375" n-elements="512" />
+ </component>
+ </type>
+ 
+ <type name="SANSRightTube" outline="yes">
+ <component type="pixel">
+   <locations x="-0.5140234375" x-end="0.484023475" n-elements="512" />
+ </component>
+ </type>
+ 
+ <!-- the length of one pixel is assumed 1000/512 = 1.953125mm, the internal radius is less then given here, more like 7.8mm/2 -->
+   <type name="pixel" is="detector">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="1.0" y="0.0" z="0.0" />
+      <radius val="0.00405" />
+      <height val="   0.001953125" />
+    </cylinder>
+    <algebra val="cyl-approx" />
+  </type>
+ 
+
+  <!-- Monitor & Detector ID Lists, note the "left" tubes are followed by the "right" tubes, 
+          in the same order as the y locations list, starting at the bottom 
+		  they are numbered dgttppp  where d=1 for rear, 2 for front
+		                                   g= 1 to 5 for boards/cables 
+										   tt= 0 to 23 for tube number on that board
+										   ppp=0 to 512 for pixels 
+		There are 5 boards of 24 tubes,each 1m long, for each detector.
+		note that the spectrum mapping will normally reduce the number of pixels to 256 or 128 
+		[note also that the wiring table inverts the raw 0 to 511 pixel numbers to 511 to 0 so we get the correct direction] -->
+
+  <idlist idname="monitors">
+    <id start="1" end="8" />  
+  </idlist>   
+  
+  <idlist idname="RearDetector">
+   <id start="	1100000	   "  end="	1100511	" />
+   <id start="	1102000	   "  end="	1102511	" />
+   <id start="	1104000	   "  end="	1104511	" />
+   <id start="	1106000	   "  end="	1106511	" />
+   <id start="	1108000	   "  end="	1108511	" />
+   <id start="	1110000	   "  end="	1110511	" />
+   <id start="	1112000	   "  end="	1112511	" />
+   <id start="	1114000	   "  end="	1114511	" />
+   <id start="	1116000	   "  end="	1116511	" />
+   <id start="	1118000	   "  end="	1118511	" />
+   <id start="	1120000	   "  end="	1120511	" />
+   <id start="	1122000	   "  end="	1122511	" />
+   <id start="	1200000	   "  end="	1200511	" />
+   <id start="	1202000	   "  end="	1202511	" />
+   <id start="	1204000	   "  end="	1204511	" />
+   <id start="	1206000	   "  end="	1206511	" />
+   <id start="	1208000	   "  end="	1208511	" />
+   <id start="	1210000	   "  end="	1210511	" />
+   <id start="	1212000	   "  end="	1212511	" />
+   <id start="	1214000	   "  end="	1214511	" />
+   <id start="	1216000	   "  end="	1216511	" />
+   <id start="	1218000	   "  end="	1218511	" />
+   <id start="	1220000	   "  end="	1220511	" />
+   <id start="	1222000	   "  end="	1222511	" />
+   <id start="	1300000	   "  end="	1300511	" />
+   <id start="	1302000	   "  end="	1302511	" />
+   <id start="	1304000	   "  end="	1304511	" />
+   <id start="	1306000	   "  end="	1306511	" />
+   <id start="	1308000	   "  end="	1308511	" />
+   <id start="	1310000	   "  end="	1310511	" />
+   <id start="	1312000	   "  end="	1312511	" />
+   <id start="	1314000	   "  end="	1314511	" />
+   <id start="	1316000	   "  end="	1316511	" />
+   <id start="	1318000	   "  end="	1318511	" />
+   <id start="	1320000	   "  end="	1320511	" />
+   <id start="	1322000	   "  end="	1322511	" />
+   <id start="	1400000	   "  end="	1400511	" />
+   <id start="	1402000	   "  end="	1402511	" />
+   <id start="	1404000	   "  end="	1404511	" />
+   <id start="	1406000	   "  end="	1406511	" />
+   <id start="	1408000	   "  end="	1408511	" />
+   <id start="	1410000	   "  end="	1410511	" />
+   <id start="	1412000	   "  end="	1412511	" />
+   <id start="	1414000	   "  end="	1414511	" />
+   <id start="	1416000	   "  end="	1416511	" />
+   <id start="	1418000	   "  end="	1418511	" />
+   <id start="	1420000	   "  end="	1420511	" />
+   <id start="	1422000	   "  end="	1422511	" />
+   <id start="	1500000	   "  end="	1500511	" />
+   <id start="	1502000	   "  end="	1502511	" />
+   <id start="	1504000	   "  end="	1504511	" />
+   <id start="	1506000	   "  end="	1506511	" />
+   <id start="	1508000	   "  end="	1508511	" />
+   <id start="	1510000	   "  end="	1510511	" />
+   <id start="	1512000	   "  end="	1512511	" />
+   <id start="	1514000	   "  end="	1514511	" />
+   <id start="	1516000	   "  end="	1516511	" />
+   <id start="	1518000	   "  end="	1518511	" />
+   <id start="	1520000	   "  end="	1520511	" />
+   <id start="	1522000	   "  end="	1522511	" />
+				
+				
+   <id start="	1101000	   "  end="	1101511	" />
+   <id start="	1103000	   "  end="	1103511	" />
+   <id start="	1105000	   "  end="	1105511	" />
+   <id start="	1107000	   "  end="	1107511	" />
+   <id start="	1109000	   "  end="	1109511	" />
+   <id start="	1111000	   "  end="	1111511	" />
+   <id start="	1113000	   "  end="	1113511	" />
+   <id start="	1115000	   "  end="	1115511	" />
+   <id start="	1117000	   "  end="	1117511	" />
+   <id start="	1119000	   "  end="	1119511	" />
+   <id start="	1121000	   "  end="	1121511	" />
+   <id start="	1123000	   "  end="	1123511	" />
+   <id start="	1201000	   "  end="	1201511	" />
+   <id start="	1203000	   "  end="	1203511	" />
+   <id start="	1205000	   "  end="	1205511	" />
+   <id start="	1207000	   "  end="	1207511	" />
+   <id start="	1209000	   "  end="	1209511	" />
+   <id start="	1211000	   "  end="	1211511	" />
+   <id start="	1213000	   "  end="	1213511	" />
+   <id start="	1215000	   "  end="	1215511	" />
+   <id start="	1217000	   "  end="	1217511	" />
+   <id start="	1219000	   "  end="	1219511	" />
+   <id start="	1221000	   "  end="	1221511	" />
+   <id start="	1223000	   "  end="	1223511	" />
+   <id start="	1301000	   "  end="	1301511	" />
+   <id start="	1303000	   "  end="	1303511	" />
+   <id start="	1305000	   "  end="	1305511	" />
+   <id start="	1307000	   "  end="	1307511	" />
+   <id start="	1309000	   "  end="	1309511	" />
+   <id start="	1311000	   "  end="	1311511	" />
+   <id start="	1313000	   "  end="	1313511	" />
+   <id start="	1315000	   "  end="	1315511	" />
+   <id start="	1317000	   "  end="	1317511	" />
+   <id start="	1319000	   "  end="	1319511	" />
+   <id start="	1321000	   "  end="	1321511	" />
+   <id start="	1323000	   "  end="	1323511	" />
+   <id start="	1401000	   "  end="	1401511	" />
+   <id start="	1403000	   "  end="	1403511	" />
+   <id start="	1405000	   "  end="	1405511	" />
+   <id start="	1407000	   "  end="	1407511	" />
+   <id start="	1409000	   "  end="	1409511	" />
+   <id start="	1411000	   "  end="	1411511	" />
+   <id start="	1413000	   "  end="	1413511	" />
+   <id start="	1415000	   "  end="	1415511	" />
+   <id start="	1417000	   "  end="	1417511	" />
+   <id start="	1419000	   "  end="	1419511	" />
+   <id start="	1421000	   "  end="	1421511	" />
+   <id start="	1423000	   "  end="	1423511	" />
+   <id start="	1501000	   "  end="	1501511	" />
+   <id start="	1503000	   "  end="	1503511	" />
+   <id start="	1505000	   "  end="	1505511	" />
+   <id start="	1507000	   "  end="	1507511	" />
+   <id start="	1509000	   "  end="	1509511	" />
+   <id start="	1511000	   "  end="	1511511	" />
+   <id start="	1513000	   "  end="	1513511	" />
+   <id start="	1515000	   "  end="	1515511	" />
+   <id start="	1517000	   "  end="	1517511	" />
+   <id start="	1519000	   "  end="	1519511	" />
+   <id start="	1521000	   "  end="	1521511	" />
+   <id start="	1523000	   "  end="	1523511	" />
+  
+  </idlist>
+  
+  
+ <idlist idname="FrontDetector">
+   <id start="	2100000	   "  end="	2100511	" />
+   <id start="	2102000	   "  end="	2102511	" />
+   <id start="	2104000	   "  end="	2104511	" />
+   <id start="	2106000	   "  end="	2106511	" />
+   <id start="	2108000	   "  end="	2108511	" />
+   <id start="	2110000	   "  end="	2110511	" />
+   <id start="	2112000	   "  end="	2112511	" />
+   <id start="	2114000	   "  end="	2114511	" />
+   <id start="	2116000	   "  end="	2116511	" />
+   <id start="	2118000	   "  end="	2118511	" />
+   <id start="	2120000	   "  end="	2120511	" />
+   <id start="	2122000	   "  end="	2122511	" />
+   <id start="	2200000	   "  end="	2200511	" />
+   <id start="	2202000	   "  end="	2202511	" />
+   <id start="	2204000	   "  end="	2204511	" />
+   <id start="	2206000	   "  end="	2206511	" />
+   <id start="	2208000	   "  end="	2208511	" />
+   <id start="	2210000	   "  end="	2210511	" />
+   <id start="	2212000	   "  end="	2212511	" />
+   <id start="	2214000	   "  end="	2214511	" />
+   <id start="	2216000	   "  end="	2216511	" />
+   <id start="	2218000	   "  end="	2218511	" />
+   <id start="	2220000	   "  end="	2220511	" />
+   <id start="	2222000	   "  end="	2222511	" />
+   <id start="	2300000	   "  end="	2300511	" />
+   <id start="	2302000	   "  end="	2302511	" />
+   <id start="	2304000	   "  end="	2304511	" />
+   <id start="	2306000	   "  end="	2306511	" />
+   <id start="	2308000	   "  end="	2308511	" />
+   <id start="	2310000	   "  end="	2310511	" />
+   <id start="	2312000	   "  end="	2312511	" />
+   <id start="	2314000	   "  end="	2314511	" />
+   <id start="	2316000	   "  end="	2316511	" />
+   <id start="	2318000	   "  end="	2318511	" />
+   <id start="	2320000	   "  end="	2320511	" />
+   <id start="	2322000	   "  end="	2322511	" />
+   <id start="	2400000	   "  end="	2400511	" />
+   <id start="	2402000	   "  end="	2402511	" />
+   <id start="	2404000	   "  end="	2404511	" />
+   <id start="	2406000	   "  end="	2406511	" />
+   <id start="	2408000	   "  end="	2408511	" />
+   <id start="	2410000	   "  end="	2410511	" />
+   <id start="	2412000	   "  end="	2412511	" />
+   <id start="	2414000	   "  end="	2414511	" />
+   <id start="	2416000	   "  end="	2416511	" />
+   <id start="	2418000	   "  end="	2418511	" />
+   <id start="	2420000	   "  end="	2420511	" />
+   <id start="	2422000	   "  end="	2422511	" />
+   <id start="	2500000	   "  end="	2500511	" />
+   <id start="	2502000	   "  end="	2502511	" />
+   <id start="	2504000	   "  end="	2504511	" />
+   <id start="	2506000	   "  end="	2506511	" />
+   <id start="	2508000	   "  end="	2508511	" />
+   <id start="	2510000	   "  end="	2510511	" />
+   <id start="	2512000	   "  end="	2512511	" />
+   <id start="	2514000	   "  end="	2514511	" />
+   <id start="	2516000	   "  end="	2516511	" />
+   <id start="	2518000	   "  end="	2518511	" />
+   <id start="	2520000	   "  end="	2520511	" />
+   <id start="	2522000	   "  end="	2522511	" />
+		  	
+			
+   <id start="	2101000	   "  end="	2101511	" />
+   <id start="	2103000	   "  end="	2103511	" />
+   <id start="	2105000	   "  end="	2105511	" />
+   <id start="	2107000	   "  end="	2107511	" />
+   <id start="	2109000	   "  end="	2109511	" />
+   <id start="	2111000	   "  end="	2111511	" />
+   <id start="	2113000	   "  end="	2113511	" />
+   <id start="	2115000	   "  end="	2115511	" />
+   <id start="	2117000	   "  end="	2117511	" />
+   <id start="	2119000	   "  end="	2119511	" />
+   <id start="	2121000	   "  end="	2121511	" />
+   <id start="	2123000	   "  end="	2123511	" />
+   <id start="	2201000	   "  end="	2201511	" />
+   <id start="	2203000	   "  end="	2203511	" />
+   <id start="	2205000	   "  end="	2205511	" />
+   <id start="	2207000	   "  end="	2207511	" />
+   <id start="	2209000	   "  end="	2209511	" />
+   <id start="	2211000	   "  end="	2211511	" />
+   <id start="	2213000	   "  end="	2213511	" />
+   <id start="	2215000	   "  end="	2215511	" />
+   <id start="	2217000	   "  end="	2217511	" />
+   <id start="	2219000	   "  end="	2219511	" />
+   <id start="	2221000	   "  end="	2221511	" />
+   <id start="	2223000	   "  end="	2223511	" />
+   <id start="	2301000	   "  end="	2301511	" />
+   <id start="	2303000	   "  end="	2303511	" />
+   <id start="	2305000	   "  end="	2305511	" />
+   <id start="	2307000	   "  end="	2307511	" />
+   <id start="	2309000	   "  end="	2309511	" />
+   <id start="	2311000	   "  end="	2311511	" />
+   <id start="	2313000	   "  end="	2313511	" />
+   <id start="	2315000	   "  end="	2315511	" />
+   <id start="	2317000	   "  end="	2317511	" />
+   <id start="	2319000	   "  end="	2319511	" />
+   <id start="	2321000	   "  end="	2321511	" />
+   <id start="	2323000	   "  end="	2323511	" />
+   <id start="	2401000	   "  end="	2401511	" />
+   <id start="	2403000	   "  end="	2403511	" />
+   <id start="	2405000	   "  end="	2405511	" />
+   <id start="	2407000	   "  end="	2407511	" />
+   <id start="	2409000	   "  end="	2409511	" />
+   <id start="	2411000	   "  end="	2411511	" />
+   <id start="	2413000	   "  end="	2413511	" />
+   <id start="	2415000	   "  end="	2415511	" />
+   <id start="	2417000	   "  end="	2417511	" />
+   <id start="	2419000	   "  end="	2419511	" />
+   <id start="	2421000	   "  end="	2421511	" />
+   <id start="	2423000	   "  end="	2423511	" />
+   <id start="	2501000	   "  end="	2501511	" />
+   <id start="	2503000	   "  end="	2503511	" />
+   <id start="	2505000	   "  end="	2505511	" />
+   <id start="	2507000	   "  end="	2507511	" />
+   <id start="	2509000	   "  end="	2509511	" />
+   <id start="	2511000	   "  end="	2511511	" />
+   <id start="	2513000	   "  end="	2513511	" />
+   <id start="	2515000	   "  end="	2515511	" />
+   <id start="	2517000	   "  end="	2517511	" />
+   <id start="	2519000	   "  end="	2519511	" />
+   <id start="	2521000	   "  end="	2521511	" />
+   <id start="	2523000	   "  end="	2523511	" />
+
+  
+  </idlist>
+
+</instrument>

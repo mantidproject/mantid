@@ -61,7 +61,9 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    LoadMD::LoadMD()
+    LoadMD::LoadMD():
+      m_numDims(0), // uninitialized incorrect value
+      m_BoxStructureAndMethadata(true) // this is faster but rarely needed. 
     {
     }
 

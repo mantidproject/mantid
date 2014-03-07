@@ -281,11 +281,7 @@ ConfigServiceImpl::~ConfigServiceImpl()
   Kernel::Logger::shutdown();
   delete m_pSysConfig;
   delete m_pConf; // potential double delete???
-  for (std::vector<FacilityInfo*>::iterator it = m_facilities.begin(); it != m_facilities.end(); ++it)
-  {
-    delete *it;
-  }
-  m_facilities.clear();
+  clearFacilities();
 }
 
 /** Loads the config file provided.
@@ -1479,14 +1475,14 @@ const std::string ConfigServiceImpl::getInstrumentDirectory() const
  */
 void ConfigServiceImpl::updateFacilities(const std::string& fName)
 {
-  m_facilities.clear();
+  clearFacilities();
 
   std::string instrDir = getString("instrumentDefinition.directory");
   std::string fileName = fName.empty() ? instrDir + "Facilities.xml" : fName;
 
   // Set up the DOM parser and parse xml file
   Poco::XML::DOMParser pParser;
-  Poco::XML::Document* pDoc;
+  Poco::AutoPtr<Poco::XML::Document> pDoc;
 
   try
   {
@@ -1501,11 +1497,10 @@ void ConfigServiceImpl::updateFacilities(const std::string& fName)
     Poco::XML::Element* pRootElem = pDoc->documentElement();
     if (!pRootElem->hasChildNodes())
     {
-      pDoc->release();
       throw std::runtime_error("No root element in Facilities.xml file");
     }
 
-    Poco::XML::NodeList* pNL_facility = pRootElem->getElementsByTagName("facility");
+    Poco::AutoPtr<Poco::XML::NodeList> pNL_facility = pRootElem->getElementsByTagName("facility");
     unsigned long n = pNL_facility->length();
 
     for (unsigned long i = 0; i < n; ++i)
@@ -1519,18 +1514,24 @@ void ConfigServiceImpl::updateFacilities(const std::string& fName)
 
     if (m_facilities.empty())
     {
-      pNL_facility->release();
-      pDoc->release();
       throw std::runtime_error("The facility definition file " + fileName + " defines no facilities");
     }
 
-    pNL_facility->release();
-    pDoc->release();
   } catch (std::exception& e)
   {
     g_log.error(e.what());
   }
 
+}
+
+/// Empty the list of facilities, deleting the FacilityInfo objects in the process
+void ConfigServiceImpl::clearFacilities()
+{
+  for (auto it = m_facilities.begin(); it != m_facilities.end(); ++it)
+  {
+    delete *it;
+  }
+  m_facilities.clear();
 }
 
 /**

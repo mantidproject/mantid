@@ -17,8 +17,7 @@ public:
   static void destroySuite( LoadILLTest *suite ) { delete suite; }
 
 	LoadILLTest() :
-			m_testFile("ILLIN5_104007.nxs")
-	{
+			m_dataFile("ILLIN5_104007.nxs") {
 	}
 
 	void testName() {
@@ -37,35 +36,32 @@ public:
 		TS_ASSERT( loader.isInitialized());
 	}
 
-//	void testFileCheck() {
-//		std::cerr << loader.fileCheck(testFile);
-//	}
-
-	void testExec() {
+	/*
+	 * This test only loads the Sample Data
+	 * The elastic peak is obtained on the fly from the sample data.
+	 */
+	void testExecJustSample() {
 		LoadILL loader;
 		loader.initialize();
-		loader.setPropertyValue("Filename", m_testFile);
+		loader.setPropertyValue("Filename", m_dataFile);
 
 		std::string outputSpace = "LoadILLTest_out";
 		loader.setPropertyValue("OutputWorkspace", outputSpace);
 		TS_ASSERT_THROWS_NOTHING( loader.execute());
 
-		//  test workspace, copied from LoadMuonNexusTest.h
-		MatrixWorkspace_sptr output;
-
-		(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-				outputSpace));
-		MatrixWorkspace_sptr output2D = boost::dynamic_pointer_cast<
-				MatrixWorkspace>(output);
+		MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
+		MatrixWorkspace_sptr output2D = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
 
 		TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 98304);
 
 		AnalysisDataService::Instance().clear();
 	}
 
-private:
 
-	std::string m_testFile;
+
+private:
+	std::string m_dataFile;
+
 };
 
 //------------------------------------------------------------------------------
@@ -74,13 +70,21 @@ private:
 
 class LoadILLTestPerformance: public CxxTest::TestSuite {
 public:
+	LoadILLTestPerformance() :
+		m_dataFile("ILLIN5_104007.nxs"){
+	}
+
 	void testDefaultLoad() {
 		Mantid::DataHandling::LoadILL loader;
 		loader.initialize();
-		loader.setPropertyValue("Filename", "ILLIN5_104007.nxs");
+		loader.setPropertyValue("Filename", m_dataFile);
 		loader.setPropertyValue("OutputWorkspace", "ws");
-		TS_ASSERT( loader.execute());
+		TS_ASSERT(loader.execute());
 	}
+
+private:
+	std::string m_dataFile;
+
 };
 
 #endif /*LoadILLTEST_H_*/

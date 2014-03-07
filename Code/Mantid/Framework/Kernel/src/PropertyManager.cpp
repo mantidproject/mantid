@@ -121,7 +121,7 @@ namespace Mantid
      * @param start :: Absolute start time. Any log entries at times >= to this time are kept.
      * @param stop :: Absolute stop time. Any log entries at times < than this time are kept.
      */
-    void PropertyManager::filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
+    void PropertyManager::filterByTime(const Kernel::DateAndTime &start, const Kernel::DateAndTime &stop)
     {
       //Iterate through all properties
       PropertyMap::const_iterator it;
@@ -143,7 +143,7 @@ namespace Mantid
      * @param splitter :: TimeSplitterType with the intervals and destinations.
      * @param outputs :: Vector of output runs.
      */
-    void PropertyManager::splitByTime(TimeSplitterType& splitter, std::vector< PropertyManager * > outputs) const
+    void PropertyManager::splitByTime(std::vector<SplittingInterval>& splitter, std::vector< PropertyManager * > outputs) const
     {
       size_t n = outputs.size();
 

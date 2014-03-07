@@ -93,10 +93,6 @@ namespace MantidQt
 
       /// Outputs the results of the query into a table.
       void populateResultTable();
-      /// Updates the "Displaying info" text box with relevant result info (e.g. 500 of 18,832)
-      void resultInfoUpdate();
-      /// Updates the page numbers (e.g. m & n in: Page m of n )
-      void pageNumberUpdate();
 
       ///////////////////////////////////////////////////////////////////////////////
       // Methods for: "Datafile information"
@@ -116,8 +112,6 @@ namespace MantidQt
       void populateDataFileType(const std::set<std::string> &extensions);
 
     private slots:
-      /// Selects/deselects ALL rows in dataFile table.
-      void selectAllDataFiles(const bool &toggled);
       /// When the facility login button is clicked
       void onFacilityLogin();
       /// When the help button is clicked.
@@ -172,10 +166,14 @@ namespace MantidQt
       void downloadDataFiles();
       /// Loads the selected dataFiles into workspaces.
       void loadDataFiles();
+      /// Selects/deselects ALL rows in dataFile table.
+      void selectAllDataFiles(const bool &toggled);
       /// Select/Deselect row when a checkbox is selected
       void dataFileCheckboxSelected(QTableWidgetItem* item);
       /// Select/Deselect row & check-box when a row is selected.
       void dataFileRowSelected();
+      /// Sort table by file size when certain column is clicked (E.g. "File size" row).
+      void sortByFileSize(int column);
 
     private:
       /// The name of the date button the user pressed to open the calendar.
@@ -190,6 +188,8 @@ namespace MantidQt
       CatalogHelper * m_icatHelper;
       /// The directory to save the downloaded dataFiles.
       QString m_downloadSaveDir;
+      /// The current page the user is on in the results window. Used for paging.
+      int m_currentPageNumber;
     };
   }
 }

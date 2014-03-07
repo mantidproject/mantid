@@ -58,8 +58,6 @@ namespace Mantid
       /// Returns a confidence value that this algorithm can load a file
       virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
-      static bool isAscii(FILE *file);
-
     protected:
       /// Process the header information within the file.
       virtual void processHeader(std::ifstream & file) const;

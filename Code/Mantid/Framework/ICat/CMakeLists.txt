@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	src/CatalogPublish.cpp
 	src/CatalogAlgorithmHelper.cpp
 	src/CatalogDownloadDataFiles.cpp
 	src/CatalogGetDataFiles.cpp
@@ -10,6 +11,7 @@ set ( SRC_FILES
 	src/CatalogMyDataSearch.cpp
 	src/CatalogSearch.cpp
 	src/CatalogSearchParam.cpp
+	src/CompositeCatalog.cpp
 	src/GSoap.cpp
 	src/ICat3/ICat3GSoapGenerated.cpp
 	src/ICat3/ICat3ErrorHandling.cpp
@@ -22,6 +24,7 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES )
 
 set ( INC_FILES
+	inc/MantidICat/CatalogPublish.h
 	inc/MantidICat/CatalogAlgorithmHelper.h
 	inc/MantidICat/CatalogDownloadDataFiles.h
 	inc/MantidICat/CatalogGetDataFiles.h
@@ -35,6 +38,7 @@ set ( INC_FILES
 	inc/MantidICat/CatalogSearchParam.h
 	inc/MantidICat/ICatExport.h
 	inc/MantidICat/Session.h
+	inc/MantidICat/CompositeCatalog.h
 	inc/MantidICat/GSoap/soapserializersH.h
 	inc/MantidICat/GSoap/soapserializersStub.h
 	inc/MantidICat/GSoap/stdsoap2.h
@@ -59,6 +63,7 @@ set ( TEST_FILES
 	CatalogLoginTest.h
 	CatalogMyDataSearchTest.h
 	CatalogSearchTest.h
+	CompositeCatalogTest.h
 )
 
 if(UNITY_BUILD)

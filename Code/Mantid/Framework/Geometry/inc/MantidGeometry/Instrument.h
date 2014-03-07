@@ -4,16 +4,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Logger.h"
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Instrument/Detector.h"
+
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Logger.h"
+
 #include <string>
 #include <map>
-#include <ostream>
 
 namespace Mantid
 {
@@ -118,7 +118,7 @@ namespace Mantid
       void markAsMonitor(IDetector*);
 
       /// Remove a detector from the instrument
-      void removeDetector(Detector*);
+      void removeDetector(IDetector*);
 
       /// return reference to detector cache 
       void getDetectors(detid2det_map & out_map) const;
@@ -182,11 +182,11 @@ namespace Mantid
 
       /// Set the date from which the instrument definition begins to be valid.
       /// @param val :: date
-      void setValidFromDate(const Kernel::DateAndTime val);
+      void setValidFromDate(const Kernel::DateAndTime & val);
 
       /// Set the date at which the instrument definition is no longer valid.
       /// @param val :: date
-      void setValidToDate(const Kernel::DateAndTime val) { m_ValidTo = val; }
+      void setValidToDate(const Kernel::DateAndTime & val) { m_ValidTo = val; }
 
       // Methods for use with indirect geometry instruments,
       // where the physical instrument differs from the 'neutronic' one

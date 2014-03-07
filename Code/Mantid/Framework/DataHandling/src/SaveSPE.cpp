@@ -124,7 +124,7 @@ namespace Mantid
     }
     
     /** Write the data to the SPE file
-    *  @param outFile :: the file object to write to
+    *  @param outSPEFile :: the file object to write to
     *  @param inputWS :: the workspace to be saved
     */
     void SaveSPE::writeSPEFile(FILE * outSPEFile, const API::MatrixWorkspace_const_sptr &inputWS)

@@ -120,6 +120,10 @@ namespace API
     void saveExperimentInfoNexus(::NeXus::File * file) const;
     /// Loads an experiment description from the open NeXus file
     void loadExperimentInfoNexus(::NeXus::File * file, std::string & parameterStr);
+    /// Load the instrument from an open NeXus file.
+    void loadInstrumentInfoNexus(::NeXus::File * file, std::string & parameterStr);
+    /// Load the sample and log info from an open NeXus file.
+    void loadSampleAndLogInfoNexus(::NeXus::File * file);
     /// Populate the parameter map given a string
     void readParameterMap(const std::string & parameterStr);
 

@@ -27,6 +27,7 @@
 #include "MantidPythonInterface/api/PythonAlgorithm/PythonAlgorithm.h"
 #include "MantidKernel/ClassMacros.h"
 #include <boost/python/wrapper.hpp>
+#include <map>
 
 namespace Mantid
 {
@@ -58,6 +59,8 @@ namespace Mantid
       virtual const std::string category() const;
       /// A default category, chosen if there is no override
       std::string defaultCategory() const;
+      /// Returns the validateInputs result of the algorithm.
+      std::map<std::string, std::string> validateInputs();
       ///@}
 
     private:

@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/BinaryOperationMD.cpp
 	src/BooleanBinaryOperationMD.cpp
 	src/CentroidPeaksMD.cpp
+	src/CentroidPeaksMD2.cpp
 	src/CloneMDWorkspace.cpp
 	src/CompareMDWorkspaces.cpp
 	src/ConvertToDetectorFaceMD.cpp
@@ -25,6 +26,7 @@ set ( SRC_FILES
 	src/GreaterThanMD.cpp
 	src/IDynamicRebinning.cpp
 	src/IntegratePeaksMD.cpp
+	src/IntegratePeaksMD2.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
 	src/LessThanMD.cpp
@@ -47,6 +49,7 @@ set ( SRC_FILES
 	src/Quantification/ForegroundModelFactory.cpp
 	src/Quantification/MDResolutionConvolution.cpp
 	src/Quantification/MDResolutionConvolutionFactory.cpp
+	src/Quantification/Models/QCoordinate.cpp
 	src/Quantification/Models/Strontium122.cpp
 	src/Quantification/Resolution/ModeratorChopperResolution.cpp
 	src/Quantification/Resolution/TobyFitBMatrix.cpp
@@ -78,6 +81,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/BinaryOperationMD.h
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD.h
+	inc/MantidMDAlgorithms/CentroidPeaksMD2.h
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
@@ -97,6 +101,7 @@ set ( INC_FILES
     inc/MantidMDAlgorithms/GSLFunctions.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
+	inc/MantidMDAlgorithms/IntegratePeaksMD2.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/LessThanMD.h
@@ -119,6 +124,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/ForegroundModelFactory.h
 	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolution.h
 	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h
+	inc/MantidMDAlgorithms/Quantification/Models/QCoordinate.h
 	inc/MantidMDAlgorithms/Quantification/Models/Strontium122.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h
@@ -150,6 +156,7 @@ set ( TEST_FILES
 	BooleanBinaryOperationMDTest.h
 	CachedExperimentInfoTest.h
 	CentroidPeaksMDTest.h
+	CentroidPeaksMD2Test.h
 	CloneMDWorkspaceTest.h
 	CompareMDWorkspacesTest.h
 	ConvertEventsToMDTest.h
@@ -171,6 +178,7 @@ set ( TEST_FILES
 	ForegroundModelTest.h
 	GreaterThanMDTest.h
 	IntegratePeaksMDTest.h
+	IntegratePeaksMD2Test.h
 	InvalidParameterParserTest.h
 	InvalidParameterTest.h
 	LessThanMDTest.h

@@ -64,8 +64,8 @@ namespace Kernel
       if (task)
       {
         //Task-specific mutex if specified?
-        Mutex * mutex = task->getMutex();
-        if (mutex)
+        boost::shared_ptr<Mutex> mutex = task->getMutex();
+        if (bool(mutex))
           mutex->lock();
 
         try

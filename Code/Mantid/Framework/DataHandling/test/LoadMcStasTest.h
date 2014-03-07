@@ -14,6 +14,7 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h" 
 #include "MantidDataHandling/LoadInstrument.h" 
 #include <Poco/Path.h>
+#include <Poco/TemporaryFile.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -51,6 +52,13 @@ public:
     inputFile = "mcstas_event_hist.h5";
     algToBeTested.setPropertyValue("Filename", inputFile);
 
+    // mark the temp file to be deleted upon end of execution
+    { // limit variable scope
+      std::string tempFile = algToBeTested.getPropertyValue("Filename");
+      tempFile = tempFile.substr(0, tempFile.size()-2) + "vtp";
+      Poco::TemporaryFile::registerForDeletion(tempFile);
+    }
+
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());    
     TS_ASSERT( algToBeTested.isExecuted() );
 
@@ -65,21 +73,21 @@ public:
     TS_ASSERT_EQUALS( outputItem1->getNumberHistograms(), 8192);  
     //
     //
-    MatrixWorkspace_sptr outputItem2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Wavelength_monitor" + postfix);
+    MatrixWorkspace_sptr outputItem2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Edet.dat" + postfix);
     TS_ASSERT_EQUALS( outputItem2->getNumberHistograms(), 1);  
     TS_ASSERT_EQUALS( outputItem2->getNPoints(), 1000); 
     //
     //
-    MatrixWorkspace_sptr outputItem3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD_monitor" + postfix);
+    MatrixWorkspace_sptr outputItem3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD.dat" + postfix);
     TS_ASSERT_EQUALS( outputItem3->getNumberHistograms(), 128);   
     //
     //
-    MatrixWorkspace_sptr outputItem4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD_monitor_radial_average" + postfix);
+    MatrixWorkspace_sptr outputItem4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("psd2_av.dat" + postfix);
     TS_ASSERT_EQUALS( outputItem4->getNumberHistograms(), 1);  
     TS_ASSERT_EQUALS( outputItem4->getNPoints(), 100);
     //
     //
-    MatrixWorkspace_sptr outputItem5 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PSD_monitor_radial_sum" + postfix);
+    MatrixWorkspace_sptr outputItem5 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("psd2.dat" + postfix);
     TS_ASSERT_EQUALS( outputItem5->getNumberHistograms(), 1);  
     TS_ASSERT_EQUALS( outputItem5->getNPoints(), 100);     
   } // testExec()

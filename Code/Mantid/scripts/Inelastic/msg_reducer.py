@@ -62,21 +62,6 @@ class MSGReducer(reducer.Reducer):
             self._data_files = loadData.get_ws_list()
         
         self._setup_steps()
-    
-    def create_info_table(self):
-        """Sets the names of properties retrieve from the log when creating
-        an info table.
-        """
-        
-        inst_name = config.getInstrument().name()
-        inst = mtd["__empty_" + inst_name].getInstrument()
-        props = inst.getStringParameter('Workflow.InfoTable')
-        
-        if props:
-            self._info_table_props = props
-        else:
-            logger.error("Instrument does not have Workflow.InfoTable " +
-                "defined in its parameter file.  Unable to create info table for runs.")
 
     def set_detector_range(self, start, end):
         """Sets the start and end detector points for the reduction process.

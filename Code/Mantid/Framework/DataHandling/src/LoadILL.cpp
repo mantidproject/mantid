@@ -1,9 +1,13 @@
 /*WIKI* 
 
-Loads an ILL nexus file into a [[Workspace2D]] with the given name.
+Loads an ILL TOF NeXus file into a [[Workspace2D]] with the given name.
 
-To date this algorithm only supports: IN5
+This loader calculates the elastic peak position (EPP) on the fly.
+In cases where the dispersion peak might be higher than the EPP, it is good practice to load a Vanadium file.
 
+The property FilenameVanadium is optional. If it is present the EPP will be loaded from the Vanadium data.
+
+To date this algorithm only supports: IN4, IN5 and IN6
 
 *WIKI*/
 //---------------------------------------------------
@@ -79,14 +83,19 @@ namespace Mantid
     //---------------------------------------------------
 
     LoadILL::LoadILL() :
+
       API::IFileLoader<Kernel::NexusDescriptor>() 
     {
-
       m_instrumentName = "";
       m_wavelength = 0;
       m_channelWidth = 0;
       m_numberOfChannels = 0;
       m_numberOfHistograms = 0;
+      m_numberOfTubes = 0;
+      m_numberOfPixelsPerTube = 0;
+      m_monitorElasticPeakPosition = 0;
+      m_l1 = 0;
+      m_l2 = 0;
       m_supportedInstruments.push_back("IN4");
       m_supportedInstruments.push_back("IN5");
       m_supportedInstruments.push_back("IN6");
@@ -100,12 +109,17 @@ namespace Mantid
     {
       declareProperty(
         new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
-        "Name of the SPE file to load");
+        "File path of the Data file to load");
+      declareProperty(
+        new FileProperty("FilenameVanadium", "", FileProperty::OptionalLoad, ".nxs"),
+        "File path of the Vanadium file to load (Optional)");
+
       declareProperty(
         new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
         "The name to use for the output workspace");
 
     }
+
 
     /**
     * Execute the algorithm
@@ -113,23 +127,30 @@ namespace Mantid
     void LoadILL::exec() 
     {
       // Retrieve filename
-      m_filename = getPropertyValue("Filename");
-      // open the root node
-      NXRoot root(m_filename);
-      // find the first entry
-      NXEntry entry = root.openFirstEntry();
+      std::string filenameData = getPropertyValue("Filename");
+      std::string filenameVanadium = getPropertyValue("FilenameVanadium");
 
-      loadInstrumentDetails(entry);
-      loadTimeDetails(entry);
-      initWorkSpace(entry);
+      // open the root node
+      NeXus::NXRoot dataRoot(filenameData);
+      NXEntry dataFirstEntry = dataRoot.openFirstEntry();
+
+      loadInstrumentDetails(dataFirstEntry);
+      loadTimeDetails(dataFirstEntry);
+      initWorkSpace(dataFirstEntry);
 
       runLoadInstrument(); // just to get IDF contents
       initInstrumentSpecific();
 
-      loadDataIntoTheWorkSpace(entry);
+      int calculatedDetectorElasticPeakPosition = -1;
+      if (filenameVanadium != "") {
+    	  g_log.information() << "Calculating the elastic peak position from the Vanadium." << std::endl;
+    	  calculatedDetectorElasticPeakPosition = validateVanadium(filenameVanadium);
+      }
 
-      loadRunDetails(entry);
-      loadExperimentDetails(entry);
+      loadDataIntoTheWorkSpace(dataFirstEntry,calculatedDetectorElasticPeakPosition);
+
+      loadRunDetails(dataFirstEntry);
+      loadExperimentDetails(dataFirstEntry);
 
       // load the instrument from the IDF if it exists
       runLoadInstrument();
@@ -141,20 +162,27 @@ namespace Mantid
     /**
     *
     */
-    void LoadILL::loadInstrumentDetails(NeXus::NXEntry& firstEntry) 
-    {
+	void LoadILL::loadInstrumentDetails(NeXus::NXEntry& firstEntry) {
 
-      m_instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
+		m_instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
 
-      if (m_instrumentPath == "") 
-      {
-        throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
-      }
-      m_instrumentName = m_loader.getStringFromNexusPath(firstEntry,
-        m_instrumentPath + "/name");
-      g_log.debug() << "Instrument name set to: " + m_instrumentName << std::endl;
+		if (m_instrumentPath == "") {
+			throw std::runtime_error(
+					"Cannot set the instrument name from the Nexus file!");
+		}
 
-    }
+		m_instrumentName = m_loader.getStringFromNexusPath(firstEntry,
+				m_instrumentPath + "/name");
+
+		if (std::find(m_supportedInstruments.begin(), m_supportedInstruments.end(),
+				m_instrumentName) == m_supportedInstruments.end()) {
+			std::string message = "The instrument " + m_instrumentName + " is not valid for this loader!";
+			throw std::runtime_error(message);
+		}
+
+		g_log.debug() << "Instrument name set to: " + m_instrumentName << std::endl;
+
+	}
 
     /**
     * Creates the workspace and initialises member variables with
@@ -407,12 +435,50 @@ namespace Mantid
       return calculatedDetectorElasticPeakPosition;
 
     }
+
+	/**
+	 * It loads the vanadium nexus file and cross checks it against the
+	 * data file already loaded (same wavelength and same instrument configuration).
+	 * If matches looks for the elastic peak in the vanadium file and returns
+	 * it position.
+	 *
+	 * @param filenameVanadium :: The path for the vanadium nexus file.
+	 * @return The elastic peak position inside the tof channels.
+	 */
+	int LoadILL::validateVanadium(const std::string &filenameVanadium) {
+		NeXus::NXRoot vanaRoot(filenameVanadium);
+		NXEntry vanaFirstEntry = vanaRoot.openFirstEntry();
+
+		double wavelength = vanaFirstEntry.getFloat("wavelength");
+
+		// read in the data
+		NXData dataGroup = vanaFirstEntry.openNXData("data");
+		NXInt data = dataGroup.openIntData();
+
+		size_t numberOfTubes = static_cast<size_t>(data.dim0());
+		size_t numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
+		size_t numberOfChannels = static_cast<size_t>(data.dim2());
+
+		if (wavelength != m_wavelength || numberOfTubes != m_numberOfTubes
+				|| numberOfPixelsPerTube != m_numberOfPixelsPerTube
+				|| numberOfChannels != m_numberOfChannels) {
+			throw std::runtime_error(
+					"Vanadium and Data were not collected in the same conditions!");
+		}
+
+		data.load();
+		int calculatedDetectorElasticPeakPosition = getDetectorElasticPeakPosition(
+				data);
+		return calculatedDetectorElasticPeakPosition;
+	}
+
     /**
     * Loads all the spectra into the workspace, including that from the monitor
     *
     * @param entry :: The Nexus entry
+    * @param vanaCalculatedDetectorElasticPeakPosition :: If -1 uses this value as the elastic peak position at the detector.
     */
-    void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) 
+    void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry, int vanaCalculatedDetectorElasticPeakPosition)
     {
 
       // read in the data
@@ -424,8 +490,12 @@ namespace Mantid
       * Detector: Find real elastic peak in the detector.
       * Looks for a few elastic peaks on the equatorial line of the detector.
       */
-      int calculatedDetectorElasticPeakPosition = getDetectorElasticPeakPosition(
-        data);
+      int calculatedDetectorElasticPeakPosition;
+      if (vanaCalculatedDetectorElasticPeakPosition == -1)
+    	  calculatedDetectorElasticPeakPosition = getDetectorElasticPeakPosition(data);
+      else
+    	  calculatedDetectorElasticPeakPosition = vanaCalculatedDetectorElasticPeakPosition;
+
 
       double theoreticalElasticTOF = (m_loader.calculateTOF(m_l1,m_wavelength) + m_loader.calculateTOF(m_l2,m_wavelength))
         * 1e6; //microsecs
@@ -485,29 +555,23 @@ namespace Mantid
     /**
     * Run the Child Algorithm LoadInstrument.
     */
-    void LoadILL::runLoadInstrument() 
-    {
+	void LoadILL::runLoadInstrument() {
 
-      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+		IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
-      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-      try 
-      {
+		// Now execute the Child Algorithm. Catch and log any error, but don't stop.
+		try {
 
-        // TODO: depending on the m_numberOfPixelsPerTube we might need to load a different IDF
+			// TODO: depending on the m_numberOfPixelsPerTube we might need to load a different IDF
 
-        loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-        loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",
-          m_localWorkspace);
-        loadInst->execute();
-      } catch (...) 
-      {
-        g_log.information("Cannot load the instrument definition.");
-      }
-    }
-
-
-
+			loadInst->setPropertyValue("InstrumentName", m_instrumentName);
+			loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",
+					m_localWorkspace);
+			loadInst->execute();
+		} catch (...) {
+			g_log.information("Cannot load the instrument definition.");
+		}
+	}
 
 
 

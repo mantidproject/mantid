@@ -35,6 +35,7 @@ This algorithm allows instrument parameters to be specified in a separate file f
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/AutoPtr.h>
 #include <Poco/File.h>
 #include <sstream>
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
@@ -46,6 +47,7 @@ using Poco::XML::Node;
 using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
+using Poco::XML::AutoPtr;
 using Mantid::Geometry::InstrumentDefinitionParser;
 
 
@@ -59,8 +61,8 @@ DECLARE_ALGORITHM(LoadParameterFile)
 /// Sets documentation strings for this algorithm
 void LoadParameterFile::initDocs()
 {
-  this->setWikiSummary("Loads instrument parameters into a [[workspace]]. where these parameters are associated component names as defined in Instrument Definition File ([[InstrumentDefinitionFile|IDF]])."); 
-  this->setOptionalMessage("Loads instrument parameters into a workspace. where these parameters are associated component names as defined in Instrument Definition File (IDF).");
+  this->setWikiSummary("Loads instrument parameters into a [[workspace]]. where these parameters are associated component names as defined in Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) or a string consisting of the contents of such.."); 
+  this->setOptionalMessage("Loads instrument parameters into a workspace. where these parameters are associated component names as defined in Instrument Definition File (IDF) or a string consisting of the contents of such.");
 }
 
 
@@ -80,8 +82,9 @@ void LoadParameterFile::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
     "The name of the workspace to load the instrument parameters into." );
-  declareProperty(new FileProperty("Filename","", FileProperty::Load, ".xml"),
-                  "The filename (including its full or relative path) of a parameter defintion file. The file extension must either be .xml or .XML.");
+  declareProperty(new FileProperty("Filename","", FileProperty::OptionalLoad, ".xml"),
+                  "The filename (including its full or relative path) of a parameter definition file. The file extension must either be .xml or .XML.");
+  declareProperty("ParameterXML","","The parameter definition XML as a string.");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -95,31 +98,58 @@ void LoadParameterFile::exec()
   // Retrieve the filename from the properties
   std::string filename = getPropertyValue("Filename");
 
+  // Retrieve the parameter XML string from the properties
+  const Property * const parameterXMLProperty = getProperty("ParameterXML"); // to check whether it is default
+  std::string parameterXML = getPropertyValue("ParameterXML");
+
+  // Check the two properties (at least one must be set)
+  if( filename.empty() && parameterXMLProperty->isDefault()){
+    throw Kernel::Exception::FileError("Either the Filename or ParameterXML property of LoadParameterFile most be specified to load an IDF" , filename);
+  }
+
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
-  execManually(filename, localWorkspace);
+  execManually(!parameterXMLProperty->isDefault(), filename, parameterXML, localWorkspace);
 }
 
-void LoadParameterFile::execManually(std::string filename, Mantid::API::ExperimentInfo_sptr localWorkspace)
+void LoadParameterFile::execManually(bool useString, std::string filename, std::string parameterXML,  Mantid::API::ExperimentInfo_sptr localWorkspace)
 {
-  // TODO: Refactor to remove the need for the const cast
+  // TODO: Refactor to remove the need for the const cast (ticket #8521)
   Instrument_sptr instrument = boost::const_pointer_cast<Instrument>(localWorkspace->getInstrument()->baseInstrument());
 
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
-  Document* pDoc;
-  try
+  AutoPtr<Document> pDoc;
+
+  if(useString){
+    try
+    {
+      pDoc = pParser.parseString(parameterXML);
+    }
+    catch(Poco::Exception& exc)
+    {
+      throw Kernel::Exception::FileError (exc.displayText() + ". Unable to parse parameter XML string","ParameterXML");
+    }
+    catch(...)
+    {
+      throw Kernel::Exception::FileError("Unable to parse parameter XML string","ParameterXML");
+    }
+  } 
+  else
   {
-    pDoc = pParser.parse(filename);
-  }
-  catch(Poco::Exception& exc)
-  {
-    throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse File:", filename);
-  }
-  catch(...)
-  {
-    throw Kernel::Exception::FileError("Unable to parse File:" , filename);
+    try
+    {
+      pDoc = pParser.parse(filename);
+    }
+    catch(Poco::Exception& exc)
+    {
+      throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse File:", filename);
+    }
+    catch(...)
+    {
+      throw Kernel::Exception::FileError("Unable to parse File:" , filename);
+    }
   }
 
   // Get pointer to root element
@@ -136,7 +166,6 @@ void LoadParameterFile::execManually(std::string filename, Mantid::API::Experime
   // populate parameter map of workspace 
   localWorkspace->populateInstrumentParameters();
 
-  pDoc->release();
 }
 
 } // namespace DataHandling

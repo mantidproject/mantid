@@ -20,6 +20,8 @@ class PeakReport:
     __background_color = None
     __foreground_color = None
     __image_files = []
+    __zoom_factor = 1
+    __xydim = None
     
     def __init__(self, out_location):
         """
@@ -66,7 +68,22 @@ class PeakReport:
          background_color -- Background color (qcolor)
         """
         self.__background_color = background_color
-
+        
+    def set_zoom(self, zoom_factor):
+        """
+        Arguments:
+         zoom_factor -- Factor to zoom in or out by. Zoom < 1 denotes a zoom out. > 1 is zooming in.
+        """
+        self.__zoom_factor = zoom_factor
+        
+    def set_xy_dim(self, dim_x, dim_y):
+        """
+        Arguments:
+         dim_x : X dimension name
+         dim_y : Y dimension name
+        """
+        self.__xydim = (dim_x, dim_y)
+        
     def make_report(self, md_workspace, peaks_workspace, pdf_name = None):
         """
         Arguments: 
@@ -92,6 +109,11 @@ class PeakReport:
         parts.append(Spacer(0, 10))
 
         svw = plotSlice(md_workspace, colorscalelog=self.__log_scale)
+        
+        # Choose a different projection if one is specified
+        if self.__xydim:
+            svw.setXYDim( self.__xydim[0], self.__xydim[1] ) 
+        
         sv = svw.getSlicer()
         composite_presenter = sv.setPeaksWorkspaces([peaks_workspace.name()])
         peaks_presenter = composite_presenter.getPeaksPresenter(peaks_workspace.name())
@@ -102,8 +124,15 @@ class PeakReport:
         if self.__foreground_color:
             peaks_presenter.setForegroundColor(self.__foreground_color)
         
+        do_zoom = self.__zoom_factor != 1
+        
         for i in range(peaks_workspace.rowCount()):
             peaks_presenter.zoomToPeak(i)
+            
+            # zoom in or out refinements
+            if do_zoom:
+                svw.zoomBy(self.__zoom_factor)
+            
             filename = os.path.join(self.__out_location, str(i) + ".png")
             # Add for clean-up later
             self.__image_files.append(filename)

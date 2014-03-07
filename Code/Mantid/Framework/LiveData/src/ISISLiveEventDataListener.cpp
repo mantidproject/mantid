@@ -13,10 +13,8 @@
 
 #include "LoadDAE/idc.h"
 
-// Time we'll wait on a receive call (in seconds)
-const long RECV_TIMEOUT = 30;
-// Sleep time in case we need to wait for the data to become available (in milliseconds)
-const long RECV_WAIT = 100;
+const char* PROTON_CHARGE_PROPERTY = "proton_charge";
+const char* RUN_NUMBER_PROPERTY = "run_number";
 
 namespace Mantid
 {
@@ -24,34 +22,6 @@ namespace LiveData
 {
 
 DECLARE_LISTENER(ISISLiveEventDataListener)
-
-// receive a header and check if it's valid
-#define RECEIVE(buffer,msg)  \
-{\
-    long timeout = 0;\
-    while( m_socket.available() < static_cast<int>(sizeof(buffer)) )\
-    {\
-        Poco::Thread::sleep(RECV_WAIT);\
-        timeout += RECV_WAIT;\
-        if ( timeout > RECV_TIMEOUT * 1000 ) throw std::runtime_error("Receive operation timed out.");\
-    }\
-    m_socket.receiveBytes(&buffer, sizeof(buffer));\
-    if ( !buffer.isValid() )\
-    {\
-        throw std::runtime_error(msg);\
-    }\
-}
-
-namespace {
-// buffer to collect data that cannot be processed
-static char* junk_buffer[10000];
-}
-
-// receive data that cannot be processed
-#define COLLECT_JUNK(head) m_socket.receiveBytes(junk_buffer, head.length - static_cast<uint32_t>(sizeof(head)));
-
-#define PROTON_CHARGE_PROPERTY "proton_charge"
-#define RUN_NUMBER_PROPERTY "run_number"
 
 // Get a reference to the logger
 Kernel::Logger& ISISLiveEventDataListener::g_log = Kernel::Logger::get("ISISLiveEventDataListener");
@@ -63,6 +33,7 @@ ISISLiveEventDataListener::ISISLiveEventDataListener():API::ILiveListener(),
     m_isConnected(false),
     m_stopThread(false)
 {
+  m_warnings["period"] = "Period number is outside the range. Changed to 0.";
 }
 
 /**
@@ -99,8 +70,7 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     // localhost on the default port
     if (address.host().toString().compare( "0.0.0.0") == 0)
     {
-        Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
-        //Poco::Net::SocketAddress tempAddress("NDXTESTFAA:10000");
+      Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
       try {
         m_socket.connect( tempAddress);  // BLOCKING connect
       } catch (...) {
@@ -129,6 +99,12 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
       daeName.erase( i );
     }
 
+    if ( daeName == "0.0.0.0" )
+    {
+      // to connect to fake dae
+      daeName = "127.0.0.1";
+    }
+
     // set IDC reporter function for errors
     IDCsetreportfunc(&ISISLiveEventDataListener::IDCReporter);
 
@@ -141,11 +117,11 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     m_numberOfPeriods = getInt("NPER");
     m_numberOfSpectra = getInt("NSP1");
 
-    std::cerr << "number of periods " << m_numberOfPeriods << std::endl;
-    std::cerr << "number of spectra " << m_numberOfSpectra << std::endl;
+    g_log.notice() << "Number of periods " << m_numberOfPeriods << std::endl;
+    g_log.notice() << "Number of spectra " << m_numberOfSpectra << std::endl;
 
     TCPStreamEventDataSetup setup;
-    RECEIVE(setup,"Wrong version");
+    Receive(setup, "Setup", "Wrong version");
     m_startTime.set_from_time_t(setup.head_setup.start_time);
 
     // initialize the buffer workspace
@@ -165,9 +141,16 @@ void ISISLiveEventDataListener::start(Kernel::DateAndTime startTime)
 // return a workspace with collected events
 boost::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData()
 {
-    if ( !m_eventBuffer[0] )
+    if ( m_eventBuffer.empty() || !m_eventBuffer[0] )
     {
-        throw LiveData::Exception::NotYet("The workspace has not yet been initialized.");
+      // extractData() is called too early
+      throw LiveData::Exception::NotYet("The workspace has not yet been initialized.");
+    }
+
+    if ( !m_isConnected )
+    {
+      // the background thread stopped because of an error. the error message has been logged at this point
+      throw std::runtime_error("Background thread stopped.");
     }
 
     Poco::ScopedLock<Poco::FastMutex> scopedLock( m_mutex);
@@ -236,17 +219,17 @@ void ISISLiveEventDataListener::run()
         while (m_stopThread == false)
         {
             // get the header with the type of the packet
-            RECEIVE(events.head,"Corrupt stream - you should reconnect.");
+            Receive(events.head, "Events header","Corrupt stream - you should reconnect.");
             if ( !(events.head.type == TCPStreamEventHeader::Neutron) )
             {
                 // don't know what to do with it - stop
                 throw std::runtime_error("Unknown packet type.");
             }
-            COLLECT_JUNK( events.head );
+            CollectJunk( events.head );
 
             // get the header with the sream size
-            RECEIVE(events.head_n,"Corrupt stream - you should reconnect.");
-            COLLECT_JUNK( events.head_n );
+            Receive(events.head_n, "Neutrons header","Corrupt stream - you should reconnect.");
+            CollectJunk( events.head_n );
 
             // absolute pulse (frame) time
             Mantid::Kernel::DateAndTime pulseTime = m_startTime + static_cast<double>( events.head_n.frame_time_zero );
@@ -286,26 +269,23 @@ void ISISLiveEventDataListener::run()
 
     } catch (std::runtime_error &e) {  // exception handler for generic runtime exceptions
 
-      g_log.fatal() << "Caught a runtime exception." << std::endl
-                    << "Exception message: " << e.what() << std::endl
-                    << "Thread will exit." << std::endl;
+      g_log.error() << "Caught a runtime exception." << std::endl
+                    << "Exception message: " << e.what() << std::endl;
       m_isConnected = false;
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( e));
 
     } catch (std::invalid_argument &e) { // TimeSeriesProperty (and possibly some other things) can
                                         // can throw these errors
-      g_log.fatal() << "Caught an invalid argument exception." << std::endl
-                    << "Exception message: "  << e.what() << std::endl
-                    << "Thread will exit." << std::endl;
+      g_log.error() << "Caught an invalid argument exception." << std::endl
+                    << "Exception message: "  << e.what() << std::endl;
       m_isConnected = false;
       std::string newMsg( "Invalid argument exception thrown from the background thread: ");
       newMsg += e.what();
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( newMsg) );
 
     } catch (...) {  // Default exception handler
-      g_log.fatal() << "Uncaught exception in SNSLiveEventDataListener network read thread."
-                    << "  Thread is exiting." << std::endl;
+      g_log.error() << "Uncaught exception in ISISLiveEventDataListener network read thread." << std::endl;
       m_isConnected = false;
       m_backgroundException =
           boost::shared_ptr<std::runtime_error>( new std::runtime_error( "Unknown error in backgound thread") );
@@ -366,9 +346,20 @@ void ISISLiveEventDataListener::initEventBuffer(const TCPStreamEventDataSetup &s
  * Save received event data in the buffer workspace.
  * @param data :: A vector with events.
  */
-void ISISLiveEventDataListener::saveEvents(const std::vector<TCPStreamEventNeutron> &data, const Kernel::DateAndTime &pulseTime, const size_t period)
+void ISISLiveEventDataListener::saveEvents(const std::vector<TCPStreamEventNeutron> &data, const Kernel::DateAndTime &pulseTime, size_t period)
 {
     Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+
+    if ( period >= static_cast<size_t>(m_numberOfPeriods) )
+    {
+      auto warn = m_warnings.find("period");
+      if ( warn != m_warnings.end() )
+      {
+        g_log.warning() << warn->second << std::endl;
+        m_warnings.erase( warn );
+      }
+      period = 0;
+    }
 
     for(auto it = data.begin(); it != data.end(); ++it)
     {
@@ -389,15 +380,6 @@ void ISISLiveEventDataListener::loadSpectraMap()
     std::vector<int> spec;
     getIntArray( "UDET", udet, ndet);
     getIntArray( "SPEC", spec, ndet);
-
-    // Assign spectra ids to the spectra
-    int nspec = m_numberOfSpectra;
-    if ( ndet < nspec ) nspec = ndet;
-    for(size_t i = 0; i < static_cast<size_t>(nspec); ++i)
-    {
-        m_eventBuffer[0]->getSpectrum(i)->setSpectrumNo( spec[i] );
-    }
-
     // set up the mapping
     m_eventBuffer[0]->updateSpectraUsing(API::SpectrumDetectorMapping(spec, udet));
 }
@@ -408,17 +390,34 @@ void ISISLiveEventDataListener::loadSpectraMap()
   */
 void ISISLiveEventDataListener::loadInstrument(const std::string &instrName)
 {
-    API::Algorithm_sptr alg = API::AlgorithmFactory::Instance().create("LoadInstrument",-1);
-    alg->initialize();
-    alg->setPropertyValue("InstrumentName",instrName);
-    alg->setProperty("Workspace", m_eventBuffer[0]);
-    alg->setProperty("RewriteSpectraMap", false);
-    alg->setChild(true);
-    alg->execute();
-    // check if the instrument was loaded
-    if ( !alg->isExecuted() )
+    // try to load the instrument. if it doesn't load give a warning and carry on
+    if ( instrName.empty() )
     {
-        throw std::runtime_error("Failed to load instrument " + instrName);
+        g_log.warning() << "Unable to read instrument name from DAE." << std::endl;
+        return;
+    }
+    const char *warningMessage = "Failed to load instrument ";
+    try
+    {
+        g_log.notice() << "Loading instrument " << instrName << " ... " << std::endl;
+        API::Algorithm_sptr alg = API::AlgorithmFactory::Instance().create("LoadInstrument",-1);
+        alg->initialize();
+        alg->setPropertyValue("InstrumentName",instrName);
+        alg->setProperty("Workspace", m_eventBuffer[0]);
+        alg->setProperty("RewriteSpectraMap", false);
+        alg->setChild(true);
+        alg->execute();
+        // check if the instrument was loaded
+        if ( !alg->isExecuted() )
+        {
+            g_log.warning() << warningMessage << instrName << std::endl;
+        }
+        g_log.notice() << "Instrument loaded." << std::endl;
+    }
+    catch(std::exception& e)
+    {
+        g_log.warning() << warningMessage << instrName << std::endl;
+        g_log.warning() << e.what() << instrName << std::endl;
     }
 }
 

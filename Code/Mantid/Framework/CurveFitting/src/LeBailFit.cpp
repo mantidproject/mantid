@@ -4,6 +4,15 @@ This algorithm performs [[Le Bail Fit]] to powder diffraction data, and also sup
 This algorithm will refine a specified set of the powder instrumental profile parameters with a previous refined background model. 
 
 === Peak profile function for fit ===
+
+==== Back to back exponential convoluted with pseudo-voigt ====
+Here is the list of the peak profile function supported by this algorithm.
+* Thermal neutron back-to-back exponential convoluted with pseudo-voigt
+** geometry-related parameters: Dtt1, Dtt2, Zero
+** back-to-back exponential parameters: Alph0, Alph1, Beta0, Beta1
+** pseudo-voigt parameters: Sig0, Sig1, Sig2, Gam0, Gam1, Gam2
+
+==== Thermal neutron back to back exponential convoluted with pseudo-voigt ====
 Here is the list of the peak profile function supported by this algorithm.
 * Thermal neutron back-to-back exponential convoluted with pseudo-voigt
 ** geometry-related parameters: Dtt1, Zero, Dtt1t, Dtt2t, Width, Tcross
@@ -11,23 +20,21 @@ Here is the list of the peak profile function supported by this algorithm.
 ** pseudo-voigt parameters: Sig0, Sig1, Sig2, Gam0, Gam1, Gam2
 
 === Optimization ===
-''LeBailFit'' supports regular minimizes in GSL library and a tailored simulated annealing optimizer. 
+''LeBailFit'' supports  a tailored simulated annealing optimizer (using Monte Carlo random walk algorithm). 
+In future, regular minimizes in GSL library might be supported. 
 
-It is very difficult to achieve reasonable good result by non-linear minimizers such as Simplex or Levenber-Marquardt, because the parameters 
+=== Supported functionalities ===
+ * LeBailFit: fit profile parameters by Le bail algorithm; 
+ * Calculation: pattern calculation by Le bail algorithm; 
+ * MonteCarlo: fit profile parameters by Le bail algorithm with Monte Carlo random wal; 
+ * RefineBackground: refine background parameters
 
-The experience to use non-linear minimizes such as Simplex or 
-
-=== Background ===
-This algorithm does not refine background.  
-It takes a previous refined background model, for instance, from ProcessBackground().  
-
-Background fitting is not included in LeBailFit() because the mathematics problem is not well-defined 
-as peak heights are calculated but not refined but highly correlated to background model.
 
 === Further Information ===
 See [[Le Bail Fit]].
  
 *WIKI*/
+
 /* COMMIT NOTES *
   1. Rename calculateDiffractionPatternMC to calculateDiffractionPattern
   2.

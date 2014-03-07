@@ -1264,6 +1264,7 @@ void FunctionBrowser::addFunction()
 /**
  * Return the function 
  * @param prop :: Function property 
+ * @param attributesOnly :: Only set attributes
  */
 Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop, bool attributesOnly)
 {

@@ -147,6 +147,11 @@ namespace MantidQt
     void LoadDialog::initLayout()
     {
       m_form.setupUi(this);
+
+      // Add the helpful summary message
+      if(isMessageAvailable())
+        m_form.instructions->setText(getOptionalMessage());
+
       m_form.dialogLayout->addLayout(this->createDefaultButtonLayout());
       m_form.fileWidget->readSettings("Mantid/Algorithms/Load");
       m_initialHeight = this->height();

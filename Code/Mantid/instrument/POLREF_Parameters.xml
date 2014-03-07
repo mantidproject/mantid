@@ -4,18 +4,24 @@
   <parameter name="show-signed-theta" type="string">
     <value val="Always" />
   </parameter>
-    <parameter name="MonitorBackgroundMin">
-    <value val="14.0"/> 
+
+  <parameter name="MonitorBackgroundMin">
+    <value val="14.0"/>
   </parameter>
-  
+
   <parameter name="MonitorBackgroundMax">
-    <value val="15.0"/> 
+    <value val="15.0"/>
   </parameter>
-   
+
+  <parameter name="MonitorIntegralMin">
+    <value val="4.0"/>
+  </parameter>
+
+  <parameter name="MonitorIntegralMax">
+   <value val="10.0"/>
+  </parameter>
+
 <!-- here we need to add the other monitors -->
-  <parameter name="MonitorsToCorrect">
-    <value val="1"/>
-  </parameter>
 
   <parameter name="PointDetectorStart">
     <value val="3"/>
@@ -24,15 +30,15 @@
   <parameter name="PointDetectorStop">
     <value val="4"/>
   </parameter>
-  
+
   <parameter name="MultiDetectorStart">
     <value val="6"/>
   </parameter>
-  
+
   <parameter name="I0MonitorIndex">
     <value val="2"/>
   </parameter>
-  
+
   <parameter name="LambdaMin">
     <value val="1.0"/>
   </parameter>
@@ -45,11 +51,12 @@
    <parameter name="correction" type="string">
     <value val="polynomial"/>
    </parameter>
+
    <parameter name="polystring" type="string">
     <value val="35.5893,-24.5591,9.20375,-1.89265,0.222291,-0.0148746,0.00052709,-7.66807e-6"/>
     <!--<value val="28.0051,-19.396,7.5629,-1.624,0.1986,-0.013783,0.00050478,-7.56647e-6"/>-->
    </parameter>
-   
+
 <!-- POLARISATION CORRECTIONS-->
    <parameter name="crho" type="string">
     <value val="1.006831,-0.011467,0.002244,-0.000095"/>

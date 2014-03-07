@@ -42,13 +42,15 @@ namespace MantidQt
 
 			//Connect the data selector for the sample to the mini plot
 			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
+
+			connect(m_uiForm.cbProgram, SIGNAL(currentIndexChanged(int)), this, SLOT(handleProgramChange(int)));
 		}
 
 		/**
 		 * Set the data selectors to use the default save directory
 		 * when browsing for input files.
 		 *  
-		 * @param filename :: The name of the workspace to plot
+     * @param settings :: The current settings
 		 */
 		void Quasi::loadSettings(const QSettings& settings)
 		{
@@ -223,6 +225,26 @@ namespace MantidQt
     	else if (prop == m_properties["EMax"])
     	{
 				updateUpperGuide(m_properties["EMin"], m_properties["EMax"], val);
+    	}
+    }
+
+		/**
+		 * Handles when the slected item in the program combobox
+		 * is changed
+		 *
+		 * @param index :: The current index of the combobox
+		 */
+    void Quasi::handleProgramChange(int index)
+    {
+    	int numberOptions = m_uiForm.cbPlot->count();
+    	switch(index)
+    	{
+    		case 0:
+    			m_uiForm.cbPlot->setItemText(numberOptions-1, "Prob");
+    			break;
+    		case 1:
+    			m_uiForm.cbPlot->setItemText(numberOptions-1, "Beta");
+    			break;
     	}
     }
 	} // namespace CustomInterfaces

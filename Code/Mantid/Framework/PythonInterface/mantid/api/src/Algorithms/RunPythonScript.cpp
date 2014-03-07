@@ -10,9 +10,11 @@ names 'input' & 'output' respectively.
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "MantidPythonInterface/kernel/Environment/Threading.h"
-#include "MantidPythonInterface/kernel/Policies/DowncastReturnedValue.h"
+#include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
+#include "MantidPythonInterface/kernel/Registry/DowncastDataItem.h"
 #include "MantidKernel/MandatoryValidator.h"
 
+#include <boost/python/call_method.hpp>
 #include <boost/python/exec.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/import.hpp>
@@ -124,6 +126,8 @@ namespace Mantid
       using namespace API;
       using namespace boost::python;
 
+      // Execution
+      Environment::GlobalInterpreterLock gil;
       auto locals = doExecuteScript(script);
       return extractOutputWorkspace(locals);
     }
@@ -136,8 +140,6 @@ namespace Mantid
      */
     boost::python::dict RunPythonScript::doExecuteScript(const std::string & script) const
     {
-      // Execution
-      Environment::GlobalInterpreterLock gil;
       // Retrieve the main module.
       auto main = boost::python::import("__main__");
       // Retrieve the main module's namespace
@@ -175,10 +177,10 @@ namespace Mantid
       {
         // We have a generic workspace ptr but the Python needs to see the derived type so
         // that it can access the appropriate methods for that instance
-        // The DowncastReturnedValue policy is already in place for this and is used in many
+        // The ToSharedPtrWithDowncast policy is already in place for this and is used in many
         // method exports as part of a return_value_policy struct.
         // It is called manually here.
-        typedef Policies::DowncastReturnedValue::apply<API::Workspace_sptr>::type WorkspaceDowncaster;
+        typedef Policies::ToSharedPtrWithDowncast::apply<API::Workspace_sptr>::type WorkspaceDowncaster;
         locals["input"] = object(handle<>(WorkspaceDowncaster()(inputWS)));
       }
       std::string outputWSName = getPropertyValue("OutputWorkspace");
@@ -204,10 +206,10 @@ namespace Mantid
       object pyoutput = locals["output"];
       if(pyoutput.ptr() == Py_None) return Workspace_sptr();
 
-      extract<Workspace_sptr> workspaceExtractor(pyoutput);
-      if(workspaceExtractor.check())
+      if(PyObject_HasAttrString(pyoutput.ptr(), "id"))
       {
-        return workspaceExtractor();
+	const auto & entry = Registry::DowncastRegistry::retrieve(call_method<std::string>(pyoutput.ptr(), "id"));
+	return boost::dynamic_pointer_cast<API::Workspace>(entry.fromPythonAsSharedPtr(pyoutput));
       }
       else
       {

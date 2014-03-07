@@ -2,6 +2,7 @@
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <climits>
+#include <iostream>
 
 namespace Mantid
 {

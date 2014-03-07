@@ -8,6 +8,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmObserver.h"
 
+#include <Poco/ActiveResult.h>
+#include <Poco/Thread.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

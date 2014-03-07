@@ -123,6 +123,9 @@ namespace DataHandling
 	 */
 	void LoadMcStas::exec()
 	{
+
+
+
 		std::string filename = getPropertyValue("Filename");
 		g_log.debug() << "Opening file " << filename << std::endl;
         
@@ -211,8 +214,8 @@ namespace DataHandling
    
 	/**
 	 * Return the confidence with with this algorithm can load the file
-	 * @param descriptor A descriptor for the file
-	 * @param descriptor A descriptor for the file
+   * @param eventEntries map of the file entries that have events
+   * @param outputGroup pointer to the workspace group
 	 * @param nxFile Reads data from inside first first top entry
 	 */
 	void LoadMcStas::readEventData(const std::map<std::string, std::string>& eventEntries, WorkspaceGroup_sptr& outputGroup, ::NeXus::File& nxFile)
@@ -389,7 +392,9 @@ namespace DataHandling
   
 	/**
 	 * Return the confidence with with this algorithm can load the file
-	 * @param descriptor A descriptor for the file
+   * @param histogramEntries map of the file entries that have histogram
+   * @param outputGroup pointer to the workspace group
+   * @param nxFile Reads data from inside first first top entry
 	 * @returns An integer specifying the confidence level. 0 indicates it will not be used
 	 */
 	void LoadMcStas::readHistogramData(const std::map<std::string, std::string>& histogramEntries, WorkspaceGroup_sptr& outputGroup, ::NeXus::File& nxFile)
@@ -407,7 +412,7 @@ namespace DataHandling
 
       // grap title to use to e.g. create workspace name
       std::string nameAttrValueTITLE;
-      nxFile.getAttr("title", nameAttrValueTITLE);
+      nxFile.getAttr("filename", nameAttrValueTITLE);
 
 			if ( nxFile.hasAttr("ylabel") )
 			{
@@ -554,7 +559,7 @@ namespace DataHandling
 			  file.openGroup("simulation", "NXnote");
 			  std::string nameAttrValue;
         file.readData("name", nameAttrValue);
-			  if(boost::iequals(nameAttrValue, "mcstas")) confidence = 98;
+              if(boost::iequals(nameAttrValue, "mccode")) confidence = 98;
 			  file.closeGroup();
 			  file.closeGroup();
 		  }

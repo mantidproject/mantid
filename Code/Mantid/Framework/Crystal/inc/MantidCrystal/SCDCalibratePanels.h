@@ -1,4 +1,3 @@
-
 #ifndef SCDCALIBRATEPANELS_H_
 #define SCDCALIBRATEPANELS_H_
 
@@ -12,10 +11,6 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <boost/lexical_cast.hpp>
 #include "MantidDataObjects/Workspace2D.h"
-
-using namespace Mantid::Kernel;
-using namespace  Mantid::Geometry;
-using Mantid::DataObjects::Workspace2D_sptr;
 
 namespace Mantid
 {
@@ -57,22 +52,13 @@ namespace Crystal
 
     virtual ~SCDCalibratePanels();
 
-    virtual const std::string name() const
-    {
-       return "SCDCalibratePanels";
-    }
+    virtual const std::string name() const;
 
      /// Algorithm's version for identification overriding a virtual method
-     virtual int version() const
-    {
-        return 1;
-    }
+     virtual int version() const;
 
      /// Algorithm's category for identification overriding a virtual method
-     virtual const std::string category() const
-     {
-       return "Crystal";
-     }
+     virtual const std::string category() const;
 
   /**
    *  Refactors a rotation Q as a Rotation in x dir by Rotx * a Rotation in the y dir by Roty
@@ -82,7 +68,7 @@ namespace Crystal
    *  @param Roty       The angle in degrees for the rotation in y direction
    *  @param Rotz      The angle in degrees for the rotation in z direction
    */
-  static void Quat2RotxRotyRotz(const Quat Q, double &Rotx,double &Roty,double &Rotz);
+  static void Quat2RotxRotyRotz(const Kernel::Quat Q, double &Rotx,double &Roty,double &Rotz);
 
  /**
   *  Updates the ParameterMap for NewInstrument to reflect the changes in the
@@ -114,10 +100,10 @@ namespace Crystal
   *                        rotation of panels around their center
   */
   static void FixUpBankParameterMap(  std::vector<std::string>const bankNames,
-                                      boost::shared_ptr<const Instrument> NewInstrument,
-                                     V3D const pos,Quat const rot,
+                                      boost::shared_ptr<const Geometry::Instrument> NewInstrument,
+                                     Kernel::V3D const pos,Kernel::Quat const rot,
                                      double const DetWScale, double const DetHtScale,
-                                     boost::shared_ptr<const ParameterMap> const pmapOld,
+                                     boost::shared_ptr<const Geometry::ParameterMap> const pmapOld,
                                      bool RotateCenters);
 
   /**
@@ -135,8 +121,8 @@ namespace Crystal
   *                        NewInstrument). "Clones" relevant information into the
   *                        NewInstrument's parameter map.
    */
-  static void FixUpSourceParameterMap( boost::shared_ptr<const Instrument> NewInstrument,
-        double const L0,V3D const newSampPos, boost::shared_ptr<const ParameterMap>const  pmapOld) ;
+  static void FixUpSourceParameterMap( boost::shared_ptr<const Geometry::Instrument> NewInstrument,
+        double const L0,Kernel::V3D const newSampPos, boost::shared_ptr<const Geometry::ParameterMap>const  pmapOld) ;
 
   /**
    * Given a string representation of a set of groups( [] separated list of
@@ -215,16 +201,22 @@ namespace Crystal
        boost::shared_ptr<Geometry::ParameterMap> pmap,
        boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
 
-  void SaveIsawDetCal(  boost::shared_ptr<const Instrument> &NewInstrument,
-                        std::set<std::string> &AllBankName,
-                        double T0,std::string FileName);
+
+
 
   void LoadISawDetCal(
-           boost::shared_ptr<const Instrument> &instrument,
+           boost::shared_ptr<const Geometry::Instrument> &instrument,
            std::set<std::string> &AllBankName,double &T0,
            double &L0, std::string filename,
            std::string bankPrefixName);
   private:
+    void saveIsawDetCal(boost::shared_ptr<const Geometry::Instrument> &instrument,
+                        std::set<std::string> &AllBankName,
+                        double T0, std::string filename);
+
+    void createResultWorkspace(const int numGroups, const std::vector<std::string> &names,
+                               const std::vector<double> &params, const std::vector<double> &errs);
+
     void exec ();
 
     void  init ();
@@ -248,8 +240,8 @@ namespace Crystal
      * @param L0          The initial flight path
      * @param AllBankNames  The names of all the banks that wiil be processed.
      */
-    boost::shared_ptr<const Instrument> GetNewCalibInstrument(
-                              boost::shared_ptr<const Instrument>   instrument,
+    boost::shared_ptr<const Geometry::Instrument> GetNewCalibInstrument(
+                              boost::shared_ptr<const Geometry::Instrument>   instrument,
                               std::string preprocessCommand,
                               std::string preprocessFilename,
                               double &timeOffset, double &L0,
@@ -275,12 +267,12 @@ namespace Crystal
      *                                  around the center of the panel
      *
      */
-    void CalcInitParams(  RectangularDetector_const_sptr bank_rect,
-                            Instrument_const_sptr instrument,
-                            Instrument_const_sptr  PreCalibinstrument,
-                            double & detWidthScale0,double &detHeightScale0,
-                            double &Xoffset0,double &Yoffset0,double &Zoffset0,
-                            double &Xrot0,double &Yrot0,double &Zrot0);
+    void CalcInitParams(  Geometry::RectangularDetector_const_sptr bank_rect,
+                          Geometry::Instrument_const_sptr instrument,
+                          Geometry::Instrument_const_sptr  PreCalibinstrument,
+                          double & detWidthScale0,double &detHeightScale0,
+                          double &Xoffset0,double &Yoffset0,double &Zoffset0,
+                          double &Xrot0,double &Yrot0,double &Zrot0);
 
     /**
      * Creates the function and gets values using the current  values for the
@@ -289,7 +281,7 @@ namespace Crystal
      * @param ws        The workspace with the predicted qx,qy, and qz values for each
      *                   peak
      *
-     * @param nGroups   The number of Groups-Sets of panels
+     * @param NGroups   The number of Groups-Sets of panels
      * @param names     The names of the variables that have been fit
      *
      * @param params    The values of the variables that have been fit
@@ -304,8 +296,8 @@ namespace Crystal
      *
      * @param nData      The number of xVals and out values
      */
-    void  CreateFxnGetValues(Workspace2D_sptr const ws,
-                         int const nGroups, std::vector<std::string> const names,
+    void  CreateFxnGetValues(DataObjects::Workspace2D_sptr const ws,
+                         int const NGroups, std::vector<std::string> const names,
                          std::vector<double> const params,
                          std::string const BankNameString, double *out,
                          const double *xVals,const size_t nData) const;
@@ -321,8 +313,8 @@ namespace Crystal
      *
      * @param instrument   The instrument with the new values for the banks in Groups
      */
-    void SaveXmlFile(std::string const FileName, std::vector<std::vector< std::string > >const Groups,
-           Instrument_const_sptr const instrument) const;
+    void saveXmlFile(std::string const FileName, std::vector<std::vector< std::string > >const Groups,
+           Geometry::Instrument_const_sptr const instrument) const;
 
   };
 

@@ -177,6 +177,7 @@ public:
      * @param length :: length of cylinder below which to integrate
      * @param signal [out] :: set to the integrated signal
      * @param errorSquared [out] :: set to the integrated squared error.
+     * @param signal_fit [out] :: array of values for the fit.
       */
     virtual void integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared, std::vector<signal_t> & signal_fit) const = 0;
 

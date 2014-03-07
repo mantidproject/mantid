@@ -40,7 +40,7 @@ namespace MDEvents
   {
   public:
   
-    MDGridBox(boost::shared_ptr<Mantid::API::BoxController> &bc, const uint32_t depth,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
+    MDGridBox(boost::shared_ptr<API::BoxController> &bc, const uint32_t depth,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
     MDGridBox(Mantid::API::BoxController *const bc, const uint32_t depth,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
 
     MDGridBox(MDBox<MDE, nd> * box);

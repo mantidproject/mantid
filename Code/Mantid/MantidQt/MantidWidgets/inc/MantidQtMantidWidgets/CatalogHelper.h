@@ -17,9 +17,11 @@ namespace MantidQt
       /// Obtain the list of instruments that are available.
       const std::vector<std::string> getInvestigationTypeList();
       /// Run the search algorithm with the given user input.
-      void executeSearch(const std::map<std::string, std::string> &userInputs);
+      void executeSearch(const std::map<std::string, std::string> &userInputs, const int &offset, const int &limit);
+      /// Obtain the number of search results to be returned by the query of the user.
+      int64_t getNumberOfSearchResults(const std::map<std::string, std::string> &userInputFields);
       /// Search for all related dataFiles for the specified investigation.
-      void executeGetDataFiles(const int64_t &investigationId);
+      void executeGetDataFiles(const std::string &investigationId);
       /// Download dataFile (via HTTP or copy if access to archive) and return the path to it.
       const std::vector<std::string> downloadDataFiles(const std::vector<std::pair<int64_t, std::string>> &userSelectedFiles, const std::string &downloadPath);
       /// Validate each input field against the related algorithm property.
@@ -34,6 +36,8 @@ namespace MantidQt
       const std::string propertyDocumentation(const std::vector<Mantid::Kernel::Property*> &properties, const std::string &name);
       /// Execute the given algorithm asynchronously.
       void executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm);
+      /// Set the "search" properties to their related input fields.
+      void setSearchProperties(const Mantid::API::IAlgorithm_sptr &catalogAlgorithm, const std::map<std::string, std::string> &userInputFields);
 
     };
   } // namespace MantidWidgets

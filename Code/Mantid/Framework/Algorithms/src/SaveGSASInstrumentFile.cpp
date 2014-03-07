@@ -140,11 +140,11 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
   size_t numbanks = m_bankIDs.size();
 
   // Check size
-  if (m_vecCWL.size() != numbanks || m_vecCWL.size() != numbanks || m_vecCWL.size() != numbanks)
+  if (m_vecCWL.size() != numbanks || m_mindsps.size() != numbanks || m_maxdsps.size() != numbanks 
+          || m_maxtofs.size() != numbanks)
   {
-    stringstream errss;
-    errss << "Default chopper constants have different number of elements. ";
-    throw runtime_error(errss.str());
+    std::string errmsg("Default chopper constants have different number of elements. ");
+    throw runtime_error(errmsg);
   }
 
   // Set up index map
@@ -542,7 +542,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
   //----------------------------------------------------------------------------------------------
   /** Set up some constant by default
     * Output--> m_configuration
-    * @param chopperfrequency :: chopper frequency of the profile for.
+    * @param profmap :: map of parameters
     */
   void SaveGSASInstrumentFile::initConstants(const map<unsigned int, map<string, double> >& profmap)
   {
@@ -1171,7 +1171,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
     if (!loadfpirf->isExecuted())
       throw runtime_error("LoadFullprof cannot be executed. ");
 
-    m_inpWS = loadfpirf->getProperty("OutputWorkspace");
+    m_inpWS = loadfpirf->getProperty("OutputTableWorkspace");
     if (!m_inpWS)
       throw runtime_error("Failed to obtain a table workspace from LoadFullprofResolution's output.");
 

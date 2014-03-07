@@ -5,12 +5,16 @@
 // Includes
 //----------------------
 #include "ui_MuonAnalysis.h"
-#include "MantidQtAPI/UserSubWindow.h"
 
-#include "MantidQtMantidWidgets/pythonCalc.h"
-#include "MantidQtMantidWidgets/MWDiag.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+
+#include "MantidGeometry/Instrument.h"
+
+#include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtMantidWidgets/pythonCalc.h"
+#include "MantidQtMantidWidgets/MWDiag.h"
 
 #include <map>
 
@@ -19,15 +23,36 @@ namespace MantidQt
 namespace CustomInterfaces
 {
 
+using namespace Mantid;
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
+
 namespace Muon
 {
+  // Tab classes
   class MuonAnalysisOptionTab;
   class MuonAnalysisFitDataTab;
   class MuonAnalysisResultTableTab;
+  struct Grouping;
+
+  struct LoadResult {
+    Workspace_sptr loadedWorkspace;
+    Workspace_sptr loadedGrouping;
+    Workspace_sptr loadedDeadTimes;
+    std::string mainFieldDirection;
+    double timeZero;
+    double firstGoodData;
+  };
+
+  struct GroupResult {
+    bool usedExistGrouping;
+    boost::shared_ptr<Grouping> groupingUsed;
+    Workspace_sptr groupedWorkspace;
+  };
 }
 
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
+using namespace Muon;
 
 /** 
 This is the main class for the MuonAnalysis interface
@@ -70,15 +95,16 @@ public:
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
 
+signals:
+  /// Request to hide/show Mantid toolbars
+  void setToolbarsHidden(bool isHidden); 
+
 private slots:
   /// Guess Alpha clicked
   void guessAlphaClicked();
 
-  /// When second period selection combobox changed
-  void firstPeriodSelectionChanged();
-
-  /// When second period selection combobox changed
-  void secondPeriodSelectionChanged();
+  /// Checks whether two specified periods are equal and, if they are, sets second one to None
+  void checkForEqualPeriods();
 
   /// Input file changed in MWRunFiles widget
   void inputFileChanged_MWRunFiles();
@@ -123,16 +149,13 @@ private slots:
   void userSelectInstrument(const QString& prefix);
 
   /// Hide/show MantidPlot toolbars
-  void setToolbarsHidden(bool hidden);
+  void doSetToolbarsHidden(bool hidden);
 
   /// Run the plot button on the home tab.
   void runFrontPlotButton();
 
   /// Creates a plot of selected group/pair.
   void plotSelectedItem();
-
-  /// 
-  void runFrontGroupGroupPairComboBox(int index);
 
   /// Link to the wiki for the home tab
   void muonAnalysisHelpClicked();
@@ -147,19 +170,19 @@ private slots:
   void checkAppendingNextRun();
 
   /// When the tab has changed.
-  void changeTab(int);
+  void changeTab(int newTabIndex);
 
-  /// Update the plot based on changes on the front page.
+  /// Update the plot based on changes on the front tab
   void homeTabUpdatePlot();
 
-  /// Update the group plot based on changes on the group page.
-  void groupTabUpdateGroup();
-
-  /// Update the pair plot based on changes on the group page.
-  void groupTabUpdatePair();
-
-  /// Update the pair plot based on changes on the group page.
+  /// Update the plot based on changes on the settings tab
   void settingsTabUpdatePlot();
+
+  /// Update the plot based on changes on the grouping options tab
+  void groupTabUpdatePlot();
+
+  /// Sets plot type combo box on the Home tab to the same value as the one under Group Table
+  void syncGroupTablePlotTypeWithHome();
 
   /// Updates the style of the current plot according to actual parameters on settings tab.
   void updateCurrentPlotStyle();
@@ -169,12 +192,6 @@ private slots:
 
   /// Whether Overwrite option is enabled on the Settings tab.
   bool isOverwriteEnabled();
-
-  /// Show a plot for a given workspace. Closes previous plot if exists.
-  void showPlot(const QString& wsName);
-
-  /// Closes the window with the plot of the given ws
-  void closePlotWindow(const QString& wsName);
 
   /// Checks if the plot for the workspace does exist.
   bool plotExists(const QString& wsName);
@@ -191,11 +208,11 @@ private slots:
   /// Shows all the plot windows (MultiLayer ones)
   void showAllPlotWindows();
 
-  /// Called when the plot function has been changed on the home page.
-  void changeHomeFunction();
+  /// Called when dead time correction type is changed.
+  void onDeadTimeTypeChanged(int choice);
 
-  /// Change what type of deadtime to use and the options available for the user's choice.
-  void changeDeadTimeType(int);
+  /// Auto-update the plot after user has changed dead time correction type.
+  void deadTimeTypeAutoUpdate(int choice);
 
   /// Change to the dead time file, make sure graph is updated next time it is plotted.
   void deadTimeFileSelected();
@@ -209,6 +226,14 @@ private slots:
   /// Saves the value of the widget which called the slot
   void saveWidgetValue();
 
+  /// Opens a sequential fit dialog
+  void openSequentialFitDialog();
+
+  /// Update front
+  void updateFront();
+
+  /// Opens the managed directory dialog for easier access for the user.
+  void openDirectoryDialog();
 
 private:
  
@@ -242,6 +267,12 @@ private:
   /// Input file changed - update GUI accordingly
   void inputFileChanged(const QStringList& filenames);
 
+  /// Loads the given list of files
+  boost::shared_ptr<LoadResult> load(const QStringList& files) const;
+
+  /// Groups the loaded workspace
+  boost::shared_ptr<GroupResult> group(boost::shared_ptr<LoadResult> loadResult) const;
+
   /// Set whether the loading buttons and MWRunFiles widget are enabled.
   void allowLoading(bool enabled);
 
@@ -249,7 +280,7 @@ private:
   int pairInFocus();
 
   /// is grouping set
-  bool isGroupingSet();
+  bool isGroupingSet() const;
 
   /// Crop/rebins/offsets the workspace according to interface settings. 
   MatrixWorkspace_sptr prepareAnalysisWorkspace(MatrixWorkspace_sptr ws, bool isRaw);
@@ -271,23 +302,14 @@ private:
   /// Selects a workspace from the group according to what is selected on the interface for the period
   MatrixWorkspace_sptr getPeriodWorkspace(PeriodType periodType, WorkspaceGroup_sptr group);
 
-  /// Apply whatever grouping is specified in GUI tables to workspace
-  bool applyGroupingToWS( const std::string& inputWS,  const std::string& outputWS);
-
-  /// Update front 
-  void updateFront();
-
   /// Update front anc pair combo box
   void updateFrontAndCombo();
 
   /// Updates widgets related to period algebra
-  void updatePeriodWidgets(int numPeriods);
+  void updatePeriodWidgets(size_t numPeriods);
 
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
   int numOfDetectors(const std::string& str) const;
-
-  /// Return a vector of IDs for row number from string of type 1-3, 5, 10-15
-  std::vector<int> spectrumIDs(const std::string& str) const;
 
   void changeCurrentRun(std::string& workspaceGroupName);
 
@@ -297,11 +319,11 @@ private:
   /// Clear tables and front combo box
   void clearTablesAndCombo();
 
-  /// Adds the workspaces in a range.
-  void plusRangeWorkspaces();
+  /// Sums a given list of workspaces
+  Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces) const;
 
-  /// Delete ranged workspaces.
-  void deleteRangedWorkspaces();
+  /// Deletes a workspace _or_ a workspace group with the given name, if one exists
+  void deleteWorkspaceIfExists(const std::string& wsName);
 
   /// Get group workspace name
   QString getGroupName();
@@ -321,18 +343,24 @@ private:
   /// Return number of groups defined (not including pairs)
   int numGroups();
 
-  // TODO: wsIndex can be removed from functions below if we put only one group to the workspace
-  //       (as we are doing with pairs)
+  /// Returns custom dead time table file name as set on the interface
+  std::string deadTimeFilename() const;
+
+  /// Loads dead time table (group of tables) from the file.
+  Workspace_sptr loadDeadTimes(const std::string& filename) const;
+
+  /// Applies dead time correction to the loaded workspace
+  void applyDeadTimeCorrection(boost::shared_ptr<LoadResult> loadResult) const;
+
+  /// Creates and algorithm with all the properties set according to widget values on the interface
+  Algorithm_sptr createLoadAlgorithm();
 
   /// Plots specific WS spectrum (used by plotPair and plotGroup)
-  void plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale = false);
-
-  /// Set various style parameters for the plot of the given ws
-  void setPlotStyle(const QString& wsName, const QMap<QString, QString>& params);
+  void plotSpectrum(const QString& wsName, bool logScale = false);
 
   /// Get current plot style parameters. wsName and wsIndex are used to get default values if 
   /// something is not specified
-  QMap<QString, QString> getPlotStyleParams(const QString& wsName, const int wsIndex);
+  QMap<QString, QString> getPlotStyleParams(const QString& wsName);
 
   /// get period labels
   QStringList getPeriodLabels() const;
@@ -349,8 +377,11 @@ private:
   /// The last directory that was viewed
   QString m_last_dir;
 
-  /// name of workspace
+  /// Name of the loaded workspace
   std::string m_workspace_name;
+
+  /// Name of the loaded AND grouped workspace
+  std::string m_grouped_name;
 
   /// name of the loaded data
   QString m_currentDataName;
@@ -397,25 +428,16 @@ private:
   int getPairNumberFromRow(int row);
 
   /// first good bin returned in ms
-  QString firstGoodBin();
+  double firstGoodBin() const;
 
   /// According to Plot Options what is the time to plot from in ms
-  double plotFromTime();
+  double plotFromTime() const;
 
   /// According to Plot Options what is the time to plot to in ms
-  double plotToTime();
+  double plotToTime() const;
 
   /// time zero returned in ms
   double timeZero();
-
-  /// set grouping in table from information from nexus raw file
-  void setGroupingFromNexus(const QString& nexusFile); 
-
-  ///
-  void setDummyGrouping(const int numDetectors);
-
-  ///
-  void setGroupingFromIDF(const std::string& mainFieldDirection, MatrixWorkspace_sptr matrix_workspace);
 
   /// title of run
   std::string m_title;
@@ -465,6 +487,24 @@ private:
   /// Saves the value of the widget which called the slot
   void loadWidgetValue(QWidget* target, const QVariant& defaultValue);
 
+  /// Groups the workspace
+  Workspace_sptr groupWorkspace(Workspace_sptr ws, Workspace_sptr grouping) const;
+
+  /// Groups the workspace
+  Workspace_sptr groupWorkspace(const std::string& wsName, const std::string& groupingName) const;
+
+  /// Groups loaded workspace using information from Grouping Options tab
+  void groupLoadedWorkspace();
+
+  /// Parses grouping information from the UI table.
+  ITableWorkspace_sptr parseGrouping();  
+
+  /// When no data loaded set various buttons etc to inactive
+  void noDataAvailable();
+
+  /// When data loaded set various buttons etc to active
+  void nowDataAvailable();
+
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
   /// handles fit data work
@@ -480,11 +520,12 @@ private:
 
   static const QString NOT_AVAILABLE;
 
+  // Default value used for first good bin
+  static const double FIRST_GOOD_BIN_DEFAULT;
+
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
 
-  /// Creates new double validator which accepts numbers in standard notation only.
-  static QDoubleValidator* createDoubleValidator(QObject* parent);
 };
 
 }

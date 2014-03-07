@@ -96,8 +96,13 @@ public:
 
   /// Create a new function
   PropertyHandler* addFunction(const std::string& fnName);
+
   /// Get Composite Function
   boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction()const{return m_compositeFunction;}
+
+  /// Return the fitting function
+  Mantid::API::IFunction_sptr getFittingFunction() const;
+
   /// Get the default function type
   std::string defaultFunctionType()const;
   /// Set the default function type
@@ -204,14 +209,18 @@ public:
   void postDeleteHandle(const std::string& wsName);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
+  /// Called when the Fit is finished
+  virtual void finishHandle(const Mantid::API::IAlgorithm* alg);
+
   /// Returns the list of workspaces that are currently been worked on by the fit property browser.
   QStringList getWorkspaceNames();
   /// Create a MatrixWorkspace from a TableWorkspace
   Mantid::API::Workspace_sptr createMatrixFromTableWorkspace()const;
 
+
 public slots:
   virtual void fit(){ doFit(500); }
-  void sequentialFit();
+  virtual void sequentialFit();
   void undoFit();
   void clear();
   void clearBrowser();
@@ -337,8 +346,6 @@ protected:
   void minimizerChanged();
   /// Do the fitting
   void doFit(int maxIterations);
-  /// Return the fitting function
-  Mantid::API::IFunction_sptr getFittingFunction() const;
 
   /// Property managers:
   QtGroupPropertyManager  *m_groupManager;
@@ -422,8 +429,6 @@ private:
   void createCompositeFunction(const QString& str = "");
   /// Check if the workspace can be used in the fit
   virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr)const;
-  /// Called when the fit is finished
-  void finishHandle(const Mantid::API::IAlgorithm* alg);
   /// Find QtBrowserItem for a property prop among the chidren of 
   QtBrowserItem* findItem(QtBrowserItem* parent,QtProperty* prop)const;
   /// Set the parameters to the fit outcome

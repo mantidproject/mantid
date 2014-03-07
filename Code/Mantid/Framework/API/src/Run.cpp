@@ -32,6 +32,9 @@ namespace
   const char * GONIOMETER_LOG_NAME = "goniometer";
   /// Name of the stored histogram bins log when saved to NeXus
   const char * HISTO_BINS_LOG_NAME = "processed_histogram_bins";
+  const char * PEAK_RADIUS_GROUP = "peak_radius";
+  const char * INNER_BKG_RADIUS_GROUP = "inner_bkg_radius";
+  const char * OUTER_BKG_RADIUS_GROUP = "outer_bkg_radius";
 }
 // Get a reference to the logger
 Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
@@ -358,7 +361,31 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       file->writeData("value", m_histoBins);
       file->closeGroup();
     }
+    if( this->hasProperty("PeakRadius") )
+    {
+    	const std::vector<double> & values =
+    			this->getPropertyValueAsType<std::vector<double> >("PeakRadius");
 
+        file->makeGroup(PEAK_RADIUS_GROUP, "NXdata", 1);
+        file->writeData("value", values);
+        file->closeGroup();
+    }
+    if( this->hasProperty("BackgroundInnerRadius") )
+    {
+        file->makeGroup(INNER_BKG_RADIUS_GROUP, "NXdata", 1);
+       	const std::vector<double> & values =
+        		this->getPropertyValueAsType<std::vector<double> >("BackgroundInnerRadius");
+        file->writeData("value", values);
+        file->closeGroup();
+    }
+    if( this->hasProperty("BackgroundOuterRadius") )
+    {
+        file->makeGroup(OUTER_BKG_RADIUS_GROUP, "NXdata", 1);
+       	const std::vector<double> & values =
+        		this->getPropertyValueAsType<std::vector<double> >("BackgroundOuterRadius");
+        file->writeData("value", values);
+        file->closeGroup();
+    }
     if(!keepOpen)file->closeGroup();
   }
 
@@ -391,6 +418,30 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
         file->openGroup(name_class.first, "NXdata");
         file->readData("value",m_histoBins);
         file->closeGroup();
+      }
+      else if(name_class.first == PEAK_RADIUS_GROUP)
+      {
+        file->openGroup(name_class.first, "NXdata");
+        std::vector<double> values;
+        file->readData("value",values);
+        file->closeGroup();
+        this->addProperty("PeakRadius",values, true);
+      }
+      else if(name_class.first == INNER_BKG_RADIUS_GROUP)
+      {
+        file->openGroup(name_class.first, "NXdata");
+        std::vector<double> values;
+        file->readData("value",values);
+        file->closeGroup();
+        this->addProperty("BackgroundInnerRadius",values, true);
+      }
+      else if(name_class.first == OUTER_BKG_RADIUS_GROUP)
+      {
+        file->openGroup(name_class.first, "NXdata");
+        std::vector<double> values;
+        file->readData("value",values);
+        file->closeGroup();
+        this->addProperty("BackgroundOuterRadius",values, true);
       }
       else if (name_class.first == "proton_charge" && !this->hasProperty("proton_charge"))
       {
