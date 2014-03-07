@@ -40,6 +40,15 @@ void ParameterPropertyManager::setError(const QtProperty* property, double error
 }
 
 /**
+ * Clears error of the property, if one was set. If error was not set, the function does nothing.
+ * @param property :: Property to clear error for
+ */
+void ParameterPropertyManager::clearError(const QtProperty* property)
+{
+  m_errors.remove(property);
+}
+
+/**
  * Adds error parameter value to property display
  * @param property :: Property we want to display
  * @return Text representation of the property

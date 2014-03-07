@@ -46,6 +46,9 @@ public Q_SLOTS:
   /// Set property error
   void setError(const QtProperty* property, double error);
 
+  /// Clears error of the property, if one was set
+  void clearError(const QtProperty* property);
+
 protected:
   /// Text representation of the property
   virtual QString valueText(const QtProperty* property) const;

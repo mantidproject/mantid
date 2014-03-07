@@ -451,7 +451,7 @@ void FitPropertyBrowser::createEditors(QWidget *w)
   m_browser->setFactoryForManager(m_columnManager, comboBoxFactory);
   m_browser->setFactoryForManager(m_vectorSizeManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_vectorDoubleManager, doubleEditorFactory);
-  m_browser->setFactoryForManager(static_cast<QtDoublePropertyManager*>(m_parameterManager), doubleEditorFactory);
+  m_browser->setFactoryForManager(m_parameterManager, new ParameterEditorFactory(w));
 }
 
 

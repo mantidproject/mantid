@@ -1,5 +1,7 @@
 #include "DoubleEditorFactory.h"
 
+#include "ParameterPropertyManager.h"
+
 #include <QDoubleValidator>
 
 #include <iostream>
@@ -8,27 +10,12 @@
 #include <cmath>
 #include <stdexcept>
 
-void DoubleEditorFactory::connectPropertyManager(QtDoublePropertyManager *manager)
-{
-    (void) manager;
-}
-
-QWidget* DoubleEditorFactory::createEditor(QtDoublePropertyManager *manager, QtProperty *property,QWidget *parent)
-{
-    (void) manager;
-  return new DoubleEditor(property,parent);
-}
-
-void DoubleEditorFactory::disconnectPropertyManager(QtDoublePropertyManager *manager)
-{
-    (void) manager;
-}
 
 DoubleEditor::DoubleEditor(QtProperty *property, QWidget *parent)
 :QLineEdit(parent),
 m_property(property)
 {
-  QtDoublePropertyManager* mgr = dynamic_cast<QtDoublePropertyManager*>(property->propertyManager());
+  auto mgr = dynamic_cast<QtDoublePropertyManager*>(property->propertyManager());
   if (!mgr)
   {
     throw std::runtime_error("QtDoublePropertyManager expected as parent of DoubleEditor");
@@ -58,10 +45,23 @@ void DoubleEditor::setValue(const double& d)
 
 void DoubleEditor::updateProperty()
 {
-  QtDoublePropertyManager* mgr = dynamic_cast<QtDoublePropertyManager*>(m_property->propertyManager());
+  auto mgr = dynamic_cast<QtDoublePropertyManager*>(m_property->propertyManager());
   if (mgr)
   {
     mgr->setValue(m_property,text().toDouble());
   }
 }
 
+void ParameterEditor::updateProperty()
+{
+  auto mgr = dynamic_cast<ParameterPropertyManager*>(m_property->propertyManager());
+  if (mgr)
+  {
+    // As the property get supdated, the error becomes invalid, so clear it
+    mgr->clearError(m_property);
+  }
+
+  // XXX: this should be done AFTER the error was cleared, because only value change causes property
+  //      view to get updated
+  DoubleEditor::updateProperty();
+}
