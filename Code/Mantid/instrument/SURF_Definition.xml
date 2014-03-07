@@ -83,6 +83,7 @@
       <right-front-bottom-point  x="-0.02" y="-0.005" z="0.0"  />   
     </cuboid>
     
+	<!-- remove cosmetic attachment that is causing problems
     <cylinder id="top">
       <centre-of-bottom-base x="0.0" y="0.0" z="0.01" />
       <axis x="0.0" y="1.0" z="0.0" /> 
@@ -91,6 +92,7 @@
     </cylinder> 
     
     <algebra val="base : top" />
+-->
   </type>  
   
   <component type="point-detector" idlist="point-detector">
