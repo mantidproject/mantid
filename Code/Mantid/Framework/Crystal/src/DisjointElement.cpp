@@ -148,5 +148,15 @@ namespace Mantid
 
     }
 
+    /**
+     * Convenience non-member function.
+     * @param a : Pointer to first disjoint element to join
+     * @param b : Pointer to second disjoint element to join
+     */
+    void unionElements(DisjointElement* a, DisjointElement* b)
+    {
+      a->unionWith(b);
+    }
+
   } // namespace Crystal
 } // namespace Mantid

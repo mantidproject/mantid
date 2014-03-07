@@ -137,6 +137,14 @@ namespace MDEvents
       if (!m_function->isPointContained(m_center))
         next();
     }
+
+    const size_t neighbourSpan = 3;
+    size_t totalNeighbours = neighbourSpan;
+    for (size_t i = 1; i < m_nd; i++)
+    {
+      totalNeighbours = totalNeighbours * neighbourSpan;
+    }
+    m_permutations.resize(totalNeighbours);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -363,6 +371,55 @@ namespace MDEvents
   size_t MDHistoWorkspaceIterator::getLinearIndex() const
   {
     return m_pos;
+  }
+
+  /**
+   * Gets indexes of bins/pixels/boxes neighbouring the present iterator location.
+   * The number of neighbour indexes returned will depend upon the dimensionality of the workspace as well as the presence
+   * of boundaries and edges.
+   * @return vector of linear indexes to neighbour locations.
+   */
+  std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexes() const
+  {
+
+    Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker, m_indexMax,
+            m_index);
+
+    size_t offset = 1;
+    const int base = 3;
+
+    m_permutations[0] = 0;
+    m_permutations[1] = 1;
+    m_permutations[2] = -1;
+    size_t n_permutations = 3;
+
+    for(size_t j = 0; j < m_nd; ++j)
+    {
+      offset = offset * m_indexMaker[j-1];
+
+      for(size_t k = 0; k < m_permutations.size(); ++k)
+      {
+        long newVariant = m_permutations[k] + long(offset);
+        m_permutations[j] = newVariant;
+        m_permutations[j+1] = -newVariant;
+        n_permutations += 2;
+      }
+    }
+
+    std::vector<size_t> neighbourIndexes;
+    for(size_t i = 0; i < n_permutations; ++i)
+    {
+      if (m_permutations[i] == 0)
+      {
+        continue;
+      }
+      size_t neighbour_index = m_pos + m_permutations[i];
+      if( Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index, m_indexMaker, m_indexMax ) )
+      {
+        neighbourIndexes.push_back(neighbour_index);
+      }
+    }
+    return neighbourIndexes;
   }
 
 } // namespace Mantid

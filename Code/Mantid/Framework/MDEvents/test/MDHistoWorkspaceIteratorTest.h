@@ -247,6 +247,28 @@ public:
     TSM_ASSERT_EQUALS("The first index hit should be 2 since that is the first unmasked one", 5, histoIt->getLinearIndex());
   }
 
+  void test_neighours_1d()
+  {
+    const size_t nd = 1;
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
+
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+
+    // At first position
+    std::vector<size_t> neighbourIndexes = it->findNeighbourIndexes();
+    TS_ASSERT_EQUALS(1, neighbourIndexes.size()); // should be on edge
+
+    // Go to intermediate position
+    it->next();
+    neighbourIndexes = it->findNeighbourIndexes();
+    TS_ASSERT_EQUALS(2, neighbourIndexes.size()); // should be on edge
+
+    // Go to last position
+    it->jumpTo(10);
+    neighbourIndexes = it->findNeighbourIndexes();
+    TS_ASSERT_EQUALS(1, neighbourIndexes.size()); // should be on edge
+  }
+
 };
 
 

@@ -68,8 +68,7 @@ namespace Crystal
     
   };
 
-
-
+  void unionElements(DisjointElement* a, DisjointElement* b);
 
 } // namespace Crystal
 } // namespace Mantid
