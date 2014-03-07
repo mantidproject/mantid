@@ -47,10 +47,6 @@ namespace DataObjects
 class DLLExport WorkspaceSingleValue : public API::MatrixWorkspace
 {
 public:
-  /// Typedef for the workspace_iterator to use with a WorkspaceSingleValue
-  typedef API::workspace_iterator<API::LocatedDataRef, WorkspaceSingleValue> iterator;
-  /// Typedef for the const workspace_iterator to use with a WorkspaceSingleValue
-  typedef API::workspace_iterator<const API::LocatedDataRef, const WorkspaceSingleValue> const_iterator;
 
   /**	Gets the name of the workspace type
    * @return Standard string name  */

@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/CompositeCatalog.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidICat/CatalogSearchParam.h"
-#include "MantidICat/CompositeCatalog.h"
 
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -20,9 +20,9 @@ class DummyCatalog : public ICatalog
 {
   public:
 
-    void login(const std::string&,const std::string&,const std::string&)
+    CatalogSession_sptr login(const std::string&,const std::string&,const std::string&,const std::string&)
     {
-      m_counter++;
+      throw std::runtime_error("You cannot log into multiple catalogs at the same time.");
     }
 
     void logout()
@@ -95,11 +95,7 @@ class CompositeCatalogTest : public CxxTest::TestSuite
     void testLogin()
     {
       std::string temp = "";
-      // This will attempt to login to each dummy catalog
-      // that has been added to the composite created.
-      createCompositeCatalog()->login(temp,temp,temp);
-      // Verify that the composite catalog login method works as expected.
-      TS_ASSERT_EQUALS(DummyCatalog::m_counter,2);
+      TS_ASSERT_THROWS(createCompositeCatalog()->login(temp,temp,temp, temp),std::runtime_error&);
     }
 
     void testLogout()

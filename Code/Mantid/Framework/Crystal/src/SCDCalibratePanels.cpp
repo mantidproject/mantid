@@ -695,6 +695,9 @@ namespace Mantid
       bool use_PanelHeight = getProperty("usePanelHeight");
       bool use_PanelPosition = getProperty("usePanelPosition");
       bool use_PanelOrientation = getProperty("usePanelOrientation");
+      double SampleXoffset = getProperty("SampleXoffset");
+      double SampleYoffset = getProperty("SampleYoffset");
+      double SampleZoffset = getProperty("SampleZoffset");
 
       string Grouping = getProperty( "PanelGroups");
       string bankPrefix = getProperty("PanelNamePrefix");
@@ -874,18 +877,18 @@ namespace Mantid
         constrain(iFunc, paramPrefix+"Zrot", -1.*MaxRotOffset, MaxRotOffset);
       }//for vector< string > in Groups
 
+      // Function supports setting the sample position even when it isn't be refined
+      iFunc->setAttributeValue("SampleX", samplePos.X() + SampleXoffset);
+      iFunc->setAttributeValue("SampleY", samplePos.Y() + SampleYoffset);
+      iFunc->setAttributeValue("SampleZ", samplePos.Z() + SampleZoffset);
+
       // Constraints for sample offsets
       if( getProperty("AllowSampleShift"))
       {
-        // TODO the function should support setting the sample position even when it isn't be refined
-        iFunc->setAttributeValue("SampleX", samplePos.X());
-        iFunc->setAttributeValue("SampleY", samplePos.Y());
-        iFunc->setAttributeValue("SampleZ", samplePos.Z());
-
         maxXYOffset = getProperty("MaxSamplePositionChangeMeters");
-        constrain(iFunc, "SampleX", samplePos.X()-maxXYOffset, samplePos.X()+ maxXYOffset);
-        constrain(iFunc, "SampleY", samplePos.Y()-maxXYOffset, samplePos.Y()+maxXYOffset);
-        constrain(iFunc, "SampleZ", samplePos.Z()-maxXYOffset, samplePos.Z()+maxXYOffset);
+        constrain(iFunc, "SampleX", samplePos.X()+ SampleXoffset-maxXYOffset, samplePos.X()+ SampleXoffset+ maxXYOffset);
+        constrain(iFunc, "SampleY", samplePos.Y()+ SampleYoffset-maxXYOffset, samplePos.Y()+ SampleYoffset+maxXYOffset);
+        constrain(iFunc, "SampleZ", samplePos.Z()+ SampleZoffset-maxXYOffset, samplePos.Z()+ SampleZoffset+maxXYOffset);
       }
 
      tie(iFunc, !useL0, "l0", L0);
@@ -1397,6 +1400,9 @@ namespace Mantid
       declareProperty("usePanelOrientation", true, "Fit the PanelOrientation");
       declareProperty("RotateCenters", false,"Rotate bank Centers with panel orientations");
       declareProperty("AllowSampleShift",false,"Allow and fit for a sample that is off center");
+      declareProperty("SampleXoffset", 0.0, "Specify Sample x offset");
+      declareProperty("SampleYoffset", 0.0, "Specify Sample y offset");
+      declareProperty("SampleZoffset", 0.0, "Specify Sample z offset");
 
       // ---------- preprocessing
       vector< string > preProcessOptions;

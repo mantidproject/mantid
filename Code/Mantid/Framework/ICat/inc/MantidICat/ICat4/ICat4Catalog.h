@@ -4,7 +4,6 @@
 #include "MantidAPI/ICatalog.h"
 #include "MantidAPI/ICatalogInfoService.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidKernel/Logger.h"
 #include "MantidICat/CatalogSearchParam.h"
 
 namespace Mantid
@@ -39,11 +38,10 @@ namespace Mantid
     {
       public:
         /// Constructor
-        ICat4Catalog():g_log(Kernel::Logger::get("ICat4Catalog")) {}
-        /// Destructor
-        virtual ~ICat4Catalog();
+        ICat4Catalog();
         /// Log the user into the catalog system.
-        virtual void login(const std::string& username,const std::string& password,const std::string& url);
+        virtual API::CatalogSession_sptr login(const std::string& username,const std::string& password,
+            const std::string& endpoint,const std::string& facility);
         /// Log the user out of the catalog system.
         virtual void logout();
         /// Search the catalog for data.
@@ -95,6 +93,8 @@ namespace Mantid
 
         // Reference to the logger class.
         Kernel::Logger& g_log;
+        // Stores the session details for a specific catalog.
+        API::CatalogSession_sptr m_session;
 
         /**
          * Template method to save data to table workspace

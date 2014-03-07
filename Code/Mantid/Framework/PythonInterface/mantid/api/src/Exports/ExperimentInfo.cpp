@@ -32,7 +32,7 @@ void export_ExperimentInfo()
                args("self"), "Return a modifiable Sample object.")
 
           .def("run", &ExperimentInfo::run, return_value_policy<reference_existing_object>(),
-               args("self"), "Return the sample object. This cannot be modified, use mutableSample to modify.")
+               args("self"), "Return the Run object. This cannot be modified, use mutableRun to modify.")
 
           .def("mutableRun", &ExperimentInfo::mutableRun, return_value_policy<reference_existing_object>(),
                args("self"), "Return a modifiable Run object.")

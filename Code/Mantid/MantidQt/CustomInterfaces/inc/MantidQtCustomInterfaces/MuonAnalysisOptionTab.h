@@ -54,6 +54,9 @@ public:
   /// Type of rebin
   enum RebinType { NoRebin, FixedRebin, VariableRebin };
 
+  /// Types of new plot policies
+  enum NewPlotPolicy { NewWindow, PreviousWindow };
+
   /// Constructor
   MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& settingsGroup);
 
@@ -80,6 +83,9 @@ public:
 
   /// Retrieve a binning step as specified by user
   double getRebinStep();
+
+  /// Return currently selected new plot policy
+  NewPlotPolicy newPlotPolicy();
 
 signals:
   /// Update the plot because something has changed.

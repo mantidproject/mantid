@@ -237,13 +237,13 @@ private slots:
 
 private:
  
-  // Types of entities we are dealing with
+  /// Types of entities we are dealing with
   enum ItemType { Pair, Group };
   
-  // Possible plot types users might request
+  /// Possible plot types users might request
   enum PlotType { Asymmetry, Counts, Logorithm };
 
-  // Types of periods
+  /// Types of periods
   enum PeriodType { First, Second };
 
   /// Initialize local Python environment

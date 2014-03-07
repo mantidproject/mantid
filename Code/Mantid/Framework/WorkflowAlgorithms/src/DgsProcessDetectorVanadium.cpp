@@ -147,6 +147,7 @@ namespace Mantid
 
       // Mask and group workspace if necessary.
       MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
+//!!! I see masks here but where is the map workspace used for vanadium grouping (In ISIS)?
       IAlgorithm_sptr remap = this->createChildAlgorithm("DgsRemap");
       remap->setProperty("InputWorkspace", outputWS);
       remap->setProperty("OutputWorkspace", outputWS);
