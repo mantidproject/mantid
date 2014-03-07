@@ -313,6 +313,7 @@ class TubeSpec:
             """
         firstDet, numDet, step = self.getDetectorInfoFromTube( tubeIx )			   
         wkIds = []
+        skipped = []
         # print " First dectector", firstDet," Last detector", firstDet+numDet-1, "Number of detectors", numDet
         # print "Histograms", self.ws.getNumberHistograms()
         
@@ -324,7 +325,7 @@ class TubeSpec:
         if( numDetsPerWkID != 1):
             print "We have",numDetsPerWkID,"detectors per workspace index. 1 is required."
             print "cannot obtain range of workspace indices for this tube in this workspace"
-            return wkIds
+            return wkIds, skipped
         
         # Go and get workspace Indices
         if(step == -1):
@@ -332,29 +333,25 @@ class TubeSpec:
         else:
             startDet = firstDet
         if( numDet > 0):
-            skipped_histograms = []
             for i in range (0, self.ws.getNumberHistograms(), numDet):
                 try:
                     deti = self.ws.getDetector(i)
                 except:
-                    skipped_histograms.append(i)
+                    skipped.append(i)
                     continue
                 detID = deti.getID()
                 if (detID  >= startDet and detID < startDet+numDet):
                     iPixel = detID - firstDet
                     wkIds = range( i - iPixel, i - iPixel + step*numDet, step)
                     # print "Workspace indices",i-iPixel,"to",i-iPixel+numDet-1
-            if len(skipped_histograms) > 0:
-                print "The following histogram(s) were skipped since they did not " \
-                      "have an assigned detector:\n" + str(skipped_histograms)
 
         #print  firstDet, numDet
         if (numDet > 0):
-            return wkIds
+            return wkIds, skipped
         else:
             print "specified tube has no detectors."
             self.numTubes = 0
-        return wkIds
+        return wkIds, skipped
 
 	
     def getTube(self, tubeIx):
