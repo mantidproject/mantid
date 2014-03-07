@@ -42,26 +42,26 @@
 
 
 <parameter name="x0det">
-  <value val="-908.65"/>
+  <value val="-931.47"/>
 </parameter>
 
 <parameter name="y0det">
-  <value val="-872"/>
+  <value val="-860"/>
 </parameter>
 
 
 
 <parameter name="twothet">
-  <value val="90.73"/>
+  <value val="90.41"/>
 </parameter>
 
 
 <parameter name="t0">
-  <value val="-0.00348"/>
+  <value val="0.00050"/>
 </parameter>
 
 <parameter name="tconst">
-  <value val="-1.46"/>
+  <value val="-0.60"/>
 </parameter>
 
 
