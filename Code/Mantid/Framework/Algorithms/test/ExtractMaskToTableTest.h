@@ -91,6 +91,15 @@ public:
     return;
   }
 
+  void test_addToTableWorkspace()
+  {
+    ExtractMaskToTable alg;
+
+    vector<int> vecA;
+    vector<int> vecB;
+
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Test initialization of the algorithm
     */

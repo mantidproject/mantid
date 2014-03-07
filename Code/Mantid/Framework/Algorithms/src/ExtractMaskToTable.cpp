@@ -392,6 +392,12 @@ namespace Algorithms
       g_log.debug() << "[DB] There is no previously masked detectors." << ".\n";
     }
 
+    if ( numdetids == 0 )
+    {
+      // I don't know what should be done here
+      throw std::runtime_error("Empty detector ID list");
+    }
+
     // Convert vector to string
     stringstream spectralist;
     detid_t previd = maskeddetids[0];
