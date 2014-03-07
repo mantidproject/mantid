@@ -109,7 +109,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None'))
         self.current_polarisation_method = self.polarisation_options['None']
         self.comboPolarCorrect.setEnabled(self.current_instrument in self.polarisation_instruments)
-        
+        self.splitterList.setSizes([200, 800])
         self.labelStatus = QtGui.QLabel("Ready")
         self.statusMain.addWidget(self.labelStatus)
         self.initTable()
@@ -203,6 +203,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                 self.statusMain.clearMessage()
                 for run in runs:
                     self.listMain.addItem(run)
+                self.splitterList.setSizes([self.listMain.sizeHintForColumn(0), (1000 - self.listMain.sizeHintForColumn(0))])
         except Exception as ex:
             logger.notice("Could not list archive runs")
             logger.notice(str(ex))
