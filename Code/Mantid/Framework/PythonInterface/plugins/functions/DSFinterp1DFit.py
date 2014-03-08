@@ -16,7 +16,7 @@ This fitting function is closely related to algorithm [[DSFinterp]]. Please chec
 !Default
 !Description
 |-
-|colspan=6 align=center|'''Input'''
+|colspan=6 align=center|Input
 |-
 |1
 |InputWorkspaces
@@ -39,7 +39,7 @@ This fitting function is closely related to algorithm [[DSFinterp]]. Please chec
 |Mandatory
 |list of input parameter values, as a single string separated by white spaces
 |-
-|colspan=6 align=center|'''Running Local Regression Options'''
+|colspan=6 align=center|Running Local Regression Options
 |-
 |4
 |LocalRegression
