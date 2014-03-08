@@ -1,6 +1,95 @@
 '''*WIKI* 
+== Summary == 
 
+Given a set of parameter values {<math>T_i</math>} and corresponding structure factors {<math>S(Q,E,T_i)</math>}, this
+fit function interpolates <math>S(Q,E,T)</math> for any value of parameter T within the range spanned by the {<math>T_i</math>} set in order to fit against a reference S(Q,E).
 
+This fitting function is closely related to algorithm [[DSFinterp]]. Please check the algorithm wiki page to learn about the details of the interpolator.
+
+== Atributes (non-fitting parameters) ==
+ 
+{| border="1" cellpadding="5" cellspacing="0" 
+!Order
+!Name
+!Direction
+!Type
+!Default
+!Description
+|-
+|colspan=6 align=center|'''Input'''
+|-
+|1
+|InputWorkspaces
+|Input
+|str list
+|Mandatory
+|list of input workspace names in a single string, separated by white spaces
+|-
+|2
+|LoadErrors
+|Input
+|boolean
+| True
+|Do we load error data contained in the workspaces?
+|-
+|3
+|ParameterValues
+|Input
+|dbl list
+|Mandatory
+|list of input parameter values, as a single string separated by white spaces
+|-
+|colspan=6 align=center|'''Running Local Regression Options'''
+|-
+|4
+|LocalRegression
+|Input
+|boolean
+| True
+|Perform running local-regression?
+|-
+|5
+|RegressionWindow
+|Input
+|number
+| 6
+|window size for the running local-regression
+|-
+|6
+|RegressionType
+|Input
+|string
+| quadratic
+|type of local-regression; linear and quadratic are available
+|-
+|}
+
+== Fitting parameters ==
+ 
+{| border="1" cellpadding="5" cellspacing="0" 
+!Order
+!Name
+!Type
+!Default
+!Description
+|-
+|1
+|Intensity
+|dbl
+|1.0
+|Multiplicative prefactor scaling the height or intensity of the structure factor
+|-
+|2
+|TargetParameter
+|dbl
+|1.0
+|Parameter value for which the interpolator is evaluated
+|-
+|}
+
+[[Category:Fit_functions]]
+
+[[Category:QuasiElastic]]
 *WIKI*
     
 @author Jose Borreguero, NScD
@@ -32,6 +121,7 @@ from mantid.simpleapi import mtd
 from mantid import logger
 import numpy
 from scipy.interpolate import interp1d
+from pdb import set_trace as tr
 
 #from pdb import set_trace as tr
 
@@ -90,7 +180,7 @@ class DSFinterp1DFit(IFunction1D):
       self._RegressionWindow = value
 
   def validateParams(self):
-    '''Check parameters are positive'''
+    '''Check parameters within expected range'''
     intensity = self.getParameterValue('Intensity')
     if intensity <=0:
       message = 'Parameter Intensity in DSFinterp1DFit must be positive. Got {0} instead'.format(intensity)
@@ -105,12 +195,11 @@ class DSFinterp1DFit(IFunction1D):
 
 
   def function1D(self, xvals):
-    ''' Does something :)
-    '''
+    ''' Fit using the interpolated structure factor '''
     p=self.validateParams()
     if not p:
       return numpy.zeros(len(xvals), dtype=float) # return zeros if parameters not valid
-    # The first time the function is called requires some initialization
+    # The first time the function is called requires initialization of the interpolator
     if self._channelgroup == None:
       # Check consistency of the input
       # check InputWorkspaces have at least the workspace index
@@ -136,6 +225,8 @@ class DSFinterp1DFit(IFunction1D):
         raise ValueError(message)
       # Initialize the energies of the channels with the first of the input workspaces
       self._xvalues = numpy.copy( mtd[ self._InputWorkspaces[0] ].dataX(self._WorkspaceIndex) )
+      if len(self._xvalues) == 1+ len( mtd[ self._InputWorkspaces[0] ].dataY(self._WorkspaceIndex) ):
+        self._xvalues = (self._xvalues[1:]+self._xvalues[:-1])/2.0  # Deal with histogram data
       # Initialize the channel group
       nf = len(self._ParameterValues)
       # Load the InputWorkspaces into a group of dynamic structure factors
