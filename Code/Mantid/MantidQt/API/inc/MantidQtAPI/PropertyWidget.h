@@ -10,6 +10,8 @@
 #include <qpushbutton.h>
 #include "DllOption.h"
 
+class QLineEdit;
+
 namespace MantidQt
 {
 namespace API
@@ -90,6 +92,12 @@ namespace API
     void replaceWorkspaceName(const QString & propName);
 
   protected:
+    /// Set the font of the given label based on the optional/required status of the given property.
+    static void setLabelFont(Mantid::Kernel::Property * prop, QWidget * label);
+
+    /// Set the placeholder text of the given field based on the default value of the given property.
+    static void setFieldPlaceholderText(Mantid::Kernel::Property * prop, QLineEdit * field);
+
     /// Property being looked at. This is NOT owned by the widget
     Mantid::Kernel::Property * m_prop;
 

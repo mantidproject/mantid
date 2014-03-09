@@ -1,10 +1,143 @@
 #include "MantidQtAPI/PropertyWidget.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidAPI/IWorkspaceProperty.h"
+
+#include <boost/optional.hpp>
+#include <boost/assign.hpp>
+
+#include <cmath>
+#include <climits>
+#include <cfloat>
+
+#include <algorithm>
+
+#include <QLineEdit>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::API::IWorkspaceProperty;
+
+namespace // anonymous
+{
+  /**
+   * Attempts to convert the given string into a double representation of a number.
+   *
+   * @param s :: the string to convert.
+   * @returns :: the converted number, wrapped in an optional.  Else an empty optional
+   *             if conversion was unsuccesful.
+   */
+  boost::optional<double> stringToNumber(const std::string & s)
+  {
+    // Using std::istringstream is a nice way to do string-to-double conversion
+    // in this situation as it rounds numbers for us at the same time.  Unfortunately,
+    // commas seem to confuse it ("0,0,0" is converted to "0" without any warning).
+    const bool containsComma = s.find(",") != std::string::npos;
+    if( containsComma )
+      return boost::optional<double>();
+    
+    std::istringstream i(s);
+    double result;
+    
+    if (!(i >> result))
+      return boost::optional<double>();
+    
+    return boost::optional<double>(result);
+  } 
+
+  /**
+   * Tests whether or not the given string value is "valid" for the given property.
+   *
+   * @param prop  :: the property to test against
+   * @param value :: the string to test with
+   * @returns     :: true if the value is valid, else false.
+   */
+  bool isValidPropertyValue(Mantid::Kernel::Property * prop, const std::string & value)
+  {
+    const auto guineaPig = boost::shared_ptr<Property>(prop->clone());
+    return guineaPig->setValue(value).empty();
+  }
+
+  /**
+   * Checks whether or not the given string value is one of our known "EMPTY_*" macros,
+   * which are used by some algorithms to denote an empty default number value.  We
+   * class the other *_MAX macros as "empty" macros, too.
+   *
+   * @param value :: the string value to check
+   * @returns     :: true if the value is one of the macros, else false
+   */
+  bool isEmptyNumMacro(const std::string & value)
+  {
+    using namespace Mantid;
+
+    // Catch instances of Python's "sys.maxint" which otherwise seem to fall through our net.
+    if( value == "2.14748e+09" )
+      return true;
+
+    const auto number = stringToNumber(value);
+    if( !number )
+      return false;
+    
+    static const std::vector<double> EMPTY_NUM_MACROS = boost::assign::list_of
+      (EMPTY_DBL()) (EMPTY_INT()) (EMPTY_LONG())
+      (-INT_MAX)(-DBL_MAX)(DBL_MAX)(-LONG_MAX);
+
+    return std::find(EMPTY_NUM_MACROS.begin(), EMPTY_NUM_MACROS.end(), *number) != EMPTY_NUM_MACROS.end();
+  }
+
+  /**
+   * Checks whether or not the given property can optionally be left blank by
+   * an algorithm user.
+   *
+   * @param prop :: the property to check
+   * @returns    :: true if can be left blank, else false
+   */
+  bool isOptionalProperty(Mantid::Kernel::Property * prop)
+  {
+    return isValidPropertyValue(prop, "") ||
+           isValidPropertyValue(prop, prop->getDefault());
+  }
+
+  /**
+   * For a given property, will create a placeholder text string.
+   *
+   * This will act in a similar way to the function used for the same purpose in the
+   * WikiMaker script, except that we won't ever display "optional".
+   *
+   * @param prop :: the property for which to create placeholder text
+   * @returns    :: the placeholder text
+   */
+  std::string createFieldPlaceholderText(Mantid::Kernel::Property * prop)
+  {
+    const std::string defaultValue = prop->getDefault();
+    if( defaultValue.empty() )
+      return "";
+
+    if( !isValidPropertyValue(prop, defaultValue) || isEmptyNumMacro(prop->getDefault()))
+      return "";
+
+    // It seems likely that any instance of "-0" or "-0.0" should be replaced with an appropriate
+    // EMPTY_* macro, but for now just display them as they appear in the Wiki.
+    if( defaultValue == "-0" || defaultValue == "-0.0" )
+      return "0";
+
+    const auto number = stringToNumber(defaultValue);
+    if( !number )
+      return defaultValue;
+
+    // We'd like to round off any instances of "2.7999999999999998", "0.050000000000000003",
+    // or similar, but we want to keep the decimal point in values like "0.0" or "1.0" since
+    // they can be a visual clue that a double is expected.
+    if( defaultValue.length() > 5 )
+    {
+      std::stringstream roundedValue;
+      roundedValue << *number;
+      return roundedValue.str();
+    }
+
+    return defaultValue;
+  }
+} // anonymous namespace
 
 namespace MantidQt
 {
@@ -171,6 +304,34 @@ namespace API
     QWidget::setVisible(val);
   }
 
+  /**
+   * Given a property and its associated label, will make font adjustments to the label
+   * based on whether or not the property is mandatory.
+   *
+   * @param prop  :: property to which the label belongs
+   * @param label :: widget containing the label
+   */
+  void PropertyWidget::setLabelFont(Mantid::Kernel::Property * prop, QWidget * label)
+  {
+    if( !isOptionalProperty(prop) )
+    {
+      auto font = label->font();
+      font.setBold(true);
+      label->setFont(font);
+    }
+  }
+
+  /**
+   * Given a property and its associated QLineEdit text field, will set the field's placeholder
+   * text based on the default value of the property.
+   *
+   * @param prop  :: the property who's default value to use
+   * @param field :: the associated text field to set the placeholder text of
+   */
+  void PropertyWidget::setFieldPlaceholderText(Mantid::Kernel::Property * prop, QLineEdit * field)
+  {
+    field->setPlaceholderText(QString::fromStdString(createFieldPlaceholderText(prop)));
+  }
 
 } // namespace MantidQt
 } // namespace API
