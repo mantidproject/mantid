@@ -79,8 +79,11 @@ namespace // anonymous
       return false;
     
     static const std::vector<double> EMPTY_NUM_MACROS = boost::assign::list_of
-      (EMPTY_DBL()) (EMPTY_INT()) (EMPTY_LONG())
-      (-INT_MAX)(-DBL_MAX)(DBL_MAX)(-LONG_MAX);
+      (EMPTY_DBL()) (-DBL_MAX) (DBL_MAX)
+      (static_cast<double>(EMPTY_INT()))
+      (static_cast<double>(EMPTY_LONG()))
+      (static_cast<double>(-INT_MAX))
+      (static_cast<double>(-LONG_MAX));
 
     return std::find(EMPTY_NUM_MACROS.begin(), EMPTY_NUM_MACROS.end(), *number) != EMPTY_NUM_MACROS.end();
   }
@@ -131,7 +134,8 @@ namespace // anonymous
     if( defaultValue.length() > 5 )
     {
       std::stringstream roundedValue;
-      roundedValue << *number;
+      const double rounded = *number;
+      roundedValue << rounded;
       return roundedValue.str();
     }
 
