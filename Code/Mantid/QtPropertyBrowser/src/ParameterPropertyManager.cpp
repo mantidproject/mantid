@@ -3,6 +3,7 @@
 #include "qtpropertymanager.h"
 
 #include <stdexcept>
+#include <math.h>
 
 ParameterPropertyManager::ParameterPropertyManager(QObject *parent)
   : QtDoublePropertyManager(parent),
