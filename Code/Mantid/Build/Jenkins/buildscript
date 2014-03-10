@@ -23,6 +23,7 @@ if [[ $(uname) == 'Darwin' ]]; then
   export CC=icc
   export CXX=icpc
 fi
+
 ###############################################################################
 # Check whether this is a clean build (must have 'clean' in the job name)
 ###############################################################################
@@ -71,6 +72,10 @@ ctest --output-on-failure -R MantidPlot
 # Create the install kit if this is a clean build
 ###############################################################################
 if [[ "$CLEANBUILD" == true ]]; then
+  if [[ $(uname) != 'Darwin' ]]; then
+    make -j$BUILD_THREADS qtassistant
+  fi
+
   rm -f *.dmg *.rpm *.deb *.tar.gz
   cpack
 fi

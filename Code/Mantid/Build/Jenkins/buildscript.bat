@@ -66,5 +66,6 @@ ctest -C Release --output-on-failure -R MantidPlot
 :: Create the install kit if this is a clean build
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if "%CLEANBUILD%" EQU "yes" (
+    msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=Release docs/qtassistant/qtassistant.vcxproj
     cpack -C Release --config CPackConfig.cmake
 )
