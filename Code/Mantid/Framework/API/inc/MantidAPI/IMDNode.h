@@ -8,7 +8,6 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidAPI/BoxController.h"
-#include "MantidAPI/CoordTransform.h"
 
 namespace Mantid
 {
