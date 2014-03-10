@@ -4,8 +4,8 @@
 #
 # Notes:
 #
-# WORKSPACE & NODE_LABEL are environment variables that are set by Jenkins.
-#   The latter corresponds to any labels set on a slave.
+# WORKSPACE, JOB_NAME & NODE_LABEL are environment variables that are set by
+# Jenkins. The last one corresponds to any labels set on a slave.
 # BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
 ###############################################################################
 
@@ -22,6 +22,14 @@ if [[ $(uname) == 'Darwin' ]]; then
   # Make sure we pick up the Intel compiler
   export CC=icc
   export CXX=icpc
+fi
+###############################################################################
+# Check whether this is a clean build (must have 'clean' in the job name)
+###############################################################################
+if [[ ${JOB_NAME} == *clean* ]]; then
+  CLEANBUILD=true
+  # Removing the build directory entirely guarantees a completely clean build
+  rm -rf $WORKSPACE/build
 fi
 
 ###############################################################################
@@ -54,8 +62,15 @@ make -j$BUILD_THREADS AllTests
 # Run the tests
 ###############################################################################
 # Remove any Mantid.user.properties file
-rm ~/.mantid/Mantid.user.properties
+rm -f ~/.mantid/Mantid.user.properties
 ctest -j$BUILD_THREADS --schedule-random --output-on-failure -E MantidPlot
 # Run GUI tests serially
 ctest --output-on-failure -R MantidPlot
 
+###############################################################################
+# Create the install kit if this is a clean build
+###############################################################################
+if [[ "$CLEANBUILD" == true ]]; then
+  rm -f *.dmg *.rpm *.deb *.tar.gz
+  cpack
+fi
