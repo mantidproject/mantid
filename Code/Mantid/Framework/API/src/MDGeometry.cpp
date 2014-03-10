@@ -512,6 +512,24 @@ namespace API
     return xmlBuilder.create();
   }
 
+  /**
+   * Get the number of transforms defined to the original coordinate system.
+   * @return The number of transforms.
+   */
+  size_t MDGeometry::getNumberTransformsToOriginal() const
+  {
+    return m_transforms_ToOriginal.size();
+  }
+
+  /**
+   * Get the number of transforms defined from the original coordinate system.
+   * @return The number of transforms.
+   */
+  size_t MDGeometry::getNumberTransformsFromOriginal() const
+  {
+    return m_transforms_FromOriginal.size();
+  }
+
 
 } // namespace Mantid
 } // namespace API

@@ -72,7 +72,7 @@ class DLLExport UnitsConversionHelper
       float *m_pEfixedArray;
 
 public:
-    UnitsConversionHelper():m_pTwoThetas(NULL),m_pL2s(NULL){};
+    UnitsConversionHelper();
     void initialize(const MDWSDescription &targetWSDescr,const std::string &units_to);
     void initialize(const std::string &unitsFrom,const std::string &unitsTo,const DataObjects::TableWorkspace_const_sptr &DetWS,int Emode);
     void updateConversion(size_t i);

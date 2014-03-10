@@ -11,6 +11,7 @@ set ( TEST_PY_FILES
   CreateTransmissionWorkspaceTest.py
   CreateTransmissionWorkspaceAutoTest.py
   DakotaChiSquaredTest.py
+  DSFinterpTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   GetEiT0atSNSTest.py
@@ -35,7 +36,7 @@ set ( TEST_PY_FILES
   SuggestTibHYSPECTest.py
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
-  #FixGSASInstrumentFileTest.py
+  ExportSampleLogsToCSVFileTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

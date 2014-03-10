@@ -49,7 +49,7 @@ namespace Mantid
        */
       template<typename ContainerType>
       void SequenceTypeHandler<ContainerType>::set(Kernel::IPropertyManager* alg, const std::string &name,
-                                                   const boost::python::object & value)
+                                                   const boost::python::object & value) const
       {
         using boost::python::len;
         typedef typename ContainerType::value_type DestElementType;

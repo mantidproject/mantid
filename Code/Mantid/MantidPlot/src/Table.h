@@ -44,12 +44,18 @@
 
 class MyTable : public Q3Table
 {
+  Q_OBJECT
 public:
     MyTable(QWidget * parent = 0, const char * name = 0);
     MyTable(int numRows, int numCols, QWidget * parent = 0, const char * name = 0);
+    void blockResizing(bool yes);
 
+signals:
+    void unwantedResize();
 private:
     void activateNextCell();
+    void resizeData(int n);
+    bool m_blockResizing; // a workaround to prevent unwanted resizes
 };
 
 /**\brief MDI window providing a spreadsheet table with column logic.
@@ -231,6 +237,7 @@ public slots:
 	void insertRow();
 	void insertRow(int row);//Mantid
 	void addRows(int num);//Mantid
+	virtual void insertRows(int atRow, int num);
 	//@}
 
 	//! Selection Operations

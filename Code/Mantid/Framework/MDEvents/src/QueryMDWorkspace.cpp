@@ -264,7 +264,7 @@ namespace MDEvents
       output->cell<double>(rowCounter, cellIndex++) = it->getNormalizedError();
       output->cell<int>(rowCounter, cellIndex++) = int(it->getNumEvents());
       VMD center = it->getCenter();
-      const size_t numberOriginal = input->numOriginalWorkspaces();
+      const size_t numberOriginal = input->getNumberTransformsToOriginal();
       if(numberOriginal > 0)
       {
         const size_t index = numberOriginal -1;

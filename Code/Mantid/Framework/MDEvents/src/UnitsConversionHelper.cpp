@@ -112,7 +112,7 @@ void UnitsConversionHelper::updateConversion(size_t i)
   case(CnvrtToMD::ConvertFast):      return;
   case(CnvrtToMD::ConvertFromTOF):
     {
-      double delta;
+      double delta(std::numeric_limits<double>::quiet_NaN());
       m_TwoTheta = (*m_pTwoThetas)[i];
       m_L2       = (*m_pL2s)[i];
       double    Efix = m_Efix;
@@ -123,7 +123,7 @@ void UnitsConversionHelper::updateConversion(size_t i)
     }
   case(CnvrtToMD::ConvertByTOF):
     {
-      double delta;
+      double delta(std::numeric_limits<double>::quiet_NaN());
       m_TwoTheta = (*m_pTwoThetas)[i];
       m_L2       = (*m_pL2s)[i];
       double  Efix = m_Efix;
@@ -187,6 +187,14 @@ UnitsConversionHelper::UnitsConversionHelper(const UnitsConversionHelper &anothe
   if(another.m_SourceWSUnit)m_SourceWSUnit = Kernel::Unit_sptr(another.m_SourceWSUnit->clone());      
   if(another.m_TargetUnit)  m_TargetUnit   = Kernel::Unit_sptr(another.m_TargetUnit->clone());
 }
+
+UnitsConversionHelper::UnitsConversionHelper():
+  m_UnitCnvrsn(CnvrtToMD::ConvertNo),
+  m_Factor(1),m_Power(1),
+  m_Emode(-1), // undefined
+  m_L1(1),m_Efix(1),m_TwoTheta(0),m_L2(1),
+  m_pTwoThetas(NULL),m_pL2s(NULL),m_pEfixedArray(NULL)
+{};
 
 } // endNamespace MDEvents
 } // endNamespace Mantid

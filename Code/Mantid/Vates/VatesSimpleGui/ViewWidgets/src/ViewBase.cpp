@@ -396,6 +396,9 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp)
 
   if (1 < numTimesteps)
   {
+    double tStart = dvp->GetElement(0);
+    double tEnd = dvp->GetElement(dvp->GetNumberOfElements() - 1);
+    emit this->setAnimationControlInfo(tStart, tEnd, numTimesteps);
     emit this->setAnimationControlState(true);
   }
   else

@@ -50,6 +50,9 @@ namespace WorkflowAlgorithms
     void init();
     void exec();
 
+    // We dont' want processGroups to be called
+    virtual bool checkGroups() { return false; }
+
     /// Returns a workspace for the first period as specified using FirstPeriod property.
     MatrixWorkspace_sptr getFirstPeriodWS(WorkspaceGroup_sptr ws);
 
@@ -57,7 +60,7 @@ namespace WorkflowAlgorithms
     MatrixWorkspace_sptr getSecondPeriodWS(WorkspaceGroup_sptr ws);
 
     /// Groups specified workspace according to specified DetectorGroupingTable.
-    MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_sptr ws);
+    MatrixWorkspace_sptr groupWorkspace(MatrixWorkspace_sptr ws, TableWorkspace_sptr grouping);
 
     /// Applies dead time correction to the workspace.
     MatrixWorkspace_sptr applyDTC(MatrixWorkspace_sptr ws, TableWorkspace_sptr dt);

@@ -5,7 +5,7 @@ This algorithm disconnects the logged in user from the information catalog.
 *WIKI*/
 
 #include "MantidICat/CatalogLogout.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
+#include "MantidAPI/CatalogManager.h"
 
 namespace Mantid
 {
@@ -21,12 +21,15 @@ namespace Mantid
     }
 
     /// Init method to declare algorithm properties
-    void CatalogLogout::init() {}
+    void CatalogLogout::init()
+    {
+      declareProperty("Session","","The session information of the catalog to use.");
+    }
 
     /// execute the algorithm
     void CatalogLogout::exec()
     {
-      CatalogAlgorithmHelper().createCatalog()->logout();
+      API::CatalogManager::Instance().destroyCatalog(getPropertyValue("Session"));
     }
   }
 }

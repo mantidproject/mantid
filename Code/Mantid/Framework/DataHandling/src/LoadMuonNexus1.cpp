@@ -126,13 +126,28 @@ namespace Mantid
         std::string firstGoodBin = counts.attributes("first_good_bin");
         if ( !firstGoodBin.empty() && infoResolution.stat != NX_ERROR )
         {
+          double resolution;
+
+          switch(infoResolution.type)
+          {
+            case NX_FLOAT32:
+              resolution = static_cast<double>(entry.getFloat("resolution")); break;
+            case NX_INT32:
+              resolution = static_cast<double>(entry.getInt("resolution")); break;
+            default:
+              throw std::runtime_error("Unsupported data type for resolution");
+          }
+
           double bin = static_cast<double>(boost::lexical_cast<int>(firstGoodBin));
-          double bin_size = static_cast<double>(root.getInt("run/histogram_data_1/resolution"))/1000000.0;
+          double bin_size = resolution/1000000.0;
+
           setProperty("FirstGoodData", bin*bin_size);
         }
       }
-      catch (...)
-      {}
+      catch (std::exception& e)
+      {
+        g_log.warning() << "Error while loading the FirstGoodData value: " << e.what() << "\n";
+      }
 
       NXEntry nxRun = root.openEntry("run");
       std::string title;
@@ -188,14 +203,15 @@ namespace Mantid
       {
         loadedGrouping = loadDetectorGrouping(root);
 
-        if ( loadedGrouping )
+        if ( loadedGrouping && returnGrouping)
         {
           // Return loaded grouping, if requested
-          if ( returnGrouping )
-            setProperty("DetectorGroupingTable", loadedGrouping);
+          setProperty("DetectorGroupingTable", loadedGrouping);
         }
-        else
+
+        if ( !loadedGrouping && autoGroup )
         {
+          // If autoGroup requested and no grouping in the file - show a warning
           g_log.warning("Unable to load grouping from the file. Grouping not applied.");
         }
       }
