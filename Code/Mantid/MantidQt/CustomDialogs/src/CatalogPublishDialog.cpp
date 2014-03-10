@@ -1,6 +1,7 @@
 #include "MantidQtCustomDialogs/CatalogPublishDialog.h"
 
 #include "MantidAPI/CatalogFactory.h"
+#include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ICatalog.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -20,9 +21,6 @@ namespace MantidQt
      * @param parent :: Parent dialog.
      */
     CatalogPublishDialog::CatalogPublishDialog(QWidget *parent) : MantidQt::API::AlgorithmDialog(parent), m_uiForm() {}
-
-    /// Destructor
-    CatalogPublishDialog::~CatalogPublishDialog() {}
 
     /// Initialise the layout
     void CatalogPublishDialog::initLayout()
@@ -63,9 +61,10 @@ namespace MantidQt
     void CatalogPublishDialog::populateUserInvestigations()
     {
       auto workspace = Mantid::API::WorkspaceFactory::Instance().createTable();
-      std::string catalogName = Mantid::Kernel::ConfigService::Instance().getFacility().catalogInfo().catalogName();
-      auto catalog = Mantid::API::CatalogFactory::Instance().create(catalogName);
-      catalog->myData(workspace);
+
+      // This again is a temporary measure to ensure publishing functionality will work with one catalog.
+      auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
+      if (!session.empty()) Mantid::API::CatalogManager::Instance().getCatalog(session.front()->getSessionId())->myData(workspace);
 
       // The user is not an investigator on any investigations and cannot publish
       // or they are not logged into the catalog then update the related message..

@@ -1292,7 +1292,6 @@ namespace Algorithms
       dataY[i] = rawY[i_min+i] - backgroundvalues[i];
       if (dataY[i] < 0)
         dataY[i] = 0.;
-      g_log.notice() << "[SuperDB] " << dataX[i] << "\t " << dataY[i] << "\t " << backgroundvalues[i] << "\n";
     }
     MantidVec& dataE = peakws->dataE(0);
     dataE.assign(numpts, 1.);

@@ -12,11 +12,11 @@ This algorithm searches for the investigations and stores the search results in 
     GCC_DIAG_ON(literal-suffix)
 #endif
 
+#include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
 
 #include <boost/algorithm/string/regex.hpp>
 #include <limits>
@@ -58,6 +58,8 @@ namespace Mantid
       declareProperty<int>("Limit", 0, "");
       declareProperty<int>("Offset",0, "");
 
+      declareProperty("Session","","The session information of the catalog to use.");
+
       declareProperty(new API::WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Kernel::Direction::Output),
           "The name of the workspace that will be created to store the ICat investigations search result.");
       declareProperty<int64_t>("NumberOfSearchResults", 0, "", Kernel::Direction::Output);
@@ -72,19 +74,19 @@ namespace Mantid
       getInputProperties(params);
       // Create output workspace.
       auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      // Create a catalog since we use it twice on execution.
-      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
+      // Obtain all the active catalogs.
+      auto catalogs = API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"));
       // Search for investigations with user specific search inputs.
       setProperty("OutputWorkspace",workspace);
       // Do not perform a full search if we only want a COUNT search.
       if (getProperty("CountOnly"))
       {
         // Set the related property needed for paging.
-        setProperty("NumberOfSearchResults", catalog->getNumberOfSearchResults(params));
+        setProperty("NumberOfSearchResults", catalogs->getNumberOfSearchResults(params));
         return;
       }
       // Search for investigations in the archives.
-      catalog->search(params,workspace,getProperty("Offset"),getProperty("Limit"));
+      catalogs->search(params,workspace,getProperty("Offset"),getProperty("Limit"));
     }
 
     /**

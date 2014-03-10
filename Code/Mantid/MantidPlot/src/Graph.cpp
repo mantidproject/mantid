@@ -3193,11 +3193,6 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
       }
     }
 
-    // Layout we will use to draw curves
-    CurveLayout cl = initCurveLayout(style, drawableNames.count() - noOfErrorCols);
-    cl.sSize = sSize;
-    cl.lWidth = float(lWidth);
-
     for (int i = 0; i < drawableNames.count(); i++){
       QString colName = drawableNames[i];
       int colIndex = w->colIndex(colName);
@@ -3222,6 +3217,8 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
       if (xColName.isEmpty() || yColName.isEmpty())
         return false;
 
+      PlotCurve* newCurve(NULL);
+
       // --- Drawing error columns -----------------------------
       if (colType == Table::xErr || colType == Table::yErr){
         int dir;
@@ -3230,8 +3227,7 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
         else
           dir = QwtErrorPlotCurve::Vertical;
 
-        PlotCurve* c = addErrorBars(xColName, yColName, w, colName, dir);
-        updateCurveLayout(c, &cl);
+        newCurve = addErrorBars(xColName, yColName, w, colName, dir);
       // --- Drawing label columns -----------------------------
       } else if (colType == Table::Label){
         DataCurve* mc = masterCurve(xColName, yColName);
@@ -3243,8 +3239,17 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
       // --- Drawing Y columns -----------------------------
       } else if (colType == Table::Y)
       {
-        PlotCurve* c = insertCurve(w, xColName, yColName, style, startRow, endRow);
-        updateCurveLayout(c, &cl);
+        newCurve = insertCurve(w, xColName, yColName, style, startRow, endRow);
+      }
+
+      // Set a layout for the new curve, if we've added one
+      if (newCurve)
+      {
+        CurveLayout cl = initCurveLayout(style, drawableNames.count() - noOfErrorCols);
+        cl.sSize = sSize;
+        cl.lWidth = static_cast<float>(lWidth);
+
+        updateCurveLayout(newCurve, &cl);
       }
     }
   }

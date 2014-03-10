@@ -12,9 +12,12 @@ set ( SRC_FILES
 	src/Axis.cpp
 	src/BoxController.cpp
 	src/CatalogFactory.cpp
+	src/CatalogManager.cpp
+	src/CatalogSession.cpp
 	src/ChopperModel.cpp
 	src/Column.cpp
 	src/ColumnFactory.cpp
+	src/CompositeCatalog.cpp
 	src/CompositeDomainMD.cpp
 	src/CompositeFunction.cpp
 	src/ConstraintFactory.cpp
@@ -133,9 +136,12 @@ set ( INC_FILES
 	inc/MantidAPI/Axis.h
 	inc/MantidAPI/BoxController.h
 	inc/MantidAPI/CatalogFactory.h
+	inc/MantidAPI/CatalogManager.h
+	inc/MantidAPI/CatalogSession.h
 	inc/MantidAPI/ChopperModel.h
 	inc/MantidAPI/Column.h
 	inc/MantidAPI/ColumnFactory.h
+	inc/MantidAPI/CompositeCatalog.h
 	inc/MantidAPI/CompositeDomain.h
 	inc/MantidAPI/CompositeDomainMD.h
 	inc/MantidAPI/CompositeFunction.h

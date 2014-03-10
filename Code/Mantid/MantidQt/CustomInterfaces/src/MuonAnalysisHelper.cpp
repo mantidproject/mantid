@@ -2,12 +2,12 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
 
 #include <stdexcept>
+#include <boost/scope_exit.hpp>
 
 namespace MantidQt
 {
@@ -71,6 +71,18 @@ size_t numPeriods(Workspace_sptr ws)
  */
 void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out)
 {
+  // Remember current out stream format
+  std::ios_base::fmtflags outFlags(out.flags());
+  std::streamsize outPrecision(out.precision());
+
+  BOOST_SCOPE_EXIT((&out)(&outFlags)(&outPrecision))
+  {
+    // Restore the flags when exiting the function
+    out.precision(outPrecision);
+    out.flags(outFlags);
+  }
+  BOOST_SCOPE_EXIT_END
+
   // Set display style for floating point values
   out << std::fixed << std::setprecision(12);
 

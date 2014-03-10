@@ -5,7 +5,7 @@ This algorithm retrieves the instrument names from a catalog and stores them in 
 *WIKI*/
 
 #include "MantidICat/CatalogListInstruments.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
+#include "MantidAPI/CatalogManager.h"
 #include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid
@@ -25,18 +25,17 @@ namespace Mantid
     /// Init method
     void CatalogListInstruments::init()
     {
-      declareProperty( new Kernel::ArrayProperty<std::string>("InstrumentList",std::vector<std::string>(),
-                                                      boost::make_shared<Kernel::NullValidator>(),
-                                                      Kernel::Direction::Output),
-                       "A list containing instrument names");
+      declareProperty("Session","","The session information of the catalog to use.");
+      declareProperty(new Kernel::ArrayProperty<std::string>("InstrumentList",std::vector<std::string>(),
+          boost::make_shared<Kernel::NullValidator>(),Kernel::Direction::Output), "A list containing instrument names.");
     }
 
     /// exec method
     void CatalogListInstruments::exec()
     {
-      std::vector<std::string> intruments;
-      CatalogAlgorithmHelper().createCatalog()->listInstruments(intruments);
-      setProperty("InstrumentList",intruments);
+      std::vector<std::string> instruments;
+      API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->listInstruments(instruments);
+      setProperty("InstrumentList",instruments);
     }
 
   }
