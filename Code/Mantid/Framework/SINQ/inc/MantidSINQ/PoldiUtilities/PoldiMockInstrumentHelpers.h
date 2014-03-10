@@ -3,6 +3,7 @@
 
 #include "MantidSINQ/DllConfig.h"
 #include <gmock/gmock.h>
+#include <algorithm>
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
 

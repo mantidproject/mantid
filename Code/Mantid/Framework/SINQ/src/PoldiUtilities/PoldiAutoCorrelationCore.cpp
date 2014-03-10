@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "boost/range/irange.hpp"
 #include "boost/bind.hpp"
+#include "boost/algorithm/cxx11/any_of.hpp"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -143,7 +144,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
 
         /* Finally, the d-Values are converted to q-Values for plotting etc. and inserted into the output workspace. */
         std::vector<double> qValues(dValues.size());
-        std::transform(dValues.crbegin(), dValues.crend(), qValues.begin(), [] (double d) { return 2.0 * M_PI / d; });
+        std::transform(dValues.rbegin(), dValues.rend(), qValues.begin(), [] (double d) { return 2.0 * M_PI / d; });
 
         m_logger.information() << "  Setting result..." << std::endl;
         DataObjects::Workspace2D_sptr outputWorkspace = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
@@ -418,7 +419,7 @@ double PoldiAutoCorrelationCore::reduceChopperSlitList(std::vector<std::pair<dou
     std::vector<double> iOverSigma(valuesWithSigma.size());
     std::transform(valuesWithSigma.begin(), valuesWithSigma.end(), iOverSigma.begin(), [] (std::pair<double, double> iAndSigma) { return iAndSigma.first / iAndSigma.second; });
 
-    if(std::any_of(iOverSigma.begin(), iOverSigma.end(), [] (double iOverS) { return iOverS < 0; })) {
+    if(boost::algorithm::any_of(iOverSigma.begin(), iOverSigma.end(), [] (double iOverS) { return iOverS < 0; })) {
         return 0.0;
     }
 
