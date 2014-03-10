@@ -1,10 +1,7 @@
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/LocatedDataRef.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/WorkspaceIterator.h"
-#include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -944,10 +941,6 @@ namespace DataObjects
 } // namespace DataObjects
 } // namespace Mantid
 
-
-///\cond TEMPLATE
-template DLLExport class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef, Mantid::DataObjects::EventWorkspace>;
-template DLLExport class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::DataObjects::EventWorkspace>;
 
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::EventWorkspace>;
 

@@ -48,6 +48,9 @@ class MuonAnalysisOptionTab : public QWidget
 {
  Q_OBJECT
 public:
+  /// Types of new plot policies
+  enum NewPlotPolicy { NewWindow, PreviousWindow };
+
   /// Constructor
   MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& settingsGroup);
 
@@ -57,6 +60,9 @@ public:
   /// Get plot style parameters from widgets
   QMap<QString, QString> parsePlotStyleParams() const;
 
+  /// Return currently selected new plot policy
+  NewPlotPolicy newPlotPolicy();
+
 signals:
   /// Update the plot because something has changed.
   void settingsTabUpdatePlot();
@@ -65,6 +71,7 @@ signals:
   void plotStyleChanged();
 
 private:
+
   /// The Muon Analysis UI file.
   Ui::MuonAnalysis& m_uiForm;
 

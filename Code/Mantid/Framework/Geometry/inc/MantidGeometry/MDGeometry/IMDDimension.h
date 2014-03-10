@@ -69,7 +69,9 @@ namespace Mantid
     /// @return an XML string representation of the dimension.
     virtual std::string toXMLString() const = 0;
 
-    /// Change the extents and number of bins
+    /** Change the extents and number of bins
+     *  @throws std::invalid_argument If min is greater than max
+     */
     virtual void setRange(size_t nBins, coord_t min, coord_t max) = 0;
 
     /** @return coordinate of the axis at the given index

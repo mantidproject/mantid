@@ -237,13 +237,13 @@ private slots:
 
 private:
  
-  // Types of entities we are dealing with
+  /// Types of entities we are dealing with
   enum ItemType { Pair, Group };
   
-  // Possible plot types users might request
+  /// Possible plot types users might request
   enum PlotType { Asymmetry, Counts, Logorithm };
 
-  // Types of periods
+  /// Types of periods
   enum PeriodType { First, Second };
 
   /// Initialize local Python environment
@@ -428,13 +428,13 @@ private:
   int getPairNumberFromRow(int row);
 
   /// first good bin returned in ms
-  QString firstGoodBin();
+  double firstGoodBin() const;
 
   /// According to Plot Options what is the time to plot from in ms
-  double plotFromTime();
+  double plotFromTime() const;
 
   /// According to Plot Options what is the time to plot to in ms
-  double plotToTime();
+  double plotToTime() const;
 
   /// time zero returned in ms
   double timeZero();
@@ -519,6 +519,9 @@ private:
   double m_dataFirstGoodData;
 
   static const QString NOT_AVAILABLE;
+
+  // Default value used for first good bin
+  static const double FIRST_GOOD_BIN_DEFAULT;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
