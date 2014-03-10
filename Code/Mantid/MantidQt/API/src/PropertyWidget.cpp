@@ -124,7 +124,7 @@ namespace // anonymous
     if( defaultValue == "-0" || defaultValue == "-0.0" )
       return "0";
 
-    const boost::optional<double> number = stringToNumber(defaultValue);
+    const auto number = stringToNumber(defaultValue);
     if( !number )
       return defaultValue;
 
@@ -134,7 +134,7 @@ namespace // anonymous
     if( defaultValue.length() > 5 )
     {
       std::stringstream roundedValue;
-      roundedValue << *number;
+      roundedValue << number.get();
       return roundedValue.str();
     }
 
