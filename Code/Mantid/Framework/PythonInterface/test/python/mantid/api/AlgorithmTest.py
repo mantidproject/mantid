@@ -1,5 +1,5 @@
 import unittest
-from mantid.api import AlgorithmManager
+from mantid.api import AlgorithmID, AlgorithmManager
 from testhelpers import run_algorithm
 
 ############### Test class for cancellation ################
@@ -70,8 +70,19 @@ class AlgorithmTest(unittest.TestCase):
         
         as_str = str(alg)
         self.assertEquals(as_str, "CreateWorkspace.1(OutputWorkspace=UNUSED_NAME_FOR_CHILD,DataX=1,2,3,DataY=1,2,3,UnitX=Wavelength)")
-        
-        
+    
+    def test_getAlgorithmID_returns_AlgorithmID_object(self):
+        alg = AlgorithmManager.createUnmanaged('Load')
+        self.assertEquals(AlgorithmID, type(alg.getAlgorithmID()))
+
+    def test_AlgorithmID_compares_by_value(self):
+        alg = AlgorithmManager.createUnmanaged('Load')
+        id = alg.getAlgorithmID()
+        self.assertEquals(id, id) # equals itself 
+        alg2 = AlgorithmManager.createUnmanaged('Load')
+        id2 = alg.getAlgorithmID()
+        self.assertNotEqual(id2, id1)
+
     def test_cancel_does_nothing_to_executed_algorithm(self):
         data = [1.0]
         alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength',child=True)
@@ -95,9 +106,11 @@ class AlgorithmTest(unittest.TestCase):
         test_alg = CancellableAlg()
         exec_thread = AlgThread(test_alg)
         exec_thread.start()
-        self.assertTrue(test_alg.isRunning())
+        while not test_alg.isRunning():
+            pass
+        self.assertEquals(True, test_alg.isRunning() )
         test_alg.cancel()
-        exec_thread.join() # maximum time to way set by CancellableAlg.timeout
+        exec_thread.join() # maximum time to wait set by CancellableAlg.timeout
         self.assertEquals(False, test_alg.timeout_reached)
         
 

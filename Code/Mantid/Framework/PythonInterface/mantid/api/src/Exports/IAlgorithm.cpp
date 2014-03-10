@@ -2,6 +2,7 @@
   #pragma warning( disable: 4250 ) // Disable warning regarding inheritance via dominance, we have no way around it with the design
 #endif
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidPythonInterface/api/AlgorithmIDProxy.h"
 #ifdef _MSC_VER
   #pragma warning( default: 4250 )
 #endif
@@ -13,13 +14,16 @@
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/object.hpp>
+#include <boost/python/operators.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::IPropertyManager;
 using Mantid::Kernel::Property;
 using Mantid::Kernel::Direction;
+using Mantid::API::AlgorithmID;
 using Mantid::API::IAlgorithm;
 using Mantid::API::IAlgorithm_sptr;
+using Mantid::PythonInterface::AlgorithmIDProxy;
 using Mantid::PythonInterface::Policies::VectorToNumpy;
 using namespace boost::python;
 
@@ -209,13 +213,31 @@ namespace
     return result;
   }
 
+  /**
+   * @param self A reference to the calling object
+   * @return An AlgorithmID wrapped in a AlgorithmIDProxy container or None if there is
+   *         no ID
+   */
+  PyObject * getAlgorithmID(IAlgorithm & self)
+  {
+    AlgorithmID id = self.getAlgorithmID();
+    if(id) return to_python_value<AlgorithmIDProxy>()(AlgorithmIDProxy(id));
+    else Py_RETURN_NONE;
+  }
+
 }
 
 void export_ialgorithm()
 {
+  class_<AlgorithmIDProxy>("AlgorithmID", no_init)
+    .def(self == self)
+  ;
+
+  // --------------------------------- IAlgorithm ------------------------------------------------
   register_ptr_to_python<boost::shared_ptr<IAlgorithm>>();
 
-  class_<IAlgorithm, bases<IPropertyManager>, boost::noncopyable>("IAlgorithm", "Interface for all algorithms", no_init)
+  class_<IAlgorithm, bases<IPropertyManager>,
+         boost::noncopyable>("IAlgorithm", "Interface for all algorithms", no_init)
     .def("name", &IAlgorithm::name, "Returns the name of the algorithm")
     .def("alias", &IAlgorithm::alias, "Return the aliases for the algorithm")
     .def("version", &IAlgorithm::version, "Returns the version number of the algorithm")
@@ -228,6 +250,7 @@ void export_ialgorithm()
          "Returns a set of class names that will have the method attached. Empty list indicates all types")
     .def("workspaceMethodInputProperty", &IAlgorithm::workspaceMethodInputProperty,
          "Returns the name of the input workspace property used by the calling object")
+    .def("getAlgorithmID", &getAlgorithmID, "Returns a unique identifier for this algorithm object")
     .def("getOptionalMessage", &IAlgorithm::getOptionalMessage, "Returns the optional user message attached to the algorithm")
     .def("getWikiSummary", &IAlgorithm::getWikiSummary, "Returns the summary found on the wiki page")
     .def("getWikiDescription", &IAlgorithm::getWikiDescription, "Returns the description found on the wiki page using wiki markup")
