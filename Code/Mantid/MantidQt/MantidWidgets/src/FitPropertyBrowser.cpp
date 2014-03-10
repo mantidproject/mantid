@@ -1849,12 +1849,11 @@ void FitPropertyBrowser::vectorDoubleChanged(QtProperty *prop)
 }
 
 /**
- * Update the function parameter properties. If isFitDone is true, set parameter errors as well.
- * @param setErrors :: Whether errors should be set as well
+ * Update the function parameter properties
  */
-void FitPropertyBrowser::updateParameters(bool setErrors)
+void FitPropertyBrowser::updateParameters()
 {
-  getHandler()->updateParameters(setErrors);
+  getHandler()->updateParameters();
 }
 
 /**
@@ -1913,7 +1912,8 @@ void FitPropertyBrowser::getFitResults()
       }
     }
     while(row.next());
-    updateParameters(true);
+    updateParameters();
+    getHandler()->updateErrors();
   }
 }
 
@@ -1929,6 +1929,7 @@ void FitPropertyBrowser::undoFit()
       compositeFunction()->setParameter(i,m_initialParameters[i]);
     }
     updateParameters();
+    getHandler()->clearErrors();
   }
   disableUndo();
 }

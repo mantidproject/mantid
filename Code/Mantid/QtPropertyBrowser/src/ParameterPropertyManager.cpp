@@ -54,6 +54,7 @@ void ParameterPropertyManager::setError(QtProperty* property, double error)
 void ParameterPropertyManager::clearError(QtProperty* property)
 {
   m_errors.remove(property);
+  emit propertyChanged(property);
 }
 
 /**

@@ -921,33 +921,66 @@ void PropertyHandler::setVectorAttribute(QtProperty *prop)
 }
 
 /**
- * Update the parameter properties. If isFitDone is true, parameter errors are set as well.
- * @param setErrors :: Whether errors should be set
+ * Applies given function to all the parameter properties recursively, within this context.
+ * @param func :: Function to apply
  */
-void PropertyHandler::updateParameters(bool setErrors)
+void PropertyHandler::applyToAllParameters(void (PropertyHandler::*func)(QtProperty*))
 {
   for(int i=0;i<m_parameters.size();i++)
   {
     QtProperty* prop = m_parameters[i];
-
-    size_t parIndex = function()->parameterIndex(prop->propertyName().toStdString());
-
-    double parValue = function()->getParameter(parIndex);
-    m_browser->m_parameterManager->setValue(prop, parValue);
-
-    if (setErrors)
-    {
-      double parError = function()->getError(parIndex);
-      m_browser->m_parameterManager->setError(prop, parError);
-    }
+    (this->*(func))(prop);
   }
+
   if (m_cf)
   {
     for(size_t i=0;i<m_cf->nFunctions();i++)
     {
-      getHandler(i)->updateParameters(setErrors);
+      getHandler(i)->applyToAllParameters(func);
     }
   }
+}
+
+void PropertyHandler::updateParameters()
+{
+  applyToAllParameters(&PropertyHandler::updateParameter);
+}
+
+void PropertyHandler::updateErrors()
+{
+  applyToAllParameters(&PropertyHandler::updateError);
+}
+
+void PropertyHandler::clearErrors()
+{
+  applyToAllParameters(&PropertyHandler::clearError);
+}
+
+/**
+ * @param prop :: Property of the parameter
+ */
+void PropertyHandler::updateParameter(QtProperty* prop)
+{
+  double parValue = function()->getParameter(prop->propertyName().toStdString());
+  m_browser->m_parameterManager->setValue(prop, parValue);
+}
+
+/**
+ * @param prop :: Property of the parameter
+ */
+void PropertyHandler::updateError(QtProperty* prop)
+{
+  size_t index = function()->parameterIndex(prop->propertyName().toStdString());
+  double error = function()->getError(index);
+  m_browser->m_parameterManager->setError(prop, error);
+}
+
+/**
+ * @param prop :: Property of the parameter
+ */
+void PropertyHandler::clearError(QtProperty* prop)
+{
+  m_browser->m_parameterManager->clearError(prop);
 }
 
 /**

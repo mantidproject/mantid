@@ -90,7 +90,7 @@ public:
   /// Get the current function
   boost::shared_ptr<const Mantid::API::IFunction> theFunction()const;
   /// Update the function parameters
-  void updateParameters(bool setErrors = false);
+  void updateParameters();
   /// Get function parameter values
   QList<double> getParameterValues() const;
   /// Get function parameter names
