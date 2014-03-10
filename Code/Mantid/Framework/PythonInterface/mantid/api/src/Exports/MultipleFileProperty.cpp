@@ -1,11 +1,12 @@
 #include "MantidAPI/MultipleFileProperty.h"
-#include "MantidPythonInterface/kernel/PropertyWithValue.h"
+#include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/str.hpp>
 
 using Mantid::API::MultipleFileProperty;
 using Mantid::Kernel::PropertyWithValue;
+using Mantid::PythonInterface::PropertyWithValueExporter;
 using namespace boost::python;
 
 namespace
@@ -57,7 +58,7 @@ namespace
 void export_MultipleFileProperty()
 {
   typedef PropertyWithValue<HeldType> BaseClass;
-  EXPORT_PROP_W_VALUE(HeldType,vec_vec_str);
+  PropertyWithValueExporter<HeldType>::define("VectorVectorStringPropertyWithValue");
 
   class_<MultipleFileProperty, bases<BaseClass>, boost::noncopyable>("MultipleFileProperty", no_init)
     // Override the base class one to do something more appropriate

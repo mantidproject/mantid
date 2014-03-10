@@ -64,6 +64,8 @@
 
 #include <boost/tokenizer.hpp>
 
+#include <Poco/ActiveResult.h>
+
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
@@ -1898,13 +1900,13 @@ void MantidUI::handleConfigServiceUpdate(Mantid::Kernel::ConfigValChangeNotifica
     // at #7097 of letting python scripts usable when downloaded from Script Repository. 
     // This code was added because changing the pythonscripts.directories update the 
     // python path just after restarting MantidPlot.
-    QString code = QString("import sys\n\
-                           paths = '%1'\n\
-                           list_of_path = paths.split(';')\n\
-                           if isinstance(list_of_path,str):\n\
-                           list_of_path = [list_of_path,]\n\
-                           for value in list_of_path:\n\
-                           if value not in sys.path: sys.path.append(value)\n").arg(QString::fromStdString(pNf->curValue()));
+    QString code = QString("import sys\n"
+                           "paths = '%1'\n"
+                           "list_of_path = paths.split(';')\n"
+                           "if isinstance(list_of_path,str):\n"
+                           "  list_of_path = [list_of_path,]\n"
+                           "for value in list_of_path:\n"
+                           "  if value not in sys.path: sys.path.append(value)\n").arg(QString::fromStdString(pNf->curValue()));
     // run this code silently
     appWindow()->runPythonScript(code, false, true, true);
   }

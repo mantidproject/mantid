@@ -282,13 +282,39 @@ def CheckElimits(erange,Xin):
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
 
-def plotSpectra(ws, axis_title, indicies=[]):
-    mp = import_mantidplot()
-    if len(indicies) > 0:
-        try:
-            plot = mp.plotSpectrum(ws, indicies, True)
-            layer = plot.activeLayer()
-            layer.setAxisTitle(mp.Layer.Left, axis_title)
-        except RuntimeError, e:
-            #User clicked cancel on plot so don't do anything
-            return
+def plotSpectra(ws, y_axis_title, indicies=[]):
+    """
+    Plot a selection of spectra given a list of indicies
+
+    @param ws - the workspace to plot
+    @param y_axis_title - label for the y axis
+    @param indicies - list of spectrum indicies to plot
+    """
+    if len(indicies) == 0:
+        num_spectra = mtd[ws].getNumberHistograms()
+        indicies = range(num_spectra)
+
+    try:
+        mp = import_mantidplot()
+        plot = mp.plotSpectrum(ws, indicies, True)
+        layer = plot.activeLayer()
+        layer.setAxisTitle(mp.Layer.Left, y_axis_title)
+    except RuntimeError, e:
+        #User clicked cancel on plot so don't do anything
+        return
+
+def plotParameters(ws, param_names=[]):
+    """
+    Plot a number of spectra given a list of parameter names
+    This searchs for relevent spectra using the text axis label.
+
+    @param ws - the workspace to plot from
+    @param param_names - list of names to search for
+    """
+    if len(param_names) == 0: return
+    num_spectra = mtd[ws].getNumberHistograms()
+    
+    for name in param_names:
+        indicies = [i for i in range(num_spectra) if name in mtd[ws].getAxis(1).label(i)]
+        if len(indicies) > 0: 
+            plotSpectra(ws, name, indicies)

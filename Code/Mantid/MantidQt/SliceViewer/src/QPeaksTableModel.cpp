@@ -328,29 +328,35 @@ namespace MantidQt
 
       // only show bank name for SNS instruments
       std::string instrName = instr->getName();
-      Mantid::Kernel::InstrumentInfo instrInfo
-          = Mantid::Kernel::ConfigService::Instance().getInstrument(instrName);
-      if (instrInfo.facility().name() != "SNS")
-        result.push_back(COL_BANKNAME);
+      try
+      {
+        Mantid::Kernel::InstrumentInfo instrInfo =
+            Mantid::Kernel::ConfigService::Instance().getInstrument(instrName);
+        if (instrInfo.facility().name() != "SNS")
+          result.push_back(COL_BANKNAME);
 
-      // hide some columns based on the techniques
-      { // shrink variable scope
-        std::set<std::string> techniques = instrInfo.techniques();
-        // required for showing final and delta energy
-        const std::string IGS("TOF Indirect Geometry Spectroscopy");
-        // required for showing initial and delta energy
-        const std::string DGS("TOF Direct Geometry Spectroscopy");
-        bool showEnergy(false);
-        if (techniques.find(DGS) == techniques.end())
-          result.push_back(COL_FINAL_ENERGY);
-        else
-          showEnergy = true;
-        if (techniques.find(IGS) == techniques.end())
-          result.push_back(COL_INITIAL_ENERGY);
-        else
-          showEnergy = true;
-        if (!showEnergy)
-          result.push_back(COL_ENERGY);
+        // hide some columns based on the techniques
+        { // shrink variable scope
+          std::set<std::string> techniques = instrInfo.techniques();
+          // required for showing final and delta energy
+          const std::string IGS("TOF Indirect Geometry Spectroscopy");
+          // required for showing initial and delta energy
+          const std::string DGS("TOF Direct Geometry Spectroscopy");
+          bool showEnergy(false);
+          if (techniques.find(DGS) == techniques.end())
+            result.push_back(COL_FINAL_ENERGY);
+          else
+            showEnergy = true;
+          if (techniques.find(IGS) == techniques.end())
+            result.push_back(COL_INITIAL_ENERGY);
+          else
+            showEnergy = true;
+          if (!showEnergy)
+            result.push_back(COL_ENERGY);
+        }
+      } catch (Mantid::Kernel::Exception::NotFoundError&)
+      {
+        // Unable to fetch instrument info, so continue without it.
       }
 
       return result;

@@ -1,4 +1,12 @@
-# Algorithm to start Bayes programs
+"""*WIKI*
+
+The routine varies the width of the resolution file to give a 'stretch factor' and the area provides an intensity normalisation factor. The fitted parameters are in the group workspace with suffix _ResNorm with additional suffices of Intensity & Stretch. 
+The fitted data are in the workspace ending in _ResNorm_Fit.
+
+This routine was originally part of the MODES package.
+
+*WIKI*"""
+
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.simpleapi import *
@@ -11,6 +19,8 @@ class ResNorm(PythonAlgorithm):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
 	def PyInit(self):
+		self.setWikiSummary("This algorithm creates a group 'normalisation' file by taking a resolution file and fitting it to all the groups in the resolution (vanadium) data file which has the same grouping as the sample data of interest.")
+
 		self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (*.nxs) or Workspace')
 		self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
 		self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']), doc='Analyser & reflection')

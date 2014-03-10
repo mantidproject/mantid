@@ -1,5 +1,5 @@
-#ifndef MANTID_ICAT_CSEARCH_H_
-#define MANTID_ICAT_CSEARCH_H_
+#ifndef MANTID_ICAT_CATALOGSEARCH_H_
+#define MANTID_ICAT_CATALOGSEARCH_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -11,21 +11,21 @@ namespace Mantid
   {
 
     /**
-      CatalogSearch is a class responsible for SearchByRunNumber algorithm.
-      This algorithm does the basic search and returns the investigations record
+      This class is responsible for searching the catalog using the properties specified.
 
       Required Properties:
       <UL>
         <LI> Investigation name - The name of the investigation to search </LI>
         <LI> Instrument - The instrument to use in the search </LI>
         <LI> Run range - The range of run numbers to search between </LI>
-        <LI> StartDate - The start date used for search </LI>
-        <LI> EndDate - The end date used for search </LI>
+        <LI> Start date - The start date used for search </LI>
+        <LI> End date - The end date used for search </LI>
         <LI> Keywords - The keywords used for search </LI>
+        <LI> Investigation id - The id of an investigation to search for </LI>
         <LI> Investigators name - Search for all investigations this investigator is in </LI>
         <LI> Sample - The name of the sample used in an investigation <LI>
-        <LI> Investigation Abstract - The abstract of the investigation to be searched <LI>
-        <LI> Investigation Type - The type of the investigation to search for <LI>
+        <LI> Investigation abstract - The abstract of the investigation to be searched <LI>
+        <LI> Investigation type - The type of the investigation to search for <LI>
         <LI> My data - Search through the investigations you are part of <LI>
       </UL>
 

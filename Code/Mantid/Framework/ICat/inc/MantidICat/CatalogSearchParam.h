@@ -1,8 +1,10 @@
-#ifndef MANTID_ICAT_SAERCHPARAM_H_
-#define MANTID_ICAT_SAERCHPARAM_H_
+#ifndef MANTID_ICAT_CATALOGSEARCHPARAM_H_
+#define MANTID_ICAT_CATALOGSEARCHPARAM_H_
 
 #include <string>
 #include <stdexcept>
+
+#include "MantidAPI/DllConfig.h"
 
 namespace Mantid
 {
@@ -31,7 +33,7 @@ namespace Mantid
       File change history is stored at: <https://github.com/mantidproject/mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class CatalogSearchParam
+    class DLLExport CatalogSearchParam
     {
     public:
       /// constructor

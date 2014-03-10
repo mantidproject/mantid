@@ -39,6 +39,7 @@
 #include <QtCheckBoxFactory>
 
 using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt;
 using Mantid::MantidVec;
 
 /**
@@ -104,10 +105,7 @@ void Indirect::initLayout()
 
   // "SofQW" tab
   connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
-  connect(m_uiForm.sqw_cbInput, SIGNAL(currentIndexChanged(int)), m_uiForm.sqw_swInput, SLOT(setCurrentIndex(int)));
-  connect(m_uiForm.sqw_cbWorkspace, SIGNAL(currentIndexChanged(int)), this, SLOT(validateSofQ(int)));
-
-  connect(m_uiForm.sqw_pbPlotInput, SIGNAL(clicked()), this, SLOT(sOfQwPlotInput()));
+  connect(m_uiForm.sqw_dsSampleInput, SIGNAL(loadClicked()), this, SLOT(sOfQwPlotInput()));
 
   // "Slice" tab
   connect(m_uiForm.slice_inputFile, SIGNAL(filesFound()), this, SLOT(slicePlotRaw()));
@@ -310,11 +308,6 @@ void Indirect::runConvertToEnergy()
     pyInput += "reducer.set_save_to_cm_1(True)\n";
   }
   
-  if ( m_uiForm.ckCreateInfoTable->isChecked() )
-  {
-    pyInput += "reducer.create_info_table()\n";
-  }
-
   pyInput += "reducer.set_save_formats([" + savePyCode() + "])\n";
 
   pyInput +=
@@ -606,6 +599,12 @@ void Indirect::createRESfile(const QString& file)
   if ( m_uiForm.cal_ckPlotResult->isChecked() ) { pyInput +=	"plot = True\n"; }
   else { pyInput += "plot = False\n"; }
 
+  if ( m_uiForm.cal_ckVerbose->isChecked() ) { pyInput +=  "verbose = True\n"; }
+  else { pyInput += "verbose = False\n"; }
+
+  if ( m_uiForm.cal_ckSave->isChecked() ) { pyInput +=  "save = True\n"; }
+  else { pyInput += "save = False\n"; }
+
   QString rebinParam = QString::number(m_calDblMng->value(m_calResProp["ELow"])) + "," +
     QString::number(m_calDblMng->value(m_calResProp["EWidth"])) + "," +
     QString::number(m_calDblMng->value(m_calResProp["EHigh"]));
@@ -617,7 +616,7 @@ void Indirect::createRESfile(const QString& file)
     "background = " + background + "\n"
     "rebinParam = '" + rebinParam + "'\n"
     "file = " + file + "\n"
-    "ws = resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, plotOpt = plot, factor="+scaleFactor+")\n"
+    "ws = resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, Verbose=verbose, Plot=plot, Save=save, factor="+scaleFactor+")\n"
     "scaled = "+ scaled +"\n"
     "scaleFactor = "+m_uiForm.cal_leIntensityScaleMultiplier->text()+"\n"
     "backStart = "+QString::number(m_calDblMng->value(m_calCalProp["BackMin"]))+"\n"
@@ -710,15 +709,12 @@ bool Indirect::validateInput()
 
 
   // SpectraMin/SpectraMax
-  if (
-    m_uiForm.leSpectraMin->text() == ""
-    ||
-    m_uiForm.leSpectraMax->text() == ""
-    ||
-    (
-    m_uiForm.leSpectraMin->text().toDouble() > m_uiForm.leSpectraMax->text().toDouble()
-    )
-    )
+  const QString specMin = m_uiForm.leSpectraMin->text();
+  const QString specMax = m_uiForm.leSpectraMax->text();
+
+  if (specMin.isEmpty() || specMax.isEmpty() ||
+      (specMin.toDouble() < 1 || specMax.toDouble() < 1) ||  
+      (specMin.toDouble() > specMax.toDouble()))
   {
     valid = false;
     m_uiForm.valSpectraMin->setText("*");
@@ -840,24 +836,15 @@ bool Indirect::validateSofQw()
 {
   bool valid = true;
 
-  if ( m_uiForm.sqw_cbInput->currentText() == "File" )
+
+  UserInputValidator uiv;
+  uiv.checkDataSelectorIsValid("Sample", m_uiForm.sqw_dsSampleInput);
+  QString error = uiv.generateErrorMessage();
+
+  if (!error.isEmpty())
   {
-    if ( ! m_uiForm.sqw_inputFile->isValid() )
-    {
-      valid = false;
-    }
-  }
-  else
-  {
-    if ( m_uiForm.sqw_cbWorkspace->currentText().isEmpty() )
-    {
-      valid = false;
-      m_uiForm.sqw_valWorkspace->setText("*");
-    }
-    else
-    {
-      m_uiForm.sqw_valWorkspace->setText(" ");
-    }
+    valid = false;
+    showInformationBox(error);
   }
 
   if ( m_uiForm.sqw_ckRebinE->isChecked() )
@@ -972,7 +959,7 @@ void Indirect::loadSettings()
   m_uiForm.ind_calibFile->readSettings(settings.group());
   m_uiForm.ind_mapFile->readSettings(settings.group());
   m_uiForm.slice_calibFile->readSettings(settings.group());
-  m_uiForm.sqw_inputFile->readSettings(settings.group());
+  m_uiForm.sqw_dsSampleInput->readSettings(settings.group());
   settings.endGroup();
 }
 
@@ -1311,17 +1298,13 @@ void Indirect::mappingOptionSelected(const QString& groupType)
   {
     m_uiForm.swMapping->setCurrentIndex(0);
   }
-  else if ( groupType == "All" )
-  {
-    m_uiForm.swMapping->setCurrentIndex(2);
-  }
-  else if ( groupType == "Individual" )
-  {
-    m_uiForm.swMapping->setCurrentIndex(2);
-  }
   else if ( groupType == "Groups" )
   {
     m_uiForm.swMapping->setCurrentIndex(1);
+  }
+  else if ( groupType == "All" || groupType == "Individual" || groupType == "Default" )
+  {
+    m_uiForm.swMapping->setCurrentIndex(2);
   }
 }
 
@@ -1549,8 +1532,13 @@ void Indirect::calibCreate()
 
     reducer += "calib.execute(None, None)\n"
       "result = calib.result_workspace()\n"
-      "print result\n"
-      "SaveNexus(InputWorkspace=result, Filename=result+'.nxs')\n";
+      "print result\n";
+
+    if( m_uiForm.cal_ckSave->isChecked() )
+    {
+      reducer +=
+        "SaveNexus(InputWorkspace=result, Filename=result+'.nxs')\n";
+    }
 
     if ( m_uiForm.cal_ckPlotResult->isChecked() )
     {
@@ -1634,11 +1622,11 @@ void Indirect::calPlotRaw()
   m_calCalCurve = new QwtPlotCurve();
   m_calCalCurve->setData(&dataX[0], &dataY[0], static_cast<int>(input->blocksize()));
   m_calCalCurve->attach(m_calCalPlot);
-  
-  m_calCalPlot->setAxisScale(QwtPlot::xBottom, dataX.front(), dataX.back());
 
-  m_calCalR1->setRange(dataX.front(), dataX.back());
-  m_calCalR2->setRange(dataX.front(), dataX.back());
+  std::pair<double, double> range(dataX.front(), dataX.back());
+  m_calCalPlot->setAxisScale(QwtPlot::xBottom, range.first, range.second);
+  setPlotRange(m_calCalR1, m_calDblMng, std::pair<QtProperty*,QtProperty*>(m_calCalProp["PeakMin"], m_calCalProp["PeakMax"]), range);
+  setPlotRange(m_calCalR2, m_calDblMng, std::pair<QtProperty*,QtProperty*>(m_calCalProp["BackMin"], m_calCalProp["BackMax"]), range);
 
   // Replot
   m_calCalPlot->replot();
@@ -1691,11 +1679,11 @@ void Indirect::calPlotEnergy()
   m_calResCurve->setData(&dataX[0], &dataY[0], static_cast<int>(input->blocksize()));
   m_calResCurve->attach(m_calResPlot);
   
-  m_calResPlot->setAxisScale(QwtPlot::xBottom, dataX.front(), dataX.back());
-  m_calResR1->setRange(dataX.front(), dataX.back());
+  std::pair<double, double> range(dataX.front(), dataX.back());
+  m_calResPlot->setAxisScale(QwtPlot::xBottom, range.first, range.second);
 
-  m_calResR2->setMinimum(m_calDblMng->value(m_calResProp["ELow"]));
-  m_calResR2->setMaximum(m_calDblMng->value(m_calResProp["EHigh"]));
+  setPlotRange(m_calResR1, m_calDblMng, std::pair<QtProperty*,QtProperty*>(m_calResProp["ELow"], m_calResProp["EHigh"]), range);
+  setPlotRange(m_calResR2, m_calDblMng, std::pair<QtProperty*,QtProperty*>(m_calResProp["Start"], m_calResProp["End"]), range);
 
   calSetDefaultResolution(input);
 
@@ -1781,18 +1769,19 @@ void Indirect::sOfQwClicked()
     QString rebinString = m_uiForm.sqw_leQLow->text()+","+m_uiForm.sqw_leQWidth->text()+","+m_uiForm.sqw_leQHigh->text();
     QString pyInput = "from mantid.simpleapi import *\n";
 
-    if ( m_uiForm.sqw_cbInput->currentText() == "File" )
+    switch(m_uiForm.sqw_dsSampleInput->getCurrentView())
     {
-      pyInput +=
-        "filename = r'" +m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
-        "(dir, file) = os.path.split(filename)\n"
-        "(sqwInput, ext) = os.path.splitext(file)\n"
-        "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
-    }
-    else
-    {
-      pyInput +=
-        "sqwInput = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
+      case 0:
+        //load the file
+        pyInput += "filename = r'" + m_uiForm.sqw_dsSampleInput->getFullFilePath() + "'\n"
+          "(dir, file) = os.path.split(filename)\n"
+          "(sqwInput, ext) = os.path.splitext(file)\n"
+          "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
+          break;
+      case 1:
+        //get the workspace
+        pyInput += "sqwInput = '" + m_uiForm.sqw_dsSampleInput->getCurrentDataName() + "'\n";
+        break;
     }
 
     // Create output name before rebinning
@@ -1821,6 +1810,11 @@ void Indirect::sOfQwClicked()
     if ( m_uiForm.sqw_ckSave->isChecked() )
     {
       pyInput += "SaveNexus(InputWorkspace=sqwOutput, Filename=sqwOutput+'.nxs')\n";
+
+      if (m_uiForm.sqw_ckVerbose->isChecked())
+      {
+        pyInput += "logger.notice(\"Resolution file saved to default save directory.\")\n";
+      }
     }
 
     if ( m_uiForm.sqw_cbPlotType->currentText() == "Contour" )
@@ -1866,35 +1860,33 @@ void Indirect::sOfQwPlotInput()
   QString pyInput = "from mantid.simpleapi import *\n"
     "from mantidplot import *\n";
 
-  //...
-  if ( m_uiForm.sqw_cbInput->currentText() == "File" )
+  if (m_uiForm.sqw_dsSampleInput->isValid())
   {
-    // get filename
-    if ( m_uiForm.sqw_inputFile->isValid() )
+    switch(m_uiForm.sqw_dsSampleInput->getCurrentView())
     {
-      pyInput +=
-        "filename = r'" + m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
-        "(dir, file) = os.path.split(filename)\n"
-        "(input, ext) = os.path.splitext(file)\n"
-        "LoadNexus(Filename=filename, OutputWorkspace=input)\n";
+      case 0:
+        //load the file
+        pyInput += "filename = r'" + m_uiForm.sqw_dsSampleInput->getFullFilePath() + "'\n"
+          "(dir, file) = os.path.split(filename)\n"
+          "(sqwInput, ext) = os.path.splitext(file)\n"
+          "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
+          break;
+      case 1:
+        //get the workspace
+        pyInput += "sqwInput = '" + m_uiForm.sqw_dsSampleInput->getCurrentDataName() + "'\n";
+        break;
     }
-    else
-    {
-      showInformationBox("Invalid filename.");
-      return;
-    }
+
+    pyInput += "ConvertSpectrumAxis(InputWorkspace=sqwInput, OutputWorkspace=sqwInput[:-4]+'_rqw', Target='ElasticQ', EMode='Indirect')\n"
+    "ws = importMatrixWorkspace(sqwInput[:-4]+'_rqw')\n"
+    "ws.plotGraph2D()\n";
+
+    QString pyOutput = runPythonCode(pyInput).trimmed();
   }
   else
   {
-    pyInput += "input = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
+    showInformationBox("Invalid filename.");
   }
-
-  pyInput += "ConvertSpectrumAxis(InputWorkspace=input, OutputWorkspace=input[:-4]+'_rqw', Target='ElasticQ', EMode='Indirect')\n"
-    "ws = importMatrixWorkspace(input[:-4]+'_rqw')\n"
-    "ws.plotGraph2D()\n";
-
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-
 }
 
 // SLICE
@@ -1994,9 +1986,10 @@ void Indirect::slicePlotRaw()
     m_sltDataCurve->setData(&dataX[0], &dataY[0], static_cast<int>(input->blocksize()));
     m_sltDataCurve->attach(m_sltPlot);
 
-    m_sltPlot->setAxisScale(QwtPlot::xBottom, dataX.front(), dataX.back());
-
-    m_sltR1->setRange(dataX.front(), dataX.back());
+    std::pair<double, double> range(dataX.front(), dataX.back());
+    m_calResPlot->setAxisScale(QwtPlot::xBottom, range.first, range.second);
+    setPlotRange(m_sltR1, m_sltDblMng, std::pair<QtProperty*,QtProperty*>(m_sltProp["R1S"], m_sltProp["R1E"]), range);
+    setPlotRange(m_sltR2, m_sltDblMng, std::pair<QtProperty*,QtProperty*>(m_sltProp["R2S"], m_sltProp["R2E"]), range);
 
     // Replot
     m_sltPlot->replot();
@@ -2052,3 +2045,16 @@ void Indirect::sliceUpdateRS(QtProperty* prop, double val)
   else if ( prop == m_sltProp["R2S"] ) m_sltR2->setMinimum(val);
   else if ( prop == m_sltProp["R2E"] ) m_sltR2->setMaximum(val);
 }
+
+
+void Indirect::setPlotRange(MantidWidgets::RangeSelector* rangeSelector, QtDoublePropertyManager* dblManager, 
+  const std::pair<QtProperty*, QtProperty*> props, const std::pair<double, double>& bounds)
+{
+  dblManager->setMinimum(props.first, bounds.first);
+  dblManager->setMaximum(props.first, bounds.second);
+  dblManager->setMinimum(props.second, bounds.first);
+  dblManager->setMaximum(props.second, bounds.second);
+  rangeSelector->setRange(bounds.first, bounds.second);
+}
+
+  

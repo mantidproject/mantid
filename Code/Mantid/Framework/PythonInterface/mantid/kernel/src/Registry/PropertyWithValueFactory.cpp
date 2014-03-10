@@ -2,9 +2,13 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
-#include "MantidPythonInterface/kernel/Registry/SingleValueTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidKernel/PropertyWithValue.h"
+
+#include <boost/make_shared.hpp>
+
 #include <cassert>
+
 
 namespace Mantid
 {
@@ -15,7 +19,9 @@ namespace Mantid
       namespace
       {
         /// Lookup map type
-        typedef std::map<PyTypeObject const *, PropertyValueHandler*> PyTypeIndex;
+        typedef std::map<PyTypeObject const *,
+                         boost::shared_ptr<PropertyValueHandler>> PyTypeIndex;
+
         /**
          * Initialize lookup map
          */
@@ -23,14 +29,19 @@ namespace Mantid
         {
           assert(index.empty());
 
-#define REGISTER_MAPPING(PyType, CppType)\
-    index.insert(std::make_pair(&PyType, new Registry::SingleValueTypeHandler<CppType>()));
-
           // Map the Python types to the best match in C++
-          REGISTER_MAPPING(PyFloat_Type, double);
-          REGISTER_MAPPING(PyInt_Type, long);
-          REGISTER_MAPPING(PyBool_Type, bool);
-          REGISTER_MAPPING(PyString_Type, std::string);
+          typedef TypedPropertyValueHandler<double> FloatHandler;
+          index.insert(std::make_pair(&PyFloat_Type, boost::make_shared<FloatHandler>()));
+
+          typedef TypedPropertyValueHandler<long> IntHandler;
+          index.insert(std::make_pair(&PyInt_Type, boost::make_shared<IntHandler>()));
+
+          typedef TypedPropertyValueHandler<bool> BoolHandler;
+          index.insert(std::make_pair(&PyBool_Type, boost::make_shared<BoolHandler>()));
+
+          typedef TypedPropertyValueHandler<std::string> StrHandler;
+          index.insert(std::make_pair(&PyString_Type, boost::make_shared<StrHandler>()));
+
         }
 
         /**
@@ -57,8 +68,8 @@ namespace Mantid
       PropertyWithValueFactory::create(const std::string & name , const boost::python::object & defaultValue,
           const boost::python::object & validator, const unsigned int direction)
       {
-        Registry::PropertyValueHandler *propHandle = lookup(defaultValue.ptr()->ob_type);
-        return propHandle->create(name, defaultValue, validator, direction);
+        const auto &propHandle = lookup(defaultValue.ptr()->ob_type);
+        return propHandle.create(name, defaultValue, validator, direction);
       }
 
       /**
@@ -86,7 +97,7 @@ namespace Mantid
        * @param pythonType :: A pointer to a PyTypeObject that represents the type
        * @returns A pointer to handler that can be used to instantiate a property
        */
-      PropertyValueHandler * PropertyWithValueFactory::lookup(PyTypeObject * const pythonType)
+      const PropertyValueHandler & PropertyWithValueFactory::lookup(PyTypeObject * const pythonType)
       {
         const PyTypeIndex & typeIndex = getTypeIndex();
         auto cit = typeIndex.find(pythonType);
@@ -96,7 +107,7 @@ namespace Mantid
             os << "Cannot create PropertyWithValue from Python type " << pythonType->tp_name << ". No converter registered in PropertyWithValueFactory.";
             throw std::invalid_argument(os.str());
           }
-        return cit->second;
+        return *(cit->second);
       }
     }
   }

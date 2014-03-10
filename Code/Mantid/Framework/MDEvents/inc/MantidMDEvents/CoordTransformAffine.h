@@ -59,6 +59,8 @@ namespace MDEvents
 
     /// Raw pointer to the same underlying matrix as affineMatrix.
     coord_t ** rawMatrix;
+    /// raw pointer to the memory block, referred by the raw Matrix;
+    coord_t *  rawMemory;
 
     void copyRawMatrix();
   };

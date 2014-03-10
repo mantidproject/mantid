@@ -41,7 +41,7 @@ namespace IDA
     void xMinSelected(double val);
     void xMaxSelected(double val);
     void backgroundSelected(double val);
-    void rangePropChanged(QtProperty*, double);
+    void propertyChanged(QtProperty*, double);
     void sequential();
     void plotGuess(QtProperty*);
     void fitContextMenu(const QPoint &);
@@ -53,6 +53,7 @@ namespace IDA
     boost::shared_ptr<Mantid::API::IFunction> createUserFunction(const QString & name, bool tie=false);
     QtProperty* createExponential(const QString &);
     QtProperty* createStretchedExp(const QString &);
+    void setDefaultParameters(const QString& name);
     QString fitTypeString() const;
     
     QIntValidator * m_intVal;

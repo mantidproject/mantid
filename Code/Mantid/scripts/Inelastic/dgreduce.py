@@ -15,6 +15,8 @@ Reducer = None
 # Statement used at debug time to pull changes in DirectEnergyConversion into Mantid
 #DRC=reload(DRC)
 def getReducer():
+    # needed on Linux to adhere to correct reference return
+    global Reducer;
     return Reducer
 
 def setup(instname=None,reload=False):
@@ -145,11 +147,11 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 # --------------------------------------------------------------------------------------------------------
 #    Deal with mandatory parameters for this and may be some top level procedures
 # --------------------------------------------------------------------------------------------------------
+    Reducer.log("****************************************************************");
     if isinstance(sample_run,api.Workspace) or (isinstance(sample_run,str) and sample_run in mtd):
-        Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run for workspace name: '+str(sample_run))
+        Reducer.log('*** DGreduce run for: {0:>20} :  Workspace name: {1:<20} '.format(Reducer.instr_name,str(sample_run)))
     else:
-        Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run number/s: '+str(sample_run))
-
+        Reducer.log('*** DGreduce run for: {0:>20} :  Run number/s : {1:<20} '.format(Reducer.instr_name,str(sample_run)))
 
     try:
         n,r=funcreturns.lhs_info('both')
@@ -173,7 +175,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     abs_units_defaults_check = False
     if monovan_run != None :
        # check if mono-vanadium is provided as multiple files list or just put in brackets ocasionally
-        Reducer.log(' Output will be in absolute units of mb/str/mev/fu')
+        Reducer.log("****************************************************************");
+        Reducer.log('*** Output will be in absolute units of mb/str/mev/fu')
         if isinstance(monovan_run,list):
                 if len(monovan_run)>1:
                     raise IOError(' Can currently work only with single monovan file but list supplied')
@@ -207,10 +210,17 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     changed_Keys=Reducer.set_input_parameters(**program_args);
 
     # inform user about changed parameters
+
+    Reducer.log("*** Provisional Incident energy: {0:>12.3f} mEv".format(ei_guess))
+    Reducer.log("****************************************************************");
     for key in changed_Keys:
         val = getattr(Reducer,key);
         Reducer.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val))
 
+    save_dir = config.getString('defaultsave.directory') 
+    Reducer.log("****************************************************************");
+    Reducer.log("*** By default results are saved into: {0}".format(save_dir));
+    Reducer.log("****************************************************************");
     #do we run absolute units normalization and need to warn users if the parameters needed for that have not changed from defaults
     if abs_units_defaults_check :
         Reducer.check_abs_norm_defaults_changed(changed_Keys);
@@ -226,7 +236,6 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         Reducer.log('one2one map selected')
 
     
-          
     if  Reducer.det_cal_file != None : 
         if isinstance(Reducer.det_cal_file,str) and not Reducer.det_cal_file in mtd : # it is a file
             Reducer.log('Setting detector calibration file to '+Reducer.det_cal_file)
@@ -235,12 +244,6 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     else:
         Reducer.log('Setting detector calibration to detector block info from '+str(sample_run))
 
-    
-    if mtd.doesExist(str(sample_run))==True and Reducer.det_cal_file == None:
-        Reducer.log('For data input type: workspace detector calibration must be specified','error')
-        Reducer.log('use Keyword det_cal_file with a valid detctor file or run number','error')
-        return
-              
     # check if reducer can find all non-run files necessary for the reduction before starting long run. 
     Reducer.check_necessary_files(monovan_run);
     
@@ -251,7 +254,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
         #the D.E.C. tries to be too clever so we have to fool it into thinking the raw file is already exists as a workpsace        
         sumfilename=Reducer.instr_name+str(sample_run[0])+'.raw'
-        sample_run =sum_files(sumfilename, sample_run)
+        sample_run =sum_files(Reducer.instr_name,sumfilename, sample_run)
+        common.apply_calibration(Reducer.instr_name,sample_run,Reducer.det_cal_file)
 
         #sample_run = RenameWorkspace(InputWorkspace=accum,OutputWorkspace=inst_name+str(sample_run[0])+'.raw')
 
@@ -262,7 +266,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     masking = None;
     masks_done=False
     if not Reducer.run_diagnostics:
-       header="Diagnostics skipped "
+       header="Diagnostics including hard masking is skipped "
        masks_done = True;	
     if Reducer.save_and_reuse_masks :
         raise NotImplementedError("Save and reuse masks option is not yet implemented")
@@ -281,6 +285,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 # --------------------------------------------------------------------------------------------------------    
      # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
     if not   masks_done:
+        print '########### Run diagnose for sample run ##############################'
         masking = Reducer.diagnose(wb_run,sample = mask_run,
                                     second_white = None,print_results=True)
         header = "Diag Processed workspace with {0:d} spectra and masked {1:d} bad spectra"
@@ -292,10 +297,10 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
                 if Reducer.use_sam_msk_on_monovan == True:
                     Reducer.log('  Applying sample run mask to mono van')
                 else:
-                    print '########### Run diagnose for monochromatic vanadium run ##############'
-                    masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
-                                         second_white = None,rint_results=True)
                     if not Reducer.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better soulution for that. 
+                        print '########### Run diagnose for monochromatic vanadium run ##############'
+                        masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
+                                         second_white = None,rint_results=True)
                         masking +=  masking2
                         DeleteWorkspace(masking2)
     
@@ -321,6 +326,11 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     # calculate absolute units integral and apply it to the workspace
     if monovan_run != None or Reducer.mono_correction_factor != None :
         deltaE_wkspace_sample = apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_guess,wb_run)
+        # Hack for multirep
+        #if isinstance(monovan_run,int):
+        #    filename = common.find_file(monovan_run)
+        #    output_name = common.create_dataname(filename);
+       #     DeleteWorkspace(output_name);
 
 
     results_name = deltaE_wkspace_sample.name();
@@ -336,7 +346,9 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
     if mtd.doesExist('_wksp.spe-white')==True:
         DeleteWorkspace(Workspace='_wksp.spe-white')
-
+    # Hack for multirep mode?
+    if mtd.doesExist('hard_mask_ws') == True:
+        DeleteWorkspace(Workspace='hard_mask_ws')
     
     return deltaE_wkspace_sample
 
@@ -505,7 +517,7 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
 
 
 def process_legacy_parameters(**kwargs) :
-    """ The method to deal with old parameters which have logic different from default and easy to process using 
+    """ The method to deal with old parameters which have logi c different from default and easy to process using 
         subprogram. All other parameters just copiet to output 
     """
     params = dict();
@@ -513,14 +525,14 @@ def process_legacy_parameters(**kwargs) :
         if key == 'hardmaskOnly': # legacy key defines other mask file here
             params["hard_mask_file"] = value;
             params["use_hard_mask_only"] = True;
-        if key == 'hardmaskPlus': # legacy key defines other mask file here
+        elif key == 'hardmaskPlus': # legacy key defines other mask file here
             params["hard_mask_file"] = value;
             params["use_hard_mask_only"] = False;
         else:
             params[key]=value;    
 
     # Check all possible ways to define hard mask file:
-    if not params['hard_mask_file'] is None:
+    if 'hard_mask_file' in params and not params['hard_mask_file'] is None:
         if type(params['hard_mask_file']) == str and params['hard_mask_file']=="None":
             params['hard_mask_file'] = None;
         elif type(params['hard_mask_file']) == bool:
@@ -674,7 +686,7 @@ def get_abs_normalization_factor(Reducer,deltaE_wkspaceName,ei_monovan) :
 
 
 
-def sum_files(accumulator, files):
+def sum_files(inst_name, accumulator, files):
     """ Custom sum for multiple runs
 
         Left for compartibility as internal summation had some unspecified problems. 
@@ -690,7 +702,7 @@ def sum_files(accumulator, files):
 
          for filename in files:
               print 'Summing run ',filename,' to workspace ',accumulator
-              temp = common.load_run(filename, force=False)
+              temp = common.load_run(inst_name,filename, force=False)
 
               if accum_name in mtd: # add current workspace to the existing one
                   if not isinstance(accumulator,api.Workspace):
@@ -703,7 +715,7 @@ def sum_files(accumulator, files):
 
          return accumulator
     else:
-        temp = common.load_run(files, force=False)
+        temp = common.load_run(inst_name,files, force=False)
         accumulator=RenameWorkspace(InputWorkspace=temp,OutputWorkspace=accum_name)
         return accumulator;
 

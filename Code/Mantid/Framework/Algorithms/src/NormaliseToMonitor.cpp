@@ -603,7 +603,6 @@ void NormaliseToMonitor::normaliseBinByBin(const API::MatrixWorkspace_sptr& inpu
 
         // Calculate result and store in local variable to avoid overwriting original data if
         // output workspace is same as one of the input ones
-        // cppcheck-suppress zerodivcond
         const double newY = leftY/rightY;
 
         if (fabs(rightY)>1.0e-12 && fabs(newY)>1.0e-12)

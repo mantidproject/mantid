@@ -149,8 +149,8 @@ public:
       if (prop) prop->setGroup(group);
     }
 
-    virtual void filterByTime(const DateAndTime /*start*/, const DateAndTime /*stop*/) = 0;
-    virtual void splitByTime(TimeSplitterType& /*splitter*/, std::vector< PropertyManager * >/* outputs*/) const = 0;
+    virtual void filterByTime(const DateAndTime &/*start*/, const DateAndTime &/*stop*/) = 0;
+    virtual void splitByTime(std::vector<SplittingInterval>& /*splitter*/, std::vector< PropertyManager * >/* outputs*/) const = 0;
     virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filte*/) =0;
 
 protected:

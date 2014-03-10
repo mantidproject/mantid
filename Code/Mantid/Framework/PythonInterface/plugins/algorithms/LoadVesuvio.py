@@ -1,7 +1,7 @@
 """*WIKI* 
 
-A Workflow algorithm to load the data from the VESUVIO instrument at
-ISIS.
+A Workflow algorithm to load the data from the VESUVIO instrument at ISIS.
+
 *WIKI*"""
 
 from mantid.kernel import *
@@ -40,6 +40,7 @@ _LOGGING_ = False
 class LoadVesuvio(PythonAlgorithm):
     
     def PyInit(self):
+        self.setOptionalMessage("A Workflow algorithm to load the data from the VESUVIO instrument at ISIS.")
         self.declareProperty(RUN_PROP, "", StringMandatoryValidator(),
                              doc="The run numbers that should be loaded. E.g."
                                  "14188  - for single run"

@@ -274,7 +274,7 @@ namespace Mantid
       case(CnvrtToMD::ConvertFast):      return;
       case(CnvrtToMD::ConvertFromTOF):
         {
-          double delta;
+      double delta(std::numeric_limits<double>::quiet_NaN());
           m_TwoTheta = (*m_pTwoThetas)[i];
           m_L2       = (*m_pL2s)[i];
           double    Efix = m_Efix;
@@ -285,7 +285,7 @@ namespace Mantid
         }
       case(CnvrtToMD::ConvertByTOF):
         {
-          double delta;
+      double delta(std::numeric_limits<double>::quiet_NaN());
           m_TwoTheta = (*m_pTwoThetas)[i];
           m_L2       = (*m_pL2s)[i];
           double  Efix = m_Efix;
@@ -350,6 +350,14 @@ namespace Mantid
       if(another.m_TargetUnit)  m_TargetUnit   = Kernel::Unit_sptr(another.m_TargetUnit->clone());
     }
 
-  } // endNamespace MDEvents
+UnitsConversionHelper::UnitsConversionHelper():
+  m_UnitCnvrsn(CnvrtToMD::ConvertNo),
+  m_Factor(1),m_Power(1),
+  m_Emode(-1), // undefined
+  m_L1(1),m_Efix(1),m_TwoTheta(0),m_L2(1),
+  m_pTwoThetas(NULL),m_pL2s(NULL),m_pEfixedArray(NULL)
+{};
+
+} // endNamespace MDEvents
 } // endNamespace Mantid
 

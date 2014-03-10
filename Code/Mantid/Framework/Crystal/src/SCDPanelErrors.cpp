@@ -118,6 +118,9 @@ const string X_END("endX");
 const string PEAKS_WKSP("PeakWorkspaceName");
 const string ROTATE_CEN("RotateCenters");
 const string SAMPLE_OFF("SampleOffsets");
+const string SAMPLE_X("SampleX");
+const string SAMPLE_Y("SampleY");
+const string SAMPLE_Z("SampleZ");
 }
 
 void initializeAttributeList(vector<string> &attrs)
@@ -136,6 +139,9 @@ void initializeAttributeList(vector<string> &attrs)
   attrs.push_back(NUM_GROUPS);
   attrs.push_back(ROTATE_CEN);
   attrs.push_back(SAMPLE_OFF);
+  attrs.push_back(SAMPLE_X);
+  attrs.push_back(SAMPLE_Y);
+  attrs.push_back(SAMPLE_Z);
 }
 
 SCDPanelErrors::SCDPanelErrors() :
@@ -147,7 +153,7 @@ SCDPanelErrors::SCDPanelErrors() :
   initializeAttributeList(m_attrNames);
 
   a_set = b_set = c_set = alpha_set = beta_set = gamma_set = PeakName_set = BankNames_set = endX_set
-      = startX_set = NGroups_set  = false;
+      = startX_set = NGroups_set  = sampleX_set = sampleY_set = sampleZ_set = false;
 
   // g_log.setLevel(7);
 
@@ -160,7 +166,6 @@ SCDPanelErrors::SCDPanelErrors() :
   NGroups =1;
   RotateCenters= false;
   SampleOffsets=false;
-  SampOffsetDeclareStatus=0;
 }
 
 SCDPanelErrors::~SCDPanelErrors()
@@ -219,6 +224,12 @@ IFunction::Attribute SCDPanelErrors::getAttribute(const std::string &attName) co
     return Attribute(static_cast<int>(m_startX));
   else if (attName == X_END)
     return Attribute(static_cast<int>(m_endX));
+  else if (attName == SAMPLE_X)
+    return Attribute(SampleX);
+  else if (attName == SAMPLE_Y)
+    return Attribute(SampleY);
+  else if (attName == SAMPLE_Z)
+    return Attribute(SampleZ);
 
 
   throw std::invalid_argument("Not a valid attribute name \"" + attName + "\"");
@@ -256,6 +267,9 @@ SCDPanelErrors::SCDPanelErrors(DataObjects::PeaksWorkspace_sptr &pwk, std::strin
   setAttribute(X_END, Attribute(-1));
   setAttribute(ROTATE_CEN,Attribute(0));
   setAttribute(SAMPLE_OFF, Attribute(0));
+  setAttribute(SAMPLE_X, Attribute(0.0));
+  setAttribute(SAMPLE_Y, Attribute(0.0));
+  setAttribute(SAMPLE_Z, Attribute(0.0));
   init();
 
 }
@@ -276,14 +290,9 @@ void SCDPanelErrors::init()
 
   declareParameter("l0", 0.0, "Initial Flight Path");
   declareParameter("t0", 0.0, "Time offset");
-  SampOffsetDeclareStatus=1;
-  if( SampleOffsets)
-  {
-    declareParameter("SampleX", 0.0, "Sample x offset");
-    declareParameter("SampleY", 0.0, "Sample y offset");
-    declareParameter("SampleZ", 0.0, "Sample z offset");
-    SampOffsetDeclareStatus = 2;
-  }
+  declareParameter("SampleX", 0.0, "Sample x offset");
+  declareParameter("SampleY", 0.0, "Sample y offset");
+  declareParameter("SampleZ", 0.0, "Sample z offset");
 }
 
 void SCDPanelErrors::getPeaks() const
@@ -419,13 +428,12 @@ Instrument_sptr SCDPanelErrors::getNewInstrument(const API::IPeak & peak) const
                                                 pmapSv,RotateCenters);
 
   }//for each group
+
   V3D SampPos= instChange->getSample()->getPos();
-  if( SampleOffsets)
-  {
-    SampPos[0]+=getParameter("SampleX");
-    SampPos[1]+=getParameter("SampleY");
-    SampPos[2]+=getParameter("SampleZ");
-  }
+  SampPos[0]+=getParameter("SampleX")+SampleX;
+  SampPos[1]+=getParameter("SampleY")+SampleY;
+  SampPos[2]+=getParameter("SampleZ")+SampleZ;
+
   SCDCalibratePanels::FixUpSourceParameterMap( instChange, getParameter("l0"),SampPos, pmapSv) ;
 
   return instChange;
@@ -701,8 +709,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
   if (!m_unitCell)
     throw runtime_error("Cannot evaluate function without setting the lattice constants");
 
-  size_t StartPos = 2;
-
   size_t L0param = parameterIndex("l0");
   size_t T0param = parameterIndex("t0");
 
@@ -900,7 +906,7 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const
     Unrot_dQ[2].clear();
 
     //-------- xyz offset parameters ----------------------
-    StartPos = parameterIndex("f" + boost::lexical_cast<string>(gr) + "_Xoffset");
+    size_t StartPos = parameterIndex("f" + boost::lexical_cast<string>(gr) + "_Xoffset");
 
     for (size_t param = StartPos; param <= StartPos + (size_t) 2; ++param)
 
@@ -1323,7 +1329,7 @@ DataObjects::Workspace2D_sptr SCDPanelErrors::calcWorkspace(DataObjects::PeaksWo
     {
       API::IPeak& peak = pwks->getPeak( (int)j);
       if (peak.getBankName().compare(bankNames[k]) == 0)
-        if (peak.getH() != 0 || peak.getK() != 0 || peak.getK() != 0)
+        if (peak.getH() != 0 || peak.getK() != 0 || peak.getL() != 0)
           if (peak.getH() - floor(peak.getH()) < tolerance || floor(peak.getH() + 1) - peak.getH()
               < tolerance)
             if (peak.getK() - floor(peak.getK()) < tolerance || floor(peak.getK() + 1) - peak.getK()
@@ -1445,13 +1451,22 @@ void SCDPanelErrors::setAttribute(const std::string &attName, const Attribute & 
       SampleOffsets= false;
     else
       SampleOffsets=true;
-    if(SampOffsetDeclareStatus== 1 && SampleOffsets)
-    {
-      declareParameter("SampleX", 0.0, "Sample x offset");
-      declareParameter("SampleY", 0.0, "Sample y offset");
-      declareParameter("SampleZ", 0.0, "Sample z offset");
-      SampOffsetDeclareStatus =2;
-    }
+
+  }
+  else if (attName == SAMPLE_X)
+  {
+    SampleX = value.asDouble();
+    sampleX_set = true;
+  }
+  else if (attName == SAMPLE_Y)
+  {
+    SampleY = value.asDouble();
+    sampleY_set = true;
+  }
+  else if (attName == SAMPLE_Z)
+  {
+    SampleZ = value.asDouble();
+    sampleZ_set = true;
   }
   else if (attName == X_START)
   {

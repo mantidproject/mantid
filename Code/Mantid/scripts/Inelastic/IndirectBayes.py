@@ -844,7 +844,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 			logger.notice('Output file for Fit : ' + fpath)
 			logger.notice('Output file for Contours : ' + cpath)
 
-	if (Plot != 'None'):
+	if (Plot != 'None' and Loop == True):
 		QuestPlot(fname,Plot)
 	EndTime('Quest')
 
@@ -931,14 +931,20 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
 			CreateWorkspace(OutputWorkspace='__f1tmp', DataX=dataX, DataY=yfit[:nd], DataE=np.zeros(nd),
 				NSpec=1, UnitX='DeltaE')
 			ConjoinWorkspaces(InputWorkspace1='Fit', InputWorkspace2='__f1tmp', CheckOverlapping=False)				
-	CreateWorkspace(OutputWorkspace=fname+'_ResNorm_Intensity', DataX=xPar, DataY=yPar1, DataE=xPar,
+	
+	resnorm_intesity = fname+'_ResNorm_Intensity'
+	resnorm_stretch = fname+'_ResNorm_Stretch'
+	
+	CreateWorkspace(OutputWorkspace=resnorm_intesity, DataX=xPar, DataY=yPar1, DataE=xPar,
 		NSpec=1, UnitX='MomentumTransfer')
-	CreateWorkspace(OutputWorkspace=fname+'_ResNorm_Stretch', DataX=xPar, DataY=yPar2, DataE=xPar,
+	CreateWorkspace(OutputWorkspace=resnorm_stretch, DataX=xPar, DataY=yPar2, DataE=xPar,
 		NSpec=1, UnitX='MomentumTransfer')
-	group = fname + '_ResNorm_Intensity,'+ fname + '_ResNorm_Stretch'
+	
+	group = resnorm_intesity + ','+ resnorm_stretch
 
 	resnorm_workspace = fname+'_ResNorm'
 	resnorm_fit_workspace = fname+'_ResNorm_Fit'
+	
 	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=resnorm_workspace)
 	GroupWorkspaces(InputWorkspaces='Data,Fit',OutputWorkspace=resnorm_fit_workspace)
 	
@@ -950,7 +956,7 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot='None',Save=False):
 	
 	if Save:
 		par_path = os.path.join(workdir,resnorm_workspace+'.nxs')
-		SaveNexusProcessed(InputWorkspace=resnorm_fit_workspace, Filename=par_path)
+		SaveNexusProcessed(InputWorkspace=resnorm_workspace, Filename=par_path)
 		
 		fit_path = os.path.join(workdir,resnorm_fit_workspace+'.nxs')
 		SaveNexusProcessed(InputWorkspace=resnorm_fit_workspace, Filename=fit_path)

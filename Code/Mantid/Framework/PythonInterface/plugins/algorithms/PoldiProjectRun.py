@@ -248,6 +248,7 @@ class PoldiProjectRun(PythonAlgorithm):
         """
         
         self.setWikiSummary("""Run the POLDI analysis process for a bunch of data files stored in a tableWorkspace.""")
+        self.setOptionalMessage("""Run the POLDI analysis process for a bunch of data files stored in a tableWorkspace.""")
 
         
         
