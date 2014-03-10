@@ -61,7 +61,5 @@ void ParameterEditor::updateProperty()
     mgr->clearError(m_property);
   }
 
-  // XXX: this should be done AFTER the error was cleared, because only value change causes property
-  //      view to get updated
   DoubleEditor::updateProperty();
 }
