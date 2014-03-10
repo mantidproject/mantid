@@ -81,7 +81,7 @@ class AlgorithmTest(unittest.TestCase):
         self.assertEquals(id, id) # equals itself 
         alg2 = AlgorithmManager.createUnmanaged('Load')
         id2 = alg.getAlgorithmID()
-        self.assertNotEqual(id2, id1)
+        self.assertNotEqual(id2, id)
 
     def test_cancel_does_nothing_to_executed_algorithm(self):
         data = [1.0]
