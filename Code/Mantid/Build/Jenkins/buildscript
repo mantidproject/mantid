@@ -1,4 +1,4 @@
-#!/bin/sh -ex
+#!/bin/bash -ex
 ###############################################################################
 # LINUX/MAC SCRIPT TO DRIVE THE JENKINS BUILDS OF MANTID.
 #
