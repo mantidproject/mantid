@@ -55,7 +55,7 @@ public:
     ConfiguredHeliumDetector() :
         PoldiHeliumDetector()
     {
-        loadConfiguration(Geometry::Instrument_const_sptr(0));
+        loadConfiguration(Geometry::Instrument_const_sptr());
     }
 
     void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument)

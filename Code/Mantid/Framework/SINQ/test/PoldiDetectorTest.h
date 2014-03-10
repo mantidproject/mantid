@@ -45,7 +45,7 @@ public:
     void testConfiguration()
     {
         TestablePoldiHeliumDetector heliumDetector;
-        heliumDetector.loadConfiguration(0);
+        heliumDetector.loadConfiguration(Instrument_const_sptr());
 
 
         TS_ASSERT_DELTA(heliumDetector.m_angularResolution, 0.0008333333333, 1e-6);

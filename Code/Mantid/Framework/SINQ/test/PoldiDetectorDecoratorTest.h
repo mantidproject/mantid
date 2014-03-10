@@ -32,7 +32,7 @@ public:
 
         TS_ASSERT_EQUALS(decorator.decoratedDetector(), m_detector);
 
-        decorator.setDecoratedDetector(boost::shared_ptr<PoldiAbstractDetector>(0));
+        decorator.setDecoratedDetector(boost::shared_ptr<PoldiAbstractDetector>());
 
         TS_ASSERT(!decorator.decoratedDetector());
     }

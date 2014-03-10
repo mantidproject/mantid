@@ -5,7 +5,6 @@
 #include <algorithm>
 #include "boost/range/irange.hpp"
 #include "boost/bind.hpp"
-#include "boost/algorithm/cxx11/any_of.hpp"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -419,7 +418,7 @@ double PoldiAutoCorrelationCore::reduceChopperSlitList(std::vector<std::pair<dou
     std::vector<double> iOverSigma(valuesWithSigma.size());
     std::transform(valuesWithSigma.begin(), valuesWithSigma.end(), iOverSigma.begin(), [] (std::pair<double, double> iAndSigma) { return iAndSigma.first / iAndSigma.second; });
 
-    if(boost::algorithm::any_of(iOverSigma.begin(), iOverSigma.end(), [] (double iOverS) { return iOverS < 0; })) {
+    if(*std::min_element(iOverSigma.begin(), iOverSigma.end()) < 0.0) {
         return 0.0;
     }
 

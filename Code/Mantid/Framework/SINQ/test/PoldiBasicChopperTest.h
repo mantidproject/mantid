@@ -52,8 +52,7 @@ public:
     void testConfigurationCorrectness()
     {
         TestablePoldiBasicChopper basicChopper;
-        basicChopper.loadConfiguration(0);
-
+        basicChopper.loadConfiguration(Instrument_const_sptr());
 
         std::vector<double> slitPositions = basicChopper.slitPositions();
         TS_ASSERT_EQUALS(slitPositions.size(), 8);
