@@ -48,6 +48,11 @@ namespace Mantid
       Vertex2D(const double x, const double y);
       /// Constructor with a point
       Vertex2D(const Kernel::V2D & point);
+      /// Copy constructor
+      Vertex2D(const Vertex2D & other);
+      /// Copy-assignment operator
+      Vertex2D & operator=(const Vertex2D & rhs);
+
       /// Return the vertex as a point
       inline const Kernel::V2D & point() const { return *this; }
       /// Insert a vertex so that it is next

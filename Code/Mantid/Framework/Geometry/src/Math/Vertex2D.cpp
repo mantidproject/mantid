@@ -44,6 +44,28 @@ namespace Mantid
     }
 
     /**
+     * @param other Object to initialize this from
+     */
+    Vertex2D::Vertex2D(const Vertex2D & other) 
+      : Kernel::V2D(other)
+    {
+      initNeighbours();
+    }
+
+    /**
+     * @param rhs The object to copy the state from
+     */
+    Vertex2D & Vertex2D::operator=(const Vertex2D & rhs)
+    {
+      if(this != &rhs)
+      {
+        V2D::operator=(rhs);
+        initNeighbours();
+      }
+      return *this;
+    }
+
+    /**
      * Insert a vertex in at the next point in the chain
      * @param vertex :: A pointer to the vertex to insert
      * @returns A pointer to the inserted vertex
