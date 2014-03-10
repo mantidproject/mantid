@@ -40,7 +40,54 @@ class AlgorithmManagerTest(unittest.TestCase):
         id = returned_instance.getAlgorithmID()
         mgr_instance = AlgorithmManager.getAlgorithm(id)
         self.assertEquals(id, mgr_instance.getAlgorithmID())
-    
+        
+    def test_removeById_removes_correct_instance(self):
+        alg = AlgorithmManager.create("ConvertUnits")
+        alg2 = AlgorithmManager.create("ConvertUnits")
+        AlgorithmManager.removeById(alg.getAlgorithmID())
+        self.assertEquals(None, AlgorithmManager.getAlgorithm(alg.getAlgorithmID()))
+        self.assertNotEqual(None, AlgorithmManager.getAlgorithm(alg2.getAlgorithmID()))
+
+    def test_newestInstanceOf_returns_correct_instance(self):
+        alg = AlgorithmManager.create("ConvertUnits")
+        alg2 = AlgorithmManager.create("ConvertUnits")
+        alg3 = AlgorithmManager.newestInstanceOf("ConvertUnits")
+        
+        self.assertEquals(alg2.getAlgorithmID(), alg3.getAlgorithmID())
+        self.assertNotEqual(alg.getAlgorithmID(), alg3.getAlgorithmID())
+        
+    def test_runningInstancesOf_returns_python_list(self):
+        algs = AlgorithmManager.runningInstancesOf("ConvertUnits")
+        self.assertTrue(isinstance(algs, list))
+        
+        import threading
+        class AlgThread(threading.Thread):
+            def __init__(self):
+                threading.Thread.__init__(self)
+                self.algorithm = AlgorithmManager.create("Pause")
+            def run(self):
+                self.algorithm.initialize()
+                self.algorithm.setProperty("Duration", -1.0) #forever
+                self.algorithm.execute()
+        # end class
+        pause_thread = AlgThread()
+        try:
+            pause_thread.start()
+            while not pause_thread.algorithm.isRunning():
+                pass
+            # should now be running
+            algs = AlgorithmManager.runningInstancesOf("Pause")
+            self.assertTrue(isinstance(algs, list))
+            self.assertEquals(1, len(algs))
+        except:
+            pause_thread.algorithm.cancel()
+            pause_thread.join()
+            raise
+        finally:
+            pause_thread.algorithm.cancel()
+            pause_thread.join()
+
+
     def test_clear_removes_all_managed_algorithms(self):
         AlgorithmManager.clear()
         new_size = AlgorithmManager.size()
