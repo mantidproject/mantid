@@ -127,10 +127,8 @@ public:
   /// Set function vector attribute value
   void setVectorAttribute(QtProperty* prop);
 
-  /**
-   * Update the parameter properties
-   */
-  void updateParameters();
+  /// Update the parameter properties
+  void updateParameters(bool setErrors = false);
 
   // Get property for function parameter parName
   QtProperty* getParameterProperty(const QString& parName)const;

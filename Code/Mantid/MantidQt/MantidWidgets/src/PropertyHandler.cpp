@@ -921,9 +921,10 @@ void PropertyHandler::setVectorAttribute(QtProperty *prop)
 }
 
 /**
-* Update the parameter properties
-*/
-void PropertyHandler::updateParameters()
+ * Update the parameter properties. If isFitDone is true, parameter errors are set as well.
+ * @param setErrors :: Whether errors should be set
+ */
+void PropertyHandler::updateParameters(bool setErrors)
 {
   for(int i=0;i<m_parameters.size();i++)
   {
@@ -934,14 +935,17 @@ void PropertyHandler::updateParameters()
     double parValue = function()->getParameter(parIndex);
     m_browser->m_parameterManager->setValue(prop, parValue);
 
-    double parError = function()->getError(parIndex);
-    m_browser->m_parameterManager->setError(prop, parError);
+    if (setErrors)
+    {
+      double parError = function()->getError(parIndex);
+      m_browser->m_parameterManager->setError(prop, parError);
+    }
   }
   if (m_cf)
   {
     for(size_t i=0;i<m_cf->nFunctions();i++)
     {
-      getHandler(i)->updateParameters();
+      getHandler(i)->updateParameters(setErrors);
     }
   }
 }

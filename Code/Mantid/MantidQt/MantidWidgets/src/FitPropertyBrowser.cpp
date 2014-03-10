@@ -1834,11 +1834,13 @@ void FitPropertyBrowser::vectorDoubleChanged(QtProperty *prop)
     h->setVectorAttribute(prop);
 }
 
-/** Update the function parameter properties. 
+/**
+ * Update the function parameter properties. If isFitDone is true, set parameter errors as well.
+ * @param setErrors :: Whether errors should be set as well
  */
-void FitPropertyBrowser::updateParameters()
+void FitPropertyBrowser::updateParameters(bool setErrors)
 {
-  getHandler()->updateParameters();
+  getHandler()->updateParameters(setErrors);
 }
 
 /**
@@ -1897,7 +1899,7 @@ void FitPropertyBrowser::getFitResults()
       }
     }
     while(row.next());
-    updateParameters();
+    updateParameters(true);
   }
 }
 
