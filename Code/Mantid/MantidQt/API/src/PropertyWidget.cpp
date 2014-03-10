@@ -144,7 +144,8 @@ namespace // anonymous
     // We'd like to round off any instances of "2.7999999999999998", "0.050000000000000003",
     // or similar, but we want to keep the decimal point in values like "0.0" or "1.0" since
     // they can be a visual clue that a double is expected.
-    if( defaultValue.length() > 5 )
+    static const std::size_t STRING_ROUNDING_LENGTH = 15;
+    if( defaultValue.length() >= STRING_ROUNDING_LENGTH )
     {
       std::stringstream roundedValue;
       roundedValue << roundedNumber;
