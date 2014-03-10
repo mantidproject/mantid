@@ -204,7 +204,7 @@ std::vector<double> PoldiAutoCorrelationCore::getDGrid(double deltaD)
 
     double d0 = static_cast<double>(normedDRange.first) * deltaD;
     int n = 0;
-    std::generate(dGrid.begin(), dGrid.end(), [&n, &deltaD, &d0]{ n++; return static_cast<double>(n) * deltaD + d0; });
+    std::generate(dGrid.begin(), dGrid.end(), [&n, &deltaD, &d0]() -> double { n++; return static_cast<double>(n) * deltaD + d0; });
 
     return dGrid;
 }
