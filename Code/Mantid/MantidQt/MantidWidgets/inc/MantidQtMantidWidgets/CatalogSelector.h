@@ -15,6 +15,8 @@ namespace MantidQt
       public:
         /// Default constructor
         CatalogSelector(QWidget *parent = 0);
+        /// Obtain the session information for the facilities selected.
+        std::vector<std::string> getSelectedCatalogSessions();
 
       private:
         /// Initialise the layout
