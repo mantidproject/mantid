@@ -1,7 +1,13 @@
 /*WIKI*
 
 This algorithm is responsible for normalising data via a given incident beam
-parameter. For SNS, monitor workspaces need to be passed.
+parameter. This parameter, ''IncidentBeamNormalisation'', is controlled from the
+reduction properties. It can have the values ''None'', ''ByCurrent'' or
+''ByMonitor''. For SNS, monitor workspaces need to be passed. The monitor
+spectrum index is controlled '''ONLY''' from the
+[[instrument parameter file | InstrumentParameterFile]]. If normalisation
+is performed a sample log called ''DirectInelasticReductionNormalisedBy'' is
+added to the resulting workspace with the normlisation procedure used.
 
 *WIKI*/
 
