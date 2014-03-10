@@ -86,7 +86,11 @@ QString ParameterPropertyManager::valueText(const QtProperty* property) const
     double propError = error(property);
     int precision = decimals(property);
 
-    return originalValueText + QString(" (%1)").arg(propError, 0, 'g', precision);
+    // Format logic taken from QtDoublePropertyManager::valueText
+    double absVal = fabs(value(property));
+    char format = absVal > 1e5 || (absVal != 0 && absVal < 1e-5) ? 'e' : 'f';
+
+    return originalValueText + QString(" (%1)").arg(propError, 0, format, precision);
   }
   else
   {
