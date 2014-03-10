@@ -1,16 +1,8 @@
 import unittest
 import testhelpers
-from mantid.api import AlgorithmManager
-from mantid.api import (IAlgorithm, Algorithm, AlgorithmProxy, PythonAlgorithm, 
-                        AlgorithmFactory)
-import sys
+from mantid.api import (AlgorithmManager, IAlgorithm, Algorithm, AlgorithmProxy)
 
-class IsAnAlgorithm(PythonAlgorithm):
-    def PyInit(self):
-        pass
-    
-class NotAnAlgorithm(object):
-    pass
+import sys
 
 class AlgorithmManagerTest(unittest.TestCase):
     
@@ -36,17 +28,7 @@ class AlgorithmManagerTest(unittest.TestCase):
     def test_unmanaged_cppalg_isinstance_of_Algorithm(self):
         alg = AlgorithmManager.createUnmanaged("ConvertUnits")
         self.assertTrue(isinstance(alg, Algorithm))
-        
-    def test_pyalg_isinstance_of_Algorithm(self):
-        alg = IsAnAlgorithm()
-        self.assertTrue(isinstance(alg, Algorithm))
-        self.assertTrue(isinstance(alg, IAlgorithm))
-        
-    def test_algorithm_subscription_with_valid_object_succeeds(self):
-        testhelpers.assertRaisesNothing(self, AlgorithmFactory.subscribe, IsAnAlgorithm)
 
-    def test_algorithm_registration_with_invalid_object_throws(self):
-        self.assertRaises(ValueError, AlgorithmFactory.subscribe, NotAnAlgorithm)
 
 if __name__ == '__main__':
     unittest.main()        
