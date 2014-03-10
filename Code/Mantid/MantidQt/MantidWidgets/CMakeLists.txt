@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/AlgorithmSelectorWidget.cpp
 	src/CatalogHelper.cpp
 	src/CatalogSearch.cpp
+	src/CatalogSelector.cpp
 	src/CheckboxHeader.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
@@ -42,6 +43,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
     inc/MantidQtMantidWidgets/FunctionBrowser.h
     inc/MantidQtMantidWidgets/CatalogSearch.h
+    inc/MantidQtMantidWidgets/CatalogSelector.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
@@ -75,6 +77,7 @@ set ( INC_FILES
 set ( UI_FILES 
 	  inc/MantidQtMantidWidgets/DataSelector.ui
     inc/MantidQtMantidWidgets/CatalogSearch.ui
+    inc/MantidQtMantidWidgets/CatalogSelector.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui
     inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
