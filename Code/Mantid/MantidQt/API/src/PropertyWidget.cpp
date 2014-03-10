@@ -3,7 +3,6 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 
-#include <boost/optional.hpp>
 #include <boost/assign.hpp>
 
 #include <cmath>
@@ -22,27 +21,29 @@ namespace // anonymous
 {
   /**
    * Attempts to convert the given string into a double representation of a number.
+   * Rounding will occur so that "0.0200000000001" will be output as 0.02, for example.
    *
    * @param s :: the string to convert.
-   * @returns :: the converted number, wrapped in an optional.  Else an empty optional
-   *             if conversion was unsuccesful.
+   * @returns :: the converted number
+   *
+   * @throws std::runtime_error :: if conversion was unsuccesful.
    */
-  boost::optional<double> stringToNumber(const std::string & s)
+  double stringToRoundedNumber(const std::string & s)
   {
     // Using std::istringstream is a nice way to do string-to-double conversion
     // in this situation as it rounds numbers for us at the same time.  Unfortunately,
     // commas seem to confuse it ("0,0,0" is converted to "0" without any warning).
     const bool containsComma = s.find(",") != std::string::npos;
     if( containsComma )
-      return boost::optional<double>();
+      throw std::runtime_error("");
     
     std::istringstream i(s);
-    double result;
+    double roundedNumber;
     
-    if (!(i >> result))
-      return boost::optional<double>();
+    if (!(i >> roundedNumber))
+      throw std::runtime_error("");
     
-    return boost::optional<double>(result);
+    return roundedNumber;
   } 
 
   /**
@@ -74,9 +75,15 @@ namespace // anonymous
     if( value == "2.14748e+09" )
       return true;
 
-    const auto number = stringToNumber(value);
-    if( !number )
+    double roundedNumber;
+    try
+    {
+      roundedNumber = stringToRoundedNumber(value);
+    }
+    catch( std::runtime_error & )
+    {
       return false;
+    }
     
     static const std::vector<double> EMPTY_NUM_MACROS = boost::assign::list_of
       (EMPTY_DBL()) (-DBL_MAX) (DBL_MAX)
@@ -85,7 +92,7 @@ namespace // anonymous
       (static_cast<double>(-INT_MAX))
       (static_cast<double>(-LONG_MAX));
 
-    return std::find(EMPTY_NUM_MACROS.begin(), EMPTY_NUM_MACROS.end(), *number) != EMPTY_NUM_MACROS.end();
+    return std::find(EMPTY_NUM_MACROS.begin(), EMPTY_NUM_MACROS.end(), roundedNumber) != EMPTY_NUM_MACROS.end();
   }
 
   /**
@@ -124,9 +131,15 @@ namespace // anonymous
     if( defaultValue == "-0" || defaultValue == "-0.0" )
       return "0";
 
-    const auto number = stringToNumber(defaultValue);
-    if( !number )
+    double roundedNumber;
+    try
+    {
+      roundedNumber = stringToRoundedNumber(defaultValue);
+    }
+    catch( std::runtime_error & )
+    {
       return defaultValue;
+    }
 
     // We'd like to round off any instances of "2.7999999999999998", "0.050000000000000003",
     // or similar, but we want to keep the decimal point in values like "0.0" or "1.0" since
@@ -134,7 +147,7 @@ namespace // anonymous
     if( defaultValue.length() > 5 )
     {
       std::stringstream roundedValue;
-      roundedValue << number.get();
+      roundedValue << roundedNumber;
       return roundedValue.str();
     }
 
