@@ -382,6 +382,7 @@ protected:
   QtProperty *m_xColumn;
   QtProperty *m_yColumn;
   QtProperty *m_errColumn;
+  QtProperty *m_showParamErrors;
   QList<QtProperty*> m_minimizerProperties;
 
   /// A copy of the edited function

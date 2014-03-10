@@ -245,6 +245,11 @@ void FitPropertyBrowser::init()
                                            QVariant(false)).toBool();
   m_boolManager->setValue(m_convolveMembers, convolveCompositeItems);
 
+  m_showParamErrors = m_boolManager->addProperty("Show Parameter Errors");
+  bool showParamErrors = settings.value(m_showParamErrors->propertyName(), false).toBool();
+  m_boolManager->setValue(m_showParamErrors, showParamErrors);
+  m_parameterManager->setErrorsEnabled(showParamErrors);
+
   m_xColumn = m_columnManager->addProperty("XColumn");
   m_yColumn = m_columnManager->addProperty("YColumn");
   m_errColumn = m_columnManager->addProperty("ErrColumn");
@@ -262,6 +267,7 @@ void FitPropertyBrowser::init()
   settingsGroup->addSubProperty(m_plotDiff);
   settingsGroup->addSubProperty(m_plotCompositeMembers);
   settingsGroup->addSubProperty(m_convolveMembers);
+  settingsGroup->addSubProperty(m_showParamErrors);
 
   /* Create editors and assign them to the managers */
   createEditors(w);
@@ -1226,11 +1232,19 @@ void FitPropertyBrowser::boolChanged(QtProperty* prop)
 {
   if ( ! m_changeSlotsEnabled ) return;
 
-  if ( prop == m_plotDiff || prop == m_plotCompositeMembers || prop == m_ignoreInvalidData )
+  if ( prop == m_plotDiff || prop == m_plotCompositeMembers || prop == m_ignoreInvalidData
+       || prop == m_showParamErrors )
   {
+    bool val = m_boolManager->value(prop);
+
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
-    settings.setValue(prop->propertyName(), m_boolManager->value(prop));
+    settings.setValue(prop->propertyName(), val);
+
+    if ( m_showParamErrors )
+    {
+      m_parameterManager->setErrorsEnabled(val);
+    }
   }
   else
   {// it could be an attribute

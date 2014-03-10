@@ -42,12 +42,18 @@ public:
   /// Checks if given property has error value set
   bool isErrorSet(const QtProperty* property) const;
 
+  /// Returns errors enabled status
+  bool areErrorsEnabled() const { return m_errorsEnabled; }
+
 public Q_SLOTS:
   /// Set property error
   void setError(QtProperty* property, double error);
 
   /// Clears error of the property, if one was set
   void clearError(QtProperty* property);
+
+  /// Enabled/disables error display
+  void setErrorsEnabled(bool enabled);
 
 protected:
   /// Text representation of the property
@@ -56,6 +62,9 @@ protected:
 private:
   /// Property error values
   QMap<QtProperty*, double> m_errors;
+
+  /// Errors enabled flag. When is false, errors can be set, but will not be displayed
+  bool m_errorsEnabled;
 };
 
 #endif // PARAMETERPROPERTYMANAGER_H

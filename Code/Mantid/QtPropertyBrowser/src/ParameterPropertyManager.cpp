@@ -5,7 +5,8 @@
 #include <stdexcept>
 
 ParameterPropertyManager::ParameterPropertyManager(QObject *parent)
-  : QtDoublePropertyManager(parent)
+  : QtDoublePropertyManager(parent),
+    m_errors(), m_errorsEnabled(false)
 {}
 
 /**
@@ -56,6 +57,20 @@ void ParameterPropertyManager::clearError(QtProperty* property)
 }
 
 /**
+ * Sets errors enabled state. Updates all the properties as well to show/hide errors.
+ * @param enabled :: New errors enabled state
+ */
+void ParameterPropertyManager::setErrorsEnabled(bool enabled)
+{
+  m_errorsEnabled = enabled;
+
+  foreach(QtProperty* prop, m_errors.keys())
+  {
+    emit propertyChanged(prop);
+  }
+}
+
+/**
  * Adds error parameter value to property display
  * @param property :: Property we want to display
  * @return Text representation of the property
@@ -65,7 +80,7 @@ QString ParameterPropertyManager::valueText(const QtProperty* property) const
 {
   QString originalValueText = QtDoublePropertyManager::valueText(property);
 
-  if (isErrorSet(property))
+  if (areErrorsEnabled() && isErrorSet(property))
   {
     double propError = error(property);
     int precision = decimals(property);
@@ -74,7 +89,7 @@ QString ParameterPropertyManager::valueText(const QtProperty* property) const
   }
   else
   {
-    // No error set, so don't append error value
+    // No error set or errors disabled, so don't append error value
     return originalValueText;
   }
 }
