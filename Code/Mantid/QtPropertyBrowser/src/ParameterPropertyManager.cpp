@@ -34,16 +34,17 @@ bool ParameterPropertyManager::isErrorSet(const QtProperty* property) const
  * @param property :: Property to set error for
  * @param error :: Error value to set
  */
-void ParameterPropertyManager::setError(const QtProperty* property, double error)
+void ParameterPropertyManager::setError(QtProperty* property, double error)
 {
   m_errors[property] = error;
+  emit propertyChanged(property);
 }
 
 /**
  * Clears error of the property, if one was set. If error was not set, the function does nothing.
  * @param property :: Property to clear error for
  */
-void ParameterPropertyManager::clearError(const QtProperty* property)
+void ParameterPropertyManager::clearError(QtProperty* property)
 {
   m_errors.remove(property);
 }
