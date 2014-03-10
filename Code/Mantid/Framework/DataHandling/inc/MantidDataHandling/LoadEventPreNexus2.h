@@ -7,6 +7,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Events.h"
 
 
@@ -212,6 +213,12 @@ private:
   void processImbedLogs();
 
   void debugOutput(bool doit, size_t mindex);
+
+  void unmaskVetoEventIndex();
+
+  DataObjects::Workspace2D_sptr generateEventDistribtionWorkspace();
+
+  void createOutputWorkspace(const std::string event_filename);
 
 };
 
