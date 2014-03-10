@@ -15,10 +15,13 @@ ParameterPropertyManager::ParameterPropertyManager(QObject *parent)
  */
 double ParameterPropertyManager::error(const QtProperty* property) const
 {
-  if (!m_errors.contains(property))
+  // Cast for searching purposes
+  auto prop = const_cast<QtProperty*>(property);
+
+  if (!m_errors.contains(prop))
     throw std::runtime_error("Parameter doesn't have error value set");
 
-  return m_errors[property];
+  return m_errors[prop];
 }
 
 /**
@@ -27,7 +30,10 @@ double ParameterPropertyManager::error(const QtProperty* property) const
  */
 bool ParameterPropertyManager::isErrorSet(const QtProperty* property) const
 {
-  return m_errors.contains(property);
+  // Cast for searching purposes
+  auto prop = const_cast<QtProperty*>(property);
+
+  return m_errors.contains(prop);
 }
 
 /**

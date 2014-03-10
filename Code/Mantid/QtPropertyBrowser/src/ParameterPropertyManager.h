@@ -55,7 +55,7 @@ protected:
 
 private:
   /// Property error values
-  QMap<const QtProperty*, double> m_errors;
+  QMap<QtProperty*, double> m_errors;
 };
 
 #endif // PARAMETERPROPERTYMANAGER_H
