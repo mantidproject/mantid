@@ -76,7 +76,8 @@ class QT_QTPROPERTYBROWSER_EXPORT DoubleEditorFactory : public DoubleEditorFacto
 {
   Q_OBJECT
 public:
-  DoubleEditorFactory(QObject* parent = 0) : DoubleEditorFactoryBase(parent) {}
+  DoubleEditorFactory(QObject* parent = 0)
+    : DoubleEditorFactoryBase<QtDoublePropertyManager,DoubleEditor>(parent) {}
 };
 
 /**
@@ -86,7 +87,8 @@ class QT_QTPROPERTYBROWSER_EXPORT ParameterEditorFactory : public DoubleEditorFa
 {
   Q_OBJECT
 public:
-  ParameterEditorFactory(QObject* parent = 0) : DoubleEditorFactoryBase(parent) {}
+  ParameterEditorFactory(QObject* parent = 0)
+    :DoubleEditorFactoryBase<ParameterPropertyManager, ParameterEditor>(parent) {}
 };
 
 #endif // DOUBLEEDITORFACTORY_H

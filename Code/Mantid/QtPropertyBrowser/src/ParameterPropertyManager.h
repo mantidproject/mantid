@@ -29,7 +29,7 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class ParameterPropertyManager : public QtDoublePropertyManager
+class QT_QTPROPERTYBROWSER_EXPORT ParameterPropertyManager : public QtDoublePropertyManager
 {
   Q_OBJECT
 
