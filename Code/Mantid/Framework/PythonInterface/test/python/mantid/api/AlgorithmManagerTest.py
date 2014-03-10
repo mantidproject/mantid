@@ -29,6 +29,23 @@ class AlgorithmManagerTest(unittest.TestCase):
         alg = AlgorithmManager.createUnmanaged("ConvertUnits")
         self.assertTrue(isinstance(alg, Algorithm))
 
+    def test_size_reports_number_of_managed_algorithms(self):
+        old_size = AlgorithmManager.size()
+        new_alg = AlgorithmManager.create("ConvertUnits")
+        new_size = AlgorithmManager.size()
+        self.assertTrue(new_size == old_size + 1)
+
+    def test_getAlgorithm_returns_correct_instance(self):
+        returned_instance = AlgorithmManager.create("ConvertUnits")
+        id = returned_instance.getAlgorithmID()
+        mgr_instance = AlgorithmManager.getAlgorithm(id)
+        self.assertEquals(id, mgr_instance.getAlgorithmID())
+    
+    def test_clear_removes_all_managed_algorithms(self):
+        AlgorithmManager.clear()
+        new_size = AlgorithmManager.size()
+        self.assertEquals(0, new_size)
+
 
 if __name__ == '__main__':
     unittest.main()        
