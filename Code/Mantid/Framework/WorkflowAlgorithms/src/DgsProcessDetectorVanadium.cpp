@@ -2,7 +2,13 @@
 
 This algorithm is responsible for processing the detector vanadium in the form
 required for the sample data normalisation in the convert to energy transfer
-process.
+process. If the input detector vanadium is in TOF units and that is the
+requested units for integration, the ''ConvertUnits'' algorithm does not run.
+ISIS requires that the integrated detector vanadium be scaled by a factor
+present in the
+[[instrument parameter file | InstrumentParameterFile]]. The resulting
+integrated vanadium workspace can be saved to a file using the reduction
+property manager with the boolean property ''SaveProcessedDetVan''.
 
 *WIKI*/
 
