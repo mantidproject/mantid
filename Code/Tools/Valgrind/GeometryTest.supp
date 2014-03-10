@@ -27,4 +27,12 @@
    fun:_ZN20TColgp_Array1OfPnt2dC1Eii
    ...
 }
-
+{
+   <SurfaceFactory_singleton>
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZNSs4_Rep9_S_createEmmRKSaIcE
+   ...
+   fun:_ZN6Mantid8Geometry14SurfaceFactory15registerSurfaceEv
+   ...
+}
