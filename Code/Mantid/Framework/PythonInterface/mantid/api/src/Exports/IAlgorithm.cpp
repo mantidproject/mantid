@@ -235,8 +235,6 @@ void export_ialgorithm()
 
   // --------------------------------- IAlgorithm ------------------------------------------------
   register_ptr_to_python<boost::shared_ptr<IAlgorithm>>();
-  register_ptr_to_python<boost::shared_ptr<const IAlgorithm>>();
-
 
   class_<IAlgorithm, bases<IPropertyManager>,
          boost::noncopyable>("IAlgorithm", "Interface for all algorithms", no_init)

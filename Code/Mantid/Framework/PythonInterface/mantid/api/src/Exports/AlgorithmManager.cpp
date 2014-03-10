@@ -47,7 +47,10 @@ namespace
     auto mgrAlgs = self.runningInstancesOf(algName);
     for(auto iter = mgrAlgs.begin(); iter != mgrAlgs.end(); ++iter)
     {
-      algs.append(*iter);
+      // boost 1.41 (RHEL6) can't handle registering IAlgorithm_const_sptr so we
+      // have to cast to IAlgorithm_sptr and then convert to Python
+      // The constness is pretty-irrelevant by this point anyway
+      algs.append(boost::const_pointer_cast<IAlgorithm>(*iter));
     }
 
     return algs;
