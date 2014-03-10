@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <istream>
+#include <iosfwd>
 
 #include <Poco/Net/HTTPResponse.h>
 

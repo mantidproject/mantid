@@ -17,8 +17,6 @@
 
 #include <ostream>
 #include <sstream>
-#include <fstream>
-
 
 namespace Mantid
 {
