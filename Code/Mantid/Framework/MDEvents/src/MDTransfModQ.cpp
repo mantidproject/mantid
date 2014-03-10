@@ -361,9 +361,8 @@ namespace Mantid
 
     /// constructor;
     MDTransfModQ::MDTransfModQ():
-      m_DetDirecton(NULL)//,m_NMatrixDim(-1)
+      m_DetDirecton(NULL),//,m_NMatrixDim(-1)
       m_ex(0),m_ey(0),m_ez(1), 
-      m_Det(NULL),
       m_NMatrixDim(0), //uninitialized
       m_Emode(Kernel::DeltaEMode::Undefined), // uninitialized
       m_Ki(1.),m_Ei(1.),
