@@ -606,11 +606,12 @@ namespace MantidQt
       std::string searchResults = "searchResults";
       clearSearch(m_icatUiForm.searchResultsTbl, searchResults);
 
+      auto sessionIDs = m_catalogSelector->getSelectedCatalogSessions();
       // Obtain the number of results for paging.
-      int64_t numrows = m_icatHelper->getNumberOfSearchResults(inputFields);
+      int64_t numrows = m_icatHelper->getNumberOfSearchResults(inputFields,sessionIDs);
 
       // Setup values used for paging.
-      int limit      = 100;
+      int limit = 100;
       // Have to cast either numrows or limit to double for ceil to work correctly.
       double totalNumPages = ceil(static_cast<double>(numrows) / limit);
       int offset = (m_currentPageNumber - 1) * limit;
@@ -620,7 +621,7 @@ namespace MantidQt
       m_icatUiForm.resPageEndNumTxt->setText(QString::number(totalNumPages));
 
       // Perform a search using paging (E.g. return only n from m).
-      m_icatHelper->executeSearch(inputFields,offset,limit);
+      m_icatHelper->executeSearch(inputFields,offset,limit,sessionIDs);
 
       // Update the label to inform the user of how many investigations have been returned from the search.
       m_icatUiForm.searchResultsLbl->setText(QString::number(numrows) + " investigations found.");

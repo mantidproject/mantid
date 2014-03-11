@@ -17,9 +17,11 @@ namespace MantidQt
       /// Obtain the list of instruments that are available.
       const std::vector<std::string> getInvestigationTypeList();
       /// Run the search algorithm with the given user input.
-      void executeSearch(const std::map<std::string, std::string> &userInputs, const int &offset, const int &limit);
+      void executeSearch(const std::map<std::string, std::string> &userInputs,
+          const int &offset, const int &limit,const std::vector<std::string> &sessionIDs);
       /// Obtain the number of search results to be returned by the query of the user.
-      int64_t getNumberOfSearchResults(const std::map<std::string, std::string> &userInputFields);
+      int64_t getNumberOfSearchResults(const std::map<std::string, std::string> &userInputFields,
+          const std::vector<std::string> &sessionIDs);
       /// Search for all related dataFiles for the specified investigation.
       void executeGetDataFiles(const std::string &investigationId);
       /// Download dataFile (via HTTP or copy if access to archive) and return the path to it.

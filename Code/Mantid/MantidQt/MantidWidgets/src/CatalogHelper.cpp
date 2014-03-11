@@ -64,7 +64,7 @@ namespace MantidQt
      * @param limit    :: limit the number of rows returned by the query.
      */
     void CatalogHelper::executeSearch(const std::map<std::string, std::string> &userInputFields,
-        const int &offset, const int &limit)
+        const int &offset, const int &limit, const std::vector<std::string> &sessionIDs)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
       // Set the properties to limit the number of results returned for paging purposes.
@@ -72,8 +72,20 @@ namespace MantidQt
       catalogAlgorithm->setProperty("Offset", offset);
       // Set the "search" properties to their related input fields.
       setSearchProperties(catalogAlgorithm, userInputFields);
-      // Allow asynchronous execution to update label while search is being carried out.
-      executeAsynchronously(catalogAlgorithm);
+
+      auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
+      if (session.size() == sessionIDs.size())
+      {
+        executeAsynchronously(catalogAlgorithm);
+      }
+      else
+      {
+        for (unsigned i = 0; i < sessionIDs.size(); ++i)
+        {
+          catalogAlgorithm->setProperty("Session",sessionIDs.at(i));
+          executeAsynchronously(catalogAlgorithm);
+        }
+      }
     }
 
 
@@ -82,17 +94,30 @@ namespace MantidQt
      * @param userInputFields :: A map containing the users' search input (key => FieldName, value => FieldValue).
      * @return Number of results returned by the search query.
      */
-    int64_t CatalogHelper::getNumberOfSearchResults(const std::map<std::string, std::string> &userInputFields)
+    int64_t CatalogHelper::getNumberOfSearchResults(const std::map<std::string, std::string> &userInputFields,
+        const std::vector<std::string> &sessionIDs)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
       // Set the property to only perform a count search.
       catalogAlgorithm->setProperty("CountOnly", true);
       // Set the "search" properties to their related input fields.
       setSearchProperties(catalogAlgorithm, userInputFields);
-      // Allow asynchronous execution to update label while search is being carried out.
-      executeAsynchronously(catalogAlgorithm);
-      // Return the number of results
-      return catalogAlgorithm->getProperty("NumberOfSearchResults");
+
+      auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
+      if (session.size() == sessionIDs.size())
+      {
+        executeAsynchronously(catalogAlgorithm);
+        return catalogAlgorithm->getProperty("NumberOfSearchResults");
+      }
+      else
+      {
+        for (unsigned i = 0; i < sessionIDs.size(); ++i)
+        {
+          catalogAlgorithm->setProperty("Session",sessionIDs.at(i));
+          executeAsynchronously(catalogAlgorithm);
+        }
+        return catalogAlgorithm->getProperty("NumberOfSearchResults");
+      }
     }
 
     /**
