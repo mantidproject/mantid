@@ -22,7 +22,7 @@ namespace MantidQt
      * Constructor
      */
     CatalogSearch::CatalogSearch(QWidget* parent) : QWidget(parent),
-        m_icatHelper(new CatalogHelper()), m_currentPageNumber(1)
+        m_icatHelper(new CatalogHelper()), m_catalogSelector(new CatalogSelector()), m_currentPageNumber(1)
     {
       initLayout();
       // Load saved settings from store.
@@ -105,6 +105,8 @@ namespace MantidQt
       connect(m_icatUiForm.resNext,SIGNAL(clicked()),this,SLOT(nextPageClicked()));
       // When the user is done editing & presses enter we retrieve the results for that specific page in paging.
       connect(m_icatUiForm.pageStartNum,SIGNAL(editingFinished()),SLOT(goToInputPage()));
+      // Open the catalog/facility selection widget when 'Select a catalog' is clicked.
+      connect(m_icatUiForm.catalogSelection,SIGNAL(clicked()),SLOT(openFacilitySelection()));
 
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
@@ -680,6 +682,16 @@ namespace MantidQt
       m_icatUiForm.InvestigationType->setCurrentIndex(0);
       m_icatUiForm.advSearchCbox->setChecked(false);
       m_icatUiForm.myDataCbox->setChecked(false);
+    }
+
+    /**
+     *  Allows a user to select specific facilities that they want to search the catalogs of.
+     */
+    void CatalogSearch::openFacilitySelection()
+    {
+      m_catalogSelector->populateFacilitySelection();
+      m_catalogSelector->show();
+      m_catalogSelector->raise();
     }
 
     ///////////////////////////////////////////////////////////////////////////////
