@@ -144,7 +144,8 @@ namespace MDEvents
     {
       totalNeighbours = totalNeighbours * neighbourSpan;
     }
-    m_permutations.resize(totalNeighbours);
+    auto temp = std::vector<long>(totalNeighbours, 0);
+    m_permutations.swap(temp);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -373,6 +374,29 @@ namespace MDEvents
     return m_pos;
   }
 
+  bool isNeighbourOfSubject(const size_t ndims, const size_t neighbour_linear_index, const size_t* subject_indices, const size_t * num_bins, const size_t * index_max)
+  {
+    size_t neighbour_indices[ndims];
+    Utils::NestedForLoop::GetIndicesFromLinearIndex(ndims, neighbour_linear_index, num_bins, index_max, neighbour_indices);
+
+
+    auto a = subject_indices[0];
+    auto b = subject_indices[1];
+
+    auto n1 = neighbour_indices[0];
+    auto n2 = neighbour_indices[1];
+
+    for(size_t ind = 0; ind < ndims; ++ind)
+    {
+      auto diff = std::abs(static_cast<long>(subject_indices[ind]) -static_cast<long>(neighbour_indices[ind]));
+      if (diff > 1)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /**
    * Gets indexes of bins/pixels/boxes neighbouring the present iterator location.
    * The number of neighbour indexes returned will depend upon the dimensionality of the workspace as well as the presence
@@ -385,36 +409,37 @@ namespace MDEvents
     Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker, m_indexMax,
             m_index);
 
-    size_t offset = 1;
+    long offset = 1;
     const int base = 3;
 
-    m_permutations[0] = 0;
-    m_permutations[1] = 1;
-    m_permutations[2] = -1;
-    size_t n_permutations = 3;
+    std::vector<long> permutations(3);
+    permutations[0] = 0;
+    permutations[1] = 1;
+    permutations[2] = -1;
 
-    for(size_t j = 0; j < m_nd; ++j)
+    size_t nPermutations = permutations.size();
+    for(size_t j = 1; j < m_nd; ++j)
     {
-      offset = offset * m_indexMaker[j-1];
-
-      for(size_t k = 0; k < m_permutations.size(); ++k)
+      offset = offset * m_ws->getDimension(j-1)->getNBins();
+      for(size_t k = 0; k <nPermutations; ++k)
       {
-        long newVariant = m_permutations[k] + long(offset);
-        m_permutations[j] = newVariant;
-        m_permutations[j+1] = -newVariant;
-        n_permutations += 2;
+        long newVariant = permutations[k] + offset;
+        permutations.push_back(newVariant);
+        permutations.push_back(-1*newVariant);
       }
+      nPermutations = permutations.size();
     }
 
     std::vector<size_t> neighbourIndexes;
-    for(size_t i = 0; i < n_permutations; ++i)
+    for(size_t i = 0; i < permutations.size(); ++i)
     {
-      if (m_permutations[i] == 0)
+      if (permutations[i] == 0)
       {
         continue;
       }
-      size_t neighbour_index = m_pos + m_permutations[i];
-      if( Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index, m_indexMaker, m_indexMax ) )
+
+      size_t neighbour_index = m_pos + permutations[i];
+      if( isNeighbourOfSubject(m_nd, neighbour_index, m_index, m_indexMaker, m_indexMax ) )
       {
         neighbourIndexes.push_back(neighbour_index);
       }

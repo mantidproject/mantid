@@ -4,6 +4,7 @@
 #include "MantidKernel/DllConfig.h"
 #include <cmath>
 #include <vector>
+#include <iostream>
 
 namespace Mantid
 {
@@ -267,13 +268,17 @@ namespace Utils
    * @param num_bins
    * @return True if the are neighbours, otherwise false.
    */
-  inline bool isNeighbourOfSubject(const size_t ndims, const size_t neighbour_linear_index, const size_t* subject_indices, const size_t * num_bins, const size_t * index_max)
+  inline bool isNeighbourOfSubjectt(const size_t ndims, const size_t neighbour_linear_index, const size_t* subject_indices, const size_t * num_bins, const size_t * index_max)
   {
     size_t neighbour_indices[ndims];
     Utils::NestedForLoop::GetIndicesFromLinearIndex(ndims, neighbour_linear_index, num_bins, index_max, neighbour_indices);
+
+    std::cout << "Subject Indexes " << subject_indices[0] << "\t" << subject_indices[1] <<  std::endl;
+    std::cout << "Neighbour Indexes " << neighbour_indices[0] <<  "\t" << neighbour_indices[1] << std::endl;
+
     for(size_t ind = 0; ind < ndims; ++ind)
     {
-      auto diff = std::abs(static_cast<int>(subject_indices[ind] - neighbour_indices[ind]));
+      auto diff = std::abs(static_cast<long>(subject_indices[ind]) -static_cast<long>(neighbour_indices[ind]));
       if (diff > 1)
       {
         return false;

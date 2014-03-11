@@ -247,26 +247,130 @@ public:
     TSM_ASSERT_EQUALS("The first index hit should be 2 since that is the first unmasked one", 5, histoIt->getLinearIndex());
   }
 
+  bool doesContainIndex(const std::vector<size_t>& container, const size_t element)
+  {
+    return std::find( container.begin(), container.end(), element ) != container.end();
+  }
+
   void test_neighours_1d()
   {
     const size_t nd = 1;
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
+    /*
+    1D MDHistoWorkspace
+
+    0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
+
+    */
 
     MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
 
     // At first position
+    /*
+    0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
+    ^
+    |
+    */
     std::vector<size_t> neighbourIndexes = it->findNeighbourIndexes();
     TS_ASSERT_EQUALS(1, neighbourIndexes.size()); // should be on edge
+    TSM_ASSERT( "Neighbour at index 0 is 1", doesContainIndex(neighbourIndexes, 1) );
 
     // Go to intermediate position
+    /*
+    0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
+        ^
+        |
+    */
     it->next();
     neighbourIndexes = it->findNeighbourIndexes();
     TS_ASSERT_EQUALS(2, neighbourIndexes.size()); // should be on edge
+    TSM_ASSERT( "Neighbours at index 1 includes 0", doesContainIndex(neighbourIndexes, 0) );
+    TSM_ASSERT( "Neighbours at index 1 includes 2", doesContainIndex(neighbourIndexes, 2) );
 
     // Go to last position
-    it->jumpTo(10);
+    /*
+    0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
+                                        ^
+                                        |
+    */
+    it->jumpTo(9);
     neighbourIndexes = it->findNeighbourIndexes();
-    TS_ASSERT_EQUALS(1, neighbourIndexes.size()); // should be on edge
+    TSM_ASSERT( "Neighbour at index 9 is 8", doesContainIndex(neighbourIndexes, 8) );
+
+  }
+
+  void test_neighbours_2d()
+  {
+    const size_t nd = 2;
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
+    /*
+    2D MDHistoWorkspace
+
+    0 - 1 - 2 - 3
+    4 - 5 - 6 - 7
+    8 - 9 -10 -11
+    12-13 -14 -15
+    */
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+
+
+    // At initial position
+    /*
+    -> 0 - 1 - 2 - 3
+       4 - 5 - 6 - 7
+       8 - 9 -10 -11
+       12-13 -14 -15
+    */
+    std::vector<size_t> neighbourIndexes = it->findNeighbourIndexes();
+    TS_ASSERT_EQUALS(3, neighbourIndexes.size()); // Is on an edge
+    TSM_ASSERT( "Neighbour at index 0 is 1", doesContainIndex(neighbourIndexes, 1) );
+    TSM_ASSERT( "Neighbour at index 0 is 4", doesContainIndex(neighbourIndexes, 4) );
+    TSM_ASSERT( "Neighbour at index 0 is 5", doesContainIndex(neighbourIndexes, 5) );
+
+    // At first position
+    /*
+        |
+        *
+    0 - 1 - 2 - 3
+    4 - 5 - 6 - 7
+    8 - 9 -10 -11
+    12-13 -14 -15
+    */
+    it->next();
+    neighbourIndexes = it->findNeighbourIndexes();
+    TS_ASSERT_EQUALS(5, neighbourIndexes.size()); // Is on an edge
+    TSM_ASSERT( "Neighbour at index 1 is 0", doesContainIndex(neighbourIndexes, 0) );
+    TSM_ASSERT( "Neighbour at index 1 is 2", doesContainIndex(neighbourIndexes, 2) );
+    TSM_ASSERT( "Neighbour at index 1 is 4", doesContainIndex(neighbourIndexes, 4) );
+    TSM_ASSERT( "Neighbour at index 1 is 5", doesContainIndex(neighbourIndexes, 5) );
+    TSM_ASSERT( "Neighbour at index 1 is 6", doesContainIndex(neighbourIndexes, 6) );
+
+    // At index 9 position
+    /*
+     |
+     *
+     0 - 1 - 2 - 3
+     4 - 5 - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -15
+     */
+    it->jumpTo(9);
+    neighbourIndexes = it->findNeighbourIndexes();
+    TS_ASSERT_EQUALS(8, neighbourIndexes.size());
+    // Is on an edge
+    TSM_ASSERT( "Neighbour at index 9 is 4", doesContainIndex(neighbourIndexes, 4));
+    TSM_ASSERT( "Neighbour at index 9 is 5", doesContainIndex(neighbourIndexes, 5));
+    TSM_ASSERT( "Neighbour at index 9 is 6", doesContainIndex(neighbourIndexes, 6));
+    TSM_ASSERT( "Neighbour at index 9 is 8", doesContainIndex(neighbourIndexes, 8));
+    TSM_ASSERT( "Neighbour at index 9 is 10", doesContainIndex(neighbourIndexes, 10));
+    TSM_ASSERT( "Neighbour at index 9 is 12", doesContainIndex(neighbourIndexes, 12));
+    TSM_ASSERT( "Neighbour at index 9 is 13", doesContainIndex(neighbourIndexes, 13));
+    TSM_ASSERT( "Neighbour at index 9 is 14", doesContainIndex(neighbourIndexes, 14));
+  }
+
+  void test_neighbours_3d()
+  {
+
   }
 
 };
