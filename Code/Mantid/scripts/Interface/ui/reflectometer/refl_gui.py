@@ -305,7 +305,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         cells = self.tableMain.selectedItems()
         for cell in cells:
             column = cell.column()
-            if not (column == 17 or column == 18):
+            if column < 17:
                 cell.setText('')
     def copy_cells(self):
         cells = self.tableMain.selectedItems()
@@ -322,7 +322,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         minrow = cells[0].row()
         for cell in reversed(range(len(cells))):
             col = cells[cell].column()
-            if col != 17 and col != 18:
+            if col < 17:
                 maxcol = col
                 maxrow = cells[cell].row()
                 break
@@ -333,7 +333,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         for cell in cells:
             row = cell.row()
             col = cell.column()
-            if col != 17 and col != 18:
+            if col < 17:
                 selection[row - minrow][col - mincol] = str(cell.text())
         tocopy = ''
         for y in range(rowsize):
@@ -373,15 +373,15 @@ class ReflGui(refl_window.Ui_windowRefl):
         if len(selected) > 1:
             #discover the size of the selection
             mincol = selected[0].column()
-            if mincol == 17 or mincol == 18:
-                return
+            if mincol > 16:
                 logger.error("Cannot copy, all cells out of range")
+                return
             minrow = selected[0].row()
             #now fill that list
             for cell in selected:
                 row = cell.row()
                 col = cell.column()
-                if col != 17 and col != 18 and (col - mincol) < pastedcols and (row - minrow) < pastedrows:
+                if col < 17 and (col - mincol) < pastedcols and (row - minrow) < pastedrows:
                     cell.setText(pastedcells[row - minrow][col - mincol])
         elif selected:
             #when only a single cell is selected, paste all the copied item up until the table limits
@@ -393,7 +393,7 @@ class ReflGui(refl_window.Ui_windowRefl):
                 curcol = homecol
                 if currow < tablerows:
                     for col in row:
-                        if curcol != 17 and curcol != 18:
+                        if curcol < 17:
                             curcell = self.tableMain.item(currow, curcol)
                             curcell.setText(col)
                             curcol += 1
