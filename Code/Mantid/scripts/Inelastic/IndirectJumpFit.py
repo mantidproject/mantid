@@ -12,9 +12,9 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 	workdir = getDefaultWorkingDirectory()
 
 	#select the width we wish to fit
-	spectumWs = "__" + samWS
-	ExtractSingleSpectrum(InputWorkspace=samWS, OutputWorkspace=spectumWs, WorkspaceIndex=width)
-
+	spectrumWs = "__" + samWS
+	ExtractSingleSpectrum(InputWorkspace=samWS, OutputWorkspace=spectrumWs, WorkspaceIndex=width)
+	
 	#crop the workspace between the given ranges
 	if Verbose:
 		logger.notice('Cropping from Q= ' + str(qmin) +' to '+ str(qmax))
@@ -74,7 +74,7 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 
 	#run fit function
 	fit_workspace_base = samWS[:-10] +'_'+ jumpFunc +'fit'
-	Fit(Function=func, InputWorkspace=spectumWs, CreateOutput=True, Output=fit_workspace_base, StartX=qmin, EndX=qmax)
+	Fit(Function=func, InputWorkspace=spectrumWs, CreateOutput=True, Output=fit_workspace_base, StartX=qmin, EndX=qmax)
 	fit_workspace = fit_workspace_base + '_Workspace'
 	
 	CopyLogs(InputWorkspace=samWS, OutputWorkspace=fit_workspace)
