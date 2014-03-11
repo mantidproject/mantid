@@ -14,6 +14,8 @@ namespace Mantid
 namespace API
 {
 
+class CoordTransform;
+
 class IMDNode 
 {
 /** This is an interface to MDBox or MDGridBox of an MDWorkspace
