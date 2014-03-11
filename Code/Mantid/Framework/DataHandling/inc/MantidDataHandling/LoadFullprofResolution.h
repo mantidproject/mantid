@@ -5,6 +5,11 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
+namespace Poco { namespace XML {
+  class Document;
+  class Element;
+}}
+
 namespace Mantid
 {
 namespace DataHandling
