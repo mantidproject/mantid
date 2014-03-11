@@ -32,6 +32,28 @@ namespace MantidQt
       return selectedSessions;
     }
 
+
+    /**
+     * Populate the ListWidget with the facilities of the catalogs the user is logged in to.
+     */
+    void CatalogSelector::populateFacilitySelection()
+    {
+      auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
+
+      for (unsigned row = 0; row < session.size(); ++row)
+      {
+        // This prevents the same items being appended (again) to the list widget.
+        if (!m_uiForm.selectedCatalogs->item(row))
+        {
+          QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(session.at(row)->getFacility()));
+          // Set sessionID to user specific meta-data to easily obtain it later.
+          item->setData(Qt::UserRole,QVariant(QString::fromStdString(session.at(row)->getSessionId())));
+          item->setCheckState(Qt::Unchecked);
+          m_uiForm.selectedCatalogs->insertItem(row,item);
+        }
+      }
+    }
+
     /**
      * Initialise the  default layout.
      */
@@ -45,19 +67,9 @@ namespace MantidQt
     }
 
     /**
-     * Populate the ListWidget with the facilities of the catalogs the user is logged in to.
+     *
      */
-    void CatalogSelector::populateTable()
     {
-      auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
-
-      for (unsigned row = 0; row < session.size(); ++row)
-      {
-        QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(session.at(row)->getFacility()));
-        // Set sessionID to user specific meta-data to easily obtain it later.
-        item->setData(Qt::UserRole,QVariant(QString::fromStdString(session.at(row)->getSessionId())));
-        m_uiForm.selectedCatalogs->insertItem(row,item);
-      }
     }
 
   } // namespace MantidWidgets
