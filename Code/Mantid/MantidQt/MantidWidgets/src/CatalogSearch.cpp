@@ -383,7 +383,8 @@ namespace MantidQt
     void CatalogSearch::populateInstrumentBox()
     {
       // Obtain the list of instruments to display in the drop-box.
-      std::vector<std::string> instrumentList = m_icatHelper->getInstrumentList();
+      std::vector<std::string> instrumentList = m_icatHelper->getInstrumentList(
+          m_catalogSelector->getSelectedCatalogSessions());
 
       // This option allows the user to select no instruments (thus searching over them all).
       m_icatUiForm.Instrument->insertItem(-1,"");

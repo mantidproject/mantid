@@ -14,15 +14,35 @@ namespace MantidQt
   {
 
     /**
-     * Obtain the list of instruments from the ICAT Catalog algorithm.
+     * Obtain a list of instruments for specified catalogs.
+     * @param sessionIDs :: The sessions information of each active catalog.
      * @return A vector containing the list of all instruments available.
      */
-    const std::vector<std::string> CatalogHelper::getInstrumentList()
+    const std::vector<std::string> CatalogHelper::getInstrumentList(const std::vector<std::string> &sessionIDs)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
-      executeAsynchronously(catalogAlgorithm);
-      // return the vector containing the list of instruments available.
-      return (catalogAlgorithm->getProperty("InstrumentList"));
+      auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
+
+      // If ONE or ALL catalogs are selected to search through use no session (empty).
+      // This will invoke the compositeCatalog instead of specific catalogs for each session.
+      if (sessionIDs.size() <= 1 || session.size() == sessionIDs.size())
+      {
+        executeAsynchronously(catalogAlgorithm);
+        return catalogAlgorithm->getProperty("InstrumentList");
+      }
+
+      std::vector<std::string> instrumentList;
+      // Use catalogs for the specified sessions.
+      for (unsigned i = 0; i < sessionIDs.size(); ++i)
+      {
+        catalogAlgorithm->setProperty("Session",sessionIDs.at(i));
+        executeAsynchronously(catalogAlgorithm);
+        // Append the result of each search to the instrument list.
+        std::vector<std::string> result = catalogAlgorithm->getProperty("InstrumentList");
+        instrumentList.insert(instrumentList.end(),result.begin(),result.end());
+      }
+      // Return the vector containing the list of instruments available.
+      return instrumentList;
     }
 
     /**

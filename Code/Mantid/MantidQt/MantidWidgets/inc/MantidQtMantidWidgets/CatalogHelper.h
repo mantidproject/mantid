@@ -12,8 +12,8 @@ namespace MantidQt
     {
 
     public:
-      /// Obtain the list of instruments that are available.
-      const std::vector<std::string> getInstrumentList();
+      /// Obtain the list of instruments that are available for the given session information.
+      const std::vector<std::string> getInstrumentList(const std::vector<std::string> &sessionIDs);
       /// Obtain the list of instruments that are available.
       const std::vector<std::string> getInvestigationTypeList();
       /// Run the search algorithm with the given user input.
