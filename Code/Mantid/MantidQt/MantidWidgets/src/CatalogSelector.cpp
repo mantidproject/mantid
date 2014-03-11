@@ -21,12 +21,13 @@ namespace MantidQt
      */
     std::vector<std::string> CatalogSelector::getSelectedCatalogSessions()
     {
-      QModelIndexList indexes = m_uiForm.selectedCatalogs->selectionModel()->selectedRows();
-
       std::vector<std::string> selectedSessions;
-      for (int i = 0; i < indexes.count(); ++i)
+      for (int row = 0; row < m_uiForm.selectedCatalogs->count(); ++row)
       {
-        selectedSessions.push_back(m_uiForm.selectedCatalogs->item(i)->data(Qt::UserRole).toString().toStdString());
+        if (m_uiForm.selectedCatalogs->item(row)->isSelected())
+        {
+          selectedSessions.push_back(m_uiForm.selectedCatalogs->item(row)->data(Qt::UserRole).toString().toStdString());
+        }
       }
       return selectedSessions;
     }
