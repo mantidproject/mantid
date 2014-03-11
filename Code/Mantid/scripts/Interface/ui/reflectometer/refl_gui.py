@@ -6,6 +6,7 @@ import refl_save
 import refl_choose_col
 import csv
 import string
+import os
 from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
@@ -355,21 +356,23 @@ class ReflGui(refl_window.Ui_windowRefl):
             logger.warning("Cannot paste, no editable cells selected")
             return
         #convert line endings to windows-style
-        pastedtext = string.replace(pastedtext, '\r\n', '\n')
-        pastedtext = string.replace(pastedtext, '\n\r', '\n')
-        pastedtext = string.replace(pastedtext, '\r', '\n')
+        #pastedtext = string.replace(pastedtext, '\r\n', '\n')
+        #pastedtext = string.replace(pastedtext, '\n\r', '\n')
+        #pastedtext = string.replace(pastedtext, '\r', '\n')
         '''
         quickly check if the last row is a single cell and blank
         MS excel adds a line break at the end of copied cells which can mess with this a bit
         I'd like this to be compatible both ways
         '''
+        '''
         if pastedtext[-1] == '\n':
             pastedtext = pastedtext[:-1]
+        '''
         #if the string is now empty the only thing on the clipboard as a line break
         if not pastedtext:
             logger.warning("Nothing to Paste")
             return
-        pasted = pastedtext.split('\n')
+        pasted = pastedtext.split(os.linesep)
         pastedcells = []
         for row in pasted:
             pastedcells.append(row.split('\t'))
@@ -386,8 +389,9 @@ class ReflGui(refl_window.Ui_windowRefl):
             for cell in selected:
                 row = cell.row()
                 col = cell.column()
-                if col < 17 and (col - mincol) < pastedcols and (row - minrow) < pastedrows:
-                    cell.setText(pastedcells[row - minrow][col - mincol])
+                if len(pastedcells[row - minrow]):
+                    if col < 17 and (col - mincol) < pastedcols and (row - minrow) < pastedrows:
+                        cell.setText(pastedcells[row - minrow][col - mincol])
         elif selected:
             #when only a single cell is selected, paste all the copied item up until the table limits
             cell = selected[0]
@@ -395,20 +399,21 @@ class ReflGui(refl_window.Ui_windowRefl):
             homecol = cell.column()
             tablerows = self.tableMain.rowCount()
             for row in pastedcells:
-                curcol = homecol
-                if currow < tablerows:
-                    for col in row:
-                        if curcol < 17:
-                            curcell = self.tableMain.item(currow, curcol)
-                            curcell.setText(col)
-                            curcol += 1
-                        else:
-                            #the row has hit the end of the editable cells
-                            break
-                    currow += 1
-                else:
-                    #it's dropped off the bottom of the table
-                    break
+                if len(row):
+                    curcol = homecol
+                    if currow < tablerows:
+                        for col in row:
+                            if curcol < 17:
+                                curcell = self.tableMain.item(currow, curcol)
+                                curcell.setText(col)
+                                curcol += 1
+                            else:
+                                #the row has hit the end of the editable cells
+                                break
+                        currow += 1
+                    else:
+                        #it's dropped off the bottom of the table
+                        break
         else:
             logger.warning("Cannot paste, no editable cells selected")
     def copy_to_clipboard(self,text):
