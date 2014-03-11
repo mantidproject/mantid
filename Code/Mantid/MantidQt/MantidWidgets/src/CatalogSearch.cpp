@@ -410,7 +410,8 @@ namespace MantidQt
     void CatalogSearch::populateInvestigationTypeBox()
     {
       // Obtain the list of investigation types to display in the list-box.
-      std::vector<std::string> invesTypeList = m_icatHelper->getInvestigationTypeList();
+      std::vector<std::string> invesTypeList = m_icatHelper->getInvestigationTypeList(
+          m_catalogSelector->getSelectedCatalogSessions());
 
       std::vector<std::string>::const_iterator citr;
       for (citr = invesTypeList.begin(); citr != invesTypeList.end(); ++citr)
