@@ -26,8 +26,9 @@ public:
     MockDetector() : PoldiAbstractDetector()
     {
         m_availableElements.resize(400);
-        int n = 0;
-        std::generate(m_availableElements.begin(), m_availableElements.end(), [&n] { return n++; });
+        for(int i = 0; i < static_cast<int>(m_availableElements.size()); ++i) {
+            m_availableElements[i] = i;
+        }
     }
 
     ~MockDetector() { }
