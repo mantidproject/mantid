@@ -42,7 +42,6 @@ namespace Mantid
 #endif
         }
       }
-
     } // Anonymous namespace
 
     /**
@@ -129,6 +128,7 @@ namespace Mantid
               }
               catch(std::invalid_argument&)
               {
+                Vertex2D::deleteChain(curIntersection);
                 throw NoIntersectionException();
               }
             }
@@ -220,7 +220,8 @@ namespace Mantid
       {
         return Q;
       }
-
+      
+      Vertex2D::deleteChain(curIntersection);
       throw NoIntersectionException();
     }
 

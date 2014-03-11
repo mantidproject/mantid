@@ -11,8 +11,29 @@ namespace Mantid
     using Kernel::V2D;
 
     //-----------------------------------------------------------------------------
+    // Public static member functions
+    //-----------------------------------------------------------------------------
+
+    /**
+     * Deletes all nodes in a chain
+     * @para node A node in the chain
+     */
+    void Vertex2D::deleteChain(Vertex2D * node)
+    {
+      Vertex2D * head = node;
+      Vertex2D * next = node->next();
+      while(next != head)
+      {
+        delete next->remove();
+        next = head->next();
+      }
+      delete head;
+    }
+
+    //-----------------------------------------------------------------------------
     // Public member functions
     //-----------------------------------------------------------------------------
+
     /** 
     * Constructor puts a point at the origin
     */
