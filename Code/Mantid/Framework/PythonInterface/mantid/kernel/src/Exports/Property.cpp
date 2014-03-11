@@ -52,6 +52,7 @@ void export_Property()
     .add_property("type", make_function(&Property::type), "Returns a string identifier for the type")
 
     .add_property("units", make_function(&Property::units, return_value_policy<copy_const_reference>()),
+                  &Property::setUnits,
                   "The units attached to this property")
 
     .add_property("valueAsStr", &Property::value, &Property::setValue, "The value of the property as a string. "
