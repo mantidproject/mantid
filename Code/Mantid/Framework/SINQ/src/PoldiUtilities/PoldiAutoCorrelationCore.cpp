@@ -121,7 +121,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
         m_logger.information() << "  Calculating intensities..." << std::endl;
         std::vector<double> rawCorrelatedIntensities(dValues.size());
         PARALLEL_FOR_NO_WSP_CHECK()
-        for(size_t i = 0; i < dValues.size(); ++i) {
+        for(int i = 0; i < static_cast<int>(dValues.size()); ++i) {
             rawCorrelatedIntensities[i] = getRawCorrelatedIntensity(dValues[i], m_weightsForD[i]);
         }
 
@@ -151,7 +151,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
         std::vector<double> qValues(dCount);
 
         PARALLEL_FOR_NO_WSP_CHECK()
-        for(size_t i = 0; i < dCount; --i) {
+        for(int i = 0; i < static_cast<int>(dCount); --i) {
             qValues[dCount - i - 1] = (2.0 * M_PI / dValues[i]);
         }
 
