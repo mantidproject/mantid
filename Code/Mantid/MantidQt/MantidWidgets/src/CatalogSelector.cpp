@@ -47,13 +47,12 @@ namespace MantidQt
           QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(session.at(row)->getFacility()));
           // Set sessionID to user specific meta-data to easily obtain it later.
           item->setData(Qt::UserRole,QVariant(QString::fromStdString(session.at(row)->getSessionId())));
-          item->setCheckState(Qt::Unchecked);
+          // When a new item is added, we want to select & check it by default.
+          item->setCheckState(Qt::Checked);
           m_uiForm.selectedCatalogs->insertItem(row,item);
+          m_uiForm.selectedCatalogs->item(row)->setSelected(true);
         }
       }
-      // Select first facility by default (as the user must be logged into at least one catalog).
-      m_uiForm.selectedCatalogs->item(0)->setSelected(true);
-      m_uiForm.selectedCatalogs->item(0)->setCheckState(Qt::Checked);
       // Set the list widget as focus to better show the selected facilities.
       m_uiForm.selectedCatalogs->setFocus();
     }
@@ -64,6 +63,8 @@ namespace MantidQt
     void CatalogSelector::initLayout()
     {
       m_uiForm.setupUi(this);
+
+      populateFacilitySelection();
 
       connect(m_uiForm.updateBtn,SIGNAL(clicked()),this,SLOT(close()));
       connect(m_uiForm.cancelBtn,SIGNAL(clicked()),this,SLOT(close()));
