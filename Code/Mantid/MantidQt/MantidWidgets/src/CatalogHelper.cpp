@@ -47,12 +47,25 @@ namespace MantidQt
      * Obtain the list of investigation types from the ICAT Catalog algorithm.
      * @return A vector containing the list of all investigation types available.
      */
-    const std::vector<std::string> CatalogHelper::getInvestigationTypeList()
+    const std::vector<std::string> CatalogHelper::getInvestigationTypeList(const std::vector<std::string> &sessionIDs)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInvestigationTypes");
-      executeAsynchronously(catalogAlgorithm);
-      // return the vector containing the list of investigation types available.
-      return (catalogAlgorithm->getProperty("InvestigationTypes"));
+      auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
+
+      if (session.size() == sessionIDs.size())
+      {
+        executeAsynchronously(catalogAlgorithm);
+        return catalogAlgorithm->getProperty("InvestigationTypes");
+      }
+      else
+      {
+        for (unsigned i = 0; i < sessionIDs.size(); ++i)
+        {
+          catalogAlgorithm->setProperty("Session",sessionIDs.at(i));
+          executeAsynchronously(catalogAlgorithm);
+        }
+        return catalogAlgorithm->getProperty("InvestigationTypes");
+      }
     }
 
     /**

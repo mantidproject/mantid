@@ -15,7 +15,7 @@ namespace MantidQt
       /// Obtain the list of instruments that are available for the given session information.
       const std::vector<std::string> getInstrumentList(const std::vector<std::string> &sessionIDs);
       /// Obtain the list of instruments that are available.
-      const std::vector<std::string> getInvestigationTypeList();
+      const std::vector<std::string> getInvestigationTypeList(const std::vector<std::string> &sessionIDs);
       /// Run the search algorithm with the given user input.
       void executeSearch(const std::map<std::string, std::string> &userInputs,
           const int &offset, const int &limit,const std::vector<std::string> &sessionIDs);
