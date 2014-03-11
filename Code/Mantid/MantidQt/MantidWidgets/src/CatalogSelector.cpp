@@ -2,7 +2,6 @@
 #include "MantidAPI/CatalogManager.h"
 
 #include <QDesktopWidget>
-#include <QListWidgetItem>
 
 namespace MantidQt
 {
@@ -61,15 +60,24 @@ namespace MantidQt
     {
       m_uiForm.setupUi(this);
 
+      connect(m_uiForm.updateBtn,SIGNAL(clicked()),this,SLOT(close()));
+      connect(m_uiForm.cancelBtn,SIGNAL(clicked()),this,SLOT(close()));
+
+      // Check/un-check the checkbox when an item is clicked or selected.
+      connect(m_uiForm.selectedCatalogs,SIGNAL(itemClicked(QListWidgetItem*)),this,SLOT(checkSelectedFacility(QListWidgetItem*)));
+
       // Centre the GUI on screen.
       this->setGeometry(QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,
           this->window()->size(),QDesktopWidget().availableGeometry()));
     }
 
     /**
-     *
+     * SLOT: Checks the checkbox of the list item selected.
      */
+    void CatalogSelector::checkSelectedFacility(QListWidgetItem* item)
     {
+      if (item->isSelected()) item->setCheckState(Qt::Checked);
+      if (!item->isSelected()) item->setCheckState(Qt::Unchecked);
     }
 
   } // namespace MantidWidgets
