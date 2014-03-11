@@ -214,7 +214,7 @@ from mantid.api import PythonAlgorithm
 from mantid.api import ITableWorkspaceProperty
 from mantid.api import AlgorithmFactory, WorkspaceFactory
 
-from mantid.kernel import Direction
+from mantid.kernel import Direction, ConfigServiceImpl
 
 from mantid.simpleapi import config, mtd
 from mantid.simpleapi import (LoadSINQFile, 
@@ -225,7 +225,9 @@ from mantid.simpleapi import (LoadSINQFile,
                               PoldiLoadSpectra,
                               PoldiLoadIPP,
                               PoldiAutoCorrelation,
-                              PoldiPeakDetection)
+                              PoldiPeakDetection,
+                              GroupWorkspaces,
+                              RenameWorkspace)
 import os.path
 
 
@@ -341,8 +343,10 @@ class PoldiProjectRun(PythonAlgorithm):
                          Dictionary=dictsearch, 
                          PoldiLog=sampleNameLog)
             
+            cfgService = ConfigServiceImpl.Instance()
+
             LoadInstrument(Workspace=sample_output_ws, 
-                           InstrumentName="Poldi", 
+                           Filename=cfgService.getInstrumentDirectory() + "POLDI_Definition_ipp13.xml",
                            RewriteSpectraMap=True)
             
             
@@ -361,7 +365,7 @@ class PoldiProjectRun(PythonAlgorithm):
             self.log().debug('Poldi - dead wires')
             PoldiRemoveDeadWires(InputWorkspace=sample_output_ws, 
                                  RemoveExcludedWires=True, 
-                                 AutoRemoveBadWires=True, 
+                                 AutoRemoveBadWires=False,
                                  BadWiresThreshold=bad_wires_threshold, 
                                  PoldiDeadWires=sampleDeadWires)
         
@@ -394,9 +398,6 @@ class PoldiProjectRun(PythonAlgorithm):
                          PoldiIPP=ipp_ipp_data)
         
         
-        
-        
-        
         for sample in range(nb_of_sample):
             sampleName     = sample_info_ws.column("spl Name" )[sample]
             filePath       = sample_info_ws.column("data file")[sample]
@@ -404,30 +405,9 @@ class PoldiProjectRun(PythonAlgorithm):
             sampleDeadWires= sample_info_ws.column("spl dead wires"  )[sample]
             sampleNameCorr = sample_info_ws.column("spl corr" )[sample]
             
-            sample_ipp = sample_output_ws.getInstrument().getStringParameter("ipp")[0]
-            PoldiIPP        = sample_ipp_ws.column("ipp version")[ipp]
-            ipp_chopper_slits = "%s_Chopper" %PoldiIPP
-            ipp_Poldi_spectra = "%s_Spectra" %PoldiIPP
-            Ipp_ipp_data      = "%s_Data"    %PoldiIPP
-        
-            PoldiAutoCorrelation(InputWorkspace=mtd[sampleName], 
-                                 PoldiSampleLogs=sampleNameLog, 
-                                 PoldiDeadWires=mtd[sampleDeadWires], 
-                                 PoldiChopperSlits=mtd[ipp_chopper_slits], 
-                                 PoldiSpectra=mtd[ipp_Poldi_spectra], 
-                                 PoldiIPP=mtd[Ipp_ipp_data],
-                                 wlenmin=wlen_min,
-                                 wlenmax=wlen_max, 
-                                 OutputWorkspace=sampleNameCorr)
-            
-            
-            sampleNamePeak = sample_info_ws.column("spl peak" )[sample]
-        
-            PoldiPeakDetection(InputWorkspace=sampleNameCorr,
-                               PeakDetectionThreshold=peak_detect_threshold,
-                               OutputWorkspace=sampleNamePeak)
-            
-            
+            groupedResults = GroupWorkspaces([mtd[sampleName].name(), sampleNameLog, sampleDeadWires])
+            RenameWorkspace(InputWorkspace=groupedResults,
+                            OutputWorkspace="%s_Metadata" % sampleName)
 
         if(load_data_at_the_end):
             self.setProperty("OutputWorkspace", sample_ipp_ws)
