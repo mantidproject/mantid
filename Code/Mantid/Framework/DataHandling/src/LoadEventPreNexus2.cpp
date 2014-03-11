@@ -389,24 +389,6 @@ namespace DataHandling
     // Process the events into pixels
     procEvents(localWorkspace);
 
-    // set that the sort order on the event lists
-#if 0
-    // FIXME - Remove after verified
-    // This is a bug
-    if (this->num_pulses > 0 && this->pulsetimesincreasing)
-    {
-      const int64_t numberOfSpectra = localWorkspace->getNumberHistograms();
-      PARALLEL_FOR_NO_WSP_CHECK()
-      for (int64_t i = 0; i < numberOfSpectra; i++)
-      {
-        PARALLEL_START_INTERUPT_REGION
-        localWorkspace->getEventListPtr(i)->setSortOrder(DataObjects::PULSETIME_SORT);
-        PARALLEL_END_INTERUPT_REGION
-      }
-      PARALLEL_CHECK_INTERUPT_REGION
-    }
-#endif
-
     // Set output
     this->setProperty<IEventWorkspace_sptr>(OUT_PARAM, localWorkspace);
 
