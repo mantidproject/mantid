@@ -31,10 +31,18 @@ def loadNexus(filename):
     return name
 
 def getInstrRun(ws_name):
+    '''
+    Get the instrument name and run number from a workspace.
+
+    @param ws_name - name of the workspace
+    @return tuple of form (instrument, run number) 
+    '''
     ws = mtd[ws_name]
-    instrument = ws.getInstrument().getName()
     run_number = ws.getRun()['run_number'].value
-    instrument = config.getFacility().instrument(instrument).shortName().lower()
+    instrument = ws.getInstrument().getName()
+    facility = config.getFacility()
+    instrument = facility.instrument(instrument).filePrefix(int(run_number))
+    instrument = instrument.lower()
     return instrument,run_number
 
 def getWSprefix(wsname):
