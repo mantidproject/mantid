@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_columns.ui'
 #
-# Created: Mon Mar 10 10:17:57 2014
+# Created: Tue Mar 11 12:22:20 2014
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_ChooseColumnsDialog(object):
     def setupUi(self, ChooseColumnsDialog):
         ChooseColumnsDialog.setObjectName(_fromUtf8("ChooseColumnsDialog"))
-        ChooseColumnsDialog.resize(231, 300)
+        ChooseColumnsDialog.resize(307, 300)
         ChooseColumnsDialog.setSizeGripEnabled(False)
         self.verticalLayout = QtGui.QVBoxLayout(ChooseColumnsDialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))

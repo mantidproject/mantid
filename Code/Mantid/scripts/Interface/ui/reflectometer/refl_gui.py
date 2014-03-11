@@ -214,6 +214,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.buttonClear.clicked.connect(self.on_buttonClear_clicked)
         self.buttonProcess.clicked.connect(self.on_buttonProcess_clicked)
         self.buttonTransfer.clicked.connect(self.on_buttonTransfer_clicked)
+        self.buttonColumns.clicked.connect(self.actionChoose_Columns_triggered)
         self.actionOpen_Table.triggered.connect(self.on_actionOpen_Table_triggered)
         self.actionReload_from_Disk.triggered.connect(self.on_actionReload_from_Disk_triggered)
         self.actionSave.triggered.connect(self.on_actionSave_triggered)

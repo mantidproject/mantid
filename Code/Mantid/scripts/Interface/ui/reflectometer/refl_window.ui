@@ -155,6 +155,13 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QPushButton" name="buttonColumns">
+        <property name="text">
+         <string>Choose Columns...</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
@@ -795,6 +802,9 @@
   <action name="actionChoose_Columns">
    <property name="text">
     <string>Choose Columns...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
    </property>
   </action>
  </widget>

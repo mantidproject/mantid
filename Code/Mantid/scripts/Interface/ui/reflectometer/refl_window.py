@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_window.ui'
 #
-# Created: Mon Mar 10 10:17:57 2014
+# Created: Tue Mar 11 12:22:20 2014
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -67,6 +67,9 @@ class Ui_windowRefl(object):
         self.layoutTopRow.addWidget(self.comboPolarCorrect)
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.layoutTopRow.addItem(spacerItem2)
+        self.buttonColumns = QtGui.QPushButton(self.widgetMainRow)
+        self.buttonColumns.setObjectName(_fromUtf8("buttonColumns"))
+        self.layoutTopRow.addWidget(self.buttonColumns)
         self.layoutBase.addLayout(self.layoutTopRow)
         self.layoutMidRow = QtGui.QHBoxLayout()
         self.layoutMidRow.setSpacing(12)
@@ -317,6 +320,7 @@ class Ui_windowRefl(object):
         self.comboPolarCorrect.setItemText(0, QtGui.QApplication.translate("windowRefl", "None", None, QtGui.QApplication.UnicodeUTF8))
         self.comboPolarCorrect.setItemText(1, QtGui.QApplication.translate("windowRefl", "1-PNR", None, QtGui.QApplication.UnicodeUTF8))
         self.comboPolarCorrect.setItemText(2, QtGui.QApplication.translate("windowRefl", "2-PA", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonColumns.setText(QtGui.QApplication.translate("windowRefl", "Choose Columns...", None, QtGui.QApplication.UnicodeUTF8))
         self.labelRB.setText(QtGui.QApplication.translate("windowRefl", "RB Search:", None, QtGui.QApplication.UnicodeUTF8))
         self.textRB.setToolTip(QtGui.QApplication.translate("windowRefl", "The term to search the archives for", None, QtGui.QApplication.UnicodeUTF8))
         self.labelDepth.setText(QtGui.QApplication.translate("windowRefl", "Search Depth (Cycles):", None, QtGui.QApplication.UnicodeUTF8))
@@ -385,4 +389,5 @@ class Ui_windowRefl(object):
         self.actionClear.setText(QtGui.QApplication.translate("windowRefl", "Clear", None, QtGui.QApplication.UnicodeUTF8))
         self.actionClear.setShortcut(QtGui.QApplication.translate("windowRefl", "Del", None, QtGui.QApplication.UnicodeUTF8))
         self.actionChoose_Columns.setText(QtGui.QApplication.translate("windowRefl", "Choose Columns...", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionChoose_Columns.setShortcut(QtGui.QApplication.translate("windowRefl", "Ctrl+M", None, QtGui.QApplication.UnicodeUTF8))
 
