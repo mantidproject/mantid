@@ -264,38 +264,47 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, spec
 # Elwin
 ##############################################################################
 
-def GetTemperature(root,tempWS,log_type,Verbose):
-    (instr, run) = getInstrRun(tempWS)
-    run_name = instr+run
-    log_name = run_name+'_'+log_type
+def GetTemperature(root, tempWS, log_type, Verbose):
+    (instr, run_number) = getInstrRun(tempWS)
+
+    facility = config.getFacility()
+    pad_num = facility.instrument(instr).zeroPadding(int(run_number))
+    zero_padding = '0' * (pad_num - len(run_number))
+    
+    run_name = instr + zero_padding + run_number
+    log_name = run_name.upper() + '.log'
+
     run = mtd[tempWS].getRun()
-    unit1 = 'Temperature'               # default values
-    unit2 = 'K'
-    if log_type in run:                 # test logs in WS
+    unit = ['Temperature', 'K']
+    if log_type in run:
+        # test logs in WS
         tmp = run[log_type].value
         temp = tmp[len(tmp)-1]
-        xval = temp
-        mess = ' Run : '+run_name +' ; Temperature in log = '+str(temp)
-    else:                               # logs not in WS
-        logger.notice('Log parameter not found')
-        log_file = log_name+'.txt'
-        log_path = FileFinder.getFullPath(log_file)
-        if (log_path == ''):            # log file does not exists
-            mess = ' Run : '+run_name +' ; Temperature file not found'
-            xval = int(run_name[-3:])
-            unit1 = 'Run-number'
-            unit2 = 'last 3 digits'
-        else:                           # get from log file
+        
+        if Verbose:
+            mess = ' Run : '+run_name +' ; Temperature in log = '+str(temp)
+            logger.notice(mess)
+    else:                               
+        # logs not in WS
+        logger.warning('Log parameter not found in workspace. Searching for log file.')
+        log_path = FileFinder.getFullPath(log_name)
+        
+        if log_path != '':            
+            # get temperature from log file
             LoadLog(Workspace=tempWS, Filename=log_path)
             run_logs = mtd[tempWS].getRun()
-            tmp = run_logs[log_name].value
+            tmp = run_logs[log_type].value
             temp = tmp[len(tmp)-1]
-            xval = temp
             mess = ' Run : '+run_name+' ; Temperature in file = '+str(temp)
-    if Verbose:
-        logger.notice(mess)
-    unit = [unit1,unit2]
-    return xval,unit
+            logger.warning(mess)
+        else:
+            # can't find log file            
+            temp = int(run_name[-3:])
+            unit = ['Run-number', 'last 3 digits']
+            mess = ' Run : '+run_name +' ; Temperature file not found'
+            logger.warning(mess)
+
+    return temp,unit
 
 def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         Save=False, Verbose=False, Plot=False): 
@@ -318,7 +327,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         (root, ext) = os.path.splitext(file_name)
         LoadNexus(Filename=file, OutputWorkspace=tempWS)
         nsam,ntc = CheckHistZero(tempWS)
-        (xval, unit) = GetTemperature(root,tempWS,log_type,Verbose)
+        (xval, unit) = GetTemperature(root,tempWS,log_type, Verbose)
         if Verbose:
             logger.notice('Reading file : '+file)
         if ( len(eRange) == 4 ):
