@@ -517,9 +517,6 @@ private:
 
   static const QString NOT_AVAILABLE;
 
-  //A reference to a logger
-  static Mantid::Kernel::Logger & g_log;
-
 };
 
 }

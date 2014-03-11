@@ -11,6 +11,7 @@
 #include "MantidAPI/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Logger.h"
 #include <exception>
 
 namespace MantidQt
@@ -21,9 +22,11 @@ namespace CustomInterfaces
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-// Initialize the logger
-Logger& MantidEVWorker::g_log = Logger::get("MantidEV");
-
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("MantidEV");
+}
 
 /**
  *  Default constructor
