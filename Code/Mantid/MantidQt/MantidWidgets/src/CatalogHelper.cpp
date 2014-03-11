@@ -14,7 +14,7 @@ namespace MantidQt
   {
 
     /**
-     * Obtain a list of instruments for specified catalogs.
+     * Obtain a list of instruments for specified catalogs based on session information.
      * @param sessionIDs :: The sessions information of each active catalog.
      * @return A vector containing the list of all instruments available.
      */
@@ -44,7 +44,8 @@ namespace MantidQt
     }
 
     /**
-     * Obtain the list of investigation types from the ICAT Catalog algorithm.
+     * Obtain the list of investigation types for specified catalogs based on session information.
+     * @param sessionIDs :: The sessions information of each active catalog.
      * @return A vector containing the list of all investigation types available.
      */
     const std::vector<std::string> CatalogHelper::getInvestigationTypeList(const std::vector<std::string> &sessionIDs)
@@ -71,8 +72,9 @@ namespace MantidQt
     /**
      * Search the archive with the user input terms provided and save them to a workspace ("searchResults").
      * @param userInputFields :: A map containing all users' search fields - (key => FieldName, value => FieldValue).
-     * @param offset   :: skip this many rows and start returning rows from this point.
-     * @param limit    :: limit the number of rows returned by the query.
+     * @param offset :: skip this many rows and start returning rows from this point.
+     * @param limit  :: limit the number of rows returned by the query.
+     * @param sessionIDs :: The sessions information of each active catalog.
      */
     void CatalogHelper::executeSearch(const std::map<std::string, std::string> &userInputFields,
         const int &offset, const int &limit, const std::vector<std::string> &sessionIDs)
@@ -103,6 +105,7 @@ namespace MantidQt
     /**
      * The number of results returned by the search query (based on values of input fields).
      * @param userInputFields :: A map containing the users' search input (key => FieldName, value => FieldValue).
+     * @param sessionIDs :: The sessions information of each active catalog.
      * @return Number of results returned by the search query.
      */
     int64_t CatalogHelper::getNumberOfSearchResults(const std::map<std::string, std::string> &userInputFields,
