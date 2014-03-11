@@ -339,25 +339,25 @@ public:
         int elements[] = {1, 2};
         autoCorrelationCore.m_detectorElements = std::vector<int>(elements, elements + 2);
 
-        TS_ASSERT_DELTA(autoCorrelationCore.getCMessAndCSigma(1.2, 0.0, 0).first, 0.0, 1e-6);
-        TS_ASSERT_DELTA(autoCorrelationCore.getCMessAndCSigma(1.2, 0.0, 0).second, 0.00333333, 1e-6);
+        TS_ASSERT_DELTA(autoCorrelationCore.getCMessAndCSigma(1.2, 0.0, 0).value(), 0.0, 1e-6);
+        TS_ASSERT_DELTA(autoCorrelationCore.getCMessAndCSigma(1.2, 0.0, 0).error(), 0.00333333, 1e-6);
     }
 
     void testreduceChopperList()
     {
         TestablePoldiAutoCorrelationCore autoCorrelationCore;
 
-        std::pair<double, double> pair0(2.0, 1.0);
-        std::pair<double, double> pair1(3.0, 2.0);
-        std::pair<double, double> pair2(2.0, -1.0);
+        UncertainValue pair0(2.0, 1.0);
+        UncertainValue pair1(3.0, 2.0);
+        UncertainValue pair2(2.0, -1.0);
 
-        std::vector<std::pair<double, double> > goodList;
+        std::vector<UncertainValue> goodList;
         goodList.push_back(pair0);
         goodList.push_back(pair1);
 
         TS_ASSERT_DELTA(autoCorrelationCore.reduceChopperSlitList(goodList, 1.0), 3.428571428571428, 1e-6);
 
-        std::vector<std::pair<double, double> > badList;
+        std::vector<UncertainValue> badList;
         badList.push_back(pair0);
         badList.push_back(pair1);
         badList.push_back(pair2);

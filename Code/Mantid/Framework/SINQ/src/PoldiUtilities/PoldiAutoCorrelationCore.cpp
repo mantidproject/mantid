@@ -3,11 +3,12 @@
 #include <utility>
 #include <numeric>
 #include <algorithm>
-#include "boost/range/irange.hpp"
 #include "boost/bind.hpp"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/MultiThreaded.h"
+
+#include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 
 namespace Mantid
 {
@@ -27,6 +28,8 @@ PoldiAutoCorrelationCore::PoldiAutoCorrelationCore(Kernel::Logger &g_log) :
     m_tofsFor1Angstrom(),
     m_countData(),
     m_elementsMaxIndex(0),
+    m_sumOfWeights(0.0),
+    m_correlationBackground(0.0),
     m_damp(0.0),
     m_logger(g_log)
 {
@@ -88,9 +91,10 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
         m_detectorElements = m_detector->availableElements();
         m_tofsFor1Angstrom = getTofsFor1Angstrom(m_detectorElements);
 
-        int n = 0;
         m_indices.resize(m_detectorElements.size());
-        std::generate(m_indices.begin(), m_indices.end(), [&n] { return n++; });
+        for(int i = 0; i < static_cast<int>(m_indices.size()); ++i) {
+            m_indices[i] = i;
+        }
 
         /* The auto-correlation algorithm works by probing a list of d-Values, which
          * is created at this point. The spacing used is the maximum resolution of the instrument,
@@ -105,7 +109,8 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
          */
         m_logger.information() << "  Calculating weights (" << dValues.size() << ")..." << std::endl;
         m_weightsForD = calculateDWeights(m_tofsFor1Angstrom, m_deltaT, m_deltaD, dValues.size());
-        double sumOfWeights = getNormalizedTOFSum(m_weightsForD);
+
+        m_sumOfWeights = getNormalizedTOFSum(m_weightsForD);
 
         /* Calculation of the raw correlation spectrum. Each d-Value is mapped to an intensity value through,
          * taking into account the d-Value and the weight. Since the calculations for different d-Values do not
@@ -132,18 +137,23 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
         double sumOfCounts = getSumOfCounts(m_timeBinCount, m_detectorElements);
         m_logger.information() << "  Summing intensities (" << sumOfCounts << ")..." << std::endl;
 
-        double correlationBackground = sumOfCorrelatedIntensities - sumOfCounts;
+        m_correlationBackground = sumOfCorrelatedIntensities - sumOfCounts;
 
         m_logger.information() << "  Correcting intensities..." << std::endl;
         std::vector<double> correctedCorrelatedIntensities(dValues.size());
         std::transform(rawCorrelatedIntensities.begin(), rawCorrelatedIntensities.end(),
                        m_weightsForD.begin(),
                        correctedCorrelatedIntensities.rbegin(),
-                       [&correlationBackground, &sumOfWeights] (double intensity, double weight) { return intensity - correlationBackground * weight / sumOfWeights; });
+                       boost::bind<double>(&PoldiAutoCorrelationCore::correctedIntensity, this, _1, _2));
 
         /* Finally, the d-Values are converted to q-Values for plotting etc. and inserted into the output workspace. */
-        std::vector<double> qValues(dValues.size());
-        std::transform(dValues.rbegin(), dValues.rend(), qValues.begin(), [] (double d) { return 2.0 * M_PI / d; });
+        size_t dCount = dValues.size();
+        std::vector<double> qValues(dCount);
+
+        PARALLEL_FOR_NO_WSP_CHECK()
+        for(size_t i = 0; i < dCount; --i) {
+            qValues[dCount - i - 1] = (2.0 * M_PI / dValues[i]);
+        }
 
         m_logger.information() << "  Setting result..." << std::endl;
         DataObjects::Workspace2D_sptr outputWorkspace = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
@@ -203,8 +213,10 @@ std::vector<double> PoldiAutoCorrelationCore::getDGrid(double deltaD)
     std::vector<double> dGrid(ndSpace);
 
     double d0 = static_cast<double>(normedDRange.first) * deltaD;
-    int n = 0;
-    std::generate(dGrid.begin(), dGrid.end(), [&n, &deltaD, &d0]() -> double { n++; return static_cast<double>(n) * deltaD + d0; });
+
+    for(int i = 1; i <= static_cast<double>(dGrid.size()); ++i) {
+        dGrid[i - 1] = static_cast<double>(i) * deltaD + d0;
+    }
 
     return dGrid;
 }
@@ -241,8 +253,13 @@ std::vector<double> PoldiAutoCorrelationCore::calculateDWeights(std::vector<doub
      * necessary. But since there are not too many calculations involved and in order to stay close
      * to the original implementation, this is kept.
      */
-    std::vector<double> tofs(tofsFor1Angstrom.size());
-    std::transform(tofsFor1Angstrom.begin(), tofsFor1Angstrom.end(), tofs.begin(), [&deltaD](double tofForD1) { return tofForD1 * deltaD; });
+    std::vector<double> tofs;
+    tofs.reserve(tofsFor1Angstrom.size());
+
+    for(std::vector<double>::const_iterator tofFor1Angstrom = tofsFor1Angstrom.begin(); tofFor1Angstrom != tofsFor1Angstrom.end(); ++tofFor1Angstrom) {
+        tofs.push_back(*tofFor1Angstrom * deltaD);
+    }
+
     double sum = std::accumulate(tofs.begin(), tofs.end(), 0.0);
 
     return std::vector<double>(nd, sum / deltaT);
@@ -263,7 +280,7 @@ double PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue, double
      * there are eight possible arrival "locations" (in the sense of both space and time) for neutrons
      * diffracted by this family of planes with given d.
      */
-    std::vector<std::pair<double, double> > current;
+    std::vector<UncertainValue> current;
     current.reserve(m_chopper->slitTimes().size());
 
     for(std::vector<double>::const_iterator slitOffset = m_chopper->slitTimes().begin();
@@ -274,16 +291,18 @@ double PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue, double
          * These pairs are put into a vector for later analysis. The size of this vector
          * is equal to the number of chopper slits.
          */
-        std::vector<std::pair<double, double> > cmess(m_detector->elementCount());
+        std::vector<UncertainValue> cmess(m_detector->elementCount());
         std::transform(m_indices.begin(), m_indices.end(),
                        cmess.begin(),
-                       boost::bind<std::pair<double, double> >(&PoldiAutoCorrelationCore::getCMessAndCSigma, this, dValue, *slitOffset, _1));
+                       boost::bind<UncertainValue>(&PoldiAutoCorrelationCore::getCMessAndCSigma, this, dValue, *slitOffset, _1));
 
-        current.push_back(std::accumulate(cmess.begin(), cmess.end(), std::make_pair(0.0, 0.0), [] (std::pair<double, double> sum, std::pair<double, double> current) { return std::make_pair(sum.first + current.first, sum.second + current.second); } ));
+        UncertainValue sum = std::accumulate(cmess.begin(), cmess.end(), UncertainValue(0.0, 0.0), &UncertainValue::plainAddition);
+
+        current.push_back(sum);
     }
 
     /* This check ensures that all sigmas are non-zero. If not, a correlation intensity of 0.0 is returned. */
-    double sigma = (*std::min_element(current.begin(), current.end(), [] (std::pair<double, double> first, std::pair<double, double> second) { return first.second < second.second; })).second;
+    double sigma = (*std::min_element(current.begin(), current.end(), &UncertainValue::lessThanError)).error();
 
     if(sigma <= 0) {
         return 0.0;
@@ -302,7 +321,7 @@ double PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue, double
   * @param index :: Index of detector element the calculation is performed for.
   * @return Pair of intensity and error for given input.
   */
-std::pair<double, double> PoldiAutoCorrelationCore::getCMessAndCSigma(double dValue, double slitTimeOffset, int index)
+UncertainValue PoldiAutoCorrelationCore::getCMessAndCSigma(double dValue, double slitTimeOffset, int index)
 {
     /* Element index and TOF for 1 Angstrom from current setup. */
     int element = getElementFromIndex(index);
@@ -342,15 +361,16 @@ std::pair<double, double> PoldiAutoCorrelationCore::getCMessAndCSigma(double dVa
      */
     int indexDifference = icmax - icmin;
 
-    std::pair<double, double> c = std::make_pair(0.0, 0.0);
+    double value = 0.0;
+    double error = 0.0;
 
     double minCounts = getCounts(element, iicmin);
     double normMinCounts = getNormCounts(element, iicmin);
 
     switch(indexDifference) {
     case 0: {
-            c.first = minCounts * width / normMinCounts;
-            c.second = width / normMinCounts;
+            value = minCounts * width / normMinCounts;
+            error = width / normMinCounts;
             break;
         }
     case 2: {
@@ -359,25 +379,25 @@ std::pair<double, double> PoldiAutoCorrelationCore::getCMessAndCSigma(double dVa
             double counts = getCounts(element, middleIndex);
             double normCounts = getNormCounts(element, middleIndex);
 
-            c.first = counts * 1.0 / normCounts;
-            c.second = 1.0 / normCounts;
+            value = counts * 1.0 / normCounts;
+            error = 1.0 / normCounts;
         }
     case 1: {
-            c.first += minCounts * (static_cast<double>(icmin) - cmin + 1.0) / normMinCounts;
-            c.second += (static_cast<double>(icmin) - cmin + 1.0) / normMinCounts;
+            value += minCounts * (static_cast<double>(icmin) - cmin + 1.0) / normMinCounts;
+            error += (static_cast<double>(icmin) - cmin + 1.0) / normMinCounts;
 
             double maxCounts = getCounts(element, iicmax);
             double normMaxCounts = getNormCounts(element, iicmax);
 
-            c.first += maxCounts * (cmax - static_cast<double>(icmax)) / normMaxCounts;
-            c.second += (cmax - static_cast<double>(icmax)) / normMaxCounts;
+            value += maxCounts * (cmax - static_cast<double>(icmax)) / normMaxCounts;
+            error += (cmax - static_cast<double>(icmax)) / normMaxCounts;
             break;
         }
     default:
         break;
     }
 
-    return c;
+    return UncertainValue(value, error);
 }
 
 
@@ -407,22 +427,44 @@ void PoldiAutoCorrelationCore::setCountData(DataObjects::Workspace2D_sptr countD
     m_elementsMaxIndex = static_cast<int>(countData->getNumberHistograms()) - 1;
 }
 
+double PoldiAutoCorrelationCore::correctedIntensity(double intensity, double weight)
+{
+    return intensity - m_correlationBackground * weight / m_sumOfWeights;
+}
+
 /** Reduces list of I/sigma-pairs for N chopper slits to correlation intensity by checking for negative I/sigma-ratios and summing their inverse values.
   *
   * @param valuesWithSigma :: Vector of I/sigma-pairs.
   * @param weight :: Dimensionless weight.
   * @return Correlated intensity, multiplied by weight.
   */
-double PoldiAutoCorrelationCore::reduceChopperSlitList(std::vector<std::pair<double, double> > valuesWithSigma, double weight)
+double PoldiAutoCorrelationCore::reduceChopperSlitList(std::vector<UncertainValue> valuesWithSigma, double weight)
 {
     std::vector<double> iOverSigma(valuesWithSigma.size());
-    std::transform(valuesWithSigma.begin(), valuesWithSigma.end(), iOverSigma.begin(), [] (std::pair<double, double> iAndSigma) { return iAndSigma.first / iAndSigma.second; });
+    std::transform(valuesWithSigma.begin(), valuesWithSigma.end(), iOverSigma.begin(), &UncertainValue::valueToErrorRatio);
 
     if(*std::min_element(iOverSigma.begin(), iOverSigma.end()) < 0.0) {
         return 0.0;
     }
 
-    return pow(static_cast<double>(valuesWithSigma.size()), 2.0) / std::accumulate(iOverSigma.begin(), iOverSigma.end(), 0.0, [] (double sum, double curr) { return sum + 1.0 / curr; }) * weight;
+    return pow(static_cast<double>(valuesWithSigma.size()), 2.0) / sumIOverSigmaInverse(iOverSigma) * weight;
+}
+
+/** Sums Sigma(I)/I for given list of I/Sigma(I) values.
+  *
+  * @param iOverSigmas List of I/sigma(I)-values
+  * @return Sum of Sigma(I)/I for given list
+  */
+double PoldiAutoCorrelationCore::sumIOverSigmaInverse(std::vector<double> &iOverSigmas)
+{
+    double sum = 0.0;
+
+    for(std::vector<double>::const_iterator iovers = iOverSigmas.begin(); iovers != iOverSigmas.end(); ++iovers)
+    {
+        sum += 1.0 / *iovers;
+    }
+
+    return sum;
 }
 
 /** Transforms a vector of detector element indices to total flight path, adding the distances from chopper to sample and sample to detector element.
@@ -435,8 +477,12 @@ double PoldiAutoCorrelationCore::reduceChopperSlitList(std::vector<std::pair<dou
 std::vector<double> PoldiAutoCorrelationCore::getDistances(std::vector<int> elements)
 {
     double chopperDistance = m_chopper->distanceFromSample();
-    std::vector<double> distances(elements.size());
-    std::transform(elements.begin(), elements.end(), distances.begin(), [this, &chopperDistance] (int element) { return chopperDistance + m_detector->distanceFromSample(element); });
+    std::vector<double> distances;
+    distances.reserve(elements.size());
+
+    for(std::vector<int>::const_iterator element = elements.begin(); element != elements.end(); ++element) {
+        distances.push_back(chopperDistance + m_detector->distanceFromSample(*element));
+    }
 
     return distances;
 }
@@ -455,8 +501,11 @@ std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(std::vector<in
     std::transform(elements.begin(), elements.end(), twoThetas.begin(), boost::bind<double>(&PoldiAbstractDetector::twoTheta, m_detector, _1));
 
     // We will need sin(Theta) anyway, so we might just calculate those as well
-    std::vector<double> sinThetas(elements.size());
-    std::transform(twoThetas.begin(), twoThetas.end(), sinThetas.begin(), [](double twoTheta) { return sin(twoTheta / 2.0); });
+    std::vector<double> sinThetas;
+    sinThetas.reserve(elements.size());
+    for(std::vector<double>::const_iterator twoTheta = twoThetas.begin(); twoTheta != twoThetas.end(); ++twoTheta) {
+        sinThetas.push_back(sin(*twoTheta / 2.0));
+    }
 
     // Same goes for distances
     std::vector<double> distances = getDistances(elements);

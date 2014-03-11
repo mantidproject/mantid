@@ -60,6 +60,9 @@ protected:
     void detectorSetHook();
     std::vector<int> getGoodElements(std::vector<int> rawElements);
 
+    static bool detectorIsNotMasked(Instrument_const_sptr instrument, detid_t detectorId);
+    bool isDeadElement(int index);
+
     std::set<int> m_deadWireSet;
     std::vector<int> m_goodElements;
 };

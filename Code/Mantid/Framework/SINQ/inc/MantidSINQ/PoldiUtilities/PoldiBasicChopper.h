@@ -63,6 +63,8 @@ protected:
     void initializeFixedParameters(std::vector<double> slitPositions, double distanceFromSample, double t0, double t0const);
     void initializeVariableParameters(double rotationSpeed);
 
+    double slitPositionToTimeFraction(double slitPosition);
+
     // fixed parameters
     std::vector<double> m_slitPositions;
     double m_distanceFromSample;

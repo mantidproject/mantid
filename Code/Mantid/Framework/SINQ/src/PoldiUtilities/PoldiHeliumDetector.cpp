@@ -90,8 +90,9 @@ void PoldiHeliumDetector::initializeFixedParameters(double radius, size_t elemen
 
     m_availableElements.resize(m_elementCount);
 
-    int n = 0;
-    std::generate(m_availableElements.begin(), m_availableElements.end(), [&n] { return n++; });
+    for(int i = 0; i < static_cast<int>(m_elementCount); ++i) {
+        m_availableElements[i] = i;
+    }
 
     m_angularResolution = m_elementWidth / m_radius;
     m_totalOpeningAngle = static_cast<double>(m_elementCount) * m_angularResolution;

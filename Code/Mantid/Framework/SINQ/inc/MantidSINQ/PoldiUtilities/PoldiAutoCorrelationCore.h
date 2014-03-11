@@ -7,6 +7,7 @@
 
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
+#include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -68,8 +69,9 @@ protected:
     std::vector<double> calculateDWeights(std::vector<double> tofsFor1Angstrom, double deltaT, double deltaD, size_t nd);
 
     double getRawCorrelatedIntensity(double dValue, double weight);
-    virtual std::pair<double, double> getCMessAndCSigma(double dValue, double slitTimeOffset, int index);
-    double reduceChopperSlitList(std::vector<std::pair<double, double> > valuesWithSigma, double weight);
+    virtual UncertainValue getCMessAndCSigma(double dValue, double slitTimeOffset, int index);
+    double reduceChopperSlitList(std::vector<UncertainValue> valuesWithSigma, double weight);
+    double sumIOverSigmaInverse(std::vector<double> &iOverSigmas);
 
     std::vector<double> getDistances(std::vector<int> elements);
     std::vector<double> getTofsFor1Angstrom(std::vector<int> elements);
@@ -84,6 +86,8 @@ protected:
     virtual int cleanIndex(int index, int maximum);
 
     void setCountData(DataObjects::Workspace2D_sptr countData);
+
+    double correctedIntensity(double intensity, double weight);
 
 
     boost::shared_ptr<PoldiAbstractDetector> m_detector;
@@ -103,6 +107,9 @@ protected:
 
     DataObjects::Workspace2D_sptr m_countData;
     int m_elementsMaxIndex;
+
+    double m_sumOfWeights;
+    double m_correlationBackground;
 
     double m_damp;
     Kernel::Logger& m_logger;

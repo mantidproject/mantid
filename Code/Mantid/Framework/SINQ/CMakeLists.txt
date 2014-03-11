@@ -10,6 +10,7 @@ set ( SRC_FILES
         src/PoldiUtilities/PoldiDetectorDecorator.cpp
         src/PoldiUtilities/PoldiDetectorFactory.cpp
         src/PoldiUtilities/PoldiHeliumDetector.cpp
+        src/PoldiUtilities/UncertainValue.cpp
 	src/PoldiLoadChopperSlits.cpp
 	src/PoldiLoadIPP.cpp
 	src/PoldiLoadLog.cpp
@@ -37,6 +38,7 @@ set ( INC_FILES
         inc/MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h
         inc/MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h
         inc/MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h
+        inc/MantidSINQ/PoldiUtilities/UncertainValue.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
 	inc/MantidSINQ/PoldiLoadIPP.h
 	inc/MantidSINQ/PoldiLoadLog.h
@@ -63,6 +65,7 @@ set ( TEST_FILES
 	PoldiDetectorTest.h
 	ProjectMDTest.h
 	SliceMDHistoTest.h
+        UncertainValueTest.h
 )
 
 

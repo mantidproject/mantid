@@ -1,6 +1,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 
 #include <algorithm>
+#include "boost/bind.hpp"
 
 namespace Mantid
 {
@@ -25,7 +26,7 @@ PoldiDeadWireDecorator::PoldiDeadWireDecorator(Instrument_const_sptr poldiInstru
     std::vector<detid_t> allDetectorIds = poldiInstrument->getDetectorIDs();
     std::vector<detid_t> deadDetectorIds(allDetectorIds.size());
 
-    std::vector<detid_t>::iterator endIterator = std::remove_copy_if(allDetectorIds.begin(), allDetectorIds.end(), deadDetectorIds.begin(), [&poldiInstrument](detid_t detectorId) { return !poldiInstrument->isDetectorMasked(detectorId); });
+    std::vector<detid_t>::iterator endIterator = std::remove_copy_if(allDetectorIds.begin(), allDetectorIds.end(), deadDetectorIds.begin(), boost::bind<bool>(&PoldiDeadWireDecorator::detectorIsNotMasked, poldiInstrument, _1));
     deadDetectorIds.resize(std::distance(deadDetectorIds.begin(), endIterator));
 
     setDeadWires(std::set<int>(deadDetectorIds.begin(), deadDetectorIds.end()));
@@ -71,12 +72,22 @@ std::vector<int> PoldiDeadWireDecorator::getGoodElements(std::vector<int> rawEle
         size_t newElementCount = rawElements.size() - m_deadWireSet.size();
 
         std::vector<int> goodElements(newElementCount);
-        std::remove_copy_if(rawElements.begin(), rawElements.end(), goodElements.begin(), [this](int index) { return m_deadWireSet.count(index) != 0; });
+        std::remove_copy_if(rawElements.begin(), rawElements.end(), goodElements.begin(), boost::bind<bool>(&PoldiDeadWireDecorator::isDeadElement, this, _1));
 
         return goodElements;
     }
 
     return rawElements;
+}
+
+bool PoldiDeadWireDecorator::detectorIsNotMasked(Instrument_const_sptr instrument, detid_t detectorId)
+{
+    return !instrument->isDetectorMasked(detectorId);
+}
+
+bool PoldiDeadWireDecorator::isDeadElement(int index)
+{
+    return m_deadWireSet.count(index) != 0;
 }
 
 
