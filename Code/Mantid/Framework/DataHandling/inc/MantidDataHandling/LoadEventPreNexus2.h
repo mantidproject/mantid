@@ -7,7 +7,6 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Events.h"
 
 
@@ -216,7 +215,7 @@ private:
 
   void unmaskVetoEventIndex();
 
-  DataObjects::Workspace2D_sptr generateEventDistribtionWorkspace();
+  API::MatrixWorkspace_sptr generateEventDistribtionWorkspace();
 
   void createOutputWorkspace(const std::string event_filename);
 

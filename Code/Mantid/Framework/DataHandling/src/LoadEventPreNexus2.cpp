@@ -312,7 +312,7 @@ namespace DataHandling
     declareProperty(new WorkspaceProperty<IEventWorkspace>(OUT_PARAM,"",Direction::Output),
         "The name of the workspace that will be created, filled with the read-in data and stored in the [[Analysis Data Service]].");
 
-    declareProperty(new WorkspaceProperty<Workspace2D>("EventNumberWorkspace", "", Direction::Output, PropertyMode::Optional),
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("EventNumberWorkspace", "", Direction::Output, PropertyMode::Optional),
                     "Workspace with number of events per pulse");
 
     return;
@@ -378,7 +378,7 @@ namespace DataHandling
     std::string diswsname = getPropertyValue("EventNumberWorkspace");
     if (!diswsname.empty())
     {
-      Workspace2D_sptr disws = generateEventDistribtionWorkspace();
+      MatrixWorkspace_sptr disws = generateEventDistribtionWorkspace();
       setProperty("EventNumberWorkspace", disws);
     }
 
@@ -515,13 +515,13 @@ namespace DataHandling
     * Workspace has 2 spectrum.  spectrum 0 is the number of events in one pulse.
     * specrum 1 is the accumulated number of events
     */
-  DataObjects::Workspace2D_sptr LoadEventPreNexus2::generateEventDistribtionWorkspace()
+  API::MatrixWorkspace_sptr LoadEventPreNexus2::generateEventDistribtionWorkspace()
   {
     // Generate workspace of 2 spectrum
     size_t nspec = 2;
     size_t sizex = event_indices.size();
     size_t sizey = sizex;
-    Workspace2D_sptr disws = boost::dynamic_pointer_cast<Workspace2D>(
+    MatrixWorkspace_sptr disws = boost::dynamic_pointer_cast<MatrixWorkspace>(
           WorkspaceFactory::Instance().create("Workspace2D", nspec, sizex, sizey));
 
     g_log.debug() << "Event indexes size = " << event_indices.size() << ", "
