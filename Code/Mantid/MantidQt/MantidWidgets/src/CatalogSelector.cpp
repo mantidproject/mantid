@@ -51,6 +51,11 @@ namespace MantidQt
           m_uiForm.selectedCatalogs->insertItem(row,item);
         }
       }
+      // Select first facility by default (as the user must be logged into at least one catalog).
+      m_uiForm.selectedCatalogs->item(0)->setSelected(true);
+      m_uiForm.selectedCatalogs->item(0)->setCheckState(Qt::Checked);
+      // Set the list widget as focus to better show the selected facilities.
+      m_uiForm.selectedCatalogs->setFocus();
     }
 
     /**

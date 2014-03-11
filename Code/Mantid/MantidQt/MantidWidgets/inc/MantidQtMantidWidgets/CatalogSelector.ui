@@ -226,6 +226,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>selectedCatalogs</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>cancelBtn</tabstop>
+  <tabstop>updateBtn</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
