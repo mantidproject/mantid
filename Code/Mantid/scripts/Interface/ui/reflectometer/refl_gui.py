@@ -5,6 +5,7 @@ import refl_window
 import refl_save
 import refl_choose_col
 import csv
+import string
 from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
@@ -353,6 +354,10 @@ class ReflGui(refl_window.Ui_windowRefl):
         if not selected:
             logger.warning("Cannot paste, no editable cells selected")
             return
+        #convert line endings to windows-style
+        pastedtext = string.replace(pastedtext, '\r\n', '\n')
+        pastedtext = string.replace(pastedtext, '\n\r', '\n')
+        pastedtext = string.replace(pastedtext, '\r', '\n')
         '''
         quickly check if the last row is a single cell and blank
         MS excel adds a line break at the end of copied cells which can mess with this a bit
