@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
+ name="USANS" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2014-03-10 08:53:09">
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+    </reference-frame>
+  </defaults>
+  <component type="moderator">
+    <location z="-28.011" />
+  </component>
+  <type name="moderator" is="Source"></type>
+  
+  <!-- Sample position -->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0" />
+  </component>
+  <type name="sample-position" is="SamplePos" />
+  
+  <!-- Moderator - monitor distance: 27606 mm -->
+  <component type="monitors" idlist="monitors">
+    <location/>
+  </component>
+  <type name="monitors">
+    <component type="monitor">
+      <location z="-0.405" name="monitor1"/>
+    </component>
+  </type>
+  
+  <!-- Detector Panels -->
+  <component type="main_detector" idlist="main_detector-idlist">
+  	<!-- location x="0.0" y="0.0" z="0.0" rot="0.0" axis-x="0.0" axis-y="0.0" axis-z="1.0"/ -->
+  	<location/>
+  </component>  
+  <type name="main_detector">
+    <component type="bank1">
+      <location/>
+    </component>
+    <component type="bank2">
+      <location/>
+    </component>
+  </type>
+  <type name="bank1">
+    <component type="fourpack">
+      <location y="0.0" x="0.0" z="2.03175" />
+    </component>
+  </type>
+  <type name="bank2">
+    <component type="fourpack">
+      <location y="0.0" x="-0.0096266" z="2.04175" />
+    </component>
+  </type>
+ 
+  <component type="transmission_detector" idlist="transmission_detector-idlist">
+    <location/>
+  </component>
+  <type name="transmission_detector">
+    <component type="fourpack">
+      <location y="0.0" x="0.0" z="0.710316" />
+    </component>
+    <component type="fourpack">
+      <location y="0.0" x="-0.0096266" z="0.720316" />
+    </component>
+  </type>
+
+  
+  <!-- 4-PACK -->
+  <type name="fourpack">
+    <properties/>
+    <component type="tube">
+      <location x="-0.0288798" name="tube1"/>
+      <location x="-0.0096266" name="tube2"/>
+      <location x="0.0096266" name="tube3"/>
+      <location x="0.0288798" name="tube4"/>
+    </component>
+  </type>
+  <!--TUBE-->
+  <type name="tube" outline="yes">
+    <properties/>
+    <component type="pixel">
+		<location y="-0.10998200" name="pixel0"/>
+		<location y="-0.10183519" name="pixel1"/>
+		<location y="-0.09368837" name="pixel2"/>
+		<location y="-0.08554156" name="pixel3"/>
+		<location y="-0.07739474" name="pixel4"/>
+		<location y="-0.06924793" name="pixel5"/>
+		<location y="-0.06110111" name="pixel6"/>
+		<location y="-0.05295430" name="pixel7"/>
+		<location y="-0.04480748" name="pixel8"/>
+		<location y="-0.03666067" name="pixel9"/>
+		<location y="-0.02851385" name="pixel10"/>
+		<location y="-0.02036704" name="pixel11"/>
+		<location y="-0.01222022" name="pixel12"/>
+		<location y="-0.00407341" name="pixel13"/>
+		<location y="0.00407341" name="pixel14"/>
+		<location y="0.01222022" name="pixel15"/>
+		<location y="0.02036704" name="pixel16"/>
+		<location y="0.02851385" name="pixel17"/>
+		<location y="0.03666067" name="pixel18"/>
+		<location y="0.04480748" name="pixel19"/>
+		<location y="0.05295430" name="pixel20"/>
+		<location y="0.06110111" name="pixel21"/>
+		<location y="0.06924793" name="pixel22"/>
+		<location y="0.07739474" name="pixel23"/>
+		<location y="0.08554156" name="pixel24"/>
+		<location y="0.09368837" name="pixel25"/>
+		<location y="0.10183519" name="pixel26"/>
+		<location y="0.10998200" name="pixel27"/>
+    </component>
+  </type>
+  <!--PIXEL FOR TUBE-->
+  <type is="detector" name="pixel">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis y="1.0" x="0.0" z="0.0"/>
+      <radius val="0.00635"/>
+      <height val="0.0093741875"/>
+    </cylinder>
+    <algebra val="cyl-approx"/>
+  </type>
+  <!--MONITOR SHAPE-->
+  <type is="monitor" name="monitor">
+    <cuboid id="shape">
+      <left-front-bottom-point y="-0.08255" x="-0.0254" z="-0.01905"/>
+      <left-front-top-point y="0.08255" x="-0.0254" z="-0.01905"/>
+      <left-back-bottom-point y="-0.08255" x="-0.0254" z="0.01905"/>
+      <right-front-bottom-point y="-0.08255" x="0.0254" z="-0.01905"/>
+    </cuboid>
+    <algebra val="shape"/>
+  </type>
+  <!--DETECTOR IDs-->
+  <idlist idname="main_detector-idlist">
+    <id start="0" end="223"/>
+  </idlist>
+  <idlist idname="transmission_detector-idlist">
+    <id start="224" end="447"/>
+  </idlist>
+    <!--MONITOR IDs-->
+  <idlist idname="monitors">
+    <id val="-1"/>
+  </idlist>
+  <!--DETECTOR PARAMETERS-->
+  <component-link name="USANS">	
+	<parameter name="wavelength_peaks" type="string">
+  		<value val="0.9, 1.2, 1.8, 3.6" />
+	</parameter>
+  </component-link>
+</instrument>
