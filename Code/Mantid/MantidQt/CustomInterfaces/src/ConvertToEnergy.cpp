@@ -283,6 +283,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
   case Direct:
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabCalibration));
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabSofQW));
+    m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabMoments));
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabTimeSlice));
     m_uiForm.tabWidget->removeTab(m_uiForm.tabWidget->indexOf(m_uiForm.tabTransmission));
     m_uiForm.tabWidget->addTab(m_uiForm.tabDiagnoseDetectors, "Diagnose Detectors");
@@ -304,6 +305,7 @@ void ConvertToEnergy::changeInterface(DeltaEMode desired)
     m_uiForm.tabWidget->addTab(m_uiForm.tabTimeSlice, "Diagnostics");
     m_uiForm.tabWidget->addTab(m_uiForm.tabTransmission, "Transmission");
     m_uiForm.tabWidget->addTab(m_uiForm.tabSofQW, "S(Q, w)");
+    m_uiForm.tabWidget->addTab(m_uiForm.tabMoments, "Moments");
     if ( m_indirectInstruments == NULL )
     {
       m_indirectInstruments = new Indirect(qobject_cast<QWidget*>(this->parent()), m_uiForm);
