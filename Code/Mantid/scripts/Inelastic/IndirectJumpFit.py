@@ -15,6 +15,9 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 	spectrumWs = "__" + samWS
 	ExtractSingleSpectrum(InputWorkspace=samWS, OutputWorkspace=spectrumWs, WorkspaceIndex=width)
 	
+	#convert to HWHM
+	Scale(InputWorkspace=spectrumWs, Factor=0.5, OutputWorkspace=spectrumWs)
+	
 	#crop the workspace between the given ranges
 	if Verbose:
 		logger.notice('Cropping from Q= ' + str(qmin) +' to '+ str(qmax))
