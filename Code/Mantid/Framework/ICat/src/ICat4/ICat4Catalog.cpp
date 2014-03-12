@@ -391,6 +391,7 @@ namespace Mantid
         outputws->addColumn("str","Run range");
         outputws->addColumn("str","Start date");
         outputws->addColumn("str","End date");
+        outputws->addColumn("str","SessionID");
       }
 
       // Add data to each row in the output workspace.
@@ -438,6 +439,8 @@ namespace Mantid
             std::string endDate = formatDateTime(*investigation->endDate, "%Y-%m-%d");
             savetoTableWorkspace(&endDate, table);
           }
+          std::string sessionID = m_session->getSessionId();
+          savetoTableWorkspace(&sessionID, table);
         }
         else
         {
