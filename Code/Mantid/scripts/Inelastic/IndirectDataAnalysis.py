@@ -1001,19 +1001,9 @@ def msdfitPlotSeq(inputWS, xlabel):
         msd_layer.setAxisTitle(mp.Layer.Bottom,xlabel)
         msd_layer.setAxisTitle(mp.Layer.Left,'<u2>')
 
-def msdfit(inputs, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=False, Plot=True):
+def msdfit(ws, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=False, Plot=True):
     StartTime('msdFit')
     workdir = getDefaultWorkingDirectory()
-
-    file_path = inputs[0]
-    file_path = FileFinder.getFullPath(file_path)
-    (direct, filename) = os.path.split(file_path)
-    (ws, ext) = os.path.splitext(filename)
-
-    if Verbose:
-        logger.notice('Reading Run : '+ file_path)
-
-    LoadNexusProcessed(FileName=file_path, OutputWorkspace=ws)
 
     num_spectra = mtd[ws].getNumberHistograms()
     if spec_max is None:
