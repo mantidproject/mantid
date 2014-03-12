@@ -113,6 +113,11 @@ namespace MantidQt
             loadAlg->execute();
             
             isValid = AnalysisDataService::Instance().doesExist(wsName.toStdString());
+            
+            if(!isValid)
+            {
+              m_uiForm.rfFileInput->setFileProblem("The specified workspace is missing from the analysis data service");
+            }
           }
         }
       }
@@ -135,11 +140,7 @@ namespace MantidQt
       QString problem = "";
       const QString wsName = getCurrentDataName();
 
-      if(m_autoLoad && !AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-      {
-        problem = "The specified workspace is missing from the analysis data service";
-      }
-      else if(isFileSelectorVisible())
+      if(isFileSelectorVisible())
       {
         problem = m_uiForm.rfFileInput->getFileProblem();
       }
