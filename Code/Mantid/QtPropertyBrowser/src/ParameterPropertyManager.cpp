@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <math.h>
 
+const QString ParameterPropertyManager::ERROR_TOOLTIP(" (Error)");
+
 ParameterPropertyManager::ParameterPropertyManager(QObject *parent)
   : QtDoublePropertyManager(parent),
     m_errors(), m_errorsEnabled(false)
@@ -61,7 +63,7 @@ void ParameterPropertyManager::setError(QtProperty* property, const double& erro
 {
   m_errors[property] = error;
   emit propertyChanged(property);
-  // TODO: update tooltip
+  updateTooltip(property);
 }
 
 /**
@@ -82,7 +84,7 @@ void ParameterPropertyManager::clearError(QtProperty* property)
 {
   m_errors.remove(property);
   emit propertyChanged(property);
-  // TODO: update tooltip
+  updateTooltip(property);
 }
 
 /**
@@ -96,7 +98,7 @@ void ParameterPropertyManager::setErrorsEnabled(bool enabled)
   foreach(QtProperty* prop, m_errors.keys())
   {
     emit propertyChanged(prop);
-    // TODO: update tooltip
+    updateTooltip(prop);
   }
 }
 
@@ -133,6 +135,14 @@ QString ParameterPropertyManager::valueText(const QtProperty* property) const
  */
 void ParameterPropertyManager::updateTooltip(QtProperty* property) const
 {
-  property->setToolTip(QString::fromStdString(description(property)));
-  // TODO: append description for error if enabled and set
+  // Description only initially
+  QString tooltip = QString::fromStdString(description(property));
+
+  if ( areErrorsEnabled() && isErrorSet(property))
+  {
+    // If error is displayed - add description for it
+    tooltip += ERROR_TOOLTIP;
+  }
+
+  property->setToolTip(tooltip);
 }

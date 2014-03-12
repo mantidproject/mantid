@@ -70,6 +70,9 @@ private Q_SLOTS:
   void updateTooltip(QtProperty* property) const;
 
 private:
+  /// Text appended to parameter descr. tooltip if error is set
+  static const QString ERROR_TOOLTIP;
+
   /// Parameter error values
   QMap<QtProperty*, double> m_errors;
 
