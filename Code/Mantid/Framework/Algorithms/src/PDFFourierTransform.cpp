@@ -354,6 +354,7 @@ namespace Mantid
           double q = inputQ[q_index];
           double deltaq = inputQ[q_index] - inputQ[q_index - 1];
           double sinus  = sin(q * r) * deltaq;
+          // multiply by filter function sin(q*pi/qmax)/(q*pi/qmax)
           if ( filter && q != 0 )
           {
             sinus *= sin(q * rdelta) / (q * rdelta);
