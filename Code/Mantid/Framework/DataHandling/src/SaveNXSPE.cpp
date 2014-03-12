@@ -79,12 +79,9 @@ namespace Mantid
           exts),
           "The name of the NXSPE file to write, as a full or relative path");
 
+      declareProperty("Efixed", EMPTY_DBL(), "Value of the fixed energy to write into NXSPE file.");
+      declareProperty("Psi", EMPTY_DBL(), "Value of PSI to write into NXSPE file.");
       // if the value is not set, one should better have it invalid, e.g. NaN
-      declareProperty("Efixed",SaveNXSPE::MASK_FLAG,
-          "Value of the fixed energy to write into NXSPE file.");
-
-      declareProperty("Psi", SaveNXSPE::MASK_FLAG, boost::make_shared<NullValidator>(),
-          "Value of PSI to write into NXSPE file.");
 
       declareProperty("KiOverKfScaling", true,
           "Flags in the file whether Ki/Kf scaling has been done or not.");
@@ -106,8 +103,6 @@ namespace Mantid
     SaveNXSPE::exec()
     {
       using namespace Mantid::API;
-
-      double efixed = 0.0;
 
       // Retrieve the input workspace
       const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
@@ -154,7 +149,8 @@ namespace Mantid
       nxFile.makeGroup("NXSPE_info", "NXcollection", true);
 
       // Get the value out of the property first
-      efixed = getProperty("Efixed");
+      double efixed = getProperty("Efixed");
+      if ( isEmpty(efixed) ) efixed = MASK_FLAG;
       // Now lets check to see if the workspace nows better.
       // TODO: Check that this is the way round we want to do it.
       const API::Run & run = inputWS->run();
@@ -169,13 +165,11 @@ namespace Mantid
       nxFile.closeData();
 
       double psi = getProperty("Psi");
-      if (psi != EMPTY_DBL())
-        {
-          nxFile.writeData("psi", psi);
-          nxFile.openData("psi");
-          nxFile.putAttr("units", "degrees");
-          nxFile.closeData();
-        }
+      if ( isEmpty(psi) ) psi = MASK_FLAG;
+      nxFile.writeData("psi", psi);
+      nxFile.openData("psi");
+      nxFile.putAttr("units", "degrees");
+      nxFile.closeData();
 
       bool kikfScaling = getProperty("KiOverKfScaling");
       if (kikfScaling)
