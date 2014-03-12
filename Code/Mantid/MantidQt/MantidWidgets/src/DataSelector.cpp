@@ -85,13 +85,36 @@ namespace MantidQt
      *
      * @return :: If the data selector is valid
      */
-    bool DataSelector::isValid() const
+    bool DataSelector::isValid()
     {
+      using namespace Mantid::API;
+
       bool isValid = false;
 
       if(isFileSelectorVisible())
       {
         isValid = m_uiForm.rfFileInput->isValid();
+
+        //check to make sure the user hasn't deleted the auto-loaded file
+        //since choosing it.
+        if(isValid && m_autoLoad)
+        {
+          const QString wsName = getCurrentDataName();
+          
+          if(!AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+          {
+            //attempt to reload if we can
+            //don't use algorithm runner because we need to know instantly.
+            const QString filepath = m_uiForm.rfFileInput->getFirstFilename();
+            const Algorithm_sptr loadAlg = AlgorithmManager::Instance().createUnmanaged("Load");
+            loadAlg->initialize();
+            loadAlg->setProperty("Filename", filepath.toStdString());
+            loadAlg->setProperty("OutputWorkspace", wsName.toStdString());
+            loadAlg->execute();
+            
+            isValid = AnalysisDataService::Instance().doesExist(wsName.toStdString());
+          }
+        }
       }
       else
       {
@@ -107,9 +130,16 @@ namespace MantidQt
     */
     QString DataSelector::getProblem() const
     {
-      QString problem = "";
+      using namespace Mantid::API;
 
-      if(isFileSelectorVisible())
+      QString problem = "";
+      const QString wsName = getCurrentDataName();
+
+      if(m_autoLoad && !AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+      {
+        problem = "The specified workspace is missing from the analysis data service";
+      }
+      else if(isFileSelectorVisible())
       {
         problem = m_uiForm.rfFileInput->getFileProblem();
       }
@@ -213,7 +243,7 @@ namespace MantidQt
      *
      * @return The full file path
      */
-    QString DataSelector::getFullFilePath()
+    QString DataSelector::getFullFilePath() const
     {
       return m_uiForm.rfFileInput->getFirstFilename();
     }
@@ -228,7 +258,7 @@ namespace MantidQt
      *
      * @return The name of the current data item
      */
-    QString DataSelector::getCurrentDataName()
+    QString DataSelector::getCurrentDataName() const
     {
       QString filename("");
 
