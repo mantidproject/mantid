@@ -4,7 +4,7 @@ This algorithm is responsible for setting up the necessary workspaces to
 hand off to the [[DetectorDiagnostic]] algorithm. The diagram below shows the
 manipulations done by this algorithm. Workspaces that have dashed lines are
 optional. Parameters in italics are retrieved from the
-[[InstrumentParameterFile | instrument parameter file (IPF)]] unless they are
+[[InstrumentParameterFile|instrument parameter file (IPF)]] unless they are
 provided to the algorithm via a property manager. The mappings for these
 parameters are shown below.
 
@@ -80,6 +80,9 @@ below. All parameters given here act like italicized parameters.
 |-
 | IgnoredPixels || diag_bleed_pixels || NIgnoredCentralPixels
 |}
+
+=== Workflow ===
+[[File:DgsDiagnoseWorkflow.png]]
 
 *WIKI*/
 

@@ -21,8 +21,8 @@ to the algorithm via a property manager. The mappings are given below.
 | AbsUnitsMaximumEnergy || monovan-integr-max
 |}
 
-The last two parameters are used to create a single bin for the Rebin
-algorithm. The underlined parameter, VanadiumRmm, is taken from the atomic
+The last two parameters are used to create a single bin for the ''Rebin''
+algorithm. The dashed oval parameter, VanadiumRmm, is taken from the atomic
 information for the molecular mass of Vanadium. The open circle represents
 detector diagnostic parameters and they are detailed in the table below.
 
@@ -50,6 +50,9 @@ by a factor containing the sample mass (SampleMass), sample molecular mass
 (SampleRmm) and the cross-section (Scattering XSec) given by:
 <math>\frac{(\sigma^{V}_{incoherent}+\sigma^{V}_{coherent})\times10^{3}}{4\pi}</math>
 with the cross-section units of <math>millibarns/steradian</math>.
+
+=== Workflow ===
+[[File:DgsAbsoluteUnitsReductionWorkflow.png]]
 
 *WIKI*/
 
