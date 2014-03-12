@@ -24,6 +24,7 @@ set ( TEST_PY_FILES
   MaskWorkspaceToCalFileTest.py
   MeanTest.py
   MergeCalFilesTest.py
+  PDDetermineCharacterizationsTest.py
   ReflectometryReductionOneTest.py
   ReflectometryReductionOneAutoTest.py
   RetrieveRunInfoTest.py

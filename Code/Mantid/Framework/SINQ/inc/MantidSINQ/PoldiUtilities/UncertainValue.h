@@ -1,11 +1,13 @@
 #ifndef UNCERTAINVALUE_H
 #define UNCERTAINVALUE_H
 
+#include "MantidSINQ/DllConfig.h"
+
 namespace Mantid
 {
 namespace Poldi
 {
-class UncertainValue
+class MANTID_SINQ_DLL UncertainValue
 {
 public:
     UncertainValue();

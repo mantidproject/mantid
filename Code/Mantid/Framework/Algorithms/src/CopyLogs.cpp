@@ -52,8 +52,8 @@ namespace Algorithms
   /// Sets documentation strings for this algorithm
   void CopyLogs::initDocs()
   {
-    this->setWikiSummary("Copys the sample logs from one workspace to another.");
-    this->setOptionalMessage("Copys the sample logs from one workspace to another.");
+    this->setWikiSummary("Copies the sample logs from one workspace to another.");
+    this->setOptionalMessage("Copies the sample logs from one workspace to another.");
   }
 
   //----------------------------------------------------------------------------------------------

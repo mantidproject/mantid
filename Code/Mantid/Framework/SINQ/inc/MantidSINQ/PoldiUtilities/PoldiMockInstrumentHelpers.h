@@ -17,7 +17,7 @@ namespace Poldi {
 
 typedef std::pair<double, double> DoublePair;
 
-class MANTID_SINQ_DLL MockDetector : public PoldiAbstractDetector
+class  MockDetector : public PoldiAbstractDetector
 {
 protected:
     std::vector<int> m_availableElements;
@@ -50,7 +50,7 @@ public:
     }
 };
 
-class MANTID_SINQ_DLL ConfiguredHeliumDetector : public PoldiHeliumDetector
+class  ConfiguredHeliumDetector : public PoldiHeliumDetector
 {
 public:
     ConfiguredHeliumDetector() :
@@ -69,7 +69,7 @@ public:
 };
 
 
-class MANTID_SINQ_DLL MockChopper : public PoldiAbstractChopper
+class  MockChopper : public PoldiAbstractChopper
 {
 protected:
     std::vector<double> m_slitPositions;

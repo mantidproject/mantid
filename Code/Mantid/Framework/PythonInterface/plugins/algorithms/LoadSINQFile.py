@@ -29,6 +29,7 @@ class LoadSINQFile(PythonAlgorithm):
     def PyInit(self):
         global dictsearch
         self.setWikiSummary("Load a SINQ file with the right dictionary.")
+        self.setOptionalMessage("Load a SINQ file with the right dictionary.")
         instruments=["AMOR","BOA","DMC","FOCUS","HRPT","MARSI","MARSE","POLDI",
                      "RITA-2","SANS","SANS2","TRICS"]
         self.declareProperty("Instrument","AMOR",

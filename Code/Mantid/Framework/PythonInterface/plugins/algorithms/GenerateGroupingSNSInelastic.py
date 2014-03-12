@@ -35,6 +35,9 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         px = ["1", "2", "4","8"]
         instrument = ["ARCS","CNCS","HYSPEC","SEQUOIA"]
 
+        self.setWikiSummary("Generate grouping files for ARCS, CNCS, HYSPEC, and SEQUOIA.")
+        self.setOptionalMessage("Generate grouping files for ARCS, CNCS, HYSPEC, and SEQUOIA.")
+        
         self.declareProperty("AlongTubes", "1",mantid.kernel.StringListValidator(py), "Number of pixels across tubes to be grouped")
         self.declareProperty("AcrossTubes", "1", mantid.kernel.StringListValidator(px), "Number of pixels across tubes to be grouped")
         self.declareProperty("Instrument", instrument[0], mantid.kernel.StringListValidator(instrument), "The instrument for wich to create grouping")
