@@ -400,6 +400,19 @@ namespace Mantid
     {
       return std::vector<std::string>(0);
     }
+   
+    /// Default implementation  
+    std::vector<int> DetectorGroup::getIntParameter(const std::string&, bool) const
+    {
+      return std::vector<int>(0);
+    }
+
+    /// Default implementation  
+    std::vector<bool> DetectorGroup::getBoolParameter(const std::string&, bool) const
+    {
+      return std::vector<bool>(0);
+    }
+
     /// 
     det_topology
     DetectorGroup::getTopology(V3D &center)const

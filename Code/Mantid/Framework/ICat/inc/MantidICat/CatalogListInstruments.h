@@ -4,14 +4,12 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 
-
-
 namespace Mantid
 {
   namespace ICat
   {
     /**
-      This algorithm obtains a list of instruments used from the catalog service.
+      This algorithm obtains a list of instruments types from the catalog.
 
       @author Sofia Antony, STFC Rutherford Appleton Laboratory
       @date 09/07/2010

@@ -61,7 +61,9 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    LoadMD::LoadMD()
+    LoadMD::LoadMD():
+      m_numDims(0), // uninitialized incorrect value
+      m_BoxStructureAndMethadata(true) // this is faster but rarely needed. 
     {
     }
 
@@ -284,9 +286,7 @@ namespace Mantid
         std::string dimXML;
         m_file->getAttr(mess.str(), dimXML);
         // Use the dimension factory to read the XML
-        IMDDimensionFactory factory = IMDDimensionFactory::createDimensionFactory(dimXML);
-        IMDDimension_sptr dim(factory.create());
-        m_dims.push_back(dim);
+        m_dims.push_back(createDimension(dimXML));
       }
 
     }

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_window.ui'
 #
-# Created: Tue Jan 28 18:18:03 2014
+# Created: Tue Feb 25 11:55:14 2014
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -136,9 +136,9 @@ class Ui_windowRefl(object):
         self.tableMain.setFont(font)
         self.tableMain.setAlternatingRowColors(True)
         self.tableMain.setRowCount(100)
-        self.tableMain.setColumnCount(18)
+        self.tableMain.setColumnCount(19)
         self.tableMain.setObjectName(_fromUtf8("tableMain"))
-        self.tableMain.setColumnCount(18)
+        self.tableMain.setColumnCount(19)
         self.tableMain.setRowCount(100)
         item = QtGui.QTableWidgetItem()
         self.tableMain.setHorizontalHeaderItem(0, item)
@@ -176,6 +176,8 @@ class Ui_windowRefl(object):
         self.tableMain.setHorizontalHeaderItem(16, item)
         item = QtGui.QTableWidgetItem()
         self.tableMain.setHorizontalHeaderItem(17, item)
+        item = QtGui.QTableWidgetItem()
+        self.tableMain.setHorizontalHeaderItem(18, item)
         self.tableMain.horizontalHeader().setCascadingSectionResizes(True)
         self.tableMain.horizontalHeader().setDefaultSectionSize(60)
         self.tableMain.horizontalHeader().setMinimumSectionSize(20)
@@ -209,6 +211,9 @@ class Ui_windowRefl(object):
         self.menuFunction.setObjectName(_fromUtf8("menuFunction"))
         windowRefl.setMenuBar(self.menuBar)
         self.statusMain = QtGui.QStatusBar(windowRefl)
+        font = QtGui.QFont()
+        font.setPointSize(11)
+        self.statusMain.setFont(font)
         self.statusMain.setObjectName(_fromUtf8("statusMain"))
         windowRefl.setStatusBar(self.statusMain)
         self.actionSave_As = QtGui.QAction(windowRefl)
@@ -313,6 +318,7 @@ class Ui_windowRefl(object):
         self.tableMain.horizontalHeaderItem(15).setText(QtGui.QApplication.translate("windowRefl", "dq/q", None, QtGui.QApplication.UnicodeUTF8))
         self.tableMain.horizontalHeaderItem(16).setText(QtGui.QApplication.translate("windowRefl", "Scale", None, QtGui.QApplication.UnicodeUTF8))
         self.tableMain.horizontalHeaderItem(17).setText(QtGui.QApplication.translate("windowRefl", "Stitch?", None, QtGui.QApplication.UnicodeUTF8))
+        self.tableMain.horizontalHeaderItem(18).setText(QtGui.QApplication.translate("windowRefl", "Plot?", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonProcess.setText(QtGui.QApplication.translate("windowRefl", "Process", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonClear.setText(QtGui.QApplication.translate("windowRefl", "Clear all", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("windowRefl", "File", None, QtGui.QApplication.UnicodeUTF8))

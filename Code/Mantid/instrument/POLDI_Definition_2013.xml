@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
+            name="POLDI"
+            valid-from="2013-01-01 00:00:00"
+            last-modified="2013-01-01 00:00:00">
+    
+    <type name="source" is="Source" />
+    
+    <type name="chopper" is="ChopperPos">
+        <component type="chopperSlit">
+            <location x="0.000000" name="slit0" />
+            <location x="0.162156" name="slit1" />
+            <location x="0.250867" name="slit2" />
+            <location x="0.3704" name="slit3" />
+            <location x="0.439811" name="slit4" />
+            <location x="0.588455" name="slit5" />
+            <location x="0.761389" name="slit6" />
+            <location x="0.895667" name="slit7" />
+        </component>
+    </type>
+    
+    <type name="chopperSlit" />
+    
+    <type name="detector">
+        <component type="element" idlist="detector-elements-idlist">
+            <locations r="2.0000" t="75.0" t-end="103.0" p="0" n-elements="400" name="element" />
+        </component>
+    </type>
+    
+    <type name="element" is="Detector" />
+    
+    <idlist idname="detector-elements-idlist">
+        <id start="0" end="399" />
+    </idlist>
+    
+    <type name="sample" is="SamplePos" />
+    
+    <component type="source" name="source">
+        <location z="-12.0000" />
+    </component>        
+
+    <component type="chopper" name="chopper">
+        <location />
+        <parameter name="z">
+            <value val="-11.8000" />
+        </parameter>
+        <parameter name="rotation_speed">
+            <logfile id="chopperspeed" extract-single-value-as="first_value" />
+        </parameter>
+    </component>
+    
+    <component type="sample" name="sample">
+        <location x="0.0" y="0.0" z="0.0" />
+    </component>
+    
+    <component type="detector" name="detector">
+        <location />
+        <parameter name="radius">
+            <value val="3.0000" />
+        </parameter>
+        <parameter name="element_separation">
+            <value val="0.0025" />
+        </parameter>
+    </component>
+</instrument>

@@ -110,10 +110,10 @@ namespace MantidQt
       std::set<std::string> getDataFileExtensions(Mantid::API::Column_sptr column);
       /// Add the list of file extensions to the "Filter type..." drop-down.
       void populateDataFileType(const std::set<std::string> &extensions);
+      /// Disable the download button if user can access the files locally from the archives.
+      void disableDownloadButtonIfArchives(int row);
 
     private slots:
-      /// Selects/deselects ALL rows in dataFile table.
-      void selectAllDataFiles(const bool &toggled);
       /// When the facility login button is clicked
       void onFacilityLogin();
       /// When the help button is clicked.
@@ -160,14 +160,16 @@ namespace MantidQt
       // SLOTS for: "Datafile information"
       ///////////////////////////////////////////////////////////////////////////////
 
-      /// Enables the download & load button if user has selected a data file to download.
-      void enableDownloadButtons();
+      /// Disable load/download buttons if no datafile is selected.
+      void disableDatafileButtons();
       /// Performs filterDataFileType() for specified filer type.
       void doFilter(const int &index);
       /// Downloads selected datFiles to a specified location.
       void downloadDataFiles();
       /// Loads the selected dataFiles into workspaces.
       void loadDataFiles();
+      /// Selects/deselects ALL rows in dataFile table.
+      void selectAllDataFiles(const bool &toggled);
       /// Select/Deselect row when a checkbox is selected
       void dataFileCheckboxSelected(QTableWidgetItem* item);
       /// Select/Deselect row & check-box when a row is selected.

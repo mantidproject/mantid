@@ -228,9 +228,11 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
   case OrthogonalHKLScale://< each momentum component divided by appropriate lattice parameter; equivalent to hkl for orthogonal axis
     {
       if(spLatt)
+      {
         for(int i=0;i<3;i++){ Scale[i][i] = (2*M_PI)/spLatt->a(i);}             
         Transf = spLatt->getU();
-        break;
+      }
+      break;
     }
   case HKLScale:   //< non-orthogonal system for non-orthogonal lattice
     {
