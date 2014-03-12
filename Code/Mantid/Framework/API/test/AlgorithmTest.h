@@ -133,8 +133,6 @@ public:
     std::string wsNameToFail = getPropertyValue("WsNameToFail");
     std::string wsName = getPropertyValue("InputWorkspace");
 
-    std::cerr << wsNameToFail << wsName << std::endl;
-
     if ( wsName == wsNameToFail )
     {
       throw std::runtime_error(FAIL_MSG);
@@ -735,7 +733,7 @@ public:
     TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
   }
 
-  void test_processGroups_failsOnOneOfGroupWorkspaces()
+  void test_processGroups_failOnGroupMemberErrorMessage()
   {
     makeWorkspaceGroup("A", "A_1,A_2,A_3");
 
