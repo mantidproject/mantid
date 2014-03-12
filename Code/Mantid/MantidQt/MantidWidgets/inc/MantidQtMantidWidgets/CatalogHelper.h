@@ -28,7 +28,7 @@ namespace MantidQt
       /// Download dataFile (via HTTP or copy if access to archive) and return the path to it.
       const std::vector<std::string> downloadDataFiles(
           const std::vector<std::pair<int64_t, std::string>> &userSelectedFiles,
-          const std::string &downloadPath);
+          const std::string &downloadPath, const std::string &sessionID);
       /// Validate each input field against the related algorithm property.
       const std::map<std::string, std::string> validateProperties(
           const std::map<std::string, std::string> &inputFields);

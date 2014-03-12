@@ -94,6 +94,8 @@ namespace MantidQt
 
       /// Outputs the results of the query into a table.
       void populateResultTable();
+      /// Obtain the sessionID for the selected investigation.
+      std::string selectedInvestigationSession();
 
       ///////////////////////////////////////////////////////////////////////////////
       // Methods for: "Datafile information"

@@ -753,6 +753,19 @@ namespace MantidQt
       resultsTable->sortByColumn(headerIndexByName(resultsTable, "Start date"),Qt::DescendingOrder);
     }
 
+    /**
+     * Obtain the sessionID for the specific row selected in the search results table.
+     * (only one row can be selected at a time)
+     * @return The sessionID from the selected row.
+     */
+    std::string CatalogSearch::selectedInvestigationSession()
+    {
+      auto searchResultsTable = m_icatUiForm.searchResultsTbl;
+      return searchResultsTable->item(
+          searchResultsTable->selectionModel()->selectedRows().at(0).row(),
+          headerIndexByName(searchResultsTable, "SessionID"))->text().toStdString();
+    }
+
     ///////////////////////////////////////////////////////////////////////////////
     // SLOTS for "Search results"
     ///////////////////////////////////////////////////////////////////////////////
@@ -1084,7 +1097,9 @@ namespace MantidQt
         // Save settings to store for use next time.
         saveSettings();
         // Download the selected dataFiles to the chosen directory.
-        m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
+        m_icatHelper->downloadDataFiles(selectedDataFileNames(),
+            m_downloadSaveDir.toStdString(),
+            selectedInvestigationSession());
       }
     }
 
@@ -1094,7 +1109,8 @@ namespace MantidQt
     void CatalogSearch::loadDataFiles()
     {
       // Get the path(s) to the file that was downloaded (via HTTP) or is stored in the archive.
-      std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
+      std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(selectedDataFileNames(),
+          m_downloadSaveDir.toStdString(), selectedInvestigationSession());
 
       // Create & initialize the load algorithm we will use to load the file by path to a workspace.
       auto loadAlgorithm = Mantid::API::AlgorithmManager::Instance().create("Load");

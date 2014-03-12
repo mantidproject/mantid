@@ -157,11 +157,12 @@ namespace MantidQt
      * Retrieve the path(s) to the file that was downloaded (via HTTP) or is stored in the archive.
      * @param userSelectedFiles :: The file(s) the user has selected and wants to download.
      * @param downloadPath      :: The location to save the datafile(s).
+     * @param sessionID :: The sessions ID of the selected investigation.
      * @return A vector containing the paths to the file(s) the user wants.
      */
     const std::vector<std::string> CatalogHelper::downloadDataFiles(
         const std::vector<std::pair<int64_t, std::string>> &userSelectedFiles,
-        const std::string &downloadPath)
+        const std::string &downloadPath, const std::string &sessionID)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogDownloadDataFiles");
 
@@ -184,11 +185,7 @@ namespace MantidQt
       catalogAlgorithm->setProperty("FileIds", fileIDs);
       catalogAlgorithm->setProperty("FileNames", fileNames);
       catalogAlgorithm->setProperty("DownloadPath", downloadPath);
-
-      // This is temporary to ensure catalogdowndatafiles works as expected with one catalog.
-      auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
-      if (!session.empty())
-        catalogAlgorithm->setProperty("Session", session.front()->getSessionId());
+      catalogAlgorithm->setProperty("Session", sessionID);
 
       executeAsynchronously(catalogAlgorithm);
       // Return a vector containing the file paths to the files to download.
