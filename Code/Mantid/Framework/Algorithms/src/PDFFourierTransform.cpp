@@ -138,6 +138,7 @@ namespace Mantid
         "Minimum Q in S(Q) to calculate in Fourier transform (optional).");
       declareProperty("Qmax", EMPTY_DBL(), mustBePositive,
         "Maximum Q in S(Q) to calculate in Fourier transform. (optional)");
+      declareProperty("Filter",false,"Set to apply Lorch function filter to the input");
 
       // Set up output data type
       std::vector<std::string> outputTypes;
@@ -158,6 +159,7 @@ namespace Mantid
       setPropertyGroup("InputSofQType", recipGroup);
       setPropertyGroup("Qmin", recipGroup);
       setPropertyGroup("Qmax", recipGroup);
+      setPropertyGroup("Filter", recipGroup);
 
       string realGroup("Real Space");
       setPropertyGroup("PDFType", realGroup);
@@ -321,6 +323,7 @@ namespace Mantid
       if (isEmpty(rdelta))
         rdelta = M_PI/qmax;
       size_t sizer = static_cast<size_t>(rmax/rdelta);
+      bool filter = getProperty("Filter");
 
       // create the output workspace
       API::MatrixWorkspace_sptr outputWS
@@ -341,7 +344,6 @@ namespace Mantid
       MantidVec& outputY = outputWS->dataY(0);
       MantidVec& outputE = outputWS->dataE(0);
 
-
       // do the math
       for (size_t r_index = 0; r_index < sizer; r_index ++){
         const double r = outputR[r_index];
@@ -352,6 +354,10 @@ namespace Mantid
           double q = inputQ[q_index];
           double deltaq = inputQ[q_index] - inputQ[q_index - 1];
           double sinus  = sin(q * r) * deltaq;
+          if ( filter && q != 0 )
+          {
+            sinus *= sin(q * rdelta) / (q * rdelta);
+          }
           fs    += sinus * inputFOfQ[q_index];
           error += q * q * (sinus*inputDfOfQ[q_index]) * (sinus*inputDfOfQ[q_index]);
           // g_log.debug() << "q[" << i << "] = " << q << "  dq = " << deltaq << "  S(q) =" << s;
