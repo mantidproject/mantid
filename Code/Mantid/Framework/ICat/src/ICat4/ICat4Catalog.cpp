@@ -439,6 +439,10 @@ namespace Mantid
             std::string endDate = formatDateTime(*investigation->endDate, "%Y-%m-%d");
             savetoTableWorkspace(&endDate, table);
           }
+          else
+          {
+            savetoTableWorkspace(&emptyCell, table);
+          }
           std::string sessionID = m_session->getSessionId();
           savetoTableWorkspace(&sessionID, table);
         }

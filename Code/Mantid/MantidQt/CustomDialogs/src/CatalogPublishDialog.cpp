@@ -47,6 +47,7 @@ namespace MantidQt
       connect(m_uiForm.runBtn,SIGNAL(clicked()),this,SLOT(accept()));
       connect(m_uiForm.cancelBtn,SIGNAL(clicked()),this,SLOT(reject()));
       connect(m_uiForm.helpBtn,SIGNAL(clicked()),this,SLOT(helpClicked()));
+      connect(m_uiForm.investigationNumberCb,SIGNAL(currentIndexChanged(int)),this,SLOT(setSessionProperty(int)));
 
       // Populate "investigationNumberCb" with the investigation IDs that the user can publish to.
       populateUserInvestigations();
@@ -61,10 +62,9 @@ namespace MantidQt
     void CatalogPublishDialog::populateUserInvestigations()
     {
       auto workspace = Mantid::API::WorkspaceFactory::Instance().createTable();
-
-      // This again is a temporary measure to ensure publishing functionality will work with one catalog.
       auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
-      if (!session.empty()) Mantid::API::CatalogManager::Instance().getCatalog(session.front()->getSessionId())->myData(workspace);
+      // Obtain the investigations that the user can publish to for all their catalogs.
+      if (!session.empty()) Mantid::API::CatalogManager::Instance().getCatalog("")->myData(workspace);
 
       // The user is not an investigator on any investigations and cannot publish
       // or they are not logged into the catalog then update the related message..
@@ -86,6 +86,9 @@ namespace MantidQt
             QString::fromStdString("The title of the investigation is: \"" + workspace->cell<std::string>(row, 1) +
                                    "\".\nThe instrument of the investigation is: \"" + workspace->cell<std::string>(row, 2)) + "\".",
                                    Qt::ToolTipRole);
+        // Set the user role to the sessionID.
+        m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
+            QString::fromStdString(workspace->cell<std::string>(row, 7)),Qt::UserRole);
       }
     }
 
@@ -106,6 +109,16 @@ namespace MantidQt
         m_uiForm.fileNameTxt->clear();
         m_uiForm.fileNameTxt->setText(filepath.trimmed());
       }
+    }
+
+    /**
+     * Set/Update the sessionID of the `Session` property when
+     * the user selects an investigation from the combo-box.
+     */
+    void CatalogPublishDialog::setSessionProperty(int index)
+    {
+      storePropertyValue("Session",
+          m_uiForm.investigationNumberCb->itemData(index,Qt::UserRole).toString());
     }
   }
 }
