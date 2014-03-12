@@ -441,6 +441,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             self.statusMain.clearMessage()
         except:
             self.statusMain.clearMessage()
+            raise
 
     def _plot(self, plotbutton):
         if not isinstance(plotbutton, QtGui.QPushButton):
@@ -597,7 +598,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                     return False
         return self._save_table_contents(filename)
 
-    def _saveAs(self):
+    def _save_as(self):
         saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
         saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
         saveDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
