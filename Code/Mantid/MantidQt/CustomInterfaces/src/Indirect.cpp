@@ -1769,19 +1769,18 @@ void Indirect::sOfQwClicked()
     QString rebinString = m_uiForm.sqw_leQLow->text()+","+m_uiForm.sqw_leQWidth->text()+","+m_uiForm.sqw_leQHigh->text();
     QString pyInput = "from mantid.simpleapi import *\n";
 
-    switch(m_uiForm.sqw_dsSampleInput->getCurrentView())
+    if(m_uiForm.sqw_dsSampleInput->isFileSelectorVisible())
     {
-      case 0:
-        //load the file
-        pyInput += "filename = r'" + m_uiForm.sqw_dsSampleInput->getFullFilePath() + "'\n"
-          "(dir, file) = os.path.split(filename)\n"
-          "(sqwInput, ext) = os.path.splitext(file)\n"
-          "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
-          break;
-      case 1:
-        //get the workspace
-        pyInput += "sqwInput = '" + m_uiForm.sqw_dsSampleInput->getCurrentDataName() + "'\n";
-        break;
+      //load the file
+      pyInput += "filename = r'" + m_uiForm.sqw_dsSampleInput->getFullFilePath() + "'\n"
+      "(dir, file) = os.path.split(filename)\n"
+      "(sqwInput, ext) = os.path.splitext(file)\n"
+      "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
+    }
+    else
+    {
+      //get the workspace
+      pyInput += "sqwInput = '" + m_uiForm.sqw_dsSampleInput->getCurrentDataName() + "'\n";
     }
 
     // Create output name before rebinning
@@ -1862,19 +1861,18 @@ void Indirect::sOfQwPlotInput()
 
   if (m_uiForm.sqw_dsSampleInput->isValid())
   {
-    switch(m_uiForm.sqw_dsSampleInput->getCurrentView())
+    if(m_uiForm.sqw_dsSampleInput->isFileSelectorVisible())
     {
-      case 0:
-        //load the file
-        pyInput += "filename = r'" + m_uiForm.sqw_dsSampleInput->getFullFilePath() + "'\n"
-          "(dir, file) = os.path.split(filename)\n"
-          "(sqwInput, ext) = os.path.splitext(file)\n"
-          "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
-          break;
-      case 1:
-        //get the workspace
-        pyInput += "sqwInput = '" + m_uiForm.sqw_dsSampleInput->getCurrentDataName() + "'\n";
-        break;
+      //load the file
+      pyInput += "filename = r'" + m_uiForm.sqw_dsSampleInput->getFullFilePath() + "'\n"
+      "(dir, file) = os.path.split(filename)\n"
+      "(sqwInput, ext) = os.path.splitext(file)\n"
+      "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
+    }
+    else
+    {
+      //get the workspace
+      pyInput += "sqwInput = '" + m_uiForm.sqw_dsSampleInput->getCurrentDataName() + "'\n";
     }
 
     pyInput += "ConvertSpectrumAxis(InputWorkspace=sqwInput, OutputWorkspace=sqwInput[:-4]+'_rqw', Target='ElasticQ', EMode='Indirect')\n"
