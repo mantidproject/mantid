@@ -66,9 +66,6 @@ namespace
 
 void export_AlgorithmManager()
 {
-//  std::vector<IAlgorithm_const_sptr> runningInstancesOf(const std::string& algorithmName) const;
-
-
   class_<AlgorithmManagerImpl,boost::noncopyable>("AlgorithmManagerImpl", no_init)
     .def("create", &AlgorithmManagerImpl::create, create_overloads((arg("name"), arg("version")), "Creates a managed algorithm."))
     .def("createUnmanaged", &AlgorithmManagerImpl::createUnmanaged,
