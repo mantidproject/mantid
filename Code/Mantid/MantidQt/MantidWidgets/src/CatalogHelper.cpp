@@ -136,18 +136,17 @@ namespace MantidQt
 
     /**
      * Search the archives for all dataFiles related to an "investigation id" then save results to workspace ("dataFileResults").
+     * @param sessionID :: The sessions ID of the selected investigation.
      * @param investigationId :: The investigation id to use for the search.
      */
-    void CatalogHelper::executeGetDataFiles(const std::string &investigationId)
+    void CatalogHelper::executeGetDataFiles(const std::string &investigationId,const std::string &sessionID)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogGetDataFiles");
 
-      // Search for all related dataFiles to this investigation id.
       catalogAlgorithm->setProperty("InvestigationId", investigationId);
-      // This will be the workspace where the content of the search result is saved to.
       catalogAlgorithm->setPropertyValue("OutputWorkspace","__dataFileResults");
+      catalogAlgorithm->setProperty("Session", sessionID);
 
-      // Allow asynchronous execution to update label(s) while search is being carried out.
       executeAsynchronously(catalogAlgorithm);
     }
 

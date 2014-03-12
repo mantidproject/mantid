@@ -823,8 +823,10 @@ namespace MantidQt
       // Inform the user that the search is in progress.
       m_icatUiForm.dataFileLbl->setText("searching for related datafiles...");
 
+      QTableWidget* searchResultsTable = m_icatUiForm.searchResultsTbl;
+
       // Obtain the investigation id from the selected
-      QTableWidgetItem* investigationId = m_icatUiForm.searchResultsTbl->item(item->row(),0);
+      QTableWidgetItem* investigationId = searchResultsTable->item(item->row(),0);
 
       // Remove previous dataFile search results.
       std::string dataFileResults = "dataFileResults";
@@ -834,7 +836,8 @@ namespace MantidQt
       updateDataFileLabels(item);
 
       // Perform the "search" and obtain the related data files for the selected investigation.
-      m_icatHelper->executeGetDataFiles(investigationId->text().toStdString());
+      m_icatHelper->executeGetDataFiles(investigationId->text().toStdString(),
+          searchResultsTable->item(item->row(),headerIndexByName(searchResultsTable, "SessionID"))->text().toStdString());
 
       // Populate the dataFile table from the "dataFileResults" workspace.
       populateDataFileTable();

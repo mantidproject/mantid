@@ -23,7 +23,7 @@ namespace MantidQt
       int64_t getNumberOfSearchResults(const std::map<std::string, std::string> &userInputFields,
           const std::vector<std::string> &sessionIDs);
       /// Search for all related dataFiles for the specified investigation.
-      void executeGetDataFiles(const std::string &investigationId);
+      void executeGetDataFiles(const std::string &investigationId,const std::string &sessionID);
       /// Download dataFile (via HTTP or copy if access to archive) and return the path to it.
       const std::vector<std::string> downloadDataFiles(const std::vector<std::pair<int64_t, std::string>> &userSelectedFiles, const std::string &downloadPath);
       /// Validate each input field against the related algorithm property.
