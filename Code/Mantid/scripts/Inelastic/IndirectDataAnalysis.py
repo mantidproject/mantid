@@ -611,7 +611,7 @@ def fury(samWorkspaces, res_file, rebinParam, RES=True, Save=False, Verbose=Fals
         ExtractFFTSpectrum(InputWorkspace='sam_data', OutputWorkspace='sam_fft', FFTPart=2)
         Divide(LHSWorkspace='sam_fft', RHSWorkspace='sam_int', OutputWorkspace='sam')
         # Create save file name
-        savefile = getWSprefix(samWs, root) + 'iqt'
+        savefile = getWSprefix(samWs) + 'iqt'
         outWSlist.append(savefile)
         Divide(LHSWorkspace='sam', RHSWorkspace='res', OutputWorkspace=savefile)
         #Cleanup Sample Files
@@ -1045,13 +1045,16 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
     StartTime('msdFit')
     workdir = config['defaultsave.directory']
     log_type = 'sample'
-    file = inputs[0]
-    (direct, filename) = os.path.split(file)
-    (root, ext) = os.path.splitext(filename)
-    (instr, first) = getInstrRun(filename)
+    
+    file_name = inputs[0]
+    base_name = os.path.basename(file_name)
+    (root,ext) = os.path.splitext(base_name)
+    
     if Verbose:
-        logger.notice('Reading Run : '+file)
-    LoadNexusProcessed(FileName=file, OutputWorkspace=root)
+        logger.notice('Reading Run : ' + file_name)
+    
+    LoadNexusProcessed(FileName=file_name, OutputWorkspace=root)
+    
     nHist = mtd[root].getNumberHistograms()
     file_list = []
     run_list = []
