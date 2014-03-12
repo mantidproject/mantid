@@ -18,7 +18,8 @@ namespace MantidQt
      * @param sessionIDs :: The sessions information of each active catalog.
      * @return A vector containing the list of all instruments available.
      */
-    const std::vector<std::string> CatalogHelper::getInstrumentList(const std::vector<std::string> &sessionIDs)
+    const std::vector<std::string> CatalogHelper::getInstrumentList(
+        const std::vector<std::string> &sessionIDs)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInstruments");
       auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
@@ -35,7 +36,7 @@ namespace MantidQt
         // Use catalogs for the specified sessions.
         for (unsigned i = 0; i < sessionIDs.size(); ++i)
         {
-          catalogAlgorithm->setProperty("Session",sessionIDs.at(i));
+          catalogAlgorithm->setProperty("Session", sessionIDs.at(i));
           executeAsynchronously(catalogAlgorithm);
         }
         // Return the vector containing the list of instruments available.
@@ -48,7 +49,8 @@ namespace MantidQt
      * @param sessionIDs :: The sessions information of each active catalog.
      * @return A vector containing the list of all investigation types available.
      */
-    const std::vector<std::string> CatalogHelper::getInvestigationTypeList(const std::vector<std::string> &sessionIDs)
+    const std::vector<std::string> CatalogHelper::getInvestigationTypeList(
+        const std::vector<std::string> &sessionIDs)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogListInvestigationTypes");
       auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
@@ -62,7 +64,7 @@ namespace MantidQt
       {
         for (unsigned i = 0; i < sessionIDs.size(); ++i)
         {
-          catalogAlgorithm->setProperty("Session",sessionIDs.at(i));
+          catalogAlgorithm->setProperty("Session", sessionIDs.at(i));
           executeAsynchronously(catalogAlgorithm);
         }
         return catalogAlgorithm->getProperty("InvestigationTypes");
@@ -95,12 +97,11 @@ namespace MantidQt
       {
         for (unsigned i = 0; i < sessionIDs.size(); ++i)
         {
-          catalogAlgorithm->setProperty("Session",sessionIDs.at(i));
+          catalogAlgorithm->setProperty("Session", sessionIDs.at(i));
           executeAsynchronously(catalogAlgorithm);
         }
       }
     }
-
 
     /**
      * The number of results returned by the search query (based on values of input fields).
@@ -108,7 +109,8 @@ namespace MantidQt
      * @param sessionIDs :: The sessions information of each active catalog.
      * @return Number of results returned by the search query.
      */
-    int64_t CatalogHelper::getNumberOfSearchResults(const std::map<std::string, std::string> &userInputFields,
+    int64_t CatalogHelper::getNumberOfSearchResults(
+        const std::map<std::string, std::string> &userInputFields,
         const std::vector<std::string> &sessionIDs)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
@@ -127,7 +129,7 @@ namespace MantidQt
       {
         for (unsigned i = 0; i < sessionIDs.size(); ++i)
         {
-          catalogAlgorithm->setProperty("Session",sessionIDs.at(i));
+          catalogAlgorithm->setProperty("Session", sessionIDs.at(i));
           executeAsynchronously(catalogAlgorithm);
         }
         return catalogAlgorithm->getProperty("NumberOfSearchResults");
@@ -139,12 +141,13 @@ namespace MantidQt
      * @param sessionID :: The sessions ID of the selected investigation.
      * @param investigationId :: The investigation id to use for the search.
      */
-    void CatalogHelper::executeGetDataFiles(const std::string &investigationId,const std::string &sessionID)
+    void CatalogHelper::executeGetDataFiles(const std::string &investigationId,
+        const std::string &sessionID)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogGetDataFiles");
 
       catalogAlgorithm->setProperty("InvestigationId", investigationId);
-      catalogAlgorithm->setPropertyValue("OutputWorkspace","__dataFileResults");
+      catalogAlgorithm->setPropertyValue("OutputWorkspace", "__dataFileResults");
       catalogAlgorithm->setProperty("Session", sessionID);
 
       executeAsynchronously(catalogAlgorithm);
@@ -156,7 +159,9 @@ namespace MantidQt
      * @param downloadPath      :: The location to save the datafile(s).
      * @return A vector containing the paths to the file(s) the user wants.
      */
-    const std::vector<std::string> CatalogHelper::downloadDataFiles(const std::vector<std::pair<int64_t, std::string>> &userSelectedFiles,const std::string &downloadPath)
+    const std::vector<std::string> CatalogHelper::downloadDataFiles(
+        const std::vector<std::pair<int64_t, std::string>> &userSelectedFiles,
+        const std::string &downloadPath)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogDownloadDataFiles");
 
@@ -176,13 +181,14 @@ namespace MantidQt
       // End of the ugly!
 
       // The file IDs and file names of the data file(s) the user wants to download.
-      catalogAlgorithm->setProperty("FileIds",fileIDs);
-      catalogAlgorithm->setProperty("FileNames",fileNames);
-      catalogAlgorithm->setProperty("DownloadPath",downloadPath);
+      catalogAlgorithm->setProperty("FileIds", fileIDs);
+      catalogAlgorithm->setProperty("FileNames", fileNames);
+      catalogAlgorithm->setProperty("DownloadPath", downloadPath);
 
       // This is temporary to ensure catalogdowndatafiles works as expected with one catalog.
       auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
-      if (!session.empty()) catalogAlgorithm->setProperty("Session",session.front()->getSessionId());
+      if (!session.empty())
+        catalogAlgorithm->setProperty("Session", session.front()->getSessionId());
 
       executeAsynchronously(catalogAlgorithm);
       // Return a vector containing the file paths to the files to download.
@@ -194,7 +200,8 @@ namespace MantidQt
      * @param inputFields :: The name of the input field and value of the field (key => "StartDate", value => "00/00/0000").
      * @return The name of the input field(s) marker to update and related error to throw.
      */
-    const std::map<std::string, std::string> CatalogHelper::validateProperties(const std::map<std::string, std::string> &inputFields)
+    const std::map<std::string, std::string> CatalogHelper::validateProperties(
+        const std::map<std::string, std::string> &inputFields)
     {
       auto catalogAlgorithm = createCatalogAlgorithm("CatalogSearch");
 
@@ -203,15 +210,15 @@ namespace MantidQt
       std::map<std::string, std::string> errors;
 
       // Validate all input elements in the map.
-      for(auto iter = inputFields.begin(); iter != inputFields.end(); ++iter)
+      for (auto iter = inputFields.begin(); iter != inputFields.end(); ++iter)
       {
         try
         {
           catalogAlgorithm->setProperty(iter->first, iter->second);
-        }
-        catch (std::invalid_argument&)
+        } catch (std::invalid_argument&)
         {
-          std::string documentation = propertyDocumentation(catalogAlgorithm->getProperties(), iter->first);
+          std::string documentation = propertyDocumentation(catalogAlgorithm->getProperties(),
+              iter->first);
 
           // Add the input name + "_err" (to indicate the error marker in the GUI,
           // rather than the input field) as the key, and the related error as the value.
@@ -222,20 +229,22 @@ namespace MantidQt
     }
 
     /**
-    * Creates a time_t value from an input date ("23/06/2003") for comparison.
-    * @param inputDate :: string containing the date.
-    * @return time_t value of date
-    */
+     * Creates a time_t value from an input date ("23/06/2003") for comparison.
+     * @param inputDate :: string containing the date.
+     * @return time_t value of date
+     */
     time_t CatalogHelper::getTimevalue(const std::string& inputDate)
     {
       // Prevent any possible errors.
-      if(inputDate.empty()) return 0;
+      if (inputDate.empty())
+        return 0;
       // A container to hold the segments of the date.
       std::vector<std::string> dateSegments;
       // Split input by "/" prior to rearranging the date
       boost::algorithm::split_regex(dateSegments, inputDate, boost::regex("/"));
       // Reorganise the date to be ISO format.
-      std::string isoDate = dateSegments.at(2) + "-" + dateSegments.at(1) + "-" + dateSegments.at(0) + " 0:00:00.000";
+      std::string isoDate = dateSegments.at(2) + "-" + dateSegments.at(1) + "-" + dateSegments.at(0)
+          + " 0:00:00.000";
       // Return the date as time_t value.
       return Mantid::Kernel::DateAndTime(isoDate).to_time_t();
     }
@@ -246,7 +255,8 @@ namespace MantidQt
      * @param name       :: The name of the property to search for.
      * @return The documentation for a given property name.
      */
-    const std::string CatalogHelper::propertyDocumentation(const std::vector<Mantid::Kernel::Property*> &properties, const std::string &name)
+    const std::string CatalogHelper::propertyDocumentation(
+        const std::vector<Mantid::Kernel::Property*> &properties, const std::string &name)
     {
       for (unsigned i = 0; i < properties.size(); i++)
       {
@@ -276,7 +286,7 @@ namespace MantidQt
     void CatalogHelper::executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm)
     {
       Poco::ActiveResult<bool> result(algorithm->executeAsync());
-      while(!result.available())
+      while (!result.available())
       {
         QCoreApplication::processEvents();
       }
@@ -287,7 +297,8 @@ namespace MantidQt
      * @param catalogAlgorithm :: Algorithm to set the search properties for.
      * @param userInputFields  :: The search properties to set against the algorithm.
      */
-    void CatalogHelper::setSearchProperties(const Mantid::API::IAlgorithm_sptr &catalogAlgorithm, const std::map<std::string, std::string> &userInputFields)
+    void CatalogHelper::setSearchProperties(const Mantid::API::IAlgorithm_sptr &catalogAlgorithm,
+        const std::map<std::string, std::string> &userInputFields)
     {
       // This will be the workspace where the content of the search result is output to.
       catalogAlgorithm->setProperty("OutputWorkspace", "__searchResults");
