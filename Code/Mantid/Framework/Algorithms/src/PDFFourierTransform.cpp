@@ -12,11 +12,19 @@ the unit.  The allowed unit are MomentumTransfer and d-spacing.
 
 =====G(r)=====
 
-<math> G(r) = 4\pi r[\rho(r)-\rho_0] = \frac{2}{\pi} \int_{0}^{\infty} Q[S(Q)-1]sin(Qr)dQ </math>
+<math> G(r) = 4\pi r[\rho(r)-\rho_0] = \frac{2}{\pi} \int_{0}^{\infty} Q[S(Q)-1]\sin(Qr)dQ </math>
 
 and in this algorithm, it is implemented as
 
-<math> G(r) =  \frac{2}{\pi} \sum_{Q_{min}}^{Q_{max}} Q[S(Q)-1]sin(Qr)\Delta Q </math>
+<math> G(r) =  \frac{2}{\pi} \sum_{Q_{min}}^{Q_{max}} Q[S(Q)-1]\sin(Qr) M(Q,Q_{max}) \Delta Q </math>
+
+where <math>M(Q,Q_{max})</math> is an optional filter function. If Filter property is set (true) then
+
+<math>M(Q,Q_{max}) = \frac{\sin(\pi Q/Q_{max})}{\pi Q/Q_{max}} </math>
+
+otherwise
+
+<math>M(Q,Q_{max}) = 1\, </math>
 
 =====g(r)=====
 
