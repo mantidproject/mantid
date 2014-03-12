@@ -355,24 +355,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         if not selected:
             logger.warning("Cannot paste, no editable cells selected")
             return
-        #convert line endings to windows-style
-        #pastedtext = string.replace(pastedtext, '\r\n', '\n')
-        #pastedtext = string.replace(pastedtext, '\n\r', '\n')
-        #pastedtext = string.replace(pastedtext, '\r', '\n')
-        '''
-        quickly check if the last row is a single cell and blank
-        MS excel adds a line break at the end of copied cells which can mess with this a bit
-        I'd like this to be compatible both ways
-        '''
-        '''
-        if pastedtext[-1] == '\n':
-            pastedtext = pastedtext[:-1]
-        '''
-        #if the string is now empty the only thing on the clipboard as a line break
-        if not pastedtext:
-            logger.warning("Nothing to Paste")
-            return
-        pasted = pastedtext.split(os.linesep)
+        pasted = pastedtext.splitlines()
         pastedcells = []
         for row in pasted:
             pastedcells.append(row.split('\t'))
@@ -389,9 +372,8 @@ class ReflGui(refl_window.Ui_windowRefl):
             for cell in selected:
                 row = cell.row()
                 col = cell.column()
-                if len(pastedcells[row - minrow]):
-                    if col < 17 and (col - mincol) < pastedcols and (row - minrow) < pastedrows:
-                        cell.setText(pastedcells[row - minrow][col - mincol])
+                if col < 17 and (col - mincol) < pastedcols and (row - minrow) < pastedrows and len(pastedcells[row - minrow]):
+                    cell.setText(pastedcells[row - minrow][col - mincol])
         elif selected:
             #when only a single cell is selected, paste all the copied item up until the table limits
             cell = selected[0]
