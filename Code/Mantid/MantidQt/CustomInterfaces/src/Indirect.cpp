@@ -1054,12 +1054,14 @@ void Indirect::setupCalibration()
 
   // Create ResR2 first so ResR1 is drawn above it.
   m_calResR2 = new MantidWidgets::RangeSelector(m_calResPlot, 
-    MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, true);
+    MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
   m_calResR2->setColour(Qt::darkGreen);
   m_calResR1 = new MantidWidgets::RangeSelector(m_calResPlot);
 
   connect(m_calResR1, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
   connect(m_calResR1, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
+  connect(m_calResR2, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
+  connect(m_calResR2, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
   connect(m_calResR1, SIGNAL(rangeChanged(double, double)), m_calResR2, SLOT(setRange(double, double)));
   connect(m_calDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calUpdateRS(QtProperty*, double)));
   connect(m_calDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calUpdateRS(QtProperty*, double)));
@@ -1729,6 +1731,10 @@ void Indirect::calMinChanged(double val)
   }
   else if ( from == m_calResR1 )
   {
+    m_calDblMng->setValue(m_calResProp["ELow"], val);
+  }
+  else if ( from == m_calResR2 )
+  {
     m_calDblMng->setValue(m_calResProp["Start"], val);
   }
 }
@@ -1746,6 +1752,10 @@ void Indirect::calMaxChanged(double val)
   }
   else if ( from == m_calResR1 )
   {
+    m_calDblMng->setValue(m_calResProp["EHigh"], val);
+  }
+  else if ( from == m_calResR2 )
+  {
     m_calDblMng->setValue(m_calResProp["End"], val);
   }
 }
@@ -1756,10 +1766,10 @@ void Indirect::calUpdateRS(QtProperty* prop, double val)
   else if ( prop == m_calCalProp["PeakMax"] ) m_calCalR1->setMaximum(val);
   else if ( prop == m_calCalProp["BackMin"] ) m_calCalR2->setMinimum(val);
   else if ( prop == m_calCalProp["BackMax"] ) m_calCalR2->setMaximum(val);
-  else if ( prop == m_calResProp["Start"] ) m_calResR1->setMinimum(val);
-  else if ( prop == m_calResProp["End"] ) m_calResR1->setMaximum(val);
-  else if ( prop == m_calResProp["ELow"] ) m_calResR2->setMinimum(val);
-  else if ( prop == m_calResProp["EHigh"] ) m_calResR2->setMaximum(val);
+  else if ( prop == m_calResProp["Start"] ) m_calResR2->setMinimum(val);
+  else if ( prop == m_calResProp["End"] ) m_calResR2->setMaximum(val);
+  else if ( prop == m_calResProp["ELow"] ) m_calResR1->setMinimum(val);
+  else if ( prop == m_calResProp["EHigh"] ) m_calResR1->setMaximum(val);
 }
 
 void Indirect::sOfQwClicked()
