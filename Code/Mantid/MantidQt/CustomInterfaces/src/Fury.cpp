@@ -65,12 +65,6 @@ namespace IDA
       "from IndirectDataAnalysis import fury\n";
 
     QString wsName = uiForm().fury_dsInput->getCurrentDataName();
-    //in case the user removed the workspace somehow, attempt to reload workspace
-    // if(!Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-    // {
-    //   QString fileName = uiForm().fury_dsInput->getFullFilePath();
-    //   pyInput += wsName + " = LoadNexus('"+fileName+"')\n";
-    // }
 
     pyInput += "samples = [r'" + wsName + "']\n"
       "resolution = r'" + uiForm().fury_resFile->getFirstFilename() + "'\n"
