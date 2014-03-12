@@ -80,8 +80,9 @@ namespace DataHandling
   using std::vector;
 
 
-  /** constants for locating the parameters to use in execution
-  */
+  //----------------------------------------------------------------------------------------------
+  // constants for locating the parameters to use in execution
+  //----------------------------------------------------------------------------------------------
   static const string EVENT_PARAM("EventFilename");
   static const string PULSEID_PARAM("PulseidFilename");
   static const string MAP_PARAM("MappingFilename");
@@ -115,7 +116,7 @@ namespace DataHandling
   static const int NUM_EXT = 6;
 
   //----------------------------------------------------------------------------------------------
-  // Statistic Functions
+  // Functions to deal with file name and run information
   //----------------------------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------------------------
@@ -258,7 +259,7 @@ namespace DataHandling
     handle.seekg(0, std::ios::beg);
 
     if (filesize % objSize == 0)
-      return 80;
+      return 10;
     else
       return 0;
   }
@@ -276,7 +277,7 @@ namespace DataHandling
 
   //----------------------------------------------------------------------------------------------
   /**  Initialize the algorithm
-  */
+    */
   void FilterEventsByLogValuePreNexus::init()
   {
     // File files to use
@@ -370,9 +371,22 @@ namespace DataHandling
     // Correct wrong event index in loaded eventindexes
     unmaskVetoEventIndexes();
 
+    // Find out the frequency of the frequency
     int runfreq = findRunFrequency();
     if (m_freqHz != runfreq)
-      throw std::runtime_error("Operation frequency is not self-consistent");
+    {
+      if (m_freqHz%runfreq == 0)
+      {
+        int frame = m_freqHz/runfreq;
+        g_log.warning() << "Input frequency " << m_freqHz << " is different from data. "
+                        << "It is forced to use input frequency, while all events' pulse time will be "
+                        << "set to " << frame << "-th freme. " << "\n";
+      }
+      else
+      {
+        throw std::runtime_error("Operation frequency is not self-consistent");
+      }
+    }
 
     // Create and set up output EventWorkspace
     localWorkspace = setupOutputEventWorkspace();
@@ -552,7 +566,7 @@ namespace DataHandling
     {
       // add the start of the run as a ISO8601 date/time string. The start = the first pulse.
       // (this is used in LoadInstrument to find the right instrument file to use).
-#if 1
+#if 0
       DateAndTime pulse0 = pulsetimes[0];
       g_log.notice() << "Pulse time 0 = " <<  pulse0.totalNanoseconds() << "\n";
 #endif
@@ -1149,7 +1163,7 @@ namespace DataHandling
     }
 
     uint64_t maxeventid = m_vecEventIndex.back();
-    g_log.notice() << "Maximum event index = " << maxeventid << " vs. " << m_maxNumEvents << "\n";
+    g_log.debug() << "Maximum event index = " << maxeventid << " vs. " << m_maxNumEvents << "\n";
     maxeventid = m_maxNumEvents + 1;
 
     size_t numbadeventindex = 0;
@@ -1286,7 +1300,7 @@ namespace DataHandling
 
         double tof = static_cast<double>(tempevent.tof) * TOF_CONVERSION;
 
-#if 1
+#if 0
         if (fileOffset == 0 && ievent < 100)
         {
           g_log.notice() << ievent << "\t" << i_pulse << "\t" << pulsetime << "\t"
@@ -1295,13 +1309,13 @@ namespace DataHandling
         }
 #endif
 
+        // For function option "ExamineEventLog"
         if (m_examEventLog && pixelid == m_pixelid2exam && numeventswritten < m_numevents2write)
         {
           int64_t totaltime = pulsetime.totalNanoseconds() + static_cast<int64_t>(tof*1000);
-          g_log.notice() << "[Exam] " << numeventswritten << "\t\t" << totaltime << "\t\t" << pixelid
+          // Output: [EEL] for Examine Event Log
+          g_log.notice() << "[EEL] " << numeventswritten << "\t\t" << totaltime << "\t\t" << pixelid
                          << "\t\t" << i_pulse << "\t\t" << fileOffset << "\n";
-          // g_log.notice() << "[E] Event " << ievent << "\t: Pulse ID = " << i_pulse << ", Pulse Time = " << pulsetime
-          //                << ", TOF = " << tof << ", Pixel ID = " << pixelid << "\n";
           ++ numeventswritten;
         }
 
@@ -1329,7 +1343,7 @@ namespace DataHandling
 
           ++ local_num_good_events;
 
-#if 1
+#if 0
           if (fileOffset == 0 && numeventsprint < 10)
           {
             g_log.notice() << "[E10]" << "Pulse Time = " << pulsetime << ", TOF = " << tof
@@ -1338,7 +1352,6 @@ namespace DataHandling
             ++ numeventsprint;
           }
 #endif
-
         }
         else
         {
@@ -1377,7 +1390,7 @@ namespace DataHandling
 
     } // ENDFOR each event
 
-    g_log.notice() << "Number of wrong pixel ID = " << numwrongpid << std::endl;
+    g_log.debug() << "Number of wrong pixel ID = " << numwrongpid << " of single block. " << "\n";
 
     PARALLEL_CRITICAL( FilterEventsByLogValuePreNexus_global_statistics )
     {
@@ -1434,7 +1447,11 @@ namespace DataHandling
         longest_tof = local_longest_tof;
     }
 
-    g_log.notice() << "Encountered " << numbadeventindex << " bad event indexes" << "\n";
+    if (numbadeventindex > 0)
+    {
+      g_log.notice() << "Single block: Encountered " << numbadeventindex << " bad event indexes"
+                     << "\n";
+    }
 
     return;
   }
@@ -2129,8 +2146,8 @@ namespace DataHandling
 
     int freq = 60/static_cast<int>(shortestsame);
 
-    g_log.information() << "Shortest duration = " << shortestsame << " ---> "
-                        << "Operation frequency = " << freq << "\n";
+    g_log.notice() << "Shortest duration = " << shortestsame << " ---> "
+                   << "Operation frequency = " << freq << "\n";
 
     return freq;
   }
