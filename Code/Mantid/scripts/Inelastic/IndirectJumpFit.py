@@ -48,13 +48,13 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 		lval = 1.5
 		func = 'name=ChudleyElliot, Tau='+str(tval)+', L='+str(lval)
 
-	elif jumpFunc == 'SS':
-		# Singwi-Sjolander: HWHM=(1-exp(-L*Q^2))/Tau
+	elif jumpFunc == 'HallRoss':
+		# Hall-Ross: HWHM=(1-exp(-L*Q^2))/Tau
 		# for Q->0 W=A*Q^2*r
 
 		tval = 1.0/xmax
 		lval = 1.5
-		func = 'name=SingwiSjolander, Tau='+str(tval)+', L='+str(lval)
+		func = 'name=HallRoss, Tau='+str(tval)+', L='+str(lval)
 
 	elif jumpFunc == 'Fick':
 		# Fick: HWHM=D*Q^2

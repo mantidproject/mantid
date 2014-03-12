@@ -1,11 +1,11 @@
 '''*WIKI* 
 
-Singwi-Sjolander  jump fit
+Hall-Ross
 
 Models the Q dependence of the QENS line width (Gamma (hwhm)), diffusion coefficients (D), 
 residence times (tau) and jump lengths (l) to extract the associated long range diffusive
 motions of molecules.
-The Singwi-Sjolander Jump diffusion model (1961) has the form
+The Hall-Ross Jump diffusion model has the form
 Gamma(Q) = (1-exp(-l*Q^2))/tau
 
 *WIKI*
@@ -38,7 +38,7 @@ from mantid.api import IFunction1D, FunctionFactory
 from mantid import logger
 import math, numpy as np
 
-class SingwiSjolander(IFunction1D):
+class HallRoss(IFunction1D):
     
     def category(self):
         return "QuasiElastic"
@@ -51,6 +51,7 @@ class SingwiSjolander(IFunction1D):
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
         l = self.getParameterValue("L")
+        l = l**2 / 2
 
         xvals = np.array(xvals)
         hwhm = (1.0 - np.exp( -l * xvals * xvals )) / tau
@@ -60,6 +61,7 @@ class SingwiSjolander(IFunction1D):
     def functionDeriv1D(self, xvals, jacobian):
         tau = self.getParameterValue("Tau")
         l = self.getParameterValue("L")
+        l = l**2 / 2
 
         i = 0
         for x in xvals:
@@ -70,4 +72,4 @@ class SingwiSjolander(IFunction1D):
             i += 1
 
 # Required to have Mantid recognise the new function
-FunctionFactory.subscribe(SingwiSjolander)
+FunctionFactory.subscribe(HallRoss)
