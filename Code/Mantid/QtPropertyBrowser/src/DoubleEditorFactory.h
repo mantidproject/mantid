@@ -53,6 +53,9 @@ public:
 protected slots:
   virtual void updateProperty();
 protected:
+  /// Returns string representation of the value, using the format of the property
+  QString formatValue(const double& d) const;
+
   QtProperty* m_property;
   int m_decimals;
 };
