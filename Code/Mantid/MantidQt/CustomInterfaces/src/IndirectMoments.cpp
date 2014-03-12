@@ -106,14 +106,6 @@ namespace CustomInterfaces
     UserInputValidator uiv;
 
     uiv.checkDataSelectorIsValid("Sample input", m_uiForm.moment_dsInput);
-    if (m_uiForm.moment_dsInput->isValid())
-    {
-      QString wsName = m_uiForm.moment_dsInput->getCurrentDataName();
-      if(!AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-      {
-        loadFile(m_uiForm.moment_dsInput->getFullFilePath(), wsName);
-      }
-    }
 
     if (m_uiForm.moment_ckScale->isChecked())
     {
