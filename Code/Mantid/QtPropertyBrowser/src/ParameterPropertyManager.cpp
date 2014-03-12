@@ -27,6 +27,21 @@ double ParameterPropertyManager::error(const QtProperty* property) const
 }
 
 /**
+ * @param property :: Parameter property
+ * @return Parameter description
+ */
+std::string ParameterPropertyManager::description(const QtProperty* property) const
+{
+  // Cast for searching purposes
+  auto prop = const_cast<QtProperty*>(property);
+
+  if(!m_descriptions.contains(prop))
+    throw std::runtime_error("Parameter doesn't have description set");
+
+  return m_descriptions[prop];
+}
+
+/**
  * @param property :: Property to check
  * @return True if error was set for the property, false otherwise
  */
@@ -42,10 +57,21 @@ bool ParameterPropertyManager::isErrorSet(const QtProperty* property) const
  * @param property :: Property to set error for
  * @param error :: Error value to set
  */
-void ParameterPropertyManager::setError(QtProperty* property, double error)
+void ParameterPropertyManager::setError(QtProperty* property, const double& error)
 {
   m_errors[property] = error;
   emit propertyChanged(property);
+  // TODO: update tooltip
+}
+
+/**
+ * @param property :: Parameter property to set error for
+ * @param description :: Description of the parameter
+ */
+void ParameterPropertyManager::setDescription(QtProperty* property, const std::string& description)
+{
+  m_descriptions[property] = description;
+  updateTooltip(property);
 }
 
 /**
@@ -56,6 +82,7 @@ void ParameterPropertyManager::clearError(QtProperty* property)
 {
   m_errors.remove(property);
   emit propertyChanged(property);
+  // TODO: update tooltip
 }
 
 /**
@@ -69,6 +96,7 @@ void ParameterPropertyManager::setErrorsEnabled(bool enabled)
   foreach(QtProperty* prop, m_errors.keys())
   {
     emit propertyChanged(prop);
+    // TODO: update tooltip
   }
 }
 
@@ -98,4 +126,13 @@ QString ParameterPropertyManager::valueText(const QtProperty* property) const
     // No error set or errors disabled, so don't append error value
     return originalValueText;
   }
+}
+
+/**
+ * @param property :: Property to update tooltip for
+ */
+void ParameterPropertyManager::updateTooltip(QtProperty* property) const
+{
+  property->setToolTip(QString::fromStdString(description(property)));
+  // TODO: append description for error if enabled and set
 }

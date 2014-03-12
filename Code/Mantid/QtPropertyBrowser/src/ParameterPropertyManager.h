@@ -36,8 +36,11 @@ class QT_QTPROPERTYBROWSER_EXPORT ParameterPropertyManager : public QtDoubleProp
 public:
   ParameterPropertyManager(QObject *parent = 0);
 
-  /// Get property error
+  /// Get parameter error
   double error(const QtProperty* property) const;
+
+  /// Get parameter description
+  std::string description(const QtProperty* property) const;
 
   /// Checks if given property has error value set
   bool isErrorSet(const QtProperty* property) const;
@@ -47,7 +50,10 @@ public:
 
 public Q_SLOTS:
   /// Set property error
-  void setError(QtProperty* property, double error);
+  void setError(QtProperty* property, const double& error);
+
+  /// Set parameter description
+  void setDescription(QtProperty* property, const std::string& description);
 
   /// Clears error of the property, if one was set
   void clearError(QtProperty* property);
@@ -59,9 +65,16 @@ protected:
   /// Text representation of the property
   virtual QString valueText(const QtProperty* property) const;
 
+private Q_SLOTS:
+  /// Updates the tooltip of the property
+  void updateTooltip(QtProperty* property) const;
+
 private:
-  /// Property error values
+  /// Parameter error values
   QMap<QtProperty*, double> m_errors;
+
+  /// Parameter descriptions
+  QMap<QtProperty*, std::string> m_descriptions;
 
   /// Errors enabled flag. When is false, errors can be set, but will not be displayed
   bool m_errorsEnabled;
