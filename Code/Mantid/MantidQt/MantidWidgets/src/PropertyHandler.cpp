@@ -509,9 +509,8 @@ void PropertyHandler::removeFunction()
       }
     }
     ph->renameChildren();
+    ph->onFunctionStructChanged();
   }
-
-  onFunctionStructChanged();
 }
 
 void PropertyHandler::renameChildren()const
