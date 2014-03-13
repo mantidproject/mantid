@@ -159,6 +159,8 @@ namespace Mantid
       // Copy X values
       m_backgroundWS->setX(outputIndex,m_inputWS->refX(inputIndex));
       m_correctedWS->setX(outputIndex,m_inputWS->refX(inputIndex));
+      // Copy errors to corrected
+      m_correctedWS->dataE(outputIndex) = m_inputWS->readE(inputIndex);
 
       try
       {
