@@ -113,6 +113,16 @@ namespace MantidQt
     }
 
     /**
+     * Set/Update the sessionID of the `Session` property when
+     * the user selects an investigation from the combo-box.
+     */
+    void CatalogPublishDialog::setSessionProperty(int index)
+    {
+      storePropertyValue("Session",
+          m_uiForm.investigationNumberCb->itemData(index,Qt::UserRole).toString());
+    }
+
+    /**
      * Overridden to enable dataselector validators.
      */
     void CatalogPublishDialog::accept()
@@ -134,14 +144,5 @@ namespace MantidQt
       }
     }
 
-    /**
-     * Set/Update the sessionID of the `Session` property when
-     * the user selects an investigation from the combo-box.
-     */
-    void CatalogPublishDialog::setSessionProperty(int index)
-    {
-      storePropertyValue("Session",
-          m_uiForm.investigationNumberCb->itemData(index,Qt::UserRole).toString());
-    }
   }
 }
