@@ -107,7 +107,6 @@ public:
     pdfft->execute();
 
     DataObjects::Workspace2D_sptr pdfws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::AnalysisDataService::Instance().retrieve("PDFGofR"));
-    MantidVec& R = pdfws->dataX(0);
     MantidVec& GofR = pdfws->dataY(0);
 
     TS_ASSERT( GofR[0] > 40.0 );
