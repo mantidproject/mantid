@@ -24,6 +24,8 @@ class GetEiMonDet(PythonAlgorithm):
         return "GetEiMonDet"
     
     def PyInit(self):
+        self.setWikiSummary("Get incident energy from one monitor and some detectors.")
+        self.setOptionalMessage("Get incident energy from one monitor and some detectors.")
         """ Declare properties
         """
         self.declareProperty(WorkspaceProperty("DetectorWorkspace","",Direction.Input),"Workspace containing data from detectors")

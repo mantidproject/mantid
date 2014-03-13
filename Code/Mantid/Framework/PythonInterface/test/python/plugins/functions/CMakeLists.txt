@@ -3,9 +3,10 @@
 ##
 
 set ( TEST_PY_FILES
+  DSFinterp1DFitTest.py
   Example1DFunctionTest.py
   ExamplePeakFunctionTest.py
-  StretchedExpFTTest.py  # comment until scipy installed on the MAC
+  StretchedExpFTTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

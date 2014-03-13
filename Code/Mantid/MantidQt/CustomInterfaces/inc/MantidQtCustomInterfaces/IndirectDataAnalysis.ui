@@ -2210,6 +2210,9 @@
             </item>
             <item>
              <widget class="QCheckBox" name="abscor_ckPlotContrib">
+              <property name="enabled">
+                <bool>false</bool>
+              </property>
               <property name="text">
                <string>Plot Contributions</string>
               </property>

@@ -492,10 +492,14 @@ def getCalibration( ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
     if rangeList is None:
         rangeList = range(nTubes)
 
+    all_skipped = set()
+
     for i in rangeList:
 
         # Deal with (i+1)st tube specified
-        wht = tubeSet.getTube(i)
+        wht, skipped = tubeSet.getTube(i)
+        all_skipped.update(skipped)
+
         print "Calibrating tube", i+1,"of",nTubes, tubeSet.getTubeName(i)
         if ( len(wht) < 1 ):
            print "Unable to get any workspace indices (spectra) for this tube. Tube",tubeSet.getTubeName(i),"not calibrated."
@@ -537,6 +541,9 @@ def getCalibration( ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
                 nextRow = {'Detector ID': detIDList[j], 'Detector Position': detPosList[j] }
                 calibTable.addRow ( nextRow )
 
+    if len(all_skipped) > 0:
+        print "%i histogram(s) were excluded from the calibration since they did not have an assigned detector." % len(all_skipped)
+
     # Delete temporary workspaces used in the calibration
     for ws_name in ('TubePlot','CalibPoint_NormalisedCovarianceMatrix', 
                     'CalibPoint_NormalisedCovarianceMatrix','CalibPoint_NormalisedCovarianceMatrix',
@@ -577,7 +584,7 @@ def getCalibrationFromPeakFile ( ws, calibTable, iTube,  PeakFile ):
         tube.setTubeSpecByString(TubeName)
         actualTube = PeakArray[i][1] # e.g.  [2.0, 512.5, 1022.0]  
 
-        wht = tube.getTube(0)
+        wht, _ = tube.getTube(0)
         print "Calibrating tube", i+1 ,"of", nTubes, TubeName #, " length", tubeSet.getTubeLength(i) 
         if ( len(wht) < 1 ):
             print "Unable to get any workspace indices for this tube. Calibration abandoned."
@@ -623,7 +630,7 @@ def constructIdealTubeFromRealTube( ws, tube, fitPar, funcForm ):
    elif(nTubes > 1):
       print "Specification has several tubes. The ideal tube will be based on the first tube",tube.getTubeName(0)
 
-   wht = tube.getTube(0)
+   wht, _ = tube.getTube(0)
    # print wht
 
    # Check tube

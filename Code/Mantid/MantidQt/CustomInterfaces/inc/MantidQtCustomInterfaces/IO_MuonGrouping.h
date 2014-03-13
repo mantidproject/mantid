@@ -56,7 +56,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 
 /// Structure to represent grouping information for Muon Analysis
-typedef struct {
+struct Grouping {
   std::vector<std::string> groupNames;
   std::vector<std::string> groups; // Range strings, e.g. "1-32"
 
@@ -66,7 +66,7 @@ typedef struct {
 
   std::string description;
   std::string defaultName; // Not storing id because can be either group or pair
-} Grouping;
+};
 
 /// Saves grouping to the XML file specified
 void MANTIDQT_CUSTOMINTERFACES_DLL saveGroupingToXML(const Grouping& grouping, 
@@ -99,6 +99,20 @@ void MANTIDQT_CUSTOMINTERFACES_DLL whichPairToWhichRow(const Ui::MuonAnalysis& m
 /// Set Group / Group Pair name
 void MANTIDQT_CUSTOMINTERFACES_DLL setGroupGroupPair(Ui::MuonAnalysis& m_uiForm, 
   const std::string& name);
+
+/// Convert a grouping table to a grouping struct
+boost::shared_ptr<Grouping> MANTIDQT_CUSTOMINTERFACES_DLL tableToGrouping(ITableWorkspace_sptr table);
+
+/// Converts a grouping information to a grouping table
+ITableWorkspace_sptr MANTIDQT_CUSTOMINTERFACES_DLL groupingToTable(boost::shared_ptr<Grouping> grouping);
+
+/// Returns a "dummy" grouping which a single group with all the detectors in it
+boost::shared_ptr<Grouping> getDummyGrouping(Instrument_const_sptr instrument);
+
+/// Attempts to load a grouping information referenced by IDF
+boost::shared_ptr<Grouping> getGroupingFromIDF(Instrument_const_sptr instrument,
+                                               const std::string& mainFieldDirection);
+
 
 }
 }

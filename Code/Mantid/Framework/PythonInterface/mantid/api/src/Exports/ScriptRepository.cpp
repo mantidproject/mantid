@@ -1,22 +1,15 @@
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
-
-//#include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmWrapper.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/python/docstring_options.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
-// Python frameobject. This is under the boost includes so that boost will have done the
-// include of Python.h which it ensures is done correctly
-#include <frameobject.h>
-
-using Mantid::API::ScriptRepository; 
 using namespace Mantid::API;
 using namespace boost::python;
-using boost::python::tuple;
+
 namespace
 {
   /** @cond */
@@ -87,8 +80,7 @@ namespace
 void export_ScriptRepository()
 {
 
-  REGISTER_SHARED_PTR_TO_PYTHON(ScriptRepository);
-  //  class_<ScriptRepository, boost::noncopyable>("ScriptRepository", "Base-class for ScriptRepository", no_init);
+  register_ptr_to_python<boost::shared_ptr<ScriptRepository>>();
 
   // reset the option to 
  docstring_options local_docstring_options(true, true, false);
@@ -187,7 +179,7 @@ others methods will be available.\n\
 : param path: An existing or path to a new folder to be created, where the \n\
 ScriptRepository will install itself.";
 
-  ///@todo beter description
+  ///@todo better description
   class_<ScriptRepository,boost::noncopyable>("ScriptRepository",  repo_desc, no_init)
     .def("install",&ScriptRepository::install, install_desc)
     .def("listFiles",&getListFiles, list_files_desc)
@@ -195,6 +187,5 @@ ScriptRepository will install itself.";
     .def("description",&getDescription,file_description_desc)
     .def("fileStatus",&getStatus,file_status_desc)
     .def("download",&ScriptRepository::download,download_desc)
-    //.def("upload",&ScriptRepository::upload, "")
     .def("update",&ScriptRepository::check4Update,update_desc);  
 }

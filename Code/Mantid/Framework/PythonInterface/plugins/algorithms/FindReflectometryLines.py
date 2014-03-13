@@ -54,6 +54,7 @@ class FindReflectometryLines(PythonAlgorithm):
 		workspace_validator.add(WorkspaceUnitValidator("Wavelength"))
 		workspace_validator.add(SpectraAxisValidator())
 		
+		self.setOptionalMessage("Finds spectrum numbers corresponding to reflected and transmission lines in a line detector Reflectometry dataset.")
 		self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input, workspace_validator), "Input Reflectometry Workspace")
 		self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output Spectrum Numbers")
 		self.declareProperty(name="StartWavelength", defaultValue=0.0, validator=FloatBoundedValidator(lower=0.0),  doc="Start wavelength to use for x-axis cropping")	

@@ -38,6 +38,7 @@ Moves the detectors in an instrument to optimize the maximum intensity of each d
 #include <numeric>
 #include <Poco/File.h>
 #include <sstream>
+#include <fstream>
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"

@@ -44,7 +44,7 @@ public:
     origin = origin->insert(new Vertex2D(1.0,1.0));
     origin = origin->insert(new Vertex2D(0.0,1.0));
 
-    TS_ASSERT_THROWS_NOTHING(new ConvexPolygon(origin));
+    TS_ASSERT_THROWS_NOTHING(ConvexPolygon poly(origin));
   }
 
   void test_Building_With_Head_Vertex_Gives_Correct_Number_Of_Vertices()

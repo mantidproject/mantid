@@ -9,6 +9,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 
+#include <math.h>
 #include <QFileInfo>
 #include <QMenu>
 
@@ -66,7 +67,8 @@ namespace IDA
     m_ffProp["EndX"] = m_ffRangeManager->addProperty("EndX");
     m_ffRangeManager->setDecimals(m_ffProp["EndX"], NUM_DECIMALS);
 
-    connect(m_ffRangeManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(rangePropChanged(QtProperty*, double)));
+    connect(m_ffRangeManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(propertyChanged(QtProperty*, double)));
+    connect(m_ffDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(propertyChanged(QtProperty*, double)));
 
     m_ffProp["LinearBackground"] = m_groupManager->addProperty("LinearBackground");
     m_ffProp["BackgroundA0"] = m_ffRangeManager->addProperty("A0");
@@ -78,8 +80,19 @@ namespace IDA
   
     m_ffProp["StretchedExp"] = createStretchedExp("Stretched Exponential");
 
-    typeSelection(uiForm().furyfit_cbFitType->currentIndex());
+    m_ffRangeManager->setMinimum(m_ffProp["BackgroundA0"], 0);
+    m_ffRangeManager->setMaximum(m_ffProp["BackgroundA0"], 1);
 
+    m_ffDblMng->setMinimum(m_ffProp["Exponential 1.Intensity"], 0);
+    m_ffDblMng->setMaximum(m_ffProp["Exponential 1.Intensity"], 1);
+
+    m_ffDblMng->setMinimum(m_ffProp["Exponential 2.Intensity"], 0);
+    m_ffDblMng->setMaximum(m_ffProp["Exponential 2.Intensity"], 1);
+
+    m_ffDblMng->setMinimum(m_ffProp["Stretched Exponential.Intensity"], 0);
+    m_ffDblMng->setMaximum(m_ffProp["Stretched Exponential.Intensity"], 1);
+
+    typeSelection(uiForm().furyfit_cbFitType->currentIndex());
 
     // Connect to PlotGuess checkbox
     connect(m_ffDblMng, SIGNAL(propertyChanged(QtProperty*)), this, SLOT(plotGuess(QtProperty*)));
@@ -113,7 +126,6 @@ namespace IDA
     uiForm().furyfit_ckPlotGuess->setChecked(false);
     
     const int fitType = uiForm().furyfit_cbFitType->currentIndex();
-
     if ( uiForm().furyfit_ckConstrainIntensities->isChecked() )
     {
       switch ( fitType )
@@ -417,6 +429,8 @@ namespace IDA
 
       break;
     }
+
+    plotGuess(NULL);
   }
 
   void FuryFit::plotInput()
@@ -471,6 +485,20 @@ namespace IDA
     }
 
     int specNo = uiForm().furyfit_leSpecNo->text().toInt();
+    int nHist = static_cast<int>(m_ffInputWS->getNumberHistograms());
+
+    if( specNo < 0 || specNo >= nHist )
+    {
+      if (specNo < 0)
+      {
+        specNo = 0;
+      }
+      else
+      {
+        specNo = nHist-1;
+      }
+      uiForm().furyfit_leSpecNo->setText(QString::number(specNo));
+    }
 
     m_ffDataCurve = plotMiniplot(m_ffPlot, m_ffDataCurve, m_ffInputWS, specNo);
     try
@@ -479,7 +507,11 @@ namespace IDA
       m_ffRangeS->setRange(range.first, range.second);
       m_ffRangeManager->setRange(m_ffProp["StartX"], range.first, range.second);
       m_ffRangeManager->setRange(m_ffProp["EndX"], range.first, range.second);
-    
+      
+      setDefaultParameters("Exponential 1");
+      setDefaultParameters("Exponential 2");
+      setDefaultParameters("Stretched Exponential");
+
       m_ffPlot->setAxisScale(QwtPlot::xBottom, range.first, range.second);
       m_ffPlot->setAxisScale(QwtPlot::yLeft, 0.0, 1.0);
       m_ffPlot->replot();
@@ -488,6 +520,24 @@ namespace IDA
     {
       showInformationBox(exc.what());
     }
+  }
+
+  void FuryFit::setDefaultParameters(const QString& name)
+  {
+    double background = m_ffDblMng->value(m_ffProp["BackgroundA0"]);
+    //intensity is always 1-background
+    m_ffDblMng->setValue(m_ffProp[name+".Intensity"], 1.0-background);
+    auto x = m_ffInputWS->readX(0);
+    auto y = m_ffInputWS->readY(0);
+    double tau = 0;
+
+    if (x.size() > 4)
+    {
+      tau = -x[4] / log(y[4]);
+    }
+
+    m_ffDblMng->setValue(m_ffProp[name+".Tau"], tau);
+    m_ffDblMng->setValue(m_ffProp[name+".Beta"], 1.0);
   }
 
   void FuryFit::xMinSelected(double val)
@@ -503,9 +553,12 @@ namespace IDA
   void FuryFit::backgroundSelected(double val)
   {
     m_ffRangeManager->setValue(m_ffProp["BackgroundA0"], val);
+    m_ffDblMng->setValue(m_ffProp["Exponential 1.Intensity"], 1.0-val);
+    m_ffDblMng->setValue(m_ffProp["Exponential 2.Intensity"], 1.0-val);
+    m_ffDblMng->setValue(m_ffProp["Stretched Exponential.Intensity"], 1.0-val);
   }
 
-  void FuryFit::rangePropChanged(QtProperty* prop, double val)
+  void FuryFit::propertyChanged(QtProperty* prop, double val)
   {
     if ( prop == m_ffProp["StartX"] )
     {
@@ -515,9 +568,21 @@ namespace IDA
     {
       m_ffRangeS->setMaximum(val);
     }
-    else if ( prop == m_ffProp["BackgroundA0"] )
+    else if ( prop == m_ffProp["BackgroundA0"])
     {
       m_ffBackRangeS->setMinimum(val);
+      m_ffDblMng->setValue(m_ffProp["Exponential 1.Intensity"], 1.0-val);
+      m_ffDblMng->setValue(m_ffProp["Exponential 2.Intensity"], 1.0-val);
+      m_ffDblMng->setValue(m_ffProp["Stretched Exponential.Intensity"], 1.0-val);
+    }
+    else if( prop == m_ffProp["Exponential 1.Intensity"] 
+      || prop == m_ffProp["Exponential 2.Intensity"] 
+      || prop == m_ffProp["Stretched Exponential.Intensity"])
+    {
+      m_ffBackRangeS->setMinimum(1.0-val);
+      m_ffDblMng->setValue(m_ffProp["Exponential 1.Intensity"], val);
+      m_ffDblMng->setValue(m_ffProp["Exponential 2.Intensity"], val);
+      m_ffDblMng->setValue(m_ffProp["Stretched Exponential.Intensity"], val);
     }
   }
 
@@ -539,7 +604,8 @@ namespace IDA
 
     // Function Ties
     func->tie("f0.A1", "0");
-    if ( uiForm().furyfit_ckConstrainIntensities->isChecked() )
+    const bool constrainIntensities = uiForm().furyfit_ckConstrainIntensities->isChecked();
+    if ( constrainIntensities )
     {
       switch ( uiForm().furyfit_cbFitType->currentIndex() )
       {
@@ -563,8 +629,10 @@ namespace IDA
       "ftype = '" + fitTypeString() + "'\n"
       "startx = " + m_ffProp["StartX"]->valueText() + "\n"
       "endx = " + m_ffProp["EndX"]->valueText() + "\n"
-      "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n"
-      "save = ";
+      "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n";
+    
+    if (constrainIntensities) pyInput += "constrain_intens = True \n";
+    else pyInput += "constrain_intens = False \n";
 
     if ( uiForm().furyfit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
@@ -574,11 +642,11 @@ namespace IDA
 
     if (!constrainBeta)
     {
-      pyInput += "furyfitSeq(input, func, ftype, startx, endx, save, plot, verbose)\n";
+      pyInput += "furyfitSeq(input, func, ftype, startx, endx, constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
     }
     else
     {
-      pyInput += "furyfitMult(input, func, ftype, startx, endx, save, plot, verbose)\n";
+      pyInput += "furyfitMult(input, func, ftype, startx, endx, constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
     }
   
     QString pyOutput = runPythonCode(pyInput);

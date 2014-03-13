@@ -99,6 +99,7 @@ set ( SRC_FILES
 	src/SNSDataArchive.cpp
 	src/SNSDataArchiveICAT2.cpp
 	src/SaveAscii.cpp
+	src/SaveANSTOAscii.cpp
 	src/SaveAscii2.cpp
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
@@ -223,6 +224,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/RotateInstrumentComponent.h
 	inc/MantidDataHandling/SNSDataArchive.h
 	inc/MantidDataHandling/SNSDataArchiveICAT2.h
+	inc/MantidDataHandling/SaveANSTOAscii.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveAscii2.h
 	inc/MantidDataHandling/SaveCSV.h
@@ -345,6 +347,7 @@ set ( TEST_FILES
 	RotateInstrumentComponentTest.h
 	SNSDataArchiveICAT2Test.h
 	SNSDataArchiveTest.h
+	SaveANSTOAsciiTest.h
 	SaveAscii2Test.h
 	SaveAsciiTest.h
 	SaveCSVTest.h
