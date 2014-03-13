@@ -57,6 +57,8 @@ namespace Poldi
     virtual const std::string category() const { return "SINQ\\Poldi"; }
     
   protected:
+    void initDocs();
+
     MantidVec getNeighborSums(MantidVec correlationCounts);
 
     std::list<MantidVec::iterator> findPeaks(MantidVec::iterator begin, MantidVec::iterator end);
