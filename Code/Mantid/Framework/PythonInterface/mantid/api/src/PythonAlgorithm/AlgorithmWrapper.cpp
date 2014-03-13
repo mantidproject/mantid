@@ -26,7 +26,7 @@ namespace Mantid
       // Cache the isRunning call to save the lookup each time it is called
       // as it is most likely called in a loop
 
-      // If the derived class type has isRunning then us that.
+      // If the derived class type has isRunning then use that.
       // A standard PyObject_HasAttr will check the whole inheritance
       // hierarchy and always return true because IAlgorithm::isRunning is present.
       // We just want to look at the Python class
@@ -97,7 +97,6 @@ namespace Mantid
      */
     void AlgorithmWrapper::cancel()
     {
-      std::cerr << "in c++\n";
       // No real need for eye on performance here. Use standard methods
       if(Environment::typeHasAttribute(getSelf(), "cancel"))
       {
