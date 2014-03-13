@@ -7,6 +7,14 @@ namespace Mantid
   {
 
     /**
+     * Default constructor. Creates an 'empty' disjoint element.
+     */
+    DisjointElement::DisjointElement() :
+        m_parent(this), m_rank(0), m_id(-1)
+    {
+    }
+
+    /**
      * Constructor
      * @param id : Element id
      */
@@ -20,6 +28,53 @@ namespace Mantid
      */
     DisjointElement::~DisjointElement()
     {
+    }
+
+    /**
+     * Copy constructor
+     * @param other : Other disjoint element to copy.
+     */
+    DisjointElement::DisjointElement(const DisjointElement& other) :
+        m_parent(other.m_parent), m_rank(other.m_rank), m_id(other.m_id)
+    {
+      if (m_rank > 0)
+      {
+        throw std::logic_error(
+            "This is a parent node. Children cannot be copied, leading to possible inconsistencies.");
+      }
+      // Don't point to copy object as parent if copy object is it's own parent.
+      if (other.m_parent == &other)
+      {
+        m_parent = this;
+      }
+    }
+
+    /**
+     * Assignment operator
+     * @param other: Element to assign from
+     * @return this
+     */
+    DisjointElement& DisjointElement::operator=(const DisjointElement& other)
+    {
+      if (this != &other)
+      {
+
+        if (other.m_rank > 0)
+        {
+          throw std::logic_error(
+              "This is a parent node. Children cannot be copied, leading to possible inconsistencies.");
+        }
+
+        m_parent = other.m_parent;
+        m_rank = other.m_rank;
+        m_id = other.m_id;
+
+        if (other.m_parent == &other)
+        {
+          m_parent = this;
+        }
+      }
+      return *this;
     }
 
     /**
@@ -107,6 +162,15 @@ namespace Mantid
     int DisjointElement::getRank() const
     {
       return m_rank;
+    }
+
+    /**
+     * Determine if the disjoint element is empty. Empty corresponds to an unassigned element.
+     * @return True if empty.
+     */
+    bool DisjointElement::isEmpty() const
+    {
+      return m_id == -1;
     }
 
     /**

@@ -16,12 +16,56 @@ public:
   static DisjointElementTest *createSuite() { return new DisjointElementTest(); }
   static void destroySuite( DisjointElementTest *suite ) { delete suite; }
 
+  void test_default_constructor()
+  {
+    DisjointElement item;
+    TSM_ASSERT("Should be empty", item.isEmpty());
+  }
+
   void test_make_first_of_cluster()
   {
     DisjointElement item(12);
     TS_ASSERT_EQUALS(12, item.getId());
     TS_ASSERT_EQUALS(0, item.getRank());
+    TS_ASSERT(!item.isEmpty());
     TS_ASSERT_EQUALS(&item, item.getParent());
+  }
+
+  void test_copy()
+  {
+    DisjointElement item(1);
+    DisjointElement copy = item;
+    TS_ASSERT_EQUALS(item.getId(), copy.getId());
+    TS_ASSERT_EQUALS(item.getRank(), copy.getRank());
+    TS_ASSERT_DIFFERS(item.getParent(), copy.getParent());
+  }
+
+  void test_copy_throws()
+  {
+    DisjointElement item1(1);
+    DisjointElement item2(2);
+    item1.unionWith(&item2);
+
+    TSM_ASSERT_THROWS("Cannot copy parent",DisjointElement copy = item2, std::logic_error&)
+  }
+
+  void test_assign()
+  {
+    DisjointElement a(1);
+    DisjointElement b = a;
+    TS_ASSERT_EQUALS(a.getId(), b.getId());
+    TS_ASSERT_EQUALS(a.getRank(), b.getRank());
+    TS_ASSERT_DIFFERS(a.getParent(), b.getParent());
+  }
+
+  void test_assign_throws()
+  {
+    DisjointElement item1(1);
+    DisjointElement item2(2);
+    DisjointElement toAssignTo;
+    item1.unionWith(&item2);
+
+    TSM_ASSERT_THROWS("Cannot assign from parent", toAssignTo = item2, std::logic_error&)
   }
 
   void test_increment_rank()

@@ -5,9 +5,10 @@ set ( SRC_FILES
 	src/CalculateUMatrix.cpp
 	src/CentroidPeaks.cpp
 	src/ClearUB.cpp
-	src/DisjointElement.cpp
 	src/CombinePeaksWorkspaces.cpp
+	src/ConnectedComponentLabelling.cpp
 	src/DiffPeaksWorkspaces.cpp
+	src/DisjointElement.cpp
 	src/FilterPeaks.cpp
 	src/FindSXPeaks.cpp
 	src/FindUBUsingFFT.cpp
@@ -15,6 +16,7 @@ set ( SRC_FILES
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
 	src/GoniometerAnglesFromPhiRotation.cpp
+	src/HardThresholdBackground.cpp
 	src/HasUB.cpp
 	src/IndexPeaks.cpp
 	src/IndexSXPeaks.cpp
@@ -58,13 +60,15 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
 	inc/MantidCrystal/AnvredCorrection.h
+	inc/MantidCrystal/BackgroundStrategy.h
 	inc/MantidCrystal/CalculatePeaksHKL.h
 	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/ClearUB.h
-	inc/MantidCrystal/DisjointElement.h
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
+	inc/MantidCrystal/ConnectedComponentLabelling.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
+	inc/MantidCrystal/DisjointElement.h
 	inc/MantidCrystal/FilterPeaks.h
 	inc/MantidCrystal/FindSXPeaks.h
 	inc/MantidCrystal/FindUBUsingFFT.h
@@ -73,6 +77,7 @@ set ( INC_FILES
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
 	inc/MantidCrystal/GSLFunctions.h
 	inc/MantidCrystal/GoniometerAnglesFromPhiRotation.h
+	inc/MantidCrystal/HardThresholdBackground.h
 	inc/MantidCrystal/HasUB.h
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/IndexSXPeaks.h
@@ -119,9 +124,10 @@ set ( TEST_FILES
 	CalculateUMatrixTest.h
 	CentroidPeaksTest.h
 	ClearUBTest.h
-	DisjointElementTest.h
 	CombinePeaksWorkspacesTest.h
+	ConnectedComponentLabellingTest.h
 	DiffPeaksWorkspacesTest.h
+	DisjointElementTest.h
 	FilterPeaksTest.h
 	FindSXPeaksTest.h
 	FindUBUsingFFTTest.h
@@ -129,6 +135,7 @@ set ( TEST_FILES
 	FindUBUsingLatticeParametersTest.h
 	FindUBUsingMinMaxDTest.h
 	GoniometerAnglesFromPhiRotationTest.h
+	HardThresholdBackgroundTest.h
 	HasUBTest.h
 	IndexPeaksTest.h
 	IndexSXPeaksTest.h

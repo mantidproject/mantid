@@ -396,6 +396,7 @@ namespace MDEvents
     m_permutations[1] = 1;
     m_permutations[2] = -1;
 
+    // Figure out what possible indexes deltas to generate indexes that are next to the current one.
     size_t nPermutations = 3;
     for(size_t j = 1; j < m_nd; ++j)
     {
@@ -410,6 +411,7 @@ namespace MDEvents
       nPermutations *= 3;
     }
 
+    // Filter out indexes that are are not actually neighbours.
     std::vector<size_t> neighbourIndexes; // Accumulate neighbour indexes.
     for(size_t i = 0; i < nPermutations; ++i)
     {

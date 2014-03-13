@@ -33,6 +33,8 @@ namespace Crystal
   class DLLExport DisjointElement
   {
   public:
+    /// Default constructor
+    DisjointElement();
     /// Constructor
     DisjointElement(const int id);
     /// Destructor
@@ -49,11 +51,13 @@ namespace Crystal
     int getRank() const;
     /// Increment the rank
     int incrementRank();
-  private:
-    // Disabled copy and assignment.
+    /// Is empty.
+    bool isEmpty() const;
+    /// Copy constructor.
     DisjointElement(const DisjointElement& other);
+    /// Assignment operator.
     DisjointElement& operator=(const DisjointElement& other);
-
+  private:
     bool hasParent() const;
     int compress();
     void setParent(DisjointElement * other);
@@ -64,7 +68,7 @@ namespace Crystal
     /// Current rank
     int m_rank;
     /// Identifier
-    const int m_id;
+    int m_id;
     
   };
 
