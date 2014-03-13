@@ -47,6 +47,8 @@ namespace MantidQt
 
       // Get optional message here as we may set it if user has no investigations to publish to.
       m_uiForm.instructions->setText(getOptionalMessage());
+      // This is required as we use the currentIndexChanged SLOT.
+      storePropertyValue("Session",m_uiForm.investigationNumberCb->itemData(0,Qt::UserRole).toString());
     }
 
     /**
