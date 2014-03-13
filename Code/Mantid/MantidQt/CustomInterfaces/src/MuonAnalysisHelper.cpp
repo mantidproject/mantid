@@ -1,5 +1,7 @@
 #include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
 
+#include "MantidKernel/InstrumentInfo.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -18,6 +20,7 @@ namespace CustomInterfaces
 namespace MuonAnalysisHelper
 {
 
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 /**
@@ -337,16 +340,11 @@ std::string getRunLabel(const Workspace_sptr& ws)
   int runNumber = firstPrd->getRunNumber();
   std::string instrName = firstPrd->getInstrument()->getName();
 
-  int width(8);
-
-  if ( instrName == "ARGUS" )
-  {
-    width = 7;
-  }
+  int zeroPadding = ConfigService::Instance().getInstrument(instrName).zeroPadding(runNumber);
 
   std::ostringstream label;
   label << instrName;
-  label << std::setw(width) << std::setfill('0') << std::right << runNumber;
+  label << std::setw(zeroPadding) << std::setfill('0') << std::right << runNumber;
   return label.str();
 }
 
