@@ -110,5 +110,17 @@ namespace MantidQt
       setPropertyValue("FileName", true);
     }
 
+    /**
+     * Overridden to enable dataselector validators.
+     */
+    void CatalogPublishDialog::accept()
+    {
+      if (!m_uiForm.dataSelector->isValid())
+      {
+        QMessageBox::critical(this,"Error in catalog publishing.",m_uiForm.dataSelector->getProblem());
+        return;
+      }
+      AlgorithmDialog::accept();
+    }
   }
 }
