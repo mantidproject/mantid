@@ -110,6 +110,8 @@ namespace MantidQt
       std::set<std::string> getDataFileExtensions(Mantid::API::Column_sptr column);
       /// Add the list of file extensions to the "Filter type..." drop-down.
       void populateDataFileType(const std::set<std::string> &extensions);
+      /// Disable the download button if user can access the files locally from the archives.
+      void disableDownloadButtonIfArchives(int row);
 
     private slots:
       /// When the facility login button is clicked
@@ -158,8 +160,8 @@ namespace MantidQt
       // SLOTS for: "Datafile information"
       ///////////////////////////////////////////////////////////////////////////////
 
-      /// Enables the download & load button if user has selected a data file to download.
-      void enableDownloadButtons();
+      /// Disable load/download buttons if no datafile is selected.
+      void disableDatafileButtons();
       /// Performs filterDataFileType() for specified filer type.
       void doFilter(const int &index);
       /// Downloads selected datFiles to a specified location.

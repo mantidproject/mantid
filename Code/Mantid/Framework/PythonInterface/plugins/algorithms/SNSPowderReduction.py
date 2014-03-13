@@ -240,6 +240,8 @@ class SNSPowderReduction(PythonAlgorithm):
                              "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
         self.declareProperty("FilterBadPulses", True, "Filter out events measured while proton charge is more than 5% below average")
+        self.declareProperty("ScaleData", defaultValue=1., validator=FloatBoundedValidator(lower=0., exclusive=True),
+                             doc="Constant to multiply the data before writing out. This does not apply to PDFgetN files.")
         self.declareProperty("SaveAs", "gsas",
                              "List of all output file types. Allowed values are 'fullprof', 'gsas', 'nexus', 'pdfgetn', and 'topas'")
         self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
@@ -285,6 +287,7 @@ class SNSPowderReduction(PythonAlgorithm):
         self._vanPeakFWHM = self.getProperty("VanadiumFWHM").value
         self._vanSmoothing = self.getProperty("VanadiumSmoothParams").value
         calib = self.getProperty("CalibrationFile").value
+        self._scaleFactor = self.getProperty("ScaleData").value
         self._outDir = self.getProperty("OutputDirectory").value
         self._outPrefix = self.getProperty("OutputFilePrefix").value
         self._outTypes = self.getProperty("SaveAs").value.lower()
@@ -557,6 +560,8 @@ class SNSPowderReduction(PythonAlgorithm):
 
             # write out the files
             if mpiRank == 0:
+                if self._scaleFactor != 1.:
+                    samRun *= self._scaleFactor
                 self._save(samRun, self._info, normalized, False)
                 samRun = str(samRun)
             #mtd.releaseFreeMemory()

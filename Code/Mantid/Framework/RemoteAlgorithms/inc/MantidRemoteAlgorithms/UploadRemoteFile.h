@@ -60,6 +60,7 @@ class DLLExport UploadRemoteFile : public API::Algorithm
 
     private:
     /// Initialisation code
+    void initDocs();
     void init();
     ///Execution code
     void exec();

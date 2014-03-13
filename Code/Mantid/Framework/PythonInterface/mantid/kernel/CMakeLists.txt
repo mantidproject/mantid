@@ -13,6 +13,9 @@ set ( EXPORT_FILES
   src/Exports/IPropertyManager.cpp
   src/Exports/Property.cpp
   src/Exports/IValidator.cpp
+  src/Exports/IPropertySettings.cpp
+  src/Exports/EnabledWhenProperty.cpp
+  src/Exports/VisibleWhenProperty.cpp
   src/Exports/PropertyWithValue.cpp
   src/Exports/ArrayProperty.cpp
   src/Exports/Quat.cpp
@@ -87,6 +90,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/TypeRegistry.h  
   ${HEADER_DIR}/kernel/Registry/DowncastRegistry.h
+  ${HEADER_DIR}/kernel/DataServiceExporter.h
   ${HEADER_DIR}/kernel/IsNone.h
   ${HEADER_DIR}/kernel/PropertyWithValueExporter.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h

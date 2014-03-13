@@ -76,6 +76,9 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 
 // Static constants
 const QString MuonAnalysis::NOT_AVAILABLE("N/A");
+const QString MuonAnalysis::TIME_ZERO_DEFAULT("0.2");
+const QString MuonAnalysis::FIRST_GOOD_BIN_DEFAULT("0.3");
+
 //----------------------
 // Public member functions
 //----------------------
@@ -89,8 +92,9 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
   m_currentTab(NULL),
   m_groupNames(), 
   m_settingsGroup("CustomInterfaces/MuonAnalysis/"),
-  m_updating(false), m_loaded(false), m_deadTimesChanged(false), 
+  m_updating(false), m_updatingGrouping(false), m_loaded(false), m_deadTimesChanged(false),
   m_textToDisplay(""), 
+  m_optionTab(NULL), m_fitDataTab(NULL), m_resultTableTab(NULL), // Will be created in initLayout()
   m_dataTimeZero(0.0), m_dataFirstGoodData(0.0)
 {}
 
@@ -386,17 +390,14 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
 
     QString wsNameQ = QString::fromStdString(wsName);
 
-    // Hide all the previous plot windows, if requested by user
-    if (m_uiForm.hideGraphs->isChecked())
-      hideAllPlotWindows();
-
     // Plot the workspace
     plotSpectrum( wsNameQ, (plotType == Logorithm) );
 
     setCurrentDataName( wsNameQ );
   }
-  catch(...)
+  catch(std::exception& e)
   { 
+    g_log.error(e.what());
     QMessageBox::critical( this, "MuonAnalysis - Error", "Unable to plot the item. Check log for details." ); 
   }
 
@@ -623,36 +624,30 @@ MatrixWorkspace_sptr MuonAnalysis::prepareAnalysisWorkspace(MatrixWorkspace_sptr
   cropAlg->initialize();
   cropAlg->setChild(true);
   cropAlg->setProperty("InputWorkspace", ws);
-  cropAlg->setProperty("Xmin", plotFromTime());
-  if ( !m_uiForm.timeAxisFinishAtInput->text().isEmpty() )
-    cropAlg->setProperty("Xmax", plotToTime());
+  cropAlg->setProperty("Xmin", startTime());
+
+  double Xmax = finishTime();
+  if(Xmax != EMPTY_DBL())
+  {
+    cropAlg->setProperty("Xmax", Xmax);
+  }
+
   cropAlg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
   cropAlg->execute();
 
   ws = cropAlg->getProperty("OutputWorkspace");
 
+  std::string params = rebinParams(ws);
+
   // Rebin data if option set in Plot Options and we don't want raw workspace
-  if ( !isRaw && m_uiForm.rebinComboBox->currentIndex() != 0)
+  if ( !isRaw && !params.empty())
   {
-    std::string rebinParams;
-    double binSize = ws->dataX(0)[1] - ws->dataX(0)[0];
-
-    if(m_uiForm.rebinComboBox->currentIndex() == 1) // Fixed
-    {
-      double bunchedBinSize = binSize * m_uiForm.optionStepSizeText->text().toDouble();
-      rebinParams = boost::lexical_cast<std::string>(bunchedBinSize);
-    }
-    else // Variable
-    {
-      rebinParams = m_uiForm.binBoundaries->text().toStdString();
-    }
-
     // Rebin data
     IAlgorithm_sptr rebinAlg = AlgorithmManager::Instance().createUnmanaged("Rebin");
     rebinAlg->initialize();
     rebinAlg->setChild(true);
     rebinAlg->setProperty("InputWorkspace", ws);
-    rebinAlg->setProperty("Params", rebinParams);
+    rebinAlg->setProperty("Params", params);
     rebinAlg->setProperty("FullBinsOnly", true);
     rebinAlg->setPropertyValue("OutputWorkspace", "__IAmNinjaYouDontSeeMe"); // Is not used
     rebinAlg->execute();
@@ -1079,8 +1074,11 @@ void MuonAnalysis::groupTableChanged(int row, int column)
   {
     QTableWidgetItem *itemName = m_uiForm.groupTable->item(row,0);
 
-    if ( itemName == NULL )  // this should never happen
-      m_uiForm.groupTable->setItem(row,0, new QTableWidgetItem(""));
+    if ( itemName == NULL ) // Just in case it wasn't assigned
+    {
+      itemName = new QTableWidgetItem("");
+      m_uiForm.groupTable->setItem(row, 0, itemName);
+    }
       
     if ( itemName->text() != "" )
     {
@@ -1162,8 +1160,11 @@ void MuonAnalysis::pairTableChanged(int row, int column)
   {
     QTableWidgetItem *itemName = m_uiForm.pairTable->item(row,0);
 
-    if ( itemName == NULL )  // this should never happen
-      m_uiForm.pairTable->setItem(row,0, new QTableWidgetItem(""));
+    if ( itemName == NULL ) // Just in case it wasn't assigned
+    {
+      itemName = new QTableWidgetItem("");
+      m_uiForm.pairTable->setItem(row, 0, itemName);
+    }
       
     if ( itemName->text() != "" )
     {
@@ -1443,7 +1444,20 @@ boost::shared_ptr<GroupResult> MuonAnalysis::group(boost::shared_ptr<LoadResult>
   int instrIndex = m_uiForm.instrSelector->findText( QString::fromStdString(instr->getName()) );
   bool instrChanged = m_uiForm.instrSelector->currentIndex() != instrIndex;
 
-  if ( !instrChanged && isGroupingSet() )
+  // Check whether the number of spectra was changed
+  bool noSpectraChanged(true);
+
+  if ( AnalysisDataService::Instance().doesExist(m_workspace_name) )
+  {
+    auto currentWs = AnalysisDataService::Instance().retrieveWS<Workspace>(m_workspace_name);
+    size_t currentNoSpectra = firstPeriod(currentWs)->getNumberHistograms();
+
+    size_t loadedNoSpectra = firstPeriod(loadResult->loadedWorkspace)->getNumberHistograms();
+
+    noSpectraChanged = (currentNoSpectra != loadedNoSpectra);
+  }
+
+  if ( !noSpectraChanged && !instrChanged && isGroupingSet() )
   {
     // Use grouping currently set
     result->usedExistGrouping = true;
@@ -1567,7 +1581,10 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   // XXX: this should be done after the instrument was changed, because changing the instrument will
   //      clear the grouping
   if ( ! groupResult->usedExistGrouping )
+  {
+    runClearGroupingButton();
     fillGroupingTable(*(groupResult->groupingUsed), m_uiForm);
+  }
 
   // Populate instrument fields
   std::stringstream str;
@@ -1686,14 +1703,29 @@ void MuonAnalysis::guessAlphaClicked()
     if ( m_uiForm.homePeriodBox2->isEnabled() )
       inputWS += "_" + m_uiForm.homePeriodBox1->currentText();
 
-    Mantid::API::IAlgorithm_sptr alphaAlg = Mantid::API::AlgorithmManager::Instance().create("AlphaCalc");
-    alphaAlg->setPropertyValue("InputWorkspace", inputWS.toStdString());
-    alphaAlg->setPropertyValue("ForwardSpectra", idsF->text().toStdString());
-    alphaAlg->setPropertyValue("BackwardSpectra", idsB->text().toStdString());
-    alphaAlg->setPropertyValue("FirstGoodValue", firstGoodBin().toStdString());
-    alphaAlg->execute();  
+    double alphaValue;
 
-    const QString alpha(alphaAlg->getPropertyValue("Alpha").c_str());
+    try
+    {
+      IAlgorithm_sptr alphaAlg = AlgorithmManager::Instance().create("AlphaCalc");
+      alphaAlg->setPropertyValue("InputWorkspace", inputWS.toStdString());
+      alphaAlg->setPropertyValue("ForwardSpectra", idsF->text().toStdString());
+      alphaAlg->setPropertyValue("BackwardSpectra", idsB->text().toStdString());
+      alphaAlg->setProperty("FirstGoodValue", firstGoodBin());
+      alphaAlg->execute();
+
+      alphaValue = alphaAlg->getProperty("Alpha");
+    }
+    catch(std::exception& e)
+    {
+      g_log.error() << "Error when running AlphaCalc: " << e.what() << "\n";
+      QMessageBox::critical(this, "Guess alpha error",
+                            "Unable to guess alpha value. AlphaCalc failed. See log for details.");
+      m_updating = false;
+      return;
+    }
+
+    const QString alpha = QString::number(alphaValue);
 
     QComboBox* qwAlpha = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,3));
     if (qwAlpha)
@@ -1929,28 +1961,64 @@ QStringList MuonAnalysis::getPeriodLabels() const
  */
 void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
 {
-    // Get plotting params
-    const QMap<QString, QString>& params = getPlotStyleParams(wsName);
+    // List of script lines which acquire a window for plotting. The window is placed to Python
+    // variable named 'w';'
+    QStringList acquireWindowScript;
+
+    MuonAnalysisOptionTab::NewPlotPolicy policy = m_optionTab->newPlotPolicy();
+
+    // Hide all the previous plot windows, if creating a new one
+    if ( policy == MuonAnalysisOptionTab::NewWindow && m_uiForm.hideGraphs->isChecked())
+    {
+      hideAllPlotWindows();
+    }
+
+    if ( policy == MuonAnalysisOptionTab::PreviousWindow )
+    {
+      QStringList& s = acquireWindowScript; // To keep short
+
+      s << "ew = graph('%WSNAME%-1')";
+      s << "if '%WSNAME%' != '%PREV%' and ew != None:";
+      s << "    ew.close()";
+
+      s << "pw = graph('%PREV%-1')";
+      s << "if pw == None:";
+      s << "  pw = newGraph('%WSNAME%-1', 0)";
+
+      s << "w = plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = pw, clearWindow = True)";
+      s << "w.setName('%WSNAME%-1')";
+      s << "w.setObjectName('%WSNAME%')";
+      s << "w.show()";
+      s << "w.setFocus()";
+    }
+    else if ( policy == MuonAnalysisOptionTab::NewWindow )
+    {
+      QStringList& s = acquireWindowScript; // To keep short
+
+      s << "w = graph('%WSNAME%-1')";
+      s << "if w == None:";
+      s << "  w = plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%)";
+      s << "  w.setObjectName('%WSNAME%')";
+      s << "else:";
+      s << "  plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = w, clearWindow = True)";
+      s << "  w.show()";
+      s << "  w.setFocus()";
+    }
 
     QString pyS;
 
-    // Try to find existing graph window
-    pyS = "w = graph('%1-1')\n";
+    // Add line separators
+    pyS += acquireWindowScript.join("\n") + "\n";
 
-    // If doesn't exist - plot it
-    pyS += "if w == None:\n"
-           "  w = plotSpectrum('%1', 0, %2, %3)\n"
-           "  w.setObjectName('%1')\n";
+    // Get plotting params
+    const QMap<QString, QString>& params = getPlotStyleParams(wsName);
 
-    // If plot does exist already, it should've just been updated automatically, so we just
-    // need to make sure it is visible
-    pyS += "else:\n"
-          "  plotSpectrum('%1', 0, %2, %3, window = w, clearWindow = True)\n"
-          "  w.show()\n"
-          "  w.setFocus()\n";
+    // Insert real values
+    pyS.replace("%WSNAME%", wsName);
+    pyS.replace("%PREV%", m_currentDataName);
+    pyS.replace("%ERRORS%", params["ShowErrors"]);
+    pyS.replace("%CONNECT%", params["ConnectType"]);
 
-    pyS = pyS.arg(wsName).arg(params["ShowErrors"]).arg(params["ConnectType"]);
-  
     // Update titles
     pyS += "l = w.activeLayer()\n"
            "l.setCurveTitle(0, '%1')\n"
@@ -2223,83 +2291,86 @@ void MuonAnalysis::startUpLook()
  */
 double MuonAnalysis::timeZero()
 {
-  QString boxText = m_uiForm.timeZeroFront->text();
-  double timeZero = 0.0;
-  try
-  {
-    timeZero = boost::lexical_cast<double>(boxText.toStdString());
-  }
-  catch(boost::bad_lexical_cast&)
-  {
-    QMessageBox::warning(this, "MantidPlot - Muon Analysis", "Unable to interpret time zero as number, setting to 0.0");
-    m_uiForm.timeZeroFront->setText("0.0");
-  }
-  return timeZero;
+  return getValidatedDouble(m_uiForm.timeZeroFront, TIME_ZERO_DEFAULT, "time zero", g_log);
 }
 
- /**
- * first good bin returend in ms
- * returned as the absolute value of first-good-bin minus time zero
+/**
+ * Returns params string which can be passed to Rebin, according to what user specified. If no rebin
+ * requested by user, returns an empty string.
+ * @param wsForRebin :: Workspace we are going to rebin. Use to determine bin size
+ * @return Params string to pass to rebin
  */
-QString MuonAnalysis::firstGoodBin()
+std::string MuonAnalysis::rebinParams(Workspace_sptr wsForRebin)
 {
-  return m_uiForm.firstGoodBinFront->text();
-}
+  MuonAnalysisOptionTab::RebinType rebinType = m_optionTab->getRebinType();
 
- /**
- * According to Plot Options what time should we plot from in ms
- * @return time to plot from in ms
- */
-double MuonAnalysis::plotFromTime()
-{
-  QLineEdit* startTimeBox;
-  double defaultValue;
-
-  // If is first good bin used - we use a different box
-  if(m_uiForm.timeComboBox->currentIndex() == 0)
+  if ( rebinType == MuonAnalysisOptionTab::NoRebin )
   {
-    startTimeBox = m_uiForm.firstGoodBinFront;
-    defaultValue = 0.3;
+    return "";
+  }
+  else if ( rebinType == MuonAnalysisOptionTab::FixedRebin )
+  {
+    MatrixWorkspace_sptr ws = firstPeriod(wsForRebin);
+    double binSize = ws->dataX(0)[1] - ws->dataX(0)[0];
+
+    double stepSize = m_optionTab->getRebinStep();
+
+    return boost::lexical_cast<std::string>(binSize * stepSize);
+  }
+  else if ( rebinType == MuonAnalysisOptionTab::VariableRebin )
+  {
+    return m_optionTab->getRebinParams();
   }
   else
   {
-    startTimeBox = m_uiForm.timeAxisStartAtInput;
-    defaultValue = 0.0;
+    throw std::runtime_error("Unknown rebin type");
   }
-
-  bool ok;
-  double returnValue = startTimeBox->text().toDouble(&ok);
-
-  if(!ok)
-  {
-    returnValue = defaultValue;
-
-    startTimeBox->setText(QString::number(defaultValue));
-
-    QMessageBox::warning(this, "Mantid - MuonAnalysis", 
-      QString("Start time number not recognized. Reset to default of %1").arg(defaultValue));
-  }
-  
-  return returnValue;
 }
 
- /**
- * According to Plot Options what time should we plot to in ms
- * @return time to plot to in ms
+/**
+ * Return first good bin as set on the interface.
  */
-double MuonAnalysis::plotToTime()
+double MuonAnalysis::firstGoodBin() const
 {
-  double retVal;
-  try
+  return getValidatedDouble(m_uiForm.firstGoodBinFront, FIRST_GOOD_BIN_DEFAULT, "first good bin",
+                            g_log);
+}
+
+/**
+ * Returns min X value as specified by user.
+ * @return Min X value
+ */
+double MuonAnalysis::startTime() const
+{
+  auto startTimeType = m_optionTab->getStartTimeType();
+  double value(0);
+
+  switch(startTimeType)
   {
-    retVal = boost::lexical_cast<double>(m_uiForm.timeAxisFinishAtInput->text().toStdString());
+    case MuonAnalysisOptionTab::FirstGoodData:
+      value = firstGoodBin(); break;
+
+    case MuonAnalysisOptionTab::TimeZero:
+      value = 0; break;
+
+    case MuonAnalysisOptionTab::Custom:
+      value = m_optionTab->getCustomStartTime(); break;
+
+    default:
+      // Just in case added a new one
+      throw std::runtime_error("Unknown start time type");
   }
-  catch (...)
-  {
-    retVal = 1.0;
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Finish at (ms)' input box. Plot to time=1.0.");
-  }
-  return retVal;
+
+  return value;
+}
+
+/**
+ * Returns max X value as specified by user.
+ * @return Max X value, or EMPTY_DBL() if not set
+ */
+double MuonAnalysis::finishTime() const
+{
+  return m_optionTab->getCustomFinishTime();
 }
 
 /**
@@ -2326,8 +2397,8 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   m_uiForm.mwRunDeadTimeFile->setUserInput(savedDeadTimeFile);
 
   // Load values saved using saveWidgetValue()
-  loadWidgetValue(m_uiForm.timeZeroFront, 0.2);
-  loadWidgetValue(m_uiForm.firstGoodBinFront, 0.3);
+  loadWidgetValue(m_uiForm.timeZeroFront, TIME_ZERO_DEFAULT);
+  loadWidgetValue(m_uiForm.firstGoodBinFront, FIRST_GOOD_BIN_DEFAULT);
   loadWidgetValue(m_uiForm.timeZeroAuto, Qt::Checked);
   loadWidgetValue(m_uiForm.firstGoodDataAuto, Qt::Checked);
 }
@@ -2676,6 +2747,7 @@ void MuonAnalysis::connectAutoSave()
 
 /**
  * Saves the value of the widget which called the slot.
+ * TODO: should be done using MuonAnalysisHelper::WidgetAutoSaver
  */
 void MuonAnalysis::saveWidgetValue()
 {
@@ -2709,6 +2781,7 @@ void MuonAnalysis::saveWidgetValue()
 
 /**
  * Load previously saved value for the widget.
+ * TODO: should be done using MuonAnalysisHelper::WidgetAutoSaver
  * @param       target :: Widget where the value will be loaded to
  * @param defaultValue :: Values which will be set if there is no saved value
  */
@@ -3155,45 +3228,23 @@ Algorithm_sptr MuonAnalysis::createLoadAlgorithm()
   loadAlg->setProperty("DetectorGroupingTable", grouping);
 
   // -- X axis options --------------------------------------------------------
+  loadAlg->setProperty("Xmin", startTime());
 
-  double Xmin = m_uiForm.timeAxisStartAtInput->text().toDouble();
-  loadAlg->setProperty("Xmin", Xmin);
-
-  double Xmax = m_uiForm.timeAxisFinishAtInput->text().toDouble();
-  loadAlg->setProperty("Xmax", Xmax);
+  double Xmax = finishTime();
+  if (Xmax != EMPTY_DBL())
+  {
+    loadAlg->setProperty("Xmax", Xmax);
+  }
 
   double timeZero = m_uiForm.timeZeroFront->text().toDouble(); 
   loadAlg->setProperty("TimeZero", timeZero);
 
   // -- Rebin options ---------------------------------------------------------
+  std::string params = rebinParams(AnalysisDataService::Instance().retrieve(m_grouped_name));
 
-  if ( m_uiForm.rebinComboBox->currentIndex() != 0)
+  if (!params.empty())
   {
-    std::string rebinParams;
-
-    if(m_uiForm.rebinComboBox->currentIndex() == 1) // Fixed
-    {
-      auto loadedWS = AnalysisDataService::Instance().retrieveWS<Workspace>(m_grouped_name);
-      MatrixWorkspace_sptr ws;
-
-      if ( ! ( ws = boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWS) ) )
-      {
-        auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWS);
-        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
-      }
-
-      double binSize = ws->dataX(0)[1] - ws->dataX(0)[0];
-
-      double bunchedBinSize = binSize * m_uiForm.optionStepSizeText->text().toDouble();
-
-      rebinParams = boost::lexical_cast<std::string>(bunchedBinSize);
-    }
-    else // Variable
-    {
-      rebinParams = m_uiForm.binBoundaries->text().toStdString();
-    }
-
-    loadAlg->setPropertyValue("RebinParams", rebinParams);
+    loadAlg->setPropertyValue("RebinParams", params);
   }
 
   // -- Group/pair properties -------------------------------------------------

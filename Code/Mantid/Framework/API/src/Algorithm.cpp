@@ -532,12 +532,25 @@ namespace Mantid
       std::map<std::string, std::string> errors = this->validateInputs();
       if (!errors.empty())
       {
+        size_t numErrors = errors.size();
         // Log each issue
         for (auto it = errors.begin(); it != errors.end(); it++)
-          g_log.error() << "Invalid value for " << it->first << ": " << it->second << std::endl;
+        {
+          if (this->existsProperty(it->first))
+            g_log.error() << "Invalid value for " << it->first << ": " << it->second << "\n";
+          else
+          {
+            numErrors -= 1; // don't count it as an error
+            g_log.warning() << "validateInputs() references non-existant property \""
+                            << it->first << "\"\n";
+          }
+        }
         // Throw because something was invalid
-        notificationCenter().postNotification(new ErrorNotification(this,"Some invalid Properties found"));
-        throw std::runtime_error("Some invalid Properties found");
+        if (numErrors > 0)
+        {
+          notificationCenter().postNotification(new ErrorNotification(this,"Some invalid Properties found"));
+          throw std::runtime_error("Some invalid Properties found");
+        }
       }
 
       // ----- Check for processing groups -------------

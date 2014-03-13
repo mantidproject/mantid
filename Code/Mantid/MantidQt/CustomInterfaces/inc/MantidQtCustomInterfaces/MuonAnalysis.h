@@ -238,13 +238,13 @@ private slots:
 
 private:
  
-  // Types of entities we are dealing with
+  /// Types of entities we are dealing with
   enum ItemType { Pair, Group };
   
-  // Possible plot types users might request
+  /// Possible plot types users might request
   enum PlotType { Asymmetry, Counts, Logorithm };
 
-  // Types of periods
+  /// Types of periods
   enum PeriodType { First, Second };
 
   /// Initialize local Python environment
@@ -412,16 +412,19 @@ private:
   int getPairNumberFromRow(int row);
 
   /// first good bin returned in ms
-  QString firstGoodBin();
+  double firstGoodBin() const;
 
-  /// According to Plot Options what is the time to plot from in ms
-  double plotFromTime();
+  /// Returns start X value as specified by user
+  double startTime() const;
 
-  /// According to Plot Options what is the time to plot to in ms
-  double plotToTime();
+  /// Return finish X value as specified by user
+  double finishTime() const;
 
   /// time zero returned in ms
   double timeZero();
+
+  /// Returns params string which can be passed to Rebin, according to what user specified
+  std::string rebinParams(Workspace_sptr wsForRebin);
 
   /// title of run
   std::string m_title;
@@ -507,6 +510,10 @@ private:
 
   /// The group we should add new plot workspaces to
   WorkspaceGroup_sptr m_currentGroup;
+
+  /// Default widget values
+  static const QString TIME_ZERO_DEFAULT;
+  static const QString FIRST_GOOD_BIN_DEFAULT;
 
   static const QString NOT_AVAILABLE;
 

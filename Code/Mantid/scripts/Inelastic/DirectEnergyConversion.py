@@ -289,13 +289,9 @@ class DirectEnergyConversion(object):
 # -------------------------------------------------------------------------------------------
 #         This actually does the conversion for the mono-sample and mono-vanadium runs
 #  
-# -------------------------------------------------------------------------------------------        
-    def _do_mono(self, data_ws, monitor_ws, result_name, ei_guess, 
+# -------------------------------------------------------------------------------------------
+    def _do_mono_SNS(self, data_ws, monitor_ws, result_name, ei_guess, 
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
-        """
-        Convert units of a given workspace to deltaE, including possible 
-        normalisation to a white-beam vanadium run.
-        """
 
         # Special load monitor stuff.    
         if (self.instr_name == "CNCS" or self.instr_name == "HYSPEC"):
@@ -367,39 +363,36 @@ class DirectEnergyConversion(object):
         bin_offset = -mon1_peak
         
         # For event mode, we are going to histogram in energy first, then go back to TOF
-        if (self.__facility == "SNS"):
-            if self.check_background== True:
-                # Extract the time range for the background determination before we throw it away
-                background_bins = "%s,%s,%s" % (self.bkgd_range[0] + bin_offset, (self.bkgd_range[1]-self.bkgd_range[0]), self.bkgd_range[1] + bin_offset)
-                Rebin(InputWorkspace=result_name,OutputWorkspace= "background_origin_ws",Params=background_bins)
-            # Convert to Et
-            ConvertUnits(InputWorkspace=result_name,OutputWorkspace= "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
-            RenameWorkspace(InputWorkspace="_tmp_energy_ws",OutputWorkspace= result_name)
-            # Histogram
-            Rebin(InputWorkspace=result_name,OutputWorkspace= "_tmp_rebin_ws",Params= self.energy_bins, PreserveEvents=False)
-            RenameWorkspace(InputWorkspace="_tmp_rebin_ws",OutputWorkspace= result_name)
-            # Convert back to TOF
-            ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="TOF",EMode="Direct", EFixed=ei_value)
+        if self.check_background== True:
+           # Extract the time range for the background determination before we throw it away
+           background_bins = "%s,%s,%s" % (self.bkgd_range[0] + bin_offset, (self.bkgd_range[1]-self.bkgd_range[0]), self.bkgd_range[1] + bin_offset)
+           Rebin(InputWorkspace=result_name,OutputWorkspace= "background_origin_ws",Params=background_bins)
+
+        # Convert to Et
+        ConvertUnits(InputWorkspace=result_name,OutputWorkspace= "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
+        RenameWorkspace(InputWorkspace="_tmp_energy_ws",OutputWorkspace= result_name)
+        # Histogram
+        Rebin(InputWorkspace=result_name,OutputWorkspace= "_tmp_rebin_ws",Params= self.energy_bins, PreserveEvents=False)
+        RenameWorkspace(InputWorkspace="_tmp_rebin_ws",OutputWorkspace= result_name)
+        # Convert back to TOF
+        ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="TOF",EMode="Direct", EFixed=ei_value)
 
         if self.check_background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
             ConvertToDistribution(Workspace=result_name)    
-            if (self.__facility == "SNS"):
-                CalculateFlatBackground(InputWorkspace="background_origin_ws",OutputWorkspace= "background_ws",
+
+            CalculateFlatBackground(InputWorkspace="background_origin_ws",OutputWorkspace= "background_ws",
                                StartX= self.bkgd_range[0] + bin_offset,EndX= self.bkgd_range[1] + bin_offset,
                                WorkspaceIndexList= '',Mode= 'Mean',OutputMode= 'Return Background')
-                # Delete the raw data background region workspace
-                DeleteWorkspace("background_origin_ws")
-                # Convert to distribution to make it compatible with the data workspace (result_name).
-                ConvertToDistribution(Workspace="background_ws") 
-                # Subtract the background
-                Minus(LHSWorkspace=result_name,RHSWorkspace= "background_ws",OutputWorkspace=result_name)
-                # Delete the determined background 
-                DeleteWorkspace("background_ws")
-            else:
-                CalculateFlatBackground(InputWorkspace=result_name,OutputWorkspace=result_name,
-                               StartX= self.bkgd_range[0] + bin_offset,EndX= self.bkgd_range[1] + bin_offset,
-                               WorkspaceIndexList= '',Mode= 'Mean')
+            # Delete the raw data background region workspace
+            DeleteWorkspace("background_origin_ws")
+            # Convert to distribution to make it compatible with the data workspace (result_name).
+            ConvertToDistribution(Workspace="background_ws") 
+            # Subtract the background
+            Minus(LHSWorkspace=result_name,RHSWorkspace= "background_ws",OutputWorkspace=result_name)
+             # Delete the determined background 
+            DeleteWorkspace("background_ws")
+
             ConvertFromDistribution(Workspace=result_name)  
 
         # Normalise using the chosen method
@@ -420,15 +413,69 @@ class DirectEnergyConversion(object):
             Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= self.energy_bins,PreserveEvents=False)
         
         if self.apply_detector_eff:
-            if self.__facility == "SNS":
-                # Need to be in lambda for detector efficiency correction
-                ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="Wavelength", EMode="Direct", EFixed=ei_value)
-                He3TubeEfficiency(InputWorkspace=result_name,OutputWorkspace=result_name)
-                ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="DeltaE",EMode='Direct', EFixed=ei_value)
-            else:
-                DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
-                self.log("_do_mono: finished DetectorEfficiencyCor for : "+result_name)
+           # Need to be in lambda for detector efficiency correction
+            ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="Wavelength", EMode="Direct", EFixed=ei_value)
+            He3TubeEfficiency(InputWorkspace=result_name,OutputWorkspace=result_name)
+            ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="DeltaE",EMode='Direct', EFixed=ei_value)
+        ############
+        return
 
+    def _do_mono_ISIS(self, data_ws, monitor_ws, result_name, ei_guess, 
+                 white_run=None, map_file=None, spectra_masks=None, Tzero=None):
+
+        # Do ISIS stuff for Ei
+        # Both are these should be run properties really
+        ei_value, mon1_peak = self.get_ei(monitor_ws, result_name, ei_guess)
+        self.incident_energy = ei_value
+
+        # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in CalculateFlatBackground and normalisation
+        bin_offset = -mon1_peak
+        
+        if self.check_background == True:
+            # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
+            ConvertToDistribution(Workspace=result_name)    
+            CalculateFlatBackground(InputWorkspace=result_name,OutputWorkspace=result_name,
+                                    StartX= self.bkgd_range[0] + bin_offset,EndX= self.bkgd_range[1] + bin_offset,
+                                     WorkspaceIndexList= '',Mode= 'Mean')
+            ConvertFromDistribution(Workspace=result_name)  
+
+        # Normalise using the chosen method
+        # TODO: This really should be done as soon as possible after loading
+        self.normalise(mtd[result_name], result_name, self.normalise_method, range_offset=bin_offset)
+
+       
+
+        # This next line will fail the SystemTests
+        #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
+        # But this one passes...
+        ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
+        self.log("_do_mono: finished ConvertUnits for : "+result_name)
+      
+
+                
+        if not self.energy_bins is None:
+            Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= self.energy_bins,PreserveEvents=False)
+        
+        if self.apply_detector_eff:
+           DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
+           self.log("_do_mono: finished DetectorEfficiencyCor for : "+result_name)
+        #############
+        return
+
+    def _do_mono(self, data_ws, monitor_ws, result_name, ei_guess, 
+                 white_run=None, map_file=None, spectra_masks=None, Tzero=None):
+        """
+        Convert units of a given workspace to deltaE, including possible 
+        normalisation to a white-beam vanadium run.
+        """
+        if (self.__facility == "SNS"):
+           self._do_mono_SNS(data_ws,monitor_ws,result_name,ei_guess,
+                         white_run, map_file, spectra_masks, Tzero)
+        else:
+            self._do_mono_ISIS(data_ws,monitor_ws,result_name,ei_guess,
+                               white_run, map_file, spectra_masks, Tzero)
+
+        #######################
         # Ki/Kf Scaling...
         if self.apply_kikf_correction:
             self.log('Start Applying ki/kf corrections to the workpsace : '+result_name)                                
@@ -449,10 +496,11 @@ class DirectEnergyConversion(object):
         if white_run is not None:
             white_ws = self.do_white(white_run, spectra_masks, map_file,None)
             result_ws /= white_ws
-            #result_ws = Divide(LHSWorkspace=result_ws,RHSWorkspace=white_ws,NotWarnOnZeroDivide='1');
+
         # Overall scale factor
         result_ws *= self.scale_factor
         return result_ws
+
 
 #-------------------------------------------------------------------------------
 
