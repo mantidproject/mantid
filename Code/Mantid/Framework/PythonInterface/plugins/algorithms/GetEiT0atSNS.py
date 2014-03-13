@@ -22,6 +22,8 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
         return "GetEiT0atSNS"
     
     def PyInit(self):
+        self.setWikiSummary("Get Ei and T0 on ARCS and SEQUOIA instruments.")
+        self.setOptionalMessage("Get Ei and T0 on ARCS and SEQUOIA instruments.")
         """ Declare properties
         """        
         self.declareProperty(mantid.api.WorkspaceProperty("MonitorWorkspace", "",direction=mantid.kernel.Direction.InOut), "Monitor workspace")

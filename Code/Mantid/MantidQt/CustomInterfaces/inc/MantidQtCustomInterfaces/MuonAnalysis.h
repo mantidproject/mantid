@@ -237,13 +237,13 @@ private slots:
 
 private:
  
-  // Types of entities we are dealing with
+  /// Types of entities we are dealing with
   enum ItemType { Pair, Group };
   
-  // Possible plot types users might request
+  /// Possible plot types users might request
   enum PlotType { Asymmetry, Counts, Logorithm };
 
-  // Types of periods
+  /// Types of periods
   enum PeriodType { First, Second };
 
   /// Initialize local Python environment
@@ -430,14 +430,17 @@ private:
   /// first good bin returned in ms
   double firstGoodBin() const;
 
-  /// According to Plot Options what is the time to plot from in ms
-  double plotFromTime() const;
+  /// Returns start X value as specified by user
+  double startTime() const;
 
-  /// According to Plot Options what is the time to plot to in ms
-  double plotToTime() const;
+  /// Return finish X value as specified by user
+  double finishTime() const;
 
   /// time zero returned in ms
   double timeZero();
+
+  /// Returns params string which can be passed to Rebin, according to what user specified
+  std::string rebinParams(Workspace_sptr wsForRebin);
 
   /// title of run
   std::string m_title;
@@ -518,10 +521,11 @@ private:
   /// First Good Data time as loaded from Data file
   double m_dataFirstGoodData;
 
-  static const QString NOT_AVAILABLE;
+  /// Default widget values
+  static const QString TIME_ZERO_DEFAULT;
+  static const QString FIRST_GOOD_BIN_DEFAULT;
 
-  // Default value used for first good bin
-  static const double FIRST_GOOD_BIN_DEFAULT;
+  static const QString NOT_AVAILABLE;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

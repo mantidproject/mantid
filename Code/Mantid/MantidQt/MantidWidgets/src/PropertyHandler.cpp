@@ -18,6 +18,7 @@
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
+#include "ParameterPropertyManager.h"
 
 #include <QMessageBox>
 #include <QMenu>
@@ -247,13 +248,11 @@ void PropertyHandler::initParameters()
   {
     QString parName = QString::fromStdString(function()->parameterName(i));
     if (parName.contains('.')) continue;
-    QtProperty* prop = m_browser->addDoubleProperty(parName);
-    QString toolTip = QString::fromStdString(function()->parameterDescription(i));
-    if (!toolTip.isEmpty())
-    {
-      prop->setToolTip(toolTip);
-    }
-    m_browser->m_doubleManager->setValue(prop,function()->getParameter(i));
+    QtProperty* prop = m_browser->addDoubleProperty(parName, m_browser->m_parameterManager);
+
+    m_browser->m_parameterManager->setDescription(prop, function()->parameterDescription(i));
+    m_browser->m_parameterManager->setValue(prop,function()->getParameter(i));
+
     m_item->property()->addSubProperty(prop);
     m_parameters << prop;
     // add tie property if this parameter has a tie
@@ -682,7 +681,7 @@ bool PropertyHandler::setParameter(QtProperty* prop)
   if (m_parameters.contains(prop))
   {
     std::string parName = prop->propertyName().toStdString();
-    double parValue = m_browser->m_doubleManager->value(prop);
+    double parValue = m_browser->m_parameterManager->value(prop);
     m_fun->setParameter(parName,parValue);
     m_browser->sendParameterChanged(m_fun.get());
     return true;
@@ -920,24 +919,66 @@ void PropertyHandler::setVectorAttribute(QtProperty *prop)
 }
 
 /**
-* Update the parameter properties
-*/
-void PropertyHandler::updateParameters()
+ * Applies given function to all the parameter properties recursively, within this context.
+ * @param func :: Function to apply
+ */
+void PropertyHandler::applyToAllParameters(void (PropertyHandler::*func)(QtProperty*))
 {
   for(int i=0;i<m_parameters.size();i++)
   {
     QtProperty* prop = m_parameters[i];
-    std::string parName = prop->propertyName().toStdString();
-    double parValue = function()->getParameter(parName);
-    m_browser->m_doubleManager->setValue(prop,parValue);
+    (this->*(func))(prop);
   }
+
   if (m_cf)
   {
     for(size_t i=0;i<m_cf->nFunctions();i++)
     {
-      getHandler(i)->updateParameters();
+      getHandler(i)->applyToAllParameters(func);
     }
   }
+}
+
+void PropertyHandler::updateParameters()
+{
+  applyToAllParameters(&PropertyHandler::updateParameter);
+}
+
+void PropertyHandler::updateErrors()
+{
+  applyToAllParameters(&PropertyHandler::updateError);
+}
+
+void PropertyHandler::clearErrors()
+{
+  applyToAllParameters(&PropertyHandler::clearError);
+}
+
+/**
+ * @param prop :: Property of the parameter
+ */
+void PropertyHandler::updateParameter(QtProperty* prop)
+{
+  double parValue = function()->getParameter(prop->propertyName().toStdString());
+  m_browser->m_parameterManager->setValue(prop, parValue);
+}
+
+/**
+ * @param prop :: Property of the parameter
+ */
+void PropertyHandler::updateError(QtProperty* prop)
+{
+  size_t index = function()->parameterIndex(prop->propertyName().toStdString());
+  double error = function()->getError(index);
+  m_browser->m_parameterManager->setError(prop, error);
+}
+
+/**
+ * @param prop :: Property of the parameter
+ */
+void PropertyHandler::clearError(QtProperty* prop)
+{
+  m_browser->m_parameterManager->clearError(prop);
 }
 
 /**
@@ -1117,7 +1158,7 @@ void PropertyHandler::fix(const QString& parName)
 {
   QtProperty* parProp = getParameterProperty(parName);
   if (!parProp) return;
-  QString parValue = QString::number(m_browser->m_doubleManager->value(parProp));
+  QString parValue = QString::number(m_browser->m_parameterManager->value(parProp));
   try
   {
     m_fun->tie(parName.toStdString(),parValue.toStdString());

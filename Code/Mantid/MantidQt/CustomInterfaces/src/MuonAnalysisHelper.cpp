@@ -1,13 +1,14 @@
 #include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
 
+#include "MantidKernel/EmptyValues.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
 
 #include <stdexcept>
+#include <boost/scope_exit.hpp>
 
 namespace MantidQt
 {
@@ -17,14 +18,26 @@ namespace MuonAnalysisHelper
 {
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 /**
  * Sets double validator for specified field.
  * @param field :: Field to set validator for
+ * @param allowEmpty :: Whether the validator should accept empty inputs as well
  */
-void setDoubleValidator(QLineEdit* field)
+void setDoubleValidator(QLineEdit* field, bool allowEmpty)
 {
-  QDoubleValidator* newValidator = new QDoubleValidator(field);
+  QDoubleValidator* newValidator;
+
+  if (allowEmpty)
+  {
+    newValidator = new DoubleOrEmptyValidator(field);
+  }
+  else
+  {
+    newValidator = new QDoubleValidator(field);
+  }
+
   newValidator->setNotation(QDoubleValidator::StandardNotation);
   field->setValidator(newValidator);
 }
@@ -71,6 +84,18 @@ size_t numPeriods(Workspace_sptr ws)
  */
 void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out)
 {
+  // Remember current out stream format
+  std::ios_base::fmtflags outFlags(out.flags());
+  std::streamsize outPrecision(out.precision());
+
+  BOOST_SCOPE_EXIT((&out)(&outFlags)(&outPrecision))
+  {
+    // Restore the flags when exiting the function
+    out.precision(outPrecision);
+    out.flags(outFlags);
+  }
+  BOOST_SCOPE_EXIT_END
+
   // Set display style for floating point values
   out << std::fixed << std::setprecision(12);
 
@@ -320,6 +345,40 @@ void WidgetAutoSaver::beginGroup(const QString &name)
 void WidgetAutoSaver::endGroup()
 {
   m_settings.endGroup();
+}
+
+/**
+ * Validates and returns a double value. If it is not invalid, the widget is set to default value,
+ * appropriate warning is printed and default value is returned.
+ * @param field :: Field to get value from
+ * @param defaultValue :: Default value to return/set if field value is invalid
+ * @param valueDescr :: Description of the value
+ * @param log :: Log to print warning to in case value is invalid
+ * @return Value if field is valid, default value otherwise. If default value is empty, EMPTY_DBL() is returned
+ */
+double getValidatedDouble(QLineEdit* field, const QString& defaultValue,
+                          const QString& valueDescr, Logger& log)
+{
+  bool ok;
+  double value = field->text().toDouble(&ok);
+
+  if (!ok)
+  {
+    log.warning() << "The value of " << valueDescr.toStdString() << " is invalid. ";
+    log.warning() << "Reset to default.\n";
+    field->setText(defaultValue);
+
+    if(defaultValue.isEmpty())
+    {
+      return Mantid::EMPTY_DBL();
+    }
+    else
+    {
+      return defaultValue.toDouble();
+    }
+  }
+
+  return value;
 }
 
 } // namespace MuonAnalysisHelper
