@@ -26,6 +26,7 @@ public:
     boost::shared_ptr<Detector> pdet;
     TS_ASSERT_THROWS_NOTHING( pdet = ParComponentFactory::createDetector(det, map) );
     TS_ASSERT(pdet);
+    delete map;
   }
 
   void test_createInstrument()
