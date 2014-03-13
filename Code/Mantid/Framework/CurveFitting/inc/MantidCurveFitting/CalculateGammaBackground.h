@@ -61,6 +61,8 @@ namespace Mantid
         double gaussWidth;
       };
 
+      /// Avoid nested try catch in openmp loop by returning boolean if spectrum was corrceted
+      bool calculateBackground(size_t inputIndex, size_t ouptutIndex);
       /// Calculate & correct the given index of the input workspace
       void applyCorrection(const size_t inputIndex,const size_t outputIndex);
       /// Compute the expected spectrum from a given detector
@@ -118,8 +120,6 @@ namespace Mantid
 
       /// Pointer to progress reporting
       API::Progress *m_progress;
-      // internal method called within the loop to avoid true-catch operations which broke Microsoft compiler compiling in parallel
-      bool calculateBackground(size_t inputIndex, size_t ouptutIndex);
     };
 
 
