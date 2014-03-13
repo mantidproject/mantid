@@ -594,6 +594,10 @@ namespace MantidQt
         return;
       }
 
+      // Performed here to allow the user to login while the search GUI is open,
+      // and see results of all facilities/catalogs that they are logged in to.
+      m_catalogSelector->populateFacilitySelection();
+
       // Since there are no longer errors we hide the error labels.
       hideErrorLabels();
 
