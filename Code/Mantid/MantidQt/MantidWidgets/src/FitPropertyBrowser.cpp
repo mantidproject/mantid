@@ -29,6 +29,8 @@
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
+#include "ParameterPropertyManager.h"
+
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1125
@@ -49,6 +51,8 @@
     #pragma GCC diagnostic pop
   #endif
 #endif
+
+#include <Poco/ActiveResult.h>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -183,6 +187,7 @@ m_mantidui(mantidui)
   m_vectorManager = new QtGroupPropertyManager(w);
   m_vectorSizeManager = new QtIntPropertyManager(w);
   m_vectorDoubleManager = new QtDoublePropertyManager(w);
+  m_parameterManager = new ParameterPropertyManager(w);
 }
 
 
@@ -240,6 +245,11 @@ void FitPropertyBrowser::init()
                                            QVariant(false)).toBool();
   m_boolManager->setValue(m_convolveMembers, convolveCompositeItems);
 
+  m_showParamErrors = m_boolManager->addProperty("Show Parameter Errors");
+  bool showParamErrors = settings.value(m_showParamErrors->propertyName(), false).toBool();
+  m_boolManager->setValue(m_showParamErrors, showParamErrors);
+  m_parameterManager->setErrorsEnabled(showParamErrors);
+
   m_xColumn = m_columnManager->addProperty("XColumn");
   m_yColumn = m_columnManager->addProperty("YColumn");
   m_errColumn = m_columnManager->addProperty("ErrColumn");
@@ -257,6 +267,7 @@ void FitPropertyBrowser::init()
   settingsGroup->addSubProperty(m_plotDiff);
   settingsGroup->addSubProperty(m_plotCompositeMembers);
   settingsGroup->addSubProperty(m_convolveMembers);
+  settingsGroup->addSubProperty(m_showParamErrors);
 
   /* Create editors and assign them to the managers */
   createEditors(w);
@@ -296,6 +307,7 @@ void FitPropertyBrowser::initLayout(QWidget *w)
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
   connect(m_columnManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(columnChanged(QtProperty*)));
   connect(m_vectorDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(vectorDoubleChanged(QtProperty*)));
+  connect(m_parameterManager,SIGNAL(propertyChanged(QtProperty*)), this, SLOT(parameterChanged(QtProperty*)));
 
   QVBoxLayout* layout = new QVBoxLayout(w);
   QGridLayout* buttonsLayout = new QGridLayout();
@@ -445,6 +457,7 @@ void FitPropertyBrowser::createEditors(QWidget *w)
   m_browser->setFactoryForManager(m_columnManager, comboBoxFactory);
   m_browser->setFactoryForManager(m_vectorSizeManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_vectorDoubleManager, doubleEditorFactory);
+  m_browser->setFactoryForManager(m_parameterManager, new ParameterEditorFactory(w));
 }
 
 
@@ -1219,11 +1232,19 @@ void FitPropertyBrowser::boolChanged(QtProperty* prop)
 {
   if ( ! m_changeSlotsEnabled ) return;
 
-  if ( prop == m_plotDiff || prop == m_plotCompositeMembers || prop == m_ignoreInvalidData )
+  if ( prop == m_plotDiff || prop == m_plotCompositeMembers || prop == m_ignoreInvalidData
+       || prop == m_showParamErrors )
   {
+    bool val = m_boolManager->value(prop);
+
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
-    settings.setValue(prop->propertyName(), m_boolManager->value(prop));
+    settings.setValue(prop->propertyName(), val);
+
+    if ( m_showParamErrors )
+    {
+      m_parameterManager->setErrorsEnabled(val);
+    }
   }
   else
   {// it could be an attribute
@@ -1302,10 +1323,6 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
     emit xRangeChanged(startX(), endX());
     return;
   }
-  else if(getHandler()->setParameter(prop))
-  {
-    return;
-  }
   else
   {// check if it is a constraint
     PropertyHandler* h = getHandler()->findHandler(prop);
@@ -1331,6 +1348,19 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
     }
   }
 }
+
+/**
+ * Called when one of the parameter values gets changed. This could be caused either by user setting
+ * the value or programmatically.
+ * @param prop :: Parameter property which value got changed
+ */
+void FitPropertyBrowser::parameterChanged(QtProperty* prop)
+{
+  if ( ! m_changeSlotsEnabled ) return;
+
+  getHandler()->setParameter(prop);
+}
+
 /** Called when a string property changed
  * @param prop :: A pointer to the property 
  */
@@ -1818,7 +1848,8 @@ void FitPropertyBrowser::vectorDoubleChanged(QtProperty *prop)
     h->setVectorAttribute(prop);
 }
 
-/** Update the function parameter properties. 
+/**
+ * Update the function parameter properties
  */
 void FitPropertyBrowser::updateParameters()
 {
@@ -1861,14 +1892,19 @@ void FitPropertyBrowser::getFitResults()
       try
       {
         std::string name;
-        double value;
-        row >> name >> value;
+        double value, error;
+        row >> name >> value >> error;
+
         // In case of a single function Fit doesn't create a CompositeFunction
         if (count() == 1)
         {
           name.insert(0,"f0.");
         }
-        compositeFunction()->setParameter(name,value);
+
+        size_t paramIndex = compositeFunction()->parameterIndex(name);
+
+        compositeFunction()->setParameter(paramIndex,value);
+        compositeFunction()->setError(paramIndex, error);
       }
       catch(...)
       {
@@ -1877,6 +1913,7 @@ void FitPropertyBrowser::getFitResults()
     }
     while(row.next());
     updateParameters();
+    getHandler()->updateErrors();
   }
 }
 
@@ -1892,6 +1929,7 @@ void FitPropertyBrowser::undoFit()
       compositeFunction()->setParameter(i,m_initialParameters[i]);
     }
     updateParameters();
+    getHandler()->clearErrors();
   }
   disableUndo();
 }

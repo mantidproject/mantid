@@ -64,14 +64,19 @@ private slots:
   void helpResultsClicked();
   void selectAllLogs(bool);
   void selectAllFittings(bool);
-  void createTable();
+
+  /// Executed when "Create table" button is clicked
+  void onCreateTableClicked();
 
   /// Clear and populate both tables
   void populateTables();
 
 private:
-  /// Postfix used by Fit fot result workspaces
+  /// Postfix used by Fit for result workspaces
   static const std::string WORKSPACE_POSTFIX;
+
+  /// Postfix used by Fit for tables with fitted parameters
+  static const std::string PARAMS_POSTFIX;
 
   /// Names of the non-timeseries logs we should display
   static const QStringList NON_TIMESERIES_LOGS;
@@ -79,10 +84,36 @@ private:
   /// LessThan function used to sort log names
   static bool logNameLessThan(const QString& logName1, const QString& logName2);
 
+  /**
+   * Retrieve the workspace, checking if it is of the expected type. If workspace with given and name
+   * and type is not found in the ADS - NotFoundError is thrown.
+   * @param wsName :: Name of the workspace to retrieve
+   * @return Retrieved workspace
+   */
+  template <typename T>
+  static boost::shared_ptr<T> retrieveWSChecked(const std::string& wsName)
+  {
+    auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(wsName);
+
+    if ( ! ws )
+      throw Mantid::Kernel::Exception::NotFoundError("Incorrect type", wsName);
+
+    return ws;
+  }
+
+  /// Returns name of the fitted workspace with WORKSPACE_POSTFIX removed
+  static std::string wsBaseName(const std::string& wsName);
+
+  /// Does a few basic checks for whether the workspace is a fitted workspace
+  static bool isFittedWs(const std::string& wsName);
+
   void storeUserSettings();
   void applyUserSettings();
   void populateLogsAndValues(const QStringList& fittedWsList);
   void populateFittings(const QStringList& fittedWsList);
+
+  /// Creates the results table
+  void createTable();
 
   /// Returns a list of workspaces which should be displayed in the table
   QStringList getFittedWorkspaces();

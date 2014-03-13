@@ -19,11 +19,13 @@ all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 if 'GatherWorkspaces' in all_algs:
     HAVE_MPI = True
     from mpi4py import MPI
-    rank = MPI.COMM_WORLD.Get_rank()
+    mpiRank = MPI.COMM_WORLD.Get_rank()
 else:
     HAVE_MPI = False
+    mpiRank = 0 # simplify if clauses
 
 COMPRESS_TOL_TOF = .01
+EVENT_WORKSPACE_ID = "EventWorkspace"
 
 class SNSPowderReduction(PythonAlgorithm):
     class PDConfigFile(object):
@@ -152,7 +154,6 @@ class SNSPowderReduction(PythonAlgorithm):
             self._data[info.freq][info.wl]=info
         def __getFrequency(self, request):
             for freq in self._data.keys():
-                # commit 579b5941a6618dc8c4f2ad7838484e375a24ac37
                 if abs(float(freq)-request) == 0.:                    
                     return freq
                 if 100. * abs(float(freq)-request)/request < 5.:
@@ -239,12 +240,12 @@ class SNSPowderReduction(PythonAlgorithm):
                              "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
         self.declareProperty("FilterBadPulses", True, "Filter out events measured while proton charge is more than 5% below average")
-        outfiletypes = ['gsas', 'fullprof', 'gsas and fullprof', 'gsas and fullprof and pdfgetn', 'NeXus',
-                            'gsas and NeXus', 'fullprof and NeXus', 'gsas and fullprof and NeXus', 'gsas and fullprof and pdfgetn and NeXus']
-        self.declareProperty("SaveAs", "gsas", StringListValidator(outfiletypes))
+        self.declareProperty("ScaleData", defaultValue=1., validator=FloatBoundedValidator(lower=0., exclusive=True),
+                             doc="Constant to multiply the data before writing out. This does not apply to PDFgetN files.")
+        self.declareProperty("SaveAs", "gsas",
+                             "List of all output file types. Allowed values are 'fullprof', 'gsas', 'nexus', 'pdfgetn', and 'topas'")
         self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
         self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.Directory))
-        self.declareProperty("NormalizeByCurrent", True, "Normalized by Current")
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
 
         tableprop = ITableWorkspaceProperty("SplittersWorkspace", "", Direction.Input, PropertyMode.Optional)
@@ -252,7 +253,8 @@ class SNSPowderReduction(PythonAlgorithm):
         infotableprop = ITableWorkspaceProperty("SplitInformationWorkspace", "", Direction.Input, PropertyMode.Optional)
         self.declareProperty(infotableprop, "Name of table workspace containing information for splitters.")
 
-        self.declareProperty("LowResolutionSpectraOffset", -1,  "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. Otherwise, ignored.")
+        self.declareProperty("LowResolutionSpectraOffset", -1,
+                             "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. Otherwise, ignored.")
 
         return
 
@@ -285,15 +287,15 @@ class SNSPowderReduction(PythonAlgorithm):
         self._vanPeakFWHM = self.getProperty("VanadiumFWHM").value
         self._vanSmoothing = self.getProperty("VanadiumSmoothParams").value
         calib = self.getProperty("CalibrationFile").value
+        self._scaleFactor = self.getProperty("ScaleData").value
         self._outDir = self.getProperty("OutputDirectory").value
         self._outPrefix = self.getProperty("OutputFilePrefix").value
-        self._outTypes = self.getProperty("SaveAs").value
+        self._outTypes = self.getProperty("SaveAs").value.lower()
         samRuns = self.getProperty("RunNumber").value
         preserveEvents = self.getProperty("PreserveEvents").value
         if HAVE_MPI and preserveEvents == True:
             self.log().warning("preserveEvents set to False for MPI tasks.")
             preserveEvents = False
-        normbycurrent = self.getProperty("NormalizeByCurrent").value
         self._info = None
         self._infodict = {}
         self._chunks = self.getProperty("MaxChunkSize").value
@@ -350,7 +352,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 self.log().information("[Sum] Process run number %s. " %(str(runnumber)))
 
                 temp = self._focusChunks(temp, SUFFIX, timeFilterWall, calib, 
-                        preserveEvents=preserveEvents, normByCurrent=normbycurrent)
+                        preserveEvents=preserveEvents)
                 tempinfo = self._getinfo(temp)
 
                 if samRun is None:
@@ -366,7 +368,7 @@ class SNSPowderReduction(PythonAlgorithm):
                         raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
                                            % (tempinfo.wl, info.wl))
                     samRun = api.Plus(LHSWorkspace=samRun, RHSWorkspace=temp, OutputWorkspace=samRun)
-                    if not "histo" in SUFFIX and preserveEvents:
+                    if samRun.id() == EVENT_WORKSPACE_ID:
                         samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                                        Tolerance=COMPRESS_TOL_TOF) # 10ns
                     api.DeleteWorkspace(str(temp))
@@ -384,7 +386,7 @@ class SNSPowderReduction(PythonAlgorithm):
             if not self.getProperty("Sum").value and samRun > 0:
                 self._info = None
                 returned = self._focusChunks(samRun, SUFFIX, timeFilterWall, calib, self._splitws, 
-                        preserveEvents=preserveEvents, normByCurrent=normbycurrent)
+                        preserveEvents=preserveEvents)
 
                 if returned.__class__.__name__ == "list":
                     # Returned with a list of workspaces
@@ -430,17 +432,16 @@ class SNSPowderReduction(PythonAlgorithm):
             elif canRun < 0: # turn off the correction
                 canRun = 0
             if canRun > 0:
+                if self.getProperty("FilterCharacterizations").value:
+                    canFilterWall = timeFilterWall
+                else:
+                    canFilterWall = (0., 0.)
                 if ("%s_%d" % (self._instrument, canRun)) in mtd:
                     canRun = mtd["%s_%d" % (self._instrument, canRun)]
-                    canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
                 else:
-                    if self.getProperty("FilterCharacterizations").value:
-                        canRun = self._focusChunks(canRun, SUFFIX, timeFilterWall, calib,
+                    canRun = self._focusChunks(canRun, SUFFIX, canFilterWall, calib,
                                preserveEvents=preserveEvents)
-                    else:
-                        canRun = self._focusChunks(canRun, SUFFIX, (0., 0.), calib,
-                               preserveEvents=preserveEvents)
-                    canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
+                canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
                 workspacelist.append(str(canRun))
             else:
                 canRun = None
@@ -455,85 +456,62 @@ class SNSPowderReduction(PythonAlgorithm):
                 vanRun = 0
             self.log().information("F313C:  Correction SamRun = %s, VanRun = %s of type %s" % (str(samRun), str(vanRun), str(type(vanRun))))
             if vanRun > 0:
+                if self.getProperty("FilterCharacterizations").value:
+                    vanFilterWall = timeFilterWall
+                else:
+                    vanFilterWall = (0., 0.)
                 if ("%s_%d" % (self._instrument, vanRun)) in mtd:
                     vanRun = mtd["%s_%d" % (self._instrument, vanRun)]
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                 else:
-                    if samRun == 0:
-                        vnoiseRun = 0
-                    else:
-                        vnoiseRun = self._info.vnoise # noise run for the vanadium
-                    if self.getProperty("FilterCharacterizations").value:
-                        vanRun = self._focusChunks(vanRun, SUFFIX, timeFilterWall, calib,
-                               preserveEvents=False, normByCurrent = (vnoiseRun <= 0))
-                    else:
-                        vanRun = self._focusChunks(vanRun, SUFFIX, (0., 0.), calib,
-                               preserveEvents=False, normByCurrent = (vnoiseRun <= 0))
+                    # load the vanadium
+                    vanRun = self._loadData(vanRun, SUFFIX, vanFilterWall)
+                    name = "_".join(str(vanRun).split("_")[:-1])
+                    vanRun = api.RenameWorkspace(InputWorkspace=vanRun, OutputWorkspace=name)
+                    try:
+                        vanRun = api.NormaliseByCurrent(InputWorkspace=vanRun, 
+                                                        OutputWorkspace=vanRun)
+                        vanRun.getRun()['gsas_monitor'] = 1
+                    except Exception, e:
+                        self.log().warning(str(e))
 
-                    if (vnoiseRun > 0):
-                        if self.getProperty("FilterCharacterizations").value:
-                            vnoiseRun = self._focusChunks(vnoiseRun, SUFFIX, timeFilterWall, calib,
-                               preserveEvents=False, normByCurrent = False, filterBadPulsesOverride=False)
-                        else:
-                            vnoiseRun = self._focusChunks(vnoiseRun, SUFFIX, (0., 0.), calib,
-                               preserveEvents=False, normByCurrent = False, filterBadPulsesOverride=False)
-                        if HAVE_MPI:
-                            if rank == 0:
-                                vnoiseRun = api.ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
-                                vnoiseRun = api.FFTSmooth(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Filter="Butterworth",
-                                          Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
-                                try:
-                                    vanDuration = vanRun.getRun().get('duration')
-                                    vanDuration = vanDuration.value
-                                except:
-                                    vanDuration = 1.
-                                try:
-                                    vbackDuration = vnoiseRun.getRun().get('duration')
-                                    vbackDuration = vbackDuration.value
-                                except:
-                                    vbackDuration = 1.
-                                vnoiseRun *= (vanDuration/vbackDuration)
-                                vanRun -= vnoiseRun
-                                vanRun = api.NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
-                                workspacelist.append(str(vnoiseRun))
-                        else:
-                            vnoiseRun = api.ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
-                            vnoiseRun = api.FFTSmooth(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Filter="Butterworth",
-                                      Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
-                            try:
-                                vanDuration = vanRun.getRun().get('duration')
-                                vanDuration = vanDuration.value
-                            except:
-                                vanDuration = 1.
-                            try:
-                                vbackDuration = vnoiseRun.getRun().get('duration')
-                                vbackDuration = vbackDuration.value
-                            except:
-                                vbackDuration = 1.
-                            vnoiseRun *= (vanDuration/vbackDuration)
-                            vanRun -= vnoiseRun
-                            vanRun = api.NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
-                            workspacelist.append(str(vnoiseRun))
-                    else:
-                        vnoiseRun = None
 
+                    # load the vanadium background (if appropriate)
                     vbackRun = self.getProperty("VanadiumBackgroundNumber").value
                     if vbackRun > 0:
-                        if ("%s_%d" % (self._instrument, vbackRun)) in mtd:
-                            vbackRun = mtd["%s_%d" % (self._instrument, vbackRun)]
-                        else:
-                            if self.getProperty("FilterCharacterizations").value:
-                                vbackRun = self._focusChunks(vbackRun, SUFFIX, timeFilterWall, calib,
-                                   preserveEvents=False)
-                            else:
-                                vbackRun = self._focusChunks(vbackRun, SUFFIX, (0., 0.), calib,
-                                   preserveEvents=False)
-                        vanRun -= vbackRun
-                        workspacelist.append(str(vbackRun))
+                        vbackRun = self._loadData(vbackRun, SUFFIX, vanFilterWall, outname="vbackRun")
+                        try:
+                            vbackRun = api.NormaliseByCurrent(InputWorkspace=vbackRun, 
+                                                              OutputWorkspace=vbackRun)
+                            vbackRun.getRun()['gsas_monitor'] = 1
+                        except Exception, e:
+                            self.log().warning(str(e))
 
-                    if HAVE_MPI:
-                        if rank > 0:
-                            return
+                        vanRun -= vbackRun
+                        api.DeleteWorkspace(Workspace=vbackRun)
+                    else:
+                        vbackRun = None
+
+                    # compress events
+                    if vanRun.id() == EVENT_WORKSPACE_ID:
+                        vanRun = api.CompressEvents(InputWorkspace=vanRun, OutputWorkspace=vanRun,
+                                                    Tolerance=COMPRESS_TOL_TOF) # 10ns
+                        
+                    # do the absorption correction
+                    vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
+                    api.SetSampleMaterial(InputWorkspace=vanRun, ChemicalFormula="V", SampleNumberDensity=0.0721)
+                    vanRun = api.MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+
+                    # focus the data
+                    vanRun = api.AlignAndFocusPowder(InputWorkspace=vanRun, OutputWorkspace=vanRun, CalFileName=calib,
+                                                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
+                                                     DMin=self._info.dmin, DMax=self._info.dmax, TMin=self._info.tmin, TMax=self._info.tmax,
+                                                     RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=COMPRESS_TOL_TOF,
+                                                     UnwrapRef=self._LRef, LowResRef=self._DIFCref, LowResSpectrumOffset=self._lowResTOFoffset, 
+                                                     CropWavelengthMin=self._wavelengthMin, **(focuspos))
+                    
+
+                    # strip peaks
                     if self.getProperty("StripVanadiumPeaks").value:
                         vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
                         # api.CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun)+"_Raw")
@@ -546,23 +524,20 @@ class SNSPowderReduction(PythonAlgorithm):
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                     vanRun = api.FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
                               Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
-                    api.SetSampleMaterial(InputWorkspace=vanRun, ChemicalFormula="V", SampleNumberDensity=0.0721)
-                    vanRun = api.MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                     vanRun = api.SetUncertainties(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                 workspacelist.append(str(vanRun))
             else:
                 vanRun = None
 
-            if HAVE_MPI:
-                if rank > 0:
-                    return
+            if mpiRank > 0:
+                return
             if samRun == 0:
                 return
             # the final bit of math
             if canRun is not None:
                 samRun -= canRun
-                if not "histo" in SUFFIX and preserveEvents:
+                if samRun.id() == EVENT_WORKSPACE_ID:
                     samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                                Tolerance=COMPRESS_TOL_TOF) # 10ns
                 canRun = str(canRun)
@@ -574,7 +549,7 @@ class SNSPowderReduction(PythonAlgorithm):
             else:
                 normalized = False
 
-            if not "histo" in SUFFIX and preserveEvents and HAVE_MPI is False:
+            if samRun.id() == EVENT_WORKSPACE_ID:
                 samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                            Tolerance=COMPRESS_TOL_TOF) # 5ns/
 
@@ -584,13 +559,10 @@ class SNSPowderReduction(PythonAlgorithm):
                 samRun = api.ResetNegatives(InputWorkspace=samRun, OutputWorkspace=samRun, AddMinimum=addMin, ResetValue=0.)
 
             # write out the files
-            if HAVE_MPI:
-                if rank == 0:
-                    self._save(samRun, self._info, normalized, False)
-                    samRun = str(samRun)
-            else:
+            if mpiRank == 0:
+                if self._scaleFactor != 1.:
+                    samRun *= self._scaleFactor
                 self._save(samRun, self._info, normalized, False)
-                samRunws = samRun
                 samRun = str(samRun)
             #mtd.releaseFreeMemory()
 
@@ -604,7 +576,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
         return
 
-    def _loadData(self, runnumber, extension, filterWall=None, **chunk):
+    def _loadData(self, runnumber, extension, filterWall=None, outname=None, **chunk):
         if  runnumber is None or runnumber <= 0:
             return None
         
@@ -618,6 +590,8 @@ class SNSPowderReduction(PythonAlgorithm):
                 name += "_%d" % (1 + int(chunk["SpectrumMin"])/(int(chunk["SpectrumMax"])-int(chunk["SpectrumMin"])))        
         else:
             name += "_%d" % 0
+        if outname is not None:
+            name = outname
 
         if extension.endswith("_event.nxs"):
             chunk["Precount"] = True
@@ -634,12 +608,20 @@ class SNSPowderReduction(PythonAlgorithm):
             self.log().debug("Load run %s: unable to get events of %s.  Error message: %s" % (str(runnumber), str(wksp), str(e)))
 
         if HAVE_MPI:
-            msg = "MPI Task = %s ;" % (str(rank))
+            msg = "MPI Task = %s ;" % (str(mpiRank))
             try: 
                 msg += "Number Events = " + str(wksp.getNumberEvents())
             except Exception as e: 
                 msg += "Unable to get events of %s.  Error message: %s" % (str(wksp), str(e))
             self.log().debug(msg)
+
+        # filter bad pulses
+        if self._filterBadPulses:
+            wksp = api.FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
+            if str(type(wksp)).count("IEvent") > 0:
+                # Event workspace 
+                self.log().information("F1141D There are %d events after FilterBadPulses in workspace %s." % (
+                        wksp.getNumberEvents(), str(wksp)))
 
         return wksp
 
@@ -648,19 +630,20 @@ class SNSPowderReduction(PythonAlgorithm):
         wksp = "%s_%d" % (self._instrument, runnumber)
         strategy = []
         self.log().debug("[Fx116] Run file Name : %s,\t\tMax chunk size: %s" % (str(wksp+extension), str(self._chunks)))
-        if True:
-            Chunks = api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks)
-        else:
-            api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
-            Chunks = AnalysisDataService.retrieve("Chunks")
-        for row in Chunks: strategy.append(row)
+        chunks = api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks)
+        for row in chunks:
+            strategy.append(row)
         #For table with no rows
         if not strategy:
             strategy.append({})
+
+        # delete chunks workspace
+        chunks = str(chunks)
+        mtd.remove(chunks)
+
         return strategy
 
-    def _focusChunks(self, runnumber, extension, filterWall, calib, splitwksp=None, preserveEvents=True,
-               normByCurrent=True, filterBadPulsesOverride=True):
+    def _focusChunks(self, runnumber, extension, filterWall, calib, splitwksp=None, preserveEvents=True):
         """ Load, (optional) split and focus data in chunks
 
         Arguments: 
@@ -733,15 +716,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
             # Filtering... 
             tempwslist = []
-            if not "histo" in extension:
-                # Filter bad pulses
-                if (self._filterBadPulses and filterBadPulsesOverride):
-                    temp = api.FilterBadPulses(InputWorkspace=temp, OutputWorkspace=temp)
-                    if str(type(temp)).count("IEvent") > 0:
-                        # Event workspace 
-                        self.log().information("F1141D There are %d events after FilterBadPulses in workspace %s." % (
-                            temp.getNumberEvents(), str(temp)))
-
+            if temp.id() == EVENT_WORKSPACE_ID:
                 # Filter to bad 
                 if dosplit:
                     # Splitting workspace
@@ -809,7 +784,6 @@ class SNSPowderReduction(PythonAlgorithm):
                     RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=COMPRESS_TOL_TOF,
                     UnwrapRef=self._LRef, LowResRef=self._DIFCref, LowResSpectrumOffset=self._lowResTOFoffset, 
                     CropWavelengthMin=self._wavelengthMin, **(focuspos))
-
                 for iws in xrange(temp.getNumberHistograms()):
                     spec = temp.getSpectrum(iws)
                     self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
@@ -850,25 +824,22 @@ class SNSPowderReduction(PythonAlgorithm):
             for itemp in xrange(numwksp): 
                 wksplist[itemp].getRun()['iparm_file'] = self._config.iparmFile
 
-        api.DeleteWorkspace('Chunks')
-
         for itemp in xrange(numwksp): 
             #if wksplist[itemp].__class__.__name__.count("Event") > 0: 
             #    try: 
             #        print "[DB1050-X] Number of events = %d of split-workspace %d" % (wksplist[itemp].getNumberEvents(), itemp)
             #    except Exception as e:
             #        print e
-            if preserveEvents and not "histo" in extension:
+            if wksplist[itemp].id() == EVENT_WORKSPACE_ID:
                 wksplist[itemp] = api.CompressEvents(InputWorkspace=wksplist[itemp], 
                     OutputWorkspace=wksplist[itemp], Tolerance=COMPRESS_TOL_TOF) # 100ns
 
-            if normByCurrent:
-                try:
-                    wksplist[itemp] = api.NormaliseByCurrent(InputWorkspace=wksplist[itemp], 
-                            OutputWorkspace=wksplist[itemp])
-                    wksplist[itemp].getRun()['gsas_monitor'] = 1
-                except Exception, e:
-                    self.log().warning(str(e))
+            try:
+                wksplist[itemp] = api.NormaliseByCurrent(InputWorkspace=wksplist[itemp], 
+                                                         OutputWorkspace=wksplist[itemp])
+                wksplist[itemp].getRun()['gsas_monitor'] = 1
+            except Exception, e:
+                self.log().warning(str(e))
 
             self._save(wksplist[itemp], self._info, False, True)
             self.log().information("Done focussing data of %d." % (itemp))
@@ -883,11 +854,9 @@ class SNSPowderReduction(PythonAlgorithm):
 
         # About return
         if splitwksp is None:
-            returnee = wksplist[0]
+            return wksplist[0]
         else:
-            returnee = wksplist
-
-        return returnee
+            return wksplist
 
     def _getinfo(self, wksp):
         logs = wksp.getRun()
@@ -895,13 +864,11 @@ class SNSPowderReduction(PythonAlgorithm):
         frequency = None
         if "SpeedRequest1" in logs.keys():
             frequency = logs['SpeedRequest1']
-            # f5aa61589450be6e43ee592a4aadc63926a83f82 
             if frequency.getStatistics().mean == 0.: 
                 self.log().information("'SpeedRequest1' mean value is zero")                
                 frequency = None 
         else:
             self.log().information("'SpeedRequest1' is not specified in logs")
-        # f5aa61589450be6e43ee592a4aadc63926a83f82
         if frequency is None and "Speed1" in logs.keys():
             frequency = logs['Speed1']
             if frequency.getStatistics().mean == 0.:
@@ -948,7 +915,10 @@ class SNSPowderReduction(PythonAlgorithm):
                     MultiplyByBinWidth=normalized, Bank=info.bank, Format="SLOG", ExtendedHeader=True)
         if "fullprof" in self._outTypes:
             api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info.bank, Filename=filename+".dat")          
-        if "NeXus" in self._outTypes:
+        if "topas" in self._outTypes:
+            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info.bank, Filename=filename+".xye",
+                               Format="TOPAS")
+        if "nexus" in self._outTypes:
             api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits").value)
             #api.Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning) # crop edges
             api.SaveNexus(InputWorkspace=wksp, Filename=filename+".nxs")

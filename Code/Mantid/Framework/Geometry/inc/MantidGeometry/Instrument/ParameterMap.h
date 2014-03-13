@@ -114,6 +114,9 @@ namespace Geometry
     /// Clear any parameters with the given name
     void clearParametersByName(const std::string & name);
 
+    /// Clear any parameters with the given name for a specified component
+    void clearParametersByName(const std::string & name,const IComponent* comp);
+
     /// Method for adding a parameter providing its value as a string
     void add(const std::string& type,const IComponent* comp,const std::string& name,
              const std::string& value);

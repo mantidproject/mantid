@@ -1,6 +1,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidQtCustomInterfaces/JumpFit.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include <string>
 #include <boost/lexical_cast.hpp>
@@ -43,15 +44,21 @@ namespace MantidQt
 		 */
 		bool JumpFit::validate()
 		{
-			//check that the sample file is loaded
-			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-			QString samplePath = m_uiForm.dsSample->getFullFilePath();
+			UserInputValidator uiv;
+			uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
 
 			//this workspace doesn't have any valid widths
-			if(spectraList.size() == 0) return false;
+			if(spectraList.size() == 0)
+			{
+				uiv.addErrorMessage("Input workspace doesn't appear to contain any width data.");
+			}
 
-			//can't get hold of a pointer to the workspace
-			if(!checkFileLoaded(sampleName, samplePath)) return false;
+			QString errors = uiv.generateErrorMessage();
+			if (!errors.isEmpty())
+			{
+				emit showMessageBox(errors);
+				return false;
+			}
 
 			return true;
 		}
@@ -223,7 +230,7 @@ namespace MantidQt
 
 			if(!sampleName.isEmpty() && spectraList.size() > 0)
 			{
-				if(checkFileLoaded(sampleName, samplePath))
+				if(validate())
 				{
 					plotMiniPlot(sampleName, spectraList[text.toStdString()]);
 				}

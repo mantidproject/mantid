@@ -308,8 +308,57 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.save_results(pws,'ofn')
         self.assertEquals(file_long_name,tReducer.test_name)
 
+    def test_set_spectra_to_mon(self):
+        tReducer = self.reducer;
 
-        #self.assertEqual(tReducer.save_results(pws,'my_path'),ws_name+
+        self.assertTrue(tReducer.spectra_to_monitors_list is None);
+
+        tReducer.spectra_to_monitors_list = 35;
+        self.assertTrue(isinstance(tReducer.spectra_to_monitors_list,list));
+        self.assertEquals(35,tReducer.spectra_to_monitors_list[0]);
+
+        tReducer.spectra_to_monitors_list = None;
+        self.assertTrue(tReducer.spectra_to_monitors_list is None);
+        tReducer.spectra_to_monitors_list = 'None';
+        self.assertTrue(tReducer.spectra_to_monitors_list is None);
+        tReducer.spectra_to_monitors_list = [];
+        self.assertTrue(tReducer.spectra_to_monitors_list is None);
+
+        tReducer.spectra_to_monitors_list = '467';
+        self.assertEquals(467,tReducer.spectra_to_monitors_list[0]);
+
+        tReducer.spectra_to_monitors_list = '467,444';
+        self.assertEquals(467,tReducer.spectra_to_monitors_list[0]);
+        self.assertEquals(444,tReducer.spectra_to_monitors_list[1]);
+
+        tReducer.spectra_to_monitors_list = ['467','444'];
+        self.assertEquals(467,tReducer.spectra_to_monitors_list[0]);
+        self.assertEquals(444,tReducer.spectra_to_monitors_list[1]);
+
+
+
+
+    def test_process_copy_spectra_to_monitors(self):
+        pass
+    def test_set_get_ei_monitor(self):
+        tReducer = self.reducer;
+
+        self.assertEqual(41474,tReducer.ei_mon_spectra[0])
+        self.assertEqual(41475,tReducer.ei_mon_spectra[1])
+
+    # HOW TO MAKE IT WORK? it fails silently
+    #    tReducer.ei_mon_spectra[1]=100;
+    #    self.assertEqual(41474,tReducer.ei_mon_spectra[0])
+    #    self.assertEqual(100,tReducer.ei_mon_spectra[1])
+
+
+        tReducer.ei_mon_spectra=[100,200];
+        self.assertEqual(100,tReducer.ei_mon_spectra[0])
+        self.assertEqual(200,tReducer.ei_mon_spectra[1])
+
+        tReducer.init_idf_params(True);
+        self.assertEqual(41474,tReducer.ei_mon_spectra[0])
+        self.assertEqual(41475,tReducer.ei_mon_spectra[1])
 
 
     #def test_diag_call(self):

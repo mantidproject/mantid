@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Quasi.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 namespace MantidQt
 {
@@ -67,32 +68,27 @@ namespace MantidQt
 		 */
 		bool Quasi::validate()
 		{
-			//check that the sample file exists
-			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-			QString samplePath = m_uiForm.dsSample->getFullFilePath();
-
-			if(!checkFileLoaded(sampleName, samplePath)) return false;
-
-			//check that the resolution file exists
-			QString resName = m_uiForm.dsResolution->getCurrentDataName();
-			QString resPath = m_uiForm.dsResolution->getFullFilePath();
-
-			if(!checkFileLoaded(resName, resPath)) return false;
-
+			UserInputValidator uiv;
+			uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+			uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
+			
 			//check that the ResNorm file is valid if we are using it
 			if(m_uiForm.chkUseResNorm->isChecked())
 			{
-				QString resNormFile = m_uiForm.dsResNorm->getCurrentDataName();
-				QString resNormPath = m_uiForm.dsResNorm->getFullFilePath();
-
-				if(!checkFileLoaded(resNormFile, resNormPath)) return false;
+				uiv.checkDataSelectorIsValid("ResNorm", m_uiForm.dsResNorm);
 			}
 
 			//check fixed width file exists
 			if(m_uiForm.chkFixWidth->isChecked() &&
 					 !m_uiForm.mwFixWidthDat->isValid())
 			{
-				emit showMessageBox("Please correct the following:\n Could not find the specified Fixed Width file");
+				uiv.checkMWRunFilesIsValid("Width", m_uiForm.mwFixWidthDat);
+			}
+
+			QString errors = uiv.generateErrorMessage();
+			if (!errors.isEmpty())
+			{
+				emit showMessageBox(errors);
 				return false;
 			}
 

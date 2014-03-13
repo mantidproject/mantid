@@ -40,8 +40,6 @@ namespace MantidQt
       public:
         /// Constructor
         CatalogPublishDialog(QWidget *parent = 0);
-        /// Destructor
-        ~CatalogPublishDialog();
 
       private:
         /// Create the inital layout.

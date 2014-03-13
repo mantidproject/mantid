@@ -24,6 +24,8 @@ class Stitch1D(PythonAlgorithm):
         
         histogram_validator = HistogramValidator()
         
+        self.setWikiSummary("Stitches single histogram matrix workspaces together")
+        self.setOptionalMessage("Stitches single histogram matrix workspaces together")
         self.declareProperty(MatrixWorkspaceProperty("LHSWorkspace", "", Direction.Input, validator=histogram_validator), "Input workspace")
         self.declareProperty(MatrixWorkspaceProperty("RHSWorkspace", "", Direction.Input, validator=histogram_validator), "Input workspace")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output stitched workspace")
@@ -40,6 +42,34 @@ class Stitch1D(PythonAlgorithm):
         errors = ws.extractE()
         count = len(errors.nonzero()[0])
         return count > 0
+    
+    
+    def __run_as_child(self, name, **kwargs):
+        """Run a named algorithm and return the
+        algorithm handle
+    
+        Parameters:
+            name - The name of the algorithm
+            kwargs - A dictionary of property name:value pairs
+        """
+        alg = AlgorithmManager.createUnmanaged(name)
+        alg.initialize()
+        alg.setChild(True)
+        
+        if 'OutputWorkspace' in alg:
+            alg.setPropertyValue("OutputWorkspace","UNUSED_NAME_FOR_CHILD")
+        
+        alg.setRethrows(True)
+        for key, value in kwargs.iteritems():
+            alg.setProperty(key, value)
+        
+        alg.execute()
+        return alg.getProperty("OutputWorkspace").value
+    
+    def __to_single_value_ws(self, value):
+        value_ws = self.__run_as_child("CreateSingleValuedWorkspace", DataValue=value)
+        return value_ws
+        
     
     def __find_indexes_start_end(self, startOverlap, endOverlap, workspace):
         a1=workspace.binIndexOf(startOverlap)
@@ -104,8 +134,8 @@ class Stitch1D(PythonAlgorithm):
         
         params = self.__create_rebin_parameters()
         print params
-        lhs_rebinned = Rebin(InputWorkspace=self.getProperty("LHSWorkspace").value, Params=params)
-        rhs_rebinned = Rebin(InputWorkspace=self.getProperty("RHSWorkspace").value, Params=params)
+        lhs_rebinned = self.__run_as_child("Rebin", InputWorkspace=self.getProperty("LHSWorkspace").value, Params=params)
+        rhs_rebinned = self.__run_as_child("Rebin", InputWorkspace=self.getProperty("RHSWorkspace").value, Params=params)
         
         xRange = lhs_rebinned.readX(0)
         minX = xRange[0]
@@ -121,56 +151,58 @@ class Stitch1D(PythonAlgorithm):
         a1, a2 = self.__find_indexes_start_end(startOverlap, endOverlap, lhs_rebinned)
         
         if not useManualScaleFactor:
-            lhsOverlapIntegrated = Integration(InputWorkspace=lhs_rebinned, RangeLower=startOverlap, RangeUpper=endOverlap)
-            rhsOverlapIntegrated = Integration(InputWorkspace=rhs_rebinned, RangeLower=startOverlap, RangeUpper=endOverlap)
+            
+            lhsOverlapIntegrated = self.__run_as_child("Integration", InputWorkspace=lhs_rebinned, RangeLower=startOverlap, RangeUpper=endOverlap)
+            rhsOverlapIntegrated = self.__run_as_child("Integration", InputWorkspace=rhs_rebinned, RangeLower=startOverlap, RangeUpper=endOverlap)
+            
             y1=lhsOverlapIntegrated.readY(0)
             y2=rhsOverlapIntegrated.readY(0)
             if scaleRHSWorkspace:
-                rhs_rebinned *= (lhsOverlapIntegrated/rhsOverlapIntegrated)
+                ratio = self.__run_as_child("Divide", LHSWorkspace=lhsOverlapIntegrated, RHSWorkspace=rhsOverlapIntegrated)
+                rhs_rebinned = self.__run_as_child("Multiply", LHSWorkspace=rhs_rebinned, RHSWorkspace=ratio)
                 scalefactor = y1[0]/y2[0]
             else: 
-                lhs_rebinned *= (rhsOverlapIntegrated/lhsOverlapIntegrated)
+                
+                ratio = self.__run_as_child("Divide", RHSWorkspace=lhsOverlapIntegrated, LHSWorkspace=rhsOverlapIntegrated)
+                lhs_rebinned = self.__run_as_child("Multiply", LHSWorkspace=lhs_rebinned, RHSWorkspace=ratio)
                 scalefactor = y2[0]/y1[0]   
-            DeleteWorkspace(lhsOverlapIntegrated)
-            DeleteWorkspace(rhsOverlapIntegrated) 
         else:
+            manualScaleFactorWS = self.__to_single_value_ws(manualScaleFactor)
             if scaleRHSWorkspace:
-                rhs_rebinned *= manualScaleFactor
+                rhs_rebinned = self.__run_as_child("Multiply", LHSWorkspace=rhs_rebinned, RHSWorkspace=manualScaleFactorWS)
             else:
-                lhs_rebinned *= manualScaleFactor
+                lhs_rebinned = self.__run_as_child("Multiply", LHSWorkspace=lhs_rebinned, RHSWorkspace=manualScaleFactorWS)
             scalefactor = manualScaleFactor
         
         # Mask out everything BUT the overlap region as a new workspace.
-        overlap1 = MultiplyRange(InputWorkspace=lhs_rebinned, StartBin=0,EndBin=a1,Factor=0)
-        overlap1 = MultiplyRange(InputWorkspace=overlap1,StartBin=a2,Factor=0)
-    
+        overlap1 = self.__run_as_child("MultiplyRange", InputWorkspace=lhs_rebinned, StartBin=0,EndBin=a1,Factor=0)
+        overlap1 = self.__run_as_child("MultiplyRange", InputWorkspace=overlap1,StartBin=a2,Factor=0)
+
         # Mask out everything BUT the overlap region as a new workspace.
-        overlap2 = MultiplyRange(InputWorkspace=rhs_rebinned,StartBin=0,EndBin=a1,Factor=0)#-1
-        overlap2 = MultiplyRange(InputWorkspace=overlap2,StartBin=a2,Factor=0)
+        overlap2 = self.__run_as_child("MultiplyRange", InputWorkspace=rhs_rebinned,StartBin=0,EndBin=a1,Factor=0)
+        overlap2 = self.__run_as_child("MultiplyRange", InputWorkspace=overlap2,StartBin=a2,Factor=0)
     
         # Mask out everything AFTER the start of the overlap region
-        lhs_rebinned=MultiplyRange(InputWorkspace=lhs_rebinned, StartBin=a1+1, Factor=0)
+        lhs_rebinned = self.__run_as_child("MultiplyRange", InputWorkspace=lhs_rebinned, StartBin=a1+1, Factor=0)
+        
         # Mask out everything BEFORE the end of the overlap region
-        rhs_rebinned=MultiplyRange(InputWorkspace=rhs_rebinned,StartBin=0,EndBin=a2-1,Factor=0)
+        rhs_rebinned = self.__run_as_child("MultiplyRange",InputWorkspace=rhs_rebinned,StartBin=0,EndBin=a2-1,Factor=0)
         
         # Calculate a weighted mean for the overlap region
         overlapave = None
         if self.has_non_zero_errors(overlap1) and self.has_non_zero_errors(overlap2):
-            overlapave = WeightedMean(InputWorkspace1=overlap1,InputWorkspace2=overlap2)
+            overlapave = self.__run_as_child("WeightedMean", InputWorkspace1=overlap1,InputWorkspace2=overlap2)
         else:
             self.log().information("Using un-weighted mean for Stitch1D overlap mean")
-            overlapave = (overlap1 + overlap2)/2
+            # Calculate the mean.
+            sum = self.__run_as_child("Plus", LHSWorkspace=overlap1, RHSWorkspace=overlap2)
+            denominator = self.__to_single_value_ws(2.0)
+            overlapave = self.__run_as_child("Divide", LHSWorkspace=sum, RHSWorkspace=denominator)
             
         # Add the Three masked workspaces together to create a complete x-range
-        result = lhs_rebinned + overlapave + rhs_rebinned
-        RenameWorkspace(InputWorkspace=result, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
-        
-        # Cleanup
-        DeleteWorkspace(lhs_rebinned)
-        DeleteWorkspace(rhs_rebinned)
-        DeleteWorkspace(overlap1)
-        DeleteWorkspace(overlap2)
-        DeleteWorkspace(overlapave)
+        result = self.__run_as_child("Plus", LHSWorkspace=lhs_rebinned, RHSWorkspace=overlapave)
+        result = self.__run_as_child("Plus", LHSWorkspace=rhs_rebinned, RHSWorkspace=result)
+        #RenameWorkspace(InputWorkspace=result, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
         
         self.setProperty('OutputWorkspace', result)
         self.setProperty('OutScaleFactor', scalefactor)

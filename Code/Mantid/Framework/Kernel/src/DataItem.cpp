@@ -2,7 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/DataItem.h"
-#include <iostream>
+#include <Poco/RWLock.h>
 
 namespace Mantid
 {

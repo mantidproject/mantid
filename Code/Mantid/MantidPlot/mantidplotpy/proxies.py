@@ -81,7 +81,7 @@ class CrossThreadCall(QtCore.QObject):
             argtype = int
         return argtype
 
-def threadsafe_call(callable, *args):
+def threadsafe_call(callable, *args, **kwargs):
     """
         Calls the given function with the given arguments
         by passing it through the CrossThreadCall class. This
@@ -89,7 +89,7 @@ def threadsafe_call(callable, *args):
         happen on the correct thread.
     """
     caller = CrossThreadCall(callable)
-    return caller.dispatch(*args)
+    return caller.dispatch(*args, **kwargs)
 
 def new_proxy(classType, callable, *args, **kwargs):
     """

@@ -7,9 +7,8 @@ Datafiles and workspaces that are published are automatically made private. This
 
 '''Parameters Note'''
 
-- A file or workspace can be published, but not both at the same time.
-- When uploading a workspace, it is saved to the default save directory as a nexus file. The history of of the workspace is generated
-and saved into a Python script, which is also uploaded alongside the datafile of the workspace.
+* A file or workspace can be published, but not both at the same time.
+* When uploading a workspace, it is saved to the default save directory as a nexus file. The history of of the workspace is generated and saved into a Python script, which is also uploaded alongside the datafile of the workspace.
 
 *WIKI*/
 
@@ -17,6 +16,7 @@ and saved into a Python script, which is also uploaded alongside the datafile of
 #include "MantidICat/CatalogAlgorithmHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -61,6 +61,7 @@ namespace Mantid
           "This can only contain alphanumerics, underscores or periods.");
       declareProperty("InvestigationNumber","","The investigation number where the published file will be saved to.");
       declareProperty("DataFileDescription","","A short description of the datafile you are publishing to the catalog.");
+      declareProperty("Session","","The session information of the catalog to use.");
     }
 
     /// Execute the algorithm
@@ -85,8 +86,16 @@ namespace Mantid
         throw std::runtime_error("Please select a workspace or a file to publish. Not both.");
       }
 
-      // Create a catalog as getUploadURL is called twice if workspace is selected.
-      auto catalog = CatalogAlgorithmHelper().createCatalog();
+      // This again is a temporary measure to ensure publishing functionality will work with one catalog.
+      auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
+      if (!session.empty()) setPropertyValue("Session", session.front()->getSessionId());
+
+      // Cast a catalog to a catalogInfoService to access publishing functionality.
+      auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(
+          API::CatalogManager::Instance().getCatalog(getPropertyValue("Session")));
+
+      // Check if the catalog created supports publishing functionality.
+      if (!catalogInfoService) throw std::runtime_error("The catalog that you are using does not support publishing to the archives.");
 
       // The user want to upload a file.
       if (!filePath.empty())
@@ -120,10 +129,10 @@ namespace Mantid
       // Verify that the file can be opened correctly.
       if (fileStream.rdstate() & std::ios::failbit) throw Mantid::Kernel::Exception::FileError("Error on opening file at: ", filePath);
       // Publish the contents of the file to the server.
-      publish(fileStream,catalog->getUploadURL(
+      publish(fileStream,catalogInfoService->getUploadURL(
           getPropertyValue("InvestigationNumber"), getPropertyValue("NameInCatalog"), getPropertyValue("DataFileDescription")));
       // If a workspace was published, then we want to also publish the history of a workspace.
-      if (!ws.empty()) publishWorkspaceHistory(catalog, workspace);
+      if (!ws.empty()) publishWorkspaceHistory(catalogInfoService, workspace);
     }
 
     /**
@@ -212,10 +221,10 @@ namespace Mantid
 
     /**
      * Publish the history of a given workspace.
-     * @param catalog   :: The catalog to use to publish the file.
+     * @param catalogInfoService :: The catalog to use to publish the file.
      * @param workspace :: The workspace to obtain the history from.
      */
-    void CatalogPublish::publishWorkspaceHistory(Mantid::API::ICatalog_sptr &catalog, Mantid::API::Workspace_sptr &workspace)
+    void CatalogPublish::publishWorkspaceHistory(Mantid::API::ICatalogInfoService_sptr &catalogInfoService, Mantid::API::Workspace_sptr &workspace)
     {
       std::stringstream ss;
       // Obtain the workspace history as a string.
@@ -223,7 +232,7 @@ namespace Mantid
       // Use the name the use wants to save the file to the server as and append .py
       std::string fileName = Poco::Path(Poco::Path(getPropertyValue("NameInCatalog")).getFileName()).getBaseName() + ".py";
       // Publish the workspace history to the server.
-      publish(ss, catalog->getUploadURL(getPropertyValue("InvestigationNumber"), fileName, getPropertyValue("DataFileDescription")));
+      publish(ss, catalogInfoService->getUploadURL(getPropertyValue("InvestigationNumber"), fileName, getPropertyValue("DataFileDescription")));
     }
 
     /**

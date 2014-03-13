@@ -33,7 +33,7 @@ BOOST_PYTHON_MODULE(_kernel)
   def("version_str", &Mantid::Kernel::MantidVersion::version, 
       "Returns the Mantid version string in the form \"major.minor.patch\"");
       
-  Mantid::PythonInterface::Registry::registerBuiltins();
+  Mantid::PythonInterface::Registry::TypeRegistry::registerBuiltins();
   
 
 @EXPORT_FUNCTIONS@

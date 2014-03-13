@@ -86,6 +86,7 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
         """ Declare properties
         """
         self.setWikiSummary("""Refine powder diffractomer profile parameters sequentially.""")
+        self.setOptionalMessage("""Refine powder diffractomer profile parameters sequentially.""")
 
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input, PropertyMode.Optional), 
                 "Name of data workspace containing the diffraction pattern in .prf file. ")

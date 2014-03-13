@@ -515,7 +515,7 @@ namespace DataHandling
       throw std::runtime_error("Call LoadMask::initialize() before parseXML.");
 
     // 1. Parse and create a structure
-    NodeList* pNL_type = pRootElem->getElementsByTagName("type");
+    Poco::AutoPtr<NodeList> pNL_type = pRootElem->getElementsByTagName("type");
     g_log.information() << "Node Size = " << pNL_type->length() << std::endl;
 
     Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);

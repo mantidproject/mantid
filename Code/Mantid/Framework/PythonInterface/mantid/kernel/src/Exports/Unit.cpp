@@ -1,7 +1,7 @@
 #include "MantidKernel/Unit.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::Unit;
 using Mantid::Kernel::Unit_sptr;
@@ -22,7 +22,7 @@ namespace
 
 void export_Unit()
 {
-  REGISTER_SHARED_PTR_TO_PYTHON(Unit);
+  register_ptr_to_python<boost::shared_ptr<Unit>>();
 
   class_<Unit,boost::noncopyable>("Unit", no_init)
     .def("name", &deprecatedName, "Return the full name of the unit (deprecated, use caption)")

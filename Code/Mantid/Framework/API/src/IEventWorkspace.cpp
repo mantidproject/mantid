@@ -2,13 +2,6 @@
 // Includes
 //------------------------------------------------------
 #include "MantidAPI/IEventWorkspace.h"
-#include "MantidAPI/LocatedDataRef.h"
-#include "MantidAPI/WorkspaceIterator.h"
-#include "MantidAPI/WorkspaceIteratorCode.h"
-
-///\cond TEMPLATE
-template MANTID_API_DLL class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef,Mantid::API::IEventWorkspace>;
-template MANTID_API_DLL class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::API::IEventWorkspace>;
 
 namespace Mantid
 {
@@ -41,6 +34,7 @@ const std::string IEventWorkspace::toString() const
 
 }
 
+///\cond TEMPLATE
 /*
  * In order to be able to cast PropertyWithValue classes correctly a definition for the PropertyWithValue<IEventWorkspace> is required
  *

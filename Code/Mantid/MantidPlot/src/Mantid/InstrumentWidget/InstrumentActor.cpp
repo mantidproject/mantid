@@ -657,11 +657,7 @@ void InstrumentActor::saveSettings()
 void InstrumentActor::setMinValue(double vmin)
 {
   if (m_autoscaling) return;
-  if (vmin < m_DataMinValue)
-  {
-    vmin = m_DataMinValue;
-  }
-  if (vmin > m_DataMaxValue) return;
+  if (vmin >= m_DataMaxScaleValue) return;
   m_DataMinScaleValue = vmin;
   resetColors();
 }
@@ -669,7 +665,7 @@ void InstrumentActor::setMinValue(double vmin)
 void InstrumentActor::setMaxValue(double vmax)
 {
   if (m_autoscaling) return;
-  if (vmax < m_DataMinValue) return;
+  if (vmax <= m_DataMinScaleValue) return;
   m_DataMaxScaleValue = vmax;
   resetColors();
 }

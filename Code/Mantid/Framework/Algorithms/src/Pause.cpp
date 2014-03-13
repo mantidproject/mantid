@@ -9,8 +9,9 @@ to slow down the execution of a fast script.
 *WIKI*/
 
 #include "MantidAlgorithms/Pause.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+
+#include <Poco/Thread.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

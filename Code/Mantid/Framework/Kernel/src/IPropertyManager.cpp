@@ -53,6 +53,21 @@ namespace Mantid
         return this;
     }
 
+    /**
+     * @param name The name of the property being looked for.
+     * @return True if the property is managed by this.
+     */
+    bool IPropertyManager::existsProperty(const std::string &name) const
+    {
+      auto props = this->getProperties();
+      for (std::vector< Property*>::const_iterator prop = props.begin(); prop != props.end(); ++prop)
+      {
+        if (name == (*prop)->name())
+          return true;
+      }
+      return false;
+    }
+
     // Definitions for TypedValue cast operators
     // Have to come after getValue definitions above to keep MSVS2010 happy
     IPropertyManager::TypedValue::operator int16_t () { return pm.getValue<int16_t>(prop); }
