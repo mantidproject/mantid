@@ -48,6 +48,9 @@ namespace MantidQt
           QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(session.at(row)->getFacility()));
           // Set sessionID to user specific meta-data to easily obtain it later.
           item->setData(Qt::UserRole,QVariant(QString::fromStdString(session.at(row)->getSessionId())));
+          // Add tooltip to see the difference if logged into two facilities with different end-points.
+          item->setData(Qt::ToolTipRole,QVariant(QString::fromStdString(
+              "The soap-endpoint for this catalog is: " + session.at(row)->getSoapEndpoint())));
           // When a new item is added, we want to select & check it by default.
           item->setCheckState(Qt::Checked);
           m_uiForm.selectedCatalogs->insertItem(row,item);

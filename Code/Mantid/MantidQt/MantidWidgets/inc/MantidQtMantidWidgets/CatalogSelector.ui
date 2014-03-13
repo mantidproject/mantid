@@ -133,7 +133,7 @@
       <enum>QFrame::Sunken</enum>
      </property>
      <property name="text">
-      <string/>
+      <string>Select a facility to search through it's catalog. You can view the end-point on hover.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignJustify|Qt::AlignVCenter</set>
@@ -166,7 +166,7 @@
         <x>0</x>
         <y>0</y>
         <width>374</width>
-        <height>129</height>
+        <height>112</height>
        </rect>
       </property>
       <property name="sizePolicy">
