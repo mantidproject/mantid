@@ -16,6 +16,7 @@ set ( SRC_FILES
 	src/PoldiLoadLog.cpp
 	src/PoldiLoadSpectra.cpp
 	src/PoldiPeakDetection2.cpp
+	src/PoldiPeakSearch.cpp
 	src/PoldiRemoveDeadWires.cpp
 	src/ProjectMD.cpp
 	src/SINQHMListener.cpp
@@ -39,12 +40,14 @@ set ( INC_FILES
         inc/MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h
         inc/MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h
         inc/MantidSINQ/PoldiUtilities/UncertainValue.h
+	inc/MantidSINQ/PoldiAutoCorrelation5.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
 	inc/MantidSINQ/PoldiLoadIPP.h
 	inc/MantidSINQ/PoldiLoadLog.h
 	inc/MantidSINQ/PoldiLoadSpectra.h
-        inc/MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h
+	inc/MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h
 	inc/MantidSINQ/PoldiPeakDetection2.h
+	inc/MantidSINQ/PoldiPeakSearch.h
 	inc/MantidSINQ/PoldiRemoveDeadWires.h
 	inc/MantidSINQ/ProjectMD.h
 	inc/MantidSINQ/SINQHMListener.h
@@ -63,6 +66,7 @@ set ( TEST_FILES
 	PoldiDetectorDecoratorTest.h
 	PoldiDetectorFactoryTest.h
 	PoldiDetectorTest.h
+	PoldiPeakSearchTest.h
 	ProjectMDTest.h
 	SliceMDHistoTest.h
         UncertainValueTest.h
