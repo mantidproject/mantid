@@ -244,7 +244,7 @@ public:
         TS_ASSERT_THROWS(poldiPeakSearch.getNumberOfBackgroundPoints(tooManyPeaks, correlationCounts), std::runtime_error);
     }
 
-    void getBackgroundWithSigma()
+    void testgetBackgroundWithSigma()
     {
         TestablePoldiPeakSearch poldiPeakSearch;
         poldiPeakSearch.setMinimumDistance(2);
@@ -255,11 +255,11 @@ public:
         std::list<std::vector<double>::iterator> peaks;
         peaks.push_front(testList.begin() + 6);
 
-        TS_ASSERT_EQUALS(poldiPeakSearch.getNumberOfBackgroundPoints(peaks, testList), 8);
+        TS_ASSERT_EQUALS(poldiPeakSearch.getNumberOfBackgroundPoints(peaks, testList), 6);
 
         std::pair<double, double> bgSigma = poldiPeakSearch.getBackgroundWithSigma(peaks, testList);
-        TS_ASSERT_EQUALS(bgSigma.first, 1.5);
-        TS_ASSERT_EQUALS(bgSigma.second, 2.0);
+        TS_ASSERT_EQUALS(bgSigma.first, 10.0/6.0);
+        TS_ASSERT_EQUALS(bgSigma.second, 1.0);
     }
 
     void testminimumPeakHeightFromBackground()

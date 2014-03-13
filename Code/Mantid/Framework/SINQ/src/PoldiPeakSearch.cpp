@@ -35,6 +35,11 @@ The peaks are stored in a new workspace.
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
+#include "boost/bind.hpp"
+#include <list>
+#include <algorithm>
+#include <numeric>
+
 namespace Mantid
 {
 namespace Poldi
@@ -80,8 +85,12 @@ MantidVec PoldiPeakSearch::getNeighborSums(MantidVec correlationCounts)
     std::vector<size_t> validIndices(validCounts);
     std::generate(validIndices.begin(), validIndices.end(), [&n] () { return n++; });
 
-    MantidVec summedNeighborCounts(validCounts);
-    std::transform(validIndices.cbegin(), validIndices.cend(), summedNeighborCounts.begin(), [&correlationCounts](size_t i) { return correlationCounts[i - 1] + correlationCounts[i] + correlationCounts[i + 1]; });
+    MantidVec summedNeighborCounts;
+    summedNeighborCounts.reserve(validCounts);
+
+    for(std::vector<size_t>::const_iterator index = validIndices.begin(); index != validIndices.end(); ++index) {
+        summedNeighborCounts.push_back(correlationCounts[(*index) - 1] + correlationCounts[*index] + correlationCounts[(*index) + 1]);
+    }
 
     return summedNeighborCounts;
 }
@@ -96,12 +105,10 @@ std::list<MantidVec::iterator> PoldiPeakSearch::findPeaks(MantidVec::iterator be
      * so the list is truncated to the maximum desired peak number (N), where
      * only the N strongest peaks are kept.
      */
-    rawPeaks.sort([](MantidVec::iterator first, MantidVec::iterator second) { return (*first) > (*second); } );
+    rawPeaks.sort(&PoldiPeakSearch::vectorElementGreaterThan);//[](MantidVec::iterator first, MantidVec::iterator second) { return (*first) > (*second); } );
 
-    int actualPeakCount = std::min(m_maximumPeakNumber, static_cast<int>(rawPeaks.size()));
-
-    std::list<MantidVec::iterator> truncatedPeaks(actualPeakCount);
-    std::copy_n(rawPeaks.begin(), actualPeakCount, truncatedPeaks.begin());
+    std::list<MantidVec::iterator>::iterator rawPeaksLimit = std::next(rawPeaks.begin(), std::min(m_maximumPeakNumber, static_cast<int>(rawPeaks.size())));
+    std::list<MantidVec::iterator> truncatedPeaks(rawPeaks.begin(), rawPeaksLimit);
 
     return truncatedPeaks;
 }
@@ -155,8 +162,11 @@ MantidVec::iterator PoldiPeakSearch::getRightRangeEnd(MantidVec::iterator end)
 
 std::list<MantidVec::iterator> PoldiPeakSearch::mapPeakPositionsToCorrelationData(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator baseDataStart, MantidVec::iterator originalDataStart)
 {
-    std::list<MantidVec::iterator> transformedIndices(peakPositions.size());
-    std::transform(peakPositions.cbegin(), peakPositions.cend(), transformedIndices.begin(), [baseDataStart, originalDataStart](MantidVec::iterator summedDataIterator) { return originalDataStart + std::distance(baseDataStart, summedDataIterator) + 1; });
+    std::list<MantidVec::iterator> transformedIndices;
+
+    for(std::list<MantidVec::iterator>::const_iterator peakPosition = peakPositions.begin(); peakPosition != peakPositions.end(); ++peakPosition) {
+        transformedIndices.push_back(originalDataStart + std::distance(baseDataStart, *peakPosition) + 1);
+    }
 
     return transformedIndices;
 }
@@ -166,8 +176,8 @@ std::vector<V2D> PoldiPeakSearch::getPeakCoordinates(MantidVec::iterator baseLis
     std::vector<V2D> peakData;
     peakData.reserve(peakPositions.size());
 
-    for(std::list<MantidVec::iterator>::const_iterator peak = peakPositions.cbegin();
-        peak != peakPositions.cend();
+    for(std::list<MantidVec::iterator>::const_iterator peak = peakPositions.begin();
+        peak != peakPositions.end();
         ++peak)
     {
         size_t index = std::distance(baseListStart, *peak) + 1;
@@ -198,16 +208,27 @@ std::pair<double, double> PoldiPeakSearch::getBackgroundWithSigma(std::list<Mant
         point != correlationCounts.end() - 1;
         ++point)
     {
-        if(std::all_of(peakPositions.cbegin(), peakPositions.cend(), [point, this] (MantidVec::iterator peakPos) { return std::abs(std::distance(point, peakPos)) > m_minimumDistance; })) {
+        if(distanceToPeaksGreaterThanMinimum(peakPositions, point)) {
             background.push_back(*point);
             sigma.push_back(std::abs(*(point) - *(point + 1)));
         }
     }
 
-    double sumBackground = std::accumulate(background.cbegin(), background.cend(), 0.0);
-    double sumSigma = std::accumulate(sigma.cbegin(), sigma.cend(), 0.0);
+    double sumBackground = std::accumulate(background.begin(), background.end(), 0.0);
+    double sumSigma = std::accumulate(sigma.begin(), sigma.end(), 0.0);
 
     return std::make_pair(sumBackground / static_cast<double>(background.size()), sumSigma / static_cast<double>(sigma.size()));
+}
+
+bool PoldiPeakSearch::distanceToPeaksGreaterThanMinimum(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator point)
+{
+    for(std::list<MantidVec::iterator>::const_iterator peakPosition = peakPositions.begin(); peakPosition != peakPositions.end(); ++peakPosition) {
+        if(std::abs(std::distance(point, *peakPosition)) <= m_minimumDistance) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 size_t PoldiPeakSearch::getNumberOfBackgroundPoints(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
@@ -255,6 +276,21 @@ void PoldiPeakSearch::setRecursionAbsoluteBorders(MantidVec::iterator begin, Man
 {
     m_recursionAbsoluteBegin = begin;
     m_recursionAbsoluteEnd = end;
+}
+
+bool PoldiPeakSearch::vectorElementGreaterThan(MantidVec::iterator first, MantidVec::iterator second)
+{
+    return *first > *second;
+}
+
+bool PoldiPeakSearch::yGreaterThan(const V2D first, const V2D second)
+{
+    return first.Y() > second.Y();
+}
+
+bool PoldiPeakSearch::isLessThanMinimum(V2D peakCoordinate)
+{
+    return peakCoordinate.Y() <= m_minimumPeakHeight;
 }
 
 void PoldiPeakSearch::init()
@@ -317,18 +353,17 @@ void PoldiPeakSearch::exec()
     std::pair<double, double> backgroundWithSigma = getBackgroundWithSigma(peakPositionsCorrelation, correlatedCounts);
     g_log.information() << "   Calculated average background and deviation: " << backgroundWithSigma.first << ", " << backgroundWithSigma.second << std::endl;
 
-    double realMinimumPeakHeight = m_minimumPeakHeight;
-    if(realMinimumPeakHeight == 0.0) {
-        realMinimumPeakHeight = minimumPeakHeightFromBackground(backgroundWithSigma);
+    if((*getProperty("MinimumPeakHeight")).isDefault()) {
+        setMinimumPeakHeight(minimumPeakHeightFromBackground(backgroundWithSigma));
     }
 
     std::vector<V2D> intensityFilteredPeaks(peakCoordinates.size());
-    auto newEnd = std::copy_if(peakCoordinates.cbegin(), peakCoordinates.cend(), intensityFilteredPeaks.begin(), [&realMinimumPeakHeight] (V2D peak) { return peak.Y() > realMinimumPeakHeight; });
+    auto newEnd = std::remove_copy_if(peakCoordinates.begin(), peakCoordinates.end(), intensityFilteredPeaks.begin(), boost::bind<bool>(&PoldiPeakSearch::isLessThanMinimum, this, _1));
     intensityFilteredPeaks.resize(std::distance(intensityFilteredPeaks.begin(), newEnd));
 
-    g_log.information() << "   Peaks above minimum intensity (" << realMinimumPeakHeight << "): " << intensityFilteredPeaks.size() << std::endl;
+    g_log.information() << "   Peaks above minimum intensity (" << m_minimumPeakHeight << "): " << intensityFilteredPeaks.size() << std::endl;
 
-    std::sort(intensityFilteredPeaks.begin(), intensityFilteredPeaks.end(), [](V2D first, V2D second) { return first.Y() > second.Y(); });
+    std::sort(intensityFilteredPeaks.begin(), intensityFilteredPeaks.end(), &PoldiPeakSearch::yGreaterThan);
 
 
     ITableWorkspace_sptr peaks = boost::dynamic_pointer_cast<ITableWorkspace>(WorkspaceFactory::Instance().createTable());
@@ -336,8 +371,8 @@ void PoldiPeakSearch::exec()
     peaks->addColumn("double", "Q");
     peaks->addColumn("double", "Counts (estimated)");
 
-    for(std::vector<V2D>::const_iterator peak = intensityFilteredPeaks.cbegin();
-        peak != intensityFilteredPeaks.cend();
+    for(std::vector<V2D>::const_iterator peak = intensityFilteredPeaks.begin();
+        peak != intensityFilteredPeaks.end();
         ++peak)
     {
         TableRow newRow = peaks->appendRow();

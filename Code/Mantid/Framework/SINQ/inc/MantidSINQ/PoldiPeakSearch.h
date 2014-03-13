@@ -69,6 +69,7 @@ namespace Poldi
     std::list<MantidVec::iterator> mapPeakPositionsToCorrelationData(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator baseDataStart, MantidVec::iterator originalDataStart);
 
     std::pair<double, double> getBackgroundWithSigma(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
+    bool distanceToPeaksGreaterThanMinimum(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator point);
     size_t getNumberOfBackgroundPoints(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
 
     double minimumPeakHeightFromBackground(std::pair<double, double> backgroundWithSigma);
@@ -81,6 +82,10 @@ namespace Poldi
     void setMaximumPeakNumber(int newMaximumPeakNumber);
 
     void setRecursionAbsoluteBorders(MantidVec::iterator begin, MantidVec::iterator end);
+
+    static bool vectorElementGreaterThan(MantidVec::iterator first, MantidVec::iterator second);
+    static bool yGreaterThan(const V2D first, const V2D second);
+    bool isLessThanMinimum(V2D peakCoordinate);
 
     int m_minimumDistance;
     int m_doubleMinimumDistance;
