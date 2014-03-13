@@ -117,6 +117,11 @@ namespace MantidQt
     {
       if (!m_uiForm.dataSelector->isValid())
       {
+        if (m_uiForm.dataSelector->getFullFilePath().isEmpty())
+        {
+          QMessageBox::critical(this,"Error in catalog publishing.","No file specified.");
+          return;
+        }
         QMessageBox::critical(this,"Error in catalog publishing.",m_uiForm.dataSelector->getProblem());
         return;
       }
