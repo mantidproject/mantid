@@ -136,6 +136,11 @@ void TabulatedFunction::setAttribute(const std::string& attName,const IFunction:
   if (attName == "FileName")
   {
     std::string fileName = value.asUnquotedString();
+    if ( fileName.empty() )
+    {
+      storeAttributeValue( "FileName", Attribute("",true));
+      return;
+    }
     FileValidator fval;
     std::string error = fval.isValid(fileName);
     if (error == "")
@@ -152,9 +157,13 @@ void TabulatedFunction::setAttribute(const std::string& attName,const IFunction:
   }
   else if (attName == "Workspace")
   {
-    storeAttributeValue( attName, value );
-    storeAttributeValue( "FileName", Attribute("",true));
-    loadWorkspace( value.asString() );
+    std::string wsName = value.asString();
+    if ( !wsName.empty() )
+    {
+      storeAttributeValue( attName, value );
+      storeAttributeValue( "FileName", Attribute("",true));
+      loadWorkspace( wsName );
+    }
   }
   else
   {

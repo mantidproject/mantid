@@ -5,6 +5,8 @@ set ( SRC_FILES
 	src/CheckboxHeader.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
+	src/FilenameDialogEditor.cpp
+	src/FormulaDialogEditor.cpp
 	src/FindDialog.cpp
 	src/FindReplaceDialog.cpp
 	src/FitPropertyBrowser.cpp
@@ -26,7 +28,10 @@ set ( SRC_FILES
 	src/SelectFunctionDialog.cpp
 	src/SelectWorkspacesDialog.cpp
 	src/SequentialFitDialog.cpp
+    src/StringDialogEditor.cpp
+    src/StringEditorFactory.cpp
 	src/UserFunctionDialog.cpp
+    src/WorkspaceEditorFactory.cpp
 	src/WorkspaceSelector.cpp
 	src/pythonCalc.cpp
 )
@@ -37,6 +42,8 @@ set ( MOC_FILES
 	  inc/MantidQtMantidWidgets/CheckboxHeader.h
 	  inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
+	inc/MantidQtMantidWidgets/FilenameDialogEditor.h
+	inc/MantidQtMantidWidgets/FormulaDialogEditor.h
     inc/MantidQtMantidWidgets/FindReplaceDialog.h
     inc/MantidQtMantidWidgets/FindDialog.h
     inc/MantidQtMantidWidgets/FitPropertyBrowser.h
@@ -60,7 +67,10 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/SelectFunctionDialog.h
     inc/MantidQtMantidWidgets/SelectWorkspacesDialog.h
     inc/MantidQtMantidWidgets/SequentialFitDialog.h
+    inc/MantidQtMantidWidgets/StringDialogEditor.h
+    inc/MantidQtMantidWidgets/StringEditorFactory.h
     inc/MantidQtMantidWidgets/UserFunctionDialog.h
+    inc/MantidQtMantidWidgets/WorkspaceEditorFactory.h
     inc/MantidQtMantidWidgets/WorkspaceSelector.h
 )
 
@@ -105,7 +115,7 @@ add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (
 
 
 # For Windows:
-add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS )
+add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS -DQT_QTPROPERTYBROWSER_IMPORT )
 # Use a precompiled header where they are supported
 enable_precompiled_headers( inc/MantidQtMantidWidgets/PrecompiledHeader.h ALL_SRC )
 add_library ( MantidWidgets ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )

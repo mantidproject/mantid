@@ -1,4 +1,4 @@
-#include "StringDialogEditorFactory.h"
+#include "MantidQtMantidWidgets/StringDialogEditor.h"
 
 #include <QHBoxLayout>
 #include <QLineEdit>
@@ -10,22 +10,25 @@
 
 #include <iostream>
 
-void StringDialogEditorFactory::connectPropertyManager(QtStringPropertyManager *manager)
+/**
+ * Do nothing to connect a manager.
+ */
+void StringDialogEditorFactory::connectPropertyManager(QtStringPropertyManager*)
 {
-    (void) manager;
 }
 
-QWidget* StringDialogEditorFactory::createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent)
+/**
+ * Do nothing to disconnect a manager - it was never connected.
+ */
+void StringDialogEditorFactory::disconnectPropertyManager(QtStringPropertyManager*)
 {
-    (void) manager;
-  return new StringDialogEditor(property,parent);
 }
 
-void StringDialogEditorFactory::disconnectPropertyManager(QtStringPropertyManager *manager)
-{
-    (void) manager;
-}
-
+/**
+ * Constructor.
+ * @param property :: A property to edit.
+ * @param parent :: A widget parent for the editor widget.
+ */
 StringDialogEditor::StringDialogEditor(QtProperty *property, QWidget *parent):QWidget(parent),m_property(property)
 {
   QHBoxLayout *layout = new QHBoxLayout;
@@ -49,23 +52,18 @@ StringDialogEditor::StringDialogEditor(QtProperty *property, QWidget *parent):QW
   this->setLayout(layout);
 }
 
-void StringDialogEditor::runDialog()
-{
-  QSettings settings;
-  QString dir = settings.value("Mantid/FitBrowser/ResolutionDir").toString();
-  QString StringDialog = QFileDialog::getOpenFileName(this, tr("Open File"),dir);
-  if (!StringDialog.isEmpty())
-  {
-    m_lineEdit->setText(StringDialog);
-    updateProperty();
-  }
-}
-
+/**
+ * Set the text in the editor.
+ * @param txt :: A text to set.
+ */
 void StringDialogEditor::setText(const QString& txt)
 {
   m_lineEdit->setText(txt);
 }
 
+/**
+ * Get the current text inside the editor.
+ */
 QString StringDialogEditor::getText()const
 {
   return m_lineEdit->text();
@@ -75,6 +73,9 @@ StringDialogEditor::~StringDialogEditor()
 {
 }
 
+/**
+ * Slot which sets the property with the current text in the editor.
+ */
 void StringDialogEditor::updateProperty()
 {
   QtStringPropertyManager* mgr = dynamic_cast<QtStringPropertyManager*>(m_property->propertyManager());
