@@ -2,26 +2,6 @@ import unittest
 from mantid.api import AlgorithmID, AlgorithmManager
 from testhelpers import run_algorithm
 
-############### Test class for cancellation ################
-from mantid.api import Progress, PythonAlgorithm
-
-class CancellableAlg(PythonAlgorithm):
-    
-    timeout = 10 #seconds
-    timeout_reached = False
-    
-    def PyInit(self):
-        pass
-    
-    def PyExec(self):
-        prog = Progress(self,0.0,1.0,100000)
-        import time
-        start = time.time()
-        while (time.time() - start) < self.timeout:
-            prog.report()
-        # end while
-        self.timeout_reached = True
-
 ###########################################################
 
 class AlgorithmTest(unittest.TestCase):
@@ -91,28 +71,6 @@ class AlgorithmTest(unittest.TestCase):
         alg.cancel()
         self.assertEquals(alg.isExecuted(), True)
         self.assertEquals(alg.isRunning(), False)
-
-    def test_running_alg_can_be_cancelled(self):
-        import threading
-        class AlgThread(threading.Thread):
-            def __init__(self, alg_obj):
-                threading.Thread.__init__(self)
-                self.algorithm = alg_obj
-                self.algorithm.initialize()
-                
-            def run(self):
-                self.algorithm.execute()
-        ####################################
-        test_alg = CancellableAlg()
-        exec_thread = AlgThread(test_alg)
-        exec_thread.start()
-        while not test_alg.isRunning():
-            pass
-        self.assertEquals(True, test_alg.isRunning() )
-        test_alg.cancel()
-        exec_thread.join() # maximum time to wait set by CancellableAlg.timeout
-        self.assertEquals(False, test_alg.timeout_reached)
-        
 
     def test_createChildAlgorithm_creates_new_algorithm_that_is_set_as_child(self):
         parent_alg = AlgorithmManager.createUnmanaged('Load')

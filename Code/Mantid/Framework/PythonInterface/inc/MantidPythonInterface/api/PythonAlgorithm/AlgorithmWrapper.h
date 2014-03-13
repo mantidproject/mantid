@@ -61,6 +61,8 @@ namespace Mantid
       std::string defaultCategory() const;
       /// Allow the isRunning method to be overridden
       virtual bool isRunning() const;
+      /// Allow the cancel method to be overridden
+      virtual void cancel();
       /// Returns the validateInputs result of the algorithm.
       std::map<std::string, std::string> validateInputs();
       ///@}

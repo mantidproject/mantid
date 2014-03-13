@@ -85,11 +85,26 @@ namespace Mantid
       }
       else
       {
+        Environment::GlobalInterpreterLock gil;
         PyObject *result = PyObject_CallObject(m_isRunningObj, NULL);
         if(PyErr_Occurred()) Environment::throwRuntimeError(true);
         if(PyBool_Check(result)) return PyInt_AsLong(result);
         else throw std::runtime_error("PythonAlgorithm.isRunning - Expected bool return type.");
       }
+    }
+
+    /**
+     */
+    void AlgorithmWrapper::cancel()
+    {
+      std::cerr << "in c++\n";
+      // No real need for eye on performance here. Use standard methods
+      if(Environment::typeHasAttribute(getSelf(), "cancel"))
+      {
+        Environment::GlobalInterpreterLock gil;
+        CallMethod0<void>::dispatchWithException(getSelf(), "cancel");
+      }
+      else Algorithm::cancel();
     }
 
     /**
