@@ -1,7 +1,7 @@
 from mantid.simpleapi import *
 from mantid import config, logger
 from IndirectImport import import_mantidplot
-import sys, os.path, math, datetime
+import sys, os.path, math, datetime, re
 
 def StartTime(prog):
     logger.notice('----------')
@@ -38,12 +38,20 @@ def getInstrRun(ws_name):
     @return tuple of form (instrument, run number) 
     '''
     ws = mtd[ws_name]
-    run_number = ws.getRun()['run_number'].value
+    run_number = str(ws.getRunNumber())
+    if run_number == '0':
+        #attempt to parse run number off of name
+        match = re.match('([a-zA-Z]+)([0-9]+)', ws_name)
+        if match:
+            run_number = match.group(2)
+        else:
+            raise RuntimeError("Could not find run number associated with workspace.")
+
     instrument = ws.getInstrument().getName()
     facility = config.getFacility()
     instrument = facility.instrument(instrument).filePrefix(int(run_number))
     instrument = instrument.lower()
-    return instrument,run_number
+    return instrument, run_number
 
 def getWSprefix(wsname):
     '''
