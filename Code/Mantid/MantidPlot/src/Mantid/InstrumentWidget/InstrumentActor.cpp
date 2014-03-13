@@ -19,6 +19,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceValidators.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/algorithm/string.hpp>
@@ -56,6 +57,7 @@ double InstrumentActor::m_tolerance = 0.00001;
  */
 InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling, double scaleMin, double scaleMax):
 m_workspace(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString())),
+m_ragged(true),
 m_autoscaling(autoscaling),
 m_maskedColor(100,100,100),
 m_failedColor(200,200,200),
@@ -172,6 +174,10 @@ void InstrumentActor::setUpWorkspace(boost::shared_ptr<const Mantid::API::Matrix
   }
   setDataIntegrationRange(m_WkspBinMinValue,m_WkspBinMaxValue);
   resetColors();
+
+  // set the ragged flag using a workspace validator
+  auto wsValidator = Mantid::API::CommonBinsValidator();
+  m_ragged = ! wsValidator.isValid(sharedWorkspace).empty();
 
 }
 
@@ -414,21 +420,20 @@ void InstrumentActor::sumDetectors(QList<int> &dets, std::vector<double> &x, std
     size = ws->blocksize();
   }
 
-  // rough check for being ragged
-  if ( ws->getAxis(0)->unit()->unitID() == "TOF" )
-  {
-    // should be faster than ragged
-    sumDetectorsUniform( dets, x, y );
-  }
-  else
+  if ( m_ragged )
   {
     // could be slower than uniform
     sumDetectorsRagged( dets, x, y, size );
   }
+  else
+  {
+    // should be faster than ragged
+    sumDetectorsUniform( dets, x, y );
+  }
 }
 
 /**
- * Sum counts in detectors for purposes of rough plotting against time of flight.
+ * Sum counts in detectors for purposes of rough plotting against the units on the x-axis.
  * Assumes that all spectra share the x vector.
  *
  * @param dets :: A list of detector IDs to sum.
@@ -485,8 +490,8 @@ void InstrumentActor::sumDetectorsUniform(QList<int>& dets, std::vector<double>&
 }
 
 /**
- * Sum counts in detectors for purposes of rough plotting against time of flight.
- * Silently assumes that all spectra share the x vector.
+ * Sum counts in detectors for purposes of rough plotting against the units on the x-axis.
+ * Assumes that all spectra have different x vectors.
  *
  * @param dets :: A list of detector IDs to sum.
  * @param x :: (output) Time of flight values (or whatever values the x axis has) to plot against.

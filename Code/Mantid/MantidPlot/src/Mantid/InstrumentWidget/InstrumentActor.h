@@ -193,6 +193,8 @@ private:
   double m_DataMinValue, m_DataMaxValue, m_DataPositiveMinValue;    ///< y-values min and max for current bin (x integration) range
   double m_DataMinScaleValue, m_DataMaxScaleValue;           ///< min and max of the color map scale
   double m_BinMinValue, m_BinMaxValue;                       ///< x integration range
+  /// Hint on whether the workspace is ragged or not
+  bool m_ragged;
   /// Flag to rescale the colormap axis automatically when the data or integration range change
   bool m_autoscaling;
   /// Flag to show the guide and other components. Loaded and saved in settings.
