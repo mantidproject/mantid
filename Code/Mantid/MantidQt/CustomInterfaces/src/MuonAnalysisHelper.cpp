@@ -384,12 +384,6 @@ std::string getRunLabel(std::vector<Workspace_sptr> wsList)
   if (wsList.empty())
     throw std::invalid_argument("Unable to run on an empty list");
 
-  struct {
-     bool operator() (Workspace_sptr ws1, Workspace_sptr ws2) {
-       return firstPeriod(ws1)->getRunNumber() < firstPeriod(ws2)->getRunNumber();
-     }
-  } compareByRunNumber;
-
   // Sort by run numbers, in case of non-sequential list of runs
   std::sort(wsList.begin(), wsList.end(), compareByRunNumber);
 
@@ -482,6 +476,16 @@ double getValidatedDouble(QLineEdit* field, const QString& defaultValue,
   }
 
   return value;
+}
+
+/**
+ * @param ws1 :: First workspace to compare
+ * @param ws2 :: Second workspace to compare
+ * @return True if ws1 < ws2, false otherwise
+ */
+bool compareByRunNumber(Workspace_sptr ws1, Workspace_sptr ws2)
+{
+  return firstPeriod(ws1)->getRunNumber() < firstPeriod(ws2)->getRunNumber();
 }
 
 } // namespace MuonAnalysisHelper

@@ -45,6 +45,9 @@ MANTIDQT_CUSTOMINTERFACES_DLL std::string getRunLabel(std::vector<Workspace_sptr
 /// Sums a list of workspaces together
 MANTIDQT_CUSTOMINTERFACES_DLL Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces);
 
+/// Compares two workspaces by run numbers
+MANTIDQT_CUSTOMINTERFACES_DLL bool compareByRunNumber(Workspace_sptr ws1, Workspace_sptr ws2);
+
 /**
  * A class which deals with auto-saving the widget values. Widgets are registered and then on any
  * change, their value is stored using QSettings.
