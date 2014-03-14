@@ -280,38 +280,38 @@ double PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue, double
      * there are eight possible arrival "locations" (in the sense of both space and time) for neutrons
      * diffracted by this family of planes with given d.
      */
-    std::vector<UncertainValue> current;
-    current.reserve(m_chopper->slitTimes().size());
+    try {
+        std::vector<UncertainValue> current;
+        current.reserve(m_chopper->slitTimes().size());
 
-    for(std::vector<double>::const_iterator slitOffset = m_chopper->slitTimes().begin();
-        slitOffset != m_chopper->slitTimes().end();
-        ++slitOffset) {
-        /* For each offset, the sum of correlation intensity and error (for each detector element)
-         * is computed from the counts in the space/time location possible for this d-value (by getCMessAndCSigma).
-         * These pairs are put into a vector for later analysis. The size of this vector
-         * is equal to the number of chopper slits.
+        for(std::vector<double>::const_iterator slitOffset = m_chopper->slitTimes().begin();
+            slitOffset != m_chopper->slitTimes().end();
+            ++slitOffset) {
+            /* For each offset, the sum of correlation intensity and error (for each detector element)
+            * is computed from the counts in the space/time location possible for this d-value (by getCMessAndCSigma).
+            * These pairs are put into a vector for later analysis. The size of this vector
+            * is equal to the number of chopper slits.
+            */
+            std::vector<UncertainValue> cmess(m_detector->elementCount());
+            std::transform(m_indices.begin(), m_indices.end(),
+                           cmess.begin(),
+                           boost::bind<UncertainValue>(&PoldiAutoCorrelationCore::getCMessAndCSigma, this, dValue, *slitOffset, _1));
+
+            UncertainValue sum = std::accumulate(cmess.begin(), cmess.end(), UncertainValue(0.0, 0.0), &UncertainValue::plainAddition);
+
+            current.push_back(sum);
+        }
+
+        /* Finally, the list of I/sigma values is reduced to I.
+        * The algorithm used for this depends on the intended use.
+        */
+        return reduceChopperSlitList(current, weight);
+    } catch (std::domain_error) {
+        /* Trying to construct an UncertainValue with negative error will throw, so to preserve
+         * the old "checking behavior", this exception is caught here.
          */
-        std::vector<UncertainValue> cmess(m_detector->elementCount());
-        std::transform(m_indices.begin(), m_indices.end(),
-                       cmess.begin(),
-                       boost::bind<UncertainValue>(&PoldiAutoCorrelationCore::getCMessAndCSigma, this, dValue, *slitOffset, _1));
-
-        UncertainValue sum = std::accumulate(cmess.begin(), cmess.end(), UncertainValue(0.0, 0.0), &UncertainValue::plainAddition);
-
-        current.push_back(sum);
-    }
-
-    /* This check ensures that all sigmas are non-zero. If not, a correlation intensity of 0.0 is returned. */
-    double sigma = (*std::min_element(current.begin(), current.end(), &UncertainValue::lessThanError)).error();
-
-    if(sigma <= 0) {
         return 0.0;
     }
-
-    /* Finally, the list of I/sigma values is reduced to I.
-     * The algorithm used for this depends on the intended use.
-     */
-    return reduceChopperSlitList(current, weight);
 }
 
 /** Calculate correlation intensity and error for a given d-Value and a given time-offset, arriving
@@ -440,14 +440,14 @@ double PoldiAutoCorrelationCore::correctedIntensity(double intensity, double wei
   */
 double PoldiAutoCorrelationCore::reduceChopperSlitList(std::vector<UncertainValue> valuesWithSigma, double weight)
 {
-    std::vector<double> iOverSigma(valuesWithSigma.size());
-    std::transform(valuesWithSigma.begin(), valuesWithSigma.end(), iOverSigma.begin(), &UncertainValue::valueToErrorRatio);
+    try {
+        std::vector<double> iOverSigma(valuesWithSigma.size());
+        std::transform(valuesWithSigma.begin(), valuesWithSigma.end(), iOverSigma.begin(), &UncertainValue::valueToErrorRatio);
 
-    if(*std::min_element(iOverSigma.begin(), iOverSigma.end()) < 0.0) {
+        return pow(static_cast<double>(valuesWithSigma.size()), 2.0) / sumIOverSigmaInverse(iOverSigma) * weight;
+    } catch (std::domain_error) {
         return 0.0;
     }
-
-    return pow(static_cast<double>(valuesWithSigma.size()), 2.0) / sumIOverSigmaInverse(iOverSigma) * weight;
 }
 
 /** Sums Sigma(I)/I for given list of I/Sigma(I) values.

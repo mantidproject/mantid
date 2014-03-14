@@ -349,7 +349,7 @@ public:
 
         UncertainValue pair0(2.0, 1.0);
         UncertainValue pair1(3.0, 2.0);
-        UncertainValue pair2(2.0, -1.0);
+        UncertainValue pair2(2.0, 0.0);
 
         std::vector<UncertainValue> goodList;
         goodList.push_back(pair0);
