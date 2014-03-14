@@ -368,27 +368,25 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
 
   try 
   {
-    // Name of the group currently used to store plot workspaces. Depends on loaded data.
-    const std::string groupName = getGroupName().toStdString();
-
     // Create workspace and a raw (unbinned) version of it
     MatrixWorkspace_sptr ws = createAnalysisWorkspace(itemType, tableRow, plotType);
     MatrixWorkspace_sptr wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
 
     // Find names for new workspaces
-    const std::string wsName = getNewAnalysisWSName(groupName, itemType, tableRow, plotType); 
+    const std::string wsName = getNewAnalysisWSName(m_currentGroup->getName(), itemType, tableRow,
+                                                    plotType);
     const std::string wsRawName = wsName + "_Raw"; 
+
+    // Make sure they are in the current group
+    if ( ! m_currentGroup->contains(wsName) )
+    {
+      m_currentGroup->addWorkspace(ws);
+      m_currentGroup->addWorkspace(wsRaw);
+    }
 
     // Make sure they end up in the ADS
     ads.addOrReplace(wsName, ws);
     ads.addOrReplace(wsRawName, wsRaw);
-
-    // Make sure they are in the right group
-    if ( ! ads.retrieveWS<WorkspaceGroup>(groupName)->contains(wsName) )
-    {
-      ads.addToGroup(groupName, wsName);
-      ads.addToGroup(groupName, wsRawName);
-    }
 
     QString wsNameQ = QString::fromStdString(wsName);
 
@@ -1399,11 +1397,32 @@ boost::shared_ptr<LoadResult> MuonAnalysis::load(const QStringList& files) const
     result->mainFieldDirection = "longitudinal";
   }
 
-  // Acquire a single loaded worksace to work with. If multiple loaded - sum them to get one
   if ( loadedWorkspaces.size() == 1 )
-    result->loadedWorkspace = loadedWorkspaces.front();
+  {
+
+    // If single workspace loaded - use it
+    Workspace_sptr ws = loadedWorkspaces.front();
+    result->loadedWorkspace = ws;
+
+    result->label = getRunLabel(ws);
+  }
   else
-    result->loadedWorkspace = sumWorkspaces(loadedWorkspaces);
+  {
+    // If multiple workspaces loaded - sum them to get the one to work with
+    try
+    {
+      result->loadedWorkspace = sumWorkspaces(loadedWorkspaces);
+    }
+    catch(std::exception& e)
+    {
+      std::ostringstream error;
+      error << "Unable to sum workspaces together: " << e.what() << "\n";
+      error << "Make sure they have equal dimensions and number of periods.";
+      throw std::runtime_error(error.str());
+    }
+
+    result->label = getRunLabel(loadedWorkspaces);
+  }
 
   return result;
 }
@@ -1589,28 +1608,25 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
 
   std::ostringstream infoStr;
 
-  // Populate run information with the run number
-  QString run(getGroupName());
-  if (m_previousFilenames.size() > 1)
-    infoStr << "Runs: ";
-  else
-    infoStr << "Run: ";
+  std::string label = loadResult->label;
 
   // Remove instrument and leading zeros
-  // TODO: this should be moved to a separate method
-  int zeroCount(0);
-  for (int i=0; i<run.size(); ++i)
+  for (auto it = label.begin(); it != label.end(); ++it)
   {
-    if ( (run[i] == '0') || (run[i].isLetter() ) )
-      ++zeroCount;
-    else
+    if ( !(isalpha(*it) || *it == '0') )
     {
-      run = run.right(run.size() - zeroCount);
+      // When non-letter and non-zero met - delete everything up to it
+      label.erase(label.begin(), it);
       break;
     }
   }
 
-  infoStr << run.toStdString();
+  if (files.size() > 1)
+    infoStr << "Runs: ";
+  else
+    infoStr << "Run: ";
+
+  infoStr << label;
 
   // Add other information about the run
   printRunInfo(matrix_workspace, infoStr);
@@ -1639,42 +1655,11 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   // Make the options available
   nowDataAvailable();
 
-  // Create a group for new data, if it doesn't exist
-  const std::string groupName = getGroupName().toStdString();
-  if ( ! AnalysisDataService::Instance().doesExist(groupName) )
-  {
-    AnalysisDataService::Instance().add( groupName, boost::make_shared<WorkspaceGroup>() );
-  }
+  // Use label as a name for the group we will place plots to
+  updateCurrentGroup(loadResult->label);
 
   if(m_uiForm.frontPlotButton->isEnabled())
     plotSelectedItem();
-}
-
-/**
- * Sums a given list of workspaces
- * @param workspaces :: List of workspaces
- * @return Result workspace
- */
-Workspace_sptr MuonAnalysis::sumWorkspaces(const std::vector<Workspace_sptr>& workspaces) const
-{
-  if (workspaces.size() < 1)
-    throw std::invalid_argument("Couldn't sum an empty list of workspaces");
-
-  ScopedWorkspace accumulatorEntry(workspaces.front());
-
-  for ( auto it = (workspaces.begin() + 1); it != workspaces.end(); ++it )
-  {
-    ScopedWorkspace wsEntry(*it);
-
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");
-    alg->setPropertyValue("LHSWorkspace", accumulatorEntry.name());
-    alg->setPropertyValue("RHSWorkspace", wsEntry.name());
-    alg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
-    if (!alg->execute())
-      throw std::runtime_error("Error in adding range together.");
-  }
-
-  return accumulatorEntry.retrieve();
 }
 
 /**
@@ -1691,71 +1676,6 @@ void MuonAnalysis::deleteWorkspaceIfExists(const std::string &wsName)
     deleteAlg->execute();
   }
 }
-
-/**
-* Get the group name for the workspace.
-*
-* @return wsGroupName :: The name of the group workspace.
-*/
-QString MuonAnalysis::getGroupName()
-{
-  std::string workspaceGroupName("");
-
-  // Decide on name for workspaceGroup
-  if (m_previousFilenames.size() == 1)
-  {
-    Poco::File l_path( m_previousFilenames[0].toStdString() );
-    workspaceGroupName = Poco::Path(l_path.path()).getFileName();
-    changeCurrentRun(workspaceGroupName);
-  }
-  else
-  {
-    workspaceGroupName = getRangedName();
-  }
-
-  std::size_t extPos = workspaceGroupName.find(".");
-  if ( extPos!=std::string::npos)
-    workspaceGroupName = workspaceGroupName.substr(0,extPos);
-
-  QString wsGroupName(workspaceGroupName.c_str());
-  wsGroupName = wsGroupName.toUpper();
-  return wsGroupName;
-}
-
-/**
-* Get ranged name.
-*
-* @return rangedName :: The name to be used to identify the workspace.
-*/
-std::string MuonAnalysis::getRangedName()
-{
-  QString filePath("");
-  QString firstFile(m_previousFilenames[0]);
-  QString lastFile(m_previousFilenames[m_previousFilenames.size()-1]);
-
-  QString firstRun("");
-  QString lastRun("");
-  int runSize(-1);
-  
-  separateMuonFile(filePath, firstFile, firstRun, runSize);
-
-  separateMuonFile(filePath, lastFile, lastRun, runSize);
-  
-  for (int i=0; i<lastRun.size(); ++i)
-  {
-    if (firstRun[i] != lastRun[i])
-    {
-      lastRun = lastRun.right(lastRun.size() - i);
-      break;
-    }
-  }
-
-  if (firstFile.contains('.') )
-    firstFile.chop(firstFile.size()-firstFile.indexOf('.') );
-
-  return (firstFile.toStdString() + '-' + lastRun.toStdString());
-}
-
 
 /**
  * Guess Alpha (slot). For now include all data from first good data(bin)
@@ -2282,51 +2202,6 @@ int MuonAnalysis::numOfDetectors(const std::string& str) const
   return static_cast<int>(rangeSize);
 }
 
-/**
-* Change the workspace group name to the instrument and run number if load current run was pressed.
-*
-* @param workspaceGroupName :: The name of the group that needs to be changed or is already in correct format.
-*/
-void MuonAnalysis::changeCurrentRun(std::string & workspaceGroupName)
-{
-  QString tempGroupName(QString::fromStdString(workspaceGroupName) );
-
-  if ( (tempGroupName.contains("auto") ) || (tempGroupName.contains("argus0000000") ) )
-  {
-    Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
-    MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
-    if(!matrix_workspace) // Data collected in periods.
-    {
-      // Get run number from first period data.
-      workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
-      matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
-      if(!matrix_workspace)
-      {
-        QMessageBox::information(this, "Mantid - Muon Analysis", "Mantid expected period data but no periods were found.\n"
-                      "Default plot name will be used insead of run number.");
-        return;
-      }
-    }
-    const Run& runDetails = matrix_workspace->run();
-    
-    std::string runNumber = runDetails.getProperty("run_number")->value();
-    QString instname = m_uiForm.instrSelector->currentText().toUpper();
-
-    size_t zeroPadding(8);
-
-    if (instname == "ARGUS")
-      zeroPadding = 7;  
-
-    for (size_t i=runNumber.size(); i<zeroPadding; ++i)
-    {
-      runNumber = '0' + runNumber;
-    }
-
-    workspaceGroupName = instname.toStdString() + runNumber;
-  }
-}
-
-
 /** Is input string a number?
  *
  *  @param s :: The input string
@@ -2497,114 +2372,6 @@ double MuonAnalysis::finishTime() const
 {
   return m_optionTab->getCustomFinishTime();
 }
-
-/**
-* Check if grouping in table is consistent with data file
-*
-* @return empty string if OK otherwise a complaint
-*/
-std::string MuonAnalysis::isGroupingAndDataConsistent()
-{
-  std::string complaint = "Grouping inconsistent with data file. Plotting disabled.\n";
-
-  // should probably farm the getting of matrix workspace out into separate method or store
-  // as attribute assigned in inputFileChanged
-  Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
-  WorkspaceGroup_sptr wsPeriods = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace_ptr);
-  MatrixWorkspace_sptr matrix_workspace;
-  if (wsPeriods)
-  {
-    Workspace_sptr workspace_ptr1 = AnalysisDataService::Instance().retrieve(m_workspace_name + "_1");
-    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr1);
-  }
-  else
-  {
-    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
-  }
-
-  int nDet = static_cast<int>(matrix_workspace->getNumberHistograms());
-
-  complaint += "Number of spectra in data = " + boost::lexical_cast<std::string>(nDet) + ". ";
-
-  int numG = numGroups();
-  bool returnComplaint = false;
-  for (int iG = 0; iG < numG; iG++)
-  {
-    typedef Poco::StringTokenizer tokenizer;
-    tokenizer values(m_uiForm.groupTable->item(m_groupToRow[iG],1)->text().toStdString(), ",", tokenizer::TOK_TRIM);
-
-    for (int i = 0; i < static_cast<int>(values.count()); i++)
-    {
-      std::size_t found= values[i].find("-");
-      if (found!=std::string::npos)
-      {
-        tokenizer aPart(values[i], "-", tokenizer::TOK_TRIM);
-
-        int rightInt;
-        std::stringstream rightRead(aPart[1]);
-        rightRead >> rightInt;
-
-        if ( rightInt > nDet )
-        {
-          complaint += " Group-table row " + boost::lexical_cast<std::string>(m_groupToRow[iG]+1) + " refers to spectrum "
-            + boost::lexical_cast<std::string>(rightInt) + ".";
-          returnComplaint = true;
-          break;
-        }
-      }
-      else
-      {
-        if ( (boost::lexical_cast<int>(values[i].c_str()) > nDet) || (boost::lexical_cast<int>(values[i].c_str()) < 1) )
-        {
-          complaint += " Group-table row " + boost::lexical_cast<std::string>(m_groupToRow[iG]+1) + " refers to spectrum "
-            + values[i] + ".";
-          returnComplaint = true;
-          break;
-        }
-      }
-    }
-  }
-  if ( returnComplaint )
-    return complaint;
-  else
-    return std::string("");
-}
-
-
-/**
-* Check if dublicate ID between different rows
-* FIXME: this function doesn't seem to be used anywhere
-*/
-void MuonAnalysis::checkIf_ID_dublicatesInTable(const int row)
-{
-  QTableWidgetItem *item = m_uiForm.groupTable->item(row,1);
-
-  // row of IDs to compare against
-  std::vector<int> idsNew = Strings::parseRange(item->text().toStdString());
-
-  int numG = numGroups();
-  int rowInFocus = getGroupNumberFromRow(row);
-  for (int iG = 0; iG < numG; iG++)
-  {
-    if (iG != rowInFocus)
-    {
-      std::vector<int> ids = Strings::parseRange(m_uiForm.groupTable->item(m_groupToRow[iG],1)->text().toStdString());
-
-      for (unsigned int i = 0; i < ids.size(); i++)
-      {
-        for (unsigned int j = 0; j < idsNew.size(); j++)
-        {
-          if ( ids[i] == idsNew[j] )
-          {
-            item->setText(QString("Dublicate ID: " + item->text()));
-            return;
-          }
-        }
-      }
-    }
-  }
-}
-
 
 /**
  * Load auto saved values
@@ -2792,7 +2559,7 @@ void MuonAnalysis::changeRun(int amountToChange)
   if (currentFile.contains("auto") || currentFile.contains("argus0000000"))
   {
     separateMuonFile(filePath, currentFile, run, runSize);
-    currentFile = filePath + getGroupName() + ".nxs";
+    currentFile = filePath + QString::fromStdString(m_currentGroup->getName()) + ".nxs";
   }
     
   separateMuonFile(filePath, currentFile, run, runSize);
@@ -3552,6 +3319,33 @@ void MuonAnalysis::nowDataAvailable()
   m_uiForm.pairTablePlotButton->setEnabled(true);
   m_uiForm.guessAlphaButton->setEnabled(true);
 }
+
+/**
+ * Updates the m_currentGroup given the name of the new group we want to store plot workspace to.
+ * @param newGroupName :: Name of the group m_currentGroup should have
+ */
+void MuonAnalysis::updateCurrentGroup(const std::string& newGroupName)
+{
+  if ( AnalysisDataService::Instance().doesExist(newGroupName) )
+  {
+    auto existingGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(newGroupName);
+
+    if (existingGroup)
+    {
+      m_currentGroup = existingGroup;
+      return;
+    }
+    else
+    {
+      g_log.warning() << "Workspace with name '" << newGroupName << "' ";
+      g_log.warning() << "was replaced with the group used by MuonAnalysis." << "\n";
+    }
+  }
+
+  m_currentGroup = boost::make_shared<WorkspaceGroup>();
+  AnalysisDataService::Instance().addOrReplace(newGroupName, m_currentGroup);
+}
+
 
 void MuonAnalysis::openDirectoryDialog()
 {
