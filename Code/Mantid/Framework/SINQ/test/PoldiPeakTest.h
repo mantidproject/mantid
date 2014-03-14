@@ -18,113 +18,113 @@ public:
 
     void testCreateQOnly()
     {
-        PoldiPeak peak = PoldiPeak::create(1.0);
+        PoldiPeak_sptr peak = PoldiPeak::create(1.0);
 
-        UncertainValue dValue = peak.d();
+        UncertainValue dValue = peak->d();
         TS_ASSERT_EQUALS(dValue.value(), 2.0 * M_PI);
         TS_ASSERT_EQUALS(dValue.error(), 0.0);
 
-        double doubleDValue = peak.d();
+        double doubleDValue = peak->d();
         TS_ASSERT_EQUALS(doubleDValue, 2.0 * M_PI);
 
-        UncertainValue qValue = peak.q();
+        UncertainValue qValue = peak->q();
         TS_ASSERT_EQUALS(qValue.value(), 1.0);
 
-        TS_ASSERT_EQUALS(peak.fwhm(), 0.0);
-        TS_ASSERT_EQUALS(peak.intensity(), 0.0);
+        TS_ASSERT_EQUALS(peak->fwhm(), 0.0);
+        TS_ASSERT_EQUALS(peak->intensity(), 0.0);
 
         TS_ASSERT_THROWS(PoldiPeak::create(0.0), std::domain_error)
     }
 
     void testCreateQIntensity()
     {
-        PoldiPeak peak = PoldiPeak::create(1.0, 2000.0);
+        PoldiPeak_sptr peak = PoldiPeak::create(1.0, 2000.0);
 
-        UncertainValue intensity = peak.intensity();
+        UncertainValue intensity = peak->intensity();
         TS_ASSERT_EQUALS(intensity.value(), 2000.0);
         TS_ASSERT_EQUALS(intensity.error(), 0.0);
-        TS_ASSERT_EQUALS(peak.d(), 2.0 * M_PI);
+        TS_ASSERT_EQUALS(peak->d(), 2.0 * M_PI);
 
         TS_ASSERT_THROWS(PoldiPeak::create(0.0, 23.0), std::domain_error);
     }
 
     void testQDConversion()
     {
-        PoldiPeak one = PoldiPeak::create(2.0);
+        PoldiPeak_sptr one = PoldiPeak::create(2.0);
 
-        TS_ASSERT_EQUALS(one.d(), M_PI);
-        TS_ASSERT_EQUALS(one.q(), 2.0);
+        TS_ASSERT_EQUALS(one->d(), M_PI);
+        TS_ASSERT_EQUALS(one->q(), 2.0);
 
-        TS_ASSERT_EQUALS(one.twoTheta(1.5), 0.48212062546814725648);
+        TS_ASSERT_EQUALS(one->twoTheta(1.5), 0.48212062546814725648);
     }
 
     void testSetD()
     {
-        PoldiPeak peak = PoldiPeak::create(1.0);
+        PoldiPeak_sptr peak = PoldiPeak::create(1.0);
 
-        peak.setD(UncertainValue(0.5, 0.0001));
+        peak->setD(UncertainValue(0.5, 0.0001));
 
-        UncertainValue d = peak.d();
+        UncertainValue d = peak->d();
         TS_ASSERT_EQUALS(d.value(), 0.5);
         TS_ASSERT_EQUALS(d.error(), 0.0001);
 
-        UncertainValue q = peak.q();
+        UncertainValue q = peak->q();
         TS_ASSERT_EQUALS(q.value(), 4.0 * M_PI);
         TS_ASSERT_EQUALS(q.error(), 0.00251327412287183459);
     }
 
     void testSetQ()
     {
-        PoldiPeak peak = PoldiPeak::create(1.0);
+        PoldiPeak_sptr peak = PoldiPeak::create(1.0);
 
-        peak.setQ(UncertainValue(2.0, 0.1));
+        peak->setQ(UncertainValue(2.0, 0.1));
 
-        UncertainValue d = peak.d();
+        UncertainValue d = peak->d();
         TS_ASSERT_EQUALS(d.value(), M_PI);
         TS_ASSERT_EQUALS(d.error(), 0.15707963267948966);
 
-        UncertainValue q = peak.q();
+        UncertainValue q = peak->q();
         TS_ASSERT_EQUALS(q.value(), 2.0);
         TS_ASSERT_EQUALS(q.error(), 0.1);
     }
 
     void testSetIntensity()
     {
-        PoldiPeak peak = PoldiPeak::create(1.0, 23.0);
+        PoldiPeak_sptr peak = PoldiPeak::create(1.0, 23.0);
 
-        TS_ASSERT_EQUALS(peak.intensity(), 23.0);
+        TS_ASSERT_EQUALS(peak->intensity(), 23.0);
 
-        peak.setIntensity(UncertainValue(24.0, 2.0));
+        peak->setIntensity(UncertainValue(24.0, 2.0));
 
-        UncertainValue newIntensity = peak.intensity();
+        UncertainValue newIntensity = peak->intensity();
         TS_ASSERT_EQUALS(newIntensity.value(), 24.0);
         TS_ASSERT_EQUALS(newIntensity.error(), 2.0);
 
-        double doubleIntensity = peak.intensity();
+        double doubleIntensity = peak->intensity();
         TS_ASSERT_EQUALS(doubleIntensity, 24.0);
     }
 
     void testSetFwhm()
     {
-        PoldiPeak peak = PoldiPeak::create(1.0);
+        PoldiPeak_sptr peak = PoldiPeak::create(1.0);
 
-        peak.setFwhm(UncertainValue(0.01, 0.001));
-        UncertainValue fwhm = peak.fwhm();
+        peak->setFwhm(UncertainValue(0.01, 0.001));
+        UncertainValue fwhm = peak->fwhm();
         TS_ASSERT_EQUALS(fwhm.value(), 0.01);
         TS_ASSERT_EQUALS(fwhm.error(), 0.001);
 
-        double doubleFwhm = peak.fwhm();
+        double doubleFwhm = peak->fwhm();
         TS_ASSERT_EQUALS(doubleFwhm, 0.01);
     }
 
     void testSetHKL()
     {
-        PoldiPeak peak = PoldiPeak::create(1.0);
+        PoldiPeak_sptr peak = PoldiPeak::create(1.0);
         MillerIndices hkl(2, 0, 3);
 
-        peak.setHKL(hkl);
+        peak->setHKL(hkl);
 
-        MillerIndices newHkl = peak.hkl();
+        MillerIndices newHkl = peak->hkl();
         TS_ASSERT_EQUALS(newHkl.h(), 2);
         TS_ASSERT_EQUALS(newHkl.k(), 0);
         TS_ASSERT_EQUALS(newHkl.l(), 3);

@@ -4,9 +4,14 @@
 #include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 #include "MantidSINQ/PoldiUtilities/MillerIndices.h"
+#include "boost/shared_ptr.hpp"
 
 namespace Mantid {
 namespace Poldi {
+
+class PoldiPeak;
+
+typedef boost::shared_ptr<PoldiPeak> PoldiPeak_sptr;
 
 class MANTID_SINQ_DLL PoldiPeak
 {
@@ -28,8 +33,8 @@ public:
     void setIntensity(UncertainValue intensity);
     void setFwhm(UncertainValue fwhm);
 
-    static PoldiPeak create(UncertainValue qValue);
-    static PoldiPeak create(UncertainValue qValue, UncertainValue intensity);
+    static PoldiPeak_sptr create(UncertainValue qValue);
+    static PoldiPeak_sptr create(UncertainValue qValue, UncertainValue intensity);
 
 private:
     PoldiPeak(UncertainValue d = UncertainValue(), UncertainValue intensity = UncertainValue(), UncertainValue fwhm = UncertainValue(), MillerIndices hkl = MillerIndices());

@@ -81,14 +81,14 @@ UncertainValue PoldiPeak::qToD(UncertainValue q)
     return 2.0 * M_PI / q;
 }
 
-PoldiPeak PoldiPeak::create(UncertainValue qValue)
+PoldiPeak_sptr PoldiPeak::create(UncertainValue qValue)
 {
-    return PoldiPeak(PoldiPeak::qToD(qValue));
+    return PoldiPeak_sptr(new PoldiPeak(PoldiPeak::qToD(qValue)));
 }
 
-PoldiPeak PoldiPeak::create(UncertainValue qValue, UncertainValue intensity)
+PoldiPeak_sptr PoldiPeak::create(UncertainValue qValue, UncertainValue intensity)
 {
-    return PoldiPeak(PoldiPeak::qToD(qValue), intensity);
+    return PoldiPeak_sptr(new PoldiPeak(PoldiPeak::qToD(qValue), intensity));
 }
 
 PoldiPeak::PoldiPeak(UncertainValue d, UncertainValue intensity, UncertainValue fwhm, MillerIndices hkl) :
