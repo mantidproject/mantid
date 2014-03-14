@@ -149,7 +149,7 @@ namespace MDEvents
         next();
     }
 
-    auto temp = std::vector<long>(integerPower(3, m_nd), 0);
+    auto temp = std::vector<int64_t>(integerPower(3, m_nd), 0);
     m_permutations.swap(temp);
   }
     
@@ -391,7 +391,7 @@ namespace MDEvents
     Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker, m_indexMax,
             m_index);
 
-    long offset = 1;
+    int64_t offset = 1;
     m_permutations[0] = 0;
     m_permutations[1] = 1;
     m_permutations[2] = -1;
@@ -400,11 +400,11 @@ namespace MDEvents
     size_t nPermutations = 3;
     for(size_t j = 1; j < m_nd; ++j)
     {
-      offset = offset * m_ws->getDimension(j-1)->getNBins();
+      offset = offset * static_cast<int64_t>( m_ws->getDimension(j-1)->getNBins() );
       size_t counter = nPermutations;
       for(size_t k = 0; k <nPermutations; k+=1, counter+=2)
       {
-        long newVariant = m_permutations[k] + offset;
+        int64_t newVariant = m_permutations[k] + offset;
         m_permutations[counter] = newVariant;
         m_permutations[counter+1] = (-1*newVariant);
       }

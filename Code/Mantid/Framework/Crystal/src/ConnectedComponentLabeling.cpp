@@ -78,7 +78,7 @@ namespace Mantid
         neighbourElements.push_back(DisjointElement());
       }
 
-      size_t currentLabelCount = m_startId;
+      unsigned int currentLabelCount = m_startId;
       size_t currentIndex = 0; // We assume current index in the image can be kept in sync with the iterator.
       do
       {

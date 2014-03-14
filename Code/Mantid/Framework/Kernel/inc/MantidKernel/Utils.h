@@ -269,12 +269,12 @@ namespace Utils
    */
   inline bool isNeighbourOfSubject(const size_t ndims, const size_t neighbour_linear_index, const size_t* subject_indices, const size_t * num_bins, const size_t * index_max)
   {
-    size_t neighbour_indices[ndims];
-    Utils::NestedForLoop::GetIndicesFromLinearIndex(ndims, neighbour_linear_index, num_bins, index_max, neighbour_indices);
+    std::vector<size_t> neighbour_indices(ndims);
+    Utils::NestedForLoop::GetIndicesFromLinearIndex(ndims, neighbour_linear_index, num_bins, index_max, &neighbour_indices.front());
 
     for(size_t ind = 0; ind < ndims; ++ind)
     {
-      auto diff = std::abs(static_cast<long>(subject_indices[ind]) -static_cast<long>(neighbour_indices[ind]));
+      auto diff = std::abs(static_cast<long>(subject_indices[ind]) - static_cast<long>(neighbour_indices[ind]));
       if (diff > 1)
       {
         return false;

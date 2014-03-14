@@ -85,7 +85,7 @@ public:
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 1); // Single node. Simpliest possible test case
 
     MockBackgroundStrategy mockStrategy;
-    EXPECT_CALL(mockStrategy, isBackground(_)).Times(inWS->getNPoints()).WillRepeatedly(Return(false));// A filter that passes everything.
+    EXPECT_CALL(mockStrategy, isBackground(_)).Times(static_cast<int>(inWS->getNPoints())).WillRepeatedly(Return(false));// A filter that passes everything.
 
     ConnectedComponentLabeling ccl;
     size_t labelingId = 1;
@@ -104,7 +104,7 @@ public:
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 10); // Makes a 1 by 10 md ws with identical signal values.
 
     MockBackgroundStrategy mockStrategy;
-    EXPECT_CALL(mockStrategy, isBackground(_)).Times(inWS->getNPoints()).WillRepeatedly(Return(false));// A filter that passes everything.
+    EXPECT_CALL(mockStrategy, isBackground(_)).Times(static_cast<int>(inWS->getNPoints())).WillRepeatedly(Return(false));// A filter that passes everything.
 
     ConnectedComponentLabeling ccl;
     size_t labelingId = 2;

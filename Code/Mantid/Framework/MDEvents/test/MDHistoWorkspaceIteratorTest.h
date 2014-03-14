@@ -506,11 +506,14 @@ public:
   }
 
   MDHistoWorkspace_sptr ws;
+  MDHistoWorkspace_sptr small_ws;
 
   MDHistoWorkspaceIteratorTestPerformance()
   {
     // 125^3 workspace = about 2 million
     ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 125);
+    // 10^3 workspace = 21000
+    small_ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0,3,30);
   }
 
   /** ~Two million iterations */
@@ -586,14 +589,23 @@ public:
   void test_getIsMasked()
   {
     //Characterisation test
-    MDHistoWorkspaceIterator iterator(ws, new SkipNothing());
-    for (size_t i = 0; i < ws->getNPoints(); ++i)
+    MDHistoWorkspaceIterator iterator(small_ws, new SkipNothing());
+    for (size_t i = 0; i < small_ws->getNPoints(); ++i)
     {
       std::stringstream stream;
       stream << "Masking is different from the workspace at index: " << i;
-      TSM_ASSERT_EQUALS(stream.str(), ws->getIsMaskedAt(i), iterator.getIsMasked());
+      TSM_ASSERT_EQUALS(stream.str(), small_ws->getIsMaskedAt(i), iterator.getIsMasked());
       iterator.next();
     }
+  }
+
+  void test_findNeighbours()
+  {
+    MDHistoWorkspaceIterator iterator(small_ws, new SkipNothing());
+    do
+    {
+      iterator.findNeighbourIndexes();
+    } while (iterator.next());
   }
 
 };

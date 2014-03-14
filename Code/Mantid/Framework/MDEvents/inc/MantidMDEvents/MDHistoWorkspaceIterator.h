@@ -136,7 +136,7 @@ namespace MDEvents
     size_t * m_indexMaker;
 
     /// Neighbour finding permutations.
-    mutable std::vector<long> m_permutations;
+    mutable std::vector<int64_t> m_permutations;
 
     /// Skipping policy.
     SkippingPolicy_scptr m_skippingPolicy;
