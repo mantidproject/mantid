@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/AsciiPointBase.h"
 
 namespace Mantid
 {
@@ -48,44 +49,29 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport SaveILLCosmosAscii : public API::Algorithm
+    class DLLExport SaveILLCosmosAscii : public DataHandling::AsciiPointBase
     {
     public:
       /// Default constructor
-      SaveILLCosmosAscii();
+      SaveILLCosmosAscii() {}
       /// Destructor
       ~SaveILLCosmosAscii() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "SaveILLCosmosAscii"; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
-      /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "DataHandling\\Text"; }
 
     private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
-      /// Overwrites Algorithm method.
-      void init();
-      /// Overwrites Algorithm method
-      void exec();
-      /// returns true if the value is NaN
-      bool checkIfNan(const double& value) const;
-      /// returns true if the value if + or - infinity
-      bool checkIfInfinite(const double& value) const;
-      /// print the appropriate value to file
-      void outputval (double val, std::ofstream & file, bool leadingSep = true);
+      /// Return the file extension this algorthm should output.
+      virtual std::string ext() {return ".mft";}
       ///static reference to the logger class
       static Kernel::Logger& g_log;
-
-      /// Map the separator options to their string equivalents
-      std::map<std::string,std::string> m_separatorIndex;
-
-      int m_nBins;
-      char m_sep;
-      bool m_writeDX;
-      bool m_isHistogram;
-      API::MatrixWorkspace_const_sptr m_ws;
+      ///extra properties specifically for this
+      virtual void extraProps();
+      /// write any extra information required
+      virtual void extraHeaders(std::ofstream & file);
     };
   } // namespace DataHandling
 } // namespace Mantid

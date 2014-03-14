@@ -1,5 +1,6 @@
 set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
+	src/AsciiPointBase.cpp
 	src/CompressEvents.cpp
 	src/CreateChopperModel.cpp
 	src/CreateModeratorModel.cpp
@@ -132,6 +133,7 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
+	inc/MantidDataHandling/AsciiPointBase.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateChopperModel.h
 	inc/MantidDataHandling/CreateModeratorModel.h
