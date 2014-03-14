@@ -397,8 +397,13 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
   const MantidVec & Es = data_ws->readE(0);
 
   MantidVec::const_iterator peakIt = std::max_element(Ys.begin(), Ys.end());
+  double bkg_val = *std::min_element(Ys.begin(), Ys.end());
+  if (*peakIt == bkg_val)
+  {
+    throw std::invalid_argument("No peak in the range specified as minimal and maximal values of the function are equal ");
+  }
   MantidVec::difference_type iPeak = peakIt - Ys.begin();
-  double peakY = Ys[iPeak];
+  double peakY = Ys[iPeak]-bkg_val;
   double peakE = Es[iPeak];
 
   const std::vector<double>::size_type nxvals = Xs.size();
@@ -407,7 +412,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
   int64_t im = static_cast<int64_t>(iPeak-1);
   for( ; im >= 0; --im )
   {
-    const double ratio = Ys[im]/peakY;
+    const double ratio = (Ys[im]-bkg_val)/peakY;
     const double ratio_err = std::sqrt( std::pow(Es[im],2) + std::pow(ratio*peakE,2) )/peakY;
     if ( ratio < (1.0/prominence - m_peak_signif*ratio_err) )
     {
@@ -418,7 +423,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
   std::vector<double>::size_type ip = iPeak+1;
   for( ; ip < nxvals; ip++ )
   {
-    const double ratio = Ys[ip]/peakY;
+    const double ratio = (Ys[ip]-bkg_val)/peakY;
     const double ratio_err =
       std::sqrt( std::pow(Es[ip], 2) + std::pow(ratio*peakE, 2) )/peakY;
     if ( ratio < (1.0/prominence - m_peak_signif*ratio_err) )
