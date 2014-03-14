@@ -129,7 +129,7 @@ namespace IDA
 
     QString specMin = uiForm().msd_leSpectraMin->text();
     QString specMax = uiForm().msd_leSpectraMax->text();
-    auto specRange = std::make_pair(specMin.toDouble(), specMax.toDouble());
+    auto specRange = std::make_pair(specMin.toInt(), specMax.toInt()+1);
     uiv.checkValidRange("spectrum range", specRange);
 
     return uiv.generateErrorMessage();
