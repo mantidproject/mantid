@@ -40,7 +40,6 @@ set ( INC_FILES
         inc/MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h
         inc/MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h
         inc/MantidSINQ/PoldiUtilities/UncertainValue.h
-	inc/MantidSINQ/PoldiAutoCorrelation5.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
 	inc/MantidSINQ/PoldiLoadIPP.h
 	inc/MantidSINQ/PoldiLoadLog.h
