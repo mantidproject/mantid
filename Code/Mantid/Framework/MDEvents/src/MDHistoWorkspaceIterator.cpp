@@ -421,7 +421,7 @@ namespace MDEvents
       }
 
       size_t neighbour_index = m_pos + m_permutations[i];
-      if( Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index, m_indexMaker, m_indexMax ) )
+      if( neighbour_index < m_max && neighbour_index >= 0 && Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index, m_indexMaker, m_indexMax ) )
       {
         neighbourIndexes.push_back(neighbour_index);
       }

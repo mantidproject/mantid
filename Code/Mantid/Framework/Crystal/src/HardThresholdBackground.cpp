@@ -29,7 +29,7 @@ namespace Crystal
 
   bool HardThresholdBackground::isBackground(Mantid::API::IMDIterator* iterator) const
   {
-    return iterator->getNormalizedSignal() < m_thresholdSignal;
+    return iterator->getNormalizedSignal() <= m_thresholdSignal;
   }
 
 } // namespace Crystal

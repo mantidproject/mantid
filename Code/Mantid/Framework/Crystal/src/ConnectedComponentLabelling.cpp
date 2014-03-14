@@ -6,6 +6,7 @@
 #include "MantidCrystal/DisjointElement.h"
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
+#include <set>
 
 using namespace Mantid::API;
 
@@ -17,13 +18,13 @@ namespace Mantid
     {
       typedef std::vector<size_t> VecIndexes;
       typedef std::vector<DisjointElement> VecElements;
-      typedef std::vector<DisjointElement*> VecElementPtrs;
+      typedef std::set<size_t> SetIds;
     }
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
-    ConnectedComponentLabelling::ConnectedComponentLabelling() : m_startId(0)
+    ConnectedComponentLabelling::ConnectedComponentLabelling() : m_startId(1)
     {
     }
 
@@ -32,8 +33,10 @@ namespace Mantid
      * the initial id used.
      * @param id: Id to start with
      */
-    void ConnectedComponentLabelling::startLabellingId(const size_t& id)
+    void ConnectedComponentLabelling::startLabelingId(const size_t& id)
     {
+      if(id < 1)
+        throw std::invalid_argument("Start labeling id must be >= 1");
       m_startId = id;
     }
 
@@ -60,6 +63,12 @@ namespace Mantid
         Mantid::API::Workspace_sptr temp = alg->getProperty("OutputWorkspace");
         out_ws = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
       }
+      // zero-out output data.
+      for(size_t i = 0; i < out_ws->getNPoints(); ++i)
+      {
+        out_ws->setSignalAt(i, 0);
+        out_ws->setErrorSquaredAt(i, 0);
+      }
 
       IMDIterator* iterator = ws->createIterator(NULL);
 
@@ -78,15 +87,17 @@ namespace Mantid
           // Linear indexes of neighbours
           VecIndexes neighbourIndexes = iterator->findNeighbourIndexes();
           VecIndexes nonEmptyNeighbourIndexes;
+          SetIds neighbourIds;
           // Discover non-empty neighbours
           for (size_t i = 0; i < neighbourIndexes.size(); ++i)
           {
             size_t neighIndex = neighbourIndexes[i];
-            DisjointElement& neighbourElement = neighbourElements[neighIndex];
+            const DisjointElement& neighbourElement = neighbourElements[neighIndex];
 
             if (!neighbourElement.isEmpty())
             {
               nonEmptyNeighbourIndexes.push_back(neighIndex);
+              neighbourIds.insert(neighbourElement.getId());
             }
           }
 
@@ -95,7 +106,7 @@ namespace Mantid
             neighbourElements[currentIndex] = DisjointElement(currentLabelCount); // New leaf
             ++currentLabelCount;
           }
-          else if (nonEmptyNeighbourIndexes.size() == 1)
+          else if (neighbourIds.size() == 1) // Do we have a single unique id amongst all neighbours.
           {
             neighbourElements[currentIndex] = neighbourElements[nonEmptyNeighbourIndexes.front()]; // Copy non-empty neighbour
           }
@@ -134,7 +145,10 @@ namespace Mantid
       for (size_t i = 0; i < neighbourElements.size(); ++i)
       {
         //std::cout << "Element\t" << i << " Id: \t" << neighbourElements[i].getId() << " This location:\t"<< &neighbourElements[i] << " Root location:\t" << neighbourElements[i].getParent() << " Root Id:\t" <<  neighbourElements[i].getRoot() << std::endl;
-        out_ws->setSignalAt(i, neighbourElements[i].getRoot());
+        if(!neighbourElements[i].isEmpty())
+        {
+          out_ws->setSignalAt(i, neighbourElements[i].getRoot());
+        }
       }
 
       return out_ws;

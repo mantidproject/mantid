@@ -37,7 +37,7 @@ namespace Crystal
   {
   public:
     ConnectedComponentLabelling();
-    void startLabellingId(const size_t& id);
+    void startLabelingId(const size_t& id);
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> execute(Mantid::API::IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy) const;
     virtual ~ConnectedComponentLabelling();
   private:
