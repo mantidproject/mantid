@@ -9,8 +9,10 @@
 
 #include "MantidDataObjects/Workspace2D.h"
 
+#include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
+
 namespace Mantid
 {
 namespace Poldi
@@ -69,11 +71,11 @@ namespace Poldi
 
     std::list<MantidVec::iterator> mapPeakPositionsToCorrelationData(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator baseDataStart, MantidVec::iterator originalDataStart);
 
-    std::pair<double, double> getBackgroundWithSigma(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
+    UncertainValue getBackgroundWithSigma(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
     bool distanceToPeaksGreaterThanMinimum(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator point);
     size_t getNumberOfBackgroundPoints(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
 
-    double minimumPeakHeightFromBackground(std::pair<double, double> backgroundWithSigma);
+    double minimumPeakHeightFromBackground(UncertainValue backgroundWithSigma);
     std::vector<PoldiPeak_sptr> getPeaks(MantidVec::iterator baseListStart, std::list<MantidVec::iterator> peakPositions, MantidVec xData);
 
     void setErrorsOnWorkspace(Workspace2D_sptr correlationWorkspace, double error);

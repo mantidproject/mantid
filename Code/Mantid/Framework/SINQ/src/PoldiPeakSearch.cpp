@@ -195,7 +195,7 @@ void PoldiPeakSearch::setErrorsOnWorkspace(Workspace2D_sptr correlationWorkspace
     std::fill(errors.begin(), errors.end(), error);
 }
 
-std::pair<double, double> PoldiPeakSearch::getBackgroundWithSigma(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
+UncertainValue PoldiPeakSearch::getBackgroundWithSigma(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
 {
     size_t backgroundPoints = getNumberOfBackgroundPoints(peakPositions, correlationCounts);
 
@@ -218,7 +218,7 @@ std::pair<double, double> PoldiPeakSearch::getBackgroundWithSigma(std::list<Mant
     double sumBackground = std::accumulate(background.begin(), background.end(), 0.0);
     double sumSigma = std::accumulate(sigma.begin(), sigma.end(), 0.0);
 
-    return std::make_pair(sumBackground / static_cast<double>(background.size()), sumSigma / static_cast<double>(sigma.size()));
+    return UncertainValue(sumBackground / static_cast<double>(background.size()), sumSigma / static_cast<double>(sigma.size()));
 }
 
 bool PoldiPeakSearch::distanceToPeaksGreaterThanMinimum(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator point)
@@ -248,9 +248,9 @@ size_t PoldiPeakSearch::getNumberOfBackgroundPoints(std::list<MantidVec::iterato
     return totalDataPoints - occupiedByPeaks;
 }
 
-double PoldiPeakSearch::minimumPeakHeightFromBackground(std::pair<double, double> backgroundWithSigma)
+double PoldiPeakSearch::minimumPeakHeightFromBackground(UncertainValue backgroundWithSigma)
 {
-    return 2.75 * backgroundWithSigma.second + backgroundWithSigma.first;
+    return 2.75 * backgroundWithSigma.error() + backgroundWithSigma.value();
 }
 
 void PoldiPeakSearch::setMinimumDistance(int newMinimumDistance)
@@ -351,8 +351,8 @@ void PoldiPeakSearch::exec()
     std::vector<PoldiPeak_sptr> peakCoordinates = getPeaks(summedNeighborCounts.begin(), peakPositionsSummed, correlationQValues);
     g_log.information() << "   Extracted peak positions in Q and intensity guesses." << std::endl;
 
-    std::pair<double, double> backgroundWithSigma = getBackgroundWithSigma(peakPositionsCorrelation, correlatedCounts);
-    g_log.information() << "   Calculated average background and deviation: " << backgroundWithSigma.first << ", " << backgroundWithSigma.second << std::endl;
+    UncertainValue backgroundWithSigma = getBackgroundWithSigma(peakPositionsCorrelation, correlatedCounts);
+    g_log.information() << "   Calculated average background and deviation: " << backgroundWithSigma.value() << ", " << backgroundWithSigma.error() << std::endl;
 
     if((*getProperty("MinimumPeakHeight")).isDefault()) {
         setMinimumPeakHeight(minimumPeakHeightFromBackground(backgroundWithSigma));
@@ -373,7 +373,7 @@ void PoldiPeakSearch::exec()
         m_peaks->addPeak(*peak);
     }
 
-    setErrorsOnWorkspace(correlationWorkspace, backgroundWithSigma.second);
+    setErrorsOnWorkspace(correlationWorkspace, backgroundWithSigma.error());
 
     setProperty("OutputWorkspace", m_peaks->asTableWorkspace());
 }

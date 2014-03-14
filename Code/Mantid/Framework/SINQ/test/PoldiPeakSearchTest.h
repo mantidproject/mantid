@@ -5,6 +5,7 @@
 
 #include "MantidSINQ/PoldiPeakSearch.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
+#include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 
 using Mantid::Poldi::PoldiPeakSearch;
 using namespace Mantid::Poldi;
@@ -259,16 +260,16 @@ public:
 
         TS_ASSERT_EQUALS(poldiPeakSearch.getNumberOfBackgroundPoints(peaks, testList), 6);
 
-        std::pair<double, double> bgSigma = poldiPeakSearch.getBackgroundWithSigma(peaks, testList);
-        TS_ASSERT_EQUALS(bgSigma.first, 10.0/6.0);
-        TS_ASSERT_EQUALS(bgSigma.second, 1.0);
+        UncertainValue bgSigma = poldiPeakSearch.getBackgroundWithSigma(peaks, testList);
+        TS_ASSERT_EQUALS(bgSigma.value(), 10.0/6.0);
+        TS_ASSERT_EQUALS(bgSigma.error(), 1.0);
     }
 
     void testminimumPeakHeightFromBackground()
     {
         TestablePoldiPeakSearch poldiPeakSearch;
 
-        TS_ASSERT_EQUALS(poldiPeakSearch.minimumPeakHeightFromBackground(std::make_pair(3.0, 3.5)), 12.625);
+        TS_ASSERT_EQUALS(poldiPeakSearch.minimumPeakHeightFromBackground(UncertainValue(3.0, 3.5)), 12.625);
     }
 };
 
