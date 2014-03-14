@@ -220,8 +220,7 @@ namespace Mantid
       {
         return Q;
       }
-      
-      Vertex2D::deleteChain(curIntersection);
+
       throw NoIntersectionException();
     }
 
