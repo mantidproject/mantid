@@ -129,6 +129,8 @@ def calculateEISF(params_table):
 def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin=0, specMax=None, Verbose=False, Plot='None', Save=False):
     StartTime('ConvFit')
 
+    bgd = bgd[:-2]
+
     num_spectra = mtd[inputWS].getNumberHistograms()
     if specMin < 0 or specMax >= num_spectra:
         raise ValueError("Invalid spectrum range: %d - %d" % (specMin, specMax))
@@ -190,6 +192,8 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
     AddSampleLog(Workspace=wsname, LogName='background', LogType='String', LogText=str(bgd))
     AddSampleLog(Workspace=wsname, LogName='delta_function', LogType='String', LogText=str(using_delta_func))
     AddSampleLog(Workspace=wsname, LogName='lorentzians', LogType='String', LogText=str(lorentzians))
+
+    CopyLogs(InputWorkspace=wsname, OutputWorkspace=output_workspace + "_Workspaces")
 
     temp_correction = temperature is not None
     AddSampleLog(Workspace=wsname, LogName='temperature_correction', LogType='String', LogText=str(temp_correction))
