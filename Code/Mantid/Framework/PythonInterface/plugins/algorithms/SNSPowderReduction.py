@@ -206,14 +206,14 @@ class SNSPowderReduction(PythonAlgorithm):
                     samRun = temp
                     info = tempinfo
                 else:
-                    if (tempinfo.freq is not None) and (info.freq is not None) \
-                            and (abs(tempinfo.freq - info.freq)/info.freq > .05):
+                    if (tempinfo["frequency"] is not None) and (info["frequency"] is not None) \
+                            and (abs(tempinfo["frequency"] - info["frequency"])/info["frequency"] > .05):
                         raise RuntimeError("Cannot add incompatible frequencies (%f!=%f)" \
-                                           % (tempinfo.freq, info.freq))
-                    if (tempinfo.wl is not None) and (info.wl is not None) \
-                            and abs(tempinfo.wl - info.wl)/info.freq > .05:
+                                           % (tempinfo["frequency"], info["frequency"]))
+                    if (tempinfo["wavelength"] is not None) and (info["wavelength"] is not None) \
+                            and abs(tempinfo["wavelength"] - info["wavelength"])/info["wavelength"] > .05:
                         raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
-                                           % (tempinfo.wl, info.wl))
+                                           % (tempinfo["wavelength"], info["wavelength"]))
                     samRun = api.Plus(LHSWorkspace=samRun, RHSWorkspace=temp, OutputWorkspace=samRun)
                     if samRun.id() == EVENT_WORKSPACE_ID:
                         samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
