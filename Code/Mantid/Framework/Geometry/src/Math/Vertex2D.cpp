@@ -16,10 +16,12 @@ namespace Mantid
 
     /**
      * Deletes all nodes in a chain
-     * @para node A node in the chain
+     * @para node A node in the chain. If NULL then nothing happens
      */
     void Vertex2D::deleteChain(Vertex2D * node)
     {
+      if(!node) return;
+
       Vertex2D * head = node;
       Vertex2D * next = node->next();
       while(next != head)
