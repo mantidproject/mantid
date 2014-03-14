@@ -4,8 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidSINQ/PoldiPeakSearch.h"
+#include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 
 using Mantid::Poldi::PoldiPeakSearch;
+using namespace Mantid::Poldi;
 using namespace Mantid::Kernel;
 
 class TestablePoldiPeakSearch : public PoldiPeakSearch
@@ -189,17 +191,17 @@ public:
 
         maxima.sort();
 
-        std::vector<V2D> peakCoordinates = poldiPeakSearch.getPeakCoordinates(baseData.begin(), maxima, testXData);
+        std::vector<PoldiPeak_sptr> peaks = poldiPeakSearch.getPeaks(baseData.begin(), maxima, testXData);
 
-        TS_ASSERT_EQUALS(peakCoordinates.size(), 3);
+        TS_ASSERT_EQUALS(peaks.size(), 3);
 
-        V2D peak0 = peakCoordinates[0];
-        TS_ASSERT_EQUALS(peak0.X(), 4.0);
-        TS_ASSERT_EQUALS(peak0.Y(), 12.0 / 3.0);
+        PoldiPeak_sptr peak0 = peaks[0];
+        TS_ASSERT_EQUALS(peak0->q(), 4.0);
+        TS_ASSERT_EQUALS(peak0->intensity(), 12.0 / 3.0);
 
-        V2D peak1 = peakCoordinates[1];
-        TS_ASSERT_EQUALS(peak1.X(), 9.0);
-        TS_ASSERT_EQUALS(peak1.Y(), 34.0 / 3.0);
+        PoldiPeak_sptr peak1 = peaks[1];
+        TS_ASSERT_EQUALS(peak1->q(), 9.0);
+        TS_ASSERT_EQUALS(peak1->intensity(), 34.0 / 3.0);
     }
 
     void testmapPeakPositionsToCorrelationData()

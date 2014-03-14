@@ -58,7 +58,8 @@ PoldiPeakSearch::PoldiPeakSearch() :
     m_minimumPeakHeight(0.0),
     m_maximumPeakNumber(0),
     m_recursionAbsoluteBegin(0),
-    m_recursionAbsoluteEnd(0)
+    m_recursionAbsoluteEnd(0),
+    m_peaks(new PoldiPeakCollection())
 {
 }
 
@@ -171,9 +172,9 @@ std::list<MantidVec::iterator> PoldiPeakSearch::mapPeakPositionsToCorrelationDat
     return transformedIndices;
 }
 
-std::vector<V2D> PoldiPeakSearch::getPeakCoordinates(MantidVec::iterator baseListStart, std::list<MantidVec::iterator> peakPositions, MantidVec xData)
+std::vector<PoldiPeak_sptr> PoldiPeakSearch::getPeaks(MantidVec::iterator baseListStart, std::list<MantidVec::iterator> peakPositions, MantidVec xData)
 {
-    std::vector<V2D> peakData;
+    std::vector<PoldiPeak_sptr> peakData;
     peakData.reserve(peakPositions.size());
 
     for(std::list<MantidVec::iterator>::const_iterator peak = peakPositions.begin();
@@ -181,7 +182,7 @@ std::vector<V2D> PoldiPeakSearch::getPeakCoordinates(MantidVec::iterator baseLis
         ++peak)
     {
         size_t index = std::distance(baseListStart, *peak) + 1;
-        peakData.push_back(V2D(xData[index], **peak / 3.0));
+        peakData.push_back(PoldiPeak::create(xData[index], **peak / 3.0));
     }
 
     return peakData;
@@ -283,14 +284,14 @@ bool PoldiPeakSearch::vectorElementGreaterThan(MantidVec::iterator first, Mantid
     return *first > *second;
 }
 
-bool PoldiPeakSearch::yGreaterThan(const V2D first, const V2D second)
+bool PoldiPeakSearch::intensityGreaterThan(PoldiPeak_sptr first, PoldiPeak_sptr second)
 {
-    return first.Y() > second.Y();
+    return first->intensity() > second->intensity();
 }
 
-bool PoldiPeakSearch::isLessThanMinimum(V2D peakCoordinate)
+bool PoldiPeakSearch::isLessThanMinimum(PoldiPeak_sptr peak)
 {
-    return peakCoordinate.Y() <= m_minimumPeakHeight;
+    return peak->intensity() <= m_minimumPeakHeight;
 }
 
 void PoldiPeakSearch::init()
@@ -347,7 +348,7 @@ void PoldiPeakSearch::exec()
     /* Since intensities are required for filtering, they are extracted from the original count data,
      * along with the Q-values, forming "coordinates" (hence the use of V2D).
      */
-    std::vector<V2D> peakCoordinates = getPeakCoordinates(summedNeighborCounts.begin(), peakPositionsSummed, correlationQValues);
+    std::vector<PoldiPeak_sptr> peakCoordinates = getPeaks(summedNeighborCounts.begin(), peakPositionsSummed, correlationQValues);
     g_log.information() << "   Extracted peak positions in Q and intensity guesses." << std::endl;
 
     std::pair<double, double> backgroundWithSigma = getBackgroundWithSigma(peakPositionsCorrelation, correlatedCounts);
@@ -357,31 +358,24 @@ void PoldiPeakSearch::exec()
         setMinimumPeakHeight(minimumPeakHeightFromBackground(backgroundWithSigma));
     }
 
-    std::vector<V2D> intensityFilteredPeaks(peakCoordinates.size());
+    std::vector<PoldiPeak_sptr> intensityFilteredPeaks(peakCoordinates.size());
     auto newEnd = std::remove_copy_if(peakCoordinates.begin(), peakCoordinates.end(), intensityFilteredPeaks.begin(), boost::bind<bool>(&PoldiPeakSearch::isLessThanMinimum, this, _1));
     intensityFilteredPeaks.resize(std::distance(intensityFilteredPeaks.begin(), newEnd));
 
     g_log.information() << "   Peaks above minimum intensity (" << m_minimumPeakHeight << "): " << intensityFilteredPeaks.size() << std::endl;
 
-    std::sort(intensityFilteredPeaks.begin(), intensityFilteredPeaks.end(), &PoldiPeakSearch::yGreaterThan);
+    std::sort(intensityFilteredPeaks.begin(), intensityFilteredPeaks.end(), &PoldiPeakSearch::intensityGreaterThan);
 
-
-    ITableWorkspace_sptr peaks = boost::dynamic_pointer_cast<ITableWorkspace>(WorkspaceFactory::Instance().createTable());
-
-    peaks->addColumn("double", "Q");
-    peaks->addColumn("double", "Counts (estimated)");
-
-    for(std::vector<V2D>::const_iterator peak = intensityFilteredPeaks.begin();
+    for(std::vector<PoldiPeak_sptr>::const_iterator peak = intensityFilteredPeaks.begin();
         peak != intensityFilteredPeaks.end();
         ++peak)
     {
-        TableRow newRow = peaks->appendRow();
-        newRow << (*peak).X() << (*peak).Y();
+        m_peaks->addPeak(*peak);
     }
 
     setErrorsOnWorkspace(correlationWorkspace, backgroundWithSigma.second);
 
-    setProperty("OutputWorkspace", peaks);
+    setProperty("OutputWorkspace", m_peaks->asTableWorkspace());
 }
 
 

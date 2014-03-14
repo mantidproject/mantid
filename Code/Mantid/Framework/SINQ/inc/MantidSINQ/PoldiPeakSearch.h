@@ -9,7 +9,8 @@
 
 #include "MantidDataObjects/Workspace2D.h"
 
-
+#include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
+#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 namespace Mantid
 {
 namespace Poldi
@@ -73,7 +74,7 @@ namespace Poldi
     size_t getNumberOfBackgroundPoints(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
 
     double minimumPeakHeightFromBackground(std::pair<double, double> backgroundWithSigma);
-    std::vector<V2D> getPeakCoordinates(MantidVec::iterator baseListStart, std::list<MantidVec::iterator> peakPositions, MantidVec xData);
+    std::vector<PoldiPeak_sptr> getPeaks(MantidVec::iterator baseListStart, std::list<MantidVec::iterator> peakPositions, MantidVec xData);
 
     void setErrorsOnWorkspace(Workspace2D_sptr correlationWorkspace, double error);
 
@@ -84,8 +85,8 @@ namespace Poldi
     void setRecursionAbsoluteBorders(MantidVec::iterator begin, MantidVec::iterator end);
 
     static bool vectorElementGreaterThan(MantidVec::iterator first, MantidVec::iterator second);
-    static bool yGreaterThan(const V2D first, const V2D second);
-    bool isLessThanMinimum(V2D peakCoordinate);
+    static bool intensityGreaterThan(PoldiPeak_sptr first, PoldiPeak_sptr second);
+    bool isLessThanMinimum(PoldiPeak_sptr peak);
 
     int m_minimumDistance;
     int m_doubleMinimumDistance;
@@ -94,6 +95,8 @@ namespace Poldi
 
     MantidVec::iterator m_recursionAbsoluteBegin;
     MantidVec::iterator m_recursionAbsoluteEnd;
+
+    PoldiPeakCollection_sptr m_peaks;
 
   private:
     void init();
