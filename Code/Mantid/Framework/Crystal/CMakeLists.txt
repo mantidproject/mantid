@@ -6,7 +6,7 @@ set ( SRC_FILES
 	src/CentroidPeaks.cpp
 	src/ClearUB.cpp
 	src/CombinePeaksWorkspaces.cpp
-	src/ConnectedComponentLabelling.cpp
+	src/ConnectedComponentLabeling.cpp
 	src/DiffPeaksWorkspaces.cpp
 	src/DisjointElement.cpp
 	src/FilterPeaks.cpp
@@ -66,7 +66,7 @@ set ( INC_FILES
 	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/ClearUB.h
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
-	inc/MantidCrystal/ConnectedComponentLabelling.h
+	inc/MantidCrystal/ConnectedComponentLabeling.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/DisjointElement.h
 	inc/MantidCrystal/FilterPeaks.h
@@ -125,7 +125,7 @@ set ( TEST_FILES
 	CentroidPeaksTest.h
 	ClearUBTest.h
 	CombinePeaksWorkspacesTest.h
-	ConnectedComponentLabellingTest.h
+	ConnectedComponentLabelingTest.h
 	DiffPeaksWorkspacesTest.h
 	DisjointElementTest.h
 	FilterPeaksTest.h

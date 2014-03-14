@@ -1,5 +1,5 @@
-#ifndef MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELLINGTEST_H_
-#define MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELLINGTEST_H_
+#ifndef MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELINGTEST_H_
+#define MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELINGTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -10,7 +10,7 @@
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidCrystal/ConnectedComponentLabelling.h"
+#include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/HardThresholdBackground.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -51,7 +51,7 @@ namespace
 //=====================================================================================
 // Functional Tests
 //=====================================================================================
-class ConnectedComponentLabellingTest: public CxxTest::TestSuite
+class ConnectedComponentLabelingTest: public CxxTest::TestSuite
 {
 private:
 
@@ -70,12 +70,12 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConnectedComponentLabellingTest *createSuite()
-  { return new ConnectedComponentLabellingTest();}
-  static void destroySuite( ConnectedComponentLabellingTest *suite )
+  static ConnectedComponentLabelingTest *createSuite()
+  { return new ConnectedComponentLabelingTest();}
+  static void destroySuite( ConnectedComponentLabelingTest *suite )
   { delete suite;}
 
-  ConnectedComponentLabellingTest() : m_emptyLabel(0)
+  ConnectedComponentLabelingTest() : m_emptyLabel(0)
   {
     FrameworkManager::Instance();
   }
@@ -87,7 +87,7 @@ public:
     MockBackgroundStrategy mockStrategy;
     EXPECT_CALL(mockStrategy, isBackground(_)).Times(inWS->getNPoints()).WillRepeatedly(Return(false));// A filter that passes everything.
 
-    ConnectedComponentLabelling ccl;
+    ConnectedComponentLabeling ccl;
     size_t labelingId = 1;
     ccl.startLabelingId(labelingId);
     auto outWS = ccl.execute(inWS, &mockStrategy);
@@ -106,7 +106,7 @@ public:
     MockBackgroundStrategy mockStrategy;
     EXPECT_CALL(mockStrategy, isBackground(_)).Times(inWS->getNPoints()).WillRepeatedly(Return(false));// A filter that passes everything.
 
-    ConnectedComponentLabelling ccl;
+    ConnectedComponentLabeling ccl;
     size_t labelingId = 2;
     ccl.startLabelingId(labelingId);
     auto outWS = ccl.execute(inWS, &mockStrategy);
@@ -137,7 +137,7 @@ public:
     .WillOnce(Return(true)) // is background
     .WillRepeatedly(Return(false));
 
-    ConnectedComponentLabelling ccl;
+    ConnectedComponentLabeling ccl;
     size_t labelingId = 1;
     ccl.startLabelingId(labelingId);
     auto outWS = ccl.execute(inWS, &mockStrategy);
@@ -167,7 +167,7 @@ public:
     .WillOnce(Return(true))// is background
     .WillOnce(Return(false));
 
-    ConnectedComponentLabelling ccl;
+    ConnectedComponentLabeling ccl;
     size_t labelingId = 1;
     ccl.startLabelingId(labelingId);
     auto outWS = ccl.execute(inWS, &mockStrategy);
@@ -189,7 +189,7 @@ public:
     MockBackgroundStrategy mockStrategy;
 
     EXPECT_CALL(mockStrategy, isBackground(_)).WillRepeatedly(Return(false));// Nothing is treated as background
-    ConnectedComponentLabelling ccl;
+    ConnectedComponentLabeling ccl;
     size_t labelingId = 1;
     ccl.startLabelingId(labelingId);
     auto outWS = ccl.execute(inWS, &mockStrategy);
@@ -220,7 +220,7 @@ public:
     .WillOnce(Return(false))
     .WillOnce(Return(true));
 
-    ConnectedComponentLabelling ccl;
+    ConnectedComponentLabeling ccl;
     size_t labelingId = 1;
     ccl.startLabelingId(labelingId);
     auto outWS = ccl.execute(inWS, &mockStrategy);
@@ -252,7 +252,7 @@ public:
     .WillOnce(Return(false)).WillOnce(Return(true)).WillOnce(Return(false))
     .WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true));
 
-    ConnectedComponentLabelling ccl;
+    ConnectedComponentLabeling ccl;
     size_t labelingId = 1;
     ccl.startLabelingId(labelingId);
     auto outWS = ccl.execute(inWS, &mockStrategy);
@@ -312,7 +312,7 @@ public:
     // ---------- Run the cluster finding
     HardThresholdBackground strategy(backgroundSignal, NoNormalization);
 
-    ConnectedComponentLabelling ccl;
+    ConnectedComponentLabeling ccl;
     size_t labelingId = 1;
     ccl.startLabelingId(labelingId);
     auto outWS = ccl.execute(inWS, &strategy);
@@ -350,7 +350,7 @@ public:
 //=====================================================================================
 // Performance Tests
 //=====================================================================================
-class ConnectedComponentLabellingTestPerformance: public CxxTest::TestSuite
+class ConnectedComponentLabelingTestPerformance: public CxxTest::TestSuite
 {
 private:
 
@@ -362,17 +362,17 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConnectedComponentLabellingTestPerformance *createSuite()
+  static ConnectedComponentLabelingTestPerformance *createSuite()
   {
-    return new ConnectedComponentLabellingTestPerformance();
+    return new ConnectedComponentLabelingTestPerformance();
   }
-  static void destroySuite(ConnectedComponentLabellingTestPerformance *suite)
+  static void destroySuite(ConnectedComponentLabelingTestPerformance *suite)
   {
     delete suite;
   }
 
 
-  ConnectedComponentLabellingTestPerformance() : m_backgroundSignal(0), m_backgroundStrategy(new HardThresholdBackground(0, NoNormalization))
+  ConnectedComponentLabelingTestPerformance() : m_backgroundSignal(0), m_backgroundStrategy(new HardThresholdBackground(0, NoNormalization))
   {
     FrameworkManager::Instance();
 
@@ -397,7 +397,7 @@ public:
 
   void testPerformance()
   {
-    ConnectedComponentLabelling ccl;
+    ConnectedComponentLabeling ccl;
     size_t labelingId = 1;
     ccl.startLabelingId(labelingId);
     auto outWS = ccl.execute(m_inWS, m_backgroundStrategy.get());
@@ -412,4 +412,4 @@ public:
 
 };
 
-#endif /* MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELLINGTEST_H_ */
+#endif /* MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELINGTEST_H_ */

@@ -1,5 +1,5 @@
-#ifndef MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELLING_H_
-#define MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELLING_H_
+#ifndef MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELING_H_
+#define MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELING_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -33,13 +33,13 @@ namespace Crystal
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ConnectedComponentLabelling 
+  class DLLExport ConnectedComponentLabeling
   {
   public:
-    ConnectedComponentLabelling();
+    ConnectedComponentLabeling();
     void startLabelingId(const size_t& id);
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> execute(Mantid::API::IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy) const;
-    virtual ~ConnectedComponentLabelling();
+    virtual ~ConnectedComponentLabeling();
   private:
     size_t m_startId;
     
@@ -49,4 +49,4 @@ namespace Crystal
 } // namespace Crystal
 } // namespace Mantid
 
-#endif  /* MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELLING_H_ */
+#endif  /* MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELING_H_ */

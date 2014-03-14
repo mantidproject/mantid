@@ -1,7 +1,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidCrystal/ConnectedComponentLabelling.h"
+#include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/DisjointElement.h"
 #include <boost/shared_ptr.hpp>
@@ -24,7 +24,7 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
-    ConnectedComponentLabelling::ConnectedComponentLabelling() : m_startId(1)
+    ConnectedComponentLabeling::ConnectedComponentLabeling() : m_startId(1)
     {
     }
 
@@ -33,7 +33,7 @@ namespace Mantid
      * the initial id used.
      * @param id: Id to start with
      */
-    void ConnectedComponentLabelling::startLabelingId(const size_t& id)
+    void ConnectedComponentLabeling::startLabelingId(const size_t& id)
     {
       if(id < 1)
         throw std::invalid_argument("Start labeling id must be >= 1");
@@ -43,11 +43,11 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Destructor
      */
-    ConnectedComponentLabelling::~ConnectedComponentLabelling()
+    ConnectedComponentLabeling::~ConnectedComponentLabeling()
     {
     }
 
-    boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabelling::execute(
+    boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabeling::execute(
         IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy) const
     {
 
