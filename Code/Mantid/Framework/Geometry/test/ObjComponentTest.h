@@ -293,9 +293,8 @@ public:
     TS_ASSERT_DELTA(point.Z(),-31.5,1e-6);
   }
 
-  ObjComponent * MakeWithScaleFactor(ObjComponent * parent, double X, double Y, double Z)
+  ObjComponent * MakeWithScaleFactor(const ObjComponent * parent, ParameterMap * map, double X, double Y, double Z)
   {
-    ParameterMap * map = new ParameterMap;
     ObjComponent * ret = new ObjComponent(parent, map);
     map->addV3D(ret, "sca", V3D(X,Y,Z));
     return ret;
@@ -303,32 +302,37 @@ public:
 
   void testIsValidWithScaleFactor()
   {
-    ObjComponent * ocyl_base = new ObjComponent("ocyl", createCappedCylinder());
-    ObjComponent * ocyl = MakeWithScaleFactor(ocyl_base, 2.0,1.0,1.0);
+    ParameterMap map;
+    ObjComponent ocyl_base("ocyl", createCappedCylinder());
+    ObjComponent * ocyl = MakeWithScaleFactor(&ocyl_base, &map, 2.0,1.0,1.0);
     TS_ASSERT(ocyl->isValid(V3D(2.4,0.0,0.0)));
     TS_ASSERT(ocyl->isValid(V3D(-6.4,0.0,0.0)));
     TS_ASSERT(!ocyl->isValid(V3D(2.5,0.0,0.0)));
     TS_ASSERT(!ocyl->isValid(V3D(-6.5,0.0,0.0)));
     TS_ASSERT(ocyl->isValid(V3D(2.3,0.0,0.0)));
     TS_ASSERT(ocyl->isValid(V3D(-6.3,0.0,0.0)));
+    delete ocyl;
   }
 
   void testIsOnSideWithScaleFactor()
   {
-    ObjComponent * ocyl_base = new ObjComponent("ocyl", createCappedCylinder());
-    ObjComponent * ocyl = MakeWithScaleFactor(ocyl_base, 2.0,1.0,1.0);
+    ParameterMap map;
+    ObjComponent ocyl_base("ocyl", createCappedCylinder());
+    ObjComponent * ocyl = MakeWithScaleFactor(&ocyl_base, &map, 2.0,1.0,1.0);
     TS_ASSERT(ocyl->isOnSide(V3D(2.4,0.0,0.0)));
     TS_ASSERT(ocyl->isOnSide(V3D(-6.4,0.0,0.0)));
     TS_ASSERT(!ocyl->isOnSide(V3D(2.5,0.0,0.0)));
     TS_ASSERT(!ocyl->isOnSide(V3D(-6.5,0.0,0.0)));
     TS_ASSERT(!ocyl->isOnSide(V3D(2.3,0.0,0.0)));
     TS_ASSERT(!ocyl->isOnSide(V3D(-6.3,0.0,0.0)));
+    delete ocyl;
   }
 
   void testInterceptSurfaceWithScaleFactor()
   {
-    ObjComponent * ocyl_base = new ObjComponent("ocyl", createCappedCylinder());
-    ObjComponent * ocyl = MakeWithScaleFactor(ocyl_base, 2.0,1.0,3.0);
+    ParameterMap map;
+    ObjComponent ocyl_base("ocyl", createCappedCylinder());
+    ObjComponent * ocyl = MakeWithScaleFactor(&ocyl_base, &map, 2.0,1.0,3.0);
 
     Track trackScale(V3D(-6.5,0,0),V3D(1.0,0,0));
     TS_ASSERT_EQUALS( ocyl->interceptSurface(trackScale), 1 );
@@ -350,60 +354,70 @@ public:
     TS_ASSERT_DELTA(itscaleW->distFromStart, 6.5, 1e-6);
     TS_ASSERT_EQUALS(itscaleW->entryPoint, V3D(0,0,-1.5));
     TS_ASSERT_EQUALS(itscaleW->exitPoint, V3D(0,0,+1.5));
+    delete ocyl;
   }
 
   void testBoundingBoxWithScaleFactor()
   {
-    ObjComponent * A_base = new ObjComponent("ocyl", createCappedCylinder());
-    ObjComponent * A = MakeWithScaleFactor( A_base, 2.0,1.0,1.0);
+    ParameterMap map;
+    ObjComponent A_base("ocyl", createCappedCylinder());
+    ObjComponent * A = MakeWithScaleFactor( &A_base, &map, 2.0,1.0,1.0);
     BoundingBox bbox;
     A->getBoundingBox(bbox);
     TS_ASSERT_DELTA(bbox.xMax(), 2.4,0.00001);
     TS_ASSERT_DELTA(bbox.xMin(),-6.4,0.00001);
+    delete A;
   }
 
   void testPointInObjectWithScaleFactor()
   {
-    ObjComponent * A_base = new ObjComponent("ocyl", createCappedCylinder());
-    ObjComponent * A = MakeWithScaleFactor( A_base, 2.0,1.0,1.0);
+    ParameterMap map;
+    ObjComponent A_base("ocyl", createCappedCylinder());
+    ObjComponent * A = MakeWithScaleFactor( &A_base, &map, 2.0,1.0,1.0);
     V3D scalept;
     TS_ASSERT_EQUALS(A->getPointInObject(scalept),1);
     TS_ASSERT_DELTA(scalept.X(),0.0,1e-6);
     TS_ASSERT_DELTA(scalept.Y(),0.0,1e-6);
     TS_ASSERT_DELTA(scalept.Z(),0.0,1e-6);
+    delete A;
   }
 
   void testPointInObjectWithScaleFactor2()
   {
-    ObjComponent * A_base = new ObjComponent("ocyl", createCappedCylinder());
-    A_base->setRot(Quat(90.0,V3D(0,0,1)));
-    ObjComponent * A = MakeWithScaleFactor( A_base, 2.0,1.0,1.0);
+    ParameterMap map;
+    ObjComponent A_base("ocyl", createCappedCylinder());
+    A_base.setRot(Quat(90.0,V3D(0,0,1)));
+    ObjComponent * A = MakeWithScaleFactor( &A_base, &map, 2.0,1.0,1.0);
     V3D scalept(0,0,0);
     TS_ASSERT_EQUALS(A->getPointInObject(scalept),1);
     TS_ASSERT_DELTA(scalept.X(), 0.0,1e-6);
     TS_ASSERT_DELTA(scalept.Y(), 0.0,1e-6);
     TS_ASSERT_DELTA(scalept.Z(), 0.0,1e-6);
+    delete A;
   }
 
   void testPointInObjectWithScaleFactorAndWithOffset()
   {
-    ObjComponent * A_base = new ObjComponent("ocyl", createCappedCylinder());
-    A_base->setPos(10,0,0);
-    ObjComponent * A = MakeWithScaleFactor( A_base, 2.0,1.0,1.0);
+    ParameterMap map;
+    ObjComponent A_base("ocyl", createCappedCylinder());
+    A_base.setPos(10,0,0);
+    ObjComponent * A = MakeWithScaleFactor( &A_base, &map, 2.0,1.0,1.0);
     V3D scalept(0,0,0);
     TS_ASSERT_EQUALS(A->getPointInObject(scalept),1);
     TS_ASSERT_DELTA(scalept.X(), 10.0,1e-6);
     TS_ASSERT_DELTA(scalept.Y(), 0.0,1e-6);
     TS_ASSERT_DELTA(scalept.Z(), 0.0,1e-6);
+    delete A;
   }
 
   void testSolidAngleCappedCylinderWithScaleFactor()
   {
-    ObjComponent * A_base = new ObjComponent("ocyl", createCappedCylinder());
-    ObjComponent * A = MakeWithScaleFactor( A_base, 2.0,1.0,1.0);
+    ParameterMap map;
+    ObjComponent A_base("ocyl", createCappedCylinder());
+    ObjComponent * A = MakeWithScaleFactor( &A_base, &map, 2.0,1.0,1.0);
 
-    A_base->setPos(10,0,0);
-    A_base->setRot(Quat(90.0,V3D(0,0,1)));
+    A_base.setPos(10,0,0);
+    A_base.setRot(Quat(90.0,V3D(0,0,1)));
     double satol=3e-3; // tolerance for solid angle
 
     // this point should be 0.5 above the cylinder on its axis of sym
@@ -415,7 +429,7 @@ public:
 
     // Add a parent with a rotation of its own;
     Component parent("parent",V3D(0,10,0),Quat(0.0,V3D(0,1,0)));
-    A_base->setParent(&parent);
+    A_base.setParent(&parent);
 
     // See testSolidAngleCappedCylinder in ObjectTest - these tests are a subset of them
     // assume this is the same position as above
@@ -426,6 +440,7 @@ public:
     // Calling on an ObjComponent without an associated geometric object will throw
     ObjComponent B("noShape");
     TS_ASSERT_THROWS( B.solidAngle(V3D(1,2,3)), Exception::NullPointerException )
+    delete A;
   }
 
 private:

@@ -195,17 +195,39 @@ public:
 
   void test_clone()
   {
-    TS_ASSERT( dynamic_cast<Empty*>((new Empty())->clone()) );
-    TS_ASSERT( dynamic_cast<Label*>((new Label())->clone()) );
-    TS_ASSERT( dynamic_cast<Wavelength*>((new Wavelength())->clone()) );
-    TS_ASSERT( dynamic_cast<Energy*>((new Energy())->clone()) );
-    TS_ASSERT( dynamic_cast<Energy_inWavenumber*>((new Energy_inWavenumber())->clone()) );
-    TS_ASSERT( dynamic_cast<dSpacing*>((new dSpacing())->clone()) );
-    TS_ASSERT( dynamic_cast<MomentumTransfer*>((new MomentumTransfer())->clone()) );
-    TS_ASSERT( dynamic_cast<QSquared*>((new QSquared())->clone()) );
-    TS_ASSERT( dynamic_cast<DeltaE*>((new DeltaE())->clone()) );
-    TS_ASSERT( dynamic_cast<DeltaE_inWavenumber*>((new DeltaE_inWavenumber())->clone()) );
-    TS_ASSERT( dynamic_cast<Momentum*>((new Momentum())->clone()) );
+    auto unit = Empty().clone();
+    TS_ASSERT( dynamic_cast<Empty*>( unit ) );
+    delete unit;
+    unit = Label().clone();
+    TS_ASSERT( dynamic_cast<Label*>( unit ) );
+    delete unit;
+    unit = Wavelength().clone();
+    TS_ASSERT( dynamic_cast<Wavelength*>( unit ) );
+    delete unit;
+    unit = Energy().clone();
+    TS_ASSERT( dynamic_cast<Energy*>( unit ) );
+    delete unit;
+    unit = Energy_inWavenumber().clone();
+    TS_ASSERT( dynamic_cast<Energy_inWavenumber*>( unit ) );
+    delete unit;
+    unit = dSpacing().clone();
+    TS_ASSERT( dynamic_cast<dSpacing*>( unit ) );
+    delete unit;
+    unit = MomentumTransfer().clone();
+    TS_ASSERT( dynamic_cast<MomentumTransfer*>( unit ) );
+    delete unit;
+    unit = QSquared().clone();
+    TS_ASSERT( dynamic_cast<QSquared*>( unit ) );
+    delete unit;
+    unit = DeltaE().clone();
+    TS_ASSERT( dynamic_cast<DeltaE*>( unit ) );
+    delete unit;
+    unit = DeltaE_inWavenumber().clone();
+    TS_ASSERT( dynamic_cast<DeltaE_inWavenumber*>( unit ) );
+    delete unit;
+    unit = Momentum().clone();
+    TS_ASSERT( dynamic_cast<Momentum*>( unit ) );
+    delete unit;
   }
     
   //----------------------------------------------------------------------

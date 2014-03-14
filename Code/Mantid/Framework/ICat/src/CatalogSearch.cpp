@@ -12,11 +12,11 @@ This algorithm searches for the investigations and stores the search results in 
     GCC_DIAG_ON(literal-suffix)
 #endif
 
+#include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
 
 #include <boost/algorithm/string/regex.hpp>
 #include <limits>
@@ -25,22 +25,19 @@ namespace Mantid
 {
   namespace ICat
   {
-    using namespace Kernel;
-    using namespace API;
-
     DECLARE_ALGORITHM(CatalogSearch)
 
     /// Sets documentation strings for this algorithm
     void CatalogSearch::initDocs()
     {
-      this->setWikiSummary("Searches investigations");
-      this->setOptionalMessage("Searches investigations");
+      this->setWikiSummary("Searches investigations in the catalog using the properties set.");
+      this->setOptionalMessage("Searches investigations in the catalog using the properties set.");
     }
 
     /// Initialisation method.
     void CatalogSearch::init()
     {
-      auto isDate = boost::make_shared<DateValidator>();
+      auto isDate = boost::make_shared<Kernel::DateValidator>();
 
       // Properties related to the search fields the user will fill in to improve search.
       declareProperty("InvestigationName", "", "The name of the investigation to search.");
@@ -61,9 +58,11 @@ namespace Mantid
       declareProperty<int>("Limit", 0, "");
       declareProperty<int>("Offset",0, "");
 
-      declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
+      declareProperty("Session","","The session information of the catalog to use.");
+
+      declareProperty(new API::WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Kernel::Direction::Output),
           "The name of the workspace that will be created to store the ICat investigations search result.");
-      declareProperty<int64_t>("NumberOfSearchResults", 0, "", Direction::Output);
+      declareProperty<int64_t>("NumberOfSearchResults", 0, "", Kernel::Direction::Output);
     }
 
     /// Execution method.
@@ -74,20 +73,20 @@ namespace Mantid
       // Get the user input search terms to search for.
       getInputProperties(params);
       // Create output workspace.
-      auto workspace = WorkspaceFactory::Instance().createTable("TableWorkspace");
-      // Create a catalog since we use it twice on execution.
-      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
+      auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+      // Obtain all the active catalogs.
+      auto catalogs = API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"));
       // Search for investigations with user specific search inputs.
       setProperty("OutputWorkspace",workspace);
       // Do not perform a full search if we only want a COUNT search.
       if (getProperty("CountOnly"))
       {
         // Set the related property needed for paging.
-        setProperty("NumberOfSearchResults", catalog->getNumberOfSearchResults(params));
+        setProperty("NumberOfSearchResults", catalogs->getNumberOfSearchResults(params));
         return;
       }
       // Search for investigations in the archives.
-      catalog->search(params,workspace,getProperty("Offset"),getProperty("Limit"));
+      catalogs->search(params,workspace,getProperty("Offset"),getProperty("Limit"));
     }
 
     /**

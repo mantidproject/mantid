@@ -473,7 +473,7 @@ namespace LiveData
       Poco::XML::DOMParser parser;
       Poco::AutoPtr<Poco::XML::Document> doc = parser.parseString( m_instrumentXML);
 
-      const Poco::XML::NodeList *nodes = doc->getElementsByTagName( "parameter");
+      const Poco::AutoPtr<Poco::XML::NodeList> nodes = doc->getElementsByTagName( "parameter");
       // Oddly, NodeLists don't seem to have any provision for iterators.  Also,
       // the length() function actually traverses the list to get the count,
       // so we should probably call it once and store it in a variable instead
@@ -482,7 +482,7 @@ namespace LiveData
       for (long unsigned i = 0; i < nodesLength; i++)
       {
         Poco::XML::Node *node = nodes->item( i);
-        const Poco::XML::NodeList *childNodes = node->childNodes();
+        const Poco::AutoPtr<Poco::XML::NodeList> childNodes = node->childNodes();
 
         long unsigned childNodesLength = childNodes->length();
         for (long unsigned j=0; j < childNodesLength; j++)
@@ -491,7 +491,7 @@ namespace LiveData
           if (childNode->nodeName() == "logfile")
           {
             // Found one!
-            Poco::XML::NamedNodeMap *attr = childNode->attributes();
+            Poco::AutoPtr<Poco::XML::NamedNodeMap> attr = childNode->attributes();
             long unsigned attrLength = attr->length();
             for (long unsigned k = 0; k < attrLength; k++)
             {
@@ -501,14 +501,9 @@ namespace LiveData
                 m_requiredLogs.push_back( attrNode->nodeValue());
               }
             }
-
-            attr->release();
           }
         }
-        childNodes->release();
-
       }
-      nodes->release();
     }
 
     // Check to see if we can complete the initialzation steps

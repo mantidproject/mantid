@@ -23,11 +23,13 @@ class SuggestTibCNCS(PythonAlgorithm):
         return "SuggestTibCNCS"
     
     def PyInit(self):
+        self.setWikiSummary("Suggest possible time independent background range for CNCS.")
+        self.setOptionalMessage("Suggest possible time independent background range for CNCS.")
         """ Declare properties
         """
         val=mantid.kernel.FloatBoundedValidator()
         val.setBounds(0.5,50) #reasonable incident nergy range for CNCS
-        self.declareProperty("IncidentEnergy",0.,val,"Incident energy")
+        self.declareProperty("IncidentEnergy",0.,val,"Incident energy (0.5 to 50 meV)")
         self.declareProperty("TibMin",0.,Direction.Output)        
         self.declareProperty("TibMax",0.,Direction.Output)  
         return

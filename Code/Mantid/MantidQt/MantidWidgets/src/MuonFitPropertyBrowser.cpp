@@ -1,6 +1,7 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -13,7 +14,6 @@
 #endif
 #include "DoubleEditorFactory.h"
 #include "qteditorfactory.h"
-#include "StringDialogEditorFactory.h"
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -111,12 +111,22 @@ void MuonFitPropertyBrowser::init()
 
   // Custom settings that are specific and asked for by the muon scientists.
   QtProperty* customSettingsGroup = m_groupManager->addProperty("Settings");
+
   m_rawData = m_boolManager->addProperty("Fit To Raw Data");
   bool data = settings.value("Fit To Raw Data",QVariant(false)).toBool();
   m_boolManager->setValue(m_rawData,data);
+
+  m_showParamErrors = m_boolManager->addProperty("Show Parameter Errors");
+  // XXX: showParamErrors is true by default for Muons
+  bool showParamErrors = settings.value(m_showParamErrors->propertyName(), true).toBool();
+  m_boolManager->setValue(m_showParamErrors, showParamErrors);
+  m_parameterManager->setErrorsEnabled(showParamErrors);
+
   customSettingsGroup->addSubProperty(m_minimizer);
   customSettingsGroup->addSubProperty(m_plotDiff);
   customSettingsGroup->addSubProperty(m_rawData);
+  customSettingsGroup->addSubProperty(m_showParamErrors);
+
   m_customSettingsGroup = m_browser->addProperty(customSettingsGroup);
 
   // Initialise the layout.
@@ -165,10 +175,6 @@ void MuonFitPropertyBrowser::doubleChanged(QtProperty* prop)
     getHandler()->setAttribute(QString("End (%1s)" ).arg(QChar(0x03BC)), value); 
     emit endXChanged(endX());
     emit xRangeChanged(startX(), endX());
-    return;
-  }
-  else if(getHandler()->setParameter(prop))
-  {
     return;
   }
   else

@@ -3,11 +3,9 @@
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
-#include "MantidPythonInterface/kernel/PropertyWithValue.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
@@ -16,12 +14,13 @@
 #include <boost/python/numeric.hpp>
 
 using namespace Mantid::API;
-using Mantid::Geometry::IDetector_sptr;
-using Mantid::Kernel::PropertyWithValue;
-using Mantid::Kernel::DataItem_sptr;
-namespace Policies = Mantid::PythonInterface::Policies;
-namespace Converters = Mantid::PythonInterface::Converters;
+using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 using namespace boost::python;
+
+namespace Converters = Mantid::PythonInterface::Converters;
+namespace Policies = Mantid::PythonInterface::Policies;
+namespace Registry = Mantid::PythonInterface::Registry;
 
 namespace
 {
@@ -130,15 +129,14 @@ namespace
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
 void export_MatrixWorkspace()
 {
-  REGISTER_SHARED_PTR_TO_PYTHON(MatrixWorkspace);
-
   /// Typedef to remove const qualifier on input detector shared_ptr. See Policies/RemoveConst.h for more details
   typedef double (MatrixWorkspace::*getDetectorSignature)(Mantid::Geometry::IDetector_sptr det) const;
 
   class_<MatrixWorkspace, boost::python::bases<ExperimentInfo,IMDWorkspace>, boost::noncopyable>("MatrixWorkspace", no_init)
     //--------------------------------------- Meta information -----------------------------------------------------------------------
     .def("blocksize", &MatrixWorkspace::blocksize, args("self"), "Returns size of the Y data array")
-    .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms, args("self"), "Returns the number of spectra in the workspace")
+    .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms, args("self"), 
+         "Returns the number of spectra in the workspace")
     .def("binIndexOf", &MatrixWorkspace::binIndexOf,
           MatrixWorkspace_binIndexOfOverloads((arg("self"), arg("xvalue"), arg("workspaceIndex")),
          "Returns the index of the bin containing the given xvalue. The workspace_index is optional [default=0]"))
@@ -149,54 +147,74 @@ void export_MatrixWorkspace()
          args("self", "det"),
          "Returns the signed two theta value for given detector")
     .def("getSpectrum", (ISpectrum * (MatrixWorkspace::*)(const size_t))&MatrixWorkspace::getSpectrum,
-         return_internal_reference<>(), args("self", "workspaceIndex"), "Return the spectra at the given workspace index.")
+         return_internal_reference<>(), args("self", "workspaceIndex"), 
+         "Return the spectra at the given workspace index.")
     .def("getDetector", &MatrixWorkspace::getDetector, return_value_policy<Policies::RemoveConstSharedPtr>(),
-        args("self", "workspaceIndex"), "Return the Detector or DetectorGroup that is linked to the given workspace index")
+        args("self", "workspaceIndex"), 
+         "Return the Detector or DetectorGroup that is linked to the given workspace index")
     .def("getRun", &MatrixWorkspace::mutableRun, return_internal_reference<>(),
              args("self"), "Return the Run object for this workspace")
     .def("axes", &MatrixWorkspace::axes, args("self"), "Returns the number of axes attached to the workspace")
     .def("getAxis", &MatrixWorkspace::getAxis, return_internal_reference<>(), args("self", "axis_index"))
-    .def("isHistogramData", &MatrixWorkspace::isHistogramData, args("self"), "Returns True if this is considered to be binned data.")
+    .def("isHistogramData", &MatrixWorkspace::isHistogramData, args("self"), 
+         "Returns True if this is considered to be binned data.")
     .def("isDistribution", (const bool& (MatrixWorkspace::*)() const)&MatrixWorkspace::isDistribution,
          return_value_policy<copy_const_reference>(), args("self"), "Returns the status of the distribution flag")
-    .def("YUnit", &MatrixWorkspace::YUnit, args("self"), "Returns the current Y unit for the data (Y axis) in the workspace")
+    .def("YUnit", &MatrixWorkspace::YUnit, args("self"), 
+         "Returns the current Y unit for the data (Y axis) in the workspace")
     .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, args("self"), "Returns the caption for the Y axis")
 
     // Deprecated
-    .def("getNumberBins", &getNumberBinsDeprecated, args("self"), "Returns size of the Y data array (deprecated, use blocksize instead)")
-    .def("getSampleDetails", &getSampleDetailsDeprecated, return_internal_reference<>(), args("self"), "Return the Run object for this workspace (deprecated, use getRun instead)")
+    .def("getNumberBins", &getNumberBinsDeprecated, args("self"), 
+         "Returns size of the Y data array (deprecated, use blocksize instead)")
+    .def("getSampleDetails", &getSampleDetailsDeprecated, return_internal_reference<>(), args("self"), 
+         "Return the Run object for this workspace (deprecated, use getRun instead)")
 
-    //--------------------------------------- Setters -------------------------------------------------------------------------------
-    .def("setYUnitLabel", &MatrixWorkspace::setYUnitLabel, args("self", "newLabel"), "Sets a new caption for the data (Y axis) in the workspace")
-    .def("setYUnit", &MatrixWorkspace::setYUnit, args("self", "newUnit"), "Sets a new unit for the data (Y axis) in the workspace")
+    //--------------------------------------- Setters ------------------------------------
+    .def("setYUnitLabel", &MatrixWorkspace::setYUnitLabel, args("self", "newLabel"), 
+         "Sets a new caption for the data (Y axis) in the workspace")
+    .def("setYUnit", &MatrixWorkspace::setYUnit, args("self", "newUnit"), 
+         "Sets a new unit for the data (Y axis) in the workspace")
     .def("setDistribution", (bool& (MatrixWorkspace::*)(const bool))&MatrixWorkspace::isDistribution,
-         return_value_policy<return_by_value>(), args("self", "newVal"), "Set distribution flag. If True the workspace has been divided by the bin-width.")
+         return_value_policy<return_by_value>(), args("self", "newVal"), 
+         "Set distribution flag. If True the workspace has been divided by the bin-width.")
     .def("replaceAxis", &MatrixWorkspace::replaceAxis, args("self", "axisIndex", "newAxis"))
 
-    //--------------------------------------- Read spectrum data ---------------------------------------------------------------------------
+    //--------------------------------------- Read spectrum data -------------------------
     .def("readX", &MatrixWorkspace::readX, return_readonly_numpy(),
-          args("self", "workspaceIndex"), "Creates a read-only numpy wrapper around the original X data at the given index")
+          args("self", "workspaceIndex"), 
+         "Creates a read-only numpy wrapper around the original X data at the given index")
     .def("readY", &MatrixWorkspace::readY, return_readonly_numpy(),
-         args("self", "workspaceIndex"),  "Creates a read-only numpy wrapper around the original Y data at the given index")
+         args("self", "workspaceIndex"),  
+         "Creates a read-only numpy wrapper around the original Y data at the given index")
     .def("readE", &MatrixWorkspace::readE, return_readonly_numpy(),
-          args("self", "workspaceIndex"), "Creates a read-only numpy wrapper around the original E data at the given index")
+          args("self", "workspaceIndex"), 
+         "Creates a read-only numpy wrapper around the original E data at the given index")
     .def("readDx", &MatrixWorkspace::readDx, return_readonly_numpy(),
-         args("self", "workspaceIndex"), "Creates a read-only numpy wrapper around the original Dx data at the given index")
+         args("self", "workspaceIndex"), 
+         "Creates a read-only numpy wrapper around the original Dx data at the given index")
 
-    //--------------------------------------- Write spectrum data ---------------------------------------------------------------------------
+    //--------------------------------------- Write spectrum data ------------------------
     .def("dataX", (data_modifier)&MatrixWorkspace::dataX, return_readwrite_numpy(),
-         args("self", "workspaceIndex"), "Creates a writable numpy wrapper around the original X data at the given index")
+         args("self", "workspaceIndex"), 
+         "Creates a writable numpy wrapper around the original X data at the given index")
     .def("dataY", (data_modifier)&MatrixWorkspace::dataY, return_readwrite_numpy(),
-         args("self", "workspaceIndex"), "Creates a writable numpy wrapper around the original Y data at the given index")
+         args("self", "workspaceIndex"), 
+         "Creates a writable numpy wrapper around the original Y data at the given index")
     .def("dataE", (data_modifier)&MatrixWorkspace::dataE, return_readwrite_numpy(),
-         args("self", "workspaceIndex"), "Creates a writable numpy wrapper around the original E data at the given index")
+         args("self", "workspaceIndex"), 
+         "Creates a writable numpy wrapper around the original E data at the given index")
     .def("dataDx", (data_modifier)&MatrixWorkspace::dataDx, return_readwrite_numpy(),
-        args("self", "workspaceIndex"), "Creates a writable numpy wrapper around the original Dx data at the given index")
-    .def("setX", &setXFromPyObject, args("self", "workspaceIndex", "x"), "Set X values from a python list or numpy array. It performs a simple copy into the array.")
-    .def("setY", &setYFromPyObject, args("self", "workspaceIndex", "y"), "Set Y values from a python list or numpy array. It performs a simple copy into the array.")
-    .def("setE", &setEFromPyObject, args("self", "workspaceIndex", "e"), "Set E values from a python list or numpy array. It performs a simple copy into the array.")
+        args("self", "workspaceIndex"), 
+         "Creates a writable numpy wrapper around the original Dx data at the given index")
+    .def("setX", &setXFromPyObject, args("self", "workspaceIndex", "x"), 
+         "Set X values from a python list or numpy array. It performs a simple copy into the array.")
+    .def("setY", &setYFromPyObject, args("self", "workspaceIndex", "y"), 
+         "Set Y values from a python list or numpy array. It performs a simple copy into the array.")
+    .def("setE", &setEFromPyObject, args("self", "workspaceIndex", "e"), 
+         "Set E values from a python list or numpy array. It performs a simple copy into the array.")
 
-    // --------------------------------------- Extract data ---------------------------------------------------------------------------------
+    // --------------------------------------- Extract data ------------------------------
     .def("extractX", Mantid::PythonInterface::cloneX, args("self"),
          "Extracts (copies) the X data from the workspace into a 2D numpy array. "
          "Note: This can fail for large workspaces as numpy will require a block "
@@ -213,9 +231,25 @@ void export_MatrixWorkspace()
          "Extracts (copies) the E data from the workspace into a 2D numpy array. "
          "Note: This can fail for large workspaces as numpy will require a block "
           "of memory free that will fit all of the data.")
-    //-------------------------------------- Operators --------------------------------------------------------------------------------
-    .def("equals", &Mantid::API::equals, args("self", "other", "tolerance"), "Performs a comparison operation on two workspaces, using the CheckWorkspacesMatch algorithm")
+    //-------------------------------------- Operators -----------------------------------
+    .def("equals", &Mantid::API::equals, args("self", "other", "tolerance"), 
+         "Performs a comparison operation on two workspaces, using the "
+         "CheckWorkspacesMatch algorithm")
     ;
+  
+  //-------------------------------------------------------------------------------------------------
 
-  REGISTER_SINGLEVALUE_HANDLER(MatrixWorkspace_sptr);
+  static const int NUM_IDS = 10;
+  static const char * WORKSPACE_IDS[NUM_IDS] = {\
+      "CompressedWorkspace2D", "GroupingWorkspace", "ManagedWorkspace2D",
+      "ManagedRawFileWorkspace2D", "MaskWorkspace", "OffsetsWorkspace",
+      "RebinnedOutput", "SpecialWorkspace2D", "Workspace2D", "WorkspaceSingleValue"
+  };
+
+  Registry::DataItemInterface<MatrixWorkspace> entry;
+  for(int i = 0; i < NUM_IDS; ++i)
+  {
+    entry.castFromID(WORKSPACE_IDS[i]);
+  }
+  ;
 }

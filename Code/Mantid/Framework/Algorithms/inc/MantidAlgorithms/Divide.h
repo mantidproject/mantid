@@ -48,7 +48,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      Divide() : BinaryOperation() {};
+      Divide() : BinaryOperation(),m_warnOnZeroDivide(true){};
       /// Destructor
       virtual ~Divide() {};
       /// Algorithm's name for identification overriding a virtual method
@@ -81,7 +81,7 @@ namespace Mantid
       void checkRequirements();
 
       std::string checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
-
+      // usually you want to warn user if division by 0 occurs. set it to false to generate these warnings on debug level only
       bool m_warnOnZeroDivide;
 
     };

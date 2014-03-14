@@ -4,8 +4,8 @@ from the information catalog and saves the search results to mantid workspace.
 *WIKI*/
 
 #include "MantidICat/CatalogGetDataSets.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 namespace Mantid
@@ -26,6 +26,7 @@ namespace Mantid
     {
       declareProperty("InvestigationId","",boost::make_shared<Kernel::MandatoryValidator<std::string>>(),
           "ID of the selected investigation");
+      declareProperty("Session","","The session information of the catalog to use.");
       declareProperty(new API::WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Kernel::Direction::Output),
           "The name of the workspace to store the result of datasets search ");
     }
@@ -34,7 +35,7 @@ namespace Mantid
     void CatalogGetDataSets::exec()
     {
       auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-      CatalogAlgorithmHelper().createCatalog()->getDataSets(getProperty("InvestigationId"),workspace);
+      API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->getDataSets(getProperty("InvestigationId"),workspace);
       setProperty("OutputWorkspace",workspace);
     }
 

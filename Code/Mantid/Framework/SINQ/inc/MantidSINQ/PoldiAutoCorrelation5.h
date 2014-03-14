@@ -11,6 +11,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
 
 
 
@@ -25,11 +26,6 @@ namespace Poldi
 
 
 
-const double rad2deg = 180./M_PI;
-const double deg2rad = M_PI/180.;
-
-
-
 // N.B. PoldiAutoCorrelation5 is used to create the autocorrelation
 // function from POLDI raw data
 /** @class PoldiAutoCorrelation5 PoldiAutoCorrelation5.h Poldi/PoldiAutoCorrelation5.h
@@ -39,7 +35,10 @@ const double deg2rad = M_PI/180.;
     @author Christophe Le Bourlot, Paul Scherrer Institut - SINQ
     @date 05/06/2013
 
-    Copyright © 2013 PSI-MSS
+    @author Michael Wedel, Paul Scherrer Institut - SINQ
+    @date 18/02/2014
+
+    Copyright © 2013, 2014 PSI-MSS
 
     This file is part of Mantid.
 
@@ -90,26 +89,7 @@ private:
 	/// Overwrites Algorithm method.
 	void init();
 
-	inline double min(double a, double b){return (a<b)?a:b;}
-	inline double max(double a, double b){return (a>b)?a:b;}
-
-	double getTableValue(DataObjects::TableWorkspace_sptr tableWS, std::string colname, size_t index);
-	double getTableValueFromLabel(DataObjects::TableWorkspace_sptr tableWS, std::string colNameLabel, std::string colNameValue, std::string label);
-
-
-	DataObjects::Workspace2D_sptr localWorkspace;
-
-	std::vector<MantidVec*>* poldi_nhe3;
-	inline double nhe3(int a, int b);
-	double dblSqrt(double in);
-
-
-//	static const double hbar = 1.0545717253362894e-34;   // J.s
-//	static const double m_n = 1.674927351e-27;           // kg
-
-//	***     convkv=hquer/(Masse Neutron)
-    double CONVKV;
-	double CONVLAMV; 
+    boost::shared_ptr<PoldiAutoCorrelationCore> m_core;
 
 };
 

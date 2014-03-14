@@ -21,8 +21,17 @@ namespace Mantid
      * @param self A reference to the calling Python object
      */
     AlgorithmWrapper::AlgorithmWrapper(PyObject* self)
-      : PythonAlgorithm(), m_self(self)
+      : PythonAlgorithm(), m_self(self), m_isRunningObj(NULL)
     {
+      // Cache the isRunning call to save the lookup each time it is called
+      // as it is most likely called in a loop
+
+      // If the derived class type has isRunning then use that.
+      // A standard PyObject_HasAttr will check the whole inheritance
+      // hierarchy and always return true because IAlgorithm::isRunning is present.
+      // We just want to look at the Python class
+      if(Environment::typeHasAttribute(self, "isRunning"))
+        m_isRunningObj = PyObject_GetAttrString(self, "isRunning");
     }
 
     /**
@@ -66,6 +75,38 @@ namespace Mantid
     }
 
     /**
+     * @return True if the algorithm is considered to be running
+     */
+    bool AlgorithmWrapper::isRunning() const
+    {
+      if(!m_isRunningObj)
+      {
+        return Algorithm::isRunning();
+      }
+      else
+      {
+        Environment::GlobalInterpreterLock gil;
+        PyObject *result = PyObject_CallObject(m_isRunningObj, NULL);
+        if(PyErr_Occurred()) Environment::throwRuntimeError(true);
+        if(PyBool_Check(result)) return PyInt_AsLong(result);
+        else throw std::runtime_error("PythonAlgorithm.isRunning - Expected bool return type.");
+      }
+    }
+
+    /**
+     */
+    void AlgorithmWrapper::cancel()
+    {
+      // No real need for eye on performance here. Use standard methods
+      if(Environment::typeHasAttribute(getSelf(), "cancel"))
+      {
+        Environment::GlobalInterpreterLock gil;
+        CallMethod0<void>::dispatchWithException(getSelf(), "cancel");
+      }
+      else Algorithm::cancel();
+    }
+
+    /**
      * @copydoc Mantid::API::Algorithm::validateInputs
      */
     std::map<std::string, std::string> AlgorithmWrapper::validateInputs()
@@ -105,7 +146,7 @@ namespace Mantid
             std::string value = boost::python::extract<std::string>(resultDict[keys[i]]);
             resultMap[key] = value;
           }
-          catch(boost::python::error_already_set & e)
+          catch(boost::python::error_already_set &)
           {
             this->getLogger().error() << "In validateInputs(self): Invalid type for key/value pair "
                                       << "detected in dict.\n"

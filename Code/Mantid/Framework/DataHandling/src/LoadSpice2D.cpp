@@ -112,7 +112,7 @@ namespace Mantid
         Poco::XML::InputSource src(is);
         // Set up the DOM parser and parse xml file
         DOMParser pParser;
-        Document* pDoc;
+        Poco::AutoPtr<Document> pDoc;
         try
         {
           pDoc = pParser.parse(&src);
@@ -130,7 +130,6 @@ namespace Mantid
             confidence = 80;
           }
         }
-        pDoc->release();
       }// end of inner scope
 
       return confidence;
@@ -179,7 +178,7 @@ namespace Mantid
 
       // Set up the DOM parser and parse xml file
       DOMParser pParser;
-      Document* pDoc;
+      Poco::AutoPtr<Document> pDoc;
       try
       {
         pDoc = pParser.parse(fileName);
@@ -421,9 +420,6 @@ namespace Mantid
         g_log.error("Unable to successfully run MoveInstrumentComponent Child Algorithm");
         g_log.error(e.what());
       }
-
-      // Release the XML document memory
-      pDoc->release();
     }
 
     /** Run the Child Algorithm LoadInstrument (as for LoadRaw)

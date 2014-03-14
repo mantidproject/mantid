@@ -29,6 +29,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
         """ Declare properties
         """
         self.setWikiSummary("""Examine peak profile parameters by Le Bail fit.""")
+        self.setOptionalMessage("""Examine peak profile parameters by Le Bail fit.""")
 
         # Data file
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input, PropertyMode.Optional), 
