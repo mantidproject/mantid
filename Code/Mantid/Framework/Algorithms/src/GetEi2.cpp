@@ -162,7 +162,7 @@ double GetEi2::calculateEi(const double initial_guess)
 
       while ( formula.find("incidentEnergy") != std::string::npos )
       {
-		// check if more than one 'value' in m_eq
+    // check if more than one 'value' in m_eq
         size_t found = formula.find("incidentEnergy");
         formula.replace(found, 14, guess.str());
       }
@@ -239,8 +239,8 @@ double GetEi2::calculateEi(const double initial_guess)
 
       if(!m_fixedei) 
       {
-        throw std::invalid_argument("No peak found for the monitor"+boost::lexical_cast<std::string>(i+1)+ " (at "+
-                   boost::lexical_cast<std::string>(det_distances[i])+"  metres).\n");
+        throw std::invalid_argument("No peak found for the monitor with spectra num: "+boost::lexical_cast<std::string>(spec_nums[i])+ " (at "+
+                   boost::lexical_cast<std::string>(det_distances[i])+"  metres from source).\n");
       }
       else
       {
