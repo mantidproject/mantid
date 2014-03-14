@@ -6,6 +6,7 @@
 #include <set>
 #include <algorithm>
 #include <boost/assign/list_of.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -19,23 +20,10 @@ using namespace Mantid::API;
 using namespace Mantid::MDEvents;
 using namespace testing;
 
-class ConnectedComponentLabellingTest: public CxxTest::TestSuite
+namespace
 {
-private:
-
-  // Mock Background strategy
-  class MockBackgroundStrategy: public BackgroundStrategy
-  {
-  public:
-    MOCK_CONST_METHOD1(configureIterator, void(Mantid::API::IMDIterator* const));
-    MOCK_CONST_METHOD1(isBackground, bool(Mantid::API::IMDIterator* const));
-    virtual ~MockBackgroundStrategy()
-    {}
-  };
-
   // Helper function for determining if a set contains a specific value.
-  template
-  <typename T>
+  template<typename T>
   bool does_set_contain(const std::set<T>& container, const T& value)
   {
     return std::find(container.begin(), container.end(), value) != container.end();
@@ -51,12 +39,31 @@ private:
   std::set<size_t> connection_workspace_to_set_of_labels(IMDHistoWorkspace const * const ws)
   {
     std::set<size_t> unique_values;
-    for(size_t i = 0; i < ws->getNPoints(); ++i)
+    for (size_t i = 0; i < ws->getNPoints(); ++i)
     {
       unique_values.insert(static_cast<size_t>(ws->getSignalAt(i)));
     }
     return unique_values;
   }
+
+}
+
+//=====================================================================================
+// Functional Tests
+//=====================================================================================
+class ConnectedComponentLabellingTest: public CxxTest::TestSuite
+{
+private:
+
+  // Mock Background strategy
+  class MockBackgroundStrategy: public BackgroundStrategy
+  {
+  public:
+    MOCK_CONST_METHOD1(configureIterator, void(Mantid::API::IMDIterator* const));
+    MOCK_CONST_METHOD1(isBackground, bool(Mantid::API::IMDIterator* const));
+    virtual ~MockBackgroundStrategy()
+    {}
+  };
 
   const size_t m_emptyLabel;
 
@@ -181,7 +188,7 @@ public:
 
     MockBackgroundStrategy mockStrategy;
 
-    EXPECT_CALL(mockStrategy, isBackground(_)).WillRepeatedly(Return(false)); // Nothing is treated as background
+    EXPECT_CALL(mockStrategy, isBackground(_)).WillRepeatedly(Return(false));// Nothing is treated as background
     ConnectedComponentLabelling ccl;
     size_t labelingId = 1;
     ccl.startLabelingId(labelingId);
@@ -278,7 +285,7 @@ public:
     const double raisedSignal = 1;
     const double backgroundSignal = 0;
     // Create an array initialized to background for a n by n by n grid.
-    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(backgroundSignal, 3, 5); // 5*5*5
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(backgroundSignal, 3, 5);// 5*5*5
 
     // Now add some objects
     // First cluster amongst 3 dimensions.
@@ -336,6 +343,71 @@ public:
     do_test_cluster_labeling(clusterOneIndexes, outWS.get(), labelingId);
     do_test_cluster_labeling(clusterTwoIndexes, outWS.get(), labelingId+1);
     do_test_cluster_labeling(clusterThreeIndexes, outWS.get(), labelingId+2);
+  }
+
+};
+
+//=====================================================================================
+// Performance Tests
+//=====================================================================================
+class ConnectedComponentLabellingTestPerformance: public CxxTest::TestSuite
+{
+private:
+
+  IMDHistoWorkspace_sptr m_inWS;
+  boost::scoped_ptr<BackgroundStrategy> m_backgroundStrategy;
+  const double m_backgroundSignal;
+
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConnectedComponentLabellingTestPerformance *createSuite()
+  {
+    return new ConnectedComponentLabellingTestPerformance();
+  }
+  static void destroySuite(ConnectedComponentLabellingTestPerformance *suite)
+  {
+    delete suite;
+  }
+
+
+  ConnectedComponentLabellingTestPerformance() : m_backgroundSignal(0), m_backgroundStrategy(new HardThresholdBackground(0, NoNormalization))
+  {
+    FrameworkManager::Instance();
+
+    const double raisedSignal = 1;
+    // Create an array initialized to background for a n by n by n grid.
+    m_inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(m_backgroundSignal, 2,
+        1000); // 1000 by 1000 grid
+
+    // All cluster indexes
+    std::vector<size_t> allClusterIndexes(m_inWS->getNPoints(), 0);
+
+    size_t count = 0;
+    for (auto it = allClusterIndexes.begin(); it != allClusterIndexes.end(); ++it, ++count)
+    {
+      if (count % 2 == 0)
+      {
+        m_inWS->setSignalAt(*it, raisedSignal);
+      }
+    }
+
+  }
+
+  void testPerformance()
+  {
+    ConnectedComponentLabelling ccl;
+    size_t labelingId = 1;
+    ccl.startLabelingId(labelingId);
+    auto outWS = ccl.execute(m_inWS, m_backgroundStrategy.get());
+
+    // ----------- Basic cluster checks
+
+    std::set<size_t> uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
+    TSM_ASSERT_EQUALS("Should be chequered pattern", 2, uniqueEntries.size());
+    TS_ASSERT(does_set_contain(uniqueEntries, size_t(0)));
+    TS_ASSERT(does_set_contain(uniqueEntries, size_t(1)));
   }
 
 };
