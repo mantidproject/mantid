@@ -59,14 +59,18 @@ public:
     TS_ASSERT( Poco::File(m_long_filename).exists() );
     std::ifstream in(m_long_filename.c_str());
     std::string fullline;
+    headingsTests(in, fullline);
     getline(in,fullline);
+
     std::vector<std::string> columns;
     boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(),4);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
+    TS_ASSERT_EQUALS(columns.size(),5);
+    //the first is black due to the leading tab
+    TS_ASSERT(columns.at(0) == "");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0.6, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
     in.close();
 
     cleanupafterwards();
@@ -90,14 +94,17 @@ public:
     TS_ASSERT( Poco::File(m_long_filename).exists() );
     std::ifstream in(m_long_filename.c_str());
     std::string fullline;
+    headingsTests(in, fullline);
     getline(in,fullline);
     std::vector<std::string> columns;
     boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(),4);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
+    TS_ASSERT_EQUALS(columns.size(),5);
+    //the first is black due to the leading tab
+    TS_ASSERT(columns.at(0) == "");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT((columns.at(3) == "nan") || (columns.at(3) == "inf"));
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
+    TS_ASSERT((columns.at(4) == "nan") || (columns.at(4) == "inf"));
     in.close();
 
     cleanupafterwards();
@@ -121,14 +128,17 @@ public:
     TS_ASSERT( Poco::File(m_long_filename).exists() );
     std::ifstream in(m_long_filename.c_str());
     std::string fullline;
+    headingsTests(in, fullline);
     getline(in,fullline);
     std::vector<std::string> columns;
     boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(),4);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);  
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0.6, 0.01);
+    TS_ASSERT_EQUALS(columns.size(),5);
+    //the first is black due to the leading tab
+    TS_ASSERT(columns.at(0) == "");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);  
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
     in.close();
 
     cleanupafterwards();
@@ -152,14 +162,17 @@ public:
     TS_ASSERT( Poco::File(m_long_filename).exists() );
     std::ifstream in(m_long_filename.c_str());
     std::string fullline;
+    headingsTests(in, fullline);
     getline(in,fullline);
     std::vector<std::string> columns;
     boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
-    TS_ASSERT_EQUALS(columns.size(),4);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0.6, 0.01);
+    TS_ASSERT_EQUALS(columns.size(),5);
+    //the first is black due to the leading tab
+    TS_ASSERT(columns.at(0) == "");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
     in.close();
 
     cleanupafterwards();
@@ -179,6 +192,30 @@ public:
     TS_ASSERT( !Poco::File(m_long_filename).exists() );
   }
 private:
+  void headingsTests(std::ifstream & in,std::string & fullline)
+  {
+    getline(in,fullline);
+    TS_ASSERT(fullline == "MFT");
+    getline(in,fullline);
+    TS_ASSERT(fullline == "Instrument: ");
+    getline(in,fullline);
+    TS_ASSERT(fullline == "User-local contact: ");
+    getline(in,fullline);
+    TS_ASSERT(fullline == "Title: ");
+    getline(in,fullline);
+    TS_ASSERT(fullline == "Subtitle: ");
+    getline(in,fullline);
+    TS_ASSERT(fullline == "Start date + time: ");
+    getline(in,fullline);
+    TS_ASSERT(fullline == "End date + time: ");
+    getline(in,fullline);
+    TS_ASSERT(fullline == "Number of file format: 2");
+    getline(in,fullline);
+    TS_ASSERT(fullline == "Number of data points:\t9");
+    getline(in,fullline);
+    getline(in,fullline);
+    TS_ASSERT(fullline == "\tq\trefl\trefl_err\tq_res");
+  }
   void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false)
   {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(1,10);

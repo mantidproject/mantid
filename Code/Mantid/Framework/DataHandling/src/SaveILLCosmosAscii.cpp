@@ -39,16 +39,50 @@ namespace Mantid
 
     void SaveILLCosmosAscii::extraHeaders(std::ofstream & file)
     {
-      file << "MFT" << std::endl;
-      file << "Instrument: "<< m_ws->getInstrument()->getName() << std::endl;
-      std::string user = getProperty("UserContact");
-      file << "User-local contact: " << user << std::endl; //add optional property
-      std::string title = getProperty("Title");
-      file << "Title: " << title << std::endl;
       auto samp = m_ws->run();
-      file << "Subtitle: " << samp.getLogData("run_title")->value() << std::endl;
-      file << "Start date + time: " << samp.getLogData("run_start")->value() << std::endl;
-      file << "End date + time: " << samp.getLogData("run_end")->value() << std::endl;
+      std::string instrument;
+      std::string user;
+      std::string title;
+      std::string subtitle;
+      std::string startDT;
+      std::string endDT;
+      try
+      {instrument = m_ws->getInstrument()->getName();}
+      catch (...)
+      {instrument = "";}
+
+      try
+      {user = getProperty("UserContact");}
+      catch (...)
+      {user = "";}
+
+      try
+      {title = getProperty("Title");}
+      catch (...)
+      {title = "";}
+
+      try
+      {subtitle = samp.getLogData("run_title")->value();}
+      catch (...)
+      {subtitle = "";}
+
+      try
+      {startDT = samp.getLogData("run_start")->value();}
+      catch (...)
+      {startDT = "";}
+
+      try
+      {endDT = samp.getLogData("run_end")->value();}
+      catch (...)
+      {endDT = "";}
+
+      file << "MFT" << std::endl;
+      file << "Instrument: "<< instrument << std::endl;
+      file << "User-local contact: " << user << std::endl; //add optional property
+      file << "Title: " << title << std::endl;
+      file << "Subtitle: " << subtitle << std::endl;
+      file << "Start date + time: " << startDT << std::endl;
+      file << "End date + time: " << endDT << std::endl;
 
       const std::vector<std::string> logList = getProperty("LogList");
       ///logs
