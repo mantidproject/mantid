@@ -9,6 +9,7 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL MillerIndices {
 public:
+    MillerIndices();
     MillerIndices(int h, int k, int l);
     ~MillerIndices() {}
 

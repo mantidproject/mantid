@@ -15,6 +15,15 @@ public:
     static MillerIndicesTest *createSuite() { return new MillerIndicesTest(); }
     static void destroySuite( MillerIndicesTest *suite ) { delete suite; }
 
+    void testdefaultConstructor()
+    {
+        MillerIndices hkl;
+
+        TS_ASSERT_EQUALS(hkl.h(), 0);
+        TS_ASSERT_EQUALS(hkl.k(), 0);
+        TS_ASSERT_EQUALS(hkl.l(), 0);
+    }
+
     void testdirectAccess()
     {
         MillerIndices hkl(1, 1, 0);
