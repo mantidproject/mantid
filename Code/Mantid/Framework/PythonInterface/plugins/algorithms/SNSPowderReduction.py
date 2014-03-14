@@ -273,11 +273,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 self._info = self._getinfo(samRun)
 
             # process the container
-            canRun = self.getProperty("BackgroundNumber").value
-            if canRun == 0: # use the version in the info
-                canRun = self._info["container"]
-            elif canRun < 0: # turn off the correction
-                canRun = 0
+            canRun = self._info["container"]
             if canRun > 0:
                 if self.getProperty("FilterCharacterizations").value:
                     canFilterWall = timeFilterWall
@@ -294,14 +290,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 canRun = None
 
             # process the vanadium run
-            vanRun = self.getProperty("VanadiumNumber").value
-            self.log().debug("F313A:  Correction SamRun = %s, VanRun = %s of type %s" % (str(samRun), str(vanRun), str(type(vanRun))))
-            if vanRun == 0: # use the version in the info
-                vanRun = self._info["vanadium"]
-                self.log().debug("F313B: Van Correction SamRun = %s, VanRun = %s" % (str(samRun), str(vanRun)))
-            elif vanRun < 0: # turn off the correction
-                vanRun = 0
-            self.log().information("F313C:  Correction SamRun = %s, VanRun = %s of type %s" % (str(samRun), str(vanRun), str(type(vanRun))))
+            vanRun = self._info["vanadium"]
             if vanRun > 0:
                 if self.getProperty("FilterCharacterizations").value:
                     vanFilterWall = timeFilterWall
@@ -324,7 +313,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
 
                     # load the vanadium background (if appropriate)
-                    vbackRun = self.getProperty("VanadiumBackgroundNumber").value
+                    vbackRun = self._info["empty"]
                     if vbackRun > 0:
                         vbackRun = self._loadData(vbackRun, SUFFIX, vanFilterWall, outname="vbackRun")
                         try:
@@ -723,9 +712,9 @@ class SNSPowderReduction(PythonAlgorithm):
         charac = api.PDDetermineCharacterizations(InputWorkspace=wksp,
                                                   Characterizations="characterizations", 
                                                   ReductionProperties="__snspowderreduction",
-                                                  BackRun=0,
-                                                  NormRun=0,
-                                                  NormBackRun=0)
+                                                  BackRun=self.getProperty("BackgroundNumber").value,
+                                                  NormRun=self.getProperty("VanadiumNumber").value,
+                                                  NormBackRun=self.getProperty("VanadiumBackgroundNumber").value)
         # convert the result into a dict
         manager = PropertyManagerDataService.retrieve("__snspowderreduction")
         rowValues = {}
