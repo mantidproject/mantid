@@ -162,9 +162,14 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
         temp_fit_workspace = inputWS
 
     #fit all spectra in workspace
-    input_params = [temp_fit_workspace+',i%d' % i for i in xrange(specMin, specMax+1)]
-    PlotPeakByLogValue(Input=';'.join(input_params), OutputWorkspace=output_workspace, Function=func,
-                       StartX=startX, EndX=endX, FitType='Sequential', CreateOutput=True)
+    input_params = [temp_fit_workspace+',i%d' % i
+                    for i in xrange(specMin, specMax+1)]
+
+    PlotPeakByLogValue(Input=';'.join(input_params),
+                       OutputWorkspace=output_workspace, Function=func,
+                       StartX=startX, EndX=endX, FitType='Sequential',
+                       CreateOutput=True, OutputCompositeMembers=True,
+                       ConvolveMembers=True)
 
     DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
     DeleteWorkspace(output_workspace + '_Parameters')
