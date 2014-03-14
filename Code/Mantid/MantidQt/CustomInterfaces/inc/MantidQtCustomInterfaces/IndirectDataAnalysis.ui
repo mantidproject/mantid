@@ -23,7 +23,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabElwin">
       <attribute name="title">
@@ -2211,7 +2211,7 @@
             <item>
              <widget class="QCheckBox" name="abscor_ckPlotContrib">
               <property name="enabled">
-                <bool>false</bool>
+               <bool>false</bool>
               </property>
               <property name="text">
                <string>Plot Contributions</string>
