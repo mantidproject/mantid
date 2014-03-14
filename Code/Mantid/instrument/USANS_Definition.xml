@@ -44,6 +44,19 @@
       <location/>
     </component>
   </type>
+
+  <component type="transmission_detector" idlist="transmission_detector-idlist">
+    <location/>
+  </component>
+  <type name="transmission_detector">
+    <component type="bank3">
+      <location/>
+    </component>
+    <component type="bank4">
+      <location/>
+    </component>
+  </type>
+  
   <type name="bank1">
     <component type="fourpack">
       <location y="0.0" x="0.0" z="2.03175" />
@@ -54,16 +67,14 @@
       <location y="0.0" x="-0.0096266" z="2.04175" />
     </component>
   </type>
- 
-  <component type="transmission_detector" idlist="transmission_detector-idlist">
-    <location/>
-  </component>
-  <type name="transmission_detector">
+  <type name="bank3">
     <component type="fourpack">
-      <location y="0.0" x="0.0" z="0.710316" />
+      <location y="0.0" x="0.0" z="2.03175" />
     </component>
+  </type>
+  <type name="bank4">
     <component type="fourpack">
-      <location y="0.0" x="-0.0096266" z="0.720316" />
+      <location y="0.0" x="-0.0096266" z="2.04175" />
     </component>
   </type>
 
