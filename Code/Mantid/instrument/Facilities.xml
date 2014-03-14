@@ -360,6 +360,10 @@
       <technique>Small Angle Scattering</technique>
    </instrument> 
    
+   <instrument name="USANS" shortname="USANS" beamline="1A"> 
+      <technique>Small Angle Scattering</technique>
+   </instrument> 
+   
    <instrument name="VULCAN" beamline="7"> 
 	<technique>Neutron Diffraction</technique>
    </instrument> 
