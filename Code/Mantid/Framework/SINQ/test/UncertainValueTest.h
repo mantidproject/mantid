@@ -96,6 +96,9 @@ public:
         UncertainValue newerValue = 80.0 / newValue;
         TS_ASSERT_EQUALS(newerValue.value(), 4.0);
         TS_ASSERT_EQUALS(newerValue.error(), 0.8);
+
+        TS_ASSERT_THROWS(newValue / 0.0, std::domain_error);
+        TS_ASSERT_THROWS(2.0 / UncertainValue(0.0), std::domain_error);
     }
 
     void teststringOperator()
