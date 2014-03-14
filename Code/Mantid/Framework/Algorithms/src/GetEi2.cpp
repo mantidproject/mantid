@@ -103,6 +103,14 @@ void GetEi2::init()
 
   declareProperty("Tzero", 0.0, "", Direction::Output);
 
+  auto inRange0toOne = boost::make_shared<BoundedValidator<double> >();
+  inRange0toOne->setLower(0.0);
+  inRange0toOne->setUpper(1.0);
+  declareProperty("PeakSearchRange",0.1,inRange0toOne,
+    "Specifies the relative TOF range where the algorithm tries to find the monitor peak. Search occurs within PEAK_TOF_Guess*(1+-PeakSearchRange) ranges.\n"
+    "Defaults are almost always sufficient but decrease this value for very narrow peaks and increase for wide.",Direction::Input);
+
+
 }
 
 /** Executes the algorithm
@@ -113,8 +121,10 @@ void GetEi2::init()
 */
 void GetEi2::exec()
 {
-  m_input_ws = getProperty("InputWorkspace");
-  m_fixedei = getProperty("FixEi");
+  m_input_ws  = getProperty("InputWorkspace");
+  m_fixedei   = getProperty("FixEi");
+  m_tof_window= getProperty("PeakSearchRange");
+
   double initial_guess = getProperty("EnergyEstimate");
   //check if incident energy guess is left empty, and try to find it as EnergyRequest parameter
   if (initial_guess==EMPTY_DBL())
