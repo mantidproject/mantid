@@ -1048,6 +1048,9 @@ def msdfit(ws, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=Fals
     group.append(ws_name)
     ConvertTableToMatrixWorkspace(msd_parameters, OutputWorkspace=ws_name,
                                   ColumnX='axis-1', ColumnY='A1', ColumnE='A1_Err')
+
+    SortXAxis(ws_name, OutputWorkspace=ws_name)
+
     xunit = mtd[ws_name].getAxis(0).setUnit('Label')
     xunit.setLabel('Temperature', 'K')
 
