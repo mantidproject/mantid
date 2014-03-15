@@ -5,6 +5,7 @@
 #include "MantidSINQ/PoldiUtilities/MillerIndices.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 #include <stdexcept>
+#include "boost/bind.hpp"
 
 using namespace Mantid::Poldi;
 
@@ -128,6 +129,42 @@ public:
         TS_ASSERT_EQUALS(newHkl.h(), 2);
         TS_ASSERT_EQUALS(newHkl.k(), 0);
         TS_ASSERT_EQUALS(newHkl.l(), 3);
+    }
+
+    void testSortingGreater()
+    {
+        std::vector<PoldiPeak_sptr> peaks;
+        peaks.push_back(PoldiPeak::create(1.0, 200.0));
+        peaks.push_back(PoldiPeak::create(2.0, 20.0));
+        peaks.push_back(PoldiPeak::create(3.0, 800.0));
+
+        std::sort(peaks.begin(), peaks.end(), boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::q));
+        TS_ASSERT_EQUALS(peaks[0]->q(), 3.0);
+        TS_ASSERT_EQUALS(peaks[1]->q(), 2.0);
+        TS_ASSERT_EQUALS(peaks[2]->q(), 1.0);
+
+        std::sort(peaks.begin(), peaks.end(), boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::intensity));
+        TS_ASSERT_EQUALS(peaks[0]->q(), 3.0);
+        TS_ASSERT_EQUALS(peaks[1]->q(), 1.0);
+        TS_ASSERT_EQUALS(peaks[2]->q(), 2.0);
+    }
+
+    void testSortingLess()
+    {
+        std::vector<PoldiPeak_sptr> peaks;
+        peaks.push_back(PoldiPeak::create(1.0, 200.0));
+        peaks.push_back(PoldiPeak::create(2.0, 20.0));
+        peaks.push_back(PoldiPeak::create(3.0, 800.0));
+
+        std::sort(peaks.begin(), peaks.end(), boost::bind<bool>(&PoldiPeak::lessThan, _1, _2, &PoldiPeak::q));
+        TS_ASSERT_EQUALS(peaks[0]->q(), 1.0);
+        TS_ASSERT_EQUALS(peaks[1]->q(), 2.0);
+        TS_ASSERT_EQUALS(peaks[2]->q(), 3.0);
+
+        std::sort(peaks.begin(), peaks.end(), boost::bind<bool>(&PoldiPeak::lessThan, _1, _2, &PoldiPeak::intensity));
+        TS_ASSERT_EQUALS(peaks[0]->q(), 2.0);
+        TS_ASSERT_EQUALS(peaks[1]->q(), 1.0);
+        TS_ASSERT_EQUALS(peaks[2]->q(), 3.0);
     }
 };
 
