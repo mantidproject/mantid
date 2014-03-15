@@ -106,7 +106,7 @@ std::list<MantidVec::iterator> PoldiPeakSearch::findPeaks(MantidVec::iterator be
      * so the list is truncated to the maximum desired peak number (N), where
      * only the N strongest peaks are kept.
      */
-    rawPeaks.sort(&PoldiPeakSearch::vectorElementGreaterThan);//[](MantidVec::iterator first, MantidVec::iterator second) { return (*first) > (*second); } );
+    rawPeaks.sort(&PoldiPeakSearch::vectorElementGreaterThan);
 
     std::list<MantidVec::iterator>::iterator rawPeaksLimit = std::next(rawPeaks.begin(), std::min(m_maximumPeakNumber, static_cast<int>(rawPeaks.size())));
     std::list<MantidVec::iterator> truncatedPeaks(rawPeaks.begin(), rawPeaksLimit);
@@ -284,14 +284,9 @@ bool PoldiPeakSearch::vectorElementGreaterThan(MantidVec::iterator first, Mantid
     return *first > *second;
 }
 
-bool PoldiPeakSearch::intensityGreaterThan(PoldiPeak_sptr first, PoldiPeak_sptr second)
-{
-    return first->intensity() > second->intensity();
-}
-
 bool PoldiPeakSearch::isLessThanMinimum(PoldiPeak_sptr peak)
 {
-    return peak->intensity() <= m_minimumPeakHeight;
+    return peak->intensity().value() <= m_minimumPeakHeight;
 }
 
 void PoldiPeakSearch::init()
@@ -346,13 +341,13 @@ void PoldiPeakSearch::exec()
     g_log.information() << "   Peak positions transformed to original spectrum." << std::endl;
 
     /* Since intensities are required for filtering, they are extracted from the original count data,
-     * along with the Q-values, forming "coordinates" (hence the use of V2D).
+     * along with the Q-values.
      */
     std::vector<PoldiPeak_sptr> peakCoordinates = getPeaks(summedNeighborCounts.begin(), peakPositionsSummed, correlationQValues);
     g_log.information() << "   Extracted peak positions in Q and intensity guesses." << std::endl;
 
     UncertainValue backgroundWithSigma = getBackgroundWithSigma(peakPositionsCorrelation, correlatedCounts);
-    g_log.information() << "   Calculated average background and deviation: " << backgroundWithSigma.value() << ", " << backgroundWithSigma.error() << std::endl;
+    g_log.information() << "   Calculated average background and deviation: " << std::string(backgroundWithSigma) << std::endl;
 
     if((*getProperty("MinimumPeakHeight")).isDefault()) {
         setMinimumPeakHeight(minimumPeakHeightFromBackground(backgroundWithSigma));
@@ -364,7 +359,7 @@ void PoldiPeakSearch::exec()
 
     g_log.information() << "   Peaks above minimum intensity (" << m_minimumPeakHeight << "): " << intensityFilteredPeaks.size() << std::endl;
 
-    std::sort(intensityFilteredPeaks.begin(), intensityFilteredPeaks.end(), &PoldiPeakSearch::intensityGreaterThan);
+    std::sort(intensityFilteredPeaks.begin(), intensityFilteredPeaks.end(), boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::intensity));
 
     for(std::vector<PoldiPeak_sptr>::const_iterator peak = intensityFilteredPeaks.begin();
         peak != intensityFilteredPeaks.end();
@@ -373,6 +368,9 @@ void PoldiPeakSearch::exec()
         m_peaks->addPeak(*peak);
     }
 
+    /* The derived background error is set as error in the workspace containing
+     * correlation data, so it may be used as weights for peak fitting later on.
+     */
     setErrorsOnWorkspace(correlationWorkspace, backgroundWithSigma.error());
 
     setProperty("OutputWorkspace", m_peaks->asTableWorkspace());

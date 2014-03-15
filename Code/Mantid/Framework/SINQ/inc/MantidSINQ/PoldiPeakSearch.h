@@ -87,7 +87,6 @@ namespace Poldi
     void setRecursionAbsoluteBorders(MantidVec::iterator begin, MantidVec::iterator end);
 
     static bool vectorElementGreaterThan(MantidVec::iterator first, MantidVec::iterator second);
-    static bool intensityGreaterThan(PoldiPeak_sptr first, PoldiPeak_sptr second);
     bool isLessThanMinimum(PoldiPeak_sptr peak);
 
     int m_minimumDistance;
