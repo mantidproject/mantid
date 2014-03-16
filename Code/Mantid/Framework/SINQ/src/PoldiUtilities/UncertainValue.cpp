@@ -87,15 +87,6 @@ UncertainValue UncertainValue::operator -(double d)
     return UncertainValue(m_value - d, m_error);
 }
 
-UncertainValue::operator std::string() const
-{
-    if(m_error == 0.0) {
-        return (boost::format("%f") % m_value).str();
-    }
-
-    return (boost::format("%f +/- %f") % m_value % m_error).str();
-}
-
 UncertainValue operator *(double d, const UncertainValue &v)
 {
     return UncertainValue(d * v.value(), d * v.error());

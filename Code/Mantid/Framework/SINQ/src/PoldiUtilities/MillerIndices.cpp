@@ -1,6 +1,7 @@
 #include "MantidSINQ/PoldiUtilities/MillerIndices.h"
 
 #include <stdexcept>
+#include "boost/format.hpp"
 
 namespace Mantid {
 namespace Poldi {
@@ -17,6 +18,18 @@ MillerIndices::MillerIndices(int h, int k, int l) :
     m_asVector(3)
 {
     populateVector();
+}
+
+MillerIndices::MillerIndices(std::vector<int> hkl)
+{
+    if(hkl.size() != 3) {
+        throw std::runtime_error("MillerIndices object can only be created with 3 indices");
+    }
+
+    m_asVector = hkl;
+    m_h = hkl[0];
+    m_k = hkl[1];
+    m_l = hkl[2];
 }
 
 int MillerIndices::h() const

@@ -40,6 +40,7 @@ class MANTID_SINQ_DLL MillerIndices {
 public:
     MillerIndices();
     MillerIndices(int h, int k, int l);
+    MillerIndices(std::vector<int> hkl);
     ~MillerIndices() {}
 
     int h() const;

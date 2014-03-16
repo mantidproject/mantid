@@ -92,6 +92,11 @@ PoldiPeak_sptr PoldiPeak::create(UncertainValue qValue, UncertainValue intensity
     return PoldiPeak_sptr(new PoldiPeak(PoldiPeak::qToD(qValue), intensity));
 }
 
+PoldiPeak_sptr PoldiPeak::create(MillerIndices hkl, UncertainValue dValue, UncertainValue intensity, UncertainValue fwhm)
+{
+    return PoldiPeak_sptr(new PoldiPeak(dValue, intensity, fwhm, hkl));
+}
+
 bool PoldiPeak::greaterThan(const PoldiPeak_sptr &first, const PoldiPeak_sptr &second, UncertainValue (PoldiPeak::*function)() const)
 {
     return static_cast<double>(boost::bind<UncertainValue>(function, first.get())()) > static_cast<double>(boost::bind<UncertainValue>(function, second.get())());

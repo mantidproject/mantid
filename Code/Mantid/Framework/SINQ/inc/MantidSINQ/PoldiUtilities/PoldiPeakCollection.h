@@ -48,6 +48,7 @@ class MANTID_SINQ_DLL PoldiPeakCollection
 {
 public:
     PoldiPeakCollection();
+    PoldiPeakCollection(TableWorkspace_sptr workspace);
     ~PoldiPeakCollection() {}
 
     size_t peakCount() const;
@@ -59,6 +60,9 @@ public:
 private:
     void prepareTable(TableWorkspace_sptr table);
     void peaksToTable(TableWorkspace_sptr table);
+
+    void constructFromTableWorkspace(TableWorkspace_sptr tableWorkspace);
+    bool checkColumns(TableWorkspace_sptr tableWorkspace);
 
     std::vector<PoldiPeak_sptr> m_peaks;
 };

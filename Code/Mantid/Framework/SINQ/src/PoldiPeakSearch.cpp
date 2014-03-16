@@ -40,6 +40,8 @@ The peaks are stored in a new workspace.
 #include <algorithm>
 #include <numeric>
 
+#include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
+
 namespace Mantid
 {
 namespace Poldi
@@ -347,7 +349,7 @@ void PoldiPeakSearch::exec()
     g_log.information() << "   Extracted peak positions in Q and intensity guesses." << std::endl;
 
     UncertainValue backgroundWithSigma = getBackgroundWithSigma(peakPositionsCorrelation, correlatedCounts);
-    g_log.information() << "   Calculated average background and deviation: " << std::string(backgroundWithSigma) << std::endl;
+    g_log.information() << "   Calculated average background and deviation: " << UncertainValueIO::toString(backgroundWithSigma) << std::endl;
 
     if((*getProperty("MinimumPeakHeight")).isDefault()) {
         setMinimumPeakHeight(minimumPeakHeightFromBackground(backgroundWithSigma));

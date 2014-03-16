@@ -101,18 +101,6 @@ public:
         TS_ASSERT_THROWS(2.0 / UncertainValue(0.0), std::domain_error);
     }
 
-    void teststringOperator()
-    {
-        UncertainValue value(4.0);
-
-        std::string uncertainString = value;
-        TS_ASSERT_EQUALS(uncertainString, std::string("4.000000"));
-
-        UncertainValue otherValue(4.0, 4.0);
-        std::string otherUncertainString = otherValue;
-        TS_ASSERT_EQUALS(otherUncertainString, std::string("4.000000 +/- 4.000000"));
-    }
-
     void testadditionOperator()
     {
         UncertainValue value(2.0, 1.0);

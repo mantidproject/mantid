@@ -24,6 +24,23 @@ public:
         TS_ASSERT_EQUALS(hkl.l(), 0);
     }
 
+    void testvectorConstructor()
+    {
+        std::vector<int> hkl;
+        hkl.push_back(2);
+        hkl.push_back(5);
+        hkl.push_back(4);
+
+        MillerIndices hklMI(hkl);
+        TS_ASSERT_EQUALS(hklMI.h(), 2);
+        TS_ASSERT_EQUALS(hklMI.k(), 5);
+        TS_ASSERT_EQUALS(hklMI.l(), 4);
+
+        hkl.push_back(3);
+
+        TS_ASSERT_THROWS(MillerIndices fails(hkl), std::runtime_error);
+    }
+
     void testdirectAccess()
     {
         MillerIndices hkl(1, 1, 0);

@@ -33,6 +33,7 @@ set ( INC_FILES
 	inc/MantidSINQ/LoadFlexiNexus.h
 	inc/MantidSINQ/MDHistoToWorkspace2D.h
         inc/MantidSINQ/PoldiUtilities/MillerIndices.h
+        inc/MantidSINQ/PoldiUtilities/MillerIndicesIO.h
         inc/MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h
         inc/MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h
         inc/MantidSINQ/PoldiAutoCorrelation5.h
@@ -46,6 +47,7 @@ set ( INC_FILES
         inc/MantidSINQ/PoldiUtilities/PoldiPeak.h
         inc/MantidSINQ/PoldiUtilities/PoldiPeakCollection.h
         inc/MantidSINQ/PoldiUtilities/UncertainValue.h
+        inc/MantidSINQ/PoldiUtilities/UncertainValueIO.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
 	inc/MantidSINQ/PoldiLoadIPP.h
 	inc/MantidSINQ/PoldiLoadLog.h
@@ -65,6 +67,7 @@ set ( TEST_FILES
 	LoadFlexiNexusTest.h
 	MDHistoToWorkspace2DTest.h
         MillerIndicesTest.h
+        MillerIndicesIOTest.h
 	PoldiAutoCorrelationCoreTest.h
 	PoldiBasicChopperTest.h
 	PoldiChopperFactoryTest.h
@@ -77,6 +80,7 @@ set ( TEST_FILES
 	ProjectMDTest.h
 	SliceMDHistoTest.h
         UncertainValueTest.h
+        UncertainValueIOTest.h
 )
 
 

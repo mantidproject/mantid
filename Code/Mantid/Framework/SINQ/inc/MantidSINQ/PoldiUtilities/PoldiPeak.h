@@ -64,6 +64,7 @@ public:
 
     static PoldiPeak_sptr create(UncertainValue qValue);
     static PoldiPeak_sptr create(UncertainValue qValue, UncertainValue intensity);
+    static PoldiPeak_sptr create(MillerIndices hkl, UncertainValue dValue, UncertainValue intensity, UncertainValue fwhm);
 
     static bool greaterThan(const PoldiPeak_sptr &first, const PoldiPeak_sptr &second, UncertainValue (PoldiPeak::*function)() const);
     static bool lessThan(const PoldiPeak_sptr &first, const PoldiPeak_sptr &second, UncertainValue (PoldiPeak::*function)() const);

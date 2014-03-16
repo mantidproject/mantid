@@ -57,8 +57,6 @@ public:
     UncertainValue operator+(double d);
     UncertainValue operator-(double d);
 
-    operator std::string() const;
-
     static const UncertainValue plainAddition(UncertainValue const& left, UncertainValue const& right);
 
     static bool lessThanError(UncertainValue const& left, UncertainValue const& right);
