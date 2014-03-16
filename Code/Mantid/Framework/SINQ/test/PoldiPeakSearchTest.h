@@ -185,8 +185,12 @@ public:
 
         std::vector<double> testYData(testListRaw, testListRaw + 19);
         std::vector<double> testXData(testYData.size());
+
         double x = 0.0;
-        std::generate(testXData.begin(), testXData.end(), [&x]() { return x += 1.0; });
+        for(std::vector<double>::iterator iterX = testXData.begin(); iterX != testXData.end(); ++iterX) {
+            x += 1.0;
+            *iterX = x;
+        }
 
         std::list<std::vector<double>::iterator> maxima = poldiPeakSearch.findPeaksRecursive(baseData.begin(), baseData.end());
 
