@@ -5,6 +5,11 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 
+// On MSVC all workspaces must be deleted by the time main() exits as the
+// Workspace destruction can call to an OpenMP loop which is not allowed
+// on MSVC after main() exits.
+// See Workspace2D::~Workspace2D()
+
 namespace
 {
   /// Define single ClearAlgorithmManager object
