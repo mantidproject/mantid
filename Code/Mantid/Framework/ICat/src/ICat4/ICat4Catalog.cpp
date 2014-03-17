@@ -805,6 +805,18 @@ namespace Mantid
      */
     void ICat4Catalog::keepAlive()
     {
+      ICat4::ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
+
+      ns1__refresh request;
+      ns1__refreshResponse response;
+
+      std::string sessionID = m_session->getSessionId();
+      request.sessionId = &sessionID;
+
+      int result = icat.refresh(&request,&response);
+      // An error occurred!
+      if (result != 0) throwErrorMessage(icat);
     }
 
     /**
