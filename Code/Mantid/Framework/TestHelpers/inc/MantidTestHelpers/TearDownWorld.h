@@ -47,5 +47,16 @@ class ClearADS : public CxxTest::GlobalFixture
   bool tearDownWorld();
 };
 
+//-----------------------------------------------------------------------------
+
+/**
+ * Defines a CxxTest::GlobalFixture that clears the PropertyManagerDataService
+ * when its tearDownWorld() method is called.
+ */
+class ClearPropertyManagerDataService : public CxxTest::GlobalFixture
+{
+  bool tearDownWorld();
+};
+
 
 #endif // TEARDOWNWORLD_H_
