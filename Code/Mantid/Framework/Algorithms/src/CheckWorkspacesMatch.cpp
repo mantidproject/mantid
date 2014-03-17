@@ -380,22 +380,22 @@ bool CheckWorkspacesMatch::checkEventLists(DataObjects::EventWorkspace_const_spt
 }
 /** Function which calculates relative error between two values and analyses if this error is within the limits
 * requested
-@param x1 -- first value to check difference
-@param x2 -- second value to check difference
-@param ERROR_VAL -- the value of the error, to check against. Should  be positive != 0
+@param x1       -- first value to check difference
+@param x2       -- second value to check difference
+@param errorVal -- the value of the error, to check against. Should  be positive != 0
 
 @returns true if error or false if the value is within the limits requested
 */
-inline bool TOL_ERR(const double &x1,const double &x2,const double &ERROR_VAL)
+inline bool relErr(const double &x1,const double &x2,const double &errorVal)
 {
 
   double num= std::fabs(x1-x2);
   // how to treat x1<0 and x2 > 0 ?  probably this way
   double den=0.5*(std::fabs(x1)+std::fabs(x2));
-  if (den<ERROR_VAL) 
-    return (num>ERROR_VAL);
+  if (den<errorVal) 
+    return (num>errorVal);
 
-  return (num/den>ERROR_VAL);
+  return (num/den>errorVal);
 
 }
 
@@ -454,7 +454,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
         bool err;
         if (RelErr)
         {
-           err = (TOL_ERR(X1[j],X2[j],tolerance) || TOL_ERR(Y1[j],Y2[j],tolerance) || TOL_ERR(E1[j],E2[j],tolerance));
+           err = (relErr(X1[j],X2[j],tolerance) || relErr(Y1[j],Y2[j],tolerance) || relErr(E1[j],E2[j],tolerance));
         }
         else
            err = (std::fabs(X1[j] - X2[j]) > tolerance || std::fabs(Y1[j] - Y2[j]) > tolerance
