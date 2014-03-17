@@ -1,5 +1,6 @@
 #include "MantidPythonInterface/kernel/DataServiceExporter.h"
 #include "MantidPythonInterface/kernel/Registry/DowncastRegistry.h"
+#include "MantidPythonInterface/kernel/TrackingInstanceMethod.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
@@ -11,6 +12,7 @@
 
 using namespace Mantid::API;
 using Mantid::PythonInterface::DataServiceExporter;
+using Mantid::PythonInterface::TrackingInstanceMethod;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
@@ -68,22 +70,18 @@ namespace
 
 void export_AnalysisDataService()
 {
-
-  auto adsType = DataServiceExporter<AnalysisDataServiceImpl,
-                                     Workspace_sptr>::define("AnalysisDataServiceImpl");
+  typedef DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr> ADSExporter;
+  auto pythonClass = ADSExporter::define("AnalysisDataServiceImpl");
 
   // -- special ADS behaviour --
   // replace the add/addOrReplace,__setitem__ methods as we need to exact the exact stored type
-  adsType.def("add", &addItem,
+  pythonClass.def("add", &addItem,
        "Adds the given object to the service with the given name. If the name/object exists it will raise an error.");
-  adsType.def("addOrReplace", &addOrReplaceItem,
+  pythonClass.def("addOrReplace", &addOrReplaceItem,
        "Adds the given object to the service with the given name. The the name exists the object is replaced.");
-  adsType.def("__setitem__", &addOrReplaceItem);
+  pythonClass.def("__setitem__", &addOrReplaceItem);
 
-  // Add instance method for the ADS singleton
-  adsType.def("Instance", &AnalysisDataService::Instance,
-              return_value_policy<reference_existing_object>(),
-              "Return a reference to the ADS singleton");
-  adsType.staticmethod("Instance");
+  // Instance method
+  TrackingInstanceMethod<AnalysisDataService, typename ADSExporter::PythonType>::define(pythonClass);
 }
 

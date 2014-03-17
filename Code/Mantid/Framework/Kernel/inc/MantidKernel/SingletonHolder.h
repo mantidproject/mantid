@@ -44,6 +44,9 @@ namespace Mantid
     class SingletonHolder
     {
     public:
+      /// Allow users to access to the type returned by Instance()
+      typedef T HeldType;
+
       static T& Instance();
 
     private:
