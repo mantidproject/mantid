@@ -9,6 +9,8 @@ if ( CXXTEST_FOUND )
                         )
 
   if ( GMOCK_FOUND AND GTEST_FOUND )
+    set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/TearDownWorld.cpp )
+
     cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
     target_link_libraries( CustomInterfacesTest CustomInterfaces DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
     add_dependencies( CustomInterfacesTest MDAlgorithms )
