@@ -52,10 +52,12 @@ namespace Mantid
        */
       static void define(PythonType & classType)
       {
+        using namespace boost::python;
+
         classType.def("__del__", &TrackingInstanceMethod::decref);
         classType.def("Instance", &TrackingInstanceMethod::instance,
-                    return_value_policy<reference_existing_object>(),
-                    "Return a reference to the singleton instance");
+                      return_value_policy<reference_existing_object>(),
+                      "Return a reference to the singleton instance");
         classType.staticmethod("Instance");
       }
       
