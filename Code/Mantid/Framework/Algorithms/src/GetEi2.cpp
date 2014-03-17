@@ -255,8 +255,8 @@ double GetEi2::calculateEi(const double initial_guess)
       else
       {
         peak_times[i] = peak_guess;
-        g_log.information() << "No peak found for monitor " << (i+1) << " (at " << det_distances[i] << " metres). Setting peak time to zero\n";
-        g_log.information() << "Using guess value of Peak for monitor " << (i+1) << " (at " << det_distances[i] << " metres) = " << peak_times[i] << " microseconds\n";
+        g_log.warning() << "No peak found for monitor with spectra num " << spec_nums[i] << " (at " << det_distances[i] << " metres).\n";
+        g_log.warning() << "Using guess time found from emergy estimate of Peak = " << peak_times[i] << " microseconds\n";
       }
     }
     if(i == 0) 
