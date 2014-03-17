@@ -6,8 +6,6 @@
 #include <boost/python/def.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
-#include <boost/python/return_value_policy.hpp>
-#include <boost/python/reference_existing_object.hpp>
 
 using namespace Mantid::API;
 using Mantid::PythonInterface::AlgorithmIDProxy;

@@ -23,6 +23,9 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 #include <boost/python/class.hpp>
+#include <boost/python/return_value_policy.hpp>
+#include <boost/python/reference_existing_object.hpp>
+
 
 namespace Mantid
 {

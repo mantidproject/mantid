@@ -7,9 +7,6 @@
 
 #include <boost/python/call_method.hpp>
 
-#include <boost/python/return_value_policy.hpp>
-#include <boost/python/reference_existing_object.hpp>
-
 using namespace Mantid::API;
 using Mantid::PythonInterface::DataServiceExporter;
 using Mantid::PythonInterface::TrackingInstanceMethod;
