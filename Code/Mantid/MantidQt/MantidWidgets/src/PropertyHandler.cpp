@@ -582,7 +582,7 @@ QString PropertyHandler::functionPrefix()const
  */
 QString PropertyHandler::functionStructure() const
 {
-  if (m_cf)
+  if ( m_cf && (m_cf->name() == "CompositeFunction" || m_cf->name() == "ProductFunction") )
   {
     QStringList children;
 
@@ -593,12 +593,12 @@ QString PropertyHandler::functionStructure() const
 
     if ( children.empty() )
     {
-      return QString::fromStdString("Empty " + function()->name());
+      return QString::fromStdString("Empty " + m_cf->name());
     }
 
     QChar op('+');
 
-    if (function()->name() == "ProductFunction")
+    if (m_cf->name() == "ProductFunction")
     {
       op = '*';
     }
