@@ -1057,9 +1057,11 @@ def msdfit(ws, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=Fals
     GroupWorkspaces(InputWorkspaces=','.join(group),OutputWorkspace=msdWS)
 
     #add sample logs to output workspace
+    fit_workspaces = msdWS + '_Workspaces'
     CopyLogs(InputWorkspace=ws, OutputWorkspace=msdWS)
     AddSampleLog(Workspace=msdWS, LogName="start_x", LogType="Number", LogText=str(startX))
     AddSampleLog(Workspace=msdWS, LogName="end_x", LogType="Number", LogText=str(endX))
+    CopyLogs(InputWorkspace=msdWS + '_A0', OutputWorkspace=fit_workspaces)
 
     if Plot:
         msdfitPlotSeq(msdWS, xlabel)
@@ -1070,7 +1072,7 @@ def msdfit(ws, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=Fals
             logger.notice('Output msd file : '+msd_path)
 
     EndTime('msdFit')
-    return msdWS + '_Workspaces'
+    return fit_workspaces
 
 def plotInput(inputfiles,spectra=[]):
     OneSpectra = False
