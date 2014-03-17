@@ -24,7 +24,7 @@ void export_PropertyManagerDataService()
   auto pmdType = PMDExporter::define("PropertyManagerDataServiceImpl");
   
   // Instance method
-  TrackingInstanceMethod<PropertyManagerDataService, typename PMDExporter::PythonType>::define(pmdType);
+  TrackingInstanceMethod<PropertyManagerDataService, PMDExporter::PythonType>::define(pmdType);
 
 }
 

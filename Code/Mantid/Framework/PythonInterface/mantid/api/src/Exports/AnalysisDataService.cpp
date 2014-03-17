@@ -79,6 +79,6 @@ void export_AnalysisDataService()
   pythonClass.def("__setitem__", &addOrReplaceItem);
 
   // Instance method
-  TrackingInstanceMethod<AnalysisDataService, typename ADSExporter::PythonType>::define(pythonClass);
+  TrackingInstanceMethod<AnalysisDataService, ADSExporter::PythonType>::define(pythonClass);
 }
 
