@@ -1,7 +1,8 @@
 #include "MantidKernel/MultiFileValidator.h"
-#include <algorithm>
+#include "MantidKernel/Logger.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <algorithm>
 #include <iostream>
 
 
@@ -9,8 +10,11 @@ namespace Mantid
 {
 namespace Kernel
 {
-  // Initialize the logger
-  Logger& MultiFileValidator::g_log = Logger::get("MultiFileValidator");
+  namespace
+  {
+    // static logger
+    Logger g_log("MultiFileValidator");
+  }
 
   /// Default constructor.
   MultiFileValidator::MultiFileValidator() : TypedValidator<std::vector<std::vector<std::string> > >(),

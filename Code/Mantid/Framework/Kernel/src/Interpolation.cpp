@@ -1,13 +1,17 @@
 #include "MantidKernel/Interpolation.h"
-#include <Poco/StringTokenizer.h>
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
+#include <Poco/StringTokenizer.h>
 
 namespace Mantid
 {
 namespace Kernel
 {
-
-  Logger& Interpolation::g_log = Logger::get("Interpolation");
+  namespace
+  {
+    /// static logger
+    Logger  g_log("Interpolation");
+  }
 
   /** Constructor default to linear interpolation and x-unit set to TOF
    */

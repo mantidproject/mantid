@@ -75,7 +75,6 @@ class ThreadSafeLogStream;
     Logger(const std::string& name);
     /// Destructor
     ~Logger();
-
     /// Update the name of the logger
     void setName(const std::string & name);
 

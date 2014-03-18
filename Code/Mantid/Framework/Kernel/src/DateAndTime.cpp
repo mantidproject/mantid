@@ -13,21 +13,23 @@ namespace Mantid
 namespace Kernel
 {
 
+namespace
+{
 // Initialize the logger
-Logger& DateAndTime::g_log = Logger::get("DateAndTime");
+Logger g_log("DateAndTime");
 
 /// Max allowed nanoseconds in the time; 2^62-1
-static int64_t MAX_NANOSECONDS = 4611686018427387903LL;
+int64_t MAX_NANOSECONDS = 4611686018427387903LL;
 
 /// Max allowed seconds in the time
-static int64_t MAX_SECONDS      = 4611686017LL;
+int64_t MAX_SECONDS      = 4611686017LL;
 
 /// Min allowed nanoseconds in the time; -2^62+1
-static int64_t MIN_NANOSECONDS  = -4611686018427387903LL;
+int64_t MIN_NANOSECONDS  = -4611686018427387903LL;
 
 /// Min allowed seconds in the time
-static int64_t MIN_SECONDS      = -4611686017LL;
-
+int64_t MIN_SECONDS      = -4611686017LL;
+}
 
 namespace DateAndTimeHelpers
 {

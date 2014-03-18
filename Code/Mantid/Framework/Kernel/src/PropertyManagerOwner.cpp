@@ -10,9 +10,11 @@ namespace Mantid
 {
   namespace Kernel
   {
-
-    // Get a reference to the logger
-    Logger& PropertyManagerOwner::g_log = Logger::get("PropertyManagerOwner");
+    namespace
+    {
+      // Get a reference to the logger
+      Logger g_log("PropertyManagerOwner");
+    }
 
     /// Default constructor
     PropertyManagerOwner::PropertyManagerOwner() :
