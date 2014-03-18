@@ -172,12 +172,6 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-// logger for the algorithm workspaces  
-Kernel::Logger& ConvertToMD::g_Log =Kernel::Logger::get("MD-Algorithms");
-//
-Mantid::Kernel::Logger & 
-ConvertToMD::getLogger(){return g_Log;}
-//
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMD)
 

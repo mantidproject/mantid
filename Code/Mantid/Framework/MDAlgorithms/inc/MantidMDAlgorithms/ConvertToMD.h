@@ -71,8 +71,6 @@ namespace MDAlgorithms
    /// progress reporter
    boost::scoped_ptr<API::Progress > m_Progress;
  
-  /// logger -> to provide logging, for MD dataset file operations
-   static Mantid::Kernel::Logger& g_Log;
    //------------------------------------------------------------------------------------------------------------------------------------------
    protected: //for testing, otherwise private:
       /// the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
