@@ -62,6 +62,8 @@ public:
     void setIntensity(UncertainValue intensity);
     void setFwhm(UncertainValue fwhm);
 
+    void multiplyErrors(double factor);
+
     static PoldiPeak_sptr create(UncertainValue qValue);
     static PoldiPeak_sptr create(UncertainValue qValue, UncertainValue intensity);
     static PoldiPeak_sptr create(MillerIndices hkl, UncertainValue dValue, UncertainValue intensity, UncertainValue fwhm);

@@ -72,6 +72,13 @@ void PoldiPeak::setFwhm(UncertainValue fwhm)
     m_fwhm = fwhm;
 }
 
+void PoldiPeak::multiplyErrors(double factor)
+{
+    setQ(UncertainValue(m_q.value(), m_q.error() * factor));
+    setFwhm(UncertainValue(m_fwhm.value(), m_fwhm.error() * factor));
+    setIntensity(UncertainValue(m_intensity.value(), m_intensity.error() * factor));
+}
+
 UncertainValue PoldiPeak::dToQ(UncertainValue d)
 {
     return 2.0 * M_PI / d;
