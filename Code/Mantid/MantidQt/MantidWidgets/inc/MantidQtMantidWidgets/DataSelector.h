@@ -57,13 +57,17 @@ namespace MantidQt
       virtual ~DataSelector();
 
       /// Get the current file path in the MWRunFiles widget
-      QString getFullFilePath();
+      QString getFullFilePath() const;
       /// Get the currently available file or workspace name
-      QString getCurrentDataName();
-      /// Get whether file or workspace input is currently being shown
-      int getCurrentView() const;
+      QString getCurrentDataName() const;
+      /// Get whether the file selector is currently being shown
+      bool isFileSelectorVisible() const;
+      /// Get whether the workspace selector is currently being shown
+      bool isWorkspaceSelectorVisible() const;
       /// Checks if widget is in a valid state
-      bool isValid() const;
+      bool isValid();
+      /// Get file problem, empty string means no error.
+      QString getProblem() const;
       /// Check if the widget is set to automatically attempt to load files
       bool willAutoLoad();
       /// Set the widget to automatically attempt to load files

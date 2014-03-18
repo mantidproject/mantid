@@ -59,7 +59,10 @@ public:
 
   void test_Insert_Yields_Next_As_Inserted_Vertex()
   {
-    makeThreeVertexChain(true, false);
+    auto v2d = makeThreeVertexChain(true, false);
+    delete v2d->next()->next();
+    delete v2d->next();
+    delete v2d;
   }
 
    void test_Remove_Returns_An_Isolated_Vertex()
@@ -77,7 +80,10 @@ public:
      pIter.advance();
      TS_ASSERT_EQUALS(pIter.point(), V2D(1.0,1.0));
      pIter.advance(); //Back to the start
-     TS_ASSERT_EQUALS(pIter.point(), V2D()); 
+     TS_ASSERT_EQUALS(pIter.point(), V2D());
+     delete start->next()->next();
+     delete start->next();
+     delete start;
    }
 
 private:
@@ -123,6 +129,9 @@ private:
       UNUSED_ARG(removedTwo);
       TS_ASSERT_EQUALS(origin->next(), origin);
       TS_ASSERT_EQUALS(origin->previous(), origin);
+      delete origin;
+      delete third;
+      delete two;
       return NULL;
     }
     else

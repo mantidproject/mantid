@@ -1,6 +1,5 @@
 #include "MantidICat/ICat3/ICat3Catalog.h"
 #include "MantidAPI/CatalogFactory.h"
-#include "MantidICat/Session.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -12,27 +11,28 @@ namespace Mantid
     DECLARE_CATALOG(ICat3Catalog)
 
     /// constructor
-    ICat3Catalog::ICat3Catalog() : m_helper(new CICatHelper())
-    {
-    }
+    ICat3Catalog::ICat3Catalog() : m_helper(new CICatHelper()) {}
+
     /// destructor
-    ICat3Catalog::~ICat3Catalog()
-    {
-    }
-    /**This method is responsible for connecting the client application to ICat3 based catalog services
-     *@param username :: login name(eg. federal id) of the user
-     *@param password :: passowrd of the user
-     *@param url :: url of the user
+    ICat3Catalog::~ICat3Catalog() {}
+
+    /**
+     * Authenticate the user against all catalogues in the container.
+     * @param username :: The login name of the user.
+     * @param password :: The password of the user.
+     * @param endpoint :: The endpoint url of the catalog to log in to.
+     * @param facility :: The facility of the catalog to log in to.
      */
-    void ICat3Catalog::login(const std::string& username,const std::string& password,const std::string& url)
+    API::CatalogSession_sptr ICat3Catalog::login(const std::string& username,const std::string& password,
+        const std::string& endpoint, const std::string& facility)
     {
-      m_helper->doLogin(username,password,url);
+      return m_helper->doLogin(username,password,endpoint,facility);
     }
+
     /// This method disconnects the client application from ICat3 based catalog services
     void ICat3Catalog::logout()
     {
       m_helper->doLogout();
-      Session::Instance().setSessionId("");//clearing the session id saved to Mantid after log out
     }
 
     /*This method returns the logged in user's investigations data .

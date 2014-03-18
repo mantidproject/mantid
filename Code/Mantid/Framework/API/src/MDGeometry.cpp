@@ -1,5 +1,6 @@
 #include "MantidAPI/MDGeometry.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"

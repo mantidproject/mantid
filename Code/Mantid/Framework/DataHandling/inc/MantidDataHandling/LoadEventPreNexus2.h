@@ -213,6 +213,12 @@ private:
 
   void debugOutput(bool doit, size_t mindex);
 
+  void unmaskVetoEventIndex();
+
+  API::MatrixWorkspace_sptr generateEventDistribtionWorkspace();
+
+  void createOutputWorkspace(const std::string event_filename);
+
 };
 
   }

@@ -35,6 +35,8 @@ public:
     instrument->markAsMonitor(det3.get());
 
     pmap.reset(new ParameterMap);
+    delete source;
+    delete sample;
   }
 
   void test_Constructor_Throws_With_Invalid_Pointers()

@@ -92,7 +92,6 @@ set ( TEST_FILES
 	WeightedEventNoTimeTest.h
 	WeightedEventTest.h
 	Workspace2DTest.h
-	WorkspaceIteratorTest.h
 	WorkspaceSingleValueTest.h
 	WorkspaceValidatorsTest.h
 )

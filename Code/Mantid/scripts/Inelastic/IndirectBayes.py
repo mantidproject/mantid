@@ -96,18 +96,12 @@ def ReadNormFile(readRes,resnormWS,nsam,Verbose):            # get norm & scale 
 		Xin = mtd[resnormWS+'_Intensity'].readX(0)
 		nrm = len(Xin)						# no. points from length of x array
 		if nrm == 0:				
-			error = 'ResNorm file has no Intensity points'			
-			logger.notice('ERROR *** ' + error)
-			sys.exit(error)
+			raise ValueError('ResNorm file has no Intensity points')
 		Xin = mtd[resnormWS+'_Stretch'].readX(0)					# no. points from length of x array
 		if len(Xin) == 0:				
-			error = 'ResNorm file has no xscale points'
-			logger.notice('ERROR *** ' + error)
-			sys.exit(error)
+			raise ValueError('ResNorm file has no xscale points')
 		if nrm != nsam:				# check that no. groups are the same
-			error = 'ResNorm groups (' +str(nrm) + ') not = Sample (' +str(nsam) +')'			
-			logger.notice('ERROR *** ' + error)
-			sys.exit(error)
+			raise ValueError('ResNorm groups (' +str(nrm) + ') not = Sample (' +str(nsam) +')')
 		else:
 			dtn,xsc = GetResNorm(resnormWS,0)
 	else:
@@ -137,22 +131,15 @@ def ReadWidthFile(readWidth,widthFile,numSampleGroups,Verbose):
 			handle.close()
 
 		except Exception, e:
-			error = 'Failed to read width file'	
-			logger.notice('ERROR *** ' + error)
-			sys.exit(error)
+			raise ValueError('Failed to read width file')
 
 		numLines = len(asc)
 		
 		if numLines == 0:
-			error = 'No groups in width file'	
-			logger.notice('ERROR *** ' + error)
-			sys.exit(error)
+			raise ValueError('No groups in width file')
 		
 		if numLines != numSampleGroups:				# check that no. groups are the same
-			error = 'Width groups (' +str(numLines) + ') not = Sample (' +str(numSampleGroups) +')'	
-			logger.notice('ERROR *** ' + error)
-			sys.exit(error)
-
+			raise ValueError('Width groups (' +str(numLines) + ') not = Sample (' +str(numSampleGroups) +')')
 	else: 
 	 	# no file: just use constant values
 	 	widthY = np.zeros(numSampleGroups)
@@ -223,8 +210,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose,Plot
 		if nres == 1:
 			prog = 'QSe'						# res file
 		else:
-			error = 'Stretched Exp ONLY works with RES file'
-			sys.exit(error)
+			raise ValueError('Stretched Exp ONLY works with RES file')
 
 	if Verbose:
 		logger.notice('Version is ' +prog)
@@ -671,22 +657,16 @@ def QuasiPlot(ws_stem,plot_type,res_plot,sequential):
 def CheckBetSig(nbs):
 	Nsig = int(nbs[1])
 	if Nsig == 0:
-		error = 'Number of sigma points is Zero'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
+		raise ValueError('Number of sigma points is Zero')
 	if Nsig > 200:
-		error = 'Max number of sigma points is 200'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
+		raise ValueError('Max number of sigma points is 200')
+	
 	Nbet = int(nbs[0])
 	if Nbet == 0:
-		error = 'Number of beta points is Zero'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
+		raise ValueError('Number of beta points is Zero')
 	if Nbet > 200:
-		error = 'Max number of beta points is 200'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
+		raise ValueError('Max number of beta points is 200')
+
 	return Nbet,Nsig
 
 def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
@@ -729,9 +709,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 	if nres == 1:
 		prog = 'Qst'                        # res file
 	else:
-		error = 'Stretched Exp ONLY works with RES file'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
+		raise ValueError('Stretched Exp ONLY works with RES file')
 	if Verbose:
 		logger.notice(' Number of spectra = '+str(nsam))
 		logger.notice(' Erange : '+str(erange[0])+' to '+str(erange[1]))

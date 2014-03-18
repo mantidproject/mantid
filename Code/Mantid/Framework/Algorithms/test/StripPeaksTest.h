@@ -53,7 +53,7 @@ public:
     TS_ASSERT( strip.isInitialized() );
   }
 
-  void xtestExec()
+  void testExec()
   {
     if ( !strip.isInitialized() ) strip.initialize();
 
@@ -70,13 +70,25 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
 
     MatrixWorkspace_const_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("toStrip");
-    MatrixWorkspace::const_iterator inIt(*input);
 
-    for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
+    const size_t nhist = output->getNumberHistograms();
+    const size_t nbins = output->blocksize();
+    TS_ASSERT_EQUALS(nhist, input->getNumberHistograms());
+    TS_ASSERT_EQUALS(nbins, input->blocksize());
+
+    for(size_t i = 0; i < nhist; ++i)
     {
-      TS_ASSERT_EQUALS( it->X(), inIt->X() );
-      TS_ASSERT_DELTA( it->Y(), 5000.0, 0.5 );
-      TS_ASSERT_EQUALS( it->E(), inIt->E() );
+      const auto & inX = input->readX(i);
+      const auto & inE = input->readE(i);
+      const auto & outX = output->readX(i);
+      const auto & outY = output->readY(i);
+      const auto & outE = output->readE(i);
+      for(size_t j = 0; j < nbins; ++j)
+      {
+        TS_ASSERT_EQUALS( outX[j], inX[j] );
+        TS_ASSERT_DELTA( outY[j], 5000.0, 0.5 );
+        TS_ASSERT_EQUALS( outE[j], inE[j] );
+      }
     }
 
     AnalysisDataService::Instance().remove(outputWS);

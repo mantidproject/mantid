@@ -50,10 +50,6 @@ namespace DataObjects
   class DLLExport RebinnedOutput : public Workspace2D
   {
   public:
-    /// Typedef for the workspace_iterator to use with a RebinnedOutput
-    typedef API::workspace_iterator<API::LocatedDataRef, RebinnedOutput> iterator;
-    /// Typedef for the const workspace_iterator to use with a RebinnedOutput
-    typedef API::workspace_iterator<const API::LocatedDataRef, const RebinnedOutput> const_iterator;
 
     /// Class constructor.
     RebinnedOutput();

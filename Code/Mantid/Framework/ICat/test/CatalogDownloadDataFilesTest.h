@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidICat/CatalogDownloadDataFiles.h"
-#include "MantidICat/Session.h"
 #include "MantidICat/CatalogLogin.h"
 #include "MantidICat/CatalogGetDataFiles.h"
 #include "MantidICat/CatalogSearch.h"
@@ -61,7 +60,6 @@ public:
 	}
 	void xtestDownLoadDataFile()
 	{		
-		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
@@ -121,8 +119,6 @@ public:
 
 	void xtestDownLoadNexusFile()
 	{				
-		Session::Instance();
-
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		// Now set it...
@@ -182,8 +178,6 @@ public:
 
 	void xtestDownLoadDataFile_Merlin()
 	{
-		
-		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");

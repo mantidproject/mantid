@@ -16,7 +16,7 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <vector>
-
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
@@ -172,6 +172,59 @@ public:
     do_test_SNSTextFile("Temp1,Temp2,Temp3,Yadda", "C,K,F,Fortnights", false, false);
   }
 
+  void test_KeepLogs()
+  {
+      // Create an empty workspace and put it in the AnalysisDataService
+      EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace(1000,1,10000);
+      outputSpace = "PartiallyRemoveLogs";
+
+      // Add a bunch of logs
+      std::vector<DateAndTime> times;
+      std::vector<int> index;
+      std::vector<double> dbl1, dbl2;
+      DateAndTime startTime("2010-01-01T00:00:00");
+      for (int i = 0; i < 100; ++i)
+      {
+        times.push_back(startTime + i*10.0);
+        index.push_back(i);
+        dbl1.push_back(i*0.1);
+        dbl2.push_back(6.0);
+      }
+
+      auto scan_index = new TimeSeriesProperty<int>("scan_index");
+      scan_index->addValues(times,index);
+      ws->mutableRun().addProperty(scan_index);
+      auto dbl_prop1 = new TimeSeriesProperty<double>("some_prop");
+      auto dbl_prop2 = new TimeSeriesProperty<double>("some_other_prop");
+      dbl_prop1->addValues(times,dbl1);
+      dbl_prop2->addValues(times,dbl2);
+      ws->mutableRun().addProperty(dbl_prop1);
+      ws->mutableRun().addProperty(dbl_prop2);
+      ws->mutableRun().addProperty("Ei", 42.);
+      ws->mutableRun().addProperty("T0", 42.);
+      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));
+
+
+      // Get back the saved workspace
+      MatrixWorkspace_sptr output;
+      TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
+
+      if ( !remover.isInitialized() ) remover.initialize();
+      TS_ASSERT_THROWS_NOTHING(remover.setPropertyValue("Workspace", outputSpace));
+      TS_ASSERT_THROWS_NOTHING(remover.setPropertyValue("KeepLogs", "Ei, scan_index"));
+      TS_ASSERT_THROWS_NOTHING(remover.execute());
+
+
+      TS_ASSERT( remover.isExecuted() );
+
+      // log should have been removed
+      TS_ASSERT_THROWS( output->run().getLogData("some_other_prop"), std::runtime_error);
+      TS_ASSERT_THROWS( output->run().getLogData("some_prop"), std::runtime_error);
+      TS_ASSERT_THROWS( output->run().getLogData("T0"), std::runtime_error);
+      TS_ASSERT_THROWS_NOTHING( output->run().getLogData("Ei"));
+      TS_ASSERT_THROWS_NOTHING( output->run().getLogData("scan_index"));
+      AnalysisDataService::Instance().remove(outputSpace);
+  }
 
 private:
   LoadLog loader;

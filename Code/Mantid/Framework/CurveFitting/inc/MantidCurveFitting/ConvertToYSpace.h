@@ -71,7 +71,7 @@ namespace CurveFitting
     void exec();
 
     /// Perform the conversion to Y-space
-    void convert(const size_t i);
+    bool convert(const size_t i);
     /// Check and store appropriate input data
     void retrieveInputs();
     /// Create the output workspace

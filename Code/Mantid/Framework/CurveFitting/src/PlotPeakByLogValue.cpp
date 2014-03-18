@@ -117,6 +117,13 @@ namespace Mantid
         "Cost functions to use for fitting. Cost functions available are 'Least squares' and 'Ignore positive peaks'", Direction::InOut);
 
       declareProperty("CreateOutput", false, "Set to true to create output workspaces with the results of the fit(default is false).");
+      
+      declareProperty("OutputCompositeMembers",false,
+          "If true and CreateOutput is true then the value of each member of a Composite Function is also output.");
+      
+      declareProperty(new Kernel::PropertyWithValue<bool>("ConvolveMembers", false),
+        "If true and OutputCompositeMembers is true members of any Convolution are output convolved\n"
+        "with corresponding resolution");
     }
 
     /** 
@@ -134,6 +141,8 @@ namespace Mantid
       bool individual = getPropertyValue("FitType") == "Individual";
       bool passWSIndexToFunction = getProperty("PassWSIndexToFunction");
       bool createFitOutput = getProperty("CreateOutput");
+      bool outputCompositeMembers = getProperty("OutputCompositeMembers");
+      bool outputConvolvedMembers = getProperty("ConvolveMembers");
       std::string baseName = getPropertyValue("OutputWorkspace");
 
       bool isDataName = false; // if true first output column is of type string and is the data source name
@@ -271,6 +280,8 @@ namespace Mantid
             fit->setPropertyValue("CostFunction",getPropertyValue("CostFunction"));
             fit->setProperty("CalcErrors",true);
             fit->setProperty("CreateOutput",createFitOutput);
+            fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
+            fit->setProperty("ConvolveMembers",outputConvolvedMembers);
             fit->setProperty("Output", wsBaseName);
             fit->execute();
 

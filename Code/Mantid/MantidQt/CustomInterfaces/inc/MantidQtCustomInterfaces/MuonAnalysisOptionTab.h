@@ -48,6 +48,15 @@ class MuonAnalysisOptionTab : public QWidget
 {
  Q_OBJECT
 public:
+  /// Types of the start time
+  enum StartTimeType { FirstGoodData, TimeZero, Custom };
+
+  /// Type of rebin
+  enum RebinType { NoRebin, FixedRebin, VariableRebin };
+
+  /// Types of new plot policies
+  enum NewPlotPolicy { NewWindow, PreviousWindow };
+
   /// Constructor
   MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& settingsGroup);
 
@@ -57,6 +66,27 @@ public:
   /// Get plot style parameters from widgets
   QMap<QString, QString> parsePlotStyleParams() const;
 
+  /// Retrieve selected type of the start time
+  StartTimeType getStartTimeType();
+
+  /// Retrieve custom start time value
+  double getCustomStartTime();
+
+  /// Retrieve custom finish time value
+  double getCustomFinishTime();
+
+  /// Retrieve a type of rebin user has selected
+  RebinType getRebinType();
+
+  /// Retrieve a vairable rebin params string as specified by user
+  std::string getRebinParams();
+
+  /// Retrieve a binning step as specified by user
+  double getRebinStep();
+
+  /// Return currently selected new plot policy
+  NewPlotPolicy newPlotPolicy();
+
 signals:
   /// Update the plot because something has changed.
   void settingsTabUpdatePlot();
@@ -65,6 +95,17 @@ signals:
   void plotStyleChanged();
 
 private:
+  /// Logger to use
+  static Logger& g_log;
+
+  /// Default widget values
+  static const QString START_TIME_DEFAULT;
+  static const QString FINISH_TIME_DEFAULT;
+  static const QString MIN_Y_DEFAULT;
+  static const QString MAX_Y_DEFAULT;
+  static const QString FIXED_REBIN_DEFAULT;
+  static const QString VARIABLE_REBIN_DEFAULT;
+
   /// The Muon Analysis UI file.
   Ui::MuonAnalysis& m_uiForm;
 
