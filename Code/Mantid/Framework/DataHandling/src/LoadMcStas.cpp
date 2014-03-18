@@ -300,10 +300,9 @@ namespace DataHandling
     }
     // the one is here for the moment for backward compatibility
     eventWS->rebuildSpectraMapping(true);
-   
 
     bool isAnyNeutrons=false;  
-    // to store shortest and longest recorded TOF
+    // to store shortest and longest recorded TOF   
     double shortestTOF(0.0); 
     double longestTOF(0.0);
 
@@ -319,9 +318,6 @@ namespace DataHandling
       std::vector<double> data;
       nxFile.openData("events");
       progEntries.report("read event data from nexus");
-      nxFile.getData(data);
-      nxFile.closeData();
-      nxFile.closeGroup();
 
       // Need to take into account that the nexus readData method reads a multi-column data entry
       // into a vector  
@@ -334,42 +330,95 @@ namespace DataHandling
       // column  4 : id 	pixel id
       // column  5 : t 	time
 
-      size_t numberOfDataColumn = 6;
-      // The number of neutrons 
-      size_t nNeutrons = data.size() / numberOfDataColumn;
+      // get info about event data
+      ::NeXus::Info id_info = nxFile.getInfo();
+      if ( id_info.dims.size() != 2 )
+      {
+        g_log.error() << "Event data in McStas nexus file not loaded. Expected event data block to be two dimensional" << std::endl;
+        return;
+      }
+      int64_t nNeutrons = id_info.dims[0];
+      int64_t numberOfDataColumn = id_info.dims[1];
+      if ( nNeutrons && numberOfDataColumn != 6 )
+      {
+        g_log.error() << "Event data in McStas nexus file expecting 6 columns" << std::endl;
+        return;
+      }
       if (isAnyNeutrons==false && nNeutrons>0) isAnyNeutrons=true;
 
-      // populate workspace with McStas events          
-      const detid2index_map detIDtoWSindex_map =	eventWS->getDetectorIDToWorkspaceIndexMap(true);			
+      std::vector<int64_t> start(2);
+      std::vector<int64_t> step(2);
 
-      progEntries.report("read event data into workspace");
-      for (size_t in = 0; in < nNeutrons; in++)
-      {   
-        const int detectorID = static_cast<int>(data[4+numberOfDataColumn*in]);
-        const double detector_time =  data[5+numberOfDataColumn*in] * 1.0e6;  // convert to microseconds
-        if ( in == 0 )
+      // read the event data in blocks. 1 million event is 1000000*6*8 doubles about 50Mb
+      int64_t nNeutronsInBlock = 1000000;
+      int64_t nOfFullBlocks = nNeutrons / nNeutronsInBlock;
+      int64_t nRemainingNeutrons = nNeutrons - nOfFullBlocks * nNeutronsInBlock;
+      // sum over number of blocks + 1 to cover the remainder
+      for (int64_t iBlock = 0; iBlock < nOfFullBlocks+1; iBlock++)
+      {
+        if ( iBlock == nOfFullBlocks )
         {
-          shortestTOF = detector_time;
-          longestTOF = detector_time;
+          // read remaining neutrons
+          start[0] = nOfFullBlocks * nNeutronsInBlock; 
+          start[1] = 0;        
+          step[0] = nRemainingNeutrons; 
+          step[1] = numberOfDataColumn;
         }
         else
         {
-          if ( detector_time < shortestTOF )	shortestTOF = detector_time;
-          if ( detector_time > longestTOF )		longestTOF = detector_time;
+          // read neutrons in a full block
+          start[0] = iBlock * nNeutronsInBlock; 
+          start[1] = 0;        
+          step[0] = nNeutronsInBlock; 
+          step[1] = numberOfDataColumn;
         }
+        const int64_t nNeutronsForthisBlock = step[0]; // number of neutrons read for this block
+        data.resize(nNeutronsForthisBlock * numberOfDataColumn);
 
-        // This one does not compile on Mac
-        //size_t workspaceIndex = (*detIDtoWSindex_map)[detectorID]; 
-        const size_t workspaceIndex = detIDtoWSindex_map.find(detectorID)->second;	
- 
+        //Check that the type is what it is supposed to be
+        if (id_info.type == ::NeXus::FLOAT64)
+        {
+          nxFile.getSlab(&data[0], start, step);     
+        }
+        else
+        {
+          g_log.warning() << "Entry event field is not FLOAT64! It will be skipped.\n";
+          continue;
+        }      
 
-        int64_t pulse_time = 0;
-        //eventWS->getEventList(workspaceIndex) += TofEvent(detector_time,pulse_time);
-        //eventWS->getEventList(workspaceIndex) += TofEvent(detector_time);
-        eventWS->getEventList(workspaceIndex) += WeightedEvent(detector_time, pulse_time, data[numberOfDataColumn*in], 1.0);
-      }		      
-    }
+        // populate workspace with McStas events          
+        const detid2index_map detIDtoWSindex_map =	eventWS->getDetectorIDToWorkspaceIndexMap(true);			
 
+        progEntries.report("read event data into workspace");
+        for (size_t in = 0; in < nNeutronsForthisBlock; in++)
+        {   
+          const int detectorID = static_cast<int>(data[4+numberOfDataColumn*in]);
+          const double detector_time =  data[5+numberOfDataColumn*in] * 1.0e6;  // convert to microseconds
+          if ( in == 0 && iBlock == 0)
+          {
+            shortestTOF = detector_time;
+            longestTOF = detector_time;
+          }
+          else
+          {
+            if ( detector_time < shortestTOF )	shortestTOF = detector_time;
+            if ( detector_time > longestTOF )		longestTOF = detector_time;
+          }
+
+          const size_t workspaceIndex = detIDtoWSindex_map.find(detectorID)->second;	 
+
+          int64_t pulse_time = 0;
+          //eventWS->getEventList(workspaceIndex) += TofEvent(detector_time,pulse_time);
+          //eventWS->getEventList(workspaceIndex) += TofEvent(detector_time);
+          eventWS->getEventList(workspaceIndex) += WeightedEvent(detector_time, pulse_time, data[numberOfDataColumn*in], 1.0);
+        }		      
+      } // end reading over number of blocks of an event dataset
+
+      //nxFile.getData(data);
+      nxFile.closeData();
+      nxFile.closeGroup();
+
+    } // end reading over number of event datasets
 
     // Create a default TOF-vector for histogramming, for now just 2 bins
     // 2 bins is the standard. However for McStas simulation data it may make sense to 
