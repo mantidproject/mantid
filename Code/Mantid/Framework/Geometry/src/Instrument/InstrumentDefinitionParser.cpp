@@ -8,6 +8,7 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/UnitFactory.h"
 #include <fstream>
@@ -34,9 +35,11 @@ namespace Mantid
 {
 namespace Geometry
 {
-  // Initialize the logger
-  Kernel::Logger& InstrumentDefinitionParser::g_log = Kernel::Logger::get("InstrumentDefinitionParser");
-
+  namespace
+  {
+    // initialize the static logger
+    Kernel::Logger g_log("InstrumentDefinitionParser");
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Constructor

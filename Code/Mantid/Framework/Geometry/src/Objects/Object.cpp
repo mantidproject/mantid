@@ -1,5 +1,4 @@
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -29,8 +28,6 @@ namespace Mantid
 
     using Kernel::V3D;
     using Kernel::Quat;
-
-    Kernel::Logger& Object::PLog(Kernel::Logger::get("Object"));
 
     /**
     *  Default constuctor
@@ -304,7 +301,6 @@ namespace Mantid
             }
             else
             {
-              PLog.error("Error finding key");
               throw Kernel::Exception::NotFoundError("Object::populate", KV->getKeyN());
             }
           }

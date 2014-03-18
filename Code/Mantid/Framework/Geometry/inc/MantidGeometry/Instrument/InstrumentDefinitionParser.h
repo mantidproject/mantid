@@ -6,7 +6,6 @@
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Document.h>
 #include "MantidKernel/System.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/IDFObject.h"
@@ -96,8 +95,6 @@ namespace Geometry
     CachingOption getAppliedCachingOption() const;
 
   private:
-    /// Static reference to the logger class
-    static Kernel::Logger& g_log;
 
     /// Set location (position) of comp as specified in XML location element
     void setLocation(Geometry::IComponent* comp, const Poco::XML::Element* pElem, const double angleConvertConst,
