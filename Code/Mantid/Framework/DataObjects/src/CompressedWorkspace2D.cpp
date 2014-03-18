@@ -16,9 +16,6 @@ using std::size_t;
 
 DECLARE_WORKSPACE(CompressedWorkspace2D)
 
-// Get a reference to the logger
-Kernel::Logger& CompressedWorkspace2D::g_log = Kernel::Logger::get("CompressedWorkspace2D");
-
 /// Constructor
 CompressedWorkspace2D::CompressedWorkspace2D() :
 AbsManagedWorkspace2D()
@@ -33,8 +30,6 @@ AbsManagedWorkspace2D()
 */
 void CompressedWorkspace2D::init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength)
 {
-  g_log.information("Creating a CompressedWorkspace2D");
-
   AbsManagedWorkspace2D::init(NVectors,XLength,YLength);
   m_vectorSize = ( m_XLength + ( 2*m_YLength ) ) * sizeof(double);
 
@@ -175,8 +170,9 @@ void CompressedWorkspace2D::uncompressBlock(ManagedDataBlock2D* block,std::size_
 
   if (nBuff != m_vectorSize * m_vectorsPerBlock)
   {
-    g_log.error()<<"Unequal sizes: " <<nBuff<<" != "<<m_vectorSize * m_vectorsPerBlock<<'\n';
-    throw std::runtime_error("");
+    std::stringstream os;
+    os << "Unequal sizes: " << nBuff << " != " << m_vectorSize * m_vectorsPerBlock << '\n';
+    throw std::runtime_error(os.str());
   }
 
   double* out = reinterpret_cast<double*>(&m_outBuffer[0]);

@@ -91,9 +91,6 @@ namespace DataObjects
 
     /// Keeps all compressed data
     mutable CompressedMap m_compressedData;
-
-    /// Static reference to the logger class
-    static Kernel::Logger &g_log;
   };
 
 

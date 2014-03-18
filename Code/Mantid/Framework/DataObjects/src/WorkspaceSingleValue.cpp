@@ -11,9 +11,6 @@ namespace Mantid
 
     DECLARE_WORKSPACE(WorkspaceSingleValue)
 
-    // Get a reference to the logger
-    Kernel::Logger& WorkspaceSingleValue::g_log = Kernel::Logger::get("WorkspaceSingleValue");
-
     /// Constructor
     WorkspaceSingleValue::WorkspaceSingleValue(double value,double error) :
         API::MatrixWorkspace()
