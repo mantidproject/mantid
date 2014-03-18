@@ -8,7 +8,6 @@ This algorithm connects the logged in user to the information catalog.
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/AlgorithmProperty.h"
-
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
