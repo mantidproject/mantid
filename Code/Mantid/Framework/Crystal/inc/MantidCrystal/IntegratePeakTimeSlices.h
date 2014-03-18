@@ -452,8 +452,6 @@ private:
 
 
   bool    debug;
-  static Kernel::Logger& g_log;
-
 };
 } // namespace Crystal
 } // namespace Mantid
