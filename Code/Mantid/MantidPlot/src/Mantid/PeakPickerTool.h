@@ -36,10 +36,6 @@ class PropertyHandler;
 
 namespace Mantid
 {
-  namespace Kernel
-  {
-    class Logger;
-  }
   namespace API
   {
     class IFunction;
@@ -215,8 +211,6 @@ private:
 
   QStringList m_curveNames; // Names of all curves added to graph()
 
-  /// Logger object
-  static Mantid::Kernel::Logger & g_log;
 };
 
 
