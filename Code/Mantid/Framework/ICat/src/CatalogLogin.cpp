@@ -5,12 +5,15 @@ This algorithm connects the logged in user to the information catalog.
 *WIKI*/
 
 #include "MantidICat/CatalogLogin.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MaskedProperty.h"
+
+#include <Poco/ActiveResult.h>
 
 namespace Mantid
 {
@@ -35,6 +38,7 @@ namespace Mantid
       declareProperty("FacilityName",Mantid::Kernel::ConfigService::Instance().getFacility().name(),
     		  boost::make_shared<Kernel::StringListValidator>(Kernel::ConfigService::Instance().getFacilityNames()),
     		  "Select a facility to log in to.");
+      declareProperty("KeepAlive",true,"Keeps the session of the catalog alive if login was successful.");
     }
 
     /// execute the algorithm
@@ -44,10 +48,21 @@ namespace Mantid
       if (catalogInfo.soapEndPoint().empty()) throw std::runtime_error("There is no soap end-point for the facility you have selected.");
       g_log.notice() << "Attempting to verify user credentials against " << catalogInfo.catalogName() << std::endl;
       progress(0.5, "Verifying user credentials...");
+
       // Creates a new catalog and related session if the authentication is a success.
       // This allows us to easily manage sessions alongside catalogs in the catalogmanager.
-      API::CatalogManager::Instance().login(getProperty("Username"), getProperty("Password"),
+      auto session = API::CatalogManager::Instance().login(getProperty("Username"), getProperty("Password"),
           catalogInfo.soapEndPoint(),getProperty("FacilityName"));
+
+      progress(0, "Keeping current sessions alive.");
+
+      if(getProperty("KeepAlive") && session)
+      {
+        auto keepAliveAlgorithm = API::AlgorithmManager::Instance().create("CatalogKeepAlive");
+        keepAliveAlgorithm->initialize();
+        keepAliveAlgorithm->setPropertyValue("Session", session->getSessionId());
+        keepAliveAlgorithm->executeAsync();
+      }
     }
 
   }
