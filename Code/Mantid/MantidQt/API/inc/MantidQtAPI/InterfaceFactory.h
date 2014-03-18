@@ -7,10 +7,10 @@
 #include "DllOption.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/Logger.h"
 #include <QHash>
 #include <QStringList>
 #include <QSetIterator>
+#include <set>
 
 namespace MantidQt
 {
@@ -164,7 +164,6 @@ private:
   QHash<QString, QList<std::string> > m_badAliases; 
   /// A map of interfaces to their categories.
   QHash<QString, QSet<QString>> m_categoryLookup;
-  Mantid::Kernel::Logger & g_log;
 };
 
 /**
