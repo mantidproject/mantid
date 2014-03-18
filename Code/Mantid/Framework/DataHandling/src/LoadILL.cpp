@@ -163,6 +163,11 @@ namespace Mantid
     }
 
 
+    /**
+     * Get the elastic peak position (EPP) from a Vanadium Workspace
+     * or filename.
+     * Returns the EPP
+     */
 	int LoadILL::getEPPFromVanadium(const std::string &filenameVanadium,
 		MatrixWorkspace_sptr vanaWS) {
 		int calculatedDetectorElasticPeakPosition = -1;
@@ -195,7 +200,7 @@ namespace Mantid
 
 
     /**
-    *
+    * Set the instrument name along with its path on the nexus file
     */
 	void LoadILL::loadInstrumentDetails(NeXus::NXEntry& firstEntry) {
 
