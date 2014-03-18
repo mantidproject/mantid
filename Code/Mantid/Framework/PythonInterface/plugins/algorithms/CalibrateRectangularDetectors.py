@@ -118,7 +118,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             @param runnumer: run number (integer)
             @param extension: file extension 
         """
-        Logger.get("CalibrateRectangularDetector").warning("Loading PreNexus for run %s" % runnumber)
+        Logger("CalibrateRectangularDetector").warning("Loading PreNexus for run %s" % runnumber)
         mykwargs = {}
         if kwargs.has_key("FilterByTimeStart"):
             mykwargs["ChunkNumber"] = int(kwargs["FilterByTimeStart"])
@@ -161,7 +161,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             @param runnumber: run number (integer)
             @param extension: file extension
         """
-        Logger.get("CalibrateRectangularDetector").warning("Loading histogram Nexus for run %s" % runnumber)
+        Logger("CalibrateRectangularDetector").warning("Loading histogram Nexus for run %s" % runnumber)
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
         return LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
@@ -234,7 +234,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             if y_s[midBin] > ymax:
                     refpixel = s
                     ymax = y_s[midBin]
-        Logger.get("CalibrateRectangularDetectors").information("Reference spectra=%s" % refpixel)
+        Logger("CalibrateRectangularDetectors").information("Reference spectra=%s" % refpixel)
         # Remove old calibration files
         cmd = "rm "+calib
         os.system(cmd)
@@ -266,7 +266,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                         refpixel = s
                         ymax = y_s[midBin]
             msg = "Reference spectra = %s, lastpixel_3 = %s" % (refpixel, self._lastpixel3)
-            Logger.get("CalibrateRectangularDetectors").information(msg)
+            Logger("CalibrateRectangularDetectors").information(msg)
             self._lastpixel2 = wksp.getNumberHistograms()*self._lastpixel2/self._lastpixel3-1
             CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc2", 
                            ReferenceSpectra=refpixel, WorkspaceIndexMin=self._lastpixel+1, 
@@ -296,7 +296,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 if y_s[midBin] > ymax:
                         refpixel = s
                         ymax = y_s[midBin]
-            Logger.get("CalibrateRectangularDetectors").information("Reference spectra=%s" % refpixel)
+            Logger("CalibrateRectangularDetectors").information("Reference spectra=%s" % refpixel)
             CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc3", 
                            ReferenceSpectra=refpixel,
                            WorkspaceIndexMin=self._lastpixel2+1, 

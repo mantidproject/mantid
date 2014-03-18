@@ -10,7 +10,7 @@ void export_Logger()
   // To distinguish between the overloaded functions
   typedef void (Logger::*LogLevelFunction)(const std::string &);
 
-  class_<Logger,boost::noncopyable>("Logger", no_init)
+  class_<Logger,boost::noncopyable>("Logger", init<std::string>(arg("name")))
     .def("fatal", (LogLevelFunction)&Logger::fatal, "Send a message at fatal priority: "
         "An unrecoverable error has occured and the application will terminate")
     .def("error", (LogLevelFunction)&Logger::error, "Send a message at error priority: "
@@ -24,11 +24,6 @@ void export_Logger()
         "Useful but not vital information to be relayed back to the user.")
     .def("debug", (LogLevelFunction)&Logger::debug, "Send a message at debug priority:"
         ". Anything that may be useful to understand what the code has been doing for debugging purposes.")
-    //--------------- Loggers are created by a static factory function on the class -------------------------
-    .def("get", &Logger::get, return_value_policy<reference_existing_object>(), "Creates the named logger. "
-        "This method is static, call as Logger.get('logger_name'). The name is used as a prefix within the "
-        "log file so that msg origins can be traced more easily.")
-    .staticmethod("get")
      ;
 
 
