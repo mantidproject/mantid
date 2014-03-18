@@ -77,9 +77,6 @@ public:
 
 protected:
 
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
-
   /// Making a friend
   friend class CurveFitting::Fit;
 

@@ -340,9 +340,6 @@ namespace Mantid
       /// Shared pointer to NearestNeighbours object
       mutable boost::shared_ptr<Mantid::Geometry::INearestNeighbours> m_nearestNeighbours;
 
-      /// Static reference to the logger class
-      static Kernel::Logger& g_log;
-
       /// Getter for the dimension id based on the axis.
       std::string getDimensionIdFromAxis(const int& axisIndex) const;
 

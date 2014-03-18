@@ -35,10 +35,14 @@ namespace Mantid
 {
 namespace API
 {
-  
   using namespace Geometry;
 
-  Kernel::Logger& IFunction::g_log = Kernel::Logger::get("IFunction");
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("IFunction");
+  }
+
 
 /**
  * Destructor

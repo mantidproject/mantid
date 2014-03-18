@@ -32,11 +32,13 @@ To define a composite function inside a composite function enclose the inner one
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
+
 
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
@@ -48,6 +50,12 @@ namespace Mantid
 {
 namespace API
 {
+
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("CompositeFunction");
+  }
 
 using std::size_t;
 

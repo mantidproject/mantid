@@ -134,7 +134,7 @@ namespace Mantid
       size_t m_totalSize;
 
       /// Reference to a logger
-      Kernel::Logger & m_log;
+      mutable Kernel::Logger m_log;
     };
 
     ///Forward declaration of a specialisation of SingletonHolder for FileLoaderRegistryImpl (needed for dllexport/dllimport) and a typedef for it.
