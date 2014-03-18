@@ -41,7 +41,11 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-  Logger& NexusFileIO::g_log = Logger::get("NexusFileIO");
+  namespace
+  {
+    /// static logger
+    Logger g_log("NexusFileIO");
+  }
 
   /// Empty default constructor
   NexusFileIO::NexusFileIO() :
