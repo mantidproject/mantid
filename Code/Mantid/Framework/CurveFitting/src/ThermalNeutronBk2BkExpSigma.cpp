@@ -76,7 +76,6 @@ namespace CurveFitting
     double sigma2 = sig0sq + sig1sq*dh*dh + sig2sq*pow(dh, 4);
     if (sigma2 <= 0.0)
     {
-      g_log.error() << "Sigma^2 cannot be equal to or less than Zero!" << endl;
       throw runtime_error("Sigma^2 cannot be equal to or less than Zero!");
     }
 

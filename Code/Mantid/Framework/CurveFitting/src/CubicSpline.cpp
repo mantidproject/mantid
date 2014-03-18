@@ -14,6 +14,7 @@ The parameter names have the form 'yi' where 'y' is letter 'y' and 'i' is the pa
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/CubicSpline.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/Logger.h"
 
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
@@ -25,6 +26,12 @@ namespace Mantid
 {
   namespace CurveFitting
   {
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("CubicSpline");
+    }
+
     using namespace Kernel;
     using namespace API;
 

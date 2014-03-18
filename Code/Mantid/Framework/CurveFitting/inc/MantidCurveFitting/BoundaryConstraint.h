@@ -138,9 +138,6 @@ namespace Mantid
       double m_lowerBound;
       /// the upper bound
       double m_upperBound;
-
-      /// Static reference to the logger class
-      static Kernel::Logger& g_log;
     };
 
   } // namespace CurveFitting
