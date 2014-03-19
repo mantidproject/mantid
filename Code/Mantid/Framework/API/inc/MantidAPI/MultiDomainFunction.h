@@ -63,6 +63,8 @@ public:
   void clearDomainIndices();
   /// Get the largest domain index
   size_t getMaxIndex() const {return m_maxIndex;}
+  /// Get domain indices for a member function
+  void getDomainIndices(size_t i, size_t nDomains, std::vector<size_t>& domains)const;
 
   /// Returns the number of attributes associated with the function
   virtual size_t nLocalAttributes()const {return 1;}
@@ -80,7 +82,6 @@ protected:
   /// Counts number of the domains
   void countNumberOfDomains();
   void countValueOffsets(const CompositeDomain& domain)const;
-  void getFunctionDomains(size_t i, const CompositeDomain& cd, std::vector<size_t>& domains)const;
 
   /// Domain index map: finction -> domain
   std::map<size_t, std::vector<size_t> > m_domains;

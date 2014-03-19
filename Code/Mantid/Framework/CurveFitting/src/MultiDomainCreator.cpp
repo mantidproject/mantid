@@ -3,11 +3,21 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidAPI/JointDomain.h"
+#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidKernel/Logger.h"
+
+#include <sstream>
+#include <stdexcept>
 
 namespace Mantid
 {
 namespace CurveFitting
 {
+
+  namespace
+  {
+    Kernel::Logger& g_log = Kernel::Logger::get("MultiDomainCreator");
+  }
 
   void MultiDomainCreator::setCreator(size_t i, IDomainCreator* creator)
   {
@@ -50,6 +60,50 @@ namespace CurveFitting
     domain.reset(jointDomain);
     ivalues = values;
   }
+
+  /**
+   * Initialize the function with the workspace(s).
+   * @param function :: A function to initialize.
+   */
+  void MultiDomainCreator::initFunction(API::IFunction_sptr function)
+  {
+    auto mdFunction = boost::dynamic_pointer_cast<API::MultiDomainFunction>(function);
+    if ( mdFunction )
+    {
+      // loop over member functions and init them
+      for(size_t iFun = 0; iFun < mdFunction->nFunctions(); ++iFun)
+      {
+        std::vector<size_t> domainIndices;
+        // get domain indices for this function
+        mdFunction->getDomainIndices(iFun,m_creators.size(),domainIndices);
+        if ( !domainIndices.empty() )
+        {
+          if ( domainIndices.size() == 1 )
+          {
+            g_log.warning() << "Function #" << iFun << " applies to multiple domains." << std::endl;
+            g_log.warning() << "Only one of the domains is used to set workspace." << std::endl;
+          }
+          size_t index = domainIndices[0];
+          if ( index >= m_creators.size() )
+          {
+            std::stringstream msg;
+            msg << "Domain index is out of range. (Function #" << iFun << ")";
+            throw std::runtime_error(msg.str());
+          }
+          m_creators[index]->initFunction( mdFunction->getFunction(iFun) );
+        }
+        else
+        {
+          g_log.warning() << "Function #" << iFun << " doesn't apply to any domain" << std::endl;
+        }
+      }
+    }
+    else
+    {
+      IDomainCreator::initFunction(function);
+    }
+  }
+
 
 
 } // namespace Algorithm

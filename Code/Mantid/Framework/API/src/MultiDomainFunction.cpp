@@ -80,13 +80,16 @@ namespace API
 
   /**
    * Populates a vector with domain indices assigned to function i.
+   * @param i :: Index of a function to get the domain info about.
+   * @param nDomains :: Maximum number of domains.
+   * @param domains :: (Output) vector to collect domain indixes.
    */
-  void MultiDomainFunction::getFunctionDomains(size_t i, const CompositeDomain& cd, std::vector<size_t>& domains)const
+  void MultiDomainFunction::getDomainIndices(size_t i, size_t nDomains, std::vector<size_t>& domains)const
   {
       auto it = m_domains.find(i);
       if (it == m_domains.end())
       {// apply to all domains
-        domains.resize(cd.getNParts());
+        domains.resize(nDomains);
         for(size_t i = 0; i < domains.size(); ++i)
         {
           domains[i] = i;
@@ -128,7 +131,7 @@ namespace API
     {
       // find the domains member function must be applied to
       std::vector<size_t> domains;
-      getFunctionDomains(iFun, cd, domains);
+      getDomainIndices(iFun, cd.getNParts(), domains);
 
       for(auto i = domains.begin(); i != domains.end(); ++i)
       {
@@ -163,7 +166,7 @@ namespace API
     {
       // find the domains member function must be applied to
       std::vector<size_t> domains;
-      getFunctionDomains(iFun, cd, domains);
+      getDomainIndices(iFun, cd.getNParts(), domains);
 
       for(auto i = domains.begin(); i != domains.end(); ++i)
       {

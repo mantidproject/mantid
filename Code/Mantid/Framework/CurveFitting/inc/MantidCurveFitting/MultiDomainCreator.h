@@ -61,6 +61,8 @@ namespace Mantid
       bool hasCreator(size_t i) const;
       /// Get number of creators
       size_t getNCreators() const {return m_creators.size();}
+      /// Initialize the function
+      void initFunction(API::IFunction_sptr function);
 
     protected:
       /// Vector of creators.
