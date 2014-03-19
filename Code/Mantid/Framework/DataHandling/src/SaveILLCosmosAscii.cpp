@@ -92,10 +92,10 @@ namespace Mantid
       }
 
       file << "Number of file format: 2" << std::endl;
-      file << "Number of data points:" << m_sep << m_xlength << std::endl;
+      file << "Number of data points:" << sep() << m_xlength << std::endl;
       file << std::endl;
 
-      file << m_sep << "q" << m_sep << "refl" << m_sep << "refl_err" << m_sep << "q_res" << std::endl;
+      file << sep() << "q" << sep() << "refl" << sep() << "refl_err" << sep() << "q_res" << std::endl;
     }
   } // namespace DataHandling
 } // namespace Mantid

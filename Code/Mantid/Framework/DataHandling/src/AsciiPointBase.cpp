@@ -30,7 +30,6 @@ namespace Mantid
       std::vector<std::string> exts;
       exts.push_back(ext());
       declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts), "The filename of the output file.");
-      m_sep = sep();
       extraProps();
     }
 
@@ -94,47 +93,21 @@ namespace Mantid
       bool infcheck = checkIfInfinite(val);
       if (leadingSep)
       {
-        if (!nancheck && !infcheck)
-        {
-          file << m_sep << val;
-        }
-        else if (nancheck)
-        {
-          //not a number - output nan
-          file << m_sep << "nan";
-        }
-        else if (infcheck)
-        {
-          //infinite - output 'inf'
-          file << m_sep << "inf";
-        }
-        else
-        {
-          //not valid, nan or inf - so output 'und'
-          file << m_sep << "und";
-        }
+        file << sep();
+      }
+      if (!nancheck && !infcheck)
+      {
+        file << val;
+      }
+      else if (infcheck)
+      {
+        //infinite - output 'inf'
+        file << "inf";
       }
       else
       {
-        if (!nancheck && !infcheck)
-        {
-          file << val;
-        }
-        else if (nancheck)
-        {
-          //not a number - output nan
-          file << "nan";
-        }
-        else if (infcheck)
-        {
-          //infinite - output 'inf'
-          file << "inf";
-        }
-        else
-        {
-          //not valid, nan or inf - so output 'und'
-          file << "und";
-        }
+        //not a number - output nan
+        file << "nan";
       }
     }
 

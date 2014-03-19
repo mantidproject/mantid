@@ -36,8 +36,6 @@ namespace Mantid
       virtual void initDocs() = 0;
       /// Return the file extension this algorthm should output.
       virtual std::string ext() = 0;
-      /// Return the separator character
-      virtual char sep() {return '\t';}
       /// return if the line should start with a separator
       virtual bool leadingSep() {return true;}
       /// Add extra properties
@@ -61,7 +59,8 @@ namespace Mantid
       ///static reference to the logger class
       static Kernel::Logger& g_log;
     protected:
-      char m_sep;
+      /// Return the separator character
+      virtual char sep() {return '\t';}
       double m_qres;
       size_t m_xlength;
       API::MatrixWorkspace_const_sptr m_ws;
