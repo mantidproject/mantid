@@ -177,7 +177,43 @@ public:
 
     cleanupafterwards();
   }
+  void testParameters()
+  {
+    //create a new workspace and then delete it later on
+    createWS(false,false,false,true);
 
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveILLCosmosAscii");
+    alg->setPropertyValue("InputWorkspace", m_name);
+    alg->setPropertyValue("Filename", m_filename);
+    alg->setPropertyValue("UserContact", "John Smith");
+    alg->setPropertyValue("Title", "Testing this algorithm");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    if ( ! alg->isExecuted() )
+    {
+      TS_FAIL("Could not run SaveILLCosmosAscii");
+    }
+    m_long_filename= alg->getPropertyValue("Filename");
+    // has the algorithm written a file to disk?
+    TS_ASSERT( Poco::File(m_long_filename).exists() );
+    std::ifstream in(m_long_filename.c_str());
+    std::string fullline;
+    headingsTests(in, fullline,true);
+    getline(in,fullline);
+
+    std::vector<std::string> columns;
+    boost::split(columns, fullline, boost::is_any_of("\t"), boost::token_compress_on);
+    TS_ASSERT_EQUALS(columns.size(),5);
+    //the first is black due to the leading tab
+    TS_ASSERT(columns.at(0) == "");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1.5, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 1, 0.01);
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(4)), 0.6, 0.01);
+    in.close();
+
+    cleanupafterwards();
+  }
   void test_fail_invalid_workspace()
   {
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveILLCosmosAscii");
@@ -192,22 +228,37 @@ public:
     TS_ASSERT( !Poco::File(m_long_filename).exists() );
   }
 private:
-  void headingsTests(std::ifstream & in,std::string & fullline)
+  void headingsTests(std::ifstream & in,std::string & fullline, bool propertiesLogs = false)
   {
     getline(in,fullline);
     TS_ASSERT(fullline == "MFT");
     getline(in,fullline);
     TS_ASSERT(fullline == "Instrument: ");
     getline(in,fullline);
-    TS_ASSERT(fullline == "User-local contact: ");
-    getline(in,fullline);
-    TS_ASSERT(fullline == "Title: ");
-    getline(in,fullline);
-    TS_ASSERT(fullline == "Subtitle: ");
-    getline(in,fullline);
-    TS_ASSERT(fullline == "Start date + time: ");
-    getline(in,fullline);
-    TS_ASSERT(fullline == "End date + time: ");
+    if (propertiesLogs)
+    {
+      TS_ASSERT(fullline == "User-local contact: John Smith");
+      getline(in,fullline);
+      TS_ASSERT(fullline == "Title: Testing this algorithm");
+      getline(in,fullline);
+      TS_ASSERT(fullline == "Subtitle: ILL COSMOS save test");
+      getline(in,fullline);
+      TS_ASSERT(fullline == "Start date + time: 2011-12-16T01:27:30");
+      getline(in,fullline);
+      TS_ASSERT(fullline == "End date + time: 2011-12-16T02:13:31");
+    }
+    else
+    {
+      TS_ASSERT(fullline == "User-local contact: ");
+      getline(in,fullline);
+      TS_ASSERT(fullline == "Title: ");
+      getline(in,fullline);
+      TS_ASSERT(fullline == "Subtitle: ");
+      getline(in,fullline);
+      TS_ASSERT(fullline == "Start date + time: ");
+      getline(in,fullline);
+      TS_ASSERT(fullline == "End date + time: ");
+    }
     getline(in,fullline);
     TS_ASSERT(fullline == "Number of file format: 2");
     getline(in,fullline);
@@ -216,9 +267,17 @@ private:
     getline(in,fullline);
     TS_ASSERT(fullline == "\tq\trefl\trefl_err\tq_res");
   }
-  void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false)
+  void createWS(bool zeroX = false, bool zeroY = false, bool zeroE = false, bool createLogs = false)
   {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(1,10);
+
+    if (createLogs)
+    {
+      ws->mutableRun().addProperty("run_title",std::string("ILL COSMOS save test"));
+      ws->mutableRun().addProperty("run_start",std::string("2011-12-16T01:27:30"));
+      ws->mutableRun().addProperty("run_end",std::string("2011-12-16T02:13:31"));
+    }
+
     AnalysisDataService::Instance().addOrReplace(m_name, ws);
     //Check if any of X, Y or E should be zeroed to check for divide by zero or similiar
     if (zeroX)
