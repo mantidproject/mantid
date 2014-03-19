@@ -188,11 +188,7 @@ namespace Geometry
     UB_tran.Invert();
     adjusted_UB = UB * UB_tran;    
 
-    if ( cell_type == ReducedCell::ORTHORHOMBIC() )
-    {
-      //SetSidesIncreasing( adjusted_UB );
-    }
-    else if ( cell_type == ReducedCell::TETRAGONAL()  )
+    if ( cell_type == ReducedCell::TETRAGONAL()  )
     {
       StandardizeTetragonal( adjusted_UB );
     }

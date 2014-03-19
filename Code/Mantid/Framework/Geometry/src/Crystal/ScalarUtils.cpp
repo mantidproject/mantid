@@ -138,13 +138,11 @@ std::vector<ConventionalCell> ScalarUtils::GetCells(
                                                const std::string & cell_type,
                                                const std::string & centering )
 {
-  double angle_tolerance = 2.0;
-  double length_factor   = 1.05;
 
   std::vector<ConventionalCell> result;
-
-  std::vector<DblMatrix> UB_list = 
-                           GetRelatedUBs( UB, length_factor, angle_tolerance );
+  // Get exact form requested and not permutations
+  std::vector<DblMatrix>  UB_list;
+  UB_list.push_back(UB);
 
   for ( size_t k = 0; k < UB_list.size(); k++ )
   {
@@ -224,16 +222,14 @@ ConventionalCell ScalarUtils::GetCellForForm( const DblMatrix   & UB,
                                                     size_t        form_num )
 {
   ConventionalCell info( UB );
-  double           angle_tolerance = 2.0;
-  double           length_factor   = 1.05;
   ReducedCell      form_0;
   ReducedCell      form;
 
   double min_error = 1e20;   // errors are usually < 10, so this is big enough
-
+  // Get exact form requested and not permutations
   std::vector<double>     l_params;
-  std::vector<DblMatrix>  UB_list = 
-                           GetRelatedUBs( UB, angle_tolerance, length_factor );
+  std::vector<DblMatrix>  UB_list;
+  UB_list.push_back(UB);
 
   for ( size_t i = 0; i < UB_list.size(); i++ )
   {
