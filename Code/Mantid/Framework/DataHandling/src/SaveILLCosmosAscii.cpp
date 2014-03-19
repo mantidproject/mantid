@@ -41,40 +41,43 @@ namespace Mantid
     {
       auto samp = m_ws->run();
       std::string instrument;
-      std::string user;
-      std::string title;
+      std::string user = getProperty("UserContact");
+      std::string title = getProperty("Title");
       std::string subtitle;
       std::string startDT;
       std::string endDT;
-      try
-      {instrument = m_ws->getInstrument()->getName();}
-      catch (...)
-      {instrument = "";}
+      auto tempInst = m_ws->getInstrument();
+      if (tempInst)
+      {
+        instrument = tempInst->getName();
+      }
 
       try
-      {user = getProperty("UserContact");}
-      catch (...)
-      {user = "";}
+      {
+        subtitle = samp.getLogData("run_title")->value();
+      }
+      catch (Kernel::Exception::NotFoundError &)
+      {
+        subtitle = "";
+      }
 
       try
-      {title = getProperty("Title");}
-      catch (...)
-      {title = "";}
+      {
+        startDT = samp.getLogData("run_start")->value();
+      }
+      catch (Kernel::Exception::NotFoundError &)
+      {
+        startDT = "";
+      }
 
       try
-      {subtitle = samp.getLogData("run_title")->value();}
-      catch (...)
-      {subtitle = "";}
-
-      try
-      {startDT = samp.getLogData("run_start")->value();}
-      catch (...)
-      {startDT = "";}
-
-      try
-      {endDT = samp.getLogData("run_end")->value();}
-      catch (...)
-      {endDT = "";}
+      {
+        endDT = samp.getLogData("run_end")->value();
+      }
+      catch (Kernel::Exception::NotFoundError &)
+      {
+        endDT = "";
+      }
 
       file << "MFT" << std::endl;
       file << "Instrument: "<< instrument << std::endl;
