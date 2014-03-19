@@ -3,14 +3,16 @@
 #for the time being this also includes non-GUI behaviour
 import refl_window
 import refl_save
+import refl_choose_col
 import csv
+import string
+import os
 from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
 from isis_reflectometry import load_live_runs
 from isis_reflectometry.combineMulti import *
 from latest_isis_runs import *
-
 from mantid.api import Workspace, WorkspaceGroup
 
 try:
@@ -49,7 +51,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.populateList()
         self.current_instrument = self.instrument_list[instrument]
         self.comboPolarCorrect.setEnabled(self.current_instrument  in self.polarisation_instruments) # Enable as appropriate
-        self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None')) # Reset to None    
+        self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None')) # Reset to None
     def on_actionOpen_Table_triggered(self):
         self.loadTable()
     def on_actionReload_from_Disk_triggered(self):
@@ -72,6 +74,17 @@ class ReflGui(refl_window.Ui_windowRefl):
     def on_plotButton_clicked(self):
         plotbutton = self.windowRefl.sender()
         self.plot(plotbutton)
+    def actionCopy_triggered(self):
+        self.copy_cells()
+    def actionCut_triggered(self):
+        self.copy_cells()
+        self.clear_cells()
+    def actionPaste_triggered(self):
+        self.paste_cells()
+    def actionClear_triggered(self):
+        self.clear_cells()
+    def actionChoose_Columns_triggered(self):
+        self.chooseColumns()
     '''
     Event handler for polarisation correction selection.
     '''
@@ -83,8 +96,9 @@ class ReflGui(refl_window.Ui_windowRefl):
             logger.notice("Polarisation correction is not supported on " + str(self.current_instrument))
     def setupUi(self, windowRefl):
         super(ReflGui,self).setupUi(windowRefl)
+        self.shownCols = {}
         self.loading = False
-        
+        self.clip = QtGui.QApplication.clipboard()
         '''
         Setup instrument options with defaults assigned.
         '''
@@ -135,6 +149,8 @@ class ReflGui(refl_window.Ui_windowRefl):
                 return
         self.current_table = None
         self.accMethod = None
+        settings = QtCore.QSettings()
+        settings.beginGroup("Mantid/ISISReflGui/Columns")
         
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
@@ -180,6 +196,14 @@ class ReflGui(refl_window.Ui_windowRefl):
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
                     self.tableMain.setItem(row, column, item)
+            vis_state = settings.value(str(column), True, type=bool)
+            self.shownCols[column] = vis_state
+            if vis_state:
+                self.tableMain.showColumn(column)
+            else:
+                self.tableMain.hideColumn(column)
+        settings.endGroup()
+        del settings
         self.tableMain.resizeColumnsToContents()
         self.windowRefl.modFlag = False
     def connectSlots(self):
@@ -192,6 +216,7 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.buttonClear.clicked.connect(self.on_buttonClear_clicked)
         self.buttonProcess.clicked.connect(self.on_buttonProcess_clicked)
         self.buttonTransfer.clicked.connect(self.on_buttonTransfer_clicked)
+        self.buttonColumns.clicked.connect(self.actionChoose_Columns_triggered)
         self.actionOpen_Table.triggered.connect(self.on_actionOpen_Table_triggered)
         self.actionReload_from_Disk.triggered.connect(self.on_actionReload_from_Disk_triggered)
         self.actionSave.triggered.connect(self.on_actionSave_triggered)
@@ -204,6 +229,11 @@ class ReflGui(refl_window.Ui_windowRefl):
         self.actionClear_Table.triggered.connect(self.on_buttonClear_clicked)
         self.actionProcess.triggered.connect(self.on_buttonProcess_clicked)
         self.actionTransfer.triggered.connect(self.on_buttonTransfer_clicked)
+        self.actionClear.triggered.connect(self.actionClear_triggered)
+        self.actionPaste.triggered.connect(self.actionPaste_triggered)
+        self.actionCut.triggered.connect(self.actionCut_triggered)
+        self.actionCopy.triggered.connect(self.actionCopy_triggered)
+        self.actionChoose_Columns.triggered.connect(self.actionChoose_Columns_triggered)
         self.tableMain.cellChanged.connect(self.on_tableMain_modified)
     def populateList(self):
         # Clear existing
@@ -273,6 +303,103 @@ class ReflGui(refl_window.Ui_windowRefl):
         else:
             todisplay = groupGet(mtd[candidate], "samp", "run_number")
         return todisplay
+    def clear_cells(self):
+        cells = self.tableMain.selectedItems()
+        for cell in cells:
+            column = cell.column()
+            if column < 17:
+                cell.setText('')
+    def copy_cells(self):
+        cells = self.tableMain.selectedItems()
+        if not cells:
+            print 'nothing to copy'
+            return
+        #first discover the size of the selection and initialise a list
+        mincol = cells[0].column()
+        if mincol == 17 or mincol == 18:
+            return
+            logger.error("Cannot copy, all cells out of range")
+        maxrow = -1
+        maxcol = -1
+        minrow = cells[0].row()
+        for cell in reversed(range(len(cells))):
+            col = cells[cell].column()
+            if col < 17:
+                maxcol = col
+                maxrow = cells[cell].row()
+                break
+        colsize = maxcol - mincol + 1
+        rowsize = maxrow - minrow + 1
+        selection = [['' for x in range(colsize)] for y in range(rowsize)]
+        #now fill that list
+        for cell in cells:
+            row = cell.row()
+            col = cell.column()
+            if col < 17:
+                selection[row - minrow][col - mincol] = str(cell.text())
+        tocopy = ''
+        for y in range(rowsize):
+            for x in range(colsize):
+                if x > 0:
+                    tocopy += '\t'
+                tocopy += selection[y][x]
+            if y < (rowsize - 1):
+                tocopy += '\n'
+        self.copy_to_clipboard(tocopy)
+    def paste_cells(self):
+        pastedtext = self.clip.text()
+        if not pastedtext:
+            logger.warning("Nothing to Paste")
+            return
+        selected = self.tableMain.selectedItems()
+        if not selected:
+            logger.warning("Cannot paste, no editable cells selected")
+            return
+        pasted = pastedtext.splitlines()
+        pastedcells = []
+        for row in pasted:
+            pastedcells.append(row.split('\t'))
+        pastedcols = len(pastedcells[0])
+        pastedrows = len(pastedcells)
+        if len(selected) > 1:
+            #discover the size of the selection
+            mincol = selected[0].column()
+            if mincol > 16:
+                logger.error("Cannot copy, all cells out of range")
+                return
+            minrow = selected[0].row()
+            #now fill that list
+            for cell in selected:
+                row = cell.row()
+                col = cell.column()
+                if col < 17 and (col - mincol) < pastedcols and (row - minrow) < pastedrows and len(pastedcells[row - minrow]):
+                    cell.setText(pastedcells[row - minrow][col - mincol])
+        elif selected:
+            #when only a single cell is selected, paste all the copied item up until the table limits
+            cell = selected[0]
+            currow = cell.row()
+            homecol = cell.column()
+            tablerows = self.tableMain.rowCount()
+            for row in pastedcells:
+                if len(row):
+                    curcol = homecol
+                    if currow < tablerows:
+                        for col in row:
+                            if curcol < 17:
+                                curcell = self.tableMain.item(currow, curcol)
+                                curcell.setText(col)
+                                curcol += 1
+                            else:
+                                #the row has hit the end of the editable cells
+                                break
+                        currow += 1
+                    else:
+                        #it's dropped off the bottom of the table
+                        break
+        else:
+            logger.warning("Cannot paste, no editable cells selected")
+    def copy_to_clipboard(self,text):
+        self.clip.setText(str(text))
     def transfer(self):
         col = 0
         row = 0
@@ -650,6 +777,26 @@ class ReflGui(refl_window.Ui_windowRefl):
             Dialog.exec_()
         except Exception as ex:
             logger.notice("Could not open save workspace dialog")
+            logger.notice(str(ex))
+    def chooseColumns(self):
+        try:
+            Dialog = QtGui.QDialog()
+            u = refl_choose_col.ReflChoose()
+            u.setupUi(Dialog, self.shownCols, self.tableMain)
+            if Dialog.exec_():
+                settings = QtCore.QSettings()
+                settings.beginGroup("Mantid/ISISReflGui/Columns")
+                for key, value in u.visiblestates.iteritems():
+                    self.shownCols[key] = value
+                    settings.setValue(str(key), value)
+                    if value:
+                        self.tableMain.showColumn(key)
+                    else:
+                        self.tableMain.hideColumn(key)
+                settings.endGroup()
+                del settings
+        except Exception as ex:
+            logger.notice("Could not open choose columns dialog")
             logger.notice(str(ex))
     def showHelp(self):
         import webbrowser
