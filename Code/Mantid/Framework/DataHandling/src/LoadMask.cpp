@@ -50,6 +50,7 @@ Supporting
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -124,7 +125,7 @@ namespace DataHandling
   {
 
     // 1. Declare property
-    declareProperty("Instrument", "", "The name of the instrument to apply the mask.");
+    declareProperty("Instrument", "", boost::make_shared<MandatoryValidator<std::string>>(),"The name of the instrument to apply the mask.");
     std::vector<std::string> exts;
     exts.push_back(".xml");
     exts.push_back(".msk");
