@@ -105,6 +105,12 @@ namespace MantidQt
       /// Signal emitted when the load button is clicked
       void loadClicked();
 
+    protected:
+      //Method for handling drop events
+      void dropEvent(QDropEvent *);
+      //called when a drag event enters the class
+      void dragEnterEvent(QDragEnterEvent *);
+
     private slots:
       /// Slot called when the current view is changed
       void handleViewChanged(int index);
@@ -126,6 +132,7 @@ namespace MantidQt
       bool m_autoLoad;
       /// Flag to show or hide the load button. By default this is set to true.
       bool m_showLoad;
+
     };
 
   } /* namespace MantidWidgets */
