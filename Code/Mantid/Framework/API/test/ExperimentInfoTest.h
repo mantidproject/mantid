@@ -315,6 +315,7 @@ public:
     
     ExperimentInfo * ws2 = ws.cloneExperimentInfo();
     do_compare_ExperimentInfo(ws,*ws2);
+    delete ws2;
   }
 
   void test_clone_then_copy()
@@ -335,6 +336,8 @@ public:
     ws3.copyExperimentInfoFrom(ws2);
 
     do_compare_ExperimentInfo(ws,ws3);
+
+    delete ws2;
   }
 
   void test_default_emode_is_elastic()
