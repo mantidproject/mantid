@@ -24,13 +24,13 @@ namespace Mantid
     void CatalogKeepAlive::init()
     {
       declareProperty("Session","","The session information of the catalog to use.");
-      declareProperty<long>("TimePeriod",1200,"Frequency to refresh session in seconds. Default 1200 (20 minutes).",
+      declareProperty<int>("TimePeriod",1200,"Frequency to refresh session in seconds. Default 1200 (20 minutes).",
           Kernel::Direction::Input);
     }
 
     void CatalogKeepAlive::exec()
     {
-      long timePeriod = getProperty("TimePeriod");
+      int timePeriod = getProperty("TimePeriod");
       if (timePeriod <= 0) throw std::runtime_error("TimePeriod must be greater than zero.");
 
       Kernel::DateAndTime lastTimeExecuted = Kernel::DateAndTime::getCurrentTime();
