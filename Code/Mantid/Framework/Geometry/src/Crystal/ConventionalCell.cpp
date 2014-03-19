@@ -190,7 +190,7 @@ namespace Geometry
 
     if ( cell_type == ReducedCell::ORTHORHOMBIC() )
     {
-      SetSidesIncreasing( adjusted_UB );
+      //SetSidesIncreasing( adjusted_UB );
     }
     else if ( cell_type == ReducedCell::TETRAGONAL()  )
     {
