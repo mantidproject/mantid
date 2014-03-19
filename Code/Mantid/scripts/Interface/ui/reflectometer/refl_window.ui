@@ -362,6 +362,9 @@
               <bold>false</bold>
              </font>
             </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+            </property>
             <property name="alternatingRowColors">
              <bool>true</bool>
             </property>

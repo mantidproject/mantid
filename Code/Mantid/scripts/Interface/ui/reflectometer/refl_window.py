@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_window.ui'
 #
-# Created: Wed Mar 19 16:14:21 2014
+# Created: Wed Mar 19 16:41:17 2014
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -150,6 +150,7 @@ class Ui_windowRefl(object):
         font.setWeight(50)
         font.setBold(False)
         self.tableMain.setFont(font)
+        self.tableMain.setEditTriggers(QtGui.QAbstractItemView.AnyKeyPressed|QtGui.QAbstractItemView.DoubleClicked|QtGui.QAbstractItemView.EditKeyPressed|QtGui.QAbstractItemView.SelectedClicked)
         self.tableMain.setAlternatingRowColors(True)
         self.tableMain.setSelectionMode(QtGui.QAbstractItemView.ContiguousSelection)
         self.tableMain.setRowCount(100)
