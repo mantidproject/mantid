@@ -25,7 +25,7 @@ std::string RebinParamsValidator::checkValidity( const std::vector<double>& valu
   // it must have an odd number of values (and be at least 3 elements long)
   if ( value.size()%2 == 0 )
   {
-    return "The number of bin boundaries must be even";
+    return "The number of bin boundary parameters provided must be odd";
   }
 
   // bin widths must not be zero

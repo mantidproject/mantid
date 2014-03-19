@@ -131,7 +131,7 @@ int LoadEventPreNexus::confidence(Kernel::FileDescriptor & descriptor) const
   const size_t filesize = static_cast<size_t>(handle.tellg());
   handle.seekg(0, std::ios::beg);
 
-  if (filesize % objSize == 0) return 80;
+  if (filesize % objSize == 0) return 60;
   else return 0;
 }
 

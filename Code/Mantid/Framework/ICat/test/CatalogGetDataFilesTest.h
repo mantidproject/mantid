@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidICat/CatalogGetDataFiles.h"
-#include "MantidICat/Session.h"
 #include "MantidICat/CatalogLogin.h"
 #include "MantidICat/CatalogSearch.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
@@ -30,10 +29,6 @@ public:
 
 	void testgetDataFiles()
 	{	
-		/*std::string str;
-		std::getline(std::cin,str);*/
-	
-		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantid_test");

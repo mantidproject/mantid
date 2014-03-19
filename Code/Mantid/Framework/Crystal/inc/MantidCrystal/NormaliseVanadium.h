@@ -66,6 +66,8 @@ protected:
   API::MatrixWorkspace_sptr m_inputWS;     ///< A pointer to the input workspace
 
 protected:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   /// Initialisation code
   void init();
   /// Execution code

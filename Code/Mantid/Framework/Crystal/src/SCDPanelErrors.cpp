@@ -267,6 +267,9 @@ SCDPanelErrors::SCDPanelErrors(DataObjects::PeaksWorkspace_sptr &pwk, std::strin
   setAttribute(X_END, Attribute(-1));
   setAttribute(ROTATE_CEN,Attribute(0));
   setAttribute(SAMPLE_OFF, Attribute(0));
+  setAttribute(SAMPLE_X, Attribute(0.0));
+  setAttribute(SAMPLE_Y, Attribute(0.0));
+  setAttribute(SAMPLE_Z, Attribute(0.0));
   init();
 
 }

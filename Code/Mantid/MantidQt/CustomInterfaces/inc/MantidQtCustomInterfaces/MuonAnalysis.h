@@ -43,6 +43,7 @@ namespace Muon
     std::string mainFieldDirection;
     double timeZero;
     double firstGoodData;
+    std::string label;
   };
 
   struct GroupResult {
@@ -237,13 +238,13 @@ private slots:
 
 private:
  
-  // Types of entities we are dealing with
+  /// Types of entities we are dealing with
   enum ItemType { Pair, Group };
   
-  // Possible plot types users might request
+  /// Possible plot types users might request
   enum PlotType { Asymmetry, Counts, Logorithm };
 
-  // Types of periods
+  /// Types of periods
   enum PeriodType { First, Second };
 
   /// Initialize local Python environment
@@ -311,28 +312,14 @@ private:
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
   int numOfDetectors(const std::string& str) const;
 
-  void changeCurrentRun(std::string& workspaceGroupName);
-
   /// is string a number?
   bool isNumber(const std::string& s) const;
 
   /// Clear tables and front combo box
   void clearTablesAndCombo();
 
-  /// Sums a given list of workspaces
-  Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces) const;
-
   /// Deletes a workspace _or_ a workspace group with the given name, if one exists
   void deleteWorkspaceIfExists(const std::string& wsName);
-
-  /// Get group workspace name
-  QString getGroupName();
-
-  /// Get a name for the ranged workspace.
-  std::string getRangedName();
-
-  /// Check if grouping in table is consistent with data file
-  std::string isGroupingAndDataConsistent();
 
   ///Return true if data are loaded
   bool areDataLoaded();
@@ -416,9 +403,6 @@ private:
   /// tell which group is in which row
   std::vector<int> m_groupToRow;
 
-  ///
-  void checkIf_ID_dublicatesInTable(const int row);
-
   /// Return the group-number for the group in a row. 
   /// Return -1 if invalid group in row
   int getGroupNumberFromRow(int row);
@@ -430,14 +414,17 @@ private:
   /// first good bin returned in ms
   double firstGoodBin() const;
 
-  /// According to Plot Options what is the time to plot from in ms
-  double plotFromTime() const;
+  /// Returns start X value as specified by user
+  double startTime() const;
 
-  /// According to Plot Options what is the time to plot to in ms
-  double plotToTime() const;
+  /// Return finish X value as specified by user
+  double finishTime() const;
 
   /// time zero returned in ms
   double timeZero();
+
+  /// Returns params string which can be passed to Rebin, according to what user specified
+  std::string rebinParams(Workspace_sptr wsForRebin);
 
   /// title of run
   std::string m_title;
@@ -505,6 +492,9 @@ private:
   /// When data loaded set various buttons etc to active
   void nowDataAvailable();
 
+  /// Updates m_currentGroup given the new loaded label
+  void updateCurrentGroup(const std::string& newGroupName);
+
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
   /// handles fit data work
@@ -518,10 +508,14 @@ private:
   /// First Good Data time as loaded from Data file
   double m_dataFirstGoodData;
 
-  static const QString NOT_AVAILABLE;
+  /// The group we should add new plot workspaces to
+  WorkspaceGroup_sptr m_currentGroup;
 
-  // Default value used for first good bin
-  static const double FIRST_GOOD_BIN_DEFAULT;
+  /// Default widget values
+  static const QString TIME_ZERO_DEFAULT;
+  static const QString FIRST_GOOD_BIN_DEFAULT;
+
+  static const QString NOT_AVAILABLE;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

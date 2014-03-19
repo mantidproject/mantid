@@ -1,19 +1,33 @@
 #ifndef IMD_NODE_H_
 #define IMD_NODE_H_
 
-#include <vector>
 #include <algorithm>
-#include "MantidKernel/ThreadScheduler.h"
-#include "MantidAPI/IBoxControllerIO.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidAPI/BoxController.h"
-#include "MantidAPI/CoordTransform.h"
+#include <string>
+#include <vector>
+#include "MantidKernel/VMD.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 namespace Mantid
 {
+namespace Kernel
+{
+  class ISaveable;
+  class ThreadScheduler;
+}
+
+namespace Geometry
+{
+  template <typename T>
+  class MDDimensionExtents;
+  class MDImplicitFunction;
+}
+
 namespace API
 {
+
+class BoxController;
+class IBoxControllerIO;
+class CoordTransform;
 
 class IMDNode 
 {

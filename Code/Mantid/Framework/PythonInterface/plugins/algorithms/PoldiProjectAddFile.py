@@ -7,12 +7,7 @@ proceed POLDI data. The introductions can be found in the
 wiki page of [[PoldiProjectRun]].
 
 *WIKI*"""
-from mantid.api import (PythonAlgorithm, 
-                        AlgorithmFactory)
-from mantid.api import (FileProperty, 
-                        FileAction)
-from mantid.api import (ITableWorkspaceProperty, 
-                        WorkspaceFactory)
+from mantid.api import *
 from mantid.kernel import Direction
 
 from os import listdir
@@ -42,7 +37,7 @@ class PoldiProjectAddFile(PythonAlgorithm):
 
         self.declareProperty(FileProperty(name="File",defaultValue="",action=FileAction.Load))
 
-        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "PoldiAnalysis", direction=Direction.Output),
+        self.declareProperty(ITableWorkspaceProperty(name="OutputWorkspace", defaultValue="PoldiAnalysis", direction=Direction.Output),
                               "Poldi analysis main worksheet")
     
     
@@ -68,14 +63,14 @@ class PoldiProjectAddFile(PythonAlgorithm):
         """ Mantid required
         """
         self.log().debug('Poldi Data Analysis ---- start')
-        load_data_at_the_end = False
+        sample_info_ws = None
         
         try:
-            sample_info_ws_name = self.getProperty("OutputWorkspace").value
+            sample_info_ws_name = self.getProperty("OutputWorkspace").valueAsStr
             if(sample_info_ws_name == ""):
                 sample_info_ws_name = "PoldiAnalysis"
             self.log().debug('Poldi Data Analysis ---- %s'%(sample_info_ws_name))
-            sample_info_ws = mtd["PoldiAnalysis"]
+            sample_info_ws = mtd[sample_info_ws_name]
             self.log().debug('                    ---- workspace loaded')
         except:
             self.log().debug('                    ---- workspace created')
@@ -88,11 +83,6 @@ class PoldiProjectAddFile(PythonAlgorithm):
             sample_info_ws.addColumn("str","spl corr")
             sample_info_ws.addColumn("str","spl dead wires")
             sample_info_ws.addColumn("str","spl peak")
-            load_data_at_the_end = True
-        
-        
-        
-        
         
         dataFile = self.getProperty("File").value
         
@@ -116,15 +106,12 @@ class PoldiProjectAddFile(PythonAlgorithm):
                                    sample_name_log, 
                                    sample_name_corr,
                                    sample_name_deadw,
-                                   sample_name_peak])  
+                                   sample_name_peak])
         nb_of_sample = sample_info_ws.rowCount()
         self.log().error('Poldi -   1 samples added')
         self.log().error('      -  %d samples in total' %(nb_of_sample))
                 
-                
-        if(load_data_at_the_end):
-            self.setProperty("OutputWorkspace", sample_info_ws)
-        
+        self.setProperty("OutputWorkspace", sample_info_ws)        
         
 
 

@@ -1,4 +1,5 @@
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"

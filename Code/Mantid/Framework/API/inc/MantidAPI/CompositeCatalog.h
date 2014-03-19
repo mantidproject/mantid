@@ -5,7 +5,7 @@
 
 namespace Mantid
 {
-  namespace ICat
+  namespace API
   {
     /**
      CompositeCatalog is responsible for storing and performing options on multiple catalogues.
@@ -32,28 +32,29 @@ namespace Mantid
      File change history is stored at: <https://github.com/mantidproject/mantid>.
      Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport CompositeCatalog : public API::ICatalog
+    class MANTID_API_DLL CompositeCatalog : public ICatalog
     {
       public:
         /// Constructor
         CompositeCatalog();
         /// Adds a catalog to the list of catalogs (m_catalogs)
-        void add(const API::ICatalog_sptr catalog);
+        void add(const ICatalog_sptr catalog);
         /// Log the user into the catalog system.
-        virtual void login(const std::string& username,const std::string& password,const std::string& endpoint);
+        virtual CatalogSession_sptr login(const std::string& username,const std::string& password,
+            const std::string& endpoint,const std::string& facility);
         /// Log the user out of the catalog system.
         virtual void logout();
         /// Search the catalog for data.
-        virtual void search(const CatalogSearchParam& inputs,API::ITableWorkspace_sptr& outputws,
+        virtual void search(const ICat::CatalogSearchParam& inputs,ITableWorkspace_sptr& outputws,
             const int &offset, const int &limit);
         /// Obtain the number of results returned by the search method.
-        virtual int64_t getNumberOfSearchResults(const CatalogSearchParam& inputs);
+        virtual int64_t getNumberOfSearchResults(const ICat::CatalogSearchParam& inputs);
         /// Show the logged in user's investigations search results.
-        virtual void myData(API::ITableWorkspace_sptr& outputws);
+        virtual void myData(ITableWorkspace_sptr& outputws);
         /// Get datasets.
-        virtual void getDataSets(const std::string&investigationId,API::ITableWorkspace_sptr& outputws);
+        virtual void getDataSets(const std::string& investigationId,ITableWorkspace_sptr& outputws);
         /// Get datafiles
-        virtual void getDataFiles(const std::string&investigationId,API::ITableWorkspace_sptr& outputws);
+        virtual void getDataFiles(const std::string& investigationId,ITableWorkspace_sptr& outputws);
         /// Get instruments list
         virtual void listInstruments(std::vector<std::string>& instruments);
         /// Get investigationtypes list
@@ -62,7 +63,7 @@ namespace Mantid
         virtual void keepAlive();
 
       private:
-        std::list<API::ICatalog_sptr> m_catalogs;
+        std::list<ICatalog_sptr> m_catalogs;
     };
   }
 }

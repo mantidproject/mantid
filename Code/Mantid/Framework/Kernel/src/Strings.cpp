@@ -1169,10 +1169,12 @@ namespace Mantid
       template MANTID_KERNEL_DLL int convert(const std::string&,std::string&);
       template MANTID_KERNEL_DLL int convert(const std::string&,int&);
       template MANTID_KERNEL_DLL int convert(const std::string&,std::size_t&);
+      template MANTID_KERNEL_DLL int convert(const std::string&,bool&);
       template MANTID_KERNEL_DLL int convert(const char*,std::string&);
       template MANTID_KERNEL_DLL int convert(const char*,double&);
       template MANTID_KERNEL_DLL int convert(const char*,int&);
       template MANTID_KERNEL_DLL int convert(const char*,std::size_t&);
+      template MANTID_KERNEL_DLL int convert(const char*,bool&);
 
       template MANTID_KERNEL_DLL std::string toString(const double &value);
       template MANTID_KERNEL_DLL std::string toString(const float &value);

@@ -5,10 +5,12 @@ This algorithm connects the logged in user to the information catalog.
 *WIKI*/
 
 #include "MantidICat/CatalogLogin.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
+#include "MantidAPI/CatalogManager.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MaskedProperty.h"
-#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -38,14 +40,14 @@ namespace Mantid
     /// execute the algorithm
     void CatalogLogin::exec()
     {
-      // Obtain the soapEndPoint based on the name of the facility the user has selected.
-      std::string soapEndPoint = Kernel::ConfigService::Instance().getFacility(getProperty("FacilityName")).catalogInfo().soapEndPoint();
-      if (soapEndPoint.empty()) throw std::runtime_error("There is no soap end-point for the facility you have selected.");
-
-      g_log.notice() << "Attempting to verify user credentials against " <<
-          Mantid::Kernel::ConfigService::Instance().getFacility().catalogInfo().catalogName() << std::endl;
+      auto catalogInfo = Kernel::ConfigService::Instance().getFacility(getProperty("FacilityName")).catalogInfo();
+      if (catalogInfo.soapEndPoint().empty()) throw std::runtime_error("There is no soap end-point for the facility you have selected.");
+      g_log.notice() << "Attempting to verify user credentials against " << catalogInfo.catalogName() << std::endl;
       progress(0.5, "Verifying user credentials...");
-      CatalogAlgorithmHelper().createCatalog()->login(getProperty("Username"), getProperty("Password"), soapEndPoint);
+      // Creates a new catalog and related session if the authentication is a success.
+      // This allows us to easily manage sessions alongside catalogs in the catalogmanager.
+      API::CatalogManager::Instance().login(getProperty("Username"), getProperty("Password"),
+          catalogInfo.soapEndPoint(),getProperty("FacilityName"));
     }
 
   }

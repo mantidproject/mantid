@@ -130,6 +130,7 @@ class SANSWideAngleCorrection(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace","",direction=Direction.Output),
                                       "The transmission corrected SANS data, normalised (divided) by <math>T_0</math>, see discussion section")
 	self.setWikiSummary("Calculate the Wide Angle correction for SANS transmissions.")
+	self.setOptionalMessage("Calculate the Wide Angle correction for SANS transmissions.")
       
     def PyExec(self):
         """ Main body of execution
