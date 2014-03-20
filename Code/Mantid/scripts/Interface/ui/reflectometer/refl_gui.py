@@ -36,12 +36,13 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         super(QtGui.QMainWindow, self).__init__()
         self.setupUi(self)
         self.loading = False
+        self.clip = QtGui.QApplication.clipboard()
+        self.shownCols = {}
 
-        '''
-        Setup instrument options with defaults assigned.
-        '''
+        #Setup instrument options with defaults assigned.
         self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF']
-        self.polarisation_instruments = ['CRISP', 'POLREF'] 
+        self.polarisation_instruments = ['CRISP', 'POLREF']
+        self.polarisation_options = {'None' : PolarisationCorrection.NONE, '1-PNR' : PolarisationCorrection.PNR, '2-PA' : PolarisationCorrection.PA }
         self.modFlag = False
 
     def __del__(self):
@@ -91,30 +92,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         plotbutton = self.sender()
         self._plot(plotbutton)
 
-    def on_plotButton_clicked(self):
-        plotbutton = self.windowRefl.sender()
-        self.plot(plotbutton)
-
-    def actionCopy_triggered(self):
-        self.copy_cells()
-
-    def actionCut_triggered(self):
-        self.copy_cells()
-        self.clear_cells()
-
-    def actionPaste_triggered(self):
-        self.paste_cells()
-
-    def actionClear_triggered(self):
-        self.clear_cells()
-
-    def actionChoose_Columns_triggered(self):
-        self.chooseColumns()
-
-    '''
-    Event handler for polarisation correction selection.
-    '''
     def _polar_corr_selected(self):
+        """
+        Event handler for polarisation correction selection.
+        """
         if self.current_instrument in self.polarisation_instruments:
             chosen_method = self.comboPolarCorrect.currentText()
             self.current_polarisation_method = self.polarisation_options[chosen_method]
@@ -122,9 +103,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             logger.notice("Polarisation correction is not supported on " + str(self.current_instrument))
 
     def setup_layout(self):
-        self.shownCols = {}
-        self.loading = False
-        self.clip = QtGui.QApplication.clipboard()
         self.comboInstrument.addItems(self.instrument_list)
         current_instrument = config['default.instrument'].upper()
         if current_instrument in self.instrument_list:
@@ -132,12 +110,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         else:
             self.comboInstrument.setCurrentIndex(0)
             config['default.instrument'] = 'INTER'
-        self.current_instrument = config['default.instrument']
+        self.current_instrument = config['default.instrument'].upper()
 
-        '''
-        Setup polarisation options with default assigned
-        '''
-        self.polarisation_options = {'None' : PolarisationCorrection.NONE, '1-PNR' : PolarisationCorrection.PNR, '2-PA' : PolarisationCorrection.PA }
+        #Setup polarisation options with default assigned
         self.comboPolarCorrect.clear()
         self.comboPolarCorrect.addItems(self.polarisation_options.keys())
         self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None'))
@@ -174,10 +149,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 return
         self.current_table = None
         self.accMethod = None
-        
+
         settings = QtCore.QSettings()
         settings.beginGroup("Mantid/ISISReflGui/Columns")
-        
+
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
                 if (column == 0) or (column == 5) or (column == 10):
@@ -256,11 +231,11 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.actionProcess.triggered.connect(self._process)
         self.actionTransfer.triggered.connect(self._transfer)
         self.tableMain.cellChanged.connect(self._table_modified)
-        self.actionClear.triggered.connect(self.actionClear_triggered)
-        self.actionPaste.triggered.connect(self.actionPaste_triggered)
-        self.actionCut.triggered.connect(self.actionCut_triggered)
-        self.actionCopy.triggered.connect(self.actionCopy_triggered)
-        self.actionChoose_Columns.triggered.connect(self.actionChoose_Columns_triggered)
+        self.actionClear.triggered.connect(self._clear_cells)
+        self.actionPaste.triggered.connect(self._paste_cells)
+        self.actionCut.triggered.connect(self._cut_cells)
+        self.actionCopy.triggered.connect(self._copy_cells)
+        self.actionChoose_Columns.triggered.connect(self._choose_Columns)
 
     def _populate_runs_list(self):
         # Clear existing
@@ -325,24 +300,28 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         else:
             QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill',"There are no source cells selected.")
 
-    '''
-    Create a display name from a workspace.
-    '''
     def _create_workspace_display_name(self, candidate):
+        """
+        Create a display name from a workspace.
+        """
         if isinstance(mtd[candidate], WorkspaceGroup):
             todisplay = candidate # No single run number for a group of workspaces.
         else:
             todisplay = groupGet(mtd[candidate], "samp", "run_number")
         return todisplay
 
-    def clear_cells(self):
+    def _clear_cells(self):
         cells = self.tableMain.selectedItems()
         for cell in cells:
             column = cell.column()
             if column < 17:
                 cell.setText('')
 
-    def copy_cells(self):
+    def _cut_cells(self):
+        self._copy_cells()
+        self._clear_cells()
+
+    def _copy_cells(self):
         cells = self.tableMain.selectedItems()
         if not cells:
             print 'nothing to copy'
@@ -378,9 +357,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 tocopy += selection[y][x]
             if y < (rowsize - 1):
                 tocopy += '\n'
-        self.copy_to_clipboard(tocopy)
+        self.clip.setText(str(tocopy))
 
-    def paste_cells(self):
+    def _paste_cells(self):
         pastedtext = self.clip.text()
         if not pastedtext:
             logger.warning("Nothing to Paste")
@@ -432,9 +411,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                         break
         else:
             logger.warning("Cannot paste, no editable cells selected")
-
-    def copy_to_clipboard(self,text):
-        self.clip.setText(str(text))
 
     def _transfer(self):
         col = 0
@@ -827,7 +803,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             logger.notice("Could not open save workspace dialog")
             logger.notice(str(ex))
 
-    def chooseColumns(self):
+    def _choose_columns(self):
         try:
             Dialog = QtGui.QDialog()
             u = refl_choose_col.ReflChoose()
@@ -852,10 +828,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
 
-'''
-Get a representative workspace from the input workspace.
-'''
 def get_representative_workspace(run):
+    """
+    Get a representative workspace from the input workspace.
+    """
     if isinstance(run, WorkspaceGroup):
         run_number = groupGet(run[0], "samp", "run_number")
         _runno = Load(Filename=str(run_number))
@@ -863,7 +839,7 @@ def get_representative_workspace(run):
         _runno = run
     elif isinstance(run, int):
         _runno = Load(Filename=run, OutputWorkspace=runno)
-    elif isinstance(run, str) and mtd.doesExist(run): 
+    elif isinstance(run, str) and mtd.doesExist(run):
         ws = mtd[run]
         if isinstance(ws, WorkspaceGroup):
             run_number = groupGet(ws[0], "samp", "run_number")
@@ -874,10 +850,10 @@ def get_representative_workspace(run):
         raise TypeError("Must be a workspace, int or str")
     return _runno
 
-'''
-Calculate the resolution from the slits.
-'''
 def calcRes(run):
+    """
+    Calculate the resolution from the slits.
+    """
     runno = get_representative_workspace(run)
     # Get slits and detector angle theta from NeXuS
     th = groupGet(runno, 'samp', 'THETA')
@@ -897,10 +873,10 @@ def calcRes(run):
     return resolution
 
 def groupGet(wksp, whattoget, field=''):
-    '''
+    """
     returns information about instrument or sample details for a given workspace wksp,
     also if the workspace is a group (info from first group element)
-    '''
+    """
     if (whattoget == 'inst'):
         if isinstance(wksp, str):
             at = getattr(mtd[wksp],'size',None)
