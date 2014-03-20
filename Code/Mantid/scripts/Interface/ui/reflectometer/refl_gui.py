@@ -33,6 +33,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
     __instrumentRuns = None
 
     def __init__(self):
+        """
+        Initialise the interface
+        """
         super(QtGui.QMainWindow, self).__init__()
         self.setupUi(self)
         self.loading = False
@@ -46,10 +49,16 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.modFlag = False
 
     def __del__(self):
+        """
+        Save the contents of the table if the modified flag was still set
+        """
         if self.modFlag:
             self._save(true)
 
     def _save_check(self):
+        """
+        Show a standard message box asking if the user wants to save, or discard their changes or cancel back to the interface
+        """
         msgBox = QtGui.QMessageBox()
         msgBox.setText("The table has been modified. Do you want to save your changes?")
         msgBox.setStandardButtons(QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel)
@@ -63,6 +72,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         return ret, saved
 
     def closeEvent(self, event):
+        """
+        Close the window. but check if the user wants to save
+        """
         self.buttonProcess.setFocus()
         if self.modFlag:
             event.ignore()
@@ -71,9 +83,13 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 if saved:
                     event.accept()
             elif ret == QtGui.QMessageBox.Discard:
+                self.modFlag = False
                 event.accept()
 
     def _instrument_selected(self, instrument):
+        """
+        Change the default instrument to the selected one
+        """
         config['default.instrument'] = self.instrument_list[instrument]
         logger.notice( "Instrument is now: " + str(config['default.instrument']))
         self.textRB.clear()
@@ -83,12 +99,18 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None')) # Reset to None
 
     def _table_modified(self, row, column):
+        """
+        sets the modified flag whne the table is altered
+        """
         if not self.loading:
             self.modFlag = True
             plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
             self._reset_plot_button(plotbutton)
 
     def _plot_row(self):
+        """
+        handler for the plot buttons
+        """
         plotbutton = self.sender()
         self._plot(plotbutton)
 
@@ -103,6 +125,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             logger.notice("Polarisation correction is not supported on " + str(self.current_instrument))
 
     def setup_layout(self):
+        """
+        Do further setup layout that couldn't be done in the designer
+        """
         self.comboInstrument.addItems(self.instrument_list)
         current_instrument = config['default.instrument'].upper()
         if current_instrument in self.instrument_list:
@@ -127,6 +152,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         return True
 
     def _reset_table(self):
+        """
+        Reset the plot buttons and stitch checkboxes back to thier defualt state
+        """
         #switches from current to true, to false to make sure stateChanged fires
         self.checkTickAll.setCheckState(2)
         self.checkTickAll.setCheckState(0)
@@ -135,6 +163,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             self._reset_plot_button(plotbutton)
 
     def _reset_plot_button(self, plotbutton):
+        """
+        Reset the provided plot button to ti's default state: disabled and with no cache
+        """
         plotbutton.setDisabled(True)
         plotbutton.setProperty('runno', None)
         plotbutton.setProperty('overlapLow', None)
@@ -142,6 +173,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         plotbutton.setProperty('wksp', None)
 
     def _initialise_table(self):
+        """
+        Initialise the table. Clearing all data and adding the checkboxes and plot buttons
+        """
         #first check if the table has been changed before clearing it
         if self.modFlag:
             ret, saved = self._save_check()
@@ -209,6 +243,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.modFlag = False
 
     def _connect_slots(self):
+        """
+        Connect the signals to the corresponding methods
+        """
         self.checkTickAll.stateChanged.connect(self._set_all_stitch)
         self.comboInstrument.activated[int].connect(self._instrument_selected)
         self.comboPolarCorrect.activated.connect(self._polar_corr_selected)
@@ -238,6 +275,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.actionChoose_Columns.triggered.connect(self._choose_Columns)
 
     def _populate_runs_list(self):
+        """
+        Populate the list at the right with names of runs and workspaces form the ADS and archives
+        """
         # Clear existing
         self.listMain.clear()
         # Fill with ADS workspaces
@@ -268,11 +308,17 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             logger.notice(str(ex))
 
     def _populate_runs_listADSWorkspaces(self):
+        """
+        get the workspaces from the ADS and add them to the list
+        """
         names = mtd.getObjectNames()
         for ws in names:
             self.listMain.addItem(ws)
 
     def _autofill(self):
+        """
+        copy the contents of the selected cells to the row below as long as the row below contains a run number in the first cell
+        """
         col = 0
         # make sure all selected cells are in the same row
         sum = 0
@@ -311,6 +357,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         return todisplay
 
     def _clear_cells(self):
+        """
+        Clear the selected area of data
+        """
         cells = self.tableMain.selectedItems()
         for cell in cells:
             column = cell.column()
@@ -318,10 +367,16 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 cell.setText('')
 
     def _cut_cells(self):
+        """
+        copy the selected cells then clear the area
+        """
         self._copy_cells()
         self._clear_cells()
 
     def _copy_cells(self):
+        """
+        Copy the selected rnage of cells to the clipboard
+        """
         cells = self.tableMain.selectedItems()
         if not cells:
             print 'nothing to copy'
@@ -360,6 +415,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.clip.setText(str(tocopy))
 
     def _paste_cells(self):
+        """
+        Paste the contents of the clipboard to the table at the selected position
+        """
         pastedtext = self.clip.text()
         if not pastedtext:
             logger.warning("Nothing to Paste")
@@ -413,6 +471,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             logger.warning("Cannot paste, no editable cells selected")
 
     def _transfer(self):
+        """
+        Transfer run numbers to the table
+        """
         col = 0
         row = 0
         while (self.tableMain.item(row, 0).text() != ''):
@@ -443,10 +504,16 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 row = row + 1
 
     def _set_all_stitch(self,state):
+        """
+        Set the checkboxes in the Stitch? column to the same
+        """
         for row in range(self.tableMain.rowCount()):
             self.tableMain.cellWidget(row, 17).children()[1].setCheckState(state)
 
     def _get_acc_method(self):
+        """
+        Ask the user for the accumulation method they'd like to use with the live data they've asked for
+        """
         msgBox = QtGui.QMessageBox()
         msgBox.setText("The Data to be processed required that a Live Data service be started. What accumulation method would you like it to use?")
         msgBox.setIcon(QtGui.QMessageBox.Question)
@@ -464,6 +531,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             return "Add"
 
     def _process(self):
+        """
+        Process has been pressed, check what has been selected then pass the selection (or whole table) to quick
+        """
 #--------- If "Process" button pressed, convert raw files to IvsLam and IvsQ and combine if checkbox ticked -------------
         try:
             willProcess = True
@@ -564,6 +634,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             raise
 
     def _plot(self, plotbutton):
+        """
+        Plot the row belonging to the selected button
+        """
         if not isinstance(plotbutton, QtGui.QPushButton):
             logger.error("Problem accessing cached data: Wrong data type passed, expected QtGui.QPushbutton")
             return
@@ -641,6 +714,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 gcomb.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
 
     def _do_run(self, runno, row, which):
+        """
+        Run quick on the given run and row
+        """
         g = ['g1', 'g2', 'g3']
         transrun = str(self.tableMain.item(row, which * 5 + 2).text())
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
@@ -662,6 +738,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         return th, qmin, qmax, wlam, wq
 
     def _save_table_contents(self, filename):
+        """
+        Save the contents of the table
+        """
         try:
             writer = csv.writer(open(filename, "wb"))
             for row in range(self.tableMain.rowCount()):
@@ -679,6 +758,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         return True
 
     def _save(self, failsave = False):
+        """
+        Save the table, showing no interface if not necessary. This also provides the failing save functionality.
+        """
         filename = ''
         if failsave:
             #this is an emergency autosave as the program is failing
@@ -719,6 +801,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         return self._save_table_contents(filename)
 
     def _save_as(self):
+        """
+        show the save as dialog and save to a .tbl file with that name
+        """
         saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
         saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
         saveDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
@@ -729,6 +814,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             self._save_table_contents(filename)
 
     def _load_table(self):
+        """
+        Load a .tbl file from disk
+        """
         self.loading = True
         loadDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Open Table")
         loadDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
@@ -760,6 +848,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.modFlag = False
 
     def _reload_table(self):
+        """
+        Reload the last loaded file from disk, replacing anything in the table already
+        """
         self.loading = True
         filename = self.current_table
         if filename:
@@ -794,6 +885,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.loading = False
 
     def _save_workspaces(self):
+        """
+        Shows the export dialog for saving workspaces to non mantid formats
+        """
         try:
             Dialog = QtGui.QDialog()
             u = refl_save.Ui_SaveWindow()
@@ -804,6 +898,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             logger.notice(str(ex))
 
     def _choose_columns(self):
+        """
+        shows the choose columns dialog for hiding and revealing of columns
+        """
         try:
             Dialog = QtGui.QDialog()
             u = refl_choose_col.ReflChoose()
@@ -825,6 +922,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             logger.notice(str(ex))
 
     def _show_help(self):
+        """
+        Launches the wiki page for this interface
+        """
         import webbrowser
         webbrowser.open('http://www.mantidproject.org/ISIS_Reflectometry_GUI')
 
@@ -957,6 +1057,9 @@ def groupGet(wksp, whattoget, field=''):
             return 0
 
 def getWorkspace(wksp):
+    """
+    Gets the first workspace associated with the given string. Does not load.
+    """
     if isinstance(wksp, Workspace):
         return wksp
     elif isinstance(wksp, str):
