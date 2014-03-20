@@ -10,7 +10,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/UnitFactory.h"
+
 #include <fstream>
+
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -19,7 +21,9 @@
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/SAX/AttributesImpl.h>
+
 #include <boost/make_shared.hpp>
+#include <boost/assign/list_of.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -2348,6 +2352,32 @@ namespace Geometry
       nameCountStart = boost::lexical_cast<int>(pElem->getAttribute("name-count-start"));
     }
 
+    // A list of numeric attributes which are allowed to have corresponding -end
+    std::set<std::string> rangeAttrs = boost::assign::list_of("x")("y")("z")("r")("t")("p")("rot");
+
+    // Numeric attributes related to rotation. Doesn't make sense to have -end for those
+    std::set<std::string> rotAttrs = boost::assign::list_of("x-axis")("y-axis")("z-axis");
+
+    // A set of all numeric attributes for convenience
+    std::set<std::string> allAttrs;
+    allAttrs.insert(rangeAttrs.begin(), rangeAttrs.end());
+    allAttrs.insert(rotAttrs.begin(), rotAttrs.end());
+
+    // Attribute values as read from <locations>. If the attribute doesn't have a value here, it
+    // means that it wasn't set
+    std::map<std::string, std::string> attrValues;
+
+    // Read all the set attribute values
+    for (auto it = allAttrs.begin(); it != allAttrs.end(); ++it)
+    {
+      if ( pElem->hasAttribute(*it) )
+      {
+        attrValues[*it] = pElem->getAttribute(*it);
+      }
+    }
+
+    // TODO: read -end values and calculate steps. If no value for -end - error
+
     std::ostringstream xml;
 
     Poco::XML::XMLWriter writer(xml, Poco::XML::XMLWriter::CANONICAL);
@@ -2363,6 +2393,14 @@ namespace Geometry
         // Add name with appropriate numeric postfix
         attr.addAttribute("", "", "name", "",
                           name + boost::lexical_cast<std::string>(nameCountStart + i));
+      }
+
+      // Copy values of all the attributes set
+      for (auto it = attrValues.begin(); it != attrValues.end(); ++it)
+      {
+        attr.addAttribute("", "", it->first, "", it->second);
+
+        // TODO: if is a range attribute, increase the value by the step
       }
 
       writer.emptyElement("", "", "location", attr);

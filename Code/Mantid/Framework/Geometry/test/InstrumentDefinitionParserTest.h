@@ -810,8 +810,7 @@ public:
     TS_ASSERT_EQUALS( errorMsg.substr(0,25), "Detector location element");
   }
 
-  void initializeLocationsParser(InstrumentDefinitionParser& parser, const std::string& locations,
-                                 size_t numDetectors)
+  Instrument_sptr loadInstrLocations(const std::string& locations, detid_t numDetectors)
   {
     // TODO: the following could be done only once, not for every initialization
     std::string filename = ConfigService::Instance().getInstrumentDirectory()
@@ -821,27 +820,43 @@ public:
     boost::replace_first(contents, "%LOCATIONS%", locations);
     boost::replace_first(contents, "%NUM_DETECTORS%", boost::lexical_cast<std::string>(numDetectors));
 
+    InstrumentDefinitionParser parser;
     parser.initialize(filename, "LocationsTestInstrument", contents);
+
+    Instrument_sptr instr;
+
+    TS_ASSERT_THROWS_NOTHING(instr = parser.parseXML(NULL));
+    TS_ASSERT_EQUALS(instr->getNumberDetectors(), numDetectors);
+
+    return instr;
   }
 
   void testLocationsNaming()
   {
     std::string locations = "<locations n-elements=\"5\" name-count-start=\"10\" name=\"det\" />";
-    size_t numDetectors = 5;
+    detid_t numDetectors = 5;
 
-    InstrumentDefinitionParser parser;
-    initializeLocationsParser(parser, locations, numDetectors);
+    Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
 
-    Instrument_sptr instr;
-
-    TS_ASSERT_THROWS_NOTHING(instr = parser.parseXML(NULL));
-
-    TS_ASSERT_EQUALS(instr->getNumberDetectors(), numDetectors);
     TS_ASSERT_EQUALS(instr->getDetector(1)->getName(), "det10");
     TS_ASSERT_EQUALS(instr->getDetector(3)->getName(), "det12");
     TS_ASSERT_EQUALS(instr->getDetector(5)->getName(), "det14");
   }
 
+  void testLocationsStaticValues()
+  {
+    std::string locations = "<locations n-elements=\"5\" x=\"1.0\" y=\"2.0\" z=\"3.0\" />";
+    detid_t numDetectors = 5;
+
+    Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
+
+    for (detid_t i = 1; i <= numDetectors; ++i)
+    {
+      TS_ASSERT_DELTA(instr->getDetector(i)->getPos().X(), 1.0, 1.0E-8);
+      TS_ASSERT_DELTA(instr->getDetector(i)->getPos().Y(), 2.0, 1.0E-8);
+      TS_ASSERT_DELTA(instr->getDetector(i)->getPos().Z(), 3.0, 1.0E-8);
+    }
+  }
 
   /*
     <locations n-elements="7" r="0.5" t="0.0" t-end="180.0" rot="0.0" rot-end="180.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
