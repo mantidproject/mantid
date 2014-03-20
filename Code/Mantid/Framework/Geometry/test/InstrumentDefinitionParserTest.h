@@ -807,7 +807,7 @@ public:
     TS_ASSERT_EQUALS( errorMsg.substr(0,25), "Detector location element");
   }
 
-  Instrument_sptr loadInstrLocations(const std::string& locations, detid_t numDetectors)
+  Instrument_sptr loadInstrLocations(const std::string& locations, detid_t numDetectors, bool rethrow = false)
   {
     // TODO: the following could be done only once, not for every initialization
     std::string filename = ConfigService::Instance().getInstrumentDirectory()
@@ -822,7 +822,11 @@ public:
 
     Instrument_sptr instr;
 
-    TS_ASSERT_THROWS_NOTHING(instr = parser.parseXML(NULL));
+    if (rethrow)
+      instr = parser.parseXML(NULL);
+    else
+      TS_ASSERT_THROWS_NOTHING(instr = parser.parseXML(NULL));
+
     TS_ASSERT_EQUALS(instr->getNumberDetectors(), numDetectors);
 
     return instr;
@@ -908,6 +912,32 @@ public:
     TS_ASSERT_DELTA(instr->getDetector(5)->getPos().X(), 0.433, 1.0E-4);
     TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Y(), 0, 1.0E-8);
     TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Z(), -0.25, 1.0E-8);
+  }
+
+  void testLocationsZeroElements()
+  {
+    std::string locations = "<locations n-elements=\"0\" t=\"0.0\" t-end=\"180.0\" />";
+    detid_t numDetectors = 2;
+
+    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true), Exception::InstrumentDefinitionError);
+  }
+
+  void testLocationsNotANumber()
+  {
+    std::string locations = "<locations n-elements=\"2\" t=\"0.0\" t-end=\"180.x\" />";
+    detid_t numDetectors = 2;
+
+    TS_ASSERT_THROWS_ANYTHING(loadInstrLocations(locations, numDetectors, true));
+
+    locations = "<locations n-elements=\"2\" t=\"0.x\" t-end=\"180.0\" />";
+
+    TS_ASSERT_THROWS_ANYTHING(loadInstrLocations(locations, numDetectors, true));
+
+    locations = "<locations n-elements=\"x\" t=\"0.0\" t-end=\"180.0\" />";
+    TS_ASSERT_THROWS_ANYTHING(loadInstrLocations(locations, numDetectors, true));
+
+    locations = "<locations n-elements=\"2\" name-count-start=\"x\"/>";
+    TS_ASSERT_THROWS_ANYTHING(loadInstrLocations(locations, numDetectors, true));
   }
 };
 

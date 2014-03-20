@@ -2318,6 +2318,11 @@ namespace Geometry
     if ( pElem->hasAttribute("n-elements") )
     {
       nElements = boost::lexical_cast<size_t>(pElem->getAttribute("n-elements"));
+
+      if (nElements <= 0)
+      {
+        throw Exception::InstrumentDefinitionError("n-elements must be positive");
+      }
     }
     else
     {
