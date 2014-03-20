@@ -75,10 +75,9 @@ namespace Mantid
     {
       const std::vector<double> & yData = m_ws->readY(0);
       const std::vector<double> & eData = m_ws->readE(0);
-      double dq;
       for (size_t i = 0; i < m_xlength; ++i)
       {
-        dq = XData[i]*m_qres;
+        double dq = XData[i]*m_qres;
         outputval(XData[i], file, leadingSep());
         outputval(yData[i], file);
         outputval(eData[i], file);

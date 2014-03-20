@@ -12,24 +12,13 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    /** @class SaveILLCosmosAscii SaveILLCosmosAscii.h DataHandling/SaveILLCosmosAscii.h
+    /**
+    Saves a file in ILL Cosmos format  from a 2D workspace
+    (Workspace2D class). SaveILLCosmosAscii is an algorithm but inherits frrm the
+    AsciiPointBase class which provides the main implementation for the init() & exec() methods.
+    Output is tab delimited Ascii point data with dq/q and extra header information.
 
-    Saves a workspace or selected spectra in a coma-separated ascii file. Spectra are saved in columns.
-    Properties:
-    <ul>
-    <li>Filename - the name of the file to write to.  </li>
-    <li>Workspace - the workspace name to be saved.</li>
-    <li>SpectrumMin - the starting spectrum index to save (optional) </li>
-    <li>SpectrumMax - the ending spectrum index to save (optional) </li>
-    <li>SpectrumList - a list of comma-separated spectra indeces to save (optional) </li>
-    <li>Precision - the numeric precision - the number of significant digits for the saved data (optional) </li>
-    </ul>
-
-
-    @author Keith Brown, ISIS, Placement student from the University of Derby
-    @date 10/10/13
-
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -46,7 +35,7 @@ namespace Mantid
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>. 
+    File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     class DLLExport SaveILLCosmosAscii : public DataHandling::AsciiPointBase

@@ -27,5 +27,9 @@ namespace Mantid
       this->setWikiSummary("Saves a 2D [[workspace]] to a tab separated ascii file. ");
       this->setOptionalMessage("Saves a 2D workspace to a ascii file.");
     }
+    void SaveANSTOAscii::extraHeaders(std::ofstream & file)
+    {
+      UNUSED_ARG(file);
+    }
   } // namespace DataHandling
 } // namespace Mantid
