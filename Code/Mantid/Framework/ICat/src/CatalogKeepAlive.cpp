@@ -7,8 +7,6 @@ This algorithm refreshes the current session to the maximum amount provided by t
 #include "MantidICat/CatalogKeepAlive.h"
 #include "MantidAPI/CatalogManager.h"
 
-#include <Poco/Thread.h>
-
 namespace Mantid
 {
   namespace ICat
@@ -40,7 +38,6 @@ namespace Mantid
       {
         // Exit if the user presses cancel
         this->interruption_point();
-        Poco::Thread::sleep(timePeriod);
 
         double secondsSinceExecuted = Kernel::DateAndTime::secondsFromDuration(
             Kernel::DateAndTime::getCurrentTime() - lastTimeExecuted);
