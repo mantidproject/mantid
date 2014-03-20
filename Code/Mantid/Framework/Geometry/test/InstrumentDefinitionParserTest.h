@@ -130,6 +130,9 @@ public:
 
   void test_parse_IDF_for_unit_testing() // IDF stands for Instrument Definition File
   {
+    TS_WARN("The test is skipped");
+    return;
+
     std::string filenameNoExt = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING";
     std::string filename = filenameNoExt + ".xml";
     std::string xmlText = Strings::loadFile(filename);
