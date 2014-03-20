@@ -18,6 +18,7 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
+#include <Poco/SAX/AttributesImpl.h>
 #include <boost/make_shared.hpp>
 
 using namespace Mantid;
@@ -2355,7 +2356,16 @@ namespace Geometry
 
     for (size_t i = 0; i < nElements; ++i)
     {
-      writer.emptyElement("", "", "location");
+      Poco::XML::AttributesImpl attr;
+
+      if ( ! name.empty() )
+      {
+        // Add name with appropriate numeric postfix
+        attr.addAttribute("", "", "name", "",
+                          name + boost::lexical_cast<std::string>(nameCountStart + i));
+      }
+
+      writer.emptyElement("", "", "location", attr);
     }
 
     writer.endElement("", "", "expansion-of-locations-element");

@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <instrument name="LocationsTestInstrument" valid-from="1900-01-31 23:59:59">
   <component type="flat-detector" idlist="detector-id-list">
-    <locations n-elements="7" r="0.5" t="0.0" t-end="180.0" rot="0.0" rot-end="180.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    <!-- The above should actually mean: 
-    <location r="0.5" t="0.0" rot="0.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    <location r="0.5" t="30.0" rot="30.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    <location r="0.5" t="60.0" rot="60.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    <location r="0.5" t="90.0" rot="90.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    <location r="0.5" t="120.0" rot="120.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    <location r="0.5" t="150.0" rot="150.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    <location r="0.5" t="180.0" rot="180.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    -->
+    %LOCATIONS%
   </component>
 
   <type name="flat-detector" is="detector">
@@ -28,6 +19,6 @@
   <type name="sample" is="samplePos" />
 
   <idlist idname="detector-id-list">
-    <id start="1" end="7" />
+    <id start="1" end="%NUM_DETECTORS%" />
   </idlist>
 </instrument>

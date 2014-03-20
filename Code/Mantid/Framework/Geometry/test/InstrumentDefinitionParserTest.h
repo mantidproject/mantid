@@ -11,6 +11,7 @@
 
 #include <gmock/gmock.h>
 #include <boost/tuple/tuple.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -809,19 +810,51 @@ public:
     TS_ASSERT_EQUALS( errorMsg.substr(0,25), "Detector location element");
   }
 
-  void testLocations()
+  void initializeLocationsParser(InstrumentDefinitionParser& parser, const std::string& locations,
+                                 size_t numDetectors)
   {
+    // TODO: the following could be done only once, not for every initialization
     std::string filename = ConfigService::Instance().getInstrumentDirectory()
         + "/IDFs_for_UNIT_TESTING/IDF_for_locations_test.xml";
     std::string contents = Strings::loadFile(filename);
 
-    InstrumentDefinitionParser parser;
+    boost::replace_first(contents, "%LOCATIONS%", locations);
+    boost::replace_first(contents, "%NUM_DETECTORS%", boost::lexical_cast<std::string>(numDetectors));
+
     parser.initialize(filename, "LocationsTestInstrument", contents);
+  }
+
+  void testLocationsNaming()
+  {
+    std::string locations = "<locations n-elements=\"5\" name-count-start=\"10\" name=\"det\" />";
+    size_t numDetectors = 5;
+
+    InstrumentDefinitionParser parser;
+    initializeLocationsParser(parser, locations, numDetectors);
+
     Instrument_sptr instr;
 
     TS_ASSERT_THROWS_NOTHING(instr = parser.parseXML(NULL));
+
+    TS_ASSERT_EQUALS(instr->getNumberDetectors(), numDetectors);
+    TS_ASSERT_EQUALS(instr->getDetector(1)->getName(), "det10");
+    TS_ASSERT_EQUALS(instr->getDetector(3)->getName(), "det12");
+    TS_ASSERT_EQUALS(instr->getDetector(5)->getName(), "det14");
   }
 
+
+  /*
+    <locations n-elements="7" r="0.5" t="0.0" t-end="180.0" rot="0.0" rot-end="180.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
+    <!-- The above should actually mean:
+    <location r="0.5" t="0.0" rot="0.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
+    <location r="0.5" t="30.0" rot="30.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
+    <location r="0.5" t="60.0" rot="60.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
+    <location r="0.5" t="90.0" rot="90.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
+    <location r="0.5" t="120.0" rot="120.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
+    <location r="0.5" t="150.0" rot="150.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
+    <location r="0.5" t="180.0" rot="180.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
+    -->
+  */
 };
 
 class InstrumentDefinitionParserTestPerformance : public CxxTest::TestSuite
