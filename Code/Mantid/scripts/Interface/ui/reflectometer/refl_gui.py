@@ -40,19 +40,23 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.setupUi(self)
         self.loading = False
         self.clip = QtGui.QApplication.clipboard()
-        self.shownCols = {}
-
+        self.shown_cols = {}
+        self.mod_flag = False
+        self.run_cols = [0,5,10]
+        self.angle_cols = [1,6,11]
+        self.scale_col = 16
+        self.stitch_col = 17
+        self.plot_col = 18
         #Setup instrument options with defaults assigned.
         self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF']
         self.polarisation_instruments = ['CRISP', 'POLREF']
         self.polarisation_options = {'None' : PolarisationCorrection.NONE, '1-PNR' : PolarisationCorrection.PNR, '2-PA' : PolarisationCorrection.PA }
-        self.modFlag = False
 
     def __del__(self):
         """
         Save the contents of the table if the modified flag was still set
         """
-        if self.modFlag:
+        if self.mod_flag:
             self._save(true)
 
     def _save_check(self):
@@ -76,14 +80,14 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         Close the window. but check if the user wants to save
         """
         self.buttonProcess.setFocus()
-        if self.modFlag:
+        if self.mod_flag:
             event.ignore()
             ret, saved = self._save_check()
             if ret == QtGui.QMessageBox.Save:
                 if saved:
                     event.accept()
             elif ret == QtGui.QMessageBox.Discard:
-                self.modFlag = False
+                self.mod_flag = False
                 event.accept()
 
     def _instrument_selected(self, instrument):
@@ -95,7 +99,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.textRB.clear()
         self._populate_runs_list()
         self.current_instrument = self.instrument_list[instrument]
-        self.comboPolarCorrect.setEnabled(self.current_instrument  in self.polarisation_instruments) # Enable as appropriate
+        self.comboPolarCorrect.setEnabled(self.current_instrument in self.polarisation_instruments) # Enable as appropriate
         self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None')) # Reset to None
 
     def _table_modified(self, row, column):
@@ -103,8 +107,8 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         sets the modified flag whne the table is altered
         """
         if not self.loading:
-            self.modFlag = True
-            plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
+            self.mod_flag = True
+            plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
             self._reset_plot_button(plotbutton)
 
     def _plot_row(self):
@@ -159,7 +163,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.checkTickAll.setCheckState(2)
         self.checkTickAll.setCheckState(0)
         for row in range(self.tableMain.rowCount()):
-            plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
+            plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
             self._reset_plot_button(plotbutton)
 
     def _reset_plot_button(self, plotbutton):
@@ -177,7 +181,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         Initialise the table. Clearing all data and adding the checkboxes and plot buttons
         """
         #first check if the table has been changed before clearing it
-        if self.modFlag:
+        if self.mod_flag:
             ret, saved = self._save_check()
             if ret == QtGui.QMessageBox.Cancel:
                 return
@@ -189,17 +193,17 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
         for column in range(self.tableMain.columnCount()):
             for row in range(self.tableMain.rowCount()):
-                if (column == 0) or (column == 5) or (column == 10):
+                if (column in self.run_cols):
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
                     item.setToolTip('Runs can be colon delimited to coadd them')
                     self.tableMain.setItem(row, column, item)
-                elif (column == 1) or (column == 6) or (column == 11):
+                elif (column in self.angle_cols):
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
                     item.setToolTip('Angles are in degrees')
                     self.tableMain.setItem(row, column, item)
-                elif (column == 17):
+                elif column == self.stitch_col:
                     check = QtGui.QCheckBox()
                     check.setCheckState(False)
                     check.setToolTip('If checked, the runs in this row will be stitched together')
@@ -211,8 +215,8 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                     layout.setContentsMargins(0, 0, 0, 0)
                     item.setLayout(layout)
                     item.setContentsMargins(0, 0, 0, 0)
-                    self.tableMain.setCellWidget(row, 17, item)
-                elif (column == 18):
+                    self.tableMain.setCellWidget(row, self.stitch_col, item)
+                elif column == plot_col:
                     button = QtGui.QPushButton('Plot')
                     button.setProperty("row", row)
                     self._reset_plot_button(button)
@@ -226,13 +230,13 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                     layout.setContentsMargins(0, 0, 0, 0)
                     item.setLayout(layout)
                     item.setContentsMargins(0, 0, 0, 0)
-                    self.tableMain.setCellWidget(row, 18, item)
+                    self.tableMain.setCellWidget(row, self.plot_col, item)
                 else:
                     item = QtGui.QTableWidgetItem()
                     item.setText('')
                     self.tableMain.setItem(row, column, item)
             vis_state = settings.value(str(column), True, type=bool)
-            self.shownCols[column] = vis_state
+            self.shown_cols[column] = vis_state
             if vis_state:
                 self.tableMain.showColumn(column)
             else:
@@ -240,7 +244,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         settings.endGroup()
         del settings
         self.tableMain.resizeColumnsToContents()
-        self.modFlag = False
+        self.mod_flag = False
 
     def _connect_slots(self):
         """
@@ -363,7 +367,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         cells = self.tableMain.selectedItems()
         for cell in cells:
             column = cell.column()
-            if column < 17:
+            if column < self.stitch_col:
                 cell.setText('')
 
     def _cut_cells(self):
@@ -375,7 +379,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
     def _copy_cells(self):
         """
-        Copy the selected rnage of cells to the clipboard
+        Copy the selected ranage of cells to the clipboard
         """
         cells = self.tableMain.selectedItems()
         if not cells:
@@ -383,15 +387,15 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             return
         #first discover the size of the selection and initialise a list
         mincol = cells[0].column()
-        if mincol == 17 or mincol == 18:
-            return
+        if mincol > self.scale_col:
             logger.error("Cannot copy, all cells out of range")
+            return
         maxrow = -1
         maxcol = -1
         minrow = cells[0].row()
         for cell in reversed(range(len(cells))):
             col = cells[cell].column()
-            if col < 17:
+            if col < self.stitch_col:
                 maxcol = col
                 maxrow = cells[cell].row()
                 break
@@ -402,7 +406,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         for cell in cells:
             row = cell.row()
             col = cell.column()
-            if col < 17:
+            if col < self.stitch_col:
                 selection[row - minrow][col - mincol] = str(cell.text())
         tocopy = ''
         for y in range(rowsize):
@@ -435,7 +439,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         if len(selected) > 1:
             #discover the size of the selection
             mincol = selected[0].column()
-            if mincol > 16:
+            if mincol > self.scale_col:
                 logger.error("Cannot copy, all cells out of range")
                 return
             minrow = selected[0].row()
@@ -443,7 +447,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             for cell in selected:
                 row = cell.row()
                 col = cell.column()
-                if col < 17 and (col - mincol) < pastedcols and (row - minrow) < pastedrows and len(pastedcells[row - minrow]):
+                if col < self.stitch_col and (col - mincol) < pastedcols and (row - minrow) < pastedrows and len(pastedcells[row - minrow]):
                     cell.setText(pastedcells[row - minrow][col - mincol])
         elif selected:
             #when only a single cell is selected, paste all the copied item up until the table limits
@@ -456,7 +460,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                     curcol = homecol
                     if currow < tablerows:
                         for col in row:
-                            if curcol < 17:
+                            if curcol < self.stitch_col:
                                 curcell = self.tableMain.item(currow, curcol)
                                 curcell.setText(col)
                                 curcol += 1
@@ -508,7 +512,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         Set the checkboxes in the Stitch? column to the same
         """
         for row in range(self.tableMain.rowCount()):
-            self.tableMain.cellWidget(row, 17).children()[1].setCheckState(state)
+            self.tableMain.cellWidget(row, self.stitch_col).children()[1].setCheckState(state)
 
     def _get_acc_method(self):
         """
@@ -620,7 +624,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 overlapHigh.append(qmax)
                             if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
                                 wksp[i] = first_wq.name()
-                        plotbutton = self.tableMain.cellWidget(row, 18).children()[1]
+                        plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
                         plotbutton.setProperty('runno',runno)
                         plotbutton.setProperty('overlapLow', overlapLow)
                         plotbutton.setProperty('overlapHigh', overlapHigh)
@@ -690,7 +694,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 g[0].activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
                 g[0].activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
                 g[0].activeLayer().setAutoScale()
-        if (self.tableMain.cellWidget(row, 17).children()[1].checkState() > 0):
+        if (self.tableMain.cellWidget(row, self.stitch_col).children()[1].checkState() > 0):
             if (len(runno) == 1):
                 logger.notice("Nothing to combine!")
             elif (len(runno) == 2):
@@ -702,8 +706,8 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             if (self.tableMain.item(row, i * 5 + 4).text() == ''):
                 overlapHigh = 0.3 * max(w1.readX(0))
             wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1)
-            if (self.tableMain.item(row, 16).text() != ''):
-                Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, 16).text()))
+            if self.tableMain.item(row, self.scale_col).text():
+                Scale(InputWorkspace=outputwksp, OutputWorkspace=outputwksp, Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
             Qmin = getWorkspace(outputwksp).readX(0)[0]
             Qmax = max(getWorkspace(outputwksp).readX(0))
             if canMantidPlot:
@@ -751,10 +755,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                     writer.writerow(rowtext)
             self.current_table = filename
             logger.notice("Saved file to " + filename)
-            self.modFlag = False
+            self.mod_flag = False
         except:
             return False
-        self.modFlag = False
+        self.mod_flag = False
         return True
 
     def _save(self, failsave = False):
@@ -824,7 +828,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         if loadDialog.exec_():
             try:
                 #before loading make sure you give them a chance to save
-                if self.modFlag:
+                if self.mod_flag:
                     ret, saved = self._save_check()
                     if ret == QtGui.QMessageBox.Cancel:
                         #if they hit cancel abort the load
@@ -845,7 +849,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             except:
                 logger.error('Could not load file: ' + str(filename) + '. File not found or unable to read from file.')
         self.loading = False
-        self.modFlag = False
+        self.mod_flag = False
 
     def _reload_table(self):
         """
@@ -854,7 +858,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.loading = True
         filename = self.current_table
         if filename:
-            if self.modFlag:
+            if self.mod_flag:
                 msgBox = QtGui.QMessageBox()
                 msgBox.setText("The table has been modified. Are you sure you want to reload the table and lose your changes?")
                 msgBox.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
@@ -877,7 +881,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                             item.setText(line[column])
                             self.tableMain.setItem(row, column, item)
                         row = row + 1
-                self.modFlag = False
+                self.mod_flag = False
             except:
                 logger.error('Could not load file: ' + str(filename) + '. File not found or unable to read from file.')
         else:
@@ -904,12 +908,12 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         try:
             Dialog = QtGui.QDialog()
             u = refl_choose_col.ReflChoose()
-            u.setupUi(Dialog, self.shownCols, self.tableMain)
+            u.setupUi(Dialog, self.shown_cols, self.tableMain)
             if Dialog.exec_():
                 settings = QtCore.QSettings()
                 settings.beginGroup("Mantid/ISISReflGui/Columns")
                 for key, value in u.visiblestates.iteritems():
-                    self.shownCols[key] = value
+                    self.shown_cols[key] = value
                     settings.setValue(str(key), value)
                     if value:
                         self.tableMain.showColumn(key)
