@@ -881,6 +881,17 @@ public:
     TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Z(), 3.0, 1.0E-8);
   }
 
+  void checkDetectorRot(IDetector_const_sptr det, double deg, double axisx, double axisy, double axisz)
+  {
+    double detDeg, detAxisX, detAxisY, detAxisZ;
+    det->getRotation().getAngleAxis(detDeg, detAxisX, detAxisY, detAxisZ);
+
+    TS_ASSERT_DELTA(deg, detDeg, 1.0E-8);
+    TS_ASSERT_DELTA(axisx, detAxisX, 1.0E-8);
+    TS_ASSERT_DELTA(axisy, detAxisY, 1.0E-8);
+    TS_ASSERT_DELTA(axisz, detAxisZ, 1.0E-8);
+  }
+
   void testLocationsMixed()
   {
     // Semicircular placement, like the one for e.g. MERLIN or IN5
@@ -891,27 +902,29 @@ public:
 
     Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
 
-    // TODO: check rotations
-
-    // Left-most (r = 0.5, t, rot = )
+    // Left-most (r = 0.5, t, rot = 0)
     TS_ASSERT_DELTA(instr->getDetector(1)->getPos().X(), 0, 1.0E-8);
     TS_ASSERT_DELTA(instr->getDetector(1)->getPos().Y(), 0, 1.0E-8);
     TS_ASSERT_DELTA(instr->getDetector(1)->getPos().Z(), 0.5, 1.0E-8);
+    checkDetectorRot(instr->getDetector(1), 0, 0, 0, 1); // Special case for null rotation
 
     // Next to left-most (r = 0.5, t, rot = 30)
     TS_ASSERT_DELTA(instr->getDetector(2)->getPos().X(), 0.25, 1.0E-8);
     TS_ASSERT_DELTA(instr->getDetector(2)->getPos().Y(), 0, 1.0E-8);
     TS_ASSERT_DELTA(instr->getDetector(2)->getPos().Z(), 0.433, 1.0E-4);
+    checkDetectorRot(instr->getDetector(2), 30, 0, 1, 0);
 
     // The one directly in front (r = 0.5, t, rot = 90)
     TS_ASSERT_DELTA(instr->getDetector(4)->getPos().X(), 0.5, 1.0E-8);
     TS_ASSERT_DELTA(instr->getDetector(4)->getPos().Y(), 0, 1.0E-8);
     TS_ASSERT_DELTA(instr->getDetector(4)->getPos().Z(), 0, 1.0E-8);
+    checkDetectorRot(instr->getDetector(4), 90, 0, 1, 0);
 
     // Right-most to the one directly in front (r = 0.5, t, rot = 120)
     TS_ASSERT_DELTA(instr->getDetector(5)->getPos().X(), 0.433, 1.0E-4);
     TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Y(), 0, 1.0E-8);
     TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Z(), -0.25, 1.0E-8);
+    checkDetectorRot(instr->getDetector(5), 120, 0, 1, 0);
   }
 
   void testLocationsZeroElements()

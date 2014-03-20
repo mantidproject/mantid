@@ -2346,7 +2346,7 @@ namespace Geometry
     std::set<std::string> rangeAttrs = boost::assign::list_of("x")("y")("z")("r")("t")("p")("rot");
 
     // Numeric attributes related to rotation. Doesn't make sense to have -end for those
-    std::set<std::string> rotAttrs = boost::assign::list_of("x-axis")("y-axis")("z-axis");
+    std::set<std::string> rotAttrs = boost::assign::list_of("axis-x")("axis-y")("axis-z");
 
     // A set of all numeric attributes for convenience
     std::set<std::string> allAttrs;
