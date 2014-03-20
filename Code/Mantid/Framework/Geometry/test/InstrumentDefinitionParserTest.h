@@ -809,9 +809,9 @@ public:
 
   Instrument_sptr loadInstrLocations(const std::string& locations, detid_t numDetectors, bool rethrow = false)
   {
-    // TODO: the following could be done only once, not for every initialization
     std::string filename = ConfigService::Instance().getInstrumentDirectory()
         + "/IDFs_for_UNIT_TESTING/IDF_for_locations_test.xml";
+
     std::string contents = Strings::loadFile(filename);
 
     boost::replace_first(contents, "%LOCATIONS%", locations);
