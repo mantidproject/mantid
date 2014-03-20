@@ -2365,18 +2365,37 @@ namespace Geometry
 
     // Attribute values as read from <locations>. If the attribute doesn't have a value here, it
     // means that it wasn't set
-    std::map<std::string, std::string> attrValues;
+    std::map<std::string, double> attrValues;
 
     // Read all the set attribute values
     for (auto it = allAttrs.begin(); it != allAttrs.end(); ++it)
     {
       if ( pElem->hasAttribute(*it) )
       {
-        attrValues[*it] = pElem->getAttribute(*it);
+        attrValues[*it] = boost::lexical_cast<double>(pElem->getAttribute(*it));
       }
     }
 
-    // TODO: read -end values and calculate steps. If no value for -end - error
+    // Range attribute steps
+    std::map<std::string, double> rangeAttrSteps;
+
+    // Find *-end for range attributes and calculate steps
+    for (auto it = rangeAttrs.begin(); it != rangeAttrs.end(); ++it)
+    {
+      std::string endAttr = *it + "-end";
+      if (pElem->hasAttribute(endAttr))
+      {
+        if (attrValues.find(*it) == attrValues.end())
+        {
+          throw Exception::InstrumentDefinitionError("*-end attribute without corresponding * attribute.");
+        }
+
+        double from = attrValues[*it];
+        double to = boost::lexical_cast<double>(pElem->getAttribute(endAttr));
+
+        rangeAttrSteps[*it] = (to - from) / (static_cast<double>(nElements) - 1);
+      }
+    }
 
     std::ostringstream xml;
 
@@ -2398,9 +2417,13 @@ namespace Geometry
       // Copy values of all the attributes set
       for (auto it = attrValues.begin(); it != attrValues.end(); ++it)
       {
-        attr.addAttribute("", "", it->first, "", it->second);
+        attr.addAttribute("", "", it->first, "", boost::lexical_cast<std::string>(it->second));
 
-        // TODO: if is a range attribute, increase the value by the step
+        // If attribute has a step, increase the value by the step
+        if (rangeAttrSteps.find(it->first) != rangeAttrSteps.end())
+        {
+          it->second += rangeAttrSteps[it->first];
+        }
       }
 
       writer.emptyElement("", "", "location", attr);

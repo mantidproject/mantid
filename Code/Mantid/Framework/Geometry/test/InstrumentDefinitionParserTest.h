@@ -131,9 +131,6 @@ public:
 
   void test_parse_IDF_for_unit_testing() // IDF stands for Instrument Definition File
   {
-    TS_WARN("The test is skipped");
-    return;
-
     std::string filenameNoExt = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING";
     std::string filename = filenameNoExt + ".xml";
     std::string xmlText = Strings::loadFile(filename);
@@ -858,18 +855,60 @@ public:
     }
   }
 
-  /*
-    <locations n-elements="7" r="0.5" t="0.0" t-end="180.0" rot="0.0" rot-end="180.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    <!-- The above should actually mean:
-    <location r="0.5" t="0.0" rot="0.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    <location r="0.5" t="30.0" rot="30.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    <location r="0.5" t="60.0" rot="60.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    <location r="0.5" t="90.0" rot="90.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    <location r="0.5" t="120.0" rot="120.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    <location r="0.5" t="150.0" rot="150.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    <location r="0.5" t="180.0" rot="180.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
-    -->
-  */
+  void testLocationsRanges()
+  {
+    std::string locations = "<locations n-elements=\"5\" x=\"1.0\" x-end=\"5.0\"  "
+                            "                            y=\"4.0\" y-end=\"1.0\"  "
+                            "                            z=\"3.0\" z-end=\"3.0\"/>";
+    detid_t numDetectors = 5;
+
+    Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
+
+    TS_ASSERT_DELTA(instr->getDetector(1)->getPos().X(), 1.0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(1)->getPos().Y(), 4.0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(1)->getPos().Z(), 3.0, 1.0E-8);
+
+    TS_ASSERT_DELTA(instr->getDetector(3)->getPos().X(), 3.0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(3)->getPos().Y(), 2.5, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(3)->getPos().Z(), 3.0, 1.0E-8);
+
+    TS_ASSERT_DELTA(instr->getDetector(5)->getPos().X(), 5.0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Y(), 1.0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Z(), 3.0, 1.0E-8);
+  }
+
+  void testLocationsMixed()
+  {
+    // Semicircular placement, like the one for e.g. MERLIN or IN5
+    std::string locations = "<locations n-elements=\"7\" r=\"0.5\" t=\"0.0\" t-end=\"180.0\" "
+                            "           rot=\"0.0\" rot-end=\"180.0\" axis-x=\"0.0\" "
+                            "           axis-y=\"1.0\" axis-z=\"0.0\"/>";
+    detid_t numDetectors = 7;
+
+    Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
+
+    // TODO: check rotations
+
+    // Left-most (r = 0.5, t, rot = )
+    TS_ASSERT_DELTA(instr->getDetector(1)->getPos().X(), 0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(1)->getPos().Y(), 0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(1)->getPos().Z(), 0.5, 1.0E-8);
+
+    // Next to left-most (r = 0.5, t, rot = 30)
+    TS_ASSERT_DELTA(instr->getDetector(2)->getPos().X(), 0.25, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(2)->getPos().Y(), 0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(2)->getPos().Z(), 0.433, 1.0E-4);
+
+    // The one directly in front (r = 0.5, t, rot = 90)
+    TS_ASSERT_DELTA(instr->getDetector(4)->getPos().X(), 0.5, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(4)->getPos().Y(), 0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(4)->getPos().Z(), 0, 1.0E-8);
+
+    // Right-most to the one directly in front (r = 0.5, t, rot = 120)
+    TS_ASSERT_DELTA(instr->getDetector(5)->getPos().X(), 0.433, 1.0E-4);
+    TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Y(), 0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Z(), -0.25, 1.0E-8);
+  }
 };
 
 class InstrumentDefinitionParserTestPerformance : public CxxTest::TestSuite
