@@ -806,6 +806,19 @@ public:
     TS_ASSERT_EQUALS( errorMsg.substr(0,25), "Detector location element");
   }
 
+  void testLocations()
+  {
+    std::string filename = ConfigService::Instance().getInstrumentDirectory()
+        + "/IDFs_for_UNIT_TESTING/IDF_for_locations_test.xml";
+    std::string contents = Strings::loadFile(filename);
+
+    InstrumentDefinitionParser parser;
+    parser.initialize(filename, "LocationsTestInstrument", contents);
+    Instrument_sptr instr;
+
+    TS_ASSERT_THROWS_NOTHING(instr = parser.parseXML(NULL));
+  }
+
 };
 
 class InstrumentDefinitionParserTestPerformance : public CxxTest::TestSuite
