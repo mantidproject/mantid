@@ -952,6 +952,14 @@ public:
     locations = "<locations n-elements=\"2\" name-count-start=\"x\"/>";
     TS_ASSERT_THROWS_ANYTHING(loadInstrLocations(locations, numDetectors, true));
   }
+
+  void testLocationsNoCorrespondingStartAttr()
+  {
+    std::string locations = "<locations n-elements=\"2\" t-end=\"180.x\" />";
+    detid_t numDetectors = 2;
+
+    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true), Exception::InstrumentDefinitionError);
+  }
 };
 
 class InstrumentDefinitionParserTestPerformance : public CxxTest::TestSuite
