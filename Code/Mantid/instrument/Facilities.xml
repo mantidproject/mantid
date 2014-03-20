@@ -360,6 +360,10 @@
       <technique>Small Angle Scattering</technique>
    </instrument> 
    
+   <instrument name="USANS" shortname="USANS" beamline="1A"> 
+      <technique>Small Angle Scattering</technique>
+   </instrument> 
+   
    <instrument name="VULCAN" beamline="7"> 
 	<technique>Neutron Diffraction</technique>
    </instrument> 
@@ -367,6 +371,7 @@
    <instrument name="CORELLI" beamline="9"> 
 	<technique>Neutron Diffraction</technique>
 	<technique>Diffuse Scattering</technique>
+	<livedata address="corelli-sms.sns.gov:31415" />
    </instrument> 
       
    <instrument name="POWGEN" shortname="PG3" beamline="11A"> 
