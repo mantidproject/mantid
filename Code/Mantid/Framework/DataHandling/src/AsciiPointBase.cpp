@@ -34,7 +34,7 @@ namespace Mantid
     }
 
     /** 
-    *   Executes the algorithm.
+    *   Executes the algorithm. In this case it provides the process for any child classes as this class is abstract
     */
     void AsciiPointBase::exec()
     {
@@ -54,6 +54,10 @@ namespace Mantid
       file.close();
     }
 
+    /** Adds extra data to the top of the file.
+     *  @param file :: pointer to output file stream
+     *  @returns std::vector<double> of point data for the X column
+     */
     std::vector<double> AsciiPointBase::header(std::ofstream & file)
     {
       auto title ='#'+ m_ws->getTitle();
@@ -71,6 +75,10 @@ namespace Mantid
       return XData;
     }
 
+    /** virtual method to add information to the file before the data
+     *  @param file :: pointer to output file stream
+     *  @param XData :: pointer to a std::vector<double> containing the point data to be printed
+     */
     void AsciiPointBase::data(std::ofstream & file, const std::vector<double> & XData)
     {
       const std::vector<double> & yData = m_ws->readY(0);
@@ -86,6 +94,11 @@ namespace Mantid
       }
     }
 
+    /** writes a properly formatted line of data
+     *  @param val :: the double value to be written
+     *  @param file :: pointer to output file stream
+     *  @param leadingSep :: boolean to determine if there should be a separator before this value, default true
+     */
     void AsciiPointBase::outputval (double val, std::ofstream & file, bool leadingSep)
     {
       bool nancheck = checkIfNan(val);
@@ -110,11 +123,17 @@ namespace Mantid
       }
     }
 
+    /** checks if a value is Not A Number
+     *  @returns boolean true if the supplied value was Not a Number
+     */
     bool AsciiPointBase::checkIfNan(const double& value) const
     {
       return (boost::math::isnan(value));
     }
 
+    /** checks if a value is Infinite
+     *  @returns boolean true if the supplied value was Infinite
+     */
     bool AsciiPointBase::checkIfInfinite(const double& value) const
     {
       return (std::abs(value) == std::numeric_limits<double>::infinity());

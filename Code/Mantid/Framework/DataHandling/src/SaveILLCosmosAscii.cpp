@@ -30,6 +30,7 @@ namespace Mantid
       this->setOptionalMessage("Saves a 2D workspace to a ascii file.");
     }
     
+    /// virtual method to set the extra properties required for this algorithm
     void SaveILLCosmosAscii::extraProps()
     {
       declareProperty(new ArrayProperty<std::string>("LogList"),"List of logs to write to file.");
@@ -37,6 +38,9 @@ namespace Mantid
       declareProperty("Title", "", "Text to be written to the Title field");
     }
 
+    /** virtual method to add information to the file before the data
+     *  @param file :: pointer to output file stream
+     */
     void SaveILLCosmosAscii::extraHeaders(std::ofstream & file)
     {
       auto samp = m_ws->run();
