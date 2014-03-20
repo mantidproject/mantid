@@ -216,7 +216,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                     item.setLayout(layout)
                     item.setContentsMargins(0, 0, 0, 0)
                     self.tableMain.setCellWidget(row, self.stitch_col, item)
-                elif column == plot_col:
+                elif column == self.plot_col:
                     button = QtGui.QPushButton('Plot')
                     button.setProperty("row", row)
                     self._reset_plot_button(button)
@@ -259,6 +259,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.buttonClear.clicked.connect(self._initialise_table)
         self.buttonProcess.clicked.connect(self._process)
         self.buttonTransfer.clicked.connect(self._transfer)
+        self.buttonColumns.clicked.connect(self._choose_columns)
         self.actionOpen_Table.triggered.connect(self._load_table)
         self.actionReload_from_Disk.triggered.connect(self._reload_table)
         self.actionSave.triggered.connect(self._save)
@@ -276,7 +277,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.actionPaste.triggered.connect(self._paste_cells)
         self.actionCut.triggered.connect(self._cut_cells)
         self.actionCopy.triggered.connect(self._copy_cells)
-        self.actionChoose_Columns.triggered.connect(self._choose_Columns)
+        self.actionChoose_Columns.triggered.connect(self._choose_columns)
 
     def _populate_runs_list(self):
         """
