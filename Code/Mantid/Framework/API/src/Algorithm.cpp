@@ -1244,6 +1244,8 @@ namespace Mantid
         // Don't make the new algorithm a child so that it's workspaces are stored correctly
         alg_sptr->setChild(false);
 
+        alg_sptr->setRethrows(true);
+
         IAlgorithm* alg = alg_sptr.get();
         // Set all non-workspace properties
         this->copyNonWorkspaceProperties(alg, int(entry)+1);
@@ -1295,8 +1297,17 @@ namespace Mantid
         } // for each OutputWorkspace property
 
         // ------------ Execute the algo --------------
-        if (!alg->execute())
-          throw std::runtime_error("Execution of " + this->name() + " for group entry " + Strings::toString(entry+1) + " failed.");
+        try
+        {
+          alg->execute();
+        }
+        catch(std::exception& e)
+        {
+          std::ostringstream msg;
+          msg << "Execution of " << this->name() << " for group entry " << (entry+1) << " failed: ";
+          msg << e.what(); // Add original message
+          throw std::runtime_error(msg.str());
+        }
 
         // ------------ Fill in the output workspace group ------------------
         // this has to be done after execute() because a workspace must exist 

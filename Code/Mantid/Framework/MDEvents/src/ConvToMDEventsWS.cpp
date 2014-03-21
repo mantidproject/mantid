@@ -54,7 +54,7 @@ namespace Mantid
       it = events.begin();
       for (; it != it_end; it++)
       {
-        double val=localUnitConv.convertUnits(it->tof());         
+        double val=localUnitConv.convertUnits(it->tof());
         double signal = it->weight();
         double errorSq= it->errorSquared();
         if(!m_QConverter->calcMatrixCoord(val,locCoord,signal,errorSq))continue; // skip ND outside the range
