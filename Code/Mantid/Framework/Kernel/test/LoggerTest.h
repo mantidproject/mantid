@@ -67,6 +67,7 @@ public:
       level = otherLogger.getLevel(); // here so the optimiser doesn't kill the loop
     }
 
+    UNUSED_ARG(level);
   }
 
   //---------------------------------------------------------------------------
