@@ -455,10 +455,10 @@ void LoadILLIndirect::rl_build_properties(NXhandle nxfileID,
 			g_log.debug()<<indent_str<<nxname<<" opened."<<std::endl;
 
 			if (parent_class=="NXData") {
-				g_log.debug()<<indent_str<<"skypping NXData"<<std::endl;
+				g_log.debug()<<indent_str<<"skipping NXData"<<std::endl;
 				/* nothing */
 			} else if (parent_class=="NXMonitor") {
-				g_log.debug()<<indent_str<<"skypping NXMonitor"<<std::endl;
+				g_log.debug()<<indent_str<<"skipping NXMonitor"<<std::endl;
 				/* nothing */
 			} else { // create a property
 				int rank;
