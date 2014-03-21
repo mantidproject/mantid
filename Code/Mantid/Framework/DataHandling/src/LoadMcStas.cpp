@@ -390,7 +390,7 @@ namespace DataHandling
         const detid2index_map detIDtoWSindex_map =	eventWS->getDetectorIDToWorkspaceIndexMap(true);			
 
         progEntries.report("read event data into workspace");
-        for (size_t in = 0; in < nNeutronsForthisBlock; in++)
+        for (int64_t in = 0; in < nNeutronsForthisBlock; in++)
         {   
           const int detectorID = static_cast<int>(data[4+numberOfDataColumn*in]);
           const double detector_time =  data[5+numberOfDataColumn*in] * 1.0e6;  // convert to microseconds
