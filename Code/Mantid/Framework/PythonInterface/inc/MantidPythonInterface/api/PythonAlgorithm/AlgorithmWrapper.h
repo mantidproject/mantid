@@ -59,6 +59,10 @@ namespace Mantid
       virtual const std::string category() const;
       /// A default category, chosen if there is no override
       std::string defaultCategory() const;
+      /// Allow the isRunning method to be overridden
+      virtual bool isRunning() const;
+      /// Allow the cancel method to be overridden
+      virtual void cancel();
       /// Returns the validateInputs result of the algorithm.
       std::map<std::string, std::string> validateInputs();
       ///@}
@@ -81,6 +85,8 @@ namespace Mantid
 
       /// The Python portion of the object
       PyObject *m_self;
+      /// A pointer to an overridden isRunning method
+      PyObject *m_isRunningObj;
     };
   }
 }

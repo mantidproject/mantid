@@ -147,9 +147,9 @@ namespace Mantid
     bool MDTransfQ3D::calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
     {
       UNUSED_ARG(Coord); 
-      m_ex = (m_Det+i)->X();
-      m_ey = (m_Det+i)->Y();
-      m_ez = (m_Det+i)->Z();
+      m_ex = (m_DetDirecton+i)->X();
+      m_ey = (m_DetDirecton+i)->Y();
+      m_ez = (m_DetDirecton+i)->Z();
       // if Lorentz-corrected, retrieve the sin(Theta)^2 for the detector;
       if(m_isLorentzCorrected)m_SinThetaSq = *(m_SinThetaSqArray+i);
       // if input energy changes on each detector (efixed, indirect mode only), then set up its value
@@ -179,7 +179,7 @@ namespace Mantid
       if(!ConvParams.m_PreprDetTable)throw(std::runtime_error("The detectors have not been preprocessed but they have to before running initialize"));
       // get pointer to the positions of the preprocessed detectors
       std::vector<Kernel::V3D> const & DetDir = ConvParams.m_PreprDetTable->getColVector<Kernel::V3D>("DetDirections"); 
-      m_Det = &DetDir[0];     //
+      m_DetDirecton = &DetDir[0];     //
 
       // get min and max values defined by the algorithm. 
       ConvParams.getMinMax(m_DimMin,m_DimMax);

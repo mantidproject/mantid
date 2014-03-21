@@ -98,6 +98,7 @@ namespace API
 
     virtual size_t getMemorySize() const = 0;
 
+    virtual std::pair<double,double> getXDataRange()const;
     // ---------------------------------------------------------
     void addDetectorID(const detid_t detID);
     void addDetectorIDs(const std::set<detid_t>& detIDs);

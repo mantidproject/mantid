@@ -57,13 +57,17 @@ namespace MantidQt
       virtual ~DataSelector();
 
       /// Get the current file path in the MWRunFiles widget
-      QString getFullFilePath();
+      QString getFullFilePath() const;
       /// Get the currently available file or workspace name
-      QString getCurrentDataName();
-      /// Get whether file or workspace input is currently being shown
-      int getCurrentView() const;
+      QString getCurrentDataName() const;
+      /// Get whether the file selector is currently being shown
+      bool isFileSelectorVisible() const;
+      /// Get whether the workspace selector is currently being shown
+      bool isWorkspaceSelectorVisible() const;
       /// Checks if widget is in a valid state
-      bool isValid() const;
+      bool isValid();
+      /// Get file problem, empty string means no error.
+      QString getProblem() const;
       /// Check if the widget is set to automatically attempt to load files
       bool willAutoLoad();
       /// Set the widget to automatically attempt to load files
@@ -101,6 +105,12 @@ namespace MantidQt
       /// Signal emitted when the load button is clicked
       void loadClicked();
 
+    protected:
+      //Method for handling drop events
+      void dropEvent(QDropEvent *);
+      //called when a drag event enters the class
+      void dragEnterEvent(QDragEnterEvent *);
+
     private slots:
       /// Slot called when the current view is changed
       void handleViewChanged(int index);
@@ -122,6 +132,7 @@ namespace MantidQt
       bool m_autoLoad;
       /// Flag to show or hide the load button. By default this is set to true.
       bool m_showLoad;
+
     };
 
   } /* namespace MantidWidgets */

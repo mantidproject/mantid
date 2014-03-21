@@ -42,6 +42,7 @@ class LoadSINQ(PythonAlgorithm):
         self.declareProperty('Numor',0,'Choose file number',direction=Direction.Input)
         self.declareProperty(WorkspaceProperty("OutputWorkspace","",direction=Direction.Output))
         self.setWikiSummary("SINQ data file loader")
+        self.setOptionalMessage("SINQ data file loader")
 
     def PyExec(self):
         inst=self.getProperty('Instrument').value

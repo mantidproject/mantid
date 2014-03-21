@@ -4,18 +4,19 @@
 #include "qtpropertymanager.h"
 #include <QLineEdit>
 
-class QT_QTPROPERTYBROWSER_EXPORT StringEditorFactory : public QtAbstractEditorFactory<QtStringPropertyManager>
+class StringEditorFactory : public QtAbstractEditorFactory<QtStringPropertyManager>
 {
     Q_OBJECT
 public:
   StringEditorFactory(QObject *parent = 0): QtAbstractEditorFactory<QtStringPropertyManager>(parent){}
 protected:
-  void connectPropertyManager(QtStringPropertyManager *manager);
+  using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler warning
+  void connectPropertyManager(QtStringPropertyManager *){}
   QWidget *createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent);
-  void disconnectPropertyManager(QtStringPropertyManager *manager);
+  void disconnectPropertyManager(QtStringPropertyManager *){}
 };
 
-class QT_QTPROPERTYBROWSER_EXPORT StringEditor: public QLineEdit
+class StringEditor: public QLineEdit
 {
   Q_OBJECT
 public:

@@ -18,10 +18,11 @@ set ( SRC_FILES
 	src/IndirectBayesTab.cpp
 	src/IndirectDataAnalysis.cpp
 	src/IndirectDiffractionReduction.cpp
-	src/IndirectLoadAscii.cpp
-	src/IndirectLoadAsciiTab.cpp
-	src/IndirectMolDyn.cpp
-	src/IndirectNeutron.cpp
+  src/IndirectLoadAscii.cpp
+  src/IndirectLoadAsciiTab.cpp
+  src/IndirectMolDyn.cpp
+  src/IndirectMoments.cpp
+  src/IndirectNeutron.cpp
 	src/JumpFit.cpp
 	src/MSDFit.cpp
 	src/MantidEV.cpp
@@ -73,10 +74,11 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectBayesTab.h
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
-	inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
-	inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
-	inc/MantidQtCustomInterfaces/IndirectMolDyn.h
-	inc/MantidQtCustomInterfaces/IndirectNeutron.h
+  inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
+  inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
+  inc/MantidQtCustomInterfaces/IndirectMolDyn.h
+  inc/MantidQtCustomInterfaces/IndirectMoments.h
+  inc/MantidQtCustomInterfaces/IndirectNeutron.h
 	inc/MantidQtCustomInterfaces/JumpFit.h
 	inc/MantidQtCustomInterfaces/MSDFit.h
 	inc/MantidQtCustomInterfaces/MantidEV.h
@@ -129,6 +131,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
                 inc/MantidQtCustomInterfaces/IndirectNeutron.h
                 inc/MantidQtCustomInterfaces/IndirectMolDyn.h
+                inc/MantidQtCustomInterfaces/IndirectMoments.h
                 inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
@@ -173,6 +176,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
 set( TEST_FILES CreateMDWorkspaceAlgDialogTest.h
                 EventNexusFileMementoTest.h
                 WorkspaceMementoTest.h
+                MuonAnalysisHelperTest.h
                 WorkspaceInADSTest.h
                 RawFileMementoTest.h
                 IO_MuonGroupingTest.h

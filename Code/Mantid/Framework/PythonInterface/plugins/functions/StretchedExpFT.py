@@ -48,7 +48,7 @@ class StretchedExpFT(IFunction1D):
         self._parm2index = {'height':0,'tau':1,'beta':2} #order in which they were defined
 
     def category(self):
-        return 'QENS'
+        return 'QuasiElastic'
 
     def init(self):
         '''Declare parameters that participate in the fitting'''

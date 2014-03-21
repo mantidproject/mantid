@@ -2783,6 +2783,191 @@ Later steps in the process (saving, renaming) will not be done.</string>
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabMoments">
+      <attribute name="title">
+       <string>Moments</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="moment_verticalLayout_27">
+       <item>
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string>Input</string>
+         </property>
+         <layout class="QVBoxLayout" name="moment_verticalLayout_29">
+          <item>
+           <layout class="QGridLayout" name="moment_gridLayout_9">
+            <item row="0" column="0" colspan="2">
+             <widget class="MantidQt::MantidWidgets::DataSelector" name="moment_dsInput">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="loadLabelText" stdset="0">
+               <string>Plot Input</string>
+              </property>
+              <property name="workspaceSuffixes" stdset="0">
+               <stringlist>
+                <string>_sqw</string>
+               </stringlist>
+              </property>
+              <property name="fileBrowserSuffixes" stdset="0">
+               <stringlist>
+                <string>_sqw.nxs</string>
+               </stringlist>
+              </property>
+              <property name="showLoad">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="2">
+             <layout class="QHBoxLayout" name="horizontalLayout_54">
+              <item>
+               <widget class="QCheckBox" name="moment_ckScale">
+                <property name="text">
+                 <string>Scale By:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="moment_leScale">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>50</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="moment_validScale">
+                <property name="text">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body style=&quot; color:#aa0000;&quot;&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="textFormat">
+                 <enum>Qt::RichText</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_36">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Expanding</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_21">
+         <item>
+          <layout class="QHBoxLayout" name="moment_treeSpace"/>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="moment_plotSpace"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="moment_verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Output Options</string>
+         </property>
+         <layout class="QVBoxLayout" name="moment_verticalLayout_26">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_42">
+            <item>
+             <widget class="QCheckBox" name="moment_ckVerbose">
+              <property name="text">
+               <string>Verbose</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_31">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="moment_ckPlot">
+              <property name="text">
+               <string>Plot</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_33">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="moment_ckSave">
+              <property name="text">
+               <string>Save</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tabDiagnoseDetectors">
       <attribute name="title">
        <string>Diagnose Detectors</string>
@@ -3259,6 +3444,11 @@ Later steps in the process (saving, renaming) will not be done.</string>
    <class>MantidQt::MantidWidgets::InstrumentSelector</class>
    <extends>QComboBox</extends>
    <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/DataSelector.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>

@@ -42,7 +42,7 @@ namespace Mantid
     {
       using namespace Poco::XML;
       DOMParser pParser;
-      Document* pDoc = pParser.parseString(processXML);
+      Poco::AutoPtr<Document> pDoc = pParser.parseString(processXML);
       Element* pInstructionsXML = pDoc->documentElement();
 
       ImplicitFunctionParser* funcParser = Mantid::API::ImplicitFunctionParserFactory::Instance().createImplicitFunctionParserFromXML(processXML);

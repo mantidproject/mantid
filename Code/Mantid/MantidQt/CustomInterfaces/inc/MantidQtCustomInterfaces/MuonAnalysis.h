@@ -43,6 +43,7 @@ namespace Muon
     std::string mainFieldDirection;
     double timeZero;
     double firstGoodData;
+    std::string label;
   };
 
   struct GroupResult {
@@ -311,28 +312,14 @@ private:
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
   int numOfDetectors(const std::string& str) const;
 
-  void changeCurrentRun(std::string& workspaceGroupName);
-
   /// is string a number?
   bool isNumber(const std::string& s) const;
 
   /// Clear tables and front combo box
   void clearTablesAndCombo();
 
-  /// Sums a given list of workspaces
-  Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces) const;
-
   /// Deletes a workspace _or_ a workspace group with the given name, if one exists
   void deleteWorkspaceIfExists(const std::string& wsName);
-
-  /// Get group workspace name
-  QString getGroupName();
-
-  /// Get a name for the ranged workspace.
-  std::string getRangedName();
-
-  /// Check if grouping in table is consistent with data file
-  std::string isGroupingAndDataConsistent();
 
   ///Return true if data are loaded
   bool areDataLoaded();
@@ -415,9 +402,6 @@ private:
 
   /// tell which group is in which row
   std::vector<int> m_groupToRow;
-
-  ///
-  void checkIf_ID_dublicatesInTable(const int row);
 
   /// Return the group-number for the group in a row. 
   /// Return -1 if invalid group in row
@@ -508,6 +492,9 @@ private:
   /// When data loaded set various buttons etc to active
   void nowDataAvailable();
 
+  /// Updates m_currentGroup given the new loaded label
+  void updateCurrentGroup(const std::string& newGroupName);
+
   /// handles option tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
   /// handles fit data work
@@ -520,6 +507,9 @@ private:
 
   /// First Good Data time as loaded from Data file
   double m_dataFirstGoodData;
+
+  /// The group we should add new plot workspaces to
+  WorkspaceGroup_sptr m_currentGroup;
 
   /// Default widget values
   static const QString TIME_ZERO_DEFAULT;
