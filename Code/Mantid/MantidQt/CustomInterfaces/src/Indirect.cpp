@@ -1064,7 +1064,7 @@ void Indirect::setupCalibration()
   m_calResR2 = new MantidWidgets::RangeSelector(m_calResPlot, 
     MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
   m_calResR2->setColour(Qt::darkGreen);
-  m_calResR1 = new MantidWidgets::RangeSelector(m_calResPlot);
+  m_calResR1 = new MantidWidgets::RangeSelector(m_calResPlot, MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, true);
 
   connect(m_calResR1, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
   connect(m_calResR1, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
