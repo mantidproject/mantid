@@ -69,7 +69,9 @@ namespace Mantid
       // fields existent only at the ILL
       if (descriptor.pathExists("/entry0/wavelength")
         && descriptor.pathExists("/entry0/experiment_identifier")
-        && descriptor.pathExists("/entry0/mode")) {
+        && descriptor.pathExists("/entry0/mode")
+        && !descriptor.pathExists("/entry0/dataSD") // This one is for LoadILLIndirect
+        ) {
           return 80;
       } 
       else 
