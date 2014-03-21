@@ -172,6 +172,7 @@ void MdViewerWidget::setupUiAndConnections()
 {
   this->ui.setupUi(this);
   this->ui.splitter_2->setStretchFactor(1, 1);
+  this->ui.splitter_3->setStretchFactor(0, 1);
   this->ui.statusBar->setSizeGripEnabled(false);
 
   QObject::connect(this->ui.modeControlWidget,
@@ -183,6 +184,11 @@ void MdViewerWidget::setupUiAndConnections()
                    SIGNAL(clicked()),
                    this,
                    SLOT(onRotationPoint()));
+
+  /// Provide access to the color-editor panel for the application.
+  pqApplicationCore::instance()->registerManager(
+    "COLOR_EDITOR_PANEL", this->ui.colorMapEditorDock);
+  this->ui.colorMapEditorDock->hide();
 }
 
 /**
