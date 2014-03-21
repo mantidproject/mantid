@@ -45,7 +45,8 @@ endif()
 ###########################################################################
 # Mac-specific installation setup
 ###########################################################################
-set ( CMAKE_INSTALL_PREFIX /Applications )
+set ( CMAKE_INSTALL_PREFIX "" )
+set ( CPACK_PACKAGE_EXECUTABLES MantidPlot )
 set ( INBUNDLE MantidPlot.app/ )
 # We know exactly where this has to be on Darwin
 set ( PARAVIEW_APP_DIR "/Applications/${OSX_PARAVIEW_APP}" )
@@ -116,7 +117,6 @@ endif()
 message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
 
 string (REPLACE " " "" CPACK_SYSTEM_NAME ${OSX_CODENAME})
-set ( CPACK_OSX_PACKAGE_VERSION 10.6 )
 
-set ( CPACK_GENERATOR PackageMaker )
+set ( CPACK_GENERATOR DragNDrop )
 
