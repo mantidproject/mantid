@@ -49,7 +49,7 @@ namespace API
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl()
 #ifdef MPI_BUILD
-  m_mpi_environment()
+  : m_mpi_environment()
 #endif
 {
   // Mantid only understands English...
