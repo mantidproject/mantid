@@ -7,6 +7,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -76,6 +77,8 @@ public:
   virtual void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData);
 
 protected:
+  /// Logger instance
+  static Kernel::Logger g_log;
 
   /// Making a friend
   friend class CurveFitting::Fit;
