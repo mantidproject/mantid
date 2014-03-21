@@ -2317,11 +2317,15 @@ namespace Geometry
     size_t nElements(0);
     if ( pElem->hasAttribute("n-elements") )
     {
-      nElements = boost::lexical_cast<size_t>(pElem->getAttribute("n-elements"));
+      int n = boost::lexical_cast<int>(pElem->getAttribute("n-elements"));
 
-      if (nElements <= 0)
+      if (n <= 0)
       {
         throw Exception::InstrumentDefinitionError("n-elements must be positive");
+      }
+      else
+      {
+        nElements = static_cast<size_t>(n);
       }
     }
     else

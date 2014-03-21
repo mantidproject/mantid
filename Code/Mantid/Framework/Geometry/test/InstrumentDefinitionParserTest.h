@@ -927,10 +927,14 @@ public:
     checkDetectorRot(instr->getDetector(5), 120, 0, 1, 0);
   }
 
-  void testLocationsZeroElements()
+  void testLocationsInvalidNoElements()
   {
     std::string locations = "<locations n-elements=\"0\" t=\"0.0\" t-end=\"180.0\" />";
     detid_t numDetectors = 2;
+
+    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true), Exception::InstrumentDefinitionError);
+
+    locations = "<locations n-elements=\"-1\" t=\"0.0\" t-end=\"180.0\" />";
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true), Exception::InstrumentDefinitionError);
   }
@@ -955,7 +959,7 @@ public:
 
   void testLocationsNoCorrespondingStartAttr()
   {
-    std::string locations = "<locations n-elements=\"2\" t-end=\"180.x\" />";
+    std::string locations = "<locations n-elements=\"2\" t-end=\"180.0\" />";
     detid_t numDetectors = 2;
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true), Exception::InstrumentDefinitionError);
