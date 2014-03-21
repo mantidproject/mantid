@@ -222,7 +222,8 @@ const std::string& MDGeometryBuilderXML<CheckDimensionPolicy>::create() const
     }
 
     //Pass dimensions to dimension set.
-    dimensionSetElement->appendChild(pDoc->createTextNode("%s"));
+    AutoPtr<Text> percents = pDoc->createTextNode("%s");
+    dimensionSetElement->appendChild(percents);
 
     //x-dimension mapping.
     AutoPtr<Element> xDimensionElement = pDoc->createElement("XDimension");

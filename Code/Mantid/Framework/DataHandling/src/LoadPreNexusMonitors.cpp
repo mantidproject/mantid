@@ -142,7 +142,7 @@ void LoadPreNexusMonitors::exec()
     if (pNode->nodeName() == "DataList")
     {
       // Get a list of the child elements
-      Poco::XML::NodeList* pDataListChildren = pNode->childNodes();
+      Poco::AutoPtr<Poco::XML::NodeList> pDataListChildren = pNode->childNodes();
       for (unsigned long i = 0; i < pDataListChildren->length(); ++i)
       {
         // We only care about monitors
@@ -153,8 +153,6 @@ void LoadPreNexusMonitors::exec()
             monitorFilenames.push_back(element->getAttribute("name"));
         }
       }
-      // Release the NodeList
-      pDataListChildren->release();
 
     }
 
@@ -162,7 +160,7 @@ void LoadPreNexusMonitors::exec()
     if (pNode->nodeName() == "FileFormats")
     {
       // Get a list of the child elements
-      Poco::XML::NodeList* pDataListChildren = pNode->childNodes();
+      Poco::AutoPtr<Poco::XML::NodeList> pDataListChildren = pNode->childNodes();
       for (unsigned long i = 0; i < pDataListChildren->length(); ++i)
       {
         // We only care about monitors
@@ -173,8 +171,6 @@ void LoadPreNexusMonitors::exec()
           tchannels = boost::lexical_cast<int>(dims);
         }
       }
-      // Release the NodeList
-      pDataListChildren->release();
     }
 
     pNode = it.nextNode();

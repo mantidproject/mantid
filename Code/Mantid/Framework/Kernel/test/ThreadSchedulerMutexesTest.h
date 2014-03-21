@@ -118,6 +118,14 @@ public:
     TS_ASSERT_EQUALS( task, task5 );
     TS_ASSERT_EQUALS( sc.size(), 0 );
     // (for this task, the thread pool would have to wait till the mutex is released)
+
+    delete task1;
+    delete task2;
+    delete task3;
+    delete task4;
+    delete task5;
+    delete task6;
+    delete task7;
   }
 
   void test_clear()

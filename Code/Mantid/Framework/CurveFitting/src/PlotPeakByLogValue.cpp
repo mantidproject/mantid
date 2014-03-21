@@ -34,6 +34,7 @@ In this example a group of three Matrix workspaces were fitted with a [[Gaussian
 #include <boost/lexical_cast.hpp>
 
 #include "MantidCurveFitting/PlotPeakByLogValue.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -114,6 +115,15 @@ namespace Mantid
       std::vector<std::string> costFuncOptions = CostFunctionFactory::Instance().getKeys();
       declareProperty("CostFunction","Least squares",boost::make_shared<StringListValidator>(costFuncOptions),
         "Cost functions to use for fitting. Cost functions available are 'Least squares' and 'Ignore positive peaks'", Direction::InOut);
+
+      declareProperty("CreateOutput", false, "Set to true to create output workspaces with the results of the fit(default is false).");
+      
+      declareProperty("OutputCompositeMembers",false,
+          "If true and CreateOutput is true then the value of each member of a Composite Function is also output.");
+      
+      declareProperty(new Kernel::PropertyWithValue<bool>("ConvolveMembers", false),
+        "If true and OutputCompositeMembers is true members of any Convolution are output convolved\n"
+        "with corresponding resolution");
     }
 
     /** 
@@ -130,6 +140,10 @@ namespace Mantid
       std::string logName = getProperty("LogValue");
       bool individual = getPropertyValue("FitType") == "Individual";
       bool passWSIndexToFunction = getProperty("PassWSIndexToFunction");
+      bool createFitOutput = getProperty("CreateOutput");
+      bool outputCompositeMembers = getProperty("OutputCompositeMembers");
+      bool outputConvolvedMembers = getProperty("ConvolveMembers");
+      std::string baseName = getPropertyValue("OutputWorkspace");
 
       bool isDataName = false; // if true first output column is of type string and is the data source name
       ITableWorkspace_sptr result = WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -163,7 +177,6 @@ namespace Mantid
           }
       }
 
-
       for(size_t iPar=0;iPar<ifun->nParams();++iPar)
       {
         result->addColumn("double",ifun->parameterName(iPar));
@@ -172,6 +185,10 @@ namespace Mantid
       result->addColumn("double","Chi_squared");
 
       setProperty("OutputWorkspace",result);
+
+      std::vector<std::string> covariance_workspaces;
+      std::vector<std::string> fit_workspaces;
+      std::vector<std::string> parameter_workspaces;
 
       double dProg = 1./static_cast<double>(wsNames.size());
       double Prog = 0.;
@@ -203,6 +220,13 @@ namespace Mantid
           jend = data.indx.back() + 1;
         }
 
+        if (createFitOutput)
+        {        
+          covariance_workspaces.reserve(covariance_workspaces.size()+jend);
+          fit_workspaces.reserve(fit_workspaces.size()+jend);
+          parameter_workspaces.reserve(parameter_workspaces.size()+jend);
+        }
+        
         dProg /= abs(jend - j);
         for(;j < jend;++j)
         {
@@ -238,8 +262,14 @@ namespace Mantid
             g_log.debug() << "Fitting " << data.ws->name() << " index " << j << " with " << std::endl;
             g_log.debug() << ifun->asString() << std::endl;
 
+            std::string spectrum_index = boost::lexical_cast<std::string>(j);
+            std::string wsBaseName = "";
+            
+            if(createFitOutput) 
+              wsBaseName = wsNames[i].name + "_" + spectrum_index;
+            
             // Fit the function
-            API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
+            API::IAlgorithm_sptr fit = AlgorithmManager::Instance().createUnmanaged("Fit");
             fit->initialize();
             fit->setProperty("Function",ifun);
             fit->setProperty("InputWorkspace",data.ws);
@@ -249,6 +279,10 @@ namespace Mantid
             fit->setPropertyValue("Minimizer",getPropertyValue("Minimizer"));
             fit->setPropertyValue("CostFunction",getPropertyValue("CostFunction"));
             fit->setProperty("CalcErrors",true);
+            fit->setProperty("CreateOutput",createFitOutput);
+            fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
+            fit->setProperty("ConvolveMembers",outputConvolvedMembers);
+            fit->setProperty("Output", wsBaseName);
             fit->execute();
 
             if (!fit->isExecuted())
@@ -258,6 +292,13 @@ namespace Mantid
 
             ifun = fit->getProperty("Function");
             chi2 = fit->getProperty("OutputChi2overDoF");
+
+            if (createFitOutput)
+            {
+              covariance_workspaces.push_back(wsBaseName + "_NormalisedCovarianceMatrix");
+              parameter_workspaces.push_back(wsBaseName + "_Parameters");
+              fit_workspaces.push_back(wsBaseName + "_Workspace");
+            }
 
             g_log.debug() << "Fit result " << fit->getPropertyValue("OutputStatus") << ' ' << chi2 << std::endl;
 
@@ -298,6 +339,28 @@ namespace Mantid
           }
 
         } // for(;j < jend;++j)
+      }
+
+      if(createFitOutput)
+      {
+        //collect output of fit for each spectrum into workspace groups
+        API::IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+        groupAlg->initialize();
+        groupAlg->setProperty("InputWorkspaces", covariance_workspaces);
+        groupAlg->setProperty("OutputWorkspace", baseName + "_NormalisedCovarianceMatrices");
+        groupAlg->execute();
+
+        groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+        groupAlg->initialize();
+        groupAlg->setProperty("InputWorkspaces", parameter_workspaces);
+        groupAlg->setProperty("OutputWorkspace", baseName + "_Parameters");
+        groupAlg->execute();
+
+        groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+        groupAlg->initialize();
+        groupAlg->setProperty("InputWorkspaces", fit_workspaces);
+        groupAlg->setProperty("OutputWorkspace", baseName + "_Workspaces");
+        groupAlg->execute();
       }
     }
 

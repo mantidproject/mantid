@@ -53,10 +53,6 @@ namespace DataObjects
 class DLLExport Workspace2D : public API::MatrixWorkspace
 {
 public:
-  /// Typedef for the workspace_iterator to use with a Workspace2D
-  typedef API::workspace_iterator<API::LocatedDataRef, Workspace2D> iterator;
-  /// Typedef for the const workspace_iterator to use with a Workspace2D
-  typedef API::workspace_iterator<const API::LocatedDataRef, const Workspace2D> const_iterator;
 
   /**
   Gets the name of the workspace type

@@ -5,13 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include <iosfwd>
+
 #ifdef _WIN32
 #include <time.h>
 #else
 #include <sys/time.h>
 #endif
-#include <ostream>
-#include <string>
+
 
 namespace Mantid
 {

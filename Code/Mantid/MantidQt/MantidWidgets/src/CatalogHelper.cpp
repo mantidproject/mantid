@@ -1,9 +1,11 @@
+#include "MantidAPI/CatalogManager.h"
 #include "MantidQtMantidWidgets/CatalogHelper.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidKernel/DateAndTime.h"
 
 #include <boost/algorithm/string/regex.hpp>
+#include <Poco/ActiveResult.h>
 #include <QCoreApplication>
 
 namespace MantidQt
@@ -119,6 +121,10 @@ namespace MantidQt
       catalogAlgorithm->setProperty("FileIds",fileIDs);
       catalogAlgorithm->setProperty("FileNames",fileNames);
       catalogAlgorithm->setProperty("DownloadPath",downloadPath);
+
+      // This is temporary to ensure catalogdowndatafiles works as expected with one catalog.
+      auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
+      if (!session.empty()) catalogAlgorithm->setProperty("Session",session.front()->getSessionId());
 
       executeAsynchronously(catalogAlgorithm);
       // Return a vector containing the file paths to the files to download.

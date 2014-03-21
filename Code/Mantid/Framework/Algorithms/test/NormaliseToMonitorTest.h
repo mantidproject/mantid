@@ -317,7 +317,7 @@ public:
         // this function is usually called by GUI when senning input workspace. It should read monitors and report the condition changed
         TS_ASSERT(monSpec->getSettings()->isConditionChanged(&norm6));
         // this funciton is called by gui when the above is true. It should not throw and change the validator
-        IPropertySettings *pSett;
+        IPropertySettings *pSett(NULL);
         TS_ASSERT_THROWS_NOTHING(pSett= monSpec->getSettings());
         TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(&norm6, monSpec));
         // it should return the list of allowed monitor ID-s

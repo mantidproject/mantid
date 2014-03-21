@@ -1,5 +1,6 @@
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/PropertyHistory.h"
 
 namespace Mantid
 {

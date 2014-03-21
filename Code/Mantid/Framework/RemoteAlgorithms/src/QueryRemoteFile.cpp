@@ -1,3 +1,12 @@
+/*WIKI*
+
+Retrieve a list of the files associated with the specified transaction from a remote 
+compute resource.
+
+For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
+
+*WIKI*/
+
 #include "MantidRemoteAlgorithms/QueryRemoteFile.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -24,6 +33,12 @@ using namespace Mantid::Geometry;
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
+void QueryRemoteFile::initDocs()
+{
+  this->setWikiSummary("Retrieve a list of the files from a remote compute resource.");
+  this->setOptionalMessage("Retrieve a list of the files from a remote compute resource.");
+}
+
 void QueryRemoteFile::init()
 {
   // Unlike most algorithms, this one doesn't deal with workspaces....
@@ -32,12 +47,12 @@ void QueryRemoteFile::init()
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
-  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "The name of the remote computer to query", Direction::Input);
 
   // The transaction ID comes from the StartRemoteTransaction algortithm
-  declareProperty( "TransactionID", "", requireValue, "", Direction::Input);
+  declareProperty( "TransactionID", "", requireValue, "The ID of the transaction who's files we want to list", Direction::Input);
 
-  declareProperty(new ArrayProperty<std::string>( "FileNames", Direction::Output));
+  declareProperty(new ArrayProperty<std::string>( "FileNames", Direction::Output), "The names of all the files that were found");
 
 }
 

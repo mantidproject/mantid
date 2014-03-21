@@ -25,6 +25,7 @@ class DakotaChiSquared(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
+        self.setOptionalMessage("Compare two nexus files containing matrix workspaces and output chi squared into a file")
 	f1=mantid.api.FileProperty("DataFile","",mantid.api.FileAction.Load,".nxs")
         self.declareProperty(f1,"Input Nexus file containing data.")	
 	f2=mantid.api.FileProperty("CalculatedFile","",mantid.api.FileAction.Load,".nxs")

@@ -4,6 +4,14 @@ This is the top-level workflow algorithm for direct geometry spectrometer
 data reduction. This algorithm is responsible for gathering the necessary
 parameters and generating calls to other workflow or standard algorithms.
 
+=== Workflow ===
+Parameters for the child algorithms are not shown due to sheer number. They
+will be detailed in the child algorithm diagrams. Items in parallelograms are
+output workspaces from their respective algorithms. Not all output workspaces
+are subsequently used by other algorithms.
+
+[[File:DgsReductionWorkflow.png]]
+
  *WIKI*/
 
 #include "MantidWorkflowAlgorithms/DgsReduction.h"
@@ -815,6 +823,7 @@ namespace Mantid
         absUnitsRed->setProperty("OutputWorkspace", absWsName);
         absUnitsRed->executeAsChildAlg();
         MatrixWorkspace_sptr absUnitsWS = absUnitsRed->getProperty("OutputWorkspace");
+//!!! There is Property outputMaskWorkspace to get masks? It looks like one is using wrong property for masks
         MatrixWorkspace_sptr absMaskWS = absUnitsRed->getProperty("OutputWorkspace");
 
         IAlgorithm_sptr mask = this->createChildAlgorithm("MaskDetectors");
