@@ -49,7 +49,7 @@ private:
         TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
         autoCorrelationCore.setInstrument(deadWireDecorator, mockChopper);
 
-        return autoCorrelationCore(m_log);
+        return autoCorrelationCore;
     }
 
 public:
