@@ -109,9 +109,9 @@ namespace Mantid
     bool MDTransfModQ::calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
     {
       UNUSED_ARG(Coord); 
-      m_ex = (m_Det+i)->X();
-      m_ey = (m_Det+i)->Y();
-      m_ez = (m_Det+i)->Z();
+      m_ex = (m_DetDirecton+i)->X();
+      m_ey = (m_DetDirecton+i)->Y();
+      m_ez = (m_DetDirecton+i)->Z();
       // if input energy changes on each detector (efixed, indirect mode only), then set up its value
       if(m_pEfixedArray)
       {
@@ -196,8 +196,8 @@ namespace Mantid
     /** method returns the vector of input coordinates values where the transformed coordinates reach its extremum values in Q or dE
      * direction. 
      *
-     * @param eMin -- minimal momentum or energy transfer for the transformation
-     * @param eMax -- maxumal momentum or energy transfer for the transformation
+     * @param eMin -- minimal momentum (in elastic mode) or energy transfer (in inelastic) for the transformation
+     * @param eMax -- maxumal momentum (in elastic mode) or energy transfer (in inelastic) for the transformation
      * @param det_num -- number of the instrument detector for the transformation
      */
     std::vector<double> MDTransfModQ::getExtremumPoints(const double eMin, const double eMax,size_t det_num)const
@@ -218,7 +218,7 @@ namespace Mantid
           if(m_pEfixedArray)
             ei = double(*(m_pEfixedArray+det_num));
 
-          double ez = (m_Det+det_num)->Z();
+          double ez = (m_DetDirecton+det_num)->Z();
           double eps_extr = ei*(1-ez*ez);
           if (eps_extr>eMin && eps_extr<eMax)
           {
@@ -256,7 +256,7 @@ namespace Mantid
 
       // get pointer to the positions of the detectors
       std::vector<Kernel::V3D> const & DetDir = ConvParams.m_PreprDetTable->getColVector<Kernel::V3D>("DetDirections"); 
-      m_Det = &DetDir[0];     //
+      m_DetDirecton = &DetDir[0];     //
 
       // get min and max values defined by the algorithm. 
       ConvParams.getMinMax(m_DimMin,m_DimMax);
@@ -362,7 +362,7 @@ namespace Mantid
     /// constructor;
     MDTransfModQ::MDTransfModQ():
       m_ex(0),m_ey(0),m_ez(1), 
-      m_Det(NULL),
+      m_DetDirecton(NULL),//,m_NMatrixDim(-1)
       m_NMatrixDim(0), //uninitialized
       m_Emode(Kernel::DeltaEMode::Undefined), // uninitialized
       m_Ki(1.),m_Ei(1.),
