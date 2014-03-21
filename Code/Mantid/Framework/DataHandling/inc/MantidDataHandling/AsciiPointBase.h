@@ -76,8 +76,6 @@ namespace Mantid
       void outputval (double val, std::ofstream & file, bool leadingSep = true);
       /// write the top of the file
       virtual std::vector<double> header(std::ofstream & file);
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
     protected:
       /// Return the separator character
       virtual char sep() {return '\t';}

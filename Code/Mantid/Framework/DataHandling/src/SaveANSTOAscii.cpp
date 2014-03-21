@@ -18,9 +18,6 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    // Initialise the logger
-    Logger& SaveANSTOAscii::g_log = Logger::get("SaveANSTOAscii");
-    
     /// Sets documentation strings for this algorithm
     void SaveANSTOAscii::initDocs()
     {

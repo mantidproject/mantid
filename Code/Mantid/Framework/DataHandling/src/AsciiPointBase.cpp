@@ -18,9 +18,6 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    // Initialise the logger
-    Logger& AsciiPointBase::g_log = Logger::get("AsciiPointBase");
-
     /// Initialisation method.
     void AsciiPointBase::init()
     {

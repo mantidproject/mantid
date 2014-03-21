@@ -55,8 +55,6 @@ namespace Mantid
       virtual void initDocs();
       /// Return the file extension this algorthm should output.
       virtual std::string ext() {return ".mft";}
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
       ///extra properties specifically for this
       virtual void extraProps();
       /// write any extra information required

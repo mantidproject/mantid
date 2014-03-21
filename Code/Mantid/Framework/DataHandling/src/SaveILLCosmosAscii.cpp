@@ -20,9 +20,6 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    // Initialise the logger
-    Logger& SaveILLCosmosAscii::g_log = Logger::get("SaveILLCosmosAscii");
-
     /// Sets documentation strings for this algorithm
     void SaveILLCosmosAscii::initDocs()
     {

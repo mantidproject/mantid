@@ -60,8 +60,6 @@ namespace Mantid
       virtual void extraProps() {}
       /// no extra information required so override blank
       virtual void extraHeaders(std::ofstream & file);
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
     };
 
   } // namespace DataHandling
