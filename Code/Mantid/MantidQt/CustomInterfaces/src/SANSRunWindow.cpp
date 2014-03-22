@@ -14,6 +14,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -65,6 +66,36 @@ namespace
   Logger g_log("SANSRunWindow");
   /// static logger for centre finding
   Logger g_centreFinderLog("CentreFinder");
+
+  typedef boost::shared_ptr<Kernel::PropertyManager> ReductionSettings_sptr;
+  
+  /**
+   * Returns the PropertyManager object that is used to store the settings
+   * used by the reduction.
+   *
+   * There is a corresponding function in scripts/SANS/isis_reducer.py with
+   * more information.
+   *
+   * @returns the reduction settings.
+   */
+  ReductionSettings_sptr getReductionSettings()
+  {
+    // Must match name of the PropertyManager used in the reduction.
+    static const std::string SETTINGS_PROP_MAN_NAME = "ISISSANSReductionSettings";
+
+    if( !PropertyManagerDataService::Instance().doesExist(SETTINGS_PROP_MAN_NAME) )
+    {
+      g_log.debug() << "Creating reduction settings PropertyManager object, with name "
+                    << SETTINGS_PROP_MAN_NAME << ".";
+      
+      const auto propertyManager = boost::make_shared<Kernel::PropertyManager>();
+      PropertyManagerDataService::Instance().add(SETTINGS_PROP_MAN_NAME, propertyManager);
+
+      return propertyManager;
+    }
+
+    return PropertyManagerDataService::Instance().retrieve(SETTINGS_PROP_MAN_NAME);
+  }
 }
 //----------------------------------------------
 // Public member functions
@@ -1065,6 +1096,16 @@ void SANSRunWindow::updateMaskTable()
     }
   }
 
+  auto settings = getReductionSettings();
+
+  if( settings->existsProperty("MaskFiles") )
+  {
+    const auto maskFiles = QString::fromStdString(settings->getProperty("MaskFiles")).split(",");
+
+    foreach( const auto & maskFile, maskFiles )
+      appendRowToMaskTable("Mask File", "-", maskFile);
+  }
+
   // add phi masking to table 
   QString phiMin = m_uiForm.phi_min->text(); 
   QString phiMax = m_uiForm.phi_max->text(); 
@@ -1141,6 +1182,23 @@ void SANSRunWindow::addTimeMasksToTable(const QString & mask_string, const QStri
     const QString shape(sitr.next().trimmed());
     m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem(shape));
   }
+}
+
+/**
+ * Append the given information as a new row to the masking table.
+ *
+ * @param type     :: the type of masking information
+ * @param detector :: the detector bank this information applies to
+ * @param details  :: the details of the mask
+ */
+void SANSRunWindow::appendRowToMaskTable(const QString & type, const QString & detector, const QString & details)
+{
+  const int row = m_uiForm.mask_table->rowCount();
+
+  m_uiForm.mask_table->insertRow(row);
+  m_uiForm.mask_table->setItem(row, 0, new QTableWidgetItem(type));
+  m_uiForm.mask_table->setItem(row, 1, new QTableWidgetItem(detector));
+  m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem(details));
 }
 
 /**
@@ -1279,6 +1337,10 @@ void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& impor
   for(int row = 0; row <  nrows; ++row)
   {
     if( m_uiForm.mask_table->item(row, 2)->text().startsWith("inf") )
+    {
+      continue;
+    }
+    if( m_uiForm.mask_table->item(row, 0)->text() == "Mask File")
     {
       continue;
     }
