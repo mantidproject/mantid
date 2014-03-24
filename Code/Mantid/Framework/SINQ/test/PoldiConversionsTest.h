@@ -39,6 +39,13 @@ public:
         TS_ASSERT_THROWS(Conversions::dToQ(0.0), std::domain_error);
         TS_ASSERT_THROWS(Conversions::qToD(0.0), std::domain_error);
     }
+
+    void testDegAndRadConversions() {
+        double degree = 30.0;
+
+        TS_ASSERT_DELTA(Conversions::degToRad(degree), 0.52359877559829887308, 1e-15);
+        TS_ASSERT_EQUALS(Conversions::radToDeg(Conversions::degToRad(degree)), degree);
+    }
 };
 
 #endif // POLDICONVERSIONSTEST_H

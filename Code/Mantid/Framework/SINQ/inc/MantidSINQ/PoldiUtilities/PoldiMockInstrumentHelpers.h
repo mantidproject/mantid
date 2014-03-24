@@ -8,6 +8,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
 
 #include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
+#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 
 using namespace Mantid;
 using namespace Mantid::Poldi;
@@ -64,7 +65,7 @@ public:
         UNUSED_ARG(poldiInstrument);
 
         initializeFixedParameters(3000.0, static_cast<size_t>(400), 2.5);
-        initializeCalibratedParameters(Mantid::Kernel::V2D(-931.47, -860.0), 90.41 / 180.0 * M_PI);
+        initializeCalibratedParameters(Mantid::Kernel::V2D(-931.47, -860.0), Conversions::degToRad(90.41));
     }
 };
 

@@ -77,6 +77,23 @@ double qToD(double q)
     return (2.0 * M_PI) / q;
 }
 
+/** Converts degrees to radians
+  * @param degree :: angle in degree
+  * @return angle in radians
+  */
+double degToRad(double degree)
+{
+    return degree / 180.0 * M_PI;
+}
+
+/** Converts radians to degrees
+  * @param radians :: angle in radians
+  * @return angle in degrees
+  */
+double radToDeg(double radians)
+{
+    return radians / M_PI * 180.0;
+}
 
 }
 

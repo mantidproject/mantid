@@ -16,6 +16,9 @@ namespace Conversions {
     double MANTID_SINQ_DLL dToQ(double d);
     double MANTID_SINQ_DLL qToD(double q);
 
+    // conversions between degree and radians
+    double MANTID_SINQ_DLL degToRad(double degree);
+    double MANTID_SINQ_DLL radToDeg(double radians);
 }
 
 }
