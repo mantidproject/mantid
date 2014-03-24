@@ -10,6 +10,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"
 
 #include "MantidDataObjects/TableWorkspace.h"
 
@@ -75,75 +76,6 @@ public:
         TS_ASSERT_EQUALS(autoCorrelationCore.m_wavelengthRange.second, 5.0);
     }
 
-    void testgetDeltaD()
-    {
-        boost::shared_ptr<MockDetector> mockDetector(new MockDetector);
-        boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
-
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
-        autoCorrelationCore.setInstrument(mockDetector, mockChopper);
-
-        EXPECT_CALL(*mockDetector, centralElement())
-                .WillOnce(Return(199));
-        EXPECT_CALL(*mockChopper, distanceFromSample())
-                .WillOnce(Return(11800.0));
-        EXPECT_CALL(*mockDetector, distanceFromSample(199))
-                .WillOnce(Return(1996.017578125));
-        EXPECT_CALL(*mockDetector, twoTheta(199))
-                .WillOnce(Return(1.577357650));
-
-        TS_ASSERT_DELTA(autoCorrelationCore.getDeltaD(3.0), 0.000606307, 1e-9);
-    }
-
-    void testgetDRangeAsDeltaMultiples()
-    {
-        boost::shared_ptr<MockDetector> mockDetector(new MockDetector);
-        boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
-
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
-        autoCorrelationCore.setInstrument(mockDetector, mockChopper);
-        autoCorrelationCore.setWavelengthRange(1.1, 5.0);
-
-        EXPECT_CALL(*mockDetector, qLimits(1.1, 5.0))
-                .WillOnce(Return(std::make_pair(1.549564, 8.960878)));
-
-        std::pair<int, int> drange = autoCorrelationCore.getDRangeAsDeltaMultiples(0.000606307);
-
-        TS_ASSERT_EQUALS(drange.first, 1156);
-        TS_ASSERT_EQUALS(drange.second, 6687);
-    }
-
-    void testgetDGrid()
-    {
-        boost::shared_ptr<MockDetector> mockDetector(new MockDetector);
-        boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
-
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
-        autoCorrelationCore.setInstrument(mockDetector, mockChopper);
-        autoCorrelationCore.setWavelengthRange(1.1, 5.0);
-
-        EXPECT_CALL(*mockDetector, centralElement())
-                .WillOnce(Return(199));
-        EXPECT_CALL(*mockChopper, distanceFromSample())
-                .WillOnce(Return(11800.0));
-        EXPECT_CALL(*mockDetector, distanceFromSample(199))
-                .WillOnce(Return(1996.017578125));
-        EXPECT_CALL(*mockDetector, twoTheta(199))
-                .WillOnce(Return(1.577357650));
-
-        EXPECT_CALL(*mockDetector, qLimits(1.1, 5.0))
-                .WillOnce(Return(std::make_pair(1.549564, 8.960878)));
-
-        double deltaD = autoCorrelationCore.getDeltaD(3.0);
-
-        std::vector<double> dgrid = autoCorrelationCore.getDGrid(deltaD);
-
-        TS_ASSERT_DELTA(dgrid[0], 0.700890601 + 0.000606307, 1e-7);
-        TS_ASSERT_DELTA(dgrid[1] - dgrid[0], 0.000606307, 1e-9);
-        TS_ASSERT_DELTA(dgrid.back(), 4.0543741859, 1e-6);
-
-        TS_ASSERT_EQUALS(dgrid.size(), 5531);
-    }
 
     void testgetTOFsFor1Angstrom()
     {
@@ -188,15 +120,14 @@ public:
         TestablePoldiAutoCorrelationCore autoCorrelationCore = getCorrelationCoreWithInstrument();
         boost::shared_ptr<MockChopper> mockChopper = boost::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
         EXPECT_CALL(*mockChopper, distanceFromSample())
-                .Times(2)
-                .WillRepeatedly(Return(11800.0));
+                .WillOnce(Return(11800.0));
 
         std::vector<double> tofsD1 = autoCorrelationCore.getTofsFor1Angstrom(autoCorrelationCore.m_detector->availableElements());
 
         TS_ASSERT_EQUALS(tofsD1.size(), 388);
 
         double deltaT = 3.0;
-        double deltaD = autoCorrelationCore.getDeltaD(deltaT);
+        double deltaD = 0.000606307;
         size_t nd = 5531;
 
         std::vector<double> weights = autoCorrelationCore.calculateDWeights(tofsD1, deltaT, deltaD, nd);
@@ -213,11 +144,12 @@ public:
                 .WillRepeatedly(Return(11800.0));
 
         std::vector<double> tofsD1 = autoCorrelationCore.getTofsFor1Angstrom(autoCorrelationCore.m_detector->availableElements());
-
         TS_ASSERT_EQUALS(tofsD1.size(), 388);
 
+        PoldiDGrid dGrid(autoCorrelationCore.m_detector, autoCorrelationCore.m_chopper, 3.0, std::make_pair(1.1, 5.0));
+
         double deltaT = 3.0;
-        double deltaD = autoCorrelationCore.getDeltaD(deltaT);
+        double deltaD = dGrid.deltaD();
         size_t nd = 5531;
 
         std::vector<double> weights = autoCorrelationCore.calculateDWeights(tofsD1, deltaT, deltaD, nd);

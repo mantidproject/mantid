@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/PoldiUtilities/PoldiDeadWireDecorator.cpp
 	src/PoldiUtilities/PoldiDetectorDecorator.cpp
 	src/PoldiUtilities/PoldiDetectorFactory.cpp
+        src/PoldiUtilities/PoldiDGrid.cpp
 	src/PoldiUtilities/PoldiHeliumDetector.cpp
 	src/PoldiUtilities/PoldiPeak.cpp
 	src/PoldiUtilities/PoldiPeakCollection.cpp
@@ -54,6 +55,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h
 	inc/MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h
 	inc/MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h
+        inc/MantidSINQ/PoldiUtilities/PoldiDGrid.h
 	inc/MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h
 	inc/MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h
 	inc/MantidSINQ/PoldiUtilities/PoldiPeak.h
@@ -78,6 +80,7 @@ set ( TEST_FILES
         PoldiConversionsTest.h
 	PoldiDeadWireDecoratorTest.h
 	PoldiDetectorDecoratorTest.h
+        PoldiDGridTest.h
 	PoldiDetectorFactoryTest.h
 	PoldiDetectorTest.h
 	PoldiFitPeaks1DTest.h

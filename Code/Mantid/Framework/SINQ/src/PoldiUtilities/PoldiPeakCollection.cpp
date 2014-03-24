@@ -79,13 +79,16 @@ IFunction_sptr PoldiPeakCollection::getPeakProfile(size_t index) const
 
     IPeakFunction_sptr currentPeakFunction = m_peakProfiles[index];
     PoldiPeak_sptr currentPeak = m_peaks[index];
-    currentPeakFunction->setCentre(currentPeak->q());
+    currentPeakFunction->setCentre(currentPeak->d());
     currentPeakFunction->setHeight(currentPeak->intensity());
     currentPeakFunction->setFwhm(currentPeak->fwhm());
 
     CompositeFunction_sptr peakProfile(new CompositeFunction);
     peakProfile->addFunction(currentPeakFunction);
-    peakProfile->addFunction(m_backgrounds[index]);
+
+    if(m_backgroundTemplate) {
+        peakProfile->addFunction(m_backgrounds[index]);
+    }
 
     return peakProfile;
 }
@@ -104,9 +107,9 @@ void PoldiPeakCollection::setProfileParameters(size_t index, IFunction_sptr fitt
         if(peakFunction) {
             PoldiPeak_sptr peak = m_peaks[index];
 
-            peak->setIntensity(UncertainValue(peakFunction->height(), peakFunction->getError(0)));
-            peak->setQ(UncertainValue(peakFunction->centre(), peakFunction->getError(1)));
-            peak->setFwhm(UncertainValue(peakFunction->fwhm(), getFwhmRelation(peakFunction) * peakFunction->getError(2)));
+            peak->setIntensity(UncertainValue(peakFunction->height(), peakFunction->getError(2)));
+            peak->setD(UncertainValue(peakFunction->centre(), peakFunction->getError(0)));
+            peak->setFwhm(UncertainValue(peakFunction->fwhm(), getFwhmRelation(peakFunction) * peakFunction->getError(1)));
         }
     }
 }
@@ -211,7 +214,7 @@ void PoldiPeakCollection::updatePeakBackgroundFunctions()
 
 double PoldiPeakCollection::getFwhmRelation(IPeakFunction_sptr peakFunction)
 {
-    return peakFunction->fwhm() / peakFunction->getParameter(2);
+    return peakFunction->fwhm() / peakFunction->getParameter(1);
 }
 
 }

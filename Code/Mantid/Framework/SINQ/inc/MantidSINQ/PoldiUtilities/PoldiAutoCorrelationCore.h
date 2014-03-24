@@ -57,10 +57,6 @@ public:
     DataObjects::Workspace2D_sptr calculate(DataObjects::Workspace2D_sptr countData);
 
 protected:
-    virtual double getDeltaD(double deltaT);
-    std::pair<int, int> getDRangeAsDeltaMultiples(double getDeltaD);
-    virtual std::vector<double> getDGrid(double deltaD);
-
     double getNormalizedTOFSum(std::vector<double> normalizedTofs);
     std::vector<double> calculateDWeights(std::vector<double> tofsFor1Angstrom, double deltaT, double deltaD, size_t nd);
 

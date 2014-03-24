@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/MultiThreaded.h"
 
+#include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"
 #include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 
@@ -80,8 +81,11 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
 
         m_logger.information() << "  Setting time data..." << std::endl;
         m_deltaT = timeData[1] - timeData[0];
-        m_deltaD = getDeltaD(m_deltaT);
         m_timeBinCount = static_cast<int>(m_chopper->cycleTime() / m_deltaT);
+
+        PoldiDGrid dGrid(m_detector, m_chopper, m_deltaT, m_wavelengthRange);
+
+        m_deltaD = dGrid.deltaD();
 
         /* Data related to detector geometry
          *  - vector with available detector element-indices (wires, cells, ...)
@@ -101,7 +105,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
          * which was calculated before.
          */
         m_logger.information() << "  Generating d-grid..." << std::endl;
-        std::vector<double> dValues = getDGrid(m_deltaD);
+        std::vector<double> dValues = dGrid.grid();
 
         /* When the correlation background is subtracted from the correlation spectrum, it is done for each d-Value
          * according to a certain weight. The calculation method corresponds closely to the original fortran program,
@@ -171,56 +175,6 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
     } else {
         throw std::runtime_error("PoldiAutoCorrelationCore was run without specifying detector and chopper.");
     }
-}
-/** Computes the resolution limit of the POLDI experiment defined by the current instrument, in Angstrom, given the size of one time bin.
-  *
-  * Since this calculation is based on the time of flight, this value may be different for each point
-  * of the detector, depending on the geometry. In the current implementation this is not taken into account,
-  * instead the value for the center of the detector is calculated and assumed constant for the whole detector.
-  *
-  * @param deltaT :: Size of one time bin in microseconds.
-  * @return Resolution in Angstrom corresponding to
-  */
-double PoldiAutoCorrelationCore::getDeltaD(double deltaT)
-{
-    int centralElement = static_cast<int>(m_detector->centralElement());
-    return Conversions::TOFtoD(deltaT, m_chopper->distanceFromSample() + m_detector->distanceFromSample(centralElement), sin(m_detector->twoTheta(centralElement) / 2.0));
-}
-
-/** Computes a d-range from the limits set by the detector and expresses it as multiples of a step size given in Angstrom.
-  *
-  * @param deltaD :: Step size used for normalizing the calculated d-range (Angstrom).
-  * @return Pair of integers containing the lower and upper d-limit, divided by deltaD.
-  */
-std::pair<int, int> PoldiAutoCorrelationCore::getDRangeAsDeltaMultiples(double deltaD)
-{
-    std::pair<double, double> qLimits = m_detector->qLimits(m_wavelengthRange.first, m_wavelengthRange.second);
-
-    return std::make_pair(static_cast<int>(Conversions::qToD(qLimits.second) / deltaD), static_cast<int>(Conversions::qToD(qLimits.first) / deltaD));
-}
-
-/** Generates an equidistant grid of d-values with a given step size. The result depends on the assigned detector.
-  *
-  * @param deltaD :: Step size for the grid of d-values (Angstrom).
-  * @return Vector containing all d-values (in Angstrom) that are possible to probe with the supplied instrument configuration.
-  */
-std::vector<double> PoldiAutoCorrelationCore::getDGrid(double deltaD)
-{
-    /* The algorithm used here is very close to the one used in the original fortran code. It actually does not start with the
-     * smallest possible d-Value, but instead d0 + deltaD.
-     */
-    std::pair<int, int> normedDRange = getDRangeAsDeltaMultiples(deltaD);
-    int ndSpace = normedDRange.second - normedDRange.first;
-
-    std::vector<double> dGrid(ndSpace);
-
-    double d0 = static_cast<double>(normedDRange.first) * deltaD;
-
-    for(int i = 1; i <= static_cast<double>(dGrid.size()); ++i) {
-        dGrid[i - 1] = static_cast<double>(i) * deltaD + d0;
-    }
-
-    return dGrid;
 }
 
 /** Computes the sums of the given vector. Currently simply wraps std::accumulate.

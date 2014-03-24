@@ -96,7 +96,7 @@ PoldiPeak_sptr PoldiPeak::create(UncertainValue qValue)
 
 PoldiPeak_sptr PoldiPeak::create(UncertainValue qValue, UncertainValue intensity)
 {
-    return PoldiPeak_sptr(new PoldiPeak(PoldiPeak::qToD(qValue), intensity));
+    return PoldiPeak_sptr(new PoldiPeak(qValue, intensity));
 }
 
 PoldiPeak_sptr PoldiPeak::create(MillerIndices hkl, UncertainValue dValue, UncertainValue intensity, UncertainValue fwhm)
