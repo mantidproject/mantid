@@ -36,6 +36,8 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     
     
     def PyInit(self):
+        self.setWikiSummary("Algorithm to mask detectors in particular banks, tube, or pixels.")
+        self.setOptionalMessage("Algorithm to mask detectors in particular banks, tube, or pixels.")
         self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.InOut, optional = mantid.api.PropertyMode.Optional), "Input workspace (optional)")
         allowedInstrumentList=mantid.kernel.StringListValidator(["","ARCS","CNCS","HYSPEC","NOMAD","POWGEN","SEQUOIA","SNAP","TOPAZ"])
         self.declareProperty("Instrument","",validator=allowedInstrumentList,doc="One of the following instruments: ARCS, CNCS, HYSPEC, NOMAD, POWGEN, SNAP, SEQUOIA, TOPAZ")

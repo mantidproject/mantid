@@ -532,12 +532,25 @@ namespace Mantid
       std::map<std::string, std::string> errors = this->validateInputs();
       if (!errors.empty())
       {
+        size_t numErrors = errors.size();
         // Log each issue
         for (auto it = errors.begin(); it != errors.end(); it++)
-          g_log.error() << "Invalid value for " << it->first << ": " << it->second << std::endl;
+        {
+          if (this->existsProperty(it->first))
+            g_log.error() << "Invalid value for " << it->first << ": " << it->second << "\n";
+          else
+          {
+            numErrors -= 1; // don't count it as an error
+            g_log.warning() << "validateInputs() references non-existant property \""
+                            << it->first << "\"\n";
+          }
+        }
         // Throw because something was invalid
-        notificationCenter().postNotification(new ErrorNotification(this,"Some invalid Properties found"));
-        throw std::runtime_error("Some invalid Properties found");
+        if (numErrors > 0)
+        {
+          notificationCenter().postNotification(new ErrorNotification(this,"Some invalid Properties found"));
+          throw std::runtime_error("Some invalid Properties found");
+        }
       }
 
       // ----- Check for processing groups -------------
@@ -1234,6 +1247,8 @@ namespace Mantid
         // Don't make the new algorithm a child so that it's workspaces are stored correctly
         alg_sptr->setChild(false);
 
+        alg_sptr->setRethrows(true);
+
         IAlgorithm* alg = alg_sptr.get();
         // Set all non-workspace properties
         this->copyNonWorkspaceProperties(alg, int(entry)+1);
@@ -1285,8 +1300,17 @@ namespace Mantid
         } // for each OutputWorkspace property
 
         // ------------ Execute the algo --------------
-        if (!alg->execute())
-          throw std::runtime_error("Execution of " + this->name() + " for group entry " + Strings::toString(entry+1) + " failed.");
+        try
+        {
+          alg->execute();
+        }
+        catch(std::exception& e)
+        {
+          std::ostringstream msg;
+          msg << "Execution of " << this->name() << " for group entry " << (entry+1) << " failed: ";
+          msg << e.what(); // Add original message
+          throw std::runtime_error(msg.str());
+        }
 
         // ------------ Fill in the output workspace group ------------------
         // this has to be done after execute() because a workspace must exist 

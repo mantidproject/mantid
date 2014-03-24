@@ -1,3 +1,11 @@
+/*WIKI*
+
+Stop a job transaction on a remote compute resource.
+
+For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
+
+*WIKI*/
+
 #include "MantidRemoteAlgorithms/StopRemoteTransaction.h"
 #include "MantidRemoteAlgorithms/SimpleJSON.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -21,16 +29,22 @@ using namespace Mantid::Kernel;
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
+void StopRemoteTransaction::initDocs()
+{
+  this->setWikiSummary("Stop a job transaction on a remote compute resource.");
+  this->setOptionalMessage("Stop a job transaction on a remote compute resource.");
+}
+
 void StopRemoteTransaction::init()
 {
   auto requireValue = boost::make_shared<Mantid::Kernel::MandatoryValidator<std::string> >();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
-  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "The name of the remote computer where the transaction was created", Direction::Input);
 
   // The transaction ID comes from the StartRemoteTransaction algortithm
-  declareProperty( "TransactionID", "", requireValue, "", Mantid::Kernel::Direction::Input);
+  declareProperty( "TransactionID", "", requireValue, "The ID string returned when the transaction was created", Mantid::Kernel::Direction::Input);
 }
 
 void StopRemoteTransaction::exec()

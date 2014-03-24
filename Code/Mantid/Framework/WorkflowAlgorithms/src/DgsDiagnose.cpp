@@ -1,7 +1,88 @@
 /*WIKI*
 
 This algorithm is responsible for setting up the necessary workspaces to
-hand off to the DetectorDiagnostic algorithm.
+hand off to the [[DetectorDiagnostic]] algorithm. The diagram below shows the
+manipulations done by this algorithm. Workspaces that have dashed lines are
+optional. Parameters in italics are retrieved from the
+[[InstrumentParameterFile|instrument parameter file (IPF)]] unless they are
+provided to the algorithm via a property manager. The mappings for these
+parameters are shown below.
+
+{| class="wikitable"
+|-
+! Parameter !! IPF Mapping !! [[DetectorDiagnostic]] Mapping
+|-
+| RejectZeroBackground || diag_samp_zero || -
+|-
+| BackgroundCheck || check_background || -
+|-
+| PsdBleed || diag_bleed_test || -
+|-
+| BackgroundTofStart || bkgd-range-min || -
+|-
+| BackgroundTofEnd || bkgd-range-max || -
+|-
+| DetVanRatioVariation || diag_variation || DetVanRatioVariation
+|}
+
+The open circles represent groups of parameters. They are detailed in the tables
+below. All parameters given here act like italicized parameters.
+
+====Detectors Outside Limits Parameters====
+{| class="wikitable"
+|-
+! Parameter !! IPF Mapping !! [[DetectorDiagnostic]] Mapping
+|-
+| HighCounts || diag_huge || HighThreshold
+|-
+| LowCounts || diag_tiny || LowThreshold
+|-
+|}
+
+====Median Detector Test Parameters====
+{| class="wikitable"
+|-
+! Parameter !! IPF Mapping !! [[DetectorDiagnostic]] Mapping
+|-
+| HighOutlier || diag_van_out_hi || HighOutlier
+|-
+| LowOutlier || diag_van_out_lo || LowOutlier
+|-
+| MedianTestHigh || diag_van_hi || HighThresholdFraction
+|-
+| MedianTestLow || diag_van_lo || LowThresholdFraction
+|-
+| ErrorBarCriterion || diag_van_sig || SignificanceTest
+|-
+| MeanTestLevelsUp || diag_van_levels || LevelsUp
+|-
+| MedianTestCorrectForSolidAngle || diag_correct_solid_angle || CorrectForSolidAngle
+|}
+
+====Sample Background Parameters====
+{| class="wikitable"
+|-
+! Parameter !! IPF Mapping !! [[DetectorDiagnostic]] Mapping
+|-
+| SamBkgMedianTestHigh || diag_samp_hi || SampleBkgHighAcceptanceFactor
+|-
+| SamBkgMedianTestLow || diag_samp_lo || SampleBkgLowAcceptanceFactor
+|-
+| SamBkgErrorBarCriterion || diag_samp_sig || SampleBkgSignificanceTest
+|}
+
+====PsdBleed Parameters====
+{| class="wikitable"
+|-
+! Parameter !! IPF Mapping !! [[DetectorDiagnostic]] Mapping
+|-
+| MaxFramerate || diag_bleed_maxrate || MaxTubeFramerate
+|-
+| IgnoredPixels || diag_bleed_pixels || NIgnoredCentralPixels
+|}
+
+=== Workflow ===
+[[File:DgsDiagnoseWorkflow.png]]
 
 *WIKI*/
 
@@ -124,7 +205,7 @@ namespace Mantid
           reductionManager, "diag_samp_zero", detVanWS);
       const bool createPsdBleed = getBoolPropOrParam("PsdBleed",
           reductionManager, "diag_bleed_test", detVanWS);
-      const bool vanSA = getBoolPropOrParam("MediantestCorectForSolidAngle",
+      const bool vanSA = getBoolPropOrParam("MedianTestCorrectForSolidAngle",
           reductionManager, "diag_correct_solid_angle", detVanWS);
 
       // Numeric properties

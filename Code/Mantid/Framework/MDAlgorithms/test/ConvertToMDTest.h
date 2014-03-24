@@ -29,7 +29,7 @@ public:
     Convert2AnyTestHelper(){};
     TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string dEModeRequested="Direct",bool updateMasks=false)
     {
-      return ConvertToMD::preprocessDetectorsPositions(InWS2D,dEModeRequested,updateMasks);
+      return ConvertToMD::preprocessDetectorsPositions(InWS2D,dEModeRequested,updateMasks,std::string(this->getProperty("PreprocDetectorsWS")));
     }
     void setSourceWS(Mantid::API::MatrixWorkspace_sptr InWS2D)
     {
@@ -290,7 +290,7 @@ void test_EventNoUnitsConv()
     pTargWS->createEmptyMDWS(WSD);
 
     ConvToMDSelector AlgoSelector;
-    pConvMethods = AlgoSelector.convSelector(inWsEv);
+    pConvMethods = AlgoSelector.convSelector(inWsEv,pConvMethods);
     TS_ASSERT_THROWS_NOTHING(pConvMethods->initialize(WSD,pTargWS,false));
 
     pMockAlgorithm->resetProgress(numHist);
@@ -326,7 +326,7 @@ void test_EventFromTOFConv()
 
 
     ConvToMDSelector AlgoSelector;
-    pConvMethods = AlgoSelector.convSelector(inWsEv);
+    pConvMethods = AlgoSelector.convSelector(inWsEv,pConvMethods);
     pConvMethods->initialize(WSD,pTargWS,false);
 
     pMockAlgorithm->resetProgress(numHist);
@@ -364,7 +364,7 @@ void test_HistoFromTOFConv()
     pTargWS->createEmptyMDWS(WSD);
 
     ConvToMDSelector AlgoSelector;
-    pConvMethods = AlgoSelector.convSelector(inWs2D);
+    pConvMethods = AlgoSelector.convSelector(inWs2D,pConvMethods);
     pConvMethods->initialize(WSD,pTargWS,false);
 
     pMockAlgorithm->resetProgress(numHist);
@@ -405,7 +405,7 @@ void test_HistoNoUnitsConv()
     pTargWS->createEmptyMDWS(WSD);
 
     ConvToMDSelector AlgoSelector;
-    pConvMethods = AlgoSelector.convSelector(inWs2D);
+    pConvMethods = AlgoSelector.convSelector(inWs2D,pConvMethods);
     pConvMethods->initialize(WSD,pTargWS,false);
 
     pMockAlgorithm->resetProgress(numHist);

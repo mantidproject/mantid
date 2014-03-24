@@ -185,7 +185,6 @@ namespace Mantid
         return getParameter<int>(pname, recursive);
       }
 
-
       /**
       * Get a parameter's type -- this is HACK untill Python can export property regardless of the property type 
       * @param pname :: The name of the parameter
@@ -208,6 +207,7 @@ namespace Mantid
           else
             return std::string("");
       }
+
       /**
       * Get a parameter defined as a bool
       * @param pname :: The name of the parameter

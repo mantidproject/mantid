@@ -13,6 +13,8 @@
 #include <QUrl>
 #include <QDesktopWidget>
 
+#include <fstream>
+
 namespace MantidQt
 {
   namespace MantidWidgets
@@ -998,27 +1000,42 @@ namespace MantidQt
       }
     }
 
+    /**
+     * Disable the download button if user can access the files locally from the archives.
+     * @param row :: The row the user has selected from the table.
+     */
+    void CatalogSearch::disableDownloadButtonIfArchives(int row)
+    {
+      QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
+      // The location of the file selected in the archives.
+      std::string location = table->item(row,headerIndexByName(table, "Location"))->text().toStdString();
+      Mantid::Kernel::CatalogInfo catalogInfo = Mantid::Kernel::ConfigService::Instance().getFacility().catalogInfo();
+      std::string fileLocation = catalogInfo.transformArchivePath(location);
+
+      std::ifstream hasAccessToArchives(fileLocation.c_str());
+      if (hasAccessToArchives)
+      {
+        m_icatUiForm.dataFileDownloadBtn->setEnabled(false);
+      }
+      else
+      {
+        m_icatUiForm.dataFileDownloadBtn->setEnabled(true);
+      }
+      // Allow the user to load the datafile regardless.
+      m_icatUiForm.dataFileLoadBtn->setEnabled(true);
+    }
+
     ///////////////////////////////////////////////////////////////////////////////
     // SLOTS for: "DataFile information"
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Enables the download & load button if user has selected a data file to download. Otherwise, disables them.
+     * Disable the load/download button to prevent the user from downloading/loading nothing.
      */
-    void CatalogSearch::enableDownloadButtons()
+    void CatalogSearch::disableDatafileButtons()
     {
-      QModelIndexList indexes = m_icatUiForm.dataFileResultsTbl->selectionModel()->selection().indexes();
-
-      // If the user has selected a data file to download, then enable relevant buttons.
-      // Otherwise null would be passed to download/load, which causes an exception.
-      if (!indexes.empty())
+      if (m_icatUiForm.dataFileResultsTbl->selectionModel()->selection().indexes().empty())
       {
-        m_icatUiForm.dataFileDownloadBtn->setEnabled(true);
-        m_icatUiForm.dataFileLoadBtn->setEnabled(true);
-      }
-      else
-      {
-        // Otherwise, disable the buttons to prevent the user from downloading/loading nothing.
         m_icatUiForm.dataFileDownloadBtn->setEnabled(false);
         m_icatUiForm.dataFileLoadBtn->setEnabled(false);
       }
@@ -1119,8 +1136,6 @@ namespace MantidQt
         if (toggled) table->item(row, 0)->setCheckState(Qt::Checked);
         else table->item(row, 0)->setCheckState(Qt::Unchecked);
       }
-
-      enableDownloadButtons();
     }
 
     /**
@@ -1173,9 +1188,13 @@ namespace MantidQt
 
       for (int i = 0; i < indexes.count(); ++i)
       {
-        table->item(indexes.at(i).row(), 0)->setCheckState(Qt::Checked);
+        int row = indexes.at(i).row();
+        table->item(row, 0)->setCheckState(Qt::Checked);
+        /// Disable/Enable download button if user has access to the archives.
+        disableDownloadButtonIfArchives(row);
       }
-      enableDownloadButtons();
+      // Disable load/download buttons if no datafile is selected.
+      disableDatafileButtons();
     }
 
 

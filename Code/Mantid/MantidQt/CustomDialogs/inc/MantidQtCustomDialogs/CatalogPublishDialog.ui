@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>526</width>
-    <height>281</height>
+    <width>503</width>
+    <height>269</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -165,8 +165,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>506</width>
-        <height>197</height>
+        <width>483</width>
+        <height>185</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -181,34 +181,24 @@
          <property name="sizeConstraint">
           <enum>QLayout::SetDefaultConstraint</enum>
          </property>
-         <item row="2" column="0">
+         <item row="1" column="0">
           <widget class="QLabel" name="nameInCatalog">
            <property name="text">
             <string>Name in catalog:</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="inputWorkspace">
-           <property name="text">
-            <string>Input workspace:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
+         <item row="1" column="1">
           <widget class="QLineEdit" name="nameInCatalogTxt"/>
          </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="fileNameTxt"/>
-         </item>
-         <item row="3" column="0">
+         <item row="2" column="0">
           <widget class="QLabel" name="investigationNumber">
            <property name="text">
             <string>Investigation number:</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="2" column="1">
           <widget class="QComboBox" name="investigationNumberCb">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -218,37 +208,7 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="2">
-          <widget class="QPushButton" name="browseBtn">
-           <property name="text">
-            <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="inputWorkspaceCb">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="fileName">
-           <property name="text">
-            <string>File name:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
+         <item row="3" column="0">
           <widget class="QLabel" name="description">
            <property name="text">
             <string>Description:</string>
@@ -258,8 +218,34 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="1">
+         <item row="3" column="1">
           <widget class="QLineEdit" name="descriptionInput"/>
+         </item>
+         <item row="0" column="0" colspan="2">
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="0" colspan="2">
+            <widget class="MantidQt::MantidWidgets::DataSelector" name="dataSelector" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="autoLoad" stdset="0">
+              <bool>false</bool>
+             </property>
+             <property name="workspaceSuffixes" stdset="0">
+              <stringlist/>
+             </property>
+             <property name="fileBrowserSuffixes" stdset="0">
+              <stringlist/>
+             </property>
+             <property name="showLoad" stdset="0">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>
@@ -321,9 +307,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::WorkspaceSelector</class>
-   <extends>QComboBox</extends>
-   <header>MantidQtMantidWidgets/WorkspaceSelector.h</header>
+   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/DataSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

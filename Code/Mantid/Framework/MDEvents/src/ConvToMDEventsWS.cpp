@@ -1,6 +1,7 @@
 #include "MantidMDEvents/ConvToMDEventsWS.h"
 #include "MantidMDEvents/UnitsConversionHelper.h"
-//
+
+
 
 namespace Mantid
 {
@@ -53,7 +54,7 @@ namespace Mantid
       it = events.begin();
       for (; it != it_end; it++)
       {
-        double val=localUnitConv.convertUnits(it->tof());         
+        double val=localUnitConv.convertUnits(it->tof());
         double signal = it->weight();
         double errorSq= it->errorSquared();
         if(!m_QConverter->calcMatrixCoord(val,locCoord,signal,errorSq))continue; // skip ND outside the range
@@ -122,15 +123,16 @@ namespace Mantid
       size_t nValidSpectra  = m_NSpectra;
 
       //--->>> Thread control stuff
-      Kernel::ThreadScheduler * ts = new Kernel::ThreadSchedulerFIFO();
+      Kernel::ThreadSchedulerFIFO * ts(NULL);
+
       int nThreads(m_NumThreads);
       if(nThreads<0)nThreads= 0; // negative m_NumThreads correspond to all cores used, 0 no threads and positive number -- nThreads requested;
       bool runMultithreaded = false;
       if(m_NumThreads!=0)
       {
         runMultithreaded  = true;
-        // Create the thread pool that will run all of these.
-        ts = new Kernel::ThreadSchedulerFIFO();     
+        // Create the thread pool that will run all of these. It will be deleted by the threadpool
+        ts = new Kernel::ThreadSchedulerFIFO();
         // it will initiate thread pool with number threads or machine's cores (0 in tp constructor)
         pProgress->resetNumSteps(nValidSpectra,0,1);
       }
@@ -189,6 +191,7 @@ namespace Mantid
 
       /// Set the special coordinate system flag on the output workspace.
       m_OutWSWrapper->pWorkspace()->setCoordinateSystem(m_coordinateSystem);
+   
     }
 
 

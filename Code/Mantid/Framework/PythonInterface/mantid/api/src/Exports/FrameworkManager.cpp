@@ -44,7 +44,9 @@ namespace
     }
     else
     {
-      alg = AlgorithmManager::Instance().create(name, version); // This will be initialized already
+      // creating through the manager ensures that observers can listen for things like
+      // progress & cancellation notifications
+      alg = AlgorithmManager::Instance().create(name, version);
     }
     alg->setRethrows(true);
 
