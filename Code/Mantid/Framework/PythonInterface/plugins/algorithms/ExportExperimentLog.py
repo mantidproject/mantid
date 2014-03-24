@@ -15,8 +15,8 @@ There are 3 modes to write the experiment log file.
 
 == Missing Sample Logs ==
 If there is any sample log specified in the properites but does not exist in the workspace, 
-a string as 'XXXX' will be put to the experiment log information line, because 
-there is no sufficient information about its default. 
+a zero float value will be put to the experiment log information line, 
+as the preference of instrument scientist. 
 
 == Sample Log Operation ==
 There are 5 types of operations that are supported for a TimeSeriesProperty.  
@@ -279,9 +279,9 @@ class ExportExperimentLog(PythonAlgorithm):
             
             # check whether this property does exist. 
             if isexist is False:
-                # If not exist, use XXXX as default
+                # If not exist, use 0.00 as default
                 self.log().warning("Sample log %s does not exist in given workspace %s. " % (logname, str(self._wksp)))
-                valuedict[logname] = "XXXX"
+                valuedict[logname] = 0.0
                 continue
 
             logproperty = run.getProperty(logname)
