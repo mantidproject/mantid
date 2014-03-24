@@ -159,6 +159,8 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
         DataObjects::Workspace2D_sptr outputWorkspace = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
                 (WorkspaceFactory::Instance().create("Workspace2D", 3, dValues.size(), dValues.size()));
 
+        outputWorkspace->getAxis(0)->setUnit("MomentumTransfer");
+
         outputWorkspace->dataY(0) = correctedCorrelatedIntensities;
 
         outputWorkspace->setX(0, qValues);
@@ -441,30 +443,13 @@ double PoldiAutoCorrelationCore::correctedIntensity(double intensity, double wei
 double PoldiAutoCorrelationCore::reduceChopperSlitList(std::vector<UncertainValue> valuesWithSigma, double weight)
 {
     try {
-        std::vector<double> iOverSigma(valuesWithSigma.size());
-        std::transform(valuesWithSigma.begin(), valuesWithSigma.end(), iOverSigma.begin(), &UncertainValue::valueToErrorRatio);
+        std::vector<double> signalToNoise(valuesWithSigma.size());
+        std::transform(valuesWithSigma.begin(), valuesWithSigma.end(), signalToNoise.begin(), &UncertainValue::errorToValueRatio);
 
-        return pow(static_cast<double>(valuesWithSigma.size()), 2.0) / sumIOverSigmaInverse(iOverSigma) * weight;
+        return pow(static_cast<double>(valuesWithSigma.size()), 2.0) / std::accumulate(signalToNoise.begin(), signalToNoise.end(), 0.0) * weight;
     } catch (std::domain_error) {
         return 0.0;
     }
-}
-
-/** Sums Sigma(I)/I for given list of I/Sigma(I) values.
-  *
-  * @param iOverSigmas List of I/sigma(I)-values
-  * @return Sum of Sigma(I)/I for given list
-  */
-double PoldiAutoCorrelationCore::sumIOverSigmaInverse(std::vector<double> &iOverSigmas)
-{
-    double sum = 0.0;
-
-    for(std::vector<double>::const_iterator iovers = iOverSigmas.begin(); iovers != iOverSigmas.end(); ++iovers)
-    {
-        sum += 1.0 / *iovers;
-    }
-
-    return sum;
 }
 
 /** Transforms a vector of detector element indices to total flight path, adding the distances from chopper to sample and sample to detector element.

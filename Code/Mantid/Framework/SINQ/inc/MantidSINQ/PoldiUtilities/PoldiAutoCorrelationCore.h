@@ -71,7 +71,6 @@ protected:
     double getRawCorrelatedIntensity(double dValue, double weight);
     virtual UncertainValue getCMessAndCSigma(double dValue, double slitTimeOffset, int index);
     double reduceChopperSlitList(std::vector<UncertainValue> valuesWithSigma, double weight);
-    double sumIOverSigmaInverse(std::vector<double> &iOverSigmas);
 
     std::vector<double> getDistances(std::vector<int> elements);
     std::vector<double> getTofsFor1Angstrom(std::vector<int> elements);

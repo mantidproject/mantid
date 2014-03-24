@@ -61,6 +61,7 @@ public:
 
     static bool lessThanError(UncertainValue const& left, UncertainValue const& right);
     static double valueToErrorRatio(UncertainValue const& uncertainValue);
+    static double errorToValueRatio(UncertainValue const& uncertainValue);
 
 private:    
     double m_value;

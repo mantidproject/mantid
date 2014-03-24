@@ -63,6 +63,15 @@ double UncertainValue::valueToErrorRatio(const UncertainValue &uncertainValue)
     return uncertainValue.value() / uncertainValue.error();
 }
 
+double UncertainValue::errorToValueRatio(const UncertainValue &uncertainValue)
+{
+    if(uncertainValue.value() == 0.0) {
+        throw std::domain_error("Division by zero is not defined.");
+    }
+
+    return uncertainValue.error() / uncertainValue.value();
+}
+
 UncertainValue UncertainValue::operator *(double d)
 {
     return UncertainValue(m_value * d, m_error * d);
