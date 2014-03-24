@@ -4,10 +4,10 @@
 #include <numeric>
 #include <algorithm>
 #include "boost/bind.hpp"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/MultiThreaded.h"
 
+#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 
 namespace Mantid
@@ -152,7 +152,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
 
         PARALLEL_FOR_NO_WSP_CHECK()
         for(int i = 0; i < static_cast<int>(dCount); ++i) {
-            qValues[dCount - i - 1] = (2.0 * M_PI / dValues[i]);
+            qValues[dCount - i - 1] = Conversions::dToQ(dValues[i]);
         }
 
         m_logger.information() << "  Setting result..." << std::endl;
@@ -184,7 +184,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(DataObjects::W
 double PoldiAutoCorrelationCore::getDeltaD(double deltaT)
 {
     int centralElement = static_cast<int>(m_detector->centralElement());
-    return TOFtod(deltaT, m_chopper->distanceFromSample() + m_detector->distanceFromSample(centralElement), sin(m_detector->twoTheta(centralElement) / 2.0));
+    return Conversions::TOFtoD(deltaT, m_chopper->distanceFromSample() + m_detector->distanceFromSample(centralElement), sin(m_detector->twoTheta(centralElement) / 2.0));
 }
 
 /** Computes a d-range from the limits set by the detector and expresses it as multiples of a step size given in Angstrom.
@@ -196,7 +196,7 @@ std::pair<int, int> PoldiAutoCorrelationCore::getDRangeAsDeltaMultiples(double d
 {
     std::pair<double, double> qLimits = m_detector->qLimits(m_wavelengthRange.first, m_wavelengthRange.second);
 
-    return std::make_pair(static_cast<int>(2.0 * M_PI / qLimits.second / deltaD), static_cast<int>(2.0 * M_PI / qLimits.first / deltaD));
+    return std::make_pair(static_cast<int>(Conversions::qToD(qLimits.second) / deltaD), static_cast<int>(Conversions::qToD(qLimits.first) / deltaD));
 }
 
 /** Generates an equidistant grid of d-values with a given step size. The result depends on the assigned detector.
@@ -497,7 +497,7 @@ std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(std::vector<in
 
     // Time of flight for neutrons with a wavelength of 1 Angstrom for each element
     std::vector<double> tofFor1Angstrom(elements.size());
-    std::transform(distances.begin(), distances.end(), sinThetas.begin(), tofFor1Angstrom.begin(), boost::bind<double>(&PoldiAutoCorrelationCore::dtoTOF, 1.0, _1, _2));
+    std::transform(distances.begin(), distances.end(), sinThetas.begin(), tofFor1Angstrom.begin(), boost::bind<double>(&Conversions::dtoTOF, 1.0, _1, _2));
 
     return tofFor1Angstrom;
 }
@@ -574,44 +574,6 @@ double PoldiAutoCorrelationCore::getSumOfCounts(int timeBinCount, std::vector<in
 
     return sum;
 }
-
-/* Unit conversion functions dtoTOF and TOFtod
- *
- * This way of converting units leads to values that differ slightly from the ones produced
- * by the original fortran code. In that code there is a lot of "multiplying by 2PI and dividing by 2PI"
- * going on, which is not present here. These small deviations accumulate when a lot of conversions
- * are performed, so the end results may differ numerically in those cases.
- *
- * These two functions are exactly inverse, as demonstrated by the unit tests (PoldiAutoCorrelationCoreTest.h).
- */
-
-
-/** Converts d to TOF, given a distance and sin(theta)
-  *
-  * @param d :: d in Angstrom.
-  * @param distance :: Neutron flight path in mm.
-  * @param sinTheta :: sin(theta).
-  * @return TOF in microseconds.
-  */
-double PoldiAutoCorrelationCore::dtoTOF(double d, double distance, double sinTheta)
-{
-
-    return 2.0 * distance * sinTheta * d * PhysicalConstants::NeutronMass / (PhysicalConstants::h * 1e7);
-}
-
-/** Converts TOF to d, given a distance and sin(theta)
-  *
-  * @param tof :: Time of flight in microseconds.
-  * @param distance :: Neutron flight path in mm.
-  * @param sinTheta :: sin(theta).
-  * @return d in Angstrom.
-  */
-double PoldiAutoCorrelationCore::TOFtod(double tof, double distance, double sinTheta)
-{
-    return PhysicalConstants::h * 1e7 * tof / (2.0 * distance * sinTheta * PhysicalConstants::NeutronMass);
-}
-
-
 
 } // namespace Poldi
 } // namespace Mantid

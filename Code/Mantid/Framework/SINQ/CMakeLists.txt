@@ -15,6 +15,7 @@ set ( SRC_FILES
 	src/PoldiUtilities/PoldiAutoCorrelationCore.cpp
 	src/PoldiUtilities/PoldiBasicChopper.cpp
 	src/PoldiUtilities/PoldiChopperFactory.cpp
+        src/PoldiUtilities/PoldiConversions.cpp
 	src/PoldiUtilities/PoldiDeadWireDecorator.cpp
 	src/PoldiUtilities/PoldiDetectorDecorator.cpp
 	src/PoldiUtilities/PoldiDetectorFactory.cpp
@@ -49,6 +50,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h
 	inc/MantidSINQ/PoldiUtilities/PoldiBasicChopper.h
 	inc/MantidSINQ/PoldiUtilities/PoldiChopperFactory.h
+        inc/MantidSINQ/PoldiUtilities/PoldiConversions.h
 	inc/MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h
 	inc/MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h
 	inc/MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h
@@ -73,6 +75,7 @@ set ( TEST_FILES
 	PoldiAutoCorrelationCoreTest.h
 	PoldiBasicChopperTest.h
 	PoldiChopperFactoryTest.h
+        PoldiConversionsTest.h
 	PoldiDeadWireDecoratorTest.h
 	PoldiDetectorDecoratorTest.h
 	PoldiDetectorFactoryTest.h

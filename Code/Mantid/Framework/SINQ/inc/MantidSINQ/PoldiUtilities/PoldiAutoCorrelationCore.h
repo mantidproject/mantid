@@ -56,10 +56,6 @@ public:
 
     DataObjects::Workspace2D_sptr calculate(DataObjects::Workspace2D_sptr countData);
 
-    // conversion between TOF (in musec) and d (in Angstrom), related through distance in mm and sin(theta)
-    static double dtoTOF(double d, double distance, double sinTheta);
-    static double TOFtod(double tof, double distance, double sinTheta);
-
 protected:
     virtual double getDeltaD(double deltaT);
     std::pair<int, int> getDRangeAsDeltaMultiples(double getDeltaD);

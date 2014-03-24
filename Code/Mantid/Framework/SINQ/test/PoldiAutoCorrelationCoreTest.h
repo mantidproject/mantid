@@ -145,18 +145,6 @@ public:
         TS_ASSERT_EQUALS(dgrid.size(), 5531);
     }
 
-    void testConversions()
-    {
-        double distance = 11800.0 + 1996.017578125;
-        double sinTheta = sin(1.577357650 / 2.0);
-        double tof = 3.0;
-
-        double d = PoldiAutoCorrelationCore::TOFtod(tof, distance, sinTheta);
-
-        TS_ASSERT_DELTA(d, 0.000606307, 1e-9);
-        TS_ASSERT_EQUALS(PoldiAutoCorrelationCore::dtoTOF(d, distance, sinTheta), tof);
-    }
-
     void testgetTOFsFor1Angstrom()
     {
         boost::shared_ptr<PoldiAbstractDetector> detector(new ConfiguredHeliumDetector);
