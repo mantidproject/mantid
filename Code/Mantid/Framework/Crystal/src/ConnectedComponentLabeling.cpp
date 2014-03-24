@@ -35,8 +35,6 @@ namespace Mantid
      */
     void ConnectedComponentLabeling::startLabelingId(const size_t& id)
     {
-      if(id < 1)
-        throw std::invalid_argument("Start labeling id must be >= 1");
       m_startId = id;
     }
 

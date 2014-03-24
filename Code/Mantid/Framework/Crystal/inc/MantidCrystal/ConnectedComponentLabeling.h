@@ -41,7 +41,7 @@ namespace Crystal
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> execute(Mantid::API::IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy) const;
     virtual ~ConnectedComponentLabeling();
   private:
-    unsigned int m_startId;
+    size_t m_startId;
     
   };
 
