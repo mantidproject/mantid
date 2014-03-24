@@ -99,6 +99,9 @@ namespace Crystal
 
     this->declareProperty(new PropertyWithValue<double>( "AverageError", 0.0,
           Direction::Output), "The average HKL indexing error if apply==true.");
+
+    this->declareProperty( "AllowPermutations", false,
+                            "Allow permutations of conventional cells" );
   }
 
   Kernel::Matrix<double> SelectCellWithForm::DetermineErrors( std::vector<double> &sigabc, const Kernel::Matrix<double> &UB,
@@ -173,6 +176,8 @@ namespace Crystal
     OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
     Matrix<double> UB = o_lattice.getUB();
 
+    bool   allowPermutations        = this->getProperty("AllowPermutations");
+
     if ( ! IndexingUtils::CheckUB( UB ) )
     {
        throw std::runtime_error(
@@ -183,7 +188,7 @@ namespace Crystal
     bool   apply     = this->getProperty("Apply");
     double tolerance = this->getProperty("Tolerance");
 
-    ConventionalCell info = ScalarUtils::GetCellForForm( UB, form_num );
+    ConventionalCell info = ScalarUtils::GetCellForForm( UB, form_num, allowPermutations );
 
     DblMatrix newUB = info.GetNewUB();
 
