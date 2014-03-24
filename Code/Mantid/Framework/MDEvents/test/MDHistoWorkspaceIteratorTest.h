@@ -457,7 +457,7 @@ public:
     it->jumpTo(1);
     neighbourIndexes = it->findNeighbourIndexes();
     TS_ASSERT_EQUALS(11, neighbourIndexes.size());
-    std::vector<size_t> expected_neighbours = boost::assign::list_of(0)(2)(4)(5)(6)(16)(17)(18)(20)(21)(22)(22);
+    std::vector<size_t> expected_neighbours = boost::assign::list_of(0)(2)(4)(5)(6)(16)(17)(18)(20)(21)(22)(22).convert_to_container<std::vector<size_t>>();
     for (auto i = expected_neighbours.begin(); i != expected_neighbours.end(); ++i)
     {
       TS_ASSERT(doesContainIndex(neighbourIndexes, *i));
@@ -468,7 +468,7 @@ public:
     neighbourIndexes = it->findNeighbourIndexes();
     TSM_ASSERT_EQUALS("Should have 3^n-1 neighbours here", 26, neighbourIndexes.size());
     // Is completely enclosed
-    expected_neighbours = boost::assign::list_of(0)(1)(2)(4)(5)(6)(8)(9)(10)(16)(17)(18)(22)(20)(24)(25)(26)(32)(33)(34)(37)(38)(36)(41)(40)(42);
+    expected_neighbours = boost::assign::list_of(0)(1)(2)(4)(5)(6)(8)(9)(10)(16)(17)(18)(22)(20)(24)(25)(26)(32)(33)(34)(37)(38)(36)(41)(40)(42).convert_to_container<std::vector<size_t>>();
 
     for (auto i = expected_neighbours.begin(); i != expected_neighbours.end(); ++i)
     {
@@ -480,7 +480,7 @@ public:
     neighbourIndexes = it->findNeighbourIndexes();
     TS_ASSERT_EQUALS(7, neighbourIndexes.size());
     // Is completely enclosed
-    expected_neighbours = boost::assign::list_of(42)(43)(46)(47)(58)(59)(62);
+    expected_neighbours = boost::assign::list_of(42)(43)(46)(47)(58)(59)(62).convert_to_container<std::vector<size_t>>();
 
     for (auto i = expected_neighbours.begin(); i != expected_neighbours.end(); ++i)
     {
