@@ -355,10 +355,9 @@ class ConnectedComponentLabelingTestPerformance: public CxxTest::TestSuite
 private:
 
   IMDHistoWorkspace_sptr m_inWS;
-  boost::scoped_ptr<BackgroundStrategy> m_backgroundStrategy;
   const double m_backgroundSignal;
-
-
+  boost::scoped_ptr<BackgroundStrategy> m_backgroundStrategy;
+  
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests

@@ -76,7 +76,7 @@ namespace Mantid
         neighbourElements.push_back(DisjointElement());
       }
 
-      unsigned int currentLabelCount = m_startId;
+      size_t currentLabelCount = m_startId;
       size_t currentIndex = 0; // We assume current index in the image can be kept in sync with the iterator.
       do
       {
@@ -101,7 +101,7 @@ namespace Mantid
 
           if (nonEmptyNeighbourIndexes.empty())
           {
-            neighbourElements[currentIndex] = DisjointElement(currentLabelCount); // New leaf
+            neighbourElements[currentIndex] = DisjointElement(static_cast<int>(currentLabelCount)); // New leaf
             ++currentLabelCount;
           }
           else if (neighbourIds.size() == 1) // Do we have a single unique id amongst all neighbours.
