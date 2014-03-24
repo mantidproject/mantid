@@ -4,8 +4,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/HardThresholdBackground.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
-using Mantid::Crystal::HardThresholdBackground;
+using namespace Mantid::Crystal;
+using namespace Mantid::API;
+using namespace Mantid::MDEvents;
+using namespace Mantid::MDEvents::MDEventsTestHelper;
 
 class HardThresholdBackgroundTest : public CxxTest::TestSuite
 {
@@ -16,11 +20,16 @@ public:
   static void destroySuite( HardThresholdBackgroundTest *suite ) { delete suite; }
 
 
-  void test_Something()
+  void test_isBackground()
   {
-    TSM_ASSERT( "You forgot to write a test!", 0);
-  }
+    const double threshold = 1;
+    MDHistoWorkspace_sptr ws = makeFakeMDHistoWorkspace(threshold, 1, 1);
+    auto iterator = ws->createIterator(NULL);
 
+    HardThresholdBackground strategy(threshold, Mantid::API::NoNormalization);
+
+    TS_ASSERT(strategy.isBackground(iterator));
+  }
 
 };
 
