@@ -162,7 +162,6 @@ class ExportExperimentLog(PythonAlgorithm):
             wbuf += "%s" % (title)
             if ititle < len(self._headerTitles)-1:
                 wbuf += "\t"
-        wbuf += "\n"
             
         try:
             ofile = open(self._logfilename, "w")
@@ -251,7 +250,7 @@ class ExportExperimentLog(PythonAlgorithm):
 
         # Append to file
         lfile = open(self._logfilename, "a")
-        lfile.write("%s\n" %(wbuf))
+        lfile.write("\n%s" %(wbuf))
         lfile.close()
         
         return
