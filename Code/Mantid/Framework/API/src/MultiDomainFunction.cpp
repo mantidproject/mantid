@@ -177,6 +177,28 @@ namespace API
     }
   }
 
+  /**
+   * Called at the start of each iteration. Call iterationStarting() of the members.
+   */
+  void MultiDomainFunction::iterationStarting()
+  {
+    for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+    {
+      getFunction(iFun)->iterationStarting();
+    }
+  }
+
+  /**
+   * Called at the end of an iteration. Call iterationFinished() of the members.
+   */
+  void MultiDomainFunction::iterationFinished()
+  {
+    for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+    {
+      getFunction(iFun)->iterationFinished();
+    }
+  }
+
   /// Return a value of attribute attName
   IFunction::Attribute MultiDomainFunction::getLocalAttribute(size_t i, const std::string& attName)const
   {

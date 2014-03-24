@@ -54,6 +54,10 @@ public:
   virtual void function(const FunctionDomain& domain, FunctionValues& values)const;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);
+  /// Called at the start of each iteration
+  virtual void iterationStarting();
+  /// Called at the end of an iteration
+  virtual void iterationFinished();
 
   /// Associate a function and a domain
   void setDomainIndex(size_t funIndex, size_t domainIndex);
