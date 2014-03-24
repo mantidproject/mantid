@@ -4,6 +4,7 @@
 import refl_window
 import refl_save
 import refl_choose_col
+import refl_live_options
 import csv
 import string
 import os
@@ -278,6 +279,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.actionCut.triggered.connect(self._cut_cells)
         self.actionCopy.triggered.connect(self._copy_cells)
         self.actionChoose_Columns.triggered.connect(self._choose_columns)
+        self.actionLive_Data.triggered.connect(self._live_data_options())
 
     def _populate_runs_list(self):
         """
@@ -900,6 +902,17 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             Dialog.exec_()
         except Exception as ex:
             logger.notice("Could not open save workspace dialog")
+            logger.notice(str(ex))
+
+    def _live_data_options(self):
+        """
+        Shows the dialog for setting options regarding live data
+        """
+        try:
+            Dialog = refl_live_options.ReflLiveOptions()
+            Dialog.exec_()
+        except Exception as ex:
+            logger.notice("Could not open live data options dialog")
             logger.notice(str(ex))
 
     def _choose_columns(self):
