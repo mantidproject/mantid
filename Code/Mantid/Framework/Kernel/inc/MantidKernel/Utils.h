@@ -274,7 +274,7 @@ namespace Utils
 
     for(size_t ind = 0; ind < ndims; ++ind)
     {
-      int64_t diff = std::abs(static_cast<int64_t>(subject_indices[ind]) - static_cast<int64_t>(neighbour_indices[ind]));
+      long double diff = std::abs(static_cast<long double>(subject_indices[ind]) - static_cast<long double>(neighbour_indices[ind]));
       if (diff > 1)
       {
         return false;
