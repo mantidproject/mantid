@@ -14,8 +14,11 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/variant.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+# include <boost/variant.hpp>
+#endif
+
 #include <string>
 #include <vector>
 

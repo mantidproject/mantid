@@ -4,7 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <boost/scoped_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/scoped_ptr.hpp>
+#endif
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"

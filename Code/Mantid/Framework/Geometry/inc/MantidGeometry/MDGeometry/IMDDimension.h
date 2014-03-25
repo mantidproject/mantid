@@ -4,7 +4,9 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/V3D.h"
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include <stdexcept>
 #include <vector>
 

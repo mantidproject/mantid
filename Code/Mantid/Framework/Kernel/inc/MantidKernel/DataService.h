@@ -4,8 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
-#include <boost/algorithm/string.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+# include <boost/algorithm/string.hpp>
+#endif
 #include <Poco/NotificationCenter.h>
 #include <Poco/Notification.h>
 #include "MantidKernel/Logger.h"

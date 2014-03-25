@@ -7,7 +7,9 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Logger.h"
 
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include <string>
 #include <typeinfo>
 #include <limits>

@@ -5,7 +5,9 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidKernel/SingletonHolder.h"
 
-#include <boost/type_traits/is_base_of.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/type_traits/is_base_of.hpp>
+#endif
 
 #include <map>
 #include <string>

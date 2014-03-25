@@ -6,7 +6,9 @@
 //------------------------------------------------------------------------------
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include <nexus/NeXusFile.hpp>
 
 
