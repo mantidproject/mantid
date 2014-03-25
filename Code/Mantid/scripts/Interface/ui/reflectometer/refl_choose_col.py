@@ -9,10 +9,14 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class ReflChoose(refl_columns.Ui_ChooseColumnsDialog):
+class ReflChoose(QtGui.QDialog, refl_columns.Ui_ChooseColumnsDialog):
     visiblestates = {}
-    def setupUi(self, Dialog, ColHeaders, table):
-        super(ReflChoose, self).setupUi(Dialog)
+    def __init__(self, ColHeaders, table):
+        """
+        Initialise the interface
+        """
+        super(QtGui.QDialog, self).__init__()
+        self.setupUi(self)
         self.visiblestates.clear()
         self.listColumns.itemChanged.connect(self.on_listColumns_itemChanged)
         self.buttonsColumns.clicked.connect(self.on_buttonsColumns_Clicked)

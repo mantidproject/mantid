@@ -679,15 +679,16 @@
     <addaction name="actionPaste"/>
     <addaction name="actionClear"/>
    </widget>
-   <widget class="QMenu" name="menuView">
+   <widget class="QMenu" name="menuOptions">
     <property name="title">
-     <string>View</string>
+     <string>Options</string>
     </property>
     <addaction name="actionChoose_Columns"/>
+    <addaction name="actionLive_Data"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
-   <addaction name="menuView"/>
+   <addaction name="menuOptions"/>
    <addaction name="menuFunction"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -832,6 +833,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="actionLive_Data">
+   <property name="text">
+    <string>Live Data...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
    </property>
   </action>
  </widget>

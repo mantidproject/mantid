@@ -4,6 +4,7 @@
 import refl_window
 import refl_save
 import refl_choose_col
+import refl_live_options
 import csv
 import string
 import os
@@ -51,6 +52,20 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF']
         self.polarisation_instruments = ['CRISP', 'POLREF']
         self.polarisation_options = {'None' : PolarisationCorrection.NONE, '1-PNR' : PolarisationCorrection.PNR, '2-PA' : PolarisationCorrection.PA }
+
+        #Set the live data settings, use defualt if none have been set before
+        settings = QtCore.QSettings()
+        settings.beginGroup("Mantid/ISISReflGui/LiveData")
+        self.live_method = settings.value("method", "", type=str)
+        self.live_freq = settings.value("frequency", 0, type=float)
+        if not (self.live_freq and self.live_method):
+            logger.information("No settings were found for loading live data, Loading defaults (Update frequency: 60 seconds and Accumulation Method: Add)")
+            self.live_freq = float(60)
+            self.live_method = "Add"
+            settings.setValue("frequency", self.live_freq)
+            settings.setValue("method", self.live_method)
+        settings.endGroup()
+        del settings
 
     def __del__(self):
         """
@@ -104,7 +119,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
     def _table_modified(self, row, column):
         """
-        sets the modified flag whne the table is altered
+        sets the modified flag when the table is altered
         """
         if not self.loading:
             self.mod_flag = True
@@ -186,7 +201,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             if ret == QtGui.QMessageBox.Cancel:
                 return
         self.current_table = None
-        self.accMethod = None
 
         settings = QtCore.QSettings()
         settings.beginGroup("Mantid/ISISReflGui/Columns")
@@ -278,6 +292,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.actionCut.triggered.connect(self._cut_cells)
         self.actionCopy.triggered.connect(self._copy_cells)
         self.actionChoose_Columns.triggered.connect(self._choose_columns)
+        self.actionLive_Data.triggered.connect(self._live_data_options)
 
     def _populate_runs_list(self):
         """
@@ -515,26 +530,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         for row in range(self.tableMain.rowCount()):
             self.tableMain.cellWidget(row, self.stitch_col).children()[1].setCheckState(state)
 
-    def _get_acc_method(self):
-        """
-        Ask the user for the accumulation method they'd like to use with the live data they've asked for
-        """
-        msgBox = QtGui.QMessageBox()
-        msgBox.setText("The Data to be processed required that a Live Data service be started. What accumulation method would you like it to use?")
-        msgBox.setIcon(QtGui.QMessageBox.Question)
-        AddButton = msgBox.addButton("Add", QtGui.QMessageBox.ActionRole | QtGui.QMessageBox.AcceptRole)
-        ReplaceButton = msgBox.addButton("Replace", QtGui.QMessageBox.ActionRole | QtGui.QMessageBox.AcceptRole)
-        AppendButton = msgBox.addButton("Append", QtGui.QMessageBox.ActionRole | QtGui.QMessageBox.AcceptRole)
-        msgBox.setDefaultButton(AddButton)
-        msgBox.setEscapeButton(AddButton)
-        reply = msgBox.exec_()
-        if msgBox.clickedButton() == AppendButton:
-            return "Append"
-        elif msgBox.clickedButton() == ReplaceButton:
-            return "Replace"
-        else:
-            return "Add"
-
     def _process(self):
         """
         Process has been pressed, check what has been selected then pass the selection (or whole table) to quick
@@ -578,9 +573,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                         if (self.tableMain.item(row, 15).text() == ''):
                             loadedRun = None
                             if load_live_runs.is_live_run(runno[0]):
-                                if not self.accMethod:
-                                    self.accMethod = self._get_acc_method()
-                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], Accumulation = self.accMethod)
+                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], Frequency = self.live_freq, Accumulation = self.live_method)
                             else:
                                 Load(Filename=runno[0], OutputWorkspace="run")
                                 loadedRun = mtd["run"]
@@ -727,9 +720,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
-            if not self.accMethod:
-                self.accMethod = self._get_acc_method()
-            loadedRun = load_live_runs.get_live_data(InstrumentName = config['default.instrument'], Accumulation = self.accMethod)
+            load_live_runs.get_live_data(config['default.instrument'], Frequency = self.live_freq, Accumulation = self.live_method)
         wlam, wq, th = quick(loadedRun, trans=transrun, theta=angle)
         if ':' in runno:
             runno = runno.split(':')[0]
@@ -902,18 +893,35 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             logger.notice("Could not open save workspace dialog")
             logger.notice(str(ex))
 
+    def _live_data_options(self):
+        """
+        Shows the dialog for setting options regarding live data
+        """
+        try:
+            dialog = refl_live_options.ReflLiveOptions(def_meth = self.live_method, def_freq = self.live_freq)
+            if dialog.exec_():
+                self.live_freq = dialog.frequency
+                self.live_method = dialog.get_method()
+                settings = QtCore.QSettings()
+                settings.beginGroup("Mantid/ISISReflGui/LiveData")
+                settings.setValue("frequency", self.live_freq)
+                settings.setValue("method", self.live_method)
+                settings.endGroup()
+                del settings
+        except Exception as ex:
+            logger.notice("Could not open live data options dialog")
+            logger.notice(str(ex))
+
     def _choose_columns(self):
         """
         shows the choose columns dialog for hiding and revealing of columns
         """
         try:
-            Dialog = QtGui.QDialog()
-            u = refl_choose_col.ReflChoose()
-            u.setupUi(Dialog, self.shown_cols, self.tableMain)
-            if Dialog.exec_():
+            dialog = refl_choose_col.ReflChoose(self.shown_cols, self.tableMain)
+            if dialog.exec_():
                 settings = QtCore.QSettings()
                 settings.beginGroup("Mantid/ISISReflGui/Columns")
-                for key, value in u.visiblestates.iteritems():
+                for key, value in dialog.visiblestates.iteritems():
                     self.shown_cols[key] = value
                     settings.setValue(str(key), value)
                     if value:
