@@ -95,6 +95,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/PropertyWithValueExporter.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/StlExportDefinitions.h
+  ${HEADER_DIR}/kernel/TrackingInstanceMethod.h
   ${HEADER_DIR}/kernel/TypedValidatorExporter.h
 )
 

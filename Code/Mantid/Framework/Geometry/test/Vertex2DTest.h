@@ -48,6 +48,27 @@ public:
     TS_ASSERT_EQUALS(vertexPt.previous(), &vertexPt);
   }
 
+  void test_Copy_Gives_Correct_Values_In_Constructed_Object()
+  {
+    Vertex2D vertex(5.1, 10.9);
+    Vertex2D copy(vertex);
+    TS_ASSERT_EQUALS(copy.X(), 5.1);
+    TS_ASSERT_EQUALS(copy.Y(), 10.9);
+    TS_ASSERT_EQUALS(copy.next(), &copy);
+    TS_ASSERT_EQUALS(copy.previous(), &copy);   
+  }
+
+  void test_Assign_Gives_Correct_Values_On_LHS()
+  {
+    Vertex2D vertex(5.1, 10.9);
+    Vertex2D assigned;
+    assigned = vertex;
+    TS_ASSERT_EQUALS(assigned.X(), 5.1);
+    TS_ASSERT_EQUALS(assigned.Y(), 10.9);
+    TS_ASSERT_EQUALS(assigned.next(), &assigned);
+    TS_ASSERT_EQUALS(assigned.previous(), &assigned);   
+  }
+
   void test_Vertex_As_Pt_Returns_Correct_Value()
   {
     Vertex2D vertex(5.1, 10.9);

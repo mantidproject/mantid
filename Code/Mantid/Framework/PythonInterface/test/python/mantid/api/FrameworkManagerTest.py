@@ -1,12 +1,12 @@
 import unittest
 import testhelpers
-from mantid.api import FrameworkManager, FrameworkManagerImpl, IAlgorithm
+from mantid.api import FrameworkManager, FrameworkManagerImpl, IAlgorithm, AlgorithmProxy
 
-def _is_initialized_test(testobj, alg, version, expected_child):
+def _is_initialized_test(testobj, alg, version, expected_class, expected_child):
     testobj.assertTrue(alg.isInitialized())
     testobj.assertEquals(expected_child,alg.isChild())
     testobj.assertEquals(alg.version(), version)
-    testobj.assertTrue(isinstance(alg, IAlgorithm))
+    testobj.assertTrue(isinstance(alg, expected_class))
 
 
 class FrameworkManagerTest(unittest.TestCase):
@@ -20,11 +20,13 @@ class FrameworkManagerTest(unittest.TestCase):
         
     def test_create_algorithm_produces_initialized_alorithm(self):
         alg = FrameworkManager.createAlgorithm("Rebin")
-        _is_initialized_test(self, alg, 1, expected_child=False)
+        _is_initialized_test(self, alg, 1, expected_class=AlgorithmProxy, 
+                             expected_child=False)
         
     def test_create_algorithm_with_version_produces_initialized_alorithm(self):
         alg = FrameworkManager.createAlgorithm("LoadRaw", 2)
-        _is_initialized_test(self, alg, 2, expected_child=False)
+        _is_initialized_test(self, alg, 2, expected_class=AlgorithmProxy,
+                             expected_child=False)
         
     def test_create_algorithm_produces_child_inside_PyExec(self):
         # A small test class to have a PyExec method call the 
@@ -35,7 +37,8 @@ class FrameworkManagerTest(unittest.TestCase):
             
             def PyExec(self):
                 alg = FrameworkManager.createAlgorithm("Rebin")
-                _is_initialized_test(self._test_obj, alg, 1, expected_child=True)
+                _is_initialized_test(self._test_obj, alg, 1,
+                                     expected_class=IAlgorithm, expected_child=True)
         
         top_level = TestAlg(self)
         top_level.PyExec()

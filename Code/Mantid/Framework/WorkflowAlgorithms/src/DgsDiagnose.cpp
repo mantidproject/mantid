@@ -56,7 +56,7 @@ below. All parameters given here act like italicized parameters.
 |-
 | MeanTestLevelsUp || diag_van_levels || LevelsUp
 |-
-| MediantestCorectForSolidAngle || diag_correct_solid_angle || CorrectForSolidAngle
+| MedianTestCorrectForSolidAngle || diag_correct_solid_angle || CorrectForSolidAngle
 |}
 
 ====Sample Background Parameters====
@@ -205,7 +205,7 @@ namespace Mantid
           reductionManager, "diag_samp_zero", detVanWS);
       const bool createPsdBleed = getBoolPropOrParam("PsdBleed",
           reductionManager, "diag_bleed_test", detVanWS);
-      const bool vanSA = getBoolPropOrParam("MediantestCorectForSolidAngle",
+      const bool vanSA = getBoolPropOrParam("MedianTestCorrectForSolidAngle",
           reductionManager, "diag_correct_solid_angle", detVanWS);
 
       // Numeric properties

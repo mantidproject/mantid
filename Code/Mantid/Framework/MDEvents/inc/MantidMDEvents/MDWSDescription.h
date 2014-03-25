@@ -67,6 +67,8 @@ public:  // for the time being
 
     // preprocessed detectors workspace:
     DataObjects::TableWorkspace_const_sptr m_PreprDetTable;
+    //helper parameter, which identifies if we are building new workspace or adding data to the existing one. Allows to generate clearer error messages
+    bool m_buildingNewWorkspace;
    //=======================
 /*---> accessors: */
     unsigned int         nDimensions()const{return m_NDims;}

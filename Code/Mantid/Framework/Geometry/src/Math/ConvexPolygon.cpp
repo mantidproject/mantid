@@ -78,17 +78,7 @@ namespace Mantid
      */
     ConvexPolygon::~ConvexPolygon()
     {
-      if( m_head )
-      {
-        // Ensure we delete the vertices
-        Vertex2D *nextVertex = m_head->next();
-        while(nextVertex != m_head)
-        {
-          delete nextVertex->remove();
-          nextVertex = m_head->next();
-        }
-        delete m_head;
-      }
+      if( m_head ) Vertex2D::deleteChain(m_head);
     }
      
     /**

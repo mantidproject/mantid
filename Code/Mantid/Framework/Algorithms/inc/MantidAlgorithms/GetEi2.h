@@ -96,7 +96,7 @@ namespace Algorithms
       /// Conversion factor between time and energy
       double m_t_to_mev; 
       /// The percentage deviation from the estimated peak time that defines the peak region 
-      const double m_tof_window;
+      double m_tof_window;
       /// Number of std deviations to consider a peak
       const double m_peak_signif;
       /// Number of std deviations to consider a peak for the derivative
