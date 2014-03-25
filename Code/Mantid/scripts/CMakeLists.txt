@@ -1,7 +1,6 @@
 
 set ( TEST_PY_FILES 
       test/ConvertToWavelengthTest.py
-      test/ReducerTest.py
       test/SettingsTest.py
       test/DgreduceTest.py
       test/DirectEnergyConversionTest.py
