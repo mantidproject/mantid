@@ -96,6 +96,8 @@ namespace MDEvents
 
     size_t getLinearIndex() const;
 
+    std::vector<size_t> findNeighbourIndexes() const;
+
   protected:
     /// The MDHistoWorkspace being iterated.
     const MDHistoWorkspace * m_ws;
@@ -133,9 +135,11 @@ namespace MDEvents
     /// Array to find indices from linear indices
     size_t * m_indexMaker;
 
+    /// Neighbour finding permutations.
+    mutable std::vector<int64_t> m_permutations;
+
     /// Skipping policy.
     SkippingPolicy_scptr m_skippingPolicy;
-
   };
 
 

@@ -302,6 +302,15 @@ namespace API
     }
   }
 
+  /**
+   * Find neighbour indexes
+   * @return Neighbour indexes to the current index.
+   */
+  std::vector<size_t> MatrixWorkspaceMDIterator::findNeighbourIndexes() const
+  {
+    throw std::runtime_error("MatrixWorkspaceMDIterator does not implement findNeighbourIndexes");
+  }
+
 
 } // namespace Mantid
 } // namespace API

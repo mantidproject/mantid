@@ -255,6 +255,33 @@ namespace Utils
 
   }
 
+  /**
+   * Determine, using an any-vertex touching type approach, whether the neighbour linear index corresponds to a true neighbour of the subject, which is already
+   * decomposed into it's constituent dimension indices. subject is already expressed in it's constituent indices for speed.
+   *
+   * The approach used here is to determine if a dimension index differ by any more than 1 in any dimension. If it does, then the neighbour does not represent
+   * a valid neighbour of the subject.
+   * @param ndims
+   * @param neighbour_linear_index
+   * @param subject_indices
+   * @param num_bins
+   * @return True if the are neighbours, otherwise false.
+   */
+  inline bool isNeighbourOfSubject(const size_t ndims, const size_t neighbour_linear_index, const size_t* subject_indices, const size_t * num_bins, const size_t * index_max)
+  {
+    std::vector<size_t> neighbour_indices(ndims);
+    Utils::NestedForLoop::GetIndicesFromLinearIndex(ndims, neighbour_linear_index, num_bins, index_max, &neighbour_indices.front());
+
+    for(size_t ind = 0; ind < ndims; ++ind)
+    {
+      long double diff = std::abs(static_cast<long double>(subject_indices[ind]) - static_cast<long double>(neighbour_indices[ind]));
+      if (diff > 1)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
 
 
 } // namespace Utils
