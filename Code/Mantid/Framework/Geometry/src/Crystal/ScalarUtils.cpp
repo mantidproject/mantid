@@ -209,7 +209,7 @@ std::vector<ConventionalCell> ScalarUtils::GetCellsUBOnly(
     if ( rcell.GetCentering() == centering && 
          rcell.GetCellType()  == cell_type  )
     {
-      ConventionalCell cell_info( UB, i );
+      ConventionalCell cell_info( UB, i ,allowPermutations);
       result.push_back( cell_info );
     }
   }
