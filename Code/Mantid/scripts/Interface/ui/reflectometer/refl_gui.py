@@ -573,7 +573,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                         if (self.tableMain.item(row, 15).text() == ''):
                             loadedRun = None
                             if load_live_runs.is_live_run(runno[0]):
-                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], Frequency = self.live_freq, Accumulation = self.live_method)
+                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
                             else:
                                 Load(Filename=runno[0], OutputWorkspace="run")
                                 loadedRun = mtd["run"]
@@ -720,7 +720,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
-            load_live_runs.get_live_data(config['default.instrument'], Frequency = self.live_freq, Accumulation = self.live_method)
+            load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
         wlam, wq, th = quick(loadedRun, trans=transrun, theta=angle)
         if ':' in runno:
             runno = runno.split(':')[0]
