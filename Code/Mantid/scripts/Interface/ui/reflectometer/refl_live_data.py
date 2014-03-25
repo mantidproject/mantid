@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_live_data.ui'
 #
-# Created: Mon Mar 24 09:24:48 2014
+# Created: Tue Mar 25 11:38:14 2014
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -30,6 +30,7 @@ class Ui_LiveDataDialog(object):
         self.labelFrequency.setObjectName(_fromUtf8("labelFrequency"))
         self.layoutLive.setWidget(1, QtGui.QFormLayout.LabelRole, self.labelFrequency)
         self.dspinFrequency = QtGui.QDoubleSpinBox(LiveDataDialog)
+        self.dspinFrequency.setSingleStep(0.5)
         self.dspinFrequency.setObjectName(_fromUtf8("dspinFrequency"))
         self.layoutLive.setWidget(1, QtGui.QFormLayout.FieldRole, self.dspinFrequency)
         self.buttonsLive = QtGui.QDialogButtonBox(LiveDataDialog)
