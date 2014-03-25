@@ -6,7 +6,8 @@ if ( CXXTEST_FOUND )
   set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
                         ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../../Framework/TestHelpers/src/ScopedFileHelper.cpp
-                        )
+                        ../../../Framework/TestHelpers/src/TearDownWorld.cpp
+      )
 
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
