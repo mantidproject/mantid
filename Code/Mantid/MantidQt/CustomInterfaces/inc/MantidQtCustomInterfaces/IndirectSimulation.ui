@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectLoadAscii</class>
- <widget class="QWidget" name="IndirectLoadAscii">
+ <class>IndirectSimulation</class>
+ <widget class="QWidget" name="IndirectSimulation">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>714</width>
-    <height>330</height>
+    <width>504</width>
+    <height>277</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Indirect Load ASCII</string>
+   <string>Indirect Simulation</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTabWidget" name="IndirectLoadAsciiTabs">
+    <widget class="QTabWidget" name="IndirectSimulationTabs">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
@@ -25,9 +25,9 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="neutron">
+     <widget class="QWidget" name="molDyn">
       <attribute name="title">
-       <string>Neutron</string>
+       <string>MolDyn</string>
       </attribute>
      </widget>
     </widget>
