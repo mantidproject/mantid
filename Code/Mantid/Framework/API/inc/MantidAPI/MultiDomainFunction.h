@@ -58,6 +58,8 @@ public:
   virtual void iterationStarting();
   /// Called at the end of an iteration
   virtual void iterationFinished();
+  /// Create a list of equivalent functions
+  virtual std::vector<IFunction_sptr> createEquivalentFunctions() const;
 
   /// Associate a function and a domain
   void setDomainIndex(size_t funIndex, size_t domainIndex);

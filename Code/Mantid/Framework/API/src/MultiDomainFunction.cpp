@@ -276,6 +276,58 @@ namespace API
     setDomainIndices(i,indx);
   }
 
+  /**
+   * Split this function into independent functions. The number of functions in the 
+   * returned vector must be equal to the number 
+   * of domains. The result of evaluation of the i-th function on the i-th domain must be 
+   * the same as if this MultiDomainFunction was evaluated.
+   */
+  std::vector<IFunction_sptr> MultiDomainFunction::createEquivalentFunctions() const
+  {
+    size_t nDomains = m_maxIndex + 1;
+    std::vector<CompositeFunction_sptr> compositeFunctions(nDomains);
+    for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+    {
+      // find the domains member function must be applied to
+      std::vector<size_t> domains;
+      getDomainIndices(iFun, nDomains, domains);
+
+      for(auto i = domains.begin(); i != domains.end(); ++i)
+      {
+        size_t j = *i;
+        CompositeFunction_sptr cf = compositeFunctions[j];
+        if ( !cf )
+        {
+          // create a composite function for each domain
+          cf = CompositeFunction_sptr(new CompositeFunction());
+          compositeFunctions[j] = cf;
+        }
+        // add copies of all functions applied to j-th domain to a single compositefunction
+        cf->addFunction( FunctionFactory::Instance().createInitialized( getFunction(iFun)->asString() ));
+      }
+    }
+    std::vector<IFunction_sptr> outFunctions(nDomains);
+    // fill in the output vector
+    // check functions containing a single member and take it out of the composite
+    for(size_t i = 0; i < compositeFunctions.size(); ++i)
+    {
+      auto fun = compositeFunctions[i];
+      if ( !fun || fun->nFunctions() == 0 )
+      {
+        throw std::runtime_error("There is no function for domain " + boost::lexical_cast<std::string>(i));
+      }
+      if ( fun->nFunctions() > 1 )
+      {
+        outFunctions[i] = fun;
+      }
+      else
+      {
+        outFunctions[i] = fun->getFunction(0);
+      }
+    }
+    return outFunctions;
+  }
+
 
 } // namespace API
 } // namespace Mantid

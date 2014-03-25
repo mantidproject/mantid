@@ -4,6 +4,9 @@
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidAPI/JointDomain.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 
 #include <sstream>
@@ -104,6 +107,57 @@ namespace CurveFitting
     }
   }
 
+  /**
+   * Create the output workspace.
+   */
+  boost::shared_ptr<API::Workspace> MultiDomainCreator::createOutputWorkspace(
+    const std::string& baseName,
+    API::IFunction_sptr function,
+    boost::shared_ptr<API::FunctionDomain> domain,
+    boost::shared_ptr<API::IFunctionValues> values,
+    const std::string& outputWorkspacePropertyName
+    )
+  {
+    auto mdFunction = boost::dynamic_pointer_cast<API::MultiDomainFunction>(function);
+    if ( !mdFunction )
+    {
+      throw std::runtime_error("A MultiDomainFunction is expected to be used with MultiDomainCreator.");
+    }
+
+    // split the function into independent parts
+    std::vector<API::IFunction_sptr> functions = mdFunction->createEquivalentFunctions();
+    // there must be as many parts as there are domains
+    if ( functions.size() != m_creators.size() )
+    {
+      throw std::runtime_error("Number of functions and domains don't match");
+    }
+
+    API::WorkspaceGroup_sptr outWS = API::WorkspaceGroup_sptr( new API::WorkspaceGroup() );
+
+    for(size_t i = 0; i < functions.size(); ++i)
+    {
+      std::string localName = baseName + "_" + boost::lexical_cast<std::string>(i);
+      auto fun = functions[i];
+      auto creator = m_creators[i];
+      boost::shared_ptr<API::FunctionDomain> localDomain;
+      boost::shared_ptr<API::IFunctionValues> localValues;
+      fun->setUpForFit();
+      creator->createDomain(localDomain,localValues);
+      creator->initFunction(fun);
+      auto ws = creator->createOutputWorkspace(localName,fun,localDomain,localValues,"");
+      outWS->addWorkspace( ws );
+    }
+
+    if ( !outputWorkspacePropertyName.empty() )
+    {
+      declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>(outputWorkspacePropertyName,"",Kernel::Direction::Output),
+          "Name of the output Workspace holding resulting simulated spectrum");
+      m_manager->setPropertyValue(outputWorkspacePropertyName,baseName+"Workspace");
+      m_manager->setProperty(outputWorkspacePropertyName,outWS);
+    }
+
+    return outWS;
+  }
 
 
 } // namespace Algorithm
