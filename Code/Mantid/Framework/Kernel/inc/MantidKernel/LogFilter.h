@@ -1,5 +1,5 @@
 #ifndef MANTID_KERNEL_LOGFILTER_H_
-#define MANTID_KERNEL_LOGFILTER_H
+#define MANTID_KERNEL_LOGFILTER_H_
 
 //----------------------------------------------------------------------
 // Includes
