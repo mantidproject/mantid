@@ -898,10 +898,10 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         Shows the dialog for setting options regarding live data
         """
         try:
-            Dialog = refl_live_options.ReflLiveOptions(def_meth = self.live_method, def_freq = self.live_freq)
-            if Dialog.exec_():
-                self.live_freq = Dialog.frequency
-                self.live_method = Dialog.get_method()
+            dialog = refl_live_options.ReflLiveOptions(def_meth = self.live_method, def_freq = self.live_freq)
+            if dialog.exec_():
+                self.live_freq = dialog.frequency
+                self.live_method = dialog.get_method()
                 settings = QtCore.QSettings()
                 settings.beginGroup("Mantid/ISISReflGui/LiveData")
                 settings.setValue("frequency", self.live_freq)
@@ -917,13 +917,11 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         shows the choose columns dialog for hiding and revealing of columns
         """
         try:
-            Dialog = QtGui.QDialog()
-            u = refl_choose_col.ReflChoose()
-            u.setupUi(Dialog, self.shown_cols, self.tableMain)
-            if Dialog.exec_():
+            dialog = refl_choose_col.ReflChoose(self.shown_cols, self.tableMain)
+            if dialog.exec_():
                 settings = QtCore.QSettings()
                 settings.beginGroup("Mantid/ISISReflGui/Columns")
-                for key, value in u.visiblestates.iteritems():
+                for key, value in dialog.visiblestates.iteritems():
                     self.shown_cols[key] = value
                     settings.setValue(str(key), value)
                     if value:
