@@ -3,7 +3,6 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
-#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {

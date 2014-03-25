@@ -7,7 +7,6 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <map>
 

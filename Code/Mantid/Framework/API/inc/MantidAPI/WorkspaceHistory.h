@@ -7,7 +7,6 @@
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
 #include <nexus/NeXusFile.hpp>
-#include <boost/shared_ptr.hpp>
 #include <ctime>
 #include <list>
 #include "MantidKernel/Logger.h"

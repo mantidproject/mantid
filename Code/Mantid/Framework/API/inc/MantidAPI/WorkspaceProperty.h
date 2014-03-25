@@ -7,7 +7,6 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <boost/shared_ptr.hpp>
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceGroup.h"

@@ -4,7 +4,6 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/IComponent.h"
 #include <Poco/DOM/Element.h>
-#include <boost/shared_ptr.hpp>
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidKernel/Logger.h"

@@ -7,7 +7,6 @@
 #include <vector>
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {

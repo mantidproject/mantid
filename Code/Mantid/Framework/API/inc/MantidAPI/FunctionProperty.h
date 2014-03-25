@@ -10,8 +10,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 
-#include <boost/shared_ptr.hpp>
-
 #include <string>
 
 namespace Mantid
