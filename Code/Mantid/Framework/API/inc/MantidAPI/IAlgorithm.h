@@ -6,13 +6,11 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/IPropertyManager.h"
-#include <Poco/ActiveResult.h>
-#include <boost/weak_ptr.hpp>
-#include <string>
 
 namespace Poco
 {
   class AbstractObserver;
+  template<class T> class ActiveResult;
 }
 
 namespace Mantid
@@ -78,6 +76,16 @@ public:
 
   /// function to return any aliases of the algorithm.
   virtual const std::string alias() const = 0;
+
+  /** @name Algorithms As Methods */
+  ///@{
+  /// Returns a name that will be used when attached as a workspace method. Empty string indicates do not attach
+  virtual const std::string workspaceMethodName() const = 0;
+  /// Returns a set of class names that will have the method attached. Empty list indicates all types
+  virtual const std::vector<std::string> workspaceMethodOn() const = 0;
+  /// Returns the name of the input workspace property used by the calling object
+  virtual const std::string workspaceMethodInputProperty() const = 0;
+  ///@}
 
   /// Algorithm ID. Unmanaged algorithms return 0 (or NULL?) values. Managed ones have non-zero.
   virtual AlgorithmID getAlgorithmID()const = 0;
@@ -149,7 +157,11 @@ public:
   ///Logging can be disabled by passing a value of false
   virtual void setLogging(const bool value) = 0;
   ///returns the status of logging, True = enabled
-  virtual bool isLogging() const = 0;
+  virtual bool isLogging() const = 0;  
+  ///gets the logging priority offset
+  virtual void setLoggingOffset(const int value) = 0;
+  ///returns the logging priority offset
+  virtual int getLoggingOffset() const = 0;
   ///setting the child start progress
   virtual void setChildStartProgress(const double startProgress)const = 0;
   /// setting the child end progress
@@ -162,7 +174,6 @@ public:
 
 typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
 typedef boost::shared_ptr<const IAlgorithm> IAlgorithm_const_sptr;
-typedef boost::weak_ptr<IAlgorithm> IAlgorithm_wptr;
 
 } // namespace API
 } // namespace Mantid

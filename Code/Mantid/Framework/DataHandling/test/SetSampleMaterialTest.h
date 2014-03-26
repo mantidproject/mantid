@@ -102,6 +102,35 @@ public:
 
 	AnalysisDataService::Instance().remove(wsName);
   }
+  void testExecMat_OneAtom()
+  {
+
+	std::string wsName = "SetSampleMaterialTestWS_oneatom";
+    IAlgorithm* setmat = Mantid::API::FrameworkManager::Instance().createAlgorithm("SetSampleMaterial");
+    if ( !setmat->isInitialized() ) setmat->initialize();
+
+    // Create a small test workspace
+    MatrixWorkspace_sptr testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
+    // Needs to have units of wavelength
+    testWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+
+    // Register the workspace in the data service
+    AnalysisDataService::Instance().add(wsName, testWS);
+
+	TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("InputWorkspace", wsName) );
+    TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("ChemicalFormula","Ni") );
+    TS_ASSERT_THROWS_NOTHING( setmat->execute() );
+    TS_ASSERT( setmat->isExecuted() );
+
+    const Material *m_sampleMaterial = &(testWS->sample().getMaterial());
+    TS_ASSERT_DELTA( m_sampleMaterial->numberDensity(), 0.0913375, 0.0001 );
+    TS_ASSERT_DELTA( m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda), 18.5, 0.0001);
+    TS_ASSERT_DELTA( m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 4.49, 0.0001);
+
+    checkOutputProperties(setmat,m_sampleMaterial);
+
+	AnalysisDataService::Instance().remove(wsName);
+  }
 
   void checkOutputProperties(const IAlgorithm* alg,const Material *material)
   {

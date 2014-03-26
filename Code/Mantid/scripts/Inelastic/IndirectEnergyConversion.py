@@ -52,7 +52,7 @@ def createMappingFile(groupFile, ngroup, nspec, first):
 
 def resolution(files, iconOpt, rebinParam, bground, 
         instrument, analyser, reflection,
-        plotOpt=False, Res=True, factor=None):
+        Res=True, factor=None, Plot=False, Verbose=False, Save=False):
     reducer = inelastic_indirect_reducer.IndirectReducer()
     reducer.set_instrument_name(instrument)
     reducer.set_detector_range(iconOpt['first']-1,iconOpt['last']-1)
@@ -63,7 +63,13 @@ def resolution(files, iconOpt, rebinParam, bground,
     reducer.set_parameter_file(parfile)
     reducer.set_grouping_policy('All')
     reducer.set_sum_files(True)
-    reducer.reduce()
+    
+    try:
+        reducer.reduce()
+    except Exception, e:
+        logger.error(str(e))
+        return
+    
     iconWS = reducer.get_result_workspaces()[0]
     
     if factor != None:
@@ -74,69 +80,174 @@ def resolution(files, iconOpt, rebinParam, bground,
         CalculateFlatBackground(InputWorkspace=iconWS, OutputWorkspace=name, StartX=bground[0], EndX=bground[1], 
             Mode='Mean', OutputMode='Subtract Background')
         Rebin(InputWorkspace=name, OutputWorkspace=name, Params=rebinParam)
-        DeleteWorkspace(iconWS)
+        
+        if Save:
+            if Verbose:
+                logger.notice("Resolution file saved to default save directory.")
+            SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
             
-        SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
-            
-        if plotOpt:
+        if Plot:
             graph = mp.plotSpectrum(name, 0)
         return name
     else:
-        if plotOpt:
+        if Plot:
             graph = mp.plotSpectrum(iconWS, 0)
         return iconWS
 
-def slice(inputfiles, calib, xrange, spec, suffix, Save=False, Verbose=True,
-        Plot=False):
-    StartTime('Slice')
-    workdir = config['defaultsave.directory']
-    outWSlist = []
-    CheckXrange(xrange,'Time')
-    calib_wsname = None
-    if calib != '':
-        calib_wsname = '__calibration'
-        Load(Filename=calib,OutputWorkspace=calib_wsname)
-    for file in inputfiles:
+##############################################################################
+# Slice Functions
+##############################################################################
+
+def sliceReadRawFile(fname, Verbose):
+
+    if Verbose:
+        logger.notice('Reading file :'+fname)
+
+    #Load the raw file
+    (dir, filename) = os.path.split(fname)
+    (root, ext) = os.path.splitext(filename)
+    
+    Load(Filename=fname, OutputWorkspace=root, LoadLogFiles=False)
+
+    return root
+
+# returns the number of monitors
+# and if they're at the start or end of the file
+def countMonitors(rawFile):
+    rawFile = mtd[rawFile]
+    nhist = rawFile.getNumberHistograms()
+    detector = rawFile.getDetector(0)
+    monCount = 1
+    
+    if detector.isMonitor():
+        #monitors are at the start
+        for i in range(1,nhist):
+            detector = rawFile.getDetector(i)
+
+            if detector.isMonitor():
+                monCount += 1
+            else:
+                break
+        
+        return monCount, True
+    else:
+        #monitors are at the end
+        detector = rawFile.getDetector(nhist)
+
+        if not detector.isMonitor():
+            #if it's not, we don't have any monitors!
+            return 0, True
+        
+        for i in range(nhist,0,-1):
+            detector = rawFile.getDetector(i)
+
+            if detector.isMonitor():
+                monCount += 1
+            else:
+                break
+
+        return monCount, False
+
+# Run the calibration file with the raw file workspace
+def sliceProcessCalib(rawFile, calibWsName, spec):
+    calibSpecMin, calibSpecMax = spec
+
+    if calibSpecMax-calibSpecMin > mtd[calibWsName].getNumberHistograms():
+        raise IndexError("Number of spectra used is greater than the number of spectra in the calibration file.")
+
+    #offset cropping range to account for monitors
+    (monCount, atStart) = countMonitors(rawFile)
+
+    if atStart: 
+        calibSpecMin -= monCount+1
+        calibSpecMax -= monCount+1
+
+    #Crop the calibration workspace, excluding the monitors
+    CropWorkspace(InputWorkspace=calibWsName, OutputWorkspace=calibWsName, 
+        StartWorkspaceIndex=calibSpecMin, EndWorkspaceIndex=calibSpecMax)
+
+def sliceProcessRawFile(rawFile, calibWsName, useCalib, xRange, useTwoRanges, spec, suffix, Verbose):
+    
+    #Crop the raw file to use the desired number of spectra
+    #less one because CropWorkspace is zero based
+    CropWorkspace(InputWorkspace=rawFile, OutputWorkspace=rawFile,
+        StartWorkspaceIndex=spec[0]-1, EndWorkspaceIndex=spec[1]-1)
+
+    nhist,ntc = CheckHistZero(rawFile)
+
+    #use calibration file if desired
+    if useCalib:
         if Verbose:
-            logger.notice('Reading file :'+file)
-        (direct, filename) = os.path.split(file)
-        (root, ext) = os.path.splitext(filename)
-        if spec == [0, 0]:
-            Load(Filename=file, OutputWorkspace=root, LoadLogFiles=False)
-        else:
-            Load(Filename=file, OutputWorkspace=root, SpectrumMin=spec[0], SpectrumMax=spec[1],
-                LoadLogFiles=False)
-        nhist,ntc = CheckHistZero(root)
-        if calib != '':
-            if Verbose:
-                logger.notice('Using Calibration file :'+calib)
-            useCalib(detectors=root)
-        run = mtd[root].getRun().getLogData("run_number").value
-        sfile = root[:3].lower() + run + '_' + suffix + '_slice'
-        if (len(xrange) == 2):
-            Integration(InputWorkspace=root, OutputWorkspace=sfile, RangeLower=xrange[0], RangeUpper=xrange[1],
-                StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
-        else:
-            CalculateFlatBackground(InputWorkspace=root, OutputWorkspace=sfile, StartX=xrange[2], EndX=xrange[3], 
-                    Mode='Mean')
-            Integration(InputWorkspace=sfile, OutputWorkspace=sfile, RangeLower=xrange[0], RangeUpper=xrange[1],
-                StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
+            logger.notice('Using Calibration file :'+calib)
+
+        Divide(LHSWorkspace=rawFile, RHSWorkspace=calibWsName, OutputWorkspace=rawFile)
+
+    #construct output workspace name
+    run = mtd[rawFile].getRun().getLogData("run_number").value
+    sfile = rawFile[:3].lower() + run + '_' + suffix + '_slice'
+
+    if not useTwoRanges:
+        Integration(InputWorkspace=rawFile, OutputWorkspace=sfile, RangeLower=xRange[0], RangeUpper=xRange[1],
+            StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
+    else:
+        CalculateFlatBackground(InputWorkspace=rawFile, OutputWorkspace=sfile, StartX=xRange[2], EndX=xRange[3], 
+                Mode='Mean')
+        Integration(InputWorkspace=sfile, OutputWorkspace=sfile, RangeLower=xRange[0], RangeUpper=xRange[1],
+            StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
+
+    return sfile
+
+def slice(inputfiles, calib, xRange, spec, suffix, Save=False, Verbose=False, Plot=False):
+
+    StartTime('Slice')
+
+    CheckXrange(xRange,'Time')
+
+    workdir = config['defaultsave.directory']
+
+    outWSlist = []
+    useTwoRanges = (len(xRange) != 2)
+    useCalib = (calib != '')
+    calibWsName = '__calibration'
+    
+    #load the calibration file
+    if useCalib:
+        Load(Filename=calib, OutputWorkspace=calibWsName)
+
+    for index, file in enumerate(inputfiles):
+        rawFile = sliceReadRawFile(file, Verbose)
+
+        #only need to process the calib file once
+        if(index == 0 and useCalib):
+            sliceProcessCalib(rawFile, calibWsName, spec)
+
+        sfile = sliceProcessRawFile(rawFile, calibWsName, useCalib, xRange, useTwoRanges, spec, suffix, Verbose)
+        Transpose(InputWorkspace=sfile, OutputWorkspace=sfile)
+        unit = mtd[sfile].getAxis(0).setUnit("Label")
+        unit.setLabel("Spectrum Number", "")
+
+        outWSlist.append(sfile)
+        DeleteWorkspace(rawFile)
+
         if Save:
-            o_path = os.path.join(workdir, sfile+'.nxs')					# path name for nxs file
+            # path name for nxs file
+            o_path = os.path.join(workdir, sfile+'.nxs')
             SaveNexusProcessed(InputWorkspace=sfile, Filename=o_path)
+
             if Verbose:
                 logger.notice('Output file :'+o_path)
-        outWSlist.append(sfile)
-        DeleteWorkspace(root)
+
+    if useCalib:
+        DeleteWorkspace(Workspace=calibWsName)
+
     if Plot:
-        graph = mp.plotBin(outWSlist, 0)
-    if calib_wsname is not None:
-        DeleteWorkspace(Workspace=calib_wsname)
+        try:
+            graph = mp.plotSpectrum(sfile, 0)
+        except RuntimeError, e:
+            #User clicked cancel on plot so don't do anything
+            pass
+
     EndTime('Slice')
-        
-def useCalib(detectors):
-    Divide(LHSWorkspace=detectors, RHSWorkspace='__calibration', OutputWorkspace=detectors)
-    return detectors
     
 def getInstrumentDetails(instrument):
     instr_name = '__empty_' + instrument
@@ -279,93 +390,3 @@ def IndirectTrans(inst, sfile,cfile,Verbose=False,Plot=False,Save=False):
     if Plot:
         TransPlot(transWS)
     EndTime('Transmission')
-
-##############################################################################
-# Moments
-##############################################################################
-
-def SqwMoments(samWS,erange,factor,Verbose,Plot,Save):
-    StartTime('Moments')
-    workdir = config['defaultsave.directory']
-    nq,nw = CheckHistZero(samWS)
-    if Verbose:
-        logger.notice('Sample '+samWS+' has '+str(nq)+' Q values & '+str(nw)+' w values')
-    axis = mtd[samWS].getAxis(1)
-    Q = []
-    e0 = []
-    for i in range(0,nq):
-        Q.append(float(axis.label(i)))
-        e0.append(0.0)
-    Xin = mtd[samWS].readX(0)
-    CheckElimits(erange,Xin)
-    CropWorkspace(InputWorkspace=samWS, OutputWorkspace=samWS, XMin=erange[0], XMax=erange[1])
-    Xin = mtd[samWS].readX(0)
-    nw = len(Xin)-1
-    if Verbose:
-        logger.notice('Energy range is '+str(Xin[0])+' to '+str(Xin[nw]))
-    if factor > 0.0:
-        Scale(InputWorkspace=samWS, OutputWorkspace=samWS, Factor=factor, Operation='Multiply')
-        if Verbose:
-            logger.notice('S(q,w) scaled by '+str(factor))
-    w = mtd[samWS].readX(0)
-    yM0 = []
-    yM1 = []
-    yM2 = []
-    yM4 = []
-    xdel = []
-    for n in range(0,nw):
-        xdel.append(w[n+1]-w[n])
-    xdel.append(w[nw-1])
-    for m in range(0,nq):
-        if Verbose:
-            logger.notice('Group '+str(m+1)+' at Q = '+str(Q[m]))
-        S = mtd[samWS].readY(m)
-        m0 = 0.0
-        m1 = 0.0
-        m2 = 0.0
-        m3 = 0.0
-        m4 = 0.0
-        for n in range(0,nw):
-            S0 = S[n]*xdel[n]
-            m0 += S0
-            S1 = Xin[n]*S0
-            m1 += S1
-            S2 = Xin[n]*S1
-            m2 += S2
-            S3 = Xin[n]*S2
-            m3 += S3
-            S4 = Xin[n]*S3
-            m4 += S4
-        m1 = m1/m0
-        m2 = m2/m0
-        m3 = m3/m0
-        m4 = m4/m0
-        text = 'M0 = '+str(m0)+' ; M2 = '+str(m2)+' ; M4 = '+str(m4)
-        logger.notice(text)
-        yM0.append(m0)
-        yM1.append(m1)
-        yM2.append(m2)
-        yM4.append(m4)
-    fname = samWS[:-3] + 'Moments'
-    CreateWorkspace(OutputWorkspace=fname+'_M0', DataX=Q, DataY=yM0, DataE=e0,
-        Nspec=1, UnitX='MomentumTransfer')
-    CreateWorkspace(OutputWorkspace=fname+'_M1', DataX=Q, DataY=yM1, DataE=e0,
-        Nspec=1, UnitX='MomentumTransfer')
-    CreateWorkspace(OutputWorkspace=fname+'_M2', DataX=Q, DataY=yM2, DataE=e0,
-        Nspec=1, UnitX='MomentumTransfer')
-    CreateWorkspace(OutputWorkspace=fname+'_M4', DataX=Q, DataY=yM4, DataE=e0,
-        Nspec=1, UnitX='MomentumTransfer')
-    group = fname+'_M0,'+fname+'_M1,'+fname+'_M2,'+fname+'_M4'
-    GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname)
-    if Save:
-        opath = os.path.join(workdir,fname+'.nxs')
-        SaveNexusProcessed(InputWorkspace=fname, Filename=opath)
-        if Verbose:
-			logger.notice('Output file : ' + opath)
-    if (Plot != 'None'):
-        SqwMomentsPlot(fname,Plot)
-    EndTime('Moments')	
-	
-def SqwMomentsPlot(inputWS,Plot):
-    m0_plot=mp.plotSpectrum(inputWS+'_M0',0)
-    m2_plot=mp.plotSpectrum([inputWS+'_M2',inputWS+'_M4'],0)

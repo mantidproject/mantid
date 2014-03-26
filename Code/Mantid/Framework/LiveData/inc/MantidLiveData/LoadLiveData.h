@@ -46,18 +46,23 @@ namespace LiveData
     virtual const std::string category() const;
     virtual int version() const;
 
-    virtual void initDocs();
-    void init();
+    int runNumber() const;
+
     void exec();
 
   private:
+    virtual void initDocs();
+    void init();
+
     Mantid::API::Workspace_sptr runProcessing(Mantid::API::Workspace_sptr inputWS, bool PostProcess);
     Mantid::API::Workspace_sptr processChunk(Mantid::API::Workspace_sptr chunkWS);
     void runPostProcessing();
 
     void replaceChunk(Mantid::API::Workspace_sptr chunkWS);
     void addChunk(Mantid::API::Workspace_sptr chunkWS);
+    void addMatrixWSChunk(const std::string &algoName, API::Workspace_sptr accumWS, API::Workspace_sptr chunkWS);
     void appendChunk(Mantid::API::Workspace_sptr chunkWS);
+    API::Workspace_sptr appendMatrixWSChunk(API::Workspace_sptr accumWS, Mantid::API::Workspace_sptr chunkWS);
 
     void doSortEvents(Mantid::API::Workspace_sptr ws);
 
@@ -67,6 +72,7 @@ namespace LiveData
     /// The final output = the post-processed accumulation workspace
     Mantid::API::Workspace_sptr m_outputWS;
 
+    int m_runNumber; ///< The run number stored in the extracted workspace 'chunk', if any.
   };
 
 

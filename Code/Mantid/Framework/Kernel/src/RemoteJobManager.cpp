@@ -10,14 +10,13 @@
 #include <Poco/Net/NameValueCollection.h>
 #include <Poco/URI.h>
 
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
 
 #include <ostream>
 #include <sstream>
-#include <fstream>
-
 
 namespace Mantid
 {
@@ -28,15 +27,17 @@ namespace Kernel
 Logger& RemoteJobManager::g_log = Logger::get("RemoteJobManager");
 
 RemoteJobManager::RemoteJobManager( const Poco::XML::Element* elem)
+    : m_displayName( elem->getAttribute("name")),
+      m_session( NULL) // Make sure this is always either NULL or a valid pointer.
 {
-  m_displayName = elem->getAttribute("name");
+  // Sanity check m_displayName
   if (m_displayName.length() == 0)
   {
     g_log.error("Compute Resources must have a name attribute");
     throw std::runtime_error("Compute Resources must have a name attribute");
   }
 
-  Poco::XML::NodeList* nl = elem->getElementsByTagName("baseURL");
+  Poco::AutoPtr<Poco::XML::NodeList> nl = elem->getElementsByTagName("baseURL");
   if (nl->length() != 1)
   {
     g_log.error("HTTP Compute Resources must have exactly one baseURL tag");
@@ -55,9 +56,12 @@ RemoteJobManager::RemoteJobManager( const Poco::XML::Element* elem)
       }
     }
   }
+}
 
-  // Make sure this is always either NULL or a valid pointer.
-  m_session = NULL;
+
+RemoteJobManager::~RemoteJobManager()
+{
+    delete m_session;
 }
 
 std::istream & RemoteJobManager::httpGet( const std::string &path, const std::string &query_str,
@@ -136,7 +140,7 @@ std::istream & RemoteJobManager::httpPost(const std::string &path, const PostDat
     postBody << httpLineEnd << httpLineEnd;
     postBody << (*it).second;
     postBody << httpLineEnd;
-    it++;
+    ++it;
   }
 
   // file data is treated the same as post data, except that we set the filename field
@@ -151,7 +155,7 @@ std::istream & RemoteJobManager::httpPost(const std::string &path, const PostDat
     postBody << httpLineEnd << httpLineEnd;
     postBody << (*it).second;
     postBody << httpLineEnd;
-    it++;
+    ++it;
   }
 
   postBody << finalBoundaryLine;
@@ -182,8 +186,19 @@ std::istream & RemoteJobManager::httpPost(const std::string &path, const PostDat
 
 
 // Wrappers for a lot of the boilerplate code needed to perform an HTTPS GET or POST
+void RemoteJobManager::initGetRequest( Poco::Net::HTTPRequest &req, std::string extraPath,
+                                       std::string queryString)
+{
+    return initHTTPRequest( req, Poco::Net::HTTPRequest::HTTP_GET, extraPath, queryString);
+}
+
+void RemoteJobManager::initPostRequest( Poco::Net::HTTPRequest &req, std::string extraPath)
+{
+    return initHTTPRequest( req, Poco::Net::HTTPRequest::HTTP_POST, extraPath);
+}
+
 void RemoteJobManager::initHTTPRequest( Poco::Net::HTTPRequest &req, const std::string &method,
-                                            std::string extraPath, std::string queryString)
+                                        std::string extraPath, std::string queryString)
 {
   // Set up the session object
   if (m_session)

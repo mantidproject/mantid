@@ -26,6 +26,7 @@ class InstrumentWindowTab;
 class XIntegrationControl;
 class SimpleWidget;
 class ProjectionSurface;
+class InstrumentWindowRenderTab;
 
 // Qt forward declarations
 class QPushButton;
@@ -90,7 +91,7 @@ public:
   void setViewType(const QString& type);
   /// for saving the instrument window  to mantid project
   QString saveToString(const QString& geometry, bool saveAsTemplate= false);
-  InstrumentActor* getInstrumentActor(){return m_instrumentActor;}
+  InstrumentActor* getInstrumentActor() const {return m_instrumentActor;}
   bool blocked()const{return m_blocked;}
   void selectTab(int tab);
   void selectTab(Tab tab){selectTab(int(tab));}
@@ -98,6 +99,10 @@ public:
   InstrumentWindowTab *getTab(const Tab tab) const;
   /// Get a filename for saving
   QString getSaveFileName(const QString& title, const QString& filters, QString* selectedFilter = NULL);
+  /// Get a name for settings group
+  QString getSettingsGroupName() const;
+  /// Get a name for a instrument-specific settings group
+  QString getInstrumentSettingsGroupName() const;
 
 signals:
   void enableLighting(bool);
@@ -197,6 +202,7 @@ private:
   QTabWidget*  mControlsTab;
   /// Control tabs
   QList<InstrumentWindowTab *> m_tabs;
+  InstrumentWindowRenderTab *m_renderTab;
   XIntegrationControl * m_xIntegration;
   /// The OpenGL widget to display the instrument
   MantidGLWidget* m_InstrumentDisplay;
@@ -209,7 +215,7 @@ private:
   QAction *m_clearPeakOverlays;
 
   /// The name of workspace that this window is associated with. The InstrumentActor holds a pointer to the workspace itself.
-  const QString m_workspaceName;
+  QString m_workspaceName;
   /// Instrument actor is an interface to the instrument
   InstrumentActor* m_instrumentActor;
   /// Option to use or not OpenGL display for "unwrapped" view, 3D is always in OpenGL
@@ -241,6 +247,7 @@ private:
   /// ADS notification handlers
   virtual void preDeleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
   virtual void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
+  virtual void renameHandle(const std::string &oldName, const std::string &newName);
   virtual void clearADSHandle();
 };
 

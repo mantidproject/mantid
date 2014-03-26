@@ -1,4 +1,18 @@
-# Algorithm to start Bayes programs
+"""*WIKI*
+
+The model that is being fitted is that of a &delta;-function (elastic component) of amplitude <math>A(0)</math> and Lorentzians of amplitude <math>A(j)</math> and HWHM <math>W(j)</math> where <math>j=1,2,3</math>. The whole function is then convolved with the resolution function. The -function and Lorentzians are intrinsically 
+normalised to unity so that the amplitudes represent their integrated areas.
+
+For a Lorentzian, the Fourier transform does the conversion: <math>1/(x^{2}+\delta^{2}) \Leftrightarrow exp[-2\pi(\delta k)]</math>. 
+If <math>x</math> is identified with energy <math>E</math> and <math>2\pi k</math> with <math>t/\hbar</math> where t is time then: <math>1/[E^{2}+(\hbar / \tau )^{2}] \Leftrightarrow exp[-t /\tau]</math> and <math>\sigma</math> is identified with <math> \hbar / \tau </math>.
+The program estimates the quasielastic components of each of the groups of spectra and requires the resolution file and optionally the normalisation file created by ResNorm. 
+
+For a Stretched Exponential, the choice of several Lorentzians is replaced with a single function with the shape : <math>\psi\beta(x) \Leftrightarrow exp[-2\pi(\sigma k)\beta]</math>. This, in the energy to time FT transformation, is <math>\psi\beta(E) \Leftrightarrow exp[-(t/\tau)\beta]</math>. So \sigma is identified with <math>(2\pi)\beta\hbar/\tau</math>. 
+The model that is fitted is that of an elastic component and the stretched exponential and the program gives the best estimate for the <math>\beta</math> parameter and the width for each group of spectra.
+
+This routine was originally part of the MODES package.
+*WIKI*"""
+
 from mantid.simpleapi import *
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory
@@ -11,6 +25,8 @@ class QLines(PythonAlgorithm):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
 	def PyInit(self):
+		self.setWikiSummary("The program estimates the quasielastic components of each of the groups of spectra and requires the resolution file (.RES file) and optionally the normalisation file created by ResNorm.")
+
 		self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (*.nxs) or Workspace')
 		self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
 		self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']), doc='Analyser & reflection')
@@ -19,12 +35,13 @@ class QLines(PythonAlgorithm):
 		self.declareProperty(name='ResInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of res input - File (*_res.nxs) or Workspace')
 		self.declareProperty(name='ResType',defaultValue='Res',validator=StringListValidator(['Res','Data']), doc='Format of Resolution file')
 		self.declareProperty(name='ResNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Resolution run number')
+		self.declareProperty(name='ResNorm',defaultValue=False, doc='Use ResNorm output file')
+		self.declareProperty(name='ResNormInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of ResNorm input - File (*_red.nxs) or Workspace')
+		self.declareProperty(name='ResNormNumber',defaultValue='', doc='ResNorm run number')
 		self.declareProperty(name='BackgroundOption',defaultValue='Sloping',validator=StringListValidator(['Sloping','Flat','Zero']), doc='Form of background to fit')
 		self.declareProperty(name='ElasticOption',defaultValue=True, doc='Include elastic peak in fit')
 		self.declareProperty(name='FixWidth',defaultValue=False, doc='Fix one of the widths')
 		self.declareProperty(name='WidthFile', defaultValue='', doc='Name of file containing fixed width values')
-		self.declareProperty(name='ResNorm',defaultValue=False, doc='Use ResNorm output file')
-		self.declareProperty(name='ResNormNumber', defaultValue='', doc='Name of file containing fixed width values')
 		self.declareProperty(name='EnergyMin', defaultValue=-0.5, doc='Minimum energy for fit. Default=-0.5')
 		self.declareProperty(name='EnergyMax', defaultValue=0.5, doc='Maximum energy for fit. Default=0.5')
 		self.declareProperty(name='SamBinning', defaultValue=1, doc='Binning value (integer) for sample. Default=1')
@@ -55,6 +72,7 @@ class QLines(PythonAlgorithm):
 		bgd = self.getPropertyValue('BackgroundOption')
 		width = self.getProperty('FixWidth').value
 		wfile = self.getPropertyValue('WidthFile')
+		rsnormType = self.getPropertyValue('ResNormInputType')
 		resnorm = self.getProperty('ResNorm').value
 		resn = self.getPropertyValue('ResNormNumber')
 		emin = self.getPropertyValue('EnergyMin')
@@ -71,25 +89,8 @@ class QLines(PythonAlgorithm):
 		rname = prefix+res+'_'+ana + '_' + rext
 		rsname = prefix+resn+'_'+ana + '_ResNorm_Paras'
 		erange = [float(emin), float(emax)]
-		if elastic:
-			o_el = 1
-		else:
-			o_el = 0
-		if bgd == 'Sloping':
-			o_bgd = 2
-		if bgd == 'Flat':
-			o_bgd = 1
-		if bgd == 'Zero':
-			o_bgd = 0
-		if width:
-			o_w1 = 1
-		else:
-			o_w1 = 0
-		if resnorm:
-			o_res = 1
-		else:
-			o_res = 0
-		fitOp = [o_el, o_bgd, o_w1, o_res]
+
+		fitOp = [elastic, bgd, width, resnorm]
 		loopOp = self.getProperty('Sequence').value
 		verbOp = self.getProperty('Verbose').value
 		plotOp = self.getPropertyValue('Plot')
@@ -108,12 +109,21 @@ class QLines(PythonAlgorithm):
 			Rmessage = 'Resolution from File : '+rpath
 		else:
 			Rmessage = 'Resolution from Workspace : '+rname
+
+		if resnorm:
+			if rsnormType == 'File':
+				rpath = os.path.join(workdir, rsname+'.nxs')		# path name for res nxs file
+				LoadNexusProcessed(Filename=rpath, OutputWorkspace=rsname)
+				Rmessage = 'ResNorm from File : '+rpath
+			else:
+				Rmessage = 'ResNorm from Workspace : '+rsname
+
 		if verbOp:
 			logger.notice(Smessage)
 			logger.notice(Rmessage)
-		if fitOp[3] == 1:
-			path = os.path.join(workdir, rsname+'.nxs')	# path name for resnnrm nxs file
-			LoadNexusProcessed(Filename=path, OutputWorkspace='ResNorm')
+
+		rsname = rsname[:-6]
+
 		Main.QLRun(prog,sname,rname,rsname,erange,nbins,fitOp,wfile,loopOp,verbOp,plotOp,saveOp)
 
 AlgorithmFactory.subscribe(QLines)         # Register algorithm with Mantid

@@ -145,13 +145,14 @@ namespace Mantid
       calculateSampleContribution();
       calculateDetectorContribution();
       calculateTimeBinContribution();
+      size_t randUsed = m_randIndex;
 
       m_curRandNums = NULL;
       m_randIndex = 0;
       m_curObs = NULL;
       m_curQOmega = NULL;
 
-      return length();
+      return randUsed;
     }
 
     //-----------------------------------------------------------------------
@@ -211,12 +212,13 @@ namespace Mantid
      */
     void TobyFitYVector::calculateSampleContribution()
     {
-      double & sampleBeamDir = m_yvector[TobyFitYVector::ScatterPointBeam];
-      double & samplePerpDir = m_yvector[TobyFitYVector::ScatterPointPerp];
-      double & sampleUpDir = m_yvector[TobyFitYVector::ScatterPointUp];
 
       if(m_sampleVolume)
       {
+        double & sampleBeamDir = m_yvector[TobyFitYVector::ScatterPointBeam];
+        double & samplePerpDir = m_yvector[TobyFitYVector::ScatterPointPerp];
+        double & sampleUpDir = m_yvector[TobyFitYVector::ScatterPointUp];
+
         const Kernel::V3D & boxSize = m_curObs->sampleCuboid();
         sampleBeamDir = boxSize[2]*(nextRandomNumber() - 0.5);
         samplePerpDir = boxSize[0]*(nextRandomNumber() - 0.5);

@@ -8,7 +8,7 @@ namespace Mantid
   namespace ICat
   {
 
-  /** This class is responsible for disconnecting from the ICat DB .This class written as a Mantid algorithm.
+  /** This class is responsible for logging the user out of the catalog.
     
     @author Sofia Antony, STFC Rutherford Appleton Laboratory
     @date 23/07/2010
@@ -51,10 +51,7 @@ namespace Mantid
       virtual void initDocs();
       void init();
       void exec();
-      /// logout method
-      void doLogout();
     };
-
   }
 }
 

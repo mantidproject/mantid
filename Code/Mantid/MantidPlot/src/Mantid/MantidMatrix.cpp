@@ -483,7 +483,6 @@ double MantidMatrix::dataE(int row, int col) const
 {
   if (!m_workspace || row >= numRows() || col >= numCols()) return 0.;
   double res = m_workspace->readE(row + m_startRow)[col];
-  if (res == 0.) res = 1.;//  quick fix of the fitting problem
   return res;
 
 }
@@ -693,6 +692,7 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot, ApplicationWindow* app, Graph::CurveType type,bool project,const ProjectData* const prjData)
 {
   app->setPreferences(plot);
+
   plot->setTitle(tr("Workspace ") + name());
   const Mantid::API::Axis* ax;
   ax = m_workspace->getAxis(0);
@@ -720,6 +720,7 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot, ApplicationWindow* app, 
   auto fun = new MantidMatrixFunction(*this);
   range(&minz,&maxz);
   Spectrogram *spgrm = plot->plotSpectrogram(fun, m_spectrogramRows, m_spectrogramCols, boundingRect(), minz, maxz, type);
+  app->setSpectrogramTickStyle(plot);
   if( spgrm )
   {
     if(project)
@@ -1240,7 +1241,7 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
     }
   case Qt::BackgroundRole:
     {
-      if (checkMontorCache(index.row()))
+      if (checkMonitorCache(index.row()))
       {
         return m_mon_color;
       }
@@ -1261,36 +1262,44 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
 @param row :: current row in the table that maps to a detector.
 @return bool :: the value of if the detector is a monitor or not.
 */
-bool MantidMatrixModel::checkMontorCache(int row) const
+bool MantidMatrixModel::checkMonitorCache(int row) const
 {
-  bool isMon = false;
-  if (m_monCache.contains(row))
+  row += m_startRow; //correctly offset the row
+  if (m_workspace->getAxis(1)->isSpectra())
   {
-    isMon = m_monCache.value(row);
+    bool isMon = false;
+    if (m_monCache.contains(row))
+    {
+      isMon = m_monCache.value(row);
+    }
+    else
+    {
+      try
+      {
+        size_t wsIndex = static_cast<size_t>(row);
+        IDetector_const_sptr det = m_workspace->getDetector(wsIndex);
+        if (det->isMonitor())
+        {
+          isMon = true;
+        }
+        else
+        {
+          isMon = false;
+        }
+        m_monCache.insert(row, isMon);
+      }
+      catch (std::exception&)
+      {
+        m_monCache.insert(row,false);
+        isMon = false;
+      }
+    }
+    return isMon;
   }
   else
   {
-    try
-    {
-      size_t wsIndex = static_cast<size_t>(row);
-      IDetector_const_sptr det = m_workspace->getDetector(wsIndex);
-      if (det->isMonitor())
-      {
-        isMon = true;
-      }
-      else
-      {
-        isMon = false;
-      }
-      m_monCache.insert(row, isMon);
-    }
-    catch (std::exception e)
-    {
-      m_monCache.insert(row,false);
-      isMon = false;
-    }
+    return false;
   }
-  return isMon;
 }
 
 
@@ -1342,4 +1351,11 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy)
     miny = 0;
   if (maxy == -std::numeric_limits<double>::max())
     maxy = miny + 1e6;
+
+  if (maxy == miny)
+  {
+      if ( maxy == 0.0 ) maxy += 1.0;
+      else
+          maxy += fabs(miny);
+  }
 }

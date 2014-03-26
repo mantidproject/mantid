@@ -84,7 +84,9 @@ namespace MDEvents
     /// Get the # of children MDBoxBase'es (non-recursive)
     size_t getNumChildren() const
     { return 0; }
-
+  // to avoid casting (which need also the number of dimensions) method say if Node is a box. if not, it is gridbox
+    virtual bool isBox()const{return true;}
+ 
     /// Return the indexth child MDBoxBase.
     API::IMDNode * getChild(size_t /*index*/)
         { throw std::runtime_error("MDBox does not have children."); }

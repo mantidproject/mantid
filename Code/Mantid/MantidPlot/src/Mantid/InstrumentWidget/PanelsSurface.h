@@ -11,7 +11,7 @@ class PanelsSurface;
 
 struct FlatBankInfo
 {
-    FlatBankInfo(PanelsSurface *s):surface(s){}
+    FlatBankInfo(PanelsSurface *s);
     /// Component id of the bank
     Mantid::Geometry::ComponentID id;
     /// Bank's rotation

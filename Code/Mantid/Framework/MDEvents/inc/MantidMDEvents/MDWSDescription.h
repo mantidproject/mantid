@@ -67,6 +67,8 @@ public:  // for the time being
 
     // preprocessed detectors workspace:
     DataObjects::TableWorkspace_const_sptr m_PreprDetTable;
+    //helper parameter, which identifies if we are building new workspace or adding data to the existing one. Allows to generate clearer error messages
+    bool m_buildingNewWorkspace;
    //=======================
 /*---> accessors: */
     unsigned int         nDimensions()const{return m_NDims;}
@@ -90,6 +92,7 @@ public:  // for the time being
     
     // workspace related helper functions, providing access to various workspace functions
     API::MatrixWorkspace_const_sptr getInWS()const{return m_InWS;}
+    void setWS(API::MatrixWorkspace_sptr otherMatrixWS);
     std::string getWSName()const{return m_InWS->name();}
     bool isPowder()const{return !m_InWS->sample().hasOrientedLattice();}
     bool hasLattice()const{return m_InWS->sample().hasOrientedLattice();}
@@ -107,7 +110,7 @@ public:  // for the time being
   void setUpMissingParameters(const MDEvents::MDWSDescription &SourceMatrixWorkspace);
 
   /// method builds MD Event ws description from a matrix workspace and the transformations, requested to be performed on the workspace
-   void buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,
+   void buildFromMatrixWS(const API::MatrixWorkspace_sptr &pWS,const std::string &QMode,const std::string dEMode,
                             const std::vector<std::string> &dimProperyNames = std::vector<std::string>());
 
   /// compare two descriptions and select the coplimentary result. 
@@ -136,7 +139,7 @@ protected: // until MDWSDesctiptionDepricatedExist
     /// Calculated from number of input properties and the operations, performed on input workspace;
     unsigned int m_NDims;
     // shared pointer to the source matrix workspace
-    API::MatrixWorkspace_const_sptr m_InWS;
+    API::MatrixWorkspace_sptr m_InWS;
     /// energy transfer analysis mode 
     Kernel::DeltaEMode::Type m_Emode;
     /// if one needs to calculate Lorentz corrections

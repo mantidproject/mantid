@@ -106,12 +106,9 @@ namespace Crystal
 
       // Date: use the current date/time if not found
       Kernel::DateAndTime C_experimentDate;
-      std::string date;
       tag = getWord(in, false );
-      if(tag.empty())
-        date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
-      else if(tag == "Date:")
-        date = getWord(in, false );
+      if(tag == "Date:")
+        getWord(in, false );
       readToEndOfLine( in, true );
       confidence = 95;
     }
@@ -241,8 +238,9 @@ namespace Crystal
       }
 
       std::string SbankNum = boost::lexical_cast<std::string>(bankNum);
-
-      std::string bankName = "bank"+SbankNum;
+      std::string bankName = "bank";
+      if (instr->getName() == "WISH") bankName = "WISHpanel0";
+      bankName += SbankNum;
       boost::shared_ptr<const Geometry::IComponent> bank =instr_old->getComponentByName( bankName );
 
       if( !bank)
@@ -264,6 +262,8 @@ namespace Crystal
 
       boost::shared_ptr< const Geometry::RectangularDetector>bankR= boost::dynamic_pointer_cast
                          <const Geometry::RectangularDetector>( bank);
+
+      if (!bankR)return startChar;
 
       double DetWScale = 1, DetHtScale = 1;
       if( bank)
@@ -434,15 +434,11 @@ namespace Crystal
     // Find the detector ID from row/col
     Instrument_const_sptr inst = outWS->getInstrument();
     if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace!");
-    IComponent_const_sptr bank = inst->getComponentByName(bankName);
-    if (!bank) throw std::runtime_error("Bank named " + bankName + " not found!");
-    RectangularDetector_const_sptr rect = boost::dynamic_pointer_cast<const RectangularDetector>(bank);
-    if (!rect) throw std::runtime_error("Bank named " + bankName + " is not a RectangularDetector!");
-    IDetector_sptr det = rect->getAtXY(int(col), int(row));
-    if (!det) throw std::runtime_error("Detector not found on " + bankName + "!");
+    LoadIsawPeaks u;
+    int pixelID = u.findPixelID(inst, bankName, static_cast<int>(col), static_cast<int>(row));
 
     //Create the peak object
-    Peak peak(outWS->getInstrument(), det->getID(), wl);
+    Peak peak(outWS->getInstrument(), pixelID, wl);
     // HKL's are flipped by -1 because of the internal Q convention
     peak.setHKL(-h,-k,-l);
     peak.setIntensity(Inti);
@@ -452,6 +448,31 @@ namespace Crystal
     return peak;
   }
 
+  int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName, int col, int row)
+  {
+	  boost::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
+	  if (parent->type().compare("RectangularDetector") == 0)
+	  {
+          boost::shared_ptr<const RectangularDetector> RDet = boost::dynamic_pointer_cast<
+					const RectangularDetector>(parent);
+
+		  boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
+		  return pixel->getID();
+	  }
+	  else
+	  {
+          std::vector<Geometry::IComponent_const_sptr> children;
+          boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+          asmb->getChildren(children, false);
+          int col0 = (col%2==0 ? col/2+75 : (col-1)/2);
+          boost::shared_ptr<const Geometry::ICompAssembly> asmb2 = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[col0]);
+          std::vector<Geometry::IComponent_const_sptr> grandchildren;
+          asmb2->getChildren(grandchildren,false);
+          Geometry::IComponent_const_sptr first = grandchildren[row-1];
+          Geometry::IDetector_const_sptr det = boost::dynamic_pointer_cast<const Geometry::IDetector>(first);
+		  return det->getID();
+	  }
+  }
 
 
   //-----------------------------------------------------------------------------------------------
@@ -551,7 +572,9 @@ namespace Crystal
 
 
       std::ostringstream oss;
-      oss << "bank" << bankNum;
+      std::string bankString = "bank";
+      if (outWS->getInstrument()->getName() == "WISH") bankString = "WISHpanel0";
+      oss << bankString << bankNum;
       std::string bankName = oss.str();
 
       int seqNum = -1;
@@ -587,8 +610,29 @@ namespace Crystal
     }
 
   }
+  //-----------------------------------------------------------------------------------------------
+  /** Count the peaks from a .peaks file and compare with the workspace
+   * @param outWS :: the workspace in which to place the information
+   * @param filename :: path to the .peaks file
+   */
+  void LoadIsawPeaks::checkNumberPeaks( PeaksWorkspace_sptr outWS, std::string filename )
+  {
 
-
+    // Open the file
+    std::ifstream in( filename.c_str() );
+    std::string first;
+    int NumberPeaks = 0;
+    while (getline(in,first))
+    {
+    	if (first[0] == '3')NumberPeaks++;
+    }
+    if(NumberPeaks != outWS->getNumberPeaks())
+    {
+      g_log.error()<<"Number of peaks in file is " << NumberPeaks << " but only read "
+    		  <<outWS->getNumberPeaks() << std::endl;
+      throw std::length_error("Wrong number of peaks read");
+    }
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
@@ -603,6 +647,8 @@ namespace Crystal
 
     // Save it in the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));
+
+    this->checkNumberPeaks(ws, getPropertyValue("Filename"));
   }
 
 

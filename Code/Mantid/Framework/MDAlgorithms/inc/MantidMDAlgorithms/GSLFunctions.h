@@ -7,6 +7,7 @@ namespace Mantid
 	namespace MDAlgorithms
 	{
 	  double f_eval (double x, void *params);
+	  double f_eval2 (double x, void *params);
 	} // namespace MDAlgorithms
 } // namespace Mantid
 

@@ -116,10 +116,10 @@ private:
   long long computePhi(const int& w) const;
 
   /// Fit peak confined in a given window (x-min, x-max)
-  void fitPeakInWindow(const API::MatrixWorkspace_sptr &input, const int spectrum, const double centre, const double xmin, const double xmax);
+  void fitPeakGivenWindow(const API::MatrixWorkspace_sptr &input, const int spectrum, const double centre, const double xmin, const double xmax);
 
   /// Fit peak by given/guessed FWHM
-  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess);
+  void fitPeakGuessWindow(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess);
 
   /// Fit peak
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min, const int i_max, const int i_centre);
@@ -169,8 +169,14 @@ private:
   /// Set boundary/contraint on peak's centre
   std::string makePeakCentreConstraint(API::IFunction_sptr peak, double peakleftboundary, double peakrightboundary, bool composite);
 
+  /// Use begin and end data points in a given region to estimate background
   void estimateBackground(const MantidVec& X, const MantidVec& Y, const size_t i_min, const size_t i_max,
                                 double& out_bg0, double& out_bg1, double& out_bg2);
+
+  /// Use FindPeakBackground to estimate peak background and peak range
+  bool findPeakBackground(const API::MatrixWorkspace_sptr& input, const int spectrum, const double xmin,
+                          const double xmax, const std::string bkgdtype,
+                          double& bg0, double& bg1,double& bg2, int& ipeakmin, int& ipeakmax);
 
   std::string estimatePeakParameters(const MantidVec& vecX, const MantidVec& vecY,
                               size_t i_min, size_t i_max, double& centre, double& height, double& fwhm);

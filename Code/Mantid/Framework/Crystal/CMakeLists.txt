@@ -18,13 +18,16 @@ set ( SRC_FILES
 	src/IndexPeaks.cpp
 	src/IndexSXPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
+	src/LatticeErrors.cpp
 	src/LoadHKL.cpp
 	src/LoadIsawPeaks.cpp
+	src/LoadIsawSpectrum.cpp
 	src/LoadIsawUB.cpp
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
 	src/OptimizeCrystalPlacement.cpp
 	src/OptimizeExtinctionParameters.cpp
+	src/OptimizeLatticeForCellType.cpp
 	src/PeakHKLErrors.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
@@ -73,13 +76,16 @@ set ( INC_FILES
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/IndexSXPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
+	inc/MantidCrystal/LatticeErrors.h
 	inc/MantidCrystal/LoadHKL.h
 	inc/MantidCrystal/LoadIsawPeaks.h
+	inc/MantidCrystal/LoadIsawSpectrum.h
 	inc/MantidCrystal/LoadIsawUB.h
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/NormaliseVanadium.h
 	inc/MantidCrystal/OptimizeCrystalPlacement.h
 	inc/MantidCrystal/OptimizeExtinctionParameters.h
+	inc/MantidCrystal/OptimizeLatticeForCellType.h
 	inc/MantidCrystal/PeakHKLErrors.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
@@ -128,10 +134,12 @@ set ( TEST_FILES
 	IntegratePeakTimeSlicesTest.h
 	LoadHKLTest.h
 	LoadIsawPeaksTest.h
+        LoadIsawSpectrumTest.h
 	LoadIsawUBTest.h
 	MaskPeaksWorkspaceTest.h
 	NormaliseVanadiumTest.h
 	OptimizeCrystalPlacementTest.h
+	OptimizeLatticeForCellTypeTest.h
 	PeakHKLErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h

@@ -86,6 +86,10 @@ public:
   const std::string name() const { return "StubbedWorkspaceAlgorithm2";}
   int version() const  { return 1;}
   const std::string category() const { return "Cat;Leopard;Mink";}
+  const std::string workspaceMethodName() const { return "methodname"; }
+  const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace;ITableWorkspace"; }
+  const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
+  
   void init()
   {
     declareProperty("PropertyA", 12);
@@ -105,6 +109,40 @@ public:
 };
 DECLARE_ALGORITHM(AlgorithmWithValidateInputs)
 
+/**
+ * Algorithm which fails on specified workspace
+ */
+class FailingAlgorithm : public Algorithm
+{
+public:
+  FailingAlgorithm() : Algorithm() {}
+  virtual ~FailingAlgorithm() {}
+  const std::string name() const { return "FailingAlgorithm"; }
+  int version() const { return 1; }
+
+  static const std::string FAIL_MSG;
+
+  void init()
+  {
+    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
+    declareProperty("WsNameToFail", "");
+  }
+
+  void exec()
+  {
+    std::string wsNameToFail = getPropertyValue("WsNameToFail");
+    std::string wsName = getPropertyValue("InputWorkspace");
+
+    if ( wsName == wsNameToFail )
+    {
+      throw std::runtime_error(FAIL_MSG);
+    }
+  }
+};
+
+const std::string FailingAlgorithm::FAIL_MSG("Algorithm failed as requested");
+
+DECLARE_ALGORITHM(FailingAlgorithm)
 
 class AlgorithmTest : public CxxTest::TestSuite
 {
@@ -240,6 +278,30 @@ public:
     alg.setProperty("PropertyB", 15);
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
+  }
+
+  void test_WorkspaceMethodFunctionsReturnEmptyByDefault()
+  {
+    StubbedWorkspaceAlgorithm alg;
+
+    TS_ASSERT_EQUALS("", alg.workspaceMethodName());
+    TS_ASSERT_EQUALS(std::vector<std::string>(), alg.workspaceMethodOn());
+    TS_ASSERT_EQUALS("", alg.workspaceMethodInputProperty());
+  }
+
+  void test_WorkspaceMethodsReturnTypesCorrectly()
+  {
+    AlgorithmWithValidateInputs alg;
+
+    TS_ASSERT_EQUALS("methodname", alg.workspaceMethodName());
+    auto types = alg.workspaceMethodOn();
+    TS_ASSERT_EQUALS(2, types.size());
+    if(types.size() == 2)
+    {
+      TS_ASSERT_EQUALS("MatrixWorkspace", types[0]);
+      TS_ASSERT_EQUALS("ITableWorkspace", types[1]);
+    }
+    TS_ASSERT_EQUALS("InputWorkspace", alg.workspaceMethodInputProperty());
   }
 
   void testStringization()
@@ -576,6 +638,7 @@ public:
   /// All groups are the same size
   void test_processGroups_allSameSize()
   {
+      Mantid::API::AnalysisDataService::Instance().clear();
     WorkspaceGroup_sptr group = do_test_groups("A", "A_1,A_2,A_3",
         "B", "B_1,B_2,B_3",   "C", "C_1,C_2,C_3");
 
@@ -670,7 +733,30 @@ public:
     TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
   }
 
+  void test_processGroups_failOnGroupMemberErrorMessage()
+  {
+    makeWorkspaceGroup("A", "A_1,A_2,A_3");
 
+    FailingAlgorithm alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    alg.setLogging(false);
+    alg.setPropertyValue("InputWorkspace", "A");
+    alg.setPropertyValue("WsNameToFail", "A_2");
+
+    try
+    {
+      alg.execute();
+      TS_FAIL("Exception wasn't thrown");
+    }
+    catch(std::runtime_error& e)
+    {
+      std::string msg(e.what());
+
+      TSM_ASSERT("Error message should contain original error",
+                 msg.find(FailingAlgorithm::FAIL_MSG) != std::string::npos);
+    }
+  }
 
 private:
   IAlgorithm_sptr runFromString(const std::string & input)

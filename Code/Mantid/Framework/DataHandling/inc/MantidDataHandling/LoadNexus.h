@@ -95,8 +95,11 @@ namespace Mantid
       /// run LoadNexusProcessed
       void runLoadNexusProcessed();
 
-        /// run LoadSNSNexus
-      void runLoadSNSNexus();
+        /// run LoadTOFRawNexus
+      void runLoadTOFRawNexus();
+
+      /// set the output workspaces from the child algorithms
+      void setOutputWorkspace(const API::IAlgorithm_sptr & loader);
     };
   } // namespace DataHandling
 } // namespace Mantid

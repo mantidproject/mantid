@@ -23,6 +23,9 @@
 #include "MantidAPI/ICostFunction.h"
 
 #include "MantidQtMantidWidgets/UserFunctionDialog.h"
+#include "MantidQtMantidWidgets/FilenameDialogEditor.h"
+#include "MantidQtMantidWidgets/FormulaDialogEditor.h"
+#include "MantidQtMantidWidgets/WorkspaceEditorFactory.h"
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
@@ -36,7 +39,6 @@
   #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
 #include "qteditorfactory.h"
-#include "StringDialogEditorFactory.h"
 #include "DoubleEditorFactory.h"
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1125
@@ -68,41 +70,6 @@ namespace MantidQt
 {
 namespace MantidWidgets
 {
-
-namespace
-{
-
-class FormulaDialogEditor: public StringDialogEditor
-{
-public:
-  FormulaDialogEditor(QtProperty *property, QWidget *parent)
-    :StringDialogEditor(property,parent){}
-protected slots:
-  void runDialog()
-  {
-    MantidQt::MantidWidgets::UserFunctionDialog *dlg = new MantidQt::MantidWidgets::UserFunctionDialog((QWidget*)parent(),getText());
-    if (dlg->exec() == QDialog::Accepted)
-    {
-      setText(dlg->getFormula());
-      updateProperty();
-    };
-  }
-};
-
-class FormulaDialogEditorFactory: public StringDialogEditorFactory
-{
-public:
-  FormulaDialogEditorFactory(QObject* parent):StringDialogEditorFactory(parent){}
-protected:
-  using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler warning
-  QWidget *createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent)
-  {
-    (void) manager; //Avoid unused warning
-    return new FormulaDialogEditor(property,parent);
-  }
-};
-
-}
 
 /**
  * Constructor
@@ -144,7 +111,9 @@ void FunctionBrowser::createBrowser()
   m_indexManager = new QtStringPropertyManager(this);
   m_tieManager = new QtStringPropertyManager(this);
   m_constraintManager = new QtStringPropertyManager(this);
+  m_filenameManager = new QtStringPropertyManager(this);
   m_formulaManager = new QtStringPropertyManager(this);
+  m_workspaceManager = new QtStringPropertyManager(this);
   m_attributeVectorManager = new QtGroupPropertyManager(this);
   m_attributeSizeManager = new QtIntPropertyManager(this);
   m_attributeVectorDoubleManager = new QtDoublePropertyManager(this);
@@ -154,8 +123,9 @@ void FunctionBrowser::createBrowser()
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(this);
   QtLineEditFactory *lineEditFactory = new QtLineEditFactory(this);
   QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
-  //StringDialogEditorFactory* stringDialogEditFactory = new StringDialogEditorFactory(this);
+  FilenameDialogEditorFactory* filenameDialogEditorFactory = new FilenameDialogEditorFactory(this);
   FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(this);
+  WorkspaceEditorFactory* workspaceEditorFactory = new WorkspaceEditorFactory(this);
 
   m_browser = new QtTreePropertyBrowser();
   // assign factories to property managers
@@ -167,7 +137,9 @@ void FunctionBrowser::createBrowser()
   m_browser->setFactoryForManager(m_indexManager, lineEditFactory);
   m_browser->setFactoryForManager(m_tieManager, lineEditFactory);
   m_browser->setFactoryForManager(m_constraintManager, lineEditFactory);
+  m_browser->setFactoryForManager(m_filenameManager, filenameDialogEditorFactory);
   m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
+  m_browser->setFactoryForManager(m_workspaceManager, workspaceEditorFactory);
   m_browser->setFactoryForManager(m_attributeSizeManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_attributeVectorDoubleManager, doubleEditorFactory);
 
@@ -180,6 +152,7 @@ void FunctionBrowser::createBrowser()
   connect(m_attributeIntManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_attributeBoolManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
+  connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_attributeVectorDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeVectorDoubleChanged(QtProperty*)));
 }
 
@@ -467,10 +440,20 @@ protected:
   FunctionBrowser::AProperty apply(const std::string& str)const
   {
     QtProperty* prop = NULL;
-    if ( m_attName == "Formula" )
+    if (m_attName == "FileName")
+    {
+      prop = m_browser->m_filenameManager->addProperty(m_attName);
+      m_browser->m_filenameManager->setValue(prop, QString::fromStdString(str));
+    }
+    else if ( m_attName == "Formula" )
     {
       prop = m_browser->m_formulaManager->addProperty(m_attName);
       m_browser->m_formulaManager->setValue(prop, QString::fromStdString(str));
+    }
+    else if ( m_attName == "Workspace" )
+    {
+      prop = m_browser->m_workspaceManager->addProperty(m_attName);
+      m_browser->m_workspaceManager->setValue(prop, QString::fromStdString(str));
     }
     else
     {
@@ -546,9 +529,17 @@ protected:
   void apply(std::string& str)const
   {
     QString attName = m_prop->propertyName();
-    if ( attName == "Formula" )
+    if ( attName == "FileName" )
+    {
+      str = m_browser->m_filenameManager->value(m_prop).toStdString();
+    }
+    else if ( attName == "Formula" )
     {
       str = m_browser->m_formulaManager->value(m_prop).toStdString();
+    }
+    else if ( attName == "Workspace" )
+    {
+      str = m_browser->m_workspaceManager->value(m_prop).toStdString();
     }
     else
     {
@@ -747,7 +738,9 @@ bool FunctionBrowser::isStringAttribute(QtProperty* prop) const
 {
   return prop && (
     dynamic_cast<QtAbstractPropertyManager*>(m_attributeStringManager) == prop->propertyManager() ||
-    dynamic_cast<QtAbstractPropertyManager*>(m_formulaManager) == prop->propertyManager()
+    dynamic_cast<QtAbstractPropertyManager*>(m_formulaManager) == prop->propertyManager() ||
+    dynamic_cast<QtAbstractPropertyManager*>(m_filenameManager) == prop->propertyManager() ||
+    dynamic_cast<QtAbstractPropertyManager*>(m_workspaceManager) == prop->propertyManager()
     );
 }
 
@@ -1264,6 +1257,7 @@ void FunctionBrowser::addFunction()
 /**
  * Return the function 
  * @param prop :: Function property 
+ * @param attributesOnly :: Only set attributes
  */
 Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop, bool attributesOnly)
 {
@@ -1306,7 +1300,15 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop, bool 
         SetAttributeFromProperty setter(this,child);
         Mantid::API::IFunction::Attribute attr = fun->getAttribute(attName);
         attr.apply(setter);
-        fun->setAttribute(attName,attr);
+        try
+        {
+          fun->setAttribute(attName,attr);
+        }
+        catch(std::exception& expt)
+        {
+          QMessageBox::critical(this,"MantidPlot - Error", "Cannot set attribute " + QString::fromStdString(attName) + 
+            " of function " + prop->propertyName() + ":\n\n" + QString::fromStdString(expt.what()));
+        }
       }
       else if (!attributesOnly && isParameter(child))
       {

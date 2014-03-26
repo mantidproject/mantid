@@ -56,6 +56,10 @@
   <location x="0.0" y="0.0" z="100.0"> <facing val="none"/> </location>
 </component>
 
+<component type="tapered-guide-test" idlist="tapered-guide-test">
+  <location x="0.0" y="0.0" z="100.0"> <facing val="none"/> </location>
+</component>
+
 <component type="cuboid-rotating-test" idlist="cuboid-rotating-test">
   <location x="0.0" y="100.0" z="0.0"> </location>
   <location x="0.0" y="200.0" z="0.0">  <facing rot="45"/> </location> 
@@ -66,6 +70,10 @@
   <location x="0.0" y="200.0" z="0.0" rot="45"> </location>  
 </component>
 
+<component type="cuboid-alternate-test" idlist="cuboid-alternate-test">
+  <location x="0.0" y="0.0" z="0.0">  </location>
+</component>
+  
 <component type="infinite-cylinder-test" idlist="infinite-cylinder-test">
   <location x="0.0" y="0.0" z="0.0"> <facing val="none"/> </location>
 </component>
@@ -235,6 +243,17 @@
     <algebra val="some-shape" />  
   </type>    
   
+  <type name="tapered-guide-test" is="detector">
+    <tapered-guide id="some-shape">
+      <aperture-start height="2.0" width="2.0" />
+      <length val="2.0" />
+      <aperture-end height="4.0" width="4.0" />
+      <centre x="0.0" y="0.0" z="-1.0" />
+      <axis x="0.0" y="0.0" z="1" />
+    </tapered-guide>
+    <algebra val="some-shape" />
+  </type>
+  
   <type name="cuboid-rotating-test" is="detector">
     <cuboid id="approximate-shape">
       <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
@@ -244,6 +263,17 @@
     </cuboid>
     <algebra val="approximate-shape" /> 
   </type>    
+
+  <type name="cuboid-alternate-test" is="detector">
+    <cuboid id="some-shape">
+      <height val="0.2" />
+      <width val="0.1" />
+      <depth val="0.4" />
+      <centre x="1.0" y="1.0" z="1.0" />
+      <axis x="0" y="0" z="1" />
+    </cuboid>
+    <algebra val="some-shape" />
+  </type> 
   
   <type name="infinite-cylinder-test" is="detector">
     <infinite-cylinder id="some-shape">
@@ -290,6 +320,7 @@
   
   
   
+
   <!-- DETECTOR ID LISTS -->
   
   <idlist idname="cylinder-right">
@@ -326,6 +357,10 @@
     <id val="8" />
   </idlist> 
   
+  <idlist idname="tapered-guide-test">
+    <id val="9" />
+  </idlist> 
+  
   <idlist idname="cuboid-rotating-test">
     <id start="10" end="11" />
   </idlist>    
@@ -333,6 +368,10 @@
   <idlist idname="cuboid-rotating-test2">
     <id start="1000" end="1001" />
   </idlist>  
+
+  <idlist idname="cuboid-alternate-test">
+    <id val="18" />
+  </idlist>
   
   <idlist idname="infinite-cylinder-test">
     <id val="12" />

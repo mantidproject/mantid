@@ -108,14 +108,7 @@ class DgsReductionScripter(BaseReductionScripter):
 
         script = """StartLiveData(UpdateEvery='10',Instrument='"""
         script += self.instrument_name
-        script += """',ProcessingScript='"""
-        
-        # Have to jump through this hoop because chunks after the first have an empty EnergyRequest property
-        script += """if mtd.doesExist(\""""
-        script += output_workspace_name
-        script += """\"): input.run().addProperty("EnergyRequest",mtd[\""""
-        script += output_workspace_name
-        script += """\"].getRun()["EnergyRequest"],True)\\n"""
+        script += """',ProcessingScript='"""        
         script +=  DgsReductionScripter.TOPLEVEL_WORKFLOWALG + '('
         script += options
         script += ")"
@@ -124,7 +117,6 @@ class DgsReductionScripter(BaseReductionScripter):
         script += output_workspace
         script += ")\n" 
         
-        print script
         return script
 
     def to_batch(self):

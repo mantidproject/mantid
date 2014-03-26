@@ -91,9 +91,79 @@ public:
     TS_ASSERT_EQUALS( runInfo.getProperties().size(), 0 );
   }
 
- 
+  void testStartTime()
+  {
+    LogManager runInfo;
+    // Nothing there yet
+    TS_ASSERT_THROWS( runInfo.startTime(), std::runtime_error );
+    // Add run_start and see that get picked up
+    const std::string run_start("2013-12-19T13:38:00");
+    auto run_start_prop = new PropertyWithValue<std::string>("run_start",run_start);
+    runInfo.addProperty(run_start_prop);
+    TS_ASSERT_EQUALS( runInfo.startTime(), DateAndTime(run_start) );
+    // Add start_time and see that get picked up in preference
+    const std::string start_time("2013-12-19T13:40:00");
+    auto start_time_prop = new PropertyWithValue<std::string>("start_time",start_time);
+    runInfo.addProperty(start_time_prop);
+    TS_ASSERT_EQUALS( runInfo.startTime(), DateAndTime(start_time) );
+    // But get back run_start again if start_time is equal to the epoch
+    const std::string epoch("1990-01-01T00:00:00");
+    start_time_prop->setValue(epoch);
+    TS_ASSERT_EQUALS( runInfo.startTime(), DateAndTime(run_start) );
+    // And back to failure if they're both that
+    run_start_prop->setValue(epoch);
+    TS_ASSERT_THROWS( runInfo.startTime(), std::runtime_error );
 
-  
+    // Set run_start back to valid value and make start_time contain nonsense
+    run_start_prop->setValue(run_start);
+    start_time_prop->setValue("__");
+    TS_ASSERT_EQUALS( runInfo.startTime(), DateAndTime(run_start) );
+    // Now make start_time a completely different property type
+    runInfo.removeProperty("start_time");
+    runInfo.addProperty(new PropertyWithValue<double>("start_time",3.33));
+    TS_ASSERT_EQUALS( runInfo.startTime(), DateAndTime(run_start) );
+    // Now make run_start something invalid
+    run_start_prop->setValue("notADate");
+    TS_ASSERT_THROWS( runInfo.startTime(), std::runtime_error );
+    // And check things if it's the wrong property type
+    runInfo.removeProperty("run_start");
+    addTimeSeriesEntry(runInfo,"run_start",4.44);
+    TS_ASSERT_THROWS( runInfo.startTime(), std::runtime_error );
+  }
+
+  void testEndTime()
+  {
+    LogManager runInfo;
+    // Nothing there yet
+    TS_ASSERT_THROWS( runInfo.endTime(), std::runtime_error );
+    // Add run_end and see that get picked up
+    const std::string run_end("2013-12-19T13:38:00");
+    auto run_end_prop = new PropertyWithValue<std::string>("run_end",run_end);
+    runInfo.addProperty(run_end_prop);
+    TS_ASSERT_EQUALS( runInfo.endTime(), DateAndTime(run_end) );
+    // Add end_time and see that get picked up in preference
+    const std::string end_time("2013-12-19T13:40:00");
+    auto end_time_prop = new PropertyWithValue<std::string>("end_time",end_time);
+    runInfo.addProperty(end_time_prop);
+    TS_ASSERT_EQUALS( runInfo.endTime(), DateAndTime(end_time) );
+
+    // Set run_end back to valid value and make end_time contain nonsense
+    run_end_prop->setValue(run_end);
+    end_time_prop->setValue("__");
+    TS_ASSERT_EQUALS( runInfo.endTime(), DateAndTime(run_end) );
+    // Now make end_time a completely different property type
+    runInfo.removeProperty("end_time");
+    runInfo.addProperty(new PropertyWithValue<double>("end_time",3.33));
+    TS_ASSERT_EQUALS( runInfo.endTime(), DateAndTime(run_end) );
+    // Now make run_end something invalid
+    run_end_prop->setValue("notADate");
+    TS_ASSERT_THROWS( runInfo.endTime(), std::runtime_error );
+    // And check things if it's the wrong property type
+    runInfo.removeProperty("run_end");
+    addTimeSeriesEntry(runInfo,"run_end",4.44);
+    TS_ASSERT_THROWS( runInfo.endTime(), std::runtime_error );
+  }
+
   void testMemory()
   {
     LogManager runInfo;
@@ -259,7 +329,37 @@ public:
     TS_ASSERT_EQUALS( runInfo.getPropertyValueAsType<int>(intProp), 99 );
   }
 
+  void clearOutdatedTimeSeriesLogValues()
+  {
+    // Set up a Run object with 3 properties in it (1 time series, 2 single value)
+    LogManager runInfo;
+    const std::string stringProp("aStringProp");
+    const std::string stringVal("testing");
+    runInfo.addProperty(stringProp,stringVal);
+    const std::string intProp("anIntProp");
+    runInfo.addProperty(intProp,99);
+    const std::string tspProp("tsp");
+    addTestTimeSeries(runInfo,"tsp");
 
+    // Check it's set up right
+    TS_ASSERT_EQUALS( runInfo.getProperties().size(), 3 );
+    auto tsp = runInfo.getTimeSeriesProperty<double>(tspProp);
+    TS_ASSERT_EQUALS( tsp->realSize(), 10 );
+
+    auto lastTime = tsp->lastTime();
+    auto lastValue = tsp->lastValue();
+
+    // Do the clearing work
+    TS_ASSERT_THROWS_NOTHING( runInfo.clearOutdatedTimeSeriesLogValues() );
+
+    // Check the time-series property has 1 entry, & the others are unchanged
+    TS_ASSERT_EQUALS( runInfo.getProperties().size(), 3 );
+    TS_ASSERT_EQUALS( tsp->realSize(), 1 );
+    TS_ASSERT_EQUALS( tsp->firstTime(), lastTime );
+    TS_ASSERT_EQUALS( tsp->firstValue(), lastValue );
+    TS_ASSERT_EQUALS( runInfo.getPropertyValueAsType<std::string>(stringProp), stringVal );
+    TS_ASSERT_EQUALS( runInfo.getPropertyValueAsType<int>(intProp), 99 );
+  }
 
   /** Save and load to NXS file */
   void test_nexus()

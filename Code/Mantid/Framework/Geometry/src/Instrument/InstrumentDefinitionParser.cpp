@@ -1,6 +1,4 @@
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -9,17 +7,10 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Interpolation.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/UnitFactory.h"
 #include <fstream>
-#include <iostream>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -27,13 +18,7 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/Exception.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/make_shared.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <sstream>
-#include <cstdlib>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -70,11 +55,6 @@ namespace Geometry
    */
   InstrumentDefinitionParser::~InstrumentDefinitionParser()
   {
-    if (pDoc)
-    {
-      // release XML document
-      pDoc->release();
-    }
   }
 
   //----------------------------------------------------------------------------------------------
@@ -170,15 +150,15 @@ namespace Geometry
     {
       return m_xmlFile->getMangledName();
     }
-    else if (pDoc != NULL)
+    else if ( ! pDoc.isNull() )
     {
       std::string lastModified = pRootElem->getAttribute("last-modified");
-      if (lastModified.length() == 0)
+      if (lastModified.empty())
       {
         g_log.warning() << "The IDF that you are using doesn't contain a 'last-modified' field. ";
         g_log.warning() << "You may not get the correct definition file loaded." << std::endl ;
       }
-      return m_xmlFile->getFileNameOnly() + lastModified;
+      return m_instName + lastModified;
     }
     else
     {
@@ -204,7 +184,7 @@ namespace Geometry
 
     const std::string filename = m_xmlFile->getFileFullPathStr();
 
-    NodeList* pNL_type = pRootElem->getElementsByTagName("type");
+    Poco::AutoPtr<NodeList> pNL_type = pRootElem->getElementsByTagName("type");
     if ( pNL_type->length() == 0 )
     {
       g_log.error("XML file: " + filename + "contains no type elements.");
@@ -225,10 +205,11 @@ namespace Geometry
 
       // check if contain <combine-components-into-one-shape>. If this then such
       // types are adjusted after this loop has completed
-      NodeList* pNL_type_combine_into_one_shape = pTypeElem->getElementsByTagName("combine-components-into-one-shape");
-      if ( pNL_type_combine_into_one_shape->length() )
+      Poco::AutoPtr<NodeList> pNL_type_combine_into_one_shape = pTypeElem->getElementsByTagName("combine-components-into-one-shape");
+      if ( pNL_type_combine_into_one_shape->length() > 0 )
+      {
         continue;
-      pNL_type_combine_into_one_shape->release();
+      }
 
       // Each type in the IDF must be uniquely named, hence return error if type
       // has already been defined
@@ -241,7 +222,7 @@ namespace Geometry
 
       // identify for now a type to be an assemble by it containing elements
       // with tag name 'component'
-      NodeList* pNL_local = pTypeElem->getElementsByTagName("component");
+      Poco::AutoPtr<NodeList> pNL_local = pTypeElem->getElementsByTagName("component");
       if (pNL_local->length() == 0)
       {
         isTypeAssembly[typeName] = false;
@@ -259,7 +240,6 @@ namespace Geometry
           pTypeElem->setAttribute("object_created","no");
         }
       }
-      pNL_local->release();
     }
 
     // Deal with adjusting types containing <combine-components-into-one-shape>
@@ -269,9 +249,8 @@ namespace Geometry
       std::string typeName = pTypeElem->getAttribute("name");
 
       // In this loop only interested in types containing <combine-components-into-one-shape>
-      NodeList* pNL_type_combine_into_one_shape = pTypeElem->getElementsByTagName("combine-components-into-one-shape");
+      Poco::AutoPtr<NodeList> pNL_type_combine_into_one_shape = pTypeElem->getElementsByTagName("combine-components-into-one-shape");
       const unsigned long nelements = pNL_type_combine_into_one_shape->length();
-      pNL_type_combine_into_one_shape->release();
       if ( nelements == 0 )
         continue;
 
@@ -292,10 +271,9 @@ namespace Geometry
       mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
       mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
     }
-    pNL_type->release(); // finished with handling <combine-components-into-one-shape>
 
     // create hasParameterElement
-    NodeList* pNL_parameter = pRootElem->getElementsByTagName("parameter");
+    Poco::AutoPtr<NodeList> pNL_parameter = pRootElem->getElementsByTagName("parameter");
 
     unsigned long numParameter = pNL_parameter->length();
     hasParameterElement.reserve(numParameter);
@@ -314,7 +292,6 @@ namespace Geometry
         pNode = it.nextNode();
     }
 
-    pNL_parameter->release();
     hasParameterElement_beenSet = true;
 
     // See if any parameters set at instrument level
@@ -323,7 +300,7 @@ namespace Geometry
     //
     // do analysis for each top level compoment element
     //
-    NodeList* pNL_comp = pRootElem->childNodes(); // here get all child nodes
+    Poco::AutoPtr<NodeList> pNL_comp = pRootElem->childNodes(); // here get all child nodes
     unsigned long pNL_comp_length = pNL_comp->length();
 
     if (prog) prog->resetNumSteps(pNL_comp_length, 0.0, 1.0);
@@ -342,8 +319,8 @@ namespace Geometry
 
         // Get all <location> and <locations> elements contained in component element
         // just for the purpose of a IDF syntax check
-        NodeList* pNL_location = pElem->getElementsByTagName("location");
-        NodeList* pNL_locations = pElem->getElementsByTagName("locations");
+        Poco::AutoPtr<NodeList> pNL_location = pElem->getElementsByTagName("location");
+        Poco::AutoPtr<NodeList> pNL_locations = pElem->getElementsByTagName("locations");
         // do a IDF syntax check 
         if (pNL_location->length() == 0 && pNL_locations->length() == 0)
         {
@@ -353,15 +330,13 @@ namespace Geometry
               std::string("A component element must contain at least one <location> or <locations> element") +
               " even if it is just an empty location element of the form <location />", filename);
         }
-        pNL_location->release();
-        pNL_locations->release();
 
         // Loop through all <location> and <locations> elements of this component by looping 
         // all the child nodes and then see if any of these nodes are either <location> or
         // <locations> elements. Done this way order these locations are processed is the 
         // order they are listed in the IDF. The latter needed to get detector IDs assigned
         // as expected
-        NodeList* pNL_childs = pElem->childNodes(); // here get all child nodes
+        Poco::AutoPtr<NodeList> pNL_childs = pElem->childNodes(); // here get all child nodes
         unsigned long pNL_childs_length = pNL_childs->length();
         for (unsigned long iLoc = 0; iLoc < pNL_childs_length; iLoc++)
         {
@@ -420,11 +395,9 @@ namespace Geometry
               + pElem->getAttribute("type") + " (=" + ss2.str() + ").", filename);
         }
         idList.reset();
-        pNL_childs->release();
       }
     }
 
-    pNL_comp->release();
     // Don't need this anymore (if it was even used) so empty it out to save memory
     m_tempPosHolder.clear();
 
@@ -459,7 +432,7 @@ namespace Geometry
 
       // parse converted <locations> output
       DOMParser pLocationsParser;
-      Document* pLocationsDoc;
+      Poco::AutoPtr<Document> pLocationsDoc;
       try
       {
         pLocationsDoc = pLocationsParser.parseString(xmlLocation);
@@ -474,9 +447,9 @@ namespace Geometry
       if ( !pRootLocationsElem->hasChildNodes() )
       {
         throw Kernel::Exception::InstrumentDefinitionError("No root element in XML string", xmlLocation);
-      }              
+      }
 
-      NodeList* pNL_locInLocs = pRootLocationsElem->getElementsByTagName("location");
+      Poco::AutoPtr<NodeList> pNL_locInLocs = pRootLocationsElem->getElementsByTagName("location");
       unsigned long pNL_locInLocs_length = pNL_locInLocs->length();
       for (unsigned long iInLocs = 0; iInLocs < pNL_locInLocs_length; iInLocs++)
       {
@@ -490,8 +463,6 @@ namespace Geometry
           appendLeaf(parent, pLocInLocsElem, pCompElem, idList);
         }
       }
-      pNL_locInLocs->release();
-      pLocationsDoc->release();
   }
 
 
@@ -954,7 +925,7 @@ namespace Geometry
   std::vector<std::string> InstrumentDefinitionParser::buildExcludeList(const Poco::XML::Element* const location)
   {
     // check if <exclude> sub-elements for this location and create new exclude list to pass on
-    NodeList* pNLexclude = location->getElementsByTagName("exclude");
+    Poco::AutoPtr<NodeList> pNLexclude = location->getElementsByTagName("exclude");
     unsigned long numberExcludeEle = pNLexclude->length();
     std::vector<std::string> newExcludeList;
     for (unsigned long i = 0; i < numberExcludeEle; i++)
@@ -963,7 +934,6 @@ namespace Geometry
       if ( pExElem->hasAttribute("sub-part") )
         newExcludeList.push_back(pExElem->getAttribute("sub-part"));
     }
-    pNLexclude->release();
 
     return newExcludeList;
   }
@@ -1405,14 +1375,12 @@ namespace Geometry
     {
       // test first if any <id> elements
 
-      NodeList* pNL = pE->getElementsByTagName("id");
+      Poco::AutoPtr<NodeList> pNL = pE->getElementsByTagName("id");
 
       if ( pNL->length() == 0 )
       {
         throw Kernel::Exception::InstrumentDefinitionError("No id subelement of idlist element in XML instrument file", filename);
       }
-      pNL->release();
-
 
       // get id numbers
 
@@ -1647,7 +1615,7 @@ namespace Geometry
     if ( hasParameterElement_beenSet )
       if ( hasParameterElement.end() == std::find(hasParameterElement.begin(),hasParameterElement.end(),pElem) ) return;
 
-    NodeList* pNL_comp = pElem->childNodes(); // here get all child nodes
+    Poco::AutoPtr<NodeList> pNL_comp = pElem->childNodes(); // here get all child nodes
     unsigned long pNL_comp_length = pNL_comp->length();
 
     for (unsigned long i = 0; i < pNL_comp_length; i++)
@@ -1682,18 +1650,18 @@ namespace Geometry
         std::string extractSingleValueAs = "mean"; // default
         std::string eq = "";
 
-        NodeList* pNLvalue = pParamElem->getElementsByTagName("value");
+        Poco::AutoPtr<NodeList> pNLvalue = pParamElem->getElementsByTagName("value");
         size_t numberValueEle = pNLvalue->length();
         Element* pValueElem;
 
-        NodeList* pNLlogfile = pParamElem->getElementsByTagName("logfile");
+        Poco::AutoPtr<NodeList> pNLlogfile = pParamElem->getElementsByTagName("logfile");
         size_t numberLogfileEle = pNLlogfile->length();
         Element* pLogfileElem;
 
-        NodeList* pNLLookUp = pParamElem->getElementsByTagName("lookuptable");
+        Poco::AutoPtr<NodeList> pNLLookUp = pParamElem->getElementsByTagName("lookuptable");
         size_t numberLookUp = pNLLookUp->length();
 
-        NodeList* pNLFormula = pParamElem->getElementsByTagName("formula");
+        Poco::AutoPtr<NodeList> pNLFormula = pParamElem->getElementsByTagName("formula");
         size_t numberFormula = pNLFormula->length();
 
         if ( numberValueEle+numberLogfileEle+numberLookUp+numberFormula > 1 )
@@ -1738,9 +1706,6 @@ namespace Geometry
           if ( pLogfileElem->hasAttribute("extract-single-value-as") )
             extractSingleValueAs = pLogfileElem->getAttribute("extract-single-value-as");
         }
-        pNLlogfile->release();
-        pNLvalue->release();
-
 
         if ( pParamElem->hasAttribute("type") )
           type = pParamElem->getAttribute("type");
@@ -1749,13 +1714,12 @@ namespace Geometry
         // check if <fixed /> element present
 
         bool fixed = false;
-        NodeList* pNLFixed = pParamElem->getElementsByTagName("fixed");
+        Poco::AutoPtr<NodeList> pNLFixed = pParamElem->getElementsByTagName("fixed");
         size_t numberFixed = pNLFixed->length();
         if ( numberFixed >= 1 )
         {
           fixed = true;
         }
-        pNLFixed->release();
 
         // some processing
 
@@ -1793,9 +1757,9 @@ namespace Geometry
 
         std::vector<std::string> constraint(2, "");
 
-        NodeList* pNLMin = pParamElem->getElementsByTagName("min");
+        Poco::AutoPtr<NodeList> pNLMin = pParamElem->getElementsByTagName("min");
         size_t numberMin = pNLMin->length();
-        NodeList* pNLMax = pParamElem->getElementsByTagName("max");
+        Poco::AutoPtr<NodeList> pNLMax = pParamElem->getElementsByTagName("max");
         size_t numberMax = pNLMax->length();
 
         if ( numberMin >= 1)
@@ -1808,15 +1772,12 @@ namespace Geometry
           Element* pMax = static_cast<Element*>(pNLMax->item(0));
           constraint[1] = pMax->getAttribute("val");
         }
-        pNLMin->release();
-        pNLMax->release();
-
 
         // check if penalty-factor> elements present
 
         std::string penaltyFactor;
 
-        NodeList* pNL_penaltyFactor = pParamElem->getElementsByTagName("penalty-factor");
+        Poco::AutoPtr<NodeList> pNL_penaltyFactor = pParamElem->getElementsByTagName("penalty-factor");
         size_t numberPenaltyFactor =  pNL_penaltyFactor->length();
 
         if ( numberPenaltyFactor>= 1)
@@ -1824,8 +1785,6 @@ namespace Geometry
           Element* pPenaltyFactor = static_cast<Element*>(pNL_penaltyFactor->item(0));
           penaltyFactor = pPenaltyFactor->getAttribute("val");
         }
-        pNL_penaltyFactor->release();
-
 
         // Check if look up table is specified
 
@@ -1864,7 +1823,7 @@ namespace Geometry
               interpolation->setYUnit(pLookUp->getAttribute("y-unit"));
           }
 
-          NodeList* pNLpoint = pLookUp->getElementsByTagName("point");
+          Poco::AutoPtr<NodeList> pNLpoint = pLookUp->getElementsByTagName("point");
           unsigned long numberPoint = pNLpoint->length();
 
           for ( unsigned long i = 0; i < numberPoint; i++)
@@ -1874,10 +1833,7 @@ namespace Geometry
             double y = atof( pPoint->getAttribute("y").c_str() );
             interpolation->addPoint(x,y);
           }
-          pNLpoint->release();
         }
-        pNLLookUp->release();
-
 
         // Check if formula is specified
 
@@ -1904,8 +1860,6 @@ namespace Geometry
           if ( pFormula->hasAttribute("result-unit") )
             resultUnit = pFormula->getAttribute("result-unit");
         }
-        pNLFormula->release();
-
         
         auto cacheKey = std::make_pair(paramName, comp);
         auto cacheValue = boost::shared_ptr<XMLlogfile>(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, resultUnit,
@@ -1918,7 +1872,6 @@ namespace Geometry
         }
       } // end of if statement
     }
-    pNL_comp->release();
   }
 
 
@@ -1930,7 +1883,7 @@ namespace Geometry
   */
   void InstrumentDefinitionParser::setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pRootElem)
   {
-    NodeList* pNL_link = pRootElem->getElementsByTagName("component-link");
+    Poco::AutoPtr<NodeList> pNL_link = pRootElem->getElementsByTagName("component-link");
     unsigned long numberLinks = pNL_link->length();
 
 
@@ -1976,7 +1929,6 @@ namespace Geometry
         }
       }
     }
-    pNL_link->release();
   }
 
 
@@ -2145,25 +2097,23 @@ namespace Geometry
       throw Exception::InstrumentDefinitionError( "Argument to function adjust() must be a pointer to an XML element with tag name type." );
 
     // check that there is a <combine-components-into-one-shape> element in type
-    NodeList* pNLccioh = pElem->getElementsByTagName("combine-components-into-one-shape");
+    Poco::AutoPtr<NodeList> pNLccioh = pElem->getElementsByTagName("combine-components-into-one-shape");
     if ( pNLccioh->length() == 0 )
     {
       throw Exception::InstrumentDefinitionError( std::string("Argument to function adjust() must be a pointer to an XML element with tag name type,")
             + " which contain a <combine-components-into-one-shape> element.");
     }
-    pNLccioh->release();
 
     // check that there is a <algebra> element in type
-    NodeList* pNLalg = pElem->getElementsByTagName("algebra");
+    Poco::AutoPtr<NodeList> pNLalg = pElem->getElementsByTagName("algebra");
     if ( pNLalg->length() == 0 )
     {
       throw Exception::InstrumentDefinitionError( std::string("An <algebra> element must be part of a <type>, which")
             + " includes a <combine-components-into-one-shape> element. See www.mantidproject.org/IDF." );
     }
-    pNLalg->release();
 
     // check that there is a <location> element in type
-    NodeList* pNL = pElem->getElementsByTagName("location");
+    Poco::AutoPtr<NodeList> pNL = pElem->getElementsByTagName("location");
     unsigned long numLocation = pNL->length();
     if ( numLocation == 0 )
     {
@@ -2172,13 +2122,12 @@ namespace Geometry
     }
 
     // check if a <translate-rotate-combined-shape-to> is defined
-    NodeList* pNL_TransRot = pElem->getElementsByTagName("translate-rotate-combined-shape-to");
+    Poco::AutoPtr<NodeList> pNL_TransRot = pElem->getElementsByTagName("translate-rotate-combined-shape-to");
     Element* pTransRot = 0; 
     if ( pNL_TransRot->length() == 1 )
     {
        pTransRot = static_cast<Element*>(pNL_TransRot->item(0));
     }
-    pNL_TransRot->release();
 
     // to convert all <component>'s in type into <cuboid> elements, which are added
     // to pElem, and these <component>'s are deleted after loop
@@ -2230,7 +2179,7 @@ namespace Geometry
       }
       
       DOMParser pParser;
-      Document* pDoc;
+      Poco::AutoPtr<Document> pDoc;
       try
       {
         pDoc = pParser.parseString(cuboidStr);
@@ -2242,13 +2191,11 @@ namespace Geometry
       }
       // Get pointer to root element and add this element to pElem
       Element* pCuboid = pDoc->documentElement();
-      Node* fisse = (pElem->ownerDocument())->importNode(pCuboid, true);
+      Poco::AutoPtr<Node> fisse = (pElem->ownerDocument())->importNode(pCuboid, true);
       pElem->appendChild(fisse);
 
-      pDoc->release();
       allComponentInType.insert(pCompElem);
     }
-    pNL->release();
 
     // delete all <component> found in pElem
     std::set<Element*>::iterator it;
@@ -2336,7 +2283,7 @@ namespace Geometry
                                                                   const std::string& cuboidName)
   {
       DOMParser pParser;
-      Document* pDoc;
+      Poco::AutoPtr<Document> pDoc;
       try
       {
         pDoc = pParser.parseString(cuboidXML);
@@ -2350,8 +2297,6 @@ namespace Geometry
       Element* pCuboid = pDoc->documentElement();
 
       std::string retVal = translateRotateXMLcuboid(comp, pCuboid,cuboidName);
-
-      pDoc->release();
 
       return retVal;
   }
@@ -2390,9 +2335,6 @@ namespace Geometry
     bool alongPhi = false; 
 
     double x=0.0, y=0.0, z=0.0;
-    double x_end=0.0;
-    double y_end=0.0;
-    double z_end=0.0;
     bool alongX = false;
     bool alongY = false;
     bool alongZ = false;
@@ -2501,7 +2443,7 @@ namespace Geometry
       {
         if (  pElem->hasAttribute("y-end") || pElem->hasAttribute("z-end") )
           throwTooManyEndAttributeInLocations("x-end", "y-end or z-end");
-        x_end = atof((pElem->getAttribute("x-end")).c_str());
+        double x_end = atof((pElem->getAttribute("x-end")).c_str());
         alongX = true;
         step = (x_end - x) / static_cast<double>(n_elements-1);
         nAlong++;
@@ -2511,7 +2453,7 @@ namespace Geometry
       {
         if (  pElem->hasAttribute("x-end") || pElem->hasAttribute("z-end") )
           throwTooManyEndAttributeInLocations("y-end", "x-end or z-end");
-        y_end = atof((pElem->getAttribute("y-end")).c_str());
+        double y_end = atof((pElem->getAttribute("y-end")).c_str());
         alongY = true;
         step = (y_end - y) / static_cast<double>(n_elements-1);
         nAlong++;
@@ -2521,7 +2463,7 @@ namespace Geometry
       {
         if (  pElem->hasAttribute("x-end") || pElem->hasAttribute("y-end") )
           throwTooManyEndAttributeInLocations("z-end", "x-end or y-end");
-        z_end = atof((pElem->getAttribute("z-end")).c_str());
+        double z_end = atof((pElem->getAttribute("z-end")).c_str());
         alongZ = true;
         step = (z_end - z) / static_cast<double>(n_elements-1);
         nAlong++;
@@ -2530,7 +2472,6 @@ namespace Geometry
 
     // also check if 'rot' is the one to step through
     double rot=0.0;
-    double rot_end = 0.0;
     bool along_rot = false;    
     if ( pElem->hasAttribute("rot") ) 
     {
@@ -2538,7 +2479,7 @@ namespace Geometry
 
       if ( pElem->hasAttribute("rot-end") ) 
       {
-        rot_end = atof((pElem->getAttribute("rot-end")).c_str());
+        double rot_end = atof((pElem->getAttribute("rot-end")).c_str());
         along_rot = true;
         step = (rot_end - rot) / static_cast<double>(n_elements-1);
         nAlong++;
@@ -2731,21 +2672,18 @@ namespace Geometry
     setLocation(ass, pLocElem, m_angleConvertConst);
 
 
-    NodeList* pNL = pType->getElementsByTagName("location");
+    Poco::AutoPtr<NodeList> pNL = pType->getElementsByTagName("location");
     if ( pNL->length() == 0 )
     {
-      pNL->release();
       return pType->getAttribute("name");
     }
     else if ( pNL->length() == 1 )
     {
       Element* pElem = static_cast<Element*>(pNL->item(0));
-      pNL->release();
       return getShapeCoorSysComp(ass, pElem, getTypeElement, endAssembly);
     }
     else
     {
-      pNL->release();
       throw Exception::InstrumentDefinitionError( std::string("When using <combine-components-into-one-shape> ")
           + " the containing component elements are not allowed to contain multiple nested components. See www.mantidproject.org/IDF." );
     }

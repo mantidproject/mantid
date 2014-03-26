@@ -98,8 +98,8 @@ double ScaleTransformation::invXForm(double p, double p1, double p2, double s1, 
 
 double ScaleTransformation::xForm(double s, double s1, double s2, double p1, double p2) const
 {
-  double maxScreenCoord = 1e4;
   if ((d_engine->type() != ScaleTransformation::Linear) && s <= 0.0){
+          double maxScreenCoord = 1e4;
           if (p1 < p2){
                   if (d_engine->testAttribute(QwtScaleEngine::Inverted))
                           return maxScreenCoord;

@@ -68,6 +68,8 @@ namespace MantidQt
         aliasList.insert("Homer");
         return aliasList;
       }
+      // This interface's categories.
+      static QString categoryInfo() { return "Indirect;Direct"; }
 
     private slots:
       void helpClicked();

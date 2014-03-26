@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IFunction.h"
 
 namespace Mantid
 {
@@ -109,6 +110,10 @@ namespace Mantid
 
       /// Get a workspace
       InputData getWorkspace(const InputData& data);
+
+      /// Set any WorkspaceIndex attributes in the fitting function
+      void setWorkspaceIndexAttribute(API::IFunction_sptr fun, int wsIndex) const;
+
       /// Create a list of input workspace names
       std::vector<InputData> makeNames()const;
     };

@@ -1,17 +1,15 @@
 #include "MantidAPI/ISplittersWorkspace.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
 #include <boost/python/class.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_internal_reference.hpp>
 
-using Mantid::API::ISplittersWorkspace;
-using Mantid::API::ITableWorkspace;
-using Mantid::Kernel::DataItem_sptr;
+using namespace Mantid::API;
 using namespace boost::python;
 
 void export_IPeaksWorkspace()
 {
-  REGISTER_SHARED_PTR_TO_PYTHON(ISplittersWorkspace);
+  register_ptr_to_python<boost::shared_ptr<ISplittersWorkspace>>();
 
   // ISplittersWorkspace class
   class_< ISplittersWorkspace, bases<ITableWorkspace>, boost::noncopyable >("ISplittersWorkspace", no_init)

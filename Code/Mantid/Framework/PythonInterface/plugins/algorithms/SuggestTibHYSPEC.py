@@ -22,11 +22,13 @@ class SuggestTibHYSPEC(PythonAlgorithm):
         return "SuggestTibHYSPEC"
     
     def PyInit(self):
+        self.setWikiSummary("Suggest possible time independent background range for HYSPEC.")
+        self.setOptionalMessage("Suggest possible time independent background range for HYSPEC.")
         """ Declare properties
         """
         val=mantid.kernel.FloatBoundedValidator()
         val.setBounds(3,100) #reasonable incident nergy range for HYSPEC
-        self.declareProperty("IncidentEnergy",0.,val,"Incident energy")
+        self.declareProperty("IncidentEnergy",0.,val,"Incident energy (3 to 100 meV)")
         self.declareProperty("TibMin",0.,Direction.Output)        
         self.declareProperty("TibMax",0.,Direction.Output)  
         return

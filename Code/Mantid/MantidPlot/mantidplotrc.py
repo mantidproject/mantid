@@ -44,7 +44,10 @@ if __name__ == '__main__':
                 obj = obj._getHeldObject()
             attrs = dir(obj)
             for att in attrs:
-                fattr = getattr(obj,att)
+                try:
+                    fattr = getattr(obj,att)
+                except Exception:
+                    continue # not much we do if not even calling it causes an exception
                 if att.startswith('_'): 
                     continue
                 if inspect.isfunction(fattr) or inspect.ismethod(fattr) or \

@@ -37,14 +37,7 @@ public:
     auto inputWS = WorkspaceCreationHelper::Create2DWorkspace123(10,10);
     double factor = 2.5;
     auto result = runScaleX(inputWS, "Multiply", factor);
-
-    MatrixWorkspace::const_iterator inIt(*inputWS);
-    for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
-    {
-      TS_ASSERT_EQUALS( it->X(), 2.5*inIt->X() );
-      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
-      TS_ASSERT_EQUALS( it->E(), inIt->E() );
-    }
+    testScaleFactorApplied(inputWS, result, factor, true); //multiply=true
   }
 
   void testAddOnWS2D()
@@ -55,14 +48,8 @@ public:
     auto inputWS = WorkspaceCreationHelper::Create2DWorkspace123(10,10);
     double factor = 2.5;
     auto result = runScaleX(inputWS, "Add", factor);
+    testScaleFactorApplied(inputWS, result, factor, false); //multiply=false
 
-    MatrixWorkspace::const_iterator inIt(*inputWS);
-    for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
-    {
-      TS_ASSERT_EQUALS( it->X(), 2.5 + inIt->X() );
-      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
-      TS_ASSERT_EQUALS( it->E(), inIt->E() );
-    }
   }
 
   void testMulitplyOnEvents()
@@ -76,16 +63,8 @@ public:
     auto inputWS = WorkspaceCreationHelper::CreateEventWorkspace2(10,10);
     double factor(2.5);
     auto result = runScaleX(inputWS, "Multiply", factor);
-
     TS_ASSERT_EQUALS("EventWorkspace", result->id());
-
-    MatrixWorkspace::const_iterator inIt(*inputWS);
-    for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
-    {
-      TS_ASSERT_EQUALS( it->X(), 2.5*inIt->X() );
-      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
-      TS_ASSERT_EQUALS( it->E(), inIt->E() );
-    }
+    testScaleFactorApplied(inputWS, result, factor, true); //multiply=true
   }
 
   void testAddOnEvents()
@@ -99,16 +78,9 @@ public:
     auto inputWS = WorkspaceCreationHelper::CreateEventWorkspace2(10,10);
     double factor(2.5);
     auto result = runScaleX(inputWS, "Add", factor);
-
     TS_ASSERT_EQUALS("EventWorkspace", result->id());
+    testScaleFactorApplied(inputWS, result, factor, false); //multiply=false
 
-    MatrixWorkspace::const_iterator inIt(*inputWS);
-    for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
-    {
-      TS_ASSERT_EQUALS( it->X(), 2.5 + inIt->X() );
-      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
-      TS_ASSERT_EQUALS( it->E(), inIt->E() );
-    }
   }
 
 
@@ -215,14 +187,7 @@ public:
     double algFactor(2.0);
     bool combine(true);
     auto result = runScaleX(inputWS, "Multiply", algFactor, parname, combine);
-
-    MatrixWorkspace::const_iterator inIt(*inputWS);
-    for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
-    {
-      TS_ASSERT_EQUALS( it->X(), 20.0*inIt->X() );
-      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
-      TS_ASSERT_EQUALS( it->E(), inIt->E() );
-    }
+    testScaleFactorApplied(inputWS, result, algFactor*instFactor, true); //multiply=true
 
   }
 
@@ -241,15 +206,7 @@ public:
     double algFactor(2.0);
     bool combine(true);
     auto result = runScaleX(inputWS, "Add", algFactor, parname, combine);
-
-    MatrixWorkspace::const_iterator inIt(*inputWS);
-    for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
-    {
-      TS_ASSERT_EQUALS( it->X(), 12.0 + inIt->X() );
-      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
-      TS_ASSERT_EQUALS( it->E(), inIt->E() );
-    }
-
+    testScaleFactorApplied(inputWS, result, algFactor+instFactor, false); //multiply=true
   }
 
 
@@ -322,6 +279,22 @@ public:
       return scale.getProperty("OutputWorkspace");
     }
 
+    void testScaleFactorApplied(const Mantid::API::MatrixWorkspace_const_sptr & inputWS,
+                                const Mantid::API::MatrixWorkspace_const_sptr & outputWS,
+                                double factor, bool multiply)
+    {
+      const size_t xsize = outputWS->blocksize();
+      for(size_t i = 0; i < outputWS->getNumberHistograms(); ++i)
+      {
+        for(size_t j = 0; j < xsize; ++j)
+        {
+          double resultX = (multiply) ? factor*inputWS->readX(i)[j] : factor + inputWS->readX(i)[j];
+          TS_ASSERT_DELTA(outputWS->readX(i)[j], resultX, 1e-12);
+          TS_ASSERT_EQUALS(outputWS->readY(i)[j], inputWS->readY(i)[j]);
+          TS_ASSERT_EQUALS(outputWS->readE(i)[j], inputWS->readE(i)[j]);
+        }
+      }
+    }
 };
 
 #endif /*SCALEXTEST_H_*/

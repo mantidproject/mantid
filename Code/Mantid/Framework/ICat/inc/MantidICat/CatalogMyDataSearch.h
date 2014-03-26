@@ -1,5 +1,5 @@
-#ifndef MANTID_ICAT_CMYDATASEARCH_H_
-#define MANTID_ICAT_CMYDATASEARCH_H_
+#ifndef MANTID_ICAT_CATALOGMYDATASEARCH_H_
+#define MANTID_ICAT_CATALOGMYDATASEARCH_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -9,13 +9,12 @@ namespace Mantid
   namespace ICat
   {
 
-    /** CatalogMyDataSearch is a class responsible for searching investigations of the logged in user.
-     * This algorithm does Icat search and returns the investigations record
+    /**
+    This algorithm obtains all of the information for the investigations the logged in user is an investigator of.
 
     Required Properties:
     <UL>
-    <LI>  OutputWorkspace - name of the OutputWorkspace which contains myinvestigations search
-    <LI>  isValid         - Boolean option used to check the validity of login session
+     <LI>  OutputWorkspace - name of the OutputWorkspace which contains my investigations search
     </UL>
 
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
@@ -47,15 +46,14 @@ namespace Mantid
       ///constructor
       CatalogMyDataSearch():API::Algorithm(){}
       ///destructor
-      ~CatalogMyDataSearch()
-      {
-      }
+      ~CatalogMyDataSearch() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogMyDataSearch"; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Catalog"; }
+
     private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
@@ -63,9 +61,7 @@ namespace Mantid
       void init();
       /// Overwrites Algorithm exec method
       void exec();
-
     };
-
   }
 }
 

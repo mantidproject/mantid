@@ -53,7 +53,7 @@ namespace Mantid
         qz(qZ),
         deltaE(dE) {}
       ///
-      const double qx, qy, qz, deltaE;
+      double qx, qy, qz, deltaE;
     };
 
     /**
@@ -126,6 +126,8 @@ namespace Mantid
       void setNThreads(int nthreads);
       /// Setup the random number generator based on the given type
       void setupRandomNumberGenerator();
+      /// Delete random number generator object(s)
+      void deleteRandomNumberGenerator();
 
       /// Required by the interface. Does nothing
       void function(const Mantid::API::FunctionDomain&, Mantid::API::FunctionValues&) const {}

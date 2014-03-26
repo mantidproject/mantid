@@ -147,8 +147,11 @@ class LoadData(ReductionStep):
             else:
                 ## Extract Monitor Spectrum
                 ExtractSingleSpectrum(InputWorkspace=ws,OutputWorkspace= ws+'_mon',WorkspaceIndex= self._monitor_index)
-                ## Crop the workspace to remove uninteresting detectors
 
+                if self._detector_range_start < 0 or self._detector_range_end > mtd[ws].getNumberHistograms():
+                    raise ValueError("Range %d - %d is not a valid detector range." % (self._detector_range_start, self._detector_range_end))
+
+                ## Crop the workspace to remove uninteresting detectors
                 CropWorkspace(InputWorkspace=ws,OutputWorkspace= ws,
                     StartWorkspaceIndex=self._detector_range_start,
                     EndWorkspaceIndex=self._detector_range_end)
@@ -521,7 +524,10 @@ class HandleMonitor(ReductionStep):
         unwrapped_ws, join = UnwrapMonitor(InputWorkspace=monitor, OutputWorkspace=monitor, LRef=l_ref)
         RemoveBins(InputWorkspace=monitor,OutputWorkspace= monitor,XMin= join-0.001,XMax= join+0.001, 
             Interpolation='Linear')
-        FFTSmooth(InputWorkspace=monitor,OutputWorkspace=monitor,WorkspaceIndex=0)
+        try:
+            FFTSmooth(InputWorkspace=monitor,OutputWorkspace=monitor,WorkspaceIndex=0)
+        except ValueError:
+            raise ValueError("Indirect Energy Conversion does not support uneven bin widths.")
 
     def _get_reference_length(self, ws, index):
         workspace = mtd[ws]

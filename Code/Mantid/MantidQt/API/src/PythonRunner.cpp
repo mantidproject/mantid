@@ -45,7 +45,7 @@ QString PythonRunner::runPythonCode(const QString & code, bool no_output)
   //The file name is only valid when the file is open
   QString tmpstring = tmp_file.fileName();
   tmp_file.close();
-  QString code_to_run = "import sys; sys.stdout = open('" + tmpstring + "', 'w');\n" + code;
+  QString code_to_run = "import sys; sys.stdout = open(\"" + tmpstring + "\", 'w');\n" + code;
   emit runAsPythonScript(code_to_run, true);
 
   //Now get the output

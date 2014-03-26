@@ -72,7 +72,7 @@ void ScriptingLangDialog::updateLangList()
 
 void ScriptingLangDialog::accept()
 {
-  ApplicationWindow *app = (ApplicationWindow*) parent();
+  ApplicationWindow *app = static_cast<ApplicationWindow*>(parent());
   if (app->setScriptingLanguage(langList->currentItem()->text()))
 	close();
 }

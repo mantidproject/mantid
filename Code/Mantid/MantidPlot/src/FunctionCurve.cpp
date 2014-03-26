@@ -247,6 +247,7 @@ void FunctionCurve::loadData(int points)
         for (int i = 0; i<points; i++ ){
           X[i]=xparser.Eval();
           Y[i]=yparser.Eval();
+          //cppcheck-suppress unreadVariable
           par+=step;
         }
       } catch(mu::ParserError &) {

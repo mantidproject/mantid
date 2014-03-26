@@ -40,16 +40,18 @@ There is a python script PlotAsymmetryByLogValue.py which if called in MantidPlo
 #include <iomanip>
 #include <sstream>
 
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Progress.h"
+#include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidAPI/Progress.h"
-#include "MantidAPI/TextAxis.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
@@ -109,9 +111,10 @@ namespace Mantid
     */
     void PlotAsymmetryByLogValue::init()
     {
-      std::string ext(".nxs");
-      declareProperty(new FileProperty("FirstRun","", FileProperty::Load, ext), "The name of the first workspace in the series.");
-      declareProperty(new FileProperty("LastRun","", FileProperty::Load, ext), "The name of the last workspace in the series.");
+      std::string nexusExt(".nxs");
+
+      declareProperty(new FileProperty("FirstRun","", FileProperty::Load, nexusExt), "The name of the first workspace in the series.");
+      declareProperty(new FileProperty("LastRun","", FileProperty::Load, nexusExt), "The name of the last workspace in the series.");
       declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The name of the output workspace containing the resulting asymmetries.");
       declareProperty("LogValue","",boost::make_shared<MandatoryValidator<std::string>>(), "The name of the log values which will be used as the x-axis in the output workspace.");
       declareProperty("Red", 1, "The period number for the 'red' data.");
@@ -129,6 +132,18 @@ namespace Mantid
          "The list of spectra for the forward group. If not specified the following happens. The data will be grouped according to grouping information in the data, if available. The forward will use the first of these groups.");
        declareProperty(new ArrayProperty<int> ("BackwardSpectra"),
          "The list of spectra for the backward group. If not specified the following happens. The data will be grouped according to grouping information in the data, if available. The backward will use the second of these groups.");
+    
+      std::vector<std::string> deadTimeCorrTypes;
+      deadTimeCorrTypes.push_back("None");
+      deadTimeCorrTypes.push_back("FromRunData");
+      deadTimeCorrTypes.push_back("FromSpecifiedFile");
+
+      declareProperty("DeadTimeCorrType", deadTimeCorrTypes[0], 
+        boost::make_shared<StringListValidator>(deadTimeCorrTypes), 
+        "Type of Dead Time Correction to apply.");
+
+      declareProperty(new FileProperty("DeadTimeCorrFile", "", FileProperty::OptionalLoad, nexusExt), 
+        "Custom file with Dead Times. Will be used only if appropriate DeadTimeCorrType is set.");
     }
 
     /** 
@@ -139,8 +154,6 @@ namespace Mantid
       m_forward_list = getProperty("ForwardSpectra");		
       m_backward_list = getProperty("BackwardSpectra");
       m_autogroup = ( m_forward_list.size() == 0 && m_backward_list.size() == 0);
-
-      //double alpha = getProperty("Alpha");
 
       std::string logName = getProperty("LogValue");
 
@@ -199,6 +212,20 @@ namespace Mantid
       }
       outWS->replaceAxis(1,tAxis);
 
+      const std::string dtcType = getPropertyValue("DeadTimeCorrType");
+
+      Workspace_sptr customDeadTimes;
+
+      if ( dtcType == "FromSpecifiedFile" )
+      {
+        IAlgorithm_sptr loadDeadTimes = createChildAlgorithm("LoadNexusProcessed");
+        loadDeadTimes->initialize();
+        loadDeadTimes->setPropertyValue( "Filename", getPropertyValue("DeadTimeCorrFile") );
+        loadDeadTimes->execute();
+
+        customDeadTimes = loadDeadTimes->getProperty("OutputWorkspace");
+      }
+
       Progress progress(this,0,1,ie-is+2);
       for(size_t i=is;i<=ie;i++)
       {
@@ -206,65 +233,117 @@ namespace Mantid
         fnn << std::setw(w) << std::setfill('0') << i ;
         fn << fnBase << fnn.str() << ext;
 
-        // Load a muon nexus file with auto_group set to true
-        IAlgorithm_sptr loadNexus = createChildAlgorithm("LoadMuonNexus");
-        loadNexus->setPropertyValue("Filename", fn.str());
-        loadNexus->setPropertyValue("OutputWorkspace","tmp"+fnn.str());
-        if (m_autogroup)
-          loadNexus->setPropertyValue("AutoGroup","1");
-        loadNexus->execute();
+        IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
+        load->initialize();
+        load->setPropertyValue("Filename", fn.str());
+        load->execute();
 
-        std::string wsProp = "OutputWorkspace";
+        Workspace_sptr loadedWs = load->getProperty("OutputWorkspace");
 
-        DataObjects::Workspace2D_sptr ws_red;
-        DataObjects::Workspace2D_sptr ws_green;
-
-        // Run through the periods of the loaded file and do calculations on the selected ones
-        Workspace_sptr tmp = loadNexus->getProperty(wsProp);
-        WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(tmp);
-        if (!wsGroup)
+        if ( dtcType != "None" )
         {
-          ws_red = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmp);
+          IAlgorithm_sptr applyCorr = createChildAlgorithm("ApplyDeadTimeCorr", -1, -1, false);
+          applyCorr->initialize();
+
+          ScopedWorkspace ws(loadedWs);
+          applyCorr->setPropertyValue("InputWorkspace", ws.name());
+          applyCorr->setPropertyValue("OutputWorkspace", ws.name());
+
+          ScopedWorkspace deadTimes;
+
+          if ( dtcType == "FromSpecifiedFile" )
+          {
+            deadTimes.set(customDeadTimes);
+          }
+          else 
+          {
+            deadTimes.set( load->getProperty("DeadTimeTable") );
+          }
+
+          applyCorr->setPropertyValue( "DeadTimeTable", deadTimes.name() );
+          applyCorr->execute();
+ 
+          // Workspace should've been replaced in the ADS by ApplyDeadTimeCorr, so need to
+          // re-assign it
+          loadedWs = ws.retrieve();
+        }
+
+        if(m_autogroup)
+        {
+          Workspace_sptr loadedDetGrouping = load->getProperty("DetectorGroupingTable");
+
+          if ( ! loadedDetGrouping )
+            throw std::runtime_error("No grouping info in the file.\n\nPlease specify grouping manually");
+
+          // Could be groups of workspaces, so need to work with ADS
+          ScopedWorkspace inWS(loadedWs);
+          ScopedWorkspace grouping(loadedDetGrouping);
+          ScopedWorkspace outWS;
+
+          try
+          {
+            IAlgorithm_sptr applyGrouping = createChildAlgorithm("MuonGroupDetectors", -1, -1, false);
+            applyGrouping->initialize();
+            applyGrouping->setPropertyValue( "InputWorkspace", inWS.name() );
+            applyGrouping->setPropertyValue( "DetectorGroupingTable", grouping.name() );
+            applyGrouping->setPropertyValue( "OutputWorkspace", outWS.name() );
+            applyGrouping->execute();
+
+            loadedWs = outWS.retrieve(); 
+          }
+          catch(...)
+          {
+            throw std::runtime_error("Unable to group detectors.\n\nPlease specify grouping manually.");
+          }
+        }
+
+        WorkspaceGroup_sptr loadedGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
+
+        if (!loadedGroup)
+        {
+          Workspace2D_sptr loadedWs2D = boost::dynamic_pointer_cast<Workspace2D>(loadedWs);
+
           double Y,E; 
-          calcIntAsymmetry(ws_red,Y,E);
+          calcIntAsymmetry(loadedWs2D, Y, E);
           outWS->dataY(0)[i-is] = Y;
-          outWS->dataX(0)[i-is] = getLogValue( *ws_red, logName );
+          outWS->dataX(0)[i-is] = getLogValue(*loadedWs2D, logName);
           outWS->dataE(0)[i-is] = E;
         }
         else
         {
+          DataObjects::Workspace2D_sptr ws_red;
+          DataObjects::Workspace2D_sptr ws_green;
+          
 
-          for( int period = 1; period <= wsGroup->getNumberOfEntries(); ++period )
+          // Run through the periods of the loaded file and do calculations on the selected ones
+          for(int mi = 0; mi < loadedGroup->getNumberOfEntries(); mi++)
           {
-            std::stringstream suffix;
-            suffix << period;
-            wsProp = "OutputWorkspace_" + suffix.str();// form the property name for higher periods
+            Workspace2D_sptr memberWs = 
+              boost::dynamic_pointer_cast<Workspace2D>(loadedGroup->getItem(mi));
+
+            int period = mi + 1;
+
             // Do only one period
             if (green == EMPTY_INT() && period == red)
             {
-              Workspace_sptr tmpff = loadNexus->getProperty(wsProp);
-              ws_red = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmpff);
+              ws_red = memberWs;
               double Y,E; 
               calcIntAsymmetry(ws_red,Y,E);
               outWS->dataY(0)[i-is] = Y;
-              outWS->dataX(0)[i-is] = getLogValue( *ws_red, logName );
+              outWS->dataX(0)[i-is] = getLogValue(*ws_red, logName);
               outWS->dataE(0)[i-is] = E;
             }
             else // red & green
             {
               if (period == red)
-              {
-                Workspace_sptr temp = loadNexus->getProperty(wsProp);
-                ws_red = boost::dynamic_pointer_cast<Workspace2D>(temp);
-              }
+                ws_red = memberWs;
               if (period == green)
-              {
-                Workspace_sptr temp = loadNexus->getProperty(wsProp);
-                ws_green = boost::dynamic_pointer_cast<Workspace2D>(temp);
-              }
+                ws_green = memberWs;
             }
 
           }
+
+
           // red & green claculation
           if (green != EMPTY_INT())
           {
@@ -543,7 +622,6 @@ namespace Mantid
 
         throw std::invalid_argument("Log "+logName+" cannot be converted to a double type.");
     }
-
   } // namespace Algorithm
 } // namespace Mantid
 

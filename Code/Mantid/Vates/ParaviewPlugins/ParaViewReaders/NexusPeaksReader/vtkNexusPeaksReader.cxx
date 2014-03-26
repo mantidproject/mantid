@@ -32,7 +32,8 @@ using Mantid::API::Workspace_sptr;
 using Mantid::API::AnalysisDataService;
 
 vtkNexusPeaksReader::vtkNexusPeaksReader() :
-  m_isSetup(false), m_wsTypeName("")
+  m_isSetup(false), m_wsTypeName(""),
+  m_uintPeakMarkerSize(0.3), m_dimensions(1)
 {
   this->FileName = NULL;
   this->SetNumberOfInputPorts(0);

@@ -7,6 +7,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include <boost/shared_array.hpp>
 #include <cmath>
+#include <vector>
 
 namespace Mantid
 {
@@ -132,6 +133,8 @@ namespace Mantid
 
       /// Add a function.
       size_t addFunction(API::IFunction_sptr f);
+      /// Set up the function for a fit.
+      void setUpForFit();
 
       /// Deletes and zeroes pointer m_resolution forsing function(...) to recalculate the resolution function
       void refreshResolution()const;
@@ -141,13 +144,7 @@ namespace Mantid
 
     private:
       /// To keep the Fourier transform of the resolution function (divided by the step in xValues)
-      mutable double* m_resolution;
-      /// To keep the size of m_resolution
-      mutable size_t m_resolutionSize;
-      /// Temporary data storage used in functionDeriv
-      mutable boost::shared_array<double> m_tmp;
-      /// Temporary data storage used in functionDeriv
-      mutable boost::shared_array<double> m_tmp1;
+      mutable std::vector<double> m_resolution;
     };
 
   } // namespace CurveFitting

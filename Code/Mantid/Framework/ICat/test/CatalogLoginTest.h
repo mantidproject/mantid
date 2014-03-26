@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidICat/CatalogLogin.h"
-#include "MantidICat/Session.h"
 #include "ICatTestHelper.h"
 
 using namespace Mantid::ICat;
@@ -26,9 +25,6 @@ public:
 	}
 	void testLogin()
 	{
-		/*std::string s;
-		std::getline(std::cin,s);*/
-		Session::Instance();
 		CatalogLogin loginobj;
 
 	   if ( !loginobj.isInitialized() ) loginobj.initialize();
@@ -49,7 +45,6 @@ public:
 	{
 		
 		CatalogLogin loginobj;
-		Session::Instance();
 
 	   if ( !loginobj.isInitialized() ) loginobj.initialize();
 
@@ -64,9 +59,6 @@ public:
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		//should fail
 		TS_ASSERT( !loginobj.isExecuted() );
-		//empty sessionid
-		TS_ASSERT(!Session::Instance().getSessionId().empty());
-		
 	}
 
 		

@@ -1,19 +1,33 @@
 #ifndef IMD_NODE_H_
 #define IMD_NODE_H_
 
-#include <vector>
 #include <algorithm>
-#include "MantidKernel/ThreadScheduler.h"
-#include "MantidAPI/IBoxControllerIO.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidAPI/BoxController.h"
-#include "MantidAPI/CoordTransform.h"
+#include <string>
+#include <vector>
+#include "MantidKernel/VMD.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 namespace Mantid
 {
+namespace Kernel
+{
+  class ISaveable;
+  class ThreadScheduler;
+}
+
+namespace Geometry
+{
+  template <typename T>
+  class MDDimensionExtents;
+  class MDImplicitFunction;
+}
+
 namespace API
 {
+
+class BoxController;
+class IBoxControllerIO;
+class CoordTransform;
 
 class IMDNode 
 {
@@ -177,6 +191,7 @@ public:
      * @param length :: length of cylinder below which to integrate
      * @param signal [out] :: set to the integrated signal
      * @param errorSquared [out] :: set to the integrated squared error.
+     * @param signal_fit [out] :: array of values for the fit.
       */
     virtual void integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared, std::vector<signal_t> & signal_fit) const = 0;
 
@@ -209,6 +224,8 @@ public:
     virtual coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const=0;
     virtual void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)=0;
 
+    // to avoid casting (which need also the number of dimensions) method say if Node is a box. if not, it is gridbox
+    virtual bool isBox()const=0;
   // ----------------------------- Helper Methods --------------------------------------------------------
   //-----------------------------------------------------------------------------------------------
   /** Helper method for sorting MDBoxBasees by file position.

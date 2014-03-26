@@ -1,5 +1,6 @@
 from mantid.simpleapi import *
 from mantid import config, logger
+from IndirectImport import import_mantidplot
 import sys, platform, os.path, math, datetime, re
     
 def StartTime(prog):
@@ -71,6 +72,15 @@ def getEfixed(workspace, detIndex=0):
     inst = mtd[workspace].getInstrument()
     return inst.getNumberParameter("efixed-val")[0]
 
+# Get the default save directory and check it's valid
+def getDefaultWorkingDirectory():
+    workdir = config['defaultsave.directory']
+    
+    if not os.path.isdir(workdir):
+        raise IOError("Default save directory is not a valid path!")
+
+    return workdir
+
 def getRunTitle(workspace):
     ws = mtd[workspace]
     title = ws.getRun()['run_title'].value.strip()
@@ -102,12 +112,10 @@ def createQaxis(inputWS):
         msg = 'Creating Axis based on Detector Q value: '
         if not axis.isNumeric():
             msg += 'Input workspace must have either spectra or numeric axis.'
-            logger.notice(msg)
-            sys.exit(msg)
+            raise ValueError(msg)
         if ( axis.getUnit().unitID() != 'MomentumTransfer' ):
             msg += 'Input must have axis values of Q'
-            logger.notice(msg)
-            sys.exit(msg)
+            raise ValueError(msg)
         for i in range(0, nHist):
             result.append(float(axis.label(i)))
     return result
@@ -172,13 +180,9 @@ def CheckAnalysers(in1WS,in2WS,Verbose):
     a2 = ws2.getInstrument().getStringParameter('analyser')[0]
     r2 = ws2.getInstrument().getStringParameter('reflection')[0]
     if a1 != a2:
-        error = 'Workspace '+in1WS+' and '+in2WS+' have different analysers'
-        logger.notice('ERROR *** '+error)
-        sys.exit(error)
+        raise ValueError('Workspace '+in1WS+' and '+in2WS+' have different analysers')
     elif r1 != r2:
-        error = 'Workspace '+in1WS+' and '+in2WS+' have different reflections'
-        logger.notice('ERROR *** '+error)
-        sys.exit(error)
+        raise ValueError('Workspace '+in1WS+' and '+in2WS+' have different reflections')
     else:
         if Verbose:
             logger.notice('Analyser is '+a1+r1)
@@ -186,15 +190,11 @@ def CheckAnalysers(in1WS,in2WS,Verbose):
 def CheckHistZero(inWS):
     nhist = mtd[inWS].getNumberHistograms()       # no. of hist/groups in WS
     if nhist == 0:
-        error = 'Workspace '+inWS+' has NO histograms'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError('Workspace '+inWS+' has NO histograms')
     Xin = mtd[inWS].readX(0)
     ntc = len(Xin)-1						# no. points from length of x array
     if ntc == 0:
-        error = 'Workspace '+inWS+' has NO points'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError('Workspace '+inWS+' has NO points')
     return nhist,ntc
 
 def CheckHistSame(in1WS,name1,in2WS,name2):
@@ -208,65 +208,72 @@ def CheckHistSame(in1WS,name1,in2WS,name2):
         e1 = name1+' ('+in1WS+') histograms (' +str(nhist1) + ')'
         e2 = name2+' ('+in2WS+') histograms (' +str(nhist2) + ')'
         error = e1 + ' not = ' + e2
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError(error)
     elif xlen1 != xlen2:
         e1 = name1+' ('+in1WS+') array length (' +str(xlen1) + ')'
         e2 = name2+' ('+in2WS+') array length (' +str(xlen2) + ')'
         error = e1 + ' not = ' + e2
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError(error)
 
-def CheckXrange(xrange,type):
-    if  not ( ( len(xrange) == 2 ) or ( len(xrange) == 4 ) ):
-        error = type + ' - Range must contain either 2 or 4 numbers'
-        logger.notice(error)
-        sys.exit(error)
-    if math.fabs(xrange[0]) < 1e-5:
-        error = type + ' - input minimum ('+str(xrange[0])+') is Zero'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
-    if math.fabs(xrange[1]) < 1e-5:
-        error = type + ' - input maximum ('+str(xrange[1])+') is Zero'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
-    if xrange[1] < xrange[0]:
-        error = type + ' - input max ('+str(xrange[1])+') < min ('+xrange[0]+')'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
-    if len(xrange) >2:
-        if math.fabs(xrange[2]) < 1e-5:
-            error = type + '2 - input minimum ('+str(xrange[2])+') is Zero'			
-            logger.notice('ERROR *** ' + error)
-            sys.exit(error)
-        if math.fabs(xrange[3]) < 1e-5:
-            error = type + '2 - input maximum ('+str(xrange[3])+') is Zero'			
-            logger.notice('ERROR *** ' + error)
-            sys.exit(error)
-        if xrange[3] < xrange[2]:
-            error = type + '2 - input max ('+str(xrange[3])+') < min ('+xrange[2]+')'			
-            logger.notice('ERROR *** ' + error)
-            sys.exit(error)
+def CheckXrange(x_range,type):
+    if  not ( ( len(x_range) == 2 ) or ( len(x_range) == 4 ) ):
+        raise ValueError(type + ' - Range must contain either 2 or 4 numbers')
+    
+    for lower, upper in zip(x_range[::2], x_range[1::2]):
+        if math.fabs(lower) < 1e-5:
+            raise ValueError(type + ' - input minimum ('+str(lower)+') is Zero')
+        if math.fabs(upper) < 1e-5:
+            raise ValueError(type + ' - input maximum ('+str(upper)+') is Zero')
+        if upper < lower:
+            raise ValueError(type + ' - input max ('+str(upper)+') < min ('+lower+')')
 
 def CheckElimits(erange,Xin):
     nx = len(Xin)-1
+    
     if math.fabs(erange[0]) < 1e-5:
-        error = 'Elimits - input emin ( '+str(erange[0])+' ) is Zero'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError('Elimits - input emin ( '+str(erange[0])+' ) is Zero')
     if erange[0] < Xin[0]:
-        error = 'Elimits - input emin ( '+str(erange[0])+' ) < data emin ( '+str(Xin[0])+' )'		
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError('Elimits - input emin ( '+str(erange[0])+' ) < data emin ( '+str(Xin[0])+' )')
     if math.fabs(erange[1]) < 1e-5:
-        error = 'Elimits - input emax ( '+str(erange[1])+' ) is Zero'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) is Zero')
     if erange[1] > Xin[nx]:
-        error = 'Elimits - input emax ( '+str(erange[1])+' ) > data emax ( '+str(Xin[nx])+' )'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) > data emax ( '+str(Xin[nx])+' )')
     if erange[1] < erange[0]:
-        error = 'Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+erange[0]+' )'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+erange[0]+' )')
+
+def plotSpectra(ws, y_axis_title, indicies=[]):
+    """
+    Plot a selection of spectra given a list of indicies
+
+    @param ws - the workspace to plot
+    @param y_axis_title - label for the y axis
+    @param indicies - list of spectrum indicies to plot
+    """
+    if len(indicies) == 0:
+        num_spectra = mtd[ws].getNumberHistograms()
+        indicies = range(num_spectra)
+
+    try:
+        mp = import_mantidplot()
+        plot = mp.plotSpectrum(ws, indicies, True)
+        layer = plot.activeLayer()
+        layer.setAxisTitle(mp.Layer.Left, y_axis_title)
+    except RuntimeError, e:
+        #User clicked cancel on plot so don't do anything
+        return
+
+def plotParameters(ws, param_names=[]):
+    """
+    Plot a number of spectra given a list of parameter names
+    This searchs for relevent spectra using the text axis label.
+
+    @param ws - the workspace to plot from
+    @param param_names - list of names to search for
+    """
+    if len(param_names) == 0: return
+    num_spectra = mtd[ws].getNumberHistograms()
+    
+    for name in param_names:
+        indicies = [i for i in range(num_spectra) if name in mtd[ws].getAxis(1).label(i)]
+        if len(indicies) > 0: 
+            plotSpectra(ws, name, indicies)

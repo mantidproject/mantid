@@ -53,6 +53,7 @@ public:
   ~MantidDockWidget();
   QString getSelectedWorkspaceName() const;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const;
+  void dropEvent(QDropEvent *de);
 
 public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
@@ -165,6 +166,11 @@ public:
   void logWarningMessage(const std::string&);
   void disableNodes(bool);
   void sort();
+  void dropEvent(QDropEvent *de);
+
+protected:
+  void dragMoveEvent(QDragMoveEvent *de);
+  void dragEnterEvent(QDragEnterEvent *de);
 
 private:
   QPoint m_dragStartPosition;
@@ -173,7 +179,7 @@ private:
   Mantid::API::AnalysisDataServiceImpl & m_ads;
   static Mantid::Kernel::Logger& logObject;
   MantidItemSortScheme m_sortScheme;
-  Qt::SortOrder m_sortOrder;
+  Qt::SortOrder m_sortOrder;  
 };
 
 /**A class derived from QTreeWidgetItem, to accomodate
@@ -187,6 +193,7 @@ public:
   void disableIfNode(bool);
   void setSortPos(int o) {m_sortPos = o;}
   int getSortPos() const {return m_sortPos;}
+
 
 private:
   bool operator<(const QTreeWidgetItem &other) const;

@@ -117,12 +117,11 @@ std::string Goniometer::axesInfo()
         }
         else
         {
-            double angle;
             info<<"Name \t Direction \t Sense \t Angle \n";
             for(it=motors.begin(); it<motors.end(); ++it)
             {
                 sense=((*it).sense==CCW)?strCCW:strCW;
-                angle=((*it).angleunit==angDegrees)?((*it).angle): ((*it).angle*rad2deg);
+                double angle=((*it).angleunit==angDegrees)?((*it).angle): ((*it).angle*rad2deg);
                 info<<(*it).name<<"\t"<<(*it).rotationaxis<<"\t"<<sense<<"\t"<<angle<<std::endl;
             }
         }
@@ -291,10 +290,9 @@ void Goniometer::recalculateR()
   std::vector<double> elements;
   Quat QGlobal,QCurrent;
 
-  double ang;
   for(it=motors.begin(); it<motors.end(); ++it)
   {
-    ang=(*it).angle;
+    double ang=(*it).angle;
     if((*it).angleunit==angRadians) ang*=rad2deg;
     QCurrent=Quat(ang,(*it).rotationaxis);
     QGlobal*=QCurrent;

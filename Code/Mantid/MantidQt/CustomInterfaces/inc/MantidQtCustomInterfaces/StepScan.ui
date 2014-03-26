@@ -21,6 +21,9 @@
        <property name="label" stdset="0">
         <string>Data source</string>
        </property>
+       <property name="multipleFiles" stdset="0">
+        <bool>true</bool>
+       </property>
        <property name="optional" stdset="0">
         <bool>true</bool>
        </property>
@@ -174,6 +177,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="statusText">
+       <property name="text">
+        <string notr="true"/>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::NoTextInteraction</set>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -248,7 +261,9 @@
            <enum>QComboBox::AdjustToContents</enum>
           </property>
           <property name="WorkspaceTypes">
-           <stringlist/>
+           <stringlist>
+            <string>MaskWorkspace</string>
+           </stringlist>
           </property>
           <property name="ShowHidden" stdset="0">
            <bool>false</bool>

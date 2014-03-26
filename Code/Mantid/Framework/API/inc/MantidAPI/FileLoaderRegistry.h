@@ -80,6 +80,9 @@ namespace Mantid
         m_log.debug() << "Registered '" << nameVersion.first << "' version '" << nameVersion.second << "' as file loader\n";
       }
 
+      /// Unsubscribe a named algorithm and version from the loader registration
+      void unsubscribe(const std::string &name, const int version = -1);
+
       /// Returns the name of an Algorithm that can load the given filename
       const boost::shared_ptr<IAlgorithm> chooseLoader(const std::string &filename) const;
       /// Checks whether the given algorithm can load the file
@@ -120,6 +123,10 @@ namespace Mantid
           }
         }
       };
+
+      /// Remove a named algorithm & version from the given map
+      void removeAlgorithm(const std::string & name, const int version, 
+                           std::multimap<std::string,int> & typedLoaders);
 
       /// The list of names. The index pointed to by LoaderFormat defines a set for that format
       std::vector<std::multimap<std::string,int> > m_names;

@@ -1,3 +1,13 @@
+"""*WIKI* 
+
+Calculates Multiple Scattering based on the Monte Carlo program MINUS. It calculates <math>S(Q,w)</math> from specified functions (such as those used in JumpFit) and supports both
+Flat and Cylindrical geometries. More information on the multiple scattering can be procedure can be found in the [http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf modes manual].
+
+==== References ====
+# M W Johnson, AERE Report R7682 (1974)
+
+*WIKI*"""
+
 # Algorithm to start Bayes programs
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory
@@ -8,6 +18,9 @@ class MuscatFunc(PythonAlgorithm):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
 	def PyInit(self):
+		self.setOptionalMessage("Calculates multiple scattering using S(Q,w) from specified functions")
+		self.setWikiSummary("Calculates multiple scattering using S(Q,w) from specified functions")
+
 		self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
 		self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']))
 		self.declareProperty(name='Geom',defaultValue='Flat',validator=StringListValidator(['Flat','Cyl']), doc='')

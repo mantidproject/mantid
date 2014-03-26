@@ -52,7 +52,7 @@ bool ScalePicker::eventFilter(QObject *object, QEvent *e)
 	if (!object->inherits("QwtScaleWidget"))
 		return QObject::eventFilter(object, e);
 
-	QwtScaleWidget *scale = (QwtScaleWidget *)object;
+	QwtScaleWidget *scale = static_cast<QwtScaleWidget *>(object);
 	d_current_axis = scale;
 
 	if ( e->type() == QEvent::MouseButtonDblClick ){
@@ -139,7 +139,7 @@ return rect;
 void ScalePicker::refresh()
 {
     for ( uint i = 0; i < QwtPlot::axisCnt; i++ ){
-        QwtScaleWidget *scale = (QwtScaleWidget *)plot()->axisWidget(i);
+        QwtScaleWidget *scale = static_cast<QwtScaleWidget *>(plot()->axisWidget(i));
         if ( scale )
             scale->installEventFilter(this);
     }
@@ -216,7 +216,7 @@ void ScalePicker::selectTitle(QwtScaleWidget *scale, bool select)
     if (d_title_selected == select && d_selected_axis == scale)
         return;
 
-    Graph *g = (Graph *)plot()->parent();
+    Graph *g = static_cast<Graph *>(plot()->parent());
     g->deselect();
 
     d_title_selected = select;
@@ -241,7 +241,7 @@ void ScalePicker::selectLabels(QwtScaleWidget *scale, bool select)
     if (d_labels_selected == select && d_selected_axis == scale)
         return;
 
-	Graph *g = (Graph *)plot()->parent();
+	Graph *g = static_cast<Graph *>(plot()->parent());
     g->deselect();
 
 	d_labels_selected = select;
@@ -250,7 +250,7 @@ void ScalePicker::selectLabels(QwtScaleWidget *scale, bool select)
 
 	g->notifyFontChange(scale->font());
 
-	ScaleDraw *sc_draw = (ScaleDraw *)scale->scaleDraw();
+	ScaleDraw *sc_draw = static_cast<ScaleDraw *>(scale->scaleDraw());
 	sc_draw->setSelected(select);
 	scale->repaint();
 }
@@ -267,7 +267,7 @@ void ScalePicker::deselect()
     title.setBackgroundPen(QPen(Qt::NoPen));
     d_selected_axis->setTitle(title);
 
-	ScaleDraw *sc_draw = (ScaleDraw *)d_selected_axis->scaleDraw();
+	ScaleDraw *sc_draw = static_cast<ScaleDraw *>(d_selected_axis->scaleDraw());
 	sc_draw->setSelected(false);
 
     d_selected_axis->repaint();

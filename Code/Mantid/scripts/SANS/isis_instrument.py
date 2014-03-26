@@ -1,11 +1,88 @@
-from reduction import instrument
 import math
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, Workspace
 from mantid.kernel import Logger
+import SANSUtility as su
+import re
 sanslog = Logger.get("SANS")
 
 import sys
+
+class BaseInstrument(object):
+    def __init__(self, instr_filen=None):
+        """
+            Reads the instrument definition xml file
+            @param instr_filen: the name of the instrument definition file to read 
+            @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
+        """
+        if instr_filen is None:
+            instr_filen = self._NAME+'_Definition.xml'
+            
+        config = ConfigService.Instance()
+        self._definition_file = config["instrumentDefinition.directory"]+'/'+instr_filen
+                
+        self.definition = self.load_instrument() 
+
+    def load_instrument(self):
+        """
+            Runs LoadInstrument get the parameters for the instrument
+            @return the instrument parameter data
+        """
+        wrksp = '__'+self._NAME+'instrument_definition'
+        if not AnalysisDataService.doesExist(wrksp):
+          CreateWorkspace(OutputWorkspace=wrksp,DataX="1",DataY="1",DataE="1")
+          #read the information about the instrument that stored in its xml
+          LoadInstrument(Workspace=wrksp, InstrumentName=self._NAME)
+
+        return AnalysisDataService.retrieve(wrksp).getInstrument() 
+
+    def get_default_beam_center(self):
+        """
+            Returns the default beam center position, or the pixel location
+            of real-space coordinates (0,0).
+        """
+        return [0, 0]
+
+    def name(self):
+        """
+            Return the name of the instrument
+        """
+        return self._NAME
+    
+    def view(self, workspace_name = None):
+        """
+            Opens Mantidplot's InstrumentView displaying the current instrument. This
+            empty instrument created contained in the named workspace (a default name
+            is generated if this the argument is left blank) unless the workspace already
+            exists and then it's contents are displayed
+            @param workspace_name: the name of the workspace to create and/or display
+        """
+        if workspace_name is None:
+            workspace_name = self._NAME+'_instrument_view'
+            self.load_empty(workspace_name)
+        elif not AnalysisDataService.doesExist(workspace_name):
+            self.load_empty(workspace_name)
+
+        import mantidplot
+        instrument_win = mantidplot.getInstrumentView(workspace_name)
+        instrument_win.show()
+
+        return workspace_name
+
+    def load_empty(self, workspace_name = None):
+        """
+            Loads the instrument definition file into a workspace with the given name.
+            If no name is given a hidden workspace is used
+            @param workspace_name: the name of the workspace to create and/or display
+            @return the name of the workspace that was created
+        """
+        if workspace_name is None:
+            workspace_name = '__'+self._NAME+'_empty'
+
+        LoadEmptyInstrument(Filename=self._definition_file, OutputWorkspace=workspace_name)
+
+        return workspace_name
+   
 
 class DetectorBank:
     class _DectShape:
@@ -327,14 +404,14 @@ class DetectorBank:
                              %(self.name(), input_name,self.get_first_spec_num(),self.last_spec_num) 
                              + str(sys.exc_info()))
 
-class ISISInstrument(instrument.Instrument):
+class ISISInstrument(BaseInstrument):
     def __init__(self, filename=None):
         """
             Reads the instrument definition xml file
             @param filename: the name of the instrument definition file to read 
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
-        instrument.Instrument.__init__(self, instr_filen=filename)
+        super(ISISInstrument, self).__init__(instr_filen=filename)
 
         #the spectrum with this number is used to normalize the workspace data
         self._incid_monitor = int(self.definition.getNumberParameter(
@@ -398,7 +475,8 @@ class ISISInstrument(instrument.Instrument):
         self._back_end = None 
         #if the user moves a monitor to this z coordinate (with MON/LENGTH ...) this will be recorded here. These are overridden lines like TRANS/TRANSPEC=4/SHIFT=-100
         self.monitor_zs = {}
-
+        # Used when new calibration required.
+        self._newCalibrationWS = None
 
     def get_incident_mon(self):
         """
@@ -555,7 +633,7 @@ class ISISInstrument(instrument.Instrument):
             self._back_start = None
             self._back_end = None
 
-    def move_components(self, ws):
+    def move_all_components(self, ws):
         """
             Move the sample object to the location set in the logs or user settings file
             @param ws: the workspace containing the sample to move
@@ -573,10 +651,53 @@ class ISISInstrument(instrument.Instrument):
             MoveInstrumentComponent(Workspace=ws,ComponentName= component, Z = offset,
                                     RelativePosition=True)
 
+    def move_components(self, ws, beamX, beamY):
+        """Define how to move the bank to position beamX and beamY must be implemented"""
+        raise RuntimeError("Not Implemented")
+
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
         raise RuntimeError("Not Implemented")
 
+    def on_load_sample(self, ws_name, beamcentre, isSample):
+        """It will be called just after loading the workspace for sample and can
+        
+        It configures the instrument for the specific run of the workspace for handle historical changes in the instrument. 
+
+        It centralizes the detector bank to teh beamcentre (tuple of two values)        
+        """
+        ws_ref = mtd[str(ws_name)]
+        try:
+            run_num = ws_ref.getRun().getLogData('run_number').value
+        except:                
+            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+
+        if isSample:
+            self.set_up_for_run(run_num)
+        
+        if self._newCalibrationWS:
+            self.changeCalibration(ws_name)
+
+        # centralize the bank to the centre
+        self.move_components(ws_name, beamcentre[0], beamcentre[1])
+
+    def load_transmission_inst(self, ws_trans, ws_direct, beamcentre):
+        """
+        Called on loading of transmissions
+        """
+        pass
+
+    def changeCalibration(self, ws_name):
+        calib = mtd[self._newCalibrationWS]
+        sanslog.notice("Applying new calibration for the detectors from " + str(calib.name()))
+        CopyInstrumentParameters(calib, ws_name)
+
+    def setCalibrationWorkspace(self, ws_reference):
+        assert(isinstance(ws_reference, Workspace))
+        # we do deep copy of singleton - to be removed in 8470
+        # this forces us to have 'copyable' objects. 
+        self._newCalibrationWS = str(ws_reference)
+              
 
 
 class LOQ(ISISInstrument):
@@ -608,7 +729,7 @@ class LOQ(ISISInstrument):
             @param ybeam: y-position of the beam
             @return: the locations of (in the new coordinates) beam center, center of detector bank
         """
-        super(LOQ, self).move_components(ws)
+        self.move_all_components(ws)
         
         xshift = (317.5/1000.) - xbeam
         yshift = (317.5/1000.) - ybeam
@@ -640,19 +761,14 @@ class LOQ(ISISInstrument):
         second.set_orien('Horizontal')
         second.place_after(first)
 
-    def load_transmission_inst(self, workspace):
+    def load_transmission_inst(self, ws_trans, ws_direct, beamcentre):
         """
             Loads information about the setup used for LOQ transmission runs
         """
         trans_definition_file = config.getString('instrumentDefinition.directory')
         trans_definition_file += '/'+self._NAME+'_trans_Definition.xml'
-        LoadInstrument(Workspace=workspace,Filename= trans_definition_file, RewriteSpectraMap=False)
-
-    def check_can_logs(self):
-        """
-            This function does nothing for LOQ
-        """
-        pass
+        LoadInstrument(Workspace=ws_trans,Filename= trans_definition_file, RewriteSpectraMap=False)
+        LoadInstrument(Workspace=ws_direct, Filename = trans_definition_file, RewriteSpectraMap=False)
 
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
@@ -715,12 +831,16 @@ class SANS2D(ISISInstrument):
             #this is the default case
             first.set_first_spec_num(9)
             first.set_orien('Horizontal')
-            second.set_orien('Horizontal')
+            # empty instrument number spectra differently.
+            if base_runno == 'emptyInstrument':
+                second.set_orien('HorizontalFlipped')
+            else:
+                second.set_orien('Horizontal')
 
         #as spectrum numbers of the first detector have changed we'll move those in the second too  
         second.place_after(first)
 
-    def _getDetValues(self, ws_name):
+    def getDetValues(self, ws_name):
         """
         Retrive the values of Front_Det_Z, Front_Det_X, Front_Det_Rot, Rear_Det_Z and Rear_Det_X from
         the workspace. If it does not find the value at the run info, it takes as default value the
@@ -739,7 +859,9 @@ class SANS2D(ISISInstrument):
         for name in ('Front_Det_Z', 'Front_Det_X', 'Front_Det_Rot',
                      'Rear_Det_Z','Rear_Det_X'):
             try:
-                var = run_info.get(name).value[0]
+                var = run_info.get(name).value
+                if hasattr(var, '__iter__'):
+                    var = var[-1]
                 values[ind] = float(var)
             except:
                 pass # ignore, because we do have a default value            
@@ -761,7 +883,7 @@ class SANS2D(ISISInstrument):
         frontDet = self.getDetector('front')
         rearDet = self.getDetector('rear')
 
-        FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X = self._getDetValues(ws)
+        FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X = self.getDetValues(ws)
 
         # Deal with front detector
         # 9/1/2  this all dates to Richard Heenan & Russell Taylor's original python development for SANS2d
@@ -801,7 +923,7 @@ class SANS2D(ISISInstrument):
         MoveInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")    
             
             
-        super(SANS2D, self).move_components(ws)
+        self.move_all_components(ws)
         
         #this implements the TRANS/TRANSPEC=4/SHIFT=... line, this overrides any other monitor move
         if self.monitor_4_offset:
@@ -840,6 +962,7 @@ class SANS2D(ISISInstrument):
             @return the values that were read as a dictionary
         """
         self._marked_dets = []
+        wksp = su.getWorkspaceReference(wksp)
         #assume complete log information is stored in the first entry, it isn't stored in the group workspace itself
         if isinstance(wksp, WorkspaceGroup):
             wksp = wksp[0]
@@ -962,7 +1085,135 @@ class SANS2D(ISISInstrument):
     def get_marked_dets(self):
         return self._marked_dets
     
-    def load_transmission_inst(self, workspace):
+    def load_transmission_inst(self, ws_trans, ws_direct, beamcentre):
+        """
+        SANS2D requires the centralize the detectors of the transmission
+        as well as the sample and can.
+        """
+        self.move_components(ws_trans, beamcentre[0], beamcentre[1])
+        if ws_trans != ws_direct:
+            self.move_components(ws_direct, beamcentre[0], beamcentre[1])
+
+
+    def cur_detector_position(self, ws_name):
+        """Return the position of the center of the detector bank"""
+        ws = mtd[ws_name]
+        pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
+        
+        return [-pos.getX(), -pos.getY()]
+
+    def on_load_sample(self, ws_name, beamcentre, isSample):
+        """For SANS2D in addition of the operations defines in on_load_sample of ISISInstrument
+        it has to deal with the log, which defines some offsets for the movement of the 
+        detector bank. 
+        """
+        ws_ref = mtd[str(ws_name)]
+        try:
+            log = self.get_detector_log(ws_ref)
+            if log == "":
+                raise "Invalid log"
+        except: 
+            if isSample:
+                raise RuntimeError('Sample logs cannot be loaded, cannot continue')
+            else: 
+                logger.warning("Can logs could not be loaded, using sample values.")
+
+
+        if isSample:
+            self.apply_detector_logs(log)
+        else:
+            self.check_can_logs(log)
+
+        
+        ISISInstrument.on_load_sample(self, ws_name, beamcentre,  isSample)
+
+
+class LARMOR(ISISInstrument):
+    _NAME = 'LARMOR'
+    WAV_RANGE_MIN = 2.2
+    WAV_RANGE_MAX = 10.0
+    def __init__(self):
+        super(LARMOR,self).__init__('LARMOR_Definition.xml')
+        self.monitor_names = dict()
+
+        for i in range(1,6):
+            self.monitor_names[i] = 'monitor'+str(i)
+            
+    def set_up_for_run(self, base_runno):
+        """
+            Needs to run whenever a sample is loaded
+        """
+        first = self.DETECTORS['low-angle']
+        second = self.DETECTORS['high-angle']
+
+        first.set_orien('Horizontal')
+        first.set_first_spec_num(10)
+        second.set_orien('Horizontal')
+        second.place_after(first)
+
+    def move_components(self, ws, xbeam, ybeam):
+        self.move_all_components(ws)
+
+        detBanch = self.getDetector('rear')
+
+        xshift = -xbeam
+        yshift = -ybeam
+        #zshift = ( detBanch.z_corr)/1000.
+        #zshift -= self.REAR_DET_DEFAULT_SD_M
+        zshift = 0
+        sanslog.notice("Setup move " + str(xshift*1000) + " " + str(yshift*1000) + " " + str(zshift*1000))
+        MoveInstrumentComponent(ws, ComponentName=detBanch.name(), X=xshift, 
+                                Y=yshift, Z=zshift)
+        # beam centre, translation
+        return [0.0, 0.0], [-xbeam, -ybeam]
+
+    def cur_detector_position(self, ws_name):
+        """Return the position of the center of the detector bank"""
+        ws = mtd[ws_name]
+        pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
+        
+        return [-pos.getX(), -pos.getY()]
+
+class LARMOR(ISISInstrument):
+    _NAME = 'LARMOR'
+    WAV_RANGE_MIN = 2.2
+    WAV_RANGE_MAX = 10.0
+    def __init__(self):
+        super(LARMOR,self).__init__('LARMOR_Definition.xml')
+        self.monitor_names = dict()
+
+        for i in range(1,6):
+            self.monitor_names[i] = 'monitor'+str(i)
+            
+    def set_up_for_run(self, base_runno):
+        """
+            Needs to run whenever a sample is loaded
+        """
+        first = self.DETECTORS['low-angle']
+        second = self.DETECTORS['high-angle']
+
+        first.set_orien('Horizontal')
+        first.set_first_spec_num(10)
+        second.set_orien('Horizontal')
+        second.place_after(first)
+
+    def move_components(self, ws, xbeam, ybeam):
+        self.move_all_components(ws)
+        
+        detBanch = self.getDetector('rear')
+
+        xshift = -xbeam
+        yshift = -ybeam
+        #zshift = ( detBanch.z_corr)/1000.
+        #zshift -= self.REAR_DET_DEFAULT_SD_M
+        zshift = 0
+        sanslog.notice("Setup move " + str(xshift*1000) + " " + str(yshift*1000) + " " + str(zshift*1000))
+        MoveInstrumentComponent(ws, ComponentName=detBanch.name(), X=xshift, 
+                                Y=yshift, Z=zshift)
+        # beam centre, translation
+        return [0.0, 0.0], [-xbeam, -ybeam]
+
+    def load_transmission_inst(self, ws_trans, ws_direct, beamcentre):
         """
             Not required for SANS2D
         """

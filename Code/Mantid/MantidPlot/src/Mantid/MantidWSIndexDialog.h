@@ -244,6 +244,9 @@ private:
   /// Generates an IntervalList which defines which spectra IDs the user can ask to plot.
   void generateSpectraIdIntervals();
 
+  /// Whether or not there are any common spectra IDs between workspaces.
+  bool usingSpectraIDs() const;
+
   /// A pointer to the parent MantidUI object
   MantidUI* m_mantidUI;
 

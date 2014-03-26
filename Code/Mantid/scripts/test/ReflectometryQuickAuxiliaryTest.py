@@ -1,7 +1,7 @@
 import unittest
 import numpy
 from mantid.simpleapi import *
-from isis_reflgui import quick
+from isis_reflectometry import quick
 
 class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
     
@@ -29,44 +29,6 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
         self.assertEqual(True, ('tokeep' in cleaned_object_names))
         
         DeleteWorkspace(tokeep)
-        
-    def test_coAdd_ws_in_ADS(self):
-        inWS = CreateSingleValuedWorkspace(DataValue=1, ErrorValue=1)
-        quick.coAdd('inWS', 'ProvidedName')
-        outWS = mtd['_WProvidedName']
-        result = CheckWorkspacesMatch(Workspace1=inWS, Workspace2=outWS)
-        self.assertEquals("Success!", result)
-        DeleteWorkspace(outWS)
-        
-    def test_coAdd_run_list(self):
-        originalInstrument = config.getInstrument()
-        try:
-            # We have multiple runs from some MUSR files in AutoTest, lets use those.
-            tempInstrument = "MUSR"
-            config['default.instrument'] = tempInstrument
-            runlist = '15189, 15190'
-            
-            # Run coAdd
-            quick.coAdd(runlist, 'ProvidedName')
-            
-            # Get the output workspace and do some quick sanity checks
-            outWS = mtd['_WProvidedName']
-            self.assertEquals(outWS[0].getInstrument().getName(), tempInstrument)
-            
-            # Perform the addition of the two files manually
-            a = LoadMuonNexus(Filename='15189')
-            b = LoadMuonNexus(Filename='15190')
-            c = Plus(LHSWorkspace=a[0], RHSWorkspace=b[0]) 
-            
-            #Check the expected calculated result against coAdd
-            result = CheckWorkspacesMatch(Workspace1=c, Workspace2=outWS) 
-            self.assertEquals("Success!", result)
-        finally:
-            config['default.instrument'] = originalInstrument.name()
-            DeleteWorkspace(a[0])
-            DeleteWorkspace(b[0])
-            DeleteWorkspace(c)
-            DeleteWorkspace(outWS)
         
     def test_groupGet_instrument(self):
         
@@ -126,6 +88,45 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
         # Test with group workspace as input
         self.assertEquals(errorCode, quick.groupGet(mtd[self.__wsName][0].name(), 'samp','MADE-UP-LOG-NAME'))
         
-
+    def test_exponential_correction_strategy(self):
+        test_ws =  CreateWorkspace(UnitX="TOF", DataX=[0,1,2,3], DataY=[1,1,1], NSpec=1)
+        
+        correction = quick.ExponentialCorrectionStrategy(1, 0) # Should have no effect.
+        self.assertTrue(isinstance(correction, quick.CorrectionStrategy), msg="Should be of type Correction")
+        
+        corrected = correction.apply(test_ws)
+        
+        self.assertTrue( all( test_ws.readY(0) == corrected.readY(0) ), msg="Input and outputs should be identical" )
+        
+        DeleteWorkspace(test_ws)
+        DeleteWorkspace(corrected)
+        
+    def test_polynomial_correction_strategy(self):
+        test_ws =  CreateWorkspace(UnitX="TOF", DataX=[0,1,2,3], DataY=[1,1,1], NSpec=1)
+        
+        correction = quick.PolynomialCorrectionStrategy("1, 0") # Should have no effect.
+        self.assertTrue(isinstance(correction, quick.CorrectionStrategy), msg="Should be of type Correction")
+        
+        corrected = correction.apply(test_ws)
+        
+        self.assertTrue( all( test_ws.readY(0) == corrected.readY(0) ), msg="Input and outputs should be identical" )
+        
+        DeleteWorkspace(test_ws)
+        DeleteWorkspace(corrected)
+        
+    def test_null_correction_strategy(self):
+        test_ws = CreateWorkspace(UnitX="TOF", DataX=[0,1,2,3], DataY=[1,1,1], NSpec=1)
+        
+        correction = quick.NullCorrectionStrategy() # Should have no effect.
+        self.assertTrue(isinstance(correction, quick.CorrectionStrategy), msg="Should be of type Correction")
+        
+        corrected = correction.apply(test_ws)
+        
+        self.assertTrue( all( test_ws.readY(0) == corrected.readY(0) ), msg="Input and outputs should be identical" )
+        
+        DeleteWorkspace(test_ws)
+        DeleteWorkspace(corrected)
+        
+        
 if __name__ == '__main__':
     unittest.main()

@@ -7,8 +7,6 @@
 #include "MantidAPI/Algorithm.h"
 #include <Poco/Mutex.h>
 
-#include <list>
-
 namespace Mantid
 {
   namespace DataHandling
@@ -16,12 +14,9 @@ namespace Mantid
 
     /**
     Loads a workspace from a data file. The algorithm tries to determine the actual type
-    of the file (raw, nxs, ...) and use the specialized loading algorith to load it.
+    of the file (raw, nxs, ...) and use the specialized loading algorithm to load it.
 
-    @author Roman Tolchenov, Tessella plc
-    @date 38/07/2010
-
-    Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -63,6 +58,7 @@ namespace Mantid
       /// This method returns shared pointer to a load algorithm which got 
       /// the highest preference after file check. 
       API::IAlgorithm_sptr getFileLoader(const std::string& filePath);
+      void findFilenameProperty(const API::IAlgorithm_sptr & loader);
       /// Declare any additional input properties from the concrete loader
       void declareLoaderProperties(const API::IAlgorithm_sptr & loader);
 
@@ -97,7 +93,6 @@ namespace Mantid
       /// Manually group workspaces.
       API::WorkspaceGroup_sptr groupWsList(const std::vector<API::Workspace_sptr> & wsList);
 
-    private:
       /// The base properties
       std::set<std::string> m_baseProps;
       /// The actual loader

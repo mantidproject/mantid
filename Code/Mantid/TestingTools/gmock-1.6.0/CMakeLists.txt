@@ -77,9 +77,10 @@ include_directories("${gmock_SOURCE_DIR}/include"
 # are used for other targets, to ensure that Google Mock can be compiled by
 # a user aggressive about warnings.
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  set ( cxx_strict "/MD ${cxx_strict}")
-endif()
+## MANTID: Not required, this is done by cmake & has been removed in gmock-1.7.0 ##
+# if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+#  set ( cxx_strict "/MD ${cxx_strict}")
+#endif()
 
 cxx_library(gmock "${cxx_strict}" src/gmock-all.cc)
 target_link_libraries(gmock gtest)

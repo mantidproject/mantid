@@ -86,8 +86,7 @@ namespace Algorithms
     this->declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("PeakParametersWorkspace", "", Direction::Input),
         "Input TableWorkspace for peak's parameters.");
 
-    std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
-    this->declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(peakNames),
+    this->declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>()),
         "Peak function to calculate.");
 
     this->declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),

@@ -5,12 +5,12 @@ A Lorentzian function is defined as:
 
 where:
     <UL>
-    <LI> A (Amplitude) - Maximum peak height at peak centre </LI>
+    <LI> A (Amplitude) - Intensity scaling </LI>
     <LI><math>x_0</math> (PeakCentre) - centre of peak </LI>
-    <LI><math>\Gamma</math> (HWHM) - half-width at half-maximum </LI>
+    <LI><math>\Gamma/2</math> (HWHM) - half-width at half-maximum </LI>
     </UL>
 
-Note that the FWHM (Full Width Half Maximum) equals two times HWHM, and the integral over the Lorentzian equals 1.
+Note that the FWHM (Full Width Half Maximum) equals two times HWHM, and the integral over the Lorentzian equals the intensity scaling A.
 
 The figure below illustrate this symmetric peakshape function fitted to a TOF peak:
 
@@ -35,9 +35,9 @@ DECLARE_FUNCTION(Lorentzian);
 
 void Lorentzian::init()
 {
-  declareParameter("Amplitude", 1.0, "Maximum height of peak when x=x0");
+  declareParameter("Amplitude", 1.0, "Intensity scaling");
   declareParameter("PeakCentre", 0.0, "Centre of peak");
-  declareParameter("HWHM", 0.0, "Half-width at half-maximum");
+  declareParameter("FWHM", 0.0, "Full-width at half-maximum");
 }
 
 
@@ -45,7 +45,7 @@ void Lorentzian::functionLocal(double* out, const double* xValues, const size_t 
 {
     const double amplitude = getParameter("Amplitude");
     const double peakCentre = getParameter("PeakCentre");
-    const double halfGamma = 0.5*getParameter("HWHM");
+    const double halfGamma = 0.5*getParameter("FWHM");
 
     const double invPI = 1.0/M_PI;
     for (size_t i = 0; i < nData; i++)
@@ -59,7 +59,7 @@ void Lorentzian::functionDerivLocal(Jacobian* out, const double* xValues, const 
 {
     const double amplitude = getParameter("Amplitude");
     const double peakCentre = getParameter("PeakCentre");
-    const double gamma = getParameter("HWHM");
+    const double gamma = getParameter("FWHM");
     const double halfGamma = 0.5*gamma;
 
     const double invPI = 1.0/M_PI;

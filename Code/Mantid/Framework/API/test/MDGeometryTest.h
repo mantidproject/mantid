@@ -207,8 +207,22 @@ public:
     AnalysisDataService::Instance().remove("MDGeometryTest_originalWS");
     TSM_ASSERT("Original workspace reference was deleted.", !g.hasOriginalWorkspace());
     TSM_ASSERT("Original workspace reference is cleared.", !g.getOriginalWorkspace());
+  }
 
+  void test_transforms_to_original()
+  {
+    MDGeometry g;
+    g.setTransformFromOriginal(new NullCoordTransform, 0);
+    g.setTransformFromOriginal(new NullCoordTransform, 1);
+    TSM_ASSERT_EQUALS("Wrong number of transforms from original reported.", 2, g.getNumberTransformsFromOriginal());
+  }
 
+  void test_transforms_from_original()
+  {
+    MDGeometry g;
+    g.setTransformToOriginal(new NullCoordTransform, 0);
+    g.setTransformToOriginal(new NullCoordTransform, 1);
+    TSM_ASSERT_EQUALS("Wrong number of transforms to original reported.", 2, g.getNumberTransformsToOriginal());
   }
 
 

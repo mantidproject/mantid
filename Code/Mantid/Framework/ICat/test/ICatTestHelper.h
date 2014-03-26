@@ -2,7 +2,6 @@
 #define ICATTESTHELPER_H_
 
 #include "MantidICat/CatalogLogin.h"
-#include "MantidICat/Session.h"
 #include "MantidKernel/ConfigService.h"
 
 namespace ICatTestHelper

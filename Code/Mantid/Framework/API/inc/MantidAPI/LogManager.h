@@ -143,6 +143,8 @@ namespace Mantid
       
       /// Empty the values out of all TimeSeriesProperty logs
       void clearTimeSeriesLogs();
+      /// Empty all but the last value out of all TimeSeriesProperty logs
+      void clearOutdatedTimeSeriesLogValues();
 
       /// Save the run to a NeXus file with a given group name
       virtual void saveNexus(::NeXus::File * file, const std::string & group,bool keepOpen=false) const;

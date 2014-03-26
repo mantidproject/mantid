@@ -15,6 +15,8 @@ Reducer = None
 # Statement used at debug time to pull changes in DirectEnergyConversion into Mantid
 #DRC=reload(DRC)
 def getReducer():
+    # needed on Linux to adhere to correct reference return
+    global Reducer;
     return Reducer
 
 def setup(instname=None,reload=False):
@@ -34,6 +36,8 @@ def setup(instname=None,reload=False):
     if not (Reducer is None) :
         if  Reducer.instr_name.upper()[0:3] == instname.upper()[0:3] :
             if not reload :
+                # reinitialize idf parameters to defaults.
+                Reducer.init_idf_params(True);
                 return  # has been already defined
 
     Reducer = DRC.setup_reducer(instname)
@@ -143,11 +147,11 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 # --------------------------------------------------------------------------------------------------------
 #    Deal with mandatory parameters for this and may be some top level procedures
 # --------------------------------------------------------------------------------------------------------
+    Reducer.log("****************************************************************");
     if isinstance(sample_run,api.Workspace) or (isinstance(sample_run,str) and sample_run in mtd):
-        Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run for workspace name: '+str(sample_run))
+        Reducer.log('*** DGreduce run for: {0:>20} :  Workspace name: {1:<20} '.format(Reducer.instr_name,str(sample_run)))
     else:
-        Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run number/s: '+str(sample_run))
-
+        Reducer.log('*** DGreduce run for: {0:>20} :  Run number/s : {1:<20} '.format(Reducer.instr_name,str(sample_run)))
 
     try:
         n,r=funcreturns.lhs_info('both')
@@ -171,7 +175,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     abs_units_defaults_check = False
     if monovan_run != None :
        # check if mono-vanadium is provided as multiple files list or just put in brackets ocasionally
-        Reducer.log(' Output will be in absolute units of mb/str/mev/fu')
+        Reducer.log("****************************************************************");
+        Reducer.log('*** Output will be in absolute units of mb/str/mev/fu')
         if isinstance(monovan_run,list):
                 if len(monovan_run)>1:
                     raise IOError(' Can currently work only with single monovan file but list supplied')
@@ -205,10 +210,17 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     changed_Keys=Reducer.set_input_parameters(**program_args);
 
     # inform user about changed parameters
+
+    Reducer.log("*** Provisional Incident energy: {0:>12.3f} mEv".format(ei_guess))
+    Reducer.log("****************************************************************");
     for key in changed_Keys:
         val = getattr(Reducer,key);
         Reducer.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val))
 
+    save_dir = config.getString('defaultsave.directory') 
+    Reducer.log("****************************************************************");
+    Reducer.log("*** By default results are saved into: {0}".format(save_dir));
+    Reducer.log("****************************************************************");
     #do we run absolute units normalization and need to warn users if the parameters needed for that have not changed from defaults
     if abs_units_defaults_check :
         Reducer.check_abs_norm_defaults_changed(changed_Keys);
@@ -251,8 +263,11 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     if Reducer.mask_run == None :
         mask_run=sample_run
 
-
+    masking = None;
     masks_done=False
+    if not Reducer.run_diagnostics:
+       header="Diagnostics including hard masking is skipped "
+       masks_done = True;	
     if Reducer.save_and_reuse_masks :
         raise NotImplementedError("Save and reuse masks option is not yet implemented")
         mask_file_name = common.create_resultname(str(mask_run),Reducer.instr_name,'_masks.xml')
@@ -262,7 +277,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
             #Reducer.hard_mask_file = mask_full_file;
             #Reducer.use_hard_mask_only = True
             masks_done=True
-            header="Masking loaded "
+            header="Masking fully skipped and processed {0} spectra and  {1} bad spectra "
         else:
             pass
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -270,9 +285,10 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 # --------------------------------------------------------------------------------------------------------    
      # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
     if not   masks_done:
+        print '########### Run diagnose for sample run ##############################'
         masking = Reducer.diagnose(wb_run,sample = mask_run,
                                     second_white = None,print_results=True)
-        header = "Diag Processed "
+        header = "Diag Processed workspace with {0:d} spectra and masked {1:d} bad spectra"
 
 
    # Calculate absolute units:    
@@ -281,10 +297,10 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
                 if Reducer.use_sam_msk_on_monovan == True:
                     Reducer.log('  Applying sample run mask to mono van')
                 else:
-                    print '########### Run diagnose for monochromatic vanadium run ##############'
-                    masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
-                                         second_white = None,rint_results=True)
                     if not Reducer.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better soulution for that. 
+                        print '########### Run diagnose for monochromatic vanadium run ##############'
+                        masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
+                                         second_white = None,rint_results=True)
                         masking +=  masking2
                         DeleteWorkspace(masking2)
     
@@ -302,7 +318,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
     nMaskedSpectra = len(failed_sp_list)
     # this tells turkey in case of hard mask only but everythin else semems work fine
-    print '{0} workspace with {1:d} spectra and masked {2:d} bad spectra'.format(header,nSpectra,nMaskedSpectra)
+    print header.format(nSpectra,nMaskedSpectra)
      #Run the conversion first on the sample
     deltaE_wkspace_sample = Reducer.convert_to_energy(sample_run, ei_guess, wb_run)
     
@@ -310,6 +326,11 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     # calculate absolute units integral and apply it to the workspace
     if monovan_run != None or Reducer.mono_correction_factor != None :
         deltaE_wkspace_sample = apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_guess,wb_run)
+        # Hack for multirep
+        #if isinstance(monovan_run,int):
+        #    filename = common.find_file(monovan_run)
+        #    output_name = common.create_dataname(filename);
+       #     DeleteWorkspace(output_name);
 
 
     results_name = deltaE_wkspace_sample.name();
@@ -325,7 +346,9 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
     if mtd.doesExist('_wksp.spe-white')==True:
         DeleteWorkspace(Workspace='_wksp.spe-white')
-
+    # Hack for multirep mode?
+    if mtd.doesExist('hard_mask_ws') == True:
+        DeleteWorkspace(Workspace='hard_mask_ws')
     
     return deltaE_wkspace_sample
 
@@ -494,7 +517,7 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
 
 
 def process_legacy_parameters(**kwargs) :
-    """ The method to deal with old parameters which have logic different from default and easy to process using 
+    """ The method to deal with old parameters which have logi c different from default and easy to process using 
         subprogram. All other parameters just copiet to output 
     """
     params = dict();
@@ -502,8 +525,23 @@ def process_legacy_parameters(**kwargs) :
         if key == 'hardmaskOnly': # legacy key defines other mask file here
             params["hard_mask_file"] = value;
             params["use_hard_mask_only"] = True;
+        elif key == 'hardmaskPlus': # legacy key defines other mask file here
+            params["hard_mask_file"] = value;
+            params["use_hard_mask_only"] = False;
         else:
             params[key]=value;    
+
+    # Check all possible ways to define hard mask file:
+    if 'hard_mask_file' in params and not params['hard_mask_file'] is None:
+        if type(params['hard_mask_file']) == str and params['hard_mask_file']=="None":
+            params['hard_mask_file'] = None;
+        elif type(params['hard_mask_file']) == bool:
+           if  params['hard_mask_file']:
+               raise  TypeError("hard_mask_file has to be a file name or None. It can not be boolean True")
+           else:
+               params['hard_mask_file'] = None;
+        elif len(params['hard_mask_file']) == 0:
+             params['hard_mask_file'] = None;
 
         
     return params
@@ -695,6 +733,9 @@ def get_failed_spectra_list_from_masks(masking_wksp):
         masking_wksp = mtd[masking_wksp]
     
     failed_spectra = []
+    if masking_wksp is None:
+       return (failed_spectra,0);
+
     n_spectra = masking_wksp.getNumberHistograms()
     for i in xrange(n_spectra):
         if masking_wksp.readY(i)[0] >0.99 : # spectrum is masked

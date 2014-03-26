@@ -2,6 +2,7 @@
 #define MANTID_KERNEL_FILEDESCRIPTORTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <cstdio>
 
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/ConfigService.h"
@@ -80,6 +81,27 @@ public:
     TS_ASSERT_EQUALS(1, is.tellg());
   }
 
+  void test_isAscii_Returns_True_For_C_Handle()
+  {
+    FILE* handle = fopen(m_testAsciiPath.c_str(), "r");
+    if (handle)
+    {
+      TS_ASSERT(FileDescriptor::isAscii(handle));
+      TS_ASSERT_EQUALS(0, ftell(handle));
+      fclose(handle);
+    }
+  }
+
+  void test_isAscii_Returns_False_For_C_Handle()
+  {
+    FILE* handle = fopen(m_testNonNexusPath.c_str(), "r");
+    if (handle)
+    {
+      TS_ASSERT(!FileDescriptor::isAscii(handle));
+      TS_ASSERT_EQUALS(0, ftell(handle));
+      fclose(handle);
+    }
+  }
 
   void test_Constructor_With_Existing_File_Initializes_Description_Fields()
   {
@@ -96,7 +118,7 @@ public:
     FileDescriptor descr(filename);
 
     auto & stream = descr.data();
-    long int streamPos = stream.tellg();
+    std::streamoff streamPos = stream.tellg();
 
     TS_ASSERT_EQUALS(0, streamPos);
   }

@@ -2,23 +2,29 @@
   #pragma warning( disable: 4250 ) // Disable warning regarding inheritance via dominance, we have no way around it with the design
 #endif
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidPythonInterface/api/AlgorithmIDProxy.h"
 #ifdef _MSC_VER
   #pragma warning( default: 4250 )
 #endif
 #include "MantidKernel/Strings.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
+#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
 #include <Poco/Thread.h>
 
-#include <boost/python/object.hpp>
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
+#include <boost/python/object.hpp>
+#include <boost/python/operators.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::IPropertyManager;
 using Mantid::Kernel::Property;
 using Mantid::Kernel::Direction;
+using Mantid::API::AlgorithmID;
 using Mantid::API::IAlgorithm;
 using Mantid::API::IAlgorithm_sptr;
+using Mantid::PythonInterface::AlgorithmIDProxy;
+using Mantid::PythonInterface::Policies::VectorToNumpy;
 using namespace boost::python;
 
 namespace
@@ -207,18 +213,44 @@ namespace
     return result;
   }
 
+  /**
+   * @param self A reference to the calling object
+   * @return An AlgorithmID wrapped in a AlgorithmIDProxy container or None if there is
+   *         no ID
+   */
+  PyObject * getAlgorithmID(IAlgorithm & self)
+  {
+    AlgorithmID id = self.getAlgorithmID();
+    if(id) return to_python_value<AlgorithmIDProxy>()(AlgorithmIDProxy(id));
+    else Py_RETURN_NONE;
+  }
+
 }
 
 void export_ialgorithm()
 {
-  REGISTER_SHARED_PTR_TO_PYTHON(IAlgorithm);
+  class_<AlgorithmIDProxy>("AlgorithmID", no_init)
+    .def(self == self)
+  ;
 
-  class_<IAlgorithm, bases<IPropertyManager>, boost::noncopyable>("IAlgorithm", "Interface for all algorithms", no_init)
+  // --------------------------------- IAlgorithm ------------------------------------------------
+  register_ptr_to_python<boost::shared_ptr<IAlgorithm>>();
+
+  class_<IAlgorithm, bases<IPropertyManager>,
+         boost::noncopyable>("IAlgorithm", "Interface for all algorithms", no_init)
     .def("name", &IAlgorithm::name, "Returns the name of the algorithm")
     .def("alias", &IAlgorithm::alias, "Return the aliases for the algorithm")
     .def("version", &IAlgorithm::version, "Returns the version number of the algorithm")
+    .def("cancel", &IAlgorithm::cancel, "Request that the algorithm stop running")
     .def("category", &IAlgorithm::category, "Returns the category containing the algorithm")
     .def("categories", &IAlgorithm::categories, "Returns the list of categories this algorithm belongs to")
+    .def("workspaceMethodName",&IAlgorithm::workspaceMethodName, 
+         "Returns a name that will be used when attached as a workspace method. Empty string indicates do not attach")
+    .def("workspaceMethodOn", &IAlgorithm::workspaceMethodOn, return_value_policy<VectorToNumpy>(), // creates a list for strings
+         "Returns a set of class names that will have the method attached. Empty list indicates all types")
+    .def("workspaceMethodInputProperty", &IAlgorithm::workspaceMethodInputProperty,
+         "Returns the name of the input workspace property used by the calling object")
+    .def("getAlgorithmID", &getAlgorithmID, "Returns a unique identifier for this algorithm object")
     .def("getOptionalMessage", &IAlgorithm::getOptionalMessage, "Returns the optional user message attached to the algorithm")
     .def("getWikiSummary", &IAlgorithm::getWikiSummary, "Returns the summary found on the wiki page")
     .def("getWikiDescription", &IAlgorithm::getWikiDescription, "Returns the description found on the wiki page using wiki markup")
@@ -229,7 +261,8 @@ void export_ialgorithm()
           "such that the mandatory properties are first followed by the optional ones.")
     .def("outputProperties",&getOutputProperties, "Returns a list of the output properties on the algorithm")
     .def("isInitialized", &IAlgorithm::isInitialized, "Returns True if the algorithm is initialized, False otherwise")
-    .def("isExecuted", &IAlgorithm::isExecuted, "Returns true if the algorithm has been executed successfully, false otherwise")
+    .def("isExecuted", &IAlgorithm::isExecuted, "Returns True if the algorithm has been executed successfully, False otherwise")
+    .def("isRunning", &IAlgorithm::isRunning, "Returns True if the algorithm is considered to be running, False otherwise")
     .def("setChild", &IAlgorithm::setChild,
         "If true this algorithm is run as a child algorithm. There will be no logging and nothing is stored in the Analysis Data Service")
     .def("setAlwaysStoreInADS", &IAlgorithm::setAlwaysStoreInADS,

@@ -1,4 +1,11 @@
-# Algorithm to start Bayes programs
+"""*WIKI*
+
+This is a variation of the stretched exponential option of [[IndirectBayes:Quasi|Quasi]]. For each spectrum a fit is performed for a grid of &beta; and &sigma; values. 
+The distribution of goodness of fit values is plotted.
+
+This routine was originally part of the MODES package.
+*WIKI*"""
+
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.simpleapi import *
@@ -11,12 +18,16 @@ class Quest(PythonAlgorithm):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
 	def PyInit(self):
+		self.setWikiSummary("This is a variation of the stretched exponential option of Quasi.")
+
 		self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (*.nxs) or Workspace')
 		self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
 		self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']), doc='Analyser & reflection')
 		self.declareProperty(name='SamNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Sample run number')
 		self.declareProperty(name='ResInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of res input - File (*_res.nxs) or Workspace')
 		self.declareProperty(name='ResNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Resolution run number')
+		self.declareProperty(name='ResNormInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of ResNorm input - File (*_red.nxs) or Workspace')
+		self.declareProperty(name='ResNormNumber',defaultValue='',validator=StringMandatoryValidator(), doc='ResNorm run number')
 		self.declareProperty(name='ElasticOption',defaultValue=True, doc='Include elastic peak in fit')
 		self.declareProperty(name='BackgroundOption',defaultValue='Sloping',validator=StringListValidator(['Sloping','Flat','Zero']), doc='Form of background to fit')
 		self.declareProperty(name='EnergyMin', defaultValue=-0.5, doc='Minimum energy for fit. Default=-0.5')
@@ -44,6 +55,8 @@ class Quest(PythonAlgorithm):
 		sam = self.getPropertyValue('SamNumber')
 		rinType = self.getPropertyValue('ResInputType')
 		res = self.getPropertyValue('ResNumber')
+		rsnormType = self.getPropertyValue('ResNormInputType')
+		rsnormNum = self.getPropertyValue('ResNormNumber')
 		elastic = self.getProperty('ElasticOption').value
 		bgd = self.getPropertyValue('BackgroundOption')
 		emin = self.getPropertyValue('EnergyMin')
@@ -56,6 +69,7 @@ class Quest(PythonAlgorithm):
 
 		sname = prefix+sam+'_'+ana + '_red'
 		rname = prefix+res+'_'+ana + '_res'
+		rsname = prefix+rsnormNum+'_'+ana+ '_ResNorm_Paras'
 		erange = [float(emin), float(emax)]
 		if elastic:
 			o_el = 1
@@ -80,15 +94,24 @@ class Quest(PythonAlgorithm):
 			Smessage = 'Sample from File : '+spath
 		else:
 			Smessage = 'Sample from Workspace : '+sname
+
 		if rinType == 'File':
 			rpath = os.path.join(workdir, rname+'.nxs')		# path name for res nxs file
 			LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
 			Rmessage = 'Resolution from File : '+rpath
 		else:
 			Rmessage = 'Resolution from Workspace : '+rname
+
+		if rsnormType == 'File':
+			rpath = os.path.join(workdir, rsname+'.nxs')		# path name for res nxs file
+			LoadNexusProcessed(Filename=rpath, OutputWorkspace=rsname)
+			Rmessage = 'ResNorm from File : '+rpath
+		else:
+			Rmessage = 'ResNorm from Workspace : '+rsname
+
 		if verbOp:
 			logger.notice(Smessage)
 			logger.notice(Rmessage)
-		Main.QuestRun(sname,rname,nbs,erange,nbins,fitOp,loopOp,verbOp,plotOp,saveOp)
+		Main.QuestRun(sname,rname,rsname,nbs,erange,nbins,fitOp,loopOp,verbOp,plotOp,saveOp)
 
 AlgorithmFactory.subscribe(Quest)         # Register algorithm with Mantid

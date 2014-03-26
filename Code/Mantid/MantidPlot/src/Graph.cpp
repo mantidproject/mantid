@@ -139,7 +139,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   ignoreResize = false;
   drawAxesBackbone = true;
   autoScaleFonts = false;
-  d_antialiasing = false;
+  d_antialiasing = true;
   d_scale_on_print = true;
   d_print_cropmarks = false;
   d_synchronize_scales = false;
@@ -379,7 +379,7 @@ bool Graph::isColorBarEnabled(int axis) const
 *  @param axis the aixs to check e.g. yright ...
 *  @return true if there is a log scale on that axis
 */
-bool Graph::isLog(const QwtPlot::Axis axis) const
+bool Graph::isLog(const QwtPlot::Axis& axis) const
 {
   ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
   return ( sc_engine && sc_engine->type() == QwtScaleTransformation::Log10 );
@@ -2053,8 +2053,6 @@ void Graph::setCanvasFrame(int width, const QColor& color)
 
 void Graph::drawAxesBackbones(bool yes)
 {
-  if (drawAxesBackbone == yes)
-    return;
 
   drawAxesBackbone = yes;
 
@@ -2064,7 +2062,14 @@ void Graph::drawAxesBackbones(bool yes)
     if (scale)
     {
       ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw (i));
-      sclDraw->enableComponent (QwtAbstractScaleDraw::Backbone, yes);
+      if (isColorBarEnabled(i)) //always draw the backbone for a colour bar axis
+      {
+        sclDraw->enableComponent (QwtAbstractScaleDraw::Backbone, true);
+      }
+      else
+      {
+        sclDraw->enableComponent (QwtAbstractScaleDraw::Backbone, yes);
+      }
       scale->repaint();
     }
   }
@@ -3152,29 +3157,41 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
     // Select only those column names which we can draw and search for any X columns specified
     for (int i = 0; i < names.count(); i++)
     {
-      int d = w->colPlotDesignation(w->colIndex(names[i]));
-
-      if (d == Table::Y || d == Table::xErr || d == Table::yErr || d == Table::Label)
+      int c = w->colIndex(names[i]);
+      if (c < 0)
       {
-        drawableNames << names[i];
+        continue;
+      }
+      int d = w->colPlotDesignation(c);
 
-        // Count error columns
-        if(d == Table::xErr || d == Table::yErr)
+      switch(d)
+      {
+        case Table::Y:
+          // Y columns should be drawn first, so we are keeping them at the beginning of the list
+          drawableNames.prepend(names[i]);
+          break;
+
+        case Table::xErr: case Table::yErr:
           noOfErrorCols++;
-      } else if(d == Table::X)
-      {
-        // If multiple X columns are specified, it's an error, as we don't know which one to use
-        if(!xColNameGiven.isEmpty())
-          return false;
+          // Fall through, as we want errors to be at the end of the list in the same way as labels
+          // are. So _no break_ here on purpose.
 
-        xColNameGiven = names[i];
+        case Table::Label:
+          // Keep error/label columns at the end of the list
+          drawableNames.append(names[i]);
+          break;
+
+        case Table::X:
+          if(!xColNameGiven.isEmpty())
+            // If multiple X columns are specified, it's an error, as we don't know which one to use
+            return false;
+          xColNameGiven = names[i];
+          break;
+
+        default:
+          break;
       }
     }
-
-    // Layout we will use to draw curves
-    CurveLayout cl = initCurveLayout(style, drawableNames.count() - noOfErrorCols);
-    cl.sSize = sSize;
-    cl.lWidth = float(lWidth);
 
     for (int i = 0; i < drawableNames.count(); i++){
       QString colName = drawableNames[i];
@@ -3200,6 +3217,8 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
       if (xColName.isEmpty() || yColName.isEmpty())
         return false;
 
+      PlotCurve* newCurve(NULL);
+
       // --- Drawing error columns -----------------------------
       if (colType == Table::xErr || colType == Table::yErr){
         int dir;
@@ -3208,8 +3227,7 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
         else
           dir = QwtErrorPlotCurve::Vertical;
 
-        PlotCurve* c = addErrorBars(xColName, yColName, w, colName, dir);
-        updateCurveLayout(c, &cl);
+        newCurve = addErrorBars(xColName, yColName, w, colName, dir);
       // --- Drawing label columns -----------------------------
       } else if (colType == Table::Label){
         DataCurve* mc = masterCurve(xColName, yColName);
@@ -3221,8 +3239,17 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
       // --- Drawing Y columns -----------------------------
       } else if (colType == Table::Y)
       {
-        PlotCurve* c = insertCurve(w, xColName, yColName, style, startRow, endRow);
-        updateCurveLayout(c, &cl);
+        newCurve = insertCurve(w, xColName, yColName, style, startRow, endRow);
+      }
+
+      // Set a layout for the new curve, if we've added one
+      if (newCurve)
+      {
+        CurveLayout cl = initCurveLayout(style, drawableNames.count() - noOfErrorCols);
+        cl.sSize = sSize;
+        cl.lWidth = static_cast<float>(lWidth);
+
+        updateCurveLayout(newCurve, &cl);
       }
     }
   }
@@ -5015,27 +5042,25 @@ void Graph::guessUniqueCurveLayout(int& colorIndex, int& symbolIndex)
     }
   }
 
-  for (int i=0; i<n_curves; i++){
+  for (int i=0; i<n_curves; ++i)
+  {
     const PlotCurve *c = dynamic_cast<PlotCurve *>(curve(i));
-    if (c){
-      int index = ColorBox::colorIndex(c->pen().color());
-      if (index > colorIndex)
-        colorIndex = index;
+    if (c)
+    {
+      colorIndex = std::max(ColorBox::colorIndex(c->pen().color()), colorIndex);
 
       QwtSymbol symb = c->symbol();
-      index = SymbolBox::symbolIndex(symb.style());
-      if (index > symbolIndex)
-        symbolIndex = index;
+      symbolIndex = std::max(SymbolBox::symbolIndex(symb.style()), symbolIndex);
     }
   }
   if (n_curves > 1)
-    colorIndex = (colorIndex+1)%16;
-  if (colorIndex == 15) //avoid white invisible curves
-    colorIndex = 0;
+    colorIndex = (colorIndex+1)%ColorBox::numPredefinedColors();
+  if (ColorBox::color(colorIndex) == Qt::white) //avoid white invisible curves
+    ++colorIndex;
 
   symbolIndex = (symbolIndex+1)%15;
-  if (!symbolIndex)
-    symbolIndex = 1;
+  if (symbolIndex == 0)
+    ++symbolIndex;
 }
 
 void Graph::addFitCurve(QwtPlotCurve *c)

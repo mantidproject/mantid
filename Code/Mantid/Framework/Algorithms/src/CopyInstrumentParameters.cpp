@@ -4,6 +4,7 @@ Transfer an instrument from a giving workspace to a receiving workspace for the 
 
 The instrument in of the receiving workspace is replaced by a copy of the instrument in the giving workspace
 and so gains any manipulations such as calibration done to the instrument in the giving workspace.
+The two workspaces can have spectra allocated to their detectors differently.
 
 
 *WIKI*/
@@ -107,7 +108,7 @@ void CopyInstrumentParameters::checkProperties()
   // Check that both workspaces have the same instrument name
   if( baseInstRec != baseInstGiv )
   {
-      throw std::invalid_argument("The base instrument in the output workspace is not the same as the base instrument in the input workspace.");
+    g_log.warning() << "The base instrument in the output workspace is not the same as the base instrument in the input workspace."<< std::endl;
   }
 
 }

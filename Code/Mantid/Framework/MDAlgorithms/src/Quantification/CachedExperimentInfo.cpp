@@ -189,13 +189,13 @@ namespace Mantid
       m_sampleWidths = shape.getBoundingBox().width();
 
       // Detector volume
-      const Geometry::Object_const_sptr detShape = instrument->getDetector(detID)->shape();
-      if(!detShape)
+      // Make sure it encompasses all possible detectors
+      det->getBoundingBox(m_detBox);
+      if(m_detBox.isNull())
       {
         throw std::invalid_argument("CachedExperimentInfo::initCaches - Detector has no bounding box, cannot sample from it. ID:"
                                     + boost::lexical_cast<std::string>(det->getID()));
       }
-      m_detBox = detShape->getBoundingBox();
 
       const double rad2deg = 180./M_PI;
       const double thetaInDegs = twoTheta()*rad2deg;
@@ -205,7 +205,7 @@ namespace Mantid
       m_gonimeter->makeUniversalGoniometer();
       m_gonimeter->setRotationAngle("phi", thetaInDegs);
       m_gonimeter->setRotationAngle("chi", phiInDegs);
-      m_sampleToDetMatrix = m_gonimeter->getR()*m_exptInfo.sample().getOrientedLattice().getU();
+      m_sampleToDetMatrix = m_exptInfo.sample().getOrientedLattice().getU()*m_gonimeter->getR();
 
       // EFixed
       m_efixed = m_exptInfo.getEFixed(det);

@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>ManageCustomMenus</class>
- <widget class="QDialog" name="ManageCustomMenus" >
-  <property name="geometry" >
+ <widget class="QDialog" name="ManageCustomMenus">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,32 +10,32 @@
     <height>386</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Manage Custom Menus</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" >
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" >
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout" >
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3" >
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QPushButton" name="pbAddScript" >
-           <property name="toolTip" >
+          <widget class="QPushButton" name="pbAddScript">
+           <property name="toolTip">
             <string>Add Python Script file to menu.</string>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>Add Script</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pbRemoveScript" >
-           <property name="toolTip" >
+          <widget class="QPushButton" name="pbRemoveScript">
+           <property name="toolTip">
             <string>Remove selected Python script(s).</string>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>Remove Script</string>
            </property>
           </widget>
@@ -42,24 +43,12 @@
         </layout>
        </item>
        <item>
-        <widget class="QTreeWidget" name="twScripts" >
-         <property name="selectionMode" >
+        <widget class="QTreeWidget" name="twScripts">
+         <property name="selectionMode">
           <enum>QAbstractItemView::MultiSelection</enum>
          </property>
          <column>
-          <property name="text" >
-           <string>1</string>
-          </property>
-         </column>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTreeWidget" name="twCustomInterfaces" >
-         <property name="selectionMode" >
-          <enum>QAbstractItemView::MultiSelection</enum>
-         </property>
-         <column>
-          <property name="text" >
+          <property name="text">
            <string>1</string>
           </property>
          </column>
@@ -68,13 +57,13 @@
       </layout>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_3" >
+      <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <spacer name="verticalSpacer_2" >
-         <property name="orientation" >
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>40</height>
@@ -83,30 +72,30 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pbAddItem" >
-         <property name="maximumSize" >
+        <widget class="QPushButton" name="pbAddItem">
+         <property name="maximumSize">
           <size>
            <width>45</width>
            <height>16777215</height>
           </size>
          </property>
-         <property name="toolTip" >
+         <property name="toolTip">
           <string>Add item to menu.</string>
          </property>
-         <property name="text" >
-          <string>>></string>
+         <property name="text">
+          <string>&gt;&gt;</string>
          </property>
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_3" >
-         <property name="orientation" >
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeType" >
+         <property name="sizeType">
           <enum>QSizePolicy::Fixed</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>30</height>
@@ -115,27 +104,27 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pbRemoveItem" >
-         <property name="maximumSize" >
+        <widget class="QPushButton" name="pbRemoveItem">
+         <property name="maximumSize">
           <size>
            <width>45</width>
            <height>16777215</height>
           </size>
          </property>
-         <property name="toolTip" >
+         <property name="toolTip">
           <string>Remove item from menu.</string>
          </property>
-         <property name="text" >
+         <property name="text">
           <string>&lt;&lt;</string>
          </property>
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer" >
-         <property name="orientation" >
+        <spacer name="verticalSpacer">
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>40</height>
@@ -146,15 +135,15 @@
       </layout>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_4" >
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_4" >
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
-          <spacer name="horizontalSpacer_2" >
-           <property name="orientation" >
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0" >
+           <property name="sizeHint" stdset="0">
             <size>
              <width>40</width>
              <height>20</height>
@@ -163,11 +152,11 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="pbAddMenu" >
-           <property name="toolTip" >
+          <widget class="QPushButton" name="pbAddMenu">
+           <property name="toolTip">
             <string>Add new top-level menu.</string>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>Add Menu</string>
            </property>
           </widget>
@@ -175,12 +164,12 @@
         </layout>
        </item>
        <item>
-        <widget class="QTreeWidget" name="twMenus" >
-         <property name="headerHidden" >
+        <widget class="QTreeWidget" name="twMenus">
+         <property name="headerHidden">
           <bool>false</bool>
          </property>
          <column>
-          <property name="text" >
+          <property name="text">
            <string>1</string>
           </property>
          </column>
@@ -191,29 +180,29 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" >
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QPushButton" name="pbHelp" >
-       <property name="maximumSize" >
+      <widget class="QPushButton" name="pbHelp">
+       <property name="maximumSize">
         <size>
          <width>35</width>
          <height>16777215</height>
         </size>
        </property>
-       <property name="toolTip" >
-        <string>Open "Help" page in web browser.</string>
+       <property name="toolTip">
+        <string>Open &quot;Help&quot; page in web browser.</string>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>?</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer" >
-       <property name="orientation" >
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -222,11 +211,11 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pbConfirm" >
-       <property name="toolTip" >
+      <widget class="QPushButton" name="pbConfirm">
+       <property name="toolTip">
         <string>Close this dialog.</string>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>Ok</string>
        </property>
       </widget>
@@ -239,7 +228,6 @@
   <tabstop>pbAddScript</tabstop>
   <tabstop>pbRemoveScript</tabstop>
   <tabstop>twScripts</tabstop>
-  <tabstop>twCustomInterfaces</tabstop>
   <tabstop>pbAddItem</tabstop>
   <tabstop>pbRemoveItem</tabstop>
   <tabstop>pbAddMenu</tabstop>

@@ -15,7 +15,6 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
-#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidVatesAPI/EscalatingRebinningActionManager.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
@@ -201,7 +200,11 @@ m_presenter(new NullRebinningPresenter()),
   m_thresholdMin(0),
   m_thresholdMethodIndex(0),
   m_origin(0, 0, 0),
-  m_ForceOrthogonal(true)
+  m_lengthB1(1),
+  m_lengthB2(1),
+  m_lengthB3(1),
+  m_ForceOrthogonal(true),
+  m_bOutputHistogramWS(true)
 {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);

@@ -20,8 +20,8 @@ namespace MantidQt
       virtual bool changeShownDim(){return false;}
       virtual bool isLabelOfFreeAxis(const std::string&) const {return false;}
       SetPeaksWorkspaces presentedWorkspaces() const{SetPeaksWorkspaces empty; return empty;}
-      void setForegroundColour(const QColor){/*Do nothing*/}
-      void setBackgroundColour(const QColor){/*Do nothing*/}
+      void setForegroundColor(const QColor){/*Do nothing*/}
+      void setBackgroundColor(const QColor){/*Do nothing*/}
       std::string getTransformName() const {return "";}
       void showBackgroundRadius(const bool){/*Do nothing*/}
       void setShown(const bool){/*Do nothing*/}
@@ -31,6 +31,10 @@ namespace MantidQt
       virtual void setPeakSizeIntoProjection(const double){/*Do Nothing*/}
       virtual double getPeakSizeOnProjection() const {return 0;}
       virtual double getPeakSizeIntoProjection() const {return 0;}
+      virtual bool getShowBackground() const {return false;}
+      virtual void registerOwningPresenter(UpdateableOnDemand*) {};
+      virtual void zoomToPeak(const int){};
+      virtual bool isHidden() const {return true;}
     };
 
   }

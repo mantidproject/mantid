@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidICat/CatalogDownloadDataFiles.h"
-#include "MantidICat/Session.h"
 #include "MantidICat/CatalogLogin.h"
 #include "MantidICat/CatalogGetDataFiles.h"
 #include "MantidICat/CatalogSearch.h"
@@ -61,11 +60,10 @@ public:
 	}
 	void xtestDownLoadDataFile()
 	{		
-		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
+		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+		loginobj.setPropertyValue("Password", "MantidTestUser4");
 	
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
@@ -121,13 +119,11 @@ public:
 
 	void xtestDownLoadNexusFile()
 	{				
-		Session::Instance();
-
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		// Now set it...
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
+		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+		loginobj.setPropertyValue("Password", "MantidTestUser4");
 			
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT( loginobj.isExecuted() );
@@ -182,12 +178,10 @@ public:
 
 	void xtestDownLoadDataFile_Merlin()
 	{
-		
-		Session::Instance();
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
+		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+		loginobj.setPropertyValue("Password", "MantidTestUser4");
 	
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
@@ -238,7 +232,7 @@ public:
     if (Poco::File(filepath).exists()) Poco::File(filepath).remove();
 	}
 
-	void testDownloaddataFile1()
+	void xtestDownloaddataFile1()
 	{	
 		std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
 		filepath += "download_time.txt";
@@ -249,6 +243,13 @@ public:
 		}
 
 		CatalogDownloadDataFiles downloadobj1;
+
+		// As the algorithm now uses setProperty to allow us to save it to a directory we must pass in the default for testing.
+		std::string fName = Kernel::ConfigService::Instance().getString("defaultsave.directory");
+		// Need to initialize the algorithm in order to set the "downloadPath" property.
+		if ( !downloadobj1.isInitialized() ) downloadobj1.initialize();
+		downloadobj1.setPropertyValue("DownloadPath",fName);
+
 		clock_t start=clock();
 		std::string fullPathDownloadedFile = downloadobj1.testDownload("http://download.mantidproject.org/videos/Installation.htm","test.htm");
 		clock_t end=clock();

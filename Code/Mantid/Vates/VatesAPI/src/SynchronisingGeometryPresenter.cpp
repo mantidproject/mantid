@@ -60,6 +60,7 @@ namespace Mantid
       T_AXIS("T-AXIS"),
       m_dimensions(source.getAllDimensions()), 
       m_source(source),
+      m_view(NULL),
       m_binDisplayMode(Simple)
     {
 

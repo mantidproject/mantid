@@ -79,8 +79,6 @@ public:
   /// Create a list of keywords for the code completion API
   void generateAutoCompleteList();
 
-  /// Construct the error message from the stack trace (if one exists)
-  QString constructErrorMsg();
   /// Special handle for syntax errors as they have no traceback
   QString constructSyntaxErrorStr(PyObject *syntaxError);
   /// Convert a traceback to a string
@@ -184,6 +182,9 @@ private:
   void addPythonReference(const std::string& wsName,const Mantid::API::Workspace_sptr ws);
   /// Delete a Python reference to the given workspace name
   void deletePythonReference(const std::string& wsName);
+
+  /// Send out an error and clear it from python.
+  void emit_error();
 
   PythonScripting * m_pythonEnv;
   PyObject *localDict, *stdoutSave, *stderrSave;

@@ -4,6 +4,7 @@ import math
 import os
 import time
 import sys
+from numpy import NAN
 from functools import partial
 from reduction_gui.widgets.base_widget import BaseWidget
 #from launch_peak_back_selection_1d import DesignerMainWindow
@@ -312,9 +313,9 @@ class BaseRefWidget(BaseWidget):
         new_y_axis = []
         new_e_axis = []
         
-        if self.bDEBUG:
-            print 'x_axis before _smooth_x_axis:'
-            print x_axis
+#        if self.bDEBUG:
+#            print 'x_axis before _smooth_x_axis:'
+#            print x_axis
         
         sz = len(x_axis)        
         i=0
@@ -368,10 +369,10 @@ class BaseRefWidget(BaseWidget):
     
             i+=1
     
-        if self.bDEBUG:
-            print
-            print 'x-axis after _smooth_x_axis:'
-            print new_x_axis
+#        if self.bDEBUG:
+#            print
+#            print 'x-axis after _smooth_x_axis:'
+#            print new_x_axis
     
         self.x_axis = new_x_axis
         self.y_axis = new_y_axis
@@ -438,9 +439,10 @@ class BaseRefWidget(BaseWidget):
 
         # Add in the other histos, averaging the overlaps
         for i in range(1, len(scaled_ws_list)):
-            data_y_i = mtd[scaled_ws_list[i]+'_histo'].dataY(0)
-            data_e_i = mtd[scaled_ws_list[i]+'_histo'].dataE(0)
+            data_y_i = mtd[scaled_ws_list[i]+'_histo'].dataY(0)            
+            data_e_i = mt[scaled_ws_list[i]+'_histo'].dataE(0)
             for j in range(len(data_y_i)):
+                
                 if data_y[j]>0 and data_y_i[j]>0:
                     [data_y[j], data_e[j]] = self.weightedMean([data_y[j], data_y_i[j]], [data_e[j], data_e_i[j]]);
                 elif (data_y[j] == 0) and (data_y_i[j]>0):
@@ -463,17 +465,36 @@ class BaseRefWidget(BaseWidget):
             if ws.endswith("_scaled"):
                 scaled_ws_list.append(ws)
         
-        
         # get binning parameters
         _from_q = str(self._summary.q_min_edit.text())
         _bin_size = str(self._summary.q_step_edit.text())
         _bin_max = str(2)
         binning_parameters = _from_q + ',-' + _bin_size + ',' + _bin_max
         
+        ## DEBUGGING ONLY
+        file_number = 0
+#        print '=========== BEFORE REBINING =========='
+        for ws in scaled_ws_list:
+#            print 'file_number: ' , file_number
+            data_y = mtd[ws].dataY(0)
+            data_e = mtd[ws].dataE(0)
+            
+            # cleanup data 0-> NAN
+            for j in range(len(data_y)):
+#                print '-> data_y[j]: ' , data_y[j] , ' data_e[j]: ' , data_y[j]
+                if data_y[j] < 1e-12:
+                    data_y[j] = NAN
+                    data_e[j] = NAN
+            
+            file_number = file_number + 1
+        
+        ## END OF DEBUGGING ONLY
+        
         # Convert each histo to histograms and rebin to final binning
         for ws in scaled_ws_list:
             new_name = "%s_histo" % ws
             ConvertToHistogram(InputWorkspace=ws, OutputWorkspace=new_name)
+#            mtd[new_name].setDistribution(True)
             Rebin(InputWorkspace=new_name, Params=binning_parameters,
                   OutputWorkspace=new_name)
 
@@ -481,12 +502,44 @@ class BaseRefWidget(BaseWidget):
         data_y = mtd[scaled_ws_list[0]+'_histo'].dataY(0)
         data_e = mtd[scaled_ws_list[0]+'_histo'].dataE(0)
 
+        # skip first 3 points and last one
+        skip_index = 0
+        point_to_skip = 3
+
+#        print '============ AFTER REBINING ================' #DEBUGGING ONLY
+
         # Add in the other histos, averaging the overlaps
         for i in range(1, len(scaled_ws_list)):
+            
+#            print 'i: ' , i
+            
+            skip_point = True
+            can_skip_last_point = False
+            
             data_y_i = mtd[scaled_ws_list[i]+'_histo'].dataY(0)
             data_e_i = mtd[scaled_ws_list[i]+'_histo'].dataE(0)
-            for j in range(len(data_y_i)):
+            for j in range(len(data_y_i)-1):
+                
+#                print '-> j: ' , j
+                
+                if data_y_i[j] > 0:
+                    
+#                    print '   data_y_i[j]: ', data_y_i[j], ' data_e_i[j]: ' , data_e_i[j]
+                    
+                    can_skip_last_point = True
+                    if skip_point:
+                        skip_index = skip_index + 1
+                        if skip_index == point_to_skip:
+                            skip_point = False
+                            skip_index = 0
+                        else:
+                            continue
+                
+                if can_skip_last_point and (data_y_i[j+1]==0):
+                    break
+                
                 if data_y[j]>0 and data_y_i[j]>0:
+                    
                     if isUsingLessErrorValue:
                         if (data_e[j] > data_e_i[j]):
                             data_y[j] = data_y_i[j]
@@ -498,12 +551,14 @@ class BaseRefWidget(BaseWidget):
                     data_y[j] = data_y_i[j]
                     data_e[j] = data_e_i[j]
 
+            
         return scaled_ws_list[0]+'_histo'
         
     def _create_ascii_clicked(self):
         """
         Reached by the 'Create ASCII' button
         """
+        
         #make sure there is the right output workspace called '
 #        if not mtd.workspaceExists('ref_combined'):
 #            print 'Workspace "ref_combined" does not exist !'
@@ -547,6 +602,7 @@ class BaseRefWidget(BaseWidget):
         #using mean or value with less error
         _overlap_less_error_flag = self._summary.overlapValueLowestErrorRadioButton.isChecked()
         wks_file_name = self._produce_y_of_same_x_(_overlap_less_error_flag)
+#        print 'wks_file_name: ' , wks_file_name
 
 #        mt = mtd['ref_combined']
 #        x_axis = mt.readX(0)[:]

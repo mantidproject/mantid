@@ -2,6 +2,7 @@
 #define PARAMETERMAPTEST_H_
 
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -219,6 +220,25 @@ public:
     TSM_ASSERT_EQUALS("Parameter called first should not exist", stored, Parameter_sptr());
   }
 
+  void testClearByName_Only_Removes_Named_Parameter_for_Cmpt()
+  {
+    ParameterMap pmap;
+    pmap.addDouble(m_testInstrument.get(), "first", 5.4);
+    pmap.addDouble(m_testInstrument.get(), "second", 10.3);
+    IComponent_sptr comp = m_testInstrument->getChild(0);
+    pmap.addDouble(comp.get(), "first", 5.4);
+    TS_ASSERT_EQUALS(pmap.size(), 3);
+    pmap.clearParametersByName("first",m_testInstrument.get());
+    TS_ASSERT_EQUALS(pmap.size(), 2);
+    // Has the correct one gone?
+    Parameter_sptr stored = pmap.get(m_testInstrument.get(), "second");
+    TSM_ASSERT("Parameter called second should still exist", stored);
+    stored = pmap.get(comp.get(), "first");
+    TSM_ASSERT("Parameter called first for child should still exist", stored);
+    stored = pmap.get(m_testInstrument.get(), "first");
+    TSM_ASSERT_EQUALS("Parameter called first for inst should not exist", stored, Parameter_sptr());
+  }
+
   void testClear_Results_In_Empty_Map()
   {
     ParameterMap pmap;
@@ -319,6 +339,29 @@ public:
     TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority", "A", fetchedValue->name());
     TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority",ParameterMap::pBool(), fetchedValue->type());
     TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority",false, fetchedValue->value<bool>());
+  }
+
+  void test_copy_from_old_pmap_to_new_pmap_with_new_component(){
+
+	  IComponent_sptr oldComp = m_testInstrument->getChild(0);
+	  IComponent_sptr newComp = m_testInstrument->getChild(1);
+
+	  ParameterMap oldPMap;
+	  oldPMap.addBool(oldComp.get(), "A", false);
+	  oldPMap.addDouble(oldComp.get(), "B", 1.2);
+
+	  ParameterMap newPMap;
+
+	  TS_ASSERT_DIFFERS(oldPMap,newPMap);
+
+	  newPMap.copyFromParameterMap(oldComp.get(),newComp.get(), &oldPMap);
+
+	  TS_ASSERT_EQUALS(newPMap.contains(newComp.get(), "A", ParameterMap::pBool()), true);
+	  TS_ASSERT_EQUALS(newPMap.contains(newComp.get(), "B", ParameterMap::pDouble()), true);
+
+	  Parameter_sptr a = newPMap.get(newComp.get(), "A");
+	  TS_ASSERT_EQUALS( a->value<bool>(), false);
+
   }
 
 private:

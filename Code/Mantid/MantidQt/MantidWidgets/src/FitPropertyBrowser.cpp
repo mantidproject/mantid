@@ -25,10 +25,14 @@
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/ICostFunction.h"
 
-#include "MantidQtMantidWidgets/UserFunctionDialog.h"
+#include "MantidQtMantidWidgets/FilenameDialogEditor.h"
+#include "MantidQtMantidWidgets/FormulaDialogEditor.h"
+#include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
+#include "ParameterPropertyManager.h"
+
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1125
@@ -39,7 +43,6 @@
   #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
 #include "qteditorfactory.h"
-#include "StringDialogEditorFactory.h"
 #include "DoubleEditorFactory.h"
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1125
@@ -48,6 +51,8 @@
     #pragma GCC diagnostic pop
   #endif
 #endif
+
+#include <Poco/ActiveResult.h>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -73,38 +78,6 @@ namespace MantidQt
 {
 namespace MantidWidgets
 {
-
-
-class FormulaDialogEditor: public StringDialogEditor
-{
-public:
-  FormulaDialogEditor(QtProperty *property, QWidget *parent)
-    :StringDialogEditor(property,parent){}
-protected slots:
-  void runDialog()
-  {
-    MantidQt::MantidWidgets::UserFunctionDialog *dlg = new MantidQt::MantidWidgets::UserFunctionDialog((QWidget*)parent(),getText());
-    if (dlg->exec() == QDialog::Accepted)
-    {
-      setText(dlg->getFormula());
-      updateProperty();
-    };
-  }
-};
-
-
-class FormulaDialogEditorFactory: public StringDialogEditorFactory
-{
-public:
-  FormulaDialogEditorFactory(QObject* parent):StringDialogEditorFactory(parent){}
-protected:
-  using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler warning
-  QWidget *createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent)
-  {
-    (void) manager; //Avoid unused warning
-    return new FormulaDialogEditor(property,parent);
-  }
-};
 
 
 /**
@@ -182,6 +155,7 @@ m_mantidui(mantidui)
   m_vectorManager = new QtGroupPropertyManager(w);
   m_vectorSizeManager = new QtIntPropertyManager(w);
   m_vectorDoubleManager = new QtDoublePropertyManager(w);
+  m_parameterManager = new ParameterPropertyManager(w);
 }
 
 
@@ -197,11 +171,11 @@ void FitPropertyBrowser::init()
 
   /* Create function group */
   QtProperty* functionsGroup = m_groupManager->addProperty("Functions");
-  QtProperty* settingsGroup(NULL);
+
 
   connect(this,SIGNAL(xRangeChanged(double, double)), m_mantidui, SLOT(x_range_from_picker(double, double)));
   /* Create input - output properties */  
-  settingsGroup = m_groupManager->addProperty("Settings");    
+  QtProperty* settingsGroup = m_groupManager->addProperty("Settings");
   m_startX = addDoubleProperty("StartX");
   m_endX = addDoubleProperty("EndX");
 
@@ -221,7 +195,7 @@ void FitPropertyBrowser::init()
 
   m_enumManager->setEnumNames(m_minimizer, m_minimizers);
   m_costFunction = m_enumManager->addProperty("Cost function");
-  m_costFunctions << "Least squares";
+  m_costFunctions << "Least squares" << "Rwp";
                   //<< "Ignore positive peaks";
   m_enumManager->setEnumNames(m_costFunction,m_costFunctions);
 
@@ -233,6 +207,16 @@ void FitPropertyBrowser::init()
   bool plotCompositeItems = settings.value(m_plotCompositeMembers->propertyName(),
                                            QVariant(false)).toBool();
   m_boolManager->setValue(m_plotCompositeMembers, plotCompositeItems);
+
+  m_convolveMembers = m_boolManager->addProperty("Convolve Composite Members");
+  bool convolveCompositeItems = settings.value(m_plotCompositeMembers->propertyName(),
+                                           QVariant(false)).toBool();
+  m_boolManager->setValue(m_convolveMembers, convolveCompositeItems);
+
+  m_showParamErrors = m_boolManager->addProperty("Show Parameter Errors");
+  bool showParamErrors = settings.value(m_showParamErrors->propertyName(), false).toBool();
+  m_boolManager->setValue(m_showParamErrors, showParamErrors);
+  m_parameterManager->setErrorsEnabled(showParamErrors);
 
   m_xColumn = m_columnManager->addProperty("XColumn");
   m_yColumn = m_columnManager->addProperty("YColumn");
@@ -250,14 +234,16 @@ void FitPropertyBrowser::init()
   settingsGroup->addSubProperty(m_costFunction);
   settingsGroup->addSubProperty(m_plotDiff);
   settingsGroup->addSubProperty(m_plotCompositeMembers);
-    
+  settingsGroup->addSubProperty(m_convolveMembers);
+  settingsGroup->addSubProperty(m_showParamErrors);
+
   /* Create editors and assign them to the managers */
   createEditors(w);
 
   updateDecimals();
   
   m_functionsGroup = m_browser->addProperty(functionsGroup);
-  m_settingsGroup = m_browser->addProperty(settingsGroup);  
+  m_settingsGroup = m_browser->addProperty(settingsGroup);
 
   initLayout(w);
 
@@ -289,6 +275,7 @@ void FitPropertyBrowser::initLayout(QWidget *w)
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
   connect(m_columnManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(columnChanged(QtProperty*)));
   connect(m_vectorDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(vectorDoubleChanged(QtProperty*)));
+  connect(m_parameterManager,SIGNAL(propertyChanged(QtProperty*)), this, SLOT(parameterChanged(QtProperty*)));
 
   QVBoxLayout* layout = new QVBoxLayout(w);
   QGridLayout* buttonsLayout = new QGridLayout();
@@ -423,8 +410,8 @@ void FitPropertyBrowser::createEditors(QWidget *w)
   QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(w);
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(w);
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(w);
-  QtLineEditFactory *lineEditFactory = new QtLineEditFactory(w);
-  StringDialogEditorFactory* stringDialogEditFactory = new StringDialogEditorFactory(w);
+  StringEditorFactory* stringEditFactory = new StringEditorFactory(w);
+  FilenameDialogEditorFactory* filenameDialogEditorFactory = new FilenameDialogEditorFactory(w);
   FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(w);
 
   m_browser = new QtTreePropertyBrowser();
@@ -432,12 +419,13 @@ void FitPropertyBrowser::createEditors(QWidget *w)
   m_browser->setFactoryForManager(m_boolManager, checkBoxFactory);
   m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
-  m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
-  m_browser->setFactoryForManager(m_filenameManager, stringDialogEditFactory);
+  m_browser->setFactoryForManager(m_stringManager, stringEditFactory);
+  m_browser->setFactoryForManager(m_filenameManager, filenameDialogEditorFactory);
   m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
   m_browser->setFactoryForManager(m_columnManager, comboBoxFactory);
   m_browser->setFactoryForManager(m_vectorSizeManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_vectorDoubleManager, doubleEditorFactory);
+  m_browser->setFactoryForManager(m_parameterManager, new ParameterEditorFactory(w));
 }
 
 
@@ -1130,6 +1118,14 @@ std::string FitPropertyBrowser::costFunction()const
   return m_costFunctions[i].toStdString();
 }
 
+/**
+  * Get the "ConvolveMembers" option
+  */
+bool FitPropertyBrowser::convolveMembers() const
+{
+    return m_boolManager->value(m_convolveMembers);
+}
+
 /// Get the registered function names
 void FitPropertyBrowser::populateFunctionNames()
 {
@@ -1204,11 +1200,19 @@ void FitPropertyBrowser::boolChanged(QtProperty* prop)
 {
   if ( ! m_changeSlotsEnabled ) return;
 
-  if ( prop == m_plotDiff || prop == m_plotCompositeMembers || prop == m_ignoreInvalidData )
+  if ( prop == m_plotDiff || prop == m_plotCompositeMembers || prop == m_ignoreInvalidData
+       || prop == m_showParamErrors )
   {
+    bool val = m_boolManager->value(prop);
+
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
-    settings.setValue(prop->propertyName(), m_boolManager->value(prop));
+    settings.setValue(prop->propertyName(), val);
+
+    if ( m_showParamErrors )
+    {
+      m_parameterManager->setErrorsEnabled(val);
+    }
   }
   else
   {// it could be an attribute
@@ -1287,10 +1291,6 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
     emit xRangeChanged(startX(), endX());
     return;
   }
-  else if(getHandler()->setParameter(prop))
-  {
-    return;
-  }
   else
   {// check if it is a constraint
     PropertyHandler* h = getHandler()->findHandler(prop);
@@ -1316,6 +1316,19 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
     }
   }
 }
+
+/**
+ * Called when one of the parameter values gets changed. This could be caused either by user setting
+ * the value or programmatically.
+ * @param prop :: Parameter property which value got changed
+ */
+void FitPropertyBrowser::parameterChanged(QtProperty* prop)
+{
+  if ( ! m_changeSlotsEnabled ) return;
+
+  getHandler()->setParameter(prop);
+}
+
 /** Called when a string property changed
  * @param prop :: A pointer to the property 
  */
@@ -1511,15 +1524,7 @@ void FitPropertyBrowser::doFit(int maxIterations)
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    std::string funStr;
-    if (m_compositeFunction->nFunctions() > 1)
-    {
-      funStr = m_compositeFunction->asString();
-    }
-    else
-    {
-      funStr = (m_compositeFunction->getFunction(0))->asString();
-    }
+    std::string funStr = getFittingFunction()->asString();
 
     if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsName+"_NormalisedCovarianceMatrix"))
     {
@@ -1537,8 +1542,7 @@ void FitPropertyBrowser::doFit(int maxIterations)
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     alg->setPropertyValue("Function",funStr);
-    //alg->setPropertyValue("InputWorkspace",wsName);
-    alg->setProperty("InputWorkspace",getWorkspace());
+    alg->setPropertyValue("InputWorkspace",wsName);
     alg->setProperty("WorkspaceIndex",workspaceIndex());
     alg->setProperty("StartX",startX());
     alg->setProperty("EndX",endX());
@@ -1549,6 +1553,10 @@ void FitPropertyBrowser::doFit(int maxIterations)
     alg->setProperty( "MaxIterations", maxIterations );
     // Always output each composite function but not necessarily plot it
     alg->setProperty("OutputCompositeMembers", true);
+    if ( alg->existsProperty("ConvolveMembers") )
+    {
+        alg->setProperty("ConvolveMembers", convolveMembers());
+    }
     observeFinish(alg);
     alg->executeAsync();
 
@@ -1558,6 +1566,23 @@ void FitPropertyBrowser::doFit(int maxIterations)
     QString msg = "Fit algorithm failed.\n\n"+QString(e.what())+"\n";
     QMessageBox::critical(this,"Mantid - Error", msg);
   }
+}
+
+/**
+  * Return the function that will be passed to Fit.
+  */
+Mantid::API::IFunction_sptr FitPropertyBrowser::getFittingFunction() const
+{
+    Mantid::API::IFunction_sptr function;
+    if (m_compositeFunction->nFunctions() > 1)
+    {
+      function = m_compositeFunction;
+    }
+    else
+    {
+      function = m_compositeFunction->getFunction(0);
+    }
+    return function;
 }
 
 void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
@@ -1791,7 +1816,8 @@ void FitPropertyBrowser::vectorDoubleChanged(QtProperty *prop)
     h->setVectorAttribute(prop);
 }
 
-/** Update the function parameter properties. 
+/**
+ * Update the function parameter properties
  */
 void FitPropertyBrowser::updateParameters()
 {
@@ -1834,14 +1860,19 @@ void FitPropertyBrowser::getFitResults()
       try
       {
         std::string name;
-        double value;
-        row >> name >> value;
+        double value, error;
+        row >> name >> value >> error;
+
         // In case of a single function Fit doesn't create a CompositeFunction
         if (count() == 1)
         {
           name.insert(0,"f0.");
         }
-        compositeFunction()->setParameter(name,value);
+
+        size_t paramIndex = compositeFunction()->parameterIndex(name);
+
+        compositeFunction()->setParameter(paramIndex,value);
+        compositeFunction()->setError(paramIndex, error);
       }
       catch(...)
       {
@@ -1850,6 +1881,7 @@ void FitPropertyBrowser::getFitResults()
     }
     while(row.next());
     updateParameters();
+    getHandler()->updateErrors();
   }
 }
 
@@ -1865,6 +1897,7 @@ void FitPropertyBrowser::undoFit()
       compositeFunction()->setParameter(i,m_initialParameters[i]);
     }
     updateParameters();
+    getHandler()->clearErrors();
   }
   disableUndo();
 }
@@ -2226,6 +2259,7 @@ void FitPropertyBrowser::clearAllPlots()
 
 /** Create a double property and set some settings
  * @param name :: The name of the new property
+ * @param manager :: The current property manager
  * @return Pointer to the created property
  */
 QtProperty* FitPropertyBrowser::addDoubleProperty(const QString& name, QtDoublePropertyManager *manager)const

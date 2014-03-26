@@ -5,7 +5,6 @@
 #include "Graph.h"
 #include "LegendWidget.h"
 #include "TextDialog.h"
-#include "DataPointMarker.h"
 
 #include "Plot.h"
 #include "PlotCurve.h"

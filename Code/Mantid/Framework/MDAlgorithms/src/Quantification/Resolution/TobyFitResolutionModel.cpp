@@ -41,12 +41,13 @@ namespace Mantid
      * Default constructor
      */
     TobyFitResolutionModel::TobyFitResolutionModel()
-      : MDResolutionConvolution(), m_randomNumbers(),
+      : MDResolutionConvolution(), m_randomNumbers(1, NULL),
         m_mcLoopMin(100), m_mcLoopMax(1000),  m_mcType(4),m_mcRelErrorTol(1e-5),
         m_foregroundOnly(false), m_mosaicActive(true),
         m_bmatrix(1), m_yvector(1), m_etaInPlane(1, 0.0), m_etaOutPlane(1, 0.0), m_deltaQE(1,std::vector<double>(4, 0.0)),
         m_exptCache()
     {
+      setupRandomNumberGenerator();
     }
 
     /**
@@ -56,12 +57,13 @@ namespace Mantid
      */
     TobyFitResolutionModel::TobyFitResolutionModel(const API::IFunctionMD & fittedFunction,
                                                                      const std::string & fgModel)
-      : MDResolutionConvolution(fittedFunction, fgModel), m_randomNumbers(),
+      : MDResolutionConvolution(fittedFunction, fgModel), m_randomNumbers(1, NULL),
         m_mcLoopMin(100), m_mcLoopMax(1000),  m_mcType(4), m_mcRelErrorTol(1e-5),
         m_foregroundOnly(false), m_mosaicActive(true),
         m_bmatrix(1), m_yvector(1), m_etaInPlane(1,0.0), m_etaOutPlane(1,0.0), m_deltaQE(1,std::vector<double>(4, 0.0)),
         m_exptCache()
     {
+      setupRandomNumberGenerator();
     }
 
     /**
@@ -69,6 +71,9 @@ namespace Mantid
      */
     TobyFitResolutionModel::~TobyFitResolutionModel()
     {
+      deleteRandomNumberGenerator();
+
+      // Remove experiment cache
       auto iter = m_exptCache.begin();
       while(iter != m_exptCache.end())
       {
@@ -79,7 +84,7 @@ namespace Mantid
 
     /**
      * Returns the value of the cross-section convoluted with the resolution an event. This assumes that
-     * the box forms a 4D point with axes: Qx, Qy, Qz, \f$\Delta E\f$
+     * the box forms a 4D point with axes: Qx, Qy, Qz, \f$\Delta E\f$ in the cartesian crystal frame
      * @param box :: An iterator pointing at the current box under examination
      * @param eventIndex :: An index of the current event in the box
      * @param innerRunIndex :: An index of the current run within the workspace. This is NOT the run number. The experiment
@@ -91,41 +96,95 @@ namespace Mantid
     {
       auto iter = m_exptCache.find(std::make_pair(innerRunIndex, box.getInnerDetectorID(eventIndex))); // Guaranteed to exist
       const CachedExperimentInfo & detCachedExperimentInfo = *(iter->second);
-      QOmegaPoint qOmega(box, eventIndex);
+      QOmegaPoint qCrystal(box, eventIndex);
+
+      // Transform to spectrometer coordinates for resolution calculation
+      // Done by hand to avoid expensive memory allocations when using Matrix classes
+      const Geometry::OrientedLattice & lattice = detCachedExperimentInfo.experimentInfo().sample().getOrientedLattice();
+      const Kernel::DblMatrix & gr = detCachedExperimentInfo.experimentInfo().run().getGoniometerMatrix();
+      const Kernel::DblMatrix & umat = lattice.getU();
+
+      QOmegaPoint qLab(0.0,0.0,0.0,qCrystal.deltaE);
+      for(unsigned int i = 0; i < 3; ++i)
+      {
+        qLab.qx += (gr[0][i]*umat[i][0]*qCrystal.qx +
+                    gr[0][i]*umat[i][1]*qCrystal.qy +
+                    gr[0][i]*umat[i][2]*qCrystal.qz);
+
+        qLab.qy += (gr[1][i]*umat[i][0]*qCrystal.qx +
+                    gr[1][i]*umat[i][1]*qCrystal.qy +
+                    gr[1][i]*umat[i][2]*qCrystal.qz);
+
+        qLab.qz += (gr[2][i]*umat[i][0]*qCrystal.qx +
+                    gr[2][i]*umat[i][1]*qCrystal.qy +
+                    gr[2][i]*umat[i][2]*qCrystal.qz);
+      }
 
       if(m_foregroundOnly)
       {
         std::vector<double> & nominalQ = m_deltaQE[PARALLEL_THREAD_NUMBER];
-        nominalQ[0] = qOmega.qx;
-        nominalQ[1] = qOmega.qy;
-        nominalQ[2] = qOmega.qz;
-        nominalQ[3] = qOmega.deltaE;
+        nominalQ[0] = qCrystal.qx;
+        nominalQ[1] = qCrystal.qy;
+        nominalQ[2] = qCrystal.qz;
+        nominalQ[3] = qCrystal.deltaE;
         return foregroundModel().scatteringIntensity(detCachedExperimentInfo.experimentInfo(), nominalQ);
       }
 
       // -- Add in perturbations to nominal Q from instrument resolution --
 
       // Calculate the matrix of coefficients that contribute to the resolution function (the B matrix in TobyFit).
-      calculateResolutionCoefficients(detCachedExperimentInfo, qOmega);
+      calculateResolutionCoefficients(detCachedExperimentInfo, qLab);
+
+      // Pre calculate the transform inverse (RU) matrix elements
+      double rb00(0.0), rb01(0.0), rb02(0.0),
+             rb10(0.0), rb11(0.0), rb12(0.0),
+             rb20(0.0), rb21(0.0), rb22(0.0);
+      for(unsigned int i = 0; i < 3; ++i)
+      {
+        rb00 += gr[0][i]*umat[i][0];
+        rb01 += gr[0][i]*umat[i][1];
+        rb02 += gr[0][i]*umat[i][2];
+
+        rb10 += gr[1][i]*umat[i][0];
+        rb11 += gr[1][i]*umat[i][1];
+        rb12 += gr[1][i]*umat[i][2];
+
+        rb20 += gr[2][i]*umat[i][0];
+        rb21 += gr[2][i]*umat[i][1];
+        rb22 += gr[2][i]*umat[i][2];
+      }
+      const double determinant = (rb00*(rb11*rb22 - rb12*rb21) -
+                                  rb01*(rb10*rb22 - rb12*rb20) +
+                                  rb02*(rb10*rb21 - rb11*rb20));
 
       // Start MC loop and check the relative error every min steps
       monteCarloLoopStarting();
       double sumSigma(0.0), sumSigmaSqr(0.0), avgSigma(0.0);
       for(int step = 1; step <= m_mcLoopMax; ++step)
       {
-        generateIntegrationVariables(detCachedExperimentInfo, qOmega);
-        calculatePerturbedQE(detCachedExperimentInfo, qOmega);
+        generateIntegrationVariables(detCachedExperimentInfo, qLab);
+        calculatePerturbedQE(detCachedExperimentInfo, qLab);
 
         std::vector<double> & q0 = m_deltaQE[PARALLEL_THREAD_NUMBER]; // Currently ordered beam,perp,up (z,x,y)
         // Reorder to X,Y,Z
         std::swap(q0[0],q0[1]);
         std::swap(q0[1],q0[2]);
 
+        // Transform to crystal frame for model
+        // Need to tidy this up when we confirm it is correct
+        const double qcx = ((rb11*rb22 - rb12*rb21)*q0[0] + (rb02*rb21 - rb01*rb22)*q0[1] + (rb01*rb12 - rb02*rb11)*q0[2])/determinant;
+        const double qcy = ((rb12*rb20 - rb10*rb22)*q0[0] + (rb00*rb22 - rb02*rb20)*q0[1] + (rb02*rb10 - rb00*rb12)*q0[2])/determinant;
+        const double qcz = ((rb10*rb21 - rb11*rb20)*q0[0] + (rb01*rb20 - rb00*rb21)*q0[1] + (rb00*rb11 - rb01*rb10)*q0[2])/determinant;
+        q0[0] = qcx;
+        q0[1] = qcy;
+        q0[2] = qcz;
+
         // Compute weight from the foreground at this point
         const double weight = foregroundModel().scatteringIntensity(detCachedExperimentInfo.experimentInfo(), q0);
         // Add on this contribution to the average
         sumSigma += weight;
         sumSigmaSqr += weight*weight;
+
         avgSigma = sumSigma/step;
         if(checkForConvergence(step) && hasConverged(step, sumSigma, sumSigmaSqr, avgSigma))
         {
@@ -196,7 +255,6 @@ namespace Mantid
       }
       else
       {
-        std::cerr << "Setting attribute on TobyFitYVector " << name << "\n";
         for(auto iter = m_yvector.begin(); iter != m_yvector.end(); ++iter)
         {
           iter->setAttribute(name, value);
@@ -225,13 +283,13 @@ namespace Mantid
                                       const QOmegaPoint & eventPoint) const
     {
       const std::vector<double> & randomNums = generateRandomNumbers();
-      const size_t nvars = m_yvector[PARALLEL_THREAD_NUMBER].recalculate(randomNums, observation, eventPoint);
+      const size_t nRandUsed = m_yvector[PARALLEL_THREAD_NUMBER].recalculate(randomNums, observation, eventPoint);
 
       // Calculate crystal mosaic contribution
       if(m_mosaicActive)
       {
-        const double & r1 = randomNums[nvars];
-        const double & r2 = randomNums[nvars+1];
+        const double r1 = randomNums[nRandUsed];
+        const double r2 = randomNums[nRandUsed+1];
         const double small(1e-20);
         const double fwhhToStdDev = M_PI/180./std::sqrt(log(256.0)); // degrees FWHH -> st.dev. in radians
 
@@ -300,9 +358,10 @@ namespace Mantid
                    L10(D02*D21 - D01*D22), L11(D00*D22 - D02*D20), L12(D20*D01 - D00*D21),
                    L20(D01*D12 - D02*D11), L21(D02*D10 - D00*D12), L22(D00*D11 - D01*D10);
       
-      const double dqlab0 = (L00*xVec3 + L01*xVec4 + L02*xVec5)/determinant;
-      const double dqlab1 = (L10*xVec3 + L11*xVec4 + L12*xVec5)/determinant;
-      const double dqlab2 = (L20*xVec3 + L21*xVec4 + L22*xVec5)/determinant;
+      const double dqlab0 = (L22*xVec3 + L02*xVec4 + L12*xVec5)/determinant;
+      const double dqlab1 = (L20*xVec3 + L00*xVec4 + L10*xVec5)/determinant;
+      const double dqlab2 = (L21*xVec3 + L01*xVec4 + L11*xVec5)/determinant;
+
       std::vector<double> & deltaQE = m_deltaQE[PARALLEL_THREAD_NUMBER];
       deltaQE[0] = (xVec0 - dqlab0);
       deltaQE[1] = (xVec1 - dqlab1);
@@ -317,6 +376,7 @@ namespace Mantid
       {
         const double & etaInPlane = m_etaInPlane[PARALLEL_THREAD_NUMBER];
         const double & etaOutPlane = m_etaOutPlane[PARALLEL_THREAD_NUMBER];
+
         const double qx(qOmega.qx + deltaQE[1]),qy(qOmega.qy + deltaQE[2]),qz(qOmega.qz + deltaQE[0]);
         const double qipmodSq = qy*qy + qz*qz;
         const double qmod = std::sqrt(qx*qx + qipmodSq);
@@ -467,9 +527,9 @@ namespace Mantid
     void TobyFitResolutionModel::setNThreads(int nthreads)
     {
       if(nthreads <= 0) nthreads = 1; // Ensure we have a sensible number
-      if(nthreads == 1 ) return;
+      if(nthreads == 1 ) return; // done on construction
 
-      m_randomNumbers = std::vector<Kernel::NDRandomNumberGenerator*>(nthreads);
+      m_randomNumbers = std::vector<Kernel::NDRandomNumberGenerator*>(nthreads, NULL);
       m_bmatrix = std::vector<TobyFitBMatrix>(nthreads, m_bmatrix[0]); // Initialize with copy of current
       m_yvector = std::vector<TobyFitYVector>(nthreads, m_yvector[0]);
       m_etaInPlane = std::vector<double>(nthreads, 0.0);
@@ -501,9 +561,15 @@ namespace Mantid
        *  3 - As above for 2,4. Generator is NOT restarted but two sets must
        *      be used to ensure partial derivatives use the same set of deviates
        */
-      const unsigned int nrand = m_yvector[0].requiredRandomNums() + 2; // Extra 2 for mosaic
+      // Clear out any old ones
+      deleteRandomNumberGenerator();
 
-      const size_t nthreads(m_randomNumbers.size());
+      unsigned int nrand = m_yvector[0].requiredRandomNums();
+      if(m_mosaicActive)
+      {
+        nrand += 2; // Extra 2 for mosaic
+      }
+      const size_t ngenerators(m_yvector.size());
       if(m_mcType % 2 == 0)// Pseudo-random
       {
         size_t seed(0);
@@ -511,18 +577,31 @@ namespace Mantid
         else if(m_mcType == 4) seed = static_cast<size_t>(Poco::Timestamp().epochMicroseconds());
 
         typedef NDPseudoRandomNumberGenerator<MersenneTwister> NDMersenneTwister;
-        for(size_t i = 0; i < nthreads; ++i)
+        for(size_t i = 0; i < ngenerators; ++i)
         {
           m_randomNumbers[i] = new NDMersenneTwister(nrand, seed, 0.0, 1.0);
         }
       }
       else //Quasi-random
       {
-        for(size_t i = 0; i < nthreads; ++i)
+        for(size_t i = 0; i < ngenerators; ++i)
         {
           m_randomNumbers[i] = new Kernel::SobolSequence(nrand);
         }
       }
+    }
+
+    /**
+     */
+    void TobyFitResolutionModel::deleteRandomNumberGenerator()
+    {
+      // Delete random number generator(s)
+      auto iend = m_randomNumbers.end();
+      for(auto it = m_randomNumbers.begin(); it != iend; ++it)
+      {
+        delete *it; // Delete pointer at given iterator location. vector stays same size
+      }
+      // Leave the vector at the size it was
     }
 
   }

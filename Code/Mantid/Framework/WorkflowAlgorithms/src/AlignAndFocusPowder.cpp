@@ -28,6 +28,7 @@ This is a workflow algorithm that does the bulk of the work for time focusing di
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -107,11 +108,13 @@ namespace WorkflowAlgorithms
     declareProperty(new FileProperty("CalFileName", "", FileProperty::OptionalLoad, ".cal"),
                     "The name of the CalFile with offset, masking, and grouping data" );
     declareProperty(new WorkspaceProperty<GroupingWorkspace>("GroupingWorkspace","",Direction::Input, PropertyMode::Optional),
-                    "Optional: An GroupingWorkspace workspace giving the grouping info.");
+                    "Optional: A GroupingWorkspace giving the grouping info.");
     declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace","",Direction::Input, PropertyMode::Optional),
-                    "Optional: An OffsetsWorkspace workspace giving the detector calibration values.");
+                    "Optional: An OffsetsWorkspace giving the detector calibration values.");
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("MaskWorkspace","",Direction::Input, PropertyMode::Optional),
-                    "Optional: An Workspace workspace giving which detectors are masked.");
+                    "Optional: A workspace giving which detectors are masked.");
+    declareProperty(new WorkspaceProperty<TableWorkspace>("MaskBinTable","",Direction::Input, PropertyMode::Optional),
+                    "Optional: A workspace giving pixels and bins to mask.");
     declareProperty(new ArrayProperty<double>("Params"/*, boost::make_shared<RebinParamsValidator>()*/),
                     "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
                     "this can be followed by a comma and more widths and last boundary pairs.\n"
@@ -199,6 +202,7 @@ namespace WorkflowAlgorithms
     m_offsetsWS = getProperty("OffsetsWorkspace");
     m_maskWS = getProperty("MaskWorkspace");
     m_groupWS = getProperty("GroupingWorkspace");
+    DataObjects::TableWorkspace_sptr maskBinTableWS = getProperty("MaskBinTable");
     m_l1 = getProperty("PrimaryFlightPath");
     specids = getProperty("SpectrumIDs");
     l2s = getProperty("L2");
@@ -344,7 +348,7 @@ namespace WorkflowAlgorithms
     }
 
     // set up a progress bar with the "correct" number of steps
-    m_progress = new Progress(this, 0., 1., 21);
+    m_progress = new Progress(this, 0., 1., 22);
 
     // filter the input events if appropriate
     if (m_inputEW)
@@ -413,6 +417,18 @@ namespace WorkflowAlgorithms
         cropAlg->executeAsChildAlg();
         m_outputW = cropAlg->getProperty("OutputWorkspace");
       }
+    }
+    m_progress->report();
+
+    if (maskBinTableWS)
+    {
+      g_log.information() << "running MaskBinsFromTable\n";
+      API::IAlgorithm_sptr alg = createChildAlgorithm("MaskBinsFromTable");
+      alg->setProperty("InputWorkspace", m_outputW);
+      alg->setProperty("OutputWorkspace", m_outputW);
+      alg->setProperty("MaskingInformation", maskBinTableWS);
+      alg->executeAsChildAlg();
+      m_outputW = alg->getProperty("OutputWorkspace");
     }
     m_progress->report();
 
@@ -521,11 +537,10 @@ namespace WorkflowAlgorithms
     if (ews)
     {
       size_t numhighevents = ews->getNumberEvents();
-      size_t numlowevents = 0;
       if (m_processLowResTOF)
       {
         EventWorkspace_sptr lowes = boost::dynamic_pointer_cast<EventWorkspace>(m_lowResW);
-        numlowevents = lowes->getNumberEvents();
+        size_t numlowevents = lowes->getNumberEvents();
         g_log.information() << "Number of high TOF events = " << numhighevents << "; "
                             << "Number of low TOF events = " << numlowevents << ".\n";
       }

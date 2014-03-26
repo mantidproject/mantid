@@ -39,6 +39,9 @@ class TextFormatButtons : public QWidget
 {
   Q_OBJECT
 
+signals:
+  void formattingModified();
+
 public:
   enum Buttons{Plot3D, AxisLabel, Legend, Equation, TexLegend};
 

@@ -1039,13 +1039,12 @@ int Table::selectedColsNumber()
 
 QVarLengthArray<double> Table::col(int ycol)
 {
-  int i;
   int rows=d_table->numRows();
   int cols=d_table->numCols();
   QVarLengthArray<double> Y(rows);
   if (ycol<=cols)
   {
-    for (i=0;i<rows;i++)
+    for (int i=0;i<rows;i++)
       Y[i]=d_table->text(i,ycol).toDouble();
   }
   return Y;
@@ -1086,28 +1085,47 @@ void Table::insertCol()
   insertCols(selectedCol, 1);
 }
 
+/**
+ * Insert a row before the current row.
+ */
 void Table::insertRow()
 {
   int cr = d_table->currentRow();
   if (d_table->isRowSelected (cr, true))
   {
-    d_table->insertRows(cr, 1);
-    emit modifiedWindow(this);
+    insertRows(cr, 1);
   }
 }
 
+/**
+ * Insert a row before a specified index.
+ * @param row :: Row number at which to insert.
+ */
 void Table::insertRow(int row)
 {
   if (row < numRows())
   {
-    d_table->insertRows(row, 1);
-    emit modifiedWindow(this);
+    insertRows(row, 1);
   }
 }
 
-void Table::addRows(int num)//Mantid
+/**
+ * Add rows to the end of the table.
+ * @param num :: Number of rows to add.
+ */
+void Table::addRows(int num)
 {
-  d_table->insertRows(numRows(), num);
+  insertRows(numRows(), num);
+}
+
+/**
+ * Insert rows before a specified row.
+ * @param atRow :: Row number at which to insert.
+ * @param num :: Number of rows to insert.
+ */
+void Table::insertRows(int atRow, int num)
+{
+  d_table->insertRows(atRow, num);
   emit modifiedWindow(this);
 }
 
@@ -1556,7 +1574,7 @@ void Table::normalizeCol(int col)
 
 void Table::sortColumnsDialog()
 {
-  SortDialog *sortd = new SortDialog((QWidget*)applicationWindow());
+  SortDialog *sortd = new SortDialog(applicationWindow());
   sortd->setAttribute(Qt::WA_DeleteOnClose);
   connect (sortd, SIGNAL(sort(int, int, const QString&)), this, SLOT(sortColumns(int, int, const QString&)));
   sortd->insertColumnsList(selectedColumns());
@@ -1565,7 +1583,7 @@ void Table::sortColumnsDialog()
 
 void Table::sortTableDialog()
 {
-  SortDialog *sortd = new SortDialog((QWidget*)applicationWindow());
+  SortDialog *sortd = new SortDialog(applicationWindow());
   sortd->setAttribute(Qt::WA_DeleteOnClose);
   connect (sortd, SIGNAL(sort(int, int, const QString&)), this, SLOT(sort(int, int, const QString&)));
   sortd->insertColumnsList(colNames());
@@ -2218,11 +2236,21 @@ void Table::setHeader(QStringList header)
 
 int Table::colIndex(const QString& name)
 {
-//  std::cout << "Col " << name.toStdString() << std::endl;
-  int pos = name.find("_",false);
-  QString label = name.right(name.length()-pos-1);
+  QString label;
+
+  if ( name.startsWith(objectName()) )
+  {
+    // If fully-qualified column name specified - remove name of the table from it before searching.
+    // E.g. Table-1_A0 should become just A0. -1 for the unserscore after the table name.
+    label = name.right( name.length() - objectName().length() - 1);
+  }
+  else
+  {
+    // If doesn't begin with a table name, try to look for a full name specified.
+    label = name;
+  }
+
   return col_label.findIndex(label);
-//  return col_label.findIndex(name);
 }
 
 void Table::setHeaderColType()
@@ -2456,7 +2484,7 @@ void Table::importASCII(const QString &fname, const QString &sep, int ignoredLin
     setHeaderColType();
 
     int steps = rows/100 + 1;
-    QProgressDialog progress((QWidget *)applicationWindow());
+    QProgressDialog progress(applicationWindow());
     progress.setWindowTitle(tr("MantidPlot") + " - " + tr("Reading file..."));
     progress.setLabelText(fname);
     progress.setActiveWindow();
@@ -2712,7 +2740,7 @@ bool Table::eventFilter(QObject *object, QEvent *e)
 void Table::customEvent(QEvent *e)
 {
   if (e->type() == SCRIPTING_CHANGE_EVENT)
-    scriptingChangeEvent((ScriptingChangeEvent*)e);
+    scriptingChangeEvent(static_cast<ScriptingChangeEvent*>(e));
 }
 
 QString& Table::getSpecifications()
@@ -3306,11 +3334,11 @@ void Table::showAllColumns()
  *****************************************************************************/
 
 MyTable::MyTable(QWidget * parent, const char * name)
-:Q3Table(parent, name)
+:Q3Table(parent, name),m_blockResizing(false)
 {}
 
 MyTable::MyTable(int numRows, int numCols, QWidget * parent, const char * name)
-:Q3Table(numRows, numCols, parent, name)
+:Q3Table(numRows, numCols, parent, name),m_blockResizing(false)
 {}
 
 void MyTable::activateNextCell()
@@ -3326,3 +3354,21 @@ void MyTable::activateNextCell()
   setCurrentCell (row + 1, col);
   selectCells(row+1, col, row+1, col);
 }
+
+void MyTable::blockResizing(bool yes)
+{
+  m_blockResizing = yes;
+}
+
+void MyTable::resizeData(int n)
+{
+  if ( m_blockResizing )
+  {
+    emit unwantedResize();
+  }
+  else
+  {
+    Q3Table::resizeData(n);
+  }
+}
+

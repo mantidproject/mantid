@@ -4,13 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/DllConfig.h"
-#include <exception>
-#include <ostream>
+
 #include <Poco/Message.h>
+
+#include <iosfwd>
 #include <set>
-#include <streambuf>
 #include <string>
 
 //----------------------------------------------------------------------
@@ -19,6 +18,7 @@
 /// @cond Exclude from doxygen documentation
 namespace Poco
 {
+  class FastMutex;
   class Logger;
   class NullOutputStream;
 }
@@ -71,19 +71,8 @@ class ThreadSafeLogStream;
     // Our logger's priority types are the same as POCO's Message's types.
     typedef Poco::Message::Priority Priority;
 
-//    /// An enumeration of the priority levels of a log message.
-//    enum Priority
-//    {
-//      PRIO_FATAL = 1,           ///< A fatal error. The application will most likely terminate. This is the highest priority.
-//      PRIO_ERROR = 3,       ///< An error. An operation did not complete successfully, but the application as a whole is not affected.
-//      PRIO_WARNING = 4,     ///< A warning. An operation completed with an unexpected result.
-//      PRIO_NOTICE = 5,      ///< An informational message, usually denoting the successful completion of an Algorithm, These are the headlines of what we should be reporting to the user.
-//      PRIO_INFORMATION = 6, ///< An informational message, usually denoting the successful completion of an operation.
-//      PRIO_DEBUG = 7        ///< A debugging message.This is the lowest priority.
-//    };
-
     /// Sets the Loggername to a new value.
-    void setName(std::string newName);
+    void setName(const std::string & newName);
     /// Logs at Fatal level     
     void fatal(const std::string& msg);
     /// Logs at error level
@@ -99,23 +88,29 @@ class ThreadSafeLogStream;
 
     /// Logs at Fatal level
     std::ostream& fatal();
-    /// Logs at error level                     
+    /// Logs at error level
     std::ostream& error();
-    /// Logs at warning level                   
+    /// Logs at warning level
     std::ostream& warning();
-    /// Logs at notice level            
-    std::ostream& notice();                     
+    /// Logs at notice level
+    std::ostream& notice();
     /// Logs at information level
     std::ostream& information();
     /// Logs at debug level
-    std::ostream& debug();                      
+    std::ostream& debug();
 
     /// Logs the given message at debug level, followed by the data in buffer.
     void dump(const std::string& msg, const void* buffer, std::size_t length);
 
     /// Sets the Logger's log level.
     void setLevel(int level);
-                
+           
+    /// Sets the Logger's log offset level.
+    void setLevelOffset(int level);
+
+    /// Gets the Logger's log offset level.
+    int getLevelOffset();
+
     /// Returns the Logger's log level.
     int getLevel() const;
                 
@@ -159,8 +154,14 @@ class ThreadSafeLogStream;
     /// Overload of = operator
     Logger& operator= (const Logger&);
 
+    /// Log a message at a given priority
+    void log(const std::string & message, Logger::Priority priority);
+
+    /// gets the correct log stream for a priority
+    std::ostream& getLogStream(Logger::Priority priority);
+
     /// Return a log stream set with the given priority
-    void log(const std::string message, Logger::Priority priority);
+    Priority applyLevelOffset(Priority proposedLevel);
 
     /// Internal handle to third party logging objects
     Poco::Logger* m_log;
@@ -168,6 +169,8 @@ class ThreadSafeLogStream;
     ThreadSafeLogStream* m_logStream;
     /// Name of this logging object
     std::string m_name;
+    /// The offset of the logger
+    int m_levelOffset;
     /// The state of this logger, disabled loggers send no messages
     bool m_enabled;
     /// Typdef for a container of logger pointers
@@ -177,7 +180,7 @@ class ThreadSafeLogStream;
     /// The null stream that is used when logging is disabled
     static Poco::NullOutputStream* m_nullStream;
     /// Mutex to make changing the static logger list threadsafe.
-    static Mutex *mutexLoggerList;
+    static Poco::FastMutex *mutexLoggerList;
   };
 
 } // namespace Kernel

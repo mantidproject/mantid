@@ -52,7 +52,7 @@ void FitParameterTie::set(const QString& estr)
   if (rx.indexIn(parName) < 0)
   {
     throw std::invalid_argument("Parameter names must contain function identifiers:\n"
-      "e.g. f0.Sigma, f5.HWHM");
+      "e.g. f0.Sigma, f5.FWHM");
   }
 
   m_expr = estr;

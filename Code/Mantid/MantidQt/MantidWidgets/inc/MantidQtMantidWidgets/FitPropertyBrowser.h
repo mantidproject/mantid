@@ -26,6 +26,8 @@ class QtIntPropertyManager;
 class QtBoolPropertyManager;
 class QtStringPropertyManager;
 class QtEnumPropertyManager;
+class ParameterPropertyManager;
+
 class QtProperty;
 class QtBrowserItem;
 
@@ -96,8 +98,13 @@ public:
 
   /// Create a new function
   PropertyHandler* addFunction(const std::string& fnName);
+
   /// Get Composite Function
   boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction()const{return m_compositeFunction;}
+
+  /// Return the fitting function
+  Mantid::API::IFunction_sptr getFittingFunction() const;
+
   /// Get the default function type
   std::string defaultFunctionType()const;
   /// Set the default function type
@@ -133,6 +140,8 @@ public:
   void setIgnoreInvalidData(bool on);
   /// Get the cost function
   std::string costFunction()const;
+  /// Get the "ConvolveMembers" option
+  bool convolveMembers()const;
 
   /// Get the start X
   double startX()const;
@@ -202,14 +211,18 @@ public:
   void postDeleteHandle(const std::string& wsName);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
+  /// Called when the Fit is finished
+  virtual void finishHandle(const Mantid::API::IAlgorithm* alg);
+
   /// Returns the list of workspaces that are currently been worked on by the fit property browser.
   QStringList getWorkspaceNames();
   /// Create a MatrixWorkspace from a TableWorkspace
   Mantid::API::Workspace_sptr createMatrixFromTableWorkspace()const;
 
+
 public slots:
   virtual void fit(){ doFit(500); }
-  void sequentialFit();
+  virtual void sequentialFit();
   void undoFit();
   void clear();
   void clearBrowser();
@@ -261,6 +274,8 @@ private slots:
   void boolChanged(QtProperty* prop);
   void intChanged(QtProperty* prop);
   virtual void doubleChanged(QtProperty* prop);
+  /// Called when one of the parameter values gets changed
+  void parameterChanged(QtProperty* prop);
   void stringChanged(QtProperty* prop);
   void filenameChanged(QtProperty* prop);
   void columnChanged(QtProperty* prop);
@@ -349,6 +364,7 @@ protected:
   QtGroupPropertyManager  *m_vectorManager;
   QtIntPropertyManager *m_vectorSizeManager;
   QtDoublePropertyManager *m_vectorDoubleManager;
+  ParameterPropertyManager *m_parameterManager;
 
   QtProperty *m_workspace;
   QtProperty *m_workspaceIndex;
@@ -361,10 +377,12 @@ protected:
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
   QtProperty *m_plotCompositeMembers;
+  QtProperty *m_convolveMembers;
   QtProperty *m_rawData;
   QtProperty *m_xColumn;
   QtProperty *m_yColumn;
   QtProperty *m_errColumn;
+  QtProperty *m_showParamErrors;
   QList<QtProperty*> m_minimizerProperties;
 
   /// A copy of the edited function
@@ -417,8 +435,6 @@ private:
   void createCompositeFunction(const QString& str = "");
   /// Check if the workspace can be used in the fit
   virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr)const;
-  /// Called when the fit is finished
-  void finishHandle(const Mantid::API::IAlgorithm* alg);
   /// Find QtBrowserItem for a property prop among the chidren of 
   QtBrowserItem* findItem(QtBrowserItem* parent,QtProperty* prop)const;
   /// Set the parameters to the fit outcome

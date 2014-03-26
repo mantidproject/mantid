@@ -82,7 +82,8 @@ namespace CurveFitting
     void addPeaks(std::vector<std::vector<int> > peakhkls);
 
     /// Add background function
-    void addBackgroundFunction(string backgroundtype, const vector<double> &vecparvalues, double startx, double endx);
+    void addBackgroundFunction(string backgroundtype, const unsigned int& order, const std::vector<std::string>& vecparnames,
+                               const std::vector<double>& vecparvalues, double startx, double endx);
 
     /// Get number of peaks
     size_t getNumberOfPeaks() const { return m_numPeaks; }

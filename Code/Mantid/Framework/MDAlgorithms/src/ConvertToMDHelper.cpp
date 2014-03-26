@@ -144,10 +144,10 @@ namespace MDAlgorithms
 
     MatrixWorkspace_sptr ws=getProperty("InputWorkspace"),wstemp;
     DataObjects::EventWorkspace_sptr evWS;
-    double xmin,xmax;
 
     if (QDimension=="CopyToMD")
     {
+        double xmin,xmax;
         ws->getXMinMax(xmin,xmax);
         MinValues.push_back(xmin);
         MaxValues.push_back(xmax);
@@ -275,9 +275,27 @@ namespace MDAlgorithms
             g_log.error()<<"The workspace does not have a property "<<OtherDimensions[i]<<std::endl;
             throw std::invalid_argument("Property not found. Please see error log.");
         }
-        TimeSeriesProperty<double> *p=dynamic_cast<TimeSeriesProperty<double> *>(ws->run().getProperty(OtherDimensions[i]));
+        Kernel::Property *pProperty = (ws->run().getProperty(OtherDimensions[i]));
+        TimeSeriesProperty<double> *p=dynamic_cast<TimeSeriesProperty<double> *>(pProperty);
+        if (p)
+        {
         MinValues.push_back(p->getStatistics().minimum);
         MaxValues.push_back(p->getStatistics().maximum);
+        }
+        else // it may be not a time series property but just number property
+        {
+            Kernel::PropertyWithValue<double> *p = dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);  
+            if(!p)
+            {
+                std::string ERR = " Can not interpret property, used as dimension.\n Property: "+OtherDimensions[i]+
+                                  " is neither a time series (run) property nor a property with value<double>";
+                 throw(std::invalid_argument(ERR));
+            }
+            double val = *p;
+            MinValues.push_back(val);
+            MaxValues.push_back(val);
+
+        }
     }
 
     setProperty("MinValues",MinValues);

@@ -29,6 +29,7 @@ using Mantid::Geometry::IMDDimension_sptr;
 vtkSQWEventReader::vtkSQWEventReader() : 
   m_presenter(NULL),
   m_loadInMemory(false),
+  m_depth(1),
   m_time(0)
 {
   this->FileName = NULL;

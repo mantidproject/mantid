@@ -18,7 +18,6 @@ namespace MantidQt
 {
 namespace SliceViewer
 {
-class LineViewerCurve; // Forward dec curve class
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER LineViewer : public QWidget
 {
     Q_OBJECT
@@ -168,7 +167,6 @@ private:
 
     /// ACTUAL bin width, whether in fixed or not-fixed bin width mode
     double m_binWidth;
-
 
 };
 

@@ -64,7 +64,7 @@ namespace Mantid
       virtual void initialize(Kernel::IPropertyManager* , const std::string&, DomainType) {}
 
       /// Toggle output of either just composite or composite + members
-      void separateCompositeMembersInOutput(const bool value);
+      void separateCompositeMembersInOutput(const bool value, const bool conv = false);
 
       /// Declare properties that specify the dataset within the workspace to fit to.
       /// @param suffix :: A suffix to give to all new properties.
@@ -117,6 +117,8 @@ namespace Mantid
       DomainType m_domainType;
       /// Output separate composite function values
       bool m_outputCompositeMembers;
+      /// Perform convolution of output composite components
+      bool m_convolutionCompositeMembers;
       /// Flag to ignore nans, infinities and zero errors.
       bool m_ignoreInvalidData;
     };

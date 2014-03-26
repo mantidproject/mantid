@@ -77,7 +77,7 @@ namespace MantidQt
     private slots:
       /// Update Mantid's default instrument
       void updateDefaultInstrument(const QString & name) const;
-
+      
     private:
       void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
       /// Filter the list to only show those supporting the given technique

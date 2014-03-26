@@ -35,13 +35,15 @@ class RunLoadAndConvertToMD : public QRunnable
   public:
 
   /// Constructor just saves the info needed by the run() method
-  RunLoadAndConvertToMD(       MantidEVWorker * worker, 
+  RunLoadAndConvertToMD(MantidEVWorker * worker,
                          const std::string    & file_name,
                          const std::string    & ev_ws_name,
                          const std::string    & md_ws_name,
-                               double           maxQ,
-                               bool             do_lorentz_corr,
-                               bool             load_det_cal,
+                         const double           minQ,
+                         const double           maxQ,
+                         const bool             do_lorentz_corr,
+                         const bool             load_data,
+                         const bool             load_det_cal,
                          const std::string    & det_cal_file,
                          const std::string    & det_cal_file2 );
 
@@ -53,8 +55,10 @@ class RunLoadAndConvertToMD : public QRunnable
     std::string      file_name;
     std::string      ev_ws_name;
     std::string      md_ws_name;
+    double           minQ;
     double           maxQ;
     bool             do_lorentz_corr;
+    bool             load_data;
     bool             load_det_cal;
     std::string      det_cal_file;
     std::string      det_cal_file2;
@@ -86,6 +90,30 @@ class RunFindPeaks : public QRunnable
     double           min_intensity;
 };
 
+/// Local class to run PredictPeaks in a Non-Qt thread.
+class RunPredictPeaks : public QRunnable
+{
+  public:
+
+  /// Constructor just saves the info needed by the run() method
+  RunPredictPeaks(       MantidEVWorker * worker,
+                const std::string    & peaks_ws_name,
+                      double           min_pred_wl,
+                      double           max_pred_wl,
+                      double           min_pred_dspacing,
+                      double           max_pred_dspacing );
+
+  /// Calls worker->predictPeaks from a separate thread
+  void run();
+
+  private:
+    MantidEVWorker * worker;
+    std::string      peaks_ws_name;
+    double           min_pred_wl;
+    double           max_pred_wl;
+    double           min_pred_dspacing;
+    double           max_pred_dspacing;
+};
 
 /// Local class to run IntegratePeaksMD in a Non-Qt thread.
 class RunSphereIntegrate : public QRunnable
@@ -99,7 +127,11 @@ class RunSphereIntegrate : public QRunnable
                             double           peak_radius,
                             double           inner_radius,
                             double           outer_radius,
-                            bool             integrate_edge );
+                            bool             integrate_edge,
+                            bool             use_cylinder_integration,
+                            double           cylinder_length,
+                            double           cylinder_percent_bkg,
+                      const std::string &    cylinder_profile_fit);
 
   /// Calls worker->sphereIntegrate from a separate thread
   void run();
@@ -112,6 +144,10 @@ class RunSphereIntegrate : public QRunnable
     double           inner_radius; 
     double           outer_radius; 
     bool             integrate_edge; 
+    bool             use_cylinder_integration;
+    double           cylinder_length;
+    double           cylinder_percent_bkg;
+    std::string      cylinder_profile_fit;
 };
 
 
@@ -196,6 +232,8 @@ public:
 
   /// The name of the interface as registered into the factory
   static std::string name() { return "SCD Event Data Reduction"; }
+  // This interface's categories.
+  static QString categoryInfo() { return "Diffraction"; }
 
 public slots:
   /// Slot for Q-Point selection notification
@@ -287,11 +325,17 @@ private slots:
   /// Slot to enable/disable the find peaks controls
   void setEnabledFindPeaksParams_slot( bool on );
 
+  /// Slot to enable/disable the predict peaks controls
+  void setEnabledPredictPeaksParams_slot();
+
   /// Slot to enable/disable the Load Peaks File controls
   void setEnabledLoadPeaksParams_slot( bool on );
 
   /// Slot to enable/disable the find UB using FFT controls
   void setEnabledFindUBFFTParams_slot( bool on );
+
+  /// Slot to enable/disable the find UB using Indexed Peaks controls
+  void setEnabledFindUBUsingIndexedPeaksParams_slot( bool on );
 
   /// Slot to enable/disable the load UB controls
   void setEnabledLoadUBParams_slot( bool on );

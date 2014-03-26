@@ -1,16 +1,34 @@
 /*WIKI*
 
-The algorithm ProcessBackground() provides several functions for user to process background to prepare Le Bail Fit.   
+The algorithm ProcessBackground() provides several functions for user to process background to prepare Le Bail Fit.     
 
 ==== Simple Remove Peaks ====
-This algorithm is designed for refining the background based on the assumption that the all peaks have been fitted reasonably well. Then by removing the peaks by function 'X0 +/- n*FWHM', the rest data points are background in a very high probability.  
- 
-An arbitrary background function can be fitted against this background by standard optimizer. 
+This algorithm is designed for refining the background based on the assumption that the all peaks have been fitted reasonably well. Then by removing the peaks by function 'X0 +/- n*FWHM', the rest data points are background in a very high probability.
+
+An arbitrary background function can be fitted against this background by standard optimizer.
 
 ==== Automatic Background Points Selection ====
-This feature is designed to select many background points with user's simple input.  
-User is required to select only a few background points in the middle of two adjacent peaks.  
+This feature is designed to select many background points with user's simple input.
+User is required to select only a few background points in the middle of two adjacent peaks.
 Algorithm will fit these few points (''BackgroundPoints'') to a background function of specified type.
+
+
+== Examples ==
+
+==== Selecting background ====
+Here is a good example to select background points from a powder diffraction pattern by calling ProcessBackground() in a self-consistent manner.
+
+ 1. Select a set of background points (X values only), which can roughly describes the background, manually;
+ 2. Call ProcessBackground with Option='SelectBackgroundPoints' and SelectionMode='UserSpecifyBackground'.
+    A good choice for background function to enter is 6-th order polynomial;
+ 3. Plot spectra 2 to 4 in UserBackgroundWorkspace to check whether 'Tolerance' is proper or not.
+    If not then reset the tolerance and run ProcessBackground again with previous setup;
+ 4. Fit OutputWorkspace (the selected background) with a background function;
+ 5. Call ProcessBackground with Option='SelectBackgroundPoints' and SelectionMode='UserFunction'.
+    Set the background parameter workspace as the output parameter table workspace obtained in the last step;
+ 6. Repeat step 4 and 5 for a few times until the background plot by fitted background function
+    from selected background points is close enough to real background.
+
 
   
 *WIKI*/
@@ -63,8 +81,10 @@ DECLARE_ALGORITHM(ProcessBackground)
 
   void ProcessBackground::initDocs()
   {
-      this->setWikiSummary("ProcessBackground provides some tools to process powder diffraction pattern's background in order to help Le Bail Fit.");
-      this->setOptionalMessage("ProcessBackground provides some tools to process powder diffraction pattern's background in order to help Le Bail Fit.");
+      this->setWikiSummary("ProcessBackground provides some tools to process powder diffraction pattern's "
+                           "background in order to help Le Bail Fit.");
+      this->setOptionalMessage("ProcessBackground provides some tools to process powder diffraction pattern's "
+                               "background in order to help Le Bail Fit.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -107,8 +127,10 @@ DECLARE_ALGORITHM(ProcessBackground)
     std::vector<std::string> bkgdtype;
     bkgdtype.push_back("Polynomial");
     bkgdtype.push_back("Chebyshev");
+    // bkgdtype.push_back("FullprofPolynomial");
     auto bkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
-    declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Type of the background. Options include Polynomial and Chebyshev.");
+    declareProperty("BackgroundType", "Polynomial", bkgdvalidator,
+                    "Type of the background. Options include Polynomial and Chebyshev.");
     setPropertySettings("BackgroundType",
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
@@ -162,6 +184,11 @@ DECLARE_ALGORITHM(ProcessBackground)
     setPropertySettings("NoiseTolerance",
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
+    // Background tolerance
+    declareProperty("NegativeNoiseTolerance", EMPTY_DBL(), "Tolerance of noise range for negative number. ");
+    setPropertySettings("NegativeNoiseTolerance",
+                        new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
+
     // Optional output workspace
     declareProperty(new WorkspaceProperty<Workspace2D>("UserBackgroundWorkspace", "", Direction::Output,
                                                        PropertyMode::Optional),
@@ -169,6 +196,28 @@ DECLARE_ALGORITHM(ProcessBackground)
     setPropertySettings("UserBackgroundWorkspace",
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
+    // Optional output workspace
+    declareProperty(new WorkspaceProperty<TableWorkspace>("OutputBackgroundParameterWorkspace", "", Direction::Output,
+                                                          PropertyMode::Optional),
+                            "Output parameter table workspace containing the background fitting result. ");
+    setPropertySettings("OutputBackgroundParameterWorkspace",
+                        new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
+
+    // Output background type.
+    std::vector<std::string> outbkgdtype;
+    outbkgdtype.push_back("Polynomial");
+    outbkgdtype.push_back("Chebyshev");
+    auto outbkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
+    declareProperty("OutputBackgroundType", "Polynomial", outbkgdvalidator,
+                    "Type of background to fit with selected background points.");
+    setPropertySettings("OutputBackgroundType",
+                        new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
+
+    // Output background type.
+    declareProperty("OutputBackgroundOrder", 6,
+                    "Order of background to fit with selected background points.");
+    setPropertySettings("OutputBackgroundOrder",
+                        new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
     // Peak table workspac for "RemovePeaks"
     declareProperty(new WorkspaceProperty<TableWorkspace>("BraggPeakTableWorkspace", "", Direction::Input,
@@ -197,6 +246,8 @@ DECLARE_ALGORITHM(ProcessBackground)
       g_log.error() << "Input Workspace cannot be obtained." << std::endl;
       throw std::invalid_argument("Input Workspace cannot be obtained.");
     }
+
+    m_bkgdType = getPropertyValue("BackgroundType");
 
     int intemp = getProperty("WorkspaceIndex");
     if (intemp < 0)
@@ -228,6 +279,17 @@ DECLARE_ALGORITHM(ProcessBackground)
     }
     else if (option.compare("SelectBackgroundPoints") == 0)
     {
+      string outbkgdparwsname = getPropertyValue("OutputBackgroundParameterWorkspace");
+      if (outbkgdparwsname.size() > 0)
+      {
+        // Will fit the selected background
+        m_doFitBackground = true;
+      }
+      else
+      {
+        m_doFitBackground = false;
+      }
+
       string smode = getProperty("SelectionMode");
       if (smode == "FitGivenDataPoints")
       {
@@ -241,6 +303,14 @@ DECLARE_ALGORITHM(ProcessBackground)
       {
         throw runtime_error("N/A is not supported.");
       }
+
+      if (m_doFitBackground)
+      {
+        // Fit the selected background
+        string bkgdfunctype = getPropertyValue("OutputBackgroundType");
+        fitBackgroundFunction(bkgdfunctype);
+      }
+
     }
     else
     {
@@ -310,11 +380,11 @@ DECLARE_ALGORITHM(ProcessBackground)
     size_t numrows = peaktablews->rowCount();
     vec_peakcentre.resize(numrows, 0.);
     vec_peakfwhm.resize(numrows, 0.);
-    double centre, fwhm;
+
     for (size_t i = 0; i < numrows; ++i)
     {
-      centre = peaktablews->cell<double>(i, index_centre);
-      fwhm = peaktablews->cell<double>(i, index_fwhm);
+      double centre = peaktablews->cell<double>(i, index_centre);
+      double fwhm = peaktablews->cell<double>(i, index_fwhm);
       vec_peakcentre[i] = centre;
       vec_peakfwhm[i] = fwhm;
     }
@@ -624,7 +694,7 @@ DECLARE_ALGORITHM(ProcessBackground)
   void ProcessBackground::execSelectBkgdPoints2()
   {
     // Process properties
-    BackgroundFunction_sptr bkgdfunc = createBackgroundFunction();
+    BackgroundFunction_sptr bkgdfunc = createBackgroundFunction(m_bkgdType);
     TableWorkspace_sptr bkgdtablews = getProperty("BackgroundTableWorkspace");
 
     // Set up background function from table
@@ -662,7 +732,7 @@ DECLARE_ALGORITHM(ProcessBackground)
   DataObjects::Workspace2D_sptr ProcessBackground::autoBackgroundSelection(Workspace2D_sptr bkgdWS)
   {
     // Get background type and create bakground function
-    BackgroundFunction_sptr bkgdfunction = createBackgroundFunction();
+    BackgroundFunction_sptr bkgdfunction = createBackgroundFunction(m_bkgdType);
 
     int bkgdorder = getProperty("BackgroundOrder");
     bkgdfunction->setAttributeValue("n", bkgdorder);
@@ -735,10 +805,8 @@ DECLARE_ALGORITHM(ProcessBackground)
   //----------------------------------------------------------------------------------------------
   /** Create a background function from input properties
     */
-  BackgroundFunction_sptr ProcessBackground::createBackgroundFunction()
+  BackgroundFunction_sptr ProcessBackground::createBackgroundFunction(const string backgroundtype)
   {
-    std::string backgroundtype = getProperty("BackgroundType");
-
     CurveFitting::BackgroundFunction_sptr bkgdfunction;
 
     if (backgroundtype.compare("Polynomial") == 0)
@@ -773,7 +841,12 @@ DECLARE_ALGORITHM(ProcessBackground)
     */
   Workspace2D_sptr ProcessBackground::filterForBackground(BackgroundFunction_sptr bkgdfunction)
   {
-    double noisetolerance = getProperty("NoiseTolerance");
+    double posnoisetolerance = getProperty("NoiseTolerance");
+    double negnoisetolerance = getProperty("NegativeNoiseTolerance");
+    if (isEmpty(negnoisetolerance))
+    {
+      negnoisetolerance = posnoisetolerance;
+    }
 
     // Calcualte theoretical values
     const std::vector<double> x = m_dataWS->readX(m_wsIndex);
@@ -802,8 +875,8 @@ DECLARE_ALGORITHM(ProcessBackground)
       {
         outws->dataY(0)[i] = values[i];
         outws->dataY(1)[i] = m_dataWS->readY(m_wsIndex)[i] - values[i];
-        outws->dataY(2)[i] = noisetolerance;
-        outws->dataY(3)[i] = -noisetolerance;
+        outws->dataY(2)[i] = posnoisetolerance;
+        outws->dataY(3)[i] = -negnoisetolerance;
       }
       setProperty("UserBackgroundWorkspace", outws);
     }
@@ -814,7 +887,7 @@ DECLARE_ALGORITHM(ProcessBackground)
     {
       double y = m_dataWS->readY(m_wsIndex)[i];
       double theoryy = values[i];
-      if (y >= (theoryy-noisetolerance) && y <= (theoryy+noisetolerance) )
+      if (y-theoryy < posnoisetolerance && y-theoryy > -negnoisetolerance)
       {
         // Selected
         double x = domain[i];
@@ -829,12 +902,19 @@ DECLARE_ALGORITHM(ProcessBackground)
                         << " total data points. " << "\n";
 
     // Build new workspace
+    size_t nspec;
+    if (m_doFitBackground)
+      nspec = 3;
+    else
+      nspec = 1;
+
     Workspace2D_sptr outws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-        (API::WorkspaceFactory::Instance().create("Workspace2D", 1, vecx.size(), vecy.size()));
+        (API::WorkspaceFactory::Instance().create("Workspace2D", nspec, vecx.size(), vecy.size()));
 
     for (size_t i = 0; i < vecx.size(); ++i)
     {
-      outws->dataX(0)[i] = vecx[i];
+      for(size_t j = 0; j < nspec; ++j)
+        outws->dataX(j)[i] = vecx[i];
       outws->dataY(0)[i] = vecy[i];
       outws->dataE(0)[i] = vece[i];
     }
@@ -960,11 +1040,11 @@ DECLARE_ALGORITHM(ProcessBackground)
     size_t numrows = peaktablews->rowCount();
     vec_peakcentre.resize(numrows, 0.);
     vec_peakfwhm.resize(numrows, 0.);
-    double centre, fwhm;
+
     for (size_t i = 0; i < numrows; ++i)
     {
-      centre = peaktablews->cell<double>(i, index_centre);
-      fwhm = peaktablews->cell<double>(i, index_fwhm);
+      double centre = peaktablews->cell<double>(i, index_centre);
+      double fwhm = peaktablews->cell<double>(i, index_fwhm);
       vec_peakcentre[i] = centre;
       vec_peakfwhm[i] = fwhm;
     }
@@ -1029,6 +1109,115 @@ DECLARE_ALGORITHM(ProcessBackground)
         ++ count;
 
     return count;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Fit background function
+    */
+  void ProcessBackground::fitBackgroundFunction(std::string bkgdfunctiontype)
+  {
+    // Get background type and create bakground function
+    BackgroundFunction_sptr bkgdfunction = createBackgroundFunction(bkgdfunctiontype);
+
+    int bkgdorder = getProperty("OutputBackgroundOrder");
+    bkgdfunction->setAttributeValue("n", bkgdorder);
+
+    if (bkgdfunctiontype == "Chebyshev")
+    {
+      double xmin = m_outputWS->readX(0).front();
+      double xmax = m_outputWS->readX(0).back();
+      g_log.information() << "Chebyshev Fit range: " << xmin << ", " << xmax << "\n";
+      bkgdfunction->setAttributeValue("StartX", xmin);
+      bkgdfunction->setAttributeValue("EndX", xmax);
+    }
+
+    g_log.information() << "Fit selected background " << bkgdfunctiontype
+                        << " to data workspace with " << m_outputWS->getNumberHistograms() << " spectra."
+                        << "\n";
+
+    // Fit input (a few) background pionts to get initial guess
+    API::IAlgorithm_sptr fit;
+    try
+    {
+      fit = this->createChildAlgorithm("Fit", 0.9, 1.0, true);
+    }
+    catch (Exception::NotFoundError &)
+    {
+      g_log.error() << "Requires CurveFitting library." << std::endl;
+      throw;
+    }
+
+    g_log.information() << "Fitting background function: " << bkgdfunction->asString() << "\n";
+
+    double startx = m_lowerBound;
+    double endx = m_upperBound;
+    fit->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(bkgdfunction));
+    fit->setProperty("InputWorkspace", m_outputWS);
+    fit->setProperty("WorkspaceIndex", 0);
+    fit->setProperty("MaxIterations", 500);
+    fit->setProperty("StartX", startx);
+    fit->setProperty("EndX", endx);
+    fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
+    fit->setProperty("CostFunction", "Least squares");
+
+    fit->executeAsChildAlg();
+
+    // Get fit status and chi^2
+    std::string fitStatus = fit->getProperty("OutputStatus");
+    bool allowedfailure = (fitStatus.find("cannot") < fitStatus.size()) &&
+        (fitStatus.find("tolerance") < fitStatus.size());
+    if (fitStatus.compare("success") != 0 && !allowedfailure)
+    {
+      g_log.error() << "ProcessBackground: Fit Status = " << fitStatus
+                    << ".  Not to update fit result" << std::endl;
+      throw std::runtime_error("Bad Fit");
+    }
+
+    const double chi2 = fit->getProperty("OutputChi2overDoF");
+    g_log.information() << "Fit background: Fit Status = " << fitStatus << ", chi2 = "
+                        << chi2 << "\n";
+
+    // Get out the parameter names
+    API::IFunction_sptr funcout = fit->getProperty("Function");
+    TableWorkspace_sptr outbkgdparws = boost::make_shared<TableWorkspace>();
+    outbkgdparws->addColumn("str", "Name");
+    outbkgdparws->addColumn("double", "Value");
+
+    TableRow typerow = outbkgdparws->appendRow();
+    typerow << bkgdfunctiontype << 0.;
+
+    vector<string> parnames = funcout->getParameterNames();
+    size_t nparam = funcout->nParams();
+    for (size_t i = 0; i < nparam; ++i)
+    {
+      TableRow newrow = outbkgdparws->appendRow();
+      newrow << parnames[i] << funcout->getParameter(i);
+    }
+
+    TableRow chi2row = outbkgdparws->appendRow();
+    chi2row << "Chi-square" << chi2;
+
+    g_log.information() << "Set table workspace (#row = " << outbkgdparws->rowCount()
+                        << ") to OutputBackgroundParameterTable. " << "\n";
+    setProperty("OutputBackgroundParameterWorkspace", outbkgdparws);
+
+    // Set output workspace
+    const MantidVec& vecX = m_outputWS->readX(0);
+    const MantidVec& vecY = m_outputWS->readY(0);
+    FunctionDomain1DVector domain(vecX);
+    FunctionValues values(domain);
+
+    funcout->function(domain, values);
+
+    MantidVec& dataModel = m_outputWS->dataY(1);
+    MantidVec& dataDiff = m_outputWS->dataY(2);
+    for (size_t i = 0; i < dataModel.size(); ++i)
+    {
+      dataModel[i] = values[i];
+      dataDiff[i] = vecY[i] - dataModel[i];
+    }
+
+    return;
   }
 
 

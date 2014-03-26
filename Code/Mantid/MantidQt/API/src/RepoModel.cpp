@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include <QIcon>
 #include <QPixmap>
 using namespace MantidQt::API;
@@ -237,6 +238,9 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
         return fromStatus(status); 
         break; 
       case 2:// autoupdate option
+    	status = repo_ptr->fileStatus(path.toStdString());
+    	if (status == REMOTE_ONLY || status == LOCAL_ONLY)
+    		return QVariant();
         inf = repo_ptr->fileInfo(path.toStdString()); 
         return inf.auto_update?QString("true"):QString("false");
         break;
@@ -385,7 +389,7 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
   if (index.column() == 0)
     // the path can not be changed
     return false; 
-
+  int count_changed = 0;
   RepoItem * item = static_cast<RepoItem*>(index.internalPointer());
   std::string path = item->path().toStdString(); 
 
@@ -400,7 +404,7 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
       option = false; 
     else
       return false; // only setTrue and setFalse are allowed values for set auto update.
-    repo_ptr->setAutoUpdate(path, option); // FIXME deal with exceptions
+    count_changed = repo_ptr->setAutoUpdate(path, option);
     ret = true; 
   }
   
@@ -545,7 +549,7 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
   }// end delete action
 
   if (ret)       
-    emit dataChanged(index, index);  
+    emit dataChanged(index, this->index(count_changed,0,index));
   
   return ret;
 }
@@ -1048,4 +1052,6 @@ QString RepoModel::DeleteQueryBox::comment(){
     return comment_te->text(); 
   else
     return QString(); 
+
 }
+

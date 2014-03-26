@@ -63,6 +63,12 @@ namespace Geometry
     const Mantid::Kernel::V3D vecPointingUp() const;
     /// Convert along beam axis into a 3D direction
     const Mantid::Kernel::V3D vecPointingAlongBeam() const;
+    /// Pointing up axis as a string
+    std::string pointingUpAxis() const;
+    /// Pointing along beam axis as a string
+    std::string pointingAlongBeamAxis() const;
+    /// Pointing horizontal to beam as a string
+    std::string pointingHorizontalAxis() const;
   private:
     /// Common setup
     void init();

@@ -8,8 +8,10 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/MultiThreaded.h"
 
 #include <boost/shared_ptr.hpp>
+
 
 namespace Mantid
 {
@@ -76,7 +78,13 @@ namespace API
 
     /// Query available functions based on the template type
     template<typename FunctionType>
-    std::vector<std::string> getFunctionNames() const;
+    const std::vector<std::string>& getFunctionNames() const;
+
+    using Kernel::DynamicFactory<IFunction>::subscribe;
+    void subscribe(const std::string& className, AbstractFactory* pAbstractFactory,
+                   Kernel::DynamicFactory<IFunction>::SubscribeAction replace=ErrorIfExists);
+
+    void unsubscribe(const std::string& className);
 
   private:
     friend struct Mantid::Kernel::CreateUsingNew<FunctionFactoryImpl>;
@@ -116,9 +124,11 @@ namespace API
     /// Add a tie to the created function
     void addTie(boost::shared_ptr<IFunction> fun,const Expression& expr)const;
 
-    ///static reference to the logger class
+    /// Reference to the logger class
     Kernel::Logger& g_log;
 
+    mutable std::map<std::string,std::vector<std::string>> m_cachedFunctionNames;
+    mutable Kernel::Mutex m_mutex;
   };
 
   /**
@@ -127,13 +137,20 @@ namespace API
    * @returns A vector of the names of the functions matching the template type 
    */
   template<typename FunctionType>
-  std::vector<std::string> FunctionFactoryImpl::getFunctionNames() const
+  const std::vector<std::string>& FunctionFactoryImpl::getFunctionNames() const
   {
+    Kernel::Mutex::ScopedLock _lock(m_mutex);
+
+    const std::string soughtType(typeid(FunctionType).name());
+    if ( m_cachedFunctionNames.find( soughtType ) != m_cachedFunctionNames.end() )
+    {
+      return m_cachedFunctionNames[soughtType];
+    }
+
+    // Create the entry in the cache and work with it directly
+    std::vector<std::string>& typeNames = m_cachedFunctionNames[soughtType];
     const std::vector<std::string> names = this->getKeys();
-    std::vector<std::string> typeNames;
-    typeNames.reserve(names.size());
-    for( std::vector<std::string>::const_iterator it = names.begin(); 
-         it != names.end(); ++it )
+    for( auto it = names.begin(); it != names.end(); ++it )
     {
       boost::shared_ptr<IFunction> func = this->createFunction(*it);
       if ( func && dynamic_cast<FunctionType*>(func.get()) )
@@ -143,12 +160,13 @@ namespace API
     }
     return typeNames;
   }
-        ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
+
+  ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-        template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>;
+  template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>;
 #endif /* _WIN32 */
-        typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FunctionFactoryImpl> FunctionFactory;
+  typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FunctionFactoryImpl> FunctionFactory;
 
   /// Convenient typedef for an UpdateNotification
   typedef FunctionFactoryImpl::UpdateNotification FunctionFactoryUpdateNotification;

@@ -12,7 +12,7 @@ Defining the power algorithm as: <math>  y = \left ( a^b \right )  </math>, we c
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
- Power("InputWorkspace","Exponent")
+ outputW = Power("inputW",3)
 
 *WIKI_USAGE*/
 //----------------------------------------------------------------------

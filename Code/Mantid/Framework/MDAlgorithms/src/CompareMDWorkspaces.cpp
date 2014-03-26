@@ -263,7 +263,7 @@ namespace Mantid
         // Are both MDGridBoxes ?
         MDGridBox<MDE,nd>* gridbox1 = dynamic_cast<MDGridBox<MDE,nd>*>(box1);
         MDGridBox<MDE,nd>* gridbox2 = dynamic_cast<MDGridBox<MDE,nd>*>(box2);
-        if (gridbox1)
+        if (gridbox1 && gridbox2)
         {
           for (size_t d=0; d<nd; d++)
             this->compareTol( gridbox1->getBoxSize(d), gridbox2->getBoxSize(d), "Box sizes do not match");

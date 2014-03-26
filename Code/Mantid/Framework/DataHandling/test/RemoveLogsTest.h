@@ -16,7 +16,7 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <vector>
-
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
@@ -84,217 +84,6 @@ public:
     TS_ASSERT_THROWS( output->run().getLogData("HRP37129_ICPevent"), std::runtime_error);
 
     AnalysisDataService::Instance().remove(outputSpace);
-  }
-
-
-  void testExecWithRawDatafile()
-  {
-    FrameworkManager::Instance();
-    //if ( !loader.isInitialized() ) loader.initialize();
-
-    LoadLog loaderRawFile;
-    loaderRawFile.initialize();
-
-    // Path to test input file assumes Test directory checked out from SVN
-    loaderRawFile.setPropertyValue("Filename", "HRP37125.raw");
-    inputFile = loaderRawFile.getPropertyValue("Filename");
-
-    outputSpace = "RemoveLogsTestraw-datafile";
-    // Create an empty workspace and put it in the AnalysisDataService
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
-    loaderRawFile.setPropertyValue("Workspace", outputSpace);
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Filename") )
-    TS_ASSERT( ! result.compare(inputFile));
-
-    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Workspace") )
-
-    TS_ASSERT( ! result.compare(outputSpace));
-
-
-    TS_ASSERT_THROWS_NOTHING(loaderRawFile.execute());
-
-    TS_ASSERT( loaderRawFile.isExecuted() );    
-
-    // Get back the saved workspace
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
-
-    if ( !remover.isInitialized() ) remover.initialize();
-    TS_ASSERT_THROWS_NOTHING(remover.setPropertyValue("Workspace", outputSpace))
-    TS_ASSERT_THROWS_NOTHING(remover.execute());
-
-
-    TS_ASSERT( remover.isExecuted() );    
-
-    // logs should have been removed
-    TS_ASSERT_THROWS( output->run().getLogData("ICPevent"), std::runtime_error);
-    TS_ASSERT_THROWS( output->run().getLogData("cphs_6"), std::runtime_error);
-    TS_ASSERT_THROWS( output->run().getLogData("PROP3"), std::runtime_error);
-    TS_ASSERT_THROWS( output->run().getLogData("SE_He_Level"), std::runtime_error);
-    TS_ASSERT_THROWS( output->run().getLogData("TEMP1"), std::runtime_error);
-
-    AnalysisDataService::Instance().remove(outputSpace);
-  }
-
-
-  // Same idea as testExecWithRawDataFile() but testing on a raw file with the extension .s#
-  // where # is some integer ranging from 01,02,...,99 I believe
-  void testExecWithRawDatafile_s_type()
-  {
-    //if ( !loader.isInitialized() ) loader.initialize();
-
-    LoadLog loaderRawFile;
-    loaderRawFile.initialize();
-
-    // Path to test input file assumes Test directory checked out from SVN
-    TS_ASSERT_THROWS_NOTHING( loaderRawFile.setPropertyValue("Filename", "CSP74683.s02") )
-    inputFile = loaderRawFile.getPropertyValue("Filename");
-
-    outputSpace = "RemoveLogsTest-rawdatafile_so_type";
-    TS_ASSERT_THROWS( loaderRawFile.setPropertyValue("Workspace", outputSpace), std::invalid_argument)
-    // Create an empty workspace and put it in the AnalysisDataService
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Filename") )
-    TS_ASSERT( ! result.compare(inputFile));
-
-    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Workspace") )
-    TS_ASSERT( ! result.compare(outputSpace));
-
-
-    TS_ASSERT_THROWS_NOTHING(loaderRawFile.execute());
-
-    TS_ASSERT( loaderRawFile.isExecuted() );    
-
-    // Get back the saved workspace
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
-
-    if ( !remover.isInitialized() ) remover.initialize();
-    TS_ASSERT_THROWS_NOTHING(remover.setPropertyValue("Workspace", outputSpace))
-    TS_ASSERT_THROWS_NOTHING(remover.execute());
-
-
-    TS_ASSERT( remover.isExecuted() );    
-
-    // logs should have been removed
-    TS_ASSERT_THROWS( output->run().getLogData("ICPevent"), std::runtime_error);
-
-    AnalysisDataService::Instance().remove(outputSpace);
-  }
-
-  void testExecWiththreecolumnLogfile()
-  {
-    FrameworkManager::Instance();
-    //if ( !loader.isInitialized() ) loader.initialize();
-
-    LoadLog loaderRawFile;
-    loaderRawFile.initialize();
-
-    // Path to test input file assumes Test directory checked out from SVN
-    loaderRawFile.setPropertyValue("Filename", "NIMROD00001097.raw");
-    inputFile = loaderRawFile.getPropertyValue("Filename");
-
-    outputSpace = "threecoulmlog_datafile";
-    // Create an empty workspace and put it in the AnalysisDataService
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
-    loaderRawFile.setPropertyValue("Workspace", outputSpace);
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Filename") )
-    TS_ASSERT( ! result.compare(inputFile));
-
-    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Workspace") )
-
-    TS_ASSERT( ! result.compare(outputSpace));
-
-
-    TS_ASSERT_THROWS_NOTHING(loaderRawFile.execute());
-
-    TS_ASSERT( loaderRawFile.isExecuted() );    
-
-    // Get back the saved workspace
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
-
-    if ( !remover.isInitialized() ) remover.initialize();
-    TS_ASSERT_THROWS_NOTHING(remover.setPropertyValue("Workspace", outputSpace))
-    TS_ASSERT_THROWS_NOTHING(remover.execute());
-
-
-    TS_ASSERT( remover.isExecuted() );    
-
-    // logs should have been removed
-    TS_ASSERT_THROWS( output->run().getLogData("ICPevent"), std::runtime_error);
-    TS_ASSERT_THROWS( output->run().getLogData("J6CX"), std::runtime_error);
-    TS_ASSERT_THROWS( output->run().getLogData("BeamCurrent"), std::runtime_error);
-
-    AnalysisDataService::Instance().remove(outputSpace);
-
-
-  }
-
-  void test_withAlternateDatastream()
-  {
-    FrameworkManager::Instance();
-    //if ( !loader.isInitialized() ) loader.initialize();
-
-    LoadLog loaderRawFile;
-    loaderRawFile.initialize();
-
-    // Path to test input file assumes Test directory checked out from SVN
-    loaderRawFile.setPropertyValue("Filename", "OFFSPEC00004622.raw");
-    inputFile = loaderRawFile.getPropertyValue("Filename");
-
-    outputSpace = "ads_datafile";
-    // Create an empty workspace and put it in the AnalysisDataService
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
-    loaderRawFile.setPropertyValue("Workspace", outputSpace);
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Filename") )
-    TS_ASSERT( ! result.compare(inputFile));
-
-    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Workspace") )
-
-    TS_ASSERT( ! result.compare(outputSpace));
-
-
-    TS_ASSERT_THROWS_NOTHING(loaderRawFile.execute());
-
-    TS_ASSERT( loaderRawFile.isExecuted() );    
-
-    // Get back the saved workspace
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
-
-    if ( !remover.isInitialized() ) remover.initialize();
-    TS_ASSERT_THROWS_NOTHING(remover.setPropertyValue("Workspace", outputSpace))
-    TS_ASSERT_THROWS_NOTHING(remover.execute());
-
-
-    TS_ASSERT( remover.isExecuted() );    
-
-    // logs should have been removed
-    TS_ASSERT_THROWS( output->run().getLogData("ICPevent"), std::runtime_error);
-    TS_ASSERT_THROWS( output->run().getLogData("RF1Ampon"), std::runtime_error);
-    TS_ASSERT_THROWS( output->run().getLogData("ShutterStatus"), std::runtime_error);
-    TS_ASSERT_THROWS( output->run().getLogData("b2v2"), std::runtime_error);
-
-    AnalysisDataService::Instance().remove(outputSpace);
-
-
   }
 
 
@@ -383,6 +172,59 @@ public:
     do_test_SNSTextFile("Temp1,Temp2,Temp3,Yadda", "C,K,F,Fortnights", false, false);
   }
 
+  void test_KeepLogs()
+  {
+      // Create an empty workspace and put it in the AnalysisDataService
+      EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace(1000,1,10000);
+      outputSpace = "PartiallyRemoveLogs";
+
+      // Add a bunch of logs
+      std::vector<DateAndTime> times;
+      std::vector<int> index;
+      std::vector<double> dbl1, dbl2;
+      DateAndTime startTime("2010-01-01T00:00:00");
+      for (int i = 0; i < 100; ++i)
+      {
+        times.push_back(startTime + i*10.0);
+        index.push_back(i);
+        dbl1.push_back(i*0.1);
+        dbl2.push_back(6.0);
+      }
+
+      auto scan_index = new TimeSeriesProperty<int>("scan_index");
+      scan_index->addValues(times,index);
+      ws->mutableRun().addProperty(scan_index);
+      auto dbl_prop1 = new TimeSeriesProperty<double>("some_prop");
+      auto dbl_prop2 = new TimeSeriesProperty<double>("some_other_prop");
+      dbl_prop1->addValues(times,dbl1);
+      dbl_prop2->addValues(times,dbl2);
+      ws->mutableRun().addProperty(dbl_prop1);
+      ws->mutableRun().addProperty(dbl_prop2);
+      ws->mutableRun().addProperty("Ei", 42.);
+      ws->mutableRun().addProperty("T0", 42.);
+      TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));
+
+
+      // Get back the saved workspace
+      MatrixWorkspace_sptr output;
+      TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace));
+
+      if ( !remover.isInitialized() ) remover.initialize();
+      TS_ASSERT_THROWS_NOTHING(remover.setPropertyValue("Workspace", outputSpace));
+      TS_ASSERT_THROWS_NOTHING(remover.setPropertyValue("KeepLogs", "Ei, scan_index"));
+      TS_ASSERT_THROWS_NOTHING(remover.execute());
+
+
+      TS_ASSERT( remover.isExecuted() );
+
+      // log should have been removed
+      TS_ASSERT_THROWS( output->run().getLogData("some_other_prop"), std::runtime_error);
+      TS_ASSERT_THROWS( output->run().getLogData("some_prop"), std::runtime_error);
+      TS_ASSERT_THROWS( output->run().getLogData("T0"), std::runtime_error);
+      TS_ASSERT_THROWS_NOTHING( output->run().getLogData("Ei"));
+      TS_ASSERT_THROWS_NOTHING( output->run().getLogData("scan_index"));
+      AnalysisDataService::Instance().remove(outputSpace);
+  }
 
 private:
   LoadLog loader;

@@ -183,7 +183,8 @@ namespace CurveFitting
     void parseBraggPeaksParametersTable();
 
     /// Parse content in a table workspace to vector for background parameters
-    void parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws, vector<double>& bkgdorderparams);
+    void parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws, vector<string> &bkgdparnames,
+                                       vector<double> &bkgdorderparams);
 
     /// Create and set up output table workspace for peaks
     void exportBraggPeakParameterToTable();
@@ -344,6 +345,8 @@ namespace CurveFitting
 
     /// Background polynomials
     std::vector<double> m_backgroundParameters;
+    std::vector<std::string> m_backgroundParameterNames;
+    unsigned int m_bkgdorder;
 
     // size_t mWSIndexToWrite;
 

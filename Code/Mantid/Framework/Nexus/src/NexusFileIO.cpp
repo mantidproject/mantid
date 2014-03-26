@@ -24,6 +24,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableColumn.h"
+#include "MantidDataObjects/VectorColumn.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AlgorithmHistory.h"
@@ -150,6 +151,7 @@ using namespace DataObjects;
        The URLs are not correct as they do not exist presently, but follow the format for other
        Nexus specs.
        @param title :: title field.
+       @param wsName :: workspace name.
   */
   int NexusFileIO::writeNexusProcessedHeader( const std::string& title, const std::string& wsName) const
   {
@@ -479,10 +481,10 @@ using namespace DataObjects;
 
     for (size_t i = 0; i < itableworkspace->columnCount(); i++)
     {
-      boost::shared_ptr<const API::Column> col = itableworkspace->getColumn(i);
+      Column_const_sptr col = itableworkspace->getColumn(i);
 
       std::string str = "column_" + boost::lexical_cast<std::string>(i+1);
-  
+
       if ( col->isType<double>() )  
       {  
         double * toNexus = new double[nRows];
@@ -553,6 +555,14 @@ using namespace DataObjects;
 
         NXclosedata(fileID);
       }
+      #define IF_VECTOR_COLUMN(Type, NexusType) \
+      else if ( col->isType< std::vector<Type> >() ) \
+      { \
+        auto vecCol = boost::dynamic_pointer_cast< const VectorColumn<Type> >(col); \
+        writeNexusVectorColumn<Type>(vecCol, str, NexusType, #Type); \
+      }
+      IF_VECTOR_COLUMN(int,NX_INT32)
+      IF_VECTOR_COLUMN(double,NX_FLOAT64)
 
       // write out title 
       NXopendata(fileID, str.c_str());
@@ -563,8 +573,6 @@ using namespace DataObjects;
     status=NXclosegroup(fileID);
     return((status==NX_ERROR)?3:0);
   }
-
-
 
 
   //-------------------------------------------------------------------------------------
@@ -727,8 +735,6 @@ using namespace DataObjects;
    * */
   int NexusFileIO::writeEventList( const DataObjects::EventList & el, std::string group_name) const
   {
-    int dims_array[1];
-
     //write data entry
     NXstatus status=NXmakegroup(fileID, group_name.c_str(), "NXdata");
     if(status==NX_ERROR) return(2);
@@ -741,6 +747,7 @@ using namespace DataObjects;
     if (!dets.empty())
     {
       std::vector<detid_t> detectorIDs(dets.begin(),dets.end());
+      int dims_array[1];
       NXwritedata("detector_IDs", NX_INT64, 1, dims_array, (void*)(detectorIDs.data()), false );
     }
 
@@ -829,8 +836,7 @@ using namespace DataObjects;
     char sbuf[NX_MAXNAMELEN];
     int len=NX_MAXNAMELEN;
     type=NX_CHAR;
-    //
-    len=NX_MAXNAMELEN;
+
     if(checkAttributeName("units"))
     {
       status=NXgetattr(fileID,const_cast<char*>("units"),(void *)sbuf,&len,&type);
@@ -1144,7 +1150,7 @@ using namespace DataObjects;
           // if one of the two names we are looking for
           if(nxn.compare("definition")==0 || nxn.compare("analysis")==0)
           {
-            stat=NXopendata(fileH,nxname);
+            NXopendata(fileH,nxname);
             stat=NXgetinfo(fileH,&rank,dims,&type);
             if(stat==NX_ERROR)
               continue;
@@ -1157,7 +1163,7 @@ using namespace DataObjects;
             definition.push_back(value);
             entryName.push_back(entryList[i]);
             delete[] value;
-            stat=NXclosegroup(fileH); // close data group, then entry
+            NXclosegroup(fileH); // close data group, then entry
             stat=NXclosegroup(fileH);
             break;
           }

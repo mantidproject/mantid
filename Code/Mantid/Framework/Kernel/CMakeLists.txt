@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
+	src/CatalogInfo.cpp
 	src/CPUTimer.cpp
 	src/CompositeValidator.cpp
 	src/ConfigService.cpp
@@ -117,6 +118,7 @@ set ( INC_FILES
 	inc/MantidKernel/BinFinder.h
 	inc/MantidKernel/BinaryFile.h
 	inc/MantidKernel/BoundedValidator.h
+	inc/MantidKernel/CatalogInfo.h
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
 	inc/MantidKernel/CompositeValidator.h
@@ -245,6 +247,7 @@ set ( TEST_FILES
 	BoundedValidatorTest.h
 	CPUTimerTest.h
 	CacheTest.h
+	CatalogInfoTest.h
 	CompositeValidatorTest.h
 	ConfigServiceTest.h
 	DataServiceTest.h

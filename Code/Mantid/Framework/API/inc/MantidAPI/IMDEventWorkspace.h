@@ -68,6 +68,8 @@ namespace API
 
     /// Return the type of event contained, as a string. MDEvent or MDLeanEvent
     virtual std::string getEventTypeName() const = 0;
+    /// Return the size(in bytes) for the event, which this workspace contains
+    virtual size_t  sizeofEvent()const = 0;
 
     /// Split all boxes that exceed the split threshold.
     virtual void splitAllIfNeeded(Kernel::ThreadScheduler * ts) = 0;

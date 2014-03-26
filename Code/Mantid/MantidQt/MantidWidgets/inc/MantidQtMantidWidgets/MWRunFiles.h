@@ -106,7 +106,7 @@ namespace MantidQt
       Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
       Q_ENUMS(ButtonOpts)
       Q_ENUMS(LiveButtonOpts)
-
+      friend class DataSelector;
     public:
       /// options for bringing up the load file dialog
       enum ButtonOpts
@@ -203,6 +203,8 @@ namespace MantidQt
       void fileFindingFinished();
       /// Emitted when the live button is toggled
       void liveButtonPressed(bool);
+      /// Signal emitted after asynchronous checking of live stream availability
+      void liveButtonSetEnabledSignal(bool);
 
     public slots:
       /// Set the file text and try and find it
@@ -212,6 +214,12 @@ namespace MantidQt
       /// Find the files within the text edit field and cache their full paths
       void findFiles();
       boost::shared_ptr<const Mantid::API::IAlgorithm> stopLiveAlgorithm();
+      
+    protected:
+      //Method for handling drop events
+      void dropEvent(QDropEvent *);
+      //called when a drag event enters the class
+      void dragEnterEvent(QDragEnterEvent *);
 
     private:
       /// Create a file filter from a list of extensions
@@ -226,6 +234,8 @@ namespace MantidQt
       void setEntryNumProblem(const QString & message);
       /// displays the validator red star if either m_fileProblem or m_entryNumProblem are not empty
       void refreshValidator();
+      /// Called asynchronously to check the availability of the live stream
+      void checkLiveConnection();
 
     private slots:
       /// Browse clicked slot

@@ -77,7 +77,7 @@ public:
     memento.setUB(0,0,2,0,4,0,-8,0,0);
     memento.setLogValue("A", "12", "Number");
     memento.setLogValue("angle1", "1.234", "Number Series");
-    memento.setLogValue("angle2", "2", "Number Series");
+    memento.setLogValue("angle2", "2.0", "Number Series");
     memento.setGoniometer("angle1, 1.0,2.0,3.0,1","angle2, 1.1,2.1,3.1,-1","","","","");
 
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(memento.applyActions());

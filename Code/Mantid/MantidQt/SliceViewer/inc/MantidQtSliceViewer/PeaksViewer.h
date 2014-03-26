@@ -5,6 +5,7 @@
 #include "DllOption.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidQtSliceViewer/UpdateableOnDemand.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 
 namespace MantidQt
@@ -17,13 +18,14 @@ class ProxyCompositePeaksPresenter;
 /**
 
 */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeaksViewer : public QWidget
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeaksViewer : public QWidget, public UpdateableOnDemand
 {
     Q_OBJECT
 public:
     PeaksViewer(QWidget *parent = 0);
     void setPeaksWorkspaces(const SetPeaksWorkspaces& workspaces);
     void setPresenter(boost::shared_ptr<ProxyCompositePeaksPresenter> presenter);
+    void performUpdate();
     void hide();
     ~PeaksViewer();
 public slots:

@@ -1,6 +1,12 @@
 /*WIKI*
- TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
- *WIKI*/
+
+Loads an LLB MIBEMOL TOF NeXus file into a [[Workspace2D]] with the given name.
+
+This loader calculates the elastic peak position (EPP) on the fly.
+
+To date this algorithm only supports the MIBEMOL instrument.
+
+*WIKI*/
 
 #include "MantidDataHandling/LoadLLB.h"
 #include "MantidAPI/FileProperty.h"
@@ -223,16 +229,23 @@ void LoadLLB::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 
 int LoadLLB::getDetectorElasticPeakPosition(const NeXus::NXFloat &data) {
 
-	std::vector<int> listOfFoundEPP;
-
 	std::vector<int> cumulatedSumOfSpectras(m_numberOfChannels, 0);
-	for (size_t i = 0; i < m_numberOfTubes; i++) {
+	for (size_t i = 0; i < m_numberOfTubes; i++) 
+	{
 		float* data_p = &data(static_cast<int>(i), 0);
-		std::vector<int> thisSpectrum(data_p, data_p + m_numberOfChannels);
-		// sum spectras
-		std::transform(thisSpectrum.begin(), thisSpectrum.end(),
-				cumulatedSumOfSpectras.begin(), cumulatedSumOfSpectras.begin(),
-				std::plus<int>());
+		float currentSpec = 0;
+
+		for (size_t j = 0; j  < m_numberOfChannels; ++j)
+			currentSpec += data_p[j];
+
+		if(i > 0)
+		{
+			cumulatedSumOfSpectras[i] = cumulatedSumOfSpectras[i-1] + static_cast<int>(currentSpec);
+		}
+		else
+		{
+			cumulatedSumOfSpectras[i] = static_cast<int>(currentSpec);
+		}
 	}
 	auto it = std::max_element(cumulatedSumOfSpectras.begin(),
 			cumulatedSumOfSpectras.end());

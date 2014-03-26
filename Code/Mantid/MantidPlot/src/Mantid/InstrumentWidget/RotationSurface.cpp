@@ -10,7 +10,7 @@ RotationSurface::RotationSurface(const InstrumentActor* rootActor,const Mantid::
     UnwrappedSurface(rootActor),
     m_pos(origin),
     m_zaxis(axis),
-    m_u_correction(0)
+    m_manual_u_correction(false)
 {
 }
 
@@ -22,6 +22,11 @@ void RotationSurface::init()
     // the actor calls this->callback for each detector
     m_unwrappedDetectors.clear();
     m_assemblies.clear();
+
+    // if u-correction is applied manually then m_u_min and m_u_max
+    // have valid values and have to be saved
+    double manual_u_min = m_u_min;
+    double manual_u_max = m_u_max;
 
     size_t ndet = m_instrActor->ndetectors();
     m_unwrappedDetectors.resize(ndet);
@@ -114,22 +119,27 @@ void RotationSurface::init()
       } // is a real detectord
     } // for each detector in pick order
 
-    // Now find the overall edges in U and V coords.
-    m_u_min =  DBL_MAX;
-    m_u_max = -DBL_MAX;
-    m_v_min =  DBL_MAX;
-    m_v_max = -DBL_MAX;
-    for(size_t i=0;i<m_unwrappedDetectors.size();++i)
-    {
-      const UnwrappedDetector& udet = m_unwrappedDetectors[i];
-      if (! udet.detector ) continue;
-      if (udet.u < m_u_min) m_u_min = udet.u;
-      if (udet.u > m_u_max) m_u_max = udet.u;
-      if (udet.v < m_v_min) m_v_min = udet.v;
-      if (udet.v > m_v_max) m_v_max = udet.v;
-    }
+    // find the overall edges in u and v coords
+    findUVBounds();
 
-    findAndCorrectUGap();
+    // apply a shift in u-coord either found automatically
+    // or set manually
+    if ( !m_manual_u_correction )
+    {
+      // automatic gap correction
+      findAndCorrectUGap();
+    }
+    else
+    {
+      // apply manually set shift
+      m_u_min = manual_u_min;
+      m_u_max = manual_u_max;
+      for(size_t i=0;i<m_unwrappedDetectors.size();++i)
+      {
+        auto &udet = m_unwrappedDetectors[i];
+        udet.u = applyUCorrection( udet.u );
+      }
+    }
 
     double dU = fabs(m_u_max - m_u_min);
     double dV = fabs(m_v_max - m_v_min);
@@ -151,12 +161,26 @@ void RotationSurface::init()
       }
       dv = m_height_max;
     }
-    m_u_min -= du;
-    m_u_max += du;
-    m_v_min -= dv;
-    m_v_max += dv;
-    m_viewRect = RectF( QPointF(m_u_min,m_v_min), QPointF(m_u_max,m_v_max) );
 
+    m_viewRect = RectF( QPointF(m_u_min-du,m_v_min-dv), QPointF(m_u_max+du,m_v_max+dv) );
+
+}
+
+void RotationSurface::findUVBounds()
+{
+    m_u_min =  DBL_MAX;
+    m_u_max = -DBL_MAX;
+    m_v_min =  DBL_MAX;
+    m_v_max = -DBL_MAX;
+    for(size_t i=0;i<m_unwrappedDetectors.size();++i)
+    {
+      const UnwrappedDetector& udet = m_unwrappedDetectors[i];
+      if (! udet.detector ) continue;
+      if (udet.u < m_u_min) m_u_min = udet.u;
+      if (udet.u > m_u_max) m_u_max = udet.u;
+      if (udet.v < m_v_min) m_v_min = udet.v;
+      if (udet.v > m_v_max) m_v_max = udet.v;
+    }
 }
 
 void RotationSurface::findAndCorrectUGap()
@@ -214,24 +238,22 @@ void RotationSurface::findAndCorrectUGap()
   double uTo   = m_u_min + iTo   * bin_width;
   if (uTo - uFrom > period - (m_u_max - m_u_min))
   {
-    double du = m_u_max - uTo;
-    m_u_max = uFrom + du;
+
+    m_u_max = uFrom;
+    m_u_min = uTo;
+    if ( m_u_min > m_u_max )
+    {
+      m_u_max += period;
+    }
+
     std::vector<UnwrappedDetector>::iterator ud = m_unwrappedDetectors.begin();
     for(;ud != m_unwrappedDetectors.end(); ++ud)
     {
       if (! ud->detector ) continue;
       double& u = ud->u;
-      u += du;
-      if (u > m_u_max)
-      {
-        u -= period;
-      }
+      u = applyUCorrection(u);
     }
-    m_u_correction += du;
-    if (m_u_correction > m_u_max)
-    {
-      m_u_correction -= period;
-    }
+
   }
 }
 
@@ -245,15 +267,46 @@ double RotationSurface::applyUCorrection(double u)const
 {
   double period = uPeriod();
   if (period == 0.0) return u;
-  u += m_u_correction;
   if (u < m_u_min)
   {
-    u += period;
+    double periods = floor( (m_u_max - u) / period ) * period;
+    u += periods;
   }
   if (u > m_u_max)
   {
-    u -= period;
+    double periods = floor( (u - m_u_min) / period ) * period;
+    u -= periods;
   }
   return u;
 }
 
+/**
+  * Set new value for the u-correction. 
+  * Correct all uv corrdinates of detectors.
+  */
+void RotationSurface::setUCorrection(double umin, double umax) 
+{
+  m_u_min = umin;
+  m_u_max = umax;
+  double period = uPeriod();
+  double du = m_u_max - m_u_min;
+  if ( du > period * 1.1 )
+  {
+    m_u_max -= floor( du / period ) * period;
+  }
+  while ( m_u_min >= m_u_max )
+  {
+    m_u_max += period;
+  }
+  m_manual_u_correction = true;
+  updateDetectors();
+}
+
+/**
+  * Set automatic u-correction
+  */
+void RotationSurface::setAutomaticUCorrection()
+{
+  m_manual_u_correction = false;
+  updateDetectors();
+}

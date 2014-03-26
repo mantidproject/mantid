@@ -5,68 +5,35 @@ This algorithm retrieves logged in users investigations data from the informatio
 *WIKI*/
 
 #include "MantidICat/CatalogMyDataSearch.h"
-#include "MantidAPI/CatalogFactory.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidAPI/ICatalog.h"
+#include "MantidAPI/CatalogManager.h"
 
 namespace Mantid
 {
   namespace ICat
   {
-    using namespace Kernel;
-    using namespace API;
-
     DECLARE_ALGORITHM(CatalogMyDataSearch)
 
     /// Sets documentation strings for this algorithm
     void CatalogMyDataSearch::initDocs()
     {
-      this->setWikiSummary("This algorithm loads the logged in users' investigations.");
-      this->setOptionalMessage("This algorithm loads the logged in users' investigations.");
+      this->setWikiSummary("This algorithm loads the logged in users' investigations into a workspace.");
+      this->setOptionalMessage("This algorithm loads the logged in users' investigations into a workspace.");
     }
 
     /// Initialisation method.
     void CatalogMyDataSearch::init()
     {
-      declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
-          "The name of the workspace to store the result of MyData search ");
-      declareProperty("IsValid",true,"Boolean option used to check the validity of login session", Direction::Output);
+      declareProperty("Session","","The session information of the catalog to use.");
+      declareProperty(new API::WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Kernel::Direction::Output),
+          "The name of the workspace to store the search results.");
     }
 
     /// Execution method.
     void CatalogMyDataSearch::exec()
     {
-
-
-      ICatalog_sptr catalog_sptr;
-      try
-      {
-        catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
-
-      }
-      catch(Kernel::Exception::NotFoundError&)
-      {
-        throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file.");
-      }
-      if(!catalog_sptr)
-      {
-        throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
-      }
-
-      API::ITableWorkspace_sptr outputws = WorkspaceFactory::Instance().createTable("TableWorkspace");
-      try
-      {
-        catalog_sptr->myData(outputws);
-      }
-      catch(std::runtime_error& e)
-      {
-        setProperty("IsValid",false);
-        throw std::runtime_error("Please login to the information catalog using the login dialog provided.");
-      }
+      auto outputws = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+      API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->myData(outputws);
       setProperty("OutputWorkspace",outputws);
-
     }
-
   }
 }

@@ -61,6 +61,8 @@ public:
   virtual const std::string category() const { return "Transforms\\Masking";}
 
 private:
+  const std::string workspaceMethodName() const { return "maskDetectors"; }
+  const std::string workspaceMethodInputProperty() const { return "Workspace"; }
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   // Implement abstract Algorithm methods

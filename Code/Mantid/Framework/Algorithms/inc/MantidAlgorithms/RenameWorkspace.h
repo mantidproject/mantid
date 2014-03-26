@@ -55,6 +55,9 @@ public:
   virtual const std::string category() const { return "Utility\\Workspaces";}
 
 private:
+  const std::string workspaceMethodName() const { return "rename"; }
+  const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
+
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   // Overridden Algorithm methods

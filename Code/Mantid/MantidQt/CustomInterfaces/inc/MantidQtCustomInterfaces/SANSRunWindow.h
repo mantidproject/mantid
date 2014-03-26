@@ -71,6 +71,8 @@ class SANSRunWindow : public MantidQt::API::UserSubWindow
 public:
   /// Name of the interface
   static std::string name() { return "SANS ISIS"; }
+  // This interface's categories.
+  static QString categoryInfo() { return "SANS"; }
 
   ///Stores the batch or single run mode selection
   enum States {
@@ -141,7 +143,7 @@ private:
   QString readUserFileGUIChanges(const States type);
   QString readSampleObjectGUIChanges();
   /// Get the component distances
-  void componentLOQDistances(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, double & lms, double & lsda, double & lsdb);
+  void componentLOQDistances(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, double & lms, double & lsda, double & lsdb);
   /// Enable/disable user interaction
   void setProcessingState(const States action);
   ///Check for workspace name in the AnalysisDataService
@@ -154,11 +156,11 @@ private:
   /// Create a mask string
   void addUserMaskStrings(QString & exec_script,const QString& importCommand,enum MaskType mType);
   /// Set geometry details
-  void setGeometryDetails(const QString & sample_logs, const QString & can_logs);
+  void setGeometryDetails();
   /// Set the SANS2D geometry
-  void setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, const QString & logs, int wscode);
+  void setSANS2DGeometry(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, int wscode);
   /// Set LOQ geometry
-  void setLOQGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, int wscode);
+  void setLOQGeometry(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, int wscode);
   /// Mark an error on a label
   void markError(QLabel* label);
   /// set the name of the output workspace, empty means there is no output
@@ -166,7 +168,7 @@ private:
   /// Run an assign command
   bool runAssign(int key, QString & logs);
   /// Load a scatter sample file or can run via Python objects using the passed Python command
-  bool assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const QString & assignFn, QString & logs);
+  bool assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const QString & assignFn);
   /// runs that contain only monitor counts can be direct or transmission runs
   bool assignMonitorRun(MantidWidgets::MWRunFiles & trans, MantidWidgets::MWRunFiles & direct, const QString & assignFn);
   /// Get the detectors' names
@@ -252,9 +254,11 @@ private slots:
   /// Adds a warning message to the tab title
   void setLoggerTabTitleToWarn();
   /// Handle selection of the transmission
-  void transSelectorChanged(int ); 
-
+  void transSelectorChanged(int );
+  void loadTransmissionSettings();
   
+  void handleSlicePushButton();
+
 private:
   /// used to specify the range of validation to do
   enum ValCheck
@@ -347,6 +351,8 @@ private:
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
   static Mantid::Kernel::Logger & g_centreFinderLog;
+
+  UserSubWindow * slicingWindow;
 
 };
 

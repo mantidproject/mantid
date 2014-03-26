@@ -10,7 +10,7 @@ More details can be found [http://en.wikipedia.org/wiki/Cross-correlation here.]
 *WIKI*/
 /*WIKI_USAGE*
  '''Python'''
-    CrossCorrelate("InputW","OutputW",2,3,75,1.6,2.2)
+    OutputW = CrossCorrelate("InputW",2,3,75,1.6,2.2)
 *WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes

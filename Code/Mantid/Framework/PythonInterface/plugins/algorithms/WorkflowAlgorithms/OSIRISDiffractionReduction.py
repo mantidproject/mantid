@@ -50,10 +50,20 @@ class DRangeToWsMap(object):
                 ", which has a time regime of " + str(timeRegime))
         
         # Add the workspace to the map, alongside its DRange.
-        if dRange in self._map:
-            self._map[dRange].append(wsname)
-        else:
+        if dRange not in self._map:
             self._map[dRange] = [wsname]
+        else:
+            #check if x ranges matchs and existing run
+            for ws_name in self._map[dRange]:
+                map_lastx = mtd[ws_name].readX(0)[-1]
+                ws_lastx = ws.readX(0)[-1]
+                
+                #if it matches ignore it
+                if map_lastx == ws_lastx:
+                    DeleteWorkspace(ws)
+                    return
+
+            self._map[dRange].append(wsname)
             
     def setItem(self, dRange, wsname):
         """ Set a dRange and corresponding *single* ws.
@@ -78,11 +88,14 @@ def averageWsList(wsList):
     for name in wsList:
         avName += "_" + name
     
+    numWorkspaces = len(wsList)
+
     # Compute the average and put into "__temp_avg".
-    __temp_avg = mtd[wsList[0]] + mtd[wsList[1]]
-    for i in range(2, len(wsList) ):
+    __temp_avg = mtd[wsList[0]]
+    for i in range(1, numWorkspaces):
         __temp_avg += mtd[wsList[i]]
-    __temp_avg /= len(wsList)
+        
+    __temp_avg /= numWorkspaces
         
     # Rename the average ws and return it.
     RenameWorkspace(InputWorkspace=__temp_avg, OutputWorkspace=avName)
@@ -240,6 +253,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         
         # Create scalar data to cope with where merge has combined overlapping data.
         intersections = getIntersectionsOfRanges(self._samMap.getMap().keys())
+        
         dataX = result.dataX(0)
         dataY = []; dataE = []
         for i in range(0, len(dataX)-1):
@@ -248,14 +262,20 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 dataY.append(2); dataE.append(2)
             else:
                 dataY.append(1); dataE.append(1)
-                
-        # Create scalar from data and use to scale result.
-        CreateWorkspace(OutputWorkspace="scaling", DataX=dataX, DataY=dataY, DataE=dataE, UnitX="dSpacing")
-        scalar = mtd["scaling"]
-        Divide(LHSWorkspace=result, RHSWorkspace=scalar, OutputWorkspace=result)
+
+        # apply scalar data to result workspace
+        for i in range(0, result.getNumberHistograms()):
+            resultY = result.dataY(i)
+            resultE = result.dataE(i)
+
+            resultY = resultY / dataY
+            resultE = resultE / dataE
+
+            result.setY(i,resultY)
+            result.setE(i,resultE)
         
         # Delete all workspaces we've created, except the result.
-        for ws in self._vanMap.getMap().values() + [scalar]:
+        for ws in self._vanMap.getMap().values():
             DeleteWorkspace(Workspace=ws)
         
         self.setProperty("OutputWorkspace", result)

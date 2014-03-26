@@ -6,7 +6,7 @@ When acting on an event workspace, the output will be a Workspace2D, with the de
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
- Exponential("input","output")
+ output = Exponential("input")
 *WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes

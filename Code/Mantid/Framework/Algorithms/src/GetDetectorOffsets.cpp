@@ -12,7 +12,7 @@ This is then written into a [[CalFile|.cal file]] for every detector that contri
 /*WIKI_USAGE*
 '''Python'''
 
- GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal","offsets","mask")
+ offsets,mask = GetDetOffsetsMultiPeaks("InputW",0.01,2.0,1.8,2.2,"output.cal")
 *WIKI_USAGE*/
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidAPI/FileProperty.h"
@@ -87,8 +87,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("MaskWorkspace","Mask",Direction::Output),
           "An output workspace containing the mask.");
       // Only keep peaks
-      std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
-      declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(peakNames));
+      declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(FunctionFactory::Instance().getFunctionNames<IPeakFunction>()));
       declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
     }
 

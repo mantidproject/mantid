@@ -18,6 +18,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceValidators.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/algorithm/string.hpp>
@@ -55,66 +57,31 @@ double InstrumentActor::m_tolerance = 0.00001;
  */
 InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling, double scaleMin, double scaleMax):
 m_workspace(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString())),
+m_ragged(true),
 m_autoscaling(autoscaling),
 m_maskedColor(100,100,100),
 m_failedColor(200,200,200),
 m_sampleActor(NULL)
 {
-  auto shared_workspace = m_workspace.lock();
-  if (!shared_workspace)
-    throw std::logic_error("InstrumentActor passed a workspace that isn't a MatrixWorkspace");
-
-  const size_t nHist = shared_workspace->getNumberHistograms();
-  m_WkspBinMin = DBL_MAX;
-  m_WkspBinMax = -DBL_MAX;
-  for (size_t i = 0; i < nHist; ++i)
-  {
-    const Mantid::MantidVec & values = shared_workspace->readX(i);
-    double xtest = values.front();
-    if( xtest != std::numeric_limits<double>::infinity() )
-    {
-
-      if( xtest < m_WkspBinMin )
-      {
-        m_WkspBinMin = xtest;
-      }
-      else if( xtest > m_WkspBinMax )
-      {
-        m_WkspBinMax = xtest;
-      }
-      else {}
-    }
-
-    xtest = values.back();
-    if( xtest != std::numeric_limits<double>::infinity() )
-    {
-      if( xtest < m_WkspBinMin )
-      {
-        m_WkspBinMin = xtest;
-      }
-      else if( xtest > m_WkspBinMax )
-      {
-        m_WkspBinMax = xtest;
-      }
-      else {}
-    }
-  }
-  m_WkspDataPositiveMin = DBL_MAX;
+  // settings
   loadSettings();
 
-  if ( !m_autoscaling )
-  {
-    m_DataMinValue = -DBL_MAX;
-    m_DataMaxValue =  DBL_MAX;
-    setMinMaxRange( scaleMin, scaleMax );
-  }
+  auto sharedWorkspace = m_workspace.lock();
+  if (!sharedWorkspace)
+    throw std::logic_error("InstrumentActor passed a workspace that isn't a MatrixWorkspace");
 
-  blockSignals(true);
-  setIntegrationRange(m_WkspBinMin,m_WkspBinMax);
-  blockSignals(false);
+  // set up the color map
+  if (!m_currentColorMapFilename.isEmpty())
+  {
+    loadColorMap(m_currentColorMapFilename,false);
+  }
+  m_colorMap.changeScaleType(m_scaleType);
+
+  // set up data ranges and colours
+  setUpWorkspace(sharedWorkspace, scaleMin, scaleMax);
 
   /// Keep the pointer to the detid2index map
-  m_detid2index_map = shared_workspace->getDetectorIDToWorkspaceIndexMap();
+  m_detid2index_map = sharedWorkspace->getDetectorIDToWorkspaceIndexMap();
 
   Instrument_const_sptr instrument = getInstrument();
 
@@ -135,7 +102,7 @@ m_sampleActor(NULL)
   accept(findVisitor,GLActor::Finish);
   const ObjComponentActor* samplePosActor = dynamic_cast<const ObjComponentActor*>(findVisitor.getActor());
 
-  m_sampleActor = new SampleActor(*this,shared_workspace->sample(),samplePosActor);
+  m_sampleActor = new SampleActor(*this,sharedWorkspace->sample(),samplePosActor);
   m_scene.addActor(m_sampleActor);
   if ( !m_showGuides )
   {
@@ -152,11 +119,73 @@ InstrumentActor::~InstrumentActor()
   saveSettings();
 }
 
+/**
+  * Set up the workspace: calculate the value ranges, set the colours.
+  * @param sharedWorkspace :: A shared pointer to the workspace.
+  * @param scaleMin :: Minimum limit on the color map axis. If autoscale this value is ignored.
+  * @param scaleMax :: Maximum limit on the color map axis. If autoscale this value is ignored.
+  */
+void InstrumentActor::setUpWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace, double scaleMin, double scaleMax)
+{
+  const size_t nHist = sharedWorkspace->getNumberHistograms();
+  m_WkspBinMinValue = DBL_MAX;
+  m_WkspBinMaxValue = -DBL_MAX;
+  for (size_t i = 0; i < nHist; ++i)
+  {
+    const Mantid::MantidVec & values = sharedWorkspace->readX(i);
+    double xtest = values.front();
+    if( xtest != std::numeric_limits<double>::infinity() )
+    {
+
+      if( xtest < m_WkspBinMinValue )
+      {
+        m_WkspBinMinValue = xtest;
+      }
+      else if( xtest > m_WkspBinMaxValue )
+      {
+        m_WkspBinMaxValue = xtest;
+      }
+      else {}
+    }
+
+    xtest = values.back();
+    if( xtest != std::numeric_limits<double>::infinity() )
+    {
+      if( xtest < m_WkspBinMinValue )
+      {
+        m_WkspBinMinValue = xtest;
+      }
+      else if( xtest > m_WkspBinMaxValue )
+      {
+        m_WkspBinMaxValue = xtest;
+      }
+      else {}
+    }
+  }
+
+  // set some values as the variables will be used 
+  m_DataPositiveMinValue = DBL_MAX;
+  m_DataMinValue = -DBL_MAX;
+  m_DataMaxValue =  DBL_MAX;
+
+  if ( !m_autoscaling )
+  {
+    setDataMinMaxRange( scaleMin, scaleMax );
+  }
+  setDataIntegrationRange(m_WkspBinMinValue,m_WkspBinMaxValue);
+  resetColors();
+
+  // set the ragged flag using a workspace validator
+  auto wsValidator = Mantid::API::CommonBinsValidator();
+  m_ragged = ! wsValidator.isValid(sharedWorkspace).empty();
+
+}
+
 /** Used to set visibility of an actor corresponding to a particular component
  * When selecting a component in the InstrumentTreeWidget
  *
- * @param visitor
- * @return
+ * @param visitor :: Visitor to be accepted bu this actor.
+ * @param rule :: A rule defining visitor acceptance by assembly actors.
  */
 bool InstrumentActor::accept(GLActorVisitor& visitor, VisitorAcceptRule rule)
 {
@@ -196,14 +225,14 @@ bool InstrumentActor::hasChildVisible() const
  */
 MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const
 {
-  auto shared_workspace = m_workspace.lock();
+  auto sharedWorkspace = m_workspace.lock();
 
-  if ( !shared_workspace )
+  if ( !sharedWorkspace )
   {
     throw std::runtime_error("Instrument view: workspace doesn't exist");
   }
 
-  return shared_workspace;
+  return sharedWorkspace;
 }
 
 /** Returns the mask workspace relating to this instrument view as a MatrixWorkspace
@@ -287,23 +316,23 @@ Instrument_const_sptr InstrumentActor::getInstrument() const
     // to define our 'default' view
     std::string view = Mantid::Kernel::ConfigService::Instance().getString("instrument.view.geometry");
 
-    auto shared_workspace = getWorkspace();
-    Mantid::Kernel::ReadLock _lock(*shared_workspace);
+    auto sharedWorkspace = getWorkspace();
+    Mantid::Kernel::ReadLock _lock(*sharedWorkspace);
 
     if ( boost::iequals("Default", view) || boost::iequals("Physical", view))
     {      
         // First see if there is a 'physical' instrument available. Use it if there is.
-        retval = shared_workspace->getInstrument()->getPhysicalInstrument();
+        retval = sharedWorkspace->getInstrument()->getPhysicalInstrument();
     }
     else if (boost::iequals("Neutronic", view))
     {
-        retval = shared_workspace->getInstrument();
+        retval = sharedWorkspace->getInstrument();
     }
 
     if ( ! retval )
     {
         // Otherwise get hold of the 'main' instrument and use that
-        retval = shared_workspace->getInstrument();
+        retval = sharedWorkspace->getInstrument();
     }
 
     return retval;
@@ -354,54 +383,7 @@ size_t InstrumentActor::getWorkspaceIndex(Mantid::detid_t id) const
  */
 void InstrumentActor::setIntegrationRange(const double& xmin,const double& xmax)
 {
-  if (!getWorkspace()) return;
-
-  m_BinMinValue = xmin;
-  m_BinMaxValue = xmax;
-
-  bool binEntireRange = m_BinMinValue == m_WkspBinMin && m_BinMaxValue == m_WkspBinMax;
-
-  //Use the workspace function to get the integrated spectra
-  getWorkspace()->getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue, binEntireRange);
-
-  m_DataMinValue = DBL_MAX;
-  m_DataMaxValue = -DBL_MAX;
-  
-  //Now we need to convert to a vector where each entry is the sum for the detector ID at that spot (in integrated_values).
-  for (size_t i=0; i < m_specIntegrs.size(); i++)
-  {
-    double sum = m_specIntegrs[i];
-    if( boost::math::isinf(sum) || boost::math::isnan(sum) )
-    {
-      throw std::runtime_error("The workspace contains values that cannot be displayed (infinite or NaN).\n"
-                               "Please run ReplaceSpecialValues algorithm for correction.");
-    }
-    //integrated_values[i] = sum;
-    if( sum < m_DataMinValue )
-    {
-      m_DataMinValue = sum;
-    }
-    if( sum > m_DataMaxValue )
-    {
-      m_DataMaxValue = sum;
-    }
-    if (sum > 0 && sum < m_WkspDataPositiveMin)
-    {
-      m_WkspDataPositiveMin = sum;
-    }
-  }
-
-  // No preset value
-  if(binEntireRange)
-  {
-    m_WkspDataMin = m_DataMinValue;
-    m_WkspDataMax = m_DataMaxValue;
-  }
-  if (m_autoscaling)
-  {
-    m_DataMinScaleValue = m_DataMinValue;
-    m_DataMaxScaleValue = m_DataMaxValue;
-  }
+  setDataIntegrationRange(xmin, xmax);
   resetColors();
 }
 
@@ -421,16 +403,44 @@ double InstrumentActor::getIntegratedCounts(Mantid::detid_t id)const
 }
 
 /**
- * Sum counts in detectors for purposes of rough plotting against time of flight.
- * Silently assumes that all spectra share the x vector.
+ * Sum counts in detectors for purposes of rough plotting against the units on the x-axis.
+ * Checks (approximately) if the workspace is ragged or not and uses the appropriate summation
+ * method.
  *
  * @param dets :: A list of detector IDs to sum.
  * @param x :: (output) Time of flight values (or whatever values the x axis has) to plot against.
  * @param y :: (output) The sums of the counts for each bin.
- * @param err :: (optional output) Pointer to a buffer to receive the errors of the summed spectra.
- *               If NULL the errors are not returned.
+ * @param size :: (optional input) Size of the output vectors. If not given it will be determined automatically.
  */
-void InstrumentActor::sumDetectors(QList<int> &dets, std::vector<double> &x, std::vector<double> &y, std::vector<double> *err) const
+void InstrumentActor::sumDetectors(QList<int> &dets, std::vector<double> &x, std::vector<double> &y, size_t size) const
+{
+  Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
+  if ( size > ws->blocksize() || size == 0 )
+  {
+    size = ws->blocksize();
+  }
+
+  if ( m_ragged )
+  {
+    // could be slower than uniform
+    sumDetectorsRagged( dets, x, y, size );
+  }
+  else
+  {
+    // should be faster than ragged
+    sumDetectorsUniform( dets, x, y );
+  }
+}
+
+/**
+ * Sum counts in detectors for purposes of rough plotting against the units on the x-axis.
+ * Assumes that all spectra share the x vector.
+ *
+ * @param dets :: A list of detector IDs to sum.
+ * @param x :: (output) Time of flight values (or whatever values the x axis has) to plot against.
+ * @param y :: (output) The sums of the counts for each bin.
+ */
+void InstrumentActor::sumDetectorsUniform(QList<int>& dets, std::vector<double>&x, std::vector<double>&y) const
 {
 
     size_t wi;
@@ -449,10 +459,6 @@ void InstrumentActor::sumDetectors(QList<int> &dets, std::vector<double> &x, std
     {
         x.clear();
         y.clear();
-        if ( err )
-        {
-            err->clear();
-        }
         return;
     }
 
@@ -470,34 +476,111 @@ void InstrumentActor::sumDetectors(QList<int> &dets, std::vector<double> &x, std
       std::transform(x.begin(),x.end(),x.begin(),std::bind2nd(std::divides<double>(),2.0));
     }
     y.resize(x.size(),0);
-    if (err)
-    {
-      err->resize(x.size(),0);
-    }
-
+    // sum the spectra
     foreach(int id, dets)
     {
         try {
           size_t index = getWorkspaceIndex( id );
           const Mantid::MantidVec& Y = ws->readY(index);
           std::transform(y.begin(),y.end(),Y.begin() + imin,y.begin(),std::plus<double>());
-          if (err)
-          {
-            const Mantid::MantidVec& E = ws->readE(index);
-            std::vector<double> tmp;
-            tmp.assign(E.begin() + imin,E.begin() + imax);
-            std::transform(tmp.begin(),tmp.end(),tmp.begin(),tmp.begin(),std::multiplies<double>());
-            std::transform(err->begin(),err->end(),tmp.begin(),err->begin(),std::plus<double>());
-          }
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           continue; // Detector doesn't have a workspace index relating to it
         }
     }
+}
 
-    if (err)
-    {
-      std::transform(err->begin(),err->end(),err->begin(),Sqrt());
-    }
+/**
+ * Sum counts in detectors for purposes of rough plotting against the units on the x-axis.
+ * Assumes that all spectra have different x vectors.
+ *
+ * @param dets :: A list of detector IDs to sum.
+ * @param x :: (output) Time of flight values (or whatever values the x axis has) to plot against.
+ * @param y :: (output) The sums of the counts for each bin.
+ * @param size :: (input) Size of the output vectors.
+ */
+void InstrumentActor::sumDetectorsRagged(QList<int> &dets, std::vector<double> &x, std::vector<double> &y, size_t size) const
+{
+  if ( dets.isEmpty() || size == 0 )
+  {
+      x.clear();
+      y.clear();
+      return;
+  }
+
+  Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
+  //  create a workspace to hold the data from the selected detectors
+  Mantid::API::MatrixWorkspace_sptr dws = Mantid::API::WorkspaceFactory::Instance().create(ws,dets.size());
+
+  // x-axis limits
+  double xStart = maxBinValue();
+  double xEnd = minBinValue();
+
+  size_t nSpec = 0; // number of actual spectra to add
+  // fill in the temp workspace with the data from the detectors
+  foreach(int id, dets)
+  {
+      try {
+        size_t index = getWorkspaceIndex( id );
+        dws->dataX(nSpec) = ws->readX(index);
+        dws->dataY(nSpec) = ws->readY(index);
+        dws->dataE(nSpec) = ws->readE(index);
+        double xmin = dws->readX(nSpec)[0];
+        double xmax = dws->readX(nSpec)[size];
+        if ( xmin < xStart )
+        {
+          xStart = xmin;
+        }
+        if ( xmax > xEnd )
+        {
+          xEnd = xmax;
+        }
+        ++nSpec;
+      } catch (Mantid::Kernel::Exception::NotFoundError &) {
+        continue; // Detector doesn't have a workspace index relating to it
+      }
+  }
+
+  if ( nSpec == 0 )
+  {
+      x.clear();
+      y.clear();
+      return;
+  }
+
+  // limits should exceed the integration range
+  if ( xStart < minBinValue() )
+  {
+    xStart = minBinValue();
+  }
+
+  if ( xEnd > maxBinValue() )
+  {
+    xEnd = maxBinValue();
+  }
+
+  double dx = (xEnd - xStart) / static_cast<double>(size - 1);
+  std::string params = QString("%1,%2,%3").arg(xStart).arg(dx).arg(xEnd).toStdString();
+  std::string outName = "_TMP_sumDetectorsRagged";
+
+  // rebin all spectra to the same binning
+  Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("Rebin",-1);
+  alg->setProperty( "InputWorkspace", dws );
+  alg->setPropertyValue( "OutputWorkspace", outName );
+  alg->setPropertyValue( "Params", params );
+  alg->execute();
+
+  ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(outName));
+  Mantid::API::AnalysisDataService::Instance().remove( outName );
+
+  x = ws->readX(0);
+  y = ws->readY(0);
+  // add the spectra
+  for(size_t i = 0; i < nSpec; ++i)
+  {
+    const Mantid::MantidVec& Y = ws->readY(i);
+    std::transform( y.begin(), y.end(), Y.begin(), y.begin(), std::plus<double>() );
+  }
+
 }
 
 /**
@@ -509,7 +592,7 @@ void InstrumentActor::resetColors()
   QwtDoubleInterval qwtInterval(m_DataMinScaleValue,m_DataMaxScaleValue);
   m_colors.resize(m_specIntegrs.size());
 
-  auto shared_workspace = getWorkspace();
+  auto sharedWorkspace = getWorkspace();
 
   Instrument_const_sptr inst = getInstrument();
   IMaskWorkspace_sptr mask = getMaskWorkspaceIfExists();
@@ -522,7 +605,7 @@ void InstrumentActor::resetColors()
     try
     {
       // Find if the detector is masked
-      const std::set<detid_t>& dets = shared_workspace->getSpectrum(wi)->getDetectorIDs();
+      const std::set<detid_t>& dets = sharedWorkspace->getSpectrum(wi)->getDetectorIDs();
       bool masked = false;
 
       if ( mask )
@@ -558,7 +641,7 @@ void InstrumentActor::resetColors()
   emit colorMapChanged();
 }
 
-void InstrumentActor::update()
+void InstrumentActor::updateColors()
 {
   setIntegrationRange(m_BinMinValue,m_BinMaxValue);
   resetColors();
@@ -597,7 +680,7 @@ void InstrumentActor::draw(bool picking)const
 void InstrumentActor::loadColorMap(const QString& fname,bool reset_colors)
 {
   m_colorMap.loadMap(fname);
-  m_currentColorMap = fname;
+  m_currentColorMapFilename = fname;
   if (reset_colors)
   {
     resetColors();
@@ -661,15 +744,10 @@ void InstrumentActor::loadSettings()
 {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWindow");
-  int scaleType = settings.value("ScaleType", 0 ).toInt();
+  m_scaleType = static_cast<GraphOptions::ScaleType>( settings.value("ScaleType", 0 ).toInt() );
   //Load Colormap. If the file is invalid the default stored colour map is used
-  m_currentColorMap = settings.value("ColormapFile", "").toString();
+  m_currentColorMapFilename = settings.value("ColormapFile", "").toString();
   // Set values from settings
-  if (!m_currentColorMap.isEmpty())
-  {
-    loadColorMap(m_currentColorMap,false);
-  }
-  m_colorMap.changeScaleType(static_cast<GraphOptions::ScaleType>(scaleType));
   m_showGuides = settings.value("ShowGuides", false).toBool();
   settings.endGroup();
 }
@@ -678,7 +756,7 @@ void InstrumentActor::saveSettings()
 {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWindow");
-  settings.setValue("ColormapFile", m_currentColorMap);
+  settings.setValue("ColormapFile", m_currentColorMapFilename);
   settings.setValue("ScaleType", (int)m_colorMap.getScaleType() );
   settings.setValue("ShowGuides", m_showGuides);
   settings.endGroup();
@@ -687,11 +765,7 @@ void InstrumentActor::saveSettings()
 void InstrumentActor::setMinValue(double vmin)
 {
   if (m_autoscaling) return;
-  if (vmin < m_DataMinValue)
-  {
-    vmin = m_DataMinValue;
-  }
-  if (vmin > m_DataMaxValue) return;
+  if (vmin >= m_DataMaxScaleValue) return;
   m_DataMinScaleValue = vmin;
   resetColors();
 }
@@ -699,7 +773,7 @@ void InstrumentActor::setMinValue(double vmin)
 void InstrumentActor::setMaxValue(double vmax)
 {
   if (m_autoscaling) return;
-  if (vmax < m_DataMinValue) return;
+  if (vmax <= m_DataMinScaleValue) return;
   m_DataMaxScaleValue = vmax;
   resetColors();
 }
@@ -707,19 +781,13 @@ void InstrumentActor::setMaxValue(double vmax)
 void InstrumentActor::setMinMaxRange(double vmin, double vmax)
 {
   if (m_autoscaling) return;
-  if (vmin < m_DataMinValue)
-  {
-    vmin = m_DataMinValue;
-  }
-  if (vmin >= vmax) return;
-  m_DataMinScaleValue = vmin;
-  m_DataMaxScaleValue = vmax;
+  setDataMinMaxRange(vmin,vmax);
   resetColors();
 }
 
 bool InstrumentActor::wholeRange()const
 {
-  return m_BinMinValue == m_WkspBinMin && m_BinMaxValue == m_WkspBinMax;
+  return m_BinMinValue == m_WkspBinMinValue && m_BinMaxValue == m_WkspBinMaxValue;
 }
 
 /**
@@ -991,6 +1059,64 @@ void InstrumentActor::getBinMinMaxIndex( size_t wi, size_t& imin, size_t& imax )
       imin = static_cast<size_t>(x_from - x_begin);
       imax = static_cast<size_t>(x_to - x_begin);
     }
+  }
+}
+
+/**
+  * Set the minimum and the maximum data values on the color map scale.
+  */
+void InstrumentActor::setDataMinMaxRange(double vmin, double vmax)
+{
+  if (vmin < m_DataMinValue)
+  {
+    vmin = m_DataMinValue;
+  }
+  if (vmin >= vmax) return;
+  m_DataMinScaleValue = vmin;
+  m_DataMaxScaleValue = vmax;
+}
+
+void InstrumentActor::setDataIntegrationRange(const double& xmin,const double& xmax)
+{
+  if (!getWorkspace()) return;
+
+  m_BinMinValue = xmin;
+  m_BinMaxValue = xmax;
+
+  //Use the workspace function to get the integrated spectra
+  getWorkspace()->getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue, wholeRange());
+
+  m_DataMinValue = DBL_MAX;
+  m_DataMaxValue = -DBL_MAX;
+  
+  //Now we need to convert to a vector where each entry is the sum for the detector ID at that spot (in integrated_values).
+  for (size_t i=0; i < m_specIntegrs.size(); i++)
+  {
+    double sum = m_specIntegrs[i];
+    if( boost::math::isinf(sum) || boost::math::isnan(sum) )
+    {
+      throw std::runtime_error("The workspace contains values that cannot be displayed (infinite or NaN).\n"
+                               "Please run ReplaceSpecialValues algorithm for correction.");
+    }
+    //integrated_values[i] = sum;
+    if( sum < m_DataMinValue )
+    {
+      m_DataMinValue = sum;
+    }
+    if( sum > m_DataMaxValue )
+    {
+      m_DataMaxValue = sum;
+    }
+    if (sum > 0 && sum < m_DataPositiveMinValue)
+    {
+      m_DataPositiveMinValue = sum;
+    }
+  }
+
+  if (m_autoscaling)
+  {
+    m_DataMinScaleValue = m_DataMinValue;
+    m_DataMaxScaleValue = m_DataMaxValue;
   }
 }
 

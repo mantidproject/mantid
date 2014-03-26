@@ -83,7 +83,7 @@ set ( INC_FILES
   ${HEADER_DIR}/api/PythonAlgorithm/PythonAlgorithm.h
   ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h
-  ${HEADER_DIR}/api/WorkspacePropertyMacro.h
+  ${HEADER_DIR}/api/WorkspacePropertyExporter.h
 )
 
 set ( PY_FILES 

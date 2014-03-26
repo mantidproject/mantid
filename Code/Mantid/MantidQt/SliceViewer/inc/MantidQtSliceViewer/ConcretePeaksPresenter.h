@@ -38,8 +38,8 @@ namespace MantidQt
       virtual bool changeShownDim();
       virtual bool isLabelOfFreeAxis(const std::string& label) const;
       SetPeaksWorkspaces presentedWorkspaces() const;
-      void setForegroundColour(const QColor);
-      void setBackgroundColour(const QColor);
+      void setForegroundColor(const QColor);
+      void setBackgroundColor(const QColor);
       std::string getTransformName() const;
       void setShown(const bool shown);
       virtual PeakBoundingBox getBoundingBox(const int) const;
@@ -48,6 +48,12 @@ namespace MantidQt
       virtual void setPeakSizeIntoProjection(const double fraction);
       virtual double getPeakSizeOnProjection() const;
       virtual double getPeakSizeIntoProjection() const;
+      virtual void registerOwningPresenter(UpdateableOnDemand* owner);
+      virtual bool getShowBackground() const;
+      virtual QColor getBackgroundColor() const;
+      virtual QColor getForegroundColor() const;
+      virtual void zoomToPeak(const int index);
+      virtual bool isHidden() const;
     private:
       /// Peak overlay view.
       PeakOverlayView_sptr m_viewPeaks;
@@ -65,7 +71,11 @@ namespace MantidQt
       Mantid::Kernel::Logger & g_log;
       /// Viewable Peaks
       std::vector<bool> m_viewablePeaks;
-      /// Configurre peak transformations
+      /// Owning presenter.
+      UpdateableOnDemand* m_owningPresenter;
+      /// Flag to indicate that this is hidden.
+      bool m_isHidden;
+      /// Configure peak transformations
       bool configureMappingTransform();
       /// Hide all views
       void hideAll();
@@ -81,6 +91,8 @@ namespace MantidQt
       void checkWorkspaceCompatibilities(boost::shared_ptr<Mantid::API::MDGeometry> mdWS);
       /// Find peaks interacting with the slice and update the view.
       void doFindPeaksInRegion();
+      /// make owner update.
+      void informOwnerUpdate();
     };
 
   }

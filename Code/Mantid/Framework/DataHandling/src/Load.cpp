@@ -248,8 +248,18 @@ namespace Mantid
       }
       winningLoader->initialize();
       setUpLoader(winningLoader,0,1);
+
+      findFilenameProperty(winningLoader);
+
+      setPropertyValue("LoaderName", winningLoader->name());
+      setProperty("LoaderVersion", winningLoader->version());
+      return winningLoader;
+    }
+
+    void Load::findFilenameProperty(const API::IAlgorithm_sptr & loader)
+    {
       // Use the first file property as the main Filename
-      const auto & props = winningLoader->getProperties();
+      const auto & props = loader->getProperties();
       for(auto it = props.begin(); it != props.end(); ++it)
       {
         if(auto *fp = dynamic_cast<API::FileProperty*>(*it))
@@ -262,11 +272,8 @@ namespace Mantid
       {
         setPropertyValue("LoaderName", "");
         setProperty("LoaderVersion", -1);
-        throw std::runtime_error("Cannot find FileProperty on " + winningLoader->name() + " algorithm.");
+        throw std::runtime_error("Cannot find FileProperty on " + loader->name() + " algorithm.");
       }
-      setPropertyValue("LoaderName", winningLoader->name());
-      setProperty("LoaderVersion", winningLoader->version());
-      return winningLoader;
     }
 
     /**
@@ -379,6 +386,7 @@ namespace Mantid
       else
       {
         m_loader = createLoader(0,1);
+        findFilenameProperty(m_loader);
       }
       g_log.information() << "Using " << loaderName << " version " << m_loader->version() << ".\n";
       ///get the list properties for the concrete loader load algorithm
@@ -405,7 +413,6 @@ namespace Mantid
       setOutputWorkspace(m_loader);
     }
 
-
     void Load::loadMultipleFiles()
     {
       // allFilenames contains "rows" of filenames. If the row has more than 1 file in it
@@ -425,6 +432,8 @@ namespace Mantid
       std::vector<API::Workspace_sptr> loadedWsList;
       loadedWsList.reserve(allFilenames.size());
 
+      Workspace_sptr tempWs;
+
       // Cycle through the filenames and wsNames.
       for(; filenames != allFilenames.end(); ++filenames, ++wsName)
       {
@@ -434,8 +443,8 @@ namespace Mantid
         ++filename;
         for(; filename != filenames->end(); ++filename)
         {
-          Workspace_sptr secondWS = loadFileToWs(*filename,  "__@loadsum_temp@");
-          sumWS = plusWs(sumWS, secondWS);
+          tempWs = loadFileToWs(*filename,  "__@loadsum_temp@");
+          sumWS = plusWs(sumWS, tempWs);
         }
 
         API::WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(sumWS);
@@ -460,6 +469,7 @@ namespace Mantid
       if(loadedWsList.size() == 1)
       {
         setProperty("OutputWorkspace", loadedWsList[0]);
+        AnalysisDataService::Instance().rename(loadedWsList[0]->getName(), outputWsName);
       }
       // Else we have multiple loaded workspaces - group them and set the group as output.
       else
@@ -491,6 +501,16 @@ namespace Mantid
           declareProperty(new WorkspaceProperty<Workspace>(outWsPropName, *childWsName, Direction::Output));
           setProperty(outWsPropName, childWs);
         }
+      }
+
+      // Clean up.
+      if( tempWs )
+      {
+        Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("DeleteWorkspace");
+        alg->initialize();
+        alg->setChild(true);
+        alg->setProperty("Workspace", tempWs);
+        alg->execute();
       }
     }
 
@@ -533,15 +553,16 @@ namespace Mantid
       const std::vector< Property*> &props = loader->getProperties();
       for (unsigned int i = 0; i < props.size(); ++i)
       {
-        if (props[i]->direction() == Direction::Output && 
-          dynamic_cast<IWorkspaceProperty*>(props[i]) )
+        auto wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
+
+        if (wsProp && !wsProp->isOptional() && props[i]->direction() == Direction::Output )
         {
           if ( props[i]->value().empty() ) props[i]->setValue("LoadChildWorkspace");
         }
       }
       if (startProgress >= 0. && endProgress > startProgress && endProgress <= 1.)
       {
-        loader->addObserver(m_progressObserver);
+        loader->addObserver(this->progressObserver());
         setChildStartProgress(startProgress);
         setChildEndProgress(endProgress);
       }

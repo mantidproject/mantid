@@ -22,7 +22,7 @@ public:
   
    void xtestExec() ///< Test is disabled because it is slow and requires large files
   {
-    IAlgorithm_sptr alg( AlgorithmFactory::Instance().create("LoadSNSEventNexus", 1) );
+    IAlgorithm_sptr alg( AlgorithmFactory::Instance().create("LoadEventNexus", 1) );
     alg->initialize();
     alg->setProperty("Filename", "/home/8oz/data/TOPAZ_1786_event.nxs");
     alg->setProperty("OutputWorkspace", "savesnsnexus_workspace");

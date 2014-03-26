@@ -67,7 +67,6 @@ class QToolBar;
 //class QAssistantClient;
 class QLocale;
 class QMdiArea;
-class QUndoView;
 class QSignalMapper;
 
 class Matrix;
@@ -121,7 +120,6 @@ namespace MantidQt
 //Mantid
 class MantidUI;
 class ScriptingWindow;
-class CommandLineInterpreter;
 
 /**
 * \brief QtiPlot's main window.
@@ -240,6 +238,8 @@ public slots:
   ApplicationWindow * loadScript(const QString& fn);
   /// Runs a script from a file. Mainly useful for automatically running scripts
   void executeScriptFile(const QString & filename, const Script::ExecutionMode execMode);
+  /// Slot to connect the script execution errors to
+  void onScriptExecuteError(const QString & message, const QString & scriptName, int lineNumber);
   /// Runs an arbitrary lump of python code, return true/false on success/failure.
   bool runPythonScript(const QString & code, bool async = false, bool quiet=false, bool redirect=true);
   
@@ -461,6 +461,7 @@ public slots:
   //! \name Graphs
   //@{
   void setPreferences(Graph* g);
+  void setSpectrogramTickStyle(Graph* g);
   void setGraphDefaultSettings(bool autoscale,bool scaleFonts,bool resizeLayers,bool antialiasing, bool fixedAspectRatio);
   void setLegendDefaultSettings(int frame, const QFont& font,
     const QColor& textCol, const QColor& backgroundCol);
@@ -610,6 +611,10 @@ public slots:
   //! Creates a new empty multilayer plot
   MultiLayer* newGraph(const QString& caption = tr("Graph"));
 
+  /// Prepares MultiLayer for plotting - creates if necessary, clears, applies initial settings 
+  MultiLayer* prepareMultiLayer(bool& isNew, MultiLayer* window, const QString& newWindowName = "Graph", 
+    bool clearWindow = false);
+
   //! \name Reading from a Project File
   //@{
 
@@ -748,8 +753,6 @@ public slots:
   void showScriptWindow(bool forceVisible = false, bool quitting = false);
   void saveScriptWindowGeometry();
   void showScriptInterpreter();
-  bool testForIPython();
-  void launchIPythonConsole();
   void showMoreWindows();
   void showMarkerPopupMenu();
   void showHelp();
@@ -1026,26 +1029,12 @@ public slots:
 
   void scriptsDirPathChanged(const QString& path);
   //@}
-
-  void showToolBarsMenu();
+  
+  void makeToolbarsMenu();
   void savetoNexusFile();
 
   //Slot for writing to log window
   void writeToLogWindow(const MantidQt::API::Message& message);
-  /// execute loadraw asynchronously
-  void executeLoadRawAsynch(const QString& fileName,const QString& wsName ) ;
-
-  /// execute loadnexus asynchronously
-  void executeLoadNexusAsynch(const QString& fileName,const QString& wsName ) ;
-
-  /// execute load asynchronously
-  void executeLoadAsynch(const QString& fileName,const QString& wsName ) ;
-
-  /// execute loadraw/nexus without popingup load dialogs.
-  void executeloadAlgorithm(const QString&, const QString&, const QString&);
-
-  /// slot to execute download datafiles algorithm - called  from ICat interface
-  void executeDownloadDataFiles(const std::vector<std::string>&,const std::vector<int64_t>&);
 
   /// Activate a subwindow (docked or floating) other than current active one
   void activateNewWindow();
@@ -1106,6 +1095,9 @@ private:
   private slots:
   //! \name Initialization
   //@{
+  
+  void setToolbars();
+  void displayToolbars();
   void insertTranslatedStrings();
   void translateActionsStrings();
   void init(bool factorySettings, const QStringList& args);
@@ -1132,6 +1124,7 @@ private:
   void tableMenuAboutToShow();
   void windowsMenuAboutToShow();
   void windowsMenuActivated( int id );
+  void interfaceMenuAboutToShow();
 
   //! \name Font Format Functions
   //@{
@@ -1150,6 +1143,7 @@ private:
   //@}
 
   void showCustomActionDialog();
+  void showInterfaceCategoriesDialog();
   void showUserDirectoryDialog();
   void performCustomAction(QAction *);
 
@@ -1169,16 +1163,14 @@ private:
   /// for zooming the selected graph using mouse drag tool
   void panOnPlot();
 
-  /// Handler for ICat login menu 
-  void ICatLogin();
-  /// Handler for ICat search menu
-  void ICatIsisSearch();
-  /// Handler for ICatMyData serch menu
-  void ICatMyDataSearch();
-  // Handler for ICat CatalogLogout
-  void ICatLogout();
-
-  void ICatAdvancedSearch();
+  /// Handler for catalog login.
+  void CatalogLogin();
+  /// Handler for catalog search.
+  void CatalogSearch();
+  /// Handler for catalog publish.
+  void CatalogPublish();
+  // Handler for catalog logout.
+  void CatalogLogout();
 
   /// method to create widgets from mantid qt;
   void setGeometry(MdiSubWindow* usr_win,QWidget* user_interface);
@@ -1329,8 +1321,6 @@ public:
   QStringList renamedTables;
   // List of removed interfaces
   QStringList removed_interfaces;
-  // List of PyQt interfaces to be added to the Interfaces menu
-  QStringList pyqt_interfaces;
 
   //! \name variables used when user copy/paste markers
   //@{
@@ -1345,7 +1335,20 @@ public:
   //! The scripting language to use for new projects.
   QString defaultScriptingLang;
 
+  QDockWidget *m_interpreterDock;
+  
+  QSet<QString> allCategories() const { return m_allCategories; }
+
 private:
+  // A collection of the names of each interface as they appear in the menu and also "data"
+  // relating to how each interface can be opened.  Elsewhere, the data is expected to be a
+  // python file name, or else just the name of the interface as known to the InterfaceManager.
+  QList<QPair<QString, QString>> m_interfaceNameDataPairs;
+  // Keeping track of all unique categories.
+  QSet<QString> m_allCategories;
+  // Map interfaces to their categories.
+  QMap<QString, QSet<QString>> m_interfaceCategories;
+
   mutable MdiSubWindow *d_active_window;
   MdiSubWindow* getActiveWindow() const;
   void setActiveWindow(MdiSubWindow* w);
@@ -1379,10 +1382,8 @@ private:
   ScriptingWindow *scriptingWindow; //Mantid
   Script *m_iface_script;
   QTranslator *appTranslator, *qtTranslator;
-  QDockWidget *explorerWindow, *undoStackWindow;
+  QDockWidget *explorerWindow;
   MantidQt::MantidWidgets::MessageDisplay *resultsLog;
-  QDockWidget *m_interpreterDock;
-  CommandLineInterpreter *m_scriptInterpreter;
   QMdiArea *d_workspace;
 
   QToolBar *standardTools, *plotTools, *displayBar;
@@ -1391,21 +1392,25 @@ private:
   QWidgetList *hiddenWindows;
   QLineEdit *info;
 
-  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent;
+  QWidget* catalogSearch;
+
+  QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent, *interfaceMenu;
+  
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
-  QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu;
+  QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu, *toolbarsMenu;
 
+  QAction *actionFileTools,*actionPlotTools,*actionDisplayBar,*actionFormatToolBar;
   QAction *actionEditCurveRange, *actionCurveFullRange, *actionShowAllCurves, *actionHideCurve, *actionHideOtherCurves;
   QAction *actionEditFunction, *actionRemoveCurve, *actionShowCurveWorksheet, *actionShowCurvePlotDialog;
   QAction *actionNewProject, *actionNewNote, *actionNewTable, *actionNewFunctionPlot,*actionSaveFile;
   QAction *actionNewSurfacePlot, *actionNewMatrix, *actionNewGraph, *actionNewFolder;
   QAction *actionOpen, *actionLoadImage, *actionScriptRepo, *actionSaveProject, *actionSaveProjectAs, *actionImportImage,*actionLoadFile,*actionOpenProj;
-  QAction *actionLoad, *actionUndo, *actionRedo;
+  QAction *actionLoad;
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
   QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
-  QAction *actionICatLogin,*actionICatSearch,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
+  QAction *actionCatalogLogin,*actionCatalogSearch, *actionCatalogPublish, *actionCatalogLogout;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
@@ -1449,7 +1454,7 @@ private:
   QAction *actionNextWindow, *actionPrevWindow;
   QAction *actionScriptingLang,*actionClearTable, *actionGoToRow, *actionGoToColumn;
   QAction *actionSaveNote;
-  QAction *actionShowScriptWindow, *actionShowScriptInterpreter, *actionIPythonConsole;
+  QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
   QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
   QAction *actionDeleteRows, *actionDrawPoints;
   QAction *btnCursor, /* *btnSelect,*/ *btnPicker, *btnRemovePoints, *btnMovePoints, /* *btnPeakPick,*/ *btnMultiPeakPick;
@@ -1457,7 +1462,7 @@ private:
   QAction *actionFlipMatrixVertically, *actionFlipMatrixHorizontally, *actionRotateMatrix;
   QAction *actionViewMatrixImage, *actionViewMatrix, *actionExportMatrix;
   QAction *actionMatrixGrayScale, *actionMatrixRainbowScale, *actionMatrixCustomScale, *actionRotateMatrixMinus;
-  QAction *actionMatrixXY, *actionMatrixColumnRow, *actionImagePlot, *actionToolBars;
+  QAction *actionMatrixXY, *actionMatrixColumnRow, *actionImagePlot;
   QAction *actionMatrixFFTDirect, *actionMatrixFFTInverse;
   QAction *actionFontBold, *actionFontItalic, *actionFontBox, *actionFontSize;
   QAction *actionSuperscript, *actionSubscript, *actionUnderline, *actionGreekSymbol, *actionCustomActionDialog, *actionManageDirs, *actionFirstTimeSetup, *actionSetupParaview;
@@ -1465,15 +1470,15 @@ private:
   QAction *Box, *Frame, *None;
   QAction *front, *back, *right, *left, *ceil, *floor, *floordata, *flooriso, *floornone;
   QAction *wireframe, *hiddenline, *polygon, *filledmesh, *pointstyle, *barstyle, *conestyle, *crossHairStyle;
-  QAction *actionShowUndoStack;
   QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
   QAction *actionPanPlot;
   QAction *actionWaterfallPlot;
 
   QList<QAction *> d_user_actions;
   QList<QMenu* > d_user_menus; //Mantid
+  
+  QList<QAction *> m_interfaceActions;
 
-  QUndoView *d_undo_view;
   /// list of mantidmatrix windows opened from project file.
   QList<MantidMatrix*> m_mantidmatrixWindows;
 

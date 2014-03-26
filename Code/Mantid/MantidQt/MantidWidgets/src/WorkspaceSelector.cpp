@@ -10,6 +10,10 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 
+#include <QDropEvent>
+#include <QMimeData>
+#include <QUrl>
+#include <QDebug>
 using namespace MantidQt::MantidWidgets;
 
 /**
@@ -22,6 +26,7 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init) : QComboBox(par
   m_remObserver(*this, &WorkspaceSelector::handleRemEvent),
   m_clearObserver(*this, &WorkspaceSelector::handleClearEvent),
   m_renameObserver(*this, &WorkspaceSelector::handleRenameEvent),
+  m_replaceObserver(*this, &WorkspaceSelector::handleReplaceEvent),
   m_init(init), m_workspaceTypes(), m_showHidden(false), m_optional(false),
   m_suffix(), m_algName(), m_algPropName(), m_algorithm()
 {
@@ -33,9 +38,11 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init) : QComboBox(par
     ads.notificationCenter.addObserver(m_remObserver);
     ads.notificationCenter.addObserver(m_renameObserver);
     ads.notificationCenter.addObserver(m_clearObserver);
+    ads.notificationCenter.addObserver(m_replaceObserver);
 
     refresh();
   }
+  this->setAcceptDrops(true);
 }
 
 /**
@@ -50,6 +57,7 @@ WorkspaceSelector::~WorkspaceSelector()
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_remObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
   }
 }
 
@@ -85,6 +93,11 @@ void WorkspaceSelector::showHiddenWorkspaces(bool show)
       refresh();
     }
   }
+}
+
+bool WorkspaceSelector::isValid() const
+{
+  return (this->currentText() != "");
 }
 
 bool WorkspaceSelector::isOptional() const
@@ -212,6 +225,30 @@ void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotificati
   }
 }
 
+void WorkspaceSelector::handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
+{
+
+  QString name = QString::fromStdString(pNf->object_name());
+  auto& ads = Mantid::API::AnalysisDataService::Instance();
+
+  bool eligible = checkEligibility(name , ads.retrieve(pNf->object_name())); 
+  int index = findText(name); 
+
+  // if it is inside and it is eligible do nothing
+  // if it is not inside and it is eligible insert
+  // if it is inside and it is not eligible remove
+  // if it is not inside and it is not eligible do nothing
+  bool inside = (index != -1); 
+  if ( (inside && eligible) || (!inside && !eligible) )
+    return;
+  else if (!inside && eligible)
+    addItem(name);
+  else // (inside && !eligible)
+    removeItem(index);    
+ 
+}
+
+
 bool WorkspaceSelector::checkEligibility(const QString & name, Mantid::API::Workspace_sptr object) const
 {
   if ( m_algorithm && ! m_algPropName.isEmpty() )
@@ -279,5 +316,42 @@ void WorkspaceSelector::refresh()
     {
       addItem(name);
     }
+  }
+}
+
+/**
+  * Called when an item is dropped
+  * @param de :: the drop event data package
+  */
+void WorkspaceSelector::dropEvent(QDropEvent *de)
+{
+  const QMimeData *mimeData = de->mimeData(); 
+  QString text =  mimeData->text();
+  int equal_pos = text.indexOf("=");
+  QString ws_name = text.left(equal_pos-1);
+  QString ws_name_test = text.mid(equal_pos + 7, equal_pos-1);
+  
+  if (ws_name == ws_name_test){
+    int index = findText(ws_name);
+    if (index >= 0){
+      setCurrentIndex(index);
+      de->acceptProposedAction();
+    }
+  }
+  
+}
+
+/**
+  * Called when an item is dragged onto a control
+  * @param de :: the drag event data package
+  */
+void WorkspaceSelector::dragEnterEvent(QDragEnterEvent *de)
+{
+  const QMimeData *mimeData = de->mimeData();  
+  if(mimeData->hasText()) 
+  {
+    QString text = mimeData->text();
+    if (text.contains(" = mtd[\""))
+      de->acceptProposedAction();
   }
 }

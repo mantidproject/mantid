@@ -15,6 +15,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/V3D.h"
@@ -37,6 +38,8 @@
 #include <Poco/StringTokenizer.h>
 #include <boost/lexical_cast.hpp>
 #include "MantidGeometry/IDetector.h"
+
+#include "MantidQtCustomInterfaces/SANSEventSlicing.h"
 
 using Mantid::detid_t;
 
@@ -72,7 +75,8 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
   m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
   m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(),
-  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile("")
+  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile(""),
+  slicingWindow(NULL)
 {
   ConfigService::Instance().addObserver(m_newInDir);
 }
@@ -202,6 +206,7 @@ void SANSRunWindow::initLayout()
   connect(m_uiForm.detbank_sel, SIGNAL(currentIndexChanged(int)), this, SLOT(phiMaskingChanged(int))); 
   connect(m_uiForm.phi_min, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.phi_max, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
+  connect(m_uiForm.slicePb, SIGNAL(clicked()), this, SLOT(handleSlicePushButton()));
 
   readSettings();
 }
@@ -233,9 +238,6 @@ void SANSRunWindow::initAnalysDetTab()
   m_uiForm.q_rebin->setToolTip("Any string allowed by the Rebin algorithm may be used");
   
  
-  //Listen for Workspace delete signals
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
-
   makeValidator(m_uiForm.wavRanVal_lb, m_uiForm.wavRanges, m_uiForm.tab_2,
              "A comma separated list of numbers is required here");
 
@@ -728,9 +730,8 @@ bool SANSRunWindow::loadUserFile()
       "print i.ReductionSingleton().DQXY"), m_uiForm.qy_dqy,
       m_uiForm.qy_dqy_opt);
 
-  // The tramission line of the Limits section (read settings for sample and can)
-    transSelectorChanged(1); transSelectorChanged(0);
-
+  // The tramission line of the Limits section (read settings for sample and can) 
+  loadTransmissionSettings(); 
 
   // The front rescale/shift section
   m_uiForm.frontDetRescale->setText(runReduceScriptFunction(
@@ -1146,7 +1147,7 @@ void SANSRunWindow::addTimeMasksToTable(const QString & mask_string, const QStri
  * @param lsda :: The result of the sample-detector bank 1 distance
  * @param lsdb :: The result of the sample-detector bank 2 distance
  */
-void SANSRunWindow::componentLOQDistances(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, double & lms, double & lsda, double & lsdb)
+void SANSRunWindow::componentLOQDistances(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, double & lms, double & lsda, double & lsdb)
 {
   Instrument_const_sptr instr = workspace->getInstrument();
   if( !instr ) return;
@@ -1426,39 +1427,69 @@ void SANSRunWindow::applyMask(const QString& wsName,bool time_pixel)
 /**
  * Set the information about component distances on the geometry tab
  */
-void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QString & can_logs)
+void SANSRunWindow::setGeometryDetails()
 {
   resetGeometryDetailsBox();
+    
+  const std::string wsName = m_experWksp.toStdString();
+  if( wsName.empty() )
+    return;
 
-  double unit_conv(1000.);
+  const auto & ADS = AnalysisDataService::Instance();
   
-  QString workspace_name = m_experWksp;
-  if( workspace_name.isEmpty() ) return;
-  Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(workspace_name.toStdString());
-  MatrixWorkspace_sptr sample_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
-  if ( !sample_workspace )
-  {//assume all geometry information is in the first member of the group and it is constant for all group members
-    //function throws if a fisrt member can't be retrieved
-    sample_workspace = getGroupMember(workspace_ptr, 1);
+  assert( ADS.doesExist(wsName) );
+  auto ws = ADS.retrieveWS<const Workspace>(wsName);
+
+  if( boost::dynamic_pointer_cast<const WorkspaceGroup>(ws) )
+    // Assume all geometry information is in the first member of the group and it is
+    // constant for all group members.
+    ws = getGroupMember(ws, 1);
+
+  MatrixWorkspace_const_sptr monitorWs;
+
+  if( boost::dynamic_pointer_cast<const IEventWorkspace>(ws) )
+  {
+    // EventWorkspaces have their monitors loaded into a separate workspace.
+    const std::string monitorWsName = ws->name() + "_monitors";
+
+    if( !ADS.doesExist(monitorWsName) )
+    {
+      g_log.error() << "Expected a sister monitor workspace called \"" << monitorWsName << "\" "
+                    << "for the EventWorkspace \"" << ws->name() << "\", but could not find one "
+                    << "so unable to set geometry details.\n";
+      return;
+    }
+
+    monitorWs = ADS.retrieveWS<const MatrixWorkspace>(monitorWsName);
   }
+  else
+  {
+    // MatrixWorkspaces have their monitors loaded in the same workspace.
+    monitorWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+    assert( monitorWs );
+  }
+  
+  const auto sampleWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
-  Instrument_const_sptr instr = sample_workspace->getInstrument();
-  boost::shared_ptr<const Mantid::Geometry::IComponent> source = instr->getSource();
+  Instrument_const_sptr instr = sampleWs->getInstrument();
+  const auto source = instr->getSource();
 
-  // Moderator-monitor distance is common to LOQ and S2D
-  size_t monitorWorkspaceIndex=0;
-  specid_t monitor_spectrum = m_uiForm.monitor_spec->text().toInt();
+  // Moderator-monitor distance is common to LOQ and SANS2D.
+  size_t monitorWsIndex = 0;
+  const specid_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
   try
   {
-    monitorWorkspaceIndex = sample_workspace->getIndexFromSpectrumNumber(monitor_spectrum);
+    monitorWsIndex = monitorWs->getIndexFromSpectrumNumber(monitorSpectrum);
   }
-  catch (...)
+  catch (std::runtime_error &)
   {
-    // Spectrum number not found. Return;
+    g_log.error() << "The reported incident monitor spectrum number \"" << monitorSpectrum
+                  << "\" does not have a corresponding workspace index in \""
+                  << monitorWs->name() << "\", so unable to set geometry details.\n";
     return;
   }
 
-  const std::set<detid_t> & dets = sample_workspace->getSpectrum(monitorWorkspaceIndex)->getDetectorIDs();
+  const std::set<detid_t> & dets = monitorWs->getSpectrum(monitorWsIndex)->getDetectorIDs();
   if( dets.empty() ) return;
 
   double dist_mm(0.0);
@@ -1466,6 +1497,8 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
   try
   {
     Mantid::Geometry::IDetector_const_sptr detector = instr->getDetector(*dets.begin());
+    
+    double unit_conv(1000.);
     dist_mm = detector->getDistance(*source) * unit_conv;
   }
   catch(std::runtime_error&)
@@ -1483,7 +1516,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
     {
       m_uiForm.dist_mod_mon->setText(formatDouble(dist_mm, colour));
     }
-    setLOQGeometry(sample_workspace, 0);
+    setLOQGeometry(sampleWs, 0);
     QString can = m_experCan;
     if( !can.isEmpty() )
     {
@@ -1510,7 +1543,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
     }
 
     //SANS2D - Sample
-    setSANS2DGeometry(sample_workspace, sample_logs, 0);
+    setSANS2DGeometry(sampleWs, 0);
     //Get the can workspace if there is one
     QString can = m_experCan;
     if( can.isEmpty() ) 
@@ -1534,7 +1567,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
       can_workspace = getGroupMember(workspace_ptr, 1);
     }
 
-    setSANS2DGeometry(can_workspace, can_logs, 1);
+    setSANS2DGeometry(can_workspace, 1);
 
     //Check for discrepancies
     bool warn_user(false);
@@ -1573,10 +1606,9 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
 /**
  * Set SANS2D geometry info
  * @param workspace :: The workspace
- * @param logs :: The log information
- * @param wscode :: ?????
+ * @param wscode :: 0 for sample, 1 for can, others not defined
 */
-void SANSRunWindow::setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, const QString & logs, int wscode)
+void SANSRunWindow::setSANS2DGeometry(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, int wscode)
 {  
   double unitconv = 1000.;
 
@@ -1600,33 +1632,30 @@ void SANSRunWindow::setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorks
     dist_label = m_uiForm.dist_bkgd_ms_s2d;
   }
   dist_label->setText(formatDouble(distance, "black", 'f', 1));
-
-  // Detectors
-  QStringList det_info = logs.split(",");
-  QStringListIterator itr(det_info);
-  while( itr.hasNext() )
-  {
-    QString line = itr.next();
-    QStringList values = line.split(":");
-    QString detname = values[0].trimmed();
-    QString distance = values[1].trimmed();
-    trimPyMarkers(detname);
-
-    // instrument scientists wants distances printed
-    // out with just one digit
-    try 
-    {
-      double d = distance.toDouble();
-      distance = QString::number(d, 'f', 1);
-    } 
-    catch(...)
-    {
-      // if distance is not a double for some reason
-      // for now just proceed
-    }
   
-    QLabel *lbl = m_s2d_detlabels[wscode].value(detname);
-    if( lbl ) lbl->setText(distance);
+  // get the tuple of log values and convert to a list of 
+  QString code_to_run = QString("print ','.join([str(a) for a in i.ReductionSingleton().instrument.getDetValues('%1')])").arg(QString::fromStdString(workspace->name())); 
+
+  QStringList logvalues = runReduceScriptFunction(code_to_run).split(","); 
+  
+  QStringList dets_names;
+  dets_names << "Front_Det_Z"
+             << "Front_Det_X" 
+             << "Front_Det_Rot"
+             << "Rear_Det_Z" 
+             << "Rear_Det_X";
+  int index = 0;
+  foreach(QString detname, dets_names){
+    QString distance = logvalues[index];
+    try{
+      double d = distance.toDouble(); 
+      distance = QString::number(d, 'f', 1);       
+    }catch(...){
+      // if distance is not a double, for now just proceed
+    }
+    QLabel * lbl = m_s2d_detlabels[wscode].value(detname); 
+    if (lbl) lbl->setText(distance); 
+    index += 1;
   }
 }
 
@@ -1635,7 +1664,7 @@ void SANSRunWindow::setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorks
  * @param workspace :: The workspace to operate on
  * @param wscode :: ?????
  */
-void SANSRunWindow::setLOQGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, int wscode)
+void SANSRunWindow::setLOQGeometry(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, int wscode)
 {
   double dist_ms(0.0), dist_mdb(0.0), dist_hab(0.0);
   //Sample
@@ -1822,11 +1851,10 @@ bool SANSRunWindow::handleLoadButtonClick()
   // set the detector just before loading so to correctly move the instrument
   runReduceScriptFunction("\ni.ReductionSingleton().instrument.setDetector('" +
     m_uiForm.detbank_sel->currentText() + "')");
-  QString sample_logs, can_logs;  
   QString sample = m_uiForm.scatterSample->getFirstFilename();
   try
   {//preliminarly error checking is over try to load that data
-    is_loaded &= assignDetBankRun(*(m_uiForm.scatterSample), "AssignSample", sample_logs);
+    is_loaded &= assignDetBankRun(*(m_uiForm.scatterSample), "AssignSample");
     readNumberOfEntries("get_sample().loader", m_uiForm.scatterSample);
     if (m_uiForm.scatCan->isEmpty())
     {
@@ -1834,8 +1862,8 @@ bool SANSRunWindow::handleLoadButtonClick()
     }
     else
     {
-      is_loaded &= assignDetBankRun(*(m_uiForm.scatCan), "AssignCan", can_logs);
-      readNumberOfEntries("background_subtracter", m_uiForm.scatCan);
+      is_loaded &= assignDetBankRun(*(m_uiForm.scatCan), "AssignCan");
+      readNumberOfEntries("get_can().loader", m_uiForm.scatCan);
     }
     if ( ( ! m_uiForm.transmis->isEmpty() ) && ( ! m_uiForm.direct->isEmpty() ) )
     {
@@ -1862,28 +1890,15 @@ bool SANSRunWindow::handleLoadButtonClick()
     g_log.error() << "Problem loading file\n";
     is_loaded = false;
   }
-  if( m_uiForm.inst_opt->currentText() == "SANS2D" && sample_logs.isEmpty() )
-  {
-    is_loaded = false;
-    showInformationBox("Error: Cannot find log file for sample run, cannot continue.");
-  }
   if (!is_loaded) 
   {
     setProcessingState(NoSample);
     m_uiForm.load_dataBtn->setText("Load Data");
     return false;
   }
-  if( m_uiForm.inst_opt->currentText() == "SANS2D" && can_logs.isEmpty() )
-  {
-    if ( ! m_uiForm.scatCan->isEmpty() )
-    {
-      can_logs = sample_logs;
-      showInformationBox("Warning: Cannot find log file for can run, using sample values.");
-    }
-  }
 
   // Sort out the log information
-  setGeometryDetails(sample_logs, can_logs);
+  setGeometryDetails();
   
   Mantid::API::Workspace_sptr baseWS =
     Mantid::API::AnalysisDataService::Instance().retrieve(m_experWksp.toStdString());
@@ -2109,6 +2124,11 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
 
   //mask strings that the user has entered manually on to the GUI
   addUserMaskStrings(exec_reduce,"i.Mask",DefaultMask);
+
+  // add slicing definition
+  if (!m_uiForm.sliceEvent->isHidden())
+    exec_reduce += "i.SetEventSlices('"+m_uiForm.sliceEvent->text().trimmed()+"')\n";
+
   return exec_reduce;
 }
 ///Reads the sample geometry, these settings will override what is stored in the run file
@@ -2605,6 +2625,8 @@ void SANSRunWindow::handleDefSaveClick()
           saveCommand += "'front-detector, rear-detector'";
         if ( matrix_workspace->getInstrument()->getName() == "LOQ" )
           saveCommand += "'HAB, main-detector-bank'";
+        if ( matrix_workspace->getInstrument()->getName() == "LARMOR")
+          saveCommand += "'" + m_uiForm.detbank_sel->currentText()+"'";
 
       /* From v2, SaveCanSAS1D is able to save the Transmission workspaces related to the
          reduced data. The name of workspaces of the Transmission are available at the 
@@ -2786,6 +2808,14 @@ void SANSRunWindow::handleInstrumentChange()
   m_uiForm.front_radio->setText("&Front");
     m_uiForm.rear_radio->setText("&Rear"); 
   }
+
+  // LOQ does not have event mode collection
+  // hence, hide the widgets related to slice event mode data.
+  bool hide_events_gui = loq_selected; 
+  m_uiForm.slicePb->setHidden(hide_events_gui);
+  m_uiForm.sliceEvent->setHidden(hide_events_gui);
+  
+
 }
 /** Record if the user has changed the default filename, because then we don't
 *  change it
@@ -3059,23 +3089,18 @@ bool SANSRunWindow::assignMonitorRun(MantidWidgets::MWRunFiles & trans, MantidWi
   assignCom.append(", r'"+direct.getFirstFilename()+"'");
 
   int period = trans.getEntryNum();
-  //we can only do single period reductions now
-  if (period == MWRunFiles::ALL_ENTRIES)
+  if (period != MWRunFiles::ALL_ENTRIES)
   {
-    period = 1;
-    trans.setEntryNum(period);
+    assignCom.append(", period_t="+QString::number(period));
   }
-  assignCom.append(", period_t="+QString::number(period));
 
   period = direct.getEntryNum();
   //we can only do single period reductions now
-  if (period == MWRunFiles::ALL_ENTRIES)
+  if (period != MWRunFiles::ALL_ENTRIES)
   {
-    period = 1;
-    direct.setEntryNum(period);
+    assignCom.append(", period_d="+QString::number(period)); 
   }
-  assignCom.append(", period_d="+QString::number(period)+")");
-  
+  assignCom.append(")");  
   //assign the workspace name to a Python variable and read back some details
   QString pythonC="t1, t2 = " + assignCom + ";print '"+PYTHON_SEP+"',t1,'"+PYTHON_SEP+"',t2";
   QString ws_names = runReduceScriptFunction(pythonC);
@@ -3102,10 +3127,9 @@ bool SANSRunWindow::assignMonitorRun(MantidWidgets::MWRunFiles & trans, MantidWi
  * Load a scatter sample file or can run via Python objects using the passed Python command
  * @param[in] runFile name of file to load
  * @param[in] assignFn the Python command to run
- * @param[out] logs information loaded from the file
  * @return true if there were no Python errors, false otherwise
  */
-bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const QString & assignFn, QString & logs)
+bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const QString & assignFn)
 {
   //need something to place between names printed by Python that won't be intepreted as the names or removed as white space
   const static QString PYTHON_SEP("C++assignDetBankRunC++");
@@ -3113,13 +3137,13 @@ bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const 
   QString assignCom("i."+assignFn+"(r'" + runFile.getFirstFilename() + "'");
   assignCom.append(", reload = True");
   int period = runFile.getEntryNum();
-  //we can only do single period reductions now
-  if (period == MWRunFiles::ALL_ENTRIES)
+
+  if (period != MWRunFiles::ALL_ENTRIES)
   {
-    period = 1;
-    runFile.setEntryNum(period);
+    assignCom.append(", period = " + QString::number(period));
   }
-  assignCom.append(", period = " + QString::number(period)+")");
+  
+  assignCom.append(")");
 
   //assign the workspace name to a Python variable and read back some details
 
@@ -3129,7 +3153,9 @@ bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const 
     .arg( m_uiForm.rear_beam_y->text())
     .arg( m_uiForm.front_beam_x->text())
     .arg( m_uiForm.front_beam_y->text());
-  run_info += "SCATTER_SAMPLE, logvalues = " + assignCom+";print '"+PYTHON_SEP+"',SCATTER_SAMPLE,'"+PYTHON_SEP+"',logvalues";
+  run_info += "SCATTER_SAMPLE = " + assignCom;
+  run_info += ";ws_name = SCATTER_SAMPLE if not isinstance(SCATTER_SAMPLE, tuple) else SCATTER_SAMPLE[0]";
+  run_info += ";print '"+PYTHON_SEP+"',ws_name";
   run_info = runReduceScriptFunction(run_info);
   if (run_info.startsWith("error", Qt::CaseInsensitive))
   {
@@ -3138,12 +3164,6 @@ bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const 
   //read the informtion returned from Python
   QString base_workspace = run_info.section(PYTHON_SEP, 1, 1).trimmed();
 
-  logs = run_info.section(PYTHON_SEP, 2);
-  if( !logs.isEmpty() )
-  {
-    trimPyMarkers(logs);
-  }
-  
   if ( assignFn.contains("can", Qt::CaseInsensitive) )
   {
     m_experCan = base_workspace;
@@ -3500,6 +3520,10 @@ void SANSRunWindow::transSelectorChanged(int currindex){
                       m_uiForm.trans_max_can, m_uiForm.trans_opt_can};
   for (size_t i = 0; i< 6; i++) wid[i]->setVisible(visible);
 
+}
+
+void SANSRunWindow::loadTransmissionSettings(){
+
   QString transMin = runReduceScriptFunction(
                   "print i.ReductionSingleton().transmission_calculator.lambdaMin('SAMPLE')").trimmed();
   if (transMin == "None")
@@ -3513,6 +3537,7 @@ void SANSRunWindow::transSelectorChanged(int currindex){
     m_uiForm.trans_max->setText(runReduceScriptFunction(
       "print i.ReductionSingleton().transmission_calculator.lambdaMax('SAMPLE')").trimmed());
   }
+
   QString text = runReduceScriptFunction(
       "print i.ReductionSingleton().transmission_calculator.fitMethod('SAMPLE')").trimmed();
   int index = m_uiForm.trans_opt->findText(text, Qt::MatchFixedString);
@@ -3520,13 +3545,12 @@ void SANSRunWindow::transSelectorChanged(int currindex){
   {
     m_uiForm.trans_opt->setCurrentIndex(index);
   }
-  if ( text == "Off" || text == "None" )
+  if ( text == "OFF" || text == "None" )
     m_uiForm.transFitOnOff->setChecked(false);
   else 
     m_uiForm.transFitOnOff->setChecked(true);
 
-  if (visible){
-    transMin = runReduceScriptFunction(
+  transMin = runReduceScriptFunction(
                   "print i.ReductionSingleton().transmission_calculator.lambdaMin('CAN')").trimmed();
   if (transMin == "None")
   {
@@ -3541,18 +3565,35 @@ void SANSRunWindow::transSelectorChanged(int currindex){
   }
   text = runReduceScriptFunction(
       "print i.ReductionSingleton().transmission_calculator.fitMethod('CAN')").trimmed();
-  index = m_uiForm.trans_opt_can->findText(text, Qt::MatchCaseSensitive);
+  index = m_uiForm.trans_opt_can->findText(text, Qt::MatchFixedString);
   if( index >= 0 )
   {
     m_uiForm.trans_opt_can->setCurrentIndex(index);
   }
-  if ( text == "Off" || text == "None" )
+  if ( text == "OFF" || text == "None" )
     m_uiForm.transFitOnOff_can->setChecked(false);
   else 
     m_uiForm.transFitOnOff_can->setChecked(true);
+
+  bool separated = runReduceScriptFunction("print i.ReductionSingleton().transmission_calculator.isSeparate()").trimmed()=="True";
+  
+   m_uiForm.trans_selector_opt->setCurrentIndex(separated?1:0);
+
+
+}
+
+void SANSRunWindow::handleSlicePushButton(){
+  if (!slicingWindow){
+    slicingWindow = new SANSEventSlicing(this);
+    connect(slicingWindow, SIGNAL(runAsPythonScript(const QString&, bool)),
+            this, SIGNAL(runAsPythonScript(const QString&, bool)));
+    //    slicingWindow->setParent(this);
+    slicingWindow->initializeLayout();
+    slicingWindow->initializeLocalPython();
   }
 
-
+  slicingWindow->show(); 
+  slicingWindow->raise();
 }
 
 } //namespace CustomInterfaces

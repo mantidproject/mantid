@@ -1,5 +1,5 @@
 import isis_reducer
-import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
+from isis_reduction_steps import StripEndNans
 from mantid.simpleapi import *
 from mantid.kernel import Logger
 import SANSUtility
@@ -45,7 +45,7 @@ class CentreFinder(object):
     
         self._group_into_quadrants(setup, 'centre', trial[0], trial[1], suffix='_tmp')
     
-        if setup.background_subtracter:
+        if setup.get_can():
             #reduce the can here
             setup.reduce_can('centre_can', run_Q=False)
             
@@ -67,7 +67,7 @@ class CentreFinder(object):
         for out_wksp in self.QUADS:
             in_wksp = out_wksp+'_tmp' 
             ReplaceSpecialValues(InputWorkspace=in_wksp,OutputWorkspace=in_wksp,NaNValue=0,InfinityValue=0)
-            rem_nans = sans_reduction_steps.StripEndNans()
+            rem_nans = StripEndNans()
             rem_nans.execute(setup, in_wksp)
     
             RenameWorkspace(InputWorkspace=in_wksp,OutputWorkspace= out_wksp)
@@ -100,8 +100,8 @@ class CentreFinder(object):
         y = -y
         MoveInstrumentComponent(Workspace=setup.get_sample().wksp_name,
             ComponentName=self.detector, X=x, Y=y, RelativePosition=True)
-        if setup.background_subtracter:
-            MoveInstrumentComponent(Workspace=setup.background_subtracter.workspace.wksp_name,
+        if setup.get_can():
+            MoveInstrumentComponent(Workspace=setup.get_can().wksp_name,
                 ComponentName=self.detector, X=x, Y=y, RelativePosition=True)
 
     # Create a workspace with a quadrant value in it 

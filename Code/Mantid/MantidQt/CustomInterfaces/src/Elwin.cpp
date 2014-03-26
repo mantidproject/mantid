@@ -87,6 +87,9 @@ namespace IDA
     // Set any default values
     m_elwDblMng->setValue(m_elwProp["R1S"], -0.02);
     m_elwDblMng->setValue(m_elwProp["R1E"], 0.02);
+
+    m_elwDblMng->setValue(m_elwProp["R2S"], -0.24);
+    m_elwDblMng->setValue(m_elwProp["R2E"], -0.22);
   }
 
   void Elwin::run()
@@ -166,10 +169,28 @@ namespace IDA
         double res = params[0];
         m_elwDblMng->setValue(m_elwProp["R1S"], -res);
         m_elwDblMng->setValue(m_elwProp["R1E"], res);
+
+        m_elwDblMng->setValue(m_elwProp["R2S"], -10*res);
+        m_elwDblMng->setValue(m_elwProp["R2E"], -9*res);
       }
 
     }
   }
+
+  void Elwin::setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws)
+  {
+    auto inst = ws->getInstrument();
+    auto log = inst->getStringParameter("Workflow.SE-log");
+    QString logName("sample");
+
+    if(log.size() > 0)
+    {
+      logName = QString::fromStdString(log[0]);
+    }
+    
+    uiForm().leLogName->setText(logName);
+  }
+
 
   void Elwin::plotInput()
   {
@@ -187,6 +208,7 @@ namespace IDA
       }
 
       setDefaultResolution(ws);
+      setDefaultSampleLog(ws);
 
       m_elwDataCurve = plotMiniplot(m_elwPlot, m_elwDataCurve, ws, 0);
       try

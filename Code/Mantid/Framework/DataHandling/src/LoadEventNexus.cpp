@@ -33,6 +33,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include <boost/random/uniform_real.hpp>
 #include <boost/shared_array.hpp>
 
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
@@ -138,10 +139,12 @@ public:
    * @param event_time_of_flight :: array with event TOFS
    * @param numEvents :: how many events in the arrays
    * @param startAt :: index of the first event from event_index
-   * @param event_index_ptr :: ptr to a vector of event index (length of # of pulses)
+   * @param event_index :: vector of event index (length of # of pulses)
    * @param thisBankPulseTimes :: ptr to the pulse times for this particular bank.
    * @param have_weight :: flag for handling simulated files
    * @param event_weight :: array with weights for events
+   * @param min_event_id ;: minimum detector ID to load
+   * @param max_event_id :: maximum detector ID to load
    * @return
    */
   ProcessBankData(LoadEventNexus * alg, std::string entry_name,
@@ -451,7 +454,7 @@ public:
    */
   LoadBankFromDiskTask(LoadEventNexus * alg, const std::string& entry_name, const std::string & entry_type,
                        const std::size_t numEvents, const bool oldNeXusFileNames,
-                       Progress * prog, Mutex * ioMutex, ThreadScheduler * scheduler)
+                       Progress * prog, boost::shared_ptr<Mutex> ioMutex, ThreadScheduler * scheduler)
   : Task(),
     alg(alg), entry_name(entry_name), entry_type(entry_type),
     pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
@@ -652,6 +655,15 @@ public:
         if (temp < m_min_id) m_min_id = temp;
         if (temp > m_max_id) m_max_id = temp;
       }
+
+      if ( m_min_id > static_cast<uint32_t>(alg->eventid_max) )
+      {
+        // All the detector IDs in the bank are higher than the highest 'known' (from the IDF)
+        // ID. Setting this will abort the loading of the bank.
+        m_loadError = true;
+      }
+      // fixup the maximum pixel id in the case that it's higher than the highest 'known' id
+      if (m_max_id > static_cast<uint32_t>(alg->eventid_max)) m_max_id = static_cast<uint32_t>(alg->eventid_max);
     }
   }
 
@@ -861,9 +873,6 @@ public:
     boost::shared_array<float> event_weight_shrd(m_event_weight);
     boost::shared_ptr<std::vector<uint64_t> > event_index_shrd(event_index_ptr);
 
-    // fixup the maximum pixel id
-    if (m_max_id > static_cast<uint32_t>(alg->eventid_max)) m_max_id = static_cast<uint32_t>(alg->eventid_max);
-
     // schedule the job to generate the event lists
     auto mid_id = m_max_id;
     if (alg->splitProcessing)
@@ -1031,7 +1040,7 @@ void LoadEventNexus::init()
     "Optional: Name of the NXentry to load if it's not the default.");
 
   declareProperty(
-      new PropertyWithValue<string>("BankName", "", Direction::Input),
+      new ArrayProperty<string>("BankName", Direction::Input),
     "Optional: To only include events from one bank. Any bank whose name does not match the given string will have no events.");
 
   declareProperty(
@@ -1418,11 +1427,6 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
       // get the number of events
       std::size_t num = numEvents(file, hasTotalCounts, oldNeXusFileNames);
-      if (num == 0)
-      {
-        file.closeGroup();
-        continue;
-      }
       bankNames.push_back( entry_name );
       bankNumEvents.push_back(num);
       total_events += num;
@@ -1522,33 +1526,42 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   }
 
   // --------- Loading only one bank ? ----------------------------------
-  std::string onebank = getProperty("BankName");
-  bool doOneBank = (onebank != "");
+  std::vector<std::string> someBanks = getProperty("BankName");
   bool SingleBankPixelsOnly = getProperty("SingleBankPixelsOnly");
-  if (doOneBank && !monitors)
+  if ((!someBanks.empty()) && (!monitors))
   {
-    bool foundIt = false;
-    for (std::vector<string>::iterator it=bankNames.begin(); it!= bankNames.end(); ++it)
+    // check that all of the requested banks are in the file
+    for (auto someBank = someBanks.begin(); someBank != someBanks.end(); ++someBank)
     {
-      if (*it == ( onebank + "_events") )
+      bool foundIt = false;
+      for (auto bankName = bankNames.begin(); bankName != bankNames.end(); ++bankName)
       {
-        foundIt = true;
-        break;
+        if ((*bankName) == (*someBank)+"_events")
+        {
+          foundIt = true;
+          break;
+        }
+      }
+      if (!foundIt)
+      {
+        throw std::invalid_argument("No entry named '" + (*someBank) + "' was found in the .NXS file.\n");
       }
     }
-    if (!foundIt)
-    {
-      throw std::invalid_argument("No entry named '" + onebank + "_events'" + " was found in the .NXS file.\n");
-    }
+
+    // change the number of banks to load
     bankNames.clear();
-    bankNames.push_back( onebank + "_events" );
+    for (auto someBank = someBanks.begin(); someBank != someBanks.end(); ++someBank)
+      bankNames.push_back((*someBank) + "_events");
+
+    // how many events are in a bank
     bankNumEvents.clear();
-    bankNumEvents.push_back(1);
-    if( !SingleBankPixelsOnly ) onebank = ""; // Marker to load all pixels 
+    bankNumEvents.assign(someBanks.size(), 1); // TODO this equally weights the banks
+
+    if( !SingleBankPixelsOnly ) someBanks.clear(); // Marker to load all pixels
   }
   else
   {
-    onebank = "";
+    someBanks.clear();
   }
 
   prog->report("Initializing all pixels");
@@ -1556,7 +1569,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   if (WS->getInstrument()->hasParameter("remove-unused-banks")) deleteBanks(WS, bankNames);
   //----------------- Pad Empty Pixels -------------------------------
   // Create the required spectra mapping so that the workspace knows what to pad to
-  createSpectraMapping(m_filename, monitors, onebank);
+  createSpectraMapping(m_filename, monitors, someBanks);
 
   //This map will be used to find the workspace index
   if( this->event_id_is_spec )
@@ -1590,7 +1603,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   // Make the thread pool
   ThreadScheduler * scheduler = new ThreadSchedulerMutexes();
   ThreadPool pool(scheduler);
-  Mutex * diskIOMutex = new Mutex();
+  auto diskIOMutex = boost::make_shared<Mutex>();
   size_t bank0 = 0;
   size_t bankn = bankNames.size();
 
@@ -1664,7 +1677,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   }
   // Start and end all threads
   pool.joinAll();
-  delete diskIOMutex;
+  diskIOMutex.reset();
   delete prog2;
 
 
@@ -1802,39 +1815,43 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
  *  @param alg :: Handle of the algorithm 
  *  @return true if successful
  */
-bool LoadEventNexus::loadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace,
-    const std::string & top_entry_name, Algorithm * alg) 
+bool LoadEventNexus::loadInstrument(const std::string & nexusfilename, MatrixWorkspace_sptr localWorkspace,
+                                    const std::string & top_entry_name, Algorithm * alg)
 {
-
-   // Get the instrument group in the Nexus file
-   ::NeXus::File nxfile(nexusfilename);
-
-   bool foundInstrument = runLoadIDFFromNexus( nexusfilename, localWorkspace, alg);
-
-   if(!foundInstrument) foundInstrument = runLoadInstrument( nexusfilename, localWorkspace, top_entry_name, alg );
-
+   bool foundInstrument = runLoadIDFFromNexus( nexusfilename, localWorkspace, top_entry_name, alg);
+   if (!foundInstrument) foundInstrument = runLoadInstrument( nexusfilename, localWorkspace, top_entry_name, alg );
    return foundInstrument;
 }
 
 //-----------------------------------------------------------------------------
 /** Load the instrument from the nexus file
  *
- *  @param nxfile :: C++ interface to Nexus file with instrumentr group opened
+ *  @param nexusfilename :: The name of the nexus file being loaded
  *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
+ *  @param top_entry_name :: entry name at the top of the Nexus file
+ *  @param alg :: Handle of the algorithm
  *  @return true if successful
  */
-bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg)
+bool LoadEventNexus::runLoadIDFFromNexus(const std::string & nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+                                         const std::string & top_entry_name, Algorithm * alg)
 {
-  // Code to be added here. In meantime, fail to find instrument
+  // Test if IDF exists in file, move on quickly if not
+  try {
+    ::NeXus::File nxsfile(nexusfilename);
+    nxsfile.openPath(top_entry_name+"/instrument/instrument_xml");
+  } catch (::NeXus::Exception&) {
+    alg->getLogger().information("No instrument definition found in "+nexusfilename+" at "+top_entry_name+"/instrument");
+    return false;
+  }
 
-  IAlgorithm_sptr loadInst= alg->createChildAlgorithm("LoadIDFFromNexus",-1,-1,false);
+  IAlgorithm_sptr loadInst= alg->createChildAlgorithm("LoadIDFFromNexus");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try
   {
     loadInst->setPropertyValue("Filename", nexusfilename);
     loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
-    loadInst->setPropertyValue("InstrumentParentPath","/raw_data_1");
+    loadInst->setPropertyValue("InstrumentParentPath",top_entry_name);
     loadInst->execute();
   }
   catch( std::invalid_argument&)
@@ -1843,7 +1860,7 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, API::
   }
   catch (std::runtime_error&)
   {
-    alg->getLogger().information("No IDF found in "+nexusfilename+" at raw_data_1/Instrument");
+    alg->getLogger().debug("No instrument definition found in "+nexusfilename+" at "+top_entry_name+"/instrument");
   }
 
   if ( !loadInst->isExecuted() ) alg->getLogger().information("No IDF loaded from Nexus file.");   
@@ -2128,33 +2145,41 @@ void LoadEventNexus::deleteBanks(API::MatrixWorkspace_sptr workspace, std::vecto
  * with the associated spectra axis)
  * @param nxsfile :: The name of a nexus file to load the mapping from
  * @param monitorsOnly :: Load only the monitors is true
- * @param bankName :: An optional bank name for loading a single bank
+ * @param bankNames :: An optional bank name for loading specified banks
  */
-void LoadEventNexus::createSpectraMapping(const std::string &nxsfile, 
-    const bool monitorsOnly, const std::string & bankName)
+void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
+    const bool monitorsOnly, const std::vector<std::string> &bankNames)
 {
   bool spectramap = false;
-  if( !monitorsOnly && !bankName.empty() )
+  // set up the
+  if( !monitorsOnly && !bankNames.empty() )
   {
-    // Only build the map for the single bank
-    std::vector<IDetector_const_sptr> dets;
-    WS->getInstrument()->getDetectorsInBank(dets, bankName);
-    if (!dets.empty())
+    std::vector<IDetector_const_sptr> allDets;
+
+    for (auto name = bankNames.begin(); name != bankNames.end(); ++name)
     {
-      WS->resizeTo(dets.size());
+      // Only build the map for the single bank
+      std::vector<IDetector_const_sptr> dets;
+      WS->getInstrument()->getDetectorsInBank(dets, (*name));
+      if (dets.empty())
+        throw std::runtime_error("Could not find the bank named '" + (*name) +
+                                 "' as a component assembly in the instrument tree; or it did not contain any detectors."
+                                 " Try unchecking SingleBankPixelsOnly.");
+      allDets.insert(allDets.end(), dets.begin(), dets.end());
+    }
+    if (!allDets.empty())
+    {
+      WS->resizeTo(allDets.size());
       // Make an event list for each.
-      for(size_t wi=0; wi < dets.size(); wi++)
+      for(size_t wi=0; wi < allDets.size(); wi++)
       {
-        const detid_t detID = dets[wi]->getID();
+        const detid_t detID = allDets[wi]->getID();
         WS->getSpectrum(wi)->setDetectorID(detID);
       }
       spectramap = true;
-      g_log.debug() << "Populated spectra map for single bank " << bankName << "\n";
+      g_log.debug() << "Populated spectra map for select banks\n";
     }
-    else
-      throw std::runtime_error("Could not find the bank named " + bankName +
-          " as a component assembly in the instrument tree; or it did not contain any detectors."
-          " Try unchecking SingleBankPixelsOnly.");
+
   }
   else
   {
@@ -2588,7 +2613,7 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::Even
  * 
  * @note: It does essentially the same thing of the method: LoadISISNexus2::loadSampleData
  * 
- * @param nexusfilename : path for the nexus file
+ * @param file : handle to the nexus file
  * @param WS : pointer to the workspace
  */
 void LoadEventNexus::loadSampleDataISIScompatibility(::NeXus::File& file, Mantid::API::MatrixWorkspace_sptr WS){

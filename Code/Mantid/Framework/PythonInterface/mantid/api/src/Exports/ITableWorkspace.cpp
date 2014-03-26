@@ -2,9 +2,10 @@
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
-#include "MantidPythonInterface/kernel/PropertyWithValue.h"
+#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
+#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
@@ -14,18 +15,19 @@
 #include <boost/preprocessor/tuple/to_list.hpp>
 #include <vector>
 
-using Mantid::API::ITableWorkspace;
-using Mantid::API::ITableWorkspace_sptr;
-using Mantid::API::TableRow;
-using Mantid::API::Column_sptr;
-using Mantid::API::Column_const_sptr;
-using Mantid::API::Workspace;
-using Mantid::Kernel::DataItem_sptr;
+// See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
+#define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
+
+using namespace Mantid::API;
+using Mantid::PythonInterface::Registry::DataItemInterface;
 using namespace boost::python;
 
 namespace
 {
   namespace bpl = boost::python;
+  namespace Converters = Mantid::PythonInterface::Converters;
 
   /// Boost macro for "looping" over builtin types
   #define BUILTIN_TYPES \
@@ -35,6 +37,10 @@ namespace
   #define USER_TYPES \
     BOOST_PP_TUPLE_TO_LIST( \
         1, (Mantid::Kernel::V3D) \
+    )
+  #define ARRAY_TYPES \
+    BOOST_PP_TUPLE_TO_LIST( \
+        2, (std::vector<int>, std::vector<double> ) \
     )
 
   /**
@@ -64,12 +70,18 @@ namespace
       if(!entry) throw std::invalid_argument("Cannot find converter from C++ type.");\
       result = entry->to_python((const void *)&column->cell<T>(row));\
     }
+    #define GET_ARRAY(R, _, T) \
+    else if(typeID == typeid(T))\
+    {\
+      result = Converters::Clone::apply<T::value_type>::create1D( column->cell<T>(row) ); \
+    }
 
     // -- Use the boost preprocessor to generate a list of else if clause to cut out copy
     // and pasted code.
     PyObject *result(NULL);
     if(false){} // So that it always falls through to the list checking
     BOOST_PP_LIST_FOR_EACH(GET_BUILTIN, _ , BUILTIN_TYPES)
+    BOOST_PP_LIST_FOR_EACH(GET_ARRAY, _ , ARRAY_TYPES)
     BOOST_PP_LIST_FOR_EACH(GET_USER, _ , USER_TYPES)
     else
     {
@@ -92,11 +104,25 @@ namespace
       return;
     }
 
-#define SET_CELL(R, _, T) \
+    #define SET_CELL(R, _, T) \
     else if(typeID == typeid(T)) \
     {\
       column->cell<T>(row) = bpl::extract<T>(value)();\
     }
+    #define SET_VECTOR_CELL(R, _, T) \
+    else if(typeID == typeid(T)) \
+    {\
+      if( ! PyArray_Check( value.ptr() ) ) \
+      { \
+        column->cell<T>(row) = Converters::PySequenceToVector<T::value_type>(value)(); \
+      } \
+      else \
+      { \
+        column->cell<T>(row) = Converters::NDArrayToVector<T::value_type>(value)();\
+      } \
+    }
+
+
     // -- Use the boost preprocessor to generate a list of else if clause to cut out copy
     // and pasted code.
     // I think cppcheck is getting confused by the define
@@ -104,6 +130,7 @@ namespace
     const std::type_info & typeID = column->get_type_info();
     if(false){} // So that it always falls through to the list checking
     BOOST_PP_LIST_FOR_EACH(SET_CELL, _ , BUILTIN_TYPES)
+    BOOST_PP_LIST_FOR_EACH(SET_VECTOR_CELL, _ , ARRAY_TYPES)
     BOOST_PP_LIST_FOR_EACH(SET_CELL, _ , USER_TYPES)
     else
     {
@@ -314,7 +341,6 @@ namespace
 
 void export_ITableWorkspace()
 {
-  REGISTER_SHARED_PTR_TO_PYTHON(ITableWorkspace);
   std::string iTableWorkspace_docstring = "Most of the information from a table workspace is returned ";
   iTableWorkspace_docstring += "as native copies. All of the column accessors return lists while the ";
   iTableWorkspace_docstring += "rows return dicts. This object does support the idom 'for row in ";
@@ -362,6 +388,10 @@ void export_ITableWorkspace()
          "number then it is interpreted as a row otherwise it is interpreted as a column name")
       ;
 
-  REGISTER_SINGLEVALUE_HANDLER(ITableWorkspace_sptr);
+  //-------------------------------------------------------------------------------------------------
+
+  DataItemInterface<ITableWorkspace>()
+    .castFromID("TableWorkspace")
+  ;
 }
 

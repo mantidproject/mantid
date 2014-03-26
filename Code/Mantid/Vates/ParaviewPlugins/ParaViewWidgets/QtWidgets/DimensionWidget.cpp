@@ -23,7 +23,8 @@ using namespace Mantid::VATES;
 /**
 Constructor
 */
-DimensionWidget::DimensionWidget()
+DimensionWidget::DimensionWidget() :
+  m_pDimensionPresenter(NULL), m_initialBinDisplay(BinDisplay::Simple)
 {
   m_binStackedWidget = new QStackedWidget;
   BinInputWidget* simple = new SimpleBinInputWidget;
@@ -114,14 +115,14 @@ BinInputWidget* DimensionWidget::getCurrentBinInputWidget() const
   return dynamic_cast<BinInputWidget*>(w);
 }
 
-double DimensionWidget::getMinimum() const
+Mantid::coord_t DimensionWidget::getMinimum() const
 {
-  return atof(m_minBox->text().toStdString().c_str());
+  return m_minBox->text().toFloat();
 }
 
-double DimensionWidget::getMaximum() const
+Mantid::coord_t DimensionWidget::getMaximum() const
 {
-  return atof(m_maxBox->text().toStdString().c_str());
+  return m_maxBox->text().toFloat();
 }
 
 unsigned int DimensionWidget::getNBins() const

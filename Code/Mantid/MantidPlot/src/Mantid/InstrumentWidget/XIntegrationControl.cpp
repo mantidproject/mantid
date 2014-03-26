@@ -283,11 +283,11 @@ void XIntegrationControl::setRange(double minimum,double maximum)
   {
     std::swap(minimum,maximum);
   }
-  if (minimum < m_totalMinimum)
+  if ((minimum < m_totalMinimum)||(minimum > m_totalMaximum))
   {
     minimum = m_totalMinimum;
   }
-  if (maximum > m_totalMaximum)
+  if ((maximum > m_totalMaximum)||(maximum < m_totalMinimum))
   {
     maximum = m_totalMaximum;
   }

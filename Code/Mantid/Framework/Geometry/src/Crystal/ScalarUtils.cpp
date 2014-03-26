@@ -5,6 +5,7 @@
 #include "MantidGeometry/Crystal/ScalarUtils.h"
 #include "MantidGeometry/Crystal/ReducedCell.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -211,7 +212,7 @@ std::vector<ConventionalCell> ScalarUtils::GetCellsUBOnly(
  *  reflections of a,b,c and forming the ConventionalCellInfo object 
  *  corresponding to the smallest form error. 
  *
- *  @param UB        Orientation transformation corresponding to a Niggli 
+ *  @param UB        Crystal::Orientation transformation corresponding to a Niggli
  *                   reduced cell.
  *  @param form_num  The form number to use.
  *
@@ -228,7 +229,6 @@ ConventionalCell ScalarUtils::GetCellForForm( const DblMatrix   & UB,
   ReducedCell      form_0;
   ReducedCell      form;
 
-  double error;
   double min_error = 1e20;   // errors are usually < 10, so this is big enough
 
   std::vector<double>     l_params;
@@ -245,7 +245,7 @@ ConventionalCell ScalarUtils::GetCellForForm( const DblMatrix   & UB,
     form = ReducedCell( form_num, l_params[0], l_params[1], l_params[2],
                                   l_params[3], l_params[4], l_params[5] );
 
-    error = form_0.WeightedDistance( form );
+    double error = form_0.WeightedDistance( form );
     if ( error < min_error )
     {
       info = ConventionalCell( UB_list[i], form_num );
@@ -307,14 +307,13 @@ ConventionalCell ScalarUtils::GetCellBestError(
 
   ConventionalCell info = list[0];
   double           min_error = 1.0e20;
-  double           error;
   std::string      type;
 
   bool min_found = false;
   for ( size_t i = 0; i < list.size(); i++ )
   {
     type = list[i].GetCellType();
-    error = list[i].GetError();
+    double error = list[i].GetError();
     if ( ( use_triclinic || type != ReducedCell::TRICLINIC() ) &&
            error < min_error )
     {
@@ -381,7 +380,7 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(
   V3D   a_temp,  b_temp,  c_temp,  // vectors for generating handedness
       m_a_temp,m_b_temp,m_c_temp;  // preserving permutations of sides
 
-  IndexingUtils::GetABC( UB, a_vec, b_vec, c_vec );
+  OrientedLattice::GetABC( UB, a_vec, b_vec, c_vec );
 
   m_a_vec = a_vec * (-1.0);
   m_b_vec = b_vec * (-1.0);
@@ -437,7 +436,7 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(
              b.norm() <= factor * c.norm()   )   // could be Niggli within
         {                                        // experimental error
           Matrix<double> temp_UB(3,3,false);
-          IndexingUtils::GetUB( temp_UB, a, b, c );
+          OrientedLattice::GetUB( temp_UB, a, b, c );
           result.push_back( temp_UB );
         }
       }

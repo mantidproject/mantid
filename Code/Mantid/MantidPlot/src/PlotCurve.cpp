@@ -30,6 +30,7 @@
 #include "Grid.h"
 #include "ScaleDraw.h"
 #include "SymbolBox.h"
+#include "Graph.h"
 #include "PatternBox.h"
 #include "plot2D/ScaleEngine.h"
 #include "Mantid/ErrorBarSettings.h"
@@ -51,10 +52,10 @@ PlotCurve::PlotCurve(const PlotCurve& c) : QObject(), QwtPlotCurve(c.title().tex
 
 QString PlotCurve::saveCurveLayout()
 {
-  Plot *plot = (Plot *)this->plot();
-  Graph *g = (Graph *)plot->parent();
+  Plot *plot = static_cast<Plot *>(this->plot());
+  Graph *g = static_cast<Graph *>(plot->parent());
 
-  int index = g->curveIndex((QwtPlotCurve *)this);
+  int index = g->curveIndex(static_cast<QwtPlotCurve *>(this));
   int style = g->curveType(index);
   QString s = "<Style>" + QString::number(style) + "</Style>\n";
 
@@ -270,8 +271,8 @@ void PlotCurve::drawSideLines(QPainter *p, const QwtScaleMap &xMap, const QwtSca
 
 void PlotCurve::computeWaterfallOffsets()
 {
-  Plot *plot = (Plot *)this->plot();
-  Graph *g = (Graph *)plot->parent();
+  Plot *plot = static_cast<Plot *>(this->plot());
+  Graph *g = static_cast<Graph *>(plot->parent());
 
   // reset the offsets
   d_x_offset = 0.0;
@@ -423,8 +424,8 @@ bool DataCurve::updateData(Table *t, const QString& colName)
 
 void DataCurve::loadData()
 {
-  Plot *plot = (Plot *)this->plot();
-  Graph *g = (Graph *)plot->parent();
+  Plot *plot = static_cast<Plot *>(this->plot());
+  Graph *g = static_cast<Graph *>(plot->parent());
   if (!g)
     return;
 
@@ -536,7 +537,7 @@ void DataCurve::loadData()
       int axis = QwtPlot::xBottom;
       if (d_type == Graph::HorizontalBars)
         axis = QwtPlot::yLeft;
-      ScaleDraw *old_sd = (ScaleDraw *)plot->axisScaleDraw(axis);
+      ScaleDraw *old_sd = static_cast<ScaleDraw *>(plot->axisScaleDraw(axis));
       ScaleDraw *sd = new ScaleDraw(plot, old_sd);
       if (xColType == Table::Date)
         sd->setDateTimeOrigin(date0);
@@ -550,7 +551,7 @@ void DataCurve::loadData()
   }
 
   if (!d_labels_list.isEmpty()){
-    ((Graph*)plot->parent())->updatePlot();
+    (static_cast<Graph*>(plot->parent()))->updatePlot();
     loadLabels();
   }
 }
@@ -587,7 +588,7 @@ void DataCurve::clearErrorBars()
 
 void DataCurve::remove()
 {
-  Graph *g = (Graph *)plot()->parent();
+  Graph *g = static_cast<Graph *>(plot()->parent());
   if (!g)
     return;
 
@@ -985,7 +986,7 @@ void DataCurve::setLabelsSelected(bool on)
   }
   if (on)
   {
-    Graph *g = (Graph *) plot()->parent();
+    Graph *g = static_cast<Graph *>(plot()->parent());
     g->selectTitle(false);
     g->deselectMarker();
     g->notifyFontChange(d_labels_font);
@@ -1025,7 +1026,7 @@ void DataCurve::moveLabels(const QPoint& pos)
   updateLabelsPosition();
   d_plot->replot();
 
-  ((Graph *) d_plot->parent())->notifyChanges();
+  (static_cast<Graph *>(d_plot->parent()))->notifyChanges();
 
   d_click_pos_x = d_plot->invTransform(xAxis(), pos.x());
   d_click_pos_y = d_plot->invTransform(yAxis(), pos.y());

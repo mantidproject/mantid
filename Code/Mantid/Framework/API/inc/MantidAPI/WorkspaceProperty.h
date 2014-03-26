@@ -12,7 +12,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include <iostream>
 #include <string>
 
 namespace Mantid
@@ -147,6 +146,11 @@ namespace Mantid
        */
       virtual boost::shared_ptr<TYPE>& operator=( const boost::shared_ptr<TYPE>& value )
       {
+        std::string wsName = value->name();
+        if ( this->direction() == Kernel::Direction::Input && !wsName.empty() )
+        {
+          m_workspaceName = wsName;
+        }
         return Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=( value );
       }
 
@@ -215,6 +219,11 @@ namespace Mantid
         boost::shared_ptr<TYPE> typed = boost::dynamic_pointer_cast<TYPE>(value);
         if(typed)
         {
+          std::string wsName = typed->name();
+          if ( this->direction() == Kernel::Direction::Input && !wsName.empty() )
+          {
+            m_workspaceName = wsName;
+          }
           Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = typed;
         }
         else

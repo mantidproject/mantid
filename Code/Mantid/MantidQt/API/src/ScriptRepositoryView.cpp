@@ -4,6 +4,7 @@
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include <QMessageBox>
 #include <QTime>
 #include <QCoreApplication>
@@ -387,8 +388,10 @@ void ScriptRepositoryView::CheckBoxDelegate::paint(QPainter *painter, const QSty
 
   if (state == "true")
     modifiedOption.state |= QStyle::State_On;
-  else
+  else if (state == "false")
     modifiedOption.state |= QStyle::State_Off;
+  else
+  	return;
   // draw it 
   QApplication::style()->drawPrimitive(QStyle::PE_IndicatorItemViewItemCheck, &modifiedOption, painter); 
 

@@ -18,6 +18,7 @@
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/LoadAscii.h"
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/shared_ptr.hpp>
 #include <Poco/File.h>
@@ -454,7 +455,7 @@ namespace Mantid
      */
     bool LoadRawHelper::isAscii(FILE* file) const
     {  
-      return LoadAscii::isAscii(file);
+      return Kernel::FileDescriptor::isAscii(file);
     }
 
 
@@ -523,7 +524,7 @@ namespace Mantid
 
       IAlgorithm_sptr loadInst= createChildAlgorithm("LoadInstrument");
       // Enable progress reporting by Child Algorithm - 
-      loadInst->addObserver(m_progressObserver);
+      loadInst->addObserver(this->progressObserver());
       setChildStartProgress(progStart);
       setChildEndProgress((progStart+progEnd)/2);
       // Now execute the Child Algorithm. Catch and log any error, but don't stop.
@@ -565,7 +566,7 @@ namespace Mantid
             IAlgorithm_sptr updateInst = createChildAlgorithm("UpdateInstrumentFromFile");
             updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
             updateInst->setPropertyValue("Filename", fileName);
-            updateInst->addObserver(m_progressObserver); // Enable progress reporting by ChildAlgorithm
+            updateInst->addObserver(this->progressObserver()); // Enable progress reporting by ChildAlgorithm
             setChildStartProgress((progStart+progEnd)/2);
             setChildEndProgress(progEnd);
             if(value  == "datafile-ignore-phi" )
@@ -670,18 +671,41 @@ namespace Mantid
       std::list<std::string>::const_iterator logPath;
       for (logPath = logFiles.begin(); logPath != logFiles.end(); ++logPath)
       {
+        //check for log files we should just ignore
+        std::string ignoreSuffix = "ICPstatus.txt";
+        if(boost::algorithm::ends_with(*logPath, ignoreSuffix))
+        {
+          g_log.information("Skipping log file: " + *logPath);
+          continue;
+        }
+
+        ignoreSuffix = "ICPdebug.txt";
+        if(boost::algorithm::ends_with(*logPath, ignoreSuffix))
+        {
+          g_log.information("Skipping log file: " + *logPath);
+          continue;
+        }
+
         // Create a new object for each log file.
         IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
+
         // Pass through the same input filename
         loadLog->setPropertyValue("Filename", *logPath);
         // Set the workspace property to be the same one filled above
         loadLog->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
         // Pass the name of the log file explicitly to LoadLog.
         loadLog->setPropertyValue("Names", extractLogName(*logPath));
+
+        //Force loading two column file if it's an ISIS ICPevent log
+        if(boost::algorithm::ends_with(*logPath, "ICPevent.txt"))
+        {
+          loadLog->setPropertyValue("NumberOfColumns", "2");
+        }
+
         // Enable progress reporting by Child Algorithm - if progress range has duration
         if ( progStart < progEnd )
         {
-          loadLog->addObserver(m_progressObserver);
+          loadLog->addObserver(this->progressObserver());
           setChildStartProgress(progStart);
           setChildEndProgress(progEnd);
         }

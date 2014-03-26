@@ -425,7 +425,7 @@ public:
     presenterBuilder.withViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object
     auto concretePresenter = presenterBuilder.create();
 
-    concretePresenter->setForegroundColour(colourToChangeTo); 
+    concretePresenter->setForegroundColor(colourToChangeTo);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
   }
@@ -451,7 +451,7 @@ public:
     presenterBuilder.withViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object
     auto concretePresenter = presenterBuilder.create();
 
-    concretePresenter->setBackgroundColour(colourToChangeTo); 
+    concretePresenter->setBackgroundColor(colourToChangeTo);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
   }

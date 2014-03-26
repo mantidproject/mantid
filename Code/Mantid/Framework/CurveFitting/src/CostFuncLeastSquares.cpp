@@ -7,13 +7,9 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/CompositeDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidKernel/MultiThreaded.h"
 
 #include <iomanip>
-
-namespace
-{
-  const bool debug = false;
-}
 
 namespace Mantid
 {
@@ -25,7 +21,11 @@ DECLARE_COSTFUNCTION(CostFuncLeastSquares,Least squares)
 /**
  * Constructor
  */
-CostFuncLeastSquares::CostFuncLeastSquares() : CostFuncFitting(),m_value(0),m_pushed(false),
+CostFuncLeastSquares::CostFuncLeastSquares() : CostFuncFitting(),
+  m_includePenalty(true),
+  m_value(0),
+  m_pushed(false),
+  m_factor(0.5),
   m_log(Kernel::Logger::get("CostFuncLeastSquares")) {}
 
 /** Calculate value of cost function
@@ -56,13 +56,16 @@ double CostFuncLeastSquares::val() const
   }
 
   // add penalty
-  for(size_t i=0;i<m_function->nParams();++i)
+  if (m_includePenalty)
   {
-    if ( !m_function->isActive(i) ) continue;
-    API::IConstraint* c = m_function->getConstraint(i);
-    if (c)
+    for(size_t i=0;i<m_function->nParams();++i)
     {
-      m_value += c->check();
+      if ( !m_function->isActive(i) ) continue;
+      API::IConstraint* c = m_function->getConstraint(i);
+      if (c)
+      {
+        m_value += c->check();
+      }
     }
   }
 
@@ -82,15 +85,19 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::Function
 
   double retVal = 0.0;
 
+  double sqrtw = calSqrtW(values);
+
   for (size_t i = 0; i < ny; i++)
   {
-    double val = ( values->getCalculated(i) - values->getFitData(i) ) * values->getFitWeight(i);
+    // double val = ( values->getCalculated(i) - values->getFitData(i) ) * values->getFitWeight(i);
+    double val = ( values->getCalculated(i) - values->getFitData(i) ) * getWeight(values, i, sqrtw);
     retVal += val * val;
   }
-  
-  PARALLEL_ATOMIC
-  m_value += 0.5 * retVal;
 
+  PARALLEL_ATOMIC
+  m_value += m_factor * retVal;
+
+  return;
 }
 
 
@@ -183,12 +190,15 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
   size_t np = m_function->nParams();
   if (evalFunction)
   {
-    for(size_t i = 0; i < np; ++i)
+    if (m_includePenalty)
     {
-      API::IConstraint* c = m_function->getConstraint(i);
-      if (c)
+      for(size_t i = 0; i < np; ++i)
       {
-        m_value += c->check();
+        API::IConstraint* c = m_function->getConstraint(i);
+        if (c)
+        {
+          m_value += c->check();
+        }
       }
     }
     m_dirtyVal = false;
@@ -196,34 +206,40 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
 
   if (evalDeriv)
   {
-    size_t i = 0;
-    for(size_t ip = 0; ip < np; ++ip)
+    if (m_includePenalty)
     {
-      if ( !m_function->isActive(ip) ) continue;
-      API::IConstraint* c = m_function->getConstraint(ip);
-      if (c)
+      size_t i = 0;
+      for(size_t ip = 0; ip < np; ++ip)
       {
-        double d =  m_der.get(i) + c->checkDeriv();
-        m_der.set(i,d);
+        if ( !m_function->isActive(ip) ) continue;
+        API::IConstraint* c = m_function->getConstraint(ip);
+        if (c)
+        {
+          double d =  m_der.get(i) + c->checkDeriv();
+          m_der.set(i,d);
+        }
+        ++i;
       }
-      ++i;
     }
     m_dirtyDeriv = false;
   }
 
   if (evalDeriv)
   {
-    size_t i = 0;
-    for(size_t ip = 0; ip < np; ++ip)
+    if (m_includePenalty)
     {
-      if ( !m_function->isActive(ip) ) continue;
-      API::IConstraint* c = m_function->getConstraint(ip);
-      if (c)
+      size_t i = 0;
+      for(size_t ip = 0; ip < np; ++ip)
       {
-        double d =  m_hessian.get(i,i) + c->checkDeriv2();
-        m_hessian.set(i,i,d);
+        if ( !m_function->isActive(ip) ) continue;
+        API::IConstraint* c = m_function->getConstraint(ip);
+        if (c)
+        {
+          double d =  m_hessian.get(i,i) + c->checkDeriv2();
+          m_hessian.set(i,i,d);
+        }
+        ++i;
       }
-      ++i;
     }
     // clear the dirty flag if hessian was actually calculated
     m_dirtyHessian = m_hessian.isEmpty();
@@ -260,19 +276,20 @@ void CostFuncLeastSquares::addValDerivHessian(
 
   size_t iActiveP = 0;
   double fVal = 0.0;
-  if (debug)
+  if (m_log.is(Kernel::Logger::Priority::PRIO_DEBUG))
   {
-    std::cerr << "Jacobian:\n";
+    m_log.debug() << "Jacobian:\n";
     for(size_t i = 0; i < ny; ++i)
     {
       for(size_t ip = 0; ip < np; ++ip)
       {
         if ( !m_function->isActive(ip) ) continue;
-        std::cerr << jacobian.get(i,ip) << ' ';
+        m_log.debug() << jacobian.get(i,ip) << ' ';
       }
-      std::cerr << std::endl;
+      m_log.debug() << "\n";
     }
   }
+  double sqrtw = calSqrtW(values);
   for(size_t ip = 0; ip < np; ++ip)
   {
     if ( !function->isActive(ip) ) continue;
@@ -281,7 +298,8 @@ void CostFuncLeastSquares::addValDerivHessian(
     {
       double calc = values->getCalculated(i);
       double obs = values->getFitData(i);
-      double w = values->getFitWeight(i);
+      // double w = values->getFitWeight(i);
+      double w =  getWeight(values, i, sqrtw);
       double y = ( calc - obs ) * w;
       d += y * jacobian.get(i,ip) * w;
       if (iActiveP == 0 && evalFunction)
@@ -319,7 +337,8 @@ void CostFuncLeastSquares::addValDerivHessian(
       double d = 0.0;
       for(size_t k = 0; k < ny; ++k) // over fitting data
       {
-        double w = values->getFitWeight(k);
+        // double w = values->getFitWeight(k);
+        double w = getWeight(values, k, sqrtw);
         d += jacobian.get(k,i) * jacobian.get(k,j) * w * w;
       }
       PARALLEL_CRITICAL(hessian_set)
@@ -495,6 +514,25 @@ void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix& covar, double ep
     m_log.information().flags(prevState);
   }
 
+}
+
+//----------------------------------------------------------------------------------------------
+/** Get weight of data point i(1/sigma)
+  */
+double CostFuncLeastSquares::getWeight(API::FunctionValues_sptr values, size_t i, double sqrtW) const
+{
+  UNUSED_ARG(sqrtW);
+  return (values->getFitWeight(i));
+}
+
+//----------------------------------------------------------------------------------------------
+/** Get square root of normalization weight (W)
+  */
+double CostFuncLeastSquares::calSqrtW(API::FunctionValues_sptr values) const
+{
+  UNUSED_ARG(values);
+
+  return 1.0;
 }
 
 } // namespace CurveFitting

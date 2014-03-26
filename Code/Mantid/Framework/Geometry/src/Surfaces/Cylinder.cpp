@@ -4,6 +4,7 @@
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Matrix.h"
 #include <cfloat>
+#include <iostream>
 
 namespace Mantid
 {

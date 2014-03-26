@@ -12,8 +12,9 @@ namespace Mantid
 namespace Geometry
 {
 
-  // Get a reference to the logger
-  Kernel::Logger& FitParameter::g_log = Kernel::Logger::get("FitParameter");
+  // Get a reference to the logger, here stored in statis variable to
+  // have access to in operator<< and operator>>
+  static Kernel::Logger& g_log = Kernel::Logger::get("FitParameter");
 
 
   /**
@@ -151,7 +152,24 @@ namespace Geometry
   }
 
   /**
-    Reads in parameter value
+    Reads in information about a fitting parameter. The expected format is a comma separated
+    list of 3 or more entries. The list will be read according to:
+
+       1st (0) : parameter value (which is converted to float)
+       2nd (1) : fitting function this parameter belong to  
+       3rd (2) : parameter name
+       4th (3) : constrain min
+       5th (4) : constrain max
+       6th (5) : constrain penalty factor
+       7th (6) : set tie
+       8th (7) : set formula
+       9th (8) : set formula unit
+       10th (9) : set result unit
+       11th onwards (10-) : read lookup table values
+    
+    Information about fitting \<parameter\> can be found on www.mantidproject.org/IDF.
+    Note also printSelf() does the reverse of the this method, i.e. print of the information
+    of a parameter as listed above.
     @param in :: Input Stream
     @param f :: FitParameter to write to
     @return Current state of stream
@@ -164,32 +182,36 @@ namespace Geometry
     getline(in, str);
     tokenizer values(str, ",", tokenizer::TOK_TRIM);
 
+    if ( values.count() <= 2 )
+    {
+      g_log.warning() << "Expecting a comma separated list of at each three entries"
+                      << " (any of which may be empty strings) to set information about a fitting parameter"
+                      << " instead of: " << str << std::endl;
+      return in;
+    }    
+
     try
     {
-      f.setValue() = atof(values[0].c_str());
+      f.setValue() = boost::lexical_cast<double>(values[0]);
     }
-    catch (...)
+    catch (boost::bad_lexical_cast &)
     {
       f.setValue() = 0.0;
+
+      if ( !values[0].empty() )
+      {
+        g_log.warning() << "Could not read " << values[0] << " as double for "
+                        << " fitting parameter: " << values[1] << ":" << values[2] << std::endl;
+      }
     }
 
-    try
-    {
-      f.setFunction() = values[1];
-    }
-    catch (...)
-    {
-      f.setFunction() = "";
-    }
+    // read remaining required entries
 
-    try
-    {
-      f.setName() = values[2];
-    }
-    catch (...)
-    {
-      f.setName() = "";
-    }
+    f.setFunction() = values[1];
+    f.setName() = values[2];
+
+
+    // read optional entries
 
     try
     {

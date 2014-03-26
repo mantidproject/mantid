@@ -220,7 +220,6 @@ namespace Mantid
      * @param file An open NeXus File object
      * @param rootPath The current path that is open in the file
      * @param className The class of the current open path
-     * @param tmap [Out] An output map filled with mappings of type->path
      * @param pmap [Out] An output map filled with mappings of path->type
      * @param level An integer defining the current level in the file
      */

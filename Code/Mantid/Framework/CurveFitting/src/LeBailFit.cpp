@@ -4,6 +4,15 @@ This algorithm performs [[Le Bail Fit]] to powder diffraction data, and also sup
 This algorithm will refine a specified set of the powder instrumental profile parameters with a previous refined background model. 
 
 === Peak profile function for fit ===
+
+==== Back to back exponential convoluted with pseudo-voigt ====
+Here is the list of the peak profile function supported by this algorithm.
+* Thermal neutron back-to-back exponential convoluted with pseudo-voigt
+** geometry-related parameters: Dtt1, Dtt2, Zero
+** back-to-back exponential parameters: Alph0, Alph1, Beta0, Beta1
+** pseudo-voigt parameters: Sig0, Sig1, Sig2, Gam0, Gam1, Gam2
+
+==== Thermal neutron back to back exponential convoluted with pseudo-voigt ====
 Here is the list of the peak profile function supported by this algorithm.
 * Thermal neutron back-to-back exponential convoluted with pseudo-voigt
 ** geometry-related parameters: Dtt1, Zero, Dtt1t, Dtt2t, Width, Tcross
@@ -11,23 +20,21 @@ Here is the list of the peak profile function supported by this algorithm.
 ** pseudo-voigt parameters: Sig0, Sig1, Sig2, Gam0, Gam1, Gam2
 
 === Optimization ===
-''LeBailFit'' supports regular minimizes in GSL library and a tailored simulated annealing optimizer. 
+''LeBailFit'' supports  a tailored simulated annealing optimizer (using Monte Carlo random walk algorithm). 
+In future, regular minimizes in GSL library might be supported. 
 
-It is very difficult to achieve reasonable good result by non-linear minimizers such as Simplex or Levenber-Marquardt, because the parameters 
+=== Supported functionalities ===
+ * LeBailFit: fit profile parameters by Le bail algorithm; 
+ * Calculation: pattern calculation by Le bail algorithm; 
+ * MonteCarlo: fit profile parameters by Le bail algorithm with Monte Carlo random wal; 
+ * RefineBackground: refine background parameters
 
-The experience to use non-linear minimizes such as Simplex or 
-
-=== Background ===
-This algorithm does not refine background.  
-It takes a previous refined background model, for instance, from ProcessBackground().  
-
-Background fitting is not included in LeBailFit() because the mathematics problem is not well-defined 
-as peak heights are calculated but not refined but highly correlated to background model.
 
 === Further Information ===
 See [[Le Bail Fit]].
  
 *WIKI*/
+
 /* COMMIT NOTES *
   1. Rename calculateDiffractionPatternMC to calculateDiffractionPattern
   2.
@@ -129,7 +136,7 @@ namespace CurveFitting
     this->declareProperty(tablewsprop1, "Input table workspace containing the parameters required by LeBail fit. ");
 
     // Single peak: Reflection (HKL) Workspace, PeaksWorkspace
-    this->declareProperty(new WorkspaceProperty<TableWorkspace>("InputHKLWorkspace", "", Direction::InOut),
+    this->declareProperty(new WorkspaceProperty<TableWorkspace>("InputHKLWorkspace", "", Direction::Input),
                           "Input table workspace containing the list of reflections (HKL). ");
 
     // Bragg peaks profile parameter output table workspace
@@ -156,6 +163,7 @@ namespace CurveFitting
     // Peak type
     vector<string> peaktypes;
     peaktypes.push_back("ThermalNeutronBk2BkExpConvPVoigt");
+    peaktypes.push_back("NeutronBk2BkExpConvPVoigt");
     auto peaktypevalidator = boost::make_shared<StringListValidator>(peaktypes);
     declareProperty("PeakType", "ThermalNeutronBk2BkExpConvPVoigt", peaktypevalidator, "Peak profile type.");
 
@@ -164,6 +172,7 @@ namespace CurveFitting
     std::vector<std::string> bkgdtype;
     bkgdtype.push_back("Polynomial");
     bkgdtype.push_back("Chebyshev");
+    bkgdtype.push_back("FullprofPolynomial");
     auto bkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
     declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Background type");
 
@@ -367,6 +376,7 @@ namespace CurveFitting
     */
   void LeBailFit::processInputBackground()
   {
+    // FIXME - Need to think of FullprofPolynomial
     // Type
     m_backgroundType = getPropertyValue("BackgroundType");
 
@@ -374,16 +384,58 @@ namespace CurveFitting
     m_backgroundParameters = getProperty("BackgroundParameters");
     TableWorkspace_sptr bkgdparamws = getProperty("BackgroundParametersWorkspace");
 
-    // 2. Determine where the background parameters are from
+    // Determine where the background parameters are from
     if (!bkgdparamws)
     {
+      // Set up parameter name
+      m_backgroundParameterNames.clear();
+      size_t i0 = 0;
+      if (m_backgroundType == "FullprofPolynomial")
+      {
+        // TODO - Add this special case to Wiki
+        m_backgroundParameterNames.push_back("Bkpos");
+        if (m_backgroundParameters[0] < m_startX || m_backgroundParameters[0] > m_endX)
+          g_log.warning("Bkpos is out side of data range.  It MIGHT NOT BE RIGHT. ");
+        i0 = 1;
+      }
+
+      size_t numparams = m_backgroundParameters.size();
+      for (size_t i = i0; i < numparams; ++i)
+      {
+        stringstream parss;
+        parss << "A" << (i-i0);
+        m_backgroundParameterNames.push_back(parss.str());
+      }
+
       g_log.information() << "[Input] Use background specified with vector with input vector sized "
-                          << m_backgroundParameters.size() << ".\n";
+                          << numparams << ".\n";
     }
     else
     {
       g_log.information() << "[Input] Use background specified by table workspace.\n";
-      parseBackgroundTableWorkspace(bkgdparamws, m_backgroundParameters);
+      parseBackgroundTableWorkspace(bkgdparamws, m_backgroundParameterNames, m_backgroundParameters);
+    }
+
+    // Set up background order
+    m_bkgdorder = static_cast<unsigned int>(m_backgroundParameterNames.size());
+    if (m_backgroundType == "FullprofPolynomial")
+    {
+      // Consider 1 extra Bkpos
+      if (m_bkgdorder == 0)
+        throw runtime_error("FullprofPolynomial: Bkpos must be given! ");
+      else if (m_bkgdorder <= 7)
+        m_bkgdorder = 6;
+      else if (m_bkgdorder <= 13)
+        m_bkgdorder = 12;
+      else
+        throw runtime_error("There is something wrong to set up FullprofPolynomial. ");
+    }
+    else
+    {
+      // order n will have n+1 parameters
+      if (m_bkgdorder == 0)
+        throw runtime_error("Polynomial and Chebyshev at least be order 0 (1 parameter). ");
+      -- m_bkgdorder;
     }
 
     return;
@@ -420,18 +472,15 @@ namespace CurveFitting
     bool resultphysical = calculateDiffractionPattern(m_dataWS->readX(m_wsIndex), m_dataWS->readY(m_wsIndex),
                                                       true, true, emptyvec, vecY, rfactor);
 
-    if (!resultphysical)
-    {
-      g_log.warning() << "Input parameters are unable to generate peaks that are physical." << ".\n";
-      return;
-    }
-
+    size_t numpts = vecY.size();
     // Calculate background
     MantidVec& vec_bkgd = m_outputWS->dataY(INPUTBKGDINDEX);
     m_lebailFunction->function(vec_bkgd, vecX, false, true);
+    for (size_t i = 0; i < numpts; ++i)
+      m_outputWS->dataY(INPUTPUREPEAKINDEX)[i] = m_outputWS->readY(OBSDATAINDEX)[i] -
+          m_outputWS->readY(INPUTBKGDINDEX)[i];
 
     // Set up output workspaces
-    size_t numpts = vecY.size();
     for (size_t i = 0; i < numpts; ++i)
     {
       m_outputWS->dataY(DATADIFFINDEX)[i] = m_outputWS->readY(OBSDATAINDEX)[i] - m_outputWS->readY(CALDATAINDEX)[i];
@@ -456,6 +505,11 @@ namespace CurveFitting
     m_funcParameters["Rwp"] = par_rwp;
 
     g_log.notice() << "Rwp = " << rfactor.Rwp << ", Rp = " << rfactor.Rp << "\n";
+
+    if (!resultphysical)
+    {
+      g_log.warning() << "Input parameters are unable to generate peaks that are physical." << ".\n";
+    }
 
     return;
   }
@@ -701,7 +755,7 @@ namespace CurveFitting
     m_lebailFunction->addPeaks(vecHKL);
 
     // Add background
-    m_lebailFunction->addBackgroundFunction(m_backgroundType, m_backgroundParameters, m_startX, m_endX);
+    m_lebailFunction->addBackgroundFunction(m_backgroundType, m_bkgdorder, m_backgroundParameterNames, m_backgroundParameters, m_startX, m_endX);
 
     return;
   }
@@ -1134,7 +1188,8 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Parse table workspace (from Fit()) containing background parameters to a vector
    */
-  void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws, vector<double>& bkgdorderparams)
+  void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws, vector<string>& bkgdparnames,
+                                                vector<double>& bkgdorderparams)
   {
     g_log.debug() << "DB1105A Parsing background TableWorkspace.\n";
 
@@ -1175,29 +1230,27 @@ namespace CurveFitting
       double parvalue;
       row >> parname >> parvalue;
 
-      if (parname.size() > 0 && parname[0] == 'A')
+      // Remove extra white spaces
+      boost::algorithm::trim(parname);
+
+      if (parname.size() > 0 && (parname[0] == 'A' || parname == "Bkpos"))
       {
-        // Insert parameter name starting with A
+        // Insert parameter name starting with A or Bkpos (special case for FullprofPolynomial)
         parmap.insert(std::make_pair(parname, parvalue));
       }
     }
 
-    // Sort: increasing order
+    // Add pair to vector
+    bkgdparnames.reserve(parmap.size());
     bkgdorderparams.reserve(parmap.size());
-    for (size_t i = 0; i < parmap.size(); ++i)
-    {
-      bkgdorderparams.push_back(0.0);
-    }
 
     std::map<std::string, double>::iterator mit;
     for (mit = parmap.begin(); mit != parmap.end(); ++mit)
     {
       std::string parname = mit->first;
       double parvalue = mit->second;
-      std::vector<std::string> terms;
-      boost::split(terms, parname, boost::is_any_of("A"));
-      int tmporder = atoi(terms[1].c_str());
-      bkgdorderparams[tmporder] = parvalue;
+      bkgdparnames.push_back(parname);
+      bkgdorderparams.push_back(parvalue);
     }
 
     // Debug output
@@ -1206,7 +1259,7 @@ namespace CurveFitting
         << bkgdorderparams.size() << ": ";
     for (size_t iod = 0; iod < bkgdorderparams.size(); ++iod)
     {
-      msg << "A" << iod << " = " << bkgdorderparams[iod] << "; ";
+      msg << bkgdparnames[iod] << " = " << bkgdorderparams[iod] << "; ";
     }
     g_log.information(msg.str());
 
@@ -2069,13 +2122,6 @@ namespace CurveFitting
       peaksvalid = m_lebailFunction->calculatePeaksIntensities(vecX, vecY, values);
     }
 
-    if (!peaksvalid)
-    {
-      g_log.information("There are some peaks that have unphysical height!");
-      rfactor = badR;
-      return false;
-    }
-
     // Calculate Le Bail function
     if (values.size() != vecY.size())
     {
@@ -2120,6 +2166,13 @@ namespace CurveFitting
         std::transform(values.begin(), values.end(), veccalbkgd.begin(), caldata.begin(), std::plus<double>());
       }
       rfactor = getRFactor(m_dataWS->readY(m_wsIndex), caldata, m_dataWS->readE(m_wsIndex));
+    }
+
+    if (!peaksvalid)
+    {
+      g_log.information("LeBailFit: Some peaks have unphysical peak value. ");
+      rfactor = badR;
+      return false;
     }
 
     return true;

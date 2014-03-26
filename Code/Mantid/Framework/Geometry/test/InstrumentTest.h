@@ -251,6 +251,12 @@ public:
     TS_ASSERT_EQUALS(instrument.getNumberDetectors(true), ndets-1); // skipMonitors
   }
 
+  void testNumMonitors()
+  {
+    TS_ASSERT_EQUALS( instrument.numMonitors(), 1 );
+    TS_ASSERT_EQUALS( Instrument().numMonitors(), 0 );
+  }
+
   void testDetector()
   {
     TS_ASSERT_THROWS( instrument.getDetector(0), Exception::NotFoundError );
@@ -448,9 +454,9 @@ public:
     TS_ASSERT_EQUALS( inst->getValidToDate(), validTo);
     // Try the parametrized copy constructor
     ParameterMap_sptr map(new ParameterMap());
-    Instrument * inst2 = new Instrument(boost::dynamic_pointer_cast<Instrument>(inst), map);
-    TS_ASSERT_EQUALS( inst2->getValidFromDate(), validFrom);
-    TS_ASSERT_EQUALS( inst2->getValidToDate(), validTo);
+    Instrument inst2(boost::dynamic_pointer_cast<Instrument>(inst), map);
+    TS_ASSERT_EQUALS( inst2.getValidFromDate(), validFrom);
+    TS_ASSERT_EQUALS( inst2.getValidToDate(), validTo);
   }
 
   void test_getMinMaxDetectorIDs()

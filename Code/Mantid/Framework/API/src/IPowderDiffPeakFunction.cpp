@@ -214,83 +214,6 @@ namespace API
   }
 
   //----------------------------------------------------------------------------------------------
-  /** General implementation of the method for all peaks. Limits the peak evaluation to
-   * a certain number of FWHMs around the peak centre. The outside points are set to 0.
-   * Calls functionLocal() to compute the actual values
-   * @param out :: Output function values
-   * @param xValues :: X values for data points
-   * @param nData :: Number of data points
-
-  void IPowderDiffPeakFunction::functionLocal(double* out, const double* xValues, const size_t nData)const
-  {
-    double c = this->centre();
-    double dx = fabs(s_peakRadius*this->fwhm());
-    int i0 = -1;
-    int n = 0;
-    for(size_t i = 0; i < nData; ++i)
-    {
-      if (fabs(xValues[i] - c) < dx)
-      {
-        if (i0 < 0) i0 = static_cast<int>(i);
-        ++n;
-      }
-      else
-      {
-        out[i] = 0.0;
-      }
-    }
-
-    if (i0 < 0 || n == 0)
-      return;
-    this->functionLocal(out+i0, xValues+i0, n);
-
-    return;
-  }
-     */
-
-  //----------------------------------------------------------------------------------------------
-  /** General implementation of the method for all peaks. Calculates derivatives only
-   * for a range of x values limited to a certain number of FWHM around the peak centre.
-   * For the points outside the range all derivatives are set to 0.
-   * Calls functionDerivLocal() to compute the actual values
-   * @param out :: Derivatives
-   * @param xValues :: X values for data points
-   * @param nData :: Number of data points
-
-  void IPowderDiffPeakFunction::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData) const
-  {
-    double c = this->centre();
-    double dx = fabs(s_peakRadius*this->fwhm());
-    int i0 = -1;
-    int n = 0;
-    for(size_t i = 0; i < nData; ++i)
-    {
-      if (fabs(xValues[i] - c) < dx)
-      {
-        if (i0 < 0) i0 = static_cast<int>(i);
-        ++n;
-      }
-      else
-      {
-        for(size_t ip = 0; ip < this->nParams(); ++ip)
-        {
-          out->set(i,ip, 0.0);
-        }
-      }
-    }
-    if (i0 < 0 || n == 0) return;
-#if 0
-    PartialJacobian1 J(out,i0);
-    this->functionDerivLocal(&J,xValues+i0,n);
-#else
-    throw runtime_error("Need to think how to implement! Message 1026.");
-#endif
-
-    return;
-  }
-   */
-
-  //----------------------------------------------------------------------------------------------
   /** Set peak radius
     * @param r :: radius
     */
@@ -329,8 +252,6 @@ namespace API
    */
   std::complex<double> E1(std::complex<double> z)
   {
-    const double el = 0.5772156649015328;
-
     std::complex<double> exp_e1;
 
     double rz = real(z);
@@ -363,8 +284,8 @@ namespace API
         }
       } // ENDFOR k
 
-      // cout << "[DB] el = " << el << ", exp_e1 = " << exp_e1 << endl;
 
+      const double el = 0.5772156649015328;
       exp_e1 = -el - log(z) + (z*exp_e1);
     }
     else
@@ -386,7 +307,6 @@ namespace API
       }
     }
 
-    // cout << "[DB] Final exp_e1 = " << exp_e1 << "\n";
 
     return exp_e1;
   }

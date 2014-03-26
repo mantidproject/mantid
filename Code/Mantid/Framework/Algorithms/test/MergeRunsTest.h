@@ -314,13 +314,23 @@ public:
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS") );
+    MatrixWorkspace_const_sptr input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("in1");
 
-    MatrixWorkspace::const_iterator inIt(*(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("in1")));
-    for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
+    TS_ASSERT_EQUALS(input->getNumberHistograms(), output->getNumberHistograms());
+    TS_ASSERT_EQUALS(input->blocksize(), output->blocksize());
+
+    const size_t xsize = output->blocksize();
+    for(size_t i = 0; i < output->getNumberHistograms(); ++i)
     {
-      TS_ASSERT_EQUALS( it->X(), inIt->X() );
-      TS_ASSERT_EQUALS( it->Y(), 6.0 );
-      TS_ASSERT_DELTA( it->E(), sqrt(6.0), 0.00001 );
+      const auto & outX = output->readX(i);
+      const auto & outY = output->readY(i);
+      const auto & outE = output->readE(i);
+      for(size_t j = 0; j < xsize; ++j)
+      {
+        TS_ASSERT_DELTA(outX[j], input->readX(i)[j], 1e-12);
+        TS_ASSERT_DELTA(outY[j], 6.0, 1e-12);
+        TS_ASSERT_DELTA(outE[j], sqrt(6.0), 1e-5);
+      }
     }
 
     AnalysisDataService::Instance().remove("outWS");
