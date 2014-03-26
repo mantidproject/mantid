@@ -154,6 +154,7 @@ class MantidPlotProxiesTest(unittest.TestCase):
         mm = importMatrixWorkspace("fake", visible=True)
         g = mm.plotGraph2D()
         self.do_dock_test_and_close(g)
+        mm.confirmClose(False)
         mm.close()
 
     def test_dock_method_produces_docked_window_on_instrument_view(self):
@@ -163,6 +164,7 @@ class MantidPlotProxiesTest(unittest.TestCase):
     def do_dock_test_and_close(self, win):
         win.dock()
         self.assertTrue(win.isDocked())
+        win.confirmClose(False)
         win.close()
 
 
