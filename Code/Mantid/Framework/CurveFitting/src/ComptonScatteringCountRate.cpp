@@ -31,7 +31,7 @@ namespace CurveFitting
       m_eqMatrix(), m_bkgdOrderAttr("n"), m_bkgdPolyN(0), m_errors(), m_dataErrorRatio()
   {
     // Must be a string to be able to be passed through Fit
-    declareAttribute(CONSTRAINT_MATRIX_NAME, IFunction::Attribute(""));
+    declareAttribute(CONSTRAINT_MATRIX_NAME, IFunction::Attribute("",true));
     declareAttribute(BKGD_ORDER_ATTR_NAME, IFunction::Attribute(m_bkgdOrderAttr));
   }
 
@@ -47,7 +47,7 @@ namespace CurveFitting
                                                 const API::IFunction::Attribute& value)
   {
     CompositeFunction::setAttribute(name, value);
-    if(name == CONSTRAINT_MATRIX_NAME) parseIntensityConstraintMatrix(value.asString());
+    if(name == CONSTRAINT_MATRIX_NAME) parseIntensityConstraintMatrix(value.asUnquotedString());
     else if(name == BKGD_ORDER_ATTR_NAME) m_bkgdOrderAttr = value.asString();
   }
 
@@ -236,17 +236,18 @@ namespace CurveFitting
    * Cache workspace reference. Expects a MatrixWorkspace
    * @param ws A shared_ptr to a Workspace
    */
-  void ComptonScatteringCountRate::setWorkspace(boost::shared_ptr<const API::Workspace> ws)
+  //void ComptonScatteringCountRate::setWorkspace(boost::shared_ptr<const API::Workspace> ws)
+  void ComptonScatteringCountRate::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> matrix,size_t wsIndex,double startX, double endX)
   {
-    CompositeFunction::setWorkspace(ws);
+    CompositeFunction::setMatrixWorkspace(matrix,wsIndex,startX,endX);
 
-    auto matrix = boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
-    if(!matrix)
-    {
-      throw std::invalid_argument("ComptonScatteringCountRate - Expected an object of type MatrixWorkspace, type=" + ws->id());
-    }
+    //auto matrix = boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
+    //if(!matrix)
+    //{
+    //  throw std::invalid_argument("ComptonScatteringCountRate - Expected an object of type MatrixWorkspace, type=" + ws->id());
+    //}
     // Grab the workspace index - Assumes it's the same for all functions
-    int wsIndex = this->getFunction(0)->getAttribute("WorkspaceIndex").asInt();
+    //int wsIndex = this->getFunction(0)->getAttribute("WorkspaceIndex").asInt();
     const auto & values = matrix->readY(wsIndex);
     
     // Keep the errors for the constraint calculation

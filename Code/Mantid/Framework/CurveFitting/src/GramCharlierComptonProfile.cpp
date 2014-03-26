@@ -340,10 +340,9 @@ namespace Mantid
      * Used to cache some values when the workspace has been set
      * @param ws A pointer to the workspace
      */
-    void GramCharlierComptonProfile::setWorkspace(boost::shared_ptr<const API::Workspace> ws)
+    void GramCharlierComptonProfile::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX)
     {
-      ComptonProfile::setWorkspace(ws); // Do base-class calculation first
-
+      ComptonProfile::setMatrixWorkspace(workspace,wi,startX,endX); // Do base-class calculation first
     }
 
     /**
