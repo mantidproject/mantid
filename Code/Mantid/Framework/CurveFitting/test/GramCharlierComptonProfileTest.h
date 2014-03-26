@@ -99,7 +99,6 @@ private:
   Mantid::API::IFunction_sptr createFunctionWithParamsSet()
   {
     auto func = createFunction();
-    //func->setAttributeValue("WorkspaceIndex",0);
     func->setAttributeValue("Mass",1.0);
     // must be before C_0 C_4 parameter calls as they are created by this attribute
     func->setAttributeValue("HermiteCoeffs","1 0 1");
