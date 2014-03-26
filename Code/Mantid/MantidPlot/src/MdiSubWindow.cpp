@@ -49,59 +49,59 @@ using std::ifstream;
 using std::string;
 
 MdiSubWindow::MdiSubWindow(ApplicationWindow *app, const QString& label, const QString& name, Qt::WFlags f):
-    MdiSubWindowParent_t (app, f),
-		d_app(app),
-		d_folder(app->currentFolder()),
-		d_label(label),
-		d_status(Normal),
-		d_caption_policy(Both),
-		d_confirm_close(true),
-		d_birthdate(QDateTime::currentDateTime ().toString(Qt::LocalDate)),
-		d_min_restore_size(QSize())
+  MdiSubWindowParent_t (app, f),
+  d_app(app),
+  d_folder(app->currentFolder()),
+  d_label(label),
+  d_status(Normal),
+  d_caption_policy(Both),
+  d_confirm_close(true),
+  d_birthdate(QDateTime::currentDateTime ().toString(Qt::LocalDate)),
+  d_min_restore_size(QSize())
 {
-	setObjectName(name);
-	setAttribute(Qt::WA_DeleteOnClose);
-	setLocale(app->locale());
+  setObjectName(name);
+  setAttribute(Qt::WA_DeleteOnClose);
+  setLocale(app->locale());
   confirmClose(false);
-	if (d_folder)
-		d_folder->addWindow(this);
-	if(app->metaObject()->indexOfSlot(QMetaObject::normalizedSignature("changeToDocked(MdiSubWindow*)")))
-	{
-	  connect(this, SIGNAL(dockToMDIArea(MdiSubWindow*)), app, SLOT(changeToDocked(MdiSubWindow*)));
-	  connect(this, SIGNAL(undockFromMDIArea(MdiSubWindow*)), app, SLOT(changeToFloating(MdiSubWindow*)));
-	}
+  if (d_folder)
+    d_folder->addWindow(this);
+  if(app->metaObject()->indexOfSlot(QMetaObject::normalizedSignature("changeToDocked(MdiSubWindow*)")))
+  {
+    connect(this, SIGNAL(dockToMDIArea(MdiSubWindow*)), app, SLOT(changeToDocked(MdiSubWindow*)));
+    connect(this, SIGNAL(undockFromMDIArea(MdiSubWindow*)), app, SLOT(changeToFloating(MdiSubWindow*)));
+  }
 }
 
 void MdiSubWindow::updateCaption()
 {
-switch (d_caption_policy)
-	{
-	case Name:
+  switch (d_caption_policy)
+  {
+    case Name:
+      setWindowTitle(objectName());
+      break;
+
+    case Label:
+      if (!d_label.isEmpty())
+        setWindowTitle(d_label);
+      else
         setWindowTitle(objectName());
-	break;
+      break;
 
-	case Label:
-		if (!d_label.isEmpty())
-            setWindowTitle(d_label);
-		else
-            setWindowTitle(objectName());
-	break;
-
-	case Both:
-		if (!d_label.isEmpty())
-            setWindowTitle(objectName() + " - " + d_label);
-		else
-            setWindowTitle(objectName());
-	break;
-	}
+    case Both:
+      if (!d_label.isEmpty())
+        setWindowTitle(objectName() + " - " + d_label);
+      else
+        setWindowTitle(objectName());
+      break;
+  }
 
   QWidget* wrapper = this->getWrapperWindow();
   if (wrapper)
   {
     wrapper->setWindowTitle(windowTitle());
   }
-	d_app->setListViewLabel(objectName(), d_label);
-};
+  d_app->setListViewLabel(objectName(), d_label);
+}
 
 void MdiSubWindow::resizeEvent( QResizeEvent* e )
 {
@@ -178,7 +178,7 @@ void MdiSubWindow::move(const QPoint& pos)
   if (pw)
   {
     pw->move( pos );
-    }
+  }
 }
 
 /**
@@ -225,112 +225,112 @@ void MdiSubWindow::closeEvent( QCloseEvent *e )
   if (d_confirm_close)
   {
     result = QMessageBox::information(this, tr("MantidPlot"),
-        tr("Do you want to hide or delete") + "<p><b>'" + objectName() + "'</b> ?",
-        tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2);
+                                      tr("Do you want to hide or delete") + "<p><b>'" + objectName() + "'</b> ?",
+                                      tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2);
   }
 
   switch(result)
   {
-  case 0: // close
-    if (!widget() || widget()->close())
-    {
-      e->accept();
-      emit closedWindow(this);
-      // Continue; the mdi window should close (?)
-    }
-    else
-    {
-      QMessageBox::critical(parentWidget(),"MantidPlot - Error", "Window cannot be closed");
+    case 0: // close
+      if (!widget() || widget()->close())
+      {
+        e->accept();
+        emit closedWindow(this);
+        // Continue; the mdi window should close (?)
+      }
+      else
+      {
+        QMessageBox::critical(parentWidget(),"MantidPlot - Error", "Window cannot be closed");
+        e->ignore();
+      }
+      break;
+
+    case 1: // hide
       e->ignore();
-    }
-    break;
+      emit hiddenWindow(this);
+      break;
 
-  case 1: // hide
-    e->ignore();
-    emit hiddenWindow(this);
-    break;
-
-  case 2: // cancel
-    e->ignore();
-    break;
+    case 2: // cancel
+      e->ignore();
+      break;
   }
 
 }
 
 QString MdiSubWindow::aspect()
 {
-QString s = tr("Normal");
-switch (d_status)
-	{
-	case Normal:
-	break;
+  QString s = tr("Normal");
+  switch (d_status)
+  {
+    case Normal:
+      break;
 
-	case Minimized:
-		return tr("Minimized");
-	break;
+    case Minimized:
+      return tr("Minimized");
+      break;
 
-	case Maximized:
-		return tr("Maximized");
-	break;
+    case Maximized:
+      return tr("Maximized");
+      break;
 
-	case Hidden:
-		return tr("Hidden");
-	break;
-	}
-return s;
+    case Hidden:
+      return tr("Hidden");
+      break;
+  }
+  return s;
 }
 
 QString MdiSubWindow::sizeToString()
 {
-return QString::number(8.*static_cast<float>(sizeof(this))/1024.0, 'f', 1) + " " + tr("kB");
+  return QString::number(8.*static_cast<float>(sizeof(this))/1024.0, 'f', 1) + " " + tr("kB");
 }
 
 void MdiSubWindow::changeEvent(QEvent *event)
 {
-	if (!isHidden() && event->type() == QEvent::WindowStateChange){
-		Status oldStatus = d_status;
-		Status newStatus = Normal;
-		if( windowState() & Qt::WindowMinimized ){
-		    if (oldStatus != Minimized)
-                d_min_restore_size = frameSize();
-	    	newStatus = Minimized;
-		} else if ( windowState() & Qt::WindowMaximized )
-	     	newStatus = Maximized;
+  if (!isHidden() && event->type() == QEvent::WindowStateChange){
+    Status oldStatus = d_status;
+    Status newStatus = Normal;
+    if( windowState() & Qt::WindowMinimized ){
+      if (oldStatus != Minimized)
+        d_min_restore_size = frameSize();
+      newStatus = Minimized;
+    } else if ( windowState() & Qt::WindowMaximized )
+      newStatus = Maximized;
 
-		if (newStatus != oldStatus){
-			d_status = newStatus;
-    		emit statusChanged (this);
-		}
-	}
-	MdiSubWindowParent_t::changeEvent(event);
+    if (newStatus != oldStatus){
+      d_status = newStatus;
+      emit statusChanged (this);
+    }
+  }
+  MdiSubWindowParent_t::changeEvent(event);
 }
 
 bool MdiSubWindow::eventFilter(QObject *object, QEvent *e)
 {
-	if (e->type() == QEvent::ContextMenu && object == widget()){
-        emit showContextMenu();
-        return true;
-	}
+  if (e->type() == QEvent::ContextMenu && object == widget()){
+    emit showContextMenu();
+    return true;
+  }
 
-	if (e->type() == QEvent::Move && object == widget()){
-		QObjectList lst = children();
-		foreach(QObject *o, lst){
-			if (o->isA("QMenu") && d_app){
-          d_app->customWindowTitleBarMenu(this, dynamic_cast<QMenu *>(o));
-				break;
-			}
-		}
-	}
+  if (e->type() == QEvent::Move && object == widget()){
+    QObjectList lst = children();
+    foreach(QObject *o, lst){
+      if (o->isA("QMenu") && d_app){
+        d_app->customWindowTitleBarMenu(this, dynamic_cast<QMenu *>(o));
+        break;
+      }
+    }
+  }
   return MdiSubWindowParent_t::eventFilter(object, e);
 }
 
 void MdiSubWindow::setStatus(Status s)
 {
-	if (d_status == s)
-		return;
+  if (d_status == s)
+    return;
 
-	d_status = s;
-	emit statusChanged (this);
+  d_status = s;
+  emit statusChanged (this);
 }
 
 void MdiSubWindow::setHidden()
@@ -356,14 +356,14 @@ void MdiSubWindow::setNormal()
   }
   else
   {
-	  showNormal();
+    showNormal();
   }
-	setStatus(Normal);
+  setStatus(Normal);
 }
 
 void MdiSubWindow::setMinimized()
 {
-	setStatus(Minimized);
+  setStatus(Minimized);
   QWidget* wrapper = getWrapperWindow();
   if (wrapper)
   {
@@ -372,7 +372,7 @@ void MdiSubWindow::setMinimized()
   }
   else
   {
-	  showMinimized();
+    showMinimized();
   }
 }
 
@@ -385,120 +385,120 @@ void MdiSubWindow::setMaximized()
   }
   else
   {
-	  showMaximized();
+    showMaximized();
   }
-	setStatus(Maximized);
+  setStatus(Maximized);
 }
 
 QString MdiSubWindow::parseAsciiFile(const QString& fname, const QString &commentString,
-                        int endLine, int ignoreFirstLines, int maxRows, int& rows)
+                                     int endLine, int ignoreFirstLines, int maxRows, int& rows)
 {
-	if (endLine == ApplicationWindow::CR)
-		return parseMacAsciiFile(fname, commentString, ignoreFirstLines, maxRows, rows);
+  if (endLine == ApplicationWindow::CR)
+    return parseMacAsciiFile(fname, commentString, ignoreFirstLines, maxRows, rows);
 
-	//QTextStream replaces '\r\n' with '\n', therefore we don't need a special treatement in this case!
+  //QTextStream replaces '\r\n' with '\n', therefore we don't need a special treatement in this case!
 
-	QFile f(fname);
- 	if(!f.open(QIODevice::ReadOnly))
-  		return QString::null;
+  QFile f(fname);
+  if(!f.open(QIODevice::ReadOnly))
+    return QString::null;
 
-	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-	QTextStream t(&f);
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  QTextStream t(&f);
 
-	QTemporaryFile tempFile;
-	tempFile.open();
-	QTextStream temp(&tempFile);
+  QTemporaryFile tempFile;
+  tempFile.open();
+  QTextStream temp(&tempFile);
 
-	for (int i = 0; i < ignoreFirstLines; i++)//skip first 'ignoreFirstLines' lines
-		t.readLine();
+  for (int i = 0; i < ignoreFirstLines; i++)//skip first 'ignoreFirstLines' lines
+    t.readLine();
 
-	bool validCommentString = !commentString.isEmpty();
-	rows = 0;
-	if (maxRows <= 0){//read all valid lines
-        while(!t.atEnd()){//count the number of valid rows
-            QString s = t.readLine();
-            if (validCommentString && s.startsWith(commentString))
-                continue;
+  bool validCommentString = !commentString.isEmpty();
+  rows = 0;
+  if (maxRows <= 0){//read all valid lines
+    while(!t.atEnd()){//count the number of valid rows
+      QString s = t.readLine();
+      if (validCommentString && s.startsWith(commentString))
+        continue;
 
-            rows++;
-            temp << s + "\n";
-            qApp->processEvents(QEventLoop::ExcludeUserInput);
-        }
-	} else {//we write only 'maxRows' valid rows to the temp file
-        while(!t.atEnd() && rows < maxRows){
-            QString s = t.readLine();
-            if (validCommentString && s.startsWith(commentString))
-                continue;
+      rows++;
+      temp << s + "\n";
+      qApp->processEvents(QEventLoop::ExcludeUserInput);
+    }
+  } else {//we write only 'maxRows' valid rows to the temp file
+    while(!t.atEnd() && rows < maxRows){
+      QString s = t.readLine();
+      if (validCommentString && s.startsWith(commentString))
+        continue;
 
-            rows++;
-            temp << s + "\n";
-            qApp->processEvents(QEventLoop::ExcludeUserInput);
-        }
-	}
-	f.close();
+      rows++;
+      temp << s + "\n";
+      qApp->processEvents(QEventLoop::ExcludeUserInput);
+    }
+  }
+  f.close();
 
-	tempFile.setAutoRemove(false);
-	QString path = tempFile.fileName();
-	tempFile.close();
+  tempFile.setAutoRemove(false);
+  QString path = tempFile.fileName();
+  tempFile.close();
 
-	QApplication::restoreOverrideCursor();
-	return path;
+  QApplication::restoreOverrideCursor();
+  return path;
 }
 
 QString MdiSubWindow::parseMacAsciiFile(const QString& fname, const QString &commentString,
-                        				int ignoreFirstLines, int maxRows, int& rows)
+                                        int ignoreFirstLines, int maxRows, int& rows)
 {
-	ifstream f;
- 	f.open(fname.toAscii());
- 	if(!f)
-  		return QString::null;
+  ifstream f;
+  f.open(fname.toAscii());
+  if(!f)
+    return QString::null;
 
-	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-	QTemporaryFile tempFile;
-	tempFile.open();
-	QTextStream temp(&tempFile);
+  QTemporaryFile tempFile;
+  tempFile.open();
+  QTextStream temp(&tempFile);
 
-	for (int i = 0; i < ignoreFirstLines; i++){//skip first 'ignoreFirstLines' lines
-		string s;
-		getline(f, s, '\r');
-	}
+  for (int i = 0; i < ignoreFirstLines; i++){//skip first 'ignoreFirstLines' lines
+    string s;
+    getline(f, s, '\r');
+  }
 
-	bool validCommentString = !commentString.isEmpty();
-	string comment = commentString.ascii();
-	int commentLength = static_cast<int>(comment.size());
-	rows = 0;
-	if (maxRows <= 0){//read all valid lines
-        while(f.good() && !f.eof()){//count the number of valid rows
-            string s;
-            getline(f, s, '\r');
-            if (validCommentString && s.compare(0, commentLength, comment) == 0)
-                continue;
+  bool validCommentString = !commentString.isEmpty();
+  string comment = commentString.ascii();
+  int commentLength = static_cast<int>(comment.size());
+  rows = 0;
+  if (maxRows <= 0){//read all valid lines
+    while(f.good() && !f.eof()){//count the number of valid rows
+      string s;
+      getline(f, s, '\r');
+      if (validCommentString && s.compare(0, commentLength, comment) == 0)
+        continue;
 
-            rows++;
-            temp << QString(s.c_str()) + "\n";
-            qApp->processEvents(QEventLoop::ExcludeUserInput);
-        }
-	} else {//we write only 'maxRows' valid rows to the temp file
-        while(f.good() && !f.eof() && rows < maxRows){
-            string s;
-            getline(f, s, '\r');
-            if (validCommentString && s.compare(0, commentLength, comment) == 0)
-                continue;
+      rows++;
+      temp << QString(s.c_str()) + "\n";
+      qApp->processEvents(QEventLoop::ExcludeUserInput);
+    }
+  } else {//we write only 'maxRows' valid rows to the temp file
+    while(f.good() && !f.eof() && rows < maxRows){
+      string s;
+      getline(f, s, '\r');
+      if (validCommentString && s.compare(0, commentLength, comment) == 0)
+        continue;
 
-            rows++;
-            temp << QString(s.c_str()) + "\n";
-            qApp->processEvents(QEventLoop::ExcludeUserInput);
-        }
-	}
-	f.close();
+      rows++;
+      temp << QString(s.c_str()) + "\n";
+      qApp->processEvents(QEventLoop::ExcludeUserInput);
+    }
+  }
+  f.close();
 
-	tempFile.setAutoRemove(false);
-	QString path = tempFile.fileName();
-	tempFile.close();
+  tempFile.setAutoRemove(false);
+  QString path = tempFile.fileName();
+  tempFile.close();
 
-	QApplication::restoreOverrideCursor();
-	return path;
+  QApplication::restoreOverrideCursor();
+  return path;
 }
 
 /**
