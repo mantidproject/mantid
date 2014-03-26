@@ -197,7 +197,6 @@ bool MdiSubWindow::isFloating() const
 }
 
 /**
- * @brief MdiSubWindow::dock
  */
 void MdiSubWindow::dock()
 {
