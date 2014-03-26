@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h"
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"

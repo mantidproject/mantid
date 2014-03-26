@@ -12,7 +12,6 @@ set ( SRC_FILES
 	src/FuryFit.cpp
 	src/Homer.cpp
 	src/IDATab.cpp
-	src/IO_MuonGrouping.cpp
 	src/Indirect.cpp
 	src/IndirectBayes.cpp
 	src/IndirectBayesTab.cpp
@@ -29,11 +28,12 @@ set ( SRC_FILES
   src/MSDFit.cpp
   src/MantidEV.cpp
   src/MantidEVWorker.cpp
-  src/MuonAnalysis.cpp
-  src/MuonAnalysisFitDataTab.cpp
-  src/MuonAnalysisHelper.cpp
-  src/MuonAnalysisOptionTab.cpp
-  src/MuonAnalysisResultTableTab.cpp
+  src/Muon/IO_MuonGrouping.cpp
+  src/Muon/MuonAnalysis.cpp
+  src/Muon/MuonAnalysisFitDataTab.cpp
+  src/Muon/MuonAnalysisHelper.cpp
+  src/Muon/MuonAnalysisOptionTab.cpp
+  src/Muon/MuonAnalysisResultTableTab.cpp
   src/QtWorkspaceMementoModel.cpp
   src/Quasi.cpp
   src/RawFileMemento.cpp
@@ -70,7 +70,6 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/FuryFit.h
   inc/MantidQtCustomInterfaces/Homer.h
   inc/MantidQtCustomInterfaces/IDATab.h
-  inc/MantidQtCustomInterfaces/IO_MuonGrouping.h
   inc/MantidQtCustomInterfaces/Indirect.h
   inc/MantidQtCustomInterfaces/IndirectBayes.h
   inc/MantidQtCustomInterfaces/IndirectBayesTab.h
@@ -87,11 +86,12 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/MSDFit.h
   inc/MantidQtCustomInterfaces/MantidEV.h
   inc/MantidQtCustomInterfaces/MantidEVWorker.h
-  inc/MantidQtCustomInterfaces/MuonAnalysis.h
-  inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
-  inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
-  inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
-  inc/MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h
+  inc/MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h
+  inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
+  inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
+  inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
+  inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
+  inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
   inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
   inc/MantidQtCustomInterfaces/Quasi.h
   inc/MantidQtCustomInterfaces/RawFileMemento.h
@@ -140,11 +140,11 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
                 inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
-                inc/MantidQtCustomInterfaces/MuonAnalysis.h
-                inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
-                inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
-                inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
-                inc/MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h
+                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
+                inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
+                inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
+                inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
+                inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
                 inc/MantidQtCustomInterfaces/Quasi.h
                 inc/MantidQtCustomInterfaces/ResNorm.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
@@ -169,7 +169,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectMolDyn.ui
                inc/MantidQtCustomInterfaces/IndirectSimulation.ui
                inc/MantidQtCustomInterfaces/JumpFit.ui
-               inc/MantidQtCustomInterfaces/MuonAnalysis.ui
+               inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/Quasi.ui
                inc/MantidQtCustomInterfaces/ResNorm.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui

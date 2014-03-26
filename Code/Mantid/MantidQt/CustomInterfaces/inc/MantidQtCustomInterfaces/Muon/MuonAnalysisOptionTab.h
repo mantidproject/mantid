@@ -6,7 +6,7 @@
 //----------------------
 #include "ui_MuonAnalysis.h"
 
-#include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 namespace MantidQt
 {

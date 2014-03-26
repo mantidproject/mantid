@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidQtCustomInterfaces/MuonAnalysisOptionTab.h"
-#include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include <QLineEdit>
 #include <QSettings>
