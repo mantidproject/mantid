@@ -11,6 +11,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <limits>
+#include <numeric>      // std::accumulate
 
 namespace Mantid {
 namespace DataHandling {
