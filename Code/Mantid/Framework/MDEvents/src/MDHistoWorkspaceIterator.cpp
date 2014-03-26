@@ -12,7 +12,18 @@ namespace Mantid
 {
 namespace MDEvents
 {
-
+  namespace
+    {
+    size_t integerPower(const size_t base, const size_t pow)
+    {
+      size_t result = 1;
+      for(size_t i = 0; i < pow; ++i)
+      {
+        result *= base;
+      }
+      return result;
+    }
+    }
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -137,6 +148,9 @@ namespace MDEvents
       if (!m_function->isPointContained(m_center))
         next();
     }
+
+    auto temp = std::vector<int64_t>(integerPower(3, m_nd), 0);
+    m_permutations.swap(temp);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -363,6 +377,56 @@ namespace MDEvents
   size_t MDHistoWorkspaceIterator::getLinearIndex() const
   {
     return m_pos;
+  }
+
+  /**
+   * Gets indexes of bins/pixels/boxes neighbouring the present iterator location.
+   * The number of neighbour indexes returned will depend upon the dimensionality of the workspace as well as the presence
+   * of boundaries and edges.
+   * @return vector of linear indexes to neighbour locations.
+   */
+  std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexes() const
+  {
+
+    Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker, m_indexMax,
+            m_index);
+
+    int64_t offset = 1;
+    m_permutations[0] = 0;
+    m_permutations[1] = 1;
+    m_permutations[2] = -1;
+
+    // Figure out what possible indexes deltas to generate indexes that are next to the current one.
+    size_t nPermutations = 3;
+    for(size_t j = 1; j < m_nd; ++j)
+    {
+      offset = offset * static_cast<int64_t>( m_ws->getDimension(j-1)->getNBins() );
+      size_t counter = nPermutations;
+      for(size_t k = 0; k <nPermutations; k+=1, counter+=2)
+      {
+        int64_t newVariant = m_permutations[k] + offset;
+        m_permutations[counter] = newVariant;
+        m_permutations[counter+1] = (-1*newVariant);
+      }
+      nPermutations *= 3;
+    }
+
+    // Filter out indexes that are are not actually neighbours.
+    std::vector<size_t> neighbourIndexes; // Accumulate neighbour indexes.
+    for(size_t i = 0; i < nPermutations; ++i)
+    {
+      if (m_permutations[i] == 0)
+      {
+        continue;
+      }
+
+      size_t neighbour_index = m_pos + m_permutations[i];
+      if( neighbour_index < m_max && Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index, m_indexMaker, m_indexMax ) )
+      {
+        neighbourIndexes.push_back(neighbour_index);
+      }
+    }
+    return neighbourIndexes;
   }
 
 } // namespace Mantid

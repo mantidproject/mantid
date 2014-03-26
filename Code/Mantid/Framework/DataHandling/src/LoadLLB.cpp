@@ -1,6 +1,12 @@
 /*WIKI*
- TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
- *WIKI*/
+
+Loads an LLB MIBEMOL TOF NeXus file into a [[Workspace2D]] with the given name.
+
+This loader calculates the elastic peak position (EPP) on the fly.
+
+To date this algorithm only supports the MIBEMOL instrument.
+
+*WIKI*/
 
 #include "MantidDataHandling/LoadLLB.h"
 #include "MantidAPI/FileProperty.h"

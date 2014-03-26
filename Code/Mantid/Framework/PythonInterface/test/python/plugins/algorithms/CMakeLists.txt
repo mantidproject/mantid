@@ -24,6 +24,7 @@ set ( TEST_PY_FILES
   MaskWorkspaceToCalFileTest.py
   MeanTest.py
   MergeCalFilesTest.py
+  PDDetermineCharacterizationsTest.py
   ReflectometryReductionOneTest.py
   ReflectometryReductionOneAutoTest.py
   RetrieveRunInfoTest.py
@@ -37,6 +38,7 @@ set ( TEST_PY_FILES
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
   ExportSampleLogsToCSVFileTest.py
+  ExportExperimentLogTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

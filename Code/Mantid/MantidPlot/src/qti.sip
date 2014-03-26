@@ -487,7 +487,7 @@ private:
   ImageMarker(const ImageMarker&);
 };
 
-class LegendWidget : QObject // : QWidget /PyName=Legend/
+class LegendWidget: QWidget
 {
 %TypeHeaderCode
 #include "src/LegendWidget.h"

@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
+#include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -10,7 +11,6 @@
 #include <vtkFloatArray.h>
 #include <vtkQuad.h>
 #include <vtkCellData.h>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidKernel/ReadLock.h"
 
 using namespace Mantid::API;
@@ -98,7 +98,7 @@ namespace Mantid
           progressUpdating.eventRaised(progressFactor * double(iBox));
 
           Mantid::signal_t signal_normalized= it->getNormalizedSignal();
-          if (!boost::math::isnan( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
+          if (!isSpecial( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
           {
             useBox[iBox] = true;
             signals->InsertNextValue(static_cast<float>(signal_normalized));

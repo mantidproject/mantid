@@ -2,15 +2,9 @@
 #define MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
@@ -21,8 +15,6 @@
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::ConfigService;
-using Mantid::Kernel::Strings::loadFile;
 using namespace testing;
 using ScopedFileHelper::ScopedFile;
 

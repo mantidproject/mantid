@@ -17,7 +17,7 @@ InstrumentName=/entry1/POLDI/name
 ExperimentName=/entry1/title
 StartTime=/entry1/start_time
 #
-ProtonMonitor=/entry1/proton_monitor/data
+#ProtonMonitor=/entry1/proton_monitor/data
 #
 DetdRes=/entry1/POLDI/detector/d_resolution
 DetRadius=/entry1/POLDI/detector/det_radius

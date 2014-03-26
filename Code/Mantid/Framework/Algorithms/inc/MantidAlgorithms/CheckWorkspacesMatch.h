@@ -95,7 +95,7 @@ private:
   void doPeaksComparison(API::IPeaksWorkspace_sptr tws1, API::IPeaksWorkspace_sptr tws2);
   void doTableComparison(API::ITableWorkspace_const_sptr tws1, API::ITableWorkspace_const_sptr tws2);
   void doMDComparison(API::Workspace_sptr w1, API::Workspace_sptr w2);
-  bool checkEventLists(DataObjects::EventWorkspace_const_sptr ews1, DataObjects::EventWorkspace_const_sptr ews2);
+  bool compareEventWorkspaces(DataObjects::EventWorkspace_const_sptr ews1, DataObjects::EventWorkspace_const_sptr ews2);
   bool checkData(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkAxes(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkSpectraMap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
@@ -103,6 +103,11 @@ private:
   bool checkMasking(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkSample(const API::Sample& sample1, const API::Sample& sample2);
   bool checkRunProperties(const API::Run& run1, const API::Run& run2); 
+
+  /// Compare 2 EventsList
+  int compareEventsListInDetails(const DataObjects::EventList &el1, const DataObjects::EventList &el2,
+                        double tolTof, double tolWeight, int64_t tolPulse, bool printdetails,
+                        size_t& numdiffpulse, size_t& numdifftof, size_t& numdiffboth) const;
 
   std::string result; ///< the result string
 

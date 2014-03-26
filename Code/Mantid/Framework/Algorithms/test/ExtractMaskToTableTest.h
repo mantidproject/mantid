@@ -244,6 +244,22 @@ public:
     TS_ASSERT_DELTA(xxmax, 78910.5, 0.0001);
     TS_ASSERT_EQUALS(specstr, expectedspec2);
 
+    // Call algorithm second time with the same arguments
+    ExtractMaskToTable alg1;
+    alg1.initialize();
+
+    // Set up properties
+    alg1.setProperty("InputWorkspace", "TestWorkspace2");
+    alg1.setProperty("MaskTableWorkspace", "MaskTable2");
+    alg1.setProperty("OutputWorkspace", "MaskTable2");
+    alg1.setProperty("XMin", 1234.0);
+    alg1.setProperty("XMax", 12345.6);
+
+    // Execute
+    alg1.execute();
+    // Returns not executed but doesn't crash
+    TS_ASSERT( !alg1.isExecuted() );
+
     // Clean
     AnalysisDataService::Instance().remove("TestWorkspace2");
     AnalysisDataService::Instance().remove("MaskTable2");

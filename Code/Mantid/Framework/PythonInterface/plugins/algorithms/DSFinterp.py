@@ -131,7 +131,7 @@ There are as many splines as dynamical channels. The algorithm gathers the inter
 
 from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory
 from mantid.simpleapi import CloneWorkspace, mtd
-from mantid.kernel import StringListValidator, FloatArrayProperty, FloatArrayLengthValidator, FloatArrayMandatoryValidator, StringArrayProperty, StringArrayMandatoryValidator, Direction, FloatBoundedValidator, logger
+from mantid.kernel import StringListValidator, FloatArrayProperty, FloatArrayLengthValidator, FloatArrayMandatoryValidator, StringArrayProperty, StringArrayMandatoryValidator, Direction, FloatBoundedValidator, logger, EnabledWhenProperty, PropertyCriterion
 
 from pdb import set_trace as tr
 
@@ -152,14 +152,19 @@ class DSFinterp(PythonAlgorithm):
     self.setPropertyGroup('Workspaces', lrg)
     self.setPropertyGroup('LoadErrors', lrg)
     self.setPropertyGroup('ParameterValues', lrg)
+
     self.declareProperty('LocalRegression', True, direction=Direction.Input, doc='Perform running local-regression?')
+    condition = EnabledWhenProperty("LocalRegression", PropertyCriterion.IsDefault)
     self.declareProperty('RegressionWindow', 6, direction=Direction.Input, doc='window size for the running local-regression')
+    self.setPropertySettings("RegressionWindow", condition)
     regtypes = [ 'linear', 'quadratic']
     self.declareProperty('RegressionType', 'quadratic', StringListValidator(regtypes), direction=Direction.Input, doc='type of local-regression; linear and quadratic are available')
+    self.setPropertySettings("RegressionType", condition)
     lrg = 'Running Local Regression Options'
     self.setPropertyGroup('LocalRegression', lrg)
     self.setPropertyGroup('RegressionWindow', lrg)
     self.setPropertyGroup('RegressionType', lrg)
+
     lrg='Output'
     self.declareProperty(FloatArrayProperty('TargetParameters', values=[], ), doc="Parameters to interpolate the structure factor")
     self.declareProperty(StringArrayProperty('OutputWorkspaces', values=[], validator=arrvalidator), doc='list of output workspaces to save the interpolated structure factors')

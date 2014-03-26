@@ -59,7 +59,7 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_sptr &pWS,con
 
   m_Emode = Kernel::DeltaEMode().fromString(dEMode);
 
-  // get raw pointer to Q-transformation (do not delete this pointer!)
+  // get raw pointer to Q-transformation (do not delete this pointer, its held by MDTransfFactory!)
   MDTransfInterface* pQtransf =  MDTransfFactory::Instance().create(QMode).get();
 
   // get number of dimensions this Q transformation generates from the workspace. 
@@ -70,7 +70,18 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_sptr &pWS,con
   this->resizeDimDescriptions(m_NDims);
   // check if all MD dimensions descriptors are set properly
   if(m_NDims!=m_DimNames.size()||m_NDims!=m_DimMin.size())
-    throw(std::invalid_argument(" dimension limits vectors and dimension description vectors inconsistent as have different length"));
+  {
+    if (m_buildingNewWorkspace)
+    {
+      throw(std::invalid_argument(" dimension limits vectors and dimension description vectors inconsistent as have different length"));
+    }
+    else
+    {
+      throw(std::invalid_argument(" dimension limits vectors and dimension description vectors inconsistent as have different length\n"
+                                  " Are you trying to add to existing workspace with convertToMD, which generates workspace with different number of dimensions?"));
+    }
+  
+  }
 
 
   //*********** fill in dimension id-s, dimension units and dimension names
@@ -221,6 +232,7 @@ void  MDWSDescription::checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &N
 MDWSDescription::MDWSDescription(unsigned int nDimensions):
   m_Wtransf(3,3,true),
   m_RotMatrix(9,0),
+  m_buildingNewWorkspace(true),
   m_Emode(Kernel::DeltaEMode::Undefined),
   m_LorentzCorr(false),
   m_coordinateSystem(Mantid::API::None)

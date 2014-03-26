@@ -6,7 +6,9 @@ set ( SRC_FILES
 	src/CentroidPeaks.cpp
 	src/ClearUB.cpp
 	src/CombinePeaksWorkspaces.cpp
+	src/ConnectedComponentLabeling.cpp
 	src/DiffPeaksWorkspaces.cpp
+	src/DisjointElement.cpp
 	src/FilterPeaks.cpp
 	src/FindSXPeaks.cpp
 	src/FindUBUsingFFT.cpp
@@ -14,6 +16,7 @@ set ( SRC_FILES
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
 	src/GoniometerAnglesFromPhiRotation.cpp
+	src/HardThresholdBackground.cpp
 	src/HasUB.cpp
 	src/IndexPeaks.cpp
 	src/IndexSXPeaks.cpp
@@ -21,6 +24,7 @@ set ( SRC_FILES
 	src/LatticeErrors.cpp
 	src/LoadHKL.cpp
 	src/LoadIsawPeaks.cpp
+	src/LoadIsawSpectrum.cpp
 	src/LoadIsawUB.cpp
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
@@ -57,12 +61,15 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
 	inc/MantidCrystal/AnvredCorrection.h
+	inc/MantidCrystal/BackgroundStrategy.h
 	inc/MantidCrystal/CalculatePeaksHKL.h
 	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/ClearUB.h
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
+	inc/MantidCrystal/ConnectedComponentLabeling.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
+	inc/MantidCrystal/DisjointElement.h
 	inc/MantidCrystal/FilterPeaks.h
 	inc/MantidCrystal/FindSXPeaks.h
 	inc/MantidCrystal/FindUBUsingFFT.h
@@ -71,6 +78,7 @@ set ( INC_FILES
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
 	inc/MantidCrystal/GSLFunctions.h
 	inc/MantidCrystal/GoniometerAnglesFromPhiRotation.h
+	inc/MantidCrystal/HardThresholdBackground.h
 	inc/MantidCrystal/HasUB.h
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/IndexSXPeaks.h
@@ -78,6 +86,7 @@ set ( INC_FILES
 	inc/MantidCrystal/LatticeErrors.h
 	inc/MantidCrystal/LoadHKL.h
 	inc/MantidCrystal/LoadIsawPeaks.h
+	inc/MantidCrystal/LoadIsawSpectrum.h
 	inc/MantidCrystal/LoadIsawUB.h
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/NormaliseVanadium.h
@@ -118,7 +127,9 @@ set ( TEST_FILES
 	CentroidPeaksTest.h
 	ClearUBTest.h
 	CombinePeaksWorkspacesTest.h
+	ConnectedComponentLabelingTest.h
 	DiffPeaksWorkspacesTest.h
+	DisjointElementTest.h
 	FilterPeaksTest.h
 	FindSXPeaksTest.h
 	FindUBUsingFFTTest.h
@@ -126,12 +137,14 @@ set ( TEST_FILES
 	FindUBUsingLatticeParametersTest.h
 	FindUBUsingMinMaxDTest.h
 	GoniometerAnglesFromPhiRotationTest.h
+	HardThresholdBackgroundTest.h
 	HasUBTest.h
 	IndexPeaksTest.h
 	IndexSXPeaksTest.h
 	IntegratePeakTimeSlicesTest.h
 	LoadHKLTest.h
 	LoadIsawPeaksTest.h
+        LoadIsawSpectrumTest.h
 	LoadIsawUBTest.h
 	MaskPeaksWorkspaceTest.h
 	NormaliseVanadiumTest.h

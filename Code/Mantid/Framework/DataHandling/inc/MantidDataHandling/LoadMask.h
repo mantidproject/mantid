@@ -6,6 +6,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 
+namespace Poco { namespace XML {
+  class Document;
+  class Element;
+}}
 
 namespace Mantid
 {

@@ -26,8 +26,8 @@ private:
     MOCK_METHOD1(showAsNotIntegrated, void(VecIMDDimension_sptr));
     MOCK_METHOD0(showAsIntegrated, void());
     MOCK_METHOD1(accept, void(DimensionPresenter*));
-    MOCK_CONST_METHOD0(getMinimum, double());
-    MOCK_CONST_METHOD0(getMaximum, double());
+    MOCK_CONST_METHOD0(getMinimum, float());
+    MOCK_CONST_METHOD0(getMaximum, float());
     MOCK_CONST_METHOD0(getNBins, unsigned int());
     MOCK_CONST_METHOD0(getSelectedIndex, unsigned int());
     MOCK_CONST_METHOD0(getIsIntegrated, bool());

@@ -32,16 +32,23 @@ namespace
   PyObject * createAlgorithm(FrameworkManagerImpl & self, const std::string & name, const int version = -1)
   {
     UNUSED_ARG(self);
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name, version);
+    IAlgorithm_sptr alg;
     if( Mantid::PythonInterface::Environment::isInCallStack("PyExec") )
     {
+      alg = AlgorithmManager::Instance().createUnmanaged(name, version);
       alg->setChild(true); // Ensures locking behaves correctly
       alg->setLogging(true);
       alg->setAlwaysStoreInADS(true);
       alg->enableHistoryRecordingForChild(true);
+      alg->initialize();
+    }
+    else
+    {
+      // creating through the manager ensures that observers can listen for things like
+      // progress & cancellation notifications
+      alg = AlgorithmManager::Instance().create(name, version);
     }
     alg->setRethrows(true);
-    alg->initialize();
 
     return converter::shared_ptr_to_python(alg);
   }

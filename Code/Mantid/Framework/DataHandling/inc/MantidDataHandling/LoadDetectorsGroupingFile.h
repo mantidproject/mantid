@@ -7,6 +7,12 @@
 
 #include <fstream>
 
+namespace Poco { namespace XML {
+  class Document;
+  class Element;
+  class Node;
+}}
+
 namespace Mantid
 {
 namespace DataHandling
