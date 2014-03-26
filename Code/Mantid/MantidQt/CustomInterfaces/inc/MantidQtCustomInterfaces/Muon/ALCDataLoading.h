@@ -26,6 +26,8 @@ namespace CustomInterfaces
     virtual std::string firstRun() = 0;
     /// Returns a path to the last run file
     virtual std::string lastRun() = 0;
+    /// Returns the name of the log to use
+    virtual std::string log() = 0;
 
   public slots:
     /// Updates the data displayed by the view
