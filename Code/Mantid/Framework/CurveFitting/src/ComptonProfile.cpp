@@ -59,17 +59,13 @@ namespace CurveFitting
 
   /**
    * Also caches parameters from the instrument
-   * Throws if it is not a MatrixWorkspace
-   * @param ws The workspace set as input
+   * @param workspace The workspace set as input
+   * @param wsIndex A workspace index
+   * @param startX Starting x-vaue (unused).
+   * @param endX Ending x-vaue (unused).
    */
-  //void ComptonProfile::setWorkspace(boost::shared_ptr<const API::Workspace> ws)
   void ComptonProfile::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wsIndex,double startX, double endX)
   {
-    //auto workspace = boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
-    //if(!workspace)
-    //{
-    //  throw std::invalid_argument("ComptonProfile expected an object of type MatrixWorkspace, type=" + ws->id());
-    //}
     auto inst = workspace->getInstrument();
     auto sample = inst->getSample();
     auto source = inst->getSource();
@@ -194,7 +190,6 @@ namespace CurveFitting
    */
   void ComptonProfile::declareAttributes()
   {
-    //declareAttribute(WSINDEX_NAME, IFunction::Attribute(static_cast<int>(m_wsIndex)));
     declareAttribute(MASS_NAME, IFunction::Attribute(m_mass));
   }
 
@@ -205,8 +200,6 @@ namespace CurveFitting
   void ComptonProfile::setAttribute(const std::string& name,const Attribute& value)
   {
     IFunction::setAttribute(name,value); // Make sure the base-class stores it
-    //if(name == WSINDEX_NAME)  m_wsIndex = static_cast<size_t>(value.asInt());
-    //else 
     if(name == MASS_NAME) m_mass = value.asDouble();
   }
 

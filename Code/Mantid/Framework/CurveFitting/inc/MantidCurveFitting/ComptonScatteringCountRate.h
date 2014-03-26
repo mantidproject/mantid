@@ -57,7 +57,6 @@ namespace CurveFitting
     void updateCMatrixValues() const;
 
     /// Cache reference to workspace for use in setupForFit
-    //void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
     void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX);
     /// Cache ptrs to the individual profiles and their parameters
     void cacheFunctions();
