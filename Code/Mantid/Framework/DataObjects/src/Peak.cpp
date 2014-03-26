@@ -322,7 +322,7 @@ namespace DataObjects
     const Geometry::IObjComponent_const_sptr sourceObj = m_inst->getSource();
     if (sourceObj == NULL)
       throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed to get source component from instrument");
-    const Geometry::IObjComponent_const_sptr sampleObj = m_inst->getSample();
+    const Geometry::IComponent_const_sptr sampleObj = m_inst->getSample();
     if (sampleObj == NULL)
       throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed to get sample component from instrument");
 

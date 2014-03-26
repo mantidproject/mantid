@@ -334,7 +334,7 @@ void SaveFocusedXYE::getFocusedPos(Mantid::API::MatrixWorkspace_const_sptr wksp,
     return;
   }
   Geometry::IObjComponent_const_sptr source = instrument->getSource();
-  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+  Geometry::IComponent_const_sptr sample = instrument->getSample();
   if (source == NULL || sample == NULL)
   {
     l1 = 0.;

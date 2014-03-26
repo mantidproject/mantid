@@ -374,20 +374,32 @@ namespace Mantid
     /** Gets a pointer to the Sample Position
      *  @returns a pointer to the Sample Position
      */
-    IObjComponent_const_sptr Instrument::getSample() const
+    IComponent_const_sptr Instrument::getSample() const
     {
       if ( !m_sampleCache )
       {
         g_log.warning("In Instrument::getSamplePos(). No SamplePos has been set.");
-        return IObjComponent_const_sptr(m_sampleCache,NoDeleting());
+        return IComponent_const_sptr(m_sampleCache,NoDeleting());
       }
       else if (m_isParametrized)
       {
-        return IObjComponent_const_sptr(new ObjComponent(static_cast<const Instrument*>(m_base)->m_sampleCache,m_map));
+        auto sampleCache = static_cast<const Instrument*>(m_base)->m_sampleCache;
+        if ( dynamic_cast<const ObjComponent*>(sampleCache) )
+          return IComponent_const_sptr(new ObjComponent(sampleCache,m_map));
+        else if ( dynamic_cast<const CompAssembly*>(sampleCache) )
+          return IComponent_const_sptr(new CompAssembly(sampleCache,m_map));
+        else if ( dynamic_cast<const Component*>(sampleCache) )
+          return IComponent_const_sptr(new Component(sampleCache,m_map));   
+        else
+        {
+          g_log.error("In Instrument::getSamplePos(). SamplePos is not a recognised component type."); 
+          g_log.error("Try to assume it is a Component."); 
+          return IComponent_const_sptr(new ObjComponent(sampleCache,m_map));    
+        }
       }
       else
       {
-        return IObjComponent_const_sptr(m_sampleCache,NoDeleting());
+        return IComponent_const_sptr(m_sampleCache,NoDeleting());
       }
     }
 
@@ -664,7 +676,7 @@ namespace Mantid
      *
      *  @param comp :: Component to be marked (stored for later retrieval) as a "SamplePos" Component
      */
-    void Instrument::markAsSamplePos(const ObjComponent* comp)
+    void Instrument::markAsSamplePos(const IComponent* comp)
     {
       if (m_isParametrized)
         throw std::runtime_error("Instrument::markAsSamplePos() called on a parametrized Instrument object.");
@@ -1021,7 +1033,7 @@ namespace Mantid
       beamline_norm=2.0*beamline.norm();
 
       // Get the distance between the source and the sample (assume in metres)
-      IObjComponent_const_sptr sample = this->getSample();
+      IComponent_const_sptr sample = this->getSample();
       try
       {
         l1 = this->getSource()->getDistance(*sample);
@@ -1138,7 +1150,7 @@ namespace Mantid
     std::vector<IDetector_const_sptr> detectors;
     detectors = getDetectors( detIDs );
 
-    Geometry::IObjComponent_const_sptr sample = getSample();
+    Geometry::IComponent_const_sptr sample = getSample();
     Kernel::V3D sample_pos;
     if(sample) sample_pos = sample->getPos();
 

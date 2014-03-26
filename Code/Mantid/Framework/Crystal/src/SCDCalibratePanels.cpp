@@ -1645,7 +1645,7 @@ namespace Mantid
       IObjComponent_const_sptr source = NewInstrument->getSource();
       updateSourceParams(source, pmap, pmapOld);
 
-      IObjComponent_const_sptr sample = NewInstrument->getSample();
+      IComponent_const_sptr sample = NewInstrument->getSample();
       V3D SamplePos = sample->getPos();
       if( SamplePos != newSampPos)
       {
@@ -1804,7 +1804,7 @@ namespace Mantid
       IObjComponent_const_sptr source = instrument->getSource();
 
       oss3 << "<component-link name=\"" << source->getName() << "\">" << endl;
-      IObjComponent_const_sptr sample = instrument->getSample();
+      IComponent_const_sptr sample = instrument->getSample();
       V3D sourceRelPos = source->getRelativePos();
 
       writeXmlParameter(oss3, "x", sourceRelPos.X());

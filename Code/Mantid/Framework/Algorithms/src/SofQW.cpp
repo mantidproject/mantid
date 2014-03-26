@@ -115,7 +115,7 @@ void SofQW::exec()
 
   // Get the distance between the source and the sample (assume in metres)
   IObjComponent_const_sptr source = instrument->getSource();
-  IObjComponent_const_sptr sample = instrument->getSample();
+  IComponent_const_sptr sample = instrument->getSample();
   V3D beamDir = sample->getPos() - source->getPos();
   beamDir.normalize();
 

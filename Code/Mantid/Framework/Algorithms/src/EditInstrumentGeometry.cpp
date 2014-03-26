@@ -208,7 +208,7 @@ namespace Algorithms
         throw std::runtime_error(errmsg);
       }
       Geometry::IObjComponent_const_sptr source = originstrument->getSource();
-      Geometry::IObjComponent_const_sptr sample = originstrument->getSample();
+      Geometry::IComponent_const_sptr sample = originstrument->getSample();
       l1 = source->getDistance(*sample);
       g_log.information() << "Retrieve L1 from input data workspace. \n";
     }

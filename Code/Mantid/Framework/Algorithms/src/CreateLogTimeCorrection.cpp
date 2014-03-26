@@ -117,7 +117,7 @@ namespace Algorithms
   void CreateLogTimeCorrection::getInstrumentSetup()
   {
     // 1. Get sample position and source position
-    IObjComponent_const_sptr sample = m_instrument->getSample();
+    IComponent_const_sptr sample = m_instrument->getSample();
     if (!sample)
     {
       throw runtime_error("No sample has been set.");

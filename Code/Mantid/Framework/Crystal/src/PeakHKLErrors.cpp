@@ -65,6 +65,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::Geometry::CompAssembly;
 using Mantid::Geometry::IObjComponent_const_sptr;
+using Mantid::Geometry::IComponent_const_sptr;
 
 namespace Mantid
 {
@@ -260,7 +261,7 @@ namespace Mantid
            //------------------"clone" orig instruments pmap -------------------
 
            cLone(  pmap, instSave, pmapSv );
-           IObjComponent_const_sptr sample = instChange->getSample();
+           IComponent_const_sptr sample = instChange->getSample();
            V3D sampPos = sample->getRelativePos();
            V3D sampOffsets( getParameter( "SampleXOffset" ), getParameter( "SampleYOffset" ), getParameter( "SampleZOffset" ) );
 

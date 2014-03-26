@@ -182,7 +182,7 @@ public:
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Z(), -17.0,0.01);
 
-    boost::shared_ptr<const IObjComponent> samplepos = i->getSample();
+    boost::shared_ptr<const IComponent> samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 
@@ -296,7 +296,7 @@ public:
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Z(), -11.016,0.01);
 
-    boost::shared_ptr<const IObjComponent> samplepos = i->getSample();
+    boost::shared_ptr<const IObjComponent> samplepos = boost::dynamic_pointer_cast<const IObjComponent>(i->getSample());
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 

@@ -78,7 +78,7 @@ namespace Mantid
       IObjComponent_const_sptr getSource() const;
       IObjComponent_const_sptr getChopperPoint(const size_t index = 0) const;
       size_t getNumberOfChopperPoints() const;
-      IObjComponent_const_sptr getSample() const;
+      IComponent_const_sptr getSample() const;
       Kernel::V3D getBeamDirection() const;
 
       IDetector_const_sptr getDetector(const detid_t &detector_id) const;
@@ -99,7 +99,7 @@ namespace Mantid
       /// mark a Component which has already been added to the Instrument (as a child comp.)
       /// to be 'the' samplePos Component. For now it is assumed that we have
       /// at most one of these.
-      void markAsSamplePos(const ObjComponent*);
+      void markAsSamplePos(const IComponent*);
 
       /// Marks a Component which already exists in the instrument to the chopper cache
       void markAsChopperPoint(const ObjComponent *comp);
@@ -252,7 +252,7 @@ namespace Mantid
       std::vector<const ObjComponent*> * m_chopperPoints;
 
       /// Purpose to hold copy of samplePos component. For now assumed to be just one component
-      const ObjComponent* m_sampleCache;
+      const IComponent* m_sampleCache;
 
       /// To store info about the parameters defined in IDF. Indexed according to logfile-IDs, which equals logfile filename minus the run number and file extension
       InstrumentParameterCache m_logfileCache;
