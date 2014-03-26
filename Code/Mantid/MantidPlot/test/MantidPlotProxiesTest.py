@@ -144,8 +144,28 @@ class MantidPlotProxiesTest(unittest.TestCase):
         screenshot(g, "convertToWaterfall", "Call to convertToWaterfall() on a workspace.")
         self.try_closing(g, "convertToWaterfall()")
 
-        
-        
+    def test_dock_method_produces_docked_window_on_matrix(self):
+        self.do_dock_test_and_close(importMatrixWorkspace("fake", visible=True))
+
+    def test_dock_method_produces_docked_window_on_1D_graph(self):
+        self.do_dock_test_and_close(plotSpectrum("fake", 0))
+
+    def test_dock_method_produces_docked_window_on_2D_graph(self):
+        mm = importMatrixWorkspace("fake", visible=True)
+        g = mm.plotGraph2D()
+        self.do_dock_test_and_close(g)
+        mm.close()
+
+    def test_dock_method_produces_docked_window_on_instrument_view(self):
+        iv = getInstrumentView("IRS26173")
+        self.do_dock_test_and_close(iv)
+
+    def do_dock_test_and_close(self, win):
+        win.dock()
+        self.assertTrue(win.isDocked())
+        win.close()
+
+
 # Run the unit tests
 mantidplottests.runTests(MantidPlotProxiesTest)
 

@@ -230,6 +230,19 @@ public slots:
   void move(int x, int y);
   void move(const QPoint& pos);
 
+public: //non-slot methods
+  /**@name Floating/Docking */
+  ///@{
+  /// If docked, undock the window out of the MDI area
+  void undock();
+  /// Query if the window is floating
+  bool isFloating() const;
+  /// If floating, dock the window inside the MDI area of the application
+  void dock();
+  /// Query if the window is docked
+  bool isDocked() const;
+  ///@}
+
 signals:
 	//! Emitted when the window was closed
 	void closedWindow(MdiSubWindow *);
@@ -241,12 +254,18 @@ signals:
 	void statusChanged(MdiSubWindow *);
 	//! Show the context menu
 	void showContextMenu();
-	
+	//! Emitted when the window wants to dock to the MDI area
+	void dockToMDIArea(MdiSubWindow *);
+	//! Emitted when the window wants to undock
+	void undockFromMDIArea(MdiSubWindow *);
+
 protected:
 	//! Catches status changes
 	virtual void changeEvent(QEvent *event);
 
 private:
+	/// Default constructor
+	MdiSubWindow();
 	//! Used to parse ASCII files with carriage return ('\r') endline.
 	static QString parseMacAsciiFile(const QString& fname, const QString &commentString,
                         	 int ignoreFirstLines, int maxRows, int& rows);

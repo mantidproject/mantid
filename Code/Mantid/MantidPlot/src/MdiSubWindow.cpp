@@ -65,6 +65,11 @@ MdiSubWindow::MdiSubWindow(ApplicationWindow *app, const QString& label, const Q
   confirmClose(false);
 	if (d_folder)
 		d_folder->addWindow(this);
+	if(app->metaObject()->indexOfSlot(QMetaObject::normalizedSignature("changeToDocked(MdiSubWindow*)")))
+	{
+	  connect(this, SIGNAL(dockToMDIArea(MdiSubWindow*)), app, SLOT(changeToDocked(MdiSubWindow*)));
+	  connect(this, SIGNAL(undockFromMDIArea(MdiSubWindow*)), app, SLOT(changeToFloating(MdiSubWindow*)));
+	}
 }
 
 void MdiSubWindow::updateCaption()
@@ -173,7 +178,38 @@ void MdiSubWindow::move(const QPoint& pos)
   if (pw)
   {
     pw->move( pos );
-  }
+    }
+}
+
+/**
+ */
+void MdiSubWindow::undock()
+{
+  if(isDocked()) emit undockFromMDIArea(this);
+}
+
+/**
+ * @return True if the subwindow is undocked
+ */
+bool MdiSubWindow::isFloating() const
+{
+  return (this->getFloatingWindow() != NULL);
+}
+
+/**
+ * @brief MdiSubWindow::dock
+ */
+void MdiSubWindow::dock()
+{
+  if(isFloating()) emit dockToMDIArea(this);
+}
+
+/**
+ * @return True if the subwindow is docked to the MDI area
+ */
+bool MdiSubWindow::isDocked() const
+{
+  return (this->getDockedWindow() != NULL);
 }
 
 /**
