@@ -24,7 +24,6 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 
 #include <boost/python/object.hpp>
@@ -38,14 +37,17 @@ namespace Mantid
      * and a C++ algorithm.
      *
      * It defines several functions for declaring properties that handle the
-     * fact that the type is only known at runtime
-     *
-     * It works in tandem with the AlgorithmWrapper such that
-     * when the AlgorithmWrapper is exported to Python
-     * a user sees the PythonAlgorithm class.
+     * fact that the type is only known at runtime. The exact base class is
+     * specified as a template to allow flexiblity as to what Algorthm type
+     * is being exported. The type specified by AlgorithmBase should be
+     * API::Algorithm or inherit from the API::Algorithm class
      */
-    class PythonAlgorithm : public API::Algorithm
+    template<typename BaseAlgorithm>
+    class PythonAlgorithm : public BaseAlgorithm
     {
+      /// Convenience typedef to access the base class
+      typedef BaseAlgorithm SuperClass;
+
     public:
       /** @name Property declarations
        * The first function matches the base-classes signature so a different
@@ -70,8 +72,64 @@ namespace Mantid
     ///@}
     private:
       // Hide the base class variants as they are not required on this interface
-      using Mantid::API::Algorithm::declareProperty;
+      using SuperClass::declareProperty;
     };
+
+//    /**
+//     * Declare a preconstructed property.
+//     * @param prop :: A pointer to a property
+//     * @param doc :: An optional doc string
+//     */
+//    template<typename BaseAlgorithm>
+//    void PythonAlgorithm<BaseAlgorithm>::declarePyAlgProperty(Kernel::Property *prop, const std::string & doc)
+//    {
+//      // We need to clone the property so that python doesn't own the object that gets inserted
+//      // into the manager
+//      this->declareProperty(prop->clone(), doc);
+//    }
+
+//    /**
+//     * Declare a property using the type of the defaultValue, a documentation string and validator
+//     * @param name :: The name of the new property
+//     * @param defaultValue :: A default value for the property. The type is mapped to a C++ type
+//     * @param validator :: A validator object
+//     * @param doc :: The documentation string
+//     * @param direction :: The direction of the property
+//     */
+//    template<typename BaseAlgorithm>
+//    void PythonAlgorithm<BaseAlgorithm>::declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
+//                                                              const boost::python::object & validator,
+//                                                              const std::string & doc, const int direction)
+//    {
+//      this->declareProperty(Registry::PropertyWithValueFactory::create(name, defaultValue, validator, direction), doc);
+//    }
+
+//    /**
+//     * Declare a property using the type of the defaultValue and a documentation string
+//     * @param name :: The name of the new property
+//     * @param defaultValue :: A default value for the property. The type is mapped to a C++ type
+//     * @param doc :: The documentation string
+//     * @param direction :: The direction of the property
+//     */
+//    template<typename BaseAlgorithm>
+//    void PythonAlgorithm<BaseAlgorithm>::declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
+//                                                              const std::string & doc, const int direction)
+//    {
+//      this->declareProperty(Registry::PropertyWithValueFactory::create(name, defaultValue, direction), doc);
+//    }
+
+//    /**
+//    * Declare a property using the type of the defaultValue
+//    * @param name :: The name of the new property
+//    * @param defaultValue :: A default value for the property. The type is mapped to a C++ type
+//    * @param direction :: The direction of the property
+//    */
+//    template<typename BaseAlgorithm>
+//    void PythonAlgorithm<BaseAlgorithm>::declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
+//                                                              const int direction)
+//    {
+//      declarePyAlgProperty(name, defaultValue, "", direction);
+//    }
 
   }
 }

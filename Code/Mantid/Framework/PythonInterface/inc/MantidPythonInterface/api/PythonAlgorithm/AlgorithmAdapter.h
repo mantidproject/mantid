@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_ALGORITHMWRAPPER_H_
-#define MANTID_PYTHONINTERFACE_ALGORITHMWRAPPER_H_
+#ifndef MANTID_PYTHONINTERFACE_ALGORITHMADAPTER_H_
+#define MANTID_PYTHONINTERFACE_ALGORITHMADAPTER_H_
 /**
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -24,7 +24,9 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidPythonInterface/api/PythonAlgorithm/PythonAlgorithm.h"
+//#include "MantidPythonInterface/api/PythonAlgorithm/PythonAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
+
 #include "MantidKernel/ClassMacros.h"
 #include <boost/python/wrapper.hpp>
 #include <map>
@@ -36,16 +38,19 @@ namespace Mantid
 
     /**
      * Provides a layer class for boost::python to allow C++ virtual functions
-     * to be overridden in a Python object that is derived from PythonAlgorithm.
+     * to be overridden in a Python object that is derived an Algorithm.
      *
-     * It works in tandem with the PythonAlgorithm class. This is essentially
-     * a transparent layer that handles the function calls up into Python.
+     * The templated-base class provides a mechanism to reuse the same adapter
+     * class for other classes that inherit from a different Algorithm sub class
      */
-    class AlgorithmWrapper : public PythonAlgorithm
+    template<typename BaseAlgorithm>
+    class AlgorithmAdapter : public BaseAlgorithm
     {
+      typedef BaseAlgorithm SuperClass;
+
     public:
       /// A constructor that looks like a Python __init__ method
-      AlgorithmWrapper(PyObject* self);
+      AlgorithmAdapter(PyObject* self);
 
       /** @name Algorithm virtual methods */
       ///@{
@@ -67,21 +72,49 @@ namespace Mantid
       std::map<std::string, std::string> validateInputs();
       ///@}
 
+    public:
+      /** @name Property declarations
+       * The first function matches the base-classes signature so a different
+       * name is used consistently to avoid accidentally calling the wrong function internally
+       * From Python they will still be called declareProperty
+       */
+      ///@{
+      /// Declare a specialized property
+      void declarePyAlgProperty(Kernel::Property *prop, const std::string &doc="");
+      /// Declare a property using the type of the defaultValue with a validator and doc string
+      void declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
+                                 const boost::python::object & validator = boost::python::object(),
+                                 const std::string & doc = "", const int direction = Kernel::Direction::Input);
+
+      /// Declare a property with a documentation string
+      void declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
+                                const std::string & doc, const int direction = Kernel::Direction::Input);
+
+      /// Declare a property using the type of the defaultValue
+      void declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
+                                const int direction);
+      ///@}
+
+
+    protected:
+      /**
+       *  Returns the PyObject that owns this wrapper, i.e. self
+       * @returns A pointer to self
+       */
+      inline PyObject * getSelf() const { return m_self; }
+
     private:
       /// The PyObject must be supplied to construct the object
-      DISABLE_DEFAULT_CONSTRUCT(AlgorithmWrapper);
-      DISABLE_COPY_AND_ASSIGN(AlgorithmWrapper);
+      DISABLE_DEFAULT_CONSTRUCT(AlgorithmAdapter);
+      DISABLE_COPY_AND_ASSIGN(AlgorithmAdapter);
 
       /// Private init for this algorithm
       virtual void init();
       /// Private exec for this algorithm
       virtual void exec();
 
-      /**
-       *  Returns the PyObject that owns this wrapper, i.e. self
-       * @returns A pointer to self
-       */
-      inline PyObject * getSelf() const { return m_self; }
+      // Hide the base class variants as they are not required on this interface
+      using SuperClass::declareProperty;
 
       /// The Python portion of the object
       PyObject *m_self;
@@ -92,4 +125,4 @@ namespace Mantid
 }
 
 
-#endif /* MANTID_PYTHONINTERFACE_ALGORITHMWRAPPER_H_ */
+#endif /* MANTID_PYTHONINTERFACE_ALGORITHMADAPTER_H_ */

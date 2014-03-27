@@ -9,9 +9,9 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 #    definitions occur and some depend on their base classes being exported first -- 
 set ( EXPORT_FILES
   src/Exports/IAlgorithm.cpp
-  src/Exports/Algorithm.cpp
+  src/Exports/AlgorithmProxy.cpp
   src/Exports/DeprecatedAlgorithmChecker.cpp
-  src/Exports/PythonAlgorithmExport.cpp
+  src/Exports/Algorithm.cpp
   src/Exports/AlgorithmFactory.cpp
   src/Exports/AlgorithmManager.cpp
   src/Exports/AnalysisDataService.cpp
@@ -69,7 +69,7 @@ set ( SRC_FILES
   src/FitFunctions/IFunctionAdapter.cpp
   src/FitFunctions/IFunction1DAdapter.cpp
   src/FitFunctions/IPeakFunctionAdapter.cpp
-  src/PythonAlgorithm/AlgorithmWrapper.cpp
+  src/PythonAlgorithm/AlgorithmAdapter.cpp
   src/PythonAlgorithm/PythonAlgorithm.cpp
   src/CloneMatrixWorkspace.cpp
 )
@@ -79,7 +79,7 @@ set ( INC_FILES
   ${HEADER_DIR}/api/FitFunctions/IFunctionAdapter.h
   ${HEADER_DIR}/api/FitFunctions/IFunction1DAdapter.h
   ${HEADER_DIR}/api/FitFunctions/IPeakFunctionAdapter.h
-  ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmWrapper.h
+  ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/PythonAlgorithm.h
   ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h

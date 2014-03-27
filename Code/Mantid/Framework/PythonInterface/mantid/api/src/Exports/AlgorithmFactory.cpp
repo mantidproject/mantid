@@ -74,7 +74,8 @@ GCC_DIAG_OFF(cast-qual)
   {
     Poco::ScopedLock<Poco::Mutex> lock(PYALG_REGISTER_MUTEX);
 
-    static PyObject * const pyAlgClass = (PyObject*)converter::registered<PythonAlgorithm>::converters.to_python_target_type();
+    static PyObject * const pyAlgClass =
+        (PyObject*)converter::registered<Algorithm>::converters.to_python_target_type();
     // obj could be or instance/class, check instance first
     PyObject *classObject(NULL);
     if( PyObject_IsInstance(obj.ptr(), pyAlgClass) )
@@ -87,7 +88,7 @@ GCC_DIAG_OFF(cast-qual)
     }
     else
     {
-      throw std::invalid_argument("Cannot register an algorithm that does not derive from PythonAlgorithm.");
+      throw std::invalid_argument("Cannot register an algorithm that does not derive from Algorithm.");
     }
     boost::python::object classType(handle<>(borrowed(classObject)));
     // Takes ownership of instantiator and replaces any existing algorithm
