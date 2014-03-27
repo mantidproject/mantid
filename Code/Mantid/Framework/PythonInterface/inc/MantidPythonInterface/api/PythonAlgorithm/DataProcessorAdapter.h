@@ -48,6 +48,18 @@ namespace Mantid
 
       // Public access for protected base methods for boost.python to call
       using API::DataProcessorAlgorithm::setLoadAlg;
+      using API::DataProcessorAlgorithm::setLoadAlgFileProp;
+      using API::DataProcessorAlgorithm::setAccumAlg;
+      using API::DataProcessorAlgorithm::determineChunk;
+      using API::DataProcessorAlgorithm::loadChunk;
+      using API::DataProcessorAlgorithm::load;
+      using API::DataProcessorAlgorithm::splitInput;
+      using API::DataProcessorAlgorithm::forwardProperties;
+      using API::DataProcessorAlgorithm::getProcessProperties;
+      using API::DataProcessorAlgorithm::assemble;
+      using API::DataProcessorAlgorithm::saveNexus;
+      using API::DataProcessorAlgorithm::isMainThread;
+      using API::DataProcessorAlgorithm::getNThreads;
 
     private:
       /// The PyObject must be supplied to construct the object
