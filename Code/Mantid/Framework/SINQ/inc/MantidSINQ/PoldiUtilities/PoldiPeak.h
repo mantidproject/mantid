@@ -45,6 +45,12 @@ typedef boost::shared_ptr<PoldiPeak> PoldiPeak_sptr;
 class MANTID_SINQ_DLL PoldiPeak
 {
 public:
+    enum FwhmRelation {
+        AbsoluteQ,
+        AbsoluteD,
+        Relative
+    };
+
     ~PoldiPeak() {}
 
     const MillerIndices& hkl() const;
@@ -54,18 +60,20 @@ public:
     UncertainValue q() const;
     double twoTheta(double lambda) const;
 
-    UncertainValue fwhm() const;
+    UncertainValue fwhm(FwhmRelation relation = AbsoluteQ) const;
     UncertainValue intensity() const;
 
     void setD(UncertainValue d);
     void setQ(UncertainValue q);
     void setIntensity(UncertainValue intensity);
-    void setFwhm(UncertainValue fwhm);
+    void setFwhm(UncertainValue fwhm, FwhmRelation relation = AbsoluteQ);
 
     void multiplyErrors(double factor);
 
     static PoldiPeak_sptr create(UncertainValue qValue);
+    static PoldiPeak_sptr create(double qValue);
     static PoldiPeak_sptr create(UncertainValue qValue, UncertainValue intensity);
+    static PoldiPeak_sptr create(double qValue, double intensity);
     static PoldiPeak_sptr create(MillerIndices hkl, UncertainValue dValue, UncertainValue intensity, UncertainValue fwhm);
 
     static bool greaterThan(const PoldiPeak_sptr &first, const PoldiPeak_sptr &second, UncertainValue (PoldiPeak::*function)() const);
@@ -82,7 +90,7 @@ private:
     UncertainValue m_d;
     UncertainValue m_q;
     UncertainValue m_intensity;
-    UncertainValue m_fwhm;
+    UncertainValue m_fwhmRelative;
 };
 
 }

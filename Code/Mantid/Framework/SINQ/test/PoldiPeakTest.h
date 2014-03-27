@@ -111,11 +111,20 @@ public:
 
         peak->setFwhm(UncertainValue(0.01, 0.001));
         UncertainValue fwhm = peak->fwhm();
+        std::cout << fwhm.value() << " " << fwhm.error() << std::endl;
         TS_ASSERT_EQUALS(fwhm.value(), 0.01);
         TS_ASSERT_EQUALS(fwhm.error(), 0.001);
 
         double doubleFwhm = peak->fwhm();
         TS_ASSERT_EQUALS(doubleFwhm, 0.01);
+
+        UncertainValue fwhmD = peak->fwhm(PoldiPeak::AbsoluteD);
+        TS_ASSERT_EQUALS(fwhmD.value(), 0.02 * M_PI);
+        TS_ASSERT_EQUALS(fwhmD.error(), 0.002 * M_PI);
+
+        UncertainValue fwhmRel = peak->fwhm(PoldiPeak::Relative);
+        TS_ASSERT_EQUALS(fwhmRel.value(), 0.01);
+        TS_ASSERT_EQUALS(fwhmRel.error(), 0.001);
     }
 
     void testSetHKL()
