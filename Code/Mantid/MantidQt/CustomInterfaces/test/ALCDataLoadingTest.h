@@ -18,7 +18,7 @@ public:
   MOCK_METHOD0(firstRun, std::string());
   MOCK_METHOD0(lastRun, std::string());
   MOCK_METHOD0(log, std::string());
-  MOCK_METHOD1(setData, void(MatrixWorkspace_const_sptr));
+  MOCK_METHOD1(displayData, void(MatrixWorkspace_const_sptr));
 
   void requestLoading() { emit loadData(); }
 };
@@ -26,7 +26,7 @@ public:
 class ALCDataLoadingTest : public CxxTest::TestSuite
 {
   MockALCDataLoadingView* m_view;
-  ALCDataLoading* m_dataLoading;
+  ALCDataLoadingPresenter* m_dataLoading;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -42,7 +42,7 @@ public:
   void setUp()
   {
     m_view = new MockALCDataLoadingView();
-    m_dataLoading = new ALCDataLoading(m_view);
+    m_dataLoading = new ALCDataLoadingPresenter(m_view);
     TS_ASSERT_THROWS_NOTHING(m_dataLoading->initialize());
   }
 
@@ -59,7 +59,7 @@ public:
     EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
     EXPECT_CALL(*m_view, lastRun()).WillRepeatedly(Return("MUSR00015191.nxs"));
     EXPECT_CALL(*m_view, log()).WillRepeatedly(Return("sample_magn_field"));
-    EXPECT_CALL(*m_view, setData(_)).Times(1).WillOnce(SaveArg<0>(&loadedWs));
+    EXPECT_CALL(*m_view, displayData(_)).Times(1).WillOnce(SaveArg<0>(&loadedWs));
 
     m_view->requestLoading();
 

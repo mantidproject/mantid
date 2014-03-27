@@ -11,27 +11,27 @@ namespace CustomInterfaces
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  ALCDataLoading::ALCDataLoading(IALCDataLoadingView* view)
+  ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView* view)
     : m_view(view)
   {}
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  ALCDataLoading::~ALCDataLoading()
+  ALCDataLoadingPresenter::~ALCDataLoadingPresenter()
   {}
 
-  void ALCDataLoading::initialize()
+  void ALCDataLoadingPresenter::initialize()
   {
     connectView();
   }
 
-  void ALCDataLoading::connectView()
+  void ALCDataLoadingPresenter::connectView()
   {
     connect(m_view, SIGNAL(loadData()), SLOT(loadData()));
   }
 
-  void ALCDataLoading::loadData()
+  void ALCDataLoadingPresenter::loadData()
   {
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
     alg->setChild(true); // Don't want workspaces in the ADS

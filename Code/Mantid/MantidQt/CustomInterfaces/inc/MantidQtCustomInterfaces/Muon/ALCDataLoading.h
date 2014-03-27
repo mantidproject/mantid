@@ -31,7 +31,7 @@ namespace CustomInterfaces
 
   public slots:
     /// Updates the data displayed by the view
-    virtual void setData(MatrixWorkspace_const_sptr data) = 0;
+    virtual void displayData(MatrixWorkspace_const_sptr data) = 0;
 
   signals:
     /// Request to load data
@@ -41,13 +41,13 @@ namespace CustomInterfaces
   /**
    * Presenter
    */
-  class MANTIDQT_CUSTOMINTERFACES_DLL ALCDataLoading : public QObject
+  class MANTIDQT_CUSTOMINTERFACES_DLL ALCDataLoadingPresenter : public QObject
   {
     Q_OBJECT
 
   public:
-    ALCDataLoading(IALCDataLoadingView* view);
-    virtual ~ALCDataLoading();
+    ALCDataLoadingPresenter(IALCDataLoadingView* view);
+    virtual ~ALCDataLoadingPresenter();
 
     void initialize();
 
