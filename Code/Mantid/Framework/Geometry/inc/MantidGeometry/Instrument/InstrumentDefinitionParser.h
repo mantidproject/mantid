@@ -178,9 +178,6 @@ namespace Geometry
     /// This method return this sequence as a xml string
     std::string convertLocationsElement(const Poco::XML::Element* pElem);
 
-    /// Just to avoid replication of code here throw text string to throw when too many 'end' attribute of \<locations\> tag
-    std::string throwTooManyEndAttributeInLocations(const std::string& tx1, const std::string& tx2);
-
 public: //for testing
     /// return absolute position of point which is set relative to the
     /// coordinate system of the input component
