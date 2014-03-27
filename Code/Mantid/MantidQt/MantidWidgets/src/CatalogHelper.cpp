@@ -188,6 +188,15 @@ namespace MantidQt
      */
     bool CatalogHelper::isValidCatalogLogin()
     {
+      auto catalogAlgorithm = createCatalogAlgorithm("CatalogLogin");
+      API::InterfaceManager interface;
+      auto loginDialog = interface.createDialog(catalogAlgorithm.get());
+
+      if(loginDialog->exec() == QDialog::Accepted)
+      {
+        if (catalogAlgorithm->execute()) return true;
+      }
+      return false;
     }
 
     /**
@@ -195,6 +204,14 @@ namespace MantidQt
      */
     void CatalogHelper::catalogPublishDialog()
     {
+      auto catalogAlgorithm = createCatalogAlgorithm("CatalogPublish");
+      API::InterfaceManager interface;
+      auto publishDialog = interface.createDialog(catalogAlgorithm.get());
+
+      if(publishDialog->exec() == QDialog::Accepted)
+      {
+        executeAsynchronously(catalogAlgorithm);
+      }
     }
 
     /**
