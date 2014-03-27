@@ -12,6 +12,7 @@ set ( EXPORT_FILES
   src/Exports/AlgorithmProxy.cpp
   src/Exports/DeprecatedAlgorithmChecker.cpp
   src/Exports/Algorithm.cpp
+  src/Exports/DataProcessorAlgorithm.cpp
   src/Exports/AlgorithmFactory.cpp
   src/Exports/AlgorithmManager.cpp
   src/Exports/AnalysisDataService.cpp
@@ -70,6 +71,7 @@ set ( SRC_FILES
   src/FitFunctions/IFunction1DAdapter.cpp
   src/FitFunctions/IPeakFunctionAdapter.cpp
   src/PythonAlgorithm/AlgorithmAdapter.cpp
+  src/PythonAlgorithm/DataProcessorAdapter.cpp
   src/PythonAlgorithm/PythonAlgorithm.cpp
   src/CloneMatrixWorkspace.cpp
 )
@@ -80,6 +82,7 @@ set ( INC_FILES
   ${HEADER_DIR}/api/FitFunctions/IFunction1DAdapter.h
   ${HEADER_DIR}/api/FitFunctions/IPeakFunctionAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmAdapter.h
+  ${HEADER_DIR}/api/PythonAlgorithm/DataProcessorAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/PythonAlgorithm.h
   ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h

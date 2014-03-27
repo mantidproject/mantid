@@ -3,6 +3,7 @@
 #include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 #include "MantidPythonInterface/kernel/Environment/Threading.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/dict.hpp>
@@ -253,10 +254,12 @@ namespace Mantid
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
-    // Concete instantiation
+    // Concete instantiations (avoids definitions being all in the headers)
     //-----------------------------------------------------------------------------------------------------------------------------
     /// API::Algorithm as base
     template class AlgorithmAdapter<API::Algorithm>;
+    /// API::DataProcesstor as base
+    template class AlgorithmAdapter<API::DataProcessorAlgorithm>;
 
   }
 }
