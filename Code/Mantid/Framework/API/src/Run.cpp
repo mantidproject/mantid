@@ -476,8 +476,19 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   {
     for (size_t i=0; i < m_goniometer.getNumberAxes(); ++i)
     {
-      const double angle = getLogAsSingleValue(m_goniometer.getAxis(i).name, Kernel::Math::Mean);
-      m_goniometer.setRotationAngle(i, angle);
+      const double minAngle = getLogAsSingleValue(m_goniometer.getAxis(i).name, Kernel::Math::Minimum);
+      const double maxAngle = getLogAsSingleValue(m_goniometer.getAxis(i).name, Kernel::Math::Maximum);
+      // Use last angle if angle is changing too much (DAS problem)
+      if(abs(maxAngle-minAngle) < 1.0)
+      {
+    	  const double angle = getLogAsSingleValue(m_goniometer.getAxis(i).name, Kernel::Math::Mean);
+    	  m_goniometer.setRotationAngle(i, angle);
+      }
+      else
+      {
+    	  const double lastAngle = getLogAsSingleValue(m_goniometer.getAxis(i).name, Kernel::Math::LastValue);
+    	  m_goniometer.setRotationAngle(i, lastAngle);
+      }
     }
   }
 
