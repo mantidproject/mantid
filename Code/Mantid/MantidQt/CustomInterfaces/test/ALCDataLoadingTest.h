@@ -16,6 +16,12 @@ using namespace testing;
 class MockALCDataLoadingView : public IALCDataLoadingView
 {
 public:
+  MockALCDataLoadingView()
+    : m_presenter(this)
+  {
+    m_presenter.initialize();
+  }
+
   MOCK_METHOD0(firstRun, std::string());
   MOCK_METHOD0(lastRun, std::string());
   MOCK_METHOD0(log, std::string());
@@ -23,6 +29,9 @@ public:
   MOCK_METHOD1(displayError, void(const std::string&));
 
   void requestLoading() { emit loadData(); }
+
+private:
+  ALCDataLoadingPresenter m_presenter;
 };
 
 class ALCDataLoadingTest : public CxxTest::TestSuite
@@ -44,14 +53,11 @@ public:
   void setUp()
   {
     m_view = new MockALCDataLoadingView();
-    m_dataLoading = new ALCDataLoadingPresenter(m_view);
-    TS_ASSERT_THROWS_NOTHING(m_dataLoading->initialize());
   }
 
   void tearDown()
   {
     delete m_view;
-    delete m_dataLoading;
   }
 
   void test_basicLoading()
