@@ -7,7 +7,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 
-#include "MantidQtCustomInterfaces/Muon/ALCDataLoading.h"
+#include "MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h"
+#include "MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
@@ -19,6 +20,7 @@ public:
   MOCK_METHOD0(lastRun, std::string());
   MOCK_METHOD0(log, std::string());
   MOCK_METHOD1(displayData, void(MatrixWorkspace_const_sptr));
+  MOCK_METHOD1(displayError, void(const std::string&));
 
   void requestLoading() { emit loadData(); }
 };
@@ -74,6 +76,17 @@ public:
     TS_ASSERT_DELTA(loadedWs->readY(0)[0], 0.150, 1E-3);
     TS_ASSERT_DELTA(loadedWs->readY(0)[1], 0.142, 1E-3);
     TS_ASSERT_DELTA(loadedWs->readY(0)[2], 0.128, 1E-3);
+  }
+
+  void test_errorHandling()
+  {
+    EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
+    EXPECT_CALL(*m_view, lastRun()).WillRepeatedly(Return("non-existent-file"));
+    EXPECT_CALL(*m_view, log()).WillRepeatedly(Return("sample_magn_field"));
+    EXPECT_CALL(*m_view, displayData(_)).Times(0);
+    EXPECT_CALL(*m_view, displayError(_)).Times(1);
+
+    m_view->requestLoading();
   }
 };
 
