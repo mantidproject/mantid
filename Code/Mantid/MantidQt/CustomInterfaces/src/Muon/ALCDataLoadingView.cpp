@@ -40,6 +40,13 @@ namespace CustomInterfaces
     QMessageBox::critical(m_widget, "Loading error", QString::fromStdString(error));
   }
 
+  void ALCDataLoadingView::preparePlot()
+  {
+    m_ui.dataPlot->setCanvasBackground(Qt::white);
+    m_ui.dataPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
+    m_ui.dataPlot->setAxisFont(QwtPlot::yLeft, m_widget->font());
+  }
+
   ALCDataLoadingView::ALCDataLoadingView(QWidget* widget)
     : m_dataLoading(this), m_widget(widget)
   {
@@ -48,6 +55,8 @@ namespace CustomInterfaces
     m_ui.setupUi(m_widget);
 
     connect(m_ui.load, SIGNAL(pressed()), this, SIGNAL(loadData()));
+
+    preparePlot();
   }
 
 } // namespace CustomInterfaces

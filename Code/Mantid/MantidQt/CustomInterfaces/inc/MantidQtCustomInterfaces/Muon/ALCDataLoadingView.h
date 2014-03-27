@@ -52,6 +52,8 @@ namespace CustomInterfaces
     void displayError(const std::string &error);
 
   private:
+    void preparePlot();
+
     ALCDataLoadingPresenter m_dataLoading;
     Ui::ALCDataLoadingView m_ui;
     QWidget* const m_widget;

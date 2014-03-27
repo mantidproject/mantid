@@ -148,7 +148,6 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
                 inc/MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h
-                inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h
                 inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
