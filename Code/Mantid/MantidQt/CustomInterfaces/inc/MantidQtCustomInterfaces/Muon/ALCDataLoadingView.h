@@ -7,7 +7,7 @@
 #include "MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h"
 #include "MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h"
 
-#include "ui_ALCDataLoading.h"
+#include "ui_ALCDataLoadingView.h"
 
 namespace MantidQt
 {
@@ -53,7 +53,7 @@ namespace CustomInterfaces
 
   private:
     ALCDataLoadingPresenter m_dataLoading;
-    Ui::ALCDataLoading m_ui;
+    Ui::ALCDataLoadingView m_ui;
     QWidget* const m_widget;
   };
 

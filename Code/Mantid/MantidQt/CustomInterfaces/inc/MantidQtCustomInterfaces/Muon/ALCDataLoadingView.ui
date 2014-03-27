@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ALCDataLoading</class>
- <widget class="QWidget" name="ALCDataLoading">
+ <class>ALCDataLoadingView</class>
+ <widget class="QWidget" name="ALCDataLoadingView">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -19,7 +19,7 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QGroupBox" name="dataGroup">
@@ -102,11 +102,18 @@
        </item>
       </layout>
      </widget>
-     <widget class="QTextBrowser" name="result"/>
+     <widget class="QwtPlot" name="dataPlot"/>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QwtPlot</class>
+   <extends>QFrame</extends>
+   <header>qwt_plot.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

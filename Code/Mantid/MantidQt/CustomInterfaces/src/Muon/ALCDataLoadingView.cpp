@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h"
 
 #include <QMessageBox>
+#include <qwt_plot_curve.h>
 
 namespace MantidQt
 {
@@ -23,14 +24,15 @@ namespace CustomInterfaces
 
   void ALCDataLoadingView::displayData(MatrixWorkspace_const_sptr data)
   {
-    std::ostringstream wsView;
+    using Mantid::MantidVec;
+    const MantidVec& dataX = data->readX(0);
+    const MantidVec& dataY = data->readY(0);
 
-    for ( size_t i = 0; i < data->blocksize(); ++i )
-    {
-      wsView << data->readY(0)[i] << std::endl;
-    }
+    QwtPlotCurve* curve = new QwtPlotCurve();
+    curve->setData(&dataX[0], &dataY[0], static_cast<int>(data->blocksize()));
+    curve->attach(m_ui.dataPlot);
 
-    m_ui.result->setText(QString::fromStdString(wsView.str()));
+    m_ui.dataPlot->replot();
   }
 
   void ALCDataLoadingView::displayError(const std::string& error)
