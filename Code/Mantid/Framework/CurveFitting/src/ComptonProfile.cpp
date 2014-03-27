@@ -66,6 +66,9 @@ namespace CurveFitting
    */
   void ComptonProfile::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wsIndex,double startX, double endX)
   {
+    UNUSED_ARG(startX);
+    UNUSED_ARG(endX);
+
     auto inst = workspace->getInstrument();
     auto sample = inst->getSample();
     auto source = inst->getSource();
