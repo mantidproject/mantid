@@ -44,7 +44,7 @@ class MANTID_SINQ_DLL UncertainValue
 {
 public:
     UncertainValue();
-    UncertainValue(double value);
+    explicit UncertainValue(double value);
     UncertainValue(double value, double error);
     ~UncertainValue() {}
 
