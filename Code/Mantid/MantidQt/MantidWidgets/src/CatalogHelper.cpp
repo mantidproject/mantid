@@ -183,6 +183,21 @@ namespace MantidQt
     }
 
     /**
+     * Opens auto-generated dialog, and executes the catalog login algorithm.
+     * Returns true if login was a success.
+     */
+    bool CatalogHelper::isValidCatalogLogin()
+    {
+    }
+
+    /**
+     * Creates a publishing dialog GUI and runs the publishing algorithm when "Run" is pressed.
+     */
+    void CatalogHelper::catalogPublishDialog()
+    {
+    }
+
+    /**
      * Obtain the algorithm documentation for the given property.
      * @param properties :: A list of properties for a provided algorithm.
      * @param name       :: The name of the property to search for.
