@@ -192,6 +192,7 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/Message.h"
 
+#include "MantidQtMantidWidgets/CatalogHelper.h"
 #include "MantidQtMantidWidgets/CatalogSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
@@ -17468,7 +17469,7 @@ void ApplicationWindow::panOnPlot()
 void ApplicationWindow::CatalogLogin()
 {
   // Executes the catalog login algorithm, and returns true if user can login.
-  if (mantidUI->isValidCatalogLogin())
+  if (MantidQt::MantidWidgets::CatalogHelper().isValidCatalogLogin())
   {
     icat->addAction(actionCatalogSearch);
     icat->addAction(actionCatalogPublish);
@@ -17493,7 +17494,7 @@ void ApplicationWindow::CatalogSearch()
 
 void ApplicationWindow::CatalogPublish()
 {
-  mantidUI->catalogPublishDialog();
+  MantidQt::MantidWidgets::CatalogHelper().catalogPublishDialog();
 }
 
 void ApplicationWindow::CatalogLogout()
