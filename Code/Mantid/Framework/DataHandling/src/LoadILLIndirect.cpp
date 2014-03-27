@@ -351,9 +351,7 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry, std::vecto
 	  progress.report();
   }
 
-
-
-}
+}// LoadILLIndirect::loadDataIntoTheWorkSpace
 
 
 
@@ -581,6 +579,9 @@ void LoadILLIndirect::loadNexusEntriesIntoProperties(std::string nexusfilename) 
         throw Kernel::Exception::FileError("Unable to open File:" , nexusfilename);
     }
     rl_build_properties(nxfileID, runDetails, nexusfilename, nexusfilename, 0);
+
+    // Add also "Facility", as asked
+    runDetails.addProperty("Facility", std::string("ILL"));
 
     stat=NXclose(&nxfileID);
 }
