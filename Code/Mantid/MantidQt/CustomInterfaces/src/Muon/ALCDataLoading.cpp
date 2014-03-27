@@ -6,7 +6,7 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-
+  DECLARE_SUBWINDOW(ALCInterface);
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -42,7 +42,49 @@ namespace CustomInterfaces
     alg->execute();
 
     MatrixWorkspace_const_sptr result = alg->getProperty("OutputWorkspace");
-    m_view->setData(result);
+    m_view->displayData(result);
+  }
+
+  std::string ALCDataLoadingView::firstRun()
+  {
+    return m_ui.firstRun->text().toStdString();
+  }
+
+  std::string ALCDataLoadingView::lastRun()
+  {
+    return m_ui.lastRun->text().toStdString();
+  }
+
+  std::string ALCDataLoadingView::log()
+  {
+    return m_ui.log->text().toStdString();
+  }
+
+  void ALCDataLoadingView::displayData(MatrixWorkspace_const_sptr data)
+  {
+    std::ostringstream wsView;
+
+    for ( size_t i = 0; i < data->blocksize(); ++i )
+    {
+      wsView << data->readY(0)[i] << std::endl;
+    }
+
+    m_ui.result->setText(QString::fromStdString(wsView.str()));
+  }
+
+  ALCDataLoadingView::ALCDataLoadingView(QWidget* widget)
+    : m_dataLoading(this)
+  {
+    m_dataLoading.initialize();
+
+    m_ui.setupUi(widget);
+
+    connect(m_ui.load, SIGNAL(pressed()), this, SIGNAL(loadData()));
+  }
+
+  void ALCInterface::initLayout()
+  {
+    new ALCDataLoadingView(this);
   }
 
 } // namespace CustomInterfaces

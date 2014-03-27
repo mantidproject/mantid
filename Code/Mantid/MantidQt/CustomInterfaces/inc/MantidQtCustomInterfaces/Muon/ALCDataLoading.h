@@ -7,12 +7,18 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtAPI/UserSubWindow.h"
+
+#include "ui_ALCDataLoading.h"
+
+using namespace Mantid::API;
 
 namespace MantidQt
 {
+  using namespace API;
+
 namespace CustomInterfaces
 {
-  using namespace Mantid::API;
 
   /**
    * View interface
@@ -61,6 +67,34 @@ namespace CustomInterfaces
   private slots:
     /// Load new data and update the view accordingly
     void loadData();
+  };
+
+  /**
+   * Widget ALC Data Loading view implementation
+   */
+  class MANTIDQT_CUSTOMINTERFACES_DLL ALCDataLoadingView : public IALCDataLoadingView
+  {
+  public:
+    ALCDataLoadingView(QWidget* widget);
+
+    std::string firstRun();
+    std::string lastRun();
+    std::string log();
+
+    void displayData(MatrixWorkspace_const_sptr data);
+
+  private:
+    ALCDataLoadingPresenter m_dataLoading;
+    Ui::ALCDataLoading m_ui;
+  };
+
+  class MANTIDQT_CUSTOMINTERFACES_DLL ALCInterface : public UserSubWindow
+  {
+  public:
+    static std::string name() { return "ALC Data Loading"; }
+    static QString categoryInfo() { return "Muon"; }
+  protected:
+    void initLayout();
   };
 
 } // namespace CustomInterfaces

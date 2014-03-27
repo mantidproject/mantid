@@ -172,6 +172,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectMolDyn.ui
                inc/MantidQtCustomInterfaces/IndirectSimulation.ui
                inc/MantidQtCustomInterfaces/JumpFit.ui
+               inc/MantidQtCustomInterfaces/Muon/ALCDataLoading.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/Quasi.ui
                inc/MantidQtCustomInterfaces/ResNorm.ui
