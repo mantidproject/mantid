@@ -324,7 +324,7 @@ namespace MDEvents
 
    /** The method to convert events in a box into a table of coodrinates/signal/errors casted into coord_t type 
      *   Used to save events from plain binary file
-     *   @returns coordTable -- vector of events parameters
+     *   @returns coordTable -- vector of events parameters in the form signal, error, [detID,rinId], eventsCoordinates....
      *   @return nColumns    -- number of parameters for each event
      */
   TMDE(

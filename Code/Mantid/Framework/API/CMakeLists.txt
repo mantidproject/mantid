@@ -67,7 +67,7 @@ set ( SRC_FILES
 	src/ImmutableCompositeFunction.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
-	src/ImplictFunctionFactory.cpp
+	src/ImplicitFunctionFactory.cpp
 	src/InstrumentDataService.cpp
 	src/JointDomain.cpp
 	src/LinearScale.cpp

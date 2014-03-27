@@ -142,8 +142,9 @@ void PropertyHandler::init()
     }
   }
 
-  m_browser->m_changeSlotsEnabled = true;
+  onFunctionStructChanged();
 
+  m_browser->m_changeSlotsEnabled = true;
 }
 
 /**
@@ -478,6 +479,9 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
   }
   m_browser->setFocus();
   m_browser->setCurrentFunction(h);
+
+  onFunctionStructChanged();
+
   return h;
 }
 
@@ -504,6 +508,7 @@ void PropertyHandler::removeFunction()
       }
     }
     ph->renameChildren();
+    ph->onFunctionStructChanged();
   }
 }
 
@@ -568,6 +573,41 @@ QString PropertyHandler::functionPrefix()const
     return pref + "f" + QString::number(iFun);
   }
   return "";
+}
+
+/**
+ * For non-composite functions is equal to function()->name().
+ * @return High-level structure string, e.g. ((Gaussian * Lorentzian) + FlatBackground)
+ */
+QString PropertyHandler::functionStructure() const
+{
+  if ( m_cf && (m_cf->name() == "CompositeFunction" || m_cf->name() == "ProductFunction") )
+  {
+    QStringList children;
+
+    for (size_t i = 0; i < m_cf->nFunctions(); ++i)
+    {
+      children << getHandler(i)->functionStructure();
+    }
+
+    if ( children.empty() )
+    {
+      return QString::fromStdString("Empty " + m_cf->name());
+    }
+
+    QChar op('+');
+
+    if (m_cf->name() == "ProductFunction")
+    {
+      op = '*';
+    }
+
+    return QString("(%1)").arg(children.join(' ' + op + ' '));
+  }
+  else
+  {
+    return QString::fromStdString(function()->name());
+  }
 }
 
 // Return the parent handler
@@ -1483,6 +1523,17 @@ void PropertyHandler::plotRemoved()
   m_hasPlot = false;
 }
 
+void PropertyHandler::onFunctionStructChanged()
+{
+  // Update structural tooltip of oneself
+  m_item->property()->setToolTip(functionStructure());
+
+  // If is handler of child function, make sure ancestors are updated as well
+  if (PropertyHandler* h = parentHandler())
+  {
+    h->onFunctionStructChanged();
+  }
+}
 
 /**
  * Remove all plots including children's

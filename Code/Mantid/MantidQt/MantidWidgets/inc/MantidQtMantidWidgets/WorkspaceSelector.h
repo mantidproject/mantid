@@ -67,7 +67,7 @@ namespace MantidWidgets
     Q_PROPERTY(bool Optional READ isOptional WRITE setOptional)
     Q_PROPERTY(QStringList Suffix READ getSuffixes WRITE setSuffixes)
     Q_PROPERTY(QString Algorithm READ getValidatingAlgorithm WRITE setValidatingAlgorithm)
-
+    friend class DataSelector;
   public:
     /// Default Constructor
     WorkspaceSelector(QWidget *parent = NULL, bool init = true);
@@ -96,6 +96,12 @@ namespace MantidWidgets
 
     bool checkEligibility(const QString & name, Mantid::API::Workspace_sptr object) const;
     bool hasValidSuffix(const QString& name) const;
+      
+  protected:
+      //Method for handling drop events
+      void dropEvent(QDropEvent *);
+      //called when a drag event enters the class
+      void dragEnterEvent(QDragEnterEvent *);
 
   private:
     /// Poco Observers for ADS Notifications
@@ -120,7 +126,6 @@ namespace MantidWidgets
 
     // Algorithm to validate against
     boost::shared_ptr<Mantid::API::Algorithm> m_algorithm;
-
   };
 
 }

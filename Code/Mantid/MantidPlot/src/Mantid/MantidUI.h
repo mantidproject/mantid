@@ -141,7 +141,7 @@ public:
   Mantid::API::Workspace_const_sptr getWorkspace(const QString& workspaceName);
 
   // Deletes workspace from QtiPlot
-  bool deleteWorkspace(const QString& workspaceName);
+  void deleteWorkspace(const QString& workspaceName);
 
   // Returns the name of selected workspace in exploreMantid window
   QString getSelectedWorkspaceName();

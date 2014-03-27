@@ -95,40 +95,6 @@ namespace Mantid
       this->setOptionalMessage("Calculates the background due to gamma rays produced when neutrons are absorbed by shielding.");
     }
 
-    bool inline CalculateGammaBackground::calculateBackground(size_t inputIndex,size_t outputIndex)
-    {
-      m_backgroundWS->setX(outputIndex,m_inputWS->refX(inputIndex));
-      m_correctedWS->setX(outputIndex,m_inputWS->refX(inputIndex));
-      try
-      {
-        const auto * inSpec = m_inputWS->getSpectrum(inputIndex);
-        const specid_t spectrumNo(inSpec->getSpectrumNo());
-        m_backgroundWS->getSpectrum(outputIndex)->copyInfoFrom(*inSpec);
-        m_correctedWS->getSpectrum(outputIndex)->copyInfoFrom(*inSpec);
-
-        if(spectrumNo >= FORWARD_SCATTER_SPECMIN && spectrumNo <= FORWARD_SCATTER_SPECMAX )
-        {
-          applyCorrection(inputIndex,outputIndex);
-        }
-        else
-        {
-
-          g_log.information("Spectrum " + boost::lexical_cast<std::string>(spectrumNo) + " not in forward scatter range. Skipping correction.");
-          // Leave background at 0 and just copy data to corrected
-          m_correctedWS->dataY(outputIndex) = m_inputWS->readY(inputIndex);
-
-        }
-        return true;
-      }
-      catch(Exception::NotFoundError &)
-      {
-        return false;
-      }
-
-
-
-    }
-
     void CalculateGammaBackground::init()
     {
 
@@ -161,28 +127,68 @@ namespace Mantid
       m_progress = new Progress(this, 0.0, 1.0, nreports);
 
       PARALLEL_FOR3(m_inputWS, m_correctedWS, m_backgroundWS)
-        for(int64_t i = 0; i < nhist; ++i)
+      for(int64_t i = 0; i < nhist; ++i)
+      {
+        PARALLEL_START_INTERUPT_REGION
+        const size_t outputIndex = i;
+        auto indexIter = m_indices.cbegin();
+        std::advance(indexIter, i);
+        const size_t inputIndex = indexIter->second;
+
+        if (!calculateBackground(inputIndex,outputIndex))
         {
-          PARALLEL_START_INTERUPT_REGION
-            const size_t outputIndex = i;
-          auto indexIter = m_indices.cbegin();
-          std::advance(indexIter, i);
-          const size_t inputIndex = indexIter->second;
-
-
-          if (!calculateBackground(inputIndex,outputIndex))
-          {
-            g_log.information("No detector defined for index=" + boost::lexical_cast<std::string>(inputIndex) + ". Skipping correction.");
-          }
-
-          PARALLEL_END_INTERUPT_REGION
+          g_log.information("No detector defined for index=" + boost::lexical_cast<std::string>(inputIndex) + ". Skipping correction.");
         }
-        PARALLEL_CHECK_INTERUPT_REGION
 
+        PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
 
-          setProperty("BackgroundWorkspace",m_backgroundWS);
-        setProperty("CorrectedWorkspace",m_correctedWS);
+      setProperty("BackgroundWorkspace",m_backgroundWS);
+      setProperty("CorrectedWorkspace",m_correctedWS);
     }
+
+    /**
+     * Calculate the background from the input spectrum and assign the value to the output one
+     * @param inputIndex The index on the input workspace on which to operate
+     * @param outputIndex The index on the output workspace where the results are stored
+     * @return True if the background was subtracted, false otherwise
+     */
+    bool CalculateGammaBackground::calculateBackground(const size_t inputIndex, const size_t outputIndex)
+    {
+      // Copy X values
+      m_backgroundWS->setX(outputIndex,m_inputWS->refX(inputIndex));
+      m_correctedWS->setX(outputIndex,m_inputWS->refX(inputIndex));
+      // Copy errors to corrected
+      m_correctedWS->dataE(outputIndex) = m_inputWS->readE(inputIndex);
+
+      try
+      {
+        const auto * inSpec = m_inputWS->getSpectrum(inputIndex);
+        const specid_t spectrumNo(inSpec->getSpectrumNo());
+        m_backgroundWS->getSpectrum(outputIndex)->copyInfoFrom(*inSpec);
+        m_correctedWS->getSpectrum(outputIndex)->copyInfoFrom(*inSpec);
+
+        if(spectrumNo >= FORWARD_SCATTER_SPECMIN && spectrumNo <= FORWARD_SCATTER_SPECMAX )
+        {
+          applyCorrection(inputIndex,outputIndex);
+        }
+        else
+        {
+          g_log.information("Spectrum " + boost::lexical_cast<std::string>(spectrumNo) + " not in forward scatter range. Skipping correction.");
+          // Leave background at 0 and just copy data to corrected
+          m_correctedWS->dataY(outputIndex) = m_inputWS->readY(inputIndex);
+
+        }
+        return true;
+      }
+      catch(Exception::NotFoundError &)
+      {
+        return false;
+      }
+
+    }
+
 
     /**
     * Calculate & apply gamma correction for the given index of the

@@ -80,7 +80,7 @@ def validate_loader(f):
                         data_file = self._data_file
 
                     alg = mantid.api.FrameworkManager.createAlgorithm(algorithm)
-                    if not isinstance(alg, mantid.api.IAlgorithm):
+                    if not isinstance(alg, mantid.api.AlgorithmProxy):
                         raise RuntimeError, "Reducer expects an Algorithm object from FrameworkManager, found '%s'" % str(type(alg))
                     
                     propertyOrder = alg.orderedProperties()
@@ -221,7 +221,7 @@ def validate_step(f):
                     if outputworkspace is None:
                         outputworkspace = inputworkspace 
                     alg = mantid.FrameworkManager.createAlgorithm(algorithm)
-                    if not isinstance(alg, mantid.api.IAlgorithm):
+                    if not isinstance(alg, mantid.api.AlgorithmProxy):
                         raise RuntimeError, "Reducer expects an Algorithm object from FrameworkManager, found '%s'" % str(type(alg))
                     
                     propertyOrder = alg.orderedProperties()
