@@ -1006,6 +1006,16 @@ namespace Geometry
     setLogfile(ass, pCompElem, m_instrument->getLogfileCache());  // params specified within <component>
     setLogfile(ass, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
 
+    std::string category = "";
+    if (pType->hasAttribute("is"))
+      category = pType->getAttribute("is");
+
+    // check if special Component
+    if ( category.compare("SamplePos") == 0 || category.compare("samplePos") == 0 )
+    {
+      m_instrument->markAsSamplePos(ass);
+    }
+
     // If enabled, check for a 'neutronic position' tag and add to cache if found
     if ( m_indirectPositions )
     {

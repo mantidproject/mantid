@@ -440,6 +440,11 @@ public:
     boost::shared_ptr<const IDetector> ptrDetShape = i->getDetector(1100);
     TS_ASSERT_EQUALS( ptrDetShape->getID(), 1100);
 
+    // test sample
+    boost::shared_ptr<const IComponent> sample = i->getSample();
+    TS_ASSERT_EQUALS( sample->getName(), "nickel-holder");
+    TS_ASSERT_DELTA( sample->getPos().X(), 2.0,0.01);
+
     // Test of monitor shape
     boost::shared_ptr<const IDetector> ptrMonShape = i->getDetector(1001);
     TS_ASSERT( ptrMonShape->isValid(V3D(0.002,0.0,0.0)+ptrMonShape->getPos()) );
