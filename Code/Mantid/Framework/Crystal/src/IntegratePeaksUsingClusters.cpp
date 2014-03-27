@@ -14,6 +14,9 @@ Uses connected component analysis to integrate peaks in an PeaksWorkspace over a
 #include "MantidKernel/Utils.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include <boost/make_shared.hpp>
+#include <map>
+#include <algorithm>
+#include <boost/tuple/tuple.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -21,6 +24,24 @@ using namespace Mantid::DataObjects;
 
 namespace
 {
+  typedef boost::tuple<double, double> SignalErrorSQPair;
+  typedef std::map<size_t, SignalErrorSQPair > LabelIdIntensityMap;
+  typedef std::map<V3D, size_t> PositionToLabelIdMap;
+
+  class IsNearPeak
+{
+public:
+  IsNearPeak(const V3D& coordinates, const double& thresholdDistance ) : m_coordinates(coordinates), m_thresholdDistance(thresholdDistance)
+  {}
+  bool operator()( const PositionToLabelIdMap::value_type& v ) const 
+  { 
+    return  v.first.distance(m_coordinates) < m_thresholdDistance; 
+  }
+private:
+  const V3D m_coordinates;
+  const double m_thresholdDistance;
+};
+
   class PeakBackground : public Mantid::Crystal::HardThresholdBackground
   {
   private:
@@ -39,6 +60,9 @@ namespace
     {
       if(!HardThresholdBackground::isBackground(iterator) )
       {
+        const VMD& center = iterator->getCenter();
+        V3D temp(center[0], center[1], center[2]); // This assumes dims 1, 2, and 3 in the workspace correspond to positions.
+          
         for(size_t i = 0; i < m_peaksWS->getNumberPeaks(); ++i)
         {
           V3D coords;
@@ -54,12 +78,11 @@ namespace
           {
             coords= m_peaksWS->getPeak(i).getHKL();
           }
-          const VMD& center = iterator->getCenter();
-          V3D temp(center[0], center[1], center[2]);
           if(coords.distance(temp) < m_radiusEstimate)
           {
             return false;
           }
+          
         }
 
       }
@@ -125,18 +148,10 @@ namespace Mantid
     void IntegratePeaksUsingClusters::init()
     {
       declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace","",Direction::Input), "Input md workspace.");
-      std::vector<std::string> propOptions;
-      propOptions.push_back("NoNormalization");
-      propOptions.push_back("NumberOfEventsNormalization");
-      propOptions.push_back("VolumeNormalization");
-      declareProperty("Normalization", "NoNormalization",boost::make_shared<StringListValidator>(propOptions),
-        "Normalization to use."
-        );
-
-      declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","", Direction::Input),"A PeaksWorkspace containing the peaks to integrate.");
-      declareProperty(new PropertyWithValue<double>("RadiusEstimate", 0.1, Direction::Input), "Estimate of Peak Radius. This is optional and should not affect the ouput of the integration, but it will remove noise from the resulting MD cluster image.");
-      declareProperty(new PropertyWithValue<double>("Threshold", 0, Direction::Input), "Threshold");
-      //declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output), "An output integrated peaks workspace."); 
+      declareProperty(new WorkspaceProperty<IPeaksWorkspace>("PeaksWorkspace","", Direction::Input),"A PeaksWorkspace containing the peaks to integrate.");
+      declareProperty(new PropertyWithValue<double>("RadiusEstimate", 0.1, Direction::Input), "Estimate of Peak Radius. Points beyond this radius will not be considered, so caution towards the larger end.");
+      declareProperty(new PropertyWithValue<double>("Threshold", 0, Direction::Input), "Threshold signal above which to consider peaks");
+      declareProperty(new WorkspaceProperty<IPeaksWorkspace>("OutputWorkspace","",Direction::Output), "An output integrated peaks workspace."); 
       declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("OutputWorkspaceMD","",Direction::Output), "MDHistoWorkspace containing the clusters.");
     }
 
@@ -146,31 +161,87 @@ namespace Mantid
     void IntegratePeaksUsingClusters::exec()
     {
       IMDHistoWorkspace_sptr mdWS = getProperty("InputWorkspace");
-      PeaksWorkspace_sptr peaksWS = getProperty("PeaksWorkspace");
+      PeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
+      Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
+      if (peakWS != inPeakWS)
+        peakWS = inPeakWS->clone();
 
       const SpecialCoordinateSystem mdCoordinates = mdWS->getSpecialCoordinateSystem();
-
-
-      std::string strNormalization = getPropertyValue("Normalization");
-      MDNormalization normalization = NoNormalization;
-      if(strNormalization == "NumberOfEventsNormalization")
-      {
-        normalization = NumEventsNormalization;
-      }
-      else if(strNormalization == "VolumeNormalization")
-      {
-        normalization = VolumeNormalization;
-      }
+      // TODO. check special coordinates have been set. If unknown throw.
 
       const double threshold = getProperty("Threshold");
       const double radiusEstimate = getProperty("RadiusEstimate");
-      PeakBackground background(peaksWS, radiusEstimate, threshold, normalization, mdCoordinates);
+      PeakBackground background(peakWS, radiusEstimate, threshold, NoNormalization, mdCoordinates);
       //HardThresholdBackground background(threshold, normalization);
 
       ConnectedComponentLabeling analysis;
       IMDHistoWorkspace_sptr clusters = analysis.execute(mdWS, &background);
 
-      //setProperty("OutputWorkspace", peaksWS);
+      /*
+      Note that the following may be acheived better inside the clustering utility at the same time as the 
+      cluster workspace is populated.
+
+      Accumulate intesity values for each peak cluster and key by label_id
+      */
+      LabelIdIntensityMap labelMap;
+      PositionToLabelIdMap positionMap;
+
+       for(size_t i = 0; i < clusters->getNPoints(); ++i)
+       {
+         const size_t& label_id = static_cast<size_t>(clusters->getSignalAt(i));
+
+         const double& signal = mdWS->getSignalAt(i);
+         double errorSQ = mdWS->getErrorAt(i);
+         errorSQ *=errorSQ;
+         if(label_id >= analysis.getStartLabelId())
+         {
+         if(labelMap.find(label_id) != labelMap.end())
+         {
+           SignalErrorSQPair current = labelMap[label_id];
+           labelMap[label_id] = SignalErrorSQPair(current.get<0>() + signal, current.get<1>() + errorSQ);
+         }
+         else
+         {
+           labelMap[label_id] = SignalErrorSQPair(signal, errorSQ);
+           
+           const VMD& center = mdWS->getCenter(i);
+           V3D temp(center[0], center[1], center[2]);
+           positionMap[temp] = label_id; //Record charcteristic position of the cluster.
+         }
+         }
+       }
+
+
+       for(size_t i =0; i < peakWS->getNumberPeaks(); ++i)
+       {
+         IPeak& peak = peakWS->getPeak(i);
+         V3D coords;
+         if(mdCoordinates==QLab)
+          {
+            coords= peakWS->getPeak(i).getQLabFrame();
+          }
+          else if(mdCoordinates==QSample)
+          {
+            coords= peakWS->getPeak(i).getQSampleFrame();
+          }
+          else if(mdCoordinates==Mantid::API::HKL)
+          {
+            coords= peakWS->getPeak(i).getHKL();
+          }
+
+          /* Now find the label corresponding to these coordinates. Use the characteristic coordinates of the coordinates
+             recorded earlier to do this. A better implemention would be a direct lookup.
+          */
+          IsNearPeak nearPeak(coords, radiusEstimate);
+          auto iterator = std::find_if(positionMap.begin(), positionMap.end(), nearPeak);
+          if(iterator != positionMap.end())
+          {
+            peak.setIntensity(labelMap[ iterator->second ].get<0>());
+            peak.setSigmaIntensity(labelMap[ iterator->second ].get<1>());
+          }
+       }
+
+      setProperty("OutputWorkspace", peakWS);
       setProperty("OutputWorkspaceMD", clusters);
     }
 

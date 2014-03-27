@@ -38,6 +38,14 @@ namespace Mantid
       m_startId = id;
     }
 
+    /**
+    @return: The start label id.
+    */
+    size_t ConnectedComponentLabeling::getStartLabelId() const
+    {
+      return m_startId;
+    }
+
     //----------------------------------------------------------------------------------------------
     /** Destructor
      */

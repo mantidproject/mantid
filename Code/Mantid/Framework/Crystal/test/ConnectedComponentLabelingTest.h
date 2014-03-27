@@ -80,6 +80,20 @@ public:
     FrameworkManager::Instance();
   }
 
+  void test_default_start_label_id()
+  {
+    ConnectedComponentLabeling ccl;
+    TSM_ASSERT_EQUALS("Start Label Id should be 1 by default", 1, ccl.getStartLabelId());
+  }
+
+  void test_set_get_start_label_id()
+  {
+    ConnectedComponentLabeling ccl;
+    const size_t startLabelId = 10;
+    ccl.startLabelingId(startLabelId);
+    TS_ASSERT_EQUALS(startLabelId, ccl.getStartLabelId())
+  }
+
   void test_1d_one_node()
   {
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 1); // Single node. Simpliest possible test case
