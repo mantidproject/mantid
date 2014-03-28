@@ -52,6 +52,8 @@ namespace MantidQt
         void workspaceSelected(const QString& wsName);
         /// Set the "FileName" property when a file is selected from the file browser.
         void fileSelected();
+        /// Diables fields on dialog to improve usability
+        void disableDialog();
 
       protected:
         /// Overridden to enable dataselector validators

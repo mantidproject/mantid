@@ -62,39 +62,28 @@ namespace MantidQt
       // We need to catch the exception to prevent a fatal error.
       try
       {
-        if (!session.empty())
-        {
-          Mantid::API::CatalogManager::Instance().getCatalog(session.front()->getSessionId())->myData(workspace);
-        }
+        Mantid::API::CatalogManager::Instance().getCatalog(session.front()->getSessionId())->myData(workspace);
       }
       catch(std::runtime_error& e)
       {
         setOptionalMessage(e.what());
-        m_uiForm.scrollArea->setDisabled(true);
-        m_uiForm.runBtn->setDisabled(true);
-        return;
       }
 
-      // The user is not an investigator on any investigations and cannot publish
-      // or they are not logged into the catalog then update the related message..
-      if (workspace->rowCount() == 0)
+      if (workspace->rowCount() > 0)
       {
-        setOptionalMessage("You cannot publish datafiles as you are not an investigator on any investigations or are not logged into the catalog.");
-        // Disable the input fields and run button to prevent user from running algorithm.
-        m_uiForm.scrollArea->setDisabled(true);
-        m_uiForm.runBtn->setDisabled(true);
-        return;
+        // Populate the form with investigations that the user can publish to.
+        for (size_t row = 0; row < workspace->rowCount(); row++)
+        {
+          m_uiForm.investigationNumberCb->addItem(QString::fromStdString(workspace->cell<std::string>(row, 0)));
+          // Added tooltips to improve usability.
+          m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
+              QString::fromStdString("The title of the investigation is: \"" + workspace->cell<std::string>(row, 1) +
+                  "\".\nThe instrument of the investigation is: \"" + workspace->cell<std::string>(row, 2)) + "\".",Qt::ToolTipRole);
+        }
       }
-
-      // Populate the form with investigations that the user can publish to.
-      for (size_t row = 0; row < workspace->rowCount(); row++)
+      else
       {
-        m_uiForm.investigationNumberCb->addItem(QString::fromStdString(workspace->cell<std::string>(row, 0)));
-        // Add better tooltip for ease of use (much easier to recall the investigation if title and instrument are also provided).
-        m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
-            QString::fromStdString("The title of the investigation is: \"" + workspace->cell<std::string>(row, 1) +
-                                   "\".\nThe instrument of the investigation is: \"" + workspace->cell<std::string>(row, 2)) + "\".",
-                                   Qt::ToolTipRole);
+        disableDialog();
       }
     }
 
@@ -123,6 +112,15 @@ namespace MantidQt
       // Set the FileName property to the path that appears in the input field on the dialog.
       storePropertyValue("FileName", m_uiForm.dataSelector->getFullFilePath());
       setPropertyValue("FileName", true);
+    }
+
+    /**
+     * Diables fields on dialog to improve usability
+     */
+    void CatalogPublishDialog::disableDialog()
+    {
+      m_uiForm.scrollArea->setDisabled(true);
+      m_uiForm.runBtn->setDisabled(true);
     }
 
     /**
