@@ -86,7 +86,7 @@ def Load(*args, **kwargs):
     filename, = _get_mandatory_args('Load', ["Filename"], *args, **kwargs)
     
     # Create and execute
-    algm = _framework.createAlgorithm('Load')
+    algm = _create_algorithm_object('Load')
     _set_logging_option(algm, kwargs)
     algm.setProperty('Filename', filename) # Must be set first
     # Remove from keywords so it is not set twice
@@ -157,7 +157,7 @@ def LoadDialog(*args, **kwargs):
     if 'Disable' not in arguments: arguments['Disable']=''
     if 'Message' not in arguments: arguments['Message']=''
     
-    algm = _framework.createAlgorithm('Load')
+    algm = _create_algorithm_object('Load')
     _set_properties_dialog(algm,**arguments)
     algm.execute()
     return algm
@@ -189,7 +189,7 @@ def Fit(*args, **kwargs):
     if type(Function) == str and Function in _ads:
         raise ValueError("Fit API has changed. The function must now come first in the argument list and the workspace second.")
     # Create and execute
-    algm = _framework.createAlgorithm('Fit')
+    algm = _create_algorithm_object('Fit')
     _set_logging_option(algm, kwargs)
     algm.setProperty('Function', Function) # Must be set first
     algm.setProperty('InputWorkspace', InputWorkspace)
@@ -244,7 +244,7 @@ def FitDialog(*args, **kwargs):
     if 'Disable' not in arguments: arguments['Disable']=''
     if 'Message' not in arguments: arguments['Message']=''
     
-    algm = _framework.createAlgorithm('Fit')
+    algm = _create_algorithm_object('Fit')
     _set_properties_dialog(algm,**arguments)
     algm.execute()
     return algm
@@ -529,7 +529,7 @@ def _set_properties(alg_object, *args, **kwargs):
         else:
             alg_object.setProperty(key, value)
 
-def _create_algorithm(algorithm, version, _algm_object):
+def _create_algorithm_function(algorithm, version, _algm_object):
     """
         Create a function that will set up and execute an algorithm.
         The help that will be displayed is that of the most recent version.
@@ -546,7 +546,7 @@ def _create_algorithm(algorithm, version, _algm_object):
         if "Version" in kwargs:
             _version = kwargs["Version"]
             del kwargs["Version"]
-        algm = _framework.createAlgorithm(algorithm, _version)
+        algm = _create_algorithm_object(algorithm, _version)
         _set_logging_option(algm, kwargs)
 
         # Temporary removal of unneeded parameter from user's python scripts
@@ -621,7 +621,67 @@ def _create_algorithm(algorithm, version, _algm_object):
 
     return algorithm_wrapper
 #-------------------------------------------------------------------------------------------------------------
-    
+
+def _create_algorithm_object(name, version=-1):
+    """
+    Create and initialize the named algorithm of the given version. This
+    method checks whether the function call has come from within a PyExec
+    call. If that is the case then an unmanaged child algorithm is created.
+
+    :param name A string name giving the algorithm
+    :param version A int version number
+    """
+    import inspect
+    parent = _find_parent_pythonalgorithm(inspect.currentframe())
+    if parent is not None:
+        alg = parent.createChildAlgorithm(name, version)
+        alg.setLogging(parent.isLogging()) # default is to log if parent is logging
+        alg.setAlwaysStoreInADS(True) # Historic: simpleapi functions always put stuff in the ADS
+        if parent.__class__ == _api.DataProcessorAlgorithm:
+            alg.enableHistoryRecordingForChild(True) # this can be removed when the C++ does the correct thing
+    else:
+        # managed algorithm so that progress reporting
+        # can be more easily wired up automatically
+        alg = AlgorithmManager.create(name, version)
+    # common traits
+    alg.setRethrows(True)
+    return alg
+
+#-------------------------------------------------------------------------------------------------------------
+
+def _find_parent_pythonalgorithm(frame):
+    """
+    Look for a PyExec method in the call stack and return
+    the self object that the method is attached to
+
+    :param frame The starting frame for the stack walk
+    :returns The self object that is running the PyExec method
+             or None if one was not found
+    """
+    # We are looking for this method name
+    fn_name = "PyExec"
+
+    # Return the 'self' object of a given frame
+    def get_self(frame):
+        return frame.f_locals['self']
+
+    # Look recursively for the PyExec method in the stack
+    if frame.f_code.co_name == fn_name:
+        return get_self(frame)
+    while True:
+        if frame.f_back:
+            if frame.f_back.f_code.co_name == fn_name:
+                return get_self(frame.f_back)
+            frame = frame.f_back
+        else:
+            break
+    if frame.f_code.co_name == fn_name:
+        return get_self(frame)
+    else:
+        return None
+
+#-------------------------------------------------------------------------------------------------------------
+
 def _set_properties_dialog(algm_object, *args, **kwargs):
     """
     Set the properties all in one go assuming that you are preparing for a
@@ -701,7 +761,7 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
             if item not in kwargs:
                 kwargs[item] = ""
             
-        algm = _framework.createAlgorithm(algorithm, _version)
+        algm = _create_algorithm_object(algorithm, _version)
         _set_properties_dialog(algm, *args, **kwargs)
         algm.execute()
         return algm
@@ -816,7 +876,7 @@ def _translate():
         except Exception:
             continue
 
-        algorithm_wrapper = _create_algorithm(name, max(versions), algm_object)
+        algorithm_wrapper = _create_algorithm_function(name, max(versions), algm_object)
         method_name = algm_object.workspaceMethodName()
         if len(method_name) > 0:
             if method_name in new_methods:
