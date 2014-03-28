@@ -8,6 +8,7 @@ import refl_live_options
 import csv
 import string
 import os
+import re
 from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
@@ -48,6 +49,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.scale_col = 16
         self.stitch_col = 17
         self.plot_col = 18
+        self._last_trans = ""
         #Setup instrument options with defaults assigned.
         self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF']
         self.polarisation_instruments = ['CRISP', 'POLREF']
@@ -549,6 +551,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 else:
                     rowIndexes = range(self.tableMain.rowCount())
             if willProcess:
+                self._last_trans = ""
                 for row in rowIndexes:  # range(self.tableMain.rowCount()):
                     runno = []
                     loadedRuns = []
@@ -573,7 +576,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                         if (self.tableMain.item(row, 15).text() == ''):
                             loadedRun = None
                             if load_live_runs.is_live_run(runno[0]):
-                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], Frequency = self.live_freq, Accumulation = self.live_method)
+                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
                             else:
                                 Load(Filename=runno[0], OutputWorkspace="run")
                                 loadedRun = mtd["run"]
@@ -627,6 +630,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                         self.statusMain.clearMessage()
             self.accMethod = None
             self.statusMain.clearMessage()
+            self._last_trans = ""
+            if mtd.doesExist("transWS"):
+                DeleteWorkspace("transWS")
         except:
             self.statusMain.clearMessage()
             raise
@@ -717,10 +723,15 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         """
         g = ['g1', 'g2', 'g3']
         transrun = str(self.tableMain.item(row, which * 5 + 2).text())
+        if mtd.doesExist("transWS") and mtd["transWS"].getAxis(0).getUnit().unitID() == "Wavelength" and self._check_trans_run(transrun):
+            self._last_trans = transrun
+            transrun = mtd["transWS"]
+        else:
+            self._last_trans = transrun
         angle = str(self.tableMain.item(row, which * 5 + 1).text())
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
-            load_live_runs.get_live_data(config['default.instrument'], Frequency = self.live_freq, Accumulation = self.live_method)
+            load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
         wlam, wq, th = quick(loadedRun, trans=transrun, theta=angle)
         if ':' in runno:
             runno = runno.split(':')[0]
@@ -732,7 +743,18 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
         return th, qmin, qmax, wlam, wq
-
+    def _check_trans_run(self, transrun):
+        if self._last_trans == transrun:
+            return True
+        translist = [word.strip() for word in re.split(',|:', transrun)]
+        lastlist = [word.strip() for word in re.split(',|:', self._last_trans)]
+        if len(translist) == len(lastlist):
+            for i in range(len(lastlist)):
+                if not translist[i] == lastlist[i]:
+                    return False
+        else:
+            return False
+        return True
     def _save_table_contents(self, filename):
         """
         Save the contents of the table

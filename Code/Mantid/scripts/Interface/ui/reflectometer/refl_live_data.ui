@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>LiveDataDialog</class>
- <widget class="QDialog" name="LiveDataDialog">
+ <class>liveDataDialog</class>
+ <widget class="QDialog" name="liveDataDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -61,7 +61,7 @@
   <connection>
    <sender>buttonsLive</sender>
    <signal>accepted()</signal>
-   <receiver>LiveDataDialog</receiver>
+   <receiver>liveDataDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -77,7 +77,7 @@
   <connection>
    <sender>buttonsLive</sender>
    <signal>rejected()</signal>
-   <receiver>LiveDataDialog</receiver>
+   <receiver>liveDataDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
