@@ -1,10 +1,11 @@
-#ifndef MANTID_DATAHANDLING_SAVEANSTOASCII_H_
-#define MANTID_DATAHANDLING_SAVEANSTOASCII_H_
+#ifndef MANTID_DATAHANDLING_SaveILLCosmosAscii_H_
+#define MANTID_DATAHANDLING_SaveILLCosmosAscii_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/AsciiPointBase.h"
 
 namespace Mantid
@@ -12,10 +13,10 @@ namespace Mantid
   namespace DataHandling
   {
     /**
-    Saves a file in Ansto format and from a 2D workspace
-    (Workspace2D class). SaveANSTOAscii is an algorithm but inherits from the
+    Saves a file in ILL Cosmos format  from a 2D workspace
+    (Workspace2D class). SaveILLCosmosAscii is an algorithm but inherits frrm the
     AsciiPointBase class which provides the main implementation for the init() & exec() methods.
-    Output is tab delimited Ascii point data with dq/q.
+    Output is tab delimited Ascii point data with dq/q and extra header information.
 
     Copyright &copy; 2007-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -37,15 +38,15 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport SaveANSTOAscii : public DataHandling::AsciiPointBase
+    class DLLExport SaveILLCosmosAscii : public DataHandling::AsciiPointBase
     {
     public:
       /// Default constructor
-      SaveANSTOAscii() {}
+      SaveILLCosmosAscii() {}
       /// Destructor
-      ~SaveANSTOAscii() {}
+      ~SaveILLCosmosAscii() {}
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "SaveANSTOAscii"; }
+      virtual const std::string name() const { return "SaveILLCosmosAscii"; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
 
@@ -53,16 +54,13 @@ namespace Mantid
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
       /// Return the file extension this algorthm should output.
-      virtual std::string ext() {return ".txt";}
-      /// return if the line should start with a separator
-      virtual bool leadingSep() {return false;}
-      /// no extra properties required so override blank
-      virtual void extraProps() {}
-      /// no extra information required so override blank
+      virtual std::string ext() {return ".mft";}
+      ///extra properties specifically for this
+      virtual void extraProps();
+      /// write any extra information required
       virtual void extraHeaders(std::ofstream & file);
     };
-
   } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /*  MANTID_DATAHANDLING_SAVEANSTO_H_  */
+#endif  /*  MANTID_DATAHANDLING_SaveILLCosmosAscii_H_  */

@@ -1,5 +1,6 @@
 set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
+	src/AsciiPointBase.cpp
 	src/CompressEvents.cpp
 	src/CreateChopperModel.cpp
 	src/CreateModeratorModel.cpp
@@ -112,6 +113,7 @@ set ( SRC_FILES
 	src/SaveFullprofResolution.cpp
 	src/SaveGSS.cpp
 	src/SaveISISNexus.cpp
+	src/SaveILLCosmosAscii.cpp
 	src/SaveIsawDetCal.cpp
 	src/SaveMask.cpp
 	src/SaveNISTDAT.cpp
@@ -131,6 +133,7 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
+	inc/MantidDataHandling/AsciiPointBase.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateChopperModel.h
 	inc/MantidDataHandling/CreateModeratorModel.h
@@ -238,6 +241,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveFullprofResolution.h
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveISISNexus.h
+	inc/MantidDataHandling/SaveILLCosmosAscii.h
 	inc/MantidDataHandling/SaveIsawDetCal.h
 	inc/MantidDataHandling/SaveMask.h
 	inc/MantidDataHandling/SaveNISTDAT.h
@@ -359,6 +363,7 @@ set ( TEST_FILES
 	SaveDspacemapTest.h
 	SaveFocussedXYETest.h
 	SaveFullprofResolutionTest.h
+	SaveILLCosmosAsciiTest.h
 	SaveIsawDetCalTest.h
 	SaveMaskTest.h
 	SaveNISTDATTest.h
