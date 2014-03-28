@@ -112,13 +112,37 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self.declareProperty("SaveAs", "calibration", StringListValidator(outfiletypes))
         self.declareProperty(FileProperty("OutputDirectory", "", FileAction.Directory))
 
+    def validateInputs(self):
+        messages = {}
+
+        detectors = self.getProperty("DetectorsPeaks").value.strip()
+        if self.getProperty("CrossCorrelation").value:
+            positions = self.getProperty("PeakPositions").value.strip()
+            positions = positions.split(',')
+            if not bool(detectors):
+                if len(positions) != 1:
+                    messages["PeakPositions"] = "Can only have one cross correlation peak without specifying 'DetectorsPeaks'"
+            else:
+                detectors = detectors.split(',')
+                if len(detectors) != len(positions):
+                    messages["PeakPositions"] = "Must be the same length as 'DetectorsPeaks' (%d != %d)" \
+                        % (len(positions), len(detectors))
+                    messages["DetectorsPeaks"] = "Must be the same length as 'PeakPositions' or empty"
+                elif len(detectors) > 3:
+                    messages["DetectorsPeaks"] = "Up to 3 peaks are supported"
+        elif bool(detectors):
+            messages["DetectorsPeaks"] = "Only allowed for CrossCorrelation=True"
+            prop = self.getProperty("CrossCorrelationPoints")
+
+        return messages
+
     def _loadPreNeXusData(self, runnumber, extension, **kwargs):
         """
             Load PreNexus data
             @param runnumer: run number (integer)
             @param extension: file extension 
         """
-        Logger.get("CalibrateRectangularDetector").warning("Loading PreNexus for run %s" % runnumber)
+        self.log().warning("Loading PreNexus for run %s" % runnumber)
         mykwargs = {}
         if kwargs.has_key("FilterByTimeStart"):
             mykwargs["ChunkNumber"] = int(kwargs["FilterByTimeStart"])
@@ -161,7 +185,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             @param runnumber: run number (integer)
             @param extension: file extension
         """
-        Logger.get("CalibrateRectangularDetector").warning("Loading histogram Nexus for run %s" % runnumber)
+        self.log().warning("Loading histogram Nexus for run %s" % runnumber)
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
         return LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
@@ -234,7 +258,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             if y_s[midBin] > ymax:
                     refpixel = s
                     ymax = y_s[midBin]
-        Logger.get("CalibrateRectangularDetectors").information("Reference spectra=%s" % refpixel)
+        self.log().information("Reference spectra=%s" % refpixel)
         # Remove old calibration files
         cmd = "rm "+calib
         os.system(cmd)
@@ -266,7 +290,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                         refpixel = s
                         ymax = y_s[midBin]
             msg = "Reference spectra = %s, lastpixel_3 = %s" % (refpixel, self._lastpixel3)
-            Logger.get("CalibrateRectangularDetectors").information(msg)
+            self.log().information(msg)
             self._lastpixel2 = wksp.getNumberHistograms()*self._lastpixel2/self._lastpixel3-1
             CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc2", 
                            ReferenceSpectra=refpixel, WorkspaceIndexMin=self._lastpixel+1, 
@@ -296,7 +320,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 if y_s[midBin] > ymax:
                         refpixel = s
                         ymax = y_s[midBin]
-            Logger.get("CalibrateRectangularDetectors").information("Reference spectra=%s" % refpixel)
+            self.log().information("Reference spectra=%s" % refpixel)
             CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc3", 
                            ReferenceSpectra=refpixel,
                            WorkspaceIndexMin=self._lastpixel2+1, 
