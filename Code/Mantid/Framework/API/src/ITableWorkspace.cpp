@@ -1,15 +1,11 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid
 {
 namespace API
 {
-
-// Get a reference to the logger
-Kernel::Logger& ITableWorkspace::g_log = Kernel::Logger::get("ITableWorkspace");
 
 /**
  */

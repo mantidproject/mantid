@@ -10,11 +10,14 @@ namespace Mantid
 {
   namespace DataObjects
   {
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("TableWorkspace");
+    }
 
     DECLARE_WORKSPACE(TableWorkspace)
 
-    // Get a reference to the logger
-    Kernel::Logger& TableWorkspace::g_log = Kernel::Logger::get("TableWorkspace");
 
     /// Constructor
     TableWorkspace::TableWorkspace(size_t nrows) : ITableWorkspace(), m_rowCount(0),

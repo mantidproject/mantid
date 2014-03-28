@@ -8,8 +8,14 @@
 #include "MantidKernel/Logger.h"
 #include <boost/lexical_cast.hpp>
 
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("ISISRAW2");
+}
+
 /// No arg Constructor
-ISISRAW2::ISISRAW2() : ISISRAW(NULL,false), ndes(0), outbuff(0), m_bufferSize(0), g_log(Mantid::Kernel::Logger::get("ISISRAW2"))
+ISISRAW2::ISISRAW2() : ISISRAW(NULL,false), ndes(0), outbuff(0), m_bufferSize(0)
 {
   // Determine the size of the output buffer to create from the config service.
   g_log.debug() << "Determining ioRaw buffer size\n";

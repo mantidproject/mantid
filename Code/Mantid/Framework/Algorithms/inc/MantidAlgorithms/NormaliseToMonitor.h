@@ -104,9 +104,6 @@ private:
   double m_integrationMin;
   /// The upper bound of the integration range
   double m_integrationMax;
- /// logger -> to provide logging, for normalization operations
- static Mantid::Kernel::Logger& g_log;
-
 };
 
 

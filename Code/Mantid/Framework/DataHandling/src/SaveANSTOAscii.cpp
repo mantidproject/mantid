@@ -25,6 +25,7 @@ namespace Mantid
       this->setOptionalMessage("Saves a 2D workspace to a ascii file.");
     }
 
+
     /** virtual method to add information to the file before the data
      *  however this class doesn't have any but must implement it.
      *  @param file :: pointer to output file stream

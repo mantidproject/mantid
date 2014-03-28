@@ -71,8 +71,11 @@ using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::Muon;
 using namespace Mantid::Geometry;
 
-// Initialize the logger
-Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("MuonAnalysis");
+}
 
 // Static constants
 const QString MuonAnalysis::NOT_AVAILABLE("N/A");

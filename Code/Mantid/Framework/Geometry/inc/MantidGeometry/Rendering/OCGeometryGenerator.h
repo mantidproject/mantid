@@ -2,18 +2,12 @@
 #define OC_GEOMETRYGENERATOR_H
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Logger.h"
 #include <boost/shared_ptr.hpp>
 
 class TopoDS_Shape;
 
 namespace Mantid
 {
-  namespace Kernel
-  {
-    class Logger;
-  }
-
   namespace Geometry
   {
     class Object;
@@ -62,7 +56,6 @@ namespace Mantid
     class MANTID_GEOMETRY_DLL OCGeometryGenerator
     {
     private:                    
-      static Kernel::Logger& PLog; ///< Static reference to the logger class
       const Object *Obj; ///< Input Object
       TopoDS_Shape* ObjSurface; ///< Storage for the output surface
       int   iGridSize; ///< Grid size for sampling the object

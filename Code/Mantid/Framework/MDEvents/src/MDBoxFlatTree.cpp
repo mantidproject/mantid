@@ -17,7 +17,11 @@ namespace Mantid
 {
   namespace MDEvents
   {
-   Kernel::Logger &MDBoxFlatTree::g_log = Kernel::Logger::get("Algorithm");
+   namespace
+   {
+     /// static logger
+     Kernel::Logger g_log("MDBoxFlatTree");
+   }
 
     MDBoxFlatTree::MDBoxFlatTree():
   m_nDim(-1)

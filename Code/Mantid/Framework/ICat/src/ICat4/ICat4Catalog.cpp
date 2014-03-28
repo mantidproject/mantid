@@ -15,9 +15,15 @@ namespace Mantid
     using namespace Kernel;
     using namespace ICat4;
 
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("ICat4Catalog");
+    }
+
     DECLARE_CATALOG(ICat4Catalog)
 
-    ICat4Catalog::ICat4Catalog() : g_log(Kernel::Logger::get("ICat4Catalog")), m_session() {}
+    ICat4Catalog::ICat4Catalog() : m_session() {}
 
     /**
      * Authenticate the user against all catalogues in the container.

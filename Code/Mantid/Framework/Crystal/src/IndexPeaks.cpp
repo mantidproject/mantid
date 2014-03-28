@@ -27,8 +27,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-  Kernel::Logger& IndexPeaks::g_log = Kernel::Logger::get("IndexPeaks");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(IndexPeaks)
 

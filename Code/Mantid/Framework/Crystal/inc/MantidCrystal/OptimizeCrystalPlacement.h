@@ -72,8 +72,6 @@ namespace Crystal
      void init();
 
      void exec();
-
-     static Kernel::Logger& g_log ;
    };
 }
 }

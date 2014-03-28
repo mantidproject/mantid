@@ -59,10 +59,13 @@ using namespace Mantid::API;
 using namespace Mantid;
 using Mantid::Geometry::Instrument_const_sptr;
 
-// Initialize the logger
-Logger& SANSRunWindow::g_log = Logger::get("SANSRunWindow");
-Logger& SANSRunWindow::g_centreFinderLog = Logger::get("CentreFinder");
-
+namespace
+{
+  /// static logger for main window
+  Logger g_log("SANSRunWindow");
+  /// static logger for centre finding
+  Logger g_centreFinderLog("CentreFinder");
+}
 //----------------------------------------------
 // Public member functions
 //----------------------------------------------

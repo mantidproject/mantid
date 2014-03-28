@@ -18,7 +18,13 @@ namespace Mantid
     using namespace API;
     using namespace ICat3;
 
-    CICatHelper::CICatHelper() : g_log(Kernel::Logger::get("CICatHelper")), m_session() {}
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("CICatHelper");
+    }
+
+    CICatHelper::CICatHelper() : m_session() {}
 
     /* This method calls ICat API searchbydavanced and do the basic run search
      * @param icat :: Proxy object for ICat

@@ -31,9 +31,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-  Kernel::Logger& ShowPossibleCells::g_log = 
-                                      Kernel::Logger::get("ShowPossibleCells");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(ShowPossibleCells)
 

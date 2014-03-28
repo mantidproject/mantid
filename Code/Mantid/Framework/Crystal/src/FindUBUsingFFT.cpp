@@ -27,9 +27,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-  Kernel::Logger& FindUBUsingFFT::g_log = 
-                        Kernel::Logger::get("FindUBUsingFFT");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(FindUBUsingFFT)
 

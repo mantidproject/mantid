@@ -18,6 +18,11 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
+    namespace
+    {
+      /// static logger
+      Mantid::Kernel::Logger g_log("PeaksPresenter");
+    }
 
     /**
      * Convert from a SpecialCoordinateSystem enum to a correpsonding enum name.
@@ -102,7 +107,7 @@ namespace MantidQt
     ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr viewFactory, IPeaksWorkspace_sptr peaksWS,
         boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) : m_viewFactory(viewFactory), m_peaksWS(peaksWS), m_transformFactory(
             transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
-            g_log(Mantid::Kernel::Logger::get("PeaksPresenter")), m_owningPresenter(NULL), m_isHidden(false)
+            m_owningPresenter(NULL), m_isHidden(false)
     {
       // Check that the workspaces appear to be compatible. Log if otherwise.
       checkWorkspaceCompatibilities(mdWS);

@@ -2,7 +2,6 @@
 #define CACHE_GEOMETRYGENERATOR_H
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Logger.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -44,7 +43,6 @@ namespace Mantid
     class MANTID_GEOMETRY_DLL CacheGeometryGenerator
     {
     private:                    
-      static Kernel::Logger& PLog; ///< Static reference to the logger class
       Object *Obj; ///< Input Object
       int mNoOfVertices; ///< number of vertices 
       int mNoOfTriangles; ///< number of triangles

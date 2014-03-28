@@ -9,7 +9,7 @@ namespace Mantid
 {
   namespace Geometry
   {
-    Kernel::Logger& CacheGeometryHandler::PLog(Kernel::Logger::get("CacheGeometryHandler"));
+
     CacheGeometryHandler::CacheGeometryHandler(IObjComponent *comp):GeometryHandler(comp)
     {
       Triangulator=NULL;

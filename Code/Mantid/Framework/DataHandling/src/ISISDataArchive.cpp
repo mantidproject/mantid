@@ -27,7 +27,11 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    Mantid::Kernel::Logger & ISISDataArchive::g_log = Mantid::Kernel::Logger::get("ISISDataArchive");
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("ISISDataArchive");
+    }
 
     DECLARE_ARCHIVESEARCH(ISISDataArchive,ISISDataSearch);
 

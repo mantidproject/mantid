@@ -13,12 +13,6 @@
 namespace Mantid
 {
 
-// Forward declaration
-namespace Kernel
-{
-class Logger;
-}
-
 namespace DataHandling
 {
 /**
@@ -55,8 +49,6 @@ public:
 private:
   /// Call web service to get full path.
   std::string getPath(const std::string& fName) const;
-  /// static reference to the logger class
-  static Mantid::Kernel::Logger & g_log;
 };
 
 }

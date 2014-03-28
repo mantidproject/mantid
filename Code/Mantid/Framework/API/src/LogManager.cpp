@@ -21,8 +21,11 @@ namespace API
 
 using namespace Kernel;
 
-// Get a reference to the logger
-Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
+  namespace
+  {
+    /// static logger
+    Logger g_log("LogManager");
+  }
 
  /// Name of the log entry containing the proton charge when retrieved using getProtonCharge
  const char * LogManager::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
