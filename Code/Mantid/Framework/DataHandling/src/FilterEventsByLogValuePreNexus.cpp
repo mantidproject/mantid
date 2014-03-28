@@ -1341,7 +1341,7 @@ namespace DataHandling
           // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
           arrayOfVectors[pixelid]->emplace_back( tof, pulsetime );
 #else
-          arrayOfVectors[pid]->push_back(TofEvent(tof, pulsetime));
+          arrayOfVectors[pixelid]->push_back(TofEvent(tof, pulsetime));
 #endif
 
           ++ local_num_good_events;
