@@ -96,9 +96,24 @@ namespace Algorithms
         bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime,
         int wsindex);
 
+    /// Make multiple-log-value filters in serial
     void makeMultipleFiltersByValues(std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges, bool centre,
                                      bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime,
                                      Kernel::DateAndTime stopTime);
+
+    /// Make multiple-log-value filters in serial in parallel
+    void makeMultipleFiltersByValuesParallel(std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges, bool centre,
+                                             bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime,
+                                             Kernel::DateAndTime stopTime);
+
+    void makeMultipleFiltersByValuesPartialLog(int istart, int iend,
+                                               std::vector<Kernel::DateAndTime>& vecSplitTime,
+                                               std::vector<int>& vecSplitGroup,
+                                               std::map<size_t, int> indexwsindexmap,
+                                               const std::vector<double>& logvalueranges, Kernel::time_duration tol,
+                                               bool filterIncrease, bool filterDecrease,
+                                               Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime);
+
 
     void processIntegerValueFilter(int minvalue, int maxvalue,
                                    bool filterIncrease, bool filterDecrease, Kernel::DateAndTime runend);
@@ -111,9 +126,16 @@ namespace Algorithms
     /// Add a splitter
     void make_splitter(Kernel::DateAndTime start, Kernel::DateAndTime stop, int group, Kernel::time_duration tolerance);
 
+    /// Create a splitter and add to the vector of time splitters
+    void makeSplitterInVector(std::vector<Kernel::DateAndTime>& vecSplitTime, std::vector<int>& vecGroupIndex,
+                              Kernel::DateAndTime start, Kernel::DateAndTime stop, int group,
+                              Kernel::time_duration tolerance);
+
 
     /// Generate a matrix workspace containing splitters
     void generateSplittersInMatrixWorkspace();
+
+    void generateSplittersInMatrixWorkspaceParallel();
 
     DataObjects::EventWorkspace_const_sptr m_dataWS;
 
@@ -143,6 +165,12 @@ namespace Algorithms
     /// Vector as date and time
     std::vector<Kernel::DateAndTime> m_vecSplitterTime;
     std::vector<int> m_vecSplitterGroup;
+
+    /// Processing algorithm type
+    bool m_useParallel;
+
+    std::vector<std::vector<Kernel::DateAndTime> > vecSplitterTimeSet;
+    std::vector<std::vector<int> > vecGroupIndexSet;
 
   };
 
