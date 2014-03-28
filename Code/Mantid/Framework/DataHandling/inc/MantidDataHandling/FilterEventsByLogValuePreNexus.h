@@ -269,6 +269,13 @@ private:
   /// Accelerator operation frequency
   int m_freqHz;
 
+  int64_t istep;
+
+  int64_t m_dbPixelID;
+  bool m_useDBOutput;
+
+  bool m_corretctTOF;
+
 };
 
 }

@@ -54,6 +54,8 @@ The ChunkNumber and TotalChunks properties can be used to load only a section of
 #include <sstream>
 #include "MantidAPI/MemoryManager.h"
 
+// #define DBOUT
+
 namespace Mantid
 {
 namespace DataHandling
@@ -344,6 +346,10 @@ namespace DataHandling
     declareProperty("AcceleratorFrequency", 60,
                     "Freuqency of the accelerator at which the experiment runs. It can 20, 30 or 60.");
 
+    declareProperty("CorrectTOFtoSample", false, "Correct TOF to sample position. ");
+
+    declareProperty("DBPixelID", EMPTY_INT(), "ID of the pixel (detector) for debug output. ");
+
     return;
   }
 
@@ -387,6 +393,7 @@ namespace DataHandling
         throw std::runtime_error("Operation frequency is not self-consistent");
       }
     }
+    istep = 60/m_freqHz;
 
     // Create and set up output EventWorkspace
     localWorkspace = setupOutputEventWorkspace();
@@ -539,6 +546,17 @@ namespace DataHandling
     if (m_freqHz != 20 && m_freqHz != 30 && m_freqHz != 60)
       throw runtime_error("Only 20, 30 and 60Hz are supported. ");
 
+
+    int tempint = getProperty("DBPixelID");
+    if (isEmpty(tempint)) m_useDBOutput = false;
+    else
+    {
+      m_useDBOutput = true;
+      m_dbPixelID = static_cast<int64_t>(tempint);
+    }
+
+    m_corretctTOF = getProperty("CorrectTOFtoSample");
+
     return;
   } // END of processProperties
 
@@ -674,21 +692,28 @@ namespace DataHandling
     */
   void FilterEventsByLogValuePreNexus::addToWorkspaceLog(std::string logtitle, size_t mindex)
   {
-    // Initialize new time series property
+    // Create TimeSeriesProperty
     TimeSeriesProperty<double>* property = new TimeSeriesProperty<double>(logtitle);
 
-    // Add events in "wrong detector IDs" to log.  Event's pulse time as log time; Event's TOF as value
+    // Add entries
     size_t nbins = this->wrongdetid_pulsetimes[mindex].size();
     for (size_t k = 0; k < nbins; k ++)
     {
-      property->addValue(this->wrongdetid_pulsetimes[mindex][k], this->wrongdetid_tofs[mindex][k]);
+      double tof = this->wrongdetid_tofs[mindex][k];
+      DateAndTime pulsetime = wrongdetid_pulsetimes[mindex][k];
+      int64_t abstime_ns = pulsetime.totalNanoseconds() + static_cast<int64_t>(tof*1000);
+      DateAndTime abstime(abstime_ns);
+
+      double value = tof;
+
+      property->addValue(abstime, value);
     } // ENDFOR
 
-    // Add new property to local Workspace
-    this->localWorkspace->mutableRun().addProperty(property, false);
+    // Add property to workspace
+    localWorkspace->mutableRun().addProperty(property, false);
 
-    g_log.information() << "Size of Property " << property->name() << " = " << property->size()
-                        << " vs Original Log Size = " << nbins << "\n";
+    g_log.information() << "Size of Property " << property->name() << " = " << property->size() <<
+                           " vs Original Log Size = " << nbins << "\n";
 
     return;
   }
@@ -1187,35 +1212,10 @@ namespace DataHandling
     std::set<PixelType> local_wrongdetids;
     size_t numwrongpid = 0;
 
-
-#if 0
-    if (fileOffset == 0)
-    {
-      size_t poffset = 0;
-      for (size_t i = 0; i < m_vecEventIndex.size(); ++i)
-      {
-        if (m_vecEventIndex[i] > fileOffset)
-        {
-          poffset = i-1;
-          break;
-        }
-      }
-
-      for (size_t i = 0; i < 100; ++i)
-      {
-        if (i+poffset >= m_vecEventIndex.size())
-          break;
-        g_log.notice() << "Pulse" << i << "\t: Event Index = " << m_vecEventIndex[i+poffset] << "\n";
-      }
-    }
-#endif
-
     //----------------------------------------------------------------------------------
     // process the individual events
     //----------------------------------------------------------------------------------
     int64_t i_pulse = 0;
-    int64_t istep = 60/m_freqHz;
-    size_t numeventsprint = 0;
 
     for (size_t ievent = 0; ievent < current_event_buffer_size; ++ievent)
     {
@@ -1464,15 +1464,29 @@ namespace DataHandling
     // Check pulse ID with events
     size_t numveto = 0;
     size_t numerror = 0;
+
+    PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (size_t i = 0; i < m_vecEventIndex.size(); ++i)
     {
+      PARALLEL_START_INTERUPT_REGION
+
       uint64_t eventindex = m_vecEventIndex[i];
       if (eventindex > static_cast<uint64_t>(num_events))
       {
         uint64_t realeventindex = eventindex & VETOFLAG;
+        m_vecEventIndex[i] = realeventindex;
+      }
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
 
+ #if 0
         // Examine whether it is a veto
         bool isveto = false;
+
+
+
+
         if (realeventindex <= num_events)
         {
           if (i == 0 || realeventindex >= m_vecEventIndex[i-1])
@@ -1485,30 +1499,45 @@ namespace DataHandling
         {
           // Is veto, use the unmasked event index
           m_vecEventIndex[i] = realeventindex;
-          ++ numveto;
-          g_log.information() << "[DB Output]" << "Event index " << eventindex
-                              << " is corrected to " << realeventindex << "\n";
+          // ++ numveto;
+          g_log.debug() << "[DB Output]" << "Event index " << eventindex
+                        << " is corrected to " << realeventindex << "\n";
         }
         else
         {
-          m_vecEventIndex[i] = m_vecEventIndex[i-1];
-          ++ numerror;
-          g_log.error() << "EventIndex " << eventindex << " of pulse (indexed as " << i << ") is wrong! "
-                        << "Tried to convert them to " << realeventindex << " , still exceeding max event index "
-                        << num_events << "\n";
+          PARALLEL_CRITICAL(unmask_veto)
+          {
+            m_vecEventIndex[i] = m_vecEventIndex[i-1];
+            ++ numerror;
+            g_log.error() << "EventIndex " << eventindex << " of pulse (indexed as " << i << ") is wrong! "
+                          << "Tried to convert them to " << realeventindex << " , still exceeding max event index "
+                          << num_events << "\n";
+          }
         }
-      }
+      } // END
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
+#endif
 
     // Check
+    PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (size_t i = 0; i < m_vecEventIndex.size(); ++i)
     {
+      PARALLEL_START_INTERUPT_REGION
+
       uint64_t eventindex = m_vecEventIndex[i];
       if (eventindex > static_cast<uint64_t>(num_events))
       {
-        g_log.information() << "Check: Pulse " << i << ": unphysical event index = " << eventindex << "\n";
+        PARALLEL_CRITICAL(unmask_veto_check)
+        {
+          g_log.information() << "Check: Pulse " << i << ": unphysical event index = " << eventindex << "\n";
+        }
       }
+
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
 
     g_log.notice() << "Number of veto pulses = " << numveto << ", Number of error-event-index pulses = "
                    << numerror << "\n";
@@ -1823,8 +1852,6 @@ namespace DataHandling
 
     size_t numbadeventindex = 0;
 
-    // int numeventswritten = 0;
-
     // Declare local statistic parameters
     size_t local_num_error_events = 0;
     size_t local_num_bad_events = 0;
@@ -1833,17 +1860,82 @@ namespace DataHandling
     double local_shortest_tof = static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
     double local_longest_tof = 0.;
 
+#if 0
+    // NOT CALLED AT ALL
     // Local data structure for loaded events
     std::map<PixelType, size_t> local_pidindexmap;
     std::vector<std::vector<Kernel::DateAndTime> > local_pulsetimes;
     std::vector<std::vector<double> > local_tofs;
+#endif
+
+    //----------------------------------------------------------------------------------
+    // Find out the filter-status
+    //----------------------------------------------------------------------------------
+    int filterstatus = -1;
+    DateAndTime logpulsetime;
+    double logtof;
+    bool definedfilterstatus;
+    if (fileOffset == 0)
+    {
+      // First file loading chunk
+      filterstatus = -1;
+      definedfilterstatus = false;
+    }
+    else
+    {
+      size_t firstindex = 1234567890;
+      for (size_t i = 0; i <= current_event_buffer_size; ++i)
+      {
+        DasEvent& tempevent = *(event_buffer + i);
+        PixelType pixelid = tempevent.pid;
+        if (pixelid == m_vecLogPixelID[0])
+        {
+          filterstatus = -1;
+          definedfilterstatus = true;
+          firstindex = i;
+          break;
+        }
+        else if (pixelid == m_vecLogPixelID[1])
+        {
+          filterstatus = 1;
+          definedfilterstatus = true;
+          firstindex = i;
+          break;
+        }
+
+        // g_log.notice() << "[DB] " << "Offset = " << fileOffset << ", i = " << i << ", Pid = " << pixelid << "\n";
+      }
+
+      if (!definedfilterstatus)
+      {
+        g_log.error() << "File offset " << fileOffset << " unable to find a previoiusly defined log event. "
+                      << "\n";
+      }
+      else
+      {
+        g_log.warning() << "File offset " << fileOffset << " 1-st event log at index = " << firstindex
+                        << ", status = " << filterstatus << "\n";
+      }
+    }
+
+    Instrument_const_sptr instrument = localWorkspace->getInstrument();
+    if (!instrument)
+      throw std::runtime_error("Instrument is not setup in localWorkspace.");
+    IComponent_const_sptr source = boost::dynamic_pointer_cast<const IComponent>(instrument->getSource());
+    if (!source)
+      throw std::runtime_error("Source is not set up in local workspace.");
+    double l1 = instrument->getDistance(*source);
+    g_log.notice() << "[DB] L1 = " << l1 << "\n";
 
     //----------------------------------------------------------------------------------
     // process the individual events
     //----------------------------------------------------------------------------------
+    bool firstlogevent = true;
     int64_t i_pulse = 0;
-    int filterstatus = -1;
-    size_t numeventsprint = 0;
+    int64_t boundtime(0);
+    int64_t boundindex(0);
+    int64_t prevbtime(0);
+    PixelType boundpixel(0);
 
     for (size_t ievent = 0; ievent < current_event_buffer_size; ++ievent)
     {
@@ -1885,17 +1977,44 @@ namespace DataHandling
           // Record the wrong/special ID
           if (pixelid == m_vecLogPixelID[0])
           {
+            if (firstlogevent && definedfilterstatus)
+            {
+              if (filterstatus != -1)
+                g_log.error() << "Pre-defined filter status is wrong of fileoffset = " << fileOffset
+                              << " at index = " << ievent << "\n";
+              firstlogevent = false;
+            }
             filterstatus = 1;
             islogevent = true;
+            boundindex = ievent;
+            boundpixel = m_vecLogPixelID[0];
           }
           else if (pixelid == m_vecLogPixelID[1])
           {
+            if (firstlogevent && definedfilterstatus)
+            {
+              if (filterstatus != 1)
+                g_log.error() << "pre-defined filter status is wrong of fileoffset = " << fileOffset
+                              << " at index = " << ievent << "\n";
+              firstlogevent = false;
+            }
             filterstatus = -1;
             islogevent = true;
+            boundindex = ievent;
+            boundpixel = m_vecLogPixelID[1];
           }
           else
             iswrongdetid = true;
         }
+#if 1
+        int64_t i_totaloffsetX = ievent+fileOffset;
+        bool dbprint = (i_totaloffsetX == 23551354 || i_totaloffsetX == -117704);
+        if (dbprint)
+        {
+          g_log.notice() << "[Special] ievent = " << i_totaloffsetX << ", Filter status = "
+                         << filterstatus << ", Prev-boundary-pixel = " << boundpixel << "\n";
+        }
+#endif
 
         // Check if this pid we want to load.
         if (loadOnlySomeSpectra && !iswrongdetid && !islogevent)
@@ -1911,7 +2030,7 @@ namespace DataHandling
 
         // Work with the events to be processed
         // Find the pulse time for this event index
-        if (i_pulse < numPulses-1)
+        if (i_pulse < numPulses-istep)
         {
           // This is the total offset into the file
           size_t i_totaloffset = ievent + fileOffset;
@@ -1919,12 +2038,15 @@ namespace DataHandling
           // Go through event_index until you find where the index increases to encompass the current index.
           // Your pulse = the one before.
           uint64_t thiseventindex = m_vecEventIndex[i_pulse];
-          uint64_t nexteventindex = m_vecEventIndex[i_pulse+1];
+          uint64_t nexteventindex = m_vecEventIndex[i_pulse+istep];
           while (!((i_totaloffset >= thiseventindex) && (i_totaloffset < nexteventindex)) )
           {
-            ++ i_pulse;
-            if (i_pulse >= (numPulses-1))
+            i_pulse += istep;
+            if (i_pulse >= (numPulses-istep))
               break;
+
+            thiseventindex = nexteventindex;
+            nexteventindex = m_vecEventIndex[i_pulse+istep];
           }
 
           // Save the pulse time at this index for creating those events
@@ -1933,7 +2055,7 @@ namespace DataHandling
 
         double tof = static_cast<double>(tempevent.tof) * TOF_CONVERSION;
 
-#if 0
+#ifdef DBOUT
         // Can be modifed for other output purpose
         if (static_cast<int64_t>(m_examEventLog) && pixelid == m_pixelid2exam && numeventswritten < m_numevents2write)
         {
@@ -1943,31 +2065,88 @@ namespace DataHandling
         }
 #endif
 
-        if (!iswrongdetid && !islogevent && filterstatus > 0)
+        int64_t abstime(0);
+        bool reversestatus(false);
+        if (islogevent)
+        {
+          // Record the log boundary time
+          prevbtime = boundtime;
+          boundtime = pulsetime.totalNanoseconds() + static_cast<int64_t>(tof*1000);
+          logpulsetime = pulsetime;
+          logtof = tof;
+        }
+        else
+        {
+          double factor(1.0);
+          if (m_corretctTOF)
+          {
+            // Calculate TOF correction value
+            IComponent_const_sptr det = boost::dynamic_pointer_cast<const IComponent>(instrument->getDetector(pixelid));
+            if (!det)
+              throw std::runtime_error("Unable to get access to detector ");
+            double l2 = instrument->getDistance(*det);
+            factor = (l1)/(l1+l2);
+          }
+
+          // Examine whether to revert the filter
+          if (m_corretctTOF)
+            abstime = pulsetime.totalNanoseconds() + static_cast<int64_t>(tof*factor*1000);
+          else
+            abstime = pulsetime.totalNanoseconds() + static_cast<int64_t>(tof*1000);
+          if (abstime < boundtime)
+          {
+            // In case that the boundary time is bigger (DAS' mistake), seek previous one
+            reversestatus = true;
+#if 1
+            if (dbprint)
+              g_log.warning() << "Event " << ievent + fileOffset << " is behind an event log though it is earlier.  "
+                              << "Diff = " << boundtime - abstime << " ns \n";
+#endif
+          }
+          else
+#if 1
+            if (dbprint)
+              g_log.notice() << "[Special] Event " << ievent + fileOffset << " Revert status = " << reversestatus
+                             << ", Filter-status = " << filterstatus << "\n";
+#endif
+        }
+
+        int currstatus = filterstatus;
+        if (dbprint)
+          g_log.notice() << "[Special] A Event " << ievent + fileOffset << " Revert status = " << reversestatus
+                         << ", current-status = " << currstatus << ", Filter-status = " << filterstatus << "\n";
+        if (reversestatus)
+          currstatus = -filterstatus;
+        if (dbprint)
+          g_log.notice() << "[Special] B Event " << ievent + fileOffset << " Revert status = " << reversestatus
+                         << ", current-status = " << currstatus << ", Filter-status = " << filterstatus << "\n";
+        if (!iswrongdetid && !islogevent && currstatus > 0)
         {
           // Event on REAL detector
-          // - Find the overall max/min tof
+#if 1
+          if (dbprint)
+            g_log.notice() << "[Special] ievent = " << i_totaloffsetX << ", Filter In " << "\n";
+#endif
+
+          // Update summary variable: shortest and longest TOF
           if (tof < local_shortest_tof)
             local_shortest_tof = tof;
           if (tof > local_longest_tof)
             local_longest_tof = tof;
 
-          //The addEventQuickly method does not clear the cache, making things slightly faster.
-          //workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
-
-          // - Add event to data structure
+          // Add event to vector of events
           // (This is equivalent to workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event))
           // (But should be faster as a bunch of these calls were cached.)
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
           // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
           arrayOfVectors[pixelid]->emplace_back( tof, pulsetime );
 #else
-          arrayOfVectors[pid]->push_back(TofEvent(tof, pulsetime));
+          arrayOfVectors[pixelid]->push_back(TofEvent(tof, pulsetime));
 #endif
 
           ++ local_num_good_events;
 
-#if 1
+#ifdef DBOUT
           if (fileOffset == 0 && numeventsprint < 10)
           {
             g_log.notice() << "[E10] Event " << ievent << "\t: Pulse ID = " << i_pulse << ", Pulse Time = " << pulsetime
@@ -1976,11 +2155,31 @@ namespace DataHandling
             ++ numeventsprint;
           }
 #endif
-
+          if ( (m_useDBOutput && pixelid == m_dbPixelID) || dbprint )
+          {
+            g_log.notice() << "[Event_DB11A] Index = " << ievent+fileOffset << ", AbsTime = " << abstime
+                           << ", Pulse time = " << pulsetime << ", TOF = "
+                           << tof << ", Bound Index = " << boundindex << ", Boundary time = "
+                           << boundtime << ", Prev Boundary time = " << prevbtime
+                           << ", Boundary Pixel = " << boundpixel << ", Pixell ID = " << pixelid << "\n";
+          }
         }
         else
         {
-#if 0
+#if 1
+          if (dbprint)
+            g_log.notice() << "[Special] ievent = " << i_totaloffsetX << ", Filter Out " << "\n";
+#endif
+
+          if ( (m_useDBOutput && pixelid == m_dbPixelID) || dbprint )
+          {
+            g_log.notice() << "[Event_DB11B] Index = " <<  ievent+fileOffset << ", AbsTime = " << abstime
+                           << ", Pulse time = " << pulsetime << ", TOF = "
+                           << tof << ", Bound Index = " << boundindex << ", Boundary time = "
+                           << boundtime << ", Prev Boundary Time = " << prevbtime
+                           << ", Boundary Pixel = " << boundpixel << ", Pixell ID = " << pixelid << "\n";
+          }
+#ifdef DBOUT
           // Special events/Wrong detector id
           // - get/add index of the entry in map
           std::map<PixelType, size_t>::iterator it;
