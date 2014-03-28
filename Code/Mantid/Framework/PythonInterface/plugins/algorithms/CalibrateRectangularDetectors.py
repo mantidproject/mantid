@@ -117,14 +117,16 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
         detectors = self.getProperty("DetectorsPeaks").value.strip()
         if self.getProperty("CrossCorrelation").value:
-            positions = self.getProperty("PeakPositions").value
+            positions = self.getProperty("PeakPositions").value.strip()
+            positions = positions.split(',')
             if not bool(detectors):
                 if len(positions) != 1:
                     messages["PeakPositions"] = "Can only have one cross correlation peak without specifying 'DetectorsPeaks'"
             else:
                 detectors = detectors.split(',')
                 if len(detectors) != len(positions):
-                    messages["PeakPositions"] = "Must be the same length as 'DetectorsPeaks'"
+                    messages["PeakPositions"] = "Must be the same length as 'DetectorsPeaks' (%d != %d)" \
+                        % (len(positions), len(detectors))
                     messages["DetectorsPeaks"] = "Must be the same length as 'PeakPositions' or empty"
                 elif len(detectors) > 3:
                     messages["DetectorsPeaks"] = "Up to 3 peaks are supported"
