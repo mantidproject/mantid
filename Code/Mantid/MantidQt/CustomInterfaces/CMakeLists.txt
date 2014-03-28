@@ -29,6 +29,7 @@ set ( SRC_FILES
 	src/MantidEV.cpp
 	src/MantidEVWorker.cpp
 	src/Muon/ALCBaselineModellingPresenter.cpp
+	src/Muon/ALCBaselineModellingView.cpp
 	src/Muon/ALCDataLoadingPresenter.cpp
 	src/Muon/ALCDataLoadingView.cpp
 	src/Muon/ALCInterface.cpp
@@ -91,6 +92,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/MantidEV.h
 	inc/MantidQtCustomInterfaces/MantidEVWorker.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
+	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h
 	inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h
 	inc/MantidQtCustomInterfaces/Muon/ALCInterface.h
@@ -183,6 +185,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectMolDyn.ui
                inc/MantidQtCustomInterfaces/IndirectSimulation.ui
                inc/MantidQtCustomInterfaces/JumpFit.ui
+               inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.ui
                inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/Quasi.ui

@@ -43,6 +43,7 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
+    /// Perform any initialization actions (e.g. set up UI)
     virtual void initialize() = 0;
 
     /// Function chosen to fit the data to
