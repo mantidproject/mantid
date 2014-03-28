@@ -750,15 +750,15 @@ namespace Algorithms
 #endif
 
     // FIXME Make it parallel
-    // PARALLEL_FOR_NO_WSP_CHECK()
+    PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws)
     {
       // FIXME Make it parallel
-      // PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERUPT_REGION
 
       // Get the output event lists (should be empty) to be a map
       map<int, DataObjects::EventList* > outputs;
-      // PARALLEL_CRITICAL(build_elist)
+      PARALLEL_CRITICAL(build_elist)
       {
         for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
         {
@@ -801,9 +801,9 @@ namespace Algorithms
         g_log.notice(logmessage);
 
       // FIXME - Turn on parallel
-      // PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERUPT_REGION
     } // END FOR i = 0
-    // PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERUPT_REGION
     // FIXME - Turn on parallel
 
 
