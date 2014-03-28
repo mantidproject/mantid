@@ -1162,7 +1162,7 @@ namespace WorkspaceCreationHelper
   {  
        Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
       //
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
+      Geometry::IComponent_const_sptr source = instrument->getSource();
       Geometry::IComponent_const_sptr sample = instrument->getSample();
       if ((!source) || (!sample)) 
       {

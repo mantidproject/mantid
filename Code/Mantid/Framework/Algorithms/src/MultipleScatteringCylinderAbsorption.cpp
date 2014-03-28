@@ -144,7 +144,7 @@ void MultipleScatteringCylinderAbsorption::exec()
   Instrument_const_sptr instrument = in_WS->getInstrument();
   if (instrument == NULL)
     throw std::runtime_error("Failed to find instrument attached to InputWorkspace");
-  IObjComponent_const_sptr source = instrument->getSource();
+  IComponent_const_sptr source = instrument->getSource();
   IComponent_const_sptr sample = instrument->getSample();
   if (source == NULL)
     throw std::runtime_error("Failed to find source in the instrument for InputWorkspace");

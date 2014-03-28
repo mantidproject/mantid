@@ -327,20 +327,32 @@ namespace Mantid
     /** Gets a pointer to the source
      *   @returns a pointer to the source
      */
-    IObjComponent_const_sptr Instrument::getSource() const
+    IComponent_const_sptr Instrument::getSource() const
     {
       if ( !m_sourceCache )
       {
         g_log.warning("In Instrument::getSource(). No source has been set.");
-        return IObjComponent_const_sptr(m_sourceCache,NoDeleting());
+        return IComponent_const_sptr(m_sourceCache,NoDeleting());
       }
       else if (m_isParametrized)
       {
-        return IObjComponent_const_sptr(new ObjComponent(static_cast<const Instrument*>(m_base)->m_sourceCache,m_map));
+        auto sourceCache = static_cast<const Instrument*>(m_base)->m_sourceCache;
+        if ( dynamic_cast<const ObjComponent*>(sourceCache) )
+          return IComponent_const_sptr(new ObjComponent(sourceCache,m_map));
+        else if ( dynamic_cast<const CompAssembly*>(sourceCache) )
+          return IComponent_const_sptr(new CompAssembly(sourceCache,m_map));
+        else if ( dynamic_cast<const Component*>(sourceCache) )
+          return IComponent_const_sptr(new Component(sourceCache,m_map));   
+        else
+        {
+          g_log.error("In Instrument::getSource(). Source is not a recognised component type."); 
+          g_log.error("Try to assume it is a Component."); 
+          return IComponent_const_sptr(new ObjComponent(sourceCache,m_map));    
+        }
       }
       else
       {
-        return IObjComponent_const_sptr(m_sourceCache,NoDeleting());
+        return IComponent_const_sptr(m_sourceCache,NoDeleting());
       }
     }
 
@@ -651,7 +663,7 @@ namespace Mantid
       {
         throw std::invalid_argument("Instrument::markAsChopper - Chopper component must have a name");
       }
-      IObjComponent_const_sptr source = getSource();
+      IComponent_const_sptr source = getSource();
       if(!source)
       {
         throw Exception::InstrumentDefinitionError("Instrument::markAsChopper - No source is set, cannot defined chopper positions.");
@@ -702,7 +714,7 @@ namespace Mantid
      *
      *  @param comp :: Component to be marked (stored for later retrieval) as a "source" Component
      */
-    void Instrument::markAsSource(const ObjComponent* comp)
+    void Instrument::markAsSource(const IComponent* comp)
     {
       if (m_isParametrized)
         throw std::runtime_error("Instrument::markAsSource() called on a parametrized Instrument object.");
@@ -1022,7 +1034,7 @@ namespace Mantid
         double & beamline_norm, Kernel::V3D & samplePos) const
     {
       // Get some positions
-      const IObjComponent_const_sptr sourceObj = this->getSource();
+      const IComponent_const_sptr sourceObj = this->getSource();
       if (sourceObj == NULL)
       {
         throw Exception::InstrumentDefinitionError("Failed to get source component from instrument");

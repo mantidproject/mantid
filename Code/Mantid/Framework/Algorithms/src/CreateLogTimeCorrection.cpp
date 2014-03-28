@@ -124,7 +124,7 @@ namespace Algorithms
     }
     V3D samplepos = sample->getPos();
 
-    IObjComponent_const_sptr source = m_instrument->getSource();
+    IComponent_const_sptr source = m_instrument->getSource();
     if (!source)
     {
       throw runtime_error("No source has been set.");

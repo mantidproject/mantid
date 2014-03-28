@@ -134,7 +134,7 @@ namespace Algorithms
 
   void ConvertSpectrumAxis2::createElasticQMap(const std::string & targetUnit)
   {
-    IObjComponent_const_sptr source = m_inputWS->getInstrument()->getSource();
+    IComponent_const_sptr source = m_inputWS->getInstrument()->getSource();
     IComponent_const_sptr sample = m_inputWS->getInstrument()->getSample();
     
     const std::string emodeStr = getProperty("EMode");

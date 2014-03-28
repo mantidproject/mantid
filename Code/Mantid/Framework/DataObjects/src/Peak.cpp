@@ -319,7 +319,7 @@ namespace DataObjects
     if (!inst) throw std::runtime_error("Peak::setInstrument(): No instrument is set!");
 
     // Cache some positions
-    const Geometry::IObjComponent_const_sptr sourceObj = m_inst->getSource();
+    const Geometry::IComponent_const_sptr sourceObj = m_inst->getSource();
     if (sourceObj == NULL)
       throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed to get source component from instrument");
     const Geometry::IComponent_const_sptr sampleObj = m_inst->getSample();

@@ -100,15 +100,22 @@
 </component>
 
 <type name="undulator" is="source">
-  <properties />
-</type>
-<type name="nickel-holder" is="samplePos">
-  <component type="check that sample can be assemble">
+  <component type="check that source can be assembly">
     <location />
   </component>
   <properties />
 </type>
-<type name="check that sample can be assemble">
+<type name="check that source can be assembly">
+  <properties />
+</type>
+
+<type name="nickel-holder" is="samplePos">
+  <component type="check that sample can be assembly">
+    <location />
+  </component>
+  <properties />
+</type>
+<type name="check that sample can be assembly">
   <properties />
 </type>
 

@@ -253,7 +253,7 @@ namespace Mantid
       Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
       //this->pBaseInstr                = instrument->baseInstrument();
       //
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
+      Geometry::IComponent_const_sptr source = instrument->getSource();
       Geometry::IComponent_const_sptr sample = instrument->getSample();
       if ((!source) || (!sample)) 
       {

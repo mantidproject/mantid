@@ -159,7 +159,7 @@ public:
       TS_FAIL("Cannot find expected .vtp file next to " + filename);
     }
 
-    boost::shared_ptr<const IObjComponent> source = i->getSource();
+    boost::shared_ptr<const IObjComponent> source = boost::dynamic_pointer_cast<const IObjComponent>(i->getSource());
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Z(), -17.0,0.01);
 
@@ -444,6 +444,11 @@ public:
     boost::shared_ptr<const IComponent> sample = i->getSample();
     TS_ASSERT_EQUALS( sample->getName(), "nickel-holder");
     TS_ASSERT_DELTA( sample->getPos().X(), 2.0,0.01);
+
+    // test source
+    boost::shared_ptr<const IComponent> source = i->getSource();
+    TS_ASSERT_EQUALS( source->getName(), "undulator");
+    TS_ASSERT_DELTA( source->getPos().Z(), -95.0,0.01);
 
     // Test of monitor shape
     boost::shared_ptr<const IDetector> ptrMonShape = i->getDetector(1001);

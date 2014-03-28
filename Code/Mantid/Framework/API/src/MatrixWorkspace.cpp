@@ -750,7 +750,7 @@ namespace Mantid
     {
       Instrument_const_sptr instrument = getInstrument();
 
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
+      Geometry::IComponent_const_sptr source = instrument->getSource();
       Geometry::IComponent_const_sptr sample = instrument->getSample();
       if ( source == NULL || sample == NULL )
       {
@@ -776,7 +776,7 @@ namespace Mantid
      */
     double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const
     {
-      Geometry::IObjComponent_const_sptr source = getInstrument()->getSource();
+      Geometry::IComponent_const_sptr source = getInstrument()->getSource();
       Geometry::IComponent_const_sptr sample = getInstrument()->getSample();
       if ( source == NULL || sample == NULL )
       {

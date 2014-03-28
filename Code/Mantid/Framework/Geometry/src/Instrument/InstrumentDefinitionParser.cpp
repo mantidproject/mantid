@@ -1015,6 +1015,10 @@ namespace Geometry
     {
       m_instrument->markAsSamplePos(ass);
     }
+    if ( category.compare("Source") == 0 || category.compare("source") == 0 )
+    {
+      m_instrument->markAsSource(ass);
+    }
 
     // If enabled, check for a 'neutronic position' tag and add to cache if found
     if ( m_indirectPositions )
