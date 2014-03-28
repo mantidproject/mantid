@@ -166,9 +166,7 @@ namespace Mantid
       IPeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
       if (peakWS != inPeakWS)
       {
-        auto cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
-        cloneAlg->setChild(true);
-        cloneAlg->initialize();
+        auto cloneAlg = createChildAlgorithm("CloneWorkspace");
         cloneAlg->setProperty("InputWorkspace", inPeakWS);
         cloneAlg->setPropertyValue("OutputWorkspace", "out_ws");
         cloneAlg->execute();

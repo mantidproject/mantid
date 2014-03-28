@@ -57,7 +57,7 @@ namespace Mantid
         IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy) const
     {
 
-      auto alg = AlgorithmManager::Instance().create("CloneWorkspace");
+      auto alg = AlgorithmManager::Instance().createUnmanaged("CloneWorkspace");
       alg->initialize();
       alg->setChild(true);
       alg->setProperty("InputWorkspace", ws);

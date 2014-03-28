@@ -39,7 +39,7 @@ namespace
   // Add a fake peak to an MDEventWorkspace
   void add_fake_md_peak(Workspace_sptr mdws, const size_t& nEvents, const double& h, const double& k, const double& l, const double& radius)
   {
-    auto fakeMDEventDataAlg = AlgorithmManager::Instance().create("FakeMDEventData");
+    auto fakeMDEventDataAlg = AlgorithmManager::Instance().createUnmanaged("FakeMDEventData");
     fakeMDEventDataAlg->setChild(true);
     fakeMDEventDataAlg->initialize();
     fakeMDEventDataAlg->setProperty("InputWorkspace", mdws);
@@ -52,12 +52,12 @@ namespace
   // Make a fake peaks workspace and corresponding mdhistoworkspace and return both
    MDHistoPeaksWSTuple make_peak_and_md_ws(const std::vector<V3D>& hklValuesVec, 
     const double& min, const double& max, const std::vector<double>& peakRadiusVec, 
-    const std::vector<size_t>& nEventsInPeakVec, const size_t& nBins=100)
+    const std::vector<size_t>& nEventsInPeakVec, const size_t& nBins=20)
   {
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
 
     // --- Make a fake md histo workspace ---
-    auto mdworkspaceAlg = AlgorithmManager::Instance().create("CreateMDWorkspace");
+    auto mdworkspaceAlg = AlgorithmManager::Instance().createUnmanaged("CreateMDWorkspace");
     mdworkspaceAlg->setChild(true);
     mdworkspaceAlg->initialize();
     mdworkspaceAlg->setProperty("Dimensions", 3);
@@ -70,7 +70,7 @@ namespace
     Workspace_sptr mdws = mdworkspaceAlg->getProperty("OutputWorkspace");
 
     // --- Set speical coordinates on fake mdworkspace --
-    auto coordsAlg = AlgorithmManager::Instance().create("SetSpecialCoordinates");
+    auto coordsAlg = AlgorithmManager::Instance().createUnmanaged("SetSpecialCoordinates");
     coordsAlg->setChild(true);
     coordsAlg->initialize();
     coordsAlg->setProperty("InputWorkspace", mdws);
@@ -82,7 +82,7 @@ namespace
     peakWS->setInstrument(inst);
 
     // --- Set speical coordinates on fake PeaksWorkspace --
-    coordsAlg = AlgorithmManager::Instance().create("SetSpecialCoordinates");
+    coordsAlg = AlgorithmManager::Instance().createUnmanaged("SetSpecialCoordinates");
     coordsAlg->setChild(true);
     coordsAlg->initialize();
     coordsAlg->setProperty("InputWorkspace", peakWS);
@@ -103,7 +103,7 @@ namespace
       add_fake_md_peak(mdws, nEventsInPeakVec[i], h, k, l, peakRadiusVec[i]);
     }
 
-    auto binMDAlg = AlgorithmManager::Instance().create("BinMD");
+    auto binMDAlg = AlgorithmManager::Instance().createUnmanaged("BinMD");
     binMDAlg->setChild(true);
     binMDAlg->initialize();
     binMDAlg->setProperty("InputWorkspace", mdws);
@@ -126,7 +126,7 @@ namespace
       // Make a fake peaks workspace and corresponding mdhistoworkspace and return both
  MDHistoPeaksWSTuple make_peak_and_md_ws(const std::vector<V3D>& hklValues, 
     const double& min, const double& max, const double& peakRadius=1, 
-    const size_t nEventsInPeak=1000, const size_t& nBins=100)
+    const size_t nEventsInPeak=1000, const size_t& nBins=20)
   {
     std::vector<size_t> nEventsInPeakVec(hklValues.size(), nEventsInPeak);
     std::vector<double> peakRadiusVec(hklValues.size(), peakRadius);
@@ -371,8 +371,55 @@ public:
     TSM_ASSERT_EQUALS("Second peak is twice as 'bright'", outPeaksWS->getPeak(0).getSigmaIntensity() * 2, outPeaksWS->getPeak(1).getSigmaIntensity());
   }
 
+};
 
+//=====================================================================================
+// Performance Tests
+//=====================================================================================
+class IntegratePeaksUsingClustersTestPerformance : public CxxTest::TestSuite
+{
 
+private:
+
+  // Input data
+  MDHistoPeaksWSTuple m_inputWorkspaces;
+  double m_peakRadius;
+  double m_threshold;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static IntegratePeaksUsingClustersTestPerformance *createSuite() { return new IntegratePeaksUsingClustersTestPerformance(); }
+  static void destroySuite( IntegratePeaksUsingClustersTestPerformance *suite ) { delete suite; }
+
+  IntegratePeaksUsingClustersTestPerformance()
+  {
+    FrameworkManager::Instance();
+   
+    std::vector<V3D> hklValues;
+    for(double i = -10; i < 10; i+=4)
+    {
+      for(double j = -10; j < 10; j+=4)
+      {
+        for(double k = -10; k < 10; k+=4)
+        {
+          hklValues.push_back(V3D(i,j,k));
+        }
+      }
+    }
+    
+    m_peakRadius = 1;
+    m_threshold = 10;
+    const size_t nEventsInPeak = 1000;
+    m_inputWorkspaces = make_peak_and_md_ws(hklValues, -10, 10, m_peakRadius, nEventsInPeak, 50);
+    
+  }
+
+  void test_execute()
+  {
+    // Just run the integration. Functional tests handled in separate suite.
+    execute_integration(m_inputWorkspaces, m_peakRadius, m_threshold);
+  }
 
 };
 
