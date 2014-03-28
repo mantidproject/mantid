@@ -11,6 +11,9 @@ Uses connected component analysis to integrate peaks in an PeaksWorkspace over a
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Utils.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -150,8 +153,17 @@ namespace Mantid
     {
       declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace","",Direction::Input), "Input md workspace.");
       declareProperty(new WorkspaceProperty<IPeaksWorkspace>("PeaksWorkspace","", Direction::Input),"A PeaksWorkspace containing the peaks to integrate.");
-      declareProperty(new PropertyWithValue<double>("RadiusEstimate", 0.1, Direction::Input), "Estimate of Peak Radius. Points beyond this radius will not be considered, so caution towards the larger end.");
-      declareProperty(new PropertyWithValue<double>("Threshold", 0, Direction::Input), "Threshold signal above which to consider peaks");
+      
+      auto positiveValidator = boost::make_shared<BoundedValidator<double> >();
+      positiveValidator->setLower(0);
+      
+      auto compositeValidator = boost::make_shared<CompositeValidator>();
+      compositeValidator->add(positiveValidator);
+      compositeValidator->add(boost::make_shared<MandatoryValidator<double > >());
+
+      declareProperty(new PropertyWithValue<double>("RadiusEstimate", 0.0, compositeValidator, Direction::Input), "Estimate of Peak Radius. Points beyond this radius will not be considered, so caution towards the larger end.");
+      
+      declareProperty(new PropertyWithValue<double>("Threshold", 0, positiveValidator->clone(), Direction::Input), "Threshold signal above which to consider peaks");
       declareProperty(new WorkspaceProperty<IPeaksWorkspace>("OutputWorkspace","",Direction::Output), "An output integrated peaks workspace."); 
       declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("OutputWorkspaceMD","",Direction::Output), "MDHistoWorkspace containing the clusters.");
     }
