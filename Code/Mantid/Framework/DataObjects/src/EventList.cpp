@@ -3909,14 +3909,16 @@ namespace DataObjects
    * @param docorrection :: flag to determine whether or not to apply correction
    */
   template< class T >
-  void EventList::splitByFullTimeVectorSplitterHelper(const std::vector<int64_t>& vectimes,
-                                                      const std::vector<int>& vecgroups,
-                                                      std::map<int, EventList * > outputs,
-      typename std::vector<T> & events, double tofcorrection, bool docorrection) const
+  std::string EventList::splitByFullTimeVectorSplitterHelper(const std::vector<int64_t>& vectimes,
+                                                             const std::vector<int>& vecgroups,
+                                                             std::map<int, EventList * > outputs,
+                                                             typename std::vector<T> & events, double tofcorrection,
+                                                             bool docorrection, bool printdetail) const
   {
     // Define variables for events
     // size_t numevents = events.size();
     typename std::vector<T>::iterator eviter;
+    std::stringstream msgss;
 
     // Loop through events
     for (eviter = events.begin(); eviter != events.end(); ++eviter)
@@ -3941,22 +3943,43 @@ namespace DataObjects
         group = vecgroups[index-1];
       }
 
+      if (printdetail)
+      {
+        if (group >= 0)
+          msgss << "[Event-12A-" << group << "] AbsTime = " << evabstimens << ", Pulse = " << eviter->m_pulsetime
+                << ", TOF = " << eviter->m_tof
+                << ", AbsLower = " << vectimes[index-1] << ", AbsUpper = " << vectimes[index] << "\n";
+        else
+          msgss << "[Event-12B] AbsTime = " << evabstimens << ", Pulse = " << eviter->m_pulsetime
+                << ", TOF = " << eviter->m_tof
+                << ", AbsLower = " << vectimes[index-1] << ", AbsUpper = " << vectimes[index] << "\n";
+      }
+
       // Copy event to the proper group
       EventList* myOutput = outputs[group];
-      const T eventCopy(*eviter);
-      myOutput->addEventQuickly(eventCopy);
+      if (!myOutput)
+      {
+        std::stringstream errss;
+        errss << "Group " << group << " has a NULL output EventList. " << "\n";
+        msgss << errss.str();
+      }
+      else
+      {
+        const T eventCopy(*eviter);
+        myOutput->addEventQuickly(eventCopy);
+      }
     }
 
-    return;
+    return (msgss.str());
   }
 
 
   //----------------------------------------------------------------------------------------------
   /**
     */
-  void EventList::splitByFullTimeMatrixSplitter(const std::vector<int64_t>& vectimes, const std::vector<int>& vecgroups,
-                                                std::map<int, EventList*> vec_outputEventList,
-                                                double tofcorrection, bool docorrection) const
+  std::string EventList::splitByFullTimeMatrixSplitter(const std::vector<int64_t>& vectimes, const std::vector<int>& vecgroups,
+                                                       std::map<int, EventList*> vec_outputEventList,
+                                                       double tofcorrection, bool docorrection, bool printdetail) const
   {
     // Check validity
     if (eventType == WEIGHTED_NOTIME)
@@ -3978,6 +4001,9 @@ namespace DataObjects
       opeventlist->switchTo(eventType);
     }
 
+
+    std::string debugmessage("");
+
     // Do nothing if there are no entries
     if (vecgroups.size() == 0)
     {
@@ -3991,17 +4017,20 @@ namespace DataObjects
       switch (eventType)
       {
       case TOF:
-        splitByFullTimeVectorSplitterHelper(vectimes, vecgroups, vec_outputEventList, this->events, tofcorrection, docorrection);
-        break;
+          debugmessage = splitByFullTimeVectorSplitterHelper(vectimes, vecgroups, vec_outputEventList, this->events,
+                                                             tofcorrection, docorrection, printdetail);
+          break;
       case WEIGHTED:
-        splitByFullTimeVectorSplitterHelper(vectimes, vecgroups, vec_outputEventList, this->weightedEvents, tofcorrection, docorrection);
-        break;
+          debugmessage = splitByFullTimeVectorSplitterHelper(vectimes, vecgroups, vec_outputEventList, this->weightedEvents,
+                                                             tofcorrection, docorrection);
+          break;
       case WEIGHTED_NOTIME:
-        break;
+          debugmessage = "TOF type is weighted no time.  Impossible to split. ";
+          break;
       }
     }
 
-    return;
+    return debugmessage;
   }
 
   //------------------------------------------- --------------------------------------------------
