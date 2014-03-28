@@ -19,7 +19,7 @@ namespace CurveFitting
 
   namespace
   {
-    Kernel::Logger& g_log = Kernel::Logger::get("MultiDomainCreator");
+    Kernel::Logger g_log("MultiDomainCreator");
   }
 
   void MultiDomainCreator::setCreator(size_t i, IDomainCreator* creator)
