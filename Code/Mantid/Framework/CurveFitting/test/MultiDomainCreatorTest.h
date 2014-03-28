@@ -8,6 +8,8 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/UserFunction.h"
@@ -24,6 +26,18 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 
+class MultiDomainCreatorTest_Fun: public IFunction1D, public ParamFunction
+{
+public:
+  size_t m_wsIndex;
+  std::string name()const {return "MultiDomainCreatorTest_Fun";} 
+  void function1D(double* , const double* , const size_t )const{}
+  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX)
+  {
+    m_wsIndex = wi;
+  }
+};
+
 class MultiDomainCreatorTest : public CxxTest::TestSuite
 {
 public:
@@ -34,7 +48,6 @@ public:
   
   MultiDomainCreatorTest()
   {
-    //FrameworkManager::Instance();
     ws1.reset(new WorkspaceTester);
     ws1->initialize(1,10,10);
     {
@@ -180,17 +193,17 @@ public:
     auto mdfun = boost::make_shared<MultiDomainFunction>();
 
     auto f1 = boost::make_shared<UserFunction>();
-    f1->setAttributeValue("Formula","0.1*x");
+    f1->setAttributeValue("Formula","1.1 + 0*x");
     mdfun->addFunction(f1);
     mdfun->setDomainIndex(0,0);
 
     auto f2 = boost::make_shared<UserFunction>();
-    f2->setAttributeValue("Formula","1.1 + 0.1*x");
+    f2->setAttributeValue("Formula","2.1 + 0*x");
     mdfun->addFunction(f2);
     mdfun->setDomainIndex(1,1);
 
     auto f3 = boost::make_shared<UserFunction>();
-    f3->setAttributeValue("Formula","2.2+0.1*x");
+    f3->setAttributeValue("Formula","3.1 + 0*x");
     mdfun->addFunction(f3);
     mdfun->setDomainIndex(2,2);
 
@@ -211,6 +224,59 @@ public:
 
   }
 
+  void test_setMatrixWorkspace()
+  {
+    Mantid::Kernel::PropertyManager manager;
+    manager.declareProperty(new WorkspaceProperty<Workspace>("WS1","",Direction::Input));
+    manager.declareProperty(new WorkspaceProperty<Workspace>("WS2","",Direction::Input));
+    manager.declareProperty(new WorkspaceProperty<Workspace>("WS3","",Direction::Input));
+
+    std::vector<std::string> propNames;
+    propNames.push_back("WS1");
+    propNames.push_back("WS2");
+    propNames.push_back("WS3");
+    MultiDomainCreator multi( &manager, propNames );
+
+    manager.setProperty("WS1", ws1);
+    manager.setProperty("WS2", ws2);
+    manager.setProperty("WS3", ws3);
+
+    FitMW* creator = new FitMW( &manager, "WS1" );
+    creator->declareDatasetProperties("1");
+    multi.setCreator(0, creator);
+    creator = new FitMW( &manager, "WS2" );
+    creator->declareDatasetProperties("2");
+    multi.setCreator(1, creator);
+    creator = new FitMW( &manager, "WS3" );
+    creator->declareDatasetProperties("3");
+    multi.setCreator(2, creator);
+
+    manager.setProperty("WorkspaceIndex1", 0);
+    manager.setProperty("WorkspaceIndex2", 1);
+    manager.setProperty("WorkspaceIndex3", 2);
+
+    FunctionDomain_sptr domain;
+    IFunctionValues_sptr values;
+
+    auto mdfun = boost::make_shared<MultiDomainFunction>();
+
+    auto f1 = boost::make_shared<MultiDomainCreatorTest_Fun>();
+    mdfun->addFunction(f1);
+    mdfun->setDomainIndex(0,0);
+
+    auto f2 = boost::make_shared<MultiDomainCreatorTest_Fun>();
+    mdfun->addFunction(f2);
+    mdfun->setDomainIndex(1,1);
+
+    auto f3 = boost::make_shared<MultiDomainCreatorTest_Fun>();
+    mdfun->addFunction(f3);
+    mdfun->setDomainIndex(2,2);
+
+    multi.initFunction( mdfun );
+    TS_ASSERT_EQUALS(f1->m_wsIndex, 0);
+    TS_ASSERT_EQUALS(f2->m_wsIndex, 1);
+    TS_ASSERT_EQUALS(f3->m_wsIndex, 2);
+  }
 
 private:
 
@@ -226,6 +292,7 @@ private:
     {
       TS_ASSERT_EQUALS( data[i], static_cast<double>(index+1) );
       TS_ASSERT_EQUALS( data[i] - calc[i], diff[i] );
+      TS_ASSERT_DELTA( -0.1, diff[i], 1e-10 );
     }
 
   }
