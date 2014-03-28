@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IFunction.h"
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
@@ -41,9 +42,22 @@ namespace CustomInterfaces
   {
     Q_OBJECT
 
+  public:
+    virtual void initialize() = 0;
+
+    /// Function chosen to fit the data to
+    virtual IFunction_const_sptr function() const = 0;
+
   public slots:
-    /// Set the data we are going to model the baseline for
-    virtual void setData(MatrixWorkspace_const_sptr data) = 0;
+    /// Display the data we are going to model the baseline for
+    virtual void displayData(MatrixWorkspace_const_sptr data) = 0;
+
+    /// Update the displayed function
+    virtual void updateFunction(IFunction_const_sptr func) = 0;
+
+  signals:
+    /// Request to fit the data according to the function and sections
+    void fit();
   };
 
 

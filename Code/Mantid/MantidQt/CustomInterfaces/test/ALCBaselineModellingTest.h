@@ -4,17 +4,40 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include <boost/scoped_ptr.hpp>
+#include <boost/assign/list_of.hpp>
+
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FrameworkManager.h"
+
 #include "MantidQtCustomInterfaces/Muon/IALCBaselineModellingView.h"
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
 
 using namespace MantidQt::CustomInterfaces;
+using namespace testing;
+using boost::scoped_ptr;
 
 class MockALCBaselineModellingView : public IALCBaselineModellingView
 {
 public:
-  MockALCBaselineModellingView() : m_presenter(this) {}
+  MockALCBaselineModellingView(MatrixWorkspace_const_sptr data)
+    : m_presenter(this, data)
+  {}
 
-  MOCK_METHOD1(setData, void(MatrixWorkspace_const_sptr));
+  void initialize()
+  {
+    m_presenter.initialize();
+  }
+
+  void requestFit()
+  {
+    emit fit();
+  }
+
+  MOCK_CONST_METHOD0(function, IFunction_const_sptr());
+  MOCK_METHOD1(displayData, void(MatrixWorkspace_const_sptr));
+  MOCK_METHOD1(updateFunction, void(IFunction_const_sptr));
 
 private:
   ALCBaselineModellingPresenter m_presenter;
@@ -28,9 +51,45 @@ public:
   static ALCBaselineModellingTest *createSuite() { return new ALCBaselineModellingTest(); }
   static void destroySuite( ALCBaselineModellingTest *suite ) { delete suite; }
 
-  void test_initial()
+  ALCBaselineModellingTest()
   {
-    MockALCBaselineModellingView view;
+    FrameworkManager::Instance(); // To make sure everything is initialized
+  }
+
+  MockALCBaselineModellingView* createView(MatrixWorkspace_const_sptr data)
+  {
+    auto view = new MockALCBaselineModellingView(data);
+    EXPECT_CALL(*view, displayData(_)).Times(1);
+    view->initialize();
+    return view;
+  }
+
+  void test_basicFitting()
+  {
+    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, 3, 3);
+
+    using boost::assign::list_of;
+
+    data->dataX(0) = list_of(0)(2)(3).convert_to_container<Mantid::MantidVec>();
+    data->dataY(0) = list_of(5)(5)(5).convert_to_container<Mantid::MantidVec>();
+
+    IFunction_const_sptr func = FunctionFactory::Instance().createInitialized("name=FlatBackground,A0=0");
+    IFunction_const_sptr fittedFunc;
+
+    scoped_ptr<MockALCBaselineModellingView> view(createView(data));
+    EXPECT_CALL(*view, function()).WillRepeatedly(Return(func));
+    EXPECT_CALL(*view, updateFunction(_)).Times(1).WillOnce(SaveArg<0>(&fittedFunc));
+    EXPECT_CALL(*view, displayData(_)).Times(0);
+
+    view->requestFit();
+
+    TS_ASSERT(fittedFunc);
+
+    if (fittedFunc)
+    {
+      TS_ASSERT_EQUALS(fittedFunc->name(), "FlatBackground");
+      TS_ASSERT_DELTA(fittedFunc->getParameter("A0"), 5, 1E-8);
+    }
   }
 };
 

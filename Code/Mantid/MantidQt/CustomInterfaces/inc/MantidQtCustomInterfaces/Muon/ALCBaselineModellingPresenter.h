@@ -40,11 +40,21 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    ALCBaselineModellingPresenter(IALCBaselineModellingView* view);
+    ALCBaselineModellingPresenter(IALCBaselineModellingView* view, MatrixWorkspace_const_sptr data);
     virtual ~ALCBaselineModellingPresenter();
 
+    void initialize();
+
+  private slots:
+    /// Perform fit
+    void fit();
+
   private:
+    /// Connect to view signals
+    void connectView();
+
     IALCBaselineModellingView* const m_view;
+    const MatrixWorkspace_const_sptr m_data;
   };
 
 } // namespace CustomInterfaces
