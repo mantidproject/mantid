@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/MSDFit.cpp
 	src/MantidEV.cpp
 	src/MantidEVWorker.cpp
+	src/Muon/ALCBaselineModellingPresenter.cpp
 	src/Muon/ALCDataLoadingPresenter.cpp
 	src/Muon/ALCDataLoadingView.cpp
 	src/Muon/ALCInterface.cpp
@@ -89,9 +90,11 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/MSDFit.h
 	inc/MantidQtCustomInterfaces/MantidEV.h
 	inc/MantidQtCustomInterfaces/MantidEVWorker.h
+	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h
 	inc/MantidQtCustomInterfaces/Muon/ALCInterface.h
+	inc/MantidQtCustomInterfaces/Muon/IALCBaselineModellingView.h
 	inc/MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h
 	inc/MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
@@ -147,6 +150,8 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
                 inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
+                inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
+                inc/MantidQtCustomInterfaces/Muon/IALCBaselineModellingView.h
                 inc/MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h
                 inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
@@ -190,14 +195,16 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
 )
 
-set ( TEST_FILES ALCDataLoadingTest.h
-                 CreateMDWorkspaceAlgDialogTest.h
-                 EventNexusFileMementoTest.h
-                 WorkspaceMementoTest.h
-                 MuonAnalysisHelperTest.h
-                 WorkspaceInADSTest.h
-                 RawFileMementoTest.h
-                 IO_MuonGroupingTest.h
+set ( TEST_FILES
+	ALCBaselineModellingTest.h
+	ALCDataLoadingTest.h
+	CreateMDWorkspaceAlgDialogTest.h
+	EventNexusFileMementoTest.h
+	IO_MuonGroupingTest.h
+	MuonAnalysisHelperTest.h
+	RawFileMementoTest.h
+	WorkspaceInADSTest.h
+	WorkspaceMementoTest.h
 )
 
 include_directories ( inc )
