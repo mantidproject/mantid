@@ -10,6 +10,7 @@ Uses connected component analysis to integrate peaks in an PeaksWorkspace over a
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Utils.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -29,18 +30,18 @@ namespace
   typedef std::map<V3D, size_t> PositionToLabelIdMap;
 
   class IsNearPeak
-{
-public:
-  IsNearPeak(const V3D& coordinates, const double& thresholdDistance ) : m_coordinates(coordinates), m_thresholdDistance(thresholdDistance)
-  {}
-  bool operator()( const PositionToLabelIdMap::value_type& v ) const 
-  { 
-    return  v.first.distance(m_coordinates) < m_thresholdDistance; 
-  }
-private:
-  const V3D m_coordinates;
-  const double m_thresholdDistance;
-};
+  {
+  public:
+    IsNearPeak(const V3D& coordinates, const double& thresholdDistance ) : m_coordinates(coordinates), m_thresholdDistance(thresholdDistance)
+    {}
+    bool operator()( const PositionToLabelIdMap::value_type& v ) const 
+    { 
+      return  v.first.distance(m_coordinates) < m_thresholdDistance; 
+    }
+  private:
+    const V3D m_coordinates;
+    const double m_thresholdDistance;
+  };
 
   class PeakBackground : public Mantid::Crystal::HardThresholdBackground
   {
@@ -62,7 +63,7 @@ private:
       {
         const VMD& center = iterator->getCenter();
         V3D temp(center[0], center[1], center[2]); // This assumes dims 1, 2, and 3 in the workspace correspond to positions.
-          
+
         for(size_t i = 0; i < m_peaksWS->getNumberPeaks(); ++i)
         {
           V3D coords;
@@ -82,7 +83,7 @@ private:
           {
             return false;
           }
-          
+
         }
 
       }
@@ -161,10 +162,21 @@ namespace Mantid
     void IntegratePeaksUsingClusters::exec()
     {
       IMDHistoWorkspace_sptr mdWS = getProperty("InputWorkspace");
-      PeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
-      Mantid::DataObjects::PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
+      IPeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
+      IPeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
       if (peakWS != inPeakWS)
-        peakWS = inPeakWS->clone();
+      {
+        auto cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
+        cloneAlg->setChild(true);
+        cloneAlg->initialize();
+        cloneAlg->setProperty("InputWorkspace", inPeakWS);
+        cloneAlg->setPropertyValue("OutputWorkspace", "out_ws");
+        cloneAlg->execute();
+        {
+          Workspace_sptr temp = cloneAlg->getProperty("OutputWorkspace");
+          peakWS = boost::dynamic_pointer_cast<IPeaksWorkspace>(temp);
+        }
+      }
 
       const SpecialCoordinateSystem mdCoordinates = mdWS->getSpecialCoordinateSystem();
       // TODO. check special coordinates have been set. If unknown throw.
@@ -186,60 +198,60 @@ namespace Mantid
       LabelIdIntensityMap labelMap;
       PositionToLabelIdMap positionMap;
 
-       for(size_t i = 0; i < clusters->getNPoints(); ++i)
-       {
-         const size_t& label_id = static_cast<size_t>(clusters->getSignalAt(i));
+      for(size_t i = 0; i < clusters->getNPoints(); ++i)
+      {
+        const size_t& label_id = static_cast<size_t>(clusters->getSignalAt(i));
 
-         const double& signal = mdWS->getSignalAt(i);
-         double errorSQ = mdWS->getErrorAt(i);
-         errorSQ *=errorSQ;
-         if(label_id >= analysis.getStartLabelId())
-         {
-         if(labelMap.find(label_id) != labelMap.end())
-         {
-           SignalErrorSQPair current = labelMap[label_id];
-           labelMap[label_id] = SignalErrorSQPair(current.get<0>() + signal, current.get<1>() + errorSQ);
-         }
-         else
-         {
-           labelMap[label_id] = SignalErrorSQPair(signal, errorSQ);
-           
-           const VMD& center = mdWS->getCenter(i);
-           V3D temp(center[0], center[1], center[2]);
-           positionMap[temp] = label_id; //Record charcteristic position of the cluster.
-         }
-         }
-       }
+        const double& signal = mdWS->getSignalAt(i);
+        double errorSQ = mdWS->getErrorAt(i);
+        errorSQ *=errorSQ;
+        if(label_id >= analysis.getStartLabelId())
+        {
+          if(labelMap.find(label_id) != labelMap.end())
+          {
+            SignalErrorSQPair current = labelMap[label_id];
+            labelMap[label_id] = SignalErrorSQPair(current.get<0>() + signal, current.get<1>() + errorSQ);
+          }
+          else
+          {
+            labelMap[label_id] = SignalErrorSQPair(signal, errorSQ);
+
+            const VMD& center = mdWS->getCenter(i);
+            V3D temp(center[0], center[1], center[2]);
+            positionMap[temp] = label_id; //Record charcteristic position of the cluster.
+          }
+        }
+      }
 
 
-       for(size_t i =0; i < peakWS->getNumberPeaks(); ++i)
-       {
-         IPeak& peak = peakWS->getPeak(i);
-         V3D coords;
-         if(mdCoordinates==QLab)
-          {
-            coords= peakWS->getPeak(i).getQLabFrame();
-          }
-          else if(mdCoordinates==QSample)
-          {
-            coords= peakWS->getPeak(i).getQSampleFrame();
-          }
-          else if(mdCoordinates==Mantid::API::HKL)
-          {
-            coords= peakWS->getPeak(i).getHKL();
-          }
+      for(size_t i =0; i < peakWS->getNumberPeaks(); ++i)
+      {
+        IPeak& peak = peakWS->getPeak(i);
+        V3D coords;
+        if(mdCoordinates==QLab)
+        {
+          coords= peakWS->getPeak(i).getQLabFrame();
+        }
+        else if(mdCoordinates==QSample)
+        {
+          coords= peakWS->getPeak(i).getQSampleFrame();
+        }
+        else if(mdCoordinates==Mantid::API::HKL)
+        {
+          coords= peakWS->getPeak(i).getHKL();
+        }
 
-          /* Now find the label corresponding to these coordinates. Use the characteristic coordinates of the coordinates
-             recorded earlier to do this. A better implemention would be a direct lookup.
-          */
-          IsNearPeak nearPeak(coords, radiusEstimate);
-          auto iterator = std::find_if(positionMap.begin(), positionMap.end(), nearPeak);
-          if(iterator != positionMap.end())
-          {
-            peak.setIntensity(labelMap[ iterator->second ].get<0>());
-            peak.setSigmaIntensity(labelMap[ iterator->second ].get<1>());
-          }
-       }
+        /* Now find the label corresponding to these coordinates. Use the characteristic coordinates of the coordinates
+        recorded earlier to do this. A better implemention would be a direct lookup.
+        */
+        IsNearPeak nearPeak(coords, radiusEstimate);
+        auto iterator = std::find_if(positionMap.begin(), positionMap.end(), nearPeak);
+        if(iterator != positionMap.end())
+        {
+          peak.setIntensity(labelMap[ iterator->second ].get<0>());
+          peak.setSigmaIntensity(labelMap[ iterator->second ].get<1>());
+        }
+      }
 
       setProperty("OutputWorkspace", peakWS);
       setProperty("OutputWorkspaceMD", clusters);
