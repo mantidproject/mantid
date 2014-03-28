@@ -188,10 +188,13 @@ namespace DataHandling
     // try short instrument name
     if (!base.exists())
     {
+      return "";
+#if 0
       instrument = Kernel::ConfigService::Instance().getInstrument(instrument).shortName();
       base = Poco::File("/SNS/" + instrument + "/");
       if (!base.exists())
         return "";
+#endif
     }
     vector<string> dirs; // poco won't let me reuse temp
     base.list(dirs);

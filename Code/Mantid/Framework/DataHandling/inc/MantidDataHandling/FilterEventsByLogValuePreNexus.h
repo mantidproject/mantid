@@ -8,6 +8,7 @@
 #include "MantidKernel/BinaryFile.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 
 namespace Mantid
@@ -93,7 +94,7 @@ struct Pulse
 #pragma pack(pop)
 
 
-class DLLExport FilterEventsByLogValuePreNexus : public API::IFileLoader<Kernel::FileDescriptor>
+class DLLExport FilterEventsByLogValuePreNexus : public API::IFileLoader<Kernel::FileDescriptor>, public API::DeprecatedAlgorithm
 {
 public:
   /// Constructor
