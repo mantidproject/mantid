@@ -244,7 +244,7 @@ namespace Mantid
         join     = Strings::join(joinClause.begin(), joinClause.end(), " ");
         where    = Strings::join(whereClause.begin(), whereClause.end(), " AND ");
         orderBy  = " ORDER BY inves.id DESC";
-        includes = " INCLUDE inves.investigationInstruments.instrument, inves.parameters";
+        includes = " INCLUDE inves.facility, inves.investigationInstruments.instrument, inves.parameters";
 
         // As we joined all WHERE clause with AND we need to include the WHERE at the start of the where segment.
         where.insert(0, " WHERE ");
@@ -359,7 +359,13 @@ namespace Mantid
       std::string sessionID = m_session->getSessionId();
       request.sessionId = &sessionID;
 
-      std::string query = "Investigation INCLUDE InvestigationInstrument, Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user]";
+      std::string query = "SELECT DISTINCT inves "
+        "FROM Investigation inves "
+        "JOIN inves.investigationUsers users "
+        "JOIN users.user user "
+        "WHERE user.name = :user "
+        "ORDER BY inves.id DESC "
+        "INCLUDE inves.facility, inves.investigationInstruments.instrument, inves.parameters";
       request.query     = &query;
 
       int result = icat.search(&request, &response);
@@ -385,11 +391,13 @@ namespace Mantid
       {
         // Add rows headers to the output workspace.
         outputws->addColumn("str","Investigation id");
+        outputws->addColumn("str","Facility");
         outputws->addColumn("str","Title");
         outputws->addColumn("str","Instrument");
         outputws->addColumn("str","Run range");
         outputws->addColumn("str","Start date");
         outputws->addColumn("str","End date");
+        outputws->addColumn("str","SessionID");
       }
 
       // Add data to each row in the output workspace.
@@ -406,6 +414,7 @@ namespace Mantid
 
           // Now add the relevant investigation data to the table (They always exist).
           savetoTableWorkspace(investigation->name, table);
+          savetoTableWorkspace(investigation->facility->name, table);
           savetoTableWorkspace(investigation->title, table);
           savetoTableWorkspace(investigation->investigationInstruments.at(0)->instrument->name, table);
 
@@ -436,6 +445,12 @@ namespace Mantid
             std::string endDate = formatDateTime(*investigation->endDate, "%Y-%m-%d");
             savetoTableWorkspace(&endDate, table);
           }
+          else
+          {
+            savetoTableWorkspace(&emptyCell, table);
+          }
+          std::string sessionID = m_session->getSessionId();
+          savetoTableWorkspace(&sessionID, table);
         }
         else
         {

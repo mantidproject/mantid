@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>679</width>
-    <height>993</height>
+    <height>998</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -90,7 +90,7 @@
      </item>
      <item>
       <widget class="QFrame" name="searchHeader">
-       <layout class="QHBoxLayout" name="searchHeaderLayout" stretch="0,0">
+       <layout class="QHBoxLayout" name="searchHeaderLayout" stretch="0,0,0">
         <property name="sizeConstraint">
          <enum>QLayout::SetDefaultConstraint</enum>
         </property>
@@ -132,6 +132,16 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="catalogSelection">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:400;&quot;&gt;Select facilities of the catalogs you want to search in.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Select a catalog</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
