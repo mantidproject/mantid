@@ -81,7 +81,7 @@ namespace CurveFitting
         mdFunction->getDomainIndices(iFun,m_creators.size(),domainIndices);
         if ( !domainIndices.empty() )
         {
-          if ( domainIndices.size() == 1 )
+          if ( domainIndices.size() != 1 )
           {
             g_log.warning() << "Function #" << iFun << " applies to multiple domains." << std::endl;
             g_log.warning() << "Only one of the domains is used to set workspace." << std::endl;
@@ -108,7 +108,14 @@ namespace CurveFitting
   }
 
   /**
-   * Create the output workspace.
+   * Create the output workspace group. 
+   * @param baseName :: The base name for the output workspace. Suffix "Workspace" will be added to it.
+   * @param function :: A function to calculate the values. Must be of the MultiDomainFunction type.
+   * @param domain :: Domain created earlier with this creator (unused)
+   * @param values :: Values created earlier with this creator (unused)
+   * @param outputWorkspacePropertyName :: Name for the property to hold the output workspace. If
+   *    empty the property won't be created.
+   * @return A shared pointer to the created workspace.
    */
   boost::shared_ptr<API::Workspace> MultiDomainCreator::createOutputWorkspace(
     const std::string& baseName,

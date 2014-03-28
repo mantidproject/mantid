@@ -6,8 +6,11 @@
 #include "MantidAPI/JointDomain.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/UserFunction.h"
 #include "MantidKernel/PropertyManager.h"
 
 #include "MantidTestHelpers/FakeObjects.h"
@@ -137,10 +140,96 @@ public:
     TS_ASSERT_EQUALS(d3->size() , 10);
 
     TS_ASSERT_EQUALS(values->size() , 30);
+
+  }
+
+  void test_output_workspace()
+  {
+    Mantid::Kernel::PropertyManager manager;
+    manager.declareProperty(new WorkspaceProperty<Workspace>("WS1","",Direction::Input));
+    manager.declareProperty(new WorkspaceProperty<Workspace>("WS2","",Direction::Input));
+    manager.declareProperty(new WorkspaceProperty<Workspace>("WS3","",Direction::Input));
+
+    std::vector<std::string> propNames;
+    propNames.push_back("WS1");
+    propNames.push_back("WS2");
+    propNames.push_back("WS3");
+    MultiDomainCreator multi( &manager, propNames );
+
+    manager.setProperty("WS1", ws1);
+    manager.setProperty("WS2", ws2);
+    manager.setProperty("WS3", ws3);
+
+    FitMW* creator = new FitMW( &manager, "WS1" );
+    creator->declareDatasetProperties("1");
+    multi.setCreator(0, creator);
+    creator = new FitMW( &manager, "WS2" );
+    creator->declareDatasetProperties("2");
+    multi.setCreator(1, creator);
+    creator = new FitMW( &manager, "WS3" );
+    creator->declareDatasetProperties("3");
+    multi.setCreator(2, creator);
+
+    manager.setProperty("WorkspaceIndex1", 0);
+    manager.setProperty("WorkspaceIndex2", 0);
+    manager.setProperty("WorkspaceIndex3", 0);
+
+    FunctionDomain_sptr domain;
+    IFunctionValues_sptr values;
+
+    auto mdfun = boost::make_shared<MultiDomainFunction>();
+
+    auto f1 = boost::make_shared<UserFunction>();
+    f1->setAttributeValue("Formula","0.1*x");
+    mdfun->addFunction(f1);
+    mdfun->setDomainIndex(0,0);
+
+    auto f2 = boost::make_shared<UserFunction>();
+    f2->setAttributeValue("Formula","1.1 + 0.1*x");
+    mdfun->addFunction(f2);
+    mdfun->setDomainIndex(1,1);
+
+    auto f3 = boost::make_shared<UserFunction>();
+    f3->setAttributeValue("Formula","2.2+0.1*x");
+    mdfun->addFunction(f3);
+    mdfun->setDomainIndex(2,2);
+
+    auto ws = multi.createOutputWorkspace("out_",mdfun,FunctionDomain_sptr(),IFunctionValues_sptr(),"OUT_WS");
+    TS_ASSERT( ws );
+
+    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    TS_ASSERT( group );
+
+    TS_ASSERT_EQUALS( group->size(), 3 );
+
+    auto ows1 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    doTestOutputSpectrum( ows1, 0);
+    auto ows2 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    doTestOutputSpectrum( ows2, 1 );
+    auto ows3 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(2));
+    doTestOutputSpectrum( ows3, 2 );
+
   }
 
 
 private:
+
+  void doTestOutputSpectrum(MatrixWorkspace_sptr ws, size_t index)
+  {
+    TS_ASSERT( ws );
+    TS_ASSERT_EQUALS( ws->getNumberHistograms(), 3 );
+    auto &data = ws->readY(0);
+    auto &calc = ws->readY(1);
+    auto &diff = ws->readY(2);
+
+    for(size_t i = 0; i < data.size(); ++i)
+    {
+      TS_ASSERT_EQUALS( data[i], static_cast<double>(index+1) );
+      TS_ASSERT_EQUALS( data[i] - calc[i], diff[i] );
+    }
+
+  }
+
   MatrixWorkspace_sptr ws1,ws2,ws3;
 };
 
