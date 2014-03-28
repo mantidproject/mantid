@@ -179,7 +179,10 @@ namespace Mantid
       }
 
       const SpecialCoordinateSystem mdCoordinates = mdWS->getSpecialCoordinateSystem();
-      // TODO. check special coordinates have been set. If unknown throw.
+      if(mdCoordinates == None)
+      {
+        throw std::invalid_argument("The coordinate system of the input MDWorkspace cannot be established. Run SetSpecialCoordinates on InputWorkspace.");
+      }
 
       const double threshold = getProperty("Threshold");
       const double radiusEstimate = getProperty("RadiusEstimate");
