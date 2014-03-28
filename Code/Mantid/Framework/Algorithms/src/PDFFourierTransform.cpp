@@ -12,11 +12,19 @@ the unit.  The allowed unit are MomentumTransfer and d-spacing.
 
 =====G(r)=====
 
-<math> G(r) = 4\pi r[\rho(r)-\rho_0] = \frac{2}{\pi} \int_{0}^{\infty} Q[S(Q)-1]sin(Qr)dQ </math>
+<math> G(r) = 4\pi r[\rho(r)-\rho_0] = \frac{2}{\pi} \int_{0}^{\infty} Q[S(Q)-1]\sin(Qr)dQ </math>
 
 and in this algorithm, it is implemented as
 
-<math> G(r) =  \frac{2}{\pi} \sum_{Q_{min}}^{Q_{max}} Q[S(Q)-1]sin(Qr)\Delta Q </math>
+<math> G(r) =  \frac{2}{\pi} \sum_{Q_{min}}^{Q_{max}} Q[S(Q)-1]\sin(Qr) M(Q,Q_{max}) \Delta Q </math>
+
+where <math>M(Q,Q_{max})</math> is an optional filter function. If Filter property is set (true) then
+
+<math>M(Q,Q_{max}) = \frac{\sin(\pi Q/Q_{max})}{\pi Q/Q_{max}} </math>
+
+otherwise
+
+<math>M(Q,Q_{max}) = 1\, </math>
 
 =====g(r)=====
 
@@ -138,6 +146,7 @@ namespace Mantid
         "Minimum Q in S(Q) to calculate in Fourier transform (optional).");
       declareProperty("Qmax", EMPTY_DBL(), mustBePositive,
         "Maximum Q in S(Q) to calculate in Fourier transform. (optional)");
+      declareProperty("Filter",false,"Set to apply Lorch function filter to the input");
 
       // Set up output data type
       std::vector<std::string> outputTypes;
@@ -158,6 +167,7 @@ namespace Mantid
       setPropertyGroup("InputSofQType", recipGroup);
       setPropertyGroup("Qmin", recipGroup);
       setPropertyGroup("Qmax", recipGroup);
+      setPropertyGroup("Filter", recipGroup);
 
       string realGroup("Real Space");
       setPropertyGroup("PDFType", realGroup);
@@ -321,6 +331,7 @@ namespace Mantid
       if (isEmpty(rdelta))
         rdelta = M_PI/qmax;
       size_t sizer = static_cast<size_t>(rmax/rdelta);
+      bool filter = getProperty("Filter");
 
       // create the output workspace
       API::MatrixWorkspace_sptr outputWS
@@ -341,7 +352,6 @@ namespace Mantid
       MantidVec& outputY = outputWS->dataY(0);
       MantidVec& outputE = outputWS->dataE(0);
 
-
       // do the math
       for (size_t r_index = 0; r_index < sizer; r_index ++){
         const double r = outputR[r_index];
@@ -352,6 +362,11 @@ namespace Mantid
           double q = inputQ[q_index];
           double deltaq = inputQ[q_index] - inputQ[q_index - 1];
           double sinus  = sin(q * r) * deltaq;
+          // multiply by filter function sin(q*pi/qmax)/(q*pi/qmax)
+          if ( filter && q != 0 )
+          {
+            sinus *= sin(q * rdelta) / (q * rdelta);
+          }
           fs    += sinus * inputFOfQ[q_index];
           error += q * q * (sinus*inputDfOfQ[q_index]) * (sinus*inputDfOfQ[q_index]);
           // g_log.debug() << "q[" << i << "] = " << q << "  dq = " << deltaq << "  S(q) =" << s;
