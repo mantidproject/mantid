@@ -29,6 +29,9 @@ and splitByFullTime considers both pulse time and TOF.
 
 Therefore, FilterByLogValue is not suitable for fast log filtering.
 
+=== Comparing with other event filtering algorithms ===
+Wiki page [[EventFiltering]] has a detailed introduction on event filtering in MantidPlot. 
+
 *WIKI*/
 
 #include "MantidAlgorithms/FilterEvents.h"
@@ -48,6 +51,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 
 using namespace std;
 
@@ -101,6 +105,9 @@ namespace Algorithms
                                                              PropertyMode::Optional);
     declareProperty(tablewsprop, "Name of table workspace containing the log time correction factor for each detector. ");
 
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputTOFCorrectionWorkspace", "TOFCorrectWS", Direction::Output),
+                    "Name of output workspace for TOF correction factor. ");
+
     declareProperty("FilterByPulseTime", false,
                     "Filter the event by its pulse time only for slow sample environment log.  This option can make execution of algorithm faster.  But it lowers precision.");
 
@@ -117,6 +124,7 @@ namespace Algorithms
 
     declareProperty("NumberOutputWS", 0, "Number of output output workspace splitted. ", Direction::Output);
 
+    declareProperty("DBSpectrum", EMPTY_INT(), "Spectrum (workspace index) for debug purpose. ");
 
     return;
   }
@@ -145,8 +153,7 @@ namespace Algorithms
     // Optionall import corrections
     mProgress = 0.20;
     progress(mProgress, "Importing TOF corrections. ");
-    if (m_doTOFCorrection)
-      importDetectorTOFCalibration();
+    setupDetectorTOFCalibration();
 
     // Filter Events
     mProgress = 0.30;
@@ -228,11 +235,11 @@ namespace Algorithms
     m_toGroupWS = this->getProperty("GroupWorkspaces");
 
     // Do correction or not?
-    m_doTOFCorrection = true;
     m_genTOFCorrection = getProperty("GenerateTOFCorrection");
     if (m_detCorrectWorkspace)
     {
       // User specify detector TOF correction, then no need to generate TOF correction
+      m_doTOFCorrection = true;
       m_genTOFCorrection = false;
     }
     else if (m_genTOFCorrection)
@@ -253,6 +260,13 @@ namespace Algorithms
       mWithInfo = true;
 
     m_splitSampleLogs = getProperty("SplitSampleLogs");
+
+    // Debug spectrum
+    m_dbWSIndex = getProperty("DBSpectrum");
+    if (isEmpty(m_dbWSIndex))
+      m_useDBSpectrum = false;
+    else
+      m_useDBSpectrum = true;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -462,28 +476,36 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Parse TOF-correction table workspace to vectors
-    * Default correction value is equal to 1.
-   */
-  void FilterEvents::importDetectorTOFCalibration()
+  /** Set up neutron event's TOF correction.
+    * It can be (1) parsed from TOF-correction table workspace to vectors,
+    * (2) created according to detector's position in instrument;
+    * (3) or no correction,i.e., correction value is equal to 1.
+    */
+  void FilterEvents::setupDetectorTOFCalibration()
   {
     // Prepare output (class variables)
-    m_detectorIDs.clear();
+    std::vector<detid_t> vecDetIDs;
     m_detTofOffsets.clear();
 
     size_t numhist = m_eventWS->getNumberHistograms();
-    m_detectorIDs.resize(numhist, 0);
+    vecDetIDs.resize(numhist, 0);
     m_detTofOffsets.resize(numhist, 1.0);
 
-    // Set up the detector IDs to m_detectorIDs[]
+    // Create the output workspace for correction factors
+    MatrixWorkspace_sptr corrws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          WorkspaceFactory::Instance().create("Workspace2D", numhist, 1, 1));
+
+    // Set up the detector IDs to vecDetIDs and set up the initial value
     for (size_t i = 0; i < numhist; ++i)
     {
-      // FIXME - current implementation assumes one detector per spectra
+      // It is assumed that there is one detector per spectra.
+      // If there are more than 1 spectrum, it is very likely to have problem with correction factor
       const DataObjects::EventList events = m_eventWS->getEventList(i);
       std::set<detid_t> detids = events.getDetectorIDs();
       std::set<detid_t>::iterator detit;
       if (detids.size() != 1)
       {
+        // Check whether there are more than 1 detector per spectra.
         stringstream errss;
         errss << "The assumption is that one spectrum has one and only one detector. "
               << "Error is found at spectrum " << i << ".  It has " << detids.size() << " detectors.";
@@ -493,7 +515,10 @@ namespace Algorithms
       detid_t detid = 0;
       for (detit=detids.begin(); detit!=detids.end(); ++detit)
         detid = *detit;
-      m_detectorIDs[i] = detid;
+      vecDetIDs[i] = detid;
+
+      corrws->dataY(i)[0] = 1.0;
+      m_detTofOffsets[i] = 1.0;
     }
 
     // Calculate TOF correction value for all detectors
@@ -543,7 +568,7 @@ namespace Algorithms
       map<detid_t, double>::iterator fiter;
       for (size_t i = 0; i < numhist; ++i)
       {
-        detid_t detid = m_detectorIDs[i];
+        detid_t detid = vecDetIDs[i];
         fiter = correctmap.find(detid);
         if (fiter == correctmap.end())
         {
@@ -556,9 +581,36 @@ namespace Algorithms
         else
         {
           m_detTofOffsets[i] = fiter->second;
+          corrws->dataY(i)[0] = fiter->second;
         }
       }
     }
+    else if (m_genTOFCorrection)
+    {
+      // Generate TOF correction from instrument's set up
+
+      // Get sample distance to moderator
+      Geometry::Instrument_const_sptr instrument = m_eventWS->getInstrument();
+      IComponent_const_sptr source = boost::dynamic_pointer_cast<const IComponent>(
+            instrument->getSource());
+      double l1 = instrument->getDistance(*source);
+
+      // Get
+      for (size_t i = 0; i < numhist; ++i)
+      {
+        IComponent_const_sptr tmpdet = boost::dynamic_pointer_cast<const IComponent>(m_eventWS->getDetector(i));
+        double l2 = instrument->getDistance(*tmpdet);
+
+        double corrfactor = (l1)/(l1+l2);
+
+        m_detTofOffsets[i] = corrfactor;
+        corrws->dataY(i)[0] = corrfactor;
+      }
+    }
+
+    // Set output
+    // Add correction workspace to output
+    setProperty("OutputTOFCorrectionWorkspace", corrws);
 
     return;
   }
@@ -683,6 +735,20 @@ namespace Algorithms
     // Loop over the histograms (detector spectra) to do split from 1 event list to N event list
     g_log.debug() << "Number of spectra in input/source EventWorkspace = " << numberOfSpectra << ".\n";
 
+#if 0
+    vector< map<int, EventList*> > vec_elistmap;
+    for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws)
+    {
+      map<int, DataObjects::EventList* > outputs;
+      for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
+      {
+        int index = wsiter->first;
+        DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
+        outputs.insert(std::make_pair(index, output_el));
+      }
+    }
+#endif
+
     // FIXME Make it parallel
     // PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws)
@@ -692,17 +758,25 @@ namespace Algorithms
 
       // Get the output event lists (should be empty) to be a map
       map<int, DataObjects::EventList* > outputs;
-      for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
+      // PARALLEL_CRITICAL(build_elist)
       {
-        int index = wsiter->first;
-        DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
-        outputs.insert(std::make_pair(index, output_el));
+        for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
+        {
+          int index = wsiter->first;
+          DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
+          outputs.insert(std::make_pair(index, output_el));
+        }
       }
 
       // Get a holder on input workspace's event list of this spectrum
       const DataObjects::EventList& input_el = m_eventWS->getEventList(iws);
 
+      bool printdetail = false;
+      if (m_useDBSpectrum)
+          printdetail = (iws == static_cast<int64_t>(m_dbWSIndex));
+
       // Perform the filtering (using the splitting function and just one output)
+      std::string logmessage("");
       if (mFilterByPulseTime)
       {
         throw runtime_error("It is not a good practice to split fast event by pulse time. ");
@@ -710,16 +784,21 @@ namespace Algorithms
       }
       else if (m_doTOFCorrection)
       {
-        input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs,
-                                               m_detTofOffsets[iws], m_doTOFCorrection);
+        logmessage = input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs,
+                                               m_detTofOffsets[iws], m_doTOFCorrection, printdetail);
       }
       else
       {
-        input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs, 1.0, m_doTOFCorrection);
+        logmessage = input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs, 1.0,
+                                                            m_doTOFCorrection,
+                                                            printdetail);
       }
 
       mProgress = 0.3+(progressamount-0.2)*static_cast<double>(iws)/static_cast<double>(numberOfSpectra);
       progress(mProgress, "Filtering events");
+
+      if (printdetail)
+        g_log.notice(logmessage);
 
       // FIXME - Turn on parallel
       // PARALLEL_END_INTERUPT_REGION

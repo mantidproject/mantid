@@ -71,7 +71,7 @@ namespace Algorithms
 
     void createOutputWorkspaces();
 
-    void importDetectorTOFCalibration();
+    void setupDetectorTOFCalibration();
 
     void filterEventsBySplitters(double progressamount);
 
@@ -91,7 +91,6 @@ namespace Algorithms
     std::map<int, DataObjects::EventWorkspace_sptr> m_outputWS;
     std::vector<std::string> m_wsNames;
 
-    std::vector<detid_t> m_detectorIDs;
     std::vector<double> m_detTofOffsets;
 
     bool mFilterByPulseTime;
@@ -125,6 +124,10 @@ namespace Algorithms
 
     /// Flag to split sample logs
     bool m_splitSampleLogs;
+
+    /// Debug
+    bool m_useDBSpectrum;
+    int m_dbWSIndex;
   };
 
 
