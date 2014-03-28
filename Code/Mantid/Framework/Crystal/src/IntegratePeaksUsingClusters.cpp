@@ -6,7 +6,7 @@ Uses connected component analysis to integrate peaks in an PeaksWorkspace over a
 
 #include "MantidCrystal/IntegratePeaksUsingClusters.h"
 #include "MantidCrystal/ConnectedComponentLabeling.h"
-#include "MantidCrystal/HardThresholdBackground.h"
+#include "MantidCrystal/PeakBackground.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDIterator.h"
@@ -46,61 +46,6 @@ namespace
     const double m_thresholdDistance;
   };
 
-  class PeakBackground : public Mantid::Crystal::HardThresholdBackground
-  {
-  private:
-
-    IPeaksWorkspace_const_sptr m_peaksWS;
-    const double m_radiusEstimate;
-    const SpecialCoordinateSystem m_mdCoordinates;
-
-  public:
-    PeakBackground(IPeaksWorkspace_const_sptr peaksWS, const double& radiusEstimate, const double& thresholdSignal, const Mantid::API::MDNormalization normalisation, const SpecialCoordinateSystem coordinates) 
-      : Mantid::Crystal::HardThresholdBackground(thresholdSignal, normalisation), m_peaksWS(peaksWS), m_radiusEstimate(radiusEstimate), m_mdCoordinates(coordinates)
-    {
-    }
-
-    virtual bool isBackground(Mantid::API::IMDIterator* iterator) const
-    {
-      if(!HardThresholdBackground::isBackground(iterator) )
-      {
-        const VMD& center = iterator->getCenter();
-        V3D temp(center[0], center[1], center[2]); // This assumes dims 1, 2, and 3 in the workspace correspond to positions.
-
-        for(size_t i = 0; i < m_peaksWS->getNumberPeaks(); ++i)
-        {
-          V3D coords;
-          if(m_mdCoordinates==QLab)
-          {
-            coords= m_peaksWS->getPeak(i).getQLabFrame();
-          }
-          else if(m_mdCoordinates==QSample)
-          {
-            coords= m_peaksWS->getPeak(i).getQSampleFrame();
-          }
-          else if(m_mdCoordinates==Mantid::API::HKL)
-          {
-            coords= m_peaksWS->getPeak(i).getHKL();
-          }
-          if(coords.distance(temp) < m_radiusEstimate)
-          {
-            return false;
-          }
-
-        }
-
-      }
-      return true;
-    }
-
-    void configureIterator(Mantid::API::IMDIterator* const iterator) const
-    {
-    }
-
-    virtual ~PeakBackground()
-    {
-    }
-  };
 }
 
 namespace Mantid

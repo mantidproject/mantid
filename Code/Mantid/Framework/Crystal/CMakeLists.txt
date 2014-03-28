@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/OptimizeCrystalPlacement.cpp
 	src/OptimizeExtinctionParameters.cpp
 	src/OptimizeLatticeForCellType.cpp
+	src/PeakBackground.cpp
 	src/PeakHKLErrors.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
@@ -95,6 +96,7 @@ set ( INC_FILES
 	inc/MantidCrystal/OptimizeCrystalPlacement.h
 	inc/MantidCrystal/OptimizeExtinctionParameters.h
 	inc/MantidCrystal/OptimizeLatticeForCellType.h
+	inc/MantidCrystal/PeakBackground.h
 	inc/MantidCrystal/PeakHKLErrors.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
@@ -153,6 +155,7 @@ set ( TEST_FILES
 	NormaliseVanadiumTest.h
 	OptimizeCrystalPlacementTest.h
 	OptimizeLatticeForCellTypeTest.h
+	PeakBackgroundTest.h
 	PeakHKLErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h
