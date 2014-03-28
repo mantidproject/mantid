@@ -58,7 +58,22 @@ namespace MantidQt
 
       // This again is a temporary measure to ensure publishing functionality will work with one catalog.
       auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
-      if (!session.empty()) Mantid::API::CatalogManager::Instance().getCatalog(session.front()->getSessionId())->myData(workspace);
+
+      // We need to catch the exception to prevent a fatal error.
+      try
+      {
+        if (!session.empty())
+        {
+          Mantid::API::CatalogManager::Instance().getCatalog(session.front()->getSessionId())->myData(workspace);
+        }
+      }
+      catch(std::runtime_error& e)
+      {
+        setOptionalMessage(e.what());
+        m_uiForm.scrollArea->setDisabled(true);
+        m_uiForm.runBtn->setDisabled(true);
+        return;
+      }
 
       // The user is not an investigator on any investigations and cannot publish
       // or they are not logged into the catalog then update the related message..
