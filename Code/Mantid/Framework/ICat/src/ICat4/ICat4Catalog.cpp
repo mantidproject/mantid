@@ -848,6 +848,8 @@ namespace Mantid
       {
         exception = error.substr(start + begmsg.length(), end - (start + begmsg.length()) );
       }
+      // If no error is returned by ICAT then there is a connection problem.
+      if (exception.empty()) exception = "ICAT appears to be offline. Please check your connection or report this issue.";
 
       throw std::runtime_error(exception);
     }

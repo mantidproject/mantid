@@ -7,6 +7,7 @@
 #include <boost/algorithm/string/regex.hpp>
 #include <Poco/ActiveResult.h>
 #include <QCoreApplication>
+#include <QTime>
 
 namespace MantidQt
 {
@@ -194,7 +195,8 @@ namespace MantidQt
 
       if(loginDialog->exec() == QDialog::Accepted)
       {
-        if (catalogAlgorithm->execute()) return true;
+        executeAsynchronously(catalogAlgorithm);
+        if (catalogAlgorithm->isExecuted()) return true;
       }
       return false;
     }
@@ -246,13 +248,19 @@ namespace MantidQt
     /**
      * Execute the given algorithm asynchronously.
      * @param algorithm :: The algorithm to execute.
+     * @param maxTime :: The maximum amount of time (in seconds) to run the thread for.
      */
-    void CatalogHelper::executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm)
+    void CatalogHelper::executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm, int maxTime)
     {
+      QTime myTimer;
+      myTimer.start();
+
       Poco::ActiveResult<bool> result(algorithm->executeAsync());
       while(!result.available())
       {
-        QCoreApplication::processEvents();
+        // Convert seconds to milliseconds.
+        if (myTimer.elapsed() >= maxTime * 1000) break;
+        else QCoreApplication::processEvents();
       }
     }
 
