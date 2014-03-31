@@ -32,7 +32,7 @@ public:
   size_t m_wsIndex;
   std::string name()const {return "MultiDomainCreatorTest_Fun";} 
   void function1D(double* , const double* , const size_t )const{}
-  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX)
+  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace>,size_t wi,double, double)
   {
     m_wsIndex = wi;
   }

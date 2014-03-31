@@ -125,6 +125,9 @@ namespace CurveFitting
     const std::string& outputWorkspacePropertyName
     )
   {
+    UNUSED_ARG(domain);
+    UNUSED_ARG(values);
+
     auto mdFunction = boost::dynamic_pointer_cast<API::MultiDomainFunction>(function);
     if ( !mdFunction )
     {
