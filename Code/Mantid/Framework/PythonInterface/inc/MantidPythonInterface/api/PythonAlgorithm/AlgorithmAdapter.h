@@ -24,7 +24,6 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-//#include "MantidPythonInterface/api/PythonAlgorithm/PythonAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 
 #include "MantidKernel/ClassMacros.h"
@@ -72,7 +71,6 @@ namespace Mantid
       std::map<std::string, std::string> validateInputs();
       ///@}
 
-    public:
       /** @name Property declarations
        * The first function matches the base-classes signature so a different
        * name is used consistently to avoid accidentally calling the wrong function internally
@@ -80,21 +78,19 @@ namespace Mantid
        */
       ///@{
       /// Declare a specialized property
-      void declarePyAlgProperty(Kernel::Property *prop, const std::string &doc="");
+      static void declarePyAlgProperty(boost::python::object & self, Kernel::Property *prop, const std::string &doc = "");
       /// Declare a property using the type of the defaultValue with a validator and doc string
-      void declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
+      static void declarePyAlgProperty(boost::python::object & self, const std::string & name, const boost::python::object & defaultValue,
                                  const boost::python::object & validator = boost::python::object(),
                                  const std::string & doc = "", const int direction = Kernel::Direction::Input);
 
       /// Declare a property with a documentation string
-      void declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
+      static void declarePyAlgProperty(boost::python::object & self, const std::string & name, const boost::python::object & defaultValue,
                                 const std::string & doc, const int direction = Kernel::Direction::Input);
 
       /// Declare a property using the type of the defaultValue
-      void declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
-                                const int direction);
-      ///@}
-
+      static void declarePyAlgProperty(boost::python::object & self, const std::string & name, const boost::python::object & defaultValue,
+                                       const int direction);
 
     protected:
       /**
@@ -113,7 +109,7 @@ namespace Mantid
       /// Private exec for this algorithm
       virtual void exec();
 
-      // Hide the base class variants as they are not required on this interface
+      /// We don't want the base class versions
       using SuperClass::declareProperty;
 
       /// The Python portion of the object

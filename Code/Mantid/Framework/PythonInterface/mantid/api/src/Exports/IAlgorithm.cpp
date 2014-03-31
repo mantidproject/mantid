@@ -266,6 +266,8 @@ void export_ialgorithm()
     .def("isRunning", &IAlgorithm::isRunning, "Returns True if the algorithm is considered to be running, False otherwise")
     .def("setChild", &IAlgorithm::setChild,
         "If true this algorithm is run as a child algorithm. There will be no logging and nothing is stored in the Analysis Data Service")
+    .def("enableHistoryRecordingForChild", &IAlgorithm::enableHistoryRecordingForChild,
+         "If true then history will be recorded regardless of the child status")
     .def("setAlwaysStoreInADS", &IAlgorithm::setAlwaysStoreInADS,
         "If true then even child algorithms will have their workspaces stored in the ADS.")
     .def("isChild", &IAlgorithm::isChild, "Returns True if the algorithm has been marked to run as a child. If True then Output workspaces "

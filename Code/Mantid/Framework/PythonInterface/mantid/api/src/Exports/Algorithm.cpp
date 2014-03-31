@@ -22,20 +22,20 @@ namespace
   typedef AlgorithmAdapter<Algorithm> PythonAlgorithm;
 
   // declarePyAlgProperty(property*,doc)
-  typedef void(PythonAlgorithm::*declarePropertyType1)(Mantid::Kernel::Property*, const std::string &);
+  typedef void(*declarePropertyType1)(boost::python::object & self, Mantid::Kernel::Property*, const std::string &);
   // declarePyAlgProperty(name, defaultValue, validator, doc, direction)
-  typedef void(PythonAlgorithm::*declarePropertyType2)(const std::string &, const boost::python::object &,
+  typedef void(*declarePropertyType2)(boost::python::object & self, const std::string &, const boost::python::object &,
                                                         const boost::python::object &, const std::string &, const int);
   // declarePyAlgProperty(name, defaultValue, doc, direction)
-  typedef void(PythonAlgorithm::*declarePropertyType3)(const std::string &, const boost::python::object &,
+  typedef void(*declarePropertyType3)(boost::python::object & self, const std::string &, const boost::python::object &,
                                                         const std::string &, const int);
   // declarePyAlgProperty(name, defaultValue, direction)
-  typedef void(PythonAlgorithm::*declarePropertyType4)(const std::string &, const boost::python::object &, const int);
+  typedef void(*declarePropertyType4)(boost::python::object & self, const std::string &, const boost::python::object &, const int);
 
   // Overload types
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(declarePropertyType1_Overload, declarePyAlgProperty, 1, 2);
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(declarePropertyType2_Overload, declarePyAlgProperty, 2, 5);
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(declarePropertyType3_Overload, declarePyAlgProperty, 3, 4);
+  BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType1_Overload, PythonAlgorithm::declarePyAlgProperty, 2, 3);
+  BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType2_Overload, PythonAlgorithm::declarePyAlgProperty, 3, 6);
+  BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType3_Overload, PythonAlgorithm::declarePyAlgProperty, 4, 5);
 }
 
 void export_leaf_classes()
@@ -57,20 +57,20 @@ void export_leaf_classes()
           arg("enableLogging")=true,arg("version")=-1), "Creates and intializes a named child algorithm. Output workspaces are given a dummy name.")
 
     .def("declareProperty", (declarePropertyType1)&PythonAlgorithm::declarePyAlgProperty,
-          declarePropertyType1_Overload((arg("prop"), arg("doc") = "")))
+          declarePropertyType1_Overload((arg("self"), arg("prop"), arg("doc") = "")))
 
     .def("declareProperty", (declarePropertyType2)&PythonAlgorithm::declarePyAlgProperty,
-          declarePropertyType2_Overload((arg("name"), arg("defaultValue"), arg("validator")=object(), arg("doc")="",arg("direction")=Direction::Input),
+          declarePropertyType2_Overload((arg("self"), arg("name"), arg("defaultValue"), arg("validator")=object(), arg("doc")="",arg("direction")=Direction::Input),
                                         "Declares a named property where the type is taken from "
                                         "the type of the defaultValue and mapped to an appropriate C++ type"))
 
     .def("declareProperty", (declarePropertyType3)&PythonAlgorithm::declarePyAlgProperty,
-         declarePropertyType3_Overload((arg("name"), arg("defaultValue"), arg("doc")="",arg("direction")=Direction::Input),
+         declarePropertyType3_Overload((arg("self"), arg("name"), arg("defaultValue"), arg("doc")="",arg("direction")=Direction::Input),
                                        "Declares a named property where the type is taken from the type "
                                        "of the defaultValue and mapped to an appropriate C++ type"))
 
     .def("declareProperty", (declarePropertyType4)&PythonAlgorithm::declarePyAlgProperty,
-        (arg("name"), arg("defaultValue"), arg("direction")=Direction::Input),
+        (arg("self"), arg("name"), arg("defaultValue"), arg("direction")=Direction::Input),
          "Declares a named property where the type is taken from the type "
          "of the defaultValue and mapped to an appropriate C++ type")
 

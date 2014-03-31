@@ -3,7 +3,6 @@
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
-#include "MantidPythonInterface/api/PythonAlgorithm/PythonAlgorithm.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -16,7 +15,6 @@
 using namespace Mantid::API;
 using namespace boost::python;
 using Mantid::Kernel::AbstractInstantiator;
-using Mantid::PythonInterface::PythonAlgorithm;
 using Mantid::PythonInterface::PythonObjectInstantiator;
 
 namespace

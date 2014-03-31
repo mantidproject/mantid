@@ -1,7 +1,8 @@
 import unittest
 from testhelpers import assertRaisesNothing
 from mantid.api import (Algorithm, DataProcessorAlgorithm, AlgorithmFactory,
-                        AlgorithmManager)
+                        AlgorithmManager, WorkspaceProperty)
+from mantid.kernel import Direction
 
 class TestDataProcessor(DataProcessorAlgorithm):
     def PyInit(self):
@@ -53,6 +54,21 @@ class DataProcessorAlgorithmTest(unittest.TestCase):
 
         AlgorithmFactory.subscribe(TestDataProcessor)
         assertRaisesNothing(self, AlgorithmManager.createUnmanaged, "TestDataProcessor", 2)
+
+    def test_declareProperty_methods_can_be_called_on_inheriting_algorithm(self):
+        class DataProcessorProperties(DataProcessorAlgorithm):
+            def PyInit(self):
+                self.declareProperty("NumberProperty", 1)
+                self.declareProperty(WorkspaceProperty("Workspace","", Direction.Output))
+
+            def PyExec(self):
+                number = self.getProperty("NumberProperty").value
+                wksp = self.getProperty("Workspace").value
+        # end
+        alg = DataProcessorProperties()
+        assertRaisesNothing(self, alg.initialize)
+        alg.setPropertyValue("Workspace", "__anon")
+        assertRaisesNothing(self, alg.execute)
 
 
 if __name__ == '__main__':

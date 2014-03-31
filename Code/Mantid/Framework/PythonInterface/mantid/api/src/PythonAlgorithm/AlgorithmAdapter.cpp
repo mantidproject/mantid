@@ -178,11 +178,12 @@ namespace Mantid
      * @param doc :: An optional doc string
      */
     template<typename BaseAlgorithm>
-    void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(Kernel::Property *prop, const std::string & doc)
+    void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(boost::python::object &self, Kernel::Property *prop, const std::string & doc)
     {
+      BaseAlgorithm & caller = extract<BaseAlgorithm&>(self);
       // We need to clone the property so that python doesn't own the object that gets inserted
       // into the manager
-      this->declareProperty(prop->clone(), doc);
+      caller.declareProperty(prop->clone(), doc);
     }
 
     /**
@@ -194,11 +195,12 @@ namespace Mantid
      * @param direction :: The direction of the property
      */
     template<typename BaseAlgorithm>
-    void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
-                                                              const boost::python::object & validator,
-                                                              const std::string & doc, const int direction)
+    void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(boost::python::object &self, const std::string & name, const boost::python::object & defaultValue,
+                                                               const boost::python::object & validator,
+                                                               const std::string & doc, const int direction)
     {
-      this->declareProperty(Registry::PropertyWithValueFactory::create(name, defaultValue, validator, direction), doc);
+      BaseAlgorithm & caller = extract<BaseAlgorithm&>(self);
+      caller.declareProperty(Registry::PropertyWithValueFactory::create(name, defaultValue, validator, direction), doc);
     }
 
     /**
@@ -209,10 +211,11 @@ namespace Mantid
      * @param direction :: The direction of the property
      */
     template<typename BaseAlgorithm>
-    void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
-                                                              const std::string & doc, const int direction)
+    void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(boost::python::object &self, const std::string & name, const boost::python::object & defaultValue,
+                                                               const std::string & doc, const int direction)
     {
-      this->declareProperty(Registry::PropertyWithValueFactory::create(name, defaultValue, direction), doc);
+      BaseAlgorithm & caller = extract<BaseAlgorithm&>(self);
+      caller.declareProperty(Registry::PropertyWithValueFactory::create(name, defaultValue, direction), doc);
     }
 
     /**
@@ -222,10 +225,10 @@ namespace Mantid
     * @param direction :: The direction of the property
     */
     template<typename BaseAlgorithm>
-    void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
-                                                              const int direction)
+    void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(boost::python::object &self, const std::string & name, const boost::python::object & defaultValue,
+                                                        const int direction)
     {
-      declarePyAlgProperty(name, defaultValue, "", direction);
+      declarePyAlgProperty(self, name, defaultValue, "", direction);
     }
 
 

@@ -72,7 +72,6 @@ set ( SRC_FILES
   src/FitFunctions/IPeakFunctionAdapter.cpp
   src/PythonAlgorithm/AlgorithmAdapter.cpp
   src/PythonAlgorithm/DataProcessorAdapter.cpp
-  src/PythonAlgorithm/PythonAlgorithm.cpp
   src/CloneMatrixWorkspace.cpp
 )
 
@@ -83,7 +82,6 @@ set ( INC_FILES
   ${HEADER_DIR}/api/FitFunctions/IPeakFunctionAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/DataProcessorAdapter.h
-  ${HEADER_DIR}/api/PythonAlgorithm/PythonAlgorithm.h
   ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h
   ${HEADER_DIR}/api/WorkspacePropertyExporter.h
