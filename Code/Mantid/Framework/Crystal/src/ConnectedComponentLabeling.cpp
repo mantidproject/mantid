@@ -21,6 +21,18 @@ namespace Mantid
       typedef std::vector<size_t> VecIndexes;
       typedef std::vector<DisjointElement> VecElements;
       typedef std::set<size_t> SetIds;
+
+      size_t calculateMaxNeighbours(IMDHistoWorkspace const * const ws)
+      {
+        const size_t ndims = ws->getNumDims();
+        size_t maxNeighbours = 3;
+        for(size_t i = 1; i < ndims; ++i)
+        {
+          maxNeighbours *= 3;
+        }
+        maxNeighbours -= 1;
+        return maxNeighbours;
+      }
     }
 
     //----------------------------------------------------------------------------------------------
@@ -125,10 +137,10 @@ namespace Mantid
         while(iterator->next());
       }
 
+      // -------- Perform labeling -----------
+      const size_t maxNeighbours = calculateMaxNeighbours(ws.get());
       IMDIterator* iterator = ws->createIterator(NULL);
-
       size_t currentLabelCount = m_startId;
-
       for(size_t ii = 0; ii < allNonBackgroundIndexes.size(); ++ii)
       {
         size_t& currentIndex = allNonBackgroundIndexes[ii];
@@ -137,6 +149,7 @@ namespace Mantid
         // Linear indexes of neighbours
         VecIndexes neighbourIndexes = iterator->findNeighbourIndexes();
         VecIndexes nonEmptyNeighbourIndexes;
+        nonEmptyNeighbourIndexes.reserve(maxNeighbours);
         SetIds neighbourIds;
         // Discover non-empty neighbours
         for (size_t i = 0; i < neighbourIndexes.size(); ++i)
