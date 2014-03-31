@@ -45,19 +45,28 @@ namespace Crystal
     /// Peak workspace containing peaks of interest
     Mantid::API::IPeaksWorkspace_const_sptr m_peaksWS;
     /// Radius estimate
-    const double m_radiusEstimate;
+    double m_radiusEstimate;
     /// MD coordinates to use
-    const Mantid::API::SpecialCoordinateSystem m_mdCoordinates;
+    Mantid::API::SpecialCoordinateSystem m_mdCoordinates;
 
   public:
     /// Constructor
     PeakBackground(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, const double& radiusEstimate, const double& thresholdSignal, const Mantid::API::MDNormalization normalisation, const Mantid::API::SpecialCoordinateSystem coordinates);
+
+    /// Copy constructor
+    PeakBackground(const PeakBackground& other);
+
+    /// Assignment operator
+    PeakBackground& operator=(const PeakBackground& other);
 
     /// Overriden is background function
     virtual bool isBackground(Mantid::API::IMDIterator* iterator) const;
 
     /// Overriden configure iterator function.
     virtual void configureIterator(Mantid::API::IMDIterator* const iterator) const;
+
+    /// Virutal constructor
+    virtual PeakBackground* clone() const;
 
     /// Destructor
     virtual ~PeakBackground();

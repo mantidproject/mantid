@@ -19,11 +19,34 @@ namespace Mantid
     {
     }
 
+    PeakBackground::PeakBackground(const PeakBackground& other)
+      : HardThresholdBackground(other), m_peaksWS(other.m_peaksWS), m_radiusEstimate(other.m_radiusEstimate), m_mdCoordinates(other.m_mdCoordinates)
+    {
+    }
+
+     PeakBackground& PeakBackground::operator=(const PeakBackground& other)
+    {
+      if(this != &other)
+      {
+        HardThresholdBackground::operator=(other);
+        m_peaksWS = other.m_peaksWS;
+        m_radiusEstimate = other.m_radiusEstimate; 
+        m_mdCoordinates = other.m_mdCoordinates;
+      }
+      return *this;
+    }
+
     //----------------------------------------------------------------------------------------------
     /** Destructor
     */
     PeakBackground::~PeakBackground()
     {
+    }
+
+     /// Virutal constructor
+    PeakBackground* PeakBackground::clone() const
+    {
+      return new PeakBackground(*this);
     }
 
 
@@ -34,7 +57,7 @@ namespace Mantid
         const VMD& center = iterator->getCenter();
         V3D temp(center[0], center[1], center[2]); // This assumes dims 1, 2, and 3 in the workspace correspond to positions.
 
-        for(size_t i = 0; i < m_peaksWS->getNumberPeaks(); ++i)
+        for(int i = 0; i < m_peaksWS->getNumberPeaks(); ++i)
         {
           V3D coords;
           if(m_mdCoordinates==QLab)

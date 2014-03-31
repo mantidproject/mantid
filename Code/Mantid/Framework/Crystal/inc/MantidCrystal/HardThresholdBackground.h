@@ -35,15 +35,31 @@ namespace Crystal
   class DLLExport HardThresholdBackground : public BackgroundStrategy
   {
   public:
+    /// Contructor
     HardThresholdBackground(const double thresholdSignal, const Mantid::API::MDNormalization normalisation);
+
+     /// Copy constructor
+    HardThresholdBackground(const HardThresholdBackground& other);
+
+    /// Assignment operator
+    HardThresholdBackground& operator=(const HardThresholdBackground& other);
+
+    /// Overriden isBackground
     virtual bool isBackground(Mantid::API::IMDIterator* iterator) const;
+
+    /// Overriden configureIterator.
     void configureIterator(Mantid::API::IMDIterator* const iterator) const;
+
+    /// Virtual constructor
+    virtual HardThresholdBackground* clone() const;
+
+    /// Destructor
     virtual ~HardThresholdBackground();
   private:
     /// Cutoff
-    const double m_thresholdSignal;
+    double m_thresholdSignal;
     /// Normalization
-    const Mantid::API::MDNormalization m_normalization;
+    Mantid::API::MDNormalization m_normalization;
   };
 
 

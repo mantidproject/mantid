@@ -36,13 +36,15 @@ namespace Crystal
   class DLLExport ConnectedComponentLabeling
   {
   public:
-    ConnectedComponentLabeling();
+    ConnectedComponentLabeling(const size_t&id = 1, const bool runMultiThreaded=true);
     size_t getStartLabelId() const;
     void startLabelingId(const size_t& id);
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> execute(Mantid::API::IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy) const;
     virtual ~ConnectedComponentLabeling();
   private:
+    int getNThreads() const;
     size_t m_startId;
+    const bool m_runMultiThreaded;
     
   };
 

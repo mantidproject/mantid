@@ -11,6 +11,7 @@ Uses connected component analysis to integrate peaks in an PeaksWorkspace over a
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -156,6 +157,7 @@ namespace Mantid
       LabelIdIntensityMap labelMap;
       PositionToLabelIdMap positionMap;
 
+      // Go through the output workspace and perform the integration. by summing labels.
       for(size_t i = 0; i < clusters->getNPoints(); ++i)
       {
         const size_t& label_id = static_cast<size_t>(clusters->getSignalAt(i));
@@ -168,6 +170,7 @@ namespace Mantid
           if(labelMap.find(label_id) != labelMap.end())
           {
             SignalErrorSQPair current = labelMap[label_id];
+            // Sum labels.
             labelMap[label_id] = SignalErrorSQPair(current.get<0>() + signal, current.get<1>() + errorSQ);
           }
           else
@@ -181,9 +184,11 @@ namespace Mantid
         }
       }
 
-
-      for(size_t i =0; i < peakWS->getNumberPeaks(); ++i)
+      // Link integrated values up with peaks.
+      PARALLEL_FOR1(peakWS)
+      for(int i =0; i < peakWS->getNumberPeaks(); ++i)
       {
+        PARALLEL_START_INTERUPT_REGION
         IPeak& peak = peakWS->getPeak(i);
         V3D coords;
         if(mdCoordinates==QLab)
@@ -209,7 +214,9 @@ namespace Mantid
           peak.setIntensity(labelMap[ iterator->second ].get<0>());
           peak.setSigmaIntensity(labelMap[ iterator->second ].get<1>());
         }
+        PARALLEL_END_INTERUPT_REGION
       }
+      PARALLEL_CHECK_INTERUPT_REGION
 
       setProperty("OutputWorkspace", peakWS);
       setProperty("OutputWorkspaceMD", clusters);
