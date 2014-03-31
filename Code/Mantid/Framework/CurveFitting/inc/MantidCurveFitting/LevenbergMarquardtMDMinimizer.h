@@ -70,8 +70,6 @@ private:
   /// To keep function value
   double m_F;
   std::vector<double> m_D;
-	/// Static reference to the logger class
-	static Kernel::Logger& g_log;
 };
 
 

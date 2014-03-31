@@ -17,9 +17,6 @@ namespace Mantid
   namespace API
   {
 
-    // Get a reference to the logger
-    Kernel::Logger& AlgorithmProxy::g_log = Kernel::Logger::get("AlgorithmProxy");
-
     //----------------------------------------------------------------------
     // Public methods
     //----------------------------------------------------------------------
@@ -34,7 +31,6 @@ namespace Mantid
     {
       if (!alg)
       {
-        g_log.error("Unable to create a proxy algorithm.");
         throw std::logic_error("Unable to create a proxy algorithm.");
       }
       alg->initialize();

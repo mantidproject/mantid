@@ -2,8 +2,8 @@
 #define VTKGEOMETRYCACHEWRITER_H
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Logger.h"
 #include <string>
+
 namespace Poco{
   namespace XML{
     class Document;
@@ -47,8 +47,6 @@ namespace Mantid
     class MANTID_GEOMETRY_DLL vtkGeometryCacheWriter
     {
     private:
-
-      static Kernel::Logger& PLog;           ///< The official logger
       Poco::XML::Document* mDoc;         ///< The XML document    
       Poco::XML::Element*  mRoot;            ///< The root XML element
       std::string          mFileName;    ///< The file name

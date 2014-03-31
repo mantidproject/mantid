@@ -110,7 +110,11 @@
  #pragma GCC diagnostic ignored "-Wstrict-overflow"
 #endif
 
-Mantid::Kernel::Logger & Graph::g_log=Mantid::Kernel::Logger::get("Graph");
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("Graph");
+}
 
 Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 : QWidget(parent, f)

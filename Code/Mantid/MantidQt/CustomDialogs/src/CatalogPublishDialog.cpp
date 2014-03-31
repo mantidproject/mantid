@@ -37,7 +37,7 @@ namespace MantidQt
       connect(m_uiForm.runBtn,SIGNAL(clicked()),this,SLOT(accept()));
       connect(m_uiForm.cancelBtn,SIGNAL(clicked()),this,SLOT(reject()));
       connect(m_uiForm.helpBtn,SIGNAL(clicked()),this,SLOT(helpClicked()));
-      // When the user selects a workspace, we want to be ready to publish it.
+      connect(m_uiForm.investigationNumberCb,SIGNAL(currentIndexChanged(int)),this,SLOT(setSessionProperty(int)));
       connect(m_uiForm.dataSelector,SIGNAL(dataReady(const QString&)),this,SLOT(workspaceSelected(const QString&)));
       // When a file is chosen to be published, set the related "FileName" property of the algorithm.
       connect(m_uiForm.dataSelector,SIGNAL(filesFound()),this,SLOT(fileSelected()));
@@ -47,6 +47,8 @@ namespace MantidQt
 
       // Get optional message here as we may set it if user has no investigations to publish to.
       m_uiForm.instructions->setText(getOptionalMessage());
+      // This is required as we use the currentIndexChanged SLOT.
+      storePropertyValue("Session",m_uiForm.investigationNumberCb->itemData(0,Qt::UserRole).toString());
     }
 
     /**
@@ -55,8 +57,6 @@ namespace MantidQt
     void CatalogPublishDialog::populateUserInvestigations()
     {
       auto workspace = Mantid::API::WorkspaceFactory::Instance().createTable();
-
-      // This again is a temporary measure to ensure publishing functionality will work with one catalog.
       auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
 
       // We need to catch the exception to prevent a fatal error.
@@ -79,6 +79,9 @@ namespace MantidQt
           m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
               QString::fromStdString("The title of the investigation is: \"" + workspace->cell<std::string>(row, 1) +
                   "\".\nThe instrument of the investigation is: \"" + workspace->cell<std::string>(row, 2)) + "\".",Qt::ToolTipRole);
+          // Set the user role to the sessionID.
+          m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
+              QString::fromStdString(workspace->cell<std::string>(row, 7)),Qt::UserRole);
         }
       }
       else
@@ -124,6 +127,16 @@ namespace MantidQt
     }
 
     /**
+     * Set/Update the sessionID of the `Session` property when
+     * the user selects an investigation from the combo-box.
+     */
+    void CatalogPublishDialog::setSessionProperty(int index)
+    {
+      storePropertyValue("Session",
+          m_uiForm.investigationNumberCb->itemData(index,Qt::UserRole).toString());
+    }
+
+    /**
      * Overridden to enable dataselector validators.
      */
     void CatalogPublishDialog::accept()
@@ -144,5 +157,6 @@ namespace MantidQt
         AlgorithmDialog::accept();
       }
     }
+
   }
 }

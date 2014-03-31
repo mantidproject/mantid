@@ -41,8 +41,6 @@ namespace Mantid
   namespace Crystal
   {
 
-    Kernel::Logger& ShowPeakHKLOffsets::g_log = Kernel::Logger::get("ShowPeakHKLOffsets");
-
     DECLARE_ALGORITHM(ShowPeakHKLOffsets)
 
     ShowPeakHKLOffsets::ShowPeakHKLOffsets() :

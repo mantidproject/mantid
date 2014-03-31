@@ -59,7 +59,12 @@ namespace Mantid
 
   namespace Geometry
   {
-    Kernel::Logger& OCGeometryGenerator::PLog(Kernel::Logger::get("OCGeometryGenerator"));
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("OCGeometryGenerator");
+    }
+
     /**
     * Constructor
     * @param obj :: input object
@@ -119,7 +124,7 @@ namespace Mantid
         }
         catch(StdFail_NotDone &)
         {
-          PLog.error("Cannot build the geometry. Check the geometry definition");
+          g_log.error("Cannot build the geometry. Check the geometry definition");
         }
 
       }

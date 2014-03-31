@@ -54,6 +54,8 @@ namespace MantidQt
         void fileSelected();
         /// Diables fields on dialog to improve usability
         void disableDialog();
+        /// Set session property when user selects an investigation to publish to.
+        void setSessionProperty(int index);
 
       protected:
         /// Overridden to enable dataselector validators

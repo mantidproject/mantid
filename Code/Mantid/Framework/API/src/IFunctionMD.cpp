@@ -8,7 +8,6 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/FunctionDomainMD.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 
 #include "MantidGeometry/muParser_Silent.h"
@@ -28,8 +27,6 @@ namespace API
 {
   using namespace Geometry;
   
-  Kernel::Logger& IFunctionMD::g_log = Kernel::Logger::get("IFunctionMD");
-
   /// Virtual copy constructor
   boost::shared_ptr<IFunction> IFunctionMD::clone() const
   {
@@ -71,7 +68,6 @@ namespace API
     }
     catch(std::exception& e)
     {
-      g_log.error() << "IFunctionMD::setWorkspace failed with error: " << e.what() << '\n';
       throw;
     }
 

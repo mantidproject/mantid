@@ -6,7 +6,8 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class ReflLiveOptions(QtGui.QDialog, refl_live_data.Ui_LiveDataDialog):
+class ReflLiveOptions(QtGui.QDialog, refl_live_data.Ui_liveDataDialog):
+
 
     frequency = 0
     _method = 0

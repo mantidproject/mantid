@@ -223,9 +223,6 @@ namespace Crystal
 
     void initDocs ();
 
-    static Kernel::Logger & g_log;
-
-
     /**
      * Creates a new instrument when a calibration file( .xml or .detcal)
      * is loaded

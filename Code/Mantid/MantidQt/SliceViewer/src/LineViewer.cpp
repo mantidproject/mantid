@@ -28,10 +28,15 @@ namespace MantidQt
 {
 namespace SliceViewer
 {
+  namespace
+  {
+    /// static logger
+    Mantid::Kernel::Logger g_log("LineViewer");
+  }
+
 
 LineViewer::LineViewer(QWidget *parent)
  : QWidget(parent),
-   g_log(Kernel::Logger::get("LineViewer")),
    m_planeWidth(0),
    m_numBins(100),
    m_allDimsFree(false), m_freeDimX(0), m_freeDimY(1),

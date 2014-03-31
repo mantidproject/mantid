@@ -28,159 +28,6 @@ COMPRESS_TOL_TOF = .01
 EVENT_WORKSPACE_ID = "EventWorkspace"
 
 class SNSPowderReduction(PythonAlgorithm):
-    class PDConfigFile(object):
-        class PDInfo:
-            """Inner class for holding configuration information for a reduction."""
-            def __init__(self, data, has_dspace=False, has_vnoise=False):
-                if data is None:
-                    data = [None, None, 1, 0, 0, 0., 0.]
-                self.freq = data[0]
-                self.wl = data[1]
-                self.bank = int(data[2])
-                self.van = int(data[3])
-                self.can = int(data[4])
-                self.vnoise = 0 # default value
-                self.has_dspace = has_dspace
-                self.tmin = 0. # default value
-                self.tmax = 0. # default value
-                self.dmin = 0. # default value
-                self.dmax = 0. # default value
-
-                # calculate the remaining indices
-                offset = 5
-                if has_vnoise:
-                    self.vnoise = int(data[offset])
-                    offset += 1
-
-                if has_dspace:
-                    self.dmin = data[offset]
-                    self.dmax = data[offset+1]
-                    offset += 2
-                if len(data) > offset:
-                    self.tmin = data[offset]
-                    if len(data) > offset+1:
-                        self.tmax = data[offset+1]
-    
-        def __init__(self, filename):
-            if len(filename.strip()) <= 0:
-                filename = None
-            self.filename = filename
-            self._data = {}
-            self.use_dspace = False
-            self._use_vnoise = False
-            self._focusPos = {}
-            self.iparmFile = None
-            if self.filename is None:
-                return
-            handle = file(filename, 'r')
-            lines = handle.readlines()
-            handle.close()
-
-            # create the focus positions
-            (lines, self._focusPos) = self._generateFocusPos(lines)
-            if len(lines) == 0:
-                self.filename = None
-                return
-
-            # get the rest of the characterization information
-            for line in lines:
-                self._addData(line)
-
-        def _generateFocusPos(self, lines):
-            if not lines[0].startswith("Instrument parameter file:"):
-                return (lines, {})
-
-            result = {}
-
-            # get name of parameter file
-            temp = lines[0]
-            temp = temp.replace("Instrument parameter file:", "")
-            self.iparmFile = temp.strip()
-            if len(self.iparmFile) <= 0:
-                self.iparmFile = None
-            lines = lines[1:] # delete this line
-
-            # get the spectra into a buffer
-            spectrainfo = []
-            for line in lines:
-                if line.startswith("L1"):
-                    break
-                spectrainfo.append(line)
-            numSpectra = len(spectrainfo)
-
-            result['PrimaryFlightPath'] = lines[numSpectra].split()[1]
-
-            # delete the rest of the focus position info
-            lines = lines[numSpectra+1:]
-
-            # parse the focus positions
-            specids = []
-            l2 = []
-            polar = []
-            azimuthal = []
-            for spec in spectrainfo:
-                temp = spec.split()
-                specids.append(int(temp[0]))
-                l2.append(float(temp[1]))
-                polar.append(float(temp[2]))
-                azimuthal.append(0.)
-
-            # assign to the correct place
-            result['SpectrumIDs'] = specids
-            result['L2'] = l2
-            result['Polar'] = polar
-            result['Azimuthal'] = azimuthal
-
-            return (lines, result)
-
-        def _addData(self, line):
-            if line.startswith('#') or len(line.strip()) <= 0:
-                if "d_min" in line and "d_max" in line:
-                    self.use_dspace = True
-                if "vanadium_back" in line:
-                    self._use_vnoise = True
-                return
-            data = line.strip().split()
-            for i in range(len(data)):
-                if ',' in data[i]:
-                    temp = data[i].split(',')
-                    temp = [float(item) for item in temp]
-                    data[i] = temp
-                else:
-                    data[i] = float(data[i])
-            if data[0] not in self._data.keys():
-                self._data[data[0]]={}
-            info = self.PDInfo(data, self.use_dspace, self._use_vnoise)
-            self._data[info.freq][info.wl]=info
-        def __getFrequency(self, request):
-            for freq in self._data.keys():
-                if abs(float(freq)-request) == 0.:                    
-                    return freq
-                if 100. * abs(float(freq)-request)/request < 5.:
-                    return freq
-            raise RuntimeError("Failed to find frequency: %fHz" % request)
-    
-        def __getWavelength(self, frequency, request):
-            for wavelength in self._data[frequency].keys():
-                if 100. * abs(wavelength-request)/request < 5.:
-                    return wavelength
-            raise RuntimeError("Failed to find wavelength: %fAngstrom" % request)
-    
-        def getInfo(self, frequency, wavelength):
-            if self.filename is not None:
-                if frequency is None:
-                    raise RuntimeError("Unable to determine frequency from data")
-                if wavelength is None:
-                    raise RuntimeError("Unable to determine wavelength from data")
-                frequency = self.__getFrequency(float(frequency))
-                wavelength = self.__getWavelength(frequency, float(wavelength))
-        
-                return self._data[frequency][wavelength]
-            else:
-                return self.PDInfo(None)
-        def getFocusPos(self):
-            return self._focusPos
-
     def category(self):
         return "Diffraction;PythonAlgorithms"
 
@@ -264,7 +111,7 @@ class SNSPowderReduction(PythonAlgorithm):
         """
         # get generic information
         SUFFIX = self.getProperty("Extension").value
-        self._config = self.PDConfigFile(self.getProperty("CharacterizationRunsFile").value)
+        self._loadCharacterizations(self.getProperty("CharacterizationRunsFile").value)
         self._resampleX = self.getProperty("ResampleX").value
         if self._resampleX != 0.:
             self._binning = [0.]
@@ -318,7 +165,7 @@ class SNSPowderReduction(PythonAlgorithm):
         samwksplist = []
 
         self._lowResTOFoffset = self.getProperty("LowResolutionSpectraOffset").value
-        focuspos = self._config.getFocusPos()
+        focuspos = self._focusPos
         if self._lowResTOFoffset >= 0:
             # Dealing with the parameters for editing instrument parameters
             if focuspos.has_key("PrimaryFlightPath") is True:
@@ -359,14 +206,14 @@ class SNSPowderReduction(PythonAlgorithm):
                     samRun = temp
                     info = tempinfo
                 else:
-                    if (tempinfo.freq is not None) and (info.freq is not None) \
-                            and (abs(tempinfo.freq - info.freq)/info.freq > .05):
+                    if (tempinfo["frequency"] is not None) and (info["frequency"] is not None) \
+                            and (abs(tempinfo["frequency"] - info["frequency"])/info["frequency"] > .05):
                         raise RuntimeError("Cannot add incompatible frequencies (%f!=%f)" \
-                                           % (tempinfo.freq, info.freq))
-                    if (tempinfo.wl is not None) and (info.wl is not None) \
-                            and abs(tempinfo.wl - info.wl)/info.freq > .05:
+                                           % (tempinfo["frequency"], info["frequency"]))
+                    if (tempinfo["wavelength"] is not None) and (info["wavelength"] is not None) \
+                            and abs(tempinfo["wavelength"] - info["wavelength"])/info["wavelength"] > .05:
                         raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
-                                           % (tempinfo.wl, info.wl))
+                                           % (tempinfo["wavelength"], info["wavelength"]))
                     samRun = api.Plus(LHSWorkspace=samRun, RHSWorkspace=temp, OutputWorkspace=samRun)
                     if samRun.id() == EVENT_WORKSPACE_ID:
                         samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
@@ -426,11 +273,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 self._info = self._getinfo(samRun)
 
             # process the container
-            canRun = self.getProperty("BackgroundNumber").value
-            if canRun == 0: # use the version in the info
-                canRun = self._info.can
-            elif canRun < 0: # turn off the correction
-                canRun = 0
+            canRun = self._info["container"]
             if canRun > 0:
                 if self.getProperty("FilterCharacterizations").value:
                     canFilterWall = timeFilterWall
@@ -447,14 +290,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 canRun = None
 
             # process the vanadium run
-            vanRun = self.getProperty("VanadiumNumber").value
-            self.log().debug("F313A:  Correction SamRun = %s, VanRun = %s of type %s" % (str(samRun), str(vanRun), str(type(vanRun))))
-            if vanRun == 0: # use the version in the info
-                vanRun = self._info.van
-                self.log().debug("F313B: Van Correction SamRun = %s, VanRun = %s" % (str(samRun), str(vanRun)))
-            elif vanRun < 0: # turn off the correction
-                vanRun = 0
-            self.log().information("F313C:  Correction SamRun = %s, VanRun = %s of type %s" % (str(samRun), str(vanRun), str(type(vanRun))))
+            vanRun = self._info["vanadium"]
             if vanRun > 0:
                 if self.getProperty("FilterCharacterizations").value:
                     vanFilterWall = timeFilterWall
@@ -477,7 +313,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
 
                     # load the vanadium background (if appropriate)
-                    vbackRun = self.getProperty("VanadiumBackgroundNumber").value
+                    vbackRun = self._info["empty"]
                     if vbackRun > 0:
                         vbackRun = self._loadData(vbackRun, SUFFIX, vanFilterWall, outname="vbackRun")
                         try:
@@ -505,7 +341,8 @@ class SNSPowderReduction(PythonAlgorithm):
                     # focus the data
                     vanRun = api.AlignAndFocusPowder(InputWorkspace=vanRun, OutputWorkspace=vanRun, CalFileName=calib,
                                                      Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
-                                                     DMin=self._info.dmin, DMax=self._info.dmax, TMin=self._info.tmin, TMax=self._info.tmax,
+                                                     DMin=self._info["d_min"], DMax=self._info["d_max"],
+                                                     TMin=self._info["tof_min"], TMax=self._info["tof_max"],
                                                      RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=COMPRESS_TOL_TOF,
                                                      UnwrapRef=self._LRef, LowResRef=self._DIFCref, LowResSpectrumOffset=self._lowResTOFoffset, 
                                                      CropWavelengthMin=self._wavelengthMin, **(focuspos))
@@ -575,6 +412,18 @@ class SNSPowderReduction(PythonAlgorithm):
                 wksp = api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits").value)
 
         return
+
+    def _loadCharacterizations(self, filename):
+            results = api.PDLoadCharacterizations(Filename=filename,
+                                                  OutputWorkspace="characterizations")
+            self._charTable = results[0]
+            self.iparmFile = results[1]
+            self._focusPos = {}
+            self._focusPos['PrimaryFlightPath'] = results[2]
+            self._focusPos['SpectrumIDs'] = results[3]
+            self._focusPos['L2'] = results[4]
+            self._focusPos['Polar'] = results[5]
+            self._focusPos['Azimuthal'] = results[6]
 
     def _loadData(self, runnumber, extension, filterWall=None, outname=None, **chunk):
         if  runnumber is None or runnumber <= 0:
@@ -775,11 +624,11 @@ class SNSPowderReduction(PythonAlgorithm):
                 # Align and focus
                 self.log().information("[F1141] Align and focus workspace %s; Number of events = %d of chunk %d " % (str(temp), temp.getNumberEvents(), ichunk))
 
-                focuspos = self._config.getFocusPos()
+                focuspos = self._focusPos
 
                 temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,
                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
-                    DMin=self._info.dmin, DMax=self._info.dmax, TMin=self._info.tmin, TMax=self._info.tmax,
+                    DMin=self._info["d_min"], DMax=self._info["d_max"], TMin=self._info["tof_min"], TMax=self._info["tof_max"],
                     PreserveEvents=preserveEvents,
                     RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=COMPRESS_TOL_TOF,
                     UnwrapRef=self._LRef, LowResRef=self._DIFCref, LowResSpectrumOffset=self._lowResTOFoffset, 
@@ -819,10 +668,10 @@ class SNSPowderReduction(PythonAlgorithm):
                 wksplist[itemp].getRun().integrateProtonCharge()
         # ENDIF
 
-        if (self._config.iparmFile is not None) and (len(self._config.iparmFile) > 0):
+        if (self.iparmFile is not None) and (len(self.iparmFile) > 0):
             # When chunks are added, add iparamFile
             for itemp in xrange(numwksp): 
-                wksplist[itemp].getRun()['iparm_file'] = self._config.iparmFile
+                wksplist[itemp].getRun()['iparm_file'] = self.iparmFile
 
         for itemp in xrange(numwksp): 
             #if wksplist[itemp].__class__.__name__.count("Event") > 0: 
@@ -859,43 +708,21 @@ class SNSPowderReduction(PythonAlgorithm):
             return wksplist
 
     def _getinfo(self, wksp):
-        logs = wksp.getRun()
-        # get the frequency
-        frequency = None
-        if "SpeedRequest1" in logs.keys():
-            frequency = logs['SpeedRequest1']
-            if frequency.getStatistics().mean == 0.: 
-                self.log().information("'SpeedRequest1' mean value is zero")                
-                frequency = None 
-        else:
-            self.log().information("'SpeedRequest1' is not specified in logs")
-        if frequency is None and "Speed1" in logs.keys():
-            frequency = logs['Speed1']
-            if frequency.getStatistics().mean == 0.:
-                self.log().information("'Speed1' mean value is zero")
-                frequency = None
-        else:
-            self.log().information("'Speed1' is not specified in logs")
-        if frequency is None: 
-            if "frequency" in logs.keys():
-                frequency = logs['frequency']
-            else:
-                self.log().information("'frequency' is not specified in logs")
-                return self._config.getInfo(None, None)
-        if frequency.units != "Hz":
-            raise RuntimeError("Only know how to deal with frequency in Hz, not %s" % frequency.units)
-        frequency = frequency.getStatistics().mean
+        # get the correct row of the table
+        charac = api.PDDetermineCharacterizations(InputWorkspace=wksp,
+                                                  Characterizations="characterizations", 
+                                                  ReductionProperties="__snspowderreduction",
+                                                  BackRun=self.getProperty("BackgroundNumber").value,
+                                                  NormRun=self.getProperty("VanadiumNumber").value,
+                                                  NormBackRun=self.getProperty("VanadiumBackgroundNumber").value)
+        # convert the result into a dict
+        manager = PropertyManagerDataService.retrieve("__snspowderreduction")
+        rowValues = {}
+        for name in ["frequency", "wavelength", "bank", "vanadium", "container",
+                     "empty", "d_min", "d_max", "tof_min", "tof_max"]:
+            rowValues[name] = manager.getProperty(name).value
 
-        if not "LambdaRequest" in logs.keys():
-            self.log().information("'LambdaRequest' is not in the datafile")
-            return self._config.getInfo(None, None)
-        wavelength = logs['LambdaRequest']
-        if wavelength.units != "Angstrom":
-            raise RuntimeError("Only know how to deal with LambdaRequest in Angstrom, not $s" % wavelength)
-        wavelength = wavelength.getStatistics().mean
-
-        self.log().information("Frequency: " + str(frequency) + " Hz center wavelength:" + str(wavelength) + " Angstrom")
-        return self._config.getInfo(frequency, wavelength)
+        return rowValues
 
     def _save(self, wksp, info, normalized, pdfgetn): 
         prefix = str(wksp)        
@@ -907,16 +734,16 @@ class SNSPowderReduction(PythonAlgorithm):
                 pdfwksp = str(wksp)+"_norm"
                 pdfwksp = api.SetUncertainties(InputWorkspace=wksp, OutputWorkspace=pdfwksp, SetError="sqrt")
                 api.SaveGSS(InputWorkspace=pdfwksp, Filename=filename+".getn", SplitFiles=False, Append=False,
-                        MultiplyByBinWidth=False, Bank=info.bank, Format="SLOG", ExtendedHeader=True)
+                        MultiplyByBinWidth=False, Bank=info["bank"], Format="SLOG", ExtendedHeader=True)
                 api.DeleteWorkspace(pdfwksp)
             return # don't do the other bits of saving
         if "gsas" in self._outTypes:
             api.SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles=False, Append=False, 
-                    MultiplyByBinWidth=normalized, Bank=info.bank, Format="SLOG", ExtendedHeader=True)
+                    MultiplyByBinWidth=normalized, Bank=info["bank"], Format="SLOG", ExtendedHeader=True)
         if "fullprof" in self._outTypes:
-            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info.bank, Filename=filename+".dat")          
+            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info["bank"], Filename=filename+".dat")          
         if "topas" in self._outTypes:
-            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info.bank, Filename=filename+".xye",
+            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info["bank"], Filename=filename+".xye",
                                Format="TOPAS")
         if "nexus" in self._outTypes:
             api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits").value)

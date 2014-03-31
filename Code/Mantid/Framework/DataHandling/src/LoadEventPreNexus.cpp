@@ -26,6 +26,7 @@ Specific pulse ID and mapping files can be specified if needed; these are guesse
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BinaryFile.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"

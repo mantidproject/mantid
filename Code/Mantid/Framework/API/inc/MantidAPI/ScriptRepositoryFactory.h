@@ -14,14 +14,6 @@
 namespace Mantid
 {
 
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
-
 namespace API
 {
 
@@ -75,10 +67,6 @@ namespace API
     ScriptRepositoryFactoryImpl& operator = (const ScriptRepositoryFactoryImpl&);
     ///Private Destructor
     virtual ~ScriptRepositoryFactoryImpl();
-
-    ///static reference to the logger class
-    Kernel::Logger& g_log;
-
   };
 
         ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.

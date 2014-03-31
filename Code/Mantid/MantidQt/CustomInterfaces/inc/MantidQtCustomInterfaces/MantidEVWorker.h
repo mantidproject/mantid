@@ -1,6 +1,5 @@
 
 #include <MantidKernel/System.h>
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 #include <vector>
 
@@ -197,9 +196,6 @@ private:
 
   /// Utility to get workspace ID from ADS, blank if none
   std::string workspaceType( const std::string & ws_name );  
-
-  /// Reference to a logger
-  static Mantid::Kernel::Logger & g_log;
 };
 
 }  // namespace CustomInterfaces 
