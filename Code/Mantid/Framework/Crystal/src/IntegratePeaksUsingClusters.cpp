@@ -26,12 +26,11 @@ Uses connected component analysis to integrate peaks in an PeaksWorkspace over a
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Crystal::ConnectedComponentMappingTypes;
 
 namespace
 {
-  typedef boost::tuple<double, double> SignalErrorSQPair;
-  typedef std::map<size_t, SignalErrorSQPair > LabelIdIntensityMap;
-  typedef std::map<V3D, size_t> PositionToLabelIdMap;
+  
 
   class IsNearPeak
   {
@@ -145,44 +144,10 @@ namespace Mantid
       PeakBackground background(peakWS, radiusEstimate, threshold, NoNormalization, mdCoordinates);
       //HardThresholdBackground background(threshold, normalization);
 
-      ConnectedComponentLabeling analysis;
-      IMDHistoWorkspace_sptr clusters = analysis.execute(mdWS, &background);
-
-      /*
-      Note that the following may be acheived better inside the clustering utility at the same time as the 
-      cluster workspace is populated.
-
-      Accumulate intesity values for each peak cluster and key by label_id
-      */
+      ConnectedComponentLabeling analysis; 
       LabelIdIntensityMap labelMap;
       PositionToLabelIdMap positionMap;
-
-      // Go through the output workspace and perform the integration. by summing labels.
-      for(size_t i = 0; i < clusters->getNPoints(); ++i)
-      {
-        const size_t& label_id = static_cast<size_t>(clusters->getSignalAt(i));
-
-        const double& signal = mdWS->getSignalAt(i);
-        double errorSQ = mdWS->getErrorAt(i);
-        errorSQ *=errorSQ;
-        if(label_id >= analysis.getStartLabelId())
-        {
-          if(labelMap.find(label_id) != labelMap.end())
-          {
-            SignalErrorSQPair current = labelMap[label_id];
-            // Sum labels.
-            labelMap[label_id] = SignalErrorSQPair(current.get<0>() + signal, current.get<1>() + errorSQ);
-          }
-          else
-          {
-            labelMap[label_id] = SignalErrorSQPair(signal, errorSQ);
-
-            const VMD& center = mdWS->getCenter(i);
-            V3D temp(center[0], center[1], center[2]);
-            positionMap[temp] = label_id; //Record charcteristic position of the cluster.
-          }
-        }
-      }
+      IMDHistoWorkspace_sptr clusters = analysis.executeAndIntegrate(mdWS, &background, labelMap, positionMap);
 
       // Link integrated values up with peaks.
       PARALLEL_FOR1(peakWS)

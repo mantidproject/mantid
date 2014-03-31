@@ -1,4 +1,5 @@
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/V3D.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -7,10 +8,14 @@
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/DisjointElement.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/tuple/tuple.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <stdexcept>
 #include <set>
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::Crystal::ConnectedComponentMappingTypes;
 
 namespace Mantid
 {
@@ -18,10 +23,6 @@ namespace Mantid
   {
     namespace
     {
-      typedef std::vector<size_t> VecIndexes;
-      typedef std::vector<DisjointElement> VecElements;
-      typedef std::set<size_t> SetIds;
-
       size_t calculateMaxNeighbours(IMDHistoWorkspace const * const ws)
       {
         const size_t ndims = ws->getNumDims();
@@ -32,6 +33,22 @@ namespace Mantid
         }
         maxNeighbours -= 1;
         return maxNeighbours;
+      }
+
+      boost::shared_ptr<Mantid::API::IMDHistoWorkspace> cloneInputWorkspace(IMDHistoWorkspace_sptr& inWS)
+      {
+        auto alg = AlgorithmManager::Instance().createUnmanaged("CloneWorkspace");
+        alg->initialize();
+        alg->setChild(true);
+        alg->setProperty("InputWorkspace", inWS);
+        alg->setPropertyValue("OutputWorkspace", "out_ws");
+        alg->execute();
+        Mantid::API::IMDHistoWorkspace_sptr outWS;
+        {
+          Mantid::API::Workspace_sptr temp = alg->getProperty("OutputWorkspace");
+          outWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
+        }
+        return outWS;
       }
     }
 
@@ -73,24 +90,8 @@ namespace Mantid
       return m_runMultiThreaded ? API::FrameworkManager::Instance().getNumOMPThreads() : 1;
     }
 
-    boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabeling::execute(
-      IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy) const
+    void ConnectedComponentLabeling::calculateDisjointTree(IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, VecElements& neighbourElements) const
     {
-
-      auto alg = AlgorithmManager::Instance().createUnmanaged("CloneWorkspace");
-      alg->initialize();
-      alg->setChild(true);
-      alg->setProperty("InputWorkspace", ws);
-      alg->setPropertyValue("OutputWorkspace", "out_ws");
-      alg->execute();
-
-      Mantid::API::IMDHistoWorkspace_sptr out_ws;
-      {
-        Mantid::API::Workspace_sptr temp = alg->getProperty("OutputWorkspace");
-        out_ws = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
-      }
-
-      VecElements neighbourElements(ws->getNPoints());
 
       VecIndexes allNonBackgroundIndexes;
       allNonBackgroundIndexes.reserve(ws->getNPoints());
@@ -202,6 +203,18 @@ namespace Mantid
         }
       }
 
+    }
+
+    boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabeling::execute(
+      IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy) const
+    {
+      VecElements neighbourElements(ws->getNPoints());
+
+      // Perform the bulk of the connected component analysis, but don't collapse the elements yet.
+      calculateDisjointTree(ws, strategy, neighbourElements);
+
+      // Create the output workspace from the input workspace
+      IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
 
       // Set each pixel to the root of each disjointed element.
       PARALLEL_FOR_NO_WSP_CHECK()
@@ -210,16 +223,66 @@ namespace Mantid
         //std::cout << "Element\t" << i << " Id: \t" << neighbourElements[i].getId() << " This location:\t"<< &neighbourElements[i] << " Root location:\t" << neighbourElements[i].getParent() << " Root Id:\t" <<  neighbourElements[i].getRoot() << std::endl;
         if(!neighbourElements[i].isEmpty())
         {
-          out_ws->setSignalAt(i, neighbourElements[i].getRoot());
+          outWS->setSignalAt(i, neighbourElements[i].getRoot());
         }
         else
         {
-          out_ws->setSignalAt(i, 0);
+          outWS->setSignalAt(i, 0);
         }
-        out_ws->setErrorSquaredAt(i, 0);
+        outWS->setErrorSquaredAt(i, 0);
       }
 
-      return out_ws;
+      return outWS;
+    }
+
+    boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabeling::executeAndIntegrate(
+      IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, LabelIdIntensityMap& labelMap,
+      PositionToLabelIdMap& positionLabelMap) const
+    {
+      VecElements neighbourElements(ws->getNPoints());
+
+      // Perform the bulk of the connected component analysis, but don't collapse the elements yet.
+      calculateDisjointTree(ws, strategy, neighbourElements);
+
+      // Create the output workspace from the input workspace
+      IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
+
+      // Set each pixel to the root of each disjointed element.
+      for (size_t i = 0; i < neighbourElements.size(); ++i)
+      {
+        if(!neighbourElements[i].isEmpty())
+        {
+          const double& signal = ws->getSignalAt(i); // Intensity value at index
+          double errorSQ = ws->getErrorAt(i);
+          errorSQ *=errorSQ; // Error squared at index
+          const size_t& labelId = neighbourElements[i].getRoot();
+          // Set the output cluster workspace signal value
+          outWS->setSignalAt(i, labelId);
+
+          if(labelMap.find(labelId) != labelMap.end()) // Have we already started integrating over this label
+          {
+            SignalErrorSQPair current = labelMap[labelId];
+            // Sum labels. This is integration!
+            labelMap[labelId] = SignalErrorSQPair(current.get<0>() + signal, current.get<1>() + errorSQ);
+          }
+          else // This label is unknown to us.
+          {
+            labelMap[labelId] = SignalErrorSQPair(signal, errorSQ);
+
+            const VMD& center = ws->getCenter(i);
+            V3D temp(center[0], center[1], center[2]);
+            positionLabelMap[temp] = labelId; //Record charcteristic position of the cluster.
+          }
+          outWS->setSignalAt(i, neighbourElements[i].getRoot());
+        }
+        else
+        {
+          outWS->setSignalAt(i, 0);
+          outWS->setErrorSquaredAt(i, 0);
+        }
+      }
+
+      return outWS;
     }
 
   } // namespace Crystal

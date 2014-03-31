@@ -3,12 +3,25 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidCrystal/DisjointElement.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/tuple/tuple.hpp>
+#include <map>
 
 namespace Mantid
 {
 namespace Crystal
 {
+  namespace ConnectedComponentMappingTypes
+  {
+    typedef boost::tuple<double, double> SignalErrorSQPair;
+    typedef std::map<size_t, SignalErrorSQPair > LabelIdIntensityMap;
+    typedef std::map<Mantid::Kernel::V3D, size_t> PositionToLabelIdMap;
+    typedef std::vector<size_t> VecIndexes;
+    typedef std::vector<DisjointElement> VecElements;
+    typedef std::set<size_t> SetIds;
+  }
+
   class BackgroundStrategy;
 
   /** ConnectedComponentLabelling : Implements connected component labeling on MDHistoWorkspaces.
@@ -35,15 +48,33 @@ namespace Crystal
   */
   class DLLExport ConnectedComponentLabeling
   {
+
   public:
+    /// Constructor
     ConnectedComponentLabeling(const size_t&id = 1, const bool runMultiThreaded=true);
+    /// Getter for the start label id
     size_t getStartLabelId() const;
+    /// Setter for the label id
     void startLabelingId(const size_t& id);
+
+    /// Execute and return clusters
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> execute(Mantid::API::IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy) const;
+    
+    /// Execute and return clusters, as well as maps to integrated label values
+    boost::shared_ptr<Mantid::API::IMDHistoWorkspace> executeAndIntegrate(
+      Mantid::API::IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, ConnectedComponentMappingTypes::LabelIdIntensityMap& labelMap,
+      ConnectedComponentMappingTypes::PositionToLabelIdMap& positionLabelMap) const;
+
+    /// Destructor
     virtual ~ConnectedComponentLabeling();
   private:
+    /// Get the number of threads to use.
     int getNThreads() const;
+    /// Calculate the disjoint element tree across the image.
+    void calculateDisjointTree(Mantid::API::IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, std::vector<DisjointElement>& neighbourElements) const;
+    /// Start labeling index
     size_t m_startId;
+    /// Run multithreaded
     const bool m_runMultiThreaded;
     
   };
