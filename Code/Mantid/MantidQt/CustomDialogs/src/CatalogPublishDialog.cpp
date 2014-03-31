@@ -9,8 +9,6 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtMantidWidgets/DataSelector.h"
 
-#include <QDir>
-
 namespace MantidQt
 {
   namespace CustomDialogs
@@ -21,7 +19,7 @@ namespace MantidQt
      * Default constructor.
      * @param parent :: Parent dialog.
      */
-    CatalogPublishDialog::CatalogPublishDialog(QWidget *parent) : MantidQt::API::AlgorithmDialog(parent), m_uiForm() {}
+    CatalogPublishDialog::CatalogPublishDialog(QWidget *parent) : API::AlgorithmDialog(parent), m_uiForm() {}
 
     /// Initialise the layout
     void CatalogPublishDialog::initLayout()
@@ -62,7 +60,8 @@ namespace MantidQt
       // We need to catch the exception to prevent a fatal error.
       try
       {
-        Mantid::API::CatalogManager::Instance().getCatalog(session.front()->getSessionId())->myData(workspace);
+        if (!session.empty())
+          Mantid::API::CatalogManager::Instance().getCatalog(session.front()->getSessionId())->myData(workspace);
       }
       catch(std::runtime_error& e)
       {

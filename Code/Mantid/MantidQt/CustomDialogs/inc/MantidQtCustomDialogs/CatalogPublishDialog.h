@@ -33,7 +33,7 @@ namespace MantidQt
      File change history is stored at: <https://github.com/mantidproject/mantid>.
      Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class CatalogPublishDialog : public MantidQt::API::AlgorithmDialog
+    class CatalogPublishDialog : public API::AlgorithmDialog
     {
       Q_OBJECT
 
