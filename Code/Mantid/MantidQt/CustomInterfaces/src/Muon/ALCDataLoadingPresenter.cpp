@@ -14,11 +14,8 @@ namespace CustomInterfaces
 
   void ALCDataLoadingPresenter::initialize()
   {
-    connectView();
-  }
+    m_view->initialize();
 
-  void ALCDataLoadingPresenter::connectView()
-  {
     connect(m_view, SIGNAL(loadData()), SLOT(loadData()));
   }
 

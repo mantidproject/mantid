@@ -46,9 +46,6 @@ namespace CustomInterfaces
 
     void initialize();
 
-    /// @return Associated presenter
-    ALCBaselineModellingPresenter& presenter() { return m_presenter; }
-
     /// @see IALCBaselineModellingView::function
     IFunction_const_sptr function() const;
 
@@ -63,9 +60,7 @@ namespace CustomInterfaces
     /// The widget used
     QWidget* const m_widget;
 
-    /// Associated presenter
-    ALCBaselineModellingPresenter m_presenter;
-
+    /// UI form
     Ui::ALCBaselineModellingView m_ui;
 
     /// Plot curves

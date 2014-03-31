@@ -16,28 +16,20 @@ using namespace testing;
 class MockALCDataLoadingView : public IALCDataLoadingView
 {
 public:
-  MockALCDataLoadingView()
-    : m_presenter(this)
-  {
-    m_presenter.initialize();
-  }
-
-  MOCK_METHOD0(firstRun, std::string());
-  MOCK_METHOD0(lastRun, std::string());
-  MOCK_METHOD0(log, std::string());
+  MOCK_METHOD0(initialize, void());
+  MOCK_CONST_METHOD0(firstRun, std::string());
+  MOCK_CONST_METHOD0(lastRun, std::string());
+  MOCK_CONST_METHOD0(log, std::string());
   MOCK_METHOD1(displayData, void(MatrixWorkspace_const_sptr));
   MOCK_METHOD1(displayError, void(const std::string&));
 
   void requestLoading() { emit loadData(); }
-
-private:
-  ALCDataLoadingPresenter m_presenter;
 };
 
 class ALCDataLoadingTest : public CxxTest::TestSuite
 {
   MockALCDataLoadingView* m_view;
-  ALCDataLoadingPresenter* m_dataLoading;
+  ALCDataLoadingPresenter* m_presenter;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -53,11 +45,15 @@ public:
   void setUp()
   {
     m_view = new MockALCDataLoadingView();
+
+    m_presenter = new ALCDataLoadingPresenter(m_view);
+    m_presenter->initialize();
   }
 
   void tearDown()
   {
     delete m_view;
+    delete m_presenter;
   }
 
   void test_basicLoading()

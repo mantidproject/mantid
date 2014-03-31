@@ -41,7 +41,6 @@ namespace CustomInterfaces
 
   public:
     ALCBaselineModellingPresenter(IALCBaselineModellingView* view);
-    virtual ~ALCBaselineModellingPresenter();
 
     void initialize();
 
@@ -54,9 +53,6 @@ namespace CustomInterfaces
     void fit();
 
   private:
-    /// Connect to view signals
-    void connectView();
-
     /// Associated view
     IALCBaselineModellingView* const m_view;
 

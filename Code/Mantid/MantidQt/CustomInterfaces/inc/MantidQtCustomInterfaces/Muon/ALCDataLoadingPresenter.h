@@ -52,9 +52,6 @@ namespace CustomInterfaces
     void loadData();
 
   private:
-    /// Begin listening to the view signals
-    void connectView();
-
     /// View which the object works with
     IALCDataLoadingView* const m_view;
 

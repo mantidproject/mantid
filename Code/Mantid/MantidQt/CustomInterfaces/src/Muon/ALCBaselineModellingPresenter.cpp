@@ -13,14 +13,12 @@ namespace CustomInterfaces
   ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(IALCBaselineModellingView* view)
     : m_view(view), m_data()
   {}
-    
-  ALCBaselineModellingPresenter::~ALCBaselineModellingPresenter()
-  {
-  }
 
   void ALCBaselineModellingPresenter::initialize()
   {
-    connectView();
+    m_view->initialize();
+
+    connect(m_view, SIGNAL(fit()), this, SLOT(fit()));
   }
 
   void ALCBaselineModellingPresenter::setData(MatrixWorkspace_const_sptr data)
@@ -40,11 +38,6 @@ namespace CustomInterfaces
     fit->execute();
 
     m_view->updateFunction(funcToFit);
-  }
-
-  void ALCBaselineModellingPresenter::connectView()
-  {
-    connect(m_view, SIGNAL(fit()), this, SLOT(fit()));
   }
 
 } // namespace CustomInterfaces

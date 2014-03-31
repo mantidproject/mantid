@@ -48,6 +48,9 @@ namespace CustomInterfaces
     virtual IFunction_const_sptr function() const = 0;
 
   public slots:
+    /// Performs any necessary initialization
+    virtual void initialize() = 0;
+
     /// Display the data we are going to model the baseline for
     /// @param data :: Data workspace to display
     virtual void displayData(MatrixWorkspace_const_sptr data) = 0;

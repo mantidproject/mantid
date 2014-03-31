@@ -12,7 +12,7 @@ namespace MantidQt
 namespace CustomInterfaces
 {
   ALCBaselineModellingView::ALCBaselineModellingView(QWidget* widget)
-    : m_widget(widget), m_presenter(this), m_ui(), m_dataCurve(NULL), m_fitCurve(NULL)
+    : m_widget(widget), m_ui(), m_dataCurve(NULL), m_fitCurve(NULL)
   {
     m_dataCurve = new QwtPlotCurve();
     m_fitCurve = new QwtPlotCurve();
@@ -22,8 +22,6 @@ namespace CustomInterfaces
   {
     m_ui.setupUi(m_widget);
     connect(m_ui.fit, SIGNAL(pressed()), SIGNAL(fit()));
-
-    m_presenter.initialize();
 
     m_dataCurve->attach(m_ui.dataPlot);
 

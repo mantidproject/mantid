@@ -46,15 +46,12 @@ namespace CustomInterfaces
 
     void initialize();
 
-    /// @return Associated presenter
-    ALCDataLoadingPresenter& presenter() { return m_presenter; }
-
     /// @see IALCDataLoadingView::firstRun
-    std::string firstRun();
+    std::string firstRun() const;
     /// @see IALCDataLoadingView::lastRun
-    std::string lastRun();
+    std::string lastRun() const;
     /// @see IALCDataLoadingView::log
-    std::string log();
+    std::string log() const;
 
     /// @see IALCDataLoadingView::displayData
     void displayData(MatrixWorkspace_const_sptr data);
@@ -62,10 +59,6 @@ namespace CustomInterfaces
     void displayError(const std::string &error);
 
   private:
-
-    /// Associated presenter
-    ALCDataLoadingPresenter m_presenter;
-
     /// UI form
     Ui::ALCDataLoadingView m_ui;
 

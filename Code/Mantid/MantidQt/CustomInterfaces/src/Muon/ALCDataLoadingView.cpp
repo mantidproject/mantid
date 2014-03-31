@@ -8,7 +8,7 @@ namespace MantidQt
 namespace CustomInterfaces
 {
   ALCDataLoadingView::ALCDataLoadingView(QWidget* widget)
-    : m_presenter(this), m_widget(widget)
+    : m_widget(widget)
   {}
 
   void ALCDataLoadingView::initialize()
@@ -19,21 +19,19 @@ namespace CustomInterfaces
     m_ui.dataPlot->setCanvasBackground(Qt::white);
     m_ui.dataPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
     m_ui.dataPlot->setAxisFont(QwtPlot::yLeft, m_widget->font());
-
-    m_presenter.initialize();
   }
 
-  std::string ALCDataLoadingView::firstRun()
+  std::string ALCDataLoadingView::firstRun() const
   {
     return m_ui.firstRun->getFirstFilename().toStdString();
   }
 
-  std::string ALCDataLoadingView::lastRun()
+  std::string ALCDataLoadingView::lastRun() const
   {
     return m_ui.lastRun->getFirstFilename().toStdString();
   }
 
-  std::string ALCDataLoadingView::log()
+  std::string ALCDataLoadingView::log() const
   {
     return m_ui.log->text().toStdString();
   }

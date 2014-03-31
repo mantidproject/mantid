@@ -1,5 +1,8 @@
 #include "MantidQtCustomInterfaces/Muon/ALCInterface.h"
 
+#include "MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h"
+#include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h"
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -17,10 +20,12 @@ namespace CustomInterfaces
     connect(m_ui.nextStep, SIGNAL(pressed()), this, SLOT(nextStep()));
     connect(m_ui.previousStep, SIGNAL(pressed()), this, SLOT(previousStep()));
 
-    m_dataLoading = new ALCDataLoadingView(m_ui.dataLoadingView);
+    auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
+    m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
     m_dataLoading->initialize();
 
-    m_baselineModelling = new ALCBaselineModellingView(m_ui.baselineModellingView);
+    auto baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
+    m_baselineModelling = new ALCBaselineModellingPresenter(baselineModellingView);
     m_baselineModelling->initialize();
   }
 
@@ -32,7 +37,7 @@ namespace CustomInterfaces
     {
       if (m_ui.stepView->widget(next) == m_ui.baselineModellingView)
       {
-        m_baselineModelling->presenter().setData(m_dataLoading->presenter().loadedData());
+        m_baselineModelling->setData(m_dataLoading->loadedData());
       }
 
       m_ui.stepView->setCurrentIndex(next);

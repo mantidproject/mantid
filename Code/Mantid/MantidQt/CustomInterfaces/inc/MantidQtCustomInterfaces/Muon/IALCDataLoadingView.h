@@ -43,17 +43,20 @@ namespace CustomInterfaces
   public:
     /// Returns a path to the first run file
     /// @return Full path to file
-    virtual std::string firstRun() = 0;
+    virtual std::string firstRun() const = 0;
 
     /// Returns a path to the last run file
     /// @return Full path to file
-    virtual std::string lastRun() = 0;
+    virtual std::string lastRun() const = 0;
 
     /// Returns the name of the log to use
     /// @return Log name
-    virtual std::string log() = 0;
+    virtual std::string log() const = 0;
 
   public slots:
+    /// Performs any necessary initialization
+    virtual void initialize() = 0;
+
     /// Updates the data displayed by the view
     /// @param data :: Data workspace do display
     virtual void displayData(MatrixWorkspace_const_sptr data) = 0;
