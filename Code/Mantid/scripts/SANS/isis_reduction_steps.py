@@ -95,19 +95,29 @@ class LoadRun(object):
             self._load(inst, is_can, extra_options)
             return
       
-        workspace = self._get_workspace_name()
+        # the intension of the code below is a good idea. Hence the reason why
+        # I have left, but commented it out. However as of this writing 
+        # LoadNexusMonitors throws an error if LoadNexusMonitors is a histogram
+        # i.e. this algorithm only works for event files at present
+        # when this is fixed the code below can be uncomment and the line of code
+        # not uncomment deleted, which would 
+        # increase the loading speed where only interested in monitor histograms
+
+        self._load(inst, is_can, extra_options)
+
+        # workspace = self._get_workspace_name()
 
         # For sans, in transmission, we care only about the monitors. Hence,
         # by trying to load only the monitors we speed up the reduction process. 
-        # besides, we avoid loading events which is uselles for transmission. 
+        # besides, we avoid loading events which is useless for transmission. 
         # it may fail, if the input file was not a nexus file, in this case, 
         # it pass the job to the default _load method.
-        try:
-            outWs = LoadNexusMonitors(self._data_file, OutputWorkspace=workspace)
-            self.periods_in_file = 1
-            self._wksp_name = workspace
-        except:
-            self._load(inst, is_can, extra_options)
+        #try:
+        #    outWs = LoadNexusMonitors(self._data_file, OutputWorkspace=workspace)
+        #    self.periods_in_file = 1
+        #    self._wksp_name = workspace
+        #except:
+        #    self._load(inst, is_can, extra_options)
 
     def _load(self, inst = None, is_can=False, extra_options=dict()):
         """
