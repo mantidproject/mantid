@@ -185,11 +185,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             @param runnumber: run number (integer)
             @param extension: file extension
         """
-<<<<<<< HEAD
         self.log().warning("Loading histogram Nexus for run %s" % runnumber)
-=======
-        Logger("CalibrateRectangularDetector").warning("Loading histogram Nexus for run %s" % runnumber)
->>>>>>> 019c2930128cfeb5529ca1a5b6021b72172996e8
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
         return LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
@@ -262,11 +258,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             if y_s[midBin] > ymax:
                     refpixel = s
                     ymax = y_s[midBin]
-<<<<<<< HEAD
         self.log().information("Reference spectra=%s" % refpixel)
-=======
-        Logger("CalibrateRectangularDetectors").information("Reference spectra=%s" % refpixel)
->>>>>>> 019c2930128cfeb5529ca1a5b6021b72172996e8
         # Remove old calibration files
         cmd = "rm "+calib
         os.system(cmd)
@@ -298,11 +290,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                         refpixel = s
                         ymax = y_s[midBin]
             msg = "Reference spectra = %s, lastpixel_3 = %s" % (refpixel, self._lastpixel3)
-<<<<<<< HEAD
             self.log().information(msg)
-=======
-            Logger("CalibrateRectangularDetectors").information(msg)
->>>>>>> 019c2930128cfeb5529ca1a5b6021b72172996e8
             self._lastpixel2 = wksp.getNumberHistograms()*self._lastpixel2/self._lastpixel3-1
             CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc2", 
                            ReferenceSpectra=refpixel, WorkspaceIndexMin=self._lastpixel+1, 
@@ -332,11 +320,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 if y_s[midBin] > ymax:
                         refpixel = s
                         ymax = y_s[midBin]
-<<<<<<< HEAD
             self.log().information("Reference spectra=%s" % refpixel)
-=======
-            Logger("CalibrateRectangularDetectors").information("Reference spectra=%s" % refpixel)
->>>>>>> 019c2930128cfeb5529ca1a5b6021b72172996e8
             CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc3", 
                            ReferenceSpectra=refpixel,
                            WorkspaceIndexMin=self._lastpixel2+1, 
