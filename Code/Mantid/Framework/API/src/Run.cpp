@@ -487,18 +487,18 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
 				  + " to " + boost::lexical_cast<std::string>(maxAngle) + ".  Used mean = " + boost::lexical_cast<std::string>(angle) +".");
 		  if (axisName.compare("omega") == 0)
 		  {
-			  g_log.warning("To set to last angle run SetGoniometer(Workspace=\'workspace\',Axis0=\'"
-					  + boost::lexical_cast<std::string>(lastAngle) + ",0,1,0,1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
+			  g_log.warning("To set to last angle, replace omega with "
+					  + boost::lexical_cast<std::string>(lastAngle) + ": SetGoniometer(Workspace=\'workspace\',Axis0=omega,0,1,0,1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
 		  }
 		  else if (axisName.compare("chi") == 0)
 		  {
-			  g_log.warning("To set to last angle run SetGoniometer(Workspace=\'workspace\',Axis0='omega,0,1,0,1',Axis1=\'"
-					  + boost::lexical_cast<std::string>(lastAngle) + ",0,0,1,1\',Axis2='phi,0,1,0,1')");
+			  g_log.warning("To set to last angle, replace chi with "
+					  + boost::lexical_cast<std::string>(lastAngle) + ": SetGoniometer(Workspace=\'workspace\',Axis0=omega,0,1,0,1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
 		  }
 		  else if (axisName.compare("phi") == 0)
 		  {
-			  g_log.warning("To set to last angle run SetGoniometer(Workspace=\'workspace\',Axis0='omega,0,1,0,1',Axis1='chi,0,0,1,1',Axis2=\'"
-					  + boost::lexical_cast<std::string>(lastAngle) + ",0,1,0,1\')");
+			  g_log.warning("To set to last angle, replace phi with "
+					  + boost::lexical_cast<std::string>(lastAngle) + ": SetGoniometer(Workspace=\'workspace\',Axis0=omega,0,1,0,1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
 		  }
 	  }
 	  m_goniometer.setRotationAngle(i, angle);
