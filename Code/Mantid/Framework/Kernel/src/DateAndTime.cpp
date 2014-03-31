@@ -506,7 +506,7 @@ void DateAndTime::setFromISO8601(const std::string str)
   catch (std::exception &)
   {
     // Re-throw a more helpful error message
-    throw std::invalid_argument("Error interpreting string '" + time + "' as a date/time.");
+    throw std::invalid_argument("Error interpreting string '" + str + "' as a date/time.");
   }
 }
 
