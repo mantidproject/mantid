@@ -845,8 +845,9 @@ namespace MantidQt
 
       QTableWidget* searchResultsTable = m_icatUiForm.searchResultsTbl;
 
-      // Obtain the investigation id from the selected
-      QTableWidgetItem* investigationId = searchResultsTable->item(item->row(),0);
+      // Obtain the investigationID from the selected
+      QTableWidgetItem* investigationId = searchResultsTable->item(
+          item->row(),headerIndexByName(searchResultsTable,"InvestigationID"));
 
       // Remove previous dataFile search results.
       std::string dataFileResults = "dataFileResults";
@@ -995,14 +996,19 @@ namespace MantidQt
      */
     void CatalogSearch::updateDataFileLabels(QTableWidgetItem* item)
     {
+      QTableWidget* searchResultsTable =  m_icatUiForm.searchResultsTbl;
+
       // Set the "title" label using the data from the investigation results workspace.
-      m_icatUiForm.dataFileTitleRes->setText(m_icatUiForm.searchResultsTbl->item(item->row(),1)->text());
+      m_icatUiForm.dataFileTitleRes->setText(searchResultsTable->item(item->row(),
+          headerIndexByName(searchResultsTable, "Title"))->text());
 
       // Set the instrument label using data from the investigation results workspace.
-      m_icatUiForm.dataFileInstrumentRes->setText(m_icatUiForm.searchResultsTbl->item(item->row(),2)->text());
+      m_icatUiForm.dataFileInstrumentRes->setText(searchResultsTable->item(item->row(),
+          headerIndexByName(searchResultsTable, "Instrument"))->text());
 
       // Show the related "run-range" for the specific dataFiles.
-      m_icatUiForm.dataFileRunRangeRes->setText(m_icatUiForm.searchResultsTbl->item(item->row(),3)->text());
+      m_icatUiForm.dataFileRunRangeRes->setText(searchResultsTable->item(item->row(),
+          headerIndexByName(searchResultsTable, "Run range"))->text());
     }
 
     /**

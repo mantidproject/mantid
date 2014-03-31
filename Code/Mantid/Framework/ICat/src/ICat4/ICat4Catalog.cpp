@@ -390,7 +390,7 @@ namespace Mantid
       if (outputws->getColumnNames().empty())
       {
         // Add rows headers to the output workspace.
-        outputws->addColumn("str","Investigation id");
+        outputws->addColumn("str","InvestigationID");
         outputws->addColumn("str","Facility");
         outputws->addColumn("str","Title");
         outputws->addColumn("str","Instrument");
