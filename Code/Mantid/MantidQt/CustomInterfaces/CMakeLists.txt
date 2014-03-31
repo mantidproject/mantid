@@ -156,6 +156,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/IALCBaselineModellingView.h
                 inc/MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h
                 inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h
+                inc/MantidQtCustomInterfaces/Muon/ALCInterface.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
@@ -187,6 +188,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/JumpFit.ui
                inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.ui
                inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.ui
+               inc/MantidQtCustomInterfaces/Muon/ALCInterface.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/Quasi.ui
                inc/MantidQtCustomInterfaces/ResNorm.ui

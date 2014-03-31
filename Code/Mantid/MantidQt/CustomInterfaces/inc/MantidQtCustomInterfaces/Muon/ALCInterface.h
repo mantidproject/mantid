@@ -6,6 +6,8 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
+#include "ui_ALCInterface.h"
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -35,12 +37,23 @@ namespace CustomInterfaces
   */
   class MANTIDQT_CUSTOMINTERFACES_DLL ALCInterface : public API::UserSubWindow
   {
+    Q_OBJECT
+
   public:
+    ALCInterface(QWidget* parent = 0);
+
     static std::string name() { return "ALC"; }
     static QString categoryInfo() { return "Muon"; }
 
   protected:
     void initLayout();
+
+  private slots:
+    void nextStep();
+    void previousStep();
+
+  private:
+    Ui::ALCInterface m_ui;
   };
 
 } // namespace CustomInterfaces
