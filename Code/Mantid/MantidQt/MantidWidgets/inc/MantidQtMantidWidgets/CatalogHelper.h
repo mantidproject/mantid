@@ -2,13 +2,13 @@
 #define MANTIDQTWIDGETS_CATALOGHELPER_H_
 
 #include "MantidAPI/AlgorithmManager.h"
-#include <QWidget>
+#include "WidgetDllOption.h"
 
 namespace MantidQt
 {
   namespace MantidWidgets
   {
-    class CatalogHelper
+    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS CatalogHelper
     {
 
     public:
