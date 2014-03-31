@@ -33,11 +33,25 @@ namespace CustomInterfaces
         FunctionFactory::Instance().createInitialized( m_view->function()->asString() );
 
     IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
+    fit->setChild(true);
     fit->setProperty("Function", funcToFit);
     fit->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+    fit->setProperty("CreateOutput", true);
     fit->execute();
 
+    MatrixWorkspace_sptr fitOutput = fit->getProperty("OutputWorkspace");
+
+    IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+    extract->setChild(true);
+    extract->setProperty("InputWorkspace", fitOutput);
+    extract->setProperty("WorkspaceIndex", 2);
+    extract->setProperty("OutputWorkspace", "__NotUsed__");
+    extract->execute();
+
+    MatrixWorkspace_const_sptr diff = extract->getProperty("OutputWorkspace");
+
     m_view->updateFunction(funcToFit);
+    m_view->displayCorrected(diff);
   }
 
 } // namespace CustomInterfaces

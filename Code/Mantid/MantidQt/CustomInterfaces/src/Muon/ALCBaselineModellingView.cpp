@@ -12,11 +12,10 @@ namespace MantidQt
 namespace CustomInterfaces
 {
   ALCBaselineModellingView::ALCBaselineModellingView(QWidget* widget)
-    : m_widget(widget), m_ui(), m_dataCurve(NULL), m_fitCurve(NULL)
-  {
-    m_dataCurve = new QwtPlotCurve();
-    m_fitCurve = new QwtPlotCurve();
-  }
+    : m_widget(widget), m_ui(),
+      m_dataCurve(new QwtPlotCurve()), m_fitCurve(new QwtPlotCurve()),
+      m_correctedCurve(new QwtPlotCurve())
+  {}
     
   void ALCBaselineModellingView::initialize()
   {
@@ -41,6 +40,16 @@ namespace CustomInterfaces
 
     m_dataCurve->setData(&dataX[0], &dataY[0], static_cast<int>(data->blocksize()));
     m_ui.dataPlot->replot();
+  }
+
+  void ALCBaselineModellingView::displayCorrected(MatrixWorkspace_const_sptr data)
+  {
+    const Mantid::MantidVec& dataX = data->readX(0);
+    const Mantid::MantidVec& dataY = data->readY(0);
+
+    m_correctedCurve->setData(&dataX[0], &dataY[0], static_cast<int>(data->blocksize()));
+    m_correctedCurve->attach(m_ui.correctedPlot);
+    m_ui.correctedPlot->replot();
   }
 
   void ALCBaselineModellingView::updateFunction(IFunction_const_sptr func)

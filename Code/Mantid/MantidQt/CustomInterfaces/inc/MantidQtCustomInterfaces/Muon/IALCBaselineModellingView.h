@@ -55,6 +55,10 @@ namespace CustomInterfaces
     /// @param data :: Data workspace to display
     virtual void displayData(MatrixWorkspace_const_sptr data) = 0;
 
+    /// Display the corrected data
+    /// @param data :: Corrected data workspace
+    virtual void displayCorrected(MatrixWorkspace_const_sptr data) = 0;
+
     /// Update the displayed function
     /// @param func :: Updated function to set values from
     virtual void updateFunction(IFunction_const_sptr func) = 0;

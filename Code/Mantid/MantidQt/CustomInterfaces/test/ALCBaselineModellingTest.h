@@ -26,6 +26,7 @@ public:
   MOCK_METHOD0(initialize, void());
   MOCK_CONST_METHOD0(function, IFunction_const_sptr());
   MOCK_METHOD1(displayData, void(MatrixWorkspace_const_sptr));
+  MOCK_METHOD1(displayCorrected, void(MatrixWorkspace_const_sptr));
   MOCK_METHOD1(updateFunction, void(IFunction_const_sptr));
 };
 
@@ -46,19 +47,20 @@ public:
   {
     auto view = new MockALCBaselineModellingView();
     auto presenter = new ALCBaselineModellingPresenter(view);
+    EXPECT_CALL(*view, initialize()).Times(1);
     EXPECT_CALL(*view, displayData(_)).Times(1);
     presenter->initialize();
     presenter->setData(data);
     return view;
   }
 
-  void test_basicFitting()
+  void test_fitting()
   {
     MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, 3, 3);
 
     using boost::assign::list_of;
 
-    data->dataX(0) = list_of(0)(2)(3).convert_to_container<Mantid::MantidVec>();
+    data->dataX(0) = list_of(1)(2)(3).convert_to_container<Mantid::MantidVec>();
     data->dataY(0) = list_of(5)(5)(5).convert_to_container<Mantid::MantidVec>();
 
     IFunction_const_sptr func = FunctionFactory::Instance().createInitialized("name=FlatBackground,A0=0");
@@ -67,6 +69,7 @@ public:
     scoped_ptr<MockALCBaselineModellingView> view(createView(data));
     EXPECT_CALL(*view, function()).WillRepeatedly(Return(func));
     EXPECT_CALL(*view, updateFunction(_)).Times(1).WillOnce(SaveArg<0>(&fittedFunc));
+    EXPECT_CALL(*view, displayCorrected(_)).Times(1);
     EXPECT_CALL(*view, displayData(_)).Times(0);
 
     view->requestFit();
@@ -77,6 +80,38 @@ public:
     {
       TS_ASSERT_EQUALS(fittedFunc->name(), "FlatBackground");
       TS_ASSERT_DELTA(fittedFunc->getParameter("A0"), 5, 1E-8);
+    }
+  }
+
+  void test_baselineSubtraction()
+  {
+    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, 3, 3);
+
+    using boost::assign::list_of;
+    data->dataX(0) = data->dataY(0) = list_of(1)(2)(3).convert_to_container<Mantid::MantidVec>();
+
+    scoped_ptr<MockALCBaselineModellingView> view(createView(data));
+
+    IFunction_const_sptr func = FunctionFactory::Instance().createInitialized("name=FlatBackground,A0=0");
+    MatrixWorkspace_const_sptr corrected;
+
+    EXPECT_CALL(*view, function()).WillRepeatedly(Return(func));
+    EXPECT_CALL(*view, updateFunction(_)).Times(1);
+    EXPECT_CALL(*view, displayCorrected(_)).Times(1).WillOnce(SaveArg<0>(&corrected));
+    EXPECT_CALL(*view, displayData(_)).Times(0);
+
+    view->requestFit();
+
+    TS_ASSERT(corrected);
+
+    if ( corrected )
+    {
+      TS_ASSERT_EQUALS(corrected->getNumberHistograms(), 1);
+      TS_ASSERT_EQUALS(corrected->blocksize(), 3);
+
+      TS_ASSERT_DELTA(corrected->readY(0)[0], -1.0, 1E-8);
+      TS_ASSERT_DELTA(corrected->readY(0)[1], 0.0, 1E-8);
+      TS_ASSERT_DELTA(corrected->readY(0)[2], 1.0, 1E-8);
     }
   }
 };

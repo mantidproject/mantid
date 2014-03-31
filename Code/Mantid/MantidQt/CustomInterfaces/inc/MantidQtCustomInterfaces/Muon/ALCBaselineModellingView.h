@@ -53,6 +53,9 @@ namespace CustomInterfaces
     /// @see IALCBaselineModellingView::displayData
     void displayData(MatrixWorkspace_const_sptr data);
 
+    /// @see IALCBaselineModellingView::displayCorrected
+    void displayCorrected(MatrixWorkspace_const_sptr data);
+
     /// @see IALCBaselineModellingView::updateFunction
     void updateFunction(IFunction_const_sptr func);
 
@@ -64,7 +67,7 @@ namespace CustomInterfaces
     Ui::ALCBaselineModellingView m_ui;
 
     /// Plot curves
-    QwtPlotCurve *m_dataCurve, *m_fitCurve;
+    QwtPlotCurve *m_dataCurve, *m_fitCurve, *m_correctedCurve;
   };
 
 
