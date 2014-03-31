@@ -30,6 +30,7 @@ Dataset '''fqt''' is split into two workspaces, one for the real part and the ot
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
@@ -114,6 +115,10 @@ void LoadSassena::dataSetDouble( const hid_t& h5file, const std::string setName,
   }
 }
 
+/* Helper object and function to sort modulus of Q-vectors
+ */
+typedef std::pair<double,int> mypair;
+bool compare( const mypair& left, const mypair& right){ return left.first < right.first; }
 /**
  * load vectors onto a Workspace2D with 3 bins (the three components of the vectors)
  * dataX for the origin of the vector (assumed (0,0,0) )
@@ -122,8 +127,9 @@ void LoadSassena::dataSetDouble( const hid_t& h5file, const std::string setName,
  * @param h5file file identifier
  * @param gws pointer to WorkspaceGroup being filled
  */
-const MantidVec LoadSassena::loadQvectors(const hid_t& h5file, API::WorkspaceGroup_sptr gws)
+const MantidVec LoadSassena::loadQvectors(const hid_t& h5file, API::WorkspaceGroup_sptr gws, std::vector<int> &sorting_indexes)
 {
+
   const std::string gwsName = this->getPropertyValue("OutputWorkspace");
   const std::string setName("qvectors");
 
@@ -143,9 +149,27 @@ const MantidVec LoadSassena::loadQvectors(const hid_t& h5file, API::WorkspaceGro
   MantidVec qvmod; //store the modulus of the vector
   double* curr = buf;
   for(int iq=0; iq<nq; iq++){
-    MantidVec& Y = ws->dataY(iq);
-    Y.assign(curr,curr+3);
     qvmod.push_back( sqrt( curr[0]*curr[0] + curr[1]*curr[1] + curr[2]*curr[2] ) );
+    curr += 3;
+  }
+
+  if(getProperty("SortByQVectors"))
+  {
+    std::vector<mypair> qvmodpair;
+    for(int iq=0; iq<nq; iq++) qvmodpair.push_back( mypair(qvmod[iq],iq) );
+    std::sort(qvmodpair.begin(), qvmodpair.end(), compare);
+    for(int iq=0; iq<nq; iq++) sorting_indexes.push_back(qvmodpair[iq].second);
+    std::sort(qvmod.begin(), qvmod.end());
+  }
+  else
+    for(int iq=0; iq<nq; iq++) sorting_indexes.push_back(iq);
+
+  curr = buf;
+  for(int iq=0; iq<nq; iq++)
+  {
+    const int index=sorting_indexes[iq];
+    MantidVec& Y = ws->dataY(index);
+    Y.assign(curr,curr+3);
     curr += 3;
   }
   delete[] buf;
@@ -166,7 +190,8 @@ const MantidVec LoadSassena::loadQvectors(const hid_t& h5file, API::WorkspaceGro
  * @param setName string name of dataset
  * @param qvmod vector of Q-vectors' moduli
  */
-void LoadSassena::loadFQ(const hid_t& h5file, API::WorkspaceGroup_sptr gws, const std::string setName, const MantidVec &qvmod){
+void LoadSassena::loadFQ(const hid_t& h5file, API::WorkspaceGroup_sptr gws, const std::string setName, const MantidVec &qvmod, const std::vector<int> &sorting_indexes)
+{
   const std::string gwsName = this->getPropertyValue("OutputWorkspace");
   int nq = static_cast<int>( qvmod.size() ); //number of q-vectors
 
@@ -180,11 +205,12 @@ void LoadSassena::loadFQ(const hid_t& h5file, API::WorkspaceGroup_sptr gws, cons
   ws->dataX(0) = qvmod;  //X-axis values are the modulus of the q vector
   MantidVec& im = ws->dataY(1); // store the imaginary part
   ws->dataX(1) = qvmod;
-  double* curr = buf;
+  double *curr = buf;
   for(int iq=0; iq<nq; iq++){
-    re[iq]=curr[0];
-    im[iq]=curr[1];
-    curr += 2;
+    const int index=sorting_indexes[iq];
+    re[index]=curr[0];
+    im[index]=curr[1];
+    curr+=2;
   }
   delete[] buf;
 
@@ -204,7 +230,7 @@ void LoadSassena::loadFQ(const hid_t& h5file, API::WorkspaceGroup_sptr gws, cons
  * @param setName string name of dataset
  * @param qvmod vector of Q-vectors' moduli
  */
-void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, const std::string setName, const MantidVec &qvmod)
+void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, const std::string setName, const MantidVec &qvmod, const std::vector<int> &sorting_indexes)
 {
   const std::string gwsName = this->getPropertyValue("OutputWorkspace");
   int nq = static_cast<int>( qvmod.size() ); //number of q-vectors
@@ -231,10 +257,11 @@ void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, con
   double* curr = buf;
   for(int iq=0; iq<nq; iq++)
   {
-    MantidVec& reX = wsRe->dataX(iq);
-    MantidVec& imX = wsIm->dataX(iq);
-    MantidVec& reY = wsRe->dataY(iq);
-    MantidVec& imY = wsIm->dataY(iq);
+    const int index=sorting_indexes[iq];
+    MantidVec& reX = wsRe->dataX(index);
+    MantidVec& imX = wsIm->dataX(index);
+    MantidVec& reY = wsRe->dataY(index);
+    MantidVec& imY = wsIm->dataY(index);
     for(int it=0; it<nnt; it++)
     {
       reX[origin+it] = it*dt;  // time point for the real part
@@ -305,6 +332,8 @@ void LoadSassena::init()
   // Declare the OutputWorkspace property
   declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace","",Kernel::Direction::Output), "The name of the group workspace to be created.");
   declareProperty(new Kernel::PropertyWithValue<double>("TimeUnit", 1.0, Kernel::Direction::Input),"The Time unit in between data points, in picoseconds. Default is 1.0 picosec.");
+  declareProperty(new Kernel::PropertyWithValue<bool>("SortByQVectors", true, Kernel::Direction::Input),"Sort structure factors by increasing Q-value?");
+
 }
 
 /**
@@ -351,8 +380,8 @@ void LoadSassena::exec()
   //const std::string version(cversion);
   //determine which loader protocol to use based on the version
   //to be done at a later time, maybe implement a Version class
-
-  const MantidVec qvmod = this->loadQvectors( h5file, gws );
+  std::vector<int> sorting_indexes;
+  const MantidVec qvmod = this->loadQvectors( h5file, gws, sorting_indexes);
   //iterate over the valid sets
   std::string setName;
   for(std::vector<std::string>::const_iterator it=this->m_validSets.begin(); it!=this->m_validSets.end(); ++it){
@@ -360,9 +389,9 @@ void LoadSassena::exec()
     if(H5LTfind_dataset(h5file,setName.c_str())==1)
     {
       if(setName == "fq" || setName == "fq0" || setName == "fq2")
-        this->loadFQ( h5file, gws, setName, qvmod );
+        this->loadFQ( h5file, gws, setName, qvmod, sorting_indexes);
       else if(setName == "fqt")
-        this->loadFQT( h5file, gws, setName, qvmod );
+        this->loadFQT( h5file, gws, setName, qvmod, sorting_indexes);
     }
     else
       this->g_log.information("Dataset "+setName+" not present in file");
