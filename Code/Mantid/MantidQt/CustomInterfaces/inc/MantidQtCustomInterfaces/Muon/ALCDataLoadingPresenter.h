@@ -41,9 +41,15 @@ namespace CustomInterfaces
 
   public:
     ALCDataLoadingPresenter(IALCDataLoadingView* view);
-    virtual ~ALCDataLoadingPresenter();
 
     void initialize();
+
+    /// @return Last loaded data workspace
+    MatrixWorkspace_const_sptr loadedData() const { return m_loadedData; }
+
+  private slots:
+    /// Load new data and update the view accordingly
+    void loadData();
 
   private:
     /// Begin listening to the view signals
@@ -52,9 +58,8 @@ namespace CustomInterfaces
     /// View which the object works with
     IALCDataLoadingView* const m_view;
 
-  private slots:
-    /// Load new data and update the view accordingly
-    void loadData();
+    /// Last loaded data workspace
+    MatrixWorkspace_const_sptr m_loadedData;
   };
 
 

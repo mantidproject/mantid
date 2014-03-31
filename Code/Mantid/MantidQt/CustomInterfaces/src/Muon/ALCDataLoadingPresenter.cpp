@@ -12,9 +12,6 @@ namespace CustomInterfaces
     : m_view(view)
   {}
 
-  ALCDataLoadingPresenter::~ALCDataLoadingPresenter()
-  {}
-
   void ALCDataLoadingPresenter::initialize()
   {
     connectView();
@@ -37,9 +34,8 @@ namespace CustomInterfaces
       alg->setPropertyValue("OutputWorkspace", "__NotUsed__");
       alg->execute();
 
-      MatrixWorkspace_const_sptr result = alg->getProperty("OutputWorkspace");
-
-      m_view->displayData(result);
+      m_loadedData = alg->getProperty("OutputWorkspace");
+      m_view->displayData(m_loadedData);
     }
     catch(std::exception& e)
     {

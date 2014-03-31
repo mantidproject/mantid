@@ -42,9 +42,12 @@ namespace CustomInterfaces
   class MANTIDQT_CUSTOMINTERFACES_DLL ALCBaselineModellingView : public IALCBaselineModellingView
   {
   public:
-    ALCBaselineModellingView(QWidget* widget, MatrixWorkspace_const_sptr data);
+    ALCBaselineModellingView(QWidget* widget);
 
     void initialize();
+
+    /// @return Associated presenter
+    ALCBaselineModellingPresenter& presenter() { return m_presenter; }
 
     /// @see IALCBaselineModellingView::function
     IFunction_const_sptr function() const;

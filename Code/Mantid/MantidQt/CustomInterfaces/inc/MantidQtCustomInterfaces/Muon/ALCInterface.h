@@ -4,6 +4,8 @@
 #include "MantidKernel/System.h"
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h"
+#include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include "ui_ALCInterface.h"
@@ -53,7 +55,12 @@ namespace CustomInterfaces
     void previousStep();
 
   private:
+    /// UI form
     Ui::ALCInterface m_ui;
+
+    // Step views
+    ALCDataLoadingView* m_dataLoading;
+    ALCBaselineModellingView* m_baselineModelling;
   };
 
 } // namespace CustomInterfaces

@@ -10,9 +10,8 @@ namespace MantidQt
 namespace CustomInterfaces
 {
 
-  ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(IALCBaselineModellingView* view,
-                                                               MatrixWorkspace_const_sptr data)
-    : m_view(view), m_data(data)
+  ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(IALCBaselineModellingView* view)
+    : m_view(view), m_data()
   {}
     
   ALCBaselineModellingPresenter::~ALCBaselineModellingPresenter()
@@ -22,8 +21,12 @@ namespace CustomInterfaces
   void ALCBaselineModellingPresenter::initialize()
   {
     connectView();
+  }
 
-    m_view->displayData(m_data);
+  void ALCBaselineModellingPresenter::setData(MatrixWorkspace_const_sptr data)
+  {
+    m_data = data;
+    m_view->displayData(data);
   }
 
   void ALCBaselineModellingPresenter::fit()

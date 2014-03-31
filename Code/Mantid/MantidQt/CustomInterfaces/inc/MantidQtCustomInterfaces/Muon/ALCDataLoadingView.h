@@ -46,6 +46,9 @@ namespace CustomInterfaces
 
     void initialize();
 
+    /// @return Associated presenter
+    ALCDataLoadingPresenter& presenter() { return m_presenter; }
+
     /// @see IALCDataLoadingView::firstRun
     std::string firstRun();
     /// @see IALCDataLoadingView::lastRun

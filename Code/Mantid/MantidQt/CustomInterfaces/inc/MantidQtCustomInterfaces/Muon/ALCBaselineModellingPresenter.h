@@ -40,10 +40,14 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    ALCBaselineModellingPresenter(IALCBaselineModellingView* view, MatrixWorkspace_const_sptr data);
+    ALCBaselineModellingPresenter(IALCBaselineModellingView* view);
     virtual ~ALCBaselineModellingPresenter();
 
     void initialize();
+
+    /// Set the data we are fitting baseline to
+    /// @param :: Data to set
+    void setData(MatrixWorkspace_const_sptr data);
 
   private slots:
     /// Perform fit
@@ -53,8 +57,11 @@ namespace CustomInterfaces
     /// Connect to view signals
     void connectView();
 
+    /// Associated view
     IALCBaselineModellingView* const m_view;
-    const MatrixWorkspace_const_sptr m_data;
+
+    /// Data we are fitting the baseline to
+    MatrixWorkspace_const_sptr m_data;
   };
 
 } // namespace CustomInterfaces

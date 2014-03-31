@@ -21,14 +21,13 @@ using boost::scoped_ptr;
 class MockALCBaselineModellingView : public IALCBaselineModellingView
 {
 public:
-  MockALCBaselineModellingView(MatrixWorkspace_const_sptr data)
-    : m_presenter(this, data)
-  {}
-
-  void initialize()
+  MockALCBaselineModellingView()
+    : m_presenter(this)
   {
     m_presenter.initialize();
   }
+
+  ALCBaselineModellingPresenter& presenter() { return m_presenter; }
 
   void requestFit()
   {
@@ -58,9 +57,9 @@ public:
 
   MockALCBaselineModellingView* createView(MatrixWorkspace_const_sptr data)
   {
-    auto view = new MockALCBaselineModellingView(data);
+    auto view = new MockALCBaselineModellingView();
     EXPECT_CALL(*view, displayData(_)).Times(1);
-    view->initialize();
+    view->presenter().setData(data);
     return view;
   }
 

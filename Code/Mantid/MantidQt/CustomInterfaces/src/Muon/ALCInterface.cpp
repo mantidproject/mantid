@@ -1,8 +1,5 @@
 #include "MantidQtCustomInterfaces/Muon/ALCInterface.h"
 
-#include "MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h"
-#include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h"
-
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -10,7 +7,7 @@ namespace CustomInterfaces
   DECLARE_SUBWINDOW(ALCInterface);
 
   ALCInterface::ALCInterface(QWidget* parent)
-    : UserSubWindow(parent), m_ui()
+    : UserSubWindow(parent), m_ui(), m_dataLoading(NULL), m_baselineModelling(NULL)
   {}
 
   void ALCInterface::initLayout()
@@ -20,12 +17,11 @@ namespace CustomInterfaces
     connect(m_ui.nextStep, SIGNAL(pressed()), this, SLOT(nextStep()));
     connect(m_ui.previousStep, SIGNAL(pressed()), this, SLOT(previousStep()));
 
-    auto view1 = new ALCDataLoadingView(m_ui.dataLoadingView);
-    view1->initialize();
+    m_dataLoading = new ALCDataLoadingView(m_ui.dataLoadingView);
+    m_dataLoading->initialize();
 
-    auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>("ALCWorkspace");
-    auto view = new ALCBaselineModellingView(m_ui.baselineModellingView, ws);
-    view->initialize();
+    m_baselineModelling = new ALCBaselineModellingView(m_ui.baselineModellingView);
+    m_baselineModelling->initialize();
   }
 
   void ALCInterface::nextStep()
@@ -34,6 +30,11 @@ namespace CustomInterfaces
 
     if ( next < m_ui.stepView->count() )
     {
+      if (m_ui.stepView->widget(next) == m_ui.baselineModellingView)
+      {
+        m_baselineModelling->presenter().setData(m_dataLoading->presenter().loadedData());
+      }
+
       m_ui.stepView->setCurrentIndex(next);
     }
   }

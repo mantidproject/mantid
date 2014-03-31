@@ -11,9 +11,8 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  ALCBaselineModellingView::ALCBaselineModellingView(QWidget* widget,
-                                                     MatrixWorkspace_const_sptr data)
-    : m_widget(widget), m_presenter(this, data), m_ui(), m_dataCurve(NULL), m_fitCurve(NULL)
+  ALCBaselineModellingView::ALCBaselineModellingView(QWidget* widget)
+    : m_widget(widget), m_presenter(this), m_ui(), m_dataCurve(NULL), m_fitCurve(NULL)
   {
     m_dataCurve = new QwtPlotCurve();
     m_fitCurve = new QwtPlotCurve();
