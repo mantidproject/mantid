@@ -90,7 +90,11 @@ namespace Mantid
       return m_runMultiThreaded ? API::FrameworkManager::Instance().getNumOMPThreads() : 1;
     }
 
-    void ConnectedComponentLabeling::calculateDisjointTree(IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, VecElements& neighbourElements) const
+    void ConnectedComponentLabeling::calculateDisjointTree(IMDHistoWorkspace_sptr ws, 
+      BackgroundStrategy * const strategy, VecElements& neighbourElements,
+      LabelIdIntensityMap& labelMap,
+      PositionToLabelIdMap& positionLabelMap
+      ) const
     {
 
       VecIndexes allNonBackgroundIndexes;
@@ -168,6 +172,9 @@ namespace Mantid
         if (nonEmptyNeighbourIndexes.empty())
         {
           neighbourElements[currentIndex] = DisjointElement(static_cast<int>(currentLabelCount)); // New leaf
+          labelMap[currentLabelCount] = 0; // Pre-fill the currentlabelcount.
+          const VMD& center = iterator->getCenter(); 
+          positionLabelMap[V3D(center[0], center[1], center[2])] = currentLabelCount; // Get the position at this label.
           ++currentLabelCount;
         }
         else if (neighbourIds.size() == 1) // Do we have a single unique id amongst all neighbours.
@@ -211,7 +218,9 @@ namespace Mantid
       VecElements neighbourElements(ws->getNPoints());
 
       // Perform the bulk of the connected component analysis, but don't collapse the elements yet.
-      calculateDisjointTree(ws, strategy, neighbourElements);
+      LabelIdIntensityMap labelMap; // This will not get used.
+      PositionToLabelIdMap positionLabelMap; // This will not get used.
+      calculateDisjointTree(ws, strategy, neighbourElements, labelMap, positionLabelMap);
 
       // Create the output workspace from the input workspace
       IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
@@ -242,7 +251,7 @@ namespace Mantid
       VecElements neighbourElements(ws->getNPoints());
 
       // Perform the bulk of the connected component analysis, but don't collapse the elements yet.
-      calculateDisjointTree(ws, strategy, neighbourElements);
+      calculateDisjointTree(ws, strategy, neighbourElements, labelMap, positionLabelMap);
 
       // Create the output workspace from the input workspace
       IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
@@ -259,27 +268,17 @@ namespace Mantid
           // Set the output cluster workspace signal value
           outWS->setSignalAt(i, labelId);
 
-          if(labelMap.find(labelId) != labelMap.end()) // Have we already started integrating over this label
-          {
-            SignalErrorSQPair current = labelMap[labelId];
-            // Sum labels. This is integration!
-            labelMap[labelId] = SignalErrorSQPair(current.get<0>() + signal, current.get<1>() + errorSQ);
-          }
-          else // This label is unknown to us.
-          {
-            labelMap[labelId] = SignalErrorSQPair(signal, errorSQ);
-
-            const VMD& center = ws->getCenter(i);
-            V3D temp(center[0], center[1], center[2]);
-            positionLabelMap[temp] = labelId; //Record charcteristic position of the cluster.
-          }
+          SignalErrorSQPair current = labelMap[labelId];
+          // Sum labels. This is integration!
+          labelMap[labelId] = SignalErrorSQPair(current.get<0>() + signal, current.get<1>() + errorSQ);
+        
           outWS->setSignalAt(i, neighbourElements[i].getRoot());
         }
         else
         {
           outWS->setSignalAt(i, 0);
-          outWS->setErrorSquaredAt(i, 0);
         }
+        outWS->setErrorSquaredAt(i, 0);
       }
 
       return outWS;

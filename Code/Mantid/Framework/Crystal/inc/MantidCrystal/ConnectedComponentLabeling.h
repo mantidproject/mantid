@@ -71,7 +71,11 @@ namespace Crystal
     /// Get the number of threads to use.
     int getNThreads() const;
     /// Calculate the disjoint element tree across the image.
-    void calculateDisjointTree(Mantid::API::IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, std::vector<DisjointElement>& neighbourElements) const;
+    void calculateDisjointTree(Mantid::API::IMDHistoWorkspace_sptr ws, 
+      BackgroundStrategy * const strategy, std::vector<DisjointElement>& neighbourElements,
+      ConnectedComponentMappingTypes::LabelIdIntensityMap& labelMap,
+      ConnectedComponentMappingTypes::PositionToLabelIdMap& positionLabelMap) const;
+
     /// Start labeling index
     size_t m_startId;
     /// Run multithreaded
