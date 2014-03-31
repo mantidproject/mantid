@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/AddLogDerivative.cpp
 	src/AddPeak.cpp
 	src/AddSampleLog.cpp
+	src/AddTimeSeriesLog.cpp
 	src/AlignDetectors.cpp
 	src/AlphaCalc.cpp
 	src/AnyShapeAbsorption.cpp
@@ -232,6 +233,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddPeak.h
 	inc/MantidAlgorithms/AddSampleLog.h
+	inc/MantidAlgorithms/AddTimeSeriesLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AlphaCalc.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
@@ -470,6 +472,7 @@ set ( TEST_FILES
 	AddLogDerivativeTest.h
 	AddPeakTest.h
 	AddSampleLogTest.h
+	AddTimeSeriesLogTest.h
 	AlignDetectorsTest.h
 	AlphaCalcTest.h
 	AnyShapeAbsorptionTest.h
