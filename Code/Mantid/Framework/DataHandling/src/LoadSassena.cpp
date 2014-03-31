@@ -126,6 +126,7 @@ bool compare( const mypair& left, const mypair& right){ return left.first < righ
  * dataE is assumed (0,0,0), no errors
  * @param h5file file identifier
  * @param gws pointer to WorkspaceGroup being filled
+ * @param sorting_indexes permutation of qvmod indexes to render it in increasing order of momemtum transfer
  */
 const MantidVec LoadSassena::loadQvectors(const hid_t& h5file, API::WorkspaceGroup_sptr gws, std::vector<int> &sorting_indexes)
 {
@@ -189,6 +190,7 @@ const MantidVec LoadSassena::loadQvectors(const hid_t& h5file, API::WorkspaceGro
  * @param gws pointer to WorkspaceGroup being filled
  * @param setName string name of dataset
  * @param qvmod vector of Q-vectors' moduli
+ * @param sorting_indexes permutation of qvmod indexes to render it in increasing order of momemtum transfer
  */
 void LoadSassena::loadFQ(const hid_t& h5file, API::WorkspaceGroup_sptr gws, const std::string setName, const MantidVec &qvmod, const std::vector<int> &sorting_indexes)
 {
@@ -229,7 +231,8 @@ void LoadSassena::loadFQ(const hid_t& h5file, API::WorkspaceGroup_sptr gws, cons
  * @param gws pointer to WorkspaceGroup being filled
  * @param setName string name of dataset
  * @param qvmod vector of Q-vectors' moduli
- */
+* @param sorting_indexes permutation of qvmod indexes to render it in increasing order of momemtum transfer
+*/
 void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, const std::string setName, const MantidVec &qvmod, const std::vector<int> &sorting_indexes)
 {
   const std::string gwsName = this->getPropertyValue("OutputWorkspace");
@@ -332,7 +335,7 @@ void LoadSassena::init()
   // Declare the OutputWorkspace property
   declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace","",Kernel::Direction::Output), "The name of the group workspace to be created.");
   declareProperty(new Kernel::PropertyWithValue<double>("TimeUnit", 1.0, Kernel::Direction::Input),"The Time unit in between data points, in picoseconds. Default is 1.0 picosec.");
-  declareProperty(new Kernel::PropertyWithValue<bool>("SortByQVectors", true, Kernel::Direction::Input),"Sort structure factors by increasing Q-value?");
+  declareProperty(new Kernel::PropertyWithValue<bool>("SortByQVectors", true, Kernel::Direction::Input),"Sort structure factors by increasing momentum transfer?");
 
 }
 
