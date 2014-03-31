@@ -55,7 +55,7 @@ namespace Kernel
 
     if ( at >= m_x[N-1] )
     {
-      return m_y[N-1]+(at-m_y[N-1])*(m_y[N-1]-m_y[N-2])/(m_x[N-1]-m_x[N-2]);
+      return m_y[N-1]+(at-m_x[N-1])*(m_y[N-1]-m_y[N-2])/(m_x[N-1]-m_x[N-2]);
     }
 
     // otherwise
