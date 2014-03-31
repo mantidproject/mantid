@@ -25,12 +25,12 @@ namespace CustomInterfaces
 
   std::string ALCDataLoadingView::firstRun()
   {
-    return m_ui.firstRun->text().toStdString();
+    return m_ui.firstRun->getFirstFilename().toStdString();
   }
 
   std::string ALCDataLoadingView::lastRun()
   {
-    return m_ui.lastRun->text().toStdString();
+    return m_ui.lastRun->getFirstFilename().toStdString();
   }
 
   std::string ALCDataLoadingView::log()
