@@ -44,18 +44,29 @@ namespace CustomInterfaces
   public:
     ALCDataLoadingView(QWidget* widget);
 
+    void initialize();
+
+    /// @see IALCDataLoadingView::firstRun
     std::string firstRun();
+    /// @see IALCDataLoadingView::lastRun
     std::string lastRun();
+    /// @see IALCDataLoadingView::log
     std::string log();
 
+    /// @see IALCDataLoadingView::displayData
     void displayData(MatrixWorkspace_const_sptr data);
+    /// @see IALCDataLoadingView::displayError
     void displayError(const std::string &error);
 
   private:
-    void preparePlot();
 
-    ALCDataLoadingPresenter m_dataLoading;
+    /// Associated presenter
+    ALCDataLoadingPresenter m_presenter;
+
+    /// UI form
     Ui::ALCDataLoadingView m_ui;
+
+    /// The widget used
     QWidget* const m_widget;
   };
 

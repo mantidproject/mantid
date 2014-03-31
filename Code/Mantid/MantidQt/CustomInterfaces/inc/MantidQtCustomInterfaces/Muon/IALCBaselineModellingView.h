@@ -43,17 +43,17 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    /// Perform any initialization actions (e.g. set up UI)
-    virtual void initialize() = 0;
-
     /// Function chosen to fit the data to
+    /// @return Initialized function
     virtual IFunction_const_sptr function() const = 0;
 
   public slots:
     /// Display the data we are going to model the baseline for
+    /// @param data :: Data workspace to display
     virtual void displayData(MatrixWorkspace_const_sptr data) = 0;
 
     /// Update the displayed function
+    /// @param func :: Updated function to set values from
     virtual void updateFunction(IFunction_const_sptr func) = 0;
 
   signals:

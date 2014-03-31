@@ -19,13 +19,9 @@ namespace CustomInterfaces
     m_fitCurve = new QwtPlotCurve();
   }
     
-  ALCBaselineModellingView::~ALCBaselineModellingView()
-  {}
-
   void ALCBaselineModellingView::initialize()
   {
     m_ui.setupUi(m_widget);
-
     connect(m_ui.fit, SIGNAL(pressed()), SIGNAL(fit()));
 
     m_presenter.initialize();

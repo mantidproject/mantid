@@ -7,6 +7,22 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
+  ALCDataLoadingView::ALCDataLoadingView(QWidget* widget)
+    : m_presenter(this), m_widget(widget)
+  {}
+
+  void ALCDataLoadingView::initialize()
+  {
+    m_ui.setupUi(m_widget);
+    connect(m_ui.load, SIGNAL(pressed()), this, SIGNAL(loadData()));
+
+    m_ui.dataPlot->setCanvasBackground(Qt::white);
+    m_ui.dataPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
+    m_ui.dataPlot->setAxisFont(QwtPlot::yLeft, m_widget->font());
+
+    m_presenter.initialize();
+  }
+
   std::string ALCDataLoadingView::firstRun()
   {
     return m_ui.firstRun->text().toStdString();
@@ -38,25 +54,6 @@ namespace CustomInterfaces
   void ALCDataLoadingView::displayError(const std::string& error)
   {
     QMessageBox::critical(m_widget, "Loading error", QString::fromStdString(error));
-  }
-
-  void ALCDataLoadingView::preparePlot()
-  {
-    m_ui.dataPlot->setCanvasBackground(Qt::white);
-    m_ui.dataPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
-    m_ui.dataPlot->setAxisFont(QwtPlot::yLeft, m_widget->font());
-  }
-
-  ALCDataLoadingView::ALCDataLoadingView(QWidget* widget)
-    : m_dataLoading(this), m_widget(widget)
-  {
-    m_dataLoading.initialize();
-
-    m_ui.setupUi(m_widget);
-
-    connect(m_ui.load, SIGNAL(pressed()), this, SIGNAL(loadData()));
-
-    preparePlot();
   }
 
 } // namespace CustomInterfaces

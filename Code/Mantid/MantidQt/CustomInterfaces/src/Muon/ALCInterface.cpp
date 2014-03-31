@@ -21,6 +21,7 @@ namespace CustomInterfaces
     connect(m_ui.previousStep, SIGNAL(pressed()), this, SLOT(previousStep()));
 
     auto view1 = new ALCDataLoadingView(m_ui.dataLoadingView);
+    view1->initialize();
 
     auto ws = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>("ALCWorkspace");
     auto view = new ALCBaselineModellingView(m_ui.baselineModellingView, ws);

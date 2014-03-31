@@ -43,7 +43,6 @@ namespace CustomInterfaces
   {
   public:
     ALCBaselineModellingView(QWidget* widget, MatrixWorkspace_const_sptr data);
-    virtual ~ALCBaselineModellingView();
 
     void initialize();
 

@@ -42,17 +42,24 @@ namespace CustomInterfaces
 
   public:
     /// Returns a path to the first run file
+    /// @return Full path to file
     virtual std::string firstRun() = 0;
+
     /// Returns a path to the last run file
+    /// @return Full path to file
     virtual std::string lastRun() = 0;
+
     /// Returns the name of the log to use
+    /// @return Log name
     virtual std::string log() = 0;
 
   public slots:
     /// Updates the data displayed by the view
+    /// @param data :: Data workspace do display
     virtual void displayData(MatrixWorkspace_const_sptr data) = 0;
 
     /// Displays an error
+    /// @param error :: Error message to display
     virtual void displayError(const std::string& error) = 0;
 
   signals:
