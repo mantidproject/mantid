@@ -637,7 +637,7 @@ def _create_algorithm_object(name, version=-1):
         alg = parent.createChildAlgorithm(name, version)
         alg.setLogging(parent.isLogging()) # default is to log if parent is logging
         alg.setAlwaysStoreInADS(True) # Historic: simpleapi functions always put stuff in the ADS
-        if parent.__class__ == _api.DataProcessorAlgorithm:
+        if isinstance(parent, _api.DataProcessorAlgorithm):
             alg.enableHistoryRecordingForChild(True) # this can be removed when the C++ does the correct thing
     else:
         # managed algorithm so that progress reporting
