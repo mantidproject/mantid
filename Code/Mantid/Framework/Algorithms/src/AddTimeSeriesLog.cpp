@@ -15,12 +15,16 @@ ISO8601 format, e.g. 2010-09-14T04:20:12."
 *WIKI_USAGE*/
 
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
+#include "MantidKernel/DateTimeValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid
 {
   namespace Algorithms
   {
+    using namespace API;
+    using namespace Kernel;
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(AddTimeSeriesLog)
@@ -49,16 +53,13 @@ namespace Mantid
      */
     void AddTimeSeriesLog::init()
     {
-      using namespace API;
-      using namespace Kernel;
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace", "", Direction::InOut),
                       "In/out workspace that will store the new log information");
 
-      auto nonEmptyString = boost::make_shared<MandatoryValidator<std::string>>();
-      declareProperty("Name", "", nonEmptyString,
+      declareProperty("Name", "", boost::make_shared<MandatoryValidator<std::string>>(),
                       "A string name for either a new time series log to be created "
                       "or an existing name to update", Direction::Input);
-      declareProperty("Time", "", nonEmptyString,
+      declareProperty("Time", "", boost::make_shared<DateTimeValidator>(),
                       "An ISO formatted date/time string specifying the timestamp for "
                       "the given log value, e.g 2010-09-14T04:20:12",
                       Direction::Input);
@@ -73,6 +74,24 @@ namespace Mantid
      */
     void AddTimeSeriesLog::exec()
     {
+      MatrixWorkspace_sptr logWS = getProperty("Workspace");
+      std::string name = getProperty("Name");
+      std::string time = getProperty("Time");
+      double value = getProperty("Value");
+
+      auto & run = logWS->mutableRun();
+      TimeSeriesProperty<double> *timeSeries(NULL);
+      if(run.hasProperty(name))
+      {
+        timeSeries = dynamic_cast<TimeSeriesProperty<double>*>(run.getLogData(name));
+        if(!timeSeries) throw std::invalid_argument("Log '" + name + "' already exists but is not a time series.");
+      }
+      else
+      {
+        timeSeries = new TimeSeriesProperty<double>(name);
+        run.addProperty(timeSeries);
+      }
+      timeSeries->addValue(time, value);
     }
 
 
