@@ -476,19 +476,32 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   {
     for (size_t i=0; i < m_goniometer.getNumberAxes(); ++i)
     {
-      const double minAngle = getLogAsSingleValue(m_goniometer.getAxis(i).name, Kernel::Math::Minimum);
-      const double maxAngle = getLogAsSingleValue(m_goniometer.getAxis(i).name, Kernel::Math::Maximum);
-      // Use last angle if angle is changing too much (DAS problem)
-      if(abs(maxAngle-minAngle) < 1.0)
+  	  const std::string axisName = m_goniometer.getAxis(i).name;
+	  const double angle = getLogAsSingleValue(axisName, Kernel::Math::Mean);
+	  const double lastAngle = getLogAsSingleValue(axisName, Kernel::Math::LastValue);
+	  if(angle != lastAngle)
       {
-    	  const double angle = getLogAsSingleValue(m_goniometer.getAxis(i).name, Kernel::Math::Mean);
-    	  m_goniometer.setRotationAngle(i, angle);
-      }
-      else
-      {
-    	  const double lastAngle = getLogAsSingleValue(m_goniometer.getAxis(i).name, Kernel::Math::LastValue);
-    	  m_goniometer.setRotationAngle(i, lastAngle);
-      }
+		  const double minAngle = getLogAsSingleValue(axisName, Kernel::Math::Minimum);
+		  const double maxAngle = getLogAsSingleValue(axisName, Kernel::Math::Maximum);
+		  g_log.warning("Goniometer angle changed in " + axisName + " log from " + boost::lexical_cast<std::string>(minAngle)
+				  + " to " + boost::lexical_cast<std::string>(maxAngle) + ".  Used mean = " + boost::lexical_cast<std::string>(angle) +".");
+		  if (axisName.compare("omega") == 0)
+		  {
+			  g_log.warning("To set to last angle run SetGoniometer(Workspace=\'workspace\',Axis0=\'"
+					  + boost::lexical_cast<std::string>(lastAngle) + ",0,1,0,1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
+		  }
+		  else if (axisName.compare("chi") == 0)
+		  {
+			  g_log.warning("To set to last angle run SetGoniometer(Workspace=\'workspace\',Axis0='omega,0,1,0,1',Axis1=\'"
+					  + boost::lexical_cast<std::string>(lastAngle) + ",0,0,1,1\',Axis2='phi,0,1,0,1')");
+		  }
+		  else if (axisName.compare("phi") == 0)
+		  {
+			  g_log.warning("To set to last angle run SetGoniometer(Workspace=\'workspace\',Axis0='omega,0,1,0,1',Axis1='chi,0,0,1,1',Axis2=\'"
+					  + boost::lexical_cast<std::string>(lastAngle) + ",0,1,0,1\')");
+		  }
+	  }
+	  m_goniometer.setRotationAngle(i, angle);
     }
   }
 
