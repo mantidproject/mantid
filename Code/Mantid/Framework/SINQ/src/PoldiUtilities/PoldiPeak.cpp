@@ -100,7 +100,7 @@ void PoldiPeak::setFwhm(UncertainValue fwhm, FwhmRelation relation)
 void PoldiPeak::multiplyErrors(double factor)
 {
     setQ(UncertainValue(m_q.value(), m_q.error() * factor));
-    setFwhm(UncertainValue(m_fwhmRelative.value(), m_fwhmRelative.error() * factor));
+    setFwhm(UncertainValue(m_fwhmRelative.value(), m_fwhmRelative.error() * factor), PoldiPeak::Relative);
     setIntensity(UncertainValue(m_intensity.value(), m_intensity.error() * factor));
 }
 
