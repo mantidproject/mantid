@@ -464,7 +464,7 @@ namespace DataHandling
     // size_t numerror = 0;
 
     PRAGMA_OMP(parallel for schedule(dynamic, 1) ) 
-    for (size_t i = 0; i < event_indices.size(); ++i)
+    for (int i = 0; i < static_cast<int>(event_indices.size()); ++i)
     {
       PARALLEL_START_INTERUPT_REGION
 
@@ -482,7 +482,7 @@ namespace DataHandling
 
     // Check
     PRAGMA_OMP(parallel for schedule(dynamic, 1) ) 
-    for (size_t i = 0; i < event_indices.size(); ++i)
+    for (int i = 0; i < static_cast<int>(event_indices.size()); ++i)
     {
       PARALLEL_START_INTERUPT_REGION
       uint64_t eventindex = event_indices[i];
