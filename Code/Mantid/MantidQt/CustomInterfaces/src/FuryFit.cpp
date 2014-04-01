@@ -75,22 +75,22 @@ namespace IDA
     m_ffRangeManager->setDecimals(m_ffProp["BackgroundA0"], NUM_DECIMALS);
     m_ffProp["LinearBackground"]->addSubProperty(m_ffProp["BackgroundA0"]);
 
-    m_ffProp["Exponential1"] = createExponential("Exponential 1");
-    m_ffProp["Exponential2"] = createExponential("Exponential 2");
+    m_ffProp["Exponential1"] = createExponential("Exponential1");
+    m_ffProp["Exponential2"] = createExponential("Exponential2");
   
-    m_ffProp["StretchedExp"] = createStretchedExp("Stretched Exponential");
+    m_ffProp["StretchedExp"] = createStretchedExp("StretchedExp");
 
     m_ffRangeManager->setMinimum(m_ffProp["BackgroundA0"], 0);
     m_ffRangeManager->setMaximum(m_ffProp["BackgroundA0"], 1);
 
-    m_ffDblMng->setMinimum(m_ffProp["Exponential 1.Intensity"], 0);
-    m_ffDblMng->setMaximum(m_ffProp["Exponential 1.Intensity"], 1);
+    m_ffDblMng->setMinimum(m_ffProp["Exponential1.Intensity"], 0);
+    m_ffDblMng->setMaximum(m_ffProp["Exponential1.Intensity"], 1);
 
-    m_ffDblMng->setMinimum(m_ffProp["Exponential 2.Intensity"], 0);
-    m_ffDblMng->setMaximum(m_ffProp["Exponential 2.Intensity"], 1);
+    m_ffDblMng->setMinimum(m_ffProp["Exponential2.Intensity"], 0);
+    m_ffDblMng->setMaximum(m_ffProp["Exponential2.Intensity"], 1);
 
-    m_ffDblMng->setMinimum(m_ffProp["Stretched Exponential.Intensity"], 0);
-    m_ffDblMng->setMaximum(m_ffProp["Stretched Exponential.Intensity"], 1);
+    m_ffDblMng->setMinimum(m_ffProp["StretchedExp.Intensity"], 0);
+    m_ffDblMng->setMaximum(m_ffProp["StretchedExp.Intensity"], 1);
 
     typeSelection(uiForm().furyfit_cbFitType->currentIndex());
 
@@ -200,14 +200,14 @@ namespace IDA
     if ( fitType != 2 )
     {
       // Exp 1
-      m_ffDblMng->setValue(m_ffProp["Exponential 1.Intensity"], parameters["f1.Intensity"]);
-      m_ffDblMng->setValue(m_ffProp["Exponential 1.Tau"], parameters["f1.Tau"]);
+      m_ffDblMng->setValue(m_ffProp["Exponential1.Intensity"], parameters["f1.Intensity"]);
+      m_ffDblMng->setValue(m_ffProp["Exponential1.Tau"], parameters["f1.Tau"]);
     
       if ( fitType == 1 )
       {
         // Exp 2
-        m_ffDblMng->setValue(m_ffProp["Exponential 2.Intensity"], parameters["f2.Intensity"]);
-        m_ffDblMng->setValue(m_ffProp["Exponential 2.Tau"], parameters["f2.Tau"]);
+        m_ffDblMng->setValue(m_ffProp["Exponential2.Intensity"], parameters["f2.Intensity"]);
+        m_ffDblMng->setValue(m_ffProp["Exponential2.Tau"], parameters["f2.Tau"]);
       }
     }
   
@@ -218,9 +218,9 @@ namespace IDA
       if ( fitType == 2 ) { fval = "f1."; }
       else { fval = "f2."; }
     
-      m_ffDblMng->setValue(m_ffProp["Stretched Exponential.Intensity"], parameters[fval+"Intensity"]);
-      m_ffDblMng->setValue(m_ffProp["Stretched Exponential.Tau"], parameters[fval+"Tau"]);
-      m_ffDblMng->setValue(m_ffProp["Stretched Exponential.Beta"], parameters[fval+"Beta"]);
+      m_ffDblMng->setValue(m_ffProp["StretchedExp.Intensity"], parameters[fval+"Intensity"]);
+      m_ffDblMng->setValue(m_ffProp["StretchedExp.Tau"], parameters[fval+"Tau"]);
+      m_ffDblMng->setValue(m_ffProp["StretchedExp.Beta"], parameters[fval+"Beta"]);
     }
 
     if ( uiForm().furyfit_ckPlotOutput->isChecked() )
@@ -281,15 +281,15 @@ namespace IDA
     result->tie("f0.A1", "0");
     if ( tie ) { result->tie("f0.A0", m_ffProp["BackgroundA0"]->valueText().toStdString()); }
   
-    if ( fitType == 2 ) { fname = "Stretched Exponential"; }
-    else { fname = "Exponential 1"; }
+    if ( fitType == 2 ) { fname = "StretchedExp"; }
+    else { fname = "Exponential1"; }
 
     result->addFunction(createUserFunction(fname, tie));
 
     if ( fitType == 1 || fitType == 3 )
     {
-      if ( fitType == 1 ) { fname = "Exponential 2"; }
-      else { fname = "Stretched Exponential"; }
+      if ( fitType == 1 ) { fname = "Exponential2"; }
+      else { fname = "StretchedExp"; }
       result->addFunction(createUserFunction(fname, tie));
     }
 
@@ -508,9 +508,9 @@ namespace IDA
       m_ffRangeManager->setRange(m_ffProp["StartX"], range.first, range.second);
       m_ffRangeManager->setRange(m_ffProp["EndX"], range.first, range.second);
       
-      setDefaultParameters("Exponential 1");
-      setDefaultParameters("Exponential 2");
-      setDefaultParameters("Stretched Exponential");
+      setDefaultParameters("Exponential1");
+      setDefaultParameters("Exponential2");
+      setDefaultParameters("StretchedExp");
 
       m_ffPlot->setAxisScale(QwtPlot::xBottom, range.first, range.second);
       m_ffPlot->setAxisScale(QwtPlot::yLeft, 0.0, 1.0);
@@ -553,9 +553,9 @@ namespace IDA
   void FuryFit::backgroundSelected(double val)
   {
     m_ffRangeManager->setValue(m_ffProp["BackgroundA0"], val);
-    m_ffDblMng->setValue(m_ffProp["Exponential 1.Intensity"], 1.0-val);
-    m_ffDblMng->setValue(m_ffProp["Exponential 2.Intensity"], 1.0-val);
-    m_ffDblMng->setValue(m_ffProp["Stretched Exponential.Intensity"], 1.0-val);
+    m_ffDblMng->setValue(m_ffProp["Exponential1.Intensity"], 1.0-val);
+    m_ffDblMng->setValue(m_ffProp["Exponential2.Intensity"], 1.0-val);
+    m_ffDblMng->setValue(m_ffProp["StretchedExp.Intensity"], 1.0-val);
   }
 
   void FuryFit::propertyChanged(QtProperty* prop, double val)
@@ -571,18 +571,18 @@ namespace IDA
     else if ( prop == m_ffProp["BackgroundA0"])
     {
       m_ffBackRangeS->setMinimum(val);
-      m_ffDblMng->setValue(m_ffProp["Exponential 1.Intensity"], 1.0-val);
-      m_ffDblMng->setValue(m_ffProp["Exponential 2.Intensity"], 1.0-val);
-      m_ffDblMng->setValue(m_ffProp["Stretched Exponential.Intensity"], 1.0-val);
+      m_ffDblMng->setValue(m_ffProp["Exponential1.Intensity"], 1.0-val);
+      m_ffDblMng->setValue(m_ffProp["Exponential2.Intensity"], 1.0-val);
+      m_ffDblMng->setValue(m_ffProp["StretchedExp.Intensity"], 1.0-val);
     }
-    else if( prop == m_ffProp["Exponential 1.Intensity"] 
-      || prop == m_ffProp["Exponential 2.Intensity"] 
-      || prop == m_ffProp["Stretched Exponential.Intensity"])
+    else if( prop == m_ffProp["Exponential1.Intensity"] 
+      || prop == m_ffProp["Exponential2.Intensity"] 
+      || prop == m_ffProp["StretchedExp.Intensity"])
     {
       m_ffBackRangeS->setMinimum(1.0-val);
-      m_ffDblMng->setValue(m_ffProp["Exponential 1.Intensity"], val);
-      m_ffDblMng->setValue(m_ffProp["Exponential 2.Intensity"], val);
-      m_ffDblMng->setValue(m_ffProp["Stretched Exponential.Intensity"], val);
+      m_ffDblMng->setValue(m_ffProp["Exponential1.Intensity"], val);
+      m_ffDblMng->setValue(m_ffProp["Exponential2.Intensity"], val);
+      m_ffDblMng->setValue(m_ffProp["StretchedExp.Intensity"], val);
     }
   }
 
@@ -601,8 +601,8 @@ namespace IDA
     }
 
     Mantid::API::CompositeFunction_sptr func = createFunction();
-
     // Function Ties
+    
     func->tie("f0.A1", "0");
     const bool constrainIntensities = uiForm().furyfit_ckConstrainIntensities->isChecked();
     if ( constrainIntensities )
@@ -619,6 +619,8 @@ namespace IDA
         break;
       }
     }
+
+    func->applyTies();
 
     bool constrainBeta = uiForm().furyfit_ckConstrainBeta->isChecked();
     std::string function = std::string(func->asString());
@@ -761,9 +763,7 @@ namespace IDA
     m_stringManager->setValue(fixedProp, prop->valueText());
 
     item->parent()->property()->addSubProperty(fixedProp);
-
     m_fixedProps[fixedProp] = prop;
-
     item->parent()->property()->removeSubProperty(prop);
   }
 
