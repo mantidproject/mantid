@@ -777,6 +777,14 @@ namespace Mantid
       return url;
     }
 
+    /**
+     * Obtains the investigations that the user can publish
+     * to and saves related information to a workspace.
+     * @return A workspace containing investigation information the user can publish to.
+     */
+    API::ITableWorkspace_sptr ICat4Catalog::getPublishInvestigations()
+    {
+    }
 
     /**
      * Search the archive & obtain the dataset ID for a specific investigation.

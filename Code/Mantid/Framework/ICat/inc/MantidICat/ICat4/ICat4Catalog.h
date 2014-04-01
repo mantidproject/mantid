@@ -66,6 +66,8 @@ namespace Mantid
         /// get URL of where to PUT (publish) files.
         virtual const std::string getUploadURL(
             const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription);
+        /// Obtains the investigations that the user can publish to and saves related information to a workspace.
+        virtual API::ITableWorkspace_sptr getPublishInvestigations();
         /// Keep current session alive
         virtual void keepAlive();
 
