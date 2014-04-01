@@ -752,6 +752,7 @@ namespace MantidQt
 
       // Show only a portion of the title as they can be quite long.
       resultsTable->setColumnWidth(headerIndexByName(resultsTable, "Title"), 210);
+      resultsTable->setColumnHidden(headerIndexByName(resultsTable, "DatabaseID"),true);
       resultsTable->setColumnHidden(headerIndexByName(resultsTable, "SessionID"), true);
 
       // Sort by endDate with the most recent being first.
