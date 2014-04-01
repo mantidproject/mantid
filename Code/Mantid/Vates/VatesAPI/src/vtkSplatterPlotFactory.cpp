@@ -49,8 +49,8 @@ namespace VATES
   vtkSplatterPlotFactory::vtkSplatterPlotFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t numPoints, const double percentToUse ) :
   m_thresholdRange(thresholdRange), m_scalarName(scalarName), 
   m_numPoints(numPoints), m_percentToUse(percentToUse),
-  m_buildSortedList(true), m_wsName(""), dataSet(nullptr),
-  slice(false), sliceMask(nullptr), sliceImplicitFunction(nullptr),
+  m_buildSortedList(true), m_wsName(""), dataSet(NULL),
+  slice(false), sliceMask(NULL), sliceImplicitFunction(NULL),
   m_time(0.0)
   {
   }
@@ -211,7 +211,7 @@ namespace VATES
     {
       MDBox<MDE,nd> *box = dynamic_cast<MDBox<MDE,nd> *>(m_sortedBoxes[box_index]);
       box_index++;
-      if (box == nullptr)
+      if (NULL == box)
       {
         continue;
       }

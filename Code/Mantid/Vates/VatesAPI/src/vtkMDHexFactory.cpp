@@ -28,7 +28,7 @@ namespace Mantid
     */
   vtkMDHexFactory::vtkMDHexFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth) :
     m_thresholdRange(thresholdRange), m_scalarName(scalarName), m_maxDepth(maxDepth),
-    dataSet(nullptr), slice(false), sliceMask(nullptr), sliceImplicitFunction(nullptr), m_time(0)
+    dataSet(NULL), slice(false), sliceMask(NULL), sliceImplicitFunction(NULL), m_time(0)
   {
   }
 
