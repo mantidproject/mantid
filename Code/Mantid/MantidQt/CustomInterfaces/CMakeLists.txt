@@ -33,6 +33,7 @@ set ( SRC_FILES
 	src/Muon/ALCDataLoadingPresenter.cpp
 	src/Muon/ALCDataLoadingView.cpp
 	src/Muon/ALCInterface.cpp
+	src/Muon/ALCPeakFittingPresenter.cpp
 	src/Muon/IO_MuonGrouping.cpp
 	src/Muon/MuonAnalysis.cpp
 	src/Muon/MuonAnalysisFitDataTab.cpp
@@ -96,8 +97,10 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h
 	inc/MantidQtCustomInterfaces/Muon/ALCInterface.h
+	inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/IALCBaselineModellingView.h
 	inc/MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h
+	inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h
 	inc/MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
@@ -158,6 +161,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/ALCInterface.h
                 inc/MantidQtCustomInterfaces/Muon/IALCBaselineModellingView.h
                 inc/MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h
+                inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
@@ -204,6 +208,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
 set ( TEST_FILES
 	ALCBaselineModellingTest.h
 	ALCDataLoadingTest.h
+	ALCPeakFittingTest.h
 	CreateMDWorkspaceAlgDialogTest.h
 	EventNexusFileMementoTest.h
 	IO_MuonGroupingTest.h

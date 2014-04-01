@@ -2,6 +2,7 @@
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 #include <boost/scoped_array.hpp>
 
@@ -75,6 +76,12 @@ namespace CustomInterfaces
 
     m_correctedCurve->setData(&dataX[0], &dataY[0], static_cast<int>(data->blocksize()));
     m_ui.correctedPlot->replot();
+
+    // TODO: DEBUGGING - remove later
+    IAlgorithm_sptr copy = AlgorithmManager::Instance().create("CloneWorkspace");
+    copy->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(data));
+    copy->setProperty("OutputWorkspace", "Corrected");
+    copy->execute();
   }
 
   void ALCBaselineModellingView::updateFunction(IFunction_const_sptr func)
