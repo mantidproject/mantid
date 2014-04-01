@@ -309,26 +309,21 @@ namespace IDA
     Mantid::API::IFunction::Attribute att(formula);  
     result->setAttribute("Formula", att);
 
-    result->setParameter("Intensity", m_ffDblMng->value(m_ffProp[name+".Intensity"]));
-
-    if ( tie || ! m_ffProp[name+".Intensity"]->subProperties().isEmpty() )
+    QList<QtProperty*> props = m_ffProp[name]->subProperties();
+    for ( int i = 0; i < props.size(); i++ )
     {
-      result->tie("Intensity", m_ffProp[name+".Intensity"]->valueText().toStdString());
-    }
-    result->setParameter("Tau", m_ffDblMng->value(m_ffProp[name+".Tau"]));
-    if ( tie || ! m_ffProp[name+".Tau"]->subProperties().isEmpty() )
-    {
-      result->tie("Tau", m_ffProp[name+".Tau"]->valueText().toStdString());
-    }
-    if ( name.startsWith("Str") )
-    {
-      result->setParameter("Beta", m_ffDblMng->value(m_ffProp[name+".Beta"]));
-      if ( tie || ! m_ffProp[name+".Beta"]->subProperties().isEmpty() )
+      std::string name = props[i]->propertyName().toStdString();
+      result->setParameter(name, m_ffDblMng->value(props[i]));
+      
+      //add tie if parameter is fixed
+      if ( tie || ! props[i]->subProperties().isEmpty() )
       {
-        result->tie("Beta", m_ffProp[name+".Beta"]->valueText().toStdString());
+        std::string value = props[i]->valueText().toStdString();
+        result->tie(name, value);
       }
     }
-
+    
+    result->applyTies();
     return result;
   }
 
