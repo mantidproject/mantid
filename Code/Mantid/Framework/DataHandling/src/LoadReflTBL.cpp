@@ -60,8 +60,7 @@ namespace Mantid
       {
         std::istream & stream = descriptor.data();
         std::string firstLine;
-          Kernel::Strings::readToEndOfLine(stream,true);
-        getline(stream, firstLine);
+        Kernel::Strings::extractToEOL(stream, firstLine);
         std::vector<std::string> columns;
         try
         {
@@ -198,22 +197,7 @@ namespace Mantid
         }
         if (lastComma + 1 < line.length())
         {
-          try
-          {
-            auto test = line.at(lastComma + 1);
-            if (line.at(lastComma + 1) == '\r' || line.at(lastComma + 1) == '\n')
-            {
-              cols.push_back("");
-            }
-            else
-            {
-              cols.push_back(line.substr(lastComma + 1));
-            }
-          }
-          catch(std::out_of_range)
-          {
-            cols.push_back("");
-          }
+          cols.push_back("");
         }
         else
         {
@@ -256,7 +240,7 @@ namespace Mantid
         throw Exception::FileError("Unable to open file: " , filename);
       }
       std::string line = "";
-      getline(file, line);
+      Kernel::Strings::extractToEOL(file, line);
 
       std::vector<std::string> columns;
       getCells(line, columns);
