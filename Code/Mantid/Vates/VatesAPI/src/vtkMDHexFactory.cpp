@@ -22,12 +22,13 @@ namespace Mantid
   namespace VATES
   {
 
-    /*Constructor
+  /*Constructor
     @Param thresholdRange : Threshold range strategy
     @scalarName : Name for scalar signal array.
     */
-    vtkMDHexFactory::vtkMDHexFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth) :
-  m_thresholdRange(thresholdRange), m_scalarName(scalarName), m_maxDepth(maxDepth), m_time(0)
+  vtkMDHexFactory::vtkMDHexFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth) :
+    m_thresholdRange(thresholdRange), m_scalarName(scalarName), m_maxDepth(maxDepth),
+    dataSet(nullptr), slice(false), sliceMask(nullptr), sliceImplicitFunction(nullptr), m_time(0)
   {
   }
 
