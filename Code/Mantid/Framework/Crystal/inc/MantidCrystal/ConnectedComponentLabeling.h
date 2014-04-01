@@ -18,11 +18,8 @@ namespace Crystal
     typedef std::map<size_t, SignalErrorSQPair > LabelIdIntensityMap;
     typedef std::map<Mantid::Kernel::V3D, size_t> PositionToLabelIdMap;
     typedef std::vector<size_t> VecIndexes;
-    typedef std::vector<size_t> VecElements;
+    typedef std::vector<DisjointElement> VecElements;
     typedef std::set<size_t> SetIds;
-    typedef typename VecElements::value_type ElementType;
-    typedef std::map<ElementType,std::size_t> RankTypeMap;
-    typedef std::map<ElementType, ElementType> ElementParentMap;
   }
 
   class BackgroundStrategy;
@@ -75,11 +72,9 @@ namespace Crystal
     int getNThreads() const;
     /// Calculate the disjoint element tree across the image.
     void calculateDisjointTree(Mantid::API::IMDHistoWorkspace_sptr ws, 
-      BackgroundStrategy * const strategy, ConnectedComponentMappingTypes::VecElements& neighbourElements,
+      BackgroundStrategy * const strategy, std::vector<DisjointElement>& neighbourElements,
       ConnectedComponentMappingTypes::LabelIdIntensityMap& labelMap,
-      ConnectedComponentMappingTypes::PositionToLabelIdMap& positionLabelMap,
-      ConnectedComponentMappingTypes::ElementParentMap& parentMap
-    ) const;
+      ConnectedComponentMappingTypes::PositionToLabelIdMap& positionLabelMap) const;
 
     /// Start labeling index
     size_t m_startId;

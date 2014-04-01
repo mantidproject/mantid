@@ -5,86 +5,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include "MantidCrystal/DisjointElement.h"
-#include <boost/pending/disjoint_sets.hpp>
-#include <vector>
 
 using Mantid::Crystal::DisjointElement;
-
-namespace
-{
-  template <typename Rank, typename Parent>
-  boost::disjoint_sets<Rank,Parent>  makeDisjointSet(Rank& r, Parent& p, std::vector<DisjointElement>& elements)
-  {
-   boost::disjoint_sets<Rank,Parent> dsets(r, p);
-   for (std::vector<DisjointElement>::iterator e = elements.begin();
-        e != elements.end(); e++)
-     {
-     dsets.make_set(*e);
-     }
-
-   return dsets;
-  }
-
-  typedef std::map<DisjointElement,std::size_t> rank_t; // => order on Element
-  typedef std::map<DisjointElement,DisjointElement> parent_t;
-
-  void trial()
-  {
-    rank_t rank_map;
-    parent_t parent_map;
-
-
-    typedef std::vector<DisjointElement> VecDisjointElement;
-
-        // Create elements from 0-9
-        VecDisjointElement vecElements;
-        for(int i=0; i < 10; ++i)
-        {
-          vecElements.push_back(DisjointElement(i));
-          //rank_map.insert(std::make_pair(vecElements[i], 0));
-        }
-
-
-    boost::associative_property_map<rank_t>   rank_pmap(rank_map);
-    boost::associative_property_map<parent_t> parent_pmap(parent_map);
-
-    auto disjointSet = makeDisjointSet(rank_pmap, parent_pmap, vecElements);
-
-    disjointSet.union_set(vecElements[3], vecElements[1]);
-    disjointSet.union_set(vecElements[1], vecElements[2]);
-    disjointSet.union_set(vecElements[2], vecElements[4]);
-    disjointSet.union_set(vecElements[0], vecElements[7]);
-    disjointSet.union_set(vecElements[8], vecElements[9]);
-
-    for(auto it = rank_map.begin(); it != rank_map.end(); ++it)
-    {
-      std::cout << "Element Id: " << it->first.getId() << " Rank: " << it->second << std::endl;
-    }
-    for(auto it = parent_map.begin(); it != parent_map.end(); ++it)
-    {
-      std::cout << "Element Id: " << it->first.getId() << "Parent Id: " << it->second.getId() << std::endl;
-    }
-
-    /*
-    disjointSet.
-
-    TS_ASSERT_EQUALS(7, vecElements[0]->getRoot());
-
-        TS_ASSERT_EQUALS(1, vecElements[2]->getRoot());
-        TS_ASSERT_EQUALS(1, vecElements[3]->getRoot());
-        TS_ASSERT_EQUALS(1, vecElements[4]->getRoot());
-
-        TS_ASSERT_EQUALS(9, vecElements[8]->getRoot());
-
-        TS_ASSERT_EQUALS(7, vecElements[7]->getRoot());
-        TS_ASSERT_EQUALS(1, vecElements[1]->getRoot());
-        TS_ASSERT_EQUALS(5, vecElements[5]->getRoot());
-        TS_ASSERT_EQUALS(6, vecElements[6]->getRoot());
-        TS_ASSERT_EQUALS(9, vecElements[9]->getRoot());
-        */
-
-  }
-}
 
 class DisjointElementTest : public CxxTest::TestSuite
 {
@@ -253,11 +175,6 @@ public:
     TS_ASSERT_EQUALS(5, vecElements[5]->getRoot());
     TS_ASSERT_EQUALS(6, vecElements[6]->getRoot());
     TS_ASSERT_EQUALS(9, vecElements[9]->getRoot());
-  }
-
-  void test_x()
-  {
-    trial();
   }
 
 };
