@@ -1,5 +1,5 @@
 /*WIKI*
-Inserts/updates a time-series log entry on a chosen workspace. The given timestamp & value are appended to the
+Creates/updates a time-series log entry on a chosen workspace. The given timestamp & value are appended to the
 named log entry. If the named entry does not exist then a new log is created. A time stamp must be given in
 ISO8601 format, e.g. 2010-09-14T04:20:12."
 *WIKI*/
@@ -43,8 +43,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void AddTimeSeriesLog::initDocs()
     {
-      this->setWikiSummary("");
-      this->setOptionalMessage("");
+      this->setWikiSummary("Creates/updates a time-series log");
+      this->setOptionalMessage("Creates/updates a time-series log");
     }
 
     //----------------------------------------------------------------------------------------------
