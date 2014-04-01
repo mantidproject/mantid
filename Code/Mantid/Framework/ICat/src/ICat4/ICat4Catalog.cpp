@@ -1,5 +1,6 @@
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidICat/ICat4/GSoapGenerated/ICat4ICATPortBindingProxy.h"
 #include "MantidICat/ICat4/ICat4Catalog.h"
 #include "MantidKernel/ConfigService.h"
@@ -786,6 +787,44 @@ namespace Mantid
      */
     API::ITableWorkspace_sptr ICat4Catalog::getPublishInvestigations()
     {
+      ICat4::ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
+
+      ns1__isAccessAllowed request;
+      ns1__isAccessAllowedResponse response;
+
+      auto ws = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+      // Populate the workspace with all the investigations that
+      // the user is an investigator off and has READ access to.
+      myData(ws);
+
+      std::string sessionID = m_session->getSessionId();
+      request.sessionId = &sessionID;
+
+      ns1__accessType_ a;
+      a.__item = ns1__accessType__UPDATE;
+      request.accessType = &a.__item;
+
+      // Remove each investigation returned from `myData`
+      // were the user does not have create/write access.
+      for (int row = ws->rowCount() - 1; row >= 0; --row)
+      {
+        // The investigation used to check CREATE access against.
+        ns1__investigation investigation;
+        investigation.id = &ws->getRef<int64_t>("DatabaseID",row);
+        request.bean = &investigation;
+
+        if (icat.isAccessAllowed(&request,&response) == 0)
+        {
+          if (!response.return_) ws->removeRow(row);
+        }
+        else
+        {
+          throwErrorMessage(icat);
+        }
+      }
+
+      return ws;
     }
 
     /**
