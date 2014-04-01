@@ -493,7 +493,13 @@ void DateAndTime::setFromISO8601(const std::string str)
     }
   }
 
-  //The boost conversion will convert the string, then we subtract the time zone offset
+  // The boost conversion will convert the string, then we subtract the time zone offset
+  // Different versions of boost accept slightly different things. Earlier versions
+  // seem to accept only a date as valid, whereas later versions do not. We want the
+  // string to always denote the full timestamp so we check for a colon and if it is
+  // not present then assume the time has not been given
+  if(time.find(":") == std::string::npos)
+    throw std::invalid_argument("Error interpreting string '" + str + "' as a date/time.");
   try
   {
   if (positive_offset)

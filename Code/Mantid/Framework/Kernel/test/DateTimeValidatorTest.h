@@ -17,13 +17,6 @@ public:
 
   //---------------------------- Success cases --------------------------------------
 
-  void test_date_alone_is_valid()
-  {
-    DateTimeValidator validator;
-    const std::string input = "2014-03-21";
-    TS_ASSERT_EQUALS("", validator.isValid(input));
-  }
-
   void test_full_extended_iso_format_is_accepted()
   {
     DateTimeValidator validator;
@@ -51,6 +44,14 @@ public:
   {
     DateTimeValidator validator;
     const std::string input = "not a timestamp";
+    const std::string error = "Error interpreting string '" + input + "' as a date/time.";
+    TS_ASSERT_EQUALS(error, validator.isValid(input));
+  }
+
+  void test_date_alone_is_invalid()
+  {
+    DateTimeValidator validator;
+    const std::string input = "2014-03-21";
     const std::string error = "Error interpreting string '" + input + "' as a date/time.";
     TS_ASSERT_EQUALS(error, validator.isValid(input));
   }

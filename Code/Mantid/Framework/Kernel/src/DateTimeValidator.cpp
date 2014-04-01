@@ -27,6 +27,8 @@ namespace Mantid
     std::string DateTimeValidator::checkValidity(const std::string& value) const
     {
       // simply pass off the work DateAndTime constructor
+      // the DateAndTime::stringIsISO8601 does not seem strict enough, it accepts
+      // empty strings & strings of letters!
       std::string error("");
       try
       {
