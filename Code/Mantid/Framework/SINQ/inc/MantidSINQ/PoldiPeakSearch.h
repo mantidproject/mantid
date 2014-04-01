@@ -72,11 +72,16 @@ namespace Poldi
     std::list<MantidVec::iterator> mapPeakPositionsToCorrelationData(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator baseDataStart, MantidVec::iterator originalDataStart);
 
     UncertainValue getBackgroundWithSigma(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
+    MantidVec getBackground(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
     bool distanceToPeaksGreaterThanMinimum(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator point);
     size_t getNumberOfBackgroundPoints(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
 
+    double getMedianFromSortedVector(MantidVec::iterator begin, MantidVec::iterator end);
+    double getSn(MantidVec::iterator begin, MantidVec::iterator end);
+
     double minimumPeakHeightFromBackground(UncertainValue backgroundWithSigma);
     std::vector<PoldiPeak_sptr> getPeaks(MantidVec::iterator baseListStart, std::list<MantidVec::iterator> peakPositions, MantidVec xData);
+    double getFWHMEstimate(MantidVec::iterator baseListStart, MantidVec::iterator peakPosition, MantidVec xData);
 
     void setErrorsOnWorkspace(Workspace2D_sptr correlationWorkspace, double error);
 

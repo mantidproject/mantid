@@ -39,8 +39,14 @@ The peaks are stored in a new workspace.
 #include <list>
 #include <algorithm>
 #include <numeric>
+#include <queue>
+
+#include "boost/math/distributions.hpp"
 
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
+
+#include "MantidKernel/MultiThreaded.h"
+
 
 namespace Mantid
 {
@@ -183,11 +189,35 @@ std::vector<PoldiPeak_sptr> PoldiPeakSearch::getPeaks(MantidVec::iterator baseLi
         peak != peakPositions.end();
         ++peak)
     {
-        size_t index = std::distance(baseListStart, *peak) + 1;
-        peakData.push_back(PoldiPeak::create(xData[index], **peak / 3.0));
+        size_t index = std::distance(baseListStart, *peak);
+
+        PoldiPeak_sptr newPeak = PoldiPeak::create(UncertainValue(xData[index]), UncertainValue(**peak));
+        double fwhmEstimate = getFWHMEstimate(baseListStart, *peak, xData);
+        newPeak->setFwhm(UncertainValue(fwhmEstimate));
+        peakData.push_back(newPeak);
     }
 
     return peakData;
+}
+
+double PoldiPeakSearch::getFWHMEstimate(MantidVec::iterator baseListStart, MantidVec::iterator peakPosition, MantidVec xData)
+{
+    size_t peakPositionIndex = std::distance(baseListStart, peakPosition);
+    double halfPeakIntensity = *peakPosition / 2.0;
+
+    /* - walk to first point i with intensity < maximum/2
+     * - average positions i-1 and i as guess for position of fwhm
+     * - return difference to peak position * 2
+     */
+    MantidVec::iterator nextIntensity = peakPosition + 1;
+    while(*nextIntensity > halfPeakIntensity) {
+        nextIntensity += 1;
+    }
+
+    size_t fwhmIndex = std::distance(baseListStart, nextIntensity);
+    double hmXGuess = (xData[fwhmIndex - 1] + xData[fwhmIndex]) / 2.0;
+
+    return (hmXGuess - xData[peakPositionIndex]) * 2.0;
 }
 
 void PoldiPeakSearch::setErrorsOnWorkspace(Workspace2D_sptr correlationWorkspace, double error)
@@ -197,12 +227,9 @@ void PoldiPeakSearch::setErrorsOnWorkspace(Workspace2D_sptr correlationWorkspace
     std::fill(errors.begin(), errors.end(), error);
 }
 
-UncertainValue PoldiPeakSearch::getBackgroundWithSigma(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
+MantidVec PoldiPeakSearch::getBackground(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
 {
     size_t backgroundPoints = getNumberOfBackgroundPoints(peakPositions, correlationCounts);
-
-    MantidVec sigma;
-    sigma.reserve(backgroundPoints);
 
     MantidVec background;
     background.reserve(backgroundPoints);
@@ -213,14 +240,26 @@ UncertainValue PoldiPeakSearch::getBackgroundWithSigma(std::list<MantidVec::iter
     {
         if(distanceToPeaksGreaterThanMinimum(peakPositions, point)) {
             background.push_back(*point);
-            sigma.push_back(std::abs(*(point) - *(point + 1)));
         }
     }
 
-    double sumBackground = std::accumulate(background.begin(), background.end(), 0.0);
-    double sumSigma = std::accumulate(sigma.begin(), sigma.end(), 0.0);
+    return background;
+}
 
-    return UncertainValue(sumBackground / static_cast<double>(background.size()), sumSigma / static_cast<double>(sigma.size()));
+UncertainValue PoldiPeakSearch::getBackgroundWithSigma(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
+{
+    MantidVec background = getBackground(peakPositions, correlationCounts);
+
+    /* Instead of using Mean and Standard deviation, which are appropriate
+     * for data originating from a normal distribution (which is not the case
+     * for background of POLDI correlation spectra), the more robust measures
+     * Median and Sn are used.
+     */
+    std::sort(background.begin(), background.end());
+    double meanBackground = getMedianFromSortedVector(background.begin(), background.end());
+    double sigmaBackground = getSn(background.begin(), background.end());
+
+    return UncertainValue(meanBackground, sigmaBackground);
 }
 
 bool PoldiPeakSearch::distanceToPeaksGreaterThanMinimum(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator point)
@@ -250,9 +289,45 @@ size_t PoldiPeakSearch::getNumberOfBackgroundPoints(std::list<MantidVec::iterato
     return totalDataPoints - occupiedByPeaks;
 }
 
+double PoldiPeakSearch::getMedianFromSortedVector(MantidVec::iterator begin, MantidVec::iterator end)
+{
+    size_t count = std::distance(begin, end);
+
+    if(count % 2 == 0) {
+        return 0.5 * ( *(begin + (count / 2) - 1) + *(begin + (count / 2)) );
+    } else {
+        return *(begin + (count + 1) / 2 - 1) ;
+    }
+}
+
+double PoldiPeakSearch::getSn(MantidVec::iterator begin, MantidVec::iterator end)
+{
+    size_t numberOfPoints = std::distance(begin, end);
+    MantidVec absoluteDifferenceMedians(numberOfPoints);
+
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for(size_t i = 0; i < numberOfPoints; ++i) {
+        double currentValue = *(begin + i);
+        MantidVec temp;
+        temp.reserve(numberOfPoints - 1);
+        for(size_t j = 0; j < numberOfPoints; ++j) {
+            if(j != i) {
+                temp.push_back(fabs(*(begin + j) - currentValue));
+            }
+        }
+        std::sort(temp.begin(), temp.end());
+
+        absoluteDifferenceMedians[i] = getMedianFromSortedVector(temp.begin(), temp.end());
+    }
+
+    std::sort(absoluteDifferenceMedians.begin(), absoluteDifferenceMedians.end());
+
+    return 1.1926 * getMedianFromSortedVector(absoluteDifferenceMedians.begin(), absoluteDifferenceMedians.end());
+}
+
 double PoldiPeakSearch::minimumPeakHeightFromBackground(UncertainValue backgroundWithSigma)
 {
-    return 2.75 * backgroundWithSigma.error() + backgroundWithSigma.value();
+    return 3.0 * backgroundWithSigma.error() + backgroundWithSigma.value();
 }
 
 void PoldiPeakSearch::setMinimumDistance(int newMinimumDistance)
@@ -345,7 +420,7 @@ void PoldiPeakSearch::exec()
     /* Since intensities are required for filtering, they are extracted from the original count data,
      * along with the Q-values.
      */
-    std::vector<PoldiPeak_sptr> peakCoordinates = getPeaks(summedNeighborCounts.begin(), peakPositionsSummed, correlationQValues);
+    std::vector<PoldiPeak_sptr> peakCoordinates = getPeaks(correlatedCounts.begin(), peakPositionsCorrelation, correlationQValues);
     g_log.information() << "   Extracted peak positions in Q and intensity guesses." << std::endl;
 
     UncertainValue backgroundWithSigma = getBackgroundWithSigma(peakPositionsCorrelation, correlatedCounts);

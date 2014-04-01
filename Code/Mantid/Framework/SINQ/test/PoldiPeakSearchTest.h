@@ -201,12 +201,12 @@ public:
         TS_ASSERT_EQUALS(peaks.size(), 3);
 
         PoldiPeak_sptr peak0 = peaks[0];
-        TS_ASSERT_EQUALS(peak0->q(), 4.0);
-        TS_ASSERT_EQUALS(peak0->intensity(), 12.0 / 3.0);
+        TS_ASSERT_EQUALS(peak0->q(), 3.0);
+        TS_ASSERT_EQUALS(peak0->intensity(), 12.0);
 
         PoldiPeak_sptr peak1 = peaks[1];
-        TS_ASSERT_EQUALS(peak1->q(), 9.0);
-        TS_ASSERT_EQUALS(peak1->intensity(), 34.0 / 3.0);
+        TS_ASSERT_EQUALS(peak1->q(), 8.0);
+        TS_ASSERT_EQUALS(peak1->intensity(), 34.0);
     }
 
     void testmapPeakPositionsToCorrelationData()
@@ -251,12 +251,59 @@ public:
         TS_ASSERT_THROWS(poldiPeakSearch.getNumberOfBackgroundPoints(tooManyPeaks, correlationCounts), std::runtime_error);
     }
 
+    void testgetMedianFromSortedVector()
+    {
+        TestablePoldiPeakSearch poldiPeakSearch;
+
+        double rawTestList[] = { 2.0, 1.0, 6.0, 7.0, 5.0, 3.0, 4.0 };
+        std::vector<double> testList(rawTestList, rawTestList + 7);
+        std::sort(testList.begin(), testList.end());
+        TS_ASSERT_EQUALS(poldiPeakSearch.getMedianFromSortedVector(testList.begin(), testList.end()), 4.0);
+
+        double rawTestListEven[] = { 2.0, 1.0, 6.0, 4.0, 5.0, 3.0 };
+        std::vector<double> testListEven(rawTestListEven, rawTestListEven + 6);
+        std::sort(testListEven.begin(), testListEven.end());
+        TS_ASSERT_EQUALS(poldiPeakSearch.getMedianFromSortedVector(testListEven.begin(), testListEven.end()), 3.5);
+    }
+
+    void testgetSn()
+    {
+        TestablePoldiPeakSearch poldiPeakSearch;
+
+        double rawTestList[] = { 2.0, 1.0, 6.0, 7.0, 5.0, 3.0, 4.0 };
+        std::vector<double> testList(rawTestList, rawTestList + 7);
+        double sn = poldiPeakSearch.getSn(testList.begin(), testList.end());
+        TS_ASSERT_EQUALS(sn, 1.1926 * 2.5);
+    }
+
+    void testgetBackground()
+    {
+        TestablePoldiPeakSearch poldiPeakSearch;
+        poldiPeakSearch.setMinimumDistance(2);
+
+        double rawTestList[] = { 1.0, 2.0, 1.0, 3.0, 1.0, 0.0, 4.0, 0.0, 1.0, 2.0, 1.0, 2.0, 1.0 };
+        std::vector<double> testList(rawTestList, rawTestList + 13);
+
+        std::list<std::vector<double>::iterator> peaks;
+        peaks.push_front(testList.begin() + 6);
+
+        std::vector<double> bg = poldiPeakSearch.getBackground(peaks, testList);
+
+        TS_ASSERT_EQUALS(bg.size(), 6);
+        TS_ASSERT_EQUALS(bg[0], 2.0);
+        TS_ASSERT_EQUALS(bg[1], 1.0);
+        TS_ASSERT_EQUALS(bg[2], 3.0);
+        TS_ASSERT_EQUALS(bg[3], 2.0);
+        TS_ASSERT_EQUALS(bg[4], 1.0);
+        TS_ASSERT_EQUALS(bg[5], 2.0);
+    }
+
     void testgetBackgroundWithSigma()
     {
         TestablePoldiPeakSearch poldiPeakSearch;
         poldiPeakSearch.setMinimumDistance(2);
 
-        double rawTestList[] = { 1.0, 2.0, 1.0, 2.0, 1.0, 0.0, 4.0, 0.0, 1.0, 2.0, 1.0, 2.0, 1.0};
+        double rawTestList[] = { 1.0, 2.0, 1.0, 3.0, 1.0, 0.0, 4.0, 0.0, 1.0, 2.0, 1.0, 2.0, 1.0 };
         std::vector<double> testList(rawTestList, rawTestList + 13);
 
         std::list<std::vector<double>::iterator> peaks;
@@ -265,15 +312,15 @@ public:
         TS_ASSERT_EQUALS(poldiPeakSearch.getNumberOfBackgroundPoints(peaks, testList), 6);
 
         UncertainValue bgSigma = poldiPeakSearch.getBackgroundWithSigma(peaks, testList);
-        TS_ASSERT_EQUALS(bgSigma.value(), 10.0/6.0);
-        TS_ASSERT_EQUALS(bgSigma.error(), 1.0);
+        TS_ASSERT_EQUALS(bgSigma.value(), 2.0);
+        TS_ASSERT_EQUALS(bgSigma.error(), 1.1926 * 1.0);
     }
 
     void testminimumPeakHeightFromBackground()
     {
         TestablePoldiPeakSearch poldiPeakSearch;
 
-        TS_ASSERT_EQUALS(poldiPeakSearch.minimumPeakHeightFromBackground(UncertainValue(3.0, 3.5)), 12.625);
+        TS_ASSERT_EQUALS(poldiPeakSearch.minimumPeakHeightFromBackground(UncertainValue(3.0, 3.5)), 13.5);
     }
 };
 
