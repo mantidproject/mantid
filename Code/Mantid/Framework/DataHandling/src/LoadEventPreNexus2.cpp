@@ -37,7 +37,6 @@ The ChunkNumber and TotalChunks properties can be used to load only a section of
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BinaryFile.h"
-#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -48,6 +47,7 @@ The ChunkNumber and TotalChunks properties can be used to load only a section of
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <algorithm>
 #include <sstream>
@@ -188,7 +188,11 @@ namespace DataHandling
     // try short instrument name
     if (!base.exists())
     {
+#if 0
       instrument = Kernel::ConfigService::Instance().getInstrument(instrument).shortName();
+#else
+      instrument = "VULCAN";
+#endif
       base = Poco::File("/SNS/" + instrument + "/");
       if (!base.exists())
         return "";
@@ -456,56 +460,45 @@ namespace DataHandling
   void LoadEventPreNexus2::unmaskVetoEventIndex()
   {
     // Check pulse ID with events
-    size_t numveto = 0;
-    size_t numerror = 0;
+    // size_t numveto = 0;
+    // size_t numerror = 0;
+
+    PRAGMA_OMP(parallel for schedule(dynamic, 1) ) 
     for (size_t i = 0; i < event_indices.size(); ++i)
     {
+      PARALLEL_START_INTERUPT_REGION
+
       uint64_t eventindex = event_indices[i];
       if (eventindex > static_cast<uint64_t>(max_events))
       {
         uint64_t realeventindex = eventindex & VETOFLAG;
 
-        // Examine whether it is a veto
-        bool isveto = false;
-        if (realeventindex <= max_events)
-        {
-          if (i == 0 || realeventindex >= event_indices[i-1])
-          {
-            isveto = true;
-          }
-        }
-
-        if (isveto)
-        {
           // Is veto, use the unmasked event index
           event_indices[i] = realeventindex;
-          ++ numveto;
-          g_log.information() << "[DB Output]" << "Event index " << eventindex
-                              << " is corrected to " << realeventindex << "\n";
-        }
-        else
-        {
-          event_indices[i] = event_indices[i-1];
-          ++ numerror;
-          g_log.error() << "EventIndex " << eventindex << " of pulse (indexed as " << i << ") is wrong! "
-                        << " Tried to convert them to " << realeventindex << " , still exceeding max event index "
-                        << max_events << "\n";
-        }
       }
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
 
     // Check
+    PRAGMA_OMP(parallel for schedule(dynamic, 1) ) 
     for (size_t i = 0; i < event_indices.size(); ++i)
     {
+      PARALLEL_START_INTERUPT_REGION
       uint64_t eventindex = event_indices[i];
       if (eventindex > static_cast<uint64_t>(max_events))
       {
-        g_log.information() << "Check: Pulse " << i << ": unphysical event index = " << eventindex << "\n";
+        PARALLEL_CRITICAL(unmask_veto_check)
+        {
+          g_log.information() << "Check: Pulse " << i << ": unphysical event index = " << eventindex << "\n";
+        }
       }
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
 
-    g_log.notice() << "Number of veto pulses = " << numveto << ", Number of error-event-index pulses = "
-                   << numerror << "\n";
+    // g_log.notice() << "Number of veto pulses = " << numveto << ", Number of error-event-index pulses = "
+    //                << numerror << "\n";
 
     return;
   }
@@ -597,26 +590,37 @@ namespace DataHandling
 
 
   //----------------------------------------------------------------------------------------------
-  /** Add absolute time series to log
-   * @params
-   * - mindex:  index of the the series in the list
-   */
+  /** Add absolute time series to log. Use TOF as log value for this type of events
+    * @params logtitle :: name of the log
+    * @params mindex :: index of the log in pulse time ...
+    * - mindex:  index of the the series in the list
+    */
   void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle, size_t mindex)
   {
-    // 1. Set data structure and constants
-    size_t nbins = this->wrongdetid_pulsetimes[mindex].size();
+    // Create TimeSeriesProperty
     TimeSeriesProperty<double>* property = new TimeSeriesProperty<double>(logtitle);
 
-    // 2. Set data
+    // Add entries
+    size_t nbins = this->wrongdetid_pulsetimes[mindex].size();
     for (size_t k = 0; k < nbins; k ++)
     {
-      property->addValue(this->wrongdetid_pulsetimes[mindex][k], this->wrongdetid_tofs[mindex][k]);
+      double tof = this->wrongdetid_tofs[mindex][k];
+      DateAndTime pulsetime = wrongdetid_pulsetimes[mindex][k];
+      int64_t abstime_ns = pulsetime.totalNanoseconds() + static_cast<int64_t>(tof*1000);
+      DateAndTime abstime(abstime_ns);
+
+      double value = tof;
+
+      property->addValue(abstime, value);
+
+      // property->addValue(this->wrongdetid_pulsetimes[mindex][k], this->wrongdetid_tofs[mindex][k]);
     } // ENDFOR
 
-    this->localWorkspace->mutableRun().addProperty(property, false);
+    // Add property to workspace
+    localWorkspace->mutableRun().addProperty(property, false);
 
     g_log.information() << "Size of Property " << property->name() << " = " << property->size() <<
-        " vs Original Log Size = " << nbins << std::endl;
+                           " vs Original Log Size = " << nbins << "\n";
 
     return;
   }
@@ -1035,6 +1039,11 @@ namespace DataHandling
     std::vector<std::vector<double> > local_tofs;
     std::set<PixelType> local_wrongdetids;
 
+#if 1
+    size_t dboutcounts = 0;
+    size_t maxdbcounts = 10;
+#endif
+
     // process the individual events
     size_t numwrongpid = 0;
     for (size_t i = 0; i < current_event_buffer_size; i++)
@@ -1090,7 +1099,8 @@ namespace DataHandling
       {
         //This is the total offset into the file
         size_t total_i = i + fileOffset;
-        //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
+        // Go through event_index until you find where the index increases to encompass the current index.
+        // Your pulse = the one before.
         while (!((total_i >= event_indices[pulse_i]) && (total_i < event_indices[pulse_i+1])) )
         {
           pulse_i++;
@@ -1159,6 +1169,16 @@ namespace DataHandling
         // int64_t abstime = (pulsetime.totalNanoseconds()+int64_t(tof*1000));
         local_pulsetimes[theindex].push_back(pulsetime);
         local_tofs[theindex].push_back(tof);
+
+#if 1
+        if (dboutcounts < maxdbcounts)
+        {
+          g_log.notice() << "[DB] Event-log " << pid << ": Index = " << dboutcounts
+                         << "Pulse time = " << pulsetime << ", TOF = " << tof << "\n";
+          ++ dboutcounts;
+        }
+#endif
+
       } // END-IF-ELSE: On Event's Pixel's Nature
 
     } // ENDFOR each event
@@ -1216,7 +1236,7 @@ namespace DataHandling
         shortest_tof = local_shortest_tof;
       if (local_longest_tof > longest_tof)
         longest_tof = local_longest_tof;
-    }
+    } // END_CRITICAL
 
     return;
   }
