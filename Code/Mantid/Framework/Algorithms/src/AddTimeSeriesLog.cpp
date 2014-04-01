@@ -1,7 +1,11 @@
 /*WIKI*
 Creates/updates a time-series log entry on a chosen workspace. The given timestamp & value are appended to the
 named log entry. If the named entry does not exist then a new log is created. A time stamp must be given in
-ISO8601 format, e.g. 2010-09-14T04:20:12."
+ISO8601 format, e.g. 2010-09-14T04:20:12.
+
+By default, the given value is interpreted as a double and a double series is either created or expected. However,
+if the "Type" is set to "int" then the value is interpreted as an integer and an integer is either created
+or expected.
 *WIKI*/
 /*WIKI_USAGE*
 '''Python'''
@@ -16,8 +20,9 @@ ISO8601 format, e.g. 2010-09-14T04:20:12."
 
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
 #include "MantidKernel/DateTimeValidator.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid
 {
@@ -25,6 +30,38 @@ namespace Mantid
   {
     using namespace API;
     using namespace Kernel;
+
+    namespace
+    {
+     /**
+      * Creates/updates the named log on the given run. The template type
+      * specifies either the type of TimeSeriesProperty that is expected to
+      * exist or the type that will be created
+      * @param run A reference to the run object that stores the logs
+      * @param name The name of the log that is to be either created or updated
+      * @param time A time string in ISO format, passed to the DateAndTime constructor
+      * @param value The value at the given time
+      */
+      template<typename T>
+      void createOrUpdate(API::Run& run, const std::string & name,
+                          const std::string & time, const T value)
+      {
+        TimeSeriesProperty<T> *timeSeries(NULL);
+        if(run.hasProperty(name))
+        {
+          timeSeries = dynamic_cast<TimeSeriesProperty<T>*>(run.getLogData(name));
+          if(!timeSeries) throw std::invalid_argument("Log '" + name + "' already exists but the values are a different type.");
+        }
+        else
+        {
+          timeSeries = new TimeSeriesProperty<T>(name);
+          run.addProperty(timeSeries);
+        }
+        timeSeries->addValue(time, value);
+      }
+
+    }
+
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(AddTimeSeriesLog)
@@ -66,6 +103,14 @@ namespace Mantid
       auto nonEmtpyDbl = boost::make_shared<MandatoryValidator<double>>();
       declareProperty("Value", EMPTY_DBL(), nonEmtpyDbl, "The value for the log at the given time",
                       Direction::Input);
+
+      auto optionsValidator = boost::make_shared<ListValidator<std::string>>();
+      optionsValidator->addAllowedValue("double");
+      optionsValidator->addAllowedValue("int");
+      declareProperty("Type", "double", optionsValidator,
+                      "An optional type for the given value. A double value with a Type=int will have "
+                      "the fractional part chopped off.",
+                      Direction::Input);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -75,26 +120,22 @@ namespace Mantid
     void AddTimeSeriesLog::exec()
     {
       MatrixWorkspace_sptr logWS = getProperty("Workspace");
+      auto &run = logWS->mutableRun();
       std::string name = getProperty("Name");
       std::string time = getProperty("Time");
-      double value = getProperty("Value");
+      double valueAsDouble = getProperty("Value");
+      std::string type = getProperty("Type");
+      bool asInt = (type == "int");
 
-      auto & run = logWS->mutableRun();
-      TimeSeriesProperty<double> *timeSeries(NULL);
-      if(run.hasProperty(name))
+      if(asInt)
       {
-        timeSeries = dynamic_cast<TimeSeriesProperty<double>*>(run.getLogData(name));
-        if(!timeSeries) throw std::invalid_argument("Log '" + name + "' already exists but is not a time series.");
+        createOrUpdate<int>(run, name, time, static_cast<int>(valueAsDouble));
       }
       else
       {
-        timeSeries = new TimeSeriesProperty<double>(name);
-        run.addProperty(timeSeries);
+        createOrUpdate<double>(run, name, time, valueAsDouble);
       }
-      timeSeries->addValue(time, value);
     }
-
-
 
   } // namespace Algorithms
 } // namespace Mantid

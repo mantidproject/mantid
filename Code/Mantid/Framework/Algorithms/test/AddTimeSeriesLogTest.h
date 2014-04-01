@@ -8,30 +8,48 @@
 
 class AddTimeSeriesLogTest : public CxxTest::TestSuite
 {
+private:
+  enum LogType { Double, Integer };
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static AddTimeSeriesLogTest *createSuite() { return new AddTimeSeriesLogTest(); }
   static void destroySuite( AddTimeSeriesLogTest *suite ) { delete suite; }
 
-  void test_Workspace2D()
+  void test_defaults_create_a_double_type_series()
   {
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(10,10);
     TS_ASSERT_THROWS_NOTHING(executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:12", 20.0));
-    checkLogWithEntryExists(ws, "Test Name", "2010-09-14T04:20:12", 20.0, 0);
+    checkLogWithEntryExists<double>(ws, "Test Name", "2010-09-14T04:20:12", 20.0, 0);
     TS_ASSERT_THROWS_NOTHING(executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:19", 40.0));
-    checkLogWithEntryExists(ws, "Test Name", "2010-09-14T04:20:19", 40.0, 1);
-
+    checkLogWithEntryExists<double>(ws, "Test Name", "2010-09-14T04:20:19", 40.0, 1);
   }
 
-  void test_EventWorkspace()
+  void test_forcing_to_int_creates_int_from_double()
   {
-    auto ws = WorkspaceCreationHelper::CreateEventWorkspace(10,10);
-    TS_ASSERT_THROWS_NOTHING(executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:12", 20.0));
-    checkLogWithEntryExists(ws, "Test Name", "2010-09-14T04:20:12", 20.0, 0);
-    TS_ASSERT_THROWS_NOTHING(executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:19", 40.0));
-    checkLogWithEntryExists(ws, "Test Name", "2010-09-14T04:20:19", 40.0, 1);
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    TS_ASSERT_THROWS_NOTHING(executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:12", 20.5, Integer));
+
+    checkLogWithEntryExists<int>(ws, "Test Name", "2010-09-14T04:20:12", 20, 0);
+    TS_ASSERT_THROWS_NOTHING(executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:19", 40.0, Integer));
+    checkLogWithEntryExists<int>(ws, "Test Name", "2010-09-14T04:20:19", 40, 1);
+
   }
+
+  void test_algorithm_only_accepts_int_or_double_as_Type()
+  {
+    Mantid::Algorithms::AddTimeSeriesLog alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    const Mantid::Kernel::Property *prop = alg.getProperty("Type");
+    const auto allowedValues = prop->allowedValues();
+
+    TS_ASSERT_EQUALS(2, allowedValues.size());
+    TS_ASSERT_EQUALS(1, allowedValues.count("int"));
+    TS_ASSERT_EQUALS(1, allowedValues.count("double"));
+  }
+
 
   //-------------------------- Failure cases ------------------------------------
   void test_empty_log_name_not_allowed()
@@ -76,10 +94,21 @@ public:
     TS_ASSERT_THROWS(executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:12", 20.0), std::invalid_argument);
   }
 
+  void test_algorithm_fails_if_time_series_exists_but_it_is_incorrect_type()
+  {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    auto & run = ws->mutableRun();
+    const std::string logName = "DoubleSeries";
+    auto *timeSeries = new Mantid::Kernel::TimeSeriesProperty<double>(logName);
+    timeSeries->addValue("2010-09-14T04:20:12", 20.0);
+    run.addLogData(timeSeries);
+    TS_ASSERT_THROWS(executeAlgorithm(ws, logName, "2010-09-14T04:20:30", 30, Integer), std::invalid_argument);
+  }
+
 private:
 
   void executeAlgorithm(Mantid::API::MatrixWorkspace_sptr testWS, const std::string & logName, const std::string & logTime,
-                        const double logValue)
+                        const double logValue, const LogType type = Double)
   {
     //execute algorithm
     Mantid::Algorithms::AddTimeSeriesLog alg;
@@ -91,12 +120,14 @@ private:
     alg.setPropertyValue("Name", logName);
     alg.setPropertyValue("Time", logTime);
     alg.setProperty("Value", logValue);
+    if(type == Integer) alg.setProperty("Type", "int");
     alg.setRethrows(true);
     alg.execute();
   }
 
+  template<typename T>
   void checkLogWithEntryExists(Mantid::API::MatrixWorkspace_sptr testWS, const std::string & logName, const std::string & logTime,
-                               const double logValue, const size_t position)
+                               const T logValue, const size_t position)
   {
     using Mantid::Kernel::DateAndTime;
     using Mantid::Kernel::TimeSeriesProperty;
@@ -105,7 +136,7 @@ private:
     TSM_ASSERT("Run does not contain the expected log entry", run.hasProperty(logName));
 
     auto *prop = run.getLogData(logName);
-    auto *timeSeries = dynamic_cast<TimeSeriesProperty<double>*>(prop);
+    auto *timeSeries = dynamic_cast<TimeSeriesProperty<T>*>(prop);
     TSM_ASSERT("A log entry with the given name exists but it is not a time series", timeSeries);
     auto times = timeSeries->timesAsVector();
     TS_ASSERT(times.size() >= position + 1);
