@@ -961,7 +961,7 @@ namespace DataHandling
     g_log.information() << "Processing input event preNexus by " << numThreads << " threads"
                         << " in " << numBlocks << " blocks. " << "\n";
 
-    PRAGMA_OMP( parallel for if (parallelProcessing) )
+    PRAGMA_OMP( parallel for schedule(dynamic, 1) if (parallelProcessing) )
     for (int i=0; i < int(numThreads); i++)
     {
       // This is the partial workspace we are about to create (if in parallel)
@@ -1876,7 +1876,7 @@ namespace DataHandling
     //----------------------------------------------------------------------------------
     int filterstatus = -1;
     DateAndTime logpulsetime;
-    double logtof;
+    // double logtof;
     bool definedfilterstatus;
     if (fileOffset == 0)
     {
@@ -2076,7 +2076,7 @@ namespace DataHandling
           prevbtime = boundtime;
           boundtime = pulsetime.totalNanoseconds() + static_cast<int64_t>(tof*1000);
           logpulsetime = pulsetime;
-          logtof = tof;
+          // logtof = tof;
         }
         else
         {
