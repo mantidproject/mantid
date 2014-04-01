@@ -5,7 +5,6 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 
@@ -581,6 +580,42 @@ namespace IDA
     }
   }
 
+  void FuryFit::constrainIntensities(Mantid::API::CompositeFunction_sptr func)
+  {
+    std::string paramName = "f1.Intensity";
+    size_t index = func->parameterIndex(paramName);
+
+    switch ( uiForm().furyfit_cbFitType->currentIndex() )
+    {
+    case 0: // 1 Exp
+    case 2: // 1 Str
+      if(!func->isFixed(index))
+      {
+        func->tie(paramName, "1-f0.A0");
+      }
+      else
+      {
+        std::string paramValue = boost::lexical_cast<std::string>(func->getParameter(paramName));
+        func->tie(paramName, paramValue); 
+        func->tie("f0.A0", "1-"+paramName);
+      }
+      break;
+    case 1: // 2 Exp
+    case 3: // 1 Exp & 1 Str
+      if(!func->isFixed(index))
+      {
+        func->tie(paramName,"1-f2.Intensity-f0.A0");
+      }
+      else
+      {
+        std::string paramValue = boost::lexical_cast<std::string>(func->getParameter(paramName));
+        func->tie(paramName,"1-f2.Intensity-f0.A0");
+        func->tie(paramName, paramValue);
+      }
+      break;
+    }
+  }
+
   void FuryFit::sequential()
   {
     const QString error = validate();
@@ -597,24 +632,14 @@ namespace IDA
 
     Mantid::API::CompositeFunction_sptr func = createFunction();
     // Function Ties
-    
     func->tie("f0.A1", "0");
-    const bool constrainIntensities = uiForm().furyfit_ckConstrainIntensities->isChecked();
-    if ( constrainIntensities )
+    const bool constrainIntens = uiForm().furyfit_ckConstrainIntensities->isChecked();
+    
+    if ( constrainIntens )
     {
-      switch ( uiForm().furyfit_cbFitType->currentIndex() )
-      {
-      case 0: // 1 Exp
-      case 2: // 1 Str
-        func->tie("f1.Intensity","1-f0.A0");
-        break;
-      case 1: // 2 Exp
-      case 3: // 1 Exp & 1 Str
-        func->tie("f1.Intensity","1-f2.Intensity-f0.A0");
-        break;
-      }
+      constrainIntensities(func);
     }
-
+    
     func->applyTies();
 
     bool constrainBeta = uiForm().furyfit_ckConstrainBeta->isChecked();
@@ -628,7 +653,7 @@ namespace IDA
       "endx = " + m_ffProp["EndX"]->valueText() + "\n"
       "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n";
     
-    if (constrainIntensities) pyInput += "constrain_intens = True \n";
+    if (constrainIntens) pyInput += "constrain_intens = True \n";
     else pyInput += "constrain_intens = False \n";
 
     if ( uiForm().furyfit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
