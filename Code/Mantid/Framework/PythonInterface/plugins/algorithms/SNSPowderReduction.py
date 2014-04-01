@@ -26,7 +26,7 @@ else:
 COMPRESS_TOL_TOF = .01
 EVENT_WORKSPACE_ID = "EventWorkspace"
 
-class SNSPowderReduction(PythonAlgorithm):
+class SNSPowderReduction(DataProcessorAlgorithm):
     class PDConfigFile(object):
         class PDInfo:
             """Inner class for holding configuration information for a reduction."""
