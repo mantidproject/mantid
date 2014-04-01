@@ -64,6 +64,8 @@ namespace Mantid
       void init();
       /// Execute the algorithm
       void exec();
+      // Split into columns with respect to the comma delimiters
+      int getCells(std::string line, std::vector<std::string> & cols) const;
     };
 
   } // namespace DataHandling
