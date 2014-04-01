@@ -10,6 +10,7 @@
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Progress.h"
 #include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/HardThresholdBackground.h"
@@ -110,7 +111,8 @@ public:
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
     
     ccl.startLabelingId(labelingId);
-    auto outWS = ccl.execute(inWS, &mockStrategy);
+    Progress prog;
+    auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
     auto uniqueValues = connection_workspace_to_set_of_labels(outWS.get());
     TS_ASSERT_EQUALS(1, uniqueValues.size());
@@ -129,7 +131,8 @@ public:
     size_t labelingId = 2;
     bool multiThreaded = false;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
-    auto outWS = ccl.execute(inWS, &mockStrategy);
+    Progress prog;
+    auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
     /*
      * Because all the signal values are identical, and none are below any threshold. We assume that there will only be a single component. All
@@ -159,8 +162,9 @@ public:
 
     size_t labelingId = 1;
     bool multiThreaded = false;
+    Progress prog;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
-    auto outWS = ccl.execute(inWS, &mockStrategy);
+    auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
     std::set<size_t> uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("2 objects so should have 3 unique entries", 3, uniqueEntries.size());
@@ -190,7 +194,8 @@ public:
     size_t labelingId = 1;
     bool multiThreaded = false;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
-    auto outWS = ccl.execute(inWS, &mockStrategy);
+    Progress prog;
+    auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
     std::set<size_t> uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("3 objects so should have 4 unique entries", 4, uniqueEntries.size());
@@ -212,7 +217,8 @@ public:
     size_t labelingId = 1;
     bool multiThreaded = false;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
-    auto outWS = ccl.execute(inWS, &mockStrategy);
+    Progress prog;
+    auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
     std::set<size_t> uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("Just one object", 1, uniqueEntries.size());
@@ -243,7 +249,8 @@ public:
     size_t labelingId = 1;
     bool multiThreaded = false;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
-    auto outWS = ccl.execute(inWS, &mockStrategy);
+    Progress prog;
+    auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
     std::set<size_t> uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("Just one object, but we have some 'empty' entries too", 2, uniqueEntries.size());
@@ -275,7 +282,8 @@ public:
     size_t labelingId = 1;
     bool multiThreaded = false;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
-    auto outWS = ccl.execute(inWS, &mockStrategy);
+    Progress prog;
+    auto outWS = ccl.execute(inWS, &mockStrategy, prog);
 
     std::set<size_t> uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
     TSM_ASSERT_EQUALS("Just one object, but we have some 'empty' entries too", 2, uniqueEntries.size());
@@ -335,7 +343,8 @@ public:
     size_t labelingId = 1;
     bool multiThreaded = false;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
-    auto outWS = ccl.execute(inWS, &strategy);
+    Progress prog;
+    auto outWS = ccl.execute(inWS, &strategy, prog);
 
     // ----------- Basic cluster checks
 
@@ -419,7 +428,8 @@ public:
     ConnectedComponentLabeling ccl;
     size_t labelingId = 1;
     ccl.startLabelingId(labelingId);
-    auto outWS = ccl.execute(m_inWS, m_backgroundStrategy.get());
+    Progress prog;
+    auto outWS = ccl.execute(m_inWS, m_backgroundStrategy.get(), prog);
 
     // ----------- Basic cluster checks
 

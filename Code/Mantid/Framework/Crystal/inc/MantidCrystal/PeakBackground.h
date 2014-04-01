@@ -2,15 +2,21 @@
 #define MANTID_CRYSTAL_PEAKBACKGROUND_H_
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidCrystal/HardThresholdBackground.h"
+#include <boost/function.hpp>
 
 
 
 namespace Mantid
 {
+namespace API
+{
+  class IPeak;
+}
 namespace Crystal
 {
 
@@ -48,6 +54,8 @@ namespace Crystal
     double m_radiusEstimate;
     /// MD coordinates to use
     Mantid::API::SpecialCoordinateSystem m_mdCoordinates;
+    /// Pointer to member function used for coordinate determination.
+    boost::function<Mantid::Kernel::V3D(const Mantid::API::IPeak*)> m_coordFunction;
 
   public:
     /// Constructor

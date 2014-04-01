@@ -10,6 +10,12 @@
 
 namespace Mantid
 {
+
+namespace API
+{
+  class Progress;
+}
+
 namespace Crystal
 {
   namespace ConnectedComponentMappingTypes
@@ -58,12 +64,13 @@ namespace Crystal
     void startLabelingId(const size_t& id);
 
     /// Execute and return clusters
-    boost::shared_ptr<Mantid::API::IMDHistoWorkspace> execute(Mantid::API::IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy) const;
+    boost::shared_ptr<Mantid::API::IMDHistoWorkspace> execute(Mantid::API::IMDHistoWorkspace_sptr ws, 
+      BackgroundStrategy * const strategy, Mantid::API::Progress& progress) const;
     
     /// Execute and return clusters, as well as maps to integrated label values
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> executeAndIntegrate(
       Mantid::API::IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, ConnectedComponentMappingTypes::LabelIdIntensityMap& labelMap,
-      ConnectedComponentMappingTypes::PositionToLabelIdMap& positionLabelMap) const;
+      ConnectedComponentMappingTypes::PositionToLabelIdMap& positionLabelMap, Mantid::API::Progress& progress) const;
 
     /// Destructor
     virtual ~ConnectedComponentLabeling();
@@ -74,7 +81,8 @@ namespace Crystal
     void calculateDisjointTree(Mantid::API::IMDHistoWorkspace_sptr ws, 
       BackgroundStrategy * const strategy, std::vector<DisjointElement>& neighbourElements,
       ConnectedComponentMappingTypes::LabelIdIntensityMap& labelMap,
-      ConnectedComponentMappingTypes::PositionToLabelIdMap& positionLabelMap) const;
+      ConnectedComponentMappingTypes::PositionToLabelIdMap& positionLabelMap, 
+      Mantid::API::Progress& progress) const;
 
     /// Start labeling index
     size_t m_startId;

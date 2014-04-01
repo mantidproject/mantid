@@ -1,9 +1,10 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/Progress.h"
 #include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/DisjointElement.h"
@@ -12,6 +13,10 @@
 #include <boost/scoped_ptr.hpp>
 #include <stdexcept>
 #include <set>
+#include <algorithm>
+#include <iterator>
+
+
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -49,6 +54,17 @@ namespace Mantid
           outWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
         }
         return outWS;
+      }
+
+      template<typename T>
+      T reportEvery(const T& maxReports, const T& maxIterations)
+      {
+        T frequency = maxReports;
+        if (maxIterations >= maxReports)
+        {
+          frequency = maxIterations/maxReports;
+        }
+        return frequency;
       }
     }
 
@@ -93,18 +109,21 @@ namespace Mantid
     void ConnectedComponentLabeling::calculateDisjointTree(IMDHistoWorkspace_sptr ws, 
       BackgroundStrategy * const strategy, VecElements& neighbourElements,
       LabelIdIntensityMap& labelMap,
-      PositionToLabelIdMap& positionLabelMap
+      PositionToLabelIdMap& positionLabelMap,
+      Progress& progress
       ) const
     {
 
       VecIndexes allNonBackgroundIndexes;
       allNonBackgroundIndexes.reserve(ws->getNPoints());
 
+      progress.doReport("Pre-processing to filter background out");
+      const size_t nPoints = ws->getNPoints();
+      progress.resetNumSteps(10000, 0.0, 0.25);
       if(m_runMultiThreaded)
       {
-    
         std::vector<API::IMDIterator*> iterators = ws->createIterators(getNThreads());
-        const int nthreads = static_cast<int>(iterators.size());
+        const int nthreads = getNThreads();
         std::vector<VecIndexes> manyNonBackgroundIndexes(nthreads);
 
         PARALLEL_FOR_NO_WSP_CHECK()
@@ -118,6 +137,7 @@ namespace Mantid
               if(!strategyCopy->isBackground(iterator))
               {
                 nonBackgroundIndexes.push_back( iterator->getLinearIndex() );
+                progress.report();
               }
             }
             while(iterator->next());
@@ -131,23 +151,36 @@ namespace Mantid
       }
       else
       {
+        progress.resetNumSteps(1, 0.0, 0.5);
         API::IMDIterator *iterator = ws->createIterator(NULL);
         do
         {
           if(!strategy->isBackground(iterator))
           {
             allNonBackgroundIndexes.push_back( iterator->getLinearIndex() );
+            progress.report();
           }
+          
         }
         while(iterator->next());
       }
 
       // -------- Perform labeling -----------
+      progress.doReport("Perform connected component labeling");
+      
       const size_t maxNeighbours = calculateMaxNeighbours(ws.get());
       IMDIterator* iterator = ws->createIterator(NULL);
       size_t currentLabelCount = m_startId;
-      for(size_t ii = 0; ii < allNonBackgroundIndexes.size(); ++ii)
+      const size_t nIndexesToProcess= allNonBackgroundIndexes.size();
+      const size_t maxReports = 100;
+      const size_t frequency = reportEvery(maxReports, nIndexesToProcess);
+      progress.resetNumSteps(100, 0.25, 0.5);
+      for(size_t ii = 0; ii < nIndexesToProcess ; ++ii)
       {
+        if(ii % frequency == 0)
+        {
+          progress.doReport();
+        }
         size_t& currentIndex = allNonBackgroundIndexes[ii];
         iterator->jumpTo(currentIndex);
 
@@ -184,17 +217,10 @@ namespace Mantid
         else
         {
           // Choose the lowest neighbour index as the parent.
-          size_t parentIndex = nonEmptyNeighbourIndexes[0];
-          for (size_t i = 1; i < nonEmptyNeighbourIndexes.size(); ++i)
-          {
-            size_t neighIndex = nonEmptyNeighbourIndexes[i];
-            if (neighbourElements[neighIndex].getId() < neighbourElements[parentIndex].getId())
-            {
-              parentIndex = i;
-            }
-          }
+          const VecElements::iterator& minIt = std::min_element(neighbourElements.begin(), neighbourElements.end());
+          const size_t& parentIndex = std::distance(neighbourElements.begin(), minIt);
           // Get the chosen parent
-          DisjointElement& parentElement = neighbourElements[parentIndex];
+          DisjointElement& parentElement = *minIt;
           // Make this element a copy of the parent
           neighbourElements[currentIndex] = parentElement;
           // Union remainder parents with the chosen parent
@@ -213,32 +239,36 @@ namespace Mantid
     }
 
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabeling::execute(
-      IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy) const
+      IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, Progress& progress) const
     {
       VecElements neighbourElements(ws->getNPoints());
 
       // Perform the bulk of the connected component analysis, but don't collapse the elements yet.
       LabelIdIntensityMap labelMap; // This will not get used.
       PositionToLabelIdMap positionLabelMap; // This will not get used.
-      calculateDisjointTree(ws, strategy, neighbourElements, labelMap, positionLabelMap);
+      calculateDisjointTree(ws, strategy, neighbourElements, labelMap, positionLabelMap, progress);
 
       // Create the output workspace from the input workspace
       IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
 
+      progress.doReport("Generating cluster image");
+      const int nIndexesToProcess = static_cast<int>(neighbourElements.size());
+      progress.resetNumSteps(nIndexesToProcess, 0.5, 0.75);
       // Set each pixel to the root of each disjointed element.
       PARALLEL_FOR_NO_WSP_CHECK()
-      for (int i = 0; i < static_cast<int>(neighbourElements.size()); ++i)
+      for (int i = 0; i < nIndexesToProcess; ++i)
       {
-        //std::cout << "Element\t" << i << " Id: \t" << neighbourElements[i].getId() << " This location:\t"<< &neighbourElements[i] << " Root location:\t" << neighbourElements[i].getParent() << " Root Id:\t" <<  neighbourElements[i].getRoot() << std::endl;
         if(!neighbourElements[i].isEmpty())
         {
           outWS->setSignalAt(i, neighbourElements[i].getRoot());
+          progress.doReport();
         }
         else
         {
           outWS->setSignalAt(i, 0);
         }
         outWS->setErrorSquaredAt(i, 0);
+        
       }
 
       return outWS;
@@ -246,18 +276,23 @@ namespace Mantid
 
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabeling::executeAndIntegrate(
       IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, LabelIdIntensityMap& labelMap,
-      PositionToLabelIdMap& positionLabelMap) const
+      PositionToLabelIdMap& positionLabelMap, Progress& progress) const
     {
       VecElements neighbourElements(ws->getNPoints());
 
       // Perform the bulk of the connected component analysis, but don't collapse the elements yet.
-      calculateDisjointTree(ws, strategy, neighbourElements, labelMap, positionLabelMap);
+      calculateDisjointTree(ws, strategy, neighbourElements, labelMap, positionLabelMap, progress);
 
       // Create the output workspace from the input workspace
       IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
 
+      progress.doReport("Integrating clusters and generating cluster image");
+      const size_t nIterations = neighbourElements.size();
+      const size_t maxReports = 100;
+      const size_t frequency = reportEvery(maxReports, nIterations);
+      progress.resetNumSteps(maxReports, 0.5, 0.75);
       // Set each pixel to the root of each disjointed element.
-      for (size_t i = 0; i < neighbourElements.size(); ++i)
+      for (size_t i = 0; i < nIterations; ++i)
       {
         if(!neighbourElements[i].isEmpty())
         {
@@ -266,7 +301,7 @@ namespace Mantid
           errorSQ *=errorSQ; // Error squared at index
           const size_t& labelId = neighbourElements[i].getRoot();
           // Set the output cluster workspace signal value
-          outWS->setSignalAt(i, labelId);
+          outWS->setSignalAt(i, static_cast<Mantid::signal_t>(labelId));
 
           SignalErrorSQPair current = labelMap[labelId];
           // Sum labels. This is integration!
@@ -279,6 +314,10 @@ namespace Mantid
           outWS->setSignalAt(i, 0);
         }
         outWS->setErrorSquaredAt(i, 0);
+        if(i % frequency == 0)
+        {
+          progress.doReport();
+        }
       }
 
       return outWS;
