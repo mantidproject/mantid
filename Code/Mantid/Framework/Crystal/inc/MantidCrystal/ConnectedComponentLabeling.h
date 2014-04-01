@@ -20,9 +20,7 @@ namespace Crystal
     typedef std::vector<size_t> VecIndexes;
     typedef std::vector<size_t> VecElements;
     typedef std::set<size_t> SetIds;
-    typedef typename VecElements::value_type ElementType;
-    typedef std::map<ElementType,std::size_t> RankTypeMap;
-    typedef std::map<ElementType, ElementType> ElementParentMap;
+    typedef VecElements::value_type ElementType;
   }
 
   class BackgroundStrategy;
@@ -77,8 +75,7 @@ namespace Crystal
     void calculateDisjointTree(Mantid::API::IMDHistoWorkspace_sptr ws, 
       BackgroundStrategy * const strategy, ConnectedComponentMappingTypes::VecElements& neighbourElements,
       ConnectedComponentMappingTypes::LabelIdIntensityMap& labelMap,
-      ConnectedComponentMappingTypes::PositionToLabelIdMap& positionLabelMap,
-      ConnectedComponentMappingTypes::ElementParentMap& parentMap
+      ConnectedComponentMappingTypes::PositionToLabelIdMap& positionLabelMap
     ) const;
 
     /// Start labeling index

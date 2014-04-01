@@ -6,11 +6,6 @@ namespace Mantid
   namespace Crystal
   {
 
-    bool operator< (const DisjointElement &a,const  DisjointElement &b)
-          {
-            return a.getId() < b.getId();
-          }
-
     /**
      * Default constructor. Creates an 'empty' disjoint element.
      */
