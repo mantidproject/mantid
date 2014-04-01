@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidCrystal/DisjointElement.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <map>

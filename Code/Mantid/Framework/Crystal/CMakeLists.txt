@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/CombinePeaksWorkspaces.cpp
 	src/ConnectedComponentLabeling.cpp
 	src/DiffPeaksWorkspaces.cpp
+	src/DisjointElement.cpp
 	src/FilterPeaks.cpp
 	src/FindSXPeaks.cpp
 	src/FindUBUsingFFT.cpp
@@ -70,6 +71,7 @@ set ( INC_FILES
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
 	inc/MantidCrystal/ConnectedComponentLabeling.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
+	inc/MantidCrystal/DisjointElement.h
 	inc/MantidCrystal/FilterPeaks.h
 	inc/MantidCrystal/FindSXPeaks.h
 	inc/MantidCrystal/FindUBUsingFFT.h
@@ -131,6 +133,7 @@ set ( TEST_FILES
 	CombinePeaksWorkspacesTest.h
 	ConnectedComponentLabelingTest.h
 	DiffPeaksWorkspacesTest.h
+	DisjointElementTest.h
 	FilterPeaksTest.h
 	FindSXPeaksTest.h
 	FindUBUsingFFTTest.h
