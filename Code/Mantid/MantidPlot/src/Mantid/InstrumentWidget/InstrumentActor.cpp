@@ -60,8 +60,7 @@ m_workspace(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.t
 m_ragged(true),
 m_autoscaling(autoscaling),
 m_maskedColor(100,100,100),
-m_failedColor(200,200,200),
-m_sampleActor(NULL)
+m_failedColor(200,200,200)
 {
   // settings
   loadSettings();
@@ -98,12 +97,6 @@ m_sampleActor(NULL)
   // this adds actors for all instrument components to the scene and fills in m_detIDs
   m_scene.addActor(new CompAssemblyActor(*this,instrument->getComponentID()));
 
-  FindComponentVisitor findVisitor(instrument->getSample()->getComponentID());
-  accept(findVisitor,GLActor::Finish);
-  const ObjComponentActor* samplePosActor = dynamic_cast<const ObjComponentActor*>(findVisitor.getActor());
-
-  m_sampleActor = new SampleActor(*this,sharedWorkspace->sample(),samplePosActor);
-  m_scene.addActor(m_sampleActor);
   if ( !m_showGuides )
   {
     // hide guide and other components
@@ -192,10 +185,6 @@ bool InstrumentActor::accept(GLActorVisitor& visitor, VisitorAcceptRule rule)
   bool ok = m_scene.accept(visitor, rule);
   visitor.visit(this);
   SetVisibilityVisitor* vv = dynamic_cast<SetVisibilityVisitor*>(&visitor);
-  if (vv && m_sampleActor)
-  {
-    m_sampleActor->setVisibility(m_sampleActor->getSamplePosActor()->isVisible());
-  }
   invalidateDisplayLists();
   return ok;
 }
