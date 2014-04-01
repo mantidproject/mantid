@@ -3,6 +3,7 @@
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ICatalog.h"
+#include "MantidAPI/ICatalogInfoService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -58,8 +59,17 @@ namespace MantidQt
     {
       auto workspace = Mantid::API::WorkspaceFactory::Instance().createTable();
       auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
-      // Obtain the investigations that the user can publish to for all their catalogs.
-      if (!session.empty()) Mantid::API::CatalogManager::Instance().getCatalog("")->myData(workspace);
+
+      if (!session.empty())
+      {
+        // Cast a catalog to a catalogInfoService to access downloading functionality.
+        auto catalogInfoService = boost::dynamic_pointer_cast<Mantid::API::ICatalogInfoService>(
+            Mantid::API::CatalogManager::Instance().getCatalog(session.front()->getSessionId()));
+        // Check if the catalog created supports publishing functionality.
+        if (!catalogInfoService) throw std::runtime_error("The catalog that you are using does not support publishing.");
+        // Populate the workspace with investigations that the user has CREATE access to.
+        workspace = catalogInfoService->getPublishInvestigations();
+      }
 
       // The user is not an investigator on any investigations and cannot publish
       // or they are not logged into the catalog then update the related message..
