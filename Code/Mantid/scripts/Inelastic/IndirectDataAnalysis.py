@@ -654,7 +654,6 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False
             if Verbose:
                 logger.notice(output_ws + ' output to file : '+fpath)
 
-    print Plot
     if ( Plot != 'None' ):
         furyfitPlotSeq(fit_workspaces, Plot)
 
