@@ -660,7 +660,7 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False
 
     EndTime('FuryFit')
 
-    return fit_group
+    return result_workspace
 
 #Copy logs from sample and add some addtional ones
 def furyAddSampleLogs(inputWs, ws, params, intensities_constrained=False, beta_constrained=False):
