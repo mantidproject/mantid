@@ -111,6 +111,8 @@ namespace Mantid
                       "An optional type for the given value. A double value with a Type=int will have "
                       "the fractional part chopped off.",
                       Direction::Input);
+      declareProperty("DeleteExisting", false,
+                      "If true and the named log exists then the whole log is removed first.", Direction::Input);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -122,6 +124,15 @@ namespace Mantid
       MatrixWorkspace_sptr logWS = getProperty("Workspace");
       auto &run = logWS->mutableRun();
       std::string name = getProperty("Name");
+      const bool deleteExisting = getProperty("DeleteExisting");
+      if(deleteExisting && run.hasProperty(name))
+      {
+        auto deleter = createChildAlgorithm("DeleteLog",-1,-1,false);
+        deleter->setProperty("Workspace", logWS);
+        deleter->setProperty("Name", name);
+        deleter->executeAsChildAlg();
+      }
+
       std::string time = getProperty("Time");
       double valueAsDouble = getProperty("Value");
       std::string type = getProperty("Type");

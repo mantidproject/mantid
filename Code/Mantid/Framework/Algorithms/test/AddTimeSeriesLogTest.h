@@ -10,6 +10,7 @@ class AddTimeSeriesLogTest : public CxxTest::TestSuite
 {
 private:
   enum LogType { Double, Integer };
+  enum UpdateType { Update, Delete };
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -50,6 +51,15 @@ public:
     TS_ASSERT_EQUALS(1, allowedValues.count("double"));
   }
 
+  void test_delete_existing_removes_complete_log_first()
+  {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    TS_ASSERT_THROWS_NOTHING(executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:12", 20.0));
+    checkLogWithEntryExists<double>(ws, "Test Name", "2010-09-14T04:20:12", 20.0, 0);
+    TS_ASSERT_THROWS_NOTHING(executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:19", 40.0, Double, Delete));
+
+    checkLogWithEntryExists<double>(ws, "Test Name", "2010-09-14T04:20:19", 40.0, 0);
+  }
 
   //-------------------------- Failure cases ------------------------------------
   void test_empty_log_name_not_allowed()
@@ -108,7 +118,7 @@ public:
 private:
 
   void executeAlgorithm(Mantid::API::MatrixWorkspace_sptr testWS, const std::string & logName, const std::string & logTime,
-                        const double logValue, const LogType type = Double)
+                        const double logValue, const LogType type = Double, const UpdateType update = Update)
   {
     //execute algorithm
     Mantid::Algorithms::AddTimeSeriesLog alg;
@@ -121,6 +131,7 @@ private:
     alg.setPropertyValue("Time", logTime);
     alg.setProperty("Value", logValue);
     if(type == Integer) alg.setProperty("Type", "int");
+    if(update == Delete) alg.setProperty("DeleteExisting", true);
     alg.setRethrows(true);
     alg.execute();
   }
