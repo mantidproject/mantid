@@ -278,3 +278,30 @@ def plotParameters(ws, *param_names):
             indicies = [i for i in range(num_spectra) if name in axis.label(i)]
             if len(indicies) > 0:
                 plotSpectra(ws, name, indicies)
+
+def convertToElasticQ(input_ws, output_ws=None):
+  """
+    Helper function to convert the spectrum axis of a sample to ElasticQ.
+
+    @param input_ws - the name of the workspace to convert from
+    @param output_ws - the name to call the converted workspace
+  """
+  
+  if output_ws is None:
+    output_ws = input_ws
+    
+  try:
+      e_fixed = getEfixed(input_ws)
+      ConvertSpectrumAxis(input_ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=output_ws)
+  except RuntimeError:
+      #try to fall back to using whatever is currently there
+      axis = mtd[input_ws].getAxis(1)
+      if not axis.isNumeric():
+          logger.error('Input workspace must have either spectra or numeric axis.')
+          sys.exit()
+
+      if axis.getUnit().unitID() != 'MomentumTransfer':
+          logger.error('Input must have axis values of Q')
+          sys.exit()
+  
+      CloneWorkspace(input_ws, OutputWorkspace=output_ws)
