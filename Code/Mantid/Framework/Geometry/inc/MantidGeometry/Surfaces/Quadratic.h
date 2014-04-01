@@ -3,7 +3,6 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidKernel/Logger.h"
 #include <vector>
 
 namespace Mantid
@@ -27,8 +26,6 @@ namespace Mantid
     class MANTID_GEOMETRY_DLL Quadratic : public Surface
     {
     private:
-
-      static Kernel::Logger& PLog;           ///< The official logger
 
       void matrixForm(Kernel::Matrix<double>&,
         Kernel::V3D&,double&) const;          

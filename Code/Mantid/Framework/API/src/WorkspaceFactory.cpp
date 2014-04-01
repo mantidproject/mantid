@@ -16,12 +16,17 @@ namespace Mantid
 {
 namespace API
 {
+  namespace
+  {
+    /// static logger object
+    Kernel::Logger g_log("WorkspaceFactory");
+  }
 
 using std::size_t;
 
 /// Private constructor for singleton class
 WorkspaceFactoryImpl::WorkspaceFactoryImpl() :
-  Mantid::Kernel::DynamicFactory<Workspace>(), g_log(Kernel::Logger::get("WorkspaceFactory"))
+  Mantid::Kernel::DynamicFactory<Workspace>()
 {
   g_log.debug() << "WorkspaceFactory created." << std::endl;
 }
@@ -32,7 +37,6 @@ WorkspaceFactoryImpl::WorkspaceFactoryImpl() :
  */
 WorkspaceFactoryImpl::~WorkspaceFactoryImpl()
 {
-  //	g_log.debug() << "WorkspaceFactory destroyed." << std::endl;
 }
 
 /** Create a new instance of the same type of workspace as that given as argument.
@@ -180,7 +184,6 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, 
       MemoryInfo mi = MemoryManager::Instance().getMemoryInfo();
       if ( static_cast<unsigned int>(blockMemory)*100/1024 > mi.availMemory )
       {
-          g_log.error("There is not enough memory to allocate the workspace");
           throw std::runtime_error("There is not enough memory to allocate the workspace");
       }
 
@@ -222,13 +225,11 @@ ITableWorkspace_sptr WorkspaceFactoryImpl::createTable(const std::string& classN
         ws = boost::dynamic_pointer_cast<ITableWorkspace>(this->create(className));    
         if (!ws)
         {
-            g_log.error("Class "+className+" cannot be cast to ITableWorkspace");
             throw std::runtime_error("Class "+className+" cannot be cast to ITableWorkspace");
         }
     }
     catch(Kernel::Exception::NotFoundError& e)
     {
-        g_log.error(e.what());
         throw;
     }
     return ws;
@@ -243,13 +244,11 @@ IPeaksWorkspace_sptr WorkspaceFactoryImpl::createPeaks(const std::string& classN
         ws = boost::dynamic_pointer_cast<IPeaksWorkspace>(this->create(className));    
         if (!ws)
         {
-            //g_log.error("Class "+className+" cannot be cast to IPeaksWorkspace");
             throw std::runtime_error("Class "+className+" cannot be cast to IPeaksWorkspace");
         }
     }
     catch(Kernel::Exception::NotFoundError& e)
     {
-        g_log.error(e.what());
         throw;
     }
     return ws;

@@ -10,7 +10,6 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 
@@ -482,9 +481,6 @@ protected:
 
   /// Pointer to the progress handler
   Kernel::ProgressBase *m_progReporter;
-
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 
 private:
   /// The declared attributes

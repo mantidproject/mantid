@@ -1,7 +1,7 @@
 from mantid.simpleapi import *
-def get_live_data(InstrumentName, Frequency = 60, Accumulation = "Add", OutputName = "live"):
-    StartLiveData(Instrument=str(InstrumentName), UpdateEvery = Frequency, Outputworkspace=str(OutputName), AccumulationMethod = Accumulation)
-    ws = mtd[OutputName]
+def get_live_data(instrument_name, frequency = 60, accumulation = "Add", output_name = "live"):
+    StartLiveData(Instrument=str(instrument_name), UpdateEvery = frequency, Outputworkspace=str(output_name), AccumulationMethod = accumulation)
+    ws = mtd[output_name]
     return ws
 def is_live_run(run):
     try:

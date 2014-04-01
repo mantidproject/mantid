@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -49,9 +48,6 @@ public:
   virtual const std::string name() const { return "ITransformScale"; }
   /// The scaling transformation. Define in derived classes
   virtual void transform( std::vector<double> &gd ) = 0;
-
-protected:
-  static Kernel::Logger& g_log;
 }; // class ITransformScale
 
 /// typedef for a shared pointer

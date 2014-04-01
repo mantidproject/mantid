@@ -5,7 +5,7 @@ in [[EditInstrumentGeometry]]. If a section is missing then those parameters wil
 empty. This includes an empty table (zero rows) if that information is missing.
 *WIKI*/
 
-#include "MantidDataHandling/LoadPDCharacterizations.h"
+#include "MantidDataHandling/PDLoadCharacterizations.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -24,7 +24,7 @@ namespace DataHandling
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(LoadPDCharacterizations)
+  DECLARE_ALGORITHM(PDLoadCharacterizations)
 
   /// key for a instrument parameter file being listed
   static const std::string IPARM_KEY("Instrument parameter file:");
@@ -34,31 +34,31 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  LoadPDCharacterizations::LoadPDCharacterizations()
+  PDLoadCharacterizations::PDLoadCharacterizations()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  LoadPDCharacterizations::~LoadPDCharacterizations()
+  PDLoadCharacterizations::~PDLoadCharacterizations()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string LoadPDCharacterizations::name() const { return "LoadPDCharacterizations";};
+  const std::string PDLoadCharacterizations::name() const { return "PDLoadCharacterizations";};
   
   /// Algorithm's version for identification. @see Algorithm::version
-  int LoadPDCharacterizations::version() const { return 1;};
+  int PDLoadCharacterizations::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string LoadPDCharacterizations::category() const { return "Workflow\\DataHandling";}
+  const std::string PDLoadCharacterizations::category() const { return "Workflow\\DataHandling";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void LoadPDCharacterizations::initDocs()
+  void PDLoadCharacterizations::initDocs()
   {
     std::string descr("Load a characterization file used in Powder Diffraction Reduction.");
     this->setWikiSummary(descr);
@@ -68,7 +68,7 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void LoadPDCharacterizations::init()
+  void PDLoadCharacterizations::init()
   {
     std::vector<std::string> exts;
     exts.push_back(".txt");
@@ -97,7 +97,7 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void LoadPDCharacterizations::exec()
+  void PDLoadCharacterizations::exec()
   {
     // open the file for reading
     std::string filename = this->getProperty("Filename");
@@ -143,7 +143,7 @@ namespace DataHandling
    *
    * @param file The stream to parse.
    */
-  void LoadPDCharacterizations::readFocusInfo(std::ifstream &file)
+  void PDLoadCharacterizations::readFocusInfo(std::ifstream &file)
   {
     // end early if already at the end of the file
     if (file.eof()) return;
@@ -193,7 +193,7 @@ namespace DataHandling
    * @param file The stream to parse.
    * @param wksp The table workspace to fill in.
    */
-  void LoadPDCharacterizations::readCharInfo(std::ifstream &file, ITableWorkspace_sptr &wksp)
+  void PDLoadCharacterizations::readCharInfo(std::ifstream &file, ITableWorkspace_sptr &wksp)
   {
     // end early if already at the end of the file
     if (file.eof()) return;

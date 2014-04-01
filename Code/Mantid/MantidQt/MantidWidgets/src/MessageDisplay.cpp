@@ -229,7 +229,7 @@ namespace MantidQt
         logLevelMenu->addAction(m_debug);
 
         //check the right level
-        int level = Mantid::Kernel::Logger::get("").getLevel(); //get the root logger logging level
+        int level = Mantid::Kernel::Logger("").getLevel(); //get the root logger logging level
         if (level == Poco::Message::PRIO_ERROR)
           m_error->setChecked(true);
         if (level == Poco::Message::PRIO_WARNING)

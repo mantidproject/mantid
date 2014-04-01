@@ -16,7 +16,6 @@ namespace Kernel
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
-class Logger;
 class SplittingInterval;
 template<typename T> class TimeSeriesProperty;
 
@@ -111,9 +110,6 @@ private:
   PropertyMap m_properties;
   /// Stores the order in which the properties were declared.
   std::vector<Property*> m_orderedProperties;
-
-  /// Static reference to the logger class
-  static Logger& g_log;
 };
 
 /// Typedef for a shared pointer to a PropertyManager

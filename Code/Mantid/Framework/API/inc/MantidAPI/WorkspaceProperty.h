@@ -511,11 +511,11 @@ namespace Mantid
       LockMode::Type m_locking;
 
       /// for access to logging streams
-      static Kernel::Logger& g_log;
+      static Kernel::Logger g_log;
     };
 
     template <typename TYPE>
-    Kernel::Logger& WorkspaceProperty<TYPE>::g_log = Kernel::Logger::get("WorkspaceProperty");
+    Kernel::Logger WorkspaceProperty<TYPE>::g_log("WorkspaceProperty");
 
   } // namespace API
 } // namespace Mantid

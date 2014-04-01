@@ -83,13 +83,6 @@ namespace Mantid
 
 
       void init();
-
-
-
-    private:
-
-      static Kernel::Logger& g_log ;
-
     };
   }
 }

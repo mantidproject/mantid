@@ -1,4 +1,5 @@
 #include "MantidKernel/FileValidator.h"
+#include "MantidKernel/Logger.h"
 #include <algorithm>
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -22,8 +23,11 @@ namespace Mantid
 namespace Kernel
 {
 
-// Initialize the logger
-Logger& FileValidator::g_log = Logger::get("FileValidator");
+namespace
+{
+  // Initialize the static logger
+  Logger g_log("FileValidator");
+}
 
 /** Constructor
  *  @param extensions :: The permitted file extensions (e.g. .RAW)
@@ -78,10 +82,10 @@ std::string FileValidator::checkValidity(const std::string &value) const
       //Dropped from warning to debug level as it was printing out on every search of the archive, even when successful. re #5998
       g_log.debug() << "Unrecognised extension in file \"" << value << "\"";
       if (!this->m_extensions.empty()) {
-        this->g_log.debug() << " [ ";
+        g_log.debug() << " [ ";
         for (std::set<std::string>::const_iterator it = this->m_extensions.begin(); it != this->m_extensions.end(); ++it)
           g_log.debug() << *it << " ";
-        this->g_log.debug() << "]";
+        g_log.debug() << "]";
       }
       g_log.debug() << "\"."  << std::endl;
     }
