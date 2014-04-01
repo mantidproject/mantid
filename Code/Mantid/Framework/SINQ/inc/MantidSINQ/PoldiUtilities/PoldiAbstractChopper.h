@@ -64,6 +64,8 @@ protected:
     PoldiAbstractChopper() {}
 
 };
+
+typedef boost::shared_ptr<PoldiAbstractChopper> PoldiAbstractChopper_sptr;
 }
 }
 
