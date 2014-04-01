@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Muon/IALCBaselineModellingView.h"
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
+#include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include "ui_ALCBaselineModellingView.h"
 
@@ -15,6 +16,8 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
+
+  using namespace MantidWidgets;
 
   /** ALCBaselineModellingView : Widget-based implementation of the ALC Baseline Modelling step
                                  interface.
@@ -41,6 +44,8 @@ namespace CustomInterfaces
   */
   class MANTIDQT_CUSTOMINTERFACES_DLL ALCBaselineModellingView : public IALCBaselineModellingView
   {
+    Q_OBJECT
+
   public:
     ALCBaselineModellingView(QWidget* widget);
 
@@ -62,6 +67,9 @@ namespace CustomInterfaces
     /// @see IALCBaselineModellingView::updateFunction
     void updateFunction(IFunction_const_sptr func);
 
+  private slots:
+    void updateRange(double min, double max);
+
   private:
     /// The widget used
     QWidget* const m_widget;
@@ -71,6 +79,9 @@ namespace CustomInterfaces
 
     /// Plot curves
     QwtPlotCurve *m_dataCurve, *m_fitCurve, *m_correctedCurve;
+
+    /// Section selector
+    RangeSelector *m_sectionSelector;
   };
 
 

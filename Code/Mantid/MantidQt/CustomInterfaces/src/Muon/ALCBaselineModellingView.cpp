@@ -14,7 +14,7 @@ namespace CustomInterfaces
   ALCBaselineModellingView::ALCBaselineModellingView(QWidget* widget)
     : m_widget(widget), m_ui(),
       m_dataCurve(new QwtPlotCurve()), m_fitCurve(new QwtPlotCurve()),
-      m_correctedCurve(new QwtPlotCurve())
+      m_correctedCurve(new QwtPlotCurve()), m_sectionSelector(NULL)
   {}
     
   void ALCBaselineModellingView::initialize()
@@ -25,6 +25,9 @@ namespace CustomInterfaces
     m_dataCurve->attach(m_ui.dataPlot);
 
     m_fitCurve->setPen(QPen(Qt::red));
+
+    m_sectionSelector = new RangeSelector(m_ui.dataPlot);
+    connect(m_sectionSelector, SIGNAL(selectionChanged(double,double)), this, SLOT(updateRange(double,double)));
   }
 
   IFunction_const_sptr ALCBaselineModellingView::function() const
@@ -53,6 +56,12 @@ namespace CustomInterfaces
     const Mantid::MantidVec& dataY = data->readY(0);
 
     m_dataCurve->setData(&dataX[0], &dataY[0], static_cast<int>(data->blocksize()));
+
+    m_sectionSelector->setMaximum(data->getXMax());
+    m_sectionSelector->setMinimum(data->getXMin());
+
+    m_sectionSelector->setRange(data->getXMax(), data->getXMin());
+
     m_ui.dataPlot->replot();
   }
 
@@ -87,6 +96,11 @@ namespace CustomInterfaces
     m_ui.dataPlot->replot();
 
     m_ui.function->setText(QString::fromStdString(func->asString()));
+  }
+
+  void ALCBaselineModellingView::updateRange(double min, double max)
+  {
+    m_ui.range->setText(QString("%1 %2").arg(min).arg(max));
   }
 
 } // namespace CustomInterfaces

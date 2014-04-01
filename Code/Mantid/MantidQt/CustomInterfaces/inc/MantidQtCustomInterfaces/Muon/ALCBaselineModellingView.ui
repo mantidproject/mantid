@@ -34,6 +34,9 @@
         <widget class="QTextEdit" name="function"/>
        </item>
        <item>
+        <widget class="QLineEdit" name="range"/>
+       </item>
+       <item>
         <widget class="QTextEdit" name="sections"/>
        </item>
        <item>
