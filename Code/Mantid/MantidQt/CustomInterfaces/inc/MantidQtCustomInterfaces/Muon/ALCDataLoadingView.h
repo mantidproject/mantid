@@ -9,6 +9,8 @@
 
 #include "ui_ALCDataLoadingView.h"
 
+#include <qwt_plot_curve.h>
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -64,6 +66,9 @@ namespace CustomInterfaces
 
     /// The widget used
     QWidget* const m_widget;
+
+    /// Loaded data curve
+    QwtPlotCurve* m_dataCurve;
   };
 
 } // namespace CustomInterfaces

@@ -25,6 +25,9 @@ namespace CustomInterfaces
     m_dataCurve->attach(m_ui.dataPlot);
 
     m_fitCurve->setPen(QPen(Qt::red));
+    m_fitCurve->attach(m_ui.dataPlot);
+
+    m_correctedCurve->attach(m_ui.correctedPlot);
 
     m_sectionSelector = new RangeSelector(m_ui.dataPlot);
     connect(m_sectionSelector, SIGNAL(selectionChanged(double,double)), this, SLOT(updateRange(double,double)));
@@ -71,7 +74,6 @@ namespace CustomInterfaces
     const Mantid::MantidVec& dataY = data->readY(0);
 
     m_correctedCurve->setData(&dataX[0], &dataY[0], static_cast<int>(data->blocksize()));
-    m_correctedCurve->attach(m_ui.correctedPlot);
     m_ui.correctedPlot->replot();
   }
 
@@ -92,7 +94,6 @@ namespace CustomInterfaces
     assert(values.size() > 0);
 
     m_fitCurve->setData(&dataX[0], values.getPointerToCalculated(0), m_dataCurve->dataSize());
-    m_fitCurve->attach(m_ui.dataPlot);
     m_ui.dataPlot->replot();
 
     m_ui.function->setText(QString::fromStdString(func->asString()));
