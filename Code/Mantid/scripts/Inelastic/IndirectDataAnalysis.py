@@ -522,6 +522,7 @@ def furyPlot(inWS, spec):
 
 def fury(samWorkspaces, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         Plot=False): 
+    
     StartTime('Fury')
     workdir = config['defaultsave.directory']
     samTemp = samWorkspaces[0]
@@ -601,6 +602,7 @@ def furyfitPlotSeq(ws, plot):
     plotParameters(ws, param_names)
 
 def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False, Save=False, Plot='None', Verbose=False): 
+    
     StartTime('FuryFit')
     nHist = mtd[inputWS].getNumberHistograms()
    
@@ -612,8 +614,10 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False
         logger.notice('Option: '+fitType)  
         logger.notice(func)
 
+
     tmp_fit_workspace = "__furyfit_fit_ws"
-    ConvertToHistogram(inputWS, OutputWorkspace=tmp_fit_workspace)
+    CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx)
+    ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
     ReplaceSpecialValues(tmp_fit_workspace, NaNValue=0, NaNError=0, OutputWorkspace=tmp_fit_workspace)
     convertToElasticQ(tmp_fit_workspace)
 
