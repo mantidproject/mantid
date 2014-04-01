@@ -184,7 +184,6 @@ bool InstrumentActor::accept(GLActorVisitor& visitor, VisitorAcceptRule rule)
 {
   bool ok = m_scene.accept(visitor, rule);
   visitor.visit(this);
-  SetVisibilityVisitor* vv = dynamic_cast<SetVisibilityVisitor*>(&visitor);
   invalidateDisplayLists();
   return ok;
 }
