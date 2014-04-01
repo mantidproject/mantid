@@ -15,8 +15,7 @@ from mantid.api import *
 from mantid.kernel import *
 import os
 
-all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
-if 'GatherWorkspaces' in all_algs:
+if AlgorithmFactory.exists('GatherWorkspaces'):
     HAVE_MPI = True
     from mpi4py import MPI
     mpiRank = MPI.COMM_WORLD.Get_rank()
