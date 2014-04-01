@@ -99,13 +99,21 @@ class LoadRun(object):
         # I have left, but commented it out. However as of this writing 
         # LoadNexusMonitors throws an error if LoadNexusMonitors is a histogram
         # i.e. this algorithm only works for event files at present
-        # when this is fixed the code below can be uncomment and the line of code
-        # not uncomment deleted, which would 
+        # when this is fixed the code below can be uncomment and the lines of code
+        # not uncommented can be deleted, which would 
         # increase the loading speed where only interested in monitor histograms
 
         self._load(inst, is_can, extra_options)
 
-        # workspace = self._get_workspace_name()
+        workspace = self._get_workspace_name()
+        outWs = mtd[workspace]
+        if isinstance(outWs, IEventWorkspace):
+            RenameWorkspace(InputWorkspace=workspace + "_monitors", OutputWorkspace=workspace)            
+            self.periods_in_file = 1
+            self._wksp_name = workspace
+            
+        #else:
+        #    logger.error('is not eventworkspace in _load_transmission')
 
         # For sans, in transmission, we care only about the monitors. Hence,
         # by trying to load only the monitors we speed up the reduction process. 
