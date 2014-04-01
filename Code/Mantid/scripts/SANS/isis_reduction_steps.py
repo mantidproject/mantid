@@ -111,9 +111,6 @@ class LoadRun(object):
             RenameWorkspace(InputWorkspace=workspace + "_monitors", OutputWorkspace=workspace)            
             self.periods_in_file = 1
             self._wksp_name = workspace
-            
-        #else:
-        #    logger.error('is not eventworkspace in _load_transmission')
 
         # For sans, in transmission, we care only about the monitors. Hence,
         # by trying to load only the monitors we speed up the reduction process. 
