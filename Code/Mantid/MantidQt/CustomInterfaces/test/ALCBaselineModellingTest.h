@@ -25,6 +25,7 @@ public:
 
   MOCK_METHOD0(initialize, void());
   MOCK_CONST_METHOD0(function, IFunction_const_sptr());
+  MOCK_CONST_METHOD0(sections, std::vector<Section>());
   MOCK_METHOD1(displayData, void(MatrixWorkspace_const_sptr));
   MOCK_METHOD1(displayCorrected, void(MatrixWorkspace_const_sptr));
   MOCK_METHOD1(updateFunction, void(IFunction_const_sptr));
@@ -54,22 +55,29 @@ public:
     return view;
   }
 
-  void test_fitting()
+  void test_basicUsage()
   {
     MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, 3, 3);
 
     using boost::assign::list_of;
-
-    data->dataX(0) = list_of(1)(2)(3).convert_to_container<Mantid::MantidVec>();
-    data->dataY(0) = list_of(5)(5)(5).convert_to_container<Mantid::MantidVec>();
+    data->dataY(0) = list_of(1)(2)(100)(3)(4)(5)(100)(100).to_container(data->dataY(0));
+    data->dataX(0) = list_of(1)(2)( 3 )(4)(5)(6)( 7 )( 8 ).to_container(data->dataX(0));
 
     IFunction_const_sptr func = FunctionFactory::Instance().createInitialized("name=FlatBackground,A0=0");
+
+    std::vector<IALCBaselineModellingView::Section> sections;
+    sections.push_back(std::make_pair(1,2));
+    sections.push_back(std::make_pair(4,6));
+
     IFunction_const_sptr fittedFunc;
+    MatrixWorkspace_const_sptr corrected;
 
     scoped_ptr<MockALCBaselineModellingView> view(createView(data));
     EXPECT_CALL(*view, function()).WillRepeatedly(Return(func));
+    EXPECT_CALL(*view, sections()).WillRepeatedly(Return(sections));
+
     EXPECT_CALL(*view, updateFunction(_)).Times(1).WillOnce(SaveArg<0>(&fittedFunc));
-    EXPECT_CALL(*view, displayCorrected(_)).Times(1);
+    EXPECT_CALL(*view, displayCorrected(_)).Times(1).WillOnce(SaveArg<0>(&corrected));
     EXPECT_CALL(*view, displayData(_)).Times(0);
 
     view->requestFit();
@@ -79,41 +87,23 @@ public:
     if (fittedFunc)
     {
       TS_ASSERT_EQUALS(fittedFunc->name(), "FlatBackground");
-      TS_ASSERT_DELTA(fittedFunc->getParameter("A0"), 5, 1E-8);
+      TS_ASSERT_DELTA(fittedFunc->getParameter("A0"), 3, 1E-8);
     }
-  }
-
-  void test_baselineSubtraction()
-  {
-    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, 3, 3);
-
-    using boost::assign::list_of;
-    data->dataX(0) = data->dataY(0) = list_of(1)(2)(3).convert_to_container<Mantid::MantidVec>();
-
-    scoped_ptr<MockALCBaselineModellingView> view(createView(data));
-
-    IFunction_const_sptr func = FunctionFactory::Instance().createInitialized("name=FlatBackground,A0=0");
-    MatrixWorkspace_const_sptr corrected;
-
-    EXPECT_CALL(*view, function()).WillRepeatedly(Return(func));
-    EXPECT_CALL(*view, updateFunction(_)).Times(1);
-    EXPECT_CALL(*view, displayCorrected(_)).Times(1).WillOnce(SaveArg<0>(&corrected));
-    EXPECT_CALL(*view, displayData(_)).Times(0);
-
-    view->requestFit();
 
     TS_ASSERT(corrected);
 
     if ( corrected )
     {
       TS_ASSERT_EQUALS(corrected->getNumberHistograms(), 1);
-      TS_ASSERT_EQUALS(corrected->blocksize(), 3);
+      TS_ASSERT_EQUALS(corrected->blocksize(), 8);
 
-      TS_ASSERT_DELTA(corrected->readY(0)[0], -1.0, 1E-8);
-      TS_ASSERT_DELTA(corrected->readY(0)[1], 0.0, 1E-8);
-      TS_ASSERT_DELTA(corrected->readY(0)[2], 1.0, 1E-8);
+      TS_ASSERT_DELTA(corrected->readY(0)[0], -2.0, 1E-8);
+      TS_ASSERT_DELTA(corrected->readY(0)[2], 97, 1E-8);
+      TS_ASSERT_DELTA(corrected->readY(0)[5], 2.0, 1E-8);
+      TS_ASSERT_DELTA(corrected->readY(0)[7], 97, 1E-8);
     }
   }
+
 };
 
 

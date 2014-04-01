@@ -32,6 +32,20 @@ namespace CustomInterfaces
     return FunctionFactory::Instance().createInitialized(m_ui.function->text().toStdString());
   }
 
+  std::vector<IALCBaselineModellingView::Section> ALCBaselineModellingView::sections() const
+  {
+    std::istringstream sectionsStr(m_ui.sections->text().toStdString());
+    double from,to;
+    std::vector<Section> sections;
+
+    while(sectionsStr >> from >> to)
+    {
+      sections.push_back(std::make_pair(from,to));
+    }
+
+    return sections;
+  }
+
   // TODO: refactor out for other step views to use
   void ALCBaselineModellingView::displayData(MatrixWorkspace_const_sptr data)
   {

@@ -43,9 +43,15 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
+    typedef std::pair<double,double> Section;
+
     /// Function chosen to fit the data to
     /// @return Initialized function
     virtual IFunction_const_sptr function() const = 0;
+
+    /// List of data sections to use for fitting
+    /// @return A list of [from;to] sections
+    virtual std::vector<Section> sections() const = 0;
 
   public slots:
     /// Performs any necessary initialization

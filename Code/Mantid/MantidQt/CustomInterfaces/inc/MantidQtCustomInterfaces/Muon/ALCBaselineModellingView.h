@@ -49,6 +49,9 @@ namespace CustomInterfaces
     /// @see IALCBaselineModellingView::function
     IFunction_const_sptr function() const;
 
+    /// @see IALCBaselineModellingView::sections
+    std::vector<Section> sections() const;
+
   public slots:
     /// @see IALCBaselineModellingView::displayData
     void displayData(MatrixWorkspace_const_sptr data);

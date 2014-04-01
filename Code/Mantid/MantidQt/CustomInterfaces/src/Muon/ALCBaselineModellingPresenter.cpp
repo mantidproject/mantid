@@ -32,10 +32,12 @@ namespace CustomInterfaces
     IFunction_sptr funcToFit =
         FunctionFactory::Instance().createInitialized( m_view->function()->asString() );
 
+    MatrixWorkspace_sptr wsToFit = filteredData();
+
     IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
     fit->setChild(true);
     fit->setProperty("Function", funcToFit);
-    fit->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+    fit->setProperty("InputWorkspace", wsToFit);
     fit->setProperty("CreateOutput", true);
     fit->execute();
 
@@ -52,6 +54,59 @@ namespace CustomInterfaces
 
     m_view->updateFunction(funcToFit);
     m_view->displayCorrected(diff);
+  }
+
+  MatrixWorkspace_sptr ALCBaselineModellingPresenter::filteredData() const
+  {
+    // Assumptions about data
+    assert(m_data);
+    assert(m_data->getNumberHistograms() == 1);
+    assert(!m_data->isHistogramData()); // Point data expected
+
+    // Whether point with particular index should be disabled
+    std::vector<bool> toDisable(m_data->blocksize(), true);
+
+    std::vector<IALCBaselineModellingView::Section> sections = m_view->sections();
+
+    // Find points which are in at least one section, and exclude them from disable list
+    for (size_t i = 0; i < m_data->blocksize(); ++i)
+    {
+      for (auto it = sections.begin(); it != sections.end(); ++it)
+      {
+        if ( m_data->dataX(0)[i] >= it->first && m_data->dataX(0)[i] <= it->second )
+        {
+          toDisable[i] = false;
+          break; // No need to check other sections
+        }
+      }
+    }
+
+    // Create a copy of the data
+    IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
+    clone->setChild(true);
+    clone->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+    clone->setProperty("OutputWorkspace", "__NotUsed__");
+    clone->execute();
+
+    Workspace_sptr cloned = clone->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(cloned);
+    assert(ws); // CloneWorkspace should return the same type of workspace
+
+    // XXX: Points are disabled by settings their errors to very high value. This makes those
+    //      points to have very low weights during the fitting, effectively disabling them.
+
+    const double DISABLED_ERR = std::numeric_limits<double>::max();
+
+    // Disable chosen points
+    for (size_t i = 0; i < ws->blocksize(); ++i)
+    {
+      if (toDisable[i])
+      {
+        ws->dataE(0)[i] = DISABLED_ERR;
+      }
+    }
+
+    return ws;
   }
 
 } // namespace CustomInterfaces

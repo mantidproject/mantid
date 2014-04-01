@@ -53,6 +53,12 @@ namespace CustomInterfaces
     void fit();
 
   private:
+    /// Returns a filtered copy of m_data, where all uninteresting points where disabled.
+    /// Unintersing points are ones which are not included in any of the sections specified in the
+    /// view. Disabled here means "won't be used when fitting".
+    /// @return A copy of m_data which we can pass to Fit algorithm
+    MatrixWorkspace_sptr filteredData() const;
+
     /// Associated view
     IALCBaselineModellingView* const m_view;
 

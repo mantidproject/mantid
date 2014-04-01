@@ -34,6 +34,9 @@
         <widget class="QTextEdit" name="function"/>
        </item>
        <item>
+        <widget class="QTextEdit" name="sections"/>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
