@@ -2,7 +2,6 @@
 #define MANTID_DATAHANDLING_ISISRUNLOGS_H_
 
 #include "MantidKernel/ClassMacros.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/System.h"
 
@@ -58,8 +57,6 @@ namespace Mantid
     private:
       DISABLE_DEFAULT_CONSTRUCT(ISISRunLogs);
 
-      /// A logger reference
-      static Kernel::Logger & g_log;
       /// A LogParser object
       boost::scoped_ptr<Kernel::LogParser> m_logParser;
       /// The total number of periods in original data file

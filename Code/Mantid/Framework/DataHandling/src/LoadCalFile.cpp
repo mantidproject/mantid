@@ -36,10 +36,6 @@ namespace Mantid
 {
 namespace DataHandling
 {
-
-  // Get the logger
-  Kernel::Logger& LoadCalFile::g_log = Kernel::Logger::get("LoadCalFile");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(LoadCalFile)
   
@@ -334,12 +330,13 @@ namespace DataHandling
     }
 
     // Warn about any errors
+
     if (numErrors > 0)
-      g_log.warning() << numErrors << " errors (invalid Detector ID's) found when reading .cal file '" << calFileName << "'.\n";
+      Logger("LoadCalFile").warning() << numErrors << " errors (invalid Detector ID's) found when reading .cal file '" << calFileName << "'.\n";
     if (doGroup && (!hasGrouped))
-      g_log.warning() << "'" << calFileName << "' has no spectra grouped\n";
+      Logger("LoadCalFile").warning() << "'" << calFileName << "' has no spectra grouped\n";
     if (doMask && (!hasUnmasked))
-      g_log.warning() << "'" << calFileName << "' masks all spectra\n";
+      Logger("LoadCalFile").warning() << "'" << calFileName << "' masks all spectra\n";
   }
 
 

@@ -39,8 +39,7 @@ namespace WorkspaceCreationHelper
   using namespace Mantid::Geometry;
   using Mantid::MantidVec;
   using Mantid::MantidVecPtr;
-  // mock algorighm
-  Kernel::Logger& MockAlgorithm::g_log =Logger::get("test-Algorithms");
+
   MockAlgorithm::MockAlgorithm(size_t nSteps)
   {
       m_Progress = std::auto_ptr<API::Progress >(new API::Progress(this,0,1,nSteps));

@@ -52,14 +52,18 @@ namespace Mantid
 namespace CurveFitting
 {
 
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("IkedaCarpenterPV");
+  }
+
 using namespace Kernel;
 using namespace SpecialFunctionSupport;
 using namespace Geometry;
 
 DECLARE_FUNCTION(IkedaCarpenterPV)
 
-// Get a reference to the logger
-Kernel::Logger& IkedaCarpenterPV::g_log = Kernel::Logger::get("IkedaCarpenterPV");
 
 double IkedaCarpenterPV::centre()const 
 {

@@ -35,6 +35,7 @@ This is a workflow algorithm that does the bulk of the work for time focusing di
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidAPI/FileFinder.h"
 
 using Mantid::Geometry::Instrument_const_sptr;

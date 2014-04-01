@@ -10,7 +10,6 @@ namespace Mantid
 
   namespace Kernel
   {
-    class Logger;
     template <typename T> class Matrix;
   }
 
@@ -53,8 +52,6 @@ namespace Mantid
     class MANTID_GEOMETRY_DLL Plane : public Quadratic
     {
     private:
-
-      static Kernel::Logger& PLog;           ///< The official logger
 
       Kernel::V3D NormV;         ///< Normal vector
       double Dist;                   ///< Distance 

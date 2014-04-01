@@ -69,8 +69,6 @@ namespace Mantid
   namespace Crystal
   {
 
-    Kernel::Logger& OptimizeCrystalPlacement::g_log = Kernel::Logger::get("OptimizeCrystalPlacement");
-
     DECLARE_ALGORITHM( OptimizeCrystalPlacement )
 
     class OrEnabledWhenProperties:public Kernel::IPropertySettings

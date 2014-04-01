@@ -35,7 +35,6 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/Logger.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 
@@ -88,9 +87,6 @@ namespace Mantid
 
       /// Run the algorithm
       void exec();
-
-      /// Static reference to the logger class
-      static Kernel::Logger& g_log;
     };
 
   } //Crystal

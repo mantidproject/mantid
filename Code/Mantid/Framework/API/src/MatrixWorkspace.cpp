@@ -25,7 +25,12 @@ namespace Mantid
     using namespace Geometry;
     using Kernel::V3D;
 
-    Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("MatrixWorkspace");
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("MatrixWorkspace");
+    }
+
     const std::string MatrixWorkspace::xDimensionId = "xDimension";
     const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
@@ -91,7 +96,6 @@ namespace Mantid
       // Check validity of arguments
       if (NVectors == 0 || XLength == 0 || YLength == 0)
       {
-        g_log.error("All arguments to init must be positive and non-zero");
         throw std::out_of_range("All arguments to init must be positive and non-zero");
       }
 
@@ -105,7 +109,6 @@ namespace Mantid
       }
       catch(std::runtime_error& ex)
       {
-        g_log.error() << "Error initializing the workspace" << ex.what() << std::endl;
         throw;
       }
 
@@ -205,10 +208,9 @@ namespace Mantid
         m_nearestNeighbours.reset();
 
       }
-      catch (std::runtime_error & e)
+      catch (std::runtime_error &)
       {
-        g_log.error() << "MatrixWorkspace::rebuildSpectraMapping() error:" << std::endl;
-        throw &e;
+        throw;
       }
 
     }
@@ -849,7 +851,6 @@ namespace Mantid
     {
       if ( axisIndex >= m_axes.size() )
       {
-        g_log.error() << "Argument to getAxis (" << axisIndex << ") is invalid for this (" << m_axes.size() << " axis) workspace" << std::endl;
         throw Kernel::Exception::IndexError(axisIndex, m_axes.size(),"Argument to getAxis is invalid for this workspace");
       }
 
@@ -867,7 +868,6 @@ namespace Mantid
       // First check that axisIndex is in range
       if ( axisIndex >= m_axes.size() )
       {
-        g_log.error() << "Value of axisIndex (" << axisIndex << ") is invalid for this (" << m_axes.size() << " axis) workspace" << std::endl;
         throw Kernel::Exception::IndexError(axisIndex, m_axes.size(),"Value of axisIndex is invalid for this workspace");
       }
       // If we're OK, then delete the old axis and set the pointer to the new one
@@ -1052,7 +1052,6 @@ namespace Mantid
       // Throw if there are no masked bins for this spectrum. The caller should check first using hasMaskedBins!
       if (it==m_masks.end())
       {
-        g_log.error() << "There are no masked bins for spectrum index " << workspaceIndex << std::endl;
         throw Kernel::Exception::IndexError(workspaceIndex,0,"MatrixWorkspace::maskedBins");
       }
 

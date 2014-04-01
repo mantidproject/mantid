@@ -53,9 +53,6 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FindDetectorsPar)
 
-    //----------------------------------------------------------------
-Kernel::Logger& FindDetectorsPar::g_log=Kernel::Logger::get("DataHandling");
-
 /// Sets documentation strings for this algorithm
 void FindDetectorsPar::initDocs()
 {

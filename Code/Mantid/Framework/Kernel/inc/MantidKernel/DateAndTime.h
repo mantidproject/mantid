@@ -13,9 +13,6 @@ namespace Kernel
 /// Durations and time intervals
 typedef boost::posix_time::time_duration time_duration;
 
-// forward declaration
-class Logger;
-
 //=============================================================================================
 /** Class for holding the date and time in Mantid.
  * It is stored as a signed 64-bit int of the # of nanoseconds since Jan 1, 1990.
@@ -113,9 +110,6 @@ public:
 private:
   ///A signed 64-bit int of the # of nanoseconds since Jan 1, 1990.
   int64_t _nanoseconds;
-
-  /// A reference to the logger
-  static Logger & g_log;
 };
 #pragma pack(pop)
 

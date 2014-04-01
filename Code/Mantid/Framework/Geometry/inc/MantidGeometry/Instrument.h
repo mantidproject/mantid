@@ -10,7 +10,6 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Logger.h"
 
 #include <string>
 #include <map>
@@ -234,9 +233,6 @@ namespace Mantid
 
       /// Private copy assignment operator
       Instrument& operator=(const Instrument&);
-
-      /// Static reference to the logger class
-      static Kernel::Logger& g_log;
 
       /// Add a plottable component
       void appendPlottable(const CompAssembly& ca,std::vector<IObjComponent_const_sptr>& lst)const;

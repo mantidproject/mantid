@@ -52,6 +52,8 @@ namespace MantidQt
         void workspaceSelected(const QString& wsName);
         /// Set the "FileName" property when a file is selected from the file browser.
         void fileSelected();
+        /// Set session property when user selects an investigation to publish to.
+        void setSessionProperty(int index);
 
       protected:
         /// Overridden to enable dataselector validators

@@ -43,8 +43,6 @@ class MANTID_GEOMETRY_DLL SurfaceFactory
 {
  private:
 
-  static Kernel::Logger& PLog;           ///< The official logger
-
   typedef std::map<std::string,Surface*> MapType;     ///< Storage of surface pointers
   
   static SurfaceFactory* FOBJ;             ///< Effective "this"

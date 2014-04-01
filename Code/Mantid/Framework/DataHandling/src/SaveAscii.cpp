@@ -39,9 +39,6 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    // Initialise the logger
-    Logger& SaveAscii::g_log = Logger::get("SaveAscii");
-
     /// Empty constructor
     SaveAscii::SaveAscii() : m_separatorIndex()
     {

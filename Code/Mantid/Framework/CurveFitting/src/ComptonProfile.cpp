@@ -24,7 +24,7 @@ namespace CurveFitting
   /**
    */
   ComptonProfile::ComptonProfile() : API::ParamFunction(), API::IFunction1D(),
-      m_log(Kernel::Logger::get("ComptonProfile")),
+      m_log("ComptonProfile"),
       m_wsIndex(0), m_mass(0.0), m_voigt(),
       m_yspace(), m_modQ(), m_e0(),m_resolutionSigma(0.0), m_lorentzFWHM(0.0)
   {}

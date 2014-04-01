@@ -68,8 +68,6 @@ namespace Mantid
       void init();
       /// Overwrites Algorithm method
       void exec();
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
 
       /// Map the separator options to their string equivalents
       std::map<std::string,std::string> m_separatorIndex;

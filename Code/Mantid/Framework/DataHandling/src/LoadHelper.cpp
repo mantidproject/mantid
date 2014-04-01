@@ -7,11 +7,17 @@
 namespace Mantid {
 namespace DataHandling {
 
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("LoadHelper");
+  }
+
 using namespace Kernel;
 using namespace API;
 
-LoadHelper::LoadHelper() :
-		g_log(Kernel::Logger::get("Algorithm")) {
+LoadHelper::LoadHelper()
+{
 }
 
 LoadHelper::~LoadHelper() {
@@ -86,7 +92,6 @@ double LoadHelper::calculateEnergy(double wavelength) {
  */
 double LoadHelper::calculateTOF(double distance,double wavelength) {
 	if (wavelength <= 0) {
-		g_log.error("Wavelenght is <= 0");
 		throw std::runtime_error("Wavelenght is <= 0");
 	}
 

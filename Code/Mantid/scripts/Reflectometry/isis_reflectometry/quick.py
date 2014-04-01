@@ -195,12 +195,13 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
             source=inst.getSource()
             beamPos = sampleLocation - source.getPos()
             PI = 3.1415926535
-            theta = inst.getComponentByName(detector_component_name).getTwoTheta(sampleLocation, beamPos)*180.0/PI/2.0
+            theta = groupGet(str(_sample_ws),'samp','theta')
+            if not theta:
+                theta = inst.getComponentByName(detector_component_name).getTwoTheta(sampleLocation, beamPos)*180.0/PI/2.0
             print "Det location: ", detLocation, "Calculated theta = ",theta
             if correct_positions:  # detector is not in correct place   
                 # Get detector angle theta from NeXuS
                 logger.information('The detectorlocation is not at Y=0')
-                theta = groupGet(run_ws,'samp','theta')
                 print 'Nexus file theta =', theta
                 IvsQ = l2q(IvsLam, detector_component_name, theta, sample_component_name)
             else:
@@ -293,7 +294,7 @@ def make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_p
         _detector_ws_llam = Divide(LHSWorkspace=_detector_ws_llam, RHSWorkspace=_mon_int_trans)
         
         print stitch_start_overlap, stitch_end_overlap, stitch_params
-        _transWS, outputScaling = Stitch1D(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_detector_ws_llam, StartOverlap=stitch_start_overlap, 
+        transWS, outputScaling = Stitch1D(LHSWorkspace=_detector_ws_slam, RHSWorkspace=_detector_ws_llam, StartOverlap=stitch_start_overlap, 
                                            EndOverlap=stitch_end_overlap,  Params=stitch_params)
 
     else:
@@ -303,9 +304,9 @@ def make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_p
         _i0p_trans = RebinToWorkspace(WorkspaceToRebin=_monitor_ws_trans, WorkspaceToMatch=_detector_ws_trans)
 
         _mon_int_trans = Integration( InputWorkspace=_i0p_trans, RangeLower=int_min, RangeUpper=int_max )
-        _transWS = Divide( LHSWorkspace=_detector_ws_trans, RHSWorkspace=_mon_int_trans )
+        transWS = Divide( LHSWorkspace=_detector_ws_trans, RHSWorkspace=_mon_int_trans )
     
-    return _transWS
+    return transWS
 
 
 def transCorr(transrun, i_vs_lam, lambda_min, lambda_max, background_min, background_max, int_min, int_max, detector_index_ranges, i0_monitor_index,
@@ -315,11 +316,13 @@ def transCorr(transrun, i_vs_lam, lambda_min, lambda_max, background_min, backgr
     return the corrected result.
     """
     if isinstance(transrun, MatrixWorkspace) and transrun.getAxis(0).getUnit().unitID() == "Wavelength" :
+        logger.debug("Using existing transmission workspace.")
         _transWS = transrun
-    else:    
-         # Make the transmission correction workspace.
-         _transWS = make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_params, 
-                                    lambda_min, lambda_max, background_min, background_max, 
+    else:
+        logger.debug("Creating new transmission correction workspace.")
+        # Make the transmission correction workspace.
+        _transWS = make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_params,
+                                    lambda_min, lambda_max, background_min, background_max,
                                     int_min, int_max, detector_index_ranges, i0_monitor_index,)
     
     #got sometimes very slight binning diferences, so do this again:
@@ -349,7 +352,7 @@ def cleanup():
     names = mtd.getObjectNames()
     for name in names:
         if re.search("^_", name) and mtd.doesExist(name):
-            print "deleting " + name
+            logger.debug("deleting " + name)
             DeleteWorkspace(name)
     
 def get_defaults(run_ws, polcorr = False):

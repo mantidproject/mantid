@@ -7,7 +7,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Unit.h"
 #include <map>
@@ -98,8 +97,6 @@ public:
   /// Prints object to stream
   void printSelf(std::ostream& os) const;
 
-  /// static reference to the logger class
-  static Logger& g_log;
 };
 
 // defining operator << and >>

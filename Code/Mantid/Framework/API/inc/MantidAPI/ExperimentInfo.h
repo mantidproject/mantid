@@ -137,9 +137,6 @@ namespace API
 
   protected:
 
-    /// Static reference to the logger class
-    static Kernel::Logger& g_log;
-
     /// Description of the source object
     boost::shared_ptr<ModeratorModel> m_moderatorModel;
     /// Description of the choppers for this experiment.

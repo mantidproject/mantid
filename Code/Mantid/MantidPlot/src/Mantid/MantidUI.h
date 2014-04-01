@@ -544,9 +544,6 @@ private:
 
   //prevents some repeated code realtating to log names
   void formatLogName(QString &label, const QString &wsName);
-
-  /// Logger
-  static Mantid::Kernel::Logger & g_log;
 };
 
 

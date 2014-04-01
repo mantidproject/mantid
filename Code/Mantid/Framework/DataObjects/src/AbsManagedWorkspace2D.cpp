@@ -26,9 +26,6 @@ namespace DataObjects
 
 using std::size_t;
 
-// Get a reference to the logger
-Kernel::Logger& AbsManagedWorkspace2D::g_log = Kernel::Logger::get("AbsManagedWorkspace2D");
-
 
 /// Constructor
 AbsManagedWorkspace2D::AbsManagedWorkspace2D() :

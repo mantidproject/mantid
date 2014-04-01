@@ -5,13 +5,14 @@ namespace Mantid
 {
 namespace Geometry
 {
+  namespace
+  {
+    // static logger object
+    Kernel::Logger g_log("Detector");
+  }
 
   using Kernel::V3D;
   using Kernel::Quat;
-
-// Get a reference to the logger
-Kernel::Logger& Detector::g_log = Kernel::Logger::get("Detector");
-
 
 /** Constructor for a parametrized Detector
  * @param base: the base (un-parametrized) IComponent

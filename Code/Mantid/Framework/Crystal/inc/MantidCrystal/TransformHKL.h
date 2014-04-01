@@ -61,9 +61,6 @@ namespace Crystal
 
     /// Run the algorithm
     void exec();
-
-    /// Static reference to the logger class
-    static Kernel::Logger& g_log;
   };
 
 

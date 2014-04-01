@@ -26,11 +26,12 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-Mantid::Kernel::Logger& MantidDockWidget::logObject = Mantid::Kernel::Logger::get("MantidDockWidget");
-Mantid::Kernel::Logger& MantidTreeWidget::logObject = Mantid::Kernel::Logger::get("MantidTreeWidget");
-
 namespace
 {
+  /// static logger for dock widget
+  Mantid::Kernel::Logger docklog("MantidDockWidget");
+  Mantid::Kernel::Logger treelog("MantidTreeWidget");
+
   WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
 }
 
@@ -328,7 +329,7 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem *item, const std::string & ws
   }
   catch(std::runtime_error&)
   {
-    logObject.warning() << "Cannot find icon for workspace ID '" << wsID << "'\n";
+    docklog.warning() << "Cannot find icon for workspace ID '" << wsID << "'\n";
   }
 }
 
@@ -1220,15 +1221,15 @@ void MantidTreeWidget::dropEvent(QDropEvent *de)
       }
       catch (std::runtime_error& error)
       {
-        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+        treelog.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
       }      
       catch (std::logic_error& error)
       {
-        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+        treelog.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
       }
       catch (std::exception& error)
       {
-        logObject.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
+        treelog.error()<<"Failed to Load the file "<<filenames[i].toStdString()<<" . The reason for failure is: "<< error.what()<<std::endl;
       }
     }
 }
@@ -1432,7 +1433,7 @@ void MantidTreeWidget::sort()
  */
 void MantidTreeWidget::logWarningMessage(const std::string& msg)
 {
-  logObject.warning( msg );
+  treelog.warning( msg );
 }
 
 //-------------------- MantidTreeWidgetItem ----------------------//
