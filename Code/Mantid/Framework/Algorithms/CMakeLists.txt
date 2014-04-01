@@ -67,6 +67,7 @@ set ( SRC_FILES
 	src/CrossCorrelate.cpp
 	src/CuboidGaugeVolumeAbsorption.cpp
 	src/CylinderAbsorption.cpp
+	src/DeleteLog.cpp
 	src/DeleteWorkspace.cpp
 	src/DetectorDiagnostic.cpp
 	src/DetectorEfficiencyCor.cpp
@@ -294,6 +295,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CrossCorrelate.h
 	inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h
 	inc/MantidAlgorithms/CylinderAbsorption.h
+	inc/MantidAlgorithms/DeleteLog.h
 	inc/MantidAlgorithms/DeleteWorkspace.h
 	inc/MantidAlgorithms/DetectorDiagnostic.h
 	inc/MantidAlgorithms/DetectorEfficiencyCor.h
@@ -532,6 +534,7 @@ set ( TEST_FILES
 	CropWorkspaceTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
 	CylinderAbsorptionTest.h
+	DeleteLogTest.h
 	DeleteWorkspaceTest.h
 	DetectorEfficiencyCorTest.h
 	DetectorEfficiencyCorUserTest.h
