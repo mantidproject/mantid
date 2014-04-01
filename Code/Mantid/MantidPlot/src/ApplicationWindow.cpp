@@ -6005,7 +6005,8 @@ QString ApplicationWindow::windowGeometryInfo(MdiSubWindow *w)
 {
   QString s = "geometry\t";
   if (w->status() == MdiSubWindow::Maximized){
-    if (w == w->folder()->activeWindow())
+    //if (w == w->folder()->activeWindow())
+    if (w == activeWindow())
       return s + "maximized\tactive\n";
     else
       return s + "maximized\n";
@@ -6037,7 +6038,8 @@ QString ApplicationWindow::windowGeometryInfo(MdiSubWindow *w)
   }
 
   bool hide = hidden(w);
-  if (w == w->folder()->activeWindow() && !hide)
+  //if (w == w->folder()->activeWindow() && !hide)
+  if (w == activeWindow() && !hide)
     s+="active\n";
   else if(hide)
     s+="hidden\n";
@@ -6082,9 +6084,7 @@ void ApplicationWindow::restoreWindowGeometry(ApplicationWindow *app, MdiSubWind
   }
 
   if (s.contains ("active")) {
-    Folder *f = w->folder();
-    if (f)
-      f->setActiveWindow(w);
+    setActiveWindow(w);
   }
 }
 
@@ -8884,11 +8884,6 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w, bool activateOuterWindow
     }
   }
 
-  // update the folder
-  Folder *f = w->folder();
-  if (f)
-    f->setActiveWindow(w);
-
   blockWindowActivation = true;
   FloatingWindow* fw = w->getFloatingWindow();
   if (fw)
@@ -9018,15 +9013,12 @@ void ApplicationWindow::closeWindow(MdiSubWindow* window)
   }
   removeWindowFromLists(window);
 
-  Folder *f = window->folder();
-  f->removeWindow(window);
-
   //update list view in project explorer
   Q3ListViewItem *it=lv->findItem (window->objectName(), 0, Q3ListView::ExactMatch|Q3ListView::CaseSensitive);
   if (it)
     lv->takeItem(it);
 
-  if (show_windows_policy == ActiveFolder && !f->windowsList().count()){
+  if (show_windows_policy == ActiveFolder /*&& !f->windowsList().count()*/){
     customMenu(0);
     customToolBars(0);
   } else if (show_windows_policy == SubFolders && !(current_folder->children()).isEmpty()){
@@ -17607,6 +17599,7 @@ void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showNormal)
   }
 
   addListViewItem(w);
+  currentFolder()->addWindow(w);
 }
 
 /**

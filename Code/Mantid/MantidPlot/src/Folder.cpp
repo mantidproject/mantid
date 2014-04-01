@@ -182,7 +182,7 @@ void Folder::addWindow( MdiSubWindow *w )
 {
 	if (w) {
 		lstWindows.append( w );
-		w->setFolder(this);
+    connect(w,SIGNAL(closedWindow(MdiSubWindow *)),this,SLOT(removeWindow(MdiSubWindow *)));
 	}
 }
 

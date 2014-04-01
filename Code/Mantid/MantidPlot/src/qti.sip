@@ -57,7 +57,7 @@ public:
   sipRes = PyString_FromString(sipCpp->saveAsTemplate(*a0));
 %End
   virtual void restore(const QStringList& );
-  Folder* folder();
+  //Folder* folder();
 
   void confirmClose(bool);
   void show();

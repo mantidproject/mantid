@@ -59,7 +59,7 @@ class QShortcut;
 class QUndoStack;
 
 //! Matrix worksheet class
-class Matrix: public MdiSubWindow, public Scripted
+class Matrix: public AppMdiSubWindow, public Scripted
 {
   Q_OBJECT
 

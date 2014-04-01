@@ -160,7 +160,7 @@ public:
   enum ShowWindowsPolicy{HideAll, ActiveFolder, SubFolders};
   enum WindowType{NoWindow, TableWindow, MatrixWindow, MultiLayerWindow, NoteWindow, Plot3DWindow};
   enum MatrixToTableConversion{Direct, XYZ, YXZ};
-  enum EndLineChar{LF, CRLF, CR};
+  enum EndLineChar{LF=0, CRLF=1, CR=2};
   enum Analysis{NoAnalysis, Integrate, Diff, FitLinear, FitGauss, FitLorentz, FitSigmoidal};
 
   FolderListView *lv, *folders;

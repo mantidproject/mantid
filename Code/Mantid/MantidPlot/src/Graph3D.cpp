@@ -32,6 +32,7 @@
 #include "MyParser.h"
 #include "MatrixModel.h"
 #include "UserFunction.h"//Mantid
+//#include "ApplicationWindow.h"
 
 
 #include <QApplication>
@@ -113,7 +114,7 @@ Triple UserParametricSurface::operator()(double u, double v)
 	return Triple(x, y, z);
 }
 
-Graph3D::Graph3D(const QString& label, ApplicationWindow* parent, const char* name, Qt::WFlags f)
+Graph3D::Graph3D(const QString& label, QWidget* parent, const char* name, Qt::WFlags f)
 : MdiSubWindow(parent, label, name, f)
 {
 	initPlot();

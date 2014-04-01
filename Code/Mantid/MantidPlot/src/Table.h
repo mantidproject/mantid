@@ -42,6 +42,8 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
+class Folder;
+
 class MyTable : public Q3Table
 {
   Q_OBJECT
@@ -64,7 +66,7 @@ private:
  * Port to the Model/View approach used in Qt4 and get rid of the Qt3Support dependancy.
  * [ assigned to thzs ]
  */
-class Table: public MdiSubWindow, public Scripted
+class Table: public AppMdiSubWindow, public Scripted
 {
     Q_OBJECT
 
@@ -88,6 +90,8 @@ public:
 	//! Updates the decimal separators when importing ASCII files on user request
 	void updateDecimalSeparators(const QLocale& oldSeparators);
 	void setAutoUpdateValues(bool on = true);
+	/// Get the pointer to the parent folder of the window
+  Folder* folder(){return m_folder;}
 
 public slots:
 	MyTable* table(){return d_table;};
@@ -393,6 +397,8 @@ private:
 
 	//! Internal function to change the column header
 	void setColumnHeader(int index, const QString& label);
+	/// Pointer to the parent folder of the window
+	Folder *m_folder;
 };
 
 #endif

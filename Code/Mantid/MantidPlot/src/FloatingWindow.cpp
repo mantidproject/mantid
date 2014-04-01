@@ -70,10 +70,10 @@ bool FloatingWindow::event(QEvent * e)
     // If FloatingWindow was activated by clicking on it we need to
     // let the application know about it
     MdiSubWindow* w = dynamic_cast<MdiSubWindow*>(widget());
-    if (w && this != w->d_app->getActiveFloating())
+    if (w && this != d_app->getActiveFloating())
     {
       // the second argument says that FloatingWindow must not be activated again
-      w->d_app->activateWindow(w,false);
+      d_app->activateWindow(w,false);
     }
   }
   else if (e->type() == QEvent::WindowStateChange)
@@ -193,48 +193,3 @@ void FloatingWindow::setWidget(QWidget* w)
   wrapper->setWidget(w);
   setCentralWidget(wrapper);
 }
-
-//
-///**
-// * Handle the close event.
-// * @param e :: A QCloseEvent event.
-// */
-//void FloatingWindow::closeEvent( QCloseEvent *e )
-//{
-//  // Default result = do close.
-//  int result = 0;
-//
-////  // If you need to confirm the close, ask the user
-////  if (d_confirm_close)
-////  {
-////    result = QMessageBox::information(this, tr("MantidPlot"),
-////        tr("Do you want to hide or delete") + "<p><b>'" + objectName() + "'</b> ?",
-////        tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2);
-////  }
-//
-//  switch(result)
-//  {
-//  case 0:
-//    if (widget()->close())
-//    {
-//      e->accept();
-//      // Continue; the mdi window should close (?)
-//    }
-//    else
-//    {
-//      QMessageBox::critical(parentWidget(),"MantidPlot - Error", "Window cannot be closed");
-//      e->ignore();
-//    }
-//    break;
-//
-////  case 1:
-////    e->ignore();
-////    emit hiddenWindow(this);
-////    break;
-////
-////  case 2:
-////    e->ignore();
-////    break;
-//  }
-//
-//}

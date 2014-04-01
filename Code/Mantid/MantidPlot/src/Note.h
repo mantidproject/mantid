@@ -32,6 +32,8 @@
 #include "MdiSubWindow.h"
 #include <QTextEdit>
 
+class ApplicationWindow;
+
 /**\brief Notes window class.
  *
  * \section future Future Plans
@@ -42,7 +44,7 @@ class Note: public MdiSubWindow
   Q_OBJECT
 
 public:
-  Note(const QString& label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
+  Note(const QString& label, QWidget* parent, const QString& name = QString(), Qt::WFlags f=0);
   ~Note(){};
 
   void setName(const QString& name);

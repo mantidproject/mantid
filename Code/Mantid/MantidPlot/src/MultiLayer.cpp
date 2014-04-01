@@ -96,7 +96,7 @@ Mantid::Kernel::Logger & MultiLayer::g_log = Mantid::Kernel::Logger::get("MultiL
 
 MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols, 
                        const QString& label, const char* name, Qt::WFlags f)
-                         : MdiSubWindow(parent, label, name, f),
+                         : AppMdiSubWindow(parent, label, name, f),
                          active_graph(NULL),
                          d_cols(cols),
                          d_rows(rows),

@@ -38,7 +38,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 
-Note::Note(const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
+Note::Note(const QString& label, QWidget* parent, const QString& name, Qt::WFlags f)
   : MdiSubWindow(parent, label, name, f)
 {
   init();

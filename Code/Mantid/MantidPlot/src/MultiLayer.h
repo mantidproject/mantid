@@ -72,7 +72,7 @@ namespace Mantid
  * If MultiLayer exposes its parent Project to the widgets it manages, they could handle things like creating
  * tables by calling methods of Project instead of sending signals.
  */
-class MultiLayer: public MdiSubWindow
+class MultiLayer: public AppMdiSubWindow
 {
 	Q_OBJECT
 

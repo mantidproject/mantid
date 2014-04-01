@@ -28,8 +28,12 @@
  ***************************************************************************/
 #include "MdiSubWindow.h"
 #include "FloatingWindow.h"
+
+
 #include "Folder.h"
 #include "ApplicationWindow.h"
+
+
 
 #include <QApplication>
 #include <QMessageBox>
@@ -48,10 +52,10 @@
 using std::ifstream;
 using std::string;
 
-MdiSubWindow::MdiSubWindow(ApplicationWindow *app, const QString& label, const QString& name, Qt::WFlags f):
-    MdiSubWindowParent_t (app, f),
-		d_app(app),
-		d_folder(app->currentFolder()),
+MdiSubWindow::MdiSubWindow(QWidget *parent, const QString& label, const QString& name, Qt::WFlags f):
+    MdiSubWindowParent_t (parent, f),
+		//d_app(app),
+		//d_folder(app->currentFolder()),
 		d_label(label),
 		d_status(Normal),
 		d_caption_policy(Both),
@@ -61,10 +65,10 @@ MdiSubWindow::MdiSubWindow(ApplicationWindow *app, const QString& label, const Q
 {
 	setObjectName(name);
 	setAttribute(Qt::WA_DeleteOnClose);
-	setLocale(app->locale());
+	setLocale(parent->locale());
   confirmClose(false);
-	if (d_folder)
-		d_folder->addWindow(this);
+	//if (d_folder)
+	//	d_folder->addWindow(this);
 }
 
 void MdiSubWindow::updateCaption()
@@ -95,7 +99,8 @@ switch (d_caption_policy)
   {
     wrapper->setWindowTitle(windowTitle());
   }
-	d_app->setListViewLabel(objectName(), d_label);
+	//d_app->setListViewLabel(objectName(), d_label);
+  emit captionChanged(objectName(), d_label);
 };
 
 void MdiSubWindow::resizeEvent( QResizeEvent* e )
@@ -276,15 +281,15 @@ bool MdiSubWindow::eventFilter(QObject *object, QEvent *e)
         return true;
 	}
 
-	if (e->type() == QEvent::Move && object == widget()){
-		QObjectList lst = children();
-		foreach(QObject *o, lst){
-			if (o->isA("QMenu") && d_app){
-          d_app->customWindowTitleBarMenu(this, dynamic_cast<QMenu *>(o));
-				break;
-			}
-		}
-	}
+	//if (e->type() == QEvent::Move && object == widget()){
+	//	QObjectList lst = children();
+	//	foreach(QObject *o, lst){
+	//		if (o->isA("QMenu") && d_app){
+ //         d_app->customWindowTitleBarMenu(this, dynamic_cast<QMenu *>(o));
+	//			break;
+	//		}
+	//	}
+	//}
   return MdiSubWindowParent_t::eventFilter(object, e);
 }
 
@@ -332,7 +337,7 @@ void MdiSubWindow::setMinimized()
   if (wrapper)
   {
     wrapper->showMinimized();
-    d_app->activateNewWindow();
+    //d_app->activateNewWindow();
   }
   else
   {
@@ -357,7 +362,8 @@ void MdiSubWindow::setMaximized()
 QString MdiSubWindow::parseAsciiFile(const QString& fname, const QString &commentString,
                         int endLine, int ignoreFirstLines, int maxRows, int& rows)
 {
-	if (endLine == ApplicationWindow::CR)
+	//if (endLine == ApplicationWindow::CR)
+	if (endLine == 2)
 		return parseMacAsciiFile(fname, commentString, ignoreFirstLines, maxRows, rows);
 
 	//QTextStream replaces '\r\n' with '\n', therefore we don't need a special treatement in this case!
@@ -495,3 +501,14 @@ QWidget* MdiSubWindow::getWrapperWindow() const
   }
   return wrapper;
 }
+
+//======================================================================================//
+
+AppMdiSubWindow::AppMdiSubWindow(QWidget *parent, const QString& label, const QString& name, Qt::WFlags f)
+    :MdiSubWindow(parent, label, name, f),
+    m_app( static_cast<ApplicationWindow*>(parent) )
+  {	
+  }
+
+
+

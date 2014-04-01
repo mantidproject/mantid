@@ -59,7 +59,6 @@ public:
 	QList<MdiSubWindow *> windowsList(){return lstWindows;};
 
   void addWindow( MdiSubWindow *w );
-	void removeWindow( MdiSubWindow *w );
   bool hasWindow(MdiSubWindow *w) const;
 
 	//! The list of subfolder names, including first generation children only
@@ -124,6 +123,8 @@ public:
 public slots:
   ///Mantid: made this a slot for use with script messages when there is no script window
   void appendLogInfo(const QString& text){d_log_info += text;};
+	void removeWindow( MdiSubWindow *w );
+
 
 protected:
     QString birthdate, modifDate;
