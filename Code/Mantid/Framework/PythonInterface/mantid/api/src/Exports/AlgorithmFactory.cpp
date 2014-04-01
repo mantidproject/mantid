@@ -6,6 +6,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
+#include <boost/python/overloads.hpp>
 #include <Poco/ScopedLock.h>
 
 // Python frameobject. This is under the boost includes so that boost will have done the
@@ -96,6 +97,8 @@ GCC_DIAG_OFF(cast-qual)
     FileLoaderRegistry::Instance().unsubscribe(descr.first, descr.second);
   }
 
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(existsOverloader, exists, 1, 2);
+
   ///@endcond
 }
 GCC_DIAG_ON(cast-qual)
@@ -104,8 +107,14 @@ void export_AlgorithmFactory()
 {
 
   class_<AlgorithmFactoryImpl,boost::noncopyable>("AlgorithmFactoryImpl", no_init)
+      .def("exists", &AlgorithmFactoryImpl::exists,
+           existsOverloader((arg("name"), arg("version")=-1),
+                            "Returns true if the given algorithm exists with an option to specify the version"))
+
       .def("getRegisteredAlgorithms", &getRegisteredAlgorithms, "Returns a Python dictionary of currently registered algorithms")
+
       .def("subscribe", &subscribe, "Register a Python class derived from PythonAlgorithm into the factory")
+
       .def("Instance", &AlgorithmFactory::Instance, return_value_policy<reference_existing_object>(),
         "Returns a reference to the AlgorithmFactory singleton")
       .staticmethod("Instance")
