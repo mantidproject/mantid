@@ -60,8 +60,7 @@ namespace MantidQt
       // We need to catch the exception to prevent a fatal error.
       try
       {
-        if (!session.empty())
-          Mantid::API::CatalogManager::Instance().getCatalog(session.front()->getSessionId())->myData(workspace);
+        if (!session.empty()) Mantid::API::CatalogManager::Instance().getCatalog("")->myData(workspace);
       }
       catch(std::runtime_error& e)
       {
