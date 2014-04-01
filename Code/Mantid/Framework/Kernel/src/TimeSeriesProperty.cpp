@@ -1788,9 +1788,34 @@ namespace Mantid
     {
       if (!m_propSortedFlag)
       {
+        // Check whether it is sorted or not
+        size_t numsize = m_values.size();
+        if (numsize <= 1)
+        {
+          // Always sorted if number of elements is zero or one
+          m_propSortedFlag = true;
+        }
+        else
+        {
+          // Check
+          m_propSortedFlag = true;
+          for (size_t i = 1; i < numsize; ++i)
+            if (m_values[i] < m_values[i-1])
+            {
+              m_propSortedFlag = false;
+              break;
+            }
+        }
+      }
+
+      if (!m_propSortedFlag)
+      {
+        g_log.information("TimeSeriesProperty is not sorted.  Sorting is operated on it. ");
         std::stable_sort(m_values.begin(), m_values.end());
         m_propSortedFlag = true;
       }
+
+      return;
     }
 
     /** Find the index of the entry of time t in the mP vector (sorted)
