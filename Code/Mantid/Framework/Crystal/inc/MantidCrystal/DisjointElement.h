@@ -58,6 +58,21 @@ namespace Crystal
     /// Assignment operator.
     DisjointElement& operator=(const DisjointElement& other);
 
+    bool operator==(const DisjointElement& other)
+    {
+      return other.getId() == this->getId();
+    }
+
+    bool operator!=(const DisjointElement& other)
+        {
+          return !(*this==other);
+        }
+
+    bool operator <(const DisjointElement& rhs)
+          {
+             return this->getId() < rhs.getId();
+          }
+   // friend bool operator< ( DisjointElement &a,  DisjointElement &b);
 
 
   private:
@@ -74,6 +89,11 @@ namespace Crystal
     int m_id;
     
   };
+
+
+      bool operator< (const DisjointElement &a,const  DisjointElement &b);
+
+
 
   void unionElements(DisjointElement* a, DisjointElement* b);
 

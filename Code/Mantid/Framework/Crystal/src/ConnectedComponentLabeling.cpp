@@ -105,7 +105,7 @@ namespace Mantid
 
     void ConnectedComponentLabeling::calculateDisjointTree(IMDHistoWorkspace_sptr ws,
         BackgroundStrategy * const strategy, VecElements& neighbourElements,
-        LabelIdIntensityMap& labelMap, PositionToLabelIdMap& positionLabelMap) const
+        LabelIdIntensityMap& labelMap, PositionToLabelIdMap& positionLabelMap, ElementParentMap& parentMap) const
     {
 
       // ---- Pre-process to eliminate those cells that are below background. Record the indexes of those that are above. ----
@@ -152,12 +152,11 @@ namespace Mantid
 
       // -------- Perform labeling -----------
 
-      typedef std::map<ElementType,std::size_t> RankTypeMap;
-      typedef std::map<ElementType, ElementType> ElementParentMap;
+
       RankTypeMap rankMap;
-      ElementParentMap parentMap;
       boost::associative_property_map<RankTypeMap>   rankPmap(rankMap);
       boost::associative_property_map<ElementParentMap> parentPmap(parentMap);
+
 
       auto* disjointSet = makeDisjointSet(rankPmap, parentPmap, neighbourElements);
 
@@ -178,12 +177,12 @@ namespace Mantid
         for (size_t i = 0; i < neighbourIndexes.size(); ++i)
         {
           size_t neighIndex = neighbourIndexes[i];
-          const VecElements::value_type& neighbourLabel = neighbourElements[neighIndex];
+          const DisjointElement& neighbourElement = neighbourElements[neighIndex];
 
-          if (neighbourLabel >= m_startId)
+          if (!neighbourElement.isEmpty())
           {
             nonEmptyNeighbourIndexes.push_back(neighIndex);
-            neighbourIds.insert(neighbourLabel);
+            neighbourIds.insert(neighbourElement.getId());
           }
         }
 
@@ -226,7 +225,9 @@ namespace Mantid
           }
         }
       }
+      disjointSet->compress_sets(neighbourElements.begin(), neighbourElements.end());
       delete disjointSet;
+
     }
 
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabeling::execute(
@@ -237,8 +238,8 @@ namespace Mantid
       // Perform the bulk of the connected component analysis, but don't collapse the elements yet.
       LabelIdIntensityMap labelMap; // This will not get used.
       PositionToLabelIdMap positionLabelMap; // This will not get used.
-  
-      calculateDisjointTree(ws, strategy, neighbourElements, labelMap, positionLabelMap);
+      ElementParentMap parentMap;
+      calculateDisjointTree(ws, strategy, neighbourElements, labelMap, positionLabelMap, parentMap);
 
       // Create the output workspace from the input workspace
       IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
@@ -247,9 +248,10 @@ namespace Mantid
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int i = 0; i < static_cast<int>(neighbourElements.size()); ++i)
       {
-        if (neighbourElements[i] >= m_startId)
+        //std::cout << "Element\t" << i << " Id: \t" << neighbourElements[i].getId() << " This location:\t"<< &neighbourElements[i] << " Root location:\t" << neighbourElements[i].getParent() << " Root Id:\t" <<  neighbourElements[i].getRoot() << std::endl;
+        if (neighbourElements[i] > m_startId)
         {
-          outWS->setSignalAt(i, neighbourElements[i]);
+          outWS->setSignalAt(i, parentMap[neighbourElements[i]]);
         }
         else
         {
@@ -268,7 +270,8 @@ namespace Mantid
       VecElements neighbourElements(ws->getNPoints());
 
       // Perform the bulk of the connected component analysis, but don't collapse the elements yet.
-      calculateDisjointTree(ws, strategy, neighbourElements, labelMap, positionLabelMap);
+      ElementParentMap parentMap;
+      calculateDisjointTree(ws, strategy, neighbourElements, labelMap, positionLabelMap, parentMap);
 
       // Create the output workspace from the input workspace
       IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
@@ -276,12 +279,12 @@ namespace Mantid
       // Set each pixel to the root of each disjointed element.
       for (size_t i = 0; i < neighbourElements.size(); ++i)
       {
-        if (neighbourElements[i] >= m_startId)
+        if (!neighbourElements[i] > m_startId)
         {
           const double& signal = ws->getSignalAt(i); // Intensity value at index
           double errorSQ = ws->getErrorAt(i);
           errorSQ *= errorSQ; // Error squared at index
-          const size_t& labelId = neighbourElements[i];
+          const size_t& labelId = parentMap[neighbourElements[i]];
           // Set the output cluster workspace signal value
           outWS->setSignalAt(i, labelId);
 
