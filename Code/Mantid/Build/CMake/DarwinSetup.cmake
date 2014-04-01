@@ -74,6 +74,12 @@ install ( FILES /Library/Python/${PY_VER}/site-packages/PyQt4/Qt.so
                 /Library/Python/${PY_VER}/site-packages/PyQt4/QtXml.so
                 /Library/Python/${PY_VER}/site-packages/PyQt4/__init__.py
           DESTINATION ${BIN_DIR}/PyQt4 )
+# Newer PyQt versions have a new internal library that we need to take
+if ( EXISTS /Library/Python/${PY_VER}/site-packages/PyQt4/_qt.so )
+  install ( FILES /Library/Python/${PY_VER}/site-packages/PyQt4/_qt.so
+            DESTINATION ${BIN_DIR}/PyQt4 )
+endif ()
+
 install ( DIRECTORY /Library/Python/${PY_VER}/site-packages/PyQt4/uic DESTINATION ${BIN_DIR}/PyQt4 )
 
 # Python packages in Third_Party need copying to build directory and the final package
