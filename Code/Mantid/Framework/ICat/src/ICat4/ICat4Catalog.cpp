@@ -390,6 +390,7 @@ namespace Mantid
       if (outputws->getColumnNames().empty())
       {
         // Add rows headers to the output workspace.
+        outputws->addColumn("long64","DatabaseID");
         outputws->addColumn("str","InvestigationID");
         outputws->addColumn("str","Facility");
         outputws->addColumn("str","Title");
@@ -413,6 +414,7 @@ namespace Mantid
           std::string emptyCell("");
 
           // Now add the relevant investigation data to the table (They always exist).
+          savetoTableWorkspace(investigation->id, table);
           savetoTableWorkspace(investigation->name, table);
           savetoTableWorkspace(investigation->facility->name, table);
           savetoTableWorkspace(investigation->title, table);
