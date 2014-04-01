@@ -1007,6 +1007,8 @@ namespace Algorithms
                                                          bool centre, bool filterIncrease, bool filterDecrease,
                                                          DateAndTime startTime, DateAndTime stopTime)
   {
+    g_log.notice("Starting method 'makeMultipleFiltersByValues'. ");
+
     // Return if the log is empty.
     if (m_dblLog->size() == 0)
     {
@@ -1104,10 +1106,12 @@ namespace Algorithms
         if (correctdir)
         {
           size_t index = searchValue(logvalueranges, currValue);
+#if 0
           g_log.debug() << "DBx257 Examine Log Index " << i << ", Value = " << currValue
                         << ", Data Range Index = " << index << "; "
                         << "Group Index = " << indexwsindexmap[index/2]
                         << " (log value range vector size = " << logvalueranges.size() << ").\n";
+#endif
 
           bool valuewithin2boundaries = true;
           if (index > logvalueranges.size())
@@ -1195,7 +1199,7 @@ namespace Algorithms
           {
             // IMPOSSIBLE SITUATION
             // c2) Fall out of interval
-            g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c value range... " << std::endl;
+            g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c value range... " << "\n";
             throw runtime_error("Is it ever reached? ");
 
             // log value falls out of min/max: If start is defined, then define stop
@@ -1203,21 +1207,21 @@ namespace Algorithms
             {
               stop = currTime;
               createsplitter = true;
-              g_log.debug() << "DBOP Log Index [2] " << i << "  falls Out b/c value range... " << ".\n";
+              // g_log.debug() << "DBOP Log Index [2] " << i << "  falls Out b/c value range... " << ".\n";
             }
           }
         } // [CORRECT DIRECTION]
         else
         {
           currindex = -1;
-          g_log.debug() << "DBOP Log Index " << i << " Falls out b/c out of wrong direction" << std::endl;
+          // g_log.debug() << "DBOP Log Index " << i << " Falls out b/c out of wrong direction" << std::endl;
         }
       }
       else
       {
         // Out of time range
         currindex = -1;
-        g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c out of time range... " << std::endl;
+        // g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c out of time range... " << std::endl;
       }
 
       // d) Create Splitter
@@ -1480,6 +1484,8 @@ namespace Algorithms
     if (istart < 0 || iend >= logsize)
       throw runtime_error("Input index of makeMultipleFiltersByValuesPartialLog is out of boundary. ");
 
+    int64_t tol_ns = tol.total_nanoseconds();
+
     // Define loop control parameters
     const Kernel::DateAndTime ZeroTime(0);
     int lastindex = -1;
@@ -1487,11 +1493,12 @@ namespace Algorithms
     DateAndTime lastTime;
     DateAndTime currTime = ZeroTime;
     DateAndTime start, stop;
-    // size_t progslot = 0;
+    // size_t progslot = 0; 
 
     g_log.information() << "Log time coverage (index: " << istart << ", " << iend << ") from "
                         << m_dblLog->nthTime(istart) << ", " << m_dblLog->nthTime(iend) << "\n";
 
+    DateAndTime laststoptime(0);
     for (int i = istart; i <= iend; i ++)
     {
       // Initialize status flags and new entry
@@ -1665,7 +1672,7 @@ namespace Algorithms
             {
               stop = currTime;
               createsplitter = true;
-              g_log.debug() << "DBOP Log Index [2] " << i << "  falls Out b/c value range... " << ".\n";
+              // g_log.debug() << "DBOP Log Index [2] " << i << "  falls Out b/c value range... " << ".\n";
             }
           }
         } // [CORRECT DIRECTION]
@@ -1679,14 +1686,14 @@ namespace Algorithms
       {
         // Out of time range
         currindex = -1;
-        g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c out of time range... " << std::endl;
+        // g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c out of time range... " << std::endl;
       }
 
       // d) Create Splitter
       if (createsplitter)
       {
         // make_splitter(start, stop, lastindex, tol);
-        makeSplitterInVector(vecSplitTime, vecSplitGroup, start, stop, lastindex, tol);
+        makeSplitterInVector(vecSplitTime, vecSplitGroup, start, stop, lastindex, tol, tol_ns, laststoptime);
 
         // reset
         start = ZeroTime;
@@ -1725,7 +1732,7 @@ namespace Algorithms
       start = m_dblLog->nthTime(istart);
       stop = m_dblLog->nthTime(iend);
       lastindex = -1;
-      makeSplitterInVector(vecSplitTime, vecSplitGroup, start, stop, lastindex, tol);
+      makeSplitterInVector(vecSplitTime, vecSplitGroup, start, stop, lastindex, tol, tol_ns, laststoptime);
     }
 #if 0
     else
@@ -1923,14 +1930,18 @@ namespace Algorithms
    *
    * return:  if value is out of range, then return datarange.size() + 1
    */
+  // FIXME - Changed to const std::vector<double>& sorteddata
   size_t GenerateEventsFilter::searchValue(std::vector<double> sorteddata, double value)
   {
     size_t outrange = sorteddata.size()+1;
 
+#if 0
     g_log.debug() << "[G-E-F: DBx450] Search Value " << value << " (sorted data range = "
                   << sorteddata[0] << ", " << sorteddata.back() << ").\n";
+#endif
 
     // 1. Extreme case
+    // FIXME - Get sortedata[0] and sorteddata.back() as constant as data range
     if (value < sorteddata[0] || value > sorteddata.back())
       return outrange;
     if (sorteddata.size() == 0)
@@ -2076,27 +2087,35 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Create a splitter and add to the vector of time splitters
+    * This method will be called intensively.
     */
-  void GenerateEventsFilter::makeSplitterInVector(std::vector<Kernel::DateAndTime>& vecSplitTime, std::vector<int>& vecGroupIndex,
-                                                  Kernel::DateAndTime start, Kernel::DateAndTime stop, int group,
-                                                  Kernel::time_duration tolerance)
+  DateAndTime GenerateEventsFilter::makeSplitterInVector(std::vector<Kernel::DateAndTime>& vecSplitTime, std::vector<int>& vecGroupIndex,
+                                                         Kernel::DateAndTime start, Kernel::DateAndTime stop, int group,
+                                                         Kernel::time_duration tolerance, int64_t tol_ns, DateAndTime lasttime)
   {
-    DateAndTime starttime = start-tolerance;
-    DateAndTime stoptime = stop-tolerance;
+    DateAndTime starttime(start.totalNanoseconds()-tol_ns);
+    DateAndTime stoptime(stop.totalNanoseconds()-tol_ns);
+    // DateAndTime starttime = start-tolerance;
+    // DateAndTime stoptime = stop-tolerance;
+
+    size_t timevecsize = vecSplitTime.size();
+    if (timevecsize > 0)
+      lasttime = vecSplitTime.back();
+    // vecSplitTime.back(),vecSplitTime.back()
 
     // Start time of splitter
-    if (vecSplitTime.size() == 0)
+    if (timevecsize == 0)
     {
       // First value
       vecSplitTime.push_back(starttime);
     }
-    else if (vecSplitTime.back() < starttime)
+    else if (lasttime < starttime)
     {
       // Stop time of previous splitter is earlier than start time of this splitter (gap)
       vecSplitTime.push_back(starttime);
       vecGroupIndex.push_back(-1);
     }
-    else if (vecSplitTime.back() > starttime)
+    else if (lasttime > starttime)
     {
       // Impossible situation
       throw runtime_error("Impossible situation.");
@@ -2113,7 +2132,7 @@ namespace Algorithms
     // Group index
     vecGroupIndex.push_back(group);
 
-    return;
+    return stoptime;
   }
 
 
