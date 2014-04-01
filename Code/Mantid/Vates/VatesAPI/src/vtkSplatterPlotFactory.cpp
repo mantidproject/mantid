@@ -209,7 +209,11 @@ namespace VATES
     {
       MDBox<MDE,nd> *box = dynamic_cast<MDBox<MDE,nd> *>(m_sortedBoxes[box_index]);
       box_index++;
-      float signal_normalized = float(box->getSignalNormalized());
+      if (box == nullptr)
+      {
+        continue;
+      }
+      float signal_normalized = static_cast<float>(box->getSignalNormalized());
       size_t newPoints = box->getNPoints();
       size_t num_from_this_box = points_per_box;
       if (num_from_this_box > newPoints)
