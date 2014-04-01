@@ -71,7 +71,7 @@ PoldiPeak_sptr PoldiPeakCollection::peak(size_t index) const
     return m_peaks[index];
 }
 
-IFunction_sptr PoldiPeakCollection::getPeakProfile(size_t index) const
+IFunction_sptr PoldiPeakCollection::getSinglePeakProfile(size_t index) const
 {
     if(index >= m_peakProfiles.size()) {
         throw std::range_error("Peak access index out of range.");
@@ -79,7 +79,7 @@ IFunction_sptr PoldiPeakCollection::getPeakProfile(size_t index) const
 
     IPeakFunction_sptr currentPeakFunction = m_peakProfiles[index];
     PoldiPeak_sptr currentPeak = m_peaks[index];
-    currentPeakFunction->setCentre(currentPeak->d());
+    currentPeakFunction->setCentre(currentPeak->q());
     currentPeakFunction->setHeight(currentPeak->intensity());
     currentPeakFunction->setFwhm(currentPeak->fwhm());
 
@@ -90,10 +90,16 @@ IFunction_sptr PoldiPeakCollection::getPeakProfile(size_t index) const
         peakProfile->addFunction(m_backgrounds[index]);
     }
 
+    peakProfile->setAttributeValue("NumDeriv", false);
+
+    if(!m_ties.empty()) {
+        peakProfile->addTies(m_ties);
+    }
+
     return peakProfile;
 }
 
-void PoldiPeakCollection::setProfileParameters(size_t index, IFunction_sptr fittedFunction)
+void PoldiPeakCollection::setSingleProfileParameters(size_t index, IFunction_sptr fittedFunction)
 {
     if(index >= m_peaks.size()) {
         throw std::range_error("Peak access index out of range.");
@@ -107,9 +113,9 @@ void PoldiPeakCollection::setProfileParameters(size_t index, IFunction_sptr fitt
         if(peakFunction) {
             PoldiPeak_sptr peak = m_peaks[index];
 
-            peak->setIntensity(UncertainValue(peakFunction->height(), peakFunction->getError(2)));
-            peak->setD(UncertainValue(peakFunction->centre(), peakFunction->getError(0)));
-            peak->setFwhm(UncertainValue(peakFunction->fwhm(), getFwhmRelation(peakFunction) * peakFunction->getError(1)));
+            peak->setIntensity(UncertainValue(peakFunction->height(), peakFunction->getError(0)));
+            peak->setQ(UncertainValue(peakFunction->centre(), peakFunction->getError(1)));
+            peak->setFwhm(UncertainValue(peakFunction->fwhm(), getFwhmRelation(peakFunction) * peakFunction->getError(2)));
         }
     }
 }
@@ -214,7 +220,7 @@ void PoldiPeakCollection::updatePeakBackgroundFunctions()
 
 double PoldiPeakCollection::getFwhmRelation(IPeakFunction_sptr peakFunction)
 {
-    return peakFunction->fwhm() / peakFunction->getParameter(1);
+    return peakFunction->fwhm() / peakFunction->getParameter(2);
 }
 
 }

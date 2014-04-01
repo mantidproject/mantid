@@ -44,10 +44,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 
-class PoldiPeakCollection;
-
-typedef boost::shared_ptr<PoldiPeakCollection> PoldiPeakCollection_sptr;
-
 class MANTID_SINQ_DLL PoldiPeakCollection
 {
 public:
@@ -66,8 +62,8 @@ public:
     void addPeak(PoldiPeak_sptr newPeak);
     PoldiPeak_sptr peak(size_t index) const;
 
-    IFunction_sptr getPeakProfile(size_t index) const;
-    void setProfileParameters(size_t index, IFunction_sptr fittedFunction);
+    IFunction_sptr getSinglePeakProfile(size_t index) const;
+    void setSingleProfileParameters(size_t index, IFunction_sptr fittedFunction);
 
     TableWorkspace_sptr asTableWorkspace();
 
@@ -93,6 +89,8 @@ private:
     std::vector<IPeakFunction_sptr> m_peakProfiles;
     std::vector<IFunction_sptr> m_backgrounds;
 };
+
+typedef boost::shared_ptr<PoldiPeakCollection> PoldiPeakCollection_sptr;
 
 }
 }
