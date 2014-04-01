@@ -43,8 +43,8 @@ namespace Mantid
       * @param value The value at the given time
       */
       template<typename T>
-      void createOrUpdate(API::Run& run, const std::string & name,
-                          const std::string & time, const T value)
+      void createOrUpdateValue(API::Run& run, const std::string & name,
+                               const std::string & time, const T value)
       {
         TimeSeriesProperty<T> *timeSeries(NULL);
         if(run.hasProperty(name))
@@ -61,7 +61,6 @@ namespace Mantid
       }
 
     }
-
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(AddTimeSeriesLog)
@@ -122,17 +121,33 @@ namespace Mantid
     void AddTimeSeriesLog::exec()
     {
       MatrixWorkspace_sptr logWS = getProperty("Workspace");
-      auto &run = logWS->mutableRun();
       std::string name = getProperty("Name");
-      const bool deleteExisting = getProperty("DeleteExisting");
-      if(deleteExisting && run.hasProperty(name))
-      {
-        auto deleter = createChildAlgorithm("DeleteLog",-1,-1,false);
-        deleter->setProperty("Workspace", logWS);
-        deleter->setProperty("Name", name);
-        deleter->executeAsChildAlg();
-      }
 
+      const bool deleteExisting = getProperty("DeleteExisting");
+      auto &run = logWS->mutableRun();
+      if(deleteExisting && run.hasProperty(name)) removeExisting(logWS, name);
+
+      createOrUpdate(run, name);
+    }
+
+    /**
+     * @param logWS The workspace containing the log
+     * @param name The name of the log to delete
+     */
+    void AddTimeSeriesLog::removeExisting(API::MatrixWorkspace_sptr &logWS, const std::string & name)
+    {
+      auto deleter = createChildAlgorithm("DeleteLog",-1,-1,false);
+      deleter->setProperty("Workspace", logWS);
+      deleter->setProperty("Name", name);
+      deleter->executeAsChildAlg();
+    }
+
+    /**
+     * @param run The run object that either has the log or will store it
+     * @param name The name of the log to create/update
+     */
+    void AddTimeSeriesLog::createOrUpdate(API::Run &run, const std::string & name)
+    {
       std::string time = getProperty("Time");
       double valueAsDouble = getProperty("Value");
       std::string type = getProperty("Type");
@@ -140,13 +155,15 @@ namespace Mantid
 
       if(asInt)
       {
-        createOrUpdate<int>(run, name, time, static_cast<int>(valueAsDouble));
+        createOrUpdateValue<int>(run, name, time, static_cast<int>(valueAsDouble));
       }
       else
       {
-        createOrUpdate<double>(run, name, time, valueAsDouble);
+        createOrUpdateValue<double>(run, name, time, valueAsDouble);
       }
+
     }
+
 
   } // namespace Algorithms
 } // namespace Mantid
