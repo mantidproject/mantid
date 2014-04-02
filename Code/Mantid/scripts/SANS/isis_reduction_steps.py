@@ -95,19 +95,37 @@ class LoadRun(object):
             self._load(inst, is_can, extra_options)
             return
       
+        # the intension of the code below is a good idea. Hence the reason why
+        # I have left in the code but commented it out. As of this writing
+        # LoadNexusMonitors throws an error if LoadNexusMonitors is a histogram
+        # i.e. this algorithm only works for event files at present. The error
+        # gets presented in red to the user and causes confusion. When either
+        # LoadNexusMonitor can load histogram data as well or other equivalent
+        # change the code below which is not commented out can be deleted and 
+        # the code commented out can be uncomment and modified as necessary
+
+        self._load(inst, is_can, extra_options)
+
         workspace = self._get_workspace_name()
+        if workspace in mtd:
+            outWs = mtd[workspace]
+            if isinstance(outWs, IEventWorkspace):
+            	if workspace + "_monitors" in mtd:
+                    RenameWorkspace(InputWorkspace=workspace + "_monitors", OutputWorkspace=workspace)
+                    self.periods_in_file = 1
+                    self._wksp_name = workspace
 
         # For sans, in transmission, we care only about the monitors. Hence,
-        # by trying to load only the monitors we speed up the reduction process. 
-        # besides, we avoid loading events which is useless for transmission. 
-        # it may fail, if the input file was not a nexus file, in this case, 
+        # by trying to load only the monitors we speed up the reduction process.
+        # besides, we avoid loading events which is useless for transmission.
+        # it may fail, if the input file was not a nexus file, in this case,
         # it pass the job to the default _load method.
-        try:
-            outWs = LoadNexusMonitors(self._data_file, OutputWorkspace=workspace)
-            self.periods_in_file = 1
-            self._wksp_name = workspace
-        except:
-            self._load(inst, is_can, extra_options)
+        #try:
+        # outWs = LoadNexusMonitors(self._data_file, OutputWorkspace=workspace)
+        # self.periods_in_file = 1
+        # self._wksp_name = workspace
+        #except:
+        # self._load(inst, is_can, extra_options)
 
     def _load(self, inst = None, is_can=False, extra_options=dict()):
         """
