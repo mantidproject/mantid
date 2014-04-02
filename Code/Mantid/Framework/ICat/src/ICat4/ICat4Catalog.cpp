@@ -801,9 +801,9 @@ namespace Mantid
       std::string sessionID = m_session->getSessionId();
       request.sessionId = &sessionID;
 
-      ns1__accessType_ a;
-      a.__item = ns1__accessType__UPDATE;
-      request.accessType = &a.__item;
+      ns1__accessType_ acessType;
+      acessType.__item = ns1__accessType__READ;
+      request.accessType = &acessType.__item;
 
       // Remove each investigation returned from `myData`
       // were the user does not have create/write access.
