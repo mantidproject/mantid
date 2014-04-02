@@ -1,9 +1,17 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+PoldiFitPeaks1D takes a TableWorkspace with peaks (for example from [[ PoldiPeakSearch ]]) and a spectrum from
+[[ PoldiAutoCorrelation ]] and tries to fit a Gaussian peak profile to the spectrum for each peak. Usually, the
+peaks are accompanied by a quadratic background, so this is fitted as well.
+
+The implementation is very close to the original POLDI analysis software (using the same profile function). One
+point where this routine differs is error calculation. In the original program the parameter errors were adjusted
+by averaging <math>\chi^2</math>-values, but this does not work properly if there is an outlier caused by a bad
+fit for one of the peaks.
 *WIKI*/
 
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidSINQ/PoldiFitPeaks1D.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -32,9 +40,10 @@ DECLARE_ALGORITHM(PoldiFitPeaks1D)
 
 PoldiFitPeaks1D::PoldiFitPeaks1D() :
     m_peaks(),
+    m_profileTies(),
     m_fitCharacteristics(),
-    m_fitResultOutput(),
-    m_pointsPerPeak(0)
+    m_peakResultOutput(),
+    m_fwhmMultiples(1.0)
 {
 }
 
@@ -63,92 +72,99 @@ void PoldiFitPeaks1D::initDocs()
 void PoldiFitPeaks1D::init()
 {
     declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input), "An input workspace containing a POLDI auto-correlation spectrum.");
-    boost::shared_ptr<BoundedValidator<int> > minPointsPerPeakValidator = boost::make_shared<BoundedValidator<int> >();
-    minPointsPerPeakValidator->setLower(4);
-    declareProperty("PointsPerPeak", 24, minPointsPerPeakValidator, "Number of points which describe a peak in the spectrum.", Direction::Input);
-    declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakTable","",Direction::I), "A table workspace containing POLDI peak data.");
-    declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakFitResult","",Direction::Output), "Fit results.");
-    declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakFitCharacteristics","",Direction::Output), "Fit characteristics for each peak.");
+    boost::shared_ptr<BoundedValidator<double> > minFwhmPerDirection = boost::make_shared<BoundedValidator<double> >();
+    minFwhmPerDirection->setLower(2.0);
+    declareProperty("FwhmMultiples", 2.0, minFwhmPerDirection, "Each peak will be fitted using x * FWHM data in each direction.", Direction::Input);
+    declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakTable","",Direction::Input), "A table workspace containing POLDI peak data.");
+
+    declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace","RefinedPeakTable",Direction::Output), "Output workspace with refined peak data.");
+    declareProperty(new WorkspaceProperty<TableWorkspace>("ResultTableWorkspace","ResultTable",Direction::Output), "Fit results.");
+    declareProperty(new WorkspaceProperty<TableWorkspace>("FitCharacteristicsWorkspace","FitCharacteristics",Direction::Output), "Fit characteristics for each peak.");
+    declareProperty(new WorkspaceProperty<Workspace>("FitPlotsWorkspace","FitPlots",Direction::Output), "Plots of all peak fits.");
+}
+
+void PoldiFitPeaks1D::initializePeakFunction(IPeakFunction_sptr peakFunction, IFunction_sptr backgroundFunction, std::string ties)
+{
+    m_profileTemplate = peakFunction;
+    m_backgroundTemplate = backgroundFunction;
+    m_profileTies = ties;
+}
+
+PoldiPeakCollection_sptr PoldiFitPeaks1D::getInitializedPeakCollection(TableWorkspace_sptr peakTable)
+{
+    PoldiPeakCollection_sptr peaks(new PoldiPeakCollection(peakTable));
+    peaks->setProfileFunction(m_profileTemplate);
+    peaks->setBackgroundFunction(m_backgroundTemplate);
+    peaks->setProfileTies(m_profileTies);
+
+    return peaks;
 }
 
 void PoldiFitPeaks1D::exec()
 {
-    m_profileTemplate = boost::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction("Gaussian"));
-    m_backgroundTemplate = FunctionFactory::Instance().createInitialized("name=UserFunction, Formula=A0 + A1*(x - x0)^2");
+    initializePeakFunction(boost::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction("Gaussian")),
+                           FunctionFactory::Instance().createInitialized("name=UserFunction, Formula=A0 + A1*(x - x0)^2"),
+                           "f1.x0 = f0.PeakCentre");
 
-    m_pointsPerPeak = getProperty("PointsPerPeak");
+    // Number of points around the peak center to use for the fit
+    m_fwhmMultiples = getProperty("FwhmMultiples");
+
     // try to construct PoldiPeakCollection from provided TableWorkspace
-    TableWorkspace_sptr poldiPeakTable = getProperty("PoldiPeakTable");
-    m_peaks = PoldiPeakCollection_sptr(new PoldiPeakCollection(poldiPeakTable));
+    TableWorkspace_sptr poldiPeakTable = getProperty("PoldiPeakTable");    
+    m_peaks = getInitializedPeakCollection(poldiPeakTable);
 
     g_log.information() << "Peaks to fit: " << m_peaks->peakCount() << std::endl;
 
-    m_peaks->setProfileFunction(m_profileTemplate);
-    m_peaks->setBackgroundFunction(m_backgroundTemplate);
-    m_peaks->setProfileTies("f1.x0 = f0.PeakCentre");
+
 
     Workspace2D_sptr dataWorkspace = getProperty("InputWorkspace");
 
     m_fitCharacteristics = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
+    WorkspaceGroup_sptr fitPlotGroup(new WorkspaceGroup);
 
     for(size_t i = 0; i < m_peaks->peakCount(); ++i) {
-        IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, i);
+        PoldiPeak_sptr currentPeak = m_peaks->peak(i);
+        IFunction_sptr currentProfile = m_peaks->getSinglePeakProfile(i);
+
+        IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, currentPeak, currentProfile);
 
         bool fitSuccess = fit->execute();
 
         if(fitSuccess) {
-            m_peaks->setProfileParameters(i, fit->getProperty("Function"));
-            storeChiSquare(fit->getProperty("OutputChi2overDoF"));
+            m_peaks->setSingleProfileParameters(i, fit->getProperty("Function"));
             addPeakFitCharacteristics(fit->getProperty("OutputParameters"));
+
+            MatrixWorkspace_sptr fpg = fit->getProperty("OutputWorkspace");
+            fitPlotGroup->addWorkspace(fpg);
         }
     }
 
-    adjustErrorEstimates();
+    m_peakResultOutput = generateResultTable(m_peaks);
 
-    setProperty("PoldiPeakTable", m_peaks->asTableWorkspace());
-    setProperty("PoldiPeakFitCharacteristics", m_fitCharacteristics);
-    setProperty("PoldiPeakFitResult", m_fitResultOutput);
+    setProperty("OutputWorkspace", m_peaks->asTableWorkspace());
+    setProperty("FitCharacteristicsWorkspace", m_fitCharacteristics);
+    setProperty("ResultTableWorkspace", m_peakResultOutput);
+    setProperty("FitPlotsWorkspace", fitPlotGroup);
 }
 
-IAlgorithm_sptr PoldiFitPeaks1D::getFitAlgorithm(Workspace2D_sptr dataWorkspace, size_t peakIndex)
+IAlgorithm_sptr PoldiFitPeaks1D::getFitAlgorithm(Workspace2D_sptr dataWorkspace, PoldiPeak_sptr peak, IFunction_sptr profile)
 {
-    PoldiPeak_sptr peak = m_peaks->peak(peakIndex);
-    std::pair<double, double> xBorders = getXBorders(dataWorkspace->dataX(0), peak->q());
+    double width = peak->fwhm();
+    double extent = std::min(0.05, std::max(0.002, width)) * m_fwhmMultiples;
 
-    if(peak->fwhm() == 0.0) {
-        peak->setFwhm(2.0 * sqrt(2.0 * log(2.0)) * (xBorders.second - xBorders.first) / 20.0);
-        peak->setIntensity(peak->intensity() * 1.5);
-    }
+    std::pair<double, double> xBorders(peak->q() - extent, peak->q() + extent);
 
     IAlgorithm_sptr fitAlgorithm = createChildAlgorithm("Fit", -1, -1, false);
     fitAlgorithm->setProperty("CreateOutput", true);
-    fitAlgorithm->setProperty("Output", "PoldiFitPeak1D");
+    fitAlgorithm->setProperty("Output", "FitPeaks1D");
     fitAlgorithm->setProperty("CalcErrors", true);
-    fitAlgorithm->setProperty("Function", m_peaks->getPeakProfile(peakIndex));
-    fitAlgorithm->setProperty("Ties", m_peaks->getProfileTies());
+    fitAlgorithm->setProperty("Function", profile);
     fitAlgorithm->setProperty("InputWorkspace", dataWorkspace);
     fitAlgorithm->setProperty("WorkspaceIndex", 0);
     fitAlgorithm->setProperty("StartX", xBorders.first);
     fitAlgorithm->setProperty("EndX", xBorders.second);
 
     return fitAlgorithm;
-}
-
-std::pair<double, double> PoldiFitPeaks1D::getXBorders(const MantidVec &xdata, double peakPosition)
-{
-    MantidVec::const_iterator peakIndex;
-    for(peakIndex = xdata.begin(); peakIndex != xdata.end(); ++peakIndex) {
-        if(std::abs(*peakIndex - peakPosition) < 1e-5) {
-            break;
-        }
-    }
-
-    return std::pair<double, double>(*(peakIndex - m_pointsPerPeak / 2), *(peakIndex + m_pointsPerPeak / 2));
-}
-
-void PoldiFitPeaks1D::storeChiSquare(double chiSquare)
-{
-    m_chiSquareValues.push_back(chiSquare);
 }
 
 void PoldiFitPeaks1D::addPeakFitCharacteristics(ITableWorkspace_sptr fitResult)
@@ -174,46 +190,37 @@ void PoldiFitPeaks1D::initializeFitResultWorkspace(ITableWorkspace_sptr fitResul
     }
 }
 
-void PoldiFitPeaks1D::adjustUncertainties(PoldiPeak_sptr peak, double factor)
-{
-    peak->multiplyErrors(factor);
-}
-
 void PoldiFitPeaks1D::initializePeakResultWorkspace(TableWorkspace_sptr peakResultWorkspace)
 {
     peakResultWorkspace->addColumn("str", "Q");
     peakResultWorkspace->addColumn("str", "d");
-    peakResultWorkspace->addColumn("double", "deltaD/d *10^-3");
-    peakResultWorkspace->addColumn("str", "FWHM rel. *10^-3");
+    peakResultWorkspace->addColumn("double", "deltaD/d *10^3");
+    peakResultWorkspace->addColumn("str", "FWHM rel. *10^3");
     peakResultWorkspace->addColumn("str", "Intensity");
 }
 
-void PoldiFitPeaks1D::storePeakResult(PoldiPeak_sptr peak)
+void PoldiFitPeaks1D::storePeakResult(TableRow tableRow, PoldiPeak_sptr peak)
 {
-    TableRow newRow = m_fitResultOutput->appendRow();
-
     UncertainValue q = peak->q();
     UncertainValue d = peak->d();
 
-    newRow << UncertainValueIO::toString(q)
-           << UncertainValueIO::toString(d)
-           << d.error() / d.value() * 1e3
-           << UncertainValueIO::toString(peak->fwhm() / q.value() * 1e3)
-           << UncertainValueIO::toString(peak->intensity());
+    tableRow << UncertainValueIO::toString(q)
+             << UncertainValueIO::toString(d)
+             << d.error() / d.value() * 1e3
+             << UncertainValueIO::toString(peak->fwhm(PoldiPeak::Relative) * 1e3)
+             << UncertainValueIO::toString(peak->intensity());
 }
 
-void PoldiFitPeaks1D::adjustErrorEstimates()
+TableWorkspace_sptr PoldiFitPeaks1D::generateResultTable(PoldiPeakCollection_sptr peaks)
 {
-    double chiSquareSum = std::accumulate(m_chiSquareValues.begin(), m_chiSquareValues.end(), 0.0);
-    double sqrtChiMean  = sqrt(chiSquareSum / double(m_chiSquareValues.size()));
+    TableWorkspace_sptr outputTable = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
+    initializePeakResultWorkspace(outputTable);
 
-    m_fitResultOutput = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
-    initializePeakResultWorkspace(m_fitResultOutput);
-
-    for(size_t i = 0; i < m_peaks->peakCount(); ++i) {
-        adjustUncertainties(m_peaks->peak(i), sqrtChiMean);
-        storePeakResult(m_peaks->peak(i));
+    for(size_t i = 0; i < peaks->peakCount(); ++i) {
+        storePeakResult(outputTable->appendRow(), peaks->peak(i));
     }
+
+    return outputTable;
 }
 
 

@@ -8,6 +8,8 @@
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 
 namespace Mantid
 {
@@ -60,28 +62,27 @@ namespace Poldi
     void init();
     void exec();
 
-    IAlgorithm_sptr getFitAlgorithm(Workspace2D_sptr dataWorkspace, size_t peakIndex);
-    std::pair<double, double> getXBorders(const MantidVec &xdata, double peakPosition);
+    void initializePeakFunction(IPeakFunction_sptr peakFunction, IFunction_sptr backgroundFunction, std::string ties);
+    PoldiPeakCollection_sptr getInitializedPeakCollection(TableWorkspace_sptr peakTable);
 
-    void storeChiSquare(double chiSquare);
+    IAlgorithm_sptr getFitAlgorithm(Workspace2D_sptr dataWorkspace, PoldiPeak_sptr peak, IFunction_sptr profile);
+
     void addPeakFitCharacteristics(ITableWorkspace_sptr fitResult);
     void initializeFitResultWorkspace(ITableWorkspace_sptr fitResult);
-    void adjustUncertainties(PoldiPeak_sptr peak, double factor);
 
     void initializePeakResultWorkspace(TableWorkspace_sptr peakResultWorkspace);
-    void storePeakResult(PoldiPeak_sptr peak);
-    void adjustErrorEstimates();
+    void storePeakResult(TableRow tableRow, PoldiPeak_sptr peak);
+    TableWorkspace_sptr generateResultTable(PoldiPeakCollection_sptr peaks);
 
     PoldiPeakCollection_sptr m_peaks;
     IPeakFunction_sptr m_profileTemplate;
     IFunction_sptr m_backgroundTemplate;
+    std::string m_profileTies;
 
     TableWorkspace_sptr m_fitCharacteristics;
-    TableWorkspace_sptr m_fitResultOutput;
+    TableWorkspace_sptr m_peakResultOutput;
 
-    std::vector<double> m_chiSquareValues;
-
-    int m_pointsPerPeak;
+    double m_fwhmMultiples;
   };
 
 
