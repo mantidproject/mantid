@@ -119,7 +119,7 @@ namespace Mantid
 
       progress.doReport("Pre-processing to filter background out");
       const size_t nPoints = ws->getNPoints();
-      progress.resetNumSteps(10000, 0.0, 0.25);
+      progress.resetNumSteps(100000, 0.0, 0.25);
       if(m_runMultiThreaded)
       {
         std::vector<API::IMDIterator*> iterators = ws->createIterators(getNThreads());
@@ -217,12 +217,17 @@ namespace Mantid
         else
         {
           // Choose the lowest neighbour index as the parent.
-          const VecElements::iterator& minIt = std::min_element(neighbourElements.begin(), neighbourElements.end());
-          const size_t& parentIndex = std::distance(neighbourElements.begin(), minIt);
+          size_t parentIndex = nonEmptyNeighbourIndexes[0];
+          for (size_t i = 1; i < nonEmptyNeighbourIndexes.size(); ++i)
+          {
+            size_t neighIndex = nonEmptyNeighbourIndexes[i];
+            if (neighbourElements[neighIndex].getId() < neighbourElements[parentIndex].getId())
+            {
+              parentIndex = i;
+            }
+          }
           // Get the chosen parent
-          DisjointElement& parentElement = *minIt;
-          // Make this element a copy of the parent
-          neighbourElements[currentIndex] = parentElement;
+          DisjointElement& parentElement = neighbourElements[parentIndex];
           // Union remainder parents with the chosen parent
           for (size_t i = 0; i < nonEmptyNeighbourIndexes.size(); ++i)
           {
@@ -288,7 +293,7 @@ namespace Mantid
 
       progress.doReport("Integrating clusters and generating cluster image");
       const size_t nIterations = neighbourElements.size();
-      const size_t maxReports = 100;
+      const size_t maxReports = 1000;
       const size_t frequency = reportEvery(maxReports, nIterations);
       progress.resetNumSteps(maxReports, 0.5, 0.75);
       // Set each pixel to the root of each disjointed element.

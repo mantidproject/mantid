@@ -151,6 +151,7 @@ namespace Mantid
       const double threshold = getProperty("Threshold");
       const double radiusEstimate = getProperty("RadiusEstimate");
       PeakBackground backgroundStrategy(peakWS, radiusEstimate, threshold, NoNormalization, mdCoordinates);
+      //HardThresholdBackground backgroundStrategy(threshold,NoNormalization); 
 
       ConnectedComponentLabeling analysis; 
       LabelIdIntensityMap labelMap;
