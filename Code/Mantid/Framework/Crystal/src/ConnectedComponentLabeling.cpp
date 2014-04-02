@@ -16,8 +16,6 @@
 #include <algorithm>
 #include <iterator>
 
-
-
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Crystal::ConnectedComponentMappingTypes;
@@ -28,6 +26,12 @@ namespace Mantid
   {
     namespace
     {
+      /**
+       * Perform integer power to determine the maximum number of face and edge connected
+       * neighbours for a given dimensionality
+       * @param ws : Workspace with dimensionality
+       * @return : Maximum number of possible neighbours
+       */
       size_t calculateMaxNeighbours(IMDHistoWorkspace const * const ws)
       {
         const size_t ndims = ws->getNumDims();
@@ -40,6 +44,11 @@ namespace Mantid
         return maxNeighbours;
       }
 
+      /**
+       * Helper non-member to clone the input workspace
+       * @param inWS: To clone
+       * @return : Cloned MDHistoWorkspace
+       */
       boost::shared_ptr<Mantid::API::IMDHistoWorkspace> cloneInputWorkspace(IMDHistoWorkspace_sptr& inWS)
       {
         auto alg = AlgorithmManager::Instance().createUnmanaged("CloneWorkspace");
@@ -56,6 +65,12 @@ namespace Mantid
         return outWS;
       }
 
+      /**
+       * Helper function to calculate report frequecny
+       * @param maxReports : Maximum number of reports wanted
+       * @param maxIterations : Maximum number of possible iterations
+       * @return
+       */
       template<typename T>
       T reportEvery(const T& maxReports, const T& maxIterations)
       {
@@ -68,9 +83,11 @@ namespace Mantid
       }
     }
 
-    //----------------------------------------------------------------------------------------------
-    /** Constructor
-    */
+    /**
+     * Constructor
+     * @param startId : Start Id to use for labeling
+     * @param runMultiThreaded : Run multi threaded. Defaults to true.
+     */
     ConnectedComponentLabeling::ConnectedComponentLabeling(const size_t& startId, const bool runMultiThreaded) 
       : m_startId(startId), m_runMultiThreaded(runMultiThreaded)
     {
@@ -101,11 +118,27 @@ namespace Mantid
     {
     }
 
+    /**
+     * Get the number of threads available
+     * @return : Number of available threads
+     */
     int ConnectedComponentLabeling::getNThreads() const
     {
       return m_runMultiThreaded ? API::FrameworkManager::Instance().getNumOMPThreads() : 1;
     }
 
+    /**
+     * Perform the work of the CCL algorithm
+     * - Pre filtering of background
+     * - Labeling using DisjointElements
+     *
+     * @param ws : MDHistoWorkspace to run CCL algorithm on
+     * @param strategy : Background strategy
+     * @param neighbourElements : Neighbour elements containing DisjointElements
+     * @param labelMap : Map of label id to signal, error_sq pair for integration purposes to fill
+     * @param positionLabelMap : Map of label ids to position in workspace coordinates to fill
+     * @param progress : Progress object
+     */
     void ConnectedComponentLabeling::calculateDisjointTree(IMDHistoWorkspace_sptr ws, 
       BackgroundStrategy * const strategy, VecElements& neighbourElements,
       LabelIdIntensityMap& labelMap,
@@ -243,6 +276,13 @@ namespace Mantid
 
     }
 
+    /**
+     * Execute CCL to produce a cluster output workspace containing labels
+     * @param ws : Workspace to perform CCL on
+     * @param strategy : Background strategy
+     * @param progress : Progress object
+     * @return Cluster output workspace of results
+     */
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabeling::execute(
       IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, Progress& progress) const
     {
@@ -279,6 +319,15 @@ namespace Mantid
       return outWS;
     }
 
+    /**
+     * Execute and integrate
+     * @param ws : Image workspace to integrate
+     * @param strategy : Background strategy
+     * @param labelMap : Label map to fill. Label ids to integrated signal and errorsq for that label
+     * @param positionLabelMap : Label ids to position in workspace coordinates. This is filled as part of the work.
+     * @param progress : Progress object
+     * @return Image Workspace containing clusters.
+     */
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabeling::executeAndIntegrate(
       IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, LabelIdIntensityMap& labelMap,
       PositionToLabelIdMap& positionLabelMap, Progress& progress) const
