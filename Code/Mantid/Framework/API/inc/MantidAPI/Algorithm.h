@@ -224,18 +224,17 @@ public:
   /// Returns the cancellation state
   bool getCancel() const { return m_cancel; }
 
+  /// Returns a reference to the logger.
+  Kernel::Logger & getLogger() const { return g_log; }
   ///Logging can be disabled by passing a value of false
-  void setLogging(const bool value){g_log.setEnabled(value);}
+  void setLogging(const bool value) { g_log.setEnabled(value);}
   ///returns the status of logging, True = enabled
-  bool isLogging() const {return g_log.getEnabled();}
+  bool isLogging() const { return g_log.getEnabled();}
 
   ///sets the logging priority offset
-  void setLoggingOffset(const int value) {g_log.setLevelOffset(value);}
+  void setLoggingOffset(const int value) { g_log.setLevelOffset(value); }
   ///returns the logging priority offset
-  int getLoggingOffset() const {return g_log.getLevelOffset();}
-
-  /// Returns a reference to the logger.
-  Kernel::Logger& getLogger() const { return g_log; }
+  int getLoggingOffset() const { return g_log.getLevelOffset(); }
 
 
   /// function returns an optional message that will be displayed in the default GUI, at the top.
@@ -318,8 +317,6 @@ protected:
   bool m_cancel;
   /// Set if an exception is thrown, and not caught, within a parallel region
   bool m_parallelException;
-  /// Reference to the logger class
-  Kernel::Logger& g_log;
 
   friend class WorkspaceHistory; // Allow workspace history loading to adjust g_execCount
   static size_t g_execCount; ///< Counter to keep track of algorithm execution order
@@ -338,6 +335,10 @@ protected:
   /// All the WorkspaceProperties that are Input or InOut. Set in execute()
   std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
 
+  /// Logger for this algorithm
+  Kernel::Logger m_log;
+  Kernel::Logger &g_log;
+
 private:
   /// Private Copy constructor: NO COPY ALLOWED
   Algorithm(const Algorithm&);
@@ -355,7 +356,6 @@ private:
   bool executeAsyncImpl(const Poco::Void & i);
 
   // --------------------- Private Members -----------------------------------
-
   /// Poco::ActiveMethod used to implement asynchronous execution.
   Poco::ActiveMethod<bool, Poco::Void, Algorithm, Poco::ActiveStarter<Algorithm>> *m_executeAsync;
 

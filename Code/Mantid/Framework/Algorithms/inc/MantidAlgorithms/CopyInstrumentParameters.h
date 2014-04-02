@@ -76,11 +76,6 @@ private:
   API::MatrixWorkspace_sptr m_givingWorkspace;
   /// The receiving workspace
   API::MatrixWorkspace_sptr m_receivingWorkspace;
-
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
-
-  
 };
 
 } // namespace Algorithms

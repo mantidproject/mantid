@@ -143,8 +143,6 @@ private:
   QStringList m_selectedNames;
   /// Keep a map of renamed workspaces between updates
   QMap<QString,QString> m_renameMap;
-
-  static Mantid::Kernel::Logger& logObject;
 };
 
 class MantidTreeWidget:public QTreeWidget
@@ -177,7 +175,6 @@ private:
   MantidDockWidget *m_dockWidget;
   MantidUI *m_mantidUI;
   Mantid::API::AnalysisDataServiceImpl & m_ads;
-  static Mantid::Kernel::Logger& logObject;
   MantidItemSortScheme m_sortScheme;
   Qt::SortOrder m_sortOrder;  
 };

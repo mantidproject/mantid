@@ -55,6 +55,12 @@ namespace Mantid
 {
 namespace API
 {
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("ScriptRepositoryImpl");
+  }
+
 
   static ScriptRepoException pocoException(const std::string & info, 
                                            Poco::Exception & ex){
@@ -107,7 +113,7 @@ namespace API
   */
   ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string & local_rep, 
                                          const std::string & remote) :
-  g_log(Logger::get("ScriptRepositoryImpl")), valid(false)
+    valid(false)
   {    
     // get the local path and the remote path
     std::string loc, rem; 

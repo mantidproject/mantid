@@ -1,6 +1,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -23,7 +24,10 @@ namespace Mantid
   namespace Geometry
   {
 
-    Kernel::Logger& Instrument::g_log = Kernel::Logger::get("Instrument");
+    namespace
+    {
+      Kernel::Logger g_log("Instrument");
+    }
 
     /// Default constructor
     Instrument::Instrument() : CompAssembly(),

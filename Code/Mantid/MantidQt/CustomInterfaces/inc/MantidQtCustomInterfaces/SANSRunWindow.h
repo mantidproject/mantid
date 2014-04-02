@@ -348,10 +348,6 @@ private:
   bool runFilesAreValid();
   QString reduceSingleRun() const;
 
-  //A reference to a logger
-  static Mantid::Kernel::Logger & g_log;
-  static Mantid::Kernel::Logger & g_centreFinderLog;
-
   UserSubWindow * slicingWindow;
 
 };

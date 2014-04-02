@@ -12,8 +12,6 @@
 #include <algorithm>
 #include <iterator>
 
-#include "MantidKernel/Logger.h"
-
 #include "MantidGeometry/Math/Triple.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
@@ -26,8 +24,6 @@ namespace Mantid
 
 namespace Geometry
 {
-
-Kernel::Logger& Rule::PLog(Kernel::Logger::get("Rule"));
 
 int
 Rule::addToKey(std::vector<int>& AV,const int passN)

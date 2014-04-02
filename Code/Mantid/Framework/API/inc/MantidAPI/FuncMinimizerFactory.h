@@ -59,9 +59,6 @@ namespace API
     friend struct Mantid::Kernel::CreateUsingNew<FuncMinimizerFactoryImpl>;
     /// Private Constructor for singleton class
     FuncMinimizerFactoryImpl();
-
-    ///static reference to the logger class
-    Kernel::Logger& g_log;
   };
   
         ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.

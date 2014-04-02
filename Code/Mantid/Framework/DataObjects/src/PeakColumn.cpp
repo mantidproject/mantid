@@ -15,6 +15,9 @@ namespace DataObjects
 {
   namespace
   {
+    /// static logger
+    Kernel::Logger g_log("PeakColumn");
+
     /// Number of items to keep around in the cell cache (see void_pointer())
     size_t NCELL_ITEM_CACHED = 100;
     /// Type lookup: key=name,value=type. Moved here from static inside typeFromName

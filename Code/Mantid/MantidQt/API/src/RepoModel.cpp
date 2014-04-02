@@ -23,7 +23,11 @@ using Mantid::Kernel::ConfigService;
 #include <QtConcurrentRun>
 #include <QTextStream>
 
-
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("RepoModel");
+}
 
 // flag to indicate that the thread is delete thread
 const char * delete_mark = "*DELETE*";
@@ -75,9 +79,6 @@ static QString delete_thread(Mantid::API::ScriptRepository_sptr & pt,
   }
   return delete_mark;  
 }
-
-///Initialize the logger
-Mantid::Kernel::Logger & RepoModel::g_log = Mantid::Kernel::Logger::get("RepoModel");
 
 
 /*

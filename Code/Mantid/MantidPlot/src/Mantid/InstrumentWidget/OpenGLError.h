@@ -1,8 +1,6 @@
 #ifndef OPENGLERROR_H_
 #define OPENGLERROR_H_
 
-#include "MantidKernel/Logger.h"
-
 #include <stdexcept>
 #include <string>
 
@@ -20,7 +18,6 @@ public:
   static std::ostream& log();
 private:
   std::string m_msg;
-  static Mantid::Kernel::Logger& s_log;
 };
 
 #endif /*OPENGLERROR_H_*/

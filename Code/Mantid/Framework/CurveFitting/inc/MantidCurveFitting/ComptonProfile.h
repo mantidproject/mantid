@@ -109,7 +109,7 @@ namespace CurveFitting
 
   protected:
     /// Logger
-    Kernel::Logger & m_log;
+    mutable Kernel::Logger m_log;
 
     /// Current workspace index, required to access instrument parameters
     size_t m_wsIndex;

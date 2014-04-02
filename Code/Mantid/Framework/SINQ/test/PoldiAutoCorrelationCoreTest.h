@@ -28,6 +28,10 @@ using namespace Mantid::DataObjects;
 class TestablePoldiAutoCorrelationCore : public PoldiAutoCorrelationCore
 {
     friend class PoldiAutoCorrelationCoreTest;
+    TestablePoldiAutoCorrelationCore(Mantid::Kernel::Logger &logger)
+      : PoldiAutoCorrelationCore(logger)
+    {
+    }
 };
 
 class PoldiAutoCorrelationCoreTest : public CxxTest::TestSuite
@@ -43,7 +47,7 @@ private:
 
         boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
 
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
+        TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
         autoCorrelationCore.setInstrument(deadWireDecorator, mockChopper);
 
         return autoCorrelationCore;
@@ -55,12 +59,16 @@ public:
     static PoldiAutoCorrelationCoreTest *createSuite() { return new PoldiAutoCorrelationCoreTest(); }
     static void destroySuite( PoldiAutoCorrelationCoreTest *suite ) { delete suite; }
 
+    PoldiAutoCorrelationCoreTest() : m_log("PoldiAutoCorrelationCoreTest")
+    {
+    }
+
     void testsetInstrument()
     {
         boost::shared_ptr<MockDetector> mockDetector(new MockDetector);
         boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
 
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
+        TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
         autoCorrelationCore.setInstrument(mockDetector, mockChopper);
 
         TS_ASSERT_EQUALS(autoCorrelationCore.m_chopper, mockChopper);
@@ -69,13 +77,12 @@ public:
 
     void testsetWavelengthRange()
     {
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
+        TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
         autoCorrelationCore.setWavelengthRange(1.1, 5.0);
 
         TS_ASSERT_EQUALS(autoCorrelationCore.m_wavelengthRange.first, 1.1);
         TS_ASSERT_EQUALS(autoCorrelationCore.m_wavelengthRange.second, 5.0);
     }
-
 
     void testgetTOFsFor1Angstrom()
     {
@@ -83,7 +90,7 @@ public:
 
         boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
 
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
+        TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
         autoCorrelationCore.setInstrument(detector, mockChopper);
 
         EXPECT_CALL(*mockChopper, distanceFromSample())
@@ -102,7 +109,7 @@ public:
 
         boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
 
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
+        TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
         autoCorrelationCore.setInstrument(detector, mockChopper);
 
         EXPECT_CALL(*mockChopper, distanceFromSample())
@@ -162,7 +169,7 @@ public:
 
     void testCleanIndex()
     {
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
+        TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
 
         TS_ASSERT_EQUALS(autoCorrelationCore.cleanIndex(-10, 500), 490);
         TS_ASSERT_EQUALS(autoCorrelationCore.cleanIndex(550, 500), 50);
@@ -171,7 +178,7 @@ public:
 
     void testgetElementFromIndex()
     {
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
+        TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
 
         int elements[] = {10, 20, 30, 40};
         autoCorrelationCore.m_detectorElements = std::vector<int>(elements, elements + 4);
@@ -185,7 +192,7 @@ public:
 
     void testgetTofFromIndex()
     {
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
+        TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
 
         double elements[] = {345.0, 3123.2, 232.1, 65765.2};
         autoCorrelationCore.m_tofsFor1Angstrom = std::vector<double>(elements, elements + 4);
@@ -201,7 +208,7 @@ public:
     {
         Workspace2D_sptr testWorkspace = WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
+        TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
         autoCorrelationCore.setCountData(testWorkspace);
 
         TS_ASSERT_EQUALS(autoCorrelationCore.m_countData->getNumberHistograms(), 2);
@@ -217,7 +224,7 @@ public:
     {
         Workspace2D_sptr testWorkspace = WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
+        TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
         autoCorrelationCore.setCountData(testWorkspace);
 
         TS_ASSERT_EQUALS(autoCorrelationCore.getNormCounts(0, 0), 1.0);
@@ -230,7 +237,7 @@ public:
     {
         Workspace2D_sptr testWorkspace = WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
+        TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
         autoCorrelationCore.setCountData(testWorkspace);
 
         int elements[] = {0, 1};
@@ -265,7 +272,7 @@ public:
 
     void testreduceChopperList()
     {
-        TestablePoldiAutoCorrelationCore autoCorrelationCore;
+        TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
 
         UncertainValue pair0(2.0, 1.0);
         UncertainValue pair1(3.0, 2.0);
@@ -284,6 +291,8 @@ public:
 
         TS_ASSERT_EQUALS(autoCorrelationCore.reduceChopperSlitList(badList, 1.0), 0.0);
     }
+private:
+    Mantid::Kernel::Logger m_log;
 };
 
 

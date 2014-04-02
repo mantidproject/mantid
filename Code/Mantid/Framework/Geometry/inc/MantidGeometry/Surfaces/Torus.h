@@ -48,8 +48,6 @@ class MANTID_GEOMETRY_DLL Torus : public Surface
 {
  private:
 
-  static Kernel::Logger& PLog;           ///< The official logger
-
   Kernel::V3D Centre;        ///< Geometry::Vec3D for centre
   Kernel::V3D Normal;        ///< Normal
   double Iradius;                ///< Inner radius

@@ -1,5 +1,4 @@
 #include "MantidGeometry/Surfaces/General.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Matrix.h"
 
@@ -8,8 +7,6 @@ namespace Mantid
 
 namespace Geometry
 {
-
-Kernel::Logger& General::PLog(Kernel::Logger::get("General"));
 
 const double GTolerance(1e-6);  ///< Tolerance
 

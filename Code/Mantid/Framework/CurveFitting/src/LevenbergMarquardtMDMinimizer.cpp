@@ -19,10 +19,15 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+  namespace
+  {
+    /// static logger object
+    Kernel::Logger g_log("LevenbergMarquardMD");
+  }
+  
+
 DECLARE_FUNCMINIMIZER(LevenbergMarquardtMDMinimizer,Levenberg-MarquardtMD)
 
-// Get a reference to the logger
-Kernel::Logger& LevenbergMarquardtMDMinimizer::g_log = Kernel::Logger::get("Lev-MarqMD");
 
 /// Constructor
 LevenbergMarquardtMDMinimizer::LevenbergMarquardtMDMinimizer():
