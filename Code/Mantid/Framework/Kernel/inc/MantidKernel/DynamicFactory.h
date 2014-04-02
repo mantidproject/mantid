@@ -172,8 +172,7 @@ public:
   {
     if(className.empty())
     {
-      if (pAbstractFactory)
-        delete pAbstractFactory;
+      delete pAbstractFactory;
       throw std::invalid_argument("Cannot register empty class name");
     }
 
@@ -187,8 +186,7 @@ public:
     }
     else
     {
-      if (pAbstractFactory)
-        delete pAbstractFactory;
+      delete pAbstractFactory;
       throw std::runtime_error(className + " is already registered.\n");
     }
   }
