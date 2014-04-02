@@ -39,56 +39,6 @@ def trimData(nSpec, vals, min, max):
 # ConvFit
 ##############################################################################
 
-def search_for_fit_params(suffix, table_ws):
-    """
-    Find all fit parameters in a table workspace with the given suffix.
-    """
-    return [name for name in mtd[table_ws].getColumnNames() if name.endswith(suffix)]
-
-##############################################################################
-
-def convertParametersToWorkspace(params_table, x_column, param_names, output_name):
-    #search for any parameters in the table with the given parameter names,
-    #ignoring their function index and output them to a workspace
-    workspace_names = []
-    for param_name in param_names:
-        column_names = search_for_fit_params(param_name, params_table)
-        column_error_names = search_for_fit_params(param_name+'_Err', params_table)
-        param_workspaces = []
-        for name, error_name in zip(column_names, column_error_names):
-            ConvertTableToMatrixWorkspace(params_table, x_column, name, error_name, OutputWorkspace=name)
-            param_workspaces.append(name)
-        workspace_names.append(param_workspaces)
-
-    #transpose list of workspaces, ignoring unequal length of lists
-    #this handles the case where a parameter occurs only once in the whole workspace
-    workspace_names = map(list, itertools.izip_longest(*workspace_names))
-    workspace_names = [filter(None, sublist) for sublist in workspace_names]
-
-    #join all the parameters for each peak into a single workspace per peak
-    temp_workspaces = []
-    for peak_params in workspace_names:
-        temp_peak_ws = peak_params[0]
-        for param_ws in peak_params[1:]:
-            ConjoinWorkspaces(temp_peak_ws, param_ws, False)
-        temp_workspaces.append(temp_peak_ws)
-
-    #join all peaks into a single workspace
-    temp_workspace = temp_workspaces[0]
-    for temp_ws in temp_workspaces[1:]:
-        ConjoinWorkspaces(temp_workspace, temp_peak_ws, False)
-
-    RenameWorkspace(temp_workspace, OutputWorkspace=output_name)
-
-    #replace axis on workspaces with text axis
-    axis = TextAxis.create(mtd[output_name].getNumberHistograms())
-    workspace_names = [name for sublist in workspace_names for name in sublist]
-    for i, name in enumerate(workspace_names):
-        axis.setLabel(i, name)
-    mtd[output_name].replaceAxis(1, axis)
-
-##############################################################################
-
 def calculateEISF(params_table):
     #get height data from parameter table
     height = search_for_fit_params('Height', params_table)[0]
@@ -147,21 +97,7 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
 
     #convert input workspace to get Q axis
     temp_fit_workspace = "__convfit_fit_ws"
-    try:
-        e_fixed = getEfixed(inputWS)
-        ConvertSpectrumAxis(inputWS,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=temp_fit_workspace)
-    except RuntimeError:
-        #try to fall back to using whatever is currently there
-        axis = mtd[inputWS].getAxis(1)
-        if not axis.isNumeric():
-            logger.error('Input workspace must have either spectra or numeric axis.')
-            sys.exit()
-
-        if axis.getUnit().unitID() != 'MomentumTransfer':
-            logger.error('Input must have axis values of Q')
-            sys.exit()
-
-        temp_fit_workspace = inputWS
+    convertToElasticQ(inputWS, temp_fit_workspace)
 
     #fit all spectra in workspace
     input_params = [temp_fit_workspace+',i%d' % i
