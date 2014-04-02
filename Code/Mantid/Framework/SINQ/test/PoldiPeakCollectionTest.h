@@ -55,7 +55,7 @@ public:
         m_dummyData->addColumn("str", "d");
         m_dummyData->addColumn("str", "Q");
         m_dummyData->addColumn("str", "Intensity");
-        m_dummyData->addColumn("str", "FWHM");
+        m_dummyData->addColumn("str", "FWHM (rel.)");
 
         TableRow first = m_dummyData->appendRow();
         first << "1 0 0" << "0.5 +/- 0.001" << "12.566370 +/- 0.001000" << "2000 +/- 3" << "0.5 +/- 0.02";

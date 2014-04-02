@@ -16,12 +16,12 @@ where <math>\Delta</math> is the mininum number of data points between two peaks
 # Map peak positions from <math>y'</math> back to <math>y</math>
 # Perform background and fluctuation estimation:
 ## Extract all points from <math>y</math> (except the first and the last) that are further than <math>\Delta</math> elements away from any peak position
-## Calculate average background, <math>\bar{b}</math>, from these points.
-## Calculate average absolute difference, <math>\bar{s}</math>: <math>|y_{i} - y_{i+1}|</math>
-# Estimate peak intensity as <math>y'_{i} / 3</math>
-# If a minimum peak height is set, discard all peaks that are smaller than this, if not, discard all peaks that are lower than <math>2.75\cdot\bar{s} + \bar{b}</math>
+## Calculate median of these points as location estimate (<math>\bar{b}</math>)
+## Calculate Sn as scale estimator (<math>\bar(s)</math>)
+# Estimate peak intensity as <math>y_{i}</math>
+# If a minimum peak height is set, discard all peaks that are smaller than this, if not, discard all peaks that are lower than <math>3\cdot\bar{s} + \bar{b}</math>
 
-The peaks are stored in a new workspace.
+The peaks are stored in a new table workspace.
 *WIKI*/
 
 #include "MantidSINQ/PoldiPeakSearch.h"

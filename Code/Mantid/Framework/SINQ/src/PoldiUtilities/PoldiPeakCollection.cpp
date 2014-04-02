@@ -138,7 +138,7 @@ void PoldiPeakCollection::prepareTable(TableWorkspace_sptr table)
     table->addColumn("str", "d");
     table->addColumn("str", "Q");
     table->addColumn("str", "Intensity");
-    table->addColumn("str", "FWHM");
+    table->addColumn("str", "FWHM (rel.)");
 }
 
 void PoldiPeakCollection::peaksToTable(TableWorkspace_sptr table)
@@ -184,7 +184,7 @@ bool PoldiPeakCollection::checkColumns(TableWorkspace_sptr tableWorkspace)
     shouldNames.push_back("d");
     shouldNames.push_back("Q");
     shouldNames.push_back("Intensity");
-    shouldNames.push_back("FWHM");
+    shouldNames.push_back("FWHM (rel.)");
 
     std::vector<std::string> columnNames = tableWorkspace->getColumnNames();
 
