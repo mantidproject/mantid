@@ -531,145 +531,64 @@ def fury(samWorkspaces, res_file, rebinParam, RES=True, Save=False, Verbose=Fals
 # FuryFit
 ##############################################################################
 
-def furyfitPlotSeq(ws, plot):
-    param_names = [plot]
-    if plot == 'All':
-        param_names = ['Intensity', 'Tau', 'Beta']
-    plotParameters(ws, param_names)
 
 def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False, Save=False, Plot='None', Verbose=False): 
     
-    StartTime('FuryFit')
-    nHist = mtd[inputWS].getNumberHistograms()
-   
-    #name stem for generated workspace
-    output_workspace = getWSprefix(inputWS) + 'fury_' + ftype + "0_to_" + str(nHist-1)
-    
-    fitType = ftype[:-2]
-    if Verbose:
-        logger.notice('Option: '+fitType)  
-        logger.notice(func)
+  StartTime('FuryFit')
+  nHist = mtd[inputWS].getNumberHistograms()
+ 
+  #name stem for generated workspace
+  output_workspace = getWSprefix(inputWS) + 'fury_' + ftype + "0_to_" + str(nHist-1)
+  
+  fitType = ftype[:-2]
+  if Verbose:
+    logger.notice('Option: '+fitType)  
+    logger.notice(func)
 
+  tmp_fit_workspace = "__furyfit_fit_ws"
+  CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx)
+  ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
+  convertToElasticQ(tmp_fit_workspace)
 
-    tmp_fit_workspace = "__furyfit_fit_ws"
-    CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx)
-    ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
-    ReplaceSpecialValues(tmp_fit_workspace, NaNValue=0, NaNError=0, OutputWorkspace=tmp_fit_workspace)
-    convertToElasticQ(tmp_fit_workspace)
+  #build input string for PlotPeakByLogValue
+  input_str = [tmp_fit_workspace + ',i%d' % i for i in range(0,nHist)]
+  input_str = ';'.join(input_str)
+  
+  PlotPeakByLogValue(Input=input_str, OutputWorkspace=output_workspace, Function=func, 
+                     StartX=startx, EndX=endx, FitType='Sequential', CreateOutput=True)
 
-    #build input string for PlotPeakByLogValue
-    input_str = [tmp_fit_workspace + ',i%d' % i for i in range(0,nHist)]
-    input_str = ';'.join(input_str)
-    
-    PlotPeakByLogValue(Input=input_str, OutputWorkspace=output_workspace, Function=func, 
-                       StartX=startx, EndX=endx, FitType='Sequential', CreateOutput=True)
+  #remove unsused workspaces
+  DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
+  DeleteWorkspace(output_workspace + '_Parameters')
+  
+  fit_group = output_workspace + '_Workspaces'
+  params_table = output_workspace + '_Parameters'
+  RenameWorkspace(output_workspace, OutputWorkspace=params_table)
 
-    #remove unsused workspaces
-    DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
-    DeleteWorkspace(output_workspace + '_Parameters')
-    
-    fit_group = output_workspace + '_Workspaces'
-    params_table = output_workspace + '_Parameters'
-    RenameWorkspace(output_workspace, OutputWorkspace=params_table)
+  #create *_Result workspace
+  result_workspace = output_workspace + "_Result"
+  parameter_names = ['A0', 'Intensity', 'Tau', 'Beta']
+  convertParametersToWorkspace(params_table, "axis-1", parameter_names, result_workspace)
 
-    #create *_Result workspace
-    result_workspace = output_workspace + "_Result"
-    parameter_names = ['A0', 'Intensity', 'Tau', 'Beta']
-    convertParametersToWorkspace(params_table, "axis-1", parameter_names, result_workspace)
+  #process generated workspaces
+  wsnames = mtd[fit_group].getNames()
+  params = [startx, endx, fitType]
+  for i, ws in enumerate(wsnames):
+    output_ws = output_workspace + '_%d_Workspace' % i
+    RenameWorkspace(ws, OutputWorkspace=output_ws)
+  
+  furyAddSampleLogs(inputWS, fit_group, params, intensities_constrained=intensities_constrained)
 
-    #process generated workspaces
-    wsnames = mtd[fit_group].getNames()
-    params = [startx, endx, fitType]
-    for i, ws in enumerate(wsnames):
-        output_ws = output_workspace + '_%d_Workspace' % i
-        RenameWorkspace(ws, OutputWorkspace=output_ws)
-        furyAddSampleLogs(inputWS, output_ws, params, intensities_constrained=intensities_constrained)
+  if Save:
+    save_workspaces = [result_workspace, fit_group]
+    furyFitSaveWorkspaces(save_workspaces, Verbose)
 
-        if Save:
-            #save workspace to default directory
-            workdir = getDefaultWorkingDirectory()
-            fpath = os.path.join(workdir, output_ws+'.nxs')
-            SaveNexusProcessed(InputWorkspace=output_ws, Filename=fpath)
+  if Plot != 'None' :
+    furyfitPlotSeq(fit_workspaces, Plot)
 
-            if Verbose:
-                logger.notice(output_ws + ' output to file : '+fpath)
+  EndTime('FuryFit')
+  return result_workspace
 
-    if ( Plot != 'None' ):
-        furyfitPlotSeq(fit_workspaces, Plot)
-
-    EndTime('FuryFit')
-
-    return result_workspace
-
-#Copy logs from sample and add some addtional ones
-def furyAddSampleLogs(inputWs, ws, params, intensities_constrained=False, beta_constrained=False):
-    startx, endx, fitType = params
-    CopyLogs(InputWorkspace=inputWs, OutputWorkspace=ws)
-    AddSampleLog(Workspace=ws, LogName="start_x", LogType="Number", LogText=str(startx))
-    AddSampleLog(Workspace=ws, LogName="end_x", LogType="Number", LogText=str(endx))
-    AddSampleLog(Workspace=ws, LogName="fit_type", LogType="String", LogText=fitType)
-    AddSampleLog(Workspace=ws, LogName="intensities_constrained", LogType="String", LogText=str(intensities_constrained))
-    AddSampleLog(Workspace=ws, LogName="beta_constrained", LogType="String", LogText=str(beta_constrained))
-
-def furyfitMultParsToWS(Table, Data):
-#   Q = createQaxis(Data)
-    theta,Q = GetThetaQ(Data)
-    ws = mtd[Table+'_Parameters']
-    rCount = ws.rowCount()
-    cCount = ws.columnCount()
-    nSpec = ( rCount - 1 ) / 5
-    val = ws.column(1)     #value
-    err = ws.column(2)     #error
-    dataX = []
-    A0val = []
-    A0err = []
-    Ival = []
-    Ierr = []
-    Tval = []
-    Terr = []
-    Bval = []
-    Berr = []
-    for spec in range(0,nSpec):
-        n1 = spec*5
-        A0 = n1
-        A1 = n1+1
-        int = n1+2                   #intensity value
-        tau = n1+3                   #tau value
-        beta = n1+4                   #beta value
-        dataX.append(Q[spec])
-        A0val.append(val[A0])
-        A0err.append(err[A0])
-        Ival.append(val[int])
-        Ierr.append(err[int])
-        Tval.append(val[tau])
-        Terr.append(err[tau])
-        Bval.append(val[beta])
-        Berr.append(err[beta])
-    nQ = len(dataX)
-    Qa = np.array(dataX)
-    dataY = np.array(A0val)
-    dataE = np.array(A0err)
-    dataY = np.append(dataY,np.array(Ival))
-    dataE = np.append(dataE,np.array(Ierr))
-    dataY = np.append(dataY,np.array(Tval))
-    dataE = np.append(dataE,np.array(Terr))
-    dataY = np.append(dataY,np.array(Bval))
-    dataE = np.append(dataE,np.array(Berr))
-    names = 'f0.A0,f1.Intensity,f1.Tau,f1.Beta'
-    suffix = 'Workspace'
-    wsname = Table + '_' + suffix
-    CreateWorkspace(OutputWorkspace=wsname, DataX=Qa, DataY=dataY, DataE=dataE, 
-        Nspec=4, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
-        VerticalAxisValues=names)
-    return wsname
-
-def createFuryMultFun(ties = True, function = ''):
-    fun =  '(composite=CompositeFunction,$domains=i;'
-    fun += function
-    if ties:
-        fun += ';ties=(f1.Intensity=1-f0.A0)'
-    fun += ');'
-    return fun
 
 def createFuryMultResFun(ties = True, A0 = 0.02, Intensity = 0.98 ,Tau = 0.025, Beta = 0.8):
     fun =  '(composite=CompositeFunction,$domains=i;'
@@ -680,12 +599,12 @@ def createFuryMultResFun(ties = True, A0 = 0.02, Intensity = 0.98 ,Tau = 0.025, 
     fun += ');'
     return fun
 
+
 def getFuryMultResult(inputWS, outNm, function, Verbose):
     params = mtd[outNm+'_Parameters']
     nHist = mtd[inputWS].getNumberHistograms()
     for i in range(nHist):
         j = 5 * i
-#        assert( params.row(j)['Name'][3:] == 'f0.A0' )
         A0 = params.row(j)['Value']
         A1 = params.row(j + 1)['Value']
         Intensity = params.row(j + 2)['Value']
@@ -693,7 +612,7 @@ def getFuryMultResult(inputWS, outNm, function, Verbose):
         Beta = params.row(j + 4)['Value']
         func = createFuryMultResFun(True,  A0, Intensity ,Tau, Beta)
         if Verbose:
-            logger.notice('Fit func : '+func)  	
+            logger.notice('Fit func : '+func)   
         fitWS = outNm + '_Result_'
         fout = fitWS + str(i)
         Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i,Output=fout,MaxIterations=0)
@@ -708,50 +627,114 @@ def getFuryMultResult(inputWS, outNm, function, Verbose):
             group += ',' + fout
     GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS[:-1])
 
+
 def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=False, Save=False, Plot='None', Verbose=False):
-    StartTime('FuryFit Mult')
-    workdir = config['defaultsave.directory']
-    option = ftype[:-2]
+  StartTime('FuryFit Multi')
+
+  nHist = mtd[inputWS].getNumberHistograms()
+  output_workspace = getWSprefix(inputWS) + 'fury_1Smult_s0_to_' + str(nHist-1)
+
+  option = ftype[:-2]
+  if Verbose:
+    logger.notice('Option: '+option)  
+    logger.notice('Function: '+function)
+  
+  #prepare input workspace for fitting
+  tmp_fit_workspace = "__furyfit_fit_ws"
+  CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=tmp_fit_workspace, XMin=startx, XMax=endx)
+  ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
+  convertToElasticQ(tmp_fit_workspace)
+
+  #fit multi-domian functino to workspace
+  multi_domain_func, kwargs = createFuryMultiDomainFunction(function, tmp_fit_workspace)
+  Fit(Function=multi_domain_func, InputWorkspace=tmp_fit_workspace, WorkspaceIndex=0, 
+      Output=output_workspace, CreateOutput=True, **kwargs)
+  
+  params_table = output_workspace + '_Parameters'
+  transposeFitParametersTable(params_table)
+
+  #set first column of parameter table to be axis values
+  ax = mtd[tmp_fit_workspace].getAxis(1)
+  axis_values = ax.extractValues()
+  for i, value in enumerate(axis_values): 
+    mtd[params_table].setCell('axis-1', i, value)
+
+  #convert parameters to matrix workspace
+  result_workspace = output_workspace + "_Result"
+  parameter_names = ['A0', 'Intensity', 'Tau', 'Beta']
+  convertParametersToWorkspace(params_table, "axis-1", parameter_names, result_workspace)
+
+  result_workspace = output_workspace + '_Result'
+  # getFuryMultResult(tmp_fit_workspace, output_workspace, function, Verbose)
+
+  DeleteWorkspace(tmp_fit_workspace)
+
+  params = [startx, endx, ftype]
+  furyAddSampleLogs(inputWS, result_workspace, params, 
+                    intensities_constrained=intensities_constrained, beta_constrained=True)
+  #furyAddSampleLogs(inputWS, outWS, params, intensities_constrained=intensities_constrained, beta_constrained=True)
+
+  if Save:
+    save_workspaces = [result_workspace]
+    furyFitSaveWorkspaces(save_workspaces, Verbose)
+  
+  if Plot != 'None':
+    furyfitPlotSeq(outWS, Plot)
+  
+  EndTime('FuryFit Multi')
+
+
+def createFuryMultiDomainFunction(function, input_ws):
+  multi= 'composite=MultiDomainFunction,NumDeriv=1;'
+  comp =  '(composite=CompositeFunction,$domains=i;' + function + ');'
+
+  ties = []
+  kwargs = {}
+  num_spectra = mtd[input_ws].getNumberHistograms()
+  for i in range(0, num_spectra):
+    multi += comp
+    kwargs['WorkspaceIndex_' + str(i)] = i
+    
+    if i > 0:      
+      kwargs['InputWorkspace_' + str(i)] = input_ws
+      
+      #tie beta for every spectrum
+      tie = 'f%d.f1.Beta=f0.f1.Beta' % i
+      ties.append(tie)
+  
+  ties = ','.join(ties)
+  multi += 'ties=(' + ties + ')'
+
+  return multi, kwargs
+
+
+def furyFitSaveWorkspaces(save_workspaces, Verbose):
+  workdir = getDefaultWorkingDirectory()
+  for ws in save_workspaces:
+    #save workspace to default directory
+    fpath = os.path.join(workdir, ws+'.nxs')
+    SaveNexusProcessed(InputWorkspace=ws, Filename=fpath)
+
     if Verbose:
-        logger.notice('Option: '+option)  
-        logger.notice('Function: '+function)  
-    nHist = mtd[inputWS].getNumberHistograms()
-    outNm = getWSprefix(inputWS) + 'fury_1Smult_s0_to_' + str(nHist-1)
-    f1 = createFuryMultFun(True, function)
-    func= 'composite=MultiDomainFunction,NumDeriv=1;'
-    ties='ties=('
-    kwargs = {}
-    for i in range(0,nHist):
-        func+=f1
-        if i > 0:
-            ties += 'f' + str(i) + '.f1.Beta=f0.f1.Beta'
-            if i < nHist-1:
-                ties += ','
-            kwargs['InputWorkspace_' + str(i)] = inputWS
-        kwargs['WorkspaceIndex_' + str(i)] = i
-    ties+=')'
-    func += ties
-    CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=inputWS, XMin=startx, XMax=endx)
-    Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=0,Output=outNm,**kwargs)
-    outWS = furyfitMultParsToWS(outNm, inputWS)
-    result_workspace = outNm + '_Result'
-    getFuryMultResult(inputWS, outNm, function, Verbose)
+      logger.notice(ws + ' output to file : '+fpath)
 
-    params = [startx, endx, ftype]
-    furyAddSampleLogs(inputWS, outWS, params, intensities_constrained=intensities_constrained, beta_constrained=True)
-    furyAddSampleLogs(inputWS, result_workspace, params, intensities_constrained=intensities_constrained, beta_constrained=True)
 
-    if Save:
-        opath = os.path.join(workdir, outWS+'.nxs')					# path name for nxs file
-        SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
-        rpath = os.path.join(workdir, result_workspace+'.nxs')					# path name for nxs file
-        SaveNexusProcessed(InputWorkspace=result_workspace, Filename=rpath)
-        if Verbose:
-            logger.notice('Output file : '+opath)  
-            logger.notice('Output file : '+rpath)  
-    if ( Plot != 'None' ):
-        furyfitPlotSeq(outWS, Plot)
-    EndTime('FuryFit')
+def furyAddSampleLogs(inputWs, ws, params, intensities_constrained=False, beta_constrained=False):
+    startx, endx, fitType = params
+    CopyLogs(InputWorkspace=inputWs, OutputWorkspace=ws)
+    AddSampleLog(Workspace=ws, LogName="start_x", LogType="Number", LogText=str(startx))
+    AddSampleLog(Workspace=ws, LogName="end_x", LogType="Number", LogText=str(endx))
+    AddSampleLog(Workspace=ws, LogName="fit_type", LogType="String", LogText=fitType)
+    AddSampleLog(Workspace=ws, LogName="intensities_constrained", LogType="String", LogText=str(intensities_constrained))
+    AddSampleLog(Workspace=ws, LogName="beta_constrained", LogType="String", LogText=str(beta_constrained))
+
+
+def furyfitPlotSeq(ws, plot):
+    param_names = [plot]
+    if plot == 'All':
+        param_names = ['Intensity', 'Tau', 'Beta']
+    plotParameters(ws, param_names)
+
 
 ##############################################################################
 # MSDFit
