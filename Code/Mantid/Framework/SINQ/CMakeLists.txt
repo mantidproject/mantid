@@ -84,6 +84,7 @@ set ( TEST_FILES
 	PoldiDetectorFactoryTest.h
 	PoldiDetectorTest.h
 	PoldiFitPeaks1DTest.h
+        PoldiPeakCollectionTest.h
 	PoldiPeakSearchTest.h
 	PoldiPeakTest.h
 	ProjectMDTest.h

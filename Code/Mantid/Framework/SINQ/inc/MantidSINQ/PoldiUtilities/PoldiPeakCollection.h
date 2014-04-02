@@ -49,7 +49,7 @@ class MANTID_SINQ_DLL PoldiPeakCollection
 public:
     PoldiPeakCollection();
     PoldiPeakCollection(TableWorkspace_sptr workspace);
-    ~PoldiPeakCollection() {}
+    virtual ~PoldiPeakCollection() {}
 
     void setProfileFunction(IPeakFunction_sptr peakProfile);
     void setBackgroundFunction(IFunction_sptr backgroundFunction);
@@ -67,7 +67,7 @@ public:
 
     TableWorkspace_sptr asTableWorkspace();
 
-private:
+protected:
     void prepareTable(TableWorkspace_sptr table);
     void peaksToTable(TableWorkspace_sptr table);
 

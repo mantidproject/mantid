@@ -134,9 +134,9 @@ PoldiPeak_sptr PoldiPeak::create(double qValue, double intensity)
     return PoldiPeak::create(UncertainValue(qValue), UncertainValue(intensity));
 }
 
-PoldiPeak_sptr PoldiPeak::create(MillerIndices hkl, UncertainValue dValue, UncertainValue intensity, UncertainValue fwhm)
+PoldiPeak_sptr PoldiPeak::create(MillerIndices hkl, UncertainValue dValue, UncertainValue intensity, UncertainValue fwhmRelative)
 {
-    return PoldiPeak_sptr(new PoldiPeak(dValue, intensity, fwhm, hkl));
+    return PoldiPeak_sptr(new PoldiPeak(dValue, intensity, fwhmRelative, hkl));
 }
 
 bool PoldiPeak::greaterThan(const PoldiPeak_sptr &first, const PoldiPeak_sptr &second, UncertainValue (PoldiPeak::*function)() const)
@@ -154,7 +154,7 @@ PoldiPeak::PoldiPeak(UncertainValue d, UncertainValue intensity, UncertainValue 
     m_intensity(intensity)
 {
     setD(d);
-    setFwhm(fwhm, AbsoluteD);
+    setFwhm(fwhm, Relative);
 }
 
 }

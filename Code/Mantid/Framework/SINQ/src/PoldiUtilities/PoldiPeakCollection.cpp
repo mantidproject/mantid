@@ -60,6 +60,8 @@ size_t PoldiPeakCollection::peakCount() const
 void PoldiPeakCollection::addPeak(PoldiPeak_sptr newPeak)
 {
     m_peaks.push_back(newPeak);
+
+    addPeakFunctionFromTemplate();
 }
 
 PoldiPeak_sptr PoldiPeakCollection::peak(size_t index) const
@@ -147,7 +149,7 @@ void PoldiPeakCollection::peaksToTable(TableWorkspace_sptr table)
                << UncertainValueIO::toString((*peak)->d())
                << UncertainValueIO::toString((*peak)->q())
                << UncertainValueIO::toString((*peak)->intensity())
-               << UncertainValueIO::toString((*peak)->fwhm());
+               << UncertainValueIO::toString((*peak)->fwhm(PoldiPeak::Relative));
     }
 }
 
