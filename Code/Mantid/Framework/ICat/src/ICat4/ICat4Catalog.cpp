@@ -807,7 +807,7 @@ namespace Mantid
 
       // Remove each investigation returned from `myData`
       // were the user does not have create/write access.
-      for (int row = ws->rowCount() - 1; row >= 0; --row)
+      for (int row = static_cast<int>(ws->rowCount()) - 1; row >= 0; --row)
       {
         // The investigation used to check CREATE access against.
         ns1__investigation investigation;
