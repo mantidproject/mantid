@@ -3,8 +3,6 @@ mp = import_mantidplot()
 from IndirectCommon import *
 
 import math, re, os.path, numpy as np
-import itertools
-
 from mantid.simpleapi import *
 from mantid.api import TextAxis
 from mantid import *
@@ -577,7 +575,14 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False
     output_ws = output_workspace + '_%d_Workspace' % i
     RenameWorkspace(ws, OutputWorkspace=output_ws)
   
-  furyAddSampleLogs(inputWS, fit_group, params, intensities_constrained=intensities_constrained)
+  sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': ftype, 
+                  'intensities_constrained': intensities_constrained, 'beta_constrained': False}
+
+  CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
+  CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
+
+  addSampleLogs(fit_group, sample_logs)
+  addSampleLogs(result_workspace, sample_logs)
 
   if Save:
     save_workspaces = [result_workspace, fit_group]
@@ -667,13 +672,17 @@ def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=
   result_workspace = output_workspace + '_Result'
   # getFuryMultResult(tmp_fit_workspace, output_workspace, function, Verbose)
 
-  DeleteWorkspace(tmp_fit_workspace)
+  sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': ftype, 
+                  'intensities_constrained': intensities_constrained, 'beta_constrained': True}
 
-  params = [startx, endx, ftype]
-  furyAddSampleLogs(inputWS, result_workspace, params, 
-                    intensities_constrained=intensities_constrained, beta_constrained=True)
+  CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
+  
+  addSampleLogs(result_workspace, sample_logs)
+
   #furyAddSampleLogs(inputWS, outWS, params, intensities_constrained=intensities_constrained, beta_constrained=True)
 
+  DeleteWorkspace(tmp_fit_workspace)
+  
   if Save:
     save_workspaces = [result_workspace]
     furyFitSaveWorkspaces(save_workspaces, Verbose)
@@ -682,7 +691,6 @@ def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=
     furyfitPlotSeq(outWS, Plot)
   
   EndTime('FuryFit Multi')
-
 
 def createFuryMultiDomainFunction(function, input_ws):
   multi= 'composite=MultiDomainFunction,NumDeriv=1;'
@@ -717,16 +725,6 @@ def furyFitSaveWorkspaces(save_workspaces, Verbose):
 
     if Verbose:
       logger.notice(ws + ' output to file : '+fpath)
-
-
-def furyAddSampleLogs(inputWs, ws, params, intensities_constrained=False, beta_constrained=False):
-    startx, endx, fitType = params
-    CopyLogs(InputWorkspace=inputWs, OutputWorkspace=ws)
-    AddSampleLog(Workspace=ws, LogName="start_x", LogType="Number", LogText=str(startx))
-    AddSampleLog(Workspace=ws, LogName="end_x", LogType="Number", LogText=str(endx))
-    AddSampleLog(Workspace=ws, LogName="fit_type", LogType="String", LogText=fitType)
-    AddSampleLog(Workspace=ws, LogName="intensities_constrained", LogType="String", LogText=str(intensities_constrained))
-    AddSampleLog(Workspace=ws, LogName="beta_constrained", LogType="String", LogText=str(beta_constrained))
 
 
 def furyfitPlotSeq(ws, plot):
