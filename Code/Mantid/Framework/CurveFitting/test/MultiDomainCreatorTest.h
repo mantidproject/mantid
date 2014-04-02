@@ -30,11 +30,16 @@ class MultiDomainCreatorTest_Fun: public IFunction1D, public ParamFunction
 {
 public:
   size_t m_wsIndex;
+  boost::shared_ptr<const MatrixWorkspace> m_workspace;
   std::string name()const {return "MultiDomainCreatorTest_Fun";} 
   void function1D(double* , const double* , const size_t )const{}
   void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace>,size_t wi,double, double)
   {
     m_wsIndex = wi;
+  }
+  void setWorkspace(boost::shared_ptr<const Workspace> ws)
+  {
+    m_workspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   }
 };
 
@@ -224,7 +229,7 @@ public:
 
   }
 
-  void test_setMatrixWorkspace()
+  void test_setMatrixWorkspace_and_setWorkspace()
   {
     Mantid::Kernel::PropertyManager manager;
     manager.declareProperty(new WorkspaceProperty<Workspace>("WS1","",Direction::Input));
@@ -276,6 +281,10 @@ public:
     TS_ASSERT_EQUALS(f1->m_wsIndex, 0);
     TS_ASSERT_EQUALS(f2->m_wsIndex, 1);
     TS_ASSERT_EQUALS(f3->m_wsIndex, 2);
+
+    TS_ASSERT_EQUALS(f1->m_workspace, ws1);
+    TS_ASSERT_EQUALS(f2->m_workspace, ws2);
+    TS_ASSERT_EQUALS(f3->m_workspace, ws3);
   }
 
 private:
