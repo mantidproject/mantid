@@ -11,6 +11,7 @@
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/scoped_array.hpp>
 
 using namespace Mantid::Kernel;
 using namespace ::NeXus;
@@ -100,14 +101,13 @@ namespace PropertyNexus
         throw std::runtime_error("NXlog loading failed on field " + name + ". Expected rank 2.");
       int64_t numStrings = file->getInfo().dims[0];
       int64_t span = file->getInfo().dims[1];
-      char * data = new char[numStrings*span];
-      file->getData(data);
+      boost::scoped_array<char> data(new char[numStrings*span]);
+      file->getData(data.get());
       values.reserve(size_t(numStrings));
       for (int i=0; i<numStrings; i++)
-        values.push_back( std::string(data + i*span) );
+        values.push_back( std::string(data.get() + i*span) );
 
       TimeSeriesProperty<std::string> * prop = new TimeSeriesProperty<std::string>(name);
-      //boost::split(values, bigString, boost::is_any_of("\n"));
       prop->addValues(times, values);
       return prop;
     }
