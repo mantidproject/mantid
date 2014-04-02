@@ -161,7 +161,7 @@ namespace Mantid
       IMDHistoWorkspace_sptr clusters = analysis.executeAndIntegrate(mdWS, &backgroundStrategy, labelMap, positionMap, progress);
 
       // Link integrated values up with peaks.
-      const size_t nPeaks = peakWS->getNumberPeaks();
+      const int nPeaks = peakWS->getNumberPeaks();
       progress.resetNumSteps(nPeaks, 0, 1);
       progress.doReport("Writing out PeaksWorkspace");
       PARALLEL_FOR1(peakWS)

@@ -151,7 +151,6 @@ namespace Mantid
       allNonBackgroundIndexes.reserve(ws->getNPoints());
 
       progress.doReport("Pre-processing to filter background out");
-      const size_t nPoints = ws->getNPoints();
       progress.resetNumSteps(100000, 0.0, 0.25);
       if(m_runMultiThreaded)
       {
@@ -176,7 +175,7 @@ namespace Mantid
             while(iterator->next());
           }
           // Consolidate work from individual threads.
-          for(size_t i = 0; i < nthreads; ++i)
+          for(int i = 0; i < nthreads; ++i)
           {
             VecIndexes& source = manyNonBackgroundIndexes[i];
             allNonBackgroundIndexes.insert(allNonBackgroundIndexes.end(), source.begin(), source.end());
