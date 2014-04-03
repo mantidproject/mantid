@@ -749,18 +749,6 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot, ApplicationWindow* app, 
   plot->setAutoScale();
   return spgrm;
 }
-void MantidMatrix::setSpectrumGraph(MultiLayer *ml, Table* t)
-{
-  MantidUI::setUpSpectrumGraph(ml,name());
-  connect(ml, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
-  if (t)
-  {
-    m_plots1D[ml] = t;
-    connect(t, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
-  }
-  else
-    m_plots2D<<ml;
-}
 
 void MantidMatrix::setBinGraph(MultiLayer *ml, Table* t)
 {
