@@ -15,6 +15,7 @@ namespace Mantid
   {
     class FunctionDomain;
     class IFunctionValues;
+    class Workspace;
   }
 
   namespace API
@@ -89,12 +90,20 @@ namespace Mantid
        /// @param function :: A pointer to the fitting function
        /// @param domain :: The domain containing x-values for the function
        /// @param values :: A FunctionValues instance containing the fitting data
-      virtual void createOutputWorkspace(
+       /// @param outputWorkspacePropertyName :: Name of the property to declare and set to the created output workspace.
+       ///                                       If empty do not create the property, just return a pointer
+       /// @return A shared pointer to the created workspace.
+      virtual boost::shared_ptr<API::Workspace> createOutputWorkspace(
         const std::string& baseName,
         API::IFunction_sptr function,
         boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::IFunctionValues> values) 
-      {UNUSED_ARG(baseName);UNUSED_ARG(function);UNUSED_ARG(domain);UNUSED_ARG(values);}
+        boost::shared_ptr<API::IFunctionValues> values,
+        const std::string& outputWorkspacePropertyName = "OutputWorkspace"
+        ) 
+      {
+        UNUSED_ARG(baseName);UNUSED_ARG(function);UNUSED_ARG(domain);UNUSED_ARG(values);UNUSED_ARG(outputWorkspacePropertyName);
+        throw std::logic_error("Method createOutputWorkspace() isn't implemented");
+      }
 
       /// Initialize the function
       /// @param function :: A function to initialize.
