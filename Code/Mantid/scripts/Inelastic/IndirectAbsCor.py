@@ -238,13 +238,13 @@ def AbsRunFeeder(inputWS, canWS, geom, beam, ncan, size, avar, density, sampleFo
         @param geom - type of geometry used (flat plate or cylinder)
         @param beam - beam width
         @param ncan - number of cans used.
-        @param size - 
+        @param size - sample & can thickness
         @param sampleFormula - optional, chemical formula for the sample
         @param camFormula - optional, chemical formula for the can
         @param density - density of the sample and cans(s)
         @param sigs - scattering for sample and can(s)
         @param siga - absorption for sample and can(s)
-        @param avar - 
+        @param avar - sample angle
         @param plotOpt - whether to plot output
         @param Verbose - whether to show extra verbose output
         @param Save - whether to save the output to file
