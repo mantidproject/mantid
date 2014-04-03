@@ -258,28 +258,19 @@ def AbsRunFeeder(inputWS, canWS, geom, beam, ncan, size, avar, density, sampleFo
 
     #set sample material based on input or formula
     if sampleFormula is not None:
-        sigs = np.zeros(3)
-        siga = np.zeros(3)
         SetSampleMaterial(InputWorkspace=inputWS,ChemicalFormula=sampleFormula,SampleNumberDensity=density[0])
-    else:
-        SetSampleMaterial(InputWorkspace=inputWS,AttenuationXSection=siga[0],
-            ScatteringXSection=sigs[0],SampleNumberDensity=density[0])
     
-    sample = mtd[inputWS].sample()
-    sam_mat = sample.getMaterial()
+        sample = mtd[inputWS].sample()
+        sam_mat = sample.getMaterial()
 
-    # total scattering x-section
-    sigs[0] = sam_mat.totalScatterXSection()
-    # absorption x-section
-    siga[0] = sam_mat.absorbXSection()
+        # total scattering x-section
+        sigs[0] = sam_mat.totalScatterXSection()
+        # absorption x-section
+        siga[0] = sam_mat.absorbXSection()
 
-    if ncan == 2:
+    if  canFormula is not None and ncan == 2:
         #set can material based on input or formula
-        if canFormula is not None:
-            SetSampleMaterial(InputWorkspace=canWS, ChemicalFormula=canFormula, SampleNumberDensity=density[0])
-        else:
-            SetSampleMaterial(InputWorkspace=canWS, AttenuationXSection=siga[1],
-                ScatteringXSection=sigs[1],SampleNumberDensity=density[1])
+        SetSampleMaterial(InputWorkspace=canWS, ChemicalFormula=canFormula, SampleNumberDensity=density[1])
 
         can = mtd[canWS].sample()
         can_mat = sample.getMaterial()
