@@ -10,9 +10,6 @@ using namespace boost::python;
 
 namespace
 {
-  /// Overload generator for load() method
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(LoadMethodOverload, load, 1, 2)
-
   typedef Workspace_sptr(DataProcessorAdapter::*loadOverload1)(const std::string&);
   typedef Workspace_sptr(DataProcessorAdapter::*loadOverload2)(const std::string&, const bool);
 }
