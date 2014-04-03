@@ -188,11 +188,9 @@ namespace DataHandling
     // try short instrument name
     if (!base.exists())
     {
-#if 0
-      instrument = Kernel::ConfigService::Instance().getInstrument(instrument).shortName();
-#else
-      instrument = "VULCAN";
-#endif
+      // FIXME - master and develop are different on how to get instrument name in this case. 
+      throw std::runtime_error("Fix this due to difference in master and develop.");
+      // instrument = Kernel::ConfigService::Instance().getInstrument(instrument).shortName();
       base = Poco::File("/SNS/" + instrument + "/");
       if (!base.exists())
         return "";
@@ -460,9 +458,10 @@ namespace DataHandling
   void LoadEventPreNexus2::unmaskVetoEventIndex()
   {
     // Check pulse ID with events
-    // size_t numveto = 0;
-    // size_t numerror = 0;
 
+    {{{
+    // cppcheck-suppress syntaxError
+    }}}
     PRAGMA_OMP(parallel for schedule(dynamic, 1) ) 
     for (int i = 0; i < static_cast<int>(event_indices.size()); ++i)
     {
@@ -782,7 +781,9 @@ namespace DataHandling
     buffers.resize(numThreads);
     eventVectors = new EventVector_pt *[numThreads];
 
+    {{{
     // cppcheck-suppress syntaxError
+    }}}
     PRAGMA_OMP( parallel for if (parallelProcessing) )
     for (int i=0; i < int(numThreads); i++)
     {
@@ -1039,11 +1040,6 @@ namespace DataHandling
     std::vector<std::vector<double> > local_tofs;
     std::set<PixelType> local_wrongdetids;
 
-#if 1
-    size_t dboutcounts = 0;
-    size_t maxdbcounts = 10;
-#endif
-
     // process the individual events
     size_t numwrongpid = 0;
     for (size_t i = 0; i < current_event_buffer_size; i++)
@@ -1169,15 +1165,6 @@ namespace DataHandling
         // int64_t abstime = (pulsetime.totalNanoseconds()+int64_t(tof*1000));
         local_pulsetimes[theindex].push_back(pulsetime);
         local_tofs[theindex].push_back(tof);
-
-#if 1
-        if (dboutcounts < maxdbcounts)
-        {
-          g_log.notice() << "[DB] Event-log " << pid << ": Index = " << dboutcounts
-                         << "Pulse time = " << pulsetime << ", TOF = " << tof << "\n";
-          ++ dboutcounts;
-        }
-#endif
 
       } // END-IF-ELSE: On Event's Pixel's Nature
 
