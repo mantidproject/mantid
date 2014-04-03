@@ -95,12 +95,15 @@ namespace Mantid
 {
 namespace Crystal
 {
+  namespace
+  {
+    Kernel::Logger g_log("SCDPanelErrors");
+  }
 
 DECLARE_FUNCTION( SCDPanelErrors )
 
 // Assumes UB from optimize UB maps hkl to qxyz/2PI. So conversion factors to an from
 // UB ified q's are below.
-Kernel::Logger& SCDPanelErrors::g_log = Kernel::Logger::get("SCDPanelErrors");
 
 namespace { // anonymous namespace
 static const double ONE_OVER_TWO_PI = 1. / M_2_PI;

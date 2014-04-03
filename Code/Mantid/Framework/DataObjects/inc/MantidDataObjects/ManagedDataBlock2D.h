@@ -15,14 +15,6 @@
 namespace Mantid
 {
 
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
-        
 namespace DataObjects
 {
 /** Stores a block of 2D data.
@@ -109,9 +101,6 @@ private:
   
   /// Is the data block initialized or loaded from disk?
   bool m_loaded;
-
-  /// Static reference to the logger class
-  static Kernel::Logger &g_log;
 };
 
 } // namespace DataObjects

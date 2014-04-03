@@ -22,8 +22,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-  Kernel::Logger& TransformHKL::g_log = Kernel::Logger::get("TransformHKL");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(TransformHKL)
 

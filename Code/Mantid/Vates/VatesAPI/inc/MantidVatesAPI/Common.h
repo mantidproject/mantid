@@ -38,6 +38,8 @@ std::string makeAxisTitle(Dimension_const_sptr dim);
 void setAxisLabel(std::string metadataLabel,
                   std::string labelString,
                   vtkFieldData *fieldData);
+/// Function to check for special values.
+bool isSpecial(double value);
 
 }
 

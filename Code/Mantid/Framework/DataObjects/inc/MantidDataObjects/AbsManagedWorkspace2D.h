@@ -136,9 +136,6 @@ namespace DataObjects
     /// The size in bytes of one block
     std::size_t m_blockSize;
 
-    /// Static reference to the logger class
-    static Kernel::Logger &g_log;
-
     /// Markers used only to track which data blocks to release
     mutable mru_list m_bufferedMarkers;
 

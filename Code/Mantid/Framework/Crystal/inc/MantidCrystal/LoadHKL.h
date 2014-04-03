@@ -13,7 +13,7 @@ namespace Mantid
 namespace Crystal
 {
 
-  /** LoadHKL : Load an ISAW-style .peaks file
+  /** LoadHKL : Load an ISAW-style .hkl file
    * into a PeaksWorkspace
    * 
    * @author Vickie Lynch, SNS

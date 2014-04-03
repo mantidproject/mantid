@@ -6,6 +6,11 @@
 
 #include <QFileInfo>
 
+#include <QDropEvent>
+#include <QMimeData>
+#include <QDebug>
+#include <QUrl>
+
 namespace MantidQt
 {
   namespace MantidWidgets
@@ -24,6 +29,8 @@ namespace MantidQt
       connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SLOT(handleFileInput()));
 
       connect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(handleAutoLoadComplete(bool)));
+      this->setAcceptDrops(true);
+      m_uiForm.rfFileInput->setAcceptDrops(false);
     }
 
     DataSelector::~DataSelector()
@@ -407,6 +414,42 @@ namespace MantidQt
       m_uiForm.pbLoadFile->setVisible(load);
       m_showLoad = load;
     }
+
+    /**
+     * Called when an item is dropped
+     * @param de :: the drop event data package
+     */
+    void DataSelector::dropEvent(QDropEvent *de)
+    {
+      const QMimeData *mimeData = de->mimeData();  
+      auto before_action = de->dropAction();
+
+      if (de->mimeData() && mimeData->text().contains(" = mtd[\"")){
+        m_uiForm.wsWorkspaceInput->dropEvent(de);
+        if (de->dropAction() == before_action){    
+          m_uiForm.cbInputType->setCurrentIndex(1);
+          return;
+        }
+        de->setDropAction(before_action);    
+      }
+  
+      m_uiForm.rfFileInput->dropEvent(de);
+      if (de->dropAction() == before_action){
+        m_uiForm.cbInputType->setCurrentIndex(0);
+      }
+    }
+
+    /**
+     * Called when an item is dragged onto a control
+     * @param de :: the drag event data package
+     */
+    void DataSelector::dragEnterEvent(QDragEnterEvent *de)
+    {
+      const QMimeData *mimeData = de->mimeData();
+      if (mimeData->hasText() || mimeData->hasUrls())
+        de->acceptProposedAction();
+    }
+
 
   } /* namespace MantidWidgets */
 } /* namespace MantidQt */

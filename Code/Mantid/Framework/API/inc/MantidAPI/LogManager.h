@@ -152,8 +152,6 @@ namespace Mantid
       virtual void loadNexus(::NeXus::File * file, const std::string & group,bool keepOpen=false);
 
     protected:
-      /// Static reference to the logger class
-      static Kernel::Logger &g_log;
       /// A pointer to a property manager
       Kernel::PropertyManager m_manager;
      /// Name of the log entry containing the proton charge when retrieved using getProtonCharge

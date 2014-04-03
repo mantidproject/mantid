@@ -14,9 +14,15 @@ namespace Mantid
 {
   namespace API
   {
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("AlgorithmManager");
+    }
+
 
     /// Private Constructor for singleton class
-    AlgorithmManagerImpl::AlgorithmManagerImpl(): g_log(Kernel::Logger::get("AlgorithmManager")),m_managed_algs()
+    AlgorithmManagerImpl::AlgorithmManagerImpl() : m_managed_algs()
     {
       if ( ! Kernel::ConfigService::Instance().getValue("algorithms.retained",m_max_no_algs) || m_max_no_algs < 1 )
       {

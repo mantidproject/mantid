@@ -15,14 +15,6 @@
 
 namespace Mantid
 {
-        
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
 
 namespace API
 {
@@ -123,9 +115,6 @@ namespace API
     void addTies(boost::shared_ptr<IFunction> fun,const Expression& expr)const;
     /// Add a tie to the created function
     void addTie(boost::shared_ptr<IFunction> fun,const Expression& expr)const;
-
-    /// Reference to the logger class
-    Kernel::Logger& g_log;
 
     mutable std::map<std::string,std::vector<std::string>> m_cachedFunctionNames;
     mutable Kernel::Mutex m_mutex;

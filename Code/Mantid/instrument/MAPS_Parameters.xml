@@ -80,6 +80,13 @@
   <value val="ei-mon1-spec:ei-mon2-spec"/>
 </parameter>
 
+<!-- by default getEi looks for peaks within (1+-0.1)*TOF_GUES range where TOF_GUES is evaluated on the basis of ei guess.
+    If the peaks are very narrow, or there are a lot of them very close to each other, 
+    this value can be reduced. For example, such situation happens on MARI for very high incident energies Ei=1800.
+ -->
+<parameter name="ei_mon_peak_search_range">
+   <value val="0.1"/>
+</parameter>
 
 
 <parameter name="scale-factor">

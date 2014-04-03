@@ -83,8 +83,6 @@ namespace Mantid
   namespace Crystal
   {
 
-    Kernel::Logger& IntegratePeakTimeSlices::g_log = Kernel::Logger::get("IntegratePeakTimeSlices");
-
     DECLARE_ALGORITHM(IntegratePeakTimeSlices)
 
     //Attr, AttributeValues, and StatBase indicies

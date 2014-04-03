@@ -167,12 +167,11 @@ public:
 
   void testThatRunNumberReturnsFileWithCorrectPrefix()
   {
-    Mantid::API::FileProperty *fp = 
-      new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load, 
+    Mantid::API::FileProperty fp("Filename","", Mantid::API::FileProperty::Load,
                                     std::vector<std::string>(1, ".raw"));
-    std::string error = fp->setValue("48127");
+    std::string error = fp.setValue("48127");
     TS_ASSERT_EQUALS(error, "");
-    TS_ASSERT_DIFFERS(fp->value().find("LOQ48127"),std::string::npos);
+    TS_ASSERT_DIFFERS(fp.value().find("LOQ48127"),std::string::npos);
     
     // Now test one with an upper case extension
     auto & fileFinder = Mantid::API::FileFinder::Instance();
@@ -181,9 +180,9 @@ public:
     fileFinder.setCaseSensitive(false);
 
     ConfigService::Instance().setString("default.instrument","LOQ");
-    error = fp->setValue("25654");
+    error = fp.setValue("25654");
     TS_ASSERT_EQUALS(error, "");
-    TS_ASSERT(fp->value().find("LOQ25654") != std::string::npos);
+    TS_ASSERT(fp.value().find("LOQ25654") != std::string::npos);
 
     fileFinder.setCaseSensitive(startingCaseOption);
   }

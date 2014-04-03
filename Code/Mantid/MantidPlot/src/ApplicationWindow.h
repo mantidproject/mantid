@@ -97,14 +97,6 @@ class MantidTable;
   #define SHARED_MENUBAR
 #endif
 
-namespace Mantid
-{
-  namespace Kernel
-  {
-    class Logger;
-  }
-}
-
 namespace MantidQt
 {
   namespace API
@@ -1504,9 +1496,6 @@ private:
 
   /// Exit code to set at application end
   int m_exitCode;
-
-  /// Log object
-  Mantid::Kernel::Logger & g_log;
 
 public:
   MantidUI *mantidUI;

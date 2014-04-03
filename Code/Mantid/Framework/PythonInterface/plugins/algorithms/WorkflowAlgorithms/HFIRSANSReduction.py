@@ -288,10 +288,10 @@ class HFIRSANSReduction(PythonAlgorithm):
         if os.path.isdir(output_dir):
             output_msg += self._save_output(iq_output, iqxy_output, 
                                             output_dir, property_manager)
-            Logger.get("HFIRSANSReduction").notice("Output saved in %s" % output_dir)
+            Logger("HFIRSANSReduction").notice("Output saved in %s" % output_dir)
         elif len(output_dir)>0:
             msg = "Output directory doesn't exist: %s\n" % output_dir
-            Logger.get("HFIRSANSReduction").error(msg)
+            Logger("HFIRSANSReduction").error(msg)
     
         self.setProperty("OutputMessage", output_msg)
 
@@ -407,7 +407,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                         proc = open(process_file, 'r')
                         proc_xml = proc.read()
                     elif len(process_file)>0:
-                        Logger.get("HFIRSANSReduction").error("Could not read %s\n" % process_file)               
+                        Logger("HFIRSANSReduction").error("Could not read %s\n" % process_file)               
                 
                 filename = os.path.join(output_dir, iq_output+'.txt')
                 
@@ -432,7 +432,7 @@ class HFIRSANSReduction(PythonAlgorithm):
 
                 output_msg += "I(Q) saved in %s\n" % (filename)
             else:
-                Logger.get("HFIRSANSReduction").error("No I(Q) output found")
+                Logger("HFIRSANSReduction").error("No I(Q) output found")
         
         # Save I(Qx,Qy)
         if iqxy_output is not None:
@@ -447,7 +447,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                 #api.SaveNISTDAT(InputWorkspace=iqxy_output, Filename=filename)  
                 output_msg += "I(Qx,Qy) saved in %s\n" % (filename)
             else:
-                Logger.get("HFIRSANSReduction").error("No I(Qx,Qy) output found")
+                Logger("HFIRSANSReduction").error("No I(Qx,Qy) output found")
 
         return output_msg
 

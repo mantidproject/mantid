@@ -45,14 +45,14 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         if error_weighting:
             msg = "The ErrorWeighting option is turned ON. "
             msg += "This option is NOT RECOMMENDED"
-            Logger.get("SANSAzimuthalAverage").warning(msg)
+            Logger("SANSAzimuthalAverage").warning(msg)
             
         # Warn against sub-pixels
         n_subpix = self.getProperty("NumberOfSubpixels").value
         if n_subpix != 1:
             msg = "NumberOfSubpixels was set to %s: " % str(n_subpix)
             msg += "The recommended value is 1"
-            Logger.get("SANSAzimuthalAverage").warning(msg)
+            Logger("SANSAzimuthalAverage").warning(msg)
         
         # Q binning options
         binning = self.getProperty("Binning").value

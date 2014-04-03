@@ -4,8 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IArchiveSearch.h"
@@ -15,6 +13,13 @@
 
 namespace Mantid
 {
+  //---------------------------------------------------------------------------
+  // Forward declarations
+  //---------------------------------------------------------------------------
+  namespace Kernel
+  {
+    class InstrumentInfo;
+  }
   namespace API
   {
 
@@ -80,9 +85,6 @@ namespace Mantid
       std::string toUpper(const std::string &src) const;
       /// glob option - set to case sensitive or insensitive
       int m_globOption;
-
-      /// reference to the logger class
-      Mantid::Kernel::Logger& g_log;
     };
 
     ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.

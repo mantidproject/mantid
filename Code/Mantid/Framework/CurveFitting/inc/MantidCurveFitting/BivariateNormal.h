@@ -8,7 +8,6 @@
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 
@@ -190,20 +189,6 @@ namespace Mantid
              expCoeffy2 , 
              expCoeffxy; //<Other common values used in calculating values and
                          //<derivatives
-
-
-      
-
-     /*BoundaryConstraint* BackConstraint; ///< Constraint for background
-
-      boost::shared_ptr<BoundaryConstraint>MeanxConstraint; ///< Constraint using mean x
-
-      boost::shared_ptr<BoundaryConstraint>MeanyConstraint; ///< Constraint using mean y
-
-      boost::shared_ptr<BoundaryConstraint>IntensityConstraint; ///< Constraint using intensity
-     */
-      static Kernel::Logger & g_log;
-
 
     };
   }

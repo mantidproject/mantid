@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/Crystal/UnitCell.h"

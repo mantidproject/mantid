@@ -130,9 +130,9 @@ public:
   void test_HexagonalCase()
   {
     Matrix<double> correctNewUB(3,3,false);
-    V3D row_0( -0.122709, 0.006640, -0.144541 );
-    V3D row_1( -0.161964,-0.003276,  0.115259 );
-    V3D row_2(  0.117973, 0.233336,  0.005870 );
+    V3D row_0(  0.122709,  0.006640,  0.144541 );
+    V3D row_1(  0.161964, -0.003276, -0.115259 );
+    V3D row_2( -0.117973,  0.233336, -0.005870 );
     correctNewUB.setRow( 0, row_0 );
     correctNewUB.setRow( 1, row_1 );
     correctNewUB.setRow( 2, row_2 );

@@ -81,6 +81,8 @@ namespace API
 
     virtual bool getIsMasked() const;
 
+    virtual std::vector<size_t> findNeighbourIndexes() const;
+
   private:
     void calcWorkspacePos(size_t newWI);
 

@@ -1,9 +1,7 @@
 #ifndef MANTID_API_MULTIPLEFILEPROPERTY_H_
 #define MANTID_API_MULTIPLEFILEPROPERTY_H_
 
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/MultiFileNameParser.h"
 #include <vector>
 #include <set>
@@ -138,8 +136,6 @@ namespace API
     Kernel::MultiFileNameParsing::Parser m_parser;
     ///The default file extension associated with the type of file this property will handle
     std::string m_defaultExt;
-    /// Reference to the logger class
-    Kernel::Logger& g_log;
   };
 
 

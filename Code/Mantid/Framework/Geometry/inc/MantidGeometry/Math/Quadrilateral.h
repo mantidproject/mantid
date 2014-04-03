@@ -50,6 +50,9 @@ namespace Mantid
                     const double lowerY, const double upperY);
       /// Copy constructor
       Quadrilateral(const Quadrilateral & other);
+      /// Copy-assignment operator
+      Quadrilateral& operator=(const Quadrilateral & rhs);
+
       /// Destructor
       ~Quadrilateral();
       /// Index access.

@@ -17,7 +17,6 @@ namespace Geometry
 
 MDPlaneImplicitFunction::MDPlaneImplicitFunction() : MDImplicitFunction()
 {
-  this->origin = NULL;
 }
 
 /**
@@ -30,10 +29,9 @@ MDPlaneImplicitFunction::MDPlaneImplicitFunction() : MDImplicitFunction()
  */
 MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd,
                                                  const float *normal,
-                                                 const float *point) :
-  MDImplicitFunction()
+                                                 const float *point)
+  : MDImplicitFunction(), origin(nd)
 {
-  this->origin = new coord_t[nd];
   for( std::size_t i = 0; i < nd; i++)
   {
     this->origin[i] = static_cast<coord_t>(point[i]);
@@ -51,10 +49,9 @@ MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd,
  */
 MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd,
                                                  const double *normal,
-                                                 const double *point) :
-  MDImplicitFunction()
+                                                 const double *point)
+  : MDImplicitFunction(), origin(nd)
 {
-  this->origin = new coord_t[nd];
   for( std::size_t i = 0; i < nd; i++)
   {
     this->origin[i] = static_cast<coord_t>(point[i]);
@@ -125,7 +122,7 @@ std::string MDPlaneImplicitFunction::toXMLString() const
   origParameterElement->appendChild(origTypeElement);
   AutoPtr<Element>origValueElement = pDoc->createElement("Value");
   origParameterElement->appendChild(origValueElement);
-  AutoPtr<Text> origValueText = pDoc->createTextNode(this->coordValue(this->origin));
+  AutoPtr<Text> origValueText = pDoc->createTextNode(this->coordValue(this->origin.data()));
   origValueElement->appendChild(origValueText);
   origParameterElement->appendChild(origValueElement);
 
@@ -158,14 +155,9 @@ std::string MDPlaneImplicitFunction::coordValue(const coord_t *arr) const
 
 void MDPlaneImplicitFunction::checkOrigin()
 {
-  if (NULL == this->origin)
+  if ( origin.empty() )
   {
-    std::size_t nd = this->getNumDims();
-    this->origin = new coord_t[nd];
-    for (std::size_t i = 0; i < nd; i++)
-    {
-      this->origin[i] = std::numeric_limits<coord_t>::quiet_NaN();
-    }
+    origin.resize(getNumDims(), std::numeric_limits<coord_t>::quiet_NaN());
   }
 }
 

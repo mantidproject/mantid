@@ -49,9 +49,6 @@ public:
 	double getL2(const API::MatrixWorkspace_sptr&, int detId = 1);
 	double getInstrumentProperty(const API::MatrixWorkspace_sptr&, std::string);
 	std::string dateTimeInIsoFormat(std::string);
-private:
-	/// Reference to the logger class
-	Kernel::Logger& g_log;
 };
 
 } // namespace DataHandling

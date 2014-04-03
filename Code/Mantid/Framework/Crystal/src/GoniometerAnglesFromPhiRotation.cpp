@@ -38,8 +38,6 @@ namespace Mantid
 {
   namespace Crystal
   {
-    Kernel::Logger& GoniometerAnglesFromPhiRotation::g_log = Kernel::Logger::get(
-        "GoniometerAnglesFromPhiRotation");
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(GoniometerAnglesFromPhiRotation)

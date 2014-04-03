@@ -246,14 +246,14 @@ public:
     TS_ASSERT( wsp5->isLocking());
 
     // Create one that is not locking
-    WorkspaceProperty<Workspace> * p1 = new WorkspaceProperty<Workspace>("workspace1","ws1",Direction::Input, PropertyMode::Mandatory, LockMode::NoLock);
-    TS_ASSERT( !p1->isLocking());
+    WorkspaceProperty<Workspace> p1("workspace1","ws1",Direction::Input, PropertyMode::Mandatory, LockMode::NoLock);
+    TS_ASSERT( !p1.isLocking());
 
     // Copy constructor, both ways
-    WorkspaceProperty<Workspace> * wsp1_copy = new WorkspaceProperty<Workspace>(*wsp1);
-    TS_ASSERT( wsp1_copy->isLocking());
-    WorkspaceProperty<Workspace> * p2 = new WorkspaceProperty<Workspace>(*p1);
-    TS_ASSERT( !p2->isLocking());
+    WorkspaceProperty<Workspace> wsp1_copy(*wsp1);
+    TS_ASSERT( wsp1_copy.isLocking());
+    WorkspaceProperty<Workspace> p2(p1);
+    TS_ASSERT( !p2.isLocking());
 
   }
 

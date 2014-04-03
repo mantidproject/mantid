@@ -23,36 +23,39 @@ namespace Mantid
 {
 namespace Kernel
 {
-  // Initialize the static members
-  Logger::LoggerList* Logger::m_loggerList = NULL;
-  Poco::FastMutex* Logger::mutexLoggerList = NULL;
-  Poco::NullOutputStream* Logger::m_nullStream = NULL;
+  namespace
+  {
+    // We only need a single NullStream object
+    Poco::NullOutputStream NULL_STREAM;
+  }
 
   /** Constructor
    * @param name :: The class name invoking this logger
    */
-  Logger::Logger(const std::string& name) : m_name(name), m_levelOffset(0), m_enabled(true) 
+  Logger::Logger(const std::string& name)
+    : m_log(&Poco::Logger::get(name)), m_logStream(new ThreadSafeLogStream(*m_log)),
+      m_levelOffset(0), m_enabled(true)
   {
-    m_log=&Poco::Logger::get(m_name);
-    m_logStream = new Mantid::Kernel::ThreadSafeLogStream(*m_log);
   }
 
   /// Destructor
   Logger::~Logger()
   {
-    delete (m_logStream);
+    delete m_logStream;
   }
 
-  /// Sets the Loggername to a new value.
-  void Logger::setName(const std::string & newName)
+  /**
+   * @param name The new name
+   */
+  void Logger::setName(const std::string & name)
   {
-    //delete the log stream
-    delete (m_logStream);
-    //reassign m_log
-    m_name = newName;
-    m_log = &Poco::Logger::get(m_name);
-    //create a new Logstream
-    m_logStream = new Mantid::Kernel::ThreadSafeLogStream(*m_log);
+    auto *logger = &Poco::Logger::get(name);
+    auto *logStream = new ThreadSafeLogStream(*logger); // don't swap if this throws
+
+    using std::swap;
+    swap(m_log, logger);
+    swap(m_logStream, logStream);
+    delete logStream;
   }
 
   /** Returns true if the log is enabled
@@ -289,40 +292,6 @@ namespace Kernel
      return getLogStream(Priority::PRIO_DEBUG);
   }
 
-  /** releases resources and deletes this object.
-   */
-  void Logger::release()
-  {
-    destroy(*this);
-  }
-
-  /** Deletes the logger and clears it from the cache.
-   *
-   *  @param logger :: The logger to destroy.
-   */
-  void Logger::destroy(Logger& logger)
-  {
-    if (m_loggerList)
-    {
-      try
-      { mutexLoggerList->lock(); }
-      catch(Poco::SystemException &)
-      {}
-
-      LoggerList::iterator it = m_loggerList->find(&logger);
-      if (it != m_loggerList->end())
-      {
-        delete(*it);
-        m_loggerList->erase(it);
-      }
-
-      try
-      { mutexLoggerList->unlock(); }
-      catch(Poco::SystemException &)
-      {}
-    }
-  }
-
   /** Shuts down the logging framework and releases all Loggers.
    * Static method.
    */
@@ -330,31 +299,12 @@ namespace Kernel
   {
     try
     {
-      //first release the POCO loggers
+      // Release the POCO loggers
       Poco::Logger::shutdown();
-
-      //now delete our static cache of loggers
-      if (m_loggerList)
-      {
-        for (LoggerList::iterator it = m_loggerList->begin(); it != m_loggerList->end(); ++it)
-        {
-          delete(*it);
-        }
-        delete m_loggerList;
-        m_loggerList = 0;
-      }
-
-      //delete the NullChannel
-      delete(m_nullStream);
-      m_nullStream=0;
-
-      // Finally delete the mutex
-      delete mutexLoggerList;
-      mutexLoggerList = 0;
     }
     catch (std::exception& e)
     {
-      //failures in logging are not allowed to throw exceptions out of the logging class
+      // failures in logging are not allowed to throw exceptions out of the logging class
       std::cerr << e.what();
     }
   }
@@ -366,47 +316,6 @@ namespace Kernel
   {
     // "" is the root logger
     Poco::Logger::setLevel("",level);
-  }
-
-
-  /** Returns a reference to the Logger with the given name.
-   *  This logger is stored until in a static list until it is destroyed, released or Logger::shutdown is called.
-   *
-   *  @param name :: The name of the logger to use - this is usually the class name.
-   *  @return a reference to the Logger with the given name.
-   */
-  Logger& Logger::get(const std::string& name)
-  {
-    Logger* pLogger = new Logger(name);
-    // MG: This method can be called to initialize static logger which means
-    // it may get called before mutexLoggerList has been initialized, i.e. the
-    // usual static initialization order problem.
-    if( mutexLoggerList == NULL ) mutexLoggerList = new Poco::FastMutex();
-    try
-    { mutexLoggerList->lock(); }
-    catch(Poco::SystemException &)
-    {}
-
-    //assert the nullSteam
-    if(!m_nullStream)
-    {
-      m_nullStream = new Poco::NullOutputStream;
-    }
-
-    //assert the loggerlist
-    if (!m_loggerList)
-    {
-      m_loggerList = new LoggerList;
-    }
-    //insert the newly created logger
-    m_loggerList->insert(pLogger);
-
-    try
-    { mutexLoggerList->unlock(); }
-    catch(Poco::SystemException &)
-    {}
-
-    return *pLogger;
   }
 
   /**
@@ -455,7 +364,7 @@ namespace Kernel
    */
   std::ostream& Logger::getLogStream(Logger::Priority priority)
   {
-    if( !m_enabled ) return *m_nullStream;
+    if( !m_enabled ) return NULL_STREAM;
 
     switch( applyLevelOffset(priority) )
     {
@@ -474,7 +383,7 @@ namespace Kernel
     case Poco::Message::PRIO_DEBUG:  return m_logStream->debug();
     break;
     default:
-      return *m_nullStream;
+      return NULL_STREAM;
     }
 
   }
@@ -522,7 +431,7 @@ namespace Kernel
    * Gets the Logger's log offset level.
    * @returns The offset level
    */ /// Gets the Logger's log offset level.
-   int Logger::getLevelOffset()
+   int Logger::getLevelOffset() const
    {
      return m_levelOffset;
    }

@@ -11,6 +11,7 @@
 
 #include <gmock/gmock.h>
 #include <boost/tuple/tuple.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -806,6 +807,163 @@ public:
     TS_ASSERT_EQUALS( errorMsg.substr(0,25), "Detector location element");
   }
 
+  Instrument_sptr loadInstrLocations(const std::string& locations, detid_t numDetectors, bool rethrow = false)
+  {
+    std::string filename = ConfigService::Instance().getInstrumentDirectory()
+        + "/IDFs_for_UNIT_TESTING/IDF_for_locations_test.xml";
+
+    std::string contents = Strings::loadFile(filename);
+
+    boost::replace_first(contents, "%LOCATIONS%", locations);
+    boost::replace_first(contents, "%NUM_DETECTORS%", boost::lexical_cast<std::string>(numDetectors));
+
+    InstrumentDefinitionParser parser;
+    parser.initialize(filename, "LocationsTestInstrument", contents);
+
+    Instrument_sptr instr;
+
+    if (rethrow)
+      instr = parser.parseXML(NULL);
+    else
+      TS_ASSERT_THROWS_NOTHING(instr = parser.parseXML(NULL));
+
+    TS_ASSERT_EQUALS(instr->getNumberDetectors(), numDetectors);
+
+    return instr;
+  }
+
+  void testLocationsNaming()
+  {
+    std::string locations = "<locations n-elements=\"5\" name-count-start=\"10\" name=\"det\" />";
+    detid_t numDetectors = 5;
+
+    Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
+
+    TS_ASSERT_EQUALS(instr->getDetector(1)->getName(), "det10");
+    TS_ASSERT_EQUALS(instr->getDetector(3)->getName(), "det12");
+    TS_ASSERT_EQUALS(instr->getDetector(5)->getName(), "det14");
+  }
+
+  void testLocationsStaticValues()
+  {
+    std::string locations = "<locations n-elements=\"5\" x=\"1.0\" y=\"2.0\" z=\"3.0\" />";
+    detid_t numDetectors = 5;
+
+    Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
+
+    for (detid_t i = 1; i <= numDetectors; ++i)
+    {
+      TS_ASSERT_DELTA(instr->getDetector(i)->getPos().X(), 1.0, 1.0E-8);
+      TS_ASSERT_DELTA(instr->getDetector(i)->getPos().Y(), 2.0, 1.0E-8);
+      TS_ASSERT_DELTA(instr->getDetector(i)->getPos().Z(), 3.0, 1.0E-8);
+    }
+  }
+
+  void testLocationsRanges()
+  {
+    std::string locations = "<locations n-elements=\"5\" x=\"1.0\" x-end=\"5.0\"  "
+                            "                            y=\"4.0\" y-end=\"1.0\"  "
+                            "                            z=\"3.0\" z-end=\"3.0\"/>";
+    detid_t numDetectors = 5;
+
+    Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
+
+    TS_ASSERT_DELTA(instr->getDetector(1)->getPos().X(), 1.0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(1)->getPos().Y(), 4.0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(1)->getPos().Z(), 3.0, 1.0E-8);
+
+    TS_ASSERT_DELTA(instr->getDetector(3)->getPos().X(), 3.0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(3)->getPos().Y(), 2.5, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(3)->getPos().Z(), 3.0, 1.0E-8);
+
+    TS_ASSERT_DELTA(instr->getDetector(5)->getPos().X(), 5.0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Y(), 1.0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Z(), 3.0, 1.0E-8);
+  }
+
+  void checkDetectorRot(IDetector_const_sptr det, double deg, double axisx, double axisy, double axisz)
+  {
+    double detDeg, detAxisX, detAxisY, detAxisZ;
+    det->getRotation().getAngleAxis(detDeg, detAxisX, detAxisY, detAxisZ);
+
+    TS_ASSERT_DELTA(deg, detDeg, 1.0E-8);
+    TS_ASSERT_DELTA(axisx, detAxisX, 1.0E-8);
+    TS_ASSERT_DELTA(axisy, detAxisY, 1.0E-8);
+    TS_ASSERT_DELTA(axisz, detAxisZ, 1.0E-8);
+  }
+
+  void testLocationsMixed()
+  {
+    // Semicircular placement, like the one for e.g. MERLIN or IN5
+    std::string locations = "<locations n-elements=\"7\" r=\"0.5\" t=\"0.0\" t-end=\"180.0\" "
+                            "           rot=\"0.0\" rot-end=\"180.0\" axis-x=\"0.0\" "
+                            "           axis-y=\"1.0\" axis-z=\"0.0\"/>";
+    detid_t numDetectors = 7;
+
+    Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
+
+    // Left-most (r = 0.5, t, rot = 0)
+    TS_ASSERT_DELTA(instr->getDetector(1)->getPos().X(), 0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(1)->getPos().Y(), 0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(1)->getPos().Z(), 0.5, 1.0E-8);
+    checkDetectorRot(instr->getDetector(1), 0, 0, 0, 1); // Special case for null rotation
+
+    // Next to left-most (r = 0.5, t, rot = 30)
+    TS_ASSERT_DELTA(instr->getDetector(2)->getPos().X(), 0.25, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(2)->getPos().Y(), 0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(2)->getPos().Z(), 0.433, 1.0E-4);
+    checkDetectorRot(instr->getDetector(2), 30, 0, 1, 0);
+
+    // The one directly in front (r = 0.5, t, rot = 90)
+    TS_ASSERT_DELTA(instr->getDetector(4)->getPos().X(), 0.5, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(4)->getPos().Y(), 0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(4)->getPos().Z(), 0, 1.0E-8);
+    checkDetectorRot(instr->getDetector(4), 90, 0, 1, 0);
+
+    // Right-most to the one directly in front (r = 0.5, t, rot = 120)
+    TS_ASSERT_DELTA(instr->getDetector(5)->getPos().X(), 0.433, 1.0E-4);
+    TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Y(), 0, 1.0E-8);
+    TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Z(), -0.25, 1.0E-8);
+    checkDetectorRot(instr->getDetector(5), 120, 0, 1, 0);
+  }
+
+  void testLocationsInvalidNoElements()
+  {
+    std::string locations = "<locations n-elements=\"0\" t=\"0.0\" t-end=\"180.0\" />";
+    detid_t numDetectors = 2;
+
+    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true), Exception::InstrumentDefinitionError);
+
+    locations = "<locations n-elements=\"-1\" t=\"0.0\" t-end=\"180.0\" />";
+
+    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true), Exception::InstrumentDefinitionError);
+  }
+
+  void testLocationsNotANumber()
+  {
+    std::string locations = "<locations n-elements=\"2\" t=\"0.0\" t-end=\"180.x\" />";
+    detid_t numDetectors = 2;
+
+    TS_ASSERT_THROWS_ANYTHING(loadInstrLocations(locations, numDetectors, true));
+
+    locations = "<locations n-elements=\"2\" t=\"0.x\" t-end=\"180.0\" />";
+
+    TS_ASSERT_THROWS_ANYTHING(loadInstrLocations(locations, numDetectors, true));
+
+    locations = "<locations n-elements=\"x\" t=\"0.0\" t-end=\"180.0\" />";
+    TS_ASSERT_THROWS_ANYTHING(loadInstrLocations(locations, numDetectors, true));
+
+    locations = "<locations n-elements=\"2\" name-count-start=\"x\"/>";
+    TS_ASSERT_THROWS_ANYTHING(loadInstrLocations(locations, numDetectors, true));
+  }
+
+  void testLocationsNoCorrespondingStartAttr()
+  {
+    std::string locations = "<locations n-elements=\"2\" t-end=\"180.0\" />";
+    detid_t numDetectors = 2;
+
+    TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true), Exception::InstrumentDefinitionError);
+  }
 };
 
 class InstrumentDefinitionParserTestPerformance : public CxxTest::TestSuite

@@ -1,6 +1,5 @@
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 #include <cfloat>
@@ -14,11 +13,6 @@ namespace Geometry
 
   using Kernel::Tolerance;
   using Kernel::V3D;
-
-Kernel::Logger& Plane::PLog(Kernel::Logger::get("Plane"));
-
-/// Numerical tolerance, now set by Surface::Tolerance
-//const double PTolerance(1e-6); 
 
 Plane::Plane() : Quadratic(),
   NormV(1.0,0.0,0.0),Dist(0)

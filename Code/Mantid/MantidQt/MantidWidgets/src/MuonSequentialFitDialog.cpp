@@ -11,8 +11,10 @@ namespace MantidWidgets
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
 
-  Logger& MuonSequentialFitDialog::g_log(Logger::get("MuonSequentialFitDialog"));
-
+  namespace
+  {
+    Logger g_log("MuonSequentialFitDialog");
+  }
   const std::string MuonSequentialFitDialog::SEQUENTIAL_PREFIX("MuonSeqFit_");
 
   /** 

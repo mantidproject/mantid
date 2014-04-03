@@ -24,7 +24,11 @@
 
 #include <iostream>
 
-Mantid::Kernel::Logger & PeakPickerTool::g_log = Mantid::Kernel::Logger::get("PeakPickerTool");
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("PeakPickerTool");
+}
 
 PeakPickerTool::PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, MantidUI *mantidUI, bool showFitPropertyBrowser) :
 QwtPlotPicker(graph->plotWidget()->canvas()),
@@ -88,9 +92,8 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
           this,SLOT(removePlot(MantidQt::MantidWidgets::PropertyHandler*)));
   connect(m_fitPropertyBrowser,SIGNAL(removeFitCurves()),this,SLOT(removeFitCurves()));
 
-  // When fit browser destroyed, disable oneself in the parent graph 
-  connect(m_fitPropertyBrowser, SIGNAL( destroyed() ), graph, SLOT( disableTools() ), 
-    Qt::QueuedConnection);
+  // When fit browser destroyed, disable oneself in the parent graph
+  connect(m_fitPropertyBrowser, SIGNAL(destroyed()), graph, SLOT(disableTools()));
 
   //Show the fitPropertyBrowser if it isn't already.
   if (showFitPropertyBrowser) m_fitPropertyBrowser->show();

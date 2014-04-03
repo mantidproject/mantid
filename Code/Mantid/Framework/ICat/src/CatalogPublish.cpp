@@ -86,10 +86,6 @@ namespace Mantid
         throw std::runtime_error("Please select a workspace or a file to publish. Not both.");
       }
 
-      // This again is a temporary measure to ensure publishing functionality will work with one catalog.
-      auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
-      if (!session.empty()) setPropertyValue("Session", session.front()->getSessionId());
-
       // Cast a catalog to a catalogInfoService to access publishing functionality.
       auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(
           API::CatalogManager::Instance().getCatalog(getPropertyValue("Session")));
