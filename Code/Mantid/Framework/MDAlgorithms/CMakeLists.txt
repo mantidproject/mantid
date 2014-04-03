@@ -57,6 +57,7 @@ set ( SRC_FILES
 	src/Quantification/Resolution/TobyFitYVector.cpp
 	src/Quantification/ResolutionConvolvedCrossSection.cpp
 	src/Quantification/SimulateResolutionConvolvedModel.cpp
+	src/SXDMDNorm.cpp
 	src/SaveMD.cpp
 	src/SaveZODS.cpp
 	src/SetMDUsingMask.cpp
@@ -97,8 +98,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ExponentialMD.h
 	inc/MantidMDAlgorithms/FakeMDEventData.h
 	inc/MantidMDAlgorithms/FindPeaksMD.h
+	inc/MantidMDAlgorithms/GSLFunctions.h
 	inc/MantidMDAlgorithms/GreaterThanMD.h
-    inc/MantidMDAlgorithms/GSLFunctions.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD2.h
@@ -132,6 +133,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h
 	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
+	inc/MantidMDAlgorithms/SXDMDNorm.h
 	inc/MantidMDAlgorithms/SaveMD.h
 	inc/MantidMDAlgorithms/SaveZODS.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
@@ -155,8 +157,8 @@ set ( TEST_FILES
 	AndMDTest.h
 	BooleanBinaryOperationMDTest.h
 	CachedExperimentInfoTest.h
-	CentroidPeaksMDTest.h
 	CentroidPeaksMD2Test.h
+	CentroidPeaksMDTest.h
 	CloneMDWorkspaceTest.h
 	CompareMDWorkspacesTest.h
 	ConvertEventsToMDTest.h
@@ -177,8 +179,8 @@ set ( TEST_FILES
 	FitResolutionConvolvedModelTest.h
 	ForegroundModelTest.h
 	GreaterThanMDTest.h
-	IntegratePeaksMDTest.h
 	IntegratePeaksMD2Test.h
+	IntegratePeaksMDTest.h
 	InvalidParameterParserTest.h
 	InvalidParameterTest.h
 	LessThanMDTest.h
@@ -198,6 +200,7 @@ set ( TEST_FILES
 	PowerMDTest.h
 	PreprocessDetectorsToMDTest.h
 	ResolutionConvolvedCrossSectionTest.h
+	SXDMDNormTest.h
 	SaveMDTest.h
 	SaveZODSTest.h
 	SetMDUsingMaskTest.h
