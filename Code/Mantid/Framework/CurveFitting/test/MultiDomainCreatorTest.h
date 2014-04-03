@@ -43,6 +43,15 @@ public:
   }
 };
 
+class MultiDomainCreatorTest_Manager: public Kernel::PropertyManager
+{
+public:
+  void store(const std::string& propName)
+  {
+    dynamic_cast<IWorkspaceProperty*>(getPointerToProperty(propName))->store();
+  }
+};
+
 class MultiDomainCreatorTest : public CxxTest::TestSuite
 {
 public:
@@ -163,7 +172,7 @@ public:
 
   void test_output_workspace()
   {
-    Mantid::Kernel::PropertyManager manager;
+    MultiDomainCreatorTest_Manager manager;
     manager.declareProperty(new WorkspaceProperty<Workspace>("WS1","",Direction::Input));
     manager.declareProperty(new WorkspaceProperty<Workspace>("WS2","",Direction::Input));
     manager.declareProperty(new WorkspaceProperty<Workspace>("WS3","",Direction::Input));
@@ -227,6 +236,14 @@ public:
     auto ows3 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(2));
     doTestOutputSpectrum( ows3, 2 );
 
+    WorkspaceGroup_sptr outWS = manager.getProperty("OUT_WS");
+    TS_ASSERT( outWS );
+    TS_ASSERT_EQUALS( outWS->getItem(0)->name(), "out_Workspace_0" );
+    TS_ASSERT_EQUALS( outWS->getItem(1)->name(), "out_Workspace_1" );
+    TS_ASSERT_EQUALS( outWS->getItem(2)->name(), "out_Workspace_2" );
+    manager.store("OUT_WS");
+    TS_ASSERT_EQUALS( outWS->name(), "out_Workspaces" );
+    AnalysisDataService::Instance().clear();
   }
 
   void test_setMatrixWorkspace_and_setWorkspace()

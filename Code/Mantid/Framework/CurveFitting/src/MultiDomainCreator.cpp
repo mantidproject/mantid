@@ -146,7 +146,7 @@ namespace CurveFitting
 
     for(size_t i = 0; i < functions.size(); ++i)
     {
-      std::string localName = baseName + "_" + boost::lexical_cast<std::string>(i);
+      std::string localName = baseName + "Workspace_" + boost::lexical_cast<std::string>(i);
       auto fun = functions[i];
       auto creator = m_creators[i];
       boost::shared_ptr<API::FunctionDomain> localDomain;
@@ -155,6 +155,7 @@ namespace CurveFitting
       creator->createDomain(localDomain,localValues);
       creator->initFunction(fun);
       auto ws = creator->createOutputWorkspace(localName,fun,localDomain,localValues,"");
+      API::AnalysisDataService::Instance().addOrReplace(localName,ws);
       outWS->addWorkspace( ws );
     }
 
@@ -162,7 +163,7 @@ namespace CurveFitting
     {
       declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>(outputWorkspacePropertyName,"",Kernel::Direction::Output),
           "Name of the output Workspace holding resulting simulated spectrum");
-      m_manager->setPropertyValue(outputWorkspacePropertyName,baseName+"Workspace");
+      m_manager->setPropertyValue(outputWorkspacePropertyName,baseName+"Workspaces");
       m_manager->setProperty(outputWorkspacePropertyName,outWS);
     }
 
