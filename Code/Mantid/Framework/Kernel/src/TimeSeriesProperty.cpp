@@ -6,6 +6,7 @@
 #include "MantidKernel/TimeSplitter.h"
 
 #include <sstream>
+#include <boost/range/algorithm_ext/is_sorted.hpp>
 
 using namespace std;
 
@@ -1789,6 +1790,9 @@ namespace Mantid
       if (!m_propSortedFlag)
       {
         // Check whether it is sorted or not
+#if 1
+        m_propSortedFlag = boost::is_sorted(m_values); 
+#else
         size_t numsize = m_values.size();
         if (numsize <= 1)
         {
@@ -1806,6 +1810,7 @@ namespace Mantid
               break;
             }
         }
+#endif
       }
 
       if (!m_propSortedFlag)
