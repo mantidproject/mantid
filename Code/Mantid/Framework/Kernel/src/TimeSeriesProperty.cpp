@@ -6,7 +6,7 @@
 #include "MantidKernel/TimeSplitter.h"
 
 #include <sstream>
-#include <boost/range/algorithm_ext/is_sorted.hpp>
+// #include <boost/range/algorithm_ext/is_sorted.hpp>
 
 using namespace std;
 
@@ -1799,6 +1799,8 @@ namespace Mantid
     //-------------------------------------------------------------------------
     // Private methods
     //-------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------
     /*
      * Sort vector mP and set the flag
      */
