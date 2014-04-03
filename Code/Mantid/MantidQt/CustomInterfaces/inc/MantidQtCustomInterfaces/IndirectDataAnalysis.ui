@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>794</width>
+    <width>801</width>
     <height>642</height>
    </rect>
   </property>
@@ -962,19 +962,6 @@
         </layout>
        </item>
        <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
         <layout class="QHBoxLayout" name="confit_layoutPlotArea">
          <item>
           <layout class="QVBoxLayout" name="confit_layoutProperties">
@@ -1330,7 +1317,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
-           <layout class="QGridLayout" name="gridLayout_2">
+           <layout class="QGridLayout" name="gridLayout_2" columnminimumwidth="0,0,9">
             <item row="2" column="2">
              <widget class="QLabel" name="absp_valWidth">
               <property name="styleSheet">
@@ -1438,60 +1425,8 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <layout class="QGridLayout" name="gridLayout_5">
-                  <item row="0" column="5">
-                   <widget class="QLineEdit" name="absp_letc1">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <spacer name="horizontalSpacer_30">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeType">
-                     <enum>QSizePolicy::Fixed</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>28</width>
-                      <height>21</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                  <item row="0" column="4">
-                   <widget class="QLabel" name="absp_lbtc1">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                    <property name="text">
-                     <string>Can Front Thickness:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="7">
-                   <widget class="QLabel" name="absp_lbtc2">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                    <property name="text">
-                     <string>Can Back Thickness:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
+                 <layout class="QGridLayout" name="gridLayout_5_thickness" columnminimumwidth="97,0,0,0,0,0,0,0,0">
+                  <item row="0" column="2">
                    <widget class="QLabel" name="absp_valts">
                     <property name="styleSheet">
                      <string notr="true">color: rgb(255, 0, 0);</string>
@@ -1501,7 +1436,7 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="6">
+                  <item row="0" column="5">
                    <widget class="QLabel" name="absp_valtc1">
                     <property name="enabled">
                      <bool>false</bool>
@@ -1521,42 +1456,6 @@
                    </widget>
                   </item>
                   <item row="0" column="8">
-                   <widget class="QLineEdit" name="absp_letc2">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="2">
-                   <widget class="QLineEdit" name="absp_lets">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="absp_lbts">
-                    <property name="text">
-                     <string>Thickness:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="9">
                    <widget class="QLabel" name="absp_valtc2">
                     <property name="enabled">
                      <bool>false</bool>
@@ -1575,6 +1474,78 @@
                     </property>
                    </widget>
                   </item>
+                  <item row="0" column="7">
+                   <widget class="QLineEdit" name="absp_letc2">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="6">
+                   <widget class="QLabel" name="absp_lbtc2">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="text">
+                     <string>Can Back Thickness:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="3">
+                   <widget class="QLabel" name="absp_lbtc1">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="text">
+                     <string>Can Front Thickness:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="absp_lbts">
+                    <property name="text">
+                     <string>Thickness:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="4">
+                   <widget class="QLineEdit" name="absp_letc1">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QLineEdit" name="absp_lets">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                   </widget>
+                  </item>
                  </layout>
                 </item>
                </layout>
@@ -1585,7 +1556,7 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <layout class="QGridLayout" name="gridLayout_3">
+                 <layout class="QGridLayout" name="gridLayout_3" columnminimumwidth="0,97,0,0,0,0,0,0,0,0">
                   <item row="0" column="1">
                    <widget class="QLabel" name="absp_lbR1">
                     <property name="text">
@@ -1593,14 +1564,14 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="5">
+                  <item row="0" column="4">
                    <widget class="QLabel" name="absp_lbR2">
                     <property name="text">
                      <string>Radius 2:</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="9">
+                  <item row="0" column="8">
                    <widget class="QLineEdit" name="absp_ler3">
                     <property name="enabled">
                      <bool>false</bool>
@@ -1610,7 +1581,7 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="7">
+                  <item row="0" column="6">
                    <widget class="QLabel" name="absp_valR2">
                     <property name="styleSheet">
                      <string notr="true">color: rgb(255, 0, 0);</string>
@@ -1620,7 +1591,7 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="4">
+                  <item row="0" column="3">
                    <widget class="QLabel" name="absp_valR1">
                     <property name="styleSheet">
                      <string notr="true">color: rgb(255, 0, 0);</string>
@@ -1630,7 +1601,7 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="3">
+                  <item row="0" column="2">
                    <widget class="QLineEdit" name="absp_ler1">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -1643,7 +1614,7 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="10">
+                  <item row="0" column="9">
                    <widget class="QLabel" name="absp_valR3">
                     <property name="enabled">
                      <bool>false</bool>
@@ -1656,7 +1627,7 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="8">
+                  <item row="0" column="7">
                    <widget class="QLabel" name="absp_lbR3">
                     <property name="enabled">
                      <bool>false</bool>
@@ -1666,28 +1637,12 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="6">
+                  <item row="0" column="5">
                    <widget class="QLineEdit" name="absp_ler2">
                     <property name="text">
                      <string/>
                     </property>
                    </widget>
-                  </item>
-                  <item row="0" column="2">
-                   <spacer name="horizontalSpacer_31">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeType">
-                     <enum>QSizePolicy::Fixed</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>37</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
                   </item>
                  </layout>
                 </item>
@@ -1707,7 +1662,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_13">
           <item>
-           <layout class="QGridLayout" name="gridLayout_9">
+           <layout class="QGridLayout" name="gridLayout_9" columnminimumwidth="0,0,0,0,0,9">
             <item row="0" column="0">
              <widget class="QLabel" name="absp_lbsamden">
               <property name="sizePolicy">
@@ -1734,27 +1689,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="QComboBox" name="absp_cbSampleInputType">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <item>
-               <property name="text">
-                <string>Input</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Formula</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item row="1" column="2" colspan="2">
+            <item row="1" column="4" colspan="2">
              <widget class="QStackedWidget" name="absp_swSampleInputType">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1777,7 +1712,7 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <layout class="QGridLayout" name="gridLayout_8">
+                 <layout class="QGridLayout" name="gridLayout_8" columnminimumwidth="0,0,0,0,0,9">
                   <item row="0" column="4">
                    <widget class="QLineEdit" name="absp_lesamsiga">
                     <property name="text">
@@ -1842,7 +1777,7 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <layout class="QGridLayout" name="gridLayout_12">
+                 <layout class="QGridLayout" name="gridLayout_12" columnminimumwidth="0,9">
                   <item row="0" column="0">
                    <widget class="QLineEdit" name="absp_leSampleFormula">
                     <property name="text">
@@ -1872,32 +1807,48 @@
               </widget>
              </widget>
             </item>
-            <item row="0" column="1" colspan="3">
-             <layout class="QHBoxLayout" name="horizontalLayout_11">
+            <item row="0" column="5">
+             <widget class="QLabel" name="absp_valSamden">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 0, 0);</string>
+              </property>
+              <property name="text">
+               <string>*</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="4">
+             <widget class="QLineEdit" name="absp_lesamden">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" colspan="3">
+             <widget class="QComboBox" name="absp_cbSampleInputType">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <item>
-               <widget class="QLineEdit" name="absp_lesamden">
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
+               <property name="text">
+                <string>Input</string>
+               </property>
               </item>
               <item>
-               <widget class="QLabel" name="absp_valSamden">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">color: rgb(255, 0, 0);</string>
-                </property>
-                <property name="text">
-                 <string>*</string>
-                </property>
-               </widget>
+               <property name="text">
+                <string>Formula</string>
+               </property>
               </item>
-             </layout>
+             </widget>
             </item>
            </layout>
           </item>
@@ -1914,7 +1865,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_12">
           <item>
-           <layout class="QGridLayout" name="gridLayout_6">
+           <layout class="QGridLayout" name="gridLayout_6" columnminimumwidth="0,0,0,0,9">
             <item row="0" column="0">
              <widget class="QLabel" name="absp_lbCanden">
               <property name="sizePolicy">
@@ -1941,8 +1892,11 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="2" colspan="2">
+            <item row="1" column="3" colspan="2">
              <widget class="QStackedWidget" name="absp_swCanInputType">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -1953,6 +1907,9 @@
                <number>0</number>
               </property>
               <widget class="QWidget" name="page_3">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -1964,9 +1921,12 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <layout class="QGridLayout" name="gridLayout_7">
+                 <layout class="QGridLayout" name="gridLayout_7" columnminimumwidth="0,0,0,0,0,0,9">
                   <item row="0" column="0">
                    <widget class="QLabel" name="absp_lbCansigs">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -1980,6 +1940,9 @@
                   </item>
                   <item row="0" column="1" colspan="2">
                    <widget class="QLineEdit" name="absp_lecansigs">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="text">
                      <string/>
                     </property>
@@ -2053,7 +2016,7 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <layout class="QGridLayout" name="gridLayout_10">
+                 <layout class="QGridLayout" name="gridLayout_10" columnminimumwidth="0,9">
                   <item row="0" column="0">
                    <widget class="QLineEdit" name="absp_leCanFormula"/>
                   </item>
@@ -2079,7 +2042,33 @@
               </widget>
              </widget>
             </item>
-            <item row="1" column="1">
+            <item row="0" column="4">
+             <widget class="QLabel" name="absp_valCanden">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 0, 0);</string>
+              </property>
+              <property name="text">
+               <string>*</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="3">
+             <widget class="QLineEdit" name="absp_lecanden">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" colspan="2">
              <widget class="QComboBox" name="absp_cbCanInputType">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -2098,36 +2087,6 @@
                </property>
               </item>
              </widget>
-            </item>
-            <item row="0" column="1" colspan="3">
-             <layout class="QHBoxLayout" name="horizontalLayout_10">
-              <item>
-               <widget class="QLineEdit" name="absp_lecanden">
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="absp_valCanden">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">color: rgb(255, 0, 0);</string>
-                </property>
-                <property name="text">
-                 <string>*</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
             </item>
            </layout>
           </item>
@@ -2427,7 +2386,7 @@
             <item>
              <widget class="QCheckBox" name="abscor_ckPlotContrib">
               <property name="enabled">
-                <bool>false</bool>
+               <bool>false</bool>
               </property>
               <property name="text">
                <string>Plot Contributions</string>
@@ -2656,19 +2615,66 @@
   <tabstop>confit_leSpecNo</tabstop>
   <tabstop>confit_leSpecMax</tabstop>
   <tabstop>confit_cbPlotOutput</tabstop>
-  <tabstop>absp_lets</tabstop>
-  <tabstop>absp_ler1</tabstop>
-  <tabstop>absp_ler2</tabstop>
-  <tabstop>absp_ler3</tabstop>
-  <tabstop>absp_leavar</tabstop>
-  <tabstop>absp_lewidth</tabstop>
-  <tabstop>absp_lesamsigs</tabstop>
-  <tabstop>absp_lecansigs</tabstop>
-  <tabstop>absp_cbPlotOutput</tabstop>
   <tabstop>abscor_cbPlotOutput</tabstop>
   <tabstop>pbHelp</tabstop>
   <tabstop>pbRun</tabstop>
   <tabstop>pbManageDirs</tabstop>
+  <tabstop>elwin_inputFile</tabstop>
+  <tabstop>elwin_ckNormalise</tabstop>
+  <tabstop>leLogName</tabstop>
+  <tabstop>msd_inputFile</tabstop>
+  <tabstop>fury_resFile</tabstop>
+  <tabstop>furyfit_inputFile</tabstop>
+  <tabstop>furyfit_pbPlotInput</tabstop>
+  <tabstop>furyfit_wsIqt</tabstop>
+  <tabstop>furyfit_ckConstrainBeta</tabstop>
+  <tabstop>furyfit_cbPlotOutput</tabstop>
+  <tabstop>furyfit_pbSeqFit</tabstop>
+  <tabstop>furyfit_ckVerbose</tabstop>
+  <tabstop>furyfit_ckPlotOutput</tabstop>
+  <tabstop>furyfit_ckSaveSeq</tabstop>
+  <tabstop>confit_cbResType</tabstop>
+  <tabstop>confit_resInput</tabstop>
+  <tabstop>confit_cbInputType</tabstop>
+  <tabstop>confit_inputFile</tabstop>
+  <tabstop>confit_pbPlotInput</tabstop>
+  <tabstop>confit_wsSample</tabstop>
+  <tabstop>confit_ckTieCentres</tabstop>
+  <tabstop>confit_pbSequential</tabstop>
+  <tabstop>confit_ckVerbose</tabstop>
+  <tabstop>confit_ckPlotOutput</tabstop>
+  <tabstop>confit_ckSaveSeq</tabstop>
+  <tabstop>absp_ckUseCan</tabstop>
+  <tabstop>absp_cbShape</tabstop>
+  <tabstop>absp_leavar</tabstop>
+  <tabstop>absp_lewidth</tabstop>
+  <tabstop>absp_lets</tabstop>
+  <tabstop>absp_letc1</tabstop>
+  <tabstop>absp_letc2</tabstop>
+  <tabstop>absp_ler1</tabstop>
+  <tabstop>absp_ler2</tabstop>
+  <tabstop>absp_ler3</tabstop>
+  <tabstop>absp_lesamden</tabstop>
+  <tabstop>absp_cbSampleInputType</tabstop>
+  <tabstop>absp_lesamsigs</tabstop>
+  <tabstop>absp_lesamsiga</tabstop>
+  <tabstop>absp_leSampleFormula</tabstop>
+  <tabstop>absp_lecanden</tabstop>
+  <tabstop>absp_cbCanInputType</tabstop>
+  <tabstop>absp_lecansigs</tabstop>
+  <tabstop>absp_lecansiga</tabstop>
+  <tabstop>absp_leCanFormula</tabstop>
+  <tabstop>absp_ckVerbose</tabstop>
+  <tabstop>absp_cbPlotOutput</tabstop>
+  <tabstop>absp_ckSave</tabstop>
+  <tabstop>abscor_cbGeometry</tabstop>
+  <tabstop>abscor_ckUseCan</tabstop>
+  <tabstop>abscor_ckScaleMultiplier</tabstop>
+  <tabstop>abscor_leScaleMultiplier</tabstop>
+  <tabstop>abscor_ckUseCorrections</tabstop>
+  <tabstop>abscor_ckPlotContrib</tabstop>
+  <tabstop>abscor_ckVerbose</tabstop>
+  <tabstop>abscor_ckSave</tabstop>
  </tabstops>
  <resources/>
  <connections/>
