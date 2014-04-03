@@ -287,13 +287,22 @@ namespace Mantid
       ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
       auto colRuns = ws->addColumn("str","Run(s)");
-      auto colTheta = ws->addColumn("str","Theta");
-      auto colTrans = ws->addColumn("str","Trans");
+      auto colTheta = ws->addColumn("str","ThetaIn");
+      auto colTrans = ws->addColumn("str","TransRun(s)");
       auto colQmin = ws->addColumn("str","Qmin");
       auto colQmax = ws->addColumn("str","Qmax");
       auto colDqq = ws->addColumn("str","dq/q");
       auto colScale = ws->addColumn("str","Scale");
-      auto colStitch = ws->addColumn("str","Stitch");
+      auto colStitch = ws->addColumn("str","StitchGroup");
+
+      colRuns->setPlotType(0);
+      colTheta->setPlotType(0);
+      colTrans->setPlotType(0);
+      colQmin->setPlotType(0);
+      colQmax->setPlotType(0);
+      colDqq->setPlotType(0);
+      colScale->setPlotType(0);
+      colStitch->setPlotType(0);
 
       std::vector<std::string> columns;
 
@@ -306,6 +315,9 @@ namespace Mantid
           continue;
         }
         getCells(line, columns);
+
+        //check if the first run in the row has any data associated with it
+        // 0 = runs, 1 = theta, 2 = trans, 3 = qmin, 4 = qmax
         if (columns[0] != "" || columns[1] != "" || columns[2] != "" || columns[3] != "" || columns[4] != "")
         {
           TableRow row = ws->appendRow();
@@ -318,6 +330,9 @@ namespace Mantid
           row << columns.at(16);
           row << boost::lexical_cast<std::string>(stitchID);
         }
+
+        //check if the second run in the row has any data associated with it
+        // 5 = runs, 6 = theta, 7 = trans, 8 = qmin, 9 = qmax
         if (columns[5] != "" || columns[6] != "" || columns[7] != "" || columns[8] != "" || columns[9] != "")
         {
           TableRow row = ws->appendRow();
@@ -330,6 +345,9 @@ namespace Mantid
           row << columns.at(16);
           row << boost::lexical_cast<std::string>(stitchID);
         }
+
+        //check if the third run in the row has any data associated with it
+        // 10 = runs, 11 = theta, 12 = trans, 13 = qmin, 14 = qmax
         if (columns[10] != "" || columns[11] != "" || columns[12] != "" || columns[13] != "" || columns[14] != "")
         {
           TableRow row = ws->appendRow();

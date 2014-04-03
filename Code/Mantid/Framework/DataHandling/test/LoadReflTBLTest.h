@@ -30,14 +30,38 @@ public:
   {
   }
 
-  void testExec()
+  void testFileNoQuotes()
   {
 
   }
 
+  void testQuotedFile()
+  {
+
+  }
+
+  void testFewColumns()
+  {
+
+  }
+
+  void testManyColumns()
+  {
+
+  }
+  
+  void testBlankFile()
+  {
+
+  }
 private:
   std::string m_filename;
   std::string m_ext;
+  
+  void cleanup()
+  {
+
+  }
 };
 
 
