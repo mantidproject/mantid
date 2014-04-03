@@ -1,4 +1,5 @@
 #include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
+#include <QStringBuilder> // provides % operator for QString
 
 /// Constructor
 MantidQwtMatrixWorkspaceData::MantidQwtMatrixWorkspaceData(Mantid::API::MatrixWorkspace_const_sptr workspace,int specIndex, const bool logScale, bool distr)
@@ -138,6 +139,51 @@ double MantidQwtMatrixWorkspaceData::getYMax() const
     temp = m_minPositive;
   }
   return temp;
+}
+
+/**
+ * @return A string containin the text to use as an X axis label
+ */
+QString MantidQwtMatrixWorkspaceData::getXAxisLabel() const
+{
+  // Deal with axis names
+  Mantid::API::Axis* ax = m_workspace->getAxis(0);
+  QString xTitle;
+  if (ax->unit() && ax->unit()->unitID() != "Empty" )
+  {
+    xTitle = QString::fromStdString(ax->unit()->caption());
+    if ( !ax->unit()->label().empty() )
+    {
+      xTitle += " (" + QString::fromStdWString(ax->unit()->utf8Label()) + ")";
+    }
+  }
+  else if (!ax->title().empty())
+  {
+    xTitle = QString::fromStdString(ax->title());
+  }
+  else
+  {
+    xTitle = "X axis";
+  }
+  return xTitle;
+}
+
+/**
+ * @return A string containin the text to use as an Y axis label
+ */
+QString MantidQwtMatrixWorkspaceData::getYAxisLabel() const
+{
+  QString yTitle = QString::fromStdString(m_workspace->YUnitLabel());
+  Mantid::API::Axis* ax = m_workspace->getAxis(0);
+  if (m_isDistribution && ax->unit())
+  {
+    const std::string unitID = ax->unit()->unitID();
+    if (unitID != "" || unitID != "Empty")
+    {
+      yTitle = yTitle % " / " % ax->unit()->label().c_str();
+    }
+  }
+  return yTitle;
 }
 
 void MantidQwtMatrixWorkspaceData::setLogScale(bool on)
