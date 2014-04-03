@@ -9,6 +9,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/Strings.h"
+#include "MantidAPI/TableRow.h"
 #include <fstream>
 
 #include <boost/tokenizer.hpp>
@@ -34,9 +35,10 @@ namespace Mantid
     using namespace API;
 
     /// Empty constructor
-    LoadReflTBL::LoadReflTBL()
+    LoadReflTBL::LoadReflTBL(): m_expectedCommas(16)
     {
     }
+
 
     /**
     * Return the confidence with with this algorithm can load the file
@@ -64,8 +66,7 @@ namespace Mantid
         std::vector<std::string> columns;
         try
         {
-          getCells(firstLine, columns);
-          if (columns.size() == 17) //right ammount of columns
+          if (getCells(firstLine, columns) == 17) //right ammount of columns
           {
             if (filePath.compare(filenameLength - 4,4,".tbl") == 0 )
             {
@@ -88,13 +89,17 @@ namespace Mantid
       }
       return confidence;
     }
-    int LoadReflTBL::getCells(std::string line, std::vector<std::string> & cols) const
+
+
+    /**
+    * counte the commas in the line
+    * @param line the line to count from
+    * @returns a size_t of how many commas were in line
+    */
+    size_t LoadReflTBL::countCommas (std::string line) const
     {
-      //first check the number of commas in the line.
-      const size_t expectedCommas = 16;
-      size_t pos = 0;
       size_t found = 0;
-      pos=line.find(',',pos);
+      size_t pos=line.find(',',0);
       if (pos!=std::string::npos)
       {
         ++found;
@@ -107,12 +112,128 @@ namespace Mantid
           ++found;
         }
       }
-      if (found == expectedCommas)
+      return found;
+    }
+
+
+    /**
+    * find pairs of qutoes and store them in a vector
+    * @param line the line to count from
+    * @param quotebounds a vector<vector<size_t>> which will contain the locations of pairs of quotes
+    * @returns a size_t of how many pairs of quotes were in line
+    */
+    size_t LoadReflTBL::findQuotePairs (std::string line, std::vector<std::vector<size_t>> & quoteBounds) const
+    {
+      size_t quoteOne = 0;
+      size_t quoteTwo = 0;
+      while (quoteOne!=std::string::npos && quoteTwo!=std::string::npos)
+      {
+        if (quoteTwo == 0)
+        {
+          quoteOne=line.find('"');
+        }
+        else
+        {
+          quoteOne=line.find('"', quoteTwo + 1);
+        }
+        if (quoteOne!=std::string::npos)
+        {
+          quoteTwo=line.find('"', quoteOne + 1);
+          if (quoteTwo!=std::string::npos)
+          {
+            std::vector<size_t> quotepair;
+            quotepair.push_back(quoteOne);
+            quotepair.push_back(quoteTwo);
+            quoteBounds.push_back(quotepair);
+          }
+        }
+      }
+      return quoteBounds.size();
+    }
+
+
+    /**
+    * parse the CSV format if it's not a simple case of splitting 16 commas
+    * @param line the line to parse
+    * @param cols The vector to parse into
+    * @param quotebounds a vector<vector<size_t>> containing the locations of pairs of quotes
+    * @throws std::length_error if anything other than 17 columns (or 16 cell-delimiting commas) is found
+    */
+    void LoadReflTBL::csvParse(std::string line, std::vector<std::string> & cols, std::vector<std::vector<size_t>> & quoteBounds) const
+    {
+      size_t pairID = 0;
+      size_t valsFound = 0;
+      size_t lastComma = 0;
+      size_t pos = 0;
+      cols.clear();
+      while (pos!=std::string::npos)
+      {
+        pos=line.find(',',pos+1);
+        if (pos!=std::string::npos)
+        {
+          if (pairID < quoteBounds.size() && pos>quoteBounds.at(pairID).at(0))
+          {
+            if (pos>quoteBounds.at(pairID).at(1))
+            {
+              //use the quote indexes to get the substring
+              cols.push_back(line.substr(quoteBounds.at(pairID).at(0) + 1,
+                  quoteBounds.at(pairID).at(1) - (quoteBounds.at(pairID).at(0) + 1)));
+              ++pairID;
+              ++valsFound;
+            }
+          }
+          else
+          {
+            if (lastComma != 0)
+            {
+              cols.push_back(line.substr(lastComma + 1,pos - (lastComma + 1)));
+            }
+            else
+            {
+              cols.push_back(line.substr(0,pos));
+            }
+            ++valsFound;
+          }
+          lastComma = pos;
+        }
+        else
+        {
+          if (lastComma + 1 < line.length())
+          {
+            cols.push_back(line.substr(lastComma + 1));
+          }
+          else
+          {
+            cols.push_back("");
+          }
+        }
+      }
+      if (cols.size() > 17)
+      {
+        std::string message = "A line must contain 16 cell-delimiting commas. Found " + boost::lexical_cast<std::string>(cols.size() - 1) + ".";
+        throw std::length_error(message);
+      }
+    }
+
+
+    /**
+    * Return the confidence with with this algorithm can load the file
+    * @param line the line to parse
+    * @param cols The vector to parse into
+    * @returns An integer specifying how many columns were parsed into. This should always be 17.
+    * @throws std::length_error if anything other than 17 columns (or 16 cell-delimiting commas) is found
+    */
+    size_t LoadReflTBL::getCells(std::string line, std::vector<std::string> & cols) const
+    {
+      //first check the number of commas in the line.
+      size_t pos = 0;
+      size_t found = countCommas(line);
+      if (found == m_expectedCommas)
       {
         //If there are 16 that simplifies things and i can get boost to do the hard work
-        boost::split(cols, line, boost::is_any_of(","), boost::token_compress_on);
+        boost::split(cols, line, boost::is_any_of(","), boost::token_compress_off);
       }
-      else if (found < expectedCommas)
+      else if (found < m_expectedCommas)
       {
         //less than 16 means the line isn't properly formatted. So Throw
         std::string message = "A line must contain 16 cell-delimiting commas. Found " + boost::lexical_cast<std::string>(found) + ".";
@@ -120,96 +241,19 @@ namespace Mantid
       }
       else
       {
-        //More than 16 will need further checks. If there are pairs of double quotes, it's OK.
-        //if there aren't any qutoes throw
-        //look for pairs of double quotes so we can discount any commas inside them
-        size_t quoteOne = 0;
-        size_t quoteTwo = 0;
-        size_t foundPairs = 0;
+        //More than 16 will need further checks as more is only ok when pairs of quotes surround a comma, meaning it isn't a delimiter
         std::vector<std::vector<size_t>> quoteBounds;
-        while (quoteOne!=std::string::npos && quoteTwo!=std::string::npos)
-        {
-          if (quoteTwo == 0)
-          {
-            quoteOne=line.find('"');
-          }
-          else
-          {
-            quoteOne=line.find('"', quoteTwo + 1);
-          }
-          if (quoteOne!=std::string::npos)
-          {
-            quoteTwo=line.find('"', quoteOne + 1);
-            if (quoteTwo!=std::string::npos)
-            {
-              ++foundPairs;
-              std::vector<size_t> quotepair;
-              quotepair.push_back(quoteOne);
-              quotepair.push_back(quoteTwo);
-              quoteBounds.push_back(quotepair);
-            }
-          }
-        }
-        //now check to see how many pairs of quotes were found, if none, then there are too many commas
-        //as there'd need to be some commas inside quotes to make them part of the value and discount them as delimiters
-        //otherwise we definitely have too many delimiters
+        size_t quotepairs = findQuotePairs(line, quoteBounds);
+        //if we didn't find any quotes, then there are too many commas and we definitely have too many delimiters
         if (quoteBounds.size() == 0)
         {
           std::string message = "A line must contain 16 cell-delimiting commas. Found " + boost::lexical_cast<std::string>(found) + ".";
           throw std::length_error(message);
         }
         //now go through and split it up manually. Throw if we find ourselves in a positon where we'd add a 18th value to the vector
-        size_t pairID = 0;
-        size_t valsFound = 0;
-        size_t lastComma = 0;
-        pos = 0;
-        cols.clear();
-        while (pos!=std::string::npos)
-        {
-          pos=line.find(',',pos+1);
-          if (pos!=std::string::npos)
-          {
-            if (pairID < quoteBounds.size() && pos>quoteBounds.at(pairID).at(0))
-            {
-              if (pos>quoteBounds.at(pairID).at(1))
-              {
-                //use the quote indexes to get the substring
-                cols.push_back(line.substr(quoteBounds.at(pairID).at(0) + 1,
-                                            quoteBounds.at(pairID).at(1) - (quoteBounds.at(pairID).at(0) + 1)));
-                ++pairID;
-                ++valsFound;
-              }
-            }
-            else
-            {
-              if (lastComma != 0)
-              {
-                cols.push_back(line.substr(lastComma + 1,pos - (lastComma + 1)));
-              }
-              else
-              {
-                cols.push_back(line.substr(0,pos));
-              }
-              ++valsFound;
-            }
-            lastComma = pos;
-          }
-        }
-        if (lastComma + 1 < line.length())
-        {
-          cols.push_back("");
-        }
-        else
-        {
-          cols.push_back(line.substr(lastComma + 1));
-        }
-        if (cols.size() > 17)
-        {
-          std::string message = "A line must contain 16 cell-delimiting commas. Found " + boost::lexical_cast<std::string>(cols.size() - 1) + ".";
-          throw std::length_error(message);
-        }
+        csvParse(line, cols, quoteBounds);
       }
-      return static_cast<int>(cols.size());
+      return cols.size();
     }
     //--------------------------------------------------------------------------
     // Private methods
@@ -222,9 +266,8 @@ namespace Mantid
 
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The name of the table file to read, including its full or relative path. The file extension must be .tbl");
-      declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace",
-        "",Direction::Output), "The name of the workspace that will be created, "
-        "filled with the read-in data and stored in the [[Analysis Data Service]].");
+      declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace","",Direction::Output),
+        "The name of the workspace that will be created.");
     }
 
     /** 
@@ -240,12 +283,70 @@ namespace Mantid
         throw Exception::FileError("Unable to open file: " , filename);
       }
       std::string line = "";
-      Kernel::Strings::extractToEOL(file, line);
+
+      ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+
+      auto colRuns = ws->addColumn("str","Run(s)");
+      auto colTheta = ws->addColumn("str","Theta");
+      auto colTrans = ws->addColumn("str","Trans");
+      auto colQmin = ws->addColumn("str","Qmin");
+      auto colQmax = ws->addColumn("str","Qmax");
+      auto colDqq = ws->addColumn("str","dq/q");
+      auto colScale = ws->addColumn("str","Scale");
+      auto colStitch = ws->addColumn("str","Stitch");
 
       std::vector<std::string> columns;
-      getCells(line, columns);
-    }
 
+      int stitchID = 0;
+      while(Kernel::Strings::extractToEOL(file, line))
+      {
+        //ignore the row if the line is blank
+        if (line == "" || line == ",,,,,,,,,,,,,,,,")
+        {
+          continue;
+        }
+        getCells(line, columns);
+        if (columns[0] != "" || columns[1] != "" || columns[2] != "" || columns[3] != "" || columns[4] != "")
+        {
+          TableRow row = ws->appendRow();
+          row << columns.at(0);
+          row << columns.at(1);
+          row << columns.at(2);
+          row << columns.at(3);
+          row << columns.at(4);
+          row << columns.at(15);
+          row << columns.at(16);
+          row << boost::lexical_cast<std::string>(stitchID);
+        }
+        if (columns[5] != "" || columns[6] != "" || columns[7] != "" || columns[8] != "" || columns[9] != "")
+        {
+          TableRow row = ws->appendRow();
+          row << columns.at(5);
+          row << columns.at(6);
+          row << columns.at(7);
+          row << columns.at(8);
+          row << columns.at(9);
+          row << columns.at(15);
+          row << columns.at(16);
+          row << boost::lexical_cast<std::string>(stitchID);
+        }
+        if (columns[10] != "" || columns[11] != "" || columns[12] != "" || columns[13] != "" || columns[14] != "")
+        {
+          TableRow row = ws->appendRow();
+          row << columns.at(10);
+          row << columns.at(11);
+          row << columns.at(12);
+          row << columns.at(13);
+          row << columns.at(14);
+          row << columns.at(15);
+          row << columns.at(16);
+          row << boost::lexical_cast<std::string>(stitchID);
+        }
+        ++stitchID;
+      }
+
+      setProperty("OutputWorkspace", ws);
+    }
 
   } // namespace DataHandling
 } // namespace Mantid

@@ -65,7 +65,15 @@ namespace Mantid
       /// Execute the algorithm
       void exec();
       // Split into columns with respect to the comma delimiters
-      int getCells(std::string line, std::vector<std::string> & cols) const;
+      size_t getCells(std::string line, std::vector<std::string> & cols) const;
+      //count the number of commas in the line
+      size_t countCommas (std::string line) const;
+      //find all pairs of quotes in the line
+      size_t findQuotePairs (std::string line, std::vector<std::vector<size_t>> & quoteBounds) const;
+
+      void csvParse(std::string line, std::vector<std::string> & cols, std::vector<std::vector<size_t>> & quoteBounds) const;
+      //the perfect number of commas expected in a single line. more is fine, less is not (set to 16)
+      const size_t m_expectedCommas;
     };
 
   } // namespace DataHandling
