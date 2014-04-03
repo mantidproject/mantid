@@ -1844,7 +1844,11 @@
                 <item>
                  <layout class="QGridLayout" name="gridLayout_12">
                   <item row="0" column="0">
-                   <widget class="QLineEdit" name="absp_leSampleFormula"/>
+                   <widget class="QLineEdit" name="absp_leSampleFormula">
+                    <property name="text">
+                     <string/>
+                    </property>
+                   </widget>
                   </item>
                   <item row="0" column="1">
                    <widget class="QLabel" name="absp_valSampleFormula">
