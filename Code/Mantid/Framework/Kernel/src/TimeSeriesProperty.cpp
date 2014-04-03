@@ -6,7 +6,13 @@
 #include "MantidKernel/TimeSplitter.h"
 
 #include <sstream>
-// #include <boost/range/algorithm_ext/is_sorted.hpp>
+#if !(defined __APPLE__ && defined __INTEL_COMPILER)
+#include <algorithm>
+using std::is_sorted;
+#else
+#include <boost/range/algorithm_ext/is_sorted.hpp>
+using boost::is_sorted;
+#endif
 
 using namespace std;
 
@@ -1810,7 +1816,12 @@ namespace Mantid
       if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN)
       {
         // Check whether it is sorted or not
-        // Disabled b/c REL6 library issue. m_propSortedFlag = boost::is_sorted(m_values);
+        bool sorted = is_sorted(m_values.begin(), m_values.end());
+        if (sorted)
+          m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
+        else
+          m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
+#if 0
         size_t numsize = m_values.size();
         if (numsize <= 1)
         {
@@ -1828,7 +1839,9 @@ namespace Mantid
               break;
             }
         }
+#endif
       }
+
 
       if (m_propSortedFlag == TimeSeriesSortStatus::TSUNSORTED)
       {
