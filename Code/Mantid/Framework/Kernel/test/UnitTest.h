@@ -98,6 +98,7 @@ std::string convert_units_check_range(const Unit &aUnit,std::vector<double> &sam
 
 class UnitTest : public CxxTest::TestSuite
 {
+
   class UnitTester : public Unit
   {
 public:
@@ -249,6 +250,11 @@ public:
     TS_ASSERT_EQUALS( tof.label(), "microsecond" )
   }
 
+  void testTOF_utf8Label()
+  {
+    TS_ASSERT_EQUALS( tof.utf8Label(), L"\u03bcs" )
+  }
+
   void testTOF_cast()
   {
     Unit *u = NULL;
@@ -307,6 +313,11 @@ public:
   void testWavelength_label()
   {
     TS_ASSERT_EQUALS( lambda.label(), "Angstrom" )
+  }
+
+  void testWavelength_utf8Label()
+  {
+    TS_ASSERT_EQUALS( lambda.utf8Label(), L"\u212b" )
   }
 
   void testWavelength_cast()
@@ -390,6 +401,12 @@ public:
   {
     TS_ASSERT_EQUALS( energy.label(), "meV" )
   }
+
+  void testEnergy_utf8Label()
+  {
+    TS_ASSERT_EQUALS( energy.utf8Label(), L"meV" )
+  }
+
 
   void testEnergy_cast()
   {
@@ -475,6 +492,11 @@ public:
     TS_ASSERT_EQUALS( energyk.label(), "1/cm" )
   }
 
+  void testEnergy_inWavenumber_utf8Label()
+  {
+    TS_ASSERT_EQUALS( energyk.utf8Label(), L"cm\u207b\u00b9" )
+  }
+
   void testEnergy_inWavenumber_cast()
   {
     Unit *u = NULL;
@@ -538,6 +560,11 @@ public:
   void testdSpacing_label()
   {
     TS_ASSERT_EQUALS( d.label(), "Angstrom" )
+  }
+
+  void testdSpacing_utf8Label()
+  {
+    TS_ASSERT_EQUALS( d.utf8Label(), L"\u212b" )
   }
 
   void testdSpacing_cast()
@@ -628,6 +655,11 @@ public:
     TS_ASSERT_EQUALS( q.label(), "1/Angstrom" )
   }
 
+  void testQTransfer_utf8Label()
+  {
+    TS_ASSERT_EQUALS( q.utf8Label(), L"\u212b\u207b\u00b9" )
+  }
+
   void testQTransfer_cast()
   {
     Unit *u = NULL;
@@ -714,6 +746,11 @@ public:
   void testQ2_label()
   {
     TS_ASSERT_EQUALS( q2.label(), "Angstrom^-2" )
+  }
+
+  void testQ2_utf8Label()
+  {
+    TS_ASSERT_EQUALS( q2.utf8Label(), L"\u212b\u207b\u00b2" )
   }
 
   void testQ2_cast()
@@ -805,6 +842,11 @@ public:
     TS_ASSERT_EQUALS( dE.label(), "meV" )
   }
 
+  void testDeltaE_utf8Label()
+  {
+    TS_ASSERT_EQUALS( dE.utf8Label(), L"meV" )
+  }
+
   void testDeltaE_cast()
   {
     Unit *u = NULL;
@@ -877,7 +919,7 @@ public:
 
 
   //----------------------------------------------------------------------
-  // Energy transfer tests
+  // Energy transfer in wavenumber tests
   //----------------------------------------------------------------------
 
   void testDeltaEk_unitID()
@@ -893,6 +935,11 @@ public:
   void testDeltaEk_label()
   {
     TS_ASSERT_EQUALS( dEk.label(), "1/cm" )
+  }
+
+  void testDeltaEk_utf8Label()
+  {
+    TS_ASSERT_EQUALS( dEk.utf8Label(), L"cm\u207b\u00b9" )
   }
 
   void testDeltaEk_cast()
@@ -980,6 +1027,11 @@ public:
   void testMomentum_label()
   {
     TS_ASSERT_EQUALS( k_i.label(), "Angstrom^-1" )
+  }
+
+  void testMomentum_utf8Label()
+  {
+    TS_ASSERT_EQUALS( k_i.utf8Label(), L"\u212b\u207b\u00b9" )
   }
 
   void testMomentum_cast()
@@ -1113,6 +1165,11 @@ public:
     TS_ASSERT_EQUALS( delta.label(), "nm" )
   }
 
+  void testSpinEchoLength_utf8Label()
+  {
+    TS_ASSERT_EQUALS( delta.utf8Label(), L"nm" )
+  }
+
   void testSpinEchoLength_cast()
   {
     Unit *u = NULL;
@@ -1196,6 +1253,11 @@ public:
   void testSpinEchoTime_label()
   {
     TS_ASSERT_EQUALS( tau.label(), "ns" )
+  }
+
+  void testSpinEchoTime_utf8Llabel()
+  {
+    TS_ASSERT_EQUALS( tau.utf8Label(), L"ns" )
   }
 
   void testSpinEchoTime_cast()

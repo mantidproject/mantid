@@ -13,6 +13,15 @@ namespace Mantid
 namespace Kernel
 {
 
+/**
+ * @return A label string that can contain utf-8 character encodings.
+ *         Default returns contents of label()
+ */
+const std::wstring Unit::utf8Label() const
+{
+  auto lbl = this->label();
+  return std::wstring(lbl.begin(), lbl.end());
+}
 
 /// Copy Constructor
 Unit::Unit(const Unit & other) : initialized(false),

@@ -60,6 +60,8 @@ public:
   /// A label for the unit to be printed on axes
   /// @return The unit label
   virtual const std::string label() const = 0;
+  /// A label string that can contain utf-8 character encodings.
+  virtual const std::wstring utf8Label() const;
 
   // Check whether the unit can be converted to another via a simple factor
   bool quickConversion(const Unit& destination, double& factor, double& power) const;
@@ -282,7 +284,8 @@ public:
   const std::string unitID() const; ///< "TOF"
   const std::string caption() const { return "Time-of-flight"; }
   const std::string label() const {return "microsecond"; }
-  
+  const std::wstring utf8Label() const { return L"\u03bcs"; }
+
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
@@ -307,6 +310,7 @@ public:
   const std::string unitID() const; ///< "Wavelength"
   const std::string caption() const { return "Wavelength"; }
   const std::string label() const {return "Angstrom"; }
+  const std::wstring utf8Label() const { return L"\u212b"; }
   
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -364,6 +368,7 @@ public:
   const std::string unitID() const; ///< "Energy_inWavenumber"
   const std::string caption() const { return "Energy"; }
   const std::string label() const {return "1/cm"; }
+  const std::wstring utf8Label() const { return L"cm\u207b\u00b9"; }
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -390,6 +395,7 @@ public:
   const std::string unitID() const; ///< "dSpacing"
   const std::string caption() const { return "d-Spacing"; }
   const std::string label() const {return "Angstrom"; }
+  const std::wstring utf8Label() const { return L"\u212b"; }
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -416,6 +422,7 @@ public:
   const std::string unitID() const; ///< "MomentumTransfer"
   const std::string caption() const { return "q"; }
   const std::string label() const {return "1/Angstrom"; }
+  const std::wstring utf8Label() const { return L"\u212b\u207b\u00b9"; }
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -441,6 +448,7 @@ public:
   const std::string unitID() const; ///< "QSquared"
   const std::string caption() const { return "Q2"; }
   const std::string label() const {return "Angstrom^-2"; }
+  const std::wstring utf8Label() const { return L"\u212b\u207b\u00b2"; }
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -497,6 +505,8 @@ public:
   const std::string unitID() const; ///< "DeltaE_inWavenumber"
   const std::string caption() const { return "Energy transfer"; }
   const std::string label() const {return "1/cm"; }
+  const std::wstring utf8Label() const { return L"cm\u207b\u00b9"; }
+
 
   virtual void init();
   virtual Unit * clone() const;
@@ -544,6 +554,7 @@ public:
   const std::string unitID() const; ///< "Momentum"
   const std::string caption() const { return "Momentum"; }
   const std::string label() const {return "Angstrom^-1"; }
+  const std::wstring utf8Label() const { return L"\u212b\u207b\u00b9"; }
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -573,7 +584,8 @@ public:
   const std::string unitID() const; ///< "SpinEchoLength"
   const std::string caption() const { return "Spin Echo Length"; }
   const std::string label() const {return "nm"; }
-  
+  const std::wstring utf8Label() const { return L"nm"; }
+
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
@@ -596,7 +608,8 @@ public:
   const std::string unitID() const; ///< "SpinEchoTime"
   const std::string caption() const { return "Spin Echo Time"; }
   const std::string label() const {return "ns"; }
-  
+  const std::wstring utf8Label() const { return L"ns"; }
+
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
@@ -620,6 +633,7 @@ public:
   const std::string unitID() const; ///< "Time"
   const std::string caption() const { return "t"; }
   const std::string label() const {return "Second"; }
+  const std::wstring utf8Label() const { return L"s"; }
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
