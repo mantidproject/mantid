@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/AddLogDerivative.cpp
 	src/AddPeak.cpp
 	src/AddSampleLog.cpp
+	src/AddTimeSeriesLog.cpp
 	src/AlignDetectors.cpp
 	src/AlphaCalc.cpp
 	src/AnyShapeAbsorption.cpp
@@ -66,6 +67,7 @@ set ( SRC_FILES
 	src/CrossCorrelate.cpp
 	src/CuboidGaugeVolumeAbsorption.cpp
 	src/CylinderAbsorption.cpp
+	src/DeleteLog.cpp
 	src/DeleteWorkspace.cpp
 	src/DetectorDiagnostic.cpp
 	src/DetectorEfficiencyCor.cpp
@@ -232,6 +234,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddPeak.h
 	inc/MantidAlgorithms/AddSampleLog.h
+	inc/MantidAlgorithms/AddTimeSeriesLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AlphaCalc.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
@@ -292,6 +295,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CrossCorrelate.h
 	inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h
 	inc/MantidAlgorithms/CylinderAbsorption.h
+	inc/MantidAlgorithms/DeleteLog.h
 	inc/MantidAlgorithms/DeleteWorkspace.h
 	inc/MantidAlgorithms/DetectorDiagnostic.h
 	inc/MantidAlgorithms/DetectorEfficiencyCor.h
@@ -470,6 +474,7 @@ set ( TEST_FILES
 	AddLogDerivativeTest.h
 	AddPeakTest.h
 	AddSampleLogTest.h
+	AddTimeSeriesLogTest.h
 	AlignDetectorsTest.h
 	AlphaCalcTest.h
 	AnyShapeAbsorptionTest.h
@@ -529,6 +534,7 @@ set ( TEST_FILES
 	CropWorkspaceTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
 	CylinderAbsorptionTest.h
+	DeleteLogTest.h
 	DeleteWorkspaceTest.h
 	DetectorEfficiencyCorTest.h
 	DetectorEfficiencyCorUserTest.h
