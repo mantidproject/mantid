@@ -8,10 +8,8 @@
 #include <sstream>
 #if !(defined __APPLE__ && defined __INTEL_COMPILER)
 #include <algorithm>
-using std::is_sorted;
 #else
 #include <boost/range/algorithm_ext/is_sorted.hpp>
-using boost::is_sorted;
 #endif
 
 using namespace std;
@@ -1816,7 +1814,11 @@ namespace Mantid
       if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN)
       {
         // Check whether it is sorted or not
+#if !(defined __APPLE__ && defined __INTEL_COMPILER)
         bool sorted = is_sorted(m_values.begin(), m_values.end());
+#else
+        bool sorted = boost::is_sorted(m_values);
+#endif
         if (sorted)
           m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
         else
