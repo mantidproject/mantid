@@ -136,27 +136,29 @@ namespace Mantid
      * @param function :: The function used for the calculation
      * @param domain :: A pointer to the input domain
      * @param ivalues :: A pointer to the calculated values
+     * @param outputWorkspacePropertyName :: The property name
      */
-    void FitMD::createOutputWorkspace(const std::string& baseName,
+    boost::shared_ptr<API::Workspace> FitMD::createOutputWorkspace(const std::string& baseName,
       API::IFunction_sptr,
       boost::shared_ptr<API::FunctionDomain> domain,
-      boost::shared_ptr<API::IFunctionValues> ivalues)
+      boost::shared_ptr<API::IFunctionValues> ivalues,
+      const std::string& outputWorkspacePropertyName)
     {
       auto values = boost::dynamic_pointer_cast<API::FunctionValues>(ivalues);
       if (!values)
       {
-        return;
+        return boost::shared_ptr<API::Workspace>();
       }
       auto functionMD = boost::dynamic_pointer_cast<API::FunctionDomainMD>(domain);
       if(!functionMD)
       {
-        return;
+        return boost::shared_ptr<API::Workspace>();
       }
       API::IMDWorkspace_const_sptr domainWS = functionMD->getWorkspace();
       auto inputWS = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(domainWS);
       if(!inputWS)
       {
-        return;
+        return boost::shared_ptr<API::Workspace>();
       }
       auto outputWS = MDEventFactory::CreateMDWorkspace(inputWS->getNumDims(), "MDEvent");
       // Add events
@@ -164,7 +166,7 @@ namespace Mantid
       auto mdWS = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4> >(outputWS);
       if(!mdWS)
       {
-        return;
+        return boost::shared_ptr<API::Workspace>();
       }
 
       // Bins extents and meta data
@@ -223,10 +225,15 @@ namespace Mantid
       API::MemoryManager::Instance().releaseFreeMemory();
 
       // Store it
-      declareProperty(new API::WorkspaceProperty<API::IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
-        "Name of the output Workspace holding resulting simulated spectrum");
-      m_manager->setPropertyValue("OutputWorkspace",baseName+"Workspace");
-      m_manager->setProperty("OutputWorkspace",outputWS);
+      if ( !outputWorkspacePropertyName.empty() )
+      {
+        declareProperty(new API::WorkspaceProperty<API::IMDEventWorkspace>(outputWorkspacePropertyName,"",Direction::Output),
+          "Name of the output Workspace holding resulting simulated spectrum");
+        m_manager->setPropertyValue(outputWorkspacePropertyName,baseName+"Workspace");
+        m_manager->setProperty(outputWorkspacePropertyName,outputWS);
+      }
+
+      return outputWS;
     }
 
     /**
