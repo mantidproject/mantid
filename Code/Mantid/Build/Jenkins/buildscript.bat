@@ -3,30 +3,18 @@
 ::
 :: Notes:
 ::
-:: WORKSPACE, JOB_NAME & NODE_LABEL are environment variables that are set by
-:: Jenkins. The last one corresponds to any labels set on a slave.
+:: WORKSPACE & JOB_NAME are environment variables that are set by Jenkins.
 :: BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Test what architecture we are building for
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if "%NODE_LABELS%"=="%NODE_LABELS:win32=%" (
-    set ARCH=win64
-    set GENERATOR="Visual Studio 11 Win64"
-) else (
-    set ARCH=win32
-    set GENERATOR="Visual Studio 11"
-)
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Get or update the third party dependencies
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 cd %WORKSPACE%\Code
-call fetch_Third_Party %ARCH%
+call fetch_Third_Party win64
 cd %WORKSPACE%
 
-set PATH=%WORKSPACE%\Code\Third_Party\lib\%ARCH%;%WORKSPACE%\Code\Third_Party\lib\%ARCH%\Python27;%PARAVIEW_DIR%\bin\Release;%PATH%
+set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib\win64\Python27;%PARAVIEW_DIR%\bin\Release;%PATH%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check whether this is a clean build (must have 'clean' in the job name)
@@ -47,7 +35,7 @@ cd %WORKSPACE%\build
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G %GENERATOR% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DUSE_PRECOMPILED_HEADERS=ON ..\Code\Mantid
+"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G "Visual Studio 11 Win64" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DUSE_PRECOMPILED_HEADERS=ON ..\Code\Mantid
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
