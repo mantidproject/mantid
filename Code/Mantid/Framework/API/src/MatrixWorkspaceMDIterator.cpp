@@ -311,6 +311,11 @@ namespace API
     throw std::runtime_error("MatrixWorkspaceMDIterator does not implement findNeighbourIndexes");
   }
 
+  size_t MatrixWorkspaceMDIterator::getLinearIndex() const
+  {
+    throw std::runtime_error("MatrixWorkspaceMDIterator does not implement getLinearIndex");
+  }
+
 
 } // namespace Mantid
 } // namespace API
