@@ -56,26 +56,26 @@ $SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CPACK=ON -DMAKE_VATES=O
 ###############################################################################
 # Build step
 ###############################################################################
-make -j$BUILD_THREADS
-make -j$BUILD_THREADS AllTests
+$SCL_ON_RHEL6 "make -j$BUILD_THREADS"
+$SCL_ON_RHEL6 "make -j$BUILD_THREADS AllTests"
 
 ###############################################################################
 # Run the tests
 ###############################################################################
 # Remove any Mantid.user.properties file
 rm -f ~/.mantid/Mantid.user.properties
-ctest -j$BUILD_THREADS --schedule-random --output-on-failure -E MantidPlot
+$SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure -E MantidPlot"
 # Run GUI tests serially
-ctest --output-on-failure -R MantidPlot
+$SCL_ON_RHEL6 "ctest --output-on-failure -R MantidPlot"
 
 ###############################################################################
 # Create the install kit if this is a clean build
 ###############################################################################
 if [[ "$CLEANBUILD" == true ]]; then
   if [[ $(uname) != 'Darwin' ]]; then
-    make -j$BUILD_THREADS qtassistant
+    $SCL_ON_RHEL6 "make -j$BUILD_THREADS qtassistant"
   fi
 
   rm -f *.dmg *.rpm *.deb *.tar.gz
-  cpack
+  $SCL_ON_RHEL6 "cpack"
 fi
