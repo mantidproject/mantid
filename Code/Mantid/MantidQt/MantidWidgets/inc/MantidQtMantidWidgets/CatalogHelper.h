@@ -46,8 +46,7 @@ namespace MantidQt
       const std::string propertyDocumentation(const std::vector<Mantid::Kernel::Property*> &properties,
           const std::string &name);
       /// Execute the given algorithm asynchronously.
-      void executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm,
-          int maxTime = atoi(Mantid::Kernel::ConfigService::Instance().getString("catalog.timeout.value").c_str()));
+      void executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm,int maxTime = -1);
       /// Set the "search" properties to their related input fields.
       void setSearchProperties(const Mantid::API::IAlgorithm_sptr &catalogAlgorithm,
           const std::map<std::string, std::string> &userInputFields);

@@ -317,6 +317,8 @@ namespace MantidQt
      */
     void CatalogHelper::executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm, int maxTime)
     {
+      maxTime = boost::lexical_cast<int>(Mantid::Kernel::ConfigService::Instance().getString("catalog.timeout.value"));
+
       QTime myTimer;
       myTimer.start();
 
