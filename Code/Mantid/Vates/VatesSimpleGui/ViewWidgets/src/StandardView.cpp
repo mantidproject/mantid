@@ -110,7 +110,10 @@ void StandardView::render()
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype.toStdString().c_str());
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
-  this->origRep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  if (!this->isPeaksWorkspace(this->origSrc))
+  {
+    this->origRep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  }
 
   this->resetDisplay();
   emit this->triggerAccept();
