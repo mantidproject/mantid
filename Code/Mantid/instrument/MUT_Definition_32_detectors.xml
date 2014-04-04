@@ -23,9 +23,8 @@
   </defaults>
 
   
-  <!-- BRIEF DESCRIPTION OF EMU INSTRUMENT: 
-  
-      Data provided by Stephen Cottrell for the EMU instrument
+  <!-- BRIEF DESCRIPTION OF MUT INSTRUMENT: 
+      First version provided by Stephen Cottrell
   -->
   <parameter name="Default grouping file" type="string">
     <value val="Grouping/MUT_Detector_Grouping_LF_32.xml"/>
