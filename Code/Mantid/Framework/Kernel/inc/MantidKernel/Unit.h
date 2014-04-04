@@ -4,15 +4,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
-#include <string>
-#include <vector>
 #include <map>
+#include <vector>
+
 #include <boost/shared_ptr.hpp>
-#include <stdexcept>
-#include <limits>
-#include <cfloat>
 
 namespace Mantid
 {
@@ -49,6 +45,19 @@ namespace Kernel
 class MANTID_KERNEL_DLL Unit
 {
 public:
+
+  /// (Empty) Constructor
+  Unit();
+  /// Virtual destructor
+  virtual ~Unit();
+  /// Copy Constructor
+  Unit(const Unit & other);
+  /// Copy assignment operator
+  Unit & operator=(const Unit & rhs);
+
+  /// @return a cloned instance of the other
+  virtual Unit * clone() const = 0;
+
   /// The name of the unit. For a concrete unit, this method's definition is in the DECLARE_UNIT
   /// macro and it will return the argument passed to that macro (which is the unit's key in the
   /// factory).
@@ -57,7 +66,7 @@ public:
   /// The full name of the unit
   /// @return The unit caption
   virtual const std::string caption() const = 0;
-  /// A label for the unit to be printed on axes
+  /// A label for the unit to be printed on axes, @see UnitLabel
   /// @return The unit label
   virtual const std::string label() const = 0;
   /// A label string that can contain utf-8 character encodings.
@@ -147,16 +156,6 @@ public:
    */
   virtual double singleFromTOF(const double tof) const = 0;
 
-  /// (Empty) Constructor
-  Unit() : initialized(false), l1(0), l2(0), twoTheta(0), emode(0), efixed(0), delta(0) {}
-  /// Copy Constructor
-  Unit(const Unit & other);
-  /// Virtual destructor
-  virtual ~Unit() {}
-
-  /// @return a cloned instance of the other
-  virtual Unit * clone() const = 0;
-
   /// @return true if the unit was initialized and so can use singleToTOF()
   bool isInitialized() const
   { return initialized; }
@@ -231,13 +230,9 @@ public:
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
   virtual Unit * clone() const;
-  ///@return NaN as emty unit can not be converted from TOF
-  virtual double conversionTOFMin()const
-  {return std::numeric_limits<double>::quiet_NaN();}
 
-  ///@return NaN as emty unit can not be converted from TOF
-  virtual double conversionTOFMax()const
-  {return std::numeric_limits<double>::quiet_NaN();}
+  virtual double conversionTOFMin()const;
+  virtual double conversionTOFMax()const;
 
   /// Constructor
   Empty() : Unit() {}
@@ -259,13 +254,8 @@ public:
   void setLabel(const std::string& cpt, const std::string& lbl = "");
   virtual Unit * clone() const;
 
- ///@return NaN as Label can not be obtained from TOF in any reasonable manner
-  virtual double conversionTOFMin()const
-  {return std::numeric_limits<double>::quiet_NaN();}
- ///@return NaN as Label can not be obtained from TOF in any reasonable manner
-  virtual double conversionTOFMax()const
-  {return std::numeric_limits<double>::quiet_NaN();}
-
+  virtual double conversionTOFMin() const;
+  virtual double conversionTOFMax() const;
 
   /// Destructor
   ~Label() {}
@@ -520,33 +510,6 @@ public:
 };
 
 //=================================================================================================
-/// @cond
-// Don't document this very long winded way of getting "radians" to print on the axis.
-class Degrees : public Mantid::Kernel::Unit
-{
-  const std::string unitID() const { return ""; }
-  virtual const std::string caption() const { return "Scattering angle"; }
-  const std::string label() const { return "degrees"; }
-  virtual double singleToTOF(const double x) const { return x;}
-  virtual double singleFromTOF(const double tof) const { return tof; }
-  double conversionTOFMax()const{return DBL_MAX;}
-  double conversionTOFMin()const{return -DBL_MAX;}
-  virtual void init() {}
-
-  virtual Unit * clone() const { return new Degrees(*this); }
-};
-
-/// Class that is Phi in degrees
-class Phi : public Degrees
-{
-  virtual const std::string caption() const { return "Phi"; }
-  virtual Unit * clone() const { return new Phi(*this); }
-};
-
-/// @endcond
-
-//=================================================================================================
-//=================================================================================================
 /// Momentum in Angstrom^-1
 class MANTID_KERNEL_DLL Momentum : public Unit
 {
@@ -651,6 +614,30 @@ protected:
   double factorTo; ///< Constant factor for to conversion
   double factorFrom; ///< Constant factor for from conversion
 };
+
+//=================================================================================================
+/// Degrees that has degrees as unit at "Scattering angle" as title
+class Degrees : public Empty
+{
+  const std::string unitID() const { return ""; }
+  virtual const std::string caption() const { return "Scattering angle"; }
+  const std::string label() const { return "degrees"; }
+
+  virtual Unit * clone() const { return new Degrees(*this); }
+};
+
+//=================================================================================================
+
+/// Phi that has degrees as unit at "Phi" as title
+class Phi : public Degrees
+{
+  virtual const std::string caption() const { return "Phi"; }
+  virtual Unit * clone() const { return new Phi(*this); }
+};
+
+
+//=================================================================================================
+
 
 } // namespace Units
 

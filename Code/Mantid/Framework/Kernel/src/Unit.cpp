@@ -6,29 +6,45 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
-
+#include <cfloat>
 
 namespace Mantid
 {
 namespace Kernel
 {
 
-/**
- * @return A label string that can contain utf-8 character encodings.
- *         Default returns contents of label()
- */
-const std::wstring Unit::utf8Label() const
-{
-  auto lbl = this->label();
-  return std::wstring(lbl.begin(), lbl.end());
-}
+  /**
+   * Default constructor
+   * Gives the unit an empty UnitLabel
+   */
+  Unit::Unit() :
+    initialized(false), l1(0), l2(0), twoTheta(0), emode(0),
+    efixed(0), delta(0)
+  {
+  }
 
-/// Copy Constructor
-Unit::Unit(const Unit & other) : initialized(false),
-    l1(other.l1), l2(other.l2), twoTheta(other.twoTheta),
-    emode(other.emode), efixed(other.efixed), delta(other.delta)
-{
-}
+  /**
+   */
+  Unit::~Unit()
+  {
+  }
+
+  /// Copy Constructor
+  Unit::Unit(const Unit & other) : initialized(false),
+      l1(other.l1), l2(other.l2), twoTheta(other.twoTheta),
+      emode(other.emode), efixed(other.efixed), delta(other.delta)
+  {
+  }
+
+  /**
+   * @return A label string that can contain utf-8 character encodings.
+   *         Default returns contents of label()
+   */
+  const std::wstring Unit::utf8Label() const
+  {
+    auto lbl = this->label();
+    return std::wstring(lbl.begin(), lbl.end());
+  }
 
 
 /** Is conversion by constant multiplication possible?
@@ -208,6 +224,22 @@ Unit * Empty::clone() const
   return new Empty(*this);
 }
 
+/**
+ * @return NaN as Label can not be obtained from TOF in any reasonable manner
+ */
+double Empty::conversionTOFMin() const
+{
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+/**
+ * @return NaN as Label can not be obtained from TOF in any reasonable manner
+ */
+double Empty::conversionTOFMax() const
+{
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
 
 /* =============================================================================
  * LABEL
@@ -241,7 +273,21 @@ Unit * Label::clone() const
   return new Label(*this);
 }
 
+/**
+ * @return NaN as Label can not be obtained from TOF in any reasonable manner
+ */
+double Label::conversionTOFMin() const
+{
+  return std::numeric_limits<double>::quiet_NaN();
+}
 
+/**
+ * @return NaN as Label can not be obtained from TOF in any reasonable manner
+ */
+double Label::conversionTOFMax() const
+{
+  return std::numeric_limits<double>::quiet_NaN();
+}
 
 /* =============================================================================
  * TIME OF FLIGHT
@@ -1197,7 +1243,7 @@ double Time::conversionTOFMin()const
 
 Unit * Time::clone() const
 {
-    return new Time(*this);
+  return new Time(*this);
 }
 
 } // namespace Units
