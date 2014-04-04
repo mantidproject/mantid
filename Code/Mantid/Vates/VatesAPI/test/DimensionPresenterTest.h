@@ -234,8 +234,8 @@ public:
     EXPECT_CALL(view, configureStrongly()).Times(AnyNumber());
     EXPECT_CALL(view, showAsIntegrated()).Times(AnyNumber());
     EXPECT_CALL(view, getIsIntegrated()).Times(AtLeast(1)).WillRepeatedly(Return(false)); // view says it's integrated
-    EXPECT_CALL(view, getMinimum()).Times(AnyNumber()).WillRepeatedly(Return(10)); //Ooops, min > max, this should be handled! 
-    EXPECT_CALL(view, getMaximum()).Times(AnyNumber()).WillRepeatedly(Return(2));
+    EXPECT_CALL(view, getMinimum()).Times(AnyNumber()).WillRepeatedly(Return(10.0f)); //Ooops, min > max, this should be handled! 
+    EXPECT_CALL(view, getMaximum()).Times(AnyNumber()).WillRepeatedly(Return(2.0f));
     EXPECT_CALL(view, getNBins()).Times(AnyNumber()); 
     EXPECT_CALL(view, displayError(_)).Times(1);
 
