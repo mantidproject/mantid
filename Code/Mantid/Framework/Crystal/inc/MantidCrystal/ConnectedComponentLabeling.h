@@ -6,6 +6,7 @@
 #include "MantidCrystal/DisjointElement.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/optional.hpp>
 #include <map>
 
 namespace Mantid
@@ -61,7 +62,7 @@ namespace Mantid
     public:
 
       /// Constructor
-      ConnectedComponentLabeling(const size_t&id = 1, const bool runMultiThreaded = true);
+      ConnectedComponentLabeling(const size_t&id = 1, const boost::optional<int> nThreads = boost::none);
 
       /// Getter for the start label id
       size_t getStartLabelId() const;
@@ -99,7 +100,7 @@ namespace Mantid
       size_t m_startId;
 
       /// Run multithreaded
-      const bool m_runMultiThreaded;
+      const boost::optional<int> m_nThreads;
 
     };
 

@@ -174,8 +174,6 @@ namespace Mantid
     void DisjointElement::unionWith(DisjointElement* other)
     {
 
-
-
       if (other->getRoot() != this->getRoot()) // Check sets do not already have the same root before continuing
       {
         this->compress();

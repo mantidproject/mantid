@@ -42,7 +42,8 @@ namespace
     std::set<size_t> unique_values;
     for (size_t i = 0; i < ws->getNPoints(); ++i)
     {
-      unique_values.insert(static_cast<size_t>(ws->getSignalAt(i)));
+      const size_t signal = static_cast<size_t>(ws->getSignalAt(i));
+      unique_values.insert(signal);
     }
     return unique_values;
   }
@@ -84,7 +85,6 @@ public:
   {
     FrameworkManager::Instance();
   }
-
   void test_default_start_label_id()
   {
     ConnectedComponentLabeling ccl;
@@ -99,7 +99,7 @@ public:
     TS_ASSERT_EQUALS(startLabelId, ccl.getStartLabelId())
   }
 
-  void test_1d_one_node()
+  void xtest_1d_one_node()
   {
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 1); // Single node. Simpliest possible test case
 
@@ -107,7 +107,7 @@ public:
     EXPECT_CALL(mockStrategy, isBackground(_)).Times(static_cast<int>(inWS->getNPoints())).WillRepeatedly(Return(false));// A filter that passes everything.
 
     size_t labelingId = 1;
-    bool multiThreaded = false;
+    int multiThreaded = 1;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
     
     ccl.startLabelingId(labelingId);
@@ -129,7 +129,7 @@ public:
     EXPECT_CALL(mockStrategy, isBackground(_)).Times(static_cast<int>(inWS->getNPoints())).WillRepeatedly(Return(false));// A filter that passes everything.
 
     size_t labelingId = 2;
-    bool multiThreaded = false;
+    int multiThreaded = 1;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
     Progress prog;
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
@@ -161,7 +161,7 @@ public:
     .WillRepeatedly(Return(false));
 
     size_t labelingId = 1;
-    bool multiThreaded = false;
+    int multiThreaded = 1;
     Progress prog;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
@@ -192,7 +192,7 @@ public:
     .WillOnce(Return(false));
 
     size_t labelingId = 1;
-    bool multiThreaded = false;
+    int multiThreaded = 1;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
     Progress prog;
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
@@ -215,7 +215,7 @@ public:
 
     EXPECT_CALL(mockStrategy, isBackground(_)).WillRepeatedly(Return(false));// Nothing is treated as background
     size_t labelingId = 1;
-    bool multiThreaded = false;
+    int multiThreaded = 1;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
     Progress prog;
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
@@ -247,7 +247,7 @@ public:
     .WillOnce(Return(true));
 
     size_t labelingId = 1;
-    bool multiThreaded = false;
+    int multiThreaded = 1;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
     Progress prog;
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
@@ -280,7 +280,7 @@ public:
     .WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true));
 
     size_t labelingId = 1;
-    bool multiThreaded = false;
+    int multiThreaded = 1;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
     Progress prog;
     auto outWS = ccl.execute(inWS, &mockStrategy, prog);
@@ -341,7 +341,7 @@ public:
     HardThresholdBackground strategy(backgroundSignal, NoNormalization);
 
     size_t labelingId = 1;
-    bool multiThreaded = false;
+    int multiThreaded = 1;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
     Progress prog;
     auto outWS = ccl.execute(inWS, &strategy, prog);
@@ -372,6 +372,54 @@ public:
     do_test_cluster_labeling(clusterOneIndexes, outWS.get(), labelingId);
     do_test_cluster_labeling(clusterTwoIndexes, outWS.get(), labelingId+1);
     do_test_cluster_labeling(clusterThreeIndexes, outWS.get(), labelingId+2);
+  }
+
+  void test_1d_with_double_object_multi_threaded()
+  {
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.1, 1, 6); // Makes a 1 by 6 md ws with identical signal values.
+    inWS->setSignalAt(1, 0); // Puts a spacer in. So there are two clusters in this 1D workspace now.
+
+    HardThresholdBackground backgroundStrategy(1, NoNormalization); // Strategy to ignore everything < 1
+
+    size_t labelingId = 1;
+    bool multiThreaded = true;
+    int nThreads = 2; // For simplicity limit the threads to two
+
+    Progress prog;
+    ConnectedComponentLabeling ccl(labelingId, nThreads);
+    auto outWS = ccl.execute(inWS, &backgroundStrategy, prog);
+
+    std::set<size_t> uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
+    TSM_ASSERT_EQUALS("2 objects so should have 3 unique entries", 3, uniqueEntries.size());
+    TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
+    TS_ASSERT(does_set_contain(uniqueEntries, m_emptyLabel));// Background entries.
+    TS_ASSERT(does_set_contain(uniqueEntries, labelingId+1));
+  }
+
+  void test_1d_with_three_objects_multi_threaded()
+  {
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.1, 1, 9); // Makes a 1 by 6 md ws with identical signal values.
+    inWS->setSignalAt(1, 0); // Puts a spacer in. 
+    inWS->setSignalAt(8, 0); // Puts a spacer in.
+    // Gives 3 clusters with dividers at indexes of 1 and 8.
+
+    HardThresholdBackground backgroundStrategy(1, NoNormalization); // Strategy to ignore everything < 1
+
+    size_t labelingId = 1;
+    bool multiThreaded = true;
+    int nThreads = 3; // Run with three threads
+
+    Progress prog;
+    ConnectedComponentLabeling ccl(labelingId, nThreads);
+    auto outWS = ccl.execute(inWS, &backgroundStrategy, prog);
+
+    std::set<size_t> uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
+    TSM_ASSERT_EQUALS("3 objects so should have 4 unique entries", 3, uniqueEntries.size());
+    TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
+    TS_ASSERT(does_set_contain(uniqueEntries, m_emptyLabel));// Background entries.
+    TS_ASSERT(does_set_contain(uniqueEntries, labelingId+1));
+    TS_ASSERT(does_set_contain(uniqueEntries, labelingId+1));
+
   }
 
 };
