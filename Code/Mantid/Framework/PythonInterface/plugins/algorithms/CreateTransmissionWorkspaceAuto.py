@@ -13,7 +13,7 @@ from mantid.simpleapi import CreateTransmissionWorkspace
 from mantid.api import *
 from mantid.kernel import *
 
-class CreateTransmissionWorkspaceAuto(PythonAlgorithm):
+class CreateTransmissionWorkspaceAuto(DataProcessorAlgorithm):
     
     def category(self):
         return "Reflectometry\\ISIS"
