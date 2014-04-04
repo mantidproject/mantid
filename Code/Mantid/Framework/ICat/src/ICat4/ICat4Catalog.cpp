@@ -915,6 +915,8 @@ namespace Mantid
       // The soapEndPoint is only set when the user logs into the catalog.
       // If it's not set the correct error is returned (invalid sessionID) from the ICAT server.
       if (m_session->getSoapEndpoint().empty()) return;
+      // Stop receiving packets from ICAT server after period of time.
+      icat.recv_timeout = boost::lexical_cast<int>(Kernel::ConfigService::Instance().getString("catalog.timeout.value"));
       // Set the soap-endpoint of the catalog we want to use.
       icat.soap_endpoint = m_session->getSoapEndpoint().c_str();
       // Sets SSL authentication scheme
