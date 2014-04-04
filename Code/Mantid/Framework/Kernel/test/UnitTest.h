@@ -240,6 +240,30 @@ public:
     TS_ASSERT_EQUALS( tof.unitID(), "TOF" );
   }
 
+  void test_copy_constructor_on_concrete_type()
+  {
+    Units::TOF first;
+    first.initialize(1.0,1.0,1.0,1.0,1.0,1.0);
+    Units::TOF second(first);
+    TS_ASSERT_EQUALS(first.isInitialized(), second.isInitialized());
+    TS_ASSERT_EQUALS(first.unitID(), second.unitID())
+    TS_ASSERT_EQUALS(first.caption(), second.caption())
+    TS_ASSERT_EQUALS(first.label(), second.label())
+  }
+
+  void test_copy_assignment_operator_on_concrete_type()
+  {
+    Units::TOF first;
+    first.initialize(1.0,1.0,1.0,1.0,1.0,1.0);
+    Units::TOF second;
+    second = first;
+    TS_ASSERT_EQUALS(first.isInitialized(), second.isInitialized());
+    TS_ASSERT_EQUALS(first.unitID(), second.unitID())
+    TS_ASSERT_EQUALS(first.caption(), second.caption())
+    TS_ASSERT_EQUALS(first.label(), second.label())
+  }
+
+
   void testTOF_caption()
   {
     TS_ASSERT_EQUALS( tof.caption(), "Time-of-flight" );

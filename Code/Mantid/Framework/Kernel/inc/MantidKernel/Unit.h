@@ -14,6 +14,7 @@ namespace Mantid
 {
 namespace Kernel
 {
+
 /** The base units (abstract) class. All concrete units should inherit from
     this class and provide implementations of the caption(), label(),
     toTOF() and fromTOF() methods. They also need to declare (but NOT define)

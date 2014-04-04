@@ -29,11 +29,32 @@ namespace Kernel
   {
   }
 
-  /// Copy Constructor
-  Unit::Unit(const Unit & other) : initialized(false),
-      l1(other.l1), l2(other.l2), twoTheta(other.twoTheta),
-      emode(other.emode), efixed(other.efixed), delta(other.delta)
+  /**
+   * @param other The unit that initializes this
+   */
+  Unit::Unit(const Unit & other)
   {
+    // call assignment operator
+    *this = other;
+  }
+
+  /**
+   * @param rhs A unit object whose state is copied to this
+   * @return A reference to this object
+   */
+  Unit &Unit::operator=(const Unit &rhs)
+  {
+    if(this != &rhs)
+    {
+      initialized = rhs.initialized;
+      l1 = rhs.l1;
+      l2 = rhs.l2;
+      twoTheta = rhs.twoTheta;
+      emode = rhs.emode;
+      efixed = rhs.efixed;
+      delta = rhs.delta;
+    }
+    return *this;
   }
 
   /**
