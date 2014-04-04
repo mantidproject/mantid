@@ -1,5 +1,5 @@
 """*WIKI* 
-    Compute I(q) for reduced SANS data
+Compute I(q) for reduced SANS data
 *WIKI*"""
 from mantid.api import *
 from mantid.kernel import *
