@@ -87,6 +87,7 @@ set ( SRC_FILES
 	src/UnitConversion.cpp
 	src/UnitFactory.cpp
 	src/UnitLabel.cpp
+	src/UnitLabelTypes.cpp
 	src/UserStringParser.cpp
 	src/Utils.cpp
 	src/V2D.cpp
@@ -225,6 +226,7 @@ set ( INC_FILES
 	inc/MantidKernel/UnitConversion.h
 	inc/MantidKernel/UnitFactory.h
 	inc/MantidKernel/UnitLabel.h
+	inc/MantidKernel/UnitLabelTypes.h
 	inc/MantidKernel/UserStringParser.h
 	inc/MantidKernel/Utils.h
 	inc/MantidKernel/V2D.h
@@ -328,6 +330,7 @@ set ( TEST_FILES
 	UnitConversionTest.h
 	UnitFactoryTest.h
 	UnitLabelTest.h
+	UnitLabelTypesTest.h
 	UnitTest.h
 	UserStringParserTest.h
 	UtilsTest.h

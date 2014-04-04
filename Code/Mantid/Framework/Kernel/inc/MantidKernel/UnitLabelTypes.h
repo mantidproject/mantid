@@ -1,7 +1,6 @@
-#ifndef MANTID_KERNEL_UNITLABEL_H_
-#define MANTID_KERNEL_UNITLABEL_H_
+#ifndef MANTID_KERNEL_UNITLABELTYPES_H_
+#define MANTID_KERNEL_UNITLABELTYPES_H_
 /**
-  Define a
 
   Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -23,33 +22,32 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidKernel/DllConfig.h"
-#include <string>
+#include "MantidKernel/UnitLabel.h"
 
-namespace Mantid
+namespace Mantid { namespace Kernel
 {
-  namespace Kernel
+  namespace Units
   {
-    /**
-     * A base-class for the a class that is able to return
-     * unit labels in different representations.
-     */
-    class MANTID_KERNEL_DLL UnitLabel
+    /// Empty label
+    class MANTID_KERNEL_DLL EmptyLabel : public UnitLabel
     {
     public:
-      /// Virtual destructor
-      virtual ~UnitLabel();
-
       /// Return an ascii label for unit
-      virtual const std::string ascii() const = 0;
+      const std::string ascii() const;
       /// Return a utf-8 encoded label for unit
-      virtual const std::wstring utf8() const = 0;
-
-      /// Implicit conversion to std::string
-      operator std::string();
+      const std::wstring utf8() const;
     };
 
-  } // namespace Kernel
-} // namespace Mantid
+    /// Concrete label type for microseconds
+    class MANTID_KERNEL_DLL Microseconds : public UnitLabel
+    {
+    public:
+      /// Return an ascii label for unit
+      const std::string ascii() const;
+      /// Return a utf-8 encoded label for unit
+      const std::wstring utf8() const;
+    };
+  } // namespace Units
+}} // namespace Mantid::Kernel
 
-#endif  /* MANTID_KERNEL_UNITLABEL_H_ */
+#endif  /* MANTID_KERNEL_UNITLABELTYPES_H_ */
