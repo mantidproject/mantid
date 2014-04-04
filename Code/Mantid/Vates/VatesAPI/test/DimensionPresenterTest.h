@@ -204,8 +204,8 @@ public:
     EXPECT_CALL(view, configureStrongly()).Times(1);
     EXPECT_CALL(view, showAsIntegrated()).Times(1);
     EXPECT_CALL(view, getIsIntegrated()).Times(1).WillRepeatedly(Return(true)); // view says it's integrated
-    EXPECT_CALL(view, getMinimum()).Times(1).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaximum()).Times(1).WillOnce(Return(2));
+    EXPECT_CALL(view, getMinimum()).Times(1).WillOnce(Return(0.0f));
+    EXPECT_CALL(view, getMaximum()).Times(1).WillOnce(Return(2.0f));
     EXPECT_CALL(view, getNBins()).Times(0); //Should never need number of bins because view says it's integrated.
 
     MockIMDDimension* pMockDimension = new MockIMDDimension();
