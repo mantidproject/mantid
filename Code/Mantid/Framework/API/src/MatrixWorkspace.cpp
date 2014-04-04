@@ -752,8 +752,8 @@ namespace Mantid
     {
       Instrument_const_sptr instrument = getInstrument();
 
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      Geometry::IComponent_const_sptr source = instrument->getSource();
+      Geometry::IComponent_const_sptr sample = instrument->getSample();
       if ( source == NULL || sample == NULL )
       {
         throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
@@ -778,8 +778,8 @@ namespace Mantid
      */
     double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const
     {
-      Geometry::IObjComponent_const_sptr source = getInstrument()->getSource();
-      Geometry::IObjComponent_const_sptr sample = getInstrument()->getSample();
+      Geometry::IComponent_const_sptr source = getInstrument()->getSource();
+      Geometry::IComponent_const_sptr sample = getInstrument()->getSample();
       if ( source == NULL || sample == NULL )
       {
         throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
@@ -1556,7 +1556,7 @@ namespace Mantid
       try
       {
         Geometry::Instrument_const_sptr inst = this->getInstrument();
-        Geometry::IObjComponent_const_sptr sample = inst->getSample();
+        Geometry::IComponent_const_sptr sample = inst->getSample();
         if (sample)
         {
           Kernel::V3D sample_pos = sample->getPos();

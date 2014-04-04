@@ -1091,7 +1091,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
   t->setHeaderColType();
 
   // Cache some frequently used values
-  IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
+  IComponent_const_sptr sample = ws->getInstrument()->getSample();
   bool signedThetaParamRetrieved(false), showSignedTwoTheta(false); //If true,  signedVersion of the two theta value should be displayed
   for( int row = 0; row < nrows; ++row )
   {
