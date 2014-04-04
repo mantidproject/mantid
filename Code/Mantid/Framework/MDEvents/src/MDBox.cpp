@@ -437,17 +437,34 @@ namespace MDEvents
     // Keep 0.0 if the signal is null. This avoids dividing by 0.0
     if (this->m_signal == 0) return;
 
-    typename std::vector<MDE>::const_iterator it_end = data.end();
-    for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; ++it)
+    size_t ndata = data.size();
+    #pragma omp parallel 
+{
+    coord_t centroidLocal[3];
+    for (size_t d=0; d<nd; d++)
+      centroidLocal[d] = 0;
+
+    #pragma omp for
+    for(size_t i = 0; i < ndata; i++)
     {
-      const MDE & Evnt = *it;
-      double signal = Evnt.getSignal();
+      const MDE & Evnt = data[i];
+      coord_t signal = Evnt.getSignal();
       for (size_t d=0; d<nd; d++)
       {
         // Total up the coordinate weighted by the signal.
-        centroid[d] += Evnt.getCenter(d) * static_cast<coord_t>(signal);
+        centroidLocal[d] += Evnt.getCenter(d) * signal;
       }
     }
+    #pragma omp critical (update_sum)
+    {
+      for (size_t d=0; d<nd; d++)
+      {
+        // Total up the coordinate weighted by the signal.
+        centroid[d] += centroidLocal[d];
+      }
+    }
+    
+}
 
     // Normalize by the total signal
     for (size_t d=0; d<nd; d++)
