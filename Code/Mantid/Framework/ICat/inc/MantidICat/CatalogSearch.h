@@ -4,6 +4,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidICat/CatalogSearchParam.h"
+#include "MantidICat/DLLConfig.h"
 
 namespace Mantid
 {
@@ -51,7 +52,7 @@ namespace Mantid
       File change history is stored at: <https://github.com/mantidproject/mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport CatalogSearch: public API::Algorithm
+    class MANTID_ICAT_DLL CatalogSearch: public API::Algorithm
     {
     public:
       ///constructor

@@ -2,6 +2,7 @@
 #define MANTID_ICAT_CATALOGLOGIN_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidICat/DLLConfig.h"
 
 namespace Mantid
 {
@@ -39,7 +40,7 @@ namespace Mantid
      File change history is stored at: <https://github.com/mantidproject/mantid>.
      Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport CatalogLogin: public API::Algorithm
+    class MANTID_ICAT_DLL CatalogLogin: public API::Algorithm
     {
     public:
       /// constructor

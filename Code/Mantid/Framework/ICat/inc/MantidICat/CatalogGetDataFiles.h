@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidICat/DLLConfig.h"
 
 namespace Mantid
 {
@@ -41,7 +42,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 
      */
-    class DLLExport CatalogGetDataFiles:public API::Algorithm
+    class MANTID_ICAT_DLL CatalogGetDataFiles:public API::Algorithm
     {
     public:
 
