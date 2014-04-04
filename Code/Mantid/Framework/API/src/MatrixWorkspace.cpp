@@ -107,7 +107,7 @@ namespace Mantid
       {
         this->init(NVectors, XLength, YLength);
       }
-      catch(std::runtime_error& ex)
+      catch(std::runtime_error&)
       {
         throw;
       }

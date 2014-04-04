@@ -228,7 +228,7 @@ ITableWorkspace_sptr WorkspaceFactoryImpl::createTable(const std::string& classN
             throw std::runtime_error("Class "+className+" cannot be cast to ITableWorkspace");
         }
     }
-    catch(Kernel::Exception::NotFoundError& e)
+    catch(Kernel::Exception::NotFoundError&)
     {
         throw;
     }
@@ -247,7 +247,7 @@ IPeaksWorkspace_sptr WorkspaceFactoryImpl::createPeaks(const std::string& classN
             throw std::runtime_error("Class "+className+" cannot be cast to IPeaksWorkspace");
         }
     }
-    catch(Kernel::Exception::NotFoundError& e)
+    catch(Kernel::Exception::NotFoundError&)
     {
         throw;
     }
