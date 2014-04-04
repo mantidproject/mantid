@@ -37,7 +37,7 @@ set ( INC_FILES
 	inc/MantidICat/CatalogMyDataSearch.h
 	inc/MantidICat/CatalogSearch.h
 	inc/MantidICat/CatalogSearchParam.h
-	inc/MantidICat/DLLConfig.h
+	inc/MantidICat/DllConfig.h
 	inc/MantidICat/GSoap/soapserializersH.h
 	inc/MantidICat/GSoap/soapserializersStub.h
 	inc/MantidICat/GSoap/stdsoap2.h

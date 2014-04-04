@@ -4,7 +4,7 @@
 #include <string>
 #include <stdexcept>
 
-#include "MantidICat/DLLConfig.h"
+#include "MantidICat/DllConfig.h"
 
 namespace Mantid
 {

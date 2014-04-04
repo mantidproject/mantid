@@ -2,7 +2,7 @@
 #define MANTID_ICAT_CATALOGLOGIN_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidICat/DLLConfig.h"
+#include "MantidICat/DllConfig.h"
 
 namespace Mantid
 {

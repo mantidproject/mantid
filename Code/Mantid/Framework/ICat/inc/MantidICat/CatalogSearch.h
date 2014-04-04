@@ -4,7 +4,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidICat/CatalogSearchParam.h"
-#include "MantidICat/DLLConfig.h"
+#include "MantidICat/DllConfig.h"
 
 namespace Mantid
 {
