@@ -136,6 +136,7 @@ def _do_unary_operation(op, self, lhs_vars):
             their names as the first and second element respectively
     """
     global _workspace_op_tmps
+    import mantid.simpleapi as simpleapi
 
     if lhs_vars[0] > 0:
         # Assume the first and clear the temporaries as this
@@ -150,9 +151,8 @@ def _do_unary_operation(op, self, lhs_vars):
 
     # Do the operation
     ads = _api.AnalysisDataServiceImpl.Instance()
-    fmgr = _api.FrameworkManagerImpl.Instance()
 
-    alg = fmgr.createAlgorithm(op)
+    alg = simpleapi._create_algorithm_object(op) # gets the child status correct for PythonAlgorithms
     alg.setPropertyValue("InputWorkspace", self.name())
     alg.setPropertyValue("OutputWorkspace", output_name)
     alg.execute()

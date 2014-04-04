@@ -2,13 +2,13 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTMOLDYN_H_
 
 #include "ui_IndirectMolDyn.h"
-#include "MantidQtCustomInterfaces/IndirectLoadAsciiTab.h"
+#include "MantidQtCustomInterfaces/IndirectSimulationTab.h"
 
 namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-		class DLLExport IndirectMolDyn : public IndirectLoadAsciiTab
+		class DLLExport IndirectMolDyn : public IndirectSimulationTab
 		{
 			Q_OBJECT
 

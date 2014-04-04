@@ -25,9 +25,13 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-// Get a reference to the logger
-Mantid::Kernel::Logger& AlgorithmHistoryWindow::g_log = Mantid::Kernel::Logger::get("AlgorithmHistoryWindow");
-Mantid::Kernel::Logger& AlgHistoryTreeWidget::g_log = Mantid::Kernel::Logger::get("AlgHistoryTreeWidget");
+namespace
+{
+  /// static history window logger
+  Mantid::Kernel::Logger window_log("AlgorithmHistoryWindow");
+  /// static tree widget logger
+  Mantid::Kernel::Logger widget_log("AlgHistoryTreeWidget");
+}
 
 AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QWidget *w) : QGroupBox(w),
   m_execDurationlabel(NULL),m_execDurationEdit(NULL),
@@ -379,11 +383,11 @@ void AlgorithmHistoryWindow::updateAll(QString algName,int version,int index)
   if (index==-1)
   {	//parent in the algorithHistoryTree widget comes here
     pos=nSize-1;
-    g_log.debug()<< "selected algorithm is at position "<<pos<<"  in the History vector "<<std::endl;
+    window_log.debug()<< "selected algorithm is at position "<<pos<<"  in the History vector "<<std::endl;
   }
   else
   {	pos=nSize-2-index;
-    g_log.debug ()<< "selected algorithm is at position  "<<pos <<"  in the History vector "<<std::endl;
+    window_log.debug ()<< "selected algorithm is at position  "<<pos <<"  in the History vector "<<std::endl;
   }
   updateAlgHistoryProperties(algName,version,pos);
   updateExecSummaryGrpBox(algName,version,pos);
@@ -573,8 +577,9 @@ void AlgHistoryTreeWidget::getSelectedAlgorithmName(QString& algName,int & versi
       QModelIndex modelIndex=indexFromItem(item);
       int row=modelIndex.row();
       if(row!=0)
-      {g_log.debug()<< "It's child Item"<<std::endl;
-	index=row;
+      {
+        widget_log.debug()<< "It's child Item"<<std::endl;
+        index=row;
       }
       else if (row==0)
       {
@@ -582,13 +587,14 @@ void AlgHistoryTreeWidget::getSelectedAlgorithmName(QString& algName,int & versi
 	QTreeWidgetItem * parent=NULL;
 	parent=item->parent();
 	if(parent)
-	{//if it's child item at row zero set index =0
-	  g_log.debug()<< "It's child Item"<<std::endl;
+	{
+	  //if it's child item at row zero set index =0
+	  widget_log.debug()<< "It's child Item"<<std::endl;
 	  index=0;
 	}
 	else
 	{	//if it's parent item set index = -1
-	  g_log.debug()<< "It's parent  item "<<std::endl;
+	  widget_log.debug()<< "It's parent  item "<<std::endl;
 	  index=-1;
 	}
       }
@@ -596,7 +602,7 @@ void AlgHistoryTreeWidget::getSelectedAlgorithmName(QString& algName,int & versi
       int nDotIndex=str.indexOf(".",0,Qt::CaseSensitive );
       algName=str.left(nDotIndex-2);
       version=str.right(str.length()-nDotIndex-1).toInt();
-      g_log.debug()<< "selected alg name =  "<< algName.toStdString()<<" index number =  "<<index<<std::endl;
+      widget_log.debug()<< "selected alg name =  "<< algName.toStdString()<<" index number =  "<<index<<std::endl;
     }
   }
 }

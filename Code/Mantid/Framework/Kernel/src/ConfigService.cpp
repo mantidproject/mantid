@@ -63,6 +63,10 @@ namespace Kernel
 
 namespace { // anonymous namespace for some utility functions
 
+/// static Logger object
+Logger g_log("ConfigService");
+
+
 /**
  * Split the supplied string on semicolons.
  *
@@ -166,7 +170,7 @@ private:
 
 /// Private constructor for singleton class
 ConfigServiceImpl::ConfigServiceImpl() :
-  m_pConf(NULL), m_pSysConfig(NULL), g_log(Logger::get("ConfigService")), m_changed_keys(),
+  m_pConf(NULL), m_pSysConfig(NULL), m_changed_keys(),
   m_ConfigPaths(), m_AbsolutePaths(), m_strBaseDir(""), m_PropertyString(""),
   m_properties_file_name("Mantid.properties"),
 #ifdef MPI_BUILD
@@ -1750,11 +1754,11 @@ bool ConfigServiceImpl::quickParaViewCheck() const
   const bool ignoreParaview = hasProperty(paraviewIgnoreProperty) && atoi(getString(paraviewIgnoreProperty).c_str());
   if(ignoreParaview)
   {
-    this->g_log.debug("Ignoring ParaView");
+    g_log.debug("Ignoring ParaView");
     return false;
   }
   
-  this->g_log.debug("Checking for ParaView");
+  g_log.debug("Checking for ParaView");
   bool isAvailable = false;
 
   try
@@ -1781,7 +1785,7 @@ bool ConfigServiceImpl::quickParaViewCheck() const
       if (givenVersionNumber == targetVersionNumber)
       {
         isAvailable = true;
-        this->g_log.information("ParaView is available");
+        g_log.information("ParaView is available");
         // Now set the plugin path.
         this->setParaViewPluginPath();
       }
@@ -1789,22 +1793,22 @@ bool ConfigServiceImpl::quickParaViewCheck() const
       {
         std::stringstream messageStream;
         messageStream << "The compatible version of ParaView is " << targetVersionNumber << " but the installed version is " << givenVersionNumber;
-        this->g_log.debug(messageStream.str());
-        this->g_log.information("ParaView is not available");
+        g_log.debug(messageStream.str());
+        g_log.information("ParaView is not available");
       }
     }
     else
     {
       std::stringstream messageStream;
       messageStream << "ParaView version query failed with code: " << rc;
-      this->g_log.debug(messageStream.str());
-      this->g_log.information("ParaView is not available");
+      g_log.debug(messageStream.str());
+      g_log.information("ParaView is not available");
     }
   }
   catch(Poco::SystemException &e)
   {
-    this->g_log.debug(e.what());
-    this->g_log.information("ParaView is not available");
+    g_log.debug(e.what());
+    g_log.information("ParaView is not available");
   }
   return isAvailable; 
 }

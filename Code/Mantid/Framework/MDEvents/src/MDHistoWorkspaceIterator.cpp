@@ -149,8 +149,29 @@ namespace MDEvents
         next();
     }
 
+    // --- Calculate index permutations for neighbour finding ---
     auto temp = std::vector<int64_t>(integerPower(3, m_nd), 0);
     m_permutations.swap(temp);
+
+    int64_t offset = 1;
+    m_permutations[0] = 0;
+    m_permutations[1] = 1;
+    m_permutations[2] = -1;
+
+    // Figure out what possible indexes deltas to generate indexes that are next to the current one.
+    size_t nPermutations = 3;
+    for(size_t j = 1; j < m_nd; ++j)
+    {
+      offset = offset * static_cast<int64_t>( m_ws->getDimension(j-1)->getNBins() );
+      size_t counter = nPermutations;
+      for(size_t k = 0; k <nPermutations; k+=1, counter+=2)
+      {
+        int64_t newVariant = m_permutations[k] + offset;
+        m_permutations[counter] = newVariant;
+        m_permutations[counter+1] = (-1*newVariant);
+      }
+      nPermutations *= 3;
+    }
   }
     
   //----------------------------------------------------------------------------------------------
@@ -391,29 +412,9 @@ namespace MDEvents
     Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker, m_indexMax,
             m_index);
 
-    int64_t offset = 1;
-    m_permutations[0] = 0;
-    m_permutations[1] = 1;
-    m_permutations[2] = -1;
-
-    // Figure out what possible indexes deltas to generate indexes that are next to the current one.
-    size_t nPermutations = 3;
-    for(size_t j = 1; j < m_nd; ++j)
-    {
-      offset = offset * static_cast<int64_t>( m_ws->getDimension(j-1)->getNBins() );
-      size_t counter = nPermutations;
-      for(size_t k = 0; k <nPermutations; k+=1, counter+=2)
-      {
-        int64_t newVariant = m_permutations[k] + offset;
-        m_permutations[counter] = newVariant;
-        m_permutations[counter+1] = (-1*newVariant);
-      }
-      nPermutations *= 3;
-    }
-
     // Filter out indexes that are are not actually neighbours.
     std::vector<size_t> neighbourIndexes; // Accumulate neighbour indexes.
-    for(size_t i = 0; i < nPermutations; ++i)
+    for(size_t i = 0; i < m_permutations.size(); ++i)
     {
       if (m_permutations[i] == 0)
       {

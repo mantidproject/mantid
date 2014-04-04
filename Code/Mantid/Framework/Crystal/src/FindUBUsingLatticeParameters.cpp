@@ -37,9 +37,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-  Kernel::Logger& FindUBUsingLatticeParameters::g_log = 
-                        Kernel::Logger::get("FindUBUsingLatticeParameters");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(FindUBUsingLatticeParameters)
 

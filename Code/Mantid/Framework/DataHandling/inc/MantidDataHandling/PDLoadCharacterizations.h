@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADPDCHARACTERIZATIONS_H_
-#define MANTID_DATAHANDLING_LOADPDCHARACTERIZATIONS_H_
+#ifndef MANTID_DATAHANDLING_PDLOADCHARACTERIZATIONS_H_
+#define MANTID_DATAHANDLING_PDLOADCHARACTERIZATIONS_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -32,11 +32,11 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadPDCharacterizations  : public API::Algorithm
+  class DLLExport PDLoadCharacterizations  : public API::Algorithm
   {
   public:
-    LoadPDCharacterizations();
-    virtual ~LoadPDCharacterizations();
+    PDLoadCharacterizations();
+    virtual ~PDLoadCharacterizations();
     
     virtual const std::string name() const;
     virtual int version() const;
@@ -54,4 +54,4 @@ namespace DataHandling
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_LOADPDCHARACTERIZATIONS_H_ */
+#endif  /* MANTID_DATAHANDLING_PDLOADCHARACTERIZATIONS_H_ */

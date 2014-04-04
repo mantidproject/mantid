@@ -35,10 +35,14 @@ namespace Mantid
 {
 namespace API
 {
-  
   using namespace Geometry;
 
-  Kernel::Logger& IFunction::g_log = Kernel::Logger::get("IFunction");
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("IFunction");
+  }
+
 
 /**
  * Destructor
@@ -1020,7 +1024,7 @@ void IFunction::convertValue(std::vector<double>& values, Kernel::Unit_sptr& out
   {
     // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
     Instrument_const_sptr instrument = ws->getInstrument();
-    Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+    Geometry::IComponent_const_sptr sample = instrument->getSample();
     if (sample == NULL)
     {
       g_log.error() << "No sample defined instrument. Cannot convert units for function\n"

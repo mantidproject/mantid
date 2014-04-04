@@ -372,6 +372,11 @@ namespace MDEvents
     throw std::runtime_error("MDBoxIterator does not implement findNeighbourIndex");
   }
 
+  TMDE( size_t MDBoxIterator)::getLinearIndex() const
+  {
+    throw std::runtime_error("MDBoxIterator does not implement getLinearIndex");
+  }
+
 
 } // namespace Mantid
 } // namespace MDEvents

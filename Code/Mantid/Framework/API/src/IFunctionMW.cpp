@@ -11,8 +11,6 @@ namespace API
 {
   using namespace Geometry;
   
-  Kernel::Logger& IFunctionMW::g_log = Kernel::Logger::get("IFunctionMW");
-
 /** Initialize the function providing it the workspace
  * @param workspace :: The workspace to set
  * @param wi :: The workspace index

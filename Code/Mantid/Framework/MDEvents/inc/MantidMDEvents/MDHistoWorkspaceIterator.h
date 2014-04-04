@@ -94,7 +94,7 @@ namespace MDEvents
 
     virtual bool getIsMasked() const;
 
-    size_t getLinearIndex() const;
+    virtual size_t getLinearIndex() const;
 
     std::vector<size_t> findNeighbourIndexes() const;
 

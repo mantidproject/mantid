@@ -12,8 +12,6 @@
 #include <algorithm>
 
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
-
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/mathSupport.h"
 #include "MantidKernel/Matrix.h"
@@ -27,8 +25,6 @@ namespace Mantid
 
 namespace Geometry
 {
-
-Kernel::Logger& Surface::PLog = Kernel::Logger::get("Surface"); 
 
 Surface::Surface() : 
   Name(-1)

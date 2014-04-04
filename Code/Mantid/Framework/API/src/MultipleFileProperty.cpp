@@ -21,6 +21,9 @@ using namespace Mantid::API;
 
 namespace // anonymous
 {
+  /// static logger
+  Mantid::Kernel::Logger g_log("MultipleFileProperty");
+
   /**
    * Unary predicate for use with copy_if.  Checks for the existance of
    * a "*" wild card in the file extension string passed to it.
@@ -49,8 +52,7 @@ namespace API
       m_multiFileLoadingEnabled(),
       m_exts(),
       m_parser(),
-      m_defaultExt(""),
-      g_log(Kernel::Logger::get("MultipleFileProperty"))
+      m_defaultExt("")
   {
     std::string allowMultiFileLoading = Kernel::ConfigService::Instance().getString("loading.multifile");
 

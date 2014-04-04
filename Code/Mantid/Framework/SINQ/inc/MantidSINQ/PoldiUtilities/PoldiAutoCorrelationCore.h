@@ -48,7 +48,7 @@ namespace Poldi
 class MANTID_SINQ_DLL PoldiAutoCorrelationCore
 {
 public:
-    PoldiAutoCorrelationCore(Kernel::Logger& g_log = Kernel::Logger::get("Algorithm"));
+    PoldiAutoCorrelationCore(Kernel::Logger& g_log);
     virtual ~PoldiAutoCorrelationCore() { }
 
     void setInstrument(boost::shared_ptr<PoldiAbstractDetector> detector, boost::shared_ptr<PoldiAbstractChopper> chopper);

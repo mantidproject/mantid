@@ -14,8 +14,11 @@ namespace LiveData
 {
   DECLARE_LISTENER(FileEventDataListener)
 
-  // Get a reference to the logger
-  Kernel::Logger& FileEventDataListener::g_log = Kernel::Logger::get("FileEventDataListener");
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("FileEventDataListener");
+  }
 
   /// Constructor
   FileEventDataListener::FileEventDataListener() : ILiveListener(),

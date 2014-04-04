@@ -64,9 +64,6 @@ namespace DataHandling
     void init();
     /// Run the algorithm
     void exec();
-    ///static reference to the logger class
-    static Kernel::Logger& g_log;
-
   };
 
 

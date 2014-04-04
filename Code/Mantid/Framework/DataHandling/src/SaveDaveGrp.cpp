@@ -42,8 +42,6 @@ namespace DataHandling
     this->setWikiSummary("Saves a 2D [[workspace]] to DAVE grouped data format file.");
     this->setOptionalMessage("Saves a 2D workspace to DAVE grouped data format file.See http://www.ncnr.nist.gov/dave/documentation/ascii_help.pdf");
   }
-  // Initialise the logger
-  Logger& SaveDaveGrp::g_log = Logger::get("SaveDaveGrp");
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

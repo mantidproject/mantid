@@ -35,9 +35,11 @@ namespace
   const char * PEAK_RADIUS_GROUP = "peak_radius";
   const char * INNER_BKG_RADIUS_GROUP = "inner_bkg_radius";
   const char * OUTER_BKG_RADIUS_GROUP = "outer_bkg_radius";
+
+  /// static logger object
+  Kernel::Logger g_log("Run");
+
 }
-// Get a reference to the logger
-Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
 
   //----------------------------------------------------------------------
   // Public member functions
@@ -212,7 +214,6 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     }
     catch (Exception::NotFoundError &)
     {
-      //g_log.information() << "proton_charge log value not found. Total proton charge set to 0.0\n";
       this->setProtonCharge(0);
       return 0;
     }

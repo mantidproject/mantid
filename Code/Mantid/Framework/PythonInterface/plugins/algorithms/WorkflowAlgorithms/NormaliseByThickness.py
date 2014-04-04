@@ -42,10 +42,10 @@ class NormaliseByThickness(PythonAlgorithm):
             if input_ws.getRun().hasProperty("sample-thickness"):
                 thickness = input_ws.getRun().getProperty("sample-thickness").value
                 if thickness <= 0:
-                    Logger.get("NormaliseByThickness").error("NormaliseByThickness could not get the sample thickness")
+                    Logger("NormaliseByThickness").error("NormaliseByThickness could not get the sample thickness")
                     return
             else:
-                Logger.get("NormaliseByThickness").error("NormaliseByThickness could not get the sample thickness")
+                Logger("NormaliseByThickness").error("NormaliseByThickness could not get the sample thickness")
                 return
 
         output_ws_name = self.getPropertyValue("OutputWorkspace")

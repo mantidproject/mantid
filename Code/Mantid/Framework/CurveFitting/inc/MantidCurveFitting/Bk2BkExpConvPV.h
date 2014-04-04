@@ -4,7 +4,6 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IFunctionMW.h"
-#include "MantidKernel/Logger.h"
 #include <complex>
 
 namespace Mantid
@@ -75,9 +74,6 @@ namespace CurveFitting
 
     /// container for storing wavelength values for each data point
     mutable std::vector<double> m_dtt1;
-
-    /// Static reference to the logger class
-    static Kernel::Logger& g_log;
 
     double calOmega(double x, double eta, double N, double alpha, double beta, double H,
         double sigma2, double invert_sqrt2sigma) const;

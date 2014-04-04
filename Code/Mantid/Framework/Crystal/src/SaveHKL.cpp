@@ -341,7 +341,7 @@ namespace Crystal
     	    double mu = (9.614 * lambda) + 0.266;    // mu for GS20 glass
 			double depth = 0.2;
 			double eff_center = 1.0 - std::exp(-mu * depth);  // efficiency at center of detector
-			IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
+			IComponent_const_sptr sample = ws->getInstrument()->getSample();
 			double cosA = ws->getInstrument()->getComponentByName(p.getBankName())->getDistance(*sample) / p.getL2();
 			double pathlength = depth / cosA;
 			double eff_R = 1.0 - exp(-mu * pathlength);   // efficiency at point R

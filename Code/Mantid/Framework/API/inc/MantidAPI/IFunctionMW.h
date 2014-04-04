@@ -56,10 +56,6 @@ protected:
   boost::weak_ptr<const API::MatrixWorkspace> m_workspace;
   /// An index to a spectrum
   size_t m_workspaceIndex;
-
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
-
 };
 
 } // namespace API
