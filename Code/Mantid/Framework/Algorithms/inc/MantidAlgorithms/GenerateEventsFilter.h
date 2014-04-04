@@ -129,7 +129,7 @@ namespace Algorithms
     /// Create a splitter and add to the vector of time splitters
     Kernel::DateAndTime makeSplitterInVector(std::vector<Kernel::DateAndTime>& vecSplitTime, std::vector<int>& vecGroupIndex,
                                              Kernel::DateAndTime start, Kernel::DateAndTime stop, int group,
-                                             Kernel::time_duration tolerance, int64_t tol_ns, Kernel::DateAndTime lasttime);
+                                             int64_t tol_ns, Kernel::DateAndTime lasttime);
 
 
     /// Generate a matrix workspace containing splitters

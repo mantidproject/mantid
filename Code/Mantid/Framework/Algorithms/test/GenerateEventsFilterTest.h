@@ -718,6 +718,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeTolerance", 1.0E-8));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogBoundary",  "Centre"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseParallelProcessing",  "Parallel"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfThreads", 4));
 
     // Running and get result
     TS_ASSERT_THROWS_NOTHING(alg.execute());

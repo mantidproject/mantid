@@ -185,7 +185,7 @@ namespace Algorithms
                     "Serial: Use a single core. Good for slow log. \n"
                     "Parallel: Use multiple cores. Appropriate for fast log. ");
 
-    declareProperty("NumberOfThreads", 1, "Number of threads forced to use in the parallel mode. ");
+    declareProperty("NumberOfThreads", EMPTY_INT(), "Number of threads forced to use in the parallel mode. ");
 
     return;
   }
@@ -640,8 +640,8 @@ namespace Algorithms
       }
     } // ENDIFELSE: Double/Integer Log
 
-    g_log.debug() << "[GenearteEventFilter DB1248] minimum value = " << minvalue <<  ", "
-                  << "maximum value = " << maxvalue << ".\n";
+    g_log.information() << "Minimum value = " << minvalue <<  ", " << "maximum value = "
+                        << maxvalue << ".\n";
 
     return;
   }
@@ -769,7 +769,7 @@ namespace Algorithms
               << ". Log value range: " << logvalueranges[mit->first*2] << ", "
               << logvalueranges[mit->first*2+1] << ".\n";
     }
-    g_log.information(dbsplitss.str());
+    g_log.debug(dbsplitss.str());
 
     // Check split interval obtained wehther is with valid size
     if (logvalueranges.size() < 2)
@@ -777,7 +777,6 @@ namespace Algorithms
       g_log.warning("There is no log value interval existing.");
       return;
     }
-
 
     {
       // Warning information
@@ -814,47 +813,6 @@ namespace Algorithms
                                   filterincrease, filterdecrease, m_startTime, m_stopTime);
     }
 
-    // Put to SplittersWorkspace
-    if (m_forFastLog)
-    {
-      // Splitters in matrix workspace
-#if 0
-      g_log.notice() << "Number of vector splitter: " << m_vecSplitterTime.size()
-                     << ", " << m_vecSplitterGroup.size() << "\n";
-      for (size_t i = 0; i < m_vecSplitterGroup.size(); ++i)
-      {
-        g_log.notice() << m_vecSplitterTime[i] << ", " << m_vecSplitterGroup[i] << "\n";
-      }
-      g_log.notice() << m_vecSplitterTime.back() << "\n";
-#endif
-
-#if 0
-      size_t sizex = m_vecSplitterTime.size();
-      size_t sizey = m_vecSplitterGroup.size();
-      if (sizex - sizey != 1)
-        throw runtime_error("Logic error.");
-
-      m_filterWS = boost::dynamic_pointer_cast<MatrixWorkspace>
-          (API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey));
-
-      MantidVec& dataX = m_filterWS->dataX(0);
-      for (size_t i = 0; i < sizex; ++i)
-        dataX[i] = static_cast<double>(m_vecSplitterTime[i].totalNanoseconds());
-
-      MantidVec& dataY = m_filterWS->dataY(0);
-      for (size_t i = 0; i < sizey; ++i)
-        dataY[i] = static_cast<double>(m_vecSplitterGroup[i]);
-#else
-      // generateSplittersInMatrixWorkspace();
-#endif
-    }
-    else
-    {
-      // Normal SplitterWorkspace
-      for (size_t i = 0; i < splitters.size(); i ++)
-        m_splitWS->addSplitter(splitters[i]);
-    }
-
     return;
   }
 
@@ -883,7 +841,7 @@ namespace Algorithms
     // 1. Do nothing if the log is empty.
     if (m_dblLog->size() == 0)
     {
-      g_log.warning() << "There is no entry in this property " << this->name() << std::endl;
+      g_log.warning() << "There is no entry in this property " << this->name() << "\n";
       return;
     }
 
@@ -926,7 +884,7 @@ namespace Algorithms
       }
       else
       {
-        g_log.error() << "Neither increasing nor decreasing is selected.  It is empty!" << std::endl;
+        g_log.error("Neither increasing nor decreasing is selected.  It is empty!");
       }
 
       if (isGood)
@@ -1012,7 +970,7 @@ namespace Algorithms
     // Return if the log is empty.
     if (m_dblLog->size() == 0)
     {
-      g_log.warning() << "There is no entry in this property " << m_dblLog->name() << std::endl;
+      g_log.warning() << "There is no entry in this property " << m_dblLog->name() << "\n";
       return;
     }
 
@@ -1106,23 +1064,26 @@ namespace Algorithms
         if (correctdir)
         {
           size_t index = searchValue(logvalueranges, currValue);
-#if 0
-          g_log.debug() << "DBx257 Examine Log Index " << i << ", Value = " << currValue
-                        << ", Data Range Index = " << index << "; "
-                        << "Group Index = " << indexwsindexmap[index/2]
-                        << " (log value range vector size = " << logvalueranges.size() << ").\n";
-#endif
 
-          bool valuewithin2boundaries = true;
+          {
+            stringstream dbss;
+            dbss << "Flagx257 Examine Log Index " << i << ", Value = " << currValue
+                 << ", Data Range Index = " << index << "; "
+                 << "Group Index = " << indexwsindexmap[index/2]
+                 << " (log value range vector size = " << logvalueranges.size() << ").";
+            g_log.debug(dbss.str());
+          }
+
+          bool valueWithinMinMax = true;
           if (index > logvalueranges.size())
           {
             // Out of range
-            valuewithin2boundaries = false;
+            valueWithinMinMax = false;
           }
 
-          if (index%2 == 0 && valuewithin2boundaries)
+          if (valueWithinMinMax && index%2 == 0)
           {
-            // [Situation] Falls in the interval
+            // [Situation] Log value falls in an interval to be selected
             currindex = indexwsindexmap[index/2];
 
             if (currindex != lastindex && start.totalNanoseconds() == 0)
@@ -1168,9 +1129,9 @@ namespace Algorithms
               throw std::runtime_error(errmsg.str());
             }
           } // [In-bound: Inside interval]
-          else if (valuewithin2boundaries)
+          else if (valueWithinMinMax)
           {
-            // [Situation] Fall between interval (which is not likley happen)
+            // [Situation] Log value does not fall in any interval to be selected
             currindex = -1;
             if (start.totalNanoseconds() > 0)
             {
@@ -1178,10 +1139,10 @@ namespace Algorithms
               stop = currTime;
               createsplitter = true;
             }
-          } // [In-bound: Between interval]
-          else if (!valuewithin2boundaries)
+          } // [In-bound: Between 2 intervals]
+          else
           {
-            // Out of a range.
+            // [Situation] Log value is out of boundary (min/max)
             currindex = -1;
             if (start.totalNanoseconds() > 0)
             {
@@ -1189,63 +1150,24 @@ namespace Algorithms
               stop = currTime;
               createsplitter = true;
             }
-            else
-            {
-              // No operation required
-              ;
-            }
           } // [Out-bound]
-          else
-          {
-            // IMPOSSIBLE SITUATION
-            // c2) Fall out of interval
-            g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c value range... " << "\n";
-            throw runtime_error("Is it ever reached? ");
-
-            // log value falls out of min/max: If start is defined, then define stop
-            if (start.totalNanoseconds() > 0)
-            {
-              stop = currTime;
-              createsplitter = true;
-              // g_log.debug() << "DBOP Log Index [2] " << i << "  falls Out b/c value range... " << ".\n";
-            }
-          }
         } // [CORRECT DIRECTION]
         else
         {
+          // Log index i falls out selection due to wrong direction
           currindex = -1;
-          // g_log.debug() << "DBOP Log Index " << i << " Falls out b/c out of wrong direction" << std::endl;
         }
-      }
+      } // Neutron event is in specified time range
       else
       {
-        // Out of time range
+        // Log index i falls out of selection due to beyond specifed (absolute) time.
         currindex = -1;
-        // g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c out of time range... " << std::endl;
       }
 
-      // d) Create Splitter
+      // d) Create Splitter and reset start (time)
       if (createsplitter)
       {
         make_splitter(start, stop, lastindex, tol);
-
-#if 0
-        if (centre)
-        {
-          split.push_back( SplittingInterval(start-tol, stop-tol, lastindex) );
-        }
-        else
-        {
-          split.push_back( SplittingInterval(start, stop, lastindex) );
-        }
-
-        g_log.debug() << "DBx250 Add Splitter " << split.size()-1 << ":  " << start.totalNanoseconds() << ", "
-                      << stop.totalNanoseconds() << ", Delta T = "
-                      << static_cast<double>(stop.totalNanoseconds()-start.totalNanoseconds())*1.0E-9
-                      << "(s), Workgroup = " << lastindex << std::endl;
-#endif
-
-        // reset
         start = ZeroTime;
       }
 
@@ -1315,14 +1237,12 @@ namespace Algorithms
     time_duration tol = DateAndTime::durationFromSeconds( timetolerance );
 
     // Determine the number of threads to use
-#if 1
     int numThreads = getProperty("NumberOfThreads");
-    g_log.error() << "[DB Force] Number of threads to use = " << numThreads << "\n";
-#else
-    int numThreads = std::max(1, static_cast<int>(size_t(PARALLEL_GET_MAX_THREADS))-2);
-    g_log.notice() << "Number of threads to use = " << numThreads << "\n";
-#endif
-    numThreads = std::min(numThreads, logsize-1);
+    if (isEmpty(numThreads))
+      numThreads = static_cast<int>(PARALLEL_GET_MAX_THREADS);
+
+    // Limit the number of threads.
+    numThreads = std::min(numThreads, logsize/8);
 
     // Determine the istart and iend
     // For split, log should be [0, n], [n, 2n], [2n, 3n], ... as to look into n log values
@@ -1345,14 +1265,17 @@ namespace Algorithms
       vecEnd.push_back(iend);
     }
 
-    g_log.notice() << "Number of thread = " << numThreads << ", Log Size = " << logsize << "\n";
-#if _DBOUT
-    for (size_t i = 0; i < vecStart.size(); ++i)
     {
-      g_log.debug() << "Thread " << i << ": Log range: [" << vecStart[i] << ", " << vecEnd[i] << ") "
-                     << "Size = " << vecEnd[i] - vecStart[i] << "\n";
+      stringstream dbss;
+      dbss << "Number of thread = " << numThreads << ", Log Size = " << logsize << "\n";
+      for (size_t i = 0; i < vecStart.size(); ++i)
+      {
+        dbss << "Thread " << i << ": Log range: [" << vecStart[i] << ", " << vecEnd[i] << ") "
+                       << "Size = " << vecEnd[i] - vecStart[i] << "\n";
+      }
+      g_log.information(dbss.str());
     }
-#endif
+
 
     // Create partial vectors
     vecSplitterTimeSet.clear();
@@ -1383,44 +1306,37 @@ namespace Algorithms
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
-    // Temporary solution: combine to m_vecSplitterTime and ....
-#if _DBOUT
-    for (int i = 0; i < numThreads; ++i)
-    {
-      for (size_t j = 0; j < vecGroupIndexSet[i].size(); ++ j)
-      {
-        g_log.debug() << "[DB] Thread " << i << " Splitter " << j << " Start = "
-                       << vecSplitterTimeSet[i][j] << ", Stop = " << vecSplitterTimeSet[i][j+1]
-                       << ", Index = " << vecGroupIndexSet[i][j] << "\n";
-      }
-    }
-#endif
 
+    // Concatenate splitters on different threads together
     for (int i = 1; i < numThreads; ++i)
     {
       if (vecSplitterTimeSet[i-1].back() == vecSplitterTimeSet[i].front())
       {
+        // T_(i).back() = T_(i+1).front()
         if (vecGroupIndexSet[i-1].back() == vecGroupIndexSet[i].front())
         {
-          // T_stop = T_start, I_stop = I_start, combine: pop back last element
+          // G_(i).back() = G_(i+1).front(), combine these adjacent 2 splitters
           // Rule out impossible situation
           if (vecGroupIndexSet[i-1].back() == -1) throw runtime_error("It is not possible to have this situation (F01).");
 
+          // Pop back last element
           vecGroupIndexSet[i-1].pop_back();
           DateAndTime newt0 = vecSplitterTimeSet[i-1].front();
           vecSplitterTimeSet[i-1].pop_back();
           DateAndTime origtime = vecSplitterTimeSet[i][0];
           vecSplitterTimeSet[i][0] = newt0;
-          g_log.debug() << "[DB-0] Extending from " << origtime << " to " << newt0 << "\n";
+          g_log.debug() << "Splitter at the end of thread " << i << " is extended from "
+                        << origtime << " to " << newt0 << "\n";
         }
         else
         {
-          // Ideal case. NoOp
+          // 2 different and continous spliiter: ideal case without any operation
           ;
         }
       }
       else
       {
+        // T_(i).back() != T_(i+1).front(): need to fill the gap in time
         int lastindex = vecGroupIndexSet[i-1].back();
         int firstindex = vecGroupIndexSet[i].front();
 
@@ -1434,14 +1350,15 @@ namespace Algorithms
         {
           // Empty splitter of the thread. Extend this to next
           vecSplitterTimeSet[i-1].back() = vecSplitterTimeSet[i].front();
-          g_log.debug() << "[DB-2] Thread = " << i << ", change ending time of " << i-1 << " to " << vecSplitterTimeSet[i].front()
-                         << "\n";
+          g_log.debug() << "Thread = " << i << ", change ending time of " << i-1
+                        << " to " << vecSplitterTimeSet[i].front() << "\n";
         }
         else if (firstindex == -1 && vecGroupIndexSet[i].size() == 1)
         {
           // Empty splitter of the thread. Extend last one to this
           vecSplitterTimeSet[i].front() = vecSplitterTimeSet[i-1].back();
-          g_log.debug() << "[DB-3] Thread = " << i << ", change starting time to " << vecSplitterTimeSet[i].front() << "\n";
+          g_log.debug() << "Thread = " << i << ", change starting time to " << vecSplitterTimeSet[i].front()
+                        << "\n";
         }
         else
         {
@@ -1449,19 +1366,6 @@ namespace Algorithms
         }
       }
     }
-
-#if _DBOUT
-    g_log.notice() << "[DB] After processing multiple thread boundary issue: \n";
-    for (int i = 0; i < numThreads; ++i)
-    {
-      for (size_t j = 0; j < vecGroupIndexSet[i].size(); ++ j)
-      {
-        g_log.notice() << "[DB] Thread " << i << " Splitter " << j << " Start = "
-                       << vecSplitterTimeSet[i][j] << ", Stop = " << vecSplitterTimeSet[i][j+1]
-                       << ", Index = " << vecGroupIndexSet[i][j] << "\n";
-      }
-    }
-#endif
 
     progress(1.0);
 
@@ -1571,80 +1475,85 @@ namespace Algorithms
         if (correctdir)
         {
           size_t index = searchValue(logvalueranges, currValue);
-#if 0
-          g_log.debug() << "DBx257 Examine Log Index " << i << ", Value = " << currValue
-                        << ", Data Range Index = " << index << "; "
-                        << "Group Index = " << indexwsindexmap[index/2]
-                        << " (log value range vector size = " << logvalueranges.size() << ").\n";
-#endif
+          {
+            stringstream dbss;
+            dbss << "DBx257 Examine Log Index " << i << ", Value = " << currValue
+                 << ", Data Range Index = " << index << "; "
+                 << "Group Index = " << indexwsindexmap[index/2]
+                 << " (log value range vector size = " << logvalueranges.size() << ").";
+            g_log.debug(dbss.str());
+          }
 
-          bool valuewithin2boundaries = true;
+          bool valueWithinMinMax = true;
           if (index > logvalueranges.size())
           {
             // Out of range
-            valuewithin2boundaries = false;
+            valueWithinMinMax = false;
           }
 
-          if (index%2 == 0 && valuewithin2boundaries)
+          if (valueWithinMinMax)
           {
-            // [Situation] Falls in the interval
-            currindex = indexwsindexmap[index/2];
+            if (index%2 == 0)
+            {
+              // [Situation] Falls in the interval
+              currindex = indexwsindexmap[index/2];
 
-            if (currindex != lastindex && start.totalNanoseconds() == 0)
-            {
-              // i.   A new region!
-              newsplitter = true;
-            }
-            else if (currindex != lastindex && start.totalNanoseconds() > 0)
-            {
-              // ii.  Time to close a region and new a region
-              stop = currTime;
-              createsplitter = true;
-              newsplitter = true;
-            }
-            else if (currindex == lastindex && start.totalNanoseconds() > 0)
-            {
-              // iii. Still in the same zone
-              if (i == iend)
+              if (currindex != lastindex && start.totalNanoseconds() == 0)
               {
-                // Last entry in this section of log.  Need to flag to close the pair
+                // i.   A new region!
+                newsplitter = true;
+              }
+              else if (currindex != lastindex && start.totalNanoseconds() > 0)
+              {
+                // ii.  Time to close a region and new a region
                 stop = currTime;
                 createsplitter = true;
-                newsplitter = false;
+                newsplitter = true;
+              }
+              else if (currindex == lastindex && start.totalNanoseconds() > 0)
+              {
+                // iii. Still in the same zone
+                if (i == iend)
+                {
+                  // Last entry in this section of log.  Need to flag to close the pair
+                  stop = currTime;
+                  createsplitter = true;
+                  newsplitter = false;
+                }
+                else
+                {
+                  // Do nothing
+                  ;
+                }
               }
               else
               {
-                // Do nothing
-                ;
+                // iv.  It is impossible
+                std::stringstream errmsg;
+                double lastvalue =  m_dblLog->nthValue(i-1);
+                errmsg << "Impossible to have currindex == lastindex == " << currindex
+                       << ", while start is not init.  Log Index = " << i << "\t value = "
+                       << currValue << "\t, Index = " << index
+                       << " in range " << logvalueranges[index] << ", " << logvalueranges[index+1]
+                       << "; Last value = " << lastvalue;
+
+                g_log.error(errmsg.str());
+                throw std::runtime_error(errmsg.str());
               }
-            }
+            } // [In-bound: Inside interval]
             else
             {
-              // iv.  It is impossible
-              std::stringstream errmsg;
-              double lastvalue =  m_dblLog->nthValue(i-1);
-              errmsg << "Impossible to have currindex == lastindex == " << currindex
-                     << ", while start is not init.  Log Index = " << i << "\t value = "
-                     << currValue << "\t, Index = " << index
-                     << " in range " << logvalueranges[index] << ", " << logvalueranges[index+1]
-                     << "; Last value = " << lastvalue;
-
-              g_log.error(errmsg.str());
-              throw std::runtime_error(errmsg.str());
-            }
-          } // [In-bound: Inside interval]
-          else if (valuewithin2boundaries)
-          {
-            // [Situation] Fall between interval (which is not likley happen)
-            currindex = -1;
-            if (start.totalNanoseconds() > 0)
-            {
-              // Close the interval pair if it has been started.
-              stop = currTime;
-              createsplitter = true;
-            }
-          } // [In-bound: Between interval]
-          else if (!valuewithin2boundaries)
+              // [Situation] Fall between interval (which is not likley happen)
+              currindex = -1;
+              if (start.totalNanoseconds() > 0)
+              {
+                // Close the interval pair if it has been started.
+                stop = currTime;
+                createsplitter = true;
+              }
+            } // [In-bound: Between interval]
+          }
+          else
           {
             // Out of a range.
             currindex = -1;
@@ -1660,40 +1569,25 @@ namespace Algorithms
               ;
             }
           } // [Out-bound]
-          else
-          {
-            // IMPOSSIBLE SITUATION
-            // c2) Fall out of interval
-            g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c value range... " << std::endl;
-            throw runtime_error("Is it ever reached? ");
 
-            // log value falls out of min/max: If start is defined, then define stop
-            if (start.totalNanoseconds() > 0)
-            {
-              stop = currTime;
-              createsplitter = true;
-              // g_log.debug() << "DBOP Log Index [2] " << i << "  falls Out b/c value range... " << ".\n";
-            }
-          }
         } // [CORRECT DIRECTION]
         else
         {
+          // Log Index " << i << " Falls out b/c out of wrong direction
           currindex = -1;
-          g_log.debug() << "DBOP Log Index " << i << " Falls out b/c out of wrong direction" << std::endl;
         }
       }
       else
       {
-        // Out of time range
+        // Log Index " << i << "  Falls Out b/c out of time range... " << std::endl;
         currindex = -1;
-        // g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c out of time range... " << std::endl;
       }
 
       // d) Create Splitter
       if (createsplitter)
       {
         // make_splitter(start, stop, lastindex, tol);
-        makeSplitterInVector(vecSplitTime, vecSplitGroup, start, stop, lastindex, tol, tol_ns, laststoptime);
+        makeSplitterInVector(vecSplitTime, vecSplitGroup, start, stop, lastindex, tol_ns, laststoptime);
 
         // reset
         start = ZeroTime;
@@ -1712,17 +1606,6 @@ namespace Algorithms
       // e) Update loop variable
       lastindex = currindex;
 
-      // f) Progress
-#if 0
-      size_t tmpslot = i*90/m_dblLog->size();
-      if (tmpslot > progslot)
-      {
-        progslot = tmpslot;
-        double prog = double(progslot)/100.0+0.1;
-        progress(prog);
-      }
-#endif
-
     } // For each log value
 
     // To fill the blanks at the end of log to make last entry of splitter is stop time
@@ -1732,18 +1615,8 @@ namespace Algorithms
       start = m_dblLog->nthTime(istart);
       stop = m_dblLog->nthTime(iend);
       lastindex = -1;
-      makeSplitterInVector(vecSplitTime, vecSplitGroup, start, stop, lastindex, tol, tol_ns, laststoptime);
+      makeSplitterInVector(vecSplitTime, vecSplitGroup, start, stop, lastindex, tol_ns, laststoptime);
     }
-#if 0
-    else
-    {
-      if (vecSplitTime.back() != stop)
-      {
-        vecSplitTime.push_back(stop);
-        vecSplitGroup.push_back(-1);
-      }
-    }
-#endif
 
     return;
   }
@@ -1935,11 +1808,6 @@ namespace Algorithms
   {
     size_t outrange = sorteddata.size()+1;
 
-#if 0
-    g_log.debug() << "[G-E-F: DBx450] Search Value " << value << " (sorted data range = "
-                  << sorteddata[0] << ", " << sorteddata.back() << ").\n";
-#endif
-
     // 1. Extreme case
     // FIXME - Get sortedata[0] and sorteddata.back() as constant as data range
     if (value < sorteddata[0] || value > sorteddata.back())
@@ -2091,7 +1959,7 @@ namespace Algorithms
     */
   DateAndTime GenerateEventsFilter::makeSplitterInVector(std::vector<Kernel::DateAndTime>& vecSplitTime, std::vector<int>& vecGroupIndex,
                                                          Kernel::DateAndTime start, Kernel::DateAndTime stop, int group,
-                                                         Kernel::time_duration tolerance, int64_t tol_ns, DateAndTime lasttime)
+                                                         int64_t tol_ns, DateAndTime lasttime)
   {
     DateAndTime starttime(start.totalNanoseconds()-tol_ns);
     DateAndTime stoptime(stop.totalNanoseconds()-tol_ns);
