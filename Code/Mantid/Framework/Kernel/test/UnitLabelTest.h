@@ -21,6 +21,8 @@ class UnitLabelTest : public CxxTest::TestSuite
       ON_CALL(*this, utf8()).WillByDefault(Return(std::wstring(L"Utf8TextLabel")));
     }
 
+    MockLabel * clone() const { return new MockLabel(); }
+
     MOCK_CONST_METHOD0(ascii, const std::string());
     MOCK_CONST_METHOD0(utf8, const std::wstring());
   };

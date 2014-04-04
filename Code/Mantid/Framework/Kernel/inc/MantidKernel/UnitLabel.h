@@ -39,6 +39,15 @@ namespace Mantid
     public:
       /// Virtual destructor
       virtual ~UnitLabel();
+      /// "Virtual" copy constructor
+      virtual UnitLabel * clone() const = 0;
+
+      /// Equality operator with other label
+      bool operator==(const UnitLabel & rhs) const;
+      /// Equality operator with std::string
+      bool operator==(const std::string & rhs) const;
+      /// Equality operator with std::wtring
+      bool operator==(const std::wstring & rhs) const;
 
       /// Return an ascii label for unit
       virtual const std::string ascii() const = 0;
@@ -46,7 +55,7 @@ namespace Mantid
       virtual const std::wstring utf8() const = 0;
 
       /// Implicit conversion to std::string
-      operator std::string();
+      operator std::string() const;
     };
 
   } // namespace Kernel

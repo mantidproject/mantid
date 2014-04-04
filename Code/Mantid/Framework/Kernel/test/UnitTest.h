@@ -5,6 +5,7 @@
 
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include <boost/lexical_cast.hpp>
 #include <cfloat>
 #include <limits>
@@ -102,7 +103,7 @@ class UnitTest : public CxxTest::TestSuite
   class UnitTester : public Unit
   {
 public:
-    UnitTester() : Unit()
+    UnitTester() : Unit(new TextLabel("", L""))
     {
       addConversion("a", 1.1);
       addConversion("b", 2.2, 0.5);
@@ -112,7 +113,6 @@ public:
     // Empty overrides of virtual methods
     const std::string unitID() const {return "aUnit";}
     const std::string caption() const {return "";}
-    const std::string label() const{return "";}
     void init() {}
     virtual double singleToTOF(const double ) const { return 0; }
     virtual double singleFromTOF(const double ) const { return 0; }
@@ -132,7 +132,7 @@ public:
   {
     Label lbl("Temperature", "K");
     TS_ASSERT_EQUALS(lbl.caption(), "Temperature");
-    TS_ASSERT_EQUALS(lbl.label(), "K");
+    TS_ASSERT_EQUALS(lbl.label().ascii(), "K");
   }
 
   void testLabel_unitID()
@@ -147,7 +147,7 @@ public:
 
   void testLabel_label()
   {
-    TS_ASSERT_EQUALS( label.label(), "" );
+    TS_ASSERT_EQUALS( label.label().ascii(), "" );
   }
 
   void testLabel_cast()
@@ -161,7 +161,7 @@ public:
   {
     label.setLabel("Temperature", "K");
     TS_ASSERT_EQUALS(label.caption(), "Temperature");
-    TS_ASSERT_EQUALS(label.label(), "K");
+    TS_ASSERT_EQUALS(label.label().ascii(), "K");
   }
   void testLabel_limits()
   {    
@@ -248,7 +248,8 @@ public:
     TS_ASSERT_EQUALS(first.isInitialized(), second.isInitialized());
     TS_ASSERT_EQUALS(first.unitID(), second.unitID())
     TS_ASSERT_EQUALS(first.caption(), second.caption())
-    TS_ASSERT_EQUALS(first.label(), second.label())
+    TS_ASSERT_EQUALS(first.label().ascii(), second.label().ascii())
+    TS_ASSERT_EQUALS(first.label().utf8(), second.label().utf8())
   }
 
   void test_copy_assignment_operator_on_concrete_type()
@@ -260,7 +261,8 @@ public:
     TS_ASSERT_EQUALS(first.isInitialized(), second.isInitialized());
     TS_ASSERT_EQUALS(first.unitID(), second.unitID())
     TS_ASSERT_EQUALS(first.caption(), second.caption())
-    TS_ASSERT_EQUALS(first.label(), second.label())
+    TS_ASSERT_EQUALS(first.label().ascii(), second.label().ascii())
+    TS_ASSERT_EQUALS(first.label().utf8(), second.label().utf8())
   }
 
 
@@ -271,7 +273,7 @@ public:
 
   void testTOF_label()
   {
-    TS_ASSERT_EQUALS( tof.label(), "microsecond" )
+    TS_ASSERT_EQUALS( tof.label().ascii(), "microsecond" )
   }
 
   void testTOF_utf8Label()
@@ -336,7 +338,7 @@ public:
 
   void testWavelength_label()
   {
-    TS_ASSERT_EQUALS( lambda.label(), "Angstrom" )
+    TS_ASSERT_EQUALS( lambda.label().ascii(), "Angstrom" )
   }
 
   void testWavelength_utf8Label()
@@ -423,7 +425,7 @@ public:
 
   void testEnergy_label()
   {
-    TS_ASSERT_EQUALS( energy.label(), "meV" )
+    TS_ASSERT_EQUALS( energy.label().ascii(), "meV" )
   }
 
   void testEnergy_utf8Label()
@@ -513,7 +515,7 @@ public:
 
   void testEnergy_inWavenumber_label()
   {
-    TS_ASSERT_EQUALS( energyk.label(), "1/cm" )
+    TS_ASSERT_EQUALS( energyk.label().ascii(), "cm^-1" )
   }
 
   void testEnergy_inWavenumber_utf8Label()
@@ -583,7 +585,7 @@ public:
 
   void testdSpacing_label()
   {
-    TS_ASSERT_EQUALS( d.label(), "Angstrom" )
+    TS_ASSERT_EQUALS( d.label().ascii(), "Angstrom" )
   }
 
   void testdSpacing_utf8Label()
@@ -676,7 +678,7 @@ public:
 
   void testQTransfer_label()
   {
-    TS_ASSERT_EQUALS( q.label(), "1/Angstrom" )
+    TS_ASSERT_EQUALS( q.label().ascii(), "Angstrom^-1" )
   }
 
   void testQTransfer_utf8Label()
@@ -769,7 +771,7 @@ public:
 
   void testQ2_label()
   {
-    TS_ASSERT_EQUALS( q2.label(), "Angstrom^-2" )
+    TS_ASSERT_EQUALS( q2.label().ascii(), "Angstrom^-2" )
   }
 
   void testQ2_utf8Label()
@@ -863,7 +865,7 @@ public:
 
   void testDeltaE_label()
   {
-    TS_ASSERT_EQUALS( dE.label(), "meV" )
+    TS_ASSERT_EQUALS( dE.label().ascii(), "meV" )
   }
 
   void testDeltaE_utf8Label()
@@ -958,7 +960,7 @@ public:
 
   void testDeltaEk_label()
   {
-    TS_ASSERT_EQUALS( dEk.label(), "1/cm" )
+    TS_ASSERT_EQUALS( dEk.label().ascii(), "cm^-1" )
   }
 
   void testDeltaEk_utf8Label()
@@ -1050,7 +1052,7 @@ public:
 
   void testMomentum_label()
   {
-    TS_ASSERT_EQUALS( k_i.label(), "Angstrom^-1" )
+    TS_ASSERT_EQUALS( k_i.label().ascii(), "Angstrom^-1" )
   }
 
   void testMomentum_utf8Label()
@@ -1186,7 +1188,7 @@ public:
 
   void testSpinEchoLength_label()
   {
-    TS_ASSERT_EQUALS( delta.label(), "nm" )
+    TS_ASSERT_EQUALS( delta.label().ascii(), "nm" )
   }
 
   void testSpinEchoLength_utf8Label()
@@ -1276,7 +1278,7 @@ public:
 
   void testSpinEchoTime_label()
   {
-    TS_ASSERT_EQUALS( tau.label(), "ns" )
+    TS_ASSERT_EQUALS( tau.label().ascii(), "ns" )
   }
 
   void testSpinEchoTime_utf8Llabel()
