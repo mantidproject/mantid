@@ -366,7 +366,7 @@ namespace Mantid
         std::vector<LabelIdIntensityMap> parallelLabelIntensityMapVec(nthreads);
         std::vector<std::map<size_t, boost::shared_ptr<Cluster> > > parallelClusterMapVec(nthreads);
    
-
+        // ------------- Stage One. Local CCL in parallel.
         PARALLEL_FOR_NO_WSP_CHECK()
         for(int i = 0; i < nthreads; ++i)
         {
@@ -404,6 +404,7 @@ namespace Mantid
           while(iterator->next());
         }
 
+        // -------------------- Stage 2 --- Preparation stage for combining equivalent clusters. Must be done in sequence.
         // Combine cluster maps processed by each thread.
         std::map<size_t, boost::shared_ptr<Cluster> > clusterMap;
         for(auto it = parallelClusterMapVec.begin(); it != parallelClusterMapVec.end(); ++it)
@@ -437,7 +438,7 @@ namespace Mantid
           }
         }
 
-        // In parallel, process each incomplete cluster.
+        // ------------- Stage 3 In parallel, process each incomplete cluster.
         PARALLEL_FOR_NO_WSP_CHECK()
           for(int i = 0; i < static_cast<int>(incompleteClusterVec.size()); ++i)
         {
