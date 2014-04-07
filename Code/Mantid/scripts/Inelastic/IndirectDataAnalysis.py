@@ -661,6 +661,7 @@ def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=
     furyfitPlotSeq(outWS, Plot)
   
   EndTime('FuryFit Multi')
+  return result_workspace
 
 
 def createFuryMultiDomainFunction(function, input_ws):
