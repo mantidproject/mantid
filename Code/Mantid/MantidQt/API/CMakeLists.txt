@@ -17,6 +17,7 @@ set ( SRC_FILES
   src/MantidWidget.cpp
   src/Message.cpp
   src/OptionsPropertyWidget.cpp
+  src/PlotAxis.cpp
   src/PropertyWidget.cpp
   src/PropertyWidgetFactory.cpp
   src/PythonRunner.cpp
@@ -67,6 +68,7 @@ set ( INC_FILES
   inc/MantidQtAPI/HelpWindow.h
   inc/MantidQtAPI/InterfaceFactory.h
   inc/MantidQtAPI/InterfaceManager.h
+  inc/MantidQtAPI/PlotAxis.h
   inc/MantidQtAPI/MantidColorMap.h
   inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
   inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
@@ -85,6 +87,7 @@ set( TEST_FILES
    InterfaceManagerTest.h
    MantidColorMapTest.h
    MantidQwtMatrixWorkspaceDataTest.h
+   PlotAxisTest.h
    SelectionNotificationServiceTest.h
 )
 
