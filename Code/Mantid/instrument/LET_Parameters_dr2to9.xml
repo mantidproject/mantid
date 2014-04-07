@@ -43,7 +43,7 @@
 
 <!-- Monitor used to estimate total current on the sample.  -->
 <parameter name="norm-mon1-spec">
-  <value val="40961"/>
+  <value val="57350"/>
 </parameter>
 <!-- Time interval used for integration to estimate current on the sample 
     This interval is usually taken around the monitor peak-->
