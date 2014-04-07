@@ -53,35 +53,27 @@ namespace CustomInterfaces
     return sections;
   }
 
-  // TODO: refactor out for other step views to use
   void ALCBaselineModellingView::displayData(MatrixWorkspace_const_sptr data)
   {
-    const Mantid::MantidVec& dataX = data->readX(0);
-    const Mantid::MantidVec& dataY = data->readY(0);
+    m_dataCurve->setData(&data->readX(0)[0], &data->readY(0)[0], static_cast<int>(data->blocksize()));
 
-    m_dataCurve->setData(&dataX[0], &dataY[0], static_cast<int>(data->blocksize()));
+    double xMin = data->getXMin();
+    double xMax = data->getXMax();
 
-    m_sectionSelector->setMaximum(data->getXMax());
-    m_sectionSelector->setMinimum(data->getXMin());
+    m_sectionSelector->setMaximum(xMin);
+    m_sectionSelector->setMinimum(xMax);
 
-    m_sectionSelector->setRange(data->getXMax(), data->getXMin());
+    m_sectionSelector->setRange(xMin, xMax);
 
     m_ui.dataPlot->replot();
   }
 
   void ALCBaselineModellingView::displayCorrected(MatrixWorkspace_const_sptr data)
   {
-    const Mantid::MantidVec& dataX = data->readX(0);
-    const Mantid::MantidVec& dataY = data->readY(0);
+    m_correctedCurve->setData(&data->readX(0)[0], &data->readY(0)[0],
+        static_cast<int>(data->blocksize()));
 
-    m_correctedCurve->setData(&dataX[0], &dataY[0], static_cast<int>(data->blocksize()));
     m_ui.correctedPlot->replot();
-
-    // TODO: DEBUGGING - remove later
-    IAlgorithm_sptr copy = AlgorithmManager::Instance().create("CloneWorkspace");
-    copy->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(data));
-    copy->setProperty("OutputWorkspace", "Corrected");
-    copy->execute();
   }
 
   void ALCBaselineModellingView::updateFunction(IFunction_const_sptr func)

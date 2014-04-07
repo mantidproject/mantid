@@ -11,7 +11,8 @@ namespace CustomInterfaces
   DECLARE_SUBWINDOW(ALCInterface);
 
   ALCInterface::ALCInterface(QWidget* parent)
-    : UserSubWindow(parent), m_ui(), m_dataLoading(NULL), m_baselineModelling(NULL)
+    : UserSubWindow(parent), m_ui(), m_dataLoading(NULL), m_baselineModelling(NULL),
+      m_peakFitting(NULL)
   {}
 
   void ALCInterface::initLayout()
