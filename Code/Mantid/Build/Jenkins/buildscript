@@ -79,15 +79,20 @@ $SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure -E M
 $SCL_ON_RHEL6 "ctest --output-on-failure -R MantidPlot"
 
 ###############################################################################
-# Create the install kit if this is a clean build
+# Create the install kit if this is a clean or non-Mac build
 ###############################################################################
+rm -f *.dmg *.rpm *.deb *.tar.gz
+# Always build a package on linux
+if [[ $(uname) != 'Darwin' ]]; then
+  $SCL_ON_RHEL6 "make -j$BUILD_THREADS qtassistant"
+  $SCL_ON_RHEL6 "cpack"
+fi
+
 if [[ "$CLEANBUILD" == true ]]; then
   if [[ $(uname) != 'Darwin' ]]; then
-    $SCL_ON_RHEL6 "make -j$BUILD_THREADS qtassistant"
+    $SCL_ON_RHEL6 "cpack"
   fi
 
-  rm -f *.dmg *.rpm *.deb *.tar.gz
-  $SCL_ON_RHEL6 "cpack"
   # We could build the source tarball anywhere, but we choose to do it on RHEL6
   if [[ "$ON_RHEL6" == true ]]; then
     # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
