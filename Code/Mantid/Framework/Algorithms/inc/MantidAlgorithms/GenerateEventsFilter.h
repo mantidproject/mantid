@@ -124,7 +124,7 @@ namespace Algorithms
     void addNewTimeFilterSplitter(Kernel::DateAndTime starttime, Kernel::DateAndTime stoptime, int wsindex, std::string info);
 
     /// Add a splitter
-    void addNewLogValueSplitter(Kernel::DateAndTime start, Kernel::DateAndTime stop, int group, Kernel::time_duration tolerance);
+    // void addNewLogValueSplitter(Kernel::DateAndTime start, Kernel::DateAndTime stop, int group, Kernel::time_duration tolerance);
 
     /// Create a splitter and add to the vector of time splitters
     Kernel::DateAndTime makeSplitterInVector(std::vector<Kernel::DateAndTime>& vecSplitTime, std::vector<int>& vecGroupIndex,

@@ -272,7 +272,14 @@ namespace Algorithms
     string algtype = getPropertyValue("UseParallelProcessing");
     if (algtype == "Serial") m_useParallel = false;
     else if (algtype == "Parallel") m_useParallel = true;
-    else throw std::runtime_error("Impossible to have 3rd type. ");
+    else throw std::runtime_error("Impossible to have 3rd type other than Serial and Parallel. ");
+
+    // Conflict
+    if (m_useParallel && !m_forFastLog)
+    {
+      g_log.warning("Parallelization is for fast log only.  Automatically turn FastLog on. ");
+      m_forFastLog = true;
+    }
 
     return;
   }
@@ -580,17 +587,6 @@ namespace Algorithms
         // Generate filters for a series of log value
         processMultipleValueFilters(minvalue, maxvalue, filterIncrease, filterDecrease);
       }
-
-#if 0
-      // Add splitters
-      /// FIXME/TODO : consider of refactor!
-      size_t numsplits = m_splitters.size();
-      for (size_t i = 0; i < numsplits; ++i)
-      {
-        SplittingInterval split = m_splitters[i];
-        m_splitWS->addSplitter(split);
-      }
-#endif
     }
     else
     {
@@ -632,6 +628,7 @@ namespace Algorithms
       {
         processIntegerValueFilter(minvaluei, maxvaluei, filterIncrease, filterDecrease, runendtime);
 
+#if 0
         // Add splitters
         /// FIXME/TODO : consider of refactor!
         size_t numsplits = m_splitters.size();
@@ -640,6 +637,7 @@ namespace Algorithms
           SplittingInterval split = m_splitters[i];
           m_splitWS->addSplitter(split);
         }
+#endif
       }
     } // ENDIFELSE: Double/Integer Log
 
@@ -969,7 +967,6 @@ namespace Algorithms
   {
     g_log.notice("Starting method 'makeMultipleFiltersByValues'. ");
 
-#if 1
     // Return if the log is empty.
     int logsize = m_dblLog->size();
     if (logsize == 0)
@@ -1000,237 +997,6 @@ namespace Algorithms
     makeMultipleFiltersByValuesPartialLog(istart, iend, m_vecSplitterTime, m_vecSplitterGroup,
                                           indexwsindexmap, logvalueranges, tol,
                                           filterIncrease, filterDecrease, startTime, stopTime);
-
-#else
-
-    // Return if the log is empty.
-    if (m_dblLog->size() == 0)
-    {
-      g_log.warning() << "There is no entry in this property " << m_dblLog->name() << "\n";
-      return;
-    }
-
-    // Set up
-    double timetolerance = 0.0;
-    if (centre)
-    {
-      timetolerance = this->getProperty("TimeTolerance");
-    }
-    time_duration tol = DateAndTime::durationFromSeconds( timetolerance );
-
-    // Go through the whole log to set up time intervals
-    const Kernel::DateAndTime ZeroTime(0);
-    int lastindex = -1;
-    int currindex = -1;
-    DateAndTime lastTime;
-    DateAndTime currTime = ZeroTime;
-    DateAndTime start, stop;
-    size_t progslot = 0;
-
-    int logsize = m_dblLog->size();
-    for (int i = 0; i < logsize; i ++)
-    {
-      // Initialize status flags and new entry
-      bool breakloop = false;
-      bool createsplitter = false;
-
-      lastTime = currTime;
-      currTime = m_dblLog->nthTime(i);
-      double currValue = m_dblLog->nthValue(i);
-
-      // Filter out by time and direction (optional)
-      bool intime = false;
-      if (currTime < startTime)
-      {
-        // case i.  Too early, do nothing
-        createsplitter = false;
-      }
-      else if (currTime > stopTime)
-      {
-        // case ii. Too late.  Put to splitter if half of splitter is done.  But still within range
-        breakloop = true;
-        stop = currTime;
-        if (start.totalNanoseconds() > 0)
-        {
-          createsplitter = true;
-        }
-      }
-      else
-      {
-        // case iii. In the range to generate filters
-        intime = true;
-      }
-
-      // Check log within given time range
-      bool newsplitter = false; // Flag to start a new split in this loop
-
-      if (intime)
-      {
-        // Determine direction
-        bool correctdir = true;
-        if (filterIncrease && filterDecrease)
-        {
-          // Both direction is fine
-          correctdir = true;
-        }
-        else
-        {
-          // Filter out one direction
-          int direction = 0;
-          if ( m_dblLog->nthValue(i)-m_dblLog->nthValue(i-1) > 0)
-            direction = 1;
-          else
-            direction = -1;
-          if (filterIncrease && direction > 0)
-            correctdir = true;
-          else if (filterDecrease && direction < 0)
-            correctdir = true;
-          else
-            correctdir = false;
-
-          // Condition to generate a Splitter (close parenthesis)
-          if (!correctdir && start.totalNanoseconds() > 0)
-          {
-            stop = currTime;
-            createsplitter = true;
-          }
-        } // END-IF-ELSE: Direction
-
-        // Check this value whether it falls into any range
-        if (correctdir)
-        {
-          size_t index = searchValue(logvalueranges, currValue);
-
-          {
-            stringstream dbss;
-            dbss << "Flagx257 Examine Log Index " << i << ", Value = " << currValue
-                 << ", Data Range Index = " << index << "; "
-                 << "Group Index = " << indexwsindexmap[index/2]
-                 << " (log value range vector size = " << logvalueranges.size() << ").";
-            g_log.debug(dbss.str());
-          }
-
-          bool valueWithinMinMax = true;
-          if (index > logvalueranges.size())
-          {
-            // Out of range
-            valueWithinMinMax = false;
-          }
-
-          if (valueWithinMinMax && index%2 == 0)
-          {
-            // [Situation] Log value falls in an interval to be selected
-            currindex = indexwsindexmap[index/2];
-
-            if (currindex != lastindex && start.totalNanoseconds() == 0)
-            {
-              // i.   A new region!
-              newsplitter = true;
-            }
-            else if (currindex != lastindex && start.totalNanoseconds() > 0)
-            {
-              // ii.  Time to close a region and new a region
-              stop = currTime;
-              createsplitter = true;
-              newsplitter = true;
-            }
-            else if (currindex == lastindex && start.totalNanoseconds() > 0)
-            {
-              // iii. Still in the same zone
-              if (i == logsize-1)
-              {
-                // Last entry in the log.  Need to flag to close the pair
-                stop = currTime;
-                createsplitter = true;
-                newsplitter = false;
-              }
-              else
-              {
-                // Do nothing
-                ;
-              }
-            }
-            else
-            {
-              // iv.  It is impossible
-              std::stringstream errmsg;
-              double lastvalue =  m_dblLog->nthValue(i-1);
-              errmsg << "Impossible to have currindex == lastindex == " << currindex
-                     << ", while start is not init.  Log Index = " << i << "\t value = "
-                     << currValue << "\t, Index = " << index
-                     << " in range " << logvalueranges[index] << ", " << logvalueranges[index+1]
-                     << "; Last value = " << lastvalue;
-
-              g_log.error(errmsg.str());
-              throw std::runtime_error(errmsg.str());
-            }
-          } // [In-bound: Inside interval]
-          else if (valueWithinMinMax)
-          {
-            // [Situation] Log value does not fall in any interval to be selected
-            currindex = -1;
-            if (start.totalNanoseconds() > 0)
-            {
-              // Close the interval pair if it has been started.
-              stop = currTime;
-              createsplitter = true;
-            }
-          } // [In-bound: Between 2 intervals]
-          else
-          {
-            // [Situation] Log value is out of boundary (min/max)
-            currindex = -1;
-            if (start.totalNanoseconds() > 0)
-            {
-              // End situation
-              stop = currTime;
-              createsplitter = true;
-            }
-          } // [Out-bound]
-        } // [CORRECT DIRECTION]
-        else
-        {
-          // Log index i falls out selection due to wrong direction
-          currindex = -1;
-        }
-      } // Neutron event is in specified time range
-      else
-      {
-        // Log index i falls out of selection due to beyond specifed (absolute) time.
-        currindex = -1;
-      }
-
-      // d) Create Splitter and reset start (time)
-      if (createsplitter)
-      {
-        addNewLogValueSplitter(start, stop, lastindex, tol);
-        start = ZeroTime;
-      }
-
-      // e) Start new splitter: have to be here due to start cannot be updated before a possible splitter generated
-      if (newsplitter)
-      {
-        start = currTime;
-      }
-
-      // f) Break
-      if (breakloop)
-        break;
-
-      // e) Update loop variable
-      lastindex = currindex;
-
-      // f) Progress
-      size_t tmpslot = i*90/m_dblLog->size();
-      if (tmpslot > progslot)
-      {
-        progslot = tmpslot;
-        double prog = double(progslot)/100.0+0.1;
-        progress(prog);
-      }
-
-    } // For each log value
-#endif
 
     progress(1.0);
 
@@ -1699,9 +1465,11 @@ namespace Algorithms
     vector<int> values = m_intLog->valuesAsVector();
 
     time_duration timetol = DateAndTime::durationFromSeconds( m_logTimeTolerance*m_timeUnitConvertFactorToNS*1.0E-9);
+    int64_t timetolns = timetol.total_nanoseconds();
 
     DateAndTime splitstarttime(0);
     int pregroup = -1;
+    DateAndTime laststoptime(0);
 
     g_log.debug() << "Number of integer log entries = " << numlogentries << ".\n";
 
@@ -1736,7 +1504,10 @@ namespace Algorithms
         // previous log is in allowed region.  but this one is not.  create a splitter
         if (splitstarttime.totalNanoseconds() == 0)
           throw runtime_error("Programming logic error.");
-        addNewLogValueSplitter(splitstarttime, times[i], pregroup, timetol);
+        g_log.notice() << "[DB-1] Add splitter of group " << pregroup << "\n";
+        // addNewLogValueSplitter(splitstarttime, times[i], pregroup, timetol);
+        makeSplitterInVector(m_vecSplitterTime, m_vecSplitterGroup, splitstarttime, times[i], pregroup, timetolns, laststoptime);
+        laststoptime = times[i];
 
         splitstarttime = DateAndTime(0);
         statuschanged = true;
@@ -1752,7 +1523,10 @@ namespace Algorithms
         // migrated to a new region
         if (splitstarttime.totalNanoseconds() == 0)
           throw runtime_error("Programming logic error (1).");
-        addNewLogValueSplitter(splitstarttime, times[i], pregroup, timetol);
+        // addNewLogValueSplitter(splitstarttime, times[i], pregroup, timetol);
+        g_log.notice() << "[DB-2] Add splitter of group " << pregroup << "\n";
+        makeSplitterInVector(m_vecSplitterTime, m_vecSplitterGroup, splitstarttime, times[i], pregroup, timetolns, laststoptime);
+        laststoptime = times[i];
 
         splitstarttime = times[i];
         statuschanged = true;
@@ -1775,7 +1549,9 @@ namespace Algorithms
       // Last entry is in an allowed region.
       if (splitstarttime.totalNanoseconds() == 0)
         throw runtime_error("Programming logic error (1).");
-      addNewLogValueSplitter(splitstarttime, runend, pregroup, timetol);
+      //   addNewLogValueSplitter(splitstarttime, runend, pregroup, timetol);
+      makeSplitterInVector(m_vecSplitterTime, m_vecSplitterGroup, splitstarttime, runend, pregroup, timetolns, laststoptime);
+
     }
 
     // Write to the information workspace
@@ -1935,7 +1711,6 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Generate a new time splitter and add to a list of splitters
-    */
   void GenerateEventsFilter::addNewLogValueSplitter(Kernel::DateAndTime start, Kernel::DateAndTime stop, int group,
                                                     Kernel::time_duration tolerance)
   {
@@ -1982,6 +1757,7 @@ namespace Algorithms
 
     return;
   }
+      */
 
   //----------------------------------------------------------------------------------------------
   /** Create a splitter and add to the vector of time splitters
@@ -2020,7 +1796,8 @@ namespace Algorithms
     else
     {
       // Stop time of previous splitter is the start time of this splitter. Nothing need to do
-      ;
+      g_log.warning() << "Stop time of previous splitter " << lasttime << " is the start time of this splitter "
+                      << start << ". Nothing need to do.\n";
     }
 
     // Complete this splitter, i.e., stoptime and group
@@ -2104,7 +1881,7 @@ namespace Algorithms
   }
 
   void GenerateEventsFilter::generateSplittersInSplitterWS()
-  {
+  {    
     for (size_t i = 0; i < m_vecSplitterGroup.size(); ++i)
     {
       int groupindex = m_vecSplitterGroup[i];
