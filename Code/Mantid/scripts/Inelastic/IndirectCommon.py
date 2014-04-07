@@ -292,23 +292,23 @@ def convertToElasticQ(input_ws, output_ws=None):
   
   if output_ws is None:
     output_ws = input_ws
-    
-  try:
+   
+  axis = mtd[input_ws].getAxis(1)
+  if axis.isSpectra():
       e_fixed = getEfixed(input_ws)
       ConvertSpectrumAxis(input_ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=output_ws)
-  except RuntimeError:
-      #try to fall back to using whatever is currently there
-      axis = mtd[input_ws].getAxis(1)
-      if not axis.isNumeric():
-          logger.error('Input workspace must have either spectra or numeric axis.')
-          sys.exit()
-
+  
+  elif axis.isNumeric():
+      #check that units are Momentum Transfer
       if axis.getUnit().unitID() != 'MomentumTransfer':
           logger.error('Input must have axis values of Q')
           sys.exit()
-  
+      
       CloneWorkspace(input_ws, OutputWorkspace=output_ws)
-
+  else:
+    logger.error('Input workspace must have either spectra or numeric axis.')
+    sys.exit()
+  
 def transposeFitParametersTable(params_table, output_table=None):
   """
     Transpose the parameter table created of Fit.
