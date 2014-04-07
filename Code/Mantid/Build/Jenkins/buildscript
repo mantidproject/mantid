@@ -31,6 +31,15 @@ if [[ ${JOB_NAME} == *clean* ]]; then
   CLEANBUILD=true
   # Removing the build directory entirely guarantees a completely clean build
   rm -rf $WORKSPACE/build
+
+  # Set some variables relating to the linux packages created from clean builds
+  if [[ $(uname) != 'Darwin' ]]; then
+    if [[ ${JOB_NAME} == *master* ]]; then
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF"
+    elif [[ ${JOB_NAME} == *develop* ]]; then
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF"
+    fi
+  fi
 fi
 
 ###############################################################################
@@ -38,6 +47,7 @@ fi
 ###############################################################################
 if [[ ${NODE_LABELS} == *rhel6* ]]; then
   SCL_ON_RHEL6="scl enable mantidlibs"
+  ON_RHEL6=true
 else
   SCL_ON_RHEL6="eval"
 fi
@@ -51,7 +61,7 @@ cd $WORKSPACE/build
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} ../Code/Mantid"
+$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} ${PACKAGINGVARS} ../Code/Mantid"
 
 ###############################################################################
 # Build step
@@ -78,4 +88,9 @@ if [[ "$CLEANBUILD" == true ]]; then
 
   rm -f *.dmg *.rpm *.deb *.tar.gz
   $SCL_ON_RHEL6 "cpack"
+  # We could build the source tarball anywhere, but we choose to do it on RHEL6
+  if [[ "$ON_RHEL6" == true ]]; then
+    # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
+    $SCL_ON_RHEL6 "cpack --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX="
+  fi
 fi
