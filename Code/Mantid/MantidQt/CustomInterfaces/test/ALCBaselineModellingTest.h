@@ -33,6 +33,9 @@ public:
 
 class ALCBaselineModellingTest : public CxxTest::TestSuite
 {
+  MockALCBaselineModellingView* m_view;
+  ALCBaselineModellingPresenter* m_presenter;
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running otherl tests
@@ -44,15 +47,24 @@ public:
     FrameworkManager::Instance(); // To make sure everything is initialized
   }
 
-  MockALCBaselineModellingView* createView(MatrixWorkspace_const_sptr data)
+  void setUp()
   {
-    auto view = new MockALCBaselineModellingView();
-    auto presenter = new ALCBaselineModellingPresenter(view);
-    EXPECT_CALL(*view, initialize()).Times(1);
-    EXPECT_CALL(*view, displayData(_)).Times(1);
-    presenter->initialize();
-    presenter->setData(data);
-    return view;
+    m_view = new MockALCBaselineModellingView();
+    m_presenter = new ALCBaselineModellingPresenter(m_view);
+    EXPECT_CALL(*m_view, initialize()).Times(1);
+    m_presenter->initialize();
+  }
+
+  void tearDown()
+  {
+    delete m_presenter;
+    delete m_view;
+  }
+
+  void setData(MatrixWorkspace_const_sptr data)
+  {
+    EXPECT_CALL(*m_view, displayData(_)).Times(1);
+    m_presenter->setData(data);
   }
 
   void test_basicUsage()
@@ -63,6 +75,8 @@ public:
     data->dataY(0) = list_of(1)(2)(100)(3)(4)(5)(100)(100).to_container(data->dataY(0));
     data->dataX(0) = list_of(1)(2)( 3 )(4)(5)(6)( 7 )( 8 ).to_container(data->dataX(0));
 
+    setData(data);
+
     IFunction_const_sptr func = FunctionFactory::Instance().createInitialized("name=FlatBackground,A0=0");
 
     std::vector<IALCBaselineModellingView::Section> sections;
@@ -72,15 +86,14 @@ public:
     IFunction_const_sptr fittedFunc;
     MatrixWorkspace_const_sptr corrected;
 
-    scoped_ptr<MockALCBaselineModellingView> view(createView(data));
-    EXPECT_CALL(*view, function()).WillRepeatedly(Return(func));
-    EXPECT_CALL(*view, sections()).WillRepeatedly(Return(sections));
+    EXPECT_CALL(*m_view, function()).WillRepeatedly(Return(func));
+    EXPECT_CALL(*m_view, sections()).WillRepeatedly(Return(sections));
 
-    EXPECT_CALL(*view, updateFunction(_)).Times(1).WillOnce(SaveArg<0>(&fittedFunc));
-    EXPECT_CALL(*view, displayCorrected(_)).Times(1).WillOnce(SaveArg<0>(&corrected));
-    EXPECT_CALL(*view, displayData(_)).Times(0);
+    EXPECT_CALL(*m_view, updateFunction(_)).Times(1).WillOnce(SaveArg<0>(&fittedFunc));
+    EXPECT_CALL(*m_view, displayCorrected(_)).Times(1).WillOnce(SaveArg<0>(&corrected));
+    EXPECT_CALL(*m_view, displayData(_)).Times(0);
 
-    view->requestFit();
+    m_view->requestFit();
 
     TS_ASSERT(fittedFunc);
 
