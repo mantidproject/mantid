@@ -330,7 +330,6 @@ set ( TEST_FILES
 	UnitConversionTest.h
 	UnitFactoryTest.h
 	UnitLabelTest.h
-	UnitLabelTypesTest.h
 	UnitTest.h
 	UserStringParserTest.h
 	UtilsTest.h

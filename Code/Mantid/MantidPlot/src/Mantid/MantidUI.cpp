@@ -2977,7 +2977,7 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
     else if ( axis->unit() )
     {
       xtitle = QString::fromStdString(axis->unit()->caption()) +\
-               " (" + QString::fromStdWString(axis->unit()->utf8Label()) + ")";
+               " (" + QString::fromStdWString(axis->unit()->label().utf8()) + ")";
     }
   }
   g->setXAxisTitle(xtitle);

@@ -71,7 +71,8 @@ namespace Mantid
       if (axes() > 0 )
       {
         Axis *ax = getAxis(0);
-        if ( ax && ax->unit() ) os << ax->unit()->caption() << " / " << ax->unit()->label();
+        if ( ax && ax->unit() ) os << ax->unit()->caption()
+                                   << " / " << ax->unit()->label().ascii();
         else os << "Not set";
       }
       else
@@ -901,7 +902,7 @@ namespace Mantid
         // then append that unit to the string to be returned
         if ( !retVal.empty() && this->isDistribution() && this->axes() && this->getAxis(0)->unit() )
         {
-          retVal = retVal + " per " + this->getAxis(0)->unit()->label();
+          retVal = retVal + " per " + this->getAxis(0)->unit()->label().ascii();
         }
       }
 

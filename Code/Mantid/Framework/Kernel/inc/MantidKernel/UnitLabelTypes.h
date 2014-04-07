@@ -29,66 +29,35 @@ namespace Mantid { namespace Kernel
 {
   namespace Units
   {
-// Easily declare UnitLabels
-#define DECLARE_UNIT_LABEL(ClassName) \
-    class MANTID_KERNEL_DLL ClassName : public UnitLabel\
-    {\
-    public:\
-      ClassName * clone() const;\
-      const std::string ascii() const;\
-      const std::wstring utf8() const;\
-    };
-
-    /// Empty label
-    DECLARE_UNIT_LABEL(EmptyLabel);
-    /// Second
-    DECLARE_UNIT_LABEL(Second);
-    /// Microsecond
-    DECLARE_UNIT_LABEL(Microsecond);
-    /// Nanosecond
-    DECLARE_UNIT_LABEL(Nanosecond);
-    /// Angstrom
-    DECLARE_UNIT_LABEL(Angstrom);
-    /// InverseAngstrom
-    DECLARE_UNIT_LABEL(InverseAngstrom);
-    /// InverseAngstromSq
-    DECLARE_UNIT_LABEL(InverseAngstromSq);
-    /// MilliElectronVolts
-    DECLARE_UNIT_LABEL(MilliElectronVolts);
-    /// Metre
-    DECLARE_UNIT_LABEL(Metre);
-    /// Nanometre
-    DECLARE_UNIT_LABEL(Nanometre);
-    /// Inverse centimeters
-    DECLARE_UNIT_LABEL(InverseCM);
-
-
-    //-------------------------------------------------------------------------
-
-    /// Free text label with a different non-default constructor
-    class MANTID_KERNEL_DLL TextLabel : public UnitLabel
+    /**
+     * A simple class containing common symbol types
+     */
+    class Symbol
     {
     public:
-      /// Constructor
-      TextLabel(const std::string & ascii, const std::wstring & utf8);
-      /// Return a new object of this type
-      TextLabel * clone() const;
-
-      /// Return an ascii label for unit
-      const std::string ascii() const;
-      /// Return a utf-8 encoded label for unit
-      const std::wstring utf8() const;
-
-    private:
-      DISABLE_DEFAULT_CONSTRUCT(TextLabel);
-      /// plain-text label
-      std::string m_ascii;
-      /// utf8 label
-      std::wstring m_utf8;
+      /// Empty label
+      static const UnitLabel EmptyLabel;
+      /// Second
+      static const UnitLabel Second;
+      /// Microsecond
+      static const UnitLabel Microsecond;
+      /// Nanosecond
+      static const UnitLabel Nanosecond;
+      /// Angstrom
+      static const UnitLabel Angstrom;
+      /// InverseAngstrom
+      static const UnitLabel InverseAngstrom;
+      /// InverseAngstromSq
+      static const UnitLabel InverseAngstromSq;
+      /// MilliElectronVolts
+      static const UnitLabel MilliElectronVolts;
+      /// Metre
+      static const UnitLabel Metre;
+      /// Nanometre
+      static const UnitLabel Nanometre;
+      /// Inverse centimeters
+      static const UnitLabel InverseCM;
     };
-
-  // tidy up macro
-  #undef DECLARE_UNIT_LABEL
 
   } // namespace Units
 }} // namespace Mantid::Kernel

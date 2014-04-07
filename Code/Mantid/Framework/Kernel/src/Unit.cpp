@@ -20,17 +20,7 @@ namespace Kernel
    */
   Unit::Unit() :
     initialized(false), l1(0), l2(0), twoTheta(0), emode(0),
-    efixed(0), delta(0), m_label(new Units::EmptyLabel)
-  {
-  }
-
-  /**
-   * @param label A pointer to the UnitLabel object for this Unit
-   * Takes ownership of the pointer
-   */
-  Unit::Unit(const UnitLabel *label) :
-    initialized(false), l1(0), l2(0), twoTheta(0), emode(0),
-    efixed(0), delta(0), m_label(label)
+    efixed(0), delta(0)
   {
   }
 
@@ -38,13 +28,12 @@ namespace Kernel
    */
   Unit::~Unit()
   {
-    delete m_label;
   }
 
   /**
    * @param other The unit that initializes this
    */
-  Unit::Unit(const Unit & other) : m_label(NULL)
+  Unit::Unit(const Unit & other)
   {
     // call assignment operator for everything else
     *this = other;
@@ -65,31 +54,9 @@ namespace Kernel
       emode = rhs.emode;
       efixed = rhs.efixed;
       delta = rhs.delta;
-
-      delete m_label;
-      m_label = rhs.m_label->clone();
     }
     return *this;
   }
-
-  /**
-   * @return A label that describes the unit. @see UnitLabel
-   */
-  const UnitLabel & Unit::label() const
-  {
-    return *m_label;
-  }
-
-  /**
-   * @return A label string that can contain utf-8 character encodings.
-   *         Default returns contents of label()
-   */
-  const std::wstring Unit::utf8Label() const
-  {
-    const auto lbl = this->label().ascii();
-    return std::wstring(lbl.begin(), lbl.end());
-  }
-
 
 /** Is conversion by constant multiplication possible?
  *
@@ -162,16 +129,6 @@ void Unit::addConversion(std::string to, const double& factor, const double& pow
 void Unit::clearConversions() const
 {
   s_conversionFactors.clear();
-}
-
-/**
- * @param label A pointer to a new UnitLabel type. This object takes
- * ownership
- */
-void Unit::setLabel(const UnitLabel *label)
-{
-  delete m_label;
-  m_label = label;
 }
 
 //---------------------------------------------------------------------------------------
@@ -255,19 +212,24 @@ namespace Units
  * EMPTY
  * =============================================================================
  */
-DECLARE_UNIT(Empty)
+  DECLARE_UNIT(Empty)
 
-void Empty::init()
-{
-}
+  const UnitLabel Empty::label() const
+  {
+    return Symbol::EmptyLabel;
+  }
 
-double Empty::singleToTOF(const double x) const
-{
-  UNUSED_ARG(x);
-  throw Kernel::Exception::NotImplementedError("Cannot convert unit "+this->unitID()+" to time of flight");
-}
+  void Empty::init()
+  {
+  }
 
-double Empty::singleFromTOF(const double tof) const
+  double Empty::singleToTOF(const double x) const
+  {
+    UNUSED_ARG(x);
+    throw Kernel::Exception::NotImplementedError("Cannot convert unit "+this->unitID()+" to time of flight");
+  }
+
+  double Empty::singleFromTOF(const double tof) const
 {
   UNUSED_ARG(tof);
   throw Kernel::Exception::NotImplementedError("Cannot convert to unit "+this->unitID()+" from time of flight");
@@ -302,14 +264,19 @@ double Empty::conversionTOFMax() const
 
 DECLARE_UNIT(Label)
 
+const UnitLabel Label::label() const
+{
+  return m_label;
+}
+
 /// Constructor
 Label::Label()
-:Empty(),m_caption("Quantity")
+:Empty(),m_caption("Quantity"), m_label(Symbol::EmptyLabel)
 {
 }
 
 Label::Label(const std::string& caption, const std::string& label) : Empty(),
-  m_caption()
+  m_caption(), m_label(Symbol::EmptyLabel)
 {
   setLabel(caption, label);
 }
@@ -320,8 +287,7 @@ Label::Label(const std::string& caption, const std::string& label) : Empty(),
 void Label::setLabel(const std::string& cpt, const std::string& lbl)
 {
   m_caption = cpt;
-  Empty::setLabel(new TextLabel(lbl,
-                               std::wstring(lbl.begin(), lbl.end())));
+  m_label = UnitLabel(lbl);
 }
 
 Unit * Label::clone() const
@@ -335,10 +301,14 @@ Unit * Label::clone() const
  */
 DECLARE_UNIT(TOF)
 
-TOF::TOF() : Unit(new Microsecond)
+const UnitLabel TOF::label() const
 {
+  return Symbol::Microsecond;
 }
 
+TOF::TOF() : Unit()
+{
+}
 
 void TOF::init()
 {
@@ -380,7 +350,7 @@ double TOF::conversionTOFMax()const
  */
 DECLARE_UNIT(Wavelength)
 
-Wavelength::Wavelength() : Unit(new Angstrom)
+Wavelength::Wavelength() : Unit()
 {
   const double AngstromsSquared = 1e20;
   const double factor = ( AngstromsSquared * PhysicalConstants::h * PhysicalConstants::h )
@@ -390,6 +360,10 @@ Wavelength::Wavelength() : Unit(new Angstrom)
   addConversion("Momentum",2*M_PI,-1.0);
 }
 
+const UnitLabel Wavelength::label() const
+{
+  return Symbol::Angstrom;
+}
 
 void Wavelength::init()
 {
@@ -509,8 +483,13 @@ Unit * Wavelength::clone() const
  */
 DECLARE_UNIT(Energy)
 
+const UnitLabel Energy::label() const
+{
+  return Symbol::MilliElectronVolts;
+}
+
 /// Constructor
-Energy::Energy() : Unit(new MilliElectronVolts)
+Energy::Energy() : Unit()
 {
   addConversion("Energy_inWavenumber",PhysicalConstants::meVtoWavenumber);
   const double toAngstroms = 1e10;
@@ -573,8 +552,13 @@ Unit * Energy::clone() const
  */
 DECLARE_UNIT(Energy_inWavenumber)
 
+const UnitLabel Energy_inWavenumber::label() const
+{
+  return Symbol::InverseCM;
+}
+
 /// Constructor
-Energy_inWavenumber::Energy_inWavenumber() : Unit(new InverseCM)
+Energy_inWavenumber::Energy_inWavenumber() : Unit()
 {
   addConversion("Energy",1.0/PhysicalConstants::meVtoWavenumber);
   const double toAngstroms = 1e10;
@@ -640,7 +624,12 @@ Unit * Energy_inWavenumber::clone() const
  */
 DECLARE_UNIT(dSpacing)
 
-dSpacing::dSpacing() : Unit(new Angstrom)
+const UnitLabel dSpacing::label() const
+{
+  return Symbol::Angstrom;
+}
+
+dSpacing::dSpacing() : Unit()
 {
   const double factor = 2.0 * M_PI;
   addConversion("MomentumTransfer",factor,-1.0);
@@ -695,7 +684,13 @@ Unit * dSpacing::clone() const
  */
 DECLARE_UNIT(MomentumTransfer)
 
-MomentumTransfer::MomentumTransfer() : Unit(new InverseAngstrom)
+const UnitLabel MomentumTransfer::label() const
+{
+  return Symbol::InverseAngstrom;
+}
+
+
+MomentumTransfer::MomentumTransfer() : Unit()
 {
   addConversion("QSquared",1.0,2.0);
   const double factor = 2.0 * M_PI;
@@ -744,11 +739,6 @@ double MomentumTransfer::conversionTOFMax()const
   return DBL_MAX;
 }
 
-
-
-
-
-
 Unit * MomentumTransfer::clone() const
 {
   return new MomentumTransfer(*this);
@@ -761,7 +751,12 @@ Unit * MomentumTransfer::clone() const
  */
 DECLARE_UNIT(QSquared)
 
-QSquared::QSquared() : Unit(new InverseAngstromSq)
+const UnitLabel QSquared::label() const
+{
+  return Symbol::InverseAngstromSq;
+}
+
+QSquared::QSquared() : Unit()
 {
   addConversion("MomentumTransfer",1.0,0.5);
   const double factor = 2.0 * M_PI;
@@ -828,6 +823,11 @@ Unit * QSquared::clone() const
  * ==============================================================================
  */
 DECLARE_UNIT(DeltaE)
+
+const UnitLabel DeltaE::label() const
+{
+  return Symbol::MilliElectronVolts;
+}
 
 void DeltaE::init()
 {
@@ -958,7 +958,7 @@ Unit * DeltaE::clone() const
   return new DeltaE(*this);
 }
 
-DeltaE::DeltaE() : Unit(new MilliElectronVolts)
+DeltaE::DeltaE() : Unit()
 {
    addConversion("DeltaE_inWavenumber",PhysicalConstants::meVtoWavenumber,1.);
 }
@@ -972,6 +972,12 @@ DeltaE::DeltaE() : Unit(new MilliElectronVolts)
  * This is identical to the above (Energy Transfer in meV) with one division by meVtoWavenumber.
  */
 DECLARE_UNIT(DeltaE_inWavenumber)
+
+const UnitLabel DeltaE_inWavenumber::label() const
+{
+  return Symbol::InverseCM;
+}
+
 void DeltaE_inWavenumber::init()
 {
   DeltaE::init();
@@ -987,7 +993,6 @@ Unit * DeltaE_inWavenumber::clone() const
 DeltaE_inWavenumber::DeltaE_inWavenumber() : DeltaE()
 {
   addConversion("DeltaE",1/PhysicalConstants::meVtoWavenumber,1.);
-  setLabel(new InverseCM);
 }
 
 double DeltaE_inWavenumber::conversionTOFMin()const
@@ -1007,7 +1012,12 @@ double DeltaE_inWavenumber::conversionTOFMax()const
  */
 DECLARE_UNIT(Momentum)
 
-Momentum::Momentum() : Unit(new InverseAngstrom)
+const UnitLabel Momentum::label() const
+{
+  return Symbol::InverseAngstrom;
+}
+
+Momentum::Momentum() : Unit()
 {
 
   const double AngstromsSquared = 1e20;
@@ -1139,10 +1149,14 @@ Unit * Momentum::clone() const
  */
 DECLARE_UNIT(SpinEchoLength)
 
+const UnitLabel SpinEchoLength::label() const
+{
+  return Symbol::Nanometre;
+}
+
 SpinEchoLength::SpinEchoLength() : Wavelength()
 {
   clearConversions();
-  setLabel(new Nanometre);
 }
 
 void SpinEchoLength::init()
@@ -1200,10 +1214,14 @@ Unit * SpinEchoLength::clone() const
  */
 DECLARE_UNIT(SpinEchoTime)
 
+const UnitLabel SpinEchoTime::label() const
+{
+  return Symbol::Nanosecond;
+}
+
 SpinEchoTime::SpinEchoTime() : Wavelength()
 {
   clearConversions();
-  setLabel(new Nanosecond);
 }
 
 void SpinEchoTime::init()
@@ -1257,7 +1275,12 @@ Unit * SpinEchoTime::clone() const
  */
 DECLARE_UNIT(Time)
 
-Time::Time() : Unit(new Second)
+const UnitLabel Time::label() const
+{
+  return Symbol::Second;
+}
+
+Time::Time() : Unit()
 {
 }
 
@@ -1302,9 +1325,8 @@ Unit * Time::clone() const
  * Degrees prints degrees as a label
  */
 
-Degrees::Degrees() : Empty()
+Degrees::Degrees() : Empty(), m_label("degrees", L"degrees")
 {
-  setLabel(new TextLabel("degrees", L"degrees"));
 }
 
 } // namespace Units

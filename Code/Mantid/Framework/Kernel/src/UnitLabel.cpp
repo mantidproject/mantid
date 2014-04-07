@@ -9,8 +9,17 @@ namespace Mantid
      * @param ascii A plain-text label containing only ascii characters
      * @param unicode A label that can contain unicode characters
      */
-    UnitLabel::UnitLabel(const std::string &ascii, const std::wstring &unicode)
+    UnitLabel::UnitLabel(const AsciiString &ascii, const Utf8String &unicode)
       : m_ascii(ascii), m_utf8(unicode)
+    {
+    }
+
+    /**
+     * Use an ASCII string for the unicode variant too
+     * @param ascii A plain-text label containing only ascii characters
+     */
+    UnitLabel::UnitLabel(const UnitLabel::AsciiString &ascii)
+      : m_ascii(ascii), m_utf8(ascii.begin(), ascii.end())
     {
     }
 

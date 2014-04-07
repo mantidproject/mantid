@@ -152,9 +152,10 @@ QString MantidQwtMatrixWorkspaceData::getXAxisLabel() const
   if (ax->unit() && ax->unit()->unitID() != "Empty" )
   {
     xTitle = QString::fromStdString(ax->unit()->caption());
-    if ( !ax->unit()->label().empty() )
+    const auto lbl = ax->unit()->label();
+    if ( !lbl.utf8().empty() )
     {
-      xTitle += " (" + QString::fromStdWString(ax->unit()->utf8Label()) + ")";
+      xTitle += " (" + QString::fromStdWString(lbl.utf8()) + ")";
     }
   }
   else if (!ax->title().empty())
@@ -180,7 +181,7 @@ QString MantidQwtMatrixWorkspaceData::getYAxisLabel() const
     const std::string unitID = ax->unit()->unitID();
     if (unitID != "" || unitID != "Empty")
     {
-      yTitle = yTitle % " / " % ax->unit()->label().c_str();
+      yTitle = yTitle % " / " % ax->unit()->label().ascii().c_str();
     }
   }
   return yTitle;

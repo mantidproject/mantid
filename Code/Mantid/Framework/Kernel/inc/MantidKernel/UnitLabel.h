@@ -44,8 +44,10 @@ namespace Mantid
       /// width of the the built-in std::wstring
       typedef std::wstring Utf8String;
 
-      /// Constructor giving both labels
-      UnitLabel(const std::string & ascii, const std::wstring & unicode);
+      /// Constructor giving both labels as ascii & unicode respectively
+      UnitLabel(const AsciiString & ascii, const Utf8String & unicode);
+      /// Constructor giving both labels as ascii
+      UnitLabel(const AsciiString & ascii);
 
       /// Equality operator with other label
       bool operator==(const UnitLabel & rhs) const;

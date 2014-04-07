@@ -103,7 +103,7 @@ class UnitTest : public CxxTest::TestSuite
   class UnitTester : public Unit
   {
 public:
-    UnitTester() : Unit(new TextLabel("", L""))
+    UnitTester() : Unit()
     {
       addConversion("a", 1.1);
       addConversion("b", 2.2, 0.5);
@@ -113,6 +113,7 @@ public:
     // Empty overrides of virtual methods
     const std::string unitID() const {return "aUnit";}
     const std::string caption() const {return "";}
+    const UnitLabel label () const {return UnitLabel("");}
     void init() {}
     virtual double singleToTOF(const double ) const { return 0; }
     virtual double singleFromTOF(const double ) const { return 0; }
@@ -274,11 +275,7 @@ public:
   void testTOF_label()
   {
     TS_ASSERT_EQUALS( tof.label().ascii(), "microsecond" )
-  }
-
-  void testTOF_utf8Label()
-  {
-    TS_ASSERT_EQUALS( tof.utf8Label(), L"\u03bcs" )
+    TS_ASSERT_EQUALS( tof.label().utf8(), L"\u03bcs" )
   }
 
   void testTOF_cast()
@@ -339,11 +336,7 @@ public:
   void testWavelength_label()
   {
     TS_ASSERT_EQUALS( lambda.label().ascii(), "Angstrom" )
-  }
-
-  void testWavelength_utf8Label()
-  {
-    TS_ASSERT_EQUALS( lambda.utf8Label(), L"\u212b" )
+    TS_ASSERT_EQUALS( lambda.label().utf8(), L"\u212b" )
   }
 
   void testWavelength_cast()
@@ -426,11 +419,7 @@ public:
   void testEnergy_label()
   {
     TS_ASSERT_EQUALS( energy.label().ascii(), "meV" )
-  }
-
-  void testEnergy_utf8Label()
-  {
-    TS_ASSERT_EQUALS( energy.utf8Label(), L"meV" )
+    TS_ASSERT_EQUALS( energy.label().utf8(), L"meV" )
   }
 
 
@@ -516,12 +505,9 @@ public:
   void testEnergy_inWavenumber_label()
   {
     TS_ASSERT_EQUALS( energyk.label().ascii(), "cm^-1" )
+    TS_ASSERT_EQUALS( energyk.label().utf8(), L"cm\u207b\u00b9" )
   }
 
-  void testEnergy_inWavenumber_utf8Label()
-  {
-    TS_ASSERT_EQUALS( energyk.utf8Label(), L"cm\u207b\u00b9" )
-  }
 
   void testEnergy_inWavenumber_cast()
   {
@@ -586,11 +572,7 @@ public:
   void testdSpacing_label()
   {
     TS_ASSERT_EQUALS( d.label().ascii(), "Angstrom" )
-  }
-
-  void testdSpacing_utf8Label()
-  {
-    TS_ASSERT_EQUALS( d.utf8Label(), L"\u212b" )
+    TS_ASSERT_EQUALS( d.label().utf8(), L"\u212b" )
   }
 
   void testdSpacing_cast()
@@ -679,11 +661,7 @@ public:
   void testQTransfer_label()
   {
     TS_ASSERT_EQUALS( q.label().ascii(), "Angstrom^-1" )
-  }
-
-  void testQTransfer_utf8Label()
-  {
-    TS_ASSERT_EQUALS( q.utf8Label(), L"\u212b\u207b\u00b9" )
+    TS_ASSERT_EQUALS( q.label().utf8(), L"\u212b\u207b\u00b9" )
   }
 
   void testQTransfer_cast()
@@ -772,11 +750,7 @@ public:
   void testQ2_label()
   {
     TS_ASSERT_EQUALS( q2.label().ascii(), "Angstrom^-2" )
-  }
-
-  void testQ2_utf8Label()
-  {
-    TS_ASSERT_EQUALS( q2.utf8Label(), L"\u212b\u207b\u00b2" )
+    TS_ASSERT_EQUALS( q2.label().utf8(), L"\u212b\u207b\u00b2" )
   }
 
   void testQ2_cast()
@@ -866,11 +840,7 @@ public:
   void testDeltaE_label()
   {
     TS_ASSERT_EQUALS( dE.label().ascii(), "meV" )
-  }
-
-  void testDeltaE_utf8Label()
-  {
-    TS_ASSERT_EQUALS( dE.utf8Label(), L"meV" )
+    TS_ASSERT_EQUALS( dE.label().utf8(), L"meV" )
   }
 
   void testDeltaE_cast()
@@ -961,11 +931,7 @@ public:
   void testDeltaEk_label()
   {
     TS_ASSERT_EQUALS( dEk.label().ascii(), "cm^-1" )
-  }
-
-  void testDeltaEk_utf8Label()
-  {
-    TS_ASSERT_EQUALS( dEk.utf8Label(), L"cm\u207b\u00b9" )
+    TS_ASSERT_EQUALS( dEk.label().utf8(), L"cm\u207b\u00b9" )
   }
 
   void testDeltaEk_cast()
@@ -1053,11 +1019,7 @@ public:
   void testMomentum_label()
   {
     TS_ASSERT_EQUALS( k_i.label().ascii(), "Angstrom^-1" )
-  }
-
-  void testMomentum_utf8Label()
-  {
-    TS_ASSERT_EQUALS( k_i.utf8Label(), L"\u212b\u207b\u00b9" )
+    TS_ASSERT_EQUALS( k_i.label().utf8(), L"\u212b\u207b\u00b9" )
   }
 
   void testMomentum_cast()
@@ -1189,11 +1151,7 @@ public:
   void testSpinEchoLength_label()
   {
     TS_ASSERT_EQUALS( delta.label().ascii(), "nm" )
-  }
-
-  void testSpinEchoLength_utf8Label()
-  {
-    TS_ASSERT_EQUALS( delta.utf8Label(), L"nm" )
+    TS_ASSERT_EQUALS( delta.label().utf8(), L"nm" )
   }
 
   void testSpinEchoLength_cast()
@@ -1279,11 +1237,7 @@ public:
   void testSpinEchoTime_label()
   {
     TS_ASSERT_EQUALS( tau.label().ascii(), "ns" )
-  }
-
-  void testSpinEchoTime_utf8Llabel()
-  {
-    TS_ASSERT_EQUALS( tau.utf8Label(), L"ns" )
+    TS_ASSERT_EQUALS( tau.label().utf8(), L"ns" )
   }
 
   void testSpinEchoTime_cast()

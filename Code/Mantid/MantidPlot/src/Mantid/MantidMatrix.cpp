@@ -626,21 +626,21 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
     plot->addFunction(fun, xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows() );
 
     const Mantid::API::Axis* ax = m_workspace->getAxis(0);
-    std::string s;
-    if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
+    QString s;
+    if ( ax->unit() ) s = QString::fromStdString(ax->unit()->caption()) + " / " + QString::fromStdWString(ax->unit()->label().utf8());
     else
       s = "X Axis";
-    plot->setXAxisLabel(tr(s.c_str()));
+    plot->setXAxisLabel(s);
 
     if ( m_workspace->axes() > 1 )
     {
       ax = m_workspace->getAxis(1);
       if (ax->isNumeric())
       {
-        if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
+        if ( ax->unit() ) s = QString::fromStdString(ax->unit()->caption()) + " / " + QString::fromStdWString(ax->unit()->label().utf8());
         else
           s = "Y Axis";
-        plot->setYAxisLabel(tr(s.c_str()));
+        plot->setYAxisLabel(s);
       }
       else
         plot->setYAxisLabel(tr("Spectrum"));
@@ -696,20 +696,20 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot, ApplicationWindow* app, 
   plot->setTitle(tr("Workspace ") + name());
   const Mantid::API::Axis* ax;
   ax = m_workspace->getAxis(0);
-  std::string s;
-  if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+  QString s;
+  if (ax->unit()) s =  QString::fromStdString(ax->unit()->caption()) + " / " + QString::fromStdWString(ax->unit()->label().utf8());
   else
     s = "X Axis";
-  plot->setXAxisTitle(tr(s.c_str()));
+  plot->setXAxisTitle(s);
   if ( m_workspace->axes() > 1 )
   {
     ax = m_workspace->getAxis(1);
     if (ax->isNumeric())
     {
-      if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
+      if ( ax->unit() ) s = QString::fromStdString(ax->unit()->caption()) + " / " + QString::fromStdWString(ax->unit()->label().utf8());
       else
         s = "Y Axis";
-      plot->setYAxisTitle(tr(s.c_str()));
+      plot->setYAxisTitle(s);
     }
     else
       plot->setYAxisTitle(tr("Spectrum"));

@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/UnitLabel.h"
 #include <map>
 #include <vector>
 
@@ -14,10 +15,7 @@ namespace Mantid
 {
 namespace Kernel
 {
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-class UnitLabel;
+
 
 /** The base units (abstract) class. All concrete units should inherit from
     this class and provide implementations of the caption(), label(),
@@ -53,8 +51,6 @@ public:
 
   /// (Empty) Constructor
   Unit();
-  /// Constructor providing a unit label
-  Unit(const UnitLabel * label);
   /// Virtual destructor
   virtual ~Unit();
   /// Copy Constructor
@@ -74,10 +70,9 @@ public:
   /// @return The unit caption
   virtual const std::string caption() const = 0;
 
-  virtual const std::wstring utf8Label() const;
   /// A label for the unit to be printed on axes, @see UnitLabel
   /// @return The unit label
-  virtual const UnitLabel & label() const;
+  virtual const UnitLabel label() const = 0;
 
   // Check whether the unit can be converted to another via a simple factor
   bool quickConversion(const Unit& destination, double& factor, double& power) const;
@@ -184,9 +179,6 @@ protected:
   /// Removes all registered 'quick conversions'
   void clearConversions() const;
 
-  /// Set a new label
-  void setLabel(const UnitLabel * label);
-
   /// The unit values have been initialized
   bool initialized;
   /// l1 ::       The source-sample distance (in metres)
@@ -203,8 +195,6 @@ protected:
   double delta;
 
 private:
-  /// Label
-  const UnitLabel *m_label;
   /// A 'quick conversion' requires the constant by which to multiply the input and the power to which to raise it
   typedef std::pair< double, double > ConstantAndPower;
   /// Lists, for a given starting unit, the units to which a 'quick conversion' can be made
@@ -236,6 +226,7 @@ class MANTID_KERNEL_DLL Empty : public Unit
 public:
   const std::string unitID() const; ///< "Empty"
   const std::string caption() const { return ""; }
+  const UnitLabel label() const;
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -258,6 +249,7 @@ class MANTID_KERNEL_DLL Label : public Empty
 public:
   const std::string unitID() const; ///< "Label"
   const std::string caption() const { return m_caption; }
+  const UnitLabel label() const;
 
   Label();
   Label(const std::string& caption, const std::string& label);
@@ -269,6 +261,8 @@ public:
 private:
   /// Caption
   std::string m_caption;
+  /// Label
+  UnitLabel m_label;
 };
 
 //=================================================================================================
@@ -278,7 +272,7 @@ class MANTID_KERNEL_DLL TOF : public Unit
 public:
   const std::string unitID() const; ///< "TOF"
   const std::string caption() const { return "Time-of-flight"; }
-  const std::wstring utf8Label() const { return L"\u03bcs"; }
+  const UnitLabel label() const;
 
   TOF();
   virtual void init();
@@ -298,8 +292,8 @@ class MANTID_KERNEL_DLL Wavelength : public Unit
 public:
   const std::string unitID() const; ///< "Wavelength"
   const std::string caption() const { return "Wavelength"; }
-  const std::wstring utf8Label() const { return L"\u212b"; }
-  
+  const UnitLabel label() const;
+
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
   virtual void init();
@@ -328,6 +322,7 @@ class MANTID_KERNEL_DLL Energy : public Unit
 public:
   const std::string unitID() const; ///< "Energy"
   const std::string caption() const { return "Energy"; }
+  const UnitLabel label() const;
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -354,7 +349,7 @@ class MANTID_KERNEL_DLL Energy_inWavenumber : public Unit
 public:
   const std::string unitID() const; ///< "Energy_inWavenumber"
   const std::string caption() const { return "Energy"; }
-  const std::wstring utf8Label() const { return L"cm\u207b\u00b9"; }
+  const UnitLabel label() const;
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -380,7 +375,7 @@ class MANTID_KERNEL_DLL dSpacing : public Unit
 public:
   const std::string unitID() const; ///< "dSpacing"
   const std::string caption() const { return "d-Spacing"; }
-  const std::wstring utf8Label() const { return L"\u212b"; }
+  const UnitLabel label() const;
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -406,7 +401,7 @@ class MANTID_KERNEL_DLL MomentumTransfer : public Unit
 public:
   const std::string unitID() const; ///< "MomentumTransfer"
   const std::string caption() const { return "q"; }
-  const std::wstring utf8Label() const { return L"\u212b\u207b\u00b9"; }
+  const UnitLabel label() const;
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -431,7 +426,7 @@ class MANTID_KERNEL_DLL QSquared : public Unit
 public:
   const std::string unitID() const; ///< "QSquared"
   const std::string caption() const { return "Q2"; }
-  const std::wstring utf8Label() const { return L"\u212b\u207b\u00b2"; }
+  const UnitLabel label() const;
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -457,6 +452,7 @@ class MANTID_KERNEL_DLL DeltaE : public Unit
 public:
   virtual const std::string unitID() const; ///< "DeltaE"
   virtual const std::string caption() const { return "Energy transfer"; }
+  const UnitLabel label() const;
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -486,8 +482,7 @@ class MANTID_KERNEL_DLL DeltaE_inWavenumber : public DeltaE
 public:
   const std::string unitID() const; ///< "DeltaE_inWavenumber"
   const std::string caption() const { return "Energy transfer"; }
-  const std::wstring utf8Label() const { return L"cm\u207b\u00b9"; }
-
+  const UnitLabel label() const;
 
   virtual void init();
   virtual Unit * clone() const;
@@ -507,7 +502,7 @@ class MANTID_KERNEL_DLL Momentum : public Unit
 public:
   const std::string unitID() const; ///< "Momentum"
   const std::string caption() const { return "Momentum"; }
-  const std::wstring utf8Label() const { return L"\u212b\u207b\u00b9"; }
+  const UnitLabel label() const;
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -536,7 +531,7 @@ class MANTID_KERNEL_DLL SpinEchoLength : public Wavelength
 public:
   const std::string unitID() const; ///< "SpinEchoLength"
   const std::string caption() const { return "Spin Echo Length"; }
-  const std::wstring utf8Label() const { return L"nm"; }
+  const UnitLabel label() const;
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -559,7 +554,7 @@ class MANTID_KERNEL_DLL SpinEchoTime : public Wavelength
 public:
   const std::string unitID() const; ///< "SpinEchoTime"
   const std::string caption() const { return "Spin Echo Time"; }
-  const std::wstring utf8Label() const { return L"ns"; }
+  const UnitLabel label() const;
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -583,6 +578,7 @@ class MANTID_KERNEL_DLL Time : public Unit
 public:
   const std::string unitID() const; ///< "Time"
   const std::string caption() const { return "t"; }
+  const UnitLabel label() const;
 
   virtual double singleToTOF(const double x) const;
   virtual double singleFromTOF(const double tof) const;
@@ -605,11 +601,14 @@ protected:
 /// Degrees that has degrees as unit at "Scattering angle" as title
 class Degrees : public Empty
 {
+public:
   Degrees();
   const std::string unitID() const { return ""; }
   virtual const std::string caption() const { return "Scattering angle"; }
 
   virtual Unit * clone() const { return new Degrees(*this); }
+private:
+  UnitLabel m_label;
 };
 
 //=================================================================================================
