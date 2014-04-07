@@ -595,44 +595,6 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False
   return result_workspace
 
 
-def createFuryMultResFun(ties = True, A0 = 0.02, Intensity = 0.98 ,Tau = 0.025, Beta = 0.8):
-    fun =  '(composite=CompositeFunction,$domains=i;'
-    fun += 'name=LinearBackground,A0='+str(A0)+',A1=0,ties=(A1=0);'
-    fun += 'name=UserFunction,Formula=Intensity*exp(-(x/Tau)^Beta),Intensity='+str(Intensity)+',Tau='+str(Tau)+',Beta='+str(Beta)
-    if ties:
-        fun += ';ties=(f1.Intensity=1-f0.A0)'
-    fun += ');'
-    return fun
-
-
-def getFuryMultResult(inputWS, outNm, function, Verbose):
-    params = mtd[outNm+'_Parameters']
-    nHist = mtd[inputWS].getNumberHistograms()
-    for i in range(nHist):
-        j = 5 * i
-        A0 = params.row(j)['Value']
-        A1 = params.row(j + 1)['Value']
-        Intensity = params.row(j + 2)['Value']
-        Tau = params.row(j + 3)['Value']
-        Beta = params.row(j + 4)['Value']
-        func = createFuryMultResFun(True,  A0, Intensity ,Tau, Beta)
-        if Verbose:
-            logger.notice('Fit func : '+func)   
-        fitWS = outNm + '_Result_'
-        fout = fitWS + str(i)
-        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i,Output=fout,MaxIterations=0)
-        unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
-        unitx.setLabel('Time' , 'ns')
-        RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
-        DeleteWorkspace(fitWS+str(i)+'_NormalisedCovarianceMatrix')
-        DeleteWorkspace(fitWS+str(i)+'_Parameters')
-        if i == 0:
-            group = fout
-        else:
-            group += ',' + fout
-    GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS[:-1])
-
-
 def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=False, Save=False, Plot='None', Verbose=False):
   StartTime('FuryFit Multi')
 
@@ -670,16 +632,16 @@ def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=
   convertParametersToWorkspace(params_table, "axis-1", parameter_names, result_workspace)
 
   result_workspace = output_workspace + '_Result'
-  # getFuryMultResult(tmp_fit_workspace, output_workspace, function, Verbose)
+  fit_group = output_workspace + '_Workspaces'
 
   sample_logs  = {'start_x': startx, 'end_x': endx, 'fit_type': ftype, 
                   'intensities_constrained': intensities_constrained, 'beta_constrained': True}
 
   CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
+  CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
   
   addSampleLogs(result_workspace, sample_logs)
-
-  #furyAddSampleLogs(inputWS, outWS, params, intensities_constrained=intensities_constrained, beta_constrained=True)
+  addSampleLogs(fit_group, sample_logs)
 
   DeleteWorkspace(tmp_fit_workspace)
   
@@ -691,6 +653,7 @@ def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=
     furyfitPlotSeq(outWS, Plot)
   
   EndTime('FuryFit Multi')
+
 
 def createFuryMultiDomainFunction(function, input_ws):
   multi= 'composite=MultiDomainFunction,NumDeriv=1;'
