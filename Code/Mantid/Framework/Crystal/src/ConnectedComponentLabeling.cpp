@@ -364,47 +364,52 @@ namespace Mantid
         const int nthreads = getNThreads(); 
         std::vector<VecEdgeIndexPair> parallelEdgeVec(nthreads);
         std::vector<LabelIdIntensityMap> parallelLabelIntensityMapVec(nthreads);
+        std::vector<std::map<size_t, boost::shared_ptr<Cluster> > > parallelClusterMapVec(nthreads);
+   
+
         PARALLEL_FOR_NO_WSP_CHECK()
         for(int i = 0; i < nthreads; ++i)
         {
           API::IMDIterator* iterator = iterators[i];
           boost::scoped_ptr<BackgroundStrategy> strategy(baseStrategy->clone()); // local strategy
           VecEdgeIndexPair& edgeVec = parallelEdgeVec[i]; // local edge indexes
-          LabelIdIntensityMap& intensityMap = parallelLabelIntensityMapVec[i]; // local intensity map
+          LabelIdIntensityMap& intensityMap = parallelLabelIntensityMapVec[i]; // local intensity map. Contains unique label ids.
           const size_t startLabel = m_startId + (i * ws->getNPoints()); // Ensure that label ids are totally unique within each parallel unit.
           doConnectedComponentLabeling(iterator, strategy.get(), neighbourElements, intensityMap, positionLabelMap, progress, maxNeighbours, startLabel, edgeVec);
+
+          // Create clusters from labels.
+          std::map<size_t, boost::shared_ptr<Cluster> >& localClusterMap= parallelClusterMapVec[i]; // local cluster map.
+          for(auto it = intensityMap.begin(); it != intensityMap.end(); ++it)
+          {
+            const size_t& labelId = it->first;
+            const double& signalInt = it->second.get<0>();
+            const double& errorSQInt = it->second.get<1>();
+            auto cluster = boost::make_shared<Cluster>(labelId, signalInt, errorSQInt); // Create a cluster for the label and key it by the label.
+            localClusterMap[labelId] = cluster;
+          }
+          
+          // Associate the member DisjointElements with a cluster. Involves looping back over iterator.
+          iterator->jumpTo(0); // Reset
+          iterator->setNormalization(NoNormalization); // TODO: check that this is a valid assumption.
+          std::set<size_t> labelIds;
+          do
+          {
+            if(!baseStrategy->isBackground(iterator))
+            {
+              const size_t& index = iterator->getLinearIndex();
+              const size_t& labelAtIndex = neighbourElements[index].getRoot();
+              localClusterMap[labelAtIndex]->addIndex(index);  
+            }
+          }
+          while(iterator->next());
         }
 
-        // Create clusters from labels.
+        // Combine cluster maps processed by each thread.
         std::map<size_t, boost::shared_ptr<Cluster> > clusterMap;
-        for(auto it = parallelLabelIntensityMapVec.begin(); it != parallelLabelIntensityMapVec.end(); ++it)
+        for(auto it = parallelClusterMapVec.begin(); it != parallelClusterMapVec.end(); ++it)
         {
-          LabelIdIntensityMap& local = *it;
-          for(auto iit = local.begin(); iit != local.end(); ++iit)
-          {
-            const size_t& labelId = iit->first;
-            const double& signalInt = iit->second.get<0>();
-            const double& errorSQInt = iit->second.get<1>();
-            auto cluster = boost::make_shared<Cluster>(labelId, signalInt, errorSQInt);
-            clusterMap[labelId] = cluster;
-          }
+          clusterMap.insert(it->begin(), it->end());
         }
-
-        // Assign indexes to clusters. Clusters are still disjointed at this stage.
-        IMDIterator* iterator = ws->createIterator(NULL);
-        iterator->setNormalization(NoNormalization); // TODO: check that this is a valid assumption.
-        std::set<size_t> labelIds;
-        do
-        {
-          if(!baseStrategy->isBackground(iterator))
-          {
-            const size_t& index = iterator->getLinearIndex();
-            const size_t& labelAtIndex = neighbourElements[index].getRoot();
-            clusterMap[labelAtIndex]->addIndex(index);  
-          }
-        }
-        while(iterator->next());
-
 
         // Percolate minimum label across boundaries for indexes where there is ambiguity.
         std::vector<boost::shared_ptr<Cluster> > incompleteClusterVec;
