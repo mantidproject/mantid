@@ -1671,7 +1671,7 @@ namespace Algorithms
     DateAndTime splitstarttime(0);
     int pregroup = -1;
 
-    g_log.debug() << "[DB] Number of integer log entries = " << numlogentries << ".\n";
+    g_log.debug() << "Number of integer log entries = " << numlogentries << ".\n";
 
     for (size_t i = 0; i < numlogentries; ++i)
     {
@@ -1679,25 +1679,22 @@ namespace Algorithms
       int currgroup = -1;
 
       // Determine whether this log value is allowed and then the ws group it belonged to.
-      if (currvalue > maxvalue || currvalue < minvalue)
+      if (currvalue >= minvalue && currvalue <= maxvalue )
       {
-        // Log value is out of range
-        g_log.debug() << "[DB] Entry[" << i << "] = " << currvalue << ": out of range. " << ".\n";
-      }
-      else if ((i == 0) || (i >= 1 && ((filterIncrease && values[i] >= values[i-1]) ||
-                                       (filterDecrease && values[i] <= values[i-1]))))
-      {
-        // First entry (regardless direction) and other entries considering change of value
-        if (singlevaluemode)
+        // Log value is in specified range
+        if ((i == 0) || (i >= 1 && ((filterIncrease && values[i] >= values[i-1]) ||
+                                    (filterDecrease && values[i] <= values[i-1]))))
         {
-          currgroup = 0;
+          // First entry (regardless direction) and other entries considering change of value
+          if (singlevaluemode)
+          {
+            currgroup = 0;
+          }
+          else
+          {
+            currgroup = (currvalue-minvalue)/delta;
+          }
         }
-        else
-        {
-          currgroup = (currvalue-minvalue)/delta;
-        }
-        g_log.debug() << "[DB] Entry[" << i << "] = " << currvalue << ": belong to group "
-                      << currgroup << ".\n";
       }
 
       // Make a new splitter if condition is met
@@ -1750,7 +1747,7 @@ namespace Algorithms
     }
 
     // Write to the information workspace
-    g_log.warning() << "Consider to refactor this part with all other methods.";
+    // FIXME - Consider to refactor this part with all other methods
     if (singlevaluemode)
     {
       TableRow newrow = m_filterInfoWS->appendRow();
@@ -1786,7 +1783,7 @@ namespace Algorithms
       }
     }
 
-    g_log.notice() << "[DB] Number of splitters = " << m_splitters.size()
+    g_log.notice() << "Integer log " << m_intLog->name() << ": Number of splitters = " << m_splitters.size()
                    << ", Number of split info = " << m_filterInfoWS->rowCount() << ".\n";
 
     return;
@@ -1803,22 +1800,26 @@ namespace Algorithms
    *
    * return:  if value is out of range, then return datarange.size() + 1
    */
-  // FIXME - Changed to const std::vector<double>& sorteddata
-  size_t GenerateEventsFilter::searchValue(std::vector<double> sorteddata, double value)
+  size_t GenerateEventsFilter::searchValue(const std::vector<double>& sorteddata, double value)
   {
-    size_t outrange = sorteddata.size()+1;
+    // Case of out-of-boundary
+    size_t numdata = sorteddata.size();
+    size_t outrange = numdata+1;
+    if (numdata == 0) return outrange;
+    else if (value < sorteddata.front() || value > sorteddata.back()) return outrange;
 
-    // 1. Extreme case
-    // FIXME - Get sortedata[0] and sorteddata.back() as constant as data range
-    if (value < sorteddata[0] || value > sorteddata.back())
-      return outrange;
-    if (sorteddata.size() == 0)
-      return outrange;
+    // Binary search
+    size_t index = static_cast<size_t>(std::lower_bound(sorteddata.begin(), sorteddata.end(), value)
+                                       - sorteddata.begin());
+    if (index >= 1)
+      -- index;
 
-    // 2. Binary search
+    return index;
+
+#if 0
     bool found = false;
     size_t start = 0;
-    size_t stop = sorteddata.size()-1;
+    size_t stop = numdata-1;
 
     while (!found)
     {
@@ -1847,6 +1848,7 @@ namespace Algorithms
     }
 
     return 0;
+#endif
   }
 
   //----------------------------------------------------------------------------------------------

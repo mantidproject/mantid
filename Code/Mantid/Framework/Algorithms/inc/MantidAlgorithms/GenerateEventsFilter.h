@@ -118,7 +118,7 @@ namespace Algorithms
     void processIntegerValueFilter(int minvalue, int maxvalue,
                                    bool filterIncrease, bool filterDecrease, Kernel::DateAndTime runend);
 
-    size_t searchValue(std::vector<double> sorteddata, double value);
+    size_t searchValue(const std::vector<double> &sorteddata, double value);
 
     /// Add a splitter
     void addSplitter(Kernel::DateAndTime starttime, Kernel::DateAndTime stoptime, int wsindex, std::string info);
