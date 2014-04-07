@@ -415,17 +415,19 @@ namespace Mantid
           {
             DisjointElement& a = neighbourElements[iit->get<0>()];
             DisjointElement& b = neighbourElements[iit->get<1>()];
-
-            incompleteClusterVec.push_back( clusterMap[a.getId()] );
-            incompleteClusterVec.push_back( clusterMap[b.getId()] );
-
-            if(a.getId() < b.getId())
+            if(!a.isEmpty() && !b.isEmpty())
             {
-              b.unionWith(&a);
-            }
-            else
-            {
-              a.unionWith(&b);
+              incompleteClusterVec.push_back( clusterMap[a.getId()] );
+              incompleteClusterVec.push_back( clusterMap[b.getId()] );
+  
+              if(a.getId() < b.getId())
+              {
+                b.unionWith(&a);
+              }
+              else
+              {
+                a.unionWith(&b);
+              }
             }
           }
         }
