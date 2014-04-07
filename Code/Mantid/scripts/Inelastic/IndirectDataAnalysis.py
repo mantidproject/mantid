@@ -568,6 +568,10 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False
   parameter_names = ['A0', 'Intensity', 'Tau', 'Beta']
   convertParametersToWorkspace(params_table, "axis-1", parameter_names, result_workspace)
 
+  #set x units to be momentum transfer
+  axis = mtd[result_workspace].getAxis(0)
+  axis.setUnit("MomentumTransfer")
+
   #process generated workspaces
   wsnames = mtd[fit_group].getNames()
   params = [startx, endx, fitType]
@@ -631,6 +635,10 @@ def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=
   parameter_names = ['A0', 'Intensity', 'Tau', 'Beta']
   convertParametersToWorkspace(params_table, "axis-1", parameter_names, result_workspace)
 
+  #set x units to be momentum transfer
+  axis = mtd[result_workspace].getAxis(0)
+  axis.setUnit("MomentumTransfer")
+  
   result_workspace = output_workspace + '_Result'
   fit_group = output_workspace + '_Workspaces'
 
