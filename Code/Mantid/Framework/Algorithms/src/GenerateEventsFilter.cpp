@@ -209,12 +209,12 @@ namespace Algorithms
     std::string logname = this->getProperty("LogName");
     if (logname.empty())
     {
-      // a) Set filter by time only
+      // Set up filters by time only
       setFilterByTimeOnly();
     }
     else
     {
-      // b) Set filter by time and log
+      // Set up filters by log value in time range
       setFilterByLogValue(logname);
     }
 
@@ -233,6 +233,7 @@ namespace Algorithms
     }
     else
     {
+      generateSplittersInSplitterWS();
       setProperty("OutputWorkspace", m_splitWS);
     }
     setProperty("InformationWorkspace", m_filterInfoWS);
@@ -424,7 +425,7 @@ namespace Algorithms
 #else
       std::stringstream ss;
       ss << "Time Interval From " << m_startTime << " to " << m_stopTime;
-      addSplitter(m_startTime, m_stopTime, wsindex, ss.str());
+      addNewTimeFilterSplitter(m_startTime, m_stopTime, wsindex, ss.str());
 #endif
     }
     else
@@ -456,7 +457,7 @@ namespace Algorithms
 
         row << wsindex << ss.str();
 #else
-        addSplitter(t0, tf, wsindex, ss.str());
+        addNewTimeFilterSplitter(t0, tf, wsindex, ss.str());
 #endif
 
         // Update loop variable
@@ -580,6 +581,7 @@ namespace Algorithms
         processMultipleValueFilters(minvalue, maxvalue, filterIncrease, filterDecrease);
       }
 
+#if 0
       // Add splitters
       /// FIXME/TODO : consider of refactor!
       size_t numsplits = m_splitters.size();
@@ -588,6 +590,7 @@ namespace Algorithms
         SplittingInterval split = m_splitters[i];
         m_splitWS->addSplitter(split);
       }
+#endif
     }
     else
     {
@@ -794,7 +797,6 @@ namespace Algorithms
     }
 
     // Generate event filters by log value
-    Kernel::TimeSplitterType splitters;
     std::string logboundary = this->getProperty("LogBoundary");
     transform(logboundary.begin(), logboundary.end(), logboundary.begin(), ::tolower);
 
@@ -966,6 +968,40 @@ namespace Algorithms
                                                          DateAndTime startTime, DateAndTime stopTime)
   {
     g_log.notice("Starting method 'makeMultipleFiltersByValues'. ");
+
+#if 1
+    // Return if the log is empty.
+    int logsize = m_dblLog->size();
+    if (logsize == 0)
+    {
+      g_log.warning() << "There is no entry in this property " << m_dblLog->name() << std::endl;
+      return;
+    }
+
+    // Set up
+    double timetolerance = 0.0;
+    if (centre)
+    {
+      timetolerance = this->getProperty("TimeTolerance");
+    }
+    time_duration tol = DateAndTime::durationFromSeconds( timetolerance );
+
+    // Determine the number of threads to use
+    // int numThreads = 1;
+    vector<DateAndTime> tempvectimes;
+    // tempvectimes.reserve(m_dblLog->size());
+    vector<int> tempvecgroup;
+    // tempvecgroup.reserve(m_dblLog->size());
+    vecSplitterTimeSet.push_back(tempvectimes);
+    vecGroupIndexSet.push_back(tempvecgroup);
+    int istart = 0;
+    int iend = static_cast<int>(logsize-1);
+
+    makeMultipleFiltersByValuesPartialLog(istart, iend, m_vecSplitterTime, m_vecSplitterGroup,
+                                          indexwsindexmap, logvalueranges, tol,
+                                          filterIncrease, filterDecrease, startTime, stopTime);
+
+#else
 
     // Return if the log is empty.
     if (m_dblLog->size() == 0)
@@ -1167,7 +1203,7 @@ namespace Algorithms
       // d) Create Splitter and reset start (time)
       if (createsplitter)
       {
-        make_splitter(start, stop, lastindex, tol);
+        addNewLogValueSplitter(start, stop, lastindex, tol);
         start = ZeroTime;
       }
 
@@ -1194,6 +1230,7 @@ namespace Algorithms
       }
 
     } // For each log value
+#endif
 
     progress(1.0);
 
@@ -1555,7 +1592,7 @@ namespace Algorithms
           }
           else
           {
-            // Out of a range.
+            // Out of a range: check whether there is a splitter started
             currindex = -1;
             if (start.totalNanoseconds() > 0)
             {
@@ -1563,23 +1600,18 @@ namespace Algorithms
               stop = currTime;
               createsplitter = true;
             }
-            else
-            {
-              // No operation required
-              ;
-            }
           } // [Out-bound]
 
         } // [CORRECT DIRECTION]
         else
         {
-          // Log Index " << i << " Falls out b/c out of wrong direction
+          // Log Index i falls out b/c out of wrong direction
           currindex = -1;
         }
       }
       else
       {
-        // Log Index " << i << "  Falls Out b/c out of time range... " << std::endl;
+        // Log Index i falls out b/c out of time range...
         currindex = -1;
       }
 
@@ -1704,7 +1736,7 @@ namespace Algorithms
         // previous log is in allowed region.  but this one is not.  create a splitter
         if (splitstarttime.totalNanoseconds() == 0)
           throw runtime_error("Programming logic error.");
-        make_splitter(splitstarttime, times[i], pregroup, timetol);
+        addNewLogValueSplitter(splitstarttime, times[i], pregroup, timetol);
 
         splitstarttime = DateAndTime(0);
         statuschanged = true;
@@ -1720,7 +1752,7 @@ namespace Algorithms
         // migrated to a new region
         if (splitstarttime.totalNanoseconds() == 0)
           throw runtime_error("Programming logic error (1).");
-        make_splitter(splitstarttime, times[i], pregroup, timetol);
+        addNewLogValueSplitter(splitstarttime, times[i], pregroup, timetol);
 
         splitstarttime = times[i];
         statuschanged = true;
@@ -1743,7 +1775,7 @@ namespace Algorithms
       // Last entry is in an allowed region.
       if (splitstarttime.totalNanoseconds() == 0)
         throw runtime_error("Programming logic error (1).");
-      make_splitter(splitstarttime, runend, pregroup, timetol);
+      addNewLogValueSplitter(splitstarttime, runend, pregroup, timetol);
     }
 
     // Write to the information workspace
@@ -1852,10 +1884,10 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /**
+  /** Add a new splitter to vector of splitters.  It is used by FilterByTime only.
     */
-  void GenerateEventsFilter::addSplitter(Kernel::DateAndTime starttime, Kernel::DateAndTime stoptime,
-                                         int wsindex, string info)
+  void GenerateEventsFilter::addNewTimeFilterSplitter(Kernel::DateAndTime starttime, Kernel::DateAndTime stoptime,
+                                                      int wsindex, string info)
   {
     if (m_forFastLog)
     {
@@ -1904,13 +1936,9 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Generate a new time splitter and add to a list of splitters
     */
-  void GenerateEventsFilter::make_splitter(Kernel::DateAndTime start, Kernel::DateAndTime stop, int group, Kernel::time_duration tolerance)
+  void GenerateEventsFilter::addNewLogValueSplitter(Kernel::DateAndTime start, Kernel::DateAndTime stop, int group,
+                                                    Kernel::time_duration tolerance)
   {
-#if 0
-    Kernel::SplittingInterval newsplit(start - tolerance, stop - tolerance, group);
-    splitters.push_back(newsplit);
-#endif
-
     if (m_forFastLog)
     {
       DateAndTime starttime = start-tolerance;
@@ -1971,7 +1999,6 @@ namespace Algorithms
     size_t timevecsize = vecSplitTime.size();
     if (timevecsize > 0)
       lasttime = vecSplitTime.back();
-    // vecSplitTime.back(),vecSplitTime.back()
 
     // Start time of splitter
     if (timevecsize == 0)
@@ -2038,6 +2065,10 @@ namespace Algorithms
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Generate matrix workspace for splitters from vector of splitter time and group
+    * in the parallel-version
+    */
   void GenerateEventsFilter::generateSplittersInMatrixWorkspaceParallel()
   {
     // Determine size of output matrix workspace
@@ -2068,6 +2099,23 @@ namespace Algorithms
       }
     }
     dataX[index] = static_cast<double>(vecSplitterTimeSet.back().back().totalNanoseconds());
+
+    return;
+  }
+
+  void GenerateEventsFilter::generateSplittersInSplitterWS()
+  {
+    for (size_t i = 0; i < m_vecSplitterGroup.size(); ++i)
+    {
+      int groupindex = m_vecSplitterGroup[i];
+      if (groupindex >= 0)
+      {
+        DateAndTime start = m_vecSplitterTime[i];
+        DateAndTime stop = m_vecSplitterTime[i+1];
+        Kernel::SplittingInterval newsplit(start, stop, groupindex);
+        m_splitWS->addSplitter(newsplit);
+      }
+    }
 
     return;
   }

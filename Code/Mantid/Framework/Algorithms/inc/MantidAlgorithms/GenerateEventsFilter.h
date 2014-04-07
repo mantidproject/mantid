@@ -121,10 +121,10 @@ namespace Algorithms
     size_t searchValue(const std::vector<double> &sorteddata, double value);
 
     /// Add a splitter
-    void addSplitter(Kernel::DateAndTime starttime, Kernel::DateAndTime stoptime, int wsindex, std::string info);
+    void addNewTimeFilterSplitter(Kernel::DateAndTime starttime, Kernel::DateAndTime stoptime, int wsindex, std::string info);
 
     /// Add a splitter
-    void make_splitter(Kernel::DateAndTime start, Kernel::DateAndTime stop, int group, Kernel::time_duration tolerance);
+    void addNewLogValueSplitter(Kernel::DateAndTime start, Kernel::DateAndTime stop, int group, Kernel::time_duration tolerance);
 
     /// Create a splitter and add to the vector of time splitters
     Kernel::DateAndTime makeSplitterInVector(std::vector<Kernel::DateAndTime>& vecSplitTime, std::vector<int>& vecGroupIndex,
@@ -136,6 +136,8 @@ namespace Algorithms
     void generateSplittersInMatrixWorkspace();
 
     void generateSplittersInMatrixWorkspaceParallel();
+
+    void generateSplittersInSplitterWS();
 
     DataObjects::EventWorkspace_const_sptr m_dataWS;
 
