@@ -47,6 +47,8 @@ namespace Algorithms
 
     void setFitPeakCriteria(bool usepeakpostol, double peakpostol);
 
+    std::string getDebugMessage();
+
     /// Fit peak and background together
     bool simpleFit();
 
@@ -208,6 +210,11 @@ namespace Algorithms
     /// Final goodness value (Rwp/Chi-square)
     double m_finalGoodnessValue;
 
+    /// 
+    size_t m_numFitCalls;
+
+    /// String stream
+    std::stringstream m_sstream;
   };
 
 
@@ -409,6 +416,9 @@ namespace Algorithms
     /// Fitting result
     // std::map<std::string, double> m_fitErrorPeakFunc;
     // std::map<std::string, double> m_fitErrorBkgdFunc;
+
+    /// Option on output
+    bool m_lightWeightOutput;
 
   };
 
