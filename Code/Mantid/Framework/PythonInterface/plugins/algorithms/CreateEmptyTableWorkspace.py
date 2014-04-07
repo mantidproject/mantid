@@ -12,7 +12,8 @@ class CreateEmptyTableWorkspace(PythonAlgorithm):
  
     def PyInit(self):
         # Declare properties
-        self.setWikiSummary("""Creates an empty table workspace that can be populated by python code.""")
+        self.setWikiSummary("Creates an empty table workspace that can be populated by python code.")
+        self.setOptionalMessage("Creates an empty table workspace that can be populated by python code.")
         self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output), "The name of the table workspace that will be created.")
  
     def PyExec(self):

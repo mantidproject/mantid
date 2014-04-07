@@ -2,6 +2,7 @@
 #define PARAMETERMAPTEST_H_
 
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -217,6 +218,25 @@ public:
     TSM_ASSERT("Parameter called second should still exist", stored);
     stored = pmap.get(m_testInstrument.get(), "first");
     TSM_ASSERT_EQUALS("Parameter called first should not exist", stored, Parameter_sptr());
+  }
+
+  void testClearByName_Only_Removes_Named_Parameter_for_Cmpt()
+  {
+    ParameterMap pmap;
+    pmap.addDouble(m_testInstrument.get(), "first", 5.4);
+    pmap.addDouble(m_testInstrument.get(), "second", 10.3);
+    IComponent_sptr comp = m_testInstrument->getChild(0);
+    pmap.addDouble(comp.get(), "first", 5.4);
+    TS_ASSERT_EQUALS(pmap.size(), 3);
+    pmap.clearParametersByName("first",m_testInstrument.get());
+    TS_ASSERT_EQUALS(pmap.size(), 2);
+    // Has the correct one gone?
+    Parameter_sptr stored = pmap.get(m_testInstrument.get(), "second");
+    TSM_ASSERT("Parameter called second should still exist", stored);
+    stored = pmap.get(comp.get(), "first");
+    TSM_ASSERT("Parameter called first for child should still exist", stored);
+    stored = pmap.get(m_testInstrument.get(), "first");
+    TSM_ASSERT_EQUALS("Parameter called first for inst should not exist", stored, Parameter_sptr());
   }
 
   void testClear_Results_In_Empty_Map()

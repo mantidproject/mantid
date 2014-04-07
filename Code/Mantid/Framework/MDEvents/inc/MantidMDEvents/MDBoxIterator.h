@@ -85,6 +85,10 @@ namespace MDEvents
       return m_pos;
     }
 
+    virtual std::vector<size_t> findNeighbourIndexes() const;
+
+    virtual size_t getLinearIndex() const;
+
   private:
 
     /// Common code run my a few of the constructors.

@@ -26,6 +26,11 @@ namespace Mantid
 {
 namespace API
 {
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("FrameworkManager");
+  }
 
   /** This is a function called every time NeXuS raises an error.
    * This swallows the errors and outputs nothing.
@@ -42,9 +47,9 @@ namespace API
 
 
 /// Default constructor
-FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("FrameworkManager"))
+FrameworkManagerImpl::FrameworkManagerImpl()
 #ifdef MPI_BUILD
-      , m_mpi_environment()
+  : m_mpi_environment()
 #endif
 {
   // Mantid only understands English...
@@ -108,7 +113,7 @@ void FrameworkManagerImpl::loadAllPlugins()
   }
   else
   {
-    this->g_log.debug("Cannot load ParaView libraries");
+    g_log.debug("Cannot load ParaView libraries");
   }
 }
 
@@ -122,12 +127,12 @@ void FrameworkManagerImpl::loadPluginsUsingKey(const std::string & key)
   std::string pluginDir = config.getString(key);
   if (pluginDir.length() > 0)
   {
-    this->g_log.debug("Loading libraries from \"" + pluginDir + "\"");
+    g_log.debug("Loading libraries from \"" + pluginDir + "\"");
     Kernel::LibraryManager::Instance().OpenAllLibraries(pluginDir, false);
   }
   else
   {
-    this->g_log.debug("No library directory found in key \"" + key + "\"");
+    g_log.debug("No library directory found in key \"" + key + "\"");
   }
 }
 

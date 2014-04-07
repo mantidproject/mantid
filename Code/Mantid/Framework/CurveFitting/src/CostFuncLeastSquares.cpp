@@ -7,18 +7,21 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/CompositeDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/MultiThreaded.h"
 
 #include <iomanip>
-
-namespace
-{
-  const bool debug = false;
-}
 
 namespace Mantid
 {
 namespace CurveFitting
 {
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("CostFuncLeastSquares");
+  }
+
 
 DECLARE_COSTFUNCTION(CostFuncLeastSquares,Least squares)
 
@@ -29,8 +32,9 @@ CostFuncLeastSquares::CostFuncLeastSquares() : CostFuncFitting(),
   m_includePenalty(true),
   m_value(0),
   m_pushed(false),
-  m_factor(0.5),
-  m_log(Kernel::Logger::get("CostFuncLeastSquares")) {}
+  m_factor(0.5)
+ {
+ }
 
 /** Calculate value of cost function
  * @return :: The value of the function
@@ -280,17 +284,17 @@ void CostFuncLeastSquares::addValDerivHessian(
 
   size_t iActiveP = 0;
   double fVal = 0.0;
-  if (debug)
+  if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG))
   {
-    std::cerr << "Jacobian:\n";
+    g_log.debug() << "Jacobian:\n";
     for(size_t i = 0; i < ny; ++i)
     {
       for(size_t ip = 0; ip < np; ++ip)
       {
         if ( !m_function->isActive(ip) ) continue;
-        std::cerr << jacobian.get(i,ip) << ' ';
+        g_log.debug() << jacobian.get(i,ip) << ' ';
       }
-      std::cerr << std::endl;
+      g_log.debug() << "\n";
     }
   }
   double sqrtw = calSqrtW(values);
@@ -483,39 +487,39 @@ void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix& covar, double ep
   {
     valDerivHessian();
   }
-  if(m_log.is(Kernel::Logger::Priority::PRIO_INFORMATION))
+  if(g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION))
   {
-    m_log.information() << "== Hessian (H) ==\n";
-    std::ios::fmtflags prevState = m_log.information().flags();
-    m_log.information() << std::left << std::fixed;
+    g_log.information() << "== Hessian (H) ==\n";
+    std::ios::fmtflags prevState = g_log.information().flags();
+    g_log.information() << std::left << std::fixed;
     for(size_t i = 0; i < m_hessian.size1(); ++i)
     {
       for(size_t j = 0; j < m_hessian.size2(); ++j)
       {
-        m_log.information() << std::setw(10);
-        m_log.information() << m_hessian.get(i,j) << "  ";
+        g_log.information() << std::setw(10);
+        g_log.information() << m_hessian.get(i,j) << "  ";
       }
-      m_log.information() << "\n";
+      g_log.information() << "\n";
     }
-    m_log.information().flags(prevState);
+    g_log.information().flags(prevState);
   }
   covar = m_hessian;
   covar.invert();
-  if(m_log.is(Kernel::Logger::Priority::PRIO_INFORMATION))
+  if(g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION))
   {
-    m_log.information() << "== Covariance matrix (H^-1) ==\n";
-    std::ios::fmtflags prevState = m_log.information().flags();
-    m_log.information() << std::left << std::fixed;
+    g_log.information() << "== Covariance matrix (H^-1) ==\n";
+    std::ios::fmtflags prevState = g_log.information().flags();
+    g_log.information() << std::left << std::fixed;
     for(size_t i = 0; i < covar.size1(); ++i)
     {
       for(size_t j = 0; j < covar.size2(); ++j)
       {
-        m_log.information() << std::setw(10);
-        m_log.information() << covar.get(i,j) << "  ";
+        g_log.information() << std::setw(10);
+        g_log.information() << covar.get(i,j) << "  ";
       }
-      m_log.information() << "\n";
+      g_log.information() << "\n";
     }
-    m_log.information().flags(prevState);
+    g_log.information().flags(prevState);
   }
 
 }

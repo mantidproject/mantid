@@ -404,6 +404,11 @@ void AnvredCorrection::retrieveBaseProperties()
     Material mat("SetInAnvredCorrection", neutron, 1.0);
     m_inputWS->mutableSample().setMaterial(mat);
   }
+  if (smu != EMPTY_DBL() && amu != EMPTY_DBL())
+    g_log.notice() << "LinearScatteringCoef = " << smu << " 1/cm\n"
+                 << "LinearAbsorptionCoef = "   << amu << " 1/cm\n"
+                 << "Radius = " << radius << " cm\n"
+  			   << "Power Lorentz corrections = " << power_th << " \n";
   // Call the virtual function for any further properties
   retrieveProperties();
 }

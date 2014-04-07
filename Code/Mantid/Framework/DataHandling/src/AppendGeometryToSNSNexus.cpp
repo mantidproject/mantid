@@ -192,9 +192,9 @@ namespace DataHandling
       Geometry::Instrument_const_sptr instrument = ws->getInstrument();
 
       // Get the sample (needed to calculate distances)
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      Geometry::IComponent_const_sptr sample = instrument->getSample();
       // Get the source (moderator)
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
+      Geometry::IComponent_const_sptr source = instrument->getSource();
 
       // Open the NeXus file
       ::NeXus::File nxfile(m_filename, NXACC_RDWR);

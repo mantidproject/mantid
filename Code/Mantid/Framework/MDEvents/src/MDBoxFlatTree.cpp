@@ -17,7 +17,11 @@ namespace Mantid
 {
   namespace MDEvents
   {
-   Kernel::Logger &MDBoxFlatTree::g_log = Kernel::Logger::get("Algorithm");
+   namespace
+   {
+     /// static logger
+     Kernel::Logger g_log("MDBoxFlatTree");
+   }
 
     MDBoxFlatTree::MDBoxFlatTree():
   m_nDim(-1)
@@ -391,9 +395,8 @@ namespace Mantid
       // First, find how many experimentX blocks there are
       std::map<std::string,std::string> entries;
       file->getEntries(entries);
+      std::list<uint16_t> ExperimentBlockNum;
       std::map<std::string,std::string>::iterator it = entries.begin();
-      std::vector<bool> hasExperimentBlock;
-      uint16_t numExperimentInfo = 0;
       for (; it != entries.end(); ++it)
       {
           std::string name = it->first;
@@ -402,11 +405,10 @@ namespace Mantid
               try
               {
                   uint16_t num = boost::lexical_cast<uint16_t>(name.substr(10, name.size()-10));
-                  if (num+1 > numExperimentInfo)
+                  if (num<std::numeric_limits<uint16_t>::max()-1)
                   {
-                      numExperimentInfo = uint16_t(num+uint16_t(1));
-                      hasExperimentBlock.resize(numExperimentInfo, false);
-                      hasExperimentBlock[num] = true;
+                    // dublicated experiment info names are impossible due to the structure of the nexus file but missing -- can be found.
+                    ExperimentBlockNum.push_back(num);
                   }
               }
               catch (boost::bad_lexical_cast &)
@@ -414,15 +416,31 @@ namespace Mantid
           }
       }
 
-      // Now go through in order, loading and adding
-      for (uint16_t i=0; i < numExperimentInfo; i++)
+      ExperimentBlockNum.sort();
+
+      // check if all subsequent experiment infos numbers are present 
+      auto itr=ExperimentBlockNum.begin();
+      size_t ic=0;
+      for (;itr!=ExperimentBlockNum.end();itr++)
       {
-          std::string groupName = "experiment" + Kernel::Strings::toString(i);
-          if (!numExperimentInfo)
+        if (*itr != ic)
+        {
+          for(size_t i=ic+1;i<*itr; i++)
           {
-              g_log.warning() << "NXS file is missing a ExperimentInfo block " << groupName << ". Workspace will be missing ExperimentInfo." << std::endl;
-              break;
+           std::string groupName = "experiment" + Kernel::Strings::toString(i);
+           g_log.warning() << "NXS file is missing a ExperimentInfo block " << groupName << ". Workspace will be missing ExperimentInfo." << std::endl;         
           }
+        }
+        ic++;
+      }
+
+      // Now go through in order, loading and adding
+      itr=ExperimentBlockNum.begin();
+      for (;itr!=ExperimentBlockNum.end();itr++)
+      {
+
+          std::string groupName = "experiment" + Kernel::Strings::toString(*itr);
+
           file->openGroup(groupName, "NXgroup");
           API::ExperimentInfo_sptr ei(new API::ExperimentInfo);
           std::string parameterStr;

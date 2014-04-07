@@ -16,7 +16,7 @@ namespace MantidTestHelpers
    /**Constructor 
     @param bc shared pointer to the box controller which will use this IO operations
    */ 
-   BoxControllerDummyIO::BoxControllerDummyIO(Mantid::API::BoxController_sptr bc) :
+   BoxControllerDummyIO::BoxControllerDummyIO(const Mantid::API::BoxController* bc) :
        m_bc(bc),
        m_CoordSize(4),
        m_TypeName("MDEvent"),

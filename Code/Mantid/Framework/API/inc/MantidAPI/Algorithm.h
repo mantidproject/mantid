@@ -9,25 +9,30 @@
 #include "MantidKernel/PropertyManagerOwner.h"
 
 // -- These headers will (most-likely) be used by every inheriting algorithm
+#include "MantidAPI/AlgorithmFactory.h" //for the factory macro
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/EmptyValues.h"
 
-#include <boost/shared_ptr.hpp>
-#include <Poco/ActiveMethod.h>
-#include <Poco/NotificationCenter.h>
-#include <Poco/Notification.h>
-#include <Poco/NObserver.h>
-#include <Poco/Void.h>
+//----------------------------------------------------------------------
+// Forward Declaration
+//----------------------------------------------------------------------
+namespace boost
+{
+  template <class T> class weak_ptr;
+}
 
-#include <string>
-#include <vector>
-#include <map>
-#include <cmath>
+namespace Poco
+{
+  template <class R, class A, class O, class S> class ActiveMethod;
+  template <class O> class ActiveStarter;
+  class NotificationCenter;
+  template <class C, class N> class NObserver;
+  class Void;
+}
 
 namespace Mantid
 {
@@ -209,28 +214,27 @@ public:
   Poco::ActiveResult<bool> executeAsync();
 
   /// Add an observer for a notification
-  void addObserver(const Poco::AbstractObserver& observer)const;
+  void addObserver(const Poco::AbstractObserver& observer) const;
 
   /// Remove an observer
-  void removeObserver(const Poco::AbstractObserver& observer)const;
+  void removeObserver(const Poco::AbstractObserver& observer) const;
 
   /// Raises the cancel flag.
   virtual void cancel();
   /// Returns the cancellation state
   bool getCancel() const { return m_cancel; }
 
+  /// Returns a reference to the logger.
+  Kernel::Logger & getLogger() const { return g_log; }
   ///Logging can be disabled by passing a value of false
-  void setLogging(const bool value){g_log.setEnabled(value);}
+  void setLogging(const bool value) { g_log.setEnabled(value);}
   ///returns the status of logging, True = enabled
-  bool isLogging() const {return g_log.getEnabled();}
+  bool isLogging() const { return g_log.getEnabled();}
 
   ///sets the logging priority offset
-  void setLoggingOffset(const int value) {g_log.setLevelOffset(value);}
+  void setLoggingOffset(const int value) { g_log.setLevelOffset(value); }
   ///returns the logging priority offset
-  int getLoggingOffset() const {return g_log.getLevelOffset();}
-
-  /// Returns a reference to the logger.
-  Kernel::Logger& getLogger() const { return g_log; }
+  int getLoggingOffset() const { return g_log.getLevelOffset(); }
 
 
   /// function returns an optional message that will be displayed in the default GUI, at the top.
@@ -289,19 +293,19 @@ protected:
   void setInitialized();
   void setExecuted(bool state);
 
-  /// Sends notifications to observers. Observers can subscribe to notificationCenter
-  /// using Poco::NotificationCenter::addObserver(...);
-  mutable Poco::NotificationCenter m_notificationCenter;
-
   /** @name Progress Reporting functions */
   friend class Progress;
   void progress(double p, const std::string& msg = "", double estimatedTime = 0.0, int progressPrecision = 0);
   void interruption_point();
 
+  /// Return a reference to the algorithm's notification dispatcher
+  Poco::NotificationCenter & notificationCenter() const;
+
   ///Observation slot for child algorithm progress notification messages, these are scaled and then signalled for this algorithm.
   void handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf);
-  ///Child algorithm progress observer
-  Poco::NObserver<Algorithm, ProgressNotification> m_progressObserver;
+  /// Return a reference to the algorithm's object that is reporting progress
+  const Poco::AbstractObserver & progressObserver() const;
+
   ///checks that the value was not set by users, uses the value in empty double/int.
   template <typename NumT>
   static bool isEmpty(const NumT toCheck);
@@ -313,8 +317,6 @@ protected:
   bool m_cancel;
   /// Set if an exception is thrown, and not caught, within a parallel region
   bool m_parallelException;
-  /// Reference to the logger class
-  Kernel::Logger& g_log;
 
   friend class WorkspaceHistory; // Allow workspace history loading to adjust g_execCount
   static size_t g_execCount; ///< Counter to keep track of algorithm execution order
@@ -333,6 +335,10 @@ protected:
   /// All the WorkspaceProperties that are Input or InOut. Set in execute()
   std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
 
+  /// Logger for this algorithm
+  Kernel::Logger m_log;
+  Kernel::Logger &g_log;
+
 private:
   /// Private Copy constructor: NO COPY ALLOWED
   Algorithm(const Algorithm&);
@@ -347,12 +353,18 @@ private:
 
   void logAlgorithmInfo() const;
 
-
-  /// Poco::ActiveMethod used to implement asynchronous execution.
-  Poco::ActiveMethod<bool, Poco::Void, Algorithm> m_executeAsync;
   bool executeAsyncImpl(const Poco::Void & i);
 
   // --------------------- Private Members -----------------------------------
+  /// Poco::ActiveMethod used to implement asynchronous execution.
+  Poco::ActiveMethod<bool, Poco::Void, Algorithm, Poco::ActiveStarter<Algorithm>> *m_executeAsync;
+
+  /// Sends notifications to observers. Observers can subscribe to notificationCenter
+  /// using Poco::NotificationCenter::addObserver(...);
+  mutable Poco::NotificationCenter *m_notificationCenter;
+  ///Child algorithm progress observer
+  mutable Poco::NObserver<Algorithm, ProgressNotification> *m_progressObserver;
+
   bool m_isInitialized; ///< Algorithm has been initialized flag
   bool m_isExecuted; ///< Algorithm is executed flag
   bool m_isChildAlgorithm; ///< Algorithm is a child algorithm
@@ -367,7 +379,7 @@ private:
   std::string m_OptionalMessage; ///< An optional message string to be displayed in the GUI.
   std::string m_WikiSummary; ///< A summary line for the wiki page.
   std::string m_WikiDescription; ///< Description in the wiki page.
-  std::vector<IAlgorithm_wptr> m_ChildAlgorithms; ///< A list of weak pointers to any child algorithms created
+  std::vector<boost::weak_ptr<IAlgorithm>> m_ChildAlgorithms; ///< A list of weak pointers to any child algorithms created
 
 
   /// Vector of all the workspaces that have been read-locked

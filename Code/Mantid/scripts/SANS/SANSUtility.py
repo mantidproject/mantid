@@ -6,7 +6,7 @@ from mantid.simpleapi import *
 from mantid.api import IEventWorkspace
 import math
 import re
-
+import os
 
 def GetInstrumentDetails(instrum):
     """
@@ -438,7 +438,7 @@ def getMonitor4event(ws_event):
     if not isEventWorkspace(ws_event):
         raise RuntimeError("The workspace "+str(ws_event)+ " is not a valid Event workspace")
     file_path = getFilePathFromWorkspace(ws_event)
-    ws_monitor = loadMonitorsFromFile(file_path)
+    ws_monitor = loadMonitorsFromFile(file_path, str(ws_event) + "_monitors")
     return ws_monitor
 
 def fromEvent2Histogram(ws_event, ws_monitor = None):
@@ -625,6 +625,22 @@ def sliceParser(str_to_parser):
         raise SyntaxError('Invalid input '+ str_to_parser +'. Failed caused by this term:'+inps)
 
     return result
+
+def getFileAndName(incomplete_path):
+    this_path = FileFinder.getFullPath(incomplete_path)
+    if not this_path:
+        # do not catch exception, let it goes.
+        this_path = FileFinder.findRuns(incomplete_path)
+        # if list, get first value
+        if hasattr(this_path, '__iter__'):
+            this_path = this_path[0]
+    
+    # this_path contains the full_path
+    basename = os.path.basename(this_path)
+    # remove extension
+    basename = os.path.splitext(basename)[0]
+
+    return this_path, basename
 		
   
 if __name__ == '__main__':

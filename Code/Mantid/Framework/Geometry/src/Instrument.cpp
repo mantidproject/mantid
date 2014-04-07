@@ -1,6 +1,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -8,10 +9,10 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include <algorithm>
-#include <iostream>
-#include <sstream>
+
 #include <Poco/Path.h>
+#include <algorithm>
+#include <sstream>
 #include <queue>
 
 using namespace Mantid::Kernel;
@@ -23,7 +24,10 @@ namespace Mantid
   namespace Geometry
   {
 
-    Kernel::Logger& Instrument::g_log = Kernel::Logger::get("Instrument");
+    namespace
+    {
+      Kernel::Logger g_log("Instrument");
+    }
 
     /// Default constructor
     Instrument::Instrument() : CompAssembly(),
@@ -327,20 +331,32 @@ namespace Mantid
     /** Gets a pointer to the source
      *   @returns a pointer to the source
      */
-    IObjComponent_const_sptr Instrument::getSource() const
+    IComponent_const_sptr Instrument::getSource() const
     {
       if ( !m_sourceCache )
       {
         g_log.warning("In Instrument::getSource(). No source has been set.");
-        return IObjComponent_const_sptr(m_sourceCache,NoDeleting());
+        return IComponent_const_sptr(m_sourceCache,NoDeleting());
       }
       else if (m_isParametrized)
       {
-        return IObjComponent_const_sptr(new ObjComponent(static_cast<const Instrument*>(m_base)->m_sourceCache,m_map));
+        auto sourceCache = static_cast<const Instrument*>(m_base)->m_sourceCache;
+        if ( dynamic_cast<const ObjComponent*>(sourceCache) )
+          return IComponent_const_sptr(new ObjComponent(sourceCache,m_map));
+        else if ( dynamic_cast<const CompAssembly*>(sourceCache) )
+          return IComponent_const_sptr(new CompAssembly(sourceCache,m_map));
+        else if ( dynamic_cast<const Component*>(sourceCache) )
+          return IComponent_const_sptr(new Component(sourceCache,m_map));   
+        else
+        {
+          g_log.error("In Instrument::getSource(). Source is not a recognised component type."); 
+          g_log.error("Try to assume it is a Component."); 
+          return IComponent_const_sptr(new ObjComponent(sourceCache,m_map));    
+        }
       }
       else
       {
-        return IObjComponent_const_sptr(m_sourceCache,NoDeleting());
+        return IComponent_const_sptr(m_sourceCache,NoDeleting());
       }
     }
 
@@ -374,20 +390,32 @@ namespace Mantid
     /** Gets a pointer to the Sample Position
      *  @returns a pointer to the Sample Position
      */
-    IObjComponent_const_sptr Instrument::getSample() const
+    IComponent_const_sptr Instrument::getSample() const
     {
       if ( !m_sampleCache )
       {
         g_log.warning("In Instrument::getSamplePos(). No SamplePos has been set.");
-        return IObjComponent_const_sptr(m_sampleCache,NoDeleting());
+        return IComponent_const_sptr(m_sampleCache,NoDeleting());
       }
       else if (m_isParametrized)
       {
-        return IObjComponent_const_sptr(new ObjComponent(static_cast<const Instrument*>(m_base)->m_sampleCache,m_map));
+        auto sampleCache = static_cast<const Instrument*>(m_base)->m_sampleCache;
+        if ( dynamic_cast<const ObjComponent*>(sampleCache) )
+          return IComponent_const_sptr(new ObjComponent(sampleCache,m_map));
+        else if ( dynamic_cast<const CompAssembly*>(sampleCache) )
+          return IComponent_const_sptr(new CompAssembly(sampleCache,m_map));
+        else if ( dynamic_cast<const Component*>(sampleCache) )
+          return IComponent_const_sptr(new Component(sampleCache,m_map));   
+        else
+        {
+          g_log.error("In Instrument::getSamplePos(). SamplePos is not a recognised component type."); 
+          g_log.error("Try to assume it is a Component."); 
+          return IComponent_const_sptr(new ObjComponent(sampleCache,m_map));    
+        }
       }
       else
       {
-        return IObjComponent_const_sptr(m_sampleCache,NoDeleting());
+        return IComponent_const_sptr(m_sampleCache,NoDeleting());
       }
     }
 
@@ -639,7 +667,7 @@ namespace Mantid
       {
         throw std::invalid_argument("Instrument::markAsChopper - Chopper component must have a name");
       }
-      IObjComponent_const_sptr source = getSource();
+      IComponent_const_sptr source = getSource();
       if(!source)
       {
         throw Exception::InstrumentDefinitionError("Instrument::markAsChopper - No source is set, cannot defined chopper positions.");
@@ -664,7 +692,7 @@ namespace Mantid
      *
      *  @param comp :: Component to be marked (stored for later retrieval) as a "SamplePos" Component
      */
-    void Instrument::markAsSamplePos(const ObjComponent* comp)
+    void Instrument::markAsSamplePos(const IComponent* comp)
     {
       if (m_isParametrized)
         throw std::runtime_error("Instrument::markAsSamplePos() called on a parametrized Instrument object.");
@@ -690,7 +718,7 @@ namespace Mantid
      *
      *  @param comp :: Component to be marked (stored for later retrieval) as a "source" Component
      */
-    void Instrument::markAsSource(const ObjComponent* comp)
+    void Instrument::markAsSource(const IComponent* comp)
     {
       if (m_isParametrized)
         throw std::runtime_error("Instrument::markAsSource() called on a parametrized Instrument object.");
@@ -758,7 +786,7 @@ namespace Mantid
      *  The object is deleted.
      *  @param det The detector to remove
      */
-    void Instrument::removeDetector(Detector* det)
+    void Instrument::removeDetector(IDetector* det)
     {
       if (m_isParametrized)
         throw std::runtime_error("Instrument::removeDetector() called on a parameterized Instrument object.");
@@ -1010,7 +1038,7 @@ namespace Mantid
         double & beamline_norm, Kernel::V3D & samplePos) const
     {
       // Get some positions
-      const IObjComponent_const_sptr sourceObj = this->getSource();
+      const IComponent_const_sptr sourceObj = this->getSource();
       if (sourceObj == NULL)
       {
         throw Exception::InstrumentDefinitionError("Failed to get source component from instrument");
@@ -1021,7 +1049,7 @@ namespace Mantid
       beamline_norm=2.0*beamline.norm();
 
       // Get the distance between the source and the sample (assume in metres)
-      IObjComponent_const_sptr sample = this->getSample();
+      IComponent_const_sptr sample = this->getSample();
       try
       {
         l1 = this->getSource()->getDistance(*sample);
@@ -1138,7 +1166,7 @@ namespace Mantid
     std::vector<IDetector_const_sptr> detectors;
     detectors = getDetectors( detIDs );
 
-    Geometry::IObjComponent_const_sptr sample = getSample();
+    Geometry::IComponent_const_sptr sample = getSample();
     Kernel::V3D sample_pos;
     if(sample) sample_pos = sample->getPos();
 
@@ -1236,7 +1264,7 @@ namespace Mantid
     /// Set the date from which the instrument definition begins to be valid.
     /// @param val :: date and time
     /// @throw InstrumentDefinitionError Thrown if date is earlier than 1900-01-31 23:59:01
-    void Instrument::setValidFromDate(const Kernel::DateAndTime val)
+    void Instrument::setValidFromDate(const Kernel::DateAndTime & val)
     { 
       Kernel::DateAndTime earliestAllowedDate("1900-01-31 23:59:01");
       if ( val < earliestAllowedDate )

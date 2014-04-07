@@ -8,8 +8,6 @@
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
-
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -41,8 +39,8 @@ namespace
     {
       try {
         Mantid::Kernel::Property *p = self.getProperty(name);
-        Registry::PropertyValueHandler *entry = Registry::getHandler(*(p->type_info()));
-        entry->set(&self, name, value);
+        const auto & entry = Registry::TypeRegistry::retrieve(*(p->type_info()));
+        entry.set(&self, name, value);
       }
       catch (std::invalid_argument &e)
       {
@@ -90,25 +88,23 @@ namespace
 
 void export_PropertyManager()
 {
-  REGISTER_SHARED_PTR_TO_PYTHON(PropertyManager);
+  register_ptr_to_python<boost::shared_ptr<PropertyManager>>();
   class_<PropertyManager, bases<IPropertyManager>, boost::noncopyable>("PropertyManager")
-          .def("propertyCount", &PropertyManager::propertyCount, "Returns the number of properties being managed")
-          //.def("getProperty", &PropertyManager::getProperty, return_value_policy<return_by_value>(),
-    	  	//	"Returns the property of the given name. Use .value to give the value")
-    	  .def("getPropertyValue", &PropertyManager::getPropertyValue,
-    	  		"Returns a string representation of the named property's value")
-    	  .def("getProperties", &PropertyManager::getProperties, return_value_policy<copy_const_reference>(),
-    	  		"Returns the list of properties managed by this object")
-    	  .def("setPropertyValue", &PropertyManager::setPropertyValue,
-    	  		"Set the value of the named property via a string")
-    	  .def("setProperty", &setProperty, "Set the value of the named property")
-    	  .def("declareProperty", &declareProperty, "Create a new named property")
-    	  // Special methods to act like a dictionary
-    	  .def("__len__", &PropertyManager::propertyCount)
-    	  .def("__contains__", &PropertyManager::existsProperty)
-    	  //.def("__getitem__", &PropertyManager::getProperty)
-    	  .def("__setitem__", &declareOrSetProperty)
-    	  ;
+   .def("propertyCount", &PropertyManager::propertyCount, "Returns the number of properties being managed")
+   .def("getPropertyValue", &PropertyManager::getPropertyValue,
+        "Returns a string representation of the named property's value")
+   .def("getProperties", &PropertyManager::getProperties, return_value_policy<copy_const_reference>(),
+        "Returns the list of properties managed by this object")
+   .def("setPropertyValue", &PropertyManager::setPropertyValue,
+        "Set the value of the named property via a string")
+   .def("setProperty", &setProperty, "Set the value of the named property")
+   .def("declareProperty", &declareProperty, "Create a new named property")
+   // Special methods to act like a dictionary
+   .def("__len__", &PropertyManager::propertyCount)
+   .def("__contains__", &PropertyManager::existsProperty)
+   .def("__setitem__", &declareOrSetProperty)
+  ;
+
 }
 
 #ifdef _MSC_VER

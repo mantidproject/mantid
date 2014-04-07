@@ -1,4 +1,5 @@
 #include "MantidKernel/FileValidator.h"
+#include "MantidKernel/Logger.h"
 #include <algorithm>
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -22,8 +23,11 @@ namespace Mantid
 namespace Kernel
 {
 
-// Initialize the logger
-Logger& FileValidator::g_log = Logger::get("FileValidator");
+namespace
+{
+  // Initialize the static logger
+  Logger g_log("FileValidator");
+}
 
 /** Constructor
  *  @param extensions :: The permitted file extensions (e.g. .RAW)
@@ -78,10 +82,10 @@ std::string FileValidator::checkValidity(const std::string &value) const
       //Dropped from warning to debug level as it was printing out on every search of the archive, even when successful. re #5998
       g_log.debug() << "Unrecognised extension in file \"" << value << "\"";
       if (!this->m_extensions.empty()) {
-        this->g_log.debug() << " [ ";
+        g_log.debug() << " [ ";
         for (std::set<std::string>::const_iterator it = this->m_extensions.begin(); it != this->m_extensions.end(); ++it)
           g_log.debug() << *it << " ";
-        this->g_log.debug() << "]";
+        g_log.debug() << "]";
       }
       g_log.debug() << "\"."  << std::endl;
     }
@@ -130,21 +134,11 @@ std::string FileValidator::checkValidity(const std::string &value) const
         Poco::Path direc(value);
         if (direc.isAbsolute())
         {
-          // look for an existing parent
-          while (!Poco::File(direc).exists())
-          {
-            direc = direc.parent();
-          }
-
-          // see if the directory exists
-          Poco::File direcFile(direc);
-          if (direcFile.exists() && direcFile.isDirectory())
-          {
-            if (direcFile.canWrite())
-              return "";
-            else
-              return "Cannot write to directory \"" + direc.toString() + "\"";
-          }
+          // see if file is writable
+          if (Poco::File(direc).canWrite())
+            return "";
+          else
+            return "Cannot write to file \"" + direc.toString() + "\"";
         }
 
         g_log.debug() << "Do not have enough information to validate \""
@@ -153,6 +147,9 @@ std::string FileValidator::checkValidity(const std::string &value) const
       catch (std::exception &e)
       {
         g_log.information() << "Encountered exception while checking for writable: " << e.what();
+      }
+      catch (...) {
+    	g_log.information() << "Unknown exception while checking for writable";
       }
     }
   }

@@ -9,7 +9,6 @@
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Cache.h"
-#include "MantidKernel/Logger.h"
 
 #ifndef HAS_UNORDERED_MAP_H
 #include <map>
@@ -113,6 +112,9 @@ namespace Geometry
     }
     /// Clear any parameters with the given name
     void clearParametersByName(const std::string & name);
+
+    /// Clear any parameters with the given name for a specified component
+    void clearParametersByName(const std::string & name,const IComponent* comp);
 
     /// Method for adding a parameter providing its value as a string
     void add(const std::string& type,const IComponent* comp,const std::string& name,
@@ -286,9 +288,6 @@ namespace Geometry
     mutable Kernel::Cache<const ComponentID, Kernel::Quat > m_cacheRotMap;
     ///internal cache map for cached bounding boxes
     mutable Kernel::Cache<const ComponentID,BoundingBox> m_boundingBoxMap;
-
-    /// Static reference to the logger class
-    static Kernel::Logger& g_log;
   };
 
   /// ParameterMap shared pointer typedef

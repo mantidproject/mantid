@@ -252,7 +252,8 @@ namespace Mantid
       void cacheUserSearchPaths();
       /// Returns true if the path is in the data search list
       bool isInDataSearchList(const std::string & path) const;
-
+      /// Empty the list of facilities, deleting the FacilityInfo objects in the process
+      void clearFacilities();
       /// Set the PV_PLUGIN_PATH to point at this version of Mantid.
       void setParaViewPluginPath() const;
 
@@ -263,9 +264,6 @@ namespace Mantid
       WrappedObject<Poco::Util::PropertyFileConfiguration>* m_pConf;
       /// the POCO system Config Object
       WrappedObject<Poco::Util::SystemConfiguration>* m_pSysConfig;
-
-      /// reference to the logger class
-      Logger& g_log;
 
       /// A set of property keys that have been changed
       mutable std::set<std::string> m_changed_keys;

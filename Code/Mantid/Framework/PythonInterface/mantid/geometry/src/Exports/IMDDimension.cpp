@@ -1,8 +1,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 
 #include <boost/python/class.hpp>
-
+#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Geometry::IMDDimension;
 using Mantid::Geometry::IMDDimension_sptr;
@@ -10,7 +9,7 @@ using namespace boost::python;
 
 void export_IMDDimension()
 {
-  REGISTER_SHARED_PTR_TO_PYTHON(IMDDimension);
+  register_ptr_to_python<boost::shared_ptr<IMDDimension>>();
 
   class_< IMDDimension, boost::noncopyable >("IMDDimension", no_init)
       .def("getName", &IMDDimension::getName, "Return the name of the dimension as can be displayed along the axis")

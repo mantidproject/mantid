@@ -37,16 +37,19 @@ namespace Mantid
       template<typename ContainerType>
       struct DLLExport SequenceTypeHandler : TypedPropertyValueHandler<ContainerType>
       {
+
         /// Call to set a named property where the value is some container type
-        void set(Kernel::IPropertyManager* alg, const std::string &name, const boost::python::object & value);
-        /**
-         * Return the PyTypeObject of the DerivedType
-         * @returns A PyTypeObject for the given DerivedType
-         */
-        const PyTypeObject * pythonType() const
-        {
-          return &PyList_Type;
-        }
+        void set(Kernel::IPropertyManager* alg, const std::string &name,
+                 const boost::python::object & value) const;
+
+//        /**
+//         * Return the PyTypeObject of the DerivedType
+//         * @returns A PyTypeObject for the given DerivedType
+//         */
+//        const PyTypeObject * pythonType() const
+//        {
+//          return &PyList_Type;
+//        }
        };
 
     }

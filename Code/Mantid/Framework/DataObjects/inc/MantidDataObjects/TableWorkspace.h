@@ -15,14 +15,6 @@
 namespace Mantid
 {
 
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
-
 namespace DataObjects
 {
 /** \class TableWorkspace
@@ -123,8 +115,7 @@ namespace DataObjects
         return pTableCol->data();
       else
       {
-        g_log.error()<<"TableWorkspace::getColVector(): Can not cast to proper TableCol type\n";
-        throw(std::bad_cast());
+        throw std::runtime_error("TableWorkspace::getColVector(): Can not cast to proper TableCol type");
       }
     }
     /** get constant access to column vecotor for index i. */
@@ -136,8 +127,7 @@ namespace DataObjects
         return pTableCol->data();
       else
       {
-        g_log.error()<<"TableWorkspace::getColVector()const: Can not cast to proper TableCol type\n";
-        throw(std::bad_cast());
+        throw std::runtime_error("TableWorkspace::getColVector()const: Can not cast to proper TableCol type");
       }
     }
     /** get access to the column vecotor for column with given name . 
@@ -156,7 +146,7 @@ namespace DataObjects
         return pTableCol->data();
       else
       {
-        throw(std::bad_cast());
+        throw std::runtime_error("TableWorkspace::getColVector(): Can not cast to proper TableCol type");
       }
     }
     /** get access to column vecotor for column with given name  */
@@ -170,8 +160,7 @@ namespace DataObjects
         return pTableCol->data();
       else
       {
-        g_log.error()<<"TableWorkspace::getColVector()const: Can not cast to proper TableCol type\n";
-        throw(std::bad_cast());
+        throw std::runtime_error("TableWorkspace::getColVector()const: Can not cast to proper TableCol type");
       }
     }
     /**Non-throwing access to the pointer to the column data array for the column with given name. Returns null on error or if the coulmn has not been found
@@ -398,8 +387,6 @@ private:
     std::vector< boost::shared_ptr<API::Column> > m_columns;
     /// row count
     size_t m_rowCount;
-    /// Logger
-    static Kernel::Logger& g_log;
 
     /// shared pointer to the logManager, responsible for the workspace properties.   
     API::LogManager_sptr m_LogManager;

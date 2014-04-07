@@ -98,6 +98,8 @@ namespace MantidQt
       void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
       void pbRunFinding();  //< Called when the FileFinder starts finding the files.
       void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
+      /// Slot showing a message box to the user
+      void showMessageBox(const QString& message);
 
       void analyserSelected(int index); ///< set up cbReflection based on Analyser selection
       void reflectionSelected(int index); ///< set up parameter file values based on reflection
@@ -140,6 +142,9 @@ namespace MantidQt
     private:
       /// set and show an instrument-specific widget
       void setInstSpecificWidget(const std::string & parameterName, QCheckBox * checkBox, QCheckBox::ToggleState defaultState);
+      // set the upper and lower bounds of the plot range
+      void setPlotRange(MantidWidgets::RangeSelector* rangeSelector, QtDoublePropertyManager* dblManager, 
+        const std::pair<QtProperty*, QtProperty*> props, const std::pair<double, double>& bounds);
 
       Ui::ConvertToEnergy m_uiForm; ///< user interface form object
       Background *m_backgroundDialog; ///< background removal dialog
@@ -182,6 +187,7 @@ namespace MantidQt
       QtGroupPropertyManager* m_sltGrpMng;
 
       C2ETab* m_tab_trans;
+      C2ETab* m_tab_moments;
     };
   }
 }

@@ -39,8 +39,7 @@ namespace WorkspaceCreationHelper
   using namespace Mantid::Geometry;
   using Mantid::MantidVec;
   using Mantid::MantidVecPtr;
-  // mock algorighm
-  Kernel::Logger& MockAlgorithm::g_log =Logger::get("test-Algorithms");
+
   MockAlgorithm::MockAlgorithm(size_t nSteps)
   {
       m_Progress = std::auto_ptr<API::Progress >(new API::Progress(this,0,1,nSteps));
@@ -1162,8 +1161,8 @@ namespace WorkspaceCreationHelper
   {  
        Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
       //
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      Geometry::IComponent_const_sptr source = instrument->getSource();
+      Geometry::IComponent_const_sptr sample = instrument->getSample();
       if ((!source) || (!sample)) 
       {
  

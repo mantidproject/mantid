@@ -1,5 +1,6 @@
 #include "MantidAPI/MDGeometry.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -510,6 +511,24 @@ namespace API
     }
      // Create the xml.
     return xmlBuilder.create();
+  }
+
+  /**
+   * Get the number of transforms defined to the original coordinate system.
+   * @return The number of transforms.
+   */
+  size_t MDGeometry::getNumberTransformsToOriginal() const
+  {
+    return m_transforms_ToOriginal.size();
+  }
+
+  /**
+   * Get the number of transforms defined from the original coordinate system.
+   * @return The number of transforms.
+   */
+  size_t MDGeometry::getNumberTransformsFromOriginal() const
+  {
+    return m_transforms_FromOriginal.size();
   }
 
 

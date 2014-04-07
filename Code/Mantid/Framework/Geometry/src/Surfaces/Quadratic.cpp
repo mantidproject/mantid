@@ -23,7 +23,6 @@
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 namespace Mantid
@@ -33,9 +32,6 @@ namespace Geometry
 {
    using Kernel::Tolerance;
    using Kernel::V3D;
-
-Kernel::Logger& Quadratic::PLog(Kernel::Logger::get("Quadratic"));
-
 
 Quadratic::Quadratic() : Surface(),
   BaseEqn(10)

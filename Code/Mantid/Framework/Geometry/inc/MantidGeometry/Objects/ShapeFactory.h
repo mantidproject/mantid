@@ -21,10 +21,6 @@ namespace XML {
 
 namespace Mantid
 {       
-  namespace Kernel
-  {
-    class Logger;
-  }
 
   namespace Geometry
   {
@@ -102,9 +98,6 @@ namespace Mantid
       double getDoubleAttribute(Poco::XML::Element* pElem, const std::string& name);
       Kernel::V3D parsePosition(Poco::XML::Element* pElem);     
       void createGeometryHandler(Poco::XML::Element*,boost::shared_ptr<Object>);
-
-      /// static reference to the logger class
-      static Kernel::Logger& g_log;
     };
 
   } // namespace Geometry

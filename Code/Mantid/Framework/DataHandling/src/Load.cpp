@@ -553,15 +553,16 @@ namespace Mantid
       const std::vector< Property*> &props = loader->getProperties();
       for (unsigned int i = 0; i < props.size(); ++i)
       {
-        if (props[i]->direction() == Direction::Output && 
-          dynamic_cast<IWorkspaceProperty*>(props[i]) )
+        auto wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
+
+        if (wsProp && !wsProp->isOptional() && props[i]->direction() == Direction::Output )
         {
           if ( props[i]->value().empty() ) props[i]->setValue("LoadChildWorkspace");
         }
       }
       if (startProgress >= 0. && endProgress > startProgress && endProgress <= 1.)
       {
-        loader->addObserver(m_progressObserver);
+        loader->addObserver(this->progressObserver());
         setChildStartProgress(startProgress);
         setChildEndProgress(endProgress);
       }

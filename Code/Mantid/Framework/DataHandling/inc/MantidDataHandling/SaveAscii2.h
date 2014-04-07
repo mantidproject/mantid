@@ -79,8 +79,6 @@ namespace Mantid
       @param file :: the file writer object
       */
       void writeSpectra(const std::set<int>::const_iterator & spectraItr, std::ofstream & file);
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
 
       /// Map the separator options to their string equivalents
       std::map<std::string,std::string> m_separatorIndex;

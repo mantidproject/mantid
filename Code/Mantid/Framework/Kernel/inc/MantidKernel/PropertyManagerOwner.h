@@ -16,7 +16,6 @@ namespace Kernel
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
-class Logger;
 class PropertyManager;
 
 /** @class PropertyManagerOwner PropertyManagerOwner.h Kernel/PropertyManagerOwner.h
@@ -91,8 +90,8 @@ public:
     /// The argument is the property name. Default - do nothing.
     virtual void afterPropertySet(const std::string&);
 
-    virtual void filterByTime(const DateAndTime /*start*/, const DateAndTime /*stop*/){throw(std::runtime_error("Not yet implmented"));}
-    virtual void splitByTime(TimeSplitterType& /*splitter*/, std::vector< PropertyManager * >/* outputs*/) const{throw(std::runtime_error("Not yet implmented"));}
+    virtual void filterByTime(const DateAndTime &/*start*/, const DateAndTime &/*stop*/){throw(std::runtime_error("Not yet implmented"));}
+    virtual void splitByTime(std::vector<SplittingInterval>& /*splitter*/, std::vector< PropertyManager * >/* outputs*/) const{throw(std::runtime_error("Not yet implmented"));}
     virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filte*/){throw(std::runtime_error("Not yet implmented"));}
 
 
@@ -105,11 +104,6 @@ private:
 
     /// Shared pointer to the 'real' property manager
     boost::shared_ptr<PropertyManager> m_properties;
-
-    /// Static reference to the logger class
-    static Logger& g_log;
-
-
 };
 
 } // namespace Kernel

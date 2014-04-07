@@ -293,7 +293,7 @@ def SaveIqAscii(reducer=None, process=''):
     """ Old command for backward compatibility """
     msg = "SaveIqAscii is not longer used:\n  "
     msg += "Please use 'SaveIq' instead\n  "
-    Logger.get("CommandInterface").warning(msg)
+    Logger("CommandInterface").warning(msg)
     ReductionSingleton().reduction_properties["ProcessInfo"] = str(process)
     
 def SaveIq(output_dir=None, process=''):

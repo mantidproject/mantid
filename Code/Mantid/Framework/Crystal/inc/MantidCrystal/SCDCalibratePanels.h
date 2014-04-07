@@ -197,7 +197,7 @@ namespace Crystal
    *
    */
   static void updateSourceParams(
-        boost::shared_ptr<const Geometry::IObjComponent> bank_const,
+        boost::shared_ptr<const Geometry::IComponent> bank_const,
        boost::shared_ptr<Geometry::ParameterMap> pmap,
        boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
 
@@ -222,9 +222,6 @@ namespace Crystal
     void  init ();
 
     void initDocs ();
-
-    static Kernel::Logger & g_log;
-
 
     /**
      * Creates a new instrument when a calibration file( .xml or .detcal)

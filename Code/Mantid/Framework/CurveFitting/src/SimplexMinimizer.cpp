@@ -12,10 +12,14 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("SimplexMinimizer");
+  }
+
 DECLARE_FUNCMINIMIZER(SimplexMinimizer,Simplex)
 
-// Get a reference to the logger
-Kernel::Logger& SimplexMinimizer::g_log = Kernel::Logger::get("SimplexMinimizer");
 
 /** Calculating cost function
 *
