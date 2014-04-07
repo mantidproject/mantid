@@ -57,17 +57,14 @@ namespace CustomInterfaces
     /// Performs any necessary initialization
     virtual void initialize() = 0;
 
-    /// Display the data we are going to model the baseline for
-    /// @param data :: Data workspace to display
-    virtual void displayData(MatrixWorkspace_const_sptr data) = 0;
+    /// @param data :: New data to display
+    virtual void setData(MatrixWorkspace_const_sptr data) = 0;
 
-    /// Display the corrected data
-    /// @param data :: Corrected data workspace
-    virtual void displayCorrected(MatrixWorkspace_const_sptr data) = 0;
+    /// @param data :: New corrected data to display
+    virtual void setCorrectedData(MatrixWorkspace_const_sptr data) = 0;
 
-    /// Update the displayed function
-    /// @param func :: Updated function to set values from
-    virtual void updateFunction(IFunction_const_sptr func) = 0;
+    /// @param func :: New function to display
+    virtual void setFunction(IFunction_const_sptr func) = 0;
 
   signals:
     /// Request to fit the data according to the function and sections

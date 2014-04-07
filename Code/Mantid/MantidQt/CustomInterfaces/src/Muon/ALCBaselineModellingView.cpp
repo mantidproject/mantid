@@ -53,7 +53,7 @@ namespace CustomInterfaces
     return sections;
   }
 
-  void ALCBaselineModellingView::displayData(MatrixWorkspace_const_sptr data)
+  void ALCBaselineModellingView::setData(MatrixWorkspace_const_sptr data)
   {
     m_dataCurve->setData(&data->readX(0)[0], &data->readY(0)[0], static_cast<int>(data->blocksize()));
 
@@ -68,7 +68,7 @@ namespace CustomInterfaces
     m_ui.dataPlot->replot();
   }
 
-  void ALCBaselineModellingView::displayCorrected(MatrixWorkspace_const_sptr data)
+  void ALCBaselineModellingView::setCorrectedData(MatrixWorkspace_const_sptr data)
   {
     m_correctedCurve->setData(&data->readX(0)[0], &data->readY(0)[0],
         static_cast<int>(data->blocksize()));
@@ -76,7 +76,7 @@ namespace CustomInterfaces
     m_ui.correctedPlot->replot();
   }
 
-  void ALCBaselineModellingView::updateFunction(IFunction_const_sptr func)
+  void ALCBaselineModellingView::setFunction(IFunction_const_sptr func)
   {
     std::vector<double> dataX;
     dataX.reserve(m_dataCurve->dataSize());

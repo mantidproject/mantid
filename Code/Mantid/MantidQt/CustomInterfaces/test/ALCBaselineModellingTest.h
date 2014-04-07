@@ -26,9 +26,9 @@ public:
   MOCK_METHOD0(initialize, void());
   MOCK_CONST_METHOD0(function, IFunction_const_sptr());
   MOCK_CONST_METHOD0(sections, std::vector<Section>());
-  MOCK_METHOD1(displayData, void(MatrixWorkspace_const_sptr));
-  MOCK_METHOD1(displayCorrected, void(MatrixWorkspace_const_sptr));
-  MOCK_METHOD1(updateFunction, void(IFunction_const_sptr));
+  MOCK_METHOD1(setData, void(MatrixWorkspace_const_sptr));
+  MOCK_METHOD1(setCorrectedData, void(MatrixWorkspace_const_sptr));
+  MOCK_METHOD1(setFunction, void(IFunction_const_sptr));
 };
 
 class ALCBaselineModellingTest : public CxxTest::TestSuite
@@ -63,7 +63,7 @@ public:
 
   void setData(MatrixWorkspace_const_sptr data)
   {
-    EXPECT_CALL(*m_view, displayData(_)).Times(1);
+    EXPECT_CALL(*m_view, setData(_)).Times(1);
     m_presenter->setData(data);
   }
 
@@ -89,9 +89,9 @@ public:
     EXPECT_CALL(*m_view, function()).WillRepeatedly(Return(func));
     EXPECT_CALL(*m_view, sections()).WillRepeatedly(Return(sections));
 
-    EXPECT_CALL(*m_view, updateFunction(_)).Times(1).WillOnce(SaveArg<0>(&fittedFunc));
-    EXPECT_CALL(*m_view, displayCorrected(_)).Times(1).WillOnce(SaveArg<0>(&corrected));
-    EXPECT_CALL(*m_view, displayData(_)).Times(0);
+    EXPECT_CALL(*m_view, setFunction(_)).Times(1).WillOnce(SaveArg<0>(&fittedFunc));
+    EXPECT_CALL(*m_view, setCorrectedData(_)).Times(1).WillOnce(SaveArg<0>(&corrected));
+    EXPECT_CALL(*m_view, setData(_)).Times(0);
 
     m_view->requestFit();
 

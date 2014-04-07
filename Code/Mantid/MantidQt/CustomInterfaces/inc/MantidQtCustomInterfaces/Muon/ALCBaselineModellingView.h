@@ -59,13 +59,13 @@ namespace CustomInterfaces
 
   public slots:
     /// @see IALCBaselineModellingView::displayData
-    void displayData(MatrixWorkspace_const_sptr data);
+    void setData(MatrixWorkspace_const_sptr data);
 
     /// @see IALCBaselineModellingView::displayCorrected
-    void displayCorrected(MatrixWorkspace_const_sptr data);
+    void setCorrectedData(MatrixWorkspace_const_sptr data);
 
     /// @see IALCBaselineModellingView::updateFunction
-    void updateFunction(IFunction_const_sptr func);
+    void setFunction(IFunction_const_sptr func);
 
   private slots:
     void updateRange(double min, double max);

@@ -24,7 +24,7 @@ namespace CustomInterfaces
   void ALCBaselineModellingPresenter::setData(MatrixWorkspace_const_sptr data)
   {
     m_data = data;
-    m_view->displayData(data);
+    m_view->setData(data);
   }
 
   void ALCBaselineModellingPresenter::fit()
@@ -52,8 +52,8 @@ namespace CustomInterfaces
 
     m_correctedData = extract->getProperty("OutputWorkspace");
 
-    m_view->updateFunction(funcToFit);
-    m_view->displayCorrected(m_correctedData);
+    m_view->setFunction(funcToFit);
+    m_view->setCorrectedData(m_correctedData);
   }
 
   MatrixWorkspace_sptr ALCBaselineModellingPresenter::filteredData() const
