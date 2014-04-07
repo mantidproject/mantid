@@ -101,9 +101,9 @@ IComponent* CompAssembly::clone() const
  */
 int CompAssembly::add(IComponent* comp)
 {
-  if (m_isParametrized) {
-	  throw std::runtime_error("CompAssembly::add() called for a parametrized CompAssembly.");
-  }
+  if (m_isParametrized)
+    throw std::runtime_error("CompAssembly::add() called for a parametrized CompAssembly.");
+
   if (comp)
   {
     comp->setParent(this);
@@ -120,50 +120,18 @@ int CompAssembly::add(IComponent* comp)
  *  Comp is cloned if valid, then added in the assembly
  *  This becomes the parent of the cloned component
  */
+int CompAssembly::addCopy(IComponent* comp)
+{
+  if (m_isParametrized)
+    throw std::runtime_error("CompAssembly::addCopy() called for a parametrized CompAssembly.");
 
-void CompAssembly::addChildren(IComponent* comp){
-	m_children.push_back(comp);
-}
-
-int CompAssembly::addCopy(IComponent* comp) {
-
-	//TODO
-
-	IComponent* newcomp = comp->clone();
-	if (comp) {
-		if (m_isParametrized) {
-			// TODO
-			std::cout << "Add Copy Begin **************************" << std::endl;
-			std::cout << "Parametrized before: " << dynamic_cast<const CompAssembly*>(m_base)->nelements() << std::endl;
-			std::cout << "This:" << std::endl;
-			printTree(std::cout);
-			std::cout << "To Clone:" << std::endl;
-			dynamic_cast<const CompAssembly*>(comp)->printTree(std::cout);
-			std::cout << "Cloned (should be the same as To Clone:" << std::endl;
-			dynamic_cast<CompAssembly*>(newcomp)->printTree(std::cout);
-
-			newcomp->setParent(const_cast<Component*>(m_base));
-
-			dynamic_cast<CompAssembly*>(
-					const_cast<Component*>(m_base))->addChildren(newcomp);
-
-//			dynamic_cast<CompAssembly*>(
-//								const_cast<Component*>(m_base))->addChildren(
-//										ParComponentFactory::create( boost::shared_ptr<IComponent>(newcomp)  ,m_map).get());
-
-			std::cout << "Parametrized after: " << dynamic_cast<const CompAssembly*>(m_base)->nelements() << std::endl;
-			printTree(std::cout);
-			std::cout << "Add Copy End **************************" << std::endl;
-			std::cout.flush();
-
-			//throw std::runtime_error("CompAssembly::addCopy() called for a parametrized CompAssembly.");
-		} else {
-			std::cout << "Non Parametrized: " << static_cast<int>(m_children.size()) << std::endl;
-			newcomp->setParent(this);
-			m_children.push_back(newcomp);
-		}
-	}
-	return static_cast<int>(m_children.size());
+  if (comp)
+  {
+    IComponent* newcomp=comp->clone();
+    newcomp->setParent(this);
+    m_children.push_back(newcomp);
+  }
+  return static_cast<int>(m_children.size());
 }
 
 /** AddCopy method
@@ -486,12 +454,11 @@ void CompAssembly::printChildren(std::ostream& os) const
  */
 void CompAssembly::printTree(std::ostream& os) const
 {
-  os << "This Element: " << this->getName() << std::endl;
   for (int i=0;i<nelements();i++)
   {
     boost::shared_ptr<IComponent> it = (*this)[i];
     const CompAssembly* test=dynamic_cast<CompAssembly*>(it.get());
-    os << "Element " << i << " in the assembly : ";
+    os << "Element " << i << " from " << nelements() << " in the assembly : ";
     if (test)
     {
       os << test->getName() << std::endl;
