@@ -25,8 +25,9 @@
 #include "InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/VatesViewerInterface.h"
 
 #include "MantidKernel/EnvironmentHistory.h"
@@ -2972,13 +2973,7 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
   QString xtitle;
   if (workspace->axes() > 1)   // Protection against calling this on 1D/single value workspaces
   {
-    const Axis* const axis = workspace->getAxis(1);
-    if ( axis->isSpectra() ) xtitle = "Spectrum Number";
-    else if ( axis->unit() )
-    {
-      xtitle = QString::fromStdString(axis->unit()->caption()) +\
-               " (" + QString::fromStdWString(axis->unit()->label().utf8()) + ")";
-    }
+    xtitle = MantidQt::API::PlotAxis(workspace, 1).title();
   }
   g->setXAxisTitle(xtitle);
   g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));

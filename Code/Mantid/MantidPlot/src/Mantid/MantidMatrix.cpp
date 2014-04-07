@@ -12,6 +12,8 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
 
+#include "MantidQtAPI/PlotAxis.h"
+
 #include <QtGlobal>
 #include <QTextStream>
 #include <QList>
@@ -625,27 +627,9 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
     MantidMatrixFunction *fun = new MantidMatrixFunction(*this);
     plot->addFunction(fun, xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows() );
 
-    const Mantid::API::Axis* ax = m_workspace->getAxis(0);
-    QString s;
-    if ( ax->unit() ) s = QString::fromStdString(ax->unit()->caption()) + " / " + QString::fromStdWString(ax->unit()->label().utf8());
-    else
-      s = "X Axis";
-    plot->setXAxisLabel(s);
-
-    if ( m_workspace->axes() > 1 )
-    {
-      ax = m_workspace->getAxis(1);
-      if (ax->isNumeric())
-      {
-        if ( ax->unit() ) s = QString::fromStdString(ax->unit()->caption()) + " / " + QString::fromStdWString(ax->unit()->label().utf8());
-        else
-          s = "Y Axis";
-        plot->setYAxisLabel(s);
-      }
-      else
-        plot->setYAxisLabel(tr("Spectrum"));
-    }
-
+    using MantidQt::API::PlotAxis;
+    plot->setXAxisLabel(PlotAxis(m_workspace, 0).title());
+    plot->setYAxisLabel(PlotAxis(m_workspace, 1).title());
     plot->setZAxisLabel(tr(m_workspace->YUnitLabel().c_str()));
 
     a->initPlot3D(plot);

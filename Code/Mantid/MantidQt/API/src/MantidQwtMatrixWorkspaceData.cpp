@@ -1,5 +1,7 @@
 #include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
-#include <QStringBuilder> // provides % operator for QString
+#include "MantidQtAPI/PlotAxis.h"
+
+#include <QStringBuilder>
 
 /// Constructor
 MantidQwtMatrixWorkspaceData::MantidQwtMatrixWorkspaceData(Mantid::API::MatrixWorkspace_const_sptr workspace,int specIndex, const bool logScale, bool distr)
@@ -146,27 +148,7 @@ double MantidQwtMatrixWorkspaceData::getYMax() const
  */
 QString MantidQwtMatrixWorkspaceData::getXAxisLabel() const
 {
-  // Deal with axis names
-  Mantid::API::Axis* ax = m_workspace->getAxis(0);
-  QString xTitle;
-  if (ax->unit() && ax->unit()->unitID() != "Empty" )
-  {
-    xTitle = QString::fromStdString(ax->unit()->caption());
-    const auto lbl = ax->unit()->label();
-    if ( !lbl.utf8().empty() )
-    {
-      xTitle += " (" + QString::fromStdWString(lbl.utf8()) + ")";
-    }
-  }
-  else if (!ax->title().empty())
-  {
-    xTitle = QString::fromStdString(ax->title());
-  }
-  else
-  {
-    xTitle = "X axis";
-  }
-  return xTitle;
+  return MantidQt::API::PlotAxis(m_workspace, 0).title();
 }
 
 /**
