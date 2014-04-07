@@ -313,11 +313,10 @@ namespace MantidQt
     /**
      * Execute the given algorithm asynchronously.
      * @param algorithm :: The algorithm to execute.
-     * @param maxTime :: The maximum amount of time (in seconds) to run the thread for.
      */
-    void CatalogHelper::executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm, int maxTime)
+    void CatalogHelper::executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm)
     {
-      maxTime = boost::lexical_cast<int>(Mantid::Kernel::ConfigService::Instance().getString("catalog.timeout.value"));
+      int maxTime = boost::lexical_cast<int>(Mantid::Kernel::ConfigService::Instance().getString("catalog.timeout.value"));
 
       QTime myTimer;
       myTimer.start();
