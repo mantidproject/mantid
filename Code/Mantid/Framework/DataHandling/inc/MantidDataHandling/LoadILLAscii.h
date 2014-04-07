@@ -7,6 +7,7 @@
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataHandling/LoadILLAsciiHelper.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -57,9 +58,11 @@ private:
 	void loadExperimentDetails(ILLParser &p);
 	void loadIDF(API::MatrixWorkspace_sptr &workspace);
 	void loadsDataIntoTheWS(API::MatrixWorkspace_sptr &, const std::vector<int> &);
-	API::MatrixWorkspace_sptr mergeWorkspaces(std::vector<API::MatrixWorkspace_sptr> &);
+	API::IMDEventWorkspace_sptr mergeWorkspaces(std::vector<API::MatrixWorkspace_sptr> &);
 	void addCompAssemblyToReferenceInstrument(Geometry::CompAssembly *refInstrument,
 			Geometry::CompAssembly *instrumentFrom, const std::string &componentName);
+
+	void setWorkspaceRotationAngle(API::MatrixWorkspace_sptr, double rotationAngle);
 
 	//LoadHelper m_loader;
 	std::string m_instrumentName; ///< Name of the instrument

@@ -15,13 +15,10 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/DateAndTime.h"
-
-////#include "MantidMDEvents/ImportMDEventWorkspace.h"
-//#include "MantidKernel/System.h"
-//#include "MantidAPI/FileProperty.h"
-//#include "MantidMDEvents/MDEventFactory.h"
-//#include "MantidMDEvents/MDEventInserter.h"
-//#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/System.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
@@ -29,6 +26,8 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <stdio.h>
+#include <string.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -111,9 +110,13 @@ void LoadILLAscii::initDocs() {
 void LoadILLAscii::init() {
 	declareProperty(new FileProperty("Filename", "", FileProperty::Load, ""),
 			"Name of the data file to load.");
+//	declareProperty(
+//			new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+//			"Name to use for the output workspace");
+//
 	declareProperty(
-			new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-			"Name to use for the output workspace");
+			new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace", "",
+					Direction::Output), "An output workspace.");
 
 }
 
@@ -157,14 +160,11 @@ void LoadILLAscii::exec() {
 		thisWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 		thisWorkspace->setYUnitLabel("Counts");
 
-		// TODO make this a function. get real time from file
+		// Set this workspace position
 		double currentPositionAngle = illAsciiParser.getValue<double>("angles*1000", *iSpectraHeader) / 1000;
-		API::Run & runDetails = thisWorkspace->mutableRun();
-		Mantid::Kernel::TimeSeriesProperty<double> *p = new Mantid::Kernel::TimeSeriesProperty<double>("rotangle");
-		p->addValue(DateAndTime::getCurrentTime(), currentPositionAngle);
-		runDetails.addLogData(p);
+		setWorkspaceRotationAngle(thisWorkspace,currentPositionAngle);
 
-				//
+		//
 		loadsDataIntoTheWS(thisWorkspace, thisSpectrum);
 		loadIDF(thisWorkspace); // assigns data to the instrument
 
@@ -184,10 +184,23 @@ void LoadILLAscii::exec() {
 
 	// Merge the workspace list into a single WS with a virtual instrument
 	// TODO : Not done yet!
-	MatrixWorkspace_sptr outWorkspace = mergeWorkspaces(workspaceList);
+	IMDEventWorkspace_sptr outWorkspace = mergeWorkspaces(workspaceList);
 	setProperty("OutputWorkspace",outWorkspace);
 
 
+}
+
+/**
+ * Sets the workspace position based on the rotation angle
+ * See./instrument/D2B_Definition.xml:        <logfile id="rotangle"  eq="0.0+value"/>
+ */
+void LoadILLAscii::setWorkspaceRotationAngle(API::MatrixWorkspace_sptr ws, double rotationAngle){
+
+	API::Run & runDetails = ws->mutableRun();
+	Mantid::Kernel::TimeSeriesProperty<double> *p =
+			new Mantid::Kernel::TimeSeriesProperty<double>("rotangle");
+	p->addValue(DateAndTime::getCurrentTime(), rotationAngle);
+	runDetails.addLogData(p);
 }
 
 /**
@@ -393,19 +406,17 @@ void LoadILLAscii::addCompAssemblyToReferenceInstrument(Geometry::CompAssembly *
  *
  *
  */
-MatrixWorkspace_sptr LoadILLAscii::mergeWorkspaces(
+IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 		std::vector<API::MatrixWorkspace_sptr> &workspaceList) {
 
-	//	// Create a target output workspace.
-//    IMDEventWorkspace_sptr outWs = MDEvents::MDEventFactory::CreateMDWorkspace(2, "MDEvent");
-//
-//    outWs->addDimension(Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension("x", "X", "m", 0, 5, 2)));
-//    outWs->addDimension(Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension("y", "Y", "m", 0, 5, 2)));
-//    outWs->addDimension(Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension("z", "Z", "m", 0, 5, 2)));
+	char tempFileNameChar[128];
+	tmpnam (tempFileNameChar);
+	strcat (tempFileNameChar,".txt");
+	g_log.debug() << "Dumping WSs in a temp file: " << tempFileNameChar << std::endl;
 
 
 	std::ofstream myfile;
-	myfile.open ("/tmp/d2b_ascii.txt");
+	myfile.open (tempFileNameChar);
 	myfile << "DIMENSIONS" <<std::endl;
 	myfile << "x X m 100" <<std::endl;
 	myfile << "y Y m 100" <<std::endl;
@@ -413,13 +424,12 @@ MatrixWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 	myfile << "# Signal, Error, DetectorId, RunId, coord1, coord2, ... to end of coords" <<std::endl;
 	myfile << "MDEVENTS" <<std::endl;
 
-	if (workspaceList.size() > 0) {
 
-		for (auto it = workspaceList.begin(); it < workspaceList.end(); ++it) { // jumps the first
+	if (workspaceList.size() > 0) {
+		Progress progress(this, 0, 1, workspaceList.size());
+		for (auto it = workspaceList.begin(); it < workspaceList.end(); ++it) {
 			std::size_t pos = std::distance(workspaceList.begin(),it);
 			API::MatrixWorkspace_sptr thisWorkspace = *it;
-
-			g_log.debug() << "Writing workspace to a file." << pos << std::endl;
 
 			std::size_t nHist = thisWorkspace->getNumberHistograms();
 			for (std::size_t i=0; i < nHist; ++i){
@@ -436,89 +446,27 @@ MatrixWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 				myfile << detPos.Z() << " ";
 				myfile << std::endl;
 			}
-
-			// current position
-
-
-			//long newIdOffset = numberOfDetectorsPerScan*pos; // this must me summed to the current IDs
+			progress.report();
 		}
-
-
-
-
 		myfile.close();
 
 
+		IAlgorithm_sptr importMDEWS = createChildAlgorithm("ImportMDEventWorkspace");
+		// Now execute the Child Algorithm. Catch and log any error, but don't stop.
+		try {
+			importMDEWS->setPropertyValue("Filename", tempFileNameChar);
+			importMDEWS->setProperty("OutputWorkspace", "Test");
+			importMDEWS->execute();
+		} catch (...) {
+			std::runtime_error("Error: Cannot convert WS to MDEventWorkspace");
+		}
 
+		IMDEventWorkspace_sptr workspace = importMDEWS->getProperty("OutputWorkspace");
+		if(!workspace)
+			throw(std::runtime_error("Can not retrieve results of child algorithm ImportMDEventWorkspace"));
 
+		return workspace;
 
-
-
-
-
-
-
-//		// 1st workspace will be the reference
-		API::MatrixWorkspace_sptr &refWorkspace = workspaceList[0];
-
-		size_t numberOfHistograms = refWorkspace->getNumberHistograms() * workspaceList.size();
-		size_t xWidth = refWorkspace->blocksize()+1;
-		size_t yWidth = refWorkspace->blocksize();
-		MatrixWorkspace_sptr outWorkspace = WorkspaceFactory::Instance().create(
-				"Workspace2D", numberOfHistograms, xWidth, yWidth);
-		outWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-		outWorkspace->setYUnitLabel("Counts");
-
-//		// Fully copy the instrument
-//		auto sourceBaseInstrument = boost::shared_ptr<Geometry::Instrument>(refWorkspace->getInstrument()->baseInstrument()->clone());
-//		outWorkspace->setInstrument( sourceBaseInstrument );
-//		// OR copy base instrument => ParameterMap is empty!
-//		// outWorkspace->setInstrument(refWorkspace->getInstrument()->baseInstrument());
-//
-//		// outInstrument: The instrument that will be modified
-//		Geometry::Instrument_const_sptr outInstrument = outWorkspace->getInstrument();
-//
-//		std::size_t numberOfDetectorsPerScan = outInstrument->getNumberDetectors(true);
-//		g_log.debug() << "***** NumberOfDetectorsPerScan: " << numberOfDetectorsPerScan << std::endl;
-//
-//		//DEBUG: print outParameterMap
-//		boost::shared_ptr<Geometry::ParameterMap> outParameterMap = outInstrument->getParameterMap();
-//		// g_log.debug() << outParameterMap->asString() << std::endl;
-//		//DEBUG: print intrument tree
-//		//outInstrument->printTree(g_log.debug());
-//
-//
-//		auto it = workspaceList.begin();
-//		for (++it; it < workspaceList.end(); ++it) { // jumps the first
-//			std::size_t pos = std::distance(workspaceList.begin(),it);
-//			API::MatrixWorkspace_sptr thisWorkspace = *it;
-//
-//			g_log.debug() << "Merging the workspace: " << pos << std::endl;
-//
-//			// current position
-//			Geometry::Instrument_const_sptr thisInstrument = thisWorkspace->getInstrument();
-//
-//
-//			long newIdOffset = numberOfDetectorsPerScan*pos; // this must me summed to the current IDs
-//
-//			// FUN STARTS HERE!
-//			//addCompAssemblyToReferenceInstrument( const_cast < Geometry::Instrument* >( thisInstrument.get()),"bank_uniq");
-//			addCompAssemblyToReferenceInstrument(const_cast < Geometry::Instrument* >(outInstrument.get()),
-//					const_cast < Geometry::Instrument* >(thisInstrument.get()),"bank_uniq");
-//
-//
-//
-//
-//
-//			// Debug:
-//			/*
-//			outInstrument->printTree(g_log.debug());
-//			boost::shared_ptr<Geometry::ParameterMap> thisParameterMap = thisInstrument->getParameterMap();
-//			g_log.debug() << outParameterMap->asString() << std::endl;
-//			*/
-//
-//		}
-		return outWorkspace;
 	}
 	else{
 		throw std::runtime_error("Error: No workspaces were found to be merged!");
