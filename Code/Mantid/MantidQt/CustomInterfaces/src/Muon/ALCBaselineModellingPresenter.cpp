@@ -11,7 +11,7 @@ namespace CustomInterfaces
 {
 
   ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(IALCBaselineModellingView* view)
-    : m_view(view), m_data()
+    : m_view(view), m_data(), m_sections(), m_correctedData()
   {}
 
   void ALCBaselineModellingPresenter::initialize()
@@ -19,6 +19,7 @@ namespace CustomInterfaces
     m_view->initialize();
 
     connect(m_view, SIGNAL(fit()), this, SLOT(fit()));
+    connect(m_view, SIGNAL(addSection(Section)), this, SLOT(addSection(Section)));
   }
 
   void ALCBaselineModellingPresenter::setData(MatrixWorkspace_const_sptr data)
@@ -56,6 +57,12 @@ namespace CustomInterfaces
     m_view->setCorrectedData(m_correctedData);
   }
 
+  void ALCBaselineModellingPresenter::addSection(Section newSection)
+  {
+    m_sections.push_back(newSection);
+    m_view->setSections(m_sections);
+  }
+
   MatrixWorkspace_sptr ALCBaselineModellingPresenter::filteredData() const
   {
     // Assumptions about data
@@ -66,12 +73,10 @@ namespace CustomInterfaces
     // Whether point with particular index should be disabled
     std::vector<bool> toDisable(m_data->blocksize(), true);
 
-    std::vector<IALCBaselineModellingView::Section> sections = m_view->sections();
-
     // Find points which are in at least one section, and exclude them from disable list
     for (size_t i = 0; i < m_data->blocksize(); ++i)
     {
-      for (auto it = sections.begin(); it != sections.end(); ++it)
+      for (auto it = m_sections.begin(); it != m_sections.end(); ++it)
       {
         if ( m_data->dataX(0)[i] >= it->first && m_data->dataX(0)[i] <= it->second )
         {

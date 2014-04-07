@@ -49,10 +49,6 @@ namespace CustomInterfaces
     /// @return Initialized function
     virtual IFunction_const_sptr function() const = 0;
 
-    /// List of data sections to use for fitting
-    /// @return A list of [from;to] sections
-    virtual std::vector<Section> sections() const = 0;
-
   public slots:
     /// Performs any necessary initialization
     virtual void initialize() = 0;
@@ -66,9 +62,16 @@ namespace CustomInterfaces
     /// @param func :: New function to display
     virtual void setFunction(IFunction_const_sptr func) = 0;
 
+    /// @param sections :: New list of sections to display
+    virtual void setSections(const std::vector<Section>& sections) = 0;
+
   signals:
     /// Request to fit the data according to the function and sections
     void fit();
+
+    /// Request to add a new section
+    /// @param section :: Section to add
+    void addSection(Section section);
   };
 
 

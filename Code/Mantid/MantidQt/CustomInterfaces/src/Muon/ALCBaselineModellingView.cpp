@@ -6,6 +6,8 @@
 
 #include <boost/scoped_array.hpp>
 
+#include <QMessageBox>
+
 using namespace Mantid::API;
 
 namespace MantidQt
@@ -22,6 +24,7 @@ namespace CustomInterfaces
   {
     m_ui.setupUi(m_widget);
     connect(m_ui.fit, SIGNAL(pressed()), SIGNAL(fit()));
+    connect(m_ui.addSection, SIGNAL(pressed()), SLOT(onAddSectionPressed()));
 
     m_dataCurve->attach(m_ui.dataPlot);
 
@@ -37,20 +40,6 @@ namespace CustomInterfaces
   IFunction_const_sptr ALCBaselineModellingView::function() const
   {
     return FunctionFactory::Instance().createInitialized(m_ui.function->text().toStdString());
-  }
-
-  std::vector<IALCBaselineModellingView::Section> ALCBaselineModellingView::sections() const
-  {
-    std::istringstream sectionsStr(m_ui.sections->text().toStdString());
-    double from,to;
-    std::vector<Section> sections;
-
-    while(sectionsStr >> from >> to)
-    {
-      sections.push_back(std::make_pair(from,to));
-    }
-
-    return sections;
   }
 
   void ALCBaselineModellingView::setData(MatrixWorkspace_const_sptr data)
@@ -96,6 +85,27 @@ namespace CustomInterfaces
     m_ui.dataPlot->replot();
 
     m_ui.function->setText(QString::fromStdString(func->asString()));
+  }
+
+  void ALCBaselineModellingView::setSections(const std::vector<IALCBaselineModellingView::Section>& sections)
+  {
+    std::ostringstream sectionsStr;
+
+    for (auto it = sections.begin(); it != sections.end(); ++it)
+    {
+      sectionsStr << it->first << " " << it->second << "\n";
+    }
+
+    m_ui.sections->setPlainText(QString::fromStdString(sectionsStr.str()));
+  }
+
+  void ALCBaselineModellingView::onAddSectionPressed()
+  {
+    QStringList range = m_ui.range->text().split(' ');
+    assert(range.size() == 2);
+    double from = range[0].toDouble();
+    double to = range[1].toDouble();
+    emit addSection(std::make_pair(from, to));
   }
 
   void ALCBaselineModellingView::updateRange(double min, double max)

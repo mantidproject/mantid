@@ -34,10 +34,25 @@
         <widget class="QTextEdit" name="function"/>
        </item>
        <item>
-        <widget class="QLineEdit" name="range"/>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLineEdit" name="range"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="addSection">
+           <property name="text">
+            <string>Add</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
-        <widget class="QTextEdit" name="sections"/>
+        <widget class="QPlainTextEdit" name="sections">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
        <item>
         <spacer name="verticalSpacer">

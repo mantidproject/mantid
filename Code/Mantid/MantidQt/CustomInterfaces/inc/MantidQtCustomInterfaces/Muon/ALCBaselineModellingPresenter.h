@@ -13,6 +13,12 @@ namespace MantidQt
 namespace CustomInterfaces
 {
 
+namespace
+{
+  // Shortcut
+  typedef IALCBaselineModellingView::Section Section;
+}
+
   /** ALCBaselineModellingPresenter : Presenter for ALC Baseline Modelling step
     
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -54,6 +60,9 @@ namespace CustomInterfaces
     /// Perform fit
     void fit();
 
+    /// @param newSection :: Section to add
+    void addSection(Section newSection);
+
   private:
     /// Returns a filtered copy of m_data, where all uninteresting points where disabled.
     /// Unintersing points are ones which are not included in any of the sections specified in the
@@ -66,6 +75,9 @@ namespace CustomInterfaces
 
     /// Data we are fitting the baseline to
     MatrixWorkspace_const_sptr m_data;
+
+    /// Baseline sections we are using
+    std::vector<Section> m_sections;
 
     /// Corrected data of the last fit
     MatrixWorkspace_const_sptr m_correctedData;

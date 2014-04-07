@@ -22,13 +22,16 @@ class MockALCBaselineModellingView : public IALCBaselineModellingView
 {
 public:
   void requestFit() { emit fit(); }
+  void requestAddSection(Section section) { emit addSection(section); }
 
   MOCK_METHOD0(initialize, void());
+
   MOCK_CONST_METHOD0(function, IFunction_const_sptr());
-  MOCK_CONST_METHOD0(sections, std::vector<Section>());
+
   MOCK_METHOD1(setData, void(MatrixWorkspace_const_sptr));
   MOCK_METHOD1(setCorrectedData, void(MatrixWorkspace_const_sptr));
   MOCK_METHOD1(setFunction, void(IFunction_const_sptr));
+  MOCK_METHOD1(setSections, void(const std::vector<Section>&));
 };
 
 class ALCBaselineModellingTest : public CxxTest::TestSuite
@@ -67,6 +70,24 @@ public:
     m_presenter->setData(data);
   }
 
+  void test_addingSections()
+  {
+    std::vector<IALCBaselineModellingView::Section> oneSection;
+    oneSection.push_back(std::make_pair(1,2));
+
+    std::vector<IALCBaselineModellingView::Section> twoSections;
+    twoSections.push_back(std::make_pair(1,2));
+    twoSections.push_back(std::make_pair(3,4));
+
+    InSequence s; // Calls should come in order
+
+    EXPECT_CALL(*m_view, setSections(oneSection)).Times(1);
+    EXPECT_CALL(*m_view, setSections(twoSections)).Times(1);
+
+    m_view->requestAddSection(std::make_pair(1,2));
+    m_view->requestAddSection(std::make_pair(3,4));
+  }
+
   void test_basicUsage()
   {
     MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, 3, 3);
@@ -78,20 +99,17 @@ public:
     setData(data);
 
     IFunction_const_sptr func = FunctionFactory::Instance().createInitialized("name=FlatBackground,A0=0");
+    EXPECT_CALL(*m_view, function()).WillRepeatedly(Return(func));
 
-    std::vector<IALCBaselineModellingView::Section> sections;
-    sections.push_back(std::make_pair(1,2));
-    sections.push_back(std::make_pair(4,6));
+    EXPECT_CALL(*m_view, setSections(_)).Times(2);
+    m_view->requestAddSection(std::make_pair(1,2));
+    m_view->requestAddSection(std::make_pair(4,6));
 
     IFunction_const_sptr fittedFunc;
-    MatrixWorkspace_const_sptr corrected;
-
-    EXPECT_CALL(*m_view, function()).WillRepeatedly(Return(func));
-    EXPECT_CALL(*m_view, sections()).WillRepeatedly(Return(sections));
-
     EXPECT_CALL(*m_view, setFunction(_)).Times(1).WillOnce(SaveArg<0>(&fittedFunc));
+
+    MatrixWorkspace_const_sptr corrected;
     EXPECT_CALL(*m_view, setCorrectedData(_)).Times(1).WillOnce(SaveArg<0>(&corrected));
-    EXPECT_CALL(*m_view, setData(_)).Times(0);
 
     m_view->requestFit();
 
