@@ -19,6 +19,7 @@ namespace Mantid
 
   namespace Crystal
   {
+    class Cluster;
     /**
      * Namespace containing useful typedefs
      */
@@ -30,6 +31,7 @@ namespace Mantid
       typedef std::vector<size_t> VecIndexes;
       typedef std::vector<DisjointElement> VecElements;
       typedef std::set<size_t> SetIds;
+      typedef std::map<size_t, boost::shared_ptr<Cluster> > ClusterMap;
     }
 
     class BackgroundStrategy;
@@ -90,10 +92,8 @@ namespace Mantid
       int getNThreads() const;
 
       /// Calculate the disjoint element tree across the image.
-      void calculateDisjointTree(Mantid::API::IMDHistoWorkspace_sptr ws,
-          BackgroundStrategy * const strategy, std::vector<DisjointElement>& neighbourElements,
-          ConnectedComponentMappingTypes::LabelIdIntensityMap& labelMap,
-          ConnectedComponentMappingTypes::PositionToLabelIdMap& positionLabelMap,
+      ConnectedComponentMappingTypes::ClusterMap calculateDisjointTree(Mantid::API::IMDHistoWorkspace_sptr ws,
+          BackgroundStrategy * const strategy, 
           Mantid::API::Progress& progress) const;
 
       /// Start labeling index
