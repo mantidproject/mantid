@@ -34,6 +34,7 @@ set ( SRC_FILES
 	src/Muon/ALCDataLoadingView.cpp
 	src/Muon/ALCInterface.cpp
 	src/Muon/ALCPeakFittingPresenter.cpp
+	src/Muon/ALCPeakFittingView.cpp
 	src/Muon/IO_MuonGrouping.cpp
 	src/Muon/MuonAnalysis.cpp
 	src/Muon/MuonAnalysisFitDataTab.cpp
@@ -98,6 +99,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h
 	inc/MantidQtCustomInterfaces/Muon/ALCInterface.h
 	inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h
+	inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.h
 	inc/MantidQtCustomInterfaces/Muon/IALCBaselineModellingView.h
 	inc/MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h
 	inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h
@@ -195,6 +197,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.ui
                inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.ui
                inc/MantidQtCustomInterfaces/Muon/ALCInterface.ui
+               inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/Quasi.ui
                inc/MantidQtCustomInterfaces/ResNorm.ui

@@ -47,6 +47,9 @@ namespace CustomInterfaces
     /// @param data :: Data to fit peaks in
     void setData(MatrixWorkspace_const_sptr data);
 
+    /// @return Corrected data calculated after the last fit
+    MatrixWorkspace_const_sptr correctedData() const { return m_correctedData; }
+
   private slots:
     /// Perform fit
     void fit();
@@ -63,6 +66,9 @@ namespace CustomInterfaces
 
     /// Data we are fitting the baseline to
     MatrixWorkspace_const_sptr m_data;
+
+    /// Corrected data of the last fit
+    MatrixWorkspace_const_sptr m_correctedData;
   };
 
 } // namespace CustomInterfaces

@@ -1,22 +1,22 @@
-#ifndef MANTIDQT_CUSTOMINTERFACES_ALCINTERFACE_H_
-#define MANTIDQT_CUSTOMINTERFACES_ALCINTERFACE_H_
+#ifndef MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGVIEW_H_
+#define MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGVIEW_H_
 
 #include "MantidKernel/System.h"
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h"
-#include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
-#include "MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h"
-#include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h"
 
-#include "ui_ALCInterface.h"
+#include "ui_ALCPeakFittingView.h"
+
+#include <QWidget>
+#include <qwt_plot_curve.h>
 
 namespace MantidQt
 {
 namespace CustomInterfaces
 {
 
-  /** ALCInterface : Custom interface for Avoided Level Crossing analysis
+  /** ALCPeakFittingView : Qt implementation of the ALC Peak Fitting step interface.
     
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -38,34 +38,37 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class MANTIDQT_CUSTOMINTERFACES_DLL ALCInterface : public API::UserSubWindow
+  class MANTIDQT_CUSTOMINTERFACES_DLL ALCPeakFittingView : public IALCPeakFittingView
   {
-    Q_OBJECT
-
   public:
-    ALCInterface(QWidget* parent = 0);
+    ALCPeakFittingView(QWidget* widget);
 
-    static std::string name() { return "ALC"; }
-    static QString categoryInfo() { return "Muon"; }
+    /// @see IALCPeakFittingView::peaks
+    ListOfPeaks peaks() const;
 
-  protected:
-    void initLayout();
+  public slots:
+    /// @see IALCPeakFittingView::initialize
+    void initialize();
 
-  private slots:
-    void nextStep();
-    void previousStep();
+    /// @see IALCPeakFittingView::setData
+    void setData(MatrixWorkspace_const_sptr data);
+
+    /// @see IALCPeakFittingView::setPeaks
+    void setPeaks(const ListOfPeaks &peaks);
 
   private:
-    /// UI form
-    Ui::ALCInterface m_ui;
+    /// The widget used
+    QWidget* const m_widget;
 
-    // Step presenters
-    ALCDataLoadingPresenter* m_dataLoading;
-    ALCBaselineModellingPresenter* m_baselineModelling;
-    ALCPeakFittingPresenter* m_peakFitting;
+    /// UI form
+    Ui::ALCPeakFittingView m_ui;
+
+    /// Plot curves
+    QwtPlotCurve *m_dataCurve, *m_peakCurve;
   };
+
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif  /* MANTIDQT_CUSTOMINTERFACES_ALCINTERFACE_H_ */
+#endif  /* MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGVIEW_H_ */

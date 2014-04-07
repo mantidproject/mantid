@@ -50,10 +50,10 @@ namespace CustomInterfaces
     extract->setProperty("OutputWorkspace", "__NotUsed__");
     extract->execute();
 
-    MatrixWorkspace_const_sptr diff = extract->getProperty("OutputWorkspace");
+    m_correctedData = extract->getProperty("OutputWorkspace");
 
     m_view->updateFunction(funcToFit);
-    m_view->displayCorrected(diff);
+    m_view->displayCorrected(m_correctedData);
   }
 
   MatrixWorkspace_sptr ALCBaselineModellingPresenter::filteredData() const

@@ -21,6 +21,7 @@
      </property>
      <widget class="QWidget" name="dataLoadingView"/>
      <widget class="QWidget" name="baselineModellingView"/>
+     <widget class="QWidget" name="peakFittingView"/>
     </widget>
    </item>
    <item>
