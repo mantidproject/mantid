@@ -3,8 +3,10 @@
 
 #include "MdiSubWindow.h"
 
-class QGridLayout;
+#include <QLabel>
 
+class QGridLayout;
+class EmptyTile;
 /**
  *
  *  A mdi sub-window that contains other sub-windows arranged in rows and columns.
@@ -39,6 +41,11 @@ public slots:
   void print();
 
 private:
+  /// Tile empty cells with EmptyTiles
+  void tileEmptyCells();
+  /// Get an EmptyTile widget at position(row,col).
+  EmptyTile *getEmptyTile(int row, int col) const;
+
   /// The layout arranging the tiles into a grid.
   QGridLayout *m_layout;
 };
@@ -46,10 +53,11 @@ private:
 /**
  * A widget-placeholder showing an empty cell where a sub-window can be inserted.
  */
-class EmptyTile: public QWidget
+class EmptyTile: public QLabel
 {
 public:
   EmptyTile(QWidget *parent);
+  ~EmptyTile();
 };
 
 #endif // TiledWindow_H

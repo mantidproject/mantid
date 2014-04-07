@@ -38,6 +38,11 @@ class MantidPlotTiledWindowTest(unittest.TestCase):
         self.assertFalse( folder.findWindow(t1.name()) is None )
         tw.removeTileToFloating(0,1)
         self.assertFalse( folder.findWindow(t2.name()) is None )
+        self.assertTrue( t1.isDocked() )
+        self.assertTrue( t2.isFloating() )
+        tw.close()
+        t1.close()
+        t2.close()
         
 # Run the unit tests
 mantidplottests.runTests(MantidPlotTiledWindowTest)

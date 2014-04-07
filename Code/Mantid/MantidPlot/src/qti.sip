@@ -35,7 +35,7 @@
 %Import QtGui/QtGuimod.sip
 %Import mantidqt.sip
 
-class MdiSubWindow: QWidget /PyName=MDIWindow/
+class MdiSubWindow: QFrame /PyName=MDIWindow/
 {
 %TypeHeaderCode
 #include "src/MdiSubWindow.h"

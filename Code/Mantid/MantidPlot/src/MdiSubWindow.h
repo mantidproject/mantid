@@ -33,6 +33,7 @@
 #include <QDockWidget>
 #include <QVBoxLayout>
 #include <QMainWindow>
+#include <QFrame>
 
 #include <stdexcept>
 
@@ -41,12 +42,12 @@ class QCloseEvent;
 class QString;
 class FloatingWindow;
 
-class MdiSubWindowParent_t: public QWidget
+class MdiSubWindowParent_t: public QFrame
 {
   Q_OBJECT
 public:
   MdiSubWindowParent_t(QWidget* parent, Qt::WFlags f = 0):
-    QWidget(parent,f),
+    QFrame(parent,f),
     m_widget(NULL)
   {}
   void setWidget(QWidget* w)

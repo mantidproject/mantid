@@ -930,6 +930,8 @@ set ( MANTIDPLOT_TEST_PY_FILES
 	MantidPlotProxiesTest.py
 	MantidPlotPythonImportTest.py
 	MantidPlotFoldersTest.py 
+	MantidPlotMdiSubWindowTest.py 
+	MantidPlotTiledWindowTest.py 
 )
 
 if ( 0 )
