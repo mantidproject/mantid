@@ -14,6 +14,7 @@
 #include "MantidDataHandling/LoadILLAsciiHelper.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/DateAndTime.h"
 
 ////#include "MantidMDEvents/ImportMDEventWorkspace.h"
 //#include "MantidKernel/System.h"
@@ -146,7 +147,8 @@ void LoadILLAscii::exec() {
 			iSpectra < spectraList.end() && iSpectraHeader < spectraHeaderList.end();
 			++iSpectra, ++iSpectraHeader) {
 
-		g_log.debug() << "Reading Spectrum: " << std::distance(spectraList.begin(), iSpectra) << std::endl;
+		size_t spectrumIndex = std::distance(spectraList.begin(), iSpectra);
+		g_log.debug() << "Reading Spectrum: " << spectrumIndex << std::endl;
 
 		std::vector<int> thisSpectrum = *iSpectra;
 		API::MatrixWorkspace_sptr thisWorkspace = WorkspaceFactory::Instance().create("Workspace2D",
@@ -159,8 +161,7 @@ void LoadILLAscii::exec() {
 		double currentPositionAngle = illAsciiParser.getValue<double>("angles*1000", *iSpectraHeader) / 1000;
 		API::Run & runDetails = thisWorkspace->mutableRun();
 		Mantid::Kernel::TimeSeriesProperty<double> *p = new Mantid::Kernel::TimeSeriesProperty<double>("rotangle");
-		std::string time("2007-11-30T16:17:00");
-		p->addValue(time, currentPositionAngle);
+		p->addValue(DateAndTime::getCurrentTime(), currentPositionAngle);
 		runDetails.addLogData(p);
 
 				//
@@ -408,7 +409,7 @@ MatrixWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 	myfile << "DIMENSIONS" <<std::endl;
 	myfile << "x X m 100" <<std::endl;
 	myfile << "y Y m 100" <<std::endl;
-	myfile << "y Z m 100" <<std::endl;
+	myfile << "z Z m 100" <<std::endl;
 	myfile << "# Signal, Error, DetectorId, RunId, coord1, coord2, ... to end of coords" <<std::endl;
 	myfile << "MDEVENTS" <<std::endl;
 
