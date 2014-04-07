@@ -6,8 +6,11 @@ namespace Mantid
   {
 
     /**
+     * @param ascii A plain-text label containing only ascii characters
+     * @param unicode A label that can contain unicode characters
      */
-    UnitLabel::~UnitLabel()
+    UnitLabel::UnitLabel(const std::string &ascii, const std::wstring &unicode)
+      : m_ascii(ascii), m_utf8(unicode)
     {
     }
 
@@ -42,6 +45,22 @@ namespace Mantid
     bool UnitLabel::operator==(const std::wstring &rhs) const
     {
       return (this->utf8() == rhs);
+    }
+
+    /**
+     * @return A std::string containing the plain-text label
+     */
+    const UnitLabel::AsciiString & UnitLabel::ascii() const
+    {
+      return m_ascii;
+    }
+
+    /**
+     * @return A UnitLabel::utf8string containing the unicode label
+     */
+    const UnitLabel::Utf8String & UnitLabel::utf8() const
+    {
+      return m_utf8;
     }
 
     /**

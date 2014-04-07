@@ -23,6 +23,7 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
 #include <string>
 
@@ -37,10 +38,14 @@ namespace Mantid
     class MANTID_KERNEL_DLL UnitLabel
     {
     public:
-      /// Virtual destructor
-      virtual ~UnitLabel();
-      /// "Virtual" copy constructor
-      virtual UnitLabel * clone() const = 0;
+      /// Type that contains a plain-text string
+      typedef std::string AsciiString;
+      /// Type that can hold a unicode string. This may vary per-platform depending on the
+      /// width of the the built-in std::wstring
+      typedef std::wstring Utf8String;
+
+      /// Constructor giving both labels
+      UnitLabel(const std::string & ascii, const std::wstring & unicode);
 
       /// Equality operator with other label
       bool operator==(const UnitLabel & rhs) const;
@@ -50,12 +55,20 @@ namespace Mantid
       bool operator==(const std::wstring & rhs) const;
 
       /// Return an ascii label for unit
-      virtual const std::string ascii() const = 0;
+      const AsciiString & ascii() const;
       /// Return a utf-8 encoded label for unit
-      virtual const std::wstring utf8() const = 0;
+      const Utf8String &utf8() const;
 
       /// Implicit conversion to std::string
       operator std::string() const;
+
+    private:
+      DISABLE_DEFAULT_CONSTRUCT(UnitLabel);
+
+      /// Value of plain-text label
+      std::string m_ascii;
+      /// Value of utf-8 encoded string
+      std::wstring m_utf8;
     };
 
   } // namespace Kernel

@@ -4,28 +4,11 @@
 #include "MantidKernel/UnitLabel.h"
 
 #include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 
 using Mantid::Kernel::UnitLabel;
 
 class UnitLabelTest : public CxxTest::TestSuite
 {
-  class MockLabel: public UnitLabel
-  {
-  public:
-    MockLabel()
-    {
-      using namespace ::testing;
-      ON_CALL(*this, ascii()).WillByDefault(Return(std::string("TextLabel")));
-      ON_CALL(*this, utf8()).WillByDefault(Return(std::wstring(L"Utf8TextLabel")));
-    }
-
-    MockLabel * clone() const { return new MockLabel(); }
-
-    MOCK_CONST_METHOD0(ascii, const std::string());
-    MOCK_CONST_METHOD0(utf8, const std::wstring());
-  };
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -35,36 +18,24 @@ public:
 
   void test_simple_string()
   {
-    using namespace ::testing;
-    MockLabel label;
-    EXPECT_CALL(label, ascii()).Times(::testing::Exactly(1));
+    UnitLabel label("TextLabel", L"TextLabel");
 
-    label.ascii();
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&label));
+    TS_ASSERT_EQUALS("TextLabel", label.ascii());
   }
 
-  void test_utf8_string()
+  void test_utf8_string_can_hold_unicode_data()
   {
-    using namespace ::testing;
-    MockLabel label;
-    EXPECT_CALL(label, utf8()).WillOnce(Return(std::wstring(L"")));
+    UnitLabel label("TextLabel", L"\u212b");
 
-    label.utf8();
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&label));
+    TS_ASSERT_EQUALS(L"\u212b", label.utf8());
   }
 
   void test_implicit_string_converter_returns_ascii_method()
   {
-    using namespace ::testing;
-    MockLabel label;
-    EXPECT_CALL(label, ascii()).Times(Exactly(1));
+    UnitLabel label("TextLabel", L"\u212b");
+    std::string asciiText = label;
 
-    std::string text = label;
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&label));
-    TS_ASSERT_EQUALS("TextLabel", text);
+    TS_ASSERT_EQUALS("TextLabel", asciiText);
   }
 
 };
