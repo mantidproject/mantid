@@ -33,16 +33,28 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class MANTIDQT_CUSTOMINTERFACES_DLL ALCPeakFittingPresenter
+  class MANTIDQT_CUSTOMINTERFACES_DLL ALCPeakFittingPresenter : public QObject
   {
+    Q_OBJECT
+
   public:
     ALCPeakFittingPresenter(IALCPeakFittingView* view);
 
     void initialize();
 
+    /// @param data :: Data to fit peaks in
+    void setData(MatrixWorkspace_const_sptr data);
+
+  private slots:
+    /// Fit the data using the peaks from the view, and update them
+    void fit();
+
   private:
     /// Associated view
     IALCPeakFittingView* const m_view;
+
+    /// Data we are fitting peaks in
+    MatrixWorkspace_const_sptr m_data;
   };
 
 

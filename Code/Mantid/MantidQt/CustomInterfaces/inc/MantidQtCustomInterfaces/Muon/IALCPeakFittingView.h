@@ -55,11 +55,11 @@ namespace CustomInterfaces
 
     /// Display the data we are going to fit peaks in
     /// @param data :: Data workspace to display
-    virtual void displayData(MatrixWorkspace_const_sptr data) = 0;
+    virtual void setData(MatrixWorkspace_const_sptr data) = 0;
 
-    /// Update peak parameters
-    /// @param peaks :: List of peaks to get values from
-    virtual void updatePeaks(const ListOfPeaks& peaks) = 0;
+    /// Update displayed peaks list
+    /// @param peaks :: New list of peaks
+    virtual void setPeaks(const ListOfPeaks& peaks) = 0;
 
   signals:
     /// Request fit

@@ -44,8 +44,7 @@ namespace CustomInterfaces
 
     void initialize();
 
-    /// Set the data we are fitting baseline to
-    /// @param :: Data to set
+    /// @param data :: Data to fit peaks in
     void setData(MatrixWorkspace_const_sptr data);
 
   private slots:
