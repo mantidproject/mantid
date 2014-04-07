@@ -62,12 +62,11 @@ set ( SRC_FILES
 	src/ISpectrum.cpp
 	src/ISplittersWorkspace.cpp
 	src/ITableWorkspace.cpp
-	src/ITransformScale.cpp
 	src/IkedaCarpenterModerator.cpp
 	src/ImmutableCompositeFunction.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
-	src/ImplictFunctionFactory.cpp
+	src/ImplicitFunctionFactory.cpp
 	src/InstrumentDataService.cpp
 	src/JointDomain.cpp
 	src/LinearScale.cpp

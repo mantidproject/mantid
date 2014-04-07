@@ -57,9 +57,6 @@ namespace Mantid
       return true;
     }
 
-    // Get a reference to the logger
-    Kernel::Logger& MementoTableWorkspace::g_log = Kernel::Logger::get("MementoTableWorkspace");
-
     /// Constructor
     MementoTableWorkspace::MementoTableWorkspace(int nRows) : TableWorkspace(nRows) 
     {

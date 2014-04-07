@@ -92,10 +92,6 @@ protected:
   /// dimensions used in this function in the expected order
   std::vector< boost::shared_ptr<const Mantid::Geometry::IMDDimension> > m_dimensions;
 
-
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
-
 private:
   /// Use all the dimensions in the workspace
   virtual void useAllDimensions(boost::shared_ptr<const IMDWorkspace> workspace);

@@ -2,9 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/LogParser.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
 
 #include <algorithm>
 #include <fstream>
@@ -21,8 +22,11 @@ namespace Mantid
 {
   namespace Kernel
   {
-
-    Kernel::Logger& LogParser::g_log = Mantid::Kernel::Logger::get("LogParser");
+    namespace
+    {
+      /// static logger
+      Logger g_log("LogParser");
+    }
 
     /// @returns the name of the log created that defines the status during a run
     const std::string LogParser::statusLogName()

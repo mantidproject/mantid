@@ -1,7 +1,7 @@
 import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
-sanslog = Logger.get("SANS")
+sanslog = Logger("SANS")
 from shutil import copyfile
 
 _NO_INDIVIDUAL_PERIODS = -1

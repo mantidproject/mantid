@@ -78,11 +78,11 @@ namespace Mantid
     /// Read dataset data to a buffer ot type double
     void dataSetDouble( const hid_t& h5file, const std::string setName, double *buf );
     /// Load qvectors dataset, calculate modulus of vectors
-    const MantidVec loadQvectors(const hid_t& h5file, API::WorkspaceGroup_sptr gws);
+    const MantidVec loadQvectors(const hid_t& h5file, API::WorkspaceGroup_sptr gws, std::vector<int> &sorting_indexes);
     /// Load structure factor asa function of q-vector modulus
-    void loadFQ(const hid_t& h5file, API::WorkspaceGroup_sptr gws, const std::string setName, const MantidVec &qvmod);
+    void loadFQ(const hid_t& h5file, API::WorkspaceGroup_sptr gws, const std::string setName, const MantidVec &qvmod, const std::vector<int> &sorting_indexes);
     /// Load time-dependent structure factor
-    void loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, const std::string setName, const MantidVec &qvmod);
+    void loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, const std::string setName, const MantidVec &qvmod, const std::vector<int> &sorting_indexes);
 
   private:
     /// Sets documentation strings for this algorithm

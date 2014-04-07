@@ -77,6 +77,11 @@ void ApplyDeadTimeCorr::exec()
     {
       double numGoodFrames = boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
 
+      if (numGoodFrames == 0)
+      {
+        throw std::runtime_error("Number of good frames in the workspace is zero");
+      }
+
       // Duplicate the input workspace. Only need to change Y values based on dead time corrections
       IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
       duplicate->initialize();

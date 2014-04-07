@@ -104,9 +104,6 @@ private:
 
   /// Stores pointers to already created unit instances, with their name as the key
   mutable std::map< std::string, boost::shared_ptr<MDTransfInterface> > m_createdTransf;
-
-  /// Reference to the logger class
-  Kernel::Logger& m_log;
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) .

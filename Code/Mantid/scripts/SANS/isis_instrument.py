@@ -4,7 +4,7 @@ from mantid.api import WorkspaceGroup, Workspace
 from mantid.kernel import Logger
 import SANSUtility as su
 import re
-sanslog = Logger.get("SANS")
+sanslog = Logger("SANS")
 
 import sys
 

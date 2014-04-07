@@ -17,10 +17,6 @@ namespace Mantid
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
 
 namespace DataHandling
 {
@@ -107,9 +103,6 @@ private:
   int64_t m_numberOfPeriods;       ///< The number of periods in the raw file
 
   mutable Poco::FastMutex m_mutex;  ///< The mutex
-
-  /// Static reference to the logger class
-  static Kernel::Logger &g_log;
 
   /// a counter used for skipping the raw file if it's a monitor
   mutable int64_t m_nmonitorSkipCounter;

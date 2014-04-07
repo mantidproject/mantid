@@ -1,5 +1,5 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 
@@ -39,7 +39,12 @@ namespace Mantid
 {
   namespace Geometry
   {
-    Kernel::Logger& vtkGeometryCacheWriter::PLog(Kernel::Logger::get("vtkGeometryCacheWriter"));
+    namespace
+    {
+      ///static object
+      Kernel::Logger g_log("vtkGeometryCacheWriter");
+    }
+
     /**
      * Constructor
      */
@@ -188,7 +193,7 @@ namespace Mantid
       }
       catch(...)
       {
-        PLog.error("Geometry Cache file writing exception");
+        g_log.error("Geometry Cache file writing exception");
       }
     }
   }

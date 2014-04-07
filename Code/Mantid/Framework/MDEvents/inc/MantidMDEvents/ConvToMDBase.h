@@ -85,7 +85,7 @@ namespace MDEvents
 
    //<--- End of preprocessed detectors information
    // logger -> to provide logging, for MD dataset file operations
-   static Mantid::Kernel::Logger& g_Log;
+   static Mantid::Kernel::Logger g_Log;
    // vector to keep MD coordinates of single event 
    std::vector<coord_t> m_Coord;
    // class responsible for converting units if necessary;

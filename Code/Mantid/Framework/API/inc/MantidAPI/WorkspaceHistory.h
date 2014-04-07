@@ -6,11 +6,17 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
-#include <nexus/NeXusFile.hpp>
 #include <boost/shared_ptr.hpp>
 #include <ctime>
-#include <list>
-#include "MantidKernel/Logger.h"
+#include <set>
+
+//-----------------------------------------------------------------------------
+// Forward declarations
+//-----------------------------------------------------------------------------
+namespace NeXus
+{
+  class File;
+}
 
 namespace Mantid
 {
@@ -93,9 +99,6 @@ private:
   /// The algorithms which have been called on the workspace
   AlgorithmHistories m_algorithms;
   
-  /// Reference to the logger class
-  Kernel::Logger& g_log;
-
 };
 
 MANTID_API_DLL std::ostream& operator<<(std::ostream&, const WorkspaceHistory&);

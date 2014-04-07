@@ -48,7 +48,7 @@ class REFLReprocess(PythonAlgorithm):
         except:
             pass
         
-        Logger.get("REFLReprocess").notice("Processing %s" % ipts)
+        Logger("REFLReprocess").notice("Processing %s" % ipts)
         
         # Locate the IPTS directory
         ipts_dir = "/SNS/REF_L/%s/shared" % ipts
@@ -69,7 +69,7 @@ class REFLReprocess(PythonAlgorithm):
             for item in os.listdir(ipts_dir):
                 if item.endswith('.xml'):
                     try:
-                        Logger.get("REFLReprocess").notice("Processing %s" % os.path.join(ipts_dir, item))
+                        Logger("REFLReprocess").notice("Processing %s" % os.path.join(ipts_dir, item))
 
                         refl = REFLReductionScripter()
                         options = REFLOptions()
@@ -81,14 +81,14 @@ class REFLReprocess(PythonAlgorithm):
                                          q_min=options.get_state().data_sets[0].q_min,
                                          q_step=options.get_state().data_sets[0].q_step)
                     except:
-                        Logger.get("REFLReprocess").error(str(sys.exc_value))
+                        Logger("REFLReprocess").error(str(sys.exc_value))
         else:
-            Logger.get("REFLReprocess").error("%s not a valid directory" % ipts_dir)
+            Logger("REFLReprocess").error("%s not a valid directory" % ipts_dir)
             
     def load_processed(self, output_dir):
         filter_string = self.getProperty("Filter").value
         if not os.path.isdir(output_dir):
-            Logger.get("REFLReprocess").error("%s not a valid directory" % output_dir)
+            Logger("REFLReprocess").error("%s not a valid directory" % output_dir)
             return
 
         for item in os.listdir(output_dir):
@@ -140,7 +140,7 @@ class REFLReprocess(PythonAlgorithm):
 
         
         output_file = input_file.replace('.xml', '_reprocessed.txt')
-        Logger.get("REFLReprocess").notice("Saving to %s" % output_file)
+        Logger("REFLReprocess").notice("Saving to %s" % output_file)
           
 
         output_ws = _average_y_of_same_x_(q_min, q_step, q_max)

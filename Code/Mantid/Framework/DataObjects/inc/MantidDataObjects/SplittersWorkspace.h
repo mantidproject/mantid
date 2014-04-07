@@ -1,7 +1,6 @@
 #ifndef MANTID_DATAOBJECTS_SPLITTERSWORKSPACE_H_
 #define MANTID_DATAOBJECTS_SPLITTERSWORKSPACE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/ISplittersWorkspace.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidDataObjects/TableWorkspace.h"

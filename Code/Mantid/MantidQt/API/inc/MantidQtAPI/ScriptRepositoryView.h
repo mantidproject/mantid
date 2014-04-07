@@ -5,11 +5,7 @@
 #include <QStyledItemDelegate>
 #include "ui_ScriptRepositoryView.h"
 #include "DllOption.h"
-namespace Mantid{
-  namespace Kernel{
-    class Logger;
-  }
-}
+
 namespace MantidQt
 {
 namespace API
@@ -105,8 +101,6 @@ namespace API
   private:
     Ui::ScriptRepositoryView * ui; 
     RepoModel * model;
-    // A static reference to the Logger
-    static Mantid::Kernel::Logger & g_log; 
   };
 
 

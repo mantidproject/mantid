@@ -1,5 +1,4 @@
 #include "MantidGeometry/Surfaces/Line.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/mathSupport.h"
 #include "MantidKernel/Matrix.h"
@@ -17,8 +16,6 @@ namespace Mantid
   {
     using Kernel::Tolerance;
     using Kernel::V3D;
-
-    Kernel::Logger& Line::PLog(Kernel::Logger::get("Line"));
 
     Line::Line() : Origin(),Direct()
       /**

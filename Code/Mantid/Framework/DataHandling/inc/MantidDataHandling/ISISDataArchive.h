@@ -11,10 +11,6 @@
 
 namespace Mantid
 {
-namespace Kernel
-{
-class Logger;
-}
   namespace DataHandling
   {
 
@@ -52,9 +48,6 @@ class Logger;
     private:
       /// Queries the archive & returns the path to a single file.
       std::string getPath(const std::string& fName) const;
-
-      // static reference to the logger class
-      static Mantid::Kernel::Logger & g_log;
     };
   }
 }

@@ -3,8 +3,15 @@
 //-----------------------------------------------
 #include "MantidQtAPI/InterfaceFactory.h"
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidKernel/Logger.h"
 
 using namespace MantidQt::API;
+
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("UserSubWindowFactoryImpl");
+}
 
 //*********************************************************
 //                 UserSubWindow 
@@ -63,7 +70,7 @@ QSet<QString> UserSubWindowFactoryImpl::getInterfaceCategories(const QString & i
 //----------------------------------------
 
 /// Default constructor
-UserSubWindowFactoryImpl::UserSubWindowFactoryImpl() : m_aliasLookup(), m_badAliases(), g_log(Mantid::Kernel::Logger::get("UserSubWindowFactory"))
+UserSubWindowFactoryImpl::UserSubWindowFactoryImpl() : m_aliasLookup(), m_badAliases()
 {
 }
 

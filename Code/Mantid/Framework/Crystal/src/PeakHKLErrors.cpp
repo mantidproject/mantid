@@ -71,8 +71,11 @@ namespace Mantid
 
   namespace Crystal
   {
-
-    Kernel::Logger& PeakHKLErrors::g_log = Kernel::Logger::get("PeakHKLErrors");
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("PeakHKLErrors");
+    }
 
     DECLARE_FUNCTION( PeakHKLErrors )
 

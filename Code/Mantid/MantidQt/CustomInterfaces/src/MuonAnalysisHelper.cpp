@@ -1,8 +1,13 @@
 #include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
 
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/EmptyValues.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
@@ -17,8 +22,8 @@ namespace CustomInterfaces
 namespace MuonAnalysisHelper
 {
 
-using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 /**
  * Sets double validator for specified field.
@@ -348,6 +353,98 @@ void WidgetAutoSaver::endGroup()
 }
 
 /**
+ * Get a run label for the workspace.
+ * E.g. for MUSR data of run 15189 it will look like MUSR00015189.
+ * @param ws :: Workspace to get label for.
+ * @return
+ */
+std::string getRunLabel(const Workspace_sptr& ws)
+{
+  MatrixWorkspace_const_sptr firstPrd = firstPeriod(ws);
+
+  int runNumber = firstPrd->getRunNumber();
+  std::string instrName = firstPrd->getInstrument()->getName();
+
+  int zeroPadding = ConfigService::Instance().getInstrument(instrName).zeroPadding(runNumber);
+
+  std::ostringstream label;
+  label << instrName;
+  label << std::setw(zeroPadding) << std::setfill('0') << std::right << runNumber;
+  return label.str();
+}
+
+/**
+ * Get a run label for a list of workspaces.
+ * E.g. for MUSR data of runs 15189, 15190, 15191 it will look like MUSR00015189-91.
+ * @param wsList
+ * @return
+ */
+std::string getRunLabel(std::vector<Workspace_sptr> wsList)
+{
+  if (wsList.empty())
+    throw std::invalid_argument("Unable to run on an empty list");
+
+  // Sort by run numbers, in case of non-sequential list of runs
+  std::sort(wsList.begin(), wsList.end(), compareByRunNumber);
+
+  // Get string representation of the first and last run numbers
+  auto firstRun = boost::lexical_cast<std::string>(firstPeriod(wsList.front())->getRunNumber());
+  auto lastRun = boost::lexical_cast<std::string>(firstPeriod(wsList.back())->getRunNumber());
+
+  // Remove the common part of the first and last run, so we get e.g. "12345-56" instead of "12345-12356"
+  for (size_t i = 0; i < firstRun.size() && i < lastRun.size(); ++i)
+  {
+    if (firstRun[i] != lastRun[i])
+    {
+      lastRun.erase(0,i);
+      break;
+    }
+  }
+
+  std::ostringstream label;
+  label << getRunLabel(wsList.front());
+  label << '-' << lastRun;
+  return label.str();
+}
+
+/**
+ * Sums a given list of workspaces
+ * @param workspaces :: List of workspaces
+ * @return Result workspace
+ */
+Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
+{
+  if (workspaces.size() < 1)
+    throw std::invalid_argument("Couldn't sum an empty list of workspaces");
+
+  ScopedWorkspace firstEntry(workspaces.front());
+  ScopedWorkspace accumulatorEntry;
+
+  // Create accumulator workspace, by cloning the first one from the list
+  IAlgorithm_sptr cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
+  cloneAlg->setLogging(false);
+  cloneAlg->setRethrows(true);
+  cloneAlg->setPropertyValue("InputWorkspace", firstEntry.name());
+  cloneAlg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
+  cloneAlg->execute();
+
+  for ( auto it = (workspaces.begin() + 1); it != workspaces.end(); ++it )
+  {
+    ScopedWorkspace wsEntry(*it);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");
+    alg->setLogging(false);
+    alg->setRethrows(true);
+    alg->setPropertyValue("LHSWorkspace", accumulatorEntry.name());
+    alg->setPropertyValue("RHSWorkspace", wsEntry.name());
+    alg->setPropertyValue("OutputWorkspace", accumulatorEntry.name());
+    alg->execute();
+  }
+
+  return accumulatorEntry.retrieve();
+}
+
+/*
  * Validates and returns a double value. If it is not invalid, the widget is set to default value,
  * appropriate warning is printed and default value is returned.
  * @param field :: Field to get value from
@@ -379,6 +476,16 @@ double getValidatedDouble(QLineEdit* field, const QString& defaultValue,
   }
 
   return value;
+}
+
+/**
+ * @param ws1 :: First workspace to compare
+ * @param ws2 :: Second workspace to compare
+ * @return True if ws1 < ws2, false otherwise
+ */
+bool compareByRunNumber(Workspace_sptr ws1, Workspace_sptr ws2)
+{
+  return firstPeriod(ws1)->getRunNumber() < firstPeriod(ws2)->getRunNumber();
 }
 
 } // namespace MuonAnalysisHelper

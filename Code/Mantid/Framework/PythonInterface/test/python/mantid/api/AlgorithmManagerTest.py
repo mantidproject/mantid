@@ -1,16 +1,8 @@
 import unittest
 import testhelpers
-from mantid.api import AlgorithmManager
-from mantid.api import (IAlgorithm, Algorithm, AlgorithmProxy, PythonAlgorithm, 
-                        AlgorithmFactory)
-import sys
+from mantid.api import (AlgorithmManager, IAlgorithm, Algorithm, AlgorithmProxy)
 
-class IsAnAlgorithm(PythonAlgorithm):
-    def PyInit(self):
-        pass
-    
-class NotAnAlgorithm(object):
-    pass
+import sys
 
 class AlgorithmManagerTest(unittest.TestCase):
     
@@ -36,17 +28,71 @@ class AlgorithmManagerTest(unittest.TestCase):
     def test_unmanaged_cppalg_isinstance_of_Algorithm(self):
         alg = AlgorithmManager.createUnmanaged("ConvertUnits")
         self.assertTrue(isinstance(alg, Algorithm))
-        
-    def test_pyalg_isinstance_of_Algorithm(self):
-        alg = IsAnAlgorithm()
-        self.assertTrue(isinstance(alg, Algorithm))
-        self.assertTrue(isinstance(alg, IAlgorithm))
-        
-    def test_algorithm_subscription_with_valid_object_succeeds(self):
-        testhelpers.assertRaisesNothing(self, AlgorithmFactory.subscribe, IsAnAlgorithm)
 
-    def test_algorithm_registration_with_invalid_object_throws(self):
-        self.assertRaises(ValueError, AlgorithmFactory.subscribe, NotAnAlgorithm)
+    def test_size_reports_number_of_managed_algorithms(self):
+        old_size = AlgorithmManager.size()
+        new_alg = AlgorithmManager.create("ConvertUnits")
+        new_size = AlgorithmManager.size()
+        self.assertTrue(new_size == old_size + 1)
+
+    def test_getAlgorithm_returns_correct_instance(self):
+        returned_instance = AlgorithmManager.create("ConvertUnits")
+        id = returned_instance.getAlgorithmID()
+        mgr_instance = AlgorithmManager.getAlgorithm(id)
+        self.assertEquals(id, mgr_instance.getAlgorithmID())
+        
+    def test_removeById_removes_correct_instance(self):
+        alg = AlgorithmManager.create("ConvertUnits")
+        alg2 = AlgorithmManager.create("ConvertUnits")
+        AlgorithmManager.removeById(alg.getAlgorithmID())
+        self.assertEquals(None, AlgorithmManager.getAlgorithm(alg.getAlgorithmID()))
+        self.assertNotEqual(None, AlgorithmManager.getAlgorithm(alg2.getAlgorithmID()))
+
+    def test_newestInstanceOf_returns_correct_instance(self):
+        alg = AlgorithmManager.create("ConvertUnits")
+        alg2 = AlgorithmManager.create("ConvertUnits")
+        alg3 = AlgorithmManager.newestInstanceOf("ConvertUnits")
+        
+        self.assertEquals(alg2.getAlgorithmID(), alg3.getAlgorithmID())
+        self.assertNotEqual(alg.getAlgorithmID(), alg3.getAlgorithmID())
+        
+    def test_runningInstancesOf_returns_python_list(self):
+        algs = AlgorithmManager.runningInstancesOf("ConvertUnits")
+        self.assertTrue(isinstance(algs, list))
+        
+        import threading
+        class AlgThread(threading.Thread):
+            def __init__(self):
+                threading.Thread.__init__(self)
+                self.algorithm = AlgorithmManager.create("Pause")
+            def run(self):
+                self.algorithm.initialize()
+                self.algorithm.setProperty("Duration", -1.0) #forever
+                self.algorithm.execute()
+        # end class
+        pause_thread = AlgThread()
+        try:
+            pause_thread.start()
+            while not pause_thread.algorithm.isRunning():
+                pass
+            # should now be running
+            algs = AlgorithmManager.runningInstancesOf("Pause")
+            self.assertTrue(isinstance(algs, list))
+            self.assertEquals(1, len(algs))
+        except:
+            pause_thread.algorithm.cancel()
+            pause_thread.join()
+            raise
+        finally:
+            pause_thread.algorithm.cancel()
+            pause_thread.join()
+
+
+    def test_clear_removes_all_managed_algorithms(self):
+        AlgorithmManager.clear()
+        new_size = AlgorithmManager.size()
+        self.assertEquals(0, new_size)
+
 
 if __name__ == '__main__':
     unittest.main()        

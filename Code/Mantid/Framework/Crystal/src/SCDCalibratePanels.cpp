@@ -110,9 +110,7 @@ using namespace Mantid::Kernel;
 namespace Mantid
 {
   namespace Crystal
-
   {
-    Kernel::Logger& SCDCalibratePanels::g_log = Kernel::Logger::get("SCDCalibratePanels");
 
     DECLARE_ALGORITHM(SCDCalibratePanels)
 

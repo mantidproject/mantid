@@ -155,8 +155,6 @@ namespace Mantid
       std::vector<double> polarWidth;
       std::vector<double> secondaryFlightpath;
       std::vector<size_t> detID;
-      /// logger -> to provide logging, for MD workspaces
-      static Kernel::Logger& g_log;
 
       // calculate generic detectors parameters:
       void calcDetPar(const Geometry::IDetector_const_sptr &spDet,const Kernel::V3D &GroupCenter,DetParameters &Detector);

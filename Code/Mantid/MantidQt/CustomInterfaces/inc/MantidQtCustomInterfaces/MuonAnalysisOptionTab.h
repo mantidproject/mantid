@@ -95,9 +95,6 @@ signals:
   void plotStyleChanged();
 
 private:
-  /// Logger to use
-  static Logger& g_log;
-
   /// Default widget values
   static const QString START_TIME_DEFAULT;
   static const QString FINISH_TIME_DEFAULT;

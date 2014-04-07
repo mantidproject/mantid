@@ -86,7 +86,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         # Get the data loader
         def _load_data(filename, output_ws):
             if not property_manager.existsProperty("LoadAlgorithm"):
-                Logger.get("SANSBeamSpreaderTransmission").error("SANS reduction not set up properly: missing load algorithm")
+                Logger("SANSBeamSpreaderTransmission").error("SANS reduction not set up properly: missing load algorithm")
                 raise RuntimeError, "SANS reduction not set up properly: missing load algorithm"
             p=property_manager.getProperty("LoadAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
@@ -173,7 +173,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         # 2- Apply correction (Note: Apply2DTransCorr)      
         input_ws_name = self.getPropertyValue("InputWorkspace")
         if not AnalysisDataService.doesExist(input_ws_name):
-            Logger.get("SANSBeamSpreaderTransmission").error("Could not find input workspace")
+            Logger("SANSBeamSpreaderTransmission").error("Could not find input workspace")
         workspace = AnalysisDataService.retrieve(input_ws_name).getName()
         
         # Clone workspace to make boost-python happy

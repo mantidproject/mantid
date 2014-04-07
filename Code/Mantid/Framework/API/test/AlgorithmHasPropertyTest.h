@@ -62,34 +62,34 @@ public:
 
   void test_Algorithm_With_Correct_Property_Is_Valid()
   {
-    AlgorithmHasProperty *check = new AlgorithmHasProperty("OutputWorkspace");
+    AlgorithmHasProperty check("OutputWorkspace");
     IAlgorithm_sptr tester(new AlgorithmWithWorkspace);
     tester->initialize();
     tester->execute();
 
-    TS_ASSERT_EQUALS(check->isValid(tester), "");
+    TS_ASSERT_EQUALS(check.isValid(tester), "");
   }
 
   void test_Algorithm_Without_Property_Is_Invalid()
   {
-    AlgorithmHasProperty *check = new AlgorithmHasProperty("OutputWorkspace");
+    AlgorithmHasProperty check("OutputWorkspace");
     IAlgorithm_sptr tester(new AlgorithmWithNoWorkspace);
     tester->initialize();
     tester->execute();
 
-    TS_ASSERT_EQUALS(check->isValid(tester), 
-		     "Algorithm object does not have the required property \"OutputWorkspace\"");
+    TS_ASSERT_EQUALS(check.isValid(tester),
+        "Algorithm object does not have the required property \"OutputWorkspace\"");
   }
 
   void test_Algorithm_With_Invalid_Property_Is_Invalid()
   {
-    AlgorithmHasProperty *check = new AlgorithmHasProperty("OutputValue");
+    AlgorithmHasProperty check("OutputValue");
     IAlgorithm_sptr tester(new AlgorithmWithInvalidProperty);
     tester->initialize();
 
-    TS_ASSERT_EQUALS(check->isValid(tester),
-		     "Algorithm object contains the required property \"OutputValue\" but "
-		     "it has an invalid value: -1");
+    TS_ASSERT_EQUALS(check.isValid(tester),
+        "Algorithm object contains the required property \"OutputValue\" but "
+        "it has an invalid value: -1");
   }
   
 

@@ -319,10 +319,17 @@ class DirectEnergyConversion(object):
                 InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
                 monitor_ws=LoadPreNexusMonitors(RunInfoFilename=InfoFilename)
             
+            argi = {};
+            argi['Monitor1Spec']=int(self.ei_mon_spectra[0]);
+            argi['Monitor2Spec']=int(self.ei_mon_spectra[1]);
+            argi['EnergyEstimate']=ei_guess;
+            argi['FixEi'] =self.fix_ei
+            if hasattr(self, 'ei_mon_peak_search_range'):
+                argi['PeakSearchRange']=self.ei_mon_peak_search_range;
+
             try:
                 ei_calc,firstmon_peak,firstmon_index,TzeroCalculated = \
-                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]), 
-                          EnergyEstimate=ei_guess,FixEi=self.fix_ei)
+                    GetEi(InputWorkspace=monitor_ws,**argi)
             except:
                 self.log("Error in GetEi. Using entered values.")
                 #monitor_ws.getRun()['Ei'] = ei_value

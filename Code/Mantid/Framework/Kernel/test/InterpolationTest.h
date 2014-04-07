@@ -28,11 +28,12 @@ public:
 
     // Test that all the base class member variables are correctly assigned to
     TS_ASSERT_DELTA( interpolation.value(100), -950.0 ,0.000000001); 
-    TS_ASSERT_DELTA( interpolation.value(3000), 260400.0 ,0.000000001);
+    TS_ASSERT_DELTA( interpolation.value(3000), 280000.0 ,0.000000001);
     TS_ASSERT_DELTA( interpolation.value(200.5), 55.0 ,0.000000001); 
     TS_ASSERT_DELTA( interpolation.value(201.25), 70.0 ,0.000000001); 
     TS_ASSERT_DELTA( interpolation.value(203.5), 350.0 ,0.000000001); 
 
+    TS_ASSERT_EQUALS(interpolation.value(204.0), 400.0);
 
     interpolation.setXUnit("Wavelength");
     interpolation.setYUnit("dSpacing");
@@ -49,11 +50,11 @@ public:
 
     // Test that all the base class member variables are correctly assigned to
     TS_ASSERT_DELTA( readIn.value(100), -950.0 ,0.000000001); 
-    TS_ASSERT_DELTA( readIn.value(3000), 260400.0 ,0.000000001);
+    TS_ASSERT_DELTA( readIn.value(3000), 280000.0 ,0.000000001);
     TS_ASSERT_DELTA( readIn.value(200.5), 55.0 ,0.000000001); 
     TS_ASSERT_DELTA( readIn.value(201.25), 70.0 ,0.000000001); 
-    TS_ASSERT_DELTA( readIn.value(203.5), 350.0 ,0.000000001); 
-	}
+    TS_ASSERT_DELTA( readIn.value(203.5), 350.0 ,0.000000001);
+    }
 
 	void testEmpty()
 	{

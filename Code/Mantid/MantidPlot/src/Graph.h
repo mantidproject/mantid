@@ -1,5 +1,4 @@
 /***************************************************************************
-    File                 : Graph.h
     Project              : QtiPlot
     --------------------------------------------------------------------
     Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
@@ -53,7 +52,6 @@
 #include "PlotToolInterface.h"
 #include "MultiLayer.h"
 #include "ScaleDraw.h"
-#include "MantidKernel/Logger.h"
 #include "MantidQtAPI/GraphOptions.h"
 #include <boost/shared_ptr.hpp>
 #include <set>
@@ -854,7 +852,6 @@ private:
   LegendWidget *d_legend;
   // Flag indicating if the axes limits should be changed in order to show all data each time a curva data change occurs
   // Qtiplot variable that we don't use (use qwtplot axis behaviour directly): bool d_auto_scale;
-  static Mantid::Kernel::Logger &g_log;
   QString mCurrentColorMap;
   QwtPlotMagnifier *d_magnifier;
   QwtPlotPanner *d_panner;
