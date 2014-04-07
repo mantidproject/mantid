@@ -45,7 +45,7 @@ public:
   }
 
   /// Test initialization
-  void testInit()
+  void test_Init()
   {
     FindPeaks finder;
     TS_ASSERT_THROWS_NOTHING( finder.initialize() );
