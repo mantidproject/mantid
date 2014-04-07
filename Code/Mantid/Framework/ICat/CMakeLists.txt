@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/CatalogDownloadDataFiles.cpp
 	src/CatalogGetDataFiles.cpp
 	src/CatalogGetDataSets.cpp
+	src/CatalogKeepAlive.cpp
 	src/CatalogListInstruments.cpp
 	src/CatalogListInvestigationTypes.cpp
 	src/CatalogLogin.cpp
@@ -11,7 +12,6 @@ set ( SRC_FILES
 	src/CatalogMyDataSearch.cpp
 	src/CatalogSearch.cpp
 	src/CatalogSearchParam.cpp
-	src/CompositeCatalog.cpp
 	src/GSoap.cpp
 	src/ICat3/ICat3GSoapGenerated.cpp
 	src/ICat3/ICat3ErrorHandling.cpp
@@ -29,6 +29,7 @@ set ( INC_FILES
 	inc/MantidICat/CatalogDownloadDataFiles.h
 	inc/MantidICat/CatalogGetDataFiles.h
 	inc/MantidICat/CatalogGetDataSets.h
+	inc/MantidICat/CatalogKeepAlive.h
 	inc/MantidICat/CatalogListInstruments.h
 	inc/MantidICat/CatalogListInvestigationTypes.h
 	inc/MantidICat/CatalogLogin.h
@@ -37,8 +38,6 @@ set ( INC_FILES
 	inc/MantidICat/CatalogSearch.h
 	inc/MantidICat/CatalogSearchParam.h
 	inc/MantidICat/ICatExport.h
-	inc/MantidICat/Session.h
-	inc/MantidICat/CompositeCatalog.h
 	inc/MantidICat/GSoap/soapserializersH.h
 	inc/MantidICat/GSoap/soapserializersStub.h
 	inc/MantidICat/GSoap/stdsoap2.h

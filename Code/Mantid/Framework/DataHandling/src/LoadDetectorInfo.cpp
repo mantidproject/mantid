@@ -363,7 +363,7 @@ namespace Mantid
 
       // Cache base instrument
       m_baseInstrument = m_workspace->getInstrument()->baseInstrument();
-      Geometry::IObjComponent_const_sptr sample = m_workspace->getInstrument()->getSample();
+      Geometry::IComponent_const_sptr sample = m_workspace->getInstrument()->getSample();
       if( sample ) m_samplePos = sample->getPos();
 
       // cache values of instrument level parameters so we only change then if they are different

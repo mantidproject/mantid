@@ -54,7 +54,7 @@ public:
   /// overwrite IFunction base class methods
   virtual std::string name() const { return "ElasticDiffSphere"; }
 
-  virtual const std::string category() const { return "QENS"; }
+  virtual const std::string category() const { return "QuasiElastic"; }
 
   /// A rescaling of the peak intensity
   double HeightPrefactor() const;
@@ -95,7 +95,7 @@ public:
   virtual std::string name()const{return "InelasticDiffSphere"; }
 
   /// overwrite IFunction base class methods
-  virtual const std::string category() const { return "QENS"; }
+  virtual const std::string category() const { return "QuasiElastic"; }
 
   /// Calculate the (2l+1)*A_{n,l} coefficients for each Lorentzian
   std::vector< double > LorentzianCoefficients( double a ) const;
@@ -148,7 +148,7 @@ public:
   std::string name()const{ return "DiffSphere"; }
 
   /// overwrite IFunction base class methods
-  virtual const std::string category() const { return "QENS"; }
+  virtual const std::string category() const { return "QuasiElastic"; }
 
   /// overwrite IFunction base class methods
   virtual int version() const { return 1; }

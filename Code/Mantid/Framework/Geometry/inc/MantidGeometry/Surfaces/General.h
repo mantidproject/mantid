@@ -6,12 +6,6 @@
 
 namespace Mantid
 {
-
-  namespace Kernel
-  {
-    class Logger;
-  }
-
 namespace Geometry
 {
 
@@ -49,10 +43,6 @@ namespace Geometry
 
 class MANTID_GEOMETRY_DLL General : public Quadratic
 {
- private:
-
-  static Kernel::Logger& PLog;           ///< The official logger
-  
  public:
     
   General();

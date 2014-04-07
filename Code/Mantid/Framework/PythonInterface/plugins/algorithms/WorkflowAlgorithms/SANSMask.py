@@ -108,8 +108,8 @@ class SANSMask(PythonAlgorithm):
                         for iy in range(rec[2], rec[3]+1):
                             masked_pixels.append([ix, iy])
                 except:
-                    Logger.get("SANSMask").error("Badly defined mask from configuration file: %s" % str(rec))
-                    Logger.get("SANSMask").error(str(sys.exc_value))
+                    Logger("SANSMask").error("Badly defined mask from configuration file: %s" % str(rec))
+                    Logger("SANSMask").error(str(sys.exc_value))
             self._mask_pixels(masked_pixels, workspace, facility)
                 
     def _mask_detector_side(self, workspace, facility):
@@ -126,7 +126,7 @@ class SANSMask(PythonAlgorithm):
         
         if not workspace.getInstrument().hasParameter("number-of-x-pixels") \
             and not workspace.getInstrument().hasParameter("number-of-y-pixels"):
-            Logger.get("SANSMask").error("Could not find number of pixels: skipping side masking")
+            Logger("SANSMask").error("Could not find number of pixels: skipping side masking")
             return
             
         nx = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])

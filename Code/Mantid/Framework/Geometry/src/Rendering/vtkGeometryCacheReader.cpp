@@ -20,6 +20,7 @@ using Poco::Exception;
 using Poco::XML::Element;
 
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
@@ -29,7 +30,12 @@ namespace Mantid
 {
   namespace Geometry
   {
-    Kernel::Logger& vtkGeometryCacheReader::PLog(Kernel::Logger::get("Object"));
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("vtkGeometryCacheReader");
+    }
+
 
     /**
      * Constructor
@@ -63,8 +69,7 @@ namespace Mantid
       }
       catch(...)
       {
-	PLog.error("Unable to parse file " + mFileName);
-	throw Kernel::Exception::FileError("Unable to parse File:" , mFileName);
+        throw Kernel::Exception::FileError("Unable to parse File:" , mFileName);
       }
     }
 
@@ -79,8 +84,8 @@ namespace Mantid
       Poco::XML::Element *pEle=getElementByObjectName(objName.str());
       if(pEle==NULL) //Element not found
       {
-	PLog.debug("Cache not found for Object with name " + objName.str());
-	return;
+        g_log.debug("Cache not found for Object with name " + objName.str());
+        return;
       }
       // Read the cache from the element
       int noOfTriangles=0
@@ -138,7 +143,7 @@ namespace Mantid
       *points=new double[(*noOfPoints)*3];
       if(*points==NULL) // Out of memory
       {
-	PLog.error("Cannot allocate memory for triangle cache of Object ");
+	g_log.error("Cannot allocate memory for triangle cache of Object ");
 	return;
       }
       if(pEle->getAttribute("format").compare("ascii")==0) 
@@ -170,8 +175,8 @@ namespace Mantid
       *faces=new int[(*noOfTriangles)*3];
       if(*faces==NULL) // Out of memory
       {
-	PLog.error("Cannot allocate memory for triangle cache of Object ");
-	return;
+        g_log.error("Cannot allocate memory for triangle cache of Object ");
+        return;
       }
       if(pEle->getAttribute("format").compare("ascii")==0) 
       { //Read from Ascii

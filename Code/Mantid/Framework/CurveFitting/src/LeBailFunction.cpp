@@ -40,7 +40,7 @@ namespace CurveFitting
   }
 
   // Get a reference to the logger
-  Mantid::Kernel::Logger& LeBailFunction::g_log = Mantid::Kernel::Logger::get("LeBailFunction");
+  Kernel::Logger g_log("LeBailFunction");
 
   //----------------------------------------------------------------------------------------------
   /** Constructor

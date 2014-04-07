@@ -34,7 +34,6 @@ namespace Kernel
 // Forward declaration
 //----------------------------------------------------------------------
 class Unit;
-class Logger;
 
 /** Creates instances of concrete units.
     The factory is a singleton that hands out shared pointers to the base Unit class.
@@ -79,9 +78,6 @@ private:
   UnitFactoryImpl& operator = (const UnitFactoryImpl&);
   ///Private Destructor
   virtual ~UnitFactoryImpl();
-
-  /// Reference to the logger class
-  Kernel::Logger& m_log;
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) .

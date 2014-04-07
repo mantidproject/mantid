@@ -6,6 +6,11 @@
 
 #include <QFileInfo>
 
+#include <QDropEvent>
+#include <QMimeData>
+#include <QDebug>
+#include <QUrl>
+
 namespace MantidQt
 {
   namespace MantidWidgets
@@ -24,6 +29,8 @@ namespace MantidQt
       connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SLOT(handleFileInput()));
 
       connect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(handleAutoLoadComplete(bool)));
+      this->setAcceptDrops(true);
+      m_uiForm.rfFileInput->setAcceptDrops(false);
     }
 
     DataSelector::~DataSelector()
@@ -57,15 +64,24 @@ namespace MantidQt
     }
 
     /**
-     * Get whether file or workspace input is currently being shown.
+     * Get if the file selector is currently being shown.
      *
-     * Returns 0 for file view and 1 for workspace view
-     *
-     * @return :: index of the visible view 
+     * @return :: true if it is visible, otherwise false 
      */
-    int DataSelector::getCurrentView() const
+    bool DataSelector::isFileSelectorVisible() const
     {
-      return m_uiForm.stackedDataSelect->currentIndex();
+      int index = m_uiForm.stackedDataSelect->currentIndex();
+      return ( index == 0 );
+    }
+
+    /**
+     * Get if the workspace selector is currently being shown.
+     *
+     * @return :: true if it is visible, otherwise false 
+     */
+    bool DataSelector::isWorkspaceSelectorVisible() const
+    {
+      return !isFileSelectorVisible();
     }
 
     /**
@@ -76,23 +92,71 @@ namespace MantidQt
      *
      * @return :: If the data selector is valid
      */
-    bool DataSelector::isValid() const
+    bool DataSelector::isValid()
     {
+      using namespace Mantid::API;
+
       bool isValid = false;
 
-      switch(getCurrentView())
+      if(isFileSelectorVisible())
       {
-        case 0:
-          // file view is visible
-          isValid = m_uiForm.rfFileInput->isValid();
-          break;
-        case 1:
-          // workspace view is visible
-          isValid = m_uiForm.wsWorkspaceInput->isValid();
-          break;
+        isValid = m_uiForm.rfFileInput->isValid();
+
+        //check to make sure the user hasn't deleted the auto-loaded file
+        //since choosing it.
+        if(isValid && m_autoLoad)
+        {
+          const QString wsName = getCurrentDataName();
+          
+          if(!AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+          {
+            //attempt to reload if we can
+            //don't use algorithm runner because we need to know instantly.
+            const QString filepath = m_uiForm.rfFileInput->getFirstFilename();
+            const Algorithm_sptr loadAlg = AlgorithmManager::Instance().createUnmanaged("Load");
+            loadAlg->initialize();
+            loadAlg->setProperty("Filename", filepath.toStdString());
+            loadAlg->setProperty("OutputWorkspace", wsName.toStdString());
+            loadAlg->execute();
+            
+            isValid = AnalysisDataService::Instance().doesExist(wsName.toStdString());
+            
+            if(!isValid)
+            {
+              m_uiForm.rfFileInput->setFileProblem("The specified workspace is missing from the analysis data service");
+            }
+          }
+        }
+      }
+      else
+      {
+        isValid = m_uiForm.wsWorkspaceInput->isValid();
       }
 
       return isValid;
+    }
+
+    /**
+    * Return the error.
+    * @returns A string explaining the error.
+    */
+    QString DataSelector::getProblem() const
+    {
+      using namespace Mantid::API;
+
+      QString problem = "";
+      const QString wsName = getCurrentDataName();
+
+      if(isFileSelectorVisible())
+      {
+        problem = m_uiForm.rfFileInput->getFileProblem();
+      }
+      else
+      {
+        problem = "A valid workspace has not been selected";
+      }
+
+      return problem;
     }
 
     /**
@@ -187,7 +251,7 @@ namespace MantidQt
      *
      * @return The full file path
      */
-    QString DataSelector::getFullFilePath()
+    QString DataSelector::getFullFilePath() const
     {
       return m_uiForm.rfFileInput->getFirstFilename();
     }
@@ -202,7 +266,7 @@ namespace MantidQt
      *
      * @return The name of the current data item
      */
-    QString DataSelector::getCurrentDataName()
+    QString DataSelector::getCurrentDataName() const
     {
       QString filename("");
 
@@ -350,6 +414,42 @@ namespace MantidQt
       m_uiForm.pbLoadFile->setVisible(load);
       m_showLoad = load;
     }
+
+    /**
+     * Called when an item is dropped
+     * @param de :: the drop event data package
+     */
+    void DataSelector::dropEvent(QDropEvent *de)
+    {
+      const QMimeData *mimeData = de->mimeData();  
+      auto before_action = de->dropAction();
+
+      if (de->mimeData() && mimeData->text().contains(" = mtd[\"")){
+        m_uiForm.wsWorkspaceInput->dropEvent(de);
+        if (de->dropAction() == before_action){    
+          m_uiForm.cbInputType->setCurrentIndex(1);
+          return;
+        }
+        de->setDropAction(before_action);    
+      }
+  
+      m_uiForm.rfFileInput->dropEvent(de);
+      if (de->dropAction() == before_action){
+        m_uiForm.cbInputType->setCurrentIndex(0);
+      }
+    }
+
+    /**
+     * Called when an item is dragged onto a control
+     * @param de :: the drag event data package
+     */
+    void DataSelector::dragEnterEvent(QDragEnterEvent *de)
+    {
+      const QMimeData *mimeData = de->mimeData();
+      if (mimeData->hasText() || mimeData->hasUrls())
+        de->acceptProposedAction();
+    }
+
 
   } /* namespace MantidWidgets */
 } /* namespace MantidQt */

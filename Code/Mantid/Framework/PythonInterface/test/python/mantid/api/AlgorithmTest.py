@@ -1,6 +1,8 @@
 import unittest
-from mantid.api import AlgorithmManager
+from mantid.api import AlgorithmID, AlgorithmManager
 from testhelpers import run_algorithm
+
+###########################################################
 
 class AlgorithmTest(unittest.TestCase):
   
@@ -39,6 +41,7 @@ class AlgorithmTest(unittest.TestCase):
         data = [1.0,2.0,3.0]
         alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength',child=True)
         self.assertEquals(alg.isExecuted(), True)
+        self.assertEquals(alg.isRunning(), False)
         self.assertEquals(alg.getProperty('NSpec').value, 1)
         self.assertEquals(type(alg.getProperty('NSpec').value), int)
         self.assertEquals(alg.getProperty('NSpec').name, 'NSpec')
@@ -47,7 +50,28 @@ class AlgorithmTest(unittest.TestCase):
         
         as_str = str(alg)
         self.assertEquals(as_str, "CreateWorkspace.1(OutputWorkspace=UNUSED_NAME_FOR_CHILD,DataX=1,2,3,DataY=1,2,3,UnitX=Wavelength)")
-        
+    
+    def test_getAlgorithmID_returns_AlgorithmID_object(self):
+        alg = AlgorithmManager.createUnmanaged('Load')
+        self.assertEquals(AlgorithmID, type(alg.getAlgorithmID()))
+
+    def test_AlgorithmID_compares_by_value(self):
+        alg = AlgorithmManager.createUnmanaged('Load')
+        id = alg.getAlgorithmID()
+        self.assertEquals(id, id) # equals itself 
+        alg2 = AlgorithmManager.createUnmanaged('Load')
+        id2 = alg2.getAlgorithmID()
+        self.assertNotEqual(id2, id)
+
+    def test_cancel_does_nothing_to_executed_algorithm(self):
+        data = [1.0]
+        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength',child=True)
+        self.assertEquals(alg.isExecuted(), True)
+        self.assertEquals(alg.isRunning(), False)
+        alg.cancel()
+        self.assertEquals(alg.isExecuted(), True)
+        self.assertEquals(alg.isRunning(), False)
+
     def test_createChildAlgorithm_creates_new_algorithm_that_is_set_as_child(self):
         parent_alg = AlgorithmManager.createUnmanaged('Load')
         child_alg = parent_alg.createChildAlgorithm('Rebin')

@@ -20,7 +20,7 @@ from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
                          isEventWorkspace, fromEvent2Histogram, 
                          getFilePathFromWorkspace, getWorkspaceReference,
-                         getMonitor4event, slice2histogram)
+                         getMonitor4event, slice2histogram, getFileAndName)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
@@ -95,19 +95,37 @@ class LoadRun(object):
             self._load(inst, is_can, extra_options)
             return
       
+        # the intension of the code below is a good idea. Hence the reason why
+        # I have left in the code but commented it out. As of this writing
+        # LoadNexusMonitors throws an error if LoadNexusMonitors is a histogram
+        # i.e. this algorithm only works for event files at present. The error
+        # gets presented in red to the user and causes confusion. When either
+        # LoadNexusMonitor can load histogram data as well or other equivalent
+        # change the code below which is not commented out can be deleted and 
+        # the code commented out can be uncomment and modified as necessary
+
+        self._load(inst, is_can, extra_options)
+
         workspace = self._get_workspace_name()
+        if workspace in mtd:
+            outWs = mtd[workspace]
+            if isinstance(outWs, IEventWorkspace):
+            	if workspace + "_monitors" in mtd:
+                    RenameWorkspace(InputWorkspace=workspace + "_monitors", OutputWorkspace=workspace)
+                    self.periods_in_file = 1
+                    self._wksp_name = workspace
 
         # For sans, in transmission, we care only about the monitors. Hence,
-        # by trying to load only the monitors we speed up the reduction process. 
-        # besides, we avoid loading events which is uselles for transmission. 
-        # it may fail, if the input file was not a nexus file, in this case, 
+        # by trying to load only the monitors we speed up the reduction process.
+        # besides, we avoid loading events which is useless for transmission.
+        # it may fail, if the input file was not a nexus file, in this case,
         # it pass the job to the default _load method.
-        try:
-            outWs = LoadNexusMonitors(self._data_file, OutputWorkspace=workspace)
-            self.periods_in_file = 1
-            self._wksp_name = workspace
-        except:
-            self._load(inst, is_can, extra_options)
+        #try:
+        # outWs = LoadNexusMonitors(self._data_file, OutputWorkspace=workspace)
+        # self.periods_in_file = 1
+        # self._wksp_name = workspace
+        #except:
+        # self._load(inst, is_can, extra_options)
 
     def _load(self, inst = None, is_can=False, extra_options=dict()):
         """
@@ -1871,7 +1889,8 @@ class UserFile(ReductionStep):
         self.key_functions = {
             'BACK/' : self._read_back_line,
             'TRANS/': self._read_trans_line,
-            'MON/' : self._read_mon_line}
+            'MON/' : self._read_mon_line,
+            'TUBECALIBFILE': self._read_calibfile_line}
 
     def __deepcopy__(self, memo):
         """Called when a deep copy is requested                    
@@ -1882,7 +1901,8 @@ class UserFile(ReductionStep):
         fresh.key_functions = {
             'BACK/' : fresh._read_back_line,
             'TRANS/': fresh._read_trans_line,
-            'MON/' : fresh._read_mon_line
+            'MON/' : fresh._read_mon_line,
+            'TUBECALIBFILE': self._read_calibfile_line
             }
         return fresh
 
@@ -2472,6 +2492,21 @@ class UserFile(ReductionStep):
         reducer._corr_and_scale.rescale = 100.  # percent
         
         reducer.inst.reset_TOFs()
+
+    def _read_calibfile_line(self, arguments, reducer):
+        # remove the equals from the beggining and any space around. 
+        parts = re.split("\s?=\s?", arguments)
+        if len(parts) != 2: 
+            return "Invalid input for TUBECALIBFILE" + str(arguments)+ ". Expected TUBECALIBFILE = file_path"
+        path2file = parts[1]
+
+        try:
+          file_path, suggested_name = getFileAndName(path2file)
+          __calibrationWs = Load(file_path, OutputWorkspace=suggested_name)
+          reducer.instrument.setCalibrationWorkspace(__calibrationWs)
+        except:
+            import traceback
+            return "Invalid input for tube calibration file. Path = "+path2file+".\nReason=" + traceback.format_exc()
 
 class GetOutputName(ReductionStep):
     def __init__(self):

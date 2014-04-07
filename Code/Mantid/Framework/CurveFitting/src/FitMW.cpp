@@ -280,18 +280,20 @@ namespace
    * @param function :: A Pointer to the fitting function
    * @param domain :: The domain containing x-values for the function
    * @param ivalues :: A API::FunctionValues instance containing the fitting data
+   * @param outputWorkspacePropertyName :: The property name
    */
-  void FitMW::createOutputWorkspace(
+  boost::shared_ptr<API::Workspace> FitMW::createOutputWorkspace(
         const std::string& baseName,
         API::IFunction_sptr function,
         boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::IFunctionValues> ivalues
+        boost::shared_ptr<API::IFunctionValues> ivalues,
+        const std::string& outputWorkspacePropertyName
     )
   {
     auto values = boost::dynamic_pointer_cast<API::FunctionValues>(ivalues);
     if (!values)
     {
-      return;
+      throw std::logic_error("FunctionValues expected");
     }
 
     // Compile list of functions to output. The top-level one is first
@@ -331,10 +333,14 @@ namespace
       Diff[i] = values->getFitData(i) - Ycal[i];
     }
 
-    declareProperty(new API::WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-        "Name of the output Workspace holding resulting simulated spectrum");
-    m_manager->setPropertyValue("OutputWorkspace",baseName+"Workspace");
-    m_manager->setProperty("OutputWorkspace",ws);
+    if ( !outputWorkspacePropertyName.empty() )
+    {
+      declareProperty(new API::WorkspaceProperty<MatrixWorkspace>(outputWorkspacePropertyName,"",Direction::Output),
+          "Name of the output Workspace holding resulting simulated spectrum");
+      m_manager->setPropertyValue(outputWorkspacePropertyName,baseName+"Workspace");
+      m_manager->setProperty(outputWorkspacePropertyName,ws);
+    }
+    return ws;
   }
 
   /**

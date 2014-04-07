@@ -16,7 +16,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
-#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidVatesAPI/EscalatingRebinningActionManager.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"

@@ -16,6 +16,7 @@ Datafiles and workspaces that are published are automatically made private. This
 #include "MantidICat/CatalogAlgorithmHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -60,6 +61,7 @@ namespace Mantid
           "This can only contain alphanumerics, underscores or periods.");
       declareProperty("InvestigationNumber","","The investigation number where the published file will be saved to.");
       declareProperty("DataFileDescription","","A short description of the datafile you are publishing to the catalog.");
+      declareProperty("Session","","The session information of the catalog to use.");
     }
 
     /// Execute the algorithm
@@ -85,7 +87,9 @@ namespace Mantid
       }
 
       // Cast a catalog to a catalogInfoService to access publishing functionality.
-      auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(CatalogAlgorithmHelper().createCatalog());
+      auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(
+          API::CatalogManager::Instance().getCatalog(getPropertyValue("Session")));
+
       // Check if the catalog created supports publishing functionality.
       if (!catalogInfoService) throw std::runtime_error("The catalog that you are using does not support publishing to the archives.");
 

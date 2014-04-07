@@ -8,6 +8,7 @@ set ( TEST_PY_FILES
   AlgorithmPropertyTest.py
   AnalysisDataServiceTest.py
   AxisTest.py
+  DataProcessorAlgorithmTest.py
   DeprecatedAlgorithmCheckerTest.py
   ExperimentInfoTest.py
   FilePropertyTest.py

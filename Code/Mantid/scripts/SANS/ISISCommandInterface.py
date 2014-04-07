@@ -5,7 +5,7 @@
 import isis_instrument
 from reducer_singleton import ReductionSingleton
 from mantid.kernel import Logger
-sanslog = Logger.get("SANS")
+sanslog = Logger("SANS")
 
 import isis_reduction_steps
 import isis_reducer

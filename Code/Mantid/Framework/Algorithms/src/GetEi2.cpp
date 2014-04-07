@@ -103,6 +103,14 @@ void GetEi2::init()
 
   declareProperty("Tzero", 0.0, "", Direction::Output);
 
+  auto inRange0toOne = boost::make_shared<BoundedValidator<double> >();
+  inRange0toOne->setLower(0.0);
+  inRange0toOne->setUpper(1.0);
+  declareProperty("PeakSearchRange",0.1,inRange0toOne,
+    "Specifies the relative TOF range where the algorithm tries to find the monitor peak. Search occurs within PEAK_TOF_Guess*(1+-PeakSearchRange) ranges.\n"
+    "Defaults are almost always sufficient but decrease this value for very narrow peaks and increase for wide.",Direction::Input);
+
+
 }
 
 /** Executes the algorithm
@@ -113,8 +121,10 @@ void GetEi2::init()
 */
 void GetEi2::exec()
 {
-  m_input_ws = getProperty("InputWorkspace");
-  m_fixedei = getProperty("FixEi");
+  m_input_ws  = getProperty("InputWorkspace");
+  m_fixedei   = getProperty("FixEi");
+  m_tof_window= getProperty("PeakSearchRange");
+
   double initial_guess = getProperty("EnergyEstimate");
   //check if incident energy guess is left empty, and try to find it as EnergyRequest parameter
   if (initial_guess==EMPTY_DBL())
@@ -162,7 +172,7 @@ double GetEi2::calculateEi(const double initial_guess)
 
       while ( formula.find("incidentEnergy") != std::string::npos )
       {
-		// check if more than one 'value' in m_eq
+    // check if more than one 'value' in m_eq
         size_t found = formula.find("incidentEnergy");
         formula.replace(found, 14, guess.str());
       }
@@ -239,13 +249,14 @@ double GetEi2::calculateEi(const double initial_guess)
 
       if(!m_fixedei) 
       {
-        throw std::invalid_argument("No peak found for the monitor"+boost::lexical_cast<std::string>(i+1)+ " (at "+
-                   boost::lexical_cast<std::string>(det_distances[i])+"  metres).\n");
+        throw std::invalid_argument("No peak found for the monitor with spectra num: "+boost::lexical_cast<std::string>(spec_nums[i])+ " (at "+
+                   boost::lexical_cast<std::string>(det_distances[i])+"  metres from source).\n");
       }
       else
       {
-        peak_times[i] = 0.0;
-        g_log.information() << "No peak found for monitor " << (i+1) << " (at " << det_distances[i] << " metres). Setting peak time to zero\n";
+        peak_times[i] = peak_guess;
+        g_log.warning() << "No peak found for monitor with spectra num " << spec_nums[i] << " (at " << det_distances[i] << " metres).\n";
+        g_log.warning() << "Using guess time found from energy estimate of Peak = " << peak_times[i] << " microseconds\n";
       }
     }
     if(i == 0) 
@@ -284,7 +295,7 @@ double GetEi2::getDistanceFromSource(size_t ws_index) const
 {
   g_log.debug() << "Computing distance between spectrum at index '" << ws_index << "' and the source\n";
 
-  const IObjComponent_const_sptr source = m_input_ws->getInstrument()->getSource();
+  const IComponent_const_sptr source = m_input_ws->getInstrument()->getSource();
   // Retrieve a pointer detector
   IDetector_const_sptr det = m_input_ws->getDetector(ws_index);
   if( !det )
@@ -387,8 +398,13 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
   const MantidVec & Es = data_ws->readE(0);
 
   MantidVec::const_iterator peakIt = std::max_element(Ys.begin(), Ys.end());
+  double bkg_val = *std::min_element(Ys.begin(), Ys.end());
+  if (*peakIt == bkg_val)
+  {
+    throw std::invalid_argument("No peak in the range specified as minimal and maximal values of the function are equal ");
+  }
   MantidVec::difference_type iPeak = peakIt - Ys.begin();
-  double peakY = Ys[iPeak];
+  double peakY = Ys[iPeak]-bkg_val;
   double peakE = Es[iPeak];
 
   const std::vector<double>::size_type nxvals = Xs.size();
@@ -397,7 +413,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
   int64_t im = static_cast<int64_t>(iPeak-1);
   for( ; im >= 0; --im )
   {
-    const double ratio = Ys[im]/peakY;
+    const double ratio = (Ys[im]-bkg_val)/peakY;
     const double ratio_err = std::sqrt( std::pow(Es[im],2) + std::pow(ratio*peakE,2) )/peakY;
     if ( ratio < (1.0/prominence - m_peak_signif*ratio_err) )
     {
@@ -408,7 +424,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
   std::vector<double>::size_type ip = iPeak+1;
   for( ; ip < nxvals; ip++ )
   {
-    const double ratio = Ys[ip]/peakY;
+    const double ratio = (Ys[ip]-bkg_val)/peakY;
     const double ratio_err =
       std::sqrt( std::pow(Es[ip], 2) + std::pow(ratio*peakE, 2) )/peakY;
     if ( ratio < (1.0/prominence - m_peak_signif*ratio_err) )

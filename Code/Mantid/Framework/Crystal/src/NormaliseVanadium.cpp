@@ -1,5 +1,5 @@
 /*WIKI* 
-
+Normalises all spectra of workspace to a specified wavelength.  Following A.J.Schultz's anvred, scales the vanadium spectra.
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -35,6 +35,13 @@ using namespace DataObjects;
 NormaliseVanadium::NormaliseVanadium() : API::Algorithm()
 {}
 
+/// Sets documentation strings for this algorithm
+void NormaliseVanadium::initDocs()
+{
+  this->setWikiSummary("Normalises all spectra to a specified wavelength.");
+  this->setOptionalMessage("Normalises all spectra to a specified wavelength.");
+}
+
 void NormaliseVanadium::init()
 {
   // The input workspace must have an instrument and units of wavelength
@@ -49,7 +56,7 @@ void NormaliseVanadium::init()
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("Wavelength", 1.0, mustBePositive,
-    "Divide by vanadium at this wavelength");
+    "Normalizes spectra to this wavelength");
 
 }
 

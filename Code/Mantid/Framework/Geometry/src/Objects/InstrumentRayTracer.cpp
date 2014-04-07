@@ -16,9 +16,6 @@ namespace Mantid
 
     using Kernel::V3D;
 
-    // Initialize logger
-    Kernel::Logger & InstrumentRayTracer::g_log = Kernel::Logger::get("InstrumentRayTracer");
-
     //-------------------------------------------------------------
     // Public member functions
     //-------------------------------------------------------------
@@ -34,13 +31,11 @@ namespace Mantid
       {
         std::ostringstream lexer;
         lexer << "Cannot create a InstrumentRayTracer, invalid instrument given. Input = " << m_instrument.get() << "\n";
-        g_log.error(lexer.str()); 
         throw std::invalid_argument(lexer.str());
       }
       if( !m_instrument->getSource() )
       {
         std::string errorMsg = "Cannot create InstrumentRayTracer, instrument has no defined source.\n";
-        g_log.error(errorMsg);
         throw std::invalid_argument(errorMsg);
       }
     }

@@ -10,6 +10,10 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 
+#include <QDropEvent>
+#include <QMimeData>
+#include <QUrl>
+#include <QDebug>
 using namespace MantidQt::MantidWidgets;
 
 /**
@@ -38,6 +42,7 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init) : QComboBox(par
 
     refresh();
   }
+  this->setAcceptDrops(true);
 }
 
 /**
@@ -311,5 +316,42 @@ void WorkspaceSelector::refresh()
     {
       addItem(name);
     }
+  }
+}
+
+/**
+  * Called when an item is dropped
+  * @param de :: the drop event data package
+  */
+void WorkspaceSelector::dropEvent(QDropEvent *de)
+{
+  const QMimeData *mimeData = de->mimeData(); 
+  QString text =  mimeData->text();
+  int equal_pos = text.indexOf("=");
+  QString ws_name = text.left(equal_pos-1);
+  QString ws_name_test = text.mid(equal_pos + 7, equal_pos-1);
+  
+  if (ws_name == ws_name_test){
+    int index = findText(ws_name);
+    if (index >= 0){
+      setCurrentIndex(index);
+      de->acceptProposedAction();
+    }
+  }
+  
+}
+
+/**
+  * Called when an item is dragged onto a control
+  * @param de :: the drag event data package
+  */
+void WorkspaceSelector::dragEnterEvent(QDragEnterEvent *de)
+{
+  const QMimeData *mimeData = de->mimeData();  
+  if(mimeData->hasText()) 
+  {
+    QString text = mimeData->text();
+    if (text.contains(" = mtd[\""))
+      de->acceptProposedAction();
   }
 }

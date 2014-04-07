@@ -1,10 +1,10 @@
 import math
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, Workspace
 from mantid.kernel import Logger
 import SANSUtility as su
 import re
-sanslog = Logger.get("SANS")
+sanslog = Logger("SANS")
 
 import sys
 
@@ -475,7 +475,8 @@ class ISISInstrument(BaseInstrument):
         self._back_end = None 
         #if the user moves a monitor to this z coordinate (with MON/LENGTH ...) this will be recorded here. These are overridden lines like TRANS/TRANSPEC=4/SHIFT=-100
         self.monitor_zs = {}
-
+        # Used when new calibration required.
+        self._newCalibrationWS = None
 
     def get_incident_mon(self):
         """
@@ -674,6 +675,9 @@ class ISISInstrument(BaseInstrument):
         if isSample:
             self.set_up_for_run(run_num)
         
+        if self._newCalibrationWS:
+            self.changeCalibration(ws_name)
+
         # centralize the bank to the centre
         self.move_components(ws_name, beamcentre[0], beamcentre[1])
 
@@ -682,6 +686,18 @@ class ISISInstrument(BaseInstrument):
         Called on loading of transmissions
         """
         pass
+
+    def changeCalibration(self, ws_name):
+        calib = mtd[self._newCalibrationWS]
+        sanslog.notice("Applying new calibration for the detectors from " + str(calib.name()))
+        CopyInstrumentParameters(calib, ws_name)
+
+    def setCalibrationWorkspace(self, ws_reference):
+        assert(isinstance(ws_reference, Workspace))
+        # we do deep copy of singleton - to be removed in 8470
+        # this forces us to have 'copyable' objects. 
+        self._newCalibrationWS = str(ws_reference)
+              
 
 
 class LOQ(ISISInstrument):

@@ -174,8 +174,8 @@ public:
   void test_GetCellForForm()
   {
     size_t good_forms[] = { 1, 2, 9, 19, 10, 20, 27, 31 };
-    double errors[]     = { 0.0050198, 0.0095369, 0.0042328, 0.0050198, 
-                            0.0053090, 0.0053090, 0.0012747, 0.0000000 };
+    double errors[]     = { 0.0074, 0.0129, 0.0042328, 0.0050198,
+                            0.0057, 0.0053090, 0.0050, 0.0000000 };
    
     Matrix<double> UB = getSiliconNiggliUB();   // cubic case
     for ( size_t i = 0; i < 8; i++ )

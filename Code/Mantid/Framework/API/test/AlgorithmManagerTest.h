@@ -201,6 +201,7 @@ public:
     resA.wait();
     TSM_ASSERT_EQUALS( "Notification was received (proxy).", m_notificationValue, 12345 );
 
+    AlgorithmManager::Instance().notificationCenter.removeObserver(my_observer);
   }
 
   /** Keep the right number of algorithms in the list.

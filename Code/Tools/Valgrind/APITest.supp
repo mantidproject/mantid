@@ -1,0 +1,19 @@
+{
+   <AlgorithmManagerTest_omp>
+   Memcheck:Leak
+   ...
+   fun:pthread_create@@GLIBC_2.2.5
+   fun:???
+   fun:_ZN20AlgorithmManagerTest16testThreadSafetyEv
+   ...
+}
+{
+   <MemoryManagerTest_omp>
+   Memcheck:Leak
+   ...
+   fun:pthread_create@@GLIBC_2.2.5
+   fun:???
+   fun:_ZN17MemoryManagerTest13test_parallelEv
+   ...
+}
+

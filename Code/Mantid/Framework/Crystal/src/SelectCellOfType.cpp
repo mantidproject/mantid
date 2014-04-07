@@ -38,9 +38,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-  Kernel::Logger& SelectCellOfType::g_log = 
-                                      Kernel::Logger::get("SelectCellOfType");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(SelectCellOfType)
 

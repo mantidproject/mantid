@@ -23,9 +23,11 @@ namespace Mantid
 {
   namespace DataHandling
   {
-
-    // Get a reference to the logger
-    Kernel::Logger& ManagedRawFileWorkspace2D::g_log = Kernel::Logger::get("ManagedRawFileWorkspace2D");
+    namespace
+    {
+      // Get a reference to the logger
+      Kernel::Logger g_log("ManagedRawFileWorkspace2D");
+    }
 
     // Initialise the instance count
     int64_t ManagedRawFileWorkspace2D::g_uniqueID = 1;
@@ -54,7 +56,6 @@ namespace Mantid
       m_fileRaw = fopen(m_filenameRaw.c_str(),"rb");
       if (m_fileRaw == NULL)
       {
-        g_log.error("Unable to open file " + m_filenameRaw);
         throw Kernel::Exception::FileError("Unable to open File:" , m_filenameRaw);
       }
 
