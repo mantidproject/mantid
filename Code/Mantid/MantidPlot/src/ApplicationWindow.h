@@ -91,6 +91,7 @@ class AssociationsDialog;
 class MantidMatrix;
 class FloatingWindow;
 class MantidTable;
+class TiledWindow;
 
 // On Mac (and Ubuntu 11 Unity) the menubar must be shared between the main window and other floating windows.
 #ifdef Q_OS_MAC
@@ -194,6 +195,7 @@ public:
 
   MdiSubWindow *activeWindow(WindowType type = NoWindow);
   void addMdiSubWindow(MdiSubWindow *w, bool showNormal = true);
+  void addMdiSubWindow(MdiSubWindow *w, bool showFloating, bool showNormal);
 
   int matrixUndoStackSize(){return d_matrix_undo_stack_size;};
   void setMatrixUndoStackSize(int size);
@@ -1046,6 +1048,8 @@ public slots:
   void changeActiveToDocked();
   /// Validate sub-window position coordinates
   void validateWindowPos(MdiSubWindow* w, int& x, int& y);
+  /// Detach a subwindow from its parent - docked or floating
+  void detachMdiSubwindow(MdiSubWindow* w);
 
   /** Sets whether to prompt the user when closing/deleting a folder */
   void setConfirmFolderClose(bool value)
@@ -1055,6 +1059,11 @@ public slots:
 
   /// Show/hide MantidPlot toolbars.
   void setToolbarsVisible(bool visible);
+
+  /// \name Tiled widget
+  //@{
+  TiledWindow *newTiledWindow();
+  //@}
 
 signals:
   void modified();
@@ -1465,6 +1474,7 @@ private:
   QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
   QAction *actionPanPlot;
   QAction *actionWaterfallPlot;
+  QAction *actionNewTiledWindow;
 
   QList<QAction *> d_user_actions;
   QList<QMenu* > d_user_menus; //Mantid

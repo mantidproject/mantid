@@ -169,6 +169,20 @@ def newNote(name=None):
     else:
         return new_proxy(proxies.MDIWindow, _qti.app.newNote, name)
 
+def newTiledWindow(name=None):
+    """Create an empty tiled window.
+    
+    Args:
+        name: The name to give to the window (if None, a unique name will be generated).
+        
+    Returns:
+        A handle to the created window.
+    """
+    if name is None:
+        return new_proxy(proxies.TiledWindowProxy, _qti.app.newTiledWindow)
+    else:
+        return new_proxy(proxies.TiledWindowProxy, _qti.app.newTiledWindow, name)
+
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
 def plot(source, *args, **kwargs):

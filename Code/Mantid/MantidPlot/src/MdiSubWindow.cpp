@@ -59,6 +59,7 @@ MdiSubWindow::MdiSubWindow(QWidget *parent, const QString& label, const QString&
   d_min_restore_size(QSize())
 {
   setObjectName(name);
+  setName(name);
   setAttribute(Qt::WA_DeleteOnClose);
   setLocale(parent->locale());
   confirmClose(false);
@@ -182,7 +183,7 @@ void MdiSubWindow::move(const QPoint& pos)
  */
 void MdiSubWindow::undock()
 {
-  if(isDocked()) emit undockFromMDIArea(this);
+  if( !isFloating() ) emit undockFromMDIArea(this);
 }
 
 /**
@@ -197,7 +198,7 @@ bool MdiSubWindow::isFloating() const
  */
 void MdiSubWindow::dock()
 {
-  if(isFloating()) emit dockToMDIArea(this);
+  if( !isDocked() ) emit dockToMDIArea(this);
 }
 
 /**
@@ -206,6 +207,13 @@ void MdiSubWindow::dock()
 bool MdiSubWindow::isDocked() const
 {
   return (this->getDockedWindow() != NULL);
+}
+
+/**
+ */
+void MdiSubWindow::detach()
+{
+  emit detachFromParent(this);
 }
 
 /**
@@ -535,6 +543,4 @@ AppMdiSubWindow::AppMdiSubWindow(QWidget *parent, const QString& label, const QS
     m_app( static_cast<ApplicationWindow*>(parent) )
   {  
   }
-
-
 

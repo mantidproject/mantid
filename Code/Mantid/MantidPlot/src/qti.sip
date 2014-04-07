@@ -58,6 +58,7 @@ public:
 %End
   virtual void restore(const QStringList& );
   //Folder* folder();
+  QString name();
 
   void confirmClose(bool);
   void show();
@@ -1019,6 +1020,21 @@ private:
   Graph3D(const Graph3D&);
 };
 
+class TiledWindow: MdiSubWindow
+{
+%TypeHeaderCode
+#include "src/TiledWindow.h"
+%End
+public:
+    int rowCount() const;
+    int columnCount() const;
+    void addTile(MdiSubWindow *tile, int row, int col);
+    void removeTileToDocked(int row, int col);
+    void removeTileToFloating(int row, int col);
+private:
+    TiledWindow(const TiledWindow&);
+};
+
 class ApplicationWindow: QMainWindow
 {
 %TypeHeaderCode
@@ -1056,6 +1072,9 @@ public:
 %End
   Matrix* newMatrix();
   Matrix* newMatrix(const QString&, int=32, int=32);
+  
+  TiledWindow *newTiledWindow();
+  
   MultiLayer *plot(const QString&) /PyName=graph/;
 %MethodCode
   sipRes = sipCpp->current_folder->graph(*a0, false);

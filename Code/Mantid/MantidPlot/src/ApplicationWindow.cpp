@@ -111,6 +111,7 @@
 #include "MdiSubWindow.h"
 #include "FloatingWindow.h"
 #include "DataPickerTool.h"
+#include "TiledWindow.h"
 
 // TODO: move tool-specific code to an extension manager
 #include "ScreenPickerTool.h"
@@ -9213,6 +9214,7 @@ void ApplicationWindow::fileMenuAboutToShow()
   newMenu->addAction(actionNewGraph);
   newMenu->addAction(actionNewFunctionPlot);
   newMenu->addAction(actionNewSurfacePlot);
+  newMenu->addAction(actionNewTiledWindow);
 
 
   openMenu=fileMenu->addMenu(tr("&Load"));
@@ -9706,6 +9708,7 @@ void ApplicationWindow::showListViewPopupMenu(const QPoint &p)
   window.addAction(actionNewGraph);
   window.addAction(actionNewFunctionPlot);
   window.addAction(actionNewSurfacePlot);
+  window.addAction(actionNewTiledWindow);
   cm.insertItem(tr("New &Window"), &window);
 
   cm.insertItem(getQPixmap("newfolder_xpm"), tr("New F&older"), this, SLOT(addFolder()), Qt::Key_F7);
@@ -12664,6 +12667,10 @@ void ApplicationWindow::createActions()
   actionNewTable->setShortcut( tr("Ctrl+T") );
   connect(actionNewTable, SIGNAL(activated()), this, SLOT(newTable()));
 
+  actionNewTiledWindow = new QAction(QIcon(getQPixmap("table_xpm")), tr("New Tiled &Window"), this);
+  actionNewTiledWindow->setShortcut( tr("Ctrl+W") );
+  connect(actionNewTiledWindow, SIGNAL(activated()), this, SLOT(newTiledWindow()));
+
   actionNewMatrix = new QAction(QIcon(getQPixmap("new_matrix_xpm")), tr("New &Matrix"), this);
   actionNewMatrix->setShortcut( tr("Ctrl+M") );
   connect(actionNewMatrix, SIGNAL(activated()), this, SLOT(newMatrix()));
@@ -13489,6 +13496,10 @@ void ApplicationWindow::translateActionsStrings()
   actionNewTable->setMenuText(tr("New &Table"));
   actionNewTable->setShortcut(tr("Ctrl+T"));
   actionNewTable->setToolTip(tr("New table"));
+
+  actionNewTiledWindow->setMenuText(tr("New Tiled &Window"));
+  actionNewTiledWindow->setShortcut(tr("Ctrl+W"));
+  actionNewTiledWindow->setToolTip(tr("New tiled window"));
 
   actionNewMatrix->setMenuText(tr("New &Matrix"));
   actionNewMatrix->setShortcut(tr("Ctrl+M"));
@@ -15292,6 +15303,7 @@ void ApplicationWindow::showFolderPopupMenu(Q3ListViewItem *it, const QPoint &p,
     window.addAction(actionNewGraph);
     window.addAction(actionNewFunctionPlot);
     window.addAction(actionNewSurfacePlot);
+    window.addAction(actionNewTiledWindow);
     cm.insertItem(tr("New &Window"), &window);
   }
 
@@ -17576,14 +17588,54 @@ MultiLayer* ApplicationWindow::waterfallPlot(Table *t, const QStringList& list)
  */
 void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showNormal)
 {
+  //connect(w, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(modifiedProject(MdiSubWindow*)));
+  //connect(w, SIGNAL(resizedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
+  //connect(w, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(closeWindow(MdiSubWindow*)));
+  //connect(w, SIGNAL(hiddenWindow(MdiSubWindow*)), this, SLOT(hideWindow(MdiSubWindow*)));
+  //connect(w, SIGNAL(statusChanged(MdiSubWindow*)),this, SLOT(updateWindowStatus(MdiSubWindow*)));
+  //connect(w, SIGNAL(showContextMenu()), this, SLOT(showWindowContextMenu()));
+  //connect(w, SIGNAL(detachFromParent(MdiSubWindow*)),this, SLOT(detachMdiSubwindow(MdiSubWindow*)));
+
+  //bool showFloating = isDefaultFloating(w);
+
+  //if (showFloating && showNormal)
+  //{
+  //  addMdiSubWindowAsFloating(w);
+  //}
+  //else
+  //{
+  //  QMdiSubWindow* sw = addMdiSubWindowAsDocked(w);
+  //  if (showNormal)
+  //  {
+  //    sw->showNormal();
+  //  }
+  //  else
+  //  {
+  //    sw->showMinimized();
+  //  }
+  //}
+
+  //addListViewItem(w);
+  //currentFolder()->addWindow(w);
+  addMdiSubWindow(w, isDefaultFloating(w), showNormal);
+}
+
+/**
+ * Add a sub-window either as a docked or a floating window.
+ * @param w :: Pointer to a MdiSubWindow which to add.
+ * @param showFloating :: If true show as floating else make it docked.
+ * @param showNormal :: If true show as a normal window, if false show as a minimized docked window
+ *   regardless of what showFloating is.
+ */
+void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showFloating, bool showNormal)
+{
   connect(w, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(modifiedProject(MdiSubWindow*)));
   connect(w, SIGNAL(resizedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
   connect(w, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(closeWindow(MdiSubWindow*)));
   connect(w, SIGNAL(hiddenWindow(MdiSubWindow*)), this, SLOT(hideWindow(MdiSubWindow*)));
   connect(w, SIGNAL(statusChanged(MdiSubWindow*)),this, SLOT(updateWindowStatus(MdiSubWindow*)));
   connect(w, SIGNAL(showContextMenu()), this, SLOT(showWindowContextMenu()));
-
-  bool showFloating = isDefaultFloating(w);
+  connect(w, SIGNAL(detachFromParent(MdiSubWindow*)),this, SLOT(detachMdiSubwindow(MdiSubWindow*)));
 
   if (showFloating && showNormal)
   {
@@ -17723,18 +17775,21 @@ QMdiSubWindow* ApplicationWindow::addMdiSubWindowAsDocked(MdiSubWindow* w, QPoin
  */
 void ApplicationWindow::changeToFloating(MdiSubWindow* w)
 {
+  if ( w->isFloating() ) return;
   QMdiSubWindow* sw =w->getDockedWindow();
-  if (!sw)
+  if ( sw )
   {
-    return;
+    // remove the subwindow from the mdi area
+    d_workspace->removeSubWindow(w);
+    sw->close();
+    // create the outer floating window.
+    addMdiSubWindowAsFloating(w,sw->pos());
   }
-
-  // remove the subwindow from the mdi area
-  d_workspace->removeSubWindow(w);
-  sw->close();
-
-  // create the outer floating window.
-  addMdiSubWindowAsFloating(w,sw->pos());
+  else
+  {
+    // attach w to the ApplicationWindow and create the outer floating window (second argument == true)
+    addMdiSubWindow(w,true,true);
+  }
   activateWindow(w);
 }
 
@@ -17743,14 +17798,22 @@ void ApplicationWindow::changeToFloating(MdiSubWindow* w)
  */
 void ApplicationWindow::changeToDocked(MdiSubWindow* w)
 {
+  if ( w->isDocked() ) return;
   FloatingWindow* fw = w->getFloatingWindow();
-  if (!fw) return;
-  fw->removeMdiSubWindow();
-  removeFloatingWindow(fw);
-  // main window must be closed or application will freeze 
-  fw->close();
-  addMdiSubWindowAsDocked(w);
-  //activateWindow(w);
+  if ( fw )
+  {
+    fw->removeMdiSubWindow();
+    removeFloatingWindow(fw);
+    // main window must be closed or application will freeze 
+    fw->close();
+    // create the outer docked window.
+    addMdiSubWindowAsDocked(w);
+  }
+  else
+  {
+    // attach w to the ApplicationWindow and create the outer docked window (second argument == false)
+    addMdiSubWindow(w,false,true);
+  }
   w->setNormal();
   return;
 }
@@ -17782,6 +17845,41 @@ FloatingWindow* ApplicationWindow::getActiveFloating() const
   MdiSubWindow* w = getActiveWindow();
   if (!w) return NULL;
   return w->getFloatingWindow();
+}
+
+/**
+ * Detach a subwindow from its parent - docked or floating
+ */
+void ApplicationWindow::detachMdiSubwindow(MdiSubWindow* w)
+{
+  // remove the window from all internal lists
+  if ( currentFolder()->hasWindow(w) )
+  {
+    currentFolder()->removeWindow(w);
+  }
+  removeWindowFromLists(w);
+  Q3ListViewItem *it=lv->findItem (w->objectName(), 0, Q3ListView::ExactMatch|Q3ListView::CaseSensitive);
+  if (it)
+    lv->takeItem(it);
+
+  // if it's wrapped in a floating detach from it and close
+  FloatingWindow *fw = w->getFloatingWindow();
+  if ( fw )
+  {
+    fw->removeMdiSubWindow();
+    m_floatingWindows.remove(fw);
+    fw->deleteLater();
+    return;
+  }
+
+  // the same in docked case
+  QMdiSubWindow *dw = w->getDockedWindow();
+  if ( dw )
+  {
+    d_workspace->removeSubWindow(w);
+    dw->close();
+  }
+
 }
 
 /**
@@ -17993,4 +18091,14 @@ void ApplicationWindow::about2Start(){
     update_script_repo->setLoggingOffset(1);
     mantidUI->executeAlgorithmAsync(update_script_repo);
   }
+}
+
+/**
+ * Create a new TiledWindow with default settings.
+ */
+TiledWindow *ApplicationWindow::newTiledWindow()
+{
+  TiledWindow *widget = new TiledWindow(this,"",generateUniqueName("TiledWindow"));
+  addMdiSubWindow( widget );
+  return widget;
 }

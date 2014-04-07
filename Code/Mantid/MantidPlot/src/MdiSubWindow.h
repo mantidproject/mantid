@@ -232,6 +232,8 @@ public: //non-slot methods
   void dock();
   /// Query if the window is docked
   bool isDocked() const;
+  /// Detach this window from any parent window
+  void detach();
   ///@}
 
 signals:
@@ -251,6 +253,8 @@ signals:
   void dockToMDIArea(MdiSubWindow *);
   //! Emitted when the window wants to undock
   void undockFromMDIArea(MdiSubWindow *);
+  /// Emited to detach this window from any parent - docked or floating
+  void detachFromParent(MdiSubWindow *);
   
 protected:
   //! Catches status changes

@@ -825,3 +825,23 @@ class FitBrowserProxy(QtProxyObject):
         QtProxyObject.__init__(self,toproxy)
         
         
+#-----------------------------------------------------------------------------
+class TiledWindowProxy(QtProxyObject):
+    """
+        Proxy for the TiledWindow object. 
+    """
+    def __init__(self, toproxy):
+        QtProxyObject.__init__(self,toproxy)
+        
+    def addTile(self, tile, row, col):
+        """
+        Add a new sub-window at a given position in the layout.
+        The layout will re-shape itself if necessary to fit in the new tile.
+        
+        Args:
+        
+            tile :: An MdiSubWindow to add.
+            row :: A row index at which to place the new tile.
+            col :: A column index at which to place the new tile.
+        """
+        threadsafe_call(self._getHeldObject().addTile, tile._getHeldObject(), row, col)
