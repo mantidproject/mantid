@@ -50,7 +50,7 @@ public:
     const std::string transfID()const; // {return "ModQ"; }
     /** energy conversion modes supported by this class; 
       * The class supports three standard energy conversion modes */
-    std::vector<std::string> getEmodes()const{ return Kernel::DeltaEMode().availableTypes();}
+    std::vector<std::string> getEmodes()const;
 
     bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
     bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i);
@@ -61,6 +61,9 @@ public:
     MDTransfInterface * clone() const{return new MDTransfModQ(*this);}
     //
     void initialize(const MDWSDescription &ConvParams);
+    /***/
+    virtual std::vector<double> getExtremumPoints(const double xMin, const double xMax,size_t det_num)const;
+
 
 // WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY CAN NOT RELY ON THE CONTENTS OF THE CLASS TO BE DEFINED (THEY ARE VIRTUAL STATIC METHODS)
     /** return the number of dimensions, calculated by the transformation from the workspace.

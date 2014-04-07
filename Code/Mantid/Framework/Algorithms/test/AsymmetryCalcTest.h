@@ -101,6 +101,30 @@ public:
       TS_ASSERT_EQUALS( outputWS->readY(0)[9], -0.5 ); // == (1 - 3)/(1 + 3)
   }
 
+  void test_yUnitLabel()
+  {
+    const std::string outputWSName = "AsymmetryCalcTest_yUnitLabel_OutputWS";
+
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(2,1);
+
+    AsymmetryCalc alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setProperty("OutputWorkspace", outputWSName);
+    alg.execute();
+
+    auto result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSName);
+
+    TS_ASSERT(result);
+
+    if( result )
+    {
+      TS_ASSERT_EQUALS( result->YUnitLabel(), "Asymmetry" );
+    }
+
+    AnalysisDataService::Instance().remove(outputWSName);
+  }
+
 private:
   AsymmetryCalc asymCalc;
   Mantid::DataHandling::LoadMuonNexus2 loader;

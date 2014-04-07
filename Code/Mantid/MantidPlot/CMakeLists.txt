@@ -85,7 +85,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Plot.cpp
                    src/PlotCurve.cpp
                    src/PlotDialog.cpp
-                   src/PlotEnrichement.cpp
                    src/PlotWizard.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
@@ -233,6 +232,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InstrumentWidget/SimpleWidget.cpp
                    src/Mantid/InstrumentWidget/Viewport.cpp
                    src/Mantid/InstrumentWidget/DetXMLFile.cpp
+                   src/Mantid/InstrumentWidget/UCorrectionDialog.cpp
 )
 
 ###########################################################################
@@ -320,7 +320,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Plot3DDialog.h
                    src/PlotCurve.h
                    src/PlotDialog.h
-                   src/PlotEnrichement.h
                    src/Plot.h
                    src/PlotToolInterface.h
                    src/PlotWizard.h
@@ -467,6 +466,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/SimpleWidget.h
                    src/Mantid/InstrumentWidget/Viewport.h
                    src/Mantid/InstrumentWidget/DetXMLFile.h
+                   src/Mantid/InstrumentWidget/UCorrectionDialog.h
 )
 
 ###########################################################################
@@ -711,6 +711,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/InstrumentWidget/Projection3D.h
                        src/Mantid/InstrumentWidget/Shape2DCollection.h
                        src/Mantid/InstrumentWidget/UnwrappedSurface.h
+					   src/Mantid/InstrumentWidget/UCorrectionDialog.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui
@@ -722,6 +723,7 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/ManageCustomMenus.ui
                src/Mantid/ManageInterfaceCategories.ui
                src/Mantid/MantidMDCurveDialog.ui
+			   src/Mantid/InstrumentWidget/UCorrectionDialog.ui
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${QTIPLOT_MOC_FILES} ${MANTID_MOC_FILES} )

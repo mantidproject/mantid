@@ -148,15 +148,15 @@ namespace Mantid
 
   
       //--->>> Thread control stuff
-      Kernel::ThreadScheduler * ts = new Kernel::ThreadSchedulerFIFO();
+      Kernel::ThreadSchedulerFIFO * ts(NULL);
       int nThreads(m_NumThreads);
       if(nThreads<0)nThreads= 0; // negative m_NumThreads correspond to all cores used, 0 no threads and positive number -- nThreads requested;
       bool runMultithreaded = false;
       if(m_NumThreads!=0)
       {
         runMultithreaded  = true;
-        // Create the thread pool that will run all of these.
-        ts = new Kernel::ThreadSchedulerFIFO();     
+        // Create the thread pool that will run all of these.  It will be deleted by the threadpool
+        ts = new Kernel::ThreadSchedulerFIFO();
         // it will initiate thread pool with number threads or machine's cores (0 in tp constructor)
         pProgress->resetNumSteps(nValidSpectra,0,1);
       }
@@ -229,8 +229,9 @@ namespace Mantid
       m_OutWSWrapper->pWorkspace()->setCoordinateSystem(m_coordinateSystem);
     }
     /**function calculates the size of temporary memory used to keep convertTo MD data before these data should be added to MDEvents
-    * @param nThreads  -- number of threads used to process data
-    * @param specSize  -- the size of single spectra in matrix workspace;
+    * @param nThreads        -- number of threads used to process data
+    * @param specSize        -- the size of single spectra in matrix workspace;
+    * @param nPointsToProcess -- total number of data points in the workspace
     */
     void ConvToMDHistoWS::estimateThreadWork(size_t nThreads,size_t specSize,size_t nPointsToProcess)
     {

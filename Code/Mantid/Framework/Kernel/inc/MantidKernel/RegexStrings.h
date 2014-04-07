@@ -1,7 +1,7 @@
 #ifndef REGEXSUPPORT_H
 #define REGEXSUPPORT_H
 
-#include "MantidKernel/Strings.h"
+#include "MantidKernel/DllConfig.h"
 #include <boost/regex.hpp>
 
 namespace Mantid 

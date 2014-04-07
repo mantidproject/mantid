@@ -1,8 +1,10 @@
 #include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 #include <cfloat>
+#include <iostream>
 
 namespace Mantid
 {

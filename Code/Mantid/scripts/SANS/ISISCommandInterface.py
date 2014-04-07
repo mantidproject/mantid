@@ -3,9 +3,9 @@
     be run
 """
 import isis_instrument
-from reduction.command_interface import ReductionSingleton  
-import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
-sanslog = sans_reduction_steps.sanslog
+from reducer_singleton import ReductionSingleton
+from mantid.kernel import Logger
+sanslog = Logger.get("SANS")
 
 import isis_reduction_steps
 import isis_reducer
@@ -15,11 +15,13 @@ from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 import copy
 from SANSadd2 import *
+import SANSUtility as su
 
 # disable plotting if running outside Mantidplot
 try:
     import mantidplot
 except:
+    mantidplot = None
     #this should happen when this is called from outside Mantidplot and only then, the result is that attempting to plot will raise an exception
     pass
 
@@ -153,6 +155,10 @@ def MaskFile(file_name):
         @param file_name: the settings file
     """
     _printMessage('#Opening "'+file_name+'"')
+
+    # ensure that no slice string is kept from previous executions.
+    ReductionSingleton().setSlicesLimits("")
+
     ReductionSingleton().user_settings = isis_reduction_steps.UserFile(
         file_name)
     status = ReductionSingleton().user_settings.execute(
@@ -223,6 +229,20 @@ def TransWorkspace(sample, can = None):
     ReductionSingleton().transmission_calculator.calculated_samp = sample 
     ReductionSingleton().transmission_calculator.calculated_can = can 
 
+def _return_old_compatibility_assign_methods(ws_name):
+    """For backward compatibility, AssignCan and AssignSample returns a tuple
+    with workspace name and the log entry if available.
+    
+    In the future, those methods should return just workspace name
+    """
+    logs = ""
+    if isinstance(ReductionSingleton().instrument, isis_instrument.SANS2D):
+        try:
+            logs = ReductionSingleton().instrument.get_detector_log(ws_name)
+        except:            
+            pass        
+    return ws_name, logs
+
 def AssignCan(can_run, reload = True, period = isis_reduction_steps.LoadRun.UNSET_PERIOD):
     """
         The can is a scattering run under the same conditions as the experimental run but the
@@ -240,18 +260,10 @@ def AssignCan(can_run, reload = True, period = isis_reduction_steps.LoadRun.UNSE
         mes += ', ' + str(period)
     mes += ')'
     _printMessage(mes)
-
-    if (not can_run) or (isinstance(can_run,str) and can_run.startswith('.')):
-        ReductionSingleton().background_subtracter = None
-        return '', None
-
-    ReductionSingleton().background_subtracter = \
-        isis_reduction_steps.CanSubtraction(
-                                can_run, reload=reload, period=period)
-    #ideally this code should live in a separate load can object 
-    logs = ReductionSingleton().background_subtracter.assign_can(
-        ReductionSingleton())
-    return ReductionSingleton().background_subtracter.workspace.wksp_name, logs
+    
+    ReductionSingleton().set_can(can_run, reload, period)
+    return _return_old_compatibility_assign_methods(
+        ReductionSingleton().get_can().wksp_name)
 
 def TransmissionSample(sample, direct, reload = True, period_t = -1, period_d = -1):
     """
@@ -300,8 +312,7 @@ def AssignSample(sample_run, reload = True, period = isis_reduction_steps.LoadRu
     
     global LAST_SAMPLE
     LAST_SAMPLE = ReductionSingleton().get_sample().wksp_name
-    return ReductionSingleton().get_sample().wksp_name, \
-        ReductionSingleton().get_sample().log
+    return _return_old_compatibility_assign_methods(LAST_SAMPLE)
 
 def SetCentre(xcoord, ycoord, bank = 'rear'):
     """
@@ -316,7 +327,7 @@ def SetCentre(xcoord, ycoord, bank = 'rear'):
     """
     _printMessage('SetCentre(' + str(xcoord) + ', ' + str(ycoord) + ')')
 
-    ReductionSingleton().set_beam_finder(sans_reduction_steps.BaseBeamFinder(
+    ReductionSingleton().set_beam_finder(isis_reduction_steps.BaseBeamFinder(
                                 float(xcoord)/1000.0, float(ycoord)/1000.0), bank)
 
 def GetMismatchedDetList():
@@ -324,25 +335,6 @@ def GetMismatchedDetList():
         Return the list of mismatched detector names
     """
     return ReductionSingleton().instrument.get_marked_dets()
-
-def _setUpPeriod(i):
-    trans_samp = ReductionSingleton().samp_trans_load
-    can = ReductionSingleton().background_subtracter
-    trans_can = ReductionSingleton().can_trans_load
-    new_sample_workspaces = AssignSample(ReductionSingleton().get_sample().loader._data_file, period=i)[0]
-    if can:
-        #replace one thing that gets overwritten
-        AssignCan(can.workspace._data_file, True, period=can.workspace.getCorrospondingPeriod(i, ReductionSingleton()))
-    if trans_samp:
-        trans = trans_samp.trans
-        direct = trans_samp.direct
-        TransmissionSample(trans._data_file, direct._data_file, True, period_t=trans.getCorrospondingPeriod(i, ReductionSingleton()),period_d=direct.getCorrospondingPeriod(i, ReductionSingleton()))  
-    if trans_can:
-        trans = trans_can.trans
-        direct = trans_can.direct
-        TransmissionCan(trans._data_file, direct._data_file, True, period_t=trans.getCorrospondingPeriod(i, ReductionSingleton()),period_d=direct.getCorrospondingPeriod(i, ReductionSingleton()))  
-
-    return new_sample_workspaces
 
 def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None, resetSetup=True, out_fit_settings = dict()):
     """
@@ -441,8 +433,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                 ReductionSingleton().instrument.setDetector('front')
                 ReductionSingleton()._sample_run.reload(ReductionSingleton())
                 #reassign can
-                if ReductionSingleton().background_subtracter:
-                    ReductionSingleton().background_subtracter.assign_can(ReductionSingleton())
+                if ReductionSingleton().get_can():
+                    ReductionSingleton().get_can().reload(ReductionSingleton())
                 if ReductionSingleton().samp_trans_load:
                     #refresh Transmission
                     ReductionSingleton().samp_trans_load.execute(ReductionSingleton(), None)
@@ -573,33 +565,37 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     if rAnds.fitScale==False:
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)          
         else:
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
                 Output="__fitRescaleAndShift")   
     elif rAnds.fitShift==False:
-        if rAnds.qRangeUserSelected:        
+        if rAnds.qRangeUserSelected:
+            function_input = 'name=TabulatedFunction, Workspace="'+str(frontData)+'"' +";name=FlatBackground"
+            ties = 'f1.A0='+str(rAnds.shift*rAnds.scale)
+            logger.warning('function input ' + str(function_input))
+
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)               
         else:           
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
                 Output="__fitRescaleAndShift")   
     else:
         if rAnds.qRangeUserSelected:          
             Fit(InputWorkspace=rearData, 
-                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground",
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
-            Fit(InputWorkspace=rearData, Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+            Fit(InputWorkspace=rearData, Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
                 +";name=FlatBackground",Output="__fitRescaleAndShift")
                         
     param = mtd['__fitRescaleAndShift_Parameters']
@@ -633,36 +629,70 @@ def _WavRangeReduction(name_suffix=None):
     """
         Run a reduction that has been set up, from loading the raw data to calculating Q
     """
+    def _setUpPeriod(period):
+        assert(ReductionSingleton().get_sample().loader.move2ws(period))
+        can = ReductionSingleton().get_can()
+        if can and can.loader.periods_in_file > 1:
+            can.loader.move2ws(period)
 
-    try:
-        # do a reduction
-        calculated = [ReductionSingleton()._reduce()]
+        for trans in [ReductionSingleton().samp_trans_load, ReductionSingleton().can_trans_load]:
+            if trans and trans.direct.periods_in_file > 1 and trans.trans.periods_in_file > 1:
+                trans.direct.move2ws(period)
+                trans.trans.move2next(period)
+        return
 
-        periods = ReductionSingleton().get_sample().loader.entries    
-        if len(periods) > 1:
-            run_setup = ReductionSingleton().settings()
-            for i in periods[1:len(periods)]:
-                ReductionSingleton.replace(copy.deepcopy(run_setup))
-                temp_workspaces = _setUpPeriod(i)
-                # do a reduction for period i
-                calculated.append(ReductionSingleton()._reduce())
-                delete_workspaces(temp_workspaces)
-            result = ReductionSingleton().get_out_ws_name(show_period=False)
-            all_results = calculated[0]
-            for name in calculated[1:len(calculated)]:
-                all_results += ',' + name
-            GroupWorkspaces(OutputWorkspace=result, InputWorkspaces=all_results)
+    def _applySuffix(result, name_suffix):
+        if name_suffix:
+            old = result
+            result += name_suffix
+            RenameWorkspace(InputWorkspace=old,OutputWorkspace= result)
+        return result
+
+    def _common_substring(val1, val2):
+        l = []
+        for i in range(len(val1)):
+            if val1[i]==val2[i]: l.append(val1[i])
+            else:
+                return ''.join(l)
+
+    def _group_workspaces(list_of_values, outputname):
+        allnames = ','.join(list_of_values)
+        GroupWorkspaces(InputWorkspaces=allnames, OutputWorkspace=outputname)
+
+    def _reduceAllSlices():
+        if ReductionSingleton().getNumSlices() > 1:
+            slices = []
+            for index in range(ReductionSingleton().getNumSlices()):
+                ReductionSingleton().setSliceIndex(index)
+                slices.append(ReductionSingleton()._reduce())
+            ReductionSingleton().setSliceIndex(0)
+            group_name = _common_substring(slices[0], slices[1])
+            if group_name[-2] == "_":
+                group_name = group_name[:-2]
+            _group_workspaces(slices, group_name)
+            return group_name
         else:
-            result = calculated[0]            
-    finally:
-        f=1 #_refresh_singleton()
+            return ReductionSingleton()._reduce()
+            
+            
 
-    if name_suffix:
-        old = result
-        result += name_suffix
-        RenameWorkspace(InputWorkspace=old,OutputWorkspace= result)
-        
-    return result
+    result = ""
+    if ReductionSingleton().get_sample().loader.periods_in_file == 1:
+        result = _reduceAllSlices()
+        return _applySuffix(result, name_suffix)
+
+    calculated = []
+    try:
+        for period in ReductionSingleton().get_sample().loader.entries:
+            _setUpPeriod(period)
+            calculated.append(_reduceAllSlices())                
+    
+    finally:
+        if len(calculated) > 0:
+            result = ReductionSingleton().get_out_ws_name(show_period=False)
+            _group_workspaces(calculated, result)
+
+    return _applySuffix(result, name_suffix)
 
 def delete_workspaces(workspaces):
     """
@@ -712,7 +742,7 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
     if resetSetup:
         _refresh_singleton()
 
-    if plot:
+    if plot and mantidplot:
         mantidplot.plotSpectrum(calculated, 0)
     
     #return just the workspace name of the full range
@@ -745,7 +775,7 @@ def PhiRanges(phis, plot=True):
     finally:
         _refresh_singleton()
     
-    if plot:
+    if plot and mantidplot:
         mantidplot.plotSpectrum(calculated, 0)
     
     #return just the workspace name of the full range
@@ -906,6 +936,12 @@ def LimitsQXY(qmin, qmax, step, type):
 
     settings.readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type, ReductionSingleton())
 
+def SetEventSlices(input_str):
+    """    
+    """
+    ReductionSingleton().setSlicesLimits(input_str)
+
+
 def PlotResult(workspace, canvas=None):
     """
         Draws a graph of the passed workspace. If the workspace is 2D (has many spectra
@@ -914,6 +950,10 @@ def PlotResult(workspace, canvas=None):
         @param canvas: optional handle to an existing graph to write the plot to
         @return: a handle to the graph that was written to
     """ 
+    if not mantidplot:
+        issueWarning('Plot functions are not available, is this being run from outside Mantidplot?')
+        return
+
     #ensure that we are dealing with a workspace handle rather than its name
     workspace = mtd[str(workspace)]
     if isinstance(workspace, WorkspaceGroup):
@@ -921,14 +961,10 @@ def PlotResult(workspace, canvas=None):
     else:
         numSpecs = workspace.getNumberHistograms()
 
-    try:
-        if numSpecs == 1:
-            graph = mantidplot.plotSpectrum(workspace,0)
-        else:        
-            graph = mantidplot.importMatrixWorkspace(workspace.getName()).plotGraph2D()
-
-    except NameError:
-        issueWarning('Plot functions are not available, is this being run from outside Mantidplot?')
+    if numSpecs == 1:
+        graph = mantidplot.plotSpectrum(workspace,0)
+    else:        
+        graph = mantidplot.importMatrixWorkspace(workspace.getName()).plotGraph2D()
         
     if not canvas is None:
         #we were given a handle to an existing graph, use it
@@ -965,8 +1001,12 @@ def DisplayMask(mask_worksp=None):
         
         if samp:
             counts_data = '__DisplayMasked_tempory_wksp'
-            Integration(InputWorkspace=samp,OutputWorkspace= counts_data)
-            CloneWorkspace(InputWorkspace=samp,OutputWorkspace= mask_worksp)
+            CloneWorkspace(InputWorkspace=samp, OutputWorkspace=mask_worksp)
+
+            if su.isEventWorkspace(samp):
+                su.fromEvent2Histogram(mask_worksp)                
+            Integration(InputWorkspace=mask_worksp,OutputWorkspace= counts_data)
+
         else:
             instrument.load_empty(mask_worksp)
             instrument.set_up_for_run('emptyInstrument')
@@ -1056,7 +1096,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
     if xstart or ystart:
         ReductionSingleton().set_beam_finder(
-            sans_reduction_steps.BaseBeamFinder(
+            isis_reduction_steps.BaseBeamFinder(
             float(xstart), float(ystart)),det_bank)
 
     beamcoords = ReductionSingleton().get_beam_center()
@@ -1088,7 +1128,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         it = i
         
         centre_reduction.set_beam_finder(
-            sans_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
+            isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
 
         resX, resY = centre.SeekCentre(centre_reduction, [XNEW, YNEW])
         centre_reduction = copy.deepcopy(ReductionSingleton().reference())
@@ -1096,15 +1136,16 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
         centre.logger.notice(centre.status_str(it, resX, resY))
         
-        try :
-            if not graph_handle:
-                #once we have a plot it will be updated automatically when the workspaces are updated
-                graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
-            graph_handle.activeLayer().setTitle(
+        if mantidplot:
+            try :
+                if not graph_handle:
+                    #once we have a plot it will be updated automatically when the workspaces are updated
+                    graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
+                graph_handle.activeLayer().setTitle(
                         centre.status_str(it, resX, resY))
-        except :
-            #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
-            pass
+            except :
+                #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
+                pass
 
         #have we stepped across the y-axis that goes through the beam center?  
         if resX > resX_old:
@@ -1128,7 +1169,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         YNEW -= YSTEP
     
     ReductionSingleton().set_beam_finder(
-        sans_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
+        isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
     centre.logger.notice("Centre coordinates updated: [" + str(XNEW)+ ", "+ str(YNEW) + ']')
     
     return XNEW, YNEW

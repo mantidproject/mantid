@@ -27,6 +27,7 @@ It may give better results on [[Workspace2D]]'s that were converted to [[MDWorks
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidKernel/VMD.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/type_traits/integral_constant.hpp>
 
 #include <map>
@@ -317,9 +318,7 @@ namespace MDAlgorithms
 
     // Calculate a threshold below which a box is too diffuse to be considered a peak.
     signal_t thresholdDensity = ws->getBox()->getSignalNormalized() * DensityThresholdFactor * m_densityScaleFactor;
-    // cppcheck get confused by NaN check
-    // cppcheck-suppress duplicateExpression
-    if ((thresholdDensity != thresholdDensity) || (thresholdDensity == std::numeric_limits<double>::infinity())
+    if ( boost::math::isnan(thresholdDensity) || (thresholdDensity == std::numeric_limits<double>::infinity())
         || (thresholdDensity == -std::numeric_limits<double>::infinity()))
     {
       g_log.warning() << "Infinite or NaN overall density found. Your input data may be invalid. Using a 0 threshold instead." << std::endl;

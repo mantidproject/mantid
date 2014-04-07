@@ -12,14 +12,15 @@ namespace Mantid
   {
     /**
     Provide lorentzian peak shape function interface to IPeakFunction.
-    I.e. the function: <math>\frac{A}{\pi}( \Gamma/((x-PeakCentre)^2+HWHM^2) ).
+    I.e. the function: \f$ \frac{A}{\pi}( \Gamma/2((x-PeakCentre)^2+(\Gamma/2)^2) )\f$.
 
+    \f$\Gamma/2\f$ (HWHM) - half-width at half-maximum
 
     Lorentzian parameters:
     <UL>
-    <LI> Amplitude - Maximum height of peak at x=PeakCentre(default 1.0)</LI>
+    <LI> Amplitude - Intensity scaling (default 1.0)</LI>
     <LI> PeakCentre - centre of peak (default 0.0)</LI>
-    <LI> HWHM - half-width half-maximum (default 0.0)</LI>
+    <LI> FWHM - Full-width half-maximum (default 0.0)</LI>
     </UL>
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -51,10 +52,10 @@ namespace Mantid
       /// overwrite IPeakFunction base class methods
       virtual double centre()const {return getParameter("PeakCentre");}
       virtual double height()const {return getParameter("Amplitude");}
-      virtual double fwhm()const {return 2*getParameter("HWHM");}
+      virtual double fwhm()const {return getParameter("FWHM");}
       virtual void setCentre(const double c) {setParameter("PeakCentre",c);}
       virtual void setHeight(const double h) {setParameter("Amplitude",h);}
-      virtual void setFwhm(const double w) {setParameter("HWHM",w/2.0);}
+      virtual void setFwhm(const double w) {setParameter("FWHM",w);}
 
       /// overwrite IFunction base class methods
       std::string name()const{return "Lorentzian";}

@@ -163,8 +163,6 @@
 #include <QSpinBox>
 #include <QMdiArea>
 #include <QMdiSubWindow>
-#include <QUndoStack>
-#include <QUndoView>
 #include <QSignalMapper>
 #include <QDesktopWidget>
 #include <QPair>
@@ -339,6 +337,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   resultsLog = new MessageDisplay(MessageDisplay::EnableLogLevelControl, logWindow);
   logWindow->setWidget(resultsLog);
   connect(resultsLog, SIGNAL(errorReceived(const QString &)), logWindow, SLOT(show()));
+  
 
   // Start Mantid
   // Set the Paraview path BEFORE libaries are loaded. Doing it here prevents
@@ -413,21 +412,12 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   explorerSplitter->setSizes( splitterSizes << 45 << 45);
   explorerWindow->hide();
 
-  undoStackWindow = new QDockWidget(this);
-  undoStackWindow->setObjectName("undoStackWindow"); // this is needed for QMainWindow::restoreState()
-  undoStackWindow->setWindowTitle(tr("Undo Stack"));
-  addDockWidget(Qt::RightDockWidgetArea, undoStackWindow);
-
-  d_undo_view = new QUndoView(undoStackWindow);
-  d_undo_view->setCleanIcon(QIcon(getQPixmap("filesave_xpm")));
-  undoStackWindow->setWidget(d_undo_view);
-  undoStackWindow->hide();
-
   // Needs to be done after initialization of dock windows,
   // because we now use QDockWidget::toggleViewAction()
   createActions();
   initToolBars();
   initMainMenu();
+  makeToolbarsMenu();
 
   d_workspace = new QMdiArea();
   d_workspace->setOption(QMdiArea::DontMaximizeSubWindowOnActivation);
@@ -506,10 +496,11 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   renamedTables = QStringList();
   if (!factorySettings)
     readSettings();
+
   createLanguagesList();
   insertTranslatedStrings();
   disableToolbars();
-
+  displayToolbars();
   actionNextWindow = new QAction(QIcon(getQPixmap("next_xpm")), tr("&Next","next window"), this);
   actionNextWindow->setShortcut( tr("F5","next window shortcut") );
   connect(actionNextWindow, SIGNAL(activated()), d_workspace, SLOT(activateNextSubWindow()));
@@ -805,11 +796,11 @@ void ApplicationWindow::initGlobalConstants()
   d_show_table_comments = false;
 
   titleOn = true;
+  // 'Factory' default is to show top & right axes but without labels
   d_show_axes = QVector<bool> (QwtPlot::axisCnt, true);
-  // 'Factory' default is to not show top & right axes
-  d_show_axes[1] = false;
-  d_show_axes[3] = false;
   d_show_axes_labels = QVector<bool> (QwtPlot::axisCnt, true);
+  d_show_axes_labels[1] = false;
+  d_show_axes_labels[3] = false;
   canvasFrameWidth = 0;
   defaultPlotMargin = 0;
   drawBackbones = true;
@@ -821,7 +812,7 @@ void ApplicationWindow::initGlobalConstants()
   autoscale2DPlots = true;
   autoScaleFonts = true;
   autoResizeLayers = true;
-  antialiasing2DPlots = false; //Mantid
+  antialiasing2DPlots = true; 
   fixedAspectRatio2DPlots = false; //Mantid
   d_scale_plots_on_print = false;
   d_print_cropmarks = false;
@@ -831,15 +822,15 @@ void ApplicationWindow::initGlobalConstants()
   defaultCurveLineWidth = 1;
   defaultSymbolSize = 7;
 
-  majTicksStyle = static_cast<int>(ScaleDraw::Out);
-  minTicksStyle = static_cast<int>(ScaleDraw::Out);
+  majTicksStyle = static_cast<int>(ScaleDraw::In);
+  minTicksStyle = static_cast<int>(ScaleDraw::In);
   minTicksLength = 5;
   majTicksLength = 9;
 
   legendFrameStyle = static_cast<int>(LegendWidget::Line);
   legendTextColor = Qt::black;
   legendBackground = Qt::white;
-  legendBackground.setAlpha(0); // transparent by default;
+  legendBackground.setAlpha(255); // opaque by default;
 
   defaultArrowLineWidth = 1;
   defaultArrowColor = Qt::black;
@@ -1120,7 +1111,6 @@ void ApplicationWindow::insertTranslatedStrings()
 
   explorerWindow->setWindowTitle(tr("Project Explorer"));
   logWindow->setWindowTitle(tr("Results Log"));
-  undoStackWindow->setWindowTitle(tr("Undo Stack"));
   displayBar->setWindowTitle(tr("Data Display"));
   plotTools->setWindowTitle(tr("Plot"));
   standardTools->setWindowTitle(tr("Standard Tools"));
@@ -1171,7 +1161,7 @@ void ApplicationWindow::initMainMenu()
   mantidUI->addMenuItems(view);
 
   view->insertSeparator();
-  view->addAction(actionToolBars);
+  toolbarsMenu = view->addMenu(tr("&Toolbars"));
   view->addAction(actionShowConfigureDialog);
   view->insertSeparator();
   view->addAction(actionCustomActionDialog);
@@ -1436,11 +1426,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
   // these use the same keyboard shortcut (Ctrl+Return) and should not be enabled at the same time
   actionTableRecalculate->setEnabled(false);
 
-  // clear undo stack view (in case window is not a matrix)
-  d_undo_view->setStack(0);
-  actionUndo->setEnabled(false);
-  actionRedo->setEnabled(false);
-
   if(w){
     actionPrintAllPlots->setEnabled(projectHas2DPlots());
     actionPrint->setEnabled(true);
@@ -1545,9 +1530,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
       matrixMenuAboutToShow();
       myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
       analysisMenuAboutToShow();
-      d_undo_view->setEmptyLabel(w->objectName() + ": " + tr("Empty Stack"));
-      QUndoStack *stack = dynamic_cast<Matrix *>(w)->undoStack();
-      d_undo_view->setStack(stack);
 
     } else if (w->isA("Note")) {
       actionSaveTemplate->setEnabled(false);
@@ -2977,6 +2959,9 @@ void ApplicationWindow::setPreferences(Graph* g)
           g->setAxisTitle(i, tr(" "));
       }
     }
+
+
+
     //set the scale type i.e. log or linear
     g->setScale(QwtPlot::yLeft, d_axes_scales[0]);
     g->setScale(QwtPlot::yRight, d_axes_scales[1]);
@@ -3001,6 +2986,7 @@ void ApplicationWindow::setPreferences(Graph* g)
     for (int i = 0; i < QwtPlot::axisCnt; i++)
       g->setAxisTitleDistance(i, d_graph_axes_labels_dist);
     //    need to call the plot functions for log/linear, errorbars and distribution stuff
+
   }
 
   g->setSynchronizedScaleDivisions(d_synchronize_graph_scales);
@@ -3111,7 +3097,6 @@ Table* ApplicationWindow::newHiddenTable(const QString& name, const QString& lab
 void ApplicationWindow::initTable(Table* w, const QString& caption)
 {
   QString name = caption;
-  name = name.replace ("_","-");
 
   while(name.isEmpty() || alreadyUsedName(name))
     name = generateUniqueName(tr("Table"));
@@ -3429,10 +3414,6 @@ void ApplicationWindow::initMatrix(Matrix* m, const QString& caption)
   m->setNumericPrecision(d_decimal_digits);
 
   addMdiSubWindow(m);
-
-  QUndoStack *stack = m->undoStack();
-  connect(stack, SIGNAL(canUndoChanged(bool)), actionUndo, SLOT(setEnabled(bool)));
-  connect(stack, SIGNAL(canRedoChanged(bool)), actionRedo, SLOT(setEnabled(bool)));
 
   connect(m, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(updateMatrixPlots(MdiSubWindow *)));
 
@@ -5018,6 +4999,10 @@ void ApplicationWindow::readSettings()
   changeAppStyle(settings.value("/Style", appStyle).toString());
   autoSave = settings.value("/AutoSave", false).toBool();
   autoSaveTime = settings.value("/AutoSaveTime",15).toInt();
+  //set logging level to the last saved level
+  int lastLoggingLevel = settings.value("/LastLoggingLevel", Mantid::Kernel::Logger::Priority::PRIO_NOTICE).toInt();
+  Mantid::Kernel::Logger::setLevelForAll(lastLoggingLevel);
+
   d_backup_files = settings.value("/BackupProjects", true).toBool();
   d_init_window_type = (WindowType)settings.value("/InitWindow", NoWindow).toInt();
   defaultScriptingLang = settings.value("/ScriptingLang","Python").toString();    //Mantid M. Gigg
@@ -5152,7 +5137,54 @@ void ApplicationWindow::readSettings()
   /* --------------- end group Tables ------------------------ */
 
   /* --------------- group 2D Plots ----------------------------- */
+  
   settings.beginGroup("/2DPlots");
+   
+  // Transform from the old setting for plot defaults, will only happen once.
+  if ( !settings.contains("/UpdateForPlotImprovements1") )
+  {    
+    settings.writeEntry("/UpdateForPlotImprovements1","true");
+    settings.beginGroup("/General");
+
+    settings.writeEntry("/Antialiasing","true");
+
+    //enable right and top axes without labels
+    settings.beginWriteArray("EnabledAxes");
+    int i=1;
+    settings.setArrayIndex(i);
+    settings.writeEntry("enabled", "true");
+    settings.writeEntry("labels", "false");
+    i=3;
+    settings.setArrayIndex(i);
+    settings.writeEntry("enabled", "true");
+    settings.writeEntry("labels", "false");
+    settings.endArray();
+    settings.endGroup();
+ 
+    //ticks should be in
+    settings.beginGroup("/Ticks");
+    settings.writeEntry("/MajTicksStyle", ScaleDraw::In);
+    settings.writeEntry("/MinTicksStyle", ScaleDraw::In);
+    settings.endGroup();
+
+    //legend to opaque
+    settings.beginGroup("/Legend");
+    settings.writeEntry("/Transparency", 255); 
+    settings.endGroup(); // Legend
+  }
+    // Transform from the old setting for plot defaults, will only happen once.
+  if ( !settings.contains("/UpdateForPlotImprovements2") )
+  {    
+    settings.writeEntry("/UpdateForPlotImprovements2","true");
+    settings.beginGroup("/General");
+
+    //turn axes backbones off as these rarely join at the corners
+    settings.writeEntry("/AxesBackbones","false");
+
+    settings.writeEntry("/CanvasFrameWidth","1");
+    settings.endGroup();
+  }
+  
   settings.beginGroup("/General");
   titleOn = settings.value("/Title", true).toBool();
   canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
@@ -5166,6 +5198,7 @@ void ApplicationWindow::readSettings()
   autoscale2DPlots = settings.value("/Autoscale", true).toBool();
   autoScaleFonts = settings.value("/AutoScaleFonts", true).toBool();
   autoResizeLayers = settings.value("/AutoResizeLayers", true).toBool();
+
   antialiasing2DPlots = settings.value("/Antialiasing", false).toBool(); //Mantid
   fixedAspectRatio2DPlots = settings.value("/FixedAspectRatio2DPlots", false).toBool(); //Mantid
   d_scale_plots_on_print = settings.value("/ScaleLayersOnPrint", false).toBool();
@@ -5204,15 +5237,15 @@ void ApplicationWindow::readSettings()
   settings.endGroup(); // General
 
   settings.beginGroup("/Curves");
-  defaultCurveStyle = settings.value("/Style", Graph::Line).toInt();
+  defaultCurveStyle = settings.value("/Style", Graph::LineSymbols).toInt();
   defaultCurveLineWidth = settings.value("/LineWidth", 1).toDouble();
-  defaultSymbolSize = settings.value("/SymbolSize", 7).toInt();
+  defaultSymbolSize = settings.value("/SymbolSize", 3).toInt();
   applyCurveStyleToMantid = settings.value("/ApplyMantid", true).toBool();
   settings.endGroup(); // Curves
 
   settings.beginGroup("/Ticks");
-  majTicksStyle = settings.value("/MajTicksStyle", ScaleDraw::Out).toInt();
-  minTicksStyle = settings.value("/MinTicksStyle", ScaleDraw::Out).toInt();
+  majTicksStyle = settings.value("/MajTicksStyle", ScaleDraw::In).toInt();
+  minTicksStyle = settings.value("/MinTicksStyle", ScaleDraw::In).toInt();
   minTicksLength = settings.value("/MinTicksLength", 5).toInt();
   majTicksLength = settings.value("/MajTicksLength", 9).toInt();
   settings.endGroup(); // Ticks
@@ -5429,6 +5462,10 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/Style", appStyle);
   settings.setValue("/AutoSave", autoSave);
   settings.setValue("/AutoSaveTime", autoSaveTime);
+  //save current logger level from the root logger ""
+  int lastLoggingLevel = Mantid::Kernel::Logger::get("").getLevel();
+  settings.setValue("/LastLoggingLevel", lastLoggingLevel);
+
   settings.setValue("/BackupProjects", d_backup_files);
   settings.setValue("/InitWindow", static_cast<int>(d_init_window_type));
 
@@ -8770,6 +8807,22 @@ void ApplicationWindow::setActiveWindow(MdiSubWindow* w)
   {
     d_active_window = NULL;
   }
+  else
+  {
+    // This make sure that we don't have two versions of current active window (d_active_window and
+    // active window of MdiArea) and they are either equal (when docked window is active> or the
+    // latter one is NULL (when floating window is active).
+    if ( d_active_window->getFloatingWindow() )
+    {
+      // If floating window is activated, we set MdiArea to not have any active sub-window.
+      d_workspace->setActiveSubWindow(NULL);
+    }
+    else if ( QMdiSubWindow* w = d_active_window->getDockedWindow() )
+    {
+      // If docked window activated, activate it in MdiArea as well.
+      d_workspace->setActiveSubWindow(w);
+    }
+  }
 }
 
 
@@ -9220,26 +9273,6 @@ void ApplicationWindow::fileMenuAboutToShow()
 
 void ApplicationWindow::editMenuAboutToShow()
 {
-  MdiSubWindow *w = activeWindow();
-  if (!w){
-    actionUndo->setEnabled(false);
-    actionRedo->setEnabled(false);
-    return;
-  }
-
-  if (qobject_cast<Note *>(w)){
-    QTextDocument* doc = dynamic_cast<Note*>(w)->editor()->document();
-    actionUndo->setEnabled(doc->isUndoAvailable());
-    actionRedo->setEnabled(doc->isRedoAvailable());
-  } else if (qobject_cast<Matrix *>(w)){
-    QUndoStack *stack = (dynamic_cast<Matrix*>(w))->undoStack();
-    actionUndo->setEnabled(stack->canUndo());
-    actionRedo->setEnabled(stack->canRedo());
-  } else {
-    actionUndo->setEnabled(false);
-    actionRedo->setEnabled(false);
-  }
-
   reloadCustomActions();
 }
 
@@ -9343,6 +9376,17 @@ void ApplicationWindow::windowsMenuAboutToShow()
   reloadCustomActions();
 }
 
+namespace // anonymous
+{
+  /**
+   * Helper function used with Qt's qSort to make sure interfaces are in alphabetical order.
+   */
+  bool interfaceNameComparator(const QPair<QString, QString> & lhs, const QPair<QString, QString> & rhs)
+  {
+    return lhs.first.toLower() < rhs.first.toLower();
+  }
+} // anonymous namespace
+
 void ApplicationWindow::interfaceMenuAboutToShow()
 {
   interfaceMenu->clear();
@@ -9366,6 +9410,10 @@ void ApplicationWindow::interfaceMenuAboutToShow()
     interfaceMenu->insertItem(tr(category), categoryMenu);
     categoryMenus[category] = categoryMenu;
   }
+
+  // Show the interfaces in alphabetical order in their respective submenus.
+  qSort(m_interfaceNameDataPairs.begin(), m_interfaceNameDataPairs.end(), 
+    interfaceNameComparator);
 
   // Turn the name/data pairs into QActions with which we populate the menus.
   foreach(const auto interfaceNameDataPair, m_interfaceNameDataPairs)
@@ -9514,42 +9562,13 @@ void ApplicationWindow::timerEvent ( QTimerEvent *e)
 
 void ApplicationWindow::dropEvent( QDropEvent* e )
 {
-  if (mantidUI->drop(e)) return;//Mantid
-
-  QStringList fileNames;
-  if (Q3UriDrag::decodeLocalFiles(e, fileNames)){
-    QList<QByteArray> lst = QImageReader::supportedImageFormats() << "JPG";
-    QStringList asciiFiles;
-
-    for(int i = 0; i<(int)fileNames.count(); i++){
-      QString fn = fileNames[i];
-      QFileInfo fi (fn);
-      QString ext = fi.extension().lower();
-      QStringList tempList;
-      QByteArray temp;
-      // convert QList<QByteArray> to QStringList to be able to 'filter'
-      foreach(temp,lst)
-      tempList.append(QString(temp));
-      QStringList l = tempList.filter(ext, Qt::CaseInsensitive);
-      if (l.count()>0)
-        loadImage(fn);
-      else if ( ext == "opj" || ext == "qti")
-        open(fn);
-      else
-        asciiFiles << fn;
-    }
-
-    importASCII(asciiFiles, ImportASCIIDialog::NewTables, columnSeparator, ignoredLines,
-        renameColumns, strip_spaces, simplify_spaces, d_ASCII_import_comments,
-        d_import_dec_separators, d_ASCII_import_locale, d_ASCII_comment_string,
-        d_ASCII_import_read_only, d_ASCII_end_line,"");
-  }
+    mantidUI->drop(e);
 }
+
 
 void ApplicationWindow::dragEnterEvent( QDragEnterEvent* e )
 {
   if (e->source()){
-    //e->ignore();//Mantid
     e->accept();//Mantid
     return;
   }
@@ -11175,27 +11194,27 @@ void ApplicationWindow::openInstrumentWindow(const QStringList &list)
   }
 }
 
-/** This method opens script window when  project file is loaded
+/** This method opens script window with a list of scripts loaded
  */
 void ApplicationWindow::openScriptWindow(const QStringList &list)
 {	
   showScriptWindow();
   if(!scriptingWindow) 
     return;
+
   scriptingWindow->setWindowTitle("MantidPlot: " + scriptingEnv()->languageName() + " Window");
-  QString s=list[0];
-  QStringList scriptnames=s.split("\t");
-  int count=scriptnames.size();
-  if(count==0) 
-    return;
-  // don't create a new tab when the first script file from theproject file  opened
-  if(!scriptnames[1].isEmpty()) 
-    scriptingWindow->open(scriptnames[1],false);
-  // create a new tab  and open the script for all otehr filenames
-  for(int i=2;i<count;++i)
-  {   
-    if(!scriptnames[i].isEmpty())
-      scriptingWindow->open(scriptnames[i],true);
+  QStringList scriptnames;
+
+  foreach (QString fileNameEntry, list)
+  {
+    scriptnames.append(fileNameEntry.split("\t"));
+  }
+
+  bool newTab = false;
+  foreach (QString scriptname, scriptnames)
+  {
+    scriptingWindow->open(scriptname,newTab);
+    newTab=false;
   }
 }
 
@@ -12693,14 +12712,6 @@ void ApplicationWindow::createActions()
   actionLoad = new QAction(QIcon(getQPixmap("import_xpm")), tr("&Import ASCII..."), this);
   connect(actionLoad, SIGNAL(activated()), this, SLOT(importASCII()));
 
-  actionUndo = new QAction(QIcon(getQPixmap("undo_xpm")), tr("&Undo"), this);
-  actionUndo->setShortcut( tr("Ctrl+Z") );
-  connect(actionUndo, SIGNAL(activated()), this, SLOT(undo()));
-
-  actionRedo = new QAction(QIcon(getQPixmap("redo_xpm")), tr("&Redo"), this);
-  actionRedo->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_Z));
-  connect(actionRedo, SIGNAL(activated()), this, SLOT(redo()));
-
   actionCopyWindow = new QAction(QIcon(getQPixmap("duplicate_xpm")), tr("&Duplicate"), this);
   connect(actionCopyWindow, SIGNAL(activated()), this, SLOT(clone()));
 
@@ -12726,8 +12737,6 @@ void ApplicationWindow::createActions()
 
   actionShowLog = logWindow->toggleViewAction();
   actionShowLog->setIcon(getQPixmap("log_xpm"));
-
-  actionShowUndoStack = undoStackWindow->toggleViewAction();
 
   actionAddLayer = new QAction(QIcon(getQPixmap("newLayer_xpm")), tr("Add La&yer"), this);
   actionAddLayer->setShortcut( tr("Alt+L") );
@@ -12784,7 +12793,7 @@ void ApplicationWindow::createActions()
   actionAddErrorBars->setShortcut( tr("Ctrl+B") );
   connect(actionAddErrorBars, SIGNAL(activated()), this, SLOT(addErrorBars()));
 
-  actionRemoveErrorBars = new QAction(QIcon(getQPixmap("errors_xpm")), tr("Remove Error Bars..."), this);
+  actionRemoveErrorBars = new QAction(QIcon(getQPixmap("errors_remove_xpm")), tr("Remove Error Bars..."), this);
   //actionRemoveErrorBars->setShortcut( tr("Ctrl+B") );
   connect(actionRemoveErrorBars, SIGNAL(activated()), this, SLOT(removeErrorBars()));
 
@@ -13366,11 +13375,7 @@ void ApplicationWindow::createActions()
 
   actionEditFunction = new QAction(tr("&Edit Function..."), this);
   connect(actionEditFunction, SIGNAL(activated()), this, SLOT(showFunctionDialog()));
-
-  actionToolBars = new QAction(tr("&Toolbars..."), this);
-  actionToolBars->setShortcut(tr("Ctrl+Shift+T"));
-  connect(actionToolBars, SIGNAL(activated()), this, SLOT(showToolBarsMenu()));
-
+  
   actionFontBold = new QAction("B", this);
   actionFontBold->setToolTip(tr("Bold"));
   QFont font = appFont;
@@ -13435,6 +13440,10 @@ void ApplicationWindow::createActions()
   actionCatalogSearch = new QAction("Search",this);
   actionCatalogSearch->setToolTip(tr("Search data in archives."));
   connect(actionCatalogSearch, SIGNAL(activated()), this, SLOT(CatalogSearch()));
+
+  actionCatalogPublish = new QAction("Publish",this);
+  actionCatalogPublish->setToolTip(tr("Publish data to the archives."));
+  connect(actionCatalogPublish, SIGNAL(activated()), this, SLOT(CatalogPublish()));
 
   actionCatalogLogout = new QAction("Logout",this);
   actionCatalogLogout->setToolTip(tr("Catalog Logout"));
@@ -13531,14 +13540,6 @@ void ApplicationWindow::translateActionsStrings()
   actionLoad->setToolTip(tr("Import data file(s)"));
   actionLoad->setShortcut(tr("Ctrl+K"));
 
-  actionUndo->setMenuText(tr("&Undo"));
-  actionUndo->setToolTip(tr("Undo changes"));
-  actionUndo->setShortcut(tr("Ctrl+Z"));
-
-  actionRedo->setMenuText(tr("&Redo"));
-  actionRedo->setToolTip(tr("Redo changes"));
-  actionRedo->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_Z));
-
   actionCopyWindow->setMenuText(tr("&Duplicate"));
   actionCopyWindow->setToolTip(tr("Duplicate window"));
 
@@ -13566,9 +13567,6 @@ void ApplicationWindow::translateActionsStrings()
 
   actionShowLog->setMenuText(tr("Results &Log"));
   actionShowLog->setToolTip(tr("Results Log"));
-
-  actionShowUndoStack->setMenuText(tr("&Undo/Redo Stack"));
-  actionShowUndoStack->setToolTip(tr("Show available undo/redo commands"));
 
 #ifdef SCRIPTING_PYTHON
   actionShowScriptWindow->setMenuText(tr("&Script Window"));
@@ -13611,10 +13609,6 @@ void ApplicationWindow::translateActionsStrings()
   actionCloseAllWindows->setShortcut(tr("Ctrl+Q"));
 
   actionDeleteFitTables->setMenuText(tr("Delete &Fit Tables"));
-
-  actionToolBars->setMenuText(tr("&Toolbars..."));
-  actionToolBars->setShortcut(tr("Ctrl+Shift+T"));
-
   actionShowPlotWizard->setMenuText(tr("Plot &Wizard"));
   actionShowPlotWizard->setShortcut(tr("Ctrl+Alt+W"));
 
@@ -14234,10 +14228,25 @@ MultiLayer* ApplicationWindow::plotSpectrogram(Matrix *m, Graph::CurveType type)
 
   plot->plotSpectrogram(m, type);
 
+  setSpectrogramTickStyle(plot);  
+
   plot->setAutoScale();//Mantid
 
   QApplication::restoreOverrideCursor();
   return g;
+}
+
+void ApplicationWindow::setSpectrogramTickStyle(Graph* g)
+{
+  //always use the out tick style for colour bar axes
+  QList<int> ticksList;
+  ticksList<<majTicksStyle<<Graph::Ticks::Out<<majTicksStyle<<majTicksStyle;
+  g->setMajorTicksType(ticksList);
+  ticksList.clear();
+  ticksList<<minTicksStyle<<Graph::Ticks::Out<<minTicksStyle<<minTicksStyle;
+  g->setMinorTicksType(ticksList);
+  //reset this as the colourbar should now be detectable
+  g->drawAxesBackbones(drawBackbones);
 }
 
 ApplicationWindow* ApplicationWindow::importOPJ(const QString& filename, bool factorySettings, bool newProject)
@@ -14742,7 +14751,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
         }
         catch(std::runtime_error& exc)
         {
-          std::cerr << "Error thrown while running scrip file asynchronously '" << exc.what() << "'\n";
+          std::cerr << "Error thrown while running script file asynchronously '" << exc.what() << "'\n";
           setExitCode(1);
         }
         saved = true;
@@ -14955,7 +14964,6 @@ Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder
 
   if (fn.contains(".opj", Qt::CaseInsensitive) || fn.contains(".ogm", Qt::CaseInsensitive) ||
       fn.contains(".ogw", Qt::CaseInsensitive) || fn.contains(".ogg", Qt::CaseInsensitive))
-    // cppcheck-suppress unusedScopedObject
     ImportOPJ(this, fn);
   else{
     QFile f(fname);
@@ -16434,6 +16442,7 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
     code += in.readLine() + "\n";
   }
   Script *runner = scriptingEnv()->newScript(filename, this, Script::NonInteractive);
+  connect(runner, SIGNAL(error(const QString &, const QString &, int)), this, SLOT(onScriptExecuteError(const QString &, const QString &, int)));
   runner->redirectStdOut(false);
   scriptingEnv()->redirectStdOut(false);
   if(execMode == Script::Asynchronous)
@@ -16452,6 +16461,24 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
     runner->execute(code);
   }
   delete runner;
+}
+
+/**
+ * This is the slot for handing script execution errors. It is only
+ * attached by ::executeScriptFile which is only done in the '-xq'
+ * command line option.
+ *
+ * @param message Normally the stacktrace of the error.
+ * @param scriptName The name of the file.
+ * @param lineNumber The line number in the script that caused the error.
+ */
+void ApplicationWindow::onScriptExecuteError(const QString & message, const QString & scriptName, int lineNumber)
+{
+  g_log.fatal() << "Fatal error on line " << lineNumber << " of \"" << scriptName.toStdString()
+            << "\" encountered:\n"
+            << message.toStdString();
+  this->setExitCode(1);
+  this->exitWithPresetCode();
 }
 
 /**
@@ -16679,51 +16706,52 @@ void ApplicationWindow::scriptsDirPathChanged(const QString& path)
 //  }
 }
 
-void ApplicationWindow::showToolBarsMenu()
+void ApplicationWindow::makeToolbarsMenu()
+// cppcheck-suppress publicAllocationError
 {
-  QMenu toolBarsMenu;
-
-  QAction *actionFileTools = new QAction(standardTools->windowTitle(), this);
+  actionFileTools = new QAction(standardTools->windowTitle(), toolbarsMenu);
   actionFileTools->setCheckable(true);
-  actionFileTools->setChecked(standardTools->isVisible());
-  connect(actionFileTools, SIGNAL(toggled(bool)), standardTools, SLOT(setVisible(bool)));
-  toolBarsMenu.addAction(actionFileTools);
+  toolbarsMenu->addAction(actionFileTools);
 
-  QAction *actionPlotTools = new QAction(plotTools->windowTitle(), this);
+  actionPlotTools = new QAction(plotTools->windowTitle(), toolbarsMenu);
   actionPlotTools->setCheckable(true);
-  actionPlotTools->setChecked(plotTools->isVisible());
-  connect(actionPlotTools, SIGNAL(toggled(bool)), plotTools, SLOT(setVisible(bool)));
-  toolBarsMenu.addAction(actionPlotTools);
+  toolbarsMenu->addAction(actionPlotTools);
 
-  QAction *actionDisplayBar = new QAction(displayBar->windowTitle(), this);
+  actionDisplayBar = new QAction(displayBar->windowTitle(), toolbarsMenu);
   actionDisplayBar->setCheckable(true);
-  actionDisplayBar->setChecked(displayBar->isVisible());
-  connect(actionDisplayBar, SIGNAL(toggled(bool)), displayBar, SLOT(setVisible(bool)));
-  toolBarsMenu.addAction(actionDisplayBar);
+  toolbarsMenu->addAction(actionDisplayBar);
 
-  QAction *actionFormatToolBar = new QAction(formatToolBar->windowTitle(), this);
+  actionFormatToolBar = new QAction(formatToolBar->windowTitle(), toolbarsMenu);
   actionFormatToolBar->setCheckable(true);
-  actionFormatToolBar->setChecked(formatToolBar->isVisible());
-  connect(actionFormatToolBar, SIGNAL(toggled(bool)), formatToolBar, SLOT(setVisible(bool)));
-  toolBarsMenu.addAction(actionFormatToolBar);
+  toolbarsMenu->addAction(actionFormatToolBar);
+}
 
-  QAction *action = toolBarsMenu.exec(QCursor::pos());
-  if (!action)
-    return;
+void ApplicationWindow::displayToolbars()
+{
+  actionFileTools->setChecked(d_standard_tool_bar);
+  actionPlotTools->setChecked(d_plot_tool_bar);
+  actionDisplayBar->setChecked(d_display_tool_bar);
+  actionFormatToolBar->setChecked(d_format_tool_bar);
+  connect(actionFileTools, SIGNAL(toggled(bool)), this, SLOT(setToolbars()));
+  connect(actionPlotTools, SIGNAL(toggled(bool)), this, SLOT(setToolbars()));
+  connect(actionDisplayBar, SIGNAL(toggled(bool)), this, SLOT(setToolbars()));
+  connect(actionFormatToolBar, SIGNAL(toggled(bool)), this, SLOT(setToolbars()));
+  setToolbars();
+}
+void ApplicationWindow::setToolbars()
+{
+  d_standard_tool_bar = actionFileTools->isChecked();
+  d_plot_tool_bar = actionPlotTools->isChecked();
+  d_display_tool_bar = actionDisplayBar->isChecked();
+  d_format_tool_bar = actionFormatToolBar->isChecked();
 
   MdiSubWindow *w = activeWindow();
 
-  if (action->text() == plotTools->windowTitle()){
-    d_plot_tool_bar = action->isChecked();
-    plotTools->setEnabled(w && w->isA("MultiLayer"));
-  }
-  else if (action->text() == standardTools->windowTitle()){
-    d_standard_tool_bar = action->isChecked();
-  } else if (action->text() == displayBar->windowTitle()){
-    d_display_tool_bar = action->isChecked();
-  } else if (action->text() == formatToolBar->windowTitle()){
-    d_format_tool_bar = action->isChecked();
-  }
+  standardTools->setVisible(d_standard_tool_bar);
+  plotTools->setVisible(d_plot_tool_bar);
+  displayBar->setVisible(d_display_tool_bar);
+  formatToolBar->setVisible(d_format_tool_bar);
+  plotTools->setEnabled(w && w->isA("MultiLayer"));
 }
 
 void ApplicationWindow::saveFitFunctions(const QStringList& lst)
@@ -17443,6 +17471,7 @@ void ApplicationWindow::CatalogLogin()
   if (mantidUI->isValidCatalogLogin())
   {
     icat->addAction(actionCatalogSearch);
+    icat->addAction(actionCatalogPublish);
     icat->addAction(actionCatalogLogout);
   }
 }
@@ -17462,11 +17491,17 @@ void ApplicationWindow::CatalogSearch()
   }
 }
 
+void ApplicationWindow::CatalogPublish()
+{
+  mantidUI->catalogPublishDialog();
+}
+
 void ApplicationWindow::CatalogLogout()
 {
   auto logout = mantidUI->createAlgorithm("CatalogLogout");
   mantidUI->executeAlgorithmAsync(logout);
   icat->removeAction(actionCatalogSearch);
+  icat->removeAction(actionCatalogPublish);
   icat->removeAction(actionCatalogLogout);
 }
 
@@ -17626,23 +17661,43 @@ QPoint ApplicationWindow::desktopTopLeft() const
   */
 QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const
 {
-  const int dlt = 40; // shift in x and y
-  const QPoint first(-1,-1);
-  static QPoint lastPoint(first);
+  const int yDelta = 40; 
+  const QPoint noPoint(-1,-1);
 
-  if (lastPoint == first)
-  {
+  static QPoint lastPoint(noPoint);
+
+  if ( lastPoint == noPoint || m_floatingWindows.isEmpty() )
+  { // If no other windows added - start from top-left corner
     lastPoint = desktopTopLeft();
-    return lastPoint;
   }
-
-  lastPoint += QPoint(dlt,dlt);
-
-  QWidget* desktop = QApplication::desktop()->screen();
-  if (lastPoint.x() + sz.width() > desktop->width() ||
-      lastPoint.y() + sz.height() > desktop->height())
+  else
   {
-    lastPoint = QPoint(0,0);
+    // Get window which was added last
+    FloatingWindow* lastWindow = m_floatingWindows.last();
+
+    if ( lastWindow->isVisible() )
+    { // If it is still visibile - can't use it's location, so need to find a new one
+
+      QPoint diff = lastWindow->pos() - lastPoint;
+
+      if ( abs(diff.x()) < 20 && abs(diff.y()) < 20 )
+      { // If window was moved far enough from it's previous location - can use it 
+
+        // Get a screen space which we can use
+        const QRect screen = QApplication::desktop()->availableGeometry(this);
+
+        // How mush we need to move in X so that cascading direction is diagonal according to
+        // screen size
+        int xDelta = static_cast<int>( yDelta * ( 1.0 * screen.width() / screen.height() ) );
+
+        lastPoint += QPoint(xDelta, yDelta);
+
+        const QRect newPlace = QRect(lastPoint, sz);
+        if ( newPlace.bottom() > screen.height() || newPlace.right() > screen.width() )
+          // If new window doesn't fit to the screen - start anew
+          lastPoint = desktopTopLeft();
+      }
+    }
   }
 
   return lastPoint;

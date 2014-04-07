@@ -473,7 +473,7 @@ namespace LiveData
       Poco::XML::DOMParser parser;
       Poco::AutoPtr<Poco::XML::Document> doc = parser.parseString( m_instrumentXML);
 
-      const Poco::XML::NodeList *nodes = doc->getElementsByTagName( "parameter");
+      const Poco::AutoPtr<Poco::XML::NodeList> nodes = doc->getElementsByTagName( "parameter");
       // Oddly, NodeLists don't seem to have any provision for iterators.  Also,
       // the length() function actually traverses the list to get the count,
       // so we should probably call it once and store it in a variable instead
@@ -482,7 +482,7 @@ namespace LiveData
       for (long unsigned i = 0; i < nodesLength; i++)
       {
         Poco::XML::Node *node = nodes->item( i);
-        const Poco::XML::NodeList *childNodes = node->childNodes();
+        const Poco::AutoPtr<Poco::XML::NodeList> childNodes = node->childNodes();
 
         long unsigned childNodesLength = childNodes->length();
         for (long unsigned j=0; j < childNodesLength; j++)
@@ -491,7 +491,7 @@ namespace LiveData
           if (childNode->nodeName() == "logfile")
           {
             // Found one!
-            Poco::XML::NamedNodeMap *attr = childNode->attributes();
+            Poco::AutoPtr<Poco::XML::NamedNodeMap> attr = childNode->attributes();
             long unsigned attrLength = attr->length();
             for (long unsigned k = 0; k < attrLength; k++)
             {
@@ -501,14 +501,9 @@ namespace LiveData
                 m_requiredLogs.push_back( attrNode->nodeValue());
               }
             }
-
-            attr->release();
           }
         }
-        childNodes->release();
-
       }
-      nodes->release();
     }
 
     // Check to see if we can complete the initialzation steps
@@ -685,7 +680,7 @@ namespace LiveData
 
     // Add the run_start property
     char timeString[64];  // largest the string should end up is 20 (plus a null terminator)
-    strftime( timeString, 64, "%FT%H:%M:%SZ", gmtime( &runStartTime));
+    strftime( timeString, 64, "%Y-%m-%dT%H:%M:%SZ", gmtime( &runStartTime));
     // addProperty() wants the time as an ISO 8601 string
     m_eventBuffer->mutableRun().addProperty("run_start", std::string( timeString) );
   }
@@ -878,15 +873,15 @@ namespace LiveData
 
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> doc = parser.parseMemory( pkt.description().c_str(), pkt.description().length());
-    const Poco::XML::Node* deviceNode = doc->firstChild();
+    const Poco::XML::Node * deviceNode = doc->firstChild();
 
     // The 'device' should be the root element of the document.  I'm just being paranoid here.
-    while (deviceNode != NULL && deviceNode->nodeName() != "device")
+    while ( deviceNode && deviceNode->nodeName() != "device")
     {
       deviceNode = deviceNode->nextSibling();
     }
 
-    if (deviceNode == NULL)
+    if ( ! deviceNode )
     {
       g_log.error() << "Device descriptor packet did not contain a device element!!  This should never happen!" << std::endl;
       return false;
@@ -896,53 +891,63 @@ namespace LiveData
     // Note: for now, I'm ignoring the 'device_name' & 'enumeration' elements because I don't
     // think I need them
 
-    const Poco::XML::Node *node = deviceNode->firstChild();
-    while (node != NULL && node->nodeName() != "process_variables" )
+    const Poco::XML::Node * node = deviceNode->firstChild();
+    while ( node && node->nodeName() != "process_variables" )
     {
       node = node->nextSibling();
     }
 
-    if (node == NULL)
+    if ( ! node )
     {
-      g_log.warning() << "Device descriptor packet did not contain a a process_variables element." << std::endl;
+      g_log.warning() << "Device descriptor packet did not contain a process_variables element." << std::endl;
       return false;
     }
 
     node = node->firstChild();
-    while (node != NULL)
+    while ( node )
     {
       // iterate through each individual variable...
       if (node->nodeName() == "process_variable")
       {
         // we need the name, ID and type
-        const Poco::XML::Node*pvNode = node->firstChild();
+        const Poco::XML::Node * pvNode = node->firstChild();
         std::string pvName;
         std::string pvId;
         unsigned pvIdNum;
         std::string pvUnits;
         std::string pvType;
-        while (pvNode != NULL)
+        while ( pvNode )
         {
-          if (pvNode->nodeName() == "pv_name")
-            pvName = pvNode->firstChild()->nodeValue();
-          else if (pvNode->nodeName() == "pv_id")
+          const Poco::XML::Node * textElement = pvNode->firstChild();
+          if ( textElement )
           {
-            pvId = pvNode->firstChild()->nodeValue();
-            std::istringstream(pvId) >> pvIdNum;
+            if (pvNode->nodeName() == "pv_name")
+            {
+              pvName = textElement->nodeValue();
+            }
+            else if (pvNode->nodeName() == "pv_id")
+            {
+              pvId = textElement->nodeValue();
+              std::istringstream(pvId) >> pvIdNum;
+            }
+            else if (pvNode->nodeName() == "pv_type")
+            {
+              pvType = textElement->nodeValue();
+            }
+            else if (pvNode->nodeName() == "pv_units")
+            {
+              pvUnits = textElement->nodeValue();
+            }
           }
-          else if (pvNode->nodeName() == "pv_type")
-            pvType = pvNode->firstChild()->nodeValue();
-          else if (pvNode->nodeName() == "pv_units")
-            pvUnits = pvNode->firstChild()->nodeValue();
 
           pvNode = pvNode->nextSibling();
         }
 
         // We need at least the name, id & type before we can create the property
         // (Units are optional)
-        if ( pvName.size() == 0 || pvId.size() == 0 || pvType.size() == 0)
+        if ( pvName.empty() || pvId.empty() || pvType.empty() )
         {
-          if (pvName.size() == 0)
+          if ( pvName.empty() )
           {
             pvName = "<UNKNOWN>";
           }
@@ -980,16 +985,16 @@ namespace LiveData
             }
             else
             {
-                // invalid type string
-                g_log.warning() << "Ignoring process variable " << pvName << " because it had an unrecognized type ("
-                                << pvType << ")." << std::endl;
+              // invalid type string
+              g_log.warning() << "Ignoring process variable " << pvName << " because it had an unrecognized type ("
+                              << pvType << ")." << std::endl;
             }
 
             if (prop)
             {
-              if (pvUnits.size() > 0)
+              if ( ! pvUnits.empty() )
               {
-                  prop->setUnits( pvUnits);
+                prop->setUnits( pvUnits);
               }
               {
                 // Note: it's possible for us receive device descriptor packets in the middle

@@ -5,6 +5,11 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
+namespace Poco { namespace XML {
+  class Document;
+  class Element;
+}}
+
 namespace Mantid
 {
 namespace DataHandling
@@ -58,12 +63,15 @@ namespace DataHandling
     /// Load file to a vector of strings
     void loadFile(std::string filename, std::vector<std::string>& lines);
 
+    /// Get the NPROF number
+    int getProfNumber( const std::vector<std::string>& lines );
+
     /// Scan imported file for bank information
     void scanBanks(const std::vector<std::string>& lines, std::vector<int>& banks,
                    std::map<int, int> &bankstartindexmap, std::map<int, int> &bankendindexmap);
 
     /// Parse .irf file to a map
-    void parseResolutionStrings(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, int bankid, int startlineindex, int endlineindex);
+    void parseResolutionStrings(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, int bankid, int startlineindex, int endlineindex, int nProf);
     
     void parseBankLine(std::string line, double& cwl, int& bankid);
 
@@ -81,6 +89,45 @@ namespace DataHandling
 
     /// Generate bank information workspace
     DataObjects::TableWorkspace_sptr genInfoTableWorkspace(std::vector<int> banks);
+
+    /// Create Bank to Workspace Correspondence
+    void createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, size_t>& WorkpsaceOfBank );
+
+    /// Put parameters into a matrix workspace
+    void putParametersIntoWorkspace( const API::Column_const_sptr, API::MatrixWorkspace_sptr ws, int profNumber);
+
+     /// Add an Ikeda-Carpenter PV ALFBE parameter 
+    void addALFBEParameter(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string& paramName);
+
+    /// Add set of Ikeda-Carpenter PV Sigma parameters 
+    void addSigmaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+    /// Add set of Ikeda-Carpenter PV Gamma parameters 
+    void addGammaParameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+    /// Add set of BackToBackExponential S parameters 
+    void addBBX_S_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+    /// Add set of BackToBackExponential A parameters 
+    void addBBX_A_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+    /// Add set of BackToBackExponential B parameters 
+    void addBBX_B_Parameters(const API::Column_const_sptr, Poco::XML::Document* mDoc, Poco::XML::Element* parent );
+
+    /// Get value for XML eq attribute for parameter
+    std::string getXMLEqValue( const API::Column_const_sptr, const std::string& name );
+
+    /// Get value for XML eq attribute for squared parameter
+    std::string getXMLSquaredEqValue( const API::Column_const_sptr column, const std::string& name );
+
+    // Translate a parameter name from as it appears in the table workspace to its name in the XML file
+    std::string getXMLParameterName( const std::string& name );
+
+    /// Get row numbers of the parameters in the table workspace
+    void getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap);
+
+    /// Place to store the row numbers
+    std::map<std::string, size_t> m_rowNumbers;
 
   };
 

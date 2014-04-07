@@ -3,6 +3,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtMantidWidgets/CatalogSearch.h"
+#include <Poco/ActiveResult.h>
 #include <Poco/Path.h>
 
 #include <QDesktopServices>
@@ -12,14 +13,18 @@
 #include <QUrl>
 #include <QDesktopWidget>
 
+#include <fstream>
+
 namespace MantidQt
 {
   namespace MantidWidgets
   {
+
     /**
      * Constructor
      */
-    CatalogSearch::CatalogSearch(QWidget* parent) : QWidget(parent)
+    CatalogSearch::CatalogSearch(QWidget* parent) : QWidget(parent),
+        m_icatHelper(new CatalogHelper()), m_currentPageNumber(1)
     {
       initLayout();
       // Load saved settings from store.
@@ -96,6 +101,12 @@ namespace MantidQt
       connect(m_icatUiForm.dataFileResultsTbl,SIGNAL(itemClicked(QTableWidgetItem*)),this,SLOT(dataFileCheckboxSelected(QTableWidgetItem*)));
       // When several rows are selected we want to check the related checkboxes.
       connect(m_icatUiForm.dataFileResultsTbl,SIGNAL(itemSelectionChanged()),this,SLOT(dataFileRowSelected()));
+      // When the user clicks "< Prev" populate the results table with the previous 100 results.
+      connect(m_icatUiForm.resPrevious,SIGNAL(clicked()),this,SLOT(prevPageClicked()));
+      // When the user clicks "Next >" populate the results table with the next 100 results.
+      connect(m_icatUiForm.resNext,SIGNAL(clicked()),this,SLOT(nextPageClicked()));
+      // When the user is done editing & presses enter we retrieve the results for that specific page in paging.
+      connect(m_icatUiForm.pageStartNum,SIGNAL(editingFinished()),SLOT(goToInputPage()));
 
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
@@ -106,18 +117,12 @@ namespace MantidQt
       // these elements for testing purposes as multiple facilities or paging has not yet been implemented.
       // They will be implemented in separate tickets in the next release.
       m_icatUiForm.facilityLogin->hide();
-      m_icatUiForm.resDisplayingTxt->hide();
-      m_icatUiForm.resInstructions->hide();
-      m_icatUiForm.resPageEndNumTxt->hide();
-      m_icatUiForm.resPageNextTxt->hide();
-      m_icatUiForm.resPageOfTxt->hide();
-      m_icatUiForm.resPageStartNumTxt->hide();
-      m_icatUiForm.resPageTxt->hide();
-      m_icatUiForm.resPreviousTxt->hide();
 
       // Limit input to: A number, 1 hyphen or colon followed by another number. E.g. 444-444, -444, 444-
       QRegExp re("[0-9]*(-|:){1}[0-9]*");
       m_icatUiForm.RunRange->setValidator(new QRegExpValidator(re, this));
+      // Limit the page number input field to only digits.
+      m_icatUiForm.pageStartNum->setValidator(new QIntValidator(0,999,this));
 
       // Resize to minimum width/height to improve UX.
       this->resize(minimumSizeHint());
@@ -278,7 +283,6 @@ namespace MantidQt
 
       // In order to reset fields for the table
       setupTable(table, 0, 0);
-
     }
 
     /**
@@ -438,6 +442,7 @@ namespace MantidQt
       }
       searchFieldInput.insert(std::pair<std::string, std::string>("InvestigatorSurname", m_icatUiForm.InvestigatorSurname->text().toStdString()));
       searchFieldInput.insert(std::pair<std::string, std::string>("DataFileName", m_icatUiForm.DataFileName->text().toStdString()));
+      searchFieldInput.insert(std::pair<std::string, std::string>("InvestigationId", m_icatUiForm.InvestigationId->text().toStdString()));
 
       // Right side of form.
       if (m_icatUiForm.StartDate->text().size() > 2)
@@ -563,46 +568,64 @@ namespace MantidQt
      */
     void CatalogSearch::searchClicked()
     {
-      if (m_icatUiForm.searchBtn)
+      std::string name = sender()->name();
+      // This allows us to perform paging on each search separately
+      // as we call this method in three separate SLOTS (two paging & search button).
+      if (name.compare("searchBtn") == 0) m_currentPageNumber = 1;
+
+      clearDataFileFrame();
+
+      std::map<std::string, std::string> inputFields = getSearchFields();
+      // Contains the error label names, and the related error message.
+      std::map<std::string, std::string> errors = m_icatHelper->validateProperties(inputFields);
+
+      // Has any errors occurred?
+      if (!errors.empty() || validateDates())
       {
-        clearDataFileFrame();
-
-        std::map<std::string, std::string> inputFields = getSearchFields();
-        // Contains the error label names, and the related error message.
-        std::map<std::string, std::string> errors = m_icatHelper->validateProperties(inputFields);
-
-        // Has any errors occurred?
-        if (!errors.empty() || validateDates())
-        {
-          // Clear form to prevent previous search results showing if an error occurs.
-          clearSearchResultFrame();
-          showErrorLabels(errors);
-          m_icatUiForm.searchResultsLbl->setText("An error has occurred in the search form.");
-          // Stop here to prevent the search being carried out below.
-          return;
-        }
-
-        // Since there are no longer errors we hide the error labels.
-        hideErrorLabels();
-
-        // We want to disable/hide these as a search is in progress, but no results have been obtained.
-        m_icatUiForm.resFrame->hide();
-        m_icatUiForm.searchResultsCbox->setEnabled(false);
-        m_icatUiForm.searchResultsCbox->setChecked(false);
-
-        // Update the label to inform the user that searching is in progress.
-        m_icatUiForm.searchResultsLbl->setText("searching investigations...");
-
-        // Remove previous search results.
-        std::string searchResults = "searchResults";
-        clearSearch(m_icatUiForm.searchResultsTbl, searchResults);
-
-        // Perform the search using the values the user has input as they are valid.
-        m_icatHelper->executeSearch(inputFields);
-
-        // Populate the result table from the searchResult workspace.
-        populateResultTable();
+        // Clear form to prevent previous search results showing if an error occurs.
+        clearSearchResultFrame();
+        showErrorLabels(errors);
+        m_icatUiForm.searchResultsLbl->setText("An error has occurred in the search form.");
+        // Stop here to prevent the search being carried out below.
+        return;
       }
+
+      // Since there are no longer errors we hide the error labels.
+      hideErrorLabels();
+
+      // We want to disable/hide these as a search is in progress, but no results have been obtained.
+      m_icatUiForm.resFrame->hide();
+      m_icatUiForm.searchResultsCbox->setEnabled(false);
+      m_icatUiForm.searchResultsCbox->setChecked(false);
+
+      // Update the label to inform the user that searching is in progress.
+      m_icatUiForm.searchResultsLbl->setText("searching investigations...");
+
+      // Remove previous search results.
+      std::string searchResults = "searchResults";
+      clearSearch(m_icatUiForm.searchResultsTbl, searchResults);
+
+      // Obtain the number of results for paging.
+      int64_t numrows = m_icatHelper->getNumberOfSearchResults(inputFields);
+
+      // Setup values used for paging.
+      int limit      = 100;
+      // Have to cast either numrows or limit to double for ceil to work correctly.
+      double totalNumPages = ceil(static_cast<double>(numrows) / limit);
+      int offset = (m_currentPageNumber - 1) * limit;
+
+      // Set paging labels.
+      m_icatUiForm.pageStartNum->setText(QString::number(m_currentPageNumber));
+      m_icatUiForm.resPageEndNumTxt->setText(QString::number(totalNumPages));
+
+      // Perform a search using paging (E.g. return only n from m).
+      m_icatHelper->executeSearch(inputFields,offset,limit);
+
+      // Update the label to inform the user of how many investigations have been returned from the search.
+      m_icatUiForm.searchResultsLbl->setText(QString::number(numrows) + " investigations found.");
+
+      // Populate the result table from the searchResult workspace.
+      populateResultTable();
     }
 
     /**
@@ -633,6 +656,7 @@ namespace MantidQt
       m_icatUiForm.InvestigationName_err->setVisible(false);
       m_icatUiForm.Instrument_err->setVisible(false);
       m_icatUiForm.RunRange_err->setVisible(false);
+      m_icatUiForm.InvestigationId_err->setVisible(false);
       m_icatUiForm.InvestigatorSurname_err->setVisible(false);
       m_icatUiForm.InvestigationAbstract_err->setVisible(false);
       // Right side of form.
@@ -641,8 +665,6 @@ namespace MantidQt
       m_icatUiForm.Keywords_err->setVisible(false);
       m_icatUiForm.SampleName_err->setVisible(false);
       m_icatUiForm.InvestigationType_err->setVisible(false);
-
-
     }
 
     /**
@@ -700,7 +722,6 @@ namespace MantidQt
       setupTable(resultsTable, workspace->rowCount(), workspace->columnCount());
 
       // Update the label to inform the user of how many investigations have been returned from the search.
-      m_icatUiForm.searchResultsLbl->setText(QString::number(workspace->rowCount()) + " investigations found.");
 
       // We want to show this now as we are certain that search results exist, and not display a blank frame (bad UX).
       m_icatUiForm.resFrame->show();
@@ -710,31 +731,12 @@ namespace MantidQt
       // Add data from the workspace to the results table.
       populateTable(resultsTable, workspace);
 
-      // Hide the "Investigation id" column (It's used by the CatalogGetDataFiles algorithm).
-      resultsTable->setColumnHidden(0, true);
-
       // Show only a portion of the title as they can be quite long.
       resultsTable->setColumnWidth(headerIndexByName(resultsTable, "Title"), 210);
 
       // Sort by endDate with the most recent being first.
       resultsTable->setSortingEnabled(true);
       resultsTable->sortByColumn(headerIndexByName(resultsTable, "Start date"),Qt::DescendingOrder);
-    }
-
-    /**
-     * Updates the "Displaying info" text box with relevant result info (e.g. 500 of 18,832)
-     */
-    void CatalogSearch::resultInfoUpdate()
-    {
-
-    }
-
-    /**
-     * Updates the page numbers (e.g. m & n in: Page m of n )
-     */
-    void CatalogSearch::pageNumberUpdate()
-    {
-
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -746,7 +748,17 @@ namespace MantidQt
      */
     void CatalogSearch::nextPageClicked()
     {
-
+      int totalNumPages = m_icatUiForm.resPageEndNumTxt->text().toInt();
+      // Prevent user from pressing "next" when no more investigations exist.
+      if (m_currentPageNumber >= totalNumPages)
+      {
+        m_currentPageNumber = totalNumPages;
+        return;
+      }
+      // Increment here as we need to validate page number above.
+      m_currentPageNumber++;
+      // Perform the search, and update the table with the new results using the current page num.
+      searchClicked();
     }
 
     /**
@@ -754,7 +766,14 @@ namespace MantidQt
      */
     void CatalogSearch::prevPageClicked()
     {
-
+      m_currentPageNumber--;
+      // Prevent user from pressing "Previous" when no investigations exist.
+      if (m_currentPageNumber <= 0)
+      {
+        m_currentPageNumber = 1;
+        return;
+      }
+      searchClicked();
     }
 
     /**
@@ -762,7 +781,16 @@ namespace MantidQt
      */
     void CatalogSearch::goToInputPage()
     {
-
+      int pageNum = m_icatUiForm.pageStartNum->text().toInt();
+      // If the user inputs a page number larger than the total
+      // amount of page numbers we do not want to do anything.
+      if (pageNum > m_icatUiForm.resPageEndNumTxt->text().toInt() || pageNum <= 0)
+      {
+        m_icatUiForm.pageStartNum->setText(QString::number(m_currentPageNumber));
+        return;
+      }
+      m_currentPageNumber = pageNum;
+      searchClicked();
     }
 
     /**
@@ -793,7 +821,7 @@ namespace MantidQt
       updateDataFileLabels(item);
 
       // Perform the "search" and obtain the related data files for the selected investigation.
-      m_icatHelper->executeGetDataFiles(investigationId->text().toLongLong());
+      m_icatHelper->executeGetDataFiles(investigationId->text().toStdString());
 
       // Populate the dataFile table from the "dataFileResults" workspace.
       populateDataFileTable();
@@ -808,7 +836,7 @@ namespace MantidQt
      */
     void CatalogSearch::populateDataFileTable()
     {
-      // Obtain a pointer to the "dataFileResults" workspace where the related datafiles for the user selected invesitgation exist.
+      // Obtain a pointer to the "dataFileResults" workspace where the related datafiles for the user selected investigation exist.
       Mantid::API::ITableWorkspace_sptr workspace;
 
       // Check to see if the workspace exists...
@@ -841,6 +869,10 @@ namespace MantidQt
       // Create the custom header with checkbox ability.
       m_customHeader = new CheckboxHeader(Qt::Horizontal, dataFileTable);
 
+      // There is no simple way to override default QTableWidget sort.
+      // Instead, connecting header to obtain column clicked, and sorting by
+      connect(m_customHeader,SIGNAL(sectionClicked(int)),this,SLOT(sortByFileSize(int)));
+
       // Set it prior to adding labels in populateTable.
       dataFileTable->setHorizontalHeader(m_customHeader);
 
@@ -857,6 +889,7 @@ namespace MantidQt
       // Hide these columns as they're not useful for the user, but are used by the algorithms.
       dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "Id"), true);
       dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "Location"), true);
+      dataFileTable->setColumnHidden(headerIndexByName(dataFileTable, "File size(bytes)"), true);
 
       // Obtain the list of extensions of all dataFiles for the chosen investigation.
       // "File name" is the first column of "dataFileResults" so we make use of it.
@@ -967,56 +1000,42 @@ namespace MantidQt
       }
     }
 
+    /**
+     * Disable the download button if user can access the files locally from the archives.
+     * @param row :: The row the user has selected from the table.
+     */
+    void CatalogSearch::disableDownloadButtonIfArchives(int row)
+    {
+      QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
+      // The location of the file selected in the archives.
+      std::string location = table->item(row,headerIndexByName(table, "Location"))->text().toStdString();
+      Mantid::Kernel::CatalogInfo catalogInfo = Mantid::Kernel::ConfigService::Instance().getFacility().catalogInfo();
+      std::string fileLocation = catalogInfo.transformArchivePath(location);
+
+      std::ifstream hasAccessToArchives(fileLocation.c_str());
+      if (hasAccessToArchives)
+      {
+        m_icatUiForm.dataFileDownloadBtn->setEnabled(false);
+      }
+      else
+      {
+        m_icatUiForm.dataFileDownloadBtn->setEnabled(true);
+      }
+      // Allow the user to load the datafile regardless.
+      m_icatUiForm.dataFileLoadBtn->setEnabled(true);
+    }
+
     ///////////////////////////////////////////////////////////////////////////////
     // SLOTS for: "DataFile information"
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
-     * If the user has checked "check all", then check and select ALL rows. Otherwise, deselect all.
-     * @param toggled :: True if user has checked the checkbox in the dataFile table header.
+     * Disable the load/download button to prevent the user from downloading/loading nothing.
      */
-    void CatalogSearch::selectAllDataFiles(const bool &toggled)
+    void CatalogSearch::disableDatafileButtons()
     {
-      QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
-
-      for(int col = 0 ; col < table->columnCount(); col++)
+      if (m_icatUiForm.dataFileResultsTbl->selectionModel()->selection().indexes().empty())
       {
-        for(int row = 0; row < table->rowCount(); ++row)
-        {
-          QTableWidgetItem *item  = table->item(row, col);
-
-          if (toggled)
-          {
-            table->item(row, 0)->setCheckState(Qt::Checked);
-            item->setSelected(true);
-          }
-          else
-          {
-            table->item(row, 0)->setCheckState(Qt::Unchecked);
-            item->setSelected(false);
-          }
-        }
-      }
-      enableDownloadButtons();
-    }
-
-    /**
-     * Enables the download & load button if user has selected a data file to download. Otherwise, disables them.
-     */
-    void CatalogSearch::enableDownloadButtons()
-    {
-      QModelIndexList indexes = m_icatUiForm.dataFileResultsTbl->selectionModel()->selection().indexes();
-
-      // If the user has selected a data file to download, then enable relevant buttons.
-      // Otherwise null would be passed to download/load, which causes an exception.
-      if (!indexes.empty())
-      {
-        m_icatUiForm.dataFileDownloadBtn->setEnabled(true);
-        m_icatUiForm.dataFileLoadBtn->setEnabled(true);
-      }
-      else
-      {
-        // Otherwise, disable the buttons to prevent the user from downloading/loading nothing.
         m_icatUiForm.dataFileDownloadBtn->setEnabled(false);
         m_icatUiForm.dataFileLoadBtn->setEnabled(false);
       }
@@ -1076,12 +1095,13 @@ namespace MantidQt
       std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
 
       // Create & initialize the load algorithm we will use to load the file by path to a workspace.
-      auto loadAlgorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+      auto loadAlgorithm = Mantid::API::AlgorithmManager::Instance().create("Load");
       loadAlgorithm->initialize();
 
       // For all the files downloaded (or in archive) we want to load them.
       for (unsigned i = 0; i < filePaths.size(); i++)
       {
+        if (filePaths.at(i).empty()) return;
         // Set the filename (path) of the algorithm to load from.
         loadAlgorithm->setPropertyValue("Filename", filePaths.at(i));
         // Sets the output workspace to be the name of the file.
@@ -1092,6 +1112,29 @@ namespace MantidQt
         {
           QCoreApplication::processEvents();
         }
+      }
+    }
+
+    /**
+     * If the user has checked "check all", then check and select ALL rows. Otherwise, deselect all.
+     * @param toggled :: True if user has checked the checkbox in the dataFile table header.
+     */
+    void CatalogSearch::selectAllDataFiles(const bool &toggled)
+    {
+      QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
+
+      // Used to gain easier access to table selection.
+      QItemSelectionModel *selectionModel = table->selectionModel();
+
+      // Select or deselect all rows depending on toggle.
+      if (toggled) table->selectAll();
+      else selectionModel->select(selectionModel->selection(), QItemSelectionModel::Deselect);
+
+      // Check/un-check the checkboxes of each row.
+      for (int row = 0; row < table->rowCount(); ++row)
+      {
+        if (toggled) table->item(row, 0)->setCheckState(Qt::Checked);
+        else table->item(row, 0)->setCheckState(Qt::Unchecked);
       }
     }
 
@@ -1145,9 +1188,37 @@ namespace MantidQt
 
       for (int i = 0; i < indexes.count(); ++i)
       {
-        table->item(indexes.at(i).row(), 0)->setCheckState(Qt::Checked);
+        int row = indexes.at(i).row();
+        table->item(row, 0)->setCheckState(Qt::Checked);
+        /// Disable/Enable download button if user has access to the archives.
+        disableDownloadButtonIfArchives(row);
       }
-      enableDownloadButtons();
+      // Disable load/download buttons if no datafile is selected.
+      disableDatafileButtons();
+    }
+
+
+    /**
+     * When the user clicks "File size" column sort the table by "File size(bytes)".
+     * @param column :: The column that was clicked by the user.
+     */
+    void CatalogSearch::sortByFileSize(int column)
+    {
+      QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
+      int byteColumn  = headerIndexByName(table, "File size(bytes)");
+
+      if (column == headerIndexByName(table, "File size"))
+      {
+        // Convert cell value to int within the datamodel.
+        // This allows us to sort by the specific column.
+        for(int row = 0 ; row < table->rowCount(); row++)
+        {
+          QTableWidgetItem *item = new QTableWidgetItem;
+          item->setData(Qt::EditRole, table->item(row, byteColumn)->text().toInt());
+          table->setItem(row, byteColumn, item);
+        }
+        table->sortByColumn(byteColumn);
+      }
     }
 
   } // namespace MantidWidgets

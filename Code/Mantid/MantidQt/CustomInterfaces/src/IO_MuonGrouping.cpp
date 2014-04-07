@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
 
+#include "MantidAPI/TableRow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include <Poco/DOM/Document.h>
@@ -26,7 +27,6 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
 #include <fstream>  
@@ -496,6 +496,116 @@ void whichPairToWhichRow(const Ui::MuonAnalysis& m_uiForm, std::vector<int>& pai
   }
 }
 
+/**
+ * Convert a grouping table to a grouping struct.
+ * @param table :: A table to convert
+ * @return Grouping info
+ */
+boost::shared_ptr<Grouping> tableToGrouping(ITableWorkspace_sptr table)
+{
+  auto grouping = boost::make_shared<Grouping>();
+
+  for ( size_t row = 0; row < table->rowCount(); ++row )
+  {
+    std::vector<int> detectors = table->cell< std::vector<int> >(row,0);
+
+    // toString() expects the sequence to be sorted
+    std::sort( detectors.begin(), detectors.end() );
+
+    // Convert to a range string, i.e. 1-5,6-8,9
+    std::string detectorRange = Strings::toString(detectors);
+
+    grouping->groupNames.push_back(boost::lexical_cast<std::string>(row + 1));
+    grouping->groups.push_back(detectorRange);
+  }
+
+  // If we have 2 groups only - create a longitudinal pair
+  if ( grouping->groups.size() == 2 )
+  {
+    grouping->pairNames.push_back("long");
+    grouping->pairAlphas.push_back(1.0);
+    grouping->pairs.push_back(std::make_pair(0,1));
+  }
+
+  return grouping;
+}
+
+/**
+ * Converts a grouping information to a grouping table. Discard all the information not stored in a
+ * table - group names, pairing, description.
+ * @param grouping :: Grouping information to convert
+ * @return A grouping table as accepted by MuonGroupDetectors
+ */
+ITableWorkspace_sptr groupingToTable(boost::shared_ptr<Grouping> grouping)
+{
+  auto newTable = boost::dynamic_pointer_cast<ITableWorkspace>(
+      WorkspaceFactory::Instance().createTable("TableWorkspace") );
+
+  newTable->addColumn("vector_int", "Detectors");
+
+  for ( auto it = grouping->groups.begin(); it != grouping->groups.end(); ++it )
+  {
+    TableRow newRow = newTable->appendRow();
+    newRow << Strings::parseRange(*it);
+  }
+
+  return newTable;
+}
+
+/**
+ * Returns a "dummy" grouping which a single group with all the detectors in it.
+ * @param instrument :: Instrument we want a dummy grouping for
+ * @return Grouping information
+ */
+boost::shared_ptr<Grouping> getDummyGrouping(Instrument_const_sptr instrument)
+{
+  // Group with all the detectors
+  std::ostringstream all;
+  all << "1-" << instrument->getNumberDetectors();
+
+  auto dummyGrouping = boost::make_shared<Grouping>();
+  dummyGrouping->description = "Dummy grouping";
+  dummyGrouping->groupNames.push_back("all");
+  dummyGrouping->groups.push_back(all.str());
+  return dummyGrouping;
+}
+
+/**
+ * Attempts to load a grouping information referenced by IDF.
+ * @param instrument :: Intrument which we went the grouping for
+ * @param mainFieldDirection :: (MUSR) orientation of the instrument
+ * @return Grouping information
+ */
+boost::shared_ptr<Grouping> getGroupingFromIDF(Instrument_const_sptr instrument,
+                                               const std::string& mainFieldDirection)
+{
+  std::string parameterName = "Default grouping file";
+
+  // Special case for MUSR, because it has two possible groupings
+  if (instrument->getName() == "MUSR")
+  {
+    parameterName.append(" - " + mainFieldDirection);
+  }
+
+  std::vector<std::string> groupingFiles = instrument->getStringParameter(parameterName);
+
+  if ( groupingFiles.size() == 1 )
+  {
+    const std::string groupingFile = groupingFiles[0];
+
+    // Get search directory for XML instrument definition files (IDFs)
+    std::string directoryName = ConfigService::Instance().getInstrumentDirectory();
+
+    auto loadedGrouping = boost::make_shared<Grouping>();
+    loadGroupingFromXML(directoryName + groupingFile, *loadedGrouping);
+
+    return loadedGrouping;
+  }
+  else
+  {
+    throw std::runtime_error("Multiple groupings specified for the instrument");
+  }
+}
 
 }
 }

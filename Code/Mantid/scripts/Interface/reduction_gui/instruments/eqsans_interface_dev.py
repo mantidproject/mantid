@@ -51,19 +51,22 @@ class EQSANSInterface(InstrumentInterface):
         # Sample
         self.attach(DataSetsWidget(settings = self._settings, data_proxy=None, data_type = self.data_type))
         
-        # Reduction output
-        self.attach(OutputWidget(settings = self._settings))
-        
         # Catalog
         self.attach(SANSCatalogWidget(settings = self._settings, catalog_cls=DataCatalog))
 
         # Tabs that only make sense within MantidPlot
         if IS_IN_MANTIDPLOT:
+            # Stitcher
+            self.attach(StitcherWidget(settings = self._settings))
+
+        # Reduction output
+        self.attach(OutputWidget(settings = self._settings))
+        
+        # Tabs that only make sense within MantidPlot
+        if IS_IN_MANTIDPLOT:
             # Remote jobs status
             if self.remote_resources_available():
                 self.attach(RemoteJobsWidget(settings = self._settings))
-            # Stitcher
-            self.attach(StitcherWidget(settings = self._settings))
 
     def has_advanced_version(self):
         """

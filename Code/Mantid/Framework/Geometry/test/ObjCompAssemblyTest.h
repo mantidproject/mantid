@@ -57,8 +57,8 @@ public:
 void testAddBad()
   {
     ObjCompAssembly bank("BankName");
-    Component* det1 = new Component("Det1Name");
-    TS_ASSERT_THROWS(bank.add(det1),Mantid::Kernel::Exception::InstrumentDefinitionError);
+    Component det1("Det1Name");
+    TS_ASSERT_THROWS(bank.add(&det1),Mantid::Kernel::Exception::InstrumentDefinitionError);
   }
 
 void testAdd()

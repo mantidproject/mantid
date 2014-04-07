@@ -7,7 +7,7 @@
   </archive>
   
   <catalog name="ICat4Catalog">
-    <soapendpoint url="​https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
+    <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
     <externaldownload url="https://isisicatds.stfc.ac.uk/idsbeta/"></externaldownload>
     <filelocation>
       <prefix regex="\\\\isis\\inst\$\\Instruments\$"></prefix>
@@ -305,9 +305,20 @@
    </archive>
 
    <computeResource name="Fermi">
-      <baseURL>https://fermi.ornl.gov/MantidRemote</baseURL>
+     <baseURL>https://fermi.ornl.gov/MantidRemote</baseURL>
    </computeResource>
 
+   <catalog name="ICat4Catalog">
+     <soapendpoint url="https://icat.sns.gov:8181/ICATService/ICAT"></soapendpoint>
+     <externaldownload url="https://icat.sns.gov/ids/"></externaldownload>
+     <filelocation>
+       <prefix regex=""></prefix>
+       <windows replacement=""></windows>
+       <linux replacement=""></linux>
+       <mac replacement=""></mac>
+     </filelocation>
+   </catalog>
+  
    <instrument name="DAS"> 
       <technique>technique</technique>
    </instrument> 
@@ -346,6 +357,10 @@
    </instrument> 
    
    <instrument name="EQ-SANS" shortname="EQSANS" beamline="6"> 
+      <technique>Small Angle Scattering</technique>
+   </instrument> 
+   
+   <instrument name="USANS" shortname="USANS" beamline="1A"> 
       <technique>Small Angle Scattering</technique>
    </instrument> 
    
@@ -548,6 +563,11 @@
     <technique>Muon spectroscopy</technique>
   </instrument>
 
+  <instrument name="GPS">
+    <zeropadding size="3"/>
+    <technique>Muon spectroscopy</technique>
+  </instrument>
+  
 </facility>
 
 <!--  Reactor Orphee (France) -->

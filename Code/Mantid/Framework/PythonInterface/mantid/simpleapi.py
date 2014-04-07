@@ -34,6 +34,8 @@ from api._aliases import *
 #------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
 __SPECIALIZED_FUNCTIONS__ = ["Load", "Fit"]
+# List of specialized algorithms
+__MDCOORD_FUNCTIONS__ = ["PeakIntensityVsRadius", "CentroidPeaksMD","IntegratePeaksMD"]
 # The "magic" keyword to enable/disable logging
 __LOGGING_KEYWORD__ = "EnableLogging"
 
@@ -177,6 +179,12 @@ def Fit(*args, **kwargs):
           StartX='0.05',EndX='1.0',Output="Z1")
     """
     Function, InputWorkspace = _get_mandatory_args('Fit', ["Function", "InputWorkspace"], *args, **kwargs)
+    # Remove from keywords so it is not set twice
+    if "Function" in kwargs:
+        del kwargs['Function']
+    if "InputWorkspace" in kwargs:
+        del kwargs['InputWorkspace']
+
     # Check for behaviour consistent with old API
     if type(Function) == str and Function in _ads:
         raise ValueError("Fit API has changed. The function must now come first in the argument list and the workspace second.")
@@ -185,12 +193,7 @@ def Fit(*args, **kwargs):
     _set_logging_option(algm, kwargs)
     algm.setProperty('Function', Function) # Must be set first
     algm.setProperty('InputWorkspace', InputWorkspace)
-    # Remove from keywords so it is not set twice
-    try:
-        del kwargs['Function']
-        del kwargs['InputWorkspace']
-    except KeyError:
-        pass
+
     # Set all workspace properties before others
     for key in kwargs.keys():
         if key.startswith('InputWorkspace_'):
@@ -326,7 +329,6 @@ def _get_mandatory_args(func_name, required_args ,*args, **kwargs):
     def get_argument_value(key, kwargs):
         try:
             value = kwargs[key]
-            del kwargs[key]
             return value
         except KeyError:
             raise RuntimeError('%s argument not supplied to %s function' % (str(key), func_name))
@@ -547,6 +549,10 @@ def _create_algorithm(algorithm, version, _algm_object):
         algm = _framework.createAlgorithm(algorithm, _version)
         _set_logging_option(algm, kwargs)
 
+        # Temporary removal of unneeded parameter from user's python scripts
+        if "CoordinatesToUse" in kwargs and algorithm in __MDCOORD_FUNCTIONS__:
+            del kwargs["CoordinatesToUse"]
+ 
         try:
             frame = kwargs["__LHS_FRAME_OBJECT__"]
             del kwargs["__LHS_FRAME_OBJECT__"]

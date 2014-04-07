@@ -5,6 +5,7 @@ set ( TEST_PY_FILES
   IComponentTest.py
   InstrumentTest.py
   OrientedLatticeTest.py
+  RectangularDetectorTest.py
   ReferenceFrameTest.py
   UnitCellTest.py
 )

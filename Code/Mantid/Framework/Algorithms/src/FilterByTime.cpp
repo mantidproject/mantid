@@ -9,6 +9,9 @@ You must specify:
 * Both AbsoluteStartTime and AbsoluteStop time.
 * But not another combination of the four, or the algorithm will abort.
 
+=== Comparing with other event filtering algorithms ===
+Wiki page [[EventFiltering]] has a detailed introduction on event filtering in MantidPlot. 
+
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes

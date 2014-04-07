@@ -57,16 +57,17 @@ This could cause Mantid to run very slowly or to crash due to lack of memory.
 
 #include "MantidLiveData/LoadLiveData.h"
 #include "MantidLiveData/Exception.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/WriteLock.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/SingletonHolder.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/CPUTimer.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+
+#include <Poco/Thread.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -250,8 +251,18 @@ namespace LiveData
 
       if (!PostProcess)
       {
+          if ( !temp )
+          {
+            // a group workspace cannot be returned by wsProp
+            temp = AnalysisDataService::Instance().retrieve(inputName);
+          }
         // Remove the chunk workspace from the ADS, it is no longer needed there.
         AnalysisDataService::Instance().remove(inputName);
+      }
+      else if ( !temp )
+      {
+        // a group workspace cannot be returned by wsProp
+        temp = AnalysisDataService::Instance().retrieve(getPropertyValue("OutputWorkspace"));
       }
       return temp;
     }
@@ -385,31 +396,78 @@ namespace LiveData
   //----------------------------------------------------------------------------------------------
   /** Accumulate the data by appending the spectra into the
    * the output workspace.
-   * Calls AppendSpectra algorithm.
+   * Checks if the chunk is a group and if it is calls appendMatrixWSChunk for each item.
+   * If it's a matrix just calls appendMatrixWSChunk.
    * Sets m_accumWS.
    *
    * @param chunkWS :: processed live data chunk workspace
    */
   void LoadLiveData::appendChunk(Mantid::API::Workspace_sptr chunkWS)
   {
-    IAlgorithm_sptr alg;
-    ReadLock _lock1(*m_accumWS);
-    ReadLock _lock2(*chunkWS);
+      // ISIS multi-period data come in workspace groups
+      WorkspaceGroup_sptr chunk_gws = boost::dynamic_pointer_cast<WorkspaceGroup>(chunkWS);
 
-    alg = this->createChildAlgorithm("AppendSpectra");
-    alg->setProperty("InputWorkspace1", m_accumWS);
-    alg->setProperty("InputWorkspace2", chunkWS);
-    alg->setProperty("ValidateInputs", false);
-    alg->execute();
-    if (!alg->isExecuted())
-    {
-      throw std::runtime_error("Error when calling AppendSpectra to append the spectra of the chunk of live data. See log.");
-    }
-    // TODO: What about workspace groups?
-    MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
-    m_accumWS = temp;
-    // And sort the events, if any
-    doSortEvents(m_accumWS);
+      if ( chunk_gws )
+      {
+          WorkspaceGroup_sptr accum_gws = boost::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
+          if ( !accum_gws )
+          {
+              throw std::runtime_error("Two workspace groups are expected.");
+          }
+          if ( accum_gws->getNumberOfEntries() != chunk_gws->getNumberOfEntries() )
+          {
+              throw std::runtime_error("Accumulation and chunk workspace groups are expected to have the same size.");
+          }
+          // disassemble the accum group and put it back together again with updated items
+          size_t nItems = static_cast<size_t>(chunk_gws->getNumberOfEntries());
+          std::vector<Workspace_sptr> items(nItems);
+          for(size_t i = 0; i < nItems; ++i)
+          {
+              items[i] = accum_gws->getItem(i);
+          }
+          accum_gws->removeAll();
+          // append members one by one
+          for(size_t i = 0; i < nItems; ++i)
+          {
+              accum_gws->addWorkspace( appendMatrixWSChunk( items[i], chunk_gws->getItem(i) ) );
+          }
+      }
+      else
+      {
+          // just append the chunk
+          m_accumWS = appendMatrixWSChunk( m_accumWS, chunkWS );
+      }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Accumulate the data by appending the spectra into the
+   * the output workspace.
+   * Calls AppendSpectra algorithm.
+   *
+   * @param accumWS :: accumulation matrix workspace
+   * @param chunkWS :: processed live data chunk matrix workspace
+   */
+  Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS, Workspace_sptr chunkWS)
+  {
+      IAlgorithm_sptr alg;
+      ReadLock _lock1(*accumWS);
+      ReadLock _lock2(*chunkWS);
+
+      alg = this->createChildAlgorithm("AppendSpectra");
+      alg->setProperty("InputWorkspace1", accumWS);
+      alg->setProperty("InputWorkspace2", chunkWS);
+      alg->setProperty("ValidateInputs", false);
+      alg->execute();
+      if (!alg->isExecuted())
+      {
+        throw std::runtime_error("Error when calling AppendSpectra to append the spectra of the chunk of live data. See log.");
+      }
+
+      MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
+      accumWS = temp;
+      // And sort the events, if any
+      doSortEvents(accumWS);
+      return accumWS;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -547,6 +605,31 @@ namespace LiveData
       this->setProperty("OutputWorkspace", m_outputWS);
     }
 
+    // Output group requires some additional handling
+    WorkspaceGroup_sptr out_gws = boost::dynamic_pointer_cast<WorkspaceGroup>(m_outputWS);
+    if ( out_gws )
+    {
+        size_t n = static_cast<size_t>(out_gws->getNumberOfEntries());
+        for(size_t i = 0; i < n; ++i)
+        {
+            auto ws = out_gws->getItem(i);
+            std::string itemName = ws->name();
+            std::string wsName = getPropertyValue("OutputWorkspace") + "_" + boost::lexical_cast<std::string>(i+1);
+            if ( wsName != itemName )
+            {
+                if ( AnalysisDataService::Instance().doesExist(itemName) )
+                {
+                    // replace the temporary name with the proper one
+                    AnalysisDataService::Instance().rename(itemName,wsName);
+                }
+            }
+            else
+            {
+                // touch the workspace in the ADS to issue a notification to update the GUI
+                AnalysisDataService::Instance().addOrReplace(itemName,ws);
+            }
+        }
+    }
 
   }
 

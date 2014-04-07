@@ -60,6 +60,30 @@ namespace Geometry
     return result;
   }
 
+
+  /**
+   * Non-member helper method to convert a direction enum to a string label.
+   * @param direction
+   * @return label
+   */
+  std::string directionToString(const PointingAlong& direction)
+  {
+    std::string result;
+    if(direction == X)
+    {
+      result = "X";
+    }
+    else if(direction == Y)
+    {
+      result = "Y";
+    }
+    else
+    {
+      result = "Z";
+    }
+    return result;
+  }
+
   ///Perform common initalisation steps.
   void ReferenceFrame::init()
   {
@@ -92,6 +116,33 @@ namespace Geometry
   {
     return m_alongBeam;
   }
+
+   /**
+   * Get the axis label for the pointing up direction.
+   * @return label for up
+   */
+   std::string ReferenceFrame::pointingUpAxis() const
+   {
+     return directionToString(m_up);
+   }
+
+   /**
+   * Get the axis label for the pointing along direction.
+   * @return label for up
+   */
+   std::string ReferenceFrame::pointingAlongBeamAxis() const
+   {
+     return directionToString(m_alongBeam);
+   }
+
+   /**
+    * Get the axis label for the pointing horizontal direction.
+    * @return Axis label for the axis that is perpendicular to the beam and up direction in the instrument
+    */
+   std::string ReferenceFrame::pointingHorizontalAxis() const
+   {
+     return directionToString(pointingHorizontal());
+   }
 
   /**
    * Gets the pointing horizontal direction, i.e perpendicular to up & along beam

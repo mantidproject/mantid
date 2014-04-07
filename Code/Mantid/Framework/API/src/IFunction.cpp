@@ -167,7 +167,7 @@ std::string IFunction::asString()const
   {
     std::string attName = attr[i];
     std::string attValue = this->getAttribute(attr[i]).value();
-    if (!attValue.empty())
+    if (!attValue.empty() && attValue != "\"\"" )
     {
       ostr<<','<<attName<<'='<<attValue;
     }
@@ -415,6 +415,9 @@ std::string IFunction::Attribute::asQuotedString()const
     throw std::runtime_error("Trying to access a "+type()+" attribute "
       "as string");
   }
+
+  if ( attr.empty() ) return "\"\"";
+
   std::string quoted(attr);
   if( *(attr.begin()) != '\"' ) quoted = "\"" + attr;
   if( *(quoted.end() - 1) != '\"' ) quoted += "\"";
@@ -970,54 +973,23 @@ double IFunction::convertValue(double value, Kernel::Unit_sptr& outUnit,
                                boost::shared_ptr<const MatrixWorkspace> ws,
                                size_t wsIndex)const
 {
-  double retVal = value;
-  Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
+  // only required if formula or look-up-table different from ws unit
+  const auto & wsUnit = ws->getAxis(0)->unit();
+  if ( outUnit->unitID().compare(wsUnit->unitID()) == 0 ) return value;
 
-  // if unit required by formula or look-up-table different from ws-unit then 
-  if ( outUnit->unitID().compare(wsUnit->unitID()) != 0 )
+  // first check if it is possible to do a quick conversion and convert
+  // slight duplication to below to avoid instantiating vector unless necessary
+  double factor(0.0), power(0.0);
+  if (wsUnit->quickConversion(*outUnit,factor,power) )
   {
-    // first check if it is possible to do a quick convertion convert
-    double factor,power;
-    if (wsUnit->quickConversion(*outUnit,factor,power) )
-    {
-      retVal = factor * std::pow(retVal,power);
-    }
-    else
-    {
-      double l1,l2,twoTheta;
-
-      // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
-      Instrument_const_sptr instrument = ws->getInstrument();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-      if (sample == NULL)
-      {
-        g_log.error() << "No sample defined instrument. Cannot convert units for function\n"
-                      << "Ignore convertion."; 
-        return value; 
-      }
-      l1 = instrument->getSource()->getDistance(*sample);
-      Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
-      if ( ! det->isMonitor() )
-      {
-        l2 = det->getDistance(*sample);
-        twoTheta = ws->detectorTwoTheta(det);
-      }
-      else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
-      {
-        l2 = det->getDistance(*(instrument->getSource()));
-        l2 = l2 - l1;
-        twoTheta = 0.0;
-      }
-
-      std::vector<double> endPoint;
-      endPoint.push_back(retVal);
-      std::vector<double> emptyVec;
-      wsUnit->toTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-      outUnit->fromTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-      retVal = endPoint[0];
-    }
-  }  
-  return retVal;
+    return factor * std::pow(value,power);
+  }
+  else
+  {
+    std::vector<double> singleValue(1, value);
+    convertValue(singleValue, outUnit, ws, wsIndex);
+    return singleValue.front();
+  }
 }
 
 /** Convert values from unit defined in workspace (ws) to outUnit
@@ -1032,50 +1004,60 @@ void IFunction::convertValue(std::vector<double>& values, Kernel::Unit_sptr& out
                                boost::shared_ptr<const MatrixWorkspace> ws,
                                size_t wsIndex) const
 {
-  Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
+  // only required if  formula or look-up-table different from ws unit
+  const auto & wsUnit = ws->getAxis(0)->unit();
+  if ( outUnit->unitID().compare(wsUnit->unitID()) == 0 ) return;
 
-  // if unit required by formula or look-up-table different from ws-unit then 
-  if ( outUnit->unitID().compare(wsUnit->unitID()) != 0 )
+  // first check if it is possible to do a quick conversion convert
+  double factor, power;
+  if (wsUnit->quickConversion(*outUnit,factor,power) )
   {
-    // first check if it is possible to do a quick convertion convert
-    double factor,power;
-    if (wsUnit->quickConversion(*outUnit,factor,power) )
+    auto iend = values.end();
+    for(auto itr = values.begin(); itr != iend; ++itr)
+      (*itr) = factor * std::pow(*itr, power);
+  }
+  else
+  {
+    // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
+    Instrument_const_sptr instrument = ws->getInstrument();
+    Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+    if (sample == NULL)
     {
-      for (size_t i = 0; i < values.size(); i++)
-        values[i] = factor * std::pow(values[i],power);
+      g_log.error() << "No sample defined instrument. Cannot convert units for function\n"
+          << "Ignore convertion.";
+      return;
     }
-    else
+    double l1 = instrument->getSource()->getDistance(*sample);
+    Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
+    double l2(-1.0), twoTheta(0.0);
+    if ( ! det->isMonitor() )
     {
-      double l1,l2,twoTheta;
-
-      // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
-      Instrument_const_sptr instrument = ws->getInstrument();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-      if (sample == NULL)
-      {
-        g_log.error() << "No sample defined instrument. Cannot convert units for function\n"
-                      << "Ignore convertion."; 
-        return; 
-      }
-      l1 = instrument->getSource()->getDistance(*sample);
-      Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
-      if ( ! det->isMonitor() )
-      {
-        l2 = det->getDistance(*sample);
-        twoTheta = ws->detectorTwoTheta(det);
-      }
-      else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
-      {
-        l2 = det->getDistance(*(instrument->getSource()));
-        l2 = l2 - l1;
-        twoTheta = 0.0;
-      }
-
-      std::vector<double> emptyVec;
-      wsUnit->toTOF(values,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-      outUnit->fromTOF(values,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+      l2 = det->getDistance(*sample);
+      twoTheta = ws->detectorTwoTheta(det);
     }
-  }  
+    else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
+    {
+      l2 = det->getDistance(*(instrument->getSource()));
+      l2 = l2 - l1;
+      twoTheta = 0.0;
+    }
+    int emode = static_cast<int>(ws->getEMode());
+    double efixed(0.0);
+    try
+    {
+      efixed = ws->getEFixed(det);
+    }
+    catch(std::exception &)
+    {
+      // assume elastic
+      efixed = 0.0;
+      emode = 0;
+    }
+
+    std::vector<double> emptyVec;
+    wsUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, efixed, 0.0);
+    outUnit->fromTOF(values, emptyVec,l1,l2,twoTheta, emode, efixed, 0.0);
+  }
 }
 
 /**
@@ -1090,6 +1072,29 @@ size_t IFunction::nAttributes() const
 bool IFunction::hasAttribute(const std::string& name)const
 {
     return m_attrs.find(name) != m_attrs.end();
+}
+
+/**
+  * Overload for const char* values.
+  * @param attName :: Attribute name
+  * @param value :: New attribute value to set
+  */
+void IFunction::setAttributeValue(const std::string &attName, const char *value)
+{
+    std::string str(value);
+    setAttributeValue( attName, str );
+}
+
+/**
+  * Set string attribute by value. Make sure that quoted style doesn't change.
+  * @param attName :: Attribute name
+  * @param value :: New attribute value to set
+  */
+void IFunction::setAttributeValue(const std::string &attName, const std::string &value)
+{
+    Attribute att = getAttribute(attName);
+    att.setString(value);
+    setAttribute( attName, att );
 }
 
 /// Returns a list of attribute names

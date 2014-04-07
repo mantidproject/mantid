@@ -103,6 +103,20 @@ namespace MantidQt
     }
 
     /**
+     * Check that the given DataSelector widget has valid files.
+     *
+     * @param name   :: the "name" of the widget so as to be recognised by the user.
+     * @param widget :: the widget to check
+     */
+    void UserInputValidator::checkDataSelectorIsValid(const QString & name, DataSelector * widget)
+    {
+      if( ! widget->isValid() )
+      {
+        m_errorMessages.append(name + " error: " + widget->getProblem());
+      }
+    }
+
+    /**
      * Check that the given start and end range is valid.
      *
      * @param name  :: the name of the range

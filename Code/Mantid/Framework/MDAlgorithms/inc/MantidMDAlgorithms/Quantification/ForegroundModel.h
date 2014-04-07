@@ -25,6 +25,12 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModelFactory.h"
 
+// Includes that each model will most probably require
+// This lightens the load for the user model writer
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/Math/Distributions/BoseEinsteinDistribution.h"
+
+
 namespace Mantid
 {
   //----------------------------------------------------------------------------

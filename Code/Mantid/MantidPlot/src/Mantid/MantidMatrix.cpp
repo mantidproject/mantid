@@ -692,6 +692,7 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot, ApplicationWindow* app, Graph::CurveType type,bool project,const ProjectData* const prjData)
 {
   app->setPreferences(plot);
+
   plot->setTitle(tr("Workspace ") + name());
   const Mantid::API::Axis* ax;
   ax = m_workspace->getAxis(0);
@@ -719,6 +720,7 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot, ApplicationWindow* app, 
   auto fun = new MantidMatrixFunction(*this);
   range(&minz,&maxz);
   Spectrogram *spgrm = plot->plotSpectrogram(fun, m_spectrogramRows, m_spectrogramCols, boundingRect(), minz, maxz, type);
+  app->setSpectrogramTickStyle(plot);
   if( spgrm )
   {
     if(project)
@@ -1239,7 +1241,7 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
     }
   case Qt::BackgroundRole:
     {
-      if (checkMontorCache(index.row()))
+      if (checkMonitorCache(index.row()))
       {
         return m_mon_color;
       }
@@ -1260,8 +1262,9 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
 @param row :: current row in the table that maps to a detector.
 @return bool :: the value of if the detector is a monitor or not.
 */
-bool MantidMatrixModel::checkMontorCache(int row) const
+bool MantidMatrixModel::checkMonitorCache(int row) const
 {
+  row += m_startRow; //correctly offset the row
   if (m_workspace->getAxis(1)->isSpectra())
   {
     bool isMon = false;
@@ -1348,4 +1351,11 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy)
     miny = 0;
   if (maxy == -std::numeric_limits<double>::max())
     maxy = miny + 1e6;
+
+  if (maxy == miny)
+  {
+      if ( maxy == 0.0 ) maxy += 1.0;
+      else
+          maxy += fabs(miny);
+  }
 }

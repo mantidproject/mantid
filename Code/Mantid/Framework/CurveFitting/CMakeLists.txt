@@ -11,10 +11,14 @@ set ( SRC_FILES
 	src/BivariateNormal.cpp
 	src/Bk2BkExpConvPV.cpp
 	src/BoundaryConstraint.cpp
+	src/CalculateGammaBackground.cpp
 	src/Chebyshev.cpp
+	src/ComptonPeakProfile.cpp
 	src/ComptonProfile.cpp
 	src/ComptonScatteringCountRate.cpp
+	src/ConvertToYSpace.cpp
 	src/Convolution.cpp
+	src/ConvolveWorkspaces.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
 	src/CostFuncRwp.cpp
@@ -22,8 +26,8 @@ set ( SRC_FILES
 	src/DampingMinimizer.cpp
 	src/DeltaFunction.cpp
 	src/DerivMinimizer.cpp
+	src/DiffRotDiscreteCircle.cpp
 	src/DiffSphere.cpp
-	src/ElasticDiffSphere.cpp
 	src/EndErfc.cpp
 	src/ExpDecay.cpp
 	src/ExpDecayMuon.cpp
@@ -43,7 +47,6 @@ set ( SRC_FILES
 	src/GaussianComptonProfile.cpp
 	src/GramCharlierComptonProfile.cpp
 	src/IkedaCarpenterPV.cpp
-	src/InelasticDiffSphere.cpp
 	src/LeBailFit.cpp
 	src/LeBailFunction.cpp
 	src/LevenbergMarquardtMDMinimizer.cpp
@@ -55,6 +58,7 @@ set ( SRC_FILES
 	src/MultiDomainCreator.cpp
 	src/MuonFInteraction.cpp
 	src/NeutronBk2BkExpConvPVoigt.cpp
+	src/NormaliseByPeakArea.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/ParDomain.cpp
 	src/PlotPeakByLogValue.cpp
@@ -66,7 +70,7 @@ set ( SRC_FILES
 	src/Quadratic.cpp
 	src/RefinePowderInstrumentParameters.cpp
 	src/RefinePowderInstrumentParameters3.cpp
-  src/ReflectivityMulf.cpp
+	src/ReflectivityMulf.cpp
 	src/Resolution.cpp
 	src/SeqDomain.cpp
 	src/SimplexMinimizer.cpp
@@ -106,11 +110,15 @@ set ( INC_FILES
 	inc/MantidCurveFitting/BivariateNormal.h
 	inc/MantidCurveFitting/Bk2BkExpConvPV.h
 	inc/MantidCurveFitting/BoundaryConstraint.h
+	inc/MantidCurveFitting/CalculateGammaBackground.h
 	inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/CompositeValues.h
+	inc/MantidCurveFitting/ComptonPeakProfile.h
 	inc/MantidCurveFitting/ComptonProfile.h
 	inc/MantidCurveFitting/ComptonScatteringCountRate.h
+	inc/MantidCurveFitting/ConvertToYSpace.h
 	inc/MantidCurveFitting/Convolution.h
+	inc/MantidCurveFitting/ConvolveWorkspaces.h
 	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
 	inc/MantidCurveFitting/CostFuncRwp.h
@@ -119,8 +127,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DeltaFunction.h
 	inc/MantidCurveFitting/DerivMinimizer.h
 	inc/MantidCurveFitting/DiffSphere.h
+	inc/MantidCurveFitting/DiffRotDiscreteCircle.h
 	inc/MantidCurveFitting/DllConfig.h
-	inc/MantidCurveFitting/ElasticDiffSphere.h
 	inc/MantidCurveFitting/EmptyValues.h
 	inc/MantidCurveFitting/EndErfc.h
 	inc/MantidCurveFitting/ExpDecay.h
@@ -143,7 +151,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/GaussianComptonProfile.h
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
-	inc/MantidCurveFitting/InelasticDiffSphere.h
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LeBailFit.h
 	inc/MantidCurveFitting/LeBailFunction.h
@@ -156,6 +163,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/MultiDomainCreator.h
 	inc/MantidCurveFitting/MuonFInteraction.h
 	inc/MantidCurveFitting/NeutronBk2BkExpConvPVoigt.h
+	inc/MantidCurveFitting/NormaliseByPeakArea.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/ParDomain.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
@@ -167,7 +175,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Quadratic.h
 	inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
 	inc/MantidCurveFitting/RefinePowderInstrumentParameters3.h
-  inc/MantidCurveFitting/ReflectivityMulf.h
+	inc/MantidCurveFitting/ReflectivityMulf.h
 	inc/MantidCurveFitting/Resolution.h
 	inc/MantidCurveFitting/SeqDomain.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
@@ -195,7 +203,6 @@ set ( INC_FILES
 set ( TEST_FILES
 	# ChebyshevPolynomialBackgroundTest.h
 	# RefinePowderInstrumentParametersTest.h
-	#DiffSphereTest.h
 	#SCDPanelErrorsTest.h
 	AbragamTest.h
 	AugmentedLagrangianOptimizerTest.h
@@ -205,14 +212,20 @@ set ( TEST_FILES
 	BivariateNormalTest.h
 	Bk2BkExpConvPVTest.h
 	BoundaryConstraintTest.h
+	CalculateGammaBackgroundTest.h
 	ChebyshevTest.h
 	CompositeFunctionTest.h
+	ComptonPeakProfileTest.h
 	ComptonProfileTest.h
 	ComptonScatteringCountRateTest.h
+	ConvertToYSpaceTest.h
 	ConvolutionTest.h
+	ConvolveWorkspacesTest.h
 	CubicSplineTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h
+	DiffRotDiscreteCircleTest.h
+	DiffSphereTest.h
 	EndErfcTest.h
 	ExpDecayMuonTest.h
 	ExpDecayOscTest.h
@@ -243,6 +256,7 @@ set ( TEST_FILES
 	MultiDomainFunctionTest.h
 	MuonFInteractionTest.h
 	NeutronBk2BkExpConvPVoigtTest.h
+	NormaliseByPeakAreaTest.h
 	PRConjugateGradientTest.h
 	PlotPeakByLogValueTest.h
 	PolynomialTest.h
@@ -252,7 +266,7 @@ set ( TEST_FILES
 	ProductQuadraticExpTest.h
 	QuadraticTest.h
 	RefinePowderInstrumentParameters3Test.h
-  ReflectivityMulfTest.h
+	ReflectivityMulfTest.h
 	ResolutionTest.h
 	SimplexTest.h
 	SpecialFunctionSupportTest.h

@@ -63,6 +63,8 @@ namespace Algorithms
   {
     declareProperty( new WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input),
                               "The input EventWorkspace. Must contain 'raw' (unweighted) events" );
+    declareProperty( new WorkspaceProperty<DataObjects::EventWorkspace>("MonitorWorkspace","",Direction::Input,PropertyMode::Optional),
+                              "A workspace containing the monitor counts relating to the input workspace");
     declareProperty( new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
                               "The name of the workspace to be created as the output of the algorithm. The output workspace will be a [[TableWorkspace]] in the case that a log holding integer values is given, and a single-spectrum [[Workspace2D]] otherwise." );
 
@@ -309,39 +311,30 @@ namespace Algorithms
   void SumEventsByLogValue::addMonitorCounts(ITableWorkspace_sptr outputWorkspace,
       const TimeSeriesProperty<int> * log, const int minVal, const int maxVal)
   {
-    // See if there's a monitor workspace alongside the input one
-    const std::string monitorWorkspaceName = m_inputWorkspace->name() + "_monitors";
-    DataObjects::EventWorkspace_const_sptr monitorWorkspace;
-    try {
-      monitorWorkspace = AnalysisDataService::Instance().retrieveWS<DataObjects::EventWorkspace>(monitorWorkspaceName);
-      // Check that we have an EventWorkspace for the monitors. If not, just return.
-      if ( !monitorWorkspace )
-      {
-        g_log.warning() << "A monitor workspace (" << monitorWorkspaceName << ") was found, but "
-            << "it is not an EventWorkspace so cannot be used in this algorithm.\n";
-        return;
-      }
-    } catch (Exception::NotFoundError&) {
-      // The monitors workspace isn't there - just return
-      g_log.debug() << "No monitor workspace (" << monitorWorkspaceName << ") found.\n";
-      return;
-    }
+    DataObjects::EventWorkspace_const_sptr monitorWorkspace = getProperty("MonitorWorkspace");
+    // If no monitor workspace was given, there's nothing to do
+    if ( ! monitorWorkspace ) return;
 
     const int xLength = maxVal - minVal + 1;
     // Loop over the spectra - there will be one per monitor
     for ( std::size_t spec = 0; spec < monitorWorkspace->getNumberHistograms(); ++spec )
     {
-      // Create a column for this monitor
-      const std::string monitorName = monitorWorkspace->getDetector(spec)->getName();
-      auto monitorCounts = outputWorkspace->addColumn("int",monitorName);
-      const IEventList & eventList = monitorWorkspace->getEventList(spec);
-      // Accumulate things in a local vector before transferring to the table workspace
-      std::vector<int> Y(xLength);
-      filterEventList(eventList, minVal, maxVal, log, Y);
-      // Transfer the results to the table
-      for ( int i = 0; i < xLength; ++i )
-      {
-        monitorCounts->cell<int>(i) = Y[i];
+      try {
+        // Create a column for this monitor
+        const std::string monitorName = monitorWorkspace->getDetector(spec)->getName();
+        auto monitorCounts = outputWorkspace->addColumn("int",monitorName);
+        const IEventList & eventList = monitorWorkspace->getEventList(spec);
+        // Accumulate things in a local vector before transferring to the table workspace
+        std::vector<int> Y(xLength);
+        filterEventList(eventList, minVal, maxVal, log, Y);
+        // Transfer the results to the table
+        for ( int i = 0; i < xLength; ++i )
+        {
+          monitorCounts->cell<int>(i) = Y[i];
+        }
+      } catch (Exception::NotFoundError&) {
+        // ADARA-generated nexus files have sometimes been seen to contain 'phantom' monitors that aren't in the IDF.
+        // This handles that by ignoring those spectra.
       }
     }
   }

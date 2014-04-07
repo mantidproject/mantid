@@ -5,6 +5,7 @@
 #include "MantidGeometry/Crystal/ScalarUtils.h"
 #include "MantidGeometry/Crystal/ReducedCell.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -211,7 +212,7 @@ std::vector<ConventionalCell> ScalarUtils::GetCellsUBOnly(
  *  reflections of a,b,c and forming the ConventionalCellInfo object 
  *  corresponding to the smallest form error. 
  *
- *  @param UB        Orientation transformation corresponding to a Niggli 
+ *  @param UB        Crystal::Orientation transformation corresponding to a Niggli
  *                   reduced cell.
  *  @param form_num  The form number to use.
  *
@@ -379,7 +380,7 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(
   V3D   a_temp,  b_temp,  c_temp,  // vectors for generating handedness
       m_a_temp,m_b_temp,m_c_temp;  // preserving permutations of sides
 
-  IndexingUtils::GetABC( UB, a_vec, b_vec, c_vec );
+  OrientedLattice::GetABC( UB, a_vec, b_vec, c_vec );
 
   m_a_vec = a_vec * (-1.0);
   m_b_vec = b_vec * (-1.0);
@@ -435,7 +436,7 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(
              b.norm() <= factor * c.norm()   )   // could be Niggli within
         {                                        // experimental error
           Matrix<double> temp_UB(3,3,false);
-          IndexingUtils::GetUB( temp_UB, a, b, c );
+          OrientedLattice::GetUB( temp_UB, a, b, c );
           result.push_back( temp_UB );
         }
       }

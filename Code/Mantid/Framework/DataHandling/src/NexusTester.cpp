@@ -16,14 +16,15 @@ saving and loading rates, in MB per second.
 *WIKI*/
 
 #include "MantidDataHandling/NexusTester.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ListValidator.h"
+
+#include <Poco/File.h>
+#include <Poco/Thread.h>
+
 #include <nexus/NeXusFile.hpp>
 #include <stdlib.h>
-#include "MantidKernel/CPUTimer.h"
-#include "MantidAPI/Progress.h"
-#include <Poco/File.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

@@ -6,21 +6,24 @@
     Most of this code is a copy-paste from SANSReduction.py, organized to be used with
     ReductionStep objects. The guts needs refactoring.
 """
-from reduction import ReductionStep
-import isis_reducer
-import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
-sanslog = sans_reduction_steps.sanslog
-
-from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup, Workspace
-from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
-                         isEventWorkspace, fromEvent2Histogram, 
-                         getFilePathFromWorkspace, getWorkspaceReference)
-import isis_instrument
 import os
 import math
 import copy
 import re
+
+
+from mantid.kernel import Logger
+sanslog = Logger.get("SANS")
+
+from mantid.simpleapi import *
+from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
+from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
+                         isEventWorkspace, fromEvent2Histogram, 
+                         getFilePathFromWorkspace, getWorkspaceReference,
+                         getMonitor4event, slice2histogram, getFileAndName)
+import isis_instrument
+import isis_reducer
+from reducer_singleton import ReductionStep
 
 def _issueWarning(msg):
     """
@@ -56,72 +59,87 @@ class LoadRun(object):
         self._reload = reload
         #entry number of the run inside the run file that will be analysed, as requested by the caller
         self._period = int(entry)
+        self._index_of_group = 0
+
         #set to the total number of periods in the file
         self.periods_in_file = None
         self.ext = ''
         self.shortrun_no = -1
         #the name of the loaded workspace in Mantid
-        self.wksp_name = ''
-        
+        self._wksp_name = ''
+
+    def curr_period(self):
+        if self._period != self.UNSET_PERIOD:
+            return self._period
+        return self._index_of_group + 1
+            
+    def move2ws(self, index):
+        if self.periods_in_file > 1:
+            if index < self.periods_in_file:
+                self._index_of_group = index
+                return True
+        else:
+            return False
+
+    def get_wksp_name(self):
+        ref_ws = mtd[str(self._wksp_name)]
+        if isinstance(ref_ws, WorkspaceGroup):
+            return ref_ws[self._index_of_group].name()
+        else:
+            return self._wksp_name
+  
+    wksp_name = property(get_wksp_name, None, None, None)
+
+    def _load_transmission(self, inst=None, is_can=False, extra_options=dict()):
+        if '.raw' in self._data_file or '.RAW' in self._data_file:
+            self._load(inst, is_can, extra_options)
+            return
+      
+        workspace = self._get_workspace_name()
+
+        # For sans, in transmission, we care only about the monitors. Hence,
+        # by trying to load only the monitors we speed up the reduction process. 
+        # besides, we avoid loading events which is uselles for transmission. 
+        # it may fail, if the input file was not a nexus file, in this case, 
+        # it pass the job to the default _load method.
+        try:
+            outWs = LoadNexusMonitors(self._data_file, OutputWorkspace=workspace)
+            self.periods_in_file = 1
+            self._wksp_name = workspace
+        except:
+            self._load(inst, is_can, extra_options)
+
     def _load(self, inst = None, is_can=False, extra_options=dict()):
         """
             Load a workspace and read the logs into the passed instrument reference
             @param inst: a reference to the current instrument
             @param iscan: set this to True for can runs
             @param extra_options: arguments to pass on to the Load Algorithm.
-            @return: log values, number of periods in the workspace
+            @return: number of periods in the workspace
         """
-        if self._period > 1:
+        if self._period != self.UNSET_PERIOD:
             workspace = self._get_workspace_name(self._period)
+            extra_options['EntryNumber'] = self._period
         else:
             workspace = self._get_workspace_name()
 
-        period = self._period
-        if period == self.UNSET_PERIOD:
-            period = 1
-
-        if os.path.splitext(self._data_file)[1].lower().startswith('.r') or os.path.splitext(self._data_file)[1].lower().startswith('.s'):
-            outWs = LoadRaw(Filename=self._data_file, 
-                            OutputWorkspace=workspace,
-                            **extra_options)
-
-            LoadSampleDetailsFromRaw(InputWorkspace=workspace, Filename=self._data_file)
-
-            workspace = self._leaveSinglePeriod(workspace, period)
-        else:
-            if period != 1:
-                extra_options['EntryNumber']=period
-            outWs = LoadNexus(Filename=self._data_file, 
-                              OutputWorkspace=workspace,
-                              **extra_options)
-
-        SANS2D_log_file = mtd[workspace]
-       
-        numPeriods  = self._find_workspace_num_periods(workspace)
-        #deal with the difficult situation of not reporting the period of single period files
-        if numPeriods > 1:
-            #get the workspace name, a period number of 1 is only included if the file has more than 1 period
-            period_definitely_inc = self._get_workspace_name(self._period)
-            if period_definitely_inc != workspace:
-                RenameWorkspace(InputWorkspace=workspace,OutputWorkspace= period_definitely_inc)
-                workspace = period_definitely_inc 
+        extra_options['OutputWorkspace'] = workspace
         
-        log = self._extract_log_info(SANS2D_log_file, inst)
-        
-        self.wksp_name = workspace 
-        return numPeriods, log        
+        outWs = Load(self._data_file, **extra_options)
 
-    def _extract_log_info(self,wksp_pointer, inst):
-        log = None
-        if (not inst is None) and inst.name() == 'SANS2D':
-            #this instrument has logs to be loaded 
-            try:
-                log = inst.get_detector_log(wksp_pointer)
-            except:
-                #transmission workspaces, don't have logs 
-                if not self._is_trans:
-                    raise
-        return log
+        if isinstance(outWs, IEventWorkspace):
+            LoadNexusMonitors(self._data_file, OutputWorkspace=workspace + "_monitors")
+        
+        loader_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
+        
+        if loader_name == 'LoadRaw':
+            self._loadSampleDetails(workspace)
+        
+        if self._period != self.UNSET_PERIOD and isinstance(outWs, WorkspaceGroup):
+            outWs = mtd[self._leaveSinglePeriod(outWs.name(), self._period)]
+
+        self.periods_in_file = self._find_workspace_num_periods(workspace)
+        self._wksp_name = workspace
 
     def _get_workspace_name(self, entry_num=None):
         """
@@ -142,6 +160,16 @@ class LoadRun(object):
             return run + '_sans_' + self.ext.lower()
 
 
+    def _loadSampleDetails(self, ws_name):
+        ws_pointer = mtd[str(ws_name)]
+        if isinstance(ws_pointer, WorkspaceGroup):
+            workspaces = [ws for ws in ws_pointer]
+        else:
+            workspaces = [ws_pointer]
+        for ws in workspaces:
+            LoadSampleDetailsFromRaw(ws, self._data_file)
+        
+
     def _loadFromWorkspace(self, reducer):
         """ It substitute the work of _assignHelper for workspaces, or, at least, 
         prepare the internal attributes, to be processed by the _assignHelper. 
@@ -161,36 +189,38 @@ class LoadRun(object):
         except:
             raise RuntimeError("Failed to retrieve information to reload this workspace " + str(self._data_file))
         self._data_file = _file_path
+        self.ext = _file_path[-3:]
+        if isinstance(ws_pointer, WorkspaceGroup):
+            self.shortrun_no = ws_pointer[0].getRunNumber()
+        else:
+            self.shortrun_no = ws_pointer.getRunNumber()
+
         if self._reload:
             # give to _assignHelper the responsibility of loading this data.
-            return False, None
+            return False
 
-        #test if the sample details are already loaded:
-        if not ws_pointer.sample().getGeometryFlag():
-            LoadSampleDetailsFromRaw(ws_pointer, self._data_file)
+        #test if the sample details are already loaded, necessary only for raw files:
+        if '.nxs' not in self._data_file[-4:]:
+            self._loadSampleDetails(ws_pointer)
 
         # so, it will try, not to reload the workspace.
-        self.wksp_name = ws_pointer.name()
-        self.periods_in_file = 1
-        self.shortrun_no = ws_pointer.getRunNumber()
+        self._wksp_name = ws_pointer.name()
+        self.periods_in_file = self._find_workspace_num_periods(self._wksp_name)
 
         #check that the current workspace has never been moved
         hist_str = self._getHistory(ws_pointer)
         if 'Algorithm: Move' in hist_str or 'Algorithm: Rotate' in hist_str:
             raise RuntimeError('Moving components needs to be made compatible with not reloading the sample')
         
-        if isEventWorkspace(ws_pointer):
-            ws_pointer = fromEvent2Histogram(ws_pointer)
-
-        return True, self._extract_log_info(ws_pointer, reducer.instrument)
+        return True
         
 
     # Helper function
     def _assignHelper(self, reducer):
         if isinstance(self._data_file, Workspace):
-            loaded_flag, logs = self._loadFromWorkspace(reducer)
+            loaded_flag= self._loadFromWorkspace(reducer)
             if loaded_flag:
-                return logs
+                return
 
         if self._data_file == '' or self._data_file.startswith('.'):
             raise RuntimeError('Sample needs to be assigned as run_number.file_type')
@@ -213,53 +243,42 @@ class LoadRun(object):
                 spec_min = dimension*dimension*2
                 spectrum_limits = {'SpectrumMin':spec_min, 'SpectrumMax':spec_min + 4}
 
-        try:
-            # the spectrum_limits is not the default only for transmission data
-            self.periods_in_file, logs = self._load(reducer.instrument, extra_options=spectrum_limits)
+        try:            
+            if self._is_trans and reducer.instrument.name() != 'LOQ':
+                # Unfortunatelly, LOQ in transmission acquire 3 monitors the 3 monitor usually
+                # is the first spectrum for detector. This causes the following method to fail
+                # when it tries to load only monitors. Hence, we are forced to skip this method
+                # for LOQ. ticket #8559
+                self._load_transmission(reducer.instrument, extra_options=spectrum_limits)
+            else:
+                # the spectrum_limits is not the default only for transmission data
+                self._load(reducer.instrument, extra_options=spectrum_limits)
         except RuntimeError, details:
             sanslog.warning(str(details))
-            self.wksp_name = ''
-            return '', -1
+            self._wksp_name = ''
+            return 
         
-        return logs
+        return 
 
     def _leaveSinglePeriod(self, workspace, period):
         groupW = mtd[workspace]
-        if isinstance(groupW, WorkspaceGroup):
-            num_periods = groupW.getNames()
-        else:
-            num_periods = 1
-
-        if period > num_periods or period < 1:
-            raise ValueError('Period number ' + str(period) + ' doesn\'t exist in workspace ' + groupW.getName())
-        
-        if num_periods == 1:
+        if not isinstance(groupW, WorkspaceGroup):
+            logger.warning("Invalid request for getting single period in a non group workspace")
             return workspace
-        #get the name of the individual workspace in the group
-        oldName = groupW.getName()+'_'+str(self._period)
-        #move this workspace out of the group (this doesn't delete it)
-        groupW.remove(oldName)
+        if len(groupW) < period:
+            raise ValueError('Period number ' + str(period) + ' doesn\'t exist in workspace ' + groupW.getName())
+        ws_name = groupW[period].name()
+        
+        # remove this workspace from the group
+        groupW.remove(ws_name)
+        # remove the entire group
+        DeleteWorkspace(groupW)
+        
+        new_name = self._get_workspace_name(period)
+        if new_name != ws_name:
+            RenameWorkspace(ws_name, OutputWorkspace=new_name)
+        return new_name
     
-        discriptors = groupW.getName().split('_')       #information about the run (run number, if it's 1D or 2D, etc) is listed in the workspace name between '_'s
-        for i in range(0, len(discriptors) ):           #insert the period name after the run number
-            if i == 0 :                                 #the run number is the first part of the name
-                newName = discriptors[0]+'p'+str(self._period)#so add the period number here
-            else :
-                newName += '_'+discriptors[i]
-    
-        if oldName != newName:
-            RenameWorkspace(InputWorkspace=oldName,OutputWorkspace= newName)
-    
-        #remove the rest of the group
-        DeleteWorkspace(groupW.getName())
-        return newName
-    
-    def _clearPrevious(self, inWS, others = []):
-        if inWS != None:
-            if inWs in mtd and (not inWS in others):
-                DeleteWorkspace(inWs)
-                
-
     def _extract_run_details(self, run_string):
         """
             Takes a run number and file type and generates the filename, workspace name and log name
@@ -273,27 +292,15 @@ class LoadRun(object):
     
     def _find_workspace_num_periods(self, workspace): 
         """
-            Deal with selection and reporting of periods in multi-period files,
-            this is complicated because different file formats have different ways
-            of report numbers of periods
             @param workspace: the name of the workspace
         """
         numPeriods = -1
         pWorksp = mtd[workspace]
         if isinstance(pWorksp, WorkspaceGroup) :
             #get the number of periods in a group using the fact that each period has a different name
-            numPeriods = len(pWorksp.getNames())
+            numPeriods = len(pWorksp)
         else :
             numPeriods = 1
-
-        #the logs have the definitive information on the number of periods, if it is in the logs
-        try:
-            samp = pWorksp.getRun()
-            numPeriods = samp.getLogData('nperiods').value
-        except:
-            #it's OK for there not to be any logs
-            pass
-        
         return numPeriods
 
     def _getHistory(self, wk_name):
@@ -331,7 +338,7 @@ class LoadRun(object):
             raise RuntimeError('There is a mismatch in the number of periods (entries) in the file between the sample and another run')
 
 
-class LoadTransmissions(ReductionStep):
+class LoadTransmissions():
     """
         Loads the file used to apply the transmission correction to the
         sample or can 
@@ -345,7 +352,6 @@ class LoadTransmissions(ReductionStep):
             @param is_can: if this is to correct the can (default false i.e. it's for the sample)
             @param reload: setting this to false will mean the workspaces aren't reloaded if they already exist (default True i.e. reload)
         """
-        super(LoadTransmissions, self).__init__()
         self.trans = None
         self.direct = None
         self._reload = reload
@@ -380,14 +386,7 @@ class LoadTransmissions(ReductionStep):
                 raise RuntimeError('Transmission run set without direct run error')
  
         #transmission workspaces sometimes have monitor locations, depending on the instrument, load these locations
-        reducer.instrument.load_transmission_inst(self.trans.wksp_name)
-        reducer.instrument.load_transmission_inst(self.direct.wksp_name)
-        
-        if reducer.instrument.name() == 'SANS2D':        
-            beamcoords = reducer.get_beam_center()
-            reducer.instrument.move_components(self.trans.wksp_name, beamcoords[0], beamcoords[1]) 
-            if  self.trans.wksp_name != self.direct.wksp_name:
-              reducer.instrument.move_components(self.direct.wksp_name, beamcoords[0], beamcoords[1])                
+        reducer.instrument.load_transmission_inst(self.trans.wksp_name, self.direct.wksp_name, reducer.get_beam_center())
 
         return self.trans.wksp_name, self.direct.wksp_name
 
@@ -396,49 +395,17 @@ class CanSubtraction(ReductionStep):
         Apply the same corrections to the can that were applied to the sample and
         then subtracts this can from the sample.
     """
-    def __init__(self, can_run, reload = True, period = -1):
-        """
-            @param can_run: the run number followed by dot and the extension 
-            @param reload: if set to true (default) the workspace is replaced if it already exists
-            @param period: for multiple entry workspaces this is the period number
-        """
+    def __init__(self):
         super(CanSubtraction, self).__init__()
-        #contains the workspace with the background (can) data
-        self.workspace = LoadRun(can_run, reload=reload, entry=period)
-
-    def assign_can(self, reducer):
-        """
-            Loads the can workspace into Mantid and reads any log file
-            @param reducer: the reduction chain
-            @return: the logs object  
-        """
-        if not reducer.user_settings.executed:
-            raise RuntimeError('User settings must be loaded before the can can be loaded, run UserFile() first')
-    
-        logs = self.workspace._assignHelper(reducer)
-
-        if self.workspace.wksp_name == '':
-            sanslog.warning('Unable to load SANS can run, cannot continue.')
-            return '()'
-          
-        if logs:
-            reducer.instrument.check_can_logs(logs)
-        else:
-            logs = ""
-            if reducer.instrument.name() == 'SANS2D':
-                _issueWarning("Can logs could not be loaded, using sample values.")
-                return "()"    
-        
-        beamcoords = reducer.get_beam_center()
-        reducer.instrument.move_components(self.wksp_name, beamcoords[0], beamcoords[1])
-
-        return logs
 
     def execute(self, reducer, workspace):
         """
             Apply same corrections as for sample workspace then subtract from data
         """        
-        #remain the sample workspace, its name will be restored to the original once the subtraction has been done 
+        if reducer.get_can() is None:
+            return
+
+        #rename the sample workspace, its name will be restored to the original once the subtraction has been done 
         tmp_smp = workspace+"_sam_tmp"
         RenameWorkspace(InputWorkspace=workspace,OutputWorkspace= tmp_smp)
 
@@ -451,9 +418,10 @@ class CanSubtraction(ReductionStep):
     
         #clean up the workspaces ready users to see them if required
         if reducer.to_Q.output_type == '1D':
-            rem_nans = sans_reduction_steps.StripEndNans()
-            rem_nans.execute(reducer, tmp_smp)
-            rem_nans.execute(reducer, tmp_can)
+            rem_nans = StripEndNans()
+
+        self._keep_partial_results(tmp_smp, tmp_can)
+
 
     def get_wksp_name(self):
         return self.workspace.wksp_name
@@ -463,16 +431,35 @@ class CanSubtraction(ReductionStep):
     def get_periods_in_file(self):
         return self.workspace.periods_in_file
 
+    def _keep_partial_results(self, sample_name, can_name):
+        # user asked to keep these results 8970
+        gp_name = 'sample_can_reductions'
+        if mtd.doesExist(gp_name):
+            gpr = mtd[gp_name]
+            for wsname in [sample_name, can_name]:
+                if not gpr.contains(wsname):
+                    gpr.add(wsname)
+        else:
+            GroupWorkspaces([sample_name, can_name], OutputWorkspace=gp_name)
+
     periods_in_file = property(get_periods_in_file, None, None, None)
 
-class Mask_ISIS(sans_reduction_steps.Mask):
+class Mask_ISIS(ReductionStep):
     """
+        Marks some spectra so that they are not included in the analysis
         Provides ISIS specific mask functionality (e.g. parsing
         MASK commands from user files), inherits from Mask
     """
     def __init__(self, timemask='', timemask_r='', timemask_f='', 
                  specmask='', specmask_r='', specmask_f=''):
-        sans_reduction_steps.Mask.__init__(self)
+        self._xml = []
+
+        #these spectra will be masked by the algorithm MaskDetectors
+        self.detect_list = []
+        
+        # List of pixels to mask
+        self.masked_pixels = []
+        
         self.time_mask=timemask 
         self.time_mask_r=timemask_r
         self.time_mask_f=timemask_f
@@ -510,6 +497,73 @@ class Mask_ISIS(sans_reduction_steps.Mask):
 
         self.min_radius = None
         self.max_radius = None
+
+    def add_xml_shape(self, complete_xml_element):
+        """
+            Add an arbitrary shape to region to be masked
+            @param complete_xml_element: description of the shape to add
+        """
+        if not complete_xml_element.startswith('<') :
+            raise ValueError('Excepted xml string but found: ' + str(complete_xml_element))
+        self._xml.append(complete_xml_element)
+
+    def _infinite_plane(self, id, plane_pt, normal_pt, complement = False):
+        """
+            Generates xml code for an infinte plane
+            @param id: a string to refer to the shape by
+            @param plane_pt: a point in the plane
+            @param normal_pt: the direction of a normal to the plane
+            @param complement: mask in the direction of the normal or away
+            @return the xml string
+        """
+        if complement:
+            addition = '#'
+        else:
+            addition = ''
+        return '<infinite-plane id="' + str(id) + '">' + \
+            '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
+            '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
+            '</infinite-plane>\n'
+
+    def _infinite_cylinder(self, centre, radius, axis, id='shape'):
+        """
+            Generates xml code for an infintely long cylinder
+            @param centre: a tupple for a point on the axis
+            @param radius: cylinder radius
+            @param axis: cylinder orientation
+            @param id: a string to refer to the shape by
+            @return the xml string
+        """
+        return '<infinite-cylinder id="' + str(id) + '">' + \
+            '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
+            '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
+            '<radius val="' + str(radius) + '" /></infinite-cylinder>\n'
+
+    def _finite_cylinder(self, centre, radius, height, axis, id='shape'):
+        """
+            Generates xml code for an infintely long cylinder
+            @param centre: a tupple for a point on the axis
+            @param radius: cylinder radius
+            @param height: cylinder height            
+            @param axis: cylinder orientation
+            @param id: a string to refer to the shape by
+            @return the xml string
+        """
+        return '<cylinder id="' + str(id) + '">' + \
+            '<centre-of-bottom-base x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
+            '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
+            '<radius val="' + str(radius) + '" /><height val="' + str(height) + '" /></cylinder>\n'
+
+    def add_cylinder(self, radius, xcentre, ycentre, ID='shape'):
+        '''Mask the inside of an infinite cylinder on the input workspace.'''
+        self.add_xml_shape(
+            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1], id=ID)+'<algebra val="' + str(ID) + '"/>')
+            
+
+    def add_outside_cylinder(self, radius, xcentre = 0.0, ycentre = 0.0, ID='shape'):
+        '''Mask out the outside of a cylinder or specified radius'''
+        self.add_xml_shape(
+            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1], id=ID)+'<algebra val="#' + str(ID) + '"/>')
 
     def set_radi(self, min, max):
         self.min_radius = float(min)/1000.
@@ -785,15 +839,6 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         else:
           return ''
     
-    def normalizePhi(self, phi):
-        if phi > 90.0:
-            phi -= 180.0
-        elif phi < -90.0:
-            phi += 180.0
-        else:
-            pass
-        return phi
-
     def set_phi_limit(self, phimin, phimax, phimirror, override=True):
         '''
             ... (tx to Richard for changes to this function 
@@ -854,7 +899,8 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         if ( not self.max_radius is None ) and ( self.max_radius > 0.0 ):
             self.add_outside_cylinder(self.max_radius, 0, 0, 'beam_area')
         #now do the masking
-        sans_reduction_steps.Mask.execute(self, reducer, workspace)
+        for shape in self._xml:
+            MaskDetectorsInShape(Workspace=workspace, ShapeXML=shape)
 
         if len(self.spec_list)>0:
             MaskDetectors(Workspace=workspace, SpectraList = self.spec_list)
@@ -870,6 +916,9 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                 start_point = [self.arm_x, self.arm_y, det_Z]
                 MaskDetectorsInShape(Workspace=workspace,ShapeXML=
                                  self._mask_line(start_point, 1e6, self.arm_width, self.arm_angle))
+
+        output_ws, detector_list = ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
+        _issueInfo("Mask check %s: %g masked pixels" % (workspace, len(detector_list)))
 
     def view(self, instrum):
         """
@@ -957,8 +1006,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             Multiply(LHSWorkspace='ones',RHSWorkspace= wksp,OutputWorkspace= 'units')
             #do the super-position and clean up
             Minus(LHSWorkspace=counts,RHSWorkspace= 'units',OutputWorkspace= wksp)
-            DeleteWorkspace('ones')
-            DeleteWorkspace('units')
+            reducer.deleteWorkspaces(['ones', 'units'])
 
         #opens an instrument showing the contents of the workspace (i.e. the instrument with masked detectors) 
         instrum.view(wksp)
@@ -972,14 +1020,13 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             '    front time mask: ', str(self.time_mask_f)+'\n'
 
 
-class LoadSample(LoadRun, ReductionStep):
+class LoadSample(LoadRun):
     """
         Handles loading the sample run, this is the main experimental run with data
         about the sample of interest
     """
     def __init__(self, sample=None, reload=True, entry=-1):
         LoadRun.__init__(self, sample, reload=reload, entry=entry)
-        ReductionStep.__init__(self)
         self._scatter_sample = None
         self._SAMPLE_RUN = None
         
@@ -987,52 +1034,25 @@ class LoadSample(LoadRun, ReductionStep):
         #is set to the entry (period) number in the sample to be run
         self.entries = []
     
-    def execute(self, reducer, workspace):
-        if not reducer.user_settings.executed:
-            raise RuntimeError('User settings must be loaded before the sample can be assigned, run UserFile() first')
-
-        # Code from AssignSample
-        self._clearPrevious(self._scatter_sample)
-        
-        logs = self._assignHelper(reducer)
-        if self._period != self.UNSET_PERIOD:
-            self.entries  = [self._period]
-        else:
-            self.entries  = range(1, self.periods_in_file+1)
+    def execute(self, reducer, isSample):
+        self._assignHelper(reducer)
 
         if self.wksp_name == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
 
-        p_run_ws = mtd[self.wksp_name]
-        
-        if isinstance(p_run_ws, WorkspaceGroup):
-            p_run_ws = p_run_ws[0]
+        if self.periods_in_file > 1:
+            self.entries = range(0, self.periods_in_file)
+
+        # applies on_load_sample for all the workspaces (single or groupworkspace)
+        num = 0
+        while True:
+            reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample)
+            num += 1
+            if num == self.periods_in_file:
+                break
+            self.move2ws(num)        
+        self.move2ws(0)
     
-        try:
-            run_num = p_run_ws.getRun().getLogData('run_number').value
-        except RuntimeError:
-            # if the run number is not stored in the workspace, try to take it from the filename
-            run_num = os.path.basename(self._data_file).split('.')[0].split('-')[0].split('0')[-1]
-            try:
-                dummy = int(run_num)
-            except ValueError:
-                logger.notice('Could not extract run number from file name ' + self._data_file)
-        
-        reducer.instrument.set_up_for_run(run_num)
-
-        if reducer.instrument.name() == 'SANS2D':
-            if logs == None:
-                DeleteWorkspace(self.wksp_name)
-                raise RuntimeError('Sample logs cannot be loaded, cannot continue')
-            reducer.instrument.apply_detector_logs(logs)           
-
-        beamcoords = reducer.get_beam_center()
-        reducer.instrument.move_components(self.wksp_name, beamcoords[0], beamcoords[1])
-
-        return logs
-    
-    def get_group_name(self):
-        return self._get_workspace_name(self._period)
 
 class CropDetBank(ReductionStep):
     """
@@ -1040,24 +1060,19 @@ class CropDetBank(ReductionStep):
         and crops the input workspace to just those spectra. Supports optionally
         generating the output workspace from a different (sample) workspace
     """ 
-    def __init__(self, crop_sample=False):
+    def __init__(self):
         """
             Sets up the object to either the output or sample workspace
-            @param crop_sample: if set to true the input workspace name is not the output but is taken from reducer.get_sample().wksp_name (default off) 
         """
         super(CropDetBank, self).__init__()
-        self._use_sample = crop_sample
 
     def execute(self, reducer, workspace):
-        if self._use_sample:
-            in_wksp = reducer.get_sample().wksp_name
-        else:
-            in_wksp = workspace
+        in_wksp = workspace
         
         # Get the detector bank that is to be used in this analysis leave the complete workspace
         reducer.instrument.cur_detector().crop_to_detector(in_wksp, workspace)
 
-class NormalizeToMonitor(sans_reduction_steps.Normalize):
+class NormalizeToMonitor(ReductionStep):
     """
         Before normalisation the monitor spectrum's background is removed 
         and for LOQ runs also the prompt peak. The input workspace is copied
@@ -1065,13 +1080,9 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
     """
     NORMALISATION_SPEC_NUMBER = 1
     NORMALISATION_SPEC_INDEX = 0
-    def __init__(self, spectrum_number=None, raw_ws=None):
-        if not spectrum_number is None:
-            index_num = spectrum_number
-        else:
-            index_num = None
-        super(NormalizeToMonitor, self).__init__(index_num)
-        self._raw_ws = raw_ws
+    def __init__(self, spectrum_number=None):
+        super(NormalizeToMonitor, self).__init__()
+        self._normalization_spectrum = spectrum_number
 
         #the result of this calculation that will be used by CalculateNorm() and the ConvertToQ
         self.output_wksp = None
@@ -1082,27 +1093,25 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             #the -1 converts from spectrum number to spectrum index
             normalization_spectrum = reducer.instrument.get_incident_mon()
         
-        raw_ws = self._raw_ws
-        if raw_ws is None:
-            raw_ws = reducer.get_sample().wksp_name
-
         sanslog.notice('Normalizing to monitor ' + str(normalization_spectrum))
 
-        self.output_wksp = 'Monitor'       
-        CropWorkspace(InputWorkspace=raw_ws,OutputWorkspace= self.output_wksp,
-                      StartWorkspaceIndex = normalization_spectrum-1, 
-                      EndWorkspaceIndex   = normalization_spectrum-1)
-    
+        self.output_wksp = str(workspace) + '_incident_monitor'
+        mon = reducer.get_sample().get_monitor(normalization_spectrum-1)
+        if reducer.event2hist.scale != 1:
+            mon *= reducer.event2hist.scale
+
+        if str(mon) != self.output_wksp:
+            RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
+        
         if reducer.instrument.name() == 'LOQ':
             RemoveBins(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp,XMin= reducer.transmission_calculator.loq_removePromptPeakMin,XMax= 
                        reducer.transmission_calculator.loq_removePromptPeakMax, Interpolation="Linear")
         
         # Remove flat background
-        TOF_start, TOF_end = reducer.inst.get_TOFs(
-                                    self.NORMALISATION_SPEC_NUMBER)
+        TOF_start, TOF_end = reducer.inst.get_TOFs(normalization_spectrum)
+
         if TOF_start and TOF_end:
-            CalculateFlatBackground(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp, StartX=TOF_start, EndX=TOF_end,
-                WorkspaceIndexList=self.NORMALISATION_SPEC_INDEX, Mode='Mean')
+            CalculateFlatBackground(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp, StartX=TOF_start, EndX=TOF_end, Mode='Mean')
 
         #perform the same conversion on the monitor spectrum as was applied to the workspace but with a possibly different rebin
         if reducer.instrument.is_interpolating_norm():
@@ -1111,7 +1120,7 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             r_alg = 'Rebin'
         reducer.to_wavelen.execute(reducer, self.output_wksp, bin_alg=r_alg)
 
-class TransmissionCalc(sans_reduction_steps.BaseTransmission):
+class TransmissionCalc(ReductionStep):
     """
         Calculates the proportion of neutrons that are transmitted through the sample
         as a function of wavelength. The results are stored as a workspace
@@ -1144,10 +1153,6 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         self.fit_settings = dict()
         for prop in self.fit_props:
             self.fit_settings['both::'+prop] = None
-        # An optional LoadTransmissions object that contains the names of the transmission and direct workspaces for the sample
-        self.samp_loader = None
-        # An optional LoadTransmissions objects for the can's transmission and direct workspaces
-        self.can_loader = None
         # this contains the spectrum number of the monitor that comes after the sample from which the transmission calculation is done 
         self._trans_spec = None
         # use InterpolatingRebin 
@@ -1162,19 +1167,6 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         self.loq_removePromptPeakMax = 20500.0       
         
         
-    def _loader(self, reducer):
-        """
-            Returns the transmission loader objects for either the sample or the can depending
-            on the reduction object passed
-            @param reducer: the reduction chain of interest
-            @return: information on the transmission workspaces if these were loaded 
-        """ 
-        if reducer.is_can():
-            return self.can_loader
-        else:
-            return self.samp_loader
-
-
     def set_trans_fit(self, fit_method, min_=None, max_=None, override=True, selector='both'):
         """
             Set how the transmission fraction fit is calculated, the range of wavelengths
@@ -1321,11 +1313,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             of the transmission
             @return: post_sample pre_sample workspace names
         """  
-        loader = self._loader(reducer)
-        if (not loader) or (not loader.trans.wksp_name):
-            return '', ''
-        else:
-            return loader.trans.wksp_name, loader.direct.wksp_name
+        return reducer.get_transmissions()
 
     def calculate(self, reducer):
         LAMBDAMIN = 'lambda_min'
@@ -1399,16 +1387,19 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
                               OutputUnfittedData=True, **options) # options FitMethod, PolynomialOrder if present
 
         # Remove temporaries
-        DeleteWorkspace(Workspace=trans_tmp_out)
+        files2delete = [trans_tmp_out]
+
         if direct_tmp_out != trans_tmp_out:
-            DeleteWorkspace(Workspace=direct_tmp_out)
+            files2delete.append(direct_tmp_out)
             
         if sel_settings[FITMETHOD] in ['OFF', 'CLEAR']:
             result = unfittedtransws
-            DeleteWorkspace(fittedtransws)
+            files2delete.append(fittedtransws)
         else:
             result = fittedtransws
     
+        reducer.deleteWorkspaces(files2delete)
+
         return result
     
     def get_trans_spec(self):
@@ -1471,18 +1462,23 @@ class AbsoluteUnitsISIS(ReductionStep):
         ws = mtd[workspace]
         ws *= scalefactor
         
-class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
+
+class CalculateNormISIS(object):
     """
-        Note this is not a reduction step, see sans_reduction_steps.CalculateNorm
+        Note this is not a reduction step, see CalculateNorm
         
         Generates the normalization workspaces required by Q1D and Qxy for normalization
         produced by other, sometimes optional, reduction_steps or a specified
         workspace
     """
     TMP_ISIS_NAME = '__CalculateNormISIS_loaded_tmp'
-    
+    TMP_WORKSPACE_NAME = '__CalculateNorm_loaded_temp'
+    WAVE_CORR_NAME = '__Q_WAVE_conversion_temp'
+    PIXEL_CORR_NAME = '__Q_pixel_conversion_temp'
+
     def  __init__(self, wavelength_deps=[]):
-        super(CalculateNormISIS, self).__init__(wavelength_deps)
+        super(CalculateNormISIS, self).__init__()
+        self._wave_steps = wavelength_deps
         #algorithm to be used to load pixel correction files
         self._load='LoadRKH'
         #a parameters string to add as the last argument to the above algorithm
@@ -1498,8 +1494,6 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
           but, now, we need pixel_file (flood file) for both detectors.
           so, an extra parameter is allowed. 
           
-          override CalculateNorm.
-          
         """
         detector = detector.upper()
 
@@ -1514,7 +1508,6 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
           but, now, we need pixel_file (flood file) for both detectors.
           so, an extra parameter is allowed. 
           
-          override CalculateNorm.
         """
         detector = detector.upper()
         if detector in ("FRONT","HAB","FRONT-DETECTOR-BANK", "FRONT-DETECTOR"):
@@ -1525,6 +1518,51 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
             logger.warning("Request of pixel correction file with unknown detector ("+ str(detector)+")")
             return self._pixel_file
 
+
+    def _multiplyAll(self, wave_wksps, wksp2match):
+        wave_adj = None
+        for wksp in wave_wksps:
+            #before the workspaces can be combined they all need to match 
+            RebinToWorkspace(WorkspaceToRebin=wksp, WorkspaceToMatch=wksp2match, 
+                             OutputWorkspace=self.TMP_WORKSPACE_NAME)
+
+            if not wave_adj:
+                wave_adj = self.WAVE_CORR_NAME
+                RenameWorkspace(InputWorkspace=self.TMP_WORKSPACE_NAME, OutputWorkspace=wave_adj)
+            else:
+                Multiply(LHSWorkspace=self.TMP_WORKSPACE_NAME, RHSWorkspace=wave_adj, 
+                         OutputWorkspace= wave_adj)
+        return wave_adj
+
+    def _loadPixelCorrection(self):
+        # read pixel correction file
+        # note the python code below is an attempt to emulate function overloading
+        # If a derived class overwrite self._load and self._load_params then 
+        # a custom specific loading can be achieved 
+        pixel_adj = ''
+        if self._pixel_file:
+            pixel_adj = self.PIXEL_CORR_NAME
+            load_com = self._load+'(Filename="'+self._pixel_file+'",OutputWorkspace="'+pixel_adj+'"'
+            if self._load_params:
+                load_com  += ','+self._load_params
+            load_com += ')'
+            eval(load_com)
+
+        return pixel_adj
+
+    def _is_point_data(self, wksp):
+        """
+            Tests if the workspace whose name is passed contains point or histogram data
+            The test is if the X and Y array lengths are the same = True, different = false
+            @param wksp: name of the workspace to test
+            @return True for point data, false for histogram
+        """
+        handle = mtd[wksp]
+        if len(handle.readX(0)) == len(handle.readY(0)):
+            return True
+        else:
+            return False
+        
     def calculate(self, reducer, wave_wks=[]):
         """
             Multiplies all the wavelength scalings into one workspace and all the detector
@@ -1544,26 +1582,98 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
         detect_pixel_file = self.getPixelCorrFile(reducer.instrument.cur_detector().name())
         if (detect_pixel_file != ""):
             self._pixel_file = detect_pixel_file
-        wave_adj, pixel_adj = super(CalculateNormISIS, self).calculate(reducer, wave_wks)
+
+        for step in self._wave_steps:
+            if step.output_wksp:
+                wave_wks.append(step.output_wksp)
+        
+        wave_adj = self._multiplyAll(wave_wks, reducer.output_wksp)
+
+        pixel_adj = self._loadPixelCorrection()
 
         if pixel_adj:
             #remove all the pixels that are not present in the sample data (the other detector)
             reducer.instrument.cur_detector().crop_to_detector(pixel_adj, pixel_adj)
         
-        isis_reducer.deleteWorkspaces([self.TMP_ISIS_NAME])
+        reducer.deleteWorkspaces([self.TMP_ISIS_NAME, self.TMP_WORKSPACE_NAME])
         
         return wave_adj, pixel_adj
 
-class ConvertToQISIS(sans_reduction_steps.ConvertToQ):
-    """
-    Extend the sans_recution_steps.ConvertToQ to use the property WavePixelAdj.
+class ConvertToQISIS(ReductionStep):
+    """ 
+    Runs the Q1D or Qxy algorithms to convert wavelength data into momentum transfer, Q
+
     Currently, this allows the wide angle transmission correction.
     """
+    # the list of possible Q conversion algorithms to use
+    _OUTPUT_TYPES = {'1D' : 'Q1D',
+                     '2D' : 'Qxy'}
+    # defines if Q1D should correct for gravity by default
+    _DEFAULT_GRAV = False    
+    def __init__(self, normalizations):
+        """
+            @param normalizations: CalculateNormISIS object contains the workspace, ReductionSteps or files require for the optional normalization arguments
+        """
+        if not issubclass(normalizations.__class__,  CalculateNormISIS):
+            raise RuntimeError('Error initializing ConvertToQ, invalid normalization object')
+        #contains the normalization optional workspaces to pass to the Q algorithm 
+        self._norms = normalizations
+        
+        #this should be set to 1D or 2D
+        self._output_type = '1D'
+        #the algorithm that corresponds to the above choice
+        self._Q_alg = self._OUTPUT_TYPES[self._output_type]
+        #if true gravity is taken into account in the Q1D calculation
+        self._use_gravity = self._DEFAULT_GRAV
+        #used to implement a default setting for gravity that can be over written but doesn't over write
+        self._grav_set = False
+        #this should contain the rebin parameters
+        self.binning = None
+
+        #The minimum distance in metres from the beam center at which all wavelengths are used in the calculation
+        self.r_cut = 0.0
+        #The shortest wavelength in angstrom at which counts should be summed from all detector pixels in Angstrom
+        self.w_cut = 0.0
+        # Whether to output parts when running either Q1D2 or Qxy
+        self.outputParts = False
+ 
+    def set_output_type(self, descript):
+        """
+            Requests the given output from the Q conversion, either 1D or 2D. For
+            the 1D calculation it asks the reducer to keep a workspace for error
+            estimates
+            @param descript: 1D or 2D
+        """
+        self._Q_alg = self._OUTPUT_TYPES[descript]
+        self._output_type = descript
+                    
+    def get_output_type(self):
+        return self._output_type
+
+    output_type = property(get_output_type, set_output_type, None, None)
+
+    def get_gravity(self):
+        return self._use_gravity
+
+    def set_gravity(self, flag, override=True):
+        """
+            Enable or disable including gravity when calculating Q
+            @param flag: set to True to enable the gravity correction
+            @param override: over write the setting from a previous call to this method (default is True)
+        """
+        if override:
+            self._grav_set = True
+
+        if (not self._grav_set) or override:
+                self._use_gravity = bool(flag)
+        else:
+            msg = "User file can't override previous gravity setting, do gravity correction remains " + str(self._use_gravity) 
+            print msg
+            sanslog.warning(msg)
+
     def execute(self, reducer, workspace):
         """
         Calculate the normalization workspaces and then call the chosen Q conversion algorithm.
-        Almost a copy of sans_reduction_steps.ConvertToQ, except by the calculation of
-        the transmission correction wide angle.
         """
         wavepixeladj = ""
         if (reducer.wide_angle_correction and reducer.transmission_calculator.output_wksp):
@@ -1580,16 +1690,6 @@ class ConvertToQISIS(sans_reduction_steps.ConvertToQ):
         else:
             raise RuntimeError('Normalization workspaces must be created by CalculateNorm() and passed to this step')
 
-        # If some prenormalization flag is set - normalize data with wave_adj and pixel_adj
-        if self.prenorm:
-            data = mtd[workspace]
-            if wave_adj:
-                data /= mtd[wave_adj]
-            if pixel_adj:
-                data /= mtd[pixel_adj]
-            self._deleteWorkspaces([wave_adj, pixel_adj])
-            wave_adj, pixel_adj = '', ''
-
         try:
             if self._Q_alg == 'Q1D':
                 Q1D(DetBankWorkspace=workspace,OutputWorkspace= workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts, WavePixelAdj = wavepixeladj)
@@ -1600,10 +1700,10 @@ class ConvertToQISIS(sans_reduction_steps.ConvertToQ):
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
         except:
             #when we are all up to Python 2.5 replace the duplicated code below with one finally:
-            self._deleteWorkspaces([wave_adj, pixel_adj, wavepixeladj])
+            reducer.deleteWorkspaces([wave_adj, pixel_adj, wavepixeladj])
             raise
 
-        self._deleteWorkspaces([wave_adj, pixel_adj, wavepixeladj])
+        reducer.deleteWorkspaces([wave_adj, pixel_adj, wavepixeladj])
 
 class UnitsConvert(ReductionStep):
     """
@@ -1700,6 +1800,60 @@ class UnitsConvert(ReductionStep):
     def __str__(self):
         return '    Wavelength range: ' + self.get_rebin()
 
+class SliceEvent(ReductionStep):
+    
+    def __init__(self):
+        super(SliceEvent, self).__init__()
+        self.scale = 1
+
+    def execute(self, reducer, workspace):
+        ws_pointer = getWorkspaceReference(workspace)
+
+        # it applies only for event workspace
+        if not isinstance(ws_pointer, IEventWorkspace):
+            self.scale = 1
+            return
+        start, stop = reducer.getCurrSliceLimit()
+        
+        _monitor = reducer.get_sample().get_monitor()
+
+        hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor)
+        self.scale = part_c / tot_c
+
+
+class BaseBeamFinder(ReductionStep):
+    """
+        Base beam finder. Holds the position of the beam center
+        and the algorithm for calculates it using the beam's
+        displacement under gravity
+    """
+    def __init__(self, beam_center_x=None, beam_center_y=None):
+        """
+            Initial beam center is given in pixel coordinates
+            @param beam_center_x: pixel position of the beam in x
+            @param beam_center_y: pixel position of the beam in y
+        """
+        super(BaseBeamFinder, self).__init__()
+        self._beam_center_x = beam_center_x
+        self._beam_center_y = beam_center_y
+        self._beam_radius = None
+        self._datafile = None
+        self._persistent = True
+        
+    def set_persistent(self, persistent):
+        self._persistent = persistent
+        return self
+        
+    def get_beam_center(self):
+        """
+            Returns the beam center
+        """
+        return [self._beam_center_x, self._beam_center_y]
+    
+    def execute(self, reducer, workspace=None):
+        return "Beam Center set at: %s %s" % (str(self._beam_center_x), str(self._beam_center_y))
+        
+
 class UserFile(ReductionStep):
     """
         Reads an ISIS SANS mask file of the format described here mantidproject.org/SANS_User_File_Commands
@@ -1717,7 +1871,8 @@ class UserFile(ReductionStep):
         self.key_functions = {
             'BACK/' : self._read_back_line,
             'TRANS/': self._read_trans_line,
-            'MON/' : self._read_mon_line}
+            'MON/' : self._read_mon_line,
+            'TUBECALIBFILE': self._read_calibfile_line}
 
     def __deepcopy__(self, memo):
         """Called when a deep copy is requested                    
@@ -1728,7 +1883,8 @@ class UserFile(ReductionStep):
         fresh.key_functions = {
             'BACK/' : fresh._read_back_line,
             'TRANS/': fresh._read_trans_line,
-            'MON/' : fresh._read_mon_line
+            'MON/' : fresh._read_mon_line,
+            'TUBECALIBFILE': self._read_calibfile_line
             }
         return fresh
 
@@ -1741,7 +1897,7 @@ class UserFile(ReductionStep):
         if not os.path.isfile(user_file):
             user_file = os.path.join(reducer.user_file_path, self.filename)
             if not os.path.isfile(user_file):
-                user_file = reducer._full_file_path(self.filename)
+                user_file = FileFinder.getFullPath(self.filename)
                 if not os.path.isfile(user_file):
                     raise RuntimeError, "Cannot read mask. File path '%s' does not exist or is not in the user path." % self.filename
             
@@ -1814,9 +1970,9 @@ class UserFile(ReductionStep):
               y_pos = float(values[3])/1000.0
             if (hab_str_pos > 0):
               print 'Front values = ',x_pos,y_pos
-              reducer.set_beam_finder(sans_reduction_steps.BaseBeamFinder(x_pos, y_pos),'front')
+              reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos),'front')
             else:
-              reducer.set_beam_finder(sans_reduction_steps.BaseBeamFinder(x_pos, y_pos))
+              reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos))
         
         elif upper_line.startswith('SET SCALES'):
             values = upper_line.split()
@@ -2207,8 +2363,8 @@ class UserFile(ReductionStep):
                 reducer.inst.set_TOFs(None, None, int(parts[0]))
                 return ''
 
-            # assume a line of the form BACK/M1/TIME 
-            parts = arguments.split('/TIME')
+            # assume a line of the form BACK/M1/TIMES 
+            parts = arguments.split('/TIMES')
             if len(parts) == 2:
                 times = parts[1].split()
             else:
@@ -2319,6 +2475,21 @@ class UserFile(ReductionStep):
         
         reducer.inst.reset_TOFs()
 
+    def _read_calibfile_line(self, arguments, reducer):
+        # remove the equals from the beggining and any space around. 
+        parts = re.split("\s?=\s?", arguments)
+        if len(parts) != 2: 
+            return "Invalid input for TUBECALIBFILE" + str(arguments)+ ". Expected TUBECALIBFILE = file_path"
+        path2file = parts[1]
+
+        try:
+          file_path, suggested_name = getFileAndName(path2file)
+          __calibrationWs = Load(file_path, OutputWorkspace=suggested_name)
+          reducer.instrument.setCalibrationWorkspace(__calibrationWs)
+        except:
+            import traceback
+            return "Invalid input for tube calibration file. Path = "+path2file+".\nReason=" + traceback.format_exc()
+
 class GetOutputName(ReductionStep):
     def __init__(self):
         """
@@ -2359,3 +2530,246 @@ def _padRunNumber(run_no, field_width):
     else:
         filebase = run_no[:digit_end].rjust(field_width, '0')
         return filebase + run_no[digit_end:], run_no[:digit_end]
+
+
+class StripEndNans(ReductionStep):
+    # ISIS only
+    def __init__(self):
+        super(StripEndNans, self).__init__()
+        
+    def _isNan(self, val):
+        """
+            Can replaced by isNaN in Python 2.6
+            @param val: float to check
+        """
+        if val != val:
+            return True
+        else:
+            return False
+        
+    def execute(self, reducer, workspace):
+        """
+            Trips leading and trailing Nan values from workspace
+            @param reducer: unused
+            @param workspace: the workspace to convert
+        """
+        result_ws = mtd[workspace]
+        if result_ws.getNumberHistograms() != 1:
+            #Strip zeros is only possible on 1D workspaces
+            return
+
+        y_vals = result_ws.readY(0)
+        length = len(y_vals)
+        # Find the first non-zero value
+        start = 0
+        for i in range(0, length):
+            if not self._isNan(y_vals[i]):
+                start = i
+                break
+        # Now find the last non-zero value
+        stop = 0
+        length -= 1
+        for j in range(length, 0,-1):
+            if not self._isNan(y_vals[j]):
+                stop = j
+                break
+        # Find the appropriate X values and call CropWorkspace
+        x_vals = result_ws.readX(0)
+        startX = x_vals[start]
+        # Make sure we're inside the bin that we want to crop
+        endX = 1.001*x_vals[stop + 1]
+        CropWorkspace(InputWorkspace=workspace, OutputWorkspace=workspace, XMin=startX, XMax=endX)
+
+
+class GetSampleGeom(ReductionStep):
+    """
+        Loads, stores, retrieves, etc. data about the geometry of the sample
+        On initialisation this class will return default geometry values (compatible with the Colette software)
+        There are functions to override these settings
+        On execute if there is geometry information in the workspace this will override any unset attributes
+        
+        ISIS only
+        ORNL only divides by thickness, in the absolute scaling step
+        
+    """
+    # IDs for each shape as used by the Colette software
+    _shape_ids = {1 : 'cylinder-axis-up',
+                  2 : 'cuboid',
+                  3 : 'cylinder-axis-along'}
+    _default_shape = 'cylinder-axis-along'
+    
+    def __init__(self):
+        super(GetSampleGeom, self).__init__()
+
+        # string specifies the sample's shape
+        self._shape = None
+        # sample's width
+        self._width = None
+        self._thickness = None
+        self._height = None
+        
+        self._use_wksp_shape = True
+        self._use_wksp_width = True
+        self._use_wksp_thickness = True
+        self._use_wksp_height = True
+
+    def _get_default(self, attrib):
+        if attrib == 'shape':
+            return self._default_shape
+        elif attrib == 'width' or attrib == 'thickness' or attrib == 'height':
+            return 1.0
+
+    def set_shape(self, new_shape):
+        """
+            Sets the sample's shape from a string or an ID. If the ID is not
+            in the list of allowed values the shape is set to the default but
+            shape strings not in the list are not checked
+        """
+        try:
+            # deal with ID numbers as arguments
+            new_shape = self._shape_ids[int(new_shape)]
+        except ValueError:            
+            # means that we weren't passed an ID number, the code below treats it as a shape name
+            pass
+        except KeyError:
+            _issueWarning("Warning: Invalid geometry type for sample: " + str(new_shape) + ". Setting default to " + self._default_shape)
+            new_shape = self._default_shape
+
+        self._shape = new_shape
+        self._use_wksp_shape = False
+
+        #check that the dimensions that we have make sense for our new shape
+        if self._width:
+            self.width = self._width
+        if self._thickness:
+            self.thickness = self._thickness
+    
+    def get_shape(self):
+        if self._shape is None:
+            return self._get_default('shape')
+        else:
+            return self._shape
+        
+    def set_width(self, width):
+        self._width = float(width)
+        self._use_wksp_width = False
+        # For a disk the height=width
+        if self._shape and self._shape.startswith('cylinder'):
+            self._height = self._width
+            self._use_wksp_height = False
+
+    def get_width(self):
+        if self._width is None:
+            return self._get_default('width')
+        else:
+            return self._width
+            
+    def set_height(self, height):
+        self._height = float(height)
+        self._use_wksp_height = False
+        
+        # For a cylinder and sphere the height=width=radius
+        if (not self._shape is None) and (self._shape.startswith('cylinder')):
+            self._width = self._height
+        self._use_wksp_widtht = False
+
+    def get_height(self):
+        if self._height is None:
+            return self._get_default('height')
+        else:
+            return self._height
+
+    def set_thickness(self, thickness):
+        """
+            Simply sets the variable _thickness to the value passed
+        """
+        #as only cuboids use the thickness the warning below may be informative
+        #if (not self._shape is None) and (not self._shape == 'cuboid'):
+        #    mantid.sendLogMessage('::SANS::Warning: Can\'t set thickness for shape "'+self._shape+'"')
+        self._thickness = float(thickness)
+        self._use_wksp_thickness = False
+
+    def get_thickness(self):
+        if self._thickness is None:
+            return self._get_default('thickness')
+        else:
+            return self._thickness
+
+    shape = property(get_shape, set_shape, None, None)
+    width = property(get_width, set_width, None, None)
+    height = property(get_height, set_height, None, None)
+    thickness = property(get_thickness, set_thickness, None, None)
+
+    def execute(self, reducer, workspace):
+        """
+            Reads the geometry information stored in the workspace
+            but doesn't replace values that have been previously set
+        """
+        wksp = mtd[workspace] 
+        if isinstance(wksp, WorkspaceGroup):
+            wksp = wksp[0]
+        sample_details = wksp.sample()
+
+        if self._use_wksp_shape:
+            self.shape = sample_details.getGeometryFlag()
+        if self._use_wksp_thickness:
+            self.thickness = sample_details.getThickness()
+        if self._use_wksp_width:
+            self.width = sample_details.getWidth()
+        if self._use_wksp_height:
+            self.height = sample_details.getHeight()
+
+    def __str__(self):
+        return '-- Sample Geometry --\n' + \
+               '    Shape: ' + self.shape+'\n'+\
+               '    Width: ' + str(self.width)+'\n'+\
+               '    Height: ' + str(self.height)+'\n'+\
+               '    Thickness: ' + str(self.thickness)+'\n'
+
+class SampleGeomCor(ReductionStep):
+    """
+        Correct the neutron count rates for the size of the sample
+        
+        ISIS only
+        ORNL only divides by thickness, in the absolute scaling step
+
+    """
+    def __init__(self):
+        self.volume = 1.0
+
+    def calculate_volume(self, reducer):
+        geo = reducer.get_sample().geometry
+        assert( issubclass(geo.__class__, GetSampleGeom))
+
+        try:
+            if geo.shape == 'cylinder-axis-up':
+                # Volume = circle area * height
+                # Factor of four comes from radius = width/2
+                volume = geo.height*math.pi
+                volume *= math.pow(geo.width,2)/4.0
+            elif geo.shape == 'cuboid':
+                # Flat plate sample
+                volume = geo.width
+                volume *= geo.height*geo.thickness
+            elif geo.shape == 'cylinder-axis-along':
+                # Factor of four comes from radius = width/2
+                # Disc - where height is not used
+                volume = geo.thickness*math.pi
+                volume *= math.pow(geo.width, 2)/4.0
+            else:
+                raise NotImplemented('Shape "'+geo.shape+'" is not in the list of supported shapes')
+        except TypeError:
+            raise TypeError('Error calculating sample volume with width='+str(geo.width) + ' height='+str(geo.height) + 'and thickness='+str(geo.thickness)) 
+                
+        return volume
+
+    def execute(self, reducer, workspace):
+        """
+            Divide the counts by the volume of the sample
+        """
+        if not reducer.is_can():
+            # it calculates the volume for the sample and may or not apply to the can as well.
+            self.volume = self.calculate_volume(reducer)
+            
+        ws = mtd[str(workspace)]
+        ws /= self.volume

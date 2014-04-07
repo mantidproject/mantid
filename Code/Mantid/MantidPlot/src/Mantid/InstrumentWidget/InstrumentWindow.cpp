@@ -55,6 +55,9 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace MantidQt::API;
 
+// Name of the QSettings group to store the InstrumentWindw settings
+const char* InstrumentWindowSettingsGroup = "Mantid/InstrumentWindow";
+
 /**
  * Constructor.
  */
@@ -144,6 +147,7 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   // Watch for the deletion of the associated workspace
   observePreDelete();
   observeAfterReplace();
+  observeRename();
   observeADSClear();
 
   connect(app->mantidUI->getAlgMonitor(),SIGNAL(algorithmStarted(void*)),this,SLOT(block()));
@@ -797,30 +801,35 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
   //Replace current workspace
   if (wsName == m_workspaceName.toStdString())
   {
-    bool resetGeometry = true;
-    bool autoscaling = true;
-    double scaleMin = 0.0;
-    double scaleMax = 0.0;
     if (m_instrumentActor)
     {
       // try to detect if the instrument changes with the workspace
       auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>( workspace );
-      resetGeometry = matrixWS->getInstrument()->getNumberDetectors() != m_instrumentActor->ndetectors();
+      bool resetGeometry = matrixWS->getInstrument()->getNumberDetectors() != m_instrumentActor->ndetectors();
 
       // if instrument doesn't change keep the scaling
       if ( !resetGeometry )
       {
-        autoscaling = m_instrumentActor->autoscaling();
-        scaleMin = m_instrumentActor->minValue();
-        scaleMax = m_instrumentActor->maxValue();
+        m_instrumentActor->updateColors();
       }
-
-      delete m_instrumentActor;
-      m_instrumentActor = NULL;
+      else
+      {
+        delete m_instrumentActor;
+        m_instrumentActor = NULL;
+        init( resetGeometry, true, 0.0, 0.0, false );
+        updateInstrumentDetectors();
+      }
     }
 
-    init( resetGeometry, autoscaling, scaleMin, scaleMax, false );
-    updateInstrumentDetectors();
+  }
+}
+
+void InstrumentWindow::renameHandle(const std::string &oldName, const std::string &newName)
+{
+  if (oldName == m_workspaceName.toStdString())
+  {
+    m_workspaceName = QString::fromStdString(newName);
+    setWindowTitle(QString("Instrument - ") + m_workspaceName);
   }
 }
 
@@ -1015,8 +1024,8 @@ void InstrumentWindow::setViewType(const QString& type)
 
 void InstrumentWindow::dragEnterEvent( QDragEnterEvent* e )
 {
-  QString text = e->mimeData()->text();
-  if (text.startsWith("Workspace::"))
+  QString name = e->mimeData()->objectName();
+  if (name == "MantidWorkspace")
   {
     e->accept();
   }
@@ -1028,11 +1037,23 @@ void InstrumentWindow::dragEnterEvent( QDragEnterEvent* e )
 
 void InstrumentWindow::dropEvent( QDropEvent* e )
 {
-  QString text = e->mimeData()->text();
-  if (text.startsWith("Workspace::"))
+  QString name = e->mimeData()->objectName();
+  if (name == "MantidWorkspace")
   {
-    QStringList wsName = text.split("::");
-    if(this->overlay(wsName[1])) e->accept();    
+    QString text = e->mimeData()->text();
+    int endIndex = 0;
+    QStringList wsNames;
+    while (text.indexOf("[\"",endIndex) > -1)
+    {
+      int startIndex = text.indexOf("[\"",endIndex) + 2;
+      endIndex = text.indexOf("\"]",startIndex);
+      wsNames.append(text.mid(startIndex,endIndex-startIndex));
+    }
+
+    foreach (const auto& wsName, wsNames)
+    {
+      if(this->overlay(wsName)) e->accept();  
+    }   
   }
   e->ignore();
 }
@@ -1331,4 +1352,21 @@ void InstrumentWindow::createTabs(QSettings& settings)
 
     m_tabs << m_renderTab << pickTab << maskTab << treeTab;
 
+}
+
+/**
+  * Return a name for a group in QSettings to store InstrumentWindow configuration.
+  */
+QString InstrumentWindow::getSettingsGroupName() const
+{
+  return QString::fromAscii( InstrumentWindowSettingsGroup );
+}
+
+/**
+  * Construct a name for a group in QSettings to store instrument-specific configuration.
+  */
+QString InstrumentWindow::getInstrumentSettingsGroupName() const
+{
+  return QString::fromAscii( InstrumentWindowSettingsGroup ) + "/" +
+      QString::fromStdString( getInstrumentActor()->getInstrument()->getName() );
 }

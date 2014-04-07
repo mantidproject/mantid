@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Stretch.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 namespace MantidQt
 {
@@ -44,6 +45,7 @@ namespace MantidQt
 
 			//Connect the data selector for the sample to the mini plot
 			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
+			connect(m_uiForm.chkSequentialFit, SIGNAL(toggled(bool)), m_uiForm.cbPlot, SLOT(setEnabled(bool)));
 		}
 
 		/**
@@ -53,17 +55,16 @@ namespace MantidQt
 		 */
 		bool Stretch::validate()
 		{
-						//check that the sample file exists
-			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-			QString samplePath = m_uiForm.dsSample->getFullFilePath();
+			UserInputValidator uiv;
+			uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+			uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
-			if(!checkFileLoaded(sampleName, samplePath)) return false;
-
-			//check that the resolution file exists
-			QString resName = m_uiForm.dsResolution->getCurrentDataName();
-			QString resPath = m_uiForm.dsResolution->getFullFilePath();
-
-			if(!checkFileLoaded(resName, resPath)) return false;
+			QString errors = uiv.generateErrorMessage();
+			if (!errors.isEmpty())
+			{
+				emit showMessageBox(errors);
+				return false;
+			}
 
 			return true;
 		}
@@ -121,7 +122,7 @@ namespace MantidQt
 		 * Set the data selectors to use the default save directory
 		 * when browsing for input files.
 		 *  
-		 * @param filename :: The name of the workspace to plot
+     * @param settings :: The current settings
 		 */
 		void Stretch::loadSettings(const QSettings& settings)
 		{

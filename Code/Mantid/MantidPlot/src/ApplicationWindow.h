@@ -67,7 +67,6 @@ class QToolBar;
 //class QAssistantClient;
 class QLocale;
 class QMdiArea;
-class QUndoView;
 class QSignalMapper;
 
 class Matrix;
@@ -239,6 +238,8 @@ public slots:
   ApplicationWindow * loadScript(const QString& fn);
   /// Runs a script from a file. Mainly useful for automatically running scripts
   void executeScriptFile(const QString & filename, const Script::ExecutionMode execMode);
+  /// Slot to connect the script execution errors to
+  void onScriptExecuteError(const QString & message, const QString & scriptName, int lineNumber);
   /// Runs an arbitrary lump of python code, return true/false on success/failure.
   bool runPythonScript(const QString & code, bool async = false, bool quiet=false, bool redirect=true);
   
@@ -460,6 +461,7 @@ public slots:
   //! \name Graphs
   //@{
   void setPreferences(Graph* g);
+  void setSpectrogramTickStyle(Graph* g);
   void setGraphDefaultSettings(bool autoscale,bool scaleFonts,bool resizeLayers,bool antialiasing, bool fixedAspectRatio);
   void setLegendDefaultSettings(int frame, const QFont& font,
     const QColor& textCol, const QColor& backgroundCol);
@@ -1027,8 +1029,8 @@ public slots:
 
   void scriptsDirPathChanged(const QString& path);
   //@}
-
-  void showToolBarsMenu();
+  
+  void makeToolbarsMenu();
   void savetoNexusFile();
 
   //Slot for writing to log window
@@ -1093,6 +1095,9 @@ private:
   private slots:
   //! \name Initialization
   //@{
+  
+  void setToolbars();
+  void displayToolbars();
   void insertTranslatedStrings();
   void translateActionsStrings();
   void init(bool factorySettings, const QStringList& args);
@@ -1162,6 +1167,8 @@ private:
   void CatalogLogin();
   /// Handler for catalog search.
   void CatalogSearch();
+  /// Handler for catalog publish.
+  void CatalogPublish();
   // Handler for catalog logout.
   void CatalogLogout();
 
@@ -1375,7 +1382,7 @@ private:
   ScriptingWindow *scriptingWindow; //Mantid
   Script *m_iface_script;
   QTranslator *appTranslator, *qtTranslator;
-  QDockWidget *explorerWindow, *undoStackWindow;
+  QDockWidget *explorerWindow;
   MantidQt::MantidWidgets::MessageDisplay *resultsLog;
   QMdiArea *d_workspace;
 
@@ -1391,18 +1398,19 @@ private:
   
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
-  QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu;
+  QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu, *toolbarsMenu;
 
+  QAction *actionFileTools,*actionPlotTools,*actionDisplayBar,*actionFormatToolBar;
   QAction *actionEditCurveRange, *actionCurveFullRange, *actionShowAllCurves, *actionHideCurve, *actionHideOtherCurves;
   QAction *actionEditFunction, *actionRemoveCurve, *actionShowCurveWorksheet, *actionShowCurvePlotDialog;
   QAction *actionNewProject, *actionNewNote, *actionNewTable, *actionNewFunctionPlot,*actionSaveFile;
   QAction *actionNewSurfacePlot, *actionNewMatrix, *actionNewGraph, *actionNewFolder;
   QAction *actionOpen, *actionLoadImage, *actionScriptRepo, *actionSaveProject, *actionSaveProjectAs, *actionImportImage,*actionLoadFile,*actionOpenProj;
-  QAction *actionLoad, *actionUndo, *actionRedo;
+  QAction *actionLoad;
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
   QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
-  QAction *actionCatalogLogin,*actionCatalogSearch,*actionCatalogLogout;
+  QAction *actionCatalogLogin,*actionCatalogSearch, *actionCatalogPublish, *actionCatalogLogout;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
@@ -1454,7 +1462,7 @@ private:
   QAction *actionFlipMatrixVertically, *actionFlipMatrixHorizontally, *actionRotateMatrix;
   QAction *actionViewMatrixImage, *actionViewMatrix, *actionExportMatrix;
   QAction *actionMatrixGrayScale, *actionMatrixRainbowScale, *actionMatrixCustomScale, *actionRotateMatrixMinus;
-  QAction *actionMatrixXY, *actionMatrixColumnRow, *actionImagePlot, *actionToolBars;
+  QAction *actionMatrixXY, *actionMatrixColumnRow, *actionImagePlot;
   QAction *actionMatrixFFTDirect, *actionMatrixFFTInverse;
   QAction *actionFontBold, *actionFontItalic, *actionFontBox, *actionFontSize;
   QAction *actionSuperscript, *actionSubscript, *actionUnderline, *actionGreekSymbol, *actionCustomActionDialog, *actionManageDirs, *actionFirstTimeSetup, *actionSetupParaview;
@@ -1462,7 +1470,6 @@ private:
   QAction *Box, *Frame, *None;
   QAction *front, *back, *right, *left, *ceil, *floor, *floordata, *flooriso, *floornone;
   QAction *wireframe, *hiddenline, *polygon, *filledmesh, *pointstyle, *barstyle, *conestyle, *crossHairStyle;
-  QAction *actionShowUndoStack;
   QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
   QAction *actionPanPlot;
   QAction *actionWaterfallPlot;
@@ -1472,7 +1479,6 @@ private:
   
   QList<QAction *> m_interfaceActions;
 
-  QUndoView *d_undo_view;
   /// list of mantidmatrix windows opened from project file.
   QList<MantidMatrix*> m_mantidmatrixWindows;
 

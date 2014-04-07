@@ -12,13 +12,18 @@ class FileValidatorTest: public CxxTest::TestSuite
 {
 public:
 
-void testVectorConstructor()
+void testConstructors()
 {
+  // empty constructor
+  FileValidator v1;
+  TS_ASSERT_EQUALS(v1.allowedValues().size(), 0 );
+
+  // one with a vector of extensions
   std::vector<std::string> vec;
   vec.push_back("raw");
   vec.push_back("RAW");
-  FileValidator v(vec);
-  TS_ASSERT_EQUALS  ( v.allowedValues().size(), 2 );
+  FileValidator v2(vec);
+  TS_ASSERT_EQUALS  ( v2.allowedValues().size(), 2 );
 }
 
 void testPassesOnExistentFile()
@@ -107,6 +112,21 @@ void testFailsOnEmptyFileString()
 {
   FileValidator file_val;
   TS_ASSERT_EQUALS( file_val.isValid(""), "File \"\" not found" );
+}
+
+void testCanWrite()
+{
+  std::string filename("myJunkFile_hgfvj.cpp");
+
+  // file existance is optional
+  FileValidator v1(std::vector<std::string>(), false, true);
+  TS_ASSERT_EQUALS( v1.isValid(""), "Cannot write to empty filename" );
+  TS_ASSERT_EQUALS( v1.isValid(filename), "");
+
+  // file existance is required
+  FileValidator v2(std::vector<std::string>(), true, true) ;
+  TS_ASSERT_EQUALS( v2.isValid(""), "File \"\" not found" );
+  TS_ASSERT_EQUALS( v2.isValid(filename), "File \"" + filename + "\" not found");
 }
 
 };

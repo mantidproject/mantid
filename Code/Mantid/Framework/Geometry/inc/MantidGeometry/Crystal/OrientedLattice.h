@@ -50,6 +50,8 @@ namespace Geometry
                       const int angleunit=angDegrees);
       //UnitCell constructor
       OrientedLattice(const UnitCell & uc , const Kernel::DblMatrix & Umatrix = Kernel::DblMatrix(3,3,true));
+      //UnitCell constructor
+      OrientedLattice(const UnitCell * uc , const Kernel::DblMatrix & Umatrix = Kernel::DblMatrix(3,3,true));
       // Destructor
       virtual ~OrientedLattice();  
 
@@ -61,14 +63,27 @@ namespace Geometry
       //get u and v vectors for Horace/Mslice
       Kernel::V3D getuVector();
       Kernel::V3D getvVector();
-      /// Return q(hkl) from the lab coordinates
+      /// Return hkl from the Q-sample coordinates
       Kernel::V3D hklFromQ(const Kernel::V3D & Q) const;
+      /// Return Q-sample coordinates from hkl
+      Kernel::V3D qFromHKL(const Kernel::V3D & hkl) const;
       /// Create the U matrix from two vectors
       const Kernel::DblMatrix & setUFromVectors(const Kernel::V3D &u, const Kernel::V3D &v);
       /// Save the lattice to an open NeXus file
       void saveNexus(::NeXus::File * file, const std::string & group) const;
       /// Load the lattice to from an open NeXus file
       void loadNexus(::NeXus::File * file, const std::string & group);
+      /// Get the UB matix corresponding to the real space edge vectors a, b, c
+      static bool GetUB(       Kernel::DblMatrix  & UB,
+                         const Kernel::V3D        & a_dir,
+                         const Kernel::V3D        & b_dir,
+                         const Kernel::V3D        & c_dir  );
+
+      /// Get the real space edge vectors a, b, c corresponding to the UB matrix
+      static bool GetABC( const Kernel::DblMatrix  & UB,
+                                Kernel::V3D        & a_dir,
+                                Kernel::V3D        & b_dir,
+                                Kernel::V3D        & c_dir  );
 
     private:
       Kernel::DblMatrix U;

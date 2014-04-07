@@ -262,7 +262,7 @@ public:
     TS_ASSERT_EQUALS(3, dim2->getMaximum());
   }
 
-  void test_load_lean_mdevents()
+  void test_load_lean_mdevents_2d()
   {
     // Setup the corrupt file. 
     FileContentsBuilder fileContents; 
@@ -284,7 +284,7 @@ public:
     TS_ASSERT_EQUALS("MDLeanEvent", outWS->getEventTypeName());
   }
 
-  void test_load_full_mdevents()
+  void test_load_full_mdevents_2d()
   {
     // Setup the corrupt file. 
     FileContentsBuilder fileContents; 
@@ -300,6 +300,33 @@ public:
     
     IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("test_out");
     TS_ASSERT_EQUALS(2, outWS->getNumDims());
+
+    TS_ASSERT_EQUALS(3, outWS->getNPoints());
+    TS_ASSERT_EQUALS("MDEvent", outWS->getEventTypeName());
+  }
+
+  void test_load_full_mdevents_3d()
+  {
+    // Setup the corrupt file.
+    FileContentsBuilder fileContents;
+
+    const std::string dim1 = "a A U 10\n";
+    const std::string dim2 = "b B U 11\n";
+    const std::string dim3 = "c C U 12\n"; // Ooops, forgot to put in the number of bins for this dimension.
+
+    fileContents.setDimensionEntries(dim1 + dim2 + dim3);
+    fileContents.setMDEventEntries("1 1 1 2 -1 -2 3\n1 1 2 3 2 3 3\n1 1 3 4 5 6 3"); // mins -1, -2, maxs 2, 3
+    MDFileObject infile(fileContents);
+    // Run the algorithm.
+    ImportMDEventWorkspace alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", infile.getFileName());
+    alg.setPropertyValue("OutputWorkspace", "test_out");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("test_out");
+    TS_ASSERT_EQUALS(3, outWS->getNumDims());
 
     TS_ASSERT_EQUALS(3, outWS->getNPoints());
     TS_ASSERT_EQUALS("MDEvent", outWS->getEventTypeName());

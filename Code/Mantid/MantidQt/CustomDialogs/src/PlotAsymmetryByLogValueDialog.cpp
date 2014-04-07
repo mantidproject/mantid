@@ -142,12 +142,13 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString&)
 
   m_uiForm.logBox->clear();
 
-  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmFactory::Instance().create("LoadNexus",-1);
+  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmFactory::Instance().create("LoadMuonNexus",-1);
   alg->initialize();
   try
   {
     alg->setPropertyValue("Filename",nexusFileName.toStdString());
     alg->setPropertyValue("OutputWorkspace","PlotAsymmetryByLogValueDialog_tmp");
+    alg->setPropertyValue("DeadTimeTable", ""); // Don't need it for now
     alg->setPropertyValue("SpectrumMin","0");
     alg->setPropertyValue("SpectrumMax","0");
     alg->execute();

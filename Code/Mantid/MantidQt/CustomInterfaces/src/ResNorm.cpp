@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/ResNorm.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 namespace MantidQt
 {
@@ -40,17 +41,16 @@ namespace MantidQt
 		 */
 		bool ResNorm::validate()
 		{
-			//check that the sample file exists
-			QString sampleName = m_uiForm.dsVanadium->getCurrentDataName();
-			QString samplePath = m_uiForm.dsVanadium->getFullFilePath();
+			UserInputValidator uiv;
+			uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsVanadium);
+			uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
-			if(!checkFileLoaded(sampleName, samplePath)) return false;
-
-			//check that the resolution file exists
-			QString resName = m_uiForm.dsResolution->getCurrentDataName();
-			QString resPath = m_uiForm.dsResolution->getFullFilePath();
-
-			if(!checkFileLoaded(resName, resPath)) return false;
+			QString errors = uiv.generateErrorMessage();
+			if (!errors.isEmpty())
+			{
+				emit showMessageBox(errors);
+				return false;
+			}
 
 			return true;
 		}
@@ -94,7 +94,7 @@ namespace MantidQt
 		 * Set the data selectors to use the default save directory
 		 * when browsing for input files.
 		 *  
-		 * @param filename :: The name of the workspace to plot
+     * @param settings :: The current settings
 		 */
 		void ResNorm::loadSettings(const QSettings& settings)
 		{

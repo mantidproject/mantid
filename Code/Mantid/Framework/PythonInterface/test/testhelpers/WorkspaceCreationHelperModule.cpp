@@ -17,7 +17,10 @@ using namespace WorkspaceCreationHelper;
 using namespace Mantid::MDEvents::MDEventsTestHelper;
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithFullInstrument_overloads, create2DWorkspaceWithFullInstrument, 2, 4);
+
 BOOST_PYTHON_FUNCTION_OVERLOADS(makeFakeMDHistoWorkspace_overloads, makeFakeMDHistoWorkspace, 2, 7);
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithRectangularInstrument_overloads, create2DWorkspaceWithRectangularInstrument, 3, 3);
 
 namespace
 {
@@ -45,9 +48,16 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper)
   typedef MatrixWorkspace_sptr (*Signature1_2D)(int nHist, int nBins,
                                                 bool includeMonitors, 
                                                 bool startYNegative);
+  // Forces it to return a MatrixWorkspace pointer rather than Workspace2D
+  typedef MatrixWorkspace_sptr (*Signature2_2D)(int numBanks,
+                                                int numPixels,
+                                                int numBins);
 
   def("create2DWorkspaceWithFullInstrument", (Signature1_2D)&create2DWorkspaceWithFullInstrument, 
       create2DWorkspaceWithFullInstrument_overloads());
+  def("create2DWorkspaceWithRectangularInstrument", (Signature2_2D)&create2DWorkspaceWithRectangularInstrument,
+      create2DWorkspaceWithRectangularInstrument_overloads());
+
 
   //=================================== Event Workspaces ===================================
   

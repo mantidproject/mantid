@@ -122,6 +122,15 @@ namespace Mantid
     }
 
     /**
+     * Sets the investigation id to search for.
+     * @param investigationId :: investigation id to search for.
+     */
+    void CatalogSearchParam::setInvestigationId(const std::string& investigationId)
+    {
+      m_investigationId = investigationId;
+    }
+
+    /**
      * This method returns the start run number
      * @return Run start number
      */
@@ -228,6 +237,15 @@ namespace Mantid
     {
       return m_myData;
     }
+
+    /**
+     * Gets the input from the investigation id field.
+     * @return Investigation id of the investigation.
+     */
+     const std::string& CatalogSearchParam::getInvestigationId() const
+     {
+       return m_investigationId;
+     }
 
     /**
      * Creates a time_t value from an input date ("23/06/2003").

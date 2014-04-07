@@ -57,6 +57,102 @@ namespace MantidQt
     }
 
     /**
+     * Get if the file selector is currently being shown.
+     *
+     * @return :: true if it is visible, otherwise false 
+     */
+    bool DataSelector::isFileSelectorVisible() const
+    {
+      int index = m_uiForm.stackedDataSelect->currentIndex();
+      return ( index == 0 );
+    }
+
+    /**
+     * Get if the workspace selector is currently being shown.
+     *
+     * @return :: true if it is visible, otherwise false 
+     */
+    bool DataSelector::isWorkspaceSelectorVisible() const
+    {
+      return !isFileSelectorVisible();
+    }
+
+    /**
+     * Check if the data selector is in a valid state
+     *
+     * Checks using the relvant widgets isValid method depending
+     * on what view is currently being shown
+     *
+     * @return :: If the data selector is valid
+     */
+    bool DataSelector::isValid()
+    {
+      using namespace Mantid::API;
+
+      bool isValid = false;
+
+      if(isFileSelectorVisible())
+      {
+        isValid = m_uiForm.rfFileInput->isValid();
+
+        //check to make sure the user hasn't deleted the auto-loaded file
+        //since choosing it.
+        if(isValid && m_autoLoad)
+        {
+          const QString wsName = getCurrentDataName();
+          
+          if(!AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+          {
+            //attempt to reload if we can
+            //don't use algorithm runner because we need to know instantly.
+            const QString filepath = m_uiForm.rfFileInput->getFirstFilename();
+            const Algorithm_sptr loadAlg = AlgorithmManager::Instance().createUnmanaged("Load");
+            loadAlg->initialize();
+            loadAlg->setProperty("Filename", filepath.toStdString());
+            loadAlg->setProperty("OutputWorkspace", wsName.toStdString());
+            loadAlg->execute();
+            
+            isValid = AnalysisDataService::Instance().doesExist(wsName.toStdString());
+            
+            if(!isValid)
+            {
+              m_uiForm.rfFileInput->setFileProblem("The specified workspace is missing from the analysis data service");
+            }
+          }
+        }
+      }
+      else
+      {
+        isValid = m_uiForm.wsWorkspaceInput->isValid();
+      }
+
+      return isValid;
+    }
+
+    /**
+    * Return the error.
+    * @returns A string explaining the error.
+    */
+    QString DataSelector::getProblem() const
+    {
+      using namespace Mantid::API;
+
+      QString problem = "";
+      const QString wsName = getCurrentDataName();
+
+      if(isFileSelectorVisible())
+      {
+        problem = m_uiForm.rfFileInput->getFileProblem();
+      }
+      else
+      {
+        problem = "A valid workspace has not been selected";
+      }
+
+      return problem;
+    }
+
+    /**
      * Attempt to load a file if the widget is set to attempt auto-loading
      *
      * Function creates an instance of the load algorithm and attaches it to a
@@ -148,7 +244,7 @@ namespace MantidQt
      *
      * @return The full file path
      */
-    QString DataSelector::getFullFilePath()
+    QString DataSelector::getFullFilePath() const
     {
       return m_uiForm.rfFileInput->getFirstFilename();
     }
@@ -163,7 +259,7 @@ namespace MantidQt
      *
      * @return The name of the current data item
      */
-    QString DataSelector::getCurrentDataName()
+    QString DataSelector::getCurrentDataName() const
     {
       QString filename("");
 

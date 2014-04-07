@@ -12,9 +12,12 @@ set ( SRC_FILES
 	src/Axis.cpp
 	src/BoxController.cpp
 	src/CatalogFactory.cpp
+	src/CatalogManager.cpp
+	src/CatalogSession.cpp
 	src/ChopperModel.cpp
 	src/Column.cpp
 	src/ColumnFactory.cpp
+	src/CompositeCatalog.cpp
 	src/CompositeDomainMD.cpp
 	src/CompositeFunction.cpp
 	src/ConstraintFactory.cpp
@@ -64,13 +67,11 @@ set ( SRC_FILES
 	src/ImmutableCompositeFunction.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
-	src/ImplictFunctionFactory.cpp
+	src/ImplicitFunctionFactory.cpp
 	src/InstrumentDataService.cpp
 	src/JointDomain.cpp
 	src/LinearScale.cpp
 	src/LiveListenerFactory.cpp
-	src/LocatedDataRef.cpp
-	src/LocatedDataValue.cpp
 	src/LogManager.cpp
 	src/LogarithmScale.cpp
 	src/MDGeometry.cpp
@@ -95,6 +96,7 @@ set ( SRC_FILES
 	src/Run.cpp
 	src/Sample.cpp
 	src/SampleEnvironment.cpp
+	src/ScopedWorkspace.cpp
 	src/ScriptRepository.cpp
 	src/ScriptRepositoryFactory.cpp
 	src/SpectraAxis.cpp
@@ -134,9 +136,12 @@ set ( INC_FILES
 	inc/MantidAPI/Axis.h
 	inc/MantidAPI/BoxController.h
 	inc/MantidAPI/CatalogFactory.h
+	inc/MantidAPI/CatalogManager.h
+	inc/MantidAPI/CatalogSession.h
 	inc/MantidAPI/ChopperModel.h
 	inc/MantidAPI/Column.h
 	inc/MantidAPI/ColumnFactory.h
+	inc/MantidAPI/CompositeCatalog.h
 	inc/MantidAPI/CompositeDomain.h
 	inc/MantidAPI/CompositeDomainMD.h
 	inc/MantidAPI/CompositeFunction.h
@@ -170,9 +175,9 @@ set ( INC_FILES
 	inc/MantidAPI/IBackgroundFunction.h
 	inc/MantidAPI/IBoxControllerIO.h
 	inc/MantidAPI/ICatalog.h
+	inc/MantidAPI/ICatalogInfoService.h
 	inc/MantidAPI/IConstraint.h
 	inc/MantidAPI/ICostFunction.h
-	inc/MantidAPI/IDataItem.h
 	inc/MantidAPI/IDomainCreator.h
 	inc/MantidAPI/IEventList.h
 	inc/MantidAPI/IEventWorkspace.h
@@ -185,7 +190,6 @@ set ( INC_FILES
 	inc/MantidAPI/IFunctionValues.h
 	inc/MantidAPI/IFunctionWithLocation.h
 	inc/MantidAPI/ILiveListener.h
-	inc/MantidAPI/ILocatedData.h
 	inc/MantidAPI/IMDEventWorkspace.h
 	inc/MantidAPI/IMDHistoWorkspace.h
 	inc/MantidAPI/IMDIterator.h
@@ -215,8 +219,6 @@ set ( INC_FILES
 	inc/MantidAPI/JointDomain.h
 	inc/MantidAPI/LinearScale.h
 	inc/MantidAPI/LiveListenerFactory.h
-	inc/MantidAPI/LocatedDataRef.h
-	inc/MantidAPI/LocatedDataValue.h
 	inc/MantidAPI/LogManager.h
 	inc/MantidAPI/LogarithmScale.h
 	inc/MantidAPI/MDGeometry.h
@@ -241,6 +243,7 @@ set ( INC_FILES
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleEnvironment.h
+	inc/MantidAPI/ScopedWorkspace.h
 	inc/MantidAPI/ScriptRepository.h
 	inc/MantidAPI/ScriptRepositoryFactory.h
 	inc/MantidAPI/SingleValueParameter.h
@@ -257,8 +260,6 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceFactory.h
 	inc/MantidAPI/WorkspaceGroup.h
 	inc/MantidAPI/WorkspaceHistory.h
-	inc/MantidAPI/WorkspaceIterator.h
-	inc/MantidAPI/WorkspaceIteratorCode.h
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
 	inc/MantidAPI/WorkspaceValidators.h
@@ -288,25 +289,25 @@ set ( TEST_FILES
 	FilePropertyTest.h
 	FrameworkManagerTest.h
 	FuncMinimizerFactoryTest.h
-  FunctionAttributeTest.h
-  FunctionDomainTest.h
-  FunctionFactoryTest.h
+	FunctionAttributeTest.h
+	FunctionDomainTest.h
+	FunctionFactoryTest.h
 	FunctionPropertyTest.h
 	FunctionTest.h
 	FunctionValuesTest.h
 	IEventListTest.h
 	IFunction1DTest.h
 	IFunctionMDTest.h
-	IkedaCarpenterModeratorTest.h
 	ILiveListenerTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
+	IkedaCarpenterModeratorTest.h
 	ImmutableCompositeFunctionTest.h
 	ImplicitFunctionParserFactoryTest.h
 	IncreasingAxisValidatorTest.h
 	InstrumentDataServiceTest.h
 	LiveListenerFactoryTest.h
-        LogManagerTest.h
+	LogManagerTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
 	MemoryManagerTest.h
@@ -324,6 +325,7 @@ set ( TEST_FILES
 	RunTest.h
 	SampleEnvironmentTest.h
 	SampleTest.h
+	ScopedWorkspaceTest.h
 	SpectraAxisTest.h
 	SpectrumDetectorMappingTest.h
 	TextAxisTest.h

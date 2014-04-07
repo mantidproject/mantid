@@ -78,7 +78,7 @@ namespace MantidQt
      * a specturm index.
      * 
      * @param workspace :: Pointer to the workspace
-     * @param index :: The spectrum index of the workspace
+     * @param wsIndex :: The spectrum index of the workspace
      */
     void IndirectBayesTab::plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex)
     {
@@ -131,7 +131,7 @@ namespace MantidQt
      * Checks the workspace's intrument for a resolution parameter to use as 
      * a default for the energy range on the mini plot
      *
-     * @param workspace :: Pointer to the workspace to use
+     * @param ws :: Pointer to the workspace to use
      * @param res :: The retrieved values for the resolution parameter (if one was found)
      */
     bool IndirectBayesTab::getInstrumentResolution(Mantid::API::MatrixWorkspace_const_sptr ws, std::pair<double,double>& res)
@@ -158,7 +158,7 @@ namespace MantidQt
     /**
      * Gets the range of the curve plotted in the mini plot
      *
-     * @param A pair containing the maximum and minimum points of the curve
+     * @return A pair containing the maximum and minimum points of the curve
      */
     std::pair<double,double> IndirectBayesTab::getCurveRange()
     {
@@ -239,39 +239,6 @@ namespace MantidQt
       {
         m_rangeSelector->setMaximum(value);
       }
-    }
-
-    /**
-     * Checks if a file is present in the ADS and if not attempts to load it.
-     * 
-     * @param filename :: name of the file that should be loaded
-     * @param errorMsg :: error message to display if the file couldn't be found.
-     */
-    bool IndirectBayesTab::checkFileLoaded(const QString& filename, const QString& filepath)
-    {
-      if(filename.isEmpty())
-      {
-        emit showMessageBox("Please correct the following:\n Could not find the file called \"" + filename + "\"");
-        return false;
-      }
-      else if(!Mantid::API::AnalysisDataService::Instance().doesExist(filename.toStdString()))
-      {
-        //attempt reload the file if it's not there
-        Mantid::API::Algorithm_sptr load = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load", -1);
-        load->initialize();
-        load->setProperty("Filename", filepath.toStdString());
-        load->setProperty("OutputWorkspace", filename.toStdString());
-        load->execute();
-        
-        //if reloading fails we're out of options
-        if(!load->isExecuted())
-        {
-          emit showMessageBox("Please correct the following:\n Workspace "+filename+" missing form analysis data service");
-          return false;
-        }
-      }
-
-      return true;
     }
   }
 } // namespace MantidQt

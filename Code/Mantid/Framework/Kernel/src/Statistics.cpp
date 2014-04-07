@@ -279,7 +279,6 @@ namespace Mantid
       rfactor.Rp = (sumrpnom/sumrpdenom);
       rfactor.Rwp = std::sqrt(sumnom/sumdenom);
 
-      // cppcheck-suppress duplicateExpression
       if (rfactor.Rwp != rfactor.Rwp)
         std::cout << "Rwp is NaN.  Denominator = " << sumnom << "; Nominator = " << sumdenom << ". \n";
 

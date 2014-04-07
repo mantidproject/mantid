@@ -339,7 +339,7 @@ bool LoadNexusProcessed::checkForCommonNameStem(NXRoot & root, std::vector<std::
  * Load the workspace name, if the attribute exists
  *
  * @param root :: Root of NeXus file
- * @param entr_name :: Entry in NeXus file to look at
+ * @param entry_name :: Entry in NeXus file to look at
  * @return The workspace name. If none found an empty string is returned.
  */
 std::string LoadNexusProcessed::loadWorkspaceName(NXRoot & root, const std::string& entry_name)
@@ -351,10 +351,8 @@ std::string LoadNexusProcessed::loadWorkspaceName(NXRoot & root, const std::stri
   }
   catch (std::runtime_error&)
   {
-    return std::string("");
+    return std::string();
   }
-
-  return std::string("");
 }
 
 
@@ -510,74 +508,135 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
       break;
     }
 
-    if ( info.type == NX_FLOAT64 )
+    if ( info.rank == 1 )
     {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
-      std::string columnTitle = nxDouble.attributes("name");
-      if (!columnTitle.empty())
+      if ( info.type == NX_FLOAT64 )
       {
-        workspace->addColumn("double", columnTitle);
-        nxDouble.load();
-        int length = nxDouble.dim0();
-        if ( !hasNumberOfRowBeenSet )
-        { 
-          workspace->setRowCount(length);
-          hasNumberOfRowBeenSet = true;
+        NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+        std::string columnTitle = nxDouble.attributes("name");
+        if (!columnTitle.empty())
+        {
+          workspace->addColumn("double", columnTitle);
+          nxDouble.load();
+          int length = nxDouble.dim0();
+          if ( !hasNumberOfRowBeenSet )
+          {
+            workspace->setRowCount(length);
+            hasNumberOfRowBeenSet = true;
+          }
+          for (int i = 0; i < length; i++)
+            workspace->cell<double>(i,columnNumber-1) = *(nxDouble() + i);
         }
-        for (int i = 0; i < length; i++)
-          workspace->cell<double>(i,columnNumber-1) = *(nxDouble() + i);
+      }
+      else if ( info.type == NX_INT32 )
+      {
+        NXInt nxInt = nx_tw.openNXInt(str.c_str());
+        std::string columnTitle = nxInt.attributes("name");
+        if (!columnTitle.empty())
+        {
+          workspace->addColumn("int", columnTitle);
+          nxInt.load();
+          int length = nxInt.dim0();
+          if ( !hasNumberOfRowBeenSet )
+          {
+            workspace->setRowCount(length);
+            hasNumberOfRowBeenSet = true;
+          }
+          for (int i = 0; i < length; i++)
+            workspace->cell<int>(i,columnNumber-1) = *(nxInt() + i);
+        }
       }
     }
-	else if ( info.type == NX_INT32 )
+    else if ( info.rank == 2 )
     {
-      NXInt nxInt = nx_tw.openNXInt(str.c_str());
-      std::string columnTitle = nxInt.attributes("name");
-      if (!columnTitle.empty())
+      if ( info.type == NX_CHAR )
       {
-        workspace->addColumn("int", columnTitle);
-        nxInt.load();
-        int length = nxInt.dim0();
-        if ( !hasNumberOfRowBeenSet )
-        { 
-          workspace->setRowCount(length);
-          hasNumberOfRowBeenSet = true;
+        NXChar data = nx_tw.openNXChar(str.c_str());
+        std::string columnTitle = data.attributes("name");
+        if (!columnTitle.empty())
+        {
+          workspace->addColumn("str", columnTitle);
+          int nRows = info.dims[0];
+          if ( !hasNumberOfRowBeenSet )
+          {
+            workspace->setRowCount(nRows);
+            hasNumberOfRowBeenSet = true;
+          }
+
+          const int maxStr = info.dims[1];
+          data.load();
+          for (int iR = 0; iR < nRows; ++iR)
+          {
+            auto& cellContents = workspace->cell<std::string>(iR,columnNumber-1);
+            auto startPoint = data() + maxStr*iR;
+            cellContents.assign(startPoint,startPoint+maxStr);
+            boost::trim_right(cellContents);
+          }
         }
-        for (int i = 0; i < length; i++)
-          workspace->cell<int>(i,columnNumber-1) = *(nxInt() + i);
       }
+      #define IF_VECTOR_COLUMN(Type, ColumnTypeName, NexusType) \
+      else if ( info.type == NexusType ) \
+      { \
+        loadVectorColumn<Type>(nx_tw, str, workspace, #ColumnTypeName); \
+      }
+      IF_VECTOR_COLUMN(int, vector_int, NX_INT32)
+      IF_VECTOR_COLUMN(double, vector_double, NX_FLOAT64)
+
     }
-    else if ( info.type == NX_CHAR )
-    {
-      NXChar data = nx_tw.openNXChar(str.c_str());
-      std::string columnTitle = data.attributes("name");
-      if (!columnTitle.empty())
-      {
-        workspace->addColumn("str", columnTitle);
-        int nRows = info.dims[0];
-        if ( !hasNumberOfRowBeenSet )
-        {
-          workspace->setRowCount(nRows);
-          hasNumberOfRowBeenSet = true;
-        }
-        int maxStr = info.dims[1];
-
-        std::string fromCrap(maxStr,' ');
-
-        data.load();
-        for (int iR = 0; iR < nRows; iR++)
-        {
-          for (int i = 0; i < maxStr; i++)
-            fromCrap[i] = *(data()+i+maxStr*iR);
-          workspace->cell<std::string>(iR,columnNumber-1) = fromCrap;
-        }
-      }
-    } 
 
     columnNumber++;
   
   } while ( 1 );
 
   return boost::static_pointer_cast<API::Workspace>(workspace);
+}
+
+/**
+ * Loads a vector column to the TableWorkspace.
+ * @param tableData   :: Table data to load from
+ * @param dataSetName :: Name of the data set to use to get column data
+ * @param tableWs     :: Workspace to add column to
+ * @param columnType  :: Name of the column type to create
+ */
+template<typename Type>
+void LoadNexusProcessed::loadVectorColumn(const NXData& tableData,
+                                          const std::string& dataSetName,
+                                          const ITableWorkspace_sptr& tableWs,
+                                          const std::string& columnType)
+{
+  NXDataSetTyped<Type> data = tableData.openNXDataSet<Type>(dataSetName.c_str());
+  std::string columnTitle = data.attributes("name");
+  if ( ! columnTitle.empty() )
+  {
+    tableWs->addColumn(columnType, columnTitle);
+
+    NXInfo info = tableData.getDataSetInfo(dataSetName.c_str());
+    const size_t rowCount = info.dims[0];
+    const size_t blockSize = info.dims[1];
+
+    // This might've been done already, but doing it twice should't do any harm
+    tableWs->setRowCount(rowCount);
+
+    data.load();
+
+    for ( size_t i = 0; i < rowCount; ++i )
+    {
+      auto& cell = tableWs->cell< std::vector<Type> >(i, tableWs->columnCount() - 1);
+
+      Type* from = data() + blockSize * i;
+
+      cell.assign(from, from + blockSize);
+
+      std::ostringstream rowSizeAttrName; rowSizeAttrName << "row_size_" << i;
+
+      // This is ugly, but I can only get attribute as a string using the API
+      std::istringstream rowSizeStr( data.attributes(rowSizeAttrName.str()) );
+
+      int rowSize; rowSizeStr >> rowSize;
+
+      cell.resize(rowSize);
+    }
+  }
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1252,7 +1311,7 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
 */
 void LoadNexusProcessed::loadNonSpectraAxis(API::MatrixWorkspace_sptr local_workspace, NXData & data)
 {
-  Mantid::API::Axis* axis = local_workspace->getAxis(1);
+  Axis* axis = local_workspace->getAxis(1);
 
   if ( axis->isNumeric() )
   {
@@ -1265,20 +1324,18 @@ void LoadNexusProcessed::loadNonSpectraAxis(API::MatrixWorkspace_sptr local_work
   }
   else if ( axis->isText() )
   {
-    // We must cast the axis object to TextAxis so we may use ->setLabel
-    Mantid::API::TextAxis* textAxis = dynamic_cast<Mantid::API::TextAxis*>(axis);
     NXChar axisData = data.openNXChar("axis2");
     axisData.load();
     std::string axisLabels = axisData();    
     // Use boost::tokenizer to split up the input
     boost::char_separator<char> sep("\n");
     boost::tokenizer<boost::char_separator<char> > tokenizer(axisLabels, sep);
-    boost::tokenizer<boost::char_separator<char> >::iterator tokIter;
+    // We must cast the axis object to TextAxis so we may use ->setLabel
+    TextAxis* textAxis = static_cast<TextAxis*>(axis);
     int i = 0;
-    for ( tokIter = tokenizer.begin(); tokIter != tokenizer.end(); ++tokIter )
+    for ( auto tokIter = tokenizer.begin(); tokIter != tokenizer.end(); ++tokIter, ++i )
     {
       textAxis->setLabel(i, *tokIter);
-      ++i;
     }
   }
 }
