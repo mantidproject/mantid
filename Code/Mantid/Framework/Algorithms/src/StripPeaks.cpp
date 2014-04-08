@@ -185,15 +185,19 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
   //progress from 0.3 to 1.0 here 
   prg=0.3;
   // Loop over the list of peaks
+  std::vector<std::string> colnames = peakslist->getColumnNames();
+  // for (size_t i = 0; i < colnames.size(); ++i)
+  // g_log.notice() << "Column " << i << " Name = " << colnames[i] << "\n";
+
   for (size_t i = 0; i < peakslist->rowCount(); ++i)
   {
     // Get references to the data
     const MantidVec &X = outputWS->readX(peakslist->getRef<int>("spectrum",i));
     MantidVec &Y = outputWS->dataY(peakslist->getRef<int>("spectrum",i));
     // Get back the gaussian parameters
-    const double height = peakslist->getRef<double>("f0.Height",i);
-    const double centre = peakslist->getRef<double>("f0.PeakCentre",i);
-    const double width = peakslist->getRef<double>("f0.Sigma",i);
+    const double height = peakslist->getRef<double>("Height",i);
+    const double centre = peakslist->getRef<double>("PeakCentre",i);
+    const double width = peakslist->getRef<double>("Sigma",i);
     const double chisq = peakslist->getRef<double>("chi2", i);
     // These are some heuristic rules to discard bad fits.
     // Hope to be able to remove them when we have better fitting routine
@@ -208,15 +212,15 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
                       << "  Error: Peak fit with too high of chisq " << chisq << " > " << m_maxChiSq << "\n";
       continue;
     }
-    else if (chisq <= 0.)
+    else if (chisq < 0.)
     {
       g_log.warning() << "StripPeaks():  Peak Index = " << i << " @ X = " << centre
                       << ". Error: Peak fit with too wide peak width" << width
                       << " denoted by chi^2 = " << chisq << " <= 0. \n";
     }
 
-    g_log.debug() << "Subtracting peak " << i << " from spectrum " << peakslist->getRef<int>("spectrum",i)
-                  << " at x = " << centre << " h = " << height << " s = " << width << " chi2 = " << chisq << "\n";
+    g_log.information() << "Subtracting peak " << i << " from spectrum " << peakslist->getRef<int>("spectrum",i)
+                        << " at x = " << centre << " h = " << height << " s = " << width << " chi2 = " << chisq << "\n";
 
     // Loop over the spectrum elements
     const int spectrumLength = static_cast<int>(Y.size());
@@ -225,8 +229,8 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
       // If this is histogram data, we want to use the bin's central value
       double x = (isHistogramData ? 0.5*(X[j]+X[j+1]) : X[j]);
       // Skip if not anywhere near this peak
-      if ( x < centre-3.0*width ) continue;
-      if ( x > centre+3.0*width ) break;
+      if ( x < centre-5.0*width ) continue;
+      if ( x > centre+5.0*width ) break;
       // Calculate the value of the Gaussian function at this point
       const double funcVal = height*exp(-0.5*pow((x-centre)/width,2));
       // Subtract the calculated value from the data

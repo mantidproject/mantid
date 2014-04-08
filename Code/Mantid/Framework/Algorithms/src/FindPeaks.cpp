@@ -983,7 +983,7 @@ namespace Algorithms
                                        m_minGuessedPeakWidth, m_maxGuessedPeakWidth, m_stepGuessedPeakWidth);*/
 #endif
     bool fitsuccess = false;
-    if (costfuncvalue < DBL_MAX && costfuncvalue >= DBL_MIN)
+    if (costfuncvalue < DBL_MAX && costfuncvalue >= 0.)
       fitsuccess = true;
 
     //-------------------------------------------------------------------------
@@ -1262,7 +1262,7 @@ namespace Algorithms
                              const double mincost)
   {
     // Check input validity
-    if (mincost < DBL_MIN || mincost >= DBL_MAX-1.0E-10)
+    if (mincost < 0. || mincost >= DBL_MAX-1.0E-10)
       throw std::runtime_error("Minimum cost indicates that fit fails.  This method should not be called "
                                "under this circumstance. ");
 
@@ -1643,7 +1643,11 @@ namespace Algorithms
 
     double costfuncvalue = fitpeak->getProperty("CostFunctionValue");
 #else
-    g_log.information("F1150 Fit 1 single peak.");
+    std::stringstream dbss;
+    dbss << "[F1150] Fit 1 peak at X = " << peakfunction->centre()
+         << " of spectrum " << wsindex << "\n";
+    g_log.information(dbss.str());
+
     double userFWHM = m_peakFunction->fwhm();
     bool fitwithsteppedfwhm = (guessedFWHMStep == 0);
 
@@ -1661,6 +1665,8 @@ namespace Algorithms
       fitpeak.simpleFit();
 
     double costfuncvalue = fitpeak.getFitCostFunctionValue();
+    std::string dbinfo = fitpeak.getDebugMessage();
+    g_log.information(dbinfo);
 #endif
 
     return costfuncvalue;
