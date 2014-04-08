@@ -1,12 +1,12 @@
-#ifndef MANTID_SLICEVIEWER_CONCRETEPEAKTRANSFORMFACTORY_H_
-#define MANTID_SLICEVIEWER_CONCRETEPEAKTRANSFORMFACTORY_H_
+#ifndef MANTID_API_CONCRETEPEAKTRANSFORMFACTORY_H_
+#define MANTID_API_CONCRETEPEAKTRANSFORMFACTORY_H_
 
-#include "MantidQtSliceViewer/PeakTransformFactory.h"
+#include "MantidAPI/PeakTransformFactory.h"
 #include <boost/make_shared.hpp>
 
-namespace MantidQt
+namespace Mantid
 {
-  namespace SliceViewer
+  namespace API
   {
     /**
     @class ConcretePeakTransformFactory

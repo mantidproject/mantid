@@ -3,9 +3,9 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/PeakTransform.h"
+#include "MantidAPI/PeakTransformFactory.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
-#include "MantidQtSliceViewer/PeakTransform.h"
-#include "MantidQtSliceViewer/PeakTransformFactory.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
@@ -16,6 +16,7 @@
 #include <QColor>
 
 using namespace MantidQt::SliceViewer;
+using namespace Mantid::API;
 using namespace Mantid;
 using boost::regex;
 

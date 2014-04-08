@@ -1,11 +1,11 @@
-#include "MantidQtSliceViewer/PeakTransformHKL.h"
+#include "MantidAPI/PeakTransformHKL.h"
 #include <boost/make_shared.hpp>
 
 using boost::regex;
 
-namespace MantidQt
+namespace Mantid
 {
-  namespace SliceViewer
+  namespace API
   {
 
   PeakTransformHKL::PeakTransformHKL() : PeakTransform("H", "K", regex("^(H.*)|(\\[H,0,0\\].*)$"), regex("^(K.*)|(\\[0,K,0\\].*)$"), regex("^(L.*)|(\\[0,0,L\\].*)$") )

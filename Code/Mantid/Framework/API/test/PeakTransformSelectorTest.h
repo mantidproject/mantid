@@ -1,12 +1,12 @@
-#ifndef SLICE_VIEWER_PEAKTRANSFORMSELECTOR_TEST_H_
-#define SLICE_VIEWER_PEAKTRANSFORMSELECTOR_TEST_H_
+#ifndef MANTIDAPI_PEAKTRANSFORMSELECTOR_TEST_H_
+#define MANTIDAPI_PEAKTRANSFORMSELECTOR_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidQtSliceViewer/PeakTransform.h"
-#include "MantidQtSliceViewer/PeakTransformSelector.h"
+#include "MantidAPI/PeakTransform.h"
+#include "MantidAPI/PeakTransformSelector.h"
 #include "MockObjects.h"
 
-using namespace MantidQt::SliceViewer;
+using namespace Mantid::API;
 using namespace Mantid;
 using namespace testing;
 using boost::regex;
