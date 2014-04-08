@@ -15,8 +15,9 @@ namespace CustomInterfaces
 
 namespace
 {
-  // Shortcut
+  // Shortcuts
   typedef IALCBaselineModellingView::Section Section;
+  typedef IALCBaselineModellingView::SectionIndex SectionIndex;
 }
 
   /** ALCBaselineModellingPresenter : Presenter for ALC Baseline Modelling step
@@ -62,6 +63,10 @@ namespace
 
     /// @param newSection :: Section to add
     void addSection(Section newSection);
+
+    /// @param index :: Index of the section to modify
+    /// @param modified :: Modified section values
+    void modifySection(SectionIndex index, Section modified);
 
   private:
     /// Returns a filtered copy of m_data, where all uninteresting points where disabled.

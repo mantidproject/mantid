@@ -22,7 +22,8 @@ class MockALCBaselineModellingView : public IALCBaselineModellingView
 {
 public:
   void requestFit() { emit fit(); }
-  void requestAddSection(Section section) { emit addSection(section); }
+  void requestAddSection(Section s) { emit addSection(s); }
+  void requestModifySection(SectionIndex i, Section s) { emit modifySection(i, s); }
 
   MOCK_METHOD0(initialize, void());
 
@@ -86,6 +87,38 @@ public:
 
     m_view->requestAddSection(std::make_pair(1,2));
     m_view->requestAddSection(std::make_pair(3,4));
+  }
+
+  void test_modifyingSections()
+  {
+    EXPECT_CALL(*m_view, setSections(_)).Times(2);
+    m_view->requestAddSection(std::make_pair(0,0));
+    m_view->requestAddSection(std::make_pair(0,0));
+
+    std::vector<IALCBaselineModellingView::Section> firstModified, secondModified;
+
+    firstModified.push_back(std::make_pair(1,2));
+    firstModified.push_back(std::make_pair(0,0));
+
+    secondModified.push_back(std::make_pair(1,2));
+    secondModified.push_back(std::make_pair(3,4));
+
+    InSequence s; // Calls should come in order
+
+    EXPECT_CALL(*m_view, setSections(firstModified)).Times(1);
+    EXPECT_CALL(*m_view, setSections(secondModified)).Times(1);
+
+    m_view->requestModifySection(0, std::make_pair(1,2));
+    m_view->requestModifySection(1, std::make_pair(3,4));
+  }
+
+  void test_modifyingSections_indexOutOfRange()
+  {
+    EXPECT_CALL(*m_view, setSections(_)).Times(2);
+    m_view->requestAddSection(std::make_pair(0,0));
+    m_view->requestAddSection(std::make_pair(0,0));
+
+    TS_ASSERT_THROWS(m_view->requestModifySection(2, std::make_pair(3,4)), std::out_of_range);
   }
 
   void test_basicUsage()

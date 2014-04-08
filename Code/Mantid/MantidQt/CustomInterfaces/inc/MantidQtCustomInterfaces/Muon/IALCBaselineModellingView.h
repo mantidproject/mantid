@@ -44,6 +44,7 @@ namespace CustomInterfaces
 
   public:
     typedef std::pair<double,double> Section;
+    typedef size_t SectionIndex;
 
     /// Function chosen to fit the data to
     /// @return Initialized function
@@ -72,6 +73,11 @@ namespace CustomInterfaces
     /// Request to add a new section
     /// @param section :: Section to add
     void addSection(Section section);
+
+    /// Request to modify an existing section
+    /// @param index :: Index of the section to modify
+    /// @param section :: Modified section values
+    void modifySection(SectionIndex index, Section section);
   };
 
 

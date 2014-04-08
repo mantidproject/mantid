@@ -73,7 +73,17 @@ namespace CustomInterfaces
 
     void requestAddSection();
 
+    /// Called whenever section in sections table is changed
+    /// @param row :: Changed section row
+    /// @param col :: Changed section column
+    void onSectionChanged(int row, int col);
+
   private:
+    /// Index of section start column in sections table
+    static const int SECTION_START_COL = 0;
+    /// Index of section end column in sections table
+    static const int SECTION_END_COL = 1;
+
     /// The widget used
     QWidget* const m_widget;
 

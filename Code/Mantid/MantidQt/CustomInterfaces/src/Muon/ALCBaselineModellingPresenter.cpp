@@ -20,6 +20,8 @@ namespace CustomInterfaces
 
     connect(m_view, SIGNAL(fit()), this, SLOT(fit()));
     connect(m_view, SIGNAL(addSection(Section)), this, SLOT(addSection(Section)));
+    connect(m_view, SIGNAL(modifySection(SectionIndex, Section)),
+              this, SLOT(modifySection(SectionIndex, Section)));
   }
 
   void ALCBaselineModellingPresenter::setData(MatrixWorkspace_const_sptr data)
@@ -60,6 +62,17 @@ namespace CustomInterfaces
   void ALCBaselineModellingPresenter::addSection(Section newSection)
   {
     m_sections.push_back(newSection);
+    m_view->setSections(m_sections);
+  }
+
+  void ALCBaselineModellingPresenter::modifySection(SectionIndex index, Section modified)
+  {
+    if (index >= m_sections.size())
+    {
+      throw std::out_of_range("Section index");
+    }
+
+    m_sections[index] = modified;
     m_view->setSections(m_sections);
   }
 

@@ -35,11 +35,13 @@ namespace CustomInterfaces
 
     // Context menu for sections table
     m_ui.sections->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(m_ui.sections, SIGNAL(customContextMenuRequested(const QPoint &)), this,
+    connect(m_ui.sections, SIGNAL(customContextMenuRequested(const QPoint &)),
             SLOT(sectionsContextMenu(const QPoint&)));
 
     // Make columns non-resizeable and to fill all the available space
     m_ui.sections->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+
+    connect(m_ui.sections, SIGNAL(cellChanged(int,int)), SLOT(onSectionChanged(int,int)));
   }
 
   IFunction_const_sptr ALCBaselineModellingView::function() const
@@ -85,15 +87,24 @@ namespace CustomInterfaces
 
   void ALCBaselineModellingView::setSections(const std::vector<IALCBaselineModellingView::Section>& sections)
   {
+    // We disable table signals so that cell update signals are not emitted. This causes problems
+    // when the table is half filled
+    bool prevBlockedState = m_ui.sections->blockSignals(true);
+
     m_ui.sections->setRowCount(static_cast<int>(sections.size()));
 
     for (auto it = sections.begin(); it != sections.end(); ++it)
     {
       int row = static_cast<int>(std::distance(sections.begin(), it));
 
-      m_ui.sections->setItem(row, 0, new QTableWidgetItem(QString::number(it->first)));
-      m_ui.sections->setItem(row, 1, new QTableWidgetItem(QString::number(it->second)));
+      m_ui.sections->setItem(row, SECTION_START_COL,
+                             new QTableWidgetItem(QString::number(it->first)));
+
+      m_ui.sections->setItem(row, SECTION_END_COL,
+                             new QTableWidgetItem(QString::number(it->second)));
     }
+
+   m_ui.sections->blockSignals(prevBlockedState);
   }
 
   void ALCBaselineModellingView::sectionsContextMenu(const QPoint& widgetPoint)
@@ -108,6 +119,18 @@ namespace CustomInterfaces
   void ALCBaselineModellingView::requestAddSection()
   {
     emit addSection(std::make_pair(0,0));
+  }
+
+  void ALCBaselineModellingView::onSectionChanged(int row, int col)
+  {
+    UNUSED_ARG(col); // We are updating both values at once anyway
+
+    assert(row >= 0); // I assume Qt handles that
+
+    double start = m_ui.sections->item(row, SECTION_START_COL)->text().toDouble();
+    double end = m_ui.sections->item(row, SECTION_END_COL)->text().toDouble();
+
+    emit modifySection(static_cast<SectionIndex>(row), std::make_pair(start, end));
   }
 
 } // namespace CustomInterfaces
