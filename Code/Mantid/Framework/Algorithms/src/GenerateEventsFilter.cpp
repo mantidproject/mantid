@@ -1074,6 +1074,7 @@ namespace Algorithms
     }
 
     // Create event filters/splitters in parallel
+    // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int i = 0; i < numThreads; ++i)
     {
