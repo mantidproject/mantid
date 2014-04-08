@@ -558,7 +558,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->connectDialogs();
   this->hiddenView->close();
   this->hiddenView->destroyView();
-  delete this->hiddenView;
+  this->hiddenView->deleteLater();
   this->currentView->render();
   this->currentView->setColorsForView();
   this->currentView->checkViewOnSwitch();
