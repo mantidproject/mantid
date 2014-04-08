@@ -628,6 +628,11 @@ class DirectEnergyConversion(object):
         # copy incident energy obtained on monitor workspace to detectors workspace
         if monitors_from_separate_ws:
             AddSampleLog(Workspace=input_ws,LogName='Ei',LogText=str(ei),LogType='Number')
+            # if monitors are separated from the input workspace, we need to move them too as this is what happening when monitors are integrated into workspace
+            result_mon_name=resultws_name+'_monitors';
+            ScaleX(InputWorkspace=mon_ws,OutputWorkspace=result_mon_name,Operation="Add",Factor=-mon1_peak,
+                   InstrumentParameter="DelayTime",Combine=True)
+
             
         # Adjust the TOF such that the first monitor peak is at t=0  
         ScaleX(InputWorkspace=input_ws,OutputWorkspace=resultws_name,Operation="Add",Factor=-mon1_peak,
