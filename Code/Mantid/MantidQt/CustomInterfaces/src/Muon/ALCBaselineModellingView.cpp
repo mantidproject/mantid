@@ -46,7 +46,7 @@ namespace CustomInterfaces
 
   IFunction_const_sptr ALCBaselineModellingView::function() const
   {
-    return FunctionFactory::Instance().createInitialized(m_ui.function->text().toStdString());
+    return m_ui.function->getFunction();
   }
 
   void ALCBaselineModellingView::setData(MatrixWorkspace_const_sptr data)
@@ -82,7 +82,7 @@ namespace CustomInterfaces
     m_fitCurve->setData(&dataX[0], values.getPointerToCalculated(0), m_dataCurve->dataSize());
     m_ui.dataPlot->replot();
 
-    m_ui.function->setText(QString::fromStdString(func->asString()));
+    m_ui.function->setFunction(QString::fromStdString(func->asString()));
   }
 
   void ALCBaselineModellingView::setSections(const std::vector<IALCBaselineModellingView::Section>& sections)

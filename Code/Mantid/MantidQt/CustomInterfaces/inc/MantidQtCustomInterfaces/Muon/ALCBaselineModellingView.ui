@@ -28,7 +28,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
-           <widget class="QTextEdit" name="function"/>
+           <widget class="MantidQt::MantidWidgets::FunctionBrowser" name="function" native="true"/>
           </item>
          </layout>
         </widget>
@@ -153,6 +153,12 @@
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::FunctionBrowser</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/FunctionBrowser.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
