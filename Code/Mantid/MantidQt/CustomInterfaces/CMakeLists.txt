@@ -29,7 +29,7 @@ set ( SRC_FILES
 	src/MantidEV.cpp
 	src/MantidEVWorker.cpp
 	src/Muon/ALCBaselineModellingPresenter.cpp
-	src/Muon/ALCBaselineModellingView.cpp
+  src/Muon/ALCBaselineModellingView.cpp
 	src/Muon/ALCDataLoadingPresenter.cpp
 	src/Muon/ALCDataLoadingView.cpp
 	src/Muon/ALCInterface.cpp

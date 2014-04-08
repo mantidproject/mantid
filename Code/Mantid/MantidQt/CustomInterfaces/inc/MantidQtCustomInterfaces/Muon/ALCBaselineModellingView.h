@@ -65,7 +65,7 @@ namespace CustomInterfaces
     void setFunction(IFunction_const_sptr func);
 
     /// @see IALCBaselineModellingView::setSections
-    void setSections(const std::vector<Section> &sections);
+    void setSectionsTable(const std::vector<Section> &sections);
 
   private slots:
     /// Show context menu for sections table
@@ -78,6 +78,13 @@ namespace CustomInterfaces
     /// @param row :: Changed section row
     /// @param col :: Changed section column
     void onSectionChanged(int row, int col);
+
+    /// Called whenever section in sections table is selected by user
+    /// @param newRow :: Selected section row
+    /// @param newCol :: Selected section column
+    /// @param prevRow :: Previously selected section row
+    /// @param prevCol :: Previously selected section column
+    void onSectionSelected(int newRow, int newCol, int prevRow, int prevCol);
 
   private:
     /// Index of section start column in sections table
@@ -93,6 +100,9 @@ namespace CustomInterfaces
 
     /// Plot curves
     QwtPlotCurve *m_dataCurve, *m_fitCurve, *m_correctedCurve;
+
+    /// Range selectors for all the sections
+    std::vector<RangeSelector*> m_sectionSelectors;
   };
 
 

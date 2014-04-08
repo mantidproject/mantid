@@ -18,10 +18,10 @@ namespace CustomInterfaces
   {
     m_view->initialize();
 
-    connect(m_view, SIGNAL(fit()), this, SLOT(fit()));
-    connect(m_view, SIGNAL(addSection(Section)), this, SLOT(addSection(Section)));
-    connect(m_view, SIGNAL(modifySection(SectionIndex, Section)),
-              this, SLOT(modifySection(SectionIndex, Section)));
+    connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
+    connect(m_view, SIGNAL(addSectionRequested(Section)), SLOT(addSection(Section)));
+    connect(m_view, SIGNAL(sectionsTableModified(SectionIndex,Section)),
+            SLOT(modifySection(SectionIndex, Section)));
   }
 
   void ALCBaselineModellingPresenter::setData(MatrixWorkspace_const_sptr data)
@@ -62,7 +62,7 @@ namespace CustomInterfaces
   void ALCBaselineModellingPresenter::addSection(Section newSection)
   {
     m_sections.push_back(newSection);
-    m_view->setSections(m_sections);
+    m_view->setSectionsTable(m_sections);
   }
 
   void ALCBaselineModellingPresenter::modifySection(SectionIndex index, Section modified)
@@ -73,7 +73,7 @@ namespace CustomInterfaces
     }
 
     m_sections[index] = modified;
-    m_view->setSections(m_sections);
+    m_view->setSectionsTable(m_sections);
   }
 
   MatrixWorkspace_sptr ALCBaselineModellingPresenter::filteredData() const

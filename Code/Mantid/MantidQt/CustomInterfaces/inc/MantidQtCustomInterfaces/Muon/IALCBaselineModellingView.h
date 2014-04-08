@@ -63,21 +63,21 @@ namespace CustomInterfaces
     /// @param func :: New function to display
     virtual void setFunction(IFunction_const_sptr func) = 0;
 
-    /// @param sections :: New list of sections to display
-    virtual void setSections(const std::vector<Section>& sections) = 0;
+    /// @param sections :: New list of sections to display in the table
+    virtual void setSectionsTable(const std::vector<Section>& sections) = 0;
 
   signals:
-    /// Request to fit the data according to the function and sections
-    void fit();
+    /// Fit requested
+    void fitRequested();
 
-    /// Request to add a new section
+    /// New section addition requested
     /// @param section :: Section to add
-    void addSection(Section section);
+    void addSectionRequested(Section section);
 
-    /// Request to modify an existing section
-    /// @param index :: Index of the section to modify
-    /// @param section :: Modified section values
-    void modifySection(SectionIndex index, Section section);
+    /// Section modified in the table.
+    /// @param index :: Index of modified section
+    /// @param section :: New value
+    void sectionsTableModified(SectionIndex index, Section section);
   };
 
 

@@ -18,7 +18,7 @@ namespace CustomInterfaces
   ALCBaselineModellingView::ALCBaselineModellingView(QWidget* widget)
     : m_widget(widget), m_ui(),
       m_dataCurve(new QwtPlotCurve()), m_fitCurve(new QwtPlotCurve()),
-      m_correctedCurve(new QwtPlotCurve())
+      m_correctedCurve(new QwtPlotCurve()), m_sectionSelectors()
   {}
     
   void ALCBaselineModellingView::initialize()
@@ -42,6 +42,8 @@ namespace CustomInterfaces
     m_ui.sections->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 
     connect(m_ui.sections, SIGNAL(cellChanged(int,int)), SLOT(onSectionChanged(int,int)));
+    connect(m_ui.sections, SIGNAL(currentCellChanged(int,int,int,int)),
+            SLOT(onSectionSelected(int,int,int,int)));
   }
 
   IFunction_const_sptr ALCBaselineModellingView::function() const
@@ -85,7 +87,7 @@ namespace CustomInterfaces
     m_ui.function->setFunction(QString::fromStdString(func->asString()));
   }
 
-  void ALCBaselineModellingView::setSections(const std::vector<IALCBaselineModellingView::Section>& sections)
+  void ALCBaselineModellingView::setSectionsTable(const std::vector<IALCBaselineModellingView::Section>& sections)
   {
     // We disable table signals so that cell update signals are not emitted. This causes problems
     // when the table is half filled
@@ -102,6 +104,12 @@ namespace CustomInterfaces
 
       m_ui.sections->setItem(row, SECTION_END_COL,
                              new QTableWidgetItem(QString::number(it->second)));
+
+      // Create range selector for the section
+      auto rangeSelector = new RangeSelector(m_ui.dataPlot);
+      rangeSelector->setRange(m_dataCurve->minXValue(), m_dataCurve->maxXValue());
+      rangeSelector->setMinimum(it->first);
+      rangeSelector->setMaximum(it->second);
     }
 
    m_ui.sections->blockSignals(prevBlockedState);
@@ -118,7 +126,7 @@ namespace CustomInterfaces
 
   void ALCBaselineModellingView::onAddSectionRequested()
   {
-    emit addSection(std::make_pair(0,0));
+    emit addSectionRequested(std::make_pair(0,0));
   }
 
   void ALCBaselineModellingView::onSectionChanged(int row, int col)
@@ -130,7 +138,20 @@ namespace CustomInterfaces
     double start = m_ui.sections->item(row, SECTION_START_COL)->text().toDouble();
     double end = m_ui.sections->item(row, SECTION_END_COL)->text().toDouble();
 
-    emit modifySection(static_cast<SectionIndex>(row), std::make_pair(start, end));
+    emit sectionsTableModified(static_cast<SectionIndex>(row), std::make_pair(start, end));
+  }
+
+  void ALCBaselineModellingView::onSectionSelected(int newRow, int newCol, int prevRow, int prevCol)
+  {
+    // Don't care about the column
+    UNUSED_ARG(newCol);
+    UNUSED_ARG(prevCol);
+
+    // Ignore column-only changes
+    if ( newRow == prevRow )
+      return;
+
+    // TODO: coloring
   }
 
 } // namespace CustomInterfaces

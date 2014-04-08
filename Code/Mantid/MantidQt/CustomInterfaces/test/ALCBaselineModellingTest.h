@@ -21,9 +21,9 @@ using boost::scoped_ptr;
 class MockALCBaselineModellingView : public IALCBaselineModellingView
 {
 public:
-  void requestFit() { emit fit(); }
-  void requestAddSection(Section s) { emit addSection(s); }
-  void requestModifySection(SectionIndex i, Section s) { emit modifySection(i, s); }
+  void fit() { emit fitRequested(); }
+  void addSection(Section s) { emit addSectionRequested(s); }
+  void modifySectionsTable(SectionIndex i, Section s) { emit sectionsTableModified(i, s); }
 
   MOCK_METHOD0(initialize, void());
 
@@ -32,7 +32,7 @@ public:
   MOCK_METHOD1(setData, void(MatrixWorkspace_const_sptr));
   MOCK_METHOD1(setCorrectedData, void(MatrixWorkspace_const_sptr));
   MOCK_METHOD1(setFunction, void(IFunction_const_sptr));
-  MOCK_METHOD1(setSections, void(const std::vector<Section>&));
+  MOCK_METHOD1(setSectionsTable, void(const std::vector<Section>&));
 };
 
 class ALCBaselineModellingTest : public CxxTest::TestSuite
@@ -82,18 +82,18 @@ public:
 
     InSequence s; // Calls should come in order
 
-    EXPECT_CALL(*m_view, setSections(oneSection)).Times(1);
-    EXPECT_CALL(*m_view, setSections(twoSections)).Times(1);
+    EXPECT_CALL(*m_view, setSectionsTable(oneSection)).Times(1);
+    EXPECT_CALL(*m_view, setSectionsTable(twoSections)).Times(1);
 
-    m_view->requestAddSection(std::make_pair(1,2));
-    m_view->requestAddSection(std::make_pair(3,4));
+    m_view->addSection(std::make_pair(1,2));
+    m_view->addSection(std::make_pair(3,4));
   }
 
   void test_modifyingSections()
   {
-    EXPECT_CALL(*m_view, setSections(_)).Times(2);
-    m_view->requestAddSection(std::make_pair(0,0));
-    m_view->requestAddSection(std::make_pair(0,0));
+    EXPECT_CALL(*m_view, setSectionsTable(_)).Times(2);
+    m_view->addSection(std::make_pair(0,0));
+    m_view->addSection(std::make_pair(0,0));
 
     std::vector<IALCBaselineModellingView::Section> firstModified, secondModified;
 
@@ -105,20 +105,20 @@ public:
 
     InSequence s; // Calls should come in order
 
-    EXPECT_CALL(*m_view, setSections(firstModified)).Times(1);
-    EXPECT_CALL(*m_view, setSections(secondModified)).Times(1);
+    EXPECT_CALL(*m_view, setSectionsTable(firstModified)).Times(1);
+    EXPECT_CALL(*m_view, setSectionsTable(secondModified)).Times(1);
 
-    m_view->requestModifySection(0, std::make_pair(1,2));
-    m_view->requestModifySection(1, std::make_pair(3,4));
+    m_view->modifySectionsTable(0, std::make_pair(1,2));
+    m_view->modifySectionsTable(1, std::make_pair(3,4));
   }
 
   void test_modifyingSections_indexOutOfRange()
   {
-    EXPECT_CALL(*m_view, setSections(_)).Times(2);
-    m_view->requestAddSection(std::make_pair(0,0));
-    m_view->requestAddSection(std::make_pair(0,0));
+    EXPECT_CALL(*m_view, setSectionsTable(_)).Times(2);
+    m_view->addSection(std::make_pair(0,0));
+    m_view->addSection(std::make_pair(0,0));
 
-    TS_ASSERT_THROWS(m_view->requestModifySection(2, std::make_pair(3,4)), std::out_of_range);
+    TS_ASSERT_THROWS(m_view->modifySectionsTable(2, std::make_pair(3,4)), std::out_of_range);
   }
 
   void test_basicUsage()
@@ -134,9 +134,9 @@ public:
     IFunction_const_sptr func = FunctionFactory::Instance().createInitialized("name=FlatBackground,A0=0");
     EXPECT_CALL(*m_view, function()).WillRepeatedly(Return(func));
 
-    EXPECT_CALL(*m_view, setSections(_)).Times(2);
-    m_view->requestAddSection(std::make_pair(1,2));
-    m_view->requestAddSection(std::make_pair(4,6));
+    EXPECT_CALL(*m_view, setSectionsTable(_)).Times(2);
+    m_view->addSection(std::make_pair(1,2));
+    m_view->addSection(std::make_pair(4,6));
 
     IFunction_const_sptr fittedFunc;
     EXPECT_CALL(*m_view, setFunction(_)).Times(1).WillOnce(SaveArg<0>(&fittedFunc));
@@ -144,7 +144,7 @@ public:
     MatrixWorkspace_const_sptr corrected;
     EXPECT_CALL(*m_view, setCorrectedData(_)).Times(1).WillOnce(SaveArg<0>(&corrected));
 
-    m_view->requestFit();
+    m_view->fit();
 
     TS_ASSERT(fittedFunc);
 
