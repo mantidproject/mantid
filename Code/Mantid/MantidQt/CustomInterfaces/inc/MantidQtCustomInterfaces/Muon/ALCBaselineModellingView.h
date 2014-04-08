@@ -68,10 +68,10 @@ namespace CustomInterfaces
     void setSections(const std::vector<Section> &sections);
 
   private slots:
-    /// Auto-connected slot
-    void onAddSectionPressed();
+    /// Show context menu for sections table
+    void sectionsContextMenu(const QPoint& widgetPoint);
 
-    void updateRange(double min, double max);
+    void requestAddSection();
 
   private:
     /// The widget used
@@ -82,9 +82,6 @@ namespace CustomInterfaces
 
     /// Plot curves
     QwtPlotCurve *m_dataCurve, *m_fitCurve, *m_correctedCurve;
-
-    /// Section selector
-    RangeSelector *m_sectionSelector;
   };
 
 

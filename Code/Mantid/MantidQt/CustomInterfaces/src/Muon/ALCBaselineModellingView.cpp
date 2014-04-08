@@ -7,6 +7,7 @@
 #include <boost/scoped_array.hpp>
 
 #include <QMessageBox>
+#include <QMenu>
 
 using namespace Mantid::API;
 
@@ -17,14 +18,13 @@ namespace CustomInterfaces
   ALCBaselineModellingView::ALCBaselineModellingView(QWidget* widget)
     : m_widget(widget), m_ui(),
       m_dataCurve(new QwtPlotCurve()), m_fitCurve(new QwtPlotCurve()),
-      m_correctedCurve(new QwtPlotCurve()), m_sectionSelector(NULL)
+      m_correctedCurve(new QwtPlotCurve())
   {}
     
   void ALCBaselineModellingView::initialize()
   {
     m_ui.setupUi(m_widget);
     connect(m_ui.fit, SIGNAL(pressed()), SIGNAL(fit()));
-    connect(m_ui.addSection, SIGNAL(pressed()), SLOT(onAddSectionPressed()));
 
     m_dataCurve->attach(m_ui.dataPlot);
 
@@ -33,8 +33,13 @@ namespace CustomInterfaces
 
     m_correctedCurve->attach(m_ui.correctedPlot);
 
-    m_sectionSelector = new RangeSelector(m_ui.dataPlot);
-    connect(m_sectionSelector, SIGNAL(selectionChanged(double,double)), this, SLOT(updateRange(double,double)));
+    // Context menu for sections table
+    m_ui.sections->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_ui.sections, SIGNAL(customContextMenuRequested(const QPoint &)), this,
+            SLOT(sectionsContextMenu(const QPoint&)));
+
+    // Make columns non-resizeable and to fill all the available space
+    m_ui.sections->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   }
 
   IFunction_const_sptr ALCBaselineModellingView::function() const
@@ -46,21 +51,12 @@ namespace CustomInterfaces
   {
     m_dataCurve->setData(&data->readX(0)[0], &data->readY(0)[0], static_cast<int>(data->blocksize()));
 
-    double xMin = data->getXMin();
-    double xMax = data->getXMax();
-
-    m_sectionSelector->setMaximum(xMin);
-    m_sectionSelector->setMinimum(xMax);
-
-    m_sectionSelector->setRange(xMin, xMax);
-
     m_ui.dataPlot->replot();
   }
 
   void ALCBaselineModellingView::setCorrectedData(MatrixWorkspace_const_sptr data)
   {
-    m_correctedCurve->setData(&data->readX(0)[0], &data->readY(0)[0],
-        static_cast<int>(data->blocksize()));
+    m_correctedCurve->setData(&data->readX(0)[0], &data->readY(0)[0], static_cast<int>(data->blocksize()));
 
     m_ui.correctedPlot->replot();
   }
@@ -89,28 +85,29 @@ namespace CustomInterfaces
 
   void ALCBaselineModellingView::setSections(const std::vector<IALCBaselineModellingView::Section>& sections)
   {
-    std::ostringstream sectionsStr;
+    m_ui.sections->setRowCount(static_cast<int>(sections.size()));
 
     for (auto it = sections.begin(); it != sections.end(); ++it)
     {
-      sectionsStr << it->first << " " << it->second << "\n";
+      int row = static_cast<int>(std::distance(sections.begin(), it));
+
+      m_ui.sections->setItem(row, 0, new QTableWidgetItem(QString::number(it->first)));
+      m_ui.sections->setItem(row, 1, new QTableWidgetItem(QString::number(it->second)));
     }
-
-    m_ui.sections->setPlainText(QString::fromStdString(sectionsStr.str()));
   }
 
-  void ALCBaselineModellingView::onAddSectionPressed()
+  void ALCBaselineModellingView::sectionsContextMenu(const QPoint& widgetPoint)
   {
-    QStringList range = m_ui.range->text().split(' ');
-    assert(range.size() == 2);
-    double from = range[0].toDouble();
-    double to = range[1].toDouble();
-    emit addSection(std::make_pair(from, to));
+    UNUSED_ARG(widgetPoint);
+
+    QMenu context(m_widget);
+    context.addAction("Add section", this, SLOT(requestAddSection()));
+    context.exec(QCursor::pos());
   }
 
-  void ALCBaselineModellingView::updateRange(double min, double max)
+  void ALCBaselineModellingView::requestAddSection()
   {
-    m_ui.range->setText(QString("%1 %2").arg(min).arg(max));
+    emit addSection(std::make_pair(0,0));
   }
 
 } // namespace CustomInterfaces
