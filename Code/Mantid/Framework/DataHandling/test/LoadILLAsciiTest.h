@@ -36,21 +36,23 @@ public:
 		alg.setRethrows(true);
 		TS_ASSERT_THROWS_NOTHING(alg.initialize())
 		TS_ASSERT(alg.isInitialized())
-		TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", m_testFile));
-		TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "outputWSName"));
-		TS_ASSERT_THROWS_NOTHING( alg.execute() );
-		TS_ASSERT(alg.isExecuted( ));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", m_testFile));
+		TS_ASSERT_THROWS_NOTHING(
+				alg.setPropertyValue("OutputWorkspace", "outputWSName"));
+		TS_ASSERT_THROWS_NOTHING(alg.execute());
+		TS_ASSERT(alg.isExecuted());
 
-//    // Retrieve the workspace from data service. TODO: Change to your desired type
-//    Workspace_sptr ws;
-//    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
-//    TS_ASSERT(ws);
-//    if (!ws) return;
-//
-//    // TODO: Check the results
-//
-//    // Remove workspace from the data service.
-//    AnalysisDataService::Instance().remove(outWSName);
+		// Retrieve the workspace from data service. TODO: Change to your desired type
+		IMDEventWorkspace_sptr ws;
+		TS_ASSERT_THROWS_NOTHING(
+				ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("outputWSName"));
+		TS_ASSERT(ws);
+
+		TS_ASSERT_EQUALS( ws->getNEvents(), 409600);
+
+		// Remove workspace from the data service.
+		AnalysisDataService::Instance().remove("outputWSName");
+
 	}
 
 	void test_LoadILLHelper() {
@@ -60,7 +62,6 @@ public:
 		// Parses ascii file and fills the data scructures
 		ILLParser illAsciiParser(m_testFile);
 		illAsciiParser.parse();
-
 
 		// get local references to the parsed file
 		// const std::vector<std::vector<int> > &spectraList = illAsciiParser.getSpectraList();

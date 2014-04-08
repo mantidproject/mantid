@@ -110,13 +110,9 @@ void LoadILLAscii::initDocs() {
 void LoadILLAscii::init() {
 	declareProperty(new FileProperty("Filename", "", FileProperty::Load, ""),
 			"Name of the data file to load.");
-//	declareProperty(
-//			new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-//			"Name to use for the output workspace");
-//
 	declareProperty(
 			new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace", "",
-					Direction::Output), "An output workspace.");
+					Direction::Output), "Name to use for the output workspace.");
 
 }
 
@@ -170,20 +166,17 @@ void LoadILLAscii::exec() {
 
 		workspaceList.push_back(thisWorkspace);
 
-		// just to see the list of WS in MantidPlot
-		// TODO: delete this at the end!
-		std::stringstream outWorkspaceNameStream;
-		outWorkspaceNameStream << "test" << std::distance(spectraList.begin(), iSpectra);
-		AnalysisDataService::Instance().addOrReplace(outWorkspaceNameStream.str(), thisWorkspace);
+//		// just to see the list of WS in MantidPlot
+//		// TODO: delete this at the end!
+//		std::stringstream outWorkspaceNameStream;
+//		outWorkspaceNameStream << "test" << std::distance(spectraList.begin(), iSpectra);
+//		AnalysisDataService::Instance().addOrReplace(outWorkspaceNameStream.str(), thisWorkspace);
 		// End here
 
-		progress.report();
+		progress.report("Loading scans...");
 	}
 
-	//p.showHeader();
-
 	// Merge the workspace list into a single WS with a virtual instrument
-	// TODO : Not done yet!
 	IMDEventWorkspace_sptr outWorkspace = mergeWorkspaces(workspaceList);
 	setProperty("OutputWorkspace",outWorkspace);
 
@@ -269,141 +262,10 @@ void LoadILLAscii::loadsDataIntoTheWS(API::MatrixWorkspace_sptr &thisWorkspace,
 
 }
 
-/*
- * Changes the assembly
- * Copies componentName nTimes
- *
- */
-//void duplicateCompAssembly(Geometry::CompAssembly *assembly,const std::string &componentName, int ntimes) {
-//
-//	for (int i = 0; i < assembly->nelements(); i++) {
-//
-//			boost::shared_ptr<Geometry::IComponent> it = (*assembly)[i];
-//			Geometry::CompAssembly* children = dynamic_cast<Geometry::CompAssembly*>(it.get());
-//			if (children) {
-//				if (children->getName() == componentName) {
-//					std::cout << "right component " << std::endl;
-//					for (int i =0; i < ntimes -1; ++i){
-//						std::ostringstream newComponentName;
-//						newComponentName << componentName << "_"<< i;
-//						children->addCopy(children,  newComponentName.str() );
-//					}
-//					return;
-//				}
-//				else {
-//					duplicateCompAssembly(children,componentName,ntimes);
-//				}
-//			}
-//		}
-//
-//}
-
-//void printInstrument(Geometry::CompAssembly *assembly) {
-//	for (int i = 0; i < assembly->nelements(); i++) {
-//		std::cout << "**** Element " << i << " of " << assembly->nelements() << std::endl;
-//
-//		boost::shared_ptr<Geometry::IComponent> it = (*assembly)[i];
-//
-//
-//		//it->printSelf(std::cout);
-//
-//		Geometry::CompAssembly* children = dynamic_cast<Geometry::CompAssembly*>(it.get());
-//
-//		std::cout << "Element number = " << i << " : ";
-//		if (children) {
-//			std::cout <<  " with name: " << children->getName() << std::endl;
-//			std::cout << "Children :******** " << std::endl;
-//			printInstrument(children);
-//		} else {
-//			std::cout << " with name: " << it->getName() << std::endl;
-//		}
-//	}
-//}
-
-
-//void printWorkspace(const API::MatrixWorkspace_sptr &workspace) {
-//	Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
-//
-//	//duplicateCompAssembly(const_cast < Geometry::Instrument* >( instrument.get()), "bank_uniq", 3 );
-//	printInstrument( const_cast < Geometry::Instrument* > ( instrument.get() ) );
-//
-//}
-
-/* Duplicates the componentName in the given assembly
- *
- * Both components must have the same structure!
- *
- *
- */
-void LoadILLAscii::addCompAssemblyToReferenceInstrument(Geometry::CompAssembly *refAssembly,
-		Geometry::CompAssembly *fromAssembly, const std::string &componentName) {
-
-	assert(refAssembly->nelements() == fromAssembly->nelements());
-
-	g_log.debug() << "refAssembly: " << refAssembly->getName()  <<
-					" :: fromAssembly: " << fromAssembly->getName() << std::endl;
-
-	for (int i = 0; i < refAssembly->nelements(); i++) {
-
-		g_log.debug() << "refAssembly_" << i  << " : " << (*refAssembly)[i]->getName()  <<
-				" :: fromAssembly_" << i  << " : "  << (*refAssembly)[i]->getName() << std::endl;
-
-
-		boost::shared_ptr<Geometry::IComponent> itRefAssembly = (*refAssembly)[i];
-		boost::shared_ptr<Geometry::IComponent> itFromAssembly = (*fromAssembly)[i];
-
-		Geometry::CompAssembly* childrenRefInst = dynamic_cast<Geometry::CompAssembly*>(itRefAssembly.get());
-		Geometry::CompAssembly* childrenFromInst = dynamic_cast<Geometry::CompAssembly*>(itFromAssembly.get());
-
-		if (childrenFromInst && childrenRefInst) {
-			g_log.debug() << "\tchildrenRefInst: " << childrenRefInst->getName()  <<
-					" :: childrenFromInst: " << childrenFromInst->getName() << std::endl;
-
-			if (childrenFromInst->getName() == componentName) {
-				g_log.debug() << "Add Copy: " << componentName << std::endl;
-
-				// TODO:
-
-				// Copy from childrenFromInst to ref Inst
-				// code below same as:
-				int childrenSize = childrenRefInst->addCopy(childrenFromInst);
-//				Geometry::IComponent* newcomp = childrenFromInst->clone();
-//				newcomp->setParent(childrenRefInst);
-//				childrenRefInst->add(newcomp);
-
-				g_log.debug() << "Before = " << refAssembly->nelements() << " afer = " << childrenSize << std::endl;
-				//
-
-				return;
-			} else {
-				addCompAssemblyToReferenceInstrument(childrenRefInst,
-						childrenFromInst, componentName);
-			}
-		}
-	}
-}
-
-
-
 
 /**
  * Merge all workspaces and create a virtual new instrument.
- * @return new workspace with all the scans and a new virtual instrument
- *
- * TODO:
- * See : CompAssembly::printTree
- *
- * 1. duplicate object assembly?
- *    E.g. bank_uniq
- *    Problem is CompAssembly::addCopy() does not accept parametrized CompAssembly.
- *
- *
- *
- * Options:
- *
- * 1. Make detectorId writable
- *    - copy thisWorkspace->getDetector(i) and then set the detector
- *
+ * @return new workspace with all the scans and a new virtual instrument*
  *
  */
 IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
@@ -446,7 +308,7 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 				myfile << detPos.Z() << " ";
 				myfile << std::endl;
 			}
-			progress.report();
+			progress.report("Creating MD WS");
 		}
 		myfile.close();
 
@@ -458,8 +320,11 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 			importMDEWS->setProperty("OutputWorkspace", "Test");
 			importMDEWS->execute();
 		} catch (...) {
+			std::remove(tempFileNameChar);
 			std::runtime_error("Error: Cannot convert WS to MDEventWorkspace");
 		}
+
+		std::remove(tempFileNameChar);
 
 		IMDEventWorkspace_sptr workspace = importMDEWS->getProperty("OutputWorkspace");
 		if(!workspace)
