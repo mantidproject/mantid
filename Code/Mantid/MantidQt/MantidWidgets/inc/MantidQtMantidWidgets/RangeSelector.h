@@ -25,7 +25,7 @@ namespace MantidWidgets
     enum SelectType { XMINMAX, XSINGLE, YMINMAX, YSINGLE };
 
     RangeSelector(QwtPlot* plot, SelectType type=XMINMAX, bool visible=true, bool infoOnly=false);
-    ~RangeSelector() {};
+    virtual ~RangeSelector();
 
     std::pair<double,double> getRange();
     void setRange(std::pair<double,double> range); /// Overloaded function provided for convenience
