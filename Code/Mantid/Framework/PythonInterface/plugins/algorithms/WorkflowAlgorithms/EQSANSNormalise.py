@@ -27,7 +27,7 @@ class EQSANSNormalise(PythonAlgorithm):
                                                      direction=Direction.Input))
         self.declareProperty("NormaliseToBeam", True, 
                              "If true, the data will also be normalise by the beam profile")
-        self.declareProperty("BeamSpectrumFile", "", 
+        self.declareProperty(FileProperty("BeamSpectrumFile", "", action=FileAction.OptionalLoad),
                              "Beam spectrum to be used for normalisation [takes precedence over default]")
         self.declareProperty("NormaliseToMonitor", False,
                              "If true, the algorithm will look for a monitor workspace to use")
