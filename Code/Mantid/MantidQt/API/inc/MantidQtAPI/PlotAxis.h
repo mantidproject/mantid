@@ -38,8 +38,10 @@ namespace MantidQt
     {
     public:
       /// Constructor with workspace & axis index
-      PlotAxis(const Mantid::API::MatrixWorkspace_const_sptr & workspace,
+      PlotAxis(const Mantid::API::MatrixWorkspace & workspace,
                const size_t index);
+      /// Constructor with just a workspace
+      PlotAxis(const Mantid::API::MatrixWorkspace & workspace);
 
       /// Create a new axis title
       QString title() const;
@@ -48,11 +50,11 @@ namespace MantidQt
       DISABLE_DEFAULT_CONSTRUCT(PlotAxis);
 
       /// Creates a title suitable for an axis attached to the given index
-      void titleFromIndex(const Mantid::API::MatrixWorkspace_const_sptr & workspace,
+      void titleFromIndex(const Mantid::API::MatrixWorkspace & workspace,
                           const size_t index);
 
-      /// Creates a title suitable for the Y axis
-      void initYAxisTitle(const Mantid::API::MatrixWorkspace_const_sptr & workspace);
+      /// Creates a title suitable for the Y data values
+      void titleFromYData(const Mantid::API::MatrixWorkspace & workspace);
 
       /// Title
       QString m_title;

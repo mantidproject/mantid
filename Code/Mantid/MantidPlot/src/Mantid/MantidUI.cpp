@@ -2973,10 +2973,10 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
   QString xtitle;
   if (workspace->axes() > 1)   // Protection against calling this on 1D/single value workspaces
   {
-    xtitle = MantidQt::API::PlotAxis(workspace, 1).title();
+    xtitle = MantidQt::API::PlotAxis(*workspace, 1).title();
   }
   g->setXAxisTitle(xtitle);
-  g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
+  g->setYAxisTitle(MantidQt::API::PlotAxis(*workspace).title());
 }
 
 /**

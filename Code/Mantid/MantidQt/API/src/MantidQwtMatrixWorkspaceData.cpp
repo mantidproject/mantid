@@ -148,7 +148,7 @@ double MantidQwtMatrixWorkspaceData::getYMax() const
  */
 QString MantidQwtMatrixWorkspaceData::getXAxisLabel() const
 {
-  return MantidQt::API::PlotAxis(m_workspace, 0).title();
+  return MantidQt::API::PlotAxis(*m_workspace, 0).title();
 }
 
 /**
@@ -156,17 +156,7 @@ QString MantidQwtMatrixWorkspaceData::getXAxisLabel() const
  */
 QString MantidQwtMatrixWorkspaceData::getYAxisLabel() const
 {
-  QString yTitle = QString::fromStdString(m_workspace->YUnitLabel());
-  Mantid::API::Axis* ax = m_workspace->getAxis(0);
-  if (m_isDistribution && ax->unit())
-  {
-    const std::string unitID = ax->unit()->unitID();
-    if (unitID != "" || unitID != "Empty")
-    {
-      yTitle = yTitle % " / " % ax->unit()->label().ascii().c_str();
-    }
-  }
-  return yTitle;
+  return MantidQt::API::PlotAxis(*m_workspace).title();
 }
 
 void MantidQwtMatrixWorkspaceData::setLogScale(bool on)

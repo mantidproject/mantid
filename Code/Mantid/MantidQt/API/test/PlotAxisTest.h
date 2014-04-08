@@ -22,8 +22,8 @@ public:
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
     ws->replaceAxis(1, new Mantid::API::NumericAxis(1));
 
-    TS_ASSERT_EQUALS("X axis", PlotAxis(ws, 0).title());
-    TS_ASSERT_EQUALS("Y axis", PlotAxis(ws, 1).title());
+    TS_ASSERT_EQUALS("X axis", PlotAxis(*ws, 0).title());
+    TS_ASSERT_EQUALS("Y axis", PlotAxis(*ws, 1).title());
   }
 
   void test_Empty_Unit_And_Empty_Axis_Title_On_Indexed_Axis_Prints_Default()
@@ -34,8 +34,8 @@ public:
     ws->replaceAxis(1, new Mantid::API::NumericAxis(1));
     ws->getAxis(1)->setUnit("Empty");
 
-    TS_ASSERT_EQUALS("X axis", PlotAxis(ws, 0).title());
-    TS_ASSERT_EQUALS("Y axis", PlotAxis(ws, 1).title());
+    TS_ASSERT_EQUALS("X axis", PlotAxis(*ws, 0).title());
+    TS_ASSERT_EQUALS("Y axis", PlotAxis(*ws, 1).title());
   }
 
   void test_Empty_Unit_And_Non_Empty_Title_On_Indexed_Axis_Prints_Title()
@@ -51,8 +51,8 @@ public:
     ax1->setUnit("Empty");
     ax1->title() = "Custom title 2";
 
-    TS_ASSERT_EQUALS("Custom title 1", PlotAxis(ws, 0).title());
-    TS_ASSERT_EQUALS("Custom title 2", PlotAxis(ws, 1).title());
+    TS_ASSERT_EQUALS("Custom title 1", PlotAxis(*ws, 0).title());
+    TS_ASSERT_EQUALS("Custom title 2", PlotAxis(*ws, 1).title());
   }
 
   void test_Axis_With_Unit_Has_Label_In_Parentheses()
@@ -64,8 +64,8 @@ public:
     ws->getAxis(1)->setUnit("TOF");
 
     QString expected = QString::fromUtf8("Time-of-flight (\u03bcs)");
-    TS_ASSERT_EQUALS(expected, PlotAxis(ws, 0).title());
-    TS_ASSERT_EQUALS(expected, PlotAxis(ws, 1).title());
+    TS_ASSERT_EQUALS(expected, PlotAxis(*ws, 0).title());
+    TS_ASSERT_EQUALS(expected, PlotAxis(*ws, 1).title());
   }
 
   void test_SpectraAxis_Gives_Standard_Text()
@@ -74,8 +74,27 @@ public:
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
     ws->replaceAxis(0, new Mantid::API::SpectraAxis(ws.get()));
 
-    TS_ASSERT_EQUALS("Spectrum Number", PlotAxis(ws, 0).title());
-    TS_ASSERT_EQUALS("Spectrum Number", PlotAxis(ws, 1).title());
+    TS_ASSERT_EQUALS("Spectrum Number", PlotAxis(*ws, 0).title());
+    TS_ASSERT_EQUALS("Spectrum Number", PlotAxis(*ws, 1).title());
+  }
+
+  void test_Passing_Just_NonDistribution_Workspace_Creates_UnitLess_Title_For_Y_Data()
+  {
+    using MantidQt::API::PlotAxis;
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
+    ws->setYUnit("Counts");
+
+    TS_ASSERT_EQUALS("Counts", PlotAxis(*ws).title());
+  }
+
+  void test_Passing_Just_Distribution_Workspace_Creates_Title_For_Y_Data_With_Unit()
+  {
+    using MantidQt::API::PlotAxis;
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
+    ws->setYUnit("Counts");
+
+    QString expected = QString::fromUtf8("Counts (\u03bcs\u207b\u00b9)");
+    TS_ASSERT_EQUALS("Counts", PlotAxis(*ws).title());
   }
 
   //---------------------- Failure cases -------------------------------
@@ -85,8 +104,8 @@ public:
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
 
-    TS_ASSERT_THROWS(PlotAxis(ws, 2), std::invalid_argument);
-    TS_ASSERT_THROWS(PlotAxis(ws, -1), std::invalid_argument);
+    TS_ASSERT_THROWS(PlotAxis(*ws, 2), std::invalid_argument);
+    TS_ASSERT_THROWS(PlotAxis(*ws, -1), std::invalid_argument);
   }
 };
 

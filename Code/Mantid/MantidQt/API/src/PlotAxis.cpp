@@ -1,5 +1,4 @@
 #include "MantidQtAPI/PlotAxis.h"
-#include <QStringBuilder>
 
 namespace MantidQt
 {
@@ -7,10 +6,12 @@ namespace MantidQt
   {
 
     /**
-     * @param workspace A pointer to a MatrixWorkspace object
+     * The title will be filled with the caption & units from the given Axis object
+     * of the workspace
+     * @param workspace The workspace containing the axis information
      * @param index Index of the axis in the workspace to inspect
      */
-    PlotAxis::PlotAxis(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
+    PlotAxis::PlotAxis(const Mantid::API::MatrixWorkspace &workspace,
                        const size_t index)
       : m_title()
     {
@@ -18,6 +19,16 @@ namespace MantidQt
       else
         throw std::invalid_argument("PlotAxis() - Unknown axis index: '" + \
                                     boost::lexical_cast<std::string>(index) + "'");
+    }
+
+    /**
+     * The title will be filled with the caption & label for the Y data values
+     * within the workspace, ~ the Z axis
+     * @param workspace  The workspace containing the Y title information
+     */
+    PlotAxis::PlotAxis(const Mantid::API::MatrixWorkspace &workspace)
+    {
+      titleFromYData(workspace);
     }
 
     /**
@@ -29,14 +40,14 @@ namespace MantidQt
     }
 
     /**
-     * @param workspace A pointer to a MatrixWorkspace object
+     * @param workspace  The workspace containing the axis information
      * @param index Index of the axis in the workspace to inspect
      */
-    void PlotAxis::titleFromIndex(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
+    void PlotAxis::titleFromIndex(const Mantid::API::MatrixWorkspace &workspace,
                                   const size_t index)
     {
       // Deal with axis names
-      Mantid::API::Axis* ax = workspace->getAxis(index);
+      Mantid::API::Axis* ax = workspace.getAxis(index);
       m_title = "";
       if ( ax->isSpectra() ) m_title = "Spectrum Number";
       else if (ax->unit() && ax->unit()->unitID() != "Empty" )
@@ -59,18 +70,19 @@ namespace MantidQt
     }
 
     /**
-     * @param workspace A pointer to a MatrixWorkspace object
+     * Constructs a title using the unicode methods of the UnitLabel
+     * @param workspace The workspace containing the Y title information
      */
-    void PlotAxis::initYAxisTitle(const Mantid::API::MatrixWorkspace_const_sptr &workspace)
+    void PlotAxis::titleFromYData(const Mantid::API::MatrixWorkspace &workspace)
     {
-      m_title = QString::fromStdString(workspace->YUnitLabel());
-      Mantid::API::Axis* ax = workspace->getAxis(0);
-      if (workspace->isDistribution() && ax->unit())
+      m_title = QString::fromStdString(workspace.YUnit());
+      if(workspace.isDistribution() && workspace.axes() > 0 && workspace.getAxis(0)->unit())
       {
-        const std::string unitID = ax->unit()->unitID();
-        if (unitID != "" || unitID != "Empty")
+        const auto xunit = workspace.getAxis(0)->unit();
+        const auto lbl = xunit->label();
+        if(!lbl.utf8().empty())
         {
-          m_title = m_title % " / " % ax->unit()->label().ascii().c_str();
+          m_title += " (" + QString::fromStdWString(lbl.utf8()) + QString::fromWCharArray(L"\u207b\u00b9)");
         }
       }
     }
