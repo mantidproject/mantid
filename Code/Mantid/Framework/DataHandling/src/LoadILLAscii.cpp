@@ -166,12 +166,11 @@ void LoadILLAscii::exec() {
 
 		workspaceList.push_back(thisWorkspace);
 
-//		// just to see the list of WS in MantidPlot
-//		// TODO: delete this at the end!
+//		// just to see the list of WS in MantidPlot if needed for debugging
 //		std::stringstream outWorkspaceNameStream;
 //		outWorkspaceNameStream << "test" << std::distance(spectraList.begin(), iSpectra);
 //		AnalysisDataService::Instance().addOrReplace(outWorkspaceNameStream.str(), thisWorkspace);
-		// End here
+
 
 		progress.report("Loading scans...");
 	}
@@ -265,7 +264,13 @@ void LoadILLAscii::loadsDataIntoTheWS(API::MatrixWorkspace_sptr &thisWorkspace,
 
 /**
  * Merge all workspaces and create a virtual new instrument.
- * @return new workspace with all the scans and a new virtual instrument*
+ *
+ * To date this is slow as we are passing through a temp file and then
+ * it is loaded in the ImportMDEventWorkspace.
+ * If this loader is to used at the ILL, the better option is to avoid
+ * a MDWS and go ahead with the merge instruments.
+ *
+ * @return MD Event workspace
  *
  */
 IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(

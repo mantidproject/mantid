@@ -42,7 +42,7 @@ public:
 		TS_ASSERT_THROWS_NOTHING(alg.execute());
 		TS_ASSERT(alg.isExecuted());
 
-		// Retrieve the workspace from data service. TODO: Change to your desired type
+		// Retrieve the workspace from data service.
 		IMDEventWorkspace_sptr ws;
 		TS_ASSERT_THROWS_NOTHING(
 				ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("outputWSName"));
@@ -55,19 +55,26 @@ public:
 
 	}
 
-	void test_LoadILLHelper() {
-
-		using Mantid::DataHandling::ILLParser;
-
-		// Parses ascii file and fills the data scructures
-		ILLParser illAsciiParser(m_testFile);
-		illAsciiParser.parse();
-
-		// get local references to the parsed file
-		// const std::vector<std::vector<int> > &spectraList = illAsciiParser.getSpectraList();
-		// const std::vector<std::map<std::string, std::string> > &spectraHeaderList = illAsciiParser.getSpectraHeaderList();
-
-	}
+//	// DOES NOT WORK. Can't find inout file
+//	void test_LoadILLHelper() {
+//
+//		using Mantid::DataHandling::ILLParser;
+//
+//		// Parses ascii file and fills the data scructures
+//		ILLParser illAsciiParser(m_testFile);
+//		illAsciiParser.parse();
+//
+//		double wavelength = illAsciiParser.getValueFromHeader<double>("wavelength");
+//		TS_ASSERT_EQUALS(wavelength,25)
+//
+//		// get local references to the parsed file
+//		const std::vector<std::vector<int> > &spectraList = illAsciiParser.getSpectraList();
+//		const std::vector<std::map<std::string, std::string> > &spectraHeaderList = illAsciiParser.getSpectraHeaderList();
+//
+//		TS_ASSERT_EQUALS(spectraList.size(),25)
+//		TS_ASSERT_EQUALS(spectraHeaderList.size(),25)
+//
+//	}
 
 private:
 	std::string m_testFile;

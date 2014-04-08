@@ -161,6 +161,9 @@ namespace DataHandling {
  */
 ILLParser::ILLParser(const std::string &filepath) {
 	fin.open(filepath.c_str());
+	if ( ! fin )
+		throw(std::runtime_error("File does not appear to be valid: " + filepath ));
+
 }
 
 ILLParser::~ILLParser() {
