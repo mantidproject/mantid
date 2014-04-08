@@ -9,8 +9,6 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtMantidWidgets/DataSelector.h"
 
-#include <QDir>
-
 namespace MantidQt
 {
   namespace CustomDialogs
@@ -21,7 +19,7 @@ namespace MantidQt
      * Default constructor.
      * @param parent :: Parent dialog.
      */
-    CatalogPublishDialog::CatalogPublishDialog(QWidget *parent) : MantidQt::API::AlgorithmDialog(parent), m_uiForm() {}
+    CatalogPublishDialog::CatalogPublishDialog(QWidget *parent) : API::AlgorithmDialog(parent), m_uiForm() {}
 
     /// Initialise the layout
     void CatalogPublishDialog::initLayout()
@@ -58,32 +56,35 @@ namespace MantidQt
     {
       auto workspace = Mantid::API::WorkspaceFactory::Instance().createTable();
       auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
-      // Obtain the investigations that the user can publish to for all their catalogs.
-      if (!session.empty()) Mantid::API::CatalogManager::Instance().getCatalog("")->myData(workspace);
 
-      // The user is not an investigator on any investigations and cannot publish
-      // or they are not logged into the catalog then update the related message..
-      if (workspace->rowCount() == 0)
+      // We need to catch the exception to prevent a fatal error.
+      try
       {
-        setOptionalMessage("You cannot publish datafiles as you are not an investigator on any investigations or are not logged into the catalog.");
-        // Disable the input fields and run button to prevent user from running algorithm.
-        m_uiForm.scrollArea->setDisabled(true);
-        m_uiForm.runBtn->setDisabled(true);
-        return;
+        if (!session.empty()) Mantid::API::CatalogManager::Instance().getCatalog("")->myData(workspace);
+      }
+      catch(std::runtime_error& e)
+      {
+        setOptionalMessage(e.what());
       }
 
-      // Populate the form with investigations that the user can publish to.
-      for (size_t row = 0; row < workspace->rowCount(); row++)
+      if (workspace->rowCount() > 0)
       {
-        m_uiForm.investigationNumberCb->addItem(QString::fromStdString(workspace->cell<std::string>(row, 0)));
-        // Add better tooltip for ease of use (much easier to recall the investigation if title and instrument are also provided).
-        m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
-            QString::fromStdString("The title of the investigation is: \"" + workspace->cell<std::string>(row, 1) +
-                                   "\".\nThe instrument of the investigation is: \"" + workspace->cell<std::string>(row, 2)) + "\".",
-                                   Qt::ToolTipRole);
-        // Set the user role to the sessionID.
-        m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
-            QString::fromStdString(workspace->cell<std::string>(row, 7)),Qt::UserRole);
+        // Populate the form with investigations that the user can publish to.
+        for (size_t row = 0; row < workspace->rowCount(); row++)
+        {
+          m_uiForm.investigationNumberCb->addItem(QString::fromStdString(workspace->cell<std::string>(row, 0)));
+          // Added tooltips to improve usability.
+          m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
+              QString::fromStdString("The title of the investigation is: \"" + workspace->cell<std::string>(row, 1) +
+                  "\".\nThe instrument of the investigation is: \"" + workspace->cell<std::string>(row, 2)) + "\".",Qt::ToolTipRole);
+          // Set the user role to the sessionID.
+          m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
+              QString::fromStdString(workspace->cell<std::string>(row, 7)),Qt::UserRole);
+        }
+      }
+      else
+      {
+        disableDialog();
       }
     }
 
@@ -112,6 +113,15 @@ namespace MantidQt
       // Set the FileName property to the path that appears in the input field on the dialog.
       storePropertyValue("FileName", m_uiForm.dataSelector->getFullFilePath());
       setPropertyValue("FileName", true);
+    }
+
+    /**
+     * Diables fields on dialog to improve usability
+     */
+    void CatalogPublishDialog::disableDialog()
+    {
+      m_uiForm.scrollArea->setDisabled(true);
+      m_uiForm.runBtn->setDisabled(true);
     }
 
     /**
