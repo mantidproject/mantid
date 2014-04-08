@@ -135,13 +135,10 @@ def load_run(inst_name, run_number, calibration=None, force=False):
         wrong_monitors_name = False;
         if ext.endswith("raw"):
             args['LoadMonitors']='Separate'
-            wrong_monitors_name = True
         elif ext.endswith('nxs'):
             args['LoadMonitors'] = '1'
     
         loaded_ws = Load(Filename=filename, OutputWorkspace=output_name,**args)
-        if wrong_monitors_name:
-            RenameWorkspace(InputWorkspace=output_name+'_Monitors',OutputWorkspace=output_name+'_monitors');            
         if isinstance(loaded_ws,tuple) and len(loaded_ws)>1:
             mon_ws = loaded_ws[1];
             loaded_ws=loaded_ws[0];
