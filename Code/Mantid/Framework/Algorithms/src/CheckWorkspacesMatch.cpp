@@ -24,6 +24,9 @@ In the case of [[EventWorkspace]]s, they are checked to hold identical event lis
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <sstream>
 
+//
+namespace Mantid
+{
 namespace Algorithms
 {
   namespace
@@ -52,12 +55,6 @@ namespace Algorithms
     }
 
   }
-}
-//
-namespace Mantid
-{
-namespace Algorithms
-{
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CheckWorkspacesMatch)
@@ -571,7 +568,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
         bool err;
         if (RelErr)
         {
-           err = (::Algorithms::relErr(X1[j],X2[j],tolerance) || ::Algorithms::relErr(Y1[j],Y2[j],tolerance) || ::Algorithms::relErr(E1[j],E2[j],tolerance));
+           err = (relErr(X1[j],X2[j],tolerance) || relErr(Y1[j],Y2[j],tolerance) || relErr(E1[j],E2[j],tolerance));
         }
         else
            err = (std::fabs(X1[j] - X2[j]) > tolerance || std::fabs(Y1[j] - Y2[j]) > tolerance
