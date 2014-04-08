@@ -316,17 +316,13 @@ namespace MantidQt
      */
     void CatalogHelper::executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm)
     {
-      int maxTime = boost::lexical_cast<int>(Mantid::Kernel::ConfigService::Instance().getString("catalog.timeout.value"));
-
       QTime myTimer;
       myTimer.start();
 
       Poco::ActiveResult<bool> result(algorithm->executeAsync());
       while (!result.available())
       {
-        // Convert seconds to milliseconds.
-        if (myTimer.elapsed() >= maxTime * 1000) break;
-        else QCoreApplication::processEvents();
+        QCoreApplication::processEvents();
       }
     }
 
