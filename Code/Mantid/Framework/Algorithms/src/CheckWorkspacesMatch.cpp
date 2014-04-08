@@ -24,6 +24,36 @@ In the case of [[EventWorkspace]]s, they are checked to hold identical event lis
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <sstream>
 
+namespace Algorithms
+{
+  namespace
+  {
+    /** Function which calculates relative error between two values and analyses if this error is within the limits
+    * requested. When the absolute value of the difference is smaller then the value of the error requested, 
+    * absolute error is used instead of relative error. 
+
+    @param x1       -- first value to check difference
+    @param x2       -- second value to check difference
+    @param errorVal -- the value of the error, to check against. Should  be large then 0
+
+    @returns true if error or false if the value is within the limits requested
+    */
+    inline bool relErr(const double &x1,const double &x2,const double &errorVal)
+    {
+
+      double num= std::fabs(x1-x2);
+      // how to treat x1<0 and x2 > 0 ?  probably this way
+      double den=0.5*(std::fabs(x1)+std::fabs(x2));
+      if (den<errorVal) 
+        return (num>errorVal);
+
+      return (num/den>errorVal);
+
+    }
+
+  }
+}
+//
 namespace Mantid
 {
 namespace Algorithms
@@ -485,26 +515,6 @@ bool CheckWorkspacesMatch::compareEventWorkspaces(DataObjects::EventWorkspace_co
 
   return wsmatch;
 }
-/** Function which calculates relative error between two values and analyses if this error is within the limits
-* requested
-@param x1       -- first value to check difference
-@param x2       -- second value to check difference
-@param errorVal -- the value of the error, to check against. Should  be positive != 0
-
-@returns true if error or false if the value is within the limits requested
-*/
-inline bool relErr(const double &x1,const double &x2,const double &errorVal)
-{
-
-  double num= std::fabs(x1-x2);
-  // how to treat x1<0 and x2 > 0 ?  probably this way
-  double den=0.5*(std::fabs(x1)+std::fabs(x2));
-  if (den<errorVal) 
-    return (num>errorVal);
-
-  return (num/den>errorVal);
-
-}
 
 /** Checks that the data matches
  *  @param ws1 :: the first workspace
@@ -561,7 +571,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
         bool err;
         if (RelErr)
         {
-           err = (relErr(X1[j],X2[j],tolerance) || relErr(Y1[j],Y2[j],tolerance) || relErr(E1[j],E2[j],tolerance));
+           err = (::Algorithms::relErr(X1[j],X2[j],tolerance) || ::Algorithms::relErr(Y1[j],Y2[j],tolerance) || ::Algorithms::relErr(E1[j],E2[j],tolerance));
         }
         else
            err = (std::fabs(X1[j] - X2[j]) > tolerance || std::fabs(Y1[j] - Y2[j]) > tolerance
