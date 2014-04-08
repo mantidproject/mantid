@@ -58,6 +58,10 @@ namespace MantidQt
         {
           m_title += " (" + QString::fromStdWString(lbl.utf8()) + ")";
         }
+        else if(!lbl.ascii().empty())
+        {
+          m_title += " (" + QString::fromStdString(lbl.ascii()) + ")";
+        }
       }
       else if (!ax->title().empty())
       {

@@ -678,26 +678,10 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot, ApplicationWindow* app, 
   app->setPreferences(plot);
 
   plot->setTitle(tr("Workspace ") + name());
-  const Mantid::API::Axis* ax;
-  ax = m_workspace->getAxis(0);
-  QString s;
-  if (ax->unit()) s =  QString::fromStdString(ax->unit()->caption()) + " / " + QString::fromStdWString(ax->unit()->label().utf8());
-  else
-    s = "X Axis";
-  plot->setXAxisTitle(s);
-  if ( m_workspace->axes() > 1 )
-  {
-    ax = m_workspace->getAxis(1);
-    if (ax->isNumeric())
-    {
-      if ( ax->unit() ) s = QString::fromStdString(ax->unit()->caption()) + " / " + QString::fromStdWString(ax->unit()->label().utf8());
-      else
-        s = "Y Axis";
-      plot->setYAxisTitle(s);
-    }
-    else
-      plot->setYAxisTitle(tr("Spectrum"));
-  }
+
+  using MantidQt::API::PlotAxis;
+  plot->setXAxisTitle(PlotAxis(*m_workspace, 0).title());
+  plot->setYAxisTitle(PlotAxis(*m_workspace, 1).title());
 
   // Set the range on the third, colour axis
   double minz, maxz;

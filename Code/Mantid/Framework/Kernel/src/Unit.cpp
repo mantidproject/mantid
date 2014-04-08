@@ -1325,9 +1325,15 @@ Unit * Time::clone() const
  * Degrees prints degrees as a label
  */
 
-Degrees::Degrees() : Empty(), m_label("degrees", L"degrees")
+Degrees::Degrees() : Empty(), m_label("degrees")
 {
 }
+
+const UnitLabel Degrees::label() const
+{
+  return m_label;
+}
+
 
 } // namespace Units
 

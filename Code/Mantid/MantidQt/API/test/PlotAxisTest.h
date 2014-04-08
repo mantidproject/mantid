@@ -6,10 +6,34 @@
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class PlotAxisTest : public CxxTest::TestSuite
 {
+private:
+  class EmptyUtf8Label : public Mantid::Kernel::Unit
+  {
+public:
+    EmptyUtf8Label() : Mantid::Kernel::Unit()
+    {
+    }
+
+    // Empty overrides of virtual methods
+    const std::string unitID() const {return "aUnit";}
+    const std::string caption() const {return "Caption";}
+    const Mantid::Kernel::UnitLabel label () const {return Mantid::Kernel::UnitLabel("unittext", L"");}
+    void init() {}
+    virtual double singleToTOF(const double ) const { return 0; }
+    virtual double singleFromTOF(const double ) const { return 0; }
+    virtual double conversionTOFMax()const{return std::numeric_limits<double>::quiet_NaN();}
+    virtual double conversionTOFMin()const{return std::numeric_limits<double>::quiet_NaN();}
+
+    virtual Unit * clone() const { return new EmptyUtf8Label();}
+  };
+
+
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -66,6 +90,17 @@ public:
     QString expected = QString::fromUtf8("Time-of-flight (\u03bcs)");
     TS_ASSERT_EQUALS(expected, PlotAxis(*ws, 0).title());
     TS_ASSERT_EQUALS(expected, PlotAxis(*ws, 1).title());
+  }
+
+  void test_Axis_With_Unit_But_Empty_Utf8_Lable_Uses_Ascii_In_Parentheses()
+  {
+    using MantidQt::API::PlotAxis;
+    using Mantid::Kernel::Units::Degrees;
+
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
+    ws->getAxis(0)->unit() = boost::make_shared<EmptyUtf8Label>();
+
+    TS_ASSERT_EQUALS("Caption (unittext)", PlotAxis(*ws, 0).title());
   }
 
   void test_SpectraAxis_Gives_Standard_Text()

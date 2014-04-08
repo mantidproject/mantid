@@ -605,6 +605,7 @@ public:
   Degrees();
   const std::string unitID() const { return ""; }
   virtual const std::string caption() const { return "Scattering angle"; }
+  const UnitLabel label() const;
 
   virtual Unit * clone() const { return new Degrees(*this); }
 private:
