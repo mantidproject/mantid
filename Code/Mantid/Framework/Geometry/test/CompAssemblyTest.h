@@ -9,9 +9,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidGeometry/IComponent.h"
 
-using namespace Mantid;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
@@ -474,80 +472,6 @@ public:
     TS_ASSERT_DELTA(bbox.yMax(), 1.5, 1e-08);
     TS_ASSERT_DELTA(bbox.zMin(), -0.5, 1e-08);
     TS_ASSERT_DELTA(bbox.zMax(), 0.5, 1e-08);
-
-  }
-
-  //-----------------------------------------------------------------------------
-    ICompAssembly_sptr setUpParametrized()
-    {
-      ICompAssembly_sptr top( new CompAssembly("Top") , NoDeleting());
-
-      ICompAssembly_sptr bank( new CompAssembly("BankName") , NoDeleting());
-      top->add(bank.get());
-
-      ParameterMap_sptr paramMap = boost::shared_ptr<ParameterMap>(new ParameterMap(), NoDeleting());
-
-      paramMap->add("string", bank.get(), "strName", std::string("strValue"));
-      paramMap->add("double", bank.get(), "dblName", double(0.1));
-      paramMap->add("V3D", bank.get(), "posName", V3D(1,1,1));
-      paramMap->add("Quat", bank.get(), "quatName", Quat(1,2,3,4));
-
-      for (int i=0; i<3; i++)
-      {
-        Component* det1 = new Component("Det1Name");
-        paramMap->add("string", det1, "strName_det1", std::string("strValue_det1"));
-        bank->add(det1);
-      }
-
-      CompAssembly * childbank =  new CompAssembly("ChildBank");
-      paramMap->add("string", childbank, "strName_childbank", std::string("strValue_childbank"));
-
-      for (int i=0; i<5; i++)
-      {
-        Component* det1 = new Component("ChildDet1Name");
-        paramMap->add("string", det1, "strName_det1", std::string("strValue_det1"));
-        childbank->add(det1);
-      }
-      bank->add(childbank);
-
-      ICompAssembly_sptr parametrizedComp( new CompAssembly(bank.get(),paramMap.get()) );
-      return parametrizedComp;
-    }
-
-  void test_parametrized(){
-
-	  ICompAssembly_sptr bank1 = setUpParametrized();
-	  TS_ASSERT_EQUALS(bank1->isParametrized(), true);
-
-	  ICompAssembly_sptr bank2 = setUpParametrized();
-	  TS_ASSERT_EQUALS(bank2->isParametrized(), true);
-
-	  std::vector<IComponent_const_sptr> detectors;
-	  bank1->getChildren(detectors, false);
-	  for (size_t i = 0; i < detectors.size(); i++)
-		  TS_ASSERT_EQUALS(detectors[i]->isParametrized(), true);
-
-	  bank1->printSelf(std::cout);
-
-	  boost::shared_ptr<const IComponent> toCopy = bank2->getComponentByName("ChildBank");
-	  std::cout << "Component will be copied: " << toCopy->getFullName() << std::endl;
-	  toCopy->printSelf(std::cout);
-
-
-	  Geometry::IComponent* toCopyNonConst = const_cast< Geometry::IComponent* >(toCopy.get());
-	  bank1->addCopy(toCopyNonConst);
-
-
-
-
-
-	  std::cout << std::endl;
-	  bank1->printTree(std::cout);
-	  std::cout << std::endl;
-	  bank2->printTree(std::cout);
-
-
-
 
   }
 
