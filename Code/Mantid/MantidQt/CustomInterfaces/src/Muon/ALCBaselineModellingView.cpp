@@ -112,11 +112,11 @@ namespace CustomInterfaces
     UNUSED_ARG(widgetPoint);
 
     QMenu context(m_widget);
-    context.addAction("Add section", this, SLOT(requestAddSection()));
+    context.addAction("Add section", this, SLOT(onAddSectionRequested()));
     context.exec(QCursor::pos());
   }
 
-  void ALCBaselineModellingView::requestAddSection()
+  void ALCBaselineModellingView::onAddSectionRequested()
   {
     emit addSection(std::make_pair(0,0));
   }

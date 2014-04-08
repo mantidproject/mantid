@@ -71,7 +71,8 @@ namespace CustomInterfaces
     /// Show context menu for sections table
     void sectionsContextMenu(const QPoint& widgetPoint);
 
-    void requestAddSection();
+    /// Called when section adding is requested
+    void onAddSectionRequested();
 
     /// Called whenever section in sections table is changed
     /// @param row :: Changed section row
