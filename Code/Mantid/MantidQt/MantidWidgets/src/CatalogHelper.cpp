@@ -316,9 +316,6 @@ namespace MantidQt
      */
     void CatalogHelper::executeAsynchronously(const Mantid::API::IAlgorithm_sptr &algorithm)
     {
-      QTime myTimer;
-      myTimer.start();
-
       Poco::ActiveResult<bool> result(algorithm->executeAsync());
       while (!result.available())
       {
