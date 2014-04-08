@@ -74,9 +74,9 @@ namespace Algorithms
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
-    // Implement abstract Algorithm methods
+    /// Implement abstract Algorithm methods
     void init();
-    // Implement abstract Algorithm methods
+    /// Implement abstract Algorithm methods
     void exec();
 
     /// Process properties
@@ -106,6 +106,7 @@ namespace Algorithms
                                              bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime,
                                              Kernel::DateAndTime stopTime);
 
+    /// Generate event splitters for partial sample log (serial)
     void makeMultipleFiltersByValuesPartialLog(int istart, int iend,
                                                std::vector<Kernel::DateAndTime>& vecSplitTime,
                                                std::vector<int>& vecSplitGroup,
@@ -114,17 +115,15 @@ namespace Algorithms
                                                bool filterIncrease, bool filterDecrease,
                                                Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime);
 
-
+    /// Generate event filters for integer sample log
     void processIntegerValueFilter(int minvalue, int maxvalue,
                                    bool filterIncrease, bool filterDecrease, Kernel::DateAndTime runend);
 
+    /// Search a value in a sorted vector
     size_t searchValue(const std::vector<double> &sorteddata, double value);
 
     /// Add a splitter
     void addNewTimeFilterSplitter(Kernel::DateAndTime starttime, Kernel::DateAndTime stoptime, int wsindex, std::string info);
-
-    /// Add a splitter
-    // void addNewLogValueSplitter(Kernel::DateAndTime start, Kernel::DateAndTime stop, int group, Kernel::time_duration tolerance);
 
     /// Create a splitter and add to the vector of time splitters
     Kernel::DateAndTime makeSplitterInVector(std::vector<Kernel::DateAndTime>& vecSplitTime, std::vector<int>& vecGroupIndex,
@@ -135,8 +134,10 @@ namespace Algorithms
     /// Generate a matrix workspace containing splitters
     void generateSplittersInMatrixWorkspace();
 
+    /// Generate a matrix workspace from the parallel version
     void generateSplittersInMatrixWorkspaceParallel();
 
+    /// Generate a SplittersWorkspace for filtering by log values
     void generateSplittersInSplitterWS();
 
     DataObjects::EventWorkspace_const_sptr m_dataWS;
@@ -175,18 +176,6 @@ namespace Algorithms
     std::vector<std::vector<int> > vecGroupIndexSet;
 
   };
-
-  /** Generate a new time splitter and add to a list of splitters
-
-  void make_splitter(Kernel::DateAndTime start, Kernel::DateAndTime stop, int group, Kernel::time_duration tolerance,
-                     Kernel::TimeSplitterType& splitters)
-  {
-    Kernel::SplittingInterval newsplit(start - tolerance, stop - tolerance, group);
-    splitters.push_back(newsplit);
-
-    return;
-  }
-  */
 
 } // namespace Algorithms
 } // namespace Mantid
