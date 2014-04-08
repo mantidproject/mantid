@@ -19,13 +19,13 @@ set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check whether this is a clean build (must have 'clean' in the job name)
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+set DOC_IMAGES=
 if "%JOB_NAME%"=="%JOB_NAME:clean=%" (
     set CLEANBUILD=no
-    set DOC_IMAGES=
 ) else  (
     set CLEANBUILD=yes
     rmdir /S /Q build
-    if "%JOB_NAME%"!="%JOB_NAME:master=%" (
+    if NOT "%JOB_NAME%"=="%JOB_NAME:master=%" (
         set DOC_IMAGES=-DQT_ASSISTANT_FETCH_IMAGES=ON
     )
 )
