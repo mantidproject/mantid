@@ -1028,9 +1028,9 @@ class TiledWindow: MdiSubWindow
 public:
     int rowCount() const;
     int columnCount() const;
-    void addTile(MdiSubWindow *tile, int row, int col);
-    void removeTileToDocked(int row, int col);
-    void removeTileToFloating(int row, int col);
+    void addWidget(MdiSubWindow *widget, int row, int col);
+    void removeWidgetToDocked(int row, int col);
+    void removeWidgetToFloating(int row, int col);
 private:
     TiledWindow(const TiledWindow&);
 };

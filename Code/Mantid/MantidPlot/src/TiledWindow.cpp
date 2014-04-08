@@ -3,29 +3,94 @@
 
 #include <QScrollArea>
 #include <QGridLayout>
+#include <QVBoxLayout>
 #include <QMessageBox>
 #include <QPainter>
 
 // constants defining the minimum size of tiles
 const int minimumTileWidth = 100;
 const int minimumTileHeight = 100;
+// colour constants
+const QColor normalColor("black");
+const QColor selectedColor("green");
 
 /**
  * Constructor.
  */
-EmptyTile::EmptyTile(QWidget *parent):
-  QLabel("Empty tile",parent)
+Tile::Tile(QWidget *parent):
+  QFrame(parent),m_widget(NULL),m_border("black")
 {
-  setAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
-  setFrameShape( QFrame::Box );
+  m_layout = new QVBoxLayout(this);
+  m_layout->setContentsMargins(1,1,1,1);
+  //setAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
+  //setFrameShape( QFrame::Box );
 }
 
 /**
  * Destructor.
  */
-EmptyTile::~EmptyTile()
+Tile::~Tile()
 {
-  std::cerr << "EmptyTile deleted" << std::endl;
+}
+
+/**
+ * Set a widget to this tile.
+ * @param w :: A widget to set.
+ */
+void Tile::setWidget(MdiSubWindow *w)
+{
+  if (w == NULL)
+  {
+    removeWidget();
+    return;
+  }
+
+  // widget cannot be replaced
+  if (m_widget)
+  {
+    throw std::runtime_error("Widget already set");
+  }
+
+  m_layout->addWidget(w);
+  m_widget = w;
+}
+
+/**
+ * Remove attached widget.
+ */
+void Tile::removeWidget()
+{
+  m_layout->takeAt(0);
+  m_widget = NULL;
+}
+
+/**
+ */
+void Tile::paintEvent(QPaintEvent *ev)
+{
+  QPainter p(this);
+  p.setPen(m_border);
+  QRect r = this->rect().adjusted(0,0,-1,-1);
+  p.drawRect( r );
+  QFrame::paintEvent(ev);
+}
+
+/**
+ * Make this tile look selected: change the border colour.
+ */
+void Tile::makeSelected()
+{
+  m_border = selectedColor;
+  update();
+}
+
+/**
+ * Make this tile look unselected.
+ */
+void Tile::makeNormal()
+{
+  m_border = normalColor;
+  update();
 }
 
 /**
@@ -46,7 +111,7 @@ TiledWindow::TiledWindow(QWidget* parent, const QString& label, const QString& n
   m_layout->setMargin(6);
   m_layout->setColumnMinimumWidth(0,minimumTileWidth);
   m_layout->setRowMinimumHeight(0,minimumTileHeight);
-  m_layout->addWidget(new EmptyTile(this), 0, 0);
+  m_layout->addWidget(new Tile(this), 0, 0);
   m_layout->setColumnMinimumWidth(0,minimumTileWidth);
   m_layout->setRowMinimumHeight(0,minimumTileHeight);
   m_layout->setColStretch(0,1);
@@ -98,26 +163,32 @@ void TiledWindow::reshape(int rows, int cols)
 }
 
 /**
- * If a cell contains an EmptyTile return it. If the cell contains a widget of another type
- * throw an exception. If it's empty return NULL.
+ * If a cell contains an Tile return it. If the cell contains a widget of another type
+ * throw an exception. If it's empty return fill it with a Tile and return it.
  * @param row :: The row of the cell.
  * @param col :: The column of the cell.
  */
-EmptyTile *TiledWindow::getEmptyTile(int row, int col) const
+Tile *TiledWindow::getTile(int row, int col)
 {
-  QLayoutItem *item = m_layout->itemAtPosition( row, col );
-  if ( !item ) return NULL;
-  EmptyTile *emptyTile = dynamic_cast<EmptyTile*>( item->widget() );
-  if ( emptyTile )
+  auto item = m_layout->itemAtPosition( row, col );
+  if ( item == NULL )
   {
-    return emptyTile;
+    m_layout->addWidget( new Tile(this), row, col );
+    tileEmptyCells();
+    item = m_layout->itemAtPosition( row, col );
+    if ( item == NULL )
+    {
+      throw std::logic_error("TiledWindow cannot be properly initialized.");
+    }
   }
-  QString msg = QString("Cell (%1,%2) is not empty.").arg(row).arg(col);
-  throw std::invalid_argument(msg.toStdString());
+  Tile *widget = dynamic_cast<Tile*>(item->widget());
+  if ( widget != NULL ) return widget;
+
+  throw std::logic_error("TiledWindow wasn't properly initialized.");
 }
 
 /**
- * Tile empty cells with EmptyTiles.
+ * Tile empty cells with Tiles.
  */
 void TiledWindow::tileEmptyCells()
 {
@@ -130,7 +201,7 @@ void TiledWindow::tileEmptyCells()
       QLayoutItem *item = m_layout->itemAtPosition( row, col );
       if ( item == NULL )
       {
-        m_layout->addWidget( new EmptyTile(this), row, col );
+        m_layout->addWidget( new Tile(this), row, col );
       }
     }
   }
@@ -140,29 +211,31 @@ void TiledWindow::tileEmptyCells()
  * Add a new sub-window at a given position in the layout.
  * The row and column indices do not have to be within the current shape - 
  * it will change accordingly.
- * @param tile :: An MdiSubWindow to add.
+ * @param widget :: An MdiSubWindow to add.
  * @param row :: A row index at which to place the new tile.
  * @param col :: A column index at which to place the new tile.
  */
-void TiledWindow::addTile(MdiSubWindow *tile, int row, int col)
+void TiledWindow::addWidget(MdiSubWindow *widget, int row, int col)
 {
   try
   {
-    EmptyTile *emptyTile = getEmptyTile( row, col );
-    if ( emptyTile )
+    Tile *tile = getTile( row, col );
+    if ( tile == NULL )
     {
-      m_layout->removeWidget( emptyTile );
-      emptyTile->deleteLater();
+      tile = new Tile(this);
+      m_layout->addWidget( tile );
     }
-    // detach the tile from ApplicationWindow
-    tile->detach();
+    // prepare the cell
     m_layout->setColumnMinimumWidth(col,minimumTileWidth);
     m_layout->setRowMinimumHeight(row,minimumTileHeight);
     m_layout->setColStretch(col,1);
-    // attach to this window
-    m_layout->addWidget(tile, row, col);
-    //tile->setFrameShape(QFrame::Box);
-    // fill possible empty spaces with EmptyTiles
+    // detach the widget from ApplicationWindow
+    widget->detach();
+    // disable mouse events
+    widget->setAttribute(Qt::WA_TransparentForMouseEvents,true);
+    // attach it to this window
+    tile->setWidget(widget);
+    // fill possible empty spaces with Tiles
     tileEmptyCells();
   }
   catch(std::invalid_argument& ex)
@@ -172,38 +245,32 @@ void TiledWindow::addTile(MdiSubWindow *tile, int row, int col)
 }
 
 /**
- * Get a tile at a position in the layout.
+ * Get a widget at a position in the layout.
  * @param row :: The row of the tile
  * @param col :: The column of the tile
  * @return :: A pointer to the MdiSubWindow at this position or NULL if the tile is empty.
  */
-MdiSubWindow *TiledWindow::getTile(int row, int col) const
+MdiSubWindow *TiledWindow::getWidget(int row, int col) 
 {
-  QWidget *widget = m_layout->itemAtPosition( row, col )->widget();
-  if ( widget )
-  {
-    MdiSubWindow *tile = dynamic_cast<MdiSubWindow*>( widget );
-    if ( !tile )
-    {
-      throw std::logic_error("Widget of wrong type is found in TiledWindow.");
-    }
-    return tile;
-  }
-  return NULL;
+  Tile *tile = getTile(row,col);
+  return tile->widget();
 }
 
 /**
- * Take a tile at position (row,col), remove it and make docked.
+ * Take a widget at position (row,col), remove it and make docked.
  * @param row :: The tile's row index.
  * @param col :: The tile's column index.
  */
-void TiledWindow::removeTileToDocked(int row, int col)
+void TiledWindow::removeWidgetToDocked(int row, int col)
 {
-  MdiSubWindow *tile = getTile( row, col );
-  if ( tile )
+  try
   {
-    m_layout->removeWidget( tile );
-    tile->dock();
+    MdiSubWindow *widget = removeTile( row, col );
+    widget->dock();
+  }
+  catch(std::runtime_error& ex)
+  {
+    QMessageBox::critical(this,"MantidPlot- Error","Cannot remove a widget from a TiledWindow:\n\n" + QString::fromStdString(ex.what()));
   }
 }
 
@@ -212,13 +279,114 @@ void TiledWindow::removeTileToDocked(int row, int col)
  * @param row :: The tile's row index.
  * @param col :: The tile's column index.
  */
-void TiledWindow::removeTileToFloating(int row, int col)
+void TiledWindow::removeWidgetToFloating(int row, int col)
 {
-  MdiSubWindow *tile = getTile( row, col );
-  if ( tile )
+  try
   {
-    m_layout->removeWidget( tile );
-    tile->undock();
+    MdiSubWindow *widget = removeTile( row, col );
+    widget->undock();
+  }
+  catch(std::runtime_error& ex)
+  {
+    QMessageBox::critical(this,"MantidPlot- Error","Cannot remove a widget from a TiledWindow:\n\n" + QString::fromStdString(ex.what()));
   }
 }
 
+/**
+ * Remove (but don't delete) a tile.
+ * @param tile :: A tile to remove.
+ * @return :: A pointer to the removed subwindow.
+ */
+MdiSubWindow *TiledWindow::removeTile(int row, int col)
+{
+  Tile *tile = getTile( row, col );
+  MdiSubWindow *widget = tile->widget();
+  if ( widget != NULL )
+  {
+    tile->removeWidget();
+    widget->setAttribute(Qt::WA_TransparentForMouseEvents,false);
+    return widget;
+  }
+  QString msg = QString("Cell (%1,%2) is empty.").arg(row).arg(col);
+  throw std::runtime_error(msg.toStdString());
+}
+
+/**
+ * Get a tile at a mouse position (in pixels).
+ * @param pos :: Position of the mouse as returned by QMouseEvent
+ * @return :: A pointer to the tile or NULL if clicked on an empty space.
+ */
+Tile *TiledWindow::getTileAtMousePos( const QPoint& pos ) 
+{
+  for(int i = 0; i < m_layout->count(); ++i)
+  {
+    auto *item = m_layout->itemAt(i);
+    if ( item != NULL )
+    {
+      if ( !item->geometry().contains(pos) ) continue;
+      QWidget *w = item->widget();
+      if ( w != NULL )
+      {
+        auto *tile = dynamic_cast<Tile*>(w);
+        if ( tile != NULL )
+        {
+          return tile;
+        }
+        else
+        {
+          return NULL;
+        }
+      }
+      else
+      {
+        return NULL;
+      }
+    }
+  }
+  return NULL;
+}
+
+void TiledWindow::mousePressEvent(QMouseEvent *ev)
+{
+  auto tile = getTileAtMousePos( ev->pos() );
+  if ( tile == NULL ) return;
+  bool append = (ev->modifiers() & Qt::ControlModifier) != 0;
+  addToSelection( tile, append );
+}
+
+/**
+ * Add a tile to the selection.
+ * @param tile :: A tile to add.
+ * @param append :: If true the tile will be appended to the existing selection. If false 
+ *   any previous selection will be deselected and replaced with tile.
+ */
+void TiledWindow::addToSelection(Tile *tile, bool append)
+{
+  if ( tile == NULL ) return;
+  if ( tile->widget() == NULL ) return;
+  if ( append )
+  {
+    if ( m_selection.indexOf( tile ) >= 0 )
+    {
+      return;
+    }
+  }
+  else
+  {
+    clearSelection();
+  }
+  m_selection.append( tile );
+  tile->makeSelected();
+}
+
+/**
+ * Clear the selection.
+ */
+void TiledWindow::clearSelection()
+{
+  foreach(Tile *tile, m_selection)
+  {
+    tile->makeNormal();
+  }
+  m_selection.clear();
+}

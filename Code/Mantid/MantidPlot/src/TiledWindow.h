@@ -4,9 +4,12 @@
 #include "MdiSubWindow.h"
 
 #include <QLabel>
+#include <QList>
 
 class QGridLayout;
-class EmptyTile;
+class QVBoxLayout;
+class Tile;
+
 /**
  *
  *  A mdi sub-window that contains other sub-windows arranged in rows and columns.
@@ -27,37 +30,61 @@ public slots:
   int columnCount() const;
   /// Re-shape the tile layout
   void reshape(int rows, int cols);
-  /// Add a new tile
-  void addTile(MdiSubWindow *tile, int row, int col);
-  /// Add a new tile
-  MdiSubWindow *getTile(int row, int col)const;
-  /// Remove a tile and make it docked
-  void removeTileToDocked(int row, int col);
-  /// Remove a tile and make it floating
-  void removeTileToFloating(int row, int col);
+  /// Add a new widget
+  void addWidget(MdiSubWindow *widget, int row, int col);
+  /// Get a widget at a position
+  MdiSubWindow *getWidget(int row, int col);
+  /// Remove a widget and make it docked
+  void removeWidgetToDocked(int row, int col);
+  /// Remove a widget and make it floating
+  void removeWidgetToFloating(int row, int col);
 
   QString saveToString(const QString &info, bool = false);
   void restore(const QStringList&);
   void print();
 
+protected:
+  void mousePressEvent(QMouseEvent *ev);
+
 private:
-  /// Tile empty cells with EmptyTiles
+  /// Tile empty cells with Tiles
   void tileEmptyCells();
-  /// Get an EmptyTile widget at position(row,col).
-  EmptyTile *getEmptyTile(int row, int col) const;
+  /// Get a Tile widget at position(row,col).
+  Tile *getTile(int row, int col);
+  /// Remove (but don't delete) a widget.
+  MdiSubWindow *removeTile(int row, int col);
+  /// Get a tile at a mouse position (in pixels).
+  Tile *getTileAtMousePos( const QPoint& pos );
+  /// Add a tile to the selection.
+  void addToSelection(Tile *tile, bool append);
+  /// Clear the selection.
+  void clearSelection();
 
   /// The layout arranging the tiles into a grid.
-  QGridLayout *m_layout;
+  mutable QGridLayout *m_layout;
+  /// Tile selection
+  QList<Tile*> m_selection;
 };
 
 /**
  * A widget-placeholder showing an empty cell where a sub-window can be inserted.
  */
-class EmptyTile: public QLabel
+class Tile: public QFrame
 {
 public:
-  EmptyTile(QWidget *parent);
-  ~EmptyTile();
+  Tile(QWidget *parent);
+  ~Tile();
+  void setWidget(MdiSubWindow *w);
+  void removeWidget();
+  MdiSubWindow *widget() {return m_widget;}
+  void makeSelected();
+  void makeNormal();
+protected:
+  void paintEvent(QPaintEvent *ev);
+private:
+  QVBoxLayout * m_layout;
+  MdiSubWindow* m_widget;
+  QColor m_border;
 };
 
 #endif // TiledWindow_H
