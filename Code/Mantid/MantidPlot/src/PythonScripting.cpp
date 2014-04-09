@@ -80,8 +80,14 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
     // Only doing this for Darwin and Linux so separator is always ":"
     value = std::string(pythonpath);
   }
-  value = sipLocation + ":" + value;
-  setenv(envname, value.c_str(), 1);
+    #if defined(Q_OS_DARWIN)
+        // For OS X add the homebrew python path onto the PYTHONPATH
+        // There must be a better way to do this dynamically.
+        value = sipLocation + ":" + value + "/usr/local/lib/python2.7/site-packages/";
+    #else
+        value = sipLocation + ":" + value;
+    #endif
+    setenv(envname, value.c_str(), 1);
 #endif
 
 }
