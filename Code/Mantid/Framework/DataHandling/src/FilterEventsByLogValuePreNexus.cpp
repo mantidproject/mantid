@@ -961,6 +961,7 @@ namespace DataHandling
     g_log.information() << "Processing input event preNexus by " << numThreads << " threads"
                         << " in " << numBlocks << " blocks. " << "\n";
 
+    // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for schedule(dynamic, 1) if (parallelProcessing) )
     for (int i=0; i < int(numThreads); i++)
     {
