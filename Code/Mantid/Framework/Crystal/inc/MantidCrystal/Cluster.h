@@ -5,7 +5,7 @@
 #include "MantidCrystal/DisjointElement.h"
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <boost/optional.hpp>
+#include <boost/tuple/tuple.hpp>
 
 
 namespace Mantid
@@ -16,7 +16,7 @@ namespace Mantid
   }
   namespace Crystal
   {
-
+    
     /** Cluster : Image cluster used by connected component labeling
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -44,11 +44,13 @@ namespace Mantid
      
       public:
 
+        typedef boost::tuple<double, double> ClusterIntegratedValues;
+
         /// Constructor
         Cluster(const size_t& label);
 
         /// integrate the cluster
-        void integrate(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws);
+        ClusterIntegratedValues integrate(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const;
 
         /// Apply labels to the workspace
         void writeTo(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const;
@@ -58,12 +60,6 @@ namespace Mantid
 
         /// Get the original label
         size_t getOriginalLabel() const;
-
-        /// Get the signal integrated value
-        double getSignalInt() const;
-
-        /// Get the error squared integrated value
-        double getErrorSQInt() const;
 
         /// Number of indexes tracked
         size_t size();
@@ -78,7 +74,7 @@ namespace Mantid
         bool operator==(const Cluster& other) const;
 
         /// Merge and own 
-        void attachCluster(boost::shared_ptr<Cluster>& toOwn);
+        void attachCluster(boost::shared_ptr<const Cluster>& toOwn);
 
        private:
 
@@ -93,12 +89,8 @@ namespace Mantid
         size_t m_originalLabel;
         /// indexes belonging to cluster. This is how we track cluster objects.
         std::vector<size_t> m_indexes;
-        /// Error sq integrated value of cluster
-        boost::optional<double> m_errorSQInt;
-        /// Signal integrated value of cluster
-        boost::optional<double> m_signalInt;
         /// Attached clusters.
-        std::vector<boost::shared_ptr<Cluster> > m_ownedClusters;
+        std::vector<boost::shared_ptr<const Cluster> > m_ownedClusters;
 
     };
 

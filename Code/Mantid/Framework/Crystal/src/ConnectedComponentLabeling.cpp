@@ -64,6 +64,7 @@ namespace Mantid
           outWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
         }
         // Initialize to zero.
+        PARALLEL_FOR_NO_WSP_CHECK()
         for(int i = 0; i < static_cast<int>(outWS->getNPoints()); ++i)
         {
           outWS->setSignalAt(i, 0);
@@ -345,13 +346,6 @@ namespace Mantid
                   clusterMap.erase(a.getId());
                   usedLabels.insert(a.getId());
                 }
-                if(usedLabels.find(b.getId()) != usedLabels.end())
-                {
-                  incompleteClusterVec.push_back( clusterMap[b.getId()] );
-                  clusterMap.erase(b.getId());
-                  usedLabels.insert(b.getId());
-                }
-
                 if(a.getId() < b.getId())
                 {
                   b.unionWith(&a);
@@ -372,18 +366,17 @@ namespace Mantid
               cluster->toUniformMinimum(neighbourElements);
             }
 
-            // Now combine clusters and remove old ones.
-            size_t nIncomplete = incompleteClusterVec.size();
+            // Now combine clusters and add the resolved clusters to the clustermap.
             for(size_t i = 0; i < incompleteClusterVec.size(); ++i)
             {
               const size_t label = incompleteClusterVec[i]->getLabel();
               if(!does_contain_key(clusterMap, label))
               {
-                clusterMap.insert(std::make_pair(label, incompleteClusterVec[i]));
+                clusterMap.insert(std::make_pair(label,  incompleteClusterVec[i]));
               }
               else
               {
-                clusterMap[label]->attachCluster(incompleteClusterVec[i]);
+                clusterMap[label]->attachCluster(boost::static_pointer_cast<const Cluster>(incompleteClusterVec[i]));
               }
             }
 

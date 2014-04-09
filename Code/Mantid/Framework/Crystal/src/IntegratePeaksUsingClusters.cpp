@@ -185,8 +185,10 @@ namespace Mantid
       const std::string yDim = mdWS->getDimension(1)->getName();
       PeakTransform_sptr peakTransform = peakTransformFactory->createTransform(xDim, yDim);
 
+      PARALLEL_FOR1(peakWS)
       for(int i = 0; i < peakWS->getNumberPeaks(); ++i)
       {
+        PARALLEL_START_INTERUPT_REGION
         IPeak& peak = peakWS->getPeak(i);
         const V3D& peakCenterInMDFrame = peakTransform->transformPeak(peak);
         const Mantid::signal_t signalValue = outHistoWS->getSignalAtVMD(peakCenterInMDFrame, NoNormalization);
@@ -195,54 +197,14 @@ namespace Mantid
           const size_t labelIdAtPeak = static_cast<size_t>(signalValue);
           Cluster * const cluster = clusterMap[labelIdAtPeak].get();
           
-          cluster->integrate(mdWS); // TODO. Should return rather than store values.
-          peak.setIntensity(cluster->getErrorSQInt());
-          peak.setSigmaIntensity(cluster->getErrorSQInt());
+          Cluster::ClusterIntegratedValues integratedValues = cluster->integrate(mdWS);
+          peak.setIntensity(integratedValues.get<0>());
+          peak.setSigmaIntensity(integratedValues.get<1>());
         }
+        PARALLEL_END_INTERUPT_REGION
       }
+      PARALLEL_CHECK_INTERUPT_REGION
 
-
-      /*
-
-      // Link integrated values up with peaks.
-      const int nPeaks = peakWS->getNumberPeaks();
-      progress.resetNumSteps(nPeaks, 0, 1);
-      progress.doReport("Writing out PeaksWorkspace");
-      PARALLEL_FOR1(peakWS)
-      for (int i = 0; i < nPeaks; ++i)
-      {
-        PARALLEL_START_INTERUPT_REGION
-        IPeak& peak = peakWS->getPeak(i);
-        V3D coords;
-        if (mdCoordinates == QLab)
-        {
-          coords = peakWS->getPeak(i).getQLabFrame();
-        }
-        else if (mdCoordinates == QSample)
-        {
-          coords = peakWS->getPeak(i).getQSampleFrame();
-        }
-        else if (mdCoordinates == Mantid::API::HKL)
-        {
-          coords = peakWS->getPeak(i).getHKL();
-        }
-
-        // Now find the label corresponding to these coordinates. Use the characteristic coordinates of the coordinates
-        // recorded earlier to do this. A better implementation would be a direct lookup.
-
-        IsNearPeak nearPeak(coords, radiusEstimate);
-        auto iterator = std::find_if(positionMap.begin(), positionMap.end(), nearPeak);
-        if (iterator != positionMap.end())
-        {
-          peak.setIntensity(labelMap[iterator->second].get<0>());
-          peak.setSigmaIntensity(labelMap[iterator->second].get<1>());
-        }
-        progress.report();
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
-
-    */
     setProperty("OutputWorkspace", peakWS);
     setProperty("OutputWorkspaceMD", outHistoWS);
   }

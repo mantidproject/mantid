@@ -26,19 +26,6 @@ public:
     TS_ASSERT_EQUALS(cluster.getLabel(), label);
   }
 
-  void test_get_integrated_signal_without_integrating_throws()
-  {
-    Cluster cluster(1);
-    TS_ASSERT_THROWS(cluster.getSignalInt(), std::runtime_error&);
-    
-  }
-
-  void test_get_integrated_errorSQ_without_integrating_throws()
-  {
-    Cluster cluster(1);
-    TS_ASSERT_THROWS(cluster.getErrorSQInt(), std::runtime_error&);
-  }
-
   void test_do_integration()
   {
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 6); // Makes a 1 by 6 md ws with identical signal values.
@@ -47,9 +34,9 @@ public:
     {
       cluster.addIndex(i); // Register all indexes from the workspace to the cluster.
     }
-    cluster.integrate(inWS);
-    TS_ASSERT_EQUALS(6*1, cluster.getSignalInt());
-    TS_ASSERT_EQUALS(6*1, cluster.getErrorSQInt());
+    auto result = cluster.integrate(inWS);
+    TS_ASSERT_EQUALS(6*1, result.get<0>());
+    TS_ASSERT_EQUALS(6*1, result.get<1>());
   }
 
   void test_size()

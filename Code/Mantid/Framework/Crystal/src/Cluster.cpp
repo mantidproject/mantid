@@ -15,11 +15,9 @@ namespace Mantid
 
     Cluster::Cluster(const size_t& label):
       m_label(label),
-      m_originalLabel(label),
-      m_signalInt(boost::none),
-      m_errorSQInt(boost::none)
+      m_originalLabel(label)
     {
-      m_indexes.reserve(1000); 
+      m_indexes.reserve(1000);  
     }
 
     size_t Cluster::getLabel() const
@@ -32,24 +30,7 @@ namespace Mantid
       return m_originalLabel;
     }
 
-    double Cluster::getSignalInt() const
-    {
-      if(!m_signalInt.is_initialized())
-      {
-        throw std::runtime_error("Cluster has not been integrated.");
-      }
-      return m_signalInt.get();
-    }
-
-    double Cluster::getErrorSQInt() const
-    {
-      if(!m_errorSQInt.is_initialized())
-      {
-        throw std::runtime_error("Cluster has not been integrated.");
-      }
-      return m_errorSQInt.get();
-    }
-
+   
     size_t Cluster::size()
     {
       return m_indexes.size();
@@ -73,10 +54,11 @@ namespace Mantid
       }
     }
 
-    void Cluster::integrate(Mantid::API::IMDHistoWorkspace_const_sptr ws)
+    Cluster::ClusterIntegratedValues Cluster::integrate(Mantid::API::IMDHistoWorkspace_const_sptr ws) const
     {
       double errorIntSQ = 0;
       double sigInt = 0;
+      // Integrate accross indexes owned by this workspace.
       for(size_t i = 0; i< m_indexes.size(); ++i)
       {
         sigInt += ws->getSignalAt(m_indexes[i]);
@@ -84,14 +66,14 @@ namespace Mantid
         errorSQ *= errorSQ;
         errorIntSQ += errorSQ;
       }
+      // Integrate owned clusters and add those results too.
       for(size_t i = 0; i < m_ownedClusters.size(); ++i)
       {
-        m_ownedClusters[i]->integrate(ws);
-        sigInt += m_ownedClusters[i]->getSignalInt();
-        errorIntSQ += m_ownedClusters[i]->getErrorSQInt();
+        auto integratedValues = m_ownedClusters[i]->integrate(ws);
+        sigInt += integratedValues.get<0>();
+        errorIntSQ += integratedValues.get<1>();
       }
-      m_errorSQInt = errorIntSQ;
-      m_signalInt = sigInt;
+      return ClusterIntegratedValues(sigInt, errorIntSQ);
     }
 
     void Cluster::toUniformMinimum(VecElements& disjointSet) 
@@ -123,7 +105,7 @@ namespace Mantid
       return getLabel() == other.getLabel();
     }
 
-    void Cluster::attachCluster(boost::shared_ptr<Cluster>& toOwn)
+    void Cluster::attachCluster(boost::shared_ptr<const Cluster>& toOwn)
     {
       m_ownedClusters.push_back(toOwn);
     }
