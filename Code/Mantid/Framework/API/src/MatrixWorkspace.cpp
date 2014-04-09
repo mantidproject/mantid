@@ -1211,10 +1211,15 @@ namespace Mantid
       {
       }
       /// the name of the dimennlsion as can be displayed along the axis
-      virtual std::string getName() const {return m_axis.unit()->caption();}
+      virtual std::string getName() const
+      {
+        const auto & unit = m_axis.unit();
+        if (unit && unit->unitID() != "Empty" ) return unit->caption();
+        else return m_axis.title();
+      }
 
       /// @return the units of the dimension as a string
-      virtual std::string getUnits() const {return m_axis.unit()->label();}
+      virtual const Kernel::UnitLabel getUnits() const { return m_axis.unit()->label(); }
 
       /// short name which identify the dimension among other dimension. A dimension can be usually find by its ID and various
       /// various method exist to manipulate set of dimensions by their names. 
@@ -1267,10 +1272,16 @@ namespace Mantid
       virtual ~MWXDimension(){};
 
       /// the name of the dimennlsion as can be displayed along the axis
-      virtual std::string getName() const {return m_ws->getAxis(0)->unit()->caption();}
+      virtual std::string getName() const
+      {
+        const auto *axis = m_ws->getAxis(0);
+        const auto & unit = axis->unit();
+        if (unit && unit->unitID() != "Empty" ) return unit->caption();
+        else return axis->title();
+      }
 
       /// @return the units of the dimension as a string
-      virtual std::string getUnits() const {return m_ws->getAxis(0)->unit()->label();}
+      virtual const Kernel::UnitLabel getUnits() const {return m_ws->getAxis(0)->unit()->label();}
 
       /// short name which identify the dimension among other dimension. A dimension can be usually find by its ID and various
       /// various method exist to manipulate set of dimensions by their names.

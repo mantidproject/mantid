@@ -10,6 +10,14 @@
 
 namespace Mantid
 {
+  namespace Kernel
+  {
+    //---------------------------------------------------------------------------
+    // Forward declarations
+    //---------------------------------------------------------------------------
+    class UnitLabel;
+  }
+
   namespace Geometry
   {
   /** The class discribes one dimension of multidimensional dataset representing an ortogonal dimension and linear axis.
@@ -50,7 +58,7 @@ namespace Mantid
     virtual std::string getName() const = 0;
 
     /// @return the units of the dimension as a string
-    virtual std::string getUnits() const = 0;
+    virtual const Kernel::UnitLabel getUnits() const = 0;
 
     /// short name which identify the dimension among other dimensin. A dimension can be usually find by its ID and various  
     /// various method exist to manipulate set of dimensions by their names. 

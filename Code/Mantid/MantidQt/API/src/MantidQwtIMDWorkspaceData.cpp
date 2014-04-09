@@ -453,7 +453,7 @@ QString MantidQwtIMDWorkspaceData::getXAxisLabel() const
   {
     // One of the dimensions of the original
     IMDDimension_const_sptr dim = m_originalWorkspace.lock()->getDimension(m_currentPlotAxis);
-    xLabel = QString::fromStdString(dim->getName() + " (" + dim->getUnits() + ")");
+    xLabel = QString::fromStdString(dim->getName()) + " (" + QString::fromStdWString(dim->getUnits().utf8()) + ")";
   }
   else
   {

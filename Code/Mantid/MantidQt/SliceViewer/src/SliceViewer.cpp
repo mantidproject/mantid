@@ -74,6 +74,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/PlotAxis.h"
 
 
 using namespace Mantid;
@@ -1192,10 +1193,10 @@ void SliceViewer::setXYCenter(double x, double y)
  * @param axis :: int for X or Y
  * @param dim :: dimension to show
  */
-void SliceViewer::resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr dim)
+void SliceViewer::resetAxis(int axis, const IMDDimension_const_sptr &dim)
 {
   m_plot->setAxisScale( axis, dim->getMinimum(), dim->getMaximum());
-  m_plot->setAxisTitle( axis, QString::fromStdString(dim->getName() + " (" + dim->getUnits() + ")") );
+  m_plot->setAxisTitle( axis, API::PlotAxis(*dim).title());
 }
 
 //------------------------------------------------------------------------------------
@@ -2073,7 +2074,7 @@ void SliceViewer::rebinParamsChanged()
     // Set the BasisVector property...
     VMD basis(m_ws->getNumDims());
     basis[d] = 1.0;
-    std::string prop = dim->getName() +"," + dim->getUnits() + ","
+    std::string prop = dim->getName() +"," + dim->getUnits().ascii() + ","
         + basis.toString(",");
     alg->setPropertyValue("BasisVector" + Strings::toString(d), prop);
   }
