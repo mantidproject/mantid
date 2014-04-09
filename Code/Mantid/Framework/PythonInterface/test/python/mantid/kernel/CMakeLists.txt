@@ -23,6 +23,7 @@ set ( TEST_PY_FILES
   NullValidatorTest.py
   ProgressBaseTest.py
   PropertyWithValueTest.py
+  PropertyManagerTest.py
   PythonPluginsTest.py
   StatisticsTest.py
   TimeSeriesPropertyTest.py
