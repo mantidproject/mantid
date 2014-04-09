@@ -233,6 +233,9 @@ void SmoothNeighbours::init()
     declareProperty("SumNumberOfNeighbours", 1, "Sum nearest neighbouring pixels with same parent.\n"
       "Number of pixels will be reduced. The default is false.");
 
+    declareProperty("ExpandSumAllPixels", false,
+       "OuputWorkspace will have same number of pixels as InputWorkspace using SumPixelsX and SumPixelsY.  Individual pixels will have averages.");
+
   setPropertyGroup("RadiusUnits", NON_UNIFORM_GROUP);
   setPropertyGroup("Radius", NON_UNIFORM_GROUP);
   setPropertyGroup("NumberOfNeighbours", NON_UNIFORM_GROUP);
@@ -385,7 +388,7 @@ void SmoothNeighbours::findNeighboursRectangular()
             }
 
           // Adjust the weights of each neighbour to normalize to unity
-          if (!sum) for (size_t q=0; q<neighbours.size(); q++)
+          if (!sum || expandSumAllPixels) for (size_t q=0; q<neighbours.size(); q++)
             neighbours[q].second /= totalWeight;
 
           // Save the list of neighbours for this output workspace index.
@@ -648,6 +651,8 @@ void SmoothNeighbours::exec()
 
   PreserveEvents = getProperty("PreserveEvents");
 
+  expandSumAllPixels = getProperty("ExpandSumAllPixels");
+
   // Use the unit type to translate the entered radius into meters.
   Radius = translateToMeters(getProperty("RadiusUnits"), getProperty("Radius"));
 
@@ -771,7 +776,7 @@ void SmoothNeighbours::execWorkspace2D()
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
+  if(expandSumAllPixels) spreadPixels(outWS);
 }
 
 //--------------------------------------------------------------------------------------------
@@ -814,7 +819,74 @@ void SmoothNeighbours::setupNewInstrument(MatrixWorkspace_sptr outws)
 
   return;
 }
+//--------------------------------------------------------------------------------------------
+/** Spread the average over all the pixels
+  */
+void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws)
+{
+  //Get some stuff from the input workspace
+  const size_t numberOfSpectra = inWS->getNumberHistograms();
 
+  const size_t YLength = inWS->blocksize();
+
+  MatrixWorkspace_sptr outws2;
+  //Make a brand new Workspace2D
+  if (boost::dynamic_pointer_cast<OffsetsWorkspace>(inWS))
+  {
+    g_log.information() << "Creating new OffsetsWorkspace\n";
+    outws2 = MatrixWorkspace_sptr(new OffsetsWorkspace(inWS->getInstrument()));
+  }
+  else
+  {
+    outws2 = boost::dynamic_pointer_cast<MatrixWorkspace>
+        ( API::WorkspaceFactory::Instance().create("Workspace2D", numberOfSpectra, YLength+1, YLength));
+  }
+
+  //Copy geometry over.
+  API::WorkspaceFactory::Instance().initializeFromParent(inWS, outws2, false);
+
+  // Go through all the output workspace
+  const size_t numberOfSpectra2 = outws->getNumberHistograms();
+  for (int outWIi=0; outWIi<int(numberOfSpectra2); outWIi++)
+  {
+    ISpectrum * outSpec = outws->getSpectrum(outWIi);
+    /*
+    g_log.notice() << "[DBx555] Original spectrum number for wsindex " << outWIi
+                   << " = " << outSpec->getSpectrumNo() << std::endl;
+    outSpec->setSpectrumNo(outWIi+1);
+    */
+
+
+    // Which are the neighbours?
+    std::vector< weightedNeighbour > & neighbours = m_neighbours[outWIi];
+    std::vector< weightedNeighbour >::iterator it;
+    for (it = neighbours.begin(); it != neighbours.end(); ++it)
+    {
+      size_t inWI = it->first;
+
+      const ISpectrum * inSpec = inWS->getSpectrum(inWI);
+
+      std::set<detid_t> thesedetids = inSpec->getDetectorIDs();
+      ISpectrum * outSpec2 = outws2->getSpectrum(inWI);
+      outSpec2->addDetectorIDs(thesedetids);
+      // Reset the Y and E vectors
+      outSpec2->clearData();
+      MantidVec & out2Y = outSpec2->dataY();
+      MantidVec & out2E = outSpec2->dataE();
+      MantidVec & out2X = outSpec2->dataX();
+      MantidVec & outY = outSpec->dataY();
+      MantidVec & outE = outSpec->dataE();
+      MantidVec & outX = outSpec->dataX();
+      out2Y = outY;
+      out2E = outE;
+      out2X = outX;
+
+
+    } //(each neighbour)
+  }
+  this->setProperty("OutputWorkspace", outws2);
+  return;
+}
 //--------------------------------------------------------------------------------------------
 /** Execute the algorithm for a EventWorkspace input
  * @param ws :: EventWorkspace
