@@ -308,6 +308,8 @@ namespace Algorithms
       // Output raw peak parameters
       size_t numpeakpars = m_peakFunction->nParams();
       size_t numbkgdpars = m_backgroundFunction->nParams();
+      m_numTableParams = numpeakpars + numbkgdpars;
+
       for (size_t i = 0; i < numpeakpars; ++i)
         m_outPeakTableWS->addColumn("double", m_peakParameterNames[i]);
       for (size_t i = 0; i < numbkgdpars; ++i)
