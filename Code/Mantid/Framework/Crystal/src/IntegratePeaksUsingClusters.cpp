@@ -43,6 +43,31 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Crystal::ConnectedComponentMappingTypes;
 
 
+namespace
+{
+  PeakTransform_sptr makePeakTransform(IMDHistoWorkspace const * const mdWS)
+  {
+    const SpecialCoordinateSystem mdCoordinates = mdWS->getSpecialCoordinateSystem();
+    PeakTransformFactory_sptr peakTransformFactory;
+    if (mdCoordinates == QLab)
+    {
+      peakTransformFactory = boost::make_shared<PeakTransformQLabFactory>();
+    }
+    else if (mdCoordinates == QSample)
+    {
+      peakTransformFactory = boost::make_shared<PeakTransformQSampleFactory>();
+    }
+    else if (mdCoordinates == Mantid::API::HKL)
+    {
+      peakTransformFactory = boost::make_shared<PeakTransformHKLFactory>();
+    }
+    const std::string xDim = mdWS->getDimension(0)->getName();
+    const std::string yDim = mdWS->getDimension(1)->getName();
+    PeakTransform_sptr peakTransform = peakTransformFactory->createTransform(xDim, yDim);
+    return peakTransform;
+  }
+}
+
 namespace Mantid
 {
   namespace Crystal
@@ -142,41 +167,32 @@ namespace Mantid
         }
       }
 
-      const SpecialCoordinateSystem mdCoordinates = mdWS->getSpecialCoordinateSystem();
-      if (mdCoordinates == None)
       {
-        throw std::invalid_argument(
+        const SpecialCoordinateSystem mdCoordinates = mdWS->getSpecialCoordinateSystem();
+        if (mdCoordinates == None)
+        {
+          throw std::invalid_argument(
             "The coordinate system of the input MDWorkspace cannot be established. Run SetSpecialCoordinates on InputWorkspace.");
+        }
       }
 
       const double threshold = getProperty("Threshold");
-
+      // Make a background strategy for the CCL analysis to use.
       HardThresholdBackground backgroundStrategy(threshold,NoNormalization);
-
+      // CCL. Multi-processor version.
       ConnectedComponentLabeling analysis;
-
-      Progress progress(this, 0, 1, 1);
-      ClusterTuple clusters = analysis.executeAndFetchClusters(mdWS, &backgroundStrategy, progress);
-
-      ConnectedComponentMappingTypes::ClusterMap& clusterMap = clusters.get<1>();
       
+      Progress progress(this, 0, 1, 1);
+      // Peform CCL.
+      ClusterTuple clusters = analysis.executeAndFetchClusters(mdWS, &backgroundStrategy, progress);
+      // Extract the clusters
+      ConnectedComponentMappingTypes::ClusterMap& clusterMap = clusters.get<1>();
+      // Extract the labeled image
       IMDHistoWorkspace_sptr outHistoWS = clusters.get<0>();
-      PeakTransformFactory_sptr peakTransformFactory;
-      if (mdCoordinates == QLab)
-      {
-        peakTransformFactory = boost::make_shared<PeakTransformQLabFactory>();
-      }
-      else if (mdCoordinates == QSample)
-      {
-        peakTransformFactory = boost::make_shared<PeakTransformQSampleFactory>();
-      }
-      else if (mdCoordinates == Mantid::API::HKL)
-      {
-        peakTransformFactory = boost::make_shared<PeakTransformHKLFactory>();
-      }
-      const std::string xDim = mdWS->getDimension(0)->getName();
-      const std::string yDim = mdWS->getDimension(1)->getName();
-      PeakTransform_sptr peakTransform = peakTransformFactory->createTransform(xDim, yDim);
+      // Make a peak transform so that we can understand a peak in the context of the mdworkspace coordinate setup.
+      PeakTransform_sptr peakTransform = makePeakTransform(mdWS.get());
+      // Labels taken by peaks.
+      std::set<size_t> labelsTakenByPeaks;
 
       PARALLEL_FOR1(peakWS)
       for(int i = 0; i < peakWS->getNumberPeaks(); ++i)
@@ -185,14 +201,30 @@ namespace Mantid
         IPeak& peak = peakWS->getPeak(i);
         const V3D& peakCenterInMDFrame = peakTransform->transformPeak(peak);
         const Mantid::signal_t signalValue = outHistoWS->getSignalAtVMD(peakCenterInMDFrame, NoNormalization);
-        if(!boost::math::isnan(signalValue) && signalValue >= static_cast<Mantid::signal_t>(analysis.getStartLabelId()) )
+        if(boost::math::isnan(signalValue))
+        {
+          g_log.warning() << "Warning: image for integration is off edge of detector for peak " << i << std::endl;
+        }
+        else if(signalValue < static_cast<Mantid::signal_t>(analysis.getStartLabelId()))
+        {
+          g_log.information() << "Peak: " << i << " Has no corresponding cluster/blob detected on the image. This could be down to your Threshold settings.";
+        }
+        else
         {
           const size_t labelIdAtPeak = static_cast<size_t>(signalValue);
           Cluster * const cluster = clusterMap[labelIdAtPeak].get();
-          
           Cluster::ClusterIntegratedValues integratedValues = cluster->integrate(mdWS);
           peak.setIntensity(integratedValues.get<0>());
           peak.setSigmaIntensity(integratedValues.get<1>());
+          
+          PARALLEL_CRITICAL(IntegratePeaksUsingClusters)
+          {
+            if(labelsTakenByPeaks.find(labelIdAtPeak) != labelsTakenByPeaks.end())
+            {
+              g_log.warning() << "Overlapping Peaks. Peak: " << i << " overlaps with another peak, and shares label id: " << labelIdAtPeak;
+            }
+            labelsTakenByPeaks.insert(labelIdAtPeak);
+          }
         }
         PARALLEL_END_INTERUPT_REGION
       }
