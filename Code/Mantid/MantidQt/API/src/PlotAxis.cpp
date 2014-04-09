@@ -11,14 +11,24 @@ namespace MantidQt
      * @param workspace The workspace containing the axis information
      * @param index Index of the axis in the workspace to inspect
      */
-    PlotAxis::PlotAxis(const Mantid::API::MatrixWorkspace &workspace,
+    PlotAxis::PlotAxis(const Mantid::API::IMDWorkspace &workspace,
                        const size_t index)
       : m_title()
     {
-      if (index == 0 || index == 1) titleFromIndex(workspace, index);
+      if (index < workspace.getNumDims()) titleFromIndex(workspace, index);
       else
         throw std::invalid_argument("PlotAxis() - Unknown axis index: '" + \
                                     boost::lexical_cast<std::string>(index) + "'");
+    }
+
+    /**
+     * The title will be filled with the caption & units from the given
+     * dimension object
+     * @param dim A dimension object, usually from a workspace
+     */
+    PlotAxis::PlotAxis(const Mantid::Geometry::IMDDimension &dim)
+    {
+      titleFromDimension(dim);
     }
 
     /**
@@ -43,33 +53,34 @@ namespace MantidQt
      * @param workspace  The workspace containing the axis information
      * @param index Index of the axis in the workspace to inspect
      */
-    void PlotAxis::titleFromIndex(const Mantid::API::MatrixWorkspace &workspace,
+    void PlotAxis::titleFromIndex(const Mantid::API::IMDWorkspace &workspace,
                                   const size_t index)
     {
-      // Deal with axis names
-      Mantid::API::Axis* ax = workspace.getAxis(index);
-      m_title = "";
-      if ( ax->isSpectra() ) m_title = "Spectrum Number";
-      else if (ax->unit() && ax->unit()->unitID() != "Empty" )
-      {
-        m_title = QString::fromStdString(ax->unit()->caption());
-        const auto lbl = ax->unit()->label();
-        if ( !lbl.utf8().empty() )
-        {
-          m_title += " (" + QString::fromStdWString(lbl.utf8()) + ")";
-        }
-        else if(!lbl.ascii().empty())
-        {
-          m_title += " (" + QString::fromStdString(lbl.ascii()) + ")";
-        }
-      }
-      else if (!ax->title().empty())
-      {
-        m_title = QString::fromStdString(ax->title());
-      }
-      else
+      auto dim = workspace.getDimension(index);
+      titleFromDimension(*dim);
+      if(m_title.isEmpty())
       {
         m_title = (index == 0) ? "X axis" : "Y axis";
+      }
+    }
+
+    /**
+     * @param dim A dimension object that encapsulates the axis data
+     */
+    void PlotAxis::titleFromDimension(const Mantid::Geometry::IMDDimension &dim)
+    {
+      m_title = QString::fromStdString(dim.getName());
+      if(!m_title.isEmpty())
+      {
+        auto unitLbl = dim.getUnits();
+        if ( !unitLbl.utf8().empty() )
+        {
+          m_title += " (" + QString::fromStdWString(unitLbl.utf8()) + ")";
+        }
+        else if(!unitLbl.ascii().empty())
+        {
+          m_title += " (" + QString::fromStdString(unitLbl.ascii()) + ")";
+        }
       }
     }
 

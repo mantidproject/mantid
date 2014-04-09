@@ -6,6 +6,7 @@
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -109,8 +110,8 @@ public:
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
     ws->replaceAxis(0, new Mantid::API::SpectraAxis(ws.get()));
 
-    TS_ASSERT_EQUALS("Spectrum Number", PlotAxis(*ws, 0).title());
-    TS_ASSERT_EQUALS("Spectrum Number", PlotAxis(*ws, 1).title());
+    TS_ASSERT_EQUALS("Spectrum", PlotAxis(*ws, 0).title());
+    TS_ASSERT_EQUALS("Spectrum", PlotAxis(*ws, 1).title());
   }
 
   void test_Passing_Just_NonDistribution_Workspace_Creates_UnitLess_Title_For_Y_Data()
@@ -132,9 +133,20 @@ public:
     TS_ASSERT_EQUALS("Counts", PlotAxis(*ws).title());
   }
 
+  void test_title_from_just_dimension()
+  {
+    using MantidQt::API::PlotAxis;
+    using Mantid::Geometry::MDHistoDimension;
+    using Mantid::Kernel::UnitLabel;
+
+    MDHistoDimension dim("tof", "dimx", UnitLabel("us",L"\u03bcs"), 0.0f, 1.0f, 10);
+    QString expected = QString::fromUtf8("tof (\u03bcs)");
+    TS_ASSERT_EQUALS(expected, PlotAxis(dim).title());
+  }
+
   //---------------------- Failure cases -------------------------------
 
-  void test_Index_Greater_Than_1_Or_Less_Than_Zero_Throws_Invalid_Argument()
+  void test_Index_Greater_Than_numDims_Or_Less_Than_Zero_Throws_Invalid_Argument()
   {
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
