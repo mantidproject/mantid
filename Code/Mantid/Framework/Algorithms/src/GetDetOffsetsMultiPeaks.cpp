@@ -185,10 +185,10 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** The windows should be half of the distance between the peaks of maxWidth, whichever is smaller.
-     * @param dmin The minimum d-spacing for the workspace
-     * @param dmax The maximum d-spacing for the workspace
-     * @param peaks The list of peaks to generate windows for
-     * @param maxWidth The maximum width of a window
+     * @param dmin :: The minimum d-spacing for the workspace
+     * @param dmax :: The maximum d-spacing for the workspace
+     * @param vec_peakcentre :: The list of peaks to generate windows for
+     * @param maxWidth :: The maximum width of a window
      * @return The list of windows for each peak
      */
   std::vector<double> generateWindows(const double dmin, const double dmax,
@@ -840,7 +840,7 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Generate a list of peaks that meets= all the requirements for fitting offset
-    * @param peaklist :: table workspace as the output of FindPeaks
+    * @param peakslist :: table workspace as the output of FindPeaks
     * @param wi :: workspace index of the spectrum
     * @param peakPositionRef :: reference peaks positions
     * @param peakPosToFit :: output of reference centres of the peaks used to fit offset
