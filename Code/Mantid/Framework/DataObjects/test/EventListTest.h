@@ -1522,7 +1522,7 @@ public:
 
     // Output will be 10 event lists
     std::map<int, EventList * > outputs;
-    for (size_t i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++)
       outputs.insert(std::make_pair(i, new EventList()));
     outputs.insert(std::make_pair(-1, new EventList()));
 
