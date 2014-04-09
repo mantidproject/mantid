@@ -77,8 +77,8 @@ namespace Mantid
       boost::shared_ptr<Mantid::API::IMDHistoWorkspace> execute(Mantid::API::IMDHistoWorkspace_sptr ws,
           BackgroundStrategy * const strategy, Mantid::API::Progress& progress) const;
 
-      /// Execute and return clusters, as well as maps to integrated label values
-      ConnectedComponentMappingTypes::ClusterTuple executeAndIntegrate(
+      /// Execute and return clusters, as well as maps to integratable clusters.
+      ConnectedComponentMappingTypes::ClusterTuple executeAndFetchClusters(
           Mantid::API::IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy,
           Mantid::API::Progress& progress) const;
 

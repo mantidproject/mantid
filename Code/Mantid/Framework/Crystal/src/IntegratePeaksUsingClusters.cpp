@@ -163,7 +163,7 @@ namespace Mantid
       ConnectedComponentLabeling analysis;
 
       Progress progress(this, 0, 1, 1);
-      ClusterTuple clusters = analysis.executeAndIntegrate(mdWS, &backgroundStrategy, progress);
+      ClusterTuple clusters = analysis.executeAndFetchClusters(mdWS, &backgroundStrategy, progress);
 
       ConnectedComponentMappingTypes::ClusterMap& clusterMap = clusters.get<1>();
       

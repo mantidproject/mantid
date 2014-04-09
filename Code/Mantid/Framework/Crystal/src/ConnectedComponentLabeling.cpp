@@ -307,7 +307,7 @@ namespace Mantid
 
             // Associate the member DisjointElements with a cluster. Involves looping back over iterator.
             iterator->jumpTo(0); // Reset
-            iterator->setNormalization(NoNormalization); // TODO: check that this is a valid assumption.
+            iterator->setNormalization(NoNormalization);
             std::set<size_t> labelIds;
             do
             {
@@ -330,6 +330,7 @@ namespace Mantid
 
           // Percolate minimum label across boundaries for indexes where there is ambiguity.
           std::vector<boost::shared_ptr<Cluster> > incompleteClusterVec;
+          incompleteClusterVec.reserve(1000);
           std::set<size_t> usedLabels;
           for(auto it = parallelEdgeVec.begin(); it != parallelEdgeVec.end(); ++it) 
           {
@@ -338,21 +339,26 @@ namespace Mantid
             {
               DisjointElement& a = neighbourElements[iit->get<0>()];
               DisjointElement& b = neighbourElements[iit->get<1>()];
+              // Ignore pairs that never ended up yeilding doubly labelled indexes.
               if(!a.isEmpty() && !b.isEmpty())
               {
                 if(usedLabels.find(a.getId()) != usedLabels.end())
                 {
-                  incompleteClusterVec.push_back( clusterMap[a.getId()] );
-                  clusterMap.erase(a.getId());
-                  usedLabels.insert(a.getId());
-                }
-                if(a.getId() < b.getId())
-                {
-                  b.unionWith(&a);
-                }
-                else
-                {
-                  a.unionWith(&b);
+                  /* Consider the unresolved label */
+
+                  incompleteClusterVec.push_back( clusterMap[a.getId()] ); // Register it.
+                  clusterMap.erase(a.getId()); // Unresolved clusters should not live on the final map.
+                  usedLabels.insert(a.getId()); // Avoid processing it again
+                
+                  // Percolate the minimum label accross the boundary.
+                  if(a.getId() < b.getId())
+                  {
+                    b.unionWith(&a);
+                  }
+                  else
+                  {
+                    a.unionWith(&b);
+                  }
                 }
               }
             }
@@ -423,28 +429,19 @@ namespace Mantid
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabeling::execute(
       IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, Progress& progress) const
     {
-      // Perform the bulk of the connected component analysis, but don't collapse the elements yet.
-      ClusterMap clusters = calculateDisjointTree(ws, strategy, progress);
-
-      // Create the output workspace from the input workspace
-      IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
-
-      for (auto it = clusters.begin(); it != clusters.end(); ++it) 
-      {
-        it->second->writeTo(outWS); // Apply cluster onto output workspace.
-      }
-
+      ClusterTuple result = executeAndFetchClusters(ws, strategy, progress);
+      IMDHistoWorkspace_sptr outWS = result.get<0>(); // Get the workspace, but discard cluster objects.
       return outWS;
     }
 
     /**
-    * Execute and integrate
+    * Execute 
     * @param ws : Image workspace to integrate
     * @param strategy : Background strategy
     * @param progress : Progress object
     * @return Image Workspace containing clusters as well as a map of label ids to cluster objects.
     */
-    ClusterTuple ConnectedComponentLabeling::executeAndIntegrate(
+    ClusterTuple ConnectedComponentLabeling::executeAndFetchClusters(
       IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy,
       Progress& progress) const
     {
@@ -454,10 +451,19 @@ namespace Mantid
 
       // Create the output workspace from the input workspace
       IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
-
-      for (auto it = clusters.begin(); it != clusters.end(); ++it) 
+      
+      // Get the keys (label ids) first in order to do the next stage in parallel.
+      VecIndexes keys;
+      keys.reserve(clusters.size());
+      for (auto it = clusters.begin(); it != std::end(clusters); ++it) 
       {
-        it->second->writeTo(outWS); // Apply cluster onto output workspace.
+        keys.push_back(it->first);
+      }
+      // Write each cluster out to the output workspace
+      PARALLEL_FOR_NO_WSP_CHECK()
+      for (int i = 0; i < static_cast<int>(keys.size()); ++i) 
+      {
+        clusters[keys[i]]->writeTo(outWS); 
       }
 
       return ClusterTuple(outWS, clusters);
