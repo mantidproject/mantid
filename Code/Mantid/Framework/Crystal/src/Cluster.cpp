@@ -31,9 +31,14 @@ namespace Mantid
     }
 
    
-    size_t Cluster::size()
+    size_t Cluster::size() const
     {
-      return m_indexes.size();
+      size_t size = m_indexes.size(); 
+      for(size_t i = 0; i < m_ownedClusters.size(); ++i)
+      {
+        size+=m_ownedClusters[i]->size();
+      }
+      return size;
     }
 
     void Cluster::addIndex(const size_t& index)

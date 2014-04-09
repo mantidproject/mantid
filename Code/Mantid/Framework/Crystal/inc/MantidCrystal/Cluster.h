@@ -62,7 +62,7 @@ namespace Mantid
         size_t getOriginalLabel() const;
 
         /// Number of indexes tracked
-        size_t size();
+        size_t size() const;
 
         /// Track a linear IMDHistoWorkspace index that belongs to the cluster.
         void addIndex(const size_t& index);
