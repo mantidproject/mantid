@@ -194,6 +194,9 @@ namespace Algorithms
   }
 
 
+  //----------------------------------------------------------------------------------------------
+  /** Process input properties
+   */
   void FilterEvents::processProperties()
   {
     m_eventWS = this->getProperty("InputWorkspace");
@@ -627,20 +630,22 @@ namespace Algorithms
     // Loop over the histograms (detector spectra) to do split from 1 event list to N event list
     g_log.debug() << "Number of spectra in input/source EventWorkspace = " << numberOfSpectra << ".\n";
 
-    // FIXME Make it parallel
-    // PARALLEL_FOR_NO_WSP_CHECK()
+    // FIXME - Turn on parallel: 
+    PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws)
     {
-      // FIXME Make it parallel
-      // PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERUPT_REGION
 
       // Get the output event lists (should be empty) to be a map
       std::map<int, DataObjects::EventList* > outputs;
-      for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
+      PARALLEL_CRITICAL(build_elist)
       {
-        int index = wsiter->first;
-        DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
-        outputs.insert(std::make_pair(index, output_el));
+        for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
+        {
+          int index = wsiter->first;
+          DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
+          outputs.insert(std::make_pair(index, output_el));
+        }
       }
 
       // Get a holder on input workspace's event list of this spectrum
@@ -663,11 +668,9 @@ namespace Algorithms
       mProgress = 0.3+(progressamount-0.2)*static_cast<double>(iws)/static_cast<double>(numberOfSpectra);
       progress(mProgress, "Filtering events");
 
-      // FIXME - Turn on parallel
-      // PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERUPT_REGION
     } // END FOR i = 0
-    // PARALLEL_CHECK_INTERUPT_REGION
-    // FIXME - Turn on parallel
+    PARALLEL_CHECK_INTERUPT_REGION
 
 
     // Split the sample logs in each target workspace.
@@ -735,25 +738,9 @@ namespace Algorithms
     // Loop over the histograms (detector spectra) to do split from 1 event list to N event list
     g_log.debug() << "Number of spectra in input/source EventWorkspace = " << numberOfSpectra << ".\n";
 
-#if 0
-    vector< map<int, EventList*> > vec_elistmap;
-    for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws)
-    {
-      map<int, DataObjects::EventList* > outputs;
-      for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
-      {
-        int index = wsiter->first;
-        DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
-        outputs.insert(std::make_pair(index, output_el));
-      }
-    }
-#endif
-
-    // FIXME Make it parallel
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws)
     {
-      // FIXME Make it parallel
       PARALLEL_START_INTERUPT_REGION
 
       // Get the output event lists (should be empty) to be a map
@@ -780,7 +767,6 @@ namespace Algorithms
       if (mFilterByPulseTime)
       {
         throw runtime_error("It is not a good practice to split fast event by pulse time. ");
-        // input_el.splitByPulseTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs);
       }
       else if (m_doTOFCorrection)
       {
@@ -800,58 +786,15 @@ namespace Algorithms
       if (printdetail)
         g_log.notice(logmessage);
 
-      // FIXME - Turn on parallel
       PARALLEL_END_INTERUPT_REGION
     } // END FOR i = 0
     PARALLEL_CHECK_INTERUPT_REGION
-    // FIXME - Turn on parallel
 
 
     // Finish (1) adding events and splitting the sample logs in each target workspace.
     progress(0.1+progressamount, "Splitting logs");
 
-#if 0
-    std::vector<std::string> lognames;
-    this->getTimeSeriesLogNames(lognames);
-    g_log.debug() << "[FilterEvents D1214]:  Number of TimeSeries Logs = " << lognames.size()
-                  << " to " << m_outputWS.size() << " outptu workspaces. \n";
-
-    double numws = static_cast<double>(m_outputWS.size());
-    double outwsindex = 0.;
-    for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++wsiter)
-    {
-      int wsindex = wsiter->first;
-      DataObjects::EventWorkspace_sptr opws = wsiter->second;
-
-      // Generate a list of splitters for current output workspace
-      Kernel::TimeSplitterType splitters;
-      generateSplitters(wsindex, splitters);
-
-      g_log.debug() << "[FilterEvents D1215]: Output orkspace Index " << wsindex
-                    << ": Name = " << opws->name() << "; Number of splitters = " << splitters.size() << ".\n";
-
-      // Skip output workspace has ZERO splitters
-      if (splitters.size() == 0)
-      {
-        g_log.warning() << "[FilterEvents] Workspace " << opws->name() << " Indexed @ " << wsindex <<
-                           " won't have logs splitted due to zero splitter size. " << ".\n";
-        continue;
-      }
-
-      // Split log
-      size_t numlogs = lognames.size();
-      for (size_t ilog = 0; ilog < numlogs; ++ilog)
-      {
-        this->splitLog(opws, lognames[ilog], splitters);
-      }
-      opws->mutableRun().integrateProtonCharge();
-
-      progress(0.1+progressamount+outwsindex/numws*0.2, "Splitting logs");
-      outwsindex += 1.;
-    }
-#else
     g_log.notice("Splitters in format of Matrixworkspace are not recommended to split sample logs. ");
-#endif
 
     return;
   }
