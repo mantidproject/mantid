@@ -15,7 +15,7 @@
 #include "MantidCrystal/IntegratePeaksUsingClusters.h"
 #include "MantidCrystal/Cluster.h"
 #include "MantidCrystal/ConnectedComponentLabeling.h"
-#include "MantidCrystal/PeakBackground.h"
+#include "MantidCrystal/HardThresholdBackground.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDIterator.h"
@@ -105,6 +105,7 @@ namespace Mantid
           "A PeaksWorkspace containing the peaks to integrate.");
 
       auto positiveValidator = boost::make_shared<BoundedValidator<double> >();
+      positiveValidator->setExclusive(true);
       positiveValidator->setLower(0);
 
       auto compositeValidator = boost::make_shared<CompositeValidator>();
@@ -112,11 +113,7 @@ namespace Mantid
       compositeValidator->add(boost::make_shared<MandatoryValidator<double> >());
 
       declareProperty(
-          new PropertyWithValue<double>("RadiusEstimate", 0.0, compositeValidator, Direction::Input),
-          "Estimate of Peak Radius. Points beyond this radius will not be considered, so caution towards the larger end.");
-
-      declareProperty(
-          new PropertyWithValue<double>("Threshold", 0, positiveValidator->clone(), Direction::Input),
+        new PropertyWithValue<double>("Threshold", 0, compositeValidator, Direction::Input),
           "Threshold signal above which to consider peaks");
       declareProperty(new WorkspaceProperty<IPeaksWorkspace>("OutputWorkspace", "", Direction::Output),
           "An output integrated peaks workspace.");
@@ -153,11 +150,7 @@ namespace Mantid
       }
 
       const double threshold = getProperty("Threshold");
-      const double radiusEstimate = getProperty("RadiusEstimate");
-      /*
-      PeakBackground backgroundStrategy(peakWS, radiusEstimate, threshold, NoNormalization,
-          mdCoordinates);
-      */
+
       HardThresholdBackground backgroundStrategy(threshold,NoNormalization);
 
       ConnectedComponentLabeling analysis;

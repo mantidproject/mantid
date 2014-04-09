@@ -134,7 +134,7 @@ namespace
   }
 
   // Execute the clustering integration algorithm
-  MDHistoPeaksWSTuple execute_integration(const MDHistoPeaksWSTuple& inputWorkspaces, const double& peakRadius, const double& threshold)
+  MDHistoPeaksWSTuple execute_integration(const MDHistoPeaksWSTuple& inputWorkspaces, const double& threshold)
   {
     auto mdWS = inputWorkspaces.get<0>();
     auto peaksWS = inputWorkspaces.get<1>();
@@ -146,7 +146,6 @@ namespace
     alg.setProperty("InputWorkspace", mdWS);
     alg.setProperty("PeaksWorkspace", peaksWS);
     alg.setProperty("Threshold", threshold);
-    alg.setProperty("RadiusEstimate", peakRadius + 0.1);
     alg.setPropertyValue("OutputWorkspace", "out_ws");
     alg.setPropertyValue("OutputWorkspaceMD", "out_ws_md");
     alg.execute();
@@ -190,6 +189,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", mdws);
     alg.setPropertyValue("OutputWorkspaceMD", "out_md");
+    alg.setProperty("Threshold", 0.01);
     alg.setPropertyValue("OutputWorkspace", "out_peaks");
     TSM_ASSERT_THROWS("PeaksWorkspace required", alg.execute(), std::runtime_error&);
   }
@@ -204,6 +204,7 @@ public:
     alg.setProperty("PeaksWorkspace", peaksws);
     alg.setPropertyValue("OutputWorkspaceMD", "out_md");
     alg.setPropertyValue("OutputWorkspace", "out_peaks");
+    alg.setProperty("Threshold", 0.01);
     TSM_ASSERT_THROWS("InputWorkspace required", alg.execute(), std::runtime_error&);
   }
 
@@ -219,6 +220,7 @@ public:
     alg.setProperty("PeaksWorkspace", peaksws);
     alg.setPropertyValue("OutputWorkspaceMD", "out_md");
     alg.setPropertyValue("OutputWorkspace", "out_peaks");
+    alg.setProperty("Threshold", 0.01);
     TSM_ASSERT_THROWS("Unknown special coordinates", alg.execute(), std::invalid_argument&);
   }
 
@@ -233,7 +235,7 @@ public:
     const size_t nEventsInPeak = 10000;
     MDHistoPeaksWSTuple inputWorkspaces = make_peak_and_md_ws(hklValues, -10, 10, peakRadius, nEventsInPeak);
     //-------- Execute the integratioin
-    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, peakRadius, threshold);
+    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, threshold);
     // ------- Get the integrated results
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
     IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
@@ -261,7 +263,7 @@ public:
     const size_t nEventsInPeak = 10000;
     MDHistoPeaksWSTuple inputWorkspaces = make_peak_and_md_ws(hklValues, -10, 10, peakRadius, nEventsInPeak);
     //-------- Execute the integratioin
-    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, peakRadius, threshold);
+    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, threshold);
     // ------- Get the integrated results
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
     IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
@@ -298,7 +300,7 @@ public:
     const size_t nEventsInPeak = 10000;
     MDHistoPeaksWSTuple inputWorkspaces = make_peak_and_md_ws(hklValues, -10, 10, peakRadius, nEventsInPeak);
     //-------- Execute the integratioin
-    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, peakRadius, threshold);
+    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, threshold);
     // ------- Get the integrated results
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
     IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
@@ -341,7 +343,7 @@ public:
 
     MDHistoPeaksWSTuple inputWorkspaces = make_peak_and_md_ws(hklValues, -10, 10, std::vector<double>(hklValues.size(), peakRadius), nEventsInPeakVec);
     //-------- Execute the integratioin
-    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, peakRadius, threshold);
+    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, threshold);
     // ------- Get the integrated results
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
     IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
@@ -417,7 +419,7 @@ public:
   void test_execute()
   {
     // Just run the integration. Functional tests handled in separate suite.
-    execute_integration(m_inputWorkspaces, m_peakRadius, m_threshold);
+    execute_integration(m_inputWorkspaces, m_threshold);
   }
 
 };
