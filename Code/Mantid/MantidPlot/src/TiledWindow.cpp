@@ -10,20 +10,20 @@
 // constants defining the minimum size of tiles
 const int minimumTileWidth = 100;
 const int minimumTileHeight = 100;
-// colour constants
+// tile border constants
 const QColor normalColor("black");
 const QColor selectedColor("green");
+const int normalWidth(1);
+const int selectedWidth(5);
 
 /**
  * Constructor.
  */
 Tile::Tile(QWidget *parent):
-  QFrame(parent),m_widget(NULL),m_border("black")
+  QFrame(parent),m_widget(NULL),m_border(normalColor),m_borderWidth(normalWidth)
 {
   m_layout = new QVBoxLayout(this);
-  m_layout->setContentsMargins(1,1,1,1);
-  //setAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
-  //setFrameShape( QFrame::Box );
+  m_layout->setContentsMargins(5,5,5,5);
 }
 
 /**
@@ -69,9 +69,10 @@ void Tile::removeWidget()
 void Tile::paintEvent(QPaintEvent *ev)
 {
   QPainter p(this);
-  p.setPen(m_border);
-  QRect r = this->rect().adjusted(0,0,-1,-1);
-  p.drawRect( r );
+  QPen pen(m_border);
+  pen.setWidth(m_borderWidth);
+  p.setPen(pen);
+  p.drawRect( this->rect().adjusted(0,0,-1,-1) );
   QFrame::paintEvent(ev);
 }
 
@@ -81,6 +82,7 @@ void Tile::paintEvent(QPaintEvent *ev)
 void Tile::makeSelected()
 {
   m_border = selectedColor;
+  m_borderWidth = selectedWidth;
   update();
 }
 
@@ -90,6 +92,7 @@ void Tile::makeSelected()
 void Tile::makeNormal()
 {
   m_border = normalColor;
+  m_borderWidth = normalWidth;
   update();
 }
 
@@ -346,6 +349,9 @@ Tile *TiledWindow::getTileAtMousePos( const QPoint& pos )
   return NULL;
 }
 
+/**
+ * Mouse press event handler.
+ */
 void TiledWindow::mousePressEvent(QMouseEvent *ev)
 {
   auto tile = getTileAtMousePos( ev->pos() );
@@ -366,8 +372,11 @@ void TiledWindow::addToSelection(Tile *tile, bool append)
   if ( tile->widget() == NULL ) return;
   if ( append )
   {
-    if ( m_selection.indexOf( tile ) >= 0 )
+    int index = m_selection.indexOf( tile );
+    if ( index >= 0 )
     {
+      m_selection.removeAt( index );
+      tile->makeNormal();
       return;
     }
   }

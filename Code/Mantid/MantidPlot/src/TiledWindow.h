@@ -85,6 +85,7 @@ private:
   QVBoxLayout * m_layout;
   MdiSubWindow* m_widget;
   QColor m_border;
+  int m_borderWidth;
 };
 
 #endif // TiledWindow_H
