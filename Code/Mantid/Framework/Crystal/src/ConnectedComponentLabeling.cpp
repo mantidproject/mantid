@@ -362,6 +362,7 @@ namespace Mantid
 
             // Now combine clusters and remove old ones.
             std::map<size_t, boost::shared_ptr<Cluster> > consumptionMap; // Track incomplete clusters to avoid duplicates.
+            size_t nIncomplete = incompleteClusterVec.size();
             for(size_t i = 0; i < incompleteClusterVec.size(); ++i)
             {
               const size_t label = incompleteClusterVec[i]->getLabel();
@@ -437,14 +438,12 @@ namespace Mantid
     * Execute and integrate
     * @param ws : Image workspace to integrate
     * @param strategy : Background strategy
-    * @param labelMap : Label map to fill. Label ids to integrated signal and errorsq for that label
-    * @param positionLabelMap : Label ids to position in workspace coordinates. This is filled as part of the work.
     * @param progress : Progress object
-    * @return Image Workspace containing clusters.
+    * @return Image Workspace containing clusters as well as a map of label ids to cluster objects.
     */
-    boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ConnectedComponentLabeling::executeAndIntegrate(
-      IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy, LabelIdIntensityMap& labelMap,
-      PositionToLabelIdMap& positionLabelMap, Progress& progress) const
+    ClusterTuple ConnectedComponentLabeling::executeAndIntegrate(
+      IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy,
+      Progress& progress) const
     {
 
       // Perform the bulk of the connected component analysis, but don't collapse the elements yet.
@@ -453,25 +452,7 @@ namespace Mantid
       // Create the output workspace from the input workspace
       IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
 
-      progress.doReport("Integrating clusters and generating cluster image");
-      const size_t nIterations = ws->getNPoints();
-      const size_t maxReports = 1000;
-      const size_t frequency = reportEvery(maxReports, nIterations);
-      progress.resetNumSteps(maxReports, 0.5, 0.75);
-      // Set each pixel to the root of each disjointed element.
-      int i = 0;
-      for (auto it = clusters.begin(); it != clusters.end(); ++it, ++i) 
-      {
-        it->second->writeTo(outWS); // TODO. could be done in parallel.
-        it->second->integrate(ws);
-
-        if(i % frequency == 0)
-        {
-          progress.doReport();
-        }
-      }
-
-      return outWS;
+      return ClusterTuple(outWS, clusters);
     }
 
   } // namespace Crystal

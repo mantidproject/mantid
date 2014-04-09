@@ -31,7 +31,8 @@ namespace Mantid
       typedef std::vector<size_t> VecIndexes;
       typedef std::vector<DisjointElement> VecElements;
       typedef std::set<size_t> SetIds;
-      typedef std::map<size_t, boost::shared_ptr<Cluster> > ClusterMap;
+      typedef std::map<size_t, boost::shared_ptr<Mantid::Crystal::Cluster> > ClusterMap;
+      typedef boost::tuple<Mantid::API::IMDHistoWorkspace_sptr, ClusterMap> ClusterTuple;
     }
 
     class BackgroundStrategy;
@@ -77,10 +78,8 @@ namespace Mantid
           BackgroundStrategy * const strategy, Mantid::API::Progress& progress) const;
 
       /// Execute and return clusters, as well as maps to integrated label values
-      boost::shared_ptr<Mantid::API::IMDHistoWorkspace> executeAndIntegrate(
+      ConnectedComponentMappingTypes::ClusterTuple executeAndIntegrate(
           Mantid::API::IMDHistoWorkspace_sptr ws, BackgroundStrategy * const strategy,
-          ConnectedComponentMappingTypes::LabelIdIntensityMap& labelMap,
-          ConnectedComponentMappingTypes::PositionToLabelIdMap& positionLabelMap,
           Mantid::API::Progress& progress) const;
 
       /// Destructor
