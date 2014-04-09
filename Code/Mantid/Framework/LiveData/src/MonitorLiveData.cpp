@@ -130,6 +130,7 @@ namespace LiveData
 
     m_chunkNumber = 0;
     int runNumber = 0;
+    int prevRunNumber = 0;
 
     std::string AccumulationWorkspace = this->getPropertyValue("AccumulationWorkspace");
     std::string OutputWorkspace = this->getPropertyValue("OutputWorkspace");
@@ -182,8 +183,17 @@ namespace LiveData
           g_log.debug() << "Run number set to " << runNumber << std::endl;
         }
 
-        // Did we just hit the end of a run?
-        if (listener->runStatus() == ILiveListener::EndRun)
+        // Did we just hit a run transition?
+        ILiveListener::RunStatus runStatus = listener->runStatus();
+        if (runStatus == ILiveListener::EndRun)
+        {
+          // Need to keep track of what the run number *was* so we
+          // can properly rename workspaces
+          prevRunNumber = runNumber; 
+        }
+
+        if ( (runStatus == ILiveListener::BeginRun) ||
+             (runStatus == ILiveListener::EndRun) )
         {
           std::stringstream message;
           message << "Run";
@@ -206,7 +216,22 @@ namespace LiveData
             NextAccumulationMethod = "Replace";
 
             // Now we clone the existing workspaces
-            std::string postFix = "_" + Strings::toString(runNumber);
+            std::string postFix;
+            if (runStatus == ILiveListener::EndRun)
+            {
+              postFix = "_" + Strings::toString(runNumber);
+            }
+            else
+            {
+              // indicate that this is data that arrived *after* the run ended
+              postFix = "_";
+              if (prevRunNumber != 0)
+                postFix += Strings::toString(prevRunNumber);
+
+              postFix += "_post";
+            }
+
+
             doClone(OutputWorkspace, OutputWorkspace + postFix);
             if (!AccumulationWorkspace.empty())
               doClone(AccumulationWorkspace, AccumulationWorkspace + postFix);

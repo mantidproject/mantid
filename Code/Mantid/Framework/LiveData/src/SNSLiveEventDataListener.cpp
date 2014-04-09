@@ -607,8 +607,19 @@ namespace LiveData
       }
       else
       {
-        setRunDetails(pkt);
+        // Save a copy of the packet so we can call setRunDetails() later (after
+        // extractData() has been called to fetch any data remaining from before
+        // this run start.
+        // Note: need to actually copy the contents (not just a pointer) because
+        // pkt will go away when this function returns.  And since packets don't have
+        // default constructors, we can only keep a pointer as a member, and thus
+        // have to actually allocate our deferred packet with new.
+        // Fortunately, this doesn't happen to often, so performance isn't an issue.
+        m_deferredRunDetailsPkt = boost::shared_ptr<ADARA::RunStatusPkt>(new ADARA::RunStatusPkt(pkt));
       }
+
+      // See detailed comments below for what this flag does
+      m_pauseNetRead = true;
 
     }
     else if (pkt.status() == ADARA::RunStatus::END_RUN)
@@ -1281,17 +1292,10 @@ namespace LiveData
     // It's only appropriate to return EndRun once (ie: when we've just
     // returned the last events from the run).  After that, we need to
     // change the status to NoRun.
-    // As far as I can tell, nobody ever checks for BeginRun, but I'm
-    // assuming the same logic applies....
-    if (m_status == BeginRun)
+    // The same logic applies to BeginRun and Running
+    if (m_status == BeginRun || m_status == EndRun)
     {
-      m_status = Running;
-    }
-    else if (m_status == EndRun)
-    {
-      m_status = NoRun;
-
-      // If the run has ended, replace the old workspace with a new one
+      // At run transitions, replace the old workspace with a new one
       // (This ensures that we're not using log data and/or geometry from
       // a previous run that are no longer valid.  SMS is guaranteed to
       // send us new device descriptor packets at the start of every run.)
@@ -1300,6 +1304,18 @@ namespace LiveData
       m_workspaceInitialized = false;
       m_nameMap.clear();
       initWorkspacePart1();
+
+      if (m_status == BeginRun)
+      {
+        // Set the run details using the packet we saved from the rxPacket() function
+        setRunDetails( *m_deferredRunDetailsPkt);
+        m_deferredRunDetailsPkt.reset();  // shared_ptr, so we don't use delete
+        m_status = Running;
+      }
+      else if (m_status == EndRun)
+      {
+        m_status = NoRun;
+      }
     }
 
     m_pauseNetRead = false;  // make sure the network reads start back up
