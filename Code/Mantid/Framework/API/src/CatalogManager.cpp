@@ -55,7 +55,7 @@ namespace Mantid
       }
 
       // If we reached this point then the session is corrupt/invalid.
-      throw std::runtime_error("The session ID you have provided is invalid");
+      throw std::runtime_error("The session ID you have provided is invalid.");
     }
 
     /**

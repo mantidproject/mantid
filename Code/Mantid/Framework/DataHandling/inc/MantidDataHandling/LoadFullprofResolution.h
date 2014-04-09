@@ -67,11 +67,11 @@ namespace DataHandling
     int getProfNumber( const std::vector<std::string>& lines );
 
     /// Scan imported file for bank information
-    void scanBanks(const std::vector<std::string>& lines, std::vector<int>& banks,
-                   std::map<int, int> &bankstartindexmap, std::map<int, int> &bankendindexmap);
+    void scanBanks(const std::vector<std::string>& lines, const bool useBankIDsInFile, std::vector<int>& banks,
+                   std::map<int, int> &bankstartindexmap, std::map<int, int> &bankendindexmap );
 
     /// Parse .irf file to a map
-    void parseResolutionStrings(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, int bankid, int startlineindex, int endlineindex, int nProf);
+    void parseResolutionStrings(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, const bool useBankIDsInFile, int bankid, int startlineindex, int endlineindex, int nProf);
     
     void parseBankLine(std::string line, double& cwl, int& bankid);
 

@@ -40,15 +40,6 @@ public:
     TS_ASSERT_DIFFERS(item.getParent(), copy.getParent());
   }
 
-  void test_copy_throws()
-  {
-    DisjointElement item1(1);
-    DisjointElement item2(2);
-    item1.unionWith(&item2);
-
-    TSM_ASSERT_THROWS("Cannot copy parent",DisjointElement copy = item2, std::logic_error&)
-  }
-
   void test_assign()
   {
     DisjointElement a(1);
@@ -56,16 +47,6 @@ public:
     TS_ASSERT_EQUALS(a.getId(), b.getId());
     TS_ASSERT_EQUALS(a.getRank(), b.getRank());
     TS_ASSERT_DIFFERS(a.getParent(), b.getParent());
-  }
-
-  void test_assign_throws()
-  {
-    DisjointElement item1(1);
-    DisjointElement item2(2);
-    DisjointElement toAssignTo;
-    item1.unionWith(&item2);
-
-    TSM_ASSERT_THROWS("Cannot assign from parent", toAssignTo = item2, std::logic_error&)
   }
 
   void test_increment_rank()
@@ -76,13 +57,6 @@ public:
     TS_ASSERT_EQUALS(1, item.getRank());
     item.incrementRank();
     TS_ASSERT_EQUALS(2, item.getRank());
-  }
-
-  void test_union_same_id_throws()
-  {
-    DisjointElement item1(0);
-    DisjointElement item2(0);
-    TS_ASSERT_THROWS(item1.unionWith(&item2), std::logic_error&);
   }
 
   void test_union_two_singleton_sets()

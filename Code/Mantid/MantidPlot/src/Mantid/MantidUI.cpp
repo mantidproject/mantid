@@ -1091,7 +1091,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
   t->setHeaderColType();
 
   // Cache some frequently used values
-  IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
+  IComponent_const_sptr sample = ws->getInstrument()->getSample();
   bool signedThetaParamRetrieved(false), showSignedTwoTheta(false); //If true,  signedVersion of the two theta value should be displayed
   for( int row = 0; row < nrows; ++row )
   {
@@ -2070,36 +2070,6 @@ void MantidUI::saveProject(bool saved)
 void MantidUI::enableSaveNexus(const QString& wsName)
 {
   appWindow()->enablesaveNexus(wsName);
-}
-
-/**
- * Executes the catalog login algorithm.
- * Returns true if login was a success.
- */
-bool MantidUI::isValidCatalogLogin()
-{
-  auto catalogAlgorithm = this->createAlgorithm("CatalogLogin");
-  auto loginDialog      = this->createAlgorithmDialog(catalogAlgorithm);
-
-  if(loginDialog->exec() == QDialog::Accepted)
-  {
-    if (catalogAlgorithm->execute()) return true;
-  }
-  return false;
-}
-
-/**
- * Creates a publishing dialog GUI and runs the publishing algorithm when "Run" is pressed.
- */
-void MantidUI::catalogPublishDialog()
-{
-  auto catalogAlgorithm = this->createAlgorithm("CatalogPublish");
-  auto publishDialog    = this->createAlgorithmDialog(catalogAlgorithm);
-
-  if(publishDialog->exec() == QDialog::Accepted)
-  {
-    catalogAlgorithm->executeAsync();
-  }
 }
 
 /** This method is sueful for saving the currently loaded workspaces to project file on save.

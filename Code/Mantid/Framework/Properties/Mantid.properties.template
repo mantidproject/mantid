@@ -206,3 +206,6 @@ ScriptRepositoryIgnore = *pyc;
 
 # The ability to send a job to a cluster form the reduction UIs is turned off. Set it to 'On' to enable it.
 cluster.submission=Off
+
+# Used to stop a catalog asynchronous algorithm after the timeout period
+catalog.timeout.value=30

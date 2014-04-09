@@ -15,8 +15,7 @@ from mantid.api import *
 from mantid.kernel import *
 import os
 
-all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
-if 'GatherWorkspaces' in all_algs:
+if AlgorithmFactory.exists('GatherWorkspaces'):
     HAVE_MPI = True
     from mpi4py import MPI
     mpiRank = MPI.COMM_WORLD.Get_rank()
@@ -27,7 +26,7 @@ else:
 COMPRESS_TOL_TOF = .01
 EVENT_WORKSPACE_ID = "EventWorkspace"
 
-class SNSPowderReduction(PythonAlgorithm):
+class SNSPowderReduction(DataProcessorAlgorithm):
     def category(self):
         return "Diffraction;PythonAlgorithms"
 
@@ -492,6 +491,13 @@ class SNSPowderReduction(PythonAlgorithm):
 
         return strategy
 
+    def __logChunkInfo(self, chunk):
+        keys = chunk.keys()
+        keys.sort()
+
+        keys = [ str(key) + "=" + str(chunk[key]) for key in keys ]
+        self.log().information("Working on chunk [" + ", ".join(keys) + "]")
+
     def _focusChunks(self, runnumber, extension, filterWall, calib, splitwksp=None, preserveEvents=True):
         """ Load, (optional) split and focus data in chunks
 
@@ -545,10 +551,7 @@ class SNSPowderReduction(PythonAlgorithm):
             ichunk += 1
 
             # Log information
-            if "ChunkNumber" in chunk:
-                self.log().information("Working on chunk %d of %d" % (chunk["ChunkNumber"], chunk["TotalChunks"]))
-            elif "SpectrumMin" in chunk:
-                self.log().information("Working on spectrums %d through %d" % (chunk["SpectrumMin"], chunk["SpectrumMax"]))
+            self.__logChunkInfo(chunk)
 
             # Load chunk
             temp = self._loadData(runnumber, extension, filterWall, **chunk)

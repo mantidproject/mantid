@@ -224,38 +224,47 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
 # Elwin
 ##############################################################################
 
-def GetTemperature(root,tempWS,log_type,Verbose):
-    (instr, run) = getInstrRun(root)
-    run_name = instr+run
-    log_name = run_name+'_'+log_type
+def GetTemperature(root, tempWS, log_type, Verbose):
+    (instr, run_number) = getInstrRun(tempWS)
+
+    facility = config.getFacility()
+    pad_num = facility.instrument(instr).zeroPadding(int(run_number))
+    zero_padding = '0' * (pad_num - len(run_number))
+    
+    run_name = instr + zero_padding + run_number
+    log_name = run_name.upper() + '.log'
+
     run = mtd[tempWS].getRun()
-    unit1 = 'Temperature'               # default values
-    unit2 = 'K'
-    if log_type in run:                 # test logs in WS
+    unit = ['Temperature', 'K']
+    if log_type in run:
+        # test logs in WS
         tmp = run[log_type].value
         temp = tmp[len(tmp)-1]
-        xval = temp
-        mess = ' Run : '+run_name +' ; Temperature in log = '+str(temp)
-    else:                               # logs not in WS
-        logger.notice('Log parameter not found')
-        log_file = log_name+'.txt'
-        log_path = FileFinder.getFullPath(log_file)
-        if (log_path == ''):            # log file does not exists
-            mess = ' Run : '+run_name +' ; Temperature file not found'
-            xval = int(run_name[-3:])
-            unit1 = 'Run-number'
-            unit2 = 'last 3 digits'
-        else:                           # get from log file
+        
+        if Verbose:
+            mess = ' Run : '+run_name +' ; Temperature in log = '+str(temp)
+            logger.notice(mess)
+    else:                               
+        # logs not in WS
+        logger.warning('Log parameter not found in workspace. Searching for log file.')
+        log_path = FileFinder.getFullPath(log_name)
+        
+        if log_path != '':            
+            # get temperature from log file
             LoadLog(Workspace=tempWS, Filename=log_path)
             run_logs = mtd[tempWS].getRun()
-            tmp = run_logs[log_name].value
+            tmp = run_logs[log_type].value
             temp = tmp[len(tmp)-1]
-            xval = temp
             mess = ' Run : '+run_name+' ; Temperature in file = '+str(temp)
-    if Verbose:
-        logger.notice(mess)
-    unit = [unit1,unit2]
-    return xval,unit
+            logger.warning(mess)
+        else:
+            # can't find log file            
+            temp = int(run_name[-3:])
+            unit = ['Run-number', 'last 3 digits']
+            mess = ' Run : '+run_name +' ; Temperature file not found'
+            logger.warning(mess)
+
+    return temp,unit
 
 def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         Save=False, Verbose=False, Plot=False): 
@@ -278,7 +287,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         (root, ext) = os.path.splitext(file_name)
         LoadNexus(Filename=file, OutputWorkspace=tempWS)
         nsam,ntc = CheckHistZero(tempWS)
-        (xval, unit) = GetTemperature(root,tempWS,log_type,Verbose)
+        (xval, unit) = GetTemperature(root,tempWS,log_type, Verbose)
         if Verbose:
             logger.notice('Reading file : '+file)
         if ( len(eRange) == 4 ):
@@ -288,7 +297,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         elif ( len(eRange) == 2 ):
             ElasticWindow(InputWorkspace=tempWS, Range1Start=eRange[0], Range1End=eRange[1],
                 OutputInQ='__eq1', OutputInQSquared='__eq2')
-        (instr, last) = getInstrRun(root)
+        (instr, last) = getInstrRun(tempWS)
         q1 = np.array(mtd['__eq1'].readX(0))
         i1 = np.array(mtd['__eq1'].readY(0))
         e1 = np.array(mtd['__eq1'].readE(0))
@@ -298,7 +307,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         e2 = np.array(mtd['__eq2'].readE(0))
         if (nr == 0):
             CloneWorkspace(InputWorkspace='__eq1', OutputWorkspace='__elf')
-            first = getWSprefix(tempWS,root)
+            first = getWSprefix(tempWS)
             datX1 = q1
             datY1 = i1
             datE1 = e1
@@ -562,7 +571,7 @@ def fury(samWorkspaces, res_file, rebinParam, RES=True, Save=False, Verbose=Fals
         ExtractFFTSpectrum(InputWorkspace='sam_data', OutputWorkspace='sam_fft', FFTPart=2)
         Divide(LHSWorkspace='sam_fft', RHSWorkspace='sam_int', OutputWorkspace='sam')
         # Create save file name
-        savefile = getWSprefix('sam_data', root) + 'iqt'
+        savefile = getWSprefix(samWs) + 'iqt'
         outWSlist.append(savefile)
         Divide(LHSWorkspace='sam', RHSWorkspace='res', OutputWorkspace=savefile)
         #Cleanup Sample Files
@@ -791,7 +800,6 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False
             if Verbose:
                 logger.notice(ws + ' output to file : '+fpath)
 
-    print Plot
     if ( Plot != 'None' ):
         furyfitPlotSeq(fitWS, Plot)
 
@@ -996,13 +1004,16 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
     StartTime('msdFit')
     workdir = config['defaultsave.directory']
     log_type = 'sample'
-    file = inputs[0]
-    (direct, filename) = os.path.split(file)
-    (root, ext) = os.path.splitext(filename)
-    (instr, first) = getInstrRun(filename)
+    
+    file_name = inputs[0]
+    base_name = os.path.basename(file_name)
+    (root,ext) = os.path.splitext(base_name)
+    
     if Verbose:
-        logger.notice('Reading Run : '+file)
-    LoadNexusProcessed(FileName=file, OutputWorkspace=root)
+        logger.notice('Reading Run : ' + file_name)
+    
+    LoadNexusProcessed(FileName=file_name, OutputWorkspace=root)
+    
     nHist = mtd[root].getNumberHistograms()
     file_list = []
     run_list = []
