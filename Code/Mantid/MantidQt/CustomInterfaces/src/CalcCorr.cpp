@@ -446,6 +446,7 @@ namespace IDA
     uiForm().absp_valCanden->setVisible(checked);
     uiForm().absp_valCansigs->setVisible(checked);
     uiForm().absp_valCansiga->setVisible(checked);
+    uiForm().absp_valCanFormula->setVisible(checked);
 
     uiForm().absp_dsCanInput->setEnabled(checked);
   
