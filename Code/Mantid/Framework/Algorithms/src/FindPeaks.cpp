@@ -47,7 +47,6 @@
 #include <numeric>
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidAPI/TableRow.h"
 
 #include <fstream>
 
@@ -303,8 +302,10 @@ namespace Algorithms
   {
     m_outPeakTableWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
     m_outPeakTableWS->addColumn("int", "spectrum");
+
     if (m_rawPeaksTable)
     {
+      // Output raw peak parameters
       size_t numpeakpars = m_peakFunction->nParams();
       size_t numbkgdpars = m_backgroundFunction->nParams();
       for (size_t i = 0; i < numpeakpars; ++i)
@@ -315,6 +316,7 @@ namespace Algorithms
     }
     else
     {
+      // Output centre, weight, height, A0, A1 and A2
       m_numTableParams = 6;
       m_outPeakTableWS->addColumn("double", "centre");
       m_outPeakTableWS->addColumn("double", "width");
@@ -323,6 +325,7 @@ namespace Algorithms
       m_outPeakTableWS->addColumn("double", "backgroundslope");
       m_outPeakTableWS->addColumn("double", "A2");
     }
+
     m_outPeakTableWS->addColumn("double", "chi2");
   }
 
@@ -1296,12 +1299,19 @@ namespace Algorithms
       }
 #endif
       size_t nparams = peakfunction->nParams();
+      size_t nparamsb = bkgdfunction->nParams();
+
+      size_t numcols = m_outPeakTableWS->columnCount();
+      if (nparams + nparamsb + 2 != numcols)
+      {
+          throw std::runtime_error("Error 1307 number of columns do not matches");
+      }
+
       for (size_t i = 0; i < nparams; ++i)
       {
         t << peakfunction->getParameter(i);
       }
-      nparams = bkgdfunction->nParams();
-      for (size_t i = 0; i < nparams; ++i)
+      for (size_t i = 0; i < nparamsb; ++i)
       {
         t << bkgdfunction->getParameter(i);
       }
