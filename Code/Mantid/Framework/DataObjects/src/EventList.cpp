@@ -3901,12 +3901,14 @@ namespace DataObjects
   /** Split the event list into n outputs, operating on a vector of either TofEvent's or WeightedEvent's
    *  The comparison between neutron event and splitter is based on neutron event's pulse time plus
    *
-   * @param splitter :: a TimeSplitterType giving where to split
+   * @param vectimes :: a vector of absolute time in nanoseconds serving as boundaries of splitters
+   * @param vecgroups :: a vector of integer serving as the target workspace group for splitters
    * @param outputs :: a vector of where the split events will end up. The # of entries in there should
    *        be big enough to accommodate the indices.
    * @param events :: either this->events or this->weightedEvents.
    * @param tofcorrection :: a correction for each TOF to multiply with.
    * @param docorrection :: flag to determine whether or not to apply correction
+   * @param printdetail :: flag to print out how the events are splitted.
    */
   template< class T >
   std::string EventList::splitByFullTimeVectorSplitterHelper(const std::vector<int64_t>& vectimes,
