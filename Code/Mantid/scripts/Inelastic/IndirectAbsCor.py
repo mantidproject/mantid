@@ -258,7 +258,7 @@ def AbsRunFeeder(inputWS, canWS, geom, beam, ncan, size, avar, density, sampleFo
 
     #set sample material based on input or formula
     if sampleFormula is not None:
-        SetSampleMaterial(InputWorkspace=inputWS,ChemicalFormula=sampleFormula,SampleNumberDensity=density[0])
+        SetSampleMaterial(InputWorkspace=inputWS, ChemicalFormula=sampleFormula, SampleNumberDensity=density[0])
     
         sample = mtd[inputWS].sample()
         sam_mat = sample.getMaterial()
@@ -289,85 +289,22 @@ def AbsRunFeeder(inputWS, canWS, geom, beam, ncan, size, avar, density, sampleFo
     plotAbs(workspaces, plotOpt)
 
 
-# FlatAbs - calculate flat plate absorption factors
-# 
-# For more information See:
-#   - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf  
-#   - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)  
-#
-#  Input parameters :
-#  sigs - list of scattering  cross-sections
-#  siga - list of absorption cross-sections
-#  density - list of density
-#  ncan - = 0 no can, >1 with can
-#  thick - list of thicknesses: sample thickness, can thickness1, can thickness2
-#  angles - list of angles
-#  waves - list of wavelengths
-
-def Fact(xSection,thickness,sec1,sec2):
-    S = xSection*thickness*(sec1-sec2)
-    F = 1.0
-    if (S == 0.):
-        F = thickness
-    else:
-        S = (1-math.exp(-S))/S
-        F = thickness*S
-    return F
-
-def calcThicknessAtSec(xSection, thickness, sec):
-    sec1, sec2 = sec
-
-    thickSec1 = xSection * thickness * sec1
-    thickSec2 = xSection * thickness * sec2
-
-    return thickSec1, thickSec2
-
-def calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, sampleSec2, sec):
-    nlam = len(canXSection)
-
-    assc = np.ones(nlam)
-    acsc = np.ones(nlam)
-    acc = np.ones(nlam)
-
-    sec1, sec2 = sec
-
-    #vector version of fact
-    vecFact = np.vectorize(Fact)
-    f1 = vecFact(canXSection,canThickness1,sec1,sec2)
-    f2 = vecFact(canXSection,canThickness2,sec1,sec2)
-
-    canThick1Sec1, canThick1Sec2 = calcThicknessAtSec(canXSection, canThickness1, sec)
-    canThick2Sec1, canThick2Sec2 = calcThicknessAtSec(canXSection, canThickness2, sec)
-
-    if (sec2 < 0.):
-        val = np.exp(-(canThick1Sec1-canThick1Sec2))
-        assc = ass * val
-
-        acc1 = f1
-        acc2 = f2 * val
-
-        acsc1 = acc1
-        acsc2 = acc2 * np.exp(-(sampleSec1-sampleSec2))
-    else:
-        val = np.exp(-(canThick1Sec1+canThick2Sec2))
-        assc = ass * val
-
-        acc1 = f1 * np.exp(-(canThick1Sec2+canThick2Sec2))
-        acc2 = f2 * val
-
-        acsc1 = acc1 * np.exp(-sampleSec2)
-        acsc2 = acc2 * np.exp(-sampleSec1)
-
-    canThickness = canThickness1+canThickness2
-
-    if(canThickness > 0.):
-        acc = (acc1+acc2)/canThickness
-        acsc = (acsc1+acsc2)/canThickness
-
-    return assc, acsc, acc
-
 def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
-    
+    """ 
+        FlatAbs - calculate flat plate absorption factors
+        
+        For more information See:
+          - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf  
+          - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)  
+
+        @param sigs - list of scattering  cross-sections
+        @param siga - list of absorption cross-sections
+        @param density - list of density
+        @param ncan - =0 no can, >1 with can
+        @param thick - list of thicknesses: sample thickness, can thickness1, can thickness2
+        @param angles - list of angles
+        @param waves - list of wavelengths
+    """
     PICONV = math.pi/180.
 
     #can angle and detector angle
@@ -428,3 +365,63 @@ def FlatAbs(ncan, thick, density, sigs, siga, angles, waves):
             assc, acsc, acc = calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, sampleSec2, [sec1, sec2])
 
     return ass, assc, acsc, acc
+
+def Fact(xSection,thickness,sec1,sec2):
+    S = xSection*thickness*(sec1-sec2)
+    F = 1.0
+    if (S == 0.):
+        F = thickness
+    else:
+        S = (1-math.exp(-S))/S
+        F = thickness*S
+    return F
+
+def calcThicknessAtSec(xSection, thickness, sec):
+    sec1, sec2 = sec
+
+    thickSec1 = xSection * thickness * sec1
+    thickSec2 = xSection * thickness * sec2
+
+    return thickSec1, thickSec2
+
+def calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, sampleSec2, sec):
+    assc = np.ones(nlam)
+    acsc = np.ones(nlam)
+    acc = np.ones(nlam)
+
+    sec1, sec2 = sec
+
+    #vector version of fact
+    vecFact = np.vectorize(Fact)
+    f1 = vecFact(canXSection,canThickness1,sec1,sec2)
+    f2 = vecFact(canXSection,canThickness2,sec1,sec2)
+
+    canThick1Sec1, canThick1Sec2 = calcThicknessAtSec(canXSection, canThickness1, sec)
+    canThick2Sec1, canThick2Sec2 = calcThicknessAtSec(canXSection, canThickness2, sec)
+
+    if (sec2 < 0.):
+        val = np.exp(-(canThick1Sec1-canThick1Sec2))
+        assc = ass * val
+
+        acc1 = f1
+        acc2 = f2 * val
+
+        acsc1 = acc1
+        acsc2 = acc2 * np.exp(-(sampleSec1-sampleSec2))
+    else:
+        val = np.exp(-(canThick1Sec1+canThick2Sec2))
+        assc = ass * val
+
+        acc1 = f1 * np.exp(-(canThick1Sec2+canThick2Sec2))
+        acc2 = f2 * val
+
+        acsc1 = acc1 * np.exp(-sampleSec2)
+        acsc2 = acc2 * np.exp(-sampleSec1)
+
+    canThickness = canThickness1+canThickness2
+
+    if(canThickness > 0.):
+        acc = (acc1+acc2)/canThickness
+        acsc = (acsc1+acsc2)/canThickness
+
+    return assc, acsc, acc
