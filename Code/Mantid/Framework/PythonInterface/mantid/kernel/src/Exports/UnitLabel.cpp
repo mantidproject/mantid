@@ -62,6 +62,10 @@ void export_UnitLabel()
 
     .def("utf8", &utf8ToUnicode,
          "Return the label as a unicode string")
+
+    // special functions
+    .def("__str__", &UnitLabel::ascii, return_value_policy<copy_const_reference>())
+    .def("__unicode__", &utf8ToUnicode)
     ;
 }
 
