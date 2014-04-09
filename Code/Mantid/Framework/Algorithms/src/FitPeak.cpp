@@ -596,7 +596,6 @@ namespace Algorithms
   /** Push/store a fit result (function) to storage
     * @param func :: function to get parameter values stored
     * @param funcparammap :: map to store function parameter's names and value
-    * @param paramerrormap :: map to store function parameter's names and fitting error
     */
   void FitOneSinglePeak::push(IFunction_const_sptr func, std::map<std::string, double>& funcparammap)
   {
@@ -828,11 +827,12 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Fit peak function and background function as composite function
-    * @param fitfunc :: function to fit
+    * @param peakfunc :: peak function to fit
+    * @param bkgdfunc :: background function to fit
     * @param dataws :: matrix workspace to fit with
     * @param wsindex :: workspace index of the spectrum in matrix workspace
-    * @param vec_xmin :: minimin values of domains
-    * @param vec_xmax :: maximim values of domains
+    * @param startx :: minimum x value of the fitting window
+    * @param endx :: maximum x value of the fitting window
     * @return :: Rwp/chi2
     */
   double FitOneSinglePeak::fitCompositeFunction(API::IPeakFunction_sptr peakfunc, API::IBackgroundFunction_sptr bkgdfunc,
