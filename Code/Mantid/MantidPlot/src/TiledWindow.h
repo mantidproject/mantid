@@ -57,8 +57,14 @@ private:
   Tile *getTileAtMousePos( const QPoint& pos );
   /// Add a tile to the selection.
   void addToSelection(Tile *tile, bool append);
+  /// Add a range of tiles to the selection.
+  void addRangeToSelection(Tile *tile);
   /// Clear the selection.
   void clearSelection();
+  /// Calculate a linear index of a tile .
+  int calcFlatIndex(Tile *tile) const;
+  /// Calculate tile's position in the layout.
+  void calcTilePosition( int index, int &row, int &col ) const;
 
   /// The layout arranging the tiles into a grid.
   mutable QGridLayout *m_layout;

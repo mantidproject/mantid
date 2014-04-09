@@ -127,6 +127,7 @@ TiledWindow::TiledWindow(QWidget* parent, const QString& label, const QString& n
 
 QString TiledWindow::saveToString(const QString &info, bool)
 {
+  UNUSED_ARG(info);
   QString s= "<tiled_widget>\n";
   s+="</tiled_widget>\n";
   return s;
@@ -134,6 +135,7 @@ QString TiledWindow::saveToString(const QString &info, bool)
 
 void TiledWindow::restore(const QStringList& data)
 {
+  UNUSED_ARG(data);
 }
 
 void TiledWindow::print()
@@ -163,6 +165,8 @@ int TiledWindow::columnCount() const
  */
 void TiledWindow::reshape(int rows, int cols)
 {
+  UNUSED_ARG(rows);
+  UNUSED_ARG(cols);
 }
 
 /**
@@ -356,8 +360,15 @@ void TiledWindow::mousePressEvent(QMouseEvent *ev)
 {
   auto tile = getTileAtMousePos( ev->pos() );
   if ( tile == NULL ) return;
-  bool append = (ev->modifiers() & Qt::ControlModifier) != 0;
-  addToSelection( tile, append );
+  if ( (ev->modifiers() & Qt::ShiftModifier) != 0 )
+  {
+    addRangeToSelection( tile );
+  }
+  else
+  {
+    bool append = (ev->modifiers() & Qt::ControlModifier) != 0;
+    addToSelection( tile, append );
+  }
 }
 
 /**
@@ -389,6 +400,52 @@ void TiledWindow::addToSelection(Tile *tile, bool append)
 }
 
 /**
+ * Add a range of tiles to the selection. One of the ends of tha range
+ * is given by an already selected tile with the lowest flat index (see calcFlatIndex).
+ * The other end is the tile in the argument.
+ * @param tile :: A new end tile of the range.
+ */
+void TiledWindow::addRangeToSelection(Tile *tile)
+{
+  if ( m_selection.isEmpty() )
+  {
+    addToSelection( tile, false );
+    return;
+  }
+
+  int ifirst = rowCount() * columnCount();
+  int ilast = 0;
+  foreach(Tile *selected, m_selection)
+  {
+    int index = calcFlatIndex( selected );
+    if ( index < ifirst ) ifirst = index;
+    if ( index > ilast ) ilast = index;
+  }
+
+  int index = calcFlatIndex( tile );
+  if ( index == ifirst || index == ilast ) return;
+
+  if ( index < ifirst )
+  {
+    ilast = ifirst;
+    ifirst = index;
+  }
+  else
+  {
+    ilast = index;
+  }
+
+  clearSelection();
+  for(int i = ifirst; i <= ilast; ++i)
+  {
+    int row(0), col(0);
+    calcTilePosition( i, row, col );
+    Tile *tile = getTile( row, col );
+    addToSelection( tile, true );
+  }
+}
+
+/**
  * Clear the selection.
  */
 void TiledWindow::clearSelection()
@@ -398,4 +455,43 @@ void TiledWindow::clearSelection()
     tile->makeNormal();
   }
   m_selection.clear();
+}
+
+/**
+ * Calculate an index of a tile as if they were in a 1d list of concatenated rows.
+ * QLayout::indexOf doesn't work here.
+ * @param tile :: A tile to get the index for.
+ */
+int TiledWindow::calcFlatIndex(Tile *tile) const
+{
+  int indexInLayout = m_layout->indexOf( tile );
+  int row(0), col(0), rowSpan(1), colSpan(1);
+  m_layout->getItemPosition( indexInLayout, &row, &col, &rowSpan, &colSpan );
+  return row * columnCount() + col;
+}
+
+/**
+ * Calculate tile's row and column indices given it's flat index as returned 
+ * by calcFlatIndex(...).
+ * @param index :: The flat index of a tile.
+ * @param row :: A reference to a variable to accept the row index value.
+ * @param col :: A reference to a variable to accept the column index value.
+ */
+void TiledWindow::calcTilePosition( int index, int &row, int &col ) const
+{
+  if ( index < 0 )
+  {
+    throw std::range_error("Flat index in TiledWindow is outside range.");
+  }
+  int ncols = columnCount();
+  row = index / ncols;
+  if ( row >= rowCount() )
+  {
+    throw std::range_error("Flat index in TiledWindow is outside range.");
+  }
+  col = index - row * ncols;
+  if ( col >= ncols )
+  {
+    throw std::range_error("Flat index in TiledWindow is outside range.");
+  }
 }
