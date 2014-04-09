@@ -440,14 +440,13 @@ class DirectEnergyConversion(object):
         
         if self.check_background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
-            ConvertToDistribution(Workspace=result_name)    
             CalculateFlatBackground(InputWorkspace=result_name,OutputWorkspace=result_name,
                                     StartX= self.bkgd_range[0] + bin_offset,EndX= self.bkgd_range[1] + bin_offset,
-                                     WorkspaceIndexList= '',Mode= 'Mean')
-            ConvertFromDistribution(Workspace=result_name)  
+                                     WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1')
 
-        # Normalise using the chosen method
-        # TODO: This really should be done as soon as possible after loading
+
+        # Normalise using the chosen method+group
+        # : This really should be done as soon as possible after loading
         self.normalise(mtd[result_name], result_name, self.normalise_method, range_offset=bin_offset)
 
        
