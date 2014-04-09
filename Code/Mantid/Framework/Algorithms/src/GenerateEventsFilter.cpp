@@ -803,20 +803,20 @@ namespace Algorithms
    * SINGLE log values >= min and < max. Creates SplittingInterval's where
    * times match the log values, and going to index==0.
    *
-   * @param filterIncrease :: As log value increase, and within (min, max), include this range in the filter.
-   * @param filterDecrease :: As log value increase, and within (min, max), include this range in the filter.
-   * @param startTime :: Start time.
-   * @param stopTime :: Stop time.
-   * @param wsindex :: Workspace index.
    * @param split :: Splitter that will be filled.
    * @param min :: Min value.
    * @param max :: Max value.
    * @param TimeTolerance :: Offset added to times in seconds.
    * @param centre :: Whether the log value time is considered centred or at the beginning.
+   * @param filterIncrease :: As log value increase, and within (min, max), include this range in the filter.
+   * @param filterDecrease :: As log value increase, and within (min, max), include this range in the filter.
+   * @param startTime :: Start time.
+   * @param stopTime :: Stop time.
+   * @param wsindex :: Workspace index.
    */
-  void GenerateEventsFilter::makeFilterByValue(TimeSplitterType &split,
-                                               double min, double max, double TimeTolerance, bool centre, bool filterIncrease,
-                                               bool filterDecrease, DateAndTime startTime, Kernel::DateAndTime stopTime, int wsindex)
+  void GenerateEventsFilter::makeFilterByValue(TimeSplitterType &split, double min, double max, double TimeTolerance,
+                                               bool centre, bool filterIncrease, bool filterDecrease,
+                                               DateAndTime startTime, Kernel::DateAndTime stopTime, int wsindex)
   {
     // 1. Do nothing if the log is empty.
     if (m_dblLog->size() == 0)
@@ -930,8 +930,6 @@ namespace Algorithms
   /** Fill a TimeSplitterType that will filter the events by matching
    * SINGLE log values >= min and < max. Creates SplittingInterval's where
    * times match the log values, and going to index==0.
-   *
-   * @param split :: Splitter that will be filled.
    * @param indexwsindexmap :: Index.
    * @param logvalueranges ::  A vector of double. Each 2i and 2i+1 pair is one individual log value range.
    * @param centre :: Whether the log value time is considered centred or at the beginning.
@@ -989,7 +987,6 @@ namespace Algorithms
    * SINGLE log values >= min and < max. Creates SplittingInterval's where
    * times match the log values, and going to index==0.
    *
-   * @param split :: Splitter that will be filled.
    * @param indexwsindexmap :: Index.
    * @param logvalueranges ::  A vector of double. Each 2i and 2i+1 pair is one individual log value range.
    * @param centre :: Whether the log value time is considered centred or at the beginning.
