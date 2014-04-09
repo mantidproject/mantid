@@ -102,7 +102,7 @@ void CalculateFlatBackground::exec()
   const bool removeBackground =
     std::string(getProperty("outputMode")) == "Subtract Background";
 
-  // Initialise the progress reporting object
+  // Initialize the progress reporting object
   m_progress = new Progress(this,0.0,0.2,numHists); 
 
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
