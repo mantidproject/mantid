@@ -76,6 +76,8 @@ void CalculateFlatBackground::init()
   declareProperty("OutputMode", "Subtract Background", boost::make_shared<StringListValidator>(outputOptions),
       "Once the background has been determined it can either be subtracted from \n"
       "the InputWorkspace and returned or just returned (default: Subtract Background)");
+  declareProperty("SkipMonitors",false,"By default, the algorithm calculates and removes background from monitors in the same way as from normal detectors\n"
+                  "If this property is set to true, background is not calculated/removed from monitors.",Direction::Input);
 }
 
 void CalculateFlatBackground::exec()
@@ -86,6 +88,8 @@ void CalculateFlatBackground::exec()
   const int numHists = static_cast<int>(inputWS->getNumberHistograms());
   const int blocksize = static_cast<int>(inputWS->blocksize());
 
+
+  m_skipMonitors = getProperty("SkipMonitors");
   // Get the required X range
   double startX,endX;
   this->checkRange(startX,endX);
@@ -128,18 +132,26 @@ void CalculateFlatBackground::exec()
 
   // Now loop over the required spectra
   std::vector<int>::const_iterator specIt;
+  // local cache for global variable
+  bool skipMonitors(m_skipMonitors);
   for (specIt = specInds.begin(); specIt != specInds.end(); ++specIt)
   {
     const int currentSpec = *specIt;
     try
     {
+      if (skipMonitors)
+      {
+        if (outputWS->getDetector(currentSpec)->isMonitor())
+          continue;        
+      }
+
       // Only if Mean() is called will variance be changed
       double variance = -1;
 
       // Now call the function the user selected to calculate the background
       const double background = std::string(getProperty("mode")) == "Mean" ?
         this->Mean(outputWS, currentSpec, startX, endX, variance) :
-        this->LinearFit(outputWS, currentSpec, startX, endX);
+      this->LinearFit(outputWS, currentSpec, startX, endX);
 
       if (background < 0)
       {
@@ -190,7 +202,7 @@ void CalculateFlatBackground::exec()
       throw;
     }
 
-    // make regular progress reports and check for cancelling the algorithm
+    // make regular progress reports and check for canceling the algorithm
     if ( static_cast<int>( specInds.end()-specInds.begin() ) % progStep == 0 )
     {
       interruption_point();
