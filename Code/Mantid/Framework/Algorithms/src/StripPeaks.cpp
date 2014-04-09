@@ -185,10 +185,6 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
   //progress from 0.3 to 1.0 here 
   prg=0.3;
   // Loop over the list of peaks
-  std::vector<std::string> colnames = peakslist->getColumnNames();
-  // for (size_t i = 0; i < colnames.size(); ++i)
-  // g_log.notice() << "Column " << i << " Name = " << colnames[i] << "\n";
-
   for (size_t i = 0; i < peakslist->rowCount(); ++i)
   {
     // Get references to the data
