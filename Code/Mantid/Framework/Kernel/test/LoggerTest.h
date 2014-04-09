@@ -79,6 +79,7 @@ public:
     log.information() << "Information Message" << std::endl;
   }
 
+ 
   //---------------------------------------------------------------------------
   /** Log very quickly from a lot of OpenMP threads*/
   void test_OpenMP_ParallelLogging()

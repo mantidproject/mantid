@@ -76,6 +76,8 @@ void CalculateFlatBackground::init()
   declareProperty("OutputMode", "Subtract Background", boost::make_shared<StringListValidator>(outputOptions),
       "Once the background has been determined it can either be subtracted from \n"
       "the InputWorkspace and returned or just returned (default: Subtract Background)");
+  declareProperty("SkipMonitors",false,"By default, the algorithm calculates and removes background from monitors in the same way as from normal detectors\n"
+                  "If this property is set to true, background is not calculated/removed from monitors.",Direction::Input);
 }
 
 void CalculateFlatBackground::exec()
@@ -86,6 +88,8 @@ void CalculateFlatBackground::exec()
   const int numHists = static_cast<int>(inputWS->getNumberHistograms());
   const int blocksize = static_cast<int>(inputWS->blocksize());
 
+
+  m_skipMonitors = getProperty("SkipMonitors");
   // Get the required X range
   double startX,endX;
   this->checkRange(startX,endX);
@@ -98,7 +102,7 @@ void CalculateFlatBackground::exec()
   const bool removeBackground =
     std::string(getProperty("outputMode")) == "Subtract Background";
 
-  // Initialise the progress reporting object
+  // Initialize the progress reporting object
   m_progress = new Progress(this,0.0,0.2,numHists); 
 
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -128,18 +132,26 @@ void CalculateFlatBackground::exec()
 
   // Now loop over the required spectra
   std::vector<int>::const_iterator specIt;
+  // local cache for global variable
+  bool skipMonitors(m_skipMonitors);
   for (specIt = specInds.begin(); specIt != specInds.end(); ++specIt)
   {
     const int currentSpec = *specIt;
     try
     {
+      if (skipMonitors)
+      {
+        if (outputWS->getDetector(currentSpec)->isMonitor())
+          continue;        
+      }
+
       // Only if Mean() is called will variance be changed
       double variance = -1;
 
       // Now call the function the user selected to calculate the background
       const double background = std::string(getProperty("mode")) == "Mean" ?
         this->Mean(outputWS, currentSpec, startX, endX, variance) :
-        this->LinearFit(outputWS, currentSpec, startX, endX);
+      this->LinearFit(outputWS, currentSpec, startX, endX);
 
       if (background < 0)
       {
@@ -190,7 +202,7 @@ void CalculateFlatBackground::exec()
       throw;
     }
 
-    // make regular progress reports and check for cancelling the algorithm
+    // make regular progress reports and check for canceling the algorithm
     if ( static_cast<int>( specInds.end()-specInds.begin() ) % progStep == 0 )
     {
       interruption_point();
@@ -238,7 +250,7 @@ void CalculateFlatBackground::convertToDistribution(API::MatrixWorkspace_sptr wo
     MantidVec X = workspace->readX(i);
     // Calculate bin widths
     std::adjacent_difference(X.begin()+1, X.end(), adjacents.begin());
-    // the first entry from adjacent difference is just a copy of the fisrt entry in the input vector, ignore this. The histogram validator for this algorithm ensures that X.size() > 1
+    // the first entry from adjacent difference is just a copy of the first entry in the input vector, ignore this. The histogram validator for this algorithm ensures that X.size() > 1
     MantidVec widths( adjacents.begin()+1, adjacents.end() );
     if ( ! VectorHelper::isConstantValue(widths) )
     {
@@ -337,7 +349,7 @@ double CalculateFlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS, c
     throw std::invalid_argument("EndX was set to the start of one of the spectra, it must greater than the first X-value in any of the specified spectra");
   }
   
-  // the +1 is because this is an inclusive sum (includes each bin that contains each X-value). Hence if startInd == endInd we are still analysising one bin
+  // the +1 is because this is an inclusive sum (includes each bin that contains each X-value). Hence if startInd == endInd we are still analyzing one bin
   const double numBins = static_cast<double>(1 + endInd - startInd);
   // the +1 here is because the accumulate() stops one before the location of the last iterator
   double background =
