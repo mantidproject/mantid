@@ -457,11 +457,9 @@ namespace DataHandling
     */
   void LoadEventPreNexus2::unmaskVetoEventIndex()
   {
-    // Check pulse ID with events
+    // Unmask veto bit from vetoed events
 
-    {{{
     // cppcheck-suppress syntaxError
-    }}}
     PRAGMA_OMP(parallel for schedule(dynamic, 1) ) 
     for (int i = 0; i < static_cast<int>(event_indices.size()); ++i)
     {
@@ -781,9 +779,7 @@ namespace DataHandling
     buffers.resize(numThreads);
     eventVectors = new EventVector_pt *[numThreads];
 
-    {{{
     // cppcheck-suppress syntaxError
-    }}}
     PRAGMA_OMP( parallel for if (parallelProcessing) )
     for (int i=0; i < int(numThreads); i++)
     {
