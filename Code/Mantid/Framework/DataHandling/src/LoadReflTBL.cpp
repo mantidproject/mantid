@@ -165,10 +165,22 @@ namespace Mantid
       size_t valsFound = 0;
       size_t lastComma = 0;
       size_t pos = 0;
+      bool firstCheck = true;
+      bool firstCell = true;
       cols.clear();
       while (pos!=std::string::npos)
       {
-        pos=line.find(',',pos+1);
+        if (firstCheck)
+        {
+          pos=line.find(',');
+          firstCheck = false;
+          //lastpos = pos;
+        }
+        else
+        {
+          pos=line.find(',',pos+1);
+          //lastpos = pos;
+        }
         if (pos!=std::string::npos)
         {
           if (pairID < quoteBounds.size() && pos>quoteBounds.at(pairID).at(0))
@@ -184,13 +196,14 @@ namespace Mantid
           }
           else
           {
-            if (lastComma != 0)
+            if (firstCell)
             {
-              cols.push_back(line.substr(lastComma + 1,pos - (lastComma + 1)));
+              cols.push_back(line.substr(0,pos));
+              firstCell = false;
             }
             else
             {
-              cols.push_back(line.substr(0,pos));
+              cols.push_back(line.substr(lastComma + 1,pos - (lastComma + 1)));
             }
             ++valsFound;
           }
@@ -208,7 +221,7 @@ namespace Mantid
           }
         }
       }
-      if (cols.size() > 17)
+      if (cols.size() != 17)
       {
         std::string message = "A line must contain 16 cell-delimiting commas. Found " + boost::lexical_cast<std::string>(cols.size() - 1) + ".";
         throw std::length_error(message);
@@ -293,7 +306,7 @@ namespace Mantid
       auto colQmax = ws->addColumn("str","Qmax");
       auto colDqq = ws->addColumn("str","dq/q");
       auto colScale = ws->addColumn("str","Scale");
-      auto colStitch = ws->addColumn("str","StitchGroup");
+      auto colStitch = ws->addColumn("int","StitchGroup");
 
       colRuns->setPlotType(0);
       colTheta->setPlotType(0);
@@ -328,7 +341,7 @@ namespace Mantid
           row << columns.at(4);
           row << columns.at(15);
           row << columns.at(16);
-          row << boost::lexical_cast<std::string>(stitchID);
+          row << stitchID;
         }
 
         //check if the second run in the row has any data associated with it
@@ -343,7 +356,7 @@ namespace Mantid
           row << columns.at(9);
           row << columns.at(15);
           row << columns.at(16);
-          row << boost::lexical_cast<std::string>(stitchID);
+          row << stitchID;
         }
 
         //check if the third run in the row has any data associated with it
@@ -358,7 +371,7 @@ namespace Mantid
           row << columns.at(14);
           row << columns.at(15);
           row << columns.at(16);
-          row << boost::lexical_cast<std::string>(stitchID);
+          row << stitchID;
         }
         ++stitchID;
       }
