@@ -48,13 +48,26 @@ namespace Mantid
       UnitLabel(const AsciiString & ascii, const Utf8String & unicode);
       /// Constructor giving both labels as ascii
       UnitLabel(const AsciiString & ascii);
+      /// Constructor giving both labels as ascii using a C-style string
+      UnitLabel(const char * ascii);
 
       /// Equality operator with other label
       bool operator==(const UnitLabel & rhs) const;
       /// Equality operator with std::string
       bool operator==(const std::string & rhs) const;
-      /// Equality operator with std::wtring
+      /// Equality operator with c-style string
+      bool operator==(const char * rhs) const;
+      /// Equality operator with std::wstring
       bool operator==(const std::wstring & rhs) const;
+
+      /// Inqquality operator with other label
+      bool operator!=(const UnitLabel & rhs) const;
+      /// Inequality operator with std::string
+      bool operator!=(const std::string & rhs) const;
+      /// Inequality operator with c-style string
+      bool operator!=(const char * rhs) const;
+      /// Inequality operator with std::wstring
+      bool operator!=(const std::wstring & rhs) const;
 
       /// Return an ascii label for unit
       const AsciiString & ascii() const;
