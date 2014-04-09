@@ -779,7 +779,6 @@ namespace DataHandling
     buffers.resize(numThreads);
     eventVectors = new EventVector_pt *[numThreads];
 
-    // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for if (parallelProcessing) )
     for (int i=0; i < int(numThreads); i++)
     {
