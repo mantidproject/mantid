@@ -223,14 +223,14 @@ namespace Algorithms
     m_dataWS = getProperty("InputWorkspace");
 
     // WorkspaceIndex
-    index = getProperty("WorkspaceIndex");
-    singleSpectrum = !isEmpty(index);
-    if (singleSpectrum && index >= static_cast<int>(m_dataWS->getNumberHistograms()))
+    m_wsIndex = getProperty("WorkspaceIndex");
+    singleSpectrum = !isEmpty(m_wsIndex);
+    if (singleSpectrum && m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms()))
     {
-      g_log.error() << "The value of WorkspaceIndex provided (" << index
+      g_log.error() << "The value of WorkspaceIndex provided (" << m_wsIndex
                     << ") is larger than the size of this workspace (" << m_dataWS->getNumberHistograms()
                     << ")\n";
-      throw Kernel::Exception::IndexError(index, m_dataWS->getNumberHistograms() - 1,
+      throw Kernel::Exception::IndexError(m_wsIndex, m_dataWS->getNumberHistograms() - 1,
                                           "FindPeaks WorkspaceIndex property");
     }
 
@@ -334,8 +334,8 @@ namespace Algorithms
     std::size_t numPeaks = peakcentres.size();
 
     // Loop over the spectra searching for peaks
-    const int start = singleSpectrum ? index : 0;
-    const int end = singleSpectrum ? index + 1 : static_cast<int>(m_dataWS->getNumberHistograms());
+    const int start = singleSpectrum ? m_wsIndex : 0;
+    const int end = singleSpectrum ? m_wsIndex + 1 : static_cast<int>(m_dataWS->getNumberHistograms());
     m_progress = new Progress(this, 0.0, 1.0, end - start);
 
     for (int spec = start; spec < end; ++spec)
@@ -411,8 +411,8 @@ namespace Algorithms
     //  setProperty("SmoothedData",smoothedData);
 
     // Loop over the spectra searching for peaks
-    const int start = singleSpectrum ? index : 0;
-    const int end = singleSpectrum ? index + 1 : static_cast<int>(smoothedData->getNumberHistograms());
+    const int start = singleSpectrum ? m_wsIndex : 0;
+    const int end = singleSpectrum ? m_wsIndex + 1 : static_cast<int>(smoothedData->getNumberHistograms());
     m_progress = new Progress(this, 0.0, 1.0, end - start);
     const int blocksize = static_cast<int>(smoothedData->blocksize());
 
@@ -1254,7 +1254,8 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Find peak background given a certain range
+  /** Find peak background given a certain range by
+    * calling algorithm "FindPeakBackground"
     */
   void FindPeaks::findPeakBackground(const MatrixWorkspace_sptr& input, int spectrum, size_t i_min, size_t i_max,
                                      std::vector<double>& vecBkgdParamValues, std::vector<double>& vecpeakrange)
@@ -1329,12 +1330,9 @@ namespace Algorithms
       i_peakmax = i_max;
       // Estimate background roughly for a failed case
       estimateBackground(vecX, vecY, i_min, i_max, bg0, bg1, bg2);
-      g_log.notice() << "[DBXXW] type = " << m_backgroundType << ", spectrum " << spectrum << ", i_min = " << i_min
-                     << ", Range is " << vecX[i_min] << ", " << vecX[i_max] << "\n";
+      g_log.debug() << "Baclground type = " << m_backgroundType << ", spectrum " << spectrum << ", i_min = " << i_min
+                    << ", Range is " << vecX[i_min] << ", " << vecX[i_max] << "\n";
     }
-
-    g_log.notice() << "[DBXXX] imin = " << i_min << ", imax = " << i_max << ", vector X size = "
-                   << vecX.size() << ", i_peakmin = " << i_peakmin << ", ipeakmax = " << i_peakmax << "\n";
 
     // Set output
     vecpeakrange.resize(2);
@@ -1352,7 +1350,6 @@ namespace Algorithms
 
     g_log.information() << "Number of background parameter values = " << vecBkgdParamValues.size()
                         << ", background order = " << m_bkgdOrder << "\n";
-    g_log.warning("Need to find out how the background esitmated.");
 
     return;
   }

@@ -195,7 +195,7 @@ private:
   //Properties saved in the algo.
   API::MatrixWorkspace_sptr m_dataWS; ///<workspace to check for peaks
   int m_inputPeakFWHM; ///<holder for the requested peak FWHM
-  int index; ///<list of workspace indicies to check
+  int m_wsIndex; ///<list of workspace indicies to check
   bool singleSpectrum; ///<flag for if only a single spectrum is present
   bool m_highBackground; ///<flag for find relatively weak peak in high background
   bool m_rawPeaksTable; ///<flag for whether the output is the raw peak parameters or effective (centre, width, height)
