@@ -250,7 +250,7 @@ void CalculateFlatBackground::convertToDistribution(API::MatrixWorkspace_sptr wo
     MantidVec X = workspace->readX(i);
     // Calculate bin widths
     std::adjacent_difference(X.begin()+1, X.end(), adjacents.begin());
-    // the first entry from adjacent difference is just a copy of the fisrt entry in the input vector, ignore this. The histogram validator for this algorithm ensures that X.size() > 1
+    // the first entry from adjacent difference is just a copy of the first entry in the input vector, ignore this. The histogram validator for this algorithm ensures that X.size() > 1
     MantidVec widths( adjacents.begin()+1, adjacents.end() );
     if ( ! VectorHelper::isConstantValue(widths) )
     {
@@ -349,7 +349,7 @@ double CalculateFlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS, c
     throw std::invalid_argument("EndX was set to the start of one of the spectra, it must greater than the first X-value in any of the specified spectra");
   }
   
-  // the +1 is because this is an inclusive sum (includes each bin that contains each X-value). Hence if startInd == endInd we are still analysising one bin
+  // the +1 is because this is an inclusive sum (includes each bin that contains each X-value). Hence if startInd == endInd we are still analyzing one bin
   const double numBins = static_cast<double>(1 + endInd - startInd);
   // the +1 here is because the accumulate() stops one before the location of the last iterator
   double background =
