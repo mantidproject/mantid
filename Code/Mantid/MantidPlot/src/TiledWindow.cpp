@@ -170,12 +170,11 @@ void TiledWindow::reshape(int rows, int cols)
 }
 
 /**
- * If a cell contains an Tile return it. If the cell contains a widget of another type
- * throw an exception. If it's empty return fill it with a Tile and return it.
+ * Get a Tile widget at position(row,col). If it doesn't exist create it.
  * @param row :: The row of the cell.
  * @param col :: The column of the cell.
  */
-Tile *TiledWindow::getTile(int row, int col)
+Tile *TiledWindow::getOrAddTile(int row, int col)
 {
   auto item = m_layout->itemAtPosition( row, col );
   if ( item == NULL )
@@ -187,6 +186,25 @@ Tile *TiledWindow::getTile(int row, int col)
     {
       throw std::logic_error("TiledWindow cannot be properly initialized.");
     }
+  }
+  Tile *widget = dynamic_cast<Tile*>(item->widget());
+  if ( widget != NULL ) return widget;
+
+  throw std::logic_error("TiledWindow wasn't properly initialized.");
+}
+
+/**
+ * If a cell contains an Tile return it. If the cell contains a widget of another type
+ * throw an exception. If it's empty return fill it with a Tile and return it.
+ * @param row :: The row of the cell.
+ * @param col :: The column of the cell.
+ */
+Tile *TiledWindow::getTile(int row, int col)
+{
+  auto item = m_layout->itemAtPosition( row, col );
+  if ( item == NULL )
+  {
+    throw std::runtime_error("Tile indices are out of range.");
   }
   Tile *widget = dynamic_cast<Tile*>(item->widget());
   if ( widget != NULL ) return widget;
@@ -226,12 +244,7 @@ void TiledWindow::addWidget(MdiSubWindow *widget, int row, int col)
 {
   try
   {
-    Tile *tile = getTile( row, col );
-    if ( tile == NULL )
-    {
-      tile = new Tile(this);
-      m_layout->addWidget( tile );
-    }
+    Tile *tile = getOrAddTile( row, col );
     // prepare the cell
     m_layout->setColumnMinimumWidth(col,minimumTileWidth);
     m_layout->setRowMinimumHeight(row,minimumTileHeight);
@@ -301,21 +314,36 @@ void TiledWindow::removeWidgetToFloating(int row, int col)
 
 /**
  * Remove (but don't delete) a tile.
- * @param tile :: A tile to remove.
+ * @param row :: The row of a tile to remove.
+ * @param col :: The column of a tile to remove.
  * @return :: A pointer to the removed subwindow.
  */
 MdiSubWindow *TiledWindow::removeTile(int row, int col)
 {
   Tile *tile = getTile( row, col );
+  MdiSubWindow *widget = removeTile( tile );
+  if ( widget == NULL )
+  {
+    QString msg = QString("Cell (%1,%2) is empty.").arg(row).arg(col);
+    throw std::runtime_error(msg.toStdString());
+  }
+  return widget;
+}
+
+/**
+ * Remove (but don't delete) a tile.
+ * @param tile :: A tile to remove.
+ * @return :: A pointer to the removed subwindow.
+ */
+MdiSubWindow *TiledWindow::removeTile(Tile *tile)
+{
   MdiSubWindow *widget = tile->widget();
   if ( widget != NULL )
   {
     tile->removeWidget();
     widget->setAttribute(Qt::WA_TransparentForMouseEvents,false);
-    return widget;
   }
-  QString msg = QString("Cell (%1,%2) is empty.").arg(row).arg(col);
-  throw std::runtime_error(msg.toStdString());
+  return widget;
 }
 
 /**
@@ -364,10 +392,22 @@ void TiledWindow::mousePressEvent(QMouseEvent *ev)
   {
     addRangeToSelection( tile );
   }
-  else
+  else if ( (ev->modifiers() & Qt::ControlModifier) != 0 )
   {
-    bool append = (ev->modifiers() & Qt::ControlModifier) != 0;
-    addToSelection( tile, append );
+    addToSelection( tile, true );
+  }
+}
+
+/**
+ * Mouse release event handler.
+ */
+void TiledWindow::mouseReleaseEvent(QMouseEvent *ev)
+{
+  if ( ev->modifiers() == Qt::NoModifier )
+  {
+    auto tile = getTileAtMousePos( ev->pos() );
+    if ( tile == NULL ) return;
+    addToSelection( tile, false );
   }
 }
 
@@ -383,11 +423,8 @@ void TiledWindow::addToSelection(Tile *tile, bool append)
   if ( tile->widget() == NULL ) return;
   if ( append )
   {
-    int index = m_selection.indexOf( tile );
-    if ( index >= 0 )
+    if ( deselectTile( tile ) )
     {
-      m_selection.removeAt( index );
-      tile->makeNormal();
       return;
     }
   }
@@ -423,7 +460,7 @@ void TiledWindow::addRangeToSelection(Tile *tile)
   }
 
   int index = calcFlatIndex( tile );
-  if ( index == ifirst || index == ilast ) return;
+  if ( index == ilast ) return;
 
   if ( index < ifirst )
   {
@@ -458,6 +495,23 @@ void TiledWindow::clearSelection()
 }
 
 /**
+ * Deselect a tile. If the tile isn't selected do nothing. 
+ * @param tile :: A tile to deselect.
+ * @return true if the tile was deselected and false if it was not selected before the call.
+ */
+bool TiledWindow::deselectTile(Tile *tile)
+{
+  int index = m_selection.indexOf( tile );
+  if ( index >= 0 )
+  {
+    m_selection.removeAt( index );
+    tile->makeNormal();
+    return true;
+  }
+  return false;
+}
+
+/**
  * Calculate an index of a tile as if they were in a 1d list of concatenated rows.
  * QLayout::indexOf doesn't work here.
  * @param tile :: A tile to get the index for.
@@ -481,17 +535,120 @@ void TiledWindow::calcTilePosition( int index, int &row, int &col ) const
 {
   if ( index < 0 )
   {
-    throw std::range_error("Flat index in TiledWindow is outside range.");
+    throw std::runtime_error("Flat index in TiledWindow is outside range.");
   }
   int ncols = columnCount();
   row = index / ncols;
   if ( row >= rowCount() )
   {
-    throw std::range_error("Flat index in TiledWindow is outside range.");
+    throw std::runtime_error("Flat index in TiledWindow is outside range.");
   }
   col = index - row * ncols;
   if ( col >= ncols )
   {
-    throw std::range_error("Flat index in TiledWindow is outside range.");
+    throw std::runtime_error("Flat index in TiledWindow is outside range.");
   }
+}
+
+/**
+ * Select a widget at position.
+ * @param row :: A row.
+ * @param col :: A column.
+ */
+void TiledWindow::selectWidget(int row, int col)
+{
+  try
+  {
+    addToSelection( getTile(row,col), false );
+  }
+  catch(std::runtime_error& ex)
+  {
+    QMessageBox::critical(this,"MantidPlot- Error","Cannot select a widget in TiledWindow:\n\n" + QString::fromStdString(ex.what()));
+  }
+}
+
+/**
+ * Deselect a widget at position.
+ * @param row :: A row.
+ * @param col :: A column.
+ */
+void TiledWindow::deselectWidget(int row, int col)
+{
+  try
+  {
+    deselectTile( getTile(row,col) );
+  }
+  catch(std::runtime_error&)
+  {}
+}
+
+/**
+ * Check if a widget is selected.
+ * @param row :: A row.
+ * @param col :: A column.
+ */
+bool TiledWindow::isSelected(int row, int col)
+{
+  try
+  {
+    Tile *tile = getTile(row,col);
+    return m_selection.contains(tile);
+  }
+  catch(std::runtime_error&)
+  {}
+  return false;
+}
+
+/**
+ * Select a range of Widgets.
+ * @param row1 :: Row index of the start of the range.
+ * @param col1 :: Column index of the start of the range.
+ * @param row2 :: Row index of the end of the range.
+ * @param col2 :: Column index of the end of the range.
+ */
+void TiledWindow::selectRange(int row1, int col1, int row2, int col2)
+{
+  try
+  {
+    addToSelection( getTile(row1,col1), false );
+    addRangeToSelection( getTile(row2,col2) );
+  }
+  catch(std::runtime_error& ex)
+  {
+    QMessageBox::critical(this,"MantidPlot- Error","Cannot select widgets in TiledWindow:\n\n" + QString::fromStdString(ex.what()));
+  }
+}
+
+/**
+ * Remove the selection and make all windows docked.
+ */
+void TiledWindow::removeSelectionToDocked()
+{
+  foreach(Tile *tile, m_selection)
+  {
+    MdiSubWindow *widget = removeTile( tile );
+    if ( widget == NULL )
+    {
+      throw std::logic_error("TiledWindow: Empty tile is found in slection.");
+    }
+    widget->dock();
+  }
+  clearSelection();
+}
+
+/**
+ * Remove the selection and make all windows floating.
+ */
+void TiledWindow::removeSelectionToFloating()
+{
+  foreach(Tile *tile, m_selection)
+  {
+    MdiSubWindow *widget = removeTile( tile );
+    if ( widget == NULL )
+    {
+      throw std::logic_error("TiledWindow: Empty tile is found in slection.");
+    }
+    widget->undock();
+  }
+  clearSelection();
 }

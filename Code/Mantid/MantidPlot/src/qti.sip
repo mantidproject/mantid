@@ -1031,6 +1031,13 @@ public:
     void addWidget(MdiSubWindow *widget, int row, int col);
     void removeWidgetToDocked(int row, int col);
     void removeWidgetToFloating(int row, int col);
+    void selectWidget(int row, int col);
+    void deselectWidget(int row, int col);
+    bool isSelected(int row, int col);
+    void selectRange(int row1, int col1,int row2, int col2);
+    void clearSelection();
+    void removeSelectionToDocked();
+    void removeSelectionToFloating();
 private:
     TiledWindow(const TiledWindow&);
 };

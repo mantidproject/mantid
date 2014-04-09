@@ -8,7 +8,7 @@ from PyQt4 import QtGui, QtCore
 
 class MantidPlotTiledWindowTest(unittest.TestCase):
     
-    def test_addTile(self):
+    def test_addWidget(self):
         
         folder = activeFolder()
         t1 = newTable()
@@ -24,7 +24,7 @@ class MantidPlotTiledWindowTest(unittest.TestCase):
         self.assertEqual( tw.columnCount(), 2 )
         tw.close()
         
-    def test_removeTile(self):
+    def test_removeWidget(self):
         
         folder = activeFolder()
         t1 = newTable()
@@ -40,6 +40,93 @@ class MantidPlotTiledWindowTest(unittest.TestCase):
         self.assertFalse( folder.findWindow(t2.name()) is None )
         self.assertTrue( t1.isDocked() )
         self.assertTrue( t2.isFloating() )
+        tw.close()
+        t1.close()
+        t2.close()
+        
+    def test_selectWidget(self):
+        tw = newTiledWindow()
+        t1 = newTable()
+        t2 = newTable()
+        t3 = newTable()
+        t4 = newGraph()
+
+        tw.addWidget(t4,1,2)
+        tw.addWidget(t1,0,1)
+        tw.addWidget(t2,1,0)
+        tw.addWidget(t3,2,2)
+        
+        tw.selectWidget(0,0)
+        self.assertFalse( tw.isSelected(0,0) )
+        tw.selectWidget(0,1)
+        self.assertTrue( tw.isSelected(0,1) )
+        tw.deselectWidget(0,1)
+        self.assertFalse( tw.isSelected(0,1) )
+
+        tw.selectWidget(0,1)
+        self.assertTrue( tw.isSelected(0,1) )
+        tw.selectWidget(1,0)
+        self.assertTrue( tw.isSelected(1,0) )
+        self.assertFalse( tw.isSelected(0,1) )
+        
+        tw.selectRange(1,0,2,2)
+        self.assertFalse( tw.isSelected(0,1) )
+        self.assertTrue( tw.isSelected(1,0) )
+        self.assertTrue( tw.isSelected(1,2) )
+        self.assertTrue( tw.isSelected(2,2) )
+        
+        tw.deselectWidget(1,2)
+        self.assertFalse( tw.isSelected(0,1) )
+        self.assertTrue( tw.isSelected(1,0) )
+        self.assertFalse( tw.isSelected(1,2) )
+        self.assertTrue( tw.isSelected(2,2) )
+        
+        tw.close()
+        
+    def test_dockSelected(self):
+        tw = newTiledWindow()
+        t1 = newTable()
+        t2 = newTable()
+        t3 = newTable()
+        t4 = newGraph()
+
+        tw.addWidget(t4,1,2)
+        tw.addWidget(t1,0,1)
+        tw.addWidget(t2,1,0)
+        tw.addWidget(t3,2,2)
+        
+        tw.selectRange(0,1,1,0)
+        tw.removeSelectionToDocked()
+        
+        folder = activeFolder()
+        self.assertFalse( folder.findWindow(t1.name()) is None )
+        self.assertFalse( folder.findWindow(t2.name()) is None )
+        self.assertTrue( folder.findWindow(t3.name()) is None )
+        self.assertTrue( folder.findWindow(t4.name()) is None )
+        tw.close()
+        t1.close()
+        t2.close()
+        
+    def test_undockSelected(self):
+        tw = newTiledWindow()
+        t1 = newTable()
+        t2 = newTable()
+        t3 = newTable()
+        t4 = newGraph()
+
+        tw.addWidget(t4,1,2)
+        tw.addWidget(t1,0,1)
+        tw.addWidget(t2,1,0)
+        tw.addWidget(t3,2,2)
+        
+        tw.selectRange(0,1,1,0)
+        tw.removeSelectionToFloating()
+        
+        folder = activeFolder()
+        self.assertFalse( folder.findWindow(t1.name()) is None )
+        self.assertFalse( folder.findWindow(t2.name()) is None )
+        self.assertTrue( folder.findWindow(t3.name()) is None )
+        self.assertTrue( folder.findWindow(t4.name()) is None )
         tw.close()
         t1.close()
         t2.close()
