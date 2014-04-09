@@ -15,6 +15,7 @@ namespace Mantid
 
     Cluster::Cluster(const size_t& label):
       m_label(label),
+      m_originalLabel(label),
       m_signalInt(boost::none),
       m_errorSQInt(boost::none)
     {
@@ -24,6 +25,11 @@ namespace Mantid
     size_t Cluster::getLabel() const
     {
       return m_label;
+    }
+
+    size_t Cluster::getOriginalLabel() const
+    {
+      return m_originalLabel;
     }
 
     double Cluster::getSignalInt() const
@@ -58,8 +64,12 @@ namespace Mantid
     {
       for(size_t i = 0; i< m_indexes.size(); ++i)
       {
-        ws->setSignalAt(m_indexes[i], Mantid::signal_t(m_label));
+        ws->setSignalAt(m_indexes[i], static_cast<Mantid::signal_t>(m_label));
         ws->setErrorSquaredAt(m_indexes[i], 0);
+      }
+      for(size_t i = 0; i < m_ownedClusters.size(); ++i)
+      {
+        m_ownedClusters[i]->writeTo(ws);
       }
     }
 
@@ -70,10 +80,15 @@ namespace Mantid
       for(size_t i = 0; i< m_indexes.size(); ++i)
       {
         sigInt += ws->getSignalAt(m_indexes[i]);
-        double errorSQ;
-        errorSQ = ws->getErrorAt(i);
+        double errorSQ = ws->getErrorAt(m_indexes[i]);
         errorSQ *= errorSQ;
         errorIntSQ += errorSQ;
+      }
+      for(size_t i = 0; i < m_ownedClusters.size(); ++i)
+      {
+        m_ownedClusters[i]->integrate(ws);
+        sigInt += m_ownedClusters[i]->getSignalInt();
+        errorIntSQ += m_ownedClusters[i]->getErrorSQInt();
       }
       m_errorSQInt = errorIntSQ;
       m_signalInt = sigInt;
@@ -81,22 +96,25 @@ namespace Mantid
 
     void Cluster::toUniformMinimum(VecElements& disjointSet) 
     {
-      size_t minLabelIndex = m_indexes.front();
-      size_t minLabel= disjointSet[m_indexes.front()].getRoot();
-      for(size_t i = 1; i< m_indexes.size(); ++i)
+      if(m_indexes.size() > 0)
       {
-        const size_t& currentLabel = disjointSet[m_indexes[i]].getRoot();
-        if(currentLabel < minLabel)
+        size_t minLabelIndex = m_indexes.front();
+        size_t minLabel= disjointSet[m_indexes.front()].getRoot();
+        for(size_t i = 1; i< m_indexes.size(); ++i)
         {
-          minLabel = currentLabel;
-          minLabelIndex = i;
+          const size_t& currentLabel = disjointSet[m_indexes[i]].getRoot();
+          if(currentLabel < minLabel)
+          {
+            minLabel = currentLabel;
+            minLabelIndex = i;
+          }
         }
-      }
 
-      m_label = minLabel;
-      for(size_t i = 1; i< m_indexes.size(); ++i)
-      {
-        disjointSet[m_indexes[i]].unionWith(disjointSet[minLabelIndex].getParent());
+        m_label = minLabel;
+        for(size_t i = 1; i< m_indexes.size(); ++i)
+        {
+          disjointSet[m_indexes[i]].unionWith(disjointSet[minLabelIndex].getParent());
+        }
       }
     }
 
@@ -105,14 +123,11 @@ namespace Mantid
       return getLabel() == other.getLabel();
     }
 
-    void Cluster::consumeCluster(Cluster& other)
+    void Cluster::attachCluster(boost::shared_ptr<Cluster>& toOwn)
     {
-      if(other.getLabel() != this->getLabel())
-      {
-        throw std::runtime_error("Label Ids differ. Cannot combine Clusters.");
-      }
-      m_indexes.insert(m_indexes.end(), other.m_indexes.begin(), other.m_indexes.end());
+      m_ownedClusters.push_back(toOwn);
     }
+
 
   } // namespace Crystal
 } // namespace Mantid

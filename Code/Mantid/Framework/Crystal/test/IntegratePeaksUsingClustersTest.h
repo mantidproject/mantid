@@ -250,7 +250,7 @@ public:
     TSM_ASSERT_EQUALS("Integrated intensity should be zero since no integration has occured", 0, outPeaksWS->getPeak(0).getSigmaIntensity());
   }
 
-  void test_integrate_single_peak()
+  void xtest_integrate_single_peak()
   {
     // ------- Make the fake input
     std::vector<V3D> hklValues;
@@ -280,8 +280,10 @@ public:
     }
     TSM_ASSERT_EQUALS("Only one peak present, so should only have two unique label ids", 2, labelIds.size());
 
+    TSM_ASSERT_EQUALS("Integrated intensity should be same as original peak intensity", outPeaksWS->getPeak(0).getIntensity(), nEventsInPeak);
+    TSM_ASSERT_EQUALS("Integrated error should same as original peak intensity error", outPeaksWS->getPeak(0).getSigmaIntensity(), nEventsInPeak);
+    
     TSM_ASSERT("Should have 'empy' label", does_contain(labelIds, 0));
-    TSM_ASSERT("Should have non-empy label", does_contain(labelIds, 1));
   }
 
   void test_integrate_two_separte_but_identical_peaks()
@@ -316,12 +318,10 @@ public:
     TSM_ASSERT_EQUALS("N peaks present, so should only have n+1 unique label ids", 3, labelIds.size());
 
     TSM_ASSERT("Should have 'empy' label", does_contain(labelIds, 0));
-    TSM_ASSERT("Should have non-empy label", does_contain(labelIds, 1));
-    TSM_ASSERT("Should have non-empy label", does_contain(labelIds, 2));
 
     // Two peaks are identical, so integrated values should be the same.
-    TSM_ASSERT("Integrated intensity should be greater than zero", outPeaksWS->getPeak(0).getIntensity() > 0);
-    TSM_ASSERT("Integrated error should be greater than zero", outPeaksWS->getPeak(0).getSigmaIntensity() > 0);
+    TSM_ASSERT_EQUALS("Integrated intensity should be same as original peak intensity", outPeaksWS->getPeak(0).getIntensity(), nEventsInPeak);
+    TSM_ASSERT_EQUALS("Integrated error should same as original peak intensity error", outPeaksWS->getPeak(0).getSigmaIntensity(), nEventsInPeak);
     TSM_ASSERT_EQUALS("Peaks are identical, so integrated values should be identical", outPeaksWS->getPeak(0).getIntensity(), outPeaksWS->getPeak(1).getIntensity());
     TSM_ASSERT_EQUALS("Peaks are identical, so integrated error values should be identical", outPeaksWS->getPeak(0).getSigmaIntensity(), outPeaksWS->getPeak(1).getSigmaIntensity());
   }
@@ -361,12 +361,11 @@ public:
     TSM_ASSERT_EQUALS("N peaks present, so should only have n+1 unique label ids", 3, labelIds.size());
 
     TSM_ASSERT("Should have 'empy' label", does_contain(labelIds, 0));
-    TSM_ASSERT("Should have non-empy label", does_contain(labelIds, 1));
-    TSM_ASSERT("Should have non-empy label", does_contain(labelIds, 2));
 
     // Two peaks are identical, so integrated values should be the same.
-    TSM_ASSERT("Integrated intensity should be greater than zero", outPeaksWS->getPeak(0).getIntensity() > 0);
-    TSM_ASSERT("Integrated error should be greater than zero", outPeaksWS->getPeak(0).getSigmaIntensity() > 0);
+    TSM_ASSERT_EQUALS("Integrated intensity should be same as original peak intensity", outPeaksWS->getPeak(0).getIntensity(), nEventsInPeakVec[0]);
+    TSM_ASSERT_EQUALS("Integrated error should same as original peak intensity error", outPeaksWS->getPeak(0).getSigmaIntensity(), nEventsInPeakVec[0]);
+    
     TSM_ASSERT_EQUALS("Second peak is twice as 'bright'", outPeaksWS->getPeak(0).getIntensity() * 2, outPeaksWS->getPeak(1).getIntensity());
     TSM_ASSERT_EQUALS("Second peak is twice as 'bright'", outPeaksWS->getPeak(0).getSigmaIntensity() * 2, outPeaksWS->getPeak(1).getSigmaIntensity());
   }

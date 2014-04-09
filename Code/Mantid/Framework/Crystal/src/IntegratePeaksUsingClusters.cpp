@@ -160,18 +160,13 @@ namespace Mantid
       */
       HardThresholdBackground backgroundStrategy(threshold,NoNormalization);
 
-      ConnectedComponentLabeling analysis(1,1);
+      ConnectedComponentLabeling analysis;
 
       Progress progress(this, 0, 1, 1);
       ClusterTuple clusters = analysis.executeAndIntegrate(mdWS, &backgroundStrategy, progress);
 
       ConnectedComponentMappingTypes::ClusterMap& clusterMap = clusters.get<1>();
-      std::cout << "Cluster Map Contains..." << std::endl;
-      for(auto it = clusterMap.begin(); it != clusterMap.end(); ++it)
-      {
-        std::cout << it->first << std::endl;
-      }
-
+      
       IMDHistoWorkspace_sptr outHistoWS = clusters.get<0>();
       PeakTransformFactory_sptr peakTransformFactory;
       if (mdCoordinates == QLab)
@@ -194,14 +189,13 @@ namespace Mantid
       {
         IPeak& peak = peakWS->getPeak(i);
         const V3D& peakCenterInMDFrame = peakTransform->transformPeak(peak);
-        const Mantid::signal_t signalValue = outHistoWS->getSignalAtVMD(peakCenterInMDFrame);
+        const Mantid::signal_t signalValue = outHistoWS->getSignalAtVMD(peakCenterInMDFrame, NoNormalization);
         if(!boost::math::isnan(signalValue) && signalValue >= static_cast<Mantid::signal_t>(analysis.getStartLabelId()) )
         {
           const size_t labelIdAtPeak = static_cast<size_t>(signalValue);
           Cluster * const cluster = clusterMap[labelIdAtPeak].get();
-          std::cout << "Cluster size: " << cluster->size() << std::endl;
-          cluster->writeTo(outHistoWS);
-          cluster->integrate(outHistoWS);
+          
+          cluster->integrate(mdWS); // TODO. Should return rather than store values.
           peak.setIntensity(cluster->getErrorSQInt());
           peak.setSigmaIntensity(cluster->getErrorSQInt());
         }

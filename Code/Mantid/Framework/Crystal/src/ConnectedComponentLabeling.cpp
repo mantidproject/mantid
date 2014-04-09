@@ -64,12 +64,12 @@ namespace Mantid
           outWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
         }
         // Initialize to zero.
-        PARALLEL_FOR_NO_WSP_CHECK()
         for(int i = 0; i < static_cast<int>(outWS->getNPoints()); ++i)
         {
           outWS->setSignalAt(i, 0);
           outWS->setErrorSquaredAt(i, 0);
         }
+        
         return outWS;
       }
 
@@ -190,6 +190,7 @@ namespace Mantid
                   neighbourElements[neighIndex].unionWith(&parentElement);
                 }
               }
+              neighbourElements[currentIndex].unionWith(&parentElement); 
             }
           }
         }
@@ -328,6 +329,7 @@ namespace Mantid
 
           // Percolate minimum label across boundaries for indexes where there is ambiguity.
           std::vector<boost::shared_ptr<Cluster> > incompleteClusterVec;
+          std::set<size_t> usedLabels;
           for(auto it = parallelEdgeVec.begin(); it != parallelEdgeVec.end(); ++it) 
           {
             VecEdgeIndexPair& indexPairVec = *it;
@@ -337,8 +339,18 @@ namespace Mantid
               DisjointElement& b = neighbourElements[iit->get<1>()];
               if(!a.isEmpty() && !b.isEmpty())
               {
-                incompleteClusterVec.push_back( clusterMap[a.getId()] );
-                incompleteClusterVec.push_back( clusterMap[b.getId()] );
+                if(usedLabels.find(a.getId()) != usedLabels.end())
+                {
+                  incompleteClusterVec.push_back( clusterMap[a.getId()] );
+                  clusterMap.erase(a.getId());
+                  usedLabels.insert(a.getId());
+                }
+                if(usedLabels.find(b.getId()) != usedLabels.end())
+                {
+                  incompleteClusterVec.push_back( clusterMap[b.getId()] );
+                  clusterMap.erase(b.getId());
+                  usedLabels.insert(b.getId());
+                }
 
                 if(a.getId() < b.getId())
                 {
@@ -361,19 +373,17 @@ namespace Mantid
             }
 
             // Now combine clusters and remove old ones.
-            std::map<size_t, boost::shared_ptr<Cluster> > consumptionMap; // Track incomplete clusters to avoid duplicates.
             size_t nIncomplete = incompleteClusterVec.size();
             for(size_t i = 0; i < incompleteClusterVec.size(); ++i)
             {
               const size_t label = incompleteClusterVec[i]->getLabel();
-              if(!does_contain_key(consumptionMap, label))
+              if(!does_contain_key(clusterMap, label))
               {
-                consumptionMap.insert(std::make_pair(label, incompleteClusterVec[i]));
+                clusterMap.insert(std::make_pair(label, incompleteClusterVec[i]));
               }
               else
               {
-                consumptionMap[label]->consumeCluster(*incompleteClusterVec[i].get());
-                clusterMap.erase(label); // We no longer need this label or cluster as it has been consumed.
+                clusterMap[label]->attachCluster(incompleteClusterVec[i]);
               }
             }
 
@@ -451,6 +461,11 @@ namespace Mantid
 
       // Create the output workspace from the input workspace
       IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
+
+      for (auto it = clusters.begin(); it != clusters.end(); ++it) 
+      {
+        it->second->writeTo(outWS); // Apply cluster onto output workspace.
+      }
 
       return ClusterTuple(outWS, clusters);
     }

@@ -56,6 +56,9 @@ namespace Mantid
         /// Get the cluster label
         size_t getLabel() const;
 
+        /// Get the original label
+        size_t getOriginalLabel() const;
+
         /// Get the signal integrated value
         double getSignalInt() const;
 
@@ -75,7 +78,7 @@ namespace Mantid
         bool operator==(const Cluster& other) const;
 
         /// Merge and own 
-        void consumeCluster(Cluster& other);
+        void attachCluster(boost::shared_ptr<Cluster>& toOwn);
 
        private:
 
@@ -86,12 +89,16 @@ namespace Mantid
 
         /// Label used by cluster
         size_t m_label;
+        /// original label on cluster
+        size_t m_originalLabel;
         /// indexes belonging to cluster. This is how we track cluster objects.
         std::vector<size_t> m_indexes;
         /// Error sq integrated value of cluster
         boost::optional<double> m_errorSQInt;
         /// Signal integrated value of cluster
         boost::optional<double> m_signalInt;
+        /// Attached clusters.
+        std::vector<boost::shared_ptr<Cluster> > m_ownedClusters;
 
     };
 
