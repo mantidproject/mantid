@@ -239,7 +239,6 @@
     <zeropadding size="8"/>
     <technique>Muon spectroscopy</technique>
     <technique>Radio frequency muSR</technique>
-    <livedata address="" />
   </instrument>  
   
   <instrument name="EMU">
