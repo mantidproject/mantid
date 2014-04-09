@@ -15,7 +15,7 @@ class UnitLabelTest(unittest.TestCase):
 
     def test_utf8_is_converted_to_unicode_object(self):
         tof = UnitFactory.Instance().create("TOF")
-        unit_lbl = tof.label()
+        unit_lbl = tof.symbol()
         self.assertTrue(isinstance(unit_lbl.utf8(), types.UnicodeType))
         self.assertEquals(u"\u03bcs", unit_lbl.utf8())
 
