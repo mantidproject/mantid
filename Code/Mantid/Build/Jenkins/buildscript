@@ -89,7 +89,8 @@ if [[ $(uname) != 'Darwin' ]]; then
 fi
 
 if [[ "$CLEANBUILD" == true ]]; then
-  if [[ $(uname) != 'Darwin' ]]; then
+  # On the Mac, only create a package for clean builds
+  if [[ $(uname) == 'Darwin' ]]; then
     $SCL_ON_RHEL6 "cpack"
   fi
 
