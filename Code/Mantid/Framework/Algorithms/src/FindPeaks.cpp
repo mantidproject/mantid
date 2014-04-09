@@ -735,8 +735,9 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Find the index of a value (or nearest) in a given sorted vector (vector of x axis)
-    * @param X :: vector
-    * @param centre :: value to search
+    * @param vecX :: vector
+    * @param x :: value to search
+    * @return index of x in vector
     */
   int FindPeaks::getVectorIndex(const MantidVec &vecX, double x)
   {
@@ -1004,6 +1005,7 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
+#if 0
   /** make boundary/contraint string on peak's centre
     * @param peak :: Functon to put boundary on
     * @param peakleftboundary :: left boundary of peak centre
@@ -1056,6 +1058,7 @@ namespace Algorithms
     return bcss.str();
   }
     */
+#endif
 
 
   //----------------------------------------------------------------------------------------------
@@ -1065,13 +1068,14 @@ namespace Algorithms
     * @param vecY :: vector of Y-axis
     * @param i_min :: start
     * @param i_max :: end
-    * @param centre :: estimated peak centre (maximum position)
-    * @param height :: maximum
-    * @param fwhm :: 2 fwhm
-    * @param error :: reason for estimating peak parameters error.
+    * @param centre :: (output) estimated peak centre (maximum position)
+    * @param height :: (output) estimated maximum
+    * @param fwhm :: (output) estimated fwhm
+    * @return error mesage
     */
   std::string FindPeaks::estimatePeakParameters(const MantidVec& vecX, const MantidVec& vecY,
-                                          size_t i_min, size_t i_max, double& centre, double& height, double& fwhm)
+                                                size_t i_min, size_t i_max,
+                                                double& centre, double& height, double& fwhm)
   {
     // Search for maximum
     size_t icentre = i_min;
@@ -1252,19 +1256,16 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Add a row to the output table workspace.
-    * @param spectrum number
-    * @param params The effective peak/background parameters
-    * @param rawParams The raw peak/background parameters
+    * @param spectrum :: spectrum number
+    * @param peakfunction :: peak function
+    * @param bkgdfunction :: background function
+    * @param isoutputraw :: flag to output raw function parameters
     * @param mincost Chi2 value for this set of parameters
-    * @param error Whether or not the fit ended in an error.
-    *       addInfoRow(spectrum, vec_fittedpeakparvalues, vec_fittedbkgdparvalues, m_rawPeaksTable, costfuncvalue, fitsuccess);
-    * std::vector<double> &peakparams,
-     *                       const std::vector<double> &bkgdparams,
+    * @param mincost :: minimum/best cost function value
     */
   void FindPeaks::addInfoRow(const size_t spectrum, const API::IPeakFunction_const_sptr& peakfunction,
                              const API::IBackgroundFunction_sptr& bkgdfunction,
-                             const bool isoutputraw,
-                             const double mincost)
+                             const bool isoutputraw, const double mincost)
   {
     // Check input validity
     if (mincost < 0. || mincost >= DBL_MAX-1.0E-10)
@@ -1396,6 +1397,7 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
+#if 0
   /** Get the parameter lists as appropriate using the supplied function abstraction.
     * @param compositeFunc The function to get information from.
     * @param effParams This will always be centre, width, height, backA0, backA1, backA2 reguarless of how many
@@ -1454,15 +1456,10 @@ namespace Algorithms
     return;
   }
   */
+#endif
 
   //----------------------------------------------------------------------------------------------
   /** Create functions and related variables
-    * @param height Height
-    * @param centre Centre
-    * @param sigma Sigma
-    * @param a0, a1, a2  Variables dependent on background order.
-    * @param withPeak If this is set to false then return only a background function.
-    * @return The requested function to fit.
     */
   void FindPeaks::createFunctions()
   {
@@ -1491,6 +1488,7 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
+#if 0
   /** @return The order of the polynomial for the bacground fit.
 
   int FindPeaks::getBackgroundOrder()
@@ -1503,6 +1501,7 @@ namespace Algorithms
       return 0;
   }
     */
+#endif
 
   //----------------------------------------------------------------------------------------------
   /** Find peak background given a certain range
