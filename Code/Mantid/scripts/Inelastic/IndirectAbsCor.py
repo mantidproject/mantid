@@ -385,9 +385,9 @@ def calcThicknessAtSec(xSection, thickness, sec):
     return thickSec1, thickSec2
 
 def calcFlatAbsCan(ass, canXSection, canThickness1, canThickness2, sampleSec1, sampleSec2, sec):
-    assc = np.ones(nlam)
-    acsc = np.ones(nlam)
-    acc = np.ones(nlam)
+    assc = np.ones(ass.size)
+    acsc = np.ones(ass.size)
+    acc = np.ones(ass.size)
 
     sec1, sec2 = sec
 
