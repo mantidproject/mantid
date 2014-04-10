@@ -173,8 +173,10 @@ public:
     //Are the returned arrays the right size?
     const EventList el(ew->getEventList(1));
     TS_ASSERT_EQUALS( el.constDataX().size(), NUMBINS);
-    TS_ASSERT_EQUALS( el.makeDataY()->size(), NUMBINS-1);
-    TS_ASSERT_EQUALS( el.makeDataE()->size(), NUMBINS-1);
+    boost::scoped_ptr<MantidVec> Y(el.makeDataY());
+    boost::scoped_ptr<MantidVec> E(el.makeDataE());
+    TS_ASSERT_EQUALS( Y->size(), NUMBINS-1);
+    TS_ASSERT_EQUALS( E->size(), NUMBINS-1);
     TS_ASSERT( el.hasDetectorID(1) );
   }
 
@@ -249,10 +251,10 @@ public:
     TS_ASSERT_EQUALS( el.constDataX().size(), 2);
     TS_ASSERT_EQUALS( el.constDataX()[0], 0.0);
     TS_ASSERT_EQUALS( el.constDataX()[1], std::numeric_limits<double>::min());
-    MantidVec* Y = el.makeDataY();
+    boost::scoped_ptr<MantidVec> Y(el.makeDataY());
     TS_ASSERT_EQUALS( Y->size(), 1);
     TS_ASSERT_EQUALS( (*Y)[0], 0.0);
-    MantidVec* E = el.makeDataE();
+    boost::scoped_ptr<MantidVec> E(el.makeDataE());
     TS_ASSERT_EQUALS( E->size(), 1);
     TS_ASSERT_EQUALS( (*E)[0], 0.0);
   }
@@ -401,19 +403,20 @@ public:
     //Are the returned arrays the right size?
     TS_ASSERT_EQUALS( el.constDataX().size(), NUMBINS/2);
 
-    MantidVec & Y = (*el.makeDataY());
-    MantidVec & E = (*el.makeDataE());
-    TS_ASSERT_EQUALS( Y.size(), NUMBINS/2-1);
-    TS_ASSERT_EQUALS( E.size(), NUMBINS/2-1);
+    boost::scoped_ptr<MantidVec> Y(el.makeDataY());
+    boost::scoped_ptr<MantidVec> E(el.makeDataE());
+    TS_ASSERT_EQUALS( Y->size(), NUMBINS/2-1);
+    TS_ASSERT_EQUALS( E->size(), NUMBINS/2-1);
 
     //Now there are 4 events in each bin
-    TS_ASSERT_EQUALS( Y[0], 4);
-    TS_ASSERT_EQUALS( Y[NUMBINS/2-2], 4);
+    TS_ASSERT_EQUALS( (*Y)[0], 4);
+    TS_ASSERT_EQUALS( (*Y)[NUMBINS/2-2], 4);
 
     //But pixel 1 is the same, 2 events in the bin
     const EventList el1(ew->getEventList(1));
     TS_ASSERT_EQUALS( el1.constDataX()[1], BIN_DELTA*1);
-    TS_ASSERT_EQUALS( (*el1.makeDataY())[1], 2);
+    boost::scoped_ptr<MantidVec> Y1(el1.makeDataY());
+    TS_ASSERT_EQUALS( (*Y1)[1], 2);
   }
 
 
