@@ -85,7 +85,7 @@ public:
   void test_OpenMP_ParallelLogging()
   {
     PRAGMA_OMP(parallel for)
-    for (int i=0; i<10000; i++)
+    for (int i=0; i<1000; i++)
     {
       log.information() << "Information Message " << i << std::endl;
     }
@@ -103,7 +103,7 @@ public:
   void test_ThreadPool_ParallelLogging()
   {
     ThreadPool tp;
-    for (int i=0; i<10000; i++)
+    for (int i=0; i<1000; i++)
       tp.schedule(new FunctionTask(boost::bind(&LoggerTest::doLogInParallel, &*this, i)));
     tp.joinAll();
   }
