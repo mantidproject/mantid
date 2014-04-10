@@ -103,9 +103,9 @@ namespace LiveData
     runOptions.push_back("Restart");
     runOptions.push_back("Stop");
     runOptions.push_back("Rename");
-    declareProperty("EndRunBehavior", "Restart", boost::make_shared<StringListValidator>(runOptions),
-        "What to do when a run ends?\n"
-        " - Restart: the accumulated data from the previous run is discarded.\n"
+    declareProperty("RunTransitionBehavior", "Restart", boost::make_shared<StringListValidator>(runOptions),
+        "What to do at run start/end boundaries?\n"
+        " - Restart: the previously accumulated data is discarded.\n"
         " - Stop: live data monitoring ends.\n"
         " - Rename: the previous workspaces are renamed, and monitoring continues with cleared ones.");
 

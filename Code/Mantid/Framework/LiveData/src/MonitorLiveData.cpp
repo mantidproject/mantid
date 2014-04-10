@@ -199,18 +199,18 @@ namespace LiveData
           message << "Run";
           if ( runNumber != 0 ) message << " #" << runNumber;
           message << " ended. ";
-          std::string EndRunBehavior = this->getPropertyValue("EndRunBehavior");
-          if (EndRunBehavior == "Stop")
+          std::string RunTransitionBehavior = this->getPropertyValue("RunTransitionBehavior");
+          if (RunTransitionBehavior == "Stop")
           {
             g_log.notice() << message.str() << "Stopping live data monitoring.\n";
             break;
           }
-          else if (EndRunBehavior == "Restart")
+          else if (RunTransitionBehavior == "Restart")
           {
             g_log.notice() << message.str() << "Clearing existing workspace.\n";
             NextAccumulationMethod = "Replace";
           }
-          else if (EndRunBehavior == "Rename")
+          else if (RunTransitionBehavior == "Rename")
           {
             g_log.notice() << message.str() << "Renaming existing workspace.\n";
             NextAccumulationMethod = "Replace";
@@ -250,7 +250,7 @@ namespace LiveData
         g_log.warning() << "Cannot process live data as quickly as requested: requested every " << UpdateEvery << " seconds but it takes " << seconds << " seconds!" << std::endl;
     } // loop until aborted
 
-    // Set the outputs (only applicable when EndRunBehavior is "Stop")
+    // Set the outputs (only applicable when RunTransitionBehavior is "Stop")
     Workspace_sptr OutputWS = AnalysisDataService::Instance().retrieveWS<Workspace>(OutputWorkspace);
     this->setProperty("OutputWorkspace", OutputWS);
     if (!AccumulationWorkspace.empty())
