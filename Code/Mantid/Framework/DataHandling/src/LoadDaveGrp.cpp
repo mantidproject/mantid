@@ -131,10 +131,19 @@ void LoadDaveGrp::exec()
   this->ifile.open(filename.c_str());
   if (this->ifile.is_open())
   {
-    // Size of x axis
-    this->getAxisLength(this->xLength);
-    // Size of y axis
-    this->getAxisLength(yLength);
+    try
+    {
+      // Size of x axis
+      this->getAxisLength(this->xLength);
+      // Size of y axis
+      this->getAxisLength(yLength);
+    }
+    catch (boost::bad_lexical_cast&)
+    {
+      getLogger().error("LoadDaveGrp: Failed to parse axis length from file.");
+      return;
+    }
+
     // This is also the number of groups (spectra)
     this->nGroups = yLength;
     // Read in the x axis values
@@ -204,7 +213,10 @@ void LoadDaveGrp::getAxisLength(int &length)
   // Get the axis length from the file
   this->readLine();
   std::istringstream is(this->line);
-  is >> length;
+  std::string strLength;
+  is >> strLength;
+
+  length = boost::lexical_cast<int>(strLength);
 }
 
 void LoadDaveGrp::getAxisValues(MantidVec *axis, const std::size_t length)
