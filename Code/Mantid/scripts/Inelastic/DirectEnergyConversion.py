@@ -403,7 +403,7 @@ class DirectEnergyConversion(object):
             ConvertFromDistribution(Workspace=result_name)  
 
         # Normalise using the chosen method
-        # TODO: This really should be done as soon as possible after loading
+        # This should be done as soon as possible after loading and usually happens at diag. Here just in case if diag was bypassed
         self.normalise(mtd[result_name], result_name, self.normalise_method, range_offset=bin_offset)
 
        
