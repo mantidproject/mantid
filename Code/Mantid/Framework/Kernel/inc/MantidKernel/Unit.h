@@ -599,7 +599,7 @@ protected:
 
 //=================================================================================================
 /// Degrees that has degrees as unit at "Scattering angle" as title
-class Degrees : public Empty
+class MANTID_KERNEL_DLL Degrees : public Empty
 {
 public:
   Degrees();
@@ -615,7 +615,7 @@ private:
 //=================================================================================================
 
 /// Phi that has degrees as unit at "Phi" as title
-class Phi : public Degrees
+class MANTID_KERNEL_DLL Phi : public Degrees
 {
   virtual const std::string caption() const { return "Phi"; }
   virtual Unit * clone() const { return new Phi(*this); }
