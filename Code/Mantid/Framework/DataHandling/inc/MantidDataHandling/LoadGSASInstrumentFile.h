@@ -60,6 +60,9 @@ namespace DataHandling
     /// Implement abstract Algorithm methods
     void exec();
 
+    /// Get Histogram type
+    std::string getHistogramType(std::vector<std::string>& lines);
+
     /// Load file to a vector of strings
     void loadFile(std::string filename, std::vector<std::string>& lines);
 

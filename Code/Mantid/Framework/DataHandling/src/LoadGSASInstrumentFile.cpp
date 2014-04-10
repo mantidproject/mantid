@@ -104,13 +104,26 @@ namespace DataHandling
     vector<string> lines;
     loadFile(datafile, lines);
 
+    // Check Histogram type - only PNTR is currently supported
+    std::string histType = getHistogramType( lines );
+    if (histType != "PNTR") {
+      if( histType.size()  == 4)
+      {
+        throw std::runtime_error("Histogram type "+histType+" not supported");
+      }
+      else
+      {
+        throw std::runtime_error("Error on checking histogram type: "+histType);
+      }
+    }
+
     return;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Load file to a vector of strings.  Each string is a non-empty line.
-    * @param filename :: string for name of the .irf file
-    * @param lines :: vector of strings for each non-empty line in .irf file
+    * @param filename :: string for name of the .prm file
+    * @param lines :: vector of strings for each non-empty line in .prm file
     */
   void LoadGSASInstrumentFile::loadFile(string filename, vector<string>& lines)
   {
@@ -142,12 +155,33 @@ namespace DataHandling
     else
     {
       stringstream errmsg;
-      errmsg << "Input .irf file " << filename << " cannot be open. ";
+      errmsg << "Input .prm file " << filename << " cannot be open. ";
       g_log.error(errmsg.str());
       throw runtime_error(errmsg.str());
     }
 
     return;
+  }
+
+  /* Get the histogram type
+   * @param lines :: vector of strings for each non-empty line in .irf file
+  */
+  std::string LoadGSASInstrumentFile::getHistogramType(vector<string>& lines)
+  {
+        // We assume there is just one HTYPE line, look for it from beginning and return its value.
+        std::string lookFor = "INS   HTYPE";
+        for (int i = 0; i <= lines.size(); ++i)
+        {
+          if(lines[i].substr(0,lookFor.size()) == lookFor)
+          {
+            if(lines[i].size() < lookFor.size()+7){
+              // line too short
+              return "HTYPE line too short";
+            }
+            return  lines[i].substr(lookFor.size()+3,4); // Found
+          }
+        }
+        return "HTYPE line not found";
   }
 
 } // namespace DataHandling
