@@ -134,7 +134,7 @@ def load_run(inst_name, run_number, calibration=None, force=False):
         ext = os.path.splitext(filename)[1].lower();
         wrong_monitors_name = False;
         if ext.endswith("raw"):
-            args['LoadMonitors']='Separate'
+            args['LoadMonitors']='Include'
         elif ext.endswith('nxs'):
             args['LoadMonitors'] = '1'
     
