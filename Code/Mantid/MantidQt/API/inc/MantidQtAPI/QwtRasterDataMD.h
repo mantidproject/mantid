@@ -11,7 +11,7 @@
 
 namespace MantidQt
 {
-namespace SliceViewer
+namespace API
 {
 
 /** Implemenation of QwtRasterData that can display the data

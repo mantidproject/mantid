@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/QwtRasterDataMD.h"
+#include "MantidQtAPI/QwtRasterDataMD.h"
 #include <math.h>
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -6,7 +6,7 @@
 
 namespace MantidQt
 {
-namespace SliceViewer
+namespace API
 {
 
 using namespace Mantid;

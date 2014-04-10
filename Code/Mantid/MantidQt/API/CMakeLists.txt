@@ -23,6 +23,7 @@ set ( SRC_FILES
   src/PropertyWidgetFactory.cpp
   src/PythonRunner.cpp
   src/QtSignalChannel.cpp
+  src/QwtRasterDataMD.cpp
   src/ScriptRepositoryView.cpp
   src/RepoModel.cpp
   src/SyncedCheckboxes.cpp
@@ -76,6 +77,7 @@ set ( INC_FILES
   inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
   inc/MantidQtAPI/MantidQwtWorkspaceData.h
   inc/MantidQtAPI/PropertyWidgetFactory.h
+  inc/MantidQtAPI/QwtRasterDataMD.h
   inc/MantidQtAPI/ScriptRepositoryView.h
   inc/MantidQtAPI/SelectionNotificationService.h
 )

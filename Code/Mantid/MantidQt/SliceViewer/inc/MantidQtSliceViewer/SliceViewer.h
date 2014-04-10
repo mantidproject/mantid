@@ -15,7 +15,7 @@
 #include "MantidQtSliceViewer/LineOverlay.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
-#include "QwtRasterDataMD.h"
+#include "MantidQtAPI/QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"
 #include <QtCore/QtCore>
 #include <QtGui/qdialog.h>
@@ -246,7 +246,7 @@ private:
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_dimensions;
 
   /// Data presenter
-  QwtRasterDataMD * m_data;
+  API::QwtRasterDataMD * m_data;
 
   /// The X and Y dimensions being plotted
   Mantid::Geometry::IMDDimension_const_sptr m_X;

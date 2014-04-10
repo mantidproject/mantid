@@ -19,7 +19,7 @@
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
-#include "MantidQtSliceViewer/QwtRasterDataMD.h"
+#include "MantidQtAPI/QwtRasterDataMD.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
 #include "MantidQtSliceViewer/XYLimitsDialog.h"
@@ -129,7 +129,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   QObject::connect(m_colorBar, SIGNAL(changedColorRange(double,double,bool)), this, SLOT(colorRangeChanged()));
 
   // ---- Set the color map on the data ------
-  m_data = new QwtRasterDataMD();
+  m_data = new API::QwtRasterDataMD();
   m_spect->setColorMap( m_colorBar->getColorMap() );
   m_plot->autoRefresh();
 
