@@ -8,6 +8,7 @@
 
 class QGridLayout;
 class QVBoxLayout;
+class QScrollArea;
 class Tile;
 
 /**
@@ -29,7 +30,7 @@ public slots:
   /// Get number of columns
   int columnCount() const;
   /// Re-shape the tile layout
-  void reshape(int rows, int cols);
+  void reshape(int cols);
   /// Add a new widget
   void addWidget(MdiSubWindow *widget, int row, int col);
   /// Get a widget at a position
@@ -38,6 +39,8 @@ public slots:
   void removeWidgetToDocked(int row, int col);
   /// Remove a widget and make it floating
   void removeWidgetToFloating(int row, int col);
+  /// Remove all widgets.
+  void clear();
 
   /// Select a widget
   void selectWidget(int row, int col);
@@ -63,6 +66,7 @@ protected:
   void mouseReleaseEvent(QMouseEvent *ev);
 
 private:
+  void init();
   /// Tile empty cells with Tiles
   void tileEmptyCells();
   /// Add a Tile widget at position(row,col) if it doesn't exist.
@@ -86,6 +90,8 @@ private:
   /// Deselect a tile
   bool deselectTile(Tile *tile);
 
+  /// The inner widget providing scrolling functionality.
+  QScrollArea *m_scrollArea;
   /// The layout arranging the tiles into a grid.
   mutable QGridLayout *m_layout;
   /// Tile selection
@@ -108,9 +114,15 @@ public:
 protected:
   void paintEvent(QPaintEvent *ev);
 private:
+  /// The TiledWindow which has this Tile
+  QWidget *m_tiledWindow;
+  /// The layout
   QVBoxLayout * m_layout;
+  /// A pointer to the displayed widget
   MdiSubWindow* m_widget;
+  /// Color of the border (to show selected tile)
   QColor m_border;
+  /// Width of the border (to show selected tile)
   int m_borderWidth;
 };
 

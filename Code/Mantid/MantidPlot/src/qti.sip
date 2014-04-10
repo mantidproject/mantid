@@ -1029,6 +1029,7 @@ public:
     int rowCount() const;
     int columnCount() const;
     void addWidget(MdiSubWindow *widget, int row, int col);
+    MdiSubWindow *getWidget(int row, int col);
     void removeWidgetToDocked(int row, int col);
     void removeWidgetToFloating(int row, int col);
     void selectWidget(int row, int col);
@@ -1038,6 +1039,8 @@ public:
     void clearSelection();
     void removeSelectionToDocked();
     void removeSelectionToFloating();
+    void clear();
+    void reshape(int cols);
 private:
     TiledWindow(const TiledWindow&);
 };

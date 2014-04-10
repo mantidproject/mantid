@@ -845,3 +845,6 @@ class TiledWindowProxy(QtProxyObject):
             col :: A column index at which to place the new tile.
         """
         threadsafe_call(self._getHeldObject().addWidget, tile._getHeldObject(), row, col)
+        
+    def getWidget(self, row, col):
+        return MDIWindow( threadsafe_call(self._getHeldObject().getWidget, row, col) )

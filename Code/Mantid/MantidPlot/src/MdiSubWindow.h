@@ -55,23 +55,31 @@ public:
     if (w == NULL)
       {// removing widget
         if (m_widget)
-          {
-            m_widget->setParent(NULL); // I am not sure about this
-          }
+        {
+          layout()->takeAt(0);
+          //m_widget->setParent(NULL); // I am not sure about this
+        }
         m_widget = NULL;
         return;
       }
 
     // widget cannot be replaced
     if (m_widget)
-      {
-        throw std::runtime_error("Widget already set");
-      }
+    {
+      throw std::runtime_error("Widget already set");
+    }
 
     // setting the internal widget
-    QVBoxLayout* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0,0,0,0);
-    layout->addWidget(w);
+    if ( this->layout() == NULL )
+    {
+      QVBoxLayout* layout = new QVBoxLayout(this);
+      layout->setContentsMargins(0,0,0,0);
+      layout->addWidget(w);
+    }
+    else
+    {
+      layout()->addWidget(w);
+    }
     m_widget = w;
     m_widget->setParent(this); // I am not sure about this
   }

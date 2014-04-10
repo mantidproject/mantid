@@ -20,7 +20,11 @@ const int selectedWidth(5);
  * Constructor.
  */
 Tile::Tile(QWidget *parent):
-  QFrame(parent),m_widget(NULL),m_border(normalColor),m_borderWidth(normalWidth)
+  QFrame(parent),
+  m_tiledWindow(parent),
+  m_widget(NULL),
+  m_border(normalColor),
+  m_borderWidth(normalWidth)
 {
   m_layout = new QVBoxLayout(this);
   m_layout->setContentsMargins(5,5,5,5);
@@ -31,6 +35,7 @@ Tile::Tile(QWidget *parent):
  */
 Tile::~Tile()
 {
+  //std::cerr << "Tile deleted." << std::endl;
 }
 
 /**
@@ -61,6 +66,8 @@ void Tile::setWidget(MdiSubWindow *w)
 void Tile::removeWidget()
 {
   m_layout->takeAt(0);
+  // m_widget needs it's parent set or bad things happen
+  m_widget->setParent( m_tiledWindow );
   m_widget = NULL;
 }
 
@@ -104,13 +111,21 @@ void Tile::makeNormal()
  * @param f :: Window flags.
  */
 TiledWindow::TiledWindow(QWidget* parent, const QString& label, const QString& name, Qt::WFlags f)
-  : MdiSubWindow(parent, label, name, f)
+  : MdiSubWindow(parent, label, name, f),m_scrollArea(NULL),m_layout(NULL)
 {
-  QScrollArea *scrollArea = new QScrollArea(this);
-  scrollArea->setWidgetResizable(true);
+  init();
+  setGeometry(0,0,500,400);
+}
 
-  QWidget *innerWidget = new QWidget(scrollArea);
-  m_layout = new QGridLayout();
+void TiledWindow::init()
+{
+  //QScrollArea *oldScrollArea = m_scrollArea;
+  delete m_scrollArea;
+  m_scrollArea = new QScrollArea(this);
+  m_scrollArea->setWidgetResizable(true);
+
+  QWidget *innerWidget = new QWidget(m_scrollArea);
+  m_layout = new QGridLayout(innerWidget);
   m_layout->setMargin(6);
   m_layout->setColumnMinimumWidth(0,minimumTileWidth);
   m_layout->setRowMinimumHeight(0,minimumTileHeight);
@@ -118,11 +133,13 @@ TiledWindow::TiledWindow(QWidget* parent, const QString& label, const QString& n
   m_layout->setColumnMinimumWidth(0,minimumTileWidth);
   m_layout->setRowMinimumHeight(0,minimumTileHeight);
   m_layout->setColStretch(0,1);
-  innerWidget->setLayout( m_layout );
+  //innerWidget->setLayout( m_layout );
 
-  scrollArea->setWidget(innerWidget);
-  this->setWidget( scrollArea );
-  setGeometry(0,0,500,400);
+  m_scrollArea->setWidget(innerWidget);
+  this->setWidget( NULL );
+  this->setWidget( m_scrollArea );
+
+  //if ( oldScrollArea != NULL ) delete oldScrollArea;
 }
 
 QString TiledWindow::saveToString(const QString &info, bool)
@@ -159,14 +176,62 @@ int TiledWindow::columnCount() const
 }
 
 /**
- * Re-arrange the tiles according to a new layout shape.
- * @param rows :: A new number of rows in the layout.
- * @param cols :: A new number of columns in the layout.
+ * Remove all widgets.
  */
-void TiledWindow::reshape(int rows, int cols)
+void TiledWindow::clear()
 {
-  UNUSED_ARG(rows);
-  UNUSED_ARG(cols);
+  init();
+}
+
+/**
+ * Re-arrange the tiles according to a new layout shape.
+ * @param newColumnCount :: A new number of columns in the layout.
+ */
+void TiledWindow::reshape(int newColumnCount)
+{
+  int nrows = rowCount();
+  int ncols = columnCount();
+
+  QList<MdiSubWindow*> widgets;
+  for(int row = 0; row < nrows; ++row)
+  {
+    for(int col = 0; col < ncols; ++col)
+    {
+      Tile *tile = getTile(row,col);
+      MdiSubWindow *widget = tile->widget();
+      if ( widget != NULL )
+      {
+        tile->removeWidget();
+        widgets.append( widget );
+      }
+    }
+  }
+
+  int nWidgets = widgets.size();
+  if ( nWidgets < newColumnCount )
+  {
+    newColumnCount = nWidgets;
+  }
+
+  if ( newColumnCount == 0 ) return;
+
+  // clear the layout
+  init();
+  int newRowCount = nWidgets / newColumnCount;
+  if ( newRowCount * newColumnCount != nWidgets ) 
+  {
+    newRowCount += 1;
+  }
+  // set up the new layout by putting in an empty tile at the top-right corner
+  // m_layout now knows its rowCount and columnCount and calcTilePosition can be used
+  Tile *tile = getOrAddTile(newRowCount - 1, newColumnCount - 1);
+  (void) tile;
+  for(int i = 0; i < nWidgets; ++i)
+  {
+    int row(0), col(0);
+    calcTilePosition( i, row, col );
+    addWidget( widgets[i], row, col );
+  }
 }
 
 /**
@@ -251,6 +316,8 @@ void TiledWindow::addWidget(MdiSubWindow *widget, int row, int col)
     m_layout->setColStretch(col,1);
     // detach the widget from ApplicationWindow
     widget->detach();
+    // widget must have it's parent
+    widget->setParent(this);
     // disable mouse events
     widget->setAttribute(Qt::WA_TransparentForMouseEvents,true);
     // attach it to this window
@@ -285,6 +352,7 @@ void TiledWindow::removeWidgetToDocked(int row, int col)
 {
   try
   {
+    deselectWidget( row, col );
     MdiSubWindow *widget = removeTile( row, col );
     widget->dock();
   }
@@ -303,6 +371,7 @@ void TiledWindow::removeWidgetToFloating(int row, int col)
 {
   try
   {
+    deselectWidget( row, col );
     MdiSubWindow *widget = removeTile( row, col );
     widget->undock();
   }

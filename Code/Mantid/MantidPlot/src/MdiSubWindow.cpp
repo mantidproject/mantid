@@ -213,7 +213,10 @@ bool MdiSubWindow::isDocked() const
  */
 void MdiSubWindow::detach()
 {
-  emit detachFromParent(this);
+  if ( isDocked() || isFloating() )
+  {
+    emit detachFromParent(this);
+  }
 }
 
 /**

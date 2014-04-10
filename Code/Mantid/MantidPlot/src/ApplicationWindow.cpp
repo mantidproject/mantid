@@ -1297,6 +1297,7 @@ void ApplicationWindow::tableMenuAboutToShow()
   fillMenu->clear();
 
   MdiSubWindow* t = activeWindow();
+  if ( t == NULL ) return;
 
   QMenu *setAsMenu = tableMenu->addMenu(tr("Set Columns &As"));
   setAsMenu->addAction(actionSetXCol);
@@ -17588,35 +17589,6 @@ MultiLayer* ApplicationWindow::waterfallPlot(Table *t, const QStringList& list)
  */
 void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showNormal)
 {
-  //connect(w, SIGNAL(modifiedWindow(MdiSubWindow*)), this, SLOT(modifiedProject(MdiSubWindow*)));
-  //connect(w, SIGNAL(resizedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
-  //connect(w, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(closeWindow(MdiSubWindow*)));
-  //connect(w, SIGNAL(hiddenWindow(MdiSubWindow*)), this, SLOT(hideWindow(MdiSubWindow*)));
-  //connect(w, SIGNAL(statusChanged(MdiSubWindow*)),this, SLOT(updateWindowStatus(MdiSubWindow*)));
-  //connect(w, SIGNAL(showContextMenu()), this, SLOT(showWindowContextMenu()));
-  //connect(w, SIGNAL(detachFromParent(MdiSubWindow*)),this, SLOT(detachMdiSubwindow(MdiSubWindow*)));
-
-  //bool showFloating = isDefaultFloating(w);
-
-  //if (showFloating && showNormal)
-  //{
-  //  addMdiSubWindowAsFloating(w);
-  //}
-  //else
-  //{
-  //  QMdiSubWindow* sw = addMdiSubWindowAsDocked(w);
-  //  if (showNormal)
-  //  {
-  //    sw->showNormal();
-  //  }
-  //  else
-  //  {
-  //    sw->showMinimized();
-  //  }
-  //}
-
-  //addListViewItem(w);
-  //currentFolder()->addWindow(w);
   addMdiSubWindow(w, isDefaultFloating(w), showNormal);
 }
 
@@ -17848,7 +17820,8 @@ FloatingWindow* ApplicationWindow::getActiveFloating() const
 }
 
 /**
- * Detach a subwindow from its parent - docked or floating
+ * Detach a subwindow from its parent - docked or floating.
+ * It isn't full detachment - signals are still connected.
  */
 void ApplicationWindow::detachMdiSubwindow(MdiSubWindow* w)
 {
@@ -17879,7 +17852,6 @@ void ApplicationWindow::detachMdiSubwindow(MdiSubWindow* w)
     d_workspace->removeSubWindow(w);
     dw->close();
   }
-
 }
 
 /**
