@@ -26,6 +26,7 @@ The [[Linear]] algorithm is used when the Mode = Linear Fit. From the resulting 
 #include <climits>
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {
@@ -150,6 +151,7 @@ namespace Mantid
                         {
                             // Do nothing.
                             // not every spectra is the monitor or detector, some spectra have no instrument components attached.
+                          g_log.information(" Can not find detector for spectra N: "+boost::lexical_cast<std::string>(currentSpec)+" Processing background anyway\n");
                         }
                     }
 
