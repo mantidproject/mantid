@@ -6,7 +6,6 @@
 #include "MantidAPI/IFunction.h"
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Muon/IALCBaselineModellingModel.h"
 
 #include <QObject>
 #include "qwt_data.h"
@@ -45,20 +44,15 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
+    typedef std::pair<double,double> Section;
+    typedef std::pair<double,double> SectionSelector;
+
     /// Function chosen to fit the data to
     /// @return Initialized function
     virtual IFunction_const_sptr function() const = 0;
 
-    /**
-     * @return Number of sections in sections table
-     */
-    virtual int sectionCount() const = 0;
-
-    /**
-     * @param index :: Table-index of the section to retrieve
-     * @return Section as is set in the table
-     */
-    virtual IALCBaselineModellingModel::Section section(int index) const = 0;
+    /// List of sections from the table
+    virtual std::vector<Section> sections() const = 0;
 
   public slots:
     /// Performs any necessary initialization
@@ -89,10 +83,23 @@ namespace CustomInterfaces
     virtual void setFunction(IFunction_const_sptr func) = 0;
 
     /**
-     * Add new section to the sections table
-     * @param newSection :: Initial section value
+     * Reset a list of sections displayed
+     * @param sections :: New list of sections to display
      */
-    virtual void addSection(IALCBaselineModellingModel::Section newSection) = 0;
+    virtual void setSections(const std::vector<Section>& sections) = 0;
+
+    /**
+     * Modify section values
+     * @param index :: Index of the section to modify
+     * @param section :: New section values
+     */
+    virtual void updateSection(size_t index, Section section) = 0;
+
+    /**
+     * Reset a list of section selectors
+     * @param selectors :: New list of selectors
+     */
+    virtual void setSectionSelectors(const std::vector<SectionSelector>& selectors) = 0;
 
   signals:
     /// Fit requested
@@ -100,6 +107,14 @@ namespace CustomInterfaces
 
     /// New section addition requested
     void addSectionRequested();
+
+    /**
+     * One of section selectors has been modified
+     * @param index :: Index of modified selector
+     * @param min :: New min value
+     * @param max :: New max value
+     */
+    void sectionSelectorModified(size_t index, double min, double max);
   };
 
 

@@ -22,6 +22,8 @@ namespace CustomInterfaces
 
     connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
     connect(m_view, SIGNAL(addSectionRequested()), SLOT(addSection()));
+    connect(m_view, SIGNAL(sectionSelectorModified(size_t,double,double)),
+            SLOT(onSectionSelectorModified(size_t,double,double)));
   }
 
   /**
@@ -43,15 +45,8 @@ namespace CustomInterfaces
    */
   void ALCBaselineModellingPresenter::fit()
   {
-    std::vector<IALCBaselineModellingModel::Section> sections;
-
-    for (int i = 0; i < m_view->sectionCount(); ++i)
-    {
-      sections.push_back(m_view->section(i));
-    }
-
     // TODO: catch exceptions
-    m_model->fit(m_view->function(), sections);
+    m_model->fit(m_view->function(), m_view->sections());
 
     IFunction_const_sptr fittedFunc = m_model->fittedFunction();
 
@@ -71,7 +66,23 @@ namespace CustomInterfaces
    */
   void ALCBaselineModellingPresenter::addSection()
   {
-    m_view->addSection(IALCBaselineModellingModel::Section(0,0));
+    double initStart = m_model->data()->getXMin();
+    double initEnd = m_model->data()->getXMax();
+
+    auto sections = m_view->sections();
+    sections.push_back(IALCBaselineModellingView::Section(initStart, initEnd));
+    m_view->setSections(sections);
+    m_view->setSectionSelectors(sections);
+  }
+
+  /**
+   * @param index :: Index of modified selector
+   * @param min :: New minimum value
+   * @param max :: New maximum value
+   */
+  void ALCBaselineModellingPresenter::onSectionSelectorModified(size_t index, double min, double max)
+  {
+    m_view->updateSection(index, IALCBaselineModellingView::Section(min, max));
   }
 
   /**

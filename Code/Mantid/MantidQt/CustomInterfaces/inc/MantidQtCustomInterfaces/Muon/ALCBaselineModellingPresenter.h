@@ -45,7 +45,6 @@ namespace CustomInterfaces
 
     void initialize();
 
-
     /// Set the data we should fit baseline for
     void setData(MatrixWorkspace_const_sptr data);
 
@@ -55,6 +54,9 @@ namespace CustomInterfaces
 
     /// Add a new section
     void addSection();
+
+    /// Called when section selector is modified
+    void onSectionSelectorModified(size_t index, double min, double max);
 
   private:
     /// Associated view

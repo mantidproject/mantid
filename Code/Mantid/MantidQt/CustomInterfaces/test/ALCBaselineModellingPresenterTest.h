@@ -23,18 +23,25 @@ public:
   void requestFit() { emit fitRequested(); }
   void requestAddSection() { emit addSectionRequested(); }
 
+  void modifySectionSelector(size_t index, double min, double max)
+  {
+    emit sectionSelectorModified(index, min, max);
+  }
+
   MOCK_METHOD0(initialize, void());
 
   MOCK_CONST_METHOD0(function, IFunction_const_sptr());
-  MOCK_CONST_METHOD0(sectionCount, int());
-  MOCK_CONST_METHOD1(section, IALCBaselineModellingModel::Section(int));
+  MOCK_CONST_METHOD0(sections, std::vector<Section>());
 
   MOCK_METHOD1(setDataCurve, void(const QwtData&));
   MOCK_METHOD1(setCorrectedCurve, void(const QwtData&));
   MOCK_METHOD1(setBaselineCurve, void(const QwtData&));
   MOCK_METHOD1(setFunction, void(IFunction_const_sptr));
 
-  MOCK_METHOD1(addSection, void(IALCBaselineModellingModel::Section));
+  MOCK_METHOD1(setSections, void(const std::vector<Section>&));
+  MOCK_METHOD2(updateSection, void(size_t, Section));
+
+  MOCK_METHOD1(setSectionSelectors, void(const std::vector<SectionSelector>&));
 };
 
 class MockALCBaselineModellingModel : public IALCBaselineModellingModel
@@ -126,14 +133,37 @@ public:
     m_presenter->setData(data);
   }
 
+  void test_addSection()
+  {
+    EXPECT_CALL(*m_model, data()).WillRepeatedly(Return(createTestWs(10)));
+
+    std::vector<IALCBaselineModellingView::Section> noSections;
+    EXPECT_CALL(*m_view, sections()).WillRepeatedly(Return(noSections));
+
+    EXPECT_CALL(*m_view, setSections(ElementsAre(Pair(1,10))));
+    EXPECT_CALL(*m_view, setSectionSelectors(ElementsAre(Pair(1,10))));
+
+    m_view->requestAddSection();
+  }
+
+  void test_onSectionSelectorModified()
+  {
+    EXPECT_CALL(*m_view, updateSection(5, Pair(-2,3)));
+    m_view->modifySectionSelector(5,-2,3);
+  }
+
   void test_fit()
   {
     EXPECT_CALL(*m_view, function()).WillRepeatedly(
           Return(FunctionFactory::Instance().createFunction("FlatBackground")));
 
-    EXPECT_CALL(*m_view, sectionCount()).WillRepeatedly(Return(2));
-    EXPECT_CALL(*m_view, section(0)).WillRepeatedly(Return(std::make_pair(10,20)));
-    EXPECT_CALL(*m_view, section(1)).WillRepeatedly(Return(std::make_pair(40,55)));
+    std::vector<IALCBaselineModellingView::Section> sections;
+    sections.push_back(std::make_pair(10,20));
+    sections.push_back(std::make_pair(40,55));
+    EXPECT_CALL(*m_view, sections()).WillRepeatedly(Return(sections));
+
+    EXPECT_CALL(*m_view, function()).WillRepeatedly(
+          Return(FunctionFactory::Instance().createFunction("FlatBackground")));
 
     EXPECT_CALL(*m_model, fit(AllOf(FunctionName("FlatBackground"),
                                     FunctionParameter("A0", 0, 1E-8)),
@@ -161,12 +191,6 @@ public:
                                                  QwtDataY(0, 4, 1E-8), QwtDataY(2, 6, 1E-8))));
 
     m_view->requestFit();
-  }
-
-  void test_addSection()
-  {
-    EXPECT_CALL(*m_view, addSection(Pair(0,0)));
-    m_view->requestAddSection();
   }
 
 };

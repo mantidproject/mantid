@@ -53,11 +53,8 @@ namespace CustomInterfaces
     /// @see IALCBaselineModellingView::function
     IFunction_const_sptr function() const;
 
-    /// @see IALCBaselineModellingView::sectionCount
-    int sectionCount() const;
-
-    /// @see IALCBaselineModellingView::section
-    IALCBaselineModellingModel::Section section(int index) const;
+    /// @see IALCBaselineModellingView::sections
+    std::vector<Section> sections() const;
 
   public slots:
     /// @see IALCBaselineModellingView::setDataCurve
@@ -72,12 +69,24 @@ namespace CustomInterfaces
     /// @see IALCBaselineModellingView::updateFunction
     void setFunction(IFunction_const_sptr func);
 
-    /// @see IALCBaselineModellingView::addSection
-    void addSection(IALCBaselineModellingModel::Section newSection);
+    /// @see IALCBaselineModellingView::setSections
+    void setSections(const std::vector<Section>& sections);
+
+    /// @see IALCBaselineModellingView::updateSection
+    void updateSection(size_t index, Section section);
+
+    /// @see IALCBaselineModellingView::setSectionSelectors
+    void setSectionSelectors(const std::vector<SectionSelector> &selectors);
 
   private slots:
     /// Show context menu for sections table
     void sectionsContextMenu(const QPoint& widgetPoint);
+
+    /// Called when one of range selectors is modified
+    void onRangeSelectorChanged(double min, double max);
+
+    /// Set section row values in sections table
+    void setSectionRow(int row, Section section);
 
   private:
     /// Index of section start column in sections table
@@ -93,6 +102,9 @@ namespace CustomInterfaces
 
     /// Plot curves
     QwtPlotCurve *m_dataCurve, *m_fitCurve, *m_correctedCurve;
+
+    /// Range selectors for sections
+    std::vector<RangeSelector*> m_rangeSelectors;
   };
 
 
