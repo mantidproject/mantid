@@ -117,6 +117,8 @@ namespace DataHandling
       }
     }
 
+    int numBanks = getNumberOfBanks( lines );
+
     return;
   }
 
@@ -164,24 +166,42 @@ namespace DataHandling
   }
 
   /* Get the histogram type
-   * @param lines :: vector of strings for each non-empty line in .irf file
+  * @param lines :: vector of strings for each non-empty line in .irf file
   */
   std::string LoadGSASInstrumentFile::getHistogramType(vector<string>& lines)
   {
-        // We assume there is just one HTYPE line, look for it from beginning and return its value.
-        std::string lookFor = "INS   HTYPE";
-        for (int i = 0; i <= lines.size(); ++i)
-        {
-          if(lines[i].substr(0,lookFor.size()) == lookFor)
-          {
-            if(lines[i].size() < lookFor.size()+7){
-              // line too short
-              return "HTYPE line too short";
-            }
-            return  lines[i].substr(lookFor.size()+3,4); // Found
-          }
+    // We assume there is just one HTYPE line, look for it from beginning and return its value.
+    std::string lookFor = "INS   HTYPE";
+    for (int i = 0; i <= lines.size(); ++i)
+    {
+      if(lines[i].substr(0,lookFor.size()) == lookFor)
+      {
+        if(lines[i].size() < lookFor.size()+7){
+          // line too short
+          return "HTYPE line too short";
         }
-        return "HTYPE line not found";
+        return  lines[i].substr(lookFor.size()+3,4); // Found
+      }
+    }
+    return "HTYPE line not found";
+  }
+
+  int LoadGSASInstrumentFile::getNumberOfBanks(vector<string>& lines)
+  {
+    // We assume there is just one BANK line, look for it from beginning and return its value.
+    std::string lookFor = "INS   BANK";
+    for (int i = 0; i <= lines.size(); ++i)
+    {
+      if(lines[i].substr(0,lookFor.size()) == lookFor)
+      {
+        if(lines[i].size() < lookFor.size()+3){
+          // line too short
+          return -1;
+        }
+        return  boost::lexical_cast<int>(lines[i].substr(lookFor.size(),3)); // Found
+      }
+    }
+    return 0;
   }
 
 } // namespace DataHandling
