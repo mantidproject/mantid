@@ -448,7 +448,9 @@ void SmoothNeighbours::findNeighboursUbiqutious()
     // We want to skip monitors
     try
     {
-      det = inWS->getDetector(wi);
+      // Get the list of detectors in this pixel
+      const std::set<detid_t> & dets = inWS->getSpectrum(wi)->getDetectorIDs();
+      det = inst->getDetector(*dets.begin());
       if( det->isMonitor() ) continue; //skip monitor
       if( det->isMasked() )
       {
@@ -459,7 +461,7 @@ void SmoothNeighbours::findNeighboursUbiqutious()
       if(sum > 1)
       {
         parent = det->getParent();
-        grandparent = parent->getParent();
+        if (parent) grandparent = parent->getParent();
       }
     }
     catch(Kernel::Exception::NotFoundError&)
@@ -501,9 +503,12 @@ void SmoothNeighbours::findNeighboursUbiqutious()
           size_t neighWI = mapIt->second;
           if(sum > 1)
           {
-            neighbParent = inWS->getDetector(neighWI)->getParent();
+              // Get the list of detectors in this pixel
+            const std::set<detid_t> & dets = inWS->getSpectrum(neighWI)->getDetectorIDs();
+            det = inst->getDetector(*dets.begin());
+            neighbParent = det->getParent();
             neighbGParent = neighbParent->getParent();
-            if(noNeigh >= sum || neighbParent->getName().compare(parent->getName()) > 0 || neighbGParent->getName().compare(grandparent->getName()) > 0 || used[neighWI])continue;
+            if(noNeigh >= sum || neighbParent->getName().compare(parent->getName()) != 0 || neighbGParent->getName().compare(grandparent->getName()) != 0 || used[neighWI])continue;
             noNeigh++;
             used[neighWI] = true;
           }
