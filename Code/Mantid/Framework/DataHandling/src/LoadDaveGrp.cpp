@@ -197,6 +197,14 @@ void LoadDaveGrp::exec()
   delete xAxis;
   delete yAxis;
 
+  //convert output workspace to histogram data
+  auto convert2Hist = createChildAlgorithm("ConvertToHistogram");
+  convert2Hist->setProperty("InputWorkspace", outputWorkspace);
+  convert2Hist->setProperty("OutputWorkspace", outputWorkspace);
+  convert2Hist->execute();
+
+  outputWorkspace = convert2Hist->getProperty("OutputWorkspace");
+
   outputWorkspace->mutableRun().addProperty("Filename",filename);
   this->setProperty("OutputWorkspace", outputWorkspace);
 }
