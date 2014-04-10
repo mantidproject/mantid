@@ -5,7 +5,6 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Muon/IALCBaselineModellingView.h"
-#include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include "ui_ALCBaselineModellingView.h"
@@ -54,37 +53,31 @@ namespace CustomInterfaces
     /// @see IALCBaselineModellingView::function
     IFunction_const_sptr function() const;
 
-  public slots:
-    /// @see IALCBaselineModellingView::displayData
-    void setData(MatrixWorkspace_const_sptr data);
+    /// @see IALCBaselineModellingView::sectionCount
+    int sectionCount() const;
 
-    /// @see IALCBaselineModellingView::displayCorrected
-    void setCorrectedData(MatrixWorkspace_const_sptr data);
+    /// @see IALCBaselineModellingView::section
+    IALCBaselineModellingModel::Section section(int index) const;
+
+  public slots:
+    /// @see IALCBaselineModellingView::setDataCurve
+    void setDataCurve(const QwtData &data);
+
+    /// @see IALCBaselineModellingView::setCorrectedCurve
+    void setCorrectedCurve(const QwtData &data);
+
+    /// @see IALCBaselineModellingView::setBaselineCurve
+    void setBaselineCurve(const QwtData &data);
 
     /// @see IALCBaselineModellingView::updateFunction
     void setFunction(IFunction_const_sptr func);
 
-    /// @see IALCBaselineModellingView::setSections
-    void setSectionsTable(const std::vector<Section> &sections);
+    /// @see IALCBaselineModellingView::addSection
+    void addSection(IALCBaselineModellingModel::Section newSection);
 
   private slots:
     /// Show context menu for sections table
     void sectionsContextMenu(const QPoint& widgetPoint);
-
-    /// Called when section adding is requested
-    void onAddSectionRequested();
-
-    /// Called whenever section in sections table is changed
-    /// @param row :: Changed section row
-    /// @param col :: Changed section column
-    void onSectionChanged(int row, int col);
-
-    /// Called whenever section in sections table is selected by user
-    /// @param newRow :: Selected section row
-    /// @param newCol :: Selected section column
-    /// @param prevRow :: Previously selected section row
-    /// @param prevCol :: Previously selected section column
-    void onSectionSelected(int newRow, int newCol, int prevRow, int prevCol);
 
   private:
     /// Index of section start column in sections table
@@ -100,9 +93,6 @@ namespace CustomInterfaces
 
     /// Plot curves
     QwtPlotCurve *m_dataCurve, *m_fitCurve, *m_correctedCurve;
-
-    /// Range selectors for all the sections
-    std::vector<RangeSelector*> m_sectionSelectors;
   };
 
 

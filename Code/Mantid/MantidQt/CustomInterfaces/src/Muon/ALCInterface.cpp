@@ -4,6 +4,8 @@
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h"
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingView.h"
 
+#include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h"
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -27,7 +29,8 @@ namespace CustomInterfaces
     m_dataLoading->initialize();
 
     auto baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
-    m_baselineModelling = new ALCBaselineModellingPresenter(baselineModellingView);
+    auto baselineModellingModel = new ALCBaselineModellingModel();
+    m_baselineModelling = new ALCBaselineModellingPresenter(baselineModellingView, baselineModellingModel);
     m_baselineModelling->initialize();
 
     auto peakFittingView = new ALCPeakFittingView(m_ui.peakFittingView);
@@ -46,10 +49,6 @@ namespace CustomInterfaces
       if (nextWidget == m_ui.baselineModellingView)
       {
         m_baselineModelling->setData(m_dataLoading->loadedData());
-      }
-      else if (nextWidget == m_ui.peakFittingView)
-      {
-        m_peakFitting->setData(m_baselineModelling->correctedData());
       }
 
       m_ui.stepView->setCurrentIndex(next);

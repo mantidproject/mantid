@@ -5,6 +5,7 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Muon/IALCBaselineModellingView.h"
+#include "MantidQtCustomInterfaces/Muon/IALCBaselineModellingModel.h"
 
 #include <QObject>
 
@@ -12,13 +13,6 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-
-namespace
-{
-  // Shortcuts
-  typedef IALCBaselineModellingView::Section Section;
-  typedef IALCBaselineModellingView::SectionIndex SectionIndex;
-}
 
   /** ALCBaselineModellingPresenter : Presenter for ALC Baseline Modelling step
     
@@ -47,45 +41,35 @@ namespace
     Q_OBJECT
 
   public:
-    ALCBaselineModellingPresenter(IALCBaselineModellingView* view);
+    ALCBaselineModellingPresenter(IALCBaselineModellingView* view, IALCBaselineModellingModel* model);
 
     void initialize();
 
-    /// @param data :: Data to fit peaks in
+
+    /// Set the data we should fit baseline for
     void setData(MatrixWorkspace_const_sptr data);
 
-    /// @return Corrected data calculated after the last fit
-    MatrixWorkspace_const_sptr correctedData() const { return m_correctedData; }
-
   private slots:
-    /// Perform fit
+    /// Perform a fit
     void fit();
 
-    /// @param newSection :: Section to add
-    void addSection(Section newSection);
-
-    /// @param index :: Index of the section to modify
-    /// @param modified :: Modified section values
-    void modifySection(SectionIndex index, Section modified);
+    /// Add a new section
+    void addSection();
 
   private:
-    /// Returns a filtered copy of m_data, where all uninteresting points where disabled.
-    /// Unintersing points are ones which are not included in any of the sections specified in the
-    /// view. Disabled here means "won't be used when fitting".
-    /// @return A copy of m_data which we can pass to Fit algorithm
-    MatrixWorkspace_sptr filteredData() const;
-
     /// Associated view
     IALCBaselineModellingView* const m_view;
 
-    /// Data we are fitting the baseline to
-    MatrixWorkspace_const_sptr m_data;
+    /// Associated model
+    IALCBaselineModellingModel* const m_model;
 
-    /// Baseline sections we are using
-    std::vector<Section> m_sections;
+    /// Create Qwt curve data from a workspace
+    static boost::shared_ptr<QwtData> curveDataFromWs(MatrixWorkspace_const_sptr ws,
+                                                      size_t wsIndex);
 
-    /// Corrected data of the last fit
-    MatrixWorkspace_const_sptr m_correctedData;
+    /// Create Qwt curve data from a function
+    static boost::shared_ptr<QwtData> curveDataFromFunction(IFunction_const_sptr func,
+                                                            const std::vector<double>& xValues);
   };
 
 } // namespace CustomInterfaces

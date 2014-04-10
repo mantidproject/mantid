@@ -6,8 +6,10 @@
 #include "MantidAPI/IFunction.h"
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/Muon/IALCBaselineModellingModel.h"
 
 #include <QObject>
+#include "qwt_data.h"
 
 using namespace Mantid::API;
 
@@ -43,41 +45,61 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    typedef std::pair<double,double> Section;
-    typedef size_t SectionIndex;
-
     /// Function chosen to fit the data to
     /// @return Initialized function
     virtual IFunction_const_sptr function() const = 0;
+
+    /**
+     * @return Number of sections in sections table
+     */
+    virtual int sectionCount() const = 0;
+
+    /**
+     * @param index :: Table-index of the section to retrieve
+     * @return Section as is set in the table
+     */
+    virtual IALCBaselineModellingModel::Section section(int index) const = 0;
 
   public slots:
     /// Performs any necessary initialization
     virtual void initialize() = 0;
 
-    /// @param data :: New data to display
-    virtual void setData(MatrixWorkspace_const_sptr data) = 0;
+    /**
+     * Update displayed data curve
+     * @param data :: New curve data
+     */
+    virtual void setDataCurve(const QwtData& data) = 0;
 
-    /// @param data :: New corrected data to display
-    virtual void setCorrectedData(MatrixWorkspace_const_sptr data) = 0;
+    /**
+     * Update displayed corrected data curve
+     * @param data :: New curve data
+     */
+    virtual void setCorrectedCurve(const QwtData& data) = 0;
 
-    /// @param func :: New function to display
+    /**
+     * Update displayed baseline curve
+     * @param data :: New curve data
+     */
+    virtual void setBaselineCurve(const QwtData& data) = 0;
+
+    /**
+     * Update displayed function
+     * @param func :: New function
+     */
     virtual void setFunction(IFunction_const_sptr func) = 0;
 
-    /// @param sections :: New list of sections to display in the table
-    virtual void setSectionsTable(const std::vector<Section>& sections) = 0;
+    /**
+     * Add new section to the sections table
+     * @param newSection :: Initial section value
+     */
+    virtual void addSection(IALCBaselineModellingModel::Section newSection) = 0;
 
   signals:
     /// Fit requested
     void fitRequested();
 
     /// New section addition requested
-    /// @param section :: Section to add
-    void addSectionRequested(Section section);
-
-    /// Section modified in the table.
-    /// @param index :: Index of modified section
-    /// @param section :: New value
-    void sectionsTableModified(SectionIndex index, Section section);
+    void addSectionRequested();
   };
 
 

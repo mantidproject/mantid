@@ -18,19 +18,20 @@ namespace CustomInterfaces
   ALCBaselineModellingView::ALCBaselineModellingView(QWidget* widget)
     : m_widget(widget), m_ui(),
       m_dataCurve(new QwtPlotCurve()), m_fitCurve(new QwtPlotCurve()),
-      m_correctedCurve(new QwtPlotCurve()), m_sectionSelectors()
+      m_correctedCurve(new QwtPlotCurve())
   {}
     
   void ALCBaselineModellingView::initialize()
   {
     m_ui.setupUi(m_widget);
-    connect(m_ui.fit, SIGNAL(pressed()), SIGNAL(fit()));
+    connect(m_ui.fit, SIGNAL(pressed()), SIGNAL(fitRequested()));
 
     m_dataCurve->attach(m_ui.dataPlot);
 
     m_fitCurve->setPen(QPen(Qt::red));
     m_fitCurve->attach(m_ui.dataPlot);
 
+    m_correctedCurve->setPen(QPen(Qt::green));
     m_correctedCurve->attach(m_ui.correctedPlot);
 
     // Context menu for sections table
@@ -40,10 +41,6 @@ namespace CustomInterfaces
 
     // Make columns non-resizeable and to fill all the available space
     m_ui.sections->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-
-    connect(m_ui.sections, SIGNAL(cellChanged(int,int)), SLOT(onSectionChanged(int,int)));
-    connect(m_ui.sections, SIGNAL(currentCellChanged(int,int,int,int)),
-            SLOT(onSectionSelected(int,int,int,int)));
   }
 
   IFunction_const_sptr ALCBaselineModellingView::function() const
@@ -51,68 +48,52 @@ namespace CustomInterfaces
     return m_ui.function->getFunction();
   }
 
-  void ALCBaselineModellingView::setData(MatrixWorkspace_const_sptr data)
+  int ALCBaselineModellingView::sectionCount() const
   {
-    m_dataCurve->setData(&data->readX(0)[0], &data->readY(0)[0], static_cast<int>(data->blocksize()));
+    return m_ui.sections->rowCount();
+  }
 
+  IALCBaselineModellingModel::Section ALCBaselineModellingView::section(int index) const
+  {
+    double start = m_ui.sections->item(index, SECTION_START_COL)->text().toDouble();
+    double end = m_ui.sections->item(index, SECTION_END_COL)->text().toDouble();
+
+    return IALCBaselineModellingModel::Section(start, end);
+  }
+
+  void ALCBaselineModellingView::setDataCurve(const QwtData &data)
+  {
+    m_dataCurve->setData(data);
     m_ui.dataPlot->replot();
   }
 
-  void ALCBaselineModellingView::setCorrectedData(MatrixWorkspace_const_sptr data)
+  void ALCBaselineModellingView::setCorrectedCurve(const QwtData &data)
   {
-    m_correctedCurve->setData(&data->readX(0)[0], &data->readY(0)[0], static_cast<int>(data->blocksize()));
-
+    m_correctedCurve->setData(data);
     m_ui.correctedPlot->replot();
+  }
+
+  void ALCBaselineModellingView::setBaselineCurve(const QwtData &data)
+  {
+    m_fitCurve->setData(data);
+    m_ui.dataPlot->replot();
   }
 
   void ALCBaselineModellingView::setFunction(IFunction_const_sptr func)
   {
-    std::vector<double> dataX;
-    dataX.reserve(m_dataCurve->dataSize());
-
-    for ( int i = 0; i < m_dataCurve->dataSize(); ++i )
-    {
-      dataX.push_back(m_dataCurve->x(i));
-    }
-
-    FunctionDomain1DVector domain(dataX);
-    FunctionValues values(domain);
-
-    func->function(domain, values);
-    assert(values.size() > 0);
-
-    m_fitCurve->setData(&dataX[0], values.getPointerToCalculated(0), m_dataCurve->dataSize());
-    m_ui.dataPlot->replot();
-
     m_ui.function->setFunction(QString::fromStdString(func->asString()));
   }
 
-  void ALCBaselineModellingView::setSectionsTable(const std::vector<IALCBaselineModellingView::Section>& sections)
+  void ALCBaselineModellingView::addSection(IALCBaselineModellingModel::Section newSection)
   {
-    // We disable table signals so that cell update signals are not emitted. This causes problems
-    // when the table is half filled
-    bool prevBlockedState = m_ui.sections->blockSignals(true);
+    int newIndex = m_ui.sections->rowCount();
 
-    m_ui.sections->setRowCount(static_cast<int>(sections.size()));
+    m_ui.sections->insertRow(newIndex);
 
-    for (auto it = sections.begin(); it != sections.end(); ++it)
-    {
-      int row = static_cast<int>(std::distance(sections.begin(), it));
-
-      m_ui.sections->setItem(row, SECTION_START_COL,
-                             new QTableWidgetItem(QString::number(it->first)));
-
-      m_ui.sections->setItem(row, SECTION_END_COL,
-                             new QTableWidgetItem(QString::number(it->second)));
-
-      // Create range selector for the section
-      auto rangeSelector = new RangeSelector(m_ui.dataPlot);
-      rangeSelector->setRange(m_dataCurve->minXValue(), m_dataCurve->maxXValue());
-      rangeSelector->setMinimum(it->first);
-      rangeSelector->setMaximum(it->second);
-    }
-
-   m_ui.sections->blockSignals(prevBlockedState);
+    m_ui.sections->setItem(newIndex, SECTION_START_COL,
+                           new QTableWidgetItem(QString::number(newSection.first)));
+    m_ui.sections->setItem(newIndex, SECTION_END_COL,
+                           new QTableWidgetItem(QString::number(newSection.second)));
   }
 
   void ALCBaselineModellingView::sectionsContextMenu(const QPoint& widgetPoint)
@@ -120,38 +101,8 @@ namespace CustomInterfaces
     UNUSED_ARG(widgetPoint);
 
     QMenu context(m_widget);
-    context.addAction("Add section", this, SLOT(onAddSectionRequested()));
+    context.addAction("Add section", this, SIGNAL(addSectionRequested()));
     context.exec(QCursor::pos());
-  }
-
-  void ALCBaselineModellingView::onAddSectionRequested()
-  {
-    emit addSectionRequested(std::make_pair(0,0));
-  }
-
-  void ALCBaselineModellingView::onSectionChanged(int row, int col)
-  {
-    UNUSED_ARG(col); // We are updating both values at once anyway
-
-    assert(row >= 0); // I assume Qt handles that
-
-    double start = m_ui.sections->item(row, SECTION_START_COL)->text().toDouble();
-    double end = m_ui.sections->item(row, SECTION_END_COL)->text().toDouble();
-
-    emit sectionsTableModified(static_cast<SectionIndex>(row), std::make_pair(start, end));
-  }
-
-  void ALCBaselineModellingView::onSectionSelected(int newRow, int newCol, int prevRow, int prevCol)
-  {
-    // Don't care about the column
-    UNUSED_ARG(newCol);
-    UNUSED_ARG(prevCol);
-
-    // Ignore column-only changes
-    if ( newRow == prevRow )
-      return;
-
-    // TODO: coloring
   }
 
 } // namespace CustomInterfaces

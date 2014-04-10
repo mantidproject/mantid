@@ -2,6 +2,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionDomain1D.h"
 
 using namespace Mantid::API;
 
@@ -10,8 +11,9 @@ namespace MantidQt
 namespace CustomInterfaces
 {
 
-  ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(IALCBaselineModellingView* view)
-    : m_view(view), m_data(), m_sections(), m_correctedData()
+  ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(IALCBaselineModellingView* view,
+                                                               IALCBaselineModellingModel* model)
+    : m_view(view), m_model(model)
   {}
 
   void ALCBaselineModellingPresenter::initialize()
@@ -19,112 +21,93 @@ namespace CustomInterfaces
     m_view->initialize();
 
     connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
-    connect(m_view, SIGNAL(addSectionRequested(Section)), SLOT(addSection(Section)));
-    connect(m_view, SIGNAL(sectionsTableModified(SectionIndex,Section)),
-            SLOT(modifySection(SectionIndex, Section)));
+    connect(m_view, SIGNAL(addSectionRequested()), SLOT(addSection()));
   }
 
+  /**
+   * @param data :: Data we want to fit baseline for
+   */
   void ALCBaselineModellingPresenter::setData(MatrixWorkspace_const_sptr data)
   {
-    m_data = data;
-    m_view->setData(data);
+    m_model->setData(data);
+
+    assert(data->getNumberHistograms() == 1);
+
+    boost::shared_ptr<QwtData> curveData = curveDataFromWs(data,0);
+
+    m_view->setDataCurve(*curveData);
   }
 
+  /**
+   * Perform a fit and updates the view accordingly
+   */
   void ALCBaselineModellingPresenter::fit()
   {
-    IFunction_sptr funcToFit =
-        FunctionFactory::Instance().createInitialized( m_view->function()->asString() );
+    std::vector<IALCBaselineModellingModel::Section> sections;
 
-    MatrixWorkspace_sptr wsToFit = filteredData();
-
-    IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
-    fit->setChild(true);
-    fit->setProperty("Function", funcToFit);
-    fit->setProperty("InputWorkspace", wsToFit);
-    fit->setProperty("CreateOutput", true);
-    fit->execute();
-
-    MatrixWorkspace_sptr fitOutput = fit->getProperty("OutputWorkspace");
-
-    IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-    extract->setChild(true);
-    extract->setProperty("InputWorkspace", fitOutput);
-    extract->setProperty("WorkspaceIndex", 2);
-    extract->setProperty("OutputWorkspace", "__NotUsed__");
-    extract->execute();
-
-    m_correctedData = extract->getProperty("OutputWorkspace");
-
-    m_view->setFunction(funcToFit);
-    m_view->setCorrectedData(m_correctedData);
-  }
-
-  void ALCBaselineModellingPresenter::addSection(Section newSection)
-  {
-    m_sections.push_back(newSection);
-    m_view->setSectionsTable(m_sections);
-  }
-
-  void ALCBaselineModellingPresenter::modifySection(SectionIndex index, Section modified)
-  {
-    if (index >= m_sections.size())
+    for (int i = 0; i < m_view->sectionCount(); ++i)
     {
-      throw std::out_of_range("Section index");
+      sections.push_back(m_view->section(i));
     }
 
-    m_sections[index] = modified;
-    m_view->setSectionsTable(m_sections);
+    // TODO: catch exceptions
+    m_model->fit(m_view->function(), sections);
+
+    IFunction_const_sptr fittedFunc = m_model->fittedFunction();
+
+    m_view->setFunction(fittedFunc);
+
+    const std::vector<double>& xValues = m_model->data()->readX(0);
+    m_view->setBaselineCurve(*(curveDataFromFunction(fittedFunc, xValues)));
+
+    MatrixWorkspace_const_sptr correctedData = m_model->correctedData();
+    assert(correctedData->getNumberHistograms() == 1);
+
+    m_view->setCorrectedCurve(*(curveDataFromWs(correctedData, 0)));
   }
 
-  MatrixWorkspace_sptr ALCBaselineModellingPresenter::filteredData() const
+  /**
+   * Adds new section in the view
+   */
+  void ALCBaselineModellingPresenter::addSection()
   {
-    // Assumptions about data
-    assert(m_data);
-    assert(m_data->getNumberHistograms() == 1);
-    assert(!m_data->isHistogramData()); // Point data expected
+    m_view->addSection(IALCBaselineModellingModel::Section(0,0));
+  }
 
-    // Whether point with particular index should be disabled
-    std::vector<bool> toDisable(m_data->blocksize(), true);
+  /**
+   * Creates QwtData using X and Y values from the workspace spectra.
+   * @param ws :: Workspace with X and Y values to use
+   * @param wsIndex :: Workspace index to use
+   * @return Pointer to created QwtData
+   */
+  boost::shared_ptr<QwtData> ALCBaselineModellingPresenter::curveDataFromWs(
+      MatrixWorkspace_const_sptr ws, size_t wsIndex)
+  {
+    const double* x = &ws->readX(wsIndex)[0];
+    const double* y = &ws->readY(wsIndex)[0];
+    size_t size = ws->blocksize();
 
-    // Find points which are in at least one section, and exclude them from disable list
-    for (size_t i = 0; i < m_data->blocksize(); ++i)
-    {
-      for (auto it = m_sections.begin(); it != m_sections.end(); ++it)
-      {
-        if ( m_data->dataX(0)[i] >= it->first && m_data->dataX(0)[i] <= it->second )
-        {
-          toDisable[i] = false;
-          break; // No need to check other sections
-        }
-      }
-    }
+    return boost::make_shared<QwtArrayData>(x,y,size);
+  }
 
-    // Create a copy of the data
-    IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
-    clone->setChild(true);
-    clone->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
-    clone->setProperty("OutputWorkspace", "__NotUsed__");
-    clone->execute();
+  /**
+   * Creates QwtData with Y values produced by the function for specified X values.
+   * @param func :: Function to use
+   * @param xValues :: X values which we want Y values for. QwtData will have those as well.
+   * @return Pointer to create QwtData
+   */
+  boost::shared_ptr<QwtData> ALCBaselineModellingPresenter::curveDataFromFunction(
+      IFunction_const_sptr func, const std::vector<double>& xValues)
+  {
+    FunctionDomain1DVector domain(xValues);
+    FunctionValues values(domain);
 
-    Workspace_sptr cloned = clone->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(cloned);
-    assert(ws); // CloneWorkspace should return the same type of workspace
+    func->function(domain, values);
+    assert(values.size() != 0);
 
-    // XXX: Points are disabled by settings their errors to very high value. This makes those
-    //      points to have very low weights during the fitting, effectively disabling them.
+    size_t size = xValues.size();
 
-    const double DISABLED_ERR = std::numeric_limits<double>::max();
-
-    // Disable chosen points
-    for (size_t i = 0; i < ws->blocksize(); ++i)
-    {
-      if (toDisable[i])
-      {
-        ws->dataE(0)[i] = DISABLED_ERR;
-      }
-    }
-
-    return ws;
+    return boost::make_shared<QwtArrayData>(&xValues[0], values.getPointerToCalculated(0), size);
   }
 
 } // namespace CustomInterfaces
