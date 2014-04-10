@@ -830,8 +830,8 @@ class DirectEnergyConversion(object):
 
         # this can be a workspace too
         calibration = self.det_cal_file;
-
-        result_ws = common.load_runs(self.instr_name, runs, calibration=calibration, sum=True)
+        monitors_inWS=self.load_monitors_with_workspace
+        result_ws = common.load_runs(self.instr_name, runs, calibration=calibration, sum=True,load_with_workspace=monitors_inWS)
 
         mon_WsName = result_ws.getName()+'_monitors'
         if mon_WsName in mtd:
@@ -918,6 +918,24 @@ class DirectEnergyConversion(object):
 #----------------------------------------------------------------------------------
 #              Complex setters/getters
 #----------------------------------------------------------------------------------
+    @property
+    def load_monitors_with_workspace(self):
+        if hasattr(self,'_load_monitors_with_workspace'):
+            return self._load_monitors_with_workspace;
+        else:
+            return False;
+    @load_monitors_with_workspace.setter
+    def load_monitors_with_workspace(self,val):
+        try:
+            if val>0:
+                do_load=True;
+            else:
+                do_load=False;
+        except ValueError:
+                do_load=False;
+
+        setattr(self,'_load_monitors_with_workspace',do_load);
+
     @property 
     def ei_mon_spectra(self):
 
