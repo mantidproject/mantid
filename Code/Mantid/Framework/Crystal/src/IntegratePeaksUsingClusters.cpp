@@ -140,11 +140,45 @@ namespace Mantid
       declareProperty(
         new PropertyWithValue<double>("Threshold", 0, compositeValidator, Direction::Input),
           "Threshold signal above which to consider peaks");
+
+      std::vector<std::string> normalizations(3);
+        normalizations[0] = "NoNormalization";
+        normalizations[1] = "VolumeNormalization";
+        normalizations[2] = "NumEventsNormalization";
+
+      declareProperty("Normalization",normalizations[1],
+          Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(normalizations)),
+          "Normalization to use with Threshold. Defaults to VolumeNormalization to account for different binning.");
+
       declareProperty(new WorkspaceProperty<IPeaksWorkspace>("OutputWorkspace", "", Direction::Output),
           "An output integrated peaks workspace.");
       declareProperty(
           new WorkspaceProperty<IMDHistoWorkspace>("OutputWorkspaceMD", "", Direction::Output),
           "MDHistoWorkspace containing the labeled clusters used by the algorithm.");
+    }
+
+
+    /**
+     * Get the normalization. For use with iterators + background strategies.
+     * @return Chosen normalization
+     */
+    MDNormalization IntegratePeaksUsingClusters::getNormalization()
+    {
+      std::string normProp = getPropertyValue("Normalization");
+      Mantid::API::MDNormalization normalization;
+      if (normProp == "NoNormalization")
+      {
+        normalization = NoNormalization;
+      }
+      else if (normProp == "VolumeNormalization")
+      {
+        normalization = VolumeNormalization;
+      }
+      else
+      {
+        normalization = NumEventsNormalization;
+      }
+      return normalization;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -178,12 +212,12 @@ namespace Mantid
 
       const double threshold = getProperty("Threshold");
       // Make a background strategy for the CCL analysis to use.
-      HardThresholdBackground backgroundStrategy(threshold,NoNormalization);
+      HardThresholdBackground backgroundStrategy(threshold, this->getNormalization());
       // CCL. Multi-processor version.
       ConnectedComponentLabeling analysis;
       
       Progress progress(this, 0, 1, 1);
-      // Peform CCL.
+      // Perform CCL.
       ClusterTuple clusters = analysis.executeAndFetchClusters(mdWS, &backgroundStrategy, progress);
       // Extract the clusters
       ConnectedComponentMappingTypes::ClusterMap& clusterMap = clusters.get<1>();
@@ -195,14 +229,15 @@ namespace Mantid
       std::map<size_t, size_t> labelsTakenByPeaks;
 
       progress.doReport("Performing Peak Integration");
-      progress.resetNumSteps(peakWS->getNumberPeaks(), 0.75, 1);
+      g_log.information("Starting Integration");
+      progress.resetNumSteps(peakWS->getNumberPeaks(), 0.9, 1);
       PARALLEL_FOR1(peakWS)
       for(int i = 0; i < peakWS->getNumberPeaks(); ++i)
       {
         PARALLEL_START_INTERUPT_REGION
         IPeak& peak = peakWS->getPeak(i);
         const V3D& peakCenterInMDFrame = peakTransform->transformPeak(peak);
-        const Mantid::signal_t signalValue = outHistoWS->getSignalAtVMD(peakCenterInMDFrame, NoNormalization);
+        const Mantid::signal_t signalValue = outHistoWS->getSignalAtVMD(peakCenterInMDFrame, NoNormalization); // No normalization when extracting label ids!
         if(boost::math::isnan(signalValue))
         {
           g_log.warning() << "Warning: image for integration is off edge of detector for peak " << i << std::endl;

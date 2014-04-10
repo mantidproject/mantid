@@ -1,4 +1,5 @@
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -43,6 +44,27 @@ namespace Mantid
         }
         maxNeighbours -= 1;
         return maxNeighbours;
+      }
+
+      /**
+       * Get the maximum number of clusters possible in an MD space. For use as an offset.
+       * @param ws : Workspace to interogate
+       * @param nIterators : number of equally sized iterators working on the workspace
+       * @return Maximum number of clusters.
+       */
+      size_t calculateMaxClusters(IMDHistoWorkspace const * const ws, size_t nIterators)
+      {
+        size_t maxClusters = 1;
+        for(size_t i = 0; i < ws->getNumDims(); ++i)
+        {
+          maxClusters *= ws->getDimension(i)->getNBins()/2;
+        }
+        maxClusters /= nIterators;
+        if(maxClusters == 0)
+        {
+          maxClusters = ws->getNPoints();
+        }
+        return maxClusters;
       }
 
       /**
@@ -113,6 +135,18 @@ namespace Mantid
       typedef std::set<DisjointPair> SetDisjointPair;
       typedef std::vector<EdgeIndexPair> VecEdgeIndexPair;
 
+      /**
+       * Free function performing the CCL implementation over a range defined by the iterator.
+       *
+       * @param iterator : Iterator giving access the the image
+       * @param strategy : Strategy for identifying background
+       * @param neighbourElements : Grid of DisjointElements the same size as the image
+       * @param progress : Progress object to update
+       * @param maxNeighbours : Maximum number of neighbours each element may have. Determined by dimensionality.
+       * @param startLabelId : Start label index to increment
+       * @param edgeIndexVec : Vector of edge index pairs. To identify elements across iterator boundaries to resolve later.
+       * @return
+       */
       size_t doConnectedComponentLabeling(
         IMDIterator* iterator, 
         BackgroundStrategy * const strategy, 
@@ -123,6 +157,7 @@ namespace Mantid
         )
       {
         size_t currentLabelCount = startLabelId;
+        strategy->configureIterator(iterator); // Set up such things as desired Normalization.
         do
         {
           if(!strategy->isBackground(iterator))
@@ -205,7 +240,7 @@ namespace Mantid
     * @param nThreads : Optional argument of number of threads to use.
     */
     ConnectedComponentLabeling::ConnectedComponentLabeling(const size_t& startId, const boost::optional<int> nThreads) 
-      : m_startId(startId), m_nThreads(nThreads)
+      : m_startId(startId), m_nThreads(nThreads), m_logger(Kernel::Logger::get("ConnectedComponentLabeling"))
     {
       if(m_nThreads.is_initialized() && m_nThreads.get() < 0)
       {
@@ -274,30 +309,34 @@ namespace Mantid
       VecElements neighbourElements(ws->getNPoints());
 
       const size_t maxNeighbours = calculateMaxNeighbours(ws.get());
+
       progress.doReport("Identifying clusters");
       size_t frequency = reportEvery<size_t>(10000, ws->getNPoints());
-      progress.resetNumSteps(frequency, 0.0, 0.5);
+      progress.resetNumSteps(frequency, 0.0, 0.8);
 
       // For each process maintains pair of index from within process bounds to index outside process bounds
       const int nThreadsToUse = getNThreads();
+
       if(nThreadsToUse > 1)
       {
         std::vector<API::IMDIterator*> iterators = ws->createIterators(nThreadsToUse);
-        const int nthreads = getNThreads(); 
-        std::vector<VecEdgeIndexPair> parallelEdgeVec(nthreads);
+
+        const size_t maxClustersPossible = calculateMaxClusters(ws.get(), nThreadsToUse);
+
+        std::vector<VecEdgeIndexPair> parallelEdgeVec(nThreadsToUse);
  
-        std::vector<std::map<size_t, boost::shared_ptr<Cluster> > > parallelClusterMapVec(nthreads);
+        std::vector<std::map<size_t, boost::shared_ptr<Cluster> > > parallelClusterMapVec(nThreadsToUse);
 
         // ------------- Stage One. Local CCL in parallel.
+        m_logger.debug("Parallel solve local CCL");
         PARALLEL_FOR_NO_WSP_CHECK()
-          for(int i = 0; i < nthreads; ++i)
+          for(int i = 0; i < nThreadsToUse; ++i)
           {
             API::IMDIterator* iterator = iterators[i];
-            iterator->setNormalization(NoNormalization);
             boost::scoped_ptr<BackgroundStrategy> strategy(baseStrategy->clone()); // local strategy
             VecEdgeIndexPair& edgeVec = parallelEdgeVec[i]; // local edge indexes
 
-            const size_t startLabel = m_startId + (i * ws->getNPoints()); // Ensure that label ids are totally unique within each parallel unit.
+            const size_t startLabel = m_startId + (i * maxClustersPossible); // Ensure that label ids are totally unique within each parallel unit.
             const size_t endLabel = doConnectedComponentLabeling(iterator, strategy.get(), neighbourElements, progress, maxNeighbours, startLabel, edgeVec);
 
             // Create clusters from labels.
@@ -332,6 +371,7 @@ namespace Mantid
           }
 
           // Percolate minimum label across boundaries for indexes where there is ambiguity.
+          m_logger.debug("Percolate minimum label across boundaries");
           std::vector<boost::shared_ptr<Cluster> > incompleteClusterVec;
           incompleteClusterVec.reserve(1000);
           std::set<size_t> usedLabels;
@@ -369,7 +409,8 @@ namespace Mantid
 
           // ------------- Stage 3 In parallel, process each incomplete cluster.
           progress.doReport("Merging clusters across processors");
-          progress.resetNumSteps(incompleteClusterVec.size(), 0.5, 0.75);
+          m_logger.debug("Merging clusters across processors");
+          progress.resetNumSteps(incompleteClusterVec.size(), 0.8, 0.9);
           PARALLEL_FOR_NO_WSP_CHECK()
             for(int i = 0; i < static_cast<int>(incompleteClusterVec.size()); ++i)
             {
@@ -377,13 +418,16 @@ namespace Mantid
               cluster->toUniformMinimum(neighbourElements);
               progress.report();
             }
-
-            // Now combine clusters and add the resolved clusters to the clustermap.
+          m_logger.debug("Remove duplicates");
+          m_logger.debug() << incompleteClusterVec.size() << " clusters to reconstruct" << std::endl;
+            // Now combine clusters and add the resolved clusters to the clusterMap.
+            SetIds usedOwningClusterIds;
             for(size_t i = 0; i < incompleteClusterVec.size(); ++i)
             {
               const size_t label = incompleteClusterVec[i]->getLabel();
-              if(!does_contain_key(clusterMap, label))
+              if(usedOwningClusterIds.find(label) == usedOwningClusterIds.end())
               {
+                usedOwningClusterIds.insert(label);
                 clusterMap.insert(std::make_pair(label,  incompleteClusterVec[i]));
               }
               else
@@ -409,7 +453,6 @@ namespace Mantid
 
         // Associate the member DisjointElements with a cluster. Involves looping back over iterator.
         iterator->jumpTo(0); // Reset
-        iterator->setNormalization(NoNormalization); // TODO: check that this is a valid assumption.
         std::set<size_t> labelIds;
         do
         {

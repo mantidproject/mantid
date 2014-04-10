@@ -1308,6 +1308,11 @@ namespace MDEvents
     return (3 * sizeof(signal_t) ) + sizeof(bool);
   }
 
+  boost::shared_ptr<IMDHistoWorkspace> MDHistoWorkspace::clone() const;
+  {
+    return boost::make_
+  }
+
 } // namespace Mantid
 } // namespace MDEvents
 

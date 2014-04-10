@@ -106,7 +106,7 @@ public:
 
     MockBackgroundStrategy mockStrategy;
     EXPECT_CALL(mockStrategy, isBackground(_)).Times(static_cast<int>(inWS->getNPoints())*2).WillRepeatedly(Return(false));// A filter that passes everything.
-
+    EXPECT_CALL(mockStrategy, configureIterator(_)).Times(1);
     size_t labelingId = 1;
     int multiThreaded = 1;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
@@ -128,7 +128,7 @@ public:
 
     MockBackgroundStrategy mockStrategy;
     EXPECT_CALL(mockStrategy, isBackground(_)).Times(static_cast<int>(inWS->getNPoints())*2).WillRepeatedly(Return(false));// A filter that passes everything.
-
+    EXPECT_CALL(mockStrategy, configureIterator(_)).Times(1);
     size_t labelingId = 2;
     int multiThreaded = 1;
     ConnectedComponentLabeling ccl(labelingId, multiThreaded);
@@ -151,7 +151,7 @@ public:
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 6); // Makes a 1 by 6 md ws with identical signal values.
 
     MockBackgroundStrategy mockStrategy;
-
+    EXPECT_CALL(mockStrategy, configureIterator(_)).Times(1);
     /*
      * We use the is background strategy to set up two disconected blocks for us.
      * */
@@ -192,7 +192,7 @@ public:
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 5); // Makes a 1 by 5 md ws with identical signal values.
 
     MockBackgroundStrategy mockStrategy;
-
+    EXPECT_CALL(mockStrategy, configureIterator(_)).Times(1);
     /*
      * We use the is background strategy to set up three disconected blocks for us.
      * */
@@ -230,6 +230,7 @@ public:
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 2, 4); // Makes a 4 by 4 grid.
 
     MockBackgroundStrategy mockStrategy;
+    EXPECT_CALL(mockStrategy, configureIterator(_)).Times(1);
 
     EXPECT_CALL(mockStrategy, isBackground(_)).WillRepeatedly(Return(false));// Nothing is treated as background
     size_t labelingId = 1;
@@ -249,6 +250,7 @@ public:
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 2, 3); // Makes a 3 by 3 grid.
 
     MockBackgroundStrategy mockStrategy;
+    EXPECT_CALL(mockStrategy, configureIterator(_)).Times(1);
 
     /*
      * We treat alternate cells as background, which actually should result in a single object. Think of a chequered flag.
@@ -292,6 +294,7 @@ public:
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 3, 3); // Makes a 3 by 3 by 3 grid. All populated with a single value.
 
     MockBackgroundStrategy mockStrategy;
+    EXPECT_CALL(mockStrategy, configureIterator(_)).Times(1);
 
     /*
      * We treat alternate cells as background, which actually should result in a single object. Think of a chequered flag.

@@ -400,6 +400,10 @@ namespace MDEvents
 
     /// Get the size of an element in the HistoWorkspace.
     static size_t sizeOfElement();
+
+    /// Virtual constructor.
+    boost::shared_ptr<IMDHistoWorkspace> cloneShape() const;
+
   private:
 
     void initVertexesArray();
