@@ -244,7 +244,7 @@ public:
   void test_copy_constructor_on_concrete_type()
   {
     Units::TOF first;
-    first.initialize(1.0,1.0,1.0,1.0,1.0,1.0);
+    first.initialize(1.0,1.0,1.0,2,1.0,1.0);
     Units::TOF second(first);
     TS_ASSERT_EQUALS(first.isInitialized(), second.isInitialized());
     TS_ASSERT_EQUALS(first.unitID(), second.unitID())
@@ -256,7 +256,7 @@ public:
   void test_copy_assignment_operator_on_concrete_type()
   {
     Units::TOF first;
-    first.initialize(1.0,1.0,1.0,1.0,1.0,1.0);
+    first.initialize(1.0,1.0,1.0,2,1.0,1.0);
     Units::TOF second;
     second = first;
     TS_ASSERT_EQUALS(first.isInitialized(), second.isInitialized());
