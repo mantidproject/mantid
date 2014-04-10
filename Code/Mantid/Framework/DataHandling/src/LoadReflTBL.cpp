@@ -319,7 +319,7 @@ namespace Mantid
 
       std::vector<std::string> columns;
 
-      int stitchID = 0;
+      int stitchID = 1;
       while(Kernel::Strings::extractToEOL(file, line))
       {
         //ignore the row if the line is blank
