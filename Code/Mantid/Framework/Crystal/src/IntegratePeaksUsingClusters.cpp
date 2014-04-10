@@ -192,8 +192,10 @@ namespace Mantid
       // Make a peak transform so that we can understand a peak in the context of the mdworkspace coordinate setup.
       PeakTransform_sptr peakTransform = makePeakTransform(mdWS.get());
       // Labels taken by peaks.
-      std::set<size_t> labelsTakenByPeaks;
+      std::map<size_t, size_t> labelsTakenByPeaks;
 
+      progress.doReport("Performing Peak Integration");
+      progress.resetNumSteps(peakWS->getNumberPeaks(), 0.75, 1);
       PARALLEL_FOR1(peakWS)
       for(int i = 0; i < peakWS->getNumberPeaks(); ++i)
       {
@@ -207,7 +209,7 @@ namespace Mantid
         }
         else if(signalValue < static_cast<Mantid::signal_t>(analysis.getStartLabelId()))
         {
-          g_log.information() << "Peak: " << i << " Has no corresponding cluster/blob detected on the image. This could be down to your Threshold settings.";
+          g_log.information() << "Peak: " << i << " Has no corresponding cluster/blob detected on the image. This could be down to your Threshold settings." << std::endl;
         }
         else
         {
@@ -219,12 +221,14 @@ namespace Mantid
           
           PARALLEL_CRITICAL(IntegratePeaksUsingClusters)
           {
-            if(labelsTakenByPeaks.find(labelIdAtPeak) != labelsTakenByPeaks.end())
+            auto it = labelsTakenByPeaks.find(labelIdAtPeak);
+            if(it != labelsTakenByPeaks.end())
             {
-              g_log.warning() << "Overlapping Peaks. Peak: " << i << " overlaps with another peak, and shares label id: " << labelIdAtPeak;
+              g_log.warning() << "Overlapping Peaks. Peak: " << i << " overlaps with another Peak: " << it->second << " and shares label id: " << it->first << std::endl;
             }
-            labelsTakenByPeaks.insert(labelIdAtPeak);
+            labelsTakenByPeaks.insert(std::make_pair(labelIdAtPeak, i));
           }
+          progress.report();
         }
         PARALLEL_END_INTERUPT_REGION
       }

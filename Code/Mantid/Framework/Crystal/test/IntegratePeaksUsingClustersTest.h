@@ -252,7 +252,7 @@ public:
     TSM_ASSERT_EQUALS("Integrated intensity should be zero since no integration has occured", 0, outPeaksWS->getPeak(0).getSigmaIntensity());
   }
 
-  void xtest_integrate_single_peak()
+  void test_integrate_single_peak()
   {
     // ------- Make the fake input
     std::vector<V3D> hklValues;

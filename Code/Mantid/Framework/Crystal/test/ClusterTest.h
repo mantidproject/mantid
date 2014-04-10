@@ -70,7 +70,8 @@ public:
     TS_ASSERT_EQUALS(clusterOne.size(), 1);
     Cluster* clusterTwo = new Cluster(2);
     clusterTwo->addIndex(1);
-    clusterOne.attachCluster(boost::shared_ptr<const Cluster>(clusterTwo));
+    boost::shared_ptr<const Cluster> clusterTwo_sptr(clusterTwo);
+    clusterOne.attachCluster(clusterTwo_sptr);
     TSM_ASSERT_EQUALS("Size should include children",clusterOne.size(), 2);
   }
 
@@ -84,7 +85,8 @@ public:
       clusterA.addIndex(i); // Register all indexes from the workspace to the cluster.
       clusterB->addIndex(i); // Register all indexes from the workspace to the cluster.
     }
-    clusterA.attachCluster(boost::shared_ptr<const Cluster>(clusterB));
+    boost::shared_ptr<const Cluster> clusterB_sptr(clusterB);
+    clusterA.attachCluster(clusterB_sptr);
     auto resultB = clusterB->integrate(inWS);
     TS_ASSERT_EQUALS(6*1, resultB.get<0>());
     TS_ASSERT_EQUALS(6*1, resultB.get<1>());
@@ -105,7 +107,8 @@ public:
     clusterOne.addIndex(1);
     clusterOne.addIndex(2);
     clusterTwo->addIndex(3);
-    clusterOne.attachCluster(boost::shared_ptr<const Cluster>(clusterTwo));
+    boost::shared_ptr<const Cluster> clusterTwo_sptr(clusterTwo);
+    clusterOne.attachCluster(clusterTwo_sptr);
     clusterOne.writeTo(inWS);
     TS_ASSERT_EQUALS(nolabel, inWS->getSignalAt(0));
     TS_ASSERT_EQUALS(label, inWS->getSignalAt(1));

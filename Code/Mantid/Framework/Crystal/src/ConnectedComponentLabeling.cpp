@@ -123,14 +123,13 @@ namespace Mantid
         )
       {
         size_t currentLabelCount = startLabelId;
-        iterator->setNormalization(NoNormalization); // TODO: check that this is a valid assumption.
         do
         {
           if(!strategy->isBackground(iterator))
           {
 
             size_t currentIndex = iterator->getLinearIndex();
-
+            progress.report();
             // Linear indexes of neighbours
             VecIndexes neighbourIndexes = iterator->findNeighbourIndexes();
             VecIndexes nonEmptyNeighbourIndexes;
@@ -177,7 +176,7 @@ namespace Mantid
                 size_t neighIndex = nonEmptyNeighbourIndexes[i];
                 if (neighbourElements[neighIndex].getId() < neighbourElements[parentIndex].getId())
                 {
-                  parentIndex = i;
+                  parentIndex = neighIndex;
                 }
               }
               // Get the chosen parent
@@ -275,6 +274,9 @@ namespace Mantid
       VecElements neighbourElements(ws->getNPoints());
 
       const size_t maxNeighbours = calculateMaxNeighbours(ws.get());
+      progress.doReport("Identifying clusters");
+      size_t frequency = reportEvery<size_t>(10000, ws->getNPoints());
+      progress.resetNumSteps(frequency, 0.0, 0.5);
 
       // For each process maintains pair of index from within process bounds to index outside process bounds
       const int nThreadsToUse = getNThreads();
@@ -291,6 +293,7 @@ namespace Mantid
           for(int i = 0; i < nthreads; ++i)
           {
             API::IMDIterator* iterator = iterators[i];
+            iterator->setNormalization(NoNormalization);
             boost::scoped_ptr<BackgroundStrategy> strategy(baseStrategy->clone()); // local strategy
             VecEdgeIndexPair& edgeVec = parallelEdgeVec[i]; // local edge indexes
 
@@ -307,7 +310,7 @@ namespace Mantid
 
             // Associate the member DisjointElements with a cluster. Involves looping back over iterator.
             iterator->jumpTo(0); // Reset
-            iterator->setNormalization(NoNormalization);
+
             std::set<size_t> labelIds;
             do
             {
@@ -315,7 +318,7 @@ namespace Mantid
               {
                 const size_t& index = iterator->getLinearIndex();
                 const size_t& labelAtIndex = neighbourElements[index].getRoot();
-                localClusterMap[labelAtIndex]->addIndex(index);  
+                localClusterMap[labelAtIndex]->addIndex(index);
               }
             }
             while(iterator->next());
@@ -365,11 +368,14 @@ namespace Mantid
           }
 
           // ------------- Stage 3 In parallel, process each incomplete cluster.
+          progress.doReport("Merging clusters across processors");
+          progress.resetNumSteps(incompleteClusterVec.size(), 0.5, 0.75);
           PARALLEL_FOR_NO_WSP_CHECK()
             for(int i = 0; i < static_cast<int>(incompleteClusterVec.size()); ++i)
             {
               auto cluster = incompleteClusterVec[i];
               cluster->toUniformMinimum(neighbourElements);
+              progress.report();
             }
 
             // Now combine clusters and add the resolved clusters to the clustermap.
@@ -382,7 +388,8 @@ namespace Mantid
               }
               else
               {
-                clusterMap[label]->attachCluster(boost::static_pointer_cast<const Cluster>(incompleteClusterVec[i]));
+                auto child = boost::static_pointer_cast<const Cluster>(incompleteClusterVec[i]);
+                clusterMap[label]->attachCluster(child);
               }
             }
 
@@ -455,7 +462,7 @@ namespace Mantid
       // Get the keys (label ids) first in order to do the next stage in parallel.
       VecIndexes keys;
       keys.reserve(clusters.size());
-      for (auto it = clusters.begin(); it != std::end(clusters); ++it) 
+      for (auto it = clusters.begin(); it != clusters.end(); ++it)
       {
         keys.push_back(it->first);
       }
