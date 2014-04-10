@@ -41,7 +41,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      AsciiPointBase() {}
+      AsciiPointBase(): m_qres(0), m_xlength(0), m_ws() {}
       /// Destructor
       ~AsciiPointBase() {}
       /// Algorithm's name for identification overriding a virtual method
