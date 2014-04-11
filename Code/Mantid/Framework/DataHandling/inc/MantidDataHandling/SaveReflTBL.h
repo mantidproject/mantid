@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid
 {
@@ -15,15 +15,6 @@ namespace Mantid
 
     Saves a table workspace to a reflectometry tbl format ascii file.
     Rows are 17 cells long and this save algorithm will throw if the workspace has stitch groups of longer than 3 runs.
-    
-    Properties:
-    <ul>
-    <li>Filename - the name of the file to write to.  </li>
-    <li>Workspace - the workspace name to be saved.</li>
-    </ul>
-
-    @author Keith Brown, ISIS, Placement student from the University of Derby
-    @date 27/03/14
 
     Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -66,11 +57,16 @@ namespace Mantid
       void init();
       /// Overwrites Algorithm method
       void exec();
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
-
+      /// Writes a value to the file
+      void writeVal(std::string & val,std::ofstream & file, bool endsep = true, bool endline = false);
+      //the separator
+      const char m_sep;
+      //populates the map and vector containing grouping information
+      void findGroups(API::ITableWorkspace_sptr ws);
       /// Map the separator options to their string equivalents
-      std::map<std::string,std::string> m_separatorIndex;
+      std::map<int,std::vector<size_t>> m_stichgroups;
+      std::vector<size_t> m_nogroup;
+
     };
   } // namespace DataHandling
 } // namespace Mantid
