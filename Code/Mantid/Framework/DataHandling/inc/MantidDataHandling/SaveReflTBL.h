@@ -59,7 +59,7 @@ namespace Mantid
       void exec();
       /// Writes a value to the file
       void writeVal(std::string & val,std::ofstream & file, bool endsep = true, bool endline = false);
-      //the separator
+      /// the separator
       const char m_sep;
       //populates the map and vector containing grouping information
       void findGroups(API::ITableWorkspace_sptr ws);
