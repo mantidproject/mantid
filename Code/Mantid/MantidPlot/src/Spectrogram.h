@@ -39,16 +39,26 @@
 #include "qwt_color_map.h"
 #include "PlotCurve.h"
 
-#include <fstream>
-#include <float.h>
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtAPI/MantidColorMap.h"
 #include "Mantid/InstrumentWidget/GLColor.h"
+
+#include <fstream>
+#include <float.h>
 #include <boost/shared_ptr.hpp>
 #include <QPainter>
 #include <qobject.h>
 
 class MatrixData;
 class PlotMarker;
+
+namespace MantidQt
+{
+  namespace API
+  {
+    class QwtRasterDataMD;
+  }
+}
 
 class Spectrogram: public QObject, public QwtPlotSpectrogram
 {
@@ -57,6 +67,7 @@ class Spectrogram: public QObject, public QwtPlotSpectrogram
 public:
   Spectrogram();
   Spectrogram(Matrix *m);
+  Spectrogram(const Mantid::API::IMDWorkspace_const_sptr & workspace);
   Spectrogram(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
   Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
   ~Spectrogram();
@@ -153,6 +164,8 @@ protected:
   //! Pointer to the source data matrix
   Matrix *d_matrix;
   Function2D *d_funct;
+  /// Pointer to data source for a workspace
+  MantidQt::API::QwtRasterDataMD *d_wsData;
 
   //! Axis used to display the color scale
   int color_axis;
@@ -181,8 +194,7 @@ protected:
   int d_labels_align;
   //! Labels font
   QFont d_labels_font;
-  //! Pointer to the parent plot
-  //Graph *d_graph;
+
   MantidColorMap mColorMap;
   QString mCurrentColorMap;
 

@@ -29,11 +29,11 @@ class QWT_EXPORT QwtRasterDataMD : public QwtRasterData
 public:
   QwtRasterDataMD();
   virtual ~QwtRasterDataMD();
-  QwtRasterData* copy() const;
+  QwtRasterDataMD* copy() const;
 
-  void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
+  void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
 
-  void setOverlayWorkspace(Mantid::API::IMDWorkspace_sptr ws);
+  void setOverlayWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
 
   QwtDoubleInterval range() const;
   void setRange(const QwtDoubleInterval & range);
@@ -52,11 +52,12 @@ public:
   Mantid::API::MDNormalization getNormalization() const;
 
 protected:
+
   /// Workspace being shown
-  Mantid::API::IMDWorkspace_sptr m_ws;
+  Mantid::API::IMDWorkspace_const_sptr m_ws;
 
   /// Workspace overlaid on top of original (optional)
-  Mantid::API::IMDWorkspace_sptr m_overlayWS;
+  Mantid::API::IMDWorkspace_const_sptr m_overlayWS;
 
   /// Number of dimensions in the workspace
   size_t m_nd;

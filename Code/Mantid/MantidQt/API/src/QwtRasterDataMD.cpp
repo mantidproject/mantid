@@ -37,9 +37,12 @@ QwtRasterDataMD::~QwtRasterDataMD()
 
 //-------------------------------------------------------------------------
 /** Perform a copy of this data object */
-QwtRasterData* QwtRasterDataMD::copy() const
+QwtRasterDataMD *QwtRasterDataMD::copy() const
 {
   QwtRasterDataMD* out = new QwtRasterDataMD();
+  //base bounding box
+  out->setBoundingRect(this->boundingRect());
+
   out->m_ws = this->m_ws;
   out->m_dimX = this->m_dimX;
   out->m_dimY = this->m_dimY;
@@ -200,7 +203,7 @@ QSize QwtRasterDataMD::rasterHint(const QwtDoubleRect &area) const
  *
  * @param ws :: IMDWorkspace to show
  */
-void QwtRasterDataMD::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
+void QwtRasterDataMD::setWorkspace(IMDWorkspace_const_sptr ws)
 {
   if (!ws)
     throw std::runtime_error("QwtRasterDataMD::setWorkspace(): NULL workspace passed.");
@@ -218,7 +221,7 @@ void QwtRasterDataMD::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
  *
  * @param ws :: IMDWorkspace to show
  */
-void QwtRasterDataMD::setOverlayWorkspace(Mantid::API::IMDWorkspace_sptr ws)
+void QwtRasterDataMD::setOverlayWorkspace(Mantid::API::IMDWorkspace_const_sptr ws)
 {
   if (!ws)
   {

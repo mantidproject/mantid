@@ -3190,12 +3190,47 @@ void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType 
 */
 MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType)
 {
-  MantidMatrix *matrix =  importMatrixWorkspace(wsName, -1, -1, false,false);
-  if(matrix)
+  auto workspace = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
+  if(!workspace) return NULL;
+
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  auto * ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName( wsName + "-"));
+  ml->setCloseOnEmpty(true);
+  Graph *plot = ml->activeGraph();
+  appWindow()->setPreferences(plot);
+  plot->setTitle(wsName);
+
+  const Mantid::API::Axis* ax;
+  ax = workspace->getAxis(0);
+  std::string s;
+  if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+  else
+    s = "X Axis";
+  plot->setXAxisTitle(tr(s.c_str()));
+  if ( workspace->axes() > 1 )
   {
-    return matrix->plotGraph2D(curveType);
+    ax = workspace->getAxis(1);
+    if (ax->isNumeric())
+    {
+      if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
+      else
+        s = "Y Axis";
+      plot->setYAxisTitle(tr(s.c_str()));
+    }
+    else
+      plot->setYAxisTitle(tr("Spectrum"));
   }
-  return NULL;
+
+  Spectrogram *spgrm = new Spectrogram(workspace);
+
+  plot->plotSpectrogram(spgrm, curveType);
+  appWindow()->setSpectrogramTickStyle(plot);
+  plot->setAutoScale();
+
+  QApplication::restoreOverrideCursor();
+
+
+  return ml;
 }
 
 /** Create a 1d graph form specified spectra in a MatrixWorkspace
