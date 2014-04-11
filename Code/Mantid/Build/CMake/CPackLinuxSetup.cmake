@@ -45,6 +45,8 @@ if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" OR ${UNIX_DIST} MATCHES "Fedora" OR
       set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc17" )
     elseif ( ${UNIX_CODENAME} MATCHES "SphericalCow" )
       set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc18" )
+    elseif ( ${UNIX_CODENAME} MATCHES "Heisenbug" )
+      set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc20" )
     endif ( ${UNIX_CODENAME} MATCHES "Tikanga" )
     
     # If CPACK_SET_DESTDIR is ON then the Prefix doesn't get put in the spec file
