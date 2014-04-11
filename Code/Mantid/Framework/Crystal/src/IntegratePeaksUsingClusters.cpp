@@ -1,15 +1,42 @@
 /*WIKI*
- Integrates arbitary shaped single crystal peaks defined on an [[MDHistoWorkspace]] using connected component analysis to determine
- regions of interest around each peak of the [[PeaksWorkspace]]. The output is an integrated [[PeaksWorkspace]] as well as an image
- containing the labels assigned to each cluster for diagnostic and visualisation purposes.
+Integrates arbitary shaped single crystal peaks defined on an [[MDHistoWorkspace]] using connected component analysis to determine
+regions of interest around each peak of the [[PeaksWorkspace]]. The output is an integrated [[PeaksWorkspace]] as well as an image
+containing the labels assigned to each cluster for diagnostic and visualisation purposes.
 
- A threshold for the Peak should be defined below which, parts of the image are treated as background. In addition, a radius estimate
- is required to dispose of those clusters which are not to do with peaks, and also to associate clusters in the image with a peak center.
- You can view the radius estimate as a radius cut-off.
+'''The algorithm makes no assmptions about Peak shape or size''' and can therfore be used where integration over defined shapes
+[[IntegratePeaksMD]] and [[IntegrateEllipsoids]] (for example). Will not work. 
 
- This algorithm uses an imaging technique, and it is therefore important that the MDHistoWorkspace you are using is binned to a sufficient
- resolution via [[BinMD]]. You can overlay the intergrated peaks workspace in the [[MantidPlot:_SliceViewer#Viewing_Peaks_Workspaces|Slice Viewer]] over
- the generated Cluster Labeled OutputWorkspaceMD to see what the interation region used for each peak amounts to.
+A threshold for the Peak should be defined below which, parts of the image are treated as background. The normalization method in combination with the 
+threshold may both be used to define a background. We suggest keeping the default of VolumeNormalization so that changes in the effective bin size
+do not affect the background filtering.
+
+This algorithm uses an imaging technique, and it is therefore important that the MDHistoWorkspace you are using is binned to a sufficient
+resolution via [[BinMD]]. You can overlay the intergrated peaks workspace in the [[MantidPlot:_SliceViewer#Viewing_Peaks_Workspaces|Slice Viewer]] over
+the generated Cluster Labeled OutputWorkspaceMD to see what the interation region used for each peak amounts to.
+
+== Notes for running ==
+
+It is suggested that you '''initially run the algorithm on a coarse image'''. This will help you tune the Threshold parameters. The algorithm generates 
+a large memory footprint, so it is suggested that you keep the initial image small, and run on hardware with sufficient memory to store multiple workspace
+of equal size to the input MDWorkspace (generated as part of the connected component analysis).
+
+== Warnings and Logging ==
+The algorithm will generate warning. There are three main warning to know about.
+=== Off the Image Edge ===
+The algorithm will warn about unreachable peaks (off the image). This may be because the peaks detected were off
+the edge of the detector, or because the image was cropped in BinMD in such a way that that part of the detector/TOF space is no
+longer accessible.
+=== No Cluster Corresponding to Peak ===
+This is because the input [[PeaksWorkspace]] has peaks that do not align with peaks in the image. The error could either
+be on the side of the input PeaksWorkspace (spurious peaks), or of the [[MDHistoWorkspace]] generated as part of processing. One thing to verify 
+is that the combination of Threshold and Normalization input parameters are not so low that they are treating genuine peaks in the image
+as background.
+=== Multiple Peaks Assigned to the same Cluster ===
+This means overlapping peaks in the image. This is a problem because both peaks will be given an integrated value that is the sum
+of the entire cluster. You may need to increase the Threshold parameter to resolve this problem.
+
+For more in-depth analysis, the algorithm will produce debug log messages.
+
  *WIKI*/
 
 #include "MantidCrystal/IntegratePeaksUsingClusters.h"
@@ -33,6 +60,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 #include <boost/make_shared.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <map>
 #include <algorithm>
 #include <boost/tuple/tuple.hpp>
