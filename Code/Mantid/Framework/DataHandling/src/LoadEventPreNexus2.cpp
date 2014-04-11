@@ -48,6 +48,7 @@ The ChunkNumber and TotalChunks properties can be used to load only a section of
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/InstrumentInfo.h"
 
 #include <algorithm>
 #include <sstream>
@@ -188,9 +189,7 @@ namespace DataHandling
     // try short instrument name
     if (!base.exists())
     {
-      // FIXME - master and develop are different on how to get instrument name in this case. 
-      throw std::runtime_error("Fix this due to difference in master and develop.");
-      // instrument = Kernel::ConfigService::Instance().getInstrument(instrument).shortName();
+      instrument = Kernel::ConfigService::Instance().getInstrument(instrument).shortName();
       base = Poco::File("/SNS/" + instrument + "/");
       if (!base.exists())
         return "";
