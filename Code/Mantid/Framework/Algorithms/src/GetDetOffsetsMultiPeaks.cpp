@@ -55,7 +55,7 @@ A better algorithm to find and fit peaks may save some spectrum with relatively 
 
 === <math>\chi^2</math> of the offset fitting function ===
 The goodness of fit, <math>\chi^2_{iws}</math>, of the offset fitting function
-:<math> \sum_{p} |X_{0, p} - (1+offset)X_{0, p}|/\chi^2_{p} </math>
+:<math> \sum_{p} |X_{0, p} - (1+offset)X_{0, p}|/\H^2_{p} </math>
 is an important measure of fitting quality on each spectrum (indexed as iws).
 
 === Deviation of highest peaks ===
@@ -533,19 +533,20 @@ namespace Algorithms
       // Fit peaks
       // std::vector<double> vec_peakPosRef, vec_peakPosFitted;
       std::vector<double> vec_fitChi2;
+      std::vector<double> vec_peakHeights;
       size_t nparams;
       double minD, maxD;
       int i_highestpeak;
       fr.numpeaksindrange = fitSpectra(wi, inputW, m_peakPositions, m_fitWindows,
                                        nparams, minD, maxD, vec_peakPosRef, vec_peakPosFitted,
-                                       vec_fitChi2, i_highestpeak);
+                                       vec_fitChi2, vec_peakHeights, i_highestpeak);
       fr.numpeakstofit = static_cast<int>(m_peakPositions.size());
       fr.numpeaksfitted = static_cast<int>(vec_peakPosFitted.size());
 
       // Fit offset
       if (nparams > 0 && fr.numpeaksindrange > 0)
       {
-        fitPeaksOffset(nparams, minD, maxD, vec_peakPosRef, vec_peakPosFitted, vec_fitChi2, fr);
+        fitPeaksOffset(nparams, minD, maxD, vec_peakPosRef, vec_peakPosFitted, vec_peakHeights, fr);
 
         // Deviation of calibrated position to the strong peak
         if (fr.fitoffsetstatus == "success")
@@ -590,7 +591,7 @@ namespace Algorithms
   void GetDetOffsetsMultiPeaks::fitPeaksOffset(const size_t inpnparams, const double minD, const double maxD,
                                                const std::vector<double>& vec_peakPosRef,
                                                const std::vector<double>& vec_peakPosFitted,
-                                               const std::vector<double>& vec_fitChi2,
+                                               const std::vector<double>& vec_peakHeights,
                                                FitPeakOffsetResult& fitresult)
   {
     // Set up array for minimization/optimization by GSL library
@@ -615,8 +616,8 @@ namespace Algorithms
     fitresult.peakPosFittedSize = static_cast<double>(vec_peakPosFitted.size());
     for (size_t i = 0; i < nparams; i++)
     {
-      params[i+3+2*nparams] = vec_fitChi2[i];
-      fitresult.chisqSum += vec_fitChi2[i];
+      params[i+3+2*nparams] = 1./(vec_peakHeights[i]*vec_peakHeights[i]); // vec_fitChi2[i];
+      fitresult.chisqSum += 1./(vec_peakHeights[i]*vec_peakHeights[i]); // vec_fitChi2[i];
     }
 
     // Set up GSL minimzer
@@ -740,7 +741,8 @@ namespace Algorithms
                                           const std::vector<double> &fitWindows, size_t &nparams,
                                           double &minD, double &maxD,
                                           std::vector<double>&peakPosToFit, std::vector<double>&peakPosFitted,
-                                          std::vector<double> &chisq, int& i_highestpeak)
+                                          std::vector<double> &chisq,
+                                          std::vector<double> &peakHeights, int& i_highestpeak)
   {
     // default overall fit range is the whole spectrum
     const MantidVec & X = inputW->readX(wi);
@@ -810,12 +812,47 @@ namespace Algorithms
     findpeaks->setProperty<double>("MinimumPeakHeight", m_minPeakHeight);
     findpeaks->executeAsChildAlg();
 
+#if 0
+    // Debug output (temp)
+    if (wi == 24269)
+    {
+      std::stringstream dbss;
+      dbss << "FindPeaks(" << "\n";
+      dbss << "\tInputWorkspace = " << inputW->getName() << ", \n";
+      dbss << "\tFWHM = " << 7 << ", \n";
+      dbss << "\tTolerance = 4, \n";
+      dbss << "\tWorkspaceIndex = " << (wi) << ", \n";
+      dbss << "\tPeakPositions = ";
+      for (size_t p = 0; p < peakPosToFit.size(); ++p)
+        dbss << peakPosToFit[p] << ", ";
+      dbss << ", \n";
+      if (useFitWindows)
+      {
+        dbss << "\tfitWindowsToUse = ";
+        for (size_t f = 0; f < fitWindowsToUse.size(); ++f)
+          dbss << fitWindowsToUse[f] << ", ";
+        dbss << ", \n";
+      }
+      dbss << "\tPeakFunction = " << m_peakType << ", \n";
+      dbss << "\tBackgroundType = " <<  m_backType << ", \n";
+      bool highbkgd = this->getProperty("HighBackground");
+      if (highbkgd)
+        dbss << "\tHighBackground = True, \n";
+      else
+        dbss << "\tHighBackground = False, \n";
+      dbss << "\tMinGuessedPeakWidth = " << 4 << ", \n";
+      dbss << "\tMaxGuessedPeakWidth = 4, \n";
+      dbss << "\tMinimumPeakHeight = " << m_minPeakHeight << ")";
+      g_log.notice() << "Debugging Find Peak! \n" << dbss.str() << "\n";
+    }
+#endif
+
     // Collect fitting resutl of all peaks
     ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
 
-    std::vector<double> peakHeightFitted;
+    // std::vector<double> peakHeightFitted;
     std::vector<double> tmpPeakPosToFit;
-    generatePeaksList(peakslist, static_cast<int>(wi), peakPosToFit, tmpPeakPosToFit, peakPosFitted, peakHeightFitted, chisq,
+    generatePeaksList(peakslist, static_cast<int>(wi), peakPosToFit, tmpPeakPosToFit, peakPosFitted, peakHeights, chisq,
                       useFitWindows, fitWindowsToUse, minD, maxD);
     peakPosToFit = tmpPeakPosToFit;
 
@@ -826,7 +863,7 @@ namespace Algorithms
     double maxheight = 0;
     for (int i = 0; i < static_cast<int>(peakPosFitted.size()); ++i)
     {
-      double tmpheight = peakHeightFitted[i];
+      double tmpheight = peakHeights[i];
       if (tmpheight > maxheight)
         {
           maxheight = tmpheight;
