@@ -613,7 +613,7 @@ namespace Algorithms
 
       if (m_forFastLog)
       {
-        throw runtime_error("Implement ASAP F327.");
+        throw runtime_error("It is supported to generate FastLog for integer timeseries log yet. ");
       }
       else
       {
