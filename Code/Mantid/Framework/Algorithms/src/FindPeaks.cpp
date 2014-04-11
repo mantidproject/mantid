@@ -926,7 +926,7 @@ namespace Algorithms
                                        vecpeakrange, m_minGuessedPeakWidth, m_maxGuessedPeakWidth, m_stepGuessedPeakWidth);
 
     bool fitsuccess = false;
-    if (costfuncvalue < DBL_MAX && costfuncvalue >= 0.)
+    if (costfuncvalue < DBL_MAX && costfuncvalue >= 0. && m_peakFunction->height() > m_minHeight)
       fitsuccess = true;
 
     //-------------------------------------------------------------------------
@@ -1047,8 +1047,8 @@ namespace Algorithms
       return errmsg.str();
     }
 
-    g_log.debug() << "Estimated peak parameters: Centre = " << centre << ", Height = "
-                  << height << ", FWHM = " << fwhm << ".\n";
+    g_log.information() << "Estimated peak parameters: Centre = " << centre << ", Height = "
+                        << height << ", FWHM = " << fwhm << ".\n";
 
     return std::string();
   }
@@ -1370,7 +1370,7 @@ namespace Algorithms
     g_log.information(dbss.str());
 
     double userFWHM = m_peakFunction->fwhm();
-    bool fitwithsteppedfwhm = (guessedFWHMStep == 0);
+    bool fitwithsteppedfwhm = (guessedFWHMStep > 0);
 
     FitOneSinglePeak fitpeak;
     fitpeak.setWorskpace(dataws, wsindex);
