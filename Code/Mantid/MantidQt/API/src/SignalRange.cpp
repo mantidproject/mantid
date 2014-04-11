@@ -20,7 +20,23 @@ namespace MantidQt
                              const Mantid::API::MDNormalization normalization)
       : m_interval(), m_normalization(normalization)
     {
-      findFullRange(workspace);
+      findFullRange(workspace, NULL);
+    }
+
+    /**
+     * Find the signal range that region defined by the function gives on the workspace
+     * using the given normalization
+     * @param workspace A reference to a workspace object
+     * @param function A reference to an MDImplicitFunction object that defines a region
+     *                 of the workspace
+     * @param normalization The type of normalization
+     */
+    SignalRange::SignalRange(const Mantid::API::IMDWorkspace &workspace,
+                             Mantid::Geometry::MDImplicitFunction &function,
+                             const Mantid::API::MDNormalization normalization)
+      :m_interval(), m_normalization(normalization)
+    {
+      findFullRange(workspace, &function);
     }
 
     /**
@@ -36,10 +52,13 @@ namespace MantidQt
     //-------------------------------------------------------------------------
     /**
      * @param workspace A reference to the workspace the explore
+     * @param function A pointer to an MDImplicitFunction object that defines a region
+     *                 of the workspace. NULL indicates use whole workspace
      */
-    void SignalRange::findFullRange(const Mantid::API::IMDWorkspace &workspace)
+    void SignalRange::findFullRange(const Mantid::API::IMDWorkspace &workspace,
+                                    Mantid::Geometry::MDImplicitFunction *function)
     {
-      auto iterators = workspace.createIterators(PARALLEL_GET_MAX_THREADS);
+      auto iterators = workspace.createIterators(PARALLEL_GET_MAX_THREADS, function);
       m_interval = getRange(iterators);
     }
 

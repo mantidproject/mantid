@@ -106,7 +106,7 @@ public:
     TS_ASSERT_DELTA(10.0, range.maxValue(), 1e-10);
   }
 
-  void test_IMDWorkspace_Without_Function_Uses_Specified_Normalization()
+  void test_IMDWorkspace_Uses_Specified_Normalization()
   {
     using namespace ::testing;
 
@@ -128,6 +128,42 @@ public:
         .WillOnce(Return(iterators));
 
     MantidQt::API::SignalRange sr(data, Mantid::API::NumEventsNormalization);
+    QwtDoubleInterval range = sr.interval();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&data));
+
+    TS_ASSERT_DELTA(0.75, range.minValue(), 1e-10);
+    TS_ASSERT_DELTA(5.0, range.maxValue(), 1e-10);
+  }
+
+  void test_IMDWorkspace_With_Function_()
+  {
+    using namespace ::testing;
+
+    int nthreads = PARALLEL_GET_MAX_THREADS;
+    std::vector<Mantid::API::IMDIterator*> iterators(nthreads);
+    for(int i = 0;i < nthreads; ++i)
+    {
+      auto * iterator = new NormalizableMockIterator;
+      EXPECT_CALL(*iterator, getNumEvents()).Times(Exactly(2)).WillRepeatedly(Return(2));
+      EXPECT_CALL(*iterator, valid()).WillRepeatedly(Return(true));
+      EXPECT_CALL(*iterator, next()).WillOnce(Return(true)).WillRepeatedly(Return(false));
+      EXPECT_CALL(*iterator, getSignal()).WillOnce(Return(1.5)).WillRepeatedly(Return(10.0));
+      iterators[i] = iterator;
+    }
+
+    MockMDWorkspace data;
+    Mantid::Geometry::MDImplicitFunction function;
+    Mantid::coord_t normal[3] = {1234, 456, 678};
+    Mantid::coord_t point[3] = {1,2,3};
+    function.addPlane(Mantid::Geometry::MDPlane(3, normal, point));
+
+    EXPECT_CALL(data, createIterators(nthreads, &function))
+        .Times(Exactly(1))
+        .WillOnce(Return(iterators));
+
+
+    MantidQt::API::SignalRange sr(data, function, Mantid::API::NoNormalization);
     QwtDoubleInterval range = sr.interval();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&data));
