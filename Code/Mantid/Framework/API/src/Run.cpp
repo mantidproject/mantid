@@ -477,12 +477,12 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     for (size_t i=0; i < m_goniometer.getNumberAxes(); ++i)
     {
   	  const std::string axisName = m_goniometer.getAxis(i).name;
+	  const double minAngle = getLogAsSingleValue(axisName, Kernel::Math::Minimum);
+	  const double maxAngle = getLogAsSingleValue(axisName, Kernel::Math::Maximum);
 	  const double angle = getLogAsSingleValue(axisName, Kernel::Math::Mean);
-	  const double lastAngle = getLogAsSingleValue(axisName, Kernel::Math::LastValue);
-	  if(angle != lastAngle)
+	  if(minAngle != maxAngle)
       {
-		  const double minAngle = getLogAsSingleValue(axisName, Kernel::Math::Minimum);
-		  const double maxAngle = getLogAsSingleValue(axisName, Kernel::Math::Maximum);
+		  const double lastAngle = getLogAsSingleValue(axisName, Kernel::Math::LastValue);
 		  g_log.warning("Goniometer angle changed in " + axisName + " log from " + boost::lexical_cast<std::string>(minAngle)
 				  + " to " + boost::lexical_cast<std::string>(maxAngle) + ".  Used mean = " + boost::lexical_cast<std::string>(angle) +".");
 		  if (axisName.compare("omega") == 0)
