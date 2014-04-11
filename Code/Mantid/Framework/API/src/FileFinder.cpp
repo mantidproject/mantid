@@ -26,6 +26,9 @@
 
 namespace
 {
+  /// static logger object
+  Mantid::Kernel::Logger g_log("FileFinder");
+
   /**
    * Unary predicate for use with remove_if.  Checks for the existance of
    * a "*" wild card in the file extension string passed to it.
@@ -56,7 +59,7 @@ namespace Mantid
     /**
      * Default constructor
      */
-    FileFinderImpl::FileFinderImpl() : g_log(Mantid::Kernel::Logger::get("FileFinderImpl"))
+    FileFinderImpl::FileFinderImpl()
     {
       // Make sure plugins are loaded
       std::string libpath = Kernel::ConfigService::Instance().getString("plugins.directory");

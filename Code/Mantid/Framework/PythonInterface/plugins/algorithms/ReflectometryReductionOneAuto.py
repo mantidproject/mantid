@@ -13,7 +13,7 @@ from mantid.simpleapi import ReflectometryReductionOne
 from mantid.api import *
 from mantid.kernel import *
 
-class ReflectometryReductionOneAuto(PythonAlgorithm):
+class ReflectometryReductionOneAuto(DataProcessorAlgorithm):
     
     def category(self):
         return "Reflectometry\\ISIS"

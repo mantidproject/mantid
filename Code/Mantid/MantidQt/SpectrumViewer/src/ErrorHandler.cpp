@@ -11,7 +11,11 @@ namespace SpectrumView
 
 using namespace Mantid;
 
-Kernel::Logger& g_log = Kernel::Logger::get("SpectrumView");
+  namespace
+  {
+    ///static logger
+    Kernel::Logger g_log("SpectrumView");
+  }
 
 /**
  * Display the specified string in an error message.

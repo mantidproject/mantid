@@ -34,11 +34,6 @@ void CopyInstrumentParameters::initDocs()
   this->setOptionalMessage("Transfers an instrument from on workspace to another workspace with same base instrument.");
 }
 
-/// Get a reference to the logger. It is used to print out information, warning and error messages
-Mantid::Kernel::Logger& CopyInstrumentParameters::g_log = Mantid::Kernel::Logger::get("CopyInstrumentParameters");
-
-
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

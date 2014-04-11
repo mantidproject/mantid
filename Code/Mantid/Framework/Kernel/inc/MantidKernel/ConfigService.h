@@ -265,9 +265,6 @@ namespace Mantid
       /// the POCO system Config Object
       WrappedObject<Poco::Util::SystemConfiguration>* m_pSysConfig;
 
-      /// reference to the logger class
-      Logger& g_log;
-
       /// A set of property keys that have been changed
       mutable std::set<std::string> m_changed_keys;
       

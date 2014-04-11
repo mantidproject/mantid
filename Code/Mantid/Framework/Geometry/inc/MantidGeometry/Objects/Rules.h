@@ -45,8 +45,6 @@ namespace Mantid
                 {
                 private:
 
-                        static Kernel::Logger& PLog;           ///< The official logger
-
                         Rule* Parent;                    ///< Parent object (for tree)
 
                         static int addToKey(std::vector<int>& AV,const int passN=-1);     
@@ -121,8 +119,6 @@ namespace Mantid
 
                 private:
 
-                        static Kernel::Logger& PLog;           ///< The official logger
-
                         Rule* A;    ///< Rule 1 
                         Rule* B;    ///< Rule 2 
 
@@ -170,8 +166,6 @@ namespace Mantid
                 {
 
                 private:
-
-                        static Kernel::Logger& PLog;           ///< The official logger  
 
                         Rule* A;    ///< Leaf rule A
                         Rule* B;    ///< Leaf rule B
@@ -222,7 +216,6 @@ namespace Mantid
                 {
                 private:
 
-                        static Kernel::Logger& PLog;           ///< The official logger
 
                         Surface* key;               ///< Actual Surface Base Object
                         int keyN;                   ///< Key Number (identifer)
@@ -275,8 +268,6 @@ namespace Mantid
                 {
                 private:
 
-                        static Kernel::Logger& PLog;           ///< The official logger
-
                         int objN;                   ///< Object number
                         Object* key;                ///< Object Pointer
 
@@ -328,8 +319,6 @@ namespace Mantid
                 {
                 private:
 
-                        static Kernel::Logger& PLog;           ///< The official logger
-
                         Rule* A;    ///< The rule
 
                 public:
@@ -374,8 +363,6 @@ namespace Mantid
                 class MANTID_GEOMETRY_DLL BoolValue : public Rule
                 {
                 private:
-
-                        static Kernel::Logger& PLog;           ///< The official logger
 
                         int status;          ///< Three values 0 False : 1 True : -1 doesn't matter
 

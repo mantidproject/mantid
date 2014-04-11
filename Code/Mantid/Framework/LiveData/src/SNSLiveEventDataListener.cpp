@@ -64,8 +64,11 @@ namespace LiveData
   // The DECLARE_LISTENER macro seems to confuse some editors' syntax checking.  The
   // semi-colon limits the complaints to one line.  It has no actual effect on the code.
 
-  // Get a reference to the logger
-  Kernel::Logger& SNSLiveEventDataListener::g_log = Kernel::Logger::get("SNSLiveEventDataListener");
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("SNSLiveEventDataListener");
+  }
 
   /// Constructor
   SNSLiveEventDataListener::SNSLiveEventDataListener()

@@ -277,7 +277,7 @@ void ModeratorTzeroLinear::calculateTfLi(MatrixWorkspace_const_sptr inputWS, siz
   }
   else
   {
-    IObjComponent_const_sptr sample = m_instrument->getSample();
+    IComponent_const_sptr sample = m_instrument->getSample();
     try
     {
       L_i = m_instrument->getSource()->getDistance(*sample);

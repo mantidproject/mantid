@@ -13,10 +13,10 @@
 #include <iterator>
 
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
-#include "MantidGeometry/Math/MapSupport.h"
 #include "MantidGeometry/Math/Algebra.h"
-
+#include "MantidGeometry/Math/MapSupport.h"
 
 namespace Mantid
 {
@@ -37,7 +37,6 @@ operator<<(std::ostream& OX,const Algebra& A)
   return OX;
 }
 
-Kernel::Logger& Algebra::PLog(Kernel::Logger::get("Algebra"));
 
 Algebra::Algebra() :
   F(0)

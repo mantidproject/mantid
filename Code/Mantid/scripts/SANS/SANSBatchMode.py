@@ -32,7 +32,7 @@ from ISISCommandInterface import *
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 from mantid.kernel import Logger
-sanslog = Logger.get("SANS")
+sanslog = Logger("SANS")
 import copy
 import sys
 import re

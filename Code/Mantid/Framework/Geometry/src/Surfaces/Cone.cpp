@@ -11,8 +11,6 @@
 #include <string>
 #include <algorithm>
 
-#include "MantidKernel/Logger.h"
-
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Matrix.h"
@@ -30,8 +28,6 @@ namespace Mantid
   {
     using Kernel::Tolerance;
     using Kernel::V3D;
-
-    Kernel::Logger& Cone::PLog(Kernel::Logger::get("Cone"));
 
     // The number of slices to use to approximate a cylinder
     int Cone::g_nslices = 10;

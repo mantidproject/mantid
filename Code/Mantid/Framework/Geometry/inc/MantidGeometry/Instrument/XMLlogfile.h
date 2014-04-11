@@ -86,12 +86,6 @@ namespace Mantid
       /// when this const equals 1 it means that angle=degree (default) is set in IDF
       /// otherwise if this const equals 180/pi it means that angle=radian is set in IDF 
       double m_angleConvertConst; 
-
-    private:
-
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
-
     };
 
   } // namespace Geometry

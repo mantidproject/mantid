@@ -24,6 +24,11 @@ namespace Mantid
 {
 namespace DataObjects
 {
+  namespace
+  {
+    // static logger
+    Kernel::Logger g_log("EventWorkspace");
+  }
 
   DECLARE_WORKSPACE(EventWorkspace)
 
@@ -31,13 +36,9 @@ namespace DataObjects
   using std::size_t;
   using namespace Mantid::Kernel;
 
-  // get a reference to the logger
-  Kernel::Logger& EventWorkspace::g_log
-                 = Kernel::Logger::get("EventWorkspace");
 
   //---- Constructors -------------------------------------------------------------------
-  EventWorkspace::EventWorkspace() :
-      mru(new EventWorkspaceMRU)
+  EventWorkspace::EventWorkspace() : mru(new EventWorkspaceMRU)
   {
   }
 
@@ -74,7 +75,6 @@ namespace DataObjects
     // Check validity of arguments
     if (NVectors <= 0)
     {
-      g_log.error("Negative or 0 Number of Pixels specified to EventWorkspace::init");
       throw std::out_of_range("Negative or 0 Number of Pixels specified to EventWorkspace::init");
     }
     //Initialize the data

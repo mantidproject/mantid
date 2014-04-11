@@ -185,9 +185,6 @@ namespace Mantid
 
       /// Temporary holder of external observers wishing to subscribe
       mutable std::vector<const Poco::AbstractObserver*> m_externalObservers;
-
-      /// Static refenence to the logger class
-      static Kernel::Logger& g_log;
     };
 
   } // namespace API

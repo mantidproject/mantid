@@ -60,7 +60,6 @@ set ( SRC_FILES
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
   src/Registry/DowncastRegistry.cpp
-  src/Environment/CallStack.cpp
   src/Environment/ErrorHandling.cpp
   src/Environment/Threading.cpp
   src/Environment/WrapperHelpers.cpp
@@ -77,7 +76,6 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/PyObjectToMatrix.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToV3D.h
   ${HEADER_DIR}/kernel/Converters/PySequenceToVector.h
-  ${HEADER_DIR}/kernel/Environment/CallStack.h
   ${HEADER_DIR}/kernel/Environment/CallMethod.h
   ${HEADER_DIR}/kernel/Environment/ErrorHandling.h
   ${HEADER_DIR}/kernel/Environment/Threading.h

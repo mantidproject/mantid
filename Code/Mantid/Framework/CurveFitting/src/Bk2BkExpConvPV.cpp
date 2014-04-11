@@ -14,11 +14,15 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("Bk2BkExpConvPV");
+  }
+
 
   DECLARE_FUNCTION(Bk2BkExpConvPV)
 
-  // Get a reference to the logger
-  Mantid::Kernel::Logger& Bk2BkExpConvPV::g_log = Kernel::Logger::get("Bk2BkExpConvPV");
 
   // ----------------------------
   /** Constructor and Desctructor

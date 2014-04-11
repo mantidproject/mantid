@@ -1,0 +1,102 @@
+#!/bin/bash -ex
+###############################################################################
+# LINUX/MAC SCRIPT TO DRIVE THE JENKINS BUILDS OF MANTID.
+#
+# Notes:
+#
+# WORKSPACE, JOB_NAME & NODE_LABEL are environment variables that are set by
+# Jenkins. The last one corresponds to any labels set on a slave.
+# BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
+###############################################################################
+
+###############################################################################
+# OS X setup steps
+###############################################################################
+if [[ $(uname) == 'Darwin' ]]; then
+  cd $WORKSPACE/Code
+  ./fetch_Third_Party.sh
+  cd $WORKSPACE
+  # Setup environment variables
+  source /opt/intel/bin/iccvars.sh intel64
+  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$WORKSPACE/Code/Third_Party/lib/mac64:/Library/Frameworks
+  # Make sure we pick up the Intel compiler
+  export CC=icc
+  export CXX=icpc
+fi
+
+###############################################################################
+# Check whether this is a clean build (must have 'clean' in the job name)
+###############################################################################
+if [[ ${JOB_NAME} == *clean* ]]; then
+  CLEANBUILD=true
+  # Removing the build directory entirely guarantees a completely clean build
+  rm -rf $WORKSPACE/build
+
+  # Set some variables relating to the linux packages created from clean builds
+  if [[ $(uname) != 'Darwin' ]]; then
+    if [[ ${JOB_NAME} == *master* ]]; then
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF -DQT_ASSISTANT_FETCH_IMAGES=ON"
+    elif [[ ${JOB_NAME} == *develop* ]]; then
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF"
+    fi
+  fi
+fi
+
+###############################################################################
+# RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
+###############################################################################
+if [[ ${NODE_LABELS} == *rhel6* ]]; then
+  SCL_ON_RHEL6="scl enable mantidlibs"
+  ON_RHEL6=true
+else
+  SCL_ON_RHEL6="eval"
+fi
+
+###############################################################################
+# Create the build directory if it doesn't exist
+###############################################################################
+[ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
+cd $WORKSPACE/build
+
+###############################################################################
+# CMake configuration
+###############################################################################
+$SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} ${PACKAGINGVARS} ../Code/Mantid"
+
+###############################################################################
+# Build step
+###############################################################################
+$SCL_ON_RHEL6 "make -j$BUILD_THREADS"
+$SCL_ON_RHEL6 "make -j$BUILD_THREADS AllTests"
+
+###############################################################################
+# Run the tests
+###############################################################################
+# Remove any Mantid.user.properties file
+rm -f ~/.mantid/Mantid.user.properties
+$SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure -E MantidPlot"
+# Run GUI tests serially
+$SCL_ON_RHEL6 "ctest --output-on-failure -R MantidPlot"
+
+###############################################################################
+# Create the install kit if this is a clean or non-Mac build
+###############################################################################
+rm -f *.dmg *.rpm *.deb *.tar.gz
+# Always build a package on linux
+if [[ $(uname) != 'Darwin' ]]; then
+  $SCL_ON_RHEL6 "make -j$BUILD_THREADS qtassistant"
+  $SCL_ON_RHEL6 "cpack"
+fi
+
+if [[ "$CLEANBUILD" == true ]]; then
+  # On the Mac, only create a package for clean builds
+  if [[ $(uname) == 'Darwin' ]]; then
+    $SCL_ON_RHEL6 "cpack"
+  fi
+
+  # We could build the source tarball anywhere, but we choose to do it on RHEL6
+  if [[ "$ON_RHEL6" == true ]]; then
+    # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
+    $SCL_ON_RHEL6 "cpack --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX="
+  fi
+fi

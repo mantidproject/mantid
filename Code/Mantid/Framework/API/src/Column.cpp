@@ -1,4 +1,5 @@
 #include "MantidAPI/Column.h"
+#include "MantidKernel/Logger.h"
 #include <algorithm>
 #include <iostream>
 
@@ -7,8 +8,11 @@ namespace Mantid
 namespace API
 {
 
-// Get a reference to the logger
-Kernel::Logger& Column::g_log = Kernel::Logger::get("Column");
+namespace
+{
+  /// static logger object
+  Kernel::Logger g_log("Column");
+}
 
 template<>
 bool Column::isType<bool>()const

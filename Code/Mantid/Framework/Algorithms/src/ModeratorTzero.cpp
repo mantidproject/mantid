@@ -223,7 +223,7 @@ void ModeratorTzero::execEvent()
   }
 
   //Get a pointer to the sample
-  IObjComponent_const_sptr sample = outputWS->getInstrument()->getSample();
+  IComponent_const_sptr sample = outputWS->getInstrument()->getSample();
 
   // Loop over the spectra
   Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
@@ -299,7 +299,7 @@ double ModeratorTzero::CalculateL1(Mantid::API::MatrixWorkspace_sptr inputWS, si
   }
   else
   {
-    IObjComponent_const_sptr sample = m_instrument->getSample();
+    IComponent_const_sptr sample = m_instrument->getSample();
     try
     {
       L1 = m_instrument->getSource()->getDistance(*sample);
@@ -335,7 +335,7 @@ double ModeratorTzero::CalculateT2(MatrixWorkspace_sptr inputWS, size_t i)
   }
   else
   {
-    IObjComponent_const_sptr sample = m_instrument->getSample();
+    IComponent_const_sptr sample = m_instrument->getSample();
     // Get final energy E_f, final velocity v_f
     std::vector< double >  wsProp=det->getNumberParameter("Efixed");
     if ( !wsProp.empty() )

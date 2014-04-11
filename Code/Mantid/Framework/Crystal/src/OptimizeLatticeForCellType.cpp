@@ -36,9 +36,6 @@ namespace Mantid
 {
   namespace Crystal
   {
-    Kernel::Logger& OptimizeLatticeForCellType::g_log =
-                        Kernel::Logger::get("OptimizeLatticeForCellType");
-
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(OptimizeLatticeForCellType)
     

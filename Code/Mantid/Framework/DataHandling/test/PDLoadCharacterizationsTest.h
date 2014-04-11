@@ -4,20 +4,20 @@
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadPDCharacterizations.h"
+#include "MantidDataHandling/PDLoadCharacterizations.h"
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
 
-using Mantid::DataHandling::LoadPDCharacterizations;
-class LoadPDCharacterizationsTest : public CxxTest::TestSuite
+using Mantid::DataHandling::PDLoadCharacterizations;
+class PDLoadCharacterizationsTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadPDCharacterizationsTest *createSuite() { return new LoadPDCharacterizationsTest(); }
-  static void destroySuite( LoadPDCharacterizationsTest *suite ) { delete suite; }
+  static PDLoadCharacterizationsTest *createSuite() { return new PDLoadCharacterizationsTest(); }
+  static void destroySuite( PDLoadCharacterizationsTest *suite ) { delete suite; }
 
-  void runAlg(LoadPDCharacterizations &alg, ITableWorkspace_sptr &wksp, const std::string &filename)
+  void runAlg(PDLoadCharacterizations &alg, ITableWorkspace_sptr &wksp, const std::string &filename)
   {
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT( alg.isInitialized() );
@@ -35,7 +35,7 @@ public:
   }
 
   // checks the focus positions for NOMAD
-  void checkNOMAD(LoadPDCharacterizations &alg)
+  void checkNOMAD(PDLoadCharacterizations &alg)
   {
     TS_ASSERT_EQUALS(alg.getPropertyValue("IParmFilename"), std::string("NOMAD_11_22_11.prm"));
     double l1 = alg.getProperty("PrimaryFlightPath");
@@ -112,7 +112,7 @@ public:
 
   void test_Init()
   {
-    LoadPDCharacterizations alg;
+    PDLoadCharacterizations alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -123,7 +123,7 @@ public:
     ITableWorkspace_sptr wksp;
 
     // initialize and run the algorithm
-    LoadPDCharacterizations alg;
+    PDLoadCharacterizations alg;
     runAlg(alg, wksp, CHAR_FILE);
 
     // test the table workspace
@@ -161,7 +161,7 @@ public:
     ITableWorkspace_sptr wksp;
 
     // initialize and run the algorithm
-    LoadPDCharacterizations alg;
+    PDLoadCharacterizations alg;
     runAlg(alg, wksp, CHAR_FILE);
 
     // test the table workspace
@@ -190,7 +190,7 @@ public:
     ITableWorkspace_sptr wksp;
 
     // initialize and run the algorithm
-    LoadPDCharacterizations alg;
+    PDLoadCharacterizations alg;
     runAlg(alg, wksp, CHAR_FILE);
 
     // test the table workspace
@@ -207,7 +207,7 @@ public:
     ITableWorkspace_sptr wksp;
 
     // initialize and run the algorithm
-    LoadPDCharacterizations alg;
+    PDLoadCharacterizations alg;
     runAlg(alg, wksp, CHAR_FILE);
 
     // test the table workspace
