@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/DataItem.cpp
 	src/DateAndTime.cpp
 	src/DateValidator.cpp
+	src/DateTimeValidator.cpp
 	src/DeltaEMode.cpp
 	src/DirectoryValidator.cpp
 	src/DiskBuffer.cpp
@@ -127,6 +128,7 @@ set ( INC_FILES
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DateValidator.h
+	inc/MantidKernel/DateTimeValidator.h
 	inc/MantidKernel/DeltaEMode.h
 	inc/MantidKernel/DirectoryValidator.h
 	inc/MantidKernel/DiskBuffer.h
@@ -252,6 +254,7 @@ set ( TEST_FILES
 	ConfigServiceTest.h
 	DataServiceTest.h
 	DateAndTimeTest.h
+	DateTimeValidatorTest.h
 	DateValidatorTest.h
 	DeltaEModeTest.h
 	DirectoryValidatorTest.h

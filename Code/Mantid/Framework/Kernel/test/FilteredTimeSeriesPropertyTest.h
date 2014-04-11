@@ -45,7 +45,7 @@ public:
     auto source = createTestSeries("name");
     auto filter = createTestFilter();
 
-    auto filtered = new FilteredTimeSeriesProperty<double>(source, *filter);
+    auto filtered = new FilteredTimeSeriesProperty<double>(source, *filter, true);
 
     TS_ASSERT_EQUALS(filtered->size(), 2);
     TS_ASSERT_EQUALS(filtered->nthInterval(0).begin_str(), "2007-Nov-30 16:17:25");

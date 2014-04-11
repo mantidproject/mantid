@@ -2,7 +2,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
-#include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmWrapper.h"
+#include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>

@@ -7,7 +7,7 @@ namespace Mantid
   {
 
     // logger for conversion  
-    Kernel::Logger& ConvToMDBase::g_Log =Kernel::Logger::get("MD-Algorithms");
+    Kernel::Logger ConvToMDBase::g_Log("MD-Algorithms");
 
 
     /** method which initates all main class variables
@@ -89,7 +89,12 @@ namespace Mantid
     };  
 
     /** empty default constructor */
-    ConvToMDBase::ConvToMDBase():m_NumThreads(-1), m_coordinateSystem(Mantid::API::None)
+    ConvToMDBase::ConvToMDBase():m_NDims(0), // wrong non-initialized
+      m_RunIndex(0), // defauld run index is 0
+      m_NSpectra(0), // no valid spectra by default.
+      m_NumThreads(-1), // run with all cores availible
+      m_ignoreZeros(false), // 0-s added to workspace
+      m_coordinateSystem(Mantid::API::None)
     { }
 
 

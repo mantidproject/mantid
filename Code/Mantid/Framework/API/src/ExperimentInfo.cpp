@@ -36,8 +36,11 @@ namespace Mantid
 {
 namespace API
 {
-
-  Kernel::Logger& ExperimentInfo::g_log = Kernel::Logger::get("ExperimentInfo");
+  namespace
+  {
+    /// static logger object
+    Kernel::Logger g_log("ExperimentInfo");
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Constructor

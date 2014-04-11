@@ -10,14 +10,6 @@
 namespace Mantid
 {
 
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
-
 namespace DataObjects
 {
 /** Concrete workspace implementation. Data is a single double value
@@ -47,10 +39,6 @@ namespace DataObjects
 class DLLExport WorkspaceSingleValue : public API::MatrixWorkspace
 {
 public:
-  /// Typedef for the workspace_iterator to use with a WorkspaceSingleValue
-  typedef API::workspace_iterator<API::LocatedDataRef, WorkspaceSingleValue> iterator;
-  /// Typedef for the const workspace_iterator to use with a WorkspaceSingleValue
-  typedef API::workspace_iterator<const API::LocatedDataRef, const WorkspaceSingleValue> const_iterator;
 
   /**	Gets the name of the workspace type
    * @return Standard string name  */
@@ -92,9 +80,6 @@ private:
 
   /// Instance of Histogram1D that holds the "spectrum" (AKA the single value);
   Histogram1D data;
-
-  /// Static reference to the logger class
-  static Kernel::Logger &g_log;
 };
 
   ///shared pointer to the WorkspaceSingleValue class

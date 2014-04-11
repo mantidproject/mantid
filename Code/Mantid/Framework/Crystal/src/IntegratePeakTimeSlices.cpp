@@ -83,8 +83,6 @@ namespace Mantid
   namespace Crystal
   {
 
-    Kernel::Logger& IntegratePeakTimeSlices::g_log = Kernel::Logger::get("IntegratePeakTimeSlices");
-
     DECLARE_ALGORITHM(IntegratePeakTimeSlices)
 
     //Attr, AttributeValues, and StatBase indicies
@@ -852,7 +850,7 @@ namespace Mantid
 
        Q = peak.getQLabFrame().norm();
        Geometry::Instrument_const_sptr instr = peak.getInstrument();
-       const Geometry::IObjComponent_const_sptr  sample = instr->getSample();
+       const Geometry::IComponent_const_sptr  sample = instr->getSample();
        V3D pos = peak.getDetPos()-sample->getPos();
 
        ScatAngle = acos(pos.Z() / pos.norm());

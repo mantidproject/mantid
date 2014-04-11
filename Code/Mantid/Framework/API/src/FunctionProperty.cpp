@@ -6,8 +6,6 @@ namespace Mantid
 {
 namespace API
 {
-  Kernel::Logger& FunctionProperty::g_log = Kernel::Logger::get("FunctionProperty");
-
   /** Constructor.
   *  Sets the property names but initialises the function pointer to null.
   *  @param name :: The name to assign to the property

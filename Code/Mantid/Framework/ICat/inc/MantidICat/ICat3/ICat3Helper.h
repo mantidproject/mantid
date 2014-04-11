@@ -3,11 +3,10 @@
 
 
 #include "MantidICat/ICat3/GSoapGenerated/ICat3ICATPortBindingProxy.h"
+#include "MantidICat/CatalogSearchParam.h"
+#include "MantidAPI/CatalogSession.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidKernel/Logger.h"
-#include "MantidICat/CatalogSearchParam.h"
-
 
 namespace Mantid
 {
@@ -44,19 +43,16 @@ namespace Mantid
     public:
 
       /// constructor
-      CICatHelper() : g_log(Kernel::Logger::get("CICatHelper"))
-      {}
-      /// destructor
-      ~CICatHelper(){}
+      CICatHelper();
 
       /// search method
       int doSearch(ICat3::ICATPortBindingProxy& icat,boost::shared_ptr<ICat3::ns1__searchByAdvanced>& request,ICat3::ns1__searchByAdvancedResponse& response);
 
       /// calls getInvestigationIncludes api's
-      int getDataFiles(long long invId,ICat3::ns1__investigationInclude include,API::ITableWorkspace_sptr& responsews_sptr);
+      void getDataFiles(long long invId,ICat3::ns1__investigationInclude include,API::ITableWorkspace_sptr& responsews_sptr);
 
       /// this method calls Icat api getInvestigationIncludes and returns datasets for the given investigation id.
-      int doDataSetsSearch(long long invId,ICat3::ns1__investigationInclude include,API::ITableWorkspace_sptr& responsews_sptr);
+      void doDataSetsSearch(long long invId,ICat3::ns1__investigationInclude include,API::ITableWorkspace_sptr& responsews_sptr);
 
       /// This method lists the isntruments
       void  listInstruments(std::vector<std::string>& instruments);
@@ -78,26 +74,17 @@ namespace Mantid
       int64_t getNumberOfSearchResults(const CatalogSearchParam& inputs);
 
       // do login
-      void doLogin(const std::string& name,const std::string& password,const std::string& url);
-
-      /// thsi method returns true if the  session id is valid
-      bool isvalidSession();
+      API::CatalogSession_sptr doLogin(const std::string& username,const std::string& password,
+          const std::string& endpoint,const std::string& facility);
 
       /// get the url of the given file id
-      void getdownloadURL(const long long& fileId,std::string& url);
+      const std::string getdownloadURL(const long long& fileId);
 
       /// get location of data file  or download method
-      void  getlocationString(const long long& fileid,std::string& filelocation);
+      const std::string getlocationString(const long long& fileid);
 
 
     private:
-
-      /// This method sets the request parameters for investigation includes.
-      void setReqParamforInvestigationIncludes(long long invstId,ICat3::ns1__investigationInclude include,
-          ICat3::ns1__getInvestigationIncludes& request);
-
-      ///This method saves the file search response to table workspace
-      API::ITableWorkspace_sptr saveFileSearchResponse(const ICat3::ns1__searchByAdvancedResponse& response);
 
       /// This method saves the response data of search by run number to table workspace
       void saveSearchRessults(const ICat3::ns1__searchByAdvancedPaginationResponse& response,API::ITableWorkspace_sptr& outputws);
@@ -110,24 +97,11 @@ namespace Mantid
       /// This method saves Datasets to a table workspace
       void  saveDataSets(const ICat3::ns1__getInvestigationIncludesResponse& response,API::ITableWorkspace_sptr& outputws);
 
-      /// This method sets the request parameters
-      void setReqparamforlistInstruments(ICat3::ns1__listInstruments& request);
-
-
-      /// This method creates table workspace
-      API::ITableWorkspace_sptr createTableWorkspace();
-
-      /// This method checks the given file name is raw file or nexus file
-      bool isDataFile(const std::string* fileName);
-
       /// This method saves the myinvestigations data to a table workspace
       void saveMyInvestigations(const ICat3::ns1__getMyInvestigationsIncludesResponse& response,API::ITableWorkspace_sptr& outputws);
 
       ///save investigations
       void saveInvestigations(const std::vector<ICat3::ns1__investigation*>& investigations,API::ITableWorkspace_sptr& outputws);
-
-      ///saves
-      void saveInvestigatorsNameandSample(ICat3::ns1__investigation* investigation,API::TableRow& t);
 
       /// Builds search query based on user input and stores query in related ICAT class.
       ICat3::ns1__advancedSearchDetails* buildSearchQuery(const CatalogSearchParam& inputs);
@@ -155,9 +129,8 @@ namespace Mantid
           t<<"";
         }
       }
-    private:
-      Kernel::Logger& g_log;    ///< reference to the logger class
-
+      // Stores the session details for a specific catalog.
+      API::CatalogSession_sptr m_session;
     };
 
 

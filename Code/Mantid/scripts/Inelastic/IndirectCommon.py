@@ -1,8 +1,8 @@
 from mantid.simpleapi import *
 from mantid import config, logger
 from IndirectImport import import_mantidplot
-import sys, platform, os.path, math, datetime, re
-    
+import sys, os.path, math, datetime, re
+
 def StartTime(prog):
     logger.notice('----------')
     message = 'Program ' + prog +' started @ ' + str(datetime.datetime.now())
@@ -21,50 +21,67 @@ def loadInst(instrument):
         LoadEmptyInstrument(Filename=idf, OutputWorkspace=ws)
 
 def loadNexus(filename):
-    '''Loads a Nexus file into a workspace with the name based on the
+    '''
+    Loads a Nexus file into a workspace with the name based on the
     filename. Convenience function for not having to play around with paths
-    in every function.'''
+    in every function.
+    '''
     name = os.path.splitext( os.path.split(filename)[1] )[0]
     LoadNexus(Filename=filename, OutputWorkspace=name)
     return name
-    
-def getInstrRun(file):
-    mo = re.match('([a-zA-Z]+)([0-9]+)',file)
-    instr_and_run = mo.group(0)          # instr name + run number
-    instr = mo.group(1)                  # instrument prefix
-    run = mo.group(2)                    # run number as string
-    return instr,run
 
-def getWSprefix(wsname,runfile=None):
-    '''Returns a string of the form '<ins><run>_<analyser><refl>_' on which
-    all of our other naming conventions are built.
-    The workspace is used to get the instrument parameters. If the runfile
-    string is given it is expected to be a string with instrument prefix
-    and run number. If it is empty then the workspace name is assumed to
-    contain this information
+def getInstrRun(ws_name):
+    '''
+    Get the instrument name and run number from a workspace.
+
+    @param ws_name - name of the workspace
+    @return tuple of form (instrument, run number) 
+    '''
+    ws = mtd[ws_name]
+    run_number = str(ws.getRunNumber())
+    if run_number == '0':
+        #attempt to parse run number off of name
+        match = re.match('([a-zA-Z]+)([0-9]+)', ws_name)
+        if match:
+            run_number = match.group(2)
+        else:
+            raise RuntimeError("Could not find run number associated with workspace.")
+
+    instrument = ws.getInstrument().getName()
+    facility = config.getFacility()
+    instrument = facility.instrument(instrument).filePrefix(int(run_number))
+    instrument = instrument.lower()
+    return instrument, run_number
+
+def getWSprefix(wsname):
+    '''
+    Returns a string of the form '<ins><run>_<analyser><refl>_' on which
+    all of our other naming conventions are built. The workspace is used to get the
+    instrument parameters.
     '''
     if wsname == '':
         return ''
-    if runfile is None:
-        runfile = wsname
+
     ws = mtd[wsname]
     facility = config['default.facility']
+
     ws_run = ws.getRun()
     if 'facility' in ws_run:
         facility = ws_run.getLogData('facility').value
-    if facility == 'ILL':		
-        inst = ws.getInstrument().getName()
-        runNo = ws.getRun()['run_number'].value
-        run_name = inst + '_'+ runNo
+
+    (instrument, run_number) = getInstrRun(wsname)
+    if facility == 'ILL':
+        run_name = instrument + '_'+ run_number
     else:
-        (instr, run) = getInstrRun(runfile)
-        run_name = instr + run
+        run_name = instrument + run_number
+
     try:
         analyser = ws.getInstrument().getStringParameter('analyser')[0]
         reflection = ws.getInstrument().getStringParameter('reflection')[0]
     except IndexError:
         analyser = ''
         reflection = ''
+
     prefix = run_name + '_' + analyser + reflection + '_'
     return prefix
 
@@ -77,8 +94,7 @@ def getDefaultWorkingDirectory():
     workdir = config['defaultsave.directory']
     
     if not os.path.isdir(workdir):
-        error = "Default save directory is not a valid path!"
-        sys.exit(error)
+        raise IOError("Default save directory is not a valid path!")
 
     return workdir
 
@@ -113,12 +129,10 @@ def createQaxis(inputWS):
         msg = 'Creating Axis based on Detector Q value: '
         if not axis.isNumeric():
             msg += 'Input workspace must have either spectra or numeric axis.'
-            logger.notice(msg)
-            sys.exit(msg)
+            raise ValueError(msg)
         if ( axis.getUnit().unitID() != 'MomentumTransfer' ):
             msg += 'Input must have axis values of Q'
-            logger.notice(msg)
-            sys.exit(msg)
+            raise ValueError(msg)
         for i in range(0, nHist):
             result.append(float(axis.label(i)))
     return result
@@ -183,13 +197,9 @@ def CheckAnalysers(in1WS,in2WS,Verbose):
     a2 = ws2.getInstrument().getStringParameter('analyser')[0]
     r2 = ws2.getInstrument().getStringParameter('reflection')[0]
     if a1 != a2:
-        error = 'Workspace '+in1WS+' and '+in2WS+' have different analysers'
-        logger.notice('ERROR *** '+error)
-        sys.exit(error)
+        raise ValueError('Workspace '+in1WS+' and '+in2WS+' have different analysers')
     elif r1 != r2:
-        error = 'Workspace '+in1WS+' and '+in2WS+' have different reflections'
-        logger.notice('ERROR *** '+error)
-        sys.exit(error)
+        raise ValueError('Workspace '+in1WS+' and '+in2WS+' have different reflections')
     else:
         if Verbose:
             logger.notice('Analyser is '+a1+r1)
@@ -197,15 +207,11 @@ def CheckAnalysers(in1WS,in2WS,Verbose):
 def CheckHistZero(inWS):
     nhist = mtd[inWS].getNumberHistograms()       # no. of hist/groups in WS
     if nhist == 0:
-        error = 'Workspace '+inWS+' has NO histograms'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError('Workspace '+inWS+' has NO histograms')
     Xin = mtd[inWS].readX(0)
     ntc = len(Xin)-1						# no. points from length of x array
     if ntc == 0:
-        error = 'Workspace '+inWS+' has NO points'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError('Workspace '+inWS+' has NO points')
     return nhist,ntc
 
 def CheckHistSame(in1WS,name1,in2WS,name2):
@@ -219,68 +225,38 @@ def CheckHistSame(in1WS,name1,in2WS,name2):
         e1 = name1+' ('+in1WS+') histograms (' +str(nhist1) + ')'
         e2 = name2+' ('+in2WS+') histograms (' +str(nhist2) + ')'
         error = e1 + ' not = ' + e2
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError(error)
     elif xlen1 != xlen2:
         e1 = name1+' ('+in1WS+') array length (' +str(xlen1) + ')'
         e2 = name2+' ('+in2WS+') array length (' +str(xlen2) + ')'
         error = e1 + ' not = ' + e2
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError(error)
 
-def CheckXrange(xrange,type):
-    if  not ( ( len(xrange) == 2 ) or ( len(xrange) == 4 ) ):
-        error = type + ' - Range must contain either 2 or 4 numbers'
-        logger.notice(error)
-        sys.exit(error)
-    if math.fabs(xrange[0]) < 1e-5:
-        error = type + ' - input minimum ('+str(xrange[0])+') is Zero'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
-    if math.fabs(xrange[1]) < 1e-5:
-        error = type + ' - input maximum ('+str(xrange[1])+') is Zero'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
-    if xrange[1] < xrange[0]:
-        error = type + ' - input max ('+str(xrange[1])+') < min ('+xrange[0]+')'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
-    if len(xrange) >2:
-        if math.fabs(xrange[2]) < 1e-5:
-            error = type + '2 - input minimum ('+str(xrange[2])+') is Zero'			
-            logger.notice('ERROR *** ' + error)
-            sys.exit(error)
-        if math.fabs(xrange[3]) < 1e-5:
-            error = type + '2 - input maximum ('+str(xrange[3])+') is Zero'			
-            logger.notice('ERROR *** ' + error)
-            sys.exit(error)
-        if xrange[3] < xrange[2]:
-            error = type + '2 - input max ('+str(xrange[3])+') < min ('+xrange[2]+')'			
-            logger.notice('ERROR *** ' + error)
-            sys.exit(error)
+def CheckXrange(x_range,type):
+    if  not ( ( len(x_range) == 2 ) or ( len(x_range) == 4 ) ):
+        raise ValueError(type + ' - Range must contain either 2 or 4 numbers')
+    
+    for lower, upper in zip(x_range[::2], x_range[1::2]):
+        if math.fabs(lower) < 1e-5:
+            raise ValueError(type + ' - input minimum ('+str(lower)+') is Zero')
+        if math.fabs(upper) < 1e-5:
+            raise ValueError(type + ' - input maximum ('+str(upper)+') is Zero')
+        if upper < lower:
+            raise ValueError(type + ' - input max ('+str(upper)+') < min ('+lower+')')
 
 def CheckElimits(erange,Xin):
     nx = len(Xin)-1
+    
     if math.fabs(erange[0]) < 1e-5:
-        error = 'Elimits - input emin ( '+str(erange[0])+' ) is Zero'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError('Elimits - input emin ( '+str(erange[0])+' ) is Zero')
     if erange[0] < Xin[0]:
-        error = 'Elimits - input emin ( '+str(erange[0])+' ) < data emin ( '+str(Xin[0])+' )'		
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError('Elimits - input emin ( '+str(erange[0])+' ) < data emin ( '+str(Xin[0])+' )')
     if math.fabs(erange[1]) < 1e-5:
-        error = 'Elimits - input emax ( '+str(erange[1])+' ) is Zero'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) is Zero')
     if erange[1] > Xin[nx]:
-        error = 'Elimits - input emax ( '+str(erange[1])+' ) > data emax ( '+str(Xin[nx])+' )'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) > data emax ( '+str(Xin[nx])+' )')
     if erange[1] < erange[0]:
-        error = 'Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+erange[0]+' )'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
+        raise ValueError('Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+erange[0]+' )')
 
 def plotSpectra(ws, y_axis_title, indicies=[]):
     """
@@ -299,11 +275,11 @@ def plotSpectra(ws, y_axis_title, indicies=[]):
         plot = mp.plotSpectrum(ws, indicies, True)
         layer = plot.activeLayer()
         layer.setAxisTitle(mp.Layer.Left, y_axis_title)
-    except RuntimeError, e:
+    except RuntimeError:
         #User clicked cancel on plot so don't do anything
         return
 
-def plotParameters(ws, param_names=[]):
+def plotParameters(ws, *param_names):
     """
     Plot a number of spectra given a list of parameter names
     This searchs for relevent spectra using the text axis label.
@@ -311,10 +287,11 @@ def plotParameters(ws, param_names=[]):
     @param ws - the workspace to plot from
     @param param_names - list of names to search for
     """
-    if len(param_names) == 0: return
-    num_spectra = mtd[ws].getNumberHistograms()
-    
-    for name in param_names:
-        indicies = [i for i in range(num_spectra) if name in mtd[ws].getAxis(1).label(i)]
-        if len(indicies) > 0: 
-            plotSpectra(ws, name, indicies)
+    axis = mtd[ws].getAxis(1)
+    if axis.isText() and len(param_names) > 0:
+        num_spectra = mtd[ws].getNumberHistograms()
+
+        for name in param_names:
+            indicies = [i for i in range(num_spectra) if name in axis.label(i)]
+            if len(indicies) > 0:
+                plotSpectra(ws, name, indicies)

@@ -333,6 +333,10 @@ namespace Mantid
       setProperty("AbsorptionXSectionResult",mat->absorbXSection()); // in barns
       setProperty("ReferenceWavelength",NeutronAtom::ReferenceLambda); // in Angstroms
 
+      double smu =  mat->totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
+      double amu = mat->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+      g_log.notice() << "Anvred LinearScatteringCoef = " << smu << " 1/cm\n"
+                     << "Anvred LinearAbsorptionCoef = "   << amu << " 1/cm\n";
       // Done!
       progress(1);
     }

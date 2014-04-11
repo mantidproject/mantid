@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/SingletonHolder.h"
 
@@ -74,9 +73,6 @@ namespace Mantid
       MemoryManagerImpl(const MemoryManagerImpl&);
       /// Standard Assignment operator    
       MemoryManagerImpl& operator = (const MemoryManagerImpl&);
-
-      /// Static reference to the logger class
-      Kernel::Logger& g_log;
 
       /** Amount of memory (in bytes) that has been cleared but perhaps not released.
        * releaseFreeMemoryIfAccumulated() uses this value

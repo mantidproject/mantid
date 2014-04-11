@@ -104,7 +104,15 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace()
+  ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace():
+    ClearInputWorkspace(false), // imput workspace should be left untouched
+    OneEventPerBin(false),       // it is very expensive otherwise
+    Append(true),  // append data to existing target MD workspace if one exist
+    LorentzCorrection(false), // not doing Lorents
+    l1(1.), 
+    beamline_norm(1.),
+    failedDetectorLookupCount(0),
+    m_extentsMin(NULL),m_extentsMax(NULL) // will be allocated in exec using nDims
   {
   }
     

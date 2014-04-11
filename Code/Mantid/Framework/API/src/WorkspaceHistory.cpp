@@ -16,10 +16,14 @@ namespace Mantid
 {
 namespace API
 {
+  namespace
+  {
+    /// static logger object
+    Kernel::Logger g_log("WorkspaceHistory");
+  }
 
 ///Default Constructor
-WorkspaceHistory::WorkspaceHistory() : m_environment(), m_algorithms(),
-    g_log(Kernel::Logger::get("WorkspaceHistory"))
+WorkspaceHistory::WorkspaceHistory() : m_environment(), m_algorithms()
 {}
 
 /// Destructor
@@ -31,8 +35,7 @@ WorkspaceHistory::~WorkspaceHistory()
   @param A :: WorkspaceHistory Item to copy
  */
 WorkspaceHistory::WorkspaceHistory(const WorkspaceHistory& A) :
-  m_environment(A.m_environment), m_algorithms(A.m_algorithms),
-  g_log(Kernel::Logger::get("WorkspaceHistory"))
+  m_environment(A.m_environment), m_algorithms(A.m_algorithms)
 {}
 
 /// Returns a const reference to the algorithmHistory

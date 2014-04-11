@@ -25,6 +25,7 @@ class SortByQVectors(PythonAlgorithm):
         return "SortByQVectors"
 
     def PyInit(self):
+        self.setOptionalMessage("This algorithm sorts a group workspace by the qvectors found in the qvectors file.")
         self.declareProperty("InputWorkspace", "", "Group workspace that automatically includes all members.")
    
     def PyExec(self):

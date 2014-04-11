@@ -1,6 +1,5 @@
 
 #include <MantidKernel/System.h>
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 #include <vector>
 
@@ -83,6 +82,13 @@ public:
                         double        max_abc,
                         size_t        num_to_find,
                         double        min_intensity );
+
+  /// Predict peaks and overwrite the peaks workspace
+  bool predictPeaks( const std::string & peaks_ws_name,
+                                           double        min_pred_wl,
+                                           double        max_pred_wl,
+                                           double        min_pred_dspacing,
+                                           double        max_pred_dspacing );
 
   /// Load the peaks workspace from a .peaks or .integrate file
   bool loadIsawPeaks( const std::string & peaks_ws_name,
@@ -190,9 +196,6 @@ private:
 
   /// Utility to get workspace ID from ADS, blank if none
   std::string workspaceType( const std::string & ws_name );  
-
-  /// Reference to a logger
-  static Mantid::Kernel::Logger & g_log;
 };
 
 }  // namespace CustomInterfaces 

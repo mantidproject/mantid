@@ -19,10 +19,14 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("DampingMinimizer");
+  }
+
 DECLARE_FUNCMINIMIZER(DampingMinimizer,Damping)
 
-// Get a reference to the logger
-Kernel::Logger& DampingMinimizer::g_log = Kernel::Logger::get("DampingMinimizer");
 
 /// Constructor
 DampingMinimizer::DampingMinimizer():

@@ -51,7 +51,7 @@ class DLLExport CalculateFlatBackground : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  CalculateFlatBackground() : API::Algorithm(), m_convertedFromRawCounts(false), m_progress(NULL) {}
+  CalculateFlatBackground() : API::Algorithm(), m_convertedFromRawCounts(false), m_skipMonitors(false),m_progress(NULL) {}
   /// Virtual destructor
   virtual ~CalculateFlatBackground() {if(m_progress) delete m_progress;m_progress=NULL;}
   /// Algorithm's name
@@ -78,6 +78,8 @@ private:
 
   /// variable bin width raw count data must be converted to distributions first and then converted back, keep track of this
   bool m_convertedFromRawCounts;
+  /// the variable which specifies if background should be removed from monitors too. 
+  bool m_skipMonitors;
   /// Progress reporting
   API::Progress* m_progress;
 

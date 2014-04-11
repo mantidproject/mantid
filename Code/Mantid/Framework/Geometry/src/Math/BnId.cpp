@@ -12,7 +12,6 @@
 #include <iterator>
 #include <functional>
 
-#include "MantidKernel/Logger.h"
 #include "MantidGeometry/Math/BnId.h"
 
 namespace Mantid
@@ -20,8 +19,6 @@ namespace Mantid
 
 namespace Geometry 
 {
-
-Kernel::Logger& BnId::PLog(Kernel::Logger::get("BnId"));
 
 /** Output as a stream
  *  @param of :: Reference to the output stream

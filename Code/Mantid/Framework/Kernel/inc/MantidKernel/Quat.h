@@ -3,7 +3,6 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -150,9 +149,6 @@ namespace Mantid
       double b;
       /// Internal value
       double c;
-
-     // Logger
-     static Kernel::Logger& quat_log;
     };
 
     MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const Quat&);

@@ -234,7 +234,7 @@ namespace API
     }
     else
     {
-      g_log.notice() << "Could not find property manager" << std::endl;
+      getLogger().notice() << "Could not find property manager" << std::endl;
       processProperties = boost::make_shared<PropertyManager>();
       PropertyManagerDataService::Instance().addOrReplace(propertyManager, processProperties);
     }

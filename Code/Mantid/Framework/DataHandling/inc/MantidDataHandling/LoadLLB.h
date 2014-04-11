@@ -11,7 +11,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  /** LoadLLB : TODO: DESCRIPTION
+  /** LoadLLB : Loads an LLB MIBEMOL TOF NeXus file into a Workspace2D with the given name.
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

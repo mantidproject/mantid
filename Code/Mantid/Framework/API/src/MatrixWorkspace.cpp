@@ -3,7 +3,6 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
@@ -26,7 +25,12 @@ namespace Mantid
     using namespace Geometry;
     using Kernel::V3D;
 
-    Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("MatrixWorkspace");
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("MatrixWorkspace");
+    }
+
     const std::string MatrixWorkspace::xDimensionId = "xDimension";
     const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
@@ -92,7 +96,6 @@ namespace Mantid
       // Check validity of arguments
       if (NVectors == 0 || XLength == 0 || YLength == 0)
       {
-        g_log.error("All arguments to init must be positive and non-zero");
         throw std::out_of_range("All arguments to init must be positive and non-zero");
       }
 
@@ -104,9 +107,8 @@ namespace Mantid
       {
         this->init(NVectors, XLength, YLength);
       }
-      catch(std::runtime_error& ex)
+      catch(std::runtime_error&)
       {
-        g_log.error() << "Error initializing the workspace" << ex.what() << std::endl;
         throw;
       }
 
@@ -206,10 +208,9 @@ namespace Mantid
         m_nearestNeighbours.reset();
 
       }
-      catch (std::runtime_error & e)
+      catch (std::runtime_error &)
       {
-        g_log.error() << "MatrixWorkspace::rebuildSpectraMapping() error:" << std::endl;
-        throw &e;
+        throw;
       }
 
     }
@@ -751,8 +752,8 @@ namespace Mantid
     {
       Instrument_const_sptr instrument = getInstrument();
 
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      Geometry::IComponent_const_sptr source = instrument->getSource();
+      Geometry::IComponent_const_sptr sample = instrument->getSample();
       if ( source == NULL || sample == NULL )
       {
         throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
@@ -777,8 +778,8 @@ namespace Mantid
      */
     double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const
     {
-      Geometry::IObjComponent_const_sptr source = getInstrument()->getSource();
-      Geometry::IObjComponent_const_sptr sample = getInstrument()->getSample();
+      Geometry::IComponent_const_sptr source = getInstrument()->getSource();
+      Geometry::IComponent_const_sptr sample = getInstrument()->getSample();
       if ( source == NULL || sample == NULL )
       {
         throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
@@ -850,7 +851,6 @@ namespace Mantid
     {
       if ( axisIndex >= m_axes.size() )
       {
-        g_log.error() << "Argument to getAxis (" << axisIndex << ") is invalid for this (" << m_axes.size() << " axis) workspace" << std::endl;
         throw Kernel::Exception::IndexError(axisIndex, m_axes.size(),"Argument to getAxis is invalid for this workspace");
       }
 
@@ -868,7 +868,6 @@ namespace Mantid
       // First check that axisIndex is in range
       if ( axisIndex >= m_axes.size() )
       {
-        g_log.error() << "Value of axisIndex (" << axisIndex << ") is invalid for this (" << m_axes.size() << " axis) workspace" << std::endl;
         throw Kernel::Exception::IndexError(axisIndex, m_axes.size(),"Value of axisIndex is invalid for this workspace");
       }
       // If we're OK, then delete the old axis and set the pointer to the new one
@@ -1053,7 +1052,6 @@ namespace Mantid
       // Throw if there are no masked bins for this spectrum. The caller should check first using hasMaskedBins!
       if (it==m_masks.end())
       {
-        g_log.error() << "There are no masked bins for spectrum index " << workspaceIndex << std::endl;
         throw Kernel::Exception::IndexError(workspaceIndex,0,"MatrixWorkspace::maskedBins");
       }
 
@@ -1558,7 +1556,7 @@ namespace Mantid
       try
       {
         Geometry::Instrument_const_sptr inst = this->getInstrument();
-        Geometry::IObjComponent_const_sptr sample = inst->getSample();
+        Geometry::IComponent_const_sptr sample = inst->getSample();
         if (sample)
         {
           Kernel::V3D sample_pos = sample->getPos();
@@ -1629,11 +1627,6 @@ namespace Mantid
 
   } // namespace API
 } // Namespace Mantid
-
-
-///\cond TEMPLATE
-template MANTID_API_DLL class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef,Mantid::API::MatrixWorkspace>;
-template MANTID_API_DLL class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::API::MatrixWorkspace>;
 
 namespace Mantid
 {

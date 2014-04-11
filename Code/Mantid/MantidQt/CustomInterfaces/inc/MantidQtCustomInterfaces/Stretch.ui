@@ -62,7 +62,7 @@
         </sizepolicy>
        </property>
        <property name="autoLoad">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="workspaceSuffixes" stdset="0">
         <stringlist>
@@ -212,6 +212,9 @@
         </item>
         <item>
          <widget class="QComboBox" name="cbPlot">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <item>
            <property name="text">
             <string>None</string>

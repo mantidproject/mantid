@@ -81,7 +81,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
             self._hfir_scaling(property_manager)
         else:
             msg = "Absolute scale calculation with a reference is only available for HFIR"
-            Logger.get("SANSAbsoluteScale").error(msg)
+            Logger("SANSAbsoluteScale").error(msg)
             self.setProperty("OutputMessage", msg)
             return
        
@@ -100,7 +100,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
 
         def _load_data(filename, output_ws):
             if not property_manager.existsProperty("LoadAlgorithm"):
-                Logger.get("SANSDirectBeamTransmission").error("SANS reduction not set up properly: missing load algorithm")
+                Logger("SANSDirectBeamTransmission").error("SANS reduction not set up properly: missing load algorithm")
                 raise RuntimeError, "SANS reduction not set up properly: missing load algorithm"
             p=property_manager.getProperty("LoadAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
@@ -141,7 +141,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
         if beam_diameter <= 0:
             if ref_ws.getRun().hasProperty("beam-diameter"):
                 beam_diameter = ref_ws.getRun().getProperty("beam-diameter").value
-                Logger.get("SANSAbsoluteScale").debug("Found beamstop diameter: %g" % beam_diameter)
+                Logger("SANSAbsoluteScale").debug("Found beamstop diameter: %g" % beam_diameter)
             else:
                 raise RuntimeError, "AbsoluteScale could not read the beam radius and none was provided"        
         
@@ -160,7 +160,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'
 
         # Get the reference count
-        Logger.get("SANSAbsoluteScale").information("Using beamstop diameter: %g" % beam_diameter)       
+        Logger("SANSAbsoluteScale").information("Using beamstop diameter: %g" % beam_diameter)       
         det_count = 1
         cylXML = '<infinite-cylinder id="asbsolute_scale">' + \
                    '<centre x="0.0" y="0.0" z="0.0" />' + \
@@ -188,9 +188,9 @@ class SANSAbsoluteScale(PythonAlgorithm):
         alg.execute()
         det_count_ws = alg.getProperty("OutputWorkspace").value        
         det_count = det_count_ws.readY(0)[0]
-        Logger.get("SANSAbsoluteScale").information("Reference detector counts: %g" % det_count)       
+        Logger("SANSAbsoluteScale").information("Reference detector counts: %g" % det_count)       
         if det_count <= 0:
-            Logger.get("SANSAbsoluteScale").error("Bad reference detector count: check your beam parameters")
+            Logger("SANSAbsoluteScale").error("Bad reference detector count: check your beam parameters")
         
         # Pixel size, in mm
         pixel_size_param = ref_ws.getInstrument().getNumberParameter("x-pixel-size")
@@ -213,7 +213,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
         alg.setPropertyValue("Operation", "Multiply")
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
-        Logger.get("SANSAbsoluteScale").notice( "Applied scaling factor %15.15f" % scaling_factor)
+        Logger("SANSAbsoluteScale").notice( "Applied scaling factor %15.15f" % scaling_factor)
         
         output_msg = output_msg.replace('\n','\n   |')
         output_msg = "Applied scaling factor %g\n%s" % (scaling_factor, output_msg)

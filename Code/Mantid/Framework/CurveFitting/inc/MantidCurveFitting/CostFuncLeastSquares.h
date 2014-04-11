@@ -10,10 +10,6 @@
 
 namespace Mantid
 {
-namespace Kernel
-{
-  class Logger;
-}
 namespace CurveFitting
 {
   class SeqDomain;
@@ -115,8 +111,6 @@ protected:
   friend class ParDomain;
 
   double m_factor;
-
-  Kernel::Logger & m_log;
 };
 
 } // namespace CurveFitting

@@ -192,6 +192,9 @@ public:
   const MantidVec& dataX() const;
   const MantidVec& constDataX() const;
 
+  //TODO: This overload will probably be needed in a future to work with Event data properly
+  //std::pair<double,double> getXDataRange()const;
+
   /// Disallowed data accessors - can't modify Y/E on a EventList
   void setData(const MantidVec& /*Y*/)  { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
   /// Disallowed data accessors - can't modify Y/E on a EventList

@@ -8,15 +8,15 @@
 # include <boost/scoped_ptr.hpp>
 #endif
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidAPI/WorkspaceIterator.h"
+
 
 namespace Mantid
 {
@@ -70,10 +70,6 @@ namespace Mantid
       // The Workspace Factory create-from-parent method needs direct access to the axes.
       friend class WorkspaceFactoryImpl;
 
-      /// Typedef for the workspace_iterator to use with a Workspace
-      typedef workspace_iterator<LocatedDataRef, MatrixWorkspace> iterator;
-      /// Typedef for the const workspace_iterator to use with a Workspace
-      typedef workspace_iterator<const LocatedDataRef, const MatrixWorkspace> const_iterator;
       /// Initialize
       void initialize(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
       /// Delete
@@ -345,9 +341,6 @@ namespace Mantid
 
       /// Shared pointer to NearestNeighbours object
       mutable boost::shared_ptr<Mantid::Geometry::INearestNeighbours> m_nearestNeighbours;
-
-      /// Static reference to the logger class
-      static Kernel::Logger& g_log;
 
       /// Getter for the dimension id based on the axis.
       std::string getDimensionIdFromAxis(const int& axisIndex) const;

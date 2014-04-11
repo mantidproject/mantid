@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Memory.h"
 
 #ifdef USE_TCMALLOC
@@ -17,10 +18,14 @@ namespace Mantid
 {
 namespace API
 {
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("MemoryManager");
+  }
 
 /// Private Constructor for singleton class
 MemoryManagerImpl::MemoryManagerImpl() :
-  g_log(Kernel::Logger::get("MemoryManager")),
   memoryCleared(0)
 {
   g_log.debug() << "Memory Manager created." << std::endl;

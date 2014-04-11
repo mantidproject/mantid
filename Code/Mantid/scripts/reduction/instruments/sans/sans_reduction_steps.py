@@ -18,7 +18,7 @@ from mantid.simpleapi import *
 from mantid.kernel import Logger
 import mantid.simpleapi as api
 from mantid.api import AnalysisDataService
-sanslog = Logger.get("SANS")
+sanslog = Logger("SANS")
         
 class BaseBeamFinder(ReductionStep):
     """

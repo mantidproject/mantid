@@ -12,10 +12,6 @@
 
 namespace Mantid
 {
-  namespace Kernel
-  {
-    class Logger;
-  }
 
   namespace Geometry
   {
@@ -158,7 +154,6 @@ namespace Mantid
       /// Getter for the shape xml
       std::string getShapeXML() const;
     private:
-      static Kernel::Logger& PLog;           ///< The official logger
       int ObjName;       ///< Creation number
       Rule* TopRule;     ///< Top rule [ Geometric scope of object]
 

@@ -17,20 +17,23 @@
 
 #include <ostream>
 #include <sstream>
-#include <fstream>
-
 
 namespace Mantid
 {
 namespace Kernel
 {
 
-// Get a reference to the logger
-Logger& RemoteJobManager::g_log = Logger::get("RemoteJobManager");
+namespace
+{
+  // static logger object
+  Logger g_log("RemoteJobManager");
+}
 
 RemoteJobManager::RemoteJobManager( const Poco::XML::Element* elem)
+    : m_displayName( elem->getAttribute("name")),
+      m_session( NULL) // Make sure this is always either NULL or a valid pointer.
 {
-  m_displayName = elem->getAttribute("name");
+  // Sanity check m_displayName
   if (m_displayName.length() == 0)
   {
     g_log.error("Compute Resources must have a name attribute");
@@ -56,9 +59,12 @@ RemoteJobManager::RemoteJobManager( const Poco::XML::Element* elem)
       }
     }
   }
+}
 
-  // Make sure this is always either NULL or a valid pointer.
-  m_session = NULL;
+
+RemoteJobManager::~RemoteJobManager()
+{
+    delete m_session;
 }
 
 std::istream & RemoteJobManager::httpGet( const std::string &path, const std::string &query_str,
@@ -183,8 +189,19 @@ std::istream & RemoteJobManager::httpPost(const std::string &path, const PostDat
 
 
 // Wrappers for a lot of the boilerplate code needed to perform an HTTPS GET or POST
+void RemoteJobManager::initGetRequest( Poco::Net::HTTPRequest &req, std::string extraPath,
+                                       std::string queryString)
+{
+    return initHTTPRequest( req, Poco::Net::HTTPRequest::HTTP_GET, extraPath, queryString);
+}
+
+void RemoteJobManager::initPostRequest( Poco::Net::HTTPRequest &req, std::string extraPath)
+{
+    return initHTTPRequest( req, Poco::Net::HTTPRequest::HTTP_POST, extraPath);
+}
+
 void RemoteJobManager::initHTTPRequest( Poco::Net::HTTPRequest &req, const std::string &method,
-                                            std::string extraPath, std::string queryString)
+                                        std::string extraPath, std::string queryString)
 {
   // Set up the session object
   if (m_session)

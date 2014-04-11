@@ -11,8 +11,10 @@ namespace MantidWidgets
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
 
-  Logger& MuonSequentialFitDialog::g_log(Logger::get("MuonSequentialFitDialog"));
-
+  namespace
+  {
+    Logger g_log("MuonSequentialFitDialog");
+  }
   const std::string MuonSequentialFitDialog::SEQUENTIAL_PREFIX("MuonSeqFit_");
 
   /** 
@@ -297,8 +299,11 @@ namespace MantidWidgets
     // Wait for file search to finish.
     while ( m_ui.runs->isSearching() )
     {
-      QApplication::instance()->processEvents();
+      QApplication::processEvents();
     }
+
+    // To process events from the finished thread
+    QApplication::processEvents();
 
     // Validate input fields
     if ( ! isInputValid() )

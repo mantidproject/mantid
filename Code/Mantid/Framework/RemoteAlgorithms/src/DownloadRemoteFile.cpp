@@ -1,3 +1,11 @@
+/*WIKI*
+
+Download a file from a remote compute resource.
+
+For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
+
+*WIKI*/
+
 #include "MantidRemoteAlgorithms/DownloadRemoteFile.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -25,6 +33,12 @@ using namespace Mantid::Geometry;
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
+void DownloadRemoteFile::initDocs()
+{
+  this->setWikiSummary("Download a file from a remote compute resource.");
+  this->setOptionalMessage("Download a file from a remote compute resource.");
+}
+
 void DownloadRemoteFile::init()
 {
   // Unlike most algorithms, this one doesn't deal with workspaces....
@@ -33,12 +47,12 @@ void DownloadRemoteFile::init()
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
-  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "The name of the remote computer holding the file", Direction::Input);
 
   // The transaction ID comes from the StartRemoteTransaction algortithm
-  declareProperty( "TransactionID", "", requireValue, "", Direction::Input);
-  declareProperty( "RemoteFileName", "", requireValue, "", Direction::Input);
-  declareProperty( "LocalFileName", "", requireValue, "", Direction::Input);
+  declareProperty( "TransactionID", "", requireValue, "The ID of the transaction that owns the file", Direction::Input);
+  declareProperty( "RemoteFileName", "", requireValue, "The name of the file on the remote machine. (Filename only; no path)", Direction::Input);
+  declareProperty( "LocalFileName", "", requireValue, "The full pathname on the local machine where the downloaded file should be saved.", Direction::Input);
   // Note: 'RemoteFileName' is just the name.  The remote server figures out the full path
   // from the transaction ID.  'LocalFileName' *IS* the full pathname (on the local machine)
 

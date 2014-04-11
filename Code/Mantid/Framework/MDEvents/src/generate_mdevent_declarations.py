@@ -241,8 +241,11 @@ def generate():
         f.write(line+"\n")
     f.close()
 
-    
-
+    # Post message about updating the id strings in the python layer to
+    # understand the new structure
+    print
+    print "The available IDs on the templated MDEventWorkspace classes may have changed."
+    print "Please update the casting IDs in PythonInterface/mantid/api/IMDEventWorkspace accordingly"
 
 if __name__=="__main__":
     generate()

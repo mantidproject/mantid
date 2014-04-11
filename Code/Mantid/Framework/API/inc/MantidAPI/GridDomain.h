@@ -8,7 +8,6 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FunctionDomain.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -54,9 +53,6 @@ public:
   boost::shared_ptr<GridDomain> getGrid(size_t index);
   /// re-scale all grids
   void reScale( const std::string &scaling);
-
-protected:
-  static Kernel::Logger& g_log;
 
 private:
   /// composition of grids

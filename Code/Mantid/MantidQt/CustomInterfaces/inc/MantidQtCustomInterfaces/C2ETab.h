@@ -1,8 +1,40 @@
 #ifndef MANTID_CUSTOMINTERFACES_C2ETAB_H_
 #define MANTID_CUSTOMINTERFACES_C2ETAB_H_
 
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/System.h"
+#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
 #include "MantidQtCustomInterfaces/ConvertToEnergy.h"
+#include "MantidQtMantidWidgets/RangeSelector.h"
+
+#include <QMap>
+#include <QDoubleValidator>
+#include <QtDoublePropertyManager>
+#include <QtIntPropertyManager>
+#include <QtTreePropertyBrowser>
+
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
+
+
+// Suppress a warning coming out of code that isn't ours
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1125
+#elif defined(__GNUC__)
+  #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6 )
+    #pragma GCC diagnostic push
+  #endif
+  #pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#endif
+#include "DoubleEditorFactory.h"
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1125
+#elif defined(__GNUC__)
+  #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6 )
+    #pragma GCC diagnostic pop
+  #endif
+#endif
 
 namespace MantidQt
 {
@@ -46,9 +78,40 @@ namespace CustomInterfaces
     void setupTab();
     void validateTab();
 
+  protected:
+    // Run the load algorithm with the given file name and output name 
+    bool loadFile(const QString& filename, const QString& outputName);
+    /// Function to plot a workspace to the miniplot using a workspace name
+    void plotMiniPlot(const QString& workspace, size_t index);
+    /// Function to plot a workspace to the miniplot using a workspace pointer
+    void plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex);
+    /// Function to get the range of the curve displayed on the mini plot
+    std::pair<double,double> getCurveRange();
+    /// Function to set the range limits of the plot
+    void setPlotRange(QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds);
+    /// Function to set the range selector on the mini plot
+    void setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds);
+
+    /// Plot of the input
+    QwtPlot* m_plot;
+    /// Curve on the plot
+    QwtPlotCurve* m_curve;
+    /// Range selector widget for mini plot
+    MantidQt::MantidWidgets::RangeSelector* m_rangeSelector;
+    /// Tree of the properties
+    QtTreePropertyBrowser* m_propTree;
+    /// Internal list of the properties
+    QMap<QString, QtProperty*> m_properties;
+    /// Double manager to create properties
+    QtDoublePropertyManager* m_dblManager;
+    /// Double editor facotry for the properties browser
+    DoubleEditorFactory* m_dblEdFac;
 
   signals:
-   void runAsPythonScript(const QString & code, bool no_output);
+    /// Send signal to parent window to show a message box to user
+    void showMessageBox(const QString& message);
+    /// Run a python script
+    void runAsPythonScript(const QString & code, bool no_output);
 
   private:
     /// Overidden by child class.
@@ -60,6 +123,7 @@ namespace CustomInterfaces
 
   protected:
     Ui::ConvertToEnergy m_uiForm;
+
   };
 } // namespace CustomInterfaces
 } // namespace Mantid

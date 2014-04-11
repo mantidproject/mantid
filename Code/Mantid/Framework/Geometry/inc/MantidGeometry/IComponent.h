@@ -145,6 +145,11 @@ namespace Mantid
       virtual std::vector<Kernel::Quat> getRotationParameter(const std::string& pname, bool recursive = true) const = 0;
       /// Get a parameter defined as a string
       virtual std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const = 0;
+      /// Get a parameter defined as an integer
+      virtual std::vector<int> getIntParameter(const std::string& pname, bool recursive = true) const = 0;
+      /// Get a parameter defined as a boolean
+      virtual std::vector<bool> getBoolParameter(const std::string& pname, bool recursive = true) const = 0;
+
       //@}
       /** Prints a text representation of itself
       */

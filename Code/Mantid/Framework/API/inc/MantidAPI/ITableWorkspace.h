@@ -23,10 +23,6 @@ namespace Mantid
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
 
 namespace API
 {
@@ -207,7 +203,6 @@ public:
     {
       std::string str = std::string("getRef: Type mismatch. ") +
           typeid(T).name() + " != " + c->get_type_info().name() + '\n';
-      g_log.error(str);
       throw std::runtime_error(str);
     }
     return *(static_cast<T*>(c->void_pointer(index)));
@@ -228,7 +223,6 @@ public:
     {
       std::ostringstream ostr;
       ostr << "cell: Type mismatch:\n"<<typeid(T).name()<<" != \n"<<c->get_type_info().name()<<'\n';
-      g_log.error(ostr.str());
       throw std::runtime_error(ostr.str());
     }
     if (row >= this->rowCount())
@@ -320,10 +314,6 @@ protected:
   {
     c->remove(index);
   }
-private:
-  /// Logger
-  static Kernel::Logger& g_log;
-
 };
 
 
