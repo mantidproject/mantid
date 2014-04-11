@@ -37,8 +37,10 @@ namespace MantidQt
     class EXPORT_OPT_MANTIDQT_API SignalRange
     {
     public:
-      /// Create a full range from the given workspace and normalization
       SignalRange(const Mantid::API::IMDWorkspace & workspace,
+                  const Mantid::API::MDNormalization normalization = Mantid::API::NoNormalization);
+      SignalRange(const Mantid::API::IMDWorkspace & workspace,
+                  Mantid::Geometry::MDImplicitFunction &function,
                   const Mantid::API::MDNormalization normalization = Mantid::API::NoNormalization);
 
       /// Returns the range of the workspace signal values
@@ -48,7 +50,8 @@ namespace MantidQt
       DISABLE_DEFAULT_CONSTRUCT(SignalRange);
 
       /// Find the min/max signal values in the entire workspace
-      void findFullRange(const Mantid::API::IMDWorkspace & workspace);
+      void findFullRange(const Mantid::API::IMDWorkspace & workspace,
+                         Mantid::Geometry::MDImplicitFunction *function);
       /// Get the range of signal, in parallel, given an iterator
       QwtDoubleInterval getRange(const std::vector<Mantid::API::IMDIterator *> & iterators);
       ///Get the range of signal given an iterator

@@ -178,8 +178,6 @@ private:
   void updateDisplay(bool resetAxes = false);
   void updateDimensionSliceWidgets();
   void resetAxis(int axis, const Mantid::Geometry::IMDDimension_const_sptr & dim);
-  QwtDoubleInterval getRange(Mantid::API::IMDIterator * it);
-  QwtDoubleInterval getRange(std::vector<Mantid::API::IMDIterator *> iterators);
 
   void findRangeFull();
   void findRangeSlice();
