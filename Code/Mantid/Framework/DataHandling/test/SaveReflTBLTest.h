@@ -47,7 +47,7 @@ public:
     }
 
     TS_ASSERT( Poco::File(m_abspath).exists() );
-    std::ifstream file(m_abspath);
+    std::ifstream file(m_abspath.c_str());
     std::string line = "";
     getline(file,line);
     TS_ASSERT_EQUALS(line,"13460,0.7,13463,0.01,0.06,13462,2.3,13463,0.035,0.3,13470,2.3,13463,0.035,0.3,0.04,2");
@@ -87,7 +87,7 @@ public:
     }
 
     TS_ASSERT( Poco::File(m_abspath).exists() );
-    std::ifstream file(m_abspath);
+    std::ifstream file(m_abspath.c_str());
     std::string line = "";
     getline(file,line);
     TS_ASSERT_EQUALS(line,"13460,0.7,13463,0.01,0.06,13462,2.3,13463,0.035,0.3,13470,2.3,13463,0.035,0.3,0.04,2");
