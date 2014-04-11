@@ -1,7 +1,6 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -74,17 +73,8 @@ namespace Mantid
       */
       boost::shared_ptr<Mantid::API::IMDHistoWorkspace> cloneInputWorkspace(IMDHistoWorkspace_sptr& inWS)
       {
-        auto alg = AlgorithmManager::Instance().createUnmanaged("CloneWorkspace");
-        alg->initialize();
-        alg->setChild(true);
-        alg->setProperty("InputWorkspace", inWS);
-        alg->setPropertyValue("OutputWorkspace", "out_ws");
-        alg->execute();
-        Mantid::API::IMDHistoWorkspace_sptr outWS;
-        {
-          Mantid::API::Workspace_sptr temp = alg->getProperty("OutputWorkspace");
-          outWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
-        }
+        IMDHistoWorkspace_sptr outWS = inWS->clone();
+
         // Initialize to zero.
         PARALLEL_FOR_NO_WSP_CHECK()
         for(int i = 0; i < static_cast<int>(outWS->getNPoints()); ++i)
@@ -421,13 +411,11 @@ namespace Mantid
           m_logger.debug("Remove duplicates");
           m_logger.debug() << incompleteClusterVec.size() << " clusters to reconstruct" << std::endl;
             // Now combine clusters and add the resolved clusters to the clusterMap.
-            SetIds usedOwningClusterIds;
             for(size_t i = 0; i < incompleteClusterVec.size(); ++i)
             {
               const size_t label = incompleteClusterVec[i]->getLabel();
-              if(usedOwningClusterIds.find(label) == usedOwningClusterIds.end())
+              if(does_contain_key(clusterMap, label))
               {
-                usedOwningClusterIds.insert(label);
                 clusterMap.insert(std::make_pair(label,  incompleteClusterVec[i]));
               }
               else
@@ -500,7 +488,9 @@ namespace Mantid
       ClusterMap clusters = calculateDisjointTree(ws, strategy,progress);
 
       // Create the output workspace from the input workspace
+      m_logger.debug("Start cloning input workspace");
       IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
+      m_logger.debug("Finish cloning input workspace");
       
       // Get the keys (label ids) first in order to do the next stage in parallel.
       VecIndexes keys;
