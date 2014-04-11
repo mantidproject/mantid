@@ -31,7 +31,7 @@ public:
   void testFileNoQuotes()
   {
     //create a file with each line containing different but valid data format
-    std::ofstream file(m_filename);
+    std::ofstream file(m_filename.c_str());
     file << "13460,0.7,13463,0.01,0.06,,,,,,,,,,,0.04,2" << std::endl;
     file << "13469,0.7,13463,0.01,0.06,13470,2.3,13463,0.035,0.3,,,,,,0.04,2" << std::endl;
     file << "13460,0.7,13463,0.01,0.06,13462,2.3,13463,0.035,0.3,13470,2.3,13463,0.035,0.3,0.04,2" << std::endl;
@@ -94,7 +94,7 @@ public:
   void testQuotedFile()
   {
     //create a file with each line containing different but valid data format
-    std::ofstream file(m_filename);
+    std::ofstream file(m_filename.c_str());
     file << "13460,0.7,\"13463,13464\",0.01,0.06,,,,,,,,,,,0.04,2" << std::endl;
     file << "13469,0.7,\"13463,13464\",0.01,0.06,13470,2.3,\"13463,13464\",0.035,0.3,,,,,,0.04,2" << std::endl;
     file << "13460,0.7,\"13463,13464\",0.01,0.06,13462,2.3,\"13463,13464\",0.035,0.3,13470,2.3,\"13463,13464\",0.035,0.3,0.04,2" << std::endl;
@@ -157,7 +157,7 @@ public:
   void testFewColumns()
   {
     //create a file with each line containing too few columns
-    std::ofstream file(m_filename);
+    std::ofstream file(m_filename.c_str());
     file << "13460,0.7,\"13463,13464\",0.01,0.06,,,,,,,0.04,2" << std::endl;
     file << "13469,0.7,\"13463,13464\",0.01,0.06,13470,2.3,\"13463,13464\",0.035,0.3,,0.04,2" << std::endl;
     file << "13460,0.7,\"13463,13464\",,\"13463,13464\",,13470,2.3,\"13463,13464\",0.035,0.04,2" << std::endl;
@@ -180,7 +180,7 @@ public:
   void testManyColumns()
   {
     //create a file with each line containing too many columns
-    std::ofstream file(m_filename);
+    std::ofstream file(m_filename.c_str());
     file << "13460,0.7,13463,0.01,0.06,,,,,,,,,,,0.04,2,,,,0.04,2" << std::endl;
     file << "13469,0.7,13463,0.01,0.06,13470,2.3,13463,0.035,0.3,,,,,,0.04,2,,,,0.04,2" << std::endl;
     file << "13460,0.7,13463,0.01,0.06,13462,2.3,13463,0.035,0.3,13470,2.3,13463,0.035,0.3,0.04,2,,,,0.04,2" << std::endl;
@@ -203,7 +203,7 @@ public:
   void testManyColumnsTwo()
   {
     //create a file with each line containing too many columns
-    std::ofstream file(m_filename);
+    std::ofstream file(m_filename.c_str());
     file << "13460,0.7,\"13463,0.01\",0.06,,,,,,,,,,,0.04,2,,,,0.04,2" << std::endl;
     file << "13469,0.7,13463,\"0.01,0.06\",13470,2.3,13463,0.06,\"13470,0.06,13470\",2.3,13463,0.035,0.3,,,,,,,,,0.04,2,,,,0.04,2" << std::endl;
     file << "13460,0.7,13463,0.01,0.06,13462,2.3,13463,0.035,0.3,13470,2.3,13463,0.035,0.3,0.04,2,,,,0.04,2" << std::endl;
@@ -225,7 +225,7 @@ public:
   
   void testBlankFile()
   {
-    std::ofstream file(m_filename);
+    std::ofstream file(m_filename.c_str());
     file.close();
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadReflTBL");
@@ -253,7 +253,7 @@ public:
   void testNoDataFile()
   {
     //create a file with content, and the right amount of delimiters, but no valid data
-    std::ofstream file(m_filename);
+    std::ofstream file(m_filename.c_str());
     file << ",,,,,,,,,,,,,,,," << std::endl;
     file << ",,,,,,,,,,,,,,,," << std::endl;
     file << ",,,,,,,,,,,,,,,," << std::endl;
