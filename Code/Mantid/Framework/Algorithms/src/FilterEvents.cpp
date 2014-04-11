@@ -665,9 +665,6 @@ namespace Algorithms
         input_el.splitByFullTime(m_splitters, outputs, 1.0, m_doTOFCorrection);
       }
 
-      mProgress = 0.3+(progressamount-0.2)*static_cast<double>(iws)/static_cast<double>(numberOfSpectra);
-      progress(mProgress, "Filtering events");
-
       PARALLEL_END_INTERUPT_REGION
     } // END FOR i = 0
     PARALLEL_CHECK_INTERUPT_REGION
