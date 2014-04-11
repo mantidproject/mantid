@@ -49,6 +49,21 @@ namespace MDAlgorithms
     std::vector<Mantid::Kernel::VMD> calculateIntersections(uint16_t expIndex, Mantid::Geometry::IDetector_const_sptr detector);
     size_t m_nDims;
     Mantid::MDEvents::MDHistoWorkspace_sptr m_normWS;
+    Mantid::MDEvents::MDHistoWorkspace_sptr m_inputWS;
+    ///limits for h,k,l dimensions
+    coord_t hMin,hMax,kMin,kMax,lMin,lMax;
+    ///flag for integrated h,k,l dimensions
+    bool hIntegrated,kIntegrated,lIntegrated;
+    ///index of h,k,l dimensions in the output workspaces
+    size_t hIndex,kIndex,lIndex;
+    ///name of other dimensions
+    std::vector<std::string> otherDims;
+    ///limits for other dimensions
+    std::vector<coord_t> otherDimsMin,otherDimsMax;
+    ///flag id other dimensions are integrated
+    std::vector<bool> otherDimsIntegrated;
+    ///index of other dimensions in the output workspaces
+    std::vector<size_t> otherDimsIndex;
   };
 
 
