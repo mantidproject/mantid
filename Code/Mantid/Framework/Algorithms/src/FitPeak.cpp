@@ -209,7 +209,6 @@ namespace Algorithms
     if (usrwidth <= 0)
     {
       // Set up default FWHM if user does not give reasonable peak width
-
       m_sstream << "Client inputs user-defined peak width = " << usrwidth
                 << "; Automatically reset to 4 as default." << "\n";
 
@@ -230,13 +229,22 @@ namespace Algorithms
           maxfwhm  = 4;
       }
     }
-    m_vecFWHM.push_back(usrwidth);
+    else
+    {
+      m_vecFWHM.push_back(usrwidth);
+      m_sstream << "Add user defined FWHM = " << usrwidth << "\n";
+    }
 
     m_peakWidthSet = true;
 
     // From user specified minimum value to maximim value
     if (!fitwithsteppedfwhm)
+    {
+      if (m_vecFWHM.size() == 0)
+        throw runtime_error("Logic error in setup guessed FWHM.  ");
+      m_sstream << "No FWHM is not guessed by stepped FWHM. " << "\n";
       return;
+    }
 
     const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
 
@@ -752,7 +760,7 @@ namespace Algorithms
     * @param vec_xmax :: maximim values of domains
     */
   double FitOneSinglePeak::fitFunctionMD(IFunction_sptr fitfunc, MatrixWorkspace_sptr dataws,
-                                size_t wsindex, vector<double> vec_xmin, vector<double> vec_xmax)
+                                         size_t wsindex, vector<double> vec_xmin, vector<double> vec_xmax)
   {
     // Validate
     if (vec_xmin.size() != vec_xmax.size())
