@@ -105,7 +105,7 @@ private:
                              double &in_bg0, double &in_bg1, double &in_bg2, int i_peakmin, int i_peakmax);
 
   void fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
-      const double& in_bg0, const double& in_bg1, const double& in_bg2);
+                      const double& in_bg0, const double& in_bg1, const double& in_bg2);
 
   /// Add a new row in output TableWorkspace containing information of the fitted peak+background
   void addInfoRow(const size_t spectrum, const API::IPeakFunction_const_sptr& peakfunction,
@@ -116,52 +116,20 @@ private:
   /// Add the fit record (failure) to output workspace
   void addNonFitRecord(const size_t spectrum);
 
-  void updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double> &bestEffparams, std::vector<double> &bestRawparams, double &mincost, const double expPeakPos, const double expPeakHeight);
-
+  /// Create peak and background functions
   void createFunctions();
-  // int getBackgroundOrder();
-  /// Create a background function
-  API::IFunction_sptr createBackgroundFunction(const double a0, const double a1, const double a2);
 
-  /// Fit background functions
-  bool fitBackground(const MantidVec& X, const MantidVec& Y, const MantidVec& E,
-                     size_t ileft, size_t iright, size_t imin, size_t imax,
-                     double &chi2);
+  /// Find peak background
+  void findPeakBackground(const API::MatrixWorkspace_sptr& input, int spectrum, size_t i_min, size_t i_max,
+                          std::vector<double>& vecBkgdParamValues, std::vector<double>& vecpeakrange);
 
-  /// Fit a single peak with background fixed
-  double fitPeakBackgroundFunction(API::IFunction_sptr peakbkgdfunc, API::MatrixWorkspace_sptr dataws, size_t wsindex, double startx, double endx, std::string constraint, double &init_rwp);
-
-  /// Get function parameters from a function to a map
-  std::map<std::string, double> getFunctionParameters(API::IFunction_sptr func);
-
-  /// Set parameters to a peak function
-  void setParameters(API::IFunction_sptr peak, double height, double centre, double sigma, double centre_lowerbound, double centre_upperbound);
-
-
-  /// Set parameters values to a peak function
-  void setFunctionParameterValue(API::IFunction_sptr function, std::map<std::string, double> parvalues);
-
-  /// Set boundary/contraint on peak's centre
-  std::string makePeakCentreConstraint(API::IFunction_sptr peak, double peakleftboundary, double peakrightboundary, bool composite);
-
+  /// Estimate background of a given range
   void estimateBackground(const MantidVec& X, const MantidVec& Y, const size_t i_min, const size_t i_max,
                                 double& out_bg0, double& out_bg1, double& out_bg2);
 
+  /// Estimate peak parameters
   std::string estimatePeakParameters(const MantidVec& vecX, const MantidVec& vecY,
-                              size_t i_min, size_t i_max, double& centre, double& height, double& fwhm);
-
-  /// Calulate a function with given data range, and its goodness of fit, Rwp.
-  double calculateFunctionRwp(API::IFunction_sptr function, API::MatrixWorkspace_sptr dataws,
-                              size_t wsindex, double startx, double endx);
-
-  /// Get best result from a set of fitting result
-  int getBestResult(std::vector<double> vecRwp);
-
-  void addFittedFunction(API::IFunction_sptr fitfunction, size_t ileft, size_t iright);
-
-  /// Check the GSL fit status message to determine whether the fit is successful or not
-  bool isFitSuccessful(std::string fitstatus);
-
+                                     size_t i_min, size_t i_max, double& centre, double& height, double& fwhm);
 
   /// Generate a table workspace for output peak parameters
   void generateOutputPeakParameterTable();
@@ -169,16 +137,13 @@ private:
   std::vector<double> getStartingPeakValues();
   std::vector<double> getStartingBkgdValues();
 
-  void findPeakBackground(const API::MatrixWorkspace_sptr& input, int spectrum, size_t i_min, size_t i_max,
-                          std::vector<double>& vecBkgdParamValues, std::vector<double>& vecpeakrange);
-
+  /// Fit peak by calling 'FitPeak'
   double callFitPeak(const API::MatrixWorkspace_sptr& dataws, int wsindex,
                      const API::IPeakFunction_sptr peakfunction,
                      const API::IBackgroundFunction_sptr backgroundfunction,
                      const std::vector<double>& vec_fitwindow,
                      const std::vector<double>& vec_peakrange, int minGuessedFWHM, int maxGuessFWHM,
-                     int guessedFWHMStep); //, std::vector<double>& vec_fittedpeakparvalues,
-  // std::vector<double>& vec_fittedbkgdparvalues);
+                     int guessedFWHMStep);
 
   std::vector<std::string> m_peakParameterNames;
   std::vector<std::string> m_bkgdParameterNames;
