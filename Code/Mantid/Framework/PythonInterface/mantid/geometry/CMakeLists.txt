@@ -45,9 +45,11 @@ create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/geometry.cpp EXPO
 #############################################################################################
 # Set the destination directory
 set ( OUTPUT_DIR ${PYTHON_PKG_ROOT}/geometry )
-# Set the output directory for the libraries.
-set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/geometry )
 
+if(CMAKE_GENERATOR STREQUAL Xcode)
+  # Set the output directory for the libraries.
+  set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/geometry )
+endif()
 
 copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
                            PYTHON_INSTALL_FILES )
