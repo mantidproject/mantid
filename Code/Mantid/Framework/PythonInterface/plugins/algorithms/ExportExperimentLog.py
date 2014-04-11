@@ -5,13 +5,17 @@ sample log information from a MatrixWorkspace and write them to a csv file.
 
 == File Mode ==
 There are 3 modes to write the experiment log file. 
+
 1. "new": A new file will be created with header line;
+
 2. "appendfast": A line of experiment log information will be appended to an existing file; 
-** It is assumed that the log names given are exactly same as those in the file, as well as their order;
-** Input property ''SampleLogTitles'' will be ignored in this option; 
+* It is assumed that the log names given are exactly same as those in the file, as well as their order;
+* Input property ''SampleLogTitles'' will be ignored in this option; 
+
 3. "append": A line of experiment log information will be appended to an existing file;
-** The algorithm will check whether the specified log file names, titles and their orders are exactly same as those in the file to append to;
-** If any difference is deteced, the old file will be renamed in the same directory.  And a new file will be generated. 
+* The algorithm will check whether the specified log file names, titles and their orders are exactly same as those in the file to append to;
+* If any difference is deteced, the old file will be renamed in the same directory.  And a new file will be generated.
+
 
 == Missing Sample Logs ==
 If there is any sample log specified in the properites but does not exist in the workspace, 
@@ -19,12 +23,14 @@ a zero float value will be put to the experiment log information line,
 as the preference of instrument scientist. 
 
 == Sample Log Operation ==
-There are 5 types of operations that are supported for a TimeSeriesProperty.  
-1. "min": minimum TimeSeriesProperty's values;
-2. "max": maximum TimeSeriesProperty's values; 
-3. "average": average of TimeSeriesProperty's values;
-4. "sum": summation of TimeSeriesProperty's values;
-5. "0": first value of TimeSeriesProperty's value. 
+If the type of a sample log is TimeSeriesProperty, it must be one of the following 5 types. 
+* "min": minimum TimeSeriesProperty's values;
+* "max": maximum TimeSeriesProperty's values; 
+* "average": average of TimeSeriesProperty's values;
+* "sum": summation of TimeSeriesProperty's values;
+* "0": first value of TimeSeriesProperty's value. 
+
+Otherwise, there is no operation required.  For example, log 'duration' or 'run_number' does not have any operation on its value.  An empty string will serve for them in property 'SampleLogOperation'. 
 
 *WIKI*"""
 import mantid.simpleapi as api
@@ -305,7 +311,7 @@ class ExportExperimentLog(PythonAlgorithm):
                 elif operationtype.lower() == "0":
                     propertyvalue = logproperty.value[0]
                 else:
-                    raise NotImplementedError("Operation %s is for FloatTimeSeriesProperty is not supported." % (operationtype))
+                    raise NotImplementedError("Operation %s for FloatTimeSeriesProperty %s is not supported." % (operationtype, logname))
             else:
                 raise NotImplementedError("Class type %d is not supported." % (logclass))
             
