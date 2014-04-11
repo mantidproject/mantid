@@ -81,8 +81,9 @@ namespace CurveFitting
         Direction::Output, PropertyMode::Optional),
         "The workspace containing the calculated derivatives");
 
-    auto validator = boost::make_shared<BoundedValidator<int> >(0,2);
-    declareProperty("DerivOrder", 2, validator, "Order to derivatives to calculate.");
+    auto validator = boost::make_shared<BoundedValidator<int> >();
+    validator->setLower(0);
+    declareProperty("DerivOrder", 0, validator, "Order to derivatives to calculate.");
 
     auto errorSizeValidator = boost::make_shared<BoundedValidator<double> >();
     errorSizeValidator->setLower(0.0);
@@ -113,10 +114,11 @@ namespace CurveFitting
     for(int i = 0; i < histNo; ++i)
     {
       m_cspline = boost::make_shared<BSpline>();
-
+      m_cspline->setAttributeValue("Uniform",false);
+      
       //choose some smoothing points from input workspace
       selectSmoothingPoints(inputWorkspacePt, i);
-      //performAdditionalFitting(inputWorkspacePt, i);
+      performAdditionalFitting(inputWorkspacePt, i);
 
       //compare the data set against our spline
       outputWorkspace->setX(i, inputWorkspaceBinned->readX(i));
@@ -307,18 +309,17 @@ namespace CurveFitting
   {
     //resize the number of attributes
     int num_points = static_cast<int>(points.size());
-    std::vector<double> breakPoints(num_points);
-    m_cspline->setAttributeValue("Uniform",false);
-    m_cspline->setAttributeValue("Order", num_points);
+    std::vector<double> breakPoints;
+    breakPoints.reserve(num_points);
+    //m_cspline->setAttributeValue("NBreak", num_points);
     
     //set each of the x and y points to redefine the spline
     std::set<int>::const_iterator pts;
     for(pts = points.begin(); pts != points.end(); ++pts)
     {
       breakPoints.push_back(xs[*pts]);
-      std::cout << xs[*pts] << std::endl;
     }
-    m_cspline->setAttributeValue("BreakPoints", breakPoints); 
+    m_cspline->setAttribute("BreakPoints", API::IFunction::Attribute( breakPoints )); 
     
     int i = 0;
     for (pts = points.begin(); pts != points.end(); ++pts)
@@ -351,26 +352,19 @@ namespace CurveFitting
       {
         smoothPts.insert(i);
       }
-      smoothPts.insert(xSize-1); //add largest element to end of spline.
 
       bool resmooth(true);
       while(resmooth)
       {
-        addSmoothingPoints(smoothPts, xs.data(), ys.data());
-        
         //if we're using all points then we can't do anything more.
-        if (smoothPts.size() >= xs.size()) break;
+        if (smoothPts.size() >= xs.size()-1) break;
+        
+        addSmoothingPoints(smoothPts, xs.data(), ys.data());
         resmooth = false;
 
         //calculate the spline and retrieve smoothed points
         boost::shared_array<double> ysmooth(new double[xSize]);
         m_cspline->function1D(ysmooth.get(),xs.data(),xSize);
-
-        std::vector<double> v = m_cspline->getAttribute("BreakPoints").asVector();
-        for (std::vector<double>::iterator iter = v.begin(); iter < v.end(); ++iter)
-        {
-          std::cout << *iter << std::endl;
-        }
 
         //iterate over smoothing points
         std::set<int>::const_iterator iter = smoothPts.begin();
