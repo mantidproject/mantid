@@ -198,7 +198,7 @@ namespace DataHandling
           // line too short
           return -1;
         }
-        return  boost::lexical_cast<int>(lines[i].substr(lookFor.size(),3)); // Found
+        return  boost::lexical_cast<int>(lines[i].substr(lookFor.size()+2,1)); // Found
       }
     }
     return 0;
