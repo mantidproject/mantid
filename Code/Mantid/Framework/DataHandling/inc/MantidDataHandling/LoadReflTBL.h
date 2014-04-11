@@ -14,15 +14,6 @@ namespace Mantid
     /**
     Loads a table workspace from an ascii file in reflectometry tbl format. Rows must be no longer than 17 cells.
 
-    Properties:
-    <ul>
-    <li>Filename  - the name of the file to read from.</li>
-    <li>Workspace - the workspace name that will be created and hold the loaded data.</li>
-    </ul>
-
-    @author Keith Brown, ISIS, Placement student from the University of Derby
-    @date 27/03/14
-
     Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.

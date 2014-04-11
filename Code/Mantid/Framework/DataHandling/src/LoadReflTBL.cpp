@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadReflTBL.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/Strings.h"
@@ -16,7 +15,6 @@
 #include <Poco/StringTokenizer.h>
 // String utilities
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 
 namespace Mantid
 {
@@ -292,7 +290,6 @@ namespace Mantid
       std::ifstream file(filename.c_str());
       if (!file)
       {
-        g_log.error("Unable to open file: " + filename);
         throw Exception::FileError("Unable to open file: " , filename);
       }
       std::string line = "";
@@ -334,11 +331,10 @@ namespace Mantid
         if (columns[0] != "" || columns[1] != "" || columns[2] != "" || columns[3] != "" || columns[4] != "")
         {
           TableRow row = ws->appendRow();
-          row << columns.at(0);
-          row << columns.at(1);
-          row << columns.at(2);
-          row << columns.at(3);
-          row << columns.at(4);
+          for (int i = 0; i < 5; ++i)
+          {
+            row << columns.at(i);
+          }
           row << columns.at(15);
           row << columns.at(16);
           row << stitchID;
@@ -349,11 +345,10 @@ namespace Mantid
         if (columns[5] != "" || columns[6] != "" || columns[7] != "" || columns[8] != "" || columns[9] != "")
         {
           TableRow row = ws->appendRow();
-          row << columns.at(5);
-          row << columns.at(6);
-          row << columns.at(7);
-          row << columns.at(8);
-          row << columns.at(9);
+          for (int i = 5; i < 10; ++i)
+          {
+            row << columns.at(i);
+          }
           row << columns.at(15);
           row << columns.at(16);
           row << stitchID;
@@ -364,13 +359,10 @@ namespace Mantid
         if (columns[10] != "" || columns[11] != "" || columns[12] != "" || columns[13] != "" || columns[14] != "")
         {
           TableRow row = ws->appendRow();
-          row << columns.at(10);
-          row << columns.at(11);
-          row << columns.at(12);
-          row << columns.at(13);
-          row << columns.at(14);
-          row << columns.at(15);
-          row << columns.at(16);
+          for (int i = 10; i < 17; ++i)
+          {
+            row << columns.at(i);
+          }
           row << stitchID;
         }
         ++stitchID;
