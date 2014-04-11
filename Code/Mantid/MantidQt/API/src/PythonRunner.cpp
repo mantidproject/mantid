@@ -10,7 +10,7 @@ using namespace MantidQt::API;
 
 namespace
 {
-  Mantid::Kernel::Logger & LOGGER = Mantid::Kernel::Logger::get("PythonRunner");
+  Mantid::Kernel::Logger g_log("PythonRunner");
 
   /// Format of python warning message. It will be removed from any output string
   QString PYTHON_V1_WARN = "Warning: Python API v1 call has been made.\n";
@@ -26,7 +26,7 @@ QString PythonRunner::runPythonCode(const QString & code, bool no_output)
 {
   using Mantid::Kernel::Logger;
 
-  if(LOGGER.is(Logger::Priority::PRIO_DEBUG)) LOGGER.debug() << "Running Python code:\n" << code.toAscii().data() << "\n";
+  if(g_log.is(Logger::Priority::PRIO_DEBUG)) g_log.debug() << "Running Python code:\n" << code.toAscii().data() << "\n";
 
   if( no_output )
   {
@@ -57,7 +57,7 @@ QString PythonRunner::runPythonCode(const QString & code, bool no_output)
   {
     tmpstring.append(stream.readLine().trimmed() + "\n");
   }
-  if(LOGGER.is(Logger::Priority::PRIO_DEBUG)) LOGGER.debug() << "Raw output from execution:\n" << tmpstring.toAscii().data() << "\n";
+  if(g_log.is(Logger::Priority::PRIO_DEBUG)) g_log.debug() << "Raw output from execution:\n" << tmpstring.toAscii().data() << "\n";
   return tmpstring;
 }
 /** This Python helper function converts a list of strings into one

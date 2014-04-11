@@ -9,8 +9,6 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtMantidWidgets/DataSelector.h"
 
-#include <QDir>
-
 namespace MantidQt
 {
   namespace CustomDialogs
@@ -21,7 +19,7 @@ namespace MantidQt
      * Default constructor.
      * @param parent :: Parent dialog.
      */
-    CatalogPublishDialog::CatalogPublishDialog(QWidget *parent) : MantidQt::API::AlgorithmDialog(parent), m_uiForm() {}
+    CatalogPublishDialog::CatalogPublishDialog(QWidget *parent) : API::AlgorithmDialog(parent), m_uiForm() {}
 
     /// Initialise the layout
     void CatalogPublishDialog::initLayout()
@@ -37,7 +35,7 @@ namespace MantidQt
       connect(m_uiForm.runBtn,SIGNAL(clicked()),this,SLOT(accept()));
       connect(m_uiForm.cancelBtn,SIGNAL(clicked()),this,SLOT(reject()));
       connect(m_uiForm.helpBtn,SIGNAL(clicked()),this,SLOT(helpClicked()));
-      // When the user selects a workspace, we want to be ready to publish it.
+      connect(m_uiForm.investigationNumberCb,SIGNAL(currentIndexChanged(int)),this,SLOT(setSessionProperty(int)));
       connect(m_uiForm.dataSelector,SIGNAL(dataReady(const QString&)),this,SLOT(workspaceSelected(const QString&)));
       // When a file is chosen to be published, set the related "FileName" property of the algorithm.
       connect(m_uiForm.dataSelector,SIGNAL(filesFound()),this,SLOT(fileSelected()));
@@ -47,6 +45,8 @@ namespace MantidQt
 
       // Get optional message here as we may set it if user has no investigations to publish to.
       m_uiForm.instructions->setText(getOptionalMessage());
+      // This is required as we use the currentIndexChanged SLOT.
+      storePropertyValue("Session",m_uiForm.investigationNumberCb->itemData(0,Qt::UserRole).toString());
     }
 
     /**
@@ -55,31 +55,36 @@ namespace MantidQt
     void CatalogPublishDialog::populateUserInvestigations()
     {
       auto workspace = Mantid::API::WorkspaceFactory::Instance().createTable();
-
-      // This again is a temporary measure to ensure publishing functionality will work with one catalog.
       auto session = Mantid::API::CatalogManager::Instance().getActiveSessions();
-      if (!session.empty()) Mantid::API::CatalogManager::Instance().getCatalog(session.front()->getSessionId())->myData(workspace);
 
-      // The user is not an investigator on any investigations and cannot publish
-      // or they are not logged into the catalog then update the related message..
-      if (workspace->rowCount() == 0)
+      // We need to catch the exception to prevent a fatal error.
+      try
       {
-        setOptionalMessage("You cannot publish datafiles as you are not an investigator on any investigations or are not logged into the catalog.");
-        // Disable the input fields and run button to prevent user from running algorithm.
-        m_uiForm.scrollArea->setDisabled(true);
-        m_uiForm.runBtn->setDisabled(true);
-        return;
+        if (!session.empty()) Mantid::API::CatalogManager::Instance().getCatalog("")->myData(workspace);
+      }
+      catch(std::runtime_error& e)
+      {
+        setOptionalMessage(e.what());
       }
 
-      // Populate the form with investigations that the user can publish to.
-      for (size_t row = 0; row < workspace->rowCount(); row++)
+      if (workspace->rowCount() > 0)
       {
-        m_uiForm.investigationNumberCb->addItem(QString::fromStdString(workspace->cell<std::string>(row, 0)));
-        // Add better tooltip for ease of use (much easier to recall the investigation if title and instrument are also provided).
-        m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
-            QString::fromStdString("The title of the investigation is: \"" + workspace->cell<std::string>(row, 1) +
-                                   "\".\nThe instrument of the investigation is: \"" + workspace->cell<std::string>(row, 2)) + "\".",
-                                   Qt::ToolTipRole);
+        // Populate the form with investigations that the user can publish to.
+        for (size_t row = 0; row < workspace->rowCount(); row++)
+        {
+          m_uiForm.investigationNumberCb->addItem(QString::fromStdString(workspace->cell<std::string>(row, 0)));
+          // Added tooltips to improve usability.
+          m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
+              QString::fromStdString("The title of the investigation is: \"" + workspace->cell<std::string>(row, 1) +
+                  "\".\nThe instrument of the investigation is: \"" + workspace->cell<std::string>(row, 2)) + "\".",Qt::ToolTipRole);
+          // Set the user role to the sessionID.
+          m_uiForm.investigationNumberCb->setItemData(static_cast<int>(row),
+              QString::fromStdString(workspace->cell<std::string>(row, 7)),Qt::UserRole);
+        }
+      }
+      else
+      {
+        disableDialog();
       }
     }
 
@@ -111,6 +116,25 @@ namespace MantidQt
     }
 
     /**
+     * Diables fields on dialog to improve usability
+     */
+    void CatalogPublishDialog::disableDialog()
+    {
+      m_uiForm.scrollArea->setDisabled(true);
+      m_uiForm.runBtn->setDisabled(true);
+    }
+
+    /**
+     * Set/Update the sessionID of the `Session` property when
+     * the user selects an investigation from the combo-box.
+     */
+    void CatalogPublishDialog::setSessionProperty(int index)
+    {
+      storePropertyValue("Session",
+          m_uiForm.investigationNumberCb->itemData(index,Qt::UserRole).toString());
+    }
+
+    /**
      * Overridden to enable dataselector validators.
      */
     void CatalogPublishDialog::accept()
@@ -131,5 +155,6 @@ namespace MantidQt
         AlgorithmDialog::accept();
       }
     }
+
   }
 }

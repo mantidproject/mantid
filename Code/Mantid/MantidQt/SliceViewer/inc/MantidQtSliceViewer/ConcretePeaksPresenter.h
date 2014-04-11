@@ -8,7 +8,6 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Logger.h"
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
@@ -66,8 +65,6 @@ namespace MantidQt
       Mantid::API::PeakTransform_sptr m_transform;
       /// current slicing point.
       PeakBoundingBox m_slicePoint;
-      /// Logger object
-      Mantid::Kernel::Logger & g_log;
       /// Viewable Peaks
       std::vector<bool> m_viewablePeaks;
       /// Owning presenter.

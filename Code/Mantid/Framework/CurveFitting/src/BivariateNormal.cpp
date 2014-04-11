@@ -61,6 +61,13 @@ namespace Mantid
   namespace CurveFitting
   {
 
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("BivariateNormal");
+    }
+
+
 DECLARE_FUNCTION(BivariateNormal)
 
 // Indicies into Attrib array( local variable in initCommon
@@ -85,8 +92,6 @@ DECLARE_FUNCTION(BivariateNormal)
 #define IVXX   4
 #define IVYY   5
 #define IVXY   6
-
-Kernel::Logger& BivariateNormal::g_log= Kernel::Logger::get("BivariateNormal");
 
 BivariateNormal::BivariateNormal() :
     API::ParamFunction(),

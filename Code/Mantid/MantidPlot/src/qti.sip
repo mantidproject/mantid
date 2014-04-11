@@ -35,7 +35,7 @@
 %Import QtGui/QtGuimod.sip
 %Import mantidqt.sip
 
-class MdiSubWindow: QMdiSubWindow /PyName=MDIWindow/
+class MdiSubWindow: QWidget /PyName=MDIWindow/
 {
 %TypeHeaderCode
 #include "src/MdiSubWindow.h"
@@ -65,6 +65,11 @@ public:
   bool close();
   
   void setFocus();
+
+  void undock();
+  bool isFloating() const;
+  void dock();
+  bool isDocked() const;
 
 private:
   MdiSubWindow(const MdiSubWindow&);

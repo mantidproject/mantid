@@ -107,7 +107,8 @@ namespace Mantid
       this->nBins = inputWS->blocksize();
 
       // Get a pointer to the sample
-      Geometry::IObjComponent_const_sptr sample = inputWS->getInstrument()->getSample();
+      Geometry::IComponent_const_sptr sample =
+          inputWS->getInstrument()->getSample();
 
       // Retrieve the filename from the properties
       this->filename = getPropertyValue("Filename");

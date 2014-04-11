@@ -2,6 +2,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSplitter.h"
 
 #include <sstream>
@@ -12,7 +13,11 @@ namespace Mantid
 {
   namespace Kernel
   {
-
+    namespace
+    {
+      /// static Logger definition
+      Logger g_log("TimeSeriesProperty");
+    }
 
     /**
      * Constructor

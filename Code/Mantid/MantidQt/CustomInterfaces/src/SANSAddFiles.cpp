@@ -23,8 +23,12 @@ using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-// Initialize the logger
-Logger& SANSAddFiles::g_log = Logger::get("SANSAddFiles");
+namespace
+{
+  /// static logger for main window
+  Logger g_log("SANSAddFiles");
+}
+
 const QString SANSAddFiles::OUT_MSG("Output Directory: ");
 
 SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets) :

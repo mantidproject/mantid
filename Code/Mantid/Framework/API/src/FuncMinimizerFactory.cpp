@@ -1,7 +1,6 @@
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/Expression.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/LibraryManager.h"
 
 #include <stdexcept>
@@ -11,13 +10,12 @@ namespace Mantid
 namespace API
 {
 
-FuncMinimizerFactoryImpl::FuncMinimizerFactoryImpl() : Kernel::DynamicFactory<IFuncMinimizer>(), g_log(Kernel::Logger::get("FuncMinimizerFactory"))
+FuncMinimizerFactoryImpl::FuncMinimizerFactoryImpl() : Kernel::DynamicFactory<IFuncMinimizer>()
 {
   // we need to make sure the library manager has been loaded before we 
   // are constructed so that it is destroyed after us and thus does
   // not close any loaded DLLs with loaded algorithms in them
   Mantid::Kernel::LibraryManager::Instance();
-  g_log.debug() << "FuncMinimizerFactory created." << std::endl;
 }
 
 /**
@@ -42,7 +40,6 @@ boost::shared_ptr<IFuncMinimizer> FuncMinimizerFactoryImpl::createMinimizer(cons
   if ( n == 0 )
   {
     std::string mess = "Found empty initialization string";
-    g_log.error(mess);
     throw std::invalid_argument(mess);
   }
 

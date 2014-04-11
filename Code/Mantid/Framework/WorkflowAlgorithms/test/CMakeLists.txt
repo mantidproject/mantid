@@ -5,7 +5,8 @@ if ( CXXTEST_FOUND )
   include_directories ( ../../Algorithms/inc ../../DataHandling/inc ../../TestHelpers/inc )
   # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
   # It will go out of scope at the end of this file so doesn't need un-setting
-  set ( TESTHELPER_SRCS ../../TestHelpers/src/ComponentCreationHelper.cpp 
+  set ( TESTHELPER_SRCS ../../TestHelpers/src/TearDownWorld.cpp
+                        ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp )
   cxxtest_add_test ( WorkflowAlgorithmsTest ${TEST_FILES} )
   target_link_libraries ( WorkflowAlgorithmsTest WorkflowAlgorithms Algorithms DataHandling )

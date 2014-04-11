@@ -14,6 +14,12 @@ namespace Mantid
 namespace DataObjects
 {
 
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("ManagedWorkspace2D");
+  }
+
 using std::size_t;
 
 DECLARE_WORKSPACE(ManagedWorkspace2D)

@@ -3,7 +3,6 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IPowderDiffPeakFunction.h"
-#include "MantidKernel/Logger.h"
 
 #include <complex>
 
@@ -112,9 +111,6 @@ namespace CurveFitting
     virtual void init();
 
     static int s_peakRadius;
-
-    /// Static reference to the logger class
-    static Kernel::Logger& g_log;
 
     //--------  Private Functions -----------------------------------
     /// Calcualte H and Eta

@@ -18,7 +18,13 @@ namespace Mantid
     using namespace API;
     using namespace ICat3;
 
-    CICatHelper::CICatHelper() : g_log(Kernel::Logger::get("CICatHelper")), m_session() {}
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("CICatHelper");
+    }
+
+    CICatHelper::CICatHelper() : m_session() {}
 
     /* This method calls ICat API searchbydavanced and do the basic run search
      * @param icat :: Proxy object for ICat
@@ -50,11 +56,14 @@ namespace Mantid
     {
       if (outputws->getColumnNames().empty())
       {
-        outputws->addColumn("long64","InvestigationId");
-        outputws->addColumn("str","Proposal");
+        outputws->addColumn("str","Investigation id");
+        outputws->addColumn("str","Facility");
         outputws->addColumn("str","Title");
         outputws->addColumn("str","Instrument");
-        outputws->addColumn("str","Run Range");
+        outputws->addColumn("str","Run range");
+        outputws->addColumn("str","Start date");
+        outputws->addColumn("str","End date");
+        outputws->addColumn("str","SessionID");
       }
       saveInvestigations(response.return_,outputws);
     }
@@ -65,7 +74,6 @@ namespace Mantid
      */
     void CICatHelper::saveInvestigations(const std::vector<ns1__investigation*>& investigations,API::ITableWorkspace_sptr& outputws)
     {
-
       try
       {
         std::vector<ns1__investigation*>::const_iterator citr;
@@ -73,20 +81,22 @@ namespace Mantid
         {
           API::TableRow t = outputws->appendRow();
 
-          //investigation id
-          savetoTableWorkspace((*citr)->id,t);
+          std::string id = boost::lexical_cast<std::string>(*(*citr)->id);
 
-          //Proposal
-          savetoTableWorkspace((*citr)->invNumber,t);
-
-          //title
+          savetoTableWorkspace(&id,t);
+          savetoTableWorkspace((*citr)->facility,t);
           savetoTableWorkspace((*citr)->title,t);
-
-          //Instrument
           savetoTableWorkspace((*citr)->instrument,t);
-
-          //run range
           savetoTableWorkspace((*citr)->invParamValue,t);
+
+          std::string startDate = boost::lexical_cast<std::string>(*(*citr)->invStartDate);
+          savetoTableWorkspace(&startDate,t);
+
+          std::string endDate = boost::lexical_cast<std::string>(*(*citr)->invEndDate);
+          savetoTableWorkspace(&endDate,t);
+
+          std::string sessionID = m_session->getSessionId();
+          savetoTableWorkspace(&sessionID, t);
         }
       }
       catch(std::runtime_error& )
@@ -142,6 +152,9 @@ namespace Mantid
         outputws->addColumn("str","Location");
         outputws->addColumn("str","Create Time");
         outputws->addColumn("long64","Id");
+        outputws->addColumn("long64","File size(bytes)");
+        outputws->addColumn("str","File size");
+        outputws->addColumn("str","Description");
       }
 
       try
@@ -169,7 +182,6 @@ namespace Mantid
 
           // File Name
           savetoTableWorkspace((*datafile_citr)->name,t);
-          // File Size
           savetoTableWorkspace((*datafile_citr)->location,t);
 
           //File creation Time.
@@ -184,8 +196,17 @@ namespace Mantid
             creationtime->assign(ftime);
           }
           savetoTableWorkspace(creationtime,t);
+
+
           // 
           savetoTableWorkspace((*datafile_citr)->id,t);
+
+
+          LONG64 fileSize = boost::lexical_cast<LONG64>(*(*datafile_citr)->fileSize);
+          savetoTableWorkspace(&fileSize,t);
+
+          savetoTableWorkspace((*datafile_citr)->description,t);
+
         }
 
       }
@@ -401,11 +422,14 @@ namespace Mantid
     {
       if(outputws->getColumnNames().empty())
       {
-        outputws->addColumn("long64","InvestigationId");
-        outputws->addColumn("str","Proposal");
+        outputws->addColumn("str","Investigation id");
+        outputws->addColumn("str","Facility");
         outputws->addColumn("str","Title");
         outputws->addColumn("str","Instrument");
-        outputws->addColumn("str","Run Range");
+        outputws->addColumn("str","Run range");
+        outputws->addColumn("str","Start date");
+        outputws->addColumn("str","End date");
+        outputws->addColumn("str","SessionID");
       }
       saveInvestigations(response.return_,outputws);
 

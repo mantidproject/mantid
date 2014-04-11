@@ -1,5 +1,4 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 
@@ -10,8 +9,6 @@ namespace Mantid
   {
     using Kernel::Tolerance;
     using Kernel::V3D;
-
-    Kernel::Logger& Sphere::PLog(Kernel::Logger::get("Sphere"));
 
     // The number of slices to use to approximate a sphere
     int Sphere::g_nslices = 5;

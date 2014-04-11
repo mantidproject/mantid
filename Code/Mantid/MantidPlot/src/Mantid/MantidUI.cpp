@@ -87,10 +87,10 @@ namespace
   /// The number of detectors to show within a group before eliding
   size_t DET_TABLE_NDETS_GROUP = 10;
 
+  // Initialize logger
+  Mantid::Kernel::Logger g_log("MantidUI");
 }
 
-// Initialize logger
-Mantid::Kernel::Logger & MantidUI::g_log = Mantid::Kernel::Logger::get("MantidUI");
 
 MantidUI::MantidUI(ApplicationWindow *aw):
   m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
@@ -359,9 +359,12 @@ void MantidUI::saveNexusWorkspace()
 * DeleteWorkspace
 @param workspaceName :: Name of the workspace to delete
 */
-bool MantidUI::deleteWorkspace(const QString& workspaceName)
+void MantidUI::deleteWorkspace(const QString& workspaceName)
 {
-  return FrameworkManager::Instance().deleteWorkspace(workspaceName.toStdString());
+  auto alg = createAlgorithm("DeleteWorkspace");
+  alg->setLogging(false);
+  alg->setPropertyValue("Workspace",workspaceName.toStdString());
+  executeAlgorithmAsync(alg);
 }
 
 /**
@@ -1088,7 +1091,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
   t->setHeaderColType();
 
   // Cache some frequently used values
-  IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
+  IComponent_const_sptr sample = ws->getInstrument()->getSample();
   bool signedThetaParamRetrieved(false), showSignedTwoTheta(false); //If true,  signedVersion of the two theta value should be displayed
   for( int row = 0; row < nrows; ++row )
   {
@@ -2067,36 +2070,6 @@ void MantidUI::saveProject(bool saved)
 void MantidUI::enableSaveNexus(const QString& wsName)
 {
   appWindow()->enablesaveNexus(wsName);
-}
-
-/**
- * Executes the catalog login algorithm.
- * Returns true if login was a success.
- */
-bool MantidUI::isValidCatalogLogin()
-{
-  auto catalogAlgorithm = this->createAlgorithm("CatalogLogin");
-  auto loginDialog      = this->createAlgorithmDialog(catalogAlgorithm);
-
-  if(loginDialog->exec() == QDialog::Accepted)
-  {
-    if (catalogAlgorithm->execute()) return true;
-  }
-  return false;
-}
-
-/**
- * Creates a publishing dialog GUI and runs the publishing algorithm when "Run" is pressed.
- */
-void MantidUI::catalogPublishDialog()
-{
-  auto catalogAlgorithm = this->createAlgorithm("CatalogPublish");
-  auto publishDialog    = this->createAlgorithmDialog(catalogAlgorithm);
-
-  if(publishDialog->exec() == QDialog::Accepted)
-  {
-    catalogAlgorithm->executeAsync();
-  }
 }
 
 /** This method is sueful for saving the currently loaded workspaces to project file on save.

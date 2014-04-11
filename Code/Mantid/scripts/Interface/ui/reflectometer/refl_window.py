@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_window.ui'
 #
-# Created: Wed Mar 19 16:41:17 2014
+# Created: Mon Mar 24 09:26:20 2014
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -232,8 +232,8 @@ class Ui_windowRefl(object):
         self.menuFunction.setObjectName(_fromUtf8("menuFunction"))
         self.menuEdit = QtGui.QMenu(self.menuBar)
         self.menuEdit.setObjectName(_fromUtf8("menuEdit"))
-        self.menuView = QtGui.QMenu(self.menuBar)
-        self.menuView.setObjectName(_fromUtf8("menuView"))
+        self.menuOptions = QtGui.QMenu(self.menuBar)
+        self.menuOptions.setObjectName(_fromUtf8("menuOptions"))
         windowRefl.setMenuBar(self.menuBar)
         self.statusMain = QtGui.QStatusBar(windowRefl)
         font = QtGui.QFont()
@@ -275,6 +275,8 @@ class Ui_windowRefl(object):
         self.actionClear.setObjectName(_fromUtf8("actionClear"))
         self.actionChoose_Columns = QtGui.QAction(windowRefl)
         self.actionChoose_Columns.setObjectName(_fromUtf8("actionChoose_Columns"))
+        self.actionLive_Data = QtGui.QAction(windowRefl)
+        self.actionLive_Data.setObjectName(_fromUtf8("actionLive_Data"))
         self.menuFile.addAction(self.actionOpen_Table)
         self.menuFile.addAction(self.actionReload_from_Disk)
         self.menuFile.addSeparator()
@@ -295,10 +297,11 @@ class Ui_windowRefl(object):
         self.menuEdit.addAction(self.actionCut)
         self.menuEdit.addAction(self.actionPaste)
         self.menuEdit.addAction(self.actionClear)
-        self.menuView.addAction(self.actionChoose_Columns)
+        self.menuOptions.addAction(self.actionChoose_Columns)
+        self.menuOptions.addAction(self.actionLive_Data)
         self.menuBar.addAction(self.menuFile.menuAction())
         self.menuBar.addAction(self.menuEdit.menuAction())
-        self.menuBar.addAction(self.menuView.menuAction())
+        self.menuBar.addAction(self.menuOptions.menuAction())
         self.menuBar.addAction(self.menuFunction.menuAction())
         self.menuBar.addAction(self.menuHelp.menuAction())
         self.labelInstrument.setBuddy(self.comboInstrument)
@@ -367,7 +370,7 @@ class Ui_windowRefl(object):
         self.menuHelp.setTitle(QtGui.QApplication.translate("windowRefl", "Help", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFunction.setTitle(QtGui.QApplication.translate("windowRefl", "Function", None, QtGui.QApplication.UnicodeUTF8))
         self.menuEdit.setTitle(QtGui.QApplication.translate("windowRefl", "Edit", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuView.setTitle(QtGui.QApplication.translate("windowRefl", "View", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuOptions.setTitle(QtGui.QApplication.translate("windowRefl", "Options", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSave_As.setText(QtGui.QApplication.translate("windowRefl", "Save As...", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSave_As.setShortcut(QtGui.QApplication.translate("windowRefl", "Ctrl+Alt+S", None, QtGui.QApplication.UnicodeUTF8))
         self.actionOpen_Table.setText(QtGui.QApplication.translate("windowRefl", "Open Table...", None, QtGui.QApplication.UnicodeUTF8))
@@ -402,4 +405,6 @@ class Ui_windowRefl(object):
         self.actionClear.setShortcut(QtGui.QApplication.translate("windowRefl", "Del", None, QtGui.QApplication.UnicodeUTF8))
         self.actionChoose_Columns.setText(QtGui.QApplication.translate("windowRefl", "Choose Columns...", None, QtGui.QApplication.UnicodeUTF8))
         self.actionChoose_Columns.setShortcut(QtGui.QApplication.translate("windowRefl", "Ctrl+M", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionLive_Data.setText(QtGui.QApplication.translate("windowRefl", "Live Data...", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionLive_Data.setShortcut(QtGui.QApplication.translate("windowRefl", "Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
 

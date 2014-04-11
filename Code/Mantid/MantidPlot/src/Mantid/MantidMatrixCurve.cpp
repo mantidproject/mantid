@@ -17,6 +17,13 @@ using namespace Mantid::API;
 using namespace MantidQt::API;
 using Mantid::Kernel::ReadLock;
 
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("MantidMatrixCurve");
+}
+
+
 /**
  *  @param name :: The curve's name - shown in the legend
  *  @param wsName :: The workspace name.
@@ -248,7 +255,7 @@ void MantidMatrixCurve::dataReset(const QString& wsName)
   }
   catch(std::runtime_error&)
   {
-    Mantid::Kernel::Logger::get("MantidMatrixCurve").information() << "Workspace " << wsNameStd
+    g_log.information() << "Workspace " << wsNameStd
         << " could not be found - plotted curve(s) deleted\n";
     mws = Mantid::API::MatrixWorkspace_sptr();
   }
@@ -268,7 +275,7 @@ void MantidMatrixCurve::dataReset(const QString& wsName)
   catch(std::range_error &) 
   {
     // Get here if the new workspace has fewer spectra and the plotted one no longer exists
-    Mantid::Kernel::Logger::get("MantidMatrixCurve").information() << "Workspace " << wsNameStd
+    g_log.information() << "Workspace " << wsNameStd
         << " now has fewer spectra - plotted curve(s) deleted\n";
     postDeleteHandle(wsNameStd);
   }

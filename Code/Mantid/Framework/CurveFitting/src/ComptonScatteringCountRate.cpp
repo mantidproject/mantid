@@ -11,15 +11,18 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+  using Kernel::Logger;
+
   namespace
   {
     /// Name of the intensity constraint matrix attribute
     const char * CONSTRAINT_MATRIX_NAME = "IntensityConstraints";
     /// Attribute to specify the name of the background order. Defaults to "n"
     const char * BKGD_ORDER_ATTR_NAME = "BackgroundOrderAttr";
+    /// static logger
+    Logger g_log("ComptonScatteringCountRate");
   }
 
-  using Kernel::Logger;
 
   DECLARE_FUNCTION(ComptonScatteringCountRate);
 
