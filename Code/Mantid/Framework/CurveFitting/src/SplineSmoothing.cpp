@@ -104,7 +104,7 @@ namespace CurveFitting
     int histNo = static_cast<int>(inputWorkspaceBinned->getNumberHistograms());
 
     //convert binned data to point data
-    MatrixWorkspace_sptr inputWorkspacePt = convertBinnedData(inputWorkspaceBinned);
+    MatrixWorkspace_const_sptr inputWorkspacePt = convertBinnedData(inputWorkspaceBinned);
 
     //output workspaces for points and derivs
     MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(inputWorkspaceBinned, histNo);
@@ -115,7 +115,7 @@ namespace CurveFitting
     {
       m_cspline = boost::make_shared<BSpline>();
       m_cspline->setAttributeValue("Uniform",false);
-      
+
       //choose some smoothing points from input workspace
       selectSmoothingPoints(inputWorkspacePt, i);
       performAdditionalFitting(inputWorkspacePt, i);
@@ -196,37 +196,27 @@ namespace CurveFitting
    * @param workspace :: The input workspace
    * @return the converted workspace containing point data
    */
-  MatrixWorkspace_sptr SplineSmoothing::convertBinnedData(MatrixWorkspace_sptr workspace) const
+  MatrixWorkspace_sptr SplineSmoothing::convertBinnedData(MatrixWorkspace_sptr workspace)
   {
     if(workspace->isHistogramData())
     {
       size_t histNo = workspace->getNumberHistograms();
       size_t size = workspace->readY(0).size();
 
-      //make a new workspace for the point data
       MatrixWorkspace_sptr pointWorkspace = WorkspaceFactory::Instance().create(workspace,histNo,size,size);
+      
+      auto alg = createChildAlgorithm("ConvertToPointData");
+      alg->setProperty("InputWorkspace", workspace);
+      alg->setProperty("OutputWorkspace", pointWorkspace);
+      alg->execute();
 
-      //loop over each histogram
-      for(size_t i=0; i < histNo; ++i)
-      {
-        const auto & xValues = workspace->readX(i);
-        const auto & yValues = workspace->readY(i);
-
-        auto & newXValues = pointWorkspace->dataX(i);
-        auto & newYValues = pointWorkspace->dataY(i);
-
-        //set x values to be average of bin bounds
-        for(size_t j = 0; j < size; ++j)
-        {
-          newXValues[j] = (xValues[j] + xValues[j+1])/2;
-          newYValues[j] = yValues[j];
-        }
-      }
-
+      pointWorkspace = alg->getProperty("OutputWorkspace");
       return pointWorkspace;
     }
-
-    return workspace;
+    else
+    {
+      return workspace;
+    }
   }
 
   /** Calculate smoothing of the data using the spline
@@ -335,7 +325,7 @@ namespace CurveFitting
    * @param inputWorkspace :: The input workspace containing noisy data
    * @param row :: The row of spectra to use
    */
-  void SplineSmoothing::selectSmoothingPoints(MatrixWorkspace_sptr inputWorkspace, size_t row)
+  void SplineSmoothing::selectSmoothingPoints(MatrixWorkspace_const_sptr inputWorkspace, size_t row)
   {
       std::set<int> smoothPts;
       const auto & xs = inputWorkspace->readX(row);

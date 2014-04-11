@@ -64,13 +64,13 @@ namespace CurveFitting
     API::MatrixWorkspace_sptr setupOutputWorkspace(API::MatrixWorkspace_sptr inws, int size) const;
 
     /// convert a binned workspace to point data. Uses mean of the bins as point
-    API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace) const;
+    API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace);
 
     /// set the points used in the spline for smoothing
     void setSmoothingPoint(const int index, const double xpoint, const double ypoint) const;
 
     /// choose points to define a spline and smooth the data
-    void selectSmoothingPoints(API::MatrixWorkspace_sptr inputWorkspace, size_t row);
+    void selectSmoothingPoints(API::MatrixWorkspace_const_sptr inputWorkspace, size_t row);
 
     /// calculate the spline based on the smoothing points chosen
     void calculateSmoothing(API::MatrixWorkspace_const_sptr inputWorkspace,
