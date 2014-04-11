@@ -11,11 +11,6 @@
 
 namespace Mantid
 {
-  namespace Kernel
-  {
-    class Logger;
-  }
-
   namespace API
   {
     class Progress;
@@ -104,8 +99,6 @@ namespace Mantid
 
       /// Run multithreaded
       const boost::optional<int> m_nThreads;
-
-      Mantid::Kernel::Logger& m_logger;
 
     };
 

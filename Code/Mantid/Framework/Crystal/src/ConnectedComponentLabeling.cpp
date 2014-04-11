@@ -222,6 +222,8 @@ namespace Mantid
         while(iterator->next());
         return currentLabelCount;
       }
+
+      Logger g_log("ConnectedComponentLabeling");
     }
 
     /**
@@ -230,7 +232,7 @@ namespace Mantid
     * @param nThreads : Optional argument of number of threads to use.
     */
     ConnectedComponentLabeling::ConnectedComponentLabeling(const size_t& startId, const boost::optional<int> nThreads) 
-      : m_startId(startId), m_nThreads(nThreads), m_logger(Kernel::Logger::get("ConnectedComponentLabeling"))
+      : m_startId(startId), m_nThreads(nThreads)
     {
       if(m_nThreads.is_initialized() && m_nThreads.get() < 0)
       {
@@ -318,7 +320,7 @@ namespace Mantid
         std::vector<std::map<size_t, boost::shared_ptr<Cluster> > > parallelClusterMapVec(nThreadsToUse);
 
         // ------------- Stage One. Local CCL in parallel.
-        m_logger.debug("Parallel solve local CCL");
+        g_log.debug("Parallel solve local CCL");
         PARALLEL_FOR_NO_WSP_CHECK()
           for(int i = 0; i < nThreadsToUse; ++i)
           {
@@ -361,7 +363,7 @@ namespace Mantid
           }
 
           // Percolate minimum label across boundaries for indexes where there is ambiguity.
-          m_logger.debug("Percolate minimum label across boundaries");
+          g_log.debug("Percolate minimum label across boundaries");
           std::vector<boost::shared_ptr<Cluster> > incompleteClusterVec;
           incompleteClusterVec.reserve(1000);
           std::set<size_t> usedLabels;
@@ -399,7 +401,7 @@ namespace Mantid
 
           // ------------- Stage 3 In parallel, process each incomplete cluster.
           progress.doReport("Merging clusters across processors");
-          m_logger.debug("Merging clusters across processors");
+          g_log.debug("Merging clusters across processors");
           progress.resetNumSteps(incompleteClusterVec.size(), 0.8, 0.9);
           PARALLEL_FOR_NO_WSP_CHECK()
             for(int i = 0; i < static_cast<int>(incompleteClusterVec.size()); ++i)
@@ -408,8 +410,8 @@ namespace Mantid
               cluster->toUniformMinimum(neighbourElements);
               progress.report();
             }
-          m_logger.debug("Remove duplicates");
-          m_logger.debug() << incompleteClusterVec.size() << " clusters to reconstruct" << std::endl;
+          g_log.debug("Remove duplicates");
+          g_log.debug() << incompleteClusterVec.size() << " clusters to reconstruct" << std::endl;
             // Now combine clusters and add the resolved clusters to the clusterMap.
             for(size_t i = 0; i < incompleteClusterVec.size(); ++i)
             {
@@ -488,9 +490,9 @@ namespace Mantid
       ClusterMap clusters = calculateDisjointTree(ws, strategy,progress);
 
       // Create the output workspace from the input workspace
-      m_logger.debug("Start cloning input workspace");
+      g_log.debug("Start cloning input workspace");
       IMDHistoWorkspace_sptr outWS = cloneInputWorkspace(ws);
-      m_logger.debug("Finish cloning input workspace");
+      g_log.debug("Finish cloning input workspace");
       
       // Get the keys (label ids) first in order to do the next stage in parallel.
       VecIndexes keys;
