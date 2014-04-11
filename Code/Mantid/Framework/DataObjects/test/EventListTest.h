@@ -1476,7 +1476,6 @@ public:
 
     //No events in the first ouput 0-99
     TS_ASSERT_EQUALS( outputs[0]->getNumberEvents(), 0);
-    delete outputs[0];
 
     for (size_t i=1; i<10; i++)
     {
@@ -1492,7 +1491,6 @@ public:
         //Odd
         TS_ASSERT_EQUALS( myOut->getNumberEvents(), 0);
       }
-      delete myOut;
     }
   }
 
