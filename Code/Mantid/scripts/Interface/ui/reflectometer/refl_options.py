@@ -6,14 +6,15 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class ReflLiveOptions(QtGui.QDialog, refl_live_data.Ui_liveDataDialog):
+class ReflLiveOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
 
 
     frequency = 0
     _method = 0
     _method_list = ["Add","Replace","Append"]
+    adsGet = false
 
-    def __init__(self, def_meth = "Add", def_freq = float(60)):
+    def __init__(self, def_meth = "Add", def_freq = float(60), defADS = False):
         """
         Initialise the interface
         """
@@ -27,13 +28,19 @@ class ReflLiveOptions(QtGui.QDialog, refl_live_data.Ui_liveDataDialog):
             self.comboAccMethod.setCurrentIndex(0)
 
         self.dspinFrequency.setValue(def_freq)
+        self.checkADS.setChecked(defADS)
 
+        adsGet = self.checkADS.isChecked()
         _method = self.comboAccMethod.currentIndex
         frequency = self.dspinFrequency.value
 
         #connect update signals to functions
         self.dspinFrequency.valueChanged.connect(self._update_frequency)
         self.comboAccMethod.activated.connect(self._update_method)
+        self.checkADS.clicked.connect(self._update_ADS_get)
+
+    def _update_ADS_get(self, checked):
+        self.adsGet = checked
 
     def _update_frequency(self, freq):
         self.frequency = freq
