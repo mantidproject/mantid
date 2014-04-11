@@ -55,6 +55,9 @@ namespace CustomInterfaces
     /// Add a new section
     void addSection();
 
+    /// Remove existing section
+    void removeSection(size_t index);
+
     /// Called when section selector is modified
     void onSectionSelectorModified(size_t index, double min, double max);
 

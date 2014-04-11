@@ -22,6 +22,7 @@ class MockALCBaselineModellingView : public IALCBaselineModellingView
 public:
   void requestFit() { emit fitRequested(); }
   void requestAddSection() { emit addSectionRequested(); }
+  void requestRemoveSection(size_t index) { emit removeSectionRequested(index); }
 
   void modifySectionSelector(size_t index, double min, double max)
   {
@@ -146,7 +147,33 @@ public:
     m_view->requestAddSection();
   }
 
+  void test_removeSection()
+  {
+    std::vector<IALCBaselineModellingView::Section> sections;
+    sections.push_back(std::make_pair(10,20));
+    sections.push_back(std::make_pair(30,40));
+    sections.push_back(std::make_pair(50,60));
+
+    std::vector<IALCBaselineModellingView::SectionSelector> selectors;
+
+    ON_CALL(*m_view, sections()).WillByDefault(ReturnPointee(&sections));
+    EXPECT_CALL(*m_view, setSections(_)).WillRepeatedly(SaveArg<0>(&sections));
+    EXPECT_CALL(*m_view, setSectionSelectors(_)).WillRepeatedly(SaveArg<0>(&selectors));
+
+    m_view->requestRemoveSection(1);
+    m_view->requestRemoveSection(0);
+
+    TS_ASSERT_EQUALS(sections.size(), 1);
+    TS_ASSERT_DELTA(sections[0].first, 50, 1E-8);
+    TS_ASSERT_DELTA(sections[0].second, 60, 1E-8);
+
+    TS_ASSERT_EQUALS(selectors.size(), 1);
+    TS_ASSERT_DELTA(selectors[0].first, 50, 1E-8);
+    TS_ASSERT_DELTA(selectors[0].second, 60, 1E-8);
+  }
+
   void test_onSectionSelectorModified()
+
   {
     EXPECT_CALL(*m_view, updateSection(5, Pair(-2,3)));
     m_view->modifySectionSelector(5,-2,3);

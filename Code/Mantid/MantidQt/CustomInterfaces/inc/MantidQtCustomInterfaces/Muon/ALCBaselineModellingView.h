@@ -88,6 +88,9 @@ namespace CustomInterfaces
     /// Set section row values in sections table
     void setSectionRow(int row, Section section);
 
+    /// Requests to remove section at specified row
+    void requestSectionRemoval(int row);
+
   private:
     /// Index of section start column in sections table
     static const int SECTION_START_COL = 0;

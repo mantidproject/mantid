@@ -8,6 +8,7 @@
 
 #include <QMessageBox>
 #include <QMenu>
+#include <QSignalMapper>
 
 using namespace Mantid::API;
 
@@ -126,11 +127,22 @@ namespace CustomInterfaces
 
   void ALCBaselineModellingView::sectionsContextMenu(const QPoint& widgetPoint)
   {
-    UNUSED_ARG(widgetPoint);
+    QMenu menu(m_widget);
+    menu.addAction("Add section", this, SIGNAL(addSectionRequested()));
 
-    QMenu context(m_widget);
-    context.addAction("Add section", this, SIGNAL(addSectionRequested()));
-    context.exec(QCursor::pos());
+    // Helper mapper to map removal action to row id
+    QSignalMapper removalActionMapper;
+    connect(&removalActionMapper, SIGNAL(mapped(int)), SLOT(requestSectionRemoval(int)));
+
+    int row = m_ui.sections->rowAt(widgetPoint.y());
+    if (row != -1)
+    {
+      // Add removal action
+      QAction* removeAction = menu.addAction("Remove section", &removalActionMapper, SLOT(map()));
+      removalActionMapper.setMapping(removeAction, row);
+    }
+
+    menu.exec(QCursor::pos());
   }
 
   void ALCBaselineModellingView::onRangeSelectorChanged(double min, double max)
@@ -153,6 +165,12 @@ namespace CustomInterfaces
                              new QTableWidgetItem(QString::number(section.first)));
       m_ui.sections->setItem(row, SECTION_END_COL,
                              new QTableWidgetItem(QString::number(section.second)));
+  }
+
+  void ALCBaselineModellingView::requestSectionRemoval(int row)
+  {
+    assert(row >= 0);
+    emit removeSectionRequested(static_cast<size_t>(row));
   }
 
 } // namespace CustomInterfaces

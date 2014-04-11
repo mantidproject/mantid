@@ -22,6 +22,7 @@ namespace CustomInterfaces
 
     connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
     connect(m_view, SIGNAL(addSectionRequested()), SLOT(addSection()));
+    connect(m_view, SIGNAL(removeSectionRequested(size_t)), SLOT(removeSection(size_t)));
     connect(m_view, SIGNAL(sectionSelectorModified(size_t,double,double)),
             SLOT(onSectionSelectorModified(size_t,double,double)));
   }
@@ -71,6 +72,20 @@ namespace CustomInterfaces
 
     auto sections = m_view->sections();
     sections.push_back(IALCBaselineModellingView::Section(initStart, initEnd));
+    m_view->setSections(sections);
+    m_view->setSectionSelectors(sections);
+  }
+
+  /**
+   * @param index :: Index of the section to remove. Should be valid.
+   */
+  void ALCBaselineModellingPresenter::removeSection(size_t index)
+  {
+    auto sections = m_view->sections();
+    assert(index < sections.size()); // The view should take care of that
+
+    sections.erase(sections.begin() + index);
+
     m_view->setSections(sections);
     m_view->setSectionSelectors(sections);
   }

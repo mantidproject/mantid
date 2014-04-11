@@ -108,6 +108,9 @@ namespace CustomInterfaces
     /// New section addition requested
     void addSectionRequested();
 
+    /// Removal of section requested
+    void removeSectionRequested(size_t index);
+
     /**
      * One of section selectors has been modified
      * @param index :: Index of modified selector
