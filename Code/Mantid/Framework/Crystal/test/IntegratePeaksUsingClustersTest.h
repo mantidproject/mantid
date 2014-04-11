@@ -146,6 +146,7 @@ namespace
     alg.setProperty("InputWorkspace", mdWS);
     alg.setProperty("PeaksWorkspace", peaksWS);
     alg.setProperty("Threshold", threshold);
+    alg.setProperty("Normalization", "NoNormalization");
     alg.setPropertyValue("OutputWorkspace", "out_ws");
     alg.setPropertyValue("OutputWorkspaceMD", "out_ws_md");
     alg.execute();

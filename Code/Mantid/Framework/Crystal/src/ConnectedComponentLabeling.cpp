@@ -375,7 +375,7 @@ namespace Mantid
               // Ignore pairs that never ended up yeilding doubly labelled indexes.
               if(!a.isEmpty() && !b.isEmpty())
               {
-                if(usedLabels.find(a.getId()) != usedLabels.end())
+                if(usedLabels.find(a.getId()) == usedLabels.end())
                 {
                   /* Consider the unresolved label */
 
@@ -414,7 +414,7 @@ namespace Mantid
             for(size_t i = 0; i < incompleteClusterVec.size(); ++i)
             {
               const size_t label = incompleteClusterVec[i]->getLabel();
-              if(does_contain_key(clusterMap, label))
+              if(!does_contain_key(clusterMap, label))
               {
                 clusterMap.insert(std::make_pair(label,  incompleteClusterVec[i]));
               }
