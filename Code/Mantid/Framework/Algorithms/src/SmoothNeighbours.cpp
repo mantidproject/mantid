@@ -388,8 +388,9 @@ void SmoothNeighbours::findNeighboursRectangular()
             }
 
           // Adjust the weights of each neighbour to normalize to unity
-          if (!sum || expandSumAllPixels) for (size_t q=0; q<neighbours.size(); q++)
-            neighbours[q].second /= totalWeight;
+          if (!sum || expandSumAllPixels)
+        	  for (size_t q=0; q<neighbours.size(); q++)
+        		  neighbours[q].second /= totalWeight;
 
           // Save the list of neighbours for this output workspace index.
           m_neighbours[outWI] = neighbours;
@@ -508,7 +509,8 @@ void SmoothNeighbours::findNeighboursUbiqutious()
             det = inst->getDetector(*dets.begin());
             neighbParent = det->getParent();
             neighbGParent = neighbParent->getParent();
-            if(noNeigh >= sum || neighbParent->getName().compare(parent->getName()) != 0 || neighbGParent->getName().compare(grandparent->getName()) != 0 || used[neighWI])continue;
+            if(noNeigh >= sum || neighbParent->getName().compare(parent->getName()) != 0 ||
+            		neighbGParent->getName().compare(grandparent->getName()) != 0 || used[neighWI])continue;
             noNeigh++;
             used[neighWI] = true;
           }
