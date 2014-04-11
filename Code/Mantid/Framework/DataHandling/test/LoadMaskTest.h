@@ -8,6 +8,8 @@
 #include <iomanip>
 #include <sstream>
 
+#include "boost/assign/list_of.hpp"
+
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
@@ -255,6 +257,50 @@ public:
 
     return;
   } // test_Openfile
+
+  void testSpecifyInstByIDF()
+  {
+    const std::string oldEmuIdf = "EMU_Definition_32detectors.xml";
+    const std::string newEmuIdf = "EMU_Definition_96detectors.xml";
+
+    const std::vector<int> detIDs = boost::assign::list_of(2)(10);
+    auto maskFile = genMaskingFile("emu_mask.xml", detIDs, std::vector<int>());
+
+    auto byInstName = loadMask("EMU",     maskFile.getFileName(), "LoadedByInstName");
+    auto withOldIDF = loadMask(oldEmuIdf, maskFile.getFileName(), "LoadWithOldIDF");
+    auto withNewIDF = loadMask(newEmuIdf, maskFile.getFileName(), "LoadWithNewIDF");
+
+    TS_ASSERT_EQUALS(byInstName->getNumberHistograms(), 96);
+    TS_ASSERT_EQUALS(withOldIDF->getNumberHistograms(), 32);
+    TS_ASSERT_EQUALS(withNewIDF->getNumberHistograms(), 96);
+    
+    TS_ASSERT(byInstName->isMasked(2));
+    TS_ASSERT(withOldIDF->isMasked(2));
+    TS_ASSERT(withNewIDF->isMasked(2));
+    TS_ASSERT(byInstName->isMasked(10));
+    TS_ASSERT(withOldIDF->isMasked(10));
+    TS_ASSERT(withNewIDF->isMasked(10));
+
+    TS_ASSERT_EQUALS(byInstName->getNumberMasked(), 2);
+    TS_ASSERT_EQUALS(withOldIDF->getNumberMasked(), 2);
+    TS_ASSERT_EQUALS(withNewIDF->getNumberMasked(), 2);
+  }
+
+  DataObjects::MaskWorkspace_sptr loadMask(const std::string & instrument, 
+    const std::string & inputFile, const std::string & outputWsName)
+  {
+    LoadMask loadMask;
+    loadMask.initialize();
+
+    loadMask.setProperty("Instrument", instrument);
+    loadMask.setProperty("InputFile", inputFile);
+    loadMask.setProperty("OutputWorkspace", outputWsName);
+
+    TS_ASSERT_EQUALS(loadMask.execute(), true);
+
+    //DataObjects::MaskWorkspace_sptr result = loadMask.getProperty("OutputWorkspace");
+    return AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(outputWsName);
+  }
 
   /*
    * Create a masking file
