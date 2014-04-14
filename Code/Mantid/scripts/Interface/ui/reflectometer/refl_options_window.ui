@@ -60,7 +60,7 @@
    <item row="2" column="0" colspan="2">
     <widget class="QCheckBox" name="checkADS">
      <property name="text">
-      <string>Load ADS workspaces into Runs list</string>
+      <string>Load workspaces from mantid into the Runs list</string>
      </property>
     </widget>
    </item>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_options_window.ui'
 #
-# Created: Fri Apr 11 14:49:51 2014
+# Created: Mon Apr 14 16:04:07 2014
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -54,5 +54,5 @@ class Ui_OptionsDialog(object):
         OptionsDialog.setWindowTitle(QtGui.QApplication.translate("OptionsDialog", "Refl Gui Options", None, QtGui.QApplication.UnicodeUTF8))
         self.labelAccMethod.setText(QtGui.QApplication.translate("OptionsDialog", "Accumulation Method", None, QtGui.QApplication.UnicodeUTF8))
         self.labelFrequency.setText(QtGui.QApplication.translate("OptionsDialog", "Update Every", None, QtGui.QApplication.UnicodeUTF8))
-        self.checkADS.setText(QtGui.QApplication.translate("OptionsDialog", "Load ADS workspaces into Runs list", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkADS.setText(QtGui.QApplication.translate("OptionsDialog", "Load workspaces from mantid into the Runs list", None, QtGui.QApplication.UnicodeUTF8))
 
