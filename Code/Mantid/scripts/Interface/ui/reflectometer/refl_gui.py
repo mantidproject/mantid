@@ -934,8 +934,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         Shows the dialog for setting options regarding live data
         """
         try:
-            dialog = refl_options.ReflOptions(def_meth = self.live_method, def_freq = self.live_freq, def_ADS = self.ads_get)
+            dialog = refl_options.ReflOptions(def_meth = self.live_method, def_freq = self.live_freq, def_ads = self.ads_get)
             if dialog.exec_():
+                old_ads = self.ads_get
                 self.live_freq = dialog.frequency
                 self.live_method = dialog.get_method()
                 self.ads_get = dialog.ads_get
@@ -951,6 +952,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 settings.endGroup()
 
                 del settings
+                #now populate the runs list again if ads fetching option changed
+                if self.ads_get != old_ads
+                    _populate_runs_list()
         except Exception as ex:
             logger.notice("Could not open live data options dialog")
             logger.notice(str(ex))
