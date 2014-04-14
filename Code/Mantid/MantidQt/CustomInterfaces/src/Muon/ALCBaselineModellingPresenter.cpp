@@ -23,6 +23,10 @@ namespace CustomInterfaces
     connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
     connect(m_view, SIGNAL(addSectionRequested()), SLOT(addSection()));
     connect(m_view, SIGNAL(removeSectionRequested(size_t)), SLOT(removeSection(size_t)));
+
+    connect(m_view, SIGNAL(sectionModified(size_t, double, double)),
+            SLOT(onSectionModified(size_t, double, double)));
+
     connect(m_view, SIGNAL(sectionSelectorModified(size_t,double,double)),
             SLOT(onSectionSelectorModified(size_t,double,double)));
   }
@@ -90,14 +94,14 @@ namespace CustomInterfaces
     m_view->setSectionSelectors(sections);
   }
 
-  /**
-   * @param index :: Index of modified selector
-   * @param min :: New minimum value
-   * @param max :: New maximum value
-   */
+  void ALCBaselineModellingPresenter::onSectionModified(size_t index, double min, double max)
+  {
+    m_view->updateSectionSelector(index, min, max);
+  }
+
   void ALCBaselineModellingPresenter::onSectionSelectorModified(size_t index, double min, double max)
   {
-    m_view->updateSection(index, IALCBaselineModellingView::Section(min, max));
+    m_view->updateSection(index, min, max);
   }
 
   /**

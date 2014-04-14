@@ -91,15 +91,24 @@ namespace CustomInterfaces
     /**
      * Modify section values
      * @param index :: Index of the section to modify
-     * @param section :: New section values
+     * @param min :: New section min value
+     * @param max :: New section max value
      */
-    virtual void updateSection(size_t index, Section section) = 0;
+    virtual void updateSection(size_t index, double min, double max) = 0;
 
     /**
      * Reset a list of section selectors
      * @param selectors :: New list of selectors
      */
     virtual void setSectionSelectors(const std::vector<SectionSelector>& selectors) = 0;
+
+    /**
+     * Update values of a single section selector
+     * @param index :: Index of the selector to update
+     * @param min :: New min value
+     * @param max :: New max value
+     */
+    virtual void updateSectionSelector(size_t index, double min, double max) = 0;
 
   signals:
     /// Fit requested
@@ -110,6 +119,14 @@ namespace CustomInterfaces
 
     /// Removal of section requested
     void removeSectionRequested(size_t index);
+
+    /**
+     * One of the sections in the table was modified
+     * @param index :: Index of the modified section
+     * @param min :: New min value
+     * @param max :: New max value
+     */
+    void sectionModified(size_t index, double min, double max);
 
     /**
      * One of section selectors has been modified

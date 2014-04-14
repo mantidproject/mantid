@@ -24,6 +24,11 @@ public:
   void requestAddSection() { emit addSectionRequested(); }
   void requestRemoveSection(size_t index) { emit removeSectionRequested(index); }
 
+  void modifySection(size_t index, double min, double max)
+  {
+    emit sectionModified(index, min, max);
+  }
+
   void modifySectionSelector(size_t index, double min, double max)
   {
     emit sectionSelectorModified(index, min, max);
@@ -40,9 +45,10 @@ public:
   MOCK_METHOD1(setFunction, void(IFunction_const_sptr));
 
   MOCK_METHOD1(setSections, void(const std::vector<Section>&));
-  MOCK_METHOD2(updateSection, void(size_t, Section));
+  MOCK_METHOD3(updateSection, void(size_t, double, double));
 
   MOCK_METHOD1(setSectionSelectors, void(const std::vector<SectionSelector>&));
+  MOCK_METHOD3(updateSectionSelector, void(size_t, double, double));
 };
 
 class MockALCBaselineModellingModel : public IALCBaselineModellingModel
@@ -173,10 +179,15 @@ public:
   }
 
   void test_onSectionSelectorModified()
-
   {
-    EXPECT_CALL(*m_view, updateSection(5, Pair(-2,3)));
-    m_view->modifySectionSelector(5,-2,3);
+    EXPECT_CALL(*m_view, updateSection(5, -2, 3));
+    m_view->modifySectionSelector(5,-2, 3);
+  }
+
+  void test_onSectionModified()
+  {
+    EXPECT_CALL(*m_view, updateSectionSelector(5, -5, 8));
+    m_view->modifySection(5, -5, 8);
   }
 
   void test_fit()

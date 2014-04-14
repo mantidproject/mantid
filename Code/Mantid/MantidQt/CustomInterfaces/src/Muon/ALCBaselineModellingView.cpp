@@ -42,6 +42,8 @@ namespace CustomInterfaces
 
     // Make columns non-resizeable and to fill all the available space
     m_ui.sections->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+
+    connect(m_ui.sections, SIGNAL(cellChanged(int,int)), SLOT(onSectionsTableChanged(int,int)));
   }
 
   IFunction_const_sptr ALCBaselineModellingView::function() const
@@ -55,9 +57,7 @@ namespace CustomInterfaces
 
     for (int row = 0; row < m_ui.sections->rowCount(); ++row)
     {
-      double start = m_ui.sections->item(row, SECTION_START_COL)->text().toDouble();
-      double end = m_ui.sections->item(row, SECTION_END_COL)->text().toDouble();
-      sections.push_back(Section(start,end));
+      sections.push_back(parseSectionRow(row));
     }
 
     return sections;
@@ -88,6 +88,8 @@ namespace CustomInterfaces
 
   void ALCBaselineModellingView::setSections(const std::vector<IALCBaselineModellingView::Section>& sections)
   {
+    bool prevBlockedState = m_ui.sections->blockSignals(true);
+
     m_ui.sections->setRowCount(static_cast<int>(sections.size()));
 
     for(auto it = sections.begin(); it != sections.end(); ++it)
@@ -95,11 +97,13 @@ namespace CustomInterfaces
       int row = static_cast<int>(std::distance(sections.begin(), it));
       setSectionRow(row, *it);
     }
+
+    m_ui.sections->blockSignals(prevBlockedState);
   }
 
-  void ALCBaselineModellingView::updateSection(size_t index, IALCBaselineModellingView::Section section)
+  void ALCBaselineModellingView::updateSection(size_t index, double min, double max)
   {
-    setSectionRow(static_cast<int>(index), section);
+    setSectionRow(static_cast<int>(index), std::make_pair(min,max));
   }
 
   void ALCBaselineModellingView::setSectionSelectors(
@@ -123,6 +127,14 @@ namespace CustomInterfaces
               SLOT(onRangeSelectorChanged(double,double)));
       m_rangeSelectors.push_back(selector);
     }
+  }
+
+  void ALCBaselineModellingView::updateSectionSelector(size_t index, double min, double max)
+  {
+    assert(index < m_rangeSelectors.size());
+    RangeSelector* selector = m_rangeSelectors[index];
+    selector->setMinimum(min);
+    selector->setMaximum(max);
   }
 
   void ALCBaselineModellingView::sectionsContextMenu(const QPoint& widgetPoint)
@@ -159,12 +171,28 @@ namespace CustomInterfaces
     emit sectionSelectorModified(index, min, max);
   }
 
+  void ALCBaselineModellingView::onSectionsTableChanged(int row, int col)
+  {
+    UNUSED_ARG(col); // We are checking both anyway
+
+    Section updated = parseSectionRow(row);
+
+    emit sectionModified(static_cast<int>(row), updated.first, updated.second);
+  }
+
   void ALCBaselineModellingView::setSectionRow(int row, IALCBaselineModellingView::Section section)
   {
-      m_ui.sections->setItem(row, SECTION_START_COL,
-                             new QTableWidgetItem(QString::number(section.first)));
-      m_ui.sections->setItem(row, SECTION_END_COL,
-                             new QTableWidgetItem(QString::number(section.second)));
+    m_ui.sections->setItem(row, SECTION_START_COL,
+                           new QTableWidgetItem(QString::number(section.first)));
+    m_ui.sections->setItem(row, SECTION_END_COL,
+                           new QTableWidgetItem(QString::number(section.second)));
+  }
+
+  IALCBaselineModellingView::Section ALCBaselineModellingView::parseSectionRow(int row) const
+  {
+    double start = m_ui.sections->item(row, SECTION_START_COL)->text().toDouble();
+    double end = m_ui.sections->item(row, SECTION_END_COL)->text().toDouble();
+    return Section(start,end);
   }
 
   void ALCBaselineModellingView::requestSectionRemoval(int row)

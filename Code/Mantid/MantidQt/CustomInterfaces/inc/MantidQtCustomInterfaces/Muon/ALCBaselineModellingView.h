@@ -73,10 +73,13 @@ namespace CustomInterfaces
     void setSections(const std::vector<Section>& sections);
 
     /// @see IALCBaselineModellingView::updateSection
-    void updateSection(size_t index, Section section);
+    void updateSection(size_t index, double min, double max);
 
     /// @see IALCBaselineModellingView::setSectionSelectors
     void setSectionSelectors(const std::vector<SectionSelector> &selectors);
+
+    /// @see IALCBaselineModellingView::updateSectionSelector
+    void updateSectionSelector(size_t index, double min, double max);
 
   private slots:
     /// Show context menu for sections table
@@ -85,8 +88,14 @@ namespace CustomInterfaces
     /// Called when one of range selectors is modified
     void onRangeSelectorChanged(double min, double max);
 
+    /// Called when one of sections is edited in the table
+    void onSectionsTableChanged(int row, int col);
+
     /// Set section row values in sections table
     void setSectionRow(int row, Section section);
+
+    /// Parse section from one of sections table rows
+    Section parseSectionRow(int row) const;
 
     /// Requests to remove section at specified row
     void requestSectionRemoval(int row);

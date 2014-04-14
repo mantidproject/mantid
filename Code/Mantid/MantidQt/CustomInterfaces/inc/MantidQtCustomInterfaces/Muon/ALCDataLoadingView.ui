@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>538</width>
+    <width>699</width>
     <height>354</height>
    </rect>
   </property>
@@ -53,11 +53,8 @@
           </item>
           <item row="2" column="1">
            <widget class="QLineEdit" name="log">
-            <property name="minimumSize">
-             <size>
-              <width>100</width>
-              <height>0</height>
-             </size>
+            <property name="text">
+             <string>sample_magn_field</string>
             </property>
            </widget>
           </item>
@@ -124,18 +121,19 @@
       </layout>
      </widget>
      <widget class="QGroupBox" name="groupBox">
-      <property name="minimumSize">
-       <size>
-        <width>300</width>
-        <height>300</height>
-       </size>
-      </property>
       <property name="title">
        <string>Loaded data</string>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QwtPlot" name="dataPlot"/>
+        <widget class="QwtPlot" name="dataPlot">
+         <property name="minimumSize">
+          <size>
+           <width>300</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

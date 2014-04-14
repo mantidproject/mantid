@@ -58,6 +58,9 @@ namespace CustomInterfaces
     /// Remove existing section
     void removeSection(size_t index);
 
+    /// Called when one of sections is modified
+    void onSectionModified(size_t index, double min, double max);
+
     /// Called when section selector is modified
     void onSectionSelectorModified(size_t index, double min, double max);
 
