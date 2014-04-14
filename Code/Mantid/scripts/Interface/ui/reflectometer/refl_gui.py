@@ -311,7 +311,8 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         # Clear existing
         self.listMain.clear()
         # Fill with ADS workspaces
-        self._populate_runs_listADSWorkspaces()
+        if self.ads_get:
+            self._populate_runs_listADSWorkspaces()
         try:
             selectedInstrument = config['default.instrument'].strip().upper()
             if not self.__instrumentRuns:
