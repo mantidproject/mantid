@@ -118,6 +118,7 @@ namespace DataHandling
     }
 
     int numBanks = getNumberOfBanks( lines );
+    g_log.debug() << numBanks << "banks in file";
 
     return;
   }
@@ -172,7 +173,7 @@ namespace DataHandling
   {
     // We assume there is just one HTYPE line, look for it from beginning and return its value.
     std::string lookFor = "INS   HTYPE";
-    for (int i = 0; i <= lines.size(); ++i)
+    for (size_t i = 0; i <= lines.size(); ++i)
     {
       if(lines[i].substr(0,lookFor.size()) == lookFor)
       {
@@ -190,7 +191,7 @@ namespace DataHandling
   {
     // We assume there is just one BANK line, look for it from beginning and return its value.
     std::string lookFor = "INS   BANK";
-    for (int i = 0; i <= lines.size(); ++i)
+    for (size_t i = 0; i <= lines.size(); ++i)
     {
       if(lines[i].substr(0,lookFor.size()) == lookFor)
       {
