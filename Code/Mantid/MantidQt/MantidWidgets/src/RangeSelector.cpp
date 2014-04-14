@@ -71,12 +71,6 @@ RangeSelector::RangeSelector(QwtPlot* plot, SelectType type,
   m_mrkMax->setLinePen(*m_pen);
 }
 
-RangeSelector::~RangeSelector()
-{
-  m_mrkMin->attach(NULL);
-  m_mrkMax->attach(NULL);
-}
-
 bool RangeSelector::eventFilter(QObject* obj, QEvent* evn)
 {
   Q_UNUSED(obj);
