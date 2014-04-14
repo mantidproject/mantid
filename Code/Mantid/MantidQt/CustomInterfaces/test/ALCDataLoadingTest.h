@@ -80,7 +80,12 @@ public:
     TS_ASSERT_DELTA(loadedWs->readY(0)[2], 0.128, 1E-3);
   }
 
-  void test_errorHandling()
+  void test_loadingError()
+  {
+    // TODO: with algorithm being executed asynchronously, check that errors are caught propertly
+  }
+
+  void test_nonExistentFile()
   {
     EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
     EXPECT_CALL(*m_view, lastRun()).WillRepeatedly(Return("non-existent-file"));

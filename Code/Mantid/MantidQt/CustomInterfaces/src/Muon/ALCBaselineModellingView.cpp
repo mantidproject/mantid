@@ -10,6 +10,8 @@
 #include <QMenu>
 #include <QSignalMapper>
 
+#include <qwt_symbol.h>
+
 using namespace Mantid::API;
 
 namespace MantidQt
@@ -25,14 +27,20 @@ namespace CustomInterfaces
   void ALCBaselineModellingView::initialize()
   {
     m_ui.setupUi(m_widget);
-    connect(m_ui.fit, SIGNAL(pressed()), SIGNAL(fitRequested()));
+    connect(m_ui.fit, SIGNAL(clicked()), SIGNAL(fitRequested()));
 
+    m_dataCurve->setStyle(QwtPlotCurve::NoCurve);
+    m_dataCurve->setSymbol(QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(7,7)));
+    m_dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
     m_dataCurve->attach(m_ui.dataPlot);
 
-    m_fitCurve->setPen(QPen(Qt::red));
+    m_fitCurve->setPen(QPen(Qt::red, 1.5));
+    m_fitCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
     m_fitCurve->attach(m_ui.dataPlot);
 
-    m_correctedCurve->setPen(QPen(Qt::green));
+    m_correctedCurve->setStyle(QwtPlotCurve::NoCurve);
+    m_correctedCurve->setSymbol(QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(Qt::green), QSize(7,7)));
+    m_correctedCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
     m_correctedCurve->attach(m_ui.correctedPlot);
 
     // Context menu for sections table
@@ -120,13 +128,16 @@ namespace CustomInterfaces
     for (auto it = selectors.begin(); it != selectors.end(); ++it)
     {
       auto selector = new RangeSelector(m_ui.dataPlot);
-      selector->setRange(*it);
+      // TODO: range sould be set to something meaningful
+      selector->setRange(std::numeric_limits<double>::min(), std::numeric_limits<double>::max());
       selector->setMinimum(it->first);
       selector->setMaximum(it->second);
       connect(selector, SIGNAL(selectionChanged(double,double)),
               SLOT(onRangeSelectorChanged(double,double)));
       m_rangeSelectors.push_back(selector);
     }
+
+    m_ui.dataPlot->replot();
   }
 
   void ALCBaselineModellingView::updateSectionSelector(size_t index, double min, double max)

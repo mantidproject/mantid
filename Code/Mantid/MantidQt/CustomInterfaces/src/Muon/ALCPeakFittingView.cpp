@@ -2,7 +2,7 @@
 
 #include "MantidAPI/FunctionFactory.h"
 
-using namespace Mantid;
+#include <qwt_symbol.h>
 
 namespace MantidQt
 {
@@ -22,11 +22,15 @@ void ALCPeakFittingView::initialize()
 {
   m_ui.setupUi(m_widget);
 
-  connect(m_ui.fit, SIGNAL(pressed()), this, SIGNAL(fitRequested()));
+  connect(m_ui.fit, SIGNAL(clicked()), this, SIGNAL(fitRequested()));
 
+  m_dataCurve->setStyle(QwtPlotCurve::NoCurve);
+  m_dataCurve->setSymbol(QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(7,7)));
+  m_dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
   m_dataCurve->attach(m_ui.plot);
 
-  m_fittedCurve->setPen(QPen(Qt::red));
+  m_fittedCurve->setPen(QPen(Qt::red, 1.5));
+  m_fittedCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
   m_fittedCurve->attach(m_ui.plot);
 }
 

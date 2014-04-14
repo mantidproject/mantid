@@ -2,6 +2,10 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 
+#include <Poco/ActiveResult.h>
+
+#include <QApplication>
+
 using namespace Mantid::API;
 
 namespace MantidQt
@@ -29,7 +33,13 @@ namespace CustomInterfaces
       alg->setProperty("LastRun", m_view->lastRun());
       alg->setProperty("LogValue", m_view->log());
       alg->setPropertyValue("OutputWorkspace", "__NotUsed__");
-      alg->execute();
+
+      Poco::ActiveResult<bool> result(alg->executeAsync());
+
+      while (!result.available())
+      {
+        QApplication::processEvents(); // So that progress bar gets updated
+      }
 
       m_loadedData = alg->getProperty("OutputWorkspace");
       m_view->displayData(m_loadedData);

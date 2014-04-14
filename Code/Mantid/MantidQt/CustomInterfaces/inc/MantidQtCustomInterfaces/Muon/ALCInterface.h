@@ -11,6 +11,8 @@
 
 #include "ui_ALCInterface.h"
 
+#include <qwt_symbol.h>
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -55,7 +57,10 @@ namespace CustomInterfaces
     void nextStep();
     void previousStep();
 
+    void switchStep(int newStepIndex);
+
   private:
+
     /// UI form
     Ui::ALCInterface m_ui;
 
@@ -63,6 +68,12 @@ namespace CustomInterfaces
     ALCDataLoadingPresenter* m_dataLoading;
     ALCBaselineModellingPresenter* m_baselineModelling;
     ALCPeakFittingPresenter* m_peakFitting;
+
+    /// Name for every step for labels
+    static const QStringList STEP_NAMES;
+
+    /// Format of the label at the bottom
+    static const QString LABEL_FORMAT;
   };
 
 } // namespace CustomInterfaces

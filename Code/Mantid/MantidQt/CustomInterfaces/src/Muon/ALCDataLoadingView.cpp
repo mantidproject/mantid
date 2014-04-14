@@ -2,6 +2,8 @@
 
 #include <QMessageBox>
 
+#include <qwt_symbol.h>
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -13,12 +15,15 @@ namespace CustomInterfaces
   void ALCDataLoadingView::initialize()
   {
     m_ui.setupUi(m_widget);
-    connect(m_ui.load, SIGNAL(pressed()), this, SIGNAL(loadData()));
+    connect(m_ui.load, SIGNAL(clicked()), this, SIGNAL(loadData()));
 
     m_ui.dataPlot->setCanvasBackground(Qt::white);
     m_ui.dataPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
     m_ui.dataPlot->setAxisFont(QwtPlot::yLeft, m_widget->font());
 
+    m_dataCurve->setStyle(QwtPlotCurve::NoCurve);
+    m_dataCurve->setSymbol(QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(7,7)));
+    m_dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
     m_dataCurve->attach(m_ui.dataPlot);
   }
 
