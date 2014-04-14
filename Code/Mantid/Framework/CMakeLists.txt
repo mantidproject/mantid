@@ -29,14 +29,6 @@ endif ()
 # gsl is currently needed by Geometry, Algorithms & Curvefitting
 find_package ( GSL REQUIRED )
 
-###########################################################################
-# Add OpenMP flags here - don't want them on QtPropertyBrowser
-###########################################################################
-if ( OPENMP_FOUND )
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
-endif ()
-
 check_include_files ( stdint.h stdint )
 if ( stdint )
   add_definitions ( -DHAVE_STDINT_H )
