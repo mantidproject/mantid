@@ -40,8 +40,7 @@ class Symmetrise(PythonAlgorithm):
                              Direction.Output), doc='Name to call the output workspace.')
 
     def PyExec(self):
-        from IndirectCommon import CheckHistZero, StartTime, EndTime, \
-            getDefaultWorkingDirectory
+        from IndirectCommon import CheckHistZero, StartTime, EndTime
 
         StartTime('Symmetrise')
         self._setup()
@@ -51,6 +50,7 @@ class Symmetrise(PythonAlgorithm):
         if math.fabs(self._x_cut) < 1e-5:
             raise ValueError('XCut point is Zero')
 
+        #find range of values to flip
         delta_x = sample_x[1] - sample_x[0]
 
         negative_diff = np.absolute(sample_x - self._x_cut)
@@ -74,6 +74,7 @@ class Symmetrise(PythonAlgorithm):
         CloneWorkspace(InputWorkspace=self._sample,
                        OutputWorkspace=self._output_workspace)
 
+        #for each spectrum copy positive values to the negative
         for index in xrange(num_spectra):
             x = mtd[self._output_workspace].readX(index)
             y = mtd[self._output_workspace].readY(index)
@@ -91,21 +92,15 @@ class Symmetrise(PythonAlgorithm):
             y_out[pivot:] = y[pivot:]
             e_out[pivot:] = e[pivot:]
 
-            mtd[self._output_workspace].setX(index, np.asarray(x_out))
-            mtd[self._output_workspace].setY(index, np.asarray(y_out))
-            mtd[self._output_workspace].setE(index, np.asarray(e_out))
+            mtd[self._output_workspace].setX(index, x_out)
+            mtd[self._output_workspace].setY(index, y_out)
+            mtd[self._output_workspace].setE(index, e_out)
 
         if self._save:
-            workdir = getDefaultWorkingDirectory()
-            file_path = os.path.join(workdir, self._output_workspace + '.nxs')
-            SaveNexusProcessed(InputWorkspace=self._output_workspace,
-                               Filename=file_path)
-
-        if self._verbose:
-            logger.notice('Output file : ' + file_path)
+            self._save_output()
 
         if self._plot:
-            self._plotSymmetrise()
+            self._plot_output()
 
         self.setProperty("OutputWorkspace", self._output_workspace)
         EndTime('Symmetrise')
@@ -137,7 +132,20 @@ class Symmetrise(PythonAlgorithm):
         elif index >= num_pts:
             raise ValueError('%s point %d > %d' % (label, index, num_pts))
 
-    def _plotSymmetrise(self):
+    def _save_output(self):
+        """
+        Save the output workspace to the user's default working directory
+        """
+        from IndirectCommon import getDefaultWorkingDirectory
+        workdir = getDefaultWorkingDirectory()
+        file_path = os.path.join(workdir, self._output_workspace + '.nxs')
+        SaveNexusProcessed(InputWorkspace=self._output_workspace,
+                           Filename=file_path)
+
+        if self._verbose:
+            logger.notice('Output file : ' + file_path)
+
+    def _plot_output(self):
         """
         Plot the first spectrum of the input and output workspace together.
         """
