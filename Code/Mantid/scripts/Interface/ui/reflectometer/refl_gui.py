@@ -505,34 +505,38 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         """
         Transfer run numbers to the table
         """
+        import re
         col = 0
         row = 0
         while (self.tableMain.item(row, 0).text() != ''):
             row = row + 1
         for idx in self.listMain.selectedItems():
             contents = str(idx.text()).strip()
-            first_contents = contents.split(':')[0]
             runnumber = None
-            if mtd.doesExist(first_contents):
-                runnumber = self._create_workspace_display_name(first_contents)
+            searchObj = re.search( r'^\d+:', contents)
+            if searchObj:
+                runnumber = contents.split(':')[0]
+            elif mtd.doesExist(contents):
+                runnumber = self._create_workspace_display_name(contents)
             else:
                 try:
-                    temp = Load(Filename=first_contents, OutputWorkspace="_tempforrunnumber")
+                    temp = Load(Filename=contents, OutputWorkspace="_tempforrunnumber")
                     runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
                     DeleteWorkspace(temp)
                 except:
-                    logger.error("Unable to load file. Please check your managed user directories.")
-                    QtGui.QMessageBox.critical(self.tableMain, 'Error Loading File',"Unable to load file. Please check your managed user directories.")
-            item = QtGui.QTableWidgetItem()
-            item.setText(runnumber)
-            self.tableMain.setItem(row, col, item)
-            item = QtGui.QTableWidgetItem()
-            item.setText(self.textRuns.text())
-            self.tableMain.setItem(row, col + 2, item)
-            col = col + 5
-            if col >= 11:
-                col = 0
-                row = row + 1
+                    logger.error("Unable to find a run number associated with \"" + contents + "\". Please check that the name is valid or exists in your managed user directories.")
+                    QtGui.QMessageBox.critical(self.tableMain, 'Error finding number', "Unable to find a run number associated with \"" + contents + "\". Please check that the name is valid or exists in your managed user directories.")
+            if runnumber:
+                item = QtGui.QTableWidgetItem()
+                item.setText(runnumber)
+                self.tableMain.setItem(row, col, item)
+                item = QtGui.QTableWidgetItem()
+                item.setText(self.textRuns.text())
+                self.tableMain.setItem(row, col + 2, item)
+                col = col + 5
+                if col >= 11:
+                    col = 0
+                    row = row + 1
 
     def _set_all_stitch(self,state):
         """
@@ -952,9 +956,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                 settings.endGroup()
 
                 del settings
-                #now populate the runs list again if ads fetching option changed
-                if self.ads_get != old_ads
-                    _populate_runs_list()
         except Exception as ex:
             logger.notice("Could not open live data options dialog")
             logger.notice(str(ex))
