@@ -48,6 +48,9 @@ namespace CustomInterfaces
     /// Set the data we should fit baseline for
     void setData(MatrixWorkspace_const_sptr data);
 
+    /// A model used by presenter
+    const IALCBaselineModellingModel& model() const { return *m_model; }
+
   private slots:
     /// Perform a fit
     void fit();
@@ -70,14 +73,6 @@ namespace CustomInterfaces
 
     /// Associated model
     IALCBaselineModellingModel* const m_model;
-
-    /// Create Qwt curve data from a workspace
-    static boost::shared_ptr<QwtData> curveDataFromWs(MatrixWorkspace_const_sptr ws,
-                                                      size_t wsIndex);
-
-    /// Create Qwt curve data from a function
-    static boost::shared_ptr<QwtData> curveDataFromFunction(IFunction_const_sptr func,
-                                                            const std::vector<double>& xValues);
   };
 
 } // namespace CustomInterfaces

@@ -33,6 +33,7 @@ set ( SRC_FILES
 	src/Muon/ALCBaselineModellingView.cpp
 	src/Muon/ALCDataLoadingPresenter.cpp
 	src/Muon/ALCDataLoadingView.cpp
+	src/Muon/ALCHelper.cpp
 	src/Muon/ALCInterface.cpp
 	src/Muon/ALCPeakFittingPresenter.cpp
 	src/Muon/ALCPeakFittingView.cpp
@@ -99,6 +100,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h
 	inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h
+	inc/MantidQtCustomInterfaces/Muon/ALCHelper.h
 	inc/MantidQtCustomInterfaces/Muon/ALCInterface.h
 	inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.h
@@ -214,7 +216,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
 
 set ( TEST_FILES
 	ALCBaselineModellingModelTest.h
-  ALCBaselineModellingPresenterTest.h
+	ALCBaselineModellingPresenterTest.h
 	ALCDataLoadingTest.h
 	ALCPeakFittingTest.h
 	CreateMDWorkspaceAlgDialogTest.h
