@@ -146,6 +146,7 @@ RrAadIitddddddddddddddddAatdddddddFfttttttttddddddddddddddddddddddddddIitdd etc.
 #include <vector>
 #include <string>
 #include <map>
+#include <stdlib.h>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/erase.hpp>
