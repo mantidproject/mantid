@@ -262,6 +262,7 @@ namespace Mantid
       {
         //More than 16 will need further checks as more is only ok when pairs of quotes surround a comma, meaning it isn't a delimiter
         std::vector<std::vector<size_t>> quoteBounds;
+        findQuotePairs(line, quoteBounds);
         //if we didn't find any quotes, then there are too many commas and we definitely have too many delimiters
         if (quoteBounds.size() == 0)
         {
