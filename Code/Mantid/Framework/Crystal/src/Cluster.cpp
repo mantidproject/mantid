@@ -59,7 +59,7 @@ namespace Mantid
       }
     }
 
-    Cluster::ClusterIntegratedValues Cluster::integrate(Mantid::API::IMDHistoWorkspace_const_sptr ws) const
+    ICluster::ClusterIntegratedValues Cluster::integrate(Mantid::API::IMDHistoWorkspace_const_sptr ws) const
     {
       double errorIntSQ = 0;
       double sigInt = 0;

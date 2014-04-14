@@ -1,6 +1,7 @@
 #ifndef MANTID_CRYSTAL_CLUSTER_H_
 #define MANTID_CRYSTAL_CLUSTER_H_
 
+#include "MantidCrystal/ICluster.h"
 #include "MantidKernel/System.h"
 #include "MantidCrystal/DisjointElement.h"
 #include <vector>
@@ -10,10 +11,6 @@
 
 namespace Mantid
 {
-  namespace API
-  {
-    class IMDHistoWorkspace;
-  }
   namespace Crystal
   {
     
@@ -39,12 +36,10 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Cluster 
+    class DLLExport Cluster : public ICluster
     {
      
       public:
-
-        typedef boost::tuple<double, double> ClusterIntegratedValues;
 
         /// Constructor
         Cluster(const size_t& label);
@@ -75,6 +70,7 @@ namespace Mantid
 
         /// Merge and own 
         void attachCluster(boost::shared_ptr<const Cluster>& toOwn);
+
 
        private:
 

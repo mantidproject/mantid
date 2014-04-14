@@ -7,6 +7,7 @@ set ( SRC_FILES
 	src/ClearUB.cpp
 	src/Cluster.cpp
 	src/CombinePeaksWorkspaces.cpp
+	src/CompositeCluster.cpp
 	src/ConnectedComponentLabeling.cpp
 	src/DiffPeaksWorkspaces.cpp
 	src/DisjointElement.cpp
@@ -71,6 +72,7 @@ set ( INC_FILES
 	inc/MantidCrystal/ClearUB.h
 	inc/MantidCrystal/Cluster.h
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
+	inc/MantidCrystal/CompositeCluster.h
 	inc/MantidCrystal/ConnectedComponentLabeling.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/DisjointElement.h
@@ -84,6 +86,7 @@ set ( INC_FILES
 	inc/MantidCrystal/GoniometerAnglesFromPhiRotation.h
 	inc/MantidCrystal/HardThresholdBackground.h
 	inc/MantidCrystal/HasUB.h
+	inc/MantidCrystal/ICluster.h
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/IndexSXPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
@@ -134,6 +137,7 @@ set ( TEST_FILES
 	ClearUBTest.h
 	ClusterTest.h
 	CombinePeaksWorkspacesTest.h
+	CompositeClusterTest.h
 	ConnectedComponentLabelingTest.h
 	DiffPeaksWorkspacesTest.h
 	DisjointElementTest.h
