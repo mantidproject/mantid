@@ -253,7 +253,7 @@ public:
 
   Label();
   Label(const std::string& caption, const std::string& label);
-  void setLabel(const std::string& cpt, const std::string& lbl = "");
+  void setLabel(const std::string& cpt, const UnitLabel& lbl = UnitLabel(""));
   virtual Unit * clone() const;
 
   /// Destructor

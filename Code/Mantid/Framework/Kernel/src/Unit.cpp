@@ -285,10 +285,10 @@ Label::Label(const std::string& caption, const std::string& label) : Empty(),
 /**
   * Set a caption and a label
   */
-void Label::setLabel(const std::string& cpt, const std::string& lbl)
+void Label::setLabel(const std::string& cpt, const UnitLabel& lbl)
 {
   m_caption = cpt;
-  m_label = UnitLabel(lbl);
+  m_label = lbl;
 }
 
 Unit * Label::clone() const
