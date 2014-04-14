@@ -1,6 +1,9 @@
 #ifndef MANTID_DATAHANDLING_LOADILLASCIIHELPER_H_
 #define MANTID_DATAHANDLING_LOADILLASCIIHELPER_H_
 
+#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -38,7 +41,7 @@ namespace DataHandling {
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class ILLParser {
+class DLLExport ILLParser {
 public:
 	ILLParser(const std::string &filename);
 	virtual ~ILLParser();
