@@ -458,7 +458,7 @@ namespace DataHandling
     // Unmask veto bit from vetoed events
 
     // cppcheck-suppress syntaxError
-    PRAGMA_OMP(parallel for schedule(dynamic, 1) ) 
+    PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < static_cast<int>(event_indices.size()); ++i)
     {
       PARALLEL_START_INTERUPT_REGION
@@ -466,24 +466,17 @@ namespace DataHandling
       uint64_t eventindex = event_indices[i];
       if (eventindex > static_cast<uint64_t>(max_events))
       {
-        uint64_t realeventindex = eventindex & VETOFLAG;
-
-          // Is veto, use the unmasked event index
-          event_indices[i] = realeventindex;
+        // Is veto, use the unmasked event index 
+        uint64_t realeventindex = eventindex & VETOFLAG; 
+        event_indices[i] = realeventindex;
       }
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
-
-    // Check
-    PRAGMA_OMP(parallel for schedule(dynamic, 1) ) 
-    for (int i = 0; i < static_cast<int>(event_indices.size()); ++i)
-    {
-      PARALLEL_START_INTERUPT_REGION
-      uint64_t eventindex = event_indices[i];
-      if (eventindex > static_cast<uint64_t>(max_events))
+      
+      // Check
+      uint64_t eventindexcheck = event_indices[i];
+      if (eventindexcheck > static_cast<uint64_t>(max_events))
       {
-        g_log.information() << "Check: Pulse " << i << ": unphysical event index = " << eventindex << "\n";
+        g_log.information() << "Check: Pulse " << i << ": unphysical event index = " 
+            << eventindexcheck << "\n";
       }
       PARALLEL_END_INTERUPT_REGION
     }
@@ -597,12 +590,7 @@ namespace DataHandling
       DateAndTime pulsetime = wrongdetid_pulsetimes[mindex][k];
       int64_t abstime_ns = pulsetime.totalNanoseconds() + static_cast<int64_t>(tof*1000);
       DateAndTime abstime(abstime_ns);
-
-      double value = tof;
-
-      property->addValue(abstime, value);
-
-      // property->addValue(this->wrongdetid_pulsetimes[mindex][k], this->wrongdetid_tofs[mindex][k]);
+      property->addValue(abstime, tof);
     } // ENDFOR
 
     // Add property to workspace
