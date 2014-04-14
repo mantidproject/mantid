@@ -8,6 +8,7 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
 #include <QObject>
+#include <qwt_data.h>
 
 using namespace Mantid::API;
 
@@ -43,27 +44,28 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    typedef IPeakFunction_const_sptr Peak;
-    typedef std::vector<Peak> ListOfPeaks;
-
-    /// @return List of peaks to fit
-    virtual ListOfPeaks peaks() const = 0;
+    /// @return Composite peaks function selected by user
+    virtual std::string function() const = 0;
 
   public slots:
     /// Performs any necessary initialization
     virtual void initialize() = 0;
 
-    /// Display the data we are going to fit peaks in
-    /// @param data :: Data workspace to display
-    virtual void setData(MatrixWorkspace_const_sptr data) = 0;
+    /// Update the data curve displayed
+    /// @param data :: New curve data
+    virtual void setDataCurve(const QwtData& data) = 0;
 
-    /// Update displayed peaks list
-    /// @param peaks :: New list of peaks
-    virtual void setPeaks(const ListOfPeaks& peaks) = 0;
+    /// Update the fitted curve displayed
+    /// @param data :: New curve data
+    virtual void setFittedCurve(const QwtData& data) = 0;
+
+    /// Set function displayed
+    /// @param newFunction :: New function to display
+    virtual void setFunction(const std::string& newFunction) = 0;
 
   signals:
-    /// Request fit
-    void fit();
+    /// Request to perform peak fitting
+    void fitRequested();
 
   };
 

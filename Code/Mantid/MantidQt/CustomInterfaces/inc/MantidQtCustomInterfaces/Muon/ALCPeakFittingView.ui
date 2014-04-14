@@ -25,27 +25,14 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QPlainTextEdit" name="peaks">
-         <property name="lineWrapMode">
-          <enum>QPlainTextEdit::NoWrap</enum>
-         </property>
-         <property name="plainText">
-          <string>name=Gaussian,Height=0,PeakCentre=0,Sigma=0</string>
+        <widget class="MantidQt::MantidWidgets::FunctionBrowser" name="peaks" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
         </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
@@ -83,6 +70,12 @@
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::FunctionBrowser</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/FunctionBrowser.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

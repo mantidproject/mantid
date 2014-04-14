@@ -50,6 +50,10 @@ namespace CustomInterfaces
       {
         m_baselineModelling->setData(m_dataLoading->loadedData());
       }
+      if (nextWidget == m_ui.peakFittingView)
+      {
+        m_peakFitting->setData(m_baselineModelling->model().correctedData());
+      }
 
       m_ui.stepView->setCurrentIndex(next);
     }

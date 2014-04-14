@@ -19,12 +19,14 @@ using namespace testing;
 class MockALCPeakFittingView : public IALCPeakFittingView
 {
 public:
-  void requestFit() { emit fit(); }
+  void requestFit() { emit fitRequested(); }
 
-  MOCK_CONST_METHOD0(peaks, ListOfPeaks());
   MOCK_METHOD0(initialize, void());
-  MOCK_METHOD1(setData, void(MatrixWorkspace_const_sptr));
-  MOCK_METHOD1(setPeaks, void(const ListOfPeaks&));
+  MOCK_METHOD1(setDataCurve, void(const QwtData&));
+  MOCK_METHOD1(setFittedCurve, void(const QwtData&));
+
+  MOCK_CONST_METHOD0(function, std::string());
+  MOCK_METHOD1(setFunction, void(const std::string&));
 };
 
 struct FunctionWrapper
@@ -49,6 +51,9 @@ private:
   IFunction_const_sptr m_func;
 };
 
+MATCHER_P3(QwtDataX, i, value, delta, "") { return fabs(arg.x(i) - value) < delta; }
+MATCHER_P3(QwtDataY, i, value, delta, "") { return fabs(arg.y(i) - value) < delta; }
+
 using namespace MantidQt::CustomInterfaces;
 
 class ALCPeakFittingTest : public CxxTest::TestSuite
@@ -69,11 +74,8 @@ public:
 
   void setUp()
   {
-    m_view = new MockALCPeakFittingView();
+    m_view = new NiceMock<MockALCPeakFittingView>();
     m_presenter = new ALCPeakFittingPresenter(m_view);
-
-    EXPECT_CALL(*m_view, initialize()).Times(1);
-
     m_presenter->initialize();
   }
 
@@ -83,48 +85,72 @@ public:
     delete m_view;
   }
 
-  void setData(MatrixWorkspace_const_sptr data)
+  void test_initialize()
   {
-    EXPECT_CALL(*m_view, setData(_)).Times(1);
+    MockALCPeakFittingView view;
+    ALCPeakFittingPresenter presenter(&view);
+    EXPECT_CALL(view, initialize()).Times(1);
+    presenter.initialize();
+  }
+
+  void test_setData()
+  {
+    MatrixWorkspace_sptr data = WorkspaceCreationHelper::Create2DWorkspace123(1,3);
+
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
+                                            QwtDataX(0,1,1E-8), QwtDataX(2,1,1E-8),
+                                            QwtDataY(0,2,1E-8), QwtDataY(2,2,1E-8))));
+
     m_presenter->setData(data);
+  }
+
+  IFunction_sptr createGaussian(double centre, double fwhm, double height)
+  {
+    auto peak = boost::dynamic_pointer_cast<IPeakFunction>(
+          API::FunctionFactory::Instance().createFunction("Gaussian"));
+    peak->setCentre(centre);
+    peak->setFwhm(fwhm);
+    peak->setHeight(height);
+    return peak;
   }
 
   void test_fittingOnePeak()
   {
-    auto peak = boost::dynamic_pointer_cast<IPeakFunction>(
-          API::FunctionFactory::Instance().createFunction("Gaussian"));
-    peak->setCentre(0); peak->setFwhm(1); peak->setHeight(2);
+    IFunction_sptr peak = createGaussian(0,1,2);
     FunctionWrapper peakWrapper(peak);
 
     MatrixWorkspace_const_sptr data =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(peakWrapper, 1, -5, 5, 0.1);
-    setData(data);
+        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(peakWrapper, 1, -5, 5, 0.5);
+    m_presenter->setData(data);
 
-    auto peakToFit = boost::dynamic_pointer_cast<IPeakFunction>(
-          API::FunctionFactory::Instance().createFunction("Gaussian"));
-    peakToFit->setCentre(0.2); peakToFit->setFwhm(0.8); peakToFit->setHeight(1.8);
+    IFunction_sptr peakToFit = createGaussian(0.2, 0.8, 1.8);
+    EXPECT_CALL(*m_view, function()).WillRepeatedly(Return(peakToFit->asString()));
 
-    IALCPeakFittingView::ListOfPeaks peaks;
-    peaks.push_back(peakToFit);
+    std::string fittedFuncStr;
 
-    EXPECT_CALL(*m_view, peaks()).WillRepeatedly(Return(peaks));
+    EXPECT_CALL(*m_view, setFunction(_)).WillOnce(SaveArg<0>(&fittedFuncStr));
 
-    IALCPeakFittingView::ListOfPeaks fittedPeaks;
-
-    EXPECT_CALL(*m_view, setData(_)).Times(0); // Data shouldn't be changed after fit
-    EXPECT_CALL(*m_view, setPeaks(_)).Times(1).WillOnce(SaveArg<0>(&fittedPeaks));
+    EXPECT_CALL(*m_view, setFittedCurve(AllOf(Property(&QwtData::size, 21),
+                                              QwtDataX(0,-5,1E-8),
+                                              QwtDataX(12, 1, 1E-8),
+                                              QwtDataX(20,5,1E-8),
+                                              QwtDataY(0, peakWrapper(-5,0), 1E-8),
+                                              QwtDataY(12, peakWrapper(1,0), 1E-8),
+                                              QwtDataY(20, peakWrapper(5,0), 1E-8))));
 
     m_view->requestFit();
 
-    TS_ASSERT_EQUALS(fittedPeaks.size(), 1);
+    IFunction_sptr fittedFunc;
+    TS_ASSERT_THROWS_NOTHING(fittedFunc = FunctionFactory::Instance().createInitialized(fittedFuncStr));
 
-    IALCPeakFittingView::Peak fittedPeak = fittedPeaks[0];
+    TS_ASSERT_EQUALS(fittedFunc->name(), "Gaussian");
 
+    auto fittedPeak = boost::dynamic_pointer_cast<IPeakFunction>(fittedFunc);
     TS_ASSERT(fittedPeak);
-    TS_ASSERT_EQUALS(fittedPeak->name(), "Gaussian");
-    TS_ASSERT_DELTA(fittedPeak->centre(), 0, 1E-8);
-    TS_ASSERT_DELTA(fittedPeak->fwhm(), 1, 1E-8);
-    TS_ASSERT_DELTA(fittedPeak->height(), 2, 1E-8);
+
+    TS_ASSERT_DELTA(fittedPeak->centre(), 0, 1E-6);
+    TS_ASSERT_DELTA(fittedPeak->fwhm(), 1, 1E-6);
+    TS_ASSERT_DELTA(fittedPeak->height(), 2, 1E-6);
   }
 
 };

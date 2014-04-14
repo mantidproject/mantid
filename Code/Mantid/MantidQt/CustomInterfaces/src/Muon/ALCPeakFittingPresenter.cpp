@@ -3,6 +3,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 
+#include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -16,33 +18,30 @@ namespace CustomInterfaces
   {
     m_view->initialize();
 
-    connect(m_view, SIGNAL(fit()), this, SLOT(fit()));
+    connect(m_view, SIGNAL(fitRequested()), this, SLOT(fit()));
   }
 
   void ALCPeakFittingPresenter::setData(MatrixWorkspace_const_sptr data)
   {
+    assert(data->getNumberHistograms() == 1);
+
     m_data = data;
-    m_view->setData(data);
+    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(data, 0)));
   }
 
   void ALCPeakFittingPresenter::fit()
   {
-    IFunction_sptr funcToFit =
-        FunctionFactory::Instance().createInitialized( m_view->peaks()[0]->asString() );
-
     IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
     fit->setChild(true);
-    fit->setProperty("Function", funcToFit);
+    fit->setProperty("Function", m_view->function());
     fit->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
     fit->execute();
 
-    auto fittedPeak = boost::dynamic_pointer_cast<IPeakFunction>(funcToFit);
-    assert(fittedPeak);
+    IFunction_sptr fittedFunc = fit->getProperty("Function");
+    m_view->setFunction(fittedFunc->asString());
 
-    IALCPeakFittingView::ListOfPeaks fittedPeaks;
-    fittedPeaks.push_back(fittedPeak);
-
-    m_view->setPeaks(fittedPeaks);
+    const Mantid::MantidVec& x = m_data->readX(0);
+    m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(fittedFunc, x)));
   }
 
 } // namespace CustomInterfaces

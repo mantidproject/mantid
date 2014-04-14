@@ -43,18 +43,21 @@ namespace CustomInterfaces
   public:
     ALCPeakFittingView(QWidget* widget);
 
-    /// @see IALCPeakFittingView::peaks
-    ListOfPeaks peaks() const;
+    /// @see IALCPeakFittingView
+    std::string function() const;
 
   public slots:
-    /// @see IALCPeakFittingView::initialize
+    /// @see IALCPeakFittingView
     void initialize();
 
-    /// @see IALCPeakFittingView::setData
-    void setData(MatrixWorkspace_const_sptr data);
+    /// @see IALCPeakFittingView
+    void setDataCurve(const QwtData& data);
 
-    /// @see IALCPeakFittingView::setPeaks
-    void setPeaks(const ListOfPeaks &peaks);
+    /// @see IALCPeakFittingView
+    void setFittedCurve(const QwtData &data);
+
+    //// @see IALCPeakFittingView
+    void setFunction(const std::string& newFunction);
 
   private:
     /// The widget used
@@ -64,7 +67,7 @@ namespace CustomInterfaces
     Ui::ALCPeakFittingView m_ui;
 
     /// Plot curves
-    QwtPlotCurve *m_dataCurve, *m_peakCurve;
+    QwtPlotCurve *m_dataCurve, *m_fittedCurve;
   };
 
 
