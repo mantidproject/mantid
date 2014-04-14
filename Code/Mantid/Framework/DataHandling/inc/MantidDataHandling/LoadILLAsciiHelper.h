@@ -40,7 +40,7 @@ namespace DataHandling {
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport ILLParser {
+class ILLParser {
 public:
 	ILLParser(const std::string &filename);
 	virtual ~ILLParser();

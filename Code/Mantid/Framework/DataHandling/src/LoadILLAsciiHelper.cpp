@@ -475,6 +475,6 @@ template<typename T> T ILLParser::getValue(const std::string &field,
 
 // Concrete template instantiation
 // The other libraries can't see the template definition so it needs to be instantiated in API
-template MANTID_DATAHANDLING_DLL double Mantid::DataHandling::ILLParser::getValueFromHeader(const std::string &);
-template MANTID_DATAHANDLING_DLL double Mantid::DataHandling::ILLParser::getValue(const std::string &,const std::map<std::string, std::string> &);
+template double Mantid::DataHandling::ILLParser::getValueFromHeader(const std::string &);
+template double Mantid::DataHandling::ILLParser::getValue(const std::string &,const std::map<std::string, std::string> &);
 
