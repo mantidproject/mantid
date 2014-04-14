@@ -246,7 +246,6 @@ namespace Mantid
     size_t LoadReflTBL::getCells(std::string line, std::vector<std::string> & cols) const
     {
       //first check the number of commas in the line.
-      size_t pos = 0;
       size_t found = countCommas(line);
       if (found == m_expectedCommas)
       {
@@ -263,7 +262,6 @@ namespace Mantid
       {
         //More than 16 will need further checks as more is only ok when pairs of quotes surround a comma, meaning it isn't a delimiter
         std::vector<std::vector<size_t>> quoteBounds;
-        size_t quotepairs = findQuotePairs(line, quoteBounds);
         //if we didn't find any quotes, then there are too many commas and we definitely have too many delimiters
         if (quoteBounds.size() == 0)
         {

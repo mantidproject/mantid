@@ -204,7 +204,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
   }
 
-  ITableWorkspace_sptr CreateWorkspace(bool colFail = false)
+  ITableWorkspace_sptr CreateWorkspace()
   {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
     AnalysisDataService::Instance().addOrReplace(m_name, ws);

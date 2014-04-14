@@ -46,7 +46,7 @@ namespace Mantid
     using namespace API;
 
     /// Empty constructor
-    SaveReflTBL::SaveReflTBL() : m_stichgroups(), m_nogroup(), m_sep(',')
+    SaveReflTBL::SaveReflTBL() : m_sep(','), m_stichgroups(), m_nogroup()
     {
     }
 
@@ -112,11 +112,11 @@ namespace Mantid
       }
 
       typedef std::map<int, std::vector<size_t>>::iterator map_it_type;
-      for(map_it_type iterator = m_stichgroups.begin(); iterator != m_stichgroups.end(); iterator++)
+      for(map_it_type iterator = m_stichgroups.begin(); iterator != m_stichgroups.end(); ++iterator)
       {
         std::vector<size_t> & rowNos = iterator->second;
-        int i = 0;
-        for (i; i < rowNos.size(); ++i)
+        size_t i = 0;
+        for (; i < rowNos.size(); ++i)
         {
           //for each row in the group print the first 5 columns to file
           TableRow row = ws->getRow(rowNos[i]);
@@ -126,7 +126,7 @@ namespace Mantid
           }
         }
         //if i comes out of that loop as less than 3, then we need to add the blank runs
-        for (i; i < 3; ++i)
+        for (; i < 3; ++i)
         {
           for (int j = 0; j < 5; ++j)
           {
@@ -142,7 +142,7 @@ namespace Mantid
       //now do the same for the ungrouped
 
       typedef std::vector<size_t>::iterator vec_it_type;
-      for(vec_it_type iterator = m_nogroup.begin(); iterator != m_nogroup.end(); iterator++)
+      for(vec_it_type iterator = m_nogroup.begin(); iterator != m_nogroup.end(); ++iterator)
       {
         TableRow row = ws->getRow(*iterator);
         for (int j = 0; j < 5; ++j)
