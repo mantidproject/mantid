@@ -32,7 +32,7 @@ namespace Mantid { namespace Kernel
     /**
      * A simple class containing common symbol types
      */
-    class Symbol
+    class MANTID_KERNEL_DLL Symbol
     {
     public:
       /// Empty label
