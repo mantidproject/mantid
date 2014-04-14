@@ -1,8 +1,7 @@
 #ifndef MANTID_DATAHANDLING_LOADILLASCIIHELPER_H_
 #define MANTID_DATAHANDLING_LOADILLASCIIHELPER_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/DllConfig.h"
+ #include "MantidDataHandling/DllConfig.h"
 
 #include <iostream>
 #include <fstream>
