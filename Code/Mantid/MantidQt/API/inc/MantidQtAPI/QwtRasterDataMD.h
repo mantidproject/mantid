@@ -104,6 +104,16 @@ protected:
   Mantid::API::MDNormalization m_normalization;
 };
 
+//-----------------------------------------------------------------
+// Specialised class for 2D data with no overlays
+//-----------------------------------------------------------------
+class QWT_EXPORT NoOverlayRaster2D : public QwtRasterDataMD
+{
+public:
+  NoOverlayRaster2D* copy() const;
+  double value(double x, double y) const;
+};
+
 } // namespace SliceViewer
 } // namespace Mantid
 

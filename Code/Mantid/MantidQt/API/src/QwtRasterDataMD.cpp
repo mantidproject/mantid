@@ -3,6 +3,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace MantidQt
 {
@@ -277,6 +278,63 @@ void QwtRasterDataMD::setSliceParams(size_t dimX, size_t dimY,
     m_overlayYMax = m_overlayWS->getDimension(m_dimY)->getMaximum();
     //std::cout << m_overlayXMin << "," << m_overlayXMax << "," << m_overlayYMin << "," << m_overlayYMax << std::endl;
   }
+}
+
+//===================================================================================
+// NoOverlayRaster2D
+//===================================================================================
+
+/**
+ * Create a new object with the same state as this
+ * @return A pointer to a new object
+ */
+NoOverlayRaster2D *NoOverlayRaster2D::copy() const
+{
+  auto* out = new NoOverlayRaster2D();
+  //base bounding box
+  out->setBoundingRect(this->boundingRect());
+
+  out->m_ws = this->m_ws;
+  out->m_dimX = this->m_dimX;
+  out->m_dimY = this->m_dimY;
+  out->m_nd = this->m_nd;
+  out->m_range = this->m_range;
+  out->m_slicePoint = new coord_t[m_nd];
+  for (size_t d=0; d<m_nd; d++)
+    out->m_slicePoint[d] = this->m_slicePoint[d];
+  out->m_ws = this->m_ws;
+  out->m_fast = this->m_fast;
+  out->m_zerosAsNan = this->m_zerosAsNan;
+  out->m_normalization = this->m_normalization;
+
+  out->m_overlayWS = this->m_overlayWS;
+  out->m_overlayXMin = this->m_overlayXMin;
+  out->m_overlayXMax = this->m_overlayXMax;
+  out->m_overlayYMin = this->m_overlayYMin;
+  out->m_overlayYMax = this->m_overlayYMax;
+  out->m_overlayInSlice = this->m_overlayInSlice;
+  return out;
+
+}
+
+/**
+ * Return the data value to plot at the given position specialized
+ * for a matrix workspace. There is no consideration for a
+ * slicing point. It simply plots the signal from the given
+ * coordinates
+ * @param x :: position in coordinates of the MDWorkspace
+ * @param y :: position in coordinates of the MDWorkspace
+ * @return signal to plot
+ */
+double NoOverlayRaster2D::value(double x, double y) const
+{
+  coord_t lookPoint[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
+  signal_t value = m_ws->getSignalAtCoord(lookPoint, m_normalization);
+  if(value != value) // out of range
+  {
+    value = m_range.maxValue()*1.1;
+  }
+  return value;
 }
 
 } //namespace

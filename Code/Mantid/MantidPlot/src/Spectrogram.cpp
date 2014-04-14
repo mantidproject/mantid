@@ -72,15 +72,17 @@ Spectrogram::Spectrogram(const Mantid::API::IMDWorkspace_const_sptr &workspace) 
       color_axis(QwtPlot::yRight),
       color_map_policy(Default),mColorMap()
 {
-  d_wsData = new MantidQt::API::QwtRasterDataMD;
+  d_wsData = new MantidQt::API::NoOverlayRaster2D;
   d_wsData->setWorkspace(workspace);
   d_wsData->setFastMode(false);
   d_wsData->setNormalization(Mantid::API::NoNormalization);
   d_wsData->setZerosAsNan(false);
 
+  // colour range
   QwtDoubleInterval fullRange = MantidQt::API::SignalRange(*workspace).interval();
   d_wsData->setRange(fullRange);
 
+  // X/Y axis ranges
   auto dim0 = workspace->getDimension(0);
   auto dim1 = workspace->getDimension(1);
   Mantid::coord_t minX(dim0->getMinimum()), minY(dim1->getMinimum());
@@ -927,19 +929,19 @@ bool Spectrogram::isIntensityChanged()
 
 /**
  * Override QwtPlotSpectrogram::renderImage to draw ragged spectrograms. It is almost
- * a copy of QwtPlotSpectrogram::renderImage except that pixels of the image that are 
+ * a copy of QwtPlotSpectrogram::renderImage except that pixels of the image that are
  * outside the boundaries of the histograms are set to a special colour (white).
  */
 QImage Spectrogram::renderImage(
-    const QwtScaleMap &xMap, const QwtScaleMap &yMap, 
+    const QwtScaleMap &xMap, const QwtScaleMap &yMap,
     const QwtDoubleRect &area) const
 {
+  // Mantid workspace handled in QwtRasterDataMD
+  if(d_wsData) return QwtPlotSpectrogram::renderImage(xMap,yMap,area);
 
-  MantidMatrixFunction* mantidFun = dynamic_cast<MantidMatrixFunction*>(d_funct);
-  if (!mantidFun)
-  {
-    return QwtPlotSpectrogram::renderImage(xMap,yMap,area);
-  }
+  // Not Mantid function so just use base class
+  auto *mantidFun = dynamic_cast<MantidMatrixFunction*>(d_funct);
+  if (!mantidFun) return QwtPlotSpectrogram::renderImage(xMap,yMap,area);
 
   if ( area.isEmpty() )
     return QImage();
