@@ -35,7 +35,6 @@ The ChunkNumber and TotalChunks properties can be used to load only a section of
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Glob.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -484,17 +483,11 @@ namespace DataHandling
       uint64_t eventindex = event_indices[i];
       if (eventindex > static_cast<uint64_t>(max_events))
       {
-        PARALLEL_CRITICAL(unmask_veto_check)
-        {
-          g_log.information() << "Check: Pulse " << i << ": unphysical event index = " << eventindex << "\n";
-        }
+        g_log.information() << "Check: Pulse " << i << ": unphysical event index = " << eventindex << "\n";
       }
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-
-    // g_log.notice() << "Number of veto pulses = " << numveto << ", Number of error-event-index pulses = "
-    //                << numerror << "\n";
 
     return;
   }
@@ -587,8 +580,8 @@ namespace DataHandling
 
   //----------------------------------------------------------------------------------------------
   /** Add absolute time series to log. Use TOF as log value for this type of events
-    * @params logtitle :: name of the log
-    * @params mindex :: index of the log in pulse time ...
+    * @param logtitle :: name of the log
+    * @param mindex :: index of the log in pulse time ...
     * - mindex:  index of the the series in the list
     */
   void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle, size_t mindex)
