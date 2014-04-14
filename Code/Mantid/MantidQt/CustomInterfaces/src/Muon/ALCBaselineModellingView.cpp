@@ -124,6 +124,9 @@ namespace CustomInterfaces
     }
     m_rangeSelectors.clear();
 
+    // Detach selector markers from the plot. This is not done properly in RangeSelector code
+    m_ui.dataPlot->detachItems(QwtPlotItem::Rtti_PlotMarker);
+
     // Create required range selectors
     for (auto it = selectors.begin(); it != selectors.end(); ++it)
     {
