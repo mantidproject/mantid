@@ -1,4 +1,4 @@
-import refl_live_data
+import refl_options_window
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -12,7 +12,7 @@ class ReflOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
     frequency = 0
     _method = 0
     _method_list = ["Add","Replace","Append"]
-    ads_get = false
+    ads_get = False
 
     def __init__(self, def_meth = "Add", def_freq = float(60), def_ads = False):
         """
