@@ -751,7 +751,11 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
         return th, qmin, qmax, wlam, wq
+
     def _check_trans_run(self, transrun):
+        """
+        check to see if the trasmission run is the same as the last one
+        """
         if self._last_trans == transrun:
             return True
         translist = [word.strip() for word in re.split(',|:', transrun)]
@@ -763,6 +767,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         else:
             return False
         return True
+
     def _save_table_contents(self, filename):
         """
         Save the contents of the table
