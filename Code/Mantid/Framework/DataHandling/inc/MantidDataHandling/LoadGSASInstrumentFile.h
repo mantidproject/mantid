@@ -67,7 +67,11 @@ namespace DataHandling
     std::string getHistogramType(std::vector<std::string>& lines);
 
     /// Get Number of banks
-    int getNumberOfBanks(std::vector<std::string>& lines);
+    size_t getNumberOfBanks(std::vector<std::string>& lines);
+
+    /// Scan imported file for bank information
+    void scanBanks(const std::vector<std::string>& lines, std::vector<size_t>& bankStartIndex );
+
 
   };
 

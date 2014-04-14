@@ -109,16 +109,58 @@ namespace DataHandling
     if (histType != "PNTR") {
       if( histType.size()  == 4)
       {
-        throw std::runtime_error("Histogram type "+histType+" not supported");
+        throw std::runtime_error("Histogram type "+histType+" not supported \n");
       }
       else
       {
-        throw std::runtime_error("Error on checking histogram type: "+histType);
+        throw std::runtime_error("Error on checking histogram type: "+histType+"\n");
       }
     }
 
-    int numBanks = getNumberOfBanks( lines );
-    g_log.debug() << numBanks << "banks in file";
+    size_t numBanks = getNumberOfBanks( lines );
+    g_log.debug() << numBanks << "banks in file \n";
+
+    // Examine bank information
+    vector<size_t> bankStartIndex;
+    scanBanks(lines, bankStartIndex );
+
+    if( bankStartIndex.size() == 0)
+    {
+      throw std::runtime_error("No nanks found in file. \n");
+    }
+
+    if( numBanks != bankStartIndex.size()) 
+    {  // The stated number of banks does not equal the number of banks found
+      g_log.warning() << "The number of banks found" << bankStartIndex.size() << "is not equal to the number of banks stated" << numBanks << ".\n";
+      g_log.warning() << "Number of banks found is used.";
+      numBanks = bankStartIndex.size();
+    }
+
+   // Parse banks and export profile parameters
+    //map<int, map<string, double> > bankparammap;
+    for (size_t i = 0; i < numBanks; ++i)
+    {
+      size_t bankid = i+1;
+      g_log.debug() << "Parse bank " << bankid << " of total " << numBanks << ".\n";
+      //map<string, double> parammap;
+      //parseResolutionStrings(parammap, lines, useBankIDsInFile , bankid, bankstartindexmap[bankid], bankendindexmap[bankid], nProf);
+      //bankparammap.insert(make_pair(bankid, parammap));
+      g_log.warning() << "Bank starts at line" << bankStartIndex[i] + 1 << "\n";
+    }
+
+
+    if( getPropertyValue("OutputTableWorkspace") != "")
+    {
+      // Output the output table workspace
+      //setProperty("OutputTableWorkspace", outTabWs);
+    }
+
+    if( getPropertyValue("OutputTableWorkspace") == "")
+    {
+      // We don't know where to output
+      throw std::runtime_error("Either the OutputTableWorkspace must be set.");
+    }
+
 
     return;
   }
@@ -187,7 +229,10 @@ namespace DataHandling
     return "HTYPE line not found";
   }
 
-  int LoadGSASInstrumentFile::getNumberOfBanks(vector<string>& lines)
+ /* Get number of banks
+  * @param lines :: vector of strings for each non-empty line in .irf file
+  */
+  size_t LoadGSASInstrumentFile::getNumberOfBanks(vector<string>& lines)
   {
     // We assume there is just one BANK line, look for it from beginning and return its value.
     std::string lookFor = "INS   BANK";
@@ -197,13 +242,35 @@ namespace DataHandling
       {
         if(lines[i].size() < lookFor.size()+3){
           // line too short
-          return -1;
+          return 0;
         }
-        return  boost::lexical_cast<int>(lines[i].substr(lookFor.size()+2,1)); // Found
+        return  boost::lexical_cast<size_t>(lines[i].substr(lookFor.size()+2,1)); // Found
       }
     }
     return 0;
   }
+
+  /** Scan lines to determine which line each bank begins
+  * @param lines :: vector of string of all non-empty lines in input file;
+  * @param bankStartIndex :: [output] vector of start indices of banks in the order they occur in file
+  */
+  void LoadGSASInstrumentFile::scanBanks(const std::vector<std::string>& lines, std::vector<size_t>& bankStartIndex )
+  {
+    // We look for each line that contains 'BNKPAR' and take it to be the first line of a bank.
+    // We currently ignore the bank number and assume they are numbered according to their order in the file.
+    int startindex = -1;
+    for (size_t i = 0; i < lines.size(); ++i)
+    {
+      string line = lines[i];
+      if(line.substr(0,3) == "INS"){  // Ignore all lines that don't begin with INS
+        if (line.find("BNKPAR") != string::npos)
+        {  // We've found start of a new bank
+          bankStartIndex.push_back(i);
+        }
+      }  // INS
+    } // for(i)
+  }
+
 
 } // namespace DataHandling
 } // namespace Mantid
