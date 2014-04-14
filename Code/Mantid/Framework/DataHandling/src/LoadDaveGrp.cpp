@@ -140,8 +140,7 @@ void LoadDaveGrp::exec()
     }
     catch (boost::bad_lexical_cast&)
     {
-      getLogger().error("LoadDaveGrp: Failed to parse axis length from file.");
-      return;
+      throw std::runtime_error("LoadDaveGrp: Failed to parse axis length from file.");
     }
 
     // This is also the number of groups (spectra)
