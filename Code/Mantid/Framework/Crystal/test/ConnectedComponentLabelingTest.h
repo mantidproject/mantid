@@ -424,7 +424,7 @@ public:
     do_test_cluster_labeling(clusterThreeIndexes, outWS.get());
   }
 
-  void xtest_3d_with_many_objects_single_threaded()
+  void test_3d_with_many_objects_single_threaded()
   {
     do_test_3d_with_many_objects(1 /*N threads*/);
   }
@@ -450,6 +450,24 @@ public:
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
     TS_ASSERT(does_set_contain(uniqueEntries, m_emptyLabel));// Background entries.
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId+1));
+  }
+
+  void test_1d_with_single_cluster_multi_threaded()
+  {
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.1, 1, 9); // Makes a 1 by 6 md ws with identical signal values.
+
+    HardThresholdBackground backgroundStrategy(1, NoNormalization); // Strategy to ignore everything < 1
+
+    size_t labelingId = 1;
+    int nThreads = 3; // For simplicity limit the threads to two
+
+    Progress prog;
+    ConnectedComponentLabeling ccl(labelingId, nThreads);
+    auto outWS = ccl.execute(inWS, &backgroundStrategy, prog);
+
+    std::set<size_t> uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
+    TSM_ASSERT_EQUALS("1 object covering entire space", 1, uniqueEntries.size());
+    TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
   }
 
   void xtest_1d_with_three_objects_multi_threaded()
