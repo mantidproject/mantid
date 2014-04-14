@@ -298,7 +298,6 @@ public:
 
     TS_ASSERT_EQUALS(loadMask.execute(), true);
 
-    //DataObjects::MaskWorkspace_sptr result = loadMask.getProperty("OutputWorkspace");
     return AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(outputWsName);
   }
 
