@@ -4,7 +4,7 @@
 import refl_window
 import refl_save
 import refl_choose_col
-import refl_live_options
+import refl_options
 import csv
 import string
 import os
@@ -55,18 +55,26 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.polarisation_instruments = ['CRISP', 'POLREF']
         self.polarisation_options = {'None' : PolarisationCorrection.NONE, '1-PNR' : PolarisationCorrection.PNR, '2-PA' : PolarisationCorrection.PA }
 
-        #Set the live data settings, use defualt if none have been set before
+        #Set the live data settings, use default if none have been set before
         settings = QtCore.QSettings()
         settings.beginGroup("Mantid/ISISReflGui/LiveData")
         self.live_method = settings.value("method", "", type=str)
         self.live_freq = settings.value("frequency", 0, type=float)
-        if not (self.live_freq and self.live_method):
-            logger.information("No settings were found for loading live data, Loading defaults (Update frequency: 60 seconds and Accumulation Method: Add)")
+        if not (self.live_freq):
+            logger.information("No settings were found for Update frequency of loading live data, Loading default of 60 seconds")
             self.live_freq = float(60)
-            self.live_method = "Add"
             settings.setValue("frequency", self.live_freq)
+        if not (self.live_method):
+            logger.information("No settings were found for Accumulation Method of loading live data, Loading default of \"Add\"")
+            self.live_method = "Add"
             settings.setValue("method", self.live_method)
         settings.endGroup()
+
+        settings.beginGroup("Mantid/ISISReflGui")
+        self.ads_get = settings.value("ADSget", False, type=bool)
+        settings.setValue("ADSget", self.ads_get)
+        settings.endGroup()
+
         del settings
 
     def __del__(self):
@@ -294,7 +302,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.actionCut.triggered.connect(self._cut_cells)
         self.actionCopy.triggered.connect(self._copy_cells)
         self.actionChoose_Columns.triggered.connect(self._choose_columns)
-        self.actionLive_Data.triggered.connect(self._live_data_options)
+        self.actionRefl_Gui_Options.triggered.connect(self._options_dialog)
 
     def _populate_runs_list(self):
         """
@@ -915,20 +923,27 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             logger.notice("Could not open save workspace dialog")
             logger.notice(str(ex))
 
-    def _live_data_options(self):
+    def _options_dialog(self):
         """
         Shows the dialog for setting options regarding live data
         """
         try:
-            dialog = refl_live_options.ReflLiveOptions(def_meth = self.live_method, def_freq = self.live_freq)
+            dialog = refl_options.ReflOptions(def_meth = self.live_method, def_freq = self.live_freq, def_ADS = self.ads_get)
             if dialog.exec_():
                 self.live_freq = dialog.frequency
                 self.live_method = dialog.get_method()
+                self.ads_get = dialog.ads_get
                 settings = QtCore.QSettings()
+
                 settings.beginGroup("Mantid/ISISReflGui/LiveData")
                 settings.setValue("frequency", self.live_freq)
                 settings.setValue("method", self.live_method)
                 settings.endGroup()
+
+                settings.beginGroup("Mantid/ISISReflGui")
+                settings.setValue("ADSget", self.ads_get)
+                settings.endGroup()
+
                 del settings
         except Exception as ex:
             logger.notice("Could not open live data options dialog")
