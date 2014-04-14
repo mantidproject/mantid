@@ -89,6 +89,31 @@ void SpectraAxis::setValue(const std::size_t& index, const double& value)
   const_cast<MatrixWorkspace*>(m_parentWS)->getSpectrum(index)->setSpectrumNo(static_cast<specid_t>(value));
 }
 
+/**
+ * Finds the index of the given value on the axis
+ * @param value A value on the axis. It is treated as a spectrum number and cast to specid_t on input
+ * @return The index closest to given value
+ * @throws std::out_of_range if the value is out of range of the axis
+ */
+size_t SpectraAxis::indexOfValue(const double value) const
+{
+  const specid_t specNo = static_cast<specid_t>(value);
+  // take value as spectrum number
+  for (size_t i = 0; i < this->length(); ++i)
+  {
+    try
+    {
+      if (m_parentWS->getSpectrum(i)->getSpectrumNo() == specNo) return i;
+    }
+    catch(std::range_error& e)
+    {
+      throw std::out_of_range(e.what());
+    }
+  }
+  // Not found if we reached here
+  throw std::out_of_range("SpectraAxis::indexOfValue() - Value not found on axis");
+}
+
 /** Returns the spectrum number at the position given (Spectra axis only)
  *  @param  index The position for which the value is required
  *  @return The spectrum number as an int

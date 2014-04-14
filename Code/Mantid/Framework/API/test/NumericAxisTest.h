@@ -159,6 +159,35 @@ public:
     }
   }
 
+  void test_indexOfValue_Gives_Correct_Value_When_Input_In_Range()
+  {
+    const size_t npoints(5);
+    NumericAxis axis(npoints);
+    for(size_t i = 0; i < npoints; ++i)
+    {
+      axis.setValue(i, static_cast<double>(i));
+    }
+
+    TS_ASSERT_EQUALS(0, axis.indexOfValue(0.0));
+    TS_ASSERT_EQUALS(4, axis.indexOfValue(4.0));
+    TS_ASSERT_EQUALS(3, axis.indexOfValue(2.5));
+  }
+
+  //-------------------------------- Failure cases ----------------------------
+
+  void test_indexOfValue_Throws_When_Input_Not_In_Axis_Range()
+  {
+    const size_t npoints(5);
+    NumericAxis axis(npoints);
+    for(size_t i = 0; i < npoints; ++i)
+    {
+      axis.setValue(i, static_cast<double>(i));
+    }
+
+    TS_ASSERT_THROWS(axis.indexOfValue(-0.1), std::out_of_range);
+    TS_ASSERT_THROWS(axis.indexOfValue(4.1), std::out_of_range);
+  }
+
 private:
   Axis *numericAxis;
 };
