@@ -32,36 +32,35 @@ public:
 
 	void test_exec() {
 
-		LoadILLAscii alg;
-		alg.setRethrows(true);
-		TS_ASSERT_THROWS_NOTHING(alg.initialize())
-		TS_ASSERT(alg.isInitialized())
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", m_testFile));
-		TS_ASSERT_THROWS_NOTHING(
-				alg.setPropertyValue("OutputWorkspace", "outputWSName"));
-		TS_ASSERT_THROWS_NOTHING(alg.execute());
-		TS_ASSERT(alg.isExecuted());
+		LoadILLAscii loader;
+		loader.initialize();
+		loader.setPropertyValue("Filename", m_testFile);
+		std::string outputSpaceName = "LoadILLTest_out";
+		loader.setPropertyValue("OutputWorkspace", outputSpaceName);
+		TS_ASSERT_THROWS_NOTHING( loader.execute());
 
 		// Retrieve the workspace from data service.
 		IMDEventWorkspace_sptr ws;
 		TS_ASSERT_THROWS_NOTHING(
-				ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("outputWSName"));
+				ws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outputSpaceName));
 		TS_ASSERT(ws);
 
-		TS_ASSERT_EQUALS( ws->getNEvents(), 409600);
+		//TS_ASSERT_EQUALS( ws->getNEvents(), 409600);
+		// Trimmed file to be submitted to github
+		TS_ASSERT_EQUALS( ws->getNEvents(), 114688);
 
 		// Remove workspace from the data service.
-		AnalysisDataService::Instance().remove("outputWSName");
+		AnalysisDataService::Instance().remove(outputSpaceName);
 
 	}
 
-//	// DOES NOT WORK. Can't find inout file
+//	// DOES NOT WORK. Can't find input file
 //	void test_LoadILLHelper() {
 //
 //		using Mantid::DataHandling::ILLParser;
 //
 //		// Parses ascii file and fills the data scructures
-//		ILLParser illAsciiParser(m_testFile);
+//		ILLParser illAsciiParser("../Test/AutoTestData/" + m_testFile);
 //		illAsciiParser.parse();
 //
 //		double wavelength = illAsciiParser.getValueFromHeader<double>("wavelength");
