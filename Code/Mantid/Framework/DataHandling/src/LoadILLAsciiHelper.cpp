@@ -214,7 +214,8 @@ void ILLParser::parse() {
  */
 std::string ILLParser::getInstrumentName() {
 
-	if (fin.tellg() != std::ios::beg) {
+	long length = fin.tellg() ;
+	if (length != std::ios::beg) {
 		//TODO: this doesn't seem to work.
 		fin.seekg(0, std::ios::beg);
 		fin.clear();
