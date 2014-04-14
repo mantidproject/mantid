@@ -372,12 +372,15 @@
            <property name="workspaceSuffixes" stdset="0">
             <stringlist>
              <string>_res</string>
+             <string>_red</string>
             </stringlist>
            </property>
            <property name="fileBrowserSuffixes" stdset="0">
             <stringlist>
              <string>_res.nxs</string>
              <string>.res</string>
+             <string>_red</string>
+             <string>.red</string>
             </stringlist>
            </property>
            <property name="showLoad">

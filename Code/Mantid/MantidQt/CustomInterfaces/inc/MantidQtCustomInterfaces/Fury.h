@@ -24,7 +24,6 @@ namespace IDA
     virtual QString helpURL() {return "Fury";}
 
   private slots:
-    void resType(const QString& type);
     void plotInput(const QString& wsname);
     void minChanged(double val);
     void maxChanged(double val);
