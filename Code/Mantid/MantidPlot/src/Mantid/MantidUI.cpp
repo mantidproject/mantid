@@ -3221,15 +3221,17 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
       plot->setYAxisTitle(tr("Spectrum"));
   }
 
-  Spectrogram *spgrm = new Spectrogram(workspace);
-
+  Spectrogram *spgrm = new Spectrogram(wsName, workspace);
   plot->plotSpectrogram(spgrm, curveType);
+  connect(spgrm, SIGNAL(removeMe(Spectrogram*)),
+          plot, SLOT(removeSpectrogram(Spectrogram*)));
+  connect(plot, SIGNAL(curveRemoved()), ml,
+          SLOT(maybeNeedToClose()), Qt::QueuedConnection);
+
   appWindow()->setSpectrogramTickStyle(plot);
   plot->setAutoScale();
 
   QApplication::restoreOverrideCursor();
-
-
   return ml;
 }
 

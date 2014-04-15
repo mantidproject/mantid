@@ -41,6 +41,7 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtAPI/MantidColorMap.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 #include "Mantid/InstrumentWidget/GLColor.h"
 
 #include <fstream>
@@ -60,18 +61,22 @@ namespace MantidQt
   }
 }
 
-class Spectrogram: public QObject, public QwtPlotSpectrogram
+class Spectrogram: public QObject, public QwtPlotSpectrogram, public MantidQt::API::WorkspaceObserver
 {
   Q_OBJECT
 
 public:
   Spectrogram();
   Spectrogram(Matrix *m);
-  Spectrogram(const Mantid::API::IMDWorkspace_const_sptr & workspace);
+  Spectrogram(const QString &wsName, const Mantid::API::IMDWorkspace_const_sptr & workspace);
   Spectrogram(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
   Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
   ~Spectrogram();
 
+  /// Handles delete notification
+  void postDeleteHandle(const std::string& wsName);
+  /// Handle an ADS clear notificiation
+  void clearADSHandle();
 
   enum ColorMapPolicy{GrayScale, Default, Custom};
 
@@ -156,6 +161,9 @@ public:
   /// returns boolan flag intensity change
   bool isIntensityChanged();
 
+signals:
+  void removeMe(Spectrogram*);
+
 protected:
   virtual void drawContourLines (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
   void updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
@@ -166,6 +174,8 @@ protected:
   Function2D *d_funct;
   /// Pointer to data source for a workspace
   MantidQt::API::QwtRasterDataMD *d_wsData;
+  /// Name of the workspace backing the spectrogram
+  std::string d_wsName;
 
   //! Axis used to display the color scale
   int color_axis;

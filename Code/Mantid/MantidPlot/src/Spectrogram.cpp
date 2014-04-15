@@ -47,7 +47,7 @@
 Spectrogram::Spectrogram():
       QObject(), QwtPlotSpectrogram(),
 			d_color_map_pen(false),
-			d_matrix(0),d_funct(0),d_wsData(0),//Mantid
+			d_matrix(0),d_funct(0),d_wsData(0), d_wsName(),
 	    color_axis(QwtPlot::yRight),
 	    color_map_policy(Default),
 			color_map(QwtLinearColorMap()),
@@ -66,9 +66,9 @@ Spectrogram::Spectrogram():
 {
 }
 
-Spectrogram::Spectrogram(const Mantid::API::IMDWorkspace_const_sptr &workspace) :
+Spectrogram::Spectrogram(const QString & wsName, const Mantid::API::IMDWorkspace_const_sptr &workspace) :
       QObject(), QwtPlotSpectrogram(),
-      d_matrix(NULL),d_funct(NULL),d_wsData(NULL),
+      d_matrix(NULL),d_funct(NULL),d_wsData(NULL), d_wsName(),
       color_axis(QwtPlot::yRight),
       color_map_policy(Default),mColorMap()
 {
@@ -90,6 +90,7 @@ Spectrogram::Spectrogram(const Mantid::API::IMDWorkspace_const_sptr &workspace) 
   Mantid::coord_t height = dim1->getMaximum() - minY;
   d_wsData->setBoundingRect(QwtDoubleRect(minX, minY, width, height));
   setData(*d_wsData);
+  d_wsName = wsName.toStdString();
 
   double step = fabs(data().range().maxValue() - data().range().minValue())/5.0;
   QwtValueList contourLevels;
@@ -98,11 +99,15 @@ Spectrogram::Spectrogram(const Mantid::API::IMDWorkspace_const_sptr &workspace) 
     contourLevels += level;
 
   setContourLevels(contourLevels);
+
+  observePostDelete();
+  observeADSClear();
+
 }
 
 Spectrogram::Spectrogram(Matrix *m):
 			QObject(), QwtPlotSpectrogram(QString(m->objectName())),
-			d_matrix(m),d_funct(0),d_wsData(NULL),//Mantid
+			d_matrix(m),d_funct(0),d_wsData(NULL), d_wsName(),
 			color_axis(QwtPlot::yRight),
 			color_map_policy(Default),mColorMap()
 {
@@ -120,7 +125,7 @@ Spectrogram::Spectrogram(Matrix *m):
 
 Spectrogram::Spectrogram(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz)
 :	QObject(), QwtPlotSpectrogram(),
-  d_matrix(0),d_funct(f), d_wsData(NULL),
+  d_matrix(0),d_funct(f), d_wsData(NULL), d_wsName(),
  	color_axis(QwtPlot::yRight),
  	color_map_policy(Default),
  	color_map(QwtLinearColorMap())
@@ -141,7 +146,7 @@ Spectrogram::Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,
 :	QObject(), QwtPlotSpectrogram(),
  	d_color_map_pen(false),
  	d_matrix(0),
-  d_funct(f),d_wsData(NULL),
+  d_funct(f),d_wsData(NULL), d_wsName(),
  	color_axis(QwtPlot::yRight),
  	color_map_policy(Default),
  	d_show_labels(true),
@@ -172,8 +177,31 @@ Spectrogram::Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,
 
 Spectrogram::~Spectrogram()
 {
+  observePostDelete(false);
+  observeADSClear(false);
 }
 
+/**
+ * Called after a workspace has been deleted
+ * @param wsName The name of the workspace that has been deleted
+ */
+void Spectrogram::postDeleteHandle(const std::string &wsName)
+{
+  if (wsName == d_wsName)
+  {
+    observePostDelete(false);
+    emit removeMe(this);
+  }
+}
+
+/**
+ * Called after a the ADS has been cleared
+ */
+void Spectrogram::clearADSHandle()
+{
+  observeADSClear(false);
+  postDeleteHandle(d_wsName);
+}
 
 void Spectrogram::setContourLevels (const QwtValueList & levels)
 {

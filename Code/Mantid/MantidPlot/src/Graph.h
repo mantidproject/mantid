@@ -250,6 +250,7 @@ public slots:
    */
   void removeCurves(const QString& s);
   void removeCurve(PlotCurve* c);
+  void removeSpectrogram(Spectrogram *sp);
 
   void updateCurvesData(Table* w, const QString& yColName);
 
