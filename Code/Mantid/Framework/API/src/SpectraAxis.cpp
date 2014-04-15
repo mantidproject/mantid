@@ -98,18 +98,33 @@ void SpectraAxis::setValue(const std::size_t& index, const double& value)
 size_t SpectraAxis::indexOfValue(const double value) const
 {
   const specid_t specNo = static_cast<specid_t>(value);
-  // take value as spectrum number
-  for (size_t i = 0; i < this->length(); ++i)
+  // try and be smart about how we find this. Most of the time
+  // the index & value don't differ by much. Start at a value
+  // slightly lower, 2 back, then the actual value so that most cases
+  // it should find it in a few jumps.
+  const size_t nspectra = m_parentWS->getNumberHistograms();
+  const auto & parentWS = *m_parentWS; // avoid constant dereference
+
+  size_t guess = (specNo > 2) ? static_cast<size_t>(specNo - 2) : 0;
+  if(guess >= nspectra) guess = nspectra/2; // start in the middle
+
+  size_t index(guess);
+  do
   {
     try
     {
-      if (m_parentWS->getSpectrum(i)->getSpectrumNo() == specNo) return i;
+      if (parentWS.getSpectrum(index)->getSpectrumNo() == specNo)
+        return index;
     }
-    catch(std::range_error& e)
+    catch(std::range_error&)
     {
-      throw std::out_of_range(e.what());
+      continue;
     }
+    ++index;
+    if(index == nspectra) index = 0; //wrap around to search everythin
   }
+  while (index != guess);
+
   // Not found if we reached here
   throw std::out_of_range("SpectraAxis::indexOfValue() - Value not found on axis");
 }
