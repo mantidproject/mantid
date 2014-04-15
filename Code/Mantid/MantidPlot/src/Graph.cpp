@@ -3576,8 +3576,7 @@ void Graph::updateScale()
   }
 
   d_plot->replot();//TODO: avoid 2nd replot!
-  d_zoomer[0]->setZoomBase();
-  //	d_zoomer[1]->setZoomBase();
+  d_zoomer[0]->setZoomBase(false);
 }
 
 void Graph::setBarsGap(int curve, int gapPercent, int offset)
