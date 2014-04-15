@@ -75,6 +75,8 @@ public:
 
   /// Handles delete notification
   void postDeleteHandle(const std::string& wsName);
+  /// Handles afterReplace notification
+  void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   /// Handle an ADS clear notificiation
   void clearADSHandle();
 
@@ -107,6 +109,9 @@ public:
   void setCustomColorMap(const QwtLinearColorMap& map);
   void setMantidColorMap(const MantidColorMap &map);
   void updateData(Matrix *m);
+  void updateData(const Mantid::API::IMDWorkspace_const_sptr & workspace);
+  MantidQt::API::QwtRasterDataMD *dataFromWorkspace(const Mantid::API::IMDWorkspace_const_sptr & workspace);
+  void postDataUpdate();
 
   //! Used when saving a project file
   QString saveToString();

@@ -72,23 +72,7 @@ Spectrogram::Spectrogram(const QString & wsName, const Mantid::API::IMDWorkspace
       color_axis(QwtPlot::yRight),
       color_map_policy(Default),mColorMap()
 {
-  d_wsData = new MantidQt::API::NoOverlayRaster2D;
-  d_wsData->setWorkspace(workspace);
-  d_wsData->setFastMode(false);
-  d_wsData->setNormalization(Mantid::API::NoNormalization);
-  d_wsData->setZerosAsNan(false);
-
-  // colour range
-  QwtDoubleInterval fullRange = MantidQt::API::SignalRange(*workspace).interval();
-  d_wsData->setRange(fullRange);
-
-  // X/Y axis ranges
-  auto dim0 = workspace->getDimension(0);
-  auto dim1 = workspace->getDimension(1);
-  Mantid::coord_t minX(dim0->getMinimum()), minY(dim1->getMinimum());
-  Mantid::coord_t width = dim0->getMaximum() - minX;
-  Mantid::coord_t height = dim1->getMaximum() - minY;
-  d_wsData->setBoundingRect(QwtDoubleRect(minX, minY, width, height));
+  d_wsData = dataFromWorkspace(workspace);
   setData(*d_wsData);
   d_wsName = wsName.toStdString();
 
@@ -102,7 +86,7 @@ Spectrogram::Spectrogram(const QString & wsName, const Mantid::API::IMDWorkspace
 
   observePostDelete();
   observeADSClear();
-
+  observeAfterReplace();
 }
 
 Spectrogram::Spectrogram(Matrix *m):
@@ -179,6 +163,7 @@ Spectrogram::~Spectrogram()
 {
   observePostDelete(false);
   observeADSClear(false);
+  observeAfterReplace(false);
 }
 
 /**
@@ -203,6 +188,19 @@ void Spectrogram::clearADSHandle()
   postDeleteHandle(d_wsName);
 }
 
+/**
+ * @param wsName The name of the workspace that has been replaced
+ * @param ws A pointer to the new workspace
+ */
+void Spectrogram::afterReplaceHandle(const std::string &wsName,
+                                     const boost::shared_ptr<Mantid::API::Workspace> ws)
+{
+  if (wsName == d_wsName)
+  {
+    updateData(boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(ws));
+  }
+}
+
 void Spectrogram::setContourLevels (const QwtValueList & levels)
 {
   QwtPlotSpectrogram::setContourLevels(levels);
@@ -211,14 +209,49 @@ void Spectrogram::setContourLevels (const QwtValueList & levels)
 
 void Spectrogram::updateData(Matrix *m)
 {
-  if (!m)
-    return;
-
-  QwtPlot *plot = this->plot();
-  if (!plot)
+  if (!m || !plot())
     return;
 
   setData(MatrixData(m));
+  postDataUpdate();
+
+}
+
+void Spectrogram::updateData(const Mantid::API::IMDWorkspace_const_sptr &workspace)
+{
+  if(!workspace || !plot()) return;
+
+  delete d_wsData;
+  d_wsData = dataFromWorkspace(workspace);
+  setData(*d_wsData);
+  postDataUpdate();
+}
+
+MantidQt::API::QwtRasterDataMD *Spectrogram::dataFromWorkspace(const Mantid::API::IMDWorkspace_const_sptr &workspace)
+{
+  auto *wsData = new MantidQt::API::NoOverlayRaster2D;
+  wsData->setWorkspace(workspace);
+  wsData->setFastMode(false);
+  wsData->setNormalization(Mantid::API::NoNormalization);
+  wsData->setZerosAsNan(false);
+
+  // colour range
+  QwtDoubleInterval fullRange = MantidQt::API::SignalRange(*workspace).interval();
+  wsData->setRange(fullRange);
+
+  // X/Y axis ranges
+  auto dim0 = workspace->getDimension(0);
+  auto dim1 = workspace->getDimension(1);
+  Mantid::coord_t minX(dim0->getMinimum()), minY(dim1->getMinimum());
+  Mantid::coord_t width = dim0->getMaximum() - minX;
+  Mantid::coord_t height = dim1->getMaximum() - minY;
+  wsData->setBoundingRect(QwtDoubleRect(minX, minY, width, height));
+  return wsData;
+}
+
+void Spectrogram::postDataUpdate()
+{
+  auto *plot = this->plot();
   setLevelsNumber(levels());
 
   QwtScaleWidget *colorAxis = plot->axisWidget(color_axis);
@@ -226,7 +259,9 @@ void Spectrogram::updateData(Matrix *m)
   {
     colorAxis->setColorMap(data().range(), colorMap());
   }
+
   plot->setAxisScale(color_axis, data().range().minValue(), data().range().maxValue());
+
   plot->replot();
 }
 
