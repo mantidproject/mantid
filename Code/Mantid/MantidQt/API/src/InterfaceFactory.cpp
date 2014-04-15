@@ -85,14 +85,17 @@ UserSubWindow * UserSubWindowFactoryImpl::createFromAlias(const std::string & na
   QString alias = QString::fromStdString(name);
   if( m_badAliases.contains(alias) )
   {
-    std::string error = "Alias \"" + name + "\" is defined for multiple real interfaces: \"";
+    //FIXME: Ticket-9217 - Commented out for the moment to try and get working with clang
+    //std::string error = "Alias \"" + name + "\" is defined for multiple real interfaces: \"";
     QListIterator<std::string> itr(m_badAliases.value(alias));
     while( itr.hasNext() )
     {
-      error += itr.next();
+      //FIXME: Ticket-9217 - Commented out for the moment to try and get working with clang
+      //error += itr.next();
       if( itr.hasNext() )
       {
-        error += ",";
+        //FIXME: Ticket-9217 - Commented out for the moment to try and get working with clang
+        //error += ",";
       }
     }
     //FIXME: Ticket-9217 - Commented out for the moment to try and get working with clang
