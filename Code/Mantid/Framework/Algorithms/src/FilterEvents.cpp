@@ -777,9 +777,6 @@ namespace Algorithms
                                                             printdetail);
       }
 
-      mProgress = 0.3+(progressamount-0.2)*static_cast<double>(iws)/static_cast<double>(numberOfSpectra);
-      progress(mProgress, "Filtering events");
-
       if (printdetail)
         g_log.notice(logmessage);
 
