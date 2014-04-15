@@ -472,14 +472,13 @@ namespace Mantid
       ns1__search request;
       ns1__searchResponse response;
 
-      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + investigationId + "']";
+      std::string query = "Dataset INCLUDE DatasetType, Datafile, Investigation <-> Investigation[name = '" + investigationId + "']";
       request.query     = &query;
 
       std::string sessionID = m_session->getSessionId();
       request.sessionId = &sessionID;
 
-      g_log.debug() << "ICat4Catalog::getDataSets -> { " << query << " }" << std::endl;
-
+      g_log.debug() << "The query for ICat4Catalog::getDataSets is:\n" << query << std::endl;
       int result = icat.search(&request, &response);
 
       if (result == 0)
@@ -544,7 +543,7 @@ namespace Mantid
       std::string sessionID = m_session->getSessionId();
       request.sessionId = &sessionID;
 
-      g_log.debug() << "The query for ICat4Catalog::getDataSets is:\n" << query << std::endl;
+      g_log.debug() << "The query for ICat4Catalog::getDataFiles is:\n" << query << std::endl;
 
       int result = icat.search(&request, &response);
 
