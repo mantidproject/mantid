@@ -141,7 +141,7 @@ namespace Algorithms
 
     //--------------------------------------------------------------------------------------------
     /** Helper function for calculating costs in gsl.
-      * cost = \sum_{p}|d^0_p - (1+offset)*d^{(f)}_p|/\chi_p, where d^{(f)} is within minD and maxD
+      * cost = \sum_{p}|d^0_p - (1+offset)*d^{(f)}_p|\cdot H^2_p, where d^{(f)} is within minD and maxD
        * @param v Vector of offsets.
        * @param params Array of input parameters.
        * @returns Sum of the errors.
@@ -153,7 +153,7 @@ namespace Algorithms
       size_t n = static_cast<size_t>(p[0]);
       std::vector<double> peakPosToFit(n);
       std::vector<double> peakPosFitted(n);
-      std::vector<double> chisq(n);
+      std::vector<double> height2(n);
       double minD = p[1];
       double maxD = p[2];
       for (size_t i = 0; i < n; i++)
@@ -166,7 +166,7 @@ namespace Algorithms
       }
       for (size_t i = 0; i < n; i++)
       {
-        chisq[i] = p[i+2*n+3];
+        height2[i] = p[i+2*n+3];
       }
 
       double offset = gsl_vector_get(v, 0);
@@ -177,7 +177,7 @@ namespace Algorithms
         //See formula in AlignDetectors
         double peakPosMeas = (1.+offset)*peakPosFitted[i];
         if(peakPosFitted[i] > minD && peakPosFitted[i] < maxD)
-          errsum += std::fabs(peakPosToFit[i]-peakPosMeas)/chisq[i];
+          errsum += std::fabs(peakPosToFit[i]-peakPosMeas)*height2[i];
       }
       return errsum;
     }
@@ -616,7 +616,7 @@ namespace Algorithms
     fitresult.peakPosFittedSize = static_cast<double>(vec_peakPosFitted.size());
     for (size_t i = 0; i < nparams; i++)
     {
-      params[i+3+2*nparams] = 1./(vec_peakHeights[i]*vec_peakHeights[i]); // vec_fitChi2[i];
+      params[i+3+2*nparams] = (vec_peakHeights[i]*vec_peakHeights[i]); // vec_fitChi2[i];
       fitresult.chisqSum += 1./(vec_peakHeights[i]*vec_peakHeights[i]); // vec_fitChi2[i];
     }
 
