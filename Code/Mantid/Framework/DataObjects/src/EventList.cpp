@@ -3897,6 +3897,143 @@ namespace DataObjects
     return;
   }
 
+  //------------------------------------------------------------------------------------------------
+  /** Split the event list into n outputs, operating on a vector of either TofEvent's or WeightedEvent's
+   *  The comparison between neutron event and splitter is based on neutron event's pulse time plus
+   *
+   * @param vectimes :: a vector of absolute time in nanoseconds serving as boundaries of splitters
+   * @param vecgroups :: a vector of integer serving as the target workspace group for splitters
+   * @param outputs :: a vector of where the split events will end up. The # of entries in there should
+   *        be big enough to accommodate the indices.
+   * @param events :: either this->events or this->weightedEvents.
+   * @param tofcorrection :: a correction for each TOF to multiply with.
+   * @param docorrection :: flag to determine whether or not to apply correction
+   * @param printdetail :: flag to print out how the events are splitted.
+   */
+  template< class T >
+  std::string EventList::splitByFullTimeVectorSplitterHelper(const std::vector<int64_t>& vectimes,
+                                                             const std::vector<int>& vecgroups,
+                                                             std::map<int, EventList * > outputs,
+                                                             typename std::vector<T> & events, double tofcorrection,
+                                                             bool docorrection, bool printdetail) const
+  {
+    // Define variables for events
+    // size_t numevents = events.size();
+    typename std::vector<T>::iterator eviter;
+    std::stringstream msgss;
+
+    // Loop through events
+    for (eviter = events.begin(); eviter != events.end(); ++eviter)
+    {
+      // Obtain time of event
+      int64_t evabstimens;
+      if (docorrection)
+        evabstimens = eviter->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(eviter->m_tof*1000*tofcorrection);
+      else
+        evabstimens = eviter->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(eviter->m_tof*1000);
+
+      // Search in vector
+      int index = static_cast<int>(lower_bound(vectimes.begin(), vectimes.end(), evabstimens) - vectimes.begin());
+      int group;
+      if (index == 0 || index == static_cast<int>(vectimes.size()-1))
+      {
+        // Event is before first splitter.  Put to -1
+        group = -1;
+      }
+      else
+      {
+        group = vecgroups[index-1];
+      }
+
+      if (printdetail)
+      {
+        if (group >= 0)
+          msgss << "[Event-12A-" << group << "] AbsTime = " << evabstimens << ", Pulse = " << eviter->m_pulsetime
+                << ", TOF = " << eviter->m_tof
+                << ", AbsLower = " << vectimes[index-1] << ", AbsUpper = " << vectimes[index] << "\n";
+        else
+          msgss << "[Event-12B] AbsTime = " << evabstimens << ", Pulse = " << eviter->m_pulsetime
+                << ", TOF = " << eviter->m_tof
+                << ", AbsLower = " << vectimes[index-1] << ", AbsUpper = " << vectimes[index] << "\n";
+      }
+
+      // Copy event to the proper group
+      EventList* myOutput = outputs[group];
+      if (!myOutput)
+      {
+        std::stringstream errss;
+        errss << "Group " << group << " has a NULL output EventList. " << "\n";
+        msgss << errss.str();
+      }
+      else
+      {
+        const T eventCopy(*eviter);
+        myOutput->addEventQuickly(eventCopy);
+      }
+    }
+
+    return (msgss.str());
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /**
+    */
+  std::string EventList::splitByFullTimeMatrixSplitter(const std::vector<int64_t>& vectimes, const std::vector<int>& vecgroups,
+                                                       std::map<int, EventList*> vec_outputEventList,
+                                                       double tofcorrection, bool docorrection, bool printdetail) const
+  {
+    // Check validity
+    if (eventType == WEIGHTED_NOTIME)
+      throw std::runtime_error("EventList::splitByTime() called on an EventList that no longer has time information.");
+
+    // Start by sorting the event list by pulse time.
+    // FIXME - Should find a good algorithm for sorted event list
+    sortPulseTimeTOF();
+
+    // Initialize all the output event list
+    std::map<int, EventList* >::iterator outiter;
+    for (outiter = vec_outputEventList.begin(); outiter != vec_outputEventList.end(); ++outiter)
+    {
+      EventList* opeventlist = outiter->second;
+      opeventlist->clear();
+      opeventlist->detectorIDs = this->detectorIDs;
+      opeventlist->refX = this->refX;
+      // Match the output event type.
+      opeventlist->switchTo(eventType);
+    }
+
+
+    std::string debugmessage("");
+
+    // Do nothing if there are no entries
+    if (vecgroups.size() == 0)
+    {
+      // Copy all events to group workspace = -1
+      (*vec_outputEventList[-1]) = (*this);
+      // this->duplicate(outputs[-1]);
+    }
+    else
+    {
+      // Split
+      switch (eventType)
+      {
+      case TOF:
+          debugmessage = splitByFullTimeVectorSplitterHelper(vectimes, vecgroups, vec_outputEventList, this->events,
+                                                             tofcorrection, docorrection, printdetail);
+          break;
+      case WEIGHTED:
+          debugmessage = splitByFullTimeVectorSplitterHelper(vectimes, vecgroups, vec_outputEventList, this->weightedEvents,
+                                                             tofcorrection, docorrection);
+          break;
+      case WEIGHTED_NOTIME:
+          debugmessage = "TOF type is weighted no time.  Impossible to split. ";
+          break;
+      }
+    }
+
+    return debugmessage;
+  }
 
   //------------------------------------------- --------------------------------------------------
   /** Split the event list into n outputs by each event's pulse time only
