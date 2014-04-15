@@ -103,7 +103,7 @@ namespace Crystal
     declareProperty("MinWavelength", 0.0, "Minimum wavelength (Angstroms)");
     declareProperty("MaxWavelength", 100.0, "Maximum wavelength (Angstroms)");
 
-    declareProperty("AppendFile", false, "Append to file if true.\n"
+    declareProperty("AppendFile", false, "Append to file if true. Use same corrections as file.\n"
       "If false, new file (default).");
     declareProperty("ApplyAnvredCorrections", false, "Apply anvred corrections to peaks if true.\n"
       "If false, no corrections during save (default).");
@@ -392,12 +392,22 @@ namespace Crystal
       }
 
       // SHELX can read data without the space between the l and intensity
-      double ckIntensity = correc*p.getIntensity();
-      if (ckIntensity > 99999.985) g_log.warning() << "Scaled intensity, " << ckIntensity << " is too large for format.  Decrease ScalePeaks.\n";
-      out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << ckIntensity;
+      if(p.getDetectorID() != -1)
+      {
+		  double ckIntensity = correc*p.getIntensity();
+		  if (ckIntensity > 99999.985) g_log.warning() << "Scaled intensity, " << ckIntensity << " is too large for format.  Decrease ScalePeaks.\n";
+		  out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << ckIntensity;
 
-      out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) <<
-    		  std::sqrt(std::pow(correc*p.getSigmaIntensity(),2)+std::pow(relSigSpect*correc*p.getIntensity(),2));
+		  out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) <<
+				  std::sqrt(std::pow(correc*p.getSigmaIntensity(),2)+std::pow(relSigSpect*correc*p.getIntensity(),2));
+      }
+      else
+      {
+    	  // This is data from LoadHKL which is already corrected
+          out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << p.getIntensity();
+
+          out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << p.getSigmaIntensity();
+      }
       if(type.compare(0,2,"Ba")==0) out << std::setw( 4 ) << bankSequence;
       else out << std::setw( 4 ) << runSequence;
 
