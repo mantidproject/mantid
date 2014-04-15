@@ -1,5 +1,7 @@
 """*WIKI*
 
+(20 min)
+
 Algorithm ExportExperimentLog obtains run information, sample information and 
 sample log information from a MatrixWorkspace and write them to a csv file. 
 
@@ -32,6 +34,12 @@ If the type of a sample log is TimeSeriesProperty, it must be one of the followi
 
 Otherwise, there is no operation required.  For example, log 'duration' or 'run_number' does not have any operation on its value.  An empty string will serve for them in property 'SampleLogOperation'. 
 
+== File format ==
+There are two types of output file formats that are supported.  
+They are csv (comma seperated) file and tsv (tab separated) file.  
+The csv file must have an extension as ".csv".  If a user gives the name of a log file, which is in csv format,
+does not have an extension as .csv, the algorithm will correct it automatically. 
+
 *WIKI*"""
 import mantid.simpleapi as api
 import mantid
@@ -51,7 +59,7 @@ class ExportExperimentLog(PythonAlgorithm):
         wsprop = MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input)
         self.declareProperty(wsprop, "Input workspace containing the sample log information. ")
         
-        self.declareProperty(FileProperty("OutputFilename","", FileAction.Save, ['.txt']),
+        self.declareProperty(FileProperty("OutputFilename","", FileAction.Save, ['.txt, .csv']),
             "Output file of the experiment log.")
         
         filemodes = ["append", "fastappend", "new"]
@@ -66,6 +74,10 @@ class ExportExperimentLog(PythonAlgorithm):
 
         logoperprop = StringArrayProperty("SampleLogOperation", values=[], direction=Direction.Input)
         self.declareProperty(logoperprop, "Operation on each log, including None (as no operation), min, max, average, sum and \"0\". ")
+        
+        fileformates = ["tab", "comma (csv)"]
+        self.declareProperty("FileFormat", "tab", mantid.kernel.StringListValidator(fileformates),
+            "Output file format.  'tab' format will insert a tab between 2 adjacent values; 'comma' will put a , instead.  With this option, the posfix of the output file is .csv automatically. ")
         
         return
         
@@ -106,6 +118,7 @@ class ExportExperimentLog(PythonAlgorithm):
     def _processInputs(self):
         """ Process input properties
         """
+        import os
         import os.path
         
         self._wksp = self.getProperty("InputWorkspace").value
@@ -153,7 +166,21 @@ class ExportExperimentLog(PythonAlgorithm):
                 self._renameLogFile(self._logfilename)
                 self._filemode = "new"
         """
+        
+        # Output file format
+        self._fileformat = self.getPRoperty("FileFormat").value
+        if self._fileformat == "tab":
+            self._valuesep = "\t"
+        else:
+            self._valuesep = ","
             
+        # Output file's postfix
+        if self._fileformat == "comma (csv)":
+            fileName, fileExtension = os.path.splitext(self._logfilename)
+            if fileExtension != ".csv":
+                # Force the extension of the output file to be .csv
+                self._logfilename = "%s.csv" % (fileName)
+                     
         return
         
     def _createLogFile(self):
@@ -167,7 +194,7 @@ class ExportExperimentLog(PythonAlgorithm):
             title = self._headerTitles[ititle]
             wbuf += "%s" % (title)
             if ititle < len(self._headerTitles)-1:
-                wbuf += "\t"
+                wbuf += self._valuesep
             
         try:
             ofile = open(self._logfilename, "w")
@@ -251,7 +278,7 @@ class ExportExperimentLog(PythonAlgorithm):
 
         for logname in self._sampleLogNames:
             value = logvaluedict[logname]
-            wbuf += "%s\t" % (str(value))
+            wbuf += "%s%s" % (str(value), self._valuesep)
         wbuf = wbuf[0:-1]
 
         # Append to file
