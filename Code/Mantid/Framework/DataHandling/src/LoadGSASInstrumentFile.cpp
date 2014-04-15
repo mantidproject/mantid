@@ -117,6 +117,10 @@ namespace DataHandling
       }
     }
 
+    // Get function type
+    // Initially we assume Ikeda Carpenter PV
+    int nProf = 9;
+
     size_t numBanks = getNumberOfBanks( lines );
     g_log.debug() << numBanks << "banks in file \n";
 
@@ -137,28 +141,30 @@ namespace DataHandling
     }
 
    // Parse banks and export profile parameters
-    //map<int, map<string, double> > bankparammap;
+    map<size_t, map<string, double> > bankparammap;
     for (size_t i = 0; i < numBanks; ++i)
     {
       size_t bankid = i+1;
       g_log.debug() << "Parse bank " << bankid << " of total " << numBanks << ".\n";
-      //map<string, double> parammap;
-      //parseResolutionStrings(parammap, lines, useBankIDsInFile , bankid, bankstartindexmap[bankid], bankendindexmap[bankid], nProf);
-      //bankparammap.insert(make_pair(bankid, parammap));
+      map<string, double> parammap;
+      parseBank ( parammap, lines, bankid, bankStartIndex[bankid-1], nProf);
+      bankparammap.insert(make_pair(bankid, parammap));
       g_log.warning() << "Bank starts at line" << bankStartIndex[i] + 1 << "\n";
     }
 
+    // Generate output table workspace
+    API::ITableWorkspace_sptr outTabWs = genTableWorkspace(bankparammap);
 
     if( getPropertyValue("OutputTableWorkspace") != "")
     {
       // Output the output table workspace
-      //setProperty("OutputTableWorkspace", outTabWs);
+       setProperty("OutputTableWorkspace", outTabWs);
     }
 
     if( getPropertyValue("OutputTableWorkspace") == "")
     {
       // We don't know where to output
-      throw std::runtime_error("Either the OutputTableWorkspace must be set.");
+      throw std::runtime_error("OutputTableWorkspace must be set.");
     }
 
 
@@ -258,7 +264,6 @@ namespace DataHandling
   {
     // We look for each line that contains 'BNKPAR' and take it to be the first line of a bank.
     // We currently ignore the bank number and assume they are numbered according to their order in the file.
-    int startindex = -1;
     for (size_t i = 0; i < lines.size(); ++i)
     {
       string line = lines[i];
@@ -269,6 +274,120 @@ namespace DataHandling
         }
       }  // INS
     } // for(i)
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Parse one bank in a .prm file to a map of parameter name and value
+    * @param parammap :: [output] parameter name and value map
+    * @param lines :: [input] vector of lines from .irf file;
+    * @param bankid :: [input] ID of the bank to get parsed
+    * @param startlineindex :: [input] index of the first line of the bank in vector of lines
+    * @param profNumber :: [input] index of the profile number
+    */  
+  void LoadGSASInstrumentFile::parseBank(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, size_t bankid, size_t startlineindex, int profNumber)
+  {
+        parammap["NPROF"] = profNumber;
+  }
+
+  
+ //----------------------------------------------------------------------------------------------
+  /** Generate output workspace
+  **
+  **  TO DO Resolve duplication of this code with LoadFullprofResolution::genetableWorkspace(...)
+  */
+  TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(map<size_t, map<string, double> > bankparammap)
+  {
+    g_log.notice() << "Start to generate table workspace ...." << ".\n";
+
+    // Retrieve some information
+    size_t numbanks = bankparammap.size();
+    if (numbanks == 0)
+      throw runtime_error("Unable to generate a table from an empty map!");
+
+    map<size_t, map<string, double> >::iterator bankmapiter = bankparammap.begin();
+    size_t numparams = bankmapiter->second.size();
+
+    // vector of all parameter name
+    vector<string> vec_parname;
+    vector<size_t> vec_bankids;
+
+    map<string, double>::iterator parmapiter;
+    for (parmapiter = bankmapiter->second.begin(); parmapiter != bankmapiter->second.end(); ++parmapiter)
+    {
+      string parname = parmapiter->first;
+      vec_parname.push_back(parname);
+    }
+
+    for (bankmapiter = bankparammap.begin(); bankmapiter != bankparammap.end(); ++bankmapiter)
+    {
+      size_t bankid = bankmapiter->first;
+      vec_bankids.push_back(bankid);
+    }
+
+    g_log.debug() << "[DBx240] Number of imported parameters is " << numparams
+                  << ", Number of banks = " << vec_bankids.size() << "." << "\n";
+
+    // Create TableWorkspace
+    TableWorkspace_sptr tablews(new TableWorkspace());
+
+    // set columns :
+    // Any 2 columns cannot have the same name.
+    tablews->addColumn("str", "Name");
+    for (size_t i = 0; i < numbanks; ++i)
+    {
+      stringstream colnamess;
+      size_t bankid = vec_bankids[i];
+      colnamess << "Value_" << bankid;
+      tablews->addColumn("double", colnamess.str());
+    }
+
+    g_log.debug() << "Number of column = " << tablews->columnCount() << ".\n";
+
+    // add BANK ID row
+    TableRow newrow = tablews->appendRow();
+    newrow << "BANK";
+    for (size_t i = 0; i < numbanks; ++i)
+      newrow << static_cast<double>(vec_bankids[i]);
+
+    g_log.debug() << "Number of row now = " << tablews->rowCount() << ".\n";
+
+    // add profile parameter rows
+    for (size_t i = 0; i < numparams; ++i)
+    {
+      TableRow newrow = tablews->appendRow();
+
+      string parname = vec_parname[i];
+      newrow << parname;
+
+      for (size_t j = 0; j < numbanks; ++j)
+      {
+        size_t bankid = vec_bankids[j];
+
+        // Locate map of bank 'bankid'
+        map<size_t, map<string, double> >::iterator bpmapiter;
+        bpmapiter = bankparammap.find(bankid);
+        if (bpmapiter == bankparammap.end())
+        {
+          throw runtime_error("Bank cannot be found in map.");
+        }
+
+        // Locate parameter
+        map<string, double>::iterator parmapiter;
+        parmapiter = bpmapiter->second.find(parname);
+        if (parmapiter == bpmapiter->second.end())
+        {
+          throw runtime_error("Parameter cannot be found in a bank's map.");
+        }
+        else
+        {
+          double pvalue = parmapiter->second;
+          newrow << pvalue;
+        }
+
+      } // END(j)
+    } // END(i)
+
+    return tablews;
   }
 
 

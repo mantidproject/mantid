@@ -72,6 +72,13 @@ namespace DataHandling
     /// Scan imported file for bank information
     void scanBanks(const std::vector<std::string>& lines, std::vector<size_t>& bankStartIndex );
 
+    /// Parse bank in file to a map
+    void parseBank(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, size_t bankid, size_t startlineindex, int nProf);
+
+
+    /// Generate output workspace
+    DataObjects::TableWorkspace_sptr genTableWorkspace(std::map<size_t, std::map<std::string, double> > bankparammap);
+
 
   };
 
