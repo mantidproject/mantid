@@ -64,10 +64,10 @@ namespace DataHandling
     void loadFile(std::string filename, std::vector<std::string>& lines);
 
     /// Get Histogram type
-    std::string getHistogramType(std::vector<std::string>& lines);
+    std::string getHistogramType(const std::vector<std::string>& lines);
 
     /// Get Number of banks
-    size_t getNumberOfBanks(std::vector<std::string>& lines);
+    size_t getNumberOfBanks(const std::vector<std::string>& lines);
 
     /// Scan imported file for bank information
     void scanBanks(const std::vector<std::string>& lines, std::vector<size_t>& bankStartIndex );
@@ -75,6 +75,8 @@ namespace DataHandling
     /// Parse bank in file to a map
     void parseBank(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, size_t bankid, size_t startlineindex, int nProf);
 
+    /// Find first INS line at or after lineIndex
+    size_t findINSLine(const std::vector<std::string>& lines, size_t lineIndex);
 
     /// Generate output workspace
     DataObjects::TableWorkspace_sptr genTableWorkspace(std::map<size_t, std::map<std::string, double> > bankparammap);

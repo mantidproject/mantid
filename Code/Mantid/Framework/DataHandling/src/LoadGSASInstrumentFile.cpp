@@ -149,7 +149,7 @@ namespace DataHandling
       map<string, double> parammap;
       parseBank ( parammap, lines, bankid, bankStartIndex[bankid-1], nProf);
       bankparammap.insert(make_pair(bankid, parammap));
-      g_log.warning() << "Bank starts at line" << bankStartIndex[i] + 1 << "\n";
+      g_log.debug() << "Bank starts at line" << bankStartIndex[i] + 1 << "\n";
     }
 
     // Generate output table workspace
@@ -216,8 +216,9 @@ namespace DataHandling
 
   /* Get the histogram type
   * @param lines :: vector of strings for each non-empty line in .irf file
+  * @return Histogram type code
   */
-  std::string LoadGSASInstrumentFile::getHistogramType(vector<string>& lines)
+  std::string LoadGSASInstrumentFile::getHistogramType(const vector<string>& lines)
   {
     // We assume there is just one HTYPE line, look for it from beginning and return its value.
     std::string lookFor = "INS   HTYPE";
@@ -237,8 +238,9 @@ namespace DataHandling
 
  /* Get number of banks
   * @param lines :: vector of strings for each non-empty line in .irf file
+  * @return number of banks
   */
-  size_t LoadGSASInstrumentFile::getNumberOfBanks(vector<string>& lines)
+  size_t LoadGSASInstrumentFile::getNumberOfBanks(const vector<string>& lines)
   {
     // We assume there is just one BANK line, look for it from beginning and return its value.
     std::string lookFor = "INS   BANK";
@@ -278,15 +280,61 @@ namespace DataHandling
 
   //----------------------------------------------------------------------------------------------
   /** Parse one bank in a .prm file to a map of parameter name and value
-    * @param parammap :: [output] parameter name and value map
-    * @param lines :: [input] vector of lines from .irf file;
-    * @param bankid :: [input] ID of the bank to get parsed
-    * @param startlineindex :: [input] index of the first line of the bank in vector of lines
-    * @param profNumber :: [input] index of the profile number
-    */  
+  * @param parammap :: [output] parameter name and value map
+  * @param lines :: [input] vector of lines from .irf file;
+  * @param bankid :: [input] ID of the bank to get parsed
+  * @param startlineindex :: [input] index of the first line of the bank in vector of lines
+  * @param profNumber :: [input] index of the profile number
+  */  
   void LoadGSASInstrumentFile::parseBank(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, size_t bankid, size_t startlineindex, int profNumber)
   {
-        parammap["NPROF"] = profNumber;
+    parammap["NPROF"] = profNumber;  // Add numerical code for function as LoadFullprofResolution does.
+
+    // We ignore the first three INS lines of the bank, then read 15 parameters from the next four INS lines.
+    size_t currentLineIndex = findINSLine(lines, startlineindex);
+    size_t start = 15;
+    double param1, param2, param3, param4;
+    std::istringstream paramLine;
+    //ignore 1st line
+    currentLineIndex = findINSLine(lines, currentLineIndex+1);
+    // ignore 2nd line
+    currentLineIndex = findINSLine(lines, currentLineIndex+1);
+    // ignore 3rd line
+    currentLineIndex = findINSLine(lines, currentLineIndex+1);
+    // process 4th line
+    paramLine.str( lines[currentLineIndex].substr(start));
+    paramLine >> param1 >> param2 >> param3 >> param4;
+    parammap["Alph0"] = param1;
+    parammap["Alph1"] = param2;
+    parammap["Beta0"] = param3;
+    parammap["Beta1"] = param4;
+
+    currentLineIndex = findINSLine(lines, currentLineIndex+1);
+    // process 5th line
+
+    currentLineIndex = findINSLine(lines, currentLineIndex+1);
+    // process 6th line
+
+    currentLineIndex = findINSLine(lines, currentLineIndex+1);
+    // process 7th line
+
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Get next INS line of .prm file at or after given line index 
+  * @param lines :: [input] vector of lines from .irf file;
+  * @param lineIndex :: [input] index of line to search from
+  * @return line index for INS file
+  * @throw end of file error
+  */ 
+  size_t LoadGSASInstrumentFile::findINSLine(const std::vector<std::string>& lines, size_t lineIndex)
+  {
+    for (size_t i = lineIndex; i < lines.size(); ++i)
+    {
+      string line = lines[i];
+      if(line.substr(0,3) == "INS") return i;
+    } 
+    throw std::runtime_error("Unexpected end of file reached while searching for INS line. \n");
   }
 
   
