@@ -1,5 +1,5 @@
 import unittest
-from mantid.geometry import Object
+from mantid.geometry import BoundingBox, Object
 
 class ObjectTest(unittest.TestCase):
     
@@ -18,6 +18,13 @@ class ObjectTest(unittest.TestCase):
         self.assertTrue(isinstance(shape, Object))
         xml = pixel.shape().getShapeXML()
         self.assertTrue('radius val="0.0127"' in xml)
+
+    def test_boundingBox_retrieval(self):
+        inst = self._testws.getInstrument()
+        pixel = inst.getComponentByName("pixel")
+        shape = pixel.shape()
+        box = shape.getBoundingBox()
+        self.assertTrue(isinstance(box, BoundingBox))
 
 if __name__ == '__main__':
     unittest.main()
