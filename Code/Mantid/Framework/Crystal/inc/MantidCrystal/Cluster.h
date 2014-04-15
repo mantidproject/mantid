@@ -71,6 +71,12 @@ namespace Mantid
         /// Merge and own 
         void attachCluster(boost::shared_ptr<const Cluster>& toOwn);
 
+        /// Set the root cluster
+        void setRootCluster(ICluster const* root);
+
+        /// Get a representative index of the cluster
+        virtual size_t getRepresentitiveIndex() const;
+
 
        private:
 
@@ -78,15 +84,14 @@ namespace Mantid
         Cluster(const Cluster&);
         /// Disabled assignement
         Cluster& operator=(const Cluster&);
-
-        /// Label used by cluster
-        size_t m_label;
         /// original label on cluster
         size_t m_originalLabel;
         /// indexes belonging to cluster. This is how we track cluster objects.
         std::vector<size_t> m_indexes;
         /// Attached clusters.
         std::vector<boost::shared_ptr<const Cluster> > m_ownedClusters;
+        /// Root cluster.
+        ICluster const * m_rootCluster;
 
     };
 

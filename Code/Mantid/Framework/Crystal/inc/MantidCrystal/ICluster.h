@@ -51,6 +51,9 @@ namespace Mantid
       /// Apply labels to the workspace
       virtual void writeTo(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const = 0;
 
+      /// Get the originally set label
+      virtual size_t getOriginalLabel() const = 0;
+
       /// Get the cluster label
       virtual size_t getLabel() const = 0;
 
@@ -66,6 +69,11 @@ namespace Mantid
       /// Virtual destructor
       virtual ~ICluster(){};
 
+      /// Set the root cluster
+      virtual void setRootCluster(ICluster const*  root) = 0;
+
+      /// Get a represetiative index of the cluster
+      virtual size_t getRepresentitiveIndex() const = 0;
     };
 
   } // namespace Crystal

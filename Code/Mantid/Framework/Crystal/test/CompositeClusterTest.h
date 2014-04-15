@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidCrystal/CompositeCluster.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include <gmock/gmock.h>
+#include "MockObjects.h"
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::Crystal;
@@ -23,27 +23,6 @@ namespace
 
 class CompositeClusterTest: public CxxTest::TestSuite
 {
-private:
-
-  class MockICluster: public ICluster
-  {
-  public:
-    MOCK_CONST_METHOD1(integrate,
-        ClusterIntegratedValues(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws));
-    MOCK_CONST_METHOD1(writeTo,
-        void(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws));
-    MOCK_CONST_METHOD0(getLabel,
-        size_t());
-    MOCK_CONST_METHOD0(getOriginalLabel,
-        size_t());
-    MOCK_CONST_METHOD0(size,
-        size_t());
-    MOCK_METHOD1(addIndex,
-        void(const size_t& index));
-    MOCK_METHOD1(toUniformMinimum,
-        void(std::vector<DisjointElement>& disjointSet));
-  };
-
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -123,6 +102,53 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockCluster));
     delete pMockCluster;
   }
+
+  void test_to_uniform_min()
+  {
+    std::vector<DisjointElement> disjointSet;
+
+    MockICluster* pMockClusterA = new MockICluster();
+    MockICluster* pMockClusterB = new MockICluster();
+    boost::shared_ptr<ICluster> mockClusterA(pMockClusterA);
+    boost::shared_ptr<ICluster> mockClusterB(pMockClusterB);
+
+    EXPECT_CALL(*pMockClusterA, getLabel()).Times(1).WillOnce(Return(1)); // Max label
+    EXPECT_CALL(*pMockClusterB, getLabel()).Times(1).WillOnce(Return(0));// Min label
+    EXPECT_CALL(*pMockClusterA, setRootCluster(pMockClusterB)).Times(1);// Use minimum as root
+    EXPECT_CALL(*pMockClusterB, setRootCluster(pMockClusterB)).Times(1);// Use minimum as root
+    EXPECT_CALL(*pMockClusterA, toUniformMinimum(_)).Times(1);// Use minimum as root
+    EXPECT_CALL(*pMockClusterB, toUniformMinimum(_)).Times(1);// Use minimum as root
+
+    CompositeCluster composite;
+    composite.add(mockClusterA);
+    composite.add(mockClusterB);
+
+    composite.toUniformMinimum(disjointSet);
+    TSM_ASSERT_EQUALS("Label should be minimum of subjects", 0, composite.getLabel());
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pMockClusterA));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pMockClusterB));
+  }
+
+  void test_isLabelInSet()
+  {
+    MockICluster* pMockClusterA = new MockICluster();
+    MockICluster* pMockClusterB = new MockICluster();
+    boost::shared_ptr<ICluster> mockClusterA(pMockClusterA);
+    boost::shared_ptr<ICluster> mockClusterB(pMockClusterB);
+
+    EXPECT_CALL(*pMockClusterA, getOriginalLabel()).WillRepeatedly(Return(1)); // Label 1 in set
+    EXPECT_CALL(*pMockClusterB, getOriginalLabel()).WillRepeatedly(Return(2)); // Label 2 in set
+
+    CompositeCluster composite;
+    composite.add(mockClusterA);
+    composite.add(mockClusterB);
+
+    TS_ASSERT(!composite.labelInSet(3));
+    TS_ASSERT(composite.labelInSet(1));
+    TS_ASSERT(composite.labelInSet(2));
+  }
+
 };
 
 #endif /* MANTID_CRYSTAL_COMPOSITECLUSTERTEST_H_ */

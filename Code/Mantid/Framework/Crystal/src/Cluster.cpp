@@ -14,15 +14,20 @@ namespace Mantid
   {
 
     Cluster::Cluster(const size_t& label):
-      m_label(label),
-      m_originalLabel(label)
+      m_originalLabel(label),
+      m_rootCluster(this)
     {
       m_indexes.reserve(1000);  
     }
 
     size_t Cluster::getLabel() const
     {
-      return m_label;
+      if(m_rootCluster != this)
+      {
+        return m_rootCluster->getLabel();
+      }
+
+      return m_originalLabel;
     }
 
     size_t Cluster::getOriginalLabel() const
@@ -48,9 +53,10 @@ namespace Mantid
 
     void Cluster::writeTo(Mantid::API::IMDHistoWorkspace_sptr ws) const
     {
+      const size_t label = this->getLabel();
       for(size_t i = 0; i< m_indexes.size(); ++i)
       {
-        ws->setSignalAt(m_indexes[i], static_cast<Mantid::signal_t>(m_label));
+        ws->setSignalAt(m_indexes[i], static_cast<Mantid::signal_t>(label));
         ws->setErrorSquaredAt(m_indexes[i], 0);
       }
       for(size_t i = 0; i < m_ownedClusters.size(); ++i)
@@ -85,24 +91,23 @@ namespace Mantid
     {
       if(m_indexes.size() > 0)
       {
-        size_t minLabelIndex = m_indexes.front();
-        size_t minLabel= disjointSet[m_indexes.front()].getRoot();
-        for(size_t i = 1; i< m_indexes.size(); ++i)
-        {
-          const size_t& currentLabel = disjointSet[m_indexes[i]].getRoot();
-          if(currentLabel < minLabel)
-          {
-            minLabel = currentLabel;
-            minLabelIndex = i;
-          }
-        }
+        size_t parentIndex = m_rootCluster->getRepresentitiveIndex();
 
-        m_label = minLabel;
         for(size_t i = 1; i< m_indexes.size(); ++i)
         {
-          disjointSet[m_indexes[i]].unionWith(disjointSet[minLabelIndex].getParent());
+          disjointSet[m_indexes[i]].unionWith(disjointSet[parentIndex].getParent());
         }
       }
+    }
+
+    size_t Cluster::getRepresentitiveIndex() const
+    {
+      return m_indexes.front();
+    }
+
+    void Cluster::setRootCluster(ICluster const * root)
+    {
+      m_rootCluster = root;
     }
 
     bool Cluster::operator==(const Cluster& other) const

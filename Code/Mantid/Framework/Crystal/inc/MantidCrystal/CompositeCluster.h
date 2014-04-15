@@ -46,6 +46,9 @@ namespace Mantid
       /// Apply labels to the workspace
       void writeTo(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const;
 
+      /// Original label
+      size_t getOriginalLabel() const;
+
       /// Get the cluster label
       size_t getLabel() const;
 
@@ -61,15 +64,28 @@ namespace Mantid
       /// Own.
       void add(boost::shared_ptr<ICluster>& toOwn);
 
+      /// Set the root cluster
+      void setRootCluster(ICluster const * root);
+
+      /// Get a representative index of the cluster
+      size_t getRepresentitiveIndex() const;
+
+      /// Is a given label part of this cluster
+      bool labelInSet(const size_t& label) const;
+
     private:
+
+      /// Helper method to find the minimum label.
+      void findMinimum() const;
 
       /// Disabled copy construction
       CompositeCluster(const CompositeCluster&);
+
       /// Disabled assignement
       CompositeCluster& operator=(const CompositeCluster&);
 
       /// Label used by cluster
-      boost::optional<size_t> m_label;
+      mutable boost::optional<size_t> m_label;
       /// Attached clusters.
       std::vector<boost::shared_ptr<ICluster> > m_ownedClusters;
 

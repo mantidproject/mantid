@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/CentroidPeaks.cpp
 	src/ClearUB.cpp
 	src/Cluster.cpp
+	src/ClusterRegister.cpp
 	src/CombinePeaksWorkspaces.cpp
 	src/CompositeCluster.cpp
 	src/ConnectedComponentLabeling.cpp
@@ -71,6 +72,7 @@ set ( INC_FILES
 	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/ClearUB.h
 	inc/MantidCrystal/Cluster.h
+	inc/MantidCrystal/ClusterRegister.h
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
 	inc/MantidCrystal/CompositeCluster.h
 	inc/MantidCrystal/ConnectedComponentLabeling.h
@@ -135,6 +137,7 @@ set ( TEST_FILES
 	CalculateUMatrixTest.h
 	CentroidPeaksTest.h
 	ClearUBTest.h
+	ClusterRegisterTest.h
 	ClusterTest.h
 	CombinePeaksWorkspacesTest.h
 	CompositeClusterTest.h
