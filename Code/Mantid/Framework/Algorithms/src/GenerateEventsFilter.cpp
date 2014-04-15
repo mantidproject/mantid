@@ -1682,12 +1682,9 @@ namespace Algorithms
       // Impossible situation
       throw runtime_error("Impossible situation.");
     }
-    else
-    {
-      // Stop time of previous splitter is the start time of this splitter. Nothing need to do
-      g_log.warning() << "Stop time of previous splitter " << lasttime << " is the start time of this splitter "
-                      << start << ". Nothing need to do.\n";
-    }
+
+    // The last situation is "Stop time of previous splitter is the start time of this splitter".
+    // No action is required to take
 
     // Complete this splitter, i.e., stoptime and group
     // Stop time of splitter
