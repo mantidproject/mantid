@@ -35,8 +35,7 @@ UserSubWindow * UserSubWindowFactoryImpl::createUnwrapped(const std::string & na
   }
   catch(Mantid::Kernel::Exception::NotFoundError&)
   {
-    //FIXME: Ticket-9217 - Commented out for the moment to try and get working with clang
-    //g_log.debug() << "\"" << name << "\" not registered as a real name, trying an alias.\n";
+    g_log.debug() << "\"" << name << "\" not registered as a real name, trying an alias.\n";
     window = NULL;
   }
   if( !window )
@@ -85,21 +84,17 @@ UserSubWindow * UserSubWindowFactoryImpl::createFromAlias(const std::string & na
   QString alias = QString::fromStdString(name);
   if( m_badAliases.contains(alias) )
   {
-    //FIXME: Ticket-9217 - Commented out for the moment to try and get working with clang
-    //std::string error = "Alias \"" + name + "\" is defined for multiple real interfaces: \"";
+    std::string error = "Alias \"" + name + "\" is defined for multiple real interfaces: \"";
     QListIterator<std::string> itr(m_badAliases.value(alias));
     while( itr.hasNext() )
     {
-      //FIXME: Ticket-9217 - Commented out for the moment to try and get working with clang
-      //error += itr.next();
+      error += itr.next();
       if( itr.hasNext() )
       {
-        //FIXME: Ticket-9217 - Commented out for the moment to try and get working with clang
-        //error += ",";
+        error += ",";
       }
     }
-    //FIXME: Ticket-9217 - Commented out for the moment to try and get working with clang
-    //  g_log.error() << error + "\n";
+      g_log.error() << error + "\n";
     return NULL;
   }
 
