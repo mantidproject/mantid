@@ -4,6 +4,7 @@
 set ( TEST_PY_FILES 
   IComponentTest.py
   InstrumentTest.py
+  ObjectTest.py
   OrientedLatticeTest.py
   RectangularDetectorTest.py
   ReferenceFrameTest.py
