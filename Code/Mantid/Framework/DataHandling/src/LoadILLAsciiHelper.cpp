@@ -147,6 +147,7 @@ RrAadIitddddddddddddddddAatdddddddFfttttttttddddddddddddddddddddddddddIitdd etc.
 #include <string>
 #include <map>
 #include <stdlib.h>
+#include <limits>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/erase.hpp>
@@ -453,10 +454,13 @@ template<typename T> T ILLParser::getValueFromHeader(const std::string &field) {
 
 /*
  * Get value type <T> from a map<strin,string>
+ * @return  std::numeric_limits<T>::infinity() if no key was find in the map
  */
 template<typename T> T ILLParser::getValue(const std::string &field,
 		const std::map<std::string, std::string> &thisHeader ) {
-	T ret;
+
+	T ret = std::numeric_limits<T>::infinity();
+
 	for (auto it = thisHeader.begin(); it != thisHeader.end(); ++it) {
 		//std::cout << it->first << "=>" << it->second << '\n';
 		std::size_t pos = it->first.find(field);
