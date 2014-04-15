@@ -55,7 +55,7 @@ A better algorithm to find and fit peaks may save some spectrum with relatively 
 
 === <math>\chi^2</math> of the offset fitting function ===
 The goodness of fit, <math>\chi^2_{iws}</math>, of the offset fitting function
-:<math> \sum_{p} |X_{0, p} - (1+offset)X_{0, p}|/\H^2_{p} </math>
+:<math> \sum_{p} |X_{0, p} - (1+offset)X_{0, p}|\cdot H^2_{p} </math>
 is an important measure of fitting quality on each spectrum (indexed as iws).
 
 === Deviation of highest peaks ===
