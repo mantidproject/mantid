@@ -9,8 +9,6 @@
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
-#include <boost/shared_ptr.hpp>
-
 namespace Mantid
 {
 

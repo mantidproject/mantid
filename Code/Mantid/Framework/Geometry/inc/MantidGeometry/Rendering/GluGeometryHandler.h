@@ -1,7 +1,6 @@
 #ifndef GLU_GEOMETRYHANDLER_H
 #define GLU_GEOMETRYHANDLER_H
 
-#include <boost/shared_ptr.hpp>
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 

@@ -1,7 +1,9 @@
 #ifndef MANTID_KERNEL_TASK_H_
 #define MANTID_KERNEL_TASK_H_
 
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"

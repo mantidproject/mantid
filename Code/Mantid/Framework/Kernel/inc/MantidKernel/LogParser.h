@@ -6,7 +6,9 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 
 #include <map>
 #include <sstream>

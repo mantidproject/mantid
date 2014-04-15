@@ -3,8 +3,10 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/algorithm/string.hpp>
+# include <boost/format.hpp>
+#endif
 
 namespace Mantid
 {

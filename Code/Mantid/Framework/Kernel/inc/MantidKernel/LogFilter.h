@@ -1,5 +1,5 @@
 #ifndef MANTID_KERNEL_LOGFILTER_H_
-#define MANTID_KERNEL_LOGFILTER_H
+#define MANTID_KERNEL_LOGFILTER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -8,7 +8,9 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
 
-#include <boost/scoped_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/scoped_ptr.hpp>
+#endif
 
 namespace Mantid
 {

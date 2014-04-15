@@ -7,10 +7,8 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
 #include "MantidAPI/IFunction.h"
-#include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
-#include <boost/shared_array.hpp>
 
 #ifndef HAS_UNORDERED_MAP_H
 #include <map>

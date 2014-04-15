@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
-#include <boost/shared_ptr.hpp>
 #include <ctime>
 #include <set>
 
