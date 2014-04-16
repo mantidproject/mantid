@@ -1823,25 +1823,6 @@ namespace Mantid
           m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
         else
           m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
-#if 0
-        size_t numsize = m_values.size();
-        if (numsize <= 1)
-        {
-          // Always sorted if number of elements is zero or one
-          m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
-        }
-        else
-        {
-          // Check
-          m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
-          for (size_t i = 1; i < numsize; ++i)
-            if (m_values[i] < m_values[i-1])
-            {
-              m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
-              break;
-            }
-        }
-#endif
       }
 
 
