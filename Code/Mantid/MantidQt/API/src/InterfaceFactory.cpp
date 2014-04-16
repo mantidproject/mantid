@@ -4,6 +4,7 @@
 #include "MantidQtAPI/InterfaceFactory.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidKernel/Logger.h"
+#include <sstream>
 
 using namespace MantidQt::API;
 
