@@ -121,6 +121,15 @@ double LoadHelper::getL2(const API::MatrixWorkspace_sptr& workspace, int detId) 
 	return l2;
 }
 
+double LoadHelper::getDistanceSourceToMonitor(const API::MatrixWorkspace_sptr& workspace, int detId) {
+	Geometry::Instrument_const_sptr instrument =
+				workspace->getInstrument();
+	Geometry::IComponent_const_sptr source = instrument->getSource();
+
+	double dist = workspace->getDetector(detId)->getPos().distance(source->getPos());
+	return dist;
+}
+
 /*
  * Get instrument property as double
  * @s - input property name

@@ -611,10 +611,24 @@ namespace Mantid
       // This is completely absurd but there are no X units in the ILL monitors
       // So, we are going to assume the same as in the data
 
+
+
+
+
+
       size_t spec = 0;
 
-
       for(auto it = monitors.begin(); it != monitors.end(); ++it) {
+
+//    	  double theoreticalElasticTOF
+//
+//    	  Mantid::Geometry::IDetector_const_sptr thisMonitor = m_localWorkspace->getInstrument()->getDetector(spec);
+//    	  double l1 = instrument->getSource()->getDistance(*sample);
+//
+//
+//
+//    	        double monitorTheoreticalElasticTOF= m_loader.calculateTOF(m_l1,m_wavelength) * 1e6; //microsecs
+
 
           if (spec > 0)
           {
