@@ -289,7 +289,7 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockStrategy));
   }
 
-  void xtest_3d_chequred_pattern()
+  void test_3d_chequred_pattern()
   {
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 3, 3); // Makes a 3 by 3 by 3 grid. All populated with a single value.
 
@@ -299,7 +299,7 @@ public:
     /*
      * We treat alternate cells as background, which actually should result in a single object. Think of a chequered flag.
      * */
-    EXPECT_CALL(mockStrategy, isBackground(_)).Times(27)
+    EXPECT_CALL(mockStrategy, isBackground(_))
     .WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true))
     .WillOnce(Return(false)).WillOnce(Return(true)).WillOnce(Return(false))
     .WillOnce(Return(true)).WillOnce(Return(false)).WillOnce(Return(true))
@@ -431,7 +431,7 @@ public:
 
   // ---------------- Multi threaded functional testing ---------------------------/
 
-  void xtest_1d_with_double_object_multi_threaded()
+  void test_1d_with_double_object_multi_threaded()
   {
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.1, 1, 6); // Makes a 1 by 6 md ws with identical signal values.
     inWS->setSignalAt(1, 0); // Puts a spacer in. So there are two clusters in this 1D workspace now.
@@ -470,7 +470,7 @@ public:
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
   }
 
-  void xtest_1d_with_three_objects_multi_threaded()
+  void test_1d_with_three_objects_multi_threaded()
   {
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.1, 1, 9); // Makes a 1 by 6 md ws with identical signal values.
     inWS->setSignalAt(1, 0); // Puts a spacer in. 
@@ -487,7 +487,7 @@ public:
     auto outWS = ccl.execute(inWS, &backgroundStrategy, prog);
 
     std::set<size_t> uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
-    TSM_ASSERT_EQUALS("3 objects so should have 4 unique entries", 3, uniqueEntries.size());
+    TSM_ASSERT_EQUALS("3 objects so should have 4 unique entries", 4, uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
     TS_ASSERT(does_set_contain(uniqueEntries, m_emptyLabel));// Background entries.
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId+1));
@@ -495,7 +495,7 @@ public:
 
   }
 
-  void xtest_3d_with_many_objects_multi_threaded()
+  void test_3d_with_many_objects_multi_threaded()
   {
     do_test_3d_with_many_objects(2 /*N threads*/);
   }

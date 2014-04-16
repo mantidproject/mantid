@@ -40,7 +40,7 @@ For more in-depth analysis, the algorithm will produce debug log messages.
  *WIKI*/
 
 #include "MantidCrystal/IntegratePeaksUsingClusters.h"
-#include "MantidCrystal/Cluster.h"
+#include "MantidCrystal/ICluster.h"
 #include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/HardThresholdBackground.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -277,8 +277,8 @@ namespace Mantid
         else
         {
           const size_t labelIdAtPeak = static_cast<size_t>(signalValue);
-          Cluster * const cluster = clusterMap[labelIdAtPeak].get();
-          Cluster::ClusterIntegratedValues integratedValues = cluster->integrate(mdWS);
+          ICluster * const cluster = clusterMap[labelIdAtPeak].get();
+          ICluster::ClusterIntegratedValues integratedValues = cluster->integrate(mdWS);
           peak.setIntensity(integratedValues.get<0>());
           peak.setSigmaIntensity(integratedValues.get<1>());
           

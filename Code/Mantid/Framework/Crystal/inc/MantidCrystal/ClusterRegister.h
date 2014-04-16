@@ -4,7 +4,9 @@
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include "MantidCrystal/DisjointElement.h"
 #include <map>
+#include <vector>
 
 namespace Mantid
 {
@@ -12,7 +14,6 @@ namespace Crystal
 {
   class ICluster;
   class ImplClusterRegister;
-  class DisjointElement;
 
   /** ClusterRegister : A fly-weight ICluster regeister. Handles the logic of merging clusters.
     
@@ -47,6 +48,8 @@ namespace Crystal
     void add(const size_t& label, const boost::shared_ptr<ICluster>& cluster);
 
     void merge(const DisjointElement& a, const DisjointElement& b) const;
+
+    void toUniformMinimum(std::vector<DisjointElement>& elements);
 
     MapCluster clusters() const;
 

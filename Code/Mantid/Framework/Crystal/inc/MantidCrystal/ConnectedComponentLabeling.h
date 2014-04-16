@@ -18,7 +18,7 @@ namespace Mantid
 
   namespace Crystal
   {
-    class Cluster;
+    class ICluster;
     /**
      * Namespace containing useful typedefs
      */
@@ -30,7 +30,7 @@ namespace Mantid
       typedef std::vector<size_t> VecIndexes;
       typedef std::vector<DisjointElement> VecElements;
       typedef std::set<size_t> SetIds;
-      typedef std::map<size_t, boost::shared_ptr<Mantid::Crystal::Cluster> > ClusterMap;
+      typedef std::map<size_t, boost::shared_ptr<Mantid::Crystal::ICluster> > ClusterMap;
       typedef boost::tuple<Mantid::API::IMDHistoWorkspace_sptr, ClusterMap> ClusterTuple;
     }
 

@@ -8,7 +8,10 @@
 #include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidCrystal/ICluster.h"
 #include "MantidCrystal/Cluster.h"
+#include "MantidCrystal/ClusterRegister.h"
+#include "MantidCrystal/CompositeCluster.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -112,30 +115,6 @@ namespace Mantid
       }
 
       typedef boost::tuple<size_t, size_t> EdgeIndexPair;
-
-      struct DisjointPair
-      {
-        const DisjointElement m_currentLabel;
-        const DisjointElement m_neighbourLabel;
-        DisjointPair(const DisjointElement& currentLabel, const DisjointElement& neighbourLabel) :
-            m_currentLabel(currentLabel), m_neighbourLabel(neighbourLabel)
-        {
-        }
-
-        size_t unique() const
-        {
-          const size_t min = std::min(m_currentLabel.getId(), m_neighbourLabel.getId());
-          const size_t max = std::max(m_currentLabel.getId(), m_neighbourLabel.getId());
-          return min + (max >> 32);
-        }
-
-        inline bool operator<(const DisjointPair & other) const
-        {
-          return (this->unique() < other.unique());
-        }
-      };
-
-      typedef std::set<DisjointPair> SetDisjointPair;
       typedef std::vector<EdgeIndexPair> VecEdgeIndexPair;
 
       /**
@@ -302,7 +281,7 @@ namespace Mantid
     ClusterMap ConnectedComponentLabeling::calculateDisjointTree(IMDHistoWorkspace_sptr ws,
         BackgroundStrategy * const baseStrategy, Progress& progress) const
     {
-      std::map<size_t, boost::shared_ptr<Cluster> > clusterMap;
+      std::map<size_t, boost::shared_ptr<ICluster> > clusterMap;
       VecElements neighbourElements(ws->getNPoints());
 
       const size_t maxNeighbours = calculateMaxNeighbours(ws.get());
@@ -362,17 +341,18 @@ namespace Mantid
 
         // -------------------- Stage 2 --- Preparation stage for combining equivalent clusters. Must be done in sequence.
         // Combine cluster maps processed by each thread.
+        ClusterRegister clusterRegister;
         for (auto it = parallelClusterMapVec.begin(); it != parallelClusterMapVec.end(); ++it)
         {
-          clusterMap.insert(it->begin(), it->end());
+          for(auto itt = it->begin(); itt != it->end(); ++itt)
+          {
+            clusterRegister.add(itt->first, itt->second);
+          }
         }
 
         // Percolate minimum label across boundaries for indexes where there is ambiguity.
         g_log.debug("Percolate minimum label across boundaries");
-        std::vector<boost::shared_ptr<Cluster> > incompleteClusterVec;
-        incompleteClusterVec.reserve(1000);
 
-        SetDisjointPair usedPairs;
         std::set<size_t> usedLabels;
         for (auto it = parallelEdgeVec.begin(); it != parallelEdgeVec.end(); ++it)
         {
@@ -381,67 +361,13 @@ namespace Mantid
           {
             DisjointElement& a = neighbourElements[iit->get<0>()];
             DisjointElement& b = neighbourElements[iit->get<1>()];
-            // Ignore pairs that never ended up yeilding doubly labelled indexes.
-            if (!a.isEmpty() && !b.isEmpty())
-            {
-              std::cout << "a is: " << a.getId() << " b is: " << b.getId() << std::endl;
-              DisjointPair temp(a, b);
-              if (usedPairs.find(temp) == usedPairs.end())
-              {
-                std::cout << "About to insert as incomplete: a is: " << a.getId() << " b is: "
-                    << b.getId() << std::endl;
-                usedPairs.insert(DisjointPair(a, b));
-                // Percolate the minimum label across the boundary.
-                if (a.getId() < b.getId())
-                {
-                  b.unionWith(&a);
-                }
-                else
-                {
-                  a.unionWith(&b);
-                }
-              }
-
-              if (usedLabels.find(a.getId()) == usedLabels.end())
-              {
-                /* Consider the unresolved label */
-                incompleteClusterVec.push_back(clusterMap[a.getId()]); // Register it.
-                clusterMap.erase(a.getId()); // Unresolved clusters should not live on the final map.
-                usedLabels.insert(a.getId()); // Avoid processing it again
-              }
-
-            }
+            clusterRegister.merge(a, b);
           }
         }
+        clusterRegister.toUniformMinimum(neighbourElements);
+        clusterMap = clusterRegister.clusters();
 
-        // ------------- Stage 3 In parallel, process each incomplete cluster.
-        progress.doReport("Merging clusters across processors");
-        g_log.debug("Merging clusters across processors");
-        progress.resetNumSteps(incompleteClusterVec.size(), 0.8, 0.9);
-        PARALLEL_FOR_NO_WSP_CHECK()
-        for (int i = 0; i < static_cast<int>(incompleteClusterVec.size()); ++i)
-        {
-          auto cluster = incompleteClusterVec[i];
-          cluster->toUniformMinimum(neighbourElements);
-          progress.report();
-        }
-        g_log.debug("Remove duplicates");
-        g_log.debug() << incompleteClusterVec.size() << " clusters to reconstruct" << std::endl;
-        // Now combine clusters and add the resolved clusters to the clusterMap.
-        for (size_t i = 0; i < incompleteClusterVec.size(); ++i)
-        {
-          const size_t label = incompleteClusterVec[i]->getLabel();
-          if (!does_contain_key(clusterMap, label))
-          {
-            clusterMap.insert(std::make_pair(label, incompleteClusterVec[i]));
-          }
-          else
-          {
-            auto child = boost::static_pointer_cast<const Cluster>(incompleteClusterVec[i]);
-            clusterMap[label]->attachCluster(child);
-          }
-        }
-
+        
       }
       else
       {

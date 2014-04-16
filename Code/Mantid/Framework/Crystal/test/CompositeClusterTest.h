@@ -112,8 +112,8 @@ public:
     boost::shared_ptr<ICluster> mockClusterA(pMockClusterA);
     boost::shared_ptr<ICluster> mockClusterB(pMockClusterB);
 
-    EXPECT_CALL(*pMockClusterA, getLabel()).Times(1).WillOnce(Return(1)); // Max label
-    EXPECT_CALL(*pMockClusterB, getLabel()).Times(1).WillOnce(Return(0));// Min label
+    EXPECT_CALL(*pMockClusterA, getLabel()).WillRepeatedly(Return(1)); // Max label
+    EXPECT_CALL(*pMockClusterB, getLabel()).WillRepeatedly(Return(0));// Min label
     EXPECT_CALL(*pMockClusterA, setRootCluster(pMockClusterB)).Times(1);// Use minimum as root
     EXPECT_CALL(*pMockClusterB, setRootCluster(pMockClusterB)).Times(1);// Use minimum as root
     EXPECT_CALL(*pMockClusterA, toUniformMinimum(_)).Times(1);// Use minimum as root

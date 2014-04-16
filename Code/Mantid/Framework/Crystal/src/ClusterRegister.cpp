@@ -113,14 +113,23 @@ namespace Mantid
       }
     }
 
+    void ClusterRegister::toUniformMinimum(std::vector<DisjointElement>& elements)
+    {
+      for(size_t i = 0; i < m_Impl->m_merged.size(); ++i)
+      {
+        const auto&  merged = m_Impl->m_merged[i];
+        merged->toUniformMinimum(elements);
+      }
+    }
+
     ClusterRegister::MapCluster ClusterRegister::clusters() const
     {
       MapCluster temp;
       temp.insert(m_Impl->m_register.begin(), m_Impl->m_register.end());
       for(size_t i = 0; i < m_Impl->m_merged.size(); ++i)
       {
-        const auto & merged = m_Impl->m_merged[i];
-        temp.insert(std::make_pair( merged->getLabel(), merged ));
+        const auto&  merged = m_Impl->m_merged[i];
+        temp.insert(std::make_pair( merged->getLabel(), merged));
       }
       return temp;
     }

@@ -65,10 +65,6 @@ public:
     TS_ASSERT(combined.find(2) != combined.end());
     TS_ASSERT(boost::dynamic_pointer_cast<ICluster>(combined[1]));
     TS_ASSERT(boost::dynamic_pointer_cast<CompositeCluster>(combined[2]));
-    for(auto it = combined.begin(); it != combined.end(); ++it)
-    {
-      std::cout << "Type is " << typeid(it->second.get()).name() << std::endl;
-    }
   }
 
   void test_simple_merge_repeat()
@@ -114,8 +110,8 @@ public:
 
     auto combined = cRegister.clusters();
     TS_ASSERT_EQUALS(1, combined.size());
-    TSM_ASSERT("Combined all clusters, so should have a single Composite cluster.",
-        boost::dynamic_pointer_cast<CompositeCluster>(combined[0]));
+    TSM_ASSERT("Combined all clusters, so should have a single Composite cluster. Composite should be labelled with the lowest label.",
+        boost::dynamic_pointer_cast<CompositeCluster>(combined[1]));
   }
 
 };
