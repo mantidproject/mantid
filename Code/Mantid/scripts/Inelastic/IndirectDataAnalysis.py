@@ -593,7 +593,7 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, intensities_constrained=False
     furyFitSaveWorkspaces(save_workspaces, Verbose)
 
   if Plot != 'None' :
-    furyfitPlotSeq(fit_workspaces, Plot)
+    furyfitPlotSeq(result_workspace, Plot)
 
   EndTime('FuryFit')
   return result_workspace
@@ -658,7 +658,7 @@ def furyfitMult(inputWS, function, ftype, startx, endx, intensities_constrained=
     furyFitSaveWorkspaces(save_workspaces, Verbose)
   
   if Plot != 'None':
-    furyfitPlotSeq(outWS, Plot)
+    furyfitPlotSeq(result_workspace, Plot)
   
   EndTime('FuryFit Multi')
   return result_workspace
@@ -700,10 +700,12 @@ def furyFitSaveWorkspaces(save_workspaces, Verbose):
 
 
 def furyfitPlotSeq(ws, plot):
-    param_names = [plot]
     if plot == 'All':
         param_names = ['Intensity', 'Tau', 'Beta']
-    plotParameters(ws, param_names)
+    else:
+        param_names = [plot]
+        
+    plotParameters(ws, *param_names)
 
 
 ##############################################################################
