@@ -293,8 +293,6 @@ namespace DataHandling
     // We ignore the first three INS lines of the bank, then read 15 parameters from the next four INS lines.
     size_t currentLineIndex = findINSLine(lines, startlineindex);
     size_t start = 15;
-    double param1, param2, param3, param4;
-    std::istringstream paramLine;
     //ignore 1st line
     currentLineIndex = findINSLine(lines, currentLineIndex+1);
     // ignore 2nd line
@@ -302,21 +300,44 @@ namespace DataHandling
     // ignore 3rd line
     currentLineIndex = findINSLine(lines, currentLineIndex+1);
     // process 4th line
-    paramLine.str( lines[currentLineIndex].substr(start));
-    paramLine >> param1 >> param2 >> param3 >> param4;
+    std::istringstream paramLine4;
+    double param1, param2, param3, param4;
+    paramLine4.str( lines[currentLineIndex].substr(start));
+    paramLine4 >> param1 >> param2 >> param3 >> param4;
     parammap["Alph0"] = param1;
     parammap["Alph1"] = param2;
     parammap["Beta0"] = param3;
-    parammap["Beta1"] = param4;
+    parammap["Beta1"] = param4; // Kappa
 
     currentLineIndex = findINSLine(lines, currentLineIndex+1);
     // process 5th line
+    std::istringstream paramLine5;
+    double param5, param6, param7, param8;
+    paramLine5.str( lines[currentLineIndex].substr(start));
+    paramLine5 >> param5 >> param6 >> param7 >> param8;
+    parammap["Sig0"] = param5;
+    parammap["Sig1"] = param6;
+    parammap["Sig2"] = param7;
+    parammap["Gam0"] = param8;
 
     currentLineIndex = findINSLine(lines, currentLineIndex+1);
     // process 6th line
+    std::istringstream paramLine6;
+    double param9, param10, param11, param12;
+    paramLine6.str( lines[currentLineIndex].substr(start));
+    paramLine6 >> param9 >> param10 >> param11 >> param12;
+    parammap["Gam1"] = param9;
+    parammap["Gam2"] = param10;
+    if( param11 != 0.0)
+    {
+      g_log.warning() << "Bank" << bankid << "stec not 0, but " << param3;
+    }
+    if( param12 != 0.0)
+    {
+      g_log.warning() << "Bank" << bankid << "ptec not 0, but " << param4;
+    }
 
-    currentLineIndex = findINSLine(lines, currentLineIndex+1);
-    // process 7th line
+    // ignore 7th line
 
   }
 
