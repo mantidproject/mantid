@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
- name="IN4" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2013-03-11 14:06:56">
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" name="IN4" valid-from="1900-01-31 23:59:59"
+valid-to="2100-01-31 23:59:59" last-modified="2014-04-16 09:52:09">
   <!-- Author: ricardo.leal@ill.fr -->
   <defaults>
     <length unit="meter" />
@@ -18,6 +18,15 @@
     <location z="-2" />
   </component>
   <type name="moderator" is="Source"></type>
+  <!--MONITORS-->
+  <component type="monitors" idlist="monitors">
+    <location />
+  </component>
+  <type name="monitors">
+    <component type="monitor">
+      <location z="-0.5" name="monitor1" />
+    </component>
+  </type>
   <!-- Sample position -->
   <component type="sample-position">
     <location y="0.0" x="0.0" z="0.0" />
@@ -444,6 +453,21 @@
       <location r="2.000000" t="8.738000" p="315.000000" name="det396"></location>
     </component>
   </type>
+  <!--MONITOR SHAPE-->
+  <!--FIXME: Do something real here.-->
+  <type is="monitor" name="monitor">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base y="0.0" x="0.0" z="0.0" />
+      <axis y="0.0" x="0.0" z="1.0" />
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder>
+    <algebra val="cyl-approx" />
+  </type>
+  <!--MONITOR IDs-->
+  <idlist idname="monitors">
+    <id val="0" />
+  </idlist>
   <type name="pack" is="detector">
     <cuboid id="pack-pixel-shape">
       <left-front-bottom-point z="-0.005" y="-0.2" x="-0.01" />
