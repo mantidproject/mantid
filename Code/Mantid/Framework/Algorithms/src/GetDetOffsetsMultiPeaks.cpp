@@ -733,6 +733,7 @@ namespace Algorithms
     * @param peakPosToFit :: Actual peak positions to fit (output).
     * @param peakPosFitted :: Actual peak positions fitted (output).
     * @param chisq :: chisq.
+    * @param peakHeights :: vector for fitted heights of peaks
     * @param i_highestpeak:: index of the highest peak among all peaks
     * @return The number of peaks in range
     */
