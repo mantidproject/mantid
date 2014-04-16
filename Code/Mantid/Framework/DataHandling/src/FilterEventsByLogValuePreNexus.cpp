@@ -724,8 +724,7 @@ namespace DataHandling
 
   //----------------------------------------------------------------------------------------------
   /** Perform statistics to event (wrong pixel ID) logs
-    * @params
-    * - mindex:  index of the the series in the list
+    * @param mindex ::  index of the the series in the list
     */
   void FilterEventsByLogValuePreNexus::doStatToEventLog(size_t mindex)
   {
@@ -1552,7 +1551,6 @@ namespace DataHandling
 
   //----------------------------------------------------------------------------------------------
   /** Process the event file properly.
-   * @param workspace :: EventWorkspace to write to.
    */
   void FilterEventsByLogValuePreNexus::filterEvents()
   {
