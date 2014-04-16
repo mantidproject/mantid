@@ -46,7 +46,7 @@ public:
 
   void testExec()
   {
-     // Create input workspace with paremeterised instrument and put into data store
+     // Create input workspace with parameterized instrument and put into data store
      MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
      const std::string wsName1("CopyInstParamWs1");
      AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
@@ -67,6 +67,11 @@ public:
      Geometry::ComponentHelper::moveComponent(*det1, *pmap, V3D(6.0,0.0,0.7), Absolute );
      IComponent_const_sptr det2 =instrument->getDetector(2);
      Geometry::ComponentHelper::moveComponent(*det2, *pmap, V3D(6.0,0.1,0.7), Absolute );
+     // add auxiliary instrument parameters
+     pmap->addDouble(instrument.get(),"Ei",100);
+     pmap->addString(instrument.get(),"some_param","some_value");
+
+
 
      // Verify that a detector moved in the input workspace has not yet been moved in the output workspace
      IDetector_const_sptr deto = ws2->getDetector(0);
@@ -92,21 +97,35 @@ public:
      TS_ASSERT_DELTA( newPos2.X() , 6.0, 0.0001);
      TS_ASSERT_DELTA( newPos2.Y() , 0.1, 0.0001);
      TS_ASSERT_DELTA( newPos2.Z() , 0.7, 0.0001);
+     auto instr2=ws2->getInstrument();
+     std::set<std::string> param_names = instr2->getParameterNames();
+     TS_ASSERT(param_names.find("Ei")!=param_names.end());
+     TS_ASSERT(param_names.find("some_param")!=param_names.end());
+
 
      dataStore.remove(wsName1);
      dataStore.remove(wsName2);
   }
 
-	// #8186: it was decided to relax the previous requirement that it does not copy the instrument
-	// parameter for different instruments
+  // #8186: it was decided to relax the previous requirement that it does not copy the instrument
+  // parameter for different instruments
   void testDifferent_BaseInstrument_Warns()
   {
-    // Create input workspace with parameterised instrument and put into data store
+    // Create input workspace with parameterized instrument and put into data store
      MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
      const std::string wsName1("CopyInstParamWs1");
      AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
      dataStore.add(wsName1, ws1);
-     // Create output workspace with another parameterised instrument and put into data store
+
+
+     Geometry::Instrument_const_sptr instrument = ws1->getInstrument();
+     Geometry::ParameterMap *pmap;
+     pmap = &(ws1->instrumentParameters());
+    // add auxiliary instrument parameters
+     pmap->addDouble(instrument.get(),"Ei",100);
+     pmap->addString(instrument.get(),"some_param","some_value");
+
+     // Create output workspace with another parameterized instrument and put into data store
      MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
      const std::string wsName2("CopyInstParamWs2");
      dataStore.add(wsName2, ws2);
@@ -119,6 +138,11 @@ public:
      copyInstParam.setRethrows(true);
      TS_ASSERT(copyInstParam.execute());
      TS_ASSERT( copyInstParam.isExecuted() );
+
+     auto instr2=ws2->getInstrument();
+     std::set<std::string> param_names = instr2->getParameterNames();
+     TS_ASSERT(param_names.find("Ei")!=param_names.end());
+     TS_ASSERT(param_names.find("some_param")!=param_names.end());
 
      dataStore.remove(wsName1);
      dataStore.remove(wsName2);
