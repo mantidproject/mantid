@@ -224,7 +224,7 @@ namespace IDA
 
     //can and sample formulas
     QString sampleFormula = uiForm().absp_leSampleFormula->text();
-    QString canFormula = uiForm().absp_leSampleFormula->text();
+    QString canFormula = uiForm().absp_leCanFormula->text();
 
     if ( sampleFormula.isEmpty() ) 
     { 
