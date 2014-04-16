@@ -44,7 +44,7 @@ namespace CustomInterfaces
    * Run the load algorithm with the supplied filename
    * 
    * @param filename :: The name of the file to load
-   * @param workspace :: The name of the workspace
+   * @param outputName :: The name of the output workspace
    * @return If the algorithm was successful
    */
   bool C2ETab::loadFile(const QString& filename, const QString& outputName)
