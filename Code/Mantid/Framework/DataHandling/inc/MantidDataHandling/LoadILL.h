@@ -72,14 +72,15 @@ private:
 
 	int getEPPFromVanadium(const std::string &,Mantid::API::MatrixWorkspace_sptr);
 	void loadInstrumentDetails(NeXus::NXEntry&);
-	void initWorkSpace(NeXus::NXEntry& entry);
+	std::vector< std::vector<int> > getMonitorInfo(NeXus::NXEntry& firstEntry);
+	void initWorkSpace(NeXus::NXEntry& entry, const std::vector<std::vector<int> >&);
 	void initInstrumentSpecific();
 	void loadRunDetails(NeXus::NXEntry & entry);
 	void loadExperimentDetails(NeXus::NXEntry & entry);
 	int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
 	void loadTimeDetails(NeXus::NXEntry& entry);
 	NeXus::NXData loadNexusFileData(NeXus::NXEntry& entry);
-	void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry, int vanaCalculatedDetectorElasticPeakPosition = -1);
+	void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry, const std::vector<std::vector<int> >&, int vanaCalculatedDetectorElasticPeakPosition = -1);
 
 	void runLoadInstrument();
 

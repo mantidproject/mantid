@@ -22,6 +22,8 @@ To date this algorithm only supports: IN4, IN5 and IN6
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadHelper.h"
 
+#include <boost/algorithm/string/predicate.hpp> // boost::starts_with
+
 #include <limits>
 #include <algorithm>
 #include <iostream>
@@ -143,14 +145,17 @@ namespace Mantid
 
       loadInstrumentDetails(dataFirstEntry);
       loadTimeDetails(dataFirstEntry);
-      initWorkSpace(dataFirstEntry);
+
+      std::vector<std::vector<int> > monitors = getMonitorInfo(dataFirstEntry);
+
+      initWorkSpace(dataFirstEntry,monitors);
 
       runLoadInstrument(); // just to get IDF contents
       initInstrumentSpecific();
 
       int calculatedDetectorElasticPeakPosition = getEPPFromVanadium(filenameVanadium,vanaWS);
 
-      loadDataIntoTheWorkSpace(dataFirstEntry,calculatedDetectorElasticPeakPosition);
+      loadDataIntoTheWorkSpace(dataFirstEntry,monitors,calculatedDetectorElasticPeakPosition);
 
       loadRunDetails(dataFirstEntry);
       loadExperimentDetails(dataFirstEntry);
@@ -161,6 +166,37 @@ namespace Mantid
       // Set the output workspace property
       setProperty("OutputWorkspace", m_localWorkspace);
     }
+
+
+	/**
+	 *
+	 * @return : list of monitor data
+	 */
+	std::vector<std::vector<int> > LoadILL::getMonitorInfo(
+			NeXus::NXEntry& firstEntry) {
+
+		std::vector<std::vector<int> > monitorList;
+
+		for (std::vector<NXClassInfo>::const_iterator it =
+				firstEntry.groups().begin(); it != firstEntry.groups().end();
+				++it) {
+
+			if (it->nxclass == "NXmonitor"
+					|| boost::starts_with(it->nxname, "monitor")) {
+
+				g_log.debug() << "Load monitor data from " + it->nxname;
+
+				NXData dataGroup = firstEntry.openNXData(it->nxname + "/data");
+				NXInt data = dataGroup.openIntData();
+				// load the counts from the file into memory
+				data.load();
+
+				std::vector<int> thisMonitor(data(), data() + data.size());
+				monitorList.push_back(thisMonitor);
+			}
+		}
+		return monitorList;
+	}
 
 
     /**
@@ -231,7 +267,7 @@ namespace Mantid
     * @param entry :: The Nexus entry
     *
     */
-    void LoadILL::initWorkSpace(NeXus::NXEntry& entry) 
+    void LoadILL::initWorkSpace(NeXus::NXEntry& entry,  const std::vector<std::vector<int> >&monitors)
     {
 
       // read in the data
@@ -241,6 +277,7 @@ namespace Mantid
       m_numberOfTubes = static_cast<size_t>(data.dim0());
       m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
       m_numberOfChannels = static_cast<size_t>(data.dim2());
+      size_t numberOfMonitors = monitors.size();
 
       // dim0 * m_numberOfPixelsPerTube is the total number of detectors
       m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
@@ -258,7 +295,7 @@ namespace Mantid
       // bin boundaries = m_numberOfChannels + 1
       // Z/time dimension
       m_localWorkspace = WorkspaceFactory::Instance().create("Workspace2D",
-        m_numberOfHistograms, m_numberOfChannels + 1, m_numberOfChannels);
+        m_numberOfHistograms + numberOfMonitors, m_numberOfChannels + 1, m_numberOfChannels);
       m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(
         "TOF");
       m_localWorkspace->setYUnitLabel("Counts");
@@ -518,7 +555,9 @@ namespace Mantid
     * @param entry :: The Nexus entry
     * @param vanaCalculatedDetectorElasticPeakPosition :: If -1 uses this value as the elastic peak position at the detector.
     */
-    void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry, int vanaCalculatedDetectorElasticPeakPosition)
+    void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry,
+    		const std::vector<std::vector<int> >&monitors,
+    		 int vanaCalculatedDetectorElasticPeakPosition)
     {
 
       // read in the data
@@ -564,12 +603,42 @@ namespace Mantid
         << detectorTofBins[calculatedDetectorElasticPeakPosition + 1] << "]"
         << std::endl;
 
+
       // Assign calculated bins to first X axis
       m_localWorkspace->dataX(0).assign(detectorTofBins.begin(),
         detectorTofBins.end());
 
-      Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
+      // This is completely absurd but there are no X units in the ILL monitors
+      // So, we are going to assume the same as in the data
+
       size_t spec = 0;
+
+
+      for(auto it = monitors.begin(); it != monitors.end(); ++it) {
+
+          if (spec > 0)
+          {
+            // just copy the time binning axis to every spectra
+            m_localWorkspace->dataX(spec) = m_localWorkspace->readX(0);
+          }
+          // Assign Y
+
+          m_localWorkspace->dataY(spec).assign(it->begin(),it->end());
+
+          // Assign Error
+          MantidVec& E = m_localWorkspace->dataE(spec);
+          std::transform(it->begin(),it->end(), E.begin(), LoadILL::calculateError);
+
+          ++spec;
+
+
+      }
+
+
+
+
+      Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
+      //size_t spec = 0;
       for (size_t i = 0; i < m_numberOfTubes; ++i) 
       {
         for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) 
