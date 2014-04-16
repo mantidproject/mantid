@@ -378,9 +378,7 @@
            <property name="fileBrowserSuffixes" stdset="0">
             <stringlist>
              <string>_res.nxs</string>
-             <string>.res</string>
-             <string>_red</string>
-             <string>.red</string>
+             <string>_red.nxs</string>
             </stringlist>
            </property>
            <property name="showLoad">
@@ -901,9 +899,7 @@
            <property name="fileBrowserSuffixes" stdset="0">
             <stringlist>
              <string>_res.nxs</string>
-             <string>.res</string>
              <string>_red.nxs</string>
-             <string>_red</string>
             </stringlist>
            </property>
            <property name="showLoad">
