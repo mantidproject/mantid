@@ -1628,6 +1628,7 @@ namespace Mantid
   } // namespace API
 } // Namespace Mantid
 
+///\cond TEMPLATE
 namespace Mantid
 {
   namespace Kernel
