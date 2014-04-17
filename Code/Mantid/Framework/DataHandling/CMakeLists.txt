@@ -296,6 +296,7 @@ set ( TEST_FILES
 	LoadEventPreNexus2Test.h
 	LoadEventPreNexusTest.h
 	LoadFullprofResolutionTest.h
+	LoadGSASInstrumentFileTest.h
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
 	LoadILLSANSTest.h
