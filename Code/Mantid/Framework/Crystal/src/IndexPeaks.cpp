@@ -244,7 +244,8 @@ namespace Crystal
     // Save output properties
     this->setProperty("NumIndexed", total_indexed);
     this->setProperty("AverageError", average_error);
-
+    // Show the lattice parameters
+    g_log.notice() << o_lattice << "\n";
   }
 
 
