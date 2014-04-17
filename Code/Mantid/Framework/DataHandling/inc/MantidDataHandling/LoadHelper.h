@@ -47,7 +47,7 @@ public:
 	double calculateTOF(double, double);
 	double getL1(const API::MatrixWorkspace_sptr&);
 	double getL2(const API::MatrixWorkspace_sptr&, int detId = 1);
-	double getDistanceSourceToMonitor(const API::MatrixWorkspace_sptr&, int);
+	double getDistanceSourceToMonitor(const API::MatrixWorkspace_sptr&, size_t);
 	double getInstrumentProperty(const API::MatrixWorkspace_sptr&, std::string);
 	std::string dateTimeInIsoFormat(std::string);
 };

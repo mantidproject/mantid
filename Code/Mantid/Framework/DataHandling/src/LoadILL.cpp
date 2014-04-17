@@ -604,37 +604,25 @@ namespace Mantid
         << std::endl;
 
 
-      // Assign calculated bins to first X axis
-      m_localWorkspace->dataX(0).assign(detectorTofBins.begin(),
-        detectorTofBins.end());
 
       // This is completely absurd but there are no X units in the ILL monitors
       // So, we are going to assume the same as in the data
-
-
-
-
-
 
       size_t spec = 0;
 
       for(auto it = monitors.begin(); it != monitors.end(); ++it) {
 
-//    	  double theoreticalElasticTOF
-//
-//    	  Mantid::Geometry::IDetector_const_sptr thisMonitor = m_localWorkspace->getInstrument()->getDetector(spec);
-//    	  double l1 = instrument->getSource()->getDistance(*sample);
-//
-//
-//
-//    	        double monitorTheoreticalElasticTOF= m_loader.calculateTOF(m_l1,m_wavelength) * 1e6; //microsecs
+    	  double distanceSourceToMonitor = m_loader.getDistanceSourceToMonitor(m_localWorkspace, spec);
+    	  double monitorTheoreticalElasticTOF = m_loader.calculateTOF(distanceSourceToMonitor,m_wavelength) * 1e6;
+    	  double monitorTheoreticalElasticTOFToSubtract =  theoreticalElasticTOF - (theoreticalElasticTOF - monitorTheoreticalElasticTOF);
+
+    	  std::vector<double> thisMonitorBin(detectorTofBins.begin(),detectorTofBins.end());
+    	  for (size_t i = 0; i < thisMonitorBin.size() ; i++)
+    		  thisMonitorBin[i] = thisMonitorBin[i] - monitorTheoreticalElasticTOFToSubtract;
 
 
-          if (spec > 0)
-          {
-            // just copy the time binning axis to every spectra
-            m_localWorkspace->dataX(spec) = m_localWorkspace->readX(0);
-          }
+          m_localWorkspace->dataX(spec).assign(thisMonitorBin.begin(),thisMonitorBin.end());
+
           // Assign Y
 
           m_localWorkspace->dataY(spec).assign(it->begin(),it->end());
@@ -649,7 +637,9 @@ namespace Mantid
       }
 
 
-
+      // Assign calculated bins to first X axis
+      size_t firstSpec = spec;
+      m_localWorkspace->dataX(firstSpec).assign(detectorTofBins.begin(),detectorTofBins.end());
 
       Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
       //size_t spec = 0;
@@ -657,10 +647,10 @@ namespace Mantid
       {
         for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) 
         {
-          if (spec > 0) 
+          if (spec > firstSpec)
           {
             // just copy the time binning axis to every spectra
-            m_localWorkspace->dataX(spec) = m_localWorkspace->readX(0);
+            m_localWorkspace->dataX(spec) = m_localWorkspace->readX(firstSpec);
           }
           // Assign Y
           int* data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);

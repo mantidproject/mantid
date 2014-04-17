@@ -121,7 +121,7 @@ double LoadHelper::getL2(const API::MatrixWorkspace_sptr& workspace, int detId) 
 	return l2;
 }
 
-double LoadHelper::getDistanceSourceToMonitor(const API::MatrixWorkspace_sptr& workspace, int detId) {
+double LoadHelper::getDistanceSourceToMonitor(const API::MatrixWorkspace_sptr& workspace, size_t detId) {
 	Geometry::Instrument_const_sptr instrument =
 				workspace->getInstrument();
 	Geometry::IComponent_const_sptr source = instrument->getSource();
