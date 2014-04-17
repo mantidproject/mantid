@@ -26,6 +26,7 @@
 #include <cassert>
 #include <stdexcept>
 #include <typeinfo>
+#include <string>
 #include <MantidKernel/DllConfig.h>
 
 namespace Mantid

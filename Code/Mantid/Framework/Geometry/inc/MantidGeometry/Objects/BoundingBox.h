@@ -5,7 +5,9 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include <sstream>
 
 namespace Mantid

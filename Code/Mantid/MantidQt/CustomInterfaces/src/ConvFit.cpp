@@ -505,7 +505,7 @@ namespace IDA
       
       if(useTempCorrection)
       {
-        product->addFunction(createTemperatureCorrection());
+        createTemperatureCorrection(product);
       }
 
       func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
@@ -525,7 +525,7 @@ namespace IDA
     
       if(useTempCorrection)
       {
-        product->addFunction(createTemperatureCorrection());
+        createTemperatureCorrection(product);
       }
 
       func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
@@ -551,26 +551,24 @@ namespace IDA
     return comp;
   }
 
-  Mantid::API::IFunction_sptr ConvFit::createTemperatureCorrection()
+  void ConvFit::createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product)
   {
     //create temperature correction function to multiply with the lorentzians
     Mantid::API::IFunction_sptr tempFunc;
     QString temperature = uiForm().confit_leTempCorrection->text();
-    bool useTempCorrection = (!temperature.isEmpty() && uiForm().confit_ckTempCorrection->isChecked());
     
-    if(useTempCorrection)
-    {
-      //create user function for the exponential correction
-      // (x*temp) / 1-exp(-(x*temp))
-      tempFunc = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
-      //11.606 is the conversion factor from meV to K
-      std::string formula = "((x*11.606)/Temp) / (1 - exp(-((x*11.606)/Temp)))";
-      Mantid::API::IFunction::Attribute att(formula);
-      tempFunc->setAttribute("Formula", att);
-      tempFunc->setParameter("Temp", temperature.toDouble());
-    }
+    //create user function for the exponential correction
+    // (x*temp) / 1-exp(-(x*temp))
+    tempFunc = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
+    //11.606 is the conversion factor from meV to K
+    std::string formula = "((x*11.606)/Temp) / (1 - exp(-((x*11.606)/Temp)))";
+    Mantid::API::IFunction::Attribute att(formula);
+    tempFunc->setAttribute("Formula", att);
+    tempFunc->setParameter("Temp", temperature.toDouble());
 
-    return tempFunc;
+    product->addFunction(tempFunc);
+    product->tie("f0.Temp", temperature.toStdString());
+    product->applyTies();
   }
 
   QtProperty* ConvFit::createLorentzian(const QString & name)

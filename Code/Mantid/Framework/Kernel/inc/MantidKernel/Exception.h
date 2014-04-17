@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <stdexcept>
+#include <string>
 #include "MantidKernel/DllConfig.h"
 
 namespace Mantid

@@ -4,6 +4,7 @@
 #include "MantidQtAPI/InterfaceFactory.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidKernel/Logger.h"
+#include <sstream>
 
 using namespace MantidQt::API;
 
@@ -35,7 +36,7 @@ UserSubWindow * UserSubWindowFactoryImpl::createUnwrapped(const std::string & na
   }
   catch(Mantid::Kernel::Exception::NotFoundError&)
   {
-    g_log.debug() << "\"" << name << "\" not registered as a real name, trying an alias.\n"; 
+    g_log.debug() << "\"" << name << "\" not registered as a real name, trying an alias.\n";
     window = NULL;
   }
   if( !window )
@@ -94,7 +95,7 @@ UserSubWindow * UserSubWindowFactoryImpl::createFromAlias(const std::string & na
         error += ",";
       }
     }
-    g_log.error() << error << "\"\n";
+      g_log.error() << error + "\n";
     return NULL;
   }
 

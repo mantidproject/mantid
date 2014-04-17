@@ -105,20 +105,26 @@ namespace Mantid
     /**
     * Initialise the algorithm
     */
-    void LoadILL::init() 
-    {
-      declareProperty(
-        new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
-        "File path of the Data file to load");
-      declareProperty(
-        new FileProperty("FilenameVanadium", "", FileProperty::OptionalLoad, ".nxs"),
-        "File path of the Vanadium file to load (Optional)");
+	void LoadILL::init() {
+		declareProperty(
+				new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
+				"File path of the Data file to load");
 
-      declareProperty(
-        new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-        "The name to use for the output workspace");
+		declareProperty(
+				new FileProperty("FilenameVanadium", "", FileProperty::OptionalLoad,
+						".nxs"),
+				"File path of the Vanadium file to load (Optional)");
 
-    }
+		declareProperty(
+				new WorkspaceProperty<API::MatrixWorkspace>("WorkspaceVanadium", "",
+						Direction::Input, PropertyMode::Optional),
+				"Vanadium Workspace file to load (Optional)");
+
+		declareProperty(
+				new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+				"The name to use for the output workspace");
+
+	}
 
 
     /**
@@ -129,6 +135,7 @@ namespace Mantid
       // Retrieve filename
       std::string filenameData = getPropertyValue("Filename");
       std::string filenameVanadium = getPropertyValue("FilenameVanadium");
+      MatrixWorkspace_sptr vanaWS = getProperty("WorkspaceVanadium");
 
       // open the root node
       NeXus::NXRoot dataRoot(filenameData);
@@ -141,11 +148,7 @@ namespace Mantid
       runLoadInstrument(); // just to get IDF contents
       initInstrumentSpecific();
 
-      int calculatedDetectorElasticPeakPosition = -1;
-      if (filenameVanadium != "") {
-    	  g_log.information() << "Calculating the elastic peak position from the Vanadium." << std::endl;
-    	  calculatedDetectorElasticPeakPosition = validateVanadium(filenameVanadium);
-      }
+      int calculatedDetectorElasticPeakPosition = getEPPFromVanadium(filenameVanadium,vanaWS);
 
       loadDataIntoTheWorkSpace(dataFirstEntry,calculatedDetectorElasticPeakPosition);
 
@@ -159,8 +162,45 @@ namespace Mantid
       setProperty("OutputWorkspace", m_localWorkspace);
     }
 
+
     /**
-    *
+     * Get the elastic peak position (EPP) from a Vanadium Workspace
+     * or filename.
+     * Returns the EPP
+     */
+	int LoadILL::getEPPFromVanadium(const std::string &filenameVanadium,
+		MatrixWorkspace_sptr vanaWS) {
+		int calculatedDetectorElasticPeakPosition = -1;
+
+		if (vanaWS != NULL) {
+
+			// Check if it has been store on the run object for this workspace
+			if (vanaWS->run().hasProperty("EPP")) {
+				Kernel::Property* prop = vanaWS->run().getProperty("EPP");
+				calculatedDetectorElasticPeakPosition = boost::lexical_cast<int>(
+						prop->value());
+				g_log.information()
+						<< "Using EPP from Vanadium WorkSpace : value =  "
+						<< calculatedDetectorElasticPeakPosition << "\n";
+			} else {
+				g_log.error(
+						"No EPP Property in the Vanadium Workspace. Following regular procedure...");
+				//throw std::invalid_argument("No EPP value has been set or stored within the run information.");
+			}
+		}
+		if (calculatedDetectorElasticPeakPosition == -1 && filenameVanadium != "") {
+			g_log.information()
+					<< "Calculating the elastic peak position from the Vanadium."
+					<< std::endl;
+			calculatedDetectorElasticPeakPosition = validateVanadium(
+					filenameVanadium);
+		}
+		return calculatedDetectorElasticPeakPosition;
+	}
+
+
+    /**
+    * Set the instrument name along with its path on the nexus file
     */
 	void LoadILL::loadInstrumentDetails(NeXus::NXEntry& firstEntry) {
 
@@ -496,6 +536,9 @@ namespace Mantid
       else
     	  calculatedDetectorElasticPeakPosition = vanaCalculatedDetectorElasticPeakPosition;
 
+      //set it as a Property
+      API::Run & runDetails = m_localWorkspace->mutableRun();
+      runDetails.addProperty("EPP", calculatedDetectorElasticPeakPosition);
 
       double theoreticalElasticTOF = (m_loader.calculateTOF(m_l1,m_wavelength) + m_loader.calculateTOF(m_l2,m_wavelength))
         * 1e6; //microsecs

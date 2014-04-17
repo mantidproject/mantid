@@ -334,6 +334,10 @@ namespace MDEvents
       MDE::eventsToData(this->data,coordTable,nColumns,signal,errorSq);
       this->m_signal       = static_cast<signal_t>(signal);
       this->m_errorSquared = static_cast<signal_t>(errorSq);
+
+#ifdef MDBOX_TRACK_CENTROID
+      this->calculateCentroid(this->m_centroid);
+#endif
   };
     /** The method to convert the table of data into vector of events 
      *   Used to load events from plain binary file
@@ -406,6 +410,9 @@ namespace MDEvents
 
     this->m_signal = signal_t(signalSum);
     this->m_errorSquared=signal_t(errorSum);
+#ifdef MDBOX_TRACK_CENTROID
+    this->calculateCentroid(this->m_centroid);
+#endif
 
     /// TODO #4734: sum the individual weights of each event?
     this->m_totalWeight = static_cast<double>(this->getNPoints());
@@ -430,28 +437,31 @@ namespace MDEvents
   TMDE(
   void MDBox)::calculateCentroid(coord_t * centroid) const
   {
-    for (size_t d=0; d<nd; d++)
-      centroid[d] = 0;
+	for (size_t d=0; d<nd; d++)
+	  centroid[d] = 0;
 
-    // Signal was calculated before (when adding)
-    // Keep 0.0 if the signal is null. This avoids dividing by 0.0
-    if (this->m_signal == 0) return;
+	// Signal was calculated before (when adding)
+	// Keep 0.0 if the signal is null. This avoids dividing by 0.0
+	if (this->m_signal == 0) return;
 
-    typename std::vector<MDE>::const_iterator it_end = data.end();
-    for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; ++it)
-    {
-      const MDE & Evnt = *it;
-      double signal = Evnt.getSignal();
-      for (size_t d=0; d<nd; d++)
-      {
-        // Total up the coordinate weighted by the signal.
-        centroid[d] += Evnt.getCenter(d) * static_cast<coord_t>(signal);
-      }
-    }
+	typename std::vector<MDE>::const_iterator it_end = data.end();
+	for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; ++it)
+	{
+	  const MDE & Evnt = *it;
+	  double signal = Evnt.getSignal();
+	  for (size_t d=0; d<nd; d++)
+	  {
+		// Total up the coordinate weighted by the signal.
+		centroid[d] += Evnt.getCenter(d) * static_cast<coord_t>(signal);
+	  }
+	}
 
-    // Normalize by the total signal
-    for (size_t d=0; d<nd; d++)
-      centroid[d] /= coord_t(this->m_signal);
+	// Normalize by the total signal
+	for (size_t d=0; d<nd; d++)
+	{
+		centroid[d] /= coord_t(this->m_signal);
+	}
+
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -650,6 +660,16 @@ namespace MDEvents
         m_Saveable->setBusy(false);
     }
   }
+
+  //-----------------------------------------------------------------------------------------------
+ /** Return the centroid of this box.
+  * @param centroid [out] :: nd-sized array that will be set to the centroid.
+  */
+ TMDE(
+                 coord_t * MDBox)::getCentroid() const
+ {
+   return this->m_centroid;
+ }
 
   //-----------------------------------------------------------------------------------------------
   /** Find the centroid of all events contained within by doing a weighted average
@@ -874,6 +894,9 @@ namespace MDEvents
 
        this->m_signal = static_cast<signal_t>(totalSignal);
        this->m_errorSquared = static_cast<signal_t>(totalErrSq);
+#ifdef MDBOX_TRACK_CENTROID
+       this->calculateCentroid(this->m_centroid);
+#endif
 
        FileSaver->saveBlock(TabledData,position);
 

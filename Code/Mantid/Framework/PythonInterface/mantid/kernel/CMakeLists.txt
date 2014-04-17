@@ -116,6 +116,12 @@ create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp EXPORT
 # Add rule to copy over the pure Python files for the module
 #############################################################################################
 set ( OUTPUT_DIR ${PYTHON_PKG_ROOT}/kernel )
+
+if(CMAKE_GENERATOR STREQUAL Xcode)
+  # Set the output directory for the libraries.
+  set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/kernel )
+endif()
+
 copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
                            PYTHON_INSTALL_FILES )
 

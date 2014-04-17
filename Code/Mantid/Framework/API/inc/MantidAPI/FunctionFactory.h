@@ -10,9 +10,6 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include <boost/shared_ptr.hpp>
-
-
 namespace Mantid
 {
 
