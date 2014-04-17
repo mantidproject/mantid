@@ -256,6 +256,7 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
     #attempt to find beam width if none given
     if beam_width is None:
         beam_width = getInstrumentParameter(inputWS, 'Workflow.beam-width')
+        beam_width = float(beam_width)
 
     beam = [3.0, 0.5*beam_width, -0.5*beam_width, 2.0, -2.0, 0.0, 3.0, 0.0, 3.0]
 

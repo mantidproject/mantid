@@ -255,7 +255,7 @@ namespace IDA
           return;
         }
       }
-      pyInput += "inputws = '" + canWs + "'\n";
+      pyInput += "canws = '" + canWs + "'\n";
 
       //can absoprtion and scattering x section.
       QString canScatteringXSec = uiForm().absp_lesamsigs->text();
@@ -289,13 +289,13 @@ namespace IDA
 
     pyInput +=
       "geom = '" + geom + "'\n"
-      "beam = " + width + "\n";
+      "beam = " + width + "\n"
       "size = " + size + "\n"
       "avar = " + uiForm().absp_leavar->text() + "\n"
       "plotOpt = '" + uiForm().absp_cbPlotOutput->currentText() + "'\n"
       "sampleFormula = " + sampleFormula + "\n"
       "canFormula = " + canFormula + "\n"
-      "IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, beam, ncan, size, avar, density, sampleFormula, canFormula, sigs, siga, plotOpt=plotOpt, Save=save, Verbose=verbose)\n";
+      "IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plotOpt=plotOpt, Save=save, Verbose=verbose)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
