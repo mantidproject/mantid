@@ -202,19 +202,6 @@ public:
     cleanUpComponent();
   }
 
-  void testMergeComponents(){
-	  Component* c1= createParameterizedTree2Levels();
-	  Component* c2 = createParameterizedTree2Levels();
-
-	  TS_ASSERT_EQUALS(c1->isParametrized(),true);
-	  TS_ASSERT_EQUALS(c2->isParametrized(),true);
-
-
-
-	  delete c1;
-	  delete c2;
-  }
-
 
 private:
 
@@ -254,32 +241,6 @@ private:
     m_paramMap->add("string", m_childOneComp, m_strName + "_child1", m_strValue + "_child1");
     m_childTwoComp = new Component("Child2", V3D(3,2,1), m_childOneComp);
     m_paramMap->add("string", m_childTwoComp, m_strName + "_child2", m_strValue + "_child2");
-  }
-
-  Component* createParameterizedTree2Levels()
-  {
-		Component  *parentComp = new Component("Parent",V3D(1,1,1));
-		ParameterMap_sptr paramMap = boost::shared_ptr<ParameterMap>(new ParameterMap(), NoDeleting());
-
-		paramMap->add("string", parentComp, "strName", std::string("strValue"));
-		paramMap->add("double", parentComp, "dblName", double(0.1));
-		paramMap->add("V3D", parentComp, "posName", V3D(1,1,1));
-		paramMap->add("Quat", parentComp, "quatName", Quat(1,2,3,4));
-
-		Component *childOneComp = new Component("Child1", V3D(1,2,3), parentComp);
-		paramMap->add("string", childOneComp, "strName_child1", std::string("strValue_child1"));
-		Component *childTwoComp = new Component("Child2", V3D(3,2,1), childOneComp);
-		paramMap->add("string", childTwoComp, "strName_child2", std::string("strValue_child2"));
-
-		Component *child2OneComp = new Component("Child12", V3D(1,2,3), childOneComp);
-		paramMap->add("string", child2OneComp, "strName_child12", std::string("strValue_child12"));
-		Component *child2TwoComp = new Component("Child22", V3D(3,2,1), childTwoComp);
-		paramMap->add("string", child2TwoComp, "strName_child22", std::string("strValue_child22"));
-
-		Component *parametrizedComp = new Component(parentComp,paramMap.get());
-
-		return parametrizedComp;
-
   }
 
   void cleanUpComponent()
