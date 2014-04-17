@@ -281,7 +281,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
 
         # Locate file
-        outfilename = alg_test.getProperty("OutputFilename").value
+        outfilename = alg_test.getProperty("OutputFilename").value.split(".txt")[0] + ".csv"
         try:
             print "Output file is %s. " % (outfilename)
             ifile = open(outfilename)
