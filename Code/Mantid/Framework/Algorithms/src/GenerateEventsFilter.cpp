@@ -67,6 +67,7 @@ and thus the first splitter will start from the first log time.
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/Column.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -134,6 +135,8 @@ namespace Algorithms
     // Split by time (only) in steps
     declareProperty("TimeInterval", -1.0,
         "Length of the time splices if filtered in time only.");
+    setPropertySettings("TimeInterval",
+                        new VisibleWhenProperty("LogName", IS_EQUAL_TO,  ""));
 
     std::vector<std::string> timeoptions;
     timeoptions.push_back("Seconds");
@@ -150,12 +153,18 @@ namespace Algorithms
         "For example, the pulse charge is recorded in 'ProtonCharge'.");
 
     declareProperty("MinimumLogValue", EMPTY_DBL(), "Minimum log value for which to keep events.");
+    setPropertySettings("MinimumLogValue",
+                        new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
     declareProperty("MaximumLogValue", EMPTY_DBL(), "Maximum log value for which to keep events.");
+    setPropertySettings("MaximumLogValue",
+                        new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
     declareProperty("LogValueInterval", EMPTY_DBL(),
         "Delta of log value to be sliced into from min log value and max log value.\n"
         "If not given, then only value ");
+    setPropertySettings("LogValueInterval",
+                        new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
     std::vector<std::string> filteroptions;
     filteroptions.push_back("Both");
@@ -164,10 +173,14 @@ namespace Algorithms
     declareProperty("FilterLogValueByChangingDirection", "Both",
                     boost::make_shared<Kernel::StringListValidator>(filteroptions),
                     "d(log value)/dt can be positive and negative.  They can be put to different splitters.");
+    setPropertySettings("FilterLogValueByChangingDirection",
+                        new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
     declareProperty("TimeTolerance", 0.0,
                     "Tolerance in time for the event times to keep. "
                     "It is used in the case to filter by single value.");
+    setPropertySettings("TimeTolerance",
+                        new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
     vector<string> logboundoptions;
     logboundoptions.push_back("Centre");
@@ -176,12 +189,13 @@ namespace Algorithms
     auto logvalidator = boost::make_shared<StringListValidator>(logboundoptions);
     declareProperty("LogBoundary", "Centre", logvalidator,
                     "How to treat log values as being measured in the centre of time.");
+    setPropertySettings("LogBoundary",
+                        new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
     declareProperty("LogValueTolerance", EMPTY_DBL(),
         "Tolerance of the log value to be included in filter.  It is used in the case to filter by multiple values.");
-
-    declareProperty("LogValueTimeSections", 1,
-        "In one log value interval, it can be further divided into sections in even time slice.");
+    setPropertySettings("LogValueTolerance",
+                        new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
 
     // Output workspaces' title and name
     declareProperty("TitleOfSplitters", "",
