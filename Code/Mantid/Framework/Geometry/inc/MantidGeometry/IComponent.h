@@ -21,6 +21,7 @@ namespace Mantid
     //---------------------------------------------------------
     class IComponent;
     class BoundingBox;
+    class ParameterMap;
 
     /// Define a type for a unique component identifier.
     typedef IComponent* ComponentID;
@@ -153,6 +154,7 @@ namespace Mantid
       */
       virtual void printSelf(std::ostream&) const = 0;
 
+      virtual const ParameterMap * getParameterMap()=0;
     };
 
     ///Typedef of a shared pointer to a IComponent

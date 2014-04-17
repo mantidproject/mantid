@@ -41,7 +41,8 @@ using namespace Geometry;
 
 /// Default constructor
 CopyInstrumentParameters::CopyInstrumentParameters() : 
-  Algorithm()
+  Algorithm(),
+  m_different_instrument_sp(false)
 {}
 
 /// Destructor
@@ -71,10 +72,53 @@ void CopyInstrumentParameters::exec()
   this->checkProperties();
 
   // Get parameters
-  const Geometry::ParameterMap& givParams = m_givingWorkspace->constInstrumentParameters() ;
+  Geometry::ParameterMap& givParams = m_givingWorkspace->instrumentParameters() ;
 
-  // Copy parameters
-  m_receivingWorkspace->replaceInstrumentParameters( givParams );
+  if (m_different_instrument_sp)
+  {
+    Instrument_const_sptr inst1 = m_givingWorkspace->getInstrument();
+    Instrument_const_sptr inst2 = m_receivingWorkspace->getInstrument();
+    auto Name1=inst1->getName();
+    auto Name2=inst2->getName();
+
+     // vector of all components contained, in target instrument
+     std::vector<IComponent_const_sptr> targComponents;
+     inst2->getChildren(targComponents,true);
+
+      auto it = givParams.begin();
+      for(;it!= givParams.end(); it++)
+      {
+        auto oldPlace=it->first;
+        std::string source_name=oldPlace->getFullName();
+        size_t nameStart = source_name.find(Name1);
+        std::string targ_name = source_name.replace(nameStart,nameStart+Name1.size(),Name2);
+        for(size_t i=0;i<targComponents.size();i++)
+        {
+          if(targComponents[i]->getFullName() == targ_name)
+          {
+            if (targComponents[i]->isParametrized())
+            {
+    //void ParameterMap::copyFromParameterMap(const IComponent* oldComp,
+    //                                        const IComponent* newComp, const ParameterMap *oldPMap) 
+
+               targComponents[i]->getParameterMap()->copyFromParameterMap(oldPlace,
+                                            targComponents[i].get(), &givParams) ;
+            }
+            else
+            {
+            }
+          }
+        }
+
+      }
+  }
+  else
+  {
+  // unchanged Copy parameters
+    m_receivingWorkspace->replaceInstrumentParameters( givParams );
+
+  }
+
 
 }
 
@@ -103,6 +147,7 @@ void CopyInstrumentParameters::checkProperties()
   // Check that both workspaces have the same instrument name
   if( baseInstRec != baseInstGiv )
   {
+    m_different_instrument_sp=true;
     g_log.warning() << "The base instrument in the output workspace is not the same as the base instrument in the input workspace."<< std::endl;
   }
 

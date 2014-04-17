@@ -268,7 +268,7 @@ namespace Mantid
       virtual void writeXML(Poco::XML::XMLWriter & writer) const;
       virtual void appendXML(std::ostream& xmlStream) const;
 
-     
+      virtual const ParameterMap * getParameterMap(){return m_map;}
     protected:
       /// Parent component in the tree
       const IComponent* m_parent;
