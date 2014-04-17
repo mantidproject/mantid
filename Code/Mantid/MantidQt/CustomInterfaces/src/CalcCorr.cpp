@@ -367,7 +367,7 @@ namespace IDA
         break;
       case 1:
           //input using formula
-          //uiv.checkFieldIsValid("Sample Cross-Section Formula", uiForm().absp_leSampleFormula, uiForm().absp_valSampleFormula);
+          uiv.checkFieldIsNotEmpty("Sample Formula", uiForm().absp_leSampleFormula, uiForm().absp_valSampleFormula);
         break;
     }
 
@@ -392,7 +392,7 @@ namespace IDA
           break;
         case 1:
             //input using formula
-            //uiv.checkFieldIsValid("Can Cross-Section Formula", uiForm().absp_leCanFormula, uiForm().absp_valCanFormula);
+            uiv.checkFieldIsNotEmpty("Can Formula", uiForm().absp_leSampleFormula, uiForm().absp_valSampleFormula);
           break;
       }
     }
