@@ -53,9 +53,6 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FindDetectorsPar)
 
-    //----------------------------------------------------------------
-Kernel::Logger& FindDetectorsPar::g_log=Kernel::Logger::get("DataHandling");
-
 /// Sets documentation strings for this algorithm
 void FindDetectorsPar::initDocs()
 {
@@ -514,7 +511,7 @@ FindDetectorsPar::populate_values_from_file(const API::MatrixWorkspace_sptr & in
     else
     {
 
-       Geometry::IObjComponent_const_sptr sample =inputWS->getInstrument()->getSample();
+       Geometry::IComponent_const_sptr sample =inputWS->getInstrument()->getSample();
        secondaryFlightpath.resize(nHist);
      // Loop over the spectra
      for (size_t i = 0; i < nHist; i++){

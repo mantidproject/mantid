@@ -13,21 +13,23 @@ namespace Mantid
 namespace Kernel
 {
 
+namespace
+{
 // Initialize the logger
-Logger& DateAndTime::g_log = Logger::get("DateAndTime");
+Logger g_log("DateAndTime");
 
 /// Max allowed nanoseconds in the time; 2^62-1
-static int64_t MAX_NANOSECONDS = 4611686018427387903LL;
+int64_t MAX_NANOSECONDS = 4611686018427387903LL;
 
 /// Max allowed seconds in the time
-static int64_t MAX_SECONDS      = 4611686017LL;
+int64_t MAX_SECONDS      = 4611686017LL;
 
 /// Min allowed nanoseconds in the time; -2^62+1
-static int64_t MIN_NANOSECONDS  = -4611686018427387903LL;
+int64_t MIN_NANOSECONDS  = -4611686018427387903LL;
 
 /// Min allowed seconds in the time
-static int64_t MIN_SECONDS      = -4611686017LL;
-
+int64_t MIN_SECONDS      = -4611686017LL;
+}
 
 namespace DateAndTimeHelpers
 {
@@ -491,7 +493,13 @@ void DateAndTime::setFromISO8601(const std::string str)
     }
   }
 
-  //The boost conversion will convert the string, then we subtract the time zone offset
+  // The boost conversion will convert the string, then we subtract the time zone offset
+  // Different versions of boost accept slightly different things. Earlier versions
+  // seem to accept only a date as valid, whereas later versions do not. We want the
+  // string to always denote the full timestamp so we check for a colon and if it is
+  // not present then assume the time has not been given
+  if(time.find(":") == std::string::npos)
+    throw std::invalid_argument("Error interpreting string '" + str + "' as a date/time.");
   try
   {
   if (positive_offset)
@@ -504,7 +512,7 @@ void DateAndTime::setFromISO8601(const std::string str)
   catch (std::exception &)
   {
     // Re-throw a more helpful error message
-    throw std::invalid_argument("Error interpreting string '" + time + "' as a date/time.");
+    throw std::invalid_argument("Error interpreting string '" + str + "' as a date/time.");
   }
 }
 

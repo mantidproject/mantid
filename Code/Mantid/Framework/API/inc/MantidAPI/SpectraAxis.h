@@ -8,7 +8,6 @@
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
-#include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
 

@@ -52,14 +52,18 @@ namespace Mantid
 namespace CurveFitting
 {
 
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("IkedaCarpenterPV");
+  }
+
 using namespace Kernel;
 using namespace SpecialFunctionSupport;
 using namespace Geometry;
 
 DECLARE_FUNCTION(IkedaCarpenterPV)
 
-// Get a reference to the logger
-Kernel::Logger& IkedaCarpenterPV::g_log = Kernel::Logger::get("IkedaCarpenterPV");
 
 double IkedaCarpenterPV::centre()const 
 {
@@ -174,7 +178,7 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
       {
         API::MatrixWorkspace_const_sptr mws = getMatrixWorkspace();
         Instrument_const_sptr instrument = mws->getInstrument();
-        Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+        Geometry::IComponent_const_sptr sample = instrument->getSample();
         if (sample != NULL)
         {
           convertValue(m_waveLength, wavelength, mws, m_workspaceIndex);

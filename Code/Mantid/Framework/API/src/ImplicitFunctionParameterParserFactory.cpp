@@ -32,7 +32,7 @@ namespace Mantid
       {
         throw std::runtime_error("Expected passed element to be ParameterList.");
       }
-      Poco::XML::NodeList* parameters = parametersElement->getElementsByTagName("Parameter");
+      Poco::AutoPtr<Poco::XML::NodeList> parameters = parametersElement->getElementsByTagName("Parameter");
       ImplicitFunctionParameterParser* paramParser = NULL;
       ImplicitFunctionParameterParser* nextParser = NULL;
       for(unsigned long i = 0 ; i < parameters->length(); i++)

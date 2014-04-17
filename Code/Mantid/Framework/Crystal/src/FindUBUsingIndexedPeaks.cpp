@@ -18,9 +18,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-  Kernel::Logger& FindUBUsingIndexedPeaks::g_log = 
-                        Kernel::Logger::get("FindUBUsingIndexedPeaks");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(FindUBUsingIndexedPeaks)
 

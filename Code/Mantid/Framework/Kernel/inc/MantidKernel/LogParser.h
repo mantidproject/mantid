@@ -5,9 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Logger.h"
 
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 
 #include <map>
 #include <sstream>
@@ -111,9 +112,6 @@ namespace Mantid
 
       /// Number of periods
       int m_nOfPeriods;
-
-      /// static reference to the logger class
-      static Kernel::Logger& g_log;
 
       /// Creates a map of all available old-style commands.
       CommandMap createCommandMap(bool newStyle) const;

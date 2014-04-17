@@ -12,6 +12,10 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QHash>
+#include <QDropEvent>
+#include <QDragEnterEvent>
+#include <QMimeData>
+#include <QUrl>
 #include <QtConcurrentRun>
 #include <Poco/File.h>
 
@@ -236,6 +240,10 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   // is installed in
   QStringList datadirs = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories")).split(";", QString::SkipEmptyParts);
   if ( ! datadirs.isEmpty() ) m_lastDir = datadirs[0];
+
+  //this for accepts drops, but the underlying text input does not.
+  this->setAcceptDrops(true);
+  m_uiForm.fileEditor->setAcceptDrops(false);
 }
 
 MWRunFiles::~MWRunFiles() 
@@ -1063,4 +1071,48 @@ void MWRunFiles::checkEntry()
   }
 
   setEntryNumProblem("");
+}
+
+/**
+  * Called when an item is dropped
+  * @param de :: the drop event data package
+  */
+void MWRunFiles::dropEvent(QDropEvent *de)
+{
+  const QMimeData *mimeData = de->mimeData(); 
+  if (mimeData->hasUrls()){
+    auto url_list = mimeData->urls(); 
+    m_uiForm.fileEditor->setText(url_list[0].toLocalFile());
+    de->acceptProposedAction();
+  }else if (mimeData->hasText()){
+    QString text = mimeData->text();
+    m_uiForm.fileEditor->setText(text); 
+    de->acceptProposedAction();
+  }
+  
+}
+
+/**
+  * Called when an item is dragged onto a control
+  * @param de :: the drag event data package
+  */
+void MWRunFiles::dragEnterEvent(QDragEnterEvent *de)
+{
+  const QMimeData *mimeData = de->mimeData();  
+  if (mimeData->hasUrls()){
+    auto listurl = mimeData->urls(); 
+    if (listurl.empty())
+      return;
+    if (!listurl[0].isLocalFile())
+      return;
+    de->acceptProposedAction();
+  }
+  else if(mimeData->hasText()) 
+  {
+    QString text = mimeData->text();
+    if (text.contains(" = mtd[\""))
+      de->setDropAction(Qt::IgnoreAction);
+    else
+      de->acceptProposedAction();
+  }
 }

@@ -57,7 +57,7 @@ namespace API
     m_scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_scroll->setWidget(m_viewport);
     m_scroll->setWidgetResizable(true);
-    m_scroll->setAlignment(Qt::AlignLeft & Qt::AlignTop);
+    m_scroll->setAlignment(Qt::Alignment(Qt::AlignLeft & Qt::AlignTop));
 
 
     // Add a layout for the whole widget, containing just the m_scroll area

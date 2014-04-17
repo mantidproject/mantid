@@ -6,7 +6,9 @@ set ( SRC_FILES
 	src/CentroidPeaks.cpp
 	src/ClearUB.cpp
 	src/CombinePeaksWorkspaces.cpp
+	src/ConnectedComponentLabeling.cpp
 	src/DiffPeaksWorkspaces.cpp
+	src/DisjointElement.cpp
 	src/FilterPeaks.cpp
 	src/FindSXPeaks.cpp
 	src/FindUBUsingFFT.cpp
@@ -14,10 +16,12 @@ set ( SRC_FILES
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
 	src/GoniometerAnglesFromPhiRotation.cpp
+	src/HardThresholdBackground.cpp
 	src/HasUB.cpp
 	src/IndexPeaks.cpp
 	src/IndexSXPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
+	src/IntegratePeaksUsingClusters.cpp
 	src/LatticeErrors.cpp
 	src/LoadHKL.cpp
 	src/LoadIsawPeaks.cpp
@@ -28,6 +32,7 @@ set ( SRC_FILES
 	src/OptimizeCrystalPlacement.cpp
 	src/OptimizeExtinctionParameters.cpp
 	src/OptimizeLatticeForCellType.cpp
+	src/PeakBackground.cpp
 	src/PeakHKLErrors.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
@@ -58,12 +63,15 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
 	inc/MantidCrystal/AnvredCorrection.h
+	inc/MantidCrystal/BackgroundStrategy.h
 	inc/MantidCrystal/CalculatePeaksHKL.h
 	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/ClearUB.h
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
+	inc/MantidCrystal/ConnectedComponentLabeling.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
+	inc/MantidCrystal/DisjointElement.h
 	inc/MantidCrystal/FilterPeaks.h
 	inc/MantidCrystal/FindSXPeaks.h
 	inc/MantidCrystal/FindUBUsingFFT.h
@@ -72,10 +80,12 @@ set ( INC_FILES
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
 	inc/MantidCrystal/GSLFunctions.h
 	inc/MantidCrystal/GoniometerAnglesFromPhiRotation.h
+	inc/MantidCrystal/HardThresholdBackground.h
 	inc/MantidCrystal/HasUB.h
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/IndexSXPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
+	inc/MantidCrystal/IntegratePeaksUsingClusters.h
 	inc/MantidCrystal/LatticeErrors.h
 	inc/MantidCrystal/LoadHKL.h
 	inc/MantidCrystal/LoadIsawPeaks.h
@@ -86,6 +96,7 @@ set ( INC_FILES
 	inc/MantidCrystal/OptimizeCrystalPlacement.h
 	inc/MantidCrystal/OptimizeExtinctionParameters.h
 	inc/MantidCrystal/OptimizeLatticeForCellType.h
+	inc/MantidCrystal/PeakBackground.h
 	inc/MantidCrystal/PeakHKLErrors.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
@@ -120,7 +131,9 @@ set ( TEST_FILES
 	CentroidPeaksTest.h
 	ClearUBTest.h
 	CombinePeaksWorkspacesTest.h
+	ConnectedComponentLabelingTest.h
 	DiffPeaksWorkspacesTest.h
+	DisjointElementTest.h
 	FilterPeaksTest.h
 	FindSXPeaksTest.h
 	FindUBUsingFFTTest.h
@@ -128,18 +141,21 @@ set ( TEST_FILES
 	FindUBUsingLatticeParametersTest.h
 	FindUBUsingMinMaxDTest.h
 	GoniometerAnglesFromPhiRotationTest.h
+	HardThresholdBackgroundTest.h
 	HasUBTest.h
 	IndexPeaksTest.h
 	IndexSXPeaksTest.h
 	IntegratePeakTimeSlicesTest.h
+	IntegratePeaksUsingClustersTest.h
 	LoadHKLTest.h
 	LoadIsawPeaksTest.h
-        LoadIsawSpectrumTest.h
+	LoadIsawSpectrumTest.h
 	LoadIsawUBTest.h
 	MaskPeaksWorkspaceTest.h
 	NormaliseVanadiumTest.h
 	OptimizeCrystalPlacementTest.h
 	OptimizeLatticeForCellTypeTest.h
+	PeakBackgroundTest.h
 	PeakHKLErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h

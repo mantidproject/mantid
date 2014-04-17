@@ -8,8 +8,11 @@
 #include "MantidKernel/Unit.h"
 #include "MantidAPI/Axis.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+# include <boost/lexical_cast.hpp>
+#endif
+
 #include <string>
 #include <vector>
 

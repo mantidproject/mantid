@@ -25,14 +25,6 @@
 
 namespace Mantid
 {
-  //----------------------------------------------------------------------
-  // Forward declaration
-  //----------------------------------------------------------------------
-  namespace Kernel
-  {
-    class Logger;
-  }
-
   namespace API
   {
     //----------------------------------------------------------------------
@@ -79,8 +71,6 @@ namespace Mantid
         virtual ~CatalogFactoryImpl();
         /// Stores pointers to already created Catalog instances, with their name as the key
         mutable std::map< std::string, boost::shared_ptr<ICatalog> > m_createdCatalogs;
-        /// Reference to the logger class
-        Kernel::Logger& m_log;
     };
 
     ///Forward declaration of a specialisation of SingletonHolder for CatalogFactoryImpl (needed for dllexport/dllimport) .

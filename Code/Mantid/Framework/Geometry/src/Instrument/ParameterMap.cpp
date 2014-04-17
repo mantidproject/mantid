@@ -15,29 +15,29 @@ namespace Mantid
     using Kernel::V3D;
     using Kernel::Quat;
 
-    namespace // for strings to be inserted into the parameter map
+    namespace
     {
-        const std::string POS_PARAM_NAME="pos";
-        const std::string POSX_PARAM_NAME="x";
-        const std::string POSY_PARAM_NAME="y";
-        const std::string POSZ_PARAM_NAME="z";
+      // names of common parameter types
+      const std::string POS_PARAM_NAME="pos";
+      const std::string POSX_PARAM_NAME="x";
+      const std::string POSY_PARAM_NAME="y";
+      const std::string POSZ_PARAM_NAME="z";
 
-        const std::string ROT_PARAM_NAME="rot";
-        const std::string ROTX_PARAM_NAME="rotx";
-        const std::string ROTY_PARAM_NAME="roty";
-        const std::string ROTZ_PARAM_NAME="rotz";
+      const std::string ROT_PARAM_NAME="rot";
+      const std::string ROTX_PARAM_NAME="rotx";
+      const std::string ROTY_PARAM_NAME="roty";
+      const std::string ROTZ_PARAM_NAME="rotz";
 
-        const std::string DOUBLE_PARAM_NAME="double";
-        const std::string INT_PARAM_NAME="int";
-        const std::string BOOL_PARAM_NAME="bool";
-        const std::string STRING_PARAM_NAME="string";
-        const std::string V3D_PARAM_NAME="V3D";
-        const std::string QUAT_PARAM_NAME="Quat";
+      const std::string DOUBLE_PARAM_NAME="double";
+      const std::string INT_PARAM_NAME="int";
+      const std::string BOOL_PARAM_NAME="bool";
+      const std::string STRING_PARAM_NAME="string";
+      const std::string V3D_PARAM_NAME="V3D";
+      const std::string QUAT_PARAM_NAME="Quat";
+
+      // static logger reference
+      Kernel::Logger g_log("ParameterMap");
     }
-
-    // Get a reference to the logger
-    Kernel::Logger& ParameterMap::g_log = Kernel::Logger::get("ParameterMap");
-
     //--------------------------------------------------------------------------
     // Public method
     //--------------------------------------------------------------------------

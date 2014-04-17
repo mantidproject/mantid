@@ -192,6 +192,9 @@ public:
   const MantidVec& dataX() const;
   const MantidVec& constDataX() const;
 
+  //TODO: This overload will probably be needed in a future to work with Event data properly
+  //std::pair<double,double> getXDataRange()const;
+
   /// Disallowed data accessors - can't modify Y/E on a EventList
   void setData(const MantidVec& /*Y*/)  { throw std::runtime_error("EventList: cannot set Y or E data directly."); }
   /// Disallowed data accessors - can't modify Y/E on a EventList
@@ -281,8 +284,15 @@ public:
 
   void splitByFullTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs, double tofcorrection, bool docorrection) const;
 
+  /// Split ...
+  std::string splitByFullTimeMatrixSplitter(const std::vector<int64_t>& vectimes, const std::vector<int>& vecgroups,
+                                            std::map<int, EventList*> vec_outputEventList,
+                                            double tofcorrection, bool docorrection, bool printdetail=false) const;
+
   /// Split events by pulse time
   void splitByPulseTime(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs) const;
+
+
 
   void multiply(const double value, const double error = 0.0);
   EventList& operator*=(const double value);
@@ -382,6 +392,10 @@ private:
   template< class T >
   void splitByPulseTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs,
                               typename std::vector<T> & events) const;
+  template< class T >
+  std::string splitByFullTimeVectorSplitterHelper(const std::vector<int64_t>& vectimes, const std::vector<int>& vecgroups,
+                                                   std::map<int, EventList * > outputs, typename std::vector<T> & events,
+                                                   double tofcorrection, bool docorrection, bool printdetail=false) const;
   template< class T>
   static void multiplyHelper(std::vector<T> & events, const double value, const double error = 0.0);
   template<class T>

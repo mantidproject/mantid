@@ -14,11 +14,15 @@ namespace Mantid
 {
 namespace DataObjects
 {
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("ManagedDataBlock2D");
+  }
 
 using std::size_t;
 
-// Get a reference to the logger
-Kernel::Logger& ManagedDataBlock2D::g_log = Kernel::Logger::get("ManagedDataBlock2D");
+
 
 /** Constructor.
  *  @param minIndex :: The index of the workspace that this data block starts at
@@ -152,19 +156,19 @@ std::fstream& operator<<(std::fstream& fs, ManagedDataBlock2D& data)
     if (it->directDataX().size() != data.m_XLength)
     {
       it->directDataX().resize(data.m_XLength, 0.0);
-      ManagedDataBlock2D::g_log.warning() << "X vector resized to " << data.m_XLength << " elements.";
+      g_log.warning() << "X vector resized to " << data.m_XLength << " elements.";
     }
     fs.write(reinterpret_cast<char *>(&(it->directDataX().front())), data.m_XLength * sizeof(double));
     if (it->directDataY().size() != data.m_YLength)
     {
       it->directDataY().resize(data.m_YLength, 0.0);
-      ManagedDataBlock2D::g_log.warning() << "Y vector resized to " << data.m_YLength << " elements.";
+      g_log.warning() << "Y vector resized to " << data.m_YLength << " elements.";
     }
     fs.write(reinterpret_cast<char *>(&(it->directDataY().front())), data.m_YLength * sizeof(double));
     if (it->directDataE().size() != data.m_YLength)
     {
       it->directDataE().resize(data.m_YLength, 0.0);
-      ManagedDataBlock2D::g_log.warning() << "E vector resized to " << data.m_YLength << " elements.";
+      g_log.warning() << "E vector resized to " << data.m_YLength << " elements.";
     }
     fs.write(reinterpret_cast<char *>(&(it->directDataE().front())), data.m_YLength * sizeof(double));
     

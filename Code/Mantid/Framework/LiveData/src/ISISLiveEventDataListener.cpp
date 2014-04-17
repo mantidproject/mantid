@@ -23,8 +23,11 @@ namespace LiveData
 
 DECLARE_LISTENER(ISISLiveEventDataListener)
 
-// Get a reference to the logger
-Kernel::Logger& ISISLiveEventDataListener::g_log = Kernel::Logger::get("ISISLiveEventDataListener");
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("ISISLiveEventDataListener");
+  }
 
 /**
  * The constructor

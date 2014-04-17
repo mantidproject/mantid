@@ -6,13 +6,17 @@
 #include <stdexcept>
 
 #include "MantidAPI/GridDomain.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
 namespace API
 {
-
-Kernel::Logger& GridDomain::g_log = Kernel::Logger::get("GridDomain");
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("GridDomain");
+  }
 
 /// number of points in the grid
 size_t GridDomain::size() const{
@@ -45,7 +49,6 @@ GridDomain_sptr GridDomain::getGrid(size_t index)
   catch(std::out_of_range &ex)
   {
     g_log.error( ex.what() );
-
   }
   return g;
 }

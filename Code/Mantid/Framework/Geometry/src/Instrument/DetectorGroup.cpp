@@ -9,11 +9,15 @@ namespace Mantid
 {
   namespace Geometry
   {
+    namespace
+    {
+      // static logger
+      Kernel::Logger g_log("DetectorGroup");
+    }
+
     using Kernel::V3D;
     using Kernel::Quat;
    
-    // Get a reference to the logger
-    Kernel::Logger& DetectorGroup::g_log = Kernel::Logger::get("DetectorGroup");
 
     /**
      * Default constructor

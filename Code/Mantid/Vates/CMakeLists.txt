@@ -1,15 +1,6 @@
 # Define the project name
 project( Vates )
 
-###########################################################################
-# Add OpenMP flags here . TODO: Is this the right spot?
-###########################################################################
-if ( OPENMP_FOUND )
-  #message (Hey OPENMP was found for VATES.)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
-endif ()
-
 include( CommonVatesSetup )
 
 # Select either building Paraview plugins

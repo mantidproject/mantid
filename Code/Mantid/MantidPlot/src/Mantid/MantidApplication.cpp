@@ -4,12 +4,17 @@
 #include "MantidApplication.h"
 #include "MantidQtAPI/MantidDialog.h"
 
+#include "MantidKernel/Logger.h"
+
 #include <QMessageBox>
 #include <QPushButton>
 #include <iostream>
 
-/// The logger
-Mantid::Kernel::Logger& MantidApplication::g_log = Mantid::Kernel::Logger::get("MantidPlot");
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("MantidApplication");
+}
 
 /// Constructor
 MantidApplication::MantidApplication(int &argc, char ** argv ) : QApplication(argc, argv)

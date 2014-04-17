@@ -12,14 +12,17 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+  namespace
+  {
+    ///static logger
+    Kernel::Logger g_log("BoundaryConstraint");
+  }
 
 DECLARE_CONSTRAINT(BoundaryConstraint)
 
 //using namespace Kernel;
 using namespace API;
 
-// Get a reference to the logger
-Kernel::Logger& BoundaryConstraint::g_log = Kernel::Logger::get("BoundaryConstraint");
 
 /** Constructor with boundary arguments
  * @param fun :: The function

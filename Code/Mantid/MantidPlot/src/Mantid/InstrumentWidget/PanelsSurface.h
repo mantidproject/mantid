@@ -3,7 +3,6 @@
 
 #include "UnwrappedSurface.h"
 
-#include "MantidKernel/Logger.h"
 
 #include <QPolygonF>
 
@@ -97,9 +96,6 @@ protected:
   QList<FlatBankInfo*> m_flatBanks;
   /// Maps detector ids to indices of FlatBankInfos in m_flatBanks
   QMap<Mantid::detid_t,int> m_detector2bankMap;
-
-  /// The logger
-  static Mantid::Kernel::Logger &g_log;
 
   friend class FlatBankFinder;
   friend struct FlatBankInfo;

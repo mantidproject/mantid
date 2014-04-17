@@ -359,7 +359,7 @@ public:
 
 
     std::vector<size_t> &SizeTData = tw.getColVector<size_t>("SizeT");
-    TS_ASSERT_THROWS(tw.getColVector<int>("Double"),std::bad_cast);
+    TS_ASSERT_THROWS(tw.getColVector<int>("Double"),std::runtime_error);
     std::vector<double> &DoublData = tw.getColVector<double>("Double");
     std::vector<std::string> &StrData = tw.getColVector<std::string>("String");
 
@@ -375,7 +375,7 @@ public:
     StrData[2] = "3";
 
     auto SizeTDataI = tw.getColVector<size_t>(0);
-    TS_ASSERT_THROWS(tw.getColVector<int>(1),std::bad_cast);
+    TS_ASSERT_THROWS(tw.getColVector<int>(1),std::runtime_error);
     auto DoublDataI = tw.getColVector<double>(1);
     auto StrDataI = tw.getColVector<std::string>(2);
 

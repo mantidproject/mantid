@@ -175,7 +175,6 @@ namespace API
       // Throw exception if tried to reset the miller index
       stringstream errss;
       errss << "Profile function " << name() << "cannot have (HKL) reset.";
-      g_log.error(errss.str());
       throw runtime_error(errss.str());
     }
     else
@@ -194,7 +193,6 @@ namespace API
     {
       stringstream errmsg;
       errmsg << "H = K = L = 0 is not allowed";
-      g_log.error(errmsg.str());
       throw std::invalid_argument(errmsg.str());
     }
 

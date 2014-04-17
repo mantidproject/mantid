@@ -315,6 +315,7 @@ public:
     
     ExperimentInfo * ws2 = ws.cloneExperimentInfo();
     do_compare_ExperimentInfo(ws,*ws2);
+    delete ws2;
   }
 
   void test_clone_then_copy()
@@ -335,6 +336,8 @@ public:
     ws3.copyExperimentInfoFrom(ws2);
 
     do_compare_ExperimentInfo(ws,ws3);
+
+    delete ws2;
   }
 
   void test_default_emode_is_elastic()
@@ -710,11 +713,15 @@ private:
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
     boost::shared_ptr<Instrument> inst1(new Instrument());
     inst1->setName("MyTestInst");
-    inst1->markAsSource(new ObjComponent("source"));
+    auto source = new ObjComponent("source");
+    inst1->add(source);
+    inst1->markAsSource(source);
 
     for(size_t i = 0; i < npoints; ++i)
     {
-      inst1->markAsChopperPoint(new ObjComponent("ChopperPoint"));
+      auto chopperPoint = new ObjComponent("ChopperPoint");
+      inst1->add(chopperPoint);
+      inst1->markAsChopperPoint(chopperPoint);
     }
     exptInfo->setInstrument(inst1);
     return exptInfo;

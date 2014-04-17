@@ -24,7 +24,7 @@ namespace MantidQt
      * Constructor
      */
     CatalogSearch::CatalogSearch(QWidget* parent) : QWidget(parent),
-        m_icatHelper(new CatalogHelper()), m_currentPageNumber(1)
+        m_icatHelper(new CatalogHelper()), m_catalogSelector(new CatalogSelector()), m_currentPageNumber(1)
     {
       initLayout();
       // Load saved settings from store.
@@ -107,6 +107,8 @@ namespace MantidQt
       connect(m_icatUiForm.resNext,SIGNAL(clicked()),this,SLOT(nextPageClicked()));
       // When the user is done editing & presses enter we retrieve the results for that specific page in paging.
       connect(m_icatUiForm.pageStartNum,SIGNAL(editingFinished()),SLOT(goToInputPage()));
+      // Open the catalog/facility selection widget when 'Select a catalog' is clicked.
+      connect(m_icatUiForm.catalogSelection,SIGNAL(clicked()),SLOT(openFacilitySelection()));
 
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
@@ -383,7 +385,8 @@ namespace MantidQt
     void CatalogSearch::populateInstrumentBox()
     {
       // Obtain the list of instruments to display in the drop-box.
-      std::vector<std::string> instrumentList = m_icatHelper->getInstrumentList();
+      std::vector<std::string> instrumentList = m_icatHelper->getInstrumentList(
+          m_catalogSelector->getSelectedCatalogSessions());
 
       // This option allows the user to select no instruments (thus searching over them all).
       m_icatUiForm.Instrument->insertItem(-1,"");
@@ -409,7 +412,8 @@ namespace MantidQt
     void CatalogSearch::populateInvestigationTypeBox()
     {
       // Obtain the list of investigation types to display in the list-box.
-      std::vector<std::string> invesTypeList = m_icatHelper->getInvestigationTypeList();
+      std::vector<std::string> invesTypeList = m_icatHelper->getInvestigationTypeList(
+          m_catalogSelector->getSelectedCatalogSessions());
 
       std::vector<std::string>::const_iterator citr;
       for (citr = invesTypeList.begin(); citr != invesTypeList.end(); ++citr)
@@ -590,6 +594,10 @@ namespace MantidQt
         return;
       }
 
+      // Performed here to allow the user to login while the search GUI is open,
+      // and see results of all facilities/catalogs that they are logged in to.
+      m_catalogSelector->populateFacilitySelection();
+
       // Since there are no longer errors we hide the error labels.
       hideErrorLabels();
 
@@ -605,11 +613,12 @@ namespace MantidQt
       std::string searchResults = "searchResults";
       clearSearch(m_icatUiForm.searchResultsTbl, searchResults);
 
+      auto sessionIDs = m_catalogSelector->getSelectedCatalogSessions();
       // Obtain the number of results for paging.
-      int64_t numrows = m_icatHelper->getNumberOfSearchResults(inputFields);
+      int64_t numrows = m_icatHelper->getNumberOfSearchResults(inputFields,sessionIDs);
 
       // Setup values used for paging.
-      int limit      = 100;
+      int limit = 100;
       // Have to cast either numrows or limit to double for ceil to work correctly.
       double totalNumPages = ceil(static_cast<double>(numrows) / limit);
       int offset = (m_currentPageNumber - 1) * limit;
@@ -619,7 +628,7 @@ namespace MantidQt
       m_icatUiForm.resPageEndNumTxt->setText(QString::number(totalNumPages));
 
       // Perform a search using paging (E.g. return only n from m).
-      m_icatHelper->executeSearch(inputFields,offset,limit);
+      m_icatHelper->executeSearch(inputFields,offset,limit,sessionIDs);
 
       // Update the label to inform the user of how many investigations have been returned from the search.
       m_icatUiForm.searchResultsLbl->setText(QString::number(numrows) + " investigations found.");
@@ -684,6 +693,16 @@ namespace MantidQt
       m_icatUiForm.myDataCbox->setChecked(false);
     }
 
+    /**
+     *  Allows a user to select specific facilities that they want to search the catalogs of.
+     */
+    void CatalogSearch::openFacilitySelection()
+    {
+      m_catalogSelector->populateFacilitySelection();
+      m_catalogSelector->show();
+      m_catalogSelector->raise();
+    }
+
     ///////////////////////////////////////////////////////////////////////////////
     // Methods for "Search results"
     ///////////////////////////////////////////////////////////////////////////////
@@ -733,10 +752,24 @@ namespace MantidQt
 
       // Show only a portion of the title as they can be quite long.
       resultsTable->setColumnWidth(headerIndexByName(resultsTable, "Title"), 210);
+      resultsTable->setColumnHidden(headerIndexByName(resultsTable, "SessionID"), true);
 
       // Sort by endDate with the most recent being first.
       resultsTable->setSortingEnabled(true);
       resultsTable->sortByColumn(headerIndexByName(resultsTable, "Start date"),Qt::DescendingOrder);
+    }
+
+    /**
+     * Obtain the sessionID for the specific row selected in the search results table.
+     * (only one row can be selected at a time)
+     * @return The sessionID from the selected row.
+     */
+    std::string CatalogSearch::selectedInvestigationSession()
+    {
+      auto searchResultsTable = m_icatUiForm.searchResultsTbl;
+      return searchResultsTable->item(
+          searchResultsTable->selectionModel()->selectedRows().at(0).row(),
+          headerIndexByName(searchResultsTable, "SessionID"))->text().toStdString();
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -810,8 +843,10 @@ namespace MantidQt
       // Inform the user that the search is in progress.
       m_icatUiForm.dataFileLbl->setText("searching for related datafiles...");
 
+      QTableWidget* searchResultsTable = m_icatUiForm.searchResultsTbl;
+
       // Obtain the investigation id from the selected
-      QTableWidgetItem* investigationId = m_icatUiForm.searchResultsTbl->item(item->row(),0);
+      QTableWidgetItem* investigationId = searchResultsTable->item(item->row(),0);
 
       // Remove previous dataFile search results.
       std::string dataFileResults = "dataFileResults";
@@ -821,7 +856,8 @@ namespace MantidQt
       updateDataFileLabels(item);
 
       // Perform the "search" and obtain the related data files for the selected investigation.
-      m_icatHelper->executeGetDataFiles(investigationId->text().toStdString());
+      m_icatHelper->executeGetDataFiles(investigationId->text().toStdString(),
+          searchResultsTable->item(item->row(),headerIndexByName(searchResultsTable, "SessionID"))->text().toStdString());
 
       // Populate the dataFile table from the "dataFileResults" workspace.
       populateDataFileTable();
@@ -1082,7 +1118,9 @@ namespace MantidQt
         // Save settings to store for use next time.
         saveSettings();
         // Download the selected dataFiles to the chosen directory.
-        m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
+        m_icatHelper->downloadDataFiles(selectedDataFileNames(),
+            m_downloadSaveDir.toStdString(),
+            selectedInvestigationSession());
       }
     }
 
@@ -1092,7 +1130,8 @@ namespace MantidQt
     void CatalogSearch::loadDataFiles()
     {
       // Get the path(s) to the file that was downloaded (via HTTP) or is stored in the archive.
-      std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(selectedDataFileNames(), m_downloadSaveDir.toStdString());
+      std::vector<std::string> filePaths = m_icatHelper->downloadDataFiles(selectedDataFileNames(),
+          m_downloadSaveDir.toStdString(), selectedInvestigationSession());
 
       // Create & initialize the load algorithm we will use to load the file by path to a workspace.
       auto loadAlgorithm = Mantid::API::AlgorithmManager::Instance().create("Load");

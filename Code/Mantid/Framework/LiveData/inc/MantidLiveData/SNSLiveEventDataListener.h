@@ -195,9 +195,6 @@ namespace Mantid
       // Returns false if the packet should be processed, true if is should be ignored
       bool ignorePacket( const ADARA::PacketHeader &hdr, const ADARA::RunStatus::Enum status = ADARA::RunStatus::NO_RUN);
       void setRunDetails( const ADARA::RunStatusPkt& pkt );
-
-      // ----------------------------------------------------------------------------
-      static Kernel::Logger& g_log;   ///< reference to the logger class
     };
 
   } // namespace LiveData

@@ -1,7 +1,6 @@
 /*WIKI*
 
- Loads an ILL D33 nexus file into a [[Workspace2D]] with the given name.
-
+Loads an ILL D33 nexus file into a [[Workspace2D]] with the given name.
 
  *WIKI*/
 

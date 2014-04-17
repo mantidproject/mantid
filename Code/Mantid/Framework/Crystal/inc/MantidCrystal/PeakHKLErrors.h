@@ -173,8 +173,6 @@ namespace Mantid
 
       void setUpOptRuns();
 
-      static Kernel::Logger& g_log ;
-
     };
   }
 }

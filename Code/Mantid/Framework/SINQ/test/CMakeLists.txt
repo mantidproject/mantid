@@ -2,8 +2,9 @@ if ( CXXTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
   include_directories ( ../../MDEvents/inc ../../MDAlgorithms/inc ../../Nexus/inc ../../NexusCPP/inc ../../TestHelpers/inc)
-
-  set ( TESTHELPER_SRCS ../../TestHelpers/src/ComponentCreationHelper.cpp
+  
+  set ( TESTHELPER_SRCS ../../TestHelpers/src/TearDownWorld.cpp 
+                        ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp )
 
   if ( GMOCK_FOUND AND GTEST_FOUND )
