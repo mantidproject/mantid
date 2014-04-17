@@ -228,7 +228,7 @@ def plotAbs(workspaces, plotOpt):
         graph.activeLayer().setAxisTitle(mp.Layer.Bottom, 'Angle')
 
 
-def AbsRunFeeder(inputWS, canWS, geom, beam, ncan, size, avar, density, sampleFormula=None, canFormula=None, sigs=None, siga=None,
+def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=None, sampleFormula=None, canFormula=None, sigs=None, siga=None,
         plotOpt='None', Verbose=False,Save=False):
     """
         Handles the feeding of input and plotting of output for the F2PY
@@ -236,7 +236,7 @@ def AbsRunFeeder(inputWS, canWS, geom, beam, ncan, size, avar, density, sampleFo
 
         @param inputWS - workspace to generate corrections for
         @param geom - type of geometry used (flat plate or cylinder)
-        @param beam - beam width
+        @param beam_width - width of the beam used. If None this will be taken from the IPF
         @param ncan - number of cans used.
         @param size - sample & can thickness
         @param sampleFormula - optional, chemical formula for the sample
@@ -252,6 +252,12 @@ def AbsRunFeeder(inputWS, canWS, geom, beam, ncan, size, avar, density, sampleFo
 
     StartTime('CalculateCorrections')
     CheckDensity(density,ncan)
+
+    #attempt to find beam width if none given
+    if beam_width is None:
+        beam_width = getInstrumentParameter(inputWS, 'Workflow.beam-width')
+
+    beam = [3.0, 0.5*beam_width, -0.5*beam_width, 2.0, -2.0, 0.0, 3.0, 0.0, 3.0]
 
     if sampleFormula is None and (sigs is None or siga is None):
         raise ValueError("Either a formula for the sample or values for the cross sections must be supplied.")

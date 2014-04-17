@@ -195,25 +195,22 @@ namespace IDA
       }
     }
 
+    //get beam width
     QString width = uiForm().absp_lewidth->text();
-    QString filename = uiForm().absp_dsSampleInput->getCurrentDataName();
+    if (width.isEmpty()) { width = "None"; }
 
-    if ( !Mantid::API::AnalysisDataService::Instance().doesExist(filename.toStdString()) )
+    //get sample workspace. Load from if needed.
+    QString sampleWs = uiForm().absp_dsSampleInput->getCurrentDataName();
+    if ( uiForm().absp_dsSampleInput->isFileSelectorVisible() )
     {
-      QString input = uiForm().absp_dsSampleInput->getFullFilePath();
-      if ( input == "" ) { return; }
-      pyInput +=
-      "import os.path as op\n"
-      "file = r'" + input + "'\n"
-      "( dir, filename ) = op.split(file)\n"
-      "( name, ext ) = op.splitext(filename)\n"
-      "LoadNexusProcessed(Filename=file, OutputWorkspace=name)\n"
-      "inputws = name\n";
+      QString samplefilePath = uiForm().absp_dsSampleInput->getFullFilePath();
+      auto ws = runLoadNexus(samplefilePath, sampleWs);
+      if (!ws)
+      {
+        return;
+      }
     }
-    else
-    {
-      pyInput += "inputws = '" + filename + "'\n";
-    }
+    pyInput += "inputws = '" + sampleWs + "'\n";
 
     //sample absorption and scattering x sections.
     QString sampleScatteringXSec = uiForm().absp_lesamsigs->text();
@@ -247,25 +244,18 @@ namespace IDA
     //create python string to execute
     if ( uiForm().absp_ckUseCan->isChecked() )
     {
-      QString canFile = uiForm().absp_dsCanInput->getCurrentDataName();
-
-      //load the can file / get the can workspace 
-      if ( !Mantid::API::AnalysisDataService::Instance().doesExist(canFile.toStdString()) )
+      //get sample workspace. Load from if needed.
+      QString canWs = uiForm().absp_dsCanInput->getCurrentDataName();
+      if ( uiForm().absp_dsCanInput->isFileSelectorVisible() )
       {
-        QString input = uiForm().absp_dsCanInput->getFullFilePath();
-        if ( input == "" ) { return; }
-        pyInput +=
-        "import os.path as op\n"
-        "file = r'" + input + "'\n"
-        "( dir, filename ) = op.split(file)\n"
-        "( name, ext ) = op.splitext(filename)\n"
-        "LoadNexusProcessed(Filename=file, OutputWorkspace=name)\n"
-        "canws = name\n";
+        QString canfilePath = uiForm().absp_dsCanInput->getFullFilePath();
+        auto ws = runLoadNexus(canfilePath, canWs);
+        if (!ws)
+        {
+          return;
+        }
       }
-      else
-      {
-        pyInput += "inputws = '" + canFile + "'\n";
-      }
+      pyInput += "inputws = '" + canWs + "'\n";
 
       //can absoprtion and scattering x section.
       QString canScatteringXSec = uiForm().absp_lesamsigs->text();
@@ -299,7 +289,7 @@ namespace IDA
 
     pyInput +=
       "geom = '" + geom + "'\n"
-      "beam = [3.0, 0.5*" + width + ", -0.5*" + width + ", 2.0, -2.0, 0.0, 3.0, 0.0, 3.0]\n"
+      "beam = " + width + "\n";
       "size = " + size + "\n"
       "avar = " + uiForm().absp_leavar->text() + "\n"
       "plotOpt = '" + uiForm().absp_cbPlotOutput->currentText() + "'\n"
@@ -313,13 +303,13 @@ namespace IDA
   QString CalcCorr::validate()
   {
     UserInputValidator uiv;
+    bool useCan = uiForm().absp_ckUseCan->isChecked();
 
-    // Input (file or workspace)
-    QString filename = uiForm().absp_dsSampleInput->getCurrentDataName();
-
-    if(filename.isEmpty())
+    // Input files/workspaces
+    uiv.checkDataSelectorIsValid("Sample", uiForm().absp_dsSampleInput);
+    if (useCan)
     {
-      uiv.addErrorMessage("You must select a Sample file or workspace.");
+      uiv.checkDataSelectorIsValid("Can", uiForm().absp_dsCanInput);
     }
 
     if ( uiForm().absp_cbShape->currentText() == "Flat" )
@@ -327,7 +317,7 @@ namespace IDA
       // Flat Geometry
       uiv.checkFieldIsValid("Thickness", uiForm().absp_lets, uiForm().absp_valts);
 
-      if ( uiForm().absp_ckUseCan->isChecked() )
+      if ( useCan )
       {
         uiv.checkFieldIsValid("Front Thickness", uiForm().absp_letc1, uiForm().absp_valtc1);
         uiv.checkFieldIsValid("Back Thickness",  uiForm().absp_letc2, uiForm().absp_valtc2);
@@ -348,7 +338,7 @@ namespace IDA
         uiv.addErrorMessage("Radius 1 should be less than Radius 2.");
 
       // R3 only relevant when using can
-      if ( uiForm().absp_ckUseCan->isChecked() )
+      if ( useCan )
       {
         uiv.checkFieldIsValid("Radius 3", uiForm().absp_ler3, uiForm().absp_valR3);
         
@@ -364,8 +354,6 @@ namespace IDA
       if( stepSize >= (radius2 - radius1) )
         uiv.addErrorMessage("Step size should be less than (Radius 2 - Radius 1).");
     }
-
-    uiv.checkFieldIsValid("Beam Width", uiForm().absp_lewidth, uiForm().absp_valWidth);
 
     // Sample details
     uiv.checkFieldIsValid("Sample Number Density", uiForm().absp_lesamden, uiForm().absp_valSamden);
