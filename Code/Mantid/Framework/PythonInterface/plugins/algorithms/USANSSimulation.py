@@ -79,7 +79,7 @@ class USANSSimulation(PythonAlgorithm):
         theta_b = 70.0
         theta = theta_b + two_theta
         out_ws.getRun().addProperty("AnalyzerTheta", theta, 'degree', True)
-        out_ws.getRun().addProperty("TwoTheta", two_theta, 'degree', True)
+        out_ws.getRun().addProperty("two_theta", two_theta, 'degree', True)
         out_ws.getRun().addProperty("MonochromatorTheta", theta_b, 'degree', True)
         out_ws.getRun().addProperty("run_title", "Simulated USANS", True)
         out_ws.getRun().addProperty("run_number", "1234", True)
