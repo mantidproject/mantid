@@ -284,7 +284,7 @@ void ILLParser::parseFieldNumeric(std::map<std::string, std::string> &header,
 	std::string line;
 	std::getline(fin, line);
 	int nNumericFields = -1, nTextLines = -1;
-	sscanf(line.c_str(), "%d %d", &nNumericFields, &nTextLines);
+	sscanf(line.c_str(), "%8d %8d", &nNumericFields, &nTextLines);
 
 	std::vector<std::string> keys(nNumericFields);
 	std::vector<std::string> values(nNumericFields);
@@ -331,7 +331,7 @@ std::vector<int> ILLParser::parseFieldISpec(int fieldWith) {
 	std::string line;
 	std::getline(fin, line);
 	int nSpectra;
-	sscanf(line.c_str(), "%d", &nSpectra);
+	sscanf(line.c_str(), "%8d", &nSpectra);
 	std::vector<int> spectrumValues(nSpectra);
 
 	int nSpectraRead = 0, index = 0;
@@ -342,7 +342,7 @@ std::vector<int> ILLParser::parseFieldISpec(int fieldWith) {
 		nSpectraRead += static_cast<int>(s.size());
 		for (auto it = s.begin(); it != s.end(); ++it) {
 			// sscanf is much faster than lexical_cast / erase_spaces
-			sscanf(it->c_str(), "%d", &spectrumValues[index]);
+			sscanf(it->c_str(), "%8d", &spectrumValues[index]);
 			index += 1;
 		}
 	}
@@ -429,7 +429,7 @@ std::vector<std::string> ILLParser::splitLineInFixedWithFields(
 }
 
 /**
- * Evaluate the input string to a type <T>
+ * Evaluate the input string to a type T
  */
 template<typename T>
 T ILLParser::evaluate(std::string field) {
@@ -439,7 +439,8 @@ T ILLParser::evaluate(std::string field) {
 	try {
 		value = boost::lexical_cast<T>(field);
 	} catch (boost::bad_lexical_cast &e) {
-		throw e;
+		// throw e;
+		throw; // to avoid cppcheck : Throwing a copy of the caught exception instead of rethrowing the original exception.
 	}
 	return value;
 }

@@ -184,7 +184,7 @@ void LoadILLAscii::exec() {
 
 /**
  * Sets the workspace position based on the rotation angle
- * See./instrument/D2B_Definition.xml:        <logfile id="rotangle"  eq="0.0+value"/>
+ * See tag logfile in file instrument/D2B_Definition.xml
  */
 void LoadILLAscii::setWorkspaceRotationAngle(API::MatrixWorkspace_sptr ws, double rotationAngle){
 
@@ -196,7 +196,7 @@ void LoadILLAscii::setWorkspaceRotationAngle(API::MatrixWorkspace_sptr ws, doubl
 }
 
 /**
- * Load instrument details
+ * Loads instrument details
  */
 void LoadILLAscii::loadExperimentDetails(ILLParser &p) {
 
