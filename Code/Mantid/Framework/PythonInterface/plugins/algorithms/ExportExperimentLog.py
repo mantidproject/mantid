@@ -168,7 +168,7 @@ class ExportExperimentLog(PythonAlgorithm):
         """
         
         # Output file format
-        self._fileformat = self.getPRoperty("FileFormat").value
+        self._fileformat = self.getProperty("FileFormat").value
         if self._fileformat == "tab":
             self._valuesep = "\t"
         else:
