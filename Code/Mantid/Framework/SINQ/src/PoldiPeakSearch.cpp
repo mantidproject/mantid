@@ -76,7 +76,7 @@ void PoldiPeakSearch::initDocs()
     setWikiSummary("This algorithm finds the peaks in a POLDI auto-correlation spectrum.");
 }
 
-MantidVec PoldiPeakSearch::getNeighborSums(MantidVec correlationCounts)
+MantidVec PoldiPeakSearch::getNeighborSums(MantidVec correlationCounts) const
 {
     /* Since the first and last element in a list don't have two neighbors, they are excluded from the calculation
      * and the result vector's size is reduced by two. Also, the algorithm does not work on vectors with fewer
@@ -104,11 +104,11 @@ MantidVec PoldiPeakSearch::getNeighborSums(MantidVec correlationCounts)
     return summedNeighborCounts;
 }
 
-std::list<MantidVec::iterator> PoldiPeakSearch::findPeaks(MantidVec::iterator begin, MantidVec::iterator end) {
+std::list<MantidVec::const_iterator> PoldiPeakSearch::findPeaks(MantidVec::const_iterator begin, MantidVec::const_iterator end) {
     // These borders need to be known for handling the edges correctly in the recursion
     setRecursionAbsoluteBorders(begin, end);
 
-    std::list<MantidVec::iterator> rawPeaks = findPeaksRecursive(begin, end);
+    std::list<MantidVec::const_iterator> rawPeaks = findPeaksRecursive(begin, end);
 
     /* The recursive algorithms potentially finds maxima that are not peaks,
      * so the list is truncated to the maximum desired peak number (N), where
@@ -116,28 +116,28 @@ std::list<MantidVec::iterator> PoldiPeakSearch::findPeaks(MantidVec::iterator be
      */
     rawPeaks.sort(&PoldiPeakSearch::vectorElementGreaterThan);
 
-    std::list<MantidVec::iterator>::iterator rawPeaksLimit = std::next(rawPeaks.begin(), std::min(m_maximumPeakNumber, static_cast<int>(rawPeaks.size())));
-    std::list<MantidVec::iterator> truncatedPeaks(rawPeaks.begin(), rawPeaksLimit);
+    std::list<MantidVec::const_iterator>::iterator rawPeaksLimit = std::next(rawPeaks.begin(), std::min(m_maximumPeakNumber, static_cast<int>(rawPeaks.size())));
+    std::list<MantidVec::const_iterator> truncatedPeaks(rawPeaks.begin(), rawPeaksLimit);
 
     return truncatedPeaks;
 }
 
-std::list<MantidVec::iterator> PoldiPeakSearch::findPeaksRecursive(MantidVec::iterator begin, MantidVec::iterator end)
+std::list<MantidVec::const_iterator> PoldiPeakSearch::findPeaksRecursive(MantidVec::const_iterator begin, MantidVec::const_iterator end) const
 {
     // find the maximum intensity in the range (begin - end)...
-    MantidVec::iterator maxInRange = std::max_element(begin, end);
+    MantidVec::const_iterator maxInRange = std::max_element(begin, end);
 
-    std::list<MantidVec::iterator> peaks;
+    std::list<MantidVec::const_iterator> peaks;
     peaks.push_back(maxInRange);
 
     // ...and perform same search on sub-list left of maximum...
-    MantidVec::iterator leftBegin = getLeftRangeBegin(begin);
+    MantidVec::const_iterator leftBegin = getLeftRangeBegin(begin);
     if(std::distance(leftBegin, maxInRange) > m_minimumDistance) {
         peaks.merge(findPeaksRecursive(leftBegin, maxInRange - m_minimumDistance));
     }
 
     // ...and right of maximum
-    MantidVec::iterator rightEnd = getRightRangeEnd(end);
+    MantidVec::const_iterator rightEnd = getRightRangeEnd(end);
     if(std::distance(maxInRange + 1, rightEnd) > m_minimumDistance) {
         peaks.merge(findPeaksRecursive(maxInRange + 1 + m_minimumDistance, rightEnd));
     }
@@ -145,7 +145,7 @@ std::list<MantidVec::iterator> PoldiPeakSearch::findPeaksRecursive(MantidVec::it
     return peaks;
 }
 
-MantidVec::iterator PoldiPeakSearch::getLeftRangeBegin(MantidVec::iterator begin)
+MantidVec::const_iterator PoldiPeakSearch::getLeftRangeBegin(MantidVec::const_iterator begin) const
 {
     /* The edges of the searched range require special treatment. Without this sanitation,
      * each recursion step that includes the leftmost sublist would chop off m_minimumDistance
@@ -160,7 +160,7 @@ MantidVec::iterator PoldiPeakSearch::getLeftRangeBegin(MantidVec::iterator begin
     return begin;
 }
 
-MantidVec::iterator PoldiPeakSearch::getRightRangeEnd(MantidVec::iterator end)
+MantidVec::const_iterator PoldiPeakSearch::getRightRangeEnd(MantidVec::const_iterator end) const
 {
     if(end != m_recursionAbsoluteEnd) {
         return end - m_minimumDistance;
@@ -169,23 +169,23 @@ MantidVec::iterator PoldiPeakSearch::getRightRangeEnd(MantidVec::iterator end)
     return end;
 }
 
-std::list<MantidVec::iterator> PoldiPeakSearch::mapPeakPositionsToCorrelationData(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator baseDataStart, MantidVec::iterator originalDataStart)
+std::list<MantidVec::const_iterator> PoldiPeakSearch::mapPeakPositionsToCorrelationData(std::list<MantidVec::const_iterator> peakPositions, MantidVec::const_iterator baseDataStart, MantidVec::const_iterator originalDataStart) const
 {
-    std::list<MantidVec::iterator> transformedIndices;
+    std::list<MantidVec::const_iterator> transformedIndices;
 
-    for(std::list<MantidVec::iterator>::const_iterator peakPosition = peakPositions.begin(); peakPosition != peakPositions.end(); ++peakPosition) {
+    for(std::list<MantidVec::const_iterator>::const_iterator peakPosition = peakPositions.begin(); peakPosition != peakPositions.end(); ++peakPosition) {
         transformedIndices.push_back(originalDataStart + std::distance(baseDataStart, *peakPosition) + 1);
     }
 
     return transformedIndices;
 }
 
-std::vector<PoldiPeak_sptr> PoldiPeakSearch::getPeaks(MantidVec::iterator baseListStart, std::list<MantidVec::iterator> peakPositions, MantidVec xData)
+std::vector<PoldiPeak_sptr> PoldiPeakSearch::getPeaks(MantidVec::const_iterator baseListStart, std::list<MantidVec::const_iterator> peakPositions, const MantidVec &xData) const
 {
     std::vector<PoldiPeak_sptr> peakData;
     peakData.reserve(peakPositions.size());
 
-    for(std::list<MantidVec::iterator>::const_iterator peak = peakPositions.begin();
+    for(std::list<MantidVec::const_iterator>::const_iterator peak = peakPositions.begin();
         peak != peakPositions.end();
         ++peak)
     {
@@ -200,7 +200,7 @@ std::vector<PoldiPeak_sptr> PoldiPeakSearch::getPeaks(MantidVec::iterator baseLi
     return peakData;
 }
 
-double PoldiPeakSearch::getFWHMEstimate(MantidVec::iterator baseListStart, MantidVec::iterator peakPosition, MantidVec xData)
+double PoldiPeakSearch::getFWHMEstimate(MantidVec::const_iterator baseListStart, MantidVec::const_iterator peakPosition, const MantidVec &xData) const
 {
     size_t peakPositionIndex = std::distance(baseListStart, peakPosition);
     double halfPeakIntensity = *peakPosition / 2.0;
@@ -209,7 +209,7 @@ double PoldiPeakSearch::getFWHMEstimate(MantidVec::iterator baseListStart, Manti
      * - average positions i-1 and i as guess for position of fwhm
      * - return difference to peak position * 2
      */
-    MantidVec::iterator nextIntensity = peakPosition + 1;
+    MantidVec::const_iterator nextIntensity = peakPosition + 1;
     while(*nextIntensity > halfPeakIntensity) {
         nextIntensity += 1;
     }
@@ -220,21 +220,21 @@ double PoldiPeakSearch::getFWHMEstimate(MantidVec::iterator baseListStart, Manti
     return (hmXGuess - xData[peakPositionIndex]) * 2.0;
 }
 
-void PoldiPeakSearch::setErrorsOnWorkspace(Workspace2D_sptr correlationWorkspace, double error)
+void PoldiPeakSearch::setErrorsOnWorkspace(Workspace2D_sptr correlationWorkspace, double error) const
 {
     MantidVec &errors = correlationWorkspace->dataE(0);
 
     std::fill(errors.begin(), errors.end(), error);
 }
 
-MantidVec PoldiPeakSearch::getBackground(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
+MantidVec PoldiPeakSearch::getBackground(std::list<MantidVec::const_iterator> peakPositions, const MantidVec &correlationCounts) const
 {
     size_t backgroundPoints = getNumberOfBackgroundPoints(peakPositions, correlationCounts);
 
     MantidVec background;
     background.reserve(backgroundPoints);
 
-    for(MantidVec::iterator point = correlationCounts.begin() + 1;
+    for(MantidVec::const_iterator point = correlationCounts.begin() + 1;
         point != correlationCounts.end() - 1;
         ++point)
     {
@@ -246,7 +246,7 @@ MantidVec PoldiPeakSearch::getBackground(std::list<MantidVec::iterator> peakPosi
     return background;
 }
 
-UncertainValue PoldiPeakSearch::getBackgroundWithSigma(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
+UncertainValue PoldiPeakSearch::getBackgroundWithSigma(std::list<MantidVec::const_iterator> peakPositions, const MantidVec &correlationCounts) const
 {
     MantidVec background = getBackground(peakPositions, correlationCounts);
 
@@ -262,9 +262,9 @@ UncertainValue PoldiPeakSearch::getBackgroundWithSigma(std::list<MantidVec::iter
     return UncertainValue(meanBackground, sigmaBackground);
 }
 
-bool PoldiPeakSearch::distanceToPeaksGreaterThanMinimum(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator point)
+bool PoldiPeakSearch::distanceToPeaksGreaterThanMinimum(std::list<MantidVec::const_iterator> peakPositions, MantidVec::const_iterator point) const
 {
-    for(std::list<MantidVec::iterator>::const_iterator peakPosition = peakPositions.begin(); peakPosition != peakPositions.end(); ++peakPosition) {
+    for(std::list<MantidVec::const_iterator>::const_iterator peakPosition = peakPositions.begin(); peakPosition != peakPositions.end(); ++peakPosition) {
         if(std::abs(std::distance(point, *peakPosition)) <= m_minimumDistance) {
             return false;
         }
@@ -273,7 +273,7 @@ bool PoldiPeakSearch::distanceToPeaksGreaterThanMinimum(std::list<MantidVec::ite
     return true;
 }
 
-size_t PoldiPeakSearch::getNumberOfBackgroundPoints(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts)
+size_t PoldiPeakSearch::getNumberOfBackgroundPoints(std::list<MantidVec::const_iterator> peakPositions, const MantidVec &correlationCounts) const
 {
     /* subtracting 2, to match original algorithm, where
      * the first and the last point of the spectrum are not
@@ -289,7 +289,7 @@ size_t PoldiPeakSearch::getNumberOfBackgroundPoints(std::list<MantidVec::iterato
     return totalDataPoints - occupiedByPeaks;
 }
 
-double PoldiPeakSearch::getMedianFromSortedVector(MantidVec::iterator begin, MantidVec::iterator end)
+double PoldiPeakSearch::getMedianFromSortedVector(MantidVec::const_iterator begin, MantidVec::const_iterator end) const
 {
     size_t count = std::distance(begin, end);
 
@@ -300,7 +300,7 @@ double PoldiPeakSearch::getMedianFromSortedVector(MantidVec::iterator begin, Man
     }
 }
 
-double PoldiPeakSearch::getSn(MantidVec::iterator begin, MantidVec::iterator end)
+double PoldiPeakSearch::getSn(MantidVec::const_iterator begin, MantidVec::const_iterator end) const
 {
     size_t numberOfPoints = std::distance(begin, end);
     MantidVec absoluteDifferenceMedians(numberOfPoints);
@@ -325,7 +325,7 @@ double PoldiPeakSearch::getSn(MantidVec::iterator begin, MantidVec::iterator end
     return 1.1926 * getMedianFromSortedVector(absoluteDifferenceMedians.begin(), absoluteDifferenceMedians.end());
 }
 
-double PoldiPeakSearch::minimumPeakHeightFromBackground(UncertainValue backgroundWithSigma)
+double PoldiPeakSearch::minimumPeakHeightFromBackground(UncertainValue backgroundWithSigma) const
 {
     return 3.0 * backgroundWithSigma.error() + backgroundWithSigma.value();
 }
@@ -350,13 +350,13 @@ void PoldiPeakSearch::setMaximumPeakNumber(int newMaximumPeakNumber)
     m_maximumPeakNumber = newMaximumPeakNumber;
 }
 
-void PoldiPeakSearch::setRecursionAbsoluteBorders(MantidVec::iterator begin, MantidVec::iterator end)
+void PoldiPeakSearch::setRecursionAbsoluteBorders(MantidVec::const_iterator begin, MantidVec::const_iterator end)
 {
     m_recursionAbsoluteBegin = begin;
     m_recursionAbsoluteEnd = end;
 }
 
-bool PoldiPeakSearch::vectorElementGreaterThan(MantidVec::iterator first, MantidVec::iterator second)
+bool PoldiPeakSearch::vectorElementGreaterThan(MantidVec::const_iterator first, MantidVec::const_iterator second)
 {
     return *first > *second;
 }
@@ -407,14 +407,14 @@ void PoldiPeakSearch::exec()
     MantidVec summedNeighborCounts = getNeighborSums(correlatedCounts);
     g_log.information() << "   Neighboring counts summed, contains " << summedNeighborCounts.size() << " data points." << std::endl;
 
-    std::list<MantidVec::iterator> peakPositionsSummed = findPeaks(summedNeighborCounts.begin(), summedNeighborCounts.end());
+    std::list<MantidVec::const_iterator> peakPositionsSummed = findPeaks(summedNeighborCounts.begin(), summedNeighborCounts.end());
     g_log.information() << "   Peaks detected in summed spectrum: " << peakPositionsSummed.size() << std::endl;
 
     /* This step is required because peaks are actually searched in the "sum-of-neighbors"-spectrum.
      * The mapping removes the offset from the peak position which results from different beginning
      * of this vector compared to the original correlation counts.
      */
-    std::list<MantidVec::iterator> peakPositionsCorrelation = mapPeakPositionsToCorrelationData(peakPositionsSummed, summedNeighborCounts.begin(), correlatedCounts.begin());
+    std::list<MantidVec::const_iterator> peakPositionsCorrelation = mapPeakPositionsToCorrelationData(peakPositionsSummed, summedNeighborCounts.begin(), correlatedCounts.begin());
     g_log.information() << "   Peak positions transformed to original spectrum." << std::endl;
 
     /* Since intensities are required for filtering, they are extracted from the original count data,

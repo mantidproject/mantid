@@ -62,36 +62,36 @@ namespace Poldi
   protected:
     void initDocs();
 
-    MantidVec getNeighborSums(MantidVec correlationCounts);
+    MantidVec getNeighborSums(MantidVec correlationCounts) const;
 
-    std::list<MantidVec::iterator> findPeaks(MantidVec::iterator begin, MantidVec::iterator end);
-    std::list<MantidVec::iterator> findPeaksRecursive(MantidVec::iterator begin, MantidVec::iterator end);
-    MantidVec::iterator getLeftRangeBegin(MantidVec::iterator begin);
-    MantidVec::iterator getRightRangeEnd(MantidVec::iterator end);
+    std::list<MantidVec::const_iterator> findPeaks(MantidVec::const_iterator begin, MantidVec::const_iterator end);
+    std::list<MantidVec::const_iterator> findPeaksRecursive(MantidVec::const_iterator begin, MantidVec::const_iterator end) const;
+    MantidVec::const_iterator getLeftRangeBegin(MantidVec::const_iterator begin) const;
+    MantidVec::const_iterator getRightRangeEnd(MantidVec::const_iterator end) const;
 
-    std::list<MantidVec::iterator> mapPeakPositionsToCorrelationData(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator baseDataStart, MantidVec::iterator originalDataStart);
+    std::list<MantidVec::const_iterator> mapPeakPositionsToCorrelationData(std::list<MantidVec::const_iterator> peakPositions, MantidVec::const_iterator baseDataStart, MantidVec::const_iterator originalDataStart) const;
 
-    UncertainValue getBackgroundWithSigma(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
-    MantidVec getBackground(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
-    bool distanceToPeaksGreaterThanMinimum(std::list<MantidVec::iterator> peakPositions, MantidVec::iterator point);
-    size_t getNumberOfBackgroundPoints(std::list<MantidVec::iterator> peakPositions, MantidVec &correlationCounts);
+    UncertainValue getBackgroundWithSigma(std::list<MantidVec::const_iterator> peakPositions, const MantidVec &correlationCounts) const;
+    MantidVec getBackground(std::list<MantidVec::const_iterator> peakPositions, const MantidVec &correlationCounts) const;
+    bool distanceToPeaksGreaterThanMinimum(std::list<MantidVec::const_iterator> peakPositions, MantidVec::const_iterator point) const;
+    size_t getNumberOfBackgroundPoints(std::list<MantidVec::const_iterator> peakPositions, const MantidVec &correlationCounts) const;
 
-    double getMedianFromSortedVector(MantidVec::iterator begin, MantidVec::iterator end);
-    double getSn(MantidVec::iterator begin, MantidVec::iterator end);
+    double getMedianFromSortedVector(MantidVec::const_iterator begin, MantidVec::const_iterator end) const;
+    double getSn(MantidVec::const_iterator begin, MantidVec::const_iterator end) const;
 
-    double minimumPeakHeightFromBackground(UncertainValue backgroundWithSigma);
-    std::vector<PoldiPeak_sptr> getPeaks(MantidVec::iterator baseListStart, std::list<MantidVec::iterator> peakPositions, MantidVec xData);
-    double getFWHMEstimate(MantidVec::iterator baseListStart, MantidVec::iterator peakPosition, MantidVec xData);
+    double minimumPeakHeightFromBackground(UncertainValue backgroundWithSigma) const;
+    std::vector<PoldiPeak_sptr> getPeaks(MantidVec::const_iterator baseListStart, std::list<MantidVec::const_iterator> peakPositions, const MantidVec &xData) const;
+    double getFWHMEstimate(MantidVec::const_iterator baseListStart, MantidVec::const_iterator peakPosition, const MantidVec &xData) const;
 
-    void setErrorsOnWorkspace(Workspace2D_sptr correlationWorkspace, double error);
+    void setErrorsOnWorkspace(Workspace2D_sptr correlationWorkspace, double error) const;
 
     void setMinimumDistance(int newMinimumDistance);
     void setMinimumPeakHeight(double newMinimumPeakHeight);
     void setMaximumPeakNumber(int newMaximumPeakNumber);
 
-    void setRecursionAbsoluteBorders(MantidVec::iterator begin, MantidVec::iterator end);
+    void setRecursionAbsoluteBorders(MantidVec::const_iterator begin, MantidVec::const_iterator end);
 
-    static bool vectorElementGreaterThan(MantidVec::iterator first, MantidVec::iterator second);
+    static bool vectorElementGreaterThan(MantidVec::const_iterator first, MantidVec::const_iterator second);
     bool isLessThanMinimum(PoldiPeak_sptr peak);
 
     int m_minimumDistance;
@@ -99,8 +99,8 @@ namespace Poldi
     double m_minimumPeakHeight;
     int m_maximumPeakNumber;
 
-    MantidVec::iterator m_recursionAbsoluteBegin;
-    MantidVec::iterator m_recursionAbsoluteEnd;
+    MantidVec::const_iterator m_recursionAbsoluteBegin;
+    MantidVec::const_iterator m_recursionAbsoluteEnd;
 
     PoldiPeakCollection_sptr m_peaks;
 

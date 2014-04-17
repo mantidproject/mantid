@@ -80,7 +80,7 @@ public:
         double testListRaw[] = {-3.0, -2.0, 12.0, 3.0, 5.0, 7.0, 12.0, 34.0, 13.0, 18.0, 1.0, -10.0, 12.0, 3.0, 4.0, 6.0, 7.0};
         std::vector<double> testList(testListRaw, testListRaw + 17);
 
-        std::list<std::vector<double>::iterator> maxima = poldiPeakSearch.findPeaksRecursive(testList.begin(), testList.end());
+        std::list<std::vector<double>::const_iterator> maxima = poldiPeakSearch.findPeaksRecursive(testList.begin(), testList.end());
         TS_ASSERT_EQUALS(maxima.size(), 3);
 
         maxima.sort();
@@ -94,7 +94,7 @@ public:
 
         // Same test with absolute recursion borders gives one additional peak at the right edge
         poldiPeakSearch.setRecursionAbsoluteBorders(testList.begin(), testList.end());
-        std::list<std::vector<double>::iterator> edgeCasesMaxima = poldiPeakSearch.findPeaksRecursive(testList.begin(), testList.end());
+        std::list<std::vector<double>::const_iterator> edgeCasesMaxima = poldiPeakSearch.findPeaksRecursive(testList.begin(), testList.end());
         TS_ASSERT_EQUALS(edgeCasesMaxima.size(), 4);
 
         edgeCasesMaxima.sort();
@@ -167,7 +167,7 @@ public:
         double testListRaw[] = {-3.0, -2.0, 12.0, 3.0, 5.0, 7.0, 12.0, 34.0, 13.0, 18.0, 1.0, -10.0, 12.0, 3.0, 4.0, 6.0, 7.0};
         std::vector<double> testList(testListRaw, testListRaw + 17);
 
-        std::list<std::vector<double>::iterator> maxima = poldiPeakSearch.findPeaks(testList.begin(), testList.end());
+        std::list<std::vector<double>::const_iterator> maxima = poldiPeakSearch.findPeaks(testList.begin(), testList.end());
         TS_ASSERT_EQUALS(maxima.size(), maxPeakNum);
         TS_ASSERT_EQUALS(*maxima.front(), 34.0);        
         TS_ASSERT_EQUALS(*maxima.back(), 12.0);
@@ -192,7 +192,7 @@ public:
             *iterX = x;
         }
 
-        std::list<std::vector<double>::iterator> maxima = poldiPeakSearch.findPeaksRecursive(baseData.begin(), baseData.end());
+        std::list<std::vector<double>::const_iterator> maxima = poldiPeakSearch.findPeaksRecursive(baseData.begin(), baseData.end());
 
         maxima.sort();
 
@@ -227,11 +227,11 @@ public:
         secondVector.push_back(5.5);
         secondVector.push_back(6.5);
 
-        std::list<std::vector<double>::iterator> firstIterators;
+        std::list<std::vector<double>::const_iterator> firstIterators;
         firstIterators.push_back(firstVector.begin() + 2);
         firstIterators.push_back(firstVector.begin() + 3);
 
-        std::list<std::vector<double>::iterator> secondIterators = poldiPeakSearch.mapPeakPositionsToCorrelationData(firstIterators, firstVector.begin(), secondVector.begin());
+        std::list<std::vector<double>::const_iterator> secondIterators = poldiPeakSearch.mapPeakPositionsToCorrelationData(firstIterators, firstVector.begin(), secondVector.begin());
 
         TS_ASSERT_EQUALS(*secondIterators.front(), 4.5);
         TS_ASSERT_EQUALS(*secondIterators.back(), 5.5);
@@ -242,12 +242,12 @@ public:
         TestablePoldiPeakSearch poldiPeakSearch;
         poldiPeakSearch.setMinimumDistance(2);
 
-        std::list<std::vector<double>::iterator> peakPositions(4);
+        std::list<std::vector<double>::const_iterator> peakPositions(4);
         std::vector<double> correlationCounts(30);
 
         TS_ASSERT_EQUALS(poldiPeakSearch.getNumberOfBackgroundPoints(peakPositions, correlationCounts), 8);
 
-        std::list<std::vector<double>::iterator> tooManyPeaks(40);
+        std::list<std::vector<double>::const_iterator> tooManyPeaks(40);
         TS_ASSERT_THROWS(poldiPeakSearch.getNumberOfBackgroundPoints(tooManyPeaks, correlationCounts), std::runtime_error);
     }
 
@@ -284,7 +284,7 @@ public:
         double rawTestList[] = { 1.0, 2.0, 1.0, 3.0, 1.0, 0.0, 4.0, 0.0, 1.0, 2.0, 1.0, 2.0, 1.0 };
         std::vector<double> testList(rawTestList, rawTestList + 13);
 
-        std::list<std::vector<double>::iterator> peaks;
+        std::list<std::vector<double>::const_iterator> peaks;
         peaks.push_front(testList.begin() + 6);
 
         std::vector<double> bg = poldiPeakSearch.getBackground(peaks, testList);
@@ -306,7 +306,7 @@ public:
         double rawTestList[] = { 1.0, 2.0, 1.0, 3.0, 1.0, 0.0, 4.0, 0.0, 1.0, 2.0, 1.0, 2.0, 1.0 };
         std::vector<double> testList(rawTestList, rawTestList + 13);
 
-        std::list<std::vector<double>::iterator> peaks;
+        std::list<std::vector<double>::const_iterator> peaks;
         peaks.push_front(testList.begin() + 6);
 
         TS_ASSERT_EQUALS(poldiPeakSearch.getNumberOfBackgroundPoints(peaks, testList), 6);
