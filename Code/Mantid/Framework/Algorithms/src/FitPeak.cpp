@@ -702,8 +702,6 @@ namespace Algorithms
       throw std::runtime_error(errss.str());
     }
 
-    m_sstream << "F1200 Cost function is " << m_costFunction << "\n";
-
     // Set the properties
     fit->setProperty("Function", fitfunc);
     fit->setProperty("InputWorkspace", dataws);
