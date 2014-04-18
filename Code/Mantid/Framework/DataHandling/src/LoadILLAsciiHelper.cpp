@@ -430,19 +430,13 @@ std::vector<std::string> ILLParser::splitLineInFixedWithFields(
 
 /**
  * Evaluate the input string to a type T
+ * @throws bad_lexical_cast if the input cannot be converted
  */
 template<typename T>
-T ILLParser::evaluate(std::string field) {
-	boost::algorithm::erase_all(field, " ");
-	//std::cout << subs << std::endl;
-	T value;
-	try {
-		value = boost::lexical_cast<T>(field);
-	} catch (boost::bad_lexical_cast &e) {
-		// throw e;
-		throw; // to avoid cppcheck : Throwing a copy of the caught exception instead of rethrowing the original exception.
-	}
-	return value;
+T ILLParser::evaluate(std::string field)
+{
+  boost::algorithm::erase_all(field, " ");
+  return boost::lexical_cast<T>(field);
 }
 
 /**
