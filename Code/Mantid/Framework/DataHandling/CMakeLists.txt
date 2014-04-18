@@ -373,6 +373,7 @@ set ( TEST_FILES
 	SetScalingPSDTest.h
 	UpdateInstrumentFromFileTest.h
 	XMLlogfileTest.h
+	FilterEventsByLogValuePreNexusTest.h
 )
 
 
