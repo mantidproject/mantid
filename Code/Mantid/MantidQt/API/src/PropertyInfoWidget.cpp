@@ -48,10 +48,10 @@ namespace API
   }
 
   /**
-   * Set the given icon's visibility.
+   * Set the visibility of the given information.
    *
-   * @param icon    :: icon to set
-   * @param visible :: whether or not the icon should be visible
+   * @param info    :: info to set
+   * @param visible :: whether or not the info should be visible
    */
   void PropertyInfoWidget::setInfoVisible( Info info, bool visible )
   {
@@ -59,9 +59,9 @@ namespace API
   }
 
   /**
-   * Set the given icon's tool tip.
+   * Set the tool tip of the given information.
    *
-   * @param icon    :: icon to set
+   * @param info    :: info to set
    * @param toolTip :: the contents of the tool tip
    */
   void PropertyInfoWidget::setInfoToolTip( Info info, const QString & toolTip )
