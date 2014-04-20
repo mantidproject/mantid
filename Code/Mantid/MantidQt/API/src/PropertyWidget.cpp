@@ -2,6 +2,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidQtAPI/PropertyInfoWidget.h"
 
 #include <boost/assign.hpp>
 
@@ -167,8 +169,9 @@ namespace API
    */
   PropertyWidget::PropertyWidget(Mantid::Kernel::Property * prop, QWidget * parent, QGridLayout * layout, int row)
   : QWidget(parent),
-    m_prop(prop), m_gridLayout(layout), m_row(row),
-    m_replaceWSButton(NULL)
+    m_prop(prop), m_gridLayout(layout), m_parent(NULL), m_row(row), m_info(NULL),
+    m_doc(), m_replaceWSButton(NULL), m_widgets(), m_error(), m_isOutputWsProp(false),
+    m_previousValue()
   {
     if (!prop)
       throw std::runtime_error("NULL Property passed to the PropertyWidget constructor.");
@@ -190,21 +193,22 @@ namespace API
       // Use the parent of the provided QGridLayout when adding widgets
       m_parent = parent;
     }
-
-    // Create the validator label (that red star)
-    m_validLbl = new QLabel("*");
-    QPalette pal = m_validLbl->palette();
-    pal.setColor(QPalette::WindowText, Qt::darkRed);
-    m_validLbl->setPalette(pal);
-    // Start off hidden
-    m_validLbl->setVisible(false);
-    // Put it in the 4th column.
-    m_gridLayout->addWidget(m_validLbl, m_row, 4);
+    
+    m_info = new PropertyInfoWidget(this);
+    m_gridLayout->addWidget(m_info, m_row, 4);
 
     /// Save the documentation tooltip
     m_doc = QString::fromStdString(prop->documentation());
 
-
+    if( !isOptionalProperty(prop) )
+    {
+      if(!m_doc.isEmpty())
+        m_doc += "\n\n";
+      m_doc += "This property is required.";
+    }
+    
+    if( prop->direction() == Direction::Output && dynamic_cast<IWorkspaceProperty*>(prop) )
+      m_isOutputWsProp = true;
   }
     
   //----------------------------------------------------------------------------------------------
@@ -212,6 +216,28 @@ namespace API
    */
   PropertyWidget::~PropertyWidget()
   {
+  }
+
+  /**
+   * Set this widget's value.
+   *
+   * @param value :: the value to set
+   */
+  void PropertyWidget::setValue(const QString & value)
+  {
+    setValueImpl(value);
+    setRestoredStatus();
+  }
+
+  /**
+   * Set this widget's value as a previously-entered value.
+   *
+   * @param previousValue :: the previous value of this widget
+   */
+  void PropertyWidget::setPreviousValue(const QString & previousValue)
+  {
+    m_previousValue = previousValue;
+    setValue(previousValue);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -243,6 +269,7 @@ namespace API
       //m_wsbtn_tracker[btn ] = 1;
       m_replaceWSButton->setToolTip("Replace input workspace");
       connect(m_replaceWSButton, SIGNAL(clicked()), this, SLOT(replaceWSButtonClicked()));
+      connect(m_replaceWSButton, SIGNAL(clicked()), this, SLOT(valueChangedSlot()));
       m_widgets.push_back(m_replaceWSButton);
       // Place in the grid on column 2.
       m_gridLayout->addWidget(m_replaceWSButton, m_row, 2);
@@ -260,14 +287,9 @@ namespace API
   {
     m_error = error.trimmed();
 
-    // Show the invalid star if there was an error
-    if (m_error.isEmpty())
-      m_validLbl->setVisible(false);
-    else
-    {
-      m_validLbl->setVisible(true);
-      m_validLbl->setToolTip(m_error);
-    }
+    // Show the invalid star if there was an error.
+    m_info->setInfoVisible(PropertyInfoWidget::INVALID, !m_error.isEmpty());
+    m_info->setInfoToolTip(PropertyInfoWidget::INVALID, m_error);
   }
 
 
@@ -297,6 +319,14 @@ namespace API
     }
     this->setError(QString::fromStdString(error).trimmed());
 
+    setRestoredStatus();
+
+    if( m_isOutputWsProp )
+    {
+      const bool wsExists = Mantid::API::AnalysisDataService::Instance().doesExist(value.toStdString());
+      m_info->setInfoVisible(PropertyInfoWidget::REPLACE, wsExists);
+    }
+
     // This will be caught by the GenericDialog.
     emit valueChanged( QString::fromStdString(m_prop->name()) ) ;
   }
@@ -319,6 +349,19 @@ namespace API
     for (int i=0; i < m_widgets.size(); i++)
       m_widgets[i]->setVisible(val);
     QWidget::setVisible(val);
+  }
+
+  /**
+   * "Nudge" the restored information icon.
+   */
+  void PropertyWidget::setRestoredStatus()
+  {
+    if( m_previousValue == getValue() &&
+        getValue().toStdString() != m_prop->getDefault() &&
+        !getValue().isEmpty() )
+      m_info->setInfoVisible(PropertyInfoWidget::RESTORE, true);
+    else
+      m_info->setInfoVisible(PropertyInfoWidget::RESTORE, false);
   }
 
   /**

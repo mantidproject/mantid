@@ -5,6 +5,7 @@
 #include <QtGui/qwidget.h>
 #include <qgridlayout.h>
 #include "MantidKernel/Property.h"
+#include "MantidQtAPI/PropertyInfoWidget.h"
 #include <QLabel>
 #include <QtCore/qstring.h>
 #include <qpushbutton.h>
@@ -56,7 +57,9 @@ namespace API
     virtual QString getValue() const = 0;
 
     /// Set the value of the property given into the GUI state.
-    virtual void setValue(const QString & value) = 0;
+    void setValue(const QString & value);
+    /// Set this widget's previously-entered value.
+    void setPreviousValue(const QString & previousValue);
 
     virtual QWidget * getMainWidget() = 0;
 
@@ -78,6 +81,10 @@ namespace API
     { return m_prop; }
 
     void setError(const QString & error);
+
+  private:
+    virtual void setValueImpl(const QString & value) = 0;
+    void setRestoredStatus();
 
   public slots:
     void replaceWSButtonClicked();
@@ -110,8 +117,8 @@ namespace API
     /// If using the GridLayout, this is the row where the widget was inserted.
     int m_row;
 
-    /// Label that is visible when the property is NOT valid.
-    QLabel * m_validLbl;
+    /// Widget to display information about this property.
+    PropertyInfoWidget * m_info;
 
     /// Documentation string (tooltip)
     QString m_doc;
@@ -124,6 +131,11 @@ namespace API
 
     /// Error message received when trying to set the value
     QString m_error;
+
+    /// Whether or not the property is an output workspace.
+    bool m_isOutputWsProp;
+
+    QString m_previousValue;
   };
 
 

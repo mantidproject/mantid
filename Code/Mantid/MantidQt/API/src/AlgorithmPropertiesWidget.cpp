@@ -268,7 +268,7 @@ namespace API
           if (!oldValue.isEmpty())
           {
             prop->setValue(oldValue.toStdString());
-            widget->setValue(oldValue);
+            widget->setPreviousValue(oldValue);
           }
         }
 
