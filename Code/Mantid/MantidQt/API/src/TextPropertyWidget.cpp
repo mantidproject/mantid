@@ -20,12 +20,14 @@ namespace API
     // Label at column 0
     m_label = new QLabel(QString::fromStdString(prop->name()), m_parent);
     m_label->setToolTip(m_doc);
+    setLabelFont(prop, m_label);
     m_gridLayout->addWidget(m_label, m_row, 0, 0);
     m_widgets.push_back(m_label);
 
     // Text box at column 1
     m_textbox = new QLineEdit(m_parent);
     m_textbox->setToolTip(m_doc);
+    setFieldPlaceholderText(prop, m_textbox);
     connect(m_textbox, SIGNAL(editingFinished()), this, SLOT(valueChangedSlot()));
     m_gridLayout->addWidget(m_textbox, m_row, 1, 0);
     m_widgets.push_back(m_textbox);
@@ -56,7 +58,7 @@ namespace API
   /** Set the value into the GUI
    *
    * @param value :: string representation of the value */
-  void TextPropertyWidget::setValue(const QString & value)
+  void TextPropertyWidget::setValueImpl(const QString & value)
   {
     QString temp = value;
     if (temp.isEmpty() && !m_prop->isDefault())
