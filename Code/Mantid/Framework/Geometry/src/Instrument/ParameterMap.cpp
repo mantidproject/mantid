@@ -502,6 +502,7 @@ namespace Mantid
      * Avoids having to instantiate temporary std::string in method below when called with a string directly
      * @param comp :: The component to be searched as a c-string
      * @param name :: The name of the parameter
+     * @param type :: The type of the component
      * @return A boolean indicating if the map contains the named parameter.
      */
     bool ParameterMap::contains(const IComponent* comp, const char * name, const char *type) const

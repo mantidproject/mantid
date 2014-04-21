@@ -136,12 +136,13 @@ namespace Algorithms
 
   }
 
-  ///Adds a parameter to the component
-  /// @param pmap  The parameter map to use
-  /// @param cmptId  The component id to add the the parameter to
-  /// @param paramName  The parameter name to use
-  /// @param ParamType  The parameter type
-  /// @param paramValue  The parameter value as a string
+  /** Adds a parameter to the component
+   *  @param pmap  The parameter map to use
+   *  @param cmptId  The component id to add the the parameter to
+   *  @param paramName  The parameter name to use
+   *  @param paramType  The parameter type
+   *  @param paramValue  The parameter value as a string
+   */
   void SetInstrumentParameter::addParameter(Mantid::Geometry::ParameterMap& pmap, 
     const Mantid::Geometry::IComponent* cmptId, const std::string& paramName, 
     const std::string& paramType, const std::string& paramValue) const

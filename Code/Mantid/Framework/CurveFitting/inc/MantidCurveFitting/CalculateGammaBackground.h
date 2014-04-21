@@ -62,7 +62,7 @@ namespace Mantid
       };
 
       /// Avoid nested try catch in openmp loop by returning boolean if spectrum was corrceted
-      bool calculateBackground(size_t inputIndex, size_t ouptutIndex);
+      bool calculateBackground(size_t inputIndex, size_t outputIndex);
       /// Calculate & correct the given index of the input workspace
       void applyCorrection(const size_t inputIndex,const size_t outputIndex);
       /// Compute the expected spectrum from a given detector
