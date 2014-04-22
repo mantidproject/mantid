@@ -143,6 +143,8 @@ namespace Mantid
       /// Return separator for list of names of detectors
       std::string getNameSeparator() const { return ";"; }
 
+      /// returns pointer to the const parameter map
+      virtual const ParameterMap * getParameterMap();
     protected:
       /// The ID of this effective detector
       int m_id;
@@ -153,7 +155,7 @@ namespace Mantid
       /// The collection of grouped detectors
       DetCollection m_detectors;
      /** the parameter describes the topology of the detector's group namely if detectors form a box or a ring.  
-      *  the topology is undefined on construction and caclulated on first request   */
+      *  the topology is undefined on construction and calculated on first request   */
       mutable det_topology group_topology;
       /// group centre is the geometrical centre of the detectors group calculated when the calculate group topology is invoked
       mutable Kernel::V3D  groupCentre; 

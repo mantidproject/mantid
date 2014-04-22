@@ -18,12 +18,8 @@ namespace Geometry
    * @param map :: a ParameterMap to parameterize the component
    */
   Component::Component(const IComponent* base,  const ParameterMap * map)
-  : m_base(dynamic_cast<const Component*>(base)), m_map(map), m_isParametrized(true)
+  : m_base(dynamic_cast<const Component*>(base)), m_map(map)
   {
-    if (m_isParametrized && !m_map)
-    {
-      throw std::invalid_argument("Zero pointer to parameter map in parametrized component");
-    }
     if( !m_base )
     {
       throw std::invalid_argument("Component::Component() - Cannot construct a "
@@ -37,7 +33,7 @@ namespace Geometry
    *  Create a component with null parent
    */
   Component::Component()
-    : m_parent(NULL), m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(), m_pos(), m_rot()
+    : m_parent(NULL), m_base(NULL), m_map(NULL),m_name(), m_pos(), m_rot()
   {
   }
 
@@ -46,7 +42,7 @@ namespace Geometry
    *  @param parent :: parent Component (optional)
    */
   Component::Component(const std::string& name, IComponent* parent)
-    : m_parent(parent), m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name), m_pos(), m_rot()
+    : m_parent(parent), m_base(NULL), m_map(NULL), m_name(name), m_pos(), m_rot()
   {
   }
 
@@ -57,7 +53,7 @@ namespace Geometry
    *  @param parent :: parent Component
    */
   Component::Component(const std::string& name, const V3D& position, IComponent* parent)
-    : m_parent(parent), m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name), m_pos(position), m_rot()
+    : m_parent(parent), m_base(NULL), m_map(NULL), m_name(name), m_pos(position), m_rot()
   {
   }
 
@@ -68,7 +64,7 @@ namespace Geometry
    *  @param parent :: parent Component (optional)
    */
   Component::Component(const std::string& name, const V3D& position, const Quat& rotation, IComponent* parent)
-    : m_parent(parent), m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name),m_pos(position), m_rot(rotation)
+    : m_parent(parent), m_base(NULL), m_map(NULL),  m_name(name),m_pos(position), m_rot(rotation)
   {
   }
 
@@ -83,7 +79,7 @@ namespace Geometry
    */
   bool Component::isParametrized() const
   {
-    return m_isParametrized;
+    return (m_map!=NULL);
   }
 
   /** Clone method
@@ -100,7 +96,7 @@ namespace Geometry
    */
   ComponentID Component::getComponentID()const
   {
-    if (m_isParametrized)
+    if (m_map)
       return ComponentID(const_cast<Component*>(m_base));
     else
       return ComponentID(const_cast<Component*>(this));
@@ -122,7 +118,7 @@ namespace Geometry
    */
   boost::shared_ptr<const IComponent> Component::getParent() const
   {
-    if (this->m_isParametrized)
+    if (this->m_map)
     {
       boost::shared_ptr<const IComponent> parent = m_base->getParent();
       return ParComponentFactory::create(parent,m_map);
@@ -177,7 +173,7 @@ namespace Geometry
    */
   void Component::setName(const std::string& s)
   {
-    if (!m_isParametrized)
+    if (!m_map)
       this->m_name = s;
     else
       throw Kernel::Exception::NotImplementedError("Component::setName (for Parametrized Component)");
@@ -189,7 +185,7 @@ namespace Geometry
    */
   std::string Component::getName() const
   {
-    if (m_isParametrized)
+    if (m_map)
       return m_base->getName();
     else
       return m_name;
@@ -222,7 +218,7 @@ namespace Geometry
    */
   void Component::setPos(double x, double y, double z)
   {
-    if (!m_isParametrized)
+    if (!m_map)
       m_pos = V3D(x,y,z);
     else
       throw Kernel::Exception::NotImplementedError("Component::setPos (for Parametrized Component)");
@@ -234,7 +230,7 @@ namespace Geometry
    */
   void Component::setPos(const V3D& v)
   {
-    if (!m_isParametrized)
+    if (!m_map)
       m_pos = v;
     else
       throw Kernel::Exception::NotImplementedError("Component::setPos (for Parametrized Component)");
@@ -246,7 +242,7 @@ namespace Geometry
    */
   void Component::setRot(const Quat& q)
   {
-    if (!m_isParametrized)
+    if (!m_map)
       m_rot = q;
     else
       throw Kernel::Exception::NotImplementedError("Component::setRot (for Parametrized Component)");
@@ -260,7 +256,7 @@ namespace Geometry
    */
   void Component::translate(double x, double y, double z)
   {
-    if (!m_isParametrized)
+    if (!m_map)
     {
       m_pos[0]+=x;
       m_pos[1]+=y;
@@ -275,7 +271,7 @@ namespace Geometry
    */
   void Component::translate(const V3D& v)
   {
-    if (!m_isParametrized)
+    if (!m_map)
       m_pos+=v;
     else
       throw Kernel::Exception::NotImplementedError("Component::translate (for Parametrized Component)");
@@ -286,7 +282,7 @@ namespace Geometry
    */
   void Component::rotate(const Quat& r)
   {
-    if (!m_isParametrized)
+    if (!m_map)
       m_rot=m_rot*r;
     else
       throw Kernel::Exception::NotImplementedError("Component::rotate (for Parametrized Component)");
@@ -308,7 +304,7 @@ namespace Geometry
    */
   const V3D Component::getRelativePos() const
   {
-    if( m_isParametrized )
+    if( m_map )
     {
       if( m_map->contains(m_base, "pos") )
       {
@@ -325,7 +321,7 @@ namespace Geometry
    */
   V3D Component::getScaleFactor() const
   {
-    if (m_isParametrized)
+    if (m_map)
     {
       Parameter_sptr par = m_map->get(m_base,"sca");
       if (par)
@@ -342,7 +338,7 @@ namespace Geometry
    */
   V3D Component::getPos() const
   {
-    if (this->m_isParametrized)
+    if (this->m_map)
     {
       // Avoid instantiation of the parent's parameterized object if possible
       const IComponent * baseParent = m_base->m_parent;
@@ -393,7 +389,7 @@ namespace Geometry
    */
   const Quat& Component::getRelativeRot() const
   {
-    if( m_isParametrized )
+    if( m_map )
     {
       if( m_map->contains(m_base, "rot") )
       {
@@ -409,7 +405,7 @@ namespace Geometry
    */
   const Quat Component::getRotation() const
   {
-    if (m_isParametrized)
+    if (m_map)
     {
       // Avoid instantiation of the parent's parameterized object if possible
       const IComponent * baseParent = m_base->m_parent;
@@ -468,7 +464,7 @@ namespace Geometry
    */
   std::set<std::string> Component::getParameterNames(bool recursive) const
   {
-    if (!m_isParametrized) return std::set<std::string>();
+    if (!m_map) return std::set<std::string>();
 
     std::set<std::string> names = m_map->names(this);
     if( recursive )
@@ -492,7 +488,7 @@ namespace Geometry
    */
   bool Component::hasParameter(const std::string & name, bool recursive) const
   {
-    if (!m_isParametrized) return false;
+    if (!m_map) return false;
 
     bool match_found(false);
     if( m_map->contains(this, name) )
@@ -520,7 +516,7 @@ namespace Geometry
 
 
   /** Prints a text representation of itself
-   * @param os :: The ouput stream to write to
+   * @param os :: The output stream to write to
    */
   void Component::printSelf(std::ostream& os) const
   {
@@ -537,9 +533,9 @@ namespace Geometry
   }
 
   /** Prints a text representation
-   * @param os :: The ouput stream to write to
+   * @param os :: The output stream to write to
    * @param comp :: The Component to output
-   * @returns The ouput stream
+   * @returns The output stream
    */
   std::ostream& operator<<(std::ostream& os, const Component& comp)
   {
@@ -593,7 +589,7 @@ namespace Geometry
   void Component::swap(const Component* base, const ParameterMap * pmap)
   {
     m_base = base;
-    m_map = pmap;
+    m_map = const_cast<ParameterMap *>(pmap);
   }
 
 } // Namespace Geometry

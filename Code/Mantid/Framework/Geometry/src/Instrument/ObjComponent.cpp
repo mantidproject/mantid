@@ -57,7 +57,7 @@ namespace Mantid
      */
     const Object_const_sptr ObjComponent::shape()const
     {
-      if (m_isParametrized)
+      if (m_map)
         return dynamic_cast<const ObjComponent*>(m_base)->m_shape;
       else
         return m_shape;
@@ -66,7 +66,7 @@ namespace Mantid
     /// Set a new shape on the component
     void ObjComponent::setShape(Object_const_sptr newShape)
     {
-      if (m_isParametrized)
+      if (m_map)
         throw std::runtime_error("ObjComponent::setShape - Cannot change the shape of a parameterized object");
       else
         m_shape = newShape;
@@ -74,7 +74,7 @@ namespace Mantid
 
     /** 
      * Return the material of the component. Currently 
-     * unaffacted by parametrization
+     * unaffected by parametrization
      */
     const Kernel::Material_const_sptr ObjComponent::material() const
     {

@@ -288,7 +288,7 @@ namespace Geometry
 
     /// internal parameter map instance
     pmap m_map;
-    /// internal cache map instance for cached postition values
+    /// internal cache map instance for cached position values
     mutable Kernel::Cache<const ComponentID, Kernel::V3D > m_cacheLocMap;
     /// internal cache map instance for cached rotation values
     mutable Kernel::Cache<const ComponentID, Kernel::Quat > m_cacheRotMap;

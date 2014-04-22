@@ -81,40 +81,72 @@ void CopyInstrumentParameters::exec()
     auto Name1=inst1->getName();
     auto Name2=inst2->getName();
 
-     // vector of all components contained, in target instrument
-     std::vector<IComponent_const_sptr> targComponents;
-     inst2->getChildren(targComponents,true);
+    Geometry::ParameterMap targMap;
 
-      auto it = givParams.begin();
-      for(;it!= givParams.end(); it++)
+    //// vector of all components contained in the target instrument
+    //std::vector<IComponent_const_sptr> targComponents;
+    //// flattens instrument definition tree
+    //inst2->getChildren(targComponents,true);
+    //// multimap of existing instrument parameters
+    //std::multimap<std::string,IComponent const *> existingComponents;
+    //for(size_t i=0;i<targComponents.size();i++)
+    //{        
+    //   if (dynamic_cast<IDetector const *>(targComponents[i].get()))
+    //     continue;
+    //   existingComponents.insert(std::pair<std::string,IComponent const *>(targComponents[i]->getFullName(),targComponents[i].get()));
+    //}
+
+    auto it = givParams.begin();
+    for(;it!= givParams.end(); it++)
+    {
+      IComponent * oldComponent=it->first;
+
+
+      const Geometry::IComponent* targComp = 0;
+
+      IDetector *pOldDet = dynamic_cast<IDetector *>(oldComponent);
+      if (pOldDet)
       {
-        auto oldPlace=it->first;
-        std::string source_name=oldPlace->getFullName();
+        detid_t detID = pOldDet->getID();
+        targComp = inst2->getDetector(detID).get();
+        if (!targComp)
+        {
+          g_log.warning()<<"Target instrument does not have detector with ID "<<detID<<'\n';
+          continue;
+        }
+      }
+      else
+      {
+        std::string source_name=oldComponent->getFullName();
         size_t nameStart = source_name.find(Name1);
         std::string targ_name = source_name.replace(nameStart,nameStart+Name1.size(),Name2);
-        for(size_t i=0;i<targComponents.size();i++)
+        //existingComponents.
+        targComp = inst2->getComponentByName(targ_name).get();
+        if (!targComp)
         {
-          if(targComponents[i]->getFullName() == targ_name)
+          auto old_comp_map = oldComponent->getParameterMap();
+          auto it = old_comp_map->begin();
+          for(;it!=old_comp_map->end();it++)
           {
-            if (targComponents[i]->isParametrized())
-            {
-    //void ParameterMap::copyFromParameterMap(const IComponent* oldComp,
-    //                                        const IComponent* newComp, const ParameterMap *oldPMap) 
-
-               targComponents[i]->getParameterMap()->copyFromParameterMap(oldPlace,
-                                            targComponents[i].get(), &givParams) ;
-            }
-            else
-            {
-            }
+            auto pParam = (*it).second.get();
+            targMap.add(pParam->type(),inst2.get(),targ_name,pParam->asString());
           }
+          continue;
         }
 
       }
+      // process existing target component
+
+
+    }
+
+    // unchanged Copy parameters
+    m_receivingWorkspace->replaceInstrumentParameters( targMap );
+
   }
   else
   {
-  // unchanged Copy parameters
+    // unchanged Copy parameters
     m_receivingWorkspace->replaceInstrumentParameters( givParams );
 
   }
