@@ -90,7 +90,7 @@ class USANSSimulation(PythonAlgorithm):
         
         for wl in wl_peaks:
             q = 6.28*math.sin(two_theta)/wl
-            Logger.get("USANS").notice( "wl = %g; Q = %g" % (wl, q))
+            Logger("USANS").notice( "wl = %g; Q = %g" % (wl, q))
                         
             for i in range(len(data_x)-1):
                 wl_i = 0.0039560/30.0*(data_x[i]+data_x[i+1])/2.0

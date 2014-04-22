@@ -156,8 +156,8 @@
   </idlist>
   <!--DETECTOR PARAMETERS-->
   <component-link name="USANS">	
-	<parameter name="wavelength_peaks" type="string">
-  		<value val="0.9, 1.2, 1.8, 3.6" />
+	<parameter name="wavelength_config" type="string">
+	    <value val='[{"wavelength": 0.72, "t_max": 6000, "t_min": 4800}, {"wavelength": 0.90, "t_max": 7525, "t_min": 6200}, {"wavelength": 1.2, "t_max": 9975, "t_min": 8225}, {"wavelength": 1.8, "t_max": 14438, "t_min": 12775}, {"wavelength": 3.60, "t_max": 28175, "t_min": 26425}]' />
 	</parameter>
   </component-link>
 </instrument>
