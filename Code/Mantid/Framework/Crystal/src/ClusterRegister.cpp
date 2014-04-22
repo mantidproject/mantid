@@ -7,34 +7,6 @@
 #include <set>
 #include <list>
 
-namespace
-{
-  using namespace Mantid::Crystal;
-  struct DisjointPair
-  {
-    const DisjointElement m_currentLabel;
-    const DisjointElement m_neighbourLabel;
-    DisjointPair(const DisjointElement& currentLabel, const DisjointElement& neighbourLabel) :
-      m_currentLabel(currentLabel), m_neighbourLabel(neighbourLabel)
-    {
-    }
-
-    size_t unique() const
-    {
-      const size_t min = std::min(m_currentLabel.getId(), m_neighbourLabel.getId());
-      const size_t max = std::max(m_currentLabel.getId(), m_neighbourLabel.getId());
-      return min + (max >> 32);
-    }
-
-    inline bool operator<(const DisjointPair & other) const
-    {
-      return (this->unique() < other.unique());
-    }
-  };
-
-  typedef std::set<DisjointPair> SetDisjointPair;
-}
-
 namespace Mantid
 {
   namespace Crystal
@@ -44,13 +16,11 @@ namespace Mantid
     {
     public:
 
+      /// All registered input clusters
       ClusterRegister::MapCluster m_register;
 
+      /// Clusters that do not need merging
       ClusterRegister::MapCluster m_unique;
-
-      //std::list<boost::shared_ptr<CompositeCluster> > m_merged;
-
-      SetDisjointPair m_setPairs;
 
       typedef std::list<std::set<size_t> > GroupType;
       GroupType m_groups;

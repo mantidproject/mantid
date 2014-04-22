@@ -1,11 +1,13 @@
-#include "MantidKernel/MultiThreaded.h"
+#include "MantidCrystal/ConnectedComponentLabeling.h"
+
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Memory.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Progress.h"
-#include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/DisjointElement.h"
 #include "MantidCrystal/ICluster.h"
@@ -210,6 +212,23 @@ namespace Mantid
       }
 
       Logger g_log("ConnectedComponentLabeling");
+
+      void memoryCheck(size_t nPoints)
+      {
+        size_t sizeOfElement =  (3 * sizeof(signal_t) ) + sizeof(bool);
+
+        MemoryStats memoryStats;
+        const size_t freeMemory = memoryStats.availMem(); // in kB
+        const size_t memoryCost = sizeOfElement * nPoints / 1000 ; // in kB
+        if(memoryCost > freeMemory)
+        {
+          std::string basicMessage = "CCL requires more free memory than you have available.";
+          std::stringstream sstream;
+          sstream << basicMessage << " Requires " <<  memoryCost << " KB of contiguous memory.";
+          g_log.notice(sstream.str());
+          throw std::runtime_error(basicMessage);
+        }
+      }
     }
 
     /**
@@ -423,6 +442,8 @@ namespace Mantid
     ClusterTuple ConnectedComponentLabeling::executeAndFetchClusters(IMDHistoWorkspace_sptr ws,
         BackgroundStrategy * const strategy, Progress& progress) const
     {
+      // Can we run the analysis
+      memoryCheck(ws->getNPoints());
 
       // Perform the bulk of the connected component analysis, but don't collapse the elements yet.
       ClusterMap clusters = calculateDisjointTree(ws, strategy, progress);
