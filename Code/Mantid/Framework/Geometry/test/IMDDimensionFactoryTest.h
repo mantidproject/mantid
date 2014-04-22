@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
+#include "MantidKernel/UnitLabel.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/XML/XMLException.h>
@@ -54,7 +55,7 @@ public:
   void testCorrectGeneration()
   {
     IMDDimension_const_sptr dimension = createDimension(constructDimensionWithUnitsXMLString());
-    TS_ASSERT_EQUALS("Cubits", dimension->getUnits());
+    TS_ASSERT_EQUALS("Cubits", dimension->getUnits().ascii());
     TS_ASSERT_EQUALS("Qz", dimension->getName());
     TS_ASSERT_EQUALS("qz", dimension->getDimensionId());
     TS_ASSERT_EQUALS(-3, dimension->getMinimum());
@@ -65,7 +66,7 @@ public:
   void testCorrectGenerationWithoutUnits()
   {
     IMDDimension_const_sptr dimension = createDimension(constructDimensionWithoutUnitsXMLString());
-    TS_ASSERT_EQUALS("None", dimension->getUnits());
+    TS_ASSERT_EQUALS("None", dimension->getUnits().ascii());
     TS_ASSERT_EQUALS("Qz", dimension->getName());
     TS_ASSERT_EQUALS("qz", dimension->getDimensionId());
     TS_ASSERT_EQUALS(-3, dimension->getMinimum());
@@ -87,7 +88,7 @@ public:
   void testOverrideMethod()
   {
     IMDDimension_const_sptr dimension = createDimension(constructDimensionWithUnitsXMLString(),10,-9.0,8.5);
-    TS_ASSERT_EQUALS("Cubits", dimension->getUnits());
+    TS_ASSERT_EQUALS("Cubits", dimension->getUnits().ascii());
     TS_ASSERT_EQUALS("Qz", dimension->getName());
     TS_ASSERT_EQUALS("qz", dimension->getDimensionId());
     TS_ASSERT_EQUALS(-9.0, dimension->getMinimum());

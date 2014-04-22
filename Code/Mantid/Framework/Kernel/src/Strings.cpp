@@ -1,5 +1,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/UnitLabel.h"
 
 #include <Poco/StringTokenizer.h>
 #include <Poco/Path.h>
@@ -775,6 +776,12 @@ namespace Mantid
       std::string toString(const std::set<T> &value)
       {
         return toString(std::vector<T>(value.begin(), value.end()));
+      }
+
+      template<>
+      MANTID_KERNEL_DLL std::string toString(const UnitLabel &value)
+      {
+        return value;
       }
 
       //------------------------------------------------------------------------------------------------

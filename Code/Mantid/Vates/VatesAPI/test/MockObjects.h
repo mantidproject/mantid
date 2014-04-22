@@ -10,6 +10,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/UnitLabel.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/Clipper.h"
@@ -54,7 +55,7 @@ private:
 public:
   FakeIMDDimension(std::string id, unsigned int nbins=10) : m_id(id), m_nbins(nbins) {}
   std::string getName() const {throw std::runtime_error("Not implemented");}
-  std::string getUnits() const {throw std::runtime_error("Not implemented");}
+  const Mantid::Kernel::UnitLabel getUnits() const {throw std::runtime_error("Not implemented");}
   std::string getDimensionId() const {return m_id;}
   coord_t getMaximum() const {return 10;}
   coord_t getMinimum() const {return 0;};

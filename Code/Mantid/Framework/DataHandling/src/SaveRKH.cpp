@@ -125,8 +125,8 @@ void SaveRKH::writeHeader()
     const Kernel::Unit_const_sptr unit2 = m_workspace->getAxis(1)->unit();
     const int unitCode1 = unit1->caption() == "q" ? Q_CODE : 0;
     const int unitCode2 = unit2->caption() == "q" ? Q_CODE : 0;
-    m_outRKH << "  " << unitCode1 << " " << unit1->caption() << " (" << unit1->label() << ")\n"
-             << "  " << unitCode2 << " " << unit2->caption() << " (" << unit2->label() << ")\n"
+    m_outRKH << "  " << unitCode1 << " " << unit1->caption() << " (" << unit1->label().ascii() << ")\n"
+             << "  " << unitCode2 << " " << unit2->caption() << " (" << unit2->label().ascii() << ")\n"
              << "  0 " << m_workspace->YUnitLabel() << "\n"
              << "  1\n";
   }

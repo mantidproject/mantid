@@ -40,6 +40,7 @@ set ( EXPORT_FILES
   src/Exports/LogFilter.cpp
   src/Exports/UnitConversion.cpp
   src/Exports/UnitFactory.cpp
+  src/Exports/UnitLabel.cpp
   src/Exports/DeltaEMode.cpp
   src/Exports/PropertyManager.cpp
   src/Exports/Memory.cpp

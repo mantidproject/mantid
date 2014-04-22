@@ -7,6 +7,7 @@
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include <QStringBuilder>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -443,16 +444,16 @@ int MantidQwtIMDWorkspaceData::currentPlotXAxis() const
 
 //-----------------------------------------------------------------------------
 /// @return the label for the X axis
-std::string MantidQwtIMDWorkspaceData::getXAxisLabel() const
+QString MantidQwtIMDWorkspaceData::getXAxisLabel() const
 {
-  std::string xLabel;
+  QString xLabel;
   if ( m_originalWorkspace.expired() )
     return xLabel; // Empty string
   if (m_currentPlotAxis >= 0)
   {
     // One of the dimensions of the original
     IMDDimension_const_sptr dim = m_originalWorkspace.lock()->getDimension(m_currentPlotAxis);
-    xLabel = dim->getName() + " (" + dim->getUnits() + ")";
+    xLabel = QString::fromStdString(dim->getName()) + " (" + QString::fromStdWString(dim->getUnits().utf8()) + ")";
   }
   else
   {
@@ -471,7 +472,7 @@ std::string MantidQwtIMDWorkspaceData::getXAxisLabel() const
 
 //-----------------------------------------------------------------------------
 /// @return the label for the Y axis, based on the selected normalization
-std::string MantidQwtIMDWorkspaceData::getYAxisLabel() const
+QString MantidQwtIMDWorkspaceData::getYAxisLabel() const
 {
   switch (m_normalization)
   {

@@ -11,6 +11,7 @@
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
 #include "MantidAPI/IPeak.h"
+#include "MantidKernel/UnitLabel.h"
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
 #include <QColor>
@@ -268,7 +269,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_CONST_METHOD0(getName,
       std::string());
     MOCK_CONST_METHOD0(getUnits,
-      std::string());
+      const Mantid::Kernel::UnitLabel());
     MOCK_CONST_METHOD0(getDimensionId,
       std::string());
     MOCK_CONST_METHOD0(getMaximum,
