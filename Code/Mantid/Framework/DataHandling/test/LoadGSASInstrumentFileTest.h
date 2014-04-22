@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadGsasInstrumentFile.h"
+#include "MantidDataHandling/LoadGSASInstrumentFile.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/LoadInstrument.h"
