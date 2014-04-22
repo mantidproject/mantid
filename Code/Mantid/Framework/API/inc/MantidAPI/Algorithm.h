@@ -273,6 +273,8 @@ public:
   boost::shared_ptr<Algorithm> createChildAlgorithm(const std::string& name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging=true, const int& version = -1);
 
+  virtual bool checkGroups();
+
 protected:
 
   /// Virtual method - must be overridden by concrete algorithm
@@ -322,7 +324,7 @@ protected:
   static size_t g_execCount; ///< Counter to keep track of algorithm execution order
 
   // ------------------ For WorkspaceGroups ------------------------------------
-  virtual bool checkGroups();
+
   virtual bool processGroups();
   virtual void setOtherProperties(IAlgorithm * alg, const std::string & propertyName, const std::string & propertyValue, int periodNum);
   typedef std::vector<boost::shared_ptr<Workspace> > WorkspaceVector;

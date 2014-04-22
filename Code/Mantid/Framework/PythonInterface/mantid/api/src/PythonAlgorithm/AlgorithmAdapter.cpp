@@ -67,6 +67,26 @@ namespace Mantid
     }
 
     /**
+     * Returns the version of the algorithm. If not overridden
+     * it returns 1
+     */
+    template<typename BaseAlgorithm>
+    bool AlgorithmAdapter<BaseAlgorithm>::checkGroups()
+    {
+      return CallMethod0<bool>::dispatchWithDefaultReturn(getSelf(), "checkGroups", checkGroupsDefault());
+    }
+
+    /**
+     * Returns the default version of the algorithm. If not overridden
+     * it returns 1
+     */
+    template<typename BaseAlgorithm>
+    bool AlgorithmAdapter<BaseAlgorithm>::checkGroupsDefault()
+    {
+      return true;
+    }
+
+    /**
      * Returns the category of the algorithm. If not overridden
      * it returns "AlgorithmAdapter"
      */
