@@ -1,6 +1,28 @@
 #include "MantidCrystal/CompositeCluster.h"
 #include <stdexcept>
 #include <algorithm>
+
+namespace
+{
+  /**
+   * Helper comparitor for finding IClusters based on an input label.
+   */
+  class Comparitor
+  {
+  private:
+    size_t m_label;
+  public:
+    Comparitor(const size_t& label) :
+        m_label(label)
+    {
+    }
+    bool operator()(const boost::shared_ptr<Mantid::Crystal::ICluster>& pCluster) const
+    {
+      return pCluster->containsLabel(m_label);
+    }
+  };
+}
+
 namespace Mantid
 {
   namespace Crystal
@@ -20,6 +42,11 @@ namespace Mantid
     {
     }
 
+    /**
+     * Integrate the composite cluster.
+     * @param ws. Workspace to integrate
+     * @return Integrated signal and error sq values.
+     */
     ICluster::ClusterIntegratedValues CompositeCluster::integrate(
         boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const
     {
@@ -36,6 +63,10 @@ namespace Mantid
       return ClusterIntegratedValues(sigInt, errorIntSQ);
     }
 
+    /**
+     * Write to an output histo workspace.
+     * @param ws
+     */
     void CompositeCluster::writeTo(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const
     {
       for (size_t i = 0; i < m_ownedClusters.size(); ++i)
@@ -44,6 +75,10 @@ namespace Mantid
       }
     }
 
+    /**
+     * Get the label.
+     * @return Current label.
+     */
     size_t CompositeCluster::getLabel() const
     {
       findMinimum();
@@ -57,11 +92,19 @@ namespace Mantid
       }
     }
 
+    /**
+     * Get the original label. Doesn't make sense for composites, so wired through to getLabel()
+     * @return getLabel()
+     */
     size_t CompositeCluster::getOriginalLabel() const
     {
       return getLabel();
     }
 
+    /**
+     * Get the size of the composite. This is the total size of all owned clusters.
+     * @return total size.
+     */
     size_t CompositeCluster::size() const
     {
       size_t size = 0;
@@ -72,11 +115,18 @@ namespace Mantid
       return size;
     }
 
-    void CompositeCluster::addIndex(const size_t& index)
+    /**
+     * Add an index. This method does not apply to composite clusters.
+     * @param
+     */
+    void CompositeCluster::addIndex(const size_t&)
     {
       throw std::runtime_error("addIndex not implemented on CompositeCluster");
     }
 
+    /**
+     * Find the minimum label in the composite
+     */
     void CompositeCluster::findMinimum() const
     {
       if (!m_ownedClusters.empty())
@@ -95,6 +145,10 @@ namespace Mantid
       }
     }
 
+    /**
+     * Convert the disjointSet to a uniform minimum value
+     * @param disjointSet : DisjointSets to adapt.
+     */
     void CompositeCluster::toUniformMinimum(std::vector<DisjointElement>& disjointSet)
     {
       if (!m_ownedClusters.empty())
@@ -120,11 +174,19 @@ namespace Mantid
       }
     }
 
+    /**
+     * Get any representative index from this cluster
+     * @return : Representative index.
+     */
     size_t CompositeCluster::getRepresentitiveIndex() const
     {
       return this->m_ownedClusters.front()->getRepresentitiveIndex();
     }
 
+    /**
+     * Set the root cluster
+     * @param root : Root cluster to use
+     */
     void CompositeCluster::setRootCluster(ICluster const* root)
     {
       for (size_t i = 0; i < m_ownedClusters.size(); ++i)
@@ -133,32 +195,27 @@ namespace Mantid
       }
     }
 
-
+    /**
+     * Add other IClusters to own.
+     * @param toOwn : Item to own
+     */
     void CompositeCluster::add(boost::shared_ptr<ICluster>& toOwn)
     {
-      if(toOwn->size() > 0) // Do not add empty clusters.
+      if (toOwn->size() > 0) // Do not add empty clusters.
       {
         m_ownedClusters.push_back(toOwn);
       }
     }
 
+    /**
+     * Does this cluster contain the label of the argument.
+     * @param label : Label id to find
+     * @return True only if that label is contained.
+     */
     bool CompositeCluster::containsLabel(const size_t& label) const
     {
       bool inSet = false;
-      class Comparitor
-      {
-      private:
-        size_t m_label;
-      public:
-        Comparitor(const size_t& label) :
-            m_label(label)
-        {
-        }
-        bool operator()(const boost::shared_ptr<ICluster>& pCluster) const
-        {
-          return pCluster->containsLabel(m_label);
-        }
-      };
+
       Comparitor comparitor(label);
       return m_ownedClusters.end()
           != std::find_if(m_ownedClusters.begin(), m_ownedClusters.end(), comparitor);

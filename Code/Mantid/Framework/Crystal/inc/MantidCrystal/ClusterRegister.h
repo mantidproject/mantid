@@ -41,22 +41,30 @@ namespace Crystal
   {
   public:
 
+    /// Cluster map
     typedef std::map<size_t, boost::shared_ptr<ICluster> >  MapCluster;
 
+    /// Constructor
     ClusterRegister();
 
+    /// Add clusters
     void add(const size_t& label, const boost::shared_ptr<ICluster>& cluster);
 
+    /// Merge clusters on the basis of known pairs of disjoint elements
     void merge(const DisjointElement& a, const DisjointElement& b) const;
 
+    /// Get all combined clusters
     MapCluster clusters(std::vector<DisjointElement>& elements) const;
 
+    /// Get all combined clusters
     MapCluster clusters() const;
 
+    /// Destructor
     virtual ~ClusterRegister();
     
   private:
 
+    /// Pointer to implementation
     boost::scoped_ptr<ImplClusterRegister> m_Impl;
 
   };

@@ -22,9 +22,18 @@ namespace Mantid
       /// Clusters that do not need merging
       ClusterRegister::MapCluster m_unique;
 
+      /// Type for identifying label groups
       typedef std::list<std::set<size_t> > GroupType;
+
+      /// Groups of labels to maintain
       GroupType m_groups;
 
+      /**
+       * Inserts a pair of disjoint elements. Determines whether they can be used to reorder existing sets of lables.
+       * @param a : One part of pair
+       * @param b : Other part of pair
+       * @return : true if a new cluster was required for the insertion.
+       */
       bool insert(const DisjointElement& a, const DisjointElement& b)
       {
         const size_t& aLabel = a.getRoot();
@@ -33,7 +42,7 @@ namespace Mantid
 
         GroupType containingAny;
         GroupType containingNone;
-        // Find equivalent sets
+        // ------------- Find equivalent sets
         for(GroupType::iterator i = m_groups.begin(); i != m_groups.end(); ++i)
         {
           GroupType::value_type& cluster =*i;
@@ -47,12 +56,13 @@ namespace Mantid
           }
           else
           {
-            containingNone.push_back(cluster);
+            containingNone.push_back(cluster); // Current iterated set contains NEITHER of these labels. It can therfore be ignored.
           }
         }
-        // Process equivalent sets
+        // ------------ Process equivalent sets
         if(containingAny.empty())
         {
+          // Neither label is yet known to any set. We must add a new set for these
           GroupType::value_type newSet;
           newSet.insert(aLabel);
           newSet.insert(bLabel);
@@ -60,23 +70,29 @@ namespace Mantid
         }
         else
         {
+          // At least one set already contains at least one label. We merge all such sets into a master set.
+
           // implement copy and swap. Rebuild the sets.
           GroupType temp = containingNone;
           GroupType::value_type masterSet;
-          masterSet.insert(aLabel);
-          masterSet.insert(bLabel);
+          masterSet.insert(aLabel); // Incase it doesn't already contain a
+          masterSet.insert(bLabel); // Incase it doesn't already contain b
           for(auto i = containingAny.begin(); i != containingAny.end(); ++i)
           {
             GroupType::value_type& childSet = *i;
-            masterSet.insert(childSet.begin(), childSet.end());
+            masterSet.insert(childSet.begin(), childSet.end()); // Build the master set.
           }
           temp.push_back(masterSet);
-          m_groups = temp;
+          m_groups = temp; // Swap.
           newItem = false;
         }
         return newItem;
       }
 
+      /**
+       * Make composite clusters from the merged groups.
+       * @return Merged composite clusters.
+       */
       std::list<boost::shared_ptr<CompositeCluster> >  makeCompositeClusters()
       {
         std::list<boost::shared_ptr<CompositeCluster> >  composites;
@@ -112,6 +128,11 @@ namespace Mantid
     {
     }
 
+    /**
+     * Add/register a cluster.
+     * @param label : Label as key
+     * @param cluster : Cluster with label
+     */
     void ClusterRegister::add(const size_t& label, const boost::shared_ptr<ICluster>& cluster)
     {
       m_Impl->m_register.insert(std::make_pair(label, cluster));
@@ -119,6 +140,11 @@ namespace Mantid
     }
 
 
+    /**
+     * Use known pairs of disjoint elements to perform cluster merges.
+     * @param a : Disjoint element which is part of pair
+     * @param b : Disjoint element with is part of pair
+     */
     void ClusterRegister::merge(const DisjointElement& a, const DisjointElement& b) const
     {
       if (!a.isEmpty() && !b.isEmpty())
@@ -129,6 +155,10 @@ namespace Mantid
       }
     }
 
+    /**
+     * Get the clusters
+     * @return both merged and unique clusters in a single map.
+     */
     ClusterRegister::MapCluster ClusterRegister::clusters() const
     {
       MapCluster temp;
@@ -142,6 +172,11 @@ namespace Mantid
       return temp;
     }
 
+    /**
+     * Get the clusters. Also set the elements to the uniform minimum of each cluster.
+     * @param elements
+     * @return: Map of merged clusters.
+     */
     ClusterRegister::MapCluster ClusterRegister::clusters(std::vector<DisjointElement>& elements) const
     {
       MapCluster temp;
