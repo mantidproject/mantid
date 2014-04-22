@@ -41,28 +41,7 @@ QwtRasterDataMD::~QwtRasterDataMD()
 QwtRasterDataMD *QwtRasterDataMD::copy() const
 {
   QwtRasterDataMD* out = new QwtRasterDataMD();
-  //base bounding box
-  out->setBoundingRect(this->boundingRect());
-
-  out->m_ws = this->m_ws;
-  out->m_dimX = this->m_dimX;
-  out->m_dimY = this->m_dimY;
-  out->m_nd = this->m_nd;
-  out->m_range = this->m_range;
-  out->m_slicePoint = new coord_t[m_nd];
-  for (size_t d=0; d<m_nd; d++)
-    out->m_slicePoint[d] = this->m_slicePoint[d];
-  out->m_ws = this->m_ws;
-  out->m_fast = this->m_fast;
-  out->m_zerosAsNan = this->m_zerosAsNan;
-  out->m_normalization = this->m_normalization;
-
-  out->m_overlayWS = this->m_overlayWS;
-  out->m_overlayXMin = this->m_overlayXMin;
-  out->m_overlayXMax = this->m_overlayXMax;
-  out->m_overlayYMin = this->m_overlayYMin;
-  out->m_overlayYMax = this->m_overlayYMax;
-  out->m_overlayInSlice = this->m_overlayInSlice;
+  this->copyFrom(*this, *out);
   return out;
 }
 
@@ -276,13 +255,72 @@ void QwtRasterDataMD::setSliceParams(size_t dimX, size_t dimY,
     m_overlayXMax = m_overlayWS->getDimension(m_dimX)->getMaximum();
     m_overlayYMin = m_overlayWS->getDimension(m_dimY)->getMinimum();
     m_overlayYMax = m_overlayWS->getDimension(m_dimY)->getMaximum();
-    //std::cout << m_overlayXMin << "," << m_overlayXMax << "," << m_overlayYMin << "," << m_overlayYMax << std::endl;
   }
 }
+
+//-----------------------------------------------------------------------------
+// Protected members
+//-----------------------------------------------------------------------------
+
+/**
+ * Copy settings from one object to another
+ * @param source A source object to copy from
+ * @param dest The destination object that receives the contents
+ */
+void QwtRasterDataMD::copyFrom(const QwtRasterDataMD &source, QwtRasterDataMD &dest) const
+{
+  //base bounding box
+  dest.setBoundingRect(source.boundingRect());
+
+  dest.m_ws = source.m_ws;
+  dest.m_dimX = source.m_dimX;
+  dest.m_dimY = source.m_dimY;
+  dest.m_nd = source.m_nd;
+  dest.m_range = source.m_range;
+  dest.m_slicePoint = new coord_t[m_nd];
+  for (size_t d=0; d<m_nd; d++)
+    dest.m_slicePoint[d] = source.m_slicePoint[d];
+  dest.m_ws = source.m_ws;
+  dest.m_fast = source.m_fast;
+  dest.m_zerosAsNan = source.m_zerosAsNan;
+  dest.m_normalization = source.m_normalization;
+
+  dest.m_overlayWS = source.m_overlayWS;
+  dest.m_overlayXMin = source.m_overlayXMin;
+  dest.m_overlayXMax = source.m_overlayXMax;
+  dest.m_overlayYMin = source.m_overlayYMin;
+  dest.m_overlayYMax = source.m_overlayYMax;
+  dest.m_overlayInSlice = source.m_overlayInSlice;
+}
+
 
 //===================================================================================
 // NoOverlayRaster2D
 //===================================================================================
+
+/** Sets the workspace being displayed. It only allows those inheriting
+ * from MatrixWorkspace
+ * @param ws :: IMDWorkspace to show
+ */
+void NoOverlayRaster2D::setWorkspace(IMDWorkspace_const_sptr ws)
+{
+  if (!ws)
+    throw std::runtime_error("NoOverlayRaster2D::setWorkspace(): NULL workspace passed.");
+  m_matrixWS = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws);
+  if(!m_matrixWS)
+  {
+    throw std::invalid_argument("NoOverlayRaster2D::setWorkspace() - Workspace must be a type of MatrixWorkspace");
+  }
+  if(m_matrixWS->axes() != 2)
+  {
+    throw std::invalid_argument("NoOverlayRaster2D::setWorkspace() - MatrixWorkspace must have 2 axes");
+  }
+
+  QwtRasterDataMD::setWorkspace(ws);
+  //cache spectrum number lookup if vertical axis is spectrum
+  if(m_matrixWS->getAxis(1)->isSpectra())
+    m_specIndex = m_matrixWS->getSpectrumToWorkspaceIndexMap();
+}
 
 /**
  * Create a new object with the same state as this
@@ -291,28 +329,10 @@ void QwtRasterDataMD::setSliceParams(size_t dimX, size_t dimY,
 NoOverlayRaster2D *NoOverlayRaster2D::copy() const
 {
   auto* out = new NoOverlayRaster2D();
-  //base bounding box
-  out->setBoundingRect(this->boundingRect());
+  this->copyFrom(*this, *out);
 
-  out->m_ws = this->m_ws;
-  out->m_dimX = this->m_dimX;
-  out->m_dimY = this->m_dimY;
-  out->m_nd = this->m_nd;
-  out->m_range = this->m_range;
-  out->m_slicePoint = new coord_t[m_nd];
-  for (size_t d=0; d<m_nd; d++)
-    out->m_slicePoint[d] = this->m_slicePoint[d];
-  out->m_ws = this->m_ws;
-  out->m_fast = this->m_fast;
-  out->m_zerosAsNan = this->m_zerosAsNan;
-  out->m_normalization = this->m_normalization;
-
-  out->m_overlayWS = this->m_overlayWS;
-  out->m_overlayXMin = this->m_overlayXMin;
-  out->m_overlayXMax = this->m_overlayXMax;
-  out->m_overlayYMin = this->m_overlayYMin;
-  out->m_overlayYMax = this->m_overlayYMax;
-  out->m_overlayInSlice = this->m_overlayInSlice;
+  out->m_matrixWS = this->m_matrixWS;
+  out->m_specIndex = this->m_specIndex;
   return out;
 
 }
@@ -328,13 +348,84 @@ NoOverlayRaster2D *NoOverlayRaster2D::copy() const
  */
 double NoOverlayRaster2D::value(double x, double y) const
 {
-  coord_t lookPoint[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
-  signal_t value = m_ws->getSignalAtCoord(lookPoint, m_normalization);
-  if(value != value) // out of range
+  if(!m_matrixWS) return 0.0;
+
+  // First, find the workspace index
+  Axis * ax1 = m_matrixWS->getAxis(1);
+  size_t wi(-1);
+  if(ax1->isSpectra())
   {
-    value = m_range.maxValue()*1.1;
+    // use cache
+    auto idxIter = m_specIndex.find(static_cast<Mantid::specid_t>(y));
+    if(idxIter == m_specIndex.end()) return std::numeric_limits<double>::quiet_NaN();
+    else wi = idxIter->second;
   }
-  return value;
+  else
+  {
+    try
+    {
+      wi = ax1->indexOfValue(y);
+    }
+    catch(std::out_of_range &)
+    {
+      return std::numeric_limits<double>::quiet_NaN();
+    }
+  }
+
+  const size_t nhist = m_matrixWS->getNumberHistograms();
+  const auto & yVals = m_matrixWS->readY(wi);
+  Mantid::API::MDNormalization normalization(this->getNormalization());
+  double yBinSize(1.0); // only applies for volume normalization & numeric axis
+  if (normalization == VolumeNormalization && ax1->isNumeric())
+  {
+    if (wi + 1 == nhist && nhist > 1)
+    {
+      yBinSize =  yVals[wi] - yVals[wi-1];
+    }
+    else
+    {
+      yBinSize = yVals[wi+1] - yVals[wi];
+    }
+  }
+
+  if (wi < nhist)
+  {
+    const MantidVec & X = m_matrixWS->readX(wi);
+    MantidVec::const_iterator it = std::lower_bound(X.begin(), X.end(), x);
+    if (it == X.end())
+    {
+      // Out of range
+      return std::numeric_limits<double>::quiet_NaN();
+    }
+    else
+    {
+      size_t i = (it - X.begin());
+      if (i > 0)
+      {
+        double value = yVals[i-1];
+        // What is our normalization factor?
+        switch (normalization)
+        {
+        case NoNormalization:
+          return value;
+        case VolumeNormalization:
+          // Divide the signal by the area
+          return value / (yBinSize*(X[i] - X[i-1]));
+        case NumEventsNormalization:
+          // Not yet implemented, may not make sense
+          return value;
+        }
+        // This won't happen
+        return value;
+      }
+      else
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+  }
+  else
+    // Out of range
+    return std::numeric_limits<double>::quiet_NaN();
+
 }
 
 } //namespace

@@ -1,13 +1,14 @@
 #ifndef QwtRasterDataMD_H_
 #define QwtRasterDataMD_H_
 
-#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <qwt_double_interval.h>
 #include <qwt_raster_data.h>
 #include <vector>
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
 
 namespace MantidQt
 {
@@ -31,7 +32,7 @@ public:
   virtual ~QwtRasterDataMD();
   QwtRasterDataMD* copy() const;
 
-  void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
+  virtual void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
 
   void setOverlayWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
 
@@ -52,6 +53,8 @@ public:
   Mantid::API::MDNormalization getNormalization() const;
 
 protected:
+
+  void copyFrom(const QwtRasterDataMD & source, QwtRasterDataMD& dest) const;
 
   /// Workspace being shown
   Mantid::API::IMDWorkspace_const_sptr m_ws;
@@ -110,8 +113,14 @@ protected:
 class QWT_EXPORT NoOverlayRaster2D : public QwtRasterDataMD
 {
 public:
+  void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
+
   NoOverlayRaster2D* copy() const;
   double value(double x, double y) const;
+
+private:
+  Mantid::API::MatrixWorkspace_const_sptr m_matrixWS;
+  Mantid::spec2index_map m_specIndex;
 };
 
 } // namespace SliceViewer
