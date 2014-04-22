@@ -113,7 +113,7 @@ public:
   void testDifferent_BaseInstrument_Warns()
   {
     // Create input workspace with parameterized instrument and put into data store
-     MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
+     MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(4, 10, true,false,true,"testInstr_new");
      const std::string wsName1("CopyInstParamWs1");
      AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
      dataStore.add(wsName1, ws1);
@@ -134,6 +134,12 @@ public:
      const std::string wsName2("CopyInstParamWs2");
      dataStore.add(wsName2, ws2);
 
+     pmap = &(ws2->instrumentParameters());
+     instrument = ws2->getInstrument();
+     pmap->addDouble(instrument.get(),"T",10);
+     pmap->addString(instrument.get(),"some_param","other_value");
+
+
      // Set properties
      TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("InputWorkspace", wsName1 ));
      TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("OutputWorkspace", wsName2 ));
@@ -148,6 +154,10 @@ public:
      std::set<std::string> param_names = instr2->getParameterNames();
      TS_ASSERT(param_names.find("Ei")!=param_names.end());
      TS_ASSERT(param_names.find("some_param")!=param_names.end());
+     TS_ASSERT(param_names.find("T")!=param_names.end());
+     TS_ASSERT(std::string("some_value")==instr2->getStringParameter("some_param"));
+     TS_ASSERT_EQUALS("100",instr2->getNumberParameter("Ei"));
+     TS_ASSERT_EQUALS("10",instr2->getNumberParameter("T"));
 
      IDetector_const_sptr deto1 = ws2->getDetector(0);
      int id1 = deto1->getID();

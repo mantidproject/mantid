@@ -124,18 +124,20 @@ void CopyInstrumentParameters::exec()
         targComp = inst2->getComponentByName(targ_name).get();
         if (!targComp)
         {
-          auto old_comp_map = oldComponent->getParameterMap();
-          auto it = old_comp_map->begin();
-          for(;it!=old_comp_map->end();it++)
-          {
-            auto pParam = (*it).second.get();
-            targMap.add(pParam->type(),inst2.get(),targ_name,pParam->asString());
-          }
+          g_log.warning()<<"Target instrument does not have component with full name "<<targ_name<<'\n';
           continue;
         }
 
       }
-      // process existing target component
+      // merge maps for existing target component
+
+          //auto old_comp_map = oldComponent->getParameterMap();
+          //auto it = old_comp_map->begin();
+          //for(;it!=old_comp_map->end();it++)
+          //{
+          //  auto pParam = (*it).second.get();
+          //  targMap.add(pParam->type(),inst2.get(),targ_name,pParam->asString());
+          //}
 
 
     }

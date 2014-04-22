@@ -312,7 +312,7 @@ namespace WorkspaceCreationHelper
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
   Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
-                                                       bool startYNegative, bool isHistogram)
+                                                       bool startYNegative, bool isHistogram,const std::string instrumentName)
   {
     if( includeMonitors && nhist < 2 )
     {
@@ -326,7 +326,7 @@ namespace WorkspaceCreationHelper
     space->getAxis(0)->setUnit("TOF");
     space->setYUnit("Counts");
 
-    boost::shared_ptr<Instrument> testInst(new Instrument("testInst"));
+    boost::shared_ptr<Instrument> testInst(new Instrument("instrumentName"));
     testInst->setReferenceFrame(boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y,X,Left,"")));
     space->setInstrument(testInst);
 
