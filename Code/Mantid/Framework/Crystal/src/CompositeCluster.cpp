@@ -214,8 +214,6 @@ namespace Mantid
      */
     bool CompositeCluster::containsLabel(const size_t& label) const
     {
-      bool inSet = false;
-
       Comparitor comparitor(label);
       return m_ownedClusters.end()
           != std::find_if(m_ownedClusters.begin(), m_ownedClusters.end(), comparitor);
