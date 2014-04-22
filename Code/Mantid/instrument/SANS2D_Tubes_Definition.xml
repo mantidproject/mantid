@@ -35,6 +35,7 @@
       02/04/12 Put in 'no shape monitors' for possible in the future monitors
       with ID 5-8
 	  04/02/14 start again with gas tube arrays
+	  14/03/14 correct the active tube length to 1041.4mm, zigzag offset 3mm 
   -->
   
   
@@ -120,7 +121,7 @@
 
     
  <type name="detector-bank">
- <!-- the horizontal tubes are spaced vertically at 8.1mm intervals, with left and right sets ~30mm displaced -->
+ <!-- the horizontal tubes are spaced vertically at 8.1mm intervals, with left and right sets ~3mm displaced -->
  <component type="SANSLeftTube">
     <locations y="-0.48195" y-end="0.47385" n-elements="60" name="left" />
  </component>
@@ -132,23 +133,23 @@
  
  <type name="SANSLeftTube" outline="yes">
  <component type="pixel">
-   <locations x="-0.484023475" x-end="0.5140234375" n-elements="512" />
+   <locations x="-0.5192" x-end="0.5222" n-elements="512" />
  </component>
  </type>
  
  <type name="SANSRightTube" outline="yes">
  <component type="pixel">
-   <locations x="-0.5140234375" x-end="0.484023475" n-elements="512" />
+   <locations x="-0.5222" x-end="0.5192" n-elements="512" />
  </component>
  </type>
  
- <!-- the length of one pixel is assumed 1000/512 = 1.953125mm, the internal radius is less then given here, more like 7.8mm/2 -->
+ <!-- the length of one pixel is assumed 1041.4/512 = 2.033984375mm, the internal radius is less then given here, more like 7.8mm/2 -->
    <type name="pixel" is="detector">
     <cylinder id="cyl-approx">
       <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
       <axis x="1.0" y="0.0" z="0.0" />
       <radius val="0.00405" />
-      <height val="   0.001953125" />
+      <height val="   0.002033984375" />
     </cylinder>
     <algebra val="cyl-approx" />
   </type>
