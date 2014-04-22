@@ -345,8 +345,6 @@ namespace Mantid
 
           // Associate the member DisjointElements with a cluster. Involves looping back over iterator.
           iterator->jumpTo(0); // Reset
-
-          std::set<size_t> labelIds;
           do
           {
             if (!baseStrategy->isBackground(iterator))
@@ -403,7 +401,7 @@ namespace Mantid
 
         // Associate the member DisjointElements with a cluster. Involves looping back over iterator.
         iterator->jumpTo(0); // Reset
-        std::set<size_t> labelIds;
+
         do
         {
           if (!baseStrategy->isBackground(iterator))
