@@ -151,7 +151,7 @@ void GetEi::exec()
 */
 void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specid_t mon0Spec, specid_t mon1Spec, double &monitor0Dist, double &monitor1Dist) const
 {
-  const IObjComponent_const_sptr source = WS->getInstrument()->getSource();
+  const IComponent_const_sptr source = WS->getInstrument()->getSource();
 
   // retrieve a pointer to the first detector and get its distance
   size_t monWI = 0;

@@ -80,7 +80,7 @@ private:
 
 
 	Geometry::Instrument_const_sptr m_instrument;
-	Geometry::IObjComponent_const_sptr m_sample;
+	Geometry::IComponent_const_sptr m_sample;
 
 	double m_l2;
 	double m_wavelength;

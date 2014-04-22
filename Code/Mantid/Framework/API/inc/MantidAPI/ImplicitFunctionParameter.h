@@ -13,8 +13,11 @@
 #include <sstream>
 #include <vector>
 #include <memory>
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
+
+#ifndef Q_MOC_RUN
+# include <boost/algorithm/string.hpp>
+# include <boost/format.hpp>
+#endif
 
 namespace Mantid
 {

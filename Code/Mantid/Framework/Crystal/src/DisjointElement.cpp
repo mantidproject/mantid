@@ -37,11 +37,7 @@ namespace Mantid
     DisjointElement::DisjointElement(const DisjointElement& other) :
         m_parent(other.m_parent), m_rank(other.m_rank), m_id(other.m_id)
     {
-      if (m_rank > 0)
-      {
-        throw std::logic_error(
-            "This is a parent node. Children cannot be copied, leading to possible inconsistencies.");
-      }
+      
       // Don't point to copy object as parent if copy object is it's own parent.
       if (other.m_parent == &other)
       {
@@ -59,11 +55,6 @@ namespace Mantid
       if (this != &other)
       {
 
-        if (other.m_rank > 0)
-        {
-          throw std::logic_error(
-              "This is a parent node. Children cannot be copied, leading to possible inconsistencies.");
-        }
 
         m_parent = other.m_parent;
         m_rank = other.m_rank;
@@ -183,10 +174,7 @@ namespace Mantid
     void DisjointElement::unionWith(DisjointElement* other)
     {
 
-      if (this->getId() == other->getId())
-      {
-        throw std::logic_error("Trying to union two elements with the same Id");
-      }
+
 
       if (other->getRoot() != this->getRoot()) // Check sets do not already have the same root before continuing
       {

@@ -46,6 +46,7 @@ public:
   virtual signal_t getInnerError(size_t ) const {return 0;}
   virtual bool getIsMasked() const {return false;}
   virtual std::vector<size_t> findNeighbourIndexes() const {throw std::runtime_error("findNeighbourIndexes not implemented on IMDWorkspaceTesterIterator");}
+  virtual size_t getLinearIndex() const {throw std::runtime_error("getLinearIndex not implemented on IMDWorkspaceTesterIterator");}
 };
 
 class IMDWorkspaceTester: public WorkspaceTester

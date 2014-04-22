@@ -4,7 +4,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
 #include "MantidGeometry/IDTypes.h"
-#include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
 

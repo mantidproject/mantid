@@ -1024,7 +1024,7 @@ void IFunction::convertValue(std::vector<double>& values, Kernel::Unit_sptr& out
   {
     // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
     Instrument_const_sptr instrument = ws->getInstrument();
-    Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+    Geometry::IComponent_const_sptr sample = instrument->getSample();
     if (sample == NULL)
     {
       g_log.error() << "No sample defined instrument. Cannot convert units for function\n"

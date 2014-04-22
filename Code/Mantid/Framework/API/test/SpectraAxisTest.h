@@ -32,6 +32,7 @@ public:
   ~SpectraAxisTest()
   {
     delete spectraAxis;
+    delete ws;
   }
   
   void testConstructor()

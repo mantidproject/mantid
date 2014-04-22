@@ -8,8 +8,9 @@
 #include "MantidKernel/UnitLabel.h"
 #include <map>
 #include <vector>
-
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 
 namespace Mantid
 {

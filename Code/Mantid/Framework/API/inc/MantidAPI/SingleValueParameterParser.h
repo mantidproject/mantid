@@ -17,7 +17,10 @@
 #include <Poco/Path.h>
 
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
-#include <boost/lexical_cast.hpp>
+
+#ifndef Q_MOC_RUN
+# include <boost/lexical_cast.hpp>
+#endif
 
 namespace Mantid
 {

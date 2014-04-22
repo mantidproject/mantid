@@ -18,6 +18,7 @@ set ( SRC_FILES
   src/Message.cpp
   src/OptionsPropertyWidget.cpp
   src/PlotAxis.cpp
+  src/PropertyInfoWidget.cpp
   src/PropertyWidget.cpp
   src/PropertyWidgetFactory.cpp
   src/PythonRunner.cpp
@@ -43,6 +44,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/MantidDialog.h
   inc/MantidQtAPI/MantidWidget.h
   inc/MantidQtAPI/OptionsPropertyWidget.h
+  inc/MantidQtAPI/PropertyInfoWidget.h
   inc/MantidQtAPI/PropertyWidget.h
   inc/MantidQtAPI/PythonRunner.h
   inc/MantidQtAPI/QtSignalChannel.h

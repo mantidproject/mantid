@@ -437,7 +437,7 @@
 
 </facility>
 
-<facility name="ILL" FileExtensions=".nxs,.hdf,.inx,.asc">
+<facility name="ILL" zeropadding="6" FileExtensions=".nxs,.hdf,.inx,.asc">
 
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique> 

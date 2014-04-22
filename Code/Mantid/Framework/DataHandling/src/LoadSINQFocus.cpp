@@ -1,8 +1,8 @@
 /*WIKI*
 
- Loads a SINQ (PSI) nexus file into a [[Workspace2D]] with the given name.
+Loads a SINQ (PSI) nexus file into a [[Workspace2D]] with the given name.
 
- To date this algorithm only supports: FOCUS
+To date this algorithm only supports: FOCUS
 
  *WIKI*/
 
