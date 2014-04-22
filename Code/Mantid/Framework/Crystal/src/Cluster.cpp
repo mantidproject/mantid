@@ -20,6 +20,10 @@ namespace Mantid
       m_indexes.reserve(1000);  
     }
 
+    Cluster::~Cluster()
+    {
+    }
+
     size_t Cluster::getLabel() const
     {
       if(m_rootCluster != this)
@@ -35,15 +39,9 @@ namespace Mantid
       return m_originalLabel;
     }
 
-   
     size_t Cluster::size() const
     {
-      size_t size = m_indexes.size(); 
-      for(size_t i = 0; i < m_ownedClusters.size(); ++i)
-      {
-        size+=m_ownedClusters[i]->size();
-      }
-      return size;
+      return m_indexes.size(); 
     }
 
     void Cluster::addIndex(const size_t& index)
@@ -59,10 +57,6 @@ namespace Mantid
         ws->setSignalAt(m_indexes[i], static_cast<Mantid::signal_t>(label));
         ws->setErrorSquaredAt(m_indexes[i], 0);
       }
-      for(size_t i = 0; i < m_ownedClusters.size(); ++i)
-      {
-        m_ownedClusters[i]->writeTo(ws);
-      }
     }
 
     ICluster::ClusterIntegratedValues Cluster::integrate(Mantid::API::IMDHistoWorkspace_const_sptr ws) const
@@ -76,13 +70,6 @@ namespace Mantid
         double errorSQ = ws->getErrorAt(m_indexes[i]);
         errorSQ *= errorSQ;
         errorIntSQ += errorSQ;
-      }
-      // Integrate owned clusters and add those results too.
-      for(size_t i = 0; i < m_ownedClusters.size(); ++i)
-      {
-        auto integratedValues = m_ownedClusters[i]->integrate(ws);
-        sigInt += integratedValues.get<0>();
-        errorIntSQ += integratedValues.get<1>();
       }
       return ClusterIntegratedValues(sigInt, errorIntSQ);
     }
@@ -115,9 +102,9 @@ namespace Mantid
       return getLabel() == other.getLabel();
     }
 
-    void Cluster::attachCluster(boost::shared_ptr<const Cluster>& toOwn)
+    bool Cluster::containsLabel(const size_t& label) const
     {
-      m_ownedClusters.push_back(toOwn);
+      return (label == this->getLabel());
     }
 
 

@@ -35,6 +35,10 @@ namespace Mantid
         void(std::vector<DisjointElement>& disjointSet));
     MOCK_METHOD1(setRootCluster, void(ICluster const*));
     MOCK_CONST_METHOD0(getRepresentitiveIndex, size_t());
+    virtual bool containsLabel(const size_t& label) const
+    {
+      return this->getLabel() == label;
+    }
   };
   }
 }

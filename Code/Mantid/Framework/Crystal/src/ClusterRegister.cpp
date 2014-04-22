@@ -5,7 +5,7 @@
 #include <boost/make_shared.hpp>
 #include <algorithm>
 #include <set>
-#include <vector>
+#include <list>
 
 namespace
 {
@@ -15,7 +15,7 @@ namespace
     const DisjointElement m_currentLabel;
     const DisjointElement m_neighbourLabel;
     DisjointPair(const DisjointElement& currentLabel, const DisjointElement& neighbourLabel) :
-        m_currentLabel(currentLabel), m_neighbourLabel(neighbourLabel)
+      m_currentLabel(currentLabel), m_neighbourLabel(neighbourLabel)
     {
     }
 
@@ -39,27 +39,51 @@ namespace Mantid
 {
   namespace Crystal
   {
-    
-    struct ImplClusterRegister
+
+    class ImplClusterRegister
     {
+    public:
+
       ClusterRegister::MapCluster m_register;
 
-      std::vector<boost::shared_ptr<CompositeCluster> > m_merged;
+      std::list<boost::shared_ptr<CompositeCluster> > m_merged;
 
       SetDisjointPair m_setPairs;
+
+      void findAndMerge(const boost::shared_ptr<CompositeCluster>& composite, const size_t label)
+      {
+        // now go look for b in other merged clusters. 
+        auto j = m_merged.begin();
+        for(; j != m_merged.end(); ++j)
+        {
+          boost::shared_ptr<ICluster>  subComposite = *j;
+          if(subComposite != composite && subComposite->containsLabel(label))
+          {
+            composite->add(subComposite); // Merge composites
+            m_merged.remove((*j));
+            break;
+          }
+        }
+        if(j == m_merged.end())
+        {
+          // No other composite cluster 'owns' b.
+          composite->add(m_register[label]);
+          m_register.erase(label);
+        }
+      }
     };
 
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
-     */
+    */
     ClusterRegister::ClusterRegister() : m_Impl(new ImplClusterRegister)
     {
     }
 
     //----------------------------------------------------------------------------------------------
     /** Destructor
-     */
+    */
     ClusterRegister::~ClusterRegister()
     {
     }
@@ -69,6 +93,7 @@ namespace Mantid
       m_Impl->m_register.insert(std::make_pair(label, cluster));
     }
 
+
     void ClusterRegister::merge(const DisjointElement& a, const DisjointElement& b) const
     {
       if (!a.isEmpty() && !b.isEmpty())
@@ -76,24 +101,26 @@ namespace Mantid
         DisjointPair pair(a, b);
         if (m_Impl->m_setPairs.find(pair) == m_Impl->m_setPairs.end())
         {
-          const size_t& aId = a.getId();
-          const size_t& bId = b.getId();
+          const size_t& aId = a.getRoot();
+          const size_t& bId = b.getRoot();
           bool newClusterRequired = true;
-          for(size_t i = 0; i < m_Impl->m_merged.size(); ++i)
+          for(auto i = m_Impl->m_merged.begin(); i != m_Impl->m_merged.end(); ++i)
           {
-            auto & composite = m_Impl->m_merged[i];
-            if(composite->labelInSet(aId) && !composite->labelInSet(bId))
+            const auto & composite = *i;
+            if(composite->containsLabel(aId) && composite->containsLabel(bId))
             {
-              composite->add(m_Impl->m_register[bId]);
-              m_Impl->m_register.erase(bId);
               newClusterRequired = false;
               break;
             }
-            else if(!composite->labelInSet(aId) && composite->labelInSet(bId))
+            else if(composite->containsLabel(aId) && !composite->containsLabel(bId))
             {
-              composite->add(m_Impl->m_register[aId]);
-              m_Impl->m_register.erase(aId);
-
+              m_Impl->findAndMerge(composite, bId);
+              newClusterRequired = false;
+              break;
+            }
+            else if(!composite->containsLabel(aId) && composite->containsLabel(bId))
+            {
+              m_Impl->findAndMerge(composite, aId);
               newClusterRequired = false;
               break;
             }
@@ -115,9 +142,9 @@ namespace Mantid
 
     void ClusterRegister::toUniformMinimum(std::vector<DisjointElement>& elements)
     {
-      for(size_t i = 0; i < m_Impl->m_merged.size(); ++i)
+      for(auto i = m_Impl->m_merged.begin(); i != m_Impl->m_merged.end(); ++i)
       {
-        const auto&  merged = m_Impl->m_merged[i];
+        const auto&  merged = *i;
         merged->toUniformMinimum(elements);
       }
     }
@@ -126,9 +153,9 @@ namespace Mantid
     {
       MapCluster temp;
       temp.insert(m_Impl->m_register.begin(), m_Impl->m_register.end());
-      for(size_t i = 0; i < m_Impl->m_merged.size(); ++i)
+      for(auto i = m_Impl->m_merged.begin(); i != m_Impl->m_merged.end(); ++i)
       {
-        const auto&  merged = m_Impl->m_merged[i];
+        const auto&  merged = *i;
         temp.insert(std::make_pair( merged->getLabel(), merged));
       }
       return temp;

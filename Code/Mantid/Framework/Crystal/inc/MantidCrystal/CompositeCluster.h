@@ -71,7 +71,7 @@ namespace Mantid
       size_t getRepresentitiveIndex() const;
 
       /// Is a given label part of this cluster
-      bool labelInSet(const size_t& label) const;
+      bool containsLabel(const size_t& label) const;
 
     private:
 
@@ -83,6 +83,8 @@ namespace Mantid
 
       /// Disabled assignement
       CompositeCluster& operator=(const CompositeCluster&);
+
+      void validateNoRepeat(CompositeCluster*const other) const;
 
       /// Label used by cluster
       mutable boost::optional<size_t> m_label;

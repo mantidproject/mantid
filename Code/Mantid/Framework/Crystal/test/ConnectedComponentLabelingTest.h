@@ -492,7 +492,6 @@ public:
     TS_ASSERT(does_set_contain(uniqueEntries, m_emptyLabel));// Background entries.
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId+1));
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId+1));
-
   }
 
   void test_3d_with_many_objects_multi_threaded()

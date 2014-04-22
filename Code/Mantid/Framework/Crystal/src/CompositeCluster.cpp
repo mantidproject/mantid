@@ -133,12 +133,37 @@ namespace Mantid
       }
     }
 
-    void CompositeCluster::add(boost::shared_ptr<ICluster>& toOwn)
+
+    void CompositeCluster::validateNoRepeat(CompositeCluster* other) const
     {
-      m_ownedClusters.push_back(toOwn);
+      if(other == this)
+      {
+        throw std::runtime_error("Adding to self.");
+      }
+      for (size_t i = 0; i < m_ownedClusters.size(); ++i)
+      {
+        if(auto subComposite = boost::dynamic_pointer_cast<CompositeCluster>(m_ownedClusters[i]))
+        {
+          subComposite->validateNoRepeat(other);
+        }
+      }
     }
 
-    bool CompositeCluster::labelInSet(const size_t& label) const
+    void CompositeCluster::add(boost::shared_ptr<ICluster>& toOwn)
+    {
+      
+        if(auto subComposite = boost::dynamic_pointer_cast<CompositeCluster>(toOwn))
+        {
+          subComposite->validateNoRepeat(this);
+        }
+
+      if(toOwn->size() > 0) // Do not add empty clusters.
+      {
+        m_ownedClusters.push_back(toOwn);
+      }
+    }
+
+    bool CompositeCluster::containsLabel(const size_t& label) const
     {
       bool inSet = false;
       class Comparitor
@@ -152,7 +177,7 @@ namespace Mantid
         }
         bool operator()(const boost::shared_ptr<ICluster>& pCluster) const
         {
-          return (pCluster->getOriginalLabel() == m_label);
+          return pCluster->containsLabel(m_label);
         }
       };
       Comparitor comparitor(label);

@@ -44,6 +44,9 @@ namespace Mantid
         /// Constructor
         Cluster(const size_t& label);
 
+        /// Destructor
+        virtual ~Cluster();
+
         /// integrate the cluster
         ClusterIntegratedValues integrate(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const;
 
@@ -68,15 +71,14 @@ namespace Mantid
         /// Overloaded equals.
         bool operator==(const Cluster& other) const;
 
-        /// Merge and own 
-        void attachCluster(boost::shared_ptr<const Cluster>& toOwn);
-
         /// Set the root cluster
         void setRootCluster(ICluster const* root);
 
         /// Get a representative index of the cluster
         virtual size_t getRepresentitiveIndex() const;
 
+        /// Does the cluster contain the label.
+        virtual bool containsLabel(const size_t& label) const;
 
        private:
 
@@ -88,8 +90,6 @@ namespace Mantid
         size_t m_originalLabel;
         /// indexes belonging to cluster. This is how we track cluster objects.
         std::vector<size_t> m_indexes;
-        /// Attached clusters.
-        std::vector<boost::shared_ptr<const Cluster> > m_ownedClusters;
         /// Root cluster.
         ICluster const * m_rootCluster;
 

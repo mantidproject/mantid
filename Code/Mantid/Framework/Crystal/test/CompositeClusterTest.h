@@ -31,6 +31,19 @@ public:
   static void destroySuite( CompositeClusterTest *suite )
   { delete suite;}
 
+  void test_dont_add_if_child_empty()
+  {
+    MockICluster* pMockCluster = new MockICluster();
+    EXPECT_CALL(*pMockCluster, size()).WillRepeatedly(Return(0)); // Size==0, empty child cluster.
+    boost::shared_ptr<ICluster> mockCluster(pMockCluster);
+
+    CompositeCluster composite;
+    composite.add(mockCluster);
+    TSM_ASSERT_EQUALS("Should not have added cluster", 0, composite.size());
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pMockCluster));
+  }
+
   void testAdd()
   {
 
@@ -70,6 +83,7 @@ public:
   {
     MockICluster* pMockCluster = new MockICluster();
     EXPECT_CALL(*pMockCluster, writeTo(_)).Times(2);
+    EXPECT_CALL(*pMockCluster, size()).WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will not be added to composite cluster
     boost::shared_ptr<ICluster> mockCluster1(pMockCluster, null_deleter());
     boost::shared_ptr<ICluster> mockCluster2(pMockCluster, null_deleter());
 
@@ -87,6 +101,7 @@ public:
   void test_integrate()
   {
     MockICluster* pMockCluster = new MockICluster();
+    EXPECT_CALL(*pMockCluster, size()).WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will not be added to composite cluster
     EXPECT_CALL(*pMockCluster, integrate(_)).WillRepeatedly(Return(ICluster::ClusterIntegratedValues(1,2)));
     boost::shared_ptr<ICluster> mockCluster1(pMockCluster, null_deleter());
     boost::shared_ptr<ICluster> mockCluster2(pMockCluster, null_deleter());
@@ -112,6 +127,8 @@ public:
     boost::shared_ptr<ICluster> mockClusterA(pMockClusterA);
     boost::shared_ptr<ICluster> mockClusterB(pMockClusterB);
 
+    EXPECT_CALL(*pMockClusterA, size()).WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will not be added to composite cluster
+    EXPECT_CALL(*pMockClusterB, size()).WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will not be added to composite cluster
     EXPECT_CALL(*pMockClusterA, getLabel()).WillRepeatedly(Return(1)); // Max label
     EXPECT_CALL(*pMockClusterB, getLabel()).WillRepeatedly(Return(0));// Min label
     EXPECT_CALL(*pMockClusterA, setRootCluster(pMockClusterB)).Times(1);// Use minimum as root
@@ -137,16 +154,18 @@ public:
     boost::shared_ptr<ICluster> mockClusterA(pMockClusterA);
     boost::shared_ptr<ICluster> mockClusterB(pMockClusterB);
 
-    EXPECT_CALL(*pMockClusterA, getOriginalLabel()).WillRepeatedly(Return(1)); // Label 1 in set
-    EXPECT_CALL(*pMockClusterB, getOriginalLabel()).WillRepeatedly(Return(2)); // Label 2 in set
+    EXPECT_CALL(*pMockClusterA, size()).WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will not be added to composite cluster
+    EXPECT_CALL(*pMockClusterB, size()).WillRepeatedly(Return(1)); // Fake the size as non-zero otherwise will not be added to composite cluster
+    EXPECT_CALL(*pMockClusterA, getLabel()).WillRepeatedly(Return(1)); // Label 1 in set
+    EXPECT_CALL(*pMockClusterB, getLabel()).WillRepeatedly(Return(2)); // Label 2 in set
 
     CompositeCluster composite;
     composite.add(mockClusterA);
     composite.add(mockClusterB);
 
-    TS_ASSERT(!composite.labelInSet(3));
-    TS_ASSERT(composite.labelInSet(1));
-    TS_ASSERT(composite.labelInSet(2));
+    TS_ASSERT(!composite.containsLabel(3));
+    TS_ASSERT(composite.containsLabel(1));
+    TS_ASSERT(composite.containsLabel(2));
   }
 
 };

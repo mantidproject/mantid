@@ -54,6 +54,9 @@ public:
     cRegister.add(1, a);
     cRegister.add(2, b);
     cRegister.add(3, c);
+    EXPECT_CALL(*a.get(), size()).WillRepeatedly(Return(1));
+    EXPECT_CALL(*b.get(), size()).WillRepeatedly(Return(1));
+    EXPECT_CALL(*c.get(), size()).WillRepeatedly(Return(1));
     EXPECT_CALL(*a.get(), getLabel()).WillRepeatedly(Return(1));
     EXPECT_CALL(*b.get(), getLabel()).WillRepeatedly(Return(2));
     EXPECT_CALL(*c.get(), getLabel()).WillRepeatedly(Return(3));
@@ -76,6 +79,9 @@ public:
     cRegister.add(1, a);
     cRegister.add(2, b);
     cRegister.add(3, c);
+    EXPECT_CALL(*a.get(), size()).WillRepeatedly(Return(1));
+    EXPECT_CALL(*b.get(), size()).WillRepeatedly(Return(1));
+    EXPECT_CALL(*c.get(), size()).WillRepeatedly(Return(1));
     EXPECT_CALL(*a.get(), getLabel()).WillRepeatedly(Return(1));
     EXPECT_CALL(*b.get(), getLabel()).WillRepeatedly(Return(2));
     EXPECT_CALL(*c.get(), getLabel()).WillRepeatedly(Return(3));
@@ -99,6 +105,9 @@ public:
     cRegister.add(1, a);
     cRegister.add(2, b);
     cRegister.add(3, c);
+    EXPECT_CALL(*a.get(), size()).WillRepeatedly(Return(1));
+    EXPECT_CALL(*b.get(), size()).WillRepeatedly(Return(1));
+    EXPECT_CALL(*c.get(), size()).WillRepeatedly(Return(1));
     EXPECT_CALL(*a.get(), getLabel()).WillRepeatedly(Return(1));
     EXPECT_CALL(*b.get(), getLabel()).WillRepeatedly(Return(2));
     EXPECT_CALL(*c.get(), getLabel()).WillRepeatedly(Return(3));
@@ -112,6 +121,39 @@ public:
     TS_ASSERT_EQUALS(1, combined.size());
     TSM_ASSERT("Combined all clusters, so should have a single Composite cluster. Composite should be labelled with the lowest label.",
         boost::dynamic_pointer_cast<CompositeCluster>(combined[1]));
+  }
+
+  void test_complex_merge()
+  {
+    // Merge (1,2)  (3,4) then (2, 3), we should get one big cluster at the end.
+
+    auto one = boost::make_shared<Cluster>(1);
+    auto two = boost::make_shared<Cluster>(2);
+    auto three = boost::make_shared<Cluster>(3);
+    auto four = boost::make_shared<Cluster>(4);
+
+    one->addIndex(0);
+    two->addIndex(0);
+    three->addIndex(0);
+    four->addIndex(0);
+
+    ClusterRegister cRegister;
+    cRegister.add(1, one);
+    cRegister.add(2, two);
+    cRegister.add(3, three);
+    cRegister.add(4, four);
+
+    cRegister.merge(DisjointElement(1), DisjointElement(2));
+    cRegister.merge(DisjointElement(3), DisjointElement(4));
+    cRegister.merge(DisjointElement(2), DisjointElement(3));
+
+    auto clusters = cRegister.clusters();
+    
+    TSM_ASSERT_EQUALS("One big cluster", clusters.size(), 1);
+    TSM_ASSERT_EQUALS("All four Clusters registered under big composite.", clusters[1]->size(), 4);
+
+    auto label = clusters[1]->getLabel();
+    TSM_ASSERT_EQUALS("Entire clustere labeled as minimum (1)", label, 1);
   }
 
 };

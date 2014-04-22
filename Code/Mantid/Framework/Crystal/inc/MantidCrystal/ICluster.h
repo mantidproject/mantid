@@ -74,6 +74,9 @@ namespace Mantid
 
       /// Get a represetiative index of the cluster
       virtual size_t getRepresentitiveIndex() const = 0;
+
+      /// Is the label contained in the cluster
+      virtual bool containsLabel(const size_t& label) const = 0;
     };
 
   } // namespace Crystal
