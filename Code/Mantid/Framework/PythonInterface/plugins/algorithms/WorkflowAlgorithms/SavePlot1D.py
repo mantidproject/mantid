@@ -16,6 +16,9 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 	""" Algorithm name
 	"""
         return "SavePlot1D"
+    
+    def checkGroups(self):
+        return False
         
     def PyInit(self):
         self.setWikiSummary("Save 1D plots to a file")
@@ -30,10 +33,11 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         self._wksp = self.getProperty("InputWorkspace").value
         if type(self._wksp)==mantid.api._api.WorkspaceGroup:
             for i in range(self._wksp.getNumberOfEntries()):
-                plt.subplot(self._wksp.getNumberOfEntries(),1,i)
+                plt.subplot(self._wksp.getNumberOfEntries(),1,i+1)
                 self.DoPlot(self._wksp.getItem(i))
         else:
             self.DoPlot(self._wksp) 
+        plt.tight_layout(1.08)
         plt.show()
         filename = self.getProperty("OutputFilename").value
         plt.savefig(filename,bbox_inches='tight')    
