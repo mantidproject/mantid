@@ -46,31 +46,85 @@ namespace Mantid
 
       ClusterRegister::MapCluster m_register;
 
-      std::list<boost::shared_ptr<CompositeCluster> > m_merged;
+      ClusterRegister::MapCluster m_unique;
+
+      //std::list<boost::shared_ptr<CompositeCluster> > m_merged;
 
       SetDisjointPair m_setPairs;
 
-      void findAndMerge(const boost::shared_ptr<CompositeCluster>& composite, const size_t label)
+      typedef std::list<std::set<size_t> > GroupType;
+      GroupType m_groups;
+
+      bool insert(const DisjointElement& a, const DisjointElement& b)
       {
-        // now go look for b in other merged clusters. 
-        auto j = m_merged.begin();
-        for(; j != m_merged.end(); ++j)
+        const size_t& aLabel = a.getRoot();
+        const size_t& bLabel = b.getRoot();
+        bool newItem = true;
+
+        GroupType containingAny;
+        GroupType containingNone;
+        // Find equivalent sets
+        for(GroupType::iterator i = m_groups.begin(); i != m_groups.end(); ++i)
         {
-          boost::shared_ptr<ICluster>  subComposite = *j;
-          if(subComposite != composite && subComposite->containsLabel(label))
+          GroupType::value_type& cluster =*i;
+          if(cluster.find(aLabel) != cluster.end())
           {
-            composite->add(subComposite); // Merge composites
-            m_merged.remove((*j));
-            break;
+            containingAny.push_back(cluster);
+          }
+          else if(cluster.find(bLabel) != cluster.end())
+          {
+            containingAny.push_back(cluster);
+          }
+          else
+          {
+            containingNone.push_back(cluster);
           }
         }
-        if(j == m_merged.end())
+        // Process equivalent sets
+        if(containingAny.empty())
         {
-          // No other composite cluster 'owns' b.
-          composite->add(m_register[label]);
-          m_register.erase(label);
+          GroupType::value_type newSet;
+          newSet.insert(aLabel);
+          newSet.insert(bLabel);
+          m_groups.push_back(newSet);
         }
+        else
+        {
+          // implement copy and swap. Rebuild the sets.
+          GroupType temp = containingNone;
+          GroupType::value_type masterSet;
+          masterSet.insert(aLabel);
+          masterSet.insert(bLabel);
+          for(auto i = containingAny.begin(); i != containingAny.end(); ++i)
+          {
+            GroupType::value_type& childSet = *i;
+            masterSet.insert(childSet.begin(), childSet.end());
+          }
+          temp.push_back(masterSet);
+          m_groups = temp;
+          newItem = false;
+        }
+        return newItem;
       }
+
+      std::list<boost::shared_ptr<CompositeCluster> >  makeCompositeClusters()
+      {
+        std::list<boost::shared_ptr<CompositeCluster> >  composites;
+        for(auto i = m_groups.begin(); i != m_groups.end(); ++i)
+        {
+          GroupType::value_type& labelSet = *i;
+          auto composite = boost::make_shared<CompositeCluster>();
+          for(auto j = labelSet.begin(); j != labelSet.end(); ++j)
+          {
+            boost::shared_ptr<ICluster>& cluster = m_register[(*j)];
+            composite->add(cluster);
+          }
+          composites.push_back(composite);
+        }
+        return composites;
+      }
+
+    
     };
 
 
@@ -91,6 +145,7 @@ namespace Mantid
     void ClusterRegister::add(const size_t& label, const boost::shared_ptr<ICluster>& cluster)
     {
       m_Impl->m_register.insert(std::make_pair(label, cluster));
+      m_Impl->m_unique.insert(std::make_pair(label, cluster));
     }
 
 
@@ -98,64 +153,34 @@ namespace Mantid
     {
       if (!a.isEmpty() && !b.isEmpty())
       {
-        DisjointPair pair(a, b);
-        if (m_Impl->m_setPairs.find(pair) == m_Impl->m_setPairs.end())
-        {
-          const size_t& aId = a.getRoot();
-          const size_t& bId = b.getRoot();
-          bool newClusterRequired = true;
-          for(auto i = m_Impl->m_merged.begin(); i != m_Impl->m_merged.end(); ++i)
-          {
-            const auto & composite = *i;
-            if(composite->containsLabel(aId) && composite->containsLabel(bId))
-            {
-              newClusterRequired = false;
-              break;
-            }
-            else if(composite->containsLabel(aId) && !composite->containsLabel(bId))
-            {
-              m_Impl->findAndMerge(composite, bId);
-              newClusterRequired = false;
-              break;
-            }
-            else if(!composite->containsLabel(aId) && composite->containsLabel(bId))
-            {
-              m_Impl->findAndMerge(composite, aId);
-              newClusterRequired = false;
-              break;
-            }
-          }
-          if(newClusterRequired)
-          {
-            auto composite = boost::make_shared<CompositeCluster>();
-            composite->add(m_Impl->m_register[aId]);
-            composite->add(m_Impl->m_register[bId]);
-            m_Impl->m_register.erase(aId);
-            m_Impl->m_register.erase(bId);
-            m_Impl->m_merged.push_back(composite);
-          }
-
-          m_Impl->m_setPairs.insert(pair);
-        }
-      }
-    }
-
-    void ClusterRegister::toUniformMinimum(std::vector<DisjointElement>& elements)
-    {
-      for(auto i = m_Impl->m_merged.begin(); i != m_Impl->m_merged.end(); ++i)
-      {
-        const auto&  merged = *i;
-        merged->toUniformMinimum(elements);
+        m_Impl->insert(a, b);
+        m_Impl->m_unique.erase(a.getId());
+        m_Impl->m_unique.erase(b.getId());
       }
     }
 
     ClusterRegister::MapCluster ClusterRegister::clusters() const
     {
       MapCluster temp;
-      temp.insert(m_Impl->m_register.begin(), m_Impl->m_register.end());
-      for(auto i = m_Impl->m_merged.begin(); i != m_Impl->m_merged.end(); ++i)
+      temp.insert(m_Impl->m_unique.begin(), m_Impl->m_unique.end());
+      auto mergedClusters = m_Impl->makeCompositeClusters();
+      for(auto i = mergedClusters.begin(); i != mergedClusters.end(); ++i)
       {
         const auto&  merged = *i;
+        temp.insert(std::make_pair( merged->getLabel(), merged));
+      }
+      return temp;
+    }
+
+    ClusterRegister::MapCluster ClusterRegister::clusters(std::vector<DisjointElement>& elements) const
+    {
+      MapCluster temp;
+      temp.insert(m_Impl->m_unique.begin(), m_Impl->m_unique.end());
+      auto mergedClusters = m_Impl->makeCompositeClusters();
+      for(auto i = mergedClusters.begin(); i != mergedClusters.end(); ++i)
+      {
+        const auto&  merged = *i;
+        merged->toUniformMinimum(elements);
         temp.insert(std::make_pair( merged->getLabel(), merged));
       }
       return temp;

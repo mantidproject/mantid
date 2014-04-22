@@ -364,8 +364,7 @@ namespace Mantid
             clusterRegister.merge(a, b);
           }
         }
-        clusterRegister.toUniformMinimum(neighbourElements);
-        clusterMap = clusterRegister.clusters();
+        clusterMap = clusterRegister.clusters(neighbourElements);
 
         
       }

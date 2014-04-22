@@ -84,7 +84,7 @@ namespace Mantid
       /// Disabled assignement
       CompositeCluster& operator=(const CompositeCluster&);
 
-      void validateNoRepeat(CompositeCluster*const other) const;
+      //void validateNoRepeat(CompositeCluster*const other) const;
 
       /// Label used by cluster
       mutable boost::optional<size_t> m_label;

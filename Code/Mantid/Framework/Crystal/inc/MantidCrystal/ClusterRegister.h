@@ -49,7 +49,7 @@ namespace Crystal
 
     void merge(const DisjointElement& a, const DisjointElement& b) const;
 
-    void toUniformMinimum(std::vector<DisjointElement>& elements);
+    MapCluster clusters(std::vector<DisjointElement>& elements) const;
 
     MapCluster clusters() const;
 

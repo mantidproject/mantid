@@ -13,6 +13,7 @@ using namespace testing;
 
 class ClusterRegisterTest: public CxxTest::TestSuite
 {
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -48,18 +49,15 @@ public:
   void test_simple_merge()
   {
     ClusterRegister cRegister;
-    auto a = boost::make_shared<MockICluster>();
-    auto b = boost::make_shared<MockICluster>();
-    auto c = boost::make_shared<MockICluster>();
+    auto a = boost::make_shared<Cluster>(1);
+    auto b = boost::make_shared<Cluster>(2);
+    auto c = boost::make_shared<Cluster>(3);
+    a->addIndex(0);
+    b->addIndex(0);
+    c->addIndex(0);
     cRegister.add(1, a);
     cRegister.add(2, b);
     cRegister.add(3, c);
-    EXPECT_CALL(*a.get(), size()).WillRepeatedly(Return(1));
-    EXPECT_CALL(*b.get(), size()).WillRepeatedly(Return(1));
-    EXPECT_CALL(*c.get(), size()).WillRepeatedly(Return(1));
-    EXPECT_CALL(*a.get(), getLabel()).WillRepeatedly(Return(1));
-    EXPECT_CALL(*b.get(), getLabel()).WillRepeatedly(Return(2));
-    EXPECT_CALL(*c.get(), getLabel()).WillRepeatedly(Return(3));
     cRegister.merge(DisjointElement(2), DisjointElement(3)); // Merge clusters 2 and 3
 
     auto combined = cRegister.clusters();
@@ -73,18 +71,15 @@ public:
   void test_simple_merge_repeat()
   {
     ClusterRegister cRegister;
-    auto a = boost::make_shared<MockICluster>();
-    auto b = boost::make_shared<MockICluster>();
-    auto c = boost::make_shared<MockICluster>();
+    auto a = boost::make_shared<Cluster>(1);
+    auto b = boost::make_shared<Cluster>(2);
+    auto c = boost::make_shared<Cluster>(3);
+    a->addIndex(0);
+    b->addIndex(0);
+    c->addIndex(0);
     cRegister.add(1, a);
     cRegister.add(2, b);
     cRegister.add(3, c);
-    EXPECT_CALL(*a.get(), size()).WillRepeatedly(Return(1));
-    EXPECT_CALL(*b.get(), size()).WillRepeatedly(Return(1));
-    EXPECT_CALL(*c.get(), size()).WillRepeatedly(Return(1));
-    EXPECT_CALL(*a.get(), getLabel()).WillRepeatedly(Return(1));
-    EXPECT_CALL(*b.get(), getLabel()).WillRepeatedly(Return(2));
-    EXPECT_CALL(*c.get(), getLabel()).WillRepeatedly(Return(3));
     cRegister.merge(DisjointElement(2), DisjointElement(3)); // Merge clusters 2 and 3
     cRegister.merge(DisjointElement(3), DisjointElement(2)); // This is a duplicate call that should be ignored.
 
@@ -99,21 +94,15 @@ public:
   void test_multi_merge()
   {
     ClusterRegister cRegister;
-    auto a = boost::make_shared<MockICluster>();
-    auto b = boost::make_shared<MockICluster>();
-    auto c = boost::make_shared<MockICluster>();
+    auto a = boost::make_shared<Cluster>(1);
+    auto b = boost::make_shared<Cluster>(2);
+    auto c = boost::make_shared<Cluster>(3);
+    a->addIndex(0);
+    b->addIndex(0);
+    c->addIndex(0);
     cRegister.add(1, a);
     cRegister.add(2, b);
     cRegister.add(3, c);
-    EXPECT_CALL(*a.get(), size()).WillRepeatedly(Return(1));
-    EXPECT_CALL(*b.get(), size()).WillRepeatedly(Return(1));
-    EXPECT_CALL(*c.get(), size()).WillRepeatedly(Return(1));
-    EXPECT_CALL(*a.get(), getLabel()).WillRepeatedly(Return(1));
-    EXPECT_CALL(*b.get(), getLabel()).WillRepeatedly(Return(2));
-    EXPECT_CALL(*c.get(), getLabel()).WillRepeatedly(Return(3));
-    EXPECT_CALL(*a.get(), getOriginalLabel()).WillRepeatedly(Return(1));
-    EXPECT_CALL(*b.get(), getOriginalLabel()).WillRepeatedly(Return(2));
-    EXPECT_CALL(*c.get(), getOriginalLabel()).WillRepeatedly(Return(3));
     cRegister.merge(DisjointElement(2), DisjointElement(3)); // Merge clusters 2 and 3
     cRegister.merge(DisjointElement(1), DisjointElement(2)); // Merge clusters 1 and 2
 

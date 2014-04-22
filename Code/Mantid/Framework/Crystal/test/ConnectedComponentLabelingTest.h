@@ -487,7 +487,7 @@ public:
     auto outWS = ccl.execute(inWS, &backgroundStrategy, prog);
 
     std::set<size_t> uniqueEntries = connection_workspace_to_set_of_labels(outWS.get());
-    TSM_ASSERT_EQUALS("3 objects so should have 4 unique entries", 4, uniqueEntries.size());
+    TSM_ASSERT_EQUALS("3 objects", 3, uniqueEntries.size());
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId));
     TS_ASSERT(does_set_contain(uniqueEntries, m_emptyLabel));// Background entries.
     TS_ASSERT(does_set_contain(uniqueEntries, labelingId+1));
