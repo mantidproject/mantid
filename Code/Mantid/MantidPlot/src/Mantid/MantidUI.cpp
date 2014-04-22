@@ -435,7 +435,10 @@ Graph3D *MantidUI::plot3DMatrix(int style)
 MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
 {
   MantidMatrix *m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
-  if (m) return m->plotGraph2D(type);
+  if (m)
+  {
+    return drawSingleColorFillPlot(QString::fromStdString(m->getWorkspaceName()), type);
+  }
   return 0;
 }
 
