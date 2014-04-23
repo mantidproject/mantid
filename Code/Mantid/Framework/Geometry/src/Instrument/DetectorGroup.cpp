@@ -270,31 +270,6 @@ namespace Mantid
       return false;
 
     }
-    /** Return const parameter map of the detector group. Throws if more then one detector in the group is parameterized as it is unclear what to do about it 
-      */ 
-    const ParameterMap * DetectorGroup::getParameterMap()
-    {
-      const ParameterMap * detMap(NULL);
-      DetCollection::const_iterator it;
-      for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
-        if( (*it).second->isParametrized()) 
-        {
-          auto csp_Det= (*it).second;
-          // have to cast as parameter_map here is defined by const_sptr(s) Why is that? 
-          auto iDet = const_cast<IDetector *>(csp_Det.get());
-          if (!detMap)
-          {
-            detMap = iDet->getParameterMap();
-          }
-          else
-          {
-            if (iDet->getParameterMap() != detMap)
-              throw Kernel::Exception::NotImplementedError("Can not yet interpret different parameters map for detectors in a detectors group ");
-          }
-        }
-      return detMap;
-    }
- 
 
 
     /** Indicates whether this is a monitor.

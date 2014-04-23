@@ -268,7 +268,6 @@ namespace Mantid
       virtual void appendXML(std::ostream& xmlStream) const;
 
       bool isParametrized() const;
-      virtual const ParameterMap * getParameterMap(){return m_map;}
     protected:
       /// Parent component in the tree
       const IComponent* m_parent;

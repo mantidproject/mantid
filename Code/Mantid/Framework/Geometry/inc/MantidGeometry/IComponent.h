@@ -153,13 +153,11 @@ namespace Mantid
       virtual void printSelf(std::ostream&) const = 0;
       //! Returns true if the Component is parametrized (has a parameter map)
       virtual bool isParametrized() const = 0;
-      /// Returns pointer to const parameter map
-      virtual const ParameterMap * getParameterMap()=0;
     };
 
     ///Typedef of a shared pointer to a IComponent
     typedef boost::shared_ptr<IComponent> IComponent_sptr;
-    ///Typdef of a shared poitner to a const IComponent
+    ///Typdef of a shared pointer to a const IComponent
     typedef boost::shared_ptr<const IComponent> IComponent_const_sptr;
 
     /** Prints a text representation
