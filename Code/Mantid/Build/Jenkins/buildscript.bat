@@ -8,10 +8,13 @@
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: If pvnext in JOB_NAME, use PARAVIEW_NEXT_DIR for PARAVIEW_DIR
+:: If pvnext in JOB_NAME, use PARAVIEW_NEXT_DIR for LOCAL_PARAVIEW_DIR else 
+:: use PARAVIEW_DIR
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if "%JOB_NAME%"=="%JOB_NAME:pvnext=%" (
-    set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
+    set LOCAL_PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
+) else (
+    set LOCAL_PARAVIEW_DIR=%PARAVIEW_DIR%
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -46,7 +49,7 @@ cd %WORKSPACE%\build
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G "Visual Studio 11 Win64" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DUSE_PRECOMPILED_HEADERS=ON %DOC_IMAGES% ..\Code\Mantid
+"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G "Visual Studio 11 Win64" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%LOCAL_PARAVIEW_DIR% -DUSE_PRECOMPILED_HEADERS=ON %DOC_IMAGES% ..\Code\Mantid
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
