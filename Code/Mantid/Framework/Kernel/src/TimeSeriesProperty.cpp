@@ -6,6 +6,11 @@
 #include "MantidKernel/TimeSplitter.h"
 
 #include <sstream>
+#if !(defined __APPLE__ && defined __INTEL_COMPILER)
+#include <algorithm>
+#else
+#include <boost/range/algorithm_ext/is_sorted.hpp>
+#endif
 
 using namespace std;
 
@@ -80,7 +85,7 @@ namespace Mantid
         if (this->operator!=(*rhs))
         {
           m_values.insert(m_values.end(), rhs->m_values.begin(), rhs->m_values.end());
-          m_propSortedFlag = false;
+          m_propSortedFlag = TimeSeriesSortStatus::TSUNKNOWN;
         }
         else
         {
@@ -820,9 +825,22 @@ namespace Mantid
 
       // Toggle the sorted flag if necessary
       // (i.e. if the flag says we're sorted and the added time is before the prior last time)
-      if ( m_propSortedFlag && m_size > 1 && *m_values.rbegin() < *(m_values.rbegin()+1) )
+      if (m_size == 1)
       {
-        m_propSortedFlag = false;
+        // First item, must be sorted.
+        m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
+      }
+      else if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN &&
+               m_values.back() < *(m_values.rbegin()+1))
+      {
+        // Previously unknown and still unknown
+        m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
+      }
+      else if (m_propSortedFlag == TimeSeriesSortStatus::TSSORTED &&
+               m_values.back() < *(m_values.rbegin()+1) )
+      {
+        // Previously sorted but last added is not in order
+        m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
       }
 
       m_filterApplied = false;
@@ -862,7 +880,7 @@ namespace Mantid
     template<typename TYPE>
     void TimeSeriesProperty<TYPE>::addValues(const std::vector<Kernel::DateAndTime> &times,
         const std::vector<TYPE> & values)
-        {
+    {
       for (size_t i = 0; i < times.size(); i ++)
       {
         if (i >= values.size())
@@ -875,10 +893,10 @@ namespace Mantid
       }
 
       if (values.size() > 0)
-        m_propSortedFlag = false;
+        m_propSortedFlag = TimeSeriesSortStatus::TSUNKNOWN;
 
       return;
-        }
+    }
 
     /**
      * Returns the last time
@@ -1097,7 +1115,7 @@ namespace Mantid
       m_size = 0;
       m_values.clear();
 
-      m_propSortedFlag = false;
+      m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
       m_filterApplied = false;
     }
 
@@ -1118,6 +1136,7 @@ namespace Mantid
       }
     }
 
+    //--------------------------------------------------------------------------------------------
     /**
      * Clears and creates a TimeSeriesProperty from these parameters:
      *  @param start_time :: The reference time as a boost::posix_time::ptime value
@@ -1126,9 +1145,10 @@ namespace Mantid
      *    Vector sizes must match.
      */
     template<typename TYPE>
-    void TimeSeriesProperty<TYPE>::create(const Kernel::DateAndTime &start_time, const std::vector<double> & time_sec,
-        const std::vector<TYPE> & new_values)
-        {
+    void TimeSeriesProperty<TYPE>::create(const Kernel::DateAndTime &start_time,
+                                          const std::vector<double> & time_sec,
+                                          const std::vector<TYPE> & new_values)
+    {
       if (time_sec.size() != new_values.size())
         throw std::invalid_argument("TimeSeriesProperty::create: mismatched size for the time and values vectors.");
 
@@ -1137,8 +1157,9 @@ namespace Mantid
       DateAndTime::createVector(start_time, time_sec, times);
 
       this->create(times, new_values);
-        }
+    }
 
+    //--------------------------------------------------------------------------------------------
     /** Clears and creates a TimeSeriesProperty from these parameters:
      *
      * @param new_times :: A vector of DateAndTime.
@@ -1146,7 +1167,8 @@ namespace Mantid
      *                      Vector sizes must match.
      */
     template<typename TYPE>
-    void TimeSeriesProperty<TYPE>::create(const std::vector<DateAndTime> & new_times, const std::vector<TYPE> & new_values)
+    void TimeSeriesProperty<TYPE>::create(const std::vector<DateAndTime> & new_times,
+                                          const std::vector<TYPE> & new_values)
     {
       if (new_times.size() != new_values.size())
         throw std::invalid_argument("TimeSeriesProperty::create: mismatched size for the time and values vectors.");
@@ -1155,11 +1177,18 @@ namespace Mantid
       m_values.reserve(new_times.size());
 
       std::size_t num = new_values.size();
+
+      m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
       for (std::size_t i=0; i < num; i++)
       {
-        // By providing a guess iterator to the insert method, it speeds inserting up by a good amount.
         TimeValueUnit<TYPE> newentry(new_times[i], new_values[i]);
         m_values.push_back(newentry);
+        if (m_propSortedFlag == TimeSeriesSortStatus::TSSORTED && i > 0 &&
+            new_times[i-1] > new_times[i])
+        {
+          // Status gets to unsorted
+          m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
+        }
       }
 
       // reset the size
@@ -1780,17 +1809,37 @@ namespace Mantid
     //-------------------------------------------------------------------------
     // Private methods
     //-------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------
     /*
      * Sort vector mP and set the flag
      */
     template <typename TYPE>
     void TimeSeriesProperty<TYPE>::sort() const
     {
-      if (!m_propSortedFlag)
+      if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN)
       {
-        std::stable_sort(m_values.begin(), m_values.end());
-        m_propSortedFlag = true;
+        // Check whether it is sorted or not
+#if !(defined __APPLE__ && defined __INTEL_COMPILER)
+        bool sorted = is_sorted(m_values.begin(), m_values.end());
+#else
+        bool sorted = boost::is_sorted(m_values);
+#endif
+        if (sorted)
+          m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
+        else
+          m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
       }
+
+
+      if (m_propSortedFlag == TimeSeriesSortStatus::TSUNSORTED)
+      {
+        g_log.information("TimeSeriesProperty is not sorted.  Sorting is operated on it. ");
+        std::stable_sort(m_values.begin(), m_values.end());
+        m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
+      }
+
+      return;
     }
 
     /** Find the index of the entry of time t in the mP vector (sorted)
