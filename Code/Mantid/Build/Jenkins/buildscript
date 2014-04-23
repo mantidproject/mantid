@@ -49,7 +49,6 @@ if [[ ${JOB_NAME} == *clean* ]]; then
     elif [[ ${JOB_NAME} == *pvnext* ]]; then
       PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable-pvnext -DCPACK_PACKAGE_SUFFIX=unstable-pvnext -DCPACK_SET_DESTDIR=OFF"
     fi
-
   fi
 fi
 
