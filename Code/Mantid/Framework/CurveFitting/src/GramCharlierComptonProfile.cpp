@@ -339,7 +339,7 @@ namespace Mantid
     /**
      * Used to cache some values when the workspace has been set
      * @param workspace A pointer to the workspace
-     * @param wsIndex A workspace index
+     * @param wi A workspace index
      * @param startX Starting x-vaue (unused).
      * @param endX Ending x-vaue (unused).
      */
