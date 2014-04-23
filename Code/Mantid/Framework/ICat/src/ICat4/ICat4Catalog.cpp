@@ -851,11 +851,12 @@ namespace Mantid
 
       std::string query = "Dataset <-> Investigation[name = '" + investigationID + "']";
       request.query     = &query;
+
       std::string sessionID = m_session->getSessionId();
       request.sessionId = &sessionID;
 
-      g_log.debug() << "The query performed to obtain a dataset from an investigation" <<
-          " id in ICat4Catalog::getDatasetIdFromFileName is:\n" << query << std::endl;
+      g_log.debug() << "The query performed to obtain a dataset from an investigation id " <<
+          "in ICat4Catalog::getDatasetId is: " << query << std::endl;
       
       int64_t datasetID = 0;
       
@@ -870,6 +871,7 @@ namespace Mantid
         }
         ns1__dataset * dataset = dynamic_cast<ns1__dataset*>(response.return_.at(0));
         if (dataset && dataset->id) datasetID = *(dataset->id);
+        g_log.debug() << "The name of the dataset related to " << investigationID << " is: " << *(dataset->name) << "\n";
       }
       else
       {
