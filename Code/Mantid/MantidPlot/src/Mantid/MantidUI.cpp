@@ -3189,17 +3189,31 @@ void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType 
 * Draw a single ColorFill plot for the named workspace
 * @param wsName :: The name of the workspace which provides data for the plot
 * @param curveType :: The type of curve
+* @param window :: An optional pointer to a plot window. If not NULL the window is cleared
+*                      and reused
 * @returns A pointer to the created plot
 */
-MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType)
+MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType,
+                                              MultiLayer* window)
 {
   auto workspace = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
   if(!workspace) return NULL;
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  auto * ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName( wsName + "-"));
-  ml->setCloseOnEmpty(true);
-  Graph *plot = ml->activeGraph();
+  if(window == NULL)
+  {
+    window = appWindow()->multilayerPlot(appWindow()->generateUniqueName( wsName + "-"));
+    window->setCloseOnEmpty(true);
+  }
+  else
+  {
+    // start fresh layer
+    window->setWindowTitle(appWindow()->generateUniqueName( wsName + "-"));
+    window->setLayersNumber(0);
+    window->addLayer();
+  }
+
+  Graph *plot = window->activeGraph();
   appWindow()->setPreferences(plot);
   plot->setTitle(wsName);
 
@@ -3228,14 +3242,14 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
   plot->plotSpectrogram(spgrm, curveType);
   connect(spgrm, SIGNAL(removeMe(Spectrogram*)),
           plot, SLOT(removeSpectrogram(Spectrogram*)));
-  connect(plot, SIGNAL(curveRemoved()), ml,
+  connect(plot, SIGNAL(curveRemoved()), window,
           SLOT(maybeNeedToClose()), Qt::QueuedConnection);
 
   appWindow()->setSpectrogramTickStyle(plot);
   plot->setAutoScale();
 
   QApplication::restoreOverrideCursor();
-  return ml;
+  return window;
 }
 
 /** Create a 1d graph form specified spectra in a MatrixWorkspace
