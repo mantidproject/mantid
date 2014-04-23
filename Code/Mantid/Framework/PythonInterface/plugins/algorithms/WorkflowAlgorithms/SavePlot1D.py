@@ -43,7 +43,10 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         plt.savefig(filename,bbox_inches='tight')    
         
     def DoPlot(self,ws):
-        for j in range(ws.getNumberHistograms()):
+        spectra=ws.getNumberHistograms()
+        if spectra>10:
+            mantid.kernel.logger.warning("more than 10 spectra to plot")
+        for j in range(spectra):
             x=ws.readX(j)
             y=ws.readY(j)
             if x.size==y.size+1:
@@ -60,14 +63,12 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                     unitLabel="$\\AA$"   
                 xlabel=xaxis.getUnit().caption()+" ("+unitLabel+")"
             if ylabel=="":
-                yaxis=ws.getAxis(1)
-                if yaxis.getUnit().caption()=="":
-                    ylabel="Counts"
-                else:
-                    ylabel=yaxis.getUnit().caption()+" ("+yaxis.getUnit().label()+")"               
+                ylabel=ws.YUnit()              
 
             plt.xlabel(xlabel)
             plt.ylabel(ylabel) 
+        if spectra<=10:
+            pass
             #plt.legend()            
         
 try:
