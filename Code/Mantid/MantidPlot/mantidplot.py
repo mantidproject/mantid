@@ -222,7 +222,10 @@ def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, 
         return graph
 
 #----------------------------------------------------------------------------------------------------
-def plot2D(source, style = -1, window = None):
+# IPython auto-complete can't handle enumerations as defaults
+DEFAULT_2D_STYLE = int(_qti.Layer.ColorMap)
+
+def plot2D(source, style = DEFAULT_2D_STYLE, window = None):
     """Open a 2D plot of the given workspace(s)
 
     Produces a 2D histogram for each of the given workspaces
