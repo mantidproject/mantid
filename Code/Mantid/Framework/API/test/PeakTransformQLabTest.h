@@ -1,13 +1,12 @@
-#ifndef SLICE_VIEWER_PEAKTRANSFORMQLAB_TEST_H_
-#define SLICE_VIEWER_PEAKTRANSFORMQLAB_TEST_H_
+#ifndef MANTIDAPI_PEAKTRANSFORMQLAB_TEST_H_
+#define MANTIDAPI_PEAKTRANSFORMQLAB_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidCrystal/PeaksInRegion.h"
-#include "MantidQtSliceViewer/PeakTransformQLab.h"
+#include "MantidAPI/PeakTransformQLab.h"
 #include "MockObjects.h"
 #include <boost/make_shared.hpp>
 
-using namespace MantidQt::SliceViewer;
+using namespace Mantid::API;
 using namespace Mantid;
 using Mantid::Kernel::V3D;
 using namespace testing;
@@ -211,12 +210,8 @@ void test_getCoordinateSystem()
   TS_ASSERT_EQUALS(Mantid::API::QLab, transform.getCoordinateSystem())
 }
 
-void test_friendlyname_against_PeaksInRegion()
-{
-  TSM_ASSERT_EQUALS("These labels must be compatible", PeakTransformQLab::name(), Mantid::Crystal::PeaksInRegion::qLabFrame());
-}
 
 };
 #endif
 
-//end SLICE_VIEWER_PEAKTRANSFORMQLAB_TEST_H_
+//end MANTIDAPI_PEAKTRANSFORMQLAB_TEST_H_

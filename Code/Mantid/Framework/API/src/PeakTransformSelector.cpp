@@ -1,9 +1,9 @@
-#include "MantidQtSliceViewer/PeakTransformSelector.h"
+#include "MantidAPI/PeakTransformSelector.h"
 #include <stdexcept>
 
-namespace MantidQt
+namespace Mantid
 {
-  namespace SliceViewer
+  namespace API
   {
     /// Constructor
     PeakTransformSelector::PeakTransformSelector()

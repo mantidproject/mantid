@@ -85,6 +85,8 @@ namespace API
 
     virtual size_t getLinearIndex() const;
 
+    virtual bool isWithinBounds(size_t index) const;
+
   private:
     void calcWorkspacePos(size_t newWI);
 

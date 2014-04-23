@@ -1,12 +1,12 @@
-#ifndef MANTID_SLICEVIEWER_PEAKTRANSFORMHKL_H_
-#define MANTID_SLICEVIEWER_PEAKTRANSFORMHKL_H_
+#ifndef MANTID_API_PEAKTRANSFORMHKL_H_
+#define MANTID_API_PEAKTRANSFORMHKL_H_
 
-#include "MantidQtSliceViewer/PeakTransform.h"
-#include "MantidQtSliceViewer/ConcretePeakTransformFactory.h"
+#include "MantidAPI/PeakTransform.h"
+#include "MantidAPI/ConcretePeakTransformFactory.h"
 
-namespace MantidQt
+namespace Mantid
 {
-  namespace SliceViewer
+  namespace API
   {
     /**
     @class PeakTransformHKL
@@ -45,4 +45,4 @@ namespace MantidQt
   }
 }
 
-#endif /* MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTERHKL_H_ */
+#endif /* MANTID_API_CONCRETEPEAKSPRESENTERHKL_H_ */

@@ -2,13 +2,11 @@
 #define SLICE_VIEWER_PEAKTRANSFORMHKL_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidQtSliceViewer/PeakTransformHKL.h"
-#include "MantidCrystal/PeaksInRegion.h"
+#include "MantidAPI/PeakTransformHKL.h"
 #include "MockObjects.h"
 #include <boost/make_shared.hpp>
 
-using namespace MantidQt::SliceViewer;
-using namespace Mantid;
+using namespace Mantid::API;
 using Mantid::Kernel::V3D;
 using namespace testing;
 
@@ -271,10 +269,6 @@ void test_getFriendlyName()
   TS_ASSERT_EQUALS("HKL", transform.getFriendlyName());
 }
 
-void test_friendlyname_against_PeaksInRegion()
-{
-  TSM_ASSERT_EQUALS("These labels must be compatible", PeakTransformHKL::name(), Mantid::Crystal::PeaksInRegion::hklFrame());
-}
 
 void test_getCoordinateSystem()
 {

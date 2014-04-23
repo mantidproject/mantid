@@ -1,5 +1,5 @@
-#ifndef MANTID_SLICEVIEWER_PEAKTRANSFORM_H_
-#define MANTID_SLICEVIEWER_PEAKTRANSFORM_H_
+#ifndef MANTID_API_PEAKTRANSFORM_H_
+#define MANTID_API_PEAKTRANSFORM_H_
 
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/IPeak.h"
@@ -7,9 +7,9 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/SpecialCoordinateSystem.h"
 
-namespace MantidQt
+namespace Mantid
 {
-  namespace SliceViewer
+  namespace API
   {
     /**
     @class PeakTransform
@@ -70,4 +70,4 @@ namespace MantidQt
   }
 }
 
-#endif /* MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_ */
+#endif /* MANTID_API_CONCRETEPEAKSPRESENTER_H_ */

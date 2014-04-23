@@ -1,12 +1,12 @@
-#ifndef MANTID_SLICEVIEWER_PEAKTRANSFORMQSAMPLE_H_
-#define MANTID_SLICEVIEWER_PEAKTRANSFORMQSAMPLE_H_
+#ifndef MANTID_API_PEAKTRANSFORMQSAMPLE_H_
+#define MANTID_API_PEAKTRANSFORMQSAMPLE_H_
 
-#include "MantidQtSliceViewer/PeakTransform.h"
-#include "MantidQtSliceViewer/ConcretePeakTransformFactory.h"
+#include "MantidAPI/PeakTransform.h"
+#include "MantidAPI/ConcretePeakTransformFactory.h"
 
-namespace MantidQt
+namespace Mantid
 {
-  namespace SliceViewer
+  namespace API
   {
     /**
     @class PeakTransformQSample
@@ -46,4 +46,4 @@ namespace MantidQt
   }
 }
 
-#endif /* MANTID_SLICEVIEWER_PEAKTRANSFORMQSAMPLE_H_ */
+#endif /* MANTID_API_PEAKTRANSFORMQSAMPLE_H_ */

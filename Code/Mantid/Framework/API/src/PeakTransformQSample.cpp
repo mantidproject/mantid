@@ -1,11 +1,11 @@
-#include "MantidQtSliceViewer/PeakTransformQSample.h"
+#include "MantidAPI/PeakTransformQSample.h"
 #include <boost/make_shared.hpp>
 
 using boost::regex;
 
-namespace MantidQt
+namespace Mantid
 {
-  namespace SliceViewer
+  namespace API
   {
 
   PeakTransformQSample::PeakTransformQSample() : PeakTransform("Q_sample_x", "Q_sample_y", regex("^Q_sample_x.*$"), regex("^Q_sample_y.*$"), regex("^Q_sample_z.*$") )

@@ -98,6 +98,8 @@ namespace MDEvents
 
     std::vector<size_t> findNeighbourIndexes() const;
 
+    virtual bool isWithinBounds(size_t index) const;
+
   protected:
     /// The MDHistoWorkspace being iterated.
     const MDHistoWorkspace * m_ws;

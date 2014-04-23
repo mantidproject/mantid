@@ -1,12 +1,12 @@
-#ifndef MANTID_SLICEVIEWER_PEAKTRANSFORMSELECTOR_H_
-#define MANTID_SLICEVIEWER_PEAKTRANSFORMSELECTOR_H_
+#ifndef MANTID_API_PEAKTRANSFORMSELECTOR_H_
+#define MANTID_API_PEAKTRANSFORMSELECTOR_H_
 
-#include "MantidQtSliceViewer/PeakTransformFactory.h"
+#include "MantidAPI/PeakTransformFactory.h"
 #include <set>
 
-namespace MantidQt
+namespace Mantid
 {
-  namespace SliceViewer
+  namespace API
   {
     /**
     @class PeakTransformSelector
