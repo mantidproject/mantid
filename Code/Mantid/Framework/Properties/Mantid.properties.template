@@ -108,8 +108,6 @@ ManagedWorkspace.LowerMemoryLimit = 80
 ManagedWorkspace.AlwaysInMemory = 0
 ManagedWorkspace.DataBlockSize = 4000
 ManagedWorkspace.FilePath = 
-# Setting this to 1 will disable managedrawfileworkspaces
-ManagedRawFileWorkspace.DoNotUse = 0
 
 # Defines the maximum number of cores to use for OpenMP
 # For machine default set to 0
