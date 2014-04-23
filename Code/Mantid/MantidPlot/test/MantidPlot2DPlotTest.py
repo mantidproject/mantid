@@ -59,6 +59,7 @@ class MantidPlot2DPlotTest(unittest.TestCase):
         self.assertTrue(isinstance(plots[0], proxies.Graph))
         self.assertTrue(isinstance(plots[1], proxies.Graph))
 
+        plots[-1].confirmClose(False) # for deletion
         DeleteWorkspace("fake2")
         plots.pop()
 
