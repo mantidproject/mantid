@@ -24,7 +24,7 @@ cd %WORKSPACE%\Code
 call fetch_Third_Party win64
 cd %WORKSPACE%
 
-set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib\win64\Python27;%PARAVIEW_DIR%\bin\Release;%PATH%
+set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib\win64\Python27;%LOCAL_PARAVIEW_DIR%\bin\Release;%PATH%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check whether this is a clean build (must have 'clean' in the job name)
