@@ -86,7 +86,7 @@ public:
     std::vector<Mantid::API::IMDIterator*> iterators(nthreads);
     for(int i = 0;i < nthreads; ++i)
     {
-      auto * iterator = new MockMDIterator;
+      auto * iterator = new MockMDIterator; // deleted by call to SignalRange below
       EXPECT_CALL(*iterator, valid()).WillRepeatedly(Return(true));
       EXPECT_CALL(*iterator, next()).WillOnce(Return(true)).WillRepeatedly(Return(false));
       EXPECT_CALL(*iterator, getNormalizedSignal()).WillOnce(Return(1.5)).WillRepeatedly(Return(10.0));
@@ -115,7 +115,7 @@ public:
     std::vector<Mantid::API::IMDIterator*> iterators(nthreads);
     for(int i = 0;i < nthreads; ++i)
     {
-      auto * iterator = new NormalizableMockIterator;
+      auto * iterator = new NormalizableMockIterator;  // deleted by call to SignalRange below
       EXPECT_CALL(*iterator, getNumEvents()).Times(Exactly(2)).WillRepeatedly(Return(2));
       EXPECT_CALL(*iterator, valid()).WillRepeatedly(Return(true));
       EXPECT_CALL(*iterator, next()).WillOnce(Return(true)).WillRepeatedly(Return(false));
@@ -145,7 +145,7 @@ public:
     std::vector<Mantid::API::IMDIterator*> iterators(nthreads);
     for(int i = 0;i < nthreads; ++i)
     {
-      auto * iterator = new NormalizableMockIterator;
+      auto * iterator = new NormalizableMockIterator;  // deleted by call to SignalRange below
       EXPECT_CALL(*iterator, getNumEvents()).Times(Exactly(2)).WillRepeatedly(Return(2));
       EXPECT_CALL(*iterator, valid()).WillRepeatedly(Return(true));
       EXPECT_CALL(*iterator, next()).WillOnce(Return(true)).WillRepeatedly(Return(false));

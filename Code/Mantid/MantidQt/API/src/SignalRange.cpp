@@ -73,10 +73,11 @@ namespace MantidQt
       PRAGMA_OMP( parallel for schedule(dynamic, 1))
       for (int i=0; i < int(iterators.size()); i++)
       {
-        auto * it = iterators[i];
+        Mantid::API::IMDIterator * it = iterators[i];
         QwtDoubleInterval range = this->getRange(it);
         intervals[i] = range;
-        delete it;
+        // don't delete iterator in parallel. MSVC doesn't like it
+        // when the iterator points to a mock object.
       }
 
       // Combine the overall min/max
@@ -85,6 +86,8 @@ namespace MantidQt
       auto inf = std::numeric_limits<double>::infinity();
       for (size_t i=0; i < iterators.size(); i++)
       {
+        delete iterators[i];
+
         double signal;
         signal = intervals[i].minValue();
         if (signal != inf && signal > 0 && signal < minSignal) minSignal = signal;
