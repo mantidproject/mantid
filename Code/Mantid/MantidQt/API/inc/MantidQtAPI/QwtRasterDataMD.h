@@ -1,14 +1,17 @@
 #ifndef QwtRasterDataMD_H_
 #define QwtRasterDataMD_H_
 
+#include "MantidQtAPI/DllOption.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+
 #include <qwt_double_interval.h>
 #include <qwt_raster_data.h>
+
 #include <vector>
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidAPI/SpectraDetectorTypes.h"
 
 namespace MantidQt
 {
@@ -25,7 +28,7 @@ namespace API
  * @date Sep 29, 2011
  */
 
-class QWT_EXPORT QwtRasterDataMD : public QwtRasterData
+class EXPORT_OPT_MANTIDQT_API QwtRasterDataMD : public QwtRasterData
 {
 public:
   QwtRasterDataMD();
@@ -110,7 +113,7 @@ protected:
 //-----------------------------------------------------------------
 // Specialised class for 2D data with no overlays
 //-----------------------------------------------------------------
-class QWT_EXPORT NoOverlayRaster2D : public QwtRasterDataMD
+class EXPORT_OPT_MANTIDQT_API NoOverlayRaster2D : public QwtRasterDataMD
 {
 public:
   void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
