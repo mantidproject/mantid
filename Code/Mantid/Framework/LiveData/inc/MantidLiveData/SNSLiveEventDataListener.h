@@ -70,6 +70,7 @@ namespace Mantid
       //virtual bool rxPacket( const ADARA::Packet &pkt);
       //virtual bool rxPacket( const ADARA::RawDataPkt &pkt);
       virtual bool rxPacket( const ADARA::BankedEventPkt &pkt);
+      virtual bool rxPacket( const ADARA::BeamMonitorPkt &pkt);
       virtual bool rxPacket( const ADARA::GeometryPkt &pkt);
       virtual bool rxPacket( const ADARA::BeamlineInfoPkt &pkt);
       virtual bool rxPacket( const ADARA::RunStatusPkt &pkt);
@@ -81,7 +82,7 @@ namespace Mantid
       //virtual bool rxPacket( const ADARA::RunInfoPkt &pkt);
 
     private:
-     
+
       // Workspace initialization needs to happen in 2 steps.  Part 1 must happen
       // before we receive *any* packets.
       void initWorkspacePart1();
@@ -128,6 +129,8 @@ namespace Mantid
 
       std::vector<std::string> m_requiredLogs;  // Names of log values that we need before we can initialize
                                                 // m_buffer.  We get the names by parsing m_instrumentXML;
+      std::vector<std::string> m_monitorLogs;   // Names of any monitor logs (these must be manually removed
+                                                // during the call to extractData())
 
       uint64_t m_rtdlPulseId;  // We get this from the RTDL packe  
 
