@@ -181,6 +181,31 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Test invalid histrogram type
+    */
+  void test_Invalid_Histogram_Type()
+  {
+    // Generate file
+    string filename("TestBadHistogramType.prm");
+    generateBadHistogramTypePrmFile(filename);
+
+    // Initialise and set Properties
+    LoadGSASInstrumentFile alg;
+    alg.initialize();
+    alg.setProperty("Filename", filename);
+    alg.setProperty("OutputTableWorkspace", "TestBadHistogramTable");
+
+   // Execute and check that execution failed
+    alg.execute();
+    TS_ASSERT(!alg.isExecuted());
+
+    // 3. Clean
+    Poco::File("TestBadHistogramType.prm").remove();
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Parse a TableWorkspace to a map
     */
   void parseTableWorkspace(TableWorkspace_sptr tablews, map<string, double>& parammap)
@@ -284,6 +309,39 @@ public:
       ofile << "INS  2PRCF 2   0.200000E+00   0.295572E+03  -0.134662E+01   0.000000E+00       \n";
       ofile << "INS  2PRCF 3   0.361229E+01   0.000000E+00   0.000000E+00   0.000000E+00       \n";
       ofile << "INS  2PRCF 4   0.000000E+00   0.000000E+00   0.000000E+00                      \n";
+      ofile.close();
+    }
+    else
+    {
+      throw runtime_error("Unable to open file to write.");
+    }
+
+    return;
+  }
+
+    //----------------------------------------------------------------------------------------------
+  /** Generate a 1 bank .prm file
+    */
+  void generateBadHistogramTypePrmFile(string filename)
+  {
+    ofstream ofile;
+    ofile.open(filename.c_str());
+
+    if (ofile.is_open())
+    {
+      ofile << "COMM  Test file with one bank       \n";
+      ofile << "INS   BANK  1                                                                  \n";
+      ofile << "INS   HTYPE   BLOG      \n";
+      ofile << "COMM5678901234567890                                                           \n";
+      ofile << "INS  1 ICONS    746.96     -0.24      3.04                                     \n";
+      ofile << "INS  1BNKPAR    2.3696      9.39      0.00    .00000     .3000    1    1       \n";
+      ofile << "INS  1I ITYP    0    1.000     25.000       2                                  \n";
+      ofile << "INS  1PRCF      2   15   0.00100                                               \n";
+      ofile << "COMM The next 15 parameters as in wiki page CreateIkedaCarpenterParametersGSAS \n";
+      ofile << "INS  1PRCF 1   0.000000E+00   0.210000E+00   0.317927E+02   0.514205E+02       \n";
+      ofile << "INS  1PRCF 2   0.100000E+00   0.176802E+03   0.000000E+00   0.000000E+00       \n";
+      ofile << "INS  1PRCF 3   0.007000E+00   0.008000E+00   0.000000E+00   0.000000E+00       \n";
+      ofile << "INS  1PRCF 4   0.000000E+00   0.000000E+00   0.000000E+00                      \n";
       ofile.close();
     }
     else
