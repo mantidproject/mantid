@@ -589,7 +589,7 @@ namespace Geometry
   void Component::swap(const Component* base, const ParameterMap * pmap)
   {
     m_base = base;
-    m_map = const_cast<ParameterMap *>(pmap);
+    m_map = pmap;
   }
 
 } // Namespace Geometry

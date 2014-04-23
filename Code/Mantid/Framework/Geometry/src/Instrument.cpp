@@ -494,7 +494,7 @@ namespace Mantid
     /**	Gets a pointer to the detector from its ID
     *  Note that for getting the detector associated with a spectrum, the MatrixWorkspace::getDetector
     *  method should be used rather than this one because it takes account of the possibility of more
-    *  than one detector contibuting to a single spectrum
+    *  than one detector contributing to a single spectrum
     *  @param   detector_id The requested detector ID
     *  @returns A pointer to the detector object
     *  @throw   NotFoundError If no detector is found for the detector ID given
@@ -521,6 +521,21 @@ namespace Mantid
         return it->second;
       }
     }
+
+  /**	Gets a pointer to the base (non-parametrized) detector from its ID
+    * returns null if the detector has not been found
+    *  @param   detector_id The requested detector ID
+    *  @returns A const pointer to the detector object
+    */ 
+   const IDetector* Instrument::getBaseDetector(const detid_t &detector_id) const
+   {
+        detid2det_map::const_iterator it = m_instr->m_detectorCache.find(detector_id);
+        if ( it == m_instr->m_detectorCache.end() )
+        {
+          return NULL;
+        }
+        return it->second.get();
+   }
 
     bool Instrument::isMonitor(const detid_t &detector_id) const
     {
@@ -740,7 +755,7 @@ namespace Mantid
     /** Mark a Component which has already been added to the Instrument (as a child component)
     * to be a Detector by adding it to a detector cache.
     *
-    * @param det :: Component to be marked (stored for later retrievel) as a detector Component
+    * @param det :: Component to be marked (stored for later retrieval) as a detector Component
     *
     */
     void Instrument::markAsDetector(const IDetector* det)

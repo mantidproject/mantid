@@ -108,7 +108,7 @@ void CopyInstrumentParameters::exec()
       if (pOldDet)
       {
         detid_t detID = pOldDet->getID();
-        targComp = inst2->getDetector(detID).get();
+        targComp = inst2->getBaseDetector(detID);
         if (!targComp)
         {
           g_log.warning()<<"Target instrument does not have detector with ID "<<detID<<'\n';
@@ -127,22 +127,14 @@ void CopyInstrumentParameters::exec()
           g_log.warning()<<"Target instrument does not have component with full name "<<targ_name<<'\n';
           continue;
         }
-
       }
       // merge maps for existing target component
-
-          //auto old_comp_map = oldComponent->getParameterMap();
-          //auto it = old_comp_map->begin();
-          //for(;it!=old_comp_map->end();it++)
-          //{
-          //  auto pParam = (*it).second.get();
-          //  targMap.add(pParam->type(),inst2.get(),targ_name,pParam->asString());
-          //}
-
+      auto param = it->second.get();
+      targMap.add(param->type(),targComp,param->name(),param->asString());
 
     }
 
-    // unchanged Copy parameters
+    // changed parameters
     m_receivingWorkspace->replaceInstrumentParameters( targMap );
 
   }
