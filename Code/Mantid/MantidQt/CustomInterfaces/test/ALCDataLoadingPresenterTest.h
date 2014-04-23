@@ -20,13 +20,16 @@ public:
   MOCK_CONST_METHOD0(firstRun, std::string());
   MOCK_CONST_METHOD0(lastRun, std::string());
   MOCK_CONST_METHOD0(log, std::string());
-  MOCK_METHOD1(displayData, void(MatrixWorkspace_const_sptr));
+  MOCK_METHOD1(setDataCurve, void(const QwtData&));
   MOCK_METHOD1(displayError, void(const std::string&));
 
-  void requestLoading() { emit loadData(); }
+  void requestLoading() { emit loadRequested(); }
 };
 
-class ALCDataLoadingTest : public CxxTest::TestSuite
+MATCHER_P3(QwtDataX, i, value, delta, "") { return fabs(arg.x(i) - value) < delta; }
+MATCHER_P3(QwtDataY, i, value, delta, "") { return fabs(arg.y(i) - value) < delta; }
+
+class ALCDataLoadingPresenterTest : public CxxTest::TestSuite
 {
   MockALCDataLoadingView* m_view;
   ALCDataLoadingPresenter* m_presenter;
@@ -34,18 +37,17 @@ class ALCDataLoadingTest : public CxxTest::TestSuite
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ALCDataLoadingTest *createSuite() { return new ALCDataLoadingTest(); }
-  static void destroySuite( ALCDataLoadingTest *suite ) { delete suite; }
+  static ALCDataLoadingPresenterTest *createSuite() { return new ALCDataLoadingPresenterTest(); }
+  static void destroySuite( ALCDataLoadingPresenterTest *suite ) { delete suite; }
 
-  ALCDataLoadingTest()
+  ALCDataLoadingPresenterTest()
   {
     FrameworkManager::Instance(); // To make sure everything is initialized
   }
 
   void setUp()
   {
-    m_view = new MockALCDataLoadingView();
-
+    m_view = new NiceMock<MockALCDataLoadingView>();
     m_presenter = new ALCDataLoadingPresenter(m_view);
     m_presenter->initialize();
   }
@@ -56,41 +58,42 @@ public:
     delete m_presenter;
   }
 
-  void test_basicLoading()
+  void test_initialize()
   {
-    MatrixWorkspace_const_sptr loadedWs;
+    MockALCDataLoadingView view;
+    ALCDataLoadingPresenter presenter(&view);
+    EXPECT_CALL(view, initialize());
+    presenter.initialize();
+  }
 
+  void test_load()
+  {
     EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
     EXPECT_CALL(*m_view, lastRun()).WillRepeatedly(Return("MUSR00015191.nxs"));
     EXPECT_CALL(*m_view, log()).WillRepeatedly(Return("sample_magn_field"));
-    EXPECT_CALL(*m_view, displayData(_)).Times(1).WillOnce(SaveArg<0>(&loadedWs));
+
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size,3),
+                                            QwtDataX(0, 1350, 1E-8),
+                                            QwtDataX(1, 1360, 1E-8),
+                                            QwtDataX(2, 1370, 1E-8),
+                                            QwtDataY(0, 0.150, 1E-3),
+                                            QwtDataY(1, 0.143, 1E-3),
+                                            QwtDataY(2, 0.128, 1E-3))));
 
     m_view->requestLoading();
-
-    TS_ASSERT(loadedWs);
-    TS_ASSERT_EQUALS(loadedWs->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(loadedWs->blocksize(), 3);
-
-    TS_ASSERT_DELTA(loadedWs->readX(0)[0], 1350, 1E-8);
-    TS_ASSERT_DELTA(loadedWs->readX(0)[1], 1360, 1E-8);
-    TS_ASSERT_DELTA(loadedWs->readX(0)[2], 1370, 1E-8);
-
-    TS_ASSERT_DELTA(loadedWs->readY(0)[0], 0.150, 1E-3);
-    TS_ASSERT_DELTA(loadedWs->readY(0)[1], 0.142, 1E-3);
-    TS_ASSERT_DELTA(loadedWs->readY(0)[2], 0.128, 1E-3);
   }
 
-  void test_loadingError()
+  void test_load_error()
   {
     // TODO: with algorithm being executed asynchronously, check that errors are caught propertly
   }
 
-  void test_nonExistentFile()
+  void test_load_nonExistentFile()
   {
     EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
     EXPECT_CALL(*m_view, lastRun()).WillRepeatedly(Return("non-existent-file"));
     EXPECT_CALL(*m_view, log()).WillRepeatedly(Return("sample_magn_field"));
-    EXPECT_CALL(*m_view, displayData(_)).Times(0);
+    EXPECT_CALL(*m_view, setDataCurve(_)).Times(0);
     EXPECT_CALL(*m_view, displayError(_)).Times(1);
 
     m_view->requestLoading();

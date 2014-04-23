@@ -8,6 +8,8 @@
 
 #include <QObject>
 
+#include <qwt_data.h>
+
 using namespace Mantid::API;
 
 namespace MantidQt
@@ -57,9 +59,9 @@ namespace CustomInterfaces
     /// Performs any necessary initialization
     virtual void initialize() = 0;
 
-    /// Updates the data displayed by the view
-    /// @param data :: Data workspace do display
-    virtual void displayData(MatrixWorkspace_const_sptr data) = 0;
+    /// Updates the data curve
+    /// @param data :: New curve data to set
+    virtual void setDataCurve(const QwtData& data) = 0;
 
     /// Displays an error
     /// @param error :: Error message to display
@@ -67,7 +69,7 @@ namespace CustomInterfaces
 
   signals:
     /// Request to load data
-    void loadData();
+    void loadRequested();
   };
 
 } // namespace CustomInterfaces

@@ -49,7 +49,7 @@ namespace CustomInterfaces
 
   private slots:
     /// Load new data and update the view accordingly
-    void loadData();
+    void load();
 
   private:
     /// View which the object works with

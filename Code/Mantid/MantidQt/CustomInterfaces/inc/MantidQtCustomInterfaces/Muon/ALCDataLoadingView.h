@@ -56,7 +56,7 @@ namespace CustomInterfaces
     std::string log() const;
 
     /// @see IALCDataLoadingView::displayData
-    void displayData(MatrixWorkspace_const_sptr data);
+    void setDataCurve(const QwtData& data);
     /// @see IALCDataLoadingView::displayError
     void displayError(const std::string &error);
 

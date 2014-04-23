@@ -217,7 +217,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
 set ( TEST_FILES
 	ALCBaselineModellingModelTest.h
 	ALCBaselineModellingPresenterTest.h
-	ALCDataLoadingTest.h
+  ALCDataLoadingPresenterTest.h
 	ALCPeakFittingTest.h
 	CreateMDWorkspaceAlgDialogTest.h
 	EventNexusFileMementoTest.h

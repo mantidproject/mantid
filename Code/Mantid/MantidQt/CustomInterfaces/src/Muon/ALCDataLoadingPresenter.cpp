@@ -2,6 +2,8 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 
+#include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
+
 #include <Poco/ActiveResult.h>
 
 #include <QApplication>
@@ -20,10 +22,10 @@ namespace CustomInterfaces
   {
     m_view->initialize();
 
-    connect(m_view, SIGNAL(loadData()), SLOT(loadData()));
+    connect(m_view, SIGNAL(loadRequested()), SLOT(load()));
   }
 
-  void ALCDataLoadingPresenter::loadData()
+  void ALCDataLoadingPresenter::load()
   {
     try
     {
@@ -42,7 +44,8 @@ namespace CustomInterfaces
       }
 
       m_loadedData = alg->getProperty("OutputWorkspace");
-      m_view->displayData(m_loadedData);
+      assert(m_loadedData->getNumberHistograms() == 1); // PlotAsymmetryByLogValue guarantees that
+      m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_loadedData, 0)));
     }
     catch(std::exception& e)
     {

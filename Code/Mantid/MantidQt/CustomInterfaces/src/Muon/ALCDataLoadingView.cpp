@@ -15,7 +15,7 @@ namespace CustomInterfaces
   void ALCDataLoadingView::initialize()
   {
     m_ui.setupUi(m_widget);
-    connect(m_ui.load, SIGNAL(clicked()), this, SIGNAL(loadData()));
+    connect(m_ui.load, SIGNAL(clicked()), this, SIGNAL(loadRequested()));
 
     m_ui.dataPlot->setCanvasBackground(Qt::white);
     m_ui.dataPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
@@ -42,13 +42,9 @@ namespace CustomInterfaces
     return m_ui.log->text().toStdString();
   }
 
-  void ALCDataLoadingView::displayData(MatrixWorkspace_const_sptr data)
+  void ALCDataLoadingView::setDataCurve(const QwtData& data)
   {
-    const Mantid::MantidVec& dataX = data->readX(0);
-    const Mantid::MantidVec& dataY = data->readY(0);
-
-    m_dataCurve->setData(&dataX[0], &dataY[0], static_cast<int>(data->blocksize()));
-
+    m_dataCurve->setData(data);
     m_ui.dataPlot->replot();
   }
 
