@@ -10,16 +10,10 @@
 ###############################################################################
 
 ###############################################################################
-# Set the name for the unstable package
-###############################################################################
-UNSTABLE_NAME="unstable"
-
-###############################################################################
 # If pvnext in JOB_NAME, use PARAVIEW_NEXT_DIR for PARAVIEW_DIR and add suffix # to the UNSTABLE_NAME
 ###############################################################################
 if [[ ${JOB_NAME} == *pvnext* ]]; then
   export PARAVIEW_DIR=${PARAVIEW_NEXT_DIR}
-  UNSTABLE_NAME="${UNSTABLE_NAME}-pvnext"
 fi
 
 ###############################################################################
@@ -50,8 +44,12 @@ if [[ ${JOB_NAME} == *clean* ]]; then
     if [[ ${JOB_NAME} == *master* ]]; then
       PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF -DQT_ASSISTANT_FETCH_IMAGES=ON"
     elif [[ ${JOB_NAME} == *develop* ]]; then
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantid${UNSTABLE_NAME} -DCPACK_PACKAGE_SUFFIX=${UNSTABLE_NAME} -DCPACK_SET_DESTDIR=OFF"
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF"
     fi
+    elif [[ ${JOB_NAME} == *pvnext* ]]; then
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable-pvnext -DCPACK_PACKAGE_SUFFIX=unstable-pvnext -DCPACK_SET_DESTDIR=OFF"
+    fi
+
   fi
 fi
 
