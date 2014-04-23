@@ -771,7 +771,7 @@ namespace Mantid
       // Set the elements of the URL.
       std::string session   = "sessionId="  + m_session->getSessionId();
       std::string name      = "&name="      + createFileName;
-      std::string datasetId = "&datasetId=" + boost::lexical_cast<std::string>(getDatasetId(investigationID));
+      std::string datasetId = "&datasetId=" + boost::lexical_cast<std::string>(getMantidDatasetId(investigationID));
       std::string description = "&description=" + dataFileDescription;
 
       // Add pieces of URL together.
@@ -817,7 +817,7 @@ namespace Mantid
         // We want to check that the user can publish to the "mantid" dataset
         // related to the investigations of which they are investigators (via "my data").
         ns1__dataset dataset;
-        int64_t datasetID = getDatasetId(ws->getRef<std::string>("InvestigationID",row));
+        int64_t datasetID = getMantidDatasetId(ws->getRef<std::string>("InvestigationID",row));
         dataset.id = &datasetID;
         datafile.dataset = &dataset;
 
@@ -837,11 +837,12 @@ namespace Mantid
     }
 
     /**
-     * Search the archive & obtain the dataset ID for a specific investigation.
+     * Search the archive & obtain the "mantid" dataset ID for a specific investigation if it exists.
+     * If it does not exist, we will attempt to create it.
      * @param investigationID :: Used to obtain the related dataset ID.
      * @return Dataset ID of the provided investigation.
      */
-    int64_t ICat4Catalog::getDatasetId(const std::string &investigationID)
+    int64_t ICat4Catalog::getMantidDatasetId(const std::string &investigationID)
     {
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
@@ -856,7 +857,7 @@ namespace Mantid
       request.sessionId = &sessionID;
 
       g_log.debug() << "The query performed to obtain a dataset from an investigation id " <<
-          "in ICat4Catalog::getDatasetId is: " << query << std::endl;
+          "in ICat4Catalog::getMantidDatasetId is: " << query << std::endl;
       
       int64_t datasetID = 0;
       
