@@ -831,10 +831,16 @@ namespace Mantid
         m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
       }
       else if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN &&
-               *m_values.rbegin() > *(m_values.rbegin()+1))
+               m_values.back() > *(m_values.rbegin()+1))
       {
         // Previously unknown and still unknown
         m_propSortedFlag = TimeSeriesSortStatus::TSUNKNOWN;
+      }
+      else if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN &&
+               m_values.back() < *(m_values.rbegin()+1))
+      {
+        // Previously unknown and still unknown
+        m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
       }
       else if (m_propSortedFlag == TimeSeriesSortStatus::TSSORTED &&
                m_values.back() < *(m_values.rbegin()+1) )
@@ -880,7 +886,7 @@ namespace Mantid
     template<typename TYPE>
     void TimeSeriesProperty<TYPE>::addValues(const std::vector<Kernel::DateAndTime> &times,
         const std::vector<TYPE> & values)
-        {
+    {
       for (size_t i = 0; i < times.size(); i ++)
       {
         if (i >= values.size())
@@ -896,7 +902,7 @@ namespace Mantid
         m_propSortedFlag = TimeSeriesSortStatus::TSUNKNOWN;
 
       return;
-        }
+    }
 
     /**
      * Returns the last time
