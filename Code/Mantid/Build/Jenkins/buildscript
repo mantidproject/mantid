@@ -45,7 +45,6 @@ if [[ ${JOB_NAME} == *clean* ]]; then
       PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF -DQT_ASSISTANT_FETCH_IMAGES=ON"
     elif [[ ${JOB_NAME} == *develop* ]]; then
       PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF"
-    fi
     elif [[ ${JOB_NAME} == *pvnext* ]]; then
       PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable-pvnext -DCPACK_PACKAGE_SUFFIX=unstable-pvnext -DCPACK_SET_DESTDIR=OFF"
     fi
