@@ -44,7 +44,7 @@ namespace Mantid
 
     /**
      * Integrate the composite cluster.
-     * @param ws. Workspace to integrate
+     * @param ws : Workspace to integrate
      * @return Integrated signal and error sq values.
      */
     ICluster::ClusterIntegratedValues CompositeCluster::integrate(
@@ -115,10 +115,8 @@ namespace Mantid
       return size;
     }
 
-    /**
-     * Add an index. This method does not apply to composite clusters.
-     * @param
-     */
+
+    /// Add an index. This method does not apply to composite clusters.
     void CompositeCluster::addIndex(const size_t&)
     {
       throw std::runtime_error("addIndex not implemented on CompositeCluster");
