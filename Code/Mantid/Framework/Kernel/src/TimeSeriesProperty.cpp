@@ -837,7 +837,7 @@ namespace Mantid
         m_propSortedFlag = TimeSeriesSortStatus::TSUNKNOWN;
       }
       else if (m_propSortedFlag == TimeSeriesSortStatus::TSSORTED &&
-               *m_values.rbegin() < *(m_values.rbegin()+1) )
+               m_values.back() < *(m_values.rbegin()+1) )
       {
         // Previously sorted but last added is not in order
         m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
@@ -1179,7 +1179,6 @@ namespace Mantid
       std::size_t num = new_values.size();
       for (std::size_t i=0; i < num; i++)
       {
-        // By providing a guess iterator to the insert method, it speeds inserting up by a good amount.
         TimeValueUnit<TYPE> newentry(new_times[i], new_values[i]);
         m_values.push_back(newentry);
       }
