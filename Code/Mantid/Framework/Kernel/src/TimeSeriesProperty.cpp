@@ -831,12 +831,6 @@ namespace Mantid
         m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
       }
       else if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN &&
-               m_values.back() > *(m_values.rbegin()+1))
-      {
-        // Previously unknown and still unknown
-        m_propSortedFlag = TimeSeriesSortStatus::TSUNKNOWN;
-      }
-      else if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN &&
                m_values.back() < *(m_values.rbegin()+1))
       {
         // Previously unknown and still unknown
@@ -1183,14 +1177,21 @@ namespace Mantid
       m_values.reserve(new_times.size());
 
       std::size_t num = new_values.size();
+
+      m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
       for (std::size_t i=0; i < num; i++)
       {
         TimeValueUnit<TYPE> newentry(new_times[i], new_values[i]);
         m_values.push_back(newentry);
+        if (m_propSortedFlag == TimeSeriesSortStatus::TSSORTED && i > 0 &&
+            new_times[i-1] > new_times[i])
+        {
+          // Status gets to unsorted
+          m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
+        }
       }
 
       // reset the size
-      m_propSortedFlag = TimeSeriesSortStatus::TSUNKNOWN;
       m_size = static_cast<int>(m_values.size());
 
       return;
