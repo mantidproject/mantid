@@ -3215,28 +3215,11 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
 
   Graph *plot = window->activeGraph();
   appWindow()->setPreferences(plot);
-  plot->setTitle(wsName);
 
-  const Mantid::API::Axis* ax;
-  ax = workspace->getAxis(0);
-  std::string s;
-  if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
-  else
-    s = "X Axis";
-  plot->setXAxisTitle(tr(s.c_str()));
-  if ( workspace->axes() > 1 )
-  {
-    ax = workspace->getAxis(1);
-    if (ax->isNumeric())
-    {
-      if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
-      else
-        s = "Y Axis";
-      plot->setYAxisTitle(tr(s.c_str()));
-    }
-    else
-      plot->setYAxisTitle(tr("Spectrum"));
-  }
+  plot->setTitle(wsName);
+  using MantidQt::API::PlotAxis;
+  plot->setXAxisTitle(PlotAxis(*workspace, 0).title());
+  plot->setYAxisTitle(PlotAxis(*workspace, 1).title());
 
   Spectrogram *spgrm = new Spectrogram(wsName, workspace);
   plot->plotSpectrogram(spgrm, curveType);
