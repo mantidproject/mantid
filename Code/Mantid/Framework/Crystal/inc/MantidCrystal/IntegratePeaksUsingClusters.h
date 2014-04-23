@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid
 {
@@ -42,6 +43,7 @@ namespace Crystal
     virtual const std::string category() const;
 
   private:
+    Mantid::API::MDNormalization getNormalization();
     virtual void initDocs();
     void init();
     void exec();

@@ -25,8 +25,9 @@
 #include "InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/VatesViewerInterface.h"
 
 #include "MantidKernel/EnvironmentHistory.h"
@@ -603,8 +604,8 @@ MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis,
       // Using information from the first graph
       if( i == 0 && isGraphNew )
       {
-        g->setXAxisTitle(QString::fromStdString(data->getXAxisLabel()));
-        g->setYAxisTitle(QString::fromStdString(data->getYAxisLabel()));
+        g->setXAxisTitle(data->getXAxisLabel());
+        g->setYAxisTitle(data->getYAxisLabel());
         g->setAutoScale();
       }
     }
@@ -2930,42 +2931,6 @@ MultiLayer* MantidUI::createGraphFromTable(Table* t, int type)
   return ml;
 }
 
-/** Set properties of a 1d graph which plots spectrum data from a workspace such as the title and axes captions.
-@param ml :: MultiLayer plot with the graph
-@param wsName :: Workspace Name
-*/
-void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
-{
-  Mantid::API::MatrixWorkspace_sptr workspace =
-    boost::dynamic_pointer_cast<MatrixWorkspace>(
-    AnalysisDataService::Instance().retrieve(wsName.toStdString())
-    );
-  Graph* g = ml->activeGraph();
-  g->setTitle(tr("Workspace ")+wsName);
-  Mantid::API::Axis* ax;
-  ax = workspace->getAxis(0);
-  std::string s;
-  if (ax->unit() && ax->unit()->unitID() != "Empty" )
-  {
-    s = ax->unit()->caption();
-    if ( !ax->unit()->label().empty() )
-    {
-      s += " / " + ax->unit()->label();
-    }
-  }
-  else if (!ax->title().empty())
-  {
-    s = ax->title();
-  }
-  else
-  {
-    s = "X axis";
-  }
-  g->setXAxisTitle(tr(s.c_str()));
-  g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
-  g->setAutoScale();
-}
-
 /** Set properties of a 1d graph which plots bin data from a workspace.
 @param ml :: MultiLayer plot with the graph
 @param Name :: Name of the graph
@@ -2975,15 +2940,13 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
 {
   Graph* g = ml->activeGraph();
   g->setTitle(tr("Workspace ")+Name);
-  std::string xtitle;
+  QString xtitle;
   if (workspace->axes() > 1)   // Protection against calling this on 1D/single value workspaces
   {
-    const Axis* const axis = workspace->getAxis(1);
-    if ( axis->isSpectra() ) xtitle = "Spectrum Number";
-    else if ( axis->unit() ) xtitle = axis->unit()->caption() + " / " + axis->unit()->label();
+    xtitle = MantidQt::API::PlotAxis(*workspace, 1).title();
   }
-  g->setXAxisTitle(tr(xtitle.c_str()));
-  g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
+  g->setXAxisTitle(xtitle);
+  g->setYAxisTitle(MantidQt::API::PlotAxis(*workspace).title());
 }
 
 /**
@@ -3109,12 +3072,13 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   Graph *g = ml->activeGraph();
 
   // Try to add curves to the plot
-  MantidMatrixCurve* mc = NULL;
+  MantidMatrixCurve* firstCurve(NULL);
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();++it)
   {
-    try {
-      mc = new MantidMatrixCurve(it.key(),g,it.value(),errs,distr,style);
-      UNUSED_ARG(mc)
+    try
+    {
+      auto * wsCurve = new MantidMatrixCurve(it.key(),g,it.value(),errs,distr,style);
+      if(!firstCurve) firstCurve = wsCurve;
     } 
     catch (Mantid::Kernel::Exception::NotFoundError&) 
     {
@@ -3128,39 +3092,10 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 
   if(isGraphNew)
   {
- 
-    auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      AnalysisDataService::Instance().retrieve(firstWsName.toStdString()));
+    if(!firstCurve) return NULL;
 
-    // Deal with axis names
-    Mantid::API::Axis* ax = workspace->getAxis(0);
-    std::string xTitle, xUnits;
-    if (ax->unit() && ax->unit()->unitID() != "Empty" )
-    {
-      xTitle = ax->unit()->caption();
-      if ( !ax->unit()->label().empty() )
-      {
-        xUnits = ax->unit()->label();
-        xTitle += " / " + xUnits;
-      }
-    }
-    else if (!ax->title().empty())
-    {
-      xTitle = ax->title();
-    }
-    else
-    {
-      xTitle = "X axis";
-    }
-    g->setXAxisTitle(tr(xTitle.c_str()));
-
-    std::string yTitle = workspace->YUnitLabel();
-    if (distr)
-    {
-      yTitle += " / " + xUnits;
-    }
-    g->setYAxisTitle(tr(yTitle.c_str()));
-
+    g->setXAxisTitle(firstCurve->mantidData()->getXAxisLabel());
+    g->setYAxisTitle(firstCurve->mantidData()->getYAxisLabel());
     g->setAutoScale();
     /* The 'setAutoScale' above is needed to make sure that the plot initially encompasses all the
      * data points. However, this has the side-effect suggested by its name: all the axes become
@@ -3172,7 +3107,7 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 
     // This deals with the case where the X-values are not in order. In general, this shouldn't
     // happen, but it does apparently with some muon analyses.
-    g->checkValuesInAxisRange(mc);
+    g->checkValuesInAxisRange(firstCurve);
   }
 
   if(!isGraphNew)

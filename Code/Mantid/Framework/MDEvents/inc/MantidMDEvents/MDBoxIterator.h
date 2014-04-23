@@ -89,6 +89,8 @@ namespace MDEvents
 
     virtual size_t getLinearIndex() const;
 
+    virtual bool isWithinBounds(size_t index) const;
+
   private:
 
     /// Common code run my a few of the constructors.

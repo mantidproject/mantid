@@ -404,6 +404,11 @@ namespace MDEvents
    * Gets indexes of bins/pixels/boxes neighbouring the present iterator location.
    * The number of neighbour indexes returned will depend upon the dimensionality of the workspace as well as the presence
    * of boundaries and edges.
+
+   FindNeighbours will return the indexes of neighbours even if they are unreachable from the current iterator.
+   To verify that the indexes are reachable from the current iterator, run isWithinBounds. Note that this is only a concern
+   where the workspace iteration is portioned up amongst >1 iterators.
+
    * @return vector of linear indexes to neighbour locations.
    */
   std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexes() const
@@ -422,12 +427,21 @@ namespace MDEvents
       }
 
       size_t neighbour_index = m_pos + m_permutations[i];
-      if( neighbour_index < m_max && Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index, m_indexMaker, m_indexMax ) )
+      if( neighbour_index < m_ws->getNPoints() && Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index, m_indexMaker, m_indexMax ) )
       {
         neighbourIndexes.push_back(neighbour_index);
       }
     }
     return neighbourIndexes;
+  }
+
+  /**
+  @param index : linear index to inspect against iterator
+  @return True only if the index is between the min and max bounds of the iterator.
+  */
+  bool MDHistoWorkspaceIterator::isWithinBounds(size_t index) const
+  {
+    return index >= m_begin && index < m_max;
   }
 
 } // namespace Mantid

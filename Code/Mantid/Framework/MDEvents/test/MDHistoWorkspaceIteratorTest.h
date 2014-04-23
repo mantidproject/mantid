@@ -282,6 +282,20 @@ public:
     return std::find(container.begin(), container.end(), element) != container.end();
   }
 
+  void test_isWithinBounds()
+  {
+    const size_t nd = 1;
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
+
+    size_t begin = 1;
+    size_t end = 5;
+    MDHistoWorkspaceIterator iterator(ws.get(), NULL, begin, end);
+    
+    TS_ASSERT(iterator.isWithinBounds(begin));
+    TS_ASSERT(iterator.isWithinBounds(end-1));
+    TS_ASSERT(!iterator.isWithinBounds(end));
+  }
+
   void test_neighours_1d()
   {
     const size_t nd = 1;

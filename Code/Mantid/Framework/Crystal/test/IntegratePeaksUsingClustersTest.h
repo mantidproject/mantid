@@ -134,7 +134,7 @@ namespace
   }
 
   // Execute the clustering integration algorithm
-  MDHistoPeaksWSTuple execute_integration(const MDHistoPeaksWSTuple& inputWorkspaces, const double& peakRadius, const double& threshold)
+  MDHistoPeaksWSTuple execute_integration(const MDHistoPeaksWSTuple& inputWorkspaces, const double& threshold)
   {
     auto mdWS = inputWorkspaces.get<0>();
     auto peaksWS = inputWorkspaces.get<1>();
@@ -146,7 +146,7 @@ namespace
     alg.setProperty("InputWorkspace", mdWS);
     alg.setProperty("PeaksWorkspace", peaksWS);
     alg.setProperty("Threshold", threshold);
-    alg.setProperty("RadiusEstimate", peakRadius + 0.1);
+    alg.setProperty("Normalization", "NoNormalization");
     alg.setPropertyValue("OutputWorkspace", "out_ws");
     alg.setPropertyValue("OutputWorkspaceMD", "out_ws_md");
     alg.execute();
@@ -190,6 +190,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", mdws);
     alg.setPropertyValue("OutputWorkspaceMD", "out_md");
+    alg.setProperty("Threshold", 0.01);
     alg.setPropertyValue("OutputWorkspace", "out_peaks");
     TSM_ASSERT_THROWS("PeaksWorkspace required", alg.execute(), std::runtime_error&);
   }
@@ -204,6 +205,7 @@ public:
     alg.setProperty("PeaksWorkspace", peaksws);
     alg.setPropertyValue("OutputWorkspaceMD", "out_md");
     alg.setPropertyValue("OutputWorkspace", "out_peaks");
+    alg.setProperty("Threshold", 0.01);
     TSM_ASSERT_THROWS("InputWorkspace required", alg.execute(), std::runtime_error&);
   }
 
@@ -219,6 +221,7 @@ public:
     alg.setProperty("PeaksWorkspace", peaksws);
     alg.setPropertyValue("OutputWorkspaceMD", "out_md");
     alg.setPropertyValue("OutputWorkspace", "out_peaks");
+    alg.setProperty("Threshold", 0.01);
     TSM_ASSERT_THROWS("Unknown special coordinates", alg.execute(), std::invalid_argument&);
   }
 
@@ -233,7 +236,7 @@ public:
     const size_t nEventsInPeak = 10000;
     MDHistoPeaksWSTuple inputWorkspaces = make_peak_and_md_ws(hklValues, -10, 10, peakRadius, nEventsInPeak);
     //-------- Execute the integratioin
-    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, peakRadius, threshold);
+    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, threshold);
     // ------- Get the integrated results
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
     IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
@@ -261,7 +264,7 @@ public:
     const size_t nEventsInPeak = 10000;
     MDHistoPeaksWSTuple inputWorkspaces = make_peak_and_md_ws(hklValues, -10, 10, peakRadius, nEventsInPeak);
     //-------- Execute the integratioin
-    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, peakRadius, threshold);
+    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, threshold);
     // ------- Get the integrated results
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
     IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
@@ -280,8 +283,10 @@ public:
     }
     TSM_ASSERT_EQUALS("Only one peak present, so should only have two unique label ids", 2, labelIds.size());
 
+    TSM_ASSERT_EQUALS("Integrated intensity should be same as original peak intensity", outPeaksWS->getPeak(0).getIntensity(), nEventsInPeak);
+    TSM_ASSERT_EQUALS("Integrated error should same as original peak intensity error", outPeaksWS->getPeak(0).getSigmaIntensity(), nEventsInPeak);
+    
     TSM_ASSERT("Should have 'empy' label", does_contain(labelIds, 0));
-    TSM_ASSERT("Should have non-empy label", does_contain(labelIds, 1));
   }
 
   void test_integrate_two_separte_but_identical_peaks()
@@ -296,7 +301,7 @@ public:
     const size_t nEventsInPeak = 10000;
     MDHistoPeaksWSTuple inputWorkspaces = make_peak_and_md_ws(hklValues, -10, 10, peakRadius, nEventsInPeak);
     //-------- Execute the integratioin
-    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, peakRadius, threshold);
+    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, threshold);
     // ------- Get the integrated results
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
     IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
@@ -316,12 +321,10 @@ public:
     TSM_ASSERT_EQUALS("N peaks present, so should only have n+1 unique label ids", 3, labelIds.size());
 
     TSM_ASSERT("Should have 'empy' label", does_contain(labelIds, 0));
-    TSM_ASSERT("Should have non-empy label", does_contain(labelIds, 1));
-    TSM_ASSERT("Should have non-empy label", does_contain(labelIds, 2));
 
     // Two peaks are identical, so integrated values should be the same.
-    TSM_ASSERT("Integrated intensity should be greater than zero", outPeaksWS->getPeak(0).getIntensity() > 0);
-    TSM_ASSERT("Integrated error should be greater than zero", outPeaksWS->getPeak(0).getSigmaIntensity() > 0);
+    TSM_ASSERT_EQUALS("Integrated intensity should be same as original peak intensity", outPeaksWS->getPeak(0).getIntensity(), nEventsInPeak);
+    TSM_ASSERT_EQUALS("Integrated error should same as original peak intensity error", outPeaksWS->getPeak(0).getSigmaIntensity(), nEventsInPeak);
     TSM_ASSERT_EQUALS("Peaks are identical, so integrated values should be identical", outPeaksWS->getPeak(0).getIntensity(), outPeaksWS->getPeak(1).getIntensity());
     TSM_ASSERT_EQUALS("Peaks are identical, so integrated error values should be identical", outPeaksWS->getPeak(0).getSigmaIntensity(), outPeaksWS->getPeak(1).getSigmaIntensity());
   }
@@ -341,7 +344,7 @@ public:
 
     MDHistoPeaksWSTuple inputWorkspaces = make_peak_and_md_ws(hklValues, -10, 10, std::vector<double>(hklValues.size(), peakRadius), nEventsInPeakVec);
     //-------- Execute the integratioin
-    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, peakRadius, threshold);
+    MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, threshold);
     // ------- Get the integrated results
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
     IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
@@ -361,12 +364,11 @@ public:
     TSM_ASSERT_EQUALS("N peaks present, so should only have n+1 unique label ids", 3, labelIds.size());
 
     TSM_ASSERT("Should have 'empy' label", does_contain(labelIds, 0));
-    TSM_ASSERT("Should have non-empy label", does_contain(labelIds, 1));
-    TSM_ASSERT("Should have non-empy label", does_contain(labelIds, 2));
 
     // Two peaks are identical, so integrated values should be the same.
-    TSM_ASSERT("Integrated intensity should be greater than zero", outPeaksWS->getPeak(0).getIntensity() > 0);
-    TSM_ASSERT("Integrated error should be greater than zero", outPeaksWS->getPeak(0).getSigmaIntensity() > 0);
+    TSM_ASSERT_EQUALS("Integrated intensity should be same as original peak intensity", outPeaksWS->getPeak(0).getIntensity(), nEventsInPeakVec[0]);
+    TSM_ASSERT_EQUALS("Integrated error should same as original peak intensity error", outPeaksWS->getPeak(0).getSigmaIntensity(), nEventsInPeakVec[0]);
+    
     TSM_ASSERT_EQUALS("Second peak is twice as 'bright'", outPeaksWS->getPeak(0).getIntensity() * 2, outPeaksWS->getPeak(1).getIntensity());
     TSM_ASSERT_EQUALS("Second peak is twice as 'bright'", outPeaksWS->getPeak(0).getSigmaIntensity() * 2, outPeaksWS->getPeak(1).getSigmaIntensity());
   }
@@ -418,7 +420,7 @@ public:
   void test_execute()
   {
     // Just run the integration. Functional tests handled in separate suite.
-    execute_integration(m_inputWorkspaces, m_peakRadius, m_threshold);
+    execute_integration(m_inputWorkspaces, m_threshold);
   }
 
 };

@@ -58,7 +58,7 @@ public:
     TS_ASSERT_DIFFERS( newSpecAxis, spectraAxis );
     TS_ASSERT( newSpecAxis->isSpectra() );
     TS_ASSERT_EQUALS( newSpecAxis->title(), "A spectra axis" );
-    TS_ASSERT_EQUALS( newSpecAxis->unit()->unitID(), "Empty" );
+    TS_ASSERT_EQUALS( newSpecAxis->unit()->unitID(), "Label" );
     // Although the 'different length' constructor is still there (for now) it has no effect.
     TS_ASSERT_EQUALS( newSpecAxis->length(), 5 );
     TS_ASSERT_EQUALS( (*newSpecAxis)(1), 2.0 );
