@@ -871,8 +871,11 @@ namespace Mantid
               " (Based on investigation ID: " + investigationID + ")");
         }
         ns1__dataset * dataset = dynamic_cast<ns1__dataset*>(response.return_.at(0));
-        if (dataset && dataset->id) datasetID = *(dataset->id);
-        g_log.debug() << "The name of the dataset related to " << investigationID << " is: " << *(dataset->name) << "\n";
+        if (dataset && dataset->id)
+        {
+          datasetID = *(dataset->id);
+          g_log.debug() << "The name of the dataset related to " << investigationID << " is: " << *(dataset->name) << "\n";
+        }
       }
       else
       {
