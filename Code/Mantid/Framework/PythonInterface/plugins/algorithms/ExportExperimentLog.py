@@ -46,6 +46,9 @@ import mantid
 from mantid.api import *
 from mantid.kernel import *
 
+import os
+import datetime
+
 class ExportExperimentLog(PythonAlgorithm):
     """ Algorithm to export experiment log
     """
@@ -76,8 +79,14 @@ class ExportExperimentLog(PythonAlgorithm):
         self.declareProperty(logoperprop, "Operation on each log, including None (as no operation), min, max, average, sum and \"0\". ")
         
         fileformates = ["tab", "comma (csv)"]
-        self.declareProperty("FileFormat", "tab", mantid.kernel.StringListValidator(fileformates),
-            "Output file format.  'tab' format will insert a tab between 2 adjacent values; 'comma' will put a , instead.  With this option, the posfix of the output file is .csv automatically. ")
+        des = "Output file format.  'tab' format will insert a tab between 2 adjacent values; 'comma' will put a , instead. " + \
+                "With this option, the posfix of the output file is .csv automatically. "
+        self.declareProperty("FileFormat", "tab", mantid.kernel.StringListValidator(fileformates), des)
+
+	# Time zone
+	timezones = ["UTC", "America/New_York"]
+        self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
+        
         
         return
         
@@ -159,13 +168,6 @@ class ExportExperimentLog(PythonAlgorithm):
 
         # This is left for a feature that might be needed in future. 
         self._reorderOld = False
-        """
-        if self._filemode == "append":
-            match = self._checkTitleMatch(self._logfilename, self._headerTitles)
-            if match is False:
-                self._renameLogFile(self._logfilename)
-                self._filemode = "new"
-        """
         
         # Output file format
         self._fileformat = self.getProperty("FileFormat").value
@@ -180,6 +182,8 @@ class ExportExperimentLog(PythonAlgorithm):
             if fileExtension != ".csv":
                 # Force the extension of the output file to be .csv
                 self._logfilename = "%s.csv" % (fileName)
+
+	self._timezone = self.getProperty("TimeZone").value
                      
         return
         
@@ -323,6 +327,9 @@ class ExportExperimentLog(PythonAlgorithm):
             # Get log value according to type
             if logclass == "StringPropertyWithValue":
                 propertyvalue = logproperty.value
+                operationtype = self._sampleLogOperations[logname]
+                if operationtype.lower() == "localtime":
+                    propertyvalue = self._convertLocalTimeString(propertyvalue)
             elif logclass == "FloatPropertyWithValue":
                 propertyvalue = logproperty.value
             elif logclass == "FloatTimeSeriesProperty":
@@ -346,8 +353,38 @@ class ExportExperimentLog(PythonAlgorithm):
         # ENDFOR
         
         return valuedict
-        
-        
+
+
+    def _convertLocalTimeString(self, utctimestr):
+        """ Convert a UTC time in string to the local time in string
+        """
+        from datetime import datetime
+        from dateutil import tz
+
+        utctimestr = str(utctimestr)
+
+        self.log().information("Input UTC time = %s" % (utctimestr))
+
+        from_zone = tz.gettz('UTC')
+        to_zone = tz.gettz(self._timezone)
+
+        try: 
+            if utctimestr.count(".") == 1:
+                tail = utctimestr.split(".")[1]
+                extralen = len(tail)-6
+                extra = utctimestr[-extralen:] 
+                utctimestr = utctimestr[0:-extralen]
+            utctime = datetime.strptime(utctimestr, '%Y-%m-%dT%H:%M:%S.%f')
+        except ValueError as err:
+            self.log().error("Unable to convert time string %s. Error message: %s" % (utctimestr, str(err)))
+            raise err
+
+        utctime = utctime.replace(tzinfo=from_zone)
+        localtime = utctime.astimezone(to_zone)
+
+        localtimestr = localtime.strftime("%Y-%m-%d %H:%M:%S.%f") + extra
+
+        return localtimestr
         
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(ExportExperimentLog)
