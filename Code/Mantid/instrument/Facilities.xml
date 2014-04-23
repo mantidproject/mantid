@@ -235,6 +235,12 @@
     <livedata address="NDXMUSR:6789" />
   </instrument>
   
+  <instrument name="MUT">
+    <zeropadding size="8"/>
+    <technique>Muon spectroscopy</technique>
+    <technique>Radio frequency muSR</technique>
+  </instrument>  
+  
   <instrument name="EMU">
     <zeropadding size="8"/>
     <technique>Muon spectroscopy</technique>
