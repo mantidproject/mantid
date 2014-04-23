@@ -168,9 +168,8 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, 
   // Creates a managed workspace if over the trigger size and a 2D workspace is being requested.
   // Otherwise calls the vanilla create method.
   bool is2D = className.find("2D") != std::string::npos;
-  bool isCompressedOK = false;
   if ( MemoryManager::Instance().goForManagedWorkspace(static_cast<size_t>(NVectors), static_cast<size_t>(XLength),
-                                                          static_cast<size_t>(YLength),&isCompressedOK) && is2D )
+                                                          static_cast<size_t>(YLength)) && is2D )
   {
       // check if there is enough memory for 100 data blocks
       int blockMemory;
@@ -187,21 +186,13 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, 
           throw std::runtime_error("There is not enough memory to allocate the workspace");
       }
 
-      if ( !isCompressedOK )
-      {
-          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create("ManagedWorkspace2D"));
-          g_log.information("Created a ManagedWorkspace2D");
-      }
-      else
-      {
-          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create("CompressedWorkspace2D"));
-          g_log.information("Created a CompressedWorkspace2D");
-      }
+      ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create("ManagedWorkspace2D"));
+      g_log.information("Created a ManagedWorkspace2D");
   }
   else
   {
       // No need for a Managed Workspace
-      if ( is2D && ( className.substr(0,7) == "Managed" || className.substr(0,10) == "Compressed"))
+      if ( is2D && ( className.substr(0,7) == "Managed" ))
           ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create("Workspace2D"));
       else
           ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create(className));

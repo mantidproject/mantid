@@ -1,6 +1,5 @@
 set ( SRC_FILES
 	src/AbsManagedWorkspace2D.cpp
-	src/CompressedWorkspace2D.cpp
 	src/EventList.cpp
 	src/EventWorkspace.cpp
 	src/EventWorkspaceHelpers.cpp
@@ -35,7 +34,6 @@ set ( SRC_UNITY_IGNORE_FILES
 
 set ( INC_FILES
 	inc/MantidDataObjects/AbsManagedWorkspace2D.h
-	inc/MantidDataObjects/CompressedWorkspace2D.h
 	inc/MantidDataObjects/DllConfig.h
 	inc/MantidDataObjects/EventList.h
 	inc/MantidDataObjects/EventWorkspace.h
@@ -64,7 +62,6 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-	CompressedWorkspace2DTest.h
 	EventListTest.h
 	EventWorkspaceMRUTest.h
 	EventWorkspaceTest.h

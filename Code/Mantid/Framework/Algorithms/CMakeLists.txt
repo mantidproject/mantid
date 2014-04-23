@@ -501,7 +501,6 @@ set ( TEST_FILES
 	ClearMaskFlagTest.h
 	CloneWorkspaceTest.h
 	CommutativeBinaryOperationTest.h
-	CompressedRebinTest.h
 	ConjoinWorkspacesTest.h
 	ConvertAxisByFormulaTest.h
 	ConvertFromDistributionTest.h

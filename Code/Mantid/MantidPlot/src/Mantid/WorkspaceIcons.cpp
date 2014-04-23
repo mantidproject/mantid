@@ -38,7 +38,6 @@ void WorkspaceIcons::initInternalLookup()
 {
   m_idToPixmapName.clear();
   // MatrixWorkspace types
-  m_idToPixmapName["CompressedWorkspace2D"] = "mantid_matrix_xpm";
   m_idToPixmapName["EventWorkspace"] = "mantid_matrix_xpm";
   m_idToPixmapName["GroupingWorkspace"] = "mantid_matrix_xpm";
   m_idToPixmapName["ManagedWorkspace2D"] = "mantid_matrix_xpm";

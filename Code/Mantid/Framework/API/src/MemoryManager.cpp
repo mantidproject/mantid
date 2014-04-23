@@ -56,10 +56,9 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
     @param NVectors :: the number of vectors
     @param XLength :: the size of the X vector
     @param YLength :: the size of the Y vector
-    @param isCompressedOK :: The address of a boolean indicating if the compression succeeded or not
     @return true is managed workspace is needed
  */
-bool MemoryManagerImpl::goForManagedWorkspace(std::size_t NVectors, std::size_t XLength, std::size_t YLength, bool* isCompressedOK)
+bool MemoryManagerImpl::goForManagedWorkspace(std::size_t NVectors, std::size_t XLength, std::size_t YLength)
 {
   int AlwaysInMemory;// Check for disabling flag
   if (Kernel::ConfigService::Instance().getValue("ManagedWorkspace.AlwaysInMemory", AlwaysInMemory)
@@ -118,35 +117,6 @@ bool MemoryManagerImpl::goForManagedWorkspace(std::size_t NVectors, std::size_t 
     g_log.debug() << "Requested memory: " << (wsSize * sizeof(double))/1024 << " MB." << std::endl;
     g_log.debug() << "Available memory: " << (mi.availMemory)/1024 << " MB." << std::endl;
     g_log.debug() << "ManagedWS trigger memory: " << (triggerSize * sizeof(double))/1024 << " MB." << std::endl;
-  }
-
-  if (isCompressedOK)
-  {
-    if (goManaged)
-    {
-      int notOK = 0;
-      if ( !Kernel::ConfigService::Instance().getValue("CompressedWorkspace.DoNotUse",notOK) ) notOK = 0;
-      if (notOK) *isCompressedOK = false;
-      else
-      {
-        double compressRatio;
-        if (!Kernel::ConfigService::Instance().getValue("CompressedWorkspace.EstimatedCompressRatio",compressRatio)) compressRatio = 4.;
-        int VectorsPerBlock;
-        if (!Kernel::ConfigService::Instance().getValue("CompressedWorkspace.VectorsPerBlock",VectorsPerBlock)) VectorsPerBlock = 4;
-        double compressedSize = (1./compressRatio + 100.0*static_cast<double>(VectorsPerBlock)/static_cast<double>(NVectors))
-                                      * static_cast<double>(wsSize);
-        double memoryLeft = (static_cast<double>(triggerSize)/availPercent*100. - compressedSize)/1024. * sizeof(double);
-        // To prevent bad allocation on Windows when free memory is too low.
-        if (memoryLeft < 200.)
-          *isCompressedOK = false;
-        else
-          *isCompressedOK =  compressedSize < static_cast<double>(triggerSize);
-      }
-    }
-    else
-    {
-      *isCompressedOK = false;
-    }
   }
 
   return goManaged;
