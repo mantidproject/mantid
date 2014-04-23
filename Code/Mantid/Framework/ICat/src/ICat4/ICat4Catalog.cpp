@@ -790,29 +790,38 @@ namespace Mantid
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
-      ns1__isAccessAllowed request;
-      ns1__isAccessAllowedResponse response;
-
       auto ws = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       // Populate the workspace with all the investigations that
       // the user is an investigator off and has READ access to.
       myData(ws);
 
+      ns1__isAccessAllowed request;
+      ns1__isAccessAllowedResponse response;
+
       std::string sessionID = m_session->getSessionId();
       request.sessionId = &sessionID;
 
       ns1__accessType_ acessType;
-      acessType.__item = ns1__accessType__READ;
+      acessType.__item = ns1__accessType__CREATE;
       request.accessType = &acessType.__item;
 
       // Remove each investigation returned from `myData`
       // were the user does not have create/write access.
       for (int row = static_cast<int>(ws->rowCount()) - 1; row >= 0; --row)
       {
-        // The investigation used to check CREATE access against.
-        ns1__investigation investigation;
-        investigation.id = &ws->getRef<int64_t>("DatabaseID",row);
-        request.bean = &investigation;
+        ns1__datafile datafile;
+        std::string datafileName = "tempName.nxs";
+        datafile.name = &datafileName;
+
+        // Each investigation can have multiple datasets.
+        // We want to check that the user can publish to the "mantid" dataset
+        // related to the investigations of which they are investigators (via "my data").
+        ns1__dataset dataset;
+        int64_t datasetID = getDatasetId(ws->getRef<std::string>("InvestigationID",row));
+        dataset.id = &datasetID;
+        datafile.dataset = &dataset;
+
+        request.bean = &datafile;
 
         if (icat.isAccessAllowed(&request,&response) == 0)
         {
