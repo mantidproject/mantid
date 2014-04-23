@@ -109,9 +109,7 @@ set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataObjects PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( ${ZLIB_INCLUDE_DIRS} )
-
-target_link_libraries ( DataObjects ${MANTIDLIBS} ${ZLIB_LIBRARIES} )
+target_link_libraries ( DataObjects ${MANTIDLIBS} )
 
 # Add the unit tests directory
 add_subdirectory ( test )
