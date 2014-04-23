@@ -1,14 +1,19 @@
 ## Generating gSoap files
 
-Run the following command in order to generate a source declartion file from the SOAP endpoint:
+Previously, the SOAP endpoint would be used directly by the `wsdl2h` command. However, there is a [bug in glassfish](https://groups.google.com/forum/#!searchin/icatgroup/wsdl/icatgroup/Una77-JHVWY/OwoM59B-_R4J) that prevents certain SOAP data from being transmitted to ICAT correctly, for example, datasets related to a datafile.
 
-    wsdl2h -qNameOfNameSpace -o NameOfFile.h https://ICAT-uri?wsdl
-    #Example: wsdl2h -qICat4 -o ICat4Service.h https://icatisis.esc.rl.ac.uk/ICATService/ICAT?wsdl
+The ICAT developers have released a [script](https://code.google.com/p/icatproject/source/browse/icat/trunk/client/wsdl.sh?r=2377) to address this, which generates a `wsdl` and `xsd` file with modified attributes. To generate these files run the script against the endpoint, for example:
+
+    $ ./wsdl.sh https://icatisis.esc.rl.ac.uk
+
+To generate the source declartion file needed by `soapcpp2` you need to run `wsdl2h` against both the `xsd` file and the `wsdl`:
+
+    // Note: the "ICATCompat" related commands and files in the ICAT provided script are not required.
+    $ wsdl2h -qICat4 -o ICat4Service.h ICAT.xsd ICAT.wsdl
 
 The following command will generate classes and headers based on the source file generated above:
 
-    soapcpp2 -i -x -C -qNameOfNameSpace -I</path/to/gsoap/import> NameOfFile.h
-    #Example: soapcpp2 -i -x -C -qICat4 -I/home/gsoap-2.8/gsoap/import ICat4Service.h
+    $ soapcpp2 -i -x -C -qICat4 -I</path/to/gsoap/import> ICat4Service.h
     
 ### Possible issues
 #### *OSX warnings*
