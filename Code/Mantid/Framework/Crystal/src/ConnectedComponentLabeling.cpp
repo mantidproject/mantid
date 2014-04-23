@@ -370,7 +370,6 @@ namespace Mantid
         // Percolate minimum label across boundaries for indexes where there is ambiguity.
         g_log.debug("Percolate minimum label across boundaries");
 
-        std::set<size_t> usedLabels;
         for (auto it = parallelEdgeVec.begin(); it != parallelEdgeVec.end(); ++it)
         {
           VecEdgeIndexPair& indexPairVec = *it;
