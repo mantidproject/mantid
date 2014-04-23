@@ -1,7 +1,5 @@
 """*WIKI*
 
-(20 min)
-
 Algorithm ExportExperimentLog obtains run information, sample information and 
 sample log information from a MatrixWorkspace and write them to a csv file. 
 
@@ -31,6 +29,9 @@ If the type of a sample log is TimeSeriesProperty, it must be one of the followi
 * "average": average of TimeSeriesProperty's values;
 * "sum": summation of TimeSeriesProperty's values;
 * "0": first value of TimeSeriesProperty's value. 
+
+If the type of a sample log is string and in fact it is a string for time, then there will an option as
+* "localtime": convert the time from UTC (default) to local time
 
 Otherwise, there is no operation required.  For example, log 'duration' or 'run_number' does not have any operation on its value.  An empty string will serve for them in property 'SampleLogOperation'. 
 
