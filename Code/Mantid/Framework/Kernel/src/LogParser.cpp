@@ -2,9 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/LogParser.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PropertyWithValue.h"
-
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <algorithm>
@@ -64,7 +64,7 @@ namespace Mantid
       // MG 22/09/09: If the log file was written on a Windows machine and then read on a Linux machine, std::getline will
       // leave CR at the end of the string and this causes problems when reading out the log values. Mantid::extractTOEOL
       // extracts all EOL characters
-      while(Mantid::Kernel::extractToEOL(file,str))
+      while(Mantid::Kernel::Strings::extractToEOL(file,str))
       {
         if( str.empty() || str[0]=='#') {continue;}
 
@@ -374,48 +374,6 @@ namespace Mantid
       return res;
     }
 
-
-
-
-    /**
-    * Extract a string until an EOL character is reached. There are 3 scenarios that we need to deal with
-    * 1) Windows-style  - CRLF ('\\r\\n');
-    * 2) Unix-style     - LF ('\\n');
-    * 3) Old MAC style  - CR ('\\r').
-    * This function will give the string preceding any of these sequences
-    * @param is :: The input stream to read from
-    * @param str :: The output string to use to accumulate the line
-    * @returns A reference to the input stream
-    */
-    std::istream& extractToEOL(std::istream& is, std::string& str)
-    {
-      // Empty the string
-      str = "";
-      char c('\0');
-      while( is.get(c) )
-      {
-        if( c == '\r' )
-        {
-          c = static_cast<char>(is.peek());
-          if( c == '\n' )
-          {
-            //Extract this as well
-            is.get();
-          }
-          break;
-        }
-        else if( c == '\n')
-        {
-          break;
-        }
-        else 
-        {
-          //Accumulate the string
-          str += c;
-        }
-      }
-      return is;
-    }
 
   } // namespace Geometry
 } // namespace Mantid

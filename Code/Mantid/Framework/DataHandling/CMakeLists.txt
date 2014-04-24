@@ -76,6 +76,7 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
+	src/LoadReflTBL.cpp
 	src/LoadSINQFocus.cpp
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
@@ -122,6 +123,7 @@ set ( SRC_FILES
 	src/SaveNexusProcessed.cpp
 	src/SavePAR.cpp
 	src/SavePHX.cpp
+	src/SaveReflTBL.cpp
 	src/SaveRKH.cpp
 	src/SaveSPE.cpp
 	src/SaveToSNSHistogramNexus.cpp
@@ -204,6 +206,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
+	inc/MantidDataHandling/LoadReflTBL.h
 	inc/MantidDataHandling/LoadSINQFocus.h
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
@@ -250,6 +253,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveNexusProcessed.h
 	inc/MantidDataHandling/SavePAR.h
 	inc/MantidDataHandling/SavePHX.h
+	inc/MantidDataHandling/SaveReflTBL.h
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
@@ -328,6 +332,7 @@ set ( TEST_FILES
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
 	LoadRawTest.h
+	LoadReflTBLTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h
@@ -373,6 +378,7 @@ set ( TEST_FILES
 	SavePARTest.h
 	SavePHXTest.h
 	SaveRKHTest.h
+	SaveReflTBLTest.h
 	SaveSPETest.h
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h
