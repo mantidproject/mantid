@@ -96,7 +96,7 @@ namespace Mantid
       //! Returns the ComponentID - a unique identifier of the component.
       ComponentID getComponentID()const;
       //! Returns const pointer to base component if this component is parametrized or pointer to itself if not. Currently is the same as getComponentID bar const cast;
-      IComponent const * Component::getBaseComponent()const;
+      IComponent const * getBaseComponent()const;
 
       //! Assign a parent IComponent. Previous parent link is lost
       void setParent(IComponent*);
