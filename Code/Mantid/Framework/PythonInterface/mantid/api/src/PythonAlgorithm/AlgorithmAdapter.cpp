@@ -67,8 +67,8 @@ namespace Mantid
     }
 
     /**
-     * Returns the version of the algorithm. If not overridden
-     * it returns 1
+     * Returns checkGroups. If false, workspace groups will be treated as a whole
+     * If true, the algorithm will act on each component of the workspace group individually
      */
     template<typename BaseAlgorithm>
     bool AlgorithmAdapter<BaseAlgorithm>::checkGroups()
@@ -77,8 +77,7 @@ namespace Mantid
     }
 
     /**
-     * Returns the default version of the algorithm. If not overridden
-     * it returns 1
+     * Returns the default checkGroup
      */
     template<typename BaseAlgorithm>
     bool AlgorithmAdapter<BaseAlgorithm>::checkGroupsDefault()
