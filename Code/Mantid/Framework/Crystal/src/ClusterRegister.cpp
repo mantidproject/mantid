@@ -171,8 +171,8 @@ namespace Mantid
     {
       if (!a.isEmpty() && !b.isEmpty())
       {
-        const size_t& aId = a.getId();
-        const size_t& bId = b.getId();
+        const int& aId = a.getId();
+        const int& bId = b.getId();
 
         size_t hash = m_Impl->m_labelHasher(ordered_pair(aId, bId));
         if(m_Impl->m_labelHash.find(hash) == m_Impl->m_labelHash.end()) // Only if this pair combination has not already been processed
