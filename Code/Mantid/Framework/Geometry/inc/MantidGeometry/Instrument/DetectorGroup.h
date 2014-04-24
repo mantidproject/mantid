@@ -142,6 +142,10 @@ namespace Mantid
 
       /// Return separator for list of names of detectors
       std::string getNameSeparator() const { return ";"; }
+      /** Returns const pointer to itself. This currently (2914/04/24) contradicts the logic behind getComponentID overload, so CopyInstrumentParameters will fail on 
+          grouped instrument but it is something TO DO:      */
+      virtual IComponent const * getBaseComponent()const
+      {   return const_cast<const DetectorGroup*>(this);}
     protected:
       /// The ID of this effective detector
       int m_id;

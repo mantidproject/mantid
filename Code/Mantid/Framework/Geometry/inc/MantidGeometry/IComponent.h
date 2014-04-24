@@ -74,6 +74,8 @@ namespace Mantid
       virtual ~IComponent(){}
       //! Returns the ComponentID - a unique identifier of the component.
       virtual ComponentID getComponentID()const = 0;
+      //! Returns const pointer to base component if this component is parametrized or pointer to itself if not. Currently is the same as getComponentID bar const cast;
+      virtual IComponent const * getBaseComponent()const = 0;
       //! Assign a parent IComponent. Previous parent link is lost
       virtual void setParent(IComponent*)= 0;
       //! Return a pointer to the current parent.

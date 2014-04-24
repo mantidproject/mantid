@@ -121,12 +121,13 @@ void CopyInstrumentParameters::exec()
         size_t nameStart = source_name.find(Name1);
         std::string targ_name = source_name.replace(nameStart,nameStart+Name1.size(),Name2);
         //existingComponents.
-        targComp = inst2->getComponentByName(targ_name).get();
-        if (!targComp)
+        auto spTargComp = inst2->getComponentByName(targ_name);
+        if (!spTargComp)
         {
-          g_log.warning()<<"Target instrument does not have component with full name "<<targ_name<<'\n';
+          g_log.warning()<<"Target instrument does not have component with full name: "<<targ_name<<'\n';
           continue;
         }
+        targComp = spTargComp->getBaseComponent();
       }
       // merge maps for existing target component
       auto param = it->second.get();

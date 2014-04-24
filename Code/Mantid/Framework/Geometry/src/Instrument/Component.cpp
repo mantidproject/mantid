@@ -100,7 +100,17 @@ namespace Geometry
       return ComponentID(const_cast<Component*>(m_base));
     else
       return ComponentID(const_cast<Component*>(this));
+
   }
+
+  const IComponent * Component::getBaseComponent()const
+  {
+    if (m_map)
+      return const_cast<const Component*>(m_base);
+    else
+      return const_cast<const Component*>(this);
+  }
+
 
   //-------------------------------------------------------------------------------
   /** Set the parent. Previous parenting is lost.
