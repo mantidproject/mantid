@@ -74,6 +74,9 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 try:
     import matplotlib
     matplotlib.use("agg")
+    matplotlib.rcParams['text.latex.unicode']=True
+    matplotlib.rcParams['text.usetex'] = True
+    matplotlib.rc('font', **{'sans-serif' : 'Arial','family' : 'sans-serif'})
     import matplotlib.pyplot as plt
     mantid.api.AlgorithmFactory.subscribe(SavePlot1D)
 except:
