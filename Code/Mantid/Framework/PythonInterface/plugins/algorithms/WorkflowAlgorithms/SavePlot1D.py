@@ -31,6 +31,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
     def PyExec(self):
         self._wksp = self.getProperty("InputWorkspace").value
+        plt.figure()
+        #TODO add progress
         if type(self._wksp)==mantid.api._api.WorkspaceGroup:
             for i in range(self._wksp.getNumberOfEntries()):
                 plt.subplot(self._wksp.getNumberOfEntries(),1,i+1)
@@ -46,17 +48,27 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         spectra=ws.getNumberHistograms()
         if spectra>10:
             mantid.kernel.logger.warning("more than 10 spectra to plot")
+        
+        
         for j in range(spectra):
             x=ws.readX(j)
             y=ws.readY(j)
             if x.size==y.size+1:
-                x=(x[:-1]+x[1:])*0.5   
-            plt.plot(x,y)
+                x=(x[:-1]+x[1:])*0.5  
+            #get labels for the curves
+            a=ws.getAxis(1)
+            if a.isSpectra():
+                plotlabel=a.label(j)
+            else:
+                plotlabel=unicode(a.title())+" = "+str(float(a.label(j)))   
+                #FIXME |Q| is shown as -Q-
+            plt.plot(x,y,label=plotlabel)
             xlabel=self.getProperty("XLabel").value
             ylabel=self.getProperty("YLabel").value
             if xlabel=="":
                 xaxis=ws.getAxis(0)
-                unitLabel=xaxis.getUnit().label()
+                unitLabel=xaxis.getUnit().symbol().ascii()
+                #FIXME use utf-8 instead of ascii
                 if unitLabel=='1/Angstrom' or unitLabel=='Angstrom^-1':
                     unitLabel="$\\AA^{-1}$"
                 if unitLabel=='Angstrom':
@@ -67,9 +79,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
             plt.xlabel(xlabel)
             plt.ylabel(ylabel) 
-        if spectra<=10:
-            pass
-            #plt.legend()            
+        if spectra>1 and spectra<=10:            
+            plt.legend()            
         
 try:
     import matplotlib
