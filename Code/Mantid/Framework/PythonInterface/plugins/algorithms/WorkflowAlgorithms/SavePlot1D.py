@@ -32,7 +32,6 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
     def PyExec(self):
         self._wksp = self.getProperty("InputWorkspace").value
         plt.figure()
-        #TODO add progress
         if type(self._wksp)==mantid.api._api.WorkspaceGroup:
             for i in range(self._wksp.getNumberOfEntries()):
                 plt.subplot(self._wksp.getNumberOfEntries(),1,i+1)
@@ -48,7 +47,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         spectra=ws.getNumberHistograms()
         if spectra>10:
             mantid.kernel.logger.warning("more than 10 spectra to plot")
-        
+        prog_reporter=mantid.api.Progress(self,start=0.0,end=1.0,
+                    nreports=spectra)
         
         for j in range(spectra):
             x=ws.readX(j)
@@ -61,14 +61,12 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                 plotlabel=a.label(j)
             else:
                 plotlabel=unicode(a.title())+" = "+str(float(a.label(j)))   
-                #FIXME |Q| is shown as -Q-
             plt.plot(x,y,label=plotlabel)
             xlabel=self.getProperty("XLabel").value
             ylabel=self.getProperty("YLabel").value
             if xlabel=="":
                 xaxis=ws.getAxis(0)
-                unitLabel=xaxis.getUnit().symbol().ascii()
-                #FIXME use utf-8 instead of ascii
+                unitLabel=xaxis.getUnit().symbol().utf8()
                 if unitLabel=='1/Angstrom' or unitLabel=='Angstrom^-1':
                     unitLabel="$\\AA^{-1}$"
                 if unitLabel=='Angstrom':
@@ -79,15 +77,14 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 
             plt.xlabel(xlabel)
             plt.ylabel(ylabel) 
+            prog_reporter.report("Processing") 
         if spectra>1 and spectra<=10:            
-            plt.legend()            
+            plt.legend()
+                   
         
 try:
     import matplotlib
     matplotlib.use("agg")
-    matplotlib.rcParams['text.latex.unicode']=True
-    matplotlib.rcParams['text.usetex'] = True
-    matplotlib.rc('font', **{'sans-serif' : 'Arial','family' : 'sans-serif'})
     import matplotlib.pyplot as plt
     mantid.api.AlgorithmFactory.subscribe(SavePlot1D)
 except:
