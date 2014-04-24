@@ -3,11 +3,13 @@
 #include "MantidAPI/AlgorithmManager.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include <Poco/ActiveResult.h>
 
 #include <QApplication>
 
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace MantidQt
@@ -23,6 +25,7 @@ namespace CustomInterfaces
     m_view->initialize();
 
     connect(m_view, SIGNAL(loadRequested()), SLOT(load()));
+    connect(m_view, SIGNAL(firstRunSelected()), SLOT(updateAvailableLogs()));
   }
 
   void ALCDataLoadingPresenter::load()
@@ -34,7 +37,7 @@ namespace CustomInterfaces
       alg->setProperty("FirstRun", m_view->firstRun());
       alg->setProperty("LastRun", m_view->lastRun());
       alg->setProperty("LogValue", m_view->log());
-      alg->setPropertyValue("OutputWorkspace", "__NotUsed__");
+      alg->setPropertyValue("OutputWorkspace", "__NotUsed");
 
       Poco::ActiveResult<bool> result(alg->executeAsync());
 
@@ -52,5 +55,41 @@ namespace CustomInterfaces
       m_view->displayError(e.what());
     }
   }
+
+  void ALCDataLoadingPresenter::updateAvailableLogs()
+  {
+    Workspace_sptr loadedWs;
+
+    try //... to load the first run
+    {
+      IAlgorithm_sptr load = AlgorithmManager::Instance().create("LoadMuonNexus");
+      load->setChild(true); // Don't want workspaces in the ADS
+      load->setProperty("Filename", m_view->firstRun());
+      // Don't load any data - we need logs only
+      load->setPropertyValue("SpectrumMin","0");
+      load->setPropertyValue("SpectrumMax","0");
+      load->setPropertyValue("OutputWorkspace", "__NotUsed");
+      load->execute();
+
+      loadedWs = load->getProperty("OutputWorkspace");
+    }
+    catch(std::exception& e)
+    {
+      m_view->setAvailableLogs(std::vector<std::string>()); // Empty logs list
+      return;
+    }
+
+    MatrixWorkspace_const_sptr ws = MuonAnalysisHelper::firstPeriod(loadedWs);
+    std::vector<std::string> logs;
+
+    const auto& properties = ws->run().getProperties();
+    for(auto it = properties.begin(); it != properties.end(); ++it)
+    {
+      logs.push_back((*it)->name());
+    }
+
+    m_view->setAvailableLogs(logs);
+  }
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

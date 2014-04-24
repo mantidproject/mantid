@@ -67,9 +67,16 @@ namespace CustomInterfaces
     /// @param error :: Error message to display
     virtual void displayError(const std::string& error) = 0;
 
+    /// Update the list of logs user can select
+    /// @param logs :: New list of log names
+    virtual void setAvailableLogs(const std::vector<std::string>& logs) = 0;
+
   signals:
     /// Request to load data
     void loadRequested();
+
+    /// User has selected the first run
+    void firstRunSelected();
   };
 
 } // namespace CustomInterfaces

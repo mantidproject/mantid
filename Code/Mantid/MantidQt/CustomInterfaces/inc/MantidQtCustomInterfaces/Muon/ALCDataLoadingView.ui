@@ -51,13 +51,6 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="log">
-            <property name="text">
-             <string>sample_magn_field</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1">
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="firstRun" native="true">
             <property name="label" stdset="0">
@@ -74,6 +67,13 @@
              <string/>
             </property>
             <property name="multipleFiles" stdset="0">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="log">
+            <property name="editable">
              <bool>false</bool>
             </property>
            </widget>

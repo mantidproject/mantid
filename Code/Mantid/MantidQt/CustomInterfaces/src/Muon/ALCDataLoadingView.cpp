@@ -15,7 +15,8 @@ namespace CustomInterfaces
   void ALCDataLoadingView::initialize()
   {
     m_ui.setupUi(m_widget);
-    connect(m_ui.load, SIGNAL(clicked()), this, SIGNAL(loadRequested()));
+    connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
+    connect(m_ui.firstRun, SIGNAL(fileFindingFinished()), SIGNAL(firstRunSelected()));
 
     m_ui.dataPlot->setCanvasBackground(Qt::white);
     m_ui.dataPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
@@ -39,7 +40,7 @@ namespace CustomInterfaces
 
   std::string ALCDataLoadingView::log() const
   {
-    return m_ui.log->text().toStdString();
+    return m_ui.log->currentText().toStdString();
   }
 
   void ALCDataLoadingView::setDataCurve(const QwtData& data)
@@ -51,6 +52,18 @@ namespace CustomInterfaces
   void ALCDataLoadingView::displayError(const std::string& error)
   {
     QMessageBox::critical(m_widget, "Loading error", QString::fromStdString(error));
+  }
+
+  void ALCDataLoadingView::setAvailableLogs(const std::vector<std::string>& logs)
+  {
+    // Clear previous log list
+    m_ui.log->clear();
+
+    // Add new items
+    for (auto it = logs.begin(); it != logs.end(); ++it)
+    {
+      m_ui.log->addItem(QString::fromStdString(*it));
+    }
   }
 
 } // namespace CustomInterfaces

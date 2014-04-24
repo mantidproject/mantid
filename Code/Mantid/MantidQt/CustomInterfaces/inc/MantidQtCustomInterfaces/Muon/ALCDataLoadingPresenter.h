@@ -51,6 +51,9 @@ namespace CustomInterfaces
     /// Load new data and update the view accordingly
     void load();
 
+    /// Updates the list of logs user can choose from
+    void updateAvailableLogs();
+
   private:
     /// View which the object works with
     IALCDataLoadingView* const m_view;

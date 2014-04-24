@@ -16,14 +16,17 @@ using namespace testing;
 class MockALCDataLoadingView : public IALCDataLoadingView
 {
 public:
-  MOCK_METHOD0(initialize, void());
   MOCK_CONST_METHOD0(firstRun, std::string());
   MOCK_CONST_METHOD0(lastRun, std::string());
   MOCK_CONST_METHOD0(log, std::string());
+
+  MOCK_METHOD0(initialize, void());
   MOCK_METHOD1(setDataCurve, void(const QwtData&));
   MOCK_METHOD1(displayError, void(const std::string&));
+  MOCK_METHOD1(setAvailableLogs, void(const std::vector<std::string>&));
 
   void requestLoading() { emit loadRequested(); }
+  void selectFirstRun() { emit firstRunSelected(); }
 };
 
 MATCHER_P3(QwtDataX, i, value, delta, "") { return fabs(arg.x(i) - value) < delta; }
@@ -81,6 +84,23 @@ public:
                                             QwtDataY(2, 0.128, 1E-3))));
 
     m_view->requestLoading();
+  }
+
+  void test_updateAvailableLogs()
+  {
+    EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
+    EXPECT_CALL(*m_view, setAvailableLogs(AllOf(Property(&std::vector<std::string>::size, 33),
+                                                Contains("run_number"),
+                                                Contains("sample_magn_field"),
+                                                Contains("Field_Danfysik"))));
+    m_view->selectFirstRun();
+  }
+
+  void test_updateAvailableLogs_invalidFirstRun()
+  {
+    EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("LOQ49886.nxs")); // XXX: not a Muon file
+    EXPECT_CALL(*m_view, setAvailableLogs(ElementsAre())); // Empty array expectedB
+    TS_ASSERT_THROWS_NOTHING(m_view->selectFirstRun());
   }
 
   void test_load_error()

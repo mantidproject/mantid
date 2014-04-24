@@ -46,19 +46,19 @@ namespace CustomInterfaces
   public:
     ALCDataLoadingView(QWidget* widget);
 
+    // -- IALCDataLoadingView interface ------------------------------------------------------------
+
     void initialize();
 
-    /// @see IALCDataLoadingView::firstRun
     std::string firstRun() const;
-    /// @see IALCDataLoadingView::lastRun
     std::string lastRun() const;
-    /// @see IALCDataLoadingView::log
     std::string log() const;
 
-    /// @see IALCDataLoadingView::displayData
     void setDataCurve(const QwtData& data);
-    /// @see IALCDataLoadingView::displayError
     void displayError(const std::string &error);
+    void setAvailableLogs(const std::vector<std::string> &logs);
+
+    // -- End of IALCDataLoadingView interface -----------------------------------------------------
 
   private:
     /// UI form
