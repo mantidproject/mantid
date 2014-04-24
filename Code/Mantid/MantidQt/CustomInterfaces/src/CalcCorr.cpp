@@ -201,15 +201,6 @@ namespace IDA
 
     //get sample workspace. Load from if needed.
     QString sampleWs = uiForm().absp_dsSampleInput->getCurrentDataName();
-    if ( uiForm().absp_dsSampleInput->isFileSelectorVisible() )
-    {
-      QString samplefilePath = uiForm().absp_dsSampleInput->getFullFilePath();
-      auto ws = runLoadNexus(samplefilePath, sampleWs);
-      if (!ws)
-      {
-        return;
-      }
-    }
     pyInput += "inputws = '" + sampleWs + "'\n";
 
     //sample absorption and scattering x sections.
@@ -246,15 +237,6 @@ namespace IDA
     {
       //get sample workspace. Load from if needed.
       QString canWs = uiForm().absp_dsCanInput->getCurrentDataName();
-      if ( uiForm().absp_dsCanInput->isFileSelectorVisible() )
-      {
-        QString canfilePath = uiForm().absp_dsCanInput->getFullFilePath();
-        auto ws = runLoadNexus(canfilePath, canWs);
-        if (!ws)
-        {
-          return;
-        }
-      }
       pyInput += "canws = '" + canWs + "'\n";
 
       //can absoprtion and scattering x section.

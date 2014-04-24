@@ -1271,7 +1271,7 @@
             </sizepolicy>
            </property>
            <property name="autoLoad">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="showLoad">
             <bool>false</bool>
@@ -1294,7 +1294,7 @@
             </sizepolicy>
            </property>
            <property name="autoLoad">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="showLoad">
             <bool>false</bool>
