@@ -279,8 +279,8 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
         #set can material based on input or formula
         SetSampleMaterial(InputWorkspace=canWS, ChemicalFormula=canFormula, SampleNumberDensity=density[1])
 
-        can = mtd[canWS].sample()
-        can_mat = sample.getMaterial()
+        can_sample = mtd[canWS].sample()
+        can_mat = can_sample.getMaterial()
 
         # total scattering x-section for can
         sigs[1] = can_mat.totalScatterXSection()
