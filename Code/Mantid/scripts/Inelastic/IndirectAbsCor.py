@@ -229,7 +229,7 @@ def plotAbs(workspaces, plotOpt):
 
 
 def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=None, sampleFormula=None, canFormula=None, sigs=None, siga=None,
-        plotOpt='None', Verbose=False,Save=False):
+                 plotOpt='None', Verbose=False,Save=False):
     """
         Handles the feeding of input and plotting of output for the F2PY
         absorption correction routine.
@@ -251,7 +251,7 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
     """
 
     StartTime('CalculateCorrections')
-    CheckDensity(density,ncan)
+    CheckDensity(density, ncan)
 
     #attempt to find beam width if none given
     if beam_width is None:
@@ -266,7 +266,7 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
     #set sample material based on input or formula
     if sampleFormula is not None:
         SetSampleMaterial(InputWorkspace=inputWS, ChemicalFormula=sampleFormula, SampleNumberDensity=density[0])
-    
+
         sample = mtd[inputWS].sample()
         sam_mat = sample.getMaterial()
 
@@ -275,7 +275,7 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
         # absorption x-section
         siga[0] = sam_mat.absorbXSection()
 
-    if  canFormula is not None and ncan == 2:
+    if canFormula is not None and ncan == 2:
         #set can material based on input or formula
         SetSampleMaterial(InputWorkspace=canWS, ChemicalFormula=canFormula, SampleNumberDensity=density[1])
 
@@ -290,8 +290,8 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
         siga[2] = can_mat.absorbXSection()
 
     workspaces = AbsRun(inputWS, geom, beam, ncan, size, density,
-        sigs, siga, avar, Verbose, Save)
-    
+                        sigs, siga, avar, Verbose, Save)
+
     EndTime('CalculateCorrections')
     plotAbs(workspaces, plotOpt)
 
