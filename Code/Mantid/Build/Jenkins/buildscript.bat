@@ -17,6 +17,8 @@ if "%JOB_NAME%"=="%JOB_NAME:pvnext=%" (
     set LOCAL_PARAVIEW_DIR=%PARAVIEW_DIR%
 )
 
+echo "A: %LOCAL_PARAVIEW_DIR"
+
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Get or update the third party dependencies
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
