@@ -126,7 +126,7 @@ namespace Mantid
     /**
     * find pairs of qutoes and store them in a vector
     * @param line the line to count from
-    * @param quotebounds a vector<vector<size_t>> which will contain the locations of pairs of quotes
+    * @param quoteBounds a vector<vector<size_t>> which will contain the locations of pairs of quotes
     * @returns a size_t of how many pairs of quotes were in line
     */
     size_t LoadReflTBL::findQuotePairs (std::string line, std::vector<std::vector<size_t>> & quoteBounds) const
@@ -163,7 +163,7 @@ namespace Mantid
     * parse the CSV format if it's not a simple case of splitting 16 commas
     * @param line the line to parse
     * @param cols The vector to parse into
-    * @param quotebounds a vector<vector<size_t>> containing the locations of pairs of quotes
+    * @param quoteBounds a vector<vector<size_t>> containing the locations of pairs of quotes
     * @throws std::length_error if anything other than 17 columns (or 16 cell-delimiting commas) is found
     */
     void LoadReflTBL::csvParse(std::string line, std::vector<std::string> & cols, std::vector<std::vector<size_t>> & quoteBounds) const
