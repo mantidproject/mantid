@@ -9,12 +9,15 @@
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: If pvnext in JOB_NAME, use PARAVIEW_NEXT_DIR for PARAVIEW_DIR
+:: Also, occasionally pvnext needs a different build type. Get it from 
+:: PVNEXT_BUILD_TYPE
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if NOT "%JOB_NAME%"=="%JOB_NAME:pvnext=%" (
     set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
+    set BUILD_TYPE=%PVNEXT_BUILD_TYPE%
+) else (
+    set BUILD_TYPE=Release
 )
-
-echo "A: %PARAVIEW_DIR%"
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Get or update the third party dependencies
@@ -23,8 +26,8 @@ cd %WORKSPACE%\Code
 call fetch_Third_Party win64
 cd %WORKSPACE%
 
-set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib\win64\Python27;%PARAVIEW_DIR%\bin\Release;%PATH%
-echo "B: %PATH%"
+set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib\win64\Python27;%PARAVIEW_DIR%\bin\%BUILD_TYPE%;%PATH%
+
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check whether this is a clean build (must have 'clean' in the job name)
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -53,20 +56,20 @@ cd %WORKSPACE%\build
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=Release Mantid.sln
+msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_TYPE% Mantid.sln
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the tests
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-"C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C Release -j%BUILD_THREADS% --schedule-random --output-on-failure -E MantidPlot
+"C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C %BUILD_TYPE% -j%BUILD_THREADS% --schedule-random --output-on-failure -E MantidPlot
 :: Run GUI tests serially
-ctest -C Release --output-on-failure -R MantidPlot
+ctest -C %BUILD_TYPE% --output-on-failure -R MantidPlot
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the install kit if this is a clean build
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if "%CLEANBUILD%" EQU "yes" (
-    msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=Release docs/qtassistant/qtassistant.vcxproj
-    cpack -C Release --config CPackConfig.cmake
+    msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_TYPE% docs/qtassistant/qtassistant.vcxproj
+    cpack -C %BUILD_TYPE% --config CPackConfig.cmake
 )
