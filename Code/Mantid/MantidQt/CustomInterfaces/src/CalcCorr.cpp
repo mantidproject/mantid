@@ -104,6 +104,7 @@ namespace IDA
     connect(uiForm().absp_letc1, SIGNAL(editingFinished()), this, SLOT(tcSync()));
     connect(uiForm().absp_cbSampleInputType, SIGNAL(currentIndexChanged(int)), uiForm().absp_swSampleInputType, SLOT(setCurrentIndex(int)));
     connect(uiForm().absp_cbCanInputType, SIGNAL(currentIndexChanged(int)), uiForm().absp_swCanInputType, SLOT(setCurrentIndex(int)));
+    connect(uiForm().absp_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(getBeamWidthFromWorkspace(const QString&)));
 
     // Sort the fields into various lists.
 
@@ -294,6 +295,8 @@ namespace IDA
       uiv.checkDataSelectorIsValid("Can", uiForm().absp_dsCanInput);
     }
 
+    uiv.checkFieldIsValid("Beam Width", uiForm().absp_lewidth, uiForm().absp_valWidth);
+
     if ( uiForm().absp_cbShape->currentText() == "Flat" )
     {
       // Flat Geometry
@@ -443,6 +446,31 @@ namespace IDA
       QString val = uiForm().absp_letc1->text();
       uiForm().absp_letc2->setText(val);
     }
+  }
+
+  void CalcCorr::getBeamWidthFromWorkspace(const QString& wsname)
+  {
+    using namespace Mantid::API;
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
+    
+    if (!ws)
+    {
+      showInformationBox("Failed to find workspace " + wsname);
+      return; 
+    }
+
+    std::string paramName = "Workflow.beam-width";
+    auto instrument = ws->getInstrument();
+    if (instrument->hasParameter(paramName))
+    {
+      std::string beamWidth = instrument->getStringParameter(paramName)[0];
+      uiForm().absp_lewidth->setText(QString::fromUtf8(beamWidth.c_str()));
+    }
+    else
+    {
+      uiForm().absp_lewidth->setText("");
+    }
+
   }
 } // namespace IDA
 } // namespace CustomInterfaces
