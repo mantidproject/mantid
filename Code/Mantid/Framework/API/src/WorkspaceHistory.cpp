@@ -39,7 +39,7 @@ WorkspaceHistory::WorkspaceHistory(const WorkspaceHistory& A) :
 {}
 
 /// Returns a const reference to the algorithmHistory
-const WorkspaceHistory::AlgorithmHistories & WorkspaceHistory::getAlgorithmHistories() const
+const Mantid::API::AlgorithmHistories & WorkspaceHistory::getAlgorithmHistories() const
 {
   return m_algorithms;
 }

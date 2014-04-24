@@ -19,7 +19,7 @@ using Kernel::DateAndTime;
  *  @param uexeccount :: an  unsigned int for algorithm execution order
  */
 AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const Kernel::DateAndTime& start, const double& duration,std::size_t uexeccount) :
-  m_name(alg->name()), m_version(alg->version()), m_executionDate(start), m_executionDuration(duration),m_execCount(uexeccount)
+  m_name(alg->name()), m_version(alg->version()), m_executionDate(start), m_executionDuration(duration),m_execCount(uexeccount), m_childHistories()
 {
   // Now go through the algorithm's properties and create the PropertyHistory objects.
   const std::vector<Property*>& properties = alg->getProperties();
@@ -44,7 +44,8 @@ AlgorithmHistory::~AlgorithmHistory()
  */
 AlgorithmHistory::AlgorithmHistory(const std::string& name, int vers, const Kernel::DateAndTime& start, const double& duration, std::size_t uexeccount) :
   m_name(name),m_version(vers),m_executionDate(start),
-  m_executionDuration(duration),m_execCount(uexeccount)
+  m_executionDuration(duration),m_execCount(uexeccount), 
+  m_childHistories()
 {
 }
 
@@ -54,7 +55,8 @@ AlgorithmHistory::AlgorithmHistory(const std::string& name, int vers, const Kern
  */
 AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory& A) :
   m_name(A.m_name),m_version(A.m_version),m_executionDate(A.m_executionDate),
-  m_executionDuration(A.m_executionDuration),m_properties(A.m_properties),m_execCount(A.m_execCount)
+  m_executionDuration(A.m_executionDuration),m_properties(A.m_properties),
+  m_execCount(A.m_execCount), m_childHistories(A.m_childHistories)
 {
 }
 
@@ -78,6 +80,22 @@ void AlgorithmHistory::addExecutionInfo(const DateAndTime& start, const double& 
 				     const unsigned int& direction)
 {
   m_properties.push_back(Kernel::PropertyHistory(name,value,"",isdefault, direction));
+}
+
+/** Add a child algorithm history to hsitory 
+ *  @param childHist :: The child history
+ */
+void AlgorithmHistory::addChildHistory(const AlgorithmHistory& childHist)
+{
+  m_childHistories.insert(childHist);
+}
+
+/** Set the duration time of the algorithm in the history
+ *  @param duration :: The time the algorithm took to execute
+ */
+void AlgorithmHistory::setAlgorithmDuration(const double& duration)
+{
+  m_executionDuration = duration;
 }
 
 /** Prints a text representation of itself

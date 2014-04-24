@@ -52,9 +52,6 @@ namespace API
 class MANTID_API_DLL WorkspaceHistory
 {
 public:
-  /// History container
-  typedef std::set<AlgorithmHistory> AlgorithmHistories;
-
   /// Default constructor
   WorkspaceHistory();
   /// Destructor
@@ -96,7 +93,7 @@ private:
   /// The environment of the workspace
   const Kernel::EnvironmentHistory m_environment;
   /// The algorithms which have been called on the workspace
-  AlgorithmHistories m_algorithms;
+  Mantid::API::AlgorithmHistories m_algorithms;
   
 };
 
