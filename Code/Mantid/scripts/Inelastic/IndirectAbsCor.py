@@ -271,7 +271,7 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
     # beam[3:4]  a1,b1          scattered beam width parameters (a1 > b1)
     # beam[5:6]  hdown,hup      bottom and top of beam from sample bottom
     # beam[7:8]  hsdown,hsup    bottom and top of scattered beam from sample b.
-    beam = [beam_height, 0.5 * beam_width, -0.5 * beam_width, 2.0, -2.0, 0.0, 3.0, 0.0, 3.0]
+    beam = [beam_height, 0.5 * beam_width, -0.5 * beam_width, (beam_width / 2), -(beam_width / 2), 0.0, beam_height, 0.0, beam_height]
 
     if sampleFormula is None and (sigs is None or siga is None):
         raise ValueError("Either a formula for the sample or values for the cross sections must be supplied.")
