@@ -8,16 +8,13 @@
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: If pvnext in JOB_NAME, use PARAVIEW_NEXT_DIR for LOCAL_PARAVIEW_DIR else 
-:: use PARAVIEW_DIR
+:: If pvnext in JOB_NAME, use PARAVIEW_NEXT_DIR for PARAVIEW_DIR
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if "%JOB_NAME%"=="%JOB_NAME:pvnext=%" (
-    set LOCAL_PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
-) else (
-    set LOCAL_PARAVIEW_DIR=%PARAVIEW_DIR%
+if NOT "%JOB_NAME%"=="%JOB_NAME:pvnext=%" (
+    set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
 )
 
-echo "A: %LOCAL_PARAVIEW_DIR%"
+echo "A: %PARAVIEW_DIR%"
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Get or update the third party dependencies
@@ -26,7 +23,7 @@ cd %WORKSPACE%\Code
 call fetch_Third_Party win64
 cd %WORKSPACE%
 
-set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib\win64\Python27;%LOCAL_PARAVIEW_DIR%\bin\Release;%PATH%
+set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib\win64\Python27;%PARAVIEW_DIR%\bin\Release;%PATH%
 echo "B: %PATH%"
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check whether this is a clean build (must have 'clean' in the job name)
