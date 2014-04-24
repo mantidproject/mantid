@@ -273,7 +273,7 @@ AlgEnvHistoryGrpBox* AlgorithmHistoryWindow::createEnvHistGrpBox(const Environme
 AlgHistoryProperties* AlgorithmHistoryWindow::createAlgHistoryPropWindow()
 {	
   std::vector<PropertyHistory> histProp;
-  const WorkspaceHistory::AlgorithmHistories & entries = m_algHist.getAlgorithmHistories();
+  const Mantid::API::AlgorithmHistories & entries = m_algHist.getAlgorithmHistories();
   auto rIter = entries.rbegin();
   histProp=(*rIter).getProperties();
 
@@ -329,7 +329,7 @@ void AlgorithmHistoryWindow::writeToScriptFile()
 
 void AlgorithmHistoryWindow::populateAlgHistoryTreeWidget()
 {
-  const WorkspaceHistory::AlgorithmHistories & entries = m_algHist.getAlgorithmHistories();
+  const Mantid::API::AlgorithmHistories & entries = m_algHist.getAlgorithmHistories();
   auto ralgHistory_Iter = entries.rbegin();
   std::string algrithmName;
   algrithmName=(*ralgHistory_Iter).name();

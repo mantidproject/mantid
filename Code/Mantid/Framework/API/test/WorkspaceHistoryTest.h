@@ -210,7 +210,7 @@ public:
     TS_ASSERT_EQUALS(history.size(), 1);
     TS_ASSERT_EQUALS(history.empty(), false);
 
-    const WorkspaceHistory::AlgorithmHistories & algs = history.getAlgorithmHistories();
+    const Mantid::API::AlgorithmHistories & algs = history.getAlgorithmHistories();
     TS_ASSERT_EQUALS(algs.size(), 1);
     TS_ASSERT_EQUALS(history.getAlgorithmHistory(0).name(), "FirstAlgorithm");
     TS_ASSERT_EQUALS((*algs.begin()).name(), "FirstAlgorithm");
