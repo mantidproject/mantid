@@ -270,7 +270,7 @@ public:
   static IAlgorithm_sptr fromHistory(const AlgorithmHistory & history);
   //@}
 
-  boost::shared_ptr<Algorithm> createChildAlgorithm(const std::string& name, const double startProgress = -1.,
+  virtual boost::shared_ptr<Algorithm> createChildAlgorithm(const std::string& name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging=true, const int& version = -1);
 
 protected:
@@ -312,6 +312,11 @@ protected:
 
   ///checks the property is a workspace property
   bool isWorkspaceProperty(const Kernel::Property* const prop) const;
+  
+  /// set whether we wish to track the child algorithm's history and pass it the parent object to fill.
+  void trackAlgorithmHistory(AlgorithmHistory* parentHist);
+  /// get whether we are tracking the history for this algorithm,
+  bool trackingHistory();
 
   /// Set to true to stop execution
   bool m_cancel;
@@ -334,7 +339,7 @@ protected:
 
   /// All the WorkspaceProperties that are Input or InOut. Set in execute()
   std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
-
+  
   /// Logger for this algorithm
   Kernel::Logger m_log;
   Kernel::Logger &g_log;
@@ -381,7 +386,6 @@ private:
   std::string m_WikiDescription; ///< Description in the wiki page.
   std::vector<boost::weak_ptr<IAlgorithm>> m_ChildAlgorithms; ///< A list of weak pointers to any child algorithms created
 
-
   /// Vector of all the workspaces that have been read-locked
   WorkspaceVector m_readLockedWorkspaces;
   /// Vector of all the workspaces that have been write-locked
@@ -402,6 +406,8 @@ private:
   size_t m_groupSize;
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
+  /// Pointer to the parent history object (if set)
+  AlgorithmHistory* m_parentHistory;
   /// A non-recursive mutex for thread-safety
   mutable Kernel::Mutex m_mutex;
 };
