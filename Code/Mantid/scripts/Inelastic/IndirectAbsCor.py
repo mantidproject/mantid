@@ -258,7 +258,20 @@ def AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=Non
         beam_width = getInstrumentParameter(inputWS, 'Workflow.beam-width')
         beam_width = float(beam_width)
 
-    beam = [3.0, 0.5*beam_width, -0.5*beam_width, 2.0, -2.0, 0.0, 3.0, 0.0, 3.0]
+    #attempt to find beam height from parameter file
+    try:
+        beam_height = getInstrumentParameter(inputWS, 'Workflow.beam-height')
+        beam_height = float(beam_height)
+    except ValueError:
+        # fall back on default value for beam height
+        beam_height = 3.0
+
+    # beam[0]    height         overall height of sample
+    # beam[1:2]  a,b            beam width parameters (a>b)
+    # beam[3:4]  a1,b1          scattered beam width parameters (a1 > b1)
+    # beam[5:6]  hdown,hup      bottom and top of beam from sample bottom
+    # beam[7:8]  hsdown,hsup    bottom and top of scattered beam from sample b.
+    beam = [beam_height, 0.5 * beam_width, -0.5 * beam_width, 2.0, -2.0, 0.0, 3.0, 0.0, 3.0]
 
     if sampleFormula is None and (sigs is None or siga is None):
         raise ValueError("Either a formula for the sample or values for the cross sections must be supplied.")
