@@ -193,4 +193,103 @@ private:
 
 };
 
+
+class CopyInstrumentParametersTestPerformance : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static CopyInstrumentParametersTestPerformance *createSuite() { return new CopyInstrumentParametersTestPerformance(); }
+  static void destroySuite( CopyInstrumentParametersTestPerformance *suite ) { delete suite; }
+
+
+  CopyInstrumentParametersTestPerformance():
+    m_SourceWSName("SourceWS"),m_TargetWSName("TargWS")
+  {
+    size_t n_detectors=44327;
+    size_t n_Parameters=200;
+    // Create input workspace with parameterized instrument and put into data store
+     MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(n_detectors+2, 10, true,false,true,"Instr_calibrated");
+     AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
+     dataStore.add(m_SourceWSName, ws1);
+
+
+     Geometry::Instrument_const_sptr instrument = ws1->getInstrument();
+     Geometry::ParameterMap *pmap;
+     pmap = &(ws1->instrumentParameters());
+     for(size_t i=0;i<n_Parameters;i++)
+     {
+      // add auxiliary instrument parameters
+       pmap->addDouble(instrument.get(),"Param-"+boost::lexical_cast<std::string>(i),static_cast<double>(i*10));
+     }
+     // calibrate detectors;
+     for(size_t i=0;i<n_detectors;i++)
+     {
+       IComponent_const_sptr det =instrument->getDetector(1);
+       Geometry::ComponentHelper::moveComponent(*det, *pmap, V3D(sin(3.1415926*double(i)),cos(3.1415926*double(i/500)),7), Absolute );
+     }
+
+     // Create output workspace with another parameterized instrument and put into data store
+     MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(n_detectors, 10, true,false,true,"Instr_base");
+     dataStore.add(m_TargetWSName, ws2);
+
+
+     copyInstParam.initialize();
+
+  }
+
+public:
+
+  void test_copy_performance()
+  {
+     // Set properties
+     TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("InputWorkspace", m_SourceWSName ));
+     TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("OutputWorkspace", m_TargetWSName ));
+
+     // Execute Algorithm, should warn but proceed
+     copyInstParam.setRethrows(true);
+     TS_ASSERT(copyInstParam.execute());
+     TS_ASSERT( copyInstParam.isExecuted() );
+     TS_ASSERT(copyInstParam.isInstrumentDifferent());
+
+     MatrixWorkspace_sptr ws2 =copyInstParam.getProperty("OutputWorkspace");
+     auto instr2=ws2->getInstrument();
+
+
+     std::set<std::string> param_names = instr2->getParameterNames();
+
+     for(auto it =param_names.begin();  it!=param_names.end();it++)
+     {
+       auto name = *it;
+       double num = boost::lexical_cast<double>(name.substr(6,name.size()-6));
+       double val = instr2->getNumberParameter(name)[0];
+       TS_ASSERT_DELTA(num,val,1.e-8);
+     }
+
+     // new detector allocation applied
+     size_t nDetectors = ws2->getNumberHistograms();
+     for(size_t i=0;i<nDetectors;i++)
+     {
+       IDetector_const_sptr deto1 = ws2->getDetector(i);
+       int id = deto1->getID();
+       V3D newPos1 = deto1->getPos();
+       TS_ASSERT_EQUALS( id, i+1);
+       TS_ASSERT_DELTA( newPos1.X() ,sin(3.1415926*double(id)), 0.0001);
+       TS_ASSERT_DELTA( newPos1.Y() ,cos(3.1415926*double(i/500)), 0.0001);
+       TS_ASSERT_DELTA( newPos1.Z() , 7, 1.e-6);
+
+     }
+
+     AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
+     dataStore.remove(m_SourceWSName);
+     dataStore.remove(m_TargetWSName);
+
+  }
+private:
+  CopyInstrumentParameters copyInstParam;
+  const std::string m_SourceWSName,m_TargetWSName;
+ 
+
+};
+
 #endif /*COPYINSTRUMENTPARAMETERSTEST_H_*/
