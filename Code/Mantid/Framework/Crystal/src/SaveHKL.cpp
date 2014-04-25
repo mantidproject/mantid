@@ -47,6 +47,7 @@ Last line must have all 0's
 #include "MantidKernel/ListValidator.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
+#include "Poco/File.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -102,7 +103,7 @@ namespace Crystal
     declareProperty("MinWavelength", 0.0, "Minimum wavelength (Angstroms)");
     declareProperty("MaxWavelength", 100.0, "Maximum wavelength (Angstroms)");
 
-    declareProperty("AppendFile", false, "Append to file if true.\n"
+    declareProperty("AppendFile", false, "Append to file if true. Use same corrections as file.\n"
       "If false, new file (default).");
     declareProperty("ApplyAnvredCorrections", false, "Apply anvred corrections to peaks if true.\n"
       "If false, no corrections during save (default).");
@@ -128,8 +129,10 @@ namespace Crystal
     declareProperty("SortBy", histoTypes[2],boost::make_shared<StringListValidator>(histoTypes),
       "Sort the histograms by bank, run number or both (default).");
     declareProperty("MinIsigI", EMPTY_DBL(), mustBePositive,
-      "The minimum I/sig(I) ratio");
+       "The minimum I/sig(I) ratio");
     declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
+    declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive,
+       "The minimum Intensity");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -146,6 +149,7 @@ namespace Crystal
     double wlMax = getProperty("MaxWavelength");
     std::string type = getProperty("SortBy");
     double minIsigI = getProperty("MinIsigI");
+    double minIntensity = getProperty("MinIntensity");
     int widthBorder = getProperty("WidthBorder");
 
     // Sequence and run number
@@ -175,20 +179,27 @@ namespace Crystal
 
     std::fstream out;
     bool append = getProperty("AppendFile");
-    if (append)
+    if (append && Poco::File(filename.c_str()).exists())
     {
-      out.open( filename.c_str(), std::ios::in|std::ios::out|std::ios::ate);
-      std::streamoff pos = out.tellp();
-      out.seekp (28);
-      out >> runSequence;
-      out.seekp (pos - 110);
-      out >> seqNum;
-      out.seekp (pos - 73);
-      seqNum ++;
+		IAlgorithm_sptr load_alg = createChildAlgorithm("LoadHKL");
+		load_alg->setPropertyValue("Filename", filename.c_str());
+		load_alg->setProperty("OutputWorkspace", "peaks");
+		load_alg->executeAsChildAlg();
+		// Get back the result
+		DataObjects::PeaksWorkspace_sptr ws2 = load_alg->getProperty("OutputWorkspace");
+	    ws2->setInstrument(ws->getInstrument());
+
+		IAlgorithm_sptr plus_alg = createChildAlgorithm("CombinePeaksWorkspaces");
+		plus_alg->setProperty("LHSWorkspace", ws);
+		plus_alg->setProperty("RHSWorkspace", ws2);
+		plus_alg->executeAsChildAlg();
+		// Get back the result
+		ws = plus_alg->getProperty("OutputWorkspace");
+		out.open( filename.c_str(), std::ios::out);
     }
     else
     {
-      out.open( filename.c_str(), std::ios::out);
+    	out.open( filename.c_str(), std::ios::out);
     }
 
     // We must sort the peaks by bank #
@@ -196,6 +207,9 @@ namespace Crystal
     if(type.compare(0,2,"Ba")==0) criteria.push_back( std::pair<std::string, bool>("BankName", true) );
     else if(type.compare(0,2,"Ru")==0) criteria.push_back( std::pair<std::string, bool>("RunNumber", true) );
     else criteria.push_back( std::pair<std::string, bool>("BankName", true) );
+    criteria.push_back( std::pair<std::string, bool>("h", true) );
+    criteria.push_back( std::pair<std::string, bool>("k", true) );
+    criteria.push_back( std::pair<std::string, bool>("l", true) );
     ws->sort(criteria);
 
     bool correctPeaks = getProperty("ApplyAnvredCorrections");
@@ -299,6 +313,7 @@ namespace Crystal
       if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) || 
         boost::math::isnan(p.getSigmaIntensity())) continue;
       if (minIsigI != EMPTY_DBL() && p.getIntensity() < std::abs(minIsigI * p.getSigmaIntensity())) continue;
+      if (minIntensity != EMPTY_DBL() && p.getIntensity() < minIntensity) continue;
       int run = p.getRunNumber();
       int bank = 0;
       std::string bankName = p.getBankName();
@@ -377,10 +392,22 @@ namespace Crystal
       }
 
       // SHELX can read data without the space between the l and intensity
-      out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << correc*p.getIntensity();
+      if(p.getDetectorID() != -1)
+      {
+		  double ckIntensity = correc*p.getIntensity();
+		  if (ckIntensity > 99999.985) g_log.warning() << "Scaled intensity, " << ckIntensity << " is too large for format.  Decrease ScalePeaks.\n";
+		  out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << ckIntensity;
 
-      out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) <<
-    		  std::sqrt(std::pow(correc*p.getSigmaIntensity(),2)+std::pow(relSigSpect*correc*p.getIntensity(),2));
+		  out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) <<
+				  std::sqrt(std::pow(correc*p.getSigmaIntensity(),2)+std::pow(relSigSpect*correc*p.getIntensity(),2));
+      }
+      else
+      {
+    	  // This is data from LoadHKL which is already corrected
+          out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << p.getIntensity();
+
+          out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << p.getSigmaIntensity();
+      }
       if(type.compare(0,2,"Ba")==0) out << std::setw( 4 ) << bankSequence;
       else out << std::setw( 4 ) << runSequence;
 
@@ -528,6 +555,7 @@ namespace Crystal
   {
          if (bankName.compare("None") == 0) return;
          boost::shared_ptr<const IComponent> parent = ws->getInstrument()->getComponentByName(bankName);
+         if(!parent) return;
          if (parent->type().compare("RectangularDetector") == 0)
          {
 			boost::shared_ptr<const RectangularDetector> RDet = boost::dynamic_pointer_cast<
