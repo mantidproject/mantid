@@ -4,8 +4,12 @@ regions of interest around each peak of the [[PeaksWorkspace]]. The output is an
 containing the labels assigned to each cluster for diagnostic and visualisation purposes.
 
 '''The algorithm makes no assmptions about Peak shape or size''' and can therfore be used where integration over defined shapes
-[[IntegratePeaksMD]] and [[IntegrateEllipsoids]] (for example). Will not work. 
+[[IntegratePeaksMD]] and [[IntegrateEllipsoids]], for example, will not work.
 
+[[File:ClusterImage.png|400px]]
+
+''Cluster Label region displayed in the [[SliceViewer]]. Peak centre is marked with an X. The green circle illustrates the integration region used by [[IntegratePeaksMD]]''
+ 
 A threshold for the Peak should be defined below which, parts of the image are treated as background. The normalization method in combination with the 
 threshold may both be used to define a background. We suggest keeping the default of VolumeNormalization so that changes in the effective bin size
 do not affect the background filtering.
