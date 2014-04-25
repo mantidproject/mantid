@@ -1,11 +1,12 @@
 /*WIKI* 
 
-Transfer an instrument from a giving workspace to a receiving workspace for the same instrument.
+Transfer an instrument parameters from a giving workspace to a receiving workspace.
 
-The instrument in of the receiving workspace is replaced by a copy of the instrument in the giving workspace
-and so gains any manipulations such as calibration done to the instrument in the giving workspace.
-The two workspaces can have spectra allocated to their detectors differently.
+The instrument parameters in the receiving workspace are REPLACED (despite you can assume from the name of the algorithm)
+by a copy of the instrument parameters in the giving workspace
+so gaining any manipulations such as calibration done to the instrument in the giving workspace.
 
+Does not work on workspaces with grouped detectors if some of the detectors were calibrated. 
 
 *WIKI*/
 //----------------------------------------------------------------------
