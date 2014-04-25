@@ -37,6 +37,8 @@ set ( SRC_FILES
   src/QtWorkspaceMementoModel.cpp
   src/Quasi.cpp
   src/RawFileMemento.cpp
+  src/ReflMainView.cpp
+  src/ReflMainViewPresenter.cpp
   src/ResNorm.cpp
   src/SANSAddFiles.cpp
   src/SANSDiagnostics.cpp
@@ -95,6 +97,8 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
   inc/MantidQtCustomInterfaces/Quasi.h
   inc/MantidQtCustomInterfaces/RawFileMemento.h
+  inc/MantidQtCustomInterfaces/ReflMainView.h
+  inc/MantidQtCustomInterfaces/ReflMainViewPresenter.h
   inc/MantidQtCustomInterfaces/ResNorm.h
   inc/MantidQtCustomInterfaces/SANSAddFiles.h
   inc/MantidQtCustomInterfaces/SANSDiagnostics.h
@@ -187,6 +191,7 @@ set( TEST_FILES CreateMDWorkspaceAlgDialogTest.h
                 WorkspaceInADSTest.h
                 RawFileMementoTest.h
                 IO_MuonGroupingTest.h
+                ReflMainViewPresenterTest.h
 )
 
 include_directories ( inc )
