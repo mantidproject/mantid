@@ -132,6 +132,7 @@ set ( SRC_FILES
 	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
 	src/UpdateInstrumentFromFile.cpp
+	src/FilterEventsByLogValuePreNexus.cpp
 )
 
 set ( INC_FILES
@@ -263,6 +264,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
+	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	src/LoadRaw/byte_rel_comp.h
 	src/LoadRaw/isisraw.h
 	src/LoadRaw/isisraw2.h
@@ -388,6 +390,7 @@ set ( TEST_FILES
 	SetScalingPSDTest.h
 	UpdateInstrumentFromFileTest.h
 	XMLlogfileTest.h
+	FilterEventsByLogValuePreNexusTest.h
 )
 
 
