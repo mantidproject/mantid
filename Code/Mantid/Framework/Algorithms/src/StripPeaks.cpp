@@ -137,8 +137,14 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
   findpeaks->setProperty<double>("PeakPositionTolerance", peakpostol);
   findpeaks->setProperty<bool>("RawPeakParameters", true);
 
+  findpeaks->executeAsChildAlg();
+
+  ITableWorkspace_sptr peaklistws = findpeaks->getProperty("PeaksList");
+  if (!peaklistws)
+    throw std::runtime_error("Algorithm FindPeaks() returned a NULL pointer for table workspace 'PeaksList'.");
+
   std::stringstream infoss;
-  infoss << "Call FindPeaks() with parameters: \n";
+  infoss << "Call FindPeaks() to find " << peakpositions.size() << " peaks with parameters: \n";
   infoss << "\t FWHM            = " << fwhm << ";\n";
   infoss << "\t Tolerance       = " << tolerance << ";\n";
   infoss << "\t HighBackground  = " << highbackground << ";\n";
@@ -150,10 +156,11 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
       if (i < peakpositions.size() - 1)
         infoss << ", ";
   }
+  infoss << ")\n"
+         << "Returned number of fitted peak = " << peaklistws->rowCount() << ".";
   g_log.information(infoss.str());
 
-  findpeaks->executeAsChildAlg();
-  return findpeaks->getProperty("PeaksList");
+  return peaklistws;
 }
 
 /** If a peak was successfully fitted, it is subtracted from the data.
@@ -203,6 +210,8 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     }
     if ( chisq > m_maxChiSq)
     {
+      g_log.information() << "Error for fit peak at " << centre << " is " << chisq
+                          << ", which exceeds allowed value " << m_maxChiSq << "\n";
       if (chisq != DBL_MAX)
         g_log.error() << "StripPeaks():  Peak Index = " << i << " @ X = " << centre
                       << "  Error: Peak fit with too high of chisq " << chisq << " > " << m_maxChiSq << "\n";
