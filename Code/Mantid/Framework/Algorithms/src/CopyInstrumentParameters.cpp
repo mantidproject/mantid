@@ -83,19 +83,6 @@ void CopyInstrumentParameters::exec()
 
     Geometry::ParameterMap targMap;
 
-    //// vector of all components contained in the target instrument
-    //std::vector<IComponent_const_sptr> targComponents;
-    //// flattens instrument definition tree
-    //inst2->getChildren(targComponents,true);
-    //// multimap of existing instrument parameters
-    //std::multimap<std::string,IComponent const *> existingComponents;
-    //for(size_t i=0;i<targComponents.size();i++)
-    //{        
-    //   if (dynamic_cast<IDetector const *>(targComponents[i].get()))
-    //     continue;
-    //   existingComponents.insert(std::pair<std::string,IComponent const *>(targComponents[i]->getFullName(),targComponents[i].get()));
-    //}
-
     auto it = givParams.begin();
     for(;it!= givParams.end(); it++)
     {
@@ -130,8 +117,8 @@ void CopyInstrumentParameters::exec()
         targComp = spTargComp->getBaseComponent();
       }
       // merge maps for existing target component
-      auto param = it->second.get();
-      targMap.add(param->type(),targComp,param->name(),param->asString());
+      auto param = it->second; //.get();
+      targMap.add(targComp, param);
 
     }
 

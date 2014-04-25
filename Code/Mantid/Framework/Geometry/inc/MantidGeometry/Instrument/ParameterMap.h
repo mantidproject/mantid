@@ -59,6 +59,16 @@ namespace Geometry
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
+#ifndef HAS_UNORDERED_MAP_H
+    /// Parameter map iterator typedef
+  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator component_map_it;
+  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator component_map_cit;
+#else
+   /// Parameter map iterator typedef
+   typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator component_map_it;
+   typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator component_map_cit;
+#endif
+
   class MANTID_GEOMETRY_DLL ParameterMap
   {
   public:
@@ -148,6 +158,8 @@ namespace Geometry
         }
       }
     }
+    /// Method for adding a parameter providing shared pointer to it. The class stores share pointer and increment ref count to it
+    void add(const IComponent* comp,const boost::shared_ptr<Parameter> &param);
     /** @name Helper methods for adding and updating parameter types  */
     /// Create or adjust "pos" parameter for a component
     void addPositionCoordinate(const IComponent* comp,const std::string& name, const double value);
@@ -285,6 +297,11 @@ namespace Geometry
     /// Retrieve a parameter by either creating a new one of getting an existing one
     Parameter_sptr retrieveParameter(bool &created, const std::string & type, const IComponent* comp,
                                      const std::string & name);
+    /// internal function to get position of the parameter in the parameter map
+    component_map_it getMapPlace(const IComponent* comp,const char *name, const char * type);
+    ///const version of the internal function to get position of the parameter in the parameter map
+    component_map_cit getMapPlace(const IComponent* comp,const char *name, const char * type)const;
+
 
     /// internal parameter map instance
     pmap m_map;

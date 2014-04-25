@@ -61,6 +61,7 @@ public:
    
     ParameterMap pmapA;
     ParameterMap pmapB;
+    ParameterMap pmapG;
     // Empty
     TS_ASSERT_EQUALS(pmapA,pmapB);
     
@@ -69,36 +70,61 @@ public:
     TS_ASSERT_EQUALS(pmapA,pmapA);
     // Differs from other
     TS_ASSERT_DIFFERS(pmapA,pmapB);
+    TS_ASSERT_DIFFERS(pmapA,pmapG);
+
+    auto par= pmapA.getRecursive(m_testInstrument.get(),name);
+    pmapG.add(m_testInstrument.get(),par);
+    TS_ASSERT_EQUALS(pmapA,pmapG);
 
     // Same name/value/component
     pmapB.addDouble(m_testInstrument.get(), name, value);
     // Now equal
     TS_ASSERT_EQUALS(pmapA,pmapB);
+    TS_ASSERT_EQUALS(pmapA,pmapG);
 
-    ParameterMap pmapC;
+    //---  C
+    ParameterMap pmapC,pmapC1;
     // Same name/value different component
     IComponent_sptr comp = m_testInstrument->getChild(0);
     pmapC.addDouble(comp.get(), name, value);
+    auto par1=pmapC.getRecursive(comp.get(),name);
+    pmapC1.add(comp.get(), par1);
     // Differs from other
     TS_ASSERT_DIFFERS(pmapA,pmapC);
+    // Equal
+    TS_ASSERT_EQUALS(pmapC,pmapC1);
 
+
+    //---  D
     // Same name/component different value
     ParameterMap pmapD;
     pmapD.addDouble(m_testInstrument.get(), name, value + 1.0);
     // Differs from other
     TS_ASSERT_DIFFERS(pmapA,pmapD);
+    // Adding the same replaces the same par
+    pmapD.add(m_testInstrument.get(), par1);
+    // Equal
+    TS_ASSERT_EQUALS(pmapA,pmapD);
 
+
+    //---  E
     // Same value/component different name
     ParameterMap pmapE;
     pmapE.addDouble(m_testInstrument.get(), name + "_differ", value);
     // Differs from other
     TS_ASSERT_DIFFERS(pmapA,pmapE);
 
+    //---  F
     //Different type
     ParameterMap pmapF;
     pmapF.addInt(m_testInstrument.get(), name, 5);
     // Differs from other
     TS_ASSERT_DIFFERS(pmapA,pmapF);
+    // Adding the same replaces the same par regardless of type
+    pmapF.add(m_testInstrument.get(), par1);
+    // Equal
+    TS_ASSERT_EQUALS(pmapA,pmapF);
+
   }
 
   void testAdding_A_Parameter_That_Is_Not_Present_Puts_The_Parameter_In()
@@ -343,24 +369,24 @@ public:
 
   void test_copy_from_old_pmap_to_new_pmap_with_new_component(){
 
-	  IComponent_sptr oldComp = m_testInstrument->getChild(0);
-	  IComponent_sptr newComp = m_testInstrument->getChild(1);
+    IComponent_sptr oldComp = m_testInstrument->getChild(0);
+    IComponent_sptr newComp = m_testInstrument->getChild(1);
 
-	  ParameterMap oldPMap;
-	  oldPMap.addBool(oldComp.get(), "A", false);
-	  oldPMap.addDouble(oldComp.get(), "B", 1.2);
+    ParameterMap oldPMap;
+    oldPMap.addBool(oldComp.get(), "A", false);
+    oldPMap.addDouble(oldComp.get(), "B", 1.2);
 
-	  ParameterMap newPMap;
+    ParameterMap newPMap;
 
-	  TS_ASSERT_DIFFERS(oldPMap,newPMap);
+    TS_ASSERT_DIFFERS(oldPMap,newPMap);
 
-	  newPMap.copyFromParameterMap(oldComp.get(),newComp.get(), &oldPMap);
+    newPMap.copyFromParameterMap(oldComp.get(),newComp.get(), &oldPMap);
 
-	  TS_ASSERT_EQUALS(newPMap.contains(newComp.get(), "A", ParameterMap::pBool()), true);
-	  TS_ASSERT_EQUALS(newPMap.contains(newComp.get(), "B", ParameterMap::pDouble()), true);
+    TS_ASSERT_EQUALS(newPMap.contains(newComp.get(), "A", ParameterMap::pBool()), true);
+    TS_ASSERT_EQUALS(newPMap.contains(newComp.get(), "B", ParameterMap::pDouble()), true);
 
-	  Parameter_sptr a = newPMap.get(newComp.get(), "A");
-	  TS_ASSERT_EQUALS( a->value<bool>(), false);
+    Parameter_sptr a = newPMap.get(newComp.get(), "A");
+    TS_ASSERT_EQUALS( a->value<bool>(), false);
 
   }
 
