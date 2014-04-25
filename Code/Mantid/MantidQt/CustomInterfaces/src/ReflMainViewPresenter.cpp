@@ -12,7 +12,16 @@ namespace MantidQt
       view->showTable(model);
     }
 
+    ReflMainViewPresenter::ReflMainViewPresenter(std::string model, ReflMainView* view)
+    {
+      //view->showTable(model);
+    }
+
     ReflMainViewPresenter::~ReflMainViewPresenter()
+    {
+    }
+
+    void ReflMainViewPresenter::load()
     {
     }
   }

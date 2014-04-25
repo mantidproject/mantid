@@ -25,6 +25,7 @@ set ( SRC_FILES
   src/IndirectNeutron.cpp
   src/IndirectSimulation.cpp
   src/IndirectSimulationTab.cpp
+  src/IReflPresenter.cpp
   src/JumpFit.cpp
   src/MSDFit.cpp
   src/MantidEV.cpp
@@ -39,6 +40,7 @@ set ( SRC_FILES
   src/RawFileMemento.cpp
   src/ReflMainView.cpp
   src/ReflMainViewPresenter.cpp
+  src/ReflNullMainViewPresenter.cpp
   src/ResNorm.cpp
   src/SANSAddFiles.cpp
   src/SANSDiagnostics.cpp
@@ -85,6 +87,7 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/IndirectNeutron.h
   inc/MantidQtCustomInterfaces/IndirectSimulation.h
   inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
+  inc/MantidQtCustomInterfaces/IReflPresenter.h
   inc/MantidQtCustomInterfaces/JumpFit.h
   inc/MantidQtCustomInterfaces/MSDFit.h
   inc/MantidQtCustomInterfaces/MantidEV.h
@@ -99,6 +102,7 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/RawFileMemento.h
   inc/MantidQtCustomInterfaces/ReflMainView.h
   inc/MantidQtCustomInterfaces/ReflMainViewPresenter.h
+  inc/MantidQtCustomInterfaces/ReflNullMainViewPresenter.h
   inc/MantidQtCustomInterfaces/ResNorm.h
   inc/MantidQtCustomInterfaces/SANSAddFiles.h
   inc/MantidQtCustomInterfaces/SANSDiagnostics.h

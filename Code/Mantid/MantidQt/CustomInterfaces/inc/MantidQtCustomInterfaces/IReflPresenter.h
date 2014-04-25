@@ -1,9 +1,6 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
+#define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidQtCustomInterfaces/ReflMainView.h"
-#include "MantidQtCustomInterfaces/IReflPresenter.h"
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -32,13 +29,11 @@ namespace MantidQt
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-    class DLLExport ReflMainViewPresenter: public IReflPresenter
+    class DLLExport IReflPresenter
     {
     public:
-      ReflMainViewPresenter(Mantid::API::ITableWorkspace_sptr model, ReflMainView* view);
-      ReflMainViewPresenter(std::string model, ReflMainView* view);
-      virtual ~ReflMainViewPresenter();
-      virtual void load();
+      virtual ~IReflPresenter() = 0;
+      virtual void load() = 0;
     private:
 
     };
