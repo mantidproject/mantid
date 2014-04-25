@@ -31,6 +31,7 @@ set ( SRC_FILES
 	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
 	src/LoadFullprofResolution.cpp
+        src/LoadGSASInstrumentFile.cpp
 	src/LoadGSS.cpp
 	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
@@ -92,8 +93,8 @@ set ( SRC_FILES
 	src/ModifyDetectorDotDatFile.cpp
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
-  src/PDLoadCharacterizations.cpp
-  src/ProcessDasNexusLog.cpp
+        src/PDLoadCharacterizations.cpp
+        src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
 	src/RemoveLogs.cpp
 	src/RenameLog.cpp
@@ -166,6 +167,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
+        inc/MantidDataHandling/LoadGSASInstrumentFile.h
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
@@ -298,6 +300,7 @@ set ( TEST_FILES
 	LoadEventPreNexus2Test.h
 	LoadEventPreNexusTest.h
 	LoadFullprofResolutionTest.h
+	LoadGSASInstrumentFileTest.h
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
 	LoadILLSANSTest.h
