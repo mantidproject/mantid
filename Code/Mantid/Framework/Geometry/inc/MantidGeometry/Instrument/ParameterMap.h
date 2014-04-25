@@ -120,6 +120,12 @@ namespace Geometry
       m_map.clear();
       clearPositionSensitiveCaches();
     }
+    /// method swaps two parameter maps contents  each other. All caches contents is nullified (TO DO: it can be efficiently swapped too)
+    void swap(ParameterMap &other)
+    {
+      m_map.swap(other.m_map);
+      clearPositionSensitiveCaches();
+    }
     /// Clear any parameters with the given name
     void clearParametersByName(const std::string & name);
 

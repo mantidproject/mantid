@@ -125,7 +125,7 @@ void CopyInstrumentParameters::exec()
     }
 
     // changed parameters
-    m_receivingWorkspace->replaceInstrumentParameters( targMap );
+    m_receivingWorkspace->swapInstrumentParameters(targMap);
 
   }
   else
