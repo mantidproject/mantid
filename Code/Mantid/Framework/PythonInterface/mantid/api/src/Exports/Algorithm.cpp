@@ -51,7 +51,7 @@ void export_leaf_classes()
     .def("fromString", &Algorithm::fromString, "Initialize the algorithm from a string representation")
     .staticmethod("fromString")
 
-    .def("checkGroups",&PythonAlgorithm::checkGroups,"process groups ")
+    //.def("checkGroups",&PythonAlgorithm::checkGroups,"process groups ")
     .def("setOptionalMessage", &Algorithm::setOptionalMessage)
     .def("createChildAlgorithm", &Algorithm::createChildAlgorithm,
          (arg("name"),arg("startProgress")=-1.0,arg("endProgress")=-1.0,
