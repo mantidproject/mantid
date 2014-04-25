@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <string>
+#include <sstream>
 
 namespace Mantid
 {
@@ -344,7 +345,15 @@ namespace Mantid
       /// @return A populated PropertyHistory for this class
       virtual const Kernel::PropertyHistory createHistory() const
       {
-        return Kernel::PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction());
+        std::string wsName = this->name(); 
+        if (wsName.empty())
+        {
+          //give the workspace a temporary name in the history
+          std::ostringstream os;
+          os << this;
+          wsName = "__TMP" + os.str();
+        }
+        return Kernel::PropertyHistory(wsName,this->value(),this->type(),this->isDefault(),Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction());
       }
 
       /** If this is an output workspace, store it into the AnalysisDataService
