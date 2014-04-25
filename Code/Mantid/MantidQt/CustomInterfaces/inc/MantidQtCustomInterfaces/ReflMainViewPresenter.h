@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 
+#include "MantidKernel/System.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"

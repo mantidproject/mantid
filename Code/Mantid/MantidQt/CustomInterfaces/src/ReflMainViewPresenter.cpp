@@ -7,14 +7,17 @@ namespace MantidQt
   namespace CustomInterfaces
   {
 
-    ReflMainViewPresenter::ReflMainViewPresenter(Mantid::API::ITableWorkspace_sptr model, ReflMainView* view)
+    using namespace Mantid::API;
+
+    ReflMainViewPresenter::ReflMainViewPresenter(ITableWorkspace_sptr model, ReflMainView* view)
     {
       view->showTable(model);
     }
 
     ReflMainViewPresenter::ReflMainViewPresenter(std::string model, ReflMainView* view)
     {
-      //view->showTable(model);
+      ITableWorkspace_sptr tws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(model);
+      view->showTable(tws);
     }
 
     ReflMainViewPresenter::~ReflMainViewPresenter()

@@ -9,7 +9,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
-#include "MantidQtCustomInterfaces/ReflNullMainViewPresenter.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
@@ -21,7 +20,7 @@ class ReflMainViewPresenterTest : public CxxTest::TestSuite
 {
 
 private:
-  
+
   class MockView : public ReflMainView
   {
     public:
@@ -38,14 +37,6 @@ public:
     EXPECT_CALL(mockView, showTable(_)).Times(1);
     ReflMainViewPresenter presenter(boost::make_shared<Mantid::DataObjects::TableWorkspace>(),&mockView);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-
-  void testNullThrow()
-  {
-    MockView mockView;
-    //EXPECT_CALL(mockView, showTable(_)).Times(1);
-    ReflNullMainViewPresenter presenter;
-    TS_ASSERT_THROWS(presenter.load(),std::runtime_error);
   }
 };
 #endif

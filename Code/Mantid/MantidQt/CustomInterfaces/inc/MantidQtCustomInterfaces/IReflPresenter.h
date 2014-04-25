@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 
+#include "MantidKernel/System.h"
 namespace MantidQt
 {
   namespace CustomInterfaces

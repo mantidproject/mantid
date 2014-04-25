@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLNULLMAINVIEWPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_REFLNULLMAINVIEWPRESENTER_H
 
+#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 namespace MantidQt
 {

@@ -196,6 +196,7 @@ set( TEST_FILES CreateMDWorkspaceAlgDialogTest.h
                 RawFileMementoTest.h
                 IO_MuonGroupingTest.h
                 ReflMainViewPresenterTest.h
+                ReflNullMainViewPresenterTest.h
 )
 
 include_directories ( inc )
