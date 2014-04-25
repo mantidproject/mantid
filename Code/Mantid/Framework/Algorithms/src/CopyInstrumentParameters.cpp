@@ -116,8 +116,10 @@ void CopyInstrumentParameters::exec()
         }
         targComp = spTargComp->getBaseComponent();
       }
-      // merge maps for existing target component
-      auto param = it->second; //.get();
+
+      // create shared pointer to independent copy of original parameter. Would be easy and nice to have cow_pointer instead of shared_ptr in the parameter map. 
+      auto param = Parameter_sptr(it->second->clone());
+      // add new parameter to the maps for existing target component
       targMap.add(targComp, param);
 
     }
