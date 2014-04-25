@@ -53,7 +53,7 @@ namespace Algorithms
     bool simpleFit();
 
     /// Fit peak first considering high background
-    bool highBkgdFit();
+    void highBkgdFit();
 
     /// Get fitting error
     void getFitError(std::map<std::string, double>& peakerrormap, std::map<std::string, double>& bkgderrormap);
@@ -97,7 +97,7 @@ namespace Algorithms
     bool hasSetupToFitPeak(std::string &errmsg);
 
     /// Estimate the peak height from a set of data containing pure peaks
-    double estimatePeakHeight(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
+    double estimatePeakHeight(API::IPeakFunction_const_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
                               size_t wsindex, size_t ixmin, size_t ixmax);
 
     /// Check a peak function whether it is valid comparing to user specified criteria
@@ -192,9 +192,6 @@ namespace Algorithms
     std::string m_minimizer;
     /// Cost function
     std::string m_costFunction;
-
-    /// Goodness of fit
-    double m_finalFitGoodness;
 
     std::vector<double> m_vecFWHM;
 

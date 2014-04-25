@@ -23,6 +23,8 @@ If FitWindows is defined, then a peak's range to fit (i.e., x-min and x-max) is 
 If PeakRange is defined and starting peak centre given by user is not within this range, then the situation is considered illegal.  
 In future, FitPeak might be able to estimate the peak centre in this situation by locating the X-value whose corresponding Y-value is largest within user-defined peak range. 
 
+== What's new ==
+
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
@@ -280,7 +282,7 @@ namespace Algorithms
       else
       {
         m_sstream << "Fx330 i_width = " << iwidth << ", i_left = " << ileftside << ", i_right = "
-                  << irightside << ", FWHM = " << in_fwhm << ".\n";
+                  << irightside << ", FWHM = " << in_fwhm << ", i_centre = " << i_centre << ".\n";
       }
 
       m_vecFWHM.push_back(in_fwhm);
@@ -434,8 +436,8 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Estimate the peak height from a set of data containing pure peaks
     */
-  double FitOneSinglePeak::estimatePeakHeight(API::IPeakFunction_sptr peakfunc, MatrixWorkspace_sptr dataws,
-                                            size_t wsindex, size_t ixmin, size_t ixmax)
+  double FitOneSinglePeak::estimatePeakHeight(API::IPeakFunction_const_sptr peakfunc, MatrixWorkspace_sptr dataws,
+                                              size_t wsindex, size_t ixmin, size_t ixmax)
   {
     // Get current peak height: from current peak centre (previously setup)
     double peakcentre = peakfunc->centre();
@@ -444,9 +446,6 @@ namespace Algorithms
     FunctionValues svvalues(svdomain);
     peakfunc->function(svdomain, svvalues);
     double curpeakheight = svvalues[0];
-
-    // Get maximum peak value among
-    // const MantidVec& vecX = dataws->readX(wsindex);
 
     const MantidVec& vecX = dataws->readX(wsindex);
     const MantidVec& vecY = dataws->readY(wsindex);
@@ -520,8 +519,6 @@ namespace Algorithms
 
     double goodness = fitFunctionSD(peakfunc, dataws, wsindex, startx, endx, false);
 
-    m_sstream << "Peak parameter goodness-Fit = " << goodness << "\n";
-
     return goodness;
   }
 
@@ -532,7 +529,7 @@ namespace Algorithms
     * 1. Fit background
     * 2. Create a new workspace with limited region
     */
-  bool FitOneSinglePeak::highBkgdFit()
+  void FitOneSinglePeak::highBkgdFit()
   {
     m_numFitCalls = 0;
 
@@ -551,6 +548,18 @@ namespace Algorithms
     m_bestRwp = DBL_MAX;
 
     // Fit background
+    if (i_minFitX == i_minPeakX || i_maxFitX == i_maxFitX)
+    {
+      // Very noisy data
+      g_log.warning() << "Very noisy data.  Automatic peak range finder does not work. "
+                      << "Number of data points in fitting window = " << i_maxFitX - i_minFitX << "\n" ;
+      size_t numpts = i_maxFitX - i_minFitX ;
+      i_minPeakX += static_cast<size_t>(static_cast<double>(numpts)/6.);
+      m_minPeakX = m_dataWS->readX(m_wsIndex)[i_minPeakX];
+      i_maxPeakX -= static_cast<size_t>(static_cast<double>(numpts)/6.);
+      m_maxPeakX = m_dataWS->readX(m_wsIndex)[i_maxPeakX];
+    }
+
     m_bkgdFunc = fitBackground(m_bkgdFunc);
 
     // Generate partial workspace within given fit window
@@ -581,6 +590,8 @@ namespace Algorithms
       // Fit
       double rwp = fitPeakFunction(m_peakFunc, purePeakWS, 0, m_minFitX, m_maxFitX);
 
+      m_sstream << "Fit peak function cost = " << rwp << "\n";
+
       // Store result
       processNStoreFitResult(rwp,false);
     }
@@ -589,14 +600,14 @@ namespace Algorithms
     pop(m_bestPeakFunc, m_peakFunc);
 
     // Fit the composite function as final
-    m_finalFitGoodness = fitCompositeFunction(m_peakFunc, m_bkgdFunc, m_dataWS, m_wsIndex,
-                                              m_minFitX, m_maxFitX);
+    double compcost = fitCompositeFunction(m_peakFunc, m_bkgdFunc, m_dataWS, m_wsIndex,
+                                           m_minFitX, m_maxFitX);
 
     m_sstream << "MultStep-Fit: Best Fitted Peak: " << m_peakFunc->asString()
-              << "Final " << m_costFunction << " = " << m_finalFitGoodness << "\n"
+              << ". Final " << m_costFunction << " = " << compcost << "\n"
               << "Number of calls on Fit = " << m_numFitCalls << "\n";
 
-    return false;
+    return;
   }
 
 
@@ -805,7 +816,9 @@ namespace Algorithms
     fit->setProperty("Minimizer", m_minimizer);
     fit->setProperty("CostFunction", "Least squares");
 
-    m_sstream << "FitMultiDomain: Funcion " << funcmd->asString() << "\n";
+    m_sstream << "FitMultiDomain: Funcion " << funcmd->name() << ": " << "Range: (" << vec_xmin[0]
+              << ", " << vec_xmax[0] << ") and (" << vec_xmin[1] << ", " << vec_xmax[1] << "); "
+              << funcmd->asString() << "\n";
 
     // Execute
     fit->execute();
@@ -850,10 +863,11 @@ namespace Algorithms
     compfunc->addFunction(peakfunc);
     compfunc->addFunction(bkgdfunc);
 
-    // Do calculation for starting chi^2/Rwp
+    // Do calculation for starting chi^2/Rwp: as the assumption that the input the so far the best Rwp
     bool modecal = true;
-    double goodness_init = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
-    m_sstream << "Peak+Backgruond: Pre-fit Goodness = " << goodness_init << "\n";
+    // FIXME - This is not a good practise...
+    m_bestRwp = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
+    m_sstream << "Peak+Backgruond: Pre-fit Goodness = " << m_bestRwp << "\n";
 
     map<string, double> bkuppeakmap, bkupbkgdmap;
     push(peakfunc, bkuppeakmap);
@@ -870,22 +884,20 @@ namespace Algorithms
     goodness = checkFittedPeak(peakfunc, goodness, errorreason);
 
     if (errorreason.size() > 0)
-      m_sstream << "Error reason: " << errorreason << "\n";
+      m_sstream << "Error reason of fit peak+background composite: " << errorreason << "\n";
 
     double goodness_final = DBL_MAX;
-    if (goodness <= goodness_init)
+    if (goodness <= m_bestRwp)
     {
       // Fit for composite function renders a better result
       goodness_final = goodness;
       processNStoreFitResult(goodness_final, true);
     }
-    else if (goodness > goodness_init && goodness_init < DBL_MAX)
+    else if (goodness > m_bestRwp && m_bestRwp < DBL_MAX)
     {
       // A worse result is got.  Revert to original function parameters
-      goodness_final = goodness_init;
-
       m_sstream << "Fit peak/background composite function FAILS to render a better solution. "
-                << "Input cost function value = " << goodness_init << ", output cost function value = "
+                << "Input cost function value = " << m_bestRwp << ", output cost function value = "
                 << goodness << "\n";
 
       pop(bkuppeakmap, peakfunc);
@@ -1015,7 +1027,9 @@ namespace Algorithms
       else if (f_centre < m_minPeakX || f_centre > m_maxPeakX)
       {
         rwp = DBL_MAX;
-        failreason += "Peak centre out of input peak range. ";
+        failreason += "Peak centre out of input peak range ";
+        m_sstream << "Peak centre " << f_centre << " is out of peak range: "
+                  << m_minPeakX << ", " << m_maxPeakX << "\n";
         fitsuccess = false;
       }
 
@@ -1026,8 +1040,8 @@ namespace Algorithms
       fitsuccess = false;
     }
 
-    m_sstream << "Process and Store is called. " << "Rwp = " << rwp << ", best Rwp = "
-              << m_bestRwp << ", Fit success = " << fitsuccess << "\n";
+    m_sstream << "Process fit result: " << "Rwp = " << rwp << ", best Rwp = "
+              << m_bestRwp << ", Fit success = " << fitsuccess << ". ";
 
     // Store result if
     if (rwp < m_bestRwp && fitsuccess)
@@ -1040,6 +1054,8 @@ namespace Algorithms
         storeFunctionError(m_bkgdFunc, m_fitErrorBkgdFunc);
       }
       m_bestRwp = rwp;
+
+      m_sstream << "Store result and new Best RWP = " << m_bestRwp << ".\n";
     }
     else if (!fitsuccess)
     {
