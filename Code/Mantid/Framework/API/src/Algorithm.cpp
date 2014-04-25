@@ -84,8 +84,7 @@ namespace Mantid
       m_isInitialized(false), m_isExecuted(false),m_isChildAlgorithm(false), m_recordHistoryForChild(false),
       m_alwaysStoreInADS(false),m_runningAsync(false),
       m_running(false),m_rethrow(false),m_algorithmID(this),
-      m_singleGroup(-1), m_groupSize(0), m_groupsHaveSimilarNames(false),
-      m_parentHistory(NULL)
+      m_singleGroup(-1), m_groupSize(0), m_groupsHaveSimilarNames(false)
     {
     }
 
@@ -606,6 +605,10 @@ namespace Mantid
           }
 
           start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
+          //populate history record before execution so we can record child algorithms in it
+          AlgorithmHistory algHist(this, start_time, -1.0, Algorithm::g_execCount);
+          m_history = boost::make_shared<AlgorithmHistory>(algHist);
+          
           // Start a timer
           Timer timer;
           // Call the concrete algorithm's exec method
@@ -614,10 +617,11 @@ namespace Mantid
           interruption_point();			
           // Get how long this algorithm took to run
           const float duration = timer.elapsed();
+          m_history->setDuration(duration);
 
           // need it to throw before trying to run fillhistory() on an algorithm which has failed
           if(trackingHistory())
-            fillHistory(start_time,duration,Algorithm::g_execCount);
+            fillHistory();
 
           // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
           if (!isChild() || m_alwaysStoreInADS)
@@ -1009,15 +1013,11 @@ namespace Mantid
     *  @param duration :: a double defining the length of duration of the algorithm
     *  @param  uexecCount an unsigned int for defining the excution order of algorithm
     */
-    void Algorithm::fillHistory(Mantid::Kernel::DateAndTime start,double duration,std::size_t uexecCount)
+    void Algorithm::fillHistory()
     {
       // Create two vectors to hold a list of pointers to the input & output workspaces (InOut's go in both)
       std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;
       findWorkspaceProperties(inputWorkspaces,outputWorkspaces);
-
-      // Create the history object for this algorithm
-      AlgorithmHistory algHistory(this,start,duration,uexecCount);
-
       
       //this is not a child algorithm. Add the history algorithm to the WorkspaceHistory object.
       if (!isChild())
@@ -1035,21 +1035,22 @@ namespace Mantid
             (*outWS)->history().addHistory( (*inWS)->getHistory() );
           }
           // Add the history for the current algorithm to all the output workspaces
-          (*outWS)->history().addHistory(algHistory);
+          (*outWS)->history().addHistory(*m_history);
         }
       }
       //this is a child algorithm, but we still want to keep the history.
       else if (m_recordHistoryForChild && m_parentHistory)
       {
-        m_parentHistory->addHistory(algHistory);
+        m_parentHistory->addChildHistory(*m_history);
       }
+
     }
 
     /** Indicates that this algrithms history should be tracked regardless of if it is a child.
     *  @param state :: a boolean indicating whether to track the history or not 
     *  @param parent :: the parent algorithm history object the history in.
     */
-    void Algorithm::trackAlgorithmHistory(AlgorithmHistory* parentHist)
+    void Algorithm::trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist)
     {
       m_recordHistoryForChild = true;
       m_parentHistory = parentHist;

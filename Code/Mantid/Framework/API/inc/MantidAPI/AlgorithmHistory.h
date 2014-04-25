@@ -71,7 +71,7 @@ public:
   /// add a child algorithm history record to this history object
   void addChildHistory(const AlgorithmHistory& childHist);
   /// set the duration time this algorithm history object
-  void setAlgorithmDuration(const double& duration);
+  void setDuration(const double& duration);
   // get functions
   /// get name of algorithm in history const
   const std::string& name() const {return m_name;}

@@ -30,6 +30,7 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const Kernel::Dat
   }
 }
 
+
 /// Destructor
 AlgorithmHistory::~AlgorithmHistory()
 {}
@@ -93,7 +94,7 @@ void AlgorithmHistory::addChildHistory(const AlgorithmHistory& childHist)
 /** Set the duration time of the algorithm in the history
  *  @param duration :: The time the algorithm took to execute
  */
-void AlgorithmHistory::setAlgorithmDuration(const double& duration)
+void AlgorithmHistory::setDuration(const double& duration)
 {
   m_executionDuration = duration;
 }

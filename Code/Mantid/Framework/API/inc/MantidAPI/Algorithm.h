@@ -314,7 +314,7 @@ protected:
   bool isWorkspaceProperty(const Kernel::Property* const prop) const;
   
   /// set whether we wish to track the child algorithm's history and pass it the parent object to fill.
-  void trackAlgorithmHistory(AlgorithmHistory* parentHist);
+  void trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist);
   /// get whether we are tracking the history for this algorithm,
   bool trackingHistory();
 
@@ -339,6 +339,8 @@ protected:
 
   /// All the WorkspaceProperties that are Input or InOut. Set in execute()
   std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
+  /// Pointer to the history for the algorithm being executed
+  boost::shared_ptr<AlgorithmHistory> m_history;
   
   /// Logger for this algorithm
   Kernel::Logger m_log;
@@ -354,7 +356,7 @@ private:
   void unlockWorkspaces();
 
   void store();
-  void fillHistory(Mantid::Kernel::DateAndTime, double,std::size_t);
+  void fillHistory();
 
   void logAlgorithmInfo() const;
 
@@ -407,7 +409,7 @@ private:
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
   /// Pointer to the parent history object (if set)
-  AlgorithmHistory* m_parentHistory;
+  boost::shared_ptr<AlgorithmHistory> m_parentHistory;
   /// A non-recursive mutex for thread-safety
   mutable Kernel::Mutex m_mutex;
 };
