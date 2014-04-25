@@ -102,7 +102,7 @@ public:
     getParameterMap(outtablews, 0, parammap);
 
     TS_ASSERT_DELTA(parammap["PeakCentre"], 1.2356, 0.03);
-    TS_ASSERT_DELTA(parammap["Height"], 595., 3.00);
+    TS_ASSERT_DELTA(parammap["Height"], 595., 5.00);
 
     // Clean
     AnalysisDataService::Instance().remove(wsname);
@@ -159,7 +159,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("InputWorkspace","FindPeaksTest_vanadium") );
     TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("WorkspaceIndex","0") );
     TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("PeakPositions", "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401") );
-//    TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("SmoothedData","ignored_smoothed_data") );
     TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("PeaksList","FindPeaksTest_foundpeaks2") );
 
     TS_ASSERT_THROWS_NOTHING( finder.execute() );

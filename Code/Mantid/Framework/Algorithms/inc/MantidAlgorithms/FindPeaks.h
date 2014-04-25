@@ -125,7 +125,8 @@ private:
 
   /// Estimate background of a given range
   void estimateBackground(const MantidVec& X, const MantidVec& Y, const size_t i_min, const size_t i_max,
-                                double& out_bg0, double& out_bg1, double& out_bg2);
+                          double& out_bg0, double& out_bg1, double& out_bg2,
+                          double &peakleftbound, double &peakrightbound);
 
   /// Estimate peak parameters
   std::string estimatePeakParameters(const MantidVec& vecX, const MantidVec& vecY,
@@ -165,7 +166,7 @@ private:
   bool m_highBackground; ///<flag for find relatively weak peak in high background
   bool m_rawPeaksTable; ///<flag for whether the output is the raw peak parameters or effective (centre, width, height)
   std::size_t m_numTableParams; //<Number of parameters in the output table workspace
-  bool m_searchPeakPos; ///<flag to search for peak in the window
+  // bool m_searchPeakPos; ///<flag to search for peak in the window
   std::string m_peakFuncType; //< The name of the peak function to fit
   std::string m_backgroundType; //< The type of background to fit
 
@@ -196,6 +197,9 @@ private:
 
   /// Minimum peak height
   double m_minHeight;
+
+  /// Start values
+  bool m_useObsCentre;
 
 };
 
