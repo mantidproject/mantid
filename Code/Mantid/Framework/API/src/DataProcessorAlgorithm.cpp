@@ -45,10 +45,12 @@ namespace API
   boost::shared_ptr<Algorithm> DataProcessorAlgorithm::createChildAlgorithm(const std::string& name, const double startProgress,
       const double endProgress, const bool enableLogging, const int& version)
   {
-    //pass pointer to the history object created in Algorithm to the child
-    trackAlgorithmHistory(m_history);
+
     //call parent method to create the child algorithm
-    return Algorithm::createChildAlgorithm(name, startProgress, endProgress, enableLogging, version);
+    auto alg = Algorithm::createChildAlgorithm(name, startProgress, endProgress, enableLogging, version);
+    //pass pointer to the history object created in Algorithm to the child
+    alg->trackAlgorithmHistory(m_history);
+    return alg;
   }
 
   void DataProcessorAlgorithm::setLoadAlg(const std::string &alg)
