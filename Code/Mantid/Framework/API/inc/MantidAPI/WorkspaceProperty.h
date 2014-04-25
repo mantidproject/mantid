@@ -7,7 +7,6 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <boost/shared_ptr.hpp>
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -511,11 +510,11 @@ namespace Mantid
       LockMode::Type m_locking;
 
       /// for access to logging streams
-      static Kernel::Logger& g_log;
+      static Kernel::Logger g_log;
     };
 
     template <typename TYPE>
-    Kernel::Logger& WorkspaceProperty<TYPE>::g_log = Kernel::Logger::get("WorkspaceProperty");
+    Kernel::Logger WorkspaceProperty<TYPE>::g_log("WorkspaceProperty");
 
   } // namespace API
 } // namespace Mantid

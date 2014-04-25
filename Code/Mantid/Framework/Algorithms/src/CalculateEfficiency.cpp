@@ -41,7 +41,7 @@ using namespace DataObjects;
 void CalculateEfficiency::init()
 {
   declareProperty(
-    new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<CommonBinsValidator>()),
+    new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
                             "The workspace containing the flood data" );
   declareProperty(
     new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),

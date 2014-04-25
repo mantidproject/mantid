@@ -2,7 +2,6 @@
 #define Algebra_h
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Math/BnId.h"
 #include "MantidGeometry/Math/Acomp.h"
@@ -47,8 +46,6 @@ namespace Geometry
 class MANTID_GEOMETRY_DLL Algebra
 {
  private:
-
-  static Kernel::Logger& PLog;           ///< The official logger
 
   std::map<int,std::string> SurfMap;     ///< Internal surface map
   Acomp F;       ///< Factor

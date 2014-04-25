@@ -19,8 +19,11 @@
 //----------------------------------------------------------------------
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+# include <boost/interprocess/smart_ptr/unique_ptr.hpp>
+#endif
+
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>

@@ -1,5 +1,6 @@
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include <boost/make_shared.hpp>
 #include <iostream>
 #include <Poco/File.h>
@@ -14,6 +15,13 @@ namespace MantidQt
 {
 namespace API
 {
+  namespace
+  {
+    /// static logger
+    Mantid::Kernel::Logger g_log("HelpWindow");
+  }
+
+
 using std::string;
 
 /// Base url for all of the files in the project.
@@ -33,8 +41,7 @@ HelpWindowImpl::HelpWindowImpl() :
     m_collectionFile(""),
     m_cacheFile(""),
     m_assistantExe(""),
-    m_firstRun(true),
-    m_log(Mantid::Kernel::Logger::get("HelpWindow"))
+    m_firstRun(true)
 {
     this->determineFileLocs();
 }
@@ -61,7 +68,7 @@ const string stateToStr(const int code)
 
 void HelpWindowImpl::openWebpage(const string &url)
 {
-    m_log.debug() << "open url \"" << url << "\"\n";
+    g_log.debug() << "open url \"" << url << "\"\n";
     QDesktopServices::openUrl(QUrl(QLatin1String(url.c_str())));
 }
 
@@ -89,10 +96,10 @@ void HelpWindowImpl::showURL(const string &url)
 
         // make sure the process is going
         this->start(url);
-        m_log.debug() << m_assistantExe << " "
+        g_log.debug() << m_assistantExe << " "
                       << " (state = \"" << stateToStr(m_process->state()) << "\")\n";
 
-        m_log.debug() << "open help url \"" << urlToShow << "\"\n";
+        g_log.debug() << "open help url \"" << urlToShow << "\"\n";
         string temp("setSource " + urlToShow + "\n");
         QByteArray ba;
         ba.append(QLatin1String(temp.c_str()));
@@ -212,14 +219,14 @@ void HelpWindowImpl::start(const std::string &url)
     // check if it is already started
     if (this->isRunning())
     {
-        m_log.debug() << "helpwindow process already running\n";
+        g_log.debug() << "helpwindow process already running\n";
         return;
     }
 
     // see if chache file exists and remove it - shouldn't be necessary, but it is
     if ((!m_cacheFile.empty()) && (Poco::File(m_cacheFile).exists()))
     {
-        m_log.debug() << "Removing help cache file \"" << m_cacheFile << "\"\n";
+        g_log.debug() << "Removing help cache file \"" << m_cacheFile << "\"\n";
         Poco::File(m_cacheFile).remove();
     }
 
@@ -241,7 +248,7 @@ void HelpWindowImpl::start(const std::string &url)
 
     // start the process
     m_process = boost::make_shared<QProcess>();
-    m_log.debug() << m_assistantExe
+    g_log.debug() << m_assistantExe
                   << " " << args.join(QString(" ")).toStdString()
                   << " (state = \"" << stateToStr(m_process->state()) << "\")\n";
     m_process->start(QLatin1String(m_assistantExe.c_str()), args);
@@ -249,13 +256,13 @@ void HelpWindowImpl::start(const std::string &url)
     // wait for it to start before returning
     if (!m_process->waitForStarted())
     {
-        m_log.warning() << "Failed to start qt assistant process\n";
+        g_log.warning() << "Failed to start qt assistant process\n";
         return;
     }
     if (m_firstRun)
     {
         m_firstRun = false;
-        m_log.debug() << "Very first run of qt assistant comes up slowly (2.5 sec pause)\n";
+        g_log.debug() << "Very first run of qt assistant comes up slowly (2.5 sec pause)\n";
         Poco::Thread::sleep(2500); // 2.5 seconds
     }
 }
@@ -292,7 +299,7 @@ void HelpWindowImpl::findCollectionFile(std::string &binDir)
 
     // try next to the executable
     Poco::Path path(binDir, COLLECTION);
-    m_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
+    g_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
     if (Poco::File(path).exists())
     {
         m_collectionFile =path.absolute().toString();
@@ -301,7 +308,7 @@ void HelpWindowImpl::findCollectionFile(std::string &binDir)
 
     // try where the builds will put it
     path = Poco::Path(binDir, "qtassistant/"+COLLECTION);
-    m_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
+    g_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
     if (Poco::File(path).exists())
     {
         m_collectionFile = path.absolute().toString();
@@ -310,7 +317,7 @@ void HelpWindowImpl::findCollectionFile(std::string &binDir)
 
     // try in a good linux install location
     path = Poco::Path(binDir, "../share/doc/" + COLLECTION);
-    m_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
+    g_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
     if (Poco::File(path).exists())
     {
         m_collectionFile = path.absolute().toString();
@@ -326,7 +333,7 @@ void HelpWindowImpl::findCollectionFile(std::string &binDir)
     }
 
     // all tries have failed
-    m_log.information("Failed to find help system collection file \"" + COLLECTION + "\"");
+    g_log.information("Failed to find help system collection file \"" + COLLECTION + "\"");
 }
 
 /**
@@ -346,40 +353,40 @@ void HelpWindowImpl::findQtAssistantExe(std::string &binDir)
     m_assistantExe = "/usr/local/bin/assistant-qt4";
     if (Poco::File(m_assistantExe).exists())
         return;
-    m_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
+    g_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
 
     m_assistantExe = "/usr/bin/assistant-qt4";
     if (Poco::File(m_assistantExe).exists())
         return;
-    m_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
+    g_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
 
     m_assistantExe = "/usr/local/bin/assistant";
     if (Poco::File(m_assistantExe).exists())
         return;
-    m_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
+    g_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
 
     m_assistantExe = "/usr/bin/assistant";
     if (Poco::File(m_assistantExe).exists())
         return;
-    m_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
+    g_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
 
     // give up and hope it is in the path
-    m_log.debug() << "Assuming qt-assistant is elsewhere in the path.\n";
+    g_log.debug() << "Assuming qt-assistant is elsewhere in the path.\n";
     m_assistantExe = "assistant";
 #else
     // windows it is next to MantidPlot
     m_assistantExe = Poco::Path(binDir, "assistant").absolute().toString();
     if (Poco::File(m_assistantExe).exists())
         return;
-    m_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
+    g_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
 
     m_assistantExe = Poco::Path(binDir, "assistant.exe").absolute().toString();
     if (Poco::File(m_assistantExe).exists())
         return;
-    m_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
+    g_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
 
     // give up and hope it is in the path
-    m_log.debug() << "Assuming qt-assistant is elsewhere in the path.\n";
+    g_log.debug() << "Assuming qt-assistant is elsewhere in the path.\n";
     m_assistantExe = "assistant.exe";
 #endif
 }
@@ -399,7 +406,7 @@ void HelpWindowImpl::determineFileLocs()
         m_cacheFile = "";
         return;
     }
-    m_log.debug() << "Using collection file \"" << m_collectionFile << "\"\n";
+    g_log.debug() << "Using collection file \"" << m_collectionFile << "\"\n";
 
     // location for qtassistant
     this->findQtAssistantExe(binDir);
@@ -410,7 +417,7 @@ void HelpWindowImpl::determineFileLocs()
         m_cacheFile = "";
         return;
     }
-    m_log.debug() << "Using \"" << m_assistantExe << "\" for viewing help\n";
+    g_log.debug() << "Using \"" << m_assistantExe << "\" for viewing help\n";
 
     // determine cache file location
     m_cacheFile = "mantid.qhc";
@@ -431,7 +438,7 @@ void HelpWindowImpl::determineFileLocs()
     }
     else
     {
-        m_log.debug() << "Failed to determine help cache file location\n"; // REMOVE
+        g_log.debug() << "Failed to determine help cache file location\n"; // REMOVE
         m_cacheFile = "";
     }
 }

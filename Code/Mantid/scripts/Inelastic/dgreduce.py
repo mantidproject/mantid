@@ -217,8 +217,11 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         val = getattr(Reducer,key);
         Reducer.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val))
 
+
     save_dir = config.getString('defaultsave.directory') 
     Reducer.log("****************************************************************");
+    if monovan_run != None and not('van_mass' in changed_Keys or 'vanadium-mass' in changed_Keys) :
+         Reducer.log("*** Monochromatic vanadium mass used : {0} ".format(Reducer.van_mass))
     Reducer.log("*** By default results are saved into: {0}".format(save_dir));
     Reducer.log("****************************************************************");
     #do we run absolute units normalization and need to warn users if the parameters needed for that have not changed from defaults

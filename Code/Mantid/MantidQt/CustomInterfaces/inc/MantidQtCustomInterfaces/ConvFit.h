@@ -49,6 +49,7 @@ namespace IDA
   private:
     boost::shared_ptr<Mantid::API::CompositeFunction> createFunction(bool tieCentres=false);
     QtProperty* createLorentzian(const QString &);
+    void createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product);
     void populateFunction(Mantid::API::IFunction_sptr func, Mantid::API::IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie);
     QString fitTypeString() const;
     QString backgroundString() const;

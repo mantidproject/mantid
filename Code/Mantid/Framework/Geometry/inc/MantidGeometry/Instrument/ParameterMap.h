@@ -9,7 +9,6 @@
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Cache.h"
-#include "MantidKernel/Logger.h"
 
 #ifndef HAS_UNORDERED_MAP_H
 #include <map>
@@ -289,9 +288,6 @@ namespace Geometry
     mutable Kernel::Cache<const ComponentID, Kernel::Quat > m_cacheRotMap;
     ///internal cache map for cached bounding boxes
     mutable Kernel::Cache<const ComponentID,BoundingBox> m_boundingBoxMap;
-
-    /// Static reference to the logger class
-    static Kernel::Logger& g_log;
   };
 
   /// ParameterMap shared pointer typedef

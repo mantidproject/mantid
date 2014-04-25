@@ -394,8 +394,8 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
   Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit();
 
   // Get the distance between the source and the sample (assume in metres)
-  IObjComponent_const_sptr source = instrument->getSource();
-  IObjComponent_const_sptr sample = instrument->getSample();
+  IComponent_const_sptr source = instrument->getSource();
+  IComponent_const_sptr sample = instrument->getSample();
   if ( source == NULL || sample == NULL )
   {
     throw Exception::InstrumentDefinitionError("Instrubment not sufficiently defined: failed to get source and/or sample");

@@ -29,6 +29,7 @@ set ( TEST_PY_FILES
   QuatTest.py
   UnitConversionTest.py
   UnitFactoryTest.py
+  UnitLabelTest.py
   UnitsTest.py
   V3DTest.py
   VisibleWhenPropertyTest.py

@@ -109,7 +109,7 @@ def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # 
         if num_versions > 0:
             htmlfile.h2("Version %d" % version)
 
-        alg = mantid.FrameworkManager.createAlgorithm(name, version)
+        alg = mantid.AlgorithmManager.create(name, version)
         categories.extend(alg.categories())
         
         htmlfile.h3("Summary")

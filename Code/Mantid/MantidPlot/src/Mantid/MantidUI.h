@@ -215,9 +215,6 @@ public:
     MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, bool errs=true, bool distr=false);
 
     // Set properties of a 1d graph which plots data from a workspace
-    static void setUpSpectrumGraph(MultiLayer* ml, const QString& wsName);
-
-    // Set properties of a 1d graph which plots data from a workspace
     static void setUpBinGraph(MultiLayer* ml, const QString& wsName, Mantid::API::MatrixWorkspace_const_sptr workspace);
 
     // Copy to a Table Y-values (and Err-values if errs==true) of bins with indeces from i0 to i1 (inclusive) from a workspace
@@ -289,11 +286,6 @@ public:
 
   void saveProject(bool save);
   void enableSaveNexus(const QString & wsName);
-
-  /// Verifies if the Catalog login was a success.
-  bool isValidCatalogLogin();
-  /// Create a publishing dialog.
-  void catalogPublishDialog();
 
 signals:
   //A signal to indicate that we want a script to produce a dialog
@@ -544,9 +536,6 @@ private:
 
   //prevents some repeated code realtating to log names
   void formatLogName(QString &label, const QString &wsName);
-
-  /// Logger
-  static Mantid::Kernel::Logger & g_log;
 };
 
 

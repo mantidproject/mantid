@@ -112,6 +112,9 @@ private:
   std::string result; ///< the result string
 
   API::Progress * prog;
+  /// Variable states if one wants to compare workspaces in parallell. This usully true but if one wants to look at the comparison logs, parallell comparison make things complicated as 
+  /// logs from different threads are mixed together.  In this case, it is better not to do parallell comparison. 
+  bool m_ParallelComparison;
 };
 
 } // namespace Algorithms

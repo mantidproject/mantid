@@ -9,9 +9,12 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class ReflChoose(QtGui.QDialog, refl_columns.Ui_ChooseColumnsDialog):
+class ReflChoose(QtGui.QDialog, refl_columns.Ui_chooseColumnsDialog):
+
+
     visiblestates = {}
-    def __init__(self, ColHeaders, table):
+
+    def __init__(self, col_headers, table):
         """
         Initialise the interface
         """
@@ -20,7 +23,7 @@ class ReflChoose(QtGui.QDialog, refl_columns.Ui_ChooseColumnsDialog):
         self.visiblestates.clear()
         self.listColumns.itemChanged.connect(self.on_listColumns_itemChanged)
         self.buttonsColumns.clicked.connect(self.on_buttonsColumns_Clicked)
-        for key, value in ColHeaders.iteritems():
+        for key, value in col_headers.iteritems():
             header = table.horizontalHeaderItem(key).text()
             item = QtGui.QListWidgetItem(header)
             if value:

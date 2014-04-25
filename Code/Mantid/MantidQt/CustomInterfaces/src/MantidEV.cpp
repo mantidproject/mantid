@@ -555,7 +555,7 @@ void MantidEV::selectWorkspace_slot()
      errorMessage("Previous operation still running, please wait until it is finished");
      return;
    }
-
+   std::string file_name = m_uiForm.EventFileName_ledt->text().trimmed().toStdString();
    if (m_uiForm.convertToMDGroupBox->isChecked())
    {
      if (!m_uiForm.loadDataGroupBox->isChecked())
@@ -566,12 +566,13 @@ void MantidEV::selectWorkspace_slot()
          return;
        }
      }
-
-     std::string file_name = m_uiForm.EventFileName_ledt->text().trimmed().toStdString();
-     if (file_name.empty())
+     else
      {
-       errorMessage("Specify the name of an event file to load.");
-       return;
+       if (file_name.empty())
+       {
+         errorMessage("Specify the name of an event file to load.");
+         return;
+       }
      }
 
      double minQ;

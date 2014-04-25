@@ -1,3 +1,6 @@
+#include "MantidKernel/Memory.h"
+#include "MantidKernel/Logger.h"
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -22,8 +25,6 @@
   #include <Psapi.h>
 #endif
 
-#include "MantidKernel/Memory.h"
-#include "MantidKernel/System.h"
 
 using std::size_t;
 using std::string;
@@ -32,6 +33,12 @@ namespace Mantid
 {
 namespace Kernel
 {
+namespace
+{
+  /// static logger object
+  Logger g_log("Memory");
+}
+
 
 /// Utility function to convert memory in kiB into easy to read units.
 template <typename TYPE>
@@ -287,19 +294,19 @@ void MemoryOptions::initAllocatorOptions()
    */
   mallopt(M_MMAP_THRESHOLD, 8*4096);
 #elif _WIN32
-  Kernel::Logger &g_log = Kernel::Logger::get("MemoryOptions");
+  Logger memOptLogger("MemoryOptions");
   // Try to enable the Low Fragmentation Heap for all heaps
   // Bit of a brute force approach, but don't know which heap workspace data ends up on
   HANDLE hHeaps[1025];
   // Get the number of heaps
   const DWORD numHeap = GetProcessHeaps(1024, hHeaps);
-  g_log.debug() << "Number of heaps: " << numHeap   << "\n";//GetProcessHeaps(0, NULL) << "\n";
+  memOptLogger.debug() << "Number of heaps: " << numHeap   << "\n";//GetProcessHeaps(0, NULL) << "\n";
   ULONG ulEnableLFH = 2; // 2 = Low Fragmentation Heap
   for(DWORD i = 0; i < numHeap; i++)
   {
     if(!HeapSetInformation(hHeaps[i], HeapCompatibilityInformation, &ulEnableLFH, sizeof(ulEnableLFH)))
     {
-      g_log.debug() << "Failed to enable the LFH for heap " << i << "\n";
+      memOptLogger.debug() << "Failed to enable the LFH for heap " << i << "\n";
     }
   }
 #endif
@@ -307,9 +314,6 @@ void MemoryOptions::initAllocatorOptions()
 }
 
 // ------------------ The actual class ----------------------------------------
-
-/// Initialize the logger
-Kernel::Logger & MemoryStats::g_log = Kernel::Logger::get("Memory");
 
 /**
  * Constructor

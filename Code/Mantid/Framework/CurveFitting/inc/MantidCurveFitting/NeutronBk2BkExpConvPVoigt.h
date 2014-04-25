@@ -3,7 +3,6 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IPowderDiffPeakFunction.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -93,9 +92,6 @@ namespace CurveFitting
                     const bool explicitoutput=false) const;
 
     static int s_peakRadius;
-
-    /// Static reference to the logger class
-    static Kernel::Logger& g_log;
 
     /// Set 2 functions to be hidden from client
     /*

@@ -229,10 +229,24 @@ public:
 	uint32_t cycle(void) const { return m_fields[2]; }
 	uint32_t flags(void) const { return m_fields[3]; }
 
-	// TODO implment monitor/event accessors
+	// For now, we only care about the monitor ID's and event counts.
+	// There's currently no way to actual event TOF values.
+	void firstSection() const { m_sectionStartIndex = 4; }
+	bool nextSection() const;
+	uint32_t getSectionMonitorID() const;
+	uint32_t getSectionEventCount() const;
+
+	// TODO: Implement these if/when they become necessary
+	// uint32_t getSectionTOFOffset() const;
+	// bool getSectionCORFlag() const;
+	// uint32_t getFirstTOF() const;
+	// uint32_t getNextTOF() const;
 
 private:
 	const uint32_t *m_fields;
+
+	// Data about the current monitor section
+	mutable uint32_t m_sectionStartIndex;  // index into m_fields for the start of this section
 
 	BeamMonitorPkt(const uint8_t *data, uint32_t len);
 

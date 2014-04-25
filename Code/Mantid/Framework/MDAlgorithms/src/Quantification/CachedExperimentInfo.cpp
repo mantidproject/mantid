@@ -154,8 +154,8 @@ namespace Mantid
       m_up = refFrame->pointingUp();
       m_horiz = refFrame->pointingHorizontal();
 
-      IObjComponent_const_sptr source = instrument->getSource();
-      IObjComponent_const_sptr sample = instrument->getSample();
+      IComponent_const_sptr source = instrument->getSource();
+      IComponent_const_sptr sample = instrument->getSample();
       IComponent_const_sptr aperture = instrument->getComponentByName("aperture", 1);
       if(!aperture)
       {

@@ -6,7 +6,6 @@
 //------------------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/TypedValidator.h"
-#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {

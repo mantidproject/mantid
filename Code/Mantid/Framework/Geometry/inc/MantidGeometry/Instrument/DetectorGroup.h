@@ -7,7 +7,6 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <map>
 
@@ -214,8 +213,6 @@ namespace Mantid
       /// Private, unimplemented copy assignment operator
       DetectorGroup& operator=(const DetectorGroup&);
 
-   /// Static reference to the logger class
-      static Kernel::Logger& g_log;
       /// function calculates the detectors arrangement (topology)
       void calculateGroupTopology()const;
     };

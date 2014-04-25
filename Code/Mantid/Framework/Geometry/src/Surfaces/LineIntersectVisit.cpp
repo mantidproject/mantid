@@ -1,5 +1,4 @@
 #include "MantidGeometry/Surfaces/LineIntersectVisit.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Surfaces/Surface.h"
@@ -17,8 +16,6 @@ namespace Mantid
 
 namespace Geometry
 {
-
-Kernel::Logger& LineIntersectVisit::PLog(Kernel::Logger::get("LineIntersectVisit"));
 
 LineIntersectVisit::LineIntersectVisit
   (const Kernel::V3D& Pt,const Kernel::V3D& uVec) :

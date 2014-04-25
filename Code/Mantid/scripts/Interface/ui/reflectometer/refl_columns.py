@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_columns.ui'
 #
-# Created: Wed Mar 19 16:41:17 2014
+# Created: Tue Mar 25 15:42:15 2014
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -14,24 +14,24 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class Ui_ChooseColumnsDialog(object):
-    def setupUi(self, ChooseColumnsDialog):
-        ChooseColumnsDialog.setObjectName(_fromUtf8("ChooseColumnsDialog"))
-        ChooseColumnsDialog.resize(307, 300)
-        ChooseColumnsDialog.setSizeGripEnabled(False)
-        self.verticalLayout = QtGui.QVBoxLayout(ChooseColumnsDialog)
+class Ui_chooseColumnsDialog(object):
+    def setupUi(self, chooseColumnsDialog):
+        chooseColumnsDialog.setObjectName(_fromUtf8("chooseColumnsDialog"))
+        chooseColumnsDialog.resize(307, 300)
+        chooseColumnsDialog.setSizeGripEnabled(False)
+        self.verticalLayout = QtGui.QVBoxLayout(chooseColumnsDialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.labelColumns = QtGui.QLabel(ChooseColumnsDialog)
+        self.labelColumns = QtGui.QLabel(chooseColumnsDialog)
         self.labelColumns.setObjectName(_fromUtf8("labelColumns"))
         self.verticalLayout.addWidget(self.labelColumns)
         self.layoutListButtons = QtGui.QHBoxLayout()
         self.layoutListButtons.setObjectName(_fromUtf8("layoutListButtons"))
-        self.listColumns = QtGui.QListWidget(ChooseColumnsDialog)
+        self.listColumns = QtGui.QListWidget(chooseColumnsDialog)
         self.listColumns.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.listColumns.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
         self.listColumns.setObjectName(_fromUtf8("listColumns"))
         self.layoutListButtons.addWidget(self.listColumns)
-        self.buttonsColumns = QtGui.QDialogButtonBox(ChooseColumnsDialog)
+        self.buttonsColumns = QtGui.QDialogButtonBox(chooseColumnsDialog)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -45,12 +45,12 @@ class Ui_ChooseColumnsDialog(object):
         self.layoutListButtons.addWidget(self.buttonsColumns)
         self.verticalLayout.addLayout(self.layoutListButtons)
 
-        self.retranslateUi(ChooseColumnsDialog)
-        QtCore.QObject.connect(self.buttonsColumns, QtCore.SIGNAL(_fromUtf8("accepted()")), ChooseColumnsDialog.accept)
-        QtCore.QObject.connect(self.buttonsColumns, QtCore.SIGNAL(_fromUtf8("rejected()")), ChooseColumnsDialog.reject)
-        QtCore.QMetaObject.connectSlotsByName(ChooseColumnsDialog)
+        self.retranslateUi(chooseColumnsDialog)
+        QtCore.QObject.connect(self.buttonsColumns, QtCore.SIGNAL(_fromUtf8("accepted()")), chooseColumnsDialog.accept)
+        QtCore.QObject.connect(self.buttonsColumns, QtCore.SIGNAL(_fromUtf8("rejected()")), chooseColumnsDialog.reject)
+        QtCore.QMetaObject.connectSlotsByName(chooseColumnsDialog)
 
-    def retranslateUi(self, ChooseColumnsDialog):
-        ChooseColumnsDialog.setWindowTitle(QtGui.QApplication.translate("ChooseColumnsDialog", "Choose Columns...", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelColumns.setText(QtGui.QApplication.translate("ChooseColumnsDialog", "Choose columns to display", None, QtGui.QApplication.UnicodeUTF8))
+    def retranslateUi(self, chooseColumnsDialog):
+        chooseColumnsDialog.setWindowTitle(QtGui.QApplication.translate("chooseColumnsDialog", "Choose Columns...", None, QtGui.QApplication.UnicodeUTF8))
+        self.labelColumns.setText(QtGui.QApplication.translate("chooseColumnsDialog", "Choose columns to display", None, QtGui.QApplication.UnicodeUTF8))
 

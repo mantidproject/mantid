@@ -16,12 +16,13 @@ const string NXENTRY("NXentry");
 const string NXLOG("NXlog");
 ///< Special string for start time
 const string START_TIME("start_time");
+
+/// logger
+Mantid::Kernel::Logger g_log("MuonNexusReader");
 }
 
 using namespace Mantid;
 
-// Acquire logger
-Mantid::Kernel::Logger& MuonNexusReader::g_log( Mantid::Kernel::Logger::get("MuonNexusReader") );
 
 /// Default constructor
 MuonNexusReader::MuonNexusReader() : 

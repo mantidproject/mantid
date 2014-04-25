@@ -93,8 +93,8 @@ namespace Mantid
         tth = 0.;
         return;
       }
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      Geometry::IComponent_const_sptr source = instrument->getSource();
+      Geometry::IComponent_const_sptr sample = instrument->getSample();
       if (source == NULL || sample == NULL)
       {
         l1 = 0.;
@@ -143,8 +143,8 @@ namespace Mantid
       Progress p(this, 0.0, 1.0, nHist);
       double l1, l2, tth;
       Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
-      Geometry::IObjComponent_const_sptr source;
-      Geometry::IObjComponent_const_sptr sample;
+      Geometry::IComponent_const_sptr source;
+      Geometry::IComponent_const_sptr sample;
       if (instrument != NULL)
       {
         source = instrument->getSource();

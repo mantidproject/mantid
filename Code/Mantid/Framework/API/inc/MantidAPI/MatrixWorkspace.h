@@ -4,6 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#ifndef Q_MOC_RUN
+# include <boost/scoped_ptr.hpp>
+#endif
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -14,7 +17,6 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 
-#include <boost/scoped_ptr.hpp>
 
 namespace Mantid
 {
@@ -339,9 +341,6 @@ namespace Mantid
 
       /// Shared pointer to NearestNeighbours object
       mutable boost::shared_ptr<Mantid::Geometry::INearestNeighbours> m_nearestNeighbours;
-
-      /// Static reference to the logger class
-      static Kernel::Logger& g_log;
 
       /// Getter for the dimension id based on the axis.
       std::string getDimensionIdFromAxis(const int& axisIndex) const;

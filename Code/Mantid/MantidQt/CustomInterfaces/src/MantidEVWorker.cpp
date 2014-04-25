@@ -11,6 +11,7 @@
 #include "MantidAPI/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Logger.h"
 #include <exception>
 
 namespace MantidQt
@@ -21,9 +22,11 @@ namespace CustomInterfaces
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-// Initialize the logger
-Logger& MantidEVWorker::g_log = Logger::get("MantidEV");
-
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("MantidEV");
+}
 
 /**
  *  Default constructor
@@ -292,13 +295,12 @@ bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
  *  Predict peaks and overwrite
  *  specified peaks workspace.
  *
- *  @param md_ws_name     Name of the MD workspace to use
  *  @param peaks_ws_name  Name of the peaks workspace to create
  *
  *  @param min_pred_wl        Minimum wavelength
  *  @param max_pred_wl        Maximum wavelength
-*  @param min_pred_dspacing   Minimum d-space
-*  @param max_pred_dspacing   Maximum d-space
+ *  @param min_pred_dspacing   Minimum d-space
+ *  @param max_pred_dspacing   Maximum d-space
  *
  *  @return true if PredictPeaks completed successfully.
  */

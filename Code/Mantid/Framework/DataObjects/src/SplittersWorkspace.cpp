@@ -1,5 +1,4 @@
 #include "MantidDataObjects/SplittersWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/IPropertyManager.h"
@@ -11,9 +10,11 @@ namespace Mantid
 {
 namespace DataObjects
 {
-
-  Kernel::Logger& mg_log = Kernel::Logger::get("ITableWorkspace");
-
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("SplittersWorkspace");
+  }
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
@@ -70,7 +71,7 @@ namespace DataObjects
     bool removed;
     if (index >= this->rowCount())
     {
-      mg_log.error() << "Try to delete a non-existing splitter " << index << std::endl;
+      g_log.error() << "Try to delete a non-existing splitter " << index << std::endl;
       removed = false;
     }
     else

@@ -1,7 +1,6 @@
 #ifndef CACHE_GEOMETRYHANDLER_H
 #define CACHE_GEOMETRYHANDLER_H
 
-#include <boost/shared_ptr.hpp>
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 
@@ -52,7 +51,6 @@ namespace Mantid
     class MANTID_GEOMETRY_DLL CacheGeometryHandler: public GeometryHandler
     {
     private:
-      static Kernel::Logger& PLog;           ///< The official logger
       CacheGeometryRenderer* Renderer;         ///< Geometry renderer variable used for rendering Object/ObjComponent
       CacheGeometryGenerator* Triangulator;    ///< Geometry generator to triangulate Object
 

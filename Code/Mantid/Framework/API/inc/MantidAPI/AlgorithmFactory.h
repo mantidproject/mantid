@@ -10,7 +10,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -158,8 +157,6 @@ public:
   std::string createName(const std::string&, const int&)const;
   /// fills a set with the hidden categories
   void fillHiddenCategories(std::set<std::string> *categorySet) const;
-  ///static reference to the logger class
-  Kernel::Logger& g_log;
 
   /// A typedef for the map of algorithm versions
   typedef std::map<std::string, int> VersionMap;

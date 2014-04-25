@@ -1,4 +1,7 @@
 #include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
+#include "MantidQtAPI/PlotAxis.h"
+
+#include <QStringBuilder>
 
 /// Constructor
 MantidQwtMatrixWorkspaceData::MantidQwtMatrixWorkspaceData(Mantid::API::MatrixWorkspace_const_sptr workspace,int specIndex, const bool logScale, bool distr)
@@ -138,6 +141,22 @@ double MantidQwtMatrixWorkspaceData::getYMax() const
     temp = m_minPositive;
   }
   return temp;
+}
+
+/**
+ * @return A string containin the text to use as an X axis label
+ */
+QString MantidQwtMatrixWorkspaceData::getXAxisLabel() const
+{
+  return MantidQt::API::PlotAxis(*m_workspace, 0).title();
+}
+
+/**
+ * @return A string containin the text to use as an Y axis label
+ */
+QString MantidQwtMatrixWorkspaceData::getYAxisLabel() const
+{
+  return MantidQt::API::PlotAxis(*m_workspace).title();
 }
 
 void MantidQwtMatrixWorkspaceData::setLogScale(bool on)

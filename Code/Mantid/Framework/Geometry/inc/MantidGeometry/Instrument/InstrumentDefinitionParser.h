@@ -6,7 +6,6 @@
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Document.h>
 #include "MantidKernel/System.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/IDFObject.h"
@@ -96,8 +95,6 @@ namespace Geometry
     CachingOption getAppliedCachingOption() const;
 
   private:
-    /// Static reference to the logger class
-    static Kernel::Logger& g_log;
 
     /// Set location (position) of comp as specified in XML location element
     void setLocation(Geometry::IComponent* comp, const Poco::XML::Element* pElem, const double angleConvertConst,
@@ -177,9 +174,6 @@ namespace Geometry
     /// Take as input a \<locations\> element. Such an element is a short-hand notation for a sequence of \<location\> elements. 
     /// This method return this sequence as a xml string
     std::string convertLocationsElement(const Poco::XML::Element* pElem);
-
-    /// Just to avoid replication of code here throw text string to throw when too many 'end' attribute of \<locations\> tag
-    std::string throwTooManyEndAttributeInLocations(const std::string& tx1, const std::string& tx2);
 
 public: //for testing
     /// return absolute position of point which is set relative to the

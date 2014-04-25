@@ -16,11 +16,6 @@ set ( SRC_FILES
 	src/PeakOverlayViewFactorySelector.cpp  
 	src/PeakPalette.cpp
 	src/PeaksTableColumnsDialog.cpp
-	src/PeakTransform.cpp
-	src/PeakTransformHKL.cpp
-	src/PeakTransformQSample.cpp
-	src/PeakTransformQLab.cpp
-	src/PeakTransformSelector.cpp
 	src/PeaksViewer.cpp
 	src/PeaksWorkspaceWidget.cpp
 	src/PhysicalCrossPeak.cpp
@@ -41,7 +36,6 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/ColorBarWidget.h
 	inc/MantidQtSliceViewer/CompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/ConcretePeaksPresenter.h
-	inc/MantidQtSliceViewer/ConcretePeakTransformFactory.h
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
 	inc/MantidQtSliceViewer/FirstExperimentInfoQuery.h
@@ -61,12 +55,6 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeakPalette.h
 	inc/MantidQtSliceViewer/PeaksPresenter.h
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h
-	inc/MantidQtSliceViewer/PeakTransformHKL.h
-	inc/MantidQtSliceViewer/PeakTransformQSample.h
-	inc/MantidQtSliceViewer/PeakTransformQLab.h
-	inc/MantidQtSliceViewer/PeakTransform.h
-	inc/MantidQtSliceViewer/PeakTransformFactory.h 
-	inc/MantidQtSliceViewer/PeakTransformSelector.h
 	inc/MantidQtSliceViewer/PeaksViewer.h
 	inc/MantidQtSliceViewer/PeaksViewerOverlayDialog.h
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.h
@@ -124,11 +112,6 @@ set ( TEST_FILES
     test/ConcretePeaksPresenterTest.h
     test/PeakBoundingBoxTest.h
     test/PeakPaletteTest.h
-    test/PeakOverlayViewFactorySelectorTest.h
-    test/PeakTransformHKLTest.h
-    test/PeakTransformQSampleTest.h
-    test/PeakTransformQLabTest.h
-    test/PeakTransformSelectorTest.h
     test/PhysicalCrossPeakTest.h
     test/PhysicalSphericalPeakTest.h
     test/NullPeaksPresenterTest.h

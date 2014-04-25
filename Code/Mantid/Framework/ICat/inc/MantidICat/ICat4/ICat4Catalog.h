@@ -66,6 +66,8 @@ namespace Mantid
         /// get URL of where to PUT (publish) files.
         virtual const std::string getUploadURL(
             const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription);
+        /// Obtains the investigations that the user can publish to and saves related information to a workspace.
+        virtual API::ITableWorkspace_sptr getPublishInvestigations();
         /// Keep current session alive
         virtual void keepAlive();
 
@@ -87,12 +89,10 @@ namespace Mantid
         // Helper method that formats a given timestamp.
         std::string formatDateTime(const time_t &timestamp, const std::string &format);
         // Search the archive & obtain the dataset ID based on the investigationID.
-        int64_t getDatasetId(const std::string &investigationID);
+        int64_t getMantidDatasetId(const std::string &investigationID);
         // Sets the soap-endpoint & SSL context for the given ICAT proxy.
         void setICATProxySettings(ICat4::ICATPortBindingProxy& icat);
 
-        // Reference to the logger class.
-        Kernel::Logger& g_log;
         // Stores the session details for a specific catalog.
         API::CatalogSession_sptr m_session;
 

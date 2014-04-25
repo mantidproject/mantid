@@ -975,7 +975,7 @@ void AlgorithmDialog::setPreviousValue(QWidget* widget, const QString& propName)
   PropertyWidget * propWidget = qobject_cast<PropertyWidget*>(widget);
   if (propWidget)
   {
-    propWidget->setValue(value);
+    propWidget->setPreviousValue(value);
     
     return;
   }

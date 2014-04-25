@@ -25,7 +25,12 @@ namespace Mantid
     using namespace Geometry;
     using Kernel::V3D;
 
-    Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("MatrixWorkspace");
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("MatrixWorkspace");
+    }
+
     const std::string MatrixWorkspace::xDimensionId = "xDimension";
     const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
@@ -66,7 +71,8 @@ namespace Mantid
       if (axes() > 0 )
       {
         Axis *ax = getAxis(0);
-        if ( ax && ax->unit() ) os << ax->unit()->caption() << " / " << ax->unit()->label();
+        if ( ax && ax->unit() ) os << ax->unit()->caption()
+                                   << " / " << ax->unit()->label().ascii();
         else os << "Not set";
       }
       else
@@ -91,7 +97,6 @@ namespace Mantid
       // Check validity of arguments
       if (NVectors == 0 || XLength == 0 || YLength == 0)
       {
-        g_log.error("All arguments to init must be positive and non-zero");
         throw std::out_of_range("All arguments to init must be positive and non-zero");
       }
 
@@ -103,9 +108,8 @@ namespace Mantid
       {
         this->init(NVectors, XLength, YLength);
       }
-      catch(std::runtime_error& ex)
+      catch(std::runtime_error&)
       {
-        g_log.error() << "Error initializing the workspace" << ex.what() << std::endl;
         throw;
       }
 
@@ -205,10 +209,9 @@ namespace Mantid
         m_nearestNeighbours.reset();
 
       }
-      catch (std::runtime_error & e)
+      catch (std::runtime_error &)
       {
-        g_log.error() << "MatrixWorkspace::rebuildSpectraMapping() error:" << std::endl;
-        throw &e;
+        throw;
       }
 
     }
@@ -750,8 +753,8 @@ namespace Mantid
     {
       Instrument_const_sptr instrument = getInstrument();
 
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      Geometry::IComponent_const_sptr source = instrument->getSource();
+      Geometry::IComponent_const_sptr sample = instrument->getSample();
       if ( source == NULL || sample == NULL )
       {
         throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
@@ -776,8 +779,8 @@ namespace Mantid
      */
     double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const
     {
-      Geometry::IObjComponent_const_sptr source = getInstrument()->getSource();
-      Geometry::IObjComponent_const_sptr sample = getInstrument()->getSample();
+      Geometry::IComponent_const_sptr source = getInstrument()->getSource();
+      Geometry::IComponent_const_sptr sample = getInstrument()->getSample();
       if ( source == NULL || sample == NULL )
       {
         throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
@@ -849,7 +852,6 @@ namespace Mantid
     {
       if ( axisIndex >= m_axes.size() )
       {
-        g_log.error() << "Argument to getAxis (" << axisIndex << ") is invalid for this (" << m_axes.size() << " axis) workspace" << std::endl;
         throw Kernel::Exception::IndexError(axisIndex, m_axes.size(),"Argument to getAxis is invalid for this workspace");
       }
 
@@ -867,7 +869,6 @@ namespace Mantid
       // First check that axisIndex is in range
       if ( axisIndex >= m_axes.size() )
       {
-        g_log.error() << "Value of axisIndex (" << axisIndex << ") is invalid for this (" << m_axes.size() << " axis) workspace" << std::endl;
         throw Kernel::Exception::IndexError(axisIndex, m_axes.size(),"Value of axisIndex is invalid for this workspace");
       }
       // If we're OK, then delete the old axis and set the pointer to the new one
@@ -901,7 +902,7 @@ namespace Mantid
         // then append that unit to the string to be returned
         if ( !retVal.empty() && this->isDistribution() && this->axes() && this->getAxis(0)->unit() )
         {
-          retVal = retVal + " per " + this->getAxis(0)->unit()->label();
+          retVal = retVal + " per " + this->getAxis(0)->unit()->label().ascii();
         }
       }
 
@@ -1052,7 +1053,6 @@ namespace Mantid
       // Throw if there are no masked bins for this spectrum. The caller should check first using hasMaskedBins!
       if (it==m_masks.end())
       {
-        g_log.error() << "There are no masked bins for spectrum index " << workspaceIndex << std::endl;
         throw Kernel::Exception::IndexError(workspaceIndex,0,"MatrixWorkspace::maskedBins");
       }
 
@@ -1211,10 +1211,15 @@ namespace Mantid
       {
       }
       /// the name of the dimennlsion as can be displayed along the axis
-      virtual std::string getName() const {return m_axis.unit()->caption();}
+      virtual std::string getName() const
+      {
+        const auto & unit = m_axis.unit();
+        if (unit && unit->unitID() != "Empty" ) return unit->caption();
+        else return m_axis.title();
+      }
 
       /// @return the units of the dimension as a string
-      virtual std::string getUnits() const {return m_axis.unit()->label();}
+      virtual const Kernel::UnitLabel getUnits() const { return m_axis.unit()->label(); }
 
       /// short name which identify the dimension among other dimension. A dimension can be usually find by its ID and various
       /// various method exist to manipulate set of dimensions by their names. 
@@ -1267,10 +1272,16 @@ namespace Mantid
       virtual ~MWXDimension(){};
 
       /// the name of the dimennlsion as can be displayed along the axis
-      virtual std::string getName() const {return m_ws->getAxis(0)->unit()->caption();}
+      virtual std::string getName() const
+      {
+        const auto *axis = m_ws->getAxis(0);
+        const auto & unit = axis->unit();
+        if (unit && unit->unitID() != "Empty" ) return unit->caption();
+        else return axis->title();
+      }
 
       /// @return the units of the dimension as a string
-      virtual std::string getUnits() const {return m_ws->getAxis(0)->unit()->label();}
+      virtual const Kernel::UnitLabel getUnits() const {return m_ws->getAxis(0)->unit()->label();}
 
       /// short name which identify the dimension among other dimension. A dimension can be usually find by its ID and various
       /// various method exist to manipulate set of dimensions by their names.
@@ -1557,7 +1568,7 @@ namespace Mantid
       try
       {
         Geometry::Instrument_const_sptr inst = this->getInstrument();
-        Geometry::IObjComponent_const_sptr sample = inst->getSample();
+        Geometry::IComponent_const_sptr sample = inst->getSample();
         if (sample)
         {
           Kernel::V3D sample_pos = sample->getPos();
@@ -1629,6 +1640,7 @@ namespace Mantid
   } // namespace API
 } // Namespace Mantid
 
+///\cond TEMPLATE
 namespace Mantid
 {
   namespace Kernel

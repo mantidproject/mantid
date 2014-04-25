@@ -40,8 +40,12 @@ namespace Mantid
 
   namespace Crystal
   {
+    namespace
+    {
+      /// static logger
+      Kernel::Logger g_log("LatticeErrors");
+    }
 
-    Kernel::Logger& LatticeErrors::g_log = Kernel::Logger::get("LatticeErrors");
 
     DECLARE_FUNCTION( LatticeErrors )
 

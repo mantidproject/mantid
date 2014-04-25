@@ -1,9 +1,14 @@
 #include "OpenGLError.h"
 #include <iostream>
 #include <sstream>
+#include "MantidKernel/Logger.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 
-Mantid::Kernel::Logger& OpenGLError::s_log(Mantid::Kernel::Logger::get("OpenGL"));
+namespace
+{
+  // Initialize logger
+  Mantid::Kernel::Logger g_log("OpenGL");
+}
 
 /**
   * Check for a GL error and throw OpenGLError if found
@@ -18,7 +23,7 @@ bool OpenGLError::check(const std::string& funName)
    {
      std::ostringstream ostr;
      ostr<<"OpenGL error detected in " << funName <<": " << gluErrorString(err);
-     s_log.error()<<ostr.str()<<'\n';
+     g_log.error()<<ostr.str()<<'\n';
      //throw OpenGLError(ostr.str());
      return true;
    }
@@ -27,5 +32,5 @@ bool OpenGLError::check(const std::string& funName)
 
 std::ostream& OpenGLError::log()
 {
-  return s_log.error();
+  return g_log.error();
 }

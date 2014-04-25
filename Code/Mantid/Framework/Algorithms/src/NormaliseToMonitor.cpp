@@ -180,9 +180,6 @@ using namespace Kernel;
 using namespace API;
 using std::size_t;
 
-// logger for operations  
-Kernel::Logger& NormaliseToMonitor::g_log =Kernel::Logger::get("Algorithms");
-
 /// Default constructor
 NormaliseToMonitor::NormaliseToMonitor() :
   Algorithm(), m_monitor(), m_commonBins(false),

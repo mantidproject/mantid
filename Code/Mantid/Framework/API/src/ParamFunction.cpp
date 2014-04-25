@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
@@ -17,6 +18,11 @@ namespace Mantid
 {
 namespace API
 {
+  namespace
+  {
+    Kernel::Logger g_log("ParamFunction");
+  }
+
 
 /// Destructor
 ParamFunction::~ParamFunction()

@@ -247,9 +247,7 @@ public:
     {
         if (this->get() == NULL)
         {
-            Kernel::Logger& log = Kernel::Logger::get("TableWorkspace");
             std::string str = "Data type of column "+c->name()+" does not match "+typeid(T).name();
-            log.error(str);
             throw std::runtime_error(str);
         }
     }
@@ -267,9 +265,7 @@ public:
     {
         if (this->get() == NULL)
         {
-            Kernel::Logger& log = Kernel::Logger::get("TableWorkspace");
             std::string str = "Data type of column "+c->name()+" does not match "+typeid(API::Boolean).name();
-            log.error(str);
             throw std::runtime_error(str);
         }
     }

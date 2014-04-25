@@ -18,11 +18,6 @@
 namespace Mantid
 {
 
-  namespace Kernel
-  {
-    class Logger;
-  }
-
   namespace API
   {
     //----------------------------------------------------------------------
@@ -116,9 +111,6 @@ namespace Mantid
       void loadPluginsUsingKey(const std::string & key);
       /// Silence NeXus output
       void disableNexusOutput();
-
-      /// Reference to the logger class
-      Kernel::Logger& g_log;
 
       #ifdef MPI_BUILD
       /** Member variable that initialises the MPI environment on construction (in the
