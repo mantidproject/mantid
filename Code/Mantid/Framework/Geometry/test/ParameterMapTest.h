@@ -1,9 +1,11 @@
 #ifndef PARAMETERMAPTEST_H_
 #define PARAMETERMAPTEST_H_
 
+#include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
 
 #include <boost/make_shared.hpp>
@@ -126,6 +128,31 @@ public:
     TS_ASSERT_EQUALS(pmapA,pmapF);
 
   }
+
+  void testClone()
+  {
+    const double value(5.1);
+   
+    ParameterMap pmapA,pmapB;
+   
+    pmapA.addDouble(m_testInstrument.get(), "testDouble", value);
+    pmapA.addV3D(m_testInstrument.get(), "testV3D", Mantid::Kernel::V3D(1,2,3));
+
+    auto parD= pmapA.getRecursive(m_testInstrument.get(),"testDouble");
+    auto parV3= pmapA.getRecursive(m_testInstrument.get(),"testV3D");
+
+    Mantid::Geometry::Parameter *pParD = parD->clone();
+    Mantid::Geometry::Parameter *pParV = parV3->clone();
+
+    TS_ASSERT_EQUALS(pParD->asString(),parD->asString())
+    TS_ASSERT_EQUALS(pParV->asString(),parV3->asString())
+
+    pmapB.add(m_testInstrument.get(),Parameter_sptr(pParD));
+    pmapB.add(m_testInstrument.get(),Parameter_sptr(pParV));
+
+    TS_ASSERT_EQUALS(pmapA,pmapB);
+  }
+
 
   void testAdding_A_Parameter_That_Is_Not_Present_Puts_The_Parameter_In()
   {
