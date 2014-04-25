@@ -71,8 +71,64 @@ public:
     TS_ASSERT_EQUALS(compareAlg->getPropertyValue("arg1_param"), "x");
     TS_ASSERT_EQUALS(compareAlg->getPropertyValue("arg2_param"), "5");
     
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("testalg1",1);
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe(testInput->name(),testInput->version());
     delete testInput;
+  }
+
+  void test_Nested_History()
+  {
+    AlgorithmFactory::Instance().subscribe<testalg>();
+    using namespace Mantid::API;
+    AlgorithmHistory algHist = createTestHistory();
+  
+    //create some nested history records
+    auto child1 = createFromTestAlg("child1");
+    auto subChild11 = createFromTestAlg("subChild11");
+    child1.addChildHistory(subChild11);
+    
+    auto child2 = createFromTestAlg("child2");
+    auto subChild21 = createFromTestAlg("subChild21");
+    auto subChild22 = createFromTestAlg("subChild22");
+    child2.addChildHistory(subChild21);
+    child2.addChildHistory(subChild22);
+    
+    auto child3 = createFromTestAlg("child3");
+
+    algHist.addChildHistory(child1);
+    algHist.addChildHistory(child2);
+    algHist.addChildHistory(child3);
+
+    //check parent algorithm matches
+    std::ostringstream output;
+    output.exceptions( std::ios::failbit | std::ios::badbit );
+    TS_ASSERT_THROWS_NOTHING(output << algHist);
+    TS_ASSERT_EQUALS(output.str(), m_correctOutput);
+
+    auto children = algHist.getChildHistories();
+    TS_ASSERT_EQUALS(children.size(), 3);
+    
+    //check children are valid
+    int i = 1;
+    AlgorithmHistories::iterator it;
+    for (it = children.begin(); it != children.end(); ++it, ++i)
+    {
+      IAlgorithm_sptr childAlg = it->createAlgorithm();
+      std::string index = boost::lexical_cast<std::string>(i);
+      TS_ASSERT_EQUALS( childAlg->getPropertyValue("arg1_param"), "child" + index );
+
+      //check sub children
+      auto subchildren = it->getChildHistories();
+      int j = 1;
+      AlgorithmHistories::iterator jt;
+      for(jt = subchildren.begin(); jt != subchildren.end(); ++j, ++jt )
+      {
+        IAlgorithm_sptr subChildAlg = jt->createAlgorithm();
+        std::string subindex = boost::lexical_cast<std::string>(j);
+        TS_ASSERT_EQUALS( subChildAlg->getPropertyValue("arg1_param"), "subChild" + index + subindex );
+      } 
+    }
+
+    AlgorithmFactory::Instance().unsubscribe("testalg1", 1);
   }
 
 private:
@@ -121,6 +177,18 @@ private:
 
     return AlgorithmHistory(&alg, execTime, 14.0,  m_execCount++);
   }
+
+  AlgorithmHistory createFromTestAlg(std::string paramValue)
+  {
+    Algorithm *testInput = new testalg;
+    testInput->initialize();
+    testInput->setPropertyValue("arg1_param", paramValue);
+    AlgorithmHistory history(testInput, 1.0, -1.0, m_execCount++);
+
+    delete testInput;
+    return history;
+  }
+
 
   std::string m_correctOutput;
   size_t m_execCount;
