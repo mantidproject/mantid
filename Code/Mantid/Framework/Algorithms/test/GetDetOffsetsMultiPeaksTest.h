@@ -28,20 +28,20 @@ public:
     Mantid::API::FrameworkManager::Instance();
   }
 
-  void PtestTheBasics()
+  void testTheBasics()
   {
     TS_ASSERT_EQUALS( offsets.name(), "GetDetOffsetsMultiPeaks" );
     TS_ASSERT_EQUALS( offsets.version(), 1 );
     TS_ASSERT_EQUALS( offsets.category(), "Diffraction" );
   }
 
-  void PtestInit()
+  void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( offsets.initialize() );
     TS_ASSERT( offsets.isInitialized() );
   }
 
-  void testExec()
+  void FtestExec()
   {
     // ---- Create the simple workspace -------
     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,200);
@@ -84,7 +84,7 @@ public:
   }
 
 
-  void testExecWithGroup()
+  void FtestExecWithGroup()
   {
     // --------- Workspace with summed spectra -------
     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::CreateGroupedWorkspace2D(3, 200, 1.0);
