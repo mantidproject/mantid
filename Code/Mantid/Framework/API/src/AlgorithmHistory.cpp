@@ -88,6 +88,12 @@ void AlgorithmHistory::addExecutionInfo(const DateAndTime& start, const double& 
  */
 void AlgorithmHistory::addChildHistory(const AlgorithmHistory& childHist)
 {
+  // Don't copy one's own history onto oneself
+  if (this == &childHist)
+  {
+    return;
+  }
+
   m_childHistories.insert(childHist);
 }
 
@@ -168,6 +174,7 @@ AlgorithmHistory& AlgorithmHistory::operator=(const AlgorithmHistory& A)
     m_executionDate=A.m_executionDate;
     m_executionDuration=A.m_executionDuration;
     m_properties=A.m_properties;
+    m_childHistories=A.m_childHistories;
   }
   return *this;
 }
