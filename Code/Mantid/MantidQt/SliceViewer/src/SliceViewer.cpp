@@ -2257,7 +2257,7 @@ void SliceViewer::clearPeaksWorkspaces()
       {
         // Incompatible PeaksWorkspace.
         disablePeakOverlays();
-        throw e;
+        throw;
       }
     }
     updatePeakOverlaySliderWidget();
