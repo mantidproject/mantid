@@ -134,7 +134,7 @@ private:
 
   /// Estimate peak parameters
   std::string estimatePeakParameters(const MantidVec& vecX, const MantidVec& vecY,
-                                     size_t i_min, size_t i_max, const std::vector<double> vecbkgdparvalues,
+                                     size_t i_min, size_t i_max, const std::vector<double> &vecbkgdparvalues,
                                      size_t &iobscentre,
                                      double& height, double& fwhm, double& leftfwhm,
                                      double& rightfwhm);

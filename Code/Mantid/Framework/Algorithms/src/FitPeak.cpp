@@ -281,7 +281,7 @@ namespace Algorithms
       }
       else
       {
-        m_sstream << "Fx330 i_width = " << iwidth << ", i_left = " << ileftside << ", i_right = "
+        m_sstream << "Setup: i_width = " << iwidth << ", i_left = " << ileftside << ", i_right = "
                   << irightside << ", FWHM = " << in_fwhm << ", i_centre = " << i_centre << ".\n";
       }
 
@@ -550,10 +550,13 @@ namespace Algorithms
     // Fit background
     if (i_minFitX == i_minPeakX || i_maxPeakX == i_maxFitX)
     {
-      // Very noisy data
-      // This may not be a very noisy data.  But it is just an indicator that the
-      g_log.warning() << "Peak range cannot be trusted!  Automatic peak range finder does not work. "
-                      << "Number of data points in fitting window = " << i_maxFitX - i_minFitX << "\n" ;
+      // User's input peak range cannot be trusted.  Data might be noisy
+      stringstream outss;
+      outss << "User specified peak range cannot be trusted!  Because peak range overlap fit window. "
+            << "Number of data points in fitting window = " << i_maxFitX - i_minFitX
+            << ". A UNRELIABLE algorithm is used to guess peak range. ";
+      g_log.warning(outss.str());
+
       size_t numpts = i_maxFitX - i_minFitX ;
       i_minPeakX += static_cast<size_t>(static_cast<double>(numpts)/6.);
       m_minPeakX = m_dataWS->readX(m_wsIndex)[i_minPeakX];
@@ -704,7 +707,7 @@ namespace Algorithms
     IAlgorithm_sptr fit;
     try
     {
-      fit = createChildAlgorithm("Fit", -1, -1, true);
+      fit = createChildAlgorithm("Fit", -1, -1, false);
     }
     catch (Exception::NotFoundError &)
     {
@@ -1373,17 +1376,14 @@ namespace Algorithms
 
     if (m_minPeakX < m_minFitX)
     {
+      m_minPeakX = m_minFitX;
       g_log.warning() << "Minimum peak range is out side of the lower boundary of fit window.  ";
     }
     if (m_maxPeakX > m_maxFitX)
     {
+      m_maxPeakX = m_maxFitX;
       g_log.warning() << "Maximum peak range is out side of the upper boundary of fit window. ";
     }
-
-    // i_minFitX = getVectorIndex(vecX, m_minFitX);
-    // i_maxFitX = getVectorIndex(vecX, m_maxFitX);
-    // i_minPeakX = getVectorIndex(vecX, m_minPeakX);
-    // i_maxPeakX = getVectorIndex(vecX, m_maxPeakX);
 
     // Fit strategy
     m_fitBkgdFirst = getProperty("FitBackgroundFirst");
@@ -1461,7 +1461,6 @@ namespace Algorithms
     // Generate background function
     m_bkgdFunc = boost::dynamic_pointer_cast<IBackgroundFunction>(
           FunctionFactory::Instance().createFunction(bkgdtype));
-    // g_log.debug() << "Created background function of type " << bkgdtype << "\n";
 
     // Set background function parameter values
     m_bkgdParameterNames = getProperty("BackgroundParameterNames");
@@ -1500,7 +1499,6 @@ namespace Algorithms
     string peaktype = parseFunctionTypeFull(peaktypeprev, defaultparorder);
     m_peakFunc = boost::dynamic_pointer_cast<IPeakFunction>(
           FunctionFactory::Instance().createFunction(peaktype));
-    // g_log.debug() << "Create peak function of type " << peaktype << "\n";
 
     // Peak parameters' names
     m_peakParameterNames = getProperty("PeakParameterNames");
@@ -1534,8 +1532,6 @@ namespace Algorithms
     {
       m_peakFunc->setParameter(m_peakParameterNames[i], vec_peakparvalues[i]);
     }
-
-    // g_log.information() << "Created peak function " << m_peakFunc->asString() << "\n";
 
     return;
   }
@@ -1575,16 +1571,8 @@ namespace Algorithms
 
     // Check validity on peak centre
     double centre_guess = m_peakFunc->centre();
-#if 0
-    g_log.debug() << "Fit Peak with given window:  Guessed center = " << centre_guess
-                        << "  x-min = " << m_minFitX
-                        << ", x-max = " << m_maxFitX << "\n";
-#endif
     if (m_minFitX >= centre_guess || m_maxFitX <= centre_guess)
-    {
-      g_log.error("Peak centre is out side of fit window.");
       throw runtime_error("Peak centre is out side of fit window. ");
-    }
 
     // Peak width and centre: from user input
     m_userGuessedFWHM = m_peakFunc->fwhm();
@@ -1602,8 +1590,6 @@ namespace Algorithms
     // TODO - Need to retrieve useful information from FitOneSinglePeak object (think of how)
     size_t i_minFitX = getVectorIndex(m_dataWS->readX(m_wsIndex), m_minFitX);
     size_t i_maxFitX = getVectorIndex(m_dataWS->readX(m_wsIndex), m_maxFitX);
-
-    // g_log.debug() << "[DB] i_min/max Fit X = " << i_minFitX << ", " << i_maxFitX << "\n";
 
     // Data workspace
     size_t nspec = 3;
