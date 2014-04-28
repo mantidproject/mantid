@@ -103,7 +103,7 @@ MatrixWorkspace_sptr SANSBeamFinder::loadBeamFinderFile(const std::string& beamC
       if (loadAlg->existsProperty("NoBeamCenter")) loadAlg->setProperty("NoBeamCenter", true);
       if (loadAlg->existsProperty("BeamCenterX")) loadAlg->setProperty("BeamCenterX", EMPTY_DBL());
       if (loadAlg->existsProperty("BeamCenterY")) loadAlg->setProperty("BeamCenterY", EMPTY_DBL());
-      loadAlg->setProperty("ReductionProperties", reductionManagerName);
+      if (loadAlg->existsProperty("ReductionProperties")) loadAlg->setProperty("ReductionProperties", reductionManagerName);
       loadAlg->setPropertyValue("OutputWorkspace", finderWSName);
       loadAlg->execute();
       boost::shared_ptr<Workspace> wks = AnalysisDataService::Instance().retrieve(finderWSName);

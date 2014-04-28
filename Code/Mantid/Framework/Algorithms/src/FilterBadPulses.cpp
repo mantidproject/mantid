@@ -41,7 +41,12 @@ using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
 using std::size_t;
 
-const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
+namespace { // anonymous namespace for some internal variables
+/// Name of log for integrated proton charge
+const std::string INT_CHARGE_NAME("gd_prtn_chrg");
+/// Name of log for proton charge
+const std::string LOG_CHARGE_NAME("proton_charge");
+}
 
 //========================================================================
 //========================================================================
@@ -96,15 +101,38 @@ void FilterBadPulses::exec()
   // the input workspace into the event workspace we already know it is
   EventWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
 
-  // get the proton charge exists in the run object
+  // get the run object
   const API::Run& runlogs = inputWS->run();
-  if (!runlogs.hasProperty("proton_charge"))
+
+  // see if the gd_prtn_charge log has anything useful to say
+  if (runlogs.hasProperty(INT_CHARGE_NAME))
   {
-    throw std::runtime_error("Failed to find \"proton_charge\" in sample logs");
+    double value = runlogs.getPropertyValueAsType<double>(INT_CHARGE_NAME);
+    if (value <= 0.)
+    {
+      throw std::runtime_error("Found no integrated charge value in " + INT_CHARGE_NAME);
+    }
+  }
+  else
+  {
+    this->g_log.warning() << "Failed to find \""<< INT_CHARGE_NAME << "\" in run object.\n";
+  }
+
+  // get the proton charge exists in the run object
+  if (!runlogs.hasProperty(LOG_CHARGE_NAME))
+  {
+    throw std::runtime_error("Failed to find \"" + LOG_CHARGE_NAME + "\" in sample logs");
   }
   Kernel::TimeSeriesProperty<double> * pcharge_log
-      = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( runlogs.getLogData("proton_charge") );
+      = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( runlogs.getLogData(LOG_CHARGE_NAME) );
   Kernel::TimeSeriesPropertyStatistics stats = pcharge_log->getStatistics();
+
+  // check that the maximum value is greater than zero
+  if (stats.maximum <= 0.)
+  {
+    throw std::runtime_error("Maximum value of charge is not greater than zero ("
+                             + LOG_CHARGE_NAME + ")");
+  }
 
   // set the range
   double min_percent = this->getProperty("LowerCutoff");

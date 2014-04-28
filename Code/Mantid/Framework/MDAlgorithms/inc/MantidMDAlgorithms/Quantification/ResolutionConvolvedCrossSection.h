@@ -93,9 +93,6 @@ namespace Mantid
 
       /// Output events. Need to find a better way to handle other dimensions
       mutable std::list<MDEvents::MDEvent<4> > m_simulatedEvents;
-
-      /// A reference to the logger
-      static Kernel::Logger & g_log;
     };
 
   }

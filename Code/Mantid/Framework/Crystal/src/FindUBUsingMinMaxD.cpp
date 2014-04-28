@@ -17,9 +17,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-  Kernel::Logger& FindUBUsingMinMaxD::g_log = 
-                        Kernel::Logger::get("FindUBUsingMinMaxD");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(FindUBUsingMinMaxD)
 

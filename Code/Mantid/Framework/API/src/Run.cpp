@@ -25,9 +25,11 @@ using namespace Kernel;
 namespace
 {
   /// The number of log entries summed when adding a run
-  const int ADDABLES = 6;
+  const int ADDABLES = 12;
   /// The names of the log entries summed when adding two runs together
-  const std::string ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm", "dur", "gd_prtn_chrg", "uA.hour"}; 
+  const std::string ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm", "dur", "gd_prtn_chrg", "uA.hour",
+                                         "monitor0_counts", "monitor1_counts", "monitor2_counts", "monitor3_counts",
+                                         "monitor4_counts", "monitor5_counts"};
   /// Name of the goniometer log when saved to a NeXus file
   const char * GONIOMETER_LOG_NAME = "goniometer";
   /// Name of the stored histogram bins log when saved to NeXus
@@ -35,9 +37,11 @@ namespace
   const char * PEAK_RADIUS_GROUP = "peak_radius";
   const char * INNER_BKG_RADIUS_GROUP = "inner_bkg_radius";
   const char * OUTER_BKG_RADIUS_GROUP = "outer_bkg_radius";
+
+  /// static logger object
+  Kernel::Logger g_log("Run");
+
 }
-// Get a reference to the logger
-Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
 
   //----------------------------------------------------------------------
   // Public member functions
@@ -212,7 +216,6 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     }
     catch (Exception::NotFoundError &)
     {
-      //g_log.information() << "proton_charge log value not found. Total proton charge set to 0.0\n";
       this->setProtonCharge(0);
       return 0;
     }
@@ -476,8 +479,32 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   {
     for (size_t i=0; i < m_goniometer.getNumberAxes(); ++i)
     {
-      const double angle = getLogAsSingleValue(m_goniometer.getAxis(i).name, Kernel::Math::Mean);
-      m_goniometer.setRotationAngle(i, angle);
+  	  const std::string axisName = m_goniometer.getAxis(i).name;
+	  const double minAngle = getLogAsSingleValue(axisName, Kernel::Math::Minimum);
+	  const double maxAngle = getLogAsSingleValue(axisName, Kernel::Math::Maximum);
+	  const double angle = getLogAsSingleValue(axisName, Kernel::Math::Mean);
+	  if(minAngle != maxAngle)
+      {
+		  const double lastAngle = getLogAsSingleValue(axisName, Kernel::Math::LastValue);
+		  g_log.warning("Goniometer angle changed in " + axisName + " log from " + boost::lexical_cast<std::string>(minAngle)
+				  + " to " + boost::lexical_cast<std::string>(maxAngle) + ".  Used mean = " + boost::lexical_cast<std::string>(angle) +".");
+		  if (axisName.compare("omega") == 0)
+		  {
+			  g_log.warning("To set to last angle, replace omega with "
+					  + boost::lexical_cast<std::string>(lastAngle) + ": SetGoniometer(Workspace=\'workspace\',Axis0=omega,0,1,0,1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
+		  }
+		  else if (axisName.compare("chi") == 0)
+		  {
+			  g_log.warning("To set to last angle, replace chi with "
+					  + boost::lexical_cast<std::string>(lastAngle) + ": SetGoniometer(Workspace=\'workspace\',Axis0=omega,0,1,0,1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
+		  }
+		  else if (axisName.compare("phi") == 0)
+		  {
+			  g_log.warning("To set to last angle, replace phi with "
+					  + boost::lexical_cast<std::string>(lastAngle) + ": SetGoniometer(Workspace=\'workspace\',Axis0=omega,0,1,0,1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
+		  }
+	  }
+	  m_goniometer.setRotationAngle(i, angle);
     }
   }
 

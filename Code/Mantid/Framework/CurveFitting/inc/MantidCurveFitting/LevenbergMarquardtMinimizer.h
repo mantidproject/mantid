@@ -79,9 +79,6 @@ private:
 
   /// Relative error required for parameters
   double m_relError;
-
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 

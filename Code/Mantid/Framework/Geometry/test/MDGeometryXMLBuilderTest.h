@@ -8,6 +8,8 @@
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
+#include "MantidKernel/UnitLabel.h"
+
 #include <boost/functional/hash.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
@@ -20,6 +22,7 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <Poco/AutoPtr.h>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -35,7 +38,7 @@ private:
     MOCK_CONST_METHOD0(getName,
       std::string());
     MOCK_CONST_METHOD0(getUnits,
-      std::string());
+      const Mantid::Kernel::UnitLabel());
     MOCK_CONST_METHOD0(getDimensionId,
       std::string());
     MOCK_CONST_METHOD0(getMaximum,
@@ -195,18 +198,18 @@ void testWithOrinaryDimensionOnly()
   Poco::XML::DOMParser pParser;
   std::string xmlToParse = builder.create(); //Serialize the geometry.
 
-  Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+  Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
   Poco::XML::Element* pRootElem = pDoc->documentElement();
 
   //Check that the number of dimensions provided is correct.
-  TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 1, pRootElem->getElementsByTagName("Dimension")->length());
+  Poco::AutoPtr<Poco::XML::NodeList> dimension = pRootElem->getElementsByTagName("Dimension");
+  TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 1, dimension->length());
 
   //Check that mapping nodes give correct mappings.
-  Poco::XML::Element* dimensionSetElement = pRootElem;
-  TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "", dimensionSetElement->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "", dimensionSetElement->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("Should have no DimensionZ mapping", "", dimensionSetElement->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("Should have no DimensionT mapping", "", dimensionSetElement->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "", pRootElem->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "", pRootElem->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("Should have no DimensionZ mapping", "", pRootElem->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("Should have no DimensionT mapping", "", pRootElem->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
 }
 
 void testManyOrinaryDimensions()
@@ -250,18 +253,18 @@ void testWithXDimensionOnly()
   Poco::XML::DOMParser pParser;
   std::string xmlToParse = builder.create(); //Serialize the geometry.
 
-  Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+  Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
   Poco::XML::Element* pRootElem = pDoc->documentElement();
 
   //Check that the number of dimensions provided is correct.
-  TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 1, pRootElem->getElementsByTagName("Dimension")->length());
+  Poco::AutoPtr<Poco::XML::NodeList> dimension = pRootElem->getElementsByTagName("Dimension");
+  TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 1, dimension->length());
 
   //Check that mapping nodes give correct mappings.
-  Poco::XML::Element* dimensionSetElement = pRootElem;
-  TSM_ASSERT_EQUALS("No DimensionX mapping is incorrect", "a", dimensionSetElement->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "", dimensionSetElement->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("Should have no DimensionZ mapping", "", dimensionSetElement->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("Should have no DimensionT mapping", "", dimensionSetElement->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("No DimensionX mapping is incorrect", "a", pRootElem->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "", pRootElem->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("Should have no DimensionZ mapping", "", pRootElem->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("Should have no DimensionT mapping", "", pRootElem->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
 }
 
 void testWithXYDimensionOnly()
@@ -282,18 +285,18 @@ void testWithXYDimensionOnly()
   Poco::XML::DOMParser pParser;
   std::string xmlToParse = builder.create(); //Serialize the geometry.
 
-  Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+  Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
   Poco::XML::Element* pRootElem = pDoc->documentElement();
 
   //Check that the number of dimensions provided is correct.
-  TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 2, pRootElem->getElementsByTagName("Dimension")->length());
+  Poco::AutoPtr<Poco::XML::NodeList> dimension = pRootElem->getElementsByTagName("Dimension");
+  TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 2, dimension->length());
 
   //Check that mapping nodes give correct mappings.
-  Poco::XML::Element* dimensionSetElement = pRootElem;
-  TSM_ASSERT_EQUALS("No DimensionX mapping is incorrect", "a", dimensionSetElement->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "b", dimensionSetElement->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("Should have no DimensionZ mapping", "", dimensionSetElement->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("Should have no DimensionT mapping", "", dimensionSetElement->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("No DimensionX mapping is incorrect", "a", pRootElem->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "b", pRootElem->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("Should have no DimensionZ mapping", "", pRootElem->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("Should have no DimensionT mapping", "", pRootElem->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
 }
 
 void testWithXYZDimensionOnly()
@@ -319,18 +322,18 @@ void testWithXYZDimensionOnly()
   Poco::XML::DOMParser pParser;
   std::string xmlToParse = builder.create(); //Serialize the geometry.
 
-  Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+  Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
   Poco::XML::Element* pRootElem = pDoc->documentElement();
 
   //Check that the number of dimensions provided is correct.
-  TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 3, pRootElem->getElementsByTagName("Dimension")->length());
+  Poco::AutoPtr<Poco::XML::NodeList> dimension = pRootElem->getElementsByTagName("Dimension");
+  TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 3, dimension->length());
 
   //Check that mapping nodes give correct mappings.
-  Poco::XML::Element* dimensionSetElement = pRootElem;
-  TSM_ASSERT_EQUALS("No DimensionX mapping is incorrect", "a", dimensionSetElement->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "b", dimensionSetElement->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("Should have no DimensionZ mapping", "c", dimensionSetElement->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("Should have no DimensionT mapping", "", dimensionSetElement->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("No DimensionX mapping is incorrect", "a", pRootElem->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("Should have no DimensionY mapping", "b", pRootElem->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("Should have no DimensionZ mapping", "c", pRootElem->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("Should have no DimensionT mapping", "", pRootElem->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
 }
 
 void testFullCreate()
@@ -362,24 +365,28 @@ void testFullCreate()
   Poco::XML::DOMParser pParser;
   std::string xmlToParse = builder.create(); //Serialize the geometry.
 
-  Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+  Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
   Poco::XML::Element* pRootElem = pDoc->documentElement();
 
   //Check that the number of dimensions provided is correct.
-  TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 4, pRootElem->getElementsByTagName("Dimension")->length());
+  Poco::AutoPtr<Poco::XML::NodeList> dimension = pRootElem->getElementsByTagName("Dimension");
+  TSM_ASSERT_EQUALS("Wrong number of dimensions in geometry xml", 4, dimension->length());
 
   //Check that mapping nodes have been provided.
-  TSM_ASSERT_EQUALS("No DimensionX in geometry xml", 1, pRootElem->getElementsByTagName("XDimension")->length());
-  TSM_ASSERT_EQUALS("No DimensionY in geometry xml", 1, pRootElem->getElementsByTagName("YDimension")->length());
-  TSM_ASSERT_EQUALS("No DimensionZ in geometry xml", 1, pRootElem->getElementsByTagName("ZDimension")->length());
-  TSM_ASSERT_EQUALS("No DimensionT in geometry xml", 1, pRootElem->getElementsByTagName("TDimension")->length());
+  Poco::AutoPtr<Poco::XML::NodeList> xdimension = pRootElem->getElementsByTagName("XDimension");
+  TSM_ASSERT_EQUALS("No DimensionX in geometry xml", 1, xdimension->length());
+  Poco::AutoPtr<Poco::XML::NodeList> ydimension = pRootElem->getElementsByTagName("YDimension");
+  TSM_ASSERT_EQUALS("No DimensionY in geometry xml", 1, ydimension->length());
+  Poco::AutoPtr<Poco::XML::NodeList> zdimension = pRootElem->getElementsByTagName("ZDimension");
+  TSM_ASSERT_EQUALS("No DimensionZ in geometry xml", 1, zdimension->length());
+  Poco::AutoPtr<Poco::XML::NodeList> tdimension = pRootElem->getElementsByTagName("TDimension");
+  TSM_ASSERT_EQUALS("No DimensionT in geometry xml", 1, tdimension->length());
 
   //Check that mapping nodes give correct mappings.
-  Poco::XML::Element* dimensionSetElement = pRootElem;
-  TSM_ASSERT_EQUALS("No DimensionX mapping is incorrect", "a", dimensionSetElement->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("No DimensionY mapping is incorrect", "b", dimensionSetElement->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("No DimensionZ mapping is incorrect", "c", dimensionSetElement->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
-  TSM_ASSERT_EQUALS("No DimensionT mapping is incorrect", "d", dimensionSetElement->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("No DimensionX mapping is incorrect", "a", pRootElem->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("No DimensionY mapping is incorrect", "b", pRootElem->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("No DimensionZ mapping is incorrect", "c", pRootElem->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
+  TSM_ASSERT_EQUALS("No DimensionT mapping is incorrect", "d", pRootElem->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
 }
 
 };

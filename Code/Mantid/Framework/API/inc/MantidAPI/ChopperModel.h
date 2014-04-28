@@ -24,8 +24,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/Run.h"
 
-#include <boost/shared_ptr.hpp>
-
 #include <string>
 
 namespace Mantid

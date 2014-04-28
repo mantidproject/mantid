@@ -29,8 +29,10 @@ namespace Mantid
 {
 namespace API
 {
-  using namespace Geometry;
-    Kernel::Logger& IFunction1D::g_log = Kernel::Logger::get("IFunction1D");
+    using namespace Geometry;
+
+    /// init logger
+    Kernel::Logger IFunction1D::g_log("IFunction1D");
 
     void IFunction1D::function(const FunctionDomain& domain, FunctionValues& values) const
     {

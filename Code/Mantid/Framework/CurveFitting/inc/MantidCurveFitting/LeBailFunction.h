@@ -125,8 +125,6 @@ namespace CurveFitting
     double getPeakMaximumValue(std::vector<int> hkl, const vector<double> &xvalues, size_t& ix);
 
   private:
-    /// Log
-    static Kernel::Logger& g_log;
 
     /// Set peak parameters
     void setPeakParameters(IPowderDiffPeakFunction_sptr peak, map<string, double > parammap,

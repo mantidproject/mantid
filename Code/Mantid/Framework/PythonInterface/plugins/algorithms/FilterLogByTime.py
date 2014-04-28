@@ -34,6 +34,7 @@ class FilterLogByTime(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty(name="FilteredResult", direction=Direction.Output), doc="Filtered values between specified times.")
         self.declareProperty(name="ResultStatistic", defaultValue=0.0, direction=Direction.Output, doc="Requested statistic")
         self.setWikiSummary("Filters a log between time intervals and applies a user defined operation to the result.")
+        self.setOptionalMessage("Filters a log between time intervals and applies a user defined operation to the result.")
     
     def PyExec(self):
         in_ws = self.getProperty("InputWorkspace").value

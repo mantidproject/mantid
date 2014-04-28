@@ -64,11 +64,13 @@ namespace Mantid
       virtual void createDomain(
         boost::shared_ptr<API::FunctionDomain>& domain, 
         boost::shared_ptr<API::FunctionValues>& values, size_t i0 = 0);
-      void createOutputWorkspace(
+      boost::shared_ptr<API::Workspace> createOutputWorkspace(
         const std::string& baseName,
         API::IFunction_sptr function,
         boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::FunctionValues> values);
+        boost::shared_ptr<API::FunctionValues> values,
+        const std::string& outputWorkspacePropertyName
+        );
       /// Return the size of the domain to be created.
       virtual size_t getDomainSize() const;
       /// Initialize the function

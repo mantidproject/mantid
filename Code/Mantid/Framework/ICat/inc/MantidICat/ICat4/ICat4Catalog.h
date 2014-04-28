@@ -2,8 +2,8 @@
 #define MANTID_ICAT_ICAT4CATALOG_H_
 
 #include "MantidAPI/ICatalog.h"
+#include "MantidAPI/ICatalogInfoService.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidKernel/Logger.h"
 #include "MantidICat/CatalogSearchParam.h"
 
 namespace Mantid
@@ -34,15 +34,14 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class  ICat4Catalog : public Mantid::API::ICatalog
+    class ICat4Catalog : public Mantid::API::ICatalog, public Mantid::API::ICatalogInfoService
     {
       public:
         /// Constructor
-        ICat4Catalog():g_log(Kernel::Logger::get("ICat4Catalog")) {}
-        /// Destructor
-        virtual ~ICat4Catalog();
+        ICat4Catalog();
         /// Log the user into the catalog system.
-        virtual void login(const std::string& username,const std::string& password,const std::string& url);
+        virtual API::CatalogSession_sptr login(const std::string& username,const std::string& password,
+            const std::string& endpoint,const std::string& facility);
         /// Log the user out of the catalog system.
         virtual void logout();
         /// Search the catalog for data.
@@ -61,16 +60,16 @@ namespace Mantid
         /// Get investigationtypes list
         virtual void listInvestigationTypes(std::vector<std::string>& invstTypes);
         /// Get the file location string(s) from archive.
-        virtual void getFileLocation(const long long&fileID,std::string& fileLocation);
+        virtual const std::string getFileLocation(const long long&fileID);
         /// Get the url(s) based on the fileID.
-        virtual void getDownloadURL(const long long& fileID,std::string & url);
+        virtual const std::string getDownloadURL(const long long& fileID);
         /// get URL of where to PUT (publish) files.
         virtual const std::string getUploadURL(
             const std::string &investigationID, const std::string &createFileName, const std::string &dataFileDescription);
+        /// Obtains the investigations that the user can publish to and saves related information to a workspace.
+        virtual API::ITableWorkspace_sptr getPublishInvestigations();
         /// Keep current session alive
         virtual void keepAlive();
-        /// Keep alive in minutes
-        virtual int keepAliveinminutes();
 
       private:
         // Ensures human friendly error messages are provided to the user.
@@ -90,12 +89,12 @@ namespace Mantid
         // Helper method that formats a given timestamp.
         std::string formatDateTime(const time_t &timestamp, const std::string &format);
         // Search the archive & obtain the dataset ID based on the investigationID.
-        int64_t getDatasetId(const std::string &investigationID);
+        int64_t getMantidDatasetId(const std::string &investigationID);
         // Sets the soap-endpoint & SSL context for the given ICAT proxy.
         void setICATProxySettings(ICat4::ICATPortBindingProxy& icat);
 
-        // Reference to the logger class.
-        Kernel::Logger& g_log;
+        // Stores the session details for a specific catalog.
+        API::CatalogSession_sptr m_session;
 
         /**
          * Template method to save data to table workspace

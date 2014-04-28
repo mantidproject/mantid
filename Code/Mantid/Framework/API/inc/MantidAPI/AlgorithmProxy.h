@@ -7,8 +7,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/PropertyManagerOwner.h"
-#include <boost/shared_ptr.hpp>
-
 
 #ifdef _MSC_VER
   #pragma warning( disable: 4250 ) // Disable warning regarding inheritance via dominance, we have no way around it with the design
@@ -185,9 +183,6 @@ namespace Mantid
 
       /// Temporary holder of external observers wishing to subscribe
       mutable std::vector<const Poco::AbstractObserver*> m_externalObservers;
-
-      /// Static refenence to the logger class
-      static Kernel::Logger& g_log;
     };
 
   } // namespace API

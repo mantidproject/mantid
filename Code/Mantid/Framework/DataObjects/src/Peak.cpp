@@ -319,10 +319,10 @@ namespace DataObjects
     if (!inst) throw std::runtime_error("Peak::setInstrument(): No instrument is set!");
 
     // Cache some positions
-    const Geometry::IObjComponent_const_sptr sourceObj = m_inst->getSource();
+    const Geometry::IComponent_const_sptr sourceObj = m_inst->getSource();
     if (sourceObj == NULL)
       throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed to get source component from instrument");
-    const Geometry::IObjComponent_const_sptr sampleObj = m_inst->getSample();
+    const Geometry::IComponent_const_sptr sampleObj = m_inst->getSample();
     if (sampleObj == NULL)
       throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed to get sample component from instrument");
 
@@ -392,7 +392,7 @@ namespace DataObjects
     V3D detDir = detPos - samplePos;
 
     double two_theta = detDir.angle(beamDir);
-    
+
     // In general case (2*pi/d)^2=k_i^2+k_f^2-2*k_i*k_f*cos(two_theta)
     // E_i,f=k_i,f^2*hbar^2/(2 m)
     return 1e10*PhysicalConstants::h/sqrt(2.0*PhysicalConstants::NeutronMass*PhysicalConstants::meV)
@@ -541,8 +541,8 @@ namespace DataObjects
     {
       // Set the detector ID, the row, col, etc.
       this->setDetectorID(det->getID());
-      // HOWEVER, we retain the old detector position because we assume that is a little more precise.
-      detPos = samplePos + beam * detPos.norm();
+      // The old detector position is not more precise if it comes from FindPeaksMD
+      detPos = det->getPos();
       return true;
     }
     return false;

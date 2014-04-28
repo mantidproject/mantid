@@ -33,9 +33,11 @@ namespace Mantid
 {
 namespace DataHandling
 {
-
-// Get a reference to the logger
-Mantid::Kernel::Logger & SNSDataArchiveICAT2::g_log = Mantid::Kernel::Logger::get("SNSDataArchiveICAT2");
+  namespace
+  {
+    // Get a reference to the logger
+    Kernel::Logger g_log("SNSDataArchiveICAT2");
+  }
 
 DECLARE_ARCHIVESEARCH(SNSDataArchiveICAT2,SNSDataSearchICAT2);
 

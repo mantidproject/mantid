@@ -336,7 +336,7 @@ void InstrumentWindow::setSurfaceType(int type)
     // Surface factory
     {
         Mantid::Geometry::Instrument_const_sptr instr = m_instrumentActor->getInstrument();
-        Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
+        Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
         Mantid::Kernel::V3D sample_pos = sample->getPos();
         Mantid::Kernel::V3D axis;
         // define the axis

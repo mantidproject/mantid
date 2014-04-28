@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/AddLogDerivative.cpp
 	src/AddPeak.cpp
 	src/AddSampleLog.cpp
+	src/AddTimeSeriesLog.cpp
 	src/AlignDetectors.cpp
 	src/AlphaCalc.cpp
 	src/AnyShapeAbsorption.cpp
@@ -66,6 +67,7 @@ set ( SRC_FILES
 	src/CrossCorrelate.cpp
 	src/CuboidGaugeVolumeAbsorption.cpp
 	src/CylinderAbsorption.cpp
+	src/DeleteLog.cpp
 	src/DeleteWorkspace.cpp
 	src/DetectorDiagnostic.cpp
 	src/DetectorEfficiencyCor.cpp
@@ -189,6 +191,7 @@ set ( SRC_FILES
 	src/SaveGSASInstrumentFile.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
+	src/SetInstrumentParameter.cpp
 	src/SetUncertainties.cpp
 	src/ShiftLogTime.cpp
 	src/SignalOverError.cpp
@@ -231,6 +234,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddPeak.h
 	inc/MantidAlgorithms/AddSampleLog.h
+	inc/MantidAlgorithms/AddTimeSeriesLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AlphaCalc.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
@@ -291,6 +295,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CrossCorrelate.h
 	inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h
 	inc/MantidAlgorithms/CylinderAbsorption.h
+	inc/MantidAlgorithms/DeleteLog.h
 	inc/MantidAlgorithms/DeleteWorkspace.h
 	inc/MantidAlgorithms/DetectorDiagnostic.h
 	inc/MantidAlgorithms/DetectorEfficiencyCor.h
@@ -415,6 +420,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SaveGSASInstrumentFile.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
+	inc/MantidAlgorithms/SetInstrumentParameter.h
 	inc/MantidAlgorithms/SetUncertainties.h
 	inc/MantidAlgorithms/ShiftLogTime.h
 	inc/MantidAlgorithms/SignalOverError.h
@@ -468,6 +474,7 @@ set ( TEST_FILES
 	AddLogDerivativeTest.h
 	AddPeakTest.h
 	AddSampleLogTest.h
+	AddTimeSeriesLogTest.h
 	AlignDetectorsTest.h
 	AlphaCalcTest.h
 	AnyShapeAbsorptionTest.h
@@ -498,6 +505,7 @@ set ( TEST_FILES
 	ConjoinWorkspacesTest.h
 	ConvertAxisByFormulaTest.h
 	ConvertFromDistributionTest.h
+	ConvertMDHistoToMatrixWorkspaceTest.h
 	ConvertSpectrumAxis2Test.h
 	ConvertSpectrumAxisTest.h
 	ConvertTableToMatrixWorkspaceTest.h
@@ -526,6 +534,7 @@ set ( TEST_FILES
 	CropWorkspaceTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
 	CylinderAbsorptionTest.h
+	DeleteLogTest.h
 	DeleteWorkspaceTest.h
 	DetectorEfficiencyCorTest.h
 	DetectorEfficiencyCorUserTest.h
@@ -633,6 +642,7 @@ set ( TEST_FILES
 	SaveGSASInstrumentFileTest.h
 	ScaleTest.h
 	ScaleXTest.h
+	SetInstrumentParameterTest.h
 	ShiftLogTimeTest.h
 	SignalOverErrorTest.h
 	SmoothDataTest.h

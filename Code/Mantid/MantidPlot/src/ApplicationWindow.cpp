@@ -192,6 +192,7 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/Message.h"
 
+#include "MantidQtMantidWidgets/CatalogHelper.h"
 #include "MantidQtMantidWidgets/CatalogSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
@@ -211,6 +212,12 @@
 using namespace Qwt3D;
 using namespace MantidQt::API;
 
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("ApplicationWindow");
+}
+
 extern "C"
 {
 void file_compress(const char  *file, const char  *mode);
@@ -222,7 +229,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings)
 Scripted(ScriptingLangManager::newEnv(this)),
 blockWindowActivation(false),
 m_enableQtiPlotFitting(false),
-m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
+m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
   settings(QSettings::IniFormat, QSettings::UserScope, "Mantid", "MantidPlot")
 #else
@@ -238,7 +245,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings, const QStringList& ar
 Scripted(ScriptingLangManager::newEnv(this)),
 blockWindowActivation(false),
 m_enableQtiPlotFitting(false),
-m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
+m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
   settings(QSettings::IniFormat, QSettings::UserScope, "Mantid", "MantidPlot")
 #else
@@ -337,6 +344,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   resultsLog = new MessageDisplay(MessageDisplay::EnableLogLevelControl, logWindow);
   logWindow->setWidget(resultsLog);
   connect(resultsLog, SIGNAL(errorReceived(const QString &)), logWindow, SLOT(show()));
+  
 
   // Start Mantid
   // Set the Paraview path BEFORE libaries are loaded. Doing it here prevents
@@ -475,7 +483,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
     }
     else
     {
-      Mantid::Kernel::Logger& g_log = Mantid::Kernel::Logger::get("ConfigService");
       g_log.warning() << "Could not find interface script: " << scriptPath.ascii() << "\n";
     }
   }
@@ -495,6 +502,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   renamedTables = QStringList();
   if (!factorySettings)
     readSettings();
+
   createLanguagesList();
   insertTranslatedStrings();
   disableToolbars();
@@ -4997,6 +5005,10 @@ void ApplicationWindow::readSettings()
   changeAppStyle(settings.value("/Style", appStyle).toString());
   autoSave = settings.value("/AutoSave", false).toBool();
   autoSaveTime = settings.value("/AutoSaveTime",15).toInt();
+  //set logging level to the last saved level
+  int lastLoggingLevel = settings.value("/LastLoggingLevel", Mantid::Kernel::Logger::Priority::PRIO_NOTICE).toInt();
+  Mantid::Kernel::Logger::setLevelForAll(lastLoggingLevel);
+
   d_backup_files = settings.value("/BackupProjects", true).toBool();
   d_init_window_type = (WindowType)settings.value("/InitWindow", NoWindow).toInt();
   defaultScriptingLang = settings.value("/ScriptingLang","Python").toString();    //Mantid M. Gigg
@@ -5419,7 +5431,6 @@ void ApplicationWindow::readSettings()
     //FIXME: A nice alternative to showing a message in the log window would
     // be to pop up a message box. This should be done AFTER MantidPlot has started.
     //QMessageBox::warning(this, tr("MantidPlot - Menu Warning"), tr(mess.ascii()));
-    Mantid::Kernel::Logger& g_log = Mantid::Kernel::Logger::get("ConfigService");
     g_log.warning() << mess.ascii() << "\n";
     settings.setValue("/DuplicationDialogShown", true);
   }
@@ -5456,6 +5467,10 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/Style", appStyle);
   settings.setValue("/AutoSave", autoSave);
   settings.setValue("/AutoSaveTime", autoSaveTime);
+  //save current logger level from the root logger ""
+  int lastLoggingLevel = Mantid::Kernel::Logger("").getLevel();
+  settings.setValue("/LastLoggingLevel", lastLoggingLevel);
+
   settings.setValue("/BackupProjects", d_backup_files);
   settings.setValue("/InitWindow", static_cast<int>(d_init_window_type));
 
@@ -8796,6 +8811,22 @@ void ApplicationWindow::setActiveWindow(MdiSubWindow* w)
   if (!existsWindow(d_active_window))
   {
     d_active_window = NULL;
+  }
+  else
+  {
+    // This make sure that we don't have two versions of current active window (d_active_window and
+    // active window of MdiArea) and they are either equal (when docked window is active> or the
+    // latter one is NULL (when floating window is active).
+    if ( d_active_window->getFloatingWindow() )
+    {
+      // If floating window is activated, we set MdiArea to not have any active sub-window.
+      d_workspace->setActiveSubWindow(NULL);
+    }
+    else if ( QMdiSubWindow* w = d_active_window->getDockedWindow() )
+    {
+      // If docked window activated, activate it in MdiArea as well.
+      d_workspace->setActiveSubWindow(w);
+    }
   }
 }
 
@@ -12767,7 +12798,7 @@ void ApplicationWindow::createActions()
   actionAddErrorBars->setShortcut( tr("Ctrl+B") );
   connect(actionAddErrorBars, SIGNAL(activated()), this, SLOT(addErrorBars()));
 
-  actionRemoveErrorBars = new QAction(QIcon(getQPixmap("errors_xpm")), tr("Remove Error Bars..."), this);
+  actionRemoveErrorBars = new QAction(QIcon(getQPixmap("errors_remove_xpm")), tr("Remove Error Bars..."), this);
   //actionRemoveErrorBars->setShortcut( tr("Ctrl+B") );
   connect(actionRemoveErrorBars, SIGNAL(activated()), this, SLOT(removeErrorBars()));
 
@@ -17442,7 +17473,7 @@ void ApplicationWindow::panOnPlot()
 void ApplicationWindow::CatalogLogin()
 {
   // Executes the catalog login algorithm, and returns true if user can login.
-  if (mantidUI->isValidCatalogLogin())
+  if (MantidQt::MantidWidgets::CatalogHelper().isValidCatalogLogin())
   {
     icat->addAction(actionCatalogSearch);
     icat->addAction(actionCatalogPublish);
@@ -17467,7 +17498,7 @@ void ApplicationWindow::CatalogSearch()
 
 void ApplicationWindow::CatalogPublish()
 {
-  mantidUI->catalogPublishDialog();
+  MantidQt::MantidWidgets::CatalogHelper().catalogPublishDialog();
 }
 
 void ApplicationWindow::CatalogLogout()

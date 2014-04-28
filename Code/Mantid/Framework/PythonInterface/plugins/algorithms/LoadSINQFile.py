@@ -1,7 +1,8 @@
 """*WIKI*
-== DESCRIPTION ==
 
-LoadSINQFile is a wrapper algorithm around LoadFlexiNexus. It locates a suitable dictionary file for the instrument in question and then goes away to call LoadFlexiNexus with the right arguments. It also performs any other magic which might be required to get the data in the right shape for further processing in Mantid. 
+LoadSINQFile is a wrapper algorithm around LoadFlexiNexus. 
+It locates a suitable dictionary file for the instrument in question and then goes away to call LoadFlexiNexus with the right arguments. 
+It also performs any other magic which might be required to get the data in the right shape for further processing in Mantid. 
 
 *WIKI*"""
 
@@ -29,6 +30,7 @@ class LoadSINQFile(PythonAlgorithm):
     def PyInit(self):
         global dictsearch
         self.setWikiSummary("Load a SINQ file with the right dictionary.")
+        self.setOptionalMessage("Load a SINQ file with the right dictionary.")
         instruments=["AMOR","BOA","DMC","FOCUS","HRPT","MARSI","MARSE","POLDI",
                      "RITA-2","SANS","SANS2","TRICS"]
         self.declareProperty("Instrument","AMOR",
@@ -62,6 +64,9 @@ class LoadSINQFile(PythonAlgorithm):
         ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,OutputWorkspace=wname)
 
         if inst == "POLDI":
+            if ws.getNumberHistograms() == 800:
+               ws.maskDetectors(SpectraList=range(0,800)[::2])
+
             config.appendDataSearchDir(config['groupingFiles.directory'])
             grp_file = "POLDI_Grouping_800to400.xml"
             ws = mantid.simpleapi.GroupDetectors(InputWorkspace=ws,

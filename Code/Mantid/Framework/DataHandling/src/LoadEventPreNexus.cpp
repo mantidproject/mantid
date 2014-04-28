@@ -26,6 +26,7 @@ Specific pulse ID and mapping files can be specified if needed; these are guesse
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BinaryFile.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -131,7 +132,7 @@ int LoadEventPreNexus::confidence(Kernel::FileDescriptor & descriptor) const
   const size_t filesize = static_cast<size_t>(handle.tellg());
   handle.seekg(0, std::ios::beg);
 
-  if (filesize % objSize == 0) return 80;
+  if (filesize % objSize == 0) return 60;
   else return 0;
 }
 

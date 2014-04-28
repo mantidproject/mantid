@@ -5,28 +5,10 @@
 
 #include "MantidCurveFitting/IkedaCarpenterPV.h"
 #include "MantidCurveFitting/Fit.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/LinearBackground.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/InstrumentDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/LoadRaw3.h"
-#include "MantidKernel/Exception.h"
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadNexus.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/cow_ptr.h"
-#include <limits>
 
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
-using namespace Mantid::CurveFitting;
-using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <boost/scoped_array.hpp>
 
 class IkedaCarpenterPVTest : public CxxTest::TestSuite
 {
@@ -36,9 +18,17 @@ public:
   static IkedaCarpenterPVTest *createSuite() { return new IkedaCarpenterPVTest(); }
   static void destroySuite( IkedaCarpenterPVTest *suite ) { delete suite; }
 
-  IkedaCarpenterPVTest()
+  void setUp()
   {
+    using Mantid::Kernel::ConfigService;
+    m_preSetupPeakRadius = ConfigService::Instance().getString("curvefitting.peakRadius");
     ConfigService::Instance().setString("curvefitting.peakRadius","100");
+  }
+
+  void tearDown()
+  {
+    using Mantid::Kernel::ConfigService;
+    ConfigService::Instance().setString("curvefitting.peakRadius", m_preSetupPeakRadius);
   }
 
   void getMockData(Mantid::MantidVec& y, Mantid::MantidVec& e)
@@ -111,63 +101,29 @@ public:
   // here tries to fit an IC peak to a Gaussian mock data peak
   void testAgainstMockData()
   {
+    using namespace Mantid::API;
+    using namespace Mantid::CurveFitting;
+
     /**
      * Changing compiler on OS X has yet again caused this (and only this) test to fail.
      * Switch it off until it is clear why the other Fit tests are okay on OS X using Intel
      */
 #if !(defined __APPLE__ && defined __INTEL_COMPILER)
 
-    Fit alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
-
     // create mock data to test against
     std::string wsName = "IkedaCarpenterPV1D_GaussMockData";
-    int histogramNumber = 1;
-    int timechannels = 31;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-    for (int i = 0; i < timechannels; i++) ws2D->dataX(0)[i] = i*5;
-    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
-    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
-    getMockData(y, e);
-
+    auto mockDataWS = createMockDataWorkspaceNoInstrument();
     //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, mockDataWS));
 
-
-    // set up fitting function and pass to Fit
-    IkedaCarpenterPV icpv;
-    icpv.initialize();
-
-    icpv.setParameter("I",1000);
-    icpv.tie("Alpha0", "1.597107");
-    icpv.tie("Alpha1", "1.496805");
-    icpv.tie("Beta0", "31.891718");
-    icpv.tie("Kappa", "46.025921");
-    //icpv.tie("SigmaSquared", "100.0");
-    icpv.setParameter("X0",45.0);
-    //icpv.tie("Gamma", "1.0");
-
-    alg2.setPropertyValue("Function",icpv.asString());
-    // Set general Fit parameters
-    alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("WorkspaceIndex","0");
-    alg2.setPropertyValue("StartX","0");
-    alg2.setPropertyValue("EndX","150");
-
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( alg2.execute() )
-    )    
-    TS_ASSERT( alg2.isExecuted() );
+    auto alg = runFit(wsName);
+    TS_ASSERT( alg->isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 13.13,1);
+    double chi2 = alg->getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA( chi2, 13.13,1);
 
-    IFunction_sptr out = alg2.getProperty("Function");
+    IFunction_sptr out = alg->getProperty("Function");
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out.get()); 
 
     TS_ASSERT_DELTA( pk->height(), 13.99 ,1);
@@ -187,9 +143,11 @@ public:
     // regardless m_wavelength set to zero in IC code 
     //pk->setMatrixWorkspace(ws2D, 0);
 
-    const double* x = &ws2D->readX(0)[0];
-    double *yy = new double[timechannels]; 
-    pk->function1D(yy, x, timechannels);
+    size_t timechannels = mockDataWS->readX(0).size();
+
+    const double* x = &mockDataWS->readX(0)[0];
+    boost::scoped_array<double> yy(new double[timechannels]);
+    pk->function1D(yy.get(), x, timechannels);
 
     // note that fitting a none-totally optimized IC to a Gaussian peak so 
     // not a perfect fit - but pretty ok result
@@ -199,8 +157,6 @@ public:
     TS_ASSERT_DELTA( yy[12], 41.1798, 2);
     TS_ASSERT_DELTA( yy[13], 15.0869 ,1);
     TS_ASSERT_DELTA( yy[14], 5.55355 ,1);
-
-    delete[] yy;
 
     // check its categories
     const std::vector<std::string> categories = out->categories();
@@ -212,7 +168,121 @@ public:
 #endif
   }
 
+  void test_Against_Data_In_DeltaE()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::CurveFitting;
 
+
+#if !(defined __APPLE__ && defined __INTEL_COMPILER)
+
+    // create mock data to test against
+    std::string wsName = "IkedaCarpenterPV1D_GaussMockData_DeltaE";
+    auto mockDataWS = createMockDataWorkspaceInDeltaE();
+    mockDataWS->getAxis(0)->setUnit("DeltaE");
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, mockDataWS));
+
+    auto alg = runFit(wsName);
+    TS_ASSERT( !alg->isExecuted() );
+
+    // set efixed for direct
+    mockDataWS->mutableRun().addProperty<std::string>("deltaE-mode", "direct");
+    mockDataWS->mutableRun().addProperty<double>("Ei", 11.0);
+
+    alg = runFit(wsName);
+    TS_ASSERT( alg->isExecuted() );
+    // test the output from fit is what you expect
+    double chi2 = alg->getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA( chi2, 31.8966, 1);
+
+    // set efixed for indirect
+    mockDataWS->mutableRun().addProperty<std::string>("deltaE-mode", "indirect", true);
+    auto & pmap = mockDataWS->instrumentParameters();
+    auto inst = mockDataWS->getInstrument()->baseInstrument();
+    pmap.addDouble(inst.get(), "EFixed", 20.0);
+
+    alg = runFit(wsName);
+    TS_ASSERT( alg->isExecuted() );
+    chi2 = alg->getProperty("OutputChi2overDoF");
+    TS_ASSERT_DELTA( chi2, 0.5721, 1);
+
+    AnalysisDataService::Instance().remove(wsName);
+
+#endif
+
+  }
+
+private:
+
+  Mantid::API::MatrixWorkspace_sptr createMockDataWorkspaceNoInstrument()
+  {
+    using Mantid::API::WorkspaceFactory;
+
+    // create mock data to test against
+    std::string wsName = "IkedaCarpenterPV1D_GaussMockData";
+    int histogramNumber = 1;
+    int timechannels = 31;
+    auto ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    for (int i = 0; i < timechannels; i++)
+    {
+      ws->dataX(0)[i] = i*5;
+    }
+    Mantid::MantidVec& y = ws->dataY(0); // y-values (counts)
+    Mantid::MantidVec& e = ws->dataE(0); // error values of counts
+    getMockData(y, e);
+    return ws;
+  }
+
+  Mantid::API::MatrixWorkspace_sptr createMockDataWorkspaceInDeltaE()
+  {
+    using Mantid::API::WorkspaceFactory;
+
+    // create mock data to test against
+    std::string wsName = "IkedaCarpenterPV1D_GaussMockData";
+    int nhist(1), nbins(31);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nhist, nbins, false, false, false);
+    for (int i = 0; i < nbins; i++)
+    {
+      ws->dataX(0)[i] = i*5;
+    }
+    Mantid::MantidVec& y = ws->dataY(0); // y-values (counts)
+    Mantid::MantidVec& e = ws->dataE(0); // error values of counts
+    getMockData(y, e);
+    return ws;
+  }
+
+  Mantid::API::IAlgorithm_sptr runFit(const std::string & wsName)
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::CurveFitting;
+
+    // set up fitting function and pass to Fit
+    IkedaCarpenterPV icpv;
+    icpv.initialize();
+
+    icpv.setParameter("I",1000);
+    icpv.tie("Alpha0", "1.597107");
+    icpv.tie("Alpha1", "1.496805");
+    icpv.tie("Beta0", "31.891718");
+    icpv.tie("Kappa", "46.025921");
+    icpv.setParameter("X0",45.0);
+
+    auto alg = boost::shared_ptr<IAlgorithm>(new Fit);
+    alg->initialize();
+    alg->setPropertyValue("Function",icpv.asString());
+    // Set general Fit parameters
+    alg->setPropertyValue("InputWorkspace", wsName);
+    alg->setPropertyValue("WorkspaceIndex","0");
+    alg->setPropertyValue("StartX","0");
+    alg->setPropertyValue("EndX","150");
+    alg->execute();
+
+    return alg;
+  }
+
+  std::string m_preSetupPeakRadius;
 };
 
 #endif /*IKEDACARPENTERPVTEST_H_*/

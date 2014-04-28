@@ -299,12 +299,18 @@ void Qxy::exec()
 
   
   // Count of the number of empty cells
-  MatrixWorkspace::const_iterator wsIt(*outputWorkspace);
+  const size_t nhist = outputWorkspace->getNumberHistograms();
+  const size_t nbins = outputWorkspace->blocksize();
   int emptyBins = 0;
-  for (;wsIt != wsIt.end(); ++wsIt)
+  for(size_t i = 0; i < nhist; ++i)
   {
-      if (wsIt->Y() < 1.0e-12) ++emptyBins;
+    const auto & yOut = outputWorkspace->readY(i);
+    for(size_t j = 0; j < nbins; ++j)
+    {
+      if (yOut[j] < 1.0e-12) ++emptyBins;
+    }
   }
+
   // Log the number of empty bins
   g_log.notice() << "There are a total of " << emptyBins << " (" 
                  << (100*emptyBins)/(outputWorkspace->size()) << "%) empty Q bins.\n"; 

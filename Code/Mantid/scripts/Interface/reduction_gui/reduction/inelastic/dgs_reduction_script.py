@@ -113,7 +113,7 @@ class DgsReductionScripter(BaseReductionScripter):
         script += options
         script += ")"
         
-        script += """',PreserveEvents=True,EndRunBehavior='Stop',"""
+        script += """',PreserveEvents=True,RunTransitionBehavior='Stop',"""
         script += output_workspace
         script += ")\n" 
         

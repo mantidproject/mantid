@@ -78,15 +78,17 @@ static const std::string BRAVAIS_CENTERING[15] =
  *                    used to form the list of possible conventional cells.
  *  @param best_only  If true, only include the best form for each Bravais
  *                    lattice.
+ *  @param allowPermutations Allow permutations of conventional cells for 
+ *                           related UBs with better fit to peaks.
  *
  *  @return a vector of conventional cell info objects, corresponding to the
  *          best matching forms for UB and cells related to UB by reflections
  *          of pairs of cell edges.
  */
-
 std::vector<ConventionalCell> ScalarUtils::GetCells( 
                                                   const DblMatrix & UB,
-                                                        bool        best_only )
+                                                        bool        best_only ,
+                                                        bool allowPermutations)
 {
   std::vector<ConventionalCell> result;
 
@@ -94,7 +96,7 @@ std::vector<ConventionalCell> ScalarUtils::GetCells(
   for ( size_t i = 0; i < num_lattices; i++ )
   {
     std::vector<ConventionalCell>
-                 temp = GetCells( UB, BRAVAIS_TYPE[i], BRAVAIS_CENTERING[i] );
+                 temp = GetCells( UB, BRAVAIS_TYPE[i], BRAVAIS_CENTERING[i], allowPermutations);
     if ( best_only )
     {
       ConventionalCell info = GetCellBestError( temp, true );
@@ -127,6 +129,8 @@ std::vector<ConventionalCell> ScalarUtils::GetCells(
  *                    ReducedCell class.
  *  @param centering  String specifying the centering, as listed in the
  *                    ReducedCell class.
+ *  @param allowPermutations Allow permutations of conventional cells for 
+ *                           related UBs with better fit to peaks.
  *
  *  @return a vector of conventional cell objects, for the specified 
  *          cell type and centering, corresponding to the
@@ -136,20 +140,28 @@ std::vector<ConventionalCell> ScalarUtils::GetCells(
 std::vector<ConventionalCell> ScalarUtils::GetCells( 
                                                const DblMatrix   & UB,
                                                const std::string & cell_type,
-                                               const std::string & centering )
+                                               const std::string & centering,
+                                               bool allowPermutations)
 {
-  double angle_tolerance = 2.0;
-  double length_factor   = 1.05;
-
   std::vector<ConventionalCell> result;
 
-  std::vector<DblMatrix> UB_list = 
-                           GetRelatedUBs( UB, length_factor, angle_tolerance );
+  std::vector<DblMatrix> UB_list;
+  if (allowPermutations)
+  {
+	  double angle_tolerance = 2.0;
+	  double length_factor   = 1.05;
+	  UB_list = GetRelatedUBs( UB, length_factor, angle_tolerance );
+  }
+  else
+  {
+	  // Get exact form requested and not permutations
+	  UB_list.push_back(UB);
+  }
 
   for ( size_t k = 0; k < UB_list.size(); k++ )
   {
     std::vector<ConventionalCell> 
-                   temp = GetCellsUBOnly( UB_list[k], cell_type, centering );
+                   temp = GetCellsUBOnly( UB_list[k], cell_type, centering, allowPermutations );
 
     for ( size_t i = 0; i < temp.size(); i++ )
       AddIfBest( result, temp[i] );
@@ -177,13 +189,16 @@ std::vector<ConventionalCell> ScalarUtils::GetCells(
  *                    ReducedCell class.
  *  @param centering  String specifying the centering, as listed in the
  *                    ReducedCell class.
+ *  @param allowPermutations Allow permutations of conventional cells for 
+ *                           related UBs with better fit to peaks.
  *  @return a list of conventional cells for the specified UB, of the
  *          specified type and centering.
  */
 std::vector<ConventionalCell> ScalarUtils::GetCellsUBOnly( 
                                                const DblMatrix   & UB,
                                                const std::string & cell_type,
-                                               const std::string & centering )
+                                               const std::string & centering ,
+                                               bool allowPermutations)
 {
   std::vector<ConventionalCell> result;
 
@@ -198,7 +213,7 @@ std::vector<ConventionalCell> ScalarUtils::GetCellsUBOnly(
     if ( rcell.GetCentering() == centering && 
          rcell.GetCellType()  == cell_type  )
     {
-      ConventionalCell cell_info( UB, i );
+      ConventionalCell cell_info( UB, i ,allowPermutations);
       result.push_back( cell_info );
     }
   }
@@ -215,26 +230,36 @@ std::vector<ConventionalCell> ScalarUtils::GetCellsUBOnly(
  *  @param UB        Crystal::Orientation transformation corresponding to a Niggli
  *                   reduced cell.
  *  @param form_num  The form number to use.
+ *  @param allowPermutations Allow permutations of conventional cells for 
+ *                           related UBs with better fit to peaks.
  *
  *  @return A ConventionalCellInfo object corresponding to the specified 
  *          form number and UB (or a related matrix) with the smallest
  *          error of any related matrix.
  */ 
 ConventionalCell ScalarUtils::GetCellForForm( const DblMatrix   & UB,
-                                                    size_t        form_num )
+                                                    size_t        form_num ,
+                                                    bool allowPermutations)
 {
   ConventionalCell info( UB );
-  double           angle_tolerance = 2.0;
-  double           length_factor   = 1.05;
   ReducedCell      form_0;
   ReducedCell      form;
 
   double min_error = 1e20;   // errors are usually < 10, so this is big enough
 
   std::vector<double>     l_params;
-  std::vector<DblMatrix>  UB_list = 
-                           GetRelatedUBs( UB, angle_tolerance, length_factor );
-
+  std::vector<DblMatrix> UB_list;
+  if (allowPermutations)
+  {
+	  double           angle_tolerance = 2.0;
+	  double           length_factor   = 1.05;
+	  UB_list = GetRelatedUBs( UB, angle_tolerance, length_factor );
+  }
+  else
+  {
+	  // Get exact form requested and not permutations
+	  UB_list.push_back(UB);
+  }
   for ( size_t i = 0; i < UB_list.size(); i++ )
   {
     IndexingUtils::GetLatticeParameters( UB_list[i], l_params );
@@ -248,7 +273,7 @@ ConventionalCell ScalarUtils::GetCellForForm( const DblMatrix   & UB,
     double error = form_0.WeightedDistance( form );
     if ( error < min_error )
     {
-      info = ConventionalCell( UB_list[i], form_num );
+      info = ConventionalCell( UB_list[i], form_num, allowPermutations );
       min_error = error;
     }
   }

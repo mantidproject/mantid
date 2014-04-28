@@ -7,11 +7,17 @@
 namespace Mantid {
 namespace DataHandling {
 
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("LoadHelper");
+  }
+
 using namespace Kernel;
 using namespace API;
 
-LoadHelper::LoadHelper() :
-		g_log(Kernel::Logger::get("Algorithm")) {
+LoadHelper::LoadHelper()
+{
 }
 
 LoadHelper::~LoadHelper() {
@@ -86,7 +92,6 @@ double LoadHelper::calculateEnergy(double wavelength) {
  */
 double LoadHelper::calculateTOF(double distance,double wavelength) {
 	if (wavelength <= 0) {
-		g_log.error("Wavelenght is <= 0");
 		throw std::runtime_error("Wavelenght is <= 0");
 	}
 
@@ -99,7 +104,7 @@ double LoadHelper::calculateTOF(double distance,double wavelength) {
 double LoadHelper::getL1(const API::MatrixWorkspace_sptr& workspace) {
 	Geometry::Instrument_const_sptr instrument =
 			workspace->getInstrument();
-	Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+	Geometry::IComponent_const_sptr sample = instrument->getSample();
 	double l1 = instrument->getSource()->getDistance(*sample);
 	return l1;
 }
@@ -109,7 +114,7 @@ double LoadHelper::getL2(const API::MatrixWorkspace_sptr& workspace, int detId) 
 	Geometry::Instrument_const_sptr instrument =
 			workspace->getInstrument();
 	// Get the distance between the source and the sample (assume in metres)
-	Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+	Geometry::IComponent_const_sptr sample = instrument->getSample();
 	// Get the sample-detector distance for this detector (in metres)
 	double l2 = workspace->getDetector(detId)->getPos().distance(
 			sample->getPos());

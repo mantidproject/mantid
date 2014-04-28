@@ -13,9 +13,13 @@ namespace Mantid
 {
 namespace API
 {
-
-Kernel::Logger& WorkspaceGroup::g_log = Kernel::Logger::get("WorkspaceGroup");
-size_t WorkspaceGroup::g_maximum_depth = 100;
+  namespace
+  {
+    /// initialize depth parameter
+    size_t MAXIMUM_DEPTH = 100;
+    /// static logger object
+    Kernel::Logger g_log("WorkspaceGroup");
+  }
 
 WorkspaceGroup::WorkspaceGroup() :
   Workspace(), 
@@ -393,7 +397,7 @@ bool WorkspaceGroup::isMultiperiod() const
 bool WorkspaceGroup::isInGroup(const Workspace &workspace, size_t level) const
 {
     // Check for a cycle.
-    if ( level > g_maximum_depth )
+    if ( level > MAXIMUM_DEPTH )
     {
         throw std::runtime_error("WorkspaceGroup nesting level is too deep.");
     }

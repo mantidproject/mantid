@@ -1,19 +1,33 @@
 #ifndef IMD_NODE_H_
 #define IMD_NODE_H_
 
-#include <vector>
 #include <algorithm>
-#include "MantidKernel/ThreadScheduler.h"
-#include "MantidAPI/IBoxControllerIO.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidAPI/BoxController.h"
-#include "MantidAPI/CoordTransform.h"
+#include <string>
+#include <vector>
+#include "MantidKernel/VMD.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 namespace Mantid
 {
+namespace Kernel
+{
+  class ISaveable;
+  class ThreadScheduler;
+}
+
+namespace Geometry
+{
+  template <typename T>
+  class MDDimensionExtents;
+  class MDImplicitFunction;
+}
+
 namespace API
 {
+
+class BoxController;
+class IBoxControllerIO;
+class CoordTransform;
 
 class IMDNode 
 {
@@ -187,6 +201,8 @@ public:
     virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL)=0;
     /** Calculate the centroid of this box and all sub-boxes. */
     virtual void calculateCentroid(coord_t * /*centroid*/) const=0;
+    /** Get the centroid of this box and all sub-boxes. */
+    virtual coord_t * getCentroid() const=0;
     //----------------------------------------------------------------------------------------------------------------------------------
     // MDBoxBase interface, related to average signals/error box parameters
     virtual signal_t getSignal() const=0;

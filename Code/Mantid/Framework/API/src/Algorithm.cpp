@@ -77,7 +77,7 @@ namespace Mantid
     /// Constructor
     Algorithm::Algorithm() :
     PropertyManagerOwner(),
-      m_cancel(false),m_parallelException(false),g_log(Kernel::Logger::get("Algorithm")),
+      m_cancel(false),m_parallelException(false), m_log("Algorithm"), g_log(m_log),
       m_executeAsync(NULL),
       m_notificationCenter(NULL),
       m_progressObserver(NULL),
@@ -95,7 +95,6 @@ namespace Mantid
       delete m_executeAsync;
       delete m_progressObserver;
 
-      g_log.release();
       // Free up any memory available.
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
     }
@@ -300,9 +299,8 @@ namespace Mantid
         {
           this->init();
         }
-        catch(std::runtime_error& ex)
+        catch(std::runtime_error&)
         {
-          g_log.error() << "Error initializing " << this->name() << " algorithm: " << ex.what() << std::endl;
           throw;
         }
 
@@ -319,7 +317,7 @@ namespace Mantid
       {
         // Gaudi: A call to the auditor service is here
         // (1) perform the printout
-        g_log.fatal("UNKNOWN Exception is caught in initialize()");
+        getLogger().fatal("UNKNOWN Exception is caught in initialize()");
         throw;
       }
 
@@ -397,6 +395,7 @@ namespace Mantid
         throw std::logic_error("Algorithm::lockWorkspaces(): The workspaces have already been locked!");
 
       // First, Write-lock the output workspaces
+      auto & debugLog = g_log.debug();
       for (size_t i=0; i<m_outputWorkspaceProps.size(); i++)
       {
         Workspace_sptr ws = m_outputWorkspaceProps[i]->getWorkspace();
@@ -408,7 +407,7 @@ namespace Mantid
               && std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws) == m_writeLockedWorkspaces.end())
           {
             // Write-lock it if not already
-            g_log.debug() << "Write-locking " << ws->getName() << std::endl;
+            debugLog << "Write-locking " << ws->getName() << std::endl;
             ws->getLock()->writeLock();
             m_writeLockedWorkspaces.push_back(ws);
           }
@@ -427,7 +426,7 @@ namespace Mantid
               && std::find(m_writeLockedWorkspaces.begin(), m_writeLockedWorkspaces.end(), ws) == m_writeLockedWorkspaces.end())
           {
             // Read-lock it if not already write-locked
-            g_log.debug() << "Read-locking " << ws->getName() << std::endl;
+            debugLog << "Read-locking " << ws->getName() << std::endl;
             ws->getLock()->readLock();
             m_readLockedWorkspaces.push_back(ws);
           }
@@ -444,13 +443,13 @@ namespace Mantid
       // Do not lock workspace for child algos
       if (this->isChild())
         return;
-
+      auto & debugLog = g_log.debug();
       for (size_t i=0; i<m_writeLockedWorkspaces.size(); i++)
       {
         Workspace_sptr ws = m_writeLockedWorkspaces[i];
         if (ws)
         {
-          g_log.debug() << "Unlocking " << ws->getName() << std::endl;
+          debugLog << "Unlocking " << ws->getName() << std::endl;
           ws->getLock()->unlock();
         }
       }
@@ -459,7 +458,7 @@ namespace Mantid
         Workspace_sptr ws = m_readLockedWorkspaces[i];
         if (ws)
         {
-          g_log.debug() << "Unlocking " << ws->getName() << std::endl;
+          debugLog << "Unlocking " << ws->getName() << std::endl;
           ws->getLock()->unlock();
         }
       }
@@ -485,7 +484,7 @@ namespace Mantid
       {
         DeprecatedAlgorithm * depo = dynamic_cast<DeprecatedAlgorithm *>(this);
         if (depo != NULL)
-          g_log.error(depo->deprecationMsg(this));
+          getLogger().error(depo->deprecationMsg(this));
       }
       // Start by freeing up any memory available.
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
@@ -496,7 +495,6 @@ namespace Mantid
       // Return a failure if the algorithm hasn't been initialized
       if ( !isInitialized() )
       {
-        g_log.error("Algorithm is not initialized:" + this->name());
         throw std::runtime_error("Algorithm is not initialised:" + this->name());
       }
 
@@ -532,12 +530,27 @@ namespace Mantid
       std::map<std::string, std::string> errors = this->validateInputs();
       if (!errors.empty())
       {
+        size_t numErrors = errors.size();
         // Log each issue
+        auto & errorLog = getLogger().error();
+        auto & warnLog = getLogger().warning();
         for (auto it = errors.begin(); it != errors.end(); it++)
-          g_log.error() << "Invalid value for " << it->first << ": " << it->second << std::endl;
+        {
+          if (this->existsProperty(it->first))
+            errorLog << "Invalid value for " << it->first << ": " << it->second << "\n";
+          else
+          {
+            numErrors -= 1; // don't count it as an error
+            warnLog << "validateInputs() references non-existant property \""
+                    << it->first << "\"\n";
+          }
+        }
         // Throw because something was invalid
-        notificationCenter().postNotification(new ErrorNotification(this,"Some invalid Properties found"));
-        throw std::runtime_error("Some invalid Properties found");
+        if (numErrors > 0)
+        {
+          notificationCenter().postNotification(new ErrorNotification(this,"Some invalid Properties found"));
+          throw std::runtime_error("Some invalid Properties found");
+        }
       }
 
       // ----- Check for processing groups -------------
@@ -555,8 +568,8 @@ namespace Mantid
       }
       catch(std::exception& ex)
       {
-        g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-        g_log.error()<<ex.what()<<std::endl;
+        getLogger().error() << "Error in execution of algorithm "<< this->name() << std::endl
+                      << ex.what()<<std::endl;
         notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
         m_running = false;
         if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
@@ -613,11 +626,11 @@ namespace Mantid
           setExecuted(true);
           if (!m_isChildAlgorithm || m_alwaysStoreInADS)
           {
-            g_log.notice() << name() << " successful, Duration "
+            getLogger().notice() << name() << " successful, Duration "
               << std::fixed << std::setprecision(2) << duration << " seconds" << std::endl;
           }
           else
-            g_log.debug() << name() << " finished with isChild = " << isChild() << std::endl;
+            getLogger().debug() << name() << " finished with isChild = " << isChild() << std::endl;
           m_running = false;
         }
         catch(std::runtime_error& ex)
@@ -626,8 +639,8 @@ namespace Mantid
           if (m_isChildAlgorithm || m_runningAsync || m_rethrow) throw;
           else
           {
-            g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
-            g_log.error()<< ex.what()<<std::endl;
+            getLogger().error() << "Error in execution of algorithm "<< this->name()<<std::endl
+                          << ex.what()<<std::endl;
           }
           notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
           m_running = false;
@@ -638,8 +651,8 @@ namespace Mantid
           if (m_isChildAlgorithm || m_runningAsync || m_rethrow) throw;
           else
           {
-            g_log.error()<< "Logic Error in execution of algorithm "<< this->name()<<std::endl;
-            g_log.error()<< ex.what()<<std::endl;
+            getLogger().error() << "Logic Error in execution of algorithm "<< this->name() << std::endl
+                          << ex.what()<<std::endl;
           }
           notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
           m_running = false;
@@ -649,7 +662,7 @@ namespace Mantid
       {
         m_runningAsync = false;
         m_running = false;
-        g_log.error() << this->name() << ": Execution terminated by user.\n";
+        getLogger().error() << this->name() << ": Execution terminated by user.\n";
         notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
         this->unlockWorkspaces();
         throw;
@@ -662,8 +675,8 @@ namespace Mantid
         m_running = false;
 
         notificationCenter().postNotification(new ErrorNotification(this,ex.what()));
-        g_log.error() << "Error in execution of algorithm " << this->name() << ":\n";
-        g_log.error(ex.what());
+        getLogger().error() << "Error in execution of algorithm " << this->name() << ":\n"
+                      << ex.what() << "\n";
         this->unlockWorkspaces();
         throw;
       }
@@ -676,7 +689,7 @@ namespace Mantid
         m_running = false;
 
         notificationCenter().postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught in exec()"));
-        g_log.error() << this->name() << ": UNKNOWN Exception is caught in exec()\n";
+        getLogger().error() << this->name() << ": UNKNOWN Exception is caught in exec()\n";
         this->unlockWorkspaces();
         throw;
       }
@@ -705,13 +718,11 @@ namespace Mantid
       }
       catch (std::runtime_error&)
       {
-        g_log.error() << "Unable to successfully run ChildAlgorithm " << this->name() << std::endl;
         throw;
       }
 
       if ( ! executed )
       {
-        g_log.error() << "Unable to successfully run ChildAlgorithm " << this->name() << std::endl;
         throw std::runtime_error("Unable to successfully run ChildAlgorithm " + this->name());
       }
     }
@@ -741,7 +752,6 @@ namespace Mantid
 						}
 						catch (std::runtime_error&)
 						{
-							g_log.error("Error storing output workspace in AnalysisDataService");
 							throw;
 						}
 					}
@@ -765,7 +775,6 @@ namespace Mantid
 					}
 					catch (std::runtime_error&)
 					{
-						g_log.error("Error storing output workspace in AnalysisDataService");
 						throw;
 					}
 				}
@@ -798,10 +807,9 @@ namespace Mantid
       {
         alg->initialize();
       }
-      catch (std::runtime_error& exc)
+      catch (std::runtime_error&)
       {
-        g_log.error() << "Unable to initialise Child Algorithm " << name << std::endl;
-        g_log.error() << exc.what() << "\n";
+        throw std::runtime_error("Unable to initialise Child Algorithm '" + name + "'");
       }
 
       // If output workspaces are nameless, give them a temporary name to satisfy validator
@@ -816,9 +824,7 @@ namespace Mantid
 
       if (startProgress >= 0 && endProgress > startProgress && endProgress <= 1.)
       {
-        std::cerr << "progress observer=" << m_progressObserver << "\n";
         alg->addObserver(this->progressObserver());
-        std::cerr << "progress observer=" << m_progressObserver << "\n";
         m_startChildProgress = startProgress;
         m_endChildProgress = endProgress;
       }
@@ -1063,13 +1069,15 @@ namespace Mantid
     /** Sends out algorithm parameter information to the logger */
     void Algorithm::logAlgorithmInfo() const
     {
-      g_log.notice() << name() << " started";
+      auto & logger = getLogger();
+
+      logger.notice() << name() << " started";
       if (this->isChild())
-        g_log.notice() << " (child)";
-      g_log.notice() << std::endl;
+        logger.notice() << " (child)";
+      logger.notice() << std::endl;
       // Make use of the AlgorithmHistory class, which holds all the info we want here
       AlgorithmHistory AH(this);
-      g_log.information() << AH;
+      logger.information() << AH;
     }
 
 
@@ -1236,6 +1244,8 @@ namespace Mantid
         // Don't make the new algorithm a child so that it's workspaces are stored correctly
         alg_sptr->setChild(false);
 
+        alg_sptr->setRethrows(true);
+
         IAlgorithm* alg = alg_sptr.get();
         // Set all non-workspace properties
         this->copyNonWorkspaceProperties(alg, int(entry)+1);
@@ -1287,8 +1297,17 @@ namespace Mantid
         } // for each OutputWorkspace property
 
         // ------------ Execute the algo --------------
-        if (!alg->execute())
-          throw std::runtime_error("Execution of " + this->name() + " for group entry " + Strings::toString(entry+1) + " failed.");
+        try
+        {
+          alg->execute();
+        }
+        catch(std::exception& e)
+        {
+          std::ostringstream msg;
+          msg << "Execution of " << this->name() << " for group entry " << (entry+1) << " failed: ";
+          msg << e.what(); // Add original message
+          throw std::runtime_error(msg.str());
+        }
 
         // ------------ Fill in the output workspace group ------------------
         // this has to be done after execute() because a workspace must exist 

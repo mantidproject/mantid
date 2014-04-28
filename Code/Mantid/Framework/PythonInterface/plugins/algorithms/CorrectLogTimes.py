@@ -24,6 +24,7 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
     
     
     def PyInit(self):
+        self.setOptionalMessage("This algorithm attempts to make the time series property logs start at the same time as the first time in the proton charge log.")
         self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.InOut), "Input workspace")
         self.declareProperty("LogNames","",doc="Experimental og values to be shifted. If empty, will attempt to shift all logs")                  
 

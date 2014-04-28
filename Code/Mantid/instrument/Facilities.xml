@@ -235,6 +235,12 @@
     <livedata address="NDXMUSR:6789" />
   </instrument>
   
+  <instrument name="MUT">
+    <zeropadding size="8"/>
+    <technique>Muon spectroscopy</technique>
+    <technique>Radio frequency muSR</technique>
+  </instrument>  
+  
   <instrument name="EMU">
     <zeropadding size="8"/>
     <technique>Muon spectroscopy</technique>
@@ -360,6 +366,10 @@
       <technique>Small Angle Scattering</technique>
    </instrument> 
    
+   <instrument name="USANS" shortname="USANS" beamline="1A"> 
+      <technique>Small Angle Scattering</technique>
+   </instrument> 
+   
    <instrument name="VULCAN" beamline="7"> 
 	<technique>Neutron Diffraction</technique>
    </instrument> 
@@ -367,6 +377,7 @@
    <instrument name="CORELLI" beamline="9"> 
 	<technique>Neutron Diffraction</technique>
 	<technique>Diffuse Scattering</technique>
+	<livedata address="corelli-sms.sns.gov:31415" />
    </instrument> 
       
    <instrument name="POWGEN" shortname="PG3" beamline="11A"> 
@@ -432,7 +443,7 @@
 
 </facility>
 
-<facility name="ILL" FileExtensions=".nxs,.hdf,.inx,.asc">
+<facility name="ILL" zeropadding="6" FileExtensions=".nxs,.hdf,.inx,.asc">
 
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique> 

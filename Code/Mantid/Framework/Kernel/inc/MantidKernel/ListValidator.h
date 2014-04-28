@@ -5,7 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/TypedValidator.h"
-#include <boost/lexical_cast.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/lexical_cast.hpp>
+#endif
 #include <vector>
 
 namespace Mantid

@@ -124,7 +124,7 @@ void UnwrapSNS::exec()
   // without the primary flight path the algorithm cannot work
   try {
     Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
-    Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+    Geometry::IComponent_const_sptr sample = instrument->getSample();
     m_L1 = instrument->getSource()->getDistance(*sample);
   }
   catch (NotFoundError&)

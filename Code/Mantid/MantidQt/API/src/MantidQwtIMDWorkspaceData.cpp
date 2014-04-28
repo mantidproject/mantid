@@ -7,6 +7,7 @@
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include <QStringBuilder>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -325,21 +326,32 @@ void MantidQwtIMDWorkspaceData::setPreviewMode(bool preview)
 {
   m_preview = preview;
   // If the workspace has no original, then we MUST be in preview mode.
-  if (preview || (m_workspace->numOriginalWorkspaces() == 0))
+  const size_t nOriginalWorkspaces = m_workspace->numOriginalWorkspaces();
+  if (preview || (nOriginalWorkspaces == 0))
   {
     // Preview mode. No transformation.
     m_originalWorkspace = m_workspace;
-    m_transform = new NullCoordTransform(m_workspace->getNumDims());
   }
   else
   {
     // Refer to the last workspace = the intermediate in the case of MDHisto binning
-    size_t index = m_workspace->numOriginalWorkspaces()-1;
-    m_originalWorkspace = boost::dynamic_pointer_cast<IMDWorkspace>(m_workspace->getOriginalWorkspace(index));
-    CoordTransform * temp = m_workspace->getTransformToOriginal(index);
-    if (temp)
-      m_transform = temp->clone();
+    const size_t indexOfWS = nOriginalWorkspaces-1; // Get the last workspace
+    m_originalWorkspace = boost::dynamic_pointer_cast<IMDWorkspace>(m_workspace->getOriginalWorkspace(indexOfWS));
   }
+
+  const size_t nTransformsToOriginal = m_workspace->getNumberTransformsToOriginal();
+  if (preview || (nTransformsToOriginal == 0))
+  {
+    m_transform = new NullCoordTransform(m_workspace->getNumDims());
+  }
+  else
+  {
+    const size_t indexOfTransform = nTransformsToOriginal-1; // Get the last transform
+    CoordTransform * temp = m_workspace->getTransformToOriginal(indexOfTransform);
+    if (temp)
+          m_transform = temp->clone();
+  }
+
   this->choosePlotAxis();
 }
 
@@ -432,16 +444,16 @@ int MantidQwtIMDWorkspaceData::currentPlotXAxis() const
 
 //-----------------------------------------------------------------------------
 /// @return the label for the X axis
-std::string MantidQwtIMDWorkspaceData::getXAxisLabel() const
+QString MantidQwtIMDWorkspaceData::getXAxisLabel() const
 {
-  std::string xLabel;
+  QString xLabel;
   if ( m_originalWorkspace.expired() )
     return xLabel; // Empty string
   if (m_currentPlotAxis >= 0)
   {
     // One of the dimensions of the original
     IMDDimension_const_sptr dim = m_originalWorkspace.lock()->getDimension(m_currentPlotAxis);
-    xLabel = dim->getName() + " (" + dim->getUnits() + ")";
+    xLabel = QString::fromStdString(dim->getName()) + " (" + QString::fromStdWString(dim->getUnits().utf8()) + ")";
   }
   else
   {
@@ -460,7 +472,7 @@ std::string MantidQwtIMDWorkspaceData::getXAxisLabel() const
 
 //-----------------------------------------------------------------------------
 /// @return the label for the Y axis, based on the selected normalization
-std::string MantidQwtIMDWorkspaceData::getYAxisLabel() const
+QString MantidQwtIMDWorkspaceData::getYAxisLabel() const
 {
   switch (m_normalization)
   {

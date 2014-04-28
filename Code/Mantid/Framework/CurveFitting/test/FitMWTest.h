@@ -364,7 +364,7 @@ public:
 
     // Create Output
     const std::string baseName("TestOutput_");
-    fitmw.createOutputWorkspace(baseName, composite, domain, values);
+    fitmw.createOutputWorkspace(baseName, composite, domain, values, "OutputWorkspace");
     
     
     MatrixWorkspace_sptr outputWS;
@@ -587,7 +587,7 @@ public:
 
       // Create Output
       const std::string baseName("TestOutput_");
-      fitmw.createOutputWorkspace(baseName, conv, domain, values);
+      fitmw.createOutputWorkspace(baseName, conv, domain, values, "OutputWorkspace");
 
 
       MatrixWorkspace_sptr outputWS;

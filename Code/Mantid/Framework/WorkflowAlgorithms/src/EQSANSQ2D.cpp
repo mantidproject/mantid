@@ -89,35 +89,41 @@ void EQSANSQ2D::exec()
   }
 
   // Get run properties necessary to calculate the input parameters to Qxy
-  const double sample_detector_distance = getRunProperty(inputWS, "sample_detector_distance");
-
-  const double nx_pixels = inputWS->getInstrument()->getNumberParameter("number-of-x-pixels")[0];
-  const double ny_pixels = inputWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0];
-  const double pixel_size_x = inputWS->getInstrument()->getNumberParameter("x-pixel-size")[0];
-  const double pixel_size_y = inputWS->getInstrument()->getNumberParameter("y-pixel-size")[0];
-
-  const double beam_ctr_x = getRunProperty(inputWS, "beam_center_x");
-  const double beam_ctr_y = getRunProperty(inputWS, "beam_center_y");
-
-  double dxmax = pixel_size_x*std::max(beam_ctr_x,nx_pixels-beam_ctr_x);
-  double dymax = pixel_size_y*std::max(beam_ctr_y,ny_pixels-beam_ctr_y);
-  double maxdist = std::max(dxmax, dymax);
-
   // Wavelength bandwidths
   double wavelength_min = 0.0;
   if (inputWS->run().hasProperty("wavelength_min"))
-    wavelength_min = getRunProperty(inputWS, "wavelength_min");
+	wavelength_min = getRunProperty(inputWS, "wavelength_min");
   else if (inputWS->dataX(0).size()>1)
-    wavelength_min = (inputWS->dataX(1)[0]+inputWS->dataX(1)[1])/2.0;
+	wavelength_min = (inputWS->dataX(1)[0]+inputWS->dataX(1)[1])/2.0;
   else if (inputWS->dataX(0).size()==1)
-    wavelength_min = inputWS->dataX(1)[0];
+	wavelength_min = inputWS->dataX(1)[0];
   else
   {
-    g_log.error("Can't determine the minimum wavelength for the input workspace.");
-    throw std::invalid_argument("Can't determine the minimum wavelength for the input workspace.");
+	g_log.error("Can't determine the minimum wavelength for the input workspace.");
+	throw std::invalid_argument("Can't determine the minimum wavelength for the input workspace.");
   }
 
-  double qmax = 4*M_PI/wavelength_min*std::sin(0.5*std::atan(maxdist/sample_detector_distance));
+  double qmax = 0;
+  if (inputWS->run().hasProperty("qmax"))
+  {
+	  qmax = getRunProperty(inputWS, "qmax");
+  } else {
+	  const double sample_detector_distance = getRunProperty(inputWS, "sample_detector_distance");
+
+	  const double nx_pixels = inputWS->getInstrument()->getNumberParameter("number-of-x-pixels")[0];
+	  const double ny_pixels = inputWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0];
+	  const double pixel_size_x = inputWS->getInstrument()->getNumberParameter("x-pixel-size")[0];
+	  const double pixel_size_y = inputWS->getInstrument()->getNumberParameter("y-pixel-size")[0];
+
+	  const double beam_ctr_x = getRunProperty(inputWS, "beam_center_x");
+	  const double beam_ctr_y = getRunProperty(inputWS, "beam_center_y");
+
+	  double dxmax = pixel_size_x*std::max(beam_ctr_x,nx_pixels-beam_ctr_x);
+	  double dymax = pixel_size_y*std::max(beam_ctr_y,ny_pixels-beam_ctr_y);
+	  double maxdist = std::max(dxmax, dymax);
+
+	  qmax = 4*M_PI/wavelength_min*std::sin(0.5*std::atan(maxdist/sample_detector_distance));
+  };
 
   if (frame_skipping)
   {

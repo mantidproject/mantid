@@ -26,7 +26,7 @@ public:
 
    TS_ASSERT_EQUALS("testDimName", product->getName());
    TS_ASSERT_EQUALS("testDimId", product->getDimensionId());
-   TS_ASSERT_EQUALS("A^-1", product->getUnits());
+   TS_ASSERT_EQUALS("A^-1", product->getUnits().ascii());
    TS_ASSERT_EQUALS(0, product->getMinimum());
    TS_ASSERT_EQUALS(2, product->getMaximum());
    TS_ASSERT_EQUALS(1, product->getNBins());
@@ -47,7 +47,7 @@ public:
    TS_ASSERT_THROWS_NOTHING(product = builder.create());
    TS_ASSERT_EQUALS("testDimName", product->getName());
    TS_ASSERT_EQUALS("testDimId", product->getDimensionId());
-   TS_ASSERT_EQUALS("A^-1", product->getUnits());
+   TS_ASSERT_EQUALS("A^-1", product->getUnits().ascii());
    TS_ASSERT_EQUALS(0, product->getMinimum());
    TS_ASSERT_EQUALS(2, product->getMaximum());
    TS_ASSERT_EQUALS(1, product->getNBins());

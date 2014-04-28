@@ -242,7 +242,7 @@ void Goniometer::makeUniversalGoniometer()
 }
 
 /** Return Euler angles acording to a convention
-* @param convention :: the convention used to calculate Euler Angles. The UniversalGoniometer is YXY, a triple axis goniometer at HFIR is YZX 
+* @param convention :: the convention used to calculate Euler Angles. The UniversalGoniometer is YZY, a triple axis goniometer at HFIR is YZX
 */
 std::vector<double> Goniometer::getEulerAngles(std::string convention)
 {
