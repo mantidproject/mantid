@@ -19,6 +19,20 @@
 
  If FitWindows is defined, starting peak centres are NOT user's input, but found by highest value within peak window. (Is this correct???)
 
+ ==== Estimation of peak's background and range ====
+ If FindPeaksBackground fails, then it is necessary to estimate a rough peak range and background according to
+ observed data.
+ 1. Assume the local background (within the given fitting window) is close to linear;
+ 2. Take the first 3 and last 3 data points to calcualte the linear background;
+ 3. Remove background (rougly) and calcualte peak's height, width, and centre;
+ 4. If the peak centre (starting value) uses observed value, then set peakcentre to that value.  Otherwise, set it to given value;
+ 5. Get the bin indexes of xmin, xmax and peakcentre;
+ 6. Calcualte peak range, i.e., left and right boundary;
+ 7. If any peak boundary exceeds or too close to the boundary, there will be 2 methods to solve this issue;
+ 7.1 If peak centre is restricted to given value, then the peak range will be from 1/6 to 5/6 of the given data points;
+ 7.2 If peak centre is set to observed value, then the 3 leftmost data points will be used for background.
+
+
  ==== References ====
  # M.A.Mariscotti, ''A method for automatic identification of peaks in the presence of background and its application to spectrum analysis'', NIM '''50''' (1967) 309.
 
@@ -886,6 +900,9 @@ namespace Algorithms
   void FindPeaks::fitSinglePeak(const API::MatrixWorkspace_sptr &input, const int spectrum,
                                 const int i_min, const int i_max, const int i_centre)
   {
+    const MantidVec& vecX = input->readX(spectrum);
+    const MantidVec& vecY = input->readY(spectrum);
+
     //-------------------------------------------------------------------------
     // Estimate peak and background parameters for better fitting
     //-------------------------------------------------------------------------
@@ -896,37 +913,55 @@ namespace Algorithms
     g_log.information(outss.str());
 
     // Estimate background
-    std::vector<double> vec_bkgdparvalues0, vecpeakrange;
-    findPeakBackground(input, spectrum, i_min, i_max, vec_bkgdparvalues0, vecpeakrange);
+    std::vector<double> vecbkgdparvalue(3, 0.);
+    std::vector<double> vecpeakrange(3, 0.);
+    bool usefpdresult = findPeakBackground(input, spectrum, i_min, i_max, vecbkgdparvalue, vecpeakrange);
+    g_log.warning() << "[D] FindPeakBackground result: " << usefpdresult << "\n";
+
+    if (!usefpdresult)
+    {
+      // Estimate background roughly for a failed case
+      // estimateBackground(vecX, vecY, i_min, i_max, bg0, bg1, bg2, peakleftbound, peakrightbound);
+      estimateBackground(vecX, vecY, i_min, i_max, vecbkgdparvalue);
+      // FIXME - peakleftbounda and rightbound should be here
+    }
+    for (size_t i = 0; i < vecbkgdparvalue.size(); ++i)
+      if (i < m_bkgdOrder)
+        m_backgroundFunction->setParameter(i, vecbkgdparvalue[i]);
 
     // Estimate peak parameters
-    double est_centre, est_height, est_fwhm;
-    const MantidVec& vecX = input->readX(spectrum);
-    const MantidVec& vecY = input->readY(spectrum);
+    double est_height, est_fwhm;
     // FIXME - Is this useful if background is high and slant????
-    std::string errmsg = estimatePeakParameters(vecX, vecY, i_min, i_max, est_centre, est_height, est_fwhm);
+    size_t i_obscentre;
+    double est_leftfwhm, est_rightfwhm;
+    std::string errmsg = estimatePeakParameters(vecX, vecY, i_min, i_max, vecbkgdparvalue, i_obscentre, est_height,
+                                                est_fwhm, est_leftfwhm, est_rightfwhm);
     if (errmsg.size() > 0)
     {
       // Unable to estimate peak
-      est_centre = vecX[i_centre];
+      i_obscentre = i_centre;
       est_fwhm = 1.;
       est_height = 1.;
       g_log.error(errmsg);
     }
-    else
-    {
-      for (size_t i = 0; i < vec_bkgdparvalues0.size(); ++i)
-        m_backgroundFunction->setParameter(i, vec_bkgdparvalues0[i]);
-    }
 
     // Set peak parameters to
-    // FIXME - Add a property for this selection!!!
     if (m_useObsCentre)
-      m_peakFunction->setCentre(est_centre);
+      m_peakFunction->setCentre(vecX[i_obscentre]);
     else
       m_peakFunction->setCentre(vecX[i_centre]);
     m_peakFunction->setHeight(est_height);
     m_peakFunction->setFwhm(est_fwhm);
+
+    if (!usefpdresult)
+    {
+      // Estimate peak range based on
+      // const MantidVec& vecX,  size_t i_centre,
+      // size_t i_min, size_t i_max, const double& leftfwhm, const double& rightfwhm,
+      // std::vector<double>& vecpeakrang
+      if (!m_useObsCentre) i_obscentre = i_centre;
+      estimatePeakRange(vecX, i_obscentre, i_min, i_max, est_leftfwhm, est_rightfwhm, vecpeakrange);
+    }
 
     //-------------------------------------------------------------------------
     // Fit Peak
@@ -959,6 +994,112 @@ namespace Algorithms
 
 
   //----------------------------------------------------------------------------------------------
+  /** Find peak background given a certain range by
+    * calling algorithm "FindPeakBackground"
+    */
+  bool FindPeaks::findPeakBackground(const MatrixWorkspace_sptr& input, int spectrum, size_t i_min, size_t i_max,
+                                     std::vector<double>& vecBkgdParamValues, std::vector<double>& vecpeakrange)
+  {
+    const MantidVec& vecX = input->readX(spectrum);
+
+    // Call FindPeakBackground
+    IAlgorithm_sptr estimate = createChildAlgorithm("FindPeakBackground");
+    estimate->setProperty("InputWorkspace", input);
+    estimate->setProperty("WorkspaceIndex", spectrum);
+    //estimate->setProperty("SigmaConstant", 1.0);
+    std::vector<double> fwvec;
+    fwvec.push_back(vecX[i_min]);
+    fwvec.push_back(vecX[i_max]);
+    estimate->setProperty("BackgroundType", m_backgroundType);
+    estimate->setProperty("FitWindow", fwvec);
+    estimate->executeAsChildAlg();
+    // Get back the result
+    Mantid::API::ITableWorkspace_sptr peaklisttablews = estimate->getProperty("OutputWorkspace");
+
+    // Determine whether to use FindPeakBackground's result.
+    bool usefitresult = false;
+    if (peaklisttablews->columnCount() < 7)
+      throw std::runtime_error("No 7th column for use FindPeakBackground result or not. ");
+
+    if (peaklisttablews->rowCount() > 0)
+    {
+      int useit = peaklisttablews->Int(0, 6);
+      if (useit > 0)
+        usefitresult = true;
+    }
+
+    // Local check whether FindPeakBackground gives a reasonable value
+    vecpeakrange.resize(2);
+
+    if (usefitresult)
+    {
+      // Use FitPeakBackgroud's reuslt
+      size_t i_peakmin, i_peakmax;
+      i_peakmin = peaklisttablews->Int(0,1);
+      i_peakmax = peaklisttablews->Int(0,2);
+
+      g_log.notice() << "[2I] FindPeakBackground successful. " << "iMin = " << i_min << ", iPeakMin = "
+                     << i_peakmin << ", iPeakMax = " << i_peakmax << ", iMax = " << i_max << "\n";
+
+      if (i_peakmin < i_peakmax && i_peakmin > i_min+2 && i_peakmax < i_max-2)
+      {
+        // A more restricted criteria such that there will be at least 1 pixel for peak and at least 6 pixel for
+        // background fitting: use generated background parameters
+        g_log.warning("[D] Use peak range obtained by FindPeaksBackground.");
+
+        // FIXME - It is assumed that there are 3 background parameters set to FindPeaksBackground
+        double bg0, bg1, bg2;
+        bg0 = peaklisttablews->Double(0,3);
+        bg1 = peaklisttablews->Double(0,4);
+        bg2 = peaklisttablews->Double(0,5);
+
+        // Set output
+        vecBkgdParamValues.resize(3, 0.);
+        vecBkgdParamValues[0] = bg0;
+        vecBkgdParamValues[1] = bg1;
+        vecBkgdParamValues[2] = bg2;
+
+        g_log.notice() << "[2I] Backgroun parameters (from FindPeakBackground) A0, A1, A2 = "
+                       << bg0 << ", " << bg1 << ", " << bg2 << "\n";
+
+        vecpeakrange[0] = vecX[i_peakmin];
+        vecpeakrange[1] = vecX[i_peakmax];
+      }
+      else
+      {
+        // Do manual estimation again
+        usefitresult = false;
+        g_log.warning("[D] FindPeakBackground result is ignored due to wrong in peak range. ");
+      }
+    }
+
+#if 0
+    // Manual estimate, if FindPeakBackground failed!
+    if (!usefitresult)
+    {
+      g_log.information("FindPeakBackground failed. Rough estimation is made on peak's background. ");
+
+      // Estimate background roughly for a failed case
+      double peakleftbound, peakrightbound;
+      estimateBackground(vecX, vecY, i_min, i_max, bg0, bg1, bg2, peakleftbound, peakrightbound);
+
+      vecpeakrange[0] = peakleftbound;
+      vecpeakrange[1] = peakrightbound;
+    }
+#endif
+
+    std::stringstream outx;
+    outx << "FindPeakBackground Result: Given window (" << vecX[i_min] << ", " << vecX[i_max]
+         << ");  Determine peak range: (" << vecpeakrange[0] << ", " << vecpeakrange[1]
+         << "). ";
+    g_log.information(outx.str());
+
+    return usefitresult;
+  }
+
+
+
+  //----------------------------------------------------------------------------------------------
   /** Estimate peak parameters
     * Assumption: pure peak workspace with background removed (but it might not be true...)
     * @param vecX :: vector of X-axis
@@ -971,72 +1112,97 @@ namespace Algorithms
     * @return error mesage
     */
   std::string FindPeaks::estimatePeakParameters(const MantidVec& vecX, const MantidVec& vecY,
-                                                size_t i_min, size_t i_max,
-                                                double& centre, double& height, double& fwhm)
+                                                size_t i_min, size_t i_max, const std::vector<double> vecbkgdparvalues,
+                                                size_t& iobscentre, double& height, double& fwhm, double& leftfwhm,
+                                                double& rightfwhm)
   {
-    // Search for maximum
-    size_t icentre = i_min;
-    centre = vecX[i_min];
-    double highest = vecY[i_min];
-    double lowest = vecY[i_min];
+    // Search for maximum considering background
+    double bg0 = vecbkgdparvalues[0];
+    double bg1 = 0;
+    double bg2 = 0;
+    if (vecbkgdparvalues.size() >= 2)
+    {
+      bg1 = vecbkgdparvalues[1];
+      if (vecbkgdparvalues.size() >= 3) bg2 = vecbkgdparvalues[2];
+    }
+
+    // Starting value
+    iobscentre = i_min;
+    double tmpx = vecX[i_min];
+    height = vecY[i_min] - (bg0 + bg1*tmpx + bg2*tmpx*tmpx);
+    double lowest = height;
+
+    // Searching
     for (size_t i = i_min+1; i <= i_max; ++i)
     {
-      double y = vecY[i];
-      if (y > highest)
+      double tmpx = vecX[i];
+      double tmpheight = vecY[i] - (bg0 + bg1*tmpx + bg2*tmpx*tmpx);
+
+      if (tmpheight > height)
       {
-        icentre = i;
-        centre = vecX[i];
-        highest = y;
+        iobscentre = i;
+        height = tmpheight;
       }
-      else if (y < lowest)
+      else if (tmpheight < lowest)
       {
-        lowest = y;
+        lowest = tmpheight;
       }
     }
 
-    height = highest - lowest;
-    if (height == 0)
+    // Summarize on peak centre
+    double obscentre = vecX[iobscentre];
+    double drop = height - lowest;
+    if (drop == 0)
     {
+      // Flat spectrum.  No peak parameter can be estimated.
+      // FIXME - should have a second notice such that there will be no more fitting.
       return "Flat spectrum";
     }
     else if (height <= m_minHeight)
     {
+      // The peak is not high enough!
+      // FIXME - should have a second notice such that there will be no more fitting.
       return "Fluctuation is less than minimum allowed value.";
     }
 
     // If maximum point is on the edge 2 points, return false.  One side of peak must have at least 3 points
-    if (icentre <= i_min+1 || icentre >= i_max-1)
+    if (iobscentre <= i_min+1 || iobscentre >= i_max-1)
     {
       std::stringstream dbss;
       dbss << "Maximum value on edge. Fit window is between " << vecX[i_min] << " and " << vecX[i_max]
-           << ". Maximum value " <<  vecX[icentre] << " is located on (" << icentre << ").";
+           << ". Maximum value " <<  vecX[iobscentre] << " is located on (" << iobscentre << ").";
       return dbss.str();
     }
 
     // Search for half-maximum: no need to very precise
 
     // Slope at the left side of peak.
-    double leftfwhm = -1;
-    for (int i = static_cast<int>(icentre)-1; i >= 0; --i)
+    leftfwhm = -1.;
+    g_log.notice() << "[D] iCentre = " << iobscentre << "\n";
+    for (int i = static_cast<int>(iobscentre)-1; i >= 0; --i)
     {
-      double yright = vecY[i+1];
-      double yleft = vecY[i];
-      if (yright-lowest > 0.5*height && yleft-lowest <= 0.5*height)
+      double xleft = vecX[i];
+      double yleft = vecY[i] - (bg0 + bg1*xleft + bg2*xleft*xleft);
+      if (yleft <= 0.5*height)
       {
         // Ideal case
-        leftfwhm = centre - 0.5*(vecX[i] + vecX[i+1]);
+        // FIXME - Need a linear interpolation on it!
+        leftfwhm = obscentre - 0.5*(vecX[i] + vecX[i+1]);
+        break;
       }
     }
+    g_log.notice() << "[D] Left FWHM = " << leftfwhm << "\n";
 
     // Slope at the right side of peak
-    double rightfwhm = -1;
-    for (size_t i = icentre+1; i <= i_max; ++i)
+    rightfwhm = -1.;
+    for (size_t i = iobscentre+1; i <= i_max; ++i)
     {
-      double yleft = vecY[i-1];
-      double yright = vecY[i];
-      if (yleft-lowest > 0.5*height && yright-lowest <= 0.5*height)
+      double xright = vecX[i];
+      double yright = vecY[i] - (bg0 + bg1*xright + bg2*xright*xright);
+      if (yright <= 0.5*height)
       {
-        rightfwhm = 0.5*(vecX[i] + vecX[i-1]) - centre;
+        rightfwhm = 0.5*(vecX[i] + vecX[i-1]) - obscentre;
+        break;
       }
     }
 
@@ -1045,7 +1211,7 @@ namespace Algorithms
       std::stringstream errmsg;
       errmsg << "Estimate peak parameters error (FWHM cannot be zero): Input data size = " << vecX.size()
              << ", Xmin = " << vecX[i_min] << "(" << i_min << "), Xmax = " << vecX[i_max] << "(" << i_max << "); "
-             << "Estimated peak centre @ " << vecX[icentre] << "(" << icentre << ") with height = " << height
+             << "Estimated peak centre @ " << vecX[iobscentre] << "(" << iobscentre << ") with height = " << height
              << "; Lowest Y value = " << lowest
              << "; Output error: .  leftfwhm = " << leftfwhm << ", right fwhm = " << rightfwhm << ".";
       return errmsg.str();
@@ -1057,14 +1223,14 @@ namespace Algorithms
       std::stringstream errmsg;
       errmsg << "Estimate peak parameters error (FWHM cannot be zero): Input data size = " << vecX.size()
              << ", Xmin = " << vecX[i_min] << "(" << i_min << "), Xmax = " << vecX[i_max] << "(" << i_max << "); "
-             << "Estimated peak centre @ " << vecX[icentre] << "(" << icentre << ") with height = " << height
+             << "Estimated peak centre @ " << vecX[iobscentre] << "(" << iobscentre << ") with height = " << height
              << "; Lowest Y value = " << lowest
              << "; Output error: .  fwhm = " << fwhm << ".";
       return errmsg.str();
     }
 
-    g_log.information() << "Estimated peak parameters: Centre = " << centre << ", Height = "
-                        << height << ", FWHM = " << fwhm << ".\n";
+    g_log.warning() << "Estimated peak parameters: Centre = " << obscentre << ", Height = "
+                    << height << ", FWHM = " << fwhm << ".\n";
 
     return std::string();
   }
@@ -1072,6 +1238,8 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Estimate background parameter values and peak range
+    * The background to estimate is a linear background.  Assuming the first and last data points
+    * cannot be a major part of the peak unless the fit window is too small.
     * @param X :: vec for X
     * @param Y :: vec for Y
     * @param i_min :: index of minimum in X to estimate background
@@ -1081,12 +1249,15 @@ namespace Algorithms
     * @param out_bg2 :: a2 = 0
     */
   void FindPeaks::estimateBackground(const MantidVec& X, const MantidVec& Y, const size_t i_min, const size_t i_max,
-                                     double& out_bg0, double& out_bg1, double& out_bg2, double& peakleftbound,
-                                     double &peakrightbound)
+                                     std::vector<double>& vecbkgdparvalues)
   {
+    // double& out_bg0, double& out_bg1, double& out_bg2, double& peakleftbound, double &peakrightbound
+
     // Validate input
     if (i_min >= i_max)
       throw std::runtime_error("i_min cannot larger or equal to i_max");
+    if (vecbkgdparvalues.size() < 3)
+      vecbkgdparvalues.resize(3, 0.);
 
     // FIXME - THIS IS A MAGIC NUMBER
     const size_t MAGICNUMBER = 12;
@@ -1117,18 +1288,24 @@ namespace Algorithms
     yf = yf / static_cast<double>(numavg);
 
     // Esitmate
-    out_bg2 = 0.;
-    if (m_backgroundFunction->nParams() > 1) // linear background
+    vecbkgdparvalues[2] = 0.;
+    if (m_bkgdOrder >= 1)
     {
-      out_bg1 = (y0-yf)/(x0-xf);
-      out_bg0 = (xf*y0-x0*yf)/(xf-x0);
+      // linear background
+      vecbkgdparvalues[1] = (y0-yf)/(x0-xf);
+      vecbkgdparvalues[0] = (xf*y0-x0*yf)/(xf-x0);
     }
-    else // flat background
+    else
     {
-      out_bg1 = 0.;
-      out_bg0 = 0.5*(y0 + yf);
+      // flat background
+      vecbkgdparvalues[1] = 0.;
+      vecbkgdparvalues[0] = 0.5*(y0 + yf);
     }
 
+    return;
+
+#if 0
+    // No need to do it here!
     m_backgroundFunction->setParameter("A0", out_bg0);
     if (m_backgroundFunction->nParams() > 1)
     {
@@ -1136,6 +1313,10 @@ namespace Algorithms
       if (m_backgroundFunction->nParams() > 2)
         m_backgroundFunction->setParameter("A2", out_bg2);
     }
+#endif
+
+#if 0
+    // Moved to function ...
 
     // Estimate the peak range
 
@@ -1174,8 +1355,8 @@ namespace Algorithms
     }
 
     // Search peak left by using 6 * half of FWHM
-    peakleftbound = X[i_maxheight] - 6.*leftwidth;
-    peakrightbound = X[i_maxheight] + 6.*rightwidth;
+    peakleftbound = X[i_maxheight] - 3.*leftwidth;
+    peakrightbound = X[i_maxheight] + 3.*rightwidth;
 
     if (peakleftbound < X[i_min]) peakleftbound = X[i_min];
     if (peakrightbound > X[i_max]) peakrightbound = X[i_max];
@@ -1187,6 +1368,57 @@ namespace Algorithms
           << ". Peak boundary is (" << peakleftbound << ", " << peakrightbound << ") inside "
           << "fit window (" << X[i_min] << ", " << X[i_max] << ")";
     g_log.information(outss.str());
+#endif
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+    */
+  void FindPeaks::estimatePeakRange(const MantidVec& vecX,  size_t i_centre, size_t i_min, size_t i_max,
+                                    const double& leftfwhm, const double& rightfwhm,
+                                    std::vector<double>& vecpeakrange)
+  {
+    // Check
+    if (vecpeakrange.size() < 2)
+      vecpeakrange.resize(2, 0.);
+
+    if (i_centre < i_min || i_centre > i_max)
+      throw std::runtime_error("Estimate peak range input centre is out of fit window. ");
+
+    // Search peak left by using 6 * half of FWHM
+    double peakleftbound = vecX[i_centre] - 6.*leftfwhm;
+    double peakrightbound = vecX[i_centre] + 6.*rightfwhm;
+
+    // Deal with case the peak boundary is too close to fit window
+    size_t ipeakleft = static_cast<size_t>(getVectorIndex(vecX, peakleftbound));
+    if (ipeakleft <= i_min)
+    {
+      size_t numbkgdpts = (i_centre - i_min)/6;
+      // FIXME - 3 is a magic number
+      if (numbkgdpts < 3) numbkgdpts = 3;
+      ipeakleft = i_min + numbkgdpts;
+      if (ipeakleft >= i_centre) ipeakleft = i_min + 1;
+
+      peakleftbound = vecX[ipeakleft];
+    }
+
+    size_t ipeakright = static_cast<size_t>(getVectorIndex(vecX, peakrightbound));
+    if (ipeakright >= i_max)
+    {
+      size_t numbkgdpts = (i_max - i_centre)/6;
+      // FIXME - 3 is a magic number
+      if (numbkgdpts < 3) numbkgdpts = 3;
+      ipeakright = i_max - numbkgdpts;
+      if (ipeakright <= i_centre) ipeakright = i_max - 1;
+
+      peakrightbound = vecX[ipeakright];
+    }
+
+    // Set result to output vector
+    vecpeakrange[0] = peakleftbound;
+    vecpeakrange[1] = peakrightbound;
 
     return;
   }
@@ -1308,116 +1540,13 @@ namespace Algorithms
     g_log.information() << "Background function (" << m_backgroundFunction->name() << ") has been created. " << "\n";
 
     m_bkgdParameterNames = m_backgroundFunction->getParameterNames();
+    // FIXME - Need to add method nOrder to background function;
     m_bkgdOrder = m_backgroundFunction->nParams()-1;
 
     // Set up peak function
     m_peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
           API::FunctionFactory::Instance().createFunction(m_peakFuncType));
     m_peakParameterNames = m_peakFunction->getParameterNames();
-
-    return;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Find peak background given a certain range by
-    * calling algorithm "FindPeakBackground"
-    */
-  void FindPeaks::findPeakBackground(const MatrixWorkspace_sptr& input, int spectrum, size_t i_min, size_t i_max,
-                                     std::vector<double>& vecBkgdParamValues, std::vector<double>& vecpeakrange)
-  {
-    double bg0, bg1, bg2;
-
-    const MantidVec& vecX = input->readX(spectrum);
-    const MantidVec& vecY = input->readY(spectrum);
-
-    // Call FindPeakBackground
-    IAlgorithm_sptr estimate = createChildAlgorithm("FindPeakBackground");
-    estimate->setProperty("InputWorkspace", input);
-    // The workspace index
-    estimate->setProperty("WorkspaceIndex", spectrum);
-    //estimate->setProperty("SigmaConstant", 1.0);
-    // The workspace index
-    std::vector<double> fwvec;
-    fwvec.push_back(vecX[i_min]);
-    fwvec.push_back(vecX[i_max]);
-    estimate->setProperty("BackgroundType", m_backgroundType);
-    estimate->setProperty("FitWindow", fwvec);
-    estimate->executeAsChildAlg();
-    // Get back the result
-    Mantid::API::ITableWorkspace_sptr peaklisttablews = estimate->getProperty("OutputWorkspace");
-
-    // Determine whether to use FindPeakBackground's result.
-    bool usefitresult = false;
-    if (peaklisttablews->columnCount() < 7)
-      throw std::runtime_error("No 7th column for use FindPeakBackground result or not. ");
-
-    if (peaklisttablews->rowCount() > 0)
-    {
-      int useit = peaklisttablews->Int(0, 6);
-      if (useit > 0)
-        usefitresult = true;
-    }
-
-    // Local check whether FindPeakBackground gives a reasonable value
-    vecpeakrange.resize(2);
-
-    if (usefitresult)
-    {
-      // Use FitPeakBackgroud's reuslt
-      size_t i_peakmin, i_peakmax;
-      i_peakmin = peaklisttablews->Int(0,1);
-      i_peakmax = peaklisttablews->Int(0,2);
-
-      g_log.information() << "FindPeakBackground successful. " << "iMin = " << i_min << ", iPeakMin = "
-                          << i_peakmin << ", iPeakMax = " << i_peakmax << ", iMax = " << i_max << "\n";
-
-      if (i_peakmin < i_peakmax && i_peakmin > i_min+2 && i_peakmax < i_max-2)
-      {
-        // A more restricted criteria such that there will be at least 1 pixel for peak and at least 6 pixel for
-        // background fitting: use generated background parameters
-        g_log.warning("Use peak range obtained by FindPeaksBackground.");
-        bg0 = peaklisttablews->Double(0,3);
-        bg1 = peaklisttablews->Double(0,4);
-        bg2 = peaklisttablews->Double(0,5);
-
-        vecpeakrange[0] = vecX[i_peakmin];
-        vecpeakrange[1] = vecX[i_peakmax];
-      }
-      else
-      {
-        // Do manual estimation again
-        usefitresult = false;
-        g_log.warning("FindPeakBackground result is ignored due to wrong in peak range. ");
-      }
-    }
-
-    // Manual estimate, if FindPeakBackground failed!
-    if (!usefitresult)
-    {
-      g_log.information("FindPeakBackground failed. Rough estimation is made on peak's background. ");
-
-      // Estimate background roughly for a failed case
-      double peakleftbound, peakrightbound;
-      estimateBackground(vecX, vecY, i_min, i_max, bg0, bg1, bg2, peakleftbound, peakrightbound);
-
-      vecpeakrange[0] = peakleftbound;
-      vecpeakrange[1] = peakrightbound;
-    }
-
-    // Set output
-    vecBkgdParamValues.resize(m_bkgdOrder+1);
-    vecBkgdParamValues[0] = bg0;
-    if (m_bkgdOrder >= 1)
-    {
-      vecBkgdParamValues[1] = bg1;
-      if (m_bkgdOrder >= 2) vecBkgdParamValues[2] = bg2;
-    }
-
-    std::stringstream outx;
-    outx << "FindPeakBackground Result: Given window (" << vecX[i_min] << ", " << vecX[i_max]
-         << ");  Determine peak range: (" << vecpeakrange[0] << ", " << vecpeakrange[1]
-         << "). ";
-    g_log.information(outx.str());
 
     return;
   }

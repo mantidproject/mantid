@@ -120,17 +120,24 @@ private:
   void createFunctions();
 
   /// Find peak background
-  void findPeakBackground(const API::MatrixWorkspace_sptr& input, int spectrum, size_t i_min, size_t i_max,
+  bool findPeakBackground(const API::MatrixWorkspace_sptr& input, int spectrum, size_t i_min, size_t i_max,
                           std::vector<double>& vecBkgdParamValues, std::vector<double>& vecpeakrange);
 
   /// Estimate background of a given range
   void estimateBackground(const MantidVec& X, const MantidVec& Y, const size_t i_min, const size_t i_max,
-                          double& out_bg0, double& out_bg1, double& out_bg2,
-                          double &peakleftbound, double &peakrightbound);
+                          std::vector<double>& vecbkgdparvalues);
+
+  /// Estimate peak range based on background peak parameter
+  void estimatePeakRange(const MantidVec& vecX,  size_t i_centre,
+                         size_t i_min, size_t i_max, const double& leftfwhm, const double& rightfwhm,
+                         std::vector<double>& vecpeakrang);
 
   /// Estimate peak parameters
   std::string estimatePeakParameters(const MantidVec& vecX, const MantidVec& vecY,
-                                     size_t i_min, size_t i_max, double& centre, double& height, double& fwhm);
+                                     size_t i_min, size_t i_max, const std::vector<double> vecbkgdparvalues,
+                                     size_t &iobscentre,
+                                     double& height, double& fwhm, double& leftfwhm,
+                                     double& rightfwhm);
 
   /// Generate a table workspace for output peak parameters
   void generateOutputPeakParameterTable();
