@@ -1012,5 +1012,41 @@ namespace Mantid
       // Sets SSL authentication scheme
       setSSLContext(icat);
     }
+
+    /**
+     * Is the specified access type allowed for a specific bean?
+     * @param accessType :: The access type to check against the bean.
+     * @param bean       :: The bean to check access type against. E.g. CREATE,READ,UPDATE,DELETE.
+     * @return True if access is allowed, otherwise false.
+     **/
+    template<class T>
+    bool ICat4Catalog::isAccessAllowed(ICat4::ns1__accessType accessType, T& bean)
+    {
+      ICat4::ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
+
+      ns1__isAccessAllowed request;
+      ns1__isAccessAllowedResponse response;
+
+      std::string sessionID = m_session->getSessionId();
+      request.sessionId     = &sessionID;
+
+      ns1__accessType_ type;
+      type.__item   = accessType;
+
+      request.accessType = &type.__item;
+      request.bean = &bean;
+
+      bool isAccessAllowed = false;
+      if (icat.isAccessAllowed(&request,&response) == SOAP_OK)
+      {
+        if (response.return_) isAccessAllowed = true;
+      }
+      else
+      {
+        throwErrorMessage(icat);
+      }
+      return isAccessAllowed;
+    }
   }
 }

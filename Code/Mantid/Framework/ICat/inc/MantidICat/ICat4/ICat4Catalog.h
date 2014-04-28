@@ -93,6 +93,10 @@ namespace Mantid
         // Sets the soap-endpoint & SSL context for the given ICAT proxy.
         void setICATProxySettings(ICat4::ICATPortBindingProxy& icat);
 
+        // Is the desired accessType allowed for a specific bean?
+        template<class T>
+        bool isAccessAllowed(ICat4::ns1__accessType accessType, T& bean);
+
         // Stores the session details for a specific catalog.
         API::CatalogSession_sptr m_session;
 
