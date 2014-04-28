@@ -2253,7 +2253,7 @@ void SliceViewer::clearPeaksWorkspaces()
         m_peaksPresenter->addPeaksPresenter(
             boost::make_shared<ConcretePeaksPresenter>(viewFactorySelector->makeSelection(), peaksWS,
                 m_ws, transformFactory));
-      } catch (std::invalid_argument& e)
+      } catch (std::invalid_argument&)
       {
         // Incompatible PeaksWorkspace.
         disablePeakOverlays();
