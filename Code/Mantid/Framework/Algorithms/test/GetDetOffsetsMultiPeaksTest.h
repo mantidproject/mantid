@@ -41,7 +41,7 @@ public:
     TS_ASSERT( offsets.isInitialized() );
   }
 
-  void FtestExec()
+  void testExec()
   {
     // ---- Create the simple workspace -------
     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,200);
@@ -84,7 +84,7 @@ public:
   }
 
 
-  void FtestExecWithGroup()
+  void testExecWithGroup()
   {
     // --------- Workspace with summed spectra -------
     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::CreateGroupedWorkspace2D(3, 200, 1.0);

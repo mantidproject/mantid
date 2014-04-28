@@ -102,7 +102,7 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Full test using faked-out peak data */
-  void Ftest_exec()
+  void test_exec()
   {
     // --- Fake workspace with 3 peaks ------
     createMDEW();
@@ -244,7 +244,7 @@ public:
 
 
   //-------------------------------------------------------------------------------
-  void Ftest_exec_NotInPlace()
+  void test_exec_NotInPlace()
   {
     // --- Fake workspace with 3 peaks ------
     createMDEW();
@@ -273,7 +273,7 @@ public:
 
   //-------------------------------------------------------------------------------
   /// Integrate background between start/end background radius
-  void Ftest_exec_shellBackground()
+  void test_exec_shellBackground()
   {
     createMDEW();
     /* Create 3 overlapping shells so that density goes like this:
@@ -314,7 +314,7 @@ public:
 
   }
 
-  void Ftest_writes_out_selected_algorithm_parameters()
+  void test_writes_out_selected_algorithm_parameters()
   {
     createMDEW();
     const double peakRadius = 2;
