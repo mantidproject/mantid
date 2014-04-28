@@ -811,6 +811,7 @@ namespace Algorithms
     findpeaks->setProperty<int>("MinGuessedPeakWidth",4);
     findpeaks->setProperty<int>("MaxGuessedPeakWidth",4);
     findpeaks->setProperty<double>("MinimumPeakHeight", m_minPeakHeight);
+    findpeaks->setProperty("StartFromObservedPeakCentre", true);
     findpeaks->executeAsChildAlg();
 
 #if 0
