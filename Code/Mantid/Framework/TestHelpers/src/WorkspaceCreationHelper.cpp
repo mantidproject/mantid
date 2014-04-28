@@ -312,7 +312,7 @@ namespace WorkspaceCreationHelper
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
   Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
-                                                       bool startYNegative, bool isHistogram,const std::string instrumentName)
+                                                       bool startYNegative, bool isHistogram, const std::string& instrumentName)
   {
     if( includeMonitors && nhist < 2 )
     {
