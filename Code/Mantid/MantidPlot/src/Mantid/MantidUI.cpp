@@ -1921,7 +1921,7 @@ void MantidUI::manageMantidWorkspaces()
 #ifdef _WIN32
   memoryImage();
 #else
-  QMessageBox::warning(appWindow(),tr("Mantid Workspace"),tr("Clicked on Managed Workspace"),tr("Ok"),tr("Cancel"),QString(),0,1);
+  QMessageBox::warning(appWindow(),tr("Mantid Workspace"),tr("Clicked on Manage Workspace"),tr("Ok"),tr("Cancel"),QString(),0,1);
 #endif
 }
 

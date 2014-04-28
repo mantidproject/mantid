@@ -239,10 +239,9 @@ void export_MatrixWorkspace()
   
   //-------------------------------------------------------------------------------------------------
 
-  static const int NUM_IDS = 8;
+  static const int NUM_IDS = 7;
   static const char * WORKSPACE_IDS[NUM_IDS] = {\
-      "GroupingWorkspace", "ManagedWorkspace2D",
-      "MaskWorkspace", "OffsetsWorkspace",
+      "GroupingWorkspace", "MaskWorkspace", "OffsetsWorkspace",
       "RebinnedOutput", "SpecialWorkspace2D", "Workspace2D", "WorkspaceSingleValue"
   };
 
