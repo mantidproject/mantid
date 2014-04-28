@@ -11,7 +11,7 @@ namespace MantidQt
   {
     /** @class ReflMainViewPresenter
 
-    ReflMainViewPresenter is a 
+    ReflMainViewPresenter is a presenter class for teh Reflectometry Interface. It handles any interface functionality and model manipulation.
 
     Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

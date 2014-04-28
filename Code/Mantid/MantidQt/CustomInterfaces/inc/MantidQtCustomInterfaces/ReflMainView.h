@@ -9,7 +9,7 @@ namespace MantidQt
   {
     /** @class ReflMainView
 
-    ReflMainView is a 
+    ReflMainView is the base view class for the Reflectometry Interface. It contains no QT specific functionality as that should be handled by a subclass.
 
     Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

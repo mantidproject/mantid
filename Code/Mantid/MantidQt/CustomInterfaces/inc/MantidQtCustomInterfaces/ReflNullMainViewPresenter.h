@@ -7,9 +7,9 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /** @class ReflMainViewPresenter
+    /** @class ReflNullMainViewPresenter
 
-    ReflMainViewPresenter is a 
+    ReflNullMainViewPresenter is a Null object that supports all the IReflPresenter interfaces but raises a runtime error if any are called.
 
     Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

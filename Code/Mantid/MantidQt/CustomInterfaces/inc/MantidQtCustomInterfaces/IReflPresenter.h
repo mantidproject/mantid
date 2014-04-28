@@ -6,9 +6,9 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /** @class ReflMainViewPresenter
+    /** @class IReflPresenter
 
-    ReflMainViewPresenter is a 
+    IReflPresenter is an interface which defines the functions any reflectometry interface presenter needs to support.
 
     Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
