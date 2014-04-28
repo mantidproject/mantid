@@ -91,6 +91,31 @@ void AlgorithmHistory::addChildHistory(const AlgorithmHistory& childHist)
   m_childHistories.insert(childHist);
 }
 
+/*
+ Return the child history length
+ */
+size_t AlgorithmHistory::childHistorySize() const
+{
+  return m_childHistories.size();
+}
+
+/**
+ * Retrieve a child algorithm history by index
+ * @param index ::  An index within the child algorithm history set
+ * @returns A reference to a const AlgorithmHistory object
+ * @throws std::out_of_range error if the index is invalid
+ */
+const AlgorithmHistory & AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const
+{
+  if( index >= this->getChildHistories().size() )
+  {
+    throw std::out_of_range("AlgorithmHistory::getAlgorithmHistory() - Index out of range");
+  }
+  AlgorithmHistories::const_iterator start = m_childHistories.begin();
+  std::advance(start, index);
+  return *start;
+}
+
 /** Set the duration time of the algorithm in the history
  *  @param duration :: The time the algorithm took to execute
  */

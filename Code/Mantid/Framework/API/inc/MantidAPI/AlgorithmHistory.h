@@ -87,6 +87,10 @@ public:
   const std::vector<Kernel::PropertyHistory>& getProperties() const {return m_properties;}
   /// get the child histories of this history object
   AlgorithmHistories getChildHistories() const { return m_childHistories; }
+  /// Retrieve a child algorithm history by index
+  const AlgorithmHistory & getChildAlgorithmHistory(const size_t index) const;
+  /// Retrieve the number of child algorithms
+  size_t childHistorySize() const;
   /// print contents of object
   void printSelf(std::ostream&,const int indent = 0) const;
   /// Less than operator
