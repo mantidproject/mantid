@@ -207,6 +207,7 @@ public:
   bool isChild() const;
   void setChild(const bool isChild);
   void enableHistoryRecordingForChild(const bool on);
+  bool isRecordingHistoryForChild();
   void setAlwaysStoreInADS(const bool doStore);
   void setRethrows(const bool rethrow);
 

@@ -32,6 +32,7 @@ namespace API
     m_accumulateAlg = "Plus";
     m_loadAlgFileProp = "Filename";
     m_useMPI = false;
+    enableHistoryRecordingForChild(true);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -48,8 +49,11 @@ namespace API
 
     //call parent method to create the child algorithm
     auto alg = Algorithm::createChildAlgorithm(name, startProgress, endProgress, enableLogging, version);
-    //pass pointer to the history object created in Algorithm to the child
-    alg->trackAlgorithmHistory(m_history);
+    if (isRecordingHistoryForChild())
+    {
+      //pass pointer to the history object created in Algorithm to the child
+      alg->trackAlgorithmHistory(m_history);
+    }
     return alg;
   }
 

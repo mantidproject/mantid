@@ -163,6 +163,16 @@ namespace Mantid
        m_recordHistoryForChild = on;
      }
 
+    /**
+     * Get the state of the history recording flag. Only applicable for
+     * child algorithms. 
+     * @return The state of the flag
+     */
+     bool Algorithm::isRecordingHistoryForChild()
+     {
+      return m_recordHistoryForChild;
+     }
+
     /** Do we ALWAYS store in the AnalysisDataService? This is set to true
      * for python algorithms' child algorithms
      *
@@ -1052,7 +1062,7 @@ namespace Mantid
     */
     void Algorithm::trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist)
     {
-      m_recordHistoryForChild = true;
+      enableHistoryRecordingForChild(true);
       m_parentHistory = parentHist;
     }
 
