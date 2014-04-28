@@ -83,6 +83,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( finder1.setPropertyValue("CostFunction", "Chi-Square"));
     TS_ASSERT_THROWS_NOTHING( finder1.setPropertyValue("Minimizer", "Levenberg-MarquardtMD"));
     TS_ASSERT_THROWS_NOTHING( finder1.setPropertyValue("PeaksList","FoundedSinglePeakTable"));
+    TS_ASSERT_THROWS_NOTHING( finder1.setProperty("StartFromObservedPeakCentre", false));
 
     TS_ASSERT_THROWS_NOTHING( finder1.execute() );
 
