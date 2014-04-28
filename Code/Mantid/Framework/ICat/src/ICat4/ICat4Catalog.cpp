@@ -809,42 +809,23 @@ namespace Mantid
       // the user is an investigator off and has READ access to.
       myData(ws);
 
-      ns1__isAccessAllowed request;
-      ns1__isAccessAllowedResponse response;
-
-      std::string sessionID = m_session->getSessionId();
-      request.sessionId = &sessionID;
-
-      ns1__accessType_ acessType;
-      acessType.__item = ns1__accessType__CREATE;
-      request.accessType = &acessType.__item;
-
       // Remove each investigation returned from `myData`
       // were the user does not have create/write access.
       for (int row = static_cast<int>(ws->rowCount()) - 1; row >= 0; --row)
       {
-        ns1__datafile datafile;
-        std::string datafileName = "tempName.nxs";
-        datafile.name = &datafileName;
-
-        // Each investigation can have multiple datasets.
-        // We want to check that the user can publish to the "mantid" dataset
-        // related to the investigations of which they are investigators (via "my data").
         ns1__dataset dataset;
+        ns1__datafile datafile;
+
+        // Verify if the user can CREATE datafiles in the "mantid" specific dataset.
         int64_t datasetID = getMantidDatasetId(ws->getRef<std::string>("InvestigationID",row));
-        dataset.id = &datasetID;
+        std::string datafileName = "tempName.nxs";
+
+        dataset.id       = &datasetID;
+        datafile.name    = &datafileName;
         datafile.dataset = &dataset;
 
-        request.bean = &datafile;
-
-        if (icat.isAccessAllowed(&request,&response) == 0)
-        {
-          if (!response.return_) ws->removeRow(row);
-        }
-        else
-        {
-          throwErrorMessage(icat);
-        }
+        if (!isAccessAllowed(ICat4::ns1__accessType__CREATE,datafile))
+          ws->removeRow(row);
       }
 
       return ws;
