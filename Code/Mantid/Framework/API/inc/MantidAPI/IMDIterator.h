@@ -113,6 +113,15 @@ class IMDWorkspace;
     /// Returns true if masking is used.
     virtual bool getIsMasked() const = 0;
 
+    /// Find neighbouring indexes.
+    virtual std::vector<size_t> findNeighbourIndexes() const = 0;
+
+    /// Get the linear index.
+    virtual size_t getLinearIndex() const = 0;
+
+    /// Is index reachable by the iterator.
+    virtual bool isWithinBounds(size_t index) const = 0;
+
   protected:
     /// Normalization method for getNormalizedSignal()
     Mantid::API::MDNormalization m_normalization;

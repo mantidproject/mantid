@@ -1,9 +1,12 @@
 #include "MantidVatesAPI/Common.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/UnitLabel.h"
 
 #include <vtkNew.h>
 #include <vtkFieldData.h>
 #include <vtkStringArray.h>
+
+#include <boost/math/special_functions/fpclassify.hpp>
 
 //using namespace Mantid::Geometry;
 namespace Mantid
@@ -31,6 +34,10 @@ void setAxisLabel(std::string metadataLabel,
   fieldData->AddArray(axisTitle.GetPointer());
 }
 
+bool isSpecial(double value)
+{
+  return boost::math::isnan(value) || boost::math::isinf(value);
+}
 
 } // VATES
 } // Mantid

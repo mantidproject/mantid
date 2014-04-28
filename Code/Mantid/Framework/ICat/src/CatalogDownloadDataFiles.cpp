@@ -5,10 +5,11 @@ if the data archive is not accessible, it downloads the files from the data serv
 
 *WIKI*/
 
+#include "MantidAPI/CatalogManager.h"
+#include "MantidAPI/ICatalogInfoService.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
-#include "MantidICat/Session.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -51,6 +52,7 @@ namespace Mantid
       declareProperty(new ArrayProperty<int64_t> ("FileIds"),"List of fileids to download from the data server");
       declareProperty(new ArrayProperty<std::string> ("FileNames"),"List of filenames to download from the data server");
       declareProperty("DownloadPath","", "The path to save the files to download to.");
+      declareProperty("Session","","The session information of the catalog to use.");
       declareProperty(new ArrayProperty<std::string>("FileLocations",std::vector<std::string>(), 
                                                      boost::make_shared<NullValidator>(),
                                                      Direction::Output),
@@ -60,8 +62,11 @@ namespace Mantid
     /// Execute the algorithm
     void CatalogDownloadDataFiles::exec()
     {
-      // Create and use the catalog the user has specified in Facilities.xml
-      API::ICatalog_sptr catalog = CatalogAlgorithmHelper().createCatalog();
+      // Cast a catalog to a catalogInfoService to access downloading functionality.
+      auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(
+          API::CatalogManager::Instance().getCatalog(getPropertyValue("Session")));
+      // Check if the catalog created supports publishing functionality.
+      if (!catalogInfoService) throw std::runtime_error("The catalog that you are using does not support external downloading.");
 
       // Used in order to transform the archive path to the user's operating system.
       CatalogInfo catalogInfo = ConfigService::Instance().getFacility().catalogInfo();
@@ -86,9 +91,8 @@ namespace Mantid
 
         progress(prog,"getting location string...");
 
-        // The location of the file on the ICAT server (E.g. in the archives).
-        std::string fileLocation;
-        catalog->getFileLocation(*fileID,fileLocation);
+        // The location of the file (on the server) stored in the archives.
+        std::string fileLocation = catalogInfoService->getFileLocation(*fileID);
 
         g_log.debug() << "CatalogDownloadDataFiles -> File location before transform is: " << fileLocation << std::endl;
         // Transform the archive path to the path of the user's operating system.
@@ -100,23 +104,16 @@ namespace Mantid
         if(hasAccessToArchives)
         {
           g_log.information() << "File (" << *fileName << ") located in archives (" << fileLocation << ")." << std::endl;
-
           fileLocations.push_back(fileLocation);
         }
         else
         {
           g_log.information() << "Unable to open file (" << *fileName << ") from archive. Beginning to download over Internet." << std::endl;
-
           progress(prog/2,"getting the url ....");
-
           // Obtain URL for related file to download from net.
-          std::string url;
-          catalog->getDownloadURL(*fileID,url);
-
+          const std::string url = catalogInfoService->getDownloadURL(*fileID);
           progress(prog,"downloading over internet...");
-
-          std::string fullPathDownloadedFile = doDownloadandSavetoLocalDrive(url,*fileName);
-
+          const std::string fullPathDownloadedFile = doDownloadandSavetoLocalDrive(url,*fileName);
           fileLocations.push_back(fullPathDownloadedFile);
         }
       }

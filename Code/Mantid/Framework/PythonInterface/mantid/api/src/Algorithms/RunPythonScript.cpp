@@ -11,8 +11,10 @@ names 'input' & 'output' respectively.
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "MantidPythonInterface/kernel/Environment/Threading.h"
 #include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
+#include "MantidPythonInterface/kernel/Registry/DowncastDataItem.h"
 #include "MantidKernel/MandatoryValidator.h"
 
+#include <boost/python/call_method.hpp>
 #include <boost/python/exec.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/import.hpp>
@@ -79,9 +81,9 @@ namespace Mantid
 
     /**
      * Builds the code string from the user input. The user script is wrapped
-     * in a PyExec function to 'fool' the Python FrameworkManager into
+     * in a tiny PythonAlgorithm to 'fool' the Python framework into
      * creating a child algorithm for each algorithm that is run. See
-     * PythonInterface/mantid/api/src/Exports/FrameworkManager.cpp
+     * PythonInterface/mantid/simpleapi.py:_create_algorithm_object
      * This has to be the case to get the workspace locking correct.
      *
      * The code assumes that the scope in which it is executed has defined
@@ -99,15 +101,20 @@ namespace Mantid
       // Wrap and indent the user code (see method documentation)
       std::istringstream is(userCode);
       std::ostringstream os;
-      os << "from mantid.simpleapi import *\n"
-         << "def PyExec(input=None,output=None):\n";
+      const char * indent = "    ";
+      os << "import mantid\n"
+         << "from mantid.simpleapi import *\n"
+         << "class _DUMMY_ALG(mantid.api.PythonAlgorithm):\n"
+         << indent << "def PyExec(self, input=None,output=None):\n";
       std::string line;
       while(getline(is, line))
       {
-        os << "  " << line << "\n";
+        os << indent << indent << line << "\n";
       }
-      os << "  return input,output\n"; // When executed the global scope needs to know about input,output so we return them
-      os << "input,output = PyExec(input,output)";
+      os << indent << indent  << "return input,output\n"; // When executed the global scope needs to know about input,output so we return them
+      os << "input,output = _DUMMY_ALG().PyExec(input,output)";
+
+      if(g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) g_log.debug() << "Full code to be executed:\n" << os.str() << "\n";
       return os.str();
     }
 
@@ -124,6 +131,8 @@ namespace Mantid
       using namespace API;
       using namespace boost::python;
 
+      // Execution
+      Environment::GlobalInterpreterLock gil;
       auto locals = doExecuteScript(script);
       return extractOutputWorkspace(locals);
     }
@@ -136,8 +145,6 @@ namespace Mantid
      */
     boost::python::dict RunPythonScript::doExecuteScript(const std::string & script) const
     {
-      // Execution
-      Environment::GlobalInterpreterLock gil;
       // Retrieve the main module.
       auto main = boost::python::import("__main__");
       // Retrieve the main module's namespace
@@ -204,10 +211,10 @@ namespace Mantid
       object pyoutput = locals["output"];
       if(pyoutput.ptr() == Py_None) return Workspace_sptr();
 
-      extract<Workspace_sptr> workspaceExtractor(pyoutput);
-      if(workspaceExtractor.check())
+      if(PyObject_HasAttrString(pyoutput.ptr(), "id"))
       {
-        return workspaceExtractor();
+	const auto & entry = Registry::DowncastRegistry::retrieve(call_method<std::string>(pyoutput.ptr(), "id"));
+	return boost::dynamic_pointer_cast<API::Workspace>(entry.fromPythonAsSharedPtr(pyoutput));
       }
       else
       {

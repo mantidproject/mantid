@@ -64,6 +64,9 @@ public:
 
   QString functionPrefix()const;
 
+  /// High level structure representation of the string
+  QString functionStructure() const;
+
   // Return composite function
   boost::shared_ptr<Mantid::API::CompositeFunction> cfun()const{return m_cf;}
   // Return peak function
@@ -127,10 +130,14 @@ public:
   /// Set function vector attribute value
   void setVectorAttribute(QtProperty* prop);
 
-  /**
-   * Update the parameter properties
-   */
+  /// Sync all parameter values with the manager
   void updateParameters();
+
+  /// Set all parameter error values in the manager
+  void updateErrors();
+
+  /// Clear all parameter error values in the manager
+  void clearErrors();
 
   // Get property for function parameter parName
   QtProperty* getParameterProperty(const QString& parName)const;
@@ -188,6 +195,9 @@ protected slots:
   // 
   void plotRemoved();
 
+  /// Run when function structure is changed, i.e. children function added/removed
+  void onFunctionStructChanged();
+
 protected:
 
   void initAttributes();
@@ -213,6 +223,18 @@ private:
   int m_ci; //< approximate index in the workspace at the peak centre
   //mutable FunctionCurve* m_curve;//< the curve to plot the handled function
   mutable bool m_hasPlot;
+
+  /// Sync function parameter value with the manager
+  void updateParameter(QtProperty* prop);
+
+  /// Set function parameter error in the manager
+  void updateError(QtProperty* prop);
+
+  /// Clear function parameter error in the manager
+  void clearError(QtProperty* prop);
+
+  /// Applies given function to all the parameter properties recursively
+  void applyToAllParameters(void (PropertyHandler::*func)(QtProperty*));
 
   friend class CreateAttributeProperty;
 };

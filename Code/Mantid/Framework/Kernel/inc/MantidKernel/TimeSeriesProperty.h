@@ -7,7 +7,6 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Statistics.h"
 #include <utility>
@@ -16,6 +15,8 @@ namespace Mantid
 {
   namespace Kernel
   {
+
+    enum TimeSeriesSortStatus{TSUNKNOWN, TSUNSORTED, TSSORTED};
 
     //=========================================================================
     /** Struct holding some useful statistics for a TimeSeriesProperty
@@ -301,7 +302,7 @@ namespace Mantid
       mutable int m_size;
 
       /// Flag to state whether mP is sorted or not
-      mutable bool m_propSortedFlag;
+      mutable TimeSeriesSortStatus m_propSortedFlag;
 
       /// The filter
       mutable std::vector<std::pair<Kernel::DateAndTime, bool> > m_filter;
@@ -309,15 +310,7 @@ namespace Mantid
       mutable std::vector<std::pair<size_t, size_t> > m_filterQuickRef;
       /// True if a filter has been applied
       mutable bool m_filterApplied;
-
-      /// Static reference to the logger class
-      static Logger& g_log;
     };
-
-    /// Logger definition
-    template <typename TYPE>
-    Logger& TimeSeriesProperty<TYPE>::g_log = Logger::get("TimeSeriesProperty");
-
 
     /// Function filtering double TimeSeriesProperties according to the requested statistics.
     double DLLExport filterByStatistic(TimeSeriesProperty<double> const * const propertyToFilter, Kernel::Math::StatisticType statistic_type);

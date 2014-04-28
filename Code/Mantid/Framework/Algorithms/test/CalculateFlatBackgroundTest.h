@@ -6,9 +6,12 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <boost/lexical_cast.hpp>
 #include <cmath>
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -110,7 +113,8 @@ public:
     
     AnalysisDataService::Instance().add("calcFlatBG",WS);
 
-    //create another test wrokspace
+
+    //create another test workspace
     Mantid::DataObjects::Workspace2D_sptr WS2D(new Mantid::DataObjects::Workspace2D);
     WS2D->initialize(NUMSPECS,NUMBINS+1,NUMBINS);
     
@@ -119,12 +123,14 @@ public:
       for (int i = 0; i < NUMBINS; ++i)
       {
         WS2D->dataX(j)[i] = i;
-        // any function that means the calculation is non-trival
+        // any function that means the calculation is non-trivial
         WS2D->dataY(j)[i] = j+4*(i+1)-(i*i)/10;
         WS2D->dataE(j)[i] = 2*i;
       }
       WS2D->dataX(j)[NUMBINS] = NUMBINS;
     }
+    // used only in the last test
+    this->addInstrument(WS2D);
     
     AnalysisDataService::Instance().add("calculateflatbackgroundtest_ramp",WS2D);
   }
@@ -134,8 +140,8 @@ public:
     AnalysisDataService::Instance().remove("calculateflatbackgroundtest_ramp");
   }
   
-	void testStatics()
-	{
+  void testStatics()
+  {
     Mantid::Algorithms::CalculateFlatBackground flatBG;
     TS_ASSERT_EQUALS( flatBG.name(), "CalculateFlatBackground" )
     TS_ASSERT_EQUALS( flatBG.version(), 1 )
@@ -334,6 +340,51 @@ public:
     TS_ASSERT_DELTA( EOut[10], 37.2677, 0.001 )
     TS_ASSERT_DELTA( EOut[20], 37.2677, 0.001 )
   }
+
+  void test_skipMonitors()
+  {
+
+    Mantid::Algorithms::CalculateFlatBackground flatBG;
+    TS_ASSERT_THROWS_NOTHING( flatBG.initialize() )
+    TS_ASSERT( flatBG.isInitialized() )
+    flatBG.setPropertyValue("InputWorkspace","calculateflatbackgroundtest_ramp");
+    flatBG.setPropertyValue("OutputWorkspace","Removed1");
+    flatBG.setProperty("StartX", 1.e-6);
+    flatBG.setProperty("EndX", double(NUMBINS));
+
+
+    flatBG.setPropertyValue("WorkspaceIndexList","");
+    flatBG.setPropertyValue("Mode","Mean");
+    flatBG.setPropertyValue("SkipMonitors","1");
+
+    TS_ASSERT_THROWS_NOTHING( flatBG.execute() )
+    TS_ASSERT( flatBG.isExecuted() )
+
+    //------------------------------------------------------------------------------
+    MatrixWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("calculateflatbackgroundtest_ramp");
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed1");
+    // The X vectors should be the same
+    TS_ASSERT_DELTA( inputWS->readX(0), outputWS->readX(0) , 1e-6 )
+
+    for (int j = 0; j < NUMSPECS; ++j)
+    {
+      const Mantid::MantidVec &YIn = inputWS->readY(j);
+      const Mantid::MantidVec &EIn = inputWS->readE(j);
+      const Mantid::MantidVec &YOut = outputWS->readY(j);
+      const Mantid::MantidVec &EOut = outputWS->readE(j);
+  
+      for (int i = 0; i < NUMBINS; ++i)
+      {
+        TS_ASSERT_DELTA( YIn[i], YOut[i], 1e-12 )
+        TS_ASSERT_DELTA( EIn[i], EOut[i], 1e-12 )
+      }
+    }
+
+   //------------------------------------------------------------------------------
+
+    AnalysisDataService::Instance().remove("Removed1");
+
+  }
   
 private:
   double bg;
@@ -342,6 +393,41 @@ private:
   {
     return floor( value*100000 + 0.5 )/100000;
   }
+
+  void addInstrument(DataObjects::Workspace2D_sptr &WS)
+  {
+    int ndets = static_cast<int>(WS->getNumberHistograms());
+
+    WS->setTitle("Test histogram"); // actually adds a property call run_title to the logs
+    WS->getAxis(0)->setUnit("TOF");
+    WS->setYUnit("Counts");
+
+    boost::shared_ptr<Geometry::Instrument> testInst(new Geometry::Instrument("testInst"));
+    //testInst->setReferenceFrame(boost::shared_ptr<Geometry::ReferenceFrame>(new Geometry::ReferenceFrame(Geometry::PointingAlong::Y,Geometry::X,Geometry::Left,"")));
+    WS->setInstrument(testInst);
+
+    const double pixelRadius(0.05);
+    Geometry::Object_sptr pixelShape = 
+                     ComponentCreationHelper::createCappedCylinder(pixelRadius, 0.02, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube"); 
+
+    const double detXPos(5.0);
+    for( int i = 0; i < ndets; ++i )
+    {
+      std::ostringstream lexer;
+      lexer << "pixel-" << i << ")";
+      Geometry::Detector * physicalPixel = new Geometry::Detector(lexer.str(), WS->getAxis(1)->spectraNo(i), pixelShape, testInst.get());
+      const double ypos = i*2.0*pixelRadius;
+      physicalPixel->setPos(detXPos, ypos,0.0);
+      testInst->add(physicalPixel);
+      testInst->markAsMonitor(physicalPixel);
+      WS->getSpectrum(i)->addDetectorID(physicalPixel->getID());
+    }
+
+
+  }
+
+
+
 };
 
 #endif /*FlatBackgroundTest_H_*/

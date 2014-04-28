@@ -26,6 +26,8 @@ class QtIntPropertyManager;
 class QtBoolPropertyManager;
 class QtStringPropertyManager;
 class QtEnumPropertyManager;
+class ParameterPropertyManager;
+
 class QtProperty;
 class QtBrowserItem;
 
@@ -272,6 +274,8 @@ private slots:
   void boolChanged(QtProperty* prop);
   void intChanged(QtProperty* prop);
   virtual void doubleChanged(QtProperty* prop);
+  /// Called when one of the parameter values gets changed
+  void parameterChanged(QtProperty* prop);
   void stringChanged(QtProperty* prop);
   void filenameChanged(QtProperty* prop);
   void columnChanged(QtProperty* prop);
@@ -360,6 +364,7 @@ protected:
   QtGroupPropertyManager  *m_vectorManager;
   QtIntPropertyManager *m_vectorSizeManager;
   QtDoublePropertyManager *m_vectorDoubleManager;
+  ParameterPropertyManager *m_parameterManager;
 
   QtProperty *m_workspace;
   QtProperty *m_workspaceIndex;
@@ -377,6 +382,7 @@ protected:
   QtProperty *m_xColumn;
   QtProperty *m_yColumn;
   QtProperty *m_errColumn;
+  QtProperty *m_showParamErrors;
   QList<QtProperty*> m_minimizerProperties;
 
   /// A copy of the edited function

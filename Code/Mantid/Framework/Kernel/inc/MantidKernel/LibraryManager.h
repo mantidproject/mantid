@@ -6,17 +6,19 @@
 //----------------------------------------------------------------------
 #include <string>
 #include <map>
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/LibraryWrapper.h"
 
 namespace Mantid
 {
   namespace Kernel
   {
-    class Logger;
+    class LibraryWrapper;
+
     /** 
     Class for opening shared libraries.
 
@@ -66,9 +68,6 @@ namespace Mantid
       bool skip(const std::string & filename);
       ///Storage for the LibraryWrappers.
       std::map< const std::string, boost::shared_ptr<Mantid::Kernel::LibraryWrapper> > OpenLibs;
-
-      /// static reference to the logger class
-      Logger& g_log;
     };
 
     ///Forward declaration of a specialisation of SingletonHolder for LibraryManagerImpl (needed for dllexport/dllimport) and a typedef for it.

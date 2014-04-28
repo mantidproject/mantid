@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_PROPERTY_HPP_
-#define MANTID_PYTHONINTERFACE_PROPERTY_HPP_
+#ifndef MANTID_PYTHONINTERFACE_PROPERTYWITHVALUEEXPORTER_H_
+#define MANTID_PYTHONINTERFACE_PROPERTYWITHVALUEEXPORTER_H_
 
 /*
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -26,9 +26,11 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
 
-#include <boost/python/class.hpp>
-#include <boost/python/bases.hpp>
-#include <boost/python/return_value_policy.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/python/class.hpp>
+# include <boost/python/bases.hpp>
+# include <boost/python/return_value_policy.hpp>
+#endif
 
 namespace Mantid
 {
@@ -56,4 +58,4 @@ namespace Mantid
   }
 }
 
-#endif /* MANTID_PYTHONINTERFACE_PROPERTY_HPP_ */
+#endif /* MANTID_PYTHONINTERFACE_PROPERTYWITHVALUEEXPORTER_H_ */

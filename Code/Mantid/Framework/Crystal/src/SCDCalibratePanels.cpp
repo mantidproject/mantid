@@ -110,9 +110,7 @@ using namespace Mantid::Kernel;
 namespace Mantid
 {
   namespace Crystal
-
   {
-    Kernel::Logger& SCDCalibratePanels::g_log = Kernel::Logger::get("SCDCalibratePanels");
 
     DECLARE_ALGORITHM(SCDCalibratePanels)
 
@@ -695,6 +693,9 @@ namespace Mantid
       bool use_PanelHeight = getProperty("usePanelHeight");
       bool use_PanelPosition = getProperty("usePanelPosition");
       bool use_PanelOrientation = getProperty("usePanelOrientation");
+      double SampleXoffset = getProperty("SampleXoffset");
+      double SampleYoffset = getProperty("SampleYoffset");
+      double SampleZoffset = getProperty("SampleZoffset");
 
       string Grouping = getProperty( "PanelGroups");
       string bankPrefix = getProperty("PanelNamePrefix");
@@ -874,18 +875,18 @@ namespace Mantid
         constrain(iFunc, paramPrefix+"Zrot", -1.*MaxRotOffset, MaxRotOffset);
       }//for vector< string > in Groups
 
+      // Function supports setting the sample position even when it isn't be refined
+      iFunc->setAttributeValue("SampleX", samplePos.X() + SampleXoffset);
+      iFunc->setAttributeValue("SampleY", samplePos.Y() + SampleYoffset);
+      iFunc->setAttributeValue("SampleZ", samplePos.Z() + SampleZoffset);
+
       // Constraints for sample offsets
       if( getProperty("AllowSampleShift"))
       {
-        // TODO the function should support setting the sample position even when it isn't be refined
-        iFunc->setAttributeValue("SampleX", samplePos.X());
-        iFunc->setAttributeValue("SampleY", samplePos.Y());
-        iFunc->setAttributeValue("SampleZ", samplePos.Z());
-
         maxXYOffset = getProperty("MaxSamplePositionChangeMeters");
-        constrain(iFunc, "SampleX", samplePos.X()-maxXYOffset, samplePos.X()+ maxXYOffset);
-        constrain(iFunc, "SampleY", samplePos.Y()-maxXYOffset, samplePos.Y()+maxXYOffset);
-        constrain(iFunc, "SampleZ", samplePos.Z()-maxXYOffset, samplePos.Z()+maxXYOffset);
+        constrain(iFunc, "SampleX", samplePos.X()+ SampleXoffset-maxXYOffset, samplePos.X()+ SampleXoffset+ maxXYOffset);
+        constrain(iFunc, "SampleY", samplePos.Y()+ SampleYoffset-maxXYOffset, samplePos.Y()+ SampleYoffset+maxXYOffset);
+        constrain(iFunc, "SampleZ", samplePos.Z()+ SampleZoffset-maxXYOffset, samplePos.Z()+ SampleZoffset+maxXYOffset);
       }
 
      tie(iFunc, !useL0, "l0", L0);
@@ -1142,7 +1143,7 @@ namespace Mantid
               double mL1;
               stringstream(line) >> count >> mL1 >> T0;
               double scaleL0= .01*mL1/beamlineLen;
-              const IObjComponent_const_sptr source=instrument->getSource();
+              const IComponent_const_sptr source=instrument->getSource();
               V3D NewSourcePos= samplePos-beamline*scaleL0*2.0;//beamLine is 2*length.
               L0=beamline.norm()*scaleL0*2.0;
               V3D RelSourcePos = source->getRelativePos()+NewSourcePos-source->getPos();
@@ -1397,6 +1398,9 @@ namespace Mantid
       declareProperty("usePanelOrientation", true, "Fit the PanelOrientation");
       declareProperty("RotateCenters", false,"Rotate bank Centers with panel orientations");
       declareProperty("AllowSampleShift",false,"Allow and fit for a sample that is off center");
+      declareProperty("SampleXoffset", 0.0, "Specify Sample x offset");
+      declareProperty("SampleYoffset", 0.0, "Specify Sample y offset");
+      declareProperty("SampleZoffset", 0.0, "Specify Sample z offset");
 
       // ---------- preprocessing
       vector< string > preProcessOptions;
@@ -1611,7 +1615,7 @@ namespace Mantid
     }
 
 
-    void SCDCalibratePanels::updateSourceParams(boost::shared_ptr<const Geometry::IObjComponent> bank_const,
+    void SCDCalibratePanels::updateSourceParams(boost::shared_ptr<const Geometry::IComponent> bank_const,
       boost::shared_ptr<Geometry::ParameterMap> pmap, boost::shared_ptr<const Geometry::ParameterMap> pmapSv)
     {
       vector< V3D > posv = pmapSv->getV3D(bank_const->getName(), "pos");
@@ -1636,10 +1640,10 @@ namespace Mantid
       boost::shared_ptr<const ParameterMap> const pmapOld)
     {
       boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
-      IObjComponent_const_sptr source = NewInstrument->getSource();
+      IComponent_const_sptr source = NewInstrument->getSource();
       updateSourceParams(source, pmap, pmapOld);
 
-      IObjComponent_const_sptr sample = NewInstrument->getSample();
+      IComponent_const_sptr sample = NewInstrument->getSample();
       V3D SamplePos = sample->getPos();
       if( SamplePos != newSampPos)
       {
@@ -1795,10 +1799,10 @@ namespace Mantid
       } // for each group
 
       // write out the source
-      IObjComponent_const_sptr source = instrument->getSource();
+      IComponent_const_sptr source = instrument->getSource();
 
       oss3 << "<component-link name=\"" << source->getName() << "\">" << endl;
-      IObjComponent_const_sptr sample = instrument->getSample();
+      IComponent_const_sptr sample = instrument->getSample();
       V3D sourceRelPos = source->getRelativePos();
 
       writeXmlParameter(oss3, "x", sourceRelPos.X());

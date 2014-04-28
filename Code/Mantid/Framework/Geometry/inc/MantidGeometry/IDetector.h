@@ -9,7 +9,6 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDTypes.h"
-#include <boost/shared_ptr.hpp>
 #include <stdexcept>
 #include <map>
 

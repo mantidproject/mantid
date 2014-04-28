@@ -109,6 +109,7 @@ where
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -126,12 +127,13 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("NeutronBk2BkExpConvPV");
+  }
+
   DECLARE_FUNCTION(NeutronBk2BkExpConvPVoigt)
-
-  // Get a reference to the logger
-  Mantid::Kernel::Logger& NeutronBk2BkExpConvPVoigt::g_log =
-      Kernel::Logger::get("NeutronBk2BkExpConvPV");
-
 
   //----------------------------------------------------------------------------------------------
   /** Constructor

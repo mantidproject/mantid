@@ -53,6 +53,14 @@ namespace Mantid
       virtual void createDomain(
         boost::shared_ptr<API::FunctionDomain>& domain, 
         boost::shared_ptr<API::IFunctionValues>& values, size_t i0 = 0);
+      /// Create the output workspace
+      boost::shared_ptr<API::Workspace> createOutputWorkspace(
+        const std::string& baseName,
+        API::IFunction_sptr function,
+        boost::shared_ptr<API::FunctionDomain> domain,
+        boost::shared_ptr<API::IFunctionValues> values,
+        const std::string& outputWorkspacePropertyName
+        );
 
       /// Return the size of the domain to be created.
       virtual size_t getDomainSize() const{return 0;}
@@ -61,6 +69,8 @@ namespace Mantid
       bool hasCreator(size_t i) const;
       /// Get number of creators
       size_t getNCreators() const {return m_creators.size();}
+      /// Initialize the function
+      void initFunction(API::IFunction_sptr function);
 
     protected:
       /// Vector of creators.

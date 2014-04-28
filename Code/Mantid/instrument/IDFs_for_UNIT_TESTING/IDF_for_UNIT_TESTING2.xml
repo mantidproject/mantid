@@ -86,7 +86,7 @@
   <location z="-95." /> 
 </component>
 <component type="nickel-holder">
-  <location />
+  <location x="2.0" />
   <parameter name="klovn"> <value val="2.0" /> </parameter>   
   <parameter name="klovn"> <value val="3.0" /> </parameter>  
   <parameter name="klovn"> <value val="1.0" /> </parameter>   
@@ -100,11 +100,25 @@
 </component>
 
 <type name="undulator" is="source">
+  <component type="check that source can be assembly">
+    <location />
+  </component>
   <properties />
 </type>
+<type name="check that source can be assembly">
+  <properties />
+</type>
+
 <type name="nickel-holder" is="samplePos">
+  <component type="check that sample can be assembly">
+    <location />
+  </component>
   <properties />
 </type>
+<type name="check that sample can be assembly">
+  <properties />
+</type>
+
 
 <!-- For testing roty -->
 <component type="roty-testing" idlist="roty-testing">

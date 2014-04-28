@@ -34,8 +34,8 @@ public:
       // Redirect cout to buffer or any other ostream
       std::cout.rdbuf(obuffer.rdbuf());
       std::clog.rdbuf(lbuffer.rdbuf());
-      //root logger
-      Logger & log(Logger::get(""));
+      //root logger has empty name
+      Logger log("");
 
       //Test null channel first
       Poco::AutoPtr<Poco::NullChannel> nullChannel(new Poco::NullChannel);

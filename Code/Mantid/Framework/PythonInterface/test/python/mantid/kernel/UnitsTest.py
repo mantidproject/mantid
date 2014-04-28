@@ -1,5 +1,6 @@
 import unittest
-from mantid.kernel import UnitFactory, Unit, Label
+from mantid.kernel import UnitFactory, Unit, Label, UnitLabel
+import types
 
 class UnitsTest(unittest.TestCase):
 
@@ -10,6 +11,7 @@ class UnitsTest(unittest.TestCase):
         label_unit.setLabel("Temperature", "K")
         self.assertEquals("Temperature", label_unit.caption())
         self.assertEquals("K", label_unit.label())
+        self.assertTrue(isinstance(label_unit.symbol(), UnitLabel))
 
 if __name__ == '__main__':
     unittest.main()

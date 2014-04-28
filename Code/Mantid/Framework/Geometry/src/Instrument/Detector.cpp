@@ -5,13 +5,14 @@ namespace Mantid
 {
 namespace Geometry
 {
+  namespace
+  {
+    // static logger object
+    Kernel::Logger g_log("Detector");
+  }
 
   using Kernel::V3D;
   using Kernel::Quat;
-
-// Get a reference to the logger
-Kernel::Logger& Detector::g_log = Kernel::Logger::get("Detector");
-
 
 /** Constructor for a parametrized Detector
  * @param base: the base (un-parametrized) IComponent
@@ -53,7 +54,7 @@ Detector::~Detector()
  */
 detid_t Detector::getID() const
 {
-  if (m_isParametrized)
+  if (m_map)
     return dynamic_cast<const Detector *>(m_base)->getID();
   else
     return m_id;
@@ -141,7 +142,7 @@ det_topology Detector::getTopology(V3D &center)const
  */
 bool Detector::isMasked() const
 {
-  if (m_isParametrized)
+  if (m_map)
   {
     Parameter_sptr par = m_map->get(m_base,"masked");
     if (par)
@@ -155,7 +156,7 @@ bool Detector::isMasked() const
 ///@return true if it is a monitor
 bool Detector::isMonitor() const
 {
-  if (m_isParametrized)
+  if (m_map)
     return dynamic_cast<const Detector*>(m_base)->isMonitor();
   else
     return m_isMonitor;

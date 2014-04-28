@@ -1171,7 +1171,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
     if (!loadfpirf->isExecuted())
       throw runtime_error("LoadFullprof cannot be executed. ");
 
-    m_inpWS = loadfpirf->getProperty("OutputWorkspace");
+    m_inpWS = loadfpirf->getProperty("OutputTableWorkspace");
     if (!m_inpWS)
       throw runtime_error("Failed to obtain a table workspace from LoadFullprofResolution's output.");
 

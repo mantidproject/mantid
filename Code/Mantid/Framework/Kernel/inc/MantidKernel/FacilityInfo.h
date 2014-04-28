@@ -6,11 +6,11 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/CatalogInfo.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/RemoteJobManager.h"
-
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include <vector>
 #include <string>
 
@@ -111,7 +111,6 @@ private:
   typedef std::map< std::string, boost::shared_ptr<RemoteJobManager>  > ComputeResourcesMap;
   ComputeResourcesMap m_computeResources;      ///< list of compute resources (clusters, etc...) available at this facility
                                                // (Sorted by their names)
-  static Logger& g_log;                        ///< logger
 };
 
 } // namespace Kernel

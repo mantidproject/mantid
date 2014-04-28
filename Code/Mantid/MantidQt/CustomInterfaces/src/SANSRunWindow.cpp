@@ -59,10 +59,13 @@ using namespace Mantid::API;
 using namespace Mantid;
 using Mantid::Geometry::Instrument_const_sptr;
 
-// Initialize the logger
-Logger& SANSRunWindow::g_log = Logger::get("SANSRunWindow");
-Logger& SANSRunWindow::g_centreFinderLog = Logger::get("CentreFinder");
-
+namespace
+{
+  /// static logger for main window
+  Logger g_log("SANSRunWindow");
+  /// static logger for centre finding
+  Logger g_centreFinderLog("CentreFinder");
+}
 //----------------------------------------------
 // Public member functions
 //----------------------------------------------
@@ -1152,9 +1155,9 @@ void SANSRunWindow::componentLOQDistances(boost::shared_ptr<const Mantid::API::M
   Instrument_const_sptr instr = workspace->getInstrument();
   if( !instr ) return;
 
-  Mantid::Geometry::IObjComponent_const_sptr source = instr->getSource();
+  Mantid::Geometry::IComponent_const_sptr source = instr->getSource();
   if( source == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
-  Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
+  Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
   if( sample == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
 
   lms = source->getPos().distance(sample->getPos()) * 1000.;
@@ -1440,17 +1443,14 @@ void SANSRunWindow::setGeometryDetails()
   assert( ADS.doesExist(wsName) );
   auto ws = ADS.retrieveWS<const Workspace>(wsName);
 
-  const bool isGroupWs = boost::dynamic_pointer_cast<const WorkspaceGroup>(ws);
-  if( isGroupWs )
+  if( boost::dynamic_pointer_cast<const WorkspaceGroup>(ws) )
     // Assume all geometry information is in the first member of the group and it is
     // constant for all group members.
     ws = getGroupMember(ws, 1);
 
-  const bool isEventWs = boost::dynamic_pointer_cast<const IEventWorkspace>(ws);
-
   MatrixWorkspace_const_sptr monitorWs;
 
-  if( isEventWs )
+  if( boost::dynamic_pointer_cast<const IEventWorkspace>(ws) )
   {
     // EventWorkspaces have their monitors loaded into a separate workspace.
     const std::string monitorWsName = ws->name() + "_monitors";

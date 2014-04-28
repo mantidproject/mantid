@@ -15,7 +15,6 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
-#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidVatesAPI/EscalatingRebinningActionManager.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/vtkMDQuadFactory.h"

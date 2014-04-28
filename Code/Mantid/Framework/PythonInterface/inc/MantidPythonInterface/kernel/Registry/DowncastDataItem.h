@@ -104,7 +104,7 @@ namespace Mantid
           }
           else
           {
-            return boost::dynamic_pointer_cast<Kernel::DataItem>(extract<PythonType_sptr>(data)());
+            return boost::dynamic_pointer_cast<Kernel::DataItem>(extract<PythonType_sptr&>(data)());
           }
         }
 

@@ -10,7 +10,9 @@
 #include <string>
 #include <vector>
 #include <set>
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 
 namespace Mantid
 {
@@ -21,6 +23,7 @@ namespace Mantid
     //---------------------------------------------------------
     class IComponent;
     class BoundingBox;
+    class ParameterMap;
 
     /// Define a type for a unique component identifier.
     typedef IComponent* ComponentID;
@@ -71,10 +74,10 @@ namespace Mantid
       virtual IComponent* clone() const=0;
       /// Destructor
       virtual ~IComponent(){}
-      //! Returns true if the Component is parametrized (has a parameter map)
-      virtual bool isParametrized() const = 0;
       //! Returns the ComponentID - a unique identifier of the component.
       virtual ComponentID getComponentID()const = 0;
+      //! Returns const pointer to base component if this component is parametrized or pointer to itself if not. Currently is the same as getComponentID bar const cast;
+      virtual IComponent const * getBaseComponent()const = 0;
       //! Assign a parent IComponent. Previous parent link is lost
       virtual void setParent(IComponent*)= 0;
       //! Return a pointer to the current parent.
@@ -131,7 +134,7 @@ namespace Mantid
       virtual std::set<std::string> getParameterNames(bool recursive = true) const = 0;
       /// Returns a boolean indicating if the component has the named parameter
       virtual bool hasParameter(const std::string & name, bool recursive = true) const = 0;
-      //Hack untill proper python export functions are defined
+      //Hack until proper python export functions are defined
       virtual std::string getParameterType(const std::string& pname, bool recursive = true)const=0;
       // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to resort to
       // one for each type, luckily there won't be too many
@@ -143,16 +146,22 @@ namespace Mantid
       virtual std::vector<Kernel::Quat> getRotationParameter(const std::string& pname, bool recursive = true) const = 0;
       /// Get a parameter defined as a string
       virtual std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const = 0;
+      /// Get a parameter defined as an integer
+      virtual std::vector<int> getIntParameter(const std::string& pname, bool recursive = true) const = 0;
+      /// Get a parameter defined as a boolean
+      virtual std::vector<bool> getBoolParameter(const std::string& pname, bool recursive = true) const = 0;
+
       //@}
       /** Prints a text representation of itself
       */
       virtual void printSelf(std::ostream&) const = 0;
-
+      //! Returns true if the Component is parametrized (has a parameter map)
+      virtual bool isParametrized() const = 0;
     };
 
     ///Typedef of a shared pointer to a IComponent
     typedef boost::shared_ptr<IComponent> IComponent_sptr;
-    ///Typdef of a shared poitner to a const IComponent
+    ///Typdef of a shared pointer to a const IComponent
     typedef boost::shared_ptr<const IComponent> IComponent_const_sptr;
 
     /** Prints a text representation

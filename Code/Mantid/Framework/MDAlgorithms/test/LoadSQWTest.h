@@ -142,10 +142,10 @@ public:
     TS_ASSERT_EQUALS("en", d->getDimensionId());
 
     //Check Units
-    TS_ASSERT_EQUALS("A^-1", a->getUnits());
-    TS_ASSERT_EQUALS("A^-1", b->getUnits());
-    TS_ASSERT_EQUALS("A^-1", c->getUnits());
-    TS_ASSERT_EQUALS("mEv", d->getUnits());
+    TS_ASSERT_EQUALS("A^-1", a->getUnits().ascii());
+    TS_ASSERT_EQUALS("A^-1", b->getUnits().ascii());
+    TS_ASSERT_EQUALS("A^-1", c->getUnits().ascii());
+    TS_ASSERT_EQUALS("mEv", d->getUnits().ascii());
 
     //Check Nbins
     TS_ASSERT_EQUALS(3, a->getNBins());

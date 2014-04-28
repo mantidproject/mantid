@@ -1,17 +1,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/Column.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid
 {
-
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
 
 namespace DataObjects
 {
@@ -51,7 +42,6 @@ namespace DataObjects
       MementoTableWorkspace(int nRows=0);
       ~MementoTableWorkspace();
     private:
-      static Kernel::Logger& g_log;
       static bool expectedColumn(Mantid::API::Column_const_sptr expected, Mantid::API::Column_const_sptr candidate);
     };
 

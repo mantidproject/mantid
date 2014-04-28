@@ -14,8 +14,6 @@ namespace Mantid
     using Kernel::V3D;
     using Kernel::Quat;
 
-    Kernel::Logger& GluGeometryRenderer::PLog(Kernel::Logger::get("GluGeometryRenderer"));
-
 /**
  * Constructor
  */

@@ -166,18 +166,12 @@ private:
   double a,b,c,alpha,beta,gamma;
   int NGroups;
   bool RotateCenters, SampleOffsets;
+  double SampleX, SampleY, SampleZ;
 
   std::string PeakName;//< SCDPanelErrors{PeakName} is name in the Analysis Data Service where the PeaksWorkspace is stored
 
   bool a_set,b_set,c_set,alpha_set,beta_set,gamma_set,PeakName_set, BankNames_set,
-  startX_set,endX_set, NGroups_set;
-
-  /**
-   * 0 - no action
-   * 1- init called no declare
-   * 2- init Called and samp offset parameters are declared
-   */
-  int SampOffsetDeclareStatus;
+  startX_set,endX_set, NGroups_set, sampleX_set, sampleY_set, sampleZ_set;
 
   double tolerance;
 
@@ -188,7 +182,6 @@ private:
 
   int m_startX; ///<start index in xValues array in functionMW. -1 use all.
   int m_endX;   ///<end index in xValues array in functionMW. -1 use all.
-  static Kernel::Logger & g_log;
 
   std::vector<std::string> m_attrNames;
 };

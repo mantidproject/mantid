@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Indirect.h"
 #include "MantidQtCustomInterfaces/Transmission.h"
+#include "MantidQtCustomInterfaces/IndirectMoments.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtCustomInterfaces/Background.h"
 
@@ -7,6 +8,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
+#include <cmath>
 #include <Poco/NObserver.h>
 
 #include <QUrl>
@@ -56,7 +58,9 @@ Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) :
   m_calCalCurve(NULL), m_calResCurve(NULL),
   // Null pointers - Diagnostics Tab
   m_sltPlot(NULL), m_sltR1(NULL), m_sltR2(NULL), m_sltDataCurve(NULL),
-  m_tab_trans(new Transmission(m_uiForm,this))
+  // Additional tab interfaces
+  m_tab_trans(new Transmission(m_uiForm,this)),
+  m_tab_moments(new IndirectMoments(m_uiForm,this))
 {
   // Constructor
 }
@@ -105,18 +109,19 @@ void Indirect::initLayout()
 
   // "SofQW" tab
   connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
-  connect(m_uiForm.sqw_cbInput, SIGNAL(currentIndexChanged(int)), m_uiForm.sqw_swInput, SLOT(setCurrentIndex(int)));
-  connect(m_uiForm.sqw_cbWorkspace, SIGNAL(currentIndexChanged(int)), this, SLOT(validateSofQ(int)));
-
-  connect(m_uiForm.sqw_pbPlotInput, SIGNAL(clicked()), this, SLOT(sOfQwPlotInput()));
+  connect(m_uiForm.sqw_dsSampleInput, SIGNAL(loadClicked()), this, SLOT(sOfQwPlotInput()));
 
   // "Slice" tab
   connect(m_uiForm.slice_inputFile, SIGNAL(filesFound()), this, SLOT(slicePlotRaw()));
   connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
   connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
 
-  // "Transmission" tab
+  // additional tabs
   connect(m_tab_trans, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+  connect(m_tab_moments, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+  
+  connect(m_tab_trans, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
+  connect(m_tab_moments, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
 
   // create validators
   m_valInt = new QIntValidator(this);
@@ -190,6 +195,8 @@ void Indirect::helpClicked()
     url += "SofQW";
   else if (tabName == "Transmission")
     url += "Transmission";
+  else if (tabName == "Moments")
+    url += "Moments";
   QDesktopServices::openUrl(QUrl(url));
 }
 /**
@@ -219,6 +226,10 @@ void Indirect::runClicked()
   else if (tabName == "Transmission")
   {
     m_tab_trans->runTab();
+  }
+  else if(tabName == "Moments")
+  {
+    m_tab_moments->runTab();
   }
 }
 
@@ -311,11 +322,6 @@ void Indirect::runConvertToEnergy()
     pyInput += "reducer.set_save_to_cm_1(True)\n";
   }
   
-  if ( m_uiForm.ckCreateInfoTable->isChecked() )
-  {
-    pyInput += "reducer.create_info_table()\n";
-  }
-
   pyInput += "reducer.set_save_formats([" + savePyCode() + "])\n";
 
   pyInput +=
@@ -844,24 +850,15 @@ bool Indirect::validateSofQw()
 {
   bool valid = true;
 
-  if ( m_uiForm.sqw_cbInput->currentText() == "File" )
+
+  UserInputValidator uiv;
+  uiv.checkDataSelectorIsValid("Sample", m_uiForm.sqw_dsSampleInput);
+  QString error = uiv.generateErrorMessage();
+
+  if (!error.isEmpty())
   {
-    if ( ! m_uiForm.sqw_inputFile->isValid() )
-    {
-      valid = false;
-    }
-  }
-  else
-  {
-    if ( m_uiForm.sqw_cbWorkspace->currentText().isEmpty() )
-    {
-      valid = false;
-      m_uiForm.sqw_valWorkspace->setText("*");
-    }
-    else
-    {
-      m_uiForm.sqw_valWorkspace->setText(" ");
-    }
+    valid = false;
+    showInformationBox(error);
   }
 
   if ( m_uiForm.sqw_ckRebinE->isChecked() )
@@ -976,7 +973,10 @@ void Indirect::loadSettings()
   m_uiForm.ind_calibFile->readSettings(settings.group());
   m_uiForm.ind_mapFile->readSettings(settings.group());
   m_uiForm.slice_calibFile->readSettings(settings.group());
-  m_uiForm.sqw_inputFile->readSettings(settings.group());
+  m_uiForm.moment_dsInput->readSettings(settings.group());
+  m_uiForm.transInputFile->readSettings(settings.group());
+  m_uiForm.transCanFile->readSettings(settings.group());
+  m_uiForm.sqw_dsSampleInput->readSettings(settings.group());
   settings.endGroup();
 }
 
@@ -988,7 +988,6 @@ void Indirect::saveSettings()
 
 void Indirect::setupCalibration()
 {
-  int noDec = 6;
   // General
   m_calDblMng = new QtDoublePropertyManager();
   m_calGrpMng = new QtGroupPropertyManager();
@@ -1004,6 +1003,7 @@ void Indirect::setupCalibration()
   m_calCalProp["PeakMax"] = m_calDblMng->addProperty("Peak Max");
   m_calCalProp["BackMin"] = m_calDblMng->addProperty("Back Min");
   m_calCalProp["BackMax"] = m_calDblMng->addProperty("Back Max");
+
 
   m_calCalTree->addProperty(m_calCalProp["PeakMin"]);
   m_calCalTree->addProperty(m_calCalProp["PeakMax"]);
@@ -1046,21 +1046,28 @@ void Indirect::setupCalibration()
   resBG->addSubProperty(m_calResProp["Start"]);
   resBG->addSubProperty(m_calResProp["End"]);
   m_calResTree->addProperty(resBG);
-
+  
   // Res - rebinning
+  const int NUM_DECIMALS = 3;
   QtProperty* resRB = m_calGrpMng->addProperty("Rebinning");
+  
   m_calResProp["ELow"] = m_calDblMng->addProperty("Low");
-  m_calDblMng->setDecimals(m_calResProp["ELow"], noDec);
+  m_calDblMng->setDecimals(m_calResProp["ELow"], NUM_DECIMALS);
   m_calDblMng->setValue(m_calResProp["ELow"], -0.2);
+  
   m_calResProp["EWidth"] = m_calDblMng->addProperty("Width");
-  m_calDblMng->setDecimals(m_calResProp["EWidth"], noDec);
+  m_calDblMng->setDecimals(m_calResProp["EWidth"], NUM_DECIMALS);
   m_calDblMng->setValue(m_calResProp["EWidth"], 0.002);
+  m_calDblMng->setMinimum(m_calResProp["EWidth"], 0.001);
+
   m_calResProp["EHigh"] = m_calDblMng->addProperty("High");
-  m_calDblMng->setDecimals(m_calResProp["EHigh"], noDec);
+  m_calDblMng->setDecimals(m_calResProp["EHigh"], NUM_DECIMALS);
   m_calDblMng->setValue(m_calResProp["EHigh"], 0.2);
+  
   resRB->addSubProperty(m_calResProp["ELow"]);
   resRB->addSubProperty(m_calResProp["EWidth"]);
   resRB->addSubProperty(m_calResProp["EHigh"]);
+  
   m_calResTree->addProperty(resRB);
 
   m_calResPlot = new QwtPlot(this);
@@ -1071,12 +1078,14 @@ void Indirect::setupCalibration()
 
   // Create ResR2 first so ResR1 is drawn above it.
   m_calResR2 = new MantidWidgets::RangeSelector(m_calResPlot, 
-    MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, true);
+    MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, false);
   m_calResR2->setColour(Qt::darkGreen);
-  m_calResR1 = new MantidWidgets::RangeSelector(m_calResPlot);
+  m_calResR1 = new MantidWidgets::RangeSelector(m_calResPlot, MantidQt::MantidWidgets::RangeSelector::XMINMAX, true, true);
 
   connect(m_calResR1, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
   connect(m_calResR1, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
+  connect(m_calResR2, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
+  connect(m_calResR2, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
   connect(m_calResR1, SIGNAL(rangeChanged(double, double)), m_calResR2, SLOT(setRange(double, double)));
   connect(m_calDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calUpdateRS(QtProperty*, double)));
   connect(m_calDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(calUpdateRS(QtProperty*, double)));
@@ -1746,6 +1755,10 @@ void Indirect::calMinChanged(double val)
   }
   else if ( from == m_calResR1 )
   {
+    m_calDblMng->setValue(m_calResProp["ELow"], val);
+  }
+  else if ( from == m_calResR2 )
+  {
     m_calDblMng->setValue(m_calResProp["Start"], val);
   }
 }
@@ -1763,6 +1776,10 @@ void Indirect::calMaxChanged(double val)
   }
   else if ( from == m_calResR1 )
   {
+    m_calDblMng->setValue(m_calResProp["EHigh"], val);
+  }
+  else if ( from == m_calResR2 )
+  {
     m_calDblMng->setValue(m_calResProp["End"], val);
   }
 }
@@ -1773,10 +1790,10 @@ void Indirect::calUpdateRS(QtProperty* prop, double val)
   else if ( prop == m_calCalProp["PeakMax"] ) m_calCalR1->setMaximum(val);
   else if ( prop == m_calCalProp["BackMin"] ) m_calCalR2->setMinimum(val);
   else if ( prop == m_calCalProp["BackMax"] ) m_calCalR2->setMaximum(val);
-  else if ( prop == m_calResProp["Start"] ) m_calResR1->setMinimum(val);
-  else if ( prop == m_calResProp["End"] ) m_calResR1->setMaximum(val);
-  else if ( prop == m_calResProp["ELow"] ) m_calResR2->setMinimum(val);
-  else if ( prop == m_calResProp["EHigh"] ) m_calResR2->setMaximum(val);
+  else if ( prop == m_calResProp["Start"] ) m_calResR2->setMinimum(val);
+  else if ( prop == m_calResProp["End"] ) m_calResR2->setMaximum(val);
+  else if ( prop == m_calResProp["ELow"] ) m_calResR1->setMinimum(val);
+  else if ( prop == m_calResProp["EHigh"] ) m_calResR1->setMaximum(val);
 }
 
 void Indirect::sOfQwClicked()
@@ -1786,18 +1803,18 @@ void Indirect::sOfQwClicked()
     QString rebinString = m_uiForm.sqw_leQLow->text()+","+m_uiForm.sqw_leQWidth->text()+","+m_uiForm.sqw_leQHigh->text();
     QString pyInput = "from mantid.simpleapi import *\n";
 
-    if ( m_uiForm.sqw_cbInput->currentText() == "File" )
+    if(m_uiForm.sqw_dsSampleInput->isFileSelectorVisible())
     {
-      pyInput +=
-        "filename = r'" +m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
-        "(dir, file) = os.path.split(filename)\n"
-        "(sqwInput, ext) = os.path.splitext(file)\n"
-        "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
+      //load the file
+      pyInput += "filename = r'" + m_uiForm.sqw_dsSampleInput->getFullFilePath() + "'\n"
+      "(dir, file) = os.path.split(filename)\n"
+      "(sqwInput, ext) = os.path.splitext(file)\n"
+      "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
     }
     else
     {
-      pyInput +=
-        "sqwInput = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
+      //get the workspace
+      pyInput += "sqwInput = '" + m_uiForm.sqw_dsSampleInput->getCurrentDataName() + "'\n";
     }
 
     // Create output name before rebinning
@@ -1876,35 +1893,32 @@ void Indirect::sOfQwPlotInput()
   QString pyInput = "from mantid.simpleapi import *\n"
     "from mantidplot import *\n";
 
-  //...
-  if ( m_uiForm.sqw_cbInput->currentText() == "File" )
+  if (m_uiForm.sqw_dsSampleInput->isValid())
   {
-    // get filename
-    if ( m_uiForm.sqw_inputFile->isValid() )
+    if(m_uiForm.sqw_dsSampleInput->isFileSelectorVisible())
     {
-      pyInput +=
-        "filename = r'" + m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
-        "(dir, file) = os.path.split(filename)\n"
-        "(input, ext) = os.path.splitext(file)\n"
-        "LoadNexus(Filename=filename, OutputWorkspace=input)\n";
+      //load the file
+      pyInput += "filename = r'" + m_uiForm.sqw_dsSampleInput->getFullFilePath() + "'\n"
+      "(dir, file) = os.path.split(filename)\n"
+      "(sqwInput, ext) = os.path.splitext(file)\n"
+      "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
     }
     else
     {
-      showInformationBox("Invalid filename.");
-      return;
+      //get the workspace
+      pyInput += "sqwInput = '" + m_uiForm.sqw_dsSampleInput->getCurrentDataName() + "'\n";
     }
+
+    pyInput += "ConvertSpectrumAxis(InputWorkspace=sqwInput, OutputWorkspace=sqwInput[:-4]+'_rqw', Target='ElasticQ', EMode='Indirect')\n"
+    "ws = importMatrixWorkspace(sqwInput[:-4]+'_rqw')\n"
+    "ws.plotGraph2D()\n";
+
+    QString pyOutput = runPythonCode(pyInput).trimmed();
   }
   else
   {
-    pyInput += "input = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
+    showInformationBox("Invalid filename.");
   }
-
-  pyInput += "ConvertSpectrumAxis(InputWorkspace=input, OutputWorkspace=input[:-4]+'_rqw', Target='ElasticQ', EMode='Indirect')\n"
-    "ws = importMatrixWorkspace(input[:-4]+'_rqw')\n"
-    "ws.plotGraph2D()\n";
-
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-
 }
 
 // SLICE
@@ -2064,6 +2078,16 @@ void Indirect::sliceUpdateRS(QtProperty* prop, double val)
   else if ( prop == m_sltProp["R2E"] ) m_sltR2->setMaximum(val);
 }
 
+/**
+ * Slot to wrap the protected showInformationBox method defined
+ * in UserSubWindow and provide access to composed tabs.
+ * 
+ * @param message :: The message to display in the message box
+ */
+void Indirect::showMessageBox(const QString& message)
+{
+  showInformationBox(message);
+}
 
 void Indirect::setPlotRange(MantidWidgets::RangeSelector* rangeSelector, QtDoublePropertyManager* dblManager, 
   const std::pair<QtProperty*, QtProperty*> props, const std::pair<double, double>& bounds)
@@ -2074,5 +2098,3 @@ void Indirect::setPlotRange(MantidWidgets::RangeSelector* rangeSelector, QtDoubl
   dblManager->setMaximum(props.second, bounds.second);
   rangeSelector->setRange(bounds.first, bounds.second);
 }
-
-  

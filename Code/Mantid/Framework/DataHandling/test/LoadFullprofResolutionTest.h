@@ -125,7 +125,8 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test import all banks from a 2-bank irf file
-    */
+  ** Also test UseBankIDsInFile property
+  */
   void test_LoadAllBankCase()
   {
     // Generate file
@@ -146,7 +147,7 @@ public:
 
     // Check output workspace
     TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
-          AnalysisDataService::Instance().retrieve("TestBank4Table"));
+      AnalysisDataService::Instance().retrieve("TestBank4Table"));
     TS_ASSERT(outws);
 
     // Check table workspace size
@@ -169,16 +170,63 @@ public:
     TS_ASSERT_DELTA(parammap2["Alph0t"], 86.059, 0.00001);
 
 
+    // Test bank ID with UseBankIDsInFile set false
+    alg.setProperty("OutputTableWorkspace", "TestBank4TableFalse");
+    alg.setProperty("UseBankIDsInFile", false);
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Check output workspace
+    TableWorkspace_sptr outwsFalse = boost::dynamic_pointer_cast<TableWorkspace>(
+      AnalysisDataService::Instance().retrieve("TestBank4TableFalse"));
+    TS_ASSERT(outwsFalse);
+
+    // Check table workspace size
+    TS_ASSERT_EQUALS(outwsFalse->columnCount(), 3);
+    TS_ASSERT_EQUALS(outwsFalse->rowCount(), getExpectedNumberOfRows());
+
+    // Verify ID of second bank
+    map<string, double> parammapFalse;
+    parseTableWorkspace2(outwsFalse, parammapFalse);
+    TS_ASSERT_DELTA(parammapFalse["BANK"], 2.0, 0.0001);
+
+
+    // Test bank ID with UseBankIDsInFile set true
+    alg.setProperty("OutputTableWorkspace", "TestBank4TableTrue");
+    alg.setProperty("UseBankIDsInFile", true);
+   
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Check output workspace
+    TableWorkspace_sptr outwsTrue = boost::dynamic_pointer_cast<TableWorkspace>(
+      AnalysisDataService::Instance().retrieve("TestBank4TableTrue"));
+    TS_ASSERT(outwsTrue);
+
+     // Check table workspace size
+    TS_ASSERT_EQUALS(outwsTrue->columnCount(), 3);
+    TS_ASSERT_EQUALS(outwsTrue->rowCount(), getExpectedNumberOfRows());
+
+    // Verify ID of second bank
+    map<string, double> parammapTrue;
+    parseTableWorkspace2(outwsTrue, parammapTrue);
+    TS_ASSERT_DELTA(parammapTrue["BANK"], 3.0, 0.0001);
+
 
     // Clean
     AnalysisDataService::Instance().remove("TestBank4Table");
+    AnalysisDataService::Instance().remove("TestBank4TableFalse");
+    AnalysisDataService::Instance().remove("TestBank4TableTrue");
     Poco::File("Test2Bank.irf").remove();
 
     return;
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test import all banks from a 2-bank irf file
+  /** Test import all banks from a 3-bank irf file
     */
   void test_Load3BankCase()
   {

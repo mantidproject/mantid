@@ -35,13 +35,15 @@ public:
     instrument->markAsMonitor(det3.get());
 
     pmap.reset(new ParameterMap);
+    delete source;
+    delete sample;
   }
 
   void test_Constructor_Throws_With_Invalid_Pointers()
   {
     TS_ASSERT_THROWS(Instrument(boost::shared_ptr<Instrument>(),boost::shared_ptr<ParameterMap>()), std::invalid_argument);
-    boost::shared_ptr<Instrument> instr(new Instrument);
-    TS_ASSERT_THROWS(Instrument(instr,boost::shared_ptr<ParameterMap>()),std::invalid_argument);
+    //boost::shared_ptr<Instrument> instr(new Instrument);
+    //TS_ASSERT_THROWS(Instrument(instr,boost::shared_ptr<ParameterMap>()),std::invalid_argument);
     boost::shared_ptr<ParameterMap> paramMap(new ParameterMap);
     TS_ASSERT_THROWS(Instrument(boost::shared_ptr<Instrument>(),paramMap),std::invalid_argument);
    }
@@ -52,9 +54,13 @@ public:
     TS_ASSERT_THROWS( pinstrument.getDetector(0), Exception::NotFoundError );
     TS_ASSERT_EQUALS( pinstrument.getDetector(1)->getID(), det->getID() );
     TS_ASSERT_THROWS( pinstrument.getDetector(2), Exception::NotFoundError );
+
+    TS_ASSERT(NULL==pinstrument.getBaseDetector(0));
     Detector *d = new Detector("det",2,0);
     TS_ASSERT_THROWS_NOTHING( instrument->markAsDetector(d) );
     TS_ASSERT_EQUALS( pinstrument.getDetector(2)->getID(), d->getID() );
+
+    TS_ASSERT_EQUALS( pinstrument.getBaseDetector(2)->getID(), d->getID() );
     delete d;
   }
 

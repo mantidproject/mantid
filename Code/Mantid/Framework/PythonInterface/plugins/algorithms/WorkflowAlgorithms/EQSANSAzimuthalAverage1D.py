@@ -45,7 +45,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         input_ws_name = self.getPropertyValue('InputWorkspace')
         workspace = self.getProperty('InputWorkspace').value
         if not AnalysisDataService.doesExist(input_ws_name):
-            Logger.get('EQSANSSANSAzimuthalAverage').error('Could not find input workspace')
+            Logger('EQSANSSANSAzimuthalAverage').error('Could not find input workspace')
         
         # Get the source aperture from the run logs
         source_aperture_radius = 10.0

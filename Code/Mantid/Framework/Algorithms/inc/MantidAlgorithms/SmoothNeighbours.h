@@ -117,6 +117,9 @@ private:
   /// Build the instrument/detector setup in workspace
   void setupNewInstrument(API::MatrixWorkspace_sptr outws);
 
+  /// Build the instrument/detector setup in workspace
+  void spreadPixels(API::MatrixWorkspace_sptr outws);
+
   /// Non rectangular detector group name
   static const std::string NON_UNIFORM_GROUP;
   /// Rectangular detector group name
@@ -143,6 +146,8 @@ private:
   boost::scoped_ptr<WeightingStrategy> WeightedSum;
   /// PreserveEvents
   bool PreserveEvents;
+  ///  expand by pixel IDs
+  bool expandSumAllPixels;
   /// number of output workspace pixels
   size_t outWI;
 

@@ -7,7 +7,6 @@
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/DllConfig.h"
-#include <boost/shared_ptr.hpp>
 #include <vector>
 
 namespace Mantid

@@ -49,8 +49,6 @@ namespace Mantid
   namespace Crystal
   {
 
-    Kernel::Logger& PredictFractionalPeaks::g_log = Kernel::Logger::get("PredictFractionalPeaks");
-
     DECLARE_ALGORITHM( PredictFractionalPeaks )
 
     PredictFractionalPeaks::~PredictFractionalPeaks()

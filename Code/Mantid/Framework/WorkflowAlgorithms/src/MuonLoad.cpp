@@ -8,6 +8,10 @@ Specifically:
 # Offset, crop and rebin the workspace
 # If the loaded data is multi-period - apply the specified operation to specified periods to get a single data set.
 # Use [[MuonCalculateAsymmetry]] to get the resulting workspace.
+
+=== Workflow ===
+[[File:MuonWorkflow.png]]
+
 *WIKI*/
 
 #include "MantidWorkflowAlgorithms/MuonLoad.h"
@@ -74,7 +78,7 @@ namespace WorkflowAlgorithms
         "The name of the Nexus file to load" );
 
     declareProperty("FirstPeriod", 0, "Group index of the first period workspace to use");
-    declareProperty("SecondPeriod", EMPTY_INT(), "Group index of the first period workspace to use");
+    declareProperty("SecondPeriod", EMPTY_INT(), "Group index of the second period workspace to use");
 
     std::vector<std::string> allowedOperations;
     allowedOperations.push_back("+"); 
@@ -393,25 +397,10 @@ namespace WorkflowAlgorithms
       IAlgorithm_sptr rebin = createChildAlgorithm("Rebin");
       rebin->setProperty("InputWorkspace", ws);
       rebin->setProperty("Params", rebinParams);
+      rebin->setProperty("FullBinsOnly", true);
       rebin->execute();
 
       ws = rebin->getProperty("OutputWorkspace");
-
-      // TODO: following should be removed when FullBinsOnly function is added to Rebin algorithm
-
-      // Muon group don't want last bin if shorter than previous bins
-      double binSize = ws->dataX(0)[1] - ws->dataX(0)[0]; 
-      size_t numBins = ws->dataX(0).size();
-
-      if ( (ws->dataX(0)[numBins-1] - ws->dataX(0)[numBins-2]) != binSize )
-      {
-        IAlgorithm_sptr crop2 = createChildAlgorithm("CropWorkspace");
-        crop2->setProperty("InputWorkspace", ws);
-        crop2->setProperty("Xmax", ws->dataX(0)[numBins-2]);
-        crop2->execute();
-
-        ws = crop2->getProperty("OutputWorkspace");
-      }
     }
 
 

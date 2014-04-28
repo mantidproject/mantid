@@ -251,13 +251,13 @@ public:
 
     TS_ASSERT_EQUALS("a", dim1->getName());    
     TS_ASSERT_EQUALS("A", dim1->getDimensionId());
-    TS_ASSERT_EQUALS("U", dim1->getUnits());
+    TS_ASSERT_EQUALS("U", dim1->getUnits().ascii());
     TS_ASSERT_EQUALS(-1, dim1->getMinimum());
     TS_ASSERT_EQUALS(2, dim1->getMaximum());
 
     TS_ASSERT_EQUALS("b", dim2->getName());   
     TS_ASSERT_EQUALS("B", dim2->getDimensionId());
-    TS_ASSERT_EQUALS("U", dim2->getUnits());
+    TS_ASSERT_EQUALS("U", dim2->getUnits().ascii());
     TS_ASSERT_EQUALS(-2, dim2->getMinimum());
     TS_ASSERT_EQUALS(3, dim2->getMaximum());
   }

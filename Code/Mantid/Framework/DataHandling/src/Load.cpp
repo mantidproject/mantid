@@ -553,8 +553,9 @@ namespace Mantid
       const std::vector< Property*> &props = loader->getProperties();
       for (unsigned int i = 0; i < props.size(); ++i)
       {
-        if (props[i]->direction() == Direction::Output && 
-          dynamic_cast<IWorkspaceProperty*>(props[i]) )
+        auto wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
+
+        if (wsProp && !wsProp->isOptional() && props[i]->direction() == Direction::Output )
         {
           if ( props[i]->value().empty() ) props[i]->setValue("LoadChildWorkspace");
         }
@@ -643,6 +644,15 @@ namespace Mantid
       try
       {
         IMDWorkspace_sptr childWS = loader->getProperty(propName);
+        return childWS;
+      }
+      catch(std::runtime_error&)
+      { }
+
+      // ITableWorkspace?
+      try
+      {
+        ITableWorkspace_sptr childWS = loader->getProperty(propName);
         return childWS;
       }
       catch(std::runtime_error&)

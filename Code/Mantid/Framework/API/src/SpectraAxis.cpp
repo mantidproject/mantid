@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Unit.h"
 
 #include <boost/lexical_cast.hpp>
 #include <iostream>
@@ -22,6 +23,7 @@ using std::size_t;
 SpectraAxis::SpectraAxis(const MatrixWorkspace* const parentWorkspace)
   : Axis(), m_parentWS(parentWorkspace)
 {
+  this->unit() = boost::make_shared<Kernel::Units::Label>("Spectrum", "");
 }
 
 /** Virtual constructor

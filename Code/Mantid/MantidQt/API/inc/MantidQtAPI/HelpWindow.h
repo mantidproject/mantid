@@ -4,7 +4,6 @@
 #include <QProcess>
 #include <QString>
 #include <string>
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
 
 namespace MantidQt
@@ -43,8 +42,6 @@ private:
     std::string m_assistantExe;
     /// Whether this is the very first startup of the helpwindow.
     bool m_firstRun;
-    /// The logger for the class.
-    Mantid::Kernel::Logger& m_log;
 
     void start(const std::string &url);
     bool isRunning();

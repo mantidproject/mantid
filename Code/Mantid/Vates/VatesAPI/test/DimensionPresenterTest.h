@@ -6,6 +6,7 @@
 #include "MantidVatesAPI/GeometryPresenter.h"
 #include "MantidVatesAPI/DimensionView.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/UnitLabel.h"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
  
@@ -26,8 +27,8 @@ private:
     MOCK_METHOD1(showAsNotIntegrated, void(VecIMDDimension_sptr));
     MOCK_METHOD0(showAsIntegrated, void());
     MOCK_METHOD1(accept, void(DimensionPresenter*));
-    MOCK_CONST_METHOD0(getMinimum, double());
-    MOCK_CONST_METHOD0(getMaximum, double());
+    MOCK_CONST_METHOD0(getMinimum, float());
+    MOCK_CONST_METHOD0(getMaximum, float());
     MOCK_CONST_METHOD0(getNBins, unsigned int());
     MOCK_CONST_METHOD0(getSelectedIndex, unsigned int());
     MOCK_CONST_METHOD0(getIsIntegrated, bool());
@@ -57,7 +58,7 @@ private:
     MOCK_CONST_METHOD0(getName,
       std::string());
     MOCK_CONST_METHOD0(getUnits,
-      std::string());
+      const Mantid::Kernel::UnitLabel());
     MOCK_CONST_METHOD0(getDimensionId,
       std::string());
     MOCK_CONST_METHOD0(getMaximum,
@@ -204,8 +205,8 @@ public:
     EXPECT_CALL(view, configureStrongly()).Times(1);
     EXPECT_CALL(view, showAsIntegrated()).Times(1);
     EXPECT_CALL(view, getIsIntegrated()).Times(1).WillRepeatedly(Return(true)); // view says it's integrated
-    EXPECT_CALL(view, getMinimum()).Times(1).WillOnce(Return(0));
-    EXPECT_CALL(view, getMaximum()).Times(1).WillOnce(Return(2));
+    EXPECT_CALL(view, getMinimum()).Times(1).WillOnce(Return(0.0f));
+    EXPECT_CALL(view, getMaximum()).Times(1).WillOnce(Return(2.0f));
     EXPECT_CALL(view, getNBins()).Times(0); //Should never need number of bins because view says it's integrated.
 
     MockIMDDimension* pMockDimension = new MockIMDDimension();
@@ -234,8 +235,8 @@ public:
     EXPECT_CALL(view, configureStrongly()).Times(AnyNumber());
     EXPECT_CALL(view, showAsIntegrated()).Times(AnyNumber());
     EXPECT_CALL(view, getIsIntegrated()).Times(AtLeast(1)).WillRepeatedly(Return(false)); // view says it's integrated
-    EXPECT_CALL(view, getMinimum()).Times(AnyNumber()).WillRepeatedly(Return(10)); //Ooops, min > max, this should be handled! 
-    EXPECT_CALL(view, getMaximum()).Times(AnyNumber()).WillRepeatedly(Return(2));
+    EXPECT_CALL(view, getMinimum()).Times(AnyNumber()).WillRepeatedly(Return(10.0f)); //Ooops, min > max, this should be handled! 
+    EXPECT_CALL(view, getMaximum()).Times(AnyNumber()).WillRepeatedly(Return(2.0f));
     EXPECT_CALL(view, getNBins()).Times(AnyNumber()); 
     EXPECT_CALL(view, displayError(_)).Times(1);
 

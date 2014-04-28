@@ -6,6 +6,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 
+namespace Poco { namespace XML {
+  class Document;
+  class Element;
+}}
 
 namespace Mantid
 {
@@ -93,7 +97,7 @@ namespace DataHandling
     /// Mask Workspace
     DataObjects::MaskWorkspace_sptr mMaskWS;
     /// Instrument name
-    std::string mInstrumentName;
+    std::string m_instrumentPropValue;
     /// XML document loaded
     Poco::XML::Document* pDoc;
     /// Root element of the parsed XML
