@@ -41,7 +41,8 @@ namespace MantidQt
       virtual ~ReflMainViewPresenter();
       virtual void load();
     private:
-
+      Mantid::API::ITableWorkspace_sptr m_model;
+      ReflMainView* m_view;
     };
   }
 }

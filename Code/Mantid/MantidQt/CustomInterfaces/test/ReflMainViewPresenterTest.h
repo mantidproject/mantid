@@ -31,12 +31,20 @@ private:
 
 public:
 
+  void testConstruction()
+  {
+    MockView mockView;
+    ReflMainViewPresenter presenter(boost::make_shared<Mantid::DataObjects::TableWorkspace>(),&mockView);
+  }
+
   void testShowModel()
   {
     MockView mockView;
     EXPECT_CALL(mockView, showTable(_)).Times(1);
     ReflMainViewPresenter presenter(boost::make_shared<Mantid::DataObjects::TableWorkspace>(),&mockView);
+    presenter.load();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
+
 };
 #endif

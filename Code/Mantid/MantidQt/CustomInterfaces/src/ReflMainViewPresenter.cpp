@@ -9,15 +9,13 @@ namespace MantidQt
 
     using namespace Mantid::API;
 
-    ReflMainViewPresenter::ReflMainViewPresenter(ITableWorkspace_sptr model, ReflMainView* view)
+    ReflMainViewPresenter::ReflMainViewPresenter(ITableWorkspace_sptr model, ReflMainView* view): m_model(model), m_view(view)
     {
-      view->showTable(model);
     }
 
-    ReflMainViewPresenter::ReflMainViewPresenter(std::string model, ReflMainView* view)
+    ReflMainViewPresenter::ReflMainViewPresenter(std::string model, ReflMainView* view): m_view(view)
     {
-      ITableWorkspace_sptr tws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(model);
-      view->showTable(tws);
+      m_model = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(model);
     }
 
     ReflMainViewPresenter::~ReflMainViewPresenter()
@@ -26,6 +24,7 @@ namespace MantidQt
 
     void ReflMainViewPresenter::load()
     {
+      m_view->showTable(m_model);
     }
   }
 }
