@@ -548,10 +548,11 @@ namespace Algorithms
     m_bestRwp = DBL_MAX;
 
     // Fit background
-    if (i_minFitX == i_minPeakX || i_maxFitX == i_maxFitX)
+    if (i_minFitX == i_minPeakX || i_maxPeakX == i_maxFitX)
     {
       // Very noisy data
-      g_log.warning() << "Very noisy data.  Automatic peak range finder does not work. "
+      // This may not be a very noisy data.  But it is just an indicator that the
+      g_log.warning() << "Peak range cannot be trusted!  Automatic peak range finder does not work. "
                       << "Number of data points in fitting window = " << i_maxFitX - i_minFitX << "\n" ;
       size_t numpts = i_maxFitX - i_minFitX ;
       i_minPeakX += static_cast<size_t>(static_cast<double>(numpts)/6.);
