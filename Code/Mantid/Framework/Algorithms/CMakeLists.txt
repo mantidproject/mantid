@@ -35,6 +35,7 @@ set ( SRC_FILES
 	src/CommutativeBinaryOperation.cpp
 	src/ConjoinWorkspaces.cpp
 	src/ConvertAxisByFormula.cpp
+	src/ConvertEmptyToTof.cpp
 	src/ConvertFromDistribution.cpp
 	src/ConvertMDHistoToMatrixWorkspace.cpp
 	src/ConvertSpectrumAxis.cpp
@@ -263,6 +264,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
 	inc/MantidAlgorithms/ConvertAxisByFormula.h
+	inc/MantidAlgorithms/ConvertEmptyToTof.h
 	inc/MantidAlgorithms/ConvertFromDistribution.h
 	inc/MantidAlgorithms/ConvertMDHistoToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertSpectrumAxis.h
@@ -504,6 +506,7 @@ set ( TEST_FILES
 	CompressedRebinTest.h
 	ConjoinWorkspacesTest.h
 	ConvertAxisByFormulaTest.h
+	ConvertEmptyToTofTest.h
 	ConvertFromDistributionTest.h
 	ConvertMDHistoToMatrixWorkspaceTest.h
 	ConvertSpectrumAxis2Test.h
