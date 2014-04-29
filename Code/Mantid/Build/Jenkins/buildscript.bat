@@ -13,7 +13,6 @@
 :: PVNEXT_BUILD_TYPE
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if NOT "%JOB_NAME%"=="%JOB_NAME:pvnext=%" (
-    echo "A: %PVNEXT_BUILD_TYPE%"
     set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
     set BUILD_TYPE=%PVNEXT_BUILD_TYPE%
 ) else (
