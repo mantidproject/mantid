@@ -463,7 +463,7 @@ namespace MDAlgorithms
       prog->report("Adding Peaks");
 
     } // for each box found
-
+    g_log.notice() << "Number of peaks found: " << peakWS->getNumberPeaks() << std::endl;
   }
 
 
@@ -601,7 +601,7 @@ namespace MDAlgorithms
       prog->report("Adding Peaks");
 
     } // for each box found
-
+    g_log.notice() << "Number of peaks found: " << peakWS->getNumberPeaks() << std::endl;
   }
 
 

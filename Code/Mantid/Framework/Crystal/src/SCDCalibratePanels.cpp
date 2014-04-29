@@ -1143,7 +1143,7 @@ namespace Mantid
               double mL1;
               stringstream(line) >> count >> mL1 >> T0;
               double scaleL0= .01*mL1/beamlineLen;
-              const IObjComponent_const_sptr source=instrument->getSource();
+              const IComponent_const_sptr source=instrument->getSource();
               V3D NewSourcePos= samplePos-beamline*scaleL0*2.0;//beamLine is 2*length.
               L0=beamline.norm()*scaleL0*2.0;
               V3D RelSourcePos = source->getRelativePos()+NewSourcePos-source->getPos();
@@ -1615,7 +1615,7 @@ namespace Mantid
     }
 
 
-    void SCDCalibratePanels::updateSourceParams(boost::shared_ptr<const Geometry::IObjComponent> bank_const,
+    void SCDCalibratePanels::updateSourceParams(boost::shared_ptr<const Geometry::IComponent> bank_const,
       boost::shared_ptr<Geometry::ParameterMap> pmap, boost::shared_ptr<const Geometry::ParameterMap> pmapSv)
     {
       vector< V3D > posv = pmapSv->getV3D(bank_const->getName(), "pos");
@@ -1640,10 +1640,10 @@ namespace Mantid
       boost::shared_ptr<const ParameterMap> const pmapOld)
     {
       boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
-      IObjComponent_const_sptr source = NewInstrument->getSource();
+      IComponent_const_sptr source = NewInstrument->getSource();
       updateSourceParams(source, pmap, pmapOld);
 
-      IObjComponent_const_sptr sample = NewInstrument->getSample();
+      IComponent_const_sptr sample = NewInstrument->getSample();
       V3D SamplePos = sample->getPos();
       if( SamplePos != newSampPos)
       {
@@ -1799,10 +1799,10 @@ namespace Mantid
       } // for each group
 
       // write out the source
-      IObjComponent_const_sptr source = instrument->getSource();
+      IComponent_const_sptr source = instrument->getSource();
 
       oss3 << "<component-link name=\"" << source->getName() << "\">" << endl;
-      IObjComponent_const_sptr sample = instrument->getSample();
+      IComponent_const_sptr sample = instrument->getSample();
       V3D sourceRelPos = source->getRelativePos();
 
       writeXmlParameter(oss3, "x", sourceRelPos.X());

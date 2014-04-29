@@ -72,7 +72,7 @@ namespace DataHandling
       std::string xcaption=ws->getAxis(0)->unit()->caption();
       std::string ycaption=ws->getAxis(1)->unit()->caption();
       if (xcaption.length()==0) xcaption="X";
-      if (ycaption.length()==0) ycaption="Y";
+      if (ycaption.length()==0 || ycaption == "Spectrum") ycaption="Y";
 
       std::string filename = getProperty("Filename");
       std::ofstream file(filename.c_str());
@@ -92,6 +92,7 @@ namespace DataHandling
 
       std::string xunit=ws->getAxis(0)->unit()->label();
       std::string yunit=ws->getAxis(1)->unit()->label();
+      if(yunit == "Angstrom^-1") yunit = "1/Angstroms"; // backwards compatability with old versions
       if (toMicroeV && (xunit=="meV")) xToMicroeV=true;
       if (toMicroeV && (yunit=="meV")) yToMicroeV=true;
 

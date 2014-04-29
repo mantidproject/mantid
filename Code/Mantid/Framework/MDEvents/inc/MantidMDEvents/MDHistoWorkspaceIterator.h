@@ -94,9 +94,11 @@ namespace MDEvents
 
     virtual bool getIsMasked() const;
 
-    size_t getLinearIndex() const;
+    virtual size_t getLinearIndex() const;
 
     std::vector<size_t> findNeighbourIndexes() const;
+
+    virtual bool isWithinBounds(size_t index) const;
 
   protected:
     /// The MDHistoWorkspace being iterated.

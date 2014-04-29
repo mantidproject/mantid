@@ -1155,9 +1155,9 @@ void SANSRunWindow::componentLOQDistances(boost::shared_ptr<const Mantid::API::M
   Instrument_const_sptr instr = workspace->getInstrument();
   if( !instr ) return;
 
-  Mantid::Geometry::IObjComponent_const_sptr source = instr->getSource();
+  Mantid::Geometry::IComponent_const_sptr source = instr->getSource();
   if( source == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
-  Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
+  Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
   if( sample == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
 
   lms = source->getPos().distance(sample->getPos()) * 1000.;

@@ -70,6 +70,7 @@ private:
 	// Execution code
 	void exec();
 
+	int getEPPFromVanadium(const std::string &,Mantid::API::MatrixWorkspace_sptr);
 	void loadInstrumentDetails(NeXus::NXEntry&);
 	void initWorkSpace(NeXus::NXEntry& entry);
 	void initInstrumentSpecific();

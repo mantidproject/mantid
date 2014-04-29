@@ -37,8 +37,8 @@ DECLARE_ALGORITHM(SANSSolidAngleCorrection)
 static double getYTubeAngle(IDetector_const_sptr det,
 					 MatrixWorkspace_const_sptr workspace)
 {
-	Geometry::IObjComponent_const_sptr source = workspace->getInstrument()->getSource();
-	Geometry::IObjComponent_const_sptr sample = workspace->getInstrument()->getSample();
+	Geometry::IComponent_const_sptr source = workspace->getInstrument()->getSource();
+	Geometry::IComponent_const_sptr sample = workspace->getInstrument()->getSample();
 	if ( source == NULL || sample == NULL )
 	{
 		throw std::invalid_argument("Instrument not sufficiently defined: failed to get source and/or sample");

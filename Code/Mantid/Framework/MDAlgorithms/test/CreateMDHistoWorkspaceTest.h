@@ -111,7 +111,7 @@ public:
 
     TS_ASSERT_EQUALS("A", dim1->getName());
     TS_ASSERT_EQUALS("A", dim1->getDimensionId());
-    TS_ASSERT_EQUALS("U", dim1->getUnits());
+    TS_ASSERT_EQUALS("U", dim1->getUnits().ascii());
     TS_ASSERT_EQUALS(1, dim1->getMaximum());
     TS_ASSERT_EQUALS(-1, dim1->getMinimum());
     TS_ASSERT_EQUALS(5, dim1->getNBins());

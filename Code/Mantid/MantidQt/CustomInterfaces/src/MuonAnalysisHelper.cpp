@@ -127,6 +127,13 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out)
     out << end.toSimpleString();
   }
 
+  // Add the end time for the run
+  out << "\nGood frames: ";
+  if ( run.hasProperty("goodfrm") )
+  {
+    out << run.getProperty("goodfrm")->value();
+  }
+
   // Add counts to run information
   out << "\nCounts: ";
   double counts(0.0);
@@ -137,8 +144,10 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out)
       counts += runWs->dataY(i)[j];
     }
   }
+  // output this number to three decimal places
+  out << std::setprecision(3);
   out << counts/1000000 << " MEv";
-
+  out << std::setprecision(12);
   // Add average temperature.
   out << "\nAverage Temperature: ";
   if ( run.hasProperty("Temp_Sample") )

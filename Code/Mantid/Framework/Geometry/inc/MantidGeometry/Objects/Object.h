@@ -9,9 +9,6 @@
 #include "MantidKernel/Quat.h"
 #include "BoundingBox.h"
 #include <map>
-#include <string>
-#include <boost/shared_ptr.hpp>
-
 
 namespace Mantid
 {

@@ -295,7 +295,7 @@ double GetEi2::getDistanceFromSource(size_t ws_index) const
 {
   g_log.debug() << "Computing distance between spectrum at index '" << ws_index << "' and the source\n";
 
-  const IObjComponent_const_sptr source = m_input_ws->getInstrument()->getSource();
+  const IComponent_const_sptr source = m_input_ws->getInstrument()->getSource();
   // Retrieve a pointer detector
   IDetector_const_sptr det = m_input_ws->getDetector(ws_index);
   if( !det )

@@ -16,6 +16,9 @@ public:
   virtual double ex(size_t i)const = 0;
   virtual double getYMin() const = 0;
   virtual double getYMax() const = 0;
+  virtual QString getXAxisLabel() const = 0;
+  virtual QString getYAxisLabel() const = 0;
+
 protected:
   // Assignment operator (virtualized).
   MantidQwtWorkspaceData& operator=(const MantidQwtWorkspaceData&);

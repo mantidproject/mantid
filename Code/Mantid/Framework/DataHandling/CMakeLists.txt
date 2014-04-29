@@ -31,6 +31,7 @@ set ( SRC_FILES
 	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
 	src/LoadFullprofResolution.cpp
+        src/LoadGSASInstrumentFile.cpp
 	src/LoadGSS.cpp
 	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
@@ -76,6 +77,7 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
+	src/LoadReflTBL.cpp
 	src/LoadSINQFocus.cpp
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
@@ -91,8 +93,8 @@ set ( SRC_FILES
 	src/ModifyDetectorDotDatFile.cpp
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
-  src/PDLoadCharacterizations.cpp
-  src/ProcessDasNexusLog.cpp
+        src/PDLoadCharacterizations.cpp
+        src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
 	src/RemoveLogs.cpp
 	src/RenameLog.cpp
@@ -122,6 +124,7 @@ set ( SRC_FILES
 	src/SaveNexusProcessed.cpp
 	src/SavePAR.cpp
 	src/SavePHX.cpp
+	src/SaveReflTBL.cpp
 	src/SaveRKH.cpp
 	src/SaveSPE.cpp
 	src/SaveToSNSHistogramNexus.cpp
@@ -129,6 +132,7 @@ set ( SRC_FILES
 	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
 	src/UpdateInstrumentFromFile.cpp
+	src/FilterEventsByLogValuePreNexus.cpp
 )
 
 set ( INC_FILES
@@ -164,6 +168,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
+        inc/MantidDataHandling/LoadGSASInstrumentFile.h
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
@@ -204,6 +209,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
+	inc/MantidDataHandling/LoadReflTBL.h
 	inc/MantidDataHandling/LoadSINQFocus.h
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
@@ -250,6 +256,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveNexusProcessed.h
 	inc/MantidDataHandling/SavePAR.h
 	inc/MantidDataHandling/SavePHX.h
+	inc/MantidDataHandling/SaveReflTBL.h
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
@@ -257,6 +264,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
+	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	src/LoadRaw/byte_rel_comp.h
 	src/LoadRaw/isisraw.h
 	src/LoadRaw/isisraw2.h
@@ -294,6 +302,7 @@ set ( TEST_FILES
 	LoadEventPreNexus2Test.h
 	LoadEventPreNexusTest.h
 	LoadFullprofResolutionTest.h
+	LoadGSASInstrumentFileTest.h
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
 	LoadILLSANSTest.h
@@ -328,6 +337,7 @@ set ( TEST_FILES
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
 	LoadRawTest.h
+	LoadReflTBLTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h
@@ -373,12 +383,14 @@ set ( TEST_FILES
 	SavePARTest.h
 	SavePHXTest.h
 	SaveRKHTest.h
+	SaveReflTBLTest.h
 	SaveSPETest.h
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
 	UpdateInstrumentFromFileTest.h
 	XMLlogfileTest.h
+	FilterEventsByLogValuePreNexusTest.h
 )
 
 
@@ -396,9 +408,8 @@ set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling )
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
-IF (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR OSX_VERSION VERSION_LESS 10.9)
 	SET (HDF5_DIR "${CMAKE_MODULE_PATH}")
-	#SET (HDF5_CONFIG "${CMAKE_MODULE_PATH}/hdf5-config.cmake" )
 	find_package ( HDF5 COMPONENTS HL REQUIRED
 				        CONFIGS hdf5-config.cmake )
 ELSE()

@@ -141,6 +141,7 @@ namespace MDEvents
     /** Recalculate signal and various averages dependent on signal and the signal coordinates */
     void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL);
     void calculateCentroid(coord_t * centroid) const;
+    coord_t * getCentroid() const;
     void calculateDimensionStats(MDDimensionStats * stats) const;
     void integrateSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const;
     void centroidSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const;

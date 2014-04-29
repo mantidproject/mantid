@@ -50,15 +50,22 @@ namespace Mantid
       // boost::python::objects whn using boost::python::call_method
 
       PyObject *result = PyEval_CallMethod(getSelf(), "function1D", "(O)", xvals);
-      if(PyErr_Occurred()) Environment::throwRuntimeError(true);
+      Py_DECREF(xvals);
+      if(PyErr_Occurred())
+      {
+        Py_DECREF(result);
+        Environment::throwRuntimeError(true);
+      }
 
       PyArrayObject *nparray = (PyArrayObject *)(result);
       if(PyArray_TYPE(nparray) == NPY_DOUBLE) // dtype matches so use memcpy for speed
       {
         std::memcpy(static_cast<void*>(out), PyArray_DATA(nparray), nData*sizeof(npy_double));
+        Py_DECREF(result);
       }
       else
       {
+        Py_DECREF(result);
         PyArray_Descr *dtype=PyArray_DESCR(nparray);
         PyObject *name = PyList_GetItem(dtype->names, 0);
         std::ostringstream os;
