@@ -23,6 +23,8 @@ set ( SRC_FILES
   src/PropertyWidgetFactory.cpp
   src/PythonRunner.cpp
   src/QtSignalChannel.cpp
+  src/QwtRasterDataMD.cpp
+  src/SignalRange.cpp
   src/ScriptRepositoryView.cpp
   src/RepoModel.cpp
   src/SyncedCheckboxes.cpp
@@ -76,8 +78,10 @@ set ( INC_FILES
   inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
   inc/MantidQtAPI/MantidQwtWorkspaceData.h
   inc/MantidQtAPI/PropertyWidgetFactory.h
+  inc/MantidQtAPI/QwtRasterDataMD.h
   inc/MantidQtAPI/ScriptRepositoryView.h
   inc/MantidQtAPI/SelectionNotificationService.h
+  inc/MantidQtAPI/SignalRange.h
 )
 
 set ( UI_FILES 
@@ -91,6 +95,7 @@ set( TEST_FILES
    MantidQwtMatrixWorkspaceDataTest.h
    PlotAxisTest.h
    SelectionNotificationServiceTest.h
+   SignalRangeTest.h
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
