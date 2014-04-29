@@ -778,6 +778,7 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
     outSpec->dataX() = inputWS->readX(0);
 
     // the Y values and errors from spectra being grouped are combined in the output spectrum
+    MantidVec &firstY = outSpec->dataY();
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
     beh->dataX(outIndex)[0] = 0.0;
@@ -790,13 +791,10 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
       const ISpectrum * fromSpectrum = inputWS->getSpectrum(originalWI);
 
       // Add up all the Y spectra and store the result in the first one
-      // Need to keep the next 3 lines inside loop for now until ManagedWorkspace mru-list works properly
-      MantidVec &firstY = outSpec->dataY();
-      MantidVec::iterator fYit;
       MantidVec::iterator fEit = outSpec->dataE().begin();
       MantidVec::const_iterator Yit = fromSpectrum->dataY().begin();
       MantidVec::const_iterator Eit = fromSpectrum->dataE().begin();
-      for (fYit = firstY.begin(); fYit != firstY.end(); ++fYit, ++fEit, ++Yit, ++Eit)
+      for (auto fYit = firstY.begin(); fYit != firstY.end(); ++fYit, ++fEit, ++Yit, ++Eit)
       {
         *fYit += *Yit;
         // Assume 'normal' (i.e. Gaussian) combination of errors
