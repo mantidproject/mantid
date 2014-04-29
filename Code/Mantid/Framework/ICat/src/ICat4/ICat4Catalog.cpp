@@ -275,8 +275,6 @@ namespace Mantid
       query.insert(0, "SELECT DISTINCT inves");
       query.append(" LIMIT " + boost::lexical_cast<std::string>(offset) + "," + boost::lexical_cast<std::string>(limit));
 
-      g_log.debug() << "The search query in ICat4Catalog::search is: \n" << query << std::endl;
-
       ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
