@@ -280,23 +280,8 @@ namespace Mantid
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
-      ns1__search request;
-      ns1__searchResponse response;
-
-      std::string sessionID = m_session->getSessionId();
-      request.sessionId = &sessionID;
-      request.query = &query;
-
-      int result = icat.search(&request, &response);
-
-      if (result == 0)
-      {
-        saveInvestigations(response.return_, outputws);
-      }
-      else
-      {
-        throwErrorMessage(icat);
-      }
+      auto searchResults = performSearch(icat,query);
+      saveInvestigations(searchResults, outputws);
     }
 
     /**
@@ -308,34 +293,15 @@ namespace Mantid
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
-      ns1__search request;
-      ns1__searchResponse response;
-
-      std::string query     = buildSearchQuery(inputs);
-
+      std::string query = buildSearchQuery(inputs);
       if (query.empty()) throw std::runtime_error("You have not input any terms to search for.");
-
       query.insert(0, "SELECT COUNT(DISTINCT inves)");
-      request.query         = &query;
 
-      std::string sessionID = m_session->getSessionId();
-      request.sessionId = &sessionID;
+      int64_t numOfResults = -1;
+      auto searchResults = performSearch(icat,query);
 
-      g_log.debug() << "The paging search query in ICat4Catalog::getNumberOfSearchResults is: \n" << query << std::endl;
-
-      int result = icat.search(&request, &response);
-
-      int64_t numOfResults = 0;
-
-      if (result == 0)
-      {
-        xsd__long * numRes = dynamic_cast<xsd__long*>(response.return_.at(0));
-        numOfResults = numRes->__item;
-      }
-      else
-      {
-        throwErrorMessage(icat);
-      }
+      auto numRes = dynamic_cast<xsd__long*>(searchResults.at(0));
+      if (numRes) numOfResults = numRes->__item;
 
       g_log.debug() << "The number of paging results returned in ICat4Catalog::getNumberOfSearchResults is: " << numOfResults << std::endl;
 
@@ -351,15 +317,6 @@ namespace Mantid
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
-      ns1__search request;
-      ns1__searchResponse response;
-
-      // Prevents any calls to myData from hanging due to sending a request to icat without a session ID.
-      if (m_session->getSessionId().empty()) return;
-
-      std::string sessionID = m_session->getSessionId();
-      request.sessionId = &sessionID;
-
       std::string query = "SELECT DISTINCT inves "
         "FROM Investigation inves "
         "JOIN inves.investigationUsers users "
@@ -367,18 +324,9 @@ namespace Mantid
         "WHERE user.name = :user "
         "ORDER BY inves.id DESC "
         "INCLUDE inves.facility, inves.investigationInstruments.instrument, inves.parameters";
-      request.query     = &query;
 
-      int result = icat.search(&request, &response);
-
-      if (result == 0)
-      {
-        saveInvestigations(response.return_, outputws);
-      }
-      else
-      {
-        throwErrorMessage(icat);
-      }
+      auto searchResults = performSearch(icat,query);
+      saveInvestigations(searchResults, outputws);
     }
 
     /**
@@ -472,26 +420,9 @@ namespace Mantid
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
-      ns1__search request;
-      ns1__searchResponse response;
-
-      std::string query = "Dataset INCLUDE DatasetType, Datafile, Investigation <-> Investigation[name = '" + investigationId + "']";
-      request.query     = &query;
-
-      std::string sessionID = m_session->getSessionId();
-      request.sessionId = &sessionID;
-
-      g_log.debug() << "The query for ICat4Catalog::getDataSets is:\n" << query << std::endl;
-      int result = icat.search(&request, &response);
-
-      if (result == 0)
-      {
-        saveDataSets(response.return_, outputws);
-      }
-      else
-      {
-        throwErrorMessage(icat);
-      }
+      auto searchResults = performSearch(icat,
+          "Dataset INCLUDE DatasetType, Datafile, Investigation <-> Investigation[name = '" + investigationId + "']");
+      saveDataSets(searchResults, outputws);
     }
 
     /**
@@ -552,27 +483,8 @@ namespace Mantid
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
-      ns1__search request;
-      ns1__searchResponse response;
-
-      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + investigationId + "']";
-      request.query     = &query;
-
-      std::string sessionID = m_session->getSessionId();
-      request.sessionId = &sessionID;
-
-      g_log.debug() << "The query for ICat4Catalog::getDataFiles is:\n" << query << std::endl;
-
-      int result = icat.search(&request, &response);
-
-      if (result == 0)
-      {
-        saveDataFiles(response.return_, outputws);
-      }
-      else
-      {
-        throwErrorMessage(icat);
-      }
+      auto searchResults = performSearch(icat,"Datafile <-> Dataset <-> Investigation[name = '" + investigationId + "']");
+      saveDataFiles(searchResults, outputws);
     }
 
     /**
@@ -632,35 +544,12 @@ namespace Mantid
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
-      ns1__search request;
-      ns1__searchResponse response;
+      auto searchResults = performSearch(icat, "Instrument.fullName ORDER BY fullName");
 
-      std::string query = "Instrument.fullName ORDER BY fullName";
-      request.query     = &query;
-
-      std::string sessionID = m_session->getSessionId();
-      request.sessionId = &sessionID;
-
-      int result = icat.search(&request, &response);
-
-      if (result == 0)
+      for (unsigned i = 0; i < searchResults.size(); ++i)
       {
-        for(unsigned i = 0; i < response.return_.size(); ++i)
-        {
-          xsd__string * instrument = dynamic_cast<xsd__string*>(response.return_[i]);;
-          if (instrument)
-          {
-            instruments.push_back(instrument->__item);
-          }
-          else
-          {
-            throw std::runtime_error("ICat4Catalog::listInstruments expected an instrument. Please contact the Mantid development team.");
-          }
-        }
-      }
-      else
-      {
-        throwErrorMessage(icat);
+        auto instrument = dynamic_cast<xsd__string*>(searchResults.at(i));
+        if (instrument) instruments.push_back(instrument->__item);
       }
     }
 
@@ -670,38 +559,15 @@ namespace Mantid
      */
     void ICat4Catalog::listInvestigationTypes(std::vector<std::string>& invstTypes)
     {
-      ICat4::ICATPortBindingProxy icat;
+      ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
-      ns1__search request;
-      ns1__searchResponse response;
+      auto searchResults = performSearch(icat, "InvestigationType.name ORDER BY name");
 
-      std::string query = "InvestigationType.name ORDER BY name";
-      request.query     = &query;
-
-      std::string sessionID = m_session->getSessionId();
-      request.sessionId = &sessionID;
-
-      int result = icat.search(&request, &response);
-
-      if (result == 0)
+      for (size_t i = 0; i < searchResults.size(); ++i)
       {
-        for(unsigned i = 0; i < response.return_.size(); ++i)
-        {
-          xsd__string * investigation = dynamic_cast<xsd__string*>(response.return_[i]);
-          if (investigation)
-          {
-            invstTypes.push_back(investigation->__item);
-          }
-          else
-          {
-            throw std::runtime_error("ICat4Catalog::listInvestigationTypes expected a string. Please contact the Mantid development team.");
-          }
-        }
-      }
-      else
-      {
-        throwErrorMessage(icat);
+        auto investigationType = dynamic_cast<xsd__string*>(searchResults.at(i));
+        if (investigationType) invstTypes.push_back(investigationType->__item);
       }
     }
 
@@ -715,36 +581,13 @@ namespace Mantid
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
-      ns1__get request;
-      ns1__getResponse response;
+      auto searchResults = performSearch(icat,"Datafile[id = '" + boost::lexical_cast<std::string>(fileID) + "']");
 
-      std::string query  = "Datafile";
-      request.query      = &query;
-      request.primaryKey = fileID;
+      std::string fileLocation = "";
 
-      std::string sessionID = m_session->getSessionId();
-      request.sessionId = &sessionID;
+      auto datafile = dynamic_cast<ns1__datafile*>(searchResults.at(0));
+      if (datafile && datafile->location) fileLocation = *(datafile->location);
 
-      int result = icat.get(&request, &response);
-
-      std::string fileLocation;
-      if (result == 0)
-      {
-        ns1__datafile * datafile = dynamic_cast<ns1__datafile*>(response.return_);
-
-        if (datafile && datafile->location)
-        {
-          fileLocation = *(datafile->location);
-        }
-        else
-        {
-          throw std::runtime_error("ICat4Catalog::getFileLocation expected a datafile. Please contact the Mantid development team.");
-        }
-      }
-      else
-      {
-        throwErrorMessage(icat);
-      }
       return fileLocation;
     }
 
@@ -1012,14 +855,14 @@ namespace Mantid
 
       g_log.debug() << "The search query sent to ICAT was: \n" << query << std::endl;
 
-      std::vector<xsd__anyType*> searchResult;
+      std::vector<xsd__anyType*> searchResults;
 
       if (icat.search(&request,&response) == SOAP_OK)
-        searchResult = response.return_;
+        searchResults = response.return_;
       else
         throwErrorMessage(icat);
 
-      return searchResult;
+      return searchResults;
     }
 
     /**
