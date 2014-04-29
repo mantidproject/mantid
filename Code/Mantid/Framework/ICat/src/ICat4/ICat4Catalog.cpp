@@ -685,39 +685,18 @@ namespace Mantid
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
-      ns1__search request;
-      ns1__searchResponse response;
+      auto searchResults = performSearch(icat,"Dataset <-> Investigation[name = '" + investigationID + "']");
 
-      std::string query = "Dataset <-> Investigation[name = '" + investigationID + "']";
-      request.query     = &query;
+      auto dataset = dynamic_cast<ns1__dataset*>(searchResults.at(0));
 
-      std::string sessionID = m_session->getSessionId();
-      request.sessionId = &sessionID;
-
-      g_log.debug() << "The query performed to obtain a dataset from an investigation id " <<
-          "in ICat4Catalog::getMantidDatasetId is: " << query << std::endl;
-      
-      int64_t datasetID = 0;
-      
-      int result = icat.search(&request, &response);
-
-      if (result == 0)
-      {
-        if (response.return_.size() <= 0)
-        {
-          throw std::runtime_error("The datafile you tried to publish has no related dataset."
-              " (Based on investigation ID: " + investigationID + ")");
-        }
-        ns1__dataset * dataset = dynamic_cast<ns1__dataset*>(response.return_.at(0));
-        if (dataset && dataset->id)
-        {
-          datasetID = *(dataset->id);
-          g_log.debug() << "The name of the dataset related to " << investigationID << " is: " << *(dataset->name) << "\n";
-        }
-      }
+      if (dataset && dataset->id)
+        return *(dataset->id);
       else
+        return -1;
+    }
+
+
       {
-        throwErrorMessage(icat);
       }
 
       return datasetID;
