@@ -188,7 +188,8 @@ void LoadILLReflectometry::initWorkSpace(NeXus::NXEntry& /*entry*/, std::vector<
 			m_numberOfChannels + 1,
 			m_numberOfChannels);
 
-	m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+	m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Empty");
+
 
 	m_localWorkspace->setYUnitLabel("Counts");
 
