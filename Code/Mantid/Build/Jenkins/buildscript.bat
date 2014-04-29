@@ -71,10 +71,5 @@ ctest -C %BUILD_TYPE% --output-on-failure -R MantidPlot
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if "%CLEANBUILD%" EQU "yes" (
     msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_TYPE% docs/qtassistant/qtassistant.vcxproj
-    if "%BUILD_TYPE%" == "Release" (
-        cpack -C %BUILD_TYPE% --config CPackConfig.cmake
-    )
-    if "%BUILD_TYPE%" == "Debug" (
-        cpack -C %BUILD_TYPE% --config CPackConfig.cmake -DWINDOWS_DEPLOYMENT_TYPE=%BUILD_TYPE%
-    )
+    cpack -C %BUILD_TYPE% --config CPackConfig.cmake
 )
