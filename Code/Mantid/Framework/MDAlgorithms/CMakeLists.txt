@@ -199,6 +199,7 @@ set ( TEST_FILES
 	MinusMDTest.h
 	ModeratorChopperResolutionTest.h
 	MultiplyMDTest.h
+	MullerAnsatzTest.h 
 	NotMDTest.h
 	OrMDTest.h
 	PlusMDTest.h

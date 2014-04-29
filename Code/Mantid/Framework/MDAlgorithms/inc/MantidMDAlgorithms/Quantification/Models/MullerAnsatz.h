@@ -1,5 +1,5 @@
-#ifndef MANTID_MDALGORITHMS_STRONTIUM122_H_
-#define MANTID_MDALGORITHMS_STRONTIUM122_H_
+#ifndef MANTID_MDALGORITHMS_MULLERANSATZ_H_
+#define MANTID_MDALGORITHMS_MULLERANSATZ_H_
 /**
   Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -34,6 +34,7 @@ namespace Mantid
      */
     class DLLExport MullerAnsatz : public ForegroundModel
     {
+    public:
       enum ChainDirection
       {
         Along_a,
