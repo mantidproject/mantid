@@ -92,6 +92,8 @@ namespace Mantid
         int64_t getMantidDatasetId(const std::string &investigationID);
         // Sets the soap-endpoint & SSL context for the given ICAT proxy.
         void setICATProxySettings(ICat4::ICATPortBindingProxy& icat);
+        // Returns the results of a search against ICAT for a given query.
+        std::vector<ICat4::xsd__anyType*> performSearch(ICat4::ICATPortBindingProxy& icat, std::string query);
 
         // Is the desired accessType allowed for a specific bean?
         template<class T>

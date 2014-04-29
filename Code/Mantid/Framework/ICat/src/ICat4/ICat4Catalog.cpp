@@ -994,6 +994,34 @@ namespace Mantid
       setSSLContext(icat);
     }
 
+
+    /**
+     * Returns the results of a search against ICAT for a given query.
+     * Note: The ICatProxy object takes care of the deletion of the response object.
+     * @param icat  :: The proxy object used to interact with gSOAP.
+     * @param query :: The query to send to ICAT.
+     */
+    std::vector<xsd__anyType*> ICat4Catalog::performSearch(ICat4::ICATPortBindingProxy& icat,std::string query)
+    {
+      ns1__search request;
+      ns1__searchResponse response;
+
+      std::string sessionID = m_session->getSessionId();
+      request.sessionId     = &sessionID;
+      request.query         = &query;
+
+      g_log.debug() << "The search query sent to ICAT was: \n" << query << std::endl;
+
+      std::vector<xsd__anyType*> searchResult;
+
+      if (icat.search(&request,&response) == SOAP_OK)
+        searchResult = response.return_;
+      else
+        throwErrorMessage(icat);
+
+      return searchResult;
+    }
+
     /**
      * Is the specified access type allowed for a specific bean?
      * @param accessType :: The access type to check against the bean.
