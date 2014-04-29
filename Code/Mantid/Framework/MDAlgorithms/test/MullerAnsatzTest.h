@@ -7,7 +7,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-class Strontium122Test : public CxxTest::TestSuite
+class MullerAnsatzTest : public CxxTest::TestSuite
 {
 private:
   class FakeFGModelFitFunction :
