@@ -19,7 +19,7 @@ namespace Mantid
     namespace
     {
       /// static logger
-      Kernel::Logger g_log("ICat4Catalog");
+      Logger g_log("ICat4Catalog");
     }
 
     DECLARE_CATALOG(ICat4Catalog)
@@ -41,7 +41,7 @@ namespace Mantid
       m_session = boost::make_shared<API::CatalogSession>("",facility,endpoint);
 
       // Securely set, including soap-endpoint.
-      ICat4::ICATPortBindingProxy icat;
+      ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       // Used to authenticate the user.
@@ -101,7 +101,7 @@ namespace Mantid
      */
     void ICat4Catalog::logout()
     {
-      ICat4::ICATPortBindingProxy icat;
+      ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       ns1__logout request;
@@ -277,7 +277,7 @@ namespace Mantid
 
       g_log.debug() << "The search query in ICat4Catalog::search is: \n" << query << std::endl;
 
-      ICat4::ICATPortBindingProxy icat;
+      ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       auto searchResults = performSearch(icat,query);
@@ -290,7 +290,7 @@ namespace Mantid
      */
     int64_t ICat4Catalog::getNumberOfSearchResults(const CatalogSearchParam& inputs)
     {
-      ICat4::ICATPortBindingProxy icat;
+      ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       std::string query = buildSearchQuery(inputs);
@@ -315,7 +315,7 @@ namespace Mantid
      */
     void ICat4Catalog::myData(Mantid::API::ITableWorkspace_sptr& outputws)
     {
-      ICat4::ICATPortBindingProxy icat;
+      ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       std::string query = "SELECT DISTINCT inves "
@@ -418,7 +418,7 @@ namespace Mantid
      */
     void ICat4Catalog::getDataSets(const std::string& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
-      ICat4::ICATPortBindingProxy icat;
+      ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       auto searchResults = performSearch(icat,
@@ -481,7 +481,7 @@ namespace Mantid
      */
     void ICat4Catalog::getDataFiles(const std::string& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
-      ICat4::ICATPortBindingProxy icat;
+      ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       auto searchResults = performSearch(icat,"Datafile <-> Dataset <-> Investigation[name = '" + investigationId + "']");
@@ -542,7 +542,7 @@ namespace Mantid
      */
     void ICat4Catalog::listInstruments(std::vector<std::string>& instruments)
     {
-      ICat4::ICATPortBindingProxy icat;
+      ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       auto searchResults = performSearch(icat, "Instrument.fullName ORDER BY fullName");
@@ -579,7 +579,7 @@ namespace Mantid
      */
     const std::string ICat4Catalog::getFileLocation(const long long & fileID)
     {
-      ICat4::ICATPortBindingProxy icat;
+      ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       auto searchResults = performSearch(icat,"Datafile[id = '" + boost::lexical_cast<std::string>(fileID) + "']");
@@ -644,7 +644,7 @@ namespace Mantid
      */
     API::ITableWorkspace_sptr ICat4Catalog::getPublishInvestigations()
     {
-      ICat4::ICATPortBindingProxy icat;
+      ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       auto ws = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -667,7 +667,7 @@ namespace Mantid
         datafile.name    = &datafileName;
         datafile.dataset = &dataset;
 
-        if (!isAccessAllowed(ICat4::ns1__accessType__CREATE,datafile))
+        if (!isAccessAllowed(ns1__accessType__CREATE,datafile))
           ws->removeRow(row);
       }
 
@@ -682,7 +682,7 @@ namespace Mantid
      */
     int64_t ICat4Catalog::getMantidDatasetId(const std::string &investigationID)
     {
-      ICat4::ICATPortBindingProxy icat;
+      ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       auto searchResults = performSearch(icat,"Dataset <-> Investigation[name = '" + investigationID + "']");
@@ -707,7 +707,7 @@ namespace Mantid
      */
     void ICat4Catalog::keepAlive()
     {
-      ICat4::ICATPortBindingProxy icat;
+      ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       ns1__refresh request;
@@ -725,7 +725,7 @@ namespace Mantid
      * Defines the SSL authentication scheme.
      * @param icat :: ICATPortBindingProxy object.
      */
-    void ICat4Catalog::setSSLContext(ICat4::ICATPortBindingProxy& icat)
+    void ICat4Catalog::setSSLContext(ICATPortBindingProxy& icat)
     {
       if (soap_ssl_client_context(&icat,
           SOAP_SSL_CLIENT, /* use SOAP_SSL_DEFAULT in production code */
@@ -745,7 +745,7 @@ namespace Mantid
      * Throws an error message (returned by gsoap) to Mantid upper layer.
      * @param icat :: ICATPortBindingProxy object.
      */
-    void ICat4Catalog::throwErrorMessage(ICat4::ICATPortBindingProxy& icat)
+    void ICat4Catalog::throwErrorMessage(ICATPortBindingProxy& icat)
     {
       char buf[600];
       const int len = 600;
@@ -803,13 +803,13 @@ namespace Mantid
     /**
      * Sets the soap-endpoint & SSL context for the given ICAT proxy.
      */
-    void ICat4Catalog::setICATProxySettings(ICat4::ICATPortBindingProxy& icat)
+    void ICat4Catalog::setICATProxySettings(ICATPortBindingProxy& icat)
     {
       // The soapEndPoint is only set when the user logs into the catalog.
       // If it's not set the correct error is returned (invalid sessionID) from the ICAT server.
       if (m_session->getSoapEndpoint().empty()) return;
       // Stop receiving packets from ICAT server after period of time.
-      icat.recv_timeout = boost::lexical_cast<int>(Kernel::ConfigService::Instance().getString("catalog.timeout.value"));
+      icat.recv_timeout = boost::lexical_cast<int>(ConfigService::Instance().getString("catalog.timeout.value"));
       // Set the soap-endpoint of the catalog we want to use.
       icat.soap_endpoint = m_session->getSoapEndpoint().c_str();
       // Sets SSL authentication scheme
@@ -823,7 +823,7 @@ namespace Mantid
      * @param icat  :: The proxy object used to interact with gSOAP.
      * @param query :: The query to send to ICAT.
      */
-    std::vector<xsd__anyType*> ICat4Catalog::performSearch(ICat4::ICATPortBindingProxy& icat,std::string query)
+    std::vector<xsd__anyType*> ICat4Catalog::performSearch(ICATPortBindingProxy& icat,std::string query)
     {
       ns1__search request;
       ns1__searchResponse response;
@@ -851,9 +851,9 @@ namespace Mantid
      * @return True if access is allowed, otherwise false.
      **/
     template<class T>
-    bool ICat4Catalog::isAccessAllowed(ICat4::ns1__accessType accessType, T& bean)
+    bool ICat4Catalog::isAccessAllowed(ns1__accessType accessType, T& bean)
     {
-      ICat4::ICATPortBindingProxy icat;
+      ICATPortBindingProxy icat;
       setICATProxySettings(icat);
 
       ns1__isAccessAllowed request;
