@@ -82,7 +82,7 @@ void AlgorithmHistory::addExecutionInfo(const DateAndTime& start, const double& 
   m_properties.push_back(Kernel::PropertyHistory(name,value,"",isdefault, direction));
 }
 
-/** Add a child algorithm history to hsitory 
+/** Add a child algorithm history to history 
  *  @param childHist :: The child history
  */
 void AlgorithmHistory::addChildHistory(const AlgorithmHistory& childHist)
@@ -130,6 +130,16 @@ const AlgorithmHistory & AlgorithmHistory::getChildAlgorithmHistory(const size_t
 const AlgorithmHistory& AlgorithmHistory::operator[](const size_t index) const
 {
   return getChildAlgorithmHistory(index);
+}
+
+/**
+ *  Create an algorithm from a history record at a given index
+ * @param index :: An index within the workspace history
+ * @returns A shared pointer to an algorithm object
+ */
+boost::shared_ptr<IAlgorithm> AlgorithmHistory::getChildAlgorithm(const size_t index) const
+{
+  return Algorithm::fromHistory(this->getChildAlgorithmHistory(index));
 }
 
 /** Prints a text representation of itself

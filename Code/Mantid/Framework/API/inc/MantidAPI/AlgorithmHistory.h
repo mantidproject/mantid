@@ -106,6 +106,8 @@ public:
   }
   /// Create a concrete algorithm based on a history record
   boost::shared_ptr<IAlgorithm> createAlgorithm() const;
+  /// Create an child algorithm from a history record at a given index
+  boost::shared_ptr<IAlgorithm> getChildAlgorithm(const size_t index) const;
   // Allow Algorithm::execute to change the exec count & duration after the algorithm was executed
   friend class Algorithm;
   
