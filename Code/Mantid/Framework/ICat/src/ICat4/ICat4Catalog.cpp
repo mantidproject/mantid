@@ -297,15 +297,16 @@ namespace Mantid
       if (query.empty()) throw std::runtime_error("You have not input any terms to search for.");
       query.insert(0, "SELECT COUNT(DISTINCT inves)");
 
-      int64_t numOfResults = -1;
       auto searchResults = performSearch(icat,query);
-
       auto numRes = dynamic_cast<xsd__long*>(searchResults.at(0));
-      if (numRes) numOfResults = numRes->__item;
 
-      g_log.debug() << "The number of paging results returned in ICat4Catalog::getNumberOfSearchResults is: " << numOfResults << std::endl;
-
-      return numOfResults;
+      if (numRes)
+      {
+        g_log.debug() << "The number of paging results returned in ICat4Catalog::getNumberOfSearchResults is: " << numRes->__item << "\n";
+        return numRes->__item;
+      }
+      else
+        return -1;
     }
 
     /**
@@ -582,13 +583,12 @@ namespace Mantid
       setICATProxySettings(icat);
 
       auto searchResults = performSearch(icat,"Datafile[id = '" + boost::lexical_cast<std::string>(fileID) + "']");
-
-      std::string fileLocation = "";
-
       auto datafile = dynamic_cast<ns1__datafile*>(searchResults.at(0));
-      if (datafile && datafile->location) fileLocation = *(datafile->location);
 
-      return fileLocation;
+      if (datafile && datafile->location)
+        return *(datafile->location);
+      else
+        return "";
     }
 
     /**
@@ -868,16 +868,11 @@ namespace Mantid
       request.accessType = &type.__item;
       request.bean = &bean;
 
-      bool isAccessAllowed = false;
       if (icat.isAccessAllowed(&request,&response) == SOAP_OK)
-      {
-        if (response.return_) isAccessAllowed = true;
-      }
+        return response.return_;
       else
-      {
         throwErrorMessage(icat);
-      }
-      return isAccessAllowed;
+        return false;
     }
   }
 }
