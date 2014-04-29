@@ -70,8 +70,6 @@ public:
 
   /// add a child algorithm history record to this history object
   void addChildHistory(const AlgorithmHistory& childHist);
-  /// set the duration time this algorithm history object
-  void setDuration(const double& duration);
   // get functions
   /// get name of algorithm in history const
   const std::string& name() const {return m_name;}
@@ -89,6 +87,8 @@ public:
   AlgorithmHistories getChildHistories() const { return m_childHistories; }
   /// Retrieve a child algorithm history by index
   const AlgorithmHistory & getChildAlgorithmHistory(const size_t index) const;
+    /// Add operator[] access
+  const AlgorithmHistory & operator[](const size_t index) const;
   /// Retrieve the number of child algorithms
   size_t childHistorySize() const;
   /// print contents of object
@@ -106,8 +106,14 @@ public:
   }
   /// Create a concrete algorithm based on a history record
   boost::shared_ptr<IAlgorithm> createAlgorithm() const;
+  // Allow Algorithm::execute to change the exec count & duration after the algorithm was executed
+  friend class Algorithm;
   
 private:
+  // Set the execution count 
+  void setExecCount(std::size_t execCount) { m_execCount = execCount; }
+  /// Set the duration time 
+  void setDuration(const double& duration) { m_executionDuration = duration; }
   /// The name of the Algorithm
   std::string m_name;
   /// The version of the algorithm

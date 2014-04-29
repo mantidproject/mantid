@@ -325,7 +325,7 @@ protected:
   /// Set if an exception is thrown, and not caught, within a parallel region
   bool m_parallelException;
 
-  friend class WorkspaceHistory; // Allow workspace history loading to adjust g_execCount
+  friend class WorkspaceHistory; // Allow workspace history loading to adjust g_execCount 
   static size_t g_execCount; ///< Counter to keep track of algorithm execution order
 
   // ------------------ For WorkspaceGroups ------------------------------------

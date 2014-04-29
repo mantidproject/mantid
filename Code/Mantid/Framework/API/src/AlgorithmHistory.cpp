@@ -30,7 +30,6 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const Kernel::Dat
   }
 }
 
-
 /// Destructor
 AlgorithmHistory::~AlgorithmHistory()
 {}
@@ -122,12 +121,15 @@ const AlgorithmHistory & AlgorithmHistory::getChildAlgorithmHistory(const size_t
   return *start;
 }
 
-/** Set the duration time of the algorithm in the history
- *  @param duration :: The time the algorithm took to execute
+/**
+ * Index operator[] access to a child algorithm history
+ * @param index ::  An index within the algorithm history
+ * @returns A reference to a const AlgorithmHistory object
+ * @throws std::out_of_range error if the index is invalid
  */
-void AlgorithmHistory::setDuration(const double& duration)
+const AlgorithmHistory& AlgorithmHistory::operator[](const size_t index) const
 {
-  m_executionDuration = duration;
+  return getChildAlgorithmHistory(index);
 }
 
 /** Prints a text representation of itself
