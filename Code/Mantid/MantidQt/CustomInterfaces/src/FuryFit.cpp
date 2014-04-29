@@ -630,10 +630,10 @@ namespace IDA
       return;
     }
 
-    Mantid::API::CompositeFunction_sptr func = createFunction();
-    // Function Ties
-    func->tie("f0.A1", "0");
+    const bool constrainBeta = uiForm().furyfit_ckConstrainBeta->isChecked();
     const bool constrainIntens = uiForm().furyfit_ckConstrainIntensities->isChecked();
+    Mantid::API::CompositeFunction_sptr func = createFunction();
+    func->tie("f0.A1", "0");
     
     if ( constrainIntens )
     {
@@ -641,14 +641,12 @@ namespace IDA
     }
     
     func->applyTies();
-
-    bool constrainBeta = uiForm().furyfit_ckConstrainBeta->isChecked();
+    
     std::string function = std::string(func->asString());
-  
     QString pyInput = "from IndirectDataAnalysis import furyfitSeq, furyfitMult\n"
       "input = '" + m_ffInputWSName + "'\n"
       "func = r'" + QString::fromStdString(function) + "'\n"
-      "ftype = '" + fitTypeString() + "'\n"
+      "ftype = '"   + fitTypeString() + "'\n"
       "startx = " + m_ffProp["StartX"]->valueText() + "\n"
       "endx = " + m_ffProp["EndX"]->valueText() + "\n"
       "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n";
@@ -662,7 +660,7 @@ namespace IDA
     if ( uiForm().furyfit_ckSaveSeq->isChecked() ) pyInput += "save = True\n";
     else pyInput += "save = False\n";
 
-    if (!constrainBeta)
+    if( !constrainBeta )
     {
       pyInput += "furyfitSeq(input, func, ftype, startx, endx, constrain_intens, Save=save, Plot=plot, Verbose=verbose)\n";
     }
