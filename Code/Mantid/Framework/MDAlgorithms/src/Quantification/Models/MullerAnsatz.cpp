@@ -136,13 +136,16 @@ namespace Mantid
         const double qsqr = qx*qx + qy*qy + qz*qz;
         const double Amplitude = getCurrentParameterValue(AnsatzParameters::Ampliture);
         const double J_coupling = getCurrentParameterValue(AnsatzParameters::J_coupling);
-
+        std::cout<<" position: "<<point[0]<<"  "<<point[1]<<" "<<point[2]<<" "<<point[3]<<std::endl;
+        std::cout<<" Ampliture and J_coupling "<<Ampliture<<" "<<J_coupling;
         //  const double epssqr = eps*eps;
 
 
         double weight,qchain;
         double qh,qk,ql,arlu1,arlu2,arlu3;
         ForegroundModel::convertToHKL(exptSetup,qx,qy,qz,qh,qk,ql,arlu1,arlu2,arlu3);
+
+        std::cout<<" qhkl: "<<qh<<"  "<<qk<<" "<<ql<<std::endl;
 
         //	Orientation of the chain:
         switch(m_ChainDirection)
@@ -197,7 +200,7 @@ namespace Mantid
               formfactor = this->formFactor(qsqr);
             }
           }
-
+          std::cout<<" qsqr and ff: "<<qsqr<<"  "<<formfactor <<std::endl;
           const double tempInK = exptSetup.getLogAsSingleValue("temperature_log");
           const double boseFactor = BoseEinsteinDistribution::np1Eps(eps,tempInK);
           weight = Amplitude*(sigma_mag/M_PI)* (boseFactor/eps) * (formfactor*formfactor) /  sqrt((eps-wl)*(eps+wl));
