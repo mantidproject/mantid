@@ -791,6 +791,8 @@ namespace Mantid
       }
 
       if (datasetID == -1) datasetID = createMantidDataset(investigationID);
+      g_log.debug() << "The dataset ID of the mantid dataset was: " << datasetID << "\n";
+
       return datasetID;
     }
 
@@ -836,7 +838,10 @@ namespace Mantid
         createRequest.bean      = &dataset;
 
         if (icat.create(&createRequest,&createResponse) == SOAP_OK)
+        {
+          g_log.debug() << "Creating a new dataset named: " << *(dataset.name) << " with investigationID " << investigationID << "\n";
           datasetID = createResponse.return_;
+        }
         // Do not throw error from ICAT as we want to continue on GUI. Instead, return -1 below.
       }
 
