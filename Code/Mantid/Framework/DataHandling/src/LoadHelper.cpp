@@ -300,10 +300,10 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID,
 
 
 /**
-* show attributes attached to current Nexus entry
+* Show attributes attached to the current Nexus entry
 *
-* @param nxfileID :: The Nexus entry
-* @param indent_str :: some spaces following tree level
+* @param nxfileID The Nexus entry
+* @param indentStr Indent spaces do display nexus entries as a tree
 *
 */
 void LoadHelper::dumpNexusAttributes(NXhandle nxfileID, std::string& indentStr){
