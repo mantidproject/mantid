@@ -62,7 +62,11 @@ namespace Mantid
       void correctPosition(API::MatrixWorkspace_sptr toCorrect, const double& thetaInDeg,
           Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector);
 
+      /// Does the property have a default value.
       bool isPropertyDefault(const std::string& propertyName) const;
+
+      /// Move detectors.
+      void moveDetectors(API::MatrixWorkspace_sptr toCorrect, Geometry::IComponent_const_sptr detector, Geometry::IComponent_const_sptr sample, const double& upOffset, const double& acrossOffset);
     };
 
   } // namespace Algorithms

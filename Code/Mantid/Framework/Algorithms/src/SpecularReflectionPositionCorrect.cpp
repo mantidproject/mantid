@@ -112,7 +112,8 @@ namespace Mantid
 
       auto boundedArrayValidator = boost::make_shared<ArrayBoundedValidator<int> >();
       boundedArrayValidator->setLower(0);
-      declareProperty(new ArrayProperty<int>("SpectrumNumbersOfGroupedDetectors", boundedArrayValidator, Direction::Input),
+      declareProperty(
+          new ArrayProperty<int>("SpectrumNumbersOfDetectors", boundedArrayValidator, Direction::Input),
           "A list of spectrum numbers making up an effective point detector.");
 
       declareProperty(new PropertyWithValue<std::string>("SampleComponentName", "", Direction::Input),
@@ -122,9 +123,9 @@ namespace Mantid
           "An output workspace.");
 
       setPropertySettings("SampleComponentName",
-                new Kernel::EnabledWhenProperty("SpectrumNumbersOfGroupedDetectors", IS_NOT_DEFAULT));
-      setPropertySettings("SpectrumNumbersOfGroupedDetectors",
-                      new Kernel::EnabledWhenProperty("SampleComponentName", IS_NOT_DEFAULT));
+          new Kernel::EnabledWhenProperty("SpectrumNumbersOfGrouped", IS_NOT_DEFAULT));
+      setPropertySettings("SpectrumNumbersOfDetectors",
+          new Kernel::EnabledWhenProperty("SampleComponentName", IS_NOT_DEFAULT));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -188,11 +189,11 @@ namespace Mantid
         MatrixWorkspace_sptr workspace, const bool isPointDetector)
     {
       boost::shared_ptr<const IComponent> searchResult;
-      if (!isPropertyDefault("SpectrumNumbersOfGroupedDetectors"))
+      if (!isPropertyDefault("SpectrumNumbersOfDetectors"))
       {
-        const std::vector<int> spectrumNumbers = getProperty("SpectrumNumbersOfGroupedDetectors");
+        const std::vector<int> spectrumNumbers = getProperty("SpectrumNumbersOfDetectors");
         auto specToWorkspaceIndex = workspace->getSpectrumToWorkspaceIndexMap();
-        DetectorGroup_sptr allDetectors;
+        DetectorGroup_sptr allDetectors = boost::make_shared<DetectorGroup>();
         bool warnIfMasked = true;
         for (size_t i = 0; i < spectrumNumbers.size(); ++i)
         {
@@ -231,6 +232,48 @@ namespace Mantid
     }
 
     /**
+     * Execute the MoveInstrumentComponent on all (named) subcomponents
+     * @param toCorrect : Workspace to correct
+     * @param detector : Detector or DetectorGroup
+     * @param sample : Sample Component
+     * @param upOffset : Up offset to apply
+     * @param acrossOffset : Across offset to apply
+     */
+    void SpecularReflectionPositionCorrect::moveDetectors(API::MatrixWorkspace_sptr toCorrect,
+        IComponent_const_sptr detector, IComponent_const_sptr sample, const double& upOffset,
+        const double& acrossOffset)
+    {
+      auto instrument = toCorrect->getInstrument();
+      const V3D detectorPosition = detector->getPos();
+      const V3D samplePosition = sample->getPos();
+      auto referenceFrame = instrument->getReferenceFrame();
+      if (auto groupDetector = boost::dynamic_pointer_cast<const DetectorGroup>(detector)) // Do we have a group of detectors
+      {
+        auto detectors = groupDetector->getDetectors();
+        for (size_t i = 0; i < detectors.size(); ++i)
+        {
+          moveDetectors(toCorrect, detectors[i], sample, upOffset, acrossOffset); // Recursive call
+        }
+      }
+      else
+      {
+        auto moveComponentAlg = this->createChildAlgorithm("MoveInstrumentComponent");
+        moveComponentAlg->initialize();
+        moveComponentAlg->setProperty("Workspace", toCorrect);
+        moveComponentAlg->setProperty("ComponentName", detector->getName());
+        moveComponentAlg->setProperty("RelativePosition", false);
+        // Movements
+        moveComponentAlg->setProperty(referenceFrame->pointingAlongBeamAxis(),
+            detectorPosition.scalar_prod(referenceFrame->vecPointingAlongBeam()));
+        moveComponentAlg->setProperty(referenceFrame->pointingHorizontalAxis(), acrossOffset);
+        moveComponentAlg->setProperty(referenceFrame->pointingUpAxis(),
+            samplePosition.scalar_prod(referenceFrame->vecPointingUp()) + upOffset);
+        // Execute the movement.
+        moveComponentAlg->execute();
+      }
+    }
+
+    /**
      * Correct the position of the detectors based on the input theta value.
      * @param toCorrect : Workspace to correct detector posisitions on.
      * @param thetaInDeg : Theta in degrees to use in correction calculations.
@@ -259,17 +302,8 @@ namespace Mantid
 
       double upOffset = beamOffset * std::tan(thetaInRad); // We only correct vertical position
 
-      auto moveComponentAlg = this->createChildAlgorithm("MoveInstrumentComponent");
-      moveComponentAlg->initialize();
-      moveComponentAlg->setProperty("Workspace", toCorrect);
-      moveComponentAlg->setProperty("ComponentName", detector->getName()); // TODO. May need to move whole bank or linear detector etc.
-      moveComponentAlg->setProperty("RelativePosition", false);
-      // Movements
-      moveComponentAlg->setProperty(referenceFrame->pointingAlongBeamAxis(), detectorPosition.scalar_prod(referenceFrame->vecPointingAlongBeam()));
-      moveComponentAlg->setProperty(referenceFrame->pointingHorizontalAxis(), acrossOffset);
-      moveComponentAlg->setProperty(referenceFrame->pointingUpAxis(), samplePosition.scalar_prod(referenceFrame->vecPointingUp()) + upOffset);
-      // Execute the movement.
-      moveComponentAlg->execute();
+      // Apply the movements.
+      moveDetectors(toCorrect, detector, sample, upOffset, acrossOffset);
 
     }
 

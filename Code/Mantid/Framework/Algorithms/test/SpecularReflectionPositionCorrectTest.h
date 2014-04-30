@@ -79,7 +79,7 @@ public:
     TS_ASSERT_THROWS(alg.setProperty("ThetaIn", 90.0), std::invalid_argument&);
   }
 
-  void test_throws_if_SpectrumNumbersOfGroupedDetectors_less_than_zero()
+  void test_throws_if_SpectrumNumbersOfDetectors_less_than_zero()
   {
     SpecularReflectionPositionCorrect alg;
     alg.setRethrows(true);
@@ -88,11 +88,11 @@ public:
     alg.setPropertyValue("OutputWorkspace", "test_out");
     alg.setProperty("ThetaIn", 10.0);
     std::vector<int> invalid(1, -1);
-    TS_ASSERT_THROWS(alg.setProperty("SpectrumNumbersOfGroupedDetectors", invalid),
+    TS_ASSERT_THROWS(alg.setProperty("SpectrumNumbersOfDetectors", invalid),
         std::invalid_argument&);
   }
 
-  void test_throws_if_SpectrumNumbersOfGroupedDetectors_outside_range()
+  void test_throws_if_SpectrumNumbersOfDetectors_outside_range()
   {
     SpecularReflectionPositionCorrect alg;
     alg.setRethrows(true);
@@ -102,7 +102,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "test_out");
     alg.setProperty("ThetaIn", 10.0);
     std::vector<int> invalid(1, 1e7);  // Well outside range
-    alg.setProperty("SpectrumNumbersOfGroupedDetectors", invalid);  // Well outside range
+    alg.setProperty("SpectrumNumbersOfDetectors", invalid);  // Well outside range
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument&);
   }
 
@@ -178,7 +178,7 @@ public:
         sampleToDetectorBeamOffset, 1e-6);
   }
 
-  void test_correct_point_detector_position()
+  void do_test_correct_point_detector_position(std::string detectorFindProperty="", std::string stringValue="")
   {
     auto loadAlg = AlgorithmManager::Instance().create("Load");
     loadAlg->initialize();
@@ -196,11 +196,12 @@ public:
     const double sampleToDetectorVerticalOffsetExpected = std::tan(thetaInRad) * sampleToDetectorBeamOffsetExpected;
 
     SpecularReflectionPositionCorrect alg;
-    alg.setRethrows(true);
     alg.setChild(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", toConvert);
     alg.setPropertyValue("OutputWorkspace", "test_out");
+    if(!detectorFindProperty.empty())
+      alg.setProperty(detectorFindProperty, stringValue);
     alg.setProperty("ThetaIn", thetaInDegrees);
     alg.execute();
     MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
@@ -215,6 +216,21 @@ public:
         sampleToDetectorVerticalOffsetExpected, 1e-6);
     TSM_ASSERT_DELTA("Beam position should be unchanged", sampleToDetectorBeamOffsetCorrected,
         sampleToDetectorBeamOffsetExpected, 1e-6);
+  }
+
+  void test_correct_point_detector_position_using_defaults_for_specifying_detector()
+  {
+    do_test_correct_point_detector_position();
+  }
+
+  void test_correct_point_detector_position_using_name_for_specifying_detector()
+  {
+    do_test_correct_point_detector_position("DetectorComponentName", "point-detector");
+  }
+
+  void test_correct_point_detector_position_using_spectrum_number_for_specifying_detector()
+  {
+    do_test_correct_point_detector_position("SpectrumNumbersOfDetectors", "4");
   }
 
 };
