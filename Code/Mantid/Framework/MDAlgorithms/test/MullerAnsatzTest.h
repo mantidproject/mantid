@@ -66,22 +66,25 @@ public:
     using Mantid::MDAlgorithms::ForegroundModel;
     MullerAnsatz Cu2Default;
     Cu2Default.initialize();
-    Cu2Default.setAttributeValue("Amplitude",0.67);
-    Cu2Default.setAttributeValue("J_coupling", 2.1);
+    Cu2Default.setParameter("Amplitude",0.67);
+    Cu2Default.setParameter("J_coupling", 2.1);
     double valueWithDefault = calculateTestModelWeight(Cu2Default);
-    //TS_ASSERT_DELTA(0.016787062635810316, valueWithDefault, 1e-10); // Check the absolute value is correct
+    TS_ASSERT_DELTA(0.016787062635810316, valueWithDefault, 1e-10); // Check the absolute value is correct
 
-    MullerAnsatz Cu2Def;
-    Cu2Def.initialize();
-    Cu2Def.setAttributeValue("IonName", "Cu2");
-    Cu2Def.setAttributeValue("ChainDirection", MullerAnsatz::Along_c);
-    Cu2Def.setAttributeValue("MagneticFFDirection", MullerAnsatz::Isotropic);
+    MullerAnsatz Cu2Res;
+    Cu2Res.initialize();
+    Cu2Res.setParameter("Amplitude",0.67);
+    Cu2Res.setParameter("J_coupling", 2.1);
+
+    Cu2Res.setAttributeValue("IonName", "Cu2");
+    Cu2Res.setAttributeValue("ChainDirection", MullerAnsatz::Along_c);
+    Cu2Res.setAttributeValue("MagneticFFDirection", MullerAnsatz::Isotropic);
     
     // Same test but set the ion to check they match
-    double valueWithAttrSet = calculateTestModelWeight(Cu2Def);
+    double valueWithAttrSet = calculateTestModelWeight(Cu2Res);
 
-    //TS_ASSERT_DELTA(valueWithDefault, valueWithAttrSet, 1e-10);
-    TS_ASSERT_DELTA(valueWithDefault, valueWithAttrSet, 10);
+    TS_ASSERT_DELTA(valueWithDefault, valueWithAttrSet, 1e-10);
+    //TS_ASSERT_DELTA(valueWithDefault, valueWithAttrSet, 10);
 
 
    }
@@ -105,8 +108,8 @@ private:
     experimentDescr.mutableRun().addProperty("temperature_log", 6.0);
 
     double weight(-1.0);
-    const ForegroundModel & MulFunction = model; // scatteringIntensity is private concrete model
-    TS_ASSERT_THROWS_NOTHING( weight = MulFunction.scatteringIntensity(experimentDescr, std::vector<double>(qOmega, qOmega + 4)) );
+    //const ForegroundModel & MulFunction = model; // scatteringIntensity is private concrete model
+    TS_ASSERT_THROWS_NOTHING( weight = model.scatteringIntensity(experimentDescr, std::vector<double>(qOmega, qOmega + 4)) );
     return weight;
   }
 
