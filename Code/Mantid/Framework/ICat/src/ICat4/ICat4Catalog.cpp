@@ -789,6 +789,55 @@ namespace Mantid
         return *(dataset->id);
       else
         return -1;
+
+    /**
+     * Creates a dataset for an investigation (based on ID) named 'mantid' if it does not already exist.
+     * @param investigationID :: The investigation to create a dataset for.
+     * @return The ID of the mantid dataset.
+     */
+    int64_t ICat4Catalog::createMantidDataset(const std::string &investigationID)
+    {
+      ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
+
+      // We need to obtain an already existing datasetType as it's not recommended to create a new one.
+      auto datasetTypeSearch = performSearch(icat, "DatasetType[name ='analyzed']");
+      auto datasetType = dynamic_cast<ns1__datasetType*>(datasetTypeSearch.at(0));
+
+      auto investigationSearch = performSearch(icat, "Investigation[name = '" + investigationID + "']");
+      auto investigation = dynamic_cast<ns1__investigation*>(investigationSearch.at(0));
+
+      ns1__dataset dataset;
+      std::string datasetName = "mantidTempNotDuplicate";
+
+      dataset.name          = &datasetName;
+      dataset.complete      = false;
+      dataset.type          = datasetType;
+      dataset.investigation = investigation;
+
+      int64_t datasetID = -1;
+
+      if (isAccessAllowed(ns1__accessType__CREATE,dataset))
+      {
+        ns1__create createRequest;
+        ns1__createResponse createResponse;
+
+        // We have to re-set the dataset name as when performing isAccessAllowed
+        // an error will be thrown if the dataset already exists.
+        std::string mantidName = "mantid";
+        dataset.name = &mantidName;
+
+        std::string sessionID   = m_session->getSessionId();
+        createRequest.sessionId = &sessionID;
+        createRequest.bean      = &dataset;
+
+        if (icat.create(&createRequest,&createResponse) == SOAP_OK)
+          datasetID = createResponse.return_;
+        // Do not throw error from ICAT as we want to continue on GUI. Instead, return -1 below.
+      }
+
+      g_log.debug() << "The dataset ID returned from ICat4Catalog::createMantidDataset was: " << datasetID << "\n";
+      return datasetID; // Since we did not have access or could not create the file the default value (-1).
     }
 
     /**

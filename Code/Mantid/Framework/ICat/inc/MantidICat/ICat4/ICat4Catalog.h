@@ -90,6 +90,8 @@ namespace Mantid
         std::string formatDateTime(const time_t &timestamp, const std::string &format);
         // Search the archive & obtain the dataset ID based on the investigationID.
         int64_t getMantidDatasetId(const std::string &investigationID);
+        // Creates a dataset for an investigation (based on ID) named 'mantid' if it does not already exist.
+        int64_t createMantidDataset(const std::string &investigationID);
         // Sets the soap-endpoint & SSL context for the given ICAT proxy.
         void setICATProxySettings(ICat4::ICATPortBindingProxy& icat);
         // Returns the results of a search against ICAT for a given query.
