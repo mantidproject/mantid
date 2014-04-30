@@ -783,12 +783,16 @@ namespace Mantid
 
       auto searchResults = performSearch(icat,"Dataset <-> Investigation[name = '" + investigationID + "']");
 
-      auto dataset = dynamic_cast<ns1__dataset*>(searchResults.at(0));
+      int64_t datasetID = -1;
+      for (size_t i = 0; i < searchResults.size(); ++i)
+      {
+        auto dataset = dynamic_cast<ns1__dataset*>(searchResults.at(i));
+        if (dataset && *(dataset->name) == "mantid") datasetID = *(dataset->id);
+      }
 
-      if (dataset && dataset->id)
-        return *(dataset->id);
-      else
-        return -1;
+      if (datasetID == -1) datasetID = createMantidDataset(investigationID);
+      return datasetID;
+    }
 
     /**
      * Creates a dataset for an investigation (based on ID) named 'mantid' if it does not already exist.
