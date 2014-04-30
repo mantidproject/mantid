@@ -255,7 +255,7 @@ void LoadILLIndirect::initWorkSpace(NeXus::NXEntry& /*entry*/, std::vector< std:
 			m_numberOfChannels + 1,
 			m_numberOfChannels);
 
-	m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+	m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Empty");
 
 	m_localWorkspace->setYUnitLabel("Counts");
 
@@ -355,61 +355,7 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry, std::vecto
 
 
 
-/**
-* show attributes attached to current Nexus entry
-*
-* @param nxfileID :: The Nexus entry
-* @param indent_str :: some spaces following tree level
-*
-*/
-void LoadILLIndirect::dumpNexusAttributes(NXhandle nxfileID, std::string& indentStr){
-	// Attributes
-	NXname pName;
-	int iLength, iType;
-	int nbuff = 127;
-	boost::shared_array<char> buff(new char[nbuff+1]);
 
-	while(NXgetnextattr(nxfileID, pName, &iLength, &iType) != NX_EOD)
-	{
-		g_log.debug()<<indentStr<<'@'<<pName<<" = ";
-		switch(iType)
-		{
-		case NX_CHAR:
-			{
-				if (iLength > nbuff + 1)
-				{
-					nbuff = iLength;
-					buff.reset(new char[nbuff+1]);
-				}
-				int nz = iLength + 1;
-				NXgetattr(nxfileID,pName,buff.get(),&nz,&iType);
-				g_log.debug()<<indentStr<<buff.get()<<'\n';
-				break;
-			}
-		case NX_INT16:
-			{
-				short int value;
-				NXgetattr(nxfileID,pName,&value,&iLength,&iType);
-				g_log.debug()<<indentStr<<value<<'\n';
-				break;
-			}
-		case NX_INT32:
-			{
-				int value;
-				NXgetattr(nxfileID,pName,&value,&iLength,&iType);
-				g_log.debug()<<indentStr<<value<<'\n';
-				break;
-			}
-		case NX_UINT16:
-			{
-				short unsigned int value;
-				NXgetattr(nxfileID,pName,&value,&iLength,&iType);
-				g_log.debug()<<indentStr<<value<<'\n';
-				break;
-			}
-		}// switch
-	}// while
-}
 
 
 
@@ -426,7 +372,7 @@ void LoadILLIndirect::loadNexusEntriesIntoProperties(std::string nexusfilename) 
     	g_log.debug() << "convertNexusToProperties: Error loading " << nexusfilename;
         throw Kernel::Exception::FileError("Unable to open File:" , nexusfilename);
     }
-    m_loader.AddNexusFieldsToWsRun(nxfileID, runDetails, nexusfilename, nexusfilename, 0);
+    m_loader.addNexusFieldsToWsRun(nxfileID, runDetails, nexusfilename, nexusfilename, 0);
 
     // Add also "Facility", as asked
     runDetails.addProperty("Facility", std::string("ILL"));
@@ -444,9 +390,6 @@ void LoadILLIndirect::runLoadInstrument() {
 
 	// Now execute the Child Algorithm. Catch and log any error, but don't stop.
 	try {
-
-		// TODO: depending on the m_numberOfPixelsPerTube we might need to load a different IDF
-
 		loadInst->setPropertyValue("InstrumentName", m_instrumentName);
 		loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
 		loadInst->execute();
@@ -455,7 +398,6 @@ void LoadILLIndirect::runLoadInstrument() {
 		g_log.information("Cannot load the instrument definition.");
 	}
 }
-
 
 void LoadILLIndirect::moveComponent(const std::string &componentName, double twoTheta, double offSet) {
 
@@ -489,6 +431,11 @@ void LoadILLIndirect::moveComponent(const std::string &componentName, double two
 
 }
 
+/**
+ * IN16B has a few single detectors that are place around the sample.
+ * They are moved according to some values in the nexus file.
+ * This is not implemented yet.
+ */
 void LoadILLIndirect::moveSingleDetectors(){
 
 

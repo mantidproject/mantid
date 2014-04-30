@@ -58,8 +58,6 @@ namespace DataHandling
 	void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry, std::vector< std::vector<int> > monitorsData);
 	std::vector< std::vector<int> > loadMonitors(NeXus::NXEntry& entry);
 
-    void dumpNexusAttributes(NXhandle nxfileID,
-    		std::string& indent_str);
     void runLoadInstrument();
 
 	/// Calculate error for y

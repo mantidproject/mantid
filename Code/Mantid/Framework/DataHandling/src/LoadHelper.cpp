@@ -4,6 +4,8 @@
 
 #include "MantidDataHandling/LoadHelper.h"
 
+#include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -145,7 +147,7 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr& worksp
    * @param level       :: current level in nexus tree
    *
    */
-void LoadHelper::AddNexusFieldsToWsRun(NXhandle nxfileID,
+void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID,
 					API::Run& runDetails,
 					std::string& parent_name,
 					std::string& parent_class,
@@ -173,7 +175,7 @@ void LoadHelper::AddNexusFieldsToWsRun(NXhandle nxfileID,
 			std::string p_nxname(nxname);//current names can be useful for next level
 			std::string p_nxclass(nxclass);
 
-			AddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname, p_nxclass, level+1);
+			addNexusFieldsToWsRun(nxfileID, runDetails, p_nxname, p_nxclass, level+1);
 
 			NXclosegroup(nxfileID);
 		}// if(NXopengroup
@@ -217,7 +219,13 @@ void LoadHelper::AddNexusFieldsToWsRun(NXhandle nxfileID,
 					}
 
 					if (type==NX_CHAR) {
-						runDetails.addProperty(property_name, std::string((const char *)dataBuffer));
+						std::string property_value((const char *)dataBuffer);
+						if (boost::algorithm::ends_with(property_name, "_time")) {
+							// That's a time value! Convert to Mantid standard
+							property_value = dateTimeInIsoFormat(property_value);
+						}
+						runDetails.addProperty(property_name, property_value);
+
 					} else if ((type==NX_FLOAT32)
 								||(type==NX_FLOAT64)
 								||(type==NX_INT16)
@@ -291,6 +299,61 @@ void LoadHelper::AddNexusFieldsToWsRun(NXhandle nxfileID,
 }// RecurseForProperties
 
 
+/**
+* show attributes attached to current Nexus entry
+*
+* @param nxfileID :: The Nexus entry
+* @param indent_str :: some spaces following tree level
+*
+*/
+void LoadHelper::dumpNexusAttributes(NXhandle nxfileID, std::string& indentStr){
+	// Attributes
+	NXname pName;
+	int iLength, iType;
+	int nbuff = 127;
+	boost::shared_array<char> buff(new char[nbuff+1]);
+
+	while(NXgetnextattr(nxfileID, pName, &iLength, &iType) != NX_EOD)
+	{
+		g_log.debug()<<indentStr<<'@'<<pName<<" = ";
+		switch(iType)
+		{
+		case NX_CHAR:
+			{
+				if (iLength > nbuff + 1)
+				{
+					nbuff = iLength;
+					buff.reset(new char[nbuff+1]);
+				}
+				int nz = iLength + 1;
+				NXgetattr(nxfileID,pName,buff.get(),&nz,&iType);
+				g_log.debug()<<indentStr<<buff.get()<<'\n';
+				break;
+			}
+		case NX_INT16:
+			{
+				short int value;
+				NXgetattr(nxfileID,pName,&value,&iLength,&iType);
+				g_log.debug()<<indentStr<<value<<'\n';
+				break;
+			}
+		case NX_INT32:
+			{
+				int value;
+				NXgetattr(nxfileID,pName,&value,&iLength,&iType);
+				g_log.debug()<<indentStr<<value<<'\n';
+				break;
+			}
+		case NX_UINT16:
+			{
+				short unsigned int value;
+				NXgetattr(nxfileID,pName,&value,&iLength,&iType);
+				g_log.debug()<<indentStr<<value<<'\n';
+				break;
+			}
+		}// switch
+	}// while
+}
 /**
  * Parses the date as formatted at the ILL:
  * 29-Jun-12 11:27:26

@@ -48,11 +48,12 @@ public:
 	double getL1(const API::MatrixWorkspace_sptr&);
 	double getL2(const API::MatrixWorkspace_sptr&, int detId = 1);
 	double getInstrumentProperty(const API::MatrixWorkspace_sptr&, std::string);
-    void AddNexusFieldsToWsRun(NXhandle nxfileID,
+    void addNexusFieldsToWsRun(NXhandle nxfileID,
 			API::Run& runDetails,
     		std::string& parent_name,
     		std::string& parent_class,
     		int indent);
+    void dumpNexusAttributes(NXhandle nxfileID, std::string& indentStr);
 	std::string dateTimeInIsoFormat(std::string);
 private:
 	/// Reference to the logger class
