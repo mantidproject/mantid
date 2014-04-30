@@ -32,6 +32,29 @@ class AlgorithmHistoryTest(unittest.TestCase):
         basic_child_algs = nested_alg.getChildHistories()
         self.assertGreater(len(basic_child_algs), 0)
 
+    def test_disable_history(self):
+        trans1 = Load('INTER00013463.nxs', OutputWorkspace="trans1")
+        ws_name = '__tmp_test_algorithm_history'
+
+        # create and run algorithm without nested history capturing
+        alg = AlgorithmManager.createChildAlgorithm('CreateTransmissionWorkspaceAuto', recordHistory=False)
+        alg.initialize()
+        args = {}
+        kwargs = {'FirstTransmissionRun': trans1, 'AnalysisMode': "PointDetectorAnalysis",
+                  'OutputWorkspace': ws_name}
+        _set_properties(alg, *args, **kwargs)
+        alg.execute()
+
+        history = mtd[ws_name].getHistory()
+
+        alg_hists = history.getAlgorithmHistories()
+        self.assertEquals(history.size(), 2)
+        self.assertEquals(len(alg_hists), 2)
+
+        parent_alg = history.getAlgorithmHistory(1)
+        self.assertEquals(parent_alg.name(), 'CreateTransmissionWorkspaceAuto')
+        self.assertEquals(parent_alg.childHistorySize(), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
