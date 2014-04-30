@@ -20,21 +20,9 @@ class BaseInstrument(object):
             
         config = ConfigService.Instance()
         self._definition_file = config["instrumentDefinition.directory"]+'/'+instr_filen
-                
-        self.definition = self.load_instrument() 
 
-    def load_instrument(self):
-        """
-            Runs LoadInstrument get the parameters for the instrument
-            @return the instrument parameter data
-        """
-        wrksp = '__'+self._NAME+'instrument_definition'
-        if not AnalysisDataService.doesExist(wrksp):
-          CreateWorkspace(OutputWorkspace=wrksp,DataX="1",DataY="1",DataE="1")
-          #read the information about the instrument that stored in its xml
-          LoadInstrument(Workspace=wrksp, InstrumentName=self._NAME)
-
-        return AnalysisDataService.retrieve(wrksp).getInstrument() 
+        inst_ws_name = self.load_empty()
+        self.definition = AnalysisDataService.retrieve(inst_ws_name).getInstrument()
 
     def get_default_beam_center(self):
         """

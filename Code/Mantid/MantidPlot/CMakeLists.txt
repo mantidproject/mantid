@@ -916,7 +916,8 @@ set ( MANTIDPLOT_TEST_PY_FILES
     MantidPlotInstrumentViewTest.py
 	MantidPlotSliceViewerTest.py 
 	MantidPlot1DPlotTest.py
-	MantidPlotProxiesTest.py
+  MantidPlot2DPlotTest.py
+  MantidPlotProxiesTest.py
 	MantidPlotPythonImportTest.py
 	MantidPlotFoldersTest.py 
 )

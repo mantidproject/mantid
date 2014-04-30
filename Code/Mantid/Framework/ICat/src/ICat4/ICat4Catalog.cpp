@@ -475,14 +475,13 @@ namespace Mantid
       ns1__search request;
       ns1__searchResponse response;
 
-      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + investigationId + "']";
+      std::string query = "Dataset INCLUDE DatasetType, Datafile, Investigation <-> Investigation[name = '" + investigationId + "']";
       request.query     = &query;
 
       std::string sessionID = m_session->getSessionId();
       request.sessionId = &sessionID;
 
-      g_log.debug() << "ICat4Catalog::getDataSets -> { " << query << " }" << std::endl;
-
+      g_log.debug() << "The query for ICat4Catalog::getDataSets is:\n" << query << std::endl;
       int result = icat.search(&request, &response);
 
       if (result == 0)
@@ -505,26 +504,41 @@ namespace Mantid
       if (outputws->getColumnNames().empty())
       {
         // Add rows headers to the output workspace.
+        outputws->addColumn("long64","ID");
         outputws->addColumn("str","Name");
-        outputws->addColumn("str","Status");
-        outputws->addColumn("str","Type");
         outputws->addColumn("str","Description");
-        outputws->addColumn("str","Sample Id");
+        outputws->addColumn("str","Type");
+        outputws->addColumn("str","Related investigation ID");
+        outputws->addColumn("size_t","Number of datafiles");
       }
 
-      std::string temp("");
-
-      std::vector<xsd__anyType*>::const_iterator iter;
-      for(iter = response.begin(); iter != response.end(); ++iter)
+      std::string emptyCell = "";
+      for(auto iter = response.begin(); iter != response.end(); ++iter)
       {
-        API::TableRow table = outputws->appendRow();
-        // These are just temporary values in order for the GUI to not die.
-        // These along with related GUI aspects will be removed in another ticket.
-        savetoTableWorkspace(&temp, table);
-        savetoTableWorkspace(&temp, table);
-        savetoTableWorkspace(&temp, table);
-        savetoTableWorkspace(&temp, table);
-        savetoTableWorkspace(&temp, table);
+        ns1__dataset * dataset = dynamic_cast<ns1__dataset*>(*iter);
+        if (dataset)
+        {
+          API::TableRow table = outputws->appendRow();
+
+          savetoTableWorkspace(dataset->id, table);
+          savetoTableWorkspace(dataset->name, table);
+
+          if (dataset->description) savetoTableWorkspace(dataset->description, table);
+          else savetoTableWorkspace(&emptyCell, table);
+
+          if (dataset->type) savetoTableWorkspace(dataset->type->name,table);
+          else savetoTableWorkspace(&emptyCell, table);
+
+          if (dataset->investigation) savetoTableWorkspace(dataset->investigation->name, table);
+          else savetoTableWorkspace(&emptyCell, table);
+
+          size_t datafileCount = dataset->datafiles.size();
+          savetoTableWorkspace(&datafileCount, table);
+        }
+        else
+        {
+          throw std::runtime_error("ICat4Catalog::saveDataSets expected a dataset. Please contact the Mantid development team.");
+        }
       }
     }
 
@@ -547,7 +561,7 @@ namespace Mantid
       std::string sessionID = m_session->getSessionId();
       request.sessionId = &sessionID;
 
-      g_log.debug() << "The query for ICat4Catalog::getDataSets is:\n" << query << std::endl;
+      g_log.debug() << "The query for ICat4Catalog::getDataFiles is:\n" << query << std::endl;
 
       int result = icat.search(&request, &response);
 
