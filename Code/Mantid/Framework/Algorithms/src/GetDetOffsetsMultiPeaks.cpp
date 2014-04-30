@@ -477,6 +477,7 @@ namespace Algorithms
     removeEmptyRowsFromPeakOffsetTable();
 
     // Make summary
+    progress(0.92, "Making summary");
     makeFitSummary();
 
     return;
@@ -583,7 +584,7 @@ namespace Algorithms
     }
 
     return fr;
-  } /// ENDFUNCTION: GetDetOffsetsMultiPeaks
+  } /// ENDFUNCTION: calculatePeakOffset
 
   //----------------------------------------------------------------------------------------------
   /** Fit peaks' offset by minimize the fitting function
@@ -813,41 +814,6 @@ namespace Algorithms
     findpeaks->setProperty<double>("MinimumPeakHeight", m_minPeakHeight);
     findpeaks->setProperty("StartFromObservedPeakCentre", true);
     findpeaks->executeAsChildAlg();
-
-#if 0
-    // Debug output (temp)
-    if (wi == 24269)
-    {
-      std::stringstream dbss;
-      dbss << "FindPeaks(" << "\n";
-      dbss << "\tInputWorkspace = " << inputW->getName() << ", \n";
-      dbss << "\tFWHM = " << 7 << ", \n";
-      dbss << "\tTolerance = 4, \n";
-      dbss << "\tWorkspaceIndex = " << (wi) << ", \n";
-      dbss << "\tPeakPositions = ";
-      for (size_t p = 0; p < peakPosToFit.size(); ++p)
-        dbss << peakPosToFit[p] << ", ";
-      dbss << ", \n";
-      if (useFitWindows)
-      {
-        dbss << "\tfitWindowsToUse = ";
-        for (size_t f = 0; f < fitWindowsToUse.size(); ++f)
-          dbss << fitWindowsToUse[f] << ", ";
-        dbss << ", \n";
-      }
-      dbss << "\tPeakFunction = " << m_peakType << ", \n";
-      dbss << "\tBackgroundType = " <<  m_backType << ", \n";
-      bool highbkgd = this->getProperty("HighBackground");
-      if (highbkgd)
-        dbss << "\tHighBackground = True, \n";
-      else
-        dbss << "\tHighBackground = False, \n";
-      dbss << "\tMinGuessedPeakWidth = " << 4 << ", \n";
-      dbss << "\tMaxGuessedPeakWidth = 4, \n";
-      dbss << "\tMinimumPeakHeight = " << m_minPeakHeight << ")";
-      g_log.notice() << "Debugging Find Peak! \n" << dbss.str() << "\n";
-    }
-#endif
 
     // Collect fitting resutl of all peaks
     ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
@@ -1142,6 +1108,9 @@ namespace Algorithms
                     "No row will be removed from peak position offset table workspace. ");
       return;
     }
+    g_log.notice("Removing empty rows in Offset Table Workspace... ...");
+    g_log.warning("Skip removing empty rows in peak offset table.   ");
+    return;
 
     size_t icurrow = 0;
     for (size_t i = 0; i < numrows; ++i)
@@ -1175,6 +1144,7 @@ namespace Algorithms
     */
   void GetDetOffsetsMultiPeaks::makeFitSummary()
   {
+    g_log.notice("Making summary... ...");
     size_t numrows = m_infoTableWS->rowCount();
     double sumchi2 = 0;
     double weight_sumchi2 = 0;
@@ -1205,6 +1175,5 @@ namespace Algorithms
 
   }
 
-
-  } // namespace Algorithm
+} // namespace Algorithm
 } // namespace Mantid
