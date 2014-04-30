@@ -435,7 +435,10 @@ Graph3D *MantidUI::plot3DMatrix(int style)
 MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
 {
   MantidMatrix *m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
-  if (m) return m->plotGraph2D(type);
+  if (m)
+  {
+    return drawSingleColorFillPlot(QString::fromStdString(m->getWorkspaceName()), type);
+  }
   return 0;
 }
 
@@ -3186,16 +3189,50 @@ void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType 
 * Draw a single ColorFill plot for the named workspace
 * @param wsName :: The name of the workspace which provides data for the plot
 * @param curveType :: The type of curve
+* @param window :: An optional pointer to a plot window. If not NULL the window is cleared
+*                      and reused
 * @returns A pointer to the created plot
 */
-MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType)
+MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType,
+                                              MultiLayer* window)
 {
-  MantidMatrix *matrix =  importMatrixWorkspace(wsName, -1, -1, false,false);
-  if(matrix)
+  auto workspace = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
+  if(!workspace) return NULL;
+
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  if(window == NULL)
   {
-    return matrix->plotGraph2D(curveType);
+    window = appWindow()->multilayerPlot(appWindow()->generateUniqueName( wsName + "-"));
+    window->setCloseOnEmpty(true);
   }
-  return NULL;
+  else
+  {
+    // start fresh layer
+    window->setWindowTitle(appWindow()->generateUniqueName( wsName + "-"));
+    window->setLayersNumber(0);
+    window->addLayer();
+  }
+
+  Graph *plot = window->activeGraph();
+  appWindow()->setPreferences(plot);
+
+  plot->setTitle(wsName);
+  using MantidQt::API::PlotAxis;
+  plot->setXAxisTitle(PlotAxis(*workspace, 0).title());
+  plot->setYAxisTitle(PlotAxis(*workspace, 1).title());
+
+  Spectrogram *spgrm = new Spectrogram(wsName, workspace);
+  plot->plotSpectrogram(spgrm, curveType);
+  connect(spgrm, SIGNAL(removeMe(Spectrogram*)),
+          plot, SLOT(removeSpectrogram(Spectrogram*)));
+  connect(plot, SIGNAL(curveRemoved()), window,
+          SLOT(maybeNeedToClose()), Qt::QueuedConnection);
+
+  appWindow()->setSpectrogramTickStyle(plot);
+  plot->setAutoScale();
+
+  QApplication::restoreOverrideCursor();
+  return window;
 }
 
 /** Create a 1d graph form specified spectra in a MatrixWorkspace

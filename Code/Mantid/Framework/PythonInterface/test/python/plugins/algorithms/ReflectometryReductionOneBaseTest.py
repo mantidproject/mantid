@@ -195,7 +195,7 @@ class ReflectometryReductionOneBaseTest(object):
         alg.set_FirstTransmissionRun(trans_run1) 
         alg.set_SecondTransmissionRun(trans_run2)
         
-        alg.set_Params([1.5, 0.02, 17])
+        alg.set_Params([0.0, 0.02, 5])
         alg.set_StartOverlap( 10.0 )
         alg.set_EndOverlap( 12.0 )
         alg.set_ThetaIn(0.2)

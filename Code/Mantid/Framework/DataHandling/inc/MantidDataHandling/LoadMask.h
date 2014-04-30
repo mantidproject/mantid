@@ -97,7 +97,7 @@ namespace DataHandling
     /// Mask Workspace
     DataObjects::MaskWorkspace_sptr mMaskWS;
     /// Instrument name
-    std::string mInstrumentName;
+    std::string m_instrumentPropValue;
     /// XML document loaded
     Poco::XML::Document* pDoc;
     /// Root element of the parsed XML

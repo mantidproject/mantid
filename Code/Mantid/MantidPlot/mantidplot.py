@@ -186,7 +186,7 @@ def plot(source, *args, **kwargs):
     else:
         return plotSpectrum(source, *args, **kwargs)
         
-#-----------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------
 def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, clearWindow = False):
     """Open a 1D Plot of a spectrum in a workspace.
     
@@ -213,18 +213,59 @@ def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, 
     if window != None:
       window = window._getHeldObject()
 
-    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSpectraList, workspace_names, index_list, error_bars, type, window, clearWindow))
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSpectraList,
+                                          workspace_names, index_list, error_bars,
+                                          type, window, clearWindow))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
         return graph
+
+#----------------------------------------------------------------------------------------------------
+# IPython auto-complete can't handle enumerations as defaults
+DEFAULT_2D_STYLE = int(_qti.Layer.ColorMap)
+
+def plot2D(source, style = DEFAULT_2D_STYLE, window = None):
+    """Open a 2D plot of the given workspace(s)
+
+    Produces a 2D histogram for each of the given workspaces
+
+    Args:
+        source: workspace or name of a workspace
+        style: Indicates the type of plot required. Default=ColorMap
+        window: window used for plotting. If None a new one will be created
+    Returns:
+        If a single workspace is specified then the handle is returned, otherwise a list
+        of handles for each new window is returned
+    """
+    names = getWorkspaceNames(source)
+    if len(names) == 0:
+        raise ValueError("No workspace names given to plot")
+
+    # Unwrap the window object, if any specified
+    if window != None:
+      window = window._getHeldObject()
+
+    handles = []
+    cfunc = _qti.app.mantidUI.drawSingleColorFillPlot
+    for name in names:
+        g = proxies.Graph(threadsafe_call(cfunc, name, style, window))
+        if g:
+            handles.append(g)
+        else:
+            raise RuntimeError("Cannot create graph from workspace '%s'" % name)
+
+    if len(handles) == 1: return handles[0]
+    else: return handles
+
+#----------------------------------------------------------------------------------------------------
 
 # IPython couldn't correctly display complex enum value in doc pop-up, so we extract integer value
 # of enum manually.
 DEFAULT_MD_NORMALIZATION = int(mantid.api.MDNormalization.VolumeNormalization)
 
 def plotMD(source, plot_axis=-2, normalization = DEFAULT_MD_NORMALIZATION, error_bars = False, window = None,
-  clearWindow = False):
+           clearWindow = False):
     """Open a 1D plot of a MDWorkspace.
     
     Args:

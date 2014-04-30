@@ -124,6 +124,21 @@ public:
     }    
   }
 
+  void testIndexOfValue_Treats_Input_As_Spectrum_No()
+  {
+    for (int i=0; i<5; ++i)
+    {
+      TS_ASSERT_EQUALS(i, spectraAxis->indexOfValue(static_cast<double>(2*i)) );
+    }
+  }
+
+  // --------------------------------------- Failure cases --------------------
+  void testIndexOfValue_Throws_out_of_range_error_If_Input_Not_In_Range()
+  {
+    TS_ASSERT_THROWS(spectraAxis->indexOfValue(20.), std::out_of_range);
+  }
+
+
 private:
   WorkspaceTester *ws;
   Axis *spectraAxis;

@@ -14156,13 +14156,6 @@ MultiLayer* ApplicationWindow::plotNoContourColorMap(Matrix *m)
     return 0;
   }
 
-  //Spectrogram *spgrm = dynamic_cast<Spectrogram*>(ml->activeGraph()->plotItem(0));
-  //if( spgrm )
-  //{
-  //  //1 = ImageMode
-  //  spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
-  //  spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
-  //}
   return ml;
 }
 
@@ -14201,8 +14194,6 @@ MultiLayer* ApplicationWindow::plotImage(Matrix *m)
       return 0;
     }
     plot = g->activeGraph();
-    setPreferences(plot);
-    if( plot->plotItem(0) )plot->plotItem(0)->setAxis(QwtPlot::xTop, QwtPlot::yLeft);
   }
 
   plot->enableAxis(QwtPlot::xTop, true);

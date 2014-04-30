@@ -3,6 +3,7 @@ from mantid.api import TextAxis
 from mantid import config, logger
 
 from IndirectImport import import_mantidplot
+
 import sys, platform, os.path, math, datetime, re
 import itertools
 
