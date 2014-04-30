@@ -29,14 +29,13 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM (LoadILLIndirect);
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadILLIndirect::LoadILLIndirect() : API::IFileLoader<Kernel::NexusDescriptor>()  {
-
-    m_numberOfChannels = 0;
-    m_numberOfHistograms = 0;
-    m_numberOfTubes = 0;
-    m_numberOfPixelsPerTube = 0;
-    m_numberOfSimpleDetectors = 0;
-
+LoadILLIndirect::LoadILLIndirect() :
+		API::IFileLoader<Kernel::NexusDescriptor>(),
+		m_numberOfTubes(0),
+		m_numberOfPixelsPerTube(0),
+		m_numberOfChannels(0),
+		m_numberOfSimpleDetectors(0),
+		m_numberOfHistograms(0){
 	m_supportedInstruments.push_back("IN16B");
 }
 
@@ -357,13 +356,13 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry, std::vecto
 
 
 /**
-   * show attributes attaches to current nexus entry
-   *
-   * @param nxfileID :: The Nexus entry
-   * @param indent_str :: some spaces following tree level
-   *
-   */
-void LoadILLIndirect::dump_attributes(NXhandle nxfileID, std::string& indent_str){
+* show attributes attached to current Nexus entry
+*
+* @param nxfileID :: The Nexus entry
+* @param indent_str :: some spaces following tree level
+*
+*/
+void LoadILLIndirect::dumpNexusAttributes(NXhandle nxfileID, std::string& indentStr){
 	// Attributes
 	NXname pName;
 	int iLength, iType;
@@ -372,7 +371,7 @@ void LoadILLIndirect::dump_attributes(NXhandle nxfileID, std::string& indent_str
 
 	while(NXgetnextattr(nxfileID, pName, &iLength, &iType) != NX_EOD)
 	{
-		g_log.debug()<<indent_str<<'@'<<pName<<" = ";
+		g_log.debug()<<indentStr<<'@'<<pName<<" = ";
 		switch(iType)
 		{
 		case NX_CHAR:
@@ -384,28 +383,28 @@ void LoadILLIndirect::dump_attributes(NXhandle nxfileID, std::string& indent_str
 				}
 				int nz = iLength + 1;
 				NXgetattr(nxfileID,pName,buff.get(),&nz,&iType);
-				g_log.debug()<<indent_str<<buff.get()<<'\n';
+				g_log.debug()<<indentStr<<buff.get()<<'\n';
 				break;
 			}
 		case NX_INT16:
 			{
 				short int value;
 				NXgetattr(nxfileID,pName,&value,&iLength,&iType);
-				g_log.debug()<<indent_str<<value<<'\n';
+				g_log.debug()<<indentStr<<value<<'\n';
 				break;
 			}
 		case NX_INT32:
 			{
 				int value;
 				NXgetattr(nxfileID,pName,&value,&iLength,&iType);
-				g_log.debug()<<indent_str<<value<<'\n';
+				g_log.debug()<<indentStr<<value<<'\n';
 				break;
 			}
 		case NX_UINT16:
 			{
 				short unsigned int value;
 				NXgetattr(nxfileID,pName,&value,&iLength,&iType);
-				g_log.debug()<<indent_str<<value<<'\n';
+				g_log.debug()<<indentStr<<value<<'\n';
 				break;
 			}
 		}// switch
@@ -427,7 +426,7 @@ void LoadILLIndirect::loadNexusEntriesIntoProperties(std::string nexusfilename) 
     	g_log.debug() << "convertNexusToProperties: Error loading " << nexusfilename;
         throw Kernel::Exception::FileError("Unable to open File:" , nexusfilename);
     }
-    m_loader.RecurseForProperties(nxfileID, runDetails, nexusfilename, nexusfilename, 0);
+    m_loader.AddNexusFieldsToWsRun(nxfileID, runDetails, nexusfilename, nexusfilename, 0);
 
     // Add also "Facility", as asked
     runDetails.addProperty("Facility", std::string("ILL"));

@@ -1,6 +1,6 @@
-/*WIKI*
- TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
- *WIKI*/
+/*
+ * Helper file to gather common routines to the Loaders
+ * */
 
 #include "MantidDataHandling/LoadHelper.h"
 
@@ -135,7 +135,8 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr& worksp
 
 
 /**
-   * Recursively add properties from a nexus file
+   * Recursively add properties from a nexus file to
+   * the workspace run.
    *
    * @param nxfileID    :: The Nexus file to be parsed
    * @param runDetails  :: where to add properties
@@ -144,7 +145,7 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr& worksp
    * @param level       :: current level in nexus tree
    *
    */
-void LoadHelper::RecurseForProperties(NXhandle nxfileID,
+void LoadHelper::AddNexusFieldsToWsRun(NXhandle nxfileID,
 					API::Run& runDetails,
 					std::string& parent_name,
 					std::string& parent_class,
@@ -172,7 +173,7 @@ void LoadHelper::RecurseForProperties(NXhandle nxfileID,
 			std::string p_nxname(nxname);//current names can be useful for next level
 			std::string p_nxclass(nxclass);
 
-			RecurseForProperties(nxfileID, runDetails, p_nxname, p_nxclass, level+1);
+			AddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname, p_nxclass, level+1);
 
 			NXclosegroup(nxfileID);
 		}// if(NXopengroup

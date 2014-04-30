@@ -58,7 +58,7 @@ namespace DataHandling
 	void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry, std::vector< std::vector<int> > monitorsData);
 	std::vector< std::vector<int> > loadMonitors(NeXus::NXEntry& entry);
 
-    void dump_attributes(NXhandle nxfileID,
+    void dumpNexusAttributes(NXhandle nxfileID,
     		std::string& indent_str);
     void runLoadInstrument();
 
@@ -77,7 +77,6 @@ namespace DataHandling
 	size_t m_numberOfPixelsPerTube; //number of pixels per tube - Y
 	size_t m_numberOfChannels; // time channels - Z
 	size_t m_numberOfSimpleDetectors; // number of simple detector
-
 	size_t m_numberOfHistograms;
 
 
