@@ -135,7 +135,7 @@ namespace Mantid
      * @param baseName :: The base name for the workspace
      * @param function :: The function used for the calculation
      * @param domain :: A pointer to the input domain
-     * @param ivalues :: A pointer to the calculated values
+     * @param values :: A pointer to the calculated values
      * @param outputWorkspacePropertyName :: The property name
      */
     boost::shared_ptr<API::Workspace> FitMD::createOutputWorkspace(const std::string& baseName,
