@@ -463,7 +463,7 @@ def furyPlot(inWS, spec):
     layer = graph.activeLayer()
     layer.setScale(mp.Layer.Left, 0, 1.0)
 
-def fury(samWorkspaces, res_file, rebinParam, RES=True, Save=False, Verbose=False,
+def fury(samWorkspaces, res_workspace, rebinParam, RES=True, Save=False, Verbose=False,
         Plot=False): 
     
     StartTime('Fury')
@@ -485,17 +485,16 @@ def fury(samWorkspaces, res_file, rebinParam, RES=True, Save=False, Verbose=Fals
         sys.exit(error)
     outWSlist = []
     # Process RES Data Only Once
-    if Verbose:
-        logger.notice('Reading RES file : '+res_file)
-    LoadNexus(Filename=res_file, OutputWorkspace='res_data') # RES
-    CheckAnalysers(samTemp,'res_data',Verbose)
-    nres,nptr = CheckHistZero('res_data')
+    CheckAnalysers(samTemp, res_workspace, Verbose)
+    nres,nptr = CheckHistZero(res_workspace)
     if nres > 1:
-        CheckHistSame(samTemp,'Sample','res_data','Resolution')
-    Rebin(InputWorkspace='res_data', OutputWorkspace='res_data', Params=rebinParam)
-    Integration(InputWorkspace='res_data', OutputWorkspace='res_int')
-    ConvertToPointData(InputWorkspace='res_data', OutputWorkspace='res_data')
-    ExtractFFTSpectrum(InputWorkspace='res_data', OutputWorkspace='res_fft', FFTPart=2)
+        CheckHistSame(samTemp,'Sample', res_workspace, 'Resolution')
+
+    tmp_res_workspace = '__tmp_' + res_workspace
+    Rebin(InputWorkspace=res_workspace, OutputWorkspace=tmp_res_workspace, Params=rebinParam)
+    Integration(InputWorkspace=tmp_res_workspace, OutputWorkspace='res_int')
+    ConvertToPointData(InputWorkspace=tmp_res_workspace, OutputWorkspace=tmp_res_workspace)
+    ExtractFFTSpectrum(InputWorkspace=tmp_res_workspace, OutputWorkspace='res_fft', FFTPart=2)
     Divide(LHSWorkspace='res_fft', RHSWorkspace='res_int', OutputWorkspace='res')
     for samWs in samWorkspaces:
         (direct, filename) = os.path.split(samWs)
@@ -524,7 +523,7 @@ def fury(samWorkspaces, res_file, rebinParam, RES=True, Save=False, Verbose=Fals
             if Verbose:
                 logger.notice('Output file : '+opath)  
     # Clean Up RES files
-    DeleteWorkspace('res_data')
+    DeleteWorkspace(tmp_res_workspace)
     DeleteWorkspace('res_int')
     DeleteWorkspace('res_fft')
     DeleteWorkspace('res')

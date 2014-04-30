@@ -28,7 +28,6 @@ namespace IDA
     virtual QString helpURL() {return "ConvFit";}
 
   private slots:
-    void resType(const QString& type);
     void typeSelection(int index);
     void bgTypeSelection(int index);
     void plotInput();

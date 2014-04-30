@@ -7,7 +7,6 @@ from IndirectImport import import_mantidplot
 import sys, platform, os.path, math, datetime, re
 import itertools
 
-
 def StartTime(prog):
     logger.notice('----------')
     message = 'Program ' + prog +' started @ ' + str(datetime.datetime.now())
