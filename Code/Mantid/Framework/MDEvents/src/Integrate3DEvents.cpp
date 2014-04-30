@@ -121,6 +121,7 @@ void Integrate3DEvents::ellipseIntegrateEvents(
                                             double           peak_radius,
                                             double           back_inner_radius,
                                             double           back_outer_radius,
+                                            std::vector<double> & new_sigmas,
                                             double         & inti,
                                             double         & sigi )
 {
@@ -173,7 +174,7 @@ void Integrate3DEvents::ellipseIntegrateEvents(
   ellipseIntegrateEvents(some_events, eigen_vectors, sigmas,
                          specify_size,   peak_radius, 
                          back_inner_radius, back_outer_radius,
-                         inti, sigi);
+                         new_sigmas, inti, sigi);
 }
 
 
@@ -442,6 +443,7 @@ void Integrate3DEvents::ellipseIntegrateEvents(
                                  double                      peak_radius,
                                  double                      back_inner_radius,
                                  double                      back_outer_radius,
+                                 std::vector<double>       & new_sigmas,
                                  double                    & inti,
                                  double                    & sigi )
 {
@@ -486,13 +488,12 @@ void Integrate3DEvents::ellipseIntegrateEvents(
     }
   }
 
-  std::vector<double> new_sigmas;
-
+  new_sigmas.clear();
   for (int i = 0; i < 3; i++ )
   {
-    new_sigmas.push_back( r1*sigmas[i] );
+    new_sigmas.push_back( r3*sigmas[i] );
   }
-  double peak_w_back = numInEllipsoid( ev_list, directions, new_sigmas );
+  double back2 = numInEllipsoid( ev_list, directions, new_sigmas );
 
   for (int i = 0; i < 3; i++ )
   {
@@ -502,9 +503,9 @@ void Integrate3DEvents::ellipseIntegrateEvents(
 
   for (int i = 0; i < 3; i++ )
   {
-    new_sigmas[i] = r3*sigmas[i];
+    new_sigmas[i] = r1*sigmas[i];
   }
-  double back2 = numInEllipsoid( ev_list, directions, new_sigmas );
+  double peak_w_back = numInEllipsoid( ev_list, directions, new_sigmas );
 
   double backgrd = back2 - back1;
 

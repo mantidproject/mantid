@@ -240,6 +240,11 @@ namespace MDEvents
     {
       peak_ws = in_peak_ws->clone();
     }
+    double radius            = getProperty( "RegionRadius" );
+    bool   specify_size      = getProperty( "SpecifySize" );
+    double peak_radius       = getProperty( "PeakSize" );
+    double back_inner_radius = getProperty( "BackgroundInnerSize" );
+    double back_outer_radius = getProperty( "BackgroundOuterSize" );
                                                    // get UBinv and the list of
                                                    // peak Q's for the integrator
     std::vector<Peak> & peaks = peak_ws->getPeaks();
@@ -275,12 +280,9 @@ namespace MDEvents
     UBinv.Invert();
     UBinv *= (1.0/(2.0 * M_PI));
 
-    double radius            = getProperty( "RegionRadius" );
-    bool   specify_size      = getProperty( "SpecifySize" );
-    double peak_radius       = getProperty( "PeakSize" );
-    double back_inner_radius = getProperty( "BackgroundInnerSize" );
-    double back_outer_radius = getProperty( "BackgroundOuterSize" );
-    std::vector<double> PeakRadiusVector(n_peaks,peak_radius);
+    std::vector<double> PeakRadiusVector1(n_peaks,peak_radius);
+    std::vector<double> PeakRadiusVector2(n_peaks,peak_radius);
+    std::vector<double> PeakRadiusVector3(n_peaks,peak_radius);
     std::vector<double> BackgroundInnerRadiusVector(n_peaks,back_inner_radius);
     std::vector<double> BackgroundOuterRadiusVector(n_peaks,back_outer_radius);
     if ( specify_size )
@@ -366,11 +368,23 @@ namespace MDEvents
       if ( Geometry::IndexingUtils::ValidIndex( hkl, 1.0 ) ) 
       {
         V3D peak_q( peaks[i].getQLabFrame() );
+        std::vector<double> new_sigmas;
         integrator.ellipseIntegrateEvents( peak_q, 
           specify_size, peak_radius, back_inner_radius, back_outer_radius,
-          inti, sigi );
+          new_sigmas, inti, sigi );
         peaks[i].setIntensity( inti );
         peaks[i].setSigmaIntensity( sigi );
+        g_log.debug() << "Radii of three axes of ellipsoid for integrating peak "
+        		<< i << " = ";
+        for (int i3 = 0; i3 < 3; i3++ )
+        {
+          g_log.debug() << new_sigmas[i3] << "  ";
+        }
+        g_log.debug() << std::endl;
+
+        PeakRadiusVector1[i] = new_sigmas[0];
+        PeakRadiusVector2[i] = new_sigmas[1];
+        PeakRadiusVector3[i] = new_sigmas[2];
       }
       else
       {
@@ -383,7 +397,9 @@ namespace MDEvents
     // This flag is used by the PeaksWorkspace to evaluate whether it has been integrated.
     peak_ws->mutableRun().addProperty("PeaksIntegrated", 1, true);
     // These flags are specific to the algorithm.
-    peak_ws->mutableRun().addProperty("PeakRadius", PeakRadiusVector, true);
+    peak_ws->mutableRun().addProperty("PeakRadius", PeakRadiusVector1, true);
+    peak_ws->mutableRun().addProperty("PeakRadius2", PeakRadiusVector2, true);
+    peak_ws->mutableRun().addProperty("PeakRadius3", PeakRadiusVector3, true);
     peak_ws->mutableRun().addProperty("BackgroundInnerRadius", BackgroundInnerRadiusVector, true);
     peak_ws->mutableRun().addProperty("BackgroundOuterRadius", BackgroundOuterRadiusVector, true);
 
