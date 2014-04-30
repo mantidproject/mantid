@@ -65,8 +65,6 @@ namespace Mantid
       declareAttribute(AnsatzParameters::ATTR_NAMES[2], API::IFunction::Attribute(int(Isotropic)));
 
       setFormFactorIon(CoIon.asString()); 
-      std::cout<<" Setting Default Attribute"<<CoIon.asString()<<std::endl;
-
     }
 
     /**
@@ -88,7 +86,6 @@ namespace Mantid
       else if(name == AnsatzParameters::ATTR_NAMES[0])
       {
         setFormFactorIon(attr.asString()); 
-        std::cout<<" Setting Attribute"<<attr.asString()<<std::endl;
       }
       else 
         ForegroundModel::setAttribute(name, attr); // pass it on the base
@@ -138,9 +135,6 @@ namespace Mantid
         const double qsqr = qx*qx + qy*qy + qz*qz;
         const double Amplitude = getCurrentParameterValue(AnsatzParameters::Ampliture);
         const double J_coupling = getCurrentParameterValue(AnsatzParameters::J_coupling);
-        std::cout<<" position: "<<point[0]<<"  "<<point[1]<<" "<<point[2]<<" "<<point[3]<<std::endl;
-        std::cout<<" Ampliture and J_coupling "<<Amplitude<<" "<<J_coupling;
-        //  const double epssqr = eps*eps;
 
 
         double weight,qchain;

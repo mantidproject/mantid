@@ -152,9 +152,9 @@ namespace Mantid
           if (m_formFactorTable) 
             delete m_formFactorTable;
           m_formFactorTable = new MagneticFormFactorTable(FORM_FACTOR_TABLE_LENGTH, getMagneticIon(ionType));
+          m_MagIonName = ionType;
         }
       }
-      m_MagIonName = ionType;
     }
 
     /**
