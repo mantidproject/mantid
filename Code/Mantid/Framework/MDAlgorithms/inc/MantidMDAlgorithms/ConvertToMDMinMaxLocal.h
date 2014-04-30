@@ -39,7 +39,7 @@ namespace MDAlgorithms
     virtual ~ConvertToMDMinMaxLocal();
     
     virtual const std::string name() const;
-    virtual int version() const{return 2;}
+    virtual int version() const{return 1;}
   protected: // for testing 
      void findMinMaxValues(MDEvents::MDWSDescription &targWSDescr,
                             MDEvents::MDTransfInterface  *const qTransf,Kernel::DeltaEMode::Type dEMode,
