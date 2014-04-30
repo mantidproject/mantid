@@ -65,7 +65,7 @@ namespace Mantid
       declareAttribute(AnsatzParameters::ATTR_NAMES[2], API::IFunction::Attribute(int(Isotropic)));
 
       setFormFactorIon(CoIon.asString()); 
-      std::cout<<" Setting Default Attribute"<<attr.asString()<<std::endl;
+      std::cout<<" Setting Default Attribute"<<CoIon.asString()<<std::endl;
 
     }
 
