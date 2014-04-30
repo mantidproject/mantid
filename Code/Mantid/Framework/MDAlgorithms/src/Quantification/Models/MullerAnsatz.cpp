@@ -137,7 +137,7 @@ namespace Mantid
         const double Amplitude = getCurrentParameterValue(AnsatzParameters::Ampliture);
         const double J_coupling = getCurrentParameterValue(AnsatzParameters::J_coupling);
         std::cout<<" position: "<<point[0]<<"  "<<point[1]<<" "<<point[2]<<" "<<point[3]<<std::endl;
-        std::cout<<" Ampliture and J_coupling "<<Ampliture<<" "<<J_coupling;
+        std::cout<<" Ampliture and J_coupling "<<Amplitude<<" "<<J_coupling;
         //  const double epssqr = eps*eps;
 
 
