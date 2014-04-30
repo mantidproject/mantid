@@ -10,7 +10,7 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-  /** ConvertToMDHelper : Algorithm to calculate limits for ConvertToMD
+  /** ConvertToMDMinMaxLocal : Algorithm to calculate limits for ConvertToMD
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
