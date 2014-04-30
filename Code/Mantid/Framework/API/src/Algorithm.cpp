@@ -163,16 +163,6 @@ namespace Mantid
        m_recordHistoryForChild = on;
      }
 
-    /**
-     * Get the state of the history recording flag. Only applicable for
-     * child algorithms. 
-     * @return The state of the flag
-     */
-     bool Algorithm::isRecordingHistoryForChild()
-     {
-      return m_recordHistoryForChild;
-     }
-
     /** Do we ALWAYS store in the AnalysisDataService? This is set to true
      * for python algorithms' child algorithms
      *
@@ -811,9 +801,10 @@ namespace Mantid
     *  @return shared pointer to the newly created algorithm object
     */
     Algorithm_sptr Algorithm::createChildAlgorithm(const std::string& name, const double startProgress, const double endProgress,
-      const bool enableLogging, const int& version)
+      const bool enableLogging, const int& version, const bool recordHistory)
     {
       Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name,version);
+      alg->enableHistoryRecordingForChild(recordHistory);
       //set as a child
       alg->setChild(true);
       alg->setLogging(enableLogging);

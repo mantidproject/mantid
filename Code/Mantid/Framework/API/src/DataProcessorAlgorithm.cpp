@@ -32,7 +32,6 @@ namespace API
     m_accumulateAlg = "Plus";
     m_loadAlgFileProp = "Filename";
     m_useMPI = false;
-    enableHistoryRecordingForChild(true);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -44,12 +43,12 @@ namespace API
 
   //----------------------------------------------------------------------------------------------
   boost::shared_ptr<Algorithm> DataProcessorAlgorithm::createChildAlgorithm(const std::string& name, const double startProgress,
-      const double endProgress, const bool enableLogging, const int& version)
+      const double endProgress, const bool enableLogging, const int& version, const bool recordHistory)
   {
 
     //call parent method to create the child algorithm
-    auto alg = Algorithm::createChildAlgorithm(name, startProgress, endProgress, enableLogging, version);
-    if (isRecordingHistoryForChild())
+    auto alg = Algorithm::createChildAlgorithm(name, startProgress, endProgress, enableLogging, version, recordHistory);
+    if (recordHistory)
     {
       //pass pointer to the history object created in Algorithm to the child
       alg->trackAlgorithmHistory(m_history);

@@ -112,10 +112,12 @@ public:
   {
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input));
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","", Direction::Output));
+    declareProperty("RecordHistory", true, Direction::Input);
   }
   void exec()
   {
-    auto alg = createChildAlgorithm("NestedAlgorithm");
+    const bool recordHistory = static_cast<bool>(getProperty("RecordHistory"));
+    auto alg = createChildAlgorithm("NestedAlgorithm", -1., -1., true, -1, recordHistory);
     alg->initialize();
     alg->execute();
 
@@ -186,8 +188,8 @@ public:
     TopLevelAlgorithm alg;
     alg.initialize();
     alg.setRethrows(true);
-    alg.enableHistoryRecordingForChild(false);
     alg.setProperty("InputWorkspace", input);
+    alg.setProperty("RecordHistory", false);
     alg.setPropertyValue("OutputWorkspace", "test_output_workspace");
 
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
