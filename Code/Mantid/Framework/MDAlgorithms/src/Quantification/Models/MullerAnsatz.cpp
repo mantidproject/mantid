@@ -65,6 +65,7 @@ namespace Mantid
       declareAttribute(AnsatzParameters::ATTR_NAMES[2], API::IFunction::Attribute(int(Isotropic)));
 
       setFormFactorIon(CoIon.asString()); 
+      std::cout<<" Setting Default Attribute"<<attr.asString()<<std::endl;
 
     }
 
@@ -87,6 +88,7 @@ namespace Mantid
       else if(name == AnsatzParameters::ATTR_NAMES[0])
       {
         setFormFactorIon(attr.asString()); 
+        std::cout<<" Setting Attribute"<<attr.asString()<<std::endl;
       }
       else 
         ForegroundModel::setAttribute(name, attr); // pass it on the base
