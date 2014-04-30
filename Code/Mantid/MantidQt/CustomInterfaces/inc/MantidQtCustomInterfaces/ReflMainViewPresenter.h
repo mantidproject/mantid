@@ -32,16 +32,17 @@ namespace MantidQt
 
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
+    */
     class DLLExport ReflMainViewPresenter: public IReflPresenter
     {
     public:
       ReflMainViewPresenter(Mantid::API::ITableWorkspace_sptr model, ReflMainView* view);
       ReflMainViewPresenter(std::string model, ReflMainView* view);
       virtual ~ReflMainViewPresenter();
-      virtual void load();
+      virtual void notify();
     private:
       Mantid::API::ITableWorkspace_sptr m_model;
+      void load();
       ReflMainView* m_view;
     };
   }

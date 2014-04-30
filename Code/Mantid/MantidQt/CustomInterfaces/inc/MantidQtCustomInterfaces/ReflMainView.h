@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEW_H
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEW_H
 
+#include "MantidKernel/System.h"
 #include "MantidAPI/ITableWorkspace.h"
 
 namespace MantidQt
@@ -30,13 +31,13 @@ namespace MantidQt
 
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
+    */
 
     class DLLExport ReflMainView
     {
     public:
       ReflMainView();
-      virtual ~ReflMainView();
+      virtual ~ReflMainView() = 0;
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model) = 0;
     private:
 

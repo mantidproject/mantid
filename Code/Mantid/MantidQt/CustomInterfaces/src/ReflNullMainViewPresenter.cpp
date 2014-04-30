@@ -6,9 +6,9 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    void ReflNullMainViewPresenter::load()
+    void ReflNullMainViewPresenter::notify()
     {
-      throw std::runtime_error("Cannot load from a null presenter");
+      throw std::runtime_error("Cannot notify a null presenter");
     }
 
     ReflNullMainViewPresenter::~ReflNullMainViewPresenter()
