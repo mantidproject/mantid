@@ -6,6 +6,8 @@
 #include "MantidDataHandling/LoadILLIndirect.h"
 #include "MantidAPI/AnalysisDataService.h"
 
+
+
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLIndirect;
 
@@ -55,13 +57,18 @@ public:
     MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     TS_ASSERT(output);
 
+    if (!output) return;
+
+
     MatrixWorkspace_sptr output2D = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 2057);
 
-    if (!output) return;
-    
-    // TODO: Check the results
-    
+    const Mantid::API::Run& runlogs = output->run();
+    TS_ASSERT( runlogs.hasProperty("Facility") );
+    TS_ASSERT_EQUALS( runlogs.getProperty("Facility")->value(), "ILL");
+
+
+
     // Remove workspace from the data service.
     AnalysisDataService::Instance().clear();
   }

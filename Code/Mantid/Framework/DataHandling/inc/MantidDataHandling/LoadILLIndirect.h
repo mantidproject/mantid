@@ -10,7 +10,8 @@ namespace Mantid
 namespace DataHandling
 {
 
-  /** LoadILLIndirect : TODO: DESCRIPTION
+  /**
+    Loads an ILL IN16B nexus file into a Mantid workspace.
     
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -59,11 +60,6 @@ namespace DataHandling
 
     void dump_attributes(NXhandle nxfileID,
     		std::string& indent_str);
-    void rl_build_properties(NXhandle nxfileID,
-			API::Run& runDetails,
-    		std::string& parent_name,
-    		std::string& parent_class,
-    		int indent);
     void runLoadInstrument();
 
 	/// Calculate error for y
