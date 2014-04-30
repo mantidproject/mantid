@@ -152,9 +152,7 @@ namespace Mantid
           if (m_formFactorTable) 
           {
             delete m_formFactorTable;
-            std::cout<<" deleting existing form factor table for ions, existing: "<<m_MagIonName<<" new one "<< ionType<< std::endl;
           }
-          std::cout<<" creating form factor table for ions, existing: "<<m_MagIonName<<" new one "<< ionType<< std::endl;
           m_formFactorTable = new MagneticFormFactorTable(FORM_FACTOR_TABLE_LENGTH, getMagneticIon(ionType));
           m_MagIonName = ionType;
         }
