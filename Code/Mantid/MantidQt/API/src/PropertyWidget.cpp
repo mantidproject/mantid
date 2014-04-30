@@ -202,8 +202,7 @@ namespace API
 
     if( !isOptionalProperty(prop) )
     {
-      if(!m_doc.isEmpty())
-        m_doc += "\n\n";
+      if(!m_doc.isEmpty()) m_doc += ".\n\n";
       m_doc += "This property is required.";
     }
     
