@@ -673,34 +673,6 @@ namespace Mantid
     }
 
     /**
-     * Search the archive & obtain the "mantid" dataset ID for a specific investigation if it exists.
-     * If it does not exist, we will attempt to create it.
-     * @param investigationID :: Used to obtain the related dataset ID.
-     * @return Dataset ID of the provided investigation.
-     */
-    int64_t ICat4Catalog::getMantidDatasetId(const std::string &investigationID)
-    {
-      ICATPortBindingProxy icat;
-      setICATProxySettings(icat);
-
-      auto searchResults = performSearch(icat,"Dataset <-> Investigation[name = '" + investigationID + "']");
-
-      auto dataset = dynamic_cast<ns1__dataset*>(searchResults.at(0));
-
-      if (dataset && dataset->id)
-        return *(dataset->id);
-      else
-        return -1;
-    }
-
-
-      {
-      }
-
-      return datasetID;
-    }
-
-    /**
      * Keep the current session alive.
      */
     void ICat4Catalog::keepAlive()
@@ -799,6 +771,27 @@ namespace Mantid
     }
 
     /**
+     * Search the archive & obtain the "mantid" dataset ID for a specific investigation if it exists.
+     * If it does not exist, we will attempt to create it.
+     * @param investigationID :: Used to obtain the related dataset ID.
+     * @return Dataset ID of the provided investigation.
+     */
+    int64_t ICat4Catalog::getMantidDatasetId(const std::string &investigationID)
+    {
+      ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
+
+      auto searchResults = performSearch(icat,"Dataset <-> Investigation[name = '" + investigationID + "']");
+
+      auto dataset = dynamic_cast<ns1__dataset*>(searchResults.at(0));
+
+      if (dataset && dataset->id)
+        return *(dataset->id);
+      else
+        return -1;
+    }
+
+    /**
      * Sets the soap-endpoint & SSL context for the given ICAT proxy.
      */
     void ICat4Catalog::setICATProxySettings(ICATPortBindingProxy& icat)
@@ -813,7 +806,6 @@ namespace Mantid
       // Sets SSL authentication scheme
       setSSLContext(icat);
     }
-
 
     /**
      * Returns the results of a search against ICAT for a given query.
