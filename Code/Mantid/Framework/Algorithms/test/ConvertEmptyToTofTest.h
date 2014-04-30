@@ -86,7 +86,7 @@ private:
 				testWS->dataY(i)[j] = 10
 						* exp(
 								-pow((static_cast<double>(j) - 50), 2)
-										/ (2 * pow(0.2, 2)));
+										/ (2 * pow(1.5, 2)));
 			}
 		}
 		return testWS;
