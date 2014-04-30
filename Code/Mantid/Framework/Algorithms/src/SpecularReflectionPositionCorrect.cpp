@@ -12,6 +12,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -119,6 +120,11 @@ namespace Mantid
 
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
           "An output workspace.");
+
+      setPropertySettings("SampleComponentName",
+                new Kernel::EnabledWhenProperty("SpectrumNumbersOfGroupedDetectors", IS_NOT_DEFAULT));
+      setPropertySettings("SpectrumNumbersOfGroupedDetectors",
+                      new Kernel::EnabledWhenProperty("SampleComponentName", IS_NOT_DEFAULT));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -128,6 +134,7 @@ namespace Mantid
     {
 
       MatrixWorkspace_sptr inWS = this->getProperty("InputWorkspace");
+      const std::string analysisMode = this->getProperty("AnalysisMode");
       auto cloneWS = this->createChildAlgorithm("CloneWorkspace");
       cloneWS->initialize();
       cloneWS->setProperty("InputWorkspace", inWS);
@@ -244,26 +251,23 @@ namespace Mantid
 
       auto referenceFrame = instrument->getReferenceFrame();
 
-      const double sampleToDetectorAlongBeam = sampleToDetector.scalar_prod(
-          referenceFrame->vecPointingAlongBeam());
-
       const double thetaInRad = thetaInDeg * (M_PI / 180.0);
 
       double acrossOffset = 0;
 
-      double beamOffset = detectorPosition.scalar_prod(referenceFrame->vecPointingAlongBeam());
+      double beamOffset = sampleToDetector.scalar_prod(referenceFrame->vecPointingAlongBeam()); // We just recalculate beam offset.
 
-      double upOffset = sampleToDetectorAlongBeam * std::sin(2.0 * thetaInRad);
+      double upOffset = beamOffset * std::tan(thetaInRad); // We only correct vertical position
 
       auto moveComponentAlg = this->createChildAlgorithm("MoveInstrumentComponent");
       moveComponentAlg->initialize();
       moveComponentAlg->setProperty("Workspace", toCorrect);
-      moveComponentAlg->setProperty("ComponentName", detector->getName());
+      moveComponentAlg->setProperty("ComponentName", detector->getName()); // TODO. May need to move whole bank or linear detector etc.
       moveComponentAlg->setProperty("RelativePosition", false);
       // Movements
-      moveComponentAlg->setProperty(referenceFrame->pointingAlongBeamAxis(), beamOffset);
+      moveComponentAlg->setProperty(referenceFrame->pointingAlongBeamAxis(), detectorPosition.scalar_prod(referenceFrame->vecPointingAlongBeam()));
       moveComponentAlg->setProperty(referenceFrame->pointingHorizontalAxis(), acrossOffset);
-      moveComponentAlg->setProperty(referenceFrame->pointingUpAxis(), upOffset);
+      moveComponentAlg->setProperty(referenceFrame->pointingUpAxis(), samplePosition.scalar_prod(referenceFrame->vecPointingUp()) + upOffset);
       // Execute the movement.
       moveComponentAlg->execute();
 
