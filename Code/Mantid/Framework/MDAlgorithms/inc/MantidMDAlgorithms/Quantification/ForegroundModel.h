@@ -116,6 +116,8 @@ namespace Mantid
       /// An offset for the number of parameters that were declared before this one
       size_t m_parOffset;
 
+      /// the name of magnetic ion used to avoid resetting form factor table for the same ion
+      std::string m_MagIonName;
       /// Owned pointer to magnetic form factor cache
       PhysicalConstants::MagneticFormFactorTable *m_formFactorTable;
     };

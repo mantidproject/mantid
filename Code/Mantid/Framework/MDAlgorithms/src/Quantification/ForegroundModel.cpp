@@ -22,6 +22,7 @@ namespace Mantid
      */
     ForegroundModel::ForegroundModel()
       : API::ParamFunction(), m_fittingFunction(NULL), m_parOffset(0),
+        m_MagIonName(""),
         m_formFactorTable(NULL)
     {
       addAttributes();
@@ -146,8 +147,14 @@ namespace Mantid
       else
       {
         using namespace PhysicalConstants;
-        m_formFactorTable = new MagneticFormFactorTable(FORM_FACTOR_TABLE_LENGTH, getMagneticIon(ionType));
+        if(m_MagIonName != ionType)
+        {
+          if (m_formFactorTable) 
+            delete m_formFactorTable;
+          m_formFactorTable = new MagneticFormFactorTable(FORM_FACTOR_TABLE_LENGTH, getMagneticIon(ionType));
+        }
       }
+      m_MagIonName = ionType;
     }
 
     /**
