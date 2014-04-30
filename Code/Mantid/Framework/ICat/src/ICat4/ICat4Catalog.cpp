@@ -885,9 +885,13 @@ namespace Mantid
       std::vector<xsd__anyType*> searchResults;
 
       if (icat.search(&request,&response) == SOAP_OK)
+      {
         searchResults = response.return_;
+      }
       else
+      {
         throwErrorMessage(icat);
+      }
 
       return searchResults;
     }
