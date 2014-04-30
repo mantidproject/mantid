@@ -1247,7 +1247,7 @@ namespace Mantid
       {
         path = pathToRawFile.substr(0,pos);
       }
-      while (Mantid::Kernel::extractToEOL(adstream,str))
+      while (Mantid::Kernel::Strings::extractToEOL(adstream,str))
       {
         std::string fileName;
         pos = str.find("*");

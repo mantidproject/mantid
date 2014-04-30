@@ -136,37 +136,41 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
     def _get_binning(self, workspace, wavelength_min, wavelength_max):    
         log_binning = self.getProperty("LogBinning").value
         nbins = self.getProperty("NumberOfBins").value
-        sample_detector_distance = workspace.getRun().getProperty("sample_detector_distance").value
-        nx_pixels = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-        ny_pixels = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
-        pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
-        pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
-
-        if workspace.getRun().hasProperty("beam_center_x") and \
-             workspace.getRun().hasProperty("beam_center_y"):
-            beam_ctr_x = workspace.getRun().getProperty("beam_center_x").value
-            beam_ctr_y = workspace.getRun().getProperty("beam_center_y").value
+        if workspace.getRun().hasProperty("qmin") and workspace.getRun().hasProperty("qmax"):
+            qmin = workspace.getRun().getProperty("qmin").value
+            qmax = workspace.getRun().getProperty("qmax").value
         else:
-            property_manager_name = self.getProperty("ReductionProperties").value
-            property_manager = PropertyManagerDataService.retrieve(property_manager_name)
-            if property_manager.existsProperty("LatestBeamCenterX") and \
-                property_manager.existsProperty("LatestBeamCenterY"):
-                beam_ctr_x = property_manager.getProperty("LatestBeamCenterX").value
-                beam_ctr_y = property_manager.getProperty("LatestBeamCenterY").value
+            sample_detector_distance = workspace.getRun().getProperty("sample_detector_distance").value
+            nx_pixels = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
+            ny_pixels = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
+            pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
+            pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
+
+            if workspace.getRun().hasProperty("beam_center_x") and \
+                workspace.getRun().hasProperty("beam_center_y"):
+                beam_ctr_x = workspace.getRun().getProperty("beam_center_x").value
+                beam_ctr_y = workspace.getRun().getProperty("beam_center_y").value
             else:
-                raise RuntimeError, "No beam center information can be found on the data set"                
+                property_manager_name = self.getProperty("ReductionProperties").value
+                property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+                if property_manager.existsProperty("LatestBeamCenterX") and \
+                    property_manager.existsProperty("LatestBeamCenterY"):
+                    beam_ctr_x = property_manager.getProperty("LatestBeamCenterX").value
+                    beam_ctr_y = property_manager.getProperty("LatestBeamCenterY").value
+                else:
+                    raise RuntimeError, "No beam center information can be found on the data set"                
 
-        # Q min is one pixel from the center, unless we have the beam trap size
-        if workspace.getRun().hasProperty("beam-trap-diameter"):
-            mindist = workspace.getRun().getProperty("beam-trap-diameter").value/2.0
-        else:
-            mindist = min(pixel_size_x, pixel_size_y)
-        qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/sample_detector_distance))
+            # Q min is one pixel from the center, unless we have the beam trap size
+            if workspace.getRun().hasProperty("beam-trap-diameter"):
+                mindist = workspace.getRun().getProperty("beam-trap-diameter").value/2.0
+            else:
+                mindist = min(pixel_size_x, pixel_size_y)
+            qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/sample_detector_distance))
         
-        dxmax = pixel_size_x*max(beam_ctr_x,nx_pixels-beam_ctr_x)
-        dymax = pixel_size_y*max(beam_ctr_y,ny_pixels-beam_ctr_y)
-        maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
-        qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
+            dxmax = pixel_size_x*max(beam_ctr_x,nx_pixels-beam_ctr_x)
+            dymax = pixel_size_y*max(beam_ctr_y,ny_pixels-beam_ctr_y)
+            maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
+            qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
         
         if not log_binning:
             qstep = (qmax-qmin)/nbins

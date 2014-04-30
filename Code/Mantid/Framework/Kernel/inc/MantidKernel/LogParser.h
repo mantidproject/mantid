@@ -6,7 +6,9 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 
 #include <map>
 #include <sstream>
@@ -120,11 +122,6 @@ namespace Mantid
 
     /// Returns the mean value if the property is TimeSeriesProperty<double>
     MANTID_KERNEL_DLL double timeMean(const Kernel::Property* p);
-
-    /// Extract a line from input stream, discarding any EOL characters encountered
-    MANTID_KERNEL_DLL std::istream& extractToEOL(std::istream& is, std::string& str);
-
-
 
   } // namespace Kernel
 } // namespace Mantid

@@ -88,6 +88,11 @@ set ( SRC_FILES
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
+	src/PeakTransform.cpp
+	src/PeakTransformHKL.cpp
+	src/PeakTransformQLab.cpp
+	src/PeakTransformQSample.cpp
+	src/PeakTransformSelector.cpp
 	src/Progress.cpp
 	src/PropertyManagerDataService.cpp
 	src/PropertyNexus.cpp
@@ -144,6 +149,7 @@ set ( INC_FILES
 	inc/MantidAPI/CompositeDomain.h
 	inc/MantidAPI/CompositeDomainMD.h
 	inc/MantidAPI/CompositeFunction.h
+	inc/MantidAPI/ConcretePeakTransformFactory.h
 	inc/MantidAPI/ConstraintFactory.h
 	inc/MantidAPI/CoordTransform.h
 	inc/MantidAPI/CostFunctionFactory.h
@@ -235,6 +241,12 @@ set ( INC_FILES
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
+	inc/MantidAPI/PeakTransform.h
+	inc/MantidAPI/PeakTransformFactory.h
+	inc/MantidAPI/PeakTransformHKL.h
+	inc/MantidAPI/PeakTransformQLab.h
+	inc/MantidAPI/PeakTransformQSample.h
+	inc/MantidAPI/PeakTransformSelector.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/PropertyManagerDataService.h
 	inc/MantidAPI/PropertyNexus.h
@@ -319,6 +331,10 @@ set ( TEST_FILES
 	ParamFunctionAttributeHolderTest.h
 	ParameterReferenceTest.h
 	ParameterTieTest.h
+	PeakTransformHKLTest.h
+	PeakTransformQLabTest.h
+	PeakTransformQSampleTest.h
+	PeakTransformSelectorTest.h
 	PropertyManagerDataServiceTest.h
 	PropertyNexusTest.h
 	RunTest.h

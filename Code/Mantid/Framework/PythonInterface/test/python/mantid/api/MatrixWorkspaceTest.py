@@ -58,9 +58,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEquals(xunit.unitID(), "TOF")
 
         yunit = yaxis.getUnit()
-        self.assertEquals(yunit.caption(), "")
+        self.assertEquals(yunit.caption(), "Spectrum")
         self.assertEquals(yunit.label(), "")
-        self.assertEquals(yunit.unitID(), "Empty")
+        self.assertEquals(yunit.unitID(), "Label")
 
         
     def test_detector_retrieval(self):

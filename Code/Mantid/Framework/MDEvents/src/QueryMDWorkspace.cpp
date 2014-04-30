@@ -231,7 +231,7 @@ namespace MDEvents
     for(size_t index = 0; index < ndims; ++index)
     {
       Mantid::Geometry::IMDDimension_const_sptr dim = input->getDimension(index);
-      std::string dimInUnit = dim->getName()+"/"+dim->getUnits();
+      std::string dimInUnit = dim->getName()+"/"+dim->getUnits().ascii();
       output->addColumn("double",dimInUnit);
       //Magic numbers required to configure the X axis.
       output->getColumn(dimInUnit)->setPlotType(1);

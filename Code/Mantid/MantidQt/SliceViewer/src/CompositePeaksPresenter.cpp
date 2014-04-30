@@ -2,6 +2,8 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include <stdexcept>
 
+using Mantid::API::PeakTransform_sptr;
+
 namespace MantidQt
 {
   namespace SliceViewer

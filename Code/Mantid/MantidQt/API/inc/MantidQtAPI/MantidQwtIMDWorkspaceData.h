@@ -48,8 +48,8 @@ public:
   void setPlotAxisChoice(int choice);
   void setNormalization(Mantid::API::MDNormalization choice);
 
-  std::string getXAxisLabel() const;
-  std::string getYAxisLabel() const;
+  QString getXAxisLabel() const;
+  QString getYAxisLabel() const;
   int currentPlotXAxis() const;
 
 

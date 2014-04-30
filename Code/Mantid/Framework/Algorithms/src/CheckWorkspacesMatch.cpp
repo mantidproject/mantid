@@ -388,11 +388,11 @@ bool CheckWorkspacesMatch::compareEventWorkspaces(DataObjects::EventWorkspace_co
   double toleranceWeight = Tolerance; // Standard tolerance
   int64_t tolerancePulse = 1;
   double toleranceTOF = 0.05;
-  if ((ews1->getAxis(0)->unit()->label() != "microsecond")
-      || (ews2->getAxis(0)->unit()->label() != "microsecond"))
+  if ((ews1->getAxis(0)->unit()->label().ascii() != "microsecond")
+      || (ews2->getAxis(0)->unit()->label().ascii() != "microsecond"))
   {
-    g_log.warning() << "Event workspace has unit as " << ews1->getAxis(0)->unit()->label() << " and "
-                    << ews2->getAxis(0)->unit()->label() << ".  Tolerance of TOF is set to 0.05 still. "
+    g_log.warning() << "Event workspace has unit as " << ews1->getAxis(0)->unit()->label().ascii() << " and "
+                    << ews2->getAxis(0)->unit()->label().ascii() << ".  Tolerance of TOF is set to 0.05 still. "
                     << "\n";
     toleranceTOF = 0.05;
   }

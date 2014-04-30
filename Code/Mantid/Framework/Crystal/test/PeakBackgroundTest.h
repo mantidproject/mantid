@@ -76,6 +76,7 @@ namespace
       bool());
     MOCK_CONST_METHOD0(findNeighbourIndexes, std::vector<size_t>());
     MOCK_CONST_METHOD0(getLinearIndex, size_t());
+    MOCK_CONST_METHOD1(isWithinBounds, bool(size_t));
 
   };
 

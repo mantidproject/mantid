@@ -5,6 +5,7 @@
 #include "MantidLiveData/Exception.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WriteLock.h"
@@ -446,6 +447,68 @@ namespace LiveData
     return false;
   }
 
+  /// Parse a beam monitor event packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::BeamMonitorPkt packets.  Parsed events are counted and
+  /// the counts are accumulated in the temporary workspace until the forground
+  /// thread retrieves them.
+  /// @see extractData()
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
+  bool SNSLiveEventDataListener::rxPacket( const ADARA::BeamMonitorPkt &pkt)
+  {
+    // Check to see if we should process this packet (depending on what
+    // the user selected for start up options, the SMS might be replaying
+    // historical data that we don't care about).
+    if (ignorePacket( pkt))
+    {
+      return false;
+    }
+
+    pkt.firstSection();
+    do  // loop through all the monitor sections
+    {
+      unsigned monitorID = pkt.getSectionMonitorID();
+
+      if (monitorID > 5)
+      {
+        // Currently, we only handle monitors 0-5.  At the present time, that's sufficient.
+        g_log.error() << "Mantid cannot handle monitor ID's higher than 5.  If " << monitorID
+          << " is actually valid, then an appropriate entry must be made to the "
+          << " ADDABLE list at the top of Framework/API/src/Run.cpp";
+      }
+      else
+      {
+        std::string monName("monitor");
+        monName += (char)(monitorID + 48);  // The +48 converts to the ASCII character
+        monName += "_counts";
+        // Note: The monitor name must exactly match one of the entries in the ADDABLE
+        // list at the top of Run.cpp!
+
+        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+
+        int events = pkt.getSectionEventCount();
+        if (m_eventBuffer->run().hasProperty(monName))
+        {
+          events += m_eventBuffer->run().getPropertyValueAsType<int>(monName);
+        }
+        else
+        {
+          // First time we've received this monitor.  Add it to our list
+          m_monitorLogs.push_back(monName);
+        }
+
+        // Update the property value (overwriting the old value if there was one)
+        m_eventBuffer->mutableRun().addProperty<int>( monName, events, true);
+      }
+
+    } while (pkt.nextSection() == true);
+
+    return false;
+  }
+
   /// Parse a geometry packet
 
   /// Overrides the default function defined in ADARA::Parser and processes
@@ -607,8 +670,19 @@ namespace LiveData
       }
       else
       {
-        setRunDetails(pkt);
+        // Save a copy of the packet so we can call setRunDetails() later (after
+        // extractData() has been called to fetch any data remaining from before
+        // this run start.
+        // Note: need to actually copy the contents (not just a pointer) because
+        // pkt will go away when this function returns.  And since packets don't have
+        // default constructors, we can only keep a pointer as a member, and thus
+        // have to actually allocate our deferred packet with new.
+        // Fortunately, this doesn't happen to often, so performance isn't an issue.
+        m_deferredRunDetailsPkt = boost::shared_ptr<ADARA::RunStatusPkt>(new ADARA::RunStatusPkt(pkt));
       }
+
+      // See detailed comments below for what this flag does
+      m_pauseNetRead = true;
 
     }
     else if (pkt.status() == ADARA::RunStatus::END_RUN)
@@ -1247,6 +1321,14 @@ namespace LiveData
     // Clear out the old logs, except for the most recent entry
     temp->mutableRun().clearOutdatedTimeSeriesLogValues();
 
+    // Clear out old monitor logs
+    for (unsigned i=0; i < m_monitorLogs.size(); i++)
+    {
+      temp->mutableRun().removeProperty(m_monitorLogs[i]);
+
+    }
+    m_monitorLogs.clear();
+
     // Lock the mutex and swap the workspaces
     {
       Poco::ScopedLock<Poco::FastMutex> scopedLock( m_mutex);
@@ -1281,17 +1363,10 @@ namespace LiveData
     // It's only appropriate to return EndRun once (ie: when we've just
     // returned the last events from the run).  After that, we need to
     // change the status to NoRun.
-    // As far as I can tell, nobody ever checks for BeginRun, but I'm
-    // assuming the same logic applies....
-    if (m_status == BeginRun)
+    // The same logic applies to BeginRun and Running
+    if (m_status == BeginRun || m_status == EndRun)
     {
-      m_status = Running;
-    }
-    else if (m_status == EndRun)
-    {
-      m_status = NoRun;
-
-      // If the run has ended, replace the old workspace with a new one
+      // At run transitions, replace the old workspace with a new one
       // (This ensures that we're not using log data and/or geometry from
       // a previous run that are no longer valid.  SMS is guaranteed to
       // send us new device descriptor packets at the start of every run.)
@@ -1300,6 +1375,18 @@ namespace LiveData
       m_workspaceInitialized = false;
       m_nameMap.clear();
       initWorkspacePart1();
+
+      if (m_status == BeginRun)
+      {
+        // Set the run details using the packet we saved from the rxPacket() function
+        setRunDetails( *m_deferredRunDetailsPkt);
+        m_deferredRunDetailsPkt.reset();  // shared_ptr, so we don't use delete
+        m_status = Running;
+      }
+      else if (m_status == EndRun)
+      {
+        m_status = NoRun;
+      }
     }
 
     m_pauseNetRead = false;  // make sure the network reads start back up

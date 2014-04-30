@@ -78,12 +78,13 @@ static const std::string BRAVAIS_CENTERING[15] =
  *                    used to form the list of possible conventional cells.
  *  @param best_only  If true, only include the best form for each Bravais
  *                    lattice.
+ *  @param allowPermutations Allow permutations of conventional cells for 
+ *                           related UBs with better fit to peaks.
  *
  *  @return a vector of conventional cell info objects, corresponding to the
  *          best matching forms for UB and cells related to UB by reflections
  *          of pairs of cell edges.
  */
-
 std::vector<ConventionalCell> ScalarUtils::GetCells( 
                                                   const DblMatrix & UB,
                                                         bool        best_only ,
@@ -128,6 +129,8 @@ std::vector<ConventionalCell> ScalarUtils::GetCells(
  *                    ReducedCell class.
  *  @param centering  String specifying the centering, as listed in the
  *                    ReducedCell class.
+ *  @param allowPermutations Allow permutations of conventional cells for 
+ *                           related UBs with better fit to peaks.
  *
  *  @return a vector of conventional cell objects, for the specified 
  *          cell type and centering, corresponding to the
@@ -186,6 +189,8 @@ std::vector<ConventionalCell> ScalarUtils::GetCells(
  *                    ReducedCell class.
  *  @param centering  String specifying the centering, as listed in the
  *                    ReducedCell class.
+ *  @param allowPermutations Allow permutations of conventional cells for 
+ *                           related UBs with better fit to peaks.
  *  @return a list of conventional cells for the specified UB, of the
  *          specified type and centering.
  */
@@ -225,6 +230,8 @@ std::vector<ConventionalCell> ScalarUtils::GetCellsUBOnly(
  *  @param UB        Crystal::Orientation transformation corresponding to a Niggli
  *                   reduced cell.
  *  @param form_num  The form number to use.
+ *  @param allowPermutations Allow permutations of conventional cells for 
+ *                           related UBs with better fit to peaks.
  *
  *  @return A ConventionalCellInfo object corresponding to the specified 
  *          form number and UB (or a related matrix) with the smallest

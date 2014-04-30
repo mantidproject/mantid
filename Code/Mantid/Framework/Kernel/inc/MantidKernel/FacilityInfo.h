@@ -8,8 +8,9 @@
 #include "MantidKernel/CatalogInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/RemoteJobManager.h"
-
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include <vector>
 #include <string>
 
