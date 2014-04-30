@@ -59,6 +59,7 @@ namespace Mantid
       ModelType modelType() const { return Broad; }
       /// String name of the model
       std::string name() const { return "MullerAnsatz"; }
+      MullerAnsatz();
     private:
       /// Setup the model
       void init();

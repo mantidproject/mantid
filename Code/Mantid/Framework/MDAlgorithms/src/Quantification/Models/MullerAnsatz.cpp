@@ -40,7 +40,9 @@ namespace Mantid
       static char * ATTR_NAMES[NATTS];
 
     };
-
+    MullerAnsatz::MullerAnsatz():
+      m_ChainDirection(Along_c),m_FFDirection(Isotropic)
+    {}
     char* AnsatzParameters::PAR_NAMES[AnsatzParameters::NPARAMS] = {"Amplitude","J_coupling"};
     char* AnsatzParameters::ATTR_NAMES[AnsatzParameters::NATTS] = {"IonName","ChainDirection","MagneticFFDirection"};
     //static 

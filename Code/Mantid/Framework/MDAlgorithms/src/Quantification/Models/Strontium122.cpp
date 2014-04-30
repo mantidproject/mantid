@@ -29,6 +29,9 @@ namespace Mantid
       /// 2 \pi
       const double TWO_PI = 2.*M_PI;
     }
+    Strontium122::Strontium122():
+      m_twinType(1),m_multEps(true)
+    { }
 
     /**
      * Initialize the model
