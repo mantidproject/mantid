@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/ConvertToMDHelper2.h"
+#include "MantidMDAlgorithms/ConvertToMDMinMaxLocal.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/NumericAxis.h"
@@ -15,16 +15,16 @@
 
 
 
-using Mantid::MDAlgorithms::ConvertToMDHelper2;
-class ConvertToMDHelper2Test : public CxxTest::TestSuite
+using Mantid::MDAlgorithms::ConvertToMDMinMaxLocal;
+class ConvertToMDMinMaxLocalTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertToMDHelper2Test *createSuite() { return new ConvertToMDHelper2Test(); }
-  static void destroySuite( ConvertToMDHelper2Test *suite ) { delete suite; }
+  static ConvertToMDMinMaxLocalTest *createSuite() { return new ConvertToMDMinMaxLocalTest(); }
+  static void destroySuite( ConvertToMDMinMaxLocalTest *suite ) { delete suite; }
 
-  ConvertToMDHelper2Test():WSName("CMDHTest")
+  ConvertToMDMinMaxLocalTest():WSName("CMDHTest")
   {
 
   }
@@ -32,7 +32,7 @@ public:
 
   void test_Init()
   {
-    ConvertToMDHelper2 alg;
+    ConvertToMDMinMaxLocal alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -41,7 +41,7 @@ public:
   {
 
     Mantid::API::FrameworkManager::Instance();
-    ConvertToMDHelper2 alg;
+    ConvertToMDMinMaxLocal alg;
     Mantid::API::MatrixWorkspace_sptr  ws=MakeWorkspace(-50,1,true,60,0);
     WorkspaceCreationHelper::storeWS(WSName,ws);
     
@@ -67,7 +67,7 @@ public:
   {
 
     Mantid::API::FrameworkManager::Instance();
-    ConvertToMDHelper2 alg;
+    ConvertToMDMinMaxLocal alg;
     Mantid::API::MatrixWorkspace_sptr  ws=MakeWorkspace(-50,1,true,60,0);
     WorkspaceCreationHelper::storeWS(WSName,ws);
 
@@ -100,7 +100,7 @@ public:
   {
 
     Mantid::API::FrameworkManager::Instance();
-    ConvertToMDHelper2 alg;
+    ConvertToMDMinMaxLocal alg;
     Mantid::API::MatrixWorkspace_sptr  ws=MakeWorkspace(-50,1,true,60,0);
     WorkspaceCreationHelper::storeWS(WSName,ws);
 
@@ -135,7 +135,7 @@ public:
   {
     
     Mantid::API::FrameworkManager::Instance();
-    ConvertToMDHelper2 alg;
+    ConvertToMDMinMaxLocal alg;
     Mantid::API::MatrixWorkspace_sptr  ws=MakeWorkspace(-2.5,0.05,true,0,5);
     WorkspaceCreationHelper::storeWS(WSName,ws);
 
@@ -158,7 +158,7 @@ public:
   {
 
     Mantid::API::FrameworkManager::Instance();
-    ConvertToMDHelper2 alg;
+    ConvertToMDMinMaxLocal alg;
     Mantid::API::MatrixWorkspace_sptr  ws=MakeWorkspace(25000,10,false,0,0);
     WorkspaceCreationHelper::storeWS(WSName,ws);
 
@@ -181,7 +181,7 @@ public:
   {
 
     Mantid::API::FrameworkManager::Instance();
-    ConvertToMDHelper2 alg;
+    ConvertToMDMinMaxLocal alg;
     Mantid::API::MatrixWorkspace_sptr  ws=MakeWorkspace(25000,10,false,0,0);
     WorkspaceCreationHelper::storeWS(WSName,ws);
 

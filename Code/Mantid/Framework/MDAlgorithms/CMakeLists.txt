@@ -168,8 +168,8 @@ set ( TEST_FILES
 	ConvertToDiffractionMDWorkspace2Test.h
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToMDComponentsTest.h
-	ConvertToMDHelperTest.h
-	ConvertToMDHelper2Test.h    
+	ConvertToMDMinMaxGlobalTest.h
+	ConvertToMDMinMaxLocalTest.h    
 	ConvertToMDTest.h
 	ConvertToQ3DdETest.h
 	CreateMDHistoWorkspaceTest.h
