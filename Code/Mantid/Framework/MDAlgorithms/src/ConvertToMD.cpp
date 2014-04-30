@@ -315,17 +315,17 @@ namespace Mantid
       //e) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to different flavours of hkl
       std::string convertTo_                 = getProperty("QConversionScales");
 
-      // get the min and max values for the dimensions from the input porperties
+      // get the min and max values for the dimensions from the input properties
       std::vector<double> dimMin = getProperty("MinValues");
       std::vector<double> dimMax = getProperty("MaxValues");
 
 
       // Build the target ws description as function of the input & output ws and the parameters, supplied to the algorithm 
       MDEvents::MDWSDescription targWSDescr;
-      // get workspace parameters and build target workspace descritpion, report if there is need to build new target MD workspace
+      // get workspace parameters and build target workspace description, report if there is need to build new target MD workspace
       bool createNewTargetWs = buildTargetWSDescription(spws,QModReq,dEModReq,otherDimNames,dimMin,dimMax,QFrame,convertTo_,targWSDescr);
 
-      // create and initate new workspace or set up existing workspace as a target. 
+      // create and initiate new workspace or set up existing workspace as a target. 
       if(createNewTargetWs)  // create new
         spws = this->createNewMDWorkspace(targWSDescr);
       else // setup existing MD workspace as workspace target.
@@ -343,7 +343,7 @@ namespace Mantid
       this->m_Convertor  = AlgoSelector.convSelector(m_InWS2D,this->m_Convertor);
 
       bool ignoreZeros = getProperty("IgnoreZeroSignals");
-      // initate conversion and estimate amout of job to do
+      // initiate conversion and estimate amount of job to do
       size_t n_steps = this->m_Convertor->initialize(targWSDescr,m_OutWSWrapper,ignoreZeros);
       // progress reporter
       m_Progress.reset(new API::Progress(this,0.0,1.0,n_steps)); 
@@ -364,7 +364,7 @@ namespace Mantid
     /**
     * Copy over the metadata from the input matrix workspace to output MDEventWorkspace
     * @param mdEventWS :: The output MDEventWorkspace
-    * @param targWSDescr :: The descrition of the target workspace, used in the algorithm 
+    * @param targWSDescr :: The description of the target workspace, used in the algorithm 
     *
     * @return  :: the number of experiment info added from the current MD workspace
     */
@@ -376,7 +376,7 @@ namespace Mantid
       ei->mutableRun().addProperty("RUBW_MATRIX",targWSDescr.m_Wtransf.getVector(),true);
       ei->mutableRun().addProperty("W_MATRIX",targWSDescr.getPropertyValueAsType<std::vector<double> >("W_MATRIX"),true);
 
-      // run index as the number of experiment into megred within this run. It is possible to interpret it differently 
+      // run index as the number of experiment into merged within this run. It is possible to interpret it differently 
       // and should never expect it to start with 0 (for first experiment info)
       uint16_t runIndex = mdEventWS->addExperimentInfo(ei);
 
@@ -403,7 +403,7 @@ namespace Mantid
         expt->cacheDetectorGroupings(*mapping);
       }
 
-      // add rinindex to the target workspace description for further usage as the identifier for the events, which come from this run. 
+      // add run-index to the target workspace description for further usage as the identifier for the events, which come from this run. 
       targWSDescr.addProperty("RUN_INDEX",runIndex,true);  
 
     }
@@ -416,18 +416,18 @@ namespace Mantid
     * @param QModReq -- mode to convert momentum
     * @param dEModReq -- mode to convert energy 
     * @param otherDimNames -- the vector of additional dimensions names (if any)
-    * @param dimMin     -- the vector of minimal values for all dimensions of the workspace; on input it is copied from the algorithm parameters, on outputput 
-    it is defined from MD worksace of matrix workspace depending on how well inpupt parameters are defined 
+    * @param dimMin     -- the vector of minimal values for all dimensions of the workspace; on input it is copied from the algorithm parameters, on output 
+    it is defined from MD workspace of matrix workspace depending on how well input parameters are defined 
     * @param dimMax     -- the vector of maximal values for all dimensions of the workspace; is set up similarly to dimMin
-    * @param QFrame      -- in Q3D case this describes target coordinate system and is ignored in any othre caste
-    * @param convertTo_  -- The parameter describing Q-scaling transformtations
+    * @param QFrame      -- in Q3D case this describes target coordinate system and is ignored in any other caste
+    * @param convertTo_  -- The parameter describing Q-scaling transformations
     * @param targWSDescr -- the resulting class used to interpret all parameters together and used to describe selected transformation. 
     */ 
     bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &QModReq,const std::string &dEModReq,const std::vector<std::string> &otherDimNames,
       std::vector<double> &dimMin, std::vector<double> &dimMax,
       const std::string &QFrame,const std::string &convertTo_,MDEvents::MDWSDescription &targWSDescr)
     {
-      // ------- Is there need to creeate new ouptutworpaced?  
+      // ------- Is there need to create new output workspace?  
       bool createNewTargetWs =doWeNeedNewTargetWorkspace(spws);
 
       if (createNewTargetWs )
@@ -458,7 +458,7 @@ namespace Mantid
       bool LorentzCorrections = getProperty("LorentzCorrection");
       targWSDescr.setLorentsCorr(LorentzCorrections);
 
-      // instanciate class, responsible for defining Mslice-type projection
+      // instantiate class, responsible for defining Mslice-type projection
       MDEvents::MDWSTransform MsliceProj;
       //identify if u,v are present among input parameters and use defaults if not
       std::vector<double> ut = getProperty("UProj");
@@ -466,7 +466,7 @@ namespace Mantid
       std::vector<double> wt = getProperty("WProj");
       try
       {  
-        // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may overcomplicate things. 
+        // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may over-complicate things. 
         MsliceProj.setUVvectors(ut,vt,wt);   
       }
       catch(std::invalid_argument &)
@@ -562,8 +562,8 @@ namespace Mantid
     *@param inWS     -- the shared pointer to the source workspace
     *@param QMode    -- the string which defines algorithms Q-conversion mode
     *@param dEMode   -- the string describes the algorithms energy conversion mode
-    *@param QFrame   -- in Q3D case this describes target coordinate system and is ignored in any othre caste
-    *@param ConvertTo -- The parameter describing Q-scaling transformtations 
+    *@param QFrame   -- in Q3D case this describes target coordinate system and is ignored in any other caste
+    *@param ConvertTo -- The parameter describing Q-scaling transformations 
     *@param otherDim -- the vector of other dimension names (if any)
     *  Input-output values: 
     *@param minVal   -- the vector with min values for the algorithm
@@ -580,12 +580,12 @@ namespace Mantid
       MDTransfInterface* pQtransf =  MDTransfFactory::Instance().create(QMode).get();
       // get number of dimensions this Q transformation generates from the workspace. 
       auto iEmode = Kernel::DeltaEMode().fromString(dEMode);
-      // get total numner of dimensions the workspace would have.
+      // get total number of dimensions the workspace would have.
       unsigned int nMatrixDim = pQtransf->getNMatrixDimensions(iEmode,inWS);
       // total number of dimensions
       size_t nDim =nMatrixDim+otherDim.size();
 
-      // proabably already have well defined min-max values, so no point of precalculating them
+      // probably already have well defined min-max values, so no point of pre-calculating them
       bool wellDefined(true);
       if((nDim == minVal.size()) && (minVal.size()==maxVal.size()))
       {
@@ -604,7 +604,7 @@ namespace Mantid
 
       // we need to identify min-max values by themselves
 
-      Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("ConvertToMDHelper");
+      Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("ConvertToMDMinMaxLocal");
       if(!childAlg)throw(std::runtime_error("Can not create child ChildAlgorithm to found min/max values"));
 
       childAlg->setPropertyValue("InputWorkspace", inWS->getName());
@@ -625,7 +625,7 @@ namespace Mantid
       {
         if(minVal[i]>=maxVal[i])
         {
-          g_log.debug()<<"identified min-max values for dimension N: "<<i<<" are equal. Modyfying min-max value to produce dimension with 0.2*dimValue width\n";
+          g_log.debug()<<"identified min-max values for dimension N: "<<i<<" are equal. Modifying min-max value to produce dimension with 0.2*dimValue width\n";
           if(minVal[i]>0)
           {
             minVal[i]*=0.9;
