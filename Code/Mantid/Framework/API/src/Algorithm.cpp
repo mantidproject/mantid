@@ -798,6 +798,7 @@ namespace Mantid
     *  @param endProgress ::    The percentage progress value of the overall algorithm where this child algorithm ends
     *  @param enableLogging ::  Set to false to disable logging from the child algorithm
     *  @param version ::        The version of the child algorithm to create. By default gives the latest version.
+    *  @param recordHistory ::  Set whether to record history for children. By default this is set to false.
     *  @return shared pointer to the newly created algorithm object
     */
     Algorithm_sptr Algorithm::createChildAlgorithm(const std::string& name, const double startProgress, const double endProgress,
@@ -1011,9 +1012,6 @@ namespace Mantid
 
 
     /** Fills History, Algorithm History and Algorithm Parameters
-    *  @param start :: a date and time defnining the start time of the algorithm
-    *  @param duration :: a double defining the length of duration of the algorithm
-    *  @param  uexecCount an unsigned int for defining the excution order of algorithm
     */
     void Algorithm::fillHistory()
     {
@@ -1049,8 +1047,7 @@ namespace Mantid
     }
 
     /** Indicates that this algrithms history should be tracked regardless of if it is a child.
-    *  @param state :: a boolean indicating whether to track the history or not 
-    *  @param parent :: the parent algorithm history object the history in.
+    *  @param parentHist :: the parent algorithm history object the history in.
     */
     void Algorithm::trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist)
     {

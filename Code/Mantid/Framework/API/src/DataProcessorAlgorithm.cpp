@@ -41,7 +41,22 @@ namespace API
   {
   }
 
-  //----------------------------------------------------------------------------------------------
+  //---------------------------------------------------------------------------------------------
+  /** Create a Child Algorithm.  A call to this method creates a child algorithm object.
+  *  Using this mechanism instead of creating daughter
+  *  algorithms directly via the new operator is prefered since then
+  *  the framework can take care of all of the necessary book-keeping.
+  *
+  *  Overrides the method of the same name in Algorithm to enable history tracking by default.
+  *
+  *  @param name ::           The concrete algorithm class of the Child Algorithm
+  *  @param startProgress ::  The percentage progress value of the overall algorithm where this child algorithm starts
+  *  @param endProgress ::    The percentage progress value of the overall algorithm where this child algorithm ends
+  *  @param enableLogging ::  Set to false to disable logging from the child algorithm
+  *  @param version ::        The version of the child algorithm to create. By default gives the latest version.
+  *  @param recordHistory ::  Set whether to record history for children. By default this is set to false.
+  *  @return shared pointer to the newly created algorithm object
+  */
   boost::shared_ptr<Algorithm> DataProcessorAlgorithm::createChildAlgorithm(const std::string& name, const double startProgress,
       const double endProgress, const bool enableLogging, const int& version, const bool recordHistory)
   {
