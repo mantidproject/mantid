@@ -8,6 +8,7 @@
 #include <QList>
 #include <QValidator>
 #include <QDoubleValidator>
+#include <QRegExpValidator>
 
 class QDoubleMultiRangeValidator : public QValidator
 {
@@ -152,6 +153,13 @@ namespace IDA
     {
       connect(field, SIGNAL(textEdited(const QString &)), this, SLOT(inputChanged()));
     }
+
+    QRegExp regex("[A-Za-z0-9\\-\\(\\)]*");
+    QValidator *formulaValidator = new QRegExpValidator(regex, this);
+    uiForm().absp_leSampleFormula->setValidator(formulaValidator);
+    uiForm().absp_leCanFormula->setValidator(formulaValidator);
+    connect(uiForm().absp_leSampleFormula, SIGNAL(textEdited(const QString &)), this, SLOT(inputChanged()));
+    connect(uiForm().absp_leCanFormula, SIGNAL(textEdited(const QString &)), this, SLOT(inputChanged()));
 
     // "Nudge" color of title of QGroupBox to change.
     useCanChecked(uiForm().absp_ckUseCan->isChecked());
@@ -352,7 +360,7 @@ namespace IDA
         break;
       case 1:
           //input using formula
-          uiv.checkFieldIsNotEmpty("Sample Formula", uiForm().absp_leSampleFormula, uiForm().absp_valSampleFormula);
+          uiv.checkFieldIsValid("Sample Formula", uiForm().absp_leSampleFormula, uiForm().absp_valSampleFormula);
         break;
     }
 
@@ -377,7 +385,7 @@ namespace IDA
           break;
         case 1:
             //input using formula
-            uiv.checkFieldIsNotEmpty("Can Formula", uiForm().absp_leSampleFormula, uiForm().absp_valSampleFormula);
+            uiv.checkFieldIsValid("Can Formula", uiForm().absp_leCanFormula, uiForm().absp_valCanFormula);
           break;
       }
     }
@@ -401,25 +409,40 @@ namespace IDA
 
   void CalcCorr::useCanChecked(bool checked)
   {
-    // Disable thickness fields/labels/asterisks.
-    uiForm().absp_lbtc1->setEnabled(checked);
-    uiForm().absp_lbtc2->setEnabled(checked);
-    uiForm().absp_letc1->setEnabled(checked);
-    uiForm().absp_letc2->setEnabled(checked);
-    uiForm().absp_valtc1->setVisible(checked);
-    uiForm().absp_valtc2->setVisible(checked);
-
-    // Disable R3 field/label/asterisk.
-    uiForm().absp_lbR3->setEnabled(checked);
-    uiForm().absp_ler3->setEnabled(checked);
-    uiForm().absp_valR3->setVisible(checked);
 
     // Disable "Can Details" group and asterisks.
     uiForm().absp_gbCan->setEnabled(checked);
     uiForm().absp_valCanden->setVisible(checked);
-    uiForm().absp_valCansigs->setVisible(checked);
-    uiForm().absp_valCansiga->setVisible(checked);
-    uiForm().absp_valCanFormula->setVisible(checked);
+    uiForm().absp_lbtc1->setEnabled(checked);
+    uiForm().absp_lbtc2->setEnabled(checked);
+    uiForm().absp_letc1->setEnabled(checked);
+    uiForm().absp_letc2->setEnabled(checked);
+    uiForm().absp_lbR3->setEnabled(checked);
+    uiForm().absp_ler3->setEnabled(checked);
+    
+    QString value;
+    (checked ? value = "*" : value =  " ");
+
+    uiForm().absp_valCansigs->setText(value);
+    uiForm().absp_valCansiga->setText(value);
+    uiForm().absp_valCanFormula->setText(value);
+
+    // Disable thickness fields/labels/asterisks.
+    uiForm().absp_valtc1->setText(value);
+    uiForm().absp_valtc2->setText(value);
+
+    // // Disable R3 field/label/asterisk.
+    uiForm().absp_valR3->setText(value);
+    
+    if (checked)
+    {    
+      UserInputValidator uiv;
+      uiv.checkFieldIsValid("",uiForm().absp_lecansigs, uiForm().absp_valCansigs);
+      uiv.checkFieldIsValid("",uiForm().absp_lecansiga, uiForm().absp_valCansiga);
+      uiv.checkFieldIsValid("",uiForm().absp_letc1, uiForm().absp_valtc1);
+      uiv.checkFieldIsValid("",uiForm().absp_letc2, uiForm().absp_valtc2);
+      uiv.checkFieldIsValid("",uiForm().absp_ler3, uiForm().absp_valR3);
+    }
 
     uiForm().absp_dsCanInput->setEnabled(checked);
   
