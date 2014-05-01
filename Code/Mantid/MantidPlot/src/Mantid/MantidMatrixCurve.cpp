@@ -29,16 +29,18 @@ namespace
  *  @param wsName :: The workspace name.
  *  @param g :: The Graph widget which will display the curve
  *  @param index :: The index of the spectrum or bin in the workspace
+ *  @param indexType :: Enum indicating whether the index is a spectrum/bin index
  *  @param err :: True if the errors are to be plotted
  *  @param distr :: True if it is a distribution
  *  @param style :: CurveType style to use
  *..@throw Mantid::Kernel::Exception::NotFoundError if the workspace cannot be found
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
-MantidMatrixCurve::MantidMatrixCurve(const QString&,const QString& wsName,Graph* g,int index,bool err,bool distr, Graph::CurveType style)
+MantidMatrixCurve::MantidMatrixCurve(const QString&,const QString& wsName,Graph* g,int index, IndexDir indexType,
+                                     bool err,bool distr, Graph::CurveType style)
   :MantidCurve(err),
   m_wsName(wsName),
-  m_index(index)
+  m_index(index), m_indexType(indexType)
 {
   if(!g)
   {
@@ -51,15 +53,16 @@ MantidMatrixCurve::MantidMatrixCurve(const QString&,const QString& wsName,Graph*
  *  @param wsName :: The workspace name.
  *  @param g :: The Graph widget which will display the curve
  *  @param index :: The index of the spectrum or bin in the workspace
+ *  @param indexType :: Enum indicating whether the index is a spectrum/bin index
  *  @param err :: True if the errors are to be plotted
  *  @param distr :: True if it is a distribution
  *  @param style :: CurveType style to use
  *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
-MantidMatrixCurve::MantidMatrixCurve(const QString& wsName,Graph* g,int index,bool err,bool distr, Graph::CurveType style)
+MantidMatrixCurve::MantidMatrixCurve(const QString& wsName,Graph* g,int index, IndexDir indexType, bool err,bool distr, Graph::CurveType style)
   :MantidCurve(err),
   m_wsName(wsName),
-  m_index(index)
+  m_index(index), m_indexType(indexType)
 {
   init(g,distr,style);
 }
@@ -68,7 +71,7 @@ MantidMatrixCurve::MantidMatrixCurve(const QString& wsName,Graph* g,int index,bo
 MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve& c)
   :MantidCurve(createCopyName(c.title().text()), c.m_drawErrorBars, c.m_drawAllErrorBars),
   m_wsName(c.m_wsName),
-  m_index(c.m_index),
+  m_index(c.m_index), m_indexType(c.m_indexType),
   m_xUnits(c.m_xUnits),
   m_yUnits(c.m_yUnits)
 {
@@ -106,27 +109,38 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
   Mantid::API::MatrixWorkspace_const_sptr matrixWS = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(workspace);
   //we need to censor the data if there is a log scale because it can't deal with negative values, only the y-axis has been found to be problem so far
   const bool log = g->isLog(QwtPlot::yLeft);
-  MantidQwtMatrixWorkspaceData data(matrixWS,m_index, log,distr);
-  setData(data);
-  Mantid::API::Axis* ax = matrixWS->getAxis(0);
-  if (ax->unit())
+  Axis *xAxis(NULL), *yAxis(NULL);
+  if(m_indexType == Spectrum)
   {
-    m_xUnits = ax->unit();
+    MantidQwtMatrixWorkspaceData data(matrixWS,m_index, log,distr);
+    setData(data);
+    xAxis = matrixWS->getAxis(0);
+    yAxis = matrixWS->getAxis(1);
+  }
+  else
+  {
+    MantidQwtMatrixWorkspaceData data(matrixWS,m_index, log,distr);
+    setData(data);
+    xAxis = matrixWS->getAxis(1);
+    yAxis = matrixWS->getAxis(0);
+  }
+  if (xAxis->unit())
+  {
+    m_xUnits = xAxis->unit();
   }
   else
   {
     m_xUnits.reset(new Mantid::Kernel::Units::Empty());
   }
-
-  Mantid::API::Axis* ay = matrixWS->getAxis(1);
-  if (ay->unit())
+  if (yAxis->unit())
   {
-    m_yUnits = ay->unit();
+    m_yUnits = yAxis->unit();
   }
   else
   {
     m_yUnits.reset(new Mantid::Kernel::Units::Empty());
   }
+
   int lineWidth = 1;
   MultiLayer* ml = dynamic_cast<MultiLayer*>(g->parent()->parent()->parent());
   if (style == Graph::Unspecified || (ml && ml->applicationWindow()->applyCurveStyleToMantid) )

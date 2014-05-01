@@ -3407,7 +3407,7 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
 
 PlotCurve* Graph::insertCurve(QString workspaceName, int index, bool err, Graph::CurveType style)
 {
-  return (new MantidMatrixCurve(workspaceName,this,index,err,false,style));
+  return (new MantidMatrixCurve(workspaceName,this,index, MantidMatrixCurve::Spectrum, err,false,style));
 }
 
 /**  Insert a curve with its own data source. It does not have to be

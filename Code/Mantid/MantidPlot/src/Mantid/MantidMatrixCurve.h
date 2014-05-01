@@ -42,14 +42,20 @@ class MantidMatrixCurve:public MantidCurve
 {
   Q_OBJECT
 public:
+  /// Indicates whether the curve index is treated as a row or a column
+  enum IndexDir { Spectrum, // index is treated as a row
+                  Bin // index is treated as a column
+                };
 
   /// More complex constructor setting some defaults for the curve
   MantidMatrixCurve(const QString& name,const QString& wsName,Graph* g,
-              int index,bool err=false,bool distr = false, Graph::CurveType style = Graph::Unspecified);
+                    int index, IndexDir indexType, bool err=false, bool distr = false,
+                    Graph::CurveType style = Graph::Unspecified);
 
   /// More complex constructor setting some defaults for the curve
   MantidMatrixCurve(const QString& wsName,Graph* g,
-              int index,bool err=false,bool distr = false, Graph::CurveType style = Graph::Unspecified);
+                    int index, IndexDir indexType, bool err=false, bool distr = false,
+                    Graph::CurveType style = Graph::Unspecified);
 
   /// Copy constructor 
   MantidMatrixCurve(const MantidMatrixCurve& c);
@@ -143,8 +149,10 @@ private:
                                  const QString& wsName,int index);
 
   QString m_wsName;///< Workspace name. If empty the ws isn't in the data service
-  /// workspace index
+  /// index
   int  m_index;
+  /// Is the index a spectrum or bin index
+  IndexDir m_indexType;
   /// x units
   Mantid::Kernel::Unit_sptr m_xUnits;
   /// y units

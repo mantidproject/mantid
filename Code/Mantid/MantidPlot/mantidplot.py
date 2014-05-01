@@ -213,8 +213,8 @@ def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, 
     if window != None:
       window = window._getHeldObject()
 
-    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSpectraList,
-                                          workspace_names, index_list, error_bars,
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
+                                          workspace_names, index_list, True, error_bars,
                                           type, window, clearWindow))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
