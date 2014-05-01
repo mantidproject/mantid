@@ -77,12 +77,12 @@ namespace Mantid
     }
 
     /**
-     * Returns the default checkGroup
+     * Returns the default checkGroup (calls base class)
      */
     template<typename BaseAlgorithm>
     bool AlgorithmAdapter<BaseAlgorithm>::checkGroupsDefault()
     {
-      return false;
+      return BaseAlgorithm::checkGroups();
     }
 
     /**
