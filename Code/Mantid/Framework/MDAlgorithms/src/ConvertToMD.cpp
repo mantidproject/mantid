@@ -95,7 +95,7 @@ The test example is based on MAR1011.nxspe data file, obtained by reducing test 
 
 <div style="border:1pt dashed blue; background:#f9f9f9;padding: 1em 0;">
 <source lang="python">
-# let's load test event workspace, which has been already preprocessed and availible in Mantid Test folder 
+# let's load test event workspace, which has been already preprocessed and available in Mantid Test folder 
 WS_Name='MAR11001.nxspe'
 Load(Filename=WS_Name,OutputWorkspace=WS_Name)
 # this workspace has been  obtained from an inelastic experiment with input energy 
@@ -312,7 +312,7 @@ namespace Mantid
       std::vector<std::string> otherDimNames = getProperty("OtherDimensions");
       //d) The output dimensions in the Q3D mode, processed together with QConversionScales
       std::string QFrame                     = getProperty("Q3DFrames");
-      //e) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to different flavours of hkl
+      //e) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to different flavors of hkl
       std::string convertTo_                 = getProperty("QConversionScales");
 
       // get the min and max values for the dimensions from the input properties
