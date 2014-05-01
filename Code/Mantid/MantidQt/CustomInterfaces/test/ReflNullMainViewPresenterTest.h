@@ -21,7 +21,7 @@ public:
   void testNullThrow()
   {
     ReflNullMainViewPresenter presenter;
-    TS_ASSERT_THROWS(presenter.load(),std::runtime_error);
+    TS_ASSERT_THROWS(presenter.notify(),std::runtime_error&);
   }
 };
 #endif
