@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IBackgroundFunction.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -46,32 +47,40 @@ namespace Algorithms
    */
   void GeneratePeaks::init()
   {
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("PeakParametersWorkspace", "", Direction::Input),
-        "Input TableWorkspace for peak's parameters.");
+    declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("PeakParametersWorkspace", "", Direction::Input),
+                    "Input TableWorkspace for peak's parameters.");
 
-    this->declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>()),
-        "Peak function to calculate.");
+    declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(
+                      FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>()),
+                    "Peak function to calculate.");
 
-    this->declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
-        "InputWorkspace (optional) to take information for the instrument, and where to evaluate the x-axis.");
+    std::vector<std::string> bkgdnames = FunctionFactory::Instance().getFunctionNames<API::IBackgroundFunction>();
+    bkgdnames.push_back("Auto");
+    declareProperty("BackgroundFunction", "Flat", boost::make_shared<StringListValidator>(bkgdnames),
+                    "Background function to calculate. ");
 
-    this->declareProperty(
-      new Kernel::ArrayProperty<double>("BinningParameters", boost::make_shared<Kernel::RebinParamsValidator>(true)),
-      "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
-      "this can be followed by a comma and more widths and last boundary pairs.\n"
-      "Negative width values indicate logarithmic binning.");
+    declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
+                    "InputWorkspace (optional) to take information for the instrument, and where to evaluate the x-axis.");
+
+    declareProperty(
+          new Kernel::ArrayProperty<double>("BinningParameters", boost::make_shared<Kernel::RebinParamsValidator>(true)),
+          "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
+          "this can be followed by a comma and more widths and last boundary pairs.\n"
+          "Negative width values indicate logarithmic binning.");
 
 
-    this->declareProperty("NumberWidths", 2., "Number of peak width to evaluate each peak for. Default=2.");
-    this->declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
-        "Output Workspace to put the calculated data.");
+    declareProperty("NumberWidths", 2., "Number of peak width to evaluate each peak for. Default=2.");
+    declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
+                    "Output Workspace to put the calculated data.");
 
-    this->declareProperty("GenerateBackground", true, "Whether or not to generate the background");
+    declareProperty("GenerateBackground", true, "Whether or not to generate the background");
 
-    this->declareProperty("MaxAllowedChi2", 100.0, "Maximum chi^2 of the peak allowed to calculate. Default 100.");
+    declareProperty("MaxAllowedChi2", 100.0, "Maximum chi^2 of the peak allowed to calculate. Default 100.");
 
     declareProperty("IgnoreWidePeaks", false, "If selected, the peaks that are wider than fit window "
                     "(denoted by negative chi^2) are ignored.");
+
+    declareProperty("IsRawParameterTable", true, "Flag to show whether the parameter table contains raw parameters. ");
 
     return;
   }
@@ -84,6 +93,12 @@ namespace Algorithms
     // Get properties
     DataObjects::TableWorkspace_sptr peakParamWS = this->getProperty("PeakParametersWorkspace");
     std::string peakFunction = this->getProperty("PeakFunction");
+    std::string bkgdFunction = getProperty("BackgroundFunction");
+    if (bkgdFunction.compare("Auto") == 0)
+    {
+      m_useAutoBkgd = true;
+      bkgdFunction = "Quardratic";
+    }
 
     const std::vector<double> binParameters = this->getProperty("BinningParameters");
     MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
@@ -131,36 +146,37 @@ namespace Algorithms
 
     this->setProperty("OutputWorkspace", outputWS);
 
-    // 4. Generate peaks
+    // Generate peaks
     generatePeaks(outputWS, peakParamWS, peakFunction, newWSFromParent);
 
     return;
   }
 
-  namespace { // anonymous name space
-  /**
+  namespace
+  { // anonymous name space
+    /**
    * Determine if the table contains raw parameters.
    */
-  bool isRawTable(const std::vector<std::string> & colNames)
-  {
-    if (colNames.size() != 6)
-      return true;
-    if (colNames[0].compare("centre") != 0)
-      return true;
-    if (colNames[1].compare("width") != 0)
-      return true;
-    if (colNames[2].compare("height") != 0)
-      return true;
-    if (colNames[3].compare("backgroundintercept") != 0)
-      return true;
-    if (colNames[4].compare("backgroundslope") != 0)
-      return true;
-    if (colNames[5].compare("A2") != 0)
-      return true;
-    return false;
-  }
+    bool isRawTable(const std::vector<std::string> & colNames)
+    {
+      if (colNames.size() != 6)
+        return true;
+      if (colNames[0].compare("centre") != 0)
+        return true;
+      if (colNames[1].compare("width") != 0)
+        return true;
+      if (colNames[2].compare("height") != 0)
+        return true;
+      if (colNames[3].compare("backgroundintercept") != 0)
+        return true;
+      if (colNames[4].compare("backgroundslope") != 0)
+        return true;
+      if (colNames[5].compare("A2") != 0)
+        return true;
+      return false;
+    }
 
-  /**
+    /**
    * Determine how many parameters are in the peak function.
    */
   std::size_t getBkgOffset(const std::vector<std::string> & colNames, const bool isRaw)
@@ -208,7 +224,9 @@ namespace Algorithms
     }
     columnNames.erase(columnNames.begin()+(columnNames.size()-1)); // don't need to know that name either
     const bool isRaw = isRawTable(columnNames);
-    const std::size_t bkgOffset = getBkgOffset(columnNames, isRaw);
+    // const std::size_t bkgOffset = getBkgOffset(columnNames, isRaw);
+    // FIXME - This should be more flexible/smart
+    const std::size_t bkgOffset = 3;
     g_log.information() << "isRaw=" << isRaw << " bkgOffset=" << bkgOffset << "\n";
 
     // Create data structure for all peaks functions
@@ -341,7 +359,8 @@ namespace Algorithms
       std::string paramName;
       for (std::size_t i = 0; i < bkg_offset; i++)
       {
-        paramName = colNames[i].substr(3);
+        // paramName = colNames[i].substr(3);
+        paramName = colNames[i];
         peakFunc->setParameter(paramName, getTableValue(peakParmsWS, colNames[i], rowNum));
       }
     }
@@ -367,7 +386,8 @@ namespace Algorithms
       std::string paramName;
       for (std::size_t i = bkg_offset; i < colNames.size(); i++)
       {
-        paramName = colNames[i].substr(3);
+        // paramName = colNames[i].substr(3);
+        paramName = colNames[i];
         backFunc->setParameter(paramName, getTableValue(peakParmsWS, colNames[i], rowNum));
       }
     }
@@ -452,16 +472,22 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Get set of spectra of the input table workspace
-   */
+    * Spectra is set to the column named 'spectrum'.
+    * Algorithm supports multiple peaks in multiple spectra
+    */
   void GeneratePeaks::getSpectraSet(DataObjects::TableWorkspace_const_sptr peakParmsWS, std::set<specid_t>& spectra)
   {
     size_t numpeaks = peakParmsWS->rowCount();
+    API::Column_const_sptr col = peakParmsWS->getColumn("spectrum");
+
     for (size_t ipk = 0; ipk < numpeaks; ipk ++)
     {
-      API::Column_const_sptr col = peakParmsWS->getColumn("spectrum");
       specid_t specid = static_cast<specid_t>((*col)[ipk]);
       spectra.insert(specid);
-      g_log.debug() << "Peak " << ipk << ": specid = " << specid << std::endl;
+
+      std::stringstream outss;
+      outss << "Peak " << ipk << ": specid = " << specid;
+      g_log.debug(outss.str());
     }
 
     std::set<specid_t>::iterator pit;
@@ -469,7 +495,7 @@ namespace Algorithms
     for (pit = spectra.begin(); pit != spectra.end(); ++pit)
     {
       mSpectrumMap.insert(std::make_pair(*pit, icount));
-      ++icount;
+      ++ icount;
     }
 
     return;

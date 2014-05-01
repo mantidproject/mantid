@@ -80,6 +80,9 @@ namespace Algorithms
     API::IPeakFunction_sptr getPeakFunction(API::IFunction_sptr infunction);
 
     std::map<specid_t, specid_t> mSpectrumMap;
+
+    /// Flag to use automatic background (???)
+    bool m_useAutoBkgd;
   };
 
 
