@@ -77,7 +77,8 @@ public:
 
   void test_Nested_History()
   {
-    AlgorithmFactory::Instance().subscribe<testalg>();
+    Mantid::API::AlgorithmFactory::Instance().subscribe<testalg>();
+    Algorithm *testInput = new testalg;
     using namespace Mantid::API;
     AlgorithmHistory algHist = createTestHistory();
   
@@ -127,8 +128,44 @@ public:
         TS_ASSERT_EQUALS( subChildAlg->getPropertyValue("arg1_param"), "subChild" + index + subindex );
       } 
     }
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe(testInput->name(),testInput->version());
+    delete testInput;
+  }
 
-    AlgorithmFactory::Instance().unsubscribe("testalg1", 1);
+  void test_Create_Child_Algorithm()
+  {
+    AlgorithmFactory::Instance().subscribe<testalg>();
+    Algorithm *testInput = new testalg;
+    using namespace Mantid::API;
+    AlgorithmHistory algHist = createTestHistory();
+  
+    //create some nested history records
+    auto child1 = createFromTestAlg("child1");
+    auto subChild11 = createFromTestAlg("subChild11");
+    child1.addChildHistory(subChild11);
+    
+    auto child2 = createFromTestAlg("child2");
+    auto subChild21 = createFromTestAlg("subChild21");
+    auto subChild22 = createFromTestAlg("subChild22");
+    child2.addChildHistory(subChild21);
+    child2.addChildHistory(subChild22);
+    
+    auto child3 = createFromTestAlg("child3");
+
+    algHist.addChildHistory(child1);
+    algHist.addChildHistory(child2);
+    algHist.addChildHistory(child3);
+
+    
+    IAlgorithm_sptr alg = algHist.getChildAlgorithm(0);
+    TS_ASSERT_EQUALS(alg->name(), testInput->name());
+    TS_ASSERT_EQUALS(alg->version(), testInput->version());
+    TS_ASSERT_EQUALS(alg->category(), testInput->category());
+    
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe(testInput->name(),testInput->version());
+    delete testInput;
+    
+    TS_ASSERT_EQUALS(alg->getPropertyValue("arg1_param"), "child1");
   }
 
 private:
