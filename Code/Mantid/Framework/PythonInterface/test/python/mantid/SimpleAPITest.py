@@ -1,6 +1,6 @@
 import unittest
-from mantid.api import (AlgorithmFactory, mtd, IEventWorkspace, ITableWorkspace,
-                        MatrixWorkspace, WorkspaceGroup)
+from mantid.api import (AlgorithmFactory, AlgorithmProxy, IAlgorithm, IEventWorkspace, ITableWorkspace,
+                        PythonAlgorithm, MatrixWorkspace, mtd, WorkspaceGroup)
 import mantid.simpleapi as simpleapi
 import numpy
 
@@ -274,7 +274,7 @@ AlgorithmFactory.subscribe(%(name)s)
         name="OptionalWorkspace"
         algm_object = AlgorithmManager.createUnmanaged(name, 1)
         algm_object.initialize()
-        simpleapi._create_algorithm(name, 1, algm_object) # Create the wrapper
+        simpleapi._create_algorithm_function(name, 1, algm_object) # Create the wrapper
 
         # Call with no optional output specified
         result = simpleapi.OptionalWorkspace(RequiredWorkspace="required")
@@ -290,7 +290,36 @@ AlgorithmFactory.subscribe(%(name)s)
         
         # Tidy up simple api function
         del simpleapi.OptionalWorkspace
-        
+
+    def test_create_algorithm_object_produces_initialized_non_child_alorithm_outside_PyExec(self):
+        alg = simpleapi._create_algorithm_object("Rebin")
+        self._is_initialized_test(alg, 1, expected_class=AlgorithmProxy,
+                                  expected_child=False)
+
+    def test_create_algorithm_with_version_produces_initialized_alorithm(self):
+        alg = simpleapi._create_algorithm_object("LoadRaw", 2)
+        self._is_initialized_test(alg, 2, expected_class=AlgorithmProxy,
+                                  expected_child=False)
+
+    def test_create_algorithm_produces_child_inside_PyExec(self):
+        # A small test class to have a PyExec method call the
+        # algorithm creation
+        class TestAlg(PythonAlgorithm):
+            def PyInit(self):
+                pass
+            def PyExec(self):
+                self.alg = simpleapi._create_algorithm_object("Rebin")
+        # end
+        top_level = TestAlg()
+        top_level.PyExec()
+        self._is_initialized_test(top_level.alg, 1, expected_class=IAlgorithm,
+                                  expected_child=True)
+
+    def _is_initialized_test(self, alg, version, expected_class, expected_child):
+        self.assertTrue(alg.isInitialized())
+        self.assertEquals(expected_child,alg.isChild())
+        self.assertEquals(alg.version(), version)
+        self.assertTrue(isinstance(alg, expected_class))
 
 if __name__ == '__main__':
     unittest.main()

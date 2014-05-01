@@ -12,9 +12,12 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 	workdir = getDefaultWorkingDirectory()
 
 	#select the width we wish to fit
-	spectumWs = "__" + samWS
-	ExtractSingleSpectrum(InputWorkspace=samWS, OutputWorkspace=spectumWs, WorkspaceIndex=width)
-
+	spectrumWs = "__" + samWS
+	ExtractSingleSpectrum(InputWorkspace=samWS, OutputWorkspace=spectrumWs, WorkspaceIndex=width)
+	
+	#convert to HWHM
+	Scale(InputWorkspace=spectrumWs, Factor=0.5, OutputWorkspace=spectrumWs)
+	
 	#crop the workspace between the given ranges
 	if Verbose:
 		logger.notice('Cropping from Q= ' + str(qmin) +' to '+ str(qmax))
@@ -45,13 +48,13 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 		lval = 1.5
 		func = 'name=ChudleyElliot, Tau='+str(tval)+', L='+str(lval)
 
-	elif jumpFunc == 'SS':
-		# Singwi-Sjolander: HWHM=(1-exp(-L*Q^2))/Tau
+	elif jumpFunc == 'HallRoss':
+		# Hall-Ross: HWHM=(1-exp(-L*Q^2))/Tau
 		# for Q->0 W=A*Q^2*r
 
 		tval = 1.0/xmax
 		lval = 1.5
-		func = 'name=SingwiSjolander, Tau='+str(tval)+', L='+str(lval)
+		func = 'name=HallRoss, Tau='+str(tval)+', L='+str(lval)
 
 	elif jumpFunc == 'Fick':
 		# Fick: HWHM=D*Q^2
@@ -74,7 +77,7 @@ def JumpRun(samWS,jumpFunc,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 
 	#run fit function
 	fit_workspace_base = samWS[:-10] +'_'+ jumpFunc +'fit'
-	Fit(Function=func, InputWorkspace=spectumWs, CreateOutput=True, Output=fit_workspace_base, StartX=qmin, EndX=qmax)
+	Fit(Function=func, InputWorkspace=spectrumWs, CreateOutput=True, Output=fit_workspace_base, StartX=qmin, EndX=qmax)
 	fit_workspace = fit_workspace_base + '_Workspace'
 	
 	CopyLogs(InputWorkspace=samWS, OutputWorkspace=fit_workspace)

@@ -941,7 +941,7 @@ namespace DataObjects
 } // namespace DataObjects
 } // namespace Mantid
 
-
+///\cond TEMPLATE
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::EventWorkspace>;
 
 namespace Mantid

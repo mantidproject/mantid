@@ -1,5 +1,5 @@
 """*WIKI* 
-    Compute transmission using the beam spreader method
+Compute transmission using the beam spreader method
 *WIKI*"""
 import mantid.simpleapi as api
 from mantid.api import *

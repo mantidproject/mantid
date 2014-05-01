@@ -146,9 +146,33 @@ def load_monitors(self, property_manager):
         
     empty_mon_ws_name = "__empty_mon"
     sample_mon_ws_name = "__sample_mon"
-    
+
     det_list = [str(i) for i in det_list]
     det_list = ','.join(det_list)
+
+    # Ensuring that the binning is uniform
+    spec0 = empty_ws.dataX(0)
+    spec_last = empty_ws.dataX(empty_ws.getNumberHistograms()-1)
+    if abs(sum(spec0)-sum(spec_last))>0.000001:
+        alg = _execute("ExtractSingleSpectrum",
+                       {"InputWorkspace": empty_ws,
+                        "OutputWorkspace": '__reference_binning',
+                        "WorkspaceIndex": det_list[0]
+                        })
+        reference_ws = alg.getProperty("OutputWorkspace").value
+        alg = _execute("RebinToWorkspace",
+                       {"WorkspaceToRebin": empty_ws,
+                        "WorkspaceToMatch": reference_ws,
+                        "OutputWorkspace": empty_ws_name
+                        })
+        empty_ws = alg.getProperty("OutputWorkspace").value
+        alg = _execute("RebinToWorkspace",
+                       {"WorkspaceToRebin": sample_ws,
+                        "WorkspaceToMatch": reference_ws,
+                        "OutputWorkspace": sample_ws_name
+                        })   
+        sample_ws = alg.getProperty("OutputWorkspace").value
+
     alg = _execute("GroupDetectors",
                    {"InputWorkspace": empty_ws,
                     "OutputWorkspace": empty_mon_ws_name,

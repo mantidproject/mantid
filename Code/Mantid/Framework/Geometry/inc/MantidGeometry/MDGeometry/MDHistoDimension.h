@@ -4,6 +4,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/VMD.h"
 
 namespace Mantid
@@ -26,12 +27,12 @@ namespace Geometry
     /** Constructor for simple MDHistoDimension
     * @param name :: full name of the axis
     * @param ID :: identifier string
-    * @param units :: string giving the units of this dimension
+    * @param units :: A plain-text string giving the units of this dimension
     * @param min :: minimum extent
     * @param max :: maximum extent
     * @param numBins :: number of bins (evenly spaced)
     */
-    MDHistoDimension(std::string name, std::string ID, std::string units, coord_t min, coord_t max, size_t numBins)
+    MDHistoDimension(std::string name, std::string ID, const Kernel::UnitLabel & units, coord_t min, coord_t max, size_t numBins)
     : m_name(name), m_dimensionId(ID), m_units(units),
       m_min(min), m_max(max), m_numBins(numBins),
       m_binWidth((max-min)/static_cast<coord_t>(numBins))
@@ -65,7 +66,7 @@ namespace Geometry
     }
 
     /// Return the units of the dimension as a string
-    virtual std::string getUnits() const
+    virtual const Kernel::UnitLabel getUnits() const
     {
       return m_units;
     }
@@ -137,7 +138,7 @@ namespace Geometry
     std::string m_dimensionId;
 
     /// Dimension units
-    std::string m_units;
+    Kernel::UnitLabel m_units;
 
     /// Extent of dimension
     coord_t m_min;

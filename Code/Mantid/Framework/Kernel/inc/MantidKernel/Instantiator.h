@@ -1,7 +1,9 @@
 #ifndef MANTID_KERNEL_INSTANTIATOR_H_
 #define MANTID_KERNEL_INSTANTIATOR_H_
 
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 
 namespace Mantid 
 {

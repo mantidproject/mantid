@@ -15,8 +15,7 @@ from mantid.api import *
 from mantid.kernel import *
 import os
 
-all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
-if 'GatherWorkspaces' in all_algs:
+if AlgorithmFactory.exists('GatherWorkspaces'):
     HAVE_MPI = True
     from mpi4py import MPI
     mpiRank = MPI.COMM_WORLD.Get_rank()
@@ -27,7 +26,7 @@ else:
 COMPRESS_TOL_TOF = .01
 EVENT_WORKSPACE_ID = "EventWorkspace"
 
-class SNSPowderReduction(PythonAlgorithm):
+class SNSPowderReduction(DataProcessorAlgorithm):
     def category(self):
         return "Diffraction;PythonAlgorithms"
 
@@ -414,16 +413,19 @@ class SNSPowderReduction(PythonAlgorithm):
         return
 
     def _loadCharacterizations(self, filename):
-            results = api.PDLoadCharacterizations(Filename=filename,
-                                                  OutputWorkspace="characterizations")
-            self._charTable = results[0]
-            self.iparmFile = results[1]
-            self._focusPos = {}
-            self._focusPos['PrimaryFlightPath'] = results[2]
-            self._focusPos['SpectrumIDs'] = results[3]
-            self._focusPos['L2'] = results[4]
-            self._focusPos['Polar'] = results[5]
-            self._focusPos['Azimuthal'] = results[6]
+        self._focusPos = {}
+        if filename is None or len(filename) <= 0:
+            self.iparmFile = None
+            return
+        results = api.PDLoadCharacterizations(Filename=filename,
+                                              OutputWorkspace="characterizations")
+        self._charTable = results[0]
+        self.iparmFile = results[1]
+        self._focusPos['PrimaryFlightPath'] = results[2]
+        self._focusPos['SpectrumIDs'] = results[3]
+        self._focusPos['L2'] = results[4]
+        self._focusPos['Polar'] = results[5]
+        self._focusPos['Azimuthal'] = results[6]
 
     def _loadData(self, runnumber, extension, filterWall=None, outname=None, **chunk):
         if  runnumber is None or runnumber <= 0:
@@ -492,6 +494,13 @@ class SNSPowderReduction(PythonAlgorithm):
 
         return strategy
 
+    def __logChunkInfo(self, chunk):
+        keys = chunk.keys()
+        keys.sort()
+
+        keys = [ str(key) + "=" + str(chunk[key]) for key in keys ]
+        self.log().information("Working on chunk [" + ", ".join(keys) + "]")
+
     def _focusChunks(self, runnumber, extension, filterWall, calib, splitwksp=None, preserveEvents=True):
         """ Load, (optional) split and focus data in chunks
 
@@ -545,10 +554,7 @@ class SNSPowderReduction(PythonAlgorithm):
             ichunk += 1
 
             # Log information
-            if "ChunkNumber" in chunk:
-                self.log().information("Working on chunk %d of %d" % (chunk["ChunkNumber"], chunk["TotalChunks"]))
-            elif "SpectrumMin" in chunk:
-                self.log().information("Working on spectrums %d through %d" % (chunk["SpectrumMin"], chunk["SpectrumMax"]))
+            self.__logChunkInfo(chunk)
 
             # Load chunk
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
@@ -708,19 +714,31 @@ class SNSPowderReduction(PythonAlgorithm):
             return wksplist
 
     def _getinfo(self, wksp):
-        # get the correct row of the table
-        charac = api.PDDetermineCharacterizations(InputWorkspace=wksp,
-                                                  Characterizations="characterizations", 
-                                                  ReductionProperties="__snspowderreduction",
-                                                  BackRun=self.getProperty("BackgroundNumber").value,
-                                                  NormRun=self.getProperty("VanadiumNumber").value,
-                                                  NormBackRun=self.getProperty("VanadiumBackgroundNumber").value)
-        # convert the result into a dict
-        manager = PropertyManagerDataService.retrieve("__snspowderreduction")
         rowValues = {}
-        for name in ["frequency", "wavelength", "bank", "vanadium", "container",
-                     "empty", "d_min", "d_max", "tof_min", "tof_max"]:
-            rowValues[name] = manager.getProperty(name).value
+
+        if mtd.doesExist("characterizations"):
+            # get the correct row of the table
+            charac = api.PDDetermineCharacterizations(InputWorkspace=wksp,
+                                                      Characterizations="characterizations", 
+                                                      ReductionProperties="__snspowderreduction",
+                                                      BackRun=self.getProperty("BackgroundNumber").value,
+                                                      NormRun=self.getProperty("VanadiumNumber").value,
+                                                      NormBackRun=self.getProperty("VanadiumBackgroundNumber").value)
+            # convert the result into a dict
+            manager = PropertyManagerDataService.retrieve("__snspowderreduction")
+            for name in ["frequency", "wavelength", "bank", "vanadium", "container",
+                         "empty", "d_min", "d_max", "tof_min", "tof_max"]:
+                rowValues[name] = manager.getProperty(name).value
+        else:
+            # "frequency", "wavelength"
+            rowValues["bank"] = 0
+            rowValues["container"] = self.getProperty("BackgroundNumber").value
+            rowValues["vanadium"]  = self.getProperty("VanadiumNumber").value
+            rowValues["empty"]     = self.getProperty("VanadiumBackgroundNumber").value
+            rowValues["d_min"]     = 0.
+            rowValues["d_max"]     = 0.
+            rowValues["tof_min"]   = 0.
+            rowValues["tof_max"]   = 0.
 
         return rowValues
 

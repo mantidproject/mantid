@@ -7,7 +7,6 @@
 #include <stdint.h>
 #include "MantidAPI/Workspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <stdarg.h>
 #include "MantidAPI/MDGeometry.h"

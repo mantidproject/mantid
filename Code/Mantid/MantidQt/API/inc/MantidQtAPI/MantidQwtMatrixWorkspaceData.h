@@ -51,6 +51,10 @@ public:
 
   double getYMin() const;
   double getYMax() const;
+  /// Return the label to use for the X axis
+  QString getXAxisLabel() const;
+  /// Return the label to use for the Y axis
+  QString getYAxisLabel() const;
 
   bool isHistogram()const{return m_isHistogram;}
 

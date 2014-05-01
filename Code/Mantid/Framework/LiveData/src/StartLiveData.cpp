@@ -23,11 +23,11 @@ StartLiveData(UpdateEvery='1.0',Instrument='FakeEventDataListener',
 plotSpectrum('live', [0,1])
 </source>
 
-=== End-Of-Run Behavior ===
+=== Run Transition Behavior ===
 
-* When the experimenter stops a run, the Live Data Listener receives this as a signal.
-* The ''EndRunBehavior'' property specifies what to do when the run ends.
-** Restart: the accumulated data from the previous run is discarded as soon as the next chunk of data arrives.
+* When the experimenter starts and stops a run, the Live Data Listener receives this as a signal.
+* The ''RunTransitionBehavior'' property specifies what to do at these run transitions.
+** Restart: the accumulated data (from the previous run if a run has just ended or from the time between runs a if a run has just started) is discarded as soon as the next chunk of data arrives.
 ** Stop: live data monitoring ends. It will have to be restarted manually.
 ** Rename: the previous workspaces are renamed, and monitoring continues with cleared ones. The run number, if found, is used to rename the old workspaces.
 *** There is a check for available memory before renaming; if there is not enough memory, the old data is discarded.

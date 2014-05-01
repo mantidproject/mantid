@@ -197,7 +197,7 @@ namespace Crystal
    *
    */
   static void updateSourceParams(
-        boost::shared_ptr<const Geometry::IObjComponent> bank_const,
+        boost::shared_ptr<const Geometry::IComponent> bank_const,
        boost::shared_ptr<Geometry::ParameterMap> pmap,
        boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
 

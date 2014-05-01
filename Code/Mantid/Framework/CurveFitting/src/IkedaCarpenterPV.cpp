@@ -178,7 +178,7 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
       {
         API::MatrixWorkspace_const_sptr mws = getMatrixWorkspace();
         Instrument_const_sptr instrument = mws->getInstrument();
-        Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+        Geometry::IComponent_const_sptr sample = instrument->getSample();
         if (sample != NULL)
         {
           convertValue(m_waveLength, wavelength, mws, m_workspaceIndex);

@@ -299,7 +299,7 @@ namespace Mantid
         {
           this->init();
         }
-        catch(std::runtime_error& ex)
+        catch(std::runtime_error&)
         {
           throw;
         }
@@ -807,7 +807,7 @@ namespace Mantid
       {
         alg->initialize();
       }
-      catch (std::runtime_error& exc)
+      catch (std::runtime_error&)
       {
         throw std::runtime_error("Unable to initialise Child Algorithm '" + name + "'");
       }

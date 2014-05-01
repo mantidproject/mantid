@@ -58,6 +58,7 @@ Version 1 supports the loading version 1.0 of the muon nexus format.  This is st
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -234,7 +235,7 @@ namespace Mantid
       // Set the unit on the workspace to muon time, for now in the form of a Label Unit
       boost::shared_ptr<Kernel::Units::Label> lblUnit = 
         boost::dynamic_pointer_cast<Kernel::Units::Label>(UnitFactory::Instance().create("Label"));
-      lblUnit->setLabel("Time","microsecond");
+      lblUnit->setLabel("Time", Units::Symbol::Microsecond);
       localWorkspace->getAxis(0)->unit() = lblUnit;
       // Set y axis unit
       localWorkspace->setYUnit("Counts");

@@ -3,7 +3,10 @@
 
 #include <vector>
 #include <set>
-#include <boost/unordered_map.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/unordered_map.hpp>
+#endif
+
 #include "MantidGeometry/IDTypes.h"
 #include "MantidAPI/DllConfig.h"
 

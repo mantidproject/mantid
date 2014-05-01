@@ -75,8 +75,8 @@ namespace Algorithms
     const double count = getProperty("BinCount");
 
     Mantid::Geometry::Instrument_const_sptr instr = runWS->getInstrument();
-    Mantid::Geometry::IObjComponent_const_sptr source = instr->getSource();
-    Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
+    Mantid::Geometry::IComponent_const_sptr source = instr->getSource();
+    Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
     Mantid::Geometry::IDetector_const_sptr det = instr->getDetector(detID);
 
     const Mantid::Kernel::V3D samplePos = sample->getPos();

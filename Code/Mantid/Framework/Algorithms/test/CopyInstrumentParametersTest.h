@@ -44,9 +44,9 @@ public:
     TS_ASSERT( copyInstParam.isInitialized() )
   }
 
-  void testExec()
+  void testExec_SameInstr()
   {
-     // Create input workspace with paremeterised instrument and put into data store
+     // Create input workspace with parameterized instrument and put into data store
      MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
      const std::string wsName1("CopyInstParamWs1");
      AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
@@ -67,6 +67,11 @@ public:
      Geometry::ComponentHelper::moveComponent(*det1, *pmap, V3D(6.0,0.0,0.7), Absolute );
      IComponent_const_sptr det2 =instrument->getDetector(2);
      Geometry::ComponentHelper::moveComponent(*det2, *pmap, V3D(6.0,0.1,0.7), Absolute );
+     // add auxiliary instrument parameters
+     pmap->addDouble(instrument.get(),"Ei",100);
+     pmap->addString(instrument.get(),"some_param","some_value");
+
+
 
      // Verify that a detector moved in the input workspace has not yet been moved in the output workspace
      IDetector_const_sptr deto = ws2->getDetector(0);
@@ -76,6 +81,7 @@ public:
      // Execute Algorithm
      TS_ASSERT_THROWS_NOTHING(copyInstParam.execute());
      TS_ASSERT( copyInstParam.isExecuted() );
+     TS_ASSERT(!copyInstParam.isInstrumentDifferent());
 
      // Verify that the detectors in the output workspace have been moved as in the input workspace before execution
      IDetector_const_sptr deto1 = ws2->getDetector(0);
@@ -92,24 +98,51 @@ public:
      TS_ASSERT_DELTA( newPos2.X() , 6.0, 0.0001);
      TS_ASSERT_DELTA( newPos2.Y() , 0.1, 0.0001);
      TS_ASSERT_DELTA( newPos2.Z() , 0.7, 0.0001);
+     auto instr2=ws2->getInstrument();
+     std::set<std::string> param_names = instr2->getParameterNames();
+     TS_ASSERT(param_names.find("Ei")!=param_names.end());
+     TS_ASSERT(param_names.find("some_param")!=param_names.end());
+
 
      dataStore.remove(wsName1);
      dataStore.remove(wsName2);
   }
 
-	// #8186: it was decided to relax the previous requirement that it does not copy the instrument
-	// parameter for different instruments
-  void testDifferent_BaseInstrument_Warns()
+  // parameter for different instruments
+  void testDifferent_BaseInstrument_DifferentMapReplaced()
   {
-    // Create input workspace with parameterised instrument and put into data store
-     MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
+    // Create input workspace with parameterized instrument and put into data store
+     MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(4, 10, true,false,true,"Instr_modified");
      const std::string wsName1("CopyInstParamWs1");
      AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
      dataStore.add(wsName1, ws1);
-     // Create output workspace with another parameterised instrument and put into data store
+
+
+     Geometry::Instrument_const_sptr instrument = ws1->getInstrument();
+     Geometry::ParameterMap *pmap;
+     pmap = &(ws1->instrumentParameters());
+    // add auxiliary instrument parameters
+     pmap->addDouble(instrument.get(),"Ei",100);
+     pmap->addString(instrument.get(),"some_param","some_value");
+     IComponent_const_sptr det1 =instrument->getDetector(1);
+     Geometry::ComponentHelper::moveComponent(*det1, *pmap, V3D(6.0,0.0,0.7), Absolute );
+     IComponent_const_sptr det4 =instrument->getDetector(4);
+     Geometry::ComponentHelper::moveComponent(*det4, *pmap, V3D(6.0,0.1,0.7), Absolute );
+
+
+     // Create output workspace with another parameterized instrument and put into data store
      MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
      const std::string wsName2("CopyInstParamWs2");
      dataStore.add(wsName2, ws2);
+
+     pmap = &(ws2->instrumentParameters());
+     instrument = ws2->getInstrument();
+     pmap->addDouble(instrument.get(),"T",10);
+     pmap->addString(instrument.get(),"some_param","other_value");
+     IComponent_const_sptr det2 =instrument->getDetector(2);
+     Geometry::ComponentHelper::moveComponent(*det2, *pmap, V3D(6.0,0.2,0.7), Absolute );
+
+
 
      // Set properties
      TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("InputWorkspace", wsName1 ));
@@ -119,6 +152,36 @@ public:
      copyInstParam.setRethrows(true);
      TS_ASSERT(copyInstParam.execute());
      TS_ASSERT( copyInstParam.isExecuted() );
+     TS_ASSERT(copyInstParam.isInstrumentDifferent());
+
+     auto instr2=ws2->getInstrument();
+     std::set<std::string> param_names = instr2->getParameterNames();
+     TS_ASSERT(param_names.find("Ei")!=param_names.end());
+     TS_ASSERT(param_names.find("some_param")!=param_names.end());
+     TS_ASSERT(param_names.find("T")==param_names.end());
+     std::vector<std::string> rez = instr2->getStringParameter("some_param");
+     TS_ASSERT(std::string("some_value")==rez[0]);
+     TS_ASSERT_EQUALS(100,(instr2->getNumberParameter("Ei"))[0]);
+     //TS_ASSERT_EQUALS(10,(instr2->getNumberParameter("T"))[0]);
+
+     // new detector allocation applied
+     IDetector_const_sptr deto1 = ws2->getDetector(0);
+     int id1 = deto1->getID();
+     V3D newPos1 = deto1->getPos();
+     TS_ASSERT_EQUALS( id1, 1);
+     TS_ASSERT_DELTA( newPos1.X() , 6.0, 0.0001);
+     TS_ASSERT_DELTA( newPos1.Y() , 0.0, 0.0001);
+     TS_ASSERT_DELTA( newPos1.Z() , 0.7, 0.0001);
+
+     // previous detector placement rejected
+     IDetector_const_sptr deto2 = ws2->getDetector(1);
+     int id2 = deto2->getID();
+     V3D newPos2 = deto2->getPos();
+     TS_ASSERT_EQUALS( id2, 2);
+     TS_ASSERT_DELTA( newPos2.X() , -9.0, 0.0001);
+     TS_ASSERT_DELTA( newPos2.Y() , 0.0, 0.0001);
+     TS_ASSERT_DELTA( newPos2.Z() , 0.0, 0.0001);
+
 
      dataStore.remove(wsName1);
      dataStore.remove(wsName2);
