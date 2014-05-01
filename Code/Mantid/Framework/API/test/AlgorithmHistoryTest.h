@@ -220,7 +220,7 @@ private:
     Algorithm *testInput = new testalg;
     testInput->initialize();
     testInput->setPropertyValue("arg1_param", paramValue);
-    AlgorithmHistory history(testInput, 1.0, -1.0, m_execCount++);
+    AlgorithmHistory history(testInput, 1, -1.0, m_execCount++);
 
     delete testInput;
     return history;
