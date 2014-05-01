@@ -94,7 +94,7 @@ public:  // for the time being
     API::MatrixWorkspace_const_sptr getInWS()const{return m_InWS;}
     void setWS(API::MatrixWorkspace_sptr otherMatrixWS);
     std::string getWSName()const{return m_InWS->name();}
-    bool isPowder()const{return !m_InWS->sample().hasOrientedLattice();}
+    bool isPowder()const;
     bool hasLattice()const{return m_InWS->sample().hasOrientedLattice();}
 
     boost::shared_ptr<Geometry::OrientedLattice> getLattice()const{return getOrientedLattice(m_InWS);}

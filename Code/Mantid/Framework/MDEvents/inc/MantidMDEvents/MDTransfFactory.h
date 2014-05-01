@@ -10,7 +10,7 @@
  * The second operation that this macro performs is to provide the definition
  * of the unitID method for the concrete unit.
 
- * Second macro does the same thing as the first one, but allow to regirster the transformation 
+ * Second macro does the same thing as the first one, but allow to register the transformation 
  * with a name, different form the class name and specified by the transformation ID.  
  */
 #define DECLARE_MD_TRANSF(classname) \
@@ -106,12 +106,12 @@ private:
   mutable std::map< std::string, boost::shared_ptr<MDTransfInterface> > m_createdTransf;
 };
 
-///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) .
+///Forward declaration of a specialization of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) .
 #ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
+// this breaks new namespace declaration rules; need to find a better fix
   template class MANTID_MDEVENTS_DLL Mantid::Kernel::SingletonHolder<MDTransfFactoryImpl>;
 #endif /* _WIN32 */
-/// The specialisation of the SingletonHolder class that holds the MDTransformations Factory
+/// The specialization of the SingletonHolder class that holds the MDTransformations Factory
 typedef Kernel::SingletonHolder<MDTransfFactoryImpl> MDTransfFactory;
 
 } // namespace MDEvents

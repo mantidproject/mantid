@@ -50,7 +50,7 @@ void ConvertToMDParent::init()
    
 
      std::vector<std::string> Q_modes = MDEvents::MDTransfFactory::Instance().getKeys();
-     // something to do with different moments of thime when algorithm or test loads library. To avoid empty factory always do this. 
+     // something to do with different moments of time when algorithm or test loads library. To avoid empty factory always do this. 
      if(Q_modes.empty()) Q_modes.assign(1,"ERROR IN LOADING Q-converters");
   
      /// this variable describes default possible ID-s for Q-dimensions   
@@ -59,10 +59,10 @@ void ConvertToMDParent::init()
 "There are 3 modes currently available and described in details on [[MD Transformation factory]] page. \n"
 "The modes names are '''CopyToMD''', '''mod<nowiki>|Q|</nowiki>''' and '''Q3D'''",
                      Direction::InOut);
-     /// temporary, untill dEMode is not properly defined on Workspace
+     /// temporary, until dEMode is not properly defined on Workspace
      std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
      declareProperty("dEAnalysisMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<StringListValidator>(dE_modes),
-"You can analyse neutron energy transfer in '''Direct''', '''Indirect''' or '''Elastic''' mode. \n"
+"You can analyze neutron energy transfer in '''Direct''', '''Indirect''' or '''Elastic''' mode. \n"
 "The analysis mode has to correspond to experimental set up. Selecting inelastic mode increases \n"
 "the number of the target workspace dimensions by one. See [[MD Transformation factory]] for further details.",
                      Direction::InOut);
@@ -104,7 +104,7 @@ void ConvertToMDParent::init()
 "The name of the table workspace where the part of the detectors transformation into reciprocal space, "
 "calculated by [[PreprocessDetectorsToMD]] algorithm stored. If the workspace is not found in analysis "
 "data service, [[PreprocessDetectorsToMD]] used to calculate it. If found, the algorithm uses existing "
-"workspace. The field is useful if one expects to analyse number of different experiments obtained on "
+"workspace. The field is useful if one expects to analyze number of different experiments obtained on "
 "the same instrument. <span style=\"color:#FF0000\"> Dangerous if one uses number of workspaces with "
 "modified derived instrument one after another. </span> '''In this case this property has to be set to "
 "<span style=\"color:#FF0000\">\"-\"</span> sting (without quotes) or empty (possible from script only) "
