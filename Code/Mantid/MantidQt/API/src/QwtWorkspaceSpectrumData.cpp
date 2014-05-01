@@ -1,10 +1,10 @@
-#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "MantidQtAPI/PlotAxis.h"
 
 #include <QStringBuilder>
 
 /// Constructor
-MantidQwtMatrixWorkspaceData::MantidQwtMatrixWorkspaceData(Mantid::API::MatrixWorkspace_const_sptr workspace,int specIndex, const bool logScale, bool distr)
+QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(Mantid::API::MatrixWorkspace_const_sptr workspace,int specIndex, const bool logScale, bool distr)
  : m_workspace(workspace),
    m_spec(specIndex),
    m_X(workspace->readX(specIndex)),
@@ -18,13 +18,13 @@ MantidQwtMatrixWorkspaceData::MantidQwtMatrixWorkspaceData(Mantid::API::MatrixWo
 {}
 
 /// Copy constructor
-MantidQwtMatrixWorkspaceData::MantidQwtMatrixWorkspaceData(const MantidQwtMatrixWorkspaceData& data)
+QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(const QwtWorkspaceSpectrumData& data)
 {
   this->operator =(data);
 }
 
 /** Assignment operator */
-MantidQwtMatrixWorkspaceData& MantidQwtMatrixWorkspaceData::operator=(const MantidQwtMatrixWorkspaceData &data)
+QwtWorkspaceSpectrumData& QwtWorkspaceSpectrumData::operator=(const QwtWorkspaceSpectrumData &data)
 {
   m_workspace = data.m_workspace;
   m_spec = data.m_spec;
@@ -42,7 +42,7 @@ MantidQwtMatrixWorkspaceData& MantidQwtMatrixWorkspaceData::operator=(const Mant
 
 /** Size of the data set
  */
-size_t MantidQwtMatrixWorkspaceData::size() const
+size_t QwtWorkspaceSpectrumData::size() const
 {
   if (m_binCentres || !m_isHistogram)
   {
@@ -57,7 +57,7 @@ Return the x value of data point i
 @param i :: Index
 @return x X value of data point i
 */
-double MantidQwtMatrixWorkspaceData::x(size_t i) const
+double QwtWorkspaceSpectrumData::x(size_t i) const
 {
   return m_binCentres ? (m_X[i] + m_X[i+1])/2 : m_X[i];
 }
@@ -67,7 +67,7 @@ Return the y value of data point i
 @param i :: Index
 @return y Y value of data point i
 */
-double MantidQwtMatrixWorkspaceData::y(size_t i) const
+double QwtWorkspaceSpectrumData::y(size_t i) const
 {
   double tmp = i < m_Y.size() ? m_Y[i] : m_Y[m_Y.size()-1];
   if (m_isDistribution)
@@ -82,12 +82,12 @@ double MantidQwtMatrixWorkspaceData::y(size_t i) const
   return tmp;
 }
 
-double MantidQwtMatrixWorkspaceData::ex(size_t i) const
+double QwtWorkspaceSpectrumData::ex(size_t i) const
 {
   return m_isHistogram ? (m_X[i] + m_X[i+1])/2 : m_X[i];
 }
 
-double MantidQwtMatrixWorkspaceData::e(size_t i) const
+double QwtWorkspaceSpectrumData::e(size_t i) const
 {
   if (m_logScale)
   {
@@ -100,7 +100,7 @@ double MantidQwtMatrixWorkspaceData::e(size_t i) const
     return m_E[i];
 }
 
-size_t MantidQwtMatrixWorkspaceData::esize() const
+size_t QwtWorkspaceSpectrumData::esize() const
 {
   return m_E.size();
 }
@@ -109,7 +109,7 @@ size_t MantidQwtMatrixWorkspaceData::esize() const
  * Depending upon whether the log options have been set.
  * @return the lowest y value.
  */
-double MantidQwtMatrixWorkspaceData::getYMin() const
+double QwtWorkspaceSpectrumData::getYMin() const
 {
   auto it = std::min_element(m_Y.begin(), m_Y.end());
   double temp = 0;
@@ -128,7 +128,7 @@ double MantidQwtMatrixWorkspaceData::getYMin() const
  * Depending upon whether the log options have been set.
  * @return the highest y value.
  */
-double MantidQwtMatrixWorkspaceData::getYMax() const
+double QwtWorkspaceSpectrumData::getYMax() const
 {
   auto it = std::max_element(m_Y.begin(), m_Y.end());
   double temp = 0;
@@ -146,7 +146,7 @@ double MantidQwtMatrixWorkspaceData::getYMax() const
 /**
  * @return A string containin the text to use as an X axis label
  */
-QString MantidQwtMatrixWorkspaceData::getXAxisLabel() const
+QString QwtWorkspaceSpectrumData::getXAxisLabel() const
 {
   return MantidQt::API::PlotAxis(*m_workspace, 0).title();
 }
@@ -154,22 +154,22 @@ QString MantidQwtMatrixWorkspaceData::getXAxisLabel() const
 /**
  * @return A string containin the text to use as an Y axis label
  */
-QString MantidQwtMatrixWorkspaceData::getYAxisLabel() const
+QString QwtWorkspaceSpectrumData::getYAxisLabel() const
 {
   return MantidQt::API::PlotAxis(*m_workspace).title();
 }
 
-void MantidQwtMatrixWorkspaceData::setLogScale(bool on)
+void QwtWorkspaceSpectrumData::setLogScale(bool on)
 {
   m_logScale = on;
 }
 
-void MantidQwtMatrixWorkspaceData::saveLowestPositiveValue(const double v)
+void QwtWorkspaceSpectrumData::saveLowestPositiveValue(const double v)
 {
   if (v > 0) m_minPositive = v;
 }
 
-bool MantidQwtMatrixWorkspaceData::setAsDistribution(bool on)
+bool QwtWorkspaceSpectrumData::setAsDistribution(bool on)
 {
   m_isDistribution = on && m_isHistogram;
   return m_isDistribution;

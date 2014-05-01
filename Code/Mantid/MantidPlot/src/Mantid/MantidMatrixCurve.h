@@ -4,7 +4,7 @@
 #include "MantidCurve.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 
 // Forward definitions
 class MantidUI;
@@ -70,16 +70,16 @@ public:
   /// Used for waterfall plots: updates the data curves with an offset
   void loadData();
 
-  /// Overrides qwt_plot_curve::setData to make sure only data of MantidQwtMatrixWorkspaceData type can  be set
+  /// Overrides qwt_plot_curve::setData to make sure only data of QwtWorkspaceSpectrumData type can  be set
   void setData(const QwtData &data);
 
   /// Overrides qwt_plot_curve::boundingRect
   QwtDoubleRect boundingRect() const;
 
   /// Return pointer to the data if it of the right type or 0 otherwise
-  MantidQwtMatrixWorkspaceData* mantidData();
+  QwtWorkspaceSpectrumData* mantidData();
   /// Return pointer to the data if it of the right type or 0 otherwise, const version
-  const MantidQwtMatrixWorkspaceData* mantidData() const;
+  const QwtWorkspaceSpectrumData* mantidData() const;
 
   /// Enables/disables drawing of error bars
   void setErrorBars(bool yes=true,bool drawAll = false){m_drawErrorBars = yes;m_drawAllErrorBars = drawAll;}

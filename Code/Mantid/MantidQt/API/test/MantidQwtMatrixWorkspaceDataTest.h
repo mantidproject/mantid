@@ -8,7 +8,7 @@
 #include <QRgb>
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 
 class MantidQwtMatrixWorkspaceDataTest : public CxxTest::TestSuite
 {
@@ -31,7 +31,7 @@ public:
     }
   }
 
-  void checkHistogramData(MantidQwtMatrixWorkspaceData & data, double offset)
+  void checkHistogramData(QwtWorkspaceSpectrumData & data, double offset)
   {
     TS_ASSERT_EQUALS( data.size(), 5);
     for (size_t i=0; i<4; i++)
@@ -47,24 +47,24 @@ public:
 
   void test_histogram()
   {
-    MantidQwtMatrixWorkspaceData data(ws, 1, false, false);
+    QwtWorkspaceSpectrumData data(ws, 1, false, false);
     checkHistogramData(data, 1.0);
     TS_ASSERT( data.isHistogram() );
-    MantidQwtMatrixWorkspaceData data2(ws, 2, false, false);
+    QwtWorkspaceSpectrumData data2(ws, 2, false, false);
     checkHistogramData(data2, 2.0);
   }
 
   void test_assigmentOperator()
   {
-    MantidQwtMatrixWorkspaceData data1(ws, 1, false, false);
-    MantidQwtMatrixWorkspaceData data2 = data1;
+    QwtWorkspaceSpectrumData data1(ws, 1, false, false);
+    QwtWorkspaceSpectrumData data2 = data1;
     checkHistogramData(data2, 1.0);
   }
 
   void test_copy()
   {
-    MantidQwtMatrixWorkspaceData data1(ws, 1, false, false);
-    MantidQwtMatrixWorkspaceData * data2 = dynamic_cast<MantidQwtMatrixWorkspaceData *>(data1.copy());
+    QwtWorkspaceSpectrumData data1(ws, 1, false, false);
+    QwtWorkspaceSpectrumData * data2 = dynamic_cast<QwtWorkspaceSpectrumData *>(data1.copy());
     checkHistogramData(*data2, 1.0);
   }
 
@@ -72,7 +72,7 @@ public:
   void test_logScale()
   {
     ws->dataY(0)[2] = -10;
-    MantidQwtMatrixWorkspaceData data(ws, 0, true, false);
+    QwtWorkspaceSpectrumData data(ws, 0, true, false);
     TS_ASSERT_DELTA( data.y(1), 2.0, 1e-6);
     TS_ASSERT_DELTA( data.e(1), 3.0, 1e-6);
     TS_ASSERT_DELTA( data.y(2), 0.0, 1e-6);

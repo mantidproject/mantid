@@ -1,25 +1,24 @@
-#ifndef MANTIDQTAPI_MANTIDQWTMATRIXWORKSPACEDATA_H
-#define MANTIDQTAPI_MANTIDQWTMATRIXWORKSPACEDATA_H
+#ifndef MANTIDQTAPI_QWTWORKSPACESPECTRUMDATA_H
+#define MANTIDQTAPI_QWTWORKSPACESPECTRUMDATA_H
 
-#include <boost/shared_ptr.hpp>
 #include "MantidAPI/MatrixWorkspace.h"
-#include <QObject>
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
 #include "DllOption.h"
 
+#include <boost/shared_ptr.hpp>
 //=================================================================================================
 //=================================================================================================
 /**  This class implements QwtData with direct access to a spectrum in a MatrixWorkspace.
  */
-class EXPORT_OPT_MANTIDQT_API MantidQwtMatrixWorkspaceData : public MantidQwtWorkspaceData
+class EXPORT_OPT_MANTIDQT_API QwtWorkspaceSpectrumData : public MantidQwtWorkspaceData
 {
 public:
-  MantidQwtMatrixWorkspaceData(Mantid::API::MatrixWorkspace_const_sptr workspace, int specIndex, const bool logScale, bool distr = false);
-  MantidQwtMatrixWorkspaceData(const MantidQwtMatrixWorkspaceData& data);
-  MantidQwtMatrixWorkspaceData& operator=(const MantidQwtMatrixWorkspaceData &);
+  QwtWorkspaceSpectrumData(Mantid::API::MatrixWorkspace_const_sptr workspace, int specIndex, const bool logScale, bool distr = false);
+  QwtWorkspaceSpectrumData(const QwtWorkspaceSpectrumData& data);
+  QwtWorkspaceSpectrumData& operator=(const QwtWorkspaceSpectrumData &);
 
     //! @return Pointer to a copy (virtual copy constructor)
-  virtual QwtData *copy() const {return new MantidQwtMatrixWorkspaceData(*this);}
+  virtual QwtData *copy() const {return new QwtWorkspaceSpectrumData(*this);}
 
   //! @return Size of the data set
   virtual size_t size() const;
@@ -38,9 +37,9 @@ public:
   virtual double y(size_t i) const;
 
   /// Return a new data object of the same type but with a new workspace
-  virtual MantidQwtMatrixWorkspaceData* copy(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
+  virtual QwtWorkspaceSpectrumData* copy(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
   {
-    return new MantidQwtMatrixWorkspaceData(workspace,m_spec, m_logScale);
+    return new QwtWorkspaceSpectrumData(workspace,m_spec, m_logScale);
   }
   /// Returns the error of the i-th data point
   double e(size_t i)const;

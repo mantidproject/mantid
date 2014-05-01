@@ -112,14 +112,14 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
   Axis *xAxis(NULL), *yAxis(NULL);
   if(m_indexType == Spectrum)
   {
-    MantidQwtMatrixWorkspaceData data(matrixWS,m_index, log,distr);
+    QwtWorkspaceSpectrumData data(matrixWS,m_index, log,distr);
     setData(data);
     xAxis = matrixWS->getAxis(0);
     yAxis = matrixWS->getAxis(1);
   }
   else
   {
-    MantidQwtMatrixWorkspaceData data(matrixWS,m_index, log,distr);
+    QwtWorkspaceSpectrumData data(matrixWS,m_index, log,distr);
     setData(data);
     xAxis = matrixWS->getAxis(1);
     yAxis = matrixWS->getAxis(0);
@@ -199,8 +199,8 @@ void MantidMatrixCurve::loadData()
 
 void MantidMatrixCurve::setData(const QwtData &data)
 {
-  if (!dynamic_cast<const MantidQwtMatrixWorkspaceData*>(&data)) 
-    throw std::runtime_error("Only MantidQwtMatrixWorkspaceData can be set to a MantidMatrixCurve");
+  if (!dynamic_cast<const QwtWorkspaceSpectrumData*>(&data))
+    throw std::runtime_error("Only QwtWorkspaceSpectrumData can be set to a MantidMatrixCurve");
   PlotCurve::setData(data);
 }
 
@@ -217,10 +217,10 @@ void MantidMatrixCurve::draw(QPainter *p,
 
   if (m_drawErrorBars)// drawing error bars
   {
-    const MantidQwtMatrixWorkspaceData* d = dynamic_cast<const MantidQwtMatrixWorkspaceData*>(&data());
+    const QwtWorkspaceSpectrumData* d = dynamic_cast<const QwtWorkspaceSpectrumData*>(&data());
     if (!d)
     {
-      throw std::runtime_error("Only MantidQwtMatrixWorkspaceData can be set to a MantidMatrixCurve");
+      throw std::runtime_error("Only QwtWorkspaceSpectrumData can be set to a MantidMatrixCurve");
     }
     p->translate(d_x_offset,-d_y_offset); // For waterfall plots (will be zero otherwise)
                                           // Don't really know why you'd want errors on a waterfall plot, but just in case...
@@ -230,7 +230,7 @@ void MantidMatrixCurve::draw(QPainter *p,
 
 void MantidMatrixCurve::itemChanged()
 {
-  MantidQwtMatrixWorkspaceData* d = dynamic_cast<MantidQwtMatrixWorkspaceData*>(&data());
+  QwtWorkspaceSpectrumData* d = dynamic_cast<QwtWorkspaceSpectrumData*>(&data());
   if (d && d->m_isHistogram)
   {
     if (style() == Steps) d->m_binCentres = false;
@@ -278,12 +278,12 @@ void MantidMatrixCurve::dataReset(const QString& wsName)
   // Acquire a read-lock on the matrix workspace data
   ReadLock _lock(*mws);
 
-  const MantidQwtMatrixWorkspaceData * new_mantidData(NULL);
+  const QwtWorkspaceSpectrumData * new_mantidData(NULL);
   try 
   {
     new_mantidData = mantidData()->copy(mws);
     setData(*new_mantidData);
-    // Queue this plot to be updated once all MantidQwtMatrixWorkspaceData objects for this workspace have been
+    // Queue this plot to be updated once all QwtWorkspaceSpectrumData objects for this workspace have been
     emit dataUpdated();
   } 
   catch(std::range_error &) 
@@ -317,22 +317,22 @@ QString MantidMatrixCurve::saveToString()
 /// Returns the workspace index if a spectrum is plotted and -1 if it is a bin.
 int MantidMatrixCurve::workspaceIndex()const
 {
-  if (dynamic_cast<const MantidQwtMatrixWorkspaceData*>(mantidData()) != 0)
+  if (dynamic_cast<const QwtWorkspaceSpectrumData*>(mantidData()) != 0)
   {
     return m_index;
   }
   return -1;
 }
 
-MantidQwtMatrixWorkspaceData* MantidMatrixCurve::mantidData()
+QwtWorkspaceSpectrumData* MantidMatrixCurve::mantidData()
 {
-  MantidQwtMatrixWorkspaceData* d = dynamic_cast<MantidQwtMatrixWorkspaceData*>(&data());
+  QwtWorkspaceSpectrumData* d = dynamic_cast<QwtWorkspaceSpectrumData*>(&data());
   return d;
 }
 
-const MantidQwtMatrixWorkspaceData* MantidMatrixCurve::mantidData()const
+const QwtWorkspaceSpectrumData* MantidMatrixCurve::mantidData()const
 {
-  const MantidQwtMatrixWorkspaceData* d = dynamic_cast<const MantidQwtMatrixWorkspaceData*>(&data());
+  const QwtWorkspaceSpectrumData* d = dynamic_cast<const QwtWorkspaceSpectrumData*>(&data());
   return d;
 }
 

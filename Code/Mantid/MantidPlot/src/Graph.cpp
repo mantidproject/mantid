@@ -59,7 +59,7 @@
 #include "plot2D/ScaleEngine.h"
 
 #include "Mantid/MantidMatrixCurve.h"
-#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "Mantid/ErrorBarSettings.h"
 
 #ifdef EMF_OUTPUT
@@ -6082,7 +6082,7 @@ void Graph::updateDataCurves()
 
 void Graph::checkValuesInAxisRange(MantidMatrixCurve* mc)
 {
-  MantidQwtMatrixWorkspaceData* data = mc->mantidData();
+  QwtWorkspaceSpectrumData* data = mc->mantidData();
   double xMin(data->x(0)); // Needs to be min of current graph (x-axis)
   double xMax(data->x(data->size()-1)); // Needs to be max of current graph (x-axis)
   bool changed(false);
