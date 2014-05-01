@@ -114,6 +114,9 @@ void LoadDaveGrp::init()
   this->declareProperty(new Kernel::PropertyWithValue<bool>("IsMicroEV", false,
       Kernel::Direction::Input),
       "Original file is in units of micro-eV for DeltaE");
+  this->declareProperty(new Kernel::PropertyWithValue<bool>("ConvertToHistogram", false,
+      Kernel::Direction::Input),
+      "Convert output workspace to histogram data.");
 }
 
 void LoadDaveGrp::exec()
@@ -197,12 +200,19 @@ void LoadDaveGrp::exec()
   delete yAxis;
 
   //convert output workspace to histogram data
-  auto convert2Hist = createChildAlgorithm("ConvertToHistogram");
-  convert2Hist->setProperty("InputWorkspace", outputWorkspace);
-  convert2Hist->setProperty("OutputWorkspace", outputWorkspace);
-  convert2Hist->execute();
+  const bool convertToHistogram = this->getProperty("ConvertToHistogram");
+  if (convertToHistogram)
+  {
+    auto convert2HistAlg = createChildAlgorithm("ConvertToHistogram");
+    convert2HistAlg->setProperty("InputWorkspace", outputWorkspace);
+    convert2HistAlg->setProperty("OutputWorkspace", outputWorkspace);
+    convert2HistAlg->execute();
+    outputWorkspace = convert2HistAlg->getProperty("OutputWorkspace");
 
-  outputWorkspace = convert2Hist->getProperty("OutputWorkspace");
+    auto convertFromDistAlg = createChildAlgorithm("ConvertFromDistribution");
+    convertFromDistAlg->setProperty("Workspace", outputWorkspace);
+    convertFromDistAlg->execute();
+  }
 
   outputWorkspace->mutableRun().addProperty("Filename",filename);
   this->setProperty("OutputWorkspace", outputWorkspace);
