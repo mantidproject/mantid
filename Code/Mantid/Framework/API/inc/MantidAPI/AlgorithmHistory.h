@@ -114,8 +114,6 @@ public:
 private:
   // Set the execution count 
   void setExecCount(std::size_t execCount) { m_execCount = execCount; }
-  /// Set the duration time 
-  void setDuration(const double& duration) { m_executionDuration = duration; }
   /// The name of the Algorithm
   std::string m_name;
   /// The version of the algorithm

@@ -606,7 +606,7 @@ namespace Mantid
 
           start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
           //populate history record before execution so we can record child algorithms in it
-          AlgorithmHistory algHist(this, start_time);
+          AlgorithmHistory algHist(this);
           m_history = boost::make_shared<AlgorithmHistory>(algHist);
           
           // Start a timer
@@ -617,7 +617,7 @@ namespace Mantid
           interruption_point();			
           // Get how long this algorithm took to run
           const float duration = timer.elapsed();
-          m_history->setDuration(duration);
+          m_history->addExecutionInfo(start_time, duration);
           m_history->setExecCount(Algorithm::g_execCount);
 
           // need it to throw before trying to run fillhistory() on an algorithm which has failed
