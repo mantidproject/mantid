@@ -720,136 +720,85 @@ def furyfitPlotSeq(ws, plot):
 # MSDFit
 ##############################################################################
 
-def msdfitParsToWS(Table, xData):
-    dataX = xData
-    ws = mtd[Table+'_Table']
-    rCount = ws.rowCount()
-    yA0 = ws.column(1)
-    eA0 = ws.column(2)
-    yA1 = ws.column(3)  
-    dataY1 = map(lambda x : -x, yA1) 
-    eA1 = ws.column(4)
-    wsname = Table
-
-    #check if temp was increasing or decreasing
-    if(dataX[0] > dataX[-1]):
-        # if so reverse data to follow natural ordering
-        dataX = dataX[::-1]
-        dataY1 = dataY1[::-1]
-        eA1 = eA1[::-1]
-
-    CreateWorkspace(OutputWorkspace=wsname+'_a0', DataX=dataX, DataY=yA0, DataE=eA0,
-        Nspec=1, UnitX='')
-    CreateWorkspace(OutputWorkspace=wsname+'_a1', DataX=dataX, DataY=dataY1, DataE=eA1,
-        Nspec=1, UnitX='')
-    group = wsname+'_a0,'+wsname+'_a1'
-    GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=wsname)
-    return wsname
-
 def msdfitPlotSeq(inputWS, xlabel):
-    msd_plot = mp.plotSpectrum(inputWS+'_a1',0,True)
-    msd_layer = msd_plot.activeLayer()
-    msd_layer.setAxisTitle(mp.Layer.Bottom,xlabel)
-    msd_layer.setAxisTitle(mp.Layer.Left,'<u2>')
+    ws = mtd[inputWS+'_A1']
+    if len(ws.readX(0)) > 1:
+        msd_plot = mp.plotSpectrum(inputWS+'_A1',0,True)
+        msd_layer = msd_plot.activeLayer()
+        msd_layer.setAxisTitle(mp.Layer.Bottom,xlabel)
+        msd_layer.setAxisTitle(mp.Layer.Left,'<u2>')
 
-def msdfitPlotFits(calcWS, n):
-    mfit_plot = mp.plotSpectrum(calcWS+'_0',[0,1],True)
-    mfit_layer = mfit_plot.activeLayer()
-    mfit_layer.setAxisTitle(mp.Layer.Left,'log(Elastic Intensity)')
-
-def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True): 
+def msdfit(ws, startX, endX, spec_min=0, spec_max=None, Save=False, Verbose=False, Plot=True):
     StartTime('msdFit')
-    workdir = config['defaultsave.directory']
-    log_type = 'sample'
-    
-    file_name = inputs[0]
-    base_name = os.path.basename(file_name)
-    (root,ext) = os.path.splitext(base_name)
-    
-    if Verbose:
-        logger.notice('Reading Run : ' + file_name)
-    
-    LoadNexusProcessed(FileName=file_name, OutputWorkspace=root)
-    
-    nHist = mtd[root].getNumberHistograms()
-    file_list = []
-    run_list = []
-    ws = mtd[root]
-    ws_run = ws.getRun()
-    vertAxisValues = ws.getAxis(1).extractValues()
-    x_list = vertAxisValues
+    workdir = getDefaultWorkingDirectory()
+
+    num_spectra = mtd[ws].getNumberHistograms()
+    if spec_max is None:
+        spec_max = num_spectra - 1
+
+    if spec_min < 0 or spec_max >= num_spectra:
+        raise ValueError("Invalid spectrum range: %d - %d" % (spec_min, spec_max))
+
+    xlabel = ''
+    ws_run = mtd[ws].getRun()
+
     if 'vert_axis' in ws_run:
         xlabel = ws_run.getLogData('vert_axis').value
-    for nr in range(0, nHist):
-        nsam,ntc = CheckHistZero(root)
-        lnWS = '__lnI_'+str(nr)
-        file_list.append(lnWS)
-        ExtractSingleSpectrum(InputWorkspace=root, OutputWorkspace=lnWS,
-            WorkspaceIndex=nr)
-        if (nr == 0):
-            run_list = lnWS
-        else:
-            run_list += ';'+lnWS
-    mname = root[:-4]
+
+    mname = ws[:-4]
     msdWS = mname+'_msd'
-    if Verbose:
-       logger.notice('Fitting Runs '+mname)
-       logger.notice('Q-range from '+str(startX)+' to '+str(endX))
+
+    #fit line to each of the spectra
     function = 'name=LinearBackground, A0=0, A1=0'
-    PlotPeakByLogValue(Input=run_list, OutputWorkspace=msdWS+'_Table', Function=function,
-        StartX=startX, EndX=endX, FitType = 'Sequential')
-    msdfitParsToWS(msdWS, x_list)
-    nr = 0
-    fitWS = mname+'_Fit'
-    calcWS = mname+'_msd_Result'
-    a0 = mtd[msdWS+'_a0'].readY(0)
-    a1 = mtd[msdWS+'_a1'].readY(0)
-    for nr in range(0, nHist):
-        inWS = file_list[nr]
-        CropWorkspace(InputWorkspace=inWS,OutputWorkspace='__data',XMin=0.95*startX,XMax=1.05*endX)
-        dataX = mtd['__data'].readX(0)
-        nxd = len(dataX)
-        dataX = np.append(dataX,2*dataX[nxd-1]-dataX[nxd-2])
-        dataY = np.array(mtd['__data'].readY(0))
-        dataE = np.array(mtd['__data'].readE(0))
-        xd = []
-        yd = []
-        ed = []
-        for n in range(0,nxd):
-            line = a0[nr] - a1[nr]*dataX[n]
-            xd.append(dataX[n])
-            yd.append(line)
-            ed.append(0.0)
-        xd.append(dataX[nxd])
-        dataX = np.append(dataX,np.array(xd))
-        dataY = np.append(dataY,np.array(yd))
-        dataE = np.append(dataE,np.array(ed))
-        fout = calcWS +'_'+ str(nr)
-        CreateWorkspace(OutputWorkspace=fout, DataX=dataX, DataY=dataY, DataE=dataE,
-            Nspec=2, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues='Data,Calc')
-        if nr == 0:
-            gro = fout
-        else:
-            gro += ',' + fout
-        DeleteWorkspace(inWS)
-        DeleteWorkspace('__data')
-    GroupWorkspaces(InputWorkspaces=gro,OutputWorkspace=calcWS)
+    input_params = [ ws+',i%d' % i for i in xrange(spec_min, spec_max+1)]
+    input_params = ';'.join(input_params)
+    PlotPeakByLogValue(Input=input_params, OutputWorkspace=msdWS, Function=function,
+                       StartX=startX, EndX=endX, FitType='Sequential', CreateOutput=True)
+
+    DeleteWorkspace(msdWS + '_NormalisedCovarianceMatrices')
+    DeleteWorkspace(msdWS + '_Parameters')
+    msd_parameters = msdWS+'_Parameters'
+    RenameWorkspace(msdWS, OutputWorkspace=msd_parameters)
+
+    #create workspaces for each of the parameters
+    group = []
+
+    ws_name = msdWS + '_A0'
+    group.append(ws_name)
+    ConvertTableToMatrixWorkspace(msd_parameters, OutputWorkspace=ws_name,
+                                  ColumnX='axis-1', ColumnY='A0', ColumnE='A0_Err')
+    xunit = mtd[ws_name].getAxis(0).setUnit('Label')
+    xunit.setLabel('Temperature', 'K')
+
+    ws_name = msdWS + '_A1'
+    group.append(ws_name)
+    ConvertTableToMatrixWorkspace(msd_parameters, OutputWorkspace=ws_name,
+                                  ColumnX='axis-1', ColumnY='A1', ColumnE='A1_Err')
+
+    SortXAxis(ws_name, OutputWorkspace=ws_name)
+
+    xunit = mtd[ws_name].getAxis(0).setUnit('Label')
+    xunit.setLabel('Temperature', 'K')
+
+    GroupWorkspaces(InputWorkspaces=','.join(group),OutputWorkspace=msdWS)
 
     #add sample logs to output workspace
-    CopyLogs(InputWorkspace=root, OutputWorkspace=msdWS)
+    fit_workspaces = msdWS + '_Workspaces'
+    CopyLogs(InputWorkspace=ws, OutputWorkspace=msdWS)
     AddSampleLog(Workspace=msdWS, LogName="start_x", LogType="Number", LogText=str(startX))
     AddSampleLog(Workspace=msdWS, LogName="end_x", LogType="Number", LogText=str(endX))
-    
+    CopyLogs(InputWorkspace=msdWS + '_A0', OutputWorkspace=fit_workspaces)
+
     if Plot:
         msdfitPlotSeq(msdWS, xlabel)
-        msdfitPlotFits(calcWS, 0)
     if Save:
-        msd_path = os.path.join(workdir, msdWS+'.nxs')					# path name for nxs file
+        msd_path = os.path.join(workdir, msdWS+'.nxs')                  # path name for nxs file
         SaveNexusProcessed(InputWorkspace=msdWS, Filename=msd_path, Title=msdWS)
         if Verbose:
-            logger.notice('Output msd file : '+msd_path)  
+            logger.notice('Output msd file : '+msd_path)
+
     EndTime('msdFit')
-    return msdWS
+    return fit_workspaces
 
 def plotInput(inputfiles,spectra=[]):
     OneSpectra = False
@@ -860,13 +809,12 @@ def plotInput(inputfiles,spectra=[]):
     for file in inputfiles:
         root = LoadNexus(Filename=file)
         if not OneSpectra:
-            GroupDetectors(root, root,
-                DetectorList=range(spectra[0],spectra[1]+1) )
+            GroupDetectors(root, root, DetectorList=range(spectra[0],spectra[1]+1) )
         workspaces.append(root)
     if len(workspaces) > 0:
         graph = mp.plotSpectrum(workspaces,0)
-        layer = graph.activeLayer().setTitle(", ".join(workspaces))
-        
+        graph.activeLayer().setTitle(", ".join(workspaces))
+
 ##############################################################################
 # Corrections
 ##############################################################################
