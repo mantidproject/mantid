@@ -18,24 +18,27 @@ public:
 
   void test_simple_string()
   {
-    UnitLabel label("TextLabel", L"TextLabel");
+      UnitLabel label("TextLabel", L"TextLabel", "TextLabelLatex");
 
     TS_ASSERT_EQUALS("TextLabel", label.ascii());
+    TS_ASSERT_EQUALS("TextLabelLatex", label.latex());
   }
 
   void test_utf8_string_can_hold_unicode_data()
   {
-    UnitLabel label("TextLabel", L"\u212b");
+      UnitLabel label("TextLabel", L"\u212b", "\\AA");
 
     TS_ASSERT_EQUALS(L"\u212b", label.utf8());
+    TS_ASSERT_EQUALS("\\AA", label.latex());
   }
 
-  void test_construction_from_single_string_sets_both_label_types_to_equal()
+  void test_construction_from_single_string_sets_all_label_types_to_equal()
   {
     UnitLabel label("LabelText");
 
     TS_ASSERT_EQUALS("LabelText", label.ascii());
     TS_ASSERT_EQUALS(L"LabelText", label.utf8());
+    TS_ASSERT_EQUALS("LabelText", label.latex());
   }
 
   void test_implicit_construction_from_std_string_sets_both_label_types_to_equal()
@@ -45,7 +48,7 @@ public:
 
   void test_implicit_string_converter_returns_ascii_method()
   {
-    UnitLabel label("TextLabel", L"\u212b");
+      UnitLabel label("TextLabel", L"\u212b","\\AA");
     std::string asciiText = label;
 
     TS_ASSERT_EQUALS("TextLabel", asciiText);
@@ -53,9 +56,9 @@ public:
 
   void test_comparision_operators()
   {
-    UnitLabel label("TextLabel", L"\u212b");
-    UnitLabel labelDiffAscii("TextLabe", L"\u212b");
-    UnitLabel labelDiffUtf8("TextLabel", L"\u207b");
+      UnitLabel label("TextLabel", L"\u212b","\\AA");
+      UnitLabel labelDiffAscii("TextLabe", L"\u212b", "not used");
+      UnitLabel labelDiffUtf8("TextLabel", L"\u207b", "not used");
 
     TS_ASSERT(label == label);
     TS_ASSERT(label == "TextLabel");
