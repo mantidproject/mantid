@@ -331,7 +331,7 @@ void testTransf2HKL()
 void testModQAnyLattice()
 {
    MDEvents::MDWSDescription TWS;
-   std::vector<double> rot;
+   std::vector<double> rot,sample(9,0);
 
    Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::Create2DWorkspaceBinned(10,10);
    //Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
@@ -345,7 +345,9 @@ void testModQAnyLattice()
 
    CnvrtToMD::CoordScaling scales = CnvrtToMD::NoScaling;
    TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::HKLFrame,scales));
+   sample[0]=sample[4]=sample[8]=1;
 
+   TS_ASSERT_DELTA(sample,rot,1.e-7);
 
 }
 

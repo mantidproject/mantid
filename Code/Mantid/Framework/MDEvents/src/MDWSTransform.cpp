@@ -119,7 +119,7 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
   }
   // set the frame ID to the values, requested by properties
   CnvrtToMD::TargetFrame CoordFrameID(FrameID);
-  if(FrameID==AutoSelect) // if this value is auto-select, find appropriate frame from workspace properties
+  if(FrameID==AutoSelect || powderMode) // if this value is auto-select, find appropriate frame from workspace properties
     CoordFrameID = findTargetFrame(TargWSDescription);
   else // if not, and specific target frame requested, verify if everything is available on the workspace for this frame
     checkTargetFrame(TargWSDescription,CoordFrameID); // throw, if the information is not available
@@ -170,13 +170,13 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
   return rotMat;
 }
 /**
- Method builds transfomration Q=R*U*B*W*h where W-transf is W or WB or W*Unit*Lattice_param depending on inputs
+ Method builds transformation Q=R*U*B*W*h where W-transf is W or WB or W*Unit*Lattice_param depending on inputs
 */
 Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling ScaleID,bool UnitUB)const
 {
   //implements strategy 
   if(!(TargWSDescription.hasLattice()||UnitUB)){      
-    throw(std::invalid_argument("this funcntion should be called only on workspace with defined oriented lattice"));
+    throw(std::invalid_argument("this function should be called only on workspace with defined oriented lattice"));
   }
 
   // if u,v us default, Wmat is unit transformation
@@ -221,7 +221,7 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
       Transf = spLatt->getU();
       break;
     }
-  case SingleScale: //< momentuns divided by  2*Pi/Lattice -- equivalend to d-spacing in some sense
+  case SingleScale: //< momentums divided by  2*Pi/Lattice -- equivalent to d-spacing in some sense
     {
       double dMax(-1.e+32);
       for(int i=0;i<3;i++)  dMax =(dMax>spLatt->a(i))?(dMax):(spLatt->a(i));
