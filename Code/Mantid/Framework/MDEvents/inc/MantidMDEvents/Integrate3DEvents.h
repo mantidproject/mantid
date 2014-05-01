@@ -77,7 +77,7 @@ class DLLExport Integrate3DEvents
                                  double       peak_radius,
                                  double       back_inner_radius,
                                  double       back_outer_radius,
-                                 std::vector<double> & new_sigmas,
+                                 std::vector<double> & axes_radii,
                                  double     & inti,
                                  double     & sigi );
 
@@ -126,7 +126,7 @@ class DLLExport Integrate3DEvents
                                  double                      peak_radius,
                                  double                      back_inner_radius,
                                  double                      back_outer_radius,
-                                 std::vector<double>       & new_sigmas,
+                                 std::vector<double>       & axes_radii,
                                  double                    & inti,
                                  double                    & sigi );
 

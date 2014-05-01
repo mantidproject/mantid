@@ -368,23 +368,23 @@ namespace MDEvents
       if ( Geometry::IndexingUtils::ValidIndex( hkl, 1.0 ) ) 
       {
         V3D peak_q( peaks[i].getQLabFrame() );
-        std::vector<double> new_sigmas;
+        std::vector<double> axes_radii;
         integrator.ellipseIntegrateEvents( peak_q, 
           specify_size, peak_radius, back_inner_radius, back_outer_radius,
-          new_sigmas, inti, sigi );
+          axes_radii, inti, sigi );
         peaks[i].setIntensity( inti );
         peaks[i].setSigmaIntensity( sigi );
         g_log.debug() << "Radii of three axes of ellipsoid for integrating peak "
         		<< i << " = ";
         for (int i3 = 0; i3 < 3; i3++ )
         {
-          g_log.debug() << new_sigmas[i3] << "  ";
+          g_log.debug() << axes_radii[i3] << "  ";
         }
         g_log.debug() << std::endl;
 
-        PeakRadiusVector1[i] = new_sigmas[0];
-        PeakRadiusVector2[i] = new_sigmas[1];
-        PeakRadiusVector3[i] = new_sigmas[2];
+        PeakRadiusVector1[i] = axes_radii[0];
+        PeakRadiusVector2[i] = axes_radii[1];
+        PeakRadiusVector3[i] = axes_radii[2];
       }
       else
       {
