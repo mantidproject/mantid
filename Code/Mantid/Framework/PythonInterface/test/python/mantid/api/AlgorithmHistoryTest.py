@@ -63,7 +63,7 @@ class AlgorithmHistoryTest(unittest.TestCase):
         self.assertEquals(nested_alg.version(), 1)
 
         basic_child_algs = nested_alg.getChildHistories()
-        self.assertGreater(len(basic_child_algs), 0)
+        self.assertTrue(len(basic_child_algs) > 0)
 
     def test_disable_history(self):
         ws_name = '__tmp_test_algorithm_history'
