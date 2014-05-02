@@ -54,7 +54,7 @@ public:
   /// Return the number of parts in the domain
   virtual size_t getNDomains() const;
   /// Create and return i-th domain and i-th values, (i-1)th domain is released.
-  virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::IFunctionValues_sptr& values) const;
+  virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::FunctionValues_sptr& values) const;
   /// Add new domain creator
   void addCreator( API::IDomainCreator_sptr creator );
   /// Calculate the value of a least squares cost function
@@ -75,7 +75,7 @@ protected:
   /// Currently active domain.
   mutable std::vector< API::FunctionDomain_sptr > m_domain;
   /// Currently active values.
-  mutable std::vector< API::IFunctionValues_sptr > m_values;
+  mutable std::vector< API::FunctionValues_sptr > m_values;
   /// Domain creators.
   std::vector< boost::shared_ptr<API::IDomainCreator> > m_creators;
 };
