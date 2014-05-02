@@ -159,7 +159,7 @@ void LoadRawDialog::initLayout()
           monitorsBox->addItem(QString::fromStdString(*mitr));
       }
     }
-    prop_line->addWidget(new QLabel("Monitors:"), 0, Qt::AlignRight);
+    prop_line->addWidget(new QLabel("LoadMonitors:"), 0, Qt::AlignRight);
     prop_line->addWidget(monitorsBox);
     tie(monitorsBox, "LoadMonitors", prop_line);
   }
