@@ -152,7 +152,6 @@ void QwtWorkspaceBinData::saveLowestPositiveValue(const double v)
 //-----------------------------------------------------------------------------
 /**
  * @param workspace A reference to the workspace object that this data refers to
- * @param binIndex The column of data being referred to
  */
 void QwtWorkspaceBinData::init(const Mantid::API::MatrixWorkspace &workspace)
 {
