@@ -231,10 +231,6 @@ public:
     // Copies selected columns (time bins) in a MantidMatrix to a Table
     Table* createTableFromSelectedColumns(MantidMatrix *m, bool errs);
 
-
-    // Shows 1D graphs of selected time bins (columns) in a MantidMatrix
-    MultiLayer* createGraphFromSelectedColumns(MantidMatrix *m, bool errs = true, bool tableVisible = false);
-
     // Creates and shows a Table with detector ids for the workspace in the MantidMatrix
     Table* createTableDetectors(MantidMatrix *m);
 

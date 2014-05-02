@@ -3275,23 +3275,6 @@ Table* MantidUI::createTableFromSelectedColumns(MantidMatrix *m, bool errs)
 
 }
 
-MultiLayer* MantidUI::createGraphFromSelectedColumns(MantidMatrix *m, bool errs, bool tableVisible)
-{
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  Table *t = createTableFromSelectedColumns(m,errs);
-  //t->askOnCloseEvent(false);
-  if (!t) return NULL;
-  if (tableVisible) t->showNormal();
-
-  MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
-  Graph *g = ml->activeGraph();
-  appWindow()->polishGraph(g,Graph::Line);
-  m->setBinGraph(ml,t);
-  // ml->askOnCloseEvent(false);
-
-  QApplication::restoreOverrideCursor();
-  return ml;
-}
 /** Saves data to  nexus file
 * @param wsName :: Name of the workspace to be saved
 * @param fileName :: name of the nexus file to created
