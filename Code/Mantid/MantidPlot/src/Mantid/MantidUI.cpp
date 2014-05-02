@@ -946,16 +946,14 @@ void MantidUI::copyColumnToGraph()
 {
   MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
-  createGraphFromSelectedColumns(m,false);
-
+  plotSelectedColumns(m,false);
 }
 
 void MantidUI::copyColumnToGraphErr()
 {
   MantidMatrix* m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
   if (!m || !m->isA("MantidMatrix")) return;
-  createGraphFromSelectedColumns(m,true);
-
+  plotSelectedColumns(m,true);
 }
 
 void MantidUI::copyRowToGraphErr()
@@ -3205,6 +3203,20 @@ MultiLayer* MantidUI::plotSelectedRows(const MantidMatrix * const m, bool errs, 
   std::set<int> rowSet(rows.constBegin(),rows.constEnd());
 
   return plot1D(m->workspaceName(),rowSet,true,errs,distr);
+}
+
+/**
+ * Create a graph and plot the selected columns of a MantidMatrix
+ * @param m MantidMatrix
+ * @param errs True if errors are required
+ * @return
+ */
+MultiLayer *MantidUI::plotSelectedColumns(const MantidMatrix * const m, bool errs)
+{
+  const QList<int>& cols = m->getSelectedColumns();
+  std::set<int> colSet(cols.constBegin(),cols.constEnd());
+
+  return plot1D(m->workspaceName(),colSet,false,errs,false);
 }
 
 Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_const_sptr workspace, const QList<int>& bins, bool errs, int fromRow, int toRow)

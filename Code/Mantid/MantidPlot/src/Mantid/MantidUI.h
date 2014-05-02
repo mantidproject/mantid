@@ -180,6 +180,8 @@ public:
 
   // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
   MultiLayer* plotSelectedRows(const MantidMatrix * const m, bool errs = true, bool distr = false);
+  // Shows 1D graphs of the columns (bins) selected in a MantidMatrix
+  MultiLayer* plotSelectedColumns(const MantidMatrix * const m, bool errs = true);
 
   AlgorithmMonitor* getAlgMonitor(){return m_algMonitor;}
   /// updates the algorithms tree
