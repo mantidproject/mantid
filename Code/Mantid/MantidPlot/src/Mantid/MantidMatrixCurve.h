@@ -144,8 +144,7 @@ private slots:
 private:
 
   /// Make the curve name
-  static QString createCurveName(const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
-                                 const QString& wsName,int index);
+  QString createCurveName(const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
 
   QString m_wsName;///< Workspace name. If empty the ws isn't in the data service
   /// index
