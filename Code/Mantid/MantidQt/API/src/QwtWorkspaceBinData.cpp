@@ -147,6 +147,26 @@ void QwtWorkspaceBinData::saveLowestPositiveValue(const double v)
   if (v > 0) m_minPositive = v;
 }
 
+/**
+ * @param rhs A source object whose state is copied here
+ * @return A reference to this object
+ */
+QwtWorkspaceBinData &QwtWorkspaceBinData::operator=(const QwtWorkspaceBinData & rhs)
+{
+  if(this != &rhs)
+  {
+    m_binIndex = rhs.m_binIndex;
+    m_X = rhs.m_X;
+    m_Y = rhs.m_Y;
+    m_E = rhs.m_E;
+    m_xTitle = rhs.m_xTitle;
+    m_yTitle = rhs.m_yTitle;
+    m_logScale = rhs.m_logScale;
+    m_minPositive = rhs.m_minPositive;
+  }
+  return *this;
+}
+
 //-----------------------------------------------------------------------------
 // Private methods
 //-----------------------------------------------------------------------------

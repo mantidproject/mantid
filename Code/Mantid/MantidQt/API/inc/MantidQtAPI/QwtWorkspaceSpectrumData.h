@@ -60,6 +60,10 @@ public:
   void saveLowestPositiveValue(const double v);
   bool setAsDistribution(bool on = true);
 
+protected:
+  // Assignment operator (virtualized). MSVC not happy with compiler generated one
+  QwtWorkspaceSpectrumData& operator=(const QwtWorkspaceSpectrumData&);
+
 private:
 
   friend class MantidMatrixCurve;

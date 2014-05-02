@@ -170,3 +170,29 @@ bool QwtWorkspaceSpectrumData::setAsDistribution(bool on)
   m_isDistribution = on && m_isHistogram;
   return m_isDistribution;
 }
+
+//-----------------------------------------------------------------------------
+// Protected methods
+//-----------------------------------------------------------------------------
+/**
+ * @param rhs A source object whose state is copied here
+ * @return A reference to this object
+ */
+QwtWorkspaceSpectrumData &QwtWorkspaceSpectrumData::operator=(const QwtWorkspaceSpectrumData & rhs)
+{
+  if(this != &rhs)
+  {
+    m_spec = rhs.m_spec;
+    m_X = rhs.m_X;
+    m_Y = rhs.m_Y;
+    m_E = rhs.m_E;
+    m_xTitle = rhs.m_xTitle;
+    m_yTitle = rhs.m_yTitle;
+    m_isHistogram = rhs.m_isHistogram;
+    m_binCentres = rhs.m_binCentres;
+    m_logScale = rhs.m_logScale;
+    m_minPositive = rhs.m_minPositive;
+    m_isDistribution = rhs.m_isDistribution;
+  }
+  return *this;
+}

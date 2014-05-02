@@ -56,7 +56,7 @@ public:
 
 protected:
   // Assignment operator (virtualized).
-  MantidQwtWorkspaceData& operator=(const MantidQwtWorkspaceData&);
+  MantidQwtWorkspaceData& operator=(const MantidQwtWorkspaceData&); // required by QwtData base class
 };
 
 /**
@@ -67,6 +67,10 @@ class EXPORT_OPT_MANTIDQT_API MantidQwtMatrixWorkspaceData : public MantidQwtWor
 public:
   /// Return a new data object of the same type but with a new workspace
   virtual MantidQwtMatrixWorkspaceData* copyWithNewSource(const Mantid::API::MatrixWorkspace & workspace) const = 0;
+
+protected:
+  // Assignment operator (virtualized).
+  MantidQwtMatrixWorkspaceData& operator=(const MantidQwtMatrixWorkspaceData&); // required by QwtData base class
 };
 
 #endif

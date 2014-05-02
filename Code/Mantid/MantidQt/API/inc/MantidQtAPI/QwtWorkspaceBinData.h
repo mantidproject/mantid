@@ -60,6 +60,10 @@ public:
   bool logScale()const{return m_logScale;}
   void saveLowestPositiveValue(const double v);
 
+protected:
+  // Assignment operator (virtualized). MSVC not happy with compiler generated one
+  QwtWorkspaceBinData& operator=(const QwtWorkspaceBinData&); // required by QwtData base class
+
 private:
 
   /// Initialize the object
