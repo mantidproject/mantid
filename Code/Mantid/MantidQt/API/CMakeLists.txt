@@ -95,6 +95,7 @@ set( TEST_FILES
    InterfaceManagerTest.h
    MantidColorMapTest.h
    PlotAxisTest.h
+   QwtWorkspaceBinDataTest.h
    QwtWorkspaceSpectrumDataTest.h
    SelectionNotificationServiceTest.h
    SignalRangeTest.h
