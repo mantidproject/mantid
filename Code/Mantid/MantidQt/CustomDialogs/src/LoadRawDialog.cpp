@@ -145,7 +145,7 @@ void LoadRawDialog::initLayout()
   {  	  
     // define property values which should not be shown
     const char *excl[]={"0","1"};
-    std::vector<std::string> excluded_values(excl,std::end(excl));
+    std::vector<std::string> excluded_values(excl,excl+2);
 
 
     QComboBox *monitorsBox =new QComboBox;
