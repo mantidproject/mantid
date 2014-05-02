@@ -98,11 +98,11 @@ namespace Mantid
         "non-event Workspace, respectively. Negative width values indicate logarithmic binning. ");
 
       declareProperty("PreserveEvents", true,"Keep the output workspace as an EventWorkspace, "
-                      "if the input has events (default). If the input and output EventWorkspace "
+                      "if the input has events. If the input and output EventWorkspace "
                       "names are the same, only the X bins are set, which is very quick. If false, "
                       "then the workspace gets converted to a Workspace2D histogram.");
 
-      declareProperty("FullBinsOnly", false, "Ignore bins of the size smaller than the step size.");
+      declareProperty("FullBinsOnly", false, "Omit the final bin if it's width is smaller than the step size");
     }
 
 
