@@ -266,7 +266,7 @@ namespace Mantid
         // otherwise  set the workspace as "OutputWorkspace"
         if (nwsSpecs> 0)
         {               
-          std::string monitorwsName = wsName + "_Monitors";
+          std::string monitorwsName = wsName + "_monitors";
           declareProperty(new WorkspaceProperty<Workspace> ("MonitorWorkspace", monitorwsName,
               Direction::Output));
           setWorkspaceProperty("MonitorWorkspace", title, mongrp_sptr, monws_sptr,numberOfPeriods, true);
@@ -318,7 +318,7 @@ namespace Mantid
       suffix << (period + 1);
       if (bmonitors)
       {
-        wsName = localWSName + "_Monitors" + "_" + suffix.str();
+        wsName = localWSName + "_monitors" + "_" + suffix.str();
         outputWorkspace = "MonitorWorkspace";
       }
       else
