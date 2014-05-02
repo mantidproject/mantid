@@ -52,6 +52,7 @@ namespace VATES
    this->m_scalarName = other.m_scalarName;
    this->m_dimensionToShow = other.m_dimensionToShow;
    this->m_workspace = other.m_workspace;
+   this->m_peakRadius = other.m_peakRadius;
   }
 
   void vtkPeakMarkerFactory::initialize(Mantid::API::Workspace_sptr workspace)

@@ -7,8 +7,6 @@
 #include "MantidKernel/Exception.h"
 #include <vector>
 #include <string>
-#include <boost/shared_ptr.hpp>
-
 
 namespace Mantid
 {

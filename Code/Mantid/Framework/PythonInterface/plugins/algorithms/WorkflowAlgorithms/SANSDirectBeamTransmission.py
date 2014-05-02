@@ -1,5 +1,5 @@
 """*WIKI* 
-    Compute transmission using the direct beam method
+Compute transmission using the direct beam method
 *WIKI*"""
 import mantid.simpleapi as api
 from mantid.api import *

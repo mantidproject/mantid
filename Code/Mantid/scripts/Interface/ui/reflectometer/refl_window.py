@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_window.ui'
 #
-# Created: Mon Mar 24 09:26:20 2014
+# Created: Mon Apr 14 13:58:59 2014
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -275,8 +275,8 @@ class Ui_windowRefl(object):
         self.actionClear.setObjectName(_fromUtf8("actionClear"))
         self.actionChoose_Columns = QtGui.QAction(windowRefl)
         self.actionChoose_Columns.setObjectName(_fromUtf8("actionChoose_Columns"))
-        self.actionLive_Data = QtGui.QAction(windowRefl)
-        self.actionLive_Data.setObjectName(_fromUtf8("actionLive_Data"))
+        self.actionRefl_Gui_Options = QtGui.QAction(windowRefl)
+        self.actionRefl_Gui_Options.setObjectName(_fromUtf8("actionRefl_Gui_Options"))
         self.menuFile.addAction(self.actionOpen_Table)
         self.menuFile.addAction(self.actionReload_from_Disk)
         self.menuFile.addSeparator()
@@ -298,7 +298,7 @@ class Ui_windowRefl(object):
         self.menuEdit.addAction(self.actionPaste)
         self.menuEdit.addAction(self.actionClear)
         self.menuOptions.addAction(self.actionChoose_Columns)
-        self.menuOptions.addAction(self.actionLive_Data)
+        self.menuOptions.addAction(self.actionRefl_Gui_Options)
         self.menuBar.addAction(self.menuFile.menuAction())
         self.menuBar.addAction(self.menuEdit.menuAction())
         self.menuBar.addAction(self.menuOptions.menuAction())
@@ -405,6 +405,6 @@ class Ui_windowRefl(object):
         self.actionClear.setShortcut(QtGui.QApplication.translate("windowRefl", "Del", None, QtGui.QApplication.UnicodeUTF8))
         self.actionChoose_Columns.setText(QtGui.QApplication.translate("windowRefl", "Choose Columns...", None, QtGui.QApplication.UnicodeUTF8))
         self.actionChoose_Columns.setShortcut(QtGui.QApplication.translate("windowRefl", "Ctrl+M", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionLive_Data.setText(QtGui.QApplication.translate("windowRefl", "Live Data...", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionLive_Data.setShortcut(QtGui.QApplication.translate("windowRefl", "Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRefl_Gui_Options.setText(QtGui.QApplication.translate("windowRefl", "Refl Gui Options...", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRefl_Gui_Options.setShortcut(QtGui.QApplication.translate("windowRefl", "Ctrl+Shift+O", None, QtGui.QApplication.UnicodeUTF8))
 

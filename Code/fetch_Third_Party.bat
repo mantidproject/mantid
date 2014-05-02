@@ -19,7 +19,7 @@ if defined FOUND (
         set GitCmd=git.exe
     ) else (
         echo Cannot find git. Make sure the cmd folder is in your path.
-        exit 1
+        exit /B 1
     )
 )
 echo Using %GitCmd%
@@ -52,7 +52,7 @@ if NOT "%1"=="" (
       set arch=win32
     ) else (
      echo "Unknown architecture. Valid options are:win32,win64."
-      exit 1
+      exit /B 1
     )
   )
 )
@@ -81,7 +81,7 @@ echo %libs%
 :: Otherwise we need to clone
 echo Cloning Third_Party libraries from %libs%
 call %GitCmd% clone %libs% Third_Party/lib/%arch%
-exit 0
+exit /B 0
 
 :: Just making sure what we have is up to date
 :UpdateInc
@@ -98,4 +98,4 @@ cd Third_Party/lib/%arch%
 call %GitCmd% pull
 :: Be sure to end up back where we started
 cd ../../..
-exit 0
+exit /B 0

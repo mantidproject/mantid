@@ -209,13 +209,11 @@ public:
     /// Draw a color fill plot for each of the listed workspaces
     void drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType = Graph::ColorMap);
     /// Draw a color fill plot for the named workspace
-    MultiLayer* drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType = Graph::ColorMap);
+    MultiLayer* drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType = Graph::ColorMap,
+                                        MultiLayer* window = NULL);
 
     // Create a 1d graph form specified spectra in a MatrixWorkspace
     MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, bool errs=true, bool distr=false);
-
-    // Set properties of a 1d graph which plots data from a workspace
-    static void setUpSpectrumGraph(MultiLayer* ml, const QString& wsName);
 
     // Set properties of a 1d graph which plots data from a workspace
     static void setUpBinGraph(MultiLayer* ml, const QString& wsName, Mantid::API::MatrixWorkspace_const_sptr workspace);
@@ -289,11 +287,6 @@ public:
 
   void saveProject(bool save);
   void enableSaveNexus(const QString & wsName);
-
-  /// Verifies if the Catalog login was a success.
-  bool isValidCatalogLogin();
-  /// Create a publishing dialog.
-  void catalogPublishDialog();
 
 signals:
   //A signal to indicate that we want a script to produce a dialog

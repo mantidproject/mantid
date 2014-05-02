@@ -1,5 +1,7 @@
 #include "MantidQtSliceViewer/PhysicalSphericalPeak.h"
 
+using namespace Mantid::API;
+
 namespace MantidQt
 {
   namespace SliceViewer

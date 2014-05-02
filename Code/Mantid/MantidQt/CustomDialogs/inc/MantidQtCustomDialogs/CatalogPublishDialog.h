@@ -33,7 +33,7 @@ namespace MantidQt
      File change history is stored at: <https://github.com/mantidproject/mantid>.
      Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class CatalogPublishDialog : public MantidQt::API::AlgorithmDialog
+    class CatalogPublishDialog : public API::AlgorithmDialog
     {
       Q_OBJECT
 
@@ -52,6 +52,8 @@ namespace MantidQt
         void workspaceSelected(const QString& wsName);
         /// Set the "FileName" property when a file is selected from the file browser.
         void fileSelected();
+        /// Diables fields on dialog to improve usability
+        void disableDialog();
         /// Set session property when user selects an investigation to publish to.
         void setSessionProperty(int index);
 

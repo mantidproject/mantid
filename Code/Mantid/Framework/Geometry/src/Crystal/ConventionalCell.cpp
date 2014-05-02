@@ -25,6 +25,8 @@ namespace Geometry
    *                    reduced cell.
    *  @param  form_num  The row number from Table 2, that specifies the
    *                    reduced form number.
+   *  @param allowPermutations Allow permutations of conventional cells for 
+   *                           related UBs with better fit to peaks.
    */
   ConventionalCell::ConventionalCell( const  Kernel::DblMatrix & UB,
                                              size_t              form_num,
@@ -171,7 +173,9 @@ namespace Geometry
    *                  for UB and form number zero.
    *  @param form_i   The reduced cell form built with the lattice parameters
    *                  for UB and the form number of the desired conventional
-   *                  cell. 
+   *                  cell.
+   *  @param allowPermutations Allow permutations of conventional cells for 
+   *                           related UBs with better fit to peaks.
    */ 
   void ConventionalCell::init( const Kernel::DblMatrix & UB,
                                      ReducedCell       & form_0,

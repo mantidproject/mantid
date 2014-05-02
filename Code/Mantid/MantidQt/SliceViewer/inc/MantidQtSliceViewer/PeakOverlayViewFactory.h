@@ -3,8 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include "MantidAPI/PeakTransform.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
-#include "MantidQtSliceViewer/PeakTransform.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -48,7 +48,7 @@ namespace MantidQt
     {
     public:
       /// Create a peak view from the index of a peak in the peaks workspace
-      virtual boost::shared_ptr<PeakOverlayView> createView(PeakTransform_const_sptr transform) const = 0;
+      virtual boost::shared_ptr<PeakOverlayView> createView(Mantid::API::PeakTransform_const_sptr transform) const = 0;
       /// Destructor
       virtual ~PeakOverlayViewFactory()
       {

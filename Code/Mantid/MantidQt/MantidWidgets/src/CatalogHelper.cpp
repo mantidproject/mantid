@@ -7,6 +7,7 @@
 #include <boost/algorithm/string/regex.hpp>
 #include <Poco/ActiveResult.h>
 #include <QCoreApplication>
+#include <QTime>
 
 namespace MantidQt
 {
@@ -244,6 +245,39 @@ namespace MantidQt
           + " 0:00:00.000";
       // Return the date as time_t value.
       return Mantid::Kernel::DateAndTime(isoDate).to_time_t();
+    }
+
+    /**
+     * Opens auto-generated dialog, and executes the catalog login algorithm.
+     * Returns true if login was a success.
+     */
+    bool CatalogHelper::isValidCatalogLogin()
+    {
+      auto catalogAlgorithm = createCatalogAlgorithm("CatalogLogin");
+      API::InterfaceManager interface;
+      auto loginDialog = interface.createDialog(catalogAlgorithm.get());
+
+      if(loginDialog->exec() == QDialog::Accepted)
+      {
+        executeAsynchronously(catalogAlgorithm);
+        if (catalogAlgorithm->isExecuted()) return true;
+      }
+      return false;
+    }
+
+    /**
+     * Creates a publishing dialog GUI and runs the publishing algorithm when "Run" is pressed.
+     */
+    void CatalogHelper::catalogPublishDialog()
+    {
+      auto catalogAlgorithm = createCatalogAlgorithm("CatalogPublish");
+      API::InterfaceManager interface;
+      auto publishDialog = interface.createDialog(catalogAlgorithm.get());
+
+      if(publishDialog->exec() == QDialog::Accepted)
+      {
+        executeAsynchronously(catalogAlgorithm);
+      }
     }
 
     /**

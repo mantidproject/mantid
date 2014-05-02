@@ -5,8 +5,10 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/algorithm/string/split.hpp>
+# include <boost/algorithm/string/trim.hpp>
+#endif
 #include <cstddef>
 #include <sstream>
 #include <stdexcept>

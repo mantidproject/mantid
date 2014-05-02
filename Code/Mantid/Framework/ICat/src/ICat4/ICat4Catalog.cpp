@@ -1,5 +1,6 @@
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidICat/ICat4/GSoapGenerated/ICat4ICATPortBindingProxy.h"
 #include "MantidICat/ICat4/ICat4Catalog.h"
 #include "MantidKernel/ConfigService.h"
@@ -390,7 +391,8 @@ namespace Mantid
       if (outputws->getColumnNames().empty())
       {
         // Add rows headers to the output workspace.
-        outputws->addColumn("str","Investigation id");
+        outputws->addColumn("long64","DatabaseID");
+        outputws->addColumn("str","InvestigationID");
         outputws->addColumn("str","Facility");
         outputws->addColumn("str","Title");
         outputws->addColumn("str","Instrument");
@@ -413,6 +415,7 @@ namespace Mantid
           std::string emptyCell("");
 
           // Now add the relevant investigation data to the table (They always exist).
+          savetoTableWorkspace(investigation->id, table);
           savetoTableWorkspace(investigation->name, table);
           savetoTableWorkspace(investigation->facility->name, table);
           savetoTableWorkspace(investigation->title, table);
@@ -472,14 +475,13 @@ namespace Mantid
       ns1__search request;
       ns1__searchResponse response;
 
-      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + investigationId + "']";
+      std::string query = "Dataset INCLUDE DatasetType, Datafile, Investigation <-> Investigation[name = '" + investigationId + "']";
       request.query     = &query;
 
       std::string sessionID = m_session->getSessionId();
       request.sessionId = &sessionID;
 
-      g_log.debug() << "ICat4Catalog::getDataSets -> { " << query << " }" << std::endl;
-
+      g_log.debug() << "The query for ICat4Catalog::getDataSets is:\n" << query << std::endl;
       int result = icat.search(&request, &response);
 
       if (result == 0)
@@ -502,26 +504,41 @@ namespace Mantid
       if (outputws->getColumnNames().empty())
       {
         // Add rows headers to the output workspace.
+        outputws->addColumn("long64","ID");
         outputws->addColumn("str","Name");
-        outputws->addColumn("str","Status");
-        outputws->addColumn("str","Type");
         outputws->addColumn("str","Description");
-        outputws->addColumn("str","Sample Id");
+        outputws->addColumn("str","Type");
+        outputws->addColumn("str","Related investigation ID");
+        outputws->addColumn("size_t","Number of datafiles");
       }
 
-      std::string temp("");
-
-      std::vector<xsd__anyType*>::const_iterator iter;
-      for(iter = response.begin(); iter != response.end(); ++iter)
+      std::string emptyCell = "";
+      for(auto iter = response.begin(); iter != response.end(); ++iter)
       {
-        API::TableRow table = outputws->appendRow();
-        // These are just temporary values in order for the GUI to not die.
-        // These along with related GUI aspects will be removed in another ticket.
-        savetoTableWorkspace(&temp, table);
-        savetoTableWorkspace(&temp, table);
-        savetoTableWorkspace(&temp, table);
-        savetoTableWorkspace(&temp, table);
-        savetoTableWorkspace(&temp, table);
+        ns1__dataset * dataset = dynamic_cast<ns1__dataset*>(*iter);
+        if (dataset)
+        {
+          API::TableRow table = outputws->appendRow();
+
+          savetoTableWorkspace(dataset->id, table);
+          savetoTableWorkspace(dataset->name, table);
+
+          if (dataset->description) savetoTableWorkspace(dataset->description, table);
+          else savetoTableWorkspace(&emptyCell, table);
+
+          if (dataset->type) savetoTableWorkspace(dataset->type->name,table);
+          else savetoTableWorkspace(&emptyCell, table);
+
+          if (dataset->investigation) savetoTableWorkspace(dataset->investigation->name, table);
+          else savetoTableWorkspace(&emptyCell, table);
+
+          size_t datafileCount = dataset->datafiles.size();
+          savetoTableWorkspace(&datafileCount, table);
+        }
+        else
+        {
+          throw std::runtime_error("ICat4Catalog::saveDataSets expected a dataset. Please contact the Mantid development team.");
+        }
       }
     }
 
@@ -544,7 +561,7 @@ namespace Mantid
       std::string sessionID = m_session->getSessionId();
       request.sessionId = &sessionID;
 
-      g_log.debug() << "The query for ICat4Catalog::getDataSets is:\n" << query << std::endl;
+      g_log.debug() << "The query for ICat4Catalog::getDataFiles is:\n" << query << std::endl;
 
       int result = icat.search(&request, &response);
 
@@ -768,7 +785,7 @@ namespace Mantid
       // Set the elements of the URL.
       std::string session   = "sessionId="  + m_session->getSessionId();
       std::string name      = "&name="      + createFileName;
-      std::string datasetId = "&datasetId=" + boost::lexical_cast<std::string>(getDatasetId(investigationID));
+      std::string datasetId = "&datasetId=" + boost::lexical_cast<std::string>(getMantidDatasetId(investigationID));
       std::string description = "&description=" + dataFileDescription;
 
       // Add pieces of URL together.
@@ -777,13 +794,69 @@ namespace Mantid
       return url;
     }
 
+    /**
+     * Obtains the investigations that the user can publish
+     * to and saves related information to a workspace.
+     * @return A workspace containing investigation information the user can publish to.
+     */
+    API::ITableWorkspace_sptr ICat4Catalog::getPublishInvestigations()
+    {
+      ICat4::ICATPortBindingProxy icat;
+      setICATProxySettings(icat);
+
+      auto ws = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+      // Populate the workspace with all the investigations that
+      // the user is an investigator off and has READ access to.
+      myData(ws);
+
+      ns1__isAccessAllowed request;
+      ns1__isAccessAllowedResponse response;
+
+      std::string sessionID = m_session->getSessionId();
+      request.sessionId = &sessionID;
+
+      ns1__accessType_ acessType;
+      acessType.__item = ns1__accessType__CREATE;
+      request.accessType = &acessType.__item;
+
+      // Remove each investigation returned from `myData`
+      // were the user does not have create/write access.
+      for (int row = static_cast<int>(ws->rowCount()) - 1; row >= 0; --row)
+      {
+        ns1__datafile datafile;
+        std::string datafileName = "tempName.nxs";
+        datafile.name = &datafileName;
+
+        // Each investigation can have multiple datasets.
+        // We want to check that the user can publish to the "mantid" dataset
+        // related to the investigations of which they are investigators (via "my data").
+        ns1__dataset dataset;
+        int64_t datasetID = getMantidDatasetId(ws->getRef<std::string>("InvestigationID",row));
+        dataset.id = &datasetID;
+        datafile.dataset = &dataset;
+
+        request.bean = &datafile;
+
+        if (icat.isAccessAllowed(&request,&response) == 0)
+        {
+          if (!response.return_) ws->removeRow(row);
+        }
+        else
+        {
+          throwErrorMessage(icat);
+        }
+      }
+
+      return ws;
+    }
 
     /**
-     * Search the archive & obtain the dataset ID for a specific investigation.
+     * Search the archive & obtain the "mantid" dataset ID for a specific investigation if it exists.
+     * If it does not exist, we will attempt to create it.
      * @param investigationID :: Used to obtain the related dataset ID.
      * @return Dataset ID of the provided investigation.
      */
-    int64_t ICat4Catalog::getDatasetId(const std::string &investigationID)
+    int64_t ICat4Catalog::getMantidDatasetId(const std::string &investigationID)
     {
       ICat4::ICATPortBindingProxy icat;
       setICATProxySettings(icat);
@@ -793,11 +866,12 @@ namespace Mantid
 
       std::string query = "Dataset <-> Investigation[name = '" + investigationID + "']";
       request.query     = &query;
+
       std::string sessionID = m_session->getSessionId();
       request.sessionId = &sessionID;
 
-      g_log.debug() << "The query performed to obtain a dataset from an investigation" <<
-          " id in ICat4Catalog::getDatasetIdFromFileName is:\n" << query << std::endl;
+      g_log.debug() << "The query performed to obtain a dataset from an investigation id " <<
+          "in ICat4Catalog::getMantidDatasetId is: " << query << std::endl;
       
       int64_t datasetID = 0;
       
@@ -811,7 +885,11 @@ namespace Mantid
               " (Based on investigation ID: " + investigationID + ")");
         }
         ns1__dataset * dataset = dynamic_cast<ns1__dataset*>(response.return_.at(0));
-        if (dataset && dataset->id) datasetID = *(dataset->id);
+        if (dataset && dataset->id)
+        {
+          datasetID = *(dataset->id);
+          g_log.debug() << "The name of the dataset related to " << investigationID << " is: " << *(dataset->name) << "\n";
+        }
       }
       else
       {
@@ -881,6 +959,8 @@ namespace Mantid
       {
         exception = error.substr(start + begmsg.length(), end - (start + begmsg.length()) );
       }
+      // If no error is returned by ICAT then there is a connection problem.
+      if (exception.empty()) exception = "ICAT appears to be offline. Please check your connection or report this issue.";
 
       throw std::runtime_error(exception);
     }
@@ -925,6 +1005,8 @@ namespace Mantid
       // The soapEndPoint is only set when the user logs into the catalog.
       // If it's not set the correct error is returned (invalid sessionID) from the ICAT server.
       if (m_session->getSoapEndpoint().empty()) return;
+      // Stop receiving packets from ICAT server after period of time.
+      icat.recv_timeout = boost::lexical_cast<int>(Kernel::ConfigService::Instance().getString("catalog.timeout.value"));
       // Set the soap-endpoint of the catalog we want to use.
       icat.soap_endpoint = m_session->getSoapEndpoint().c_str();
       // Sets SSL authentication scheme

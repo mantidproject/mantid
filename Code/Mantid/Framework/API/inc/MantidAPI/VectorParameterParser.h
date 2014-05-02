@@ -16,7 +16,9 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <boost/lexical_cast.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/lexical_cast.hpp>
+#endif 
 
 namespace Mantid
 {

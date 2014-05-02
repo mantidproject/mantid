@@ -41,6 +41,14 @@
   <value val="direct"/>
 </parameter>
 
+<!-- normalise_method normalistion. To compare different runs with different length one uses normalization by some flux-dependent parameter
+     Availible values are: none (-largely meaningles), monitor-1, current 
+     the acceptable values are defined in DirectEnergyConversion init routine as recognized by direct energy conversion normalize method
+     these three are currently disabled/unknown: monitor-2, uamph peak-->
+<parameter name="normalise_method" type="string">
+    <value val="monitor-1"/>
+</parameter>
+
 <!-- Monitor used to estimate total current on the sample.  -->
 <parameter name="norm-mon1-spec">
   <value val="40961"/>
@@ -287,12 +295,6 @@
   
 <!-- **************************************** ABSOLUTE UNITS CORRECTION DEFAULTS END ****************************  -->
 
-<!-- normalise_method normalistion. Availible values are: none (-largely meaningles), monitor-1, current 
-     the acceptable values are defined in DirectEnergyConversion init routine as recognized by direct energy conversion normalize method
-     these three are currently disabled/unknown: monitor-2, uamph peak-->
-<parameter name="normalise_method" type="string">
-    <value val="monitor-1"/>
-</parameter>
 
 <!-- if defined to true, fix incident energy to this value and do not calculate the energy from the run -->
 <parameter name="fixei"  type="bool">

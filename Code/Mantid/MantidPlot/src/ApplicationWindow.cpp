@@ -192,6 +192,7 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/Message.h"
 
+#include "MantidQtMantidWidgets/CatalogHelper.h"
 #include "MantidQtMantidWidgets/CatalogSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
@@ -14155,13 +14156,6 @@ MultiLayer* ApplicationWindow::plotNoContourColorMap(Matrix *m)
     return 0;
   }
 
-  //Spectrogram *spgrm = dynamic_cast<Spectrogram*>(ml->activeGraph()->plotItem(0));
-  //if( spgrm )
-  //{
-  //  //1 = ImageMode
-  //  spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
-  //  spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
-  //}
   return ml;
 }
 
@@ -14200,8 +14194,6 @@ MultiLayer* ApplicationWindow::plotImage(Matrix *m)
       return 0;
     }
     plot = g->activeGraph();
-    setPreferences(plot);
-    if( plot->plotItem(0) )plot->plotItem(0)->setAxis(QwtPlot::xTop, QwtPlot::yLeft);
   }
 
   plot->enableAxis(QwtPlot::xTop, true);
@@ -17472,7 +17464,7 @@ void ApplicationWindow::panOnPlot()
 void ApplicationWindow::CatalogLogin()
 {
   // Executes the catalog login algorithm, and returns true if user can login.
-  if (mantidUI->isValidCatalogLogin())
+  if (MantidQt::MantidWidgets::CatalogHelper().isValidCatalogLogin())
   {
     icat->addAction(actionCatalogSearch);
     icat->addAction(actionCatalogPublish);
@@ -17497,7 +17489,7 @@ void ApplicationWindow::CatalogSearch()
 
 void ApplicationWindow::CatalogPublish()
 {
-  mantidUI->catalogPublishDialog();
+  MantidQt::MantidWidgets::CatalogHelper().catalogPublishDialog();
 }
 
 void ApplicationWindow::CatalogLogout()
