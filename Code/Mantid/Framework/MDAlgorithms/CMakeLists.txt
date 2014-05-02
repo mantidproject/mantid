@@ -16,8 +16,8 @@ set ( SRC_FILES
 	src/ConvertToDiffractionMDWorkspace2.cpp
 	src/ConvertToMD.cpp
 	src/ConvertToMDParent.cpp    
-	src/ConvertToMDHelper.cpp
-	src/ConvertToMDHelper2.cpp    
+	src/ConvertToMDMinMaxGlobal.cpp
+	src/ConvertToMDMinMaxLocal.cpp    
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
 	src/DivideMD.cpp
@@ -91,8 +91,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h
 	inc/MantidMDAlgorithms/ConvertToMD.h
 	inc/MantidMDAlgorithms/ConvertToMDParent.h    
-	inc/MantidMDAlgorithms/ConvertToMDHelper.h
-	inc/MantidMDAlgorithms/ConvertToMDHelper2.h    
+	inc/MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h
+	inc/MantidMDAlgorithms/ConvertToMDMinMaxLocal.h    
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
 	inc/MantidMDAlgorithms/DivideMD.h
@@ -168,8 +168,8 @@ set ( TEST_FILES
 	ConvertToDiffractionMDWorkspace2Test.h
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToMDComponentsTest.h
-	ConvertToMDHelperTest.h
-	ConvertToMDHelper2Test.h    
+	ConvertToMDMinMaxGlobalTest.h
+	ConvertToMDMinMaxLocalTest.h    
 	ConvertToMDTest.h
 	ConvertToQ3DdETest.h
 	CreateMDHistoWorkspaceTest.h
