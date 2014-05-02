@@ -206,6 +206,6 @@ void QwtWorkspaceBinData::init(const Mantid::API::MatrixWorkspace &workspace)
   }
 
   // meta data
-  m_xTitle = MantidQt::API::PlotAxis(workspace).title();
-  m_yTitle = MantidQt::API::PlotAxis(workspace, 0).title();
+  m_xTitle = MantidQt::API::PlotAxis(workspace, 1).title();
+  m_yTitle = MantidQt::API::PlotAxis(workspace).title();
 }
