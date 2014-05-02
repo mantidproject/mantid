@@ -1607,9 +1607,6 @@ public:
   MultiLayer* plot1D(const QList<QString>& wsnames, const QList<int>&, bool spectrumPlot, bool errs=false,
     Graph::CurveType style = Graph::Unspecified, MultiLayer* window = NULL, bool clearWindow = false);
 
-  MultiLayer* plotBin(const QString&,const QList<int>&,bool = false,Graph::CurveType style = Graph::Unspecified,
-    MultiLayer* window = NULL, bool clearWindow = false);
-
   MultiLayer* drawSingleColorFillPlot(const QString & name, Graph::CurveType style = Graph::ColorMap,
                                       MultiLayer* window = NULL);
 
