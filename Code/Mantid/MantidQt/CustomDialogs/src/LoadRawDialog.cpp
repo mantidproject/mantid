@@ -17,7 +17,7 @@
 #include <QDir>
 #include <QCheckBox>
 
-//Add this class to the list of specialised dialogs in this namespace
+//Add this class to the list of specialized dialogs in this namespace
 namespace MantidQt
 {
 namespace CustomDialogs
@@ -119,9 +119,9 @@ void LoadRawDialog::initLayout()
     std::set<std::string> items =cacheProp->allowedValues();
     std::set<std::string>::const_iterator vend = items.end();
     for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
-	      ++vitr)
+        ++vitr)
     {
-	    cacheBox->addItem(QString::fromStdString(*vitr));
+      cacheBox->addItem(QString::fromStdString(*vitr));
     }
     prop_line = new QHBoxLayout;
     prop_line->addWidget(new QLabel("Cache file locally:"), 0, Qt::AlignRight);
@@ -143,17 +143,17 @@ void LoadRawDialog::initLayout()
   Mantid::Kernel::Property* loadMonitors=getAlgorithmProperty("LoadMonitors");
   if(loadMonitors)
   {  	  
-	  QComboBox *monitorsBox =new QComboBox;
-	  std::set<std::string> monitoritems =loadMonitors->allowedValues();
-	  std::set<std::string>::const_iterator mend = monitoritems.end();
-	  for(std::set<std::string>::const_iterator mitr = monitoritems.begin(); mitr != mend; 
-		    ++mitr)
-	  {
-		  monitorsBox->addItem(QString::fromStdString(*mitr));
-	  }
-	  prop_line->addWidget(new QLabel("Monitors:"), 0, Qt::AlignRight);
-	  prop_line->addWidget(monitorsBox);
-	  tie(monitorsBox, "LoadMonitors", prop_line);
+    QComboBox *monitorsBox =new QComboBox;
+    std::set<std::string> monitoritems =loadMonitors->allowedValues();
+    std::set<std::string>::const_iterator mend = monitoritems.end();
+    for(std::set<std::string>::const_iterator mitr = monitoritems.begin(); mitr != mend; 
+        ++mitr)
+    {
+      monitorsBox->addItem(QString::fromStdString(*mitr));
+    }
+    prop_line->addWidget(new QLabel("Monitors:"), 0, Qt::AlignRight);
+    prop_line->addWidget(monitorsBox);
+    tie(monitorsBox, "LoadMonitors", prop_line);
   }
   
   
