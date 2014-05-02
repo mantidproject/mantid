@@ -139,17 +139,25 @@ void LoadRawDialog::initLayout()
     tie(checkbox, "LoadLogFiles", prop_line);
   }
   prop_line->addStretch();  
-  //If the algorithm version supports the LoadMonitors property add a check box for it
+  //------------- If the algorithm version supports the LoadMonitors property add a check box for it ----
   Mantid::Kernel::Property* loadMonitors=getAlgorithmProperty("LoadMonitors");
   if(loadMonitors)
   {  	  
+    // define property values which should not be shown
+    const char *excl[]={"0","1"};
+    std::vector<std::string> excluded_values(excl,std::end(excl));
+
+
     QComboBox *monitorsBox =new QComboBox;
     std::set<std::string> monitoritems =loadMonitors->allowedValues();
     std::set<std::string>::const_iterator mend = monitoritems.end();
     for(std::set<std::string>::const_iterator mitr = monitoritems.begin(); mitr != mend; 
         ++mitr)
     {
-      monitorsBox->addItem(QString::fromStdString(*mitr));
+      if (std::find(excluded_values.begin(), excluded_values.end(), *mitr)==excluded_values.end())
+      {
+          monitorsBox->addItem(QString::fromStdString(*mitr));
+      }
     }
     prop_line->addWidget(new QLabel("Monitors:"), 0, Qt::AlignRight);
     prop_line->addWidget(monitorsBox);
