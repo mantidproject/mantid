@@ -2,6 +2,8 @@
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/ReflNullMainViewPresenter.h"
 #include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
+#include "MantidQtCustomInterfaces/ReflBlankMainViewPresenter.h"
+#include "MantidQtCustomInterfaces/ReflLoadedMainViewPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
 
 namespace MantidQt
@@ -31,11 +33,12 @@ namespace MantidQt
       ui.setupUi(this);
       ui.workspaceSelector->refresh();
       connect(ui.workspaceSelector,SIGNAL(activated(QString)),this,SLOT(setModel(QString)));
+      m_presenter.swap(boost::scoped_ptr<IReflPresenter>(new ReflBlankMainViewPresenter(this)));
     }
 
     void QtReflMainView::setModel(QString name)
     {
-      m_presenter.swap(boost::scoped_ptr<IReflPresenter>(new ReflMainViewPresenter(name.toStdString(),this)));
+      m_presenter.swap(boost::scoped_ptr<IReflPresenter>(new ReflLoadedMainViewPresenter(name.toStdString(),this)));
       m_presenter->notify();
     }
 

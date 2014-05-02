@@ -40,6 +40,8 @@ set ( SRC_FILES
 	src/QtWorkspaceMementoModel.cpp
 	src/Quasi.cpp
 	src/RawFileMemento.cpp
+	src/ReflBlankMainViewPresenter.cpp
+	src/ReflLoadedMainViewPresenter.cpp
 	src/ReflMainView.cpp
 	src/ReflMainViewPresenter.cpp
 	src/ReflNullMainViewPresenter.cpp
@@ -104,6 +106,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
 	inc/MantidQtCustomInterfaces/Quasi.h
 	inc/MantidQtCustomInterfaces/RawFileMemento.h
+	inc/MantidQtCustomInterfaces/ReflBlankMainViewPresenter.h
+	inc/MantidQtCustomInterfaces/ReflLoadedMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/ReflMainView.h
 	inc/MantidQtCustomInterfaces/ReflMainViewPresenter.h
 	inc/MantidQtCustomInterfaces/ReflNullMainViewPresenter.h
@@ -205,6 +209,8 @@ set( TEST_FILES CreateMDWorkspaceAlgDialogTest.h
                 IO_MuonGroupingTest.h
                 ReflMainViewPresenterTest.h
                 ReflNullMainViewPresenterTest.h
+                ReflBlankMainViewPresenterTest.h
+                ReflLoadedMainViewPresenterTest.h
 )
 
 include_directories ( inc )
@@ -258,4 +264,6 @@ install ( TARGETS CustomInterfaces ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGIN
 set ( TEST_FILES
 	QReflTableModelTest.h
 	QtReflMainViewTest.h
+	ReflBlankMainViewPresenterTest.h
+	ReflLoadedMainViewPresenterTest.h
 )

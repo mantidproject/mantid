@@ -1,19 +1,19 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLBLANKMAINVIEWPRESENTER_H_
+#define MANTID_CUSTOMINTERFACES_REFLBLANKMAINVIEWPRESENTER_H_
 
 #include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/ReflMainViewPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtCustomInterfaces/ReflMainView.h"
-#include "MantidQtCustomInterfaces/IReflPresenter.h"
+
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    /** @class ReflMainViewPresenter
 
-    ReflMainViewPresenter is a presenter class for teh Reflectometry Interface. It handles any interface functionality and model manipulation.
+    /** ReflBlankMainViewPresenter : TODO: DESCRIPTION
 
-    Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -30,21 +30,20 @@ namespace MantidQt
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
+    File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport ReflMainViewPresenter: public IReflPresenter
+    class DLLExport ReflBlankMainViewPresenter: public ReflMainViewPresenter
     {
     public:
-      ReflMainViewPresenter(Mantid::API::ITableWorkspace_sptr model, ReflMainView* view);
-      ReflMainViewPresenter(ReflMainView* view);
-      virtual ~ReflMainViewPresenter() = 0;
-      virtual void notify();
-    protected:
-      Mantid::API::ITableWorkspace_sptr m_model;
-      virtual void load();
-      ReflMainView* m_view;
+
+      ReflBlankMainViewPresenter(ReflMainView* view);
+      virtual ~ReflBlankMainViewPresenter();
+
     };
-  }
-}
-#endif
+
+
+  } // namespace CustomInterfaces
+} // namespace Mantid
+
+#endif  /* MANTID_CUSTOMINTERFACES_REFLBLANKMAINVIEWPRESENTER_H_ */
