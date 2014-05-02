@@ -60,18 +60,14 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
             if a.isSpectra():
                 plotlabel=a.label(j)
             else:
-                plotlabel=unicode(a.title())+" = "+str(float(a.label(j)))   
+                plotlabel=a.title()+" = "+str(float(a.label(j)))   
             plt.plot(x,y,label=plotlabel)
             xlabel=self.getProperty("XLabel").value
             ylabel=self.getProperty("YLabel").value
             if xlabel=="":
                 xaxis=ws.getAxis(0)
-                unitLabel=xaxis.getUnit().symbol().utf8()
-                if unitLabel=='1/Angstrom' or unitLabel=='Angstrom^-1':
-                    unitLabel="$\\AA^{-1}$"
-                if unitLabel=='Angstrom':
-                    unitLabel="$\\AA$"   
-                xlabel=xaxis.getUnit().caption()+" ("+unitLabel+")"
+                unitLabel=xaxis.getUnit().symbol().latex() 
+                xlabel=xaxis.getUnit().caption()+" ($"+unitLabel+"$)"
             if ylabel=="":
                 ylabel=ws.YUnit()              
 
