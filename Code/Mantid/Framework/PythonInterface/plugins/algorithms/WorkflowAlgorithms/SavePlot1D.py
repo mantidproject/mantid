@@ -8,7 +8,7 @@ Note: the figures contain lines between points, no error bars.
 Note: Requires matplotlib version> 1.2.0
  
 *WIKI*"""
-import mantid
+import mantid,sys
  
 class SavePlot1D(mantid.api.PythonAlgorithm):
 
@@ -35,6 +35,19 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 			
 
     def PyExec(self):
+        ok2run=''
+        try:
+            import matplotlib
+            from distutils.version import LooseVersion
+            if LooseVersion(matplotlib.__version__)<=LooseVersion("1.2.0"):
+                ok2run='Wrong version of matplotlib. Required > 1.2.0'
+        except:
+            ok2run='Problem importing matplotlib'
+        if ok2run!='':
+            raise RuntimeError(ok2run)  
+        matplotlib=sys.modules['matplotlib']
+        matplotlib.use("agg")
+        import matplotlib.pyplot as plt
         self._wksp = self.getProperty("InputWorkspace").value
         plt.figure()
         if type(self._wksp)==mantid.api._api.WorkspaceGroup:
@@ -49,6 +62,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         plt.savefig(filename,bbox_inches='tight')    
         
     def DoPlot(self,ws):
+        plt=sys.modules['matplotlib.pyplot']
         spectra=ws.getNumberHistograms()
         if spectra>10:
             mantid.kernel.logger.warning("more than 10 spectra to plot")
@@ -88,13 +102,6 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
             plt.legend()
                    
         
-try:
-    import matplotlib
-    from distutils.version import LooseVersion
-    if LooseVersion(matplotlib.__version__)>LooseVersion("1.2.0"):
-        matplotlib.use("agg")
-        import matplotlib.pyplot as plt
-        mantid.api.AlgorithmFactory.subscribe(SavePlot1D)
-except:
-    mantid.kernel.logger.debug('Failed to subscribe algorithm SavePlot1D; Python package matplotlib may be missing')
-    pass
+
+mantid.api.AlgorithmFactory.subscribe(SavePlot1D)
+

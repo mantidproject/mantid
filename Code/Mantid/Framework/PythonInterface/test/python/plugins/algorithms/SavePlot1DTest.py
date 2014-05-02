@@ -18,8 +18,19 @@ class SavePlot1DTest(unittest.TestCase):
          
     def testPlot(self):
         self.makeWs()
-        mantid.simpleapi.SavePlot1D("group",self.plotfile)
-        self.assertGreater(os.path.getsize(self.plotfile),1e4)
+        ok2run=''
+        try:
+            import matplotlib
+            from distutils.version import LooseVersion
+            if LooseVersion(matplotlib.__version__)<=LooseVersion("1.2.0"):
+                ok2run='Wrong version of matplotlib. Required > 1.2.0'
+            matplotlib.use("agg")
+            import matplotlib.pyplot as plt
+        except:
+            ok2run='Problem importing matplotlib'
+        if ok2run=='':
+            mantid.simpleapi.SavePlot1D("group",self.plotfile)
+            self.assertGreater(os.path.getsize(self.plotfile),1e4)
         self.cleanup()        
 
 if __name__=="__main__":
