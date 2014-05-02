@@ -57,7 +57,6 @@ public:
         if (m_widget)
         {
           layout()->takeAt(0);
-          //m_widget->setParent(NULL); // I am not sure about this
         }
         m_widget = NULL;
         return;

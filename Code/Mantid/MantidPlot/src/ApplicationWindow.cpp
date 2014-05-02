@@ -1263,6 +1263,10 @@ void ApplicationWindow::initMainMenu()
   foldersMenu = new QMenu(this);
   foldersMenu->setCheckable(true);
 
+  tiledWindowMenu = new QMenu(this);
+  tiledWindowMenu->setObjectName("tiledWindowMenu");
+  connect(tiledWindowMenu, SIGNAL(aboutToShow()), this, SLOT(tiledWindowMenuAboutToShow()));
+
   help = new QMenu(this);
   help->setObjectName("helpMenu");
 
@@ -1540,6 +1544,9 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
 
     } else if (w->isA("Note")) {
       actionSaveTemplate->setEnabled(false);
+
+    } else if (w->isA("TiledWindow")) {
+      myMenuBar()->insertItem(tr("Tiled Window"),tiledWindowMenu);
 
     } else if (!mantidUI->menuAboutToShow(w)) // Note that this call has a side-effect (it enables menus)
         disableActions();
@@ -9340,6 +9347,7 @@ void ApplicationWindow::windowsMenuAboutToShow()
   {
     windowsMenu->insertItem(tr("Change to floating"), this, SLOT(changeActiveToFloating()));
   }
+  windowsMenu->insertItem(tr("Add to tiled window"), this, SLOT(addActiveToTiledWindow()));
   windowsMenu->insertItem(tr("&Hide Window"), this, SLOT(hideActiveWindow()));
 
   // Having the shorcut set here is neccessary on Windows, but
@@ -9444,6 +9452,16 @@ void ApplicationWindow::interfaceMenuAboutToShow()
   QAction * customiseCategoriesAction = new QAction(tr("Add/Remove Categories"), this);
   connect(customiseCategoriesAction, SIGNAL(activated()), this, SLOT(showInterfaceCategoriesDialog()));
   interfaceMenu->addAction(customiseCategoriesAction);
+}
+
+void ApplicationWindow::tiledWindowMenuAboutToShow()
+{
+  tiledWindowMenu->clear();
+  MdiSubWindow *w = activeWindow();
+  if (!w) return;
+  TiledWindow *tw = dynamic_cast<TiledWindow*>( w );
+  if ( !tw ) return;
+  tw->populateMenu( tiledWindowMenu );
 }
 
 void ApplicationWindow::showMarkerPopupMenu()
@@ -9814,6 +9832,8 @@ void ApplicationWindow::showWindowPopupMenu(Q3ListViewItem *it, const QPoint &p,
           cm.insertItem(tr("Function"), &plots);
         }
       }
+    } else if (w->isA("TiledWindow")) {
+      std::cerr << "Menu for TiledWindow" << std::endl;
     }
     cm.exec(p);
   }
@@ -18073,4 +18093,12 @@ TiledWindow *ApplicationWindow::newTiledWindow()
   TiledWindow *widget = new TiledWindow(this,"",generateUniqueName("TiledWindow"));
   addMdiSubWindow( widget );
   return widget;
+}
+
+
+void ApplicationWindow::addActiveToTiledWindow()
+{
+  MdiSubWindow *w = activeWindow();
+  if ( !w ) return;
+  //w->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 }

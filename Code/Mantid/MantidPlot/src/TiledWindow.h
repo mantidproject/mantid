@@ -9,6 +9,7 @@
 class QGridLayout;
 class QVBoxLayout;
 class QScrollArea;
+class QMenu;
 class Tile;
 
 /**
@@ -23,6 +24,10 @@ class TiledWindow: public MdiSubWindow
 
 public:
   TiledWindow(QWidget* parent, const QString& label, const QString& name = QString(), Qt::WFlags f=0);
+
+  /// Populate a menu with actions 
+  void populateMenu(QMenu *menu);
+
 public slots:
 
   /// Get number of rows
@@ -64,6 +69,9 @@ public slots:
 protected:
   void mousePressEvent(QMouseEvent *ev);
   void mouseReleaseEvent(QMouseEvent *ev);
+  void mouseMoveEvent(QMouseEvent *ev);
+  void dropEvent(QDropEvent *ev);
+  void dragEnterEvent(QDragEnterEvent *ev);
 
 private:
   void init();

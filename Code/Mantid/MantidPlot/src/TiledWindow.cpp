@@ -6,6 +6,10 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QPainter>
+#include <QMenu>
+#include <QAction>
+#include <QSignalMapper>
+#include <QActionGroup>
 
 // constants defining the minimum size of tiles
 const int minimumTileWidth = 100;
@@ -115,11 +119,11 @@ TiledWindow::TiledWindow(QWidget* parent, const QString& label, const QString& n
 {
   init();
   setGeometry(0,0,500,400);
+  setAcceptDrops( true );
 }
 
 void TiledWindow::init()
 {
-  //QScrollArea *oldScrollArea = m_scrollArea;
   delete m_scrollArea;
   m_scrollArea = new QScrollArea(this);
   m_scrollArea->setWidgetResizable(true);
@@ -133,13 +137,11 @@ void TiledWindow::init()
   m_layout->setColumnMinimumWidth(0,minimumTileWidth);
   m_layout->setRowMinimumHeight(0,minimumTileHeight);
   m_layout->setColStretch(0,1);
-  //innerWidget->setLayout( m_layout );
 
   m_scrollArea->setWidget(innerWidget);
   this->setWidget( NULL );
   this->setWidget( m_scrollArea );
 
-  //if ( oldScrollArea != NULL ) delete oldScrollArea;
 }
 
 QString TiledWindow::saveToString(const QString &info, bool)
@@ -480,6 +482,31 @@ void TiledWindow::mouseReleaseEvent(QMouseEvent *ev)
   }
 }
 
+void TiledWindow::mouseMoveEvent(QMouseEvent *ev)
+{
+  static int iii = 0;
+  std::cerr << ++iii << std::endl;
+}
+
+void TiledWindow::dragEnterEvent(QDragEnterEvent *ev)
+{
+  ev->accept();
+  std::cerr << "Drag" << std::endl;
+}
+
+void TiledWindow::dropEvent(QDropEvent *ev)
+{
+  const QMimeData *mimeData = ev->mimeData();
+  if ( !mimeData->formats().isEmpty() )
+  {
+    QString fmt = mimeData->formats()[0];
+    std::cerr << fmt.toStdString() << std::endl;
+    std::cerr << mimeData->hasFormat(fmt) << ' ' << mimeData->hasImage() << std::endl;
+    QByteArray data = mimeData->data(fmt);
+    std::cerr << data.size() << std::endl;
+  }
+}
+
 /**
  * Add a tile to the selection.
  * @param tile :: A tile to add.
@@ -720,4 +747,45 @@ void TiledWindow::removeSelectionToFloating()
     widget->undock();
   }
   clearSelection();
+}
+
+/**
+ * Populate a menu with actions.
+ * @param menu :: A menu to populate.
+ */
+void TiledWindow::populateMenu(QMenu *menu)
+{  
+  QAction *actionToDocked = new QAction("Selection to Docked",menu);
+  connect(actionToDocked,SIGNAL(triggered()),this,SLOT(removeSelectionToDocked()));
+  menu->addAction( actionToDocked );
+
+  QAction *actionToFloating = new QAction("Selection to Floating",menu);
+  connect(actionToFloating,SIGNAL(triggered()),this,SLOT(removeSelectionToFloating()));
+  menu->addAction( actionToFloating );
+
+  // reshape actions
+  {
+    QSignalMapper *reshapeMapper = new QSignalMapper(this);
+    connect(reshapeMapper,SIGNAL(mapped(int)),this,SLOT(reshape(int)));
+
+    QActionGroup *reshapeActionGroup = new QActionGroup(this);
+    const int nShapes = 9;
+    for( int i = 1; i < nShapes; ++i )
+    {
+      QAction *action = new QAction(QString("%1").arg(i),menu);
+      action->setCheckable(true);
+      connect(action,SIGNAL(triggered()),reshapeMapper,SLOT(map()));
+      reshapeMapper->setMapping(action,i);
+      reshapeActionGroup->addAction(action);
+    }
+    QMenu *submenu = new QMenu("Reshape");
+    submenu->addActions(reshapeActionGroup->actions());
+    menu->addMenu( submenu );
+  }
+
+  menu->addSeparator();
+
+  QAction *actionClear = new QAction("Clear",menu);
+  connect(actionClear,SIGNAL(triggered()),this,SLOT(clear()));
+  menu->addAction( actionClear );
 }

@@ -847,4 +847,11 @@ class TiledWindowProxy(QtProxyObject):
         threadsafe_call(self._getHeldObject().addWidget, tile._getHeldObject(), row, col)
         
     def getWidget(self, row, col):
+        """
+        Get a sub-window at a location in this TiledWindow.
+        
+        Args:
+            row :: A row of a sub-window.
+            col :: A column of a sub-window.
+        """
         return MDIWindow( threadsafe_call(self._getHeldObject().getWidget, row, col) )

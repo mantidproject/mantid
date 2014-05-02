@@ -1063,6 +1063,7 @@ public slots:
   /// \name Tiled widget
   //@{
   TiledWindow *newTiledWindow();
+  void addActiveToTiledWindow();
   //@}
 
 signals:
@@ -1126,6 +1127,7 @@ private:
   void windowsMenuAboutToShow();
   void windowsMenuActivated( int id );
   void interfaceMenuAboutToShow();
+  void tiledWindowMenuAboutToShow();
 
   //! \name Font Format Functions
   //@{
@@ -1400,6 +1402,7 @@ private:
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
   QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu, *toolbarsMenu;
+  QMenu *tiledWindowMenu;
 
   QAction *actionFileTools,*actionPlotTools,*actionDisplayBar,*actionFormatToolBar;
   QAction *actionEditCurveRange, *actionCurveFullRange, *actionShowAllCurves, *actionHideCurve, *actionHideOtherCurves;
