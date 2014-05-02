@@ -23,6 +23,7 @@ set ( SRC_FILES
   src/PythonRunner.cpp
   src/QtSignalChannel.cpp
   src/QwtRasterDataMD.cpp
+  src/QwtWorkspaceBinData.cpp
   src/QwtWorkspaceSpectrumData.cpp
   src/SignalRange.cpp
   src/ScriptRepositoryView.cpp
@@ -78,6 +79,7 @@ set ( INC_FILES
   inc/MantidQtAPI/MantidQwtWorkspaceData.h
   inc/MantidQtAPI/PropertyWidgetFactory.h
   inc/MantidQtAPI/QwtRasterDataMD.h
+  inc/MantidQtAPI/QwtWorkspaceBinData.h
   inc/MantidQtAPI/QwtWorkspaceSpectrumData.h
   inc/MantidQtAPI/ScriptRepositoryView.h
   inc/MantidQtAPI/SelectionNotificationService.h

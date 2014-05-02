@@ -4,7 +4,6 @@
 #include "MantidCurve.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 
 // Forward definitions
 class MantidUI;
@@ -77,9 +76,9 @@ public:
   QwtDoubleRect boundingRect() const;
 
   /// Return pointer to the data if it of the right type or 0 otherwise
-  QwtWorkspaceSpectrumData* mantidData();
+  MantidQwtMatrixWorkspaceData *mantidData();
   /// Return pointer to the data if it of the right type or 0 otherwise, const version
-  const QwtWorkspaceSpectrumData* mantidData() const;
+  const MantidQwtMatrixWorkspaceData* mantidData() const;
 
   /// Enables/disables drawing of error bars
   void setErrorBars(bool yes=true,bool drawAll = false){m_drawErrorBars = yes;m_drawAllErrorBars = drawAll;}

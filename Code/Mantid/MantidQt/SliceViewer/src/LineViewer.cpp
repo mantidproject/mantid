@@ -1055,7 +1055,7 @@ void LineViewer::showFull()
   MatrixWorkspace_sptr sliceMatrix = boost::dynamic_pointer_cast<MatrixWorkspace>(m_sliceWS);
   if (sliceMatrix)
   {
-    QwtWorkspaceSpectrumData curveData(sliceMatrix, 0, isLogScaledY());
+    QwtWorkspaceSpectrumData curveData(*sliceMatrix, 0, isLogScaledY());
     m_fullCurve->setData(curveData);
     setupScaleEngine(curveData);
     m_plot->setAxisTitle( QwtPlot::xBottom, curveData.getXAxisLabel() );

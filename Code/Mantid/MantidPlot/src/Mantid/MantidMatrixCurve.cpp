@@ -6,6 +6,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+#include "MantidQtAPI/QwtWorkspaceBinData.h"
+
 #include "../Graph.h"
 #include "../ApplicationWindow.h"
 #include "../MultiLayer.h"
@@ -112,14 +115,14 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
   Axis *xAxis(NULL), *yAxis(NULL);
   if(m_indexType == Spectrum)
   {
-    QwtWorkspaceSpectrumData data(matrixWS,m_index, log,distr);
+    QwtWorkspaceSpectrumData data(*matrixWS,m_index, log,distr);
     setData(data);
     xAxis = matrixWS->getAxis(0);
     yAxis = matrixWS->getAxis(1);
   }
   else
   {
-    QwtWorkspaceSpectrumData data(matrixWS,m_index, log,distr);
+    QwtWorkspaceBinData data(*matrixWS, m_index,log);
     setData(data);
     xAxis = matrixWS->getAxis(1);
     yAxis = matrixWS->getAxis(0);
@@ -199,8 +202,8 @@ void MantidMatrixCurve::loadData()
 
 void MantidMatrixCurve::setData(const QwtData &data)
 {
-  if (!dynamic_cast<const QwtWorkspaceSpectrumData*>(&data))
-    throw std::runtime_error("Only QwtWorkspaceSpectrumData can be set to a MantidMatrixCurve");
+  if (!dynamic_cast<const MantidQwtWorkspaceData*>(&data))
+    throw std::runtime_error("Only MantidQwtWorkspaceData can be set to a MantidMatrixCurve");
   PlotCurve::setData(data);
 }
 
@@ -217,10 +220,10 @@ void MantidMatrixCurve::draw(QPainter *p,
 
   if (m_drawErrorBars)// drawing error bars
   {
-    const QwtWorkspaceSpectrumData* d = dynamic_cast<const QwtWorkspaceSpectrumData*>(&data());
+    const MantidQwtWorkspaceData* d = dynamic_cast<const MantidQwtWorkspaceData*>(&data());
     if (!d)
     {
-      throw std::runtime_error("Only QwtWorkspaceSpectrumData can be set to a MantidMatrixCurve");
+      throw std::runtime_error("Only MantidQwtWorkspaceData can be set to a MantidMatrixCurve");
     }
     p->translate(d_x_offset,-d_y_offset); // For waterfall plots (will be zero otherwise)
                                           // Don't really know why you'd want errors on a waterfall plot, but just in case...
@@ -278,11 +281,11 @@ void MantidMatrixCurve::dataReset(const QString& wsName)
   // Acquire a read-lock on the matrix workspace data
   ReadLock _lock(*mws);
 
-  const QwtWorkspaceSpectrumData * new_mantidData(NULL);
   try 
   {
-    new_mantidData = mantidData()->copy(mws);
-    setData(*new_mantidData);
+    const auto *newData = mantidData()->copyWithNewSource(*mws);
+    setData(*newData);
+    delete newData;
     // Queue this plot to be updated once all QwtWorkspaceSpectrumData objects for this workspace have been
     emit dataUpdated();
   } 
@@ -293,7 +296,6 @@ void MantidMatrixCurve::dataReset(const QString& wsName)
         << " now has fewer spectra - plotted curve(s) deleted\n";
     postDeleteHandle(wsNameStd);
   }
-  delete new_mantidData;
 }
 
 void MantidMatrixCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
@@ -324,26 +326,34 @@ int MantidMatrixCurve::workspaceIndex()const
   return -1;
 }
 
-QwtWorkspaceSpectrumData* MantidMatrixCurve::mantidData()
+MantidQwtMatrixWorkspaceData * MantidMatrixCurve::mantidData()
 {
-  QwtWorkspaceSpectrumData* d = dynamic_cast<QwtWorkspaceSpectrumData*>(&data());
+  auto * d = dynamic_cast<MantidQwtMatrixWorkspaceData*>(&data());
   return d;
 }
 
-const QwtWorkspaceSpectrumData* MantidMatrixCurve::mantidData()const
+const MantidQwtMatrixWorkspaceData * MantidMatrixCurve::mantidData() const
 {
-  const QwtWorkspaceSpectrumData* d = dynamic_cast<const QwtWorkspaceSpectrumData*>(&data());
+  const auto *d = dynamic_cast<const MantidQwtMatrixWorkspaceData*>(&data());
   return d;
 }
 
 /// Enables/disables drawing as distribution, ie dividing each y-value by the bin width.
 bool MantidMatrixCurve::setDrawAsDistribution(bool on)
 {
-  return mantidData()->setAsDistribution(on);
+  if( auto *d = dynamic_cast<QwtWorkspaceSpectrumData*>(&data()))
+  {
+    return d->setAsDistribution(on);
+  }
+  else return false;
 }
 
 /// Returns whether the curve is plotted as a distribution
 bool MantidMatrixCurve::isDistribution() const
 {
-  return mantidData()->m_isDistribution;
+  if( auto *d = dynamic_cast<const QwtWorkspaceSpectrumData*>(&data()))
+  {
+    return d->m_isDistribution;
+  }
+  else return false;
 }

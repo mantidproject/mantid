@@ -6082,7 +6082,7 @@ void Graph::updateDataCurves()
 
 void Graph::checkValuesInAxisRange(MantidMatrixCurve* mc)
 {
-  QwtWorkspaceSpectrumData* data = mc->mantidData();
+  auto* data = mc->mantidData();
   double xMin(data->x(0)); // Needs to be min of current graph (x-axis)
   double xMax(data->x(data->size()-1)); // Needs to be max of current graph (x-axis)
   bool changed(false);

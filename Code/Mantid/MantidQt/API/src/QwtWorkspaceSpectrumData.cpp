@@ -4,39 +4,35 @@
 #include <QStringBuilder>
 
 /// Constructor
-QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(Mantid::API::MatrixWorkspace_const_sptr workspace,int specIndex, const bool logScale, bool distr)
- : m_workspace(workspace),
-   m_spec(specIndex),
-   m_X(workspace->readX(specIndex)),
-   m_Y(workspace->readY(specIndex)),
-   m_E(workspace->readE(specIndex)),
-   m_isHistogram(workspace->isHistogramData()),
+QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace & workspace,int specIndex, const bool logScale, bool distr)
+ : m_spec(specIndex),
+   m_X(workspace.readX(specIndex)),
+   m_Y(workspace.readY(specIndex)),
+   m_E(workspace.readE(specIndex)),
+   m_xTitle(), m_yTitle(),
+   m_isHistogram(workspace.isHistogramData()),
    m_binCentres(false),
    m_logScale(logScale),
    m_minPositive(0),
    m_isDistribution(distr)
-{}
-
-/// Copy constructor
-QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(const QwtWorkspaceSpectrumData& data)
 {
-  this->operator =(data);
+  m_xTitle = MantidQt::API::PlotAxis(workspace, 0).title();
+  m_yTitle = MantidQt::API::PlotAxis(workspace).title();
 }
 
-/** Assignment operator */
-QwtWorkspaceSpectrumData& QwtWorkspaceSpectrumData::operator=(const QwtWorkspaceSpectrumData &data)
+/// Virtual copy constructor
+QwtWorkspaceSpectrumData *QwtWorkspaceSpectrumData::copy() const
 {
-  m_workspace = data.m_workspace;
-  m_spec = data.m_spec;
-  m_X = data.m_workspace->readX(data.m_spec);
-  m_Y = data.m_workspace->readY(data.m_spec);
-  m_E = data.m_workspace->readE(data.m_spec);
-  m_isHistogram = m_workspace->isHistogramData();
-  m_binCentres = data.m_binCentres;
-  m_logScale = data.m_logScale;
-  m_minPositive = 0;
-  m_isDistribution = data.m_isDistribution;
-  return *this;
+  return new QwtWorkspaceSpectrumData(*this);
+}
+
+/**
+ * @param workspace A new workspace source
+ * @return
+*/
+ QwtWorkspaceSpectrumData* QwtWorkspaceSpectrumData::copyWithNewSource(const Mantid::API::MatrixWorkspace & workspace) const
+{
+  return new QwtWorkspaceSpectrumData(workspace, m_spec, m_logScale);
 }
 
 
@@ -148,7 +144,7 @@ double QwtWorkspaceSpectrumData::getYMax() const
  */
 QString QwtWorkspaceSpectrumData::getXAxisLabel() const
 {
-  return MantidQt::API::PlotAxis(*m_workspace, 0).title();
+  return m_xTitle;
 }
 
 /**
@@ -156,7 +152,7 @@ QString QwtWorkspaceSpectrumData::getXAxisLabel() const
  */
 QString QwtWorkspaceSpectrumData::getYAxisLabel() const
 {
-  return MantidQt::API::PlotAxis(*m_workspace).title();
+  return m_yTitle;
 }
 
 void QwtWorkspaceSpectrumData::setLogScale(bool on)

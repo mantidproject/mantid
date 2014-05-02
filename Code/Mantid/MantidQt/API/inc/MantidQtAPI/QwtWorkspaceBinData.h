@@ -1,26 +1,28 @@
-#ifndef MANTIDQTAPI_QWTWORKSPACESPECTRUMDATA_H
-#define MANTIDQTAPI_QWTWORKSPACESPECTRUMDATA_H
+#ifndef MANTIDQTAPI_QWTWORKSPACEBINDATA_H
+#define MANTIDQTAPI_QWTWORKSPACEBINDATA_H
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
 #include "DllOption.h"
 
 #include <boost/shared_ptr.hpp>
+
 #include <QString>
 
 //=================================================================================================
 //=================================================================================================
 /**  This class implements QwtData with direct access to a spectrum in a MatrixWorkspace.
  */
-class EXPORT_OPT_MANTIDQT_API QwtWorkspaceSpectrumData : public MantidQwtMatrixWorkspaceData
+class EXPORT_OPT_MANTIDQT_API QwtWorkspaceBinData : public MantidQwtMatrixWorkspaceData
 {
 public:
-  QwtWorkspaceSpectrumData(const Mantid::API::MatrixWorkspace & workspace, int specIndex, const bool logScale, bool distr = false);
+  QwtWorkspaceBinData(const Mantid::API::MatrixWorkspace & workspace, int binIndex, const bool logScale);
 
   //! @return Pointer to a copy (virtual copy constructor)
-  virtual QwtWorkspaceSpectrumData *copy() const;
+  virtual QwtWorkspaceBinData *copy() const;
+
   /// Return a new data object of the same type but with a new workspace
-  virtual QwtWorkspaceSpectrumData* copyWithNewSource(const Mantid::API::MatrixWorkspace & workspace) const;
+  virtual QwtWorkspaceBinData *copyWithNewSource(const Mantid::API::MatrixWorkspace & workspace) const;
 
   //! @return Size of the data set
   virtual size_t size() const;
@@ -38,6 +40,7 @@ public:
   */
   virtual double y(size_t i) const;
 
+
   /// Returns the error of the i-th data point
   double e(size_t i)const;
   /// Returns the x position of the error bar for the i-th data point (bin)
@@ -52,20 +55,18 @@ public:
   /// Return the label to use for the Y axis
   QString getYAxisLabel() const;
 
-  bool isHistogram()const{return m_isHistogram;}
-
   /// Inform the data that it is to be plotted on a log y scale
   void setLogScale(bool on);
   bool logScale()const{return m_logScale;}
   void saveLowestPositiveValue(const double v);
-  bool setAsDistribution(bool on = true);
 
 private:
 
-  friend class MantidMatrixCurve;
+  /// Initialize the object
+  void init(const Mantid::API::MatrixWorkspace & workspace);
 
-  /// Spectrum index in the workspace
-  int m_spec;
+  /// The column index of the current data
+  int m_binIndex;
   /// Copy of the X vector
   Mantid::MantidVec m_X;
   /// Copy of the Y vector
@@ -73,21 +74,14 @@ private:
   /// Copy of the E vector
   Mantid::MantidVec m_E;
 
-  /// A caption for the X axis
-  QString m_xTitle;
-  /// A caption for the Y axis
-  QString m_yTitle;
+ /// A title for the X axis
+ QString m_xTitle;
+ /// A title for the Y axis
+ QString m_yTitle;
 
-  /// Is the spectrum a histogram?
-  bool m_isHistogram;
-  /// This field can be set true for a histogram workspace. If it's true x(i) returns (X[i]+X[i+1])/2
-  bool m_binCentres;
   /// Indicates that the data is plotted on a log y scale
   bool m_logScale;
   /// lowest positive y value
   mutable double m_minPositive;
-  /// Is plotting as distribution
-  bool m_isDistribution;
-
 };
 #endif
