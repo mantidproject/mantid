@@ -596,19 +596,21 @@ namespace Mantid
             Poco::FastMutex::ScopedLock _lock(m_mutex);
             m_running = true;
           }
+          
+          start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
+          
           if(trackingHistory())
           {
             // count used for defining the algorithm execution order
             // If history is being recorded we need to count this as a separate algorithm
             // as the history compares histories by their execution number
             ++Algorithm::g_execCount;
+            
+            //populate history record before execution so we can record child algorithms in it
+            AlgorithmHistory algHist(this);
+            m_history = boost::make_shared<AlgorithmHistory>(algHist);
           }
 
-          start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
-          //populate history record before execution so we can record child algorithms in it
-          AlgorithmHistory algHist(this);
-          m_history = boost::make_shared<AlgorithmHistory>(algHist);
-          
           // Start a timer
           Timer timer;
           // Call the concrete algorithm's exec method
@@ -617,12 +619,14 @@ namespace Mantid
           interruption_point();			
           // Get how long this algorithm took to run
           const float duration = timer.elapsed();
-          m_history->addExecutionInfo(start_time, duration);
-          m_history->setExecCount(Algorithm::g_execCount);
 
           // need it to throw before trying to run fillhistory() on an algorithm which has failed
-          if(trackingHistory())
+          if(trackingHistory() && m_history)
+          { 
+            m_history->addExecutionInfo(start_time, duration);
+            m_history->setExecCount(Algorithm::g_execCount);
             fillHistory();
+          }
 
           // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
           if (!isChild() || m_alwaysStoreInADS)
