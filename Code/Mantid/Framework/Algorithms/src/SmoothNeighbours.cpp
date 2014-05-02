@@ -357,9 +357,9 @@ void SmoothNeighbours::findNeighboursRectangular()
     std::string det_name = det->getName();
     if (det)
     {
-      for (int j=Edge; j < det->xpixels()-Edge; j += SumX)
+      for (int j=0; j < det->xpixels(); j += SumX)
       {
-        for (int k=Edge; k < det->ypixels()-Edge; k += SumY)
+        for (int k=0; k < det->ypixels(); k += SumY)
         {
           double totalWeight = 0;
           // Neighbours and weights
@@ -372,8 +372,8 @@ void SmoothNeighbours::findNeighboursRectangular()
               double smweight = WeightedSum->weightAt(AdjX, ix, AdjY, iy);
 
               //Find the pixel ID at that XY position on the rectangular detector
-              if(j+ix >= det->xpixels() || j+ix < 0) continue;
-              if(k+iy >= det->ypixels() || k+iy < 0) continue;
+              if(j+ix >= det->xpixels()-Edge || j+ix < Edge) continue;
+              if(k+iy >= det->ypixels()-Edge || k+iy < Edge) continue;
               int pixelID = det->getAtXY(j+ix,k+iy)->getID();
 
               //Find the corresponding workspace index, if any
