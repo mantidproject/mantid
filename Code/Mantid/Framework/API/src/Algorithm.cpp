@@ -597,7 +597,6 @@ namespace Mantid
             m_running = true;
           }
           
-          start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
           
           if(trackingHistory())
           {
@@ -611,6 +610,7 @@ namespace Mantid
             m_history = boost::make_shared<AlgorithmHistory>(algHist);
           }
 
+          start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
           // Start a timer
           Timer timer;
           // Call the concrete algorithm's exec method
