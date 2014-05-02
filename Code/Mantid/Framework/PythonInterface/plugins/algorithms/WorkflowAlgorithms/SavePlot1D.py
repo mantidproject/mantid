@@ -60,7 +60,10 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
             if a.isSpectra():
                 plotlabel=a.label(j)
             else:
-                plotlabel=a.title()+" = "+str(float(a.label(j)))   
+                LHS=a.title()
+                if LHS=="":
+                    LHS=a.getUnit().caption()
+                plotlabel=LHS+" = "+str(float(a.label(j)))   
             plt.plot(x,y,label=plotlabel)
             xlabel=self.getProperty("XLabel").value
             ylabel=self.getProperty("YLabel").value
@@ -69,7 +72,9 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                 unitLabel=xaxis.getUnit().symbol().latex() 
                 xlabel=xaxis.getUnit().caption()+" ($"+unitLabel+"$)"
             if ylabel=="":
-                ylabel=ws.YUnit()              
+                ylabel=ws.YUnit() 
+                if ylabel=='':
+                    ylabel = ws.YUnitLabel()           
 
             plt.xlabel(xlabel)
             plt.ylabel(ylabel) 
