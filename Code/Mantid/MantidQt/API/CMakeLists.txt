@@ -94,8 +94,8 @@ set ( UI_FILES
 set( TEST_FILES
    InterfaceManagerTest.h
    MantidColorMapTest.h
-   MantidQwtMatrixWorkspaceDataTest.h
    PlotAxisTest.h
+   QwtWorkspaceSpectrumDataTest.h
    SelectionNotificationServiceTest.h
    SignalRangeTest.h
 )
