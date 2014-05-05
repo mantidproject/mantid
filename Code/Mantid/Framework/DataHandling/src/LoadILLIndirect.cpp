@@ -123,18 +123,6 @@ void LoadILLIndirect::exec() {
     // Load Monitor details: n. monitors x monitor contents
     std::vector< std::vector<int> > monitorsData = loadMonitors(firstEntry);
 
-/*************
-    std::cout<<"The contents of monitorsData are:"<< std::endl;
-    int monitor_index = 0;
-    for (auto itms = monitorsData.begin(); itms != monitorsData.end(); ++itms) {
-    	std::cout << "Monitor " << monitor_index << std::endl;
-		for (auto itm = itms->begin(); itm != itms->end(); ++itm)
-			std::cout << ' ' << *itm;
-      std::cout << std::endl;
-      monitor_index++;
-    }
-**************/
-
     // Load Data details (number of tubes, channels, etc)
     loadDataDetails(firstEntry);
 
