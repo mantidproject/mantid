@@ -438,7 +438,7 @@ class ISISReducer(Reducer):
         global current_settings
         current_settings = None
         
-    def settings(self):
+    def cur_settings(self):
         """
             Retrieves the state of the reducer after it was setup and before running or None
             if the reducer hasn't been setup
