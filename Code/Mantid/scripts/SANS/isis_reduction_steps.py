@@ -18,9 +18,8 @@ sanslog = Logger.get("SANS")
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
-                         isEventWorkspace, fromEvent2Histogram, 
-                         getFilePathFromWorkspace, getWorkspaceReference,
-                         getMonitor4event, slice2histogram, getFileAndName)
+                         isEventWorkspace, getFilePathFromWorkspace,
+                         getWorkspaceReference, slice2histogram, getFileAndName)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
