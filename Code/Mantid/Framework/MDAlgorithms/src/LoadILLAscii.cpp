@@ -7,11 +7,11 @@
 
  *WIKI*/
 
-#include "MantidDataHandling/LoadILLAscii.h"
+#include "MantidMDAlgorithms/LoadILLAscii.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidDataHandling/LoadILLAsciiHelper.h"
+#include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/DateAndTime.h"
@@ -19,6 +19,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <algorithm>
 #include <iterator>     // std::distance
@@ -32,7 +33,7 @@
 #include <Poco/TemporaryFile.h>
 
 namespace Mantid {
-namespace DataHandling {
+namespace MDAlgorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -96,7 +97,7 @@ int LoadILLAscii::version() const {
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLAscii::category() const {
-	return "DataHandling\\Text";
+	return "MDAlgorithms\\Text";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -191,8 +192,10 @@ void LoadILLAscii::exec() {
 void LoadILLAscii::setWorkspaceRotationAngle(API::MatrixWorkspace_sptr ws, double rotationAngle){
 
 	API::Run & runDetails = ws->mutableRun();
-	Mantid::Kernel::TimeSeriesProperty<double> *p =
-			new Mantid::Kernel::TimeSeriesProperty<double>("rotangle");
+	auto *p = new Mantid::Kernel::TimeSeriesProperty<double>("rotangle");
+
+//	auto p = boost::make_shared <Mantid::Kernel::TimeSeriesProperty<double> >("rotangle");
+
 	p->addValue(DateAndTime::getCurrentTime(), rotationAngle);
 	runDetails.addLogData(p);
 }
@@ -341,5 +344,5 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 
 }
 
-} // namespace DataHandling
+} // namespace MDAlgorithms
 } // namespace Mantid

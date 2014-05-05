@@ -1,7 +1,7 @@
-#ifndef MANTID_DATAHANDLING_LOADILLASCIIHELPER_H_
-#define MANTID_DATAHANDLING_LOADILLASCIIHELPER_H_
+#ifndef MANTID_MDALGORITHMS_LOADILLASCIIHELPER_H_
+#define MANTID_MDALGORITHMS_LOADILLASCIIHELPER_H_
 
- #include "MantidDataHandling/DllConfig.h"
+ #include "MantidMDAlgorithms/DllConfig.h"
 
 #include <iostream>
 #include <fstream>
@@ -10,7 +10,7 @@
 #include <map>
 
 namespace Mantid {
-namespace DataHandling {
+namespace MDAlgorithms {
 
 /** LoadILLAsciiHelper :
 
@@ -84,7 +84,7 @@ private:
 };
 
 }
-// namespace DataHandling
+// namespace MDAlgorithms
 }// namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_LOADILLASCIIHELPER_H_ */
+#endif  /* MANTID_MDALGORITHMS_LOADILLASCIIHELPER_H_ */

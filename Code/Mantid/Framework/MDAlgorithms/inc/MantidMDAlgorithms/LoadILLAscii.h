@@ -1,16 +1,15 @@
-#ifndef MANTID_DATAHANDLING_LOADILLASCII_H_
-#define MANTID_DATAHANDLING_LOADILLASCII_H_
+#ifndef MANTID_MDALGORITHMS_LOADILLASCII_H_
+#define MANTID_MDALGORITHMS_LOADILLASCII_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 
-#include "MantidDataHandling/LoadHelper.h"
-#include "MantidDataHandling/LoadILLAsciiHelper.h"
+#include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 
 namespace Mantid {
-namespace DataHandling {
+namespace MDAlgorithms {
 
 /** LoadILLAscii :
 
@@ -67,7 +66,7 @@ private:
 	std::vector<std::string> m_supportedInstruments;
 };
 
-} // namespace DataHandling
+} // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_LOADILLASCII_H_ */
+#endif  /* MANTID_MDALGORITHMS_LOADILLASCII_H_ */

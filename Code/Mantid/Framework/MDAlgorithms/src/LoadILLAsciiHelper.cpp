@@ -137,8 +137,8 @@ RrAadIitddddddddddddddddAatdddddddFfttttttttddddddddddddddddddddddddddIitdd etc.
 
  *WIKI*/
 
-#include "MantidDataHandling/LoadILLAsciiHelper.h"
-#include "MantidDataHandling/DllConfig.h"
+#include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 #include <iostream>
 #include <fstream>
@@ -154,7 +154,7 @@ RrAadIitddddddddddddddddAatdddddddFfttttttttddddddddddddddddddddddddddIitdd etc.
 #include <boost/algorithm/string/predicate.hpp>
 
 namespace Mantid {
-namespace DataHandling {
+namespace MDAlgorithms {
 
 
 /*
@@ -469,11 +469,11 @@ template<typename T> T ILLParser::getValue(const std::string &field,
 }
 
 
-} // namespace DataHandling
+} // namespace MDAlgorithms
 }// namespace Mantid
 
 // Concrete template instantiation
 // The other libraries can't see the template definition so it needs to be instantiated in API
-template double Mantid::DataHandling::ILLParser::getValueFromHeader(const std::string &);
-template double Mantid::DataHandling::ILLParser::getValue(const std::string &,const std::map<std::string, std::string> &);
+template double Mantid::MDAlgorithms::ILLParser::getValueFromHeader(const std::string &);
+template double Mantid::MDAlgorithms::ILLParser::getValue(const std::string &,const std::map<std::string, std::string> &);
 

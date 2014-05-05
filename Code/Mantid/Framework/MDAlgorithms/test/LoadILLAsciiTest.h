@@ -1,12 +1,12 @@
-#ifndef MANTID_DATAHANDLING_LOADILLASCIITEST_H_
-#define MANTID_DATAHANDLING_LOADILLASCIITEST_H_
+#ifndef MANTID_MDALGORITHMS_LOADILLASCIITEST_H_
+#define MANTID_MDALGORITHMS_LOADILLASCIITEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadILLAscii.h"
-#include "MantidDataHandling/LoadILLAsciiHelper.h"
+#include "MantidMDAlgorithms/LoadILLAscii.h"
+#include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
 
-using Mantid::DataHandling::LoadILLAscii;
+using Mantid::MDAlgorithms::LoadILLAscii;
 using namespace Mantid::API;
 
 class LoadILLAsciiTest: public CxxTest::TestSuite {
@@ -57,7 +57,7 @@ public:
 //	// DOES NOT WORK. Can't find input file
 //	void test_LoadILLHelper() {
 //
-//		using Mantid::DataHandling::ILLParser;
+//		using Mantid::MDAlgorithms::ILLParser;
 //
 //		// Parses ascii file and fills the data scructures
 //		ILLParser illAsciiParser("../Test/AutoTestData/" + m_testFile);
@@ -80,4 +80,4 @@ private:
 
 };
 
-#endif /* MANTID_DATAHANDLING_LOADILLASCIITEST_H_ */
+#endif /* MANTID_MDALGORITHMS_LOADILLASCIITEST_H_ */
