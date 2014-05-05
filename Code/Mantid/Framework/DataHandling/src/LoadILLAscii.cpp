@@ -21,13 +21,15 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <iterator>     // std::distance
 #include <sstream>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
 #include <string.h>
+
+#include <boost/shared_ptr.hpp>
+#include <Poco/TemporaryFile.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -276,14 +278,13 @@ void LoadILLAscii::loadsDataIntoTheWS(API::MatrixWorkspace_sptr &thisWorkspace,
 IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 		std::vector<API::MatrixWorkspace_sptr> &workspaceList) {
 
-	char tempFileNameChar[128];
-	tmpnam (tempFileNameChar);
-	strcat (tempFileNameChar,".txt");
-	g_log.debug() << "Dumping WSs in a temp file: " << tempFileNameChar << std::endl;
+	Poco::TemporaryFile tmpFile;
+	std::string tempFileName = tmpFile.path();
+	g_log.debug() << "Dumping WSs in a temp file: " << tempFileName << std::endl;
 
 
 	std::ofstream myfile;
-	myfile.open (tempFileNameChar);
+	myfile.open (tempFileName.c_str());
 	myfile << "DIMENSIONS" <<std::endl;
 	myfile << "x X m 100" <<std::endl;
 	myfile << "y Y m 100" <<std::endl;
@@ -319,18 +320,14 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 
 
 		IAlgorithm_sptr importMDEWS = createChildAlgorithm("ImportMDEventWorkspace");
-		// Now execute the Child Algorithm. Catch and log any error, but don't stop.
+		// Now execute the Child Algorithm.
 		try {
-			importMDEWS->setPropertyValue("Filename", tempFileNameChar);
+			importMDEWS->setPropertyValue("Filename", tempFileName);
 			importMDEWS->setProperty("OutputWorkspace", "Test");
-			importMDEWS->execute();
-		} catch (...) {
-			std::remove(tempFileNameChar);
-			std::runtime_error("Error: Cannot convert WS to MDEventWorkspace");
+			importMDEWS->executeAsChildAlg();
+		} catch (std::exception & exc) {
+			throw std::runtime_error(std::string("Error running ImportMDEventWorkspace: ") + exc.what());
 		}
-
-		std::remove(tempFileNameChar);
-
 		IMDEventWorkspace_sptr workspace = importMDEWS->getProperty("OutputWorkspace");
 		if(!workspace)
 			throw(std::runtime_error("Can not retrieve results of child algorithm ImportMDEventWorkspace"));
