@@ -29,7 +29,7 @@ namespace Mantid
 
       */
       /// Enumerate parameter positions and the  Number of parameters
-      enum {Ampliture,J_coupling,NPARAMS};
+      enum {Amplitude,J_coupling,NPARAMS};
 
 
       /// Parameter names, same order as above
@@ -135,7 +135,7 @@ namespace Mantid
 
         const double qx(point[0]), qy(point[1]), qz(point[2]), eps(point[3]);
         const double qsqr = qx*qx + qy*qy + qz*qz;
-        const double Amplitude = getCurrentParameterValue(AnsatzParameters::Ampliture);
+        const double Amplitude = getCurrentParameterValue(AnsatzParameters::Amplitude);
         const double J_coupling = getCurrentParameterValue(AnsatzParameters::J_coupling);
 
 
