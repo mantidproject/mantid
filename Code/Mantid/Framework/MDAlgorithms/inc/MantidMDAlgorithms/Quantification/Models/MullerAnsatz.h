@@ -1,5 +1,5 @@
-#ifndef MANTID_MDALGORITHMS_STRONTIUM122_H_
-#define MANTID_MDALGORITHMS_STRONTIUM122_H_
+#ifndef MANTID_MDALGORITHMS_MULLERANSATZ_H_
+#define MANTID_MDALGORITHMS_MULLERANSATZ_H_
 /**
   Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -29,31 +29,45 @@ namespace Mantid
   {
 
     /**
-     * Defines the Strontium-122 model of Ewings et al.
-     * This is model 207 in TobyFit.
+     * Defines the Muller Ansatz model of Ewings et al.
+     * This is model 300 in TobyFit.
      */
-    class DLLExport Strontium122 : public ForegroundModel
+    class DLLExport MullerAnsatz : public ForegroundModel
     {
-    private:
-      /// String name of the model
-      std::string name() const { return "Strontium122"; }
-
-      /// Setup the model
-      void init();
+    public:
+      /// possible scattering chain directions
+      enum ChainDirection
+      {
+        Along_a,
+        Along_b,
+        Along_c
+      };
+      /// possible magnetic form factor directions
+      enum MagneticFFDirection
+      {
+        NormalTo_a,
+        NormalTo_b,
+        NormalTo_c,
+        Isotropic
+      };
+   
+       /// Calculates the intensity for the model for the current parameters.
+      double scatteringIntensity(const API::ExperimentInfo & exptDescr, const std::vector<double> & point) const;
       /// Called when an attribute is set
       void setAttribute(const std::string & name, const API::IFunction::Attribute& attr);
-
       /// Returns the type of model
       ModelType modelType() const { return Broad; }
-      /// Calculates the intensity for the model for the current parameters.
-      double scatteringIntensity(const API::ExperimentInfo & exptDescr, const std::vector<double> & point) const;
+      /// String name of the model
+      std::string name() const { return "MullerAnsatz"; }
+      MullerAnsatz();
+    private:
+      /// Setup the model
+      void init();
+      // direction of the magnetic chain wrt the lattice vectors
+      ChainDirection m_ChainDirection;
+      // direction of the magnetic form factor wrt the lattice vectors. 
+      MagneticFFDirection m_FFDirection;
 
-      /// Twin type attribute
-      int m_twinType;
-      /// MultEps attribute
-      bool m_multEps;
-    public:
-      Strontium122();
     };
 
   }
