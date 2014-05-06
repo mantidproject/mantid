@@ -92,12 +92,15 @@ MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve& c)
  */
 void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
 {
+  // Will throw if name not found but return NULL ptr if the type is incorrect
   MatrixWorkspace_const_sptr workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName.toStdString() );
 
-  if ( !workspace || m_index >= static_cast<int>(workspace->getNumberHistograms()) )
+  if ( !workspace ) // The respective *Data classes will check for index validity
   {
     std::stringstream ss;
-    ss << m_index << " is an invalid spectrum index for workspace " << m_wsName.toStdString() << " - not plotted";
+    ss << "Workspace named '" << m_wsName.toStdString()
+       << "' found but it is not a MatrixWorkspace. ID='"
+       << AnalysisDataService::Instance().retrieve(m_wsName.toStdString() )->id() << "'";
     throw std::invalid_argument(ss.str());
   }
 

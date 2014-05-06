@@ -3023,7 +3023,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     {
       g_log.warning() << "Workspace " << it.key().toStdString() << " not found" << std::endl;
     }
-    catch (std::invalid_argument& ex)
+    catch (std::exception& ex)
     {
       g_log.warning() << ex.what() << std::endl;
     }
@@ -3031,7 +3031,11 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
 
   if(isGraphNew)
   {
-    if(!firstCurve) return NULL;
+    if(!firstCurve)
+    {
+      QApplication::restoreOverrideCursor();
+      return NULL;
+    }
 
     g->setXAxisTitle(firstCurve->mantidData()->getXAxisLabel());
     g->setYAxisTitle(firstCurve->mantidData()->getYAxisLabel());
