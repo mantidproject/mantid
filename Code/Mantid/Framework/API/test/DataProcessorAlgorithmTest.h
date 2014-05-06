@@ -169,12 +169,12 @@ public:
     TS_ASSERT_EQUALS(childHist.childHistorySize(), 1);
 
     // check basic algorithm history
-    childHist = childHist.getChildAlgorithmHistory(0);
-    TS_ASSERT_EQUALS(childHist.name(), "BasicAlgorithm");
+    auto basicChildHist = childHist.getChildAlgorithmHistory(0);
+    TS_ASSERT_EQUALS(basicChildHist.name(), "BasicAlgorithm");
     
     //even though BasicAlgorithm calls another algorithm, 
     //it should not store the history.
-    TS_ASSERT_EQUALS(childHist.childHistorySize(), 0);
+    TS_ASSERT_EQUALS(basicChildHist.childHistorySize(), 0);
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
