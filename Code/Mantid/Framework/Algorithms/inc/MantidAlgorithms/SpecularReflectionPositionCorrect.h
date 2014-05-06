@@ -59,14 +59,14 @@ namespace Mantid
           Mantid::API::MatrixWorkspace_sptr workspace, const bool isPointDetector);
 
       /// Correct detector positions.
-      void correctPosition(API::MatrixWorkspace_sptr toCorrect, const double& thetaInDeg,
+      void correctPosition(API::MatrixWorkspace_sptr toCorrect, const double& twoThetaInDeg,
           Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector);
 
       /// Does the property have a default value.
       bool isPropertyDefault(const std::string& propertyName) const;
 
       /// Move detectors.
-      void moveDetectors(API::MatrixWorkspace_sptr toCorrect, Geometry::IComponent_const_sptr detector, Geometry::IComponent_const_sptr sample, const double& upOffset, const double& acrossOffset);
+      void moveDetectors(API::MatrixWorkspace_sptr toCorrect, Geometry::IComponent_const_sptr detector, Geometry::IComponent_const_sptr sample, const double& upOffset, const double& acrossOffset, const Mantid::Kernel::V3D& detectorPosition);
     };
 
   } // namespace Algorithms

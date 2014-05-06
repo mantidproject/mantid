@@ -17,6 +17,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
@@ -32,6 +33,23 @@ namespace Mantid
       const std::string multiDetectorAnalysis = "MultiDetectorAnalysis";
       const std::string lineDetectorAnalysis = "LineDetectorAnalysis";
       const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
+
+      /**
+       * Get the root component, that is not the instrument itself.
+       * @param currentComponent : Some component in the tree
+       * @return : Parent component.
+       */
+      IComponent_const_sptr getRootComponent(IComponent_const_sptr& currentComponent)
+      {
+        if(IComponent_const_sptr parent = currentComponent->getParent())
+        {
+          if(!dynamic_cast<Instrument*>(const_cast<IComponent*>( parent.get() ) ))
+          {
+            return getRootComponent(parent);
+          }
+        }
+        return currentComponent;
+      }
     }
 
     // Register the algorithm into the AlgorithmFactory
@@ -238,45 +256,90 @@ namespace Mantid
      * @param sample : Sample Component
      * @param upOffset : Up offset to apply
      * @param acrossOffset : Across offset to apply
+     * @param detectorPosition: Actual detector or detector group position.
      */
     void SpecularReflectionPositionCorrect::moveDetectors(API::MatrixWorkspace_sptr toCorrect,
         IComponent_const_sptr detector, IComponent_const_sptr sample, const double& upOffset,
-        const double& acrossOffset)
+        const double& acrossOffset, const V3D& detectorPosition)
     {
       auto instrument = toCorrect->getInstrument();
-      const V3D detectorPosition = detector->getPos();
       const V3D samplePosition = sample->getPos();
       auto referenceFrame = instrument->getReferenceFrame();
       if (auto groupDetector = boost::dynamic_pointer_cast<const DetectorGroup>(detector)) // Do we have a group of detectors
       {
         auto detectors = groupDetector->getDetectors();
-        for (size_t i = 0; i < detectors.size(); ++i)
+        bool sameParentComponent = true;
+        IComponent const * lastParentComponent = detectors[0]->getParent().get();
+        for (size_t i = 1; i < detectors.size(); ++i)
         {
-          moveDetectors(toCorrect, detectors[i], sample, upOffset, acrossOffset); // Recursive call
+          IComponent const * currentParentComponent = detectors[i]->getParent().get();
+          if (lastParentComponent != currentParentComponent)
+          {
+            sameParentComponent = false;
+            break;
+          }
+          lastParentComponent = currentParentComponent;
+        }
+
+        if (sameParentComponent)
+        {
+          moveDetectors(toCorrect, detectors[0], sample, upOffset, acrossOffset, detectorPosition);
+        }
+        else
+        {
+          for (size_t i = 0; i < detectors.size(); ++i)
+          {
+            moveDetectors(toCorrect, detectors[i], sample, upOffset, acrossOffset, detectorPosition); // Recursive call
+          }
         }
       }
       else
       {
+        /*
+        auto& pmap = toCorrect->instrumentParameters();
+        using namespace Geometry::ComponentHelper;
+        TransformType positionType = Absolute;
+        std::map<std::string, int> alignmentMap;
+        alignmentMap["X"] = 0;
+        alignmentMap["Y"] = 1;
+        alignmentMap["Z"] = 2;
+        std::vector<double> coords(3);
+        coords[alignmentMap[referenceFrame->pointingHorizontalAxis()]] = detectorPosition.scalar_prod(referenceFrame->vecPointingAlongBeam());
+        coords[alignmentMap[referenceFrame->pointingUpAxis()]] = acrossOffset;
+        coords[alignmentMap[referenceFrame->pointingAlongBeamAxis()]] = samplePosition.scalar_prod(referenceFrame->vecPointingUp()) + upOffset;
+        double x = coords[0];
+        double y = coords[1];
+        double z = coords[2];
+        Geometry::ComponentHelper::moveComponent(*detector, pmap, V3D(coords[0], coords[1], coords[2]), positionType);
+        */
+
         auto moveComponentAlg = this->createChildAlgorithm("MoveInstrumentComponent");
         moveComponentAlg->initialize();
         moveComponentAlg->setProperty("Workspace", toCorrect);
-        moveComponentAlg->setProperty("ComponentName", detector->getName());
+        IComponent_const_sptr root = getRootComponent(detector);
+        const std::string componentName = root->getName();
+        moveComponentAlg->setProperty("ComponentName", componentName);
         moveComponentAlg->setProperty("RelativePosition", false);
         // Movements
         moveComponentAlg->setProperty(referenceFrame->pointingAlongBeamAxis(),
             detectorPosition.scalar_prod(referenceFrame->vecPointingAlongBeam()));
         moveComponentAlg->setProperty(referenceFrame->pointingHorizontalAxis(), acrossOffset);
+        const double detectorVerticalPosition = detectorPosition.scalar_prod(referenceFrame->vecPointingUp());
+        const double rootVerticalPosition = root->getPos().scalar_prod(referenceFrame->vecPointingUp());
+
+        const double dm =  rootVerticalPosition - detectorVerticalPosition;
         moveComponentAlg->setProperty(referenceFrame->pointingUpAxis(),
-            samplePosition.scalar_prod(referenceFrame->vecPointingUp()) + upOffset);
+            samplePosition.scalar_prod(referenceFrame->vecPointingUp()) + upOffset + dm);
         // Execute the movement.
         moveComponentAlg->execute();
+
       }
     }
 
     /**
      * Correct the position of the detectors based on the input theta value.
      * @param toCorrect : Workspace to correct detector posisitions on.
-     * @param thetaInDeg : Theta in degrees to use in correction calculations.
+     * @param twoThetaInDeg : 2* Theta in degrees to use in correction calculations.
      * @param sample : Pointer to the sample
      * @param detector : Pointer to a given detector
      */
@@ -287,6 +350,10 @@ namespace Mantid
       auto instrument = toCorrect->getInstrument();
 
       const V3D detectorPosition = detector->getPos();
+      const double x = detectorPosition[0];
+      const double y = detectorPosition[1];
+      const double z = detectorPosition[2];
+      std::cout << " x: " << x << " y: " << y << " z: " << z << std::endl;
 
       const V3D samplePosition = sample->getPos();
 
@@ -300,10 +367,10 @@ namespace Mantid
 
       double beamOffset = sampleToDetector.scalar_prod(referenceFrame->vecPointingAlongBeam()); // We just recalculate beam offset.
 
-      double upOffset = beamOffset * std::tan(thetaInRad); // We only correct vertical position
+      double upOffset = (beamOffset * std::tan(thetaInRad)) ; // We only correct vertical position
 
       // Apply the movements.
-      moveDetectors(toCorrect, detector, sample, upOffset, acrossOffset);
+      moveDetectors(toCorrect, detector, sample, upOffset, acrossOffset, detector->getPos());
 
     }
 

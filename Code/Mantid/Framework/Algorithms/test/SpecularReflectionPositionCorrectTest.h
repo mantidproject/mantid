@@ -88,8 +88,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "test_out");
     alg.setProperty("ThetaIn", 10.0);
     std::vector<int> invalid(1, -1);
-    TS_ASSERT_THROWS(alg.setProperty("SpectrumNumbersOfDetectors", invalid),
-        std::invalid_argument&);
+    TS_ASSERT_THROWS(alg.setProperty("SpectrumNumbersOfDetectors", invalid), std::invalid_argument&);
   }
 
   void test_throws_if_SpectrumNumbersOfDetectors_outside_range()
@@ -120,10 +119,11 @@ public:
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument&);
   }
 
-  VerticalHorizontalOffsetType determine_vertical_and_horizontal_offsets(MatrixWorkspace_sptr ws)
+  VerticalHorizontalOffsetType determine_vertical_and_horizontal_offsets(MatrixWorkspace_sptr ws,
+      std::string detectorName = "point-detector")
   {
     auto instrument = ws->getInstrument();
-    const V3D pointDetector = instrument->getComponentByName("point-detector")->getPos();
+    const V3D pointDetector = instrument->getComponentByName(detectorName)->getPos();
     const V3D surfaceHolder = instrument->getComponentByName("some-surface-holder")->getPos();
     const auto referenceFrame = instrument->getReferenceFrame();
     const V3D sampleToDetector = pointDetector - surfaceHolder;
@@ -178,7 +178,8 @@ public:
         sampleToDetectorBeamOffset, 1e-6);
   }
 
-  void do_test_correct_point_detector_position(std::string detectorFindProperty="", std::string stringValue="")
+  void do_test_correct_point_detector_position(std::string detectorFindProperty = "",
+      std::string stringValue = "")
   {
     auto loadAlg = AlgorithmManager::Instance().create("Load");
     loadAlg->initialize();
@@ -190,17 +191,18 @@ public:
     MatrixWorkspace_sptr toConvert = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
     const double thetaInDegrees = 10.0; //Desired theta in degrees.
-    const double thetaInRad = thetaInDegrees * (M_PI/180);
+    const double thetaInRad = thetaInDegrees * (M_PI / 180);
     VerticalHorizontalOffsetType offsetTuple = determine_vertical_and_horizontal_offsets(toConvert); // Offsets before correction
     const double sampleToDetectorBeamOffsetExpected = offsetTuple.get<1>();
-    const double sampleToDetectorVerticalOffsetExpected = std::tan(thetaInRad) * sampleToDetectorBeamOffsetExpected;
+    const double sampleToDetectorVerticalOffsetExpected = std::tan(thetaInRad)
+        * sampleToDetectorBeamOffsetExpected;
 
     SpecularReflectionPositionCorrect alg;
     alg.setChild(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", toConvert);
     alg.setPropertyValue("OutputWorkspace", "test_out");
-    if(!detectorFindProperty.empty())
+    if (!detectorFindProperty.empty())
       alg.setProperty(detectorFindProperty, stringValue);
     alg.setProperty("ThetaIn", thetaInDegrees);
     alg.execute();
@@ -231,6 +233,90 @@ public:
   void test_correct_point_detector_position_using_spectrum_number_for_specifying_detector()
   {
     do_test_correct_point_detector_position("SpectrumNumbersOfDetectors", "4");
+  }
+
+  double do_test_correct_line_detector_position(std::vector<int> specNumbers, double thetaInDegrees,
+      std::string detectorName = "lineardetector")
+  {
+    auto loadAlg = AlgorithmManager::Instance().create("Load");
+    loadAlg->initialize();
+    loadAlg->setChild(true);
+    loadAlg->setProperty("Filename", "POLREF0004699.nxs");
+    loadAlg->setPropertyValue("OutputWorkspace", "demo");
+    loadAlg->execute();
+    Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
+    WorkspaceGroup_sptr temp1 = boost::dynamic_pointer_cast<WorkspaceGroup>(temp);
+    MatrixWorkspace_sptr toConvert = boost::dynamic_pointer_cast<MatrixWorkspace>(temp1->getItem(0));
+
+    const double thetaInRad = thetaInDegrees * (M_PI / 180);
+    VerticalHorizontalOffsetType offsetTuple = determine_vertical_and_horizontal_offsets(toConvert,
+        detectorName); // Offsets before correction
+    const double sampleToDetectorBeamOffsetExpected = offsetTuple.get<1>();
+    const double sampleToDetectorVerticalOffsetExpected = std::tan(thetaInRad)
+        * sampleToDetectorBeamOffsetExpected;
+
+    SpecularReflectionPositionCorrect alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", toConvert);
+    alg.setPropertyValue("OutputWorkspace", "test_out");
+    alg.setProperty("SpectrumNumbersOfDetectors", specNumbers);
+    alg.setProperty("ThetaIn", thetaInDegrees);
+    alg.execute();
+    MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
+
+    VerticalHorizontalOffsetType offsetTupleCorrected = determine_vertical_and_horizontal_offsets(
+        corrected, detectorName); // Positions after correction
+    const double sampleToDetectorVerticalOffsetCorrected = offsetTupleCorrected.get<0>();
+    const double sampleToDetectorBeamOffsetCorrected = offsetTupleCorrected.get<1>();
+
+    return sampleToDetectorVerticalOffsetCorrected;
+  }
+
+  void test_correct_line_detector_position_many_spec_numbers_equal_averaging()
+  {
+    std::vector<int> specNumbers;
+    specNumbers.push_back(74);
+    double offset1 = do_test_correct_line_detector_position(specNumbers, 1, "lineardetector");
+
+    specNumbers.push_back(73); //Add spectra below
+    specNumbers.push_back(75); //Add spectra above
+    double offset2 = do_test_correct_line_detector_position(specNumbers, 1, "lineardetector");
+
+    TSM_ASSERT_DELTA(
+        "If grouping has worked correctly the group average position should be the same as for spectra 74",
+        offset1, offset2, 1e-9);
+  }
+
+  void test_correct_line_detector_position_average_offset_by_one_pixel()
+  {
+    std::vector<int> specNumbers;
+    specNumbers.push_back(100);
+    double offset1 = do_test_correct_line_detector_position(specNumbers, 0.1, "lineardetector"); // Average spectrum number at 100
+
+    specNumbers.push_back(101);
+    specNumbers.push_back(102);
+    double offset2 = do_test_correct_line_detector_position(specNumbers, 0.1, "lineardetector"); // Average spectrum number now at 101.
+
+    double const width = 1.2e-3; //Pixel height
+
+    TS_ASSERT_DELTA(
+        offset1, offset2+width, 1e-9);
+  }
+
+  void test_correct_line_detector_position_average_offset_by_many_pixels()
+  {
+    std::vector<int> specNumbers;
+    specNumbers.push_back(100);
+    double offset1 = do_test_correct_line_detector_position(specNumbers, 0.1, "lineardetector");  // Average spectrum number at 100
+
+    specNumbers.push_back(104);
+    double offset2 = do_test_correct_line_detector_position(specNumbers, 0.1, "lineardetector");  // Average spectrum number at 102
+
+    double const width = 1.2e-3; //Pixel height
+
+    TS_ASSERT_DELTA(
+        offset1, offset2+(2*width), 1e-9);
   }
 
 };
