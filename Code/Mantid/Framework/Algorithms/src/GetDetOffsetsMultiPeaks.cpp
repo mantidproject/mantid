@@ -364,7 +364,7 @@ namespace Algorithms
     // The maximum allowable chisq value for an individual peak fit
     m_maxChiSq = this->getProperty("MaxChiSq");
     m_minPeakHeight = this->getProperty("MinimumPeakHeight");
-    maxOffset=getProperty("MaxOffset");
+    m_maxOffset=getProperty("MaxOffset");
 
     // Create output workspaces
     outputW = boost::make_shared<OffsetsWorkspace>(inputW->getInstrument());
@@ -575,7 +575,7 @@ namespace Algorithms
 
     // Final check offset
     fr.mask = 0.0;
-    if (std::abs(fr.offset) > maxOffset)
+    if (std::abs(fr.offset) > m_maxOffset)
     {
       fr.mask = 1.0;
       fr.offset = 0.0;
@@ -746,12 +746,12 @@ namespace Algorithms
                                           std::vector<double> &chisq,
                                           std::vector<double> &peakHeights, int& i_highestpeak)
   {
-    // default overall fit range is the whole spectrum
+    // Default overall fit range is the whole spectrum
     const MantidVec & X = inputW->readX(wi);
     minD = X.front();
     maxD = X.back();
 
-    // trim in the edges based on where the data turns off of zero
+    // Trim in the edges based on where the data turns off of zero
     const MantidVec & Y = inputW->readY(wi);
     size_t minDindex = 0;
     for (; minDindex < Y.size(); ++minDindex)
@@ -763,8 +763,14 @@ namespace Algorithms
       }
     }
     if (minD >= maxD)
-      std::cout << "Stuff went wrong with wkspIndex=" << wi
-                << " specIndex=" <<inputW->getSpectrum(wi)->getSpectrumNo() << std::endl;
+    {
+      // throw if minD >= maxD
+      std::stringstream ess;
+      ess << "Stuff went wrong with wkspIndex=" << wi
+          << " specIndex=" <<inputW->getSpectrum(wi)->getSpectrumNo();
+      throw std::runtime_error(ess.str());
+    }
+
     size_t maxDindex = Y.size()-1;
     for (; maxDindex > minDindex; --maxDindex)
     {
@@ -774,10 +780,12 @@ namespace Algorithms
         break;
       }
     }
-    g_log.debug() << "D-RANGE[" << inputW->getSpectrum(wi)->getSpectrumNo() << "]: "
-                  << minD << " -> " << maxD << "\n";
+    std::stringstream dbss;
+    dbss << "D-RANGE[" << inputW->getSpectrum(wi)->getSpectrumNo() << "]: "
+         << minD << " -> " << maxD;
+    g_log.debug(dbss.str());
 
-    // setup the fit windows
+    // Setup the fit windows
     bool useFitWindows = (!fitWindows.empty());
     std::vector<double> fitWindowsToUse;
     for (int i = 0; i < static_cast<int>(peakPositions.size()); ++i)
@@ -795,6 +803,7 @@ namespace Algorithms
     int numPeaksInRange = static_cast<int>(peakPosToFit.size());
     if (numPeaksInRange == 0) return 0;
 
+    // Fit peaks
     API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
     findpeaks->setProperty("InputWorkspace", inputW);
     findpeaks->setProperty<int>("FWHM",7);
@@ -818,7 +827,7 @@ namespace Algorithms
     // Collect fitting resutl of all peaks
     ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
 
-    // std::vector<double> peakHeightFitted;
+    // use tmpPeakPosToFit to shuffle the vectors
     std::vector<double> tmpPeakPosToFit;
     generatePeaksList(peakslist, static_cast<int>(wi), peakPosToFit, tmpPeakPosToFit, peakPosFitted, peakHeights, chisq,
                       useFitWindows, fitWindowsToUse, minD, maxD);
@@ -867,45 +876,69 @@ namespace Algorithms
                                                   const double minD, const double maxD)
   {
     // FIXME - Need to make sure that the peakPositionRef and peakslist have the same order of peaks
+
+    // Check
+    size_t numrows = peakslist->rowCount();
+    if (numrows != peakPositionRef.size())
+      throw std::runtime_error("Number of peaks in PeaksList (from FindPeaks) is not same as number of "
+                               "referenced peaks' positions. ");
+
     std::vector<double> vec_widthDivPos;
 
     for (size_t i = 0; i < peakslist->rowCount(); ++i)
     {
-      // peak value
+      // Get peak value
       double centre = peakslist->getRef<double>("centre",i);
       double width = peakslist->getRef<double>("width",i);
       double height = peakslist->getRef<double>("height", i);
       double chi2 = peakslist->getRef<double>("chi2",i);
 
       // Identify whether this peak would be accepted to optimize offset
-      // (a) peak position within D-range
+      // - peak position within D-range
       if (centre <= minD || centre >= maxD)
       {
-        g_log.debug() << " wi = " << wi << " c = " << centre << " out of D-range "
-                      << "\n";
+        std::stringstream dbss;
+        dbss << " wi = " << wi << " c = " << centre << " out of D-range ";
+        g_log.debug(dbss.str());
         continue;
       }
 
-      // (b) peak position inside peak window
+      // - rule out of peak with wrong position
       if (useFitWindows)
       {
+        // outside peak fit window o
         if (centre <= fitWindowsToUse[2*i] || centre >= fitWindowsToUse[2*i+1])
         {
-          g_log.debug() << " wi = " << wi << " c = " << centre << " out of fit window "
-                        << "\n";
+          std::stringstream dbss;
+          dbss << " wi = " << wi << " c = " << centre << " out of fit window ";
+          g_log.debug(dbss.str());
+          continue;
+        }
+      }
+      else
+      {
+        // if no fit window, then offset is too big
+        double offset = fabs(peakPositionRef[i]/centre - 1);
+        if (offset > m_maxOffset)
+        {
+          std::stringstream dbss;
+          dbss << " wi = " << wi << " c = " << centre << " exceeds maximum offset. ";
+          g_log.debug(dbss.str());
           continue;
         }
       }
 
-      // (c) check chi-square
+      // - check chi-square
       if (chi2 > m_maxChiSq || chi2 < 0)
       {
-        g_log.debug() << " wi = " << wi << " c = " << centre << " chi2 = " << chi2
-                      << ": Too large" << "\n";
+        std::stringstream dbss;
+        dbss << " wi = " << wi << " c = " << centre << " chi2 = " << chi2
+             << ": Too large";
+        g_log.debug(dbss.str());
         continue;
       }
 
-      // (d) check peak height
+      // - check peak height
       if (height < m_minPeakHeight)
       {
         g_log.debug() << " wi = " << wi << " c = " << centre << " h = " << height
