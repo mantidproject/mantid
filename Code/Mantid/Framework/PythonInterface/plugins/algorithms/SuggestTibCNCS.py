@@ -71,7 +71,7 @@ class SuggestTibCNCS(PythonAlgorithm):
         dtinfminus=500
         dtinfplus=1500
         dtpulseminus=50
-        dtpulseplus=500
+        dtpulseplus=1500
         
         intervallist=[]
         itinfminus=interval(tinf-dtinfminus,tinf)
