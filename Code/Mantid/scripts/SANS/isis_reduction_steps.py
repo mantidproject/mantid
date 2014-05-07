@@ -20,7 +20,8 @@ from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange, 
                          isEventWorkspace, fromEvent2Histogram, 
                          getFilePathFromWorkspace, getWorkspaceReference,
-                         getMonitor4event, slice2histogram, getFileAndName)
+                         getMonitor4event, slice2histogram, getFileAndName,
+                         mask_detectors_with_masking_ws)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
@@ -928,10 +929,10 @@ class Mask_ISIS(ReductionStep):
                     LoadMask(Instrument=instrument.idf_path,
                              InputFile=mask_file_path,
                              OutputWorkspace=mask_ws_name)
-                    MaskDetectors(Workspace=workspace, MaskedWorkspace=mask_ws_name)
+                    mask_detectors_with_masking_ws(workspace, mask_ws_name)
                     DeleteWorkspace(Workspace=mask_ws_name)
                 except:
-                    return "Invalid input for mask file.  Path = %s.\nReason = %s." % (mask_file, traceback.format_exc())
+                    _issueWarning("Invalid input for mask file.  Path = %s.\nReason = %s." % (mask_file, traceback.format_exc()))
 
         if len(self.spec_list)>0:
             MaskDetectors(Workspace=workspace, SpectraList = self.spec_list)

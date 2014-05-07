@@ -641,7 +641,35 @@ def getFileAndName(incomplete_path):
     basename = os.path.splitext(basename)[0]
 
     return this_path, basename
-		
-  
+
+def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
+    """
+    Rolling our own MaskDetectors wrapper since masking is broken in a couple
+    of places that affect us here:
+
+    1. Calling MaskDetectors(Workspace=ws_name, MaskedWorkspace=mask_ws_name)
+       is not something we can do because the algorithm masks by ws index
+       rather than detector id, and unfortunately for SANS the detector table
+       is not the same for MaskingWorkspaces as it is for the workspaces
+       containing the data to be masked.  Basically, we get a mirror image of
+       what we expect.  Instead, we have to extract the det IDs and use those
+       via the DetectorList property.
+
+    2. For some reason Detector.isMasked() does not work for MaskingWorkspaces.
+       We use masking_ws.readY(ws_index)[0] == 1 instead.
+
+    @param ws :: the workspace to be masked.
+    @param masking_ws :: the masking workspace that contains masking info.
+    """
+    ws, masking_ws = mtd[ws_name], mtd[masking_ws_name]
+
+    masked_det_ids = []
+
+    for ws_index in range(masking_ws.getNumberHistograms()):
+        if masking_ws.readY(ws_index)[0] == 1:
+            masked_det_ids.append(masking_ws.getDetector(ws_index).getID())
+
+    MaskDetectors(Workspace=ws, DetectorList=masked_det_ids)
+
 if __name__ == '__main__':
     pass
