@@ -317,6 +317,7 @@ void SANSRunWindow::initLocalPython()
 
   loadUserFile();
   handleInstrumentChange();
+  m_cfg_loaded = true;
 }
 /** Initialise some of the data and signal connections in the save box
 */
