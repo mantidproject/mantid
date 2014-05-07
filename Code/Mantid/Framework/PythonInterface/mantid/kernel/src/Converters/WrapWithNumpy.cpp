@@ -17,6 +17,26 @@ namespace Mantid { namespace PythonInterface
   {
     namespace Impl
     {
+      namespace
+      {
+        /**
+         * Flip the writable flag to ensure the array is read only
+         * Numpy v1.7 removed access to the flags fields directly
+         * and introduced the PyClear_Flags function.
+         * @param arr A pointer to a numpy array
+         */
+        void markReadOnly(PyArrayObject *arr)
+        {
+          #if NPY_API_VERSION >= 0x00000007 //(1.7)
+	    // this is how they do it in ndarrayobject.h:PyArray_XDECREF_ERR
+	    PyArrayObject *base = (PyArrayObject*)PyArray_BASE(arr);
+	    PyArray_CLEARFLAGS(base, NPY_ARRAY_WRITEABLE);
+          #else
+            arr->flags &= ~NPY_WRITEABLE;
+          #endif  
+        }
+      }
+
       /**
        * Defines the wrapWithNDArray specialization for C array types
        *
@@ -32,15 +52,12 @@ namespace Mantid { namespace PythonInterface
                                 Py_intptr_t *dims, const NumpyWrapMode mode)
       {
         int datatype = NDArrayTypeIndex<ElementType>::typenum;
-        PyObject *nparray
-            = PyArray_SimpleNewFromData(ndims, dims, datatype,
-                                        static_cast<void*>(const_cast<ElementType *>(carray)));
-        if( mode == ReadOnly )
-        {
-          PyArrayObject * np = (PyArrayObject *)nparray;
-          np->flags &= ~NPY_WRITEABLE;
-        }
-        return nparray;
+        PyArrayObject *nparray = (PyArrayObject*)
+	  PyArray_SimpleNewFromData(ndims, dims, datatype,
+				    static_cast<void*>(const_cast<ElementType *>(carray)));
+
+        if( mode == ReadOnly ) markReadOnly(nparray);
+        return (PyObject*)nparray;
       }
 
       //-----------------------------------------------------------------------
