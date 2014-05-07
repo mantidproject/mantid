@@ -135,7 +135,7 @@ private:
   double m_maxChiSq;
   double m_minPeakHeight;
 
-  double maxOffset;
+  double m_maxOffset;
 
   std::vector<double> m_peakPositions;
   std::vector<double> m_fitWindows;

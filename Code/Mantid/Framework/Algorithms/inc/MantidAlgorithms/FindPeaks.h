@@ -96,7 +96,8 @@ private:
   void fitPeakInWindow(const API::MatrixWorkspace_sptr &input, const int spectrum, const double centre, const double xmin, const double xmax);
 
   /// Fit peak by given/guessed FWHM
-  void fitPeakGivenFWHM(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int fitWidth);
+  void fitPeakGivenFWHM(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int fitWidth,
+                        const bool hasleftpeak, const double leftpeakcentre, const bool hasrightpeak, const double rightpeakcentre);
 
   /// Fit peak: this is a basic peak fit function as a root function for all different type of user input
   void fitSinglePeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min, const int i_max, const int i_centre);

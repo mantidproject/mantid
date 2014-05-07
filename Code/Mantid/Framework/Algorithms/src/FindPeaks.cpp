@@ -280,6 +280,8 @@ namespace Algorithms
 
     // Specified peak positions, which is optional
     m_vecPeakCentre = getProperty("PeakPositions");
+    if (m_vecPeakCentre.size() > 0)
+      std::sort(m_vecPeakCentre.begin(), m_vecPeakCentre.end());
     m_vecFitWindows = getProperty("FitWindows");
 
     // Peak and ground type
@@ -360,16 +362,16 @@ namespace Algorithms
     {
       const MantidVec& vecX = m_dataWS->readX(spec);
 
-      for (std::size_t i = 0; i < numPeaks; i++)
+      for (std::size_t ipeak = 0; ipeak < numPeaks; ipeak++)
       {
         //Try to fit at this center
-        double x_center = peakcentres[i];
+        double x_center = peakcentres[ipeak];
 
         std::stringstream infoss;
         infoss <<  "Spectrum " << spec << ": Fit peak @ d = " << x_center;
         if (useWindows)
         {
-          infoss << " inside fit window [" << fitwindows[2 * i] << ", " << fitwindows[2 * i + 1] << "]";
+          infoss << " inside fit window [" << fitwindows[2 * ipeak] << ", " << fitwindows[2 * ipeak + 1] << "]";
         }
         g_log.information(infoss.str());
 
@@ -377,9 +379,19 @@ namespace Algorithms
         if (x_center > vecX.front() && x_center < vecX.back())
         {
           if (useWindows)
-            fitPeakInWindow(m_dataWS, spec, x_center, fitwindows[2 * i], fitwindows[2 * i + 1]);
+            fitPeakInWindow(m_dataWS, spec, x_center, fitwindows[2 * ipeak], fitwindows[2 * ipeak + 1]);
           else
-            fitPeakGivenFWHM(m_dataWS, spec, x_center, m_inputPeakFWHM);
+          {
+            bool hasLeftPeak = (ipeak > 0);
+            double leftpeakcentre = 0.;
+            if (hasLeftPeak) leftpeakcentre = peakcentres[ipeak-1];
+
+            bool hasRightPeak = (ipeak < numPeaks-1);
+            double rightpeakcentre = 0.;
+            if (hasRightPeak) rightpeakcentre = peakcentres[ipeak+1];
+
+            fitPeakGivenFWHM(m_dataWS, spec, x_center, m_inputPeakFWHM, hasLeftPeak, leftpeakcentre, hasRightPeak, rightpeakcentre);
+          }
         }
         else
         {
@@ -801,7 +813,9 @@ namespace Algorithms
     *  @param fitWidth :: A guess of the full-width-half-max of the peak, in # of bins.
     */
   void FindPeaks::fitPeakGivenFWHM(const API::MatrixWorkspace_sptr &input, const int spectrum,
-                                   const double center_guess, const int fitWidth)
+                                   const double center_guess, const int fitWidth,
+                                   const bool hasleftpeak, const double leftpeakcentre,
+                                   const bool hasrightpeak, const double rightpeakcentre)
   {
     // The X axis you are looking at
     const MantidVec &vecX = input->readX(spectrum);
@@ -810,16 +824,33 @@ namespace Algorithms
     // Find i_center - the index of the center - The guess is within the X axis?
     int i_centre = this->getVectorIndex(vecX, center_guess);
 
-    // See Mariscotti eqn. 20. Using l=1 for bg0/bg1 - correspond to p6 & p7 in paper.
-    int i_min = 1;
-    if (i_centre > 5 * fitWidth)
-      i_min = i_centre - 5 * fitWidth;
+    // Set up lower fit boundary
+    int i_min = i_centre - 5 * fitWidth;
     if (i_min < 1)
       i_min = 1;
 
+    if (hasleftpeak)
+    {
+      // Use 2/3 distance as the seperation for right peak
+      double xmin = vecX[i_min];
+      double peaksepline = center_guess - (center_guess - leftpeakcentre)*0.66;
+      if (xmin < peaksepline)
+        i_min = getVectorIndex(vecX, peaksepline);
+    }
+
+    // Set up upper boundary
     int i_max = i_centre + 5 * fitWidth;
     if (i_max >= static_cast<int>(vecX.size())-1)
       i_max = static_cast<int>(vecY.size())-2;
+
+    if (hasrightpeak)
+    {
+      // Use 2/3 distance as the separation for right peak
+      double xmax = vecX[i_max];
+      double peaksepline = center_guess + (rightpeakcentre - center_guess) * 0.66;
+      if (xmax > peaksepline)
+        i_max = getVectorIndex(vecX, peaksepline);
+    }
 
     // Check
     if (i_max - i_min <= 0)
