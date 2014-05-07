@@ -133,6 +133,12 @@ def _get_reduction_settings():
         def __setitem__(self, key, value):
             self._prop_man()[key] = value
 
+        def __len__(self):
+            return len(self._prop_man())
+
+        def clear(self):
+            PropertyManagerDataService.remove(SETTINGS_PROP_MAN_NAME)
+
     return PropertyManagerPicklableWrapper()
 
 class Sample(object):
@@ -435,8 +441,11 @@ class ISISReducer(Reducer):
         return copy.deepcopy(current_settings)
     
     def remove_settings(self):
+        logger.debug("Clearing reducer settings.")
         global current_settings
         current_settings = None
+        self.settings.clear()
+        assert len(self.settings) == 0
         
     def cur_settings(self):
         """

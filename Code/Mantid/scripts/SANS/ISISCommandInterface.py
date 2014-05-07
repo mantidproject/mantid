@@ -56,6 +56,13 @@ def issueWarning(msg):
 def _refresh_singleton():
     ReductionSingleton.clean(isis_reducer.ISISReducer)
     ReductionSingleton().remove_settings()
+
+def Clean():
+    """
+    An exposed command to allow cleaning of the reducer, and any related
+    settings.
+    """
+    _refresh_singleton()
                 
 def UserPath(path):
     """

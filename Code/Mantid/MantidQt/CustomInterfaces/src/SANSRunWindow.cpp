@@ -314,9 +314,9 @@ void SANSRunWindow::initLocalPython()
   }
   runPythonCode("import ISISCommandInterface as i\nimport copy");
   runPythonCode("import isis_instrument\nimport isis_reduction_steps");
-  handleInstrumentChange();
 
   loadUserFile();
+  handleInstrumentChange();
 }
 /** Initialise some of the data and signal connections in the save box
 */
@@ -690,7 +690,7 @@ bool SANSRunWindow::loadUserFile()
     m_uiForm.mask_table->removeRow(i);
   }
   
-  QString pyCode = "i.ReductionSingleton.clean(isis_reducer.ISISReducer)";
+  QString pyCode = "i.Clean()";
   pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
   pyCode += getInstrumentClass()+")";
   pyCode += "\ni.ReductionSingleton().user_settings =";
@@ -2362,7 +2362,6 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
   }
 
   //Reset the objects by initialising a new reducer object
-  //py_code = "i._refresh_singleton()";
   if (runMode == SingleMode) // TODO: test if it is really necessary to reload the file settings.
   {
   py_code = "\ni.ReductionSingleton.clean(isis_reducer.ISISReducer)";
@@ -2821,12 +2820,19 @@ void SANSRunWindow::handleInstrumentChange()
 
   //set up the required Python objects and delete what's out of date (perhaps everything is cleaned here)
   const QString instClass(getInstrumentClass());
-  QString pyCode("if i.ReductionSingleton().get_instrument() != '");
-  pyCode += m_uiForm.inst_opt->currentText()+"':";
-  pyCode += "\n\ti.ReductionSingleton.clean(isis_reducer.ISISReducer)";
-  pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
-  pyCode += instClass+")";
-  runReduceScriptFunction(pyCode);
+
+  // Only set the instrument if it isn't alread set to what has been selected.
+  // This is useful on interface start up, where we have already loaded the user file
+  // and don't want to set the instrument twice.
+  const QString currentInstName = runPythonCode(
+    "print i.ReductionSingleton().get_instrument().name()").trimmed();
+  if( currentInstName != m_uiForm.inst_opt->currentText() )
+  {
+    QString pyCode("i.ReductionSingleton.clean(isis_reducer.ISISReducer)");
+    pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
+    pyCode += instClass+")";
+    runReduceScriptFunction(pyCode);
+  }
 
   //now update the GUI
   fillDetectNames(m_uiForm.detbank_sel);
