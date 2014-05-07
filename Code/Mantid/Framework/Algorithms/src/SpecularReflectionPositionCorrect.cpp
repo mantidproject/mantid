@@ -58,8 +58,10 @@ namespace Mantid
         {
           throw std::invalid_argument("Spectrum numbers are not unique.");
         }
-        int max = *std::max_element(uniqueSpectrumNumbers.begin(), uniqueSpectrumNumbers.end());
-        int min = *std::min_element(uniqueSpectrumNumbers.begin(), uniqueSpectrumNumbers.end());
+        auto maxIt = std::max_element(uniqueSpectrumNumbers.begin(), uniqueSpectrumNumbers.end());
+        auto minIt = std::min_element(uniqueSpectrumNumbers.begin(), uniqueSpectrumNumbers.end());
+        const int max = *maxIt;
+        const int min = *minIt;
         for (int i = min; i <= max; ++i)
         {
           if (uniqueSpectrumNumbers.find(i) == uniqueSpectrumNumbers.end())
