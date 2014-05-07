@@ -130,7 +130,7 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 1, 1));
     alg.setPropertyValue("OutputWorkspace", "test_out");
     alg.setProperty("TwoThetaIn", 10.0);
-    std::vector<int> invalid(1, 1e7);  // Well outside range
+    std::vector<int> invalid(1, static_cast<int>(1e7));  // Well outside range
     alg.setProperty("SpectrumNumbersOfDetectors", invalid);  // Well outside range
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument&);
   }
@@ -144,7 +144,7 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 1, 1));
     alg.setPropertyValue("OutputWorkspace", "test_out");
     alg.setProperty("TwoThetaIn", 10.0);
-    std::vector<int> invalid(1, 1e7);
+    std::vector<int> invalid(1, static_cast<int>(1e7));
     alg.setProperty("DetectorComponentName", "junk_value");  // Well outside range
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument&);
   }
