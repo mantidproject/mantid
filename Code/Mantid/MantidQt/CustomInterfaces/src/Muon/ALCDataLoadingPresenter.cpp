@@ -5,8 +5,6 @@
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
-#include <Poco/ActiveResult.h>
-
 #include <QApplication>
 
 using namespace Mantid::Kernel;
@@ -39,15 +37,13 @@ namespace CustomInterfaces
       alg->setProperty("LogValue", m_view->log());
       alg->setPropertyValue("OutputWorkspace", "__NotUsed");
 
-      Poco::ActiveResult<bool> result(alg->executeAsync());
-
-      while (!result.available())
-      {
-        QApplication::processEvents(); // So that progress bar gets updated
-      }
+      alg->execute();
 
       m_loadedData = alg->getProperty("OutputWorkspace");
+
+      assert(m_loadedData); // If errors are properly caught, shouldn't happen
       assert(m_loadedData->getNumberHistograms() == 1); // PlotAsymmetryByLogValue guarantees that
+
       m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_loadedData, 0)));
     }
     catch(std::exception& e)

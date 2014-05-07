@@ -105,7 +105,12 @@ public:
 
   void test_load_error()
   {
-    // TODO: with algorithm being executed asynchronously, check that errors are caught propertly
+    EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
+    EXPECT_CALL(*m_view, lastRun()).WillRepeatedly(Return("EMU00006473.nxs"));
+    EXPECT_CALL(*m_view, log()).WillRepeatedly(Return("sample_magn_field"));
+    EXPECT_CALL(*m_view, setDataCurve(_)).Times(0);
+    EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
+    m_view->requestLoading();
   }
 
   void test_load_nonExistentFile()
@@ -114,7 +119,7 @@ public:
     EXPECT_CALL(*m_view, lastRun()).WillRepeatedly(Return("non-existent-file"));
     EXPECT_CALL(*m_view, log()).WillRepeatedly(Return("sample_magn_field"));
     EXPECT_CALL(*m_view, setDataCurve(_)).Times(0);
-    EXPECT_CALL(*m_view, displayError(_)).Times(1);
+    EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
 
     m_view->requestLoading();
   }
