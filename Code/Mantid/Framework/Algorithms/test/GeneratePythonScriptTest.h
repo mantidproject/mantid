@@ -156,7 +156,7 @@ public:
       API::WorkspaceHistory &history = ws->history();
       auto pAlg = std::auto_ptr<API::Algorithm>(new NonExistingAlgorithm());
       pAlg->initialize();
-      history.addHistory(API::AlgorithmHistory(pAlg.get()));
+      history.addHistory(boost::make_shared<AlgorithmHistory>(API::AlgorithmHistory(pAlg.get())));
 
       pAlg.reset(NULL);
 

@@ -59,21 +59,21 @@ public:
   /// Copy constructor
   WorkspaceHistory(const WorkspaceHistory&);
   /// Retrieve the algorithm history list
-  const AlgorithmHistories & getAlgorithmHistories() const;
+  const AlgorithmHistories& getAlgorithmHistories() const;
   /// Retrieve the environment history
   const Kernel::EnvironmentHistory& getEnvironmentHistory() const;
   /// Append an workspace history to this one
   void addHistory(const WorkspaceHistory& otherHistory);
   /// Append an algorithm history to this one
-  void addHistory(const AlgorithmHistory& algHistory);
+  void addHistory(AlgorithmHistory_sptr algHistory);
   /// How many entries are there
   size_t size() const;
   /// Is the history empty
   bool empty() const;
   /// Retrieve an algorithm history by index
-  const AlgorithmHistory & getAlgorithmHistory(const size_t index) const;
+  AlgorithmHistory_const_sptr getAlgorithmHistory(const size_t index) const;
   /// Add operator[] access
-  const AlgorithmHistory & operator[](const size_t index) const;
+  AlgorithmHistory_const_sptr operator[](const size_t index) const;
   /// Create an algorithm from a history record at a given index
   boost::shared_ptr<IAlgorithm> getAlgorithm(const size_t index) const;
   /// Convenience function for retrieving the last algorithm

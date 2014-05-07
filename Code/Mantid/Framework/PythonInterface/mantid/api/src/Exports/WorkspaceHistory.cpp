@@ -24,8 +24,8 @@ boost::python::object getHistoriesAsList(WorkspaceHistory& self)
 {
   boost::python::list names;
   const auto histories = self.getAlgorithmHistories();
-  std::set<AlgorithmHistory>::const_iterator iend = histories.end();
-  for(std::set<AlgorithmHistory>::const_iterator itr = histories.begin(); itr != iend; ++itr)
+  Mantid::API::AlgorithmHistories::const_iterator itr = histories.begin();
+  for(; itr != histories.end(); ++itr)
   {
     names.append(*itr);
   }
@@ -43,7 +43,6 @@ void export_WorkspaceHistory()
     
     .def("getAlgorithmHistory", &WorkspaceHistory::getAlgorithmHistory, 
           arg("index"),
-          return_value_policy<copy_const_reference>(),
          "Returns the algorithm history at the given index in the history")
     
     .def("size", &WorkspaceHistory::size, 

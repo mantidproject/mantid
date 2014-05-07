@@ -1540,8 +1540,8 @@ DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem* item)
   if(wsHist.empty()) return DateAndTime(); // now
 
   const size_t indexOfLast = wsHist.size() - 1;
-  const AlgorithmHistory & lastAlgHist = wsHist.getAlgorithmHistory(indexOfLast);
-  return lastAlgHist.executionDate();
+  const auto lastAlgHist = wsHist.getAlgorithmHistory(indexOfLast);
+  return lastAlgHist->executionDate();
 }
 
 //-------------------- AlgorithmDockWidget ----------------------//

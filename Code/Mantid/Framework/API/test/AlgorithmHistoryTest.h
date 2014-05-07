@@ -85,19 +85,19 @@ public:
     //create some nested history records
     auto child1 = createFromTestAlg("child1");
     auto subChild11 = createFromTestAlg("subChild11");
-    child1.addChildHistory(subChild11);
+    child1.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild11));
     
     auto child2 = createFromTestAlg("child2");
     auto subChild21 = createFromTestAlg("subChild21");
     auto subChild22 = createFromTestAlg("subChild22");
-    child2.addChildHistory(subChild21);
-    child2.addChildHistory(subChild22);
+    child2.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild21));
+    child2.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild22));
     
     auto child3 = createFromTestAlg("child3");
 
-    algHist.addChildHistory(child1);
-    algHist.addChildHistory(child2);
-    algHist.addChildHistory(child3);
+    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child1));
+    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child2));
+    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child3));
 
     //check parent algorithm matches
     std::ostringstream output;
@@ -113,17 +113,17 @@ public:
     AlgorithmHistories::iterator it;
     for (it = children.begin(); it != children.end(); ++it, ++i)
     {
-      IAlgorithm_sptr childAlg = it->createAlgorithm();
+      IAlgorithm_sptr childAlg = (*it)->createAlgorithm();
       std::string index = boost::lexical_cast<std::string>(i);
       TS_ASSERT_EQUALS( childAlg->getPropertyValue("arg1_param"), "child" + index );
 
       //check sub children
-      auto subchildren = it->getChildHistories();
+      auto subchildren = (*it)->getChildHistories();
       int j = 1;
       AlgorithmHistories::iterator jt;
       for(jt = subchildren.begin(); jt != subchildren.end(); ++j, ++jt )
       {
-        IAlgorithm_sptr subChildAlg = jt->createAlgorithm();
+        IAlgorithm_sptr subChildAlg = (*jt)->createAlgorithm();
         std::string subindex = boost::lexical_cast<std::string>(j);
         TS_ASSERT_EQUALS( subChildAlg->getPropertyValue("arg1_param"), "subChild" + index + subindex );
       } 
@@ -142,19 +142,19 @@ public:
     //create some nested history records
     auto child1 = createFromTestAlg("child1");
     auto subChild11 = createFromTestAlg("subChild11");
-    child1.addChildHistory(subChild11);
+    child1.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild11));
     
     auto child2 = createFromTestAlg("child2");
     auto subChild21 = createFromTestAlg("subChild21");
     auto subChild22 = createFromTestAlg("subChild22");
-    child2.addChildHistory(subChild21);
-    child2.addChildHistory(subChild22);
+    child2.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild21));
+    child2.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild22));
     
     auto child3 = createFromTestAlg("child3");
 
-    algHist.addChildHistory(child1);
-    algHist.addChildHistory(child2);
-    algHist.addChildHistory(child3);
+    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child1));
+    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child2));
+    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child3));
 
     
     IAlgorithm_sptr alg = algHist.getChildAlgorithm(0);

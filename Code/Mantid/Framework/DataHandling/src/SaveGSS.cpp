@@ -391,9 +391,9 @@ namespace Mantid
         const Mantid::API::AlgorithmHistories& algohist = workspace->getHistory().getAlgorithmHistories();
         for (Mantid::API::AlgorithmHistories::const_iterator it = algohist.begin(); it != algohist.end(); ++it)
         {
-          if (it->name().compare("NormaliseByCurrent") == 0)
+          if ((*it)->name().compare("NormaliseByCurrent") == 0)
             norm_by_current = true;
-          if (it->name().compare("NormaliseToMonitor") == 0)
+          if ((*it)->name().compare("NormaliseToMonitor") == 0)
             norm_by_monitor = true;
         }
         os << "#";

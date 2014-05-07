@@ -159,22 +159,22 @@ public:
     // check top level algorithm history
     auto algHist = wsHist.getAlgorithmHistory(0);
     
-    TS_ASSERT_EQUALS(algHist.name(), "TopLevelAlgorithm");
-    TS_ASSERT_EQUALS(algHist.childHistorySize(), 1);
+    TS_ASSERT_EQUALS(algHist->name(), "TopLevelAlgorithm");
+    TS_ASSERT_EQUALS(algHist->childHistorySize(), 1);
     
     // check nested algorithm history
-    auto childHist = algHist.getChildAlgorithmHistory(0);
+    auto childHist = algHist->getChildAlgorithmHistory(0);
 
-    TS_ASSERT_EQUALS(childHist.name(), "NestedAlgorithm");
-    TS_ASSERT_EQUALS(childHist.childHistorySize(), 1);
+    TS_ASSERT_EQUALS(childHist->name(), "NestedAlgorithm");
+    TS_ASSERT_EQUALS(childHist->childHistorySize(), 1);
 
     // check basic algorithm history
-    auto basicChildHist = childHist.getChildAlgorithmHistory(0);
-    TS_ASSERT_EQUALS(basicChildHist.name(), "BasicAlgorithm");
+    childHist = childHist->getChildAlgorithmHistory(0);
+    TS_ASSERT_EQUALS(childHist->name(), "BasicAlgorithm");
     
     //even though BasicAlgorithm calls another algorithm, 
     //it should not store the history.
-    TS_ASSERT_EQUALS(basicChildHist.childHistorySize(), 0);
+    TS_ASSERT_EQUALS(childHist->childHistorySize(), 0);
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -201,9 +201,9 @@ public:
     TS_ASSERT_EQUALS( wsHist.size(), 1 );
 
     auto algHist = wsHist.getAlgorithmHistory(0);
-    TS_ASSERT_EQUALS( algHist.name(), "TopLevelAlgorithm");    
+    TS_ASSERT_EQUALS( algHist->name(), "TopLevelAlgorithm");    
     //algorithm should have no child histories.
-    TS_ASSERT_EQUALS( algHist.childHistorySize(), 0 );
+    TS_ASSERT_EQUALS( algHist->childHistorySize(), 0 );
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");

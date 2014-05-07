@@ -85,7 +85,7 @@ void GeneratePythonScript::exec()
   std::vector<std::string> orderedHists;
   for( ; algHistIter != algHistories.end(); ++algHistIter)
   {
-    orderedHists.push_back(genAlgString(*algHistIter));
+    orderedHists.push_back(genAlgString(**algHistIter));
   }
 
   // Generate the python script from each of the Algorith strings, then write to file.

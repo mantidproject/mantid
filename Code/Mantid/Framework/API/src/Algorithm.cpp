@@ -1039,13 +1039,13 @@ namespace Mantid
             (*outWS)->history().addHistory( (*inWS)->getHistory() );
           }
           // Add the history for the current algorithm to all the output workspaces
-          (*outWS)->history().addHistory(*m_history);
+          (*outWS)->history().addHistory(m_history);
         }
       }
       //this is a child algorithm, but we still want to keep the history.
       else if (m_recordHistoryForChild && m_parentHistory)
       {
-        m_parentHistory->addChildHistory(*m_history);
+        m_parentHistory->addChildHistory(m_history);
       }
 
     }

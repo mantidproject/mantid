@@ -4,6 +4,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/return_internal_reference.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/operators.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -20,12 +21,12 @@ using namespace boost::python;
  * @param self :: A reference to the AlgorithmHistory that called this method
  * @returns A python list created from the set of child algorithm histories
  */
-boost::python::object getChildrenAsList(AlgorithmHistory& self)
+boost::python::object getChildrenAsList(boost::shared_ptr<AlgorithmHistory> self)
 {
   boost::python::list names;
-  const auto histories = self.getChildHistories();
-  std::set<AlgorithmHistory>::const_iterator iend = histories.end();
-  for(std::set<AlgorithmHistory>::const_iterator itr = histories.begin(); itr != iend; ++itr)
+  const auto histories = self->getChildHistories();
+  Mantid::API::AlgorithmHistories::const_iterator itr = histories.begin();
+  for(; itr != histories.end(); ++itr)
   {
     names.append(*itr);
   }
@@ -52,7 +53,8 @@ boost::python::object getPropertiesAsList(AlgorithmHistory& self)
 
 void export_AlgorithmHistory()
 {
-  register_ptr_to_python<AlgorithmHistory*>();
+  register_ptr_to_python<Mantid::API::AlgorithmHistory_sptr >();
+  register_ptr_to_python<Mantid::API::AlgorithmHistory_const_sptr >();
 
   class_<AlgorithmHistory>("AlgorithmHistory", no_init)
     .def("name", &AlgorithmHistory::name, return_value_policy<copy_const_reference>(),
@@ -75,7 +77,6 @@ void export_AlgorithmHistory()
     
     .def("getChildAlgorithmHistory", &AlgorithmHistory::getChildAlgorithmHistory, 
          arg("index"),
-         return_value_policy<copy_const_reference>(), 
          "Returns the child algorithm at the given index in the history")
     
     .def("getChildHistories", &getChildrenAsList,

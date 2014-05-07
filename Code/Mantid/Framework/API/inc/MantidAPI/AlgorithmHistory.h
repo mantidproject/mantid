@@ -7,6 +7,9 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/DateAndTime.h"
+
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include <ctime>
 #include <vector>
 #include <set>
@@ -19,7 +22,10 @@ namespace API
   class Algorithm;
   class AlgorithmHistory;
   
-  typedef std::set<AlgorithmHistory> AlgorithmHistories;
+  typedef boost::shared_ptr<AlgorithmHistory> AlgorithmHistory_sptr;
+  typedef boost::shared_ptr<const AlgorithmHistory> AlgorithmHistory_const_sptr;
+  typedef std::set<AlgorithmHistory_sptr, 
+    boost::function<bool(const AlgorithmHistory_const_sptr, const AlgorithmHistory_const_sptr)> > AlgorithmHistories;
 
 /** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
 
@@ -69,7 +75,7 @@ public:
                    const unsigned int& direction = 99);
 
   /// add a child algorithm history record to this history object
-  void addChildHistory(const AlgorithmHistory& childHist);
+  void addChildHistory(AlgorithmHistory_sptr childHist);
   // get functions
   /// get name of algorithm in history const
   const std::string& name() const {return m_name;}
@@ -84,11 +90,11 @@ public:
   /// get parameter list of algorithm in history const
   const std::vector<Kernel::PropertyHistory>& getProperties() const {return m_properties;}
   /// get the child histories of this history object
-  AlgorithmHistories getChildHistories() const { return m_childHistories; }
+  const AlgorithmHistories& getChildHistories() const { return m_childHistories; }
   /// Retrieve a child algorithm history by index
-  const AlgorithmHistory & getChildAlgorithmHistory(const size_t index) const;
+  AlgorithmHistory_const_sptr getChildAlgorithmHistory(const size_t index) const;
     /// Add operator[] access
-  const AlgorithmHistory & operator[](const size_t index) const;
+  AlgorithmHistory_const_sptr operator[](const size_t index) const;
   /// Retrieve the number of child algorithms
   size_t childHistorySize() const;
   /// print contents of object
@@ -103,6 +109,12 @@ public:
   {
     return (execCount() == other.execCount() &&
             name() == other.name());
+  }
+  ///Less than operator for pointers
+  inline bool compareHistory(const boost::shared_ptr<AlgorithmHistory> lhs, 
+    const boost::shared_ptr<AlgorithmHistory> rhs)
+  {
+    return *lhs < *rhs;
   }
   /// Create a concrete algorithm based on a history record
   boost::shared_ptr<IAlgorithm> createAlgorithm() const;
@@ -128,6 +140,16 @@ private:
   std::size_t m_execCount;
   /// set of child algorithm histories for this history record
   AlgorithmHistories m_childHistories;
+};
+
+struct CompareHistory
+{
+    ///Less than operator for pointers
+  static bool compare(const AlgorithmHistory_const_sptr lhs, 
+    const AlgorithmHistory_const_sptr rhs)
+  {
+    return (*lhs) < (*rhs);
+  }
 };
 
 MANTID_API_DLL std::ostream& operator<<(std::ostream&, const AlgorithmHistory&);
