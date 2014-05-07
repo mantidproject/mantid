@@ -28,6 +28,46 @@ namespace Mantid
 {
 namespace Algorithms
 {
+  namespace
+  { // anonymous name space
+    /**
+   * Determine if the table contains raw parameters.
+   */
+    bool isRawTable(const std::vector<std::string> & colNames)
+    {
+      if (colNames.size() != 6)
+        return true;
+      if (colNames[0].compare("centre") != 0)
+        return true;
+      if (colNames[1].compare("width") != 0)
+        return true;
+      if (colNames[2].compare("height") != 0)
+        return true;
+      if (colNames[3].compare("backgroundintercept") != 0)
+        return true;
+      if (colNames[4].compare("backgroundslope") != 0)
+        return true;
+      if (colNames[5].compare("A2") != 0)
+        return true;
+      return false;
+    }
+
+    /**
+    * Determine how many parameters are in the peak function.
+   */
+    std::size_t getBkgOffset(const std::vector<std::string> & colNames, const bool isRaw)
+    {
+      if (!isRaw)
+        return 3;
+
+      for (std::size_t i = 0; i < colNames.size(); i++)
+      {
+        if (colNames[i].substr(0,3).compare("f1.") == 0)
+          return i;
+      }
+      return colNames.size(); // shouldn't get here
+    }
+  }
 
   DECLARE_ALGORITHM(GeneratePeaks)
 
@@ -94,107 +134,51 @@ namespace Algorithms
   void GeneratePeaks::exec()
   {
     // Process input parameters
-    processAlgProperties();
+    std::string peaktype, bkgdtype;
+    processAlgProperties(peaktype, bkgdtype);
 
-    createFunction(m_peakfunction, m_bkgdfunction);
-
-
-#if 0
-    // Get properties
-    DataObjects::TableWorkspace_sptr peakParamWS = this->getProperty("PeakParametersWorkspace");
-    std::string peakFunction = this->getProperty("PeakFunction");
-    std::string bkgdFunction = getProperty("BackgroundFunction");
-    if (bkgdFunction.compare("Auto") == 0)
-    {
-      m_useAutoBkgd = true;
-      bkgdFunction = "Quardratic";
-    }
-
-    const std::vector<double> binParameters = this->getProperty("BinningParameters");
-    MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
-
-#endif
+    createFunction(peaktype, bkgdtype);
 
     processParamTable();
 
-#if 0
-
-    // Process peak parameter workspace
-    std::set<specid_t> spectra;
-    getSpectraSet(peakParamWS, spectra);
-#endif
-
-#if 1
-    createOutputWorkspace();
-#else
-    // Reference workspace and output workspace
-    API::MatrixWorkspace_sptr outputWS;
-    bool newWSFromParent = true;
-    if (!inputWS && binParameters.empty())
-    {
-      // Error! Neither bin parameters or reference workspace is given.
-      std::string errmsg("Must define either InputWorkspace or BinningParameters.");
-      g_log.error(errmsg);
-      throw std::invalid_argument(errmsg);
-    }
-    else if (inputWS)
-    {
-      // Generate Workspace2D from input workspace
-      if (!binParameters.empty())
-        g_log.notice() << "Both binning parameters and input workspace are given. "
-                       << "Using input worksapce to generate output workspace!\n";
-
-      outputWS = API::WorkspaceFactory::Instance().create(inputWS, inputWS->getNumberHistograms(),
-          inputWS->dataX(0).size(), inputWS->dataY(0).size());
-
-      std::set<specid_t>::iterator siter;
-      // Only copy the X-values from spectra with peaks specified in the table workspace.
-      for (siter = spectra.begin(); siter != spectra.end(); ++siter)
-      {
-        specid_t iws = *siter;
-        std::copy(inputWS->dataX(iws).begin(), inputWS->dataX(iws).end(), outputWS->dataX(iws).begin());
-      }
-
-      newWSFromParent = true;
-    }
-    else
-    {
-      // Generate a one-spectrum Workspace2D from binning
-      outputWS = createDataWorkspace(spectra, binParameters);
-      newWSFromParent = false;
-    }
-#endif
+    API::MatrixWorkspace_sptr outputWS = createOutputWorkspace();
     this->setProperty("OutputWorkspace", outputWS);
 
     // Generate peaks
-    generatePeaks(outputWS, peakParamWS, peakFunction, newWSFromParent);
+    generatePeaks(outputWS, m_funcParamWS, m_peakFunction, m_newWSFromParent);
 
     return;
   }
 
   /**
     */
-  void GeneratePeaks::processAlgProperties()
+  void GeneratePeaks::processAlgProperties(std::string& peakfunctype, std::string& bkgdfunctype)
   {
     // Get properties
-    DataObjects::TableWorkspace_sptr peakParamWS = this->getProperty("PeakParametersWorkspace");
-    std::string peakFunction = this->getProperty("PeakFunction");
-    std::string bkgdFunction = getProperty("BackgroundFunction");
-    if (bkgdFunction.compare("Auto") == 0)
+    m_funcParamWS = getProperty("PeakParametersWorkspace");
+
+    peakfunctype = getPropertyValue("PeakFunction");
+    bkgdfunctype = getPropertyValue("BackgroundFunction");
+    if (bkgdfunctype.compare("Auto") == 0)
     {
       m_useAutoBkgd = true;
-      bkgdFunction = "Quardratic";
+      bkgdfunctype = "Quardratic";
     }
 
-    const std::vector<double> binParameters = this->getProperty("BinningParameters");
-    MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
+    binParameters = this->getProperty("BinningParameters");
+    inputWS = this->getProperty("InputWorkspace");
+
+    m_genBackground = getProperty("GenerateBackground");
+
+    m_useRawParameter = getProperty("IsRawParameterTable");
+
 
     // Special properties related
     double maxchi2 = this->getProperty("MaxAllowedChi2");
     double numWidths = this->getProperty("NumberWidths");
     bool ignorewidepeaks = getProperty("IgnoreWidePeaks");
-    bool generateBackground = this->getProperty("GenerateBackground");
 
+    return;
   }
 
   void GeneratePeaks::generatePeaksNew()
@@ -452,18 +436,19 @@ namespace Algorithms
   /**
    * Create a function for fitting.
    * @return The requested function to fit.
-   */
-  API::IFunction_sptr GeneratePeaks::createFunction(const std::string &peakFuncType, const std::vector<std::string> &colNames,
+   *
+   *const std::string &peakFuncType, const std::vector<std::string> &colNames,
                                                     const bool isRaw, const bool withBackground,
                                                     DataObjects::TableWorkspace_const_sptr peakParmsWS,
-                                                    const std::size_t bkg_offset, const std::size_t rowNum, double &centre, double &fwhm)
+                                                    const std::size_t bkg_offset, const std::size_t rowNum, double &centre, double &fwhm
+   *
+   */
+  API::IFunction_sptr GeneratePeaks::createFunction(const std::string& peaktype, const std::string& bkgdtype)
   {
     // Create the peak
-
-
-
-    auto tempPeakFunc = API::FunctionFactory::Instance().createFunction(peakFuncType);
-    auto peakFunc = boost::dynamic_pointer_cast<IPeakFunction>(tempPeakFunc);
+    m_peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+          API::FunctionFactory::Instance().createFunction(peaktype));
+#if 0
     if (isRaw)
     {
       std::string paramName;
@@ -486,11 +471,15 @@ namespace Algorithms
     // skip out early
     if (!withBackground)
       return boost::shared_ptr<IFunction>(peakFunc);
+#endif
 
 
     // create the background
-    auto backFunc =
-        API::FunctionFactory::Instance().createFunction("Quadratic");
+    if (m_genBackground)
+      m_bkgdFunction = boost::dynamic_pointer_cast<IBackgroundFunction>(
+            API::FunctionFactory::Instance().createFunction(bkgdtype));
+
+#if 0
     if (isRaw)
     {
       std::string paramName;
@@ -514,6 +503,9 @@ namespace Algorithms
     fitFunc->addFunction(backFunc);
 
     return boost::shared_ptr<IFunction>(fitFunc);
+#endif
+
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -583,21 +575,21 @@ namespace Algorithms
 
   /** Process function parameter table workspace
    */
-  void GeneratePeaks::processParamTalbe()
+  void GeneratePeaks::processParamTable()
   {
     using namespace boost::algorithm;
 
     // Initial check
-    std::vector<std::string> colnames = m_peakParamWS->getColumnNames();
+    std::vector<std::string> colnames = m_funcParamWS->getColumnNames();
 
     if (colnames[0].compare("spectrum") != 0)
       throw std::runtime_error("First column must be 'spectrum' in integer. ");
-    if (colunames.back().compare("chi2") != 0)
+    if (colnames.back().compare("chi2") != 0)
       throw std::runtime_error("Last column must be 'chi2'.");
 
     // Process column names in case that there are not same as parameter names
     // fx.name might be available
-    std::vector<std::string> m_tableParamNames[colnames.size()-2];
+    std::vector<std::string> m_tableParamNames(colnames.size()-2);
     for (size_t i = 0; i < colnames.size()-2; ++i)
     {
       std::string str = colnames[i+1];
@@ -620,7 +612,7 @@ namespace Algorithms
       // Check column names are same as function parameter naems
       for (size_t i = 0; i < numpeakparams; ++i)
       {
-        if (!m_peakFunction->hasParameter(m_tableParamNames[i]))
+        if (!hasParameter(m_peakFunction, m_tableParamNames[i]))
         {
           std::stringstream errss;
           errss << "Peak function does not have paramter " << m_tableParamNames[i];
@@ -631,7 +623,7 @@ namespace Algorithms
       // Background function
       for (size_t i = 0; i < numbkgdparams; ++i)
       {
-        if (!m_bkgdFunction->hasParameter(m_tableParamNames[i+numpeakparams]))
+        if (!hasParameter(m_bkgdFunction, m_tableParamNames[i+numpeakparams]))
         {
           std::stringstream errss;
           errss << "Background function does not have paramter " << m_tableParamNames[i+numpeakparams];
@@ -646,8 +638,7 @@ namespace Algorithms
     }
 
     // Process peak parameter workspace
-    std::set<specid_t> spectra;
-    getSpectraSet(peakParamWS, spectra);
+    getSpectraSet(m_funcParamWS, spectra);
 
     return;
   }
@@ -743,13 +734,23 @@ namespace Algorithms
     return peakfunc;
   }
 
+
+  bool GeneratePeaks::hasParameter(API::IFunction_sptr function, std::string paramname)
+  {
+    // TODO - Finish it!
+
+    return false;
+  }
+
+
   /** Create output workspace
    */
-  void GeneratePeaks::createOutputWorkspace()
+  API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace()
   {
     // Reference workspace and output workspace
     API::MatrixWorkspace_sptr outputWS;
-    bool newWSFromParent = true;
+
+    m_newWSFromParent = true;
     if (!inputWS && binParameters.empty())
     {
       // Error! Neither bin parameters or reference workspace is given.
@@ -775,56 +776,15 @@ namespace Algorithms
         std::copy(inputWS->dataX(iws).begin(), inputWS->dataX(iws).end(), outputWS->dataX(iws).begin());
       }
 
-      newWSFromParent = true;
+      m_newWSFromParent = true;
     }
     else
     {
       // Generate a one-spectrum Workspace2D from binning
       outputWS = createDataWorkspace(spectra, binParameters);
-      newWSFromParent = false;
+      m_newWSFromParent = false;
     }
   }
-
-  namespace
-  { // anonymous name space
-    /**
-   * Determine if the table contains raw parameters.
-   */
-    bool isRawTable(const std::vector<std::string> & colNames)
-    {
-      if (colNames.size() != 6)
-        return true;
-      if (colNames[0].compare("centre") != 0)
-        return true;
-      if (colNames[1].compare("width") != 0)
-        return true;
-      if (colNames[2].compare("height") != 0)
-        return true;
-      if (colNames[3].compare("backgroundintercept") != 0)
-        return true;
-      if (colNames[4].compare("backgroundslope") != 0)
-        return true;
-      if (colNames[5].compare("A2") != 0)
-        return true;
-      return false;
-    }
-
-    /**
-    * Determine how many parameters are in the peak function.
-   */
-  std::size_t getBkgOffset(const std::vector<std::string> & colNames, const bool isRaw)
-  {
-    if (!isRaw)
-      return 3;
-
-    for (std::size_t i = 0; i < colNames.size(); i++)
-    {
-      if (colNames[i].substr(0,3).compare("f1.") == 0)
-        return i;
-    }
-    return colNames.size(); // shouldn't get here
-  }
-}
 
 } // namespace Mantid
 } // namespace Algorithms

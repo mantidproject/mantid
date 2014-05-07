@@ -8,6 +8,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IBackgroundFunction.h"
 
 namespace Mantid
 {
@@ -61,6 +62,16 @@ namespace Algorithms
     // Implement abstract Algorithm methods
     void exec();
 
+    void processAlgProperties(std::string &peakfunctype, std::string &bkgdfunctype);
+
+    void processParamTable();
+
+    void generatePeaks();
+
+    bool hasParameter(API::IFunction_sptr function, std::string paramname);
+
+    API::MatrixWorkspace_sptr createOutputWorkspace();
+
     API::MatrixWorkspace_sptr createDataWorkspace(std::set<specid_t> spectra, std::vector<double> binparameters);
 
     API::IFunction_sptr createFunction(const std::string &peakFuncType, const std::vector<std::string> &colNames,
@@ -72,17 +83,45 @@ namespace Algorithms
     void getSpectraSet(DataObjects::TableWorkspace_const_sptr peakParmsWS, std::set<specid_t>& spectra);
 
     void generatePeaks(API::MatrixWorkspace_sptr dataWS, DataObjects::TableWorkspace_const_sptr peakparameters,
-       std::string peakfunction, bool newWSFromParent);
+       std::string peakfunction, bool m_newWSFromParent);
 
     double getTableValue(DataObjects::TableWorkspace_const_sptr tableWS, std::string colname, size_t index);
 
     /// Get the IPeakFunction part in the input function
     API::IPeakFunction_sptr getPeakFunction(API::IFunction_sptr infunction);
 
+    /// Peak function
+    API::IPeakFunction_sptr m_peakFunction;
+
+    /// Background function
+    API::IBackgroundFunction_sptr m_bkgdFunction;
+
+    /// Spectrum map from full spectra workspace to partial spectra workspace
     std::map<specid_t, specid_t> mSpectrumMap;
+
+    std::set<specid_t> spectra;
 
     /// Flag to use automatic background (???)
     bool m_useAutoBkgd;
+
+    /// Parameter table workspace
+    DataObjects::TableWorkspace_sptr m_funcParamWS;
+
+    /// Input workspace (optional)
+    API::MatrixWorkspace_const_sptr inputWS;
+
+    /// Flag whether the new workspace is exactly as input
+    bool m_newWSFromParent;
+
+    /// Binning parameters
+    std::vector<double> binParameters;
+
+    /// Flag to generate background
+    bool m_genBackground;
+
+    bool m_useRawParameter;
+
+
   };
 
 
