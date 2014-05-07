@@ -265,10 +265,6 @@ public:
       std::string detectorName = "lineardetector", bool strictSpectrumCheck = true)
   {
     auto toConvert = this->linearDetectorWS;
-    const double thetaInRad = thetaInDegrees * (M_PI / 180);
-    VerticalHorizontalOffsetType offsetTuple = determine_vertical_and_horizontal_offsets(toConvert,
-        detectorName); // Offsets before correction
-    const double sampleToDetectorBeamOffsetExpected = offsetTuple.get<1>();
 
     SpecularReflectionPositionCorrect alg;
     alg.setChild(true);
