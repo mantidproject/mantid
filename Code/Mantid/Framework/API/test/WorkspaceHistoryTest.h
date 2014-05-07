@@ -430,6 +430,47 @@ public:
   }
 };
 
+class WorkspaceHistoryTestPerformance : public CxxTest::TestSuite
+{
+public:
+
+  void test_Wide_History()
+  {
+    int depth = 3;
+    int width = 50;
+
+    AlgorithmHistory algHist("AnAlgorithm", 1);
+    build_Algorithm_History(algHist, width, depth);
+    m_wsHist.addHistory(boost::make_shared<AlgorithmHistory>(algHist));
+  }
+
+  void test_Deep_History()
+  {
+    int depth = 10;
+    int width = 3;
+
+    AlgorithmHistory algHist("AnAlgorithm", 1);
+    build_Algorithm_History(algHist, width, depth);
+    m_wsHist.addHistory(boost::make_shared<AlgorithmHistory>(algHist));
+  }
+
+  void build_Algorithm_History(AlgorithmHistory& parent, int width, int depth=0)
+  {
+    if(depth > 0)
+    {    
+
+      for (int i=0; i < width; ++i)
+      {      
+        AlgorithmHistory algHist("AnAlgorithm", 1);
+        build_Algorithm_History(algHist, width, depth-1);
+        parent.addChildHistory(boost::make_shared<AlgorithmHistory>(algHist));
+      }
+    }
+  }
+
+private:
+  Mantid::API::WorkspaceHistory m_wsHist;
+};
 
 
 #endif
