@@ -484,7 +484,12 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Indirect Geometry Spectroscopy</technique>
   </instrument>
-  
+
+  <instrument name="IN16B">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Indirect Geometry Spectroscopy</technique>
+  </instrument>
+    
   <instrument name="D33">
     <technique>SANS</technique> 
   </instrument>
