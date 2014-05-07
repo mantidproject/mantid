@@ -48,10 +48,22 @@ private:
 	void init();
 	void exec();
 
-	bool doFitGaussianPeak(API::MatrixWorkspace_const_sptr dataws,
-			int workspaceindex, double& center, double& sigma, double& height,
-			double startX, double endX);
+	std::map<int, int> findElasticPeakPositions(
+			const DataObjects::Workspace2D_sptr inputWS,
+			const std::vector<int> &spectraIndices,
+			const std::vector<int> &channelIndices);
 
+	void estimateFWHM(const Mantid::MantidVec& spec, double& center,
+			double& sigma, double& height, double& minX, double& maxX);
+
+	bool doFitGaussianPeak(DataObjects::Workspace2D_sptr, int workspaceindex,
+			double& center, double& sigma, double& height, double startX,
+			double endX);
+	std::map<int, double> findElasticPeakTof(const DataObjects::Workspace2D_sptr inputWS, const std::map<int, int>& eppMap);
+
+	double getL1(const API::MatrixWorkspace_sptr& workspace);
+	double getL2(const API::MatrixWorkspace_sptr& workspace, int detId);
+	double calculateTOF(double distance,double wavelength);
 };
 
 } // namespace Algorithms
