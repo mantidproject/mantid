@@ -25,6 +25,12 @@ namespace
 
 class SpecularReflectionPositionCorrectTest: public CxxTest::TestSuite
 {
+
+private:
+
+  MatrixWorkspace_sptr pointDetectorWS;
+  MatrixWorkspace_sptr linearDetectorWS;
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -40,6 +46,25 @@ public:
   SpecularReflectionPositionCorrectTest()
   {
     FrameworkManager::Instance();
+
+    auto loadAlg = AlgorithmManager::Instance().create("Load");
+    loadAlg->initialize();
+    loadAlg->setChild(true);
+    loadAlg->setProperty("Filename", "INTER00013460.nxs");
+    loadAlg->setPropertyValue("OutputWorkspace", "demo");
+    loadAlg->execute();
+    Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
+    pointDetectorWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+
+    loadAlg = AlgorithmManager::Instance().create("Load");
+    loadAlg->initialize();
+    loadAlg->setChild(true);
+    loadAlg->setProperty("Filename", "POLREF0004699.nxs");
+    loadAlg->setPropertyValue("OutputWorkspace", "demo");
+    loadAlg->execute();
+    temp = loadAlg->getProperty("OutputWorkspace");
+    WorkspaceGroup_sptr temp1 = boost::dynamic_pointer_cast<WorkspaceGroup>(temp);
+    linearDetectorWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp1->getItem(0));
   }
 
   void test_init()
@@ -66,7 +91,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
     alg.setPropertyValue("OutputWorkspace", "test_out");
-    TS_ASSERT_THROWS(alg.setProperty("ThetaIn", 0.0), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg.setProperty("TwoThetaIn", 0.0), std::invalid_argument&);
   }
 
   void test_theta_is_less_than_ninety_else_throws()
@@ -76,7 +101,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
     alg.setPropertyValue("OutputWorkspace", "test_out");
-    TS_ASSERT_THROWS(alg.setProperty("ThetaIn", 90.0), std::invalid_argument&);
+    TS_ASSERT_THROWS(alg.setProperty("TwoThetaIn", 90.0), std::invalid_argument&);
   }
 
   void test_throws_if_SpectrumNumbersOfDetectors_less_than_zero()
@@ -86,7 +111,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
     alg.setPropertyValue("OutputWorkspace", "test_out");
-    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("TwoThetaIn", 10.0);
     std::vector<int> invalid(1, -1);
     TS_ASSERT_THROWS(alg.setProperty("SpectrumNumbersOfDetectors", invalid), std::invalid_argument&);
   }
@@ -99,7 +124,7 @@ public:
     alg.setProperty("InputWorkspace",
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 1, 1));
     alg.setPropertyValue("OutputWorkspace", "test_out");
-    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("TwoThetaIn", 10.0);
     std::vector<int> invalid(1, 1e7);  // Well outside range
     alg.setProperty("SpectrumNumbersOfDetectors", invalid);  // Well outside range
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument&);
@@ -113,7 +138,7 @@ public:
     alg.setProperty("InputWorkspace",
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 1, 1));
     alg.setPropertyValue("OutputWorkspace", "test_out");
-    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("TwoThetaIn", 10.0);
     std::vector<int> invalid(1, 1e7);
     alg.setProperty("DetectorComponentName", "junk_value");  // Well outside range
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument&);
@@ -138,15 +163,7 @@ public:
 
   void test_correct_point_detector_to_current_position()
   {
-    auto loadAlg = AlgorithmManager::Instance().create("Load");
-    loadAlg->initialize();
-    loadAlg->setChild(true);
-    loadAlg->setProperty("Filename", "INTER00013460.nxs");
-    loadAlg->setPropertyValue("OutputWorkspace", "demo");
-    loadAlg->execute();
-    Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr toConvert = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
-
+    auto toConvert = pointDetectorWS;
     VerticalHorizontalOffsetType offsetTuple = determine_vertical_and_horizontal_offsets(toConvert); // Offsets before correction
     const double sampleToDetectorVerticalOffset = offsetTuple.get<0>();
     const double sampleToDetectorBeamOffset = offsetTuple.get<1>();
@@ -162,7 +179,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", toConvert);
     alg.setPropertyValue("OutputWorkspace", "test_out");
-    alg.setProperty("ThetaIn", currentThetaInDeg);
+    alg.setProperty("TwoThetaIn", currentThetaInDeg);
     alg.execute();
     MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
 
@@ -181,14 +198,7 @@ public:
   void do_test_correct_point_detector_position(std::string detectorFindProperty = "",
       std::string stringValue = "")
   {
-    auto loadAlg = AlgorithmManager::Instance().create("Load");
-    loadAlg->initialize();
-    loadAlg->setChild(true);
-    loadAlg->setProperty("Filename", "INTER00013460.nxs");
-    loadAlg->setPropertyValue("OutputWorkspace", "demo");
-    loadAlg->execute();
-    Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr toConvert = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    MatrixWorkspace_sptr toConvert = pointDetectorWS;
 
     const double thetaInDegrees = 10.0; //Desired theta in degrees.
     const double thetaInRad = thetaInDegrees * (M_PI / 180);
@@ -204,7 +214,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "test_out");
     if (!detectorFindProperty.empty())
       alg.setProperty(detectorFindProperty, stringValue);
-    alg.setProperty("ThetaIn", thetaInDegrees);
+    alg.setProperty("TwoThetaIn", thetaInDegrees);
     alg.execute();
     MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
 
@@ -236,18 +246,9 @@ public:
   }
 
   double do_test_correct_line_detector_position(std::vector<int> specNumbers, double thetaInDegrees,
-      std::string detectorName = "lineardetector")
+      std::string detectorName = "lineardetector", bool strictSpectrumCheck = true)
   {
-    auto loadAlg = AlgorithmManager::Instance().create("Load");
-    loadAlg->initialize();
-    loadAlg->setChild(true);
-    loadAlg->setProperty("Filename", "POLREF0004699.nxs");
-    loadAlg->setPropertyValue("OutputWorkspace", "demo");
-    loadAlg->execute();
-    Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
-    WorkspaceGroup_sptr temp1 = boost::dynamic_pointer_cast<WorkspaceGroup>(temp);
-    MatrixWorkspace_sptr toConvert = boost::dynamic_pointer_cast<MatrixWorkspace>(temp1->getItem(0));
-
+    auto toConvert = this->linearDetectorWS;
     const double thetaInRad = thetaInDegrees * (M_PI / 180);
     VerticalHorizontalOffsetType offsetTuple = determine_vertical_and_horizontal_offsets(toConvert,
         detectorName); // Offsets before correction
@@ -261,7 +262,8 @@ public:
     alg.setProperty("InputWorkspace", toConvert);
     alg.setPropertyValue("OutputWorkspace", "test_out");
     alg.setProperty("SpectrumNumbersOfDetectors", specNumbers);
-    alg.setProperty("ThetaIn", thetaInDegrees);
+    alg.setProperty("StrictSpectrumChecking", strictSpectrumCheck);
+    alg.setProperty("TwoThetaIn", thetaInDegrees);
     alg.execute();
     MatrixWorkspace_sptr corrected = alg.getProperty("OutputWorkspace");
 
@@ -300,23 +302,32 @@ public:
 
     double const width = 1.2e-3; //Pixel height
 
-    TS_ASSERT_DELTA(
-        offset1, offset2+width, 1e-9);
+    TS_ASSERT_DELTA( offset1, offset2+width, 1e-9);
   }
 
   void test_correct_line_detector_position_average_offset_by_many_pixels()
   {
     std::vector<int> specNumbers;
     specNumbers.push_back(100);
-    double offset1 = do_test_correct_line_detector_position(specNumbers, 0.1, "lineardetector");  // Average spectrum number at 100
+    double offset1 = do_test_correct_line_detector_position(specNumbers, 0.1, "lineardetector"); // Average spectrum number at 100
 
     specNumbers.push_back(104);
-    double offset2 = do_test_correct_line_detector_position(specNumbers, 0.1, "lineardetector");  // Average spectrum number at 102
+    const bool strictSpectrumCheck = false;
+    double offset2 = do_test_correct_line_detector_position(specNumbers, 0.1, "lineardetector",
+        strictSpectrumCheck); // Average spectrum number at 102
 
     double const width = 1.2e-3; //Pixel height
 
-    TS_ASSERT_DELTA(
-        offset1, offset2+(2*width), 1e-9);
+    TS_ASSERT_DELTA( offset1, offset2+(2*width), 1e-9);
+  }
+
+  void test_correct_line_detector_position_throws_with_non_sequential_spec_numbers()
+  {
+    std::vector<int> specNumbers;
+    specNumbers.push_back(1);
+    specNumbers.push_back(3); // Missing 2 in sequence.
+    TS_ASSERT_THROWS(do_test_correct_line_detector_position(specNumbers, 0.1, "lineardetector"),
+        std::invalid_argument&);
   }
 
 };
