@@ -7,11 +7,13 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include <cmath>
 #include <boost/tuple/tuple.hpp>
+#include <Poco/Path.h>
 
 using Mantid::Algorithms::SpecularReflectionPositionCorrect;
 using namespace Mantid::API;
@@ -47,24 +49,27 @@ public:
   {
     FrameworkManager::Instance();
 
-    auto loadAlg = AlgorithmManager::Instance().create("Load");
-    loadAlg->initialize();
-    loadAlg->setChild(true);
-    loadAlg->setProperty("Filename", "INTER00013460.nxs");
-    loadAlg->setPropertyValue("OutputWorkspace", "demo");
-    loadAlg->execute();
-    Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
-    pointDetectorWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    const std::string instDir = ConfigService::Instance().getInstrumentDirectory();
+    Poco::Path path(instDir);
+    path.append("INTER_Definition.xml");
 
-    loadAlg = AlgorithmManager::Instance().create("Load");
+    auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
     loadAlg->initialize();
     loadAlg->setChild(true);
-    loadAlg->setProperty("Filename", "POLREF0004699.nxs");
+    loadAlg->setProperty("Filename", path.toString());
     loadAlg->setPropertyValue("OutputWorkspace", "demo");
     loadAlg->execute();
-    temp = loadAlg->getProperty("OutputWorkspace");
-    WorkspaceGroup_sptr temp1 = boost::dynamic_pointer_cast<WorkspaceGroup>(temp);
-    linearDetectorWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp1->getItem(0));
+    pointDetectorWS = loadAlg->getProperty("OutputWorkspace");
+
+    path = Poco::Path(instDir);
+    path.append("POLREF_Definition.xml");
+    loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+    loadAlg->initialize();
+    loadAlg->setChild(true);
+    loadAlg->setProperty("Filename", path.toString());
+    loadAlg->setPropertyValue("OutputWorkspace", "demo");
+    loadAlg->execute();
+    linearDetectorWS = loadAlg->getProperty("OutputWorkspace");
   }
 
   void test_init()
@@ -164,6 +169,17 @@ public:
   void test_correct_point_detector_to_current_position()
   {
     auto toConvert = pointDetectorWS;
+    auto referenceFrame = toConvert->getInstrument()->getReferenceFrame();
+    auto moveComponentAlg = AlgorithmManager::Instance().create("MoveInstrumentComponent");
+    moveComponentAlg->initialize();
+    moveComponentAlg->setProperty("Workspace", toConvert);
+    const std::string componentName = "point-detector";
+    moveComponentAlg->setProperty("ComponentName", componentName);
+    moveComponentAlg->setProperty("RelativePosition", true);
+    moveComponentAlg->setProperty(referenceFrame->pointingUpAxis(), 0.5); // Give the point detector a starting vertical offset.
+    // Execute the movement.
+    moveComponentAlg->execute();
+
     VerticalHorizontalOffsetType offsetTuple = determine_vertical_and_horizontal_offsets(toConvert); // Offsets before correction
     const double sampleToDetectorVerticalOffset = offsetTuple.get<0>();
     const double sampleToDetectorBeamOffset = offsetTuple.get<1>();
