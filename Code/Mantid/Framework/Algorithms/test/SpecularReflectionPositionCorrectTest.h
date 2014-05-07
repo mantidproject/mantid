@@ -269,8 +269,6 @@ public:
     VerticalHorizontalOffsetType offsetTuple = determine_vertical_and_horizontal_offsets(toConvert,
         detectorName); // Offsets before correction
     const double sampleToDetectorBeamOffsetExpected = offsetTuple.get<1>();
-    const double sampleToDetectorVerticalOffsetExpected = std::tan(thetaInRad)
-        * sampleToDetectorBeamOffsetExpected;
 
     SpecularReflectionPositionCorrect alg;
     alg.setChild(true);
@@ -286,7 +284,6 @@ public:
     VerticalHorizontalOffsetType offsetTupleCorrected = determine_vertical_and_horizontal_offsets(
         corrected, detectorName); // Positions after correction
     const double sampleToDetectorVerticalOffsetCorrected = offsetTupleCorrected.get<0>();
-    const double sampleToDetectorBeamOffsetCorrected = offsetTupleCorrected.get<1>();
 
     return sampleToDetectorVerticalOffsetCorrected;
   }
