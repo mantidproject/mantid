@@ -15,6 +15,8 @@ using Mantid::API::AlgorithmHistory;
 using Mantid::API::IAlgorithm;
 using namespace boost::python;
 
+namespace Policies = Mantid::PythonInterface::Policies;
+
 /**
  * Return a Python list of history objects from the workspace history as this is
  * far easier to work with than a set

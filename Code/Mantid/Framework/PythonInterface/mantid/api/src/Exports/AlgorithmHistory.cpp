@@ -16,6 +16,8 @@ using Mantid::Kernel::PropertyHistory;
 using Mantid::API::IAlgorithm;
 using namespace boost::python;
 
+namespace Policies = Mantid::PythonInterface::Policies;
+
 /**
  * Return a Python list of child history objects from the history as this is
  * far easier to work with than a set
@@ -82,7 +84,6 @@ void export_AlgorithmHistory()
          "Returns the child algorithm at the given index in the history")
     
     .def("getChildHistories", &getChildrenAsList,
-         return_value_policy<Policies::RemoveConstSharedPtr>(),
          "Returns a list of child algorithm histories for this algorithm history.")
     
     .def("getProperties", &getPropertiesAsList,
