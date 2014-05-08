@@ -536,6 +536,133 @@ public:
       AnalysisDataService::Instance().remove("GDEventsOut");
   }
 
+  
+  void test_GroupingWorkspace_ThreeGroup_NoUngrouped_dontPreserveEvents_inplace()
+  {
+    dotestGroupingWorkspace(3, false, false,true,false);
+  }
+
+  void test_GroupingWorkspace_TwoGroup_Ungrouped_dontPreserveEvents_inplace()
+  {
+    dotestGroupingWorkspace(2, true, true,true,false);
+  }
+
+  void test_GroupingWorkspace_ThreeGroup_NoUngrouped_PreserveEvents_inplace()
+  {
+    dotestGroupingWorkspace(3, false, false,true,true);
+  }
+
+  void test_GroupingWorkspace_TwoGroup_Ungrouped_PreserveEvents_inplace()
+  {
+    dotestGroupingWorkspace(2, false, false,true,true);
+  }
+
+   void test_GroupingWorkspace_FourGroup_Ungrouped_PreserveEvents_Notinplace()
+  {
+    dotestGroupingWorkspace(4, true, true,true,false);
+  }
+
+  void dotestGroupingWorkspace(size_t numgroups=3, bool includeUngroupedDets =true, bool includeUngroupedDetsSetting=true, bool inplace = true,  bool preserveEvents = true, int bankWidthInPixels=8 )
+  {
+    std::string nxsWSname("GroupDetectors2TestTarget_ws");
+    std::string groupWSName(nxsWSname + "_GROUP");
+    std::string outputws = nxsWSname + "_grouped";
+
+    // Create the fake event workspace
+    EventWorkspace_sptr inputW = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(static_cast<int>(numgroups), bankWidthInPixels);
+    AnalysisDataService::Instance().addOrReplace(nxsWSname, inputW);
+
+
+    //-------- Check on the input workspace ---------------
+    TS_ASSERT(inputW);
+    if (!inputW) return;
+
+    //Create an axis for each pixel. 
+    for (size_t pix=0; pix < inputW->getNumberHistograms(); pix++)
+    {
+      cow_ptr<Mantid::MantidVec> axis;
+      Mantid::MantidVec& xRef = axis.access();
+      xRef.resize(5);
+      for (int i = 0; i < 5; ++i)
+        xRef[i] = static_cast<double>(1) + i*1.0;
+      xRef[4] = 1e6;
+      //Set an X-axis
+      inputW->setX(pix, axis);
+      inputW->getEventList(pix).addEventQuickly( TofEvent(1000.0) );
+    }
+
+    // ------------ Create a grouping workspace to match -------------
+    auto groupW = boost::make_shared<GroupingWorkspace>(inputW->getInstrument());
+    AnalysisDataService::Instance().addOrReplace(nxsWSname + "_GROUP", groupW);
+    //fill in some groups
+    size_t startingGroupNo= 1;
+    size_t targetGroupNo = numgroups;
+    size_t targetSpectraCount = numgroups;
+    if (includeUngroupedDets)
+    {
+      --startingGroupNo;
+      ++targetGroupNo;
+    }
+    size_t pixPerGroup = 0;
+    if (numgroups > 0)
+    {
+      pixPerGroup = groupW->getNumberHistograms()/targetGroupNo;
+    }
+    if (includeUngroupedDets)
+    {
+      targetSpectraCount += includeUngroupedDetsSetting?pixPerGroup+1:0;
+    }
+    for (size_t pix=0; pix < groupW->getNumberHistograms(); pix++)
+    {
+      size_t groupNo = startingGroupNo + (pix/pixPerGroup);
+      groupW->dataY(pix)[0] = groupNo;
+    }
+
+    // ------------ Create a grouping workspace by name -------------
+    GroupDetectors2 groupAlg;
+    groupAlg.initialize();
+    TS_ASSERT_THROWS_NOTHING( groupAlg.setPropertyValue("InputWorkspace", nxsWSname) );
+    if (inplace) outputws = nxsWSname;
+    TS_ASSERT_THROWS_NOTHING( groupAlg.setPropertyValue("OutputWorkspace", outputws) );
+
+    //This fake calibration file was generated using DiffractiongroupAlgsing2Test_helper.py
+    TS_ASSERT_THROWS_NOTHING( groupAlg.setPropertyValue("CopyGroupingFromWorkspace", groupWSName) );
+    
+    TS_ASSERT_THROWS_NOTHING( groupAlg.setProperty("KeepUngroupedSpectra", includeUngroupedDetsSetting));
+    TS_ASSERT_THROWS_NOTHING( groupAlg.setProperty("PreserveEvents", preserveEvents) );
+    //OK, run the algorithm
+    TS_ASSERT_THROWS_NOTHING( groupAlg.execute(); );
+    TS_ASSERT( groupAlg.isExecuted() );
+
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(outputws) );
+    if (!output) return;
+
+    // ---- Did we keep the event workspace ----
+    EventWorkspace_const_sptr outputEvent;
+    TS_ASSERT_THROWS_NOTHING( outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(output) );
+    if (preserveEvents)
+    {
+      TS_ASSERT( outputEvent );
+      if (!outputEvent) return;
+    }
+    else
+    {
+      TS_ASSERT( !outputEvent );
+    }
+
+
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), targetSpectraCount);
+    
+    AnalysisDataService::Instance().remove(nxsWSname);
+    AnalysisDataService::Instance().remove(groupWSName);
+    if (!inplace)  AnalysisDataService::Instance().remove(outputws);
+
+  }
+
+
+
+
   private:
     const std::string inputWS, outputBase, inputFile;
     enum constants { NHIST = 6, NBINS = 4 };
