@@ -57,7 +57,6 @@ boost::python::object getPropertiesAsList(AlgorithmHistory& self)
 void export_AlgorithmHistory()
 {
   register_ptr_to_python<Mantid::API::AlgorithmHistory_sptr >();
-  register_ptr_to_python<Mantid::API::AlgorithmHistory_const_sptr >();
 
   class_<AlgorithmHistory>("AlgorithmHistory", no_init)
     .def("name", &AlgorithmHistory::name, return_value_policy<copy_const_reference>(),
