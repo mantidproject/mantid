@@ -124,11 +124,31 @@ public:
     AnalysisDataService::Instance().remove("Workspace");
   }
 
+  void testAddRow()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, getSaveFlag()).Times(3).WillOnce(Return(false)).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, getSaveAsFlag()).WillRepeatedly(Return(false));
+    EXPECT_CALL(mockView, getAddRowFlag()).Times(2).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, clearNotifyFlags()).Times(3);
+    EXPECT_CALL(mockView, getUserString()).Times(1).WillRepeatedly(Return("Workspace"));
+    EXPECT_CALL(mockView, askUserString()).Times(1).WillRepeatedly(Return(true));
+    ReflBlankMainViewPresenter presenter(&mockView);
+    presenter.notify();
+    presenter.notify();
+    presenter.notify();
+    ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Workspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 3);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    AnalysisDataService::Instance().remove("Workspace");
+  }
+
   void testDualFlags()
   {
     MockView mockView;
     EXPECT_CALL(mockView, getSaveAsFlag()).Times(1).WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getSaveFlag()).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, getAddRowFlag()).WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, getUserString()).Times(1).WillRepeatedly(Return("Workspace"));
     EXPECT_CALL(mockView, askUserString()).Times(1).WillRepeatedly(Return(true));
     EXPECT_CALL(mockView, clearNotifyFlags()).Times(1);
@@ -138,32 +158,6 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
     AnalysisDataService::Instance().remove("Workspace");
   }
-  /*
-  void xtestBadWorkspaceName()
-  {
-    MockView mockView;
-    TS_ASSERT_THROWS(ReflBlankMainViewPresenter presenter(createWorkspace(false),&mockView), std::runtime_error&);
-  }
-
-  void xtestBadWorkspaceType()
-  {
-    MockView mockView;
-    TS_ASSERT_THROWS(ReflBlankMainViewPresenter presenter(createBadTypedWorkspace(),&mockView), std::runtime_error&);
-  }
-
-  void xtestBadWorkspaceShort()
-  {
-    MockView mockView;
-    TS_ASSERT_THROWS(ReflBlankMainViewPresenter presenter(createBadLengthWorkspace(false),&mockView), std::runtime_error&);
-  }
-
-  void xtestBadWorkspaceLong()
-  {
-    MockView mockView;
-    TS_ASSERT_THROWS(ReflBlankMainViewPresenter presenter(createBadLengthWorkspace(true),&mockView), std::runtime_error&);
-  }
-  */
-
 };
 
 

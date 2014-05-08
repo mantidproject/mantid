@@ -21,6 +21,16 @@ namespace MantidQt
 
     }
 
+    void ReflMainViewPresenter::process()
+    {
+
+    }
+
+    void ReflMainViewPresenter::addRow()
+    {
+      m_model->appendRow();
+    }
+
     void ReflMainViewPresenter::notify()
     {
       if(m_view->getSaveAsFlag())
@@ -30,6 +40,18 @@ namespace MantidQt
       else if(m_view->getSaveFlag())
       {
         save();
+      }
+      else if(m_view->getAddRowFlag())
+      {
+        addRow();
+      }
+      else if(m_view->getProcessFlag())
+      {
+        process();
+      }
+      else if(m_view->getDeleteRowFlag())
+      {
+
       }
 
       m_view->clearNotifyFlags();

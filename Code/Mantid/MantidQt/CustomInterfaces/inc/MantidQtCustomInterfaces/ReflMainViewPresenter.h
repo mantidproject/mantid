@@ -45,6 +45,8 @@ namespace MantidQt
       Mantid::API::ITableWorkspace_sptr m_cache;
       std::string m_cache_name;
       virtual void load();
+      virtual void process();
+      virtual void addRow();
       virtual void save() = 0;
       virtual void saveAs() = 0;
       ReflMainView* m_view;
