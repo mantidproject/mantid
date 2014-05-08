@@ -43,12 +43,10 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    /// Returns a path to the first run file
-    /// @return Full path to file
+    /// @return Full path to first run data file, or empty string if invalid/not selected
     virtual std::string firstRun() const = 0;
 
-    /// Returns a path to the last run file
-    /// @return Full path to file
+    /// @return Full path to last run data file, or empty string if invalid/not selected
     virtual std::string lastRun() const = 0;
 
     /// Returns the name of the log to use

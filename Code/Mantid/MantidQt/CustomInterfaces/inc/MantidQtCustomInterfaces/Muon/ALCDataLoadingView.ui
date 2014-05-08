@@ -286,6 +286,15 @@
    <header>MantidQtMantidWidgets/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>log</tabstop>
+  <tabstop>integral</tabstop>
+  <tabstop>differential</tabstop>
+  <tabstop>timeLimit</tabstop>
+  <tabstop>minTime</tabstop>
+  <tabstop>maxTime</tabstop>
+  <tabstop>load</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

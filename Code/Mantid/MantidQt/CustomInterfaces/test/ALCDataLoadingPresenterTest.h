@@ -58,6 +58,13 @@ public:
     m_view = new NiceMock<MockALCDataLoadingView>();
     m_presenter = new ALCDataLoadingPresenter(m_view);
     m_presenter->initialize();
+
+    // Set some valid default return values for the view mock object getters
+    ON_CALL(*m_view, firstRun()).WillByDefault(Return("MUSR00015189.nxs"));
+    ON_CALL(*m_view, lastRun()).WillByDefault(Return("MUSR00015191.nxs"));
+    ON_CALL(*m_view, calculationType()).WillByDefault(Return("Integral"));
+    ON_CALL(*m_view, log()).WillByDefault(Return("sample_magn_field"));
+    ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::none));
   }
 
   void tearDown()
@@ -75,20 +82,8 @@ public:
     presenter.initialize();
   }
 
-  // Sets view getters to return some default valid values
-  void setViewDefaults()
-  {
-    ON_CALL(*m_view, firstRun()).WillByDefault(Return("MUSR00015189.nxs"));
-    ON_CALL(*m_view, lastRun()).WillByDefault(Return("MUSR00015191.nxs"));
-    ON_CALL(*m_view, calculationType()).WillByDefault(Return("Integral"));
-    ON_CALL(*m_view, log()).WillByDefault(Return("sample_magn_field"));
-    ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::none));
-  }
-
   void test_defaultLoad()
   {
-    setViewDefaults();
-
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size,3),
                                             QwtDataX(0, 1350, 1E-8),
                                             QwtDataX(1, 1360, 1E-8),
@@ -102,7 +97,6 @@ public:
 
   void test_load_differential()
   {
-    setViewDefaults();
     // Change to differential calculation type
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Differential"));
 
@@ -116,7 +110,6 @@ public:
 
   void test_load_timeLimits()
   {
-    setViewDefaults();
     // Set time limit
     ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::make_optional(std::make_pair(5.0,10.0))));
 
@@ -140,14 +133,20 @@ public:
 
   void test_updateAvailableLogs_invalidFirstRun()
   {
-    EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("LOQ49886.nxs")); // XXX: not a Muon file
-    EXPECT_CALL(*m_view, setAvailableLogs(ElementsAre())); // Empty array expectedB
+    ON_CALL(*m_view, firstRun()).WillByDefault(Return(""));
+    EXPECT_CALL(*m_view, setAvailableLogs(ElementsAre())); // Empty array expected
+    TS_ASSERT_THROWS_NOTHING(m_view->selectFirstRun());
+  }
+
+  void test_updateAvailableLogs_unsupportedFirstRun()
+  {
+    ON_CALL(*m_view, firstRun()).WillByDefault(Return("LOQ49886.nxs")); // XXX: not a Muon file
+    EXPECT_CALL(*m_view, setAvailableLogs(ElementsAre())); // Empty array expected
     TS_ASSERT_THROWS_NOTHING(m_view->selectFirstRun());
   }
 
   void test_load_error()
   {
-    setViewDefaults();
     // Set last run to one of the different instrument - should cause error within algorithms exec
     ON_CALL(*m_view, lastRun()).WillByDefault(Return("EMU00006473.nxs"));
     EXPECT_CALL(*m_view, setDataCurve(_)).Times(0);
@@ -155,9 +154,16 @@ public:
     m_view->requestLoading();
   }
 
+  void test_load_invalidRun()
+  {
+    ON_CALL(*m_view, firstRun()).WillByDefault(Return(""));
+    EXPECT_CALL(*m_view, setDataCurve(_)).Times(0);
+    EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
+    m_view->requestLoading();
+  }
+
   void test_load_nonExistentFile()
   {
-    setViewDefaults();
     ON_CALL(*m_view, lastRun()).WillByDefault(Return("non-existent-file"));
     EXPECT_CALL(*m_view, setDataCurve(_)).Times(0);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
