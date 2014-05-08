@@ -186,6 +186,11 @@ namespace Algorithms
     size_t numpeaks = m_peakParamWS->rowCount();
     size_t icolchi2 = m_numColumns - 1;
 
+    // Create data structure for all peaks functions
+    std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > > functionmap;
+    std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >::iterator mapiter;
+
+    // Go through the table workspace to create peak/background functions
     for (size_t ipeak = 0; ipeak < numpeaks; ++ipeak)
     {
       // Ignore peak with large chi^2/Rwp
@@ -238,9 +243,65 @@ namespace Algorithms
         plotfunc->addFunction(m_bkgdFunction);
 
       // Determine boundary
-      double centre = m_peakFunction->centre();
-      double fwhm = m_peakFunction->fwhm();
+      double centre = vec[i].first;
+      double fwhm = getPeakFunction()->fwhm();
 
+      // Get to know workspace index
+      // specid_t specid = static_cast<specid_t>(getTableValue(peakparameters, "spectrum", ipk));
+      specid_t wsindex;
+      if (newWSFromParent)
+        wsindex = specid;
+      else
+        wsindex = mSpectrumMap[specid];
+
+      // Existed?
+      mapiter = functionmap.find(wsindex);
+      if (mapiter == functionmap.end())
+      {
+        std::vector<std::pair<double, API::IFunction_sptr> > tempvector;
+        std::pair<std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >::iterator, bool> ret;
+        ret = functionmap.insert(std::make_pair(wsindex, tempvector));
+        mapiter = ret.first;
+      }
+
+      // Generate peak function
+      if (chi2 > maxchi2)
+      {
+        g_log.notice() << "Skip Peak " << ipk << " (chi^2 " << chi2 << " > " << maxchi2 << ") at " << centre << "\n";
+        continue;
+      }
+      else if (chi2 < 0. && ignorewidepeaks)
+      {
+        g_log.notice() << "Skip Peak " << ipk << " (chi^2 " << chi2 << " < 0 ) at " << centre << "\n";
+      }
+      else
+      {
+        mapiter->second.push_back(std::make_pair(centre, plotfunc));
+      }
+
+      g_log.debug() << "Peak " << ipk << ": Spec = " << specid << " -> WSIndex = " << wsindex
+                    << " func: " << mfunc->asString() << "\n";
+    }
+
+
+
+#if 0
+    // Generate function to plot
+    API::ICompositeFunction_sptr plotfunc = boost::make_shared<CompositeFunction>();
+    plotfunc->addFunction(m_peakFunction);
+    if (m_genBackground)
+      plotfunc->addFunction(m_bkgdFunction);
+
+    // Determine boundary
+    double centre = m_peakFunction->centre();
+    double fwhm = m_peakFunction->fwhm();
+#endif
+
+    // Calcualte function
+    for (mapiter = functionmap.begin(); mapiter != functionmap.end(); ++mapiter)
+    {
+      // Sort by
+      std::sort(mapiter->second.begin(), mapiter->second.end());
       //
       const MantidVec& X = dataWS->dataX(wsindex);
       double leftbound = centre - numWidths*fwhm;
@@ -734,10 +795,15 @@ namespace Algorithms
     return peakfunc;
   }
 
-
+  /** Find out whether a function has a certain parameter
+   */
   bool GeneratePeaks::hasParameter(API::IFunction_sptr function, std::string paramname)
   {
-    // TODO - Finish it!
+    std::vector<std::string> parnames = function->getParameterNames();
+    std::vector<std::string>::iterator piter;
+    piter = std::find (parnames.begin(), parnames.end(), paramname);
+    if (piter != parnames.end())
+      return true;
 
     return false;
   }
