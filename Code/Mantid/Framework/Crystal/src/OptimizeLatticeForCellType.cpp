@@ -88,7 +88,7 @@ namespace Mantid
     declareProperty( "Tolerance", 0.12, "Indexing Tolerance");
     declareProperty("EdgePixels",0, "Remove peaks that are at pixels this close to edge. " );
     declareProperty(new PropertyWithValue<double>("OutputChi2", 0.0,Direction::Output),"Returns the goodness of the fit");
-    declareProperty(new FileProperty("OutputDirectory", "", FileProperty::Directory),
+    declareProperty(new FileProperty("OutputDirectory", ".", FileProperty::Directory),
             "The directory where the per run peaks files and orientation matrices will be written.");
 
       //Disable default gsl error handler (which is to call abort!)
