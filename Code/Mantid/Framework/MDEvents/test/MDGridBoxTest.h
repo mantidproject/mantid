@@ -1047,7 +1047,6 @@ public:
   void test_splitAllIfNeeded_usingThreadPool()
   {
     typedef MDGridBox<MDLeanEvent<2>,2> gbox_t;
-    typedef MDBox<MDLeanEvent<2>,2> box_t;
     typedef MDBoxBase<MDLeanEvent<2>,2> ibox_t;
 
     gbox_t * b = MDEventsTestHelper::makeMDGridBox<2>();
@@ -1136,8 +1135,6 @@ public:
   void test_centerpointBin()
   {
     typedef MDGridBox<MDLeanEvent<2>,2> gbox_t;
-    typedef MDBox<MDLeanEvent<2>,2> box_t;
-    typedef MDBoxBase<MDLeanEvent<2>,2> ibox_t;
 
     // 10x10 bins, 2 events per bin, each weight of 1.0
     gbox_t * b = MDEventsTestHelper::makeMDGridBox<2>();
