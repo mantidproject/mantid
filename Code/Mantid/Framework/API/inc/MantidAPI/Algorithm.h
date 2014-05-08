@@ -323,6 +323,7 @@ protected:
 
   // ------------------ For WorkspaceGroups ------------------------------------
   virtual bool checkGroups();
+
   virtual bool processGroups();
   virtual void setOtherProperties(IAlgorithm * alg, const std::string & propertyName, const std::string & propertyValue, int periodNum);
   typedef std::vector<boost::shared_ptr<Workspace> > WorkspaceVector;
