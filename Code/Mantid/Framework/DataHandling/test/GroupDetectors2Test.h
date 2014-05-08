@@ -615,7 +615,7 @@ public:
     for (size_t pix=0; pix < groupW->getNumberHistograms(); pix++)
     {
       size_t groupNo = startingGroupNo + (pix/pixPerGroup);
-      groupW->dataY(pix)[0] = groupNo;
+      groupW->dataY(pix)[0] = static_cast<double>(groupNo);
     }
 
     // ------------ Create a grouping workspace by name -------------

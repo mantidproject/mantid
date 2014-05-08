@@ -320,7 +320,8 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
     }
     else
     {
-      //processWorkspace(groupingWS_sptr, workspace, unUsedSpec);
+      g_log.debug() << "Extracting grouping from MatrixWorkspace (" << groupingWS_sptr->name() << ")" << std::endl;
+      processMatrixWorkspace(groupingWS_sptr, workspace, unUsedSpec);
     }
     return;
   }
@@ -597,17 +598,14 @@ void GroupDetectors2::processXMLFile(std::string fname,
   return;
 }
 
-/** Get groupings from XML file
-*  @param fname :: the full path name of the file to open
+/** Get groupings from groupingworkspace
+*  @param groupWS :: the grouping workspace to use 
 *  @param workspace :: a pointer to the input workspace, used to get spectra indexes from numbers
 *  @param unUsedSpec :: the list of spectra indexes that have been not included in a group (so far)
 */
 void GroupDetectors2::processGroupingWorkspace(GroupingWorkspace_const_sptr groupWS,
   API::MatrixWorkspace_const_sptr workspace, std::vector<int64_t> &unUsedSpec)
 {
-  //fill unUsedspectra with every target spectrum for now
-  const size_t nspecTarget=workspace->getNumberHistograms();
-
   detid2index_map detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap();
   
 
@@ -632,29 +630,36 @@ void GroupDetectors2::processGroupingWorkspace(GroupingWorkspace_const_sptr grou
 
       //translate to detectors
       std::vector<detid_t> det_ids;
-      const Geometry::IDetector_const_sptr det = groupWS->getDetector(i);
-      Geometry::DetectorGroup_const_sptr detGroup = boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det);
-      if (detGroup)
+      try
       {
-        det_ids = detGroup->getDetectorIDs();
-
-      }
-      else
-      {
-        det_ids.push_back(det->getID());
-      }
-    
-      for (auto dit = det_ids.begin(); dit != det_ids.end(); ++ dit)
-      {
-        //translate detectors to target det ws indexes
-        detid_t det_id=  *dit;
-        size_t targetWSIndex = detIdToWiMap[det_id];
-        targetWSIndexSet.insert(targetWSIndex);
-        //mark as used
-        if ( unUsedSpec[targetWSIndex] != ( USED ) )
+        const Geometry::IDetector_const_sptr det = groupWS->getDetector(i);
+        Geometry::DetectorGroup_const_sptr detGroup = boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det);
+        if (detGroup)
         {
-          unUsedSpec[targetWSIndex] = ( USED );
+          det_ids = detGroup->getDetectorIDs();
+
         }
+        else
+        {
+          det_ids.push_back(det->getID());
+        }
+    
+        for (auto dit = det_ids.begin(); dit != det_ids.end(); ++ dit)
+        {
+          //translate detectors to target det ws indexes
+          detid_t det_id=  *dit;
+          size_t targetWSIndex = detIdToWiMap[det_id];
+          targetWSIndexSet.insert(targetWSIndex);
+          //mark as used
+          if ( unUsedSpec[targetWSIndex] != ( USED ) )
+          {
+            unUsedSpec[targetWSIndex] = ( USED );
+          }
+        }
+      }
+      catch (Mantid::Kernel::Exception::NotFoundError)
+      {
+        //the detector was not found - don't add it
       }
     }
   }
@@ -673,6 +678,78 @@ void GroupDetectors2::processGroupingWorkspace(GroupingWorkspace_const_sptr grou
 }
 
 
+  /** Get groupings from a matrix workspace
+*  @param groupWS :: the matrix workspace to use
+*  @param workspace :: a pointer to the input workspace, used to get spectra indexes from numbers
+*  @param unUsedSpec :: the list of spectra indexes that have been not included in a group (so far)
+*/
+  void GroupDetectors2::processMatrixWorkspace(MatrixWorkspace_const_sptr groupWS,
+  MatrixWorkspace_const_sptr workspace, std::vector<int64_t> &unUsedSpec)
+{
+  detid2index_map detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap();
+  
+
+  typedef std::map<size_t,std::set<size_t>> Group2SetMapType;
+  Group2SetMapType group2WSIndexSetmap;
+
+  const size_t nspec=groupWS->getNumberHistograms();
+	for (size_t i=0;i<nspec;++i)
+	{
+    //read spectra from groupingws
+    size_t groupid = i;
+
+    if (group2WSIndexSetmap.find(groupid) == group2WSIndexSetmap.end())
+    {
+        //not found - create an empty set
+        group2WSIndexSetmap.insert(std::make_pair(groupid, std::set<size_t>()));
+    }
+    //get a reference to the set
+    std::set<size_t>& targetWSIndexSet = group2WSIndexSetmap[groupid];
+
+    //translate to detectors
+    std::vector<detid_t> det_ids;
+    try
+    {
+      const Geometry::IDetector_const_sptr det = groupWS->getDetector(i);
+
+      Geometry::DetectorGroup_const_sptr detGroup = boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det);
+
+      if (detGroup)
+      {
+        det_ids = detGroup->getDetectorIDs();
+
+        for (auto dit = det_ids.begin(); dit != det_ids.end(); ++ dit)
+        {
+          //translate detectors to target det ws indexes
+          detid_t det_id=  *dit;
+          size_t targetWSIndex = detIdToWiMap[det_id];
+          targetWSIndexSet.insert(targetWSIndex);
+          //mark as used
+          if ( unUsedSpec[targetWSIndex] != ( USED ) )
+          {
+            unUsedSpec[targetWSIndex] = ( USED );
+          }
+        }
+      }
+    }      
+    catch (Mantid::Kernel::Exception::NotFoundError)
+    {
+      //the detector was not found - don't add it
+    }
+  }
+
+  //Build m_GroupSpecInds (group -> list of ws indices)
+  for (auto dit = group2WSIndexSetmap.begin(); dit != group2WSIndexSetmap.end(); ++ dit)
+  {
+    size_t groupid = dit->first;
+    std::set<size_t>& targetWSIndexSet = dit->second;
+    std::vector<size_t> tempv;
+    tempv.assign( targetWSIndexSet.begin(), targetWSIndexSet.end() );
+    m_GroupSpecInds.insert(std::make_pair(groupid, tempv));
+  }
+      
+  return;
+}
 /** The function expects that the string passed to it contains an integer number,
 *  it reads the number and returns it
 *  @param line :: a line read from the file, we'll interpret this

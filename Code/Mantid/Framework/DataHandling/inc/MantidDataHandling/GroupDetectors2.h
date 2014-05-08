@@ -160,6 +160,8 @@ typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
                                                 std::vector<int64_t> &unUsedSpec);
   void processGroupingWorkspace(DataObjects::GroupingWorkspace_const_sptr groupWS,
                                                 API::MatrixWorkspace_const_sptr workspace, std::vector<int64_t> &unUsedSpec);
+  void processMatrixWorkspace(API::MatrixWorkspace_const_sptr groupWS,
+                                                API::MatrixWorkspace_const_sptr workspace, std::vector<int64_t> &unUsedSpec);
   /// used while reading the file turns the string into an integer number (if possible), white space and # comments ignored
   int readInt(std::string line);
 
