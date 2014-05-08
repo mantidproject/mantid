@@ -46,6 +46,9 @@ namespace MantidQt
       //flag query methods
       virtual bool getSaveFlag() const = 0;
       virtual bool getSaveAsFlag() const = 0;
+      virtual bool getAddRowFlag() const = 0;
+      virtual bool getDeleteRowFlag() const = 0;
+      virtual bool getProcessFlag() const = 0;
 
     };
   }

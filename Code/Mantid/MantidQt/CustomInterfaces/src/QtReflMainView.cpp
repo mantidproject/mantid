@@ -37,6 +37,9 @@ namespace MantidQt
       connect(ui.buttonSave, SIGNAL(clicked()),this, SLOT(saveButton()));
       connect(ui.buttonSaveAs, SIGNAL(clicked()),this, SLOT(saveAsButton()));
       connect(ui.buttonNew, SIGNAL(clicked()),this, SLOT(setNew()));
+      connect(ui.buttonAddRow, SIGNAL(clicked()),this, SLOT(addRowButton()));
+      connect(ui.buttonDeleteRow, SIGNAL(clicked()),this, SLOT(deleteRowButton()));
+      connect(ui.buttonProcess, SIGNAL(clicked()),this, SLOT(processButton()));
       setNew();
     }
 
@@ -69,6 +72,24 @@ namespace MantidQt
       m_presenter->notify();
     }
 
+    void QtReflMainView::addRowButton()
+    {
+      m_addRow_flag = true;
+      m_presenter->notify();
+    }
+
+    void QtReflMainView::deleteRowButton()
+    {
+      m_deleteRow_flag = true;
+      m_presenter->notify();
+    }
+
+    void QtReflMainView::processButton()
+    {
+      m_process_flag = true;
+      m_presenter->notify();
+    }
+
     bool QtReflMainView::askUserString()
     {
       bool ok;
@@ -84,6 +105,9 @@ namespace MantidQt
     {
       m_save_flag = false;
       m_saveAs_flag = false;
+      m_addRow_flag = false;
+      m_deleteRow_flag = false;
+      m_process_flag = false;
     }
   } // namespace CustomInterfaces
 } // namespace Mantid

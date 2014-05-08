@@ -34,6 +34,9 @@ private:
     MOCK_CONST_METHOD0(getUserString, std::string());
     MOCK_CONST_METHOD0(getSaveFlag, bool());
     MOCK_CONST_METHOD0(getSaveAsFlag, bool());
+    MOCK_CONST_METHOD0(getAddRowFlag, bool());
+    MOCK_CONST_METHOD0(getDeleteRowFlag, bool());
+    MOCK_CONST_METHOD0(getProcessFlag, bool());
     virtual ~MockView(){}
   };
 
@@ -52,6 +55,9 @@ private:
     MOCK_CONST_METHOD0(getUserString, std::string());
     MOCK_CONST_METHOD0(getSaveFlag, bool());
     MOCK_CONST_METHOD0(getSaveAsFlag, bool());
+    MOCK_CONST_METHOD0(getAddRowFlag, bool());
+    MOCK_CONST_METHOD0(getDeleteRowFlag, bool());
+    MOCK_CONST_METHOD0(getProcessFlag, bool());
     virtual ~FakeView(){}
   };
 

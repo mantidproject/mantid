@@ -181,6 +181,10 @@ namespace MantidQt
       {
         return findColumnName(section);
       }
+      else if (orientation == Qt::Vertical)
+      {
+        return QString::number(section + 1);
+      }
       return QVariant();
     }
 

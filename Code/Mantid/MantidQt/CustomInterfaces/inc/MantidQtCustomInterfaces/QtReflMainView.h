@@ -48,12 +48,20 @@ namespace MantidQt
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model);
       virtual bool askUserString();
       virtual std::string getUserString() const {return m_UserString;}
+
+      //notify flags
       virtual bool getSaveFlag() const {return m_save_flag;}
       virtual bool getSaveAsFlag() const {return m_saveAs_flag;}
+      virtual bool getAddRowFlag() const {return m_addRow_flag;}
+      virtual bool getDeleteRowFlag() const {return m_deleteRow_flag;}
+      virtual bool getProcessFlag() const {return m_process_flag;}
       virtual void clearNotifyFlags();
     protected:
       bool m_save_flag;
       bool m_saveAs_flag;
+      bool m_addRow_flag;
+      bool m_deleteRow_flag;
+      bool m_process_flag;
     private:
       virtual void initLayout();
       std::string m_UserString;
@@ -64,6 +72,9 @@ namespace MantidQt
         void setNew();
         void saveButton();
         void saveAsButton();
+        void addRowButton();
+        void deleteRowButton();
+        void processButton();
     };
 
 
