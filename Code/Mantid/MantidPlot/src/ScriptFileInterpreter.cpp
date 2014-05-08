@@ -251,6 +251,13 @@ void ScriptFileInterpreter::executeSelection(const Script::ExecutionMode mode)
   }
 }
 
+/**
+ */
+void ScriptFileInterpreter::clearVariables()
+{
+  m_runner->clearLocals();
+}
+
 /// Toggles the progress reports on/off
 void ScriptFileInterpreter::toggleProgressReporting(bool state)
 {
