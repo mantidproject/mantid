@@ -35,8 +35,16 @@ namespace CustomInterfaces
       alg->setProperty("FirstRun", m_view->firstRun());
       alg->setProperty("LastRun", m_view->lastRun());
       alg->setProperty("LogValue", m_view->log());
-      alg->setPropertyValue("OutputWorkspace", "__NotUsed");
+      alg->setProperty("Type", m_view->calculationType());
 
+      // If time limiting requested, set min/max times
+      if (auto timeRange = m_view->timeRange())
+      {
+        alg->setProperty("TimeMin", timeRange->first);
+        alg->setProperty("TimeMax", timeRange->second);
+      }
+
+      alg->setPropertyValue("OutputWorkspace", "__NotUsed");
       alg->execute();
 
       m_loadedData = alg->getProperty("OutputWorkspace");

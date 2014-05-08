@@ -7,8 +7,8 @@
 #include "MantidKernel/System.h"
 
 #include <QObject>
-
 #include <qwt_data.h>
+#include <boost/optional.hpp>
 
 using namespace Mantid::API;
 
@@ -54,6 +54,12 @@ namespace CustomInterfaces
     /// Returns the name of the log to use
     /// @return Log name
     virtual std::string log() const = 0;
+
+    /// @return Selected calculation type - "Integral" or "Differential"
+    virtual std::string calculationType() const = 0;
+
+    /// @return Selected integration time range, or nothing if limiting is disabled
+    virtual boost::optional< std::pair<double,double> > timeRange() const = 0;
 
   public slots:
     /// Performs any necessary initialization

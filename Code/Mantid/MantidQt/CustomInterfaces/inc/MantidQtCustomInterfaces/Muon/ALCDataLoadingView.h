@@ -53,6 +53,8 @@ namespace CustomInterfaces
     std::string firstRun() const;
     std::string lastRun() const;
     std::string log() const;
+    std::string calculationType() const;
+    boost::optional< std::pair<double,double> > timeRange() const;
 
     void setDataCurve(const QwtData& data);
     void displayError(const std::string &error);
