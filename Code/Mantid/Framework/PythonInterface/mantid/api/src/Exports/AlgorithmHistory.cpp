@@ -1,6 +1,7 @@
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/PropertyHistory.h"
+#include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -77,9 +78,11 @@ void export_AlgorithmHistory()
     
     .def("getChildAlgorithmHistory", &AlgorithmHistory::getChildAlgorithmHistory, 
          arg("index"),
+         return_value_policy<Policies::RemoveConstSharedPtr>(),
          "Returns the child algorithm at the given index in the history")
     
     .def("getChildHistories", &getChildrenAsList,
+         return_value_policy<Policies::RemoveConstSharedPtr>(),
          "Returns a list of child algorithm histories for this algorithm history.")
     
     .def("getProperties", &getPropertiesAsList,

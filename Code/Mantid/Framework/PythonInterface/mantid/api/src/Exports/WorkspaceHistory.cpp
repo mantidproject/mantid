@@ -1,6 +1,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -43,6 +44,7 @@ void export_WorkspaceHistory()
     
     .def("getAlgorithmHistory", &WorkspaceHistory::getAlgorithmHistory, 
           arg("index"),
+          return_value_policy<Policies::RemoveConstSharedPtr>(),
          "Returns the algorithm history at the given index in the history")
     
     .def("size", &WorkspaceHistory::size, 
