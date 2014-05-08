@@ -8,7 +8,9 @@ import mantid.simpleapi
 from mantid.kernel import FloatBoundedValidator,Direction
 from numpy import sqrt,floor
 
-class interval(object):
+class Interval(object):
+    """Simple class that provides check for overlapping intervals
+    """
     def __init__(self,minv,maxv):
         self.min=minv
         self.max=maxv
@@ -73,48 +75,51 @@ class SuggestTibCNCS(PythonAlgorithm):
         dtpulseminus=50
         dtpulseplus=1500
         
-        intervallist=[]
-        itinfminus=interval(tinf-dtinfminus,tinf)
-        itinfplus=interval(tinf-frame,tinf-frame+dtinfplus)
-        iframeedge=interval(tmin,tmin)
-        intervallist.append(itinfplus)
-        intervallist.append(iframeedge)
-        intervallist.append(itinfminus)
+        #Create intervals that cannot be used for TIB. For ease, 
+        #move everything to times lower than t_inf, make sure
+        #one doesn't overlap with the frame edge, then if the TIB
+        #interval is in the previous frame, jut move it up
+        
+        Intervallist=[]
+        Intervallist.append(Interval(tinf-dtinfminus,tinf)) #interval close to t_inf, on the lower side
+        Intervallist.append(Interval(tmin,tmin)) #intervaldenoting frame edge. This will make sure that one cannot get an interval overlapping t_min
+        Intervallist.append(Interval(tinf-frame,tinf-frame+dtinfplus))  #interval close to t_inf, on the upper side, but moved one frame down
         
         if tpulse+dtpulseplus<tmax:
-            itpulse=interval(tpulse-dtpulseminus,tpulse+dtpulseplus)
+            itpulse=Interval(tpulse-dtpulseminus,tpulse+dtpulseplus)
         else:
-            itpulse=interval(tpulse-dtpulseminus-frame,tpulse+dtpulseplus-frame)
+            itpulse=Interval(tpulse-dtpulseminus-frame,tpulse+dtpulseplus-frame)
         
-        if itpulse.overlap(interval(tinf,tinf)):
-            itpulse1=interval(itpulse.min,tinf)
-            itpulse2=interval(tinf-frame,itpulse.max+tinf-frame)
-            intervallist.append(itpulse1)
-            intervallist.append(itpulse2)
+        if itpulse.overlap(Interval(tinf,tinf)):
+            #if the prompt pulse overlaps with t_inf move the upper part one frame down 
+            Intervallist.append(Interval(itpulse.min,tinf))
+            Intervallist.append(Interval(tinf-frame,itpulse.max+tinf-frame))
         else:
             if tinf<itpulse.min:
-                itpulse=interval(itpulse.min-frame,itpulse.max-frame)
-            intervallist.append(itpulse)        
+                itpulse=Interval(itpulse.min-frame,itpulse.max-frame)
+            Intervallist.append(itpulse)        
         
+        #create the list of times to checked. These are the lower parts of the intervals 
         timestocheck=[]
-        for i in intervallist:
+        for i in Intervallist:
             if i.min>tinf-frame:
                 timestocheck.append(i.min)
         timestocheck.sort()
         timestocheck.reverse()
         
         for t in timestocheck:
-            tinterval=interval(t-dtib,t)
-            if all( not inter.overlap(tinterval) for inter in intervallist ):
-                tibmin=tinterval.min
-                tibmax=tinterval.max
+            tInterval=Interval(t-dtib,t)
+            if all( not inter.overlap(tInterval) for inter in Intervallist ):
+                tibmin=tInterval.min
+                tibmax=tInterval.max
                 break
-            tinterval=interval(t-dtibreduced,t)
-            if all( not inter.overlap(tinterval) for inter in intervallist ):
-                tibmin=tinterval.min
-                tibmax=tinterval.max
+            tInterval=Interval(t-dtibreduced,t)
+            if all( not inter.overlap(tInterval) for inter in Intervallist ):
+                tibmin=tInterval.min
+                tibmax=tInterval.max
                 break
-                
+        
+        #move to the data frame        
         if tibmin<tmin:
             tibmin+=frame
             tibmax+=frame    
