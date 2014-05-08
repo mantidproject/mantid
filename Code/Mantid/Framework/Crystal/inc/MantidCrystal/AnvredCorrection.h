@@ -115,7 +115,7 @@ private:
   std::vector<double> lamda_weight; ///< lmabda weights
   bool OnlySphericalAbsorption;
   bool ReturnTransmissionOnly;
-
+  bool useScaleFactors;
 };
 
 } // namespace Crystal

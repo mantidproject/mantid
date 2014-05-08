@@ -135,7 +135,8 @@ void AnvredCorrection::init()
      "If true, only return the transmission coefficient.");
   declareProperty("PowerLambda", 4.0,
     "Power of lamda ");
-
+  declareProperty("DetectorBankScaleFactors", false, "No scale factors if false (default).\n"
+     "If true, use fixed TOPAZ scale factors.");
 
   defineProperties();
 }
@@ -146,6 +147,7 @@ void AnvredCorrection::exec()
   m_inputWS = getProperty("InputWorkspace");
   OnlySphericalAbsorption = getProperty("OnlySphericalAbsorption");
   ReturnTransmissionOnly = getProperty("ReturnTransmissionOnly");
+  useScaleFactors = getProperty("DetectorBankScaleFactors");
   if (!OnlySphericalAbsorption)
   {
     const API::Run & run = m_inputWS->run();
@@ -190,6 +192,24 @@ void AnvredCorrection::exec()
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
   const V3D pos = m_inputWS->getInstrument()->getSource()->getPos()-samplePos;
   double L1 = pos.norm();
+  std::map<int, double> detScale;
+
+  if (useScaleFactors)
+  {
+    detScale[17] = 1.092114823;
+    detScale[18] = 0.869105443;
+    detScale[22] = 1.081377685;
+    detScale[26] = 1.055199489;
+    detScale[27] = 1.070308725;
+    detScale[28] = 0.886157884;
+    detScale[36] = 1.112773972;
+    detScale[37] = 1.012894506;
+    detScale[38] = 1.049384146;
+    detScale[39] = 0.890313805;
+    detScale[47] = 1.068553893;
+    detScale[48] = 0.900566426;
+    detScale[58] = 0.911249203;
+  }
 
   Progress prog(this,0.0,1.0,numHists);
   // Loop over the spectra
@@ -234,6 +254,21 @@ void AnvredCorrection::exec()
 
     Mantid::Kernel::Units::Wavelength wl;
     std::vector<double> timeflight;
+    int bank = 0;
+    double depth = 0.2;
+    double pathlength = 0.0;
+    std::string bankName = "";
+    if (useScaleFactors)
+    {
+	  bankName = det->getParent()->getParent()->getName();
+	  std::string bankNameStr = bankName;
+	  // Take out the "bank" part of the bank name and convert to an int
+	  bankNameStr.erase(remove_if(bankNameStr.begin(), bankNameStr.end(), not1(std::ptr_fun (::isdigit))), bankNameStr.end());
+	  Strings::convert(bankNameStr, bank);
+	  IComponent_const_sptr sample = inst->getSample();
+	  double cosA = inst->getComponentByName(bankName)->getDistance(*sample) / L2;
+	  pathlength = depth / cosA;
+    }
 
     // Loop through the bins in the current spectrum
     for (int64_t j = 0; j < specSize; j++)
@@ -251,6 +286,16 @@ void AnvredCorrection::exec()
       else
       {
         double value = this->getEventWeight(lambda, scattering);
+        if (useScaleFactors)
+        {
+		   // correct for the slant path throught the scintillator glass
+		   double mu = (9.614 * lambda) + 0.266;    // mu for GS20 glass
+		   double eff_center = 1.0 - std::exp(-mu * depth);  // efficiency at center of detector
+		   double eff_R = 1.0 - exp(-mu * pathlength);   // efficiency at point R
+		   double sp_ratio = eff_center / eff_R;  // slant path efficiency ratio
+		   if (detScale.find(bank) != detScale.end())
+				   value *= detScale[bank] * sp_ratio;
+        }
         Y[j] = Yin[j] * value;
         E[j] = Ein[j] * value;
       }
@@ -300,6 +345,24 @@ void AnvredCorrection::execEvent()
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
   const V3D pos = m_inputWS->getInstrument()->getSource()->getPos()-samplePos;
   double L1 = pos.norm();
+  std::map<int, double> detScale;
+
+  if (useScaleFactors)
+  {
+    detScale[17] = 1.092114823;
+    detScale[18] = 0.869105443;
+    detScale[22] = 1.081377685;
+    detScale[26] = 1.055199489;
+    detScale[27] = 1.070308725;
+    detScale[28] = 0.886157884;
+    detScale[36] = 1.112773972;
+    detScale[37] = 1.012894506;
+    detScale[38] = 1.049384146;
+    detScale[39] = 0.890313805;
+    detScale[47] = 1.068553893;
+    detScale[48] = 0.900566426;
+    detScale[58] = 0.911249203;
+  }
 
   Progress prog(this,0.0,1.0,numHists);
   // Loop over the spectra
@@ -342,6 +405,21 @@ void AnvredCorrection::execEvent()
 
     Mantid::Kernel::Units::Wavelength wl;
     std::vector<double> timeflight;
+    int bank = 0;
+    double depth = 0.2;
+    double pathlength = 0.0;
+    std::string bankName = "";
+    if (useScaleFactors)
+    {
+	  bankName = det->getParent()->getParent()->getName();
+	  std::string bankNameStr = bankName;
+	  // Take out the "bank" part of the bank name and convert to an int
+	  bankNameStr.erase(remove_if(bankNameStr.begin(), bankNameStr.end(), not1(std::ptr_fun (::isdigit))), bankNameStr.end());
+	  Strings::convert(bankNameStr, bank);
+	  IComponent_const_sptr sample = inst->getSample();
+	  double cosA = inst->getComponentByName(bankName)->getDistance(*sample) / L2;
+	  pathlength = depth / cosA;
+    }
 
     // multiplying an event list by a scalar value
     for (itev = events.begin(); itev != itev_end; ++itev)
@@ -350,6 +428,16 @@ void AnvredCorrection::execEvent()
       if (unitStr.compare("TOF") == 0)
         wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
       double value = this->getEventWeight(timeflight[0], scattering);
+      if (useScaleFactors)
+      {
+		// correct for the slant path throught the scintillator glass
+		double mu = (9.614 * timeflight[0]) + 0.266;    // mu for GS20 glass
+		double eff_center = 1.0 - std::exp(-mu * depth);  // efficiency at center of detector
+		double eff_R = 1.0 - exp(-mu * pathlength);   // efficiency at point R
+		double sp_ratio = eff_center / eff_R;  // slant path efficiency ratio
+		if (detScale.find(bank) != detScale.end())
+				value *= detScale[bank] * sp_ratio;
+      }
       timeflight.clear();
       itev->m_errorSquared = static_cast<float>(itev->m_errorSquared * value*value);
       itev->m_weight *= static_cast<float>(value);
