@@ -26,7 +26,6 @@ namespace
     colStitch->setPlotType(0);
 
     TableRow row = ws->appendRow();
-    row << "" << "" << "" << "" << "" << "" << "" << 0;
     return ws;
   }
 }
@@ -53,7 +52,25 @@ namespace MantidQt
     {
     }
 
+    void ReflBlankMainViewPresenter::save()
+    {
+      if (m_cache_name != "")
+      {
+        AnalysisDataService::Instance().addOrReplace(m_cache_name, boost::shared_ptr<ITableWorkspace>(m_model->clone()));
+      }
+      else
+      {
+        saveAs();
+      }
+    }
 
-
+    void ReflBlankMainViewPresenter::saveAs()
+    {
+      if (m_view->askUserString())
+      {
+        m_cache_name = m_view->getUserString();
+        save();
+      }
+    }
   } // namespace CustomInterfaces
 } // namespace Mantid

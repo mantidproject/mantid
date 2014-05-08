@@ -28,14 +28,40 @@ private:
   {
   public:
     MockView(){};
+    MOCK_METHOD0(clearNotifyFlags, void());
     MOCK_METHOD1(showTable, void(Mantid::API::ITableWorkspace_sptr));
+    MOCK_METHOD0(askUserString, bool());
+    MOCK_CONST_METHOD0(getUserString, std::string());
+    MOCK_CONST_METHOD0(getSaveFlag, bool());
+    MOCK_CONST_METHOD0(getSaveAsFlag, bool());
     virtual ~MockView(){}
   };
 
-  ITableWorkspace_sptr createWorkspace()
+  class FakeView : public ReflMainView
+  {
+  public:
+    FakeView(){};
+    MOCK_METHOD0(clearNotifyFlags, void());
+    virtual void showTable(Mantid::API::ITableWorkspace_sptr model)
+    {
+    TableRow row = model->appendRow();
+
+    row << "13464" << "0.6" << "13465" << "0.02" << "0.03" << "0.05" << "8" << 3;
+    }
+    MOCK_METHOD0(askUserString, bool());
+    MOCK_CONST_METHOD0(getUserString, std::string());
+    MOCK_CONST_METHOD0(getSaveFlag, bool());
+    MOCK_CONST_METHOD0(getSaveAsFlag, bool());
+    virtual ~FakeView(){}
+  };
+
+  ITableWorkspace_sptr createWorkspace(bool ADS = true)
   {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-
+    if (ADS)
+    {
+      AnalysisDataService::Instance().addOrReplace("TestWorkspace", ws);
+    }
     auto colRuns = ws->addColumn("str","Run(s)");
     auto colTheta = ws->addColumn("str","ThetaIn");
     auto colTrans = ws->addColumn("str","TransRun(s)");
@@ -109,7 +135,7 @@ private:
     colQmax->setPlotType(0);
     colDqq->setPlotType(0);
     colScale->setPlotType(0);
-    
+
     if(longer)
     {
       auto colStitch = ws->addColumn("int","StitchGroup");
@@ -144,6 +170,93 @@ public:
     EXPECT_CALL(mockView, showTable(_)).Times(1);
     ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
+
+  void testSave()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, getSaveFlag()).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, getSaveAsFlag()).WillRepeatedly(Return(false));
+    EXPECT_CALL(mockView, clearNotifyFlags()).Times(1);
+    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    presenter.notify();
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
+
+  void testEditSave()
+  {
+    FakeView fakeView;
+    EXPECT_CALL(fakeView, getSaveFlag()).WillRepeatedly(Return(true));
+    EXPECT_CALL(fakeView, getSaveAsFlag()).WillRepeatedly(Return(false));
+    EXPECT_CALL(fakeView, clearNotifyFlags()).Times(1);
+    ReflLoadedMainViewPresenter presenter(createWorkspace(),&fakeView);
+    TS_ASSERT_EQUALS(AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace")->rowCount(),1);
+    presenter.notify();
+    ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 2);
+    TS_ASSERT_EQUALS(ws->String(1,0), "13464");
+    TS_ASSERT_EQUALS(ws->Int(1,7), 3);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&fakeView));
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
+
+  void testSaveAs()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, getSaveAsFlag()).Times(2).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, getSaveFlag()).WillRepeatedly(Return(false));
+    EXPECT_CALL(mockView, getUserString()).Times(1).WillRepeatedly(Return("Workspace"));
+    EXPECT_CALL(mockView, askUserString()).Times(2).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, clearNotifyFlags()).Times(2);
+    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    presenter.notify();
+    presenter.notify();
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("Workspace");
+  }
+
+  void testSaveProcess()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, getSaveAsFlag()).WillOnce(Return(true)).WillOnce(Return(true)).WillRepeatedly(Return(false));
+    EXPECT_CALL(mockView, getSaveFlag()).Times(1).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, getUserString()).Times(1).WillRepeatedly(Return("Workspace"));
+    EXPECT_CALL(mockView, askUserString()).Times(2).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, clearNotifyFlags()).Times(3);
+    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    presenter.notify();
+    presenter.notify();
+    presenter.notify();
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("Workspace");
+  }
+
+  void testDualFlags()
+  {
+    MockView mockView;
+    EXPECT_CALL(mockView, getSaveAsFlag()).Times(1).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, getSaveFlag()).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, getUserString()).Times(1).WillRepeatedly(Return("Workspace"));
+    EXPECT_CALL(mockView, askUserString()).Times(1).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, clearNotifyFlags()).Times(1);
+    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    presenter.notify();
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("Workspace");
+  }
+
+  void testBadWorkspaceName()
+  {
+    MockView mockView;
+    TS_ASSERT_THROWS(ReflLoadedMainViewPresenter presenter(createWorkspace(false),&mockView), std::runtime_error&);
   }
 
   void testBadWorkspaceType()

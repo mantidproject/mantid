@@ -12,7 +12,7 @@ namespace MantidQt
     {
     }
 
-    ReflMainViewPresenter::ReflMainViewPresenter(ITableWorkspace_sptr model, ReflMainView* view): m_view(view), m_model(model)
+    ReflMainViewPresenter::ReflMainViewPresenter(ITableWorkspace_sptr model, ReflMainView* view): m_view(view), m_model(model), m_cache_name("")
     {
     }
 
@@ -23,7 +23,16 @@ namespace MantidQt
 
     void ReflMainViewPresenter::notify()
     {
+      if(m_view->getSaveAsFlag())
+      {
+        saveAs();
+      }
+      else if(m_view->getSaveFlag())
+      {
+        save();
+      }
 
+      m_view->clearNotifyFlags();
     }
 
     void ReflMainViewPresenter::load()

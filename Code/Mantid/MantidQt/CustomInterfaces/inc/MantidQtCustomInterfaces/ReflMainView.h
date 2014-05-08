@@ -39,7 +39,13 @@ namespace MantidQt
       ReflMainView();
       virtual ~ReflMainView() = 0;
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model) = 0;
-    private:
+      virtual void clearNotifyFlags() = 0;
+      virtual std::string getUserString() const = 0;
+      virtual bool askUserString() =0;
+
+      //flag query methods
+      virtual bool getSaveFlag() const = 0;
+      virtual bool getSaveAsFlag() const = 0;
 
     };
   }

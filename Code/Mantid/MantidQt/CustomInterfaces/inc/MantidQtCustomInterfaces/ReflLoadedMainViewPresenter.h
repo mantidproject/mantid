@@ -39,6 +39,9 @@ namespace MantidQt
       ReflLoadedMainViewPresenter(Mantid::API::ITableWorkspace_sptr model, ReflMainView* view);
       ReflLoadedMainViewPresenter(std::string model, ReflMainView* view);
       virtual ~ReflLoadedMainViewPresenter();
+    protected:
+      virtual void save();
+      virtual void saveAs();
     };
 
 

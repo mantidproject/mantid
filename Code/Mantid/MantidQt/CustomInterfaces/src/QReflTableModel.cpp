@@ -117,18 +117,52 @@ namespace MantidQt
     */
     QVariant QReflTableModel::data(const QModelIndex &index, int role) const
     {
-
       if (role == Qt::TextAlignmentRole)
+      {
         return Qt::AlignRight;
-
-      if( role != Qt::DisplayRole )
+      }
+      else if( role != Qt::DisplayRole && role != Qt::EditRole)
+      {
         return QVariant();
-
+      }
       const int colNumber = index.column();
       const int rowNumber = index.row();
 
       this->updateDataCache(rowNumber);
       return m_dataCache[colNumber];
+    }
+
+    /**
+    Overrident setData method, allows view to set data for an index and role.
+    @param index : For which to extract the data
+    @param role : Role mode
+    @returns booean true if sucessful, false if unsucessful.
+    */
+    bool QReflTableModel::setData ( const QModelIndex & index, const QVariant & value, int role)
+    {
+      if (index.isValid() && role == Qt::EditRole)
+      {
+        const int colNumber = index.column();
+        const int rowNumber = index.row();
+
+        if (colNumber == 7)
+        {
+          m_tWS->Int(rowNumber, 7) = value.toInt();
+        }
+        else
+        {
+          m_tWS->String(rowNumber, colNumber) = value.toString().toStdString();
+        }
+
+        this->updateDataCache(rowNumber);
+
+        QModelIndex topLeft = createIndex(0, 0);
+        QModelIndex bottomRight = createIndex(rowCount(index) - 1, columnCount(index) - 1);
+        emit dataChanged(topLeft, bottomRight);
+
+        return true;
+      }
+      return false;
     }
 
     /**
@@ -157,7 +191,7 @@ namespace MantidQt
     Qt::ItemFlags QReflTableModel::flags(const QModelIndex &index) const
     {
       if (!index.isValid()) return 0;
-      return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+      return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
     }
 
   } // namespace CustomInterfaces

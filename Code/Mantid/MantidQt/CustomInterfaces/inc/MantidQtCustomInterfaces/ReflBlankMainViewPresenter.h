@@ -39,7 +39,9 @@ namespace MantidQt
 
       ReflBlankMainViewPresenter(ReflMainView* view);
       virtual ~ReflBlankMainViewPresenter();
-
+    protected:
+      virtual void save();
+      virtual void saveAs();
     };
 
 

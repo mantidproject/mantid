@@ -46,12 +46,24 @@ namespace MantidQt
       QtReflMainView(QWidget *parent = 0);
       virtual ~QtReflMainView();
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model);
+      virtual bool askUserString();
+      virtual std::string getUserString() const {return m_UserString;}
+      virtual bool getSaveFlag() const {return m_save_flag;}
+      virtual bool getSaveAsFlag() const {return m_saveAs_flag;}
+      virtual void clearNotifyFlags();
+    protected:
+      bool m_save_flag;
+      bool m_saveAs_flag;
     private:
       virtual void initLayout();
+      std::string m_UserString;
       boost::scoped_ptr<IReflPresenter> m_presenter;
       Ui::reflMainWidget ui;
       private slots:
         void setModel(QString name);
+        void setNew();
+        void saveButton();
+        void saveAsButton();
     };
 
 
