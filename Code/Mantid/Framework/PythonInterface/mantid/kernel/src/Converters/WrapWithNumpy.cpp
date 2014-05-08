@@ -28,9 +28,7 @@ namespace Mantid { namespace PythonInterface
         void markReadOnly(PyArrayObject *arr)
         {
           #if NPY_API_VERSION >= 0x00000007 //(1.7)
-	    // this is how they do it in ndarrayobject.h:PyArray_XDECREF_ERR
-	    PyArrayObject *base = (PyArrayObject*)PyArray_BASE(arr);
-	    PyArray_CLEARFLAGS(base, NPY_ARRAY_WRITEABLE);
+	    PyArray_CLEARFLAGS(arr, NPY_ARRAY_WRITEABLE);
           #else
             arr->flags &= ~NPY_WRITEABLE;
           #endif  
