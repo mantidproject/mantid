@@ -80,10 +80,10 @@ class SuggestTibCNCS(PythonAlgorithm):
         #one doesn't overlap with the frame edge, then if the TIB
         #interval is in the previous frame, jut move it up
         
-        Intervallist=[]
-        Intervallist.append(Interval(tinf-dtinfminus,tinf)) #interval close to t_inf, on the lower side
-        Intervallist.append(Interval(tmin,tmin)) #intervaldenoting frame edge. This will make sure that one cannot get an interval overlapping t_min
-        Intervallist.append(Interval(tinf-frame,tinf-frame+dtinfplus))  #interval close to t_inf, on the upper side, but moved one frame down
+        intervalList=[]
+        intervalList.append(Interval(tinf-dtinfminus,tinf)) #interval close to t_inf, on the lower side
+        intervalList.append(Interval(tmin,tmin)) #intervaldenoting frame edge. This will make sure that one cannot get an interval overlapping t_min
+        intervalList.append(Interval(tinf-frame,tinf-frame+dtinfplus))  #interval close to t_inf, on the upper side, but moved one frame down
         
         if tpulse+dtpulseplus<tmax:
             itpulse=Interval(tpulse-dtpulseminus,tpulse+dtpulseplus)
@@ -92,16 +92,16 @@ class SuggestTibCNCS(PythonAlgorithm):
         
         if itpulse.overlap(Interval(tinf,tinf)):
             #if the prompt pulse overlaps with t_inf move the upper part one frame down 
-            Intervallist.append(Interval(itpulse.min,tinf))
-            Intervallist.append(Interval(tinf-frame,itpulse.max+tinf-frame))
+            intervalList.append(Interval(itpulse.min,tinf))
+            intervalList.append(Interval(tinf-frame,itpulse.max+tinf-frame))
         else:
             if tinf<itpulse.min:
                 itpulse=Interval(itpulse.min-frame,itpulse.max-frame)
-            Intervallist.append(itpulse)        
+            intervalList.append(itpulse)        
         
         #create the list of times to checked. These are the lower parts of the intervals 
         timestocheck=[]
-        for i in Intervallist:
+        for i in intervalList:
             if i.min>tinf-frame:
                 timestocheck.append(i.min)
         timestocheck.sort()
@@ -109,12 +109,12 @@ class SuggestTibCNCS(PythonAlgorithm):
         
         for t in timestocheck:
             tInterval=Interval(t-dtib,t)
-            if all( not inter.overlap(tInterval) for inter in Intervallist ):
+            if all( not inter.overlap(tInterval) for inter in intervalList ):
                 tibmin=tInterval.min
                 tibmax=tInterval.max
                 break
             tInterval=Interval(t-dtibreduced,t)
-            if all( not inter.overlap(tInterval) for inter in Intervallist ):
+            if all( not inter.overlap(tInterval) for inter in intervalList ):
                 tibmin=tInterval.min
                 tibmax=tInterval.max
                 break
