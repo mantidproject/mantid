@@ -811,6 +811,10 @@ namespace Algorithms
     *  @param spectrum :: The spectrum index of the peak (is actually the WorkspaceIndex)
     *  @param center_guess :: A guess of the X-value of the center of the peak, in whatever units of the X-axis of the workspace.
     *  @param fitWidth :: A guess of the full-width-half-max of the peak, in # of bins.
+    *  @param hasleftpeak :: flag to show that there is a specified peak to its left
+    *  @param leftpeakcentre :: centre of left peak if existed
+    *  @param hasrightpeak :: flag to show that there is a specified peak to its right
+    *  @param rightpeakcentre :: centre of the right peak if existed
     */
   void FindPeaks::fitPeakGivenFWHM(const API::MatrixWorkspace_sptr &input, const int spectrum,
                                    const double center_guess, const int fitWidth,
