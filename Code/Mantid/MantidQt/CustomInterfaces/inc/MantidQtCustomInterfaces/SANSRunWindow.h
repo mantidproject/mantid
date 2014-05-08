@@ -139,6 +139,8 @@ private:
   void addSpectrumMasksToTable(const QString & mask_string, const QString & det_name);
   /// Add a time mask string to the mask table
   void addTimeMasksToTable(const QString & mask_string, const QString & det_name);
+  /// Append the given information as a new row to the masking table.
+  void appendRowToMaskTable(const QString & type, const QString & detector, const QString & details);
   void readNumberOfEntries(const QString & RunStep, MantidWidgets::MWRunFiles * const output);
   QString readUserFileGUIChanges(const States type);
   QString readSampleObjectGUIChanges();

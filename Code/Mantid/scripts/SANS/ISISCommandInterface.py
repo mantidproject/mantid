@@ -56,6 +56,13 @@ def issueWarning(msg):
 def _refresh_singleton():
     ReductionSingleton.clean(isis_reducer.ISISReducer)
     ReductionSingleton().remove_settings()
+
+def Clean():
+    """
+    An exposed command to allow cleaning of the reducer, and any related
+    settings.
+    """
+    _refresh_singleton()
                 
 def UserPath(path):
     """
@@ -421,7 +428,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             # correct position defined by its get_beam_center. (ticket #5942)
 
             # first copy the settings
-            ReductionSingleton.replace(ReductionSingleton().settings())
+            ReductionSingleton.replace(ReductionSingleton().cur_settings())
 
             # for the LOQ instrument, if the beam centers are different, we have to reload the data.
             if (ReductionSingleton().instrument._NAME == 'LOQ' and 
@@ -771,7 +778,7 @@ def PhiRanges(phis, plot=True):
             #RenameWorkspace(reducedResult,'bob')
             #calculated.append(reducedResult)
             calculated.append(ReductionSingleton()._reduce())
-            ReductionSingleton.replace(ReductionSingleton().settings())
+            ReductionSingleton.replace(ReductionSingleton().cur_settings())
     finally:
         _refresh_singleton()
     

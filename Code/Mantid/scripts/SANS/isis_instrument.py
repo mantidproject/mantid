@@ -1,12 +1,17 @@
+import datetime
 import math
+import os
+import re
+import sys
+import time
+import xml.dom.minidom
+
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup, Workspace
+from mantid.api import WorkspaceGroup, Workspace, ExperimentInfo
 from mantid.kernel import Logger
 import SANSUtility as su
-import re
-sanslog = Logger("SANS")
 
-import sys
+sanslog = Logger("SANS")
 
 class BaseInstrument(object):
     def __init__(self, instr_filen=None):
@@ -400,6 +405,8 @@ class ISISInstrument(BaseInstrument):
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
         super(ISISInstrument, self).__init__(instr_filen=filename)
+
+        self.idf_path = self._definition_file
 
         #the spectrum with this number is used to normalize the workspace data
         self._incid_monitor = int(self.definition.getNumberParameter(
