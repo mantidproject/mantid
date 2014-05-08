@@ -14,6 +14,7 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include <boost/assign/list_of.hpp>
+#include <boost/function.hpp>
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -290,13 +291,13 @@ public:
     size_t begin = 1;
     size_t end = 5;
     MDHistoWorkspaceIterator iterator(ws.get(), NULL, begin, end);
-    
+
     TS_ASSERT(iterator.isWithinBounds(begin));
     TS_ASSERT(iterator.isWithinBounds(end-1));
     TS_ASSERT(!iterator.isWithinBounds(end));
   }
 
-  void test_neighours_1d()
+  void do_test_neighbours_1d(boost::function<std::vector<size_t>(MDHistoWorkspaceIterator*) > findNeighbourMemberFunction)
   {
     const size_t nd = 1;
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
@@ -315,7 +316,7 @@ public:
      ^
      |
      */
-    std::vector<size_t> neighbourIndexes = it->findNeighbourIndexes();
+    std::vector<size_t> neighbourIndexes = findNeighbourMemberFunction(it);
     TS_ASSERT_EQUALS(1, neighbourIndexes.size());
     // should be on edge
     TSM_ASSERT( "Neighbour at index 0 is 1", doesContainIndex(neighbourIndexes, 1));
@@ -323,11 +324,11 @@ public:
     // Go to intermediate position
     /*
      0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
-     ^
-     |
+         ^
+         |
      */
     it->next();
-    neighbourIndexes = it->findNeighbourIndexes();
+    neighbourIndexes = findNeighbourMemberFunction(it);
     TS_ASSERT_EQUALS(2, neighbourIndexes.size());
     // should be on edge
     TSM_ASSERT( "Neighbours at index 1 includes 0", doesContainIndex(neighbourIndexes, 0));
@@ -336,16 +337,33 @@ public:
     // Go to last position
     /*
      0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
-     ^
-     |
+                                         ^
+                                         |
      */
     it->jumpTo(9);
-    neighbourIndexes = it->findNeighbourIndexes();
+    neighbourIndexes = findNeighbourMemberFunction(it);
     TSM_ASSERT( "Neighbour at index 9 is 8", doesContainIndex(neighbourIndexes, 8));
 
   }
 
-  void test_neighbours_2d()
+  void test_neighbours_1d_face_touching()
+  {
+    boost::function<std::vector<size_t>(MDHistoWorkspaceIterator*) > findNeighbourIndexesFaceTouching = &MDHistoWorkspaceIterator::findNeighbourIndexesFaceTouching;
+    do_test_neighbours_1d(findNeighbourIndexesFaceTouching);
+  }
+
+  void test_neighours_1d_vertex_touching()
+  {
+    boost::function<std::vector<size_t>(MDHistoWorkspaceIterator*) > findNeighbourIndexesVertexTouching = &MDHistoWorkspaceIterator::findNeighbourIndexes;
+    do_test_neighbours_1d(findNeighbourIndexesVertexTouching);
+  }
+
+  void test_neighbours_2d_face_touching()
+  {
+    throw std::runtime_error("Test not implemented yet");
+  }
+
+  void test_neighbours_2d_vertex_touching()
   {
     const size_t nd = 2;
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
@@ -471,7 +489,8 @@ public:
     it->jumpTo(1);
     neighbourIndexes = it->findNeighbourIndexes();
     TS_ASSERT_EQUALS(11, neighbourIndexes.size());
-    std::vector<size_t> expected_neighbours = boost::assign::list_of(0)(2)(4)(5)(6)(16)(17)(18)(20)(21)(22)(22).convert_to_container<std::vector<size_t>>();
+    std::vector<size_t> expected_neighbours = boost::assign::list_of(0)(2)(4)(5)(6)(16)(17)(18)(20)(21)(
+        22)(22).convert_to_container<std::vector<size_t>>();
     for (auto i = expected_neighbours.begin(); i != expected_neighbours.end(); ++i)
     {
       TS_ASSERT(doesContainIndex(neighbourIndexes, *i));
@@ -482,7 +501,8 @@ public:
     neighbourIndexes = it->findNeighbourIndexes();
     TSM_ASSERT_EQUALS("Should have 3^n-1 neighbours here", 26, neighbourIndexes.size());
     // Is completely enclosed
-    expected_neighbours = boost::assign::list_of(0)(1)(2)(4)(5)(6)(8)(9)(10)(16)(17)(18)(22)(20)(24)(25)(26)(32)(33)(34)(37)(38)(36)(41)(40)(42).convert_to_container<std::vector<size_t>>();
+    expected_neighbours = boost::assign::list_of(0)(1)(2)(4)(5)(6)(8)(9)(10)(16)(17)(18)(22)(20)(24)(25)(
+        26)(32)(33)(34)(37)(38)(36)(41)(40)(42).convert_to_container<std::vector<size_t>>();
 
     for (auto i = expected_neighbours.begin(); i != expected_neighbours.end(); ++i)
     {
@@ -494,7 +514,8 @@ public:
     neighbourIndexes = it->findNeighbourIndexes();
     TS_ASSERT_EQUALS(7, neighbourIndexes.size());
     // Is completely enclosed
-    expected_neighbours = boost::assign::list_of(42)(43)(46)(47)(58)(59)(62).convert_to_container<std::vector<size_t>>();
+    expected_neighbours = boost::assign::list_of(42)(43)(46)(47)(58)(59)(62).convert_to_container<
+        std::vector<size_t>>();
 
     for (auto i = expected_neighbours.begin(); i != expected_neighbours.end(); ++i)
     {
@@ -527,7 +548,7 @@ public:
     // 125^3 workspace = about 2 million
     ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 125);
     // 10^3 workspace = 21000
-    small_ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0,3,30);
+    small_ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 30);
   }
 
   /** ~Two million iterations */
