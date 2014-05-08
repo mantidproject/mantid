@@ -207,7 +207,6 @@ set( TEST_FILES CreateMDWorkspaceAlgDialogTest.h
                 WorkspaceInADSTest.h
                 RawFileMementoTest.h
                 IO_MuonGroupingTest.h
-                ReflMainViewPresenterTest.h
                 ReflNullMainViewPresenterTest.h
                 ReflBlankMainViewPresenterTest.h
                 ReflLoadedMainViewPresenterTest.h
