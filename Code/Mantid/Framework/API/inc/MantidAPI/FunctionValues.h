@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FunctionDomain.h"
-#include "MantidAPI/IFunctionValues.h"
 
 #include <vector>
 
@@ -40,7 +39,7 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL FunctionValues: public IFunctionValues
+class MANTID_API_DLL FunctionValues
 {
 public:
   /// Default constructor.

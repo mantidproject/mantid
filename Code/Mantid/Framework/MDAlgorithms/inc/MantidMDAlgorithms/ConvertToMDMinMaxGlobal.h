@@ -1,16 +1,16 @@
-#ifndef MANTID_MDALGORITHMS_CONVERTTOMDHELPER2_H_
-#define MANTID_MDALGORITHMS_CONVERTTOMDHELPER2_H_
+#ifndef MANTID_MDALGORITHMS_CONVERTTOMD_MINMAXGLOBAL_H_
+#define MANTID_MDALGORITHMS_CONVERTTOMD_MINMAXGLOBAL_H_
 
 #include "MantidKernel/System.h"
-#include "MantidMDAlgorithms/ConvertToMDParent.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
 namespace MDAlgorithms
 {
 
-  /** ConvertToMDHelper : Algorithm to calculate limits for ConvertToMD
+  /** ConvertToMDMinMaxGlobal : Algorithm to calculate limits for ConvertToMD transformation which can be observed using an instrument which covers whole MD-space 
+      The current version knows 
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -32,24 +32,20 @@ namespace MDAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ConvertToMDHelper2  : public ConvertToMDParent
+  class DLLExport ConvertToMDMinMaxGlobal  : public API::Algorithm
   {
   public:
-    ConvertToMDHelper2();
-    virtual ~ConvertToMDHelper2();
+    ConvertToMDMinMaxGlobal();
+    virtual ~ConvertToMDMinMaxGlobal();
     
     virtual const std::string name() const;
-    virtual int version() const{return 2;}
-  protected: // for testing 
-     void findMinMaxValues(MDEvents::MDWSDescription &targWSDescr,
-                            MDEvents::MDTransfInterface  *const qTransf,Kernel::DeltaEMode::Type dEMode,
-                            std::vector<double> &MinValues,std::vector<double> &MaxValues);
+    virtual int version() const;
+    virtual const std::string category() const;
+
   private:
     virtual void initDocs();
-    void exec();
     void init();
-    /// pointer to the input workspace;
-    Mantid::DataObjects::Workspace2D_sptr m_MinMaxWS2D;
+    void exec();
 
 
   };

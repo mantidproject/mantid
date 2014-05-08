@@ -628,10 +628,8 @@ namespace LiveData
   {
     // grab the time from the packet - we'll use it down in initializeWorkspacePart2()
     // Note that we need this value even if we otherwise ignore the packet
-    if (m_workspaceInitialized == false)
-    {
-      m_dataStartTime = timeFromPacket( pkt);
-    }
+    m_dataStartTime = timeFromPacket( pkt);
+
     
     // Check to see if we should process the rest of this packet (depending
     //  on what the user selected for start up options, the SMS might be
@@ -659,7 +657,57 @@ namespace LiveData
                         << NoRun << " (NoRun), but was " << m_status << std::endl;
       }
 
-      m_status = BeginRun;
+      if (m_workspaceInitialized)
+      {
+        m_status = BeginRun;
+      }
+      else
+      {
+        // Pay close attention here - this gets complicated!
+        //
+        // Setting m_status to "Running" is something of a little white lie.  We are
+        // in fact at the beginning of a run.  However, since we haven't yet
+        // initialized the workspace, this must be one of the first packets we've
+        // actually received.  (Probably, the user selected the option to replay
+        // history starting from the start of the current run.) Normally, when
+        // we pkt->status() is NEW_RUN, we'd set the m_pauseNetRead flag to true
+        // (see below).  That would cause us to halt reading packets until the
+        // flag was reset down in runStatus().  Having m_status set to BeginRun
+        // would also cause runStatus() to reset all the data we need to initialize
+        // the workspace in preparation for a new run.  In most cases, this is exactly
+        // what we want.
+        //
+        // HOWEVER, in this particular case, we can't set m_pauseNetRead.  If we do, we
+        // will not read the Geometry and BeamMonitor packets that have the data we
+        // need to complete the workspace initialization. Until we complete the
+        // initialization, the extractData() function won't complete successfully and
+        // the runStatus() function will thus never be called.  Since m_pauseNetRead
+        // is reset down in runStatus(), the whole live listener subsystem basically
+        // deadlocks.
+        //
+        // So, we can't set m_pauseNetRead.  That's OK, because we don't actually have
+        // any data from a previous run that we need to keep separate from this run
+        // (which was the whole purpose of m_pauseNetRead).  However, when the
+        // runStatus() function sees m_status == BeginRun (or EndRun), it sets
+        // m_workspaceInitialized to false and clears all the old data we used to
+        // initialize the workspace.  It does this because it thinks a run transition
+        // has happened and new initialization data will be arriving shortly.  As
+        // such, it implicitly assumes that m_pauseNetRead was set and we stopped
+        // reading packets.  In this particular case, we can't set m_pauseNetRead,
+        // and we're guaranteed to have initialized the workspace before runStatus()
+        // would ever be called. (See the previous paragraph.)  As such, the
+        // initialization data that runStatus() would clear is actually the data
+        // that we need.
+
+        // So, by setting m_status to Running, we avoid runStatus() wiping out our
+        // workspace initialization and everything runs as it should.
+
+        // It's debatable whether runStatus() should retain that implicit asumption of
+        // m_pauseNetRead being true, or should explicitly check its state in addition
+        // to m_status.  Either way, you're still going to need several paragraphs of
+        // comments to explain what the heck is going on.
+        m_status = Running;
+      }
 
       // Add the run_number property
       if ( haveRunNumber )
@@ -681,8 +729,12 @@ namespace LiveData
         m_deferredRunDetailsPkt = boost::shared_ptr<ADARA::RunStatusPkt>(new ADARA::RunStatusPkt(pkt));
       }
 
-      // See detailed comments below for what this flag does
-      m_pauseNetRead = true;
+      // See detailed comments below for what the m_pauseNetRead flag does and the
+      // comments above about m_status for why we don't always set it.
+      if (m_workspaceInitialized)
+      {
+        m_pauseNetRead = true;
+      }
 
     }
     else if (pkt.status() == ADARA::RunStatus::END_RUN)
@@ -1373,6 +1425,26 @@ namespace LiveData
       // Note: we can get away with not locking a mutex here because the
       // background thread is still paused.
       m_workspaceInitialized = false;
+
+      // These next 3 are what we check for in readyForInitPart2()
+      m_instrumentXML.clear();
+      m_instrumentName.clear();
+      if (m_status == EndRun)
+      {
+        // Don't clear this for BeginRun because it was set up in the parser
+        // for the RunStatus packet that signaled the beginning of a new
+        // run and is thus already set to the correct value.
+        m_dataStartTime = Kernel::DateAndTime();
+      }
+
+      // NOTE: It's probably not necessary to clear the instrument name
+      // and instrument XML (which is the geometry info) because these
+      // values don't ever change.  (Or at least, changing them requires
+      // changing the SMS config and restarting it and that would cause us
+      // to restart the live listener algorithm.)  That said, SMS is
+      // guaranteed to send this info out with every run transition, so
+      // we might as well ensure that we always use up-to-date data.
+
       m_nameMap.clear();
       initWorkspacePart1();
 

@@ -1007,11 +1007,14 @@ def DisplayMask(mask_worksp=None):
         samp = LAST_SAMPLE 
         
         if samp:
-            counts_data = '__DisplayMasked_tempory_wksp'
             CloneWorkspace(InputWorkspace=samp, OutputWorkspace=mask_worksp)
+            CloneWorkspace(InputWorkspace=samp + "_monitors",
+                           OutputWorkspace=mask_worksp + "_monitors")
 
             if su.isEventWorkspace(samp):
-                su.fromEvent2Histogram(mask_worksp)                
+                su.fromEvent2Histogram(mask_worksp, mtd[mask_worksp + "_monitors"])
+                
+            counts_data = '__DisplayMasked_tempory_wksp'
             Integration(InputWorkspace=mask_worksp,OutputWorkspace= counts_data)
 
         else:

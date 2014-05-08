@@ -55,12 +55,11 @@ double CostFuncLeastSquares::val() const
   }
   else
   {
-    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(m_values);
-    if (!simpleValues)
+    if (!m_values)
     {
-      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
     }
-    addVal(m_domain,simpleValues);
+    addVal(m_domain,m_values);
   }
 
   // add penalty
@@ -186,12 +185,11 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
   }
   else
   {
-    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(m_values);
-    if (!simpleValues)
+    if (!m_values)
     {
-      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
     }
-    addValDerivHessian(m_function,m_domain,simpleValues,evalFunction,evalDeriv,evalHessian);
+    addValDerivHessian(m_function,m_domain,m_values,evalFunction,evalDeriv,evalHessian);
   }
 
   // Add constraints penalty

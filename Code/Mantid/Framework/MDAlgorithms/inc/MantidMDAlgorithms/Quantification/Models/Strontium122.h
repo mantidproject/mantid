@@ -52,6 +52,8 @@ namespace Mantid
       int m_twinType;
       /// MultEps attribute
       bool m_multEps;
+    public:
+      Strontium122();
     };
 
   }

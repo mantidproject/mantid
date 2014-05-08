@@ -705,7 +705,7 @@ def sum_files(inst_name, accumulator, files):
 
          for filename in files:
               print 'Summing run ',filename,' to workspace ',accumulator
-              temp = common.load_run(inst_name,filename, force=False)
+              temp = common.load_run(inst_name,filename, force=False,load_with_workspace=Reducer.load_monitors_with_workspace)
 
               if accum_name in mtd: # add current workspace to the existing one
                   if not isinstance(accumulator,api.Workspace):
@@ -718,7 +718,7 @@ def sum_files(inst_name, accumulator, files):
 
          return accumulator
     else:
-        temp = common.load_run(inst_name,files, force=False)
+        temp = common.load_run(inst_name,files, force=False,load_with_workspace=Reducer.load_monitors_with_workspace)
         accumulator=RenameWorkspace(InputWorkspace=temp,OutputWorkspace=accum_name)
         return accumulator;
 
