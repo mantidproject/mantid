@@ -567,7 +567,9 @@ namespace Algorithms
       {
         // Not enough peaks have been found.
         // Output warning
-        g_log.debug() << "Spectra " << wi << " has 0 parameter for it.  Set to bad_offset." << ".\n";
+        std::stringstream outss;
+        outss << "Spectra " << wi << " has 0 parameter for it.  Set to bad_offset." ;
+        g_log.debug(outss.str());
         fr.offset = BAD_OFFSET;
         fr.fitoffsetstatus = "no peaks";
       }
@@ -577,10 +579,15 @@ namespace Algorithms
     fr.mask = 0.0;
     if (std::abs(fr.offset) > m_maxOffset)
     {
+      std::stringstream msgss;
+      if (fr.fitoffsetstatus == "success")
+        msgss << "exceed max offset. " << "offset = " << fr.offset;
+      else
+        msgss << fr.fitoffsetstatus << ". " << "offset = " << fr.offset;
+      fr.fitoffsetstatus = msgss.str();
+
       fr.mask = 1.0;
       fr.offset = 0.0;
-      if (fr.fitoffsetstatus == "success")
-        fr.fitoffsetstatus = "exceed max offset";
     }
 
     return fr;
@@ -884,6 +891,7 @@ namespace Algorithms
                                "referenced peaks' positions. ");
 
     std::vector<double> vec_widthDivPos;
+    std::vector<double> vec_offsets;
 
     for (size_t i = 0; i < peakslist->rowCount(); ++i)
     {
@@ -911,18 +919,6 @@ namespace Algorithms
         {
           std::stringstream dbss;
           dbss << " wi = " << wi << " c = " << centre << " out of fit window ";
-          g_log.debug(dbss.str());
-          continue;
-        }
-      }
-      else
-      {
-        // if no fit window, then offset is too big
-        double offset = fabs(peakPositionRef[i]/centre - 1);
-        if (offset > m_maxOffset)
-        {
-          std::stringstream dbss;
-          dbss << " wi = " << wi << " c = " << centre << " exceeds maximum offset. ";
           g_log.debug(dbss.str());
           continue;
         }
@@ -962,9 +958,23 @@ namespace Algorithms
       if (height < 0.5 * std::sqrt(height + background))
         continue;
 
+
+      // - calcualte offsets as to determine the (z-value)
+      double offset = fabs(peakPositionRef[i]/centre - 1);
+      if (offset > m_maxOffset)
+      {
+        std::stringstream dbss;
+        dbss << " wi = " << wi << " c = " << centre << " exceeds maximum offset. ";
+        g_log.debug(dbss.str());
+        continue;
+      }
+      else vec_offsets.push_back(offset);
+
       // (g) calculate width/pos as to determine the (z-value) for constant "width" - (delta d)/d
       double widthdevpos = width/centre;
       vec_widthDivPos.push_back(widthdevpos);
+
+
 
       g_log.debug() << " h:" << height << " c:" << centre << " w:" << (width/(2.*std::sqrt(2.*std::log(2.))))
                     << " b:" << background << " chisq:" << chi2 << "\n";
@@ -980,9 +990,10 @@ namespace Algorithms
     // Remove by Z-score on delta d/d
     std::vector<size_t> banned;
     std::vector<double> Zscore = getZscore(vec_widthDivPos);
+    std::vector<double> Z_offset = getZscore(vec_offsets);
     for (size_t i = 0; i < peakPosFitted.size(); ++i)
     {
-      if (Zscore[i] > 2.0)
+      if (Zscore[i] > 2.0 || Z_offset[i] > 2.0)
       {
         g_log.debug() << "Banning peak at " << peakPosFitted[i] << " in wkspindex = (no show)" // << wi
                       << " sigma/d = " << vec_widthDivPos[i] << "\n";
