@@ -93,6 +93,7 @@ namespace Crystal
     std::string filename = getPropertyValue("Filename");
     PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
     std::vector<Peak> peaks = ws->getPeaks();
+    inst = ws->getInstrument();
 
 	// We cannot assume the peaks have bank type detector modules, so we have a string to check this
 	std::string bankPart = "?";
@@ -101,8 +102,37 @@ namespace Crystal
     typedef std::map<int, std::vector<size_t> > bankMap_t;
     typedef std::map<int, bankMap_t> runMap_t;
     std::set<int> uniqueBanks;
-    runMap_t runMap;
+    // cppcheck-suppress syntaxError
+    std::string grouping = "bank";
+    if (inst->getName() == "WISH") grouping = "WISHpanel0";
+    PRAGMA_OMP(parallel for schedule(dynamic, 1) )
+    for (int num = 0; num < 300; ++num)
+    {
+        PARALLEL_START_INTERUPT_REGION
+        std::ostringstream mess;
+        mess<< grouping<<num;
+        IComponent_const_sptr comp = inst->getComponentByName(mess.str(), 5);
+        if (!comp)continue;
+        int bank = 0;
+        std::string bankName = comp->getName();
+        if (bankName.size() <= 4)
+        {
+          continue;
+        }
+  	    // Save the "bank" part once to check whether it really is a bank
+  	    if( bankPart == "?")  bankPart = bankName.substr(0,4);
+        // Take out the "bank" part of the bank name and convert to an int
+  	    if( bankPart == "bank")bankName = bankName.substr(4, bankName.size()-4);
+  	    else if( bankPart == "WISH")bankName = bankName.substr(9, bankName.size()-9);
+  	    Strings::convert(bankName, bank);
 
+        PARALLEL_CRITICAL(GroupNames)
+        uniqueBanks.insert(bank);
+        PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+
+    runMap_t runMap;
     for (size_t i=0; i < peaks.size(); ++i)
     {
       Peak & p = peaks[i];
@@ -123,11 +153,8 @@ namespace Crystal
 
       // Save in the map
       runMap[run][bank].push_back(i);
-      // Track unique bank numbers
-      uniqueBanks.insert(bank);
     }
 
-    inst = ws->getInstrument();
     if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
 
 	if( bankPart != "bank" && bankPart != "WISH" && bankPart != "?" ) {
@@ -165,8 +192,19 @@ namespace Crystal
     out << "7 "<< std::setw( 10 )  ;
     out <<   std::setprecision( 4 ) <<  std::fixed <<  ( l1*100 ) ;
     out << std::setw( 12 ) <<  std::setprecision( 3 ) <<  std::fixed  ;
-    // Time offset of 0.00 for now
-    out << "0.000" <<  std::endl;
+    // Time offset from property
+    const API::Run & run = ws->run();
+    double T0 = 0.0;
+    if ( run.hasProperty("T0") )
+    {
+      Kernel::Property* prop = run.getProperty("T0");
+      T0 = boost::lexical_cast<double,std::string>(prop->value());
+      if(T0 != 0)
+      {
+         g_log.notice()<<"T0 = " << T0 << std::endl;
+      }
+    }
+    out << T0 <<  std::endl;
 
 
     // ============================== Save .detcal info =========================================

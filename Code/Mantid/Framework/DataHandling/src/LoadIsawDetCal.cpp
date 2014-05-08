@@ -99,7 +99,7 @@ namespace DataHandling
   void LoadIsawDetCal::init()
   {
   declareProperty(
-    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, 
+    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::InOut,
                                            boost::make_shared<InstrumentValidator>()),
                             "The workspace containing the geometry to be calibrated." );
 
@@ -206,8 +206,13 @@ namespace DataHandling
         //mT0 and time of flight are both in microsec
         IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
         alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+        alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
         alg1->setProperty("Offset", mT0);
         alg1->executeAsChildAlg();
+        inputW = alg1->getProperty("OutputWorkspace");
+        // set T0 in the run parameters
+        API::Run & run = inputW->mutableRun();
+        run.addProperty<double>("T0", mT0, true);
       }
 
       if(line[0] != '5') continue;
@@ -308,7 +313,7 @@ namespace DataHandling
 
       } 
     } 
-
+    setProperty("InputWorkspace", inputW);
 
     return;
   }
