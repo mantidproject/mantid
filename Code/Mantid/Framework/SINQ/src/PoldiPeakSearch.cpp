@@ -100,7 +100,9 @@ MantidVec PoldiPeakSearch::getNeighborSums(MantidVec correlationCounts) const
 
     size_t n = 1;
     std::vector<size_t> validIndices(validCounts);
-    std::generate(validIndices.begin(), validIndices.end(), [&n] () { return n++; });
+    for(size_t i = 0; i < validCounts; ++i) {
+        validIndices[i] = n++;
+    }
 
     MantidVec summedNeighborCounts;
     summedNeighborCounts.reserve(validCounts);
