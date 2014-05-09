@@ -51,26 +51,33 @@ private:
 	void exec();
 
 	std::map<int, int> findElasticPeakPositions(
-			const DataObjects::Workspace2D_sptr inputWS,
 			const std::vector<int> &spectraIndices,
 			const std::vector<int> &channelIndices);
 
 	void estimateFWHM(const Mantid::MantidVec& spec, double& center,
 			double& sigma, double& height, double& minX, double& maxX);
 
-	bool doFitGaussianPeak(DataObjects::Workspace2D_sptr, int workspaceindex,
-			double& center, double& sigma, double& height, double startX,
-			double endX);
-	std::pair <int,double> findAverageEppAndEpTof(const DataObjects::Workspace2D_sptr inputWS, const std::map<int, int>& eppMap);
+	bool doFitGaussianPeak(int workspaceindex, double& center, double& sigma,
+			double& height, double startX, double endX);
+	std::pair<int, double> findAverageEppAndEpTof(
+			const std::map<int, int>& eppMap);
 
-	double getL1(const API::MatrixWorkspace_sptr& workspace);
-	double getL2(const API::MatrixWorkspace_sptr& workspace, int detId);
-	double calculateTOF(double distance,double wavelength);
+	double getL1(API::MatrixWorkspace_const_sptr workspace);
+	double getL2(API::MatrixWorkspace_const_sptr, int detId);
+	double calculateTOF(double distance, double wavelength);
 	bool areEqual(double a, double b, double epsilon);
-	template<typename T> T getPropertyFromRun(const DataObjects::Workspace2D_sptr inputWS, std::string propertyName);
+	template<typename T> T getPropertyFromRun(
+			API::MatrixWorkspace_const_sptr inputWS, std::string propertyName);
 	int roundUp(double value);
+	std::vector<double> makeTofAxis(int epp, double epTof, size_t size,
+			double channelWidth);
+	void setTofInWS(const std::vector<double> &tofAxis,API::MatrixWorkspace_sptr outputWS);
 
-	std::vector<double> makeTofAxis(int epp, double epTof, size_t size, double channelWidth);
+	/// The user selected (input) workspace
+	// API::MatrixWorkspace_const_sptr m_inputWS;
+	DataObjects::Workspace2D_sptr m_inputWS;
+	/// The output workspace, maybe the same as the input one
+	API::MatrixWorkspace_sptr m_outputWS;
 };
 
 } // namespace Algorithms

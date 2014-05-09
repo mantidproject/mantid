@@ -53,16 +53,16 @@ public:
 		; );
 		TS_ASSERT(alg.isExecuted());
 
-		// Retrieve the workspace from data service. TODO: Change to your desired type
-		Workspace_sptr ws;
-		TS_ASSERT_THROWS_NOTHING(
-				ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
-						outWSName));
-		TS_ASSERT(ws);
-		if (!ws)
+		auto outWS = AnalysisDataService::Instance().retrieveWS<
+				API::MatrixWorkspace>(outWSName);
+
+		TS_ASSERT(outWS);
+		if (!outWS)
 			return;
 
-		// TODO: Check the results
+		// Check the results
+		TS_ASSERT_DELTA(*(outWS->dataX(1).begin()), 31463.8,0.1);
+		TS_ASSERT_DELTA(*(outWS->dataX(1).end() - 1), 34463.8,0.1)
 
 		// Remove workspace from the data service.
 		AnalysisDataService::Instance().remove(outWSName);
@@ -75,20 +75,22 @@ private:
 		const size_t nHist = 10; //testWS->getNumberHistograms();
 		const size_t nBins = 101; //testWS->blocksize();
 		// int nHist, int nBins, bool includeMonitors = false,
-        // bool startYNegative = false, bool isHistogram = true, const std::string& instrumentName = std::string("testInst")
+		// bool startYNegative = false, bool isHistogram = true, const std::string& instrumentName = std::string("testInst")
 		DataObjects::Workspace2D_sptr testWS =
-				WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nHist, nBins, false,
-						false, true,  std::string("testInstEmpty"));
+				WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+						nHist, nBins, false, false, true,
+						std::string("testInstEmpty"));
 		testWS->getAxis(0)->setUnit("Empty");
 		API::Run & run = testWS->mutableRun();
-		run.addProperty<double>("wavelength",5.0,true); //overwrite
-		run.addProperty<double>("channel_width",30.0,true); //overwrite
-
+		run.addProperty<double>("wavelength", 5.0, true); //overwrite
+		run.addProperty<double>("channel_width", 30.0, true); //overwrite
 
 		for (size_t i = 0; i < nHist; ++i) {
 			for (size_t j = 0; j < nBins - 1; ++j) {
 				// gaussian peak centred at 50,and h=10
-				testWS->dataY(i)[j] = 10 * exp(	-pow((static_cast<double>(j) - 50), 2)
+				testWS->dataY(i)[j] = 10
+						* exp(
+								-pow((static_cast<double>(j) - 50), 2)
 										/ (2 * pow(1.5, 2)));
 			}
 		}
