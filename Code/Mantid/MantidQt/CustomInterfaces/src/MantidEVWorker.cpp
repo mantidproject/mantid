@@ -257,7 +257,8 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
  *
  *  @return true if FindPeaksMD completed successfully.
  */
-bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
+bool MantidEVWorker::findPeaks( const std::string & ev_ws_name,
+		                        const std::string & md_ws_name,
                                 const std::string & peaks_ws_name,
                                       double        max_abc,
                                       size_t        num_to_find,
@@ -274,9 +275,44 @@ bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
     alg->setProperty("MaxPeaks",(int64_t)num_to_find);
     alg->setProperty("DensityThresholdFactor",min_intensity);
     alg->setProperty("OutputWorkspace", peaks_ws_name );
+    const auto& ADS = AnalysisDataService::Instance();
 
     if ( alg->execute() )
+    {
+		bool use_monitor_counts = true;
+    	double proton_charge = 0.0;
+    	double monitor_count = 0.0;
+		if (use_monitor_counts)
+		{
+		  Mantid::API::MatrixWorkspace_sptr mon_ws = ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_monitors" );
+		  IAlgorithm_sptr int_alg = AlgorithmManager::Instance().create("Integration");
+		  int_alg->setProperty("InputWorkspace", mon_ws );
+		  int_alg->setProperty("RangeLower", 1000.0 );
+		  int_alg->setProperty("RangeUpper", 12500.0 );
+		  int_alg->setProperty("OutputWorkspace", ev_ws_name + "_integrated_monitor" );
+		  int_alg->execute();
+		  Mantid::API::MatrixWorkspace_sptr int_ws = ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
+		  monitor_count = int_ws->readY(0)[0];
+		  std::cout << "Beam monitor counts used for scaling = " << monitor_count << "\n";
+		}
+		else
+		{
+		  Mantid::API::MatrixWorkspace_sptr ev_ws = ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+		  double proton_charge = ev_ws->run().getProtonCharge()  * 1000.0;  // get proton charge
+		  std::cout << "Proton charge x 1000 used for scaling = " << proton_charge << "\n";
+		}
+
+		IPeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
+		for (int iPeak=0; iPeak < peaks_ws->getNumberPeaks(); iPeak++)
+		{
+		  Mantid::API::IPeak& peak = peaks_ws->getPeak( iPeak);
+		  if (use_monitor_counts)
+			peak.setMonitorCount( monitor_count );
+		  else
+			peak.setMonitorCount( proton_charge );
+		}
       return true;
+    }
   }
   catch( std::exception &e)
   {
@@ -374,8 +410,9 @@ bool MantidEVWorker::loadIsawPeaks( const std::string & peaks_ws_name,
  */
 bool MantidEVWorker::saveIsawPeaks( const std::string & peaks_ws_name,
                                     const std::string & file_name,
-                                          bool          append  )
+                                          bool          append )
 {  
+
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SaveIsawPeaks");
   alg->setProperty("InputWorkspace", peaks_ws_name );
   alg->setProperty("AppendFile", append );
