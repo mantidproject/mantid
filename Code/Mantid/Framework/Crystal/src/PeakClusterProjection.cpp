@@ -14,6 +14,12 @@ using namespace Mantid::API;
 
 namespace
 {
+  /**
+   * Free function to generate a peak transform from a MDWS.
+   *
+   * @param mdWS
+   * @return A peak transform matching the workspace configuration.
+   */
   PeakTransform_sptr makePeakTransform(IMDHistoWorkspace const * const mdWS)
   {
     const SpecialCoordinateSystem mdCoordinates = mdWS->getSpecialCoordinateSystem();
@@ -54,6 +60,11 @@ namespace Crystal
     if(coordinateSystem == None)
     {
       throw std::invalid_argument("Input image IMDHistoWorkspace must have a known special coordinate system.");
+    }
+
+    if(mdWS->getNumDims() < 3)
+    {
+      throw std::invalid_argument("Need to have 3 or more dimension in the workspace.");
     }
 
     // Make a peak transform so that we can understand a peak in the context of the mdworkspace coordinate setup.
