@@ -118,6 +118,7 @@ public slots:
   virtual bool setQObject(QObject*, const char*) { return false; }
   virtual bool setInt(int, const char*) { return false; }
   virtual bool setDouble(double, const char*) { return false; }
+  virtual void clearLocals() {}
   
 signals:
   /// A signal defining when this script has started executing
