@@ -104,6 +104,7 @@ namespace Crystal
     std::set<int> uniqueBanks;
     std::string grouping = "bank";
     if (inst->getName() == "WISH") grouping = "WISHpanel0";
+    // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int num = 0; num < 300; ++num)
     {
