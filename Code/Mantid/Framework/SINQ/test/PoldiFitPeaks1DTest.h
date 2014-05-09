@@ -59,7 +59,7 @@ public:
     {
         TestablePoldiFitPeaks1D poldiFitPeaks;
         poldiFitPeaks.m_backgroundTemplate = m_backgroundTestFunction;
-        poldiFitPeaks.m_profileTies = "";
+        poldiFitPeaks.initialize();
         poldiFitPeaks.setPeakFunction(m_profileTestFunction);
 
         IFunction_sptr totalProfile = poldiFitPeaks.getPeakProfile(m_testPeak);
@@ -94,6 +94,29 @@ public:
         TS_ASSERT_EQUALS(newPeak->fwhm(PoldiPeak::AbsoluteQ), m_testPeak->fwhm(PoldiPeak::AbsoluteQ));
     }
 
+    void testProperties()
+    {
+        PoldiFitPeaks1D fitPeaks1D;
+        fitPeaks1D.initialize();
+
+        TS_ASSERT_EQUALS(fitPeaks1D.propertyCount(), 8);
+
+        std::vector<Property *> properties = fitPeaks1D.getProperties();
+        std::set<std::string> names;
+
+        for(size_t i = 0; i < properties.size(); ++i) {
+            names.insert(properties[i]->name());
+        }
+
+        TS_ASSERT_EQUALS(names.count("InputWorkspace"), 1);
+        TS_ASSERT_EQUALS(names.count("FwhmMultiples"), 1);
+        TS_ASSERT_EQUALS(names.count("PeakFunction"), 1);
+        TS_ASSERT_EQUALS(names.count("PoldiPeakTable"), 1);
+        TS_ASSERT_EQUALS(names.count("OutputWorkspace"), 1);
+        TS_ASSERT_EQUALS(names.count("ResultTableWorkspace"), 1);
+        TS_ASSERT_EQUALS(names.count("FitCharacteristicsWorkspace"), 1);
+        TS_ASSERT_EQUALS(names.count("FitPlotsWorkspace"), 1);
+    }
 
 private:
     PoldiPeak_sptr m_testPeak;
