@@ -135,6 +135,7 @@ void GroupDetectors2::init()
                                           boost::make_shared<CommonBinsValidator>()),"The name of the input 2D workspace");
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name of the output workspace");
+
   std::vector<std::string> fileExts(2);
   fileExts[0] = ".map";
   fileExts[1] = ".xml";
@@ -165,6 +166,7 @@ void GroupDetectors2::init()
     "This can be either a normal workspace or a grouping workspace, but they must be from the same instrument.\n"
     "Detector ids are used to match up the spectra to be grouped.\n"
     "If this option is selected all file and list options will be ignored.");
+
 }
 
 void GroupDetectors2::exec()
@@ -845,7 +847,7 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::ifstream &File,
     {// it makes no sense to continue reading the file, we'll stop here
       throw std::invalid_argument(std::string("Bad number of spectra specification or spectra list near line number ") + boost::lexical_cast<std::string>(lineNum));
     }
-    // make regular progress reports and check for a cancellastion notification
+    // make regular progress reports and check for a cancellation notification
     if ( (m_GroupSpecInds.size() % INTERVAL) == 1 )
     {
       fileReadProg( m_GroupSpecInds.size(), specs2index.size() );

@@ -661,7 +661,89 @@ public:
   }
 
 
+  void test_GroupingWorkspaceUsingMatrixWrokspace()
+  {
+    int bankWidth = 8;
+    int numBanks = 2;
+    int numSpectraInBank = bankWidth * bankWidth;
+    int targetSpectraCount = 1 + (numBanks-1)*numSpectraInBank;
+    std::string spectraToGroup = "0-"+boost::lexical_cast<std::string>((numSpectraInBank-1));
+    
+    std::string nxsWSname("GroupingWorkspaceUsingMatrixWrokspace_ws");
+    std::string groupWSName(nxsWSname + "_GROUP");
+    std::string outputws = nxsWSname + "_grouped";
 
+    // Create the fake event workspace
+    EventWorkspace_sptr inputW = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(numBanks, bankWidth);
+    AnalysisDataService::Instance().addOrReplace(nxsWSname, inputW);
+    
+    //-------- Check on the input workspace ---------------
+    TS_ASSERT(inputW);
+    if (!inputW) return;
+
+    //Create an axis for each pixel. 
+    for (size_t pix=0; pix < inputW->getNumberHistograms(); pix++)
+    {
+      cow_ptr<Mantid::MantidVec> axis;
+      Mantid::MantidVec& xRef = axis.access();
+      xRef.resize(5);
+      for (int i = 0; i < 5; ++i)
+        xRef[i] = static_cast<double>(1) + i*1.0;
+      xRef[4] = 1e6;
+      //Set an X-axis
+      inputW->setX(pix, axis);
+      inputW->getEventList(pix).addEventQuickly( TofEvent(1000.0) );
+    }
+
+    // ------------ Create a grouped workspace using GroupDetectors -------------
+    GroupDetectors2 groupAlg1;
+    groupAlg1.initialize();
+    TS_ASSERT_THROWS_NOTHING( groupAlg1.setPropertyValue("InputWorkspace", nxsWSname) );
+    TS_ASSERT_THROWS_NOTHING( groupAlg1.setPropertyValue("OutputWorkspace", groupWSName) );
+
+    //This fake calibration file was generated using DiffractiongroupAlg1sing2Test_helper.py
+    TS_ASSERT_THROWS_NOTHING( groupAlg1.setProperty("WorkspaceIndexList", spectraToGroup) ); //group first bank
+    
+    TS_ASSERT_THROWS_NOTHING( groupAlg1.setProperty("KeepUngroupedSpectra", true));
+    TS_ASSERT_THROWS_NOTHING( groupAlg1.setProperty("PreserveEvents", false) );
+    //OK, run the algorithm
+    TS_ASSERT_THROWS_NOTHING( groupAlg1.execute(); );
+    TS_ASSERT( groupAlg1.isExecuted() );
+
+    MatrixWorkspace_const_sptr outputGrp;
+    TS_ASSERT_THROWS_NOTHING( outputGrp = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(groupWSName) );
+    if (!outputGrp) return;
+
+    TS_ASSERT_EQUALS( outputGrp->getNumberHistograms(), targetSpectraCount);
+
+    // ------------ Create a grouping workspace by name -------------
+    GroupDetectors2 groupAlg;
+    groupAlg.initialize();
+    TS_ASSERT_THROWS_NOTHING( groupAlg.setPropertyValue("InputWorkspace", nxsWSname) );
+    TS_ASSERT_THROWS_NOTHING( groupAlg.setPropertyValue("OutputWorkspace", outputws) );
+
+    //This fake calibration file was generated using DiffractiongroupAlgsing2Test_helper.py
+    TS_ASSERT_THROWS_NOTHING( groupAlg.setPropertyValue("CopyGroupingFromWorkspace", groupWSName) );
+    
+    TS_ASSERT_THROWS_NOTHING( groupAlg.setProperty("KeepUngroupedSpectra", true));
+    TS_ASSERT_THROWS_NOTHING( groupAlg.setProperty("PreserveEvents", false) );
+    //OK, run the algorithm
+    TS_ASSERT_THROWS_NOTHING( groupAlg.execute(); );
+    TS_ASSERT( groupAlg.isExecuted() );
+
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(outputws) );
+    if (!output) return;
+
+    //check output - should match template
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), outputGrp->getNumberHistograms());
+    TS_ASSERT_EQUALS( output->getDetector(0)->getID(), outputGrp->getDetector(0)->getID());
+    
+    
+    AnalysisDataService::Instance().remove(nxsWSname);
+    AnalysisDataService::Instance().remove(groupWSName);
+    AnalysisDataService::Instance().remove(outputws);
+ }
 
   private:
     const std::string inputWS, outputBase, inputFile;
