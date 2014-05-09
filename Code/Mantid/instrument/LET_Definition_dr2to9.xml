@@ -664,6 +664,7 @@
   <id start="12470001" end="12471024" />
   <id start="12480001" end="12481024" />
  </idlist>
+
   <!-- DETECTOR PARAMETERS -->
   <component-link name="monitors">
    <parameter name="DelayTime">
@@ -685,7 +686,4 @@
   </component-link>
 
 
-
  </instrument>
-
-
