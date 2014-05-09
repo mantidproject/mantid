@@ -15,6 +15,7 @@ set ( TEST_PY_FILES
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   GetEiT0atSNSTest.py
+  IndirectILLReductionTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
