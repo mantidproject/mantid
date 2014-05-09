@@ -68,10 +68,10 @@ private:
     double m_error;
 };
 
-UncertainValue operator*(double d, const UncertainValue &v);
-UncertainValue operator/(double d, const UncertainValue &v);
-UncertainValue operator+(double d, const UncertainValue &v);
-UncertainValue operator-(double d, const UncertainValue &v);
+UncertainValue MANTID_SINQ_DLL operator*(double d, const UncertainValue &v);
+UncertainValue MANTID_SINQ_DLL operator/(double d, const UncertainValue &v);
+UncertainValue MANTID_SINQ_DLL operator+(double d, const UncertainValue &v);
+UncertainValue MANTID_SINQ_DLL operator-(double d, const UncertainValue &v);
 
 }
 }

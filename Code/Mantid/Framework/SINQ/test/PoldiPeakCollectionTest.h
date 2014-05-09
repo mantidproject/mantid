@@ -58,7 +58,7 @@ public:
 
     void testConstruction()
     {
-        TS_ASSERT_THROWS_NOTHING(PoldiPeakCollection newCollection());
+        TS_ASSERT_THROWS_NOTHING(PoldiPeakCollection newCollection);
 
         TS_ASSERT_THROWS_NOTHING(PoldiPeakCollection fromTable(m_dummyData));
     }
