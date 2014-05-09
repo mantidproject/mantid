@@ -137,15 +137,18 @@ namespace Algorithms
     std::string peaktype, bkgdtype;
     processAlgProperties(peaktype, bkgdtype);
 
+    // Create functions
     createFunction(peaktype, bkgdtype);
 
+    // Process parameter table
     processParamTable();
 
     API::MatrixWorkspace_sptr outputWS = createOutputWorkspace();
     this->setProperty("OutputWorkspace", outputWS);
 
     // Generate peaks
-    generatePeaks(outputWS, m_funcParamWS, m_peakFunction, m_newWSFromParent);
+    generatePeaksNew(outputWS);
+    // generatePeaks(outputWS, m_funcParamWS, m_peakFunction, m_newWSFromParent);
 
     return;
   }
@@ -174,85 +177,95 @@ namespace Algorithms
 
 
     // Special properties related
-    double maxchi2 = this->getProperty("MaxAllowedChi2");
-    double numWidths = this->getProperty("NumberWidths");
-    bool ignorewidepeaks = getProperty("IgnoreWidePeaks");
+    m_maxChi2 = this->getProperty("MaxAllowedChi2");
+    m_numPeakWidth = this->getProperty("NumberWidths");
+    // bool ignorewidepeaks = getProperty("IgnoreWidePeaks");
 
     return;
   }
 
-  void GeneratePeaks::generatePeaksNew()
+  void GeneratePeaks::generatePeaksNew(API::MatrixWorkspace_sptr dataWS)
   {
-    size_t numpeaks = m_peakParamWS->rowCount();
-    size_t icolchi2 = m_numColumns - 1;
+    size_t numpeaks = m_funcParamWS->rowCount();
+    size_t icolchi2 = m_funcParamWS->columnCount() - 1;
+    size_t numpeakparams = m_peakFunction->nParams();
+    size_t numbkgdparams = m_bkgdFunction->nParams();
 
     // Create data structure for all peaks functions
     std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > > functionmap;
     std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >::iterator mapiter;
 
+    //--------------------------------------------------------------------------------------------
     // Go through the table workspace to create peak/background functions
+    //--------------------------------------------------------------------------------------------
     for (size_t ipeak = 0; ipeak < numpeaks; ++ipeak)
     {
+      // Spectrum
+      int wsindex = m_funcParamWS->cell<int>(ipeak, 0);
+
       // Ignore peak with large chi^2/Rwp
-      double chi2 = m_paramTableWS->cell<double>(ipeak, icolchi2);
-      if (chi2 > m_maxChi2) continue;
+      double chi2 = m_funcParamWS->cell<double>(ipeak, icolchi2);
+      if (chi2 > m_maxChi2)
+      {
+        g_log.notice() << "Skip Peak " << ipeak << " (chi^2 " << chi2 << " > " << m_maxChi2 << "\n";
+        continue;
+      }
+      else if (chi2 < 0.)
+      {
+        g_log.notice() << "Skip Peak " << ipeak << " (chi^2 " << chi2 << " < 0 )" << "\n";
+        continue;
+      }
 
       // Set up function
-      if (m_useRarParameter)
+      if (m_useRawParameter)
       {
         for (size_t p = 0; p < numpeakparams; ++p)
         {
-          std::string parname = m_funcParamNames[p];
-          double parvalue = m_paramTableWS->cell<double>(ipeak, p+1);
+          std::string parname = m_funcParameterNames[p];
+          double parvalue = m_funcParamWS->cell<double>(ipeak, p+1);
           m_peakFunction->setParameter(parname, parvalue);
         }
         if (m_genBackground)
         {
           for (size_t p = 0; p < numbkgdparams; ++p)
           {
-            std::string parname = m_funcParamNames[p+numpeakparams];
-            double parvalue = m_paramTableWS->cell<double>(ipeak, p+1+numpeakparams);
+            std::string parname = m_funcParameterNames[p+numpeakparams];
+            double parvalue = m_funcParamWS->cell<double>(ipeak, p+1+numpeakparams);
             m_bkgdFunction->setParameter(parname, parvalue);
           }
         }
       }
       else
       {
-        double tmpheight = m_paramTableWS->cell<double>(ipeak, i_height);
-        double tmpwidth = m_paramTableWS->cell<double>(ipeak, i_width);
-        double tmpcentre = m_paramTableWS->cell<double>(ipeak, i_centre);
+        double tmpheight = m_funcParamWS->cell<double>(ipeak, i_height);
+        double tmpwidth = m_funcParamWS->cell<double>(ipeak, i_width);
+        double tmpcentre = m_funcParamWS->cell<double>(ipeak, i_centre);
         m_peakFunction->setHeight(tmpheight);
         m_peakFunction->setCentre(tmpcentre);
-        m_peakFunction->setWidth(tmpwidth);
+        m_peakFunction->setFwhm(tmpwidth);
 
         if (m_genBackground)
         {
-          double tmpa0 = m_paramTableWS->cell<double>(ipeak, i_a0);
-          double tmpa1 = m_paramTableWS->cell<double>(ipeak, i_a1);
-          double tmpa2 = m_paramTableWS->cell<double>(ipeak, i_a2);
+          double tmpa0 = m_funcParamWS->cell<double>(ipeak, i_a0);
+          double tmpa1 = m_funcParamWS->cell<double>(ipeak, i_a1);
+          double tmpa2 = m_funcParamWS->cell<double>(ipeak, i_a2);
           m_bkgdFunction->setParameter("A0", tmpa0);
           m_bkgdFunction->setParameter("A1", tmpa1);
           m_bkgdFunction->setParameter("A2", tmpa2);
         }
       }
 
+      double centre = m_peakFunction->centre();
+      // double fwhm = m_peakFunction->fwhm();
+
       // Generate function to plot
-      API::ICompositeFunction_sptr plotfunc = boost::make_shared<CompositeFunction>();
+      API::CompositeFunction_sptr plotfunc = boost::make_shared<CompositeFunction>();
       plotfunc->addFunction(m_peakFunction);
       if (m_genBackground)
         plotfunc->addFunction(m_bkgdFunction);
 
-      // Determine boundary
-      double centre = vec[i].first;
-      double fwhm = getPeakFunction()->fwhm();
-
-      // Get to know workspace index
-      // specid_t specid = static_cast<specid_t>(getTableValue(peakparameters, "spectrum", ipk));
-      specid_t wsindex;
-      if (newWSFromParent)
-        wsindex = specid;
-      else
-        wsindex = mSpectrumMap[specid];
+      // Clone to another function
+      API::IFunction_sptr clonefunction = plotfunc->clone();
 
       // Existed?
       mapiter = functionmap.find(wsindex);
@@ -265,88 +278,115 @@ namespace Algorithms
       }
 
       // Generate peak function
-      if (chi2 > maxchi2)
-      {
-        g_log.notice() << "Skip Peak " << ipk << " (chi^2 " << chi2 << " > " << maxchi2 << ") at " << centre << "\n";
-        continue;
-      }
-      else if (chi2 < 0. && ignorewidepeaks)
-      {
-        g_log.notice() << "Skip Peak " << ipk << " (chi^2 " << chi2 << " < 0 ) at " << centre << "\n";
-      }
+      mapiter->second.push_back(std::make_pair(centre, clonefunction));
+
+      g_log.debug() << "Peak " << ipeak << ": Spec = " << wsindex
+                    << " func: " << clonefunction->asString() << "\n";
+
+    } //ENDFOR (ipeak)
+
+
+
+    //--------------------------------------------------------------------------------------------
+    // Calcualte function
+    //--------------------------------------------------------------------------------------------
+    for (mapiter = functionmap.begin(); mapiter != functionmap.end(); ++mapiter)
+    {
+      // Get spec id and translated to wsindex in the output workspace
+      specid_t specid = mapiter->first;
+      specid_t wsindex;
+      if (m_newWSFromParent)
+        wsindex = specid;
       else
+        wsindex = mSpectrumMap[specid];
+
+      // std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >::iterator mapiter;
+      // Sort by
+
+      std::vector<std::pair<double, API::IFunction_sptr> >& vec_centrefunc = mapiter->second;
+      std::sort(vec_centrefunc.begin(), vec_centrefunc.end());
+      // std::sort(mapiter->second.begin(), mapiter->second.end());
+
+      size_t numpeaksinspec = mapiter->second.size();
+
+      for (size_t ipeak = 0; ipeak < numpeaksinspec; ++ipeak)
       {
-        mapiter->second.push_back(std::make_pair(centre, plotfunc));
-      }
+        std::pair<double, API::IFunction_sptr>& centrefunc = vec_centrefunc[ipeak];
 
-      g_log.debug() << "Peak " << ipk << ": Spec = " << specid << " -> WSIndex = " << wsindex
-                    << " func: " << mfunc->asString() << "\n";
-    }
+        // Determine boundary
+        API::IPeakFunction_sptr thispeak = getPeakFunction(centrefunc.second);
+        double centre = centrefunc.first;
+        double fwhm = thispeak->fwhm();
 
+        // Get to know workspace index
+        // specid_t specid = static_cast<specid_t>(getTableValue(peakparameters, "spectrum", ipk));
 
 
 #if 0
-    // Generate function to plot
-    API::ICompositeFunction_sptr plotfunc = boost::make_shared<CompositeFunction>();
-    plotfunc->addFunction(m_peakFunction);
-    if (m_genBackground)
-      plotfunc->addFunction(m_bkgdFunction);
+        // Generate function to plot
+        API::ICompositeFunction_sptr plotfunc = boost::make_shared<CompositeFunction>();
+        plotfunc->addFunction(m_peakFunction);
+        if (m_genBackground)
+          plotfunc->addFunction(m_bkgdFunction);
 
-    // Determine boundary
-    double centre = m_peakFunction->centre();
-    double fwhm = m_peakFunction->fwhm();
+        // Determine boundary
+        double centre = m_peakFunction->centre();
+        double fwhm = m_peakFunction->fwhm();
 #endif
 
-    // Calcualte function
-    for (mapiter = functionmap.begin(); mapiter != functionmap.end(); ++mapiter)
-    {
-      // Sort by
-      std::sort(mapiter->second.begin(), mapiter->second.end());
-      //
-      const MantidVec& X = dataWS->dataX(wsindex);
-      double leftbound = centre - numWidths*fwhm;
-      if (ipk > 0)
-      {
-        // Not left most peak.
-        double middle = 0.5*(centre + leftPeak->centre);
-        if (leftbound < middle)
-          leftbound = middle;
-      }
-      std::vector<double>::const_iterator left = std::lower_bound(X.begin(), X.end(), leftbound);
-      if (left == X.end())
-        left = X.begin();
 
-      double rightbound = centre + numWidths*fwhm;
-      if (ipk != vecfuncs.size()-1)
-      {
-        // Not the rightmost peak
-        // FIXME - Need to have a data structure for it: vecfuncs[ipk+1]
-        double middle = 0.5*(centre + rightPeak->centre);
-        if (rightbound > middle)
-          rightbound = middle;
-      }
-      std::vector<double>::const_iterator right = std::lower_bound(left + 1, X.end(), rightbound);
+        //
+        const MantidVec& X = dataWS->dataX(wsindex);
+        double leftbound = centre - m_numPeakWidth*fwhm;
+        if (ipeak > 0)
+        {
+          // Not left most peak.
+          API::IPeakFunction_sptr leftPeak = getPeakFunction(vec_centrefunc[ipeak-1].second);
 
-      // Build domain & function
-      API::FunctionDomain1DVector domain(left, right); //dataWS->dataX(wsindex));
+          double middle = 0.5*(centre + leftPeak->centre());
+          if (leftbound < middle)
+            leftbound = middle;
+        }
+        std::vector<double>::const_iterator left = std::lower_bound(X.begin(), X.end(), leftbound);
+        if (left == X.end())
+          left = X.begin();
 
-      // 4. Evaluate the function
-      API::FunctionValues values(domain);
-      mfunc->function(domain, values);
+        double rightbound = centre + m_numPeakWidth*fwhm;
+        if (ipeak != numpeaksinspec-1)
+        {
+          // Not the rightmost peak
+          // FIXME - Need to have a data structure for it: vecfuncs[ipk+1]
+          IPeakFunction_sptr rightPeak = getPeakFunction(vec_centrefunc[ipeak+1].second);
+          double middle = 0.5*(centre + rightPeak->centre());
+          if (rightbound > middle)
+            rightbound = middle;
+        }
+        std::vector<double>::const_iterator right = std::lower_bound(left + 1, X.end(), rightbound);
 
-      // 5. Put to output
-      std::size_t offset = (left-X.begin());
-      std::size_t numY = values.size();
-      for (std::size_t i = 0; i < numY; i ++)
-      {
-        dataWS->dataY(wsindex)[i + offset] += values[i];
-      }
+        // Build domain & function
+        API::FunctionDomain1DVector domain(left, right); //dataWS->dataX(wsindex));
+
+        // 4. Evaluate the function
+        API::FunctionValues values(domain);
+        centrefunc.second->function(domain, values);
+
+        // 5. Put to output
+        std::size_t offset = (left-X.begin());
+        std::size_t numY = values.size();
+        for (std::size_t i = 0; i < numY; i ++)
+        {
+          dataWS->dataY(wsindex)[i + offset] += values[i];
+        }
+
+      } // ENDFOR(ipeak)
+
 
     }
 
     return;
   }
 
+#if 0
   //----------------------------------------------------------------------------------------------
   /** Generate peaks and background if optioned
    */
@@ -492,6 +532,7 @@ namespace Algorithms
 
     return;
   }
+#endif
 
   //----------------------------------------------------------------------------------------------
   /**
@@ -504,7 +545,7 @@ namespace Algorithms
                                                     const std::size_t bkg_offset, const std::size_t rowNum, double &centre, double &fwhm
    *
    */
-  API::IFunction_sptr GeneratePeaks::createFunction(const std::string& peaktype, const std::string& bkgdtype)
+  void GeneratePeaks::createFunction(std::string& peaktype, std::string& bkgdtype)
   {
     // Create the peak
     m_peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
@@ -638,10 +679,23 @@ namespace Algorithms
    */
   void GeneratePeaks::processParamTable()
   {
+    // Process column names for function
+    processTableColumnNames();
+
+    // Process peak parameter workspace
+    getSpectraSet(m_funcParamWS, spectra);
+
+    return;
+  }
+
+
+  void GeneratePeaks::processTableColumnNames()
+  {
     using namespace boost::algorithm;
 
     // Initial check
     std::vector<std::string> colnames = m_funcParamWS->getColumnNames();
+    size_t numcols = colnames.size();
 
     if (colnames[0].compare("spectrum") != 0)
       throw std::runtime_error("First column must be 'spectrum' in integer. ");
@@ -665,7 +719,7 @@ namespace Algorithms
     {
       // Number of parameters must be peak parameters + background parameters
       size_t numpeakparams = m_peakFunction->nParams();
-      size_t numbkgdparams = m_bkgdFunction->nparams();
+      size_t numbkgdparams = m_bkgdFunction->nParams();
       size_t numparams = numpeakparams + numbkgdparams;
       if (numparamcols != numparams)
         throw std::runtime_error("Parameters number is not correct. ");
@@ -696,13 +750,26 @@ namespace Algorithms
     {
       if (numparamcols !=  6)
         throw std::runtime_error("Number of columns must be 6 if not using raw.");
+
+      // Find the column index of height, width, centre, a0, a1 and a2
+      i_height = static_cast<int>(std::find(colnames.begin(), colnames.end(), "height") - colnames.begin());
+      i_centre = static_cast<int>(std::find(colnames.begin(), colnames.end(), "centre") - colnames.begin());
+      i_width = static_cast<int>(std::find(colnames.begin(), colnames.end(), "width") - colnames.begin());
+      i_a0 = static_cast<int>(std::find(colnames.begin(), colnames.end(), "backgroundintercept") - colnames.begin());
+      i_a1 = static_cast<int>(std::find(colnames.begin(), colnames.end(), "backgroundslope") - colnames.begin());
+      i_a2 = static_cast<int>(std::find(colnames.begin(), colnames.end(), "A2") - colnames.begin());
+
     }
 
-    // Process peak parameter workspace
-    getSpectraSet(m_funcParamWS, spectra);
+    m_funcParameterNames.resize(numcols-2);
+    for (size_t i = 1; i < numcols-1; ++i)
+    {
+      m_funcParameterNames[i-1] = colnames[i];
+    }
 
     return;
   }
+
 
   //----------------------------------------------------------------------------------------------
   /** Get set of spectra of the input table workspace
@@ -714,13 +781,13 @@ namespace Algorithms
     size_t numpeaks = peakParmsWS->rowCount();
     API::Column_const_sptr col = peakParmsWS->getColumn("spectrum");
 
-    std::vector<std::vector<double> > vecparvalues(numpeaks);
-    std::vector<std::string> vecparnames(numpeaks);
+    // std::vector<std::vector<double> > vecparvalues(numpeaks);
+    // std::vector<std::string> vecparnames(numpeaks);
     std::vector<specid_t> vecpeakspec(numpeaks);
 
     // Get parameter names other than "spectrum"
-    std::vector<std::string> colnames = peakParmsWS->getColumnNames();
-    std::copy(colnames.begin()+1, colnames.end(), vecparanames.begin());
+    // std::vector<std::string> colnames = peakParmsWS->getColumnNames();
+    // std::copy(colnames.begin()+1, colnames.end(), vecparanames.begin());
 
     for (size_t ipk = 0; ipk < numpeaks; ipk ++)
     {
@@ -850,6 +917,8 @@ namespace Algorithms
       outputWS = createDataWorkspace(spectra, binParameters);
       m_newWSFromParent = false;
     }
+
+    return outputWS;
   }
 
 } // namespace Mantid

@@ -66,7 +66,11 @@ namespace Algorithms
 
     void processParamTable();
 
+    void processTableColumnNames();
+
     void generatePeaks();
+
+    void generatePeaksNew(API::MatrixWorkspace_sptr dataWS);
 
     bool hasParameter(API::IFunction_sptr function, std::string paramname);
 
@@ -74,11 +78,15 @@ namespace Algorithms
 
     API::MatrixWorkspace_sptr createDataWorkspace(std::set<specid_t> spectra, std::vector<double> binparameters);
 
+    void createFunction(std::string& peaktype, std::string& bkgdtype);
+
+    /*
     API::IFunction_sptr createFunction(const std::string &peakFuncType, const std::vector<std::string> &colNames,
                                        const bool isRaw, const bool withBackground,
                                        DataObjects::TableWorkspace_const_sptr peakParmsWS,
                                        const std::size_t bkg_offset, const std::size_t rowNum,
                                        double &centre, double &fwhm);
+                                       */
 
     void getSpectraSet(DataObjects::TableWorkspace_const_sptr peakParmsWS, std::set<specid_t>& spectra);
 
@@ -121,6 +129,13 @@ namespace Algorithms
 
     bool m_useRawParameter;
 
+    double m_maxChi2;
+
+    double m_numPeakWidth;
+
+    std::vector<std::string> m_funcParameterNames;
+
+    int i_height, i_centre, i_width, i_a0, i_a1, i_a2;
 
   };
 
