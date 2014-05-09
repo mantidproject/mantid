@@ -242,6 +242,7 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
  *  Find peaks in the specified MD workspace and save them in the
  *  specified peaks workspace.
  *
+ *  @param ev_ws_name     Name of the event workspace to create
  *  @param md_ws_name     Name of the MD workspace to use 
  *  @param peaks_ws_name  Name of the peaks workspace to create
  *
