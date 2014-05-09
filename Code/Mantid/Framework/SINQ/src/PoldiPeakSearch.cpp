@@ -65,8 +65,8 @@ PoldiPeakSearch::PoldiPeakSearch() :
     m_doubleMinimumDistance(0),
     m_minimumPeakHeight(0.0),
     m_maximumPeakNumber(0),
-    m_recursionAbsoluteBegin(0),
-    m_recursionAbsoluteEnd(0),
+    m_recursionAbsoluteBegin(),
+    m_recursionAbsoluteEnd(),
     m_peaks(new PoldiPeakCollection())
 {
 }
@@ -444,11 +444,11 @@ double PoldiPeakSearch::getSn(MantidVec::const_iterator begin, MantidVec::const_
     MantidVec absoluteDifferenceMedians(numberOfPoints);
 
     PARALLEL_FOR_NO_WSP_CHECK()
-    for(size_t i = 0; i < numberOfPoints; ++i) {
+    for(int i = 0; i < static_cast<int>(numberOfPoints); ++i) {
         double currentValue = *(begin + i);
         MantidVec temp;
         temp.reserve(numberOfPoints - 1);
-        for(size_t j = 0; j < numberOfPoints; ++j) {
+        for(int j = 0; j < static_cast<int>(numberOfPoints); ++j) {
             if(j != i) {
                 temp.push_back(fabs(*(begin + j) - currentValue));
             }
