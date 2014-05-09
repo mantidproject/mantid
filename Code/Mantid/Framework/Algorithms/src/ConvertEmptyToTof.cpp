@@ -8,6 +8,11 @@
  * Spectrum or list of spectra to look for the elastic peak. Note that the spectra chosen must be at the same distance.
  * Elastic peak channels - List of channels to look for the elastic peak (e.g. range).
 
+ Input Workspace must have the following properties:
+ *  wavelength
+ *  channel_width
+
+
  So far this has only be tested on ILL D17.
 
  *WIKI*/
@@ -22,6 +27,8 @@
 
 #include <cmath>
 #include <map>
+#include <numeric>      // std::accumulate
+#include <utility>      // std::pair
 
 namespace Mantid {
 namespace Algorithms {
@@ -102,7 +109,7 @@ void ConvertEmptyToTof::init() {
  */
 void ConvertEmptyToTof::exec() {
 
-	DataObjects::Workspace2D_sptr inputWS = this->getProperty("InputWorkspace");
+	const DataObjects::Workspace2D_sptr inputWS = this->getProperty("InputWorkspace");
 	MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 	const std::vector<int> spectraIndices = getProperty("ListOfSpectraIndices");
 	const std::vector<int> channelIndices = getProperty("ListOfChannelIndices");
@@ -113,7 +120,10 @@ void ConvertEmptyToTof::exec() {
 		g_log.debug() << it->first << " -> " << it->second << std::endl;
 	}
 
-	std::map<int, double> eppTofMap = findElasticPeakTof(inputWS, eppMap);
+	std::pair <int,double>  eppAndEpTof = findAverageEppAndEpTof(inputWS,eppMap);
+
+	double channelWidth = getPropertyFromRun<double>(inputWS, "channel_width");
+	std::vector<double> tofAxis = makeTofAxis(eppAndEpTof.first, eppAndEpTof.second, inputWS->blocksize(), channelWidth);
 
 }
 
@@ -163,7 +173,7 @@ std::map <int, int> ConvertEmptyToTof::findElasticPeakPositions(const DataObject
 				<< "\t maxX=" << maxX  << std::endl;
 
 		// round up the center to the closest int
-		eppMap[spectrumIndex] = static_cast<int>(std::floor(center + 0.5) );
+		eppMap[spectrumIndex] = roundUp(center);
 
 	}
 	return eppMap;
@@ -307,63 +317,45 @@ bool ConvertEmptyToTof::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
 /**
  * Finds the TOF for a given epp
  * @param eppMap : pair workspace spec index - epp
- * @return pair of workspace spec index, elastic peak tof
+ * @return
  */
 
-std::map<int, double> ConvertEmptyToTof::findElasticPeakTof(const DataObjects::Workspace2D_sptr inputWS, const std::map<int, int>& eppMap){
+std::pair <int,double> ConvertEmptyToTof::findAverageEppAndEpTof(const DataObjects::Workspace2D_sptr inputWS, const std::map<int, int>& eppMap){
 
-	std::map<int, double> epTofMap;
+
 	double l1 = getL1(inputWS);
+	double wavelength = getPropertyFromRun<double>(inputWS,"wavelength");
 
-	double wavelength;
-	if (inputWS->run().hasProperty("wavelength")) {
-		Kernel::Property* prop = inputWS->run().getProperty("wavelength");
-		wavelength = boost::lexical_cast<double>(prop->value());
-	} else {
-		throw std::runtime_error("No wavelength property found in the input workspace....");
-	}
+	std::vector<double> epTofList;
+	std::vector<int> eppList;
 
+	double firstL2 = eppMap.begin()->first;
 	for (auto it = eppMap.begin(); it != eppMap.end(); ++it) {
 
 		double l2 = getL2(inputWS,it->first);
+		if (! areEqual(l2,firstL2,0.0001) ){
+			throw std::runtime_error("all the pixels for selected spectra must have the same distance from the sample!");
+		}
+		else{
+			firstL2 = l2;
+		}
 
-		epTofMap[it->first] = (calculateTOF(l1,wavelength) + calculateTOF(l2,wavelength)) * 1e6; //microsecs
+		epTofList.push_back( (calculateTOF(l1,wavelength) + calculateTOF(l2,wavelength)) * 1e6); //microsecs
+		eppList.push_back(it->first);
 
-		g_log.debug() << "WS index = " << it->first << " l1 = " << l1 << " l2 = " << l2 << " TOF = " <<  epTofMap[it->first] << std::endl;
+		g_log.debug() << "WS index = " << it->first << " l1 = " << l1 << " l2 = " << l2 << " TOF = " << *(epTofList.end()-1) << std::endl;
 	}
 
-
-
-
-
-
-//	double theoreticalElasticTOF = (m_loader.calculateTOF(m_l1,m_wavelength) + m_loader.calculateTOF(m_l2,m_wavelength))
-//	        * 1e6; //microsecs
-//
-//	      // Calculate the real tof (t1+t2) put it in tof array
-//	      std::vector<double> detectorTofBins(m_numberOfChannels + 1);
-//	      for (size_t i = 0; i < m_numberOfChannels + 1; ++i)
-//	      {
-//	        detectorTofBins[i] = theoreticalElasticTOF
-//	          + m_channelWidth
-//	          * static_cast<double>(static_cast<int>(i)
-//	          - calculatedDetectorElasticPeakPosition)
-//	          - m_channelWidth / 2; // to make sure the bin is in the middle of the elastic peak
-//
-//	      }
-//	      //g_log.debug() << "Detector TOF bins: ";
-//	      //for (auto i : detectorTofBins) g_log.debug() << i << " ";
-//	      //g_log.debug() << "\n";
-//
-//	      g_log.information() << "T1+T2 : Theoretical = " << theoreticalElasticTOF;
-//	      g_log.information() << " ::  Calculated bin = ["
-//	        << detectorTofBins[calculatedDetectorElasticPeakPosition] << ","
-//	        << detectorTofBins[calculatedDetectorElasticPeakPosition + 1] << "]"
-//	        << std::endl;
-
-	return epTofMap;
-
+	double averageEpTof = std::accumulate(epTofList.begin(), epTofList.end(),0.0) / static_cast<double>(epTofList.size());
+	int averageEpp = roundUp(static_cast<double>(std::accumulate(eppList.begin(), eppList.end(),0))
+			/ static_cast<double>(eppList.size()));
+	return std::make_pair(averageEpp,averageEpTof) ;
 }
+
+
+
+
+
 
 
 double ConvertEmptyToTof::getL1(const API::MatrixWorkspace_sptr& workspace) {
@@ -396,6 +388,75 @@ double ConvertEmptyToTof::calculateTOF(double distance,double wavelength) {
 
 	return distance / velocity;
 }
+
+/**
+ * Compare two double with a precision epsilon
+ */
+bool ConvertEmptyToTof::areEqual(double a, double b, double epsilon)
+{
+    return fabs(a - b) < epsilon;
+}
+
+template<typename T>
+T ConvertEmptyToTof::getPropertyFromRun(const DataObjects::Workspace2D_sptr inputWS, std::string propertyName){
+	if (inputWS->run().hasProperty(propertyName)) {
+		Kernel::Property* prop = inputWS->run().getProperty(propertyName);
+		return boost::lexical_cast<T>(prop->value());
+	} else {
+		std::string propertyName = "No " + propertyName + " property found in the input workspace....";
+		throw std::runtime_error(propertyName);
+	}
+}
+
+int ConvertEmptyToTof::roundUp(double value){
+	return static_cast<int>(std::floor(value + 0.5) );
+}
+
+
+/**
+ * Makes the X time Axis
+ */
+std::vector<double> ConvertEmptyToTof::makeTofAxis(int epp, double epTof, size_t size, double channelWidth){
+	std::vector<double> axis(size);
+
+	for (size_t i = 0; i < size; ++i)
+	{
+		axis[i] = epTof
+		  + channelWidth
+		  * static_cast<double>(static_cast<int>(i)
+		  - epp)
+		  - channelWidth / 2; // to make sure the bin is in the middle of the elastic peak
+	}
+	return axis;
+}
+
+//	double theoreticalElasticTOF = (m_loader.calculateTOF(m_l1,m_wavelength) + m_loader.calculateTOF(m_l2,m_wavelength))
+//	        * 1e6; //microsecs
+//
+//	      // Calculate the real tof (t1+t2) put it in tof array
+//	      std::vector<double> detectorTofBins(m_numberOfChannels + 1);
+//	      for (size_t i = 0; i < m_numberOfChannels + 1; ++i)
+//	      {
+//	        detectorTofBins[i] = theoreticalElasticTOF
+//	          + m_channelWidth
+//	          * static_cast<double>(static_cast<int>(i)
+//	          - calculatedDetectorElasticPeakPosition)
+//	          - m_channelWidth / 2; // to make sure the bin is in the middle of the elastic peak
+//
+//	      }
+//	      //g_log.debug() << "Detector TOF bins: ";
+//	      //for (auto i : detectorTofBins) g_log.debug() << i << " ";
+//	      //g_log.debug() << "\n";
+//
+//	      g_log.information() << "T1+T2 : Theoretical = " << theoreticalElasticTOF;
+//	      g_log.information() << " ::  Calculated bin = ["
+//	        << detectorTofBins[calculatedDetectorElasticPeakPosition] << ","
+//	        << detectorTofBins[calculatedDetectorElasticPeakPosition + 1] << "]"
+//	        << std::endl;
+
+
+
+
 
 
 } // namespace Algorithms

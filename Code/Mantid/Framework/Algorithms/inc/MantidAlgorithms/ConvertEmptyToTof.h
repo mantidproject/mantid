@@ -6,6 +6,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
+#include <utility>      // std::pair
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -59,11 +61,16 @@ private:
 	bool doFitGaussianPeak(DataObjects::Workspace2D_sptr, int workspaceindex,
 			double& center, double& sigma, double& height, double startX,
 			double endX);
-	std::map<int, double> findElasticPeakTof(const DataObjects::Workspace2D_sptr inputWS, const std::map<int, int>& eppMap);
+	std::pair <int,double> findAverageEppAndEpTof(const DataObjects::Workspace2D_sptr inputWS, const std::map<int, int>& eppMap);
 
 	double getL1(const API::MatrixWorkspace_sptr& workspace);
 	double getL2(const API::MatrixWorkspace_sptr& workspace, int detId);
 	double calculateTOF(double distance,double wavelength);
+	bool areEqual(double a, double b, double epsilon);
+	template<typename T> T getPropertyFromRun(const DataObjects::Workspace2D_sptr inputWS, std::string propertyName);
+	int roundUp(double value);
+
+	std::vector<double> makeTofAxis(int epp, double epTof, size_t size, double channelWidth);
 };
 
 } // namespace Algorithms
