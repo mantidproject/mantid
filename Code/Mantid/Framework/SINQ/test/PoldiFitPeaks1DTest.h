@@ -5,55 +5,100 @@
 
 #include "MantidSINQ/PoldiFitPeaks1D.h"
 
-using Mantid::SINQ::PoldiFitPeaks1D;
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IPeakFunction.h"
+
+#include "MantidCurveFitting/Gaussian.h"
+#include "MantidCurveFitting/FlatBackground.h"
+
+#include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
+
+using Mantid::Poldi::PoldiFitPeaks1D;
+using namespace Mantid::Poldi;
+using namespace Mantid::API;
+using namespace Mantid::CurveFitting;
+
+class PoldiFitPeaks1D;
+
+class TestablePoldiFitPeaks1D : public PoldiFitPeaks1D
+{
+    friend class PoldiFitPeaks1DTest;
+public:
+    TestablePoldiFitPeaks1D() :
+        PoldiFitPeaks1D()
+    {
+    }
+};
 
 class PoldiFitPeaks1DTest : public CxxTest::TestSuite
 {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static PoldiFitPeaks1DTest *createSuite() { return new PoldiFitPeaks1DTest(); }
-  static void destroySuite( PoldiFitPeaks1DTest *suite ) { delete suite; }
+    // This pair of boilerplate methods prevent the suite being created statically
+    // This means the constructor isn't called when running other tests
+    static PoldiFitPeaks1DTest *createSuite() { return new PoldiFitPeaks1DTest(); }
+    static void destroySuite( PoldiFitPeaks1DTest *suite ) { delete suite; }
+
+    PoldiFitPeaks1DTest()
+    {
+        m_testPeak = PoldiPeak::create(MillerIndices(1, 1, 1), UncertainValue(1.108329), UncertainValue(2948.231), UncertainValue(0.002));
+        m_profileTestFunction = std::string("Gaussian");
+        m_backgroundTestFunction = IFunction_sptr(new FlatBackground);
+        m_backgroundTestFunction->initialize();
+    }
+
+    void testSetPeakFunction()
+    {
+        TestablePoldiFitPeaks1D poldiFitPeaks;
+        poldiFitPeaks.setPeakFunction(m_profileTestFunction);
+
+        TS_ASSERT_EQUALS(poldiFitPeaks.m_profileTemplate, m_profileTestFunction);
+    }
+
+    void testGetPeakProfile()
+    {
+        TestablePoldiFitPeaks1D poldiFitPeaks;
+        poldiFitPeaks.m_backgroundTemplate = m_backgroundTestFunction;
+        poldiFitPeaks.m_profileTies = "";
+        poldiFitPeaks.setPeakFunction(m_profileTestFunction);
+
+        IFunction_sptr totalProfile = poldiFitPeaks.getPeakProfile(m_testPeak);
+
+        // make sure that we get back a composite of peak and background
+        CompositeFunction_sptr composite = boost::dynamic_pointer_cast<CompositeFunction>(totalProfile);
+        TS_ASSERT(composite);
+
+        // make sure that the profile is the first function in the composite
+        IPeakFunction_sptr profile = boost::dynamic_pointer_cast<IPeakFunction>(composite->getFunction(0));
+        TS_ASSERT(profile);
+
+        TS_ASSERT_EQUALS(profile->centre(), m_testPeak->q());
+        TS_ASSERT_EQUALS(profile->height(), m_testPeak->intensity());
+        TS_ASSERT_EQUALS(profile->fwhm(), m_testPeak->fwhm(PoldiPeak::AbsoluteQ));
+    }
+
+    void testSetValuesFromProfileFunction()
+    {
+        TestablePoldiFitPeaks1D poldiFitPeaks;
+        poldiFitPeaks.initialize();
+        poldiFitPeaks.setPeakFunction(m_profileTestFunction);
+
+        IFunction_sptr totalProfile = poldiFitPeaks.getPeakProfile(m_testPeak);
+
+        // now we have a profile with known parameters. assign them to a new PoldiPeak
+        PoldiPeak_sptr newPeak = PoldiPeak::create(1.0);
+        poldiFitPeaks.setValuesFromProfileFunction(newPeak, totalProfile);
+
+        TS_ASSERT_EQUALS(newPeak->q(), m_testPeak->q());
+        TS_ASSERT_EQUALS(newPeak->intensity(), m_testPeak->intensity());
+        TS_ASSERT_EQUALS(newPeak->fwhm(PoldiPeak::AbsoluteQ), m_testPeak->fwhm(PoldiPeak::AbsoluteQ));
+    }
 
 
-  void test_Init()
-  {
-    PoldiFitPeaks1D alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-  }
-  
-  void test_exec()
-  {
-    // Name of the output workspace.
-    std::string outWSName("PoldiFitPeaks1DTest_OutputWS");
-  
-    PoldiFitPeaks1D alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
-    
-    // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
-    TS_ASSERT(ws);
-    if (!ws) return;
-    
-    // TODO: Check the results
-    
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
-  }
-  
-  void test_Something()
-  {
-    TSM_ASSERT( "You forgot to write a test!", 0);
-  }
-
-
+private:
+    PoldiPeak_sptr m_testPeak;
+    std::string m_profileTestFunction;
+    IFunction_sptr m_backgroundTestFunction;
 };
 
 

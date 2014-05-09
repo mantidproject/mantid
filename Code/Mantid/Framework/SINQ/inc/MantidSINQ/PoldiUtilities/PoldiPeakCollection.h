@@ -6,8 +6,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "boost/shared_ptr.hpp"
 
-#include "MantidAPI/IPeakFunction.h"
-
 namespace Mantid {
 namespace Poldi {
 
@@ -42,7 +40,6 @@ namespace Poldi {
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
-using namespace Mantid::CurveFitting;
 
 class MANTID_SINQ_DLL PoldiPeakCollection
 {
@@ -51,19 +48,10 @@ public:
     PoldiPeakCollection(TableWorkspace_sptr workspace);
     virtual ~PoldiPeakCollection() {}
 
-    void setProfileFunction(IPeakFunction_sptr peakProfile);
-    void setBackgroundFunction(IFunction_sptr backgroundFunction);
-    void setProfileTies(std::string profileTies);
-
-    const std::string &getProfileTies() const;
-
     size_t peakCount() const;
 
     void addPeak(PoldiPeak_sptr newPeak);
     PoldiPeak_sptr peak(size_t index) const;
-
-    IFunction_sptr getSinglePeakProfile(size_t index) const;
-    void setSingleProfileParameters(size_t index, IFunction_sptr fittedFunction);
 
     TableWorkspace_sptr asTableWorkspace();
 
@@ -74,20 +62,7 @@ protected:
     void constructFromTableWorkspace(TableWorkspace_sptr tableWorkspace);
     bool checkColumns(TableWorkspace_sptr tableWorkspace);
 
-    void addPeakFunctionFromTemplate();
-
-    void updatePeakProfileFunctions();
-    void updatePeakBackgroundFunctions();
-
-    double getFwhmRelation(IPeakFunction_sptr peakFunction);
-
-    IPeakFunction_sptr m_profileTemplate;
-    IFunction_sptr m_backgroundTemplate;
-    std::string m_ties;
-
     std::vector<PoldiPeak_sptr> m_peaks;
-    std::vector<IPeakFunction_sptr> m_peakProfiles;
-    std::vector<IFunction_sptr> m_backgrounds;
 };
 
 typedef boost::shared_ptr<PoldiPeakCollection> PoldiPeakCollection_sptr;

@@ -57,13 +57,13 @@ namespace Poldi
     virtual int version() const;
     virtual const std::string category() const;
 
-  private:
-    virtual void initDocs();
-    void init();
-    void exec();
-
-    void initializePeakFunction(IPeakFunction_sptr peakFunction, IFunction_sptr backgroundFunction, std::string ties);
+  protected:
+    void setPeakFunction(std::string peakFunction);
     PoldiPeakCollection_sptr getInitializedPeakCollection(TableWorkspace_sptr peakTable);
+
+    IFunction_sptr getPeakProfile(PoldiPeak_sptr poldiPeak);
+    void setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak, IFunction_sptr fittedFunction);
+    double getFwhmWidthRelation(IPeakFunction_sptr peakFunction);
 
     IAlgorithm_sptr getFitAlgorithm(Workspace2D_sptr dataWorkspace, PoldiPeak_sptr peak, IFunction_sptr profile);
 
@@ -75,7 +75,7 @@ namespace Poldi
     TableWorkspace_sptr generateResultTable(PoldiPeakCollection_sptr peaks);
 
     PoldiPeakCollection_sptr m_peaks;
-    IPeakFunction_sptr m_profileTemplate;
+    std::string m_profileTemplate;
     IFunction_sptr m_backgroundTemplate;
     std::string m_profileTies;
 
@@ -83,6 +83,11 @@ namespace Poldi
     TableWorkspace_sptr m_peakResultOutput;
 
     double m_fwhmMultiples;
+
+  private:
+    virtual void initDocs();
+    void init();
+    void exec();
   };
 
 

@@ -18,10 +18,13 @@ fit for one of the peaks.
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/TableRow.h"
 
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
+
+#include "MantidAPI/CompositeFunction.h"
 
 
 namespace Mantid
@@ -40,11 +43,14 @@ DECLARE_ALGORITHM(PoldiFitPeaks1D)
 
 PoldiFitPeaks1D::PoldiFitPeaks1D() :
     m_peaks(),
+    m_profileTemplate(),
+    m_backgroundTemplate(),
     m_profileTies(),
     m_fitCharacteristics(),
     m_peakResultOutput(),
     m_fwhmMultiples(1.0)
 {
+
 }
 
 PoldiFitPeaks1D::~PoldiFitPeaks1D()
@@ -75,36 +81,75 @@ void PoldiFitPeaks1D::init()
     boost::shared_ptr<BoundedValidator<double> > minFwhmPerDirection = boost::make_shared<BoundedValidator<double> >();
     minFwhmPerDirection->setLower(2.0);
     declareProperty("FwhmMultiples", 2.0, minFwhmPerDirection, "Each peak will be fitted using x * FWHM data in each direction.", Direction::Input);
+
+    std::vector<std::string> peakFunctions = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
+    boost::shared_ptr<ListValidator<std::string> > peakFunctionNames(new ListValidator<std::string>(peakFunctions));
+    declareProperty("PeakFunction", "Gaussian", peakFunctionNames, "Peak function that will be fitted to all peaks.", Direction::Input);
+
     declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakTable","",Direction::Input), "A table workspace containing POLDI peak data.");
 
     declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace","RefinedPeakTable",Direction::Output), "Output workspace with refined peak data.");
     declareProperty(new WorkspaceProperty<TableWorkspace>("ResultTableWorkspace","ResultTable",Direction::Output), "Fit results.");
     declareProperty(new WorkspaceProperty<TableWorkspace>("FitCharacteristicsWorkspace","FitCharacteristics",Direction::Output), "Fit characteristics for each peak.");
     declareProperty(new WorkspaceProperty<Workspace>("FitPlotsWorkspace","FitPlots",Direction::Output), "Plots of all peak fits.");
+
+    m_backgroundTemplate = FunctionFactory::Instance().createInitialized("name=UserFunction, Formula=A0 + A1*(x - x0)^2");
+    m_profileTies = "f1.x0 = f0.PeakCentre";
 }
 
-void PoldiFitPeaks1D::initializePeakFunction(IPeakFunction_sptr peakFunction, IFunction_sptr backgroundFunction, std::string ties)
+void PoldiFitPeaks1D::setPeakFunction(std::string peakFunction)
 {
     m_profileTemplate = peakFunction;
-    m_backgroundTemplate = backgroundFunction;
-    m_profileTies = ties;
 }
 
 PoldiPeakCollection_sptr PoldiFitPeaks1D::getInitializedPeakCollection(TableWorkspace_sptr peakTable)
 {
-    PoldiPeakCollection_sptr peaks(new PoldiPeakCollection(peakTable));
-    peaks->setProfileFunction(m_profileTemplate);
-    peaks->setBackgroundFunction(m_backgroundTemplate);
-    peaks->setProfileTies(m_profileTies);
+    return PoldiPeakCollection_sptr(new PoldiPeakCollection(peakTable));
+}
 
-    return peaks;
+IFunction_sptr PoldiFitPeaks1D::getPeakProfile(PoldiPeak_sptr poldiPeak) {
+    IPeakFunction_sptr clonedProfile = boost::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction(m_profileTemplate));
+    clonedProfile->setCentre(poldiPeak->q());
+    clonedProfile->setFwhm(poldiPeak->fwhm(PoldiPeak::AbsoluteQ));
+    clonedProfile->setHeight(poldiPeak->intensity());
+
+    IFunction_sptr clonedBackground = m_backgroundTemplate->clone();
+
+    CompositeFunction_sptr totalProfile(new CompositeFunction);
+    totalProfile->initialize();
+    totalProfile->addFunction(clonedProfile);
+    totalProfile->addFunction(clonedBackground);
+
+    if(!m_profileTies.empty()) {
+        totalProfile->addTies(m_profileTies);
+    }
+
+    return totalProfile;
+}
+
+void PoldiFitPeaks1D::setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak, IFunction_sptr fittedFunction)
+{
+    CompositeFunction_sptr totalFunction = boost::dynamic_pointer_cast<CompositeFunction>(fittedFunction);
+
+    if(totalFunction) {
+        IPeakFunction_sptr peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(totalFunction->getFunction(0));
+
+        if(peakFunction) {
+            poldiPeak->setIntensity(UncertainValue(peakFunction->height(), peakFunction->getError(0)));
+            poldiPeak->setQ(UncertainValue(peakFunction->centre(), peakFunction->getError(1)));
+            poldiPeak->setFwhm(UncertainValue(peakFunction->fwhm(), getFwhmWidthRelation(peakFunction) * peakFunction->getError(2)));
+        }
+    }
+}
+
+double PoldiFitPeaks1D::getFwhmWidthRelation(IPeakFunction_sptr peakFunction)
+{
+    return peakFunction->fwhm() / peakFunction->getParameter(2);
 }
 
 void PoldiFitPeaks1D::exec()
 {
-    initializePeakFunction(boost::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction("Gaussian")),
-                           FunctionFactory::Instance().createInitialized("name=UserFunction, Formula=A0 + A1*(x - x0)^2"),
-                           "f1.x0 = f0.PeakCentre");
+    setPeakFunction(getProperty("PeakFunction"));
 
     // Number of points around the peak center to use for the fit
     m_fwhmMultiples = getProperty("FwhmMultiples");
@@ -115,8 +160,6 @@ void PoldiFitPeaks1D::exec()
 
     g_log.information() << "Peaks to fit: " << m_peaks->peakCount() << std::endl;
 
-
-
     Workspace2D_sptr dataWorkspace = getProperty("InputWorkspace");
 
     m_fitCharacteristics = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
@@ -124,14 +167,14 @@ void PoldiFitPeaks1D::exec()
 
     for(size_t i = 0; i < m_peaks->peakCount(); ++i) {
         PoldiPeak_sptr currentPeak = m_peaks->peak(i);
-        IFunction_sptr currentProfile = m_peaks->getSinglePeakProfile(i);
+        IFunction_sptr currentProfile = getPeakProfile(currentPeak);
 
         IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, currentPeak, currentProfile);
 
         bool fitSuccess = fit->execute();
 
         if(fitSuccess) {
-            m_peaks->setSingleProfileParameters(i, fit->getProperty("Function"));
+            setValuesFromProfileFunction(currentPeak, fit->getProperty("Function"));
             addPeakFitCharacteristics(fit->getProperty("OutputParameters"));
 
             MatrixWorkspace_sptr fpg = fit->getProperty("OutputWorkspace");
