@@ -97,7 +97,7 @@ namespace Crystal
         std::vector<size_t> indexes;
         Kernel::Utils::getIndicesFromLinearIndex(linearIndex, imageShape, indexes);
 
-        const auto neighbours = mdIterator->findNeighbourIndexes();
+        const auto neighbours = mdIterator->findNeighbourIndexesFaceTouching();
         for(size_t i = 0; i < neighbours.size(); ++i)
         {
           size_t neighbourLinearIndex = neighbours[i];

@@ -131,11 +131,9 @@ public:
 
     TSM_ASSERT_EQUALS("Wrong number of faces", outWS->rowCount(), 3);
 
-    size_t rowIndex = 0;
     int clusterId = 1;
-    size_t expectedWorkspaceIndex = 1;
     int expectedNormalDimensionIndex = 0;
-    bool maxExtent = true;
+    const bool maxExtent = true;
     verify_table_row(outWS, clusterId, 0/*workspace index*/, expectedNormalDimensionIndex, maxExtent);
     verify_table_row(outWS, clusterId, 2/*workspace index*/, expectedNormalDimensionIndex, maxExtent);
     verify_table_row(outWS, clusterId, 2/*workspace index*/, expectedNormalDimensionIndex, !maxExtent);
@@ -148,9 +146,9 @@ public:
 
      Single non-empty cluster point. Should produce four faces.
 
-     |---|---|---|
-     |---|-x-|---|
-     |---|---|---|
+     0 -  1  - 2
+     3 - |4| - 5
+     6 -  7  - 8
 
      --------------*/
 
@@ -160,7 +158,125 @@ public:
     ITableWorkspace_sptr outWS = doExecute(inWS);
 
     TSM_ASSERT_EQUALS("Wrong number of faces", outWS->rowCount(), 4);
+    int clusterId = 1;
+    const bool maxExtent = true;
 
+    verify_table_row(outWS, clusterId, 4 /*workspace index*/, 0 /*expectedNormalDimensionIndex*/,
+        !maxExtent);
+    verify_table_row(outWS, clusterId, 4 /*workspace index*/, 0 /*expectedNormalDimensionIndex*/,
+        maxExtent);
+    verify_table_row(outWS, clusterId, 4 /*workspace index*/, 1 /*expectedNormalDimensionIndex*/,
+        !maxExtent);
+    verify_table_row(outWS, clusterId, 4 /*workspace index*/, 1 /*expectedNormalDimensionIndex*/,
+        maxExtent);
+  }
+
+  void test_find_two_edges_2D()
+  {
+
+    /*-------------
+
+     Single non-empty cluster point.
+
+     0 -  1  - 2
+     3 -  4  - 5
+     6 -  7  -|8|
+
+     --------------*/
+
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(0, 2, 3); // Makes a 2 by 3 md ws with identical signal values of zero.
+    inWS->setSignalAt(8, 1); // last point is non-zero
+
+    ITableWorkspace_sptr outWS = doExecute(inWS);
+
+    TSM_ASSERT_EQUALS("Wrong number of faces", outWS->rowCount(), 2);
+    int clusterId = 1;
+    const bool maxExtent = true;
+
+    verify_table_row(outWS, clusterId, 8 /*workspace index*/, 0 /*expectedNormalDimensionIndex*/,
+        !maxExtent);
+    verify_table_row(outWS, clusterId, 8 /*workspace index*/, 1 /*expectedNormalDimensionIndex*/,
+        !maxExtent);
+  }
+
+  void test_find_six_edges_3D()
+  {
+    /*-------------
+
+     Single non-empty cluster point.
+
+     0 -  1  - 2
+     3 -  4  - 5
+     6 -  7  - 8
+
+     9 -  10 - 11
+     12- |13| - 14
+     15-  16 - 17
+
+     18-  19 - 20
+     21-  22 - 23
+     24-  25 - 26
+
+     --------------*/
+
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(0, 3, 3); // Makes a 3 by 3 md ws with identical signal values of zero.
+    inWS->setSignalAt(13, 1); // central point is non-zero
+
+    ITableWorkspace_sptr outWS = doExecute(inWS);
+
+    TSM_ASSERT_EQUALS("Wrong number of faces", outWS->rowCount(), 6);
+    int clusterId = 1;
+    const bool maxExtent = true;
+
+    verify_table_row(outWS, clusterId, 13 /*workspace index*/, 0 /*expectedNormalDimensionIndex*/,
+        !maxExtent);
+    verify_table_row(outWS, clusterId, 13 /*workspace index*/, 0 /*expectedNormalDimensionIndex*/,
+        maxExtent);
+    verify_table_row(outWS, clusterId, 13 /*workspace index*/, 1 /*expectedNormalDimensionIndex*/,
+        !maxExtent);
+    verify_table_row(outWS, clusterId, 13 /*workspace index*/, 1 /*expectedNormalDimensionIndex*/,
+        maxExtent);
+    verify_table_row(outWS, clusterId, 13 /*workspace index*/, 2 /*expectedNormalDimensionIndex*/,
+        !maxExtent);
+    verify_table_row(outWS, clusterId, 13 /*workspace index*/, 2 /*expectedNormalDimensionIndex*/,
+        maxExtent);
+  }
+
+  void test_find_three_edges_3D()
+  {
+    /*-------------
+
+     Single non-empty cluster point.
+
+     0 -  1  - 2
+     3 -  4  - 5
+     6 -  7  - 8
+
+     9 -  10 - 11
+     12-  13 - 14
+     15-  16 - 17
+
+     18-  19 - 20
+     21-  22 - 23
+     24-  25 -|26|
+
+     --------------*/
+
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(0, 3, 3); // Makes a 3 by 3 md ws with identical signal values of zero.
+    inWS->setSignalAt(26, 1); // central point is non-zero
+
+    ITableWorkspace_sptr outWS = doExecute(inWS);
+
+    TSM_ASSERT_EQUALS("Wrong number of faces", outWS->rowCount(), 3);
+    int clusterId = 1;
+    const bool maxExtent = true;
+
+    verify_table_row(outWS, clusterId, 26 /*workspace index*/, 1 /*expectedNormalDimensionIndex*/,
+        !maxExtent);
+    verify_table_row(outWS, clusterId, 26 /*workspace index*/, 0 /*expectedNormalDimensionIndex*/,
+        !maxExtent);
+    verify_table_row(outWS, clusterId, 26 /*workspace index*/, 2 /*expectedNormalDimensionIndex*/,
+        !maxExtent);
 
   }
 
