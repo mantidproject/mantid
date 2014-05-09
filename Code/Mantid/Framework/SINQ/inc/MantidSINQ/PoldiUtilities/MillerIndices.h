@@ -38,8 +38,7 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL MillerIndices {
 public:
-    MillerIndices();
-    MillerIndices(int h, int k, int l);
+    MillerIndices(int h = 0, int k = 0, int l = 0);
     MillerIndices(std::vector<int> hkl);
     ~MillerIndices() {}
 

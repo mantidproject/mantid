@@ -6,11 +6,6 @@
 namespace Mantid {
 namespace Poldi {
 
-MillerIndices::MillerIndices() :
-    MillerIndices(0, 0, 0)
-{
-}
-
 MillerIndices::MillerIndices(int h, int k, int l) :
     m_h(h),
     m_k(k),
