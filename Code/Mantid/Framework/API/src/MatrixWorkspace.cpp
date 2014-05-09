@@ -1434,11 +1434,16 @@ namespace Mantid
         return std::numeric_limits<double>::quiet_NaN();
       }
 
+      const size_t nhist = this->getNumberHistograms();
+      // a binned vertical axis will have 1 more value than there are histograms
+      // so if the value did not throw out of range then it must be in the last bin
+      if(wi == nhist) wi = nhist-1;
+
       const auto & yVals = this->readY(wi);
       double yBinSize(1.0); // only applies for volume normalization & numeric axis
       if (normalization == VolumeNormalization && ax1->isNumeric())
       {
-        if (wi + 1 == this->getNumberHistograms() && this->getNumberHistograms() > 1)
+        if (wi + 1 == nhist && nhist > 1)
         {
           yBinSize =  yVals[wi] - yVals[wi-1];
         }
@@ -1448,7 +1453,7 @@ namespace Mantid
         }
       }
 
-      if (wi < this->getNumberHistograms())
+      if (wi < nhist)
       {
         const MantidVec & X = this->readX(wi);
         MantidVec::const_iterator it = std::lower_bound(X.begin(), X.end(), x);

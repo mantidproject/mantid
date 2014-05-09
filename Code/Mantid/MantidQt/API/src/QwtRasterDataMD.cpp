@@ -341,7 +341,8 @@ NoOverlayRaster2D *NoOverlayRaster2D::copy() const
  * Return the data value to plot at the given position specialized
  * for a matrix workspace. There is no consideration for a
  * slicing point. It simply plots the signal from the given
- * coordinates
+ * coordinates. It also avoids MatrixWorkspace::getSignalAtCoord
+ * in favour of using the cached spectraToIndex map for speed
  * @param x :: position in coordinates of the MDWorkspace
  * @param y :: position in coordinates of the MDWorkspace
  * @return signal to plot
@@ -373,6 +374,9 @@ double NoOverlayRaster2D::value(double x, double y) const
   }
 
   const size_t nhist = m_matrixWS->getNumberHistograms();
+  // a binned vertical axis will have 1 more value than there are histograms
+  // so if the value did not throw out of range then it must be in the last bin
+  if(wi == nhist) wi = nhist-1;
   const auto & yVals = m_matrixWS->readY(wi);
   Mantid::API::MDNormalization normalization(this->getNormalization());
   double yBinSize(1.0); // only applies for volume normalization & numeric axis
