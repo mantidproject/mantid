@@ -207,6 +207,7 @@ public:
   bool isChild() const;
   void setChild(const bool isChild);
   void enableHistoryRecordingForChild(const bool on);
+  bool isRecordingHistoryForChild() { return m_recordHistoryForChild; };
   void setAlwaysStoreInADS(const bool doStore);
   void setRethrows(const bool rethrow);
 
@@ -271,7 +272,7 @@ public:
   //@}
 
   virtual boost::shared_ptr<Algorithm> createChildAlgorithm(const std::string& name, const double startProgress = -1.,
-      const double endProgress = -1., const bool enableLogging=true, const int& version = -1, const bool recordHistory = false);
+      const double endProgress = -1., const bool enableLogging=true, const int& version = -1);
 
   /// set whether we wish to track the child algorithm's history and pass it the parent object to fill.
   void trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist);

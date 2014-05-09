@@ -117,7 +117,8 @@ public:
   void exec()
   {
     const bool recordHistory = static_cast<bool>(getProperty("RecordHistory"));
-    auto alg = createChildAlgorithm("NestedAlgorithm", -1., -1., true, -1, recordHistory);
+    auto alg = createChildAlgorithm("NestedAlgorithm");
+    alg->enableHistoryRecordingForChild(recordHistory);
     alg->initialize();
     alg->execute();
 

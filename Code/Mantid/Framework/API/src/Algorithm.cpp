@@ -806,10 +806,9 @@ namespace Mantid
     *  @return shared pointer to the newly created algorithm object
     */
     Algorithm_sptr Algorithm::createChildAlgorithm(const std::string& name, const double startProgress, const double endProgress,
-      const bool enableLogging, const int& version, const bool recordHistory)
+      const bool enableLogging, const int& version)
     {
       Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name,version);
-      alg->enableHistoryRecordingForChild(recordHistory);
       //set as a child
       alg->setChild(true);
       alg->setLogging(enableLogging);

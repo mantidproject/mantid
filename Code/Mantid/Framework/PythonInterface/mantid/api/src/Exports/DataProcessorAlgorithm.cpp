@@ -22,10 +22,6 @@ void export_DataProcessorAlgorithm()
   class_<DataProcessorAlgorithm, bases<Algorithm>, boost::shared_ptr<DataProcessorAdapter>,
          boost::noncopyable>("DataProcessorAlgorithm", "Base class workflow-type algorithms")
     
-    .def("createChildAlgorithm", &Algorithm::createChildAlgorithm,
-         (arg("name"),arg("startProgress")=-1.0,arg("endProgress")=-1.0,
-          arg("enableLogging")=true,arg("version")=-1,arg("recordHistory")=true), "Creates and intializes a named child algorithm. Output workspaces are given a dummy name.")
-
     .def("setLoadAlg", &DataProcessorAdapter::setLoadAlgProxy,
          "Set the name of the algorithm called using the load() method [Default=Load]")
 

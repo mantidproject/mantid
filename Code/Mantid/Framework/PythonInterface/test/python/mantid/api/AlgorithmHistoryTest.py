@@ -23,7 +23,7 @@ class ParentAlg(DataProcessorAlgorithm):
 
     def PyExec(self):
         ws_name = self.getProperty("OutputWorkspace").value
-        alg = self.createChildAlgorithm('ChildAlg', recordHistory=False)
+        alg = self.createChildAlgorithm('ChildAlg')
         alg.initialize()
         args = {}
         kwargs = {}
@@ -70,13 +70,15 @@ class AlgorithmHistoryTest(unittest.TestCase):
 
         alg = AlgorithmManager.createUnmanaged('ParentAlg')
         alg.initialize()
+        alg.setChild(True)
+        alg.enableHistoryRecordingForChild(False)
         alg.setProperty("OutputWorkspace", ws_name)
         alg.execute()
-        history = mtd[ws_name].getHistory()
+        history = alg.getProperty("OutputWorkspace").value.getHistory()
 
         alg_hists = history.getAlgorithmHistories()
-        self.assertEquals(history.size(), 1)
-        self.assertEquals(len(alg_hists), 1)
+        self.assertEquals(history.size(), 0)
+        self.assertEquals(len(alg_hists), 0)
 
 if __name__ == '__main__':
     unittest.main()
