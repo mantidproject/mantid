@@ -1969,10 +1969,6 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
 
   appWindow()->addMdiSubWindow(insWin);
 
-  connect(insWin,SIGNAL(plotSpectra(const QString&,const std::set<int>&)),this,
-    SLOT(plot1D(const QString&,const std::set<int>&)));
-  connect(insWin,SIGNAL(createDetectorTable(const QString&,const std::vector<int>&,bool)),this,
-    SLOT(createDetectorTable(const QString&,const std::vector<int>&,bool)));
   connect(insWin, SIGNAL(execMantidAlgorithm(const QString&,const QString&,Mantid::API::AlgorithmObserver*)), this,
     SLOT(executeAlgorithm(const QString&, const QString&,Mantid::API::AlgorithmObserver*)));
   connect(insWin, SIGNAL(execMantidAlgorithm(Mantid::API::IAlgorithm_sptr)), this,
