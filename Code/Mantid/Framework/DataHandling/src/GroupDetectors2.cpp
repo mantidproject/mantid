@@ -744,7 +744,7 @@ void GroupDetectors2::processGroupingWorkspace(GroupingWorkspace_const_sptr grou
   {
     size_t groupid = dit->first;
     std::set<size_t>& targetWSIndexSet = dit->second;
-    if (targetWSIndexSet.size()>0)
+    if (!targetWSIndexSet.empty())
     {
       std::vector<size_t> tempv;
       tempv.assign( targetWSIndexSet.begin(), targetWSIndexSet.end() );
