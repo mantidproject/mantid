@@ -280,9 +280,7 @@ namespace MDEvents
     UBinv.Invert();
     UBinv *= (1.0/(2.0 * M_PI));
 
-    std::vector<double> PeakRadiusVector1(n_peaks,peak_radius);
-    std::vector<double> PeakRadiusVector2(n_peaks,peak_radius);
-    std::vector<double> PeakRadiusVector3(n_peaks,peak_radius);
+    std::vector<double> PeakRadiusVector(n_peaks,peak_radius);
     std::vector<double> BackgroundInnerRadiusVector(n_peaks,back_inner_radius);
     std::vector<double> BackgroundOuterRadiusVector(n_peaks,back_outer_radius);
     if ( specify_size )
@@ -376,17 +374,14 @@ namespace MDEvents
         peaks[i].setSigmaIntensity( sigi );
         if (axes_radii.size() == 3)
         {
-			g_log.debug() << "Radii of three axes of ellipsoid for integrating peak "
+			g_log.notice() << "Radii of three axes of ellipsoid for integrating peak "
 					<< i << " = ";
 			for (int i3 = 0; i3 < 3; i3++ )
 			{
-			  g_log.debug() << axes_radii[i3] << "  ";
+			  g_log.notice() << axes_radii[i3] << "  ";
 			}
-			g_log.debug() << std::endl;
+			g_log.notice() << std::endl;
 
-			PeakRadiusVector1[i] = axes_radii[0];
-			PeakRadiusVector2[i] = axes_radii[1];
-			PeakRadiusVector3[i] = axes_radii[2];
         }
       }
       else
@@ -400,9 +395,7 @@ namespace MDEvents
     // This flag is used by the PeaksWorkspace to evaluate whether it has been integrated.
     peak_ws->mutableRun().addProperty("PeaksIntegrated", 1, true);
     // These flags are specific to the algorithm.
-    peak_ws->mutableRun().addProperty("PeakRadius", PeakRadiusVector1, true);
-    peak_ws->mutableRun().addProperty("PeakRadius2", PeakRadiusVector2, true);
-    peak_ws->mutableRun().addProperty("PeakRadius3", PeakRadiusVector3, true);
+    peak_ws->mutableRun().addProperty("PeakRadius", PeakRadiusVector, true);
     peak_ws->mutableRun().addProperty("BackgroundInnerRadius", BackgroundInnerRadiusVector, true);
     peak_ws->mutableRun().addProperty("BackgroundOuterRadius", BackgroundOuterRadiusVector, true);
 
