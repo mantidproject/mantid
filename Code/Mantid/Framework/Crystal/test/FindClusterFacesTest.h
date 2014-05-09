@@ -53,6 +53,24 @@ public:
     TSM_ASSERT_EQUALS("There are no edge faces", outWS->rowCount(), 0);
   }
 
+  void verify_table_row(ITableWorkspace_sptr& outWS, int expectedClusterId,
+      size_t expectedWorkspaceIndex, int expectedNormalDimensionIndex, bool expectedMaxExtent)
+  {
+    for (size_t rowIndex = 0; rowIndex < outWS->rowCount(); ++rowIndex)
+    {
+      auto clusterId = outWS->cell<int>(rowIndex, 0);
+      auto wsIndex = outWS->cell<double>(rowIndex, 1);
+      auto normalDimension = outWS->cell<int>(rowIndex, 2);
+      auto maxExtent = outWS->cell<Mantid::API::Boolean>(rowIndex, 3);
+      if (expectedClusterId == clusterId && expectedWorkspaceIndex == wsIndex
+          && expectedNormalDimensionIndex == normalDimension && expectedMaxExtent == maxExtent)
+      {
+        return;
+      }
+    }
+    TSM_ASSERT("Expected row does not exist in the output table workspace", false);
+  }
+
   void test_find_one_edges_1D()
   {
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
@@ -62,15 +80,88 @@ public:
 
     TSM_ASSERT_EQUALS("One face should be identified", outWS->rowCount(), 1);
 
-    auto clusterId = outWS->cell<int>(0,  0);
-    auto wsIndex = outWS->cell<double>(0,  1);
-    auto normalDimension = outWS->cell<int>(0,  2);
-    auto max = outWS->cell<Mantid::API::Boolean>(0,  3);
+    bool maxExtent = true;
+    verify_table_row(outWS, 1, 1, 0, maxExtent);
+  }
 
-    TSM_ASSERT_EQUALS("Wrong clusterId", 1, clusterId);
-    TSM_ASSERT_EQUALS("Wrong workspace index", 1, wsIndex);
-    TSM_ASSERT_EQUALS("Wrong normal dimension", 0, normalDimension);
-    TSM_ASSERT_EQUALS("Wrong max min. Face is greater than current liner index.", true, max);
+  void test_find_two_edges_1D()
+  {
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
+    inWS->setSignalAt(2, 0); // Now we have a single edge!
+    inWS->setSignalAt(0, 0); // Now we have another edge!
+
+    ITableWorkspace_sptr outWS = doExecute(inWS);
+
+    TSM_ASSERT_EQUALS("One face should be identified", outWS->rowCount(), 2);
+
+    int clusterId = 1;
+    size_t expectedWorkspaceIndex = 1;
+    int expectedNormalDimensionIndex = 0;
+    bool maxExtent = true;
+    verify_table_row(outWS, clusterId, expectedWorkspaceIndex, expectedNormalDimensionIndex, maxExtent);
+    verify_table_row(outWS, clusterId, expectedWorkspaceIndex, expectedNormalDimensionIndex, !maxExtent);
+  }
+
+  void test_find_three_edges_1D()
+  {
+    /*-------------
+
+     signal at 0 and 2 is not empty.
+
+     0  1  2  3
+     |--|__|--|__|
+
+     ^  ^  ^  ^
+     |  |  |  |
+     |Edge Edge Edge
+     |
+     Edge
+     off
+
+
+     --------------*/
+
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 4); // Makes a 1 by 3 md ws with identical signal values.
+
+    // This really creates four faces, with two non-zero label ids.
+    inWS->setSignalAt(1, 0); // Now we have a single edge!
+    inWS->setSignalAt(3, 0); // Now we have another edge!
+
+    ITableWorkspace_sptr outWS = doExecute(inWS);
+
+    TSM_ASSERT_EQUALS("Wrong number of faces", outWS->rowCount(), 3);
+
+    size_t rowIndex = 0;
+    int clusterId = 1;
+    size_t expectedWorkspaceIndex = 1;
+    int expectedNormalDimensionIndex = 0;
+    bool maxExtent = true;
+    verify_table_row(outWS, clusterId, 0/*workspace index*/, expectedNormalDimensionIndex, maxExtent);
+    verify_table_row(outWS, clusterId, 2/*workspace index*/, expectedNormalDimensionIndex, maxExtent);
+    verify_table_row(outWS, clusterId, 2/*workspace index*/, expectedNormalDimensionIndex, !maxExtent);
+  }
+
+  void test_find_four_edges_2D()
+  {
+
+    /*-------------
+
+     Single non-empty cluster point. Should produce four faces.
+
+     |---|---|---|
+     |---|-x-|---|
+     |---|---|---|
+
+     --------------*/
+
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(0, 2, 3); // Makes a 2 by 3 md ws with identical signal values of zero.
+    inWS->setSignalAt(4, 1); // Central point is non-zero
+
+    ITableWorkspace_sptr outWS = doExecute(inWS);
+
+    TSM_ASSERT_EQUALS("Wrong number of faces", outWS->rowCount(), 4);
+
+
   }
 
 };
