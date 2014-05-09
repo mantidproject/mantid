@@ -102,7 +102,6 @@ namespace Crystal
     typedef std::map<int, std::vector<size_t> > bankMap_t;
     typedef std::map<int, bankMap_t> runMap_t;
     std::set<int> uniqueBanks;
-    // cppcheck-suppress syntaxError
     std::string grouping = "bank";
     if (inst->getName() == "WISH") grouping = "WISHpanel0";
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
