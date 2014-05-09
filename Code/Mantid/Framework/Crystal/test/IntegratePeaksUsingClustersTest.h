@@ -60,7 +60,9 @@ namespace
     auto mdworkspaceAlg = AlgorithmManager::Instance().createUnmanaged("CreateMDWorkspace");
     mdworkspaceAlg->setChild(true);
     mdworkspaceAlg->initialize();
-    mdworkspaceAlg->setProperty("Dimensions", 3);
+    mdworkspaceAlg->setProperty("Dimensionality", 3);
+    std::vector<int> numbersOfBins = std::vector<int>(3, 10);
+    mdworkspaceAlg->setProperty("NumberOfBins", numbersOfBins);
     std::vector<double> extents = boost::assign::list_of(min)(max)(min)(max)(min)(max).convert_to_container<std::vector<double> >();
     mdworkspaceAlg->setProperty("Extents", extents);
     mdworkspaceAlg->setPropertyValue("Names", "H,K,L");

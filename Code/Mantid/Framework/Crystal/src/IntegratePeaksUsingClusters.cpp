@@ -47,6 +47,7 @@ For more in-depth analysis, the algorithm will produce debug log messages.
 #include "MantidCrystal/ICluster.h"
 #include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/HardThresholdBackground.h"
+#include "MantidCrystal/PeakClusterProjection.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDIterator.h"
