@@ -172,13 +172,15 @@ std::list<MantidVec::const_iterator> PoldiPeakSearch::findPeaksRecursive(MantidV
     // ...and perform same search on sub-list left of maximum...
     MantidVec::const_iterator leftBegin = getLeftRangeBegin(begin);
     if(std::distance(leftBegin, maxInRange) > m_minimumDistance) {
-        peaks.merge(findPeaksRecursive(leftBegin, maxInRange - m_minimumDistance));
+        std::list<MantidVec::const_iterator> leftBranchPeaks = findPeaksRecursive(leftBegin, maxInRange - m_minimumDistance);
+        peaks.insert(peaks.end(), leftBranchPeaks.begin(), leftBranchPeaks.end());
     }
 
     // ...and right of maximum
     MantidVec::const_iterator rightEnd = getRightRangeEnd(end);
     if(std::distance(maxInRange + 1, rightEnd) > m_minimumDistance) {
-        peaks.merge(findPeaksRecursive(maxInRange + 1 + m_minimumDistance, rightEnd));
+        std::list<MantidVec::const_iterator> rightBranchPeaks = findPeaksRecursive(maxInRange + 1 + m_minimumDistance, rightEnd);
+        peaks.insert(peaks.end(), rightBranchPeaks.begin(), rightBranchPeaks.end());
     }
 
     return peaks;
