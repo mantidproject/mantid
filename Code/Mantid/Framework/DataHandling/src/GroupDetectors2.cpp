@@ -742,9 +742,12 @@ void GroupDetectors2::processGroupingWorkspace(GroupingWorkspace_const_sptr grou
   {
     size_t groupid = dit->first;
     std::set<size_t>& targetWSIndexSet = dit->second;
-    std::vector<size_t> tempv;
-    tempv.assign( targetWSIndexSet.begin(), targetWSIndexSet.end() );
-    m_GroupSpecInds.insert(std::make_pair(static_cast<specid_t>(groupid), tempv));
+    if (targetWSIndexSet.size()>0)
+    {
+      std::vector<size_t> tempv;
+      tempv.assign( targetWSIndexSet.begin(), targetWSIndexSet.end() );
+      m_GroupSpecInds.insert(std::make_pair(static_cast<specid_t>(groupid), tempv));
+    }
   }
       
   return;
