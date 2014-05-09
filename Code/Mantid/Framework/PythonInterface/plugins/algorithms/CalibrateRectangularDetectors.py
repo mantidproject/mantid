@@ -539,9 +539,13 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         for (samNum, backNum) in zip(samRuns, backRuns):
             # first round of processing the sample
             samRun = self._loadData(samNum, SUFFIX, filterWall)
+            CompressEvents(samRun)
             if (backNum > 0):
                 backRun = self._loadData(backNum, SUFFIX, filterWall)
+                CompressEvents(backRun)
                 samRun -= backRun
+                DeleteWorkspace(backRun)
+                CompressEvents(samRun)
             if self.getProperty("CrossCorrelation").value:
                 samRun = self._cccalibrate(samRun, calib, filterLogs)
             else:
@@ -550,6 +554,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 if AnalysisDataService.doesExist(str(samRun)):
                     AnalysisDataService.remove(str(samRun))
                 samRun = self._loadData(samNum, SUFFIX, filterWall)
+                CompressEvents(samRun)
                 LRef = self.getProperty("UnwrapRef").value
                 DIFCref = self.getProperty("LowResRef").value
                 if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
