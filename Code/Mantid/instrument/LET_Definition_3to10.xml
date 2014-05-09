@@ -2,9 +2,9 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" 
- name="LET" valid-from   ="2014-02-11 00:00:01"
-                       valid-to     ="2014-05-01 23:59:59"
-		       last-modified="2014-05-06 00:00:00">
+ name="LET" valid-from   ="2014-05-02 23:59:59"
+                       valid-to     ="2100-01-31 23:59:59"
+		       last-modified="2014-05-08 00:00:00">
  
    <defaults>
      <length unit="meter"/>
@@ -687,5 +687,4 @@
 
 
  </instrument>
-
 
