@@ -1,5 +1,6 @@
 import mantid
 from mantid.simpleapi import *
+from mantid import api
 import os
 import string
 
@@ -18,6 +19,13 @@ def create_resultname(run_number, prefix='', suffix=''):
     """Create a string based on the run number and optional prefix and 
     suffix.    
     """
+    if type(run_number) is api._api.MatrixWorkspace:
+        run_number = run_number.getRunNumber();
+    elif type(run_number) is str:
+        if run_number in mtd:
+            pws = mtd[run_number];
+            run_number = pws.getRunNumber();
+
     if type(run_number) == list:
         name = create_resultname(run_number[0], prefix, suffix)
     elif type(run_number) == int:
