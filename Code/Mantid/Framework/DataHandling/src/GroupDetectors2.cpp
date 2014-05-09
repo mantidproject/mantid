@@ -671,7 +671,7 @@ void GroupDetectors2::processGroupingWorkspace(GroupingWorkspace_const_sptr grou
     std::set<size_t>& targetWSIndexSet = dit->second;
     std::vector<size_t> tempv;
     tempv.assign( targetWSIndexSet.begin(), targetWSIndexSet.end() );
-    m_GroupSpecInds.insert(std::make_pair(groupid, tempv));
+    m_GroupSpecInds.insert(std::make_pair(static_cast<specid_t>(groupid), tempv));
   }
       
   return;
@@ -688,7 +688,6 @@ void GroupDetectors2::processGroupingWorkspace(GroupingWorkspace_const_sptr grou
 {
   detid2index_map detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap();
   
-
   typedef std::map<size_t,std::set<size_t>> Group2SetMapType;
   Group2SetMapType group2WSIndexSetmap;
 
@@ -745,7 +744,7 @@ void GroupDetectors2::processGroupingWorkspace(GroupingWorkspace_const_sptr grou
     std::set<size_t>& targetWSIndexSet = dit->second;
     std::vector<size_t> tempv;
     tempv.assign( targetWSIndexSet.begin(), targetWSIndexSet.end() );
-    m_GroupSpecInds.insert(std::make_pair(groupid, tempv));
+    m_GroupSpecInds.insert(std::make_pair(static_cast<specid_t>(groupid), tempv));
   }
       
   return;
