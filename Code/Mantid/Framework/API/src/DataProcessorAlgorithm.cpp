@@ -55,7 +55,6 @@ namespace API
   *  @param endProgress ::    The percentage progress value of the overall algorithm where this child algorithm ends
   *  @param enableLogging ::  Set to false to disable logging from the child algorithm
   *  @param version ::        The version of the child algorithm to create. By default gives the latest version.
-  *  @param recordHistory ::  Set whether to record history for children. By default this is set to false.
   *  @return shared pointer to the newly created algorithm object
   */
   boost::shared_ptr<Algorithm> DataProcessorAlgorithm::createChildAlgorithm(const std::string& name, const double startProgress,
