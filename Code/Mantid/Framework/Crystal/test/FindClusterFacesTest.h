@@ -477,7 +477,7 @@ public:
     m_filterWS = create_peaks_WS(inst);
 
     //Add 50 cluster points and correspoinding peaks.
-    for (size_t i = 0; i < nBins; i += 2)
+    for (int i = 0; i < nBins; i += 2)
     {
       m_inWS->setSignalAt(i, static_cast<Mantid::signal_t>(i));
 
