@@ -59,7 +59,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         validator.setLower(0)
         self.declareProperty(IntArrayProperty("Background", values=[0], direction=Direction.Input, 
                                               validator=validator))
-        extensions = [ "_histo.nxs", "_event.nxs", "_runinfo.xml"]
+        extensions = [ "_event.nxs", "_runinfo.xml"]
         self.declareProperty("Extension", "_event.nxs",
                              StringListValidator(extensions))
         self.declareProperty("CompressOnRead", False,
@@ -172,7 +172,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             @param runnumer: run number (integer)
             @param extension: file extension 
         """
-        kwargs["Precount"] = True
+        kwargs["Precount"] = False
+        if self.getProperty("CompressOnRead").value:
+            kwargs["CompressTolerance"] = .1
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
@@ -183,17 +185,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             LoadInstrument(Workspace=wksp, Filename=path+'/'+"NOMAD_Definition_20120701-20120731.xml", 
                            RewriteSpectraMap=False)
         return wksp
-
-    def _loadHistoNeXusData(self, runnumber, extension):
-        """
-            Load histogram Nexus
-            @param runnumber: run number (integer)
-            @param extension: file extension
-        """
-        self.log().warning("Loading histogram Nexus for run %s" % runnumber)
-        name = "%s_%d" % (self._instrument, runnumber)
-        filename = name + extension
-        return LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
 
     def _loadData(self, runnumber, extension, filterWall=None):
         """
@@ -212,11 +203,17 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             return None
 
         if extension.endswith("_event.nxs"):
-            return self._loadEventNeXusData(runnumber, extension, **filter)
-        elif extension.endswith("_histo.nxs"):
-            return self._loadHistoNeXusData(runnumber, extension)
+            wksp = self._loadEventNeXusData(runnumber, extension, **filter)
         else:
-            return self._loadPreNeXusData(runnumber, extension, **filter)
+            wksp = self._loadPreNeXusData(runnumber, extension, **filter)
+
+        if self._filterBadPulses and not self.getProperty("CompressOnRead").value:
+            wksp = FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp.name())
+
+        if not self.getProperty("CompressOnRead").value:
+            wksp = CompressEvents(wksp, OutputWorkspace=wksp.name(), 
+                                  Tolerance=COMPRESS_TOL_TOF) # 100ns
+        return wksp
 
     def _cccalibrate(self, wksp, calib, filterLogs=None):
         if wksp is None:
@@ -230,8 +227,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 wksp = RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp.name(), 
                                        ReferenceDIFC=DIFCref)
         # take care of filtering events
-        if self._filterBadPulses and not self.getProperty("CompressOnRead").value:
-            wksp = FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp.name())
         if filterLogs is not None:
             try:
                 logparam = wksp.getRun()[filterLogs[0]]
@@ -378,8 +373,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 wksp = RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp.name(), 
                                        ReferenceDIFC=DIFCref)
         # take care of filtering events
-        if self._filterBadPulses and not self.getProperty("CompressOnRead").value and not "histo" in self.getProperty("Extension").value:
-            wksp = FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp.name())
         if filterLogs is not None:
             try:
                 logparam = wksp.getRun()[filterLogs[0]]
@@ -539,13 +532,16 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         for (samNum, backNum) in zip(samRuns, backRuns):
             # first round of processing the sample
             samRun = self._loadData(samNum, SUFFIX, filterWall)
-            CompressEvents(samRun)
+            samRun = CompressEvents(samRun, OutputWorkspace=samRun.name(), 
+                                  Tolerance=COMPRESS_TOL_TOF) # 100ns
             if (backNum > 0):
                 backRun = self._loadData(backNum, SUFFIX, filterWall)
-                CompressEvents(backRun)
+                backRun = CompressEvents(backRun, OutputWorkspace=backRun.name(), 
+                                         Tolerance=COMPRESS_TOL_TOF) # 100ns
                 samRun -= backRun
                 DeleteWorkspace(backRun)
-                CompressEvents(samRun)
+                samRun = CompressEvents(samRun, OutputWorkspace=samRun.name(), 
+                                        Tolerance=COMPRESS_TOL_TOF) # 100ns
             if self.getProperty("CrossCorrelation").value:
                 samRun = self._cccalibrate(samRun, calib, filterLogs)
             else:
@@ -554,7 +550,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 if AnalysisDataService.doesExist(str(samRun)):
                     AnalysisDataService.remove(str(samRun))
                 samRun = self._loadData(samNum, SUFFIX, filterWall)
-                CompressEvents(samRun)
+                samRun = CompressEvents(samRun, OutputWorkspace=samRun.name(), 
+                                         Tolerance=COMPRESS_TOL_TOF) # 100ns
                 LRef = self.getProperty("UnwrapRef").value
                 DIFCref = self.getProperty("LowResRef").value
                 if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
