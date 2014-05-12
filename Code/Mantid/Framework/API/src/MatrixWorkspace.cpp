@@ -1,4 +1,5 @@
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
@@ -1207,9 +1208,11 @@ namespace Mantid
     public:
 
       MWDimension(const Axis* axis, const std::string& dimensionId):
-          m_axis(*axis), m_dimensionId(dimensionId)
+          m_axis(*axis), m_dimensionId(dimensionId),
+          m_haveEdges(dynamic_cast<const BinEdgeAxis*>(&m_axis) != NULL)
       {
       }
+
       /// the name of the dimennlsion as can be displayed along the axis
       virtual std::string getName() const
       {
@@ -1235,7 +1238,11 @@ namespace Mantid
       virtual coord_t getMaximum() const {return coord_t(m_axis.getMax());}
 
       /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points. 
-      virtual size_t getNBins() const {return m_axis.length();}
+      virtual size_t getNBins() const
+      {
+        if(m_haveEdges) return m_axis.length() - 1;
+        else return m_axis.length();
+      }
 
       /// Change the extents and number of bins
       virtual void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/){throw std::runtime_error("Not implemented");}
@@ -1243,14 +1250,24 @@ namespace Mantid
       ///  Get coordinate for index;
       virtual coord_t getX(size_t ind)const {return coord_t(m_axis(ind));}
 
+      /**
+       * Return the bin width taking into account if the stored values are actually bin centres or not
+       * @return A single value for the uniform bin width
+       */
+      virtual coord_t getBinWidth() const
+      {
+        size_t nsteps = (m_haveEdges) ? this->getNBins() : this->getNBins() - 1;
+        return (getMaximum() - getMinimum())/static_cast<coord_t>(nsteps);
+      }
 
       //Dimensions must be xml serializable.
       virtual std::string toXMLString() const {throw std::runtime_error("Not implemented");}
 
-      virtual ~MWDimension(){};
+      virtual ~MWDimension(){}
     private:
       const Axis& m_axis;
       const std::string m_dimensionId;
+      const bool m_haveEdges;
     };
 
 
@@ -1269,7 +1286,7 @@ namespace Mantid
         m_X = ws->readX(0);
       }
 
-      virtual ~MWXDimension(){};
+      virtual ~MWXDimension(){}
 
       /// the name of the dimennlsion as can be displayed along the axis
       virtual std::string getName() const
@@ -1297,7 +1314,10 @@ namespace Mantid
       virtual coord_t getMaximum() const {return coord_t(m_X.back());}
 
       /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points.
-      virtual size_t getNBins() const {return m_X.size()-1;}
+      virtual size_t getNBins() const
+      {
+        return (m_ws->isHistogramData()) ? m_X.size() - 1 : m_X.size();
+      }
 
       /// Change the extents and number of bins
       virtual void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/){throw std::runtime_error("Not implemented");}
@@ -1435,10 +1455,6 @@ namespace Mantid
       }
 
       const size_t nhist = this->getNumberHistograms();
-      // a binned vertical axis will have 1 more value than there are histograms
-      // so if the value did not throw out of range then it must be in the last bin
-      if(wi == nhist) wi = nhist-1;
-
       const auto & yVals = this->readY(wi);
       double yBinSize(1.0); // only applies for volume normalization & numeric axis
       if (normalization == VolumeNormalization && ax1->isNumeric())
