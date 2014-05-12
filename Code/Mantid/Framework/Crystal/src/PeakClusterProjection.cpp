@@ -51,9 +51,10 @@ namespace Crystal
 {
 
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
+ /**
+ Constructor
+ @param mdWS: Input image workspace to base the projection on and to take the coordinate system from.
+ */
   PeakClusterProjection::PeakClusterProjection(IMDHistoWorkspace_sptr& mdWS) : m_mdWS(mdWS)
   {
     auto coordinateSystem = mdWS->getSpecialCoordinateSystem();
