@@ -1,6 +1,13 @@
 /*WIKI*
- TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
- *WIKI*/
+
+Algorithm takes an image workspace (a.k.a [[IMDHistoWorkspace]]) and determines the faces of the clusters contained within the image.
+The image is expected to be a labeled image workspace outputted from [[IntegratePeaksUsingClusters]]. The algorithm generates a 
+[[TableWorkspace]] as output, which contains all the cluster edge faces required to draw the outer edge of all clusters within the workspace.
+
+You may optionally provide a FilterWorkspace, which is a [[PeaksWorkspace]]. If provided, the Peak locations are projected onto the InputWorkspace
+and the center locations are used to restrict the output to only include the clusters that are the union between the peak locations and the image clusters.
+ 
+*WIKI*/
 
 #include "MantidCrystal/FindClusterFaces.h"
 
