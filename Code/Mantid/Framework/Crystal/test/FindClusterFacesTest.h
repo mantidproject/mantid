@@ -4,14 +4,110 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindClusterFaces.h"
+
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidGeometry/Instrument.h"
+#include <boost/assign/list_of.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
+using namespace Mantid::DataObjects;
 using namespace Mantid::MDEvents;
 using Mantid::Crystal::FindClusterFaces;
 
+namespace
+{
+  // Helper function to create a peaks workspace.
+  IPeaksWorkspace_sptr create_peaks_WS(Instrument_sptr inst)
+  {
+    PeaksWorkspace* pPeaksWS = new PeaksWorkspace();
+    pPeaksWS->setCoordinateSystem(Mantid::API::HKL);
+    IPeaksWorkspace_sptr peakWS(pPeaksWS);
+    peakWS->setInstrument(inst);
+    return peakWS;
+  }
+
+  // Helper function to create a MD Image workspace of labels.
+  IMDHistoWorkspace_sptr create_HKL_MDWS(double min = -10, double max = 10, int numberOfBins = 3,
+      double signalValue = 1, double errorValue = 1)
+  {
+    const int dimensionality = 3;
+    int totalBins = 1;
+    for (int i = 0; i < dimensionality; ++i)
+    {
+      totalBins *= numberOfBins;
+    }
+    auto mdworkspaceAlg = AlgorithmManager::Instance().createUnmanaged("CreateMDHistoWorkspace");
+    mdworkspaceAlg->setChild(true);
+    mdworkspaceAlg->initialize();
+    mdworkspaceAlg->setProperty("Dimensionality", dimensionality);
+    std::vector<int> numbersOfBins(dimensionality, numberOfBins);
+    mdworkspaceAlg->setProperty("NumberOfBins", numbersOfBins);
+    std::vector<double> extents =
+        boost::assign::list_of(min)(max)(min)(max)(min)(max).convert_to_container<std::vector<double> >();
+    mdworkspaceAlg->setProperty("Extents", extents);
+    std::vector<double> signalValues(totalBins, signalValue);
+    mdworkspaceAlg->setProperty("SignalInput", signalValues);
+    std::vector<double> errorValues(totalBins, errorValue);
+    mdworkspaceAlg->setProperty("ErrorInput", errorValues);
+    mdworkspaceAlg->setPropertyValue("Names", "H,K,L");
+    mdworkspaceAlg->setPropertyValue("Units", "-,-,-");
+    mdworkspaceAlg->setPropertyValue("OutputWorkspace", "IntegratePeaksMDTest_MDEWS");
+    mdworkspaceAlg->execute();
+    IMDHistoWorkspace_sptr inWS = mdworkspaceAlg->getProperty("OutputWorkspace");
+
+    // --- Set speical coordinates on fake mdworkspace --
+    auto coordsAlg = AlgorithmManager::Instance().createUnmanaged("SetSpecialCoordinates");
+    coordsAlg->setChild(true);
+    coordsAlg->initialize();
+    coordsAlg->setProperty("InputWorkspace", inWS);
+    coordsAlg->setProperty("SpecialCoordinates", "HKL");
+    coordsAlg->execute();
+    return inWS;
+  }
+
+  ITableWorkspace_sptr doExecute(IMDHistoWorkspace_sptr& inWS)
+  {
+    FindClusterFaces alg;
+    alg.setRethrows(true);
+    //alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    alg.execute();
+    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+        "dummy_value");
+    //ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    return outWS;
+  }
+
+  ITableWorkspace_sptr doExecuteWithFilter(IMDHistoWorkspace_sptr& inWS, IPeaksWorkspace_sptr& filterWS)
+  {
+    FindClusterFaces alg;
+    alg.setRethrows(true);
+    //alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("FilterWorkspace", filterWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    alg.execute();
+    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+        "dummy_value");
+    //ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    return outWS;
+  }
+}
+
+//=====================================================================================
+// Functional Tests
+//=====================================================================================
 class FindClusterFacesTest: public CxxTest::TestSuite
 {
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -31,17 +127,9 @@ public:
     TS_ASSERT( alg.isInitialized())
   }
 
-  ITableWorkspace_sptr doExecute(IMDHistoWorkspace_sptr& inWS)
+  FindClusterFacesTest()
   {
-    FindClusterFaces alg;
-    alg.setRethrows(true);
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", inWS);
-    alg.setPropertyValue("OutputWorkspace", "dummy_value");
-    alg.execute();
-    ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
-    return outWS;
+    Mantid::API::FrameworkManager::Instance();
   }
 
   void test_find_no_edges_1D()
@@ -278,6 +366,138 @@ public:
     verify_table_row(outWS, clusterId, 26 /*workspace index*/, 2 /*expectedNormalDimensionIndex*/,
         !maxExtent);
 
+  }
+
+  void test_find_cluster_faces_throws_if_peaks_workspace_and_dimensionality_less_than_three()
+  {
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(0, 2, 1);
+
+    IPeaksWorkspace_sptr filterWS = boost::make_shared<PeaksWorkspace>();
+    TS_ASSERT_THROWS(doExecuteWithFilter(inWS, filterWS), std::invalid_argument&);
+  }
+
+  void test_only_create_faces_for_clusters_corresponding_to_peaks()
+  {
+    const double min = 0; // HKL
+    const double max = 10; // HKL
+
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+    IPeaksWorkspace_sptr filterWS = create_peaks_WS(inst);
+
+    Peak peak(inst, 15050, 1.0);
+    peak.setHKL(5, 5, 5); // Set HKL of peak
+    filterWS->addPeak(peak); // Add a single peak.
+
+    size_t nBins = 10;
+    size_t bulkSignalValue = 0;
+    auto inWS = create_HKL_MDWS(min, max, nBins, bulkSignalValue);
+    inWS->setSignalAt(0, 2); // Cluster at linear index 0. No corresponding peak position.
+    inWS->setSignalAt(555, 1); // Cluster at linear index 125. Corresponds with peak position
+
+    ITableWorkspace_sptr faces = doExecuteWithFilter(inWS, filterWS);
+    TSM_ASSERT_EQUALS(
+        "Should have exactly 6 entries in the table. One cluster with 6 neighbours. The other cluster should be ignored as has no corresponding peak.",
+        6, faces->rowCount());
+  }
+
+  void test_complex_filtering()
+  {
+    const double min = 0; // HKL
+    const double max = 10; // HKL
+
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+    IPeaksWorkspace_sptr filterWS = create_peaks_WS(inst);
+
+    Peak centerPeak(inst, 15050, 1.0);
+    centerPeak.setHKL(5, 5, 5); // Set HKL of peak
+    filterWS->addPeak(centerPeak); // Add a valid center peak. Produces 6 faces.
+
+    Peak cornerPeak(inst, 15050, 1.0);
+    cornerPeak.setHKL(0, 0, 0); // Set HKL of peak
+    filterWS->addPeak(cornerPeak); // Add a valid corner peak. Produces 3 faces.
+
+    Peak outOfBoundsPeak(inst, 15050, 1.0);
+    outOfBoundsPeak.setHKL(20, 20, 20); // Set HKL of peak
+    filterWS->addPeak(outOfBoundsPeak); // Add an out of bounds peak. Produces 0 faces.
+
+    size_t nBins = 10;
+    size_t bulkSignalValue = 0;
+    auto inWS = create_HKL_MDWS(min, max, nBins, bulkSignalValue);
+    inWS->setSignalAt(0, 2); // Cluster at linear index 0. No corresponding peak position.
+    inWS->setSignalAt(555, 1); // Cluster at linear index 125. Corresponds with peak position
+
+    ITableWorkspace_sptr faces = doExecuteWithFilter(inWS, filterWS);
+    TSM_ASSERT_EQUALS(
+        "Should have exactly 3+6 entries in the table. One cluster with 6 neighbours, another with 3. The other cluster should be ignored as has no corresponding peak.",
+        9, faces->rowCount());
+  }
+
+};
+
+//=====================================================================================
+// Performance Tests
+//=====================================================================================
+class FindClusterFacesTestPerformance: public CxxTest::TestSuite
+{
+private:
+
+  IMDHistoWorkspace_sptr m_inWS;
+  IPeaksWorkspace_sptr m_filterWS;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FindClusterFacesTestPerformance *createSuite()
+  {
+    return new FindClusterFacesTestPerformance();
+  }
+  static void destroySuite(FindClusterFacesTestPerformance *suite)
+  {
+    delete suite;
+  }
+
+  void test_Init()
+  {
+    FindClusterFaces alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize())
+    TS_ASSERT( alg.isInitialized())
+  }
+
+  FindClusterFacesTestPerformance()
+  {
+    const double min = 0; // HKL
+    const double max = 10; // HKL
+
+    Mantid::API::FrameworkManager::Instance();
+    size_t nBins = 100;
+    size_t bulkSignalValue = 0;
+    m_inWS = create_HKL_MDWS(min, max, nBins, bulkSignalValue);
+
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+    m_filterWS = create_peaks_WS(inst);
+
+    //Add 50 cluster points and correspoinding peaks.
+    for (size_t i = 0; i < nBins; i += 2)
+    {
+      m_inWS->setSignalAt(i, i);
+
+      Peak peak(inst, 15050, 1.0);
+      peak.setHKL(i, 0, 0); // Set HKL of peak
+      m_filterWS->addPeak(peak); // Add a valid center peak. Produces 6 faces.
+    }
+
+  }
+
+  void test_execution_unfiltered()
+  {
+    auto outTable = doExecute(m_inWS);
+    TS_ASSERT(outTable->rowCount() > 0);
+  }
+
+  void test_execution_filtered()
+  {
+    auto outTable = doExecuteWithFilter(m_inWS, m_filterWS);
+    TS_ASSERT(outTable->rowCount() > 0);
   }
 
 };

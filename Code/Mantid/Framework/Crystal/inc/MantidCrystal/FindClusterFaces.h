@@ -4,12 +4,14 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 
+
+
 namespace Mantid
 {
 namespace Crystal
 {
 
-  /** FindClusterFaces : TODO: DESCRIPTION
+  /** FindClusterFaces : Algorithm to find faces of clusters in an MDHistoWorkspace (image)
     
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
