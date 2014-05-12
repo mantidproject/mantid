@@ -63,17 +63,21 @@ public:
   virtual bool operator==(const Axis&) const;
   std::string label(const std::size_t& index)const;
   /// Create bin boundaries from the point values
-  std::vector<double> createBinBoundaries() const;
+  virtual std::vector<double> createBinBoundaries() const;
+  /// Return a const reference to the values
   const std::vector<double> & getValues() const;
    /// returns min value defined on axis
   double getMin()const{return m_values.front() ; }
    /// returns max value defined on axis
   double getMax()const{return m_values.back(); }
+
+protected:
+  /// A vector holding the axis values for the axis.
+  std::vector<double> m_values;
+
 private:
   /// Private, undefined copy assignment operator
   const NumericAxis& operator=(const NumericAxis&);
-  /// A vector holding the axis values for the axis.
-  std::vector<double> m_values;
 };
 
 } // namespace API

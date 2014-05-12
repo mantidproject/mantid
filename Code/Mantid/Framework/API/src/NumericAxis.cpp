@@ -72,7 +72,8 @@ void NumericAxis::setValue(const std::size_t& index, const double& value)
 }
 
 /**
- * Finds the closest index of the given value on the axis
+ * Treats values as bin centres and computes bin widths from the surrounding
+ * values. The index returned is the index of the bin
  * @param value A value on the axis
  * @return The index closest to given value
  * @throws std::out_of_range if the value is out of range of the axis
