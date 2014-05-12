@@ -237,16 +237,6 @@ public:
     TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name), std::invalid_argument);
   }
 
-  void test_GetPropertyAsSingleValue_Throws_If_StatisticType_Is_Unknown_And_Type_Is_TimeSeries()
-  {
-    LogManager runInfo;
-    const std::string name = "series";
-    addTestTimeSeries(runInfo, name);
-
-    const unsigned int statistic(100);
-    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name, (Math::StatisticType)statistic), std::invalid_argument);
-  }
-
   void test_GetPropertyAsSingleValue_Returns_Simple_Mean_By_Default_For_Time_Series()
   {
     LogManager runInfo;

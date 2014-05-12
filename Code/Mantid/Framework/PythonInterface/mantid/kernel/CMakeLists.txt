@@ -43,6 +43,7 @@ set ( EXPORT_FILES
   src/Exports/UnitLabel.cpp
   src/Exports/DeltaEMode.cpp
   src/Exports/PropertyManager.cpp
+  src/Exports/PropertyHistory.cpp
   src/Exports/Memory.cpp
   src/Exports/ProgressBase.cpp
   src/Exports/Material.cpp

@@ -47,8 +47,14 @@ class DensityOfStates(PythonAlgorithm):
 			self.declareProperty(name='ZeroThreshold', defaultValue=3.0, 
 				doc='Ignore frequencies below the this threshold. Default is 3.0')
 			
-			self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output), 
-			  doc="Name to give the output workspace.")
+			self.declareProperty(StringArrayProperty('Ions', Direction.Input), 
+				doc="List of Ions to use to calculate partial density of states. If left blank, total density of states will be calculated")
+			
+			self.declareProperty(name='SumContributions', defaultValue=False,
+				doc="Sum the partial density of states into a single workspace.")
+
+			self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output), 
+				doc="Name to give the output workspace.")
 			
 			#regex pattern for a floating point number
 			self._float_regex = '\-?(?:\d+\.?\d*|\d*\.?\d+)'
@@ -60,11 +66,37 @@ class DensityOfStates(PythonAlgorithm):
 			self._get_properties()
 
 			file_name = self.getPropertyValue('File')
-			frequencies, ir_intensities, raman_intensities, weights = self._read_data_from_file(file_name)
+			file_data = self._read_data_from_file(file_name)
+			frequencies, ir_intensities, raman_intensities, weights = file_data[:4]
 
-			if self._spec_type == 'DOS':
+			prog_reporter = Progress(self,0.0,1.0,1)
+			if self._calc_partial:
+				eigenvectors = file_data[4]
+				prog_reporter.report("Calculating partial density of states")
+				
+				if self._sum_contributions:
+					#sum each of the contributions
+					self._compute_partial(self._partial_ion_numbers, frequencies, eigenvectors, weights)				
+					mtd[self._ws_name].setYUnit('(D/A)^2/amu')
+					mtd[self._ws_name].setYUnitLabel('Intensity')
+				else:
+					#output each contribution to it's own workspace
+					partial_workspaces = []
+					for ion_name, ions in self._ion_dict.items():
+						self._compute_partial(ions, frequencies, eigenvectors, weights)
+						mtd[self._ws_name].setYUnit('(D/A)^2/amu')
+						mtd[self._ws_name].setYUnitLabel('Intensity')
+						
+						partial_ws_name = self._ws_name + '_' + ion_name
+						partial_workspaces.append(partial_ws_name)
+						RenameWorkspace(self._ws_name, OutputWorkspace=partial_ws_name)
+
+					group = ','.join(partial_workspaces)
+					GroupWorkspaces(group, OutputWorkspace=self._ws_name)
+
+			elif self._spec_type == 'DOS':
+				prog_reporter.report("Calculating density of states")
 				self._compute_DOS(frequencies, np.ones_like(frequencies), weights)
-				#set y units on output workspace
 				mtd[self._ws_name].setYUnit('(D/A)^2/amu')
 				mtd[self._ws_name].setYUnitLabel('Intensity')
 
@@ -72,8 +104,8 @@ class DensityOfStates(PythonAlgorithm):
 				if ir_intensities.size == 0:
 					raise ValueError("Could not load any IR intensities from file.")
 				
+				prog_reporter.report("Calculating IR intensities")
 				self._compute_DOS(frequencies, ir_intensities, weights)
-				#set y units on output workspace
 				mtd[self._ws_name].setYUnit('(D/A)^2/amu')
 				mtd[self._ws_name].setYUnitLabel('Intensity')
 
@@ -81,8 +113,8 @@ class DensityOfStates(PythonAlgorithm):
 				if raman_intensities.size == 0:
 					raise ValueError("Could not load any Raman intensities from file.")
 
+				prog_reporter.report("Calculating Raman intensities")
 				self._compute_raman(frequencies, raman_intensities, weights)
-				#set y units on output workspace
 				mtd[self._ws_name].setYUnit('A^4')
 				mtd[self._ws_name].setYUnitLabel('Intensity')
 
@@ -102,6 +134,9 @@ class DensityOfStates(PythonAlgorithm):
 			self._peak_width = self.getProperty('PeakWidth').value
 			self._scale = self.getProperty('Scale').value
 			self._zero_threshold = self.getProperty('ZeroThreshold').value
+			self._ions = self.getProperty('Ions').value
+			self._sum_contributions = self.getProperty('SumContributions').value
+			self._calc_partial = (len(self._ions) > 0)
 
 #----------------------------------------------------------------------------------------
 
@@ -137,6 +172,43 @@ class DensityOfStates(PythonAlgorithm):
 							dos[index+l] += hist[index] * gamma_by_2 / ( l ** 2 + gamma_by_2 **2 ) / math.pi
 				
 			return dos
+
+#----------------------------------------------------------------------------------------
+
+		def _compute_partial(self, ion_numbers, frequencies, eigenvectors, weights):
+			"""
+			Compute partial Density Of States.
+
+			This uses the eigenvectors in a .phonon file to calculate
+			the partial density of states.
+
+			@param frequencies - frequencies read from file
+			@param eigenvectors - eigenvectors read from file
+			@param weights - weights for each frequency block
+			"""
+
+			intensities = []
+			for block_vectors in eigenvectors:
+				block_intensities = []
+				for mode in xrange(self._num_branches):
+					#only select vectors for the ions we're interested in
+					lower, upper = mode*self._num_ions, (mode+1)*self._num_ions
+					vectors = block_vectors[lower:upper] 
+					vectors = vectors[ion_numbers]
+					
+					#compute intensity
+					exponent = np.empty(vectors.shape)
+					exponent.fill(2)
+					vectors = np.power(vectors, exponent)
+					total = np.sum(vectors)
+					
+					block_intensities.append(total)
+
+				intensities += block_intensities
+			
+			intensities = np.asarray(intensities)
+			self._compute_DOS(frequencies, intensities, weights)
+
 
 #----------------------------------------------------------------------------------------
 
@@ -243,14 +315,17 @@ class DensityOfStates(PythonAlgorithm):
 			if ext == '.phonon':
 				file_data = self._parse_phonon_file(file_name)
 			elif ext == '.castep':
+				if len(self._ions) > 0:
+					raise ValueError("Cannot compute partial density of states from .castep files.")
+
 				file_data = self._parse_castep_file(file_name)
 
-			frequencies, ir_intensities, raman_intensities, weights = file_data
+			frequencies = file_data[0]
 
 			if ( frequencies.size == 0 ):
 				raise ValueError("Failed to load any frequencies from file.")
 
-			return frequencies, ir_intensities, raman_intensities, weights
+			return file_data
 
 #----------------------------------------------------------------------------------------
 
@@ -287,8 +362,38 @@ class DensityOfStates(PythonAlgorithm):
 					self._num_ions = int(line.strip().split()[-1])
 				elif 'Number of branches' in line:
 					self._num_branches = int(line.strip().split()[-1])
+				elif self._calc_partial and 'Fractional Co-ordinates' in line:
+					#we're calculating partial density of states
+					self._ion_dict = dict( (ion, []) for ion in self._ions)
+					
+					if self._num_ions == None:
+						raise IOError("Failed to parse file. Invalid file header.")
 
-				if 'END header' in line: 
+					#extract the mode number for each of the ions we're interested in 
+					for _ in xrange(self._num_ions):
+						line = f_handle.readline()
+						line_data = line.strip().split()
+						ion = line_data[4]
+						
+						if ion in self._ions:
+							mode = int(line_data[0])-1 #-1 to convert to zero based indexing
+							self._ion_dict[ion].append(mode)
+
+					self._partial_ion_numbers = []
+					for ion, ion_nums in self._ion_dict.items():
+						if len(ion_nums) == 0:
+							logger.warning("Could not find any ions of type %s" % ion)		
+						self._partial_ion_numbers += ion_nums
+
+					self._partial_ion_numbers = sorted(self._partial_ion_numbers)
+					self._partial_ion_numbers = np.asarray(self._partial_ion_numbers)
+
+					if self._partial_ion_numbers.size == 0:
+						raise ValueError("Could not find any of the specified ions")
+
+				if 'END header' in line:
+					if self._num_ions == None or self._num_branches == None:
+						raise IOError("Failed to parse file. Invalid file header.")
 					return
 
 #----------------------------------------------------------------------------------------
@@ -299,11 +404,32 @@ class DensityOfStates(PythonAlgorithm):
 
 				@param f_handle - handle to the file.
 				"""
+				prog_reporter = Progress(self,0.0,1.0,1)
 				for _ in xrange( self._num_branches):
 					line = f_handle.readline()
 					line_data = line.strip().split()[1:]
 					line_data = map(float, line_data)
 					yield line_data
+				
+				prog_reporter.report("Reading frequencies.")
+
+#----------------------------------------------------------------------------------------
+		def _parse_phonon_eigenvectors(self, f_handle):
+			vectors = []
+			prog_reporter = Progress(self,0.0,1.0,self._num_branches*self._num_ions)
+			for _ in xrange(self._num_ions*self._num_branches):
+				line = f_handle.readline()
+				
+				if not line:
+					raise IOError("Could not parse file. Invalid file format.")
+				
+				line_data = line.strip().split()
+				vector_componets = line_data[2::2]
+				vector_componets = map(float, vector_componets)
+				vectors.append(vector_componets)
+				prog_reporter.report("Reading eigenvectors.")
+
+			return np.asarray(vectors)
 
 #----------------------------------------------------------------------------------------
 
@@ -323,6 +449,7 @@ class DensityOfStates(PythonAlgorithm):
 			block_count = 0
 
 			frequencies, ir_intensities, raman_intensities, weights = [], [], [], []
+			eigenvectors = []
 			data_lists = (frequencies, ir_intensities, raman_intensities)
 			with open(file_name, 'rU') as f_handle:
 				self._parse_phonon_file_header(f_handle)
@@ -345,20 +472,26 @@ class DensityOfStates(PythonAlgorithm):
 							for data_list, item in zip(data_lists, line_data):
 								data_list.append(item)
 
-					#skip over eigenvectors
 					vector_match = eigenvectors_regex.match(line)
 					if vector_match:
-						for _ in xrange(self._num_ions*self._num_branches):
-							line = f_handle.readline()
-							if not line:
-								raise IOError("Could not parse file. Invalid file format.")
-			
+						if self._calc_partial:
+							#parse eigenvectors for partial dos
+							vectors = self._parse_phonon_eigenvectors(f_handle)
+							eigenvectors.append(vectors)
+						else:
+							#skip over eigenvectors
+							for _ in xrange(self._num_ions*self._num_branches):
+								line = f_handle.readline()
+								if not line:
+									raise IOError("Bad file format. Uexpectedly reached end of file.")
+
 			frequencies = np.asarray(frequencies) 
 			ir_intensities = np.asarray(ir_intensities)
+			eigenvectors = np.asarray(eigenvectors)
 			raman_intensities = np.asarray(raman_intensities)
 			warray = np.repeat(weights, self._num_branches)
 
-			return frequencies, ir_intensities, raman_intensities, warray
+			return frequencies, ir_intensities, raman_intensities, warray, eigenvectors
 
 #----------------------------------------------------------------------------------------
 
@@ -393,6 +526,7 @@ class DensityOfStates(PythonAlgorithm):
 
 			@param f_handle - handle to the file.
 			"""
+			prog_reporter = Progress(self,0.0,1.0,1)
 			for _ in xrange(self._num_branches):
 				line = f_handle.readline()
 				line_data = line.strip().split()[1:-1]
@@ -410,6 +544,8 @@ class DensityOfStates(PythonAlgorithm):
 				line_data = [freq] + intensities
 				line_data = map(float, line_data)
 				yield line_data
+
+			prog_reporter.report("Reading frequencies.")
 
 #----------------------------------------------------------------------------------------
 

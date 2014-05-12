@@ -21,7 +21,8 @@ public:
 		}
 
 		LoadILLSANSTest() :
-				m_testFile("ILLD33_001030.nxs") {
+				m_testFileTof("ILLD33_001030.nxs"),
+				m_testFileNonTof("ILLD33_041714_NonTof.nxs"){
 		}
 		void testName() {
 			LoadILLSANS alg;
@@ -39,10 +40,10 @@ public:
 			TS_ASSERT(alg.isInitialized())
 		}
 
-		void test_exec() {
+		void test_exec_TOF() {
 			LoadILLSANS loader;
 			loader.initialize();
-			loader.setPropertyValue("Filename", m_testFile);
+			loader.setPropertyValue("Filename", m_testFileTof);
 
 			std::string outputSpace = "LoadILLSANSTest_out";
 			loader.setPropertyValue("OutputWorkspace", outputSpace);
@@ -56,14 +57,39 @@ public:
 			MatrixWorkspace_sptr output2D = boost::dynamic_pointer_cast<
 					MatrixWorkspace>(output);
 
-			TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 65536);
+			TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 65536+2);
 			TS_ASSERT_EQUALS(output2D->blocksize(), 100);
+			TS_ASSERT_DIFFERS(output2D->run().getPropertyValueAsType<double>("monitor"),0.0);
+			AnalysisDataService::Instance().clear();
+		}
+
+		void test_exec_nonTOF() {
+			LoadILLSANS loader;
+			loader.initialize();
+			loader.setPropertyValue("Filename", m_testFileNonTof);
+
+			std::string outputSpace = "LoadILLSANSTest_out";
+			loader.setPropertyValue("OutputWorkspace", outputSpace);
+			TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+			//  test workspace, copied from LoadMuonNexusTest.h
+			MatrixWorkspace_sptr output;
+
+			(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+					outputSpace));
+			MatrixWorkspace_sptr output2D = boost::dynamic_pointer_cast<
+					MatrixWorkspace>(output);
+
+			TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 65536+2);
+			TS_ASSERT_EQUALS(output2D->blocksize(), 1);
+			TS_ASSERT_DIFFERS(output2D->run().getPropertyValueAsType<double>("monitor"),0.0);
 			AnalysisDataService::Instance().clear();
 		}
 
 
 	private:
-		std::string m_testFile;
+		std::string m_testFileTof;
+		std::string m_testFileNonTof;
 
 
 };

@@ -13,7 +13,6 @@ set ( SRC_FILES
   src/MantidColorMap.cpp
   src/MantidDialog.cpp
   src/MantidQwtIMDWorkspaceData.cpp
-  src/MantidQwtMatrixWorkspaceData.cpp
   src/MantidWidget.cpp
   src/Message.cpp
   src/OptionsPropertyWidget.cpp
@@ -23,6 +22,10 @@ set ( SRC_FILES
   src/PropertyWidgetFactory.cpp
   src/PythonRunner.cpp
   src/QtSignalChannel.cpp
+  src/QwtRasterDataMD.cpp
+  src/QwtWorkspaceBinData.cpp
+  src/QwtWorkspaceSpectrumData.cpp
+  src/SignalRange.cpp
   src/ScriptRepositoryView.cpp
   src/RepoModel.cpp
   src/SyncedCheckboxes.cpp
@@ -73,11 +76,14 @@ set ( INC_FILES
   inc/MantidQtAPI/PlotAxis.h
   inc/MantidQtAPI/MantidColorMap.h
   inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
-  inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
   inc/MantidQtAPI/MantidQwtWorkspaceData.h
   inc/MantidQtAPI/PropertyWidgetFactory.h
+  inc/MantidQtAPI/QwtRasterDataMD.h
+  inc/MantidQtAPI/QwtWorkspaceBinData.h
+  inc/MantidQtAPI/QwtWorkspaceSpectrumData.h
   inc/MantidQtAPI/ScriptRepositoryView.h
   inc/MantidQtAPI/SelectionNotificationService.h
+  inc/MantidQtAPI/SignalRange.h
 )
 
 set ( UI_FILES 
@@ -88,9 +94,11 @@ set ( UI_FILES
 set( TEST_FILES
    InterfaceManagerTest.h
    MantidColorMapTest.h
-   MantidQwtMatrixWorkspaceDataTest.h
    PlotAxisTest.h
+   QwtWorkspaceBinDataTest.h
+   QwtWorkspaceSpectrumDataTest.h
    SelectionNotificationServiceTest.h
+   SignalRangeTest.h
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )

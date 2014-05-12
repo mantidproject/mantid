@@ -52,6 +52,7 @@ cd %WORKSPACE%\build
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 "C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G "Visual Studio 11 Win64" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DUSE_PRECOMPILED_HEADERS=ON %DOC_IMAGES% ..\Code\Mantid
+if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
@@ -63,13 +64,16 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Run the tests
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 "C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C %BUILD_TYPE% -j%BUILD_THREADS% --schedule-random --output-on-failure -E MantidPlot
+if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Run GUI tests serially
 ctest -C %BUILD_TYPE% --output-on-failure -R MantidPlot
+if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the install kit if this is a clean build
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if "%CLEANBUILD%" EQU "yes" (
     msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=%BUILD_TYPE% docs/qtassistant/qtassistant.vcxproj
+    if ERRORLEVEL 1 exit /B %ERRORLEVEL%
     cpack -C %BUILD_TYPE% --config CPackConfig.cmake
 )

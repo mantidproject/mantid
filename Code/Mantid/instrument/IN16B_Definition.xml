@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" name="IN16B" valid-from="1900-01-31 23:59:59"
+valid-to="2100-01-31 23:59:59" last-modified="2014-03-21 13:10:51">
+  <!-- Author: raoul@ill.fr -->
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+             y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+    </reference-frame>
+  </defaults>
+  <!--Moderator -->
+  <component type="moderator">
+    <location z="-36.41" />
+  </component>
+  <type name="moderator" is="Source"></type>
+  <!--MONITORS-->
+  <component type="monitors" idlist="monitors">
+    <location />
+  </component>
+  <type name="monitors">
+    <component type="monitor">
+      <location z="0.0181" name="monitor1" />
+    </component>
+  </type>
+  <!-- Sample position -->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0" />
+  </component>
+  <type name="sample-position" is="SamplePos" />
+  <idlist idname="detectors">
+    <id start="1" end="2048" />
+  </idlist>
+  <!-- Detector list def -->
+  <component type="detectors" idlist="detectors">
+    <location />
+  </component>
+  <!-- Detector Banks -->
+  <type name="detectors">
+    <component type="bank_uniq">
+      <location />
+    </component>
+  </type>
+  <!-- Definition of the unique existent bank (made of tubes) -->
+  <type name="bank_uniq">
+    <component type="standard_tube">
+      <location r="3.935600" t="128.000000" name="tube_1" />
+      <location r="3.935600" t="118.553333" name="tube_2" />
+      <location r="3.935600" t="109.106667" name="tube_3" />
+      <location r="3.935600" t="99.660000" name="tube_4" />
+      <location r="3.935600" t="90.213333" name="tube_5" />
+      <location r="3.935600" t="80.766667" name="tube_6" />
+      <location r="3.935600" t="71.320000" name="tube_7" />
+      <location r="3.935600" t="61.873333" name="tube_8" />
+      <location r="3.935600" t="52.426667" name="tube_9" />
+      <location r="3.935600" t="42.980000" name="tube_10" />
+      <location r="3.935600" t="33.533333" name="tube_11" />
+      <location r="3.935600" t="24.086667" name="tube_12" />
+      <location r="3.935600" t="14.640000" name="tube_13" />
+      <location r="3.935600" t="5.193333" name="tube_14" />
+      <location r="3.935600" t="-4.253333" name="tube_15" />
+      <location r="3.935600" t="-13.700000" name="tube_16" />
+    </component>
+  </type>
+  <!-- Definition of standard_tube -->
+  <type name="standard_tube" outline="yes">
+    <component type="standard_pixel">
+      <location y="-0.150000" />
+      <location y="-0.147638" />
+      <location y="-0.145276" />
+      <location y="-0.142913" />
+      <location y="-0.140551" />
+      <location y="-0.138189" />
+      <location y="-0.135827" />
+      <location y="-0.133465" />
+      <location y="-0.131102" />
+      <location y="-0.128740" />
+      <location y="-0.126378" />
+      <location y="-0.124016" />
+      <location y="-0.121654" />
+      <location y="-0.119291" />
+      <location y="-0.116929" />
+      <location y="-0.114567" />
+      <location y="-0.112205" />
+      <location y="-0.109843" />
+      <location y="-0.107480" />
+      <location y="-0.105118" />
+      <location y="-0.102756" />
+      <location y="-0.100394" />
+      <location y="-0.098031" />
+      <location y="-0.095669" />
+      <location y="-0.093307" />
+      <location y="-0.090945" />
+      <location y="-0.088583" />
+      <location y="-0.086220" />
+      <location y="-0.083858" />
+      <location y="-0.081496" />
+      <location y="-0.079134" />
+      <location y="-0.076772" />
+      <location y="-0.074409" />
+      <location y="-0.072047" />
+      <location y="-0.069685" />
+      <location y="-0.067323" />
+      <location y="-0.064961" />
+      <location y="-0.062598" />
+      <location y="-0.060236" />
+      <location y="-0.057874" />
+      <location y="-0.055512" />
+      <location y="-0.053150" />
+      <location y="-0.050787" />
+      <location y="-0.048425" />
+      <location y="-0.046063" />
+      <location y="-0.043701" />
+      <location y="-0.041339" />
+      <location y="-0.038976" />
+      <location y="-0.036614" />
+      <location y="-0.034252" />
+      <location y="-0.031890" />
+      <location y="-0.029528" />
+      <location y="-0.027165" />
+      <location y="-0.024803" />
+      <location y="-0.022441" />
+      <location y="-0.020079" />
+      <location y="-0.017717" />
+      <location y="-0.015354" />
+      <location y="-0.012992" />
+      <location y="-0.010630" />
+      <location y="-0.008268" />
+      <location y="-0.005906" />
+      <location y="-0.003543" />
+      <location y="-0.001181" />
+      <location y="0.001181" />
+      <location y="0.003543" />
+      <location y="0.005906" />
+      <location y="0.008268" />
+      <location y="0.010630" />
+      <location y="0.012992" />
+      <location y="0.015354" />
+      <location y="0.017717" />
+      <location y="0.020079" />
+      <location y="0.022441" />
+      <location y="0.024803" />
+      <location y="0.027165" />
+      <location y="0.029528" />
+      <location y="0.031890" />
+      <location y="0.034252" />
+      <location y="0.036614" />
+      <location y="0.038976" />
+      <location y="0.041339" />
+      <location y="0.043701" />
+      <location y="0.046063" />
+      <location y="0.048425" />
+      <location y="0.050787" />
+      <location y="0.053150" />
+      <location y="0.055512" />
+      <location y="0.057874" />
+      <location y="0.060236" />
+      <location y="0.062598" />
+      <location y="0.064961" />
+      <location y="0.067323" />
+      <location y="0.069685" />
+      <location y="0.072047" />
+      <location y="0.074409" />
+      <location y="0.076772" />
+      <location y="0.079134" />
+      <location y="0.081496" />
+      <location y="0.083858" />
+      <location y="0.086220" />
+      <location y="0.088583" />
+      <location y="0.090945" />
+      <location y="0.093307" />
+      <location y="0.095669" />
+      <location y="0.098031" />
+      <location y="0.100394" />
+      <location y="0.102756" />
+      <location y="0.105118" />
+      <location y="0.107480" />
+      <location y="0.109843" />
+      <location y="0.112205" />
+      <location y="0.114567" />
+      <location y="0.116929" />
+      <location y="0.119291" />
+      <location y="0.121654" />
+      <location y="0.124016" />
+      <location y="0.126378" />
+      <location y="0.128740" />
+      <location y="0.131102" />
+      <location y="0.133465" />
+      <location y="0.135827" />
+      <location y="0.138189" />
+      <location y="0.140551" />
+      <location y="0.142913" />
+      <location y="0.145276" />
+      <location y="0.147638" />
+      <location y="0.150000" />
+    </component>
+  </type>
+  <idlist idname="single_detectors">
+    <id start="2049" end="2056" />
+  </idlist>
+  <!-- Detector list def -->
+  <component type="single_detectors" idlist="single_detectors">
+    <location />
+    <!--location x="0.0" y="0.0" z="0.0" rot="0.0" axis-x="1.0" axis-y="0.0" axis-z="0.0"/-->
+  </component>
+  <!-- Detector Banks -->
+  <type name="single_detectors">
+    <component type="bank_single_detectors">
+      <location />
+    </component>
+  </type>
+  <!-- Definition of the bank_single_detectors -->
+  <type name="bank_single_detectors">
+    <component type="single_tube">
+      <location r="4.100000" t="10.000000" p="0.0" rot="100.000000" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_1" />
+      <location r="4.100000" t="25.714286" p="0.0" rot="115.714286" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_2" />
+      <location r="4.100000" t="41.428571" p="0.0" rot="131.428571" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_3" />
+      <location r="4.100000" t="57.142857" p="0.0" rot="147.142857" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_4" />
+      <location r="4.100000" t="72.857143" p="0.0" rot="162.857143" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_5" />
+      <location r="4.100000" t="88.571429" p="0.0" rot="178.571429" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_6" />
+      <location r="4.100000" t="104.285714" p="0.0" rot="194.285714" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_7" />
+      <location r="4.100000" t="120.000000" p="0.0" rot="210.000000" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_8" />
+    </component>
+  </type>
+  <!-- Definition of single_tube -->
+  <type name="single_tube" outline="yes">
+    <component type="single_pixel">
+      <location />
+    </component>
+  </type>
+  <!--MONITOR SHAPE-->
+  <!--FIXME: Do something real here.-->
+  <type is="monitor" name="monitor">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base y="0.0" x="0.0" z="0.0" />
+      <axis y="0.0" x="0.0" z="1.0" />
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder>
+    <algebra val="cyl-approx" />
+  </type>
+  <!--MONITOR IDs-->
+  <idlist idname="monitors">
+    <id val="0" />
+  </idlist>
+  <type name="standard_pixel" is="detector">
+    <cylinder id="cyl1">
+      <centre-of-bottom-base x="0.0" y="-0.006144" z="0.0" />
+      <axis x="0.0" y="1.0" z="0.0" />
+      <radius val="0.0127" />
+      <height val=".0114341328125" />
+    </cylinder>
+    <algebra val="cyl1" />
+  </type>
+  <type name="single_pixel" is="detector">
+    <cylinder id="cyl2">
+      <centre-of-bottom-base x="0.0" y="0.0" z="0.0" />
+      <axis x="1.0" y="0.0" z="0.0" />
+      <radius val="0.027" />
+      <height val=".10" />
+    </cylinder>
+  </type>
+</instrument>

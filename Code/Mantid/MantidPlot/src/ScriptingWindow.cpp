@@ -246,6 +246,10 @@ void ScriptingWindow::populateExecMenu()
 
   m_runMenu->addSeparator();
 
+  m_runMenu->addAction(m_clearScriptVars);
+
+  m_runMenu->addSeparator();
+
   m_execModeMenu->clear();
   m_execModeMenu->addAction(m_execParallel);
   m_execModeMenu->addAction(m_execSerial);
@@ -349,6 +353,13 @@ void ScriptingWindow::executeAll()
 void ScriptingWindow::executeSelection()
 {
   m_manager->executeSelection(this->getExecutionMode());
+}
+
+/**
+ */
+void ScriptingWindow::clearScriptVariables()
+{
+  m_manager->clearScriptVariables();
 }
 
 /**
@@ -513,6 +524,10 @@ void ScriptingWindow::initExecMenuActions()
   shortcuts.clear();
   shortcuts << Qt::CTRL + Qt::SHIFT + Qt::Key_Return << Qt::CTRL + Qt::SHIFT + Qt::Key_Enter;
   m_execAll->setShortcuts(shortcuts);
+
+  m_clearScriptVars = new QAction(tr("&Clear Variables"), this);
+  connect(m_clearScriptVars, SIGNAL(triggered()), this, SLOT(clearScriptVariables()));
+  m_clearScriptVars->setToolTip("Clear all variable definitions in this script");
 
   m_execParallel = new QAction("Asynchronous", this);
   m_execParallel->setCheckable(true);

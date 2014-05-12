@@ -192,12 +192,15 @@ public:
     TS_ASSERT_EQUALS( history2.type(), wsp2->type() )
     TS_ASSERT_EQUALS( history2.direction(), 1 )
 
+    wsp3->setValue("");
     PropertyHistory history3 = wsp3->createHistory();
     TS_ASSERT_EQUALS( history3.name(), "workspace3" )
-    TS_ASSERT_EQUALS( history3.value(), "ws3" )
-    TS_ASSERT( history3.isDefault() )
+    TS_ASSERT( !history3.value().empty() )
+    TS_ASSERT_EQUALS( history3.value().substr(0,5), "__TMP" )
+    //TS_ASSERT( history3.isDefault() )
     TS_ASSERT_EQUALS( history3.type(), wsp3->type() )
     TS_ASSERT_EQUALS( history3.direction(), 2 )
+    wsp3->setValue("ws3");
 
   }
 

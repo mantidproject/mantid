@@ -255,6 +255,13 @@
     <livedata address="NDXARGUS:6789" />
   </instrument> 
   
+  <instrument name="CHRONUS">
+    <zeropadding size="7"/>
+    <technique>Muon spectroscopy</technique>
+    <technique>Radio frequency muSR</technique>
+    <livedata address="NDXCHRONUS:6789" />
+  </instrument>  
+  
   <livedata listener="ISISHistoDataListener"/>
 
 </facility>
@@ -477,7 +484,12 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Indirect Geometry Spectroscopy</technique>
   </instrument>
-  
+
+  <instrument name="IN16B">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Indirect Geometry Spectroscopy</technique>
+  </instrument>
+    
   <instrument name="D33">
     <technique>SANS</technique> 
   </instrument>

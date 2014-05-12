@@ -89,6 +89,46 @@ void SpectraAxis::setValue(const std::size_t& index, const double& value)
   const_cast<MatrixWorkspace*>(m_parentWS)->getSpectrum(index)->setSpectrumNo(static_cast<specid_t>(value));
 }
 
+/**
+ * Finds the index of the given value on the axis
+ * @param value A value on the axis. It is treated as a spectrum number and cast to specid_t on input
+ * @return The index closest to given value
+ * @throws std::out_of_range if the value is out of range of the axis
+ */
+size_t SpectraAxis::indexOfValue(const double value) const
+{
+  const specid_t specNo = static_cast<specid_t>(value);
+  // try and be smart about how we find this. Most of the time
+  // the index & value don't differ by much. Start at a value
+  // slightly lower, 2 back, then the actual value so that most cases
+  // it should find it in a few jumps.
+  const size_t nspectra = m_parentWS->getNumberHistograms();
+  const auto & parentWS = *m_parentWS; // avoid constant dereference
+
+  size_t guess = (specNo > 2) ? static_cast<size_t>(specNo - 2) : 0;
+  if(guess >= nspectra) guess = nspectra/2; // start in the middle
+
+  size_t index(guess);
+  do
+  {
+    try
+    {
+      if (parentWS.getSpectrum(index)->getSpectrumNo() == specNo)
+        return index;
+    }
+    catch(std::range_error&)
+    {
+      continue;
+    }
+    ++index;
+    if(index == nspectra) index = 0; //wrap around to search everythin
+  }
+  while (index != guess);
+
+  // Not found if we reached here
+  throw std::out_of_range("SpectraAxis::indexOfValue() - Value not found on axis");
+}
+
 /** Returns the spectrum number at the position given (Spectra axis only)
  *  @param  index The position for which the value is required
  *  @return The spectrum number as an int

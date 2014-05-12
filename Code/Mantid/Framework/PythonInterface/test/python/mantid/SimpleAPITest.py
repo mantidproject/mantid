@@ -64,9 +64,9 @@ OutputWorkspace(Output:req) *MatrixWorkspace*       The name to give the output 
 
 Params(Input:req) *dbl list*       A comma separated list of first bin boundary, width, last bin boundary. Optionally this can be followed by a comma and more widths and last boundary pairs. Optionally this can also be a single number, which is the bin width. In this case, the boundary of binning will be determined by minimum and maximum TOF values among all events, or previous binning boundary, in case of event Workspace, or non-event Workspace, respectively. Negative width values indicate logarithmic binning. 
 
-PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorkspace, if the input has events (default). If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the workspace gets converted to a Workspace2D histogram.
+PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorkspace, if the input has events. If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the workspace gets converted to a Workspace2D histogram.
 
-FullBinsOnly(Input) *boolean*       Ignore bins of the size smaller than the step size.
+FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller than the step size
 """
         doc = simpleapi.rebin.__doc__
         self.assertTrue(len(doc) > 0 )
