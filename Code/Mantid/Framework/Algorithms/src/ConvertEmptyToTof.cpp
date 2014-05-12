@@ -254,7 +254,6 @@ void ConvertEmptyToTof::estimateFWHM(const Mantid::MantidVec& spec,
  *
  *  copied from PoldiPeakDetection2.cpp
  *
- @param dataws :: input raw data for the fit
  @param workspaceindex :: indice of the row to use
  @param center :: gaussian parameter - center
  @param sigma :: gaussian parameter - width
@@ -448,12 +447,13 @@ void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis,
 		API::MatrixWorkspace_sptr outputWS) {
 
 	const size_t numberOfSpectra = m_inputWS->getNumberHistograms();
+	int64_t numberOfSpectraInt64 = static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
 	g_log.debug() << "Setting the TOF X Axis for numberOfSpectra=" << numberOfSpectra << std::endl;
 
 	Progress prog(this,0.0,0.2,numberOfSpectra);
 	PARALLEL_FOR2(m_inputWS,outputWS)
-	for (size_t i = 0; i < numberOfSpectra; ++i) {
+	for (int64_t i = 0; i < numberOfSpectraInt64; ++i) {
 		PARALLEL_START_INTERUPT_REGION
 		// Just copy over
 		outputWS->dataY(i) = m_inputWS->readY(i);
