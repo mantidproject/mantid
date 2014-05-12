@@ -500,12 +500,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         for (samNum, backNum) in zip(samRuns, backRuns):
             # first round of processing the sample
             samRun = self._loadData(samNum, SUFFIX, filterWall)
-            samRun = CompressEvents(samRun, OutputWorkspace=samRun.name(), 
-                                  Tolerance=COMPRESS_TOL_TOF) # 100ns
             if (backNum > 0):
                 backRun = self._loadData(backNum, SUFFIX, filterWall)
-                backRun = CompressEvents(backRun, OutputWorkspace=backRun.name(), 
-                                         Tolerance=COMPRESS_TOL_TOF) # 100ns
                 samRun -= backRun
                 DeleteWorkspace(backRun)
                 samRun = CompressEvents(samRun, OutputWorkspace=samRun.name(), 
@@ -518,8 +514,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 if AnalysisDataService.doesExist(str(samRun)):
                     AnalysisDataService.remove(str(samRun))
                 samRun = self._loadData(samNum, SUFFIX, filterWall)
-                samRun = CompressEvents(samRun, OutputWorkspace=samRun.name(), 
-                                         Tolerance=COMPRESS_TOL_TOF) # 100ns
                 LRef = self.getProperty("UnwrapRef").value
                 DIFCref = self.getProperty("LowResRef").value
                 if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
