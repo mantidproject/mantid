@@ -8,9 +8,21 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------
     /**
+     * Constructor taking a length
+     * @param The length of the axis
      */
-    BinEdgeAxis::BinEdgeAxis(const std::size_t & length) : NumericAxis(length)
+    BinEdgeAxis::BinEdgeAxis(const std::size_t & length) : NumericAxis() // default constructor
     {
+      m_values.resize(length);
+    }
+
+    /**
+     * Constructor taking a list of edge values
+     * @param edges A list of bin boundaries
+     */
+    BinEdgeAxis::BinEdgeAxis(const std::vector<double> &edges) : NumericAxis() // default constructor
+    {
+      m_values = edges;
     }
 
     /** Virtual constructor
@@ -46,6 +58,21 @@ namespace Mantid
       return this->getValues();
     }
 
+    /** Sets the axis value at a given position
+     *  @param index :: The position along the axis for which to set the value
+     *  @param value :: The new value
+     *  @throw  IndexError If the index requested is not in the range of this axis
+     */
+    void BinEdgeAxis::setValue(const std::size_t& index, const double& value)
+    {
+      // Avoids setting edge information
+      if (index >= length())
+      {
+        throw Kernel::Exception::IndexError(index, length()-1, "BinEdgeAxis: Index out of range.");
+      }
+      m_values[index] = value;
+    }
+
     /**
      * Treats values as bin edges and returns the index of the bin, which
      * the value falls into. The maximum value will always be length() - 1
@@ -55,12 +82,7 @@ namespace Mantid
      */
     size_t BinEdgeAxis::indexOfValue(const double value) const
     {
-      size_t edgeIndex = NumericAxis::indexOfValue(value);
-      // index of bin centre is one less since the first boundary offsets the whole range
-      // need to protect for case where value equals lowest bin boundary as that will return &
-      // not 1
-      if(edgeIndex > 0) return edgeIndex - 1;
-      else return edgeIndex;
+      return NumericAxis::indexOfValue(value, m_values);
     }
 
   } // namespace API

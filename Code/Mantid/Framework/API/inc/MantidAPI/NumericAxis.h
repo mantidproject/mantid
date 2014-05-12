@@ -4,8 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DllConfig.h"
-#include "MantidKernel/Unit.h"
 #include "MantidAPI/Axis.h"
 
 #include <string>
@@ -49,7 +47,9 @@ class MANTID_API_DLL NumericAxis: public Axis
 {
 public:
   NumericAxis(const std::size_t& length);
+  NumericAxis(const std::vector<double>& centres);
   virtual ~NumericAxis(){}
+
   virtual Axis* clone(const MatrixWorkspace* const parentWorkspace);
   virtual Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace);
   ///Is the axis numeric - always true for this class
@@ -72,12 +72,20 @@ public:
   double getMax()const{return m_values.back(); }
 
 protected:
-  /// A vector holding the axis values for the axis.
+  /// Default constructor
+  NumericAxis();
+
+  /// Find the index of the value in the given set of edges
+  size_t indexOfValue(const double value, const std::vector<double> & edges) const;
+  /// A vector holding the centre values.
   std::vector<double> m_values;
 
 private:
   /// Private, undefined copy assignment operator
   const NumericAxis& operator=(const NumericAxis&);
+
+  /// A vector holding the edge values, computed from the distance between values
+  std::vector<double> m_edges;
 };
 
 } // namespace API

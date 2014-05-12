@@ -35,22 +35,23 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-    class MANTID_API_DLL BinEdgeAxis : public API::NumericAxis
+    class MANTID_API_DLL BinEdgeAxis : public NumericAxis
     {
     public:
       BinEdgeAxis(const std::size_t& length);
+      BinEdgeAxis(const std::vector<double> & edges);
       virtual ~BinEdgeAxis() {}
 
       virtual Axis* clone(const MatrixWorkspace* const parentWorkspace);
       virtual Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace);
 
       virtual std::vector<double> createBinBoundaries() const;
+      void setValue(const std::size_t& index, const double& value);
       size_t indexOfValue(const double value) const;
 
     private:
       /// Private, undefined copy assignment operator
-      const BinEdgeAxis& operator=(const NumericAxis&);
-
+      const BinEdgeAxis& operator=(const BinEdgeAxis&);
     };
 
 
