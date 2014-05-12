@@ -102,36 +102,6 @@ namespace Crystal
     typedef std::map<int, std::vector<size_t> > bankMap_t;
     typedef std::map<int, bankMap_t> runMap_t;
     std::set<int> uniqueBanks;
-    std::string grouping = "bank";
-    if (inst->getName() == "WISH") grouping = "WISHpanel0";
-    // cppcheck-suppress syntaxError
-    PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-    for (int num = 0; num < 300; ++num)
-    {
-        PARALLEL_START_INTERUPT_REGION
-        std::ostringstream mess;
-        mess<< grouping<<num;
-        IComponent_const_sptr comp = inst->getComponentByName(mess.str(), 5);
-        if (!comp)continue;
-        int bank = 0;
-        std::string bankName = comp->getName();
-        if (bankName.size() <= 4)
-        {
-          continue;
-        }
-  	    // Save the "bank" part once to check whether it really is a bank
-  	    if( bankPart == "?")  bankPart = bankName.substr(0,4);
-        // Take out the "bank" part of the bank name and convert to an int
-  	    if( bankPart == "bank")bankName = bankName.substr(4, bankName.size()-4);
-  	    else if( bankPart == "WISH")bankName = bankName.substr(9, bankName.size()-9);
-  	    Strings::convert(bankName, bank);
-
-        PARALLEL_CRITICAL(GroupNames)
-        uniqueBanks.insert(bank);
-        PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
-
     runMap_t runMap;
     for (size_t i=0; i < peaks.size(); ++i)
     {
@@ -153,6 +123,8 @@ namespace Crystal
 
       // Save in the map
       runMap[run][bank].push_back(i);
+      // Track unique bank numbers
+      uniqueBanks.insert(bank);
     }
 
     if (!inst) throw std::runtime_error("No instrument in PeaksWorkspace. Cannot save peaks file.");
