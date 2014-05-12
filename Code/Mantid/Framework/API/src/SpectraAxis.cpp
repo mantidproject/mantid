@@ -21,9 +21,10 @@ using std::size_t;
  *  @param parentWorkspace The workspace to which this axis belongs
  */
 SpectraAxis::SpectraAxis(const MatrixWorkspace* const parentWorkspace)
-  : Axis(), m_parentWS(parentWorkspace)
+  : Axis(), m_parentWS(parentWorkspace), m_halfBinWidth(0.5)
 {
   this->unit() = boost::make_shared<Kernel::Units::Label>("Spectrum", "");
+  m_halfBinWidth = 0.5*(this->getMax() - this->getMin())/static_cast<double>(m_parentWS->getNumberHistograms()-1);
 }
 
 /** Virtual constructor
@@ -80,13 +81,9 @@ double SpectraAxis::operator()(const std::size_t& index, const std::size_t& vert
  */
 void SpectraAxis::setValue(const std::size_t& index, const double& value)
 {
-  if (index >= length())
-  {
-    throw Kernel::Exception::IndexError(index, length()-1, "SpectraAxis: Index out of range.");
-  }
-
-  // TODO: Remove this evilness, preferably by removing the setValue method entirely
-  const_cast<MatrixWorkspace*>(m_parentWS)->getSpectrum(index)->setSpectrumNo(static_cast<specid_t>(value));
+  UNUSED_ARG(index)
+  UNUSED_ARG(value)
+  throw std::domain_error("setValue method cannot be used on a SpectraAxis.");
 }
 
 /**
@@ -97,7 +94,6 @@ void SpectraAxis::setValue(const std::size_t& index, const double& value)
  */
 size_t SpectraAxis::indexOfValue(const double value) const
 {
-  const specid_t specNo = static_cast<specid_t>(value);
   // try and be smart about how we find this. Most of the time
   // the index & value don't differ by much. Start at a value
   // slightly lower, 2 back, then the actual value so that most cases
@@ -105,7 +101,7 @@ size_t SpectraAxis::indexOfValue(const double value) const
   const size_t nspectra = m_parentWS->getNumberHistograms();
   const auto & parentWS = *m_parentWS; // avoid constant dereference
 
-  size_t guess = (specNo > 2) ? static_cast<size_t>(specNo - 2) : 0;
+  size_t guess = (value > 2.0) ? static_cast<size_t>(value - 2.0) : 0;
   if(guess >= nspectra) guess = nspectra/2; // start in the middle
 
   size_t index(guess);
@@ -113,7 +109,8 @@ size_t SpectraAxis::indexOfValue(const double value) const
   {
     try
     {
-      if (parentWS.getSpectrum(index)->getSpectrumNo() == specNo)
+      double curNo = static_cast<double>(parentWS.getSpectrum(index)->getSpectrumNo());
+      if((curNo - m_halfBinWidth <= value) && (value < curNo + m_halfBinWidth)) // creates an effective binning
         return index;
     }
     catch(std::range_error&)

@@ -77,6 +77,8 @@ private:
   const SpectraAxis& operator=(const SpectraAxis&);
   /// A pointer to the workspace holding the axis
   const MatrixWorkspace* const m_parentWS;
+  /// Effective bin width
+  double m_halfBinWidth;
 };
 
 } // namespace API
