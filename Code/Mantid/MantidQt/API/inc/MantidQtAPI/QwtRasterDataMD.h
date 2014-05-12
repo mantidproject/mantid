@@ -1,17 +1,21 @@
 #ifndef QwtRasterDataMD_H_
 #define QwtRasterDataMD_H_
 
-#include "MantidAPI/IMDWorkspace.h"
+#include "MantidQtAPI/DllOption.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+
 #include <qwt_double_interval.h>
 #include <qwt_raster_data.h>
+
 #include <vector>
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 namespace MantidQt
 {
-namespace SliceViewer
+namespace API
 {
 
 /** Implemenation of QwtRasterData that can display the data
@@ -24,16 +28,16 @@ namespace SliceViewer
  * @date Sep 29, 2011
  */
 
-class QWT_EXPORT QwtRasterDataMD : public QwtRasterData
+class EXPORT_OPT_MANTIDQT_API QwtRasterDataMD : public QwtRasterData
 {
 public:
   QwtRasterDataMD();
   virtual ~QwtRasterDataMD();
-  QwtRasterData* copy() const;
+  QwtRasterDataMD* copy() const;
 
-  void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
+  virtual void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
 
-  void setOverlayWorkspace(Mantid::API::IMDWorkspace_sptr ws);
+  void setOverlayWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
 
   QwtDoubleInterval range() const;
   void setRange(const QwtDoubleInterval & range);
@@ -52,11 +56,14 @@ public:
   Mantid::API::MDNormalization getNormalization() const;
 
 protected:
+
+  void copyFrom(const QwtRasterDataMD & source, QwtRasterDataMD& dest) const;
+
   /// Workspace being shown
-  Mantid::API::IMDWorkspace_sptr m_ws;
+  Mantid::API::IMDWorkspace_const_sptr m_ws;
 
   /// Workspace overlaid on top of original (optional)
-  Mantid::API::IMDWorkspace_sptr m_overlayWS;
+  Mantid::API::IMDWorkspace_const_sptr m_overlayWS;
 
   /// Number of dimensions in the workspace
   size_t m_nd;
@@ -101,6 +108,22 @@ protected:
 
   /// Normalization of signals
   Mantid::API::MDNormalization m_normalization;
+};
+
+//-----------------------------------------------------------------
+// Specialised class for 2D data with no overlays
+//-----------------------------------------------------------------
+class EXPORT_OPT_MANTIDQT_API NoOverlayRaster2D : public QwtRasterDataMD
+{
+public:
+  void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
+
+  NoOverlayRaster2D* copy() const;
+  double value(double x, double y) const;
+
+private:
+  Mantid::API::MatrixWorkspace_const_sptr m_matrixWS;
+  Mantid::spec2index_map m_specIndex;
 };
 
 } // namespace SliceViewer

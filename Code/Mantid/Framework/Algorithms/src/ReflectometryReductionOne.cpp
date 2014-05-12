@@ -30,8 +30,6 @@ parameters will be needed.
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"

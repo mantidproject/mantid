@@ -205,6 +205,7 @@ set ( SRC_FILES
 	src/SolidAngle.cpp
 	src/SortEvents.cpp
 	src/SpatialGrouping.cpp
+	src/SpecularReflectionPositionCorrect.cpp
 	src/SphericalAbsorption.cpp
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
@@ -435,6 +436,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/SortEvents.h
 	inc/MantidAlgorithms/SpatialGrouping.h
+	inc/MantidAlgorithms/SpecularReflectionPositionCorrect.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
@@ -656,6 +658,7 @@ set ( TEST_FILES
 	SolidAngleTest.h
 	SortEventsTest.h
 	SpatialGroupingTest.h
+	SpecularReflectionPositionCorrectTest.h
 	SphericalAbsorptionTest.h
 	StripPeaksTest.h
 	StripVanadiumPeaks2Test.h

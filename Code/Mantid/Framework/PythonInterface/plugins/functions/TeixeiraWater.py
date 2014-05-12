@@ -51,7 +51,8 @@ class TeixeiraWater(IFunction1D):
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
         length = self.getParameterValue("L")
-        
+        length = length**2
+
         xvals = np.array(xvals)
         hwhm = xvals * xvals * length / (tau * (1 + xvals * xvals * length))
 
@@ -60,6 +61,7 @@ class TeixeiraWater(IFunction1D):
     def functionDeriv1D(self, xvals, jacobian):
         tau = self.getParameterValue("Tau")
         length = self.getParameterValue("L")
+        length = length**2
 
         i = 0
         for x in xvals:

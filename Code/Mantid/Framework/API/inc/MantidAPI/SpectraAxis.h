@@ -57,6 +57,7 @@ public:
   virtual bool isSpectra() const{return true;}
   virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex = 0) const;
   virtual void setValue(const std::size_t& index, const double& value);
+  size_t indexOfValue(const double value) const;
   virtual bool operator==(const Axis&) const;
   std::string label(const std::size_t& index)const;
 

@@ -2,11 +2,11 @@
 Helper algorithm to calculate min-max input values for ConvertToMD algorithm, using ConvertToMD algorithm factory. 
 
 Initiates the same as ConvertToMD algorithm transformation from the ConvertToMD factory and uses this transformation to evaluate all points where 
-the transformation can achieve extremum for each workspace spectra. Then goes thorugh all extremum points, calculates min/max values for each spectra
+the transformation can achieve extrema for each workspace spectra. Then goes through all extrema points, calculates min/max values for each spectra
 and select global min-max values for the whole workspace. 
 
 For example, given input workspace in the units of energy transfer and requesting |Q| inelastic transformation, the algorithm looks through 
-all spectra of the input workspace and identifies minimal, maximal and an extremal* energy transfer for the input spectras. 
+all spectra of the input workspace and identifies minimal, maximal and an extremal* energy transfer for the input spectra. 
 Then it runs |Q| dE  conversion for these energy transfer points and loops through all spectra of the workspace to identify |Q|_min, |Q|_max 
 and dE_min and dE_max values. 
 
@@ -16,7 +16,7 @@ and dE_min and dE_max values.
 *WIKI*/
 
 
-#include "MantidMDAlgorithms/ConvertToMDHelper2.h"
+#include "MantidMDAlgorithms/ConvertToMDMinMaxLocal.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -40,38 +40,38 @@ namespace Mantid
   {
 
     // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(ConvertToMDHelper2)
+    DECLARE_ALGORITHM(ConvertToMDMinMaxLocal)
 
 
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    ConvertToMDHelper2::ConvertToMDHelper2()
+    ConvertToMDMinMaxLocal::ConvertToMDMinMaxLocal()
     { }
 
     //----------------------------------------------------------------------------------------------
     /** Destructor
     */
-    ConvertToMDHelper2::~ConvertToMDHelper2()
+    ConvertToMDMinMaxLocal::~ConvertToMDMinMaxLocal()
     {
     }
 
 
     //----------------------------------------------------------------------------------------------
     /// Algorithm's name for identification. @see Algorithm::name
-    const std::string ConvertToMDHelper2::name() const { return "ConvertToMDHelper";}
+    const std::string ConvertToMDMinMaxLocal::name() const { return "ConvertToMDMinMaxLocal";}
 
 
     //----------------------------------------------------------------------------------------------
     /// Sets documentation strings for this algorithm
 
-    void ConvertToMDHelper2::initDocs()
+    void ConvertToMDMinMaxLocal::initDocs()
     {
       this->setWikiSummary("Calculate limits required for ConvertToMD");
       this->setOptionalMessage("Calculate limits required for ConvertToMD");
     }
-    void ConvertToMDHelper2::init()
+    void ConvertToMDMinMaxLocal::init()
     {
       ConvertToMDParent::init();
 
@@ -84,7 +84,7 @@ namespace Mantid
     /** Execute the algorithm.
     */
 
-    void ConvertToMDHelper2::exec()
+    void ConvertToMDMinMaxLocal::exec()
     {
 
 
@@ -123,10 +123,10 @@ namespace Mantid
       // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less max
       targWSDescr.setMinMax(MinValues,MaxValues);   
       targWSDescr.buildFromMatrixWS(InWS2D,QModReq,dEModReq,otherDimNames);
-      // add rinindex to the target workspace description for further usage as the identifier for the events, which come from this run. 
+      // add runindex to the target workspace description for further usage as the identifier for the events, which come from this run. 
       targWSDescr.addProperty("RUN_INDEX",uint16_t(0),true);  
        
-      // instanciate class, responsible for defining Mslice-type projection
+      // instantiate class, responsible for defining Mslice-type projection
       MDEvents::MDWSTransform MsliceProj;
       //identify if u,v are present among input parameters and use defaults if not
       std::vector<double> ut = getProperty("UProj");
@@ -134,7 +134,7 @@ namespace Mantid
       std::vector<double> wt = getProperty("WProj");
       try
       {  
-        // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may overcomplicate things. 
+        // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may over-complicate things. 
         MsliceProj.setUVvectors(ut,vt,wt);   
       }
       catch(std::invalid_argument &)
@@ -158,7 +158,7 @@ namespace Mantid
     }
 
 
-    void ConvertToMDHelper2::findMinMaxValues(MDEvents::MDWSDescription &WSDescription,
+    void ConvertToMDMinMaxLocal::findMinMaxValues(MDEvents::MDWSDescription &WSDescription,
       MDEvents::MDTransfInterface *const pQtransf,Kernel::DeltaEMode::Type iEMode,std::vector<double> &MinValues,std::vector<double> &MaxValues)
     {
 
@@ -192,9 +192,9 @@ namespace Mantid
         // get valid spectrum number
         size_t iSpctr             = detIDMap[i];
 
-        // update unit convesion according to current spectra
+        // update unit conversion according to current spectra
         unitsConverter.updateConversion(iSpctr);
-        // update coordinate transformation according to the sepctra
+        // update coordinate transformation according to the spectra
         pQtransf->calcYDepCoordinates(locCoord,iSpctr);
 
         // get the range of the input data in the spectra

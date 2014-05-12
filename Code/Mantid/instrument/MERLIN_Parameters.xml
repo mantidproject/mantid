@@ -73,6 +73,16 @@
   <value val="norm-mon1-min:norm-mon1-max"/>
 </parameter>
 
+<!-- Usually one wants to avoid loading monitors together with data except in special cases. One of this cases is 
+     MARI which monitors nimbers are in the beginning of the spectra. If one loads them separately, 
+     spectra numbers change and ISIS hard masks (msk) prepared for workspace with monitors become invalid. 
+     This parameter is actual untill Mantid Masking change     
+  -->
+<parameter name="load_monitors_with_workspace"  type="bool">
+<value val="False"/>
+</parameter>
+
+
 
 <!-- First spectra number (monitor number) to use when measuring incident energy
     Should be spectra with well defined energy peak -->

@@ -25,6 +25,7 @@ import os
 import datetime
 from time import localtime, strftime
 from mantid import config
+from mantid.kernel import Direction
 
 COMPRESS_TOL_TOF = .01
 
@@ -111,6 +112,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         outfiletypes = ['dspacemap', 'calibration', 'dspacemap and calibration']
         self.declareProperty("SaveAs", "calibration", StringListValidator(outfiletypes))
         self.declareProperty(FileProperty("OutputDirectory", "", FileAction.Directory))
+        
+        self.declareProperty("OutputFilename", "", Direction.Output)
+        
+        return
 
     def validateInputs(self):
         messages = {}
@@ -344,14 +349,21 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
         lcinst = str(self._instrument)
         
+        outfilename = None
         if "dspacemap" in self._outTypes:
             #write Dspacemap file
+            outfilename = self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat")
             SaveDspacemap(InputWorkspace=str(wksp)+"offset",
-                          DspacemapFile=self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat"))
+                          DspacemapFile=outfilename)
         if "calibration" in self._outTypes:
+            outfilename = calib
             SaveCalFile(OffsetsWorkspace=str(wksp)+"offset",
                         GroupingWorkspace=str(wksp)+"group",
                         MaskWorkspace=str(wksp)+"mask",Filename=calib)
+                        
+        if outfilename is not None:
+            self.setProperty("OutputFilename", outfilename)
+            
         return wksp
 
     def _multicalibrate(self, wksp, calib, filterLogs=None):
@@ -420,14 +432,21 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                      Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
         lcinst = str(self._instrument)
         
+        outfilename = None
         if "dspacemap" in self._outTypes:
             #write Dspacemap file
+            outfilename = self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat")
             SaveDspacemap(InputWorkspace=str(wksp)+"offset",
-                          DspacemapFile=self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat"))
+                          DspacemapFile=outfilename)
         if "calibration" in self._outTypes:
             SaveCalFile(OffsetsWorkspace=str(wksp)+"offset",
                         GroupingWorkspace=str(wksp)+"group",
                         MaskWorkspace=str(wksp)+"mask", Filename=calib)
+            outfilename = calib
+            
+        if outfilename is not None:
+            self.setProperty("OutputFilename", outfilename)
+            
         return wksp
 
     def _focus(self, wksp, calib, filterLogs=None):

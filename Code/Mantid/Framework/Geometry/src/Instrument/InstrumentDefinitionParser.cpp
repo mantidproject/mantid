@@ -11,6 +11,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Strings.h"
 
 #include <fstream>
 
@@ -2334,7 +2335,7 @@ namespace Geometry
     size_t nElements(0);
     if ( pElem->hasAttribute("n-elements") )
     {
-      int n = boost::lexical_cast<int>(pElem->getAttribute("n-elements"));
+      int n = boost::lexical_cast<int>(Strings::strip(pElem->getAttribute("n-elements")));
 
       if (n <= 0)
       {
@@ -2360,7 +2361,7 @@ namespace Geometry
     int nameCountStart(0);
     if ( pElem->hasAttribute("name-count-start") )
     {
-      nameCountStart = boost::lexical_cast<int>(pElem->getAttribute("name-count-start"));
+      nameCountStart = boost::lexical_cast<int>(Strings::strip(pElem->getAttribute("name-count-start")));
     }
 
     // A list of numeric attributes which are allowed to have corresponding -end
@@ -2383,7 +2384,7 @@ namespace Geometry
     {
       if ( pElem->hasAttribute(*it) )
       {
-        attrValues[*it] = boost::lexical_cast<double>(pElem->getAttribute(*it));
+        attrValues[*it] = boost::lexical_cast<double>(Strings::strip(pElem->getAttribute(*it)));
       }
     }
 
@@ -2402,7 +2403,7 @@ namespace Geometry
         }
 
         double from = attrValues[*it];
-        double to = boost::lexical_cast<double>(pElem->getAttribute(endAttr));
+        double to = boost::lexical_cast<double>(Strings::strip(pElem->getAttribute(endAttr)));
 
         rangeAttrSteps[*it] = (to - from) / (static_cast<double>(nElements) - 1);
       }

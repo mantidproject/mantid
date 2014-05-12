@@ -11513,7 +11513,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
         try {
           if ( curvelst.size() < 7 ) // This was the case prior to 29 February, 2012
           {
-            PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
+            PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),MantidMatrixCurve::Spectrum, curvelst[4].toInt());
             // Deal with the brief period (Dec 29,2011-Feb 29, 2012) when any skip symbols count was just
             // stuck as an integer on the end of the of the line
             if ( curvelst.size() == 6 && !curvelst[5].isEmpty() ) c->setSkipSymbolsCount(curvelst[5].toInt());
@@ -11521,7 +11521,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
           else
           {
             // Anything saved with a version after 29 February 2012 comes here
-            PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt(),
+            PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(), MantidMatrixCurve::Spectrum, curvelst[4].toInt(),
                                                  curvelst[5].toInt());
             ag->setCurveType(curveID,curvelst[6].toInt());
             // Fill in the curve settings and apply them to the created curve
@@ -14156,13 +14156,6 @@ MultiLayer* ApplicationWindow::plotNoContourColorMap(Matrix *m)
     return 0;
   }
 
-  //Spectrogram *spgrm = dynamic_cast<Spectrogram*>(ml->activeGraph()->plotItem(0));
-  //if( spgrm )
-  //{
-  //  //1 = ImageMode
-  //  spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
-  //  spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
-  //}
   return ml;
 }
 
@@ -14201,8 +14194,6 @@ MultiLayer* ApplicationWindow::plotImage(Matrix *m)
       return 0;
     }
     plot = g->activeGraph();
-    setPreferences(plot);
-    if( plot->plotItem(0) )plot->plotItem(0)->setAxis(QwtPlot::xTop, QwtPlot::yLeft);
   }
 
   plot->enableAxis(QwtPlot::xTop, true);

@@ -47,11 +47,13 @@ namespace Algorithms
 
     void setFitPeakCriteria(bool usepeakpostol, double peakpostol);
 
+    std::string getDebugMessage();
+
     /// Fit peak and background together
     bool simpleFit();
 
     /// Fit peak first considering high background
-    bool highBkgdFit();
+    void highBkgdFit();
 
     /// Get fitting error
     void getFitError(std::map<std::string, double>& peakerrormap, std::map<std::string, double>& bkgderrormap);
@@ -95,7 +97,7 @@ namespace Algorithms
     bool hasSetupToFitPeak(std::string &errmsg);
 
     /// Estimate the peak height from a set of data containing pure peaks
-    double estimatePeakHeight(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
+    double estimatePeakHeight(API::IPeakFunction_const_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
                               size_t wsindex, size_t ixmin, size_t ixmax);
 
     /// Check a peak function whether it is valid comparing to user specified criteria
@@ -191,9 +193,6 @@ namespace Algorithms
     /// Cost function
     std::string m_costFunction;
 
-    /// Goodness of fit
-    double m_finalFitGoodness;
-
     std::vector<double> m_vecFWHM;
 
     /// Peak position tolerance
@@ -208,6 +207,11 @@ namespace Algorithms
     /// Final goodness value (Rwp/Chi-square)
     double m_finalGoodnessValue;
 
+    /// 
+    size_t m_numFitCalls;
+
+    /// String stream
+    std::stringstream m_sstream;
   };
 
 
@@ -409,6 +413,9 @@ namespace Algorithms
     /// Fitting result
     // std::map<std::string, double> m_fitErrorPeakFunc;
     // std::map<std::string, double> m_fitErrorBkgdFunc;
+
+    /// Option on output
+    bool m_lightWeightOutput;
 
   };
 

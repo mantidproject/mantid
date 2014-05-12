@@ -67,6 +67,10 @@ namespace Mantid
       virtual bool isRunning() const;
       /// Allow the cancel method to be overridden
       virtual void cancel();
+      /// A return of false will allow processing workspace groups as a whole
+      virtual bool checkGroups();
+      /// A default value for checkGroups, chosen if there is no override
+      bool checkGroupsDefault();
       /// Returns the validateInputs result of the algorithm.
       std::map<std::string, std::string> validateInputs();
       ///@}

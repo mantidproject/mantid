@@ -242,7 +242,7 @@ This example repeats the previous one but with the Sigmas of the two Gaussians t
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/CompositeDomain.h"
-#include "MantidAPI/IFunctionValues.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/MultiDomainFunction.h"
@@ -592,7 +592,7 @@ namespace CurveFitting
     m_function->setUpForFit();
 
     API::FunctionDomain_sptr domain;
-    API::IFunctionValues_sptr values;
+    API::FunctionValues_sptr values; // TODO: should values be part of domain?
     m_domainCreator->ignoreInvalidData(getProperty("IgnoreInvalidData"));
     m_domainCreator->createDomain(domain,values);
 
@@ -662,7 +662,7 @@ namespace CurveFitting
     setPropertyValue("OutputStatus",errorString);
 
     // degrees of freedom
-    size_t dof = values->size() - costFunc->nParams();
+    size_t dof = domain->size() - costFunc->nParams();
     if (dof == 0) dof = 1;
     double rawcostfuncval = minimizer->costFunctionVal();
     double finalCostFuncVal = rawcostfuncval / double(dof);
@@ -695,7 +695,7 @@ namespace CurveFitting
     {
       // Calculate the covariance matrix and the errors.
       costFunc->calCovarianceMatrix(covar);
-      costFunc->calFittingErrors(covar);
+      costFunc->calFittingErrors( covar, rawcostfuncval );
     }
 
     if (doCreateOutput)
