@@ -114,9 +114,18 @@ public:
   {
     for (int i=1; i < 6; ++i)
     {
-      TS_ASSERT_EQUALS(i-1, spectraAxis->indexOfValue(static_cast<double>(i - 0.5)) ); //lower boundary considered in this bin
+      // centre in this bin
       TS_ASSERT_EQUALS(i-1, spectraAxis->indexOfValue(static_cast<double>(i)) );
-      TS_ASSERT_EQUALS(i-1, spectraAxis->indexOfValue(static_cast<double>(i + 0.49)) );
+      //value on lower boundary in bin below with exception of first boundary where it is above
+      if(i==1)
+      {
+        TS_ASSERT_EQUALS(i-1, spectraAxis->indexOfValue(static_cast<double>(i - 0.5)));
+      }
+      else
+      {
+        TS_ASSERT_EQUALS(i-2, spectraAxis->indexOfValue(static_cast<double>(i - 0.5)) );
+      }
+      TS_ASSERT_EQUALS(i-1, spectraAxis->indexOfValue(static_cast<double>(i + 0.5)) );
     }
   }
 

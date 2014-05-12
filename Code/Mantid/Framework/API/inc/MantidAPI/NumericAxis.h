@@ -46,6 +46,9 @@ class MatrixWorkspace;
 class MANTID_API_DLL NumericAxis: public Axis
 {
 public:
+  /// Find the index of the value in the given set of edges
+  static size_t indexOfValue(const double value, const std::vector<double> & edges);
+
   NumericAxis(const std::size_t& length);
   NumericAxis(const std::vector<double>& centres);
   virtual ~NumericAxis(){}
@@ -75,8 +78,6 @@ protected:
   /// Default constructor
   NumericAxis();
 
-  /// Find the index of the value in the given set of edges
-  size_t indexOfValue(const double value, const std::vector<double> & edges) const;
   /// A vector holding the centre values.
   std::vector<double> m_values;
 

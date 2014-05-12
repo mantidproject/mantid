@@ -12,6 +12,40 @@ namespace Mantid
 namespace API
 {
 
+//------------------------------------------------------------------------------
+// static members
+//------------------------------------------------------------------------------
+
+/**
+ * @param value A value to find in a bin
+ * @param edges A list of edges that define the bins
+ * @return The index of the bin holding the value
+ */
+size_t NumericAxis::indexOfValue(const double value, const std::vector<double> &edges)
+{
+  if(value < edges.front())
+  {
+    throw std::out_of_range("NumericAxis::indexOfValue() - Input lower than first value.");
+  }
+  auto it = std::lower_bound(edges.begin(), edges.end(), value);
+  if (it == edges.end())
+  {
+    // Out of range
+    throw std::out_of_range("NumericAxis::indexOfValue() - Input value out of range");
+  }
+  // index of closest edge above value is distance of iterator from start
+  size_t edgeIndex = std::distance(edges.begin(), it);
+  // index of bin centre is one less since the first boundary offsets the whole range
+  // need to protect for case where value equals lowest bin boundary as that will return &
+  // not 1
+  if(edgeIndex > 0) return edgeIndex - 1;
+  else return edgeIndex;
+}
+
+//------------------------------------------------------------------------------
+// public members
+//------------------------------------------------------------------------------
+
 /** Constructor
  * @param length size of the numeric axis
  */
@@ -153,32 +187,6 @@ const std::vector<double> &  NumericAxis::getValues() const
  */
 NumericAxis::NumericAxis()
 {
-}
-
-/**
- * @param value A value to find in a bin
- * @param edges A list of edges that define the bins
- * @return The index of the bin holding the value
- */
-size_t NumericAxis::indexOfValue(const double value, const std::vector<double> &edges) const
-{
-  if(value < edges.front())
-  {
-    throw std::out_of_range("NumericAxis::indexOfValue() - Input lower than first value.");
-  }
-  auto it = std::lower_bound(edges.begin(), edges.end(), value);
-  if (it == edges.end())
-  {
-    // Out of range
-    throw std::out_of_range("NumericAxis::indexOfValue() - Input value out of range");
-  }
-  // index of closest edge above value is distance of iterator from start
-  size_t edgeIndex = std::distance(edges.begin(), it);
-  // index of bin centre is one less since the first boundary offsets the whole range
-  // need to protect for case where value equals lowest bin boundary as that will return &
-  // not 1
-  if(edgeIndex > 0) return edgeIndex - 1;
-  else return edgeIndex;
 }
 
 } // namespace API
