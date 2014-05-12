@@ -388,8 +388,8 @@ public:
     peak.setHKL(5, 5, 5); // Set HKL of peak
     filterWS->addPeak(peak); // Add a single peak.
 
-    size_t nBins = 10;
-    size_t bulkSignalValue = 0;
+    const int nBins = 10;
+    const double bulkSignalValue = 0;
     auto inWS = create_HKL_MDWS(min, max, nBins, bulkSignalValue);
     inWS->setSignalAt(0, 2); // Cluster at linear index 0. No corresponding peak position.
     inWS->setSignalAt(555, 1); // Cluster at linear index 125. Corresponds with peak position
@@ -420,8 +420,8 @@ public:
     outOfBoundsPeak.setHKL(20, 20, 20); // Set HKL of peak
     filterWS->addPeak(outOfBoundsPeak); // Add an out of bounds peak. Produces 0 faces.
 
-    size_t nBins = 10;
-    size_t bulkSignalValue = 0;
+    const int nBins = 10;
+    const double bulkSignalValue = 0;
     auto inWS = create_HKL_MDWS(min, max, nBins, bulkSignalValue);
     inWS->setSignalAt(0, 2); // Cluster at linear index 0. No corresponding peak position.
     inWS->setSignalAt(555, 1); // Cluster at linear index 125. Corresponds with peak position
@@ -469,8 +469,8 @@ public:
     const double max = 10; // HKL
 
     Mantid::API::FrameworkManager::Instance();
-    size_t nBins = 100;
-    size_t bulkSignalValue = 0;
+    const int nBins = 100;
+    const double bulkSignalValue = 0;
     m_inWS = create_HKL_MDWS(min, max, nBins, bulkSignalValue);
 
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
@@ -479,10 +479,10 @@ public:
     //Add 50 cluster points and correspoinding peaks.
     for (size_t i = 0; i < nBins; i += 2)
     {
-      m_inWS->setSignalAt(i, i);
+      m_inWS->setSignalAt(i, static_cast<Mantid::signal_t>(i));
 
       Peak peak(inst, 15050, 1.0);
-      peak.setHKL(i, 0, 0); // Set HKL of peak
+      peak.setHKL(double(i), 0, 0); // Set HKL of peak
       m_filterWS->addPeak(peak); // Add a valid center peak. Produces 6 faces.
     }
 

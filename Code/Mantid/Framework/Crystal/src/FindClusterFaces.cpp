@@ -51,7 +51,7 @@ namespace
       }
       LabelSet allowedLabels;
       PeakClusterProjection projection(clusterImage);
-      for (size_t i = 0; i < filterWorkspace->rowCount(); ++i)
+      for (int i = 0; i < filterWorkspace->getNumberPeaks(); ++i)
       {
         IPeak& peak = filterWorkspace->getPeak(i);
         const int labelIdAtPeakCenter = static_cast<int>(projection.signalAtPeakCenter(peak));
@@ -179,7 +179,7 @@ namespace Mantid
             for (size_t i = 0; i < neighbours.size(); ++i)
             {
               size_t neighbourLinearIndex = neighbours[i];
-              const int neighbourId = clusterImage->getSignalAt(neighbourLinearIndex);
+              const int neighbourId = static_cast<int>(clusterImage->getSignalAt(neighbourLinearIndex));
               if (neighbourId <= emptyLabelId)
               {
                 // We have an edge!
