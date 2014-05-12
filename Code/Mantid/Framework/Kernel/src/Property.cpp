@@ -189,7 +189,7 @@ std::set<std::string> Property::allowedValues() const
 /// Create a PropertyHistory object representing the current state of the Property.
 const PropertyHistory Property::createHistory() const
 {
-  return PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),this->direction());
+  return PropertyHistory(this);
 }
 
 //-------------------------------------------------------------------------------------------------
