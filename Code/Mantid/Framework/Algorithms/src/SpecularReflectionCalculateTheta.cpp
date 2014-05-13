@@ -12,7 +12,7 @@ Also see [[SpecularReflectionPositionCorrect]]
 
 *WIKI*/
 
-#include "MantidAlgorithms/SpecularReflectionCorrectTheta.h"
+#include "MantidAlgorithms/SpecularReflectionCalculateTheta.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
@@ -36,46 +36,46 @@ namespace Mantid
   {
 
     // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(SpecularReflectionCorrectTheta)
+    DECLARE_ALGORITHM(SpecularReflectionCalculateTheta)
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
-    SpecularReflectionCorrectTheta::SpecularReflectionCorrectTheta()
+    SpecularReflectionCalculateTheta::SpecularReflectionCalculateTheta()
     {
     }
 
     //----------------------------------------------------------------------------------------------
     /** Destructor
      */
-    SpecularReflectionCorrectTheta::~SpecularReflectionCorrectTheta()
+    SpecularReflectionCalculateTheta::~SpecularReflectionCalculateTheta()
     {
     }
 
     //----------------------------------------------------------------------------------------------
     /// Algorithm's name for identification. @see Algorithm::name
-    const std::string SpecularReflectionCorrectTheta::name() const
+    const std::string SpecularReflectionCalculateTheta::name() const
     {
-      return "SpecularReflectionCorrectTheta";
+      return "SpecularReflectionCalculateTheta";
     }
     ;
 
     /// Algorithm's version for identification. @see Algorithm::version
-    int SpecularReflectionCorrectTheta::version() const
+    int SpecularReflectionCalculateTheta::version() const
     {
       return 1;
     }
     ;
 
     /// Algorithm's category for identification. @see Algorithm::category
-    const std::string SpecularReflectionCorrectTheta::category() const
+    const std::string SpecularReflectionCalculateTheta::category() const
     {
       return "Reflectometry\\ISIS";
     }
 
     //----------------------------------------------------------------------------------------------
     /// Sets documentation strings for this algorithm
-    void SpecularReflectionCorrectTheta::initDocs()
+    void SpecularReflectionCalculateTheta::initDocs()
     {
       this->setWikiSummary(
           "Calculate the specular reflection two theta scattering angle (degrees) from the detector and sample locations .");
@@ -85,7 +85,7 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
      */
-    void SpecularReflectionCorrectTheta::init()
+    void SpecularReflectionCalculateTheta::init()
     {
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input),
           "An Input workspace to calculate the specular relection theta on.");
@@ -98,7 +98,7 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Execute the algorithm.
      */
-    void SpecularReflectionCorrectTheta::exec()
+    void SpecularReflectionCalculateTheta::exec()
     {
       MatrixWorkspace_sptr inWS = this->getProperty("InputWorkspace");
 

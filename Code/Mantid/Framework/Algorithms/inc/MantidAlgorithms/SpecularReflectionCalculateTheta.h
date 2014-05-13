@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_SPECULARREFLECTIONCORRECTTHETA_H_
-#define MANTID_ALGORITHMS_SPECULARREFLECTIONCORRECTTHETA_H_
+#ifndef MANTID_ALGORITHMS_SPECULARREFLECTIONCALCULATETHETA_H_
+#define MANTID_ALGORITHMS_SPECULARREFLECTIONCALCULATETHETA_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -32,11 +32,11 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport SpecularReflectionCorrectTheta  : public SpecularReflectionAlgorithm
+  class DLLExport SpecularReflectionCalculateTheta  : public SpecularReflectionAlgorithm
   {
   public:
-    SpecularReflectionCorrectTheta();
-    virtual ~SpecularReflectionCorrectTheta();
+    SpecularReflectionCalculateTheta();
+    virtual ~SpecularReflectionCalculateTheta();
     
     virtual const std::string name() const;
     virtual int version() const;
@@ -54,4 +54,4 @@ namespace Algorithms
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_SPECULARREFLECTIONCORRECTTHETA_H_ */
+#endif  /* MANTID_ALGORITHMS_SPECULARREFLECTIONCALCULATETHETA_H_ */

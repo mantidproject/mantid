@@ -205,7 +205,7 @@ set ( SRC_FILES
 	src/SortEvents.cpp
 	src/SpatialGrouping.cpp
 	src/SpecularReflectionAlgorithm.cpp
-	src/SpecularReflectionCorrectTheta.cpp
+	src/SpecularReflectionCalculateTheta.cpp
 	src/SpecularReflectionPositionCorrect.cpp
 	src/SphericalAbsorption.cpp
 	src/StripPeaks.cpp
@@ -437,7 +437,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SortEvents.h
 	inc/MantidAlgorithms/SpatialGrouping.h
 	inc/MantidAlgorithms/SpecularReflectionAlgorithm.h
-	inc/MantidAlgorithms/SpecularReflectionCorrectTheta.h
+	inc/MantidAlgorithms/SpecularReflectionCalculateTheta.h
 	inc/MantidAlgorithms/SpecularReflectionPositionCorrect.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
 	inc/MantidAlgorithms/StripPeaks.h
@@ -659,7 +659,7 @@ set ( TEST_FILES
 	SolidAngleTest.h
 	SortEventsTest.h
 	SpatialGroupingTest.h
-	SpecularReflectionCorrectThetaTest.h
+	SpecularReflectionCalculateThetaTest.h
 	SpecularReflectionPositionCorrectTest.h
 	SphericalAbsorptionTest.h
 	StripPeaksTest.h

@@ -6,12 +6,12 @@
 #include "SpecularReflectionAlgorithmTest.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidAlgorithms/SpecularReflectionCorrectTheta.h"
+#include "MantidAlgorithms/SpecularReflectionCalculateTheta.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
-class SpecularReflectionCorrectThetaTest: public CxxTest::TestSuite,
+class SpecularReflectionCalculateThetaTest: public CxxTest::TestSuite,
     public SpecularReflectionAlgorithmTest
 {
 
@@ -19,7 +19,7 @@ private:
 
   Mantid::API::IAlgorithm_sptr makeAlgorithm() const
   {
-    IAlgorithm_sptr alg = boost::make_shared<SpecularReflectionCorrectTheta>();
+    IAlgorithm_sptr alg = boost::make_shared<SpecularReflectionCalculateTheta>();
     alg->setRethrows(true);
     alg->setChild(true);
     alg->initialize();
@@ -29,23 +29,23 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SpecularReflectionCorrectThetaTest *createSuite()
+  static SpecularReflectionCalculateThetaTest *createSuite()
   {
-    return new SpecularReflectionCorrectThetaTest();
+    return new SpecularReflectionCalculateThetaTest();
   }
-  static void destroySuite(SpecularReflectionCorrectThetaTest *suite)
+  static void destroySuite(SpecularReflectionCalculateThetaTest *suite)
   {
     delete suite;
   }
 
   void test_Init()
   {
-    SpecularReflectionCorrectTheta alg;
+    SpecularReflectionCalculateTheta alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize())
     TS_ASSERT( alg.isInitialized())
   }
 
-  SpecularReflectionCorrectThetaTest()
+  SpecularReflectionCalculateThetaTest()
   {
   }
 
