@@ -700,33 +700,40 @@ namespace LiveData
         // that we need.
 
         // So, by setting m_status to Running, we avoid runStatus() wiping out our
-        // workspace initialization and everything runs as it should.
+        // workspace initialization.  We then call setRunDetails() (which would
+        // normally happen down in runStatus(), except that we've just gone out
+        // of our way to make sure that part of runStatus() *DOESN'T* get
+        // executed) and everything runs as it should.
 
         // It's debatable whether runStatus() should retain that implicit asumption of
         // m_pauseNetRead being true, or should explicitly check its state in addition
         // to m_status.  Either way, you're still going to need several paragraphs of
         // comments to explain what the heck is going on.
         m_status = Running;
+        setRunDetails( pkt);
       }
 
       // Add the run_number property
-      if ( haveRunNumber )
+      if (m_status == BeginRun)
       {
-        // run_number should not exist at this point, and if it does, we can't do much about it.
-        g_log.debug() << "run_number property already exists.  Current value will be ignored.\n"
-                      << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
-      }
-      else
-      {
-        // Save a copy of the packet so we can call setRunDetails() later (after
-        // extractData() has been called to fetch any data remaining from before
-        // this run start.
-        // Note: need to actually copy the contents (not just a pointer) because
-        // pkt will go away when this function returns.  And since packets don't have
-        // default constructors, we can only keep a pointer as a member, and thus
-        // have to actually allocate our deferred packet with new.
-        // Fortunately, this doesn't happen to often, so performance isn't an issue.
-        m_deferredRunDetailsPkt = boost::shared_ptr<ADARA::RunStatusPkt>(new ADARA::RunStatusPkt(pkt));
+        if ( haveRunNumber )
+        {
+          // run_number should not exist at this point, and if it does, we can't do much about it.
+          g_log.debug() << "run_number property already exists.  Current value will be ignored.\n"
+                        << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
+        }
+        else
+        {
+          // Save a copy of the packet so we can call setRunDetails() later (after
+          // extractData() has been called to fetch any data remaining from before
+          // this run start.
+          // Note: need to actually copy the contents (not just a pointer) because
+          // pkt will go away when this function returns.  And since packets don't have
+          // default constructors, we can only keep a pointer as a member, and thus
+          // have to actually allocate our deferred packet with new.
+          // Fortunately, this doesn't happen to often, so performance isn't an issue.
+          m_deferredRunDetailsPkt = boost::shared_ptr<ADARA::RunStatusPkt>(new ADARA::RunStatusPkt(pkt));
+        }
       }
 
       // See detailed comments below for what the m_pauseNetRead flag does and the
