@@ -417,6 +417,7 @@ void FunctionBrowser::addFunction(QtProperty* prop, Mantid::API::IFunction_sptr 
     cf->addFunction(fun);
     setFunction(prop, cf);
   }
+  updateFunctionIndices();
 }
 
 /**
@@ -1251,7 +1252,6 @@ void FunctionBrowser::addFunction()
   {// the browser is empty - add first function
     addFunction(NULL,f);
   }
-  updateFunctionIndices();
 }
 
 /**
