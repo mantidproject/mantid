@@ -143,7 +143,7 @@ public:
     manager.setProperty("WorkspaceIndex3", 0);
 
     FunctionDomain_sptr domain;
-    IFunctionValues_sptr values;
+    FunctionValues_sptr values;
 
     multi.createDomain( domain, values );
     
@@ -202,7 +202,7 @@ public:
     manager.setProperty("WorkspaceIndex3", 0);
 
     FunctionDomain_sptr domain;
-    IFunctionValues_sptr values;
+    FunctionValues_sptr values;
 
     auto mdfun = boost::make_shared<MultiDomainFunction>();
 
@@ -221,7 +221,7 @@ public:
     mdfun->addFunction(f3);
     mdfun->setDomainIndex(2,2);
 
-    auto ws = multi.createOutputWorkspace("out_",mdfun,FunctionDomain_sptr(),IFunctionValues_sptr(),"OUT_WS");
+    auto ws = multi.createOutputWorkspace("out_",mdfun,FunctionDomain_sptr(),FunctionValues_sptr(),"OUT_WS");
     TS_ASSERT( ws );
 
     auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
@@ -278,7 +278,7 @@ public:
     manager.setProperty("WorkspaceIndex3", 2);
 
     FunctionDomain_sptr domain;
-    IFunctionValues_sptr values;
+    FunctionValues_sptr values;
 
     auto mdfun = boost::make_shared<MultiDomainFunction>();
 

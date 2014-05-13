@@ -119,7 +119,8 @@ void ParamFunction::setParameter(const std::string& name, const double& value, b
   if (it == m_parameterNames.end())
   {
     std::ostringstream msg;
-    msg << "ParamFunction (set) parameter ("<<ucName<<") does not exist.";
+    msg << "ParamFunction tries to set value to non-exist parameter ("<<ucName<<") "
+        << "of function " << this->name();
     msg << "\nAllowed parameters: ";
     for (size_t ist = 0; ist < m_parameterNames.size(); ++ist)
     {
@@ -144,7 +145,9 @@ void ParamFunction::setParameterDescription(const std::string& name, const std::
   if (it == m_parameterNames.end())
   {
     std::ostringstream msg;
-    msg << "ParamFunction parameter ("<<ucName<<") does not exist.";
+    msg << "ParamFunction tries to set description to non-exist parameter ("<<ucName<<"). ";
+    msg << "\nAllowed parameters: ";
+    for (size_t ist = 0; ist < m_parameterNames.size(); ++ist) msg << m_parameterNames[ist] << ", ";
     throw std::invalid_argument(msg.str());
   }
   setParameterDescription(static_cast<int>(it - m_parameterNames.begin()),description);
@@ -165,7 +168,10 @@ double ParamFunction::getParameter(const std::string& name)const
   if (it == m_parameterNames.end())
   {
     std::ostringstream msg;
-    msg << "ParamFunction parameter ("<<ucName<<") does not exist.";
+    msg << "ParamFunction tries to get value of non-existing parameter ("<<ucName<<") "
+        << "to function " << this->name();
+    msg << "\nAllowed parameters: ";
+    for (size_t ist = 0; ist < m_parameterNames.size(); ++ist) msg << m_parameterNames[ist] << ", ";
     throw std::invalid_argument(msg.str());
   }
 

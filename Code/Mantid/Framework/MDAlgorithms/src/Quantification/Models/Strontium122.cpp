@@ -29,6 +29,9 @@ namespace Mantid
       /// 2 \pi
       const double TWO_PI = 2.*M_PI;
     }
+    Strontium122::Strontium122():
+      m_twinType(1),m_multEps(true)
+    { }
 
     /**
      * Initialize the model
@@ -82,53 +85,10 @@ namespace Mantid
       const double qsqr = qx*qx + qy*qy + qz*qz;
       const double epssqr = eps*eps;
 
-      // Transform the HKL only requires B matrix & goniometer (R) as ConvertToMD should have already
-      // handled addition of U matrix
-      // qhkl = (1/2pi)(RB)^-1(qxyz)
-      const Geometry::OrientedLattice & lattice = exptSetup.sample().getOrientedLattice();
-      const Kernel::DblMatrix & gr = exptSetup.run().getGoniometerMatrix();
-      const Kernel::DblMatrix & bmat = lattice.getB();
 
-      // Avoid doing inversion with Matrix class as it forces memory allocations
-      // M^-1 = (1/|M|)*M^T
-      double rb00(0.0), rb01(0.0), rb02(0.0),
-             rb10(0.0), rb11(0.0), rb12(0.0),
-             rb20(0.0), rb21(0.0), rb22(0.0);
-      for(unsigned int i = 0; i < 3; ++i)
-      {
-        rb00 += gr[0][i]*bmat[i][0];
-        rb01 += gr[0][i]*bmat[i][1];
-        rb02 += gr[0][i]*bmat[i][2];
+      double qh,qk,ql,arlu1,arlu2,arlu3;
+      ForegroundModel::convertToHKL(exptSetup,qx,qy,qz,qh,qk,ql,arlu1,arlu2,arlu3);
 
-        rb10 += gr[1][i]*bmat[i][0];
-        rb11 += gr[1][i]*bmat[i][1];
-        rb12 += gr[1][i]*bmat[i][2];
-
-        rb20 += gr[2][i]*bmat[i][0];
-        rb21 += gr[2][i]*bmat[i][1];
-        rb22 += gr[2][i]*bmat[i][2];
-      }
-      // 2pi*determinant. The tobyFit definition of rl vector has extra 2pi factor in it
-      const double twoPiDet= TWO_PI*(rb00*(rb11*rb22 - rb12*rb21) -
-                                     rb01*(rb10*rb22 - rb12*rb20) +
-                                     rb02*(rb10*rb21 - rb11*rb20));
-
-      const double qh = ((rb11*rb22 - rb12*rb21)*qx + (rb02*rb21 - rb01*rb22)*qy + (rb01*rb12 - rb02*rb11)*qz)/twoPiDet;
-      const double qk = ((rb12*rb20 - rb10*rb22)*qx + (rb00*rb22 - rb02*rb20)*qy + (rb02*rb10 - rb00*rb12)*qz)/twoPiDet;
-      const double ql = ((rb10*rb21 - rb11*rb20)*qx + (rb01*rb20 - rb00*rb21)*qy + (rb00*rb11 - rb01*rb10)*qz)/twoPiDet;
-
-      // Lattice parameters
-      double ca1 = std::cos(lattice.beta1());
-      double ca2 = std::cos(lattice.beta2());
-      double ca3 = std::cos(lattice.beta3());
-      double sa1 = std::abs(std::sin(lattice.beta1()));
-      double sa2 = std::abs(std::sin(lattice.beta2()));
-      double sa3 = std::abs(std::sin(lattice.beta3()));
-
-      const double factor = std::sqrt(1.0 + 2.0*(ca1*ca2*ca3) - (ca1*ca1 + ca2*ca2 + ca3*ca3));
-      const double arlu1 = (TWO_PI/lattice.a())*(sa1/factor); // Lattice parameters in r.l.u
-      const double arlu2 = (TWO_PI/lattice.b())*(sa2/factor);
-      const double arlu3 = (TWO_PI/lattice.c())*(sa3/factor);
 
       const double tempInK = exptSetup.getLogAsSingleValue("temperature_log");
       const double boseFactor = BoseEinsteinDistribution::np1Eps(eps,tempInK);

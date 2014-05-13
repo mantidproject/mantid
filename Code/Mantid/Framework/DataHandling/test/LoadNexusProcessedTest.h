@@ -644,10 +644,10 @@ private:
       
     if( nalgs == 4 )
     {
-      TS_ASSERT_EQUALS(history[0].name(), "LoadRaw");
-      TS_ASSERT_EQUALS(history[1].name(), "AlignDetectors");
-      TS_ASSERT_EQUALS(history[2].name(), "DiffractionFocussing");
-      TS_ASSERT_EQUALS(history[3].name(), "LoadNexusProcessed");
+      TS_ASSERT_EQUALS(history[0]->name(), "LoadRaw");
+      TS_ASSERT_EQUALS(history[1]->name(), "AlignDetectors");
+      TS_ASSERT_EQUALS(history[2]->name(), "DiffractionFocussing");
+      TS_ASSERT_EQUALS(history[3]->name(), "LoadNexusProcessed");
     }
   }
 

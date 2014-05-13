@@ -12,7 +12,7 @@ The algorithm will try to calculate the MinValues and MaxValues limits that are 
 
 *WIKI*/
 
-#include "MantidMDAlgorithms/ConvertToMDHelper.h"
+#include "MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidMDEvents/ConvToMDSelector.h"
@@ -34,47 +34,47 @@ namespace MDAlgorithms
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(ConvertToMDHelper)
+  DECLARE_ALGORITHM(ConvertToMDMinMaxGlobal)
   
 
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  ConvertToMDHelper::ConvertToMDHelper()
+  ConvertToMDMinMaxGlobal::ConvertToMDMinMaxGlobal()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  ConvertToMDHelper::~ConvertToMDHelper()
+  ConvertToMDMinMaxGlobal::~ConvertToMDMinMaxGlobal()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string ConvertToMDHelper::name() const { return "ConvertToMDHelper";};
+  const std::string ConvertToMDMinMaxGlobal::name() const { return "ConvertToMDMinMaxGlobal";};
   
   /// Algorithm's version for identification. @see Algorithm::version
-  int ConvertToMDHelper::version() const { return 1;};
+  int ConvertToMDMinMaxGlobal::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string ConvertToMDHelper::category() const { return "MDAlgorithms";}
+  const std::string ConvertToMDMinMaxGlobal::category() const { return "MDAlgorithms";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void ConvertToMDHelper::initDocs()
+  void ConvertToMDMinMaxGlobal::initDocs()
   {
-    this->setWikiSummary("Calculate limits required for ConvertToMD");
+    this->setWikiSummary("Calculate limits of ConvertToMD transformation which can be theoretically achieved on an instrument with unlimited coverage");
     this->setOptionalMessage("Calculate limits required for ConvertToMD");
   }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void ConvertToMDHelper::init()
+  void ConvertToMDMinMaxGlobal::init()
   {
       auto ws_valid = boost::make_shared<CompositeValidator>();
       //
@@ -134,7 +134,7 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void ConvertToMDHelper::exec()
+  void ConvertToMDMinMaxGlobal::exec()
   {
     std::vector<double> MinValues,MaxValues;
     std::string QDimension=getPropertyValue("QDimensions");
@@ -193,7 +193,7 @@ namespace MDAlgorithms
                 wstemp->getXMinMax(deltaEmin,deltaEmax);
             }
 
-            //Deal with nonphisical energies - conversion to DeltaE yields +-DBL_MAX
+            //Deal with nonphysical energies - conversion to DeltaE yields +-DBL_MAX
             if (deltaEmin < -DBL_MAX/2) deltaEmin=-deltaEmax;
             if (deltaEmax > DBL_MAX/2) deltaEmax=-deltaEmin;
 
@@ -249,7 +249,7 @@ namespace MDAlgorithms
             {
                 if(!ws->sample().hasOrientedLattice())
                 {
-                    g_log.error()<<"Samplem has no oriented lattice"<<std::endl;
+                    g_log.error()<<"Sample has no oriented lattice"<<std::endl;
                     throw std::invalid_argument("No UB set");
                 }
                 Mantid::Geometry::OrientedLattice ol=ws->sample().getOrientedLattice();

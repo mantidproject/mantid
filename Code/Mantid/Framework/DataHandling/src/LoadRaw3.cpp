@@ -74,7 +74,7 @@ namespace Mantid
     {
     }
 
-    /// Initialisation method.
+    /// Initialization method.
     void LoadRaw3::init()
     {
       LoadRawHelper::init();
@@ -96,10 +96,10 @@ namespace Mantid
       monitorOptions.push_back("Separate");
       declareProperty("LoadMonitors","Include", boost::make_shared<StringListValidator>(monitorOptions),
           "Option to control the loading of monitors.\n"
-			"Allowed options are Include,Exclude and Separate.\n"
-			"Include:The default is Include option which loads the monitors into the output workspace.\n"
-			"Exclude:The Exclude option excludes monitors from the output workspace.\n"
-			"Separate:The Separate option loads monitors into a separate workspace called OutputWorkspace_Monitor.\n");
+      "Allowed options are Include,Exclude and Separate.\n"
+      "Include:The default is Include option which loads the monitors into the output workspace.\n"
+      "Exclude:The Exclude option excludes monitors from the output workspace.\n"
+      "Separate:The Separate option loads monitors into a separate workspace called OutputWorkspace_Monitor.\n");
     }
 
 
@@ -211,7 +211,7 @@ namespace Mantid
           throw ;
         }
 
-        //now create a workspace of size normalwsSpecs and set it as outputworkspace
+        //now create a workspace of size normalwsSpecs and set it as output workspace
         if(normalwsSpecs > 0)
         {
           localWorkspace = createWorkspace(localWorkspace,normalwsSpecs,m_lengthIn,m_lengthIn-1);
@@ -227,8 +227,8 @@ namespace Mantid
 
       if(bseparateMonitors && normalwsSpecs == 0)
       {
-        // Ensure we fill the correct group as if we are only loading monitors then we essentially want normal behaviour
-        // with no extra _Monitors workspace
+        // Ensure we fill the correct group as if we are only loading monitors then we essentially want normal behavior
+        // with no extra _monitors workspace
         ws_grp = monitorws_grp;
       }
 
@@ -439,7 +439,7 @@ namespace Mantid
     /** This method separates monitors and creates two outputworkspaces
      *@param file :: -pointer to file
      *@param period :: period number
-     *@param monitorList :: -a list conatining the spectrum numbers for monitors
+     *@param monitorList :: -a list containing the spectrum numbers for monitors
      *@param ws_sptr :: -shared pointer to workspace
      *@param mws_sptr :: -shared pointer to monitor workspace
      */
@@ -465,7 +465,7 @@ namespace Mantid
           {
             throw std::runtime_error("Error reading raw file");
           }
-          //if this a moniotor  store that spectrum to monitor workspace
+          //if this a monitor  store that spectrum to monitor workspace
           if (isMonitor(monitorList, i))
           {
             setWorkspaceData(mws_sptr, m_timeChannelsVec, mwsIndex, i, m_noTimeRegimes,m_lengthIn,1);
@@ -660,7 +660,7 @@ namespace Mantid
       {
         Property *ws = getProperty("OutputWorkspace");
         std::string localWSName = ws->value();
-        std::string monitorWSName = localWSName + "_Monitors";
+        std::string monitorWSName = localWSName + "_monitors";
 
         declareProperty(new WorkspaceProperty<Workspace> ("MonitorWorkspace", monitorWSName,
             Direction::Output));

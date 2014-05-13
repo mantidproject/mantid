@@ -91,7 +91,7 @@ private:
   int fitSpectra(const int64_t wi, API::MatrixWorkspace_sptr inputW, const std::vector<double> &m_peakPositions,
                  const std::vector<double> &m_fitWindows, size_t &nparams, double &minD, double &maxD,
                  std::vector<double>&peakPosToFit, std::vector<double> &peakPosFitted, std::vector<double> &chisq,
-                 int &i_highestpeak);
+                 std::vector<double> &peakHeights, int &i_highestpeak);
 
   /// Add peak fitting and offset calculation information to information table workspaces per spectrum
   void addInfoToReportWS(int wi, FitPeakOffsetResult offsetresult, const std::vector<double> &tofitpeakpositions,
@@ -117,7 +117,7 @@ private:
   void fitPeaksOffset(const size_t inpnparams, const double minD, const double maxD,
                       const std::vector<double>& vec_peakPosRef,
                       const std::vector<double>& vec_peakPosFitted,
-                      const std::vector<double>& vec_fitChi2,
+                      const std::vector<double>& vec_peakHeights,
                       FitPeakOffsetResult& fitresult);
 
   /// Make a summary on all fit
@@ -135,7 +135,7 @@ private:
   double m_maxChiSq;
   double m_minPeakHeight;
 
-  double maxOffset;
+  double m_maxOffset;
 
   std::vector<double> m_peakPositions;
   std::vector<double> m_fitWindows;

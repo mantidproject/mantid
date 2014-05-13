@@ -97,6 +97,9 @@ namespace Mantid
       /// Returns the form factor for the given q^2 value
       double formFactor(const double qsqr) const;
 
+      /// helper function used for fast conversion from qx,qy,qz coordinate system into hkl coordinate system
+      static void convertToHKL(const API::ExperimentInfo & exptSetup,const double &qx,const double &qy, const double &qz,
+                                      double &qh,double &qk,double &ql,double &arlu1,double &arlu2,double &arlu3);
     private:
       DISABLE_COPY_AND_ASSIGN(ForegroundModel);
 
@@ -113,6 +116,8 @@ namespace Mantid
       /// An offset for the number of parameters that were declared before this one
       size_t m_parOffset;
 
+      /// the name of magnetic ion used to avoid resetting form factor table for the same ion
+      std::string m_MagIonName;
       /// Owned pointer to magnetic form factor cache
       PhysicalConstants::MagneticFormFactorTable *m_formFactorTable;
     };
@@ -121,6 +126,7 @@ namespace Mantid
     typedef boost::shared_ptr<ForegroundModel> ForegroundModel_sptr;
     /// boost::shared_ptr to const typedef
     typedef boost::shared_ptr<const ForegroundModel> ForegroundModel_const_sptr;
+
 
   }
 }

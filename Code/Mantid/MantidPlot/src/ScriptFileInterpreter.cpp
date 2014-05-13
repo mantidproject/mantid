@@ -225,10 +225,12 @@ void ScriptFileInterpreter::showFindReplaceDialog()
 }
 
 /**
- * Execute the whole script in the editor.
+ * Execute the whole script in the editor. Always clears the contents of the
+ * local variable dictionary first.
  */
 void ScriptFileInterpreter::executeAll(const Script::ExecutionMode mode)
 {
+  m_runner->clearLocals();
   executeCode(m_editor->text(), mode);
 }
 
@@ -247,6 +249,13 @@ void ScriptFileInterpreter::executeSelection(const Script::ExecutionMode mode)
   {
     executeAll(mode);
   }
+}
+
+/**
+ */
+void ScriptFileInterpreter::clearVariables()
+{
+  m_runner->clearLocals();
 }
 
 /// Toggles the progress reports on/off

@@ -1416,34 +1416,35 @@ namespace Mantid
      */
     signal_t MatrixWorkspace::getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const
     {
+      if (this->axes() != 2)
+        throw std::invalid_argument("MatrixWorkspace::getSignalAtCoord() - Workspace can only have 2 axes, found " +\
+                                    boost::lexical_cast<std::string>(this->axes()));
+
       coord_t x = coords[0];
       coord_t y = coords[1];
-
       // First, find the workspace index
-      NumericAxis * ax1 = dynamic_cast<NumericAxis*>(this->getAxis(1));
-
-      // If a spectra/text axis, just use the Y coord as the workspace index
-      size_t wi = size_t(y);
-      double yBinSize = 1.0;
-      if (ax1)
+      Axis * ax1 = this->getAxis(1);
+      size_t wi(-1);
+      try
       {
-        const MantidVec & yVals = ax1->getValues();
-        MantidVec::const_iterator it = std::lower_bound(yVals.begin(), yVals.end(), y);
-        if (it == yVals.end())
-        {
-          // Out of range
-          return std::numeric_limits<double>::quiet_NaN();
-        }
-        // The workspace index is the point in the vector that we found
-        wi = it - yVals.begin();
+        wi = ax1->indexOfValue(y);
+      }
+      catch(std::out_of_range &)
+      {
+        return std::numeric_limits<double>::quiet_NaN();
+      }
 
-        // Find the size of the bin in Y, if needed
-        if (normalization == VolumeNormalization)
+      const auto & yVals = this->readY(wi);
+      double yBinSize(1.0); // only applies for volume normalization & numeric axis
+      if (normalization == VolumeNormalization && ax1->isNumeric())
+      {
+        if (wi + 1 == this->getNumberHistograms() && this->getNumberHistograms() > 1)
         {
-          if ((it+1) == yVals.end() && (yVals.size() > 1))
-            yBinSize = *it - *(it-1);
-          else
-            yBinSize = *(it+1) - *it;
+          yBinSize =  yVals[wi] - yVals[wi-1];
+        }
+        else
+        {
+          yBinSize = yVals[wi+1] - yVals[wi];
         }
       }
 
@@ -1461,7 +1462,7 @@ namespace Mantid
           size_t i = (it - X.begin());
           if (i > 0)
           {
-            double y = this->readY(wi)[i-1];
+            double y = yVals[i-1];
             // What is our normalization factor?
             switch (normalization)
             {
@@ -1485,9 +1486,6 @@ namespace Mantid
         // Out of range
         return std::numeric_limits<double>::quiet_NaN();
     }
-
-
-
 
 
     //--------------------------------------------------------------------------------------------

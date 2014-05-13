@@ -326,7 +326,7 @@ namespace MantidQt
       else
       {
         QLabel *nameLbl = new QLabel(propName, parent);
-        nameLbl->setToolTip(QString::fromStdString(prop->documentation()));
+        nameLbl->setToolTip(QString::fromStdString(prop->briefDocumentation()));
         if( dynamic_cast<const PropertyWithValue<bool>* >(prop) )
         {
           QCheckBox *checkBox = new QCheckBox(parent);

@@ -198,12 +198,11 @@ namespace API
     m_gridLayout->addWidget(m_info, m_row, 4);
 
     /// Save the documentation tooltip
-    m_doc = QString::fromStdString(prop->documentation());
+    m_doc = QString::fromStdString(prop->briefDocumentation());
 
     if( !isOptionalProperty(prop) )
     {
-      if(!m_doc.isEmpty())
-        m_doc += "\n\n";
+      if(!m_doc.isEmpty()) m_doc += ".\n\n";
       m_doc += "This property is required.";
     }
     

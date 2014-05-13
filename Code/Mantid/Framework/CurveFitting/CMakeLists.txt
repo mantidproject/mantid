@@ -112,7 +112,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/BoundaryConstraint.h
 	inc/MantidCurveFitting/CalculateGammaBackground.h
 	inc/MantidCurveFitting/Chebyshev.h
-	inc/MantidCurveFitting/CompositeValues.h
 	inc/MantidCurveFitting/ComptonPeakProfile.h
 	inc/MantidCurveFitting/ComptonProfile.h
 	inc/MantidCurveFitting/ComptonScatteringCountRate.h
@@ -129,7 +128,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DiffRotDiscreteCircle.h
 	inc/MantidCurveFitting/DllConfig.h
-	inc/MantidCurveFitting/EmptyValues.h
 	inc/MantidCurveFitting/EndErfc.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
