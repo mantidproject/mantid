@@ -1,6 +1,16 @@
 /*WIKI*
- TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
- *WIKI*/
+
+Uses the Specular reflection condition ThetaIn == ThetaOut to calculate and return a corrected ThetaIn.
+
+<math>
+2*ThetaOut = tan^{-1}\frac{UpOffset}{BeamOffset}
+</math>
+
+The calculated theta value in degrees is returned by the algorithm.
+
+Also see [[SpecularReflectionPositionCorrect]]
+
+*WIKI*/
 
 #include "MantidAlgorithms/SpecularReflectionCorrectTheta.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -107,7 +117,12 @@ namespace Mantid
       const double upoffset = refFrame->vecPointingUp().scalar_prod(detSample);
       const double beamoffset = refFrame->vecPointingAlongBeam().scalar_prod(detSample);
 
-      const double twoTheta = std::atan(upoffset/beamoffset)/2 * 180 / M_PI;
+      const double twoTheta = std::atan(upoffset/beamoffset) * 180 / M_PI;
+
+      std::stringstream strstream;
+      strstream << "Recalculated two theta as: " << twoTheta;
+
+      this->g_log.information(strstream.str());
 
       this->setProperty("TwoTheta", twoTheta);
 

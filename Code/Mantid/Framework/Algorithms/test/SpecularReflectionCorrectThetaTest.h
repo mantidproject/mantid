@@ -94,7 +94,7 @@ public:
 
     // Based on the current positions, calculate the current incident theta.
     const double currentTwoThetaInRad = std::atan(
-        sampleToDetectorVerticalOffset / sampleToDetectorBeamOffset)/2;
+        sampleToDetectorVerticalOffset / sampleToDetectorBeamOffset);
     const double currentTwoThetaInDeg = currentTwoThetaInRad * (180.0 / M_PI);
 
     IAlgorithm_sptr alg = this->makeAlgorithm();
