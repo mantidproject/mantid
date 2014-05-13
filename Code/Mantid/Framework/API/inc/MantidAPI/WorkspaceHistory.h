@@ -82,13 +82,17 @@ public:
   /// Pretty print the entire history
   void printSelf(std::ostream&, const int indent  = 0) const;
 
+  /// Save the workspace history to a nexus file
   void saveNexus(::NeXus::File * file) const;
+  /// Load the workspace history from a nexus file
   void loadNexus(::NeXus::File * file);
 
 
 private:
   /// Private, unimplemented copy assignment operator
   WorkspaceHistory& operator=(const WorkspaceHistory& );
+  /// Recursive function to load the algorithm history tree from file
+  void loadNestedHistory(::NeXus::File * file, AlgorithmHistory_sptr parent = boost::shared_ptr<AlgorithmHistory>());
   /// Parse an algorithm history string loaded from file
   AlgorithmHistory_sptr parseAlgorithmHistory(const std::string& rawData);
   /// Find the history entries at this level in the file.

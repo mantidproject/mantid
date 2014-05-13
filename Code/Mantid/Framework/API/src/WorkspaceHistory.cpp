@@ -262,6 +262,20 @@ void WorkspaceHistory::loadNexus(::NeXus::File * file)
     return;
   }
 
+  loadNestedHistory(file);
+  file->closeGroup();
+}
+
+/** Load every algorithm history object at this point in the hierarchy.
+ * This method will recurse over every algorithm entry in the nexus file and 
+ * load both the record and its children.
+ * 
+ * @param file :: The handle to the nexus file
+ * @param parent :: Pointer to the parent AlgorithmHistory object. If null then loaded histories are added to 
+ * the workspace history.
+ */
+void WorkspaceHistory::loadNestedHistory(::NeXus::File * file, AlgorithmHistory_sptr parent)
+{
   // historyNumbers should be sorted by number
   std::set<int> historyNumbers = findHistoryEntries(file);
   for (auto it = historyNumbers.begin(); it != historyNumbers.end(); ++it)
@@ -270,21 +284,31 @@ void WorkspaceHistory::loadNexus(::NeXus::File * file)
     std::string rawData;
     file->openGroup(entryName, "NXnote");
     file->readData("data", rawData);
-    file->closeGroup();
     
     try
     {      
       AlgorithmHistory_sptr history = parseAlgorithmHistory(rawData);
-      this->addHistory(history);
+      loadNestedHistory(file, history);
+      if(parent)
+      {
+        parent->addChildHistory(history);
+      }
+      else
+      {
+        //if not parent point is supplied, asssume we're at the top
+        //and attach the history to the workspace 
+        this->addHistory(history);
+      }
     }
     catch (std::runtime_error& e)
     {
       //just log the exception as a warning and continue parsing history
       g_log.warning() << e.what() << "\n";
     }
+
+    file->closeGroup();
   }
 
-  file->closeGroup();
 }
 
 /** Find all the algorithm entries at a particular point the the nexus file 
