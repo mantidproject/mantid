@@ -251,16 +251,6 @@ void getWordsInString(const std::string & words4, std::string & w1, std::string 
  */
 void WorkspaceHistory::loadNexus(::NeXus::File * file)
 {
-  /// specifies the order that algorithm data is listed in workspaces' histories
-  enum AlgorithmHist
-  {
-    NAME = 0,                          //< algorithms name
-    EXEC_TIME = 1,                     //< when the algorithm was run
-    EXEC_DUR = 2,                      //< execution time for the algorithm
-    PARAMS = 3                         //< the algorithm's parameters
-  };
-
-
   // Warn but continue if the group does not exist.
   try
   {
@@ -271,13 +261,44 @@ void WorkspaceHistory::loadNexus(::NeXus::File * file)
     g_log.warning() << "Error opening the algorithm history field 'process'. Workspace will have no history." << "\n";
     return;
   }
+
+  // historyNumbers should be sorted by number
+  std::set<int> historyNumbers = findHistoryEntries(file);
+  for (auto it = historyNumbers.begin(); it != historyNumbers.end(); ++it)
+  {
+    std::string entryName = "MantidAlgorithm_" + Kernel::Strings::toString(*it);
+    std::string rawData;
+    file->openGroup(entryName, "NXnote");
+    file->readData("data", rawData);
+    file->closeGroup();
+    
+    try
+    {      
+      AlgorithmHistory_sptr history = parseAlgorithmHistory(rawData);
+      this->addHistory(history);
+    }
+    catch (std::runtime_error& e)
+    {
+      //just log the exception as a warning and continue parsing history
+      g_log.warning() << e.what() << "\n";
+    }
+  }
+
+  file->closeGroup();
+}
+
+/** Find all the algorithm entries at a particular point the the nexus file 
+ * @param file :: The handle to the nexus file
+ * @returns set of integers. One for each algorithm at the level in the file.
+ */
+std::set<int> WorkspaceHistory::findHistoryEntries(::NeXus::File* file)
+{
+  std::set<int> historyNumbers;
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
 
-
   // Histories are numberd MantidAlgorithm_0, ..., MantidAlgorithm_10, etc.
   // Find all the unique numbers
-  std::set<int> historyNumbers;
   for (auto it = entries.begin(); it != entries.end(); ++it)
   {
     std::string entryName = it->first;
@@ -291,91 +312,95 @@ void WorkspaceHistory::loadNexus(::NeXus::File * file)
     }
   }
 
-  // historyNumbers should be sorted by number
-  for (auto it = historyNumbers.begin(); it != historyNumbers.end(); ++it)
+  return historyNumbers;
+}
+
+/** Parse an algorithm history entry loaded from file.
+ * @param rawData :: The string containing the history entry loaded from file
+ * @returns a pointer to the loaded algorithm history object
+ * @throws std::runtime_error if the loaded data could not be parsed
+ */
+AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string& rawData)
+{
+  /// specifies the order that algorithm data is listed in workspaces' histories
+  enum AlgorithmHist
   {
-    std::string entryName = "MantidAlgorithm_" + Kernel::Strings::toString(*it);
-    file->openGroup(entryName, "NXnote");
-    std::string rawData;
-    file->readData("data", rawData);
-    file->closeGroup();
+    NAME = 0,                          //< algorithms name
+    EXEC_TIME = 1,                     //< when the algorithm was run
+    EXEC_DUR = 2,                      //< execution time for the algorithm
+    PARAMS = 3                         //< the algorithm's parameters
+  };
 
-    // Split into separate lines
-    std::vector<std::string> info;
-    boost::split(info, rawData, boost::is_any_of("\n"));
+  std::vector<std::string> info;
+  boost::split(info, rawData, boost::is_any_of("\n"));
 
-    const size_t nlines = info.size();
-    if( nlines < 4 )
-    {// ignore badly formed history entries
-      continue;
-    }
-
-    std::string algName, dummy, temp;
-    // get the name and version of the algorithm
-    getWordsInString(info[NAME], dummy, algName, temp);
-
-    //Chop of the v from the version string
-    size_t numStart = temp.find('v');
-    // this doesn't abort if the version string doesn't contain a v
-    numStart = numStart != 1 ? 1 : 0;
-    temp = std::string(temp.begin() + numStart, temp.end());
-    const int version = boost::lexical_cast<int>(temp);
-
-    //Get the execution date/time
-    std::string date, time;
-    getWordsInString(info[EXEC_TIME], dummy, dummy, date, time);
-    Poco::DateTime start_timedate;
-    //This is needed by the Poco parsing function
-    int tzdiff(-1);
-    if( !Poco::DateTimeParser::tryParse("%Y-%b-%d %H:%M:%S", date + " " + time, start_timedate, tzdiff))
-    {
-      g_log.warning() << "Error parsing start time in algorithm history entry." << "\n";
-      file->closeGroup();
-      return;
-    }
-    //Get the duration
-    getWordsInString(info[EXEC_DUR], dummy, dummy, temp, dummy);
-    double dur = boost::lexical_cast<double>(temp);
-    if ( dur < 0.0 )
-    {
-      g_log.warning() << "Error parsing start time in algorithm history entry." << "\n";
-      file->closeGroup();
-      return;
-    }
-    //Convert the timestamp to time_t to DateAndTime
-    Mantid::Kernel::DateAndTime utc_start;
-    utc_start.set_from_time_t( start_timedate.timestamp().epochTime() );
-    //Create the algorithm history
-    API::AlgorithmHistory alg_hist(algName, version, utc_start, dur,Algorithm::g_execCount);
-    // Simulate running an algorithm
-    ++Algorithm::g_execCount;
-
-    //Add property information
-    for( size_t index = static_cast<size_t>(PARAMS)+1;index < nlines;++index )
-    {
-      const std::string line = info[index];
-      std::string::size_type colon = line.find(":");
-      std::string::size_type comma = line.find(",");
-      //Each colon has a space after it
-      std::string prop_name = line.substr(colon + 2, comma - colon - 2);
-      colon = line.find(":", comma);
-      comma = line.find(", Default?", colon);
-      std::string prop_value = line.substr(colon + 2, comma - colon - 2);
-      colon = line.find(":", comma);
-      comma = line.find(", Direction", colon);
-      std::string is_def = line.substr(colon + 2, comma - colon - 2);
-      colon = line.find(":", comma);
-      comma = line.find(",", colon);
-      std::string direction = line.substr(colon + 2, comma - colon - 2);
-      unsigned int direc(Mantid::Kernel::Direction::asEnum(direction));
-      alg_hist.addProperty(prop_name, prop_value, (is_def[0] == 'Y'), direc);
-    }
-    
-    boost::shared_ptr<AlgorithmHistory> history = boost::make_shared<AlgorithmHistory>(alg_hist);
-    this->addHistory(history);
+  const size_t nlines = info.size();
+  if( nlines < 4 )
+  {// ignore badly formed history entries
+    throw std::runtime_error("Malformed history record: Incorrect record size.");
   }
 
-  file->closeGroup();
+  std::string algName, dummy, temp;
+  // get the name and version of the algorithm
+  getWordsInString(info[NAME], dummy, algName, temp);
+
+  //Chop of the v from the version string
+  size_t numStart = temp.find('v');
+  // this doesn't abort if the version string doesn't contain a v
+  numStart = numStart != 1 ? 1 : 0;
+  temp = std::string(temp.begin() + numStart, temp.end());
+  const int version = boost::lexical_cast<int>(temp);
+
+  //Get the execution date/time
+  std::string date, time;
+  getWordsInString(info[EXEC_TIME], dummy, dummy, date, time);
+  Poco::DateTime start_timedate;
+  //This is needed by the Poco parsing function
+  int tzdiff(-1);
+  if( !Poco::DateTimeParser::tryParse("%Y-%b-%d %H:%M:%S", date + " " + time, start_timedate, tzdiff))
+  {
+    g_log.warning() << "Error parsing start time in algorithm history entry." << "\n";
+    throw std::runtime_error("Malformed history record: could not parse algorithm start time.");
+  }
+  //Get the duration
+  getWordsInString(info[EXEC_DUR], dummy, dummy, temp, dummy);
+  double dur = boost::lexical_cast<double>(temp);
+  if ( dur < 0.0 )
+  {
+    g_log.warning() << "Error parsing start time in algorithm history entry." << "\n";
+    throw std::runtime_error("Malformed history record: could not parse algorithm duration.");
+  }
+  //Convert the timestamp to time_t to DateAndTime
+  Mantid::Kernel::DateAndTime utc_start;
+  utc_start.set_from_time_t( start_timedate.timestamp().epochTime() );
+  //Create the algorithm history
+  API::AlgorithmHistory alg_hist(algName, version, utc_start, dur,Algorithm::g_execCount);
+  // Simulate running an algorithm
+  ++Algorithm::g_execCount;
+
+  //Add property information
+  for( size_t index = static_cast<size_t>(PARAMS)+1;index < nlines;++index )
+  {
+    const std::string line = info[index];
+    std::string::size_type colon = line.find(":");
+    std::string::size_type comma = line.find(",");
+    //Each colon has a space after it
+    std::string prop_name = line.substr(colon + 2, comma - colon - 2);
+    colon = line.find(":", comma);
+    comma = line.find(", Default?", colon);
+    std::string prop_value = line.substr(colon + 2, comma - colon - 2);
+    colon = line.find(":", comma);
+    comma = line.find(", Direction", colon);
+    std::string is_def = line.substr(colon + 2, comma - colon - 2);
+    colon = line.find(":", comma);
+    comma = line.find(",", colon);
+    std::string direction = line.substr(colon + 2, comma - colon - 2);
+    unsigned int direc(Mantid::Kernel::Direction::asEnum(direction));
+    alg_hist.addProperty(prop_name, prop_value, (is_def[0] == 'Y'), direc);
+  }
+  
+  AlgorithmHistory_sptr history = boost::make_shared<AlgorithmHistory>(alg_hist);
+  return history;
 }
 
 

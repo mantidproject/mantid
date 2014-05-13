@@ -89,7 +89,10 @@ public:
 private:
   /// Private, unimplemented copy assignment operator
   WorkspaceHistory& operator=(const WorkspaceHistory& );
-
+  /// Parse an algorithm history string loaded from file
+  AlgorithmHistory_sptr parseAlgorithmHistory(const std::string& rawData);
+  /// Find the history entries at this level in the file.
+  std::set<int> findHistoryEntries(::NeXus::File* file);
   /// The environment of the workspace
   const Kernel::EnvironmentHistory m_environment;
   /// The algorithms which have been called on the workspace
