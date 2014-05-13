@@ -49,7 +49,7 @@ public:
         double dy = (center_y-(double)iy);
         Y[0] = exp(-(dx*dx+dy*dy));
         E[0] = 1;
-        ws->getAxis(1)->setValue(i, i);
+        ws->getSpectrum(i)->setSpectrumNo(i);
       }
     }
   }
