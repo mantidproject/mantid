@@ -98,8 +98,9 @@ namespace Algorithms
                     "Peak function to calculate.");
 
     std::vector<std::string> bkgdnames = FunctionFactory::Instance().getFunctionNames<API::IBackgroundFunction>();
+    bkgdnames.push_back("None");
     bkgdnames.push_back("Auto");
-    declareProperty("BackgroundFunction", "Flat", boost::make_shared<StringListValidator>(bkgdnames),
+    declareProperty("BackgroundFunction", "FlatBackground", boost::make_shared<StringListValidator>(bkgdnames),
                     "Background function to calculate. ");
 
     declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
@@ -167,6 +168,11 @@ namespace Algorithms
       m_useAutoBkgd = true;
       bkgdfunctype = "Quardratic";
     }
+    else if (bkgdfunctype.compare("None") == 0)
+    {
+      m_useAutoBkgd = false;
+      m_genBackground = false;
+    }
 
     binParameters = this->getProperty("BinningParameters");
     inputWS = this->getProperty("InputWorkspace");
@@ -189,7 +195,9 @@ namespace Algorithms
     size_t numpeaks = m_funcParamWS->rowCount();
     size_t icolchi2 = m_funcParamWS->columnCount() - 1;
     size_t numpeakparams = m_peakFunction->nParams();
-    size_t numbkgdparams = m_bkgdFunction->nParams();
+    size_t numbkgdparams = 0;
+    if (m_bkgdFunction) numbkgdparams = m_bkgdFunction->nParams();
+    else g_log.warning("There is no background function specified. ");
 
     // Create data structure for all peaks functions
     std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > > functionmap;
@@ -214,6 +222,10 @@ namespace Algorithms
       {
         g_log.notice() << "Skip Peak " << ipeak << " (chi^2 " << chi2 << " < 0 )" << "\n";
         continue;
+      }
+      else
+      {
+        g_log.notice() << "[DB] Chi-square = " << chi2 << "\n";
       }
 
       // Set up function
@@ -255,6 +267,8 @@ namespace Algorithms
         }
       }
 
+      g_log.notice("Bug flag 1");
+
       double centre = m_peakFunction->centre();
       // double fwhm = m_peakFunction->fwhm();
 
@@ -280,8 +294,8 @@ namespace Algorithms
       // Generate peak function
       mapiter->second.push_back(std::make_pair(centre, clonefunction));
 
-      g_log.debug() << "Peak " << ipeak << ": Spec = " << wsindex
-                    << " func: " << clonefunction->asString() << "\n";
+      g_log.information() << "Peak " << ipeak << ": Spec = " << wsindex
+                          << " func: " << clonefunction->asString() << "\n";
 
     } //ENDFOR (ipeak)
 
@@ -702,6 +716,9 @@ namespace Algorithms
     if (colnames.back().compare("chi2") != 0)
       throw std::runtime_error("Last column must be 'chi2'.");
 
+    g_log.notice() << "[DB] Number of columns = " << numcols << ", Use raw parameters = "
+                   << m_useRawParameter << "\n";
+
     // Process column names in case that there are not same as parameter names
     // fx.name might be available
     std::vector<std::string> m_tableParamNames(colnames.size()-2);
@@ -719,10 +736,14 @@ namespace Algorithms
     {
       // Number of parameters must be peak parameters + background parameters
       size_t numpeakparams = m_peakFunction->nParams();
-      size_t numbkgdparams = m_bkgdFunction->nParams();
+      size_t numbkgdparams = 0;
+      if (m_genBackground) numbkgdparams = m_bkgdFunction->nParams();
       size_t numparams = numpeakparams + numbkgdparams;
-      if (numparamcols != numparams)
+      if (numparamcols < numparams)
         throw std::runtime_error("Parameters number is not correct. ");
+      else if (numparamcols > numparams)
+        g_log.warning("Number of parameters given in table workspace is more than "
+                      "number of parameters of function(s) to generate peaks. ");
 
       // Check column names are same as function parameter naems
       for (size_t i = 0; i < numpeakparams; ++i)
@@ -730,7 +751,11 @@ namespace Algorithms
         if (!hasParameter(m_peakFunction, m_tableParamNames[i]))
         {
           std::stringstream errss;
-          errss << "Peak function does not have paramter " << m_tableParamNames[i];
+          errss << "Peak function " << m_peakFunction->name() << " does not have paramter " << m_tableParamNames[i]
+                   << "\n" << "Allowed function parameters are ";
+          std::vector<std::string> parnames = m_peakFunction->getParameterNames();
+          for (size_t k = 0; k < parnames.size(); ++k)
+            errss << parnames[k] << ", ";
           throw std::runtime_error(errss.str());
         }
       }
@@ -766,6 +791,8 @@ namespace Algorithms
     {
       m_funcParameterNames[i-1] = colnames[i];
     }
+
+    g_log.notice("[DB] End of processTableCulumns");
 
     return;
   }

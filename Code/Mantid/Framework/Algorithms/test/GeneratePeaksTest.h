@@ -56,30 +56,33 @@ public:
     return;
   }
 
-  /*
-   * Test to use user-provided binning parameters
+  //----------------------------------------------------------------------------------------------
+  /** Test to use user-provided binning parameters
    */
   void test_UserBinningParameters()
   {
-    // 1. Create input
+    // Create input parameter table workspace
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters();
 
+    // Initialize algorithm GenertePeaks
     GeneratePeaks alg;
     alg.initialize();
 
-    // 3. Set value
+    // Set value
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParametersWorkspace", peakparmsws));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakFunction", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundFunction", "Auto"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test01WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameterTable", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
 
-    // 4. Execute
+    // Execute
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // 5. Get result
+    // Get result/output workspace
     API::MatrixWorkspace_const_sptr peaksws =
         boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test01WS"));
     TS_ASSERT(peaksws);
@@ -118,25 +121,30 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test algorithm by using an existing input workspace as X-values
+   */
   void test_FromInputWorkspace()
   {
-    // 1. Create input
+    // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters();
     API::MatrixWorkspace_sptr inputws = createTestInputWorkspace();
 
+    // Initialize algorithm class
     GeneratePeaks alg;
     alg.initialize();
 
-    // 3. Set value
+    // Set value
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParametersWorkspace", peakparmsws));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakFunction", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundFunction", "Quadratic"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputws));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test02WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
 
-    // 4. Execute
+    // Execute
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -236,11 +244,11 @@ public:
     return;
   }
 
-  /*
-   * Generate a TableWorkspace containing 3 peaks on 2 spectra
-   * spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2 = 0
-   * spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2 = 0
-   * spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2 = 0
+  //----------------------------------------------------------------------------------------------
+  /** Generate a TableWorkspace containing 3 peaks on 2 spectra
+   *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2 = 0
+   *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2 = 0
+   *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2 = 0
    */
   DataObjects::TableWorkspace_sptr createTestPeakParameters()
   {
