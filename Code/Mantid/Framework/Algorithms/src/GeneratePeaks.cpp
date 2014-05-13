@@ -148,13 +148,13 @@ namespace Algorithms
     this->setProperty("OutputWorkspace", outputWS);
 
     // Generate peaks
-    generatePeaksNew(outputWS);
-    // generatePeaks(outputWS, m_funcParamWS, m_peakFunction, m_newWSFromParent);
+    generatePeaks(outputWS);
 
     return;
   }
 
-  /**
+  //----------------------------------------------------------------------------------------------
+  /** Process algorithm properties
     */
   void GeneratePeaks::processAlgProperties(std::string& peakfunctype, std::string& bkgdfunctype)
   {
@@ -181,16 +181,18 @@ namespace Algorithms
 
     m_useRawParameter = getProperty("IsRawParameterTable");
 
-
     // Special properties related
     m_maxChi2 = this->getProperty("MaxAllowedChi2");
     m_numPeakWidth = this->getProperty("NumberWidths");
-    // bool ignorewidepeaks = getProperty("IgnoreWidePeaks");
 
     return;
   }
 
-  void GeneratePeaks::generatePeaksNew(API::MatrixWorkspace_sptr dataWS)
+  //----------------------------------------------------------------------------------------------
+  /**  Generate peaks
+    * @param dataWS :: output matrix workspace
+    */
+  void GeneratePeaks::generatePeaks(API::MatrixWorkspace_sptr dataWS)
   {
     size_t numpeaks = m_funcParamWS->rowCount();
     size_t icolchi2 = m_funcParamWS->columnCount() - 1;
@@ -249,6 +251,7 @@ namespace Algorithms
       }
       else
       {
+        g_log.notice() << "i_height = " << i_height << "\n";
         double tmpheight = m_funcParamWS->cell<double>(ipeak, i_height);
         double tmpwidth = m_funcParamWS->cell<double>(ipeak, i_width);
         double tmpcentre = m_funcParamWS->cell<double>(ipeak, i_centre);
@@ -258,6 +261,7 @@ namespace Algorithms
 
         if (m_genBackground)
         {
+          g_log.notice() << "i_a0 = " << i_a0 << "\n";
           double tmpa0 = m_funcParamWS->cell<double>(ipeak, i_a0);
           double tmpa1 = m_funcParamWS->cell<double>(ipeak, i_a1);
           double tmpa2 = m_funcParamWS->cell<double>(ipeak, i_a2);
@@ -377,232 +381,25 @@ namespace Algorithms
 
       } // ENDFOR(ipeak)
 
-
     }
 
     return;
   }
 
-#if 0
   //----------------------------------------------------------------------------------------------
-  /** Generate peaks and background if optioned
-   */
-  void GeneratePeaks::generatePeaks(API::MatrixWorkspace_sptr dataWS, DataObjects::TableWorkspace_const_sptr peakparameters,
-                                    std::string peakfunction, bool newWSFromParent)
-  {
-
-    // Special properties related
-    double maxchi2 = this->getProperty("MaxAllowedChi2");
-    double numWidths = this->getProperty("NumberWidths");
-    bool ignorewidepeaks = getProperty("IgnoreWidePeaks");
-    bool generateBackground = this->getProperty("GenerateBackground");
-    size_t numpeaks = peakparameters->rowCount();
-
-    // Get the parameter names for the peak function
-    std::vector<std::string> columnNames = peakparameters->getColumnNames();
-    if (!columnNames.front().compare("spectrum") == 0)
-    {
-      std::stringstream msg;
-      msg << "First column of table should be \"spectrum\". Found \"" << columnNames.front() << "\"";
-      throw std::invalid_argument(msg.str());
-    }
-    columnNames.erase(columnNames.begin()); // don't need to know that name
-    if (!columnNames.back().compare("chi2") == 0)
-    {
-      std::stringstream msg;
-      msg << "Last column of table should be \"chi2\". Found \"" << columnNames.back() << "\"";
-      throw std::invalid_argument(msg.str());
-    }
-    columnNames.erase(columnNames.begin()+(columnNames.size()-1)); // don't need to know that name either
-    const bool isRaw = isRawTable(columnNames);
-    // const std::size_t bkgOffset = getBkgOffset(columnNames, isRaw);
-    // FIXME - This should be more flexible/smart
-    const std::size_t bkgOffset = 3;
-    g_log.information() << "isRaw=" << isRaw << " bkgOffset=" << bkgOffset << "\n";
-
-    // Create data structure for all peaks functions
-    std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > > functionmap;
-    std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >::iterator mapiter;
-
-    for (size_t ipk = 0; ipk < numpeaks; ipk ++)
-    {
-      // Get to know workspace index
-      specid_t specid = static_cast<specid_t>(getTableValue(peakparameters, "spectrum", ipk));
-      specid_t wsindex;
-      if (newWSFromParent)
-        wsindex = specid;
-      else
-        wsindex = mSpectrumMap[specid];
-
-      // Existed?
-      mapiter = functionmap.find(wsindex);
-      if (mapiter == functionmap.end())
-      {
-        std::vector<std::pair<double, API::IFunction_sptr> > tempvector;
-        std::pair<std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >::iterator, bool> ret;
-        ret = functionmap.insert(std::make_pair(wsindex, tempvector));
-        mapiter = ret.first;
-      }
-
-      // Generate peak function
-      double chi2 = getTableValue(peakparameters, "chi2", ipk);
-      double centre, fwhm; // output parameters
-
-      if (chi2 > maxchi2)
-      {
-        g_log.notice() << "Skip Peak " << ipk << " (chi^2 " << chi2 << " > " << maxchi2 << ") at " << centre << "\n";
-        continue;
-      }
-      else if (chi2 < 0. && ignorewidepeaks)
-      {
-        g_log.notice() << "Skip Peak " << ipk << " (chi^2 " << chi2 << " < 0 ) at " << centre << "\n";
-      }
-      else
-      {
-        mapiter->second.push_back(std::make_pair(centre, mfunc));
-      }
-
-      g_log.debug() << "Peak " << ipk << ": Spec = " << specid << " -> WSIndex = " << wsindex
-                    << " func: " << mfunc->asString() << "\n";
-    }
-
-    for (mapiter = functionmap.begin(); mapiter != functionmap.end(); ++mapiter)
-    {
-      // Sort functions in same spectrum by centre
-      std::vector<std::pair<double, API::IFunction_sptr> >& vecfuncs = mapiter->second;
-      std::sort(vecfuncs.begin(), vecfuncs.end());
-      specid_t wsindex = mapiter->first;
-
-      // Plot each
-      for (size_t ipk = 0; ipk < mapiter->second.size(); ++ipk)
-      {
-        // Basic parameters of the peak
-        API::IFunction_sptr mfunc = vecfuncs[ipk].second;
-        API::IPeakFunction_sptr mpeak = getPeakFunction(mfunc);
-        if (!mpeak)
-          throw std::runtime_error("Function in array does not contain any peak function!");
-
-        double centre = vecfuncs[ipk].first;
-        double fwhm = mpeak->fwhm();
-
-        // Determine boundary
-        const MantidVec& X = dataWS->dataX(wsindex);
-        double leftbound = centre - numWidths*fwhm;
-        if (ipk > 0)
-        {
-          // Not left most peak.
-          double middle = 0.5*(centre + vecfuncs[ipk-1].first);
-          if (leftbound < middle)
-            leftbound = middle;
-        }
-        std::vector<double>::const_iterator left = std::lower_bound(X.begin(), X.end(), leftbound);
-        if (left == X.end())
-          left = X.begin();
-
-        double rightbound = centre + numWidths*fwhm;
-        if (ipk != vecfuncs.size()-1)
-        {
-          // Not the rightmost peak
-          double middle = 0.5*(centre + vecfuncs[ipk+1].first);
-          if (rightbound > middle)
-            rightbound = middle;
-        }
-        std::vector<double>::const_iterator right = std::lower_bound(left + 1, X.end(), rightbound);
-
-        // Build domain & function
-        API::FunctionDomain1DVector domain(left, right); //dataWS->dataX(wsindex));
-
-        // 4. Evaluate the function
-        API::FunctionValues values(domain);
-        mfunc->function(domain, values);
-
-        // 5. Put to output
-        std::size_t offset = (left-X.begin());
-        std::size_t numY = values.size();
-        for (std::size_t i = 0; i < numY; i ++)
-        {
-          dataWS->dataY(wsindex)[i + offset] += values[i];
-        }
-      } // for peak
-
-    } // for spectra
-
-    return;
-  }
-#endif
-
-  //----------------------------------------------------------------------------------------------
-  /**
-   * Create a function for fitting.
-   * @return The requested function to fit.
-   *
-   *const std::string &peakFuncType, const std::vector<std::string> &colNames,
-                                                    const bool isRaw, const bool withBackground,
-                                                    DataObjects::TableWorkspace_const_sptr peakParmsWS,
-                                                    const std::size_t bkg_offset, const std::size_t rowNum, double &centre, double &fwhm
-   *
+  /** Create a function for fitting.
+   *  @return The requested function to fit
    */
   void GeneratePeaks::createFunction(std::string& peaktype, std::string& bkgdtype)
   {
-    // Create the peak
+    // Create peak function
     m_peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
           API::FunctionFactory::Instance().createFunction(peaktype));
-#if 0
-    if (isRaw)
-    {
-      std::string paramName;
-      for (std::size_t i = 0; i < bkg_offset; i++)
-      {
-        // paramName = colNames[i].substr(3);
-        paramName = colNames[i];
-        peakFunc->setParameter(paramName, getTableValue(peakParmsWS, colNames[i], rowNum));
-      }
-    }
-    else
-    {
-      peakFunc->setHeight(getTableValue(peakParmsWS, "height", rowNum));
-      peakFunc->setCentre(getTableValue(peakParmsWS, "centre", rowNum));
-      peakFunc->setFwhm(getTableValue(peakParmsWS, "width", rowNum));
-    }
-    centre = peakFunc->centre();
-    fwhm = peakFunc->fwhm();
-
-    // skip out early
-    if (!withBackground)
-      return boost::shared_ptr<IFunction>(peakFunc);
-#endif
-
 
     // create the background
     if (m_genBackground)
       m_bkgdFunction = boost::dynamic_pointer_cast<IBackgroundFunction>(
             API::FunctionFactory::Instance().createFunction(bkgdtype));
-
-#if 0
-    if (isRaw)
-    {
-      std::string paramName;
-      for (std::size_t i = bkg_offset; i < colNames.size(); i++)
-      {
-        // paramName = colNames[i].substr(3);
-        paramName = colNames[i];
-        backFunc->setParameter(paramName, getTableValue(peakParmsWS, colNames[i], rowNum));
-      }
-    }
-    else
-    {
-      backFunc->setParameter("A0", getTableValue(peakParmsWS, "backgroundintercept", rowNum));
-      backFunc->setParameter("A1", getTableValue(peakParmsWS, "backgroundslope", rowNum));
-      backFunc->setParameter("A2", getTableValue(peakParmsWS, "A2", rowNum));
-    }
-
-    // setup the output
-    API::CompositeFunction* fitFunc = new CompositeFunction();
-    fitFunc->addFunction(peakFunc);
-    fitFunc->addFunction(backFunc);
-
-    return boost::shared_ptr<IFunction>(fitFunc);
-#endif
 
     return;
   }
@@ -685,7 +482,9 @@ namespace Algorithms
     return;
   }
 
-
+  //----------------------------------------------------------------------------------------------
+  /** Process table column names for peak and background function parameters names
+    */
   void GeneratePeaks::processTableColumnNames()
   {
     using namespace boost::algorithm;
@@ -704,13 +503,13 @@ namespace Algorithms
 
     // Process column names in case that there are not same as parameter names
     // fx.name might be available
-    std::vector<std::string> m_tableParamNames(colnames.size()-2);
+    m_funcParameterNames.resize(colnames.size()-2);
     for (size_t i = 0; i < colnames.size()-2; ++i)
     {
       std::string str = colnames[i+1];
       std::vector<std::string> tokens;
       split(tokens, str, is_any_of(".")); // here it is
-      m_tableParamNames[i] = tokens.back();
+      m_funcParameterNames[i] = tokens.back();
     }
 
     // Check column number
@@ -731,10 +530,10 @@ namespace Algorithms
       // Check column names are same as function parameter naems
       for (size_t i = 0; i < numpeakparams; ++i)
       {
-        if (!hasParameter(m_peakFunction, m_tableParamNames[i]))
+        if (!hasParameter(m_peakFunction, m_funcParameterNames[i]))
         {
           std::stringstream errss;
-          errss << "Peak function " << m_peakFunction->name() << " does not have paramter " << m_tableParamNames[i]
+          errss << "Peak function " << m_peakFunction->name() << " does not have paramter " << m_funcParameterNames[i]
                    << "\n" << "Allowed function parameters are ";
           std::vector<std::string> parnames = m_peakFunction->getParameterNames();
           for (size_t k = 0; k < parnames.size(); ++k)
@@ -746,40 +545,45 @@ namespace Algorithms
       // Background function
       for (size_t i = 0; i < numbkgdparams; ++i)
       {
-        if (!hasParameter(m_bkgdFunction, m_tableParamNames[i+numpeakparams]))
+        if (!hasParameter(m_bkgdFunction, m_funcParameterNames[i+numpeakparams]))
         {
           std::stringstream errss;
-          errss << "Background function does not have paramter " << m_tableParamNames[i+numpeakparams];
+          errss << "Background function does not have paramter " << m_funcParameterNames[i+numpeakparams];
           throw std::runtime_error(errss.str());
         }
       }
     }
     else
     {
+      // Effective parameter names
       if (numparamcols !=  6)
         throw std::runtime_error("Number of columns must be 6 if not using raw.");
 
       // Find the column index of height, width, centre, a0, a1 and a2
-      i_height = static_cast<int>(std::find(colnames.begin(), colnames.end(), "height") - colnames.begin());
-      i_centre = static_cast<int>(std::find(colnames.begin(), colnames.end(), "centre") - colnames.begin());
-      i_width = static_cast<int>(std::find(colnames.begin(), colnames.end(), "width") - colnames.begin());
-      i_a0 = static_cast<int>(std::find(colnames.begin(), colnames.end(), "backgroundintercept") - colnames.begin());
-      i_a1 = static_cast<int>(std::find(colnames.begin(), colnames.end(), "backgroundslope") - colnames.begin());
-      i_a2 = static_cast<int>(std::find(colnames.begin(), colnames.end(), "A2") - colnames.begin());
-
+      i_height = static_cast<int>(std::find(m_funcParameterNames.begin(), m_funcParameterNames.end(), "height")
+                                  - m_funcParameterNames.begin()) + 1;
+      i_centre = static_cast<int>(std::find(m_funcParameterNames.begin(), m_funcParameterNames.end(), "centre")
+                                  - m_funcParameterNames.begin()) + 1;
+      i_width = static_cast<int>(std::find(m_funcParameterNames.begin(), m_funcParameterNames.end(), "width")
+                                 - m_funcParameterNames.begin()) + 1;
+      i_a0 = static_cast<int>(std::find(m_funcParameterNames.begin(), m_funcParameterNames.end(), "backgroundintercept")
+                              - m_funcParameterNames.begin()) + 1;
+      i_a1 = static_cast<int>(std::find(m_funcParameterNames.begin(), m_funcParameterNames.end(), "backgroundslope")
+                              - m_funcParameterNames.begin()) + 1;
+      i_a2 = static_cast<int>(std::find(m_funcParameterNames.begin(), m_funcParameterNames.end(), "A2")
+                              - m_funcParameterNames.begin()) + 1;
     }
 
+    /*
     m_funcParameterNames.resize(numcols-2);
     for (size_t i = 1; i < numcols-1; ++i)
     {
       m_funcParameterNames[i-1] = colnames[i];
     }
-
-    g_log.notice("[DB] End of processTableCulumns");
+    */
 
     return;
   }
-
 
   //----------------------------------------------------------------------------------------------
   /** Get set of spectra of the input table workspace
@@ -791,22 +595,11 @@ namespace Algorithms
     size_t numpeaks = peakParmsWS->rowCount();
     API::Column_const_sptr col = peakParmsWS->getColumn("spectrum");
 
-    // std::vector<std::vector<double> > vecparvalues(numpeaks);
-    // std::vector<std::string> vecparnames(numpeaks);
-    std::vector<specid_t> vecpeakspec(numpeaks);
-
-    // Get parameter names other than "spectrum"
-    // std::vector<std::string> colnames = peakParmsWS->getColumnNames();
-    // std::copy(colnames.begin()+1, colnames.end(), vecparanames.begin());
-
     for (size_t ipk = 0; ipk < numpeaks; ipk ++)
     {
       // Spectrum
       specid_t specid = static_cast<specid_t>((*col)[ipk]);
-      vecpeakspec[ipk] = specid;
       spectra.insert(specid);
-
-
 
       std::stringstream outss;
       outss << "Peak " << ipk << ": specid = " << specid;
@@ -822,27 +615,6 @@ namespace Algorithms
     }
 
     return;
-  }
-
-  /*
-   * Get one specific table value
-   */
-  double GeneratePeaks::getTableValue(DataObjects::TableWorkspace_const_sptr tableWS, std::string colname, size_t index)
-  {
-    API::Column_const_sptr col = tableWS->getColumn(colname);
-    if (!col)
-    {
-      g_log.error() << "Column with name " << colname << " does not exist" << std::endl;
-      throw std::invalid_argument("Non-exist column name");
-    }
-
-    if (index >= col->size())
-    {
-      g_log.error() << "Try to access index " << index << " out of boundary = " << col->size() << std::endl;
-      throw std::runtime_error("Access column array out of boundary");
-    }
-
-    return (*col)[index];
   }
 
   //----------------------------------------------------------------------------------------------
@@ -872,6 +644,7 @@ namespace Algorithms
     return peakfunc;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Find out whether a function has a certain parameter
    */
   bool GeneratePeaks::hasParameter(API::IFunction_sptr function, std::string paramname)
@@ -885,7 +658,7 @@ namespace Algorithms
     return false;
   }
 
-
+  //----------------------------------------------------------------------------------------------
   /** Create output workspace
    */
   API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace()

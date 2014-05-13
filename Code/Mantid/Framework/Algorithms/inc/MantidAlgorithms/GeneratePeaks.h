@@ -70,7 +70,7 @@ namespace Algorithms
 
     void generatePeaks();
 
-    void generatePeaksNew(API::MatrixWorkspace_sptr dataWS);
+    void generatePeaks(API::MatrixWorkspace_sptr dataWS);
 
     bool hasParameter(API::IFunction_sptr function, std::string paramname);
 
@@ -80,20 +80,10 @@ namespace Algorithms
 
     void createFunction(std::string& peaktype, std::string& bkgdtype);
 
-    /*
-    API::IFunction_sptr createFunction(const std::string &peakFuncType, const std::vector<std::string> &colNames,
-                                       const bool isRaw, const bool withBackground,
-                                       DataObjects::TableWorkspace_const_sptr peakParmsWS,
-                                       const std::size_t bkg_offset, const std::size_t rowNum,
-                                       double &centre, double &fwhm);
-                                       */
-
     void getSpectraSet(DataObjects::TableWorkspace_const_sptr peakParmsWS, std::set<specid_t>& spectra);
 
     void generatePeaks(API::MatrixWorkspace_sptr dataWS, DataObjects::TableWorkspace_const_sptr peakparameters,
        std::string peakfunction, bool m_newWSFromParent);
-
-    double getTableValue(DataObjects::TableWorkspace_const_sptr tableWS, std::string colname, size_t index);
 
     /// Get the IPeakFunction part in the input function
     API::IPeakFunction_sptr getPeakFunction(API::IFunction_sptr infunction);
