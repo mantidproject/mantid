@@ -50,6 +50,9 @@ private:
 	void init();
 	void exec();
 
+	void validateSpectraIndices(std::vector<int> &v);
+	void validateChannelIndices(std::vector<int> &v);
+
 	std::map<int, int> findElasticPeakPositions(
 			const std::vector<int> &spectraIndices,
 			const std::vector<int> &channelIndices);
@@ -67,7 +70,7 @@ private:
 	double calculateTOF(double distance, double wavelength);
 	bool areEqual(double a, double b, double epsilon);
 	template<typename T> T getPropertyFromRun(
-			API::MatrixWorkspace_const_sptr inputWS, std::string propertyName);
+			API::MatrixWorkspace_const_sptr inputWS,const std::string& propertyName);
 	int roundUp(double value);
 	std::vector<double> makeTofAxis(int epp, double epTof, size_t size,
 			double channelWidth);
