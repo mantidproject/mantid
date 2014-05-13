@@ -1,7 +1,5 @@
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingView.h"
 
-#include "MantidAPI/FunctionFactory.h"
-
 #include <qwt_symbol.h>
 
 namespace MantidQt
@@ -10,12 +8,23 @@ namespace CustomInterfaces
 {
 
 ALCPeakFittingView::ALCPeakFittingView(QWidget* widget)
-  : m_widget(widget), m_ui(), m_dataCurve(new QwtPlotCurve()), m_fittedCurve(new QwtPlotCurve())
+  : m_widget(widget), m_ui(), m_dataCurve(new QwtPlotCurve()), m_fittedCurve(new QwtPlotCurve()),
+    m_peakPicker(NULL)
 {}
 
-std::string ALCPeakFittingView::function() const
+IFunction_const_sptr ALCPeakFittingView::function(QString index) const
 {
-  return m_ui.peaks->getFunctionString().toStdString();
+  return m_ui.peaks->getFunctionByIndex(index);
+}
+
+boost::optional<QString> ALCPeakFittingView::currentFunctionIndex() const
+{
+  return m_ui.peaks->currentFunctionIndex();
+}
+
+IPeakFunction_const_sptr ALCPeakFittingView::peakPicker() const
+{
+  return m_peakPicker->peak();
 }
 
 void ALCPeakFittingView::initialize()
@@ -32,6 +41,15 @@ void ALCPeakFittingView::initialize()
   m_fittedCurve->setPen(QPen(Qt::red, 1.5));
   m_fittedCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
   m_fittedCurve->attach(m_ui.plot);
+
+  // XXX: Being a QwtPlotItem, should get deleted when m_ui.plot gets deleted (auto-delete option)
+  m_peakPicker = new MantidWidgets::PeakPicker(m_ui.plot, Qt::red);
+
+  connect(m_peakPicker, SIGNAL(changed()), SIGNAL(peakPickerChanged()));
+
+  connect(m_ui.peaks, SIGNAL(currentFunctionChanged()), SIGNAL(currentFunctionChanged()));
+  connect(m_ui.peaks, SIGNAL(parameterChanged(QString,QString)),
+          SIGNAL(parameterChanged(QString,QString)));
 }
 
 void ALCPeakFittingView::setDataCurve(const QwtData& data)
@@ -46,9 +64,29 @@ void ALCPeakFittingView::setFittedCurve(const QwtData& data)
   m_ui.plot->replot();
 }
 
-void ALCPeakFittingView::setFunction(const std::string& newFunction)
+void ALCPeakFittingView::setFunction(const IFunction_const_sptr& newFunction)
 {
-  m_ui.peaks->setFunction(QString::fromStdString(newFunction));
+  // String convertion hassle to avoid const-casting - Function Browser should really accept const
+  // pointer
+  m_ui.peaks->setFunction(QString::fromStdString(newFunction->asString()));
+}
+
+void ALCPeakFittingView::setParameter(const QString& funcIndex, const QString& paramName, double value)
+{
+  m_ui.peaks->setParameter(funcIndex, paramName, value);
+}
+
+void ALCPeakFittingView::setPeakPickerEnabled(bool enabled)
+{
+  m_peakPicker->setEnabled(enabled);
+  m_peakPicker->setVisible(enabled);
+  m_ui.plot->replot(); // PeakPicker might get hidden/shown
+}
+
+void ALCPeakFittingView::setPeakPicker(const IPeakFunction_const_sptr& peak)
+{
+  m_peakPicker->setPeak(peak);
+  m_ui.plot->replot();
 }
 
 } // namespace CustomInterfaces

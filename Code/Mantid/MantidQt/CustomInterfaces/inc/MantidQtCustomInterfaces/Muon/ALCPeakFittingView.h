@@ -5,6 +5,7 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h"
+#include "MantidQtMantidWidgets/PeakPicker.h"
 
 #include "ui_ALCPeakFittingView.h"
 
@@ -43,21 +44,23 @@ namespace CustomInterfaces
   public:
     ALCPeakFittingView(QWidget* widget);
 
-    /// @see IALCPeakFittingView
-    std::string function() const;
+    // -- IALCPeakFitting interface ----------------------------------------------------------------
+
+    IFunction_const_sptr function(QString index) const;
+    boost::optional<QString> currentFunctionIndex() const;
+    IPeakFunction_const_sptr peakPicker() const;
 
   public slots:
-    /// @see IALCPeakFittingView
+
     void initialize();
-
-    /// @see IALCPeakFittingView
     void setDataCurve(const QwtData& data);
+    void setFittedCurve(const QwtData& data);
+    void setFunction(const IFunction_const_sptr& newFunction);
+    void setParameter(const QString& funcIndex, const QString& paramName, double value);
+    void setPeakPickerEnabled(bool enabled);
+    void setPeakPicker(const IPeakFunction_const_sptr& peak);
 
-    /// @see IALCPeakFittingView
-    void setFittedCurve(const QwtData &data);
-
-    //// @see IALCPeakFittingView
-    void setFunction(const std::string& newFunction);
+    // -- End of IALCPeakFitting interface ---------------------------------------------------------
 
   private:
     /// The widget used
@@ -68,6 +71,9 @@ namespace CustomInterfaces
 
     /// Plot curves
     QwtPlotCurve *m_dataCurve, *m_fittedCurve;
+
+    /// Peak picker tool - only one on the plot at any given moment
+    MantidWidgets::PeakPicker* m_peakPicker;
   };
 
 

@@ -49,6 +49,15 @@ namespace CustomInterfaces
     /// Fit the data using the peaks from the view, and update them
     void fit();
 
+    /// Executed when user selects a function in a Function Browser
+    void onCurrentFunctionChanged();
+
+    /// Executed when Peak Picker if moved/resized
+    void onPeakPickerChanged();
+
+    /// Executed when user changes parameter in Function Browser
+    void onParameterChanged(const QString& funcIndex);
+
   private:
     /// Associated view
     IALCPeakFittingView* const m_view;
