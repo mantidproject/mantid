@@ -4,10 +4,14 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
 #include "MantidKernel/Interpolation.h"
+#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
+#include "MantidGeometry/IComponent.h"
 #include <stdexcept>
+
 
 using namespace Mantid::Poldi;
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 
 class PoldiSourceSpectrumTest : public CxxTest::TestSuite
 {
@@ -38,6 +42,58 @@ public:
         TS_ASSERT_EQUALS(spectrum.intensity(0.0), 2.0);
         TS_ASSERT_EQUALS(spectrum.intensity(1.0), 4.0);
     }
+
+    void testGetSourceComponent()
+    {
+        TestablePoldiSourceSpectrum spectrum;
+
+        boost::shared_ptr<const PoldiAbstractFakeInstrument> goodInstrument(new PoldiValidSourceFakeInstrument);
+        TS_ASSERT_THROWS_NOTHING(spectrum.getSourceComponent(goodInstrument));
+        IComponent_const_sptr source = spectrum.getSourceComponent(goodInstrument);
+        TS_ASSERT_EQUALS(source->getFullName(), "FakePoldiSource");
+
+        boost::shared_ptr<const PoldiAbstractFakeInstrument> badInstrument(new PoldiInvalidSourceFakeInstrument);
+        TS_ASSERT_THROWS(spectrum.getSourceComponent(badInstrument), std::runtime_error);
+    }
+
+    void testGetSpectrumParameter()
+    {
+        TestablePoldiSourceSpectrum spectrum;
+
+        boost::shared_ptr<const IComponent> source(new PoldiFakeSourceComponent);
+        ParameterMap_sptr goodParameterMap(new PoldiValidFakeParameterMap(source.get()));
+
+        TS_ASSERT_THROWS_NOTHING(spectrum.getSpectrumParameter(source, goodParameterMap));
+
+        ParameterMap_sptr badParameterMap(new PoldiInvalidFakeParameterMap);
+        TS_ASSERT_THROWS(spectrum.getSpectrumParameter(source, badParameterMap), std::runtime_error);
+    }
+
+    void testSetSpectrum()
+    {
+        TestablePoldiSourceSpectrum spectrum;
+
+        boost::shared_ptr<const IComponent> source(new PoldiFakeSourceComponent);
+        ParameterMap_sptr goodParameterMap(new PoldiValidFakeParameterMap(source.get()));
+        Parameter_sptr goodParameter = spectrum.getSpectrumParameter(source, goodParameterMap);
+        TS_ASSERT_THROWS_NOTHING(spectrum.setSpectrum(goodParameter));
+
+        TS_ASSERT_THROWS(spectrum.setSpectrum(Parameter_sptr()), std::runtime_error);
+    }
+
+private:
+    class TestablePoldiSourceSpectrum : public PoldiSourceSpectrum
+    {
+        friend class PoldiSourceSpectrumTest;
+    public:
+        TestablePoldiSourceSpectrum(Interpolation spectrum = Interpolation()) :
+            PoldiSourceSpectrum(spectrum)
+        {}
+
+        TestablePoldiSourceSpectrum(Instrument_const_sptr poldiInstrument) :
+            PoldiSourceSpectrum(poldiInstrument)
+        {}
+    };
 
 };
 

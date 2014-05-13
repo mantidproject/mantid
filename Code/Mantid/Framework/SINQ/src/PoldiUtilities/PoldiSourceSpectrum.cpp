@@ -76,13 +76,13 @@ IComponent_const_sptr PoldiSourceSpectrum::getSourceComponent(Instrument_const_s
   */
 Parameter_sptr PoldiSourceSpectrum::getSpectrumParameter(IComponent_const_sptr source, ParameterMap_sptr instrumentParameterMap)
 {
-    try {
-        Parameter_sptr spectrumParameter = instrumentParameterMap->getRecursive(&(*source), "WavelengthDistribution", "fitting");
+    Parameter_sptr spectrumParameter = instrumentParameterMap->getRecursive(&(*source), "WavelengthDistribution", "fitting");
 
-        return spectrumParameter;
-    } catch(...) {
+    if(!spectrumParameter) {
         throw std::runtime_error("WavelengthDistribution could not be extracted from source component.");
     }
+
+    return spectrumParameter;
 }
 
 /** Sets the spectrum given a parameter
