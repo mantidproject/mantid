@@ -4,6 +4,7 @@
 
 #include "MantidDataHandling/LoadHelper.h"
 
+#include <nexus/napi.h>
 #include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
 
 namespace Mantid {
@@ -31,9 +32,9 @@ LoadHelper::~LoadHelper() {
  * Usually of the form: entry0/\<NXinstrument class\>/name
  */
 std::string LoadHelper::findInstrumentNexusPath(
-		const NeXus::NXEntry &firstEntry) {
+		const Mantid::NeXus::NXEntry &firstEntry) {
 	std::string insNamePath = "";
-	std::vector<NeXus::NXClassInfo> v = firstEntry.groups();
+	std::vector<Mantid::NeXus::NXClassInfo> v = firstEntry.groups();
 	for (auto it = v.begin(); it < v.end(); it++) {
 		if (it->nxclass == "NXinstrument") {
 			insNamePath = it->nxname;
@@ -43,12 +44,12 @@ std::string LoadHelper::findInstrumentNexusPath(
 	return insNamePath;
 }
 
-std::string LoadHelper::getStringFromNexusPath(const NeXus::NXEntry &firstEntry,
+std::string LoadHelper::getStringFromNexusPath(const Mantid::NeXus::NXEntry &firstEntry,
 		const std::string &nexusPath) {
 	return firstEntry.getString(nexusPath);
 }
 
-double LoadHelper::getDoubleFromNexusPath(const NeXus::NXEntry &firstEntry,
+double LoadHelper::getDoubleFromNexusPath(const Mantid::NeXus::NXEntry &firstEntry,
 		const std::string &nexusPath) {
 	return firstEntry.getFloat(nexusPath);
 }
@@ -58,9 +59,9 @@ double LoadHelper::getDoubleFromNexusPath(const NeXus::NXEntry &firstEntry,
  * Adds an extra bin at the end
  */
 std::vector<double> LoadHelper::getTimeBinningFromNexusPath(
-		const NeXus::NXEntry &firstEntry, const std::string &nexusPath) {
+		const Mantid::NeXus::NXEntry &firstEntry, const std::string &nexusPath) {
 
-	NeXus::NXFloat timeBinningNexus = firstEntry.openNXFloat(nexusPath);
+	Mantid::NeXus::NXFloat timeBinningNexus = firstEntry.openNXFloat(nexusPath);
 	timeBinningNexus.load();
 
 	size_t numberOfBins = static_cast<size_t>(timeBinningNexus.dim0()) + 1; // boundaries
@@ -189,11 +190,8 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID,
 			//dump_attributes(nxfileID, indent_str);
 			g_log.debug()<<indent_str<<nxname<<" opened."<<std::endl;
 
-			if (parent_class=="NXData") {
-				g_log.debug()<<indent_str<<"skipping NXData"<<std::endl;
-				/* nothing */
-			} else if (parent_class=="NXMonitor") {
-				g_log.debug()<<indent_str<<"skipping NXMonitor"<<std::endl;
+			if (parent_class=="NXData" || parent_class=="NXMonitor") {
+				g_log.debug()<<indent_str<<"skipping "<<parent_class<<std::endl;
 				/* nothing */
 			} else { // create a property
 				int rank;
@@ -218,10 +216,13 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID,
 				} else {
 					void *dataBuffer;
 					NXmalloc (&dataBuffer, rank, dims, type);
+
+
 					if (NXgetdata(nxfileID, dataBuffer) != NX_OK) {
 						NXfree(&dataBuffer);
 						throw std::runtime_error("Cannot read data from NeXus file");
 					}
+
 
 					if (type==NX_CHAR) {
 						std::string property_value((const char *)dataBuffer);
@@ -250,20 +251,47 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID,
 							g_log.debug()<<indent_str<<"[ "<<property_name<<" has unit "<<units_sbuf<<" ]"<<std::endl;
 						}
 
+						if (dims[0]!=1) {
+							g_log.debug()<<indent_str<<property_name<<" is an array..."<<std::endl;
+							if (dims[0]>10) {
+								g_log.debug()<<indent_str<<"   skipping it (size="<<dims[0]<<")."<<std::endl;
+								NXfree(&dataBuffer);
+								continue;
+							}
+
+						}
+
 
 						if ((type==NX_FLOAT32)||(type==NX_FLOAT64)) {
 							// Mantid numerical properties are double only.
 							double property_double_value=0.0;
-							if (type==NX_FLOAT32) {
-								property_double_value = *((float*)dataBuffer);
-							} else if (type==NX_FLOAT64) {
-								property_double_value = *((double*)dataBuffer);
-							}
 
-							if(units_status!=NX_ERROR)
-								runDetails.addProperty(property_name, property_double_value, std::string(units_sbuf));
-							else
-								runDetails.addProperty(property_name, property_double_value);
+							// Simple case, one value
+							if (dims[0]==1) {
+								if (type==NX_FLOAT32) {
+									property_double_value = *((float*)dataBuffer);
+								} else if (type==NX_FLOAT64) {
+									property_double_value = *((double*)dataBuffer);
+								}
+								if(units_status!=NX_ERROR)
+									runDetails.addProperty(property_name, property_double_value, std::string(units_sbuf));
+								else
+									runDetails.addProperty(property_name, property_double_value);
+							} else {
+								// An array
+								for (int dim_index=0 ; dim_index<dims[0]; dim_index++) {
+									if (type==NX_FLOAT32) {
+										property_double_value = ((float*)dataBuffer)[dim_index];
+									} else if (type==NX_FLOAT64) {
+										property_double_value = ((double*)dataBuffer)[dim_index];
+									}
+									std::string indexed_property_name = property_name + std::string("_") + boost::lexical_cast<std::string>(dim_index);
+									if(units_status!=NX_ERROR)
+										runDetails.addProperty(indexed_property_name, property_double_value, std::string(units_sbuf));
+									else
+										runDetails.addProperty(indexed_property_name, property_double_value);
+								}
+							}
 
 						} else {
 							// int case
