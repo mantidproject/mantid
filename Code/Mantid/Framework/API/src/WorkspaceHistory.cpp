@@ -187,33 +187,14 @@ void WorkspaceHistory::saveNexus(::NeXus::File * file) const
   file->closeGroup();
 
   // Algorithm History
-  typedef std::map <std::size_t,std::string> orderedHistMap;
-  orderedHistMap ordMap;
-  for(std::size_t i=0;i<this->size();i++)
+  int algCount = 0;
+  AlgorithmHistories::const_iterator histIter = m_algorithms.begin();
+  for(; histIter != m_algorithms.end(); ++histIter)
   {
-    std::stringstream algData;
-    auto entry = this->getAlgorithmHistory(i);
-    entry->printSelf(algData);
-
-    //get execute count
-    std::size_t nexecCount=entry->execCount();
-    //order by execute count
-    ordMap.insert(orderedHistMap::value_type(nexecCount,algData.str()));
+    (*histIter)->saveNexus(file, algCount);
   }
-  int num=0;
-  std::map <std::size_t,std::string>::iterator m_Iter;
-  for (m_Iter=ordMap.begin( );m_Iter!=ordMap.end( );++m_Iter)
-  {
-    ++num;
-    std::stringstream algNumber;
-    algNumber << "MantidAlgorithm_" << num;
 
-    file->makeGroup(algNumber.str(), "NXnote", true);
-    file->writeData("author", std::string("mantid"));
-    file->writeData("description", std::string("Mantid Algorithm data"));
-    file->writeData("data", m_Iter->second);
-    file->closeGroup();
-  }
+  //close process group
   file->closeGroup();
 }
 

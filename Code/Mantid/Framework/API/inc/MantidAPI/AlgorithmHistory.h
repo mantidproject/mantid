@@ -7,6 +7,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/DateAndTime.h"
+#include <nexus/NeXusFile.hpp>
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
@@ -120,6 +121,8 @@ public:
   boost::shared_ptr<IAlgorithm> createAlgorithm() const;
   /// Create an child algorithm from a history record at a given index
   boost::shared_ptr<IAlgorithm> getChildAlgorithm(const size_t index) const;
+  /// Write this history object to a nexus file
+  void saveNexus(::NeXus::File* file, int& algCount) const;
   // Allow Algorithm::execute to change the exec count & duration after the algorithm was executed
   friend class Algorithm;
   
