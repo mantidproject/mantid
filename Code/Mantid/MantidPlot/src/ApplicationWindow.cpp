@@ -17992,4 +17992,7 @@ void ApplicationWindow::about2Start(){
     update_script_repo->setLoggingOffset(1);
     mantidUI->executeAlgorithmAsync(update_script_repo);
   }
+
+  // Make sure we see all of the startup messages
+  resultsLog->scrollToTop();
 }
