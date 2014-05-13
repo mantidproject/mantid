@@ -110,6 +110,25 @@ private:
   FunctionDomain1DView& operator=(const FunctionDomain1DView&);
 };
 
+/**
+ * Specialization of FunctionDomain1DVector for spectra of MatrixWorkspaces.
+ * The domain holds the workspace index allowing functions to use spectra-specific
+ * information.
+ */
+class MANTID_API_DLL FunctionDomain1DSpectrum: public FunctionDomain1DVector
+{
+public:
+  /// Constructor.
+  FunctionDomain1DSpectrum(size_t wi, const std::vector<double>& xvalues);
+  /// Constructor.
+  FunctionDomain1DSpectrum(size_t wi, std::vector<double>::const_iterator from, std::vector<double>::const_iterator to);
+  /// Get the workspace index
+  size_t getWorkspaceIndex() const {return m_workspaceIndex;}
+private:
+  /// The workspace index
+  size_t m_workspaceIndex;
+};
+
 /// typedef for a shared pointer to a FunctionDomain1D
 typedef boost::shared_ptr<FunctionDomain1D> FunctionDomain1D_sptr;
 /// typedef for a shared pointer to a const FunctionDomain1D

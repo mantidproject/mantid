@@ -227,6 +227,25 @@ public:
 
   }
 
+  void test_createDomain_creates_FunctionDomain1DSpectrum()
+  {
+    MatrixWorkspace_sptr ws2 = createTestWorkspace(true);
+
+    FunctionDomain_sptr domain;
+    FunctionValues_sptr values;
+
+    FitMW fitmw;
+    fitmw.setWorkspace( ws2 );
+    fitmw.setWorkspaceIndex( 1 );
+    fitmw.createDomain( domain, values );
+
+    FunctionDomain1DSpectrum* specDom = dynamic_cast<FunctionDomain1DSpectrum*>(domain.get());
+    TS_ASSERT( specDom );
+    TS_ASSERT_EQUALS(specDom->getWorkspaceIndex(), 1);
+    TS_ASSERT_EQUALS(specDom->size(), ws2->blocksize());
+
+  }
+
   void test_create_SeqDomain()
   {
     MatrixWorkspace_sptr ws2(new WorkspaceTester);
