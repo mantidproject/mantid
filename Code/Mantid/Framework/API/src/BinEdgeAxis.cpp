@@ -9,7 +9,7 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /**
      * Constructor taking a length
-     * @param The length of the axis
+     * @param length The length of the axis
      */
     BinEdgeAxis::BinEdgeAxis(const std::size_t & length) : NumericAxis() // default constructor
     {
