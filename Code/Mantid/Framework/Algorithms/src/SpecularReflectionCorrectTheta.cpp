@@ -4,8 +4,13 @@
 
 #include "MantidAlgorithms/SpecularReflectionCorrectTheta.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include <cmath>
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
 namespace
@@ -89,7 +94,23 @@ namespace Mantid
 
       const std::string analysisMode = this->getProperty("AnalysisMode");
 
-      this->getDetectorComponent(inWS, analysisMode == pointDetectorAnalysis);
+      Instrument_const_sptr instrument = inWS->getInstrument();
+
+      IComponent_const_sptr detector = this->getDetectorComponent(inWS, analysisMode == pointDetectorAnalysis);
+
+      IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
+
+      const V3D detSample  = detector->getPos() - sample->getPos();
+
+      boost::shared_ptr<const ReferenceFrame> refFrame = instrument->getReferenceFrame();
+
+      const double upoffset = refFrame->vecPointingUp().scalar_prod(detSample);
+      const double beamoffset = refFrame->vecPointingAlongBeam().scalar_prod(detSample);
+
+      const double twoTheta = std::atan(upoffset/beamoffset)/2 * 180 / M_PI;
+
+      this->setProperty("TwoTheta", twoTheta);
+
     }
 
   } // namespace Algorithms
