@@ -52,6 +52,9 @@ namespace Mantid
       /// Does the property have a default value.
       bool isPropertyDefault(const std::string& propertyName) const;
 
+      /// initialize common properties
+      void initCommonProperties();
+
     public:
 
       /// Destructor

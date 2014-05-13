@@ -2,18 +2,15 @@
 #define MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECTTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "SpecularReflectionAlgorithmTest.h"
 
 #include "MantidAlgorithms/SpecularReflectionPositionCorrect.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include <cmath>
 #include <boost/tuple/tuple.hpp>
-#include <Poco/Path.h>
 
 using Mantid::Algorithms::SpecularReflectionPositionCorrect;
 using namespace Mantid::API;
@@ -25,13 +22,9 @@ namespace
   typedef boost::tuple<double, double> VerticalHorizontalOffsetType;
 }
 
-class SpecularReflectionPositionCorrectTest: public CxxTest::TestSuite
+class SpecularReflectionPositionCorrectTest: public CxxTest::TestSuite,
+    public SpecularReflectionAlgorithmTest
 {
-
-private:
-
-  MatrixWorkspace_sptr pointDetectorWS;
-  MatrixWorkspace_sptr linearDetectorWS;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -47,29 +40,6 @@ public:
 
   SpecularReflectionPositionCorrectTest()
   {
-    FrameworkManager::Instance();
-
-    const std::string instDir = ConfigService::Instance().getInstrumentDirectory();
-    Poco::Path path(instDir);
-    path.append("INTER_Definition.xml");
-
-    auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
-    loadAlg->initialize();
-    loadAlg->setChild(true);
-    loadAlg->setProperty("Filename", path.toString());
-    loadAlg->setPropertyValue("OutputWorkspace", "demo");
-    loadAlg->execute();
-    pointDetectorWS = loadAlg->getProperty("OutputWorkspace");
-
-    path = Poco::Path(instDir);
-    path.append("POLREF_Definition.xml");
-    loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
-    loadAlg->initialize();
-    loadAlg->setChild(true);
-    loadAlg->setProperty("Filename", path.toString());
-    loadAlg->setPropertyValue("OutputWorkspace", "demo");
-    loadAlg->execute();
-    linearDetectorWS = loadAlg->getProperty("OutputWorkspace");
   }
 
   void test_init()
@@ -111,14 +81,14 @@ public:
 
   void test_throws_if_SpectrumNumbersOfDetectors_less_than_zero()
   {
-    SpecularReflectionPositionCorrect alg;
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
-    alg.setPropertyValue("OutputWorkspace", "test_out");
-    alg.setProperty("TwoThetaIn", 10.0);
-    std::vector<int> invalid(1, -1);
-    TS_ASSERT_THROWS(alg.setProperty("SpectrumNumbersOfDetectors", invalid), std::invalid_argument&);
+    IAlgorithm_sptr alg = boost::make_shared<SpecularReflectionPositionCorrect>();
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
+    alg->setPropertyValue("OutputWorkspace", "test_out");
+    alg->setProperty("TwoThetaIn", 10.0);
+
+    SpecularReflectionAlgorithmTest::test_throws_if_SpectrumNumbersOfDetectors_less_than_zero(alg);
   }
 
   void test_throws_if_SpectrumNumbersOfDetectors_outside_range()

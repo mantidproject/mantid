@@ -8,12 +8,8 @@
 
 #include "MantidAlgorithms/SpecularReflectionPositionCorrect.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/ArrayBoundedValidator.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -50,7 +46,6 @@ namespace Mantid
         }
         return currentComponent;
       }
-
 
       /**
        * Determine if there is a common parent component.
@@ -132,44 +127,15 @@ namespace Mantid
       thetaValidator->add(boost::make_shared<BoundedValidator<double> >(0, 90, true));
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input),
           "An input workspace to correct.");
+
       declareProperty(
           new PropertyWithValue<double>("TwoThetaIn", Mantid::EMPTY_DBL(), thetaValidator,
               Direction::Input), "Input two theta angle in degrees.");
 
-      std::vector<std::string> propOptions;
-      propOptions.push_back(pointDetectorAnalysis);
-      propOptions.push_back(lineDetectorAnalysis);
-      propOptions.push_back(multiDetectorAnalysis);
-
-      std::stringstream message;
-      message << "The type of analysis to perform. " << multiDetectorAnalysis << ", "
-          << lineDetectorAnalysis << " or " << multiDetectorAnalysis
-          << ". Used to help automatically determine the detector components to move";
-
-      declareProperty("AnalysisMode", pointDetectorAnalysis,
-          boost::make_shared<StringListValidator>(propOptions), message.str());
-
-      declareProperty(new PropertyWithValue<std::string>("DetectorComponentName", "", Direction::Input),
-          "Name of the detector component i.e. point-detector. If these are not specified, the algorithm will attempt lookup using a standard naming convention.");
-
-      declareProperty(new PropertyWithValue<std::string>("SampleComponentName", "", Direction::Input),
-          "Name of the sample component i.e. some-surface-holder. If these are not specified, the algorithm will attempt lookup using a standard naming convention.");
-
-      auto boundedArrayValidator = boost::make_shared<ArrayBoundedValidator<int> >();
-      boundedArrayValidator->setLower(0);
-      declareProperty(
-          new ArrayProperty<int>("SpectrumNumbersOfDetectors", boundedArrayValidator, Direction::Input),
-          "A list of spectrum numbers making up an effective point detector.");
-
-      declareProperty(new PropertyWithValue<bool>("StrictSpectrumChecking", true, Direction::Input), "Enable, disable strict spectrum checking. Strict spectrum checking protects against non-sequential integers in which spectrum numbers are not in {min, min+1, ..., max}");
+      this->initCommonProperties();
 
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
           "An output workspace.");
-
-      setPropertySettings("SampleComponentName",
-          new Kernel::EnabledWhenProperty("SpectrumNumbersOfGrouped", IS_NOT_DEFAULT));
-      setPropertySettings("SpectrumNumbersOfDetectors",
-          new Kernel::EnabledWhenProperty("SampleComponentName", IS_NOT_DEFAULT));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -190,14 +156,14 @@ namespace Mantid
       const double twoThetaIn = this->getProperty("TwoThetaIn");
 
       auto instrument = outWS->getInstrument();
-      IComponent_const_sptr detector = this->getDetectorComponent(outWS, analysisMode == pointDetectorAnalysis);
+      IComponent_const_sptr detector = this->getDetectorComponent(outWS,
+          analysisMode == pointDetectorAnalysis);
       IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
 
       correctPosition(outWS, twoThetaIn, sample, detector);
 
       setProperty("OutputWorkspace", outWS);
     }
-
 
     /**
      * Execute the MoveInstrumentComponent on all (named) subcomponents
