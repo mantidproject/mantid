@@ -127,7 +127,7 @@ public:
   void test_FromInputWorkspace()
   {
     // Create input
-    DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters();
+    DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters2();
     API::MatrixWorkspace_sptr inputws = createTestInputWorkspace();
 
     // Initialize algorithm class
@@ -186,8 +186,8 @@ public:
     return;
   }
 
-  /*
-   * Test to use user-provided binning parameters
+  //----------------------------------------------------------------------------------------------
+  /** Test to use user-provided binning parameters
    */
   void test_Background()
   {
@@ -200,10 +200,12 @@ public:
     // 3. Set value
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParametersWorkspace", peakparmsws));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakFunction", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundFunction", "Auto"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test01WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameterTable", false));
 
     // 4. Execute
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -245,7 +247,7 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Generate a TableWorkspace containing 3 peaks on 2 spectra
+  /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using effective parameters
    *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2 = 0
    *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2 = 0
    *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2 = 0
@@ -271,6 +273,39 @@ public:
     row1 << 0 << 8.0 << 0.1 << 10.0 << 2.0 << 1.0 << 0.0 << 0.2;
     API::TableRow row2 = peakparms->appendRow();
     row2 << 2 << 4.0 << 0.4 << 20.0 << 4.0 << 0.0 << 0.0 << 0.2;
+    API::TableRow row3 = peakparms->appendRow();
+    row3 << 2 << 4.5 << 0.4 << 20.0 << 1.0 << 9.0 << 0.0 << 1000.2;
+
+    return peakparms;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using raw parameters
+   *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2 = 0
+   *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2 = 0
+   *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2 = 0
+   */
+  DataObjects::TableWorkspace_sptr createTestPeakParameters2()
+  {
+    // 1. Build a TableWorkspace
+    DataObjects::TableWorkspace_sptr peakparms =
+        boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace);
+    peakparms->addColumn("int", "spectrum");
+    peakparms->addColumn("double", "PeakCentre");
+    peakparms->addColumn("double", "Sigma");
+    peakparms->addColumn("double", "Height");
+    peakparms->addColumn("double", "A0");
+    peakparms->addColumn("double", "A1");
+    peakparms->addColumn("double", "A2");
+    peakparms->addColumn("double", "chi2");
+
+    // 2. Add value
+    API::TableRow row0 = peakparms->appendRow();
+    row0 << 0 << 2.0 << 0.0849322 <<  5.0 << 1.0 << 2.0 << 0.0 << 0.1;
+    API::TableRow row1 = peakparms->appendRow();
+    row1 << 0 << 8.0 << 0.0424661 << 10.0 << 2.0 << 1.0 << 0.0 << 0.2;
+    API::TableRow row2 = peakparms->appendRow();
+    row2 << 2 << 4.0 << 0.169864 << 20.0 << 4.0 << 0.0 << 0.0 << 0.2;
     API::TableRow row3 = peakparms->appendRow();
     row3 << 2 << 4.5 << 0.4 << 20.0 << 1.0 << 9.0 << 0.0 << 1000.2;
 

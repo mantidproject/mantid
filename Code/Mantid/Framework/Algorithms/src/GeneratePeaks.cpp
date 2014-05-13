@@ -166,7 +166,7 @@ namespace Algorithms
     if (bkgdfunctype.compare("Auto") == 0)
     {
       m_useAutoBkgd = true;
-      bkgdfunctype = "Quardratic";
+      bkgdfunctype = "Quadratic";
     }
     else if (bkgdfunctype.compare("None") == 0)
     {
@@ -331,23 +331,6 @@ namespace Algorithms
         API::IPeakFunction_sptr thispeak = getPeakFunction(centrefunc.second);
         double centre = centrefunc.first;
         double fwhm = thispeak->fwhm();
-
-        // Get to know workspace index
-        // specid_t specid = static_cast<specid_t>(getTableValue(peakparameters, "spectrum", ipk));
-
-
-#if 0
-        // Generate function to plot
-        API::ICompositeFunction_sptr plotfunc = boost::make_shared<CompositeFunction>();
-        plotfunc->addFunction(m_peakFunction);
-        if (m_genBackground)
-          plotfunc->addFunction(m_bkgdFunction);
-
-        // Determine boundary
-        double centre = m_peakFunction->centre();
-        double fwhm = m_peakFunction->fwhm();
-#endif
-
 
         //
         const MantidVec& X = dataWS->dataX(wsindex);
