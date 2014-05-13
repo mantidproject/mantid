@@ -8,13 +8,22 @@
 
 #include "MantidAlgorithms/SpecularReflectionCorrectTheta.h"
 
-
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
 class SpecularReflectionCorrectThetaTest: public CxxTest::TestSuite,
     public SpecularReflectionAlgorithmTest
 {
+
+private:
+
+  Mantid::API::IAlgorithm_sptr makeAlgorithm() const
+  {
+    IAlgorithm_sptr alg = boost::make_shared<SpecularReflectionCorrectTheta>();
+    alg->setRethrows(true);
+    alg->initialize();
+    return alg;
+  }
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -41,12 +50,27 @@ public:
 
   void test_throws_if_SpectrumNumbersOfDetectors_less_than_zero()
   {
-    IAlgorithm_sptr alg = boost::make_shared<SpecularReflectionCorrectTheta>();
-    alg->setRethrows(true);
-    alg->initialize();
+    IAlgorithm_sptr alg = makeAlgorithm();
     alg->setProperty("InputWorkspace", WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
 
     SpecularReflectionAlgorithmTest::test_throws_if_SpectrumNumbersOfDetectors_less_than_zero(alg);
+  }
+
+  void test_throws_if_SpectrumNumbersOfDetectors_outside_range()
+  {
+    IAlgorithm_sptr alg = makeAlgorithm();
+    alg->setProperty("InputWorkspace", WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
+
+    SpecularReflectionAlgorithmTest::test_throws_if_SpectrumNumbersOfDetectors_outside_range(alg);
+  }
+
+  void test_throws_if_DetectorComponentName_unknown()
+  {
+    IAlgorithm_sptr alg = makeAlgorithm();
+    alg->setProperty("InputWorkspace",
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(1, 1, 1));
+
+    SpecularReflectionAlgorithmTest::test_throws_if_DetectorComponentName_unknown(alg);
   }
 
 };
