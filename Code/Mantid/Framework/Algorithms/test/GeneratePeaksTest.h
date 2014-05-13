@@ -192,7 +192,7 @@ public:
   void test_Background()
   {
     // 1. Create input
-    DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters();
+    DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters3();
 
     GeneratePeaks alg;
     alg.initialize();
@@ -313,9 +313,43 @@ public:
     return peakparms;
   }
 
-  /*
-   * Create a MatrixWorkspace containing 5 spectra
-   * Binning parameter = 1.0, 0.02, 9.0
+  //----------------------------------------------------------------------------------------------
+  /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using effective parameters
+    * of old style f0., f1.
+   *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2 = 0
+   *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2 = 0
+   *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2 = 0
+   */
+  DataObjects::TableWorkspace_sptr createTestPeakParameters3()
+  {
+    // 1. Build a TableWorkspace
+    DataObjects::TableWorkspace_sptr peakparms =
+        boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace);
+    peakparms->addColumn("int", "spectrum");
+    peakparms->addColumn("double", "f0.centre");
+    peakparms->addColumn("double", "f0.width");
+    peakparms->addColumn("double", "f0.height");
+    peakparms->addColumn("double", "f1.backgroundintercept");
+    peakparms->addColumn("double", "f1.backgroundslope");
+    peakparms->addColumn("double", "f1.A2");
+    peakparms->addColumn("double", "chi2");
+
+    // 2. Add value
+    API::TableRow row0 = peakparms->appendRow();
+    row0 << 0 << 2.0 << 0.2 <<  5.0 << 1.0 << 2.0 << 0.0 << 0.1;
+    API::TableRow row1 = peakparms->appendRow();
+    row1 << 0 << 8.0 << 0.1 << 10.0 << 2.0 << 1.0 << 0.0 << 0.2;
+    API::TableRow row2 = peakparms->appendRow();
+    row2 << 2 << 4.0 << 0.4 << 20.0 << 4.0 << 0.0 << 0.0 << 0.2;
+    API::TableRow row3 = peakparms->appendRow();
+    row3 << 2 << 4.5 << 0.4 << 20.0 << 1.0 << 9.0 << 0.0 << 1000.2;
+
+    return peakparms;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Create a MatrixWorkspace containing 5 spectra
+   *  Binning parameter = 1.0, 0.02, 9.0
    */
   API::MatrixWorkspace_sptr createTestInputWorkspace()
   {
