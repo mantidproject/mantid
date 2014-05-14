@@ -6,7 +6,7 @@ The image is expected to be a labeled image workspace outputted from [[Integrate
 
 You may optionally provide a FilterWorkspace, which is a [[PeaksWorkspace]]. If provided, the Peak locations are projected onto the InputWorkspace
 and the center locations are used to restrict the output to only include the clusters that are the union between the peak locations and the image clusters.
- 
+
 *WIKI*/
 
 #include "MantidCrystal/FindClusterFaces.h"
@@ -44,15 +44,15 @@ namespace
   typedef boost::optional<LabelMap> OptionalLabelPeakIndexMap;
 
   /**
-   * Create an optional label set for filtering.
-   * @param dimensionality : Dimensionality of the workspace.
-   * @param emptyLabelId : Label id corresponding to empty.
-   * @param filterWorkspace : Peaks workspace to act as filter.
-   * @param projection : Peak projection object.
-   * @return (optional) Map of labels to inspect for to the Peaks Index in the peaks workspace which matches the cluster id.
-   */
+  * Create an optional label set for filtering.
+  * @param dimensionality : Dimensionality of the workspace.
+  * @param emptyLabelId : Label id corresponding to empty.
+  * @param filterWorkspace : Peaks workspace to act as filter.
+  * @param projection : Peak projection object.
+  * @return (optional) Map of labels to inspect for to the Peaks Index in the peaks workspace which matches the cluster id.
+  */
   OptionalLabelPeakIndexMap createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
-      IPeaksWorkspace_sptr filterWorkspace, const PeakClusterProjection& projection)
+    IPeaksWorkspace_sptr filterWorkspace, const PeakClusterProjection& projection)
   {
     OptionalLabelPeakIndexMap optionalAllowedLabels;
 
@@ -61,10 +61,10 @@ namespace
       if (dimensionality < 3)
       {
         throw std::invalid_argument(
-            "A FilterWorkspace has been given, but the dimensionality of the labeled workspace is < 3.");
+          "A FilterWorkspace has been given, but the dimensionality of the labeled workspace is < 3.");
       }
       LabelMap allowedLabels;
-      
+
       for (int i = 0; i < filterWorkspace->getNumberPeaks(); ++i)
       {
         IPeak& peak = filterWorkspace->getPeak(i);
@@ -106,14 +106,14 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
-     */
+    */
     FindClusterFaces::FindClusterFaces()
     {
     }
 
     //----------------------------------------------------------------------------------------------
     /** Destructor
-     */
+    */
     FindClusterFaces::~FindClusterFaces()
     {
     }
@@ -149,22 +149,171 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
-     */
+    */
     void FindClusterFaces::init()
     {
       declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "", Direction::Input),
-          "An input image workspace consisting of cluster ids.");
+        "An input image workspace consisting of cluster ids.");
       declareProperty(
-          new WorkspaceProperty<IPeaksWorkspace>("FilterWorkspace", "", Direction::Input,
-              PropertyMode::Optional),
-          "Optional filtering peaks workspace. Used to restrict face finding to clusters in image which correspond to peaks in the workspace.");
+        new WorkspaceProperty<IPeaksWorkspace>("FilterWorkspace", "", Direction::Input,
+        PropertyMode::Optional),
+        "Optional filtering peaks workspace. Used to restrict face finding to clusters in image which correspond to peaks in the workspace.");
       declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "", Direction::Output),
-          "An output table workspace containing cluster face information.");
+        "An output table workspace containing cluster face information.");
+    }
+
+
+    void executeUnFiltered(IMDIterator* mdIterator, ClusterFaces& localClusterFaces, Progress& progress, IMDHistoWorkspace_sptr& clusterImage, const std::vector<size_t>& imageShape)
+    {
+      const int emptyLabelId = 0;
+      const double radius = -1;
+      double intPart = 0;
+      do
+      {
+        const signal_t signalValue = mdIterator->getSignal(); 
+        const int id = static_cast<int>(signalValue);
+
+
+        if (id > emptyLabelId)
+        {
+          // Check that the signal value looks like a label id.
+          if(std::modf(signalValue, &intPart) != 0.0)
+          {
+            std::stringstream buffer;
+            buffer << "Problem at linear index: " << mdIterator->getLinearIndex() 
+              << " SignalValue is not an integer: " << signalValue << " Suggests wrong input IMDHistoWorkspace passed to FindClusterFaces.";
+
+            throw std::runtime_error(buffer.str());
+          }
+
+          progress.report();
+          // Add index to cluster id map.
+          const size_t linearIndex = mdIterator->getLinearIndex();
+          std::vector<size_t> indexes;
+          Kernel::Utils::getIndicesFromLinearIndex(linearIndex, imageShape, indexes);
+
+          const auto neighbours = mdIterator->findNeighbourIndexesFaceTouching();
+          for (size_t i = 0; i < neighbours.size(); ++i)
+          {
+            size_t neighbourLinearIndex = neighbours[i];
+            const int neighbourId = static_cast<int>(clusterImage->getSignalAt(neighbourLinearIndex));
+
+            if (neighbourId <= emptyLabelId)
+            {
+              // We have an edge!
+
+              // In which dimension is the edge?
+              std::vector<size_t> neighbourIndexes;
+              Kernel::Utils::getIndicesFromLinearIndex(neighbourLinearIndex, imageShape,
+                neighbourIndexes);
+              for (size_t j = 0; j < imageShape.size(); ++j)
+              {
+                if (indexes[j] != neighbourIndexes[j])
+                {
+                  const bool maxEdge = neighbourLinearIndex > linearIndex;
+
+                  ClusterFace face;
+                  face.clusterId = id;
+                  face.workspaceIndex = linearIndex;
+                  face.faceNormalDimension = j;
+                  face.maxEdge = maxEdge;
+                  face.radius = radius;
+
+                  localClusterFaces.push_back(face);
+                }
+              }
+            }
+          }
+        }
+      } while (mdIterator->next());
+    }
+
+
+
+    void executeFiltered(IMDIterator* mdIterator, ClusterFaces& localClusterFaces, Progress& progress, IMDHistoWorkspace_sptr& clusterImage, const std::vector<size_t>& imageShape, IPeaksWorkspace_sptr&  filterWorkspace, const OptionalLabelPeakIndexMap& optionalAllowedLabels)
+    {
+      const int emptyLabelId = 0;
+      double intPart = 0;
+      PeakClusterProjection projection(clusterImage);
+      do
+      {
+        const signal_t signalValue = mdIterator->getSignal(); 
+        const int id = static_cast<int>(signalValue);
+
+        auto it = optionalAllowedLabels->find(id);
+        if (it != optionalAllowedLabels->end())
+        {
+
+          if (id > emptyLabelId)
+          {
+            // Check that the signal value looks like a label id.
+            if(std::modf(signalValue, &intPart) != 0.0)
+            {
+              std::stringstream buffer;
+              buffer << "Problem at linear index: " << mdIterator->getLinearIndex() 
+                << " SignalValue is not an integer: " << signalValue << " Suggests wrong input IMDHistoWorkspace passed to FindClusterFaces.";
+
+              throw std::runtime_error(buffer.str());
+            }
+
+
+            const int& peakIndex = it->second;
+            const IPeak& peak = filterWorkspace->getPeak(peakIndex);
+            V3D peakCenter = projection.peakCenter(peak);
+
+            // Calculate the radius
+            VMD positionND = clusterImage->getCenter(mdIterator->getLinearIndex());
+            V3D cellPosition(positionND[0], positionND[1], positionND[2]);
+            double radius = cellPosition.distance(peakCenter);
+
+
+            progress.report();
+            // Add index to cluster id map.
+            const size_t linearIndex = mdIterator->getLinearIndex();
+            std::vector<size_t> indexes;
+            Kernel::Utils::getIndicesFromLinearIndex(linearIndex, imageShape, indexes);
+
+            const auto neighbours = mdIterator->findNeighbourIndexesFaceTouching();
+            for (size_t i = 0; i < neighbours.size(); ++i)
+            {
+              size_t neighbourLinearIndex = neighbours[i];
+              const int neighbourId = static_cast<int>(clusterImage->getSignalAt(neighbourLinearIndex));
+
+              if (neighbourId <= emptyLabelId)
+              {
+                // We have an edge!
+
+                // In which dimension is the edge?
+                std::vector<size_t> neighbourIndexes;
+                Kernel::Utils::getIndicesFromLinearIndex(neighbourLinearIndex, imageShape,
+                  neighbourIndexes);
+                for (size_t j = 0; j < imageShape.size(); ++j)
+                {
+                  if (indexes[j] != neighbourIndexes[j])
+                  {
+                    const bool maxEdge = neighbourLinearIndex > linearIndex;
+
+                    ClusterFace face;
+                    face.clusterId = id;
+                    face.workspaceIndex = linearIndex;
+                    face.faceNormalDimension = j;
+                    face.maxEdge = maxEdge;
+                    face.radius = radius;
+
+                    localClusterFaces.push_back(face);
+                  }
+                }
+              }
+            }
+          }
+        }
+
+      } while (mdIterator->next());
     }
 
     //----------------------------------------------------------------------------------------------
     /** Execute the algorithm.
-     */
+    */
     void FindClusterFaces::exec()
     {
       IMDHistoWorkspace_sptr clusterImage = getProperty("InputWorkspace");
@@ -181,12 +330,12 @@ namespace Mantid
       OptionalLabelPeakIndexMap optionalAllowedLabels;
       if(filterWorkspace)
       {
-      PeakClusterProjection projection(clusterImage);
-      optionalAllowedLabels = createOptionalLabelFilter(dimensionality, emptyLabelId,
+        PeakClusterProjection projection(clusterImage);
+        optionalAllowedLabels = createOptionalLabelFilter(dimensionality, emptyLabelId,
           filterWorkspace, clusterImage);
       }
 
-      
+
       const int nThreads = Mantid::API::FrameworkManager::Instance().getNumOMPThreads(); // NThreads to Request
       auto mdIterators = clusterImage->createIterators(nThreads); // Iterators
       const int nIterators = static_cast<int>(mdIterators.size()); // Number of iterators yielded.
@@ -196,121 +345,48 @@ namespace Mantid
       {
         nSteps = optionalAllowedLabels->size();
       }
+      const bool usingFiltering = optionalAllowedLabels.is_initialized();
+
       Progress progress(this, 0, 1, nSteps);
-      PARALLEL_FOR_NO_WSP_CHECK()
-      for(int it = 0; it < nIterators; ++it)
-      {
-        PARALLEL_START_INTERUPT_REGION
-        ClusterFaces& localClusterFaces = clusterFaces[it];
-        auto mdIterator = mdIterators[it];
-        double intpart = 0;
-        double radius = -1;
-        const bool usingFiltering = optionalAllowedLabels.is_initialized();
-        do
+     // PARALLEL_FOR_NO_WSP_CHECK()
+        for(int it = 0; it < nIterators; ++it)
         {
-          const signal_t signalValue = mdIterator->getSignal(); 
-          const int id = static_cast<int>(signalValue);
-          double radius = -1;
+        //  PARALLEL_START_INTERUPT_REGION
+            ClusterFaces& localClusterFaces = clusterFaces[it];
+          auto mdIterator = mdIterators[it];
+          
           if(usingFiltering)
           {
-            PeakClusterProjection projection(clusterImage);
-            auto it = optionalAllowedLabels->find(id);
-            if(it != optionalAllowedLabels->end())
-            {
-              int peakIndex = it->second;
-              const IPeak& peak = filterWorkspace->getPeak(peakIndex);
-              V3D peakCenter = projection.peakCenter(peak);
-              
-              // Calculate the radius
-              VMD positionND = clusterImage->getCenter(mdIterator->getLinearIndex());
-              V3D cellPosition(positionND[0], positionND[1], positionND[2]);
-              radius = cellPosition.distance(peakCenter);
-
-            }
+            executeFiltered(mdIterator, localClusterFaces, progress, clusterImage, imageShape, filterWorkspace, optionalAllowedLabels);
           }
-
-
-            if (!usingFiltering
-            || (optionalAllowedLabels->find(id) != optionalAllowedLabels->end()))
+          else
           {
-            // Check that the signal value looks like a label id.
-            if(std::modf(signalValue, &intpart) != 0.0)
-            {
-              std::stringstream buffer;
-              buffer << "Problem at linear index: " << mdIterator->getLinearIndex() 
-                 << " SignalValue is not an integer: " << signalValue << " Suggests wrong input IMDHistoWorkspace passed to FindClusterFaces.";
+            executeUnFiltered(mdIterator, localClusterFaces, progress, clusterImage, imageShape);
+          }
+         // PARALLEL_END_INTERUPT_REGION
+        }
+       // PARALLEL_CHECK_INTERUPT_REGION
 
-              throw std::runtime_error(buffer.str());
-            }
+          auto out = WorkspaceFactory::Instance().createTable("TableWorkspace");
+        out->addColumn("int", "ClusterId");
+        out->addColumn("double", "MDWorkspaceIndex");
+        out->addColumn("int", "FaceNormalDimension");
+        out->addColumn("bool", "MaxEdge");
+        out->addColumn("double", "radius");
+        for(size_t i = 0; i < nIterators; ++i)
+        {
+          const ClusterFaces& localClusterFaces =  clusterFaces[i];
 
-            if (id > emptyLabelId)
-            {
-              progress.report();
-             // Add index to cluster id map.
-              const size_t linearIndex = mdIterator->getLinearIndex();
-              std::vector<size_t> indexes;
-              Kernel::Utils::getIndicesFromLinearIndex(linearIndex, imageShape, indexes);
-
-              const auto neighbours = mdIterator->findNeighbourIndexesFaceTouching();
-              for (size_t i = 0; i < neighbours.size(); ++i)
-              {
-                size_t neighbourLinearIndex = neighbours[i];
-                const int neighbourId = static_cast<int>(clusterImage->getSignalAt(neighbourLinearIndex));
-                
-                if (neighbourId <= emptyLabelId)
-                {
-                  // We have an edge!
-
-                  // In which dimension is the edge?
-                  std::vector<size_t> neighbourIndexes;
-                  Kernel::Utils::getIndicesFromLinearIndex(neighbourLinearIndex, imageShape,
-                      neighbourIndexes);
-                  for (size_t j = 0; j < imageShape.size(); ++j)
-                  {
-                    if (indexes[j] != neighbourIndexes[j])
-                    {
-                      const bool maxEdge = neighbourLinearIndex > linearIndex;
-                    
-                      ClusterFace face;
-                      face.clusterId = id;
-                      face.workspaceIndex = linearIndex;
-                      face.faceNormalDimension = j;
-                      face.maxEdge = maxEdge;
-                      face.radius = radius;
-  
-                      localClusterFaces.push_back(face);
-                  }
-                }
-              }
-            }
+          for(auto it = localClusterFaces.begin(); it != localClusterFaces.end(); ++it)
+          {
+            TableRow row = out->appendRow();
+            const ClusterFace& clusterFace = *it;
+            row << clusterFace.clusterId << double(clusterFace.workspaceIndex) 
+              << clusterFace.faceNormalDimension << clusterFace.maxEdge << clusterFace.radius; 
           }
         }
 
-      } while (mdIterator->next());
-      PARALLEL_END_INTERUPT_REGION
-      }
-      PARALLEL_CHECK_INTERUPT_REGION
-
-      auto out = WorkspaceFactory::Instance().createTable("TableWorkspace");
-      out->addColumn("int", "ClusterId");
-      out->addColumn("double", "MDWorkspaceIndex");
-      out->addColumn("int", "FaceNormalDimension");
-      out->addColumn("bool", "MaxEdge");
-      out->addColumn("double", "radius");
-      for(size_t i = 0; i < nIterators; ++i)
-      {
-        const ClusterFaces& localClusterFaces =  clusterFaces[i];
-        
-        for(auto it = localClusterFaces.begin(); it != localClusterFaces.end(); ++it)
-        {
-          TableRow row = out->appendRow();
-          const ClusterFace& clusterFace = *it;
-          row << clusterFace.clusterId << double(clusterFace.workspaceIndex) 
-            << clusterFace.faceNormalDimension << clusterFace.maxEdge << clusterFace.radius; 
-        }
-      }
-
-      setProperty("OutputWorkspace", out);
+        setProperty("OutputWorkspace", out);
     }
 
   } // namespace Crystal
