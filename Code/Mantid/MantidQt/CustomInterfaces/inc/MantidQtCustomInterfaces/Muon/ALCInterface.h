@@ -59,6 +59,8 @@ namespace CustomInterfaces
 
     void switchStep(int newStepIndex);
 
+    void exportResults();
+
   private:
 
     /// UI form

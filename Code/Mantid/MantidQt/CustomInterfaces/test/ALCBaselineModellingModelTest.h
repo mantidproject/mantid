@@ -88,6 +88,8 @@ public:
       TS_ASSERT_DELTA(corrected->readY(0)[5], 0.0, 1E-8);
       TS_ASSERT_DELTA(corrected->readY(0)[8], 97, 1E-8);
     }
+
+    TS_ASSERT_EQUALS(m_model->sections(), sections);
   }
 
 };

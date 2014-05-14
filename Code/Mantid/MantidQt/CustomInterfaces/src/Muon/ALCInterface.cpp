@@ -6,6 +6,10 @@
 
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h"
 
+#include "QInputDialog"
+
+#include "MantidAPI/WorkspaceGroup.h"
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -27,8 +31,9 @@ namespace CustomInterfaces
   {
     m_ui.setupUi(this);
 
-    connect(m_ui.nextStep, SIGNAL(clicked()), this, SLOT(nextStep()));
-    connect(m_ui.previousStep, SIGNAL(clicked()), this, SLOT(previousStep()));
+    connect(m_ui.nextStep, SIGNAL(clicked()), SLOT(nextStep()));
+    connect(m_ui.previousStep, SIGNAL(clicked()), SLOT(previousStep()));
+    connect(m_ui.exportResults, SIGNAL(clicked()), SLOT(exportResults()));
 
     auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
     m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
@@ -85,19 +90,57 @@ namespace CustomInterfaces
     int nextStepIndex = newStepIndex + 1;
     int prevStepIndex = newStepIndex - 1;
 
-    bool nextStepVisible = (nextStepIndex < m_ui.stepView->count());
-    bool prevStepVisible = (prevStepIndex >= 0);
+    bool hasNextStep = (nextStepIndex < m_ui.stepView->count());
+    bool hasPrevStep = (prevStepIndex >= 0);
 
-    m_ui.nextStep->setVisible(nextStepVisible);
-    m_ui.previousStep->setVisible(prevStepVisible);
+    m_ui.previousStep->setVisible(hasPrevStep);
 
-    if (nextStepVisible)
-      m_ui.nextStep->setText(STEP_NAMES[nextStepIndex] + " >");
+    // On last step - hide next step button, but show "Export results..."
+    m_ui.nextStep->setVisible(hasNextStep);
+    m_ui.exportResults->setVisible(!hasNextStep);
 
-    if (prevStepVisible)
+    if (hasPrevStep)
+    {
       m_ui.previousStep->setText("< " + STEP_NAMES[prevStepIndex]);
+    }
+
+    if (hasNextStep)
+    {
+      m_ui.nextStep->setText(STEP_NAMES[nextStepIndex] + " >");
+    }
 
     m_ui.stepView->setCurrentIndex(newStepIndex);
+  }
+
+  void ALCInterface::exportResults()
+  {
+    bool ok;
+    QString label = QInputDialog::getText(this, "Results label", "Label to assign to the results: ",
+                                         QLineEdit::Normal, "ALCResults", &ok);
+
+    if (!ok) // Cancelled
+    {
+      return;
+    }
+
+    std::string groupName = label.toStdString();
+
+    using namespace Mantid::API;
+
+    std::map<std::string, Workspace_sptr> results;
+
+    results["Baseline_Workspace"] = m_baselineModelling->exportWorkspace();
+    results["Baseline_Sections"] = m_baselineModelling->exportSections();
+    results["Baseline_Model"] = m_baselineModelling->exportModel();
+
+    AnalysisDataService::Instance().addOrReplace(groupName, boost::make_shared<WorkspaceGroup>());
+
+    for(auto it = results.begin(); it != results.end(); ++it)
+    {
+      std::string wsName = groupName + "_" + it->first;
+      AnalysisDataService::Instance().addOrReplace(wsName, it->second);
+      AnalysisDataService::Instance().addToGroup(groupName, wsName);
+    }
   }
 
 } // namespace CustomInterfaces

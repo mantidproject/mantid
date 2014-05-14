@@ -51,6 +51,15 @@ namespace CustomInterfaces
     /// A model used by presenter
     const IALCBaselineModellingModel& model() const { return *m_model; }
 
+    /// Export data + baseline + corrected data as a single workspace
+    MatrixWorkspace_sptr exportWorkspace();
+
+    /// Export sections used for the last fit as a table workspace
+    ITableWorkspace_sptr exportSections();
+
+    /// Exports baseline model as a table workspace
+    ITableWorkspace_sptr exportModel();
+
   private slots:
     /// Perform a fit
     void fit();

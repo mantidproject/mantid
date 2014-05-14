@@ -1,6 +1,10 @@
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/AlgorithmManager.h"
+
+#include "QMessageBox"
 
 namespace MantidQt
 {
@@ -32,16 +36,43 @@ namespace ALCHelper
   boost::shared_ptr<QwtData> curveDataFromFunction(IFunction_const_sptr func,
                                                    const std::vector<double>& xValues)
   {
-    FunctionDomain1DVector domain(xValues);
-    FunctionValues values(domain);
-
-    func->function(domain, values);
-    assert(values.size() != 0);
-
-    size_t size = xValues.size();
-
-    return boost::make_shared<QwtArrayData>(&xValues[0], values.getPointerToCalculated(0), size);
+    MatrixWorkspace_sptr ws = createWsFromFunction(func, xValues);
+    return curveDataFromWs(ws, 0);
   }
+
+  /**
+   * Creates a single-spectrum workspace filled with function values for given X values
+   * @param func :: Function to calculate values
+   * @param xValues :: X values to use
+   * @return Single-spectrum workspace with calculated function values
+   */
+  MatrixWorkspace_sptr createWsFromFunction(IFunction_const_sptr func,
+                                            const std::vector<double>& xValues)
+  {
+    auto inputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          WorkspaceFactory::Instance().create("Workspace2D", 1, xValues.size(), xValues.size()));
+    inputWs->dataX(0) = xValues;
+
+    IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
+    fit->setChild(true); // Don't want workspace in the ADS
+    fit->setProperty("Function", func->asString());
+    fit->setProperty("InputWorkspace", inputWs);
+    fit->setProperty("MaxIterations", 0); // Don't want to fit, just calculate output workspace
+    fit->setProperty("CreateOutput", true);
+    fit->execute();
+
+    MatrixWorkspace_sptr fitOutput = fit->getProperty("OutputWorkspace");
+
+    IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+    extract->setChild(true); // Don't want workspace in the ADS
+    extract->setProperty("InputWorkspace", fitOutput);
+    extract->setProperty("WorkspaceIndex", 1); // "Calc"
+    extract->setPropertyValue("OutputWorkspace", "__NotUsed");
+    extract->execute();
+
+    return extract->getProperty("OutputWorkspace");
+  }
+
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

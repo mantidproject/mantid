@@ -17,11 +17,9 @@
    <item>
     <widget class="QStackedWidget" name="stepView">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
-     <widget class="QWidget" name="dataLoadingView">
-      <zorder>gridLayoutWidget</zorder>
-     </widget>
+     <widget class="QWidget" name="dataLoadingView"/>
      <widget class="QWidget" name="baselineModellingView"/>
      <widget class="QWidget" name="peakFittingView"/>
     </widget>
@@ -34,7 +32,38 @@
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,1,1">
+    <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,1,1,0">
+     <item row="0" column="2">
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="nextStep">
+         <property name="text">
+          <string>%NEXT%</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="exportResults">
+         <property name="text">
+          <string>Export results...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
      <item row="0" column="1">
       <widget class="QLabel" name="label">
        <property name="sizePolicy">
@@ -72,30 +101,6 @@
           </size>
          </property>
         </spacer>
-       </item>
-      </layout>
-     </item>
-     <item row="0" column="2">
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <item>
-        <spacer name="horizontalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="nextStep">
-         <property name="text">
-          <string>%NEXT%</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </item>

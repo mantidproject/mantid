@@ -37,19 +37,20 @@ namespace CustomInterfaces
   class DLLExport ALCBaselineModellingModel : public IALCBaselineModellingModel
   {
   public:
-    /// @see IALCBaselineModellingModel::setData
+    // -- IALCBaselineModellingModel interface -----------------------------------------------------
+
     void setData(MatrixWorkspace_const_sptr data) { m_data = data; }
-    /// @see IALCBaselineModellingModel::data
     MatrixWorkspace_const_sptr data() const { return m_data; }
 
-    /// @see IALCBaselineModellingModel::fit
     void fit(IFunction_const_sptr function, const std::vector<Section> &sections);
 
-    /// @see IALCBaselineModellingModel::fittedFunction
     IFunction_const_sptr fittedFunction() const { return m_fittedFunction; }
 
-    /// @see IALCBaselineModellingModel::correctedData
     MatrixWorkspace_const_sptr correctedData() const { return m_correctedData; }
+
+    const std::vector<Section>& sections() const { return m_sections; }
+
+    // -- End of IALCBaselineModellingModel interface ----------------------------------------------
 
   private:
     /// Data to use for fitting
@@ -61,8 +62,12 @@ namespace CustomInterfaces
     /// Result function of the last fit
     IFunction_const_sptr m_fittedFunction;
 
+    /// Sections used for the last fit
+    std::vector<Section> m_sections;
+
     /// Disables points which shouldn't be used for fitting
     static void disableUnwantedPoints(MatrixWorkspace_sptr ws, const std::vector<Section>& sections);
+
   };
 
 } // namespace CustomInterfaces

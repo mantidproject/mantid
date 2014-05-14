@@ -3,6 +3,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/TableRow.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
@@ -46,6 +48,78 @@ namespace CustomInterfaces
     boost::shared_ptr<QwtData> curveData = ALCHelper::curveDataFromWs(data,0);
 
     m_view->setDataCurve(*curveData);
+  }
+
+  MatrixWorkspace_sptr ALCBaselineModellingPresenter::exportWorkspace()
+  {
+    IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
+    clone->setChild(true);
+    clone->setProperty("InputWorkspace",
+                       boost::const_pointer_cast<MatrixWorkspace>(m_model->data()));
+    clone->setProperty("OutputWorkspace", "__NotUsed");
+    clone->execute();
+
+    Workspace_sptr cloneResult = clone->getProperty("OutputWorkspace");
+
+    Workspace_sptr baseline = ALCHelper::createWsFromFunction(m_model->fittedFunction(),
+                                                              m_model->data()->readX(0));
+
+    IAlgorithm_sptr join1 = AlgorithmManager::Instance().create("ConjoinWorkspaces");
+    join1->setChild(true);
+    join1->setProperty("InputWorkspace1", cloneResult);
+    join1->setProperty("InputWorkspace2", baseline);
+    join1->setProperty("CheckOverlapping", false);
+    join1->execute();
+
+    MatrixWorkspace_sptr join1Result = join1->getProperty("InputWorkspace1");
+
+    IAlgorithm_sptr join2 = AlgorithmManager::Instance().create("ConjoinWorkspaces");
+    join2->setChild(true);
+    join2->setProperty("InputWorkspace1", join1Result);
+    join2->setProperty("InputWorkspace2",
+                       boost::const_pointer_cast<MatrixWorkspace>(m_model->correctedData()));
+    join2->setProperty("CheckOverlapping", false);
+    join2->execute();
+
+    MatrixWorkspace_sptr result = join2->getProperty("InputWorkspace1");
+
+    TextAxis* yAxis = new TextAxis(result->getNumberHistograms());
+    yAxis->setLabel(0,"Data");
+    yAxis->setLabel(1,"Baseline");
+    yAxis->setLabel(2,"Corrected");
+    result->replaceAxis(1,yAxis);
+
+    return result;
+  }
+
+  ITableWorkspace_sptr ALCBaselineModellingPresenter::exportSections()
+  {
+    ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+
+    table->addColumn("double", "Start X");
+    table->addColumn("double", "End X");
+
+    auto sections = m_model->sections();
+
+    for(auto it = sections.begin(); it != sections.end(); ++it)
+    {
+      TableRow newRow = table->appendRow();
+      newRow << it->first << it->second;
+    }
+
+    return table;
+  }
+
+  ITableWorkspace_sptr ALCBaselineModellingPresenter::exportModel()
+  {
+    ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+
+    table->addColumn("str", "Function");
+
+    TableRow newRow = table->appendRow();
+    newRow << m_model->fittedFunction()->asString();
+
+    return table;
   }
 
   /**

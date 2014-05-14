@@ -57,9 +57,11 @@ public:
   MOCK_CONST_METHOD0(fittedFunction, IFunction_const_sptr());
   MOCK_CONST_METHOD0(correctedData, MatrixWorkspace_const_sptr());
   MOCK_CONST_METHOD0(data, MatrixWorkspace_const_sptr());
+  MOCK_CONST_METHOD0(sections, const std::vector<Section>&());
 
   MOCK_METHOD1(setData, void(MatrixWorkspace_const_sptr));
   MOCK_METHOD2(fit, void(IFunction_const_sptr, const std::vector<Section>&));
+  MOCK_METHOD1(save, void(WorkspaceGroup_sptr));
 };
 
 MATCHER_P(FunctionName, name, "") { return arg->name() == name; }
@@ -104,6 +106,7 @@ public:
     delete m_view;
   }
 
+  // Creates a workspace with x = [1,2,3...size], y = x + deltaY and e = 1
   MatrixWorkspace_sptr createTestWs(size_t size, double deltaY = 0)
   {
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, size, size);
@@ -229,6 +232,77 @@ public:
                                                  QwtDataY(0, 4, 1E-8), QwtDataY(2, 6, 1E-8))));
 
     m_view->requestFit();
+  }
+
+  void test_exportWorkspace()
+  {
+    ON_CALL(*m_model, data()).WillByDefault(Return(createTestWs(3,3)));
+    ON_CALL(*m_model, fittedFunction()).WillByDefault(
+          Return(FunctionFactory::Instance().createInitialized("name=FlatBackground, A0=3")));
+    ON_CALL(*m_model, correctedData()).WillByDefault(Return(createTestWs(3)));
+
+    MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = m_presenter->exportWorkspace());
+
+    TS_ASSERT(ws);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 3);
+    TS_ASSERT_EQUALS(ws->blocksize(), 3);
+
+    TS_ASSERT_DELTA(ws->readY(0)[0], 4, 1E-8);
+    TS_ASSERT_DELTA(ws->readY(0)[1], 5, 1E-8);
+    TS_ASSERT_DELTA(ws->readY(0)[2], 6, 1E-8);
+
+    TS_ASSERT_DELTA(ws->readY(1)[0], 3, 1E-8);
+    TS_ASSERT_DELTA(ws->readY(1)[1], 3, 1E-8);
+    TS_ASSERT_DELTA(ws->readY(1)[2], 3, 1E-8);
+
+    TS_ASSERT_DELTA(ws->readY(2)[0], 1, 1E-8);
+    TS_ASSERT_DELTA(ws->readY(2)[1], 2, 1E-8);
+    TS_ASSERT_DELTA(ws->readY(2)[2], 3, 1E-8);
+
+    TS_ASSERT_EQUALS(ws->getAxis(1)->label(0), "Data");
+    TS_ASSERT_EQUALS(ws->getAxis(1)->label(1), "Baseline");
+    TS_ASSERT_EQUALS(ws->getAxis(1)->label(2), "Corrected");
+  }
+
+  void test_exportTable()
+  {
+    std::vector<IALCBaselineModellingModel::Section> sections;
+    sections.push_back(std::make_pair(1,2));
+    sections.push_back(std::make_pair(14,15));
+
+    ON_CALL(*m_model, sections()).WillByDefault(ReturnRef(sections));
+
+    ITableWorkspace_sptr table;
+    TS_ASSERT_THROWS_NOTHING(table = m_presenter->exportSections());
+
+    TS_ASSERT(table);
+
+    TS_ASSERT_EQUALS(table->columnCount(), 2);
+    TS_ASSERT_EQUALS(table->rowCount(), 2);
+
+    TS_ASSERT_DELTA(table->Double(0,0), 1, 1E-8);
+    TS_ASSERT_DELTA(table->Double(0,1), 2, 1E-8);
+
+    TS_ASSERT_DELTA(table->Double(1,0), 14, 1E-8);
+    TS_ASSERT_DELTA(table->Double(1,1), 15, 1E-8);
+  }
+
+  void test_exportModel()
+  {
+    std::string funcStr = "name=FlatBackground,A0=3";
+    ON_CALL(*m_model, fittedFunction()).WillByDefault(
+          Return(FunctionFactory::Instance().createInitialized(funcStr)));
+
+    ITableWorkspace_sptr table;
+    TS_ASSERT_THROWS_NOTHING(table = m_presenter->exportModel());
+
+    TS_ASSERT(table);
+
+    TS_ASSERT_EQUALS(table->columnCount(), 1);
+    TS_ASSERT_EQUALS(table->rowCount(), 1);
+
+    TS_ASSERT_EQUALS(table->String(0,0), funcStr);
   }
 
 };

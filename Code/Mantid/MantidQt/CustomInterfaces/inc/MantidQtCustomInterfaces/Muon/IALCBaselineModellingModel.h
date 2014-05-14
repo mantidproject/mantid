@@ -56,6 +56,11 @@ namespace CustomInterfaces
     virtual MatrixWorkspace_const_sptr data() const = 0;
 
     /**
+     * @return Sections used for the last fit
+     */
+    virtual const std::vector<Section>& sections() const = 0;
+
+    /**
      * @param data :: New data which will be used for fit
      */
     virtual void setData(MatrixWorkspace_const_sptr data) = 0;

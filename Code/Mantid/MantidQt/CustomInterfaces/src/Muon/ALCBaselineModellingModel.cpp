@@ -45,8 +45,8 @@ namespace CustomInterfaces
     extract->execute();
 
     m_correctedData = extract->getProperty("OutputWorkspace");
-
     m_fittedFunction = FunctionFactory::Instance().createInitialized(funcToFit->asString());
+    m_sections = sections;
   }
 
   /**
