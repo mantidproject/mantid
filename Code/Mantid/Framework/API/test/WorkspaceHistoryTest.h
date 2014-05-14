@@ -371,8 +371,8 @@ public:
 
     const auto & histories = wsHistory.getAlgorithmHistories();
     TS_ASSERT_EQUALS(3,histories.size());
-    
-    const auto history = wsHistory.getAlgorithmHistory(1);
+
+    auto history = wsHistory.getAlgorithmHistory(1);
 
     TS_ASSERT_EQUALS("CreateTransmissionWorkspaceAuto", history->name());
     TS_ASSERT_EQUALS(1, history->version());
@@ -382,6 +382,11 @@ public:
     TS_ASSERT_EQUALS("CreateTransmissionWorkspace", childHistory->name());
     TS_ASSERT_EQUALS(1, childHistory->version());
 
+    history = wsHistory.getAlgorithmHistory(2);
+
+    TS_ASSERT_EQUALS("SaveNexusProcessed", history->name());
+    TS_ASSERT_EQUALS(1, history->version());
+    
     loadhandle->close();
   }
 
