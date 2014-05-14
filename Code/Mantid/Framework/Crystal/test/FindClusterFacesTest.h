@@ -74,14 +74,12 @@ namespace
   {
     FindClusterFaces alg;
     alg.setRethrows(true);
-    //alg.setChild(true);
+    alg.setChild(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
     alg.execute();
-    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-        "dummy_value");
-    //ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
     return outWS;
   }
 

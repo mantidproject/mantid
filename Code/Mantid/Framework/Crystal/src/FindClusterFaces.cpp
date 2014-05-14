@@ -12,13 +12,16 @@ and the center locations are used to restrict the output to only include the clu
 #include "MantidCrystal/FindClusterFaces.h"
 
 #include "MantidKernel/Utils.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
 #include "MantidCrystal/PeakClusterProjection.h"
 
 #include <boost/optional.hpp>
@@ -85,6 +88,7 @@ namespace
   };
 
   typedef std::deque<ClusterFace> ClusterFaces;
+  typedef std::vector<ClusterFaces> VecClusterFaces;
 
 }
 
@@ -173,51 +177,58 @@ namespace Mantid
       OptionalLabelSet optionalAllowedLabels = createOptionalLabelFilter(dimensionality, emptyLabelId,
           filterWorkspace, clusterImage);
 
-      ClusterFaces clusterFaces;
-      auto mdIterator = clusterImage->createIterator(NULL); // TODO. This could be done in parallel!
-      do
+      
+      const int nThreads = Mantid::API::FrameworkManager::Instance().getNumOMPThreads(); // NThreads to Request
+      auto mdIterators = clusterImage->createIterators(nThreads); // Iterators
+      const int nIterators = static_cast<int>(mdIterators.size()); // Number of iterators yielded.
+      VecClusterFaces clusterFaces(nIterators);
+      for(int it = 0; it < nIterators; ++it)
       {
-        const int id = static_cast<int>(mdIterator->getSignal());
-        /*
-         * Only if the label has been allowed by the filtering, should it be used.
-         */
-        if (!optionalAllowedLabels.is_initialized()
-            || (optionalAllowedLabels->find(id) != optionalAllowedLabels->end()))
+        ClusterFaces& localClusterFaces = clusterFaces[it];
+        auto mdIterator = mdIterators[it];
+        
+        do
         {
-          if (id > emptyLabelId)
+          const int id = static_cast<int>(mdIterator->getSignal());
+          /*
+           * Only if the label has been allowed by the filtering, should it be used.
+           */
+          if (!optionalAllowedLabels.is_initialized()
+            || (optionalAllowedLabels->find(id) != optionalAllowedLabels->end()))
           {
-            // Add index to cluster id map.
-            const size_t linearIndex = mdIterator->getLinearIndex();
-            std::vector<size_t> indexes;
-            Kernel::Utils::getIndicesFromLinearIndex(linearIndex, imageShape, indexes);
-
-            const auto neighbours = mdIterator->findNeighbourIndexesFaceTouching();
-            for (size_t i = 0; i < neighbours.size(); ++i)
+            if (id > emptyLabelId)
             {
-              size_t neighbourLinearIndex = neighbours[i];
-              const int neighbourId = static_cast<int>(clusterImage->getSignalAt(neighbourLinearIndex));
-              if (neighbourId <= emptyLabelId)
+             // Add index to cluster id map.
+              const size_t linearIndex = mdIterator->getLinearIndex();
+              std::vector<size_t> indexes;
+              Kernel::Utils::getIndicesFromLinearIndex(linearIndex, imageShape, indexes);
+
+              const auto neighbours = mdIterator->findNeighbourIndexesFaceTouching();
+              for (size_t i = 0; i < neighbours.size(); ++i)
               {
-                // We have an edge!
-
-                // In which dimension is the edge?
-                std::vector<size_t> neighbourIndexes;
-                Kernel::Utils::getIndicesFromLinearIndex(neighbourLinearIndex, imageShape,
-                    neighbourIndexes);
-                for (size_t j = 0; j < imageShape.size(); ++j)
+                size_t neighbourLinearIndex = neighbours[i];
+                const int neighbourId = static_cast<int>(clusterImage->getSignalAt(neighbourLinearIndex));
+                if (neighbourId <= emptyLabelId)
                 {
-                  if (indexes[j] != neighbourIndexes[j])
+                  // We have an edge!
+
+                  // In which dimension is the edge?
+                  std::vector<size_t> neighbourIndexes;
+                  Kernel::Utils::getIndicesFromLinearIndex(neighbourLinearIndex, imageShape,
+                      neighbourIndexes);
+                  for (size_t j = 0; j < imageShape.size(); ++j)
                   {
-                    const bool maxEdge = neighbourLinearIndex > linearIndex;
+                    if (indexes[j] != neighbourIndexes[j])
+                    {
+                      const bool maxEdge = neighbourLinearIndex > linearIndex;
                     
-                    ClusterFace face;
-                    face.clusterId = id;
-                    face.workspaceIndex = linearIndex;
-                    face.faceNormalDimension = j;
-                    face.maxEdge = maxEdge;
-
-                    clusterFaces.push_back(face);
-
+                      ClusterFace face;
+                      face.clusterId = id;
+                      face.workspaceIndex = linearIndex;
+                      face.faceNormalDimension = j;
+                      face.maxEdge = maxEdge;
+  
+                      localClusterFaces.push_back(face);
                   }
                 }
               }
@@ -226,17 +237,23 @@ namespace Mantid
         }
 
       } while (mdIterator->next());
+      }
 
       auto out = WorkspaceFactory::Instance().createTable("TableWorkspace");
       out->addColumn("int", "ClusterId");
       out->addColumn("double", "MDWorkspaceIndex");
       out->addColumn("int", "FaceNormalDimension");
       out->addColumn("bool", "MaxEdge");
-      for(auto it = clusterFaces.begin(); it != clusterFaces.end(); ++it)
+      for(size_t i = 0; i < nIterators; ++i)
       {
-        const ClusterFace& clusterFace = *it;
-        TableRow row = out->appendRow();
-        row << clusterFace.clusterId << double(clusterFace.workspaceIndex) << clusterFace.faceNormalDimension << clusterFace.maxEdge; 
+        const ClusterFaces& localClusterFaces =  clusterFaces[i];
+        
+        for(auto it = localClusterFaces.begin(); it != localClusterFaces.end(); ++it)
+        {
+          TableRow row = out->appendRow();
+          const ClusterFace& clusterFace = *it;
+          row << clusterFace.clusterId << double(clusterFace.workspaceIndex) << clusterFace.faceNormalDimension << clusterFace.maxEdge; 
+        }
       }
 
       setProperty("OutputWorkspace", out);
