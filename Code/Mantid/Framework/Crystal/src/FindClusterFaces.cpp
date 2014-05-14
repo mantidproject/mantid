@@ -28,8 +28,9 @@ and the center locations are used to restrict the output to only include the clu
 
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
-#include <set>
+#include <map>
 #include <deque>
+#include <algorithm>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -37,23 +38,23 @@ using namespace Mantid::API;
 namespace
 {
   using namespace Mantid::Crystal;
-  // Set of labels
-  typedef std::set<int> LabelSet;
+  // Map of label ids to peak index in peaks workspace.
+  typedef std::map<int, int> LabelMap;
   // Optional set of labels
-  typedef boost::optional<LabelSet> OptionalLabelSet;
+  typedef boost::optional<LabelMap> OptionalLabelPeakIndexMap;
 
   /**
    * Create an optional label set for filtering.
    * @param dimensionality : Dimensionality of the workspace.
    * @param emptyLabelId : Label id corresponding to empty.
    * @param filterWorkspace : Peaks workspace to act as filter.
-   * @param clusterImage : Image constaining clusters for inspection.
-   * @return Set of labels to inspect for.
+   * @param projection : Peak projection object.
+   * @return (optional) Map of labels to inspect for to the Peaks Index in the peaks workspace which matches the cluster id.
    */
-  OptionalLabelSet createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
-      IPeaksWorkspace_sptr filterWorkspace, IMDHistoWorkspace_sptr& clusterImage)
+  OptionalLabelPeakIndexMap createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
+      IPeaksWorkspace_sptr filterWorkspace, const PeakClusterProjection& projection)
   {
-    OptionalLabelSet optionalAllowedLabels;
+    OptionalLabelPeakIndexMap optionalAllowedLabels;
 
     if (filterWorkspace)
     {
@@ -62,15 +63,15 @@ namespace
         throw std::invalid_argument(
             "A FilterWorkspace has been given, but the dimensionality of the labeled workspace is < 3.");
       }
-      LabelSet allowedLabels;
-      PeakClusterProjection projection(clusterImage);
+      LabelMap allowedLabels;
+      
       for (int i = 0; i < filterWorkspace->getNumberPeaks(); ++i)
       {
         IPeak& peak = filterWorkspace->getPeak(i);
         const int labelIdAtPeakCenter = static_cast<int>(projection.signalAtPeakCenter(peak));
         if (labelIdAtPeakCenter > emptyLabelId)
         {
-          allowedLabels.insert(labelIdAtPeakCenter);
+          allowedLabels.insert(std::make_pair(labelIdAtPeakCenter, i));
         }
       }
       optionalAllowedLabels = allowedLabels;
@@ -87,6 +88,7 @@ namespace
     size_t workspaceIndex;
     int faceNormalDimension;
     bool maxEdge;
+    double radius;
   };
 
   typedef std::deque<ClusterFace> ClusterFaces;
@@ -176,8 +178,13 @@ namespace Mantid
       }
 
       IPeaksWorkspace_sptr filterWorkspace = this->getProperty("FilterWorkspace");
-      OptionalLabelSet optionalAllowedLabels = createOptionalLabelFilter(dimensionality, emptyLabelId,
+      OptionalLabelPeakIndexMap optionalAllowedLabels;
+      if(filterWorkspace)
+      {
+      PeakClusterProjection projection(clusterImage);
+      optionalAllowedLabels = createOptionalLabelFilter(dimensionality, emptyLabelId,
           filterWorkspace, clusterImage);
+      }
 
       
       const int nThreads = Mantid::API::FrameworkManager::Instance().getNumOMPThreads(); // NThreads to Request
@@ -197,12 +204,33 @@ namespace Mantid
         ClusterFaces& localClusterFaces = clusterFaces[it];
         auto mdIterator = mdIterators[it];
         double intpart = 0;
+        double radius = -1;
+        const bool usingFiltering = optionalAllowedLabels.is_initialized();
         do
         {
           const signal_t signalValue = mdIterator->getSignal(); 
           const int id = static_cast<int>(signalValue);
-          
-          if (!optionalAllowedLabels.is_initialized()
+          double radius = -1;
+          if(usingFiltering)
+          {
+            PeakClusterProjection projection(clusterImage);
+            auto it = optionalAllowedLabels->find(id);
+            if(it != optionalAllowedLabels->end())
+            {
+              int peakIndex = it->second;
+              const IPeak& peak = filterWorkspace->getPeak(peakIndex);
+              V3D peakCenter = projection.peakCenter(peak);
+              
+              // Calculate the radius
+              VMD positionND = clusterImage->getCenter(mdIterator->getLinearIndex());
+              V3D cellPosition(positionND[0], positionND[1], positionND[2]);
+              radius = cellPosition.distance(peakCenter);
+
+            }
+          }
+
+
+            if (!usingFiltering
             || (optionalAllowedLabels->find(id) != optionalAllowedLabels->end()))
           {
             // Check that the signal value looks like a label id.
@@ -248,6 +276,7 @@ namespace Mantid
                       face.workspaceIndex = linearIndex;
                       face.faceNormalDimension = j;
                       face.maxEdge = maxEdge;
+                      face.radius = radius;
   
                       localClusterFaces.push_back(face);
                   }
@@ -267,6 +296,7 @@ namespace Mantid
       out->addColumn("double", "MDWorkspaceIndex");
       out->addColumn("int", "FaceNormalDimension");
       out->addColumn("bool", "MaxEdge");
+      out->addColumn("double", "radius");
       for(size_t i = 0; i < nIterators; ++i)
       {
         const ClusterFaces& localClusterFaces =  clusterFaces[i];
@@ -275,7 +305,8 @@ namespace Mantid
         {
           TableRow row = out->appendRow();
           const ClusterFace& clusterFace = *it;
-          row << clusterFace.clusterId << double(clusterFace.workspaceIndex) << clusterFace.faceNormalDimension << clusterFace.maxEdge; 
+          row << clusterFace.clusterId << double(clusterFace.workspaceIndex) 
+            << clusterFace.faceNormalDimension << clusterFace.maxEdge << clusterFace.radius; 
         }
       }
 

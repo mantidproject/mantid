@@ -73,12 +73,20 @@ namespace Crystal
   }
 
   /**
+  @return Get the peak center in the current coordinate system.
+  */
+  Mantid::Kernel::V3D PeakClusterProjection::peakCenter(const IPeak& peak) const
+  {
+    return m_peakTransform->transformPeak(peak);
+  }
+
+  /**
    * Get the signal value at the peak center.
    * @param peak
    * @param normalization : Optional normalization. Off by default.
    * @return signal value at peak center. NAN if the peak is not centered on the image.
    */
-  Mantid::signal_t PeakClusterProjection::signalAtPeakCenter(IPeak& peak, MDNormalization normalization) const
+  Mantid::signal_t PeakClusterProjection::signalAtPeakCenter(const IPeak& peak, MDNormalization normalization) const
   {
     const Mantid::Kernel::V3D& center = m_peakTransform->transformPeak(peak);
     return m_mdWS->getSignalAtVMD(center, normalization);

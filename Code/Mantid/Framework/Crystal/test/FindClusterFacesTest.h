@@ -73,7 +73,7 @@ namespace
   ITableWorkspace_sptr doExecute(IMDHistoWorkspace_sptr& inWS)
   {
     FindClusterFaces alg;
-    alg.setRethrows(true);
+    //alg.setRethrows(true);
     alg.setChild(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
@@ -86,16 +86,14 @@ namespace
   ITableWorkspace_sptr doExecuteWithFilter(IMDHistoWorkspace_sptr& inWS, IPeaksWorkspace_sptr& filterWS)
   {
     FindClusterFaces alg;
-    alg.setRethrows(true);
-    //alg.setChild(true);
+   // alg.setRethrows(true);
+    alg.setChild(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("FilterWorkspace", filterWS);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
     alg.execute();
-    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-        "dummy_value");
-    //ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
     return outWS;
   }
 }
@@ -140,14 +138,13 @@ public:
   void test_find_no_edges_1D()
   {
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
-
     ITableWorkspace_const_sptr outWS = doExecute(inWS);
 
     TSM_ASSERT_EQUALS("There are no edge faces", outWS->rowCount(), 0);
   }
 
   void verify_table_row(ITableWorkspace_sptr& outWS, int expectedClusterId,
-      size_t expectedWorkspaceIndex, int expectedNormalDimensionIndex, bool expectedMaxExtent)
+      size_t expectedWorkspaceIndex, int expectedNormalDimensionIndex, bool expectedMaxExtent, double expectedRadius=-1)
   {
     for (size_t rowIndex = 0; rowIndex < outWS->rowCount(); ++rowIndex)
     {
@@ -155,8 +152,10 @@ public:
       auto wsIndex = outWS->cell<double>(rowIndex, 1);
       auto normalDimension = outWS->cell<int>(rowIndex, 2);
       auto maxExtent = outWS->cell<Mantid::API::Boolean>(rowIndex, 3);
+      auto radius = outWS->cell<double>(rowIndex, 4);
       if (expectedClusterId == clusterId && expectedWorkspaceIndex == wsIndex
-          && expectedNormalDimensionIndex == normalDimension && expectedMaxExtent == maxExtent)
+          && expectedNormalDimensionIndex == normalDimension 
+          && expectedMaxExtent == maxExtent && radius==expectedRadius)
       {
         return;
       }
@@ -403,6 +402,12 @@ public:
     TSM_ASSERT_EQUALS(
         "Should have exactly 6 entries in the table. One cluster with 6 neighbours. The other cluster should be ignored as has no corresponding peak.",
         6, faces->rowCount());
+
+    const double binWidth = (max-min)/nBins;
+    const double binCenter = binWidth / 2;
+    const double expectedRadius = std::sqrt(3 *  (binCenter * binCenter) ) ;
+
+    verify_table_row(faces, 1, 555, 0, true, expectedRadius);
   }
 
   void test_complex_filtering()
