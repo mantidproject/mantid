@@ -126,9 +126,9 @@ public:
   // Allow Algorithm::execute to change the exec count & duration after the algorithm was executed
   friend class Algorithm;
   
-private:
   // Set the execution count 
   void setExecCount(std::size_t execCount) { m_execCount = execCount; }
+private:
   /// The name of the Algorithm
   std::string m_name;
   /// The version of the algorithm

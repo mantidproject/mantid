@@ -295,7 +295,7 @@ void WorkspaceHistory::loadNestedHistory(::NeXus::File * file, AlgorithmHistory_
       }
       else
       {
-        //if not parent point is supplied, asssume we're at the top
+        //if not parent point is supplied, assume we're at the top
         //and attach the history to the workspace 
         this->addHistory(history);
       }
@@ -321,7 +321,7 @@ std::set<int> WorkspaceHistory::findHistoryEntries(::NeXus::File* file)
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
 
-  // Histories are numberd MantidAlgorithm_0, ..., MantidAlgorithm_10, etc.
+  // Histories are numbered MantidAlgorithm_0, ..., MantidAlgorithm_10, etc.
   // Find all the unique numbers
   for (auto it = entries.begin(); it != entries.end(); ++it)
   {
@@ -381,10 +381,11 @@ AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string&
   Poco::DateTime start_timedate;
   //This is needed by the Poco parsing function
   int tzdiff(-1);
+  Mantid::Kernel::DateAndTime utc_start;
   if( !Poco::DateTimeParser::tryParse("%Y-%b-%d %H:%M:%S", date + " " + time, start_timedate, tzdiff))
   {
     g_log.warning() << "Error parsing start time in algorithm history entry." << "\n";
-    throw std::runtime_error("Malformed history record: could not parse algorithm start time.");
+    utc_start = Kernel::DateAndTime::defaultTime();
   }
   //Get the duration
   getWordsInString(info[EXEC_DUR], dummy, dummy, temp, dummy);
@@ -392,10 +393,9 @@ AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string&
   if ( dur < 0.0 )
   {
     g_log.warning() << "Error parsing start time in algorithm history entry." << "\n";
-    throw std::runtime_error("Malformed history record: could not parse algorithm duration.");
+    dur = -1.0;
   }
   //Convert the timestamp to time_t to DateAndTime
-  Mantid::Kernel::DateAndTime utc_start;
   utc_start.set_from_time_t( start_timedate.timestamp().epochTime() );
   //Create the algorithm history
   API::AlgorithmHistory alg_hist(algName, version, utc_start, dur,Algorithm::g_execCount);

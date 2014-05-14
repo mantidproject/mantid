@@ -155,11 +155,9 @@ void AlgorithmHistory::printSelf(std::ostream& os, const int indent)const
 {
   os << std::string(indent,' ') << "Algorithm: " << m_name;
   os << std::string(indent,' ') << " v" << m_version << std::endl;
-  if (m_executionDate != Mantid::Kernel::DateAndTime::defaultTime())
-  {
-    os << std::string(indent,' ') << "Execution Date: " << m_executionDate.toFormattedString() <<std::endl;
-    os << std::string(indent,' ') << "Execution Duration: "<< m_executionDuration << " seconds" << std::endl;
-  }
+  os << std::string(indent,' ') << "Execution Date: " << m_executionDate.toFormattedString() <<std::endl;
+  os << std::string(indent,' ') << "Execution Duration: "<< m_executionDuration << " seconds" << std::endl;
+
   std::vector<Kernel::PropertyHistory>::const_iterator it;
   os << std::string(indent,' ') << "Parameters:" <<std::endl;
 
