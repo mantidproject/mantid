@@ -20,6 +20,7 @@ and the center locations are used to restrict the output to only include the clu
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
@@ -183,7 +184,12 @@ namespace Mantid
       auto mdIterators = clusterImage->createIterators(nThreads); // Iterators
       const int nIterators = static_cast<int>(mdIterators.size()); // Number of iterators yielded.
       VecClusterFaces clusterFaces(nIterators);
-
+      size_t nSteps = 1000;
+      if(optionalAllowedLabels.is_initialized())
+      {
+        nSteps = optionalAllowedLabels->size();
+      }
+      Progress progress(this, 0, 1, nSteps);
       PARALLEL_FOR_NO_WSP_CHECK()
       for(int it = 0; it < nIterators; ++it)
       {
@@ -201,6 +207,7 @@ namespace Mantid
           {
             if (id > emptyLabelId)
             {
+              progress.report();
              // Add index to cluster id map.
               const size_t linearIndex = mdIterator->getLinearIndex();
               std::vector<size_t> indexes;
