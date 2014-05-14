@@ -269,8 +269,12 @@ namespace Algorithms
                     "A 2D matrix workspace with X values of d-spacing");
 
     declareProperty(new ArrayProperty<double>("DReference"),"Enter a comma-separated list of the expected X-position of the centre of the peaks. Only peaks near these positions will be fitted." );
+    
     declareProperty("FitWindowMaxWidth", 0.,
                     "Optional: The maximum width of the fitting window. If this is <=0 the windows is not specified to FindPeaks" );
+
+    declareProperty(new WorkspaceProperty<TableWorkspace>("FitwindowTableWorkspace", "", Direction::Input, PropertyMode::Optional),
+                    "Name of the input Tableworkspace containing peak fit window information for each spectrum. ");
 
     std::vector<std::string> peaktypes;
     peaktypes.push_back("BackToBackExponential");
@@ -324,30 +328,34 @@ namespace Algorithms
 
     // the peak positions and where to fit
     m_peakPositions = getProperty("DReference");
+    if (m_peakPositions.size() == 0)
+      throw std::runtime_error("There is no input referenced peak position.");
     std::sort(m_peakPositions.begin(), m_peakPositions.end());
 
     // Fit windows
-    double maxwidth = getProperty("FitWindowMaxWidth");
-    m_fitWindows = generateWindows(wkspDmin, wkspDmax, m_peakPositions, maxwidth);
-
-    // Debug otuput
-    std::stringstream infoss;
-    infoss << "Fit Windows : ";
-    if (m_fitWindows.empty())
+    TableWorkspace_sptr fitwintablews = getProperty("FitwindowTableWorkspace");
+    if (fitwintablews)
     {
-      infoss << "(empty)";
+      importFitWindowTableWorkspace(fitwintablews);
+      m_useFitWindowTable = true;
     }
     else
     {
-      for (std::vector<double>::const_iterator it = m_fitWindows.begin(); it != m_fitWindows.end(); ++it)
-        infoss << *it << " ";
-    }
-    g_log.information(infoss.str());
+      double maxwidth = getProperty("FitWindowMaxWidth");
+      m_fitWindows = generateWindows(wkspDmin, wkspDmax, m_peakPositions, maxwidth);
+      m_useFitWindowTable = false;
 
-    if (m_fitWindows.size() == 0)
-    {
-      g_log.warning() << "Input FitWindowMaxWidth = " << maxwidth
-                      << "  No FitWidows will be generated." << "\n";
+      // Debug otuput
+      std::stringstream infoss;
+      infoss << "Fit Windows : ";
+      if (m_fitWindows.empty()) infoss << "(empty)";
+      else for (std::vector<double>::const_iterator it = m_fitWindows.begin(); it != m_fitWindows.end(); ++it)
+        infoss << *it << " ";
+      
+      g_log.information(infoss.str());
+
+      if (m_fitWindows.size() == 0) g_log.warning() << "Input FitWindowMaxWidth = " << maxwidth
+                                                    << "  No FitWidows will be generated." << "\n";
     }
 
     // Some shortcuts for event workspaces
@@ -374,6 +382,64 @@ namespace Algorithms
 
     return;
   }
+
+
+  //-----------------------------------------------------------------------------------------
+  /** Executes the algorithm
+     *
+     *  @throw Exception::RuntimeError If ... ...
+     */
+  void GetDetOffsetsMultiPeaks::importFitWindowTableWorkspace(TableWorkspace_sptr windowtablews)
+  {
+    // Check number of columns matches number of peaks
+    size_t numcols = windowtablews->columnCount();
+    size_t numpeaks = m_peakPositions.size();
+    if (numcols != 2*numpeaks+1)
+      throw std::runtime_error("Number of columns is not 2 times of number of referenced peaks. ");
+
+    // Check number of spectra should be same to input workspace
+    size_t numrows = windowtablews->rowCount();
+    if (numrows != inputW->getNumberHistograms())
+      throw std::runtime_error("Number of spectra in fit window workspace does not match input workspace. ");
+
+    // Create workspace
+    m_vecFitWindow.clear();
+    m_vecFitWindow.resize(numrows);
+
+    for (size_t i = 0; i < numrows; ++i)
+    {
+      // spectrum number
+      int spec = windowtablews->cell<int>(i, 0);
+      if (spec < 0 || spec >= static_cast<int>(numrows))
+      {
+        std::stringstream ess;
+        ess << "Peak fit windows at row " << i << " has spectrum " << spec
+            << ", which is out of allowed range! ";
+        throw std::runtime_error(ess.str());
+      }
+      else if (m_vecFitWindow[spec].size() != 0)
+      {
+        std::stringstream ess;
+        ess << "Peak fit windows at row " << i << " has spectrum " << spec
+            << ", which appears before in fit window table workspace. ";
+        throw std::runtime_error(ess.str());
+      }
+
+      // fit windows
+      std::vector<double> fitwindows(numcols-1);
+      for (size_t j = 1; j < numcols; ++j)
+      {
+        double dtmp = windowtablews->cell<double>(i, j);
+        fitwindows[j-1] = dtmp;
+      }
+
+      // add to vector of fit windows
+      m_vecFitWindow[spec] = fitwindows;
+    }
+
+    return;
+  }
+
 
   //-----------------------------------------------------------------------------------------
   /** Executes the algorithm
@@ -579,6 +645,11 @@ namespace Algorithms
     fr.mask = 0.0;
     if (std::abs(fr.offset) > m_maxOffset)
     {
+      std::stringstream infoss;
+      infoss << "Spectrum " << wi << " has offset = " << fr.offset << ", which exceeds maximum offset "
+             << m_maxOffset << ".  Spectrum is masked. ";
+      g_log.information(infoss.str());
+
       std::stringstream msgss;
       if (fr.fitoffsetstatus == "success")
         msgss << "exceed max offset. " << "offset = " << fr.offset;
@@ -799,7 +870,12 @@ namespace Algorithms
     {
       if((peakPositions[i] > minD) && (peakPositions[i] < maxD))
       {
-        if (useFitWindows)
+        if (m_useFitWindowTable)
+        {
+          fitWindowsToUse.push_back(std::max(m_vecFitWindow[wi][2*i], minD));
+          fitWindowsToUse.push_back(std::min(m_vecFitWindow[wi][2*i+1], maxD));
+        }
+        else if (useFitWindows)
         {
           fitWindowsToUse.push_back(std::max(fitWindows[2*i], minD));
           fitWindowsToUse.push_back(std::min(fitWindows[2*i+1], maxD));
@@ -808,7 +884,13 @@ namespace Algorithms
       }
     }
     int numPeaksInRange = static_cast<int>(peakPosToFit.size());
-    if (numPeaksInRange == 0) return 0;
+    if (numPeaksInRange == 0)
+    {
+      std::stringstream outss;
+      outss << "Spectrum " << wi << " has no peak in range (" << minD << ", " << maxD << ")";
+      g_log.information(outss.str()) ;
+      return 0;
+    }
 
     // Fit peaks
     API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
@@ -837,7 +919,7 @@ namespace Algorithms
     // use tmpPeakPosToFit to shuffle the vectors
     std::vector<double> tmpPeakPosToFit;
     generatePeaksList(peakslist, static_cast<int>(wi), peakPosToFit, tmpPeakPosToFit, peakPosFitted, peakHeights, chisq,
-                      useFitWindows, fitWindowsToUse, minD, maxD);
+                      (useFitWindows || m_useFitWindowTable), fitWindowsToUse, minD, maxD);
     peakPosToFit = tmpPeakPosToFit;
 
     nparams = peakPosFitted.size();
