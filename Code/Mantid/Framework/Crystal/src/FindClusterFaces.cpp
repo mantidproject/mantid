@@ -193,18 +193,28 @@ namespace Mantid
       PARALLEL_FOR_NO_WSP_CHECK()
       for(int it = 0; it < nIterators; ++it)
       {
+        PARALLEL_START_INTERUPT_REGION
         ClusterFaces& localClusterFaces = clusterFaces[it];
         auto mdIterator = mdIterators[it];
-        
+        double intpart = 0;
         do
         {
-          const int id = static_cast<int>(mdIterator->getSignal());
-          /*
-           * Only if the label has been allowed by the filtering, should it be used.
-           */
+          const signal_t signalValue = mdIterator->getSignal(); 
+          const int id = static_cast<int>(signalValue);
+          
           if (!optionalAllowedLabels.is_initialized()
             || (optionalAllowedLabels->find(id) != optionalAllowedLabels->end()))
           {
+            // Check that the signal value looks like a label id.
+            if(std::modf(signalValue, &intpart) != 0.0)
+            {
+              std::stringstream buffer;
+              buffer << "Problem at linear index: " << mdIterator->getLinearIndex() 
+                 << " SignalValue is not an integer: " << signalValue << " Suggests wrong input IMDHistoWorkspace passed to FindClusterFaces.";
+
+              throw std::runtime_error(buffer.str());
+            }
+
             if (id > emptyLabelId)
             {
               progress.report();
@@ -218,6 +228,7 @@ namespace Mantid
               {
                 size_t neighbourLinearIndex = neighbours[i];
                 const int neighbourId = static_cast<int>(clusterImage->getSignalAt(neighbourLinearIndex));
+                
                 if (neighbourId <= emptyLabelId)
                 {
                   // We have an edge!
@@ -247,7 +258,9 @@ namespace Mantid
         }
 
       } while (mdIterator->next());
+      PARALLEL_END_INTERUPT_REGION
       }
+      PARALLEL_CHECK_INTERUPT_REGION
 
       auto out = WorkspaceFactory::Instance().createTable("TableWorkspace");
       out->addColumn("int", "ClusterId");

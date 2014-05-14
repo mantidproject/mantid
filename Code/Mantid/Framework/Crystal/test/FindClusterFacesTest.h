@@ -130,6 +130,13 @@ public:
     Mantid::API::FrameworkManager::Instance();
   }
 
+  void test_throws_with_non_cluster_mdhistoworkspace()
+  {
+    const double nonIntegerSignalValue = 1.2;
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(nonIntegerSignalValue, 1, 1);
+    TS_ASSERT_THROWS(doExecute(inWS), std::runtime_error&);
+  }
+
   void test_find_no_edges_1D()
   {
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
