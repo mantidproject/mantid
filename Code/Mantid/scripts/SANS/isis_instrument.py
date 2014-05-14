@@ -781,8 +781,8 @@ class SANS2D(ISISInstrument):
     WAV_RANGE_MIN = 2.0
     WAV_RANGE_MAX = 14.0
 
-    def __init__(self):
-        super(SANS2D, self).__init__()
+    def __init__(self, idf_path=None):
+        super(SANS2D, self).__init__(idf_path)
         
         self._marked_dets = []
         # set to true once the detector positions have been moved to the locations given in the sample logs
