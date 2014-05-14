@@ -80,20 +80,29 @@ def DataPath(path):
     """
     ReductionSingleton().set_data_path(path)
 
-def SANS2D():
+def SANS2D(idf_path=None):
     """
         Initialises the instrument settings for SANS2D
+        @param idf_path :: optionally specify the path to the SANS2D IDF to use.
+                           Uses default if none specified.
         @return True on success
     """
     _printMessage('SANS2D()')
     try:
-        instrument = isis_instrument.SANS2D()
+        instrument = isis_instrument.SANS2D(idf_path)
         
         ReductionSingleton().set_instrument(instrument)
-	config['default.instrument']='SANS2D'
+        config['default.instrument']='SANS2D'
     except:
         return False
     return True
+
+def SANS2DTUBES():
+    """
+    Quick, temporary workaround for the IDF problem we're fixing in #9367.
+    Simply pass the correct IDF to SANS2D().
+    """
+    return SANS2D("SANS2D_Definition_Tubes.xml")
 
 def LOQ():
     """
@@ -105,7 +114,7 @@ def LOQ():
         instrument = isis_instrument.LOQ()
 
         ReductionSingleton().set_instrument(instrument)
-	config['default.instrument']='LOQ'
+        config['default.instrument']='LOQ'
     except:
         return False
     return True
