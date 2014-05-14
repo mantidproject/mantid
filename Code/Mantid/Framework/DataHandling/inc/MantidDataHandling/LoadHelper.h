@@ -34,11 +34,11 @@ public:
 	LoadHelper();
 	virtual ~LoadHelper();
 
-	std::string findInstrumentNexusPath(const NeXus::NXEntry&);
-	std::string getStringFromNexusPath(const NeXus::NXEntry&,
+	std::string findInstrumentNexusPath(const Mantid::NeXus::NXEntry&);
+	std::string getStringFromNexusPath(const Mantid::NeXus::NXEntry&,
 			const std::string&);
-	double getDoubleFromNexusPath(const NeXus::NXEntry&, const std::string&);
-	std::vector<double> getTimeBinningFromNexusPath(const NeXus::NXEntry &,
+	double getDoubleFromNexusPath(const Mantid::NeXus::NXEntry&, const std::string&);
+	std::vector<double> getTimeBinningFromNexusPath(const Mantid::NeXus::NXEntry &,
 			const std::string &);
 	static double calculateStandardError(double in) {
 		return sqrt(in);
