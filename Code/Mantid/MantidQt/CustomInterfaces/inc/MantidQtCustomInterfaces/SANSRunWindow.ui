@@ -286,13 +286,7 @@
           </widget>
          </item>
          <item>
-          <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="inst_opt">
-           <property name="techniques" stdset="0">
-            <stringlist>
-             <string>Small Angle Scattering</string>
-            </stringlist>
-           </property>
-          </widget>
+          <widget class="QComboBox" name="inst_opt"/>
          </item>
         </layout>
        </item>
@@ -337,7 +331,7 @@
                </property>
                <layout class="QGridLayout" name="gridLayout_10">
                 <item row="0" column="0">
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="scatterSample">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="scatterSample" native="true">
                   <property name="toolTip">
                    <string>The run with the sample under investigation</string>
                   </property>
@@ -353,7 +347,7 @@
                  </widget>
                 </item>
                 <item row="1" column="0">
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="scatCan">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="scatCan" native="true">
                   <property name="toolTip">
                    <string>The run with the sample under investigation</string>
                   </property>
@@ -394,7 +388,7 @@
                </property>
                <layout class="QGridLayout" name="gridLayout_11">
                 <item row="0" column="0">
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transmis">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transmis" native="true">
                   <property name="toolTip">
                    <string>The run with the sample under investigation</string>
                   </property>
@@ -413,7 +407,7 @@
                  </widget>
                 </item>
                 <item row="1" column="0">
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCan">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCan" native="true">
                   <property name="toolTip">
                    <string>The run with the sample under investigation</string>
                   </property>
@@ -454,7 +448,7 @@
                </property>
                <layout class="QGridLayout" name="gridLayout_12">
                 <item row="0" column="0">
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="direct">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="direct" native="true">
                   <property name="toolTip">
                    <string>The run with the sample under investigation</string>
                   </property>
@@ -473,7 +467,7 @@
                  </widget>
                 </item>
                 <item row="1" column="0">
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dirCan">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dirCan" native="true">
                   <property name="toolTip">
                    <string>The run with the sample under investigation</string>
                   </property>
@@ -559,8 +553,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="file_opt">
-              </widget>
+              <widget class="QComboBox" name="file_opt"/>
              </item>
             </layout>
            </item>
@@ -1903,7 +1896,7 @@ intermediate ranges are there for comparison</string>
              </widget>
             </item>
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodRearFile">
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodRearFile" native="true">
               <property name="findRunFiles" stdset="0">
                <bool>false</bool>
               </property>
@@ -1933,7 +1926,7 @@ intermediate ranges are there for comparison</string>
              </widget>
             </item>
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFrontFile">
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFrontFile" native="true">
               <property name="findRunFiles" stdset="0">
                <bool>false</bool>
               </property>
@@ -3239,8 +3232,8 @@ p, li { white-space: pre-wrap; }
               </layout>
              </item>
              <item>
-              <widget class="MantidQt::MantidWidgets::MessageDisplay" name="centre_logging">
-               <property name="source">
+              <widget class="MantidQt::MantidWidgets::MessageDisplay" name="centre_logging" native="true">
+               <property name="source" stdset="0">
                 <string>CentreFinder</string>
                </property>
               </widget>
@@ -3590,8 +3583,8 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="MantidQt::MantidWidgets::MessageDisplay" name="logging_field">
-         <property name="source">
+        <widget class="MantidQt::MantidWidgets::MessageDisplay" name="logging_field" native="true">
+         <property name="source" stdset="0">
           <string>SANS</string>
          </property>
         </widget>
@@ -3849,7 +3842,7 @@ p, li { white-space: pre-wrap; }
           <number>6</number>
          </property>
          <item row="0" column="0">
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="file_run_edit">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="file_run_edit" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
              <horstretch>0</horstretch>
@@ -4109,11 +4102,6 @@ p, li { white-space: pre-wrap; }
    <class>MantidQt::MantidWidgets::MWRunFiles</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/MWRunFiles.h</header>
-  </customwidget>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::InstrumentSelector</class>
-   <extends>QComboBox</extends>
-   <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::MessageDisplay</class>

@@ -41,6 +41,16 @@ class BaseInstrument(object):
             Return the name of the instrument
         """
         return self._NAME
+
+    def versioned_name(self):
+        """
+        Hack-workaround so that we may temporarily display "SANS2DTUBES" as
+        an option in the instrument dropdown menu in the interface.  To be removed
+        as part of #9367.
+        """
+        if "SANS2D_Definition_Tubes" in self.idf_path:
+            return "SANS2DTUBES"
+        return self._NAME
     
     def view(self, workspace_name = None):
         """
