@@ -24,6 +24,7 @@ and the center locations are used to restrict the output to only include the clu
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <set>
+#include <deque>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -71,6 +72,19 @@ namespace
     }
     return optionalAllowedLabels;
   }
+
+  /**
+  Type to represent cluster face (a.k.a a row in the output table)
+  */
+  struct ClusterFace
+  {
+    int clusterId;
+    size_t workspaceIndex;
+    int faceNormalDimension;
+    bool maxEdge;
+  };
+
+  typedef std::deque<ClusterFace> ClusterFaces;
 
 }
 
@@ -148,12 +162,6 @@ namespace Mantid
       IMDHistoWorkspace_sptr clusterImage = getProperty("InputWorkspace");
       const int emptyLabelId = 0;
 
-      auto out = WorkspaceFactory::Instance().createTable("TableWorkspace");
-      out->addColumn("int", "ClusterId");
-      out->addColumn("double", "MDWorkspaceIndex");
-      out->addColumn("int", "FaceNormalDimension");
-      out->addColumn("bool", "MaxEdge");
-
       std::vector<size_t> imageShape;
       const size_t dimensionality = clusterImage->getNumDims();
       for (size_t i = 0; i < dimensionality; ++i)
@@ -165,6 +173,7 @@ namespace Mantid
       OptionalLabelSet optionalAllowedLabels = createOptionalLabelFilter(dimensionality, emptyLabelId,
           filterWorkspace, clusterImage);
 
+      ClusterFaces clusterFaces;
       auto mdIterator = clusterImage->createIterator(NULL); // TODO. This could be done in parallel!
       do
       {
@@ -199,10 +208,15 @@ namespace Mantid
                 {
                   if (indexes[j] != neighbourIndexes[j])
                   {
+                    const bool maxEdge = neighbourLinearIndex > linearIndex;
+                    
+                    ClusterFace face;
+                    face.clusterId = id;
+                    face.workspaceIndex = linearIndex;
+                    face.faceNormalDimension = j;
+                    face.maxEdge = maxEdge;
 
-                    bool maxEdge = neighbourLinearIndex > linearIndex;
-                    TableRow row = out->appendRow();
-                    row << int(id) << double(linearIndex) << int(j) << maxEdge; // Writing to a table workspace cannot be done in parallel!
+                    clusterFaces.push_back(face);
 
                   }
                 }
@@ -212,6 +226,18 @@ namespace Mantid
         }
 
       } while (mdIterator->next());
+
+      auto out = WorkspaceFactory::Instance().createTable("TableWorkspace");
+      out->addColumn("int", "ClusterId");
+      out->addColumn("double", "MDWorkspaceIndex");
+      out->addColumn("int", "FaceNormalDimension");
+      out->addColumn("bool", "MaxEdge");
+      for(auto it = clusterFaces.begin(); it != clusterFaces.end(); ++it)
+      {
+        const ClusterFace& clusterFace = *it;
+        TableRow row = out->appendRow();
+        row << clusterFace.clusterId << double(clusterFace.workspaceIndex) << clusterFace.faceNormalDimension << clusterFace.maxEdge; 
+      }
 
       setProperty("OutputWorkspace", out);
     }
