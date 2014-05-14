@@ -12,6 +12,7 @@ and the center locations are used to restrict the output to only include the clu
 #include "MantidCrystal/FindClusterFaces.h"
 
 #include "MantidKernel/Utils.h"
+#include "MantidKernel/MultiThreaded.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDIterator.h"
@@ -182,6 +183,8 @@ namespace Mantid
       auto mdIterators = clusterImage->createIterators(nThreads); // Iterators
       const int nIterators = static_cast<int>(mdIterators.size()); // Number of iterators yielded.
       VecClusterFaces clusterFaces(nIterators);
+
+      PARALLEL_FOR_NO_WSP_CHECK()
       for(int it = 0; it < nIterators; ++it)
       {
         ClusterFaces& localClusterFaces = clusterFaces[it];
