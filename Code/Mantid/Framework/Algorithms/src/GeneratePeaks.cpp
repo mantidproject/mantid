@@ -142,13 +142,17 @@ namespace Algorithms
     createFunction(peaktype, bkgdtype);
 
     // Process parameter table
-    processParamTable();
+    processTableColumnNames();
+    getSpectraSet(m_funcParamWS);
 
+    // Create output workspace
     API::MatrixWorkspace_sptr outputWS = createOutputWorkspace();
-    this->setProperty("OutputWorkspace", outputWS);
+    setProperty("OutputWorkspace", outputWS);
 
     // Generate peaks
-    generatePeaks(outputWS);
+    std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > > functionmap;
+    importPeaksFromTable(functionmap);
+    generatePeaks(functionmap, outputWS);
 
     return;
   }
@@ -189,10 +193,10 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /**  Generate peaks
-    * @param dataWS :: output matrix workspace
+  /** Import peak and background functions from table workspace
+    * @param functionmap :: (output) map contains vector of functions for each spectrum
     */
-  void GeneratePeaks::generatePeaks(API::MatrixWorkspace_sptr dataWS)
+  void GeneratePeaks::importPeaksFromTable(std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >& functionmap)
   {
     size_t numpeaks = m_funcParamWS->rowCount();
     size_t icolchi2 = m_funcParamWS->columnCount() - 1;
@@ -202,12 +206,9 @@ namespace Algorithms
     else g_log.warning("There is no background function specified. ");
 
     // Create data structure for all peaks functions
-    std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > > functionmap;
     std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >::iterator mapiter;
 
-    //--------------------------------------------------------------------------------------------
-    // Go through the table workspace to create peak/background functions
-    //--------------------------------------------------------------------------------------------
+    // Go through the table workspace to create peak/background functions    
     for (size_t ipeak = 0; ipeak < numpeaks; ++ipeak)
     {
       // Spectrum
@@ -227,7 +228,7 @@ namespace Algorithms
       }
       else
       {
-        g_log.notice() << "[DB] Chi-square = " << chi2 << "\n";
+        g_log.debug() << "[DB] Chi-square = " << chi2 << "\n";
       }
 
       // Set up function
@@ -251,7 +252,6 @@ namespace Algorithms
       }
       else
       {
-        g_log.notice() << "i_height = " << i_height << "\n";
         double tmpheight = m_funcParamWS->cell<double>(ipeak, i_height);
         double tmpwidth = m_funcParamWS->cell<double>(ipeak, i_width);
         double tmpcentre = m_funcParamWS->cell<double>(ipeak, i_centre);
@@ -261,7 +261,6 @@ namespace Algorithms
 
         if (m_genBackground)
         {
-          g_log.notice() << "i_a0 = " << i_a0 << "\n";
           double tmpa0 = m_funcParamWS->cell<double>(ipeak, i_a0);
           double tmpa1 = m_funcParamWS->cell<double>(ipeak, i_a1);
           double tmpa2 = m_funcParamWS->cell<double>(ipeak, i_a2);
@@ -271,10 +270,7 @@ namespace Algorithms
         }
       }
 
-      g_log.notice("Bug flag 1");
-
       double centre = m_peakFunction->centre();
-      // double fwhm = m_peakFunction->fwhm();
 
       // Generate function to plot
       API::CompositeFunction_sptr plotfunc = boost::make_shared<CompositeFunction>();
@@ -303,33 +299,40 @@ namespace Algorithms
 
     } //ENDFOR (ipeak)
 
+    // Sort by peak position
+    for (mapiter = functionmap.begin(); mapiter != functionmap.end(); ++mapiter)
+    {
+      std::vector<std::pair<double, API::IFunction_sptr> >& vec_centrefunc = mapiter->second;
+      std::sort(vec_centrefunc.begin(), vec_centrefunc.end());
+    }
 
+    return;
+  }
 
-    //--------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------
+  /** Generate peaks in the given output workspace
+    * @param functionmap :: map to contain the list of functions with key as their spectra
+    * @param dataWS :: output matrix workspace
+    */
+  void GeneratePeaks::generatePeaks(const std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >& functionmap,
+                                    API::MatrixWorkspace_sptr dataWS)
+  {
     // Calcualte function
-    //--------------------------------------------------------------------------------------------
+    std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >::const_iterator mapiter;
     for (mapiter = functionmap.begin(); mapiter != functionmap.end(); ++mapiter)
     {
       // Get spec id and translated to wsindex in the output workspace
       specid_t specid = mapiter->first;
       specid_t wsindex;
-      if (m_newWSFromParent)
-        wsindex = specid;
-      else
-        wsindex = mSpectrumMap[specid];
+      if (m_newWSFromParent) wsindex = specid;
+      else wsindex = m_SpectrumMap[specid];
 
-      // std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >::iterator mapiter;
-      // Sort by
-
-      std::vector<std::pair<double, API::IFunction_sptr> >& vec_centrefunc = mapiter->second;
-      std::sort(vec_centrefunc.begin(), vec_centrefunc.end());
-      // std::sort(mapiter->second.begin(), mapiter->second.end());
-
+      const std::vector<std::pair<double, API::IFunction_sptr> >& vec_centrefunc = mapiter->second;
       size_t numpeaksinspec = mapiter->second.size();
 
       for (size_t ipeak = 0; ipeak < numpeaksinspec; ++ipeak)
       {
-        std::pair<double, API::IFunction_sptr>& centrefunc = vec_centrefunc[ipeak];
+        const std::pair<double, API::IFunction_sptr>& centrefunc = vec_centrefunc[ipeak];
 
         // Determine boundary
         API::IPeakFunction_sptr thispeak = getPeakFunction(centrefunc.second);
@@ -356,7 +359,6 @@ namespace Algorithms
         if (ipeak != numpeaksinspec-1)
         {
           // Not the rightmost peak
-          // FIXME - Need to have a data structure for it: vecfuncs[ipk+1]
           IPeakFunction_sptr rightPeak = getPeakFunction(vec_centrefunc[ipeak+1].second);
           double middle = 0.5*(centre + rightPeak->centre());
           if (rightbound > middle)
@@ -367,11 +369,11 @@ namespace Algorithms
         // Build domain & function
         API::FunctionDomain1DVector domain(left, right); //dataWS->dataX(wsindex));
 
-        // 4. Evaluate the function
+        // Evaluate the function
         API::FunctionValues values(domain);
         centrefunc.second->function(domain, values);
 
-        // 5. Put to output
+        // Put to output
         std::size_t offset = (left-X.begin());
         std::size_t numY = values.size();
         for (std::size_t i = 0; i < numY; i ++)
@@ -405,84 +407,6 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Create a Workspace2D (MatrixWorkspace) with given spectra and bin parameters
-   */
-  MatrixWorkspace_sptr GeneratePeaks::createDataWorkspace(std::set<specid_t> spectra, std::vector<double> binparameters)
-  {
-    // Check validity
-    if (spectra.size() == 0)
-      throw std::invalid_argument("Input spectra list is empty. Unable to generate a new workspace.");
-
-    if (binparameters.size() < 3)
-    {
-      std::stringstream errss;
-      errss << "Number of input binning parameters are not enough (" << binparameters.size() << "). "
-            << "Binning parameters should be 3 (x0, step, xf).";
-      g_log.error(errss.str());
-      throw std::invalid_argument(errss.str());
-    }
-
-    double x0 = binparameters[0];
-    double dx = binparameters[1];
-    double xf = binparameters[2];
-    if (x0 >= xf || (xf - x0) < dx || dx == 0.)
-    {
-      std::stringstream errss;
-      errss << "Order of input binning parameters is not correct.  It is not logical to have "
-            << "x0 = " << x0 << ", xf = " << xf << ", dx = " << dx;
-      g_log.error(errss.str());
-      throw std::invalid_argument(errss.str());
-    }
-
-    // Determine number of x values
-    std::vector<double> xarray;
-    double xvalue = x0;
-    while (xvalue <= xf)
-    {
-      // Push current value to vector
-      xarray.push_back(xvalue);
-
-      // Calculate next value, linear or logarithmic
-      if (dx > 0)
-        xvalue += dx;
-      else
-        xvalue += fabs(dx)*xvalue;
-    }
-    size_t numxvalue = xarray.size();
-
-    // Create new workspace
-    MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", spectra.size(), numxvalue, numxvalue-1);
-    for (size_t ip = 0; ip < spectra.size(); ip ++)
-      std::copy(xarray.begin(), xarray.end(), ws->dataX(ip).begin());
-
-    // Set spectrum numbers
-    std::map<specid_t, specid_t>::iterator spiter;
-    for (spiter = mSpectrumMap.begin(); spiter != mSpectrumMap.end(); ++spiter)
-    {
-      specid_t specid = spiter->first;
-      specid_t wsindex = spiter->second;
-      g_log.debug() << "Build WorkspaceIndex-Spectrum  " << wsindex << " , " << specid << "\n";
-      ws->getSpectrum(wsindex)->setSpectrumNo(specid);
-    }
-
-    return ws;
-  }
-
-
-  /** Process function parameter table workspace
-   */
-  void GeneratePeaks::processParamTable()
-  {
-    // Process column names for function
-    processTableColumnNames();
-
-    // Process peak parameter workspace
-    getSpectraSet(m_funcParamWS, spectra);
-
-    return;
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Process table column names for peak and background function parameters names
     */
   void GeneratePeaks::processTableColumnNames()
@@ -491,15 +415,11 @@ namespace Algorithms
 
     // Initial check
     std::vector<std::string> colnames = m_funcParamWS->getColumnNames();
-    size_t numcols = colnames.size();
 
     if (colnames[0].compare("spectrum") != 0)
       throw std::runtime_error("First column must be 'spectrum' in integer. ");
     if (colnames.back().compare("chi2") != 0)
       throw std::runtime_error("Last column must be 'chi2'.");
-
-    g_log.notice() << "[DB] Number of columns = " << numcols << ", Use raw parameters = "
-                   << m_useRawParameter << "\n";
 
     // Process column names in case that there are not same as parameter names
     // fx.name might be available
@@ -574,14 +494,6 @@ namespace Algorithms
                               - m_funcParameterNames.begin()) + 1;
     }
 
-    /*
-    m_funcParameterNames.resize(numcols-2);
-    for (size_t i = 1; i < numcols-1; ++i)
-    {
-      m_funcParameterNames[i-1] = colnames[i];
-    }
-    */
-
     return;
   }
 
@@ -590,7 +502,7 @@ namespace Algorithms
     * Spectra is set to the column named 'spectrum'.
     * Algorithm supports multiple peaks in multiple spectra
     */
-  void GeneratePeaks::getSpectraSet(DataObjects::TableWorkspace_const_sptr peakParmsWS, std::set<specid_t>& spectra)
+  void GeneratePeaks::getSpectraSet(DataObjects::TableWorkspace_const_sptr peakParmsWS)
   {
     size_t numpeaks = peakParmsWS->rowCount();
     API::Column_const_sptr col = peakParmsWS->getColumn("spectrum");
@@ -599,7 +511,7 @@ namespace Algorithms
     {
       // Spectrum
       specid_t specid = static_cast<specid_t>((*col)[ipk]);
-      spectra.insert(specid);
+      m_spectraSet.insert(specid);
 
       std::stringstream outss;
       outss << "Peak " << ipk << ": specid = " << specid;
@@ -608,9 +520,9 @@ namespace Algorithms
 
     std::set<specid_t>::iterator pit;
     specid_t icount = 0;
-    for (pit = spectra.begin(); pit != spectra.end(); ++pit)
+    for (pit = m_spectraSet.begin(); pit != m_spectraSet.end(); ++pit)
     {
-      mSpectrumMap.insert(std::make_pair(*pit, icount));
+      m_SpectrumMap.insert(std::make_pair(*pit, icount));
       ++ icount;
     }
 
@@ -682,11 +594,11 @@ namespace Algorithms
                        << "Using input worksapce to generate output workspace!\n";
 
       outputWS = API::WorkspaceFactory::Instance().create(inputWS, inputWS->getNumberHistograms(),
-          inputWS->dataX(0).size(), inputWS->dataY(0).size());
+                                                          inputWS->dataX(0).size(), inputWS->dataY(0).size());
 
       std::set<specid_t>::iterator siter;
       // Only copy the X-values from spectra with peaks specified in the table workspace.
-      for (siter = spectra.begin(); siter != spectra.end(); ++siter)
+      for (siter = m_spectraSet.begin(); siter != m_spectraSet.end(); ++siter)
       {
         specid_t iws = *siter;
         std::copy(inputWS->dataX(iws).begin(), inputWS->dataX(iws).end(), outputWS->dataX(iws).begin());
@@ -697,12 +609,78 @@ namespace Algorithms
     else
     {
       // Generate a one-spectrum Workspace2D from binning
-      outputWS = createDataWorkspace(spectra, binParameters);
+      outputWS = createDataWorkspace(binParameters);
       m_newWSFromParent = false;
     }
 
     return outputWS;
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Create a Workspace2D (MatrixWorkspace) with given spectra and bin parameters
+   */
+  MatrixWorkspace_sptr GeneratePeaks::createDataWorkspace(std::vector<double> binparameters)
+  {
+    // Check validity
+    if (m_spectraSet.size() == 0)
+      throw std::invalid_argument("Input spectra list is empty. Unable to generate a new workspace.");
+
+    if (binparameters.size() < 3)
+    {
+      std::stringstream errss;
+      errss << "Number of input binning parameters are not enough (" << binparameters.size() << "). "
+            << "Binning parameters should be 3 (x0, step, xf).";
+      g_log.error(errss.str());
+      throw std::invalid_argument(errss.str());
+    }
+
+    double x0 = binparameters[0];
+    double dx = binparameters[1];
+    double xf = binparameters[2];
+    if (x0 >= xf || (xf - x0) < dx || dx == 0.)
+    {
+      std::stringstream errss;
+      errss << "Order of input binning parameters is not correct.  It is not logical to have "
+            << "x0 = " << x0 << ", xf = " << xf << ", dx = " << dx;
+      g_log.error(errss.str());
+      throw std::invalid_argument(errss.str());
+    }
+
+    // Determine number of x values
+    std::vector<double> xarray;
+    double xvalue = x0;
+    while (xvalue <= xf)
+    {
+      // Push current value to vector
+      xarray.push_back(xvalue);
+
+      // Calculate next value, linear or logarithmic
+      if (dx > 0)
+        xvalue += dx;
+      else
+        xvalue += fabs(dx)*xvalue;
+    }
+    size_t numxvalue = xarray.size();
+
+    // Create new workspace
+    MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", m_spectraSet.size(),
+                                                                       numxvalue, numxvalue-1);
+    for (size_t ip = 0; ip < m_spectraSet.size(); ip ++)
+      std::copy(xarray.begin(), xarray.end(), ws->dataX(ip).begin());
+
+    // Set spectrum numbers
+    std::map<specid_t, specid_t>::iterator spiter;
+    for (spiter = m_SpectrumMap.begin(); spiter != m_SpectrumMap.end(); ++spiter)
+    {
+      specid_t specid = spiter->first;
+      specid_t wsindex = spiter->second;
+      g_log.debug() << "Build WorkspaceIndex-Spectrum  " << wsindex << " , " << specid << "\n";
+      ws->getSpectrum(wsindex)->setSpectrumNo(specid);
+    }
+
+    return ws;
+  }
+
 
 } // namespace Mantid
 } // namespace Algorithms

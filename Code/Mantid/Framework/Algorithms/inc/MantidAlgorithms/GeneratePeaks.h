@@ -56,34 +56,35 @@ namespace Algorithms
     virtual const std::string category() const { return "Crystal";}
 
   private:
-    
-    // Implement abstract Algorithm methods
+
     void init();
-    // Implement abstract Algorithm methods
+
+    /// Implement abstract Algorithm methods
     void exec();
 
+    /// Process algorithm properties
     void processAlgProperties(std::string &peakfunctype, std::string &bkgdfunctype);
 
-    void processParamTable();
-
+    /// Process column names with peak parameter names
     void processTableColumnNames();
 
-    void generatePeaks();
+    void importPeaksFromTable(std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >& functionmap);
 
-    void generatePeaks(API::MatrixWorkspace_sptr dataWS);
+    /// Generate peaks in output data workspaces
+    void generatePeaks(const std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >& functionmap, API::MatrixWorkspace_sptr dataWS);
 
+    /// Check whether function has a certain parameter
     bool hasParameter(API::IFunction_sptr function, std::string paramname);
 
+    /// Create output workspace
     API::MatrixWorkspace_sptr createOutputWorkspace();
 
-    API::MatrixWorkspace_sptr createDataWorkspace(std::set<specid_t> spectra, std::vector<double> binparameters);
+    API::MatrixWorkspace_sptr createDataWorkspace(std::vector<double> binparameters);
 
     void createFunction(std::string& peaktype, std::string& bkgdtype);
 
-    void getSpectraSet(DataObjects::TableWorkspace_const_sptr peakParmsWS, std::set<specid_t>& spectra);
+    void getSpectraSet(DataObjects::TableWorkspace_const_sptr peakParmsWS);
 
-    void generatePeaks(API::MatrixWorkspace_sptr dataWS, DataObjects::TableWorkspace_const_sptr peakparameters,
-       std::string peakfunction, bool m_newWSFromParent);
 
     /// Get the IPeakFunction part in the input function
     API::IPeakFunction_sptr getPeakFunction(API::IFunction_sptr infunction);
@@ -95,9 +96,10 @@ namespace Algorithms
     API::IBackgroundFunction_sptr m_bkgdFunction;
 
     /// Spectrum map from full spectra workspace to partial spectra workspace
-    std::map<specid_t, specid_t> mSpectrumMap;
+    std::map<specid_t, specid_t> m_SpectrumMap;
 
-    std::set<specid_t> spectra;
+    /// Set of spectra (workspace indexes) in the original workspace that contain peaks to generate
+    std::set<specid_t> m_spectraSet;
 
     /// Flag to use automatic background (???)
     bool m_useAutoBkgd;
@@ -117,16 +119,20 @@ namespace Algorithms
     /// Flag to generate background
     bool m_genBackground;
 
+    /// Flag to indicate parameter table workspace containing raw parameters names
     bool m_useRawParameter;
 
+    /// Maximum chi-square to have peak generated
     double m_maxChi2;
 
+    /// Number of FWHM for peak to extend
     double m_numPeakWidth;
 
+    /// List of functions' parameters naems
     std::vector<std::string> m_funcParameterNames;
 
+    /// Indexes of height, centre, width, a0, a1, and a2 in input parameter table
     int i_height, i_centre, i_width, i_a0, i_a1, i_a2;
-
   };
 
 
