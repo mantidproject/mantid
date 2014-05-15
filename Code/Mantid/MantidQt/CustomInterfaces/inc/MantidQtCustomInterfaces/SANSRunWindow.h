@@ -101,6 +101,13 @@ private:
   /// mask type
   enum MaskType{ DefaultMask=0,TimeMask=1,PixelMask=2};
 
+  /// Enumerate the tabs of this interface.
+  enum Tab
+  { 
+    RUN_NUMBERS, REDUCTION_SETTINGS, GEOMETRY, MASKING, 
+    LOGGING, ADD_RUNS, DIAGNOSTICS, ONE_D_ANALYSIS, 
+  };
+
   /// Initialize the layout
   virtual void initLayout();
   /// Init Python environment
@@ -260,6 +267,8 @@ private slots:
   void loadTransmissionSettings();
   
   void handleSlicePushButton();
+  /// Open the help page of whichever tab the user is currently viewing.
+  void openHelpPage();
 
 private:
   /// used to specify the range of validation to do
@@ -339,6 +348,9 @@ private:
   QAction *m_batch_clear;
   //Time/Pixel mask string
   QString m_maskScript;
+
+  /// Stores the URL of each tab's help page.
+  QMap<Tab, QString> m_helpPageUrls;
   
   void initAnalysDetTab();
   void makeValidator(QLabel * const newValid, QWidget * control, QWidget * tab, const QString & errorMsg);
