@@ -47,7 +47,7 @@ namespace Crystal
     /// Get the signal value at the peak center
     Mantid::signal_t signalAtPeakCenter(const Mantid::API::IPeak& peak, Mantid::API::MDNormalization normalization = Mantid::API::NoNormalization) const;
     /// Get the peak center
-    Mantid::Kernel::V3D PeakClusterProjection::peakCenter(const Mantid::API::IPeak& peak) const;
+    Mantid::Kernel::V3D peakCenter(const Mantid::API::IPeak& peak) const;
     /// Destructor
     virtual ~PeakClusterProjection();
   private:
