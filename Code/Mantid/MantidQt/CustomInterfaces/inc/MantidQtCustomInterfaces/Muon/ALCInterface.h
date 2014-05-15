@@ -9,6 +9,7 @@
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h"
 
+#include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h"
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingModel.h"
 
 #include "MantidQtAPI/UserSubWindow.h"
@@ -76,6 +77,7 @@ namespace CustomInterfaces
     ALCPeakFittingPresenter* m_peakFitting;
 
     // Models
+    ALCBaselineModellingModel* m_baselineModellingModel;
     ALCPeakFittingModel* m_peakFittingModel;
 
     /// Name for every step for labels

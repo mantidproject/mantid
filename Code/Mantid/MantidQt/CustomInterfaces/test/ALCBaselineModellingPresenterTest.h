@@ -54,14 +54,15 @@ public:
 class MockALCBaselineModellingModel : public IALCBaselineModellingModel
 {
 public:
+  void changeData() { emit dataChanged(); }
+  void changeFittedFunction() { emit fittedFunctionChanged(); }
+  void changeCorrectedData() { emit correctedDataChanged(); }
+
   MOCK_CONST_METHOD0(fittedFunction, IFunction_const_sptr());
   MOCK_CONST_METHOD0(correctedData, MatrixWorkspace_const_sptr());
   MOCK_CONST_METHOD0(data, MatrixWorkspace_const_sptr());
-  MOCK_CONST_METHOD0(sections, const std::vector<Section>&());
 
-  MOCK_METHOD1(setData, void(MatrixWorkspace_const_sptr));
   MOCK_METHOD2(fit, void(IFunction_const_sptr, const std::vector<Section>&));
-  MOCK_METHOD1(save, void(WorkspaceGroup_sptr));
 };
 
 MATCHER_P(FunctionName, name, "") { return arg->name() == name; }
@@ -101,6 +102,9 @@ public:
 
   void tearDown()
   {
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
+
     delete m_presenter;
     delete m_model;
     delete m_view;
@@ -131,16 +135,42 @@ public:
     presenter.initialize();
   }
 
-  void test_setData()
+  void test_dataChanged()
   {
-    MatrixWorkspace_const_sptr data = createTestWs(3, 1);
-    EXPECT_CALL(*m_model, setData(data)).Times(1);
+    ON_CALL(*m_model, data()).WillByDefault(Return(createTestWs(3, 1)));
 
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
                                             QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
                                             QwtDataY(0, 2, 1E-8), QwtDataY(2, 4, 1E-8))));
 
-    m_presenter->setData(data);
+    m_model->changeData();
+  }
+
+  void test_correctedChanged()
+  {
+    ON_CALL(*m_model, correctedData()).WillByDefault(Return(createTestWs(3, 2)));
+
+    EXPECT_CALL(*m_view, setCorrectedCurve(AllOf(Property(&QwtData::size, 3),
+                                            QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
+                                            QwtDataY(0, 3, 1E-8), QwtDataY(2, 5, 1E-8))));
+
+    m_model->changeCorrectedData();
+  }
+
+  void test_fittedFunctionChanged()
+  {
+    ON_CALL(*m_model, fittedFunction()).WillByDefault(
+          Return(FunctionFactory::Instance().createInitialized("name=FlatBackground, A0=5")));
+    ON_CALL(*m_model, data()).WillByDefault(Return(createTestWs(3)));
+
+    EXPECT_CALL(*m_view, setFunction(AllOf(FunctionName("FlatBackground"),
+                                           FunctionParameter("A0", 5, 1E-8))));
+
+    EXPECT_CALL(*m_view, setBaselineCurve(AllOf(Property(&QwtData::size, 3),
+                                                QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
+                                                QwtDataY(0, 5, 1E-8), QwtDataY(2, 5, 1E-8))));
+
+    m_model->changeFittedFunction();
   }
 
   void test_addSection()
@@ -195,114 +225,21 @@ public:
 
   void test_fit()
   {
-    EXPECT_CALL(*m_view, function()).WillRepeatedly(
-          Return(FunctionFactory::Instance().createFunction("FlatBackground")));
-
     std::vector<IALCBaselineModellingView::Section> sections;
     sections.push_back(std::make_pair(10,20));
     sections.push_back(std::make_pair(40,55));
+
     EXPECT_CALL(*m_view, sections()).WillRepeatedly(Return(sections));
 
     EXPECT_CALL(*m_view, function()).WillRepeatedly(
-          Return(FunctionFactory::Instance().createFunction("FlatBackground")));
+          Return(FunctionFactory::Instance().createInitialized("name=FlatBackground,A0=3")));
 
     EXPECT_CALL(*m_model, fit(AllOf(FunctionName("FlatBackground"),
-                                    FunctionParameter("A0", 0, 1E-8)),
+                                    FunctionParameter("A0", 3, 1E-8)),
                               ElementsAre(Pair(10, 20),
                                           Pair(40, 55))));
 
-    EXPECT_CALL(*m_model, fittedFunction()).WillRepeatedly(
-          Return(FunctionFactory::Instance().createInitialized("name=FlatBackground, A0=5")));
-
-    EXPECT_CALL(*m_view, setFunction(AllOf(FunctionName("FlatBackground"),
-                                           FunctionParameter("A0", 5, 1E-8))));
-
-    EXPECT_CALL(*m_model, data()).WillRepeatedly(Return(createTestWs(3, 999)));
-
-    // Correct baseline curve set
-    EXPECT_CALL(*m_view, setBaselineCurve(AllOf(Property(&QwtData::size, 3),
-                                                QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
-                                                QwtDataY(0, 5, 1E-8), QwtDataY(2, 5, 1E-8))));
-
-    EXPECT_CALL(*m_model, correctedData()).WillRepeatedly(Return(createTestWs(3, 3)));
-
-    // Correct corrected curve set
-    EXPECT_CALL(*m_view, setCorrectedCurve(AllOf(Property(&QwtData::size, 3),
-                                                 QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
-                                                 QwtDataY(0, 4, 1E-8), QwtDataY(2, 6, 1E-8))));
-
     m_view->requestFit();
-  }
-
-  void test_exportWorkspace()
-  {
-    ON_CALL(*m_model, data()).WillByDefault(Return(createTestWs(3,3)));
-    ON_CALL(*m_model, fittedFunction()).WillByDefault(
-          Return(FunctionFactory::Instance().createInitialized("name=FlatBackground, A0=3")));
-    ON_CALL(*m_model, correctedData()).WillByDefault(Return(createTestWs(3)));
-
-    MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(ws = m_presenter->exportWorkspace());
-
-    TS_ASSERT(ws);
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 3);
-    TS_ASSERT_EQUALS(ws->blocksize(), 3);
-
-    TS_ASSERT_DELTA(ws->readY(0)[0], 4, 1E-8);
-    TS_ASSERT_DELTA(ws->readY(0)[1], 5, 1E-8);
-    TS_ASSERT_DELTA(ws->readY(0)[2], 6, 1E-8);
-
-    TS_ASSERT_DELTA(ws->readY(1)[0], 3, 1E-8);
-    TS_ASSERT_DELTA(ws->readY(1)[1], 3, 1E-8);
-    TS_ASSERT_DELTA(ws->readY(1)[2], 3, 1E-8);
-
-    TS_ASSERT_DELTA(ws->readY(2)[0], 1, 1E-8);
-    TS_ASSERT_DELTA(ws->readY(2)[1], 2, 1E-8);
-    TS_ASSERT_DELTA(ws->readY(2)[2], 3, 1E-8);
-
-    TS_ASSERT_EQUALS(ws->getAxis(1)->label(0), "Data");
-    TS_ASSERT_EQUALS(ws->getAxis(1)->label(1), "Baseline");
-    TS_ASSERT_EQUALS(ws->getAxis(1)->label(2), "Corrected");
-  }
-
-  void test_exportTable()
-  {
-    std::vector<IALCBaselineModellingModel::Section> sections;
-    sections.push_back(std::make_pair(1,2));
-    sections.push_back(std::make_pair(14,15));
-
-    ON_CALL(*m_model, sections()).WillByDefault(ReturnRef(sections));
-
-    ITableWorkspace_sptr table;
-    TS_ASSERT_THROWS_NOTHING(table = m_presenter->exportSections());
-
-    TS_ASSERT(table);
-
-    TS_ASSERT_EQUALS(table->columnCount(), 2);
-    TS_ASSERT_EQUALS(table->rowCount(), 2);
-
-    TS_ASSERT_DELTA(table->Double(0,0), 1, 1E-8);
-    TS_ASSERT_DELTA(table->Double(0,1), 2, 1E-8);
-
-    TS_ASSERT_DELTA(table->Double(1,0), 14, 1E-8);
-    TS_ASSERT_DELTA(table->Double(1,1), 15, 1E-8);
-  }
-
-  void test_exportModel()
-  {
-    std::string funcStr = "name=FlatBackground,A0=3";
-    ON_CALL(*m_model, fittedFunction()).WillByDefault(
-          Return(FunctionFactory::Instance().createInitialized(funcStr)));
-
-    ITableWorkspace_sptr table;
-    TS_ASSERT_THROWS_NOTHING(table = m_presenter->exportModel());
-
-    TS_ASSERT(table);
-
-    TS_ASSERT_EQUALS(table->columnCount(), 1);
-    TS_ASSERT_EQUALS(table->rowCount(), 1);
-
-    TS_ASSERT_EQUALS(table->String(0,0), funcStr);
   }
 
 };

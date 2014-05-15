@@ -1,7 +1,11 @@
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h"
 
+#include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/TableRow.h"
 
 using namespace Mantid::API;
 
@@ -45,8 +49,18 @@ namespace CustomInterfaces
     extract->execute();
 
     m_correctedData = extract->getProperty("OutputWorkspace");
+    emit correctedDataChanged();
+
     m_fittedFunction = FunctionFactory::Instance().createInitialized(funcToFit->asString());
+    emit fittedFunctionChanged();
+
     m_sections = sections;
+  }
+
+  void ALCBaselineModellingModel::setData(MatrixWorkspace_const_sptr data)
+  {
+    m_data = data;
+    emit dataChanged();
   }
 
   /**
@@ -87,6 +101,73 @@ namespace CustomInterfaces
         ws->dataE(0)[i] = DISABLED_ERR;
       }
     }
+  }
+
+  MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace()
+  {
+    IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
+    clone->setChild(true);
+    clone->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+    clone->setProperty("OutputWorkspace", "__NotUsed");
+    clone->execute();
+
+    Workspace_sptr cloneResult = clone->getProperty("OutputWorkspace");
+
+    Workspace_sptr baseline = ALCHelper::createWsFromFunction(m_fittedFunction, m_data->readX(0));
+
+    IAlgorithm_sptr join1 = AlgorithmManager::Instance().create("ConjoinWorkspaces");
+    join1->setChild(true);
+    join1->setProperty("InputWorkspace1", cloneResult);
+    join1->setProperty("InputWorkspace2", baseline);
+    join1->setProperty("CheckOverlapping", false);
+    join1->execute();
+
+    MatrixWorkspace_sptr join1Result = join1->getProperty("InputWorkspace1");
+
+    IAlgorithm_sptr join2 = AlgorithmManager::Instance().create("ConjoinWorkspaces");
+    join2->setChild(true);
+    join2->setProperty("InputWorkspace1", join1Result);
+    join2->setProperty("InputWorkspace2", boost::const_pointer_cast<MatrixWorkspace>(m_correctedData));
+    join2->setProperty("CheckOverlapping", false);
+    join2->execute();
+
+    MatrixWorkspace_sptr result = join2->getProperty("InputWorkspace1");
+
+    TextAxis* yAxis = new TextAxis(result->getNumberHistograms());
+    yAxis->setLabel(0,"Data");
+    yAxis->setLabel(1,"Baseline");
+    yAxis->setLabel(2,"Corrected");
+    result->replaceAxis(1,yAxis);
+
+    return result;
+  }
+
+  ITableWorkspace_sptr ALCBaselineModellingModel::exportSections()
+  {
+    ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+
+    table->addColumn("double", "Start X");
+    table->addColumn("double", "End X");
+
+    for(auto it = m_sections.begin(); it != m_sections.end(); ++it)
+    {
+      TableRow newRow = table->appendRow();
+      newRow << it->first << it->second;
+    }
+
+    return table;
+  }
+
+  ITableWorkspace_sptr ALCBaselineModellingModel::exportModel()
+  {
+    ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+
+    table->addColumn("str", "Function");
+
+    TableRow newRow = table->appendRow();
+    newRow << m_fittedFunction->asString();
+
+    return table;
   }
 
 } // namespace CustomInterfaces

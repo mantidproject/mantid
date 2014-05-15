@@ -12,6 +12,8 @@
 
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h"
 
+#include <QtTest/QSignalSpy>
+
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
@@ -43,7 +45,12 @@ public:
   void test_setData()
   {
     MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+
+    QSignalSpy spy(m_model, SIGNAL(dataChanged()));
+
     TS_ASSERT_THROWS_NOTHING(m_model->setData(data));
+
+    TS_ASSERT_EQUALS(spy.size(), 1);
     TS_ASSERT_EQUALS(m_model->data(), data);
   }
 
@@ -64,6 +71,7 @@ public:
     sections.push_back(std::make_pair(2,3));
     sections.push_back(std::make_pair(6,8));
 
+    // TODO: test that the appropriate signals are thrown
     TS_ASSERT_THROWS_NOTHING(m_model->fit(func, sections));
 
     IFunction_const_sptr fittedFunc = m_model->fittedFunction();
@@ -90,6 +98,21 @@ public:
     }
 
     TS_ASSERT_EQUALS(m_model->sections(), sections);
+  }
+
+  void test_exportWorkspace()
+  {
+    // TODO: implement
+  }
+
+  void test_exportTable()
+  {
+    // TODO: implement
+  }
+
+  void test_exportModel()
+  {
+    // TODO: implement
   }
 
 };

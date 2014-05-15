@@ -40,9 +40,9 @@ namespace CustomInterfaces
     m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
     m_dataLoading->initialize();
 
+    m_baselineModellingModel = new ALCBaselineModellingModel();
     auto baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
-    auto baselineModellingModel = new ALCBaselineModellingModel();
-    m_baselineModelling = new ALCBaselineModellingPresenter(baselineModellingView, baselineModellingModel);
+    m_baselineModelling = new ALCBaselineModellingPresenter(baselineModellingView, m_baselineModellingModel);
     m_baselineModelling->initialize();
 
     m_peakFittingModel = new ALCPeakFittingModel();
@@ -64,11 +64,11 @@ namespace CustomInterfaces
 
     if (nextWidget == m_ui.baselineModellingView)
     {
-      m_baselineModelling->setData(m_dataLoading->loadedData());
+      m_baselineModellingModel->setData(m_dataLoading->loadedData());
     }
     if (nextWidget == m_ui.peakFittingView)
     {
-      m_peakFittingModel->setData(m_baselineModelling->model().correctedData());
+      m_peakFittingModel->setData(m_baselineModellingModel->correctedData());
     }
 
     switchStep(next);
@@ -131,9 +131,9 @@ namespace CustomInterfaces
 
     std::map<std::string, Workspace_sptr> results;
 
-    results["Baseline_Workspace"] = m_baselineModelling->exportWorkspace();
-    results["Baseline_Sections"] = m_baselineModelling->exportSections();
-    results["Baseline_Model"] = m_baselineModelling->exportModel();
+    results["Baseline_Workspace"] = m_baselineModellingModel->exportWorkspace();
+    results["Baseline_Sections"] = m_baselineModellingModel->exportSections();
+    results["Baseline_Model"] = m_baselineModellingModel->exportModel();
 
     results["Peaks_Workspace"] = m_peakFittingModel->exportWorkspace();
     results["Peaks_FitResults"] = m_peakFittingModel->exportFittedPeaks();

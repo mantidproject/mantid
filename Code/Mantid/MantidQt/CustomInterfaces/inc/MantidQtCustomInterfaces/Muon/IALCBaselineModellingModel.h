@@ -3,8 +3,12 @@
 
 #include "MantidKernel/System.h"
 
+#include "MantidQtCustomInterfaces/DllConfig.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IFunction.h"
+
+#include <QObject>
 
 using namespace Mantid::API;
 
@@ -35,8 +39,10 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport IALCBaselineModellingModel 
+  class MANTIDQT_CUSTOMINTERFACES_DLL IALCBaselineModellingModel : public QObject
   {
+    Q_OBJECT
+
   public:
     typedef std::pair<double, double> Section;
 
@@ -56,16 +62,6 @@ namespace CustomInterfaces
     virtual MatrixWorkspace_const_sptr data() const = 0;
 
     /**
-     * @return Sections used for the last fit
-     */
-    virtual const std::vector<Section>& sections() const = 0;
-
-    /**
-     * @param data :: New data which will be used for fit
-     */
-    virtual void setData(MatrixWorkspace_const_sptr data) = 0;
-
-    /**
      * Perform a fit using current data and specified function and sections. Modified values returned
      * by fittedFunction and correctedData.
      * @param function :: Function to fit
@@ -73,6 +69,12 @@ namespace CustomInterfaces
      */
     virtual void fit(IFunction_const_sptr function, const std::vector<Section>& sections) = 0;
 
+  signals:
+
+    // Signals emitted when various properties get changed
+    void dataChanged();
+    void fittedFunctionChanged();
+    void correctedDataChanged();
   };
 
 } // namespace CustomInterfaces

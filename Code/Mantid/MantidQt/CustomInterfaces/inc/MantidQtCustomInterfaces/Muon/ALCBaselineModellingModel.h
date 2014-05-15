@@ -34,12 +34,11 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ALCBaselineModellingModel : public IALCBaselineModellingModel
+  class MANTIDQT_CUSTOMINTERFACES_DLL ALCBaselineModellingModel : public IALCBaselineModellingModel
   {
   public:
     // -- IALCBaselineModellingModel interface -----------------------------------------------------
 
-    void setData(MatrixWorkspace_const_sptr data) { m_data = data; }
     MatrixWorkspace_const_sptr data() const { return m_data; }
 
     void fit(IFunction_const_sptr function, const std::vector<Section> &sections);
@@ -51,6 +50,19 @@ namespace CustomInterfaces
     const std::vector<Section>& sections() const { return m_sections; }
 
     // -- End of IALCBaselineModellingModel interface ----------------------------------------------
+
+    /// Set the data we should fit baseline for
+    void setData(MatrixWorkspace_const_sptr data);
+
+    /// Export data + baseline + corrected data as a single workspace
+    MatrixWorkspace_sptr exportWorkspace();
+
+    /// Export sections used for the last fit as a table workspace
+    ITableWorkspace_sptr exportSections();
+
+    /// Exports baseline model as a table workspace
+    ITableWorkspace_sptr exportModel();
+
 
   private:
     /// Data to use for fitting

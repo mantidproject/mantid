@@ -171,6 +171,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/ALCInterface.h
                 inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h
                 inc/MantidQtCustomInterfaces/Muon/IALCBaselineModellingView.h
+                inc/MantidQtCustomInterfaces/Muon/IALCBaselineModellingModel.h
                 inc/MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h
                 inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h
                 inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h

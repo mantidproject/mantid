@@ -45,21 +45,6 @@ namespace CustomInterfaces
 
     void initialize();
 
-    /// Set the data we should fit baseline for
-    void setData(MatrixWorkspace_const_sptr data);
-
-    /// A model used by presenter
-    const IALCBaselineModellingModel& model() const { return *m_model; }
-
-    /// Export data + baseline + corrected data as a single workspace
-    MatrixWorkspace_sptr exportWorkspace();
-
-    /// Export sections used for the last fit as a table workspace
-    ITableWorkspace_sptr exportSections();
-
-    /// Exports baseline model as a table workspace
-    ITableWorkspace_sptr exportModel();
-
   private slots:
     /// Perform a fit
     void fit();
@@ -75,6 +60,18 @@ namespace CustomInterfaces
 
     /// Called when section selector is modified
     void onSectionSelectorModified(size_t index, double min, double max);
+
+    /// Updates data curve from the model
+    void updateDataCurve();
+
+    /// Updates corrected data curve from the model
+    void updateCorrectedCurve();
+
+    /// Updated baseline curve from the model
+    void updateBaselineCurve();
+
+    /// Updates function in the view from the model
+    void updateFunction();
 
   private:
     /// Associated view
