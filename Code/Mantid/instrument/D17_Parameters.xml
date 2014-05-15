@@ -7,11 +7,13 @@
 			<value val="direct" />
 		</parameter>
 
-		<!-- Distance between sample and equatorial line of the detector. Mandatory 
-			if you want to correct the flight paths. -->
-		<parameter name="l2" type="string">
-			<value val="4.0" />
+		<!-- Mapping of nexus fields -->		
+		<parameter name="channel_width" type="string">
+			<value val="instrument/det/value" />
 		</parameter>
+		
+		
+		
 
 	</component-link>
 
