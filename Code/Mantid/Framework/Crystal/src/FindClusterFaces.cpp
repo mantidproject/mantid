@@ -425,13 +425,13 @@ namespace Mantid
         out->addColumn("bool", "MaxEdge");
         out->addColumn("double", "radius");
         size_t totalFaces = 0;
-        for(size_t i = 0; i < nIterators; ++i)
+        for(int i = 0; i < nIterators; ++i)
         {
           const ClusterFaces& localClusterFaces =  clusterFaces[i];
 
           for(auto it = localClusterFaces.begin(); it != localClusterFaces.end(); ++it)
           {
-            if(!limitRows || (out->rowCount() < maxRows))
+            if(!limitRows || (out->rowCount() < size_t(maxRows)))
             {
               TableRow row = out->appendRow(); 
               const ClusterFace& clusterFace = *it;
@@ -443,7 +443,7 @@ namespace Mantid
         }
         
         bool truncatedOutput = false;
-        if(limitRows && out->rowCount() == maxRows)
+        if(limitRows && out->rowCount() == size_t(maxRows))
         {
           truncatedOutput = true;
           std::stringstream buffer;
