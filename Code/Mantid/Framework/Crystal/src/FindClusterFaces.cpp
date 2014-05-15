@@ -170,7 +170,7 @@ namespace
             ClusterFace face;
             face.clusterId = id;
             face.workspaceIndex = linearIndex;
-            face.faceNormalDimension = j;
+            face.faceNormalDimension = static_cast<int>(j);
             face.maxEdge = maxEdge;
             face.radius = radius;
 
@@ -433,7 +433,7 @@ namespace Mantid
           {
             if(!limitRows || (out->rowCount() < maxRows))
             {
-              TableRow row = out->appendRow();
+              TableRow row = out->appendRow(); 
               const ClusterFace& clusterFace = *it;
               row << clusterFace.clusterId << double(clusterFace.workspaceIndex) 
               << clusterFace.faceNormalDimension << clusterFace.maxEdge << clusterFace.radius; 
