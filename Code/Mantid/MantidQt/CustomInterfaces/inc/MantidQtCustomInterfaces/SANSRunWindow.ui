@@ -3564,7 +3564,7 @@ p, li { white-space: pre-wrap; }
        <string>Logging</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_15">
-       <item row="1" column="1">
+       <item row="1" column="2">
         <layout class="QVBoxLayout" name="verticalLayout_10">
          <item>
           <spacer name="verticalSpacer_3">
@@ -3581,8 +3581,21 @@ p, li { white-space: pre-wrap; }
          </item>
         </layout>
        </item>
-       <item row="2" column="0">
+       <item row="2" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <spacer name="horizontalSpacer_20">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
          <item>
           <widget class="QPushButton" name="logger_clear">
            <property name="text">
@@ -3605,19 +3618,36 @@ p, li { white-space: pre-wrap; }
          </item>
         </layout>
        </item>
-       <item row="0" column="0">
+       <item row="0" column="1">
         <widget class="QLabel" name="label_29">
          <property name="text">
           <string>Log messages:</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
+       <item row="1" column="1">
         <widget class="MantidQt::MantidWidgets::MessageDisplay" name="logging_field" native="true">
          <property name="source" stdset="0">
           <string>SANS</string>
          </property>
         </widget>
+       </item>
+       <item row="1" column="0">
+        <layout class="QVBoxLayout" name="verticalLayout_14">
+         <item>
+          <spacer name="verticalSpacer_5">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
