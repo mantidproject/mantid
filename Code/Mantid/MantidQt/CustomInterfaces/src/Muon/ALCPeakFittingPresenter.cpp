@@ -10,8 +10,8 @@ namespace MantidQt
 namespace CustomInterfaces
 {
 
-  ALCPeakFittingPresenter::ALCPeakFittingPresenter(IALCPeakFittingView* view)
-    : m_view(view), m_data()
+  ALCPeakFittingPresenter::ALCPeakFittingPresenter(IALCPeakFittingView* view, IALCPeakFittingModel* model)
+    : m_view(view), m_model(model)
   {}
 
   void ALCPeakFittingPresenter::initialize()
@@ -24,29 +24,14 @@ namespace CustomInterfaces
 
     // We are updating the whole function anyway, so paramName if left out
     connect(m_view, SIGNAL(parameterChanged(QString,QString)), SLOT(onParameterChanged(QString)));
-  }
 
-  void ALCPeakFittingPresenter::setData(MatrixWorkspace_const_sptr data)
-  {
-    assert(data->getNumberHistograms() == 1);
-
-    m_data = data;
-    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(data, 0)));
+    connect(m_model, SIGNAL(fittedPeaksChanged()), SLOT(onFittedPeaksChanged()));
+    connect(m_model, SIGNAL(dataChanged()), SLOT(onDataChanged()));
   }
 
   void ALCPeakFittingPresenter::fit()
   {
-    IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
-    fit->setChild(true);
-    fit->setProperty("Function", m_view->function("")->asString());
-    fit->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
-    fit->execute();
-
-    IFunction_sptr fittedFunc = fit->getProperty("Function");
-    m_view->setFunction(fittedFunc);
-
-    const Mantid::MantidVec& x = m_data->readX(0);
-    m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(fittedFunc, x)));
+    m_model->fitPeaks(m_view->function(""));
   }
 
   void ALCPeakFittingPresenter::onCurrentFunctionChanged()
@@ -99,6 +84,19 @@ namespace CustomInterfaces
         m_view->setPeakPicker(peak);
       }
     }
+  }
+
+  void ALCPeakFittingPresenter::onFittedPeaksChanged()
+  {
+    IFunction_const_sptr fittedPeaks = m_model->fittedPeaks();
+    auto x = m_model->data()->readX(0);
+    m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(fittedPeaks, x)));
+    m_view->setFunction(fittedPeaks);
+  }
+
+  void ALCPeakFittingPresenter::onDataChanged()
+  {
+    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_model->data(), 0)));
   }
 
 } // namespace CustomInterfaces

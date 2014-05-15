@@ -10,6 +10,7 @@
 #include "MantidAPI/FrameworkManager.h"
 
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h"
+#include "MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h"
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h"
 
 using namespace Mantid;
@@ -40,26 +41,15 @@ public:
   MOCK_METHOD3(setParameter, void(const QString&, const QString&, double));
 };
 
-struct FunctionWrapper
+class MockALCPeakFittingModel : public IALCPeakFittingModel
 {
-  FunctionWrapper(IFunction_const_sptr func) : m_func(func) {};
+public:
+  void changeFittedPeaks() { emit fittedPeaksChanged(); }
+  void changeData() { emit dataChanged(); }
 
-  double operator()(double x, int iSpec)
-  {
-    UNUSED_ARG(iSpec); // We return the same values for all spectra
-
-    FunctionDomain1DVector domain(x);
-    FunctionValues values(domain);
-
-    m_func->function(domain, values);
-
-    assert(values.size() == 1);
-
-    return values.getCalculated(0);
-  }
-
-private:
-  IFunction_const_sptr m_func;
+  MOCK_CONST_METHOD0(fittedPeaks, IFunction_const_sptr());
+  MOCK_CONST_METHOD0(data, MatrixWorkspace_const_sptr());
+  MOCK_METHOD1(fitPeaks, void(IFunction_const_sptr));
 };
 
 MATCHER_P3(QwtDataX, i, value, delta, "") { return fabs(arg.x(i) - value) < delta; }
@@ -70,54 +60,11 @@ MATCHER_P2(DoubleDelta, value, delta, "") { return fabs(arg - value) < delta; }
 
 using namespace MantidQt::CustomInterfaces;
 
-class ALCPeakFittingTest : public CxxTest::TestSuite
+class ALCPeakFittingPresenterTest : public CxxTest::TestSuite
 {
   MockALCPeakFittingView* m_view;
+  MockALCPeakFittingModel* m_model;
   ALCPeakFittingPresenter* m_presenter;
-
-public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static ALCPeakFittingTest *createSuite() { return new ALCPeakFittingTest(); }
-  static void destroySuite( ALCPeakFittingTest *suite ) { delete suite; }
-
-  ALCPeakFittingTest()
-  {
-    API::FrameworkManager::Instance(); // To make sure everything is initialized
-  }
-
-  void setUp()
-  {
-    m_view = new NiceMock<MockALCPeakFittingView>();
-    m_presenter = new ALCPeakFittingPresenter(m_view);
-    m_presenter->initialize();
-  }
-
-  void tearDown()
-  {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
-    delete m_presenter;
-    delete m_view;
-  }
-
-  void test_initialize()
-  {
-    MockALCPeakFittingView view;
-    ALCPeakFittingPresenter presenter(&view);
-    EXPECT_CALL(view, initialize()).Times(1);
-    presenter.initialize();
-  }
-
-  void test_setData()
-  {
-    MatrixWorkspace_sptr data = WorkspaceCreationHelper::Create2DWorkspace123(1,3);
-
-    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
-                                            QwtDataX(0,1,1E-8), QwtDataX(2,1,1E-8),
-                                            QwtDataY(0,2,1E-8), QwtDataY(2,2,1E-8))));
-
-    m_presenter->setData(data);
-  }
 
   IPeakFunction_sptr createGaussian(double centre, double fwhm, double height)
   {
@@ -129,39 +76,81 @@ public:
     return peak;
   }
 
-  void test_fittingOnePeak()
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ALCPeakFittingPresenterTest *createSuite() { return new ALCPeakFittingPresenterTest(); }
+  static void destroySuite( ALCPeakFittingPresenterTest *suite ) { delete suite; }
+
+  ALCPeakFittingPresenterTest()
   {
-    IFunction_sptr peak = createGaussian(0,1,2);
-    FunctionWrapper peakWrapper(peak);
+    API::FrameworkManager::Instance(); // To make sure everything is initialized
+  }
 
-    MatrixWorkspace_const_sptr data =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(peakWrapper, 1, -5, 5, 0.5);
-    m_presenter->setData(data);
+  void setUp()
+  {
+    m_view = new NiceMock<MockALCPeakFittingView>();
+    m_model = new NiceMock<MockALCPeakFittingModel>();
 
-    EXPECT_CALL(*m_view, function(QString(""))).WillRepeatedly(Return(createGaussian(0.2,0.8,1.8)));
+    m_presenter = new ALCPeakFittingPresenter(m_view, m_model);
+    m_presenter->initialize();
+  }
 
-    IFunction_const_sptr fittedFunc;
+  void tearDown()
+  {
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
 
-    EXPECT_CALL(*m_view, setFunction(_)).WillOnce(SaveArg<0>(&fittedFunc));
+    delete m_presenter;
+    delete m_model;
+    delete m_view;
+  }
 
-    EXPECT_CALL(*m_view, setFittedCurve(AllOf(Property(&QwtData::size, 21),
-                                              QwtDataX(0,-5,1E-8),
-                                              QwtDataX(12, 1, 1E-8),
-                                              QwtDataX(20,5,1E-8),
-                                              QwtDataY(0, peakWrapper(-5,0), 1E-8),
-                                              QwtDataY(12, peakWrapper(1,0), 1E-8),
-                                              QwtDataY(20, peakWrapper(5,0), 1E-8))));
+  void test_initialize()
+  {
+    MockALCPeakFittingView view;
+    MockALCPeakFittingModel model;
+    ALCPeakFittingPresenter presenter(&view, &model);
+    EXPECT_CALL(view, initialize()).Times(1);
+    presenter.initialize();
+  }
+
+  void test_fit()
+  {
+    IFunction_sptr peaks = createGaussian(1,2,3);
+
+    ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(peaks));
+
+    EXPECT_CALL(*m_model, fitPeaks(Property(&IFunction_const_sptr::get,
+                                            Property(&IFunction::asString, peaks->asString()))));
 
     m_view->requestFit();
+  }
 
-    TS_ASSERT_EQUALS(fittedFunc->name(), "Gaussian");
+  void test_onDataChanged()
+  {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1,3);
 
-    auto fittedPeak = boost::dynamic_pointer_cast<const IPeakFunction>(fittedFunc);
-    TS_ASSERT(fittedPeak);
+    ON_CALL(*m_model, data()).WillByDefault(Return(ws));
 
-    TS_ASSERT_DELTA(fittedPeak->centre(), 0, 1E-6);
-    TS_ASSERT_DELTA(fittedPeak->fwhm(), 1, 1E-6);
-    TS_ASSERT_DELTA(fittedPeak->height(), 2, 1E-6);
+    // TODO: check better
+    EXPECT_CALL(*m_view, setDataCurve(_));
+
+    m_model->changeData();
+  }
+
+  void test_onFittedPeaksChanged()
+  {
+    ON_CALL(*m_model, fittedPeaks()).WillByDefault(Return(createGaussian(1,2,3)));
+
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1,3);
+    ON_CALL(*m_model, data()).WillByDefault(Return(ws));
+
+    // TODO: check better
+    EXPECT_CALL(*m_view, setFittedCurve(_));
+    EXPECT_CALL(*m_view, setFunction(_));
+
+    m_model->changeFittedPeaks();
   }
 
   void test_onCurrentFunctionChanged_nothing()
@@ -245,7 +234,6 @@ public:
 
     m_view->changeParameter(QString("f1"), QString("A0"));
   }
-
 };
 
 

@@ -4,9 +4,13 @@
 #include "MantidKernel/System.h"
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
+
 #include "MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h"
+
+#include "MantidQtCustomInterfaces/Muon/ALCPeakFittingModel.h"
+
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include "ui_ALCInterface.h"
@@ -70,6 +74,9 @@ namespace CustomInterfaces
     ALCDataLoadingPresenter* m_dataLoading;
     ALCBaselineModellingPresenter* m_baselineModelling;
     ALCPeakFittingPresenter* m_peakFitting;
+
+    // Models
+    ALCPeakFittingModel* m_peakFittingModel;
 
     /// Name for every step for labels
     static const QStringList STEP_NAMES;

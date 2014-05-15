@@ -1,19 +1,19 @@
-#ifndef MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGPRESENTER_H_
-#define MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGPRESENTER_H_
+#ifndef MANTID_CUSTOMINTERFACES_ALCPEAKFITTINGMODEL_H_
+#define MANTID_CUSTOMINTERFACES_ALCPEAKFITTINGMODEL_H_
 
 #include "MantidKernel/System.h"
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
-
-#include "MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h"
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h"
+
+using namespace Mantid::API;
 
 namespace MantidQt
 {
 namespace CustomInterfaces
 {
 
-  /** ALCPeakFittingPresenter : Presenter for Peak Fitting step of ALC interface.
+  /** ALCPeakFittingModel : Concrete model for ALC peak fitting
     
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -35,41 +35,35 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class MANTIDQT_CUSTOMINTERFACES_DLL ALCPeakFittingPresenter : public QObject
+  class MANTIDQT_CUSTOMINTERFACES_DLL ALCPeakFittingModel : public IALCPeakFittingModel
   {
-    Q_OBJECT
-
   public:
-    ALCPeakFittingPresenter(IALCPeakFittingView* view, IALCPeakFittingModel* model);
+    // -- IALCPeakFittingModel interface -----------------------------------------------------------
+    IFunction_const_sptr fittedPeaks() const { return m_fittedPeaks; }
+    MatrixWorkspace_const_sptr data() const { return m_data; }
 
-    void initialize();
+    void fitPeaks(IFunction_const_sptr peaks);
+    // -- End of IALCPeakFittingModel interface ----------------------------------------------------
 
-  private slots:
-    /// Fit the data using the peaks from the view, and update them
-    void fit();
+    /// Update the data
+    void setData(MatrixWorkspace_const_sptr newData);
 
-    /// Executed when user selects a function in a Function Browser
-    void onCurrentFunctionChanged();
+    /// Export data and fitted peaks as a single workspace
+    MatrixWorkspace_sptr exportWorkspace();
 
-    /// Executed when Peak Picker if moved/resized
-    void onPeakPickerChanged();
-
-    /// Executed when user changes parameter in Function Browser
-    void onParameterChanged(const QString& funcIndex);
-
-    void onFittedPeaksChanged();
-    void onDataChanged();
+    /// Export fitted peaks as a table workspace
+    ITableWorkspace_sptr exportFittedPeaks();
 
   private:
-    /// Associated view
-    IALCPeakFittingView* const m_view;
+    /// The data we are fitting peaks to
+    MatrixWorkspace_const_sptr m_data;
 
-    /// Associated model
-    IALCPeakFittingModel* const m_model;
+    /// Last fitted peaks
+    IFunction_const_sptr m_fittedPeaks;
   };
 
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif  /* MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGPRESENTER_H_ */
+#endif  /* MANTID_CUSTOMINTERFACES_ALCPEAKFITTINGMODEL_H_ */

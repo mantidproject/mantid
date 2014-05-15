@@ -5,6 +5,7 @@
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingView.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h"
+#include "MantidQtCustomInterfaces/Muon/ALCPeakFittingModel.h"
 
 #include "QInputDialog"
 
@@ -44,8 +45,9 @@ namespace CustomInterfaces
     m_baselineModelling = new ALCBaselineModellingPresenter(baselineModellingView, baselineModellingModel);
     m_baselineModelling->initialize();
 
+    m_peakFittingModel = new ALCPeakFittingModel();
     auto peakFittingView = new ALCPeakFittingView(m_ui.peakFittingView);
-    m_peakFitting = new ALCPeakFittingPresenter(peakFittingView);
+    m_peakFitting = new ALCPeakFittingPresenter(peakFittingView, m_peakFittingModel);
     m_peakFitting->initialize();
 
     assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps
@@ -66,7 +68,7 @@ namespace CustomInterfaces
     }
     if (nextWidget == m_ui.peakFittingView)
     {
-      m_peakFitting->setData(m_baselineModelling->model().correctedData());
+      m_peakFittingModel->setData(m_baselineModelling->model().correctedData());
     }
 
     switchStep(next);
@@ -132,6 +134,9 @@ namespace CustomInterfaces
     results["Baseline_Workspace"] = m_baselineModelling->exportWorkspace();
     results["Baseline_Sections"] = m_baselineModelling->exportSections();
     results["Baseline_Model"] = m_baselineModelling->exportModel();
+
+    results["Peaks_Workspace"] = m_peakFittingModel->exportWorkspace();
+    results["Peaks_FitResults"] = m_peakFittingModel->exportFittedPeaks();
 
     AnalysisDataService::Instance().addOrReplace(groupName, boost::make_shared<WorkspaceGroup>());
 
