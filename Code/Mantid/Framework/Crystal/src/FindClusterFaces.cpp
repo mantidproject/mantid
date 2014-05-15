@@ -7,12 +7,17 @@ The image is expected to be a labeled image workspace outputted from [[Integrate
 You may optionally provide a FilterWorkspace, which is a [[PeaksWorkspace]]. If provided, the Peak locations are projected onto the InputWorkspace
 and the center locations are used to restrict the output to only include the clusters that are the union between the peak locations and the image clusters.
 
+If LimitRows is set to True (default), then you may specify a maximum number of rows to report. If the algorithm generates more rows that the 
+MaximumRows that you set, then it will emit a warning, and also, set the TruncatedOutput output property to false.
+
 *WIKI*/
 
 #include "MantidCrystal/FindClusterFaces.h"
 
-#include "MantidKernel/Utils.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Utils.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDIterator.h"
@@ -28,6 +33,7 @@ and the center locations are used to restrict the output to only include the clu
 
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <map>
 #include <deque>
 #include <algorithm>
@@ -336,12 +342,21 @@ namespace Mantid
     {
       declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "", Direction::Input),
         "An input image workspace consisting of cluster ids.");
+      
       declareProperty(
         new WorkspaceProperty<IPeaksWorkspace>("FilterWorkspace", "", Direction::Input,
         PropertyMode::Optional),
         "Optional filtering peaks workspace. Used to restrict face finding to clusters in image which correspond to peaks in the workspace.");
+      
+      declareProperty("LimitRows", true, "Limit the report output to a maximum number of rows");
+
+      declareProperty(new PropertyWithValue<int>("MaximumRows", 100000, boost::make_shared<BoundedValidator<int> >(), Direction::Input), "The number of neighbours to utilise. Defaults to 100000.");
+      setPropertySettings("MaximumRows", new EnabledWhenProperty("LimitRows", IS_DEFAULT));
+
       declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "", Direction::Output),
         "An output table workspace containing cluster face information.");
+
+      declareProperty(new PropertyWithValue<bool>("TruncatedOutput", false, Direction::Output), "Indicates that the output results were truncated if True");
     }
 
     //----------------------------------------------------------------------------------------------
@@ -397,27 +412,50 @@ namespace Mantid
         }
         PARALLEL_CHECK_INTERUPT_REGION
 
-          // Create an output table workspace now that all local cluster faces have been found in parallel.
-          auto out = WorkspaceFactory::Instance().createTable("TableWorkspace");
+
+        const bool limitRows = getProperty("LimitRows");
+        const int maxRows = getProperty("MaximumRows");
+        
+
+        // Create an output table workspace now that all local cluster faces have been found in parallel.
+        auto out = WorkspaceFactory::Instance().createTable("TableWorkspace");
         out->addColumn("int", "ClusterId");
         out->addColumn("double", "MDWorkspaceIndex");
         out->addColumn("int", "FaceNormalDimension");
         out->addColumn("bool", "MaxEdge");
         out->addColumn("double", "radius");
+        size_t totalFaces = 0;
         for(size_t i = 0; i < nIterators; ++i)
         {
           const ClusterFaces& localClusterFaces =  clusterFaces[i];
 
           for(auto it = localClusterFaces.begin(); it != localClusterFaces.end(); ++it)
           {
-            TableRow row = out->appendRow();
-            const ClusterFace& clusterFace = *it;
-            row << clusterFace.clusterId << double(clusterFace.workspaceIndex) 
+            if(!limitRows || (out->rowCount() < maxRows))
+            {
+              TableRow row = out->appendRow();
+              const ClusterFace& clusterFace = *it;
+              row << clusterFace.clusterId << double(clusterFace.workspaceIndex) 
               << clusterFace.faceNormalDimension << clusterFace.maxEdge << clusterFace.radius; 
+            }
+            ++totalFaces;
           }
         }
+        
+        bool truncatedOutput = false;
+        if(limitRows && out->rowCount() == maxRows)
+        {
+          truncatedOutput = true;
+          std::stringstream buffer;
+          buffer << "More faces found than can be reported given the MaximumRows limit. Row limit at: " 
+            << maxRows << " Total faces available: " 
+            << totalFaces;
+          g_log.warning(buffer.str());
+        }
 
+        
         setProperty("OutputWorkspace", out);
+        setProperty("TruncatedOutput", truncatedOutput);
     }
 
   } // namespace Crystal
