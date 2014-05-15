@@ -83,8 +83,7 @@ def MaskWithCylinder(workspace, radius, xcentre, ycentre, algebra):
     xmldef += '<algebra val="' + algebra + 'shape" />'
     # Apply masking
     MaskDetectorsInShape(Workspace=workspace,ShapeXML=xmldef)
-##END REMOVED STEVE 22 September 2010 (SANSReductionSteps.py)
-##START REMOVED STEVE 08 September 2010 (mask_phi ISISReductionSteps.py)
+
 # Mask such that the remainder is that specified by the phi range
 def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
     # convert all angles to be between 0 and 360
@@ -114,11 +113,7 @@ def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
             xmldef += '<algebra val="#(pla pla2)" />'
     
     MaskDetectorsInShape(Workspace=workspace,ShapeXML= xmldef)	
-##END REMOVED STEVE 08 September 2010 (mask_phi ISISReductionSteps.py)
-##START REMOVED to SANSInsts
-# Essentially an enumeration
-##END REMOVED to SANSInsts
-##START REMOVED to SANSReductionSteps
+
 # Work out the spectra IDs for block of detectors
 def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
     '''Compile a list of spectrum IDs for rectangular block of size xdim by ydim'''
@@ -153,7 +148,7 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
 		 output += str(max_row - diff_s) + ','
 
     return output.rstrip(",")
-##END REMOVED to SANSReductionSteps    
+ 
 # Mask by bin range
 def MaskByBinRange(workspace, timemask):
 	# timemask should be a ';' separated list of start/end values
@@ -162,8 +157,6 @@ def MaskByBinRange(workspace, timemask):
 		limits = r.split()
 		if len(limits) == 2:
 			MaskBins(InputWorkspace=workspace,OutputWorkspace= workspace, XMin= limits[0] ,XMax=limits[1])
-##START REMOVED STEVE (SANSReductionSteps.py)
-##END REMOVED STEVE (SANSReductionSteps.py)
 								     
 def QuadrantXML(centre,rmin,rmax,quadrant):
 	cin_id = 'cyl-in'
@@ -192,10 +185,6 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
 	xmlstring += InfinitePlaneXML(p2id, centre, plane2Axis)
 	xmlstring += '<algebra val="(#((#(' + cout_id + ':(#' + cin_id  + '))) ' + p1id + ' ' + p2id + '))"/>\n' 
 	return xmlstring
-##START REMOVED STEVE 13 September 2010 (SANSReductionSteps.py)
-##END REMOVED STEVE 13 September 2010 (SANSReductionSteps.py)
-##
-
 
 def getWorkspaceReference(ws_pointer):
     if isinstance(ws_pointer, str):
@@ -698,7 +687,7 @@ class RunDetails(object):
 
     def getDirectRaw(self):
         return self._direct_raw
-##START REMOVED
+
     def getMaskPtMin(self):
         return self._maskrmin
 
@@ -710,7 +699,7 @@ class RunDetails(object):
 
     def setMaskPtMax(self, rmax):
         self._maskrmax = rmax
-##END REMOVED
+
     def getSuffix(self):
         return self._suffix
 
