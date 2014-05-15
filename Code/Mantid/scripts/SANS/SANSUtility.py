@@ -4,9 +4,44 @@
 ########################################################
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace
+import inspect
 import math
-import re
 import os
+import re
+import types
+
+sanslog = Logger("SANS")
+
+def deprecated(obj):
+    """
+    Decorator to apply to functions or classes that we think are not being (or
+    should not be) used anymore.  Prints a warning to the log.
+    """
+    if inspect.isfunction(obj) or inspect.ismethod(obj):
+        if inspect.isfunction(obj):
+            obj_desc = "\"%s\" function" % obj.__name__
+        else:
+            obj_desc = "\"%s\" class" % obj.im_class.__name__
+        def print_warning_wrapper(*args, **kwargs):
+            sanslog.warning("The %s has been marked as deprecated and may be "\
+                            "removed in a future version of Mantid.  If you "\
+                            "believe this to have been marked in error, please "\
+                            "contact the member of the Mantid team responsible "\
+                            "for ISIS SANS." % obj_desc)
+            return obj(*args, **kwargs)
+        return print_warning_wrapper
+
+    # Add a @deprecated decorator to each of the member functions in the class
+    # (by recursion).
+    if inspect.isclass(obj):
+        for name, fn in inspect.getmembers(obj):
+            if isinstance(fn, types.UnboundMethodType):
+                setattr(obj, name, deprecated(fn))
+        return obj
+
+    assert False, "Programming error.  You have incorrectly applied the "\
+                  "@deprecated decorator.  This is only for use with functions "\
+                  "or classes."
 
 def GetInstrumentDetails(instrum):
     """
