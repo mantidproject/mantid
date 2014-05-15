@@ -423,7 +423,7 @@ namespace Mantid
         out->addColumn("double", "MDWorkspaceIndex");
         out->addColumn("int", "FaceNormalDimension");
         out->addColumn("bool", "MaxEdge");
-        out->addColumn("double", "radius");
+        out->addColumn("double", "Radius");
         size_t totalFaces = 0;
         for(int i = 0; i < nIterators; ++i)
         {
