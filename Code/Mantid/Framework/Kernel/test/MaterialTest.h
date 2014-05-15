@@ -108,7 +108,7 @@ public:
     TS_ASSERT_EQUALS(cf.aNumbers[0], 60);
     TS_ASSERT_EQUALS(cf.numberAtoms[0], 1);
 
-    cf = Material::parseChemicalFormula("H2O");
+    cf = Material::parseChemicalFormula("H2 O");
     TS_ASSERT_EQUALS(cf.atoms.size(), 2);
     TS_ASSERT_EQUALS(cf.atoms[0], "H");
     TS_ASSERT_EQUALS(cf.aNumbers[0], 0);
@@ -117,7 +117,7 @@ public:
     TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
     TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
 
-    cf = Material::parseChemicalFormula("(H1)2O");
+    cf = Material::parseChemicalFormula("(H1)2 O");
     TS_ASSERT_EQUALS(cf.atoms.size(), 2);
     TS_ASSERT_EQUALS(cf.atoms[0], "H");
     TS_ASSERT_EQUALS(cf.aNumbers[0], 1);
@@ -126,7 +126,7 @@ public:
     TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
     TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
 
-    cf = Material::parseChemicalFormula("D2O");
+    cf = Material::parseChemicalFormula("D2 O");
     TS_ASSERT_EQUALS(cf.atoms.size(), 2);
     TS_ASSERT_EQUALS(cf.atoms[0], "H");
     TS_ASSERT_EQUALS(cf.aNumbers[0], 2);
@@ -161,6 +161,23 @@ public:
     TS_ASSERT_EQUALS(cf.atoms[1], "O");
     TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
     TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
+
+    cf = Material::parseChemicalFormula("(Li7)2");
+
+    cf = Material::parseChemicalFormula("Y-Ba2-Cu3-O6.56");
+    TS_ASSERT_EQUALS(cf.atoms.size(), 4);
+    for (auto it = cf.aNumbers.begin(); it != cf.aNumbers.end(); ++it)
+    {
+        TS_ASSERT_EQUALS(*it, 0);
+    }
+    TS_ASSERT_EQUALS(cf.atoms[0], "Y");
+    TS_ASSERT_EQUALS(cf.numberAtoms[0], 1);
+    TS_ASSERT_EQUALS(cf.atoms[1], "Ba");
+    TS_ASSERT_EQUALS(cf.numberAtoms[1], 2);
+    TS_ASSERT_EQUALS(cf.atoms[2], "Cu");
+    TS_ASSERT_EQUALS(cf.numberAtoms[2], 3);
+    TS_ASSERT_EQUALS(cf.atoms[3], "O");
+    TS_ASSERT_DELTA(cf.numberAtoms[3], 6.56, .01);
   }
 
 };

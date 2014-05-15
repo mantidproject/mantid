@@ -92,7 +92,7 @@ namespace Mantid
       struct ChemicalFormula
       {
     	  std::vector<std::string> atoms;     // Chemical symbol of each atom
-    	  std::vector<uint16_t> numberAtoms;  // Number of each atom
+          std::vector<float> numberAtoms;  // Number of each atom
     	  std::vector<uint16_t> aNumbers;     // Atomic number of each atom
       };
       static ChemicalFormula parseChemicalFormula(const std::string chemicalSymbol);
