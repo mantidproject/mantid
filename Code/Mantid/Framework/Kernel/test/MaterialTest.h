@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Atom.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 
@@ -84,99 +85,99 @@ public:
   {
     Material::ChemicalFormula cf;
 
-    cf = Material::parseChemicalFormula("F60");
+    cf = Material::parseChemicalFormula("F14");
     TS_ASSERT_EQUALS(cf.atoms.size(), 1);
-    TS_ASSERT_EQUALS(cf.atoms[0], "F");
-    TS_ASSERT_EQUALS(cf.aNumbers[0], 0);
-    TS_ASSERT_EQUALS(cf.numberAtoms[0], 60);
+    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "F");
+    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 0);
+    TS_ASSERT_EQUALS(cf.numberAtoms[0], 14);
 
-    cf = Material::parseChemicalFormula("(F60)");
+    cf = Material::parseChemicalFormula("(F14)");
     TS_ASSERT_EQUALS(cf.atoms.size(), 1);
-    TS_ASSERT_EQUALS(cf.atoms[0], "F");
-    TS_ASSERT_EQUALS(cf.aNumbers[0], 60);
+    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "F");
+    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 14);
     TS_ASSERT_EQUALS(cf.numberAtoms[0], 1);
 
-    cf = Material::parseChemicalFormula("C60");
+    cf = Material::parseChemicalFormula("C15");
     TS_ASSERT_EQUALS(cf.atoms.size(), 1);
-    TS_ASSERT_EQUALS(cf.atoms[0], "C");
-    TS_ASSERT_EQUALS(cf.aNumbers[0], 0);
-    TS_ASSERT_EQUALS(cf.numberAtoms[0], 60);
+    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "C");
+    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 0);
+    TS_ASSERT_EQUALS(cf.numberAtoms[0], 15);
 
-    cf = Material::parseChemicalFormula("(C60)");
+    cf = Material::parseChemicalFormula("(C15)");
     TS_ASSERT_EQUALS(cf.atoms.size(), 1);
-    TS_ASSERT_EQUALS(cf.atoms[0], "C");
-    TS_ASSERT_EQUALS(cf.aNumbers[0], 60);
+    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "C");
+    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 15);
     TS_ASSERT_EQUALS(cf.numberAtoms[0], 1);
 
     cf = Material::parseChemicalFormula("H2 O");
     TS_ASSERT_EQUALS(cf.atoms.size(), 2);
-    TS_ASSERT_EQUALS(cf.atoms[0], "H");
-    TS_ASSERT_EQUALS(cf.aNumbers[0], 0);
+    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "H");
+    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 0);
     TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
-    TS_ASSERT_EQUALS(cf.atoms[1], "O");
-    TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
+    TS_ASSERT_EQUALS(cf.atoms[1]->symbol, "O");
+    TS_ASSERT_EQUALS(cf.atoms[1]->a_number, 0);
     TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
 
     cf = Material::parseChemicalFormula("(H1)2 O");
     TS_ASSERT_EQUALS(cf.atoms.size(), 2);
-    TS_ASSERT_EQUALS(cf.atoms[0], "H");
-    TS_ASSERT_EQUALS(cf.aNumbers[0], 1);
+    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "H");
+    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 1);
     TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
-    TS_ASSERT_EQUALS(cf.atoms[1], "O");
-    TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
+    TS_ASSERT_EQUALS(cf.atoms[1]->symbol, "O");
+    TS_ASSERT_EQUALS(cf.atoms[1]->a_number, 0);
     TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
 
     cf = Material::parseChemicalFormula("D2 O");
     TS_ASSERT_EQUALS(cf.atoms.size(), 2);
-    TS_ASSERT_EQUALS(cf.atoms[0], "H");
-    TS_ASSERT_EQUALS(cf.aNumbers[0], 2);
+    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "H");
+    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 2);
     TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
-    TS_ASSERT_EQUALS(cf.atoms[1], "O");
-    TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
+    TS_ASSERT_EQUALS(cf.atoms[1]->symbol, "O");
+    TS_ASSERT_EQUALS(cf.atoms[1]->a_number, 0);
     TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
 
     cf = Material::parseChemicalFormula("H2 O");
     TS_ASSERT_EQUALS(cf.atoms.size(), 2);
-    TS_ASSERT_EQUALS(cf.atoms[0], "H");
-    TS_ASSERT_EQUALS(cf.aNumbers[0], 0);
+    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "H");
+    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 0);
     TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
-    TS_ASSERT_EQUALS(cf.atoms[1], "O");
-    TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
+    TS_ASSERT_EQUALS(cf.atoms[1]->symbol, "O");
+    TS_ASSERT_EQUALS(cf.atoms[1]->a_number, 0);
     TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
 
     cf = Material::parseChemicalFormula("H2-O");
     TS_ASSERT_EQUALS(cf.atoms.size(), 2);
-    TS_ASSERT_EQUALS(cf.atoms[0], "H");
-    TS_ASSERT_EQUALS(cf.aNumbers[0], 0);
+    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "H");
+    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 0);
     TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
-    TS_ASSERT_EQUALS(cf.atoms[1], "O");
-    TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
+    TS_ASSERT_EQUALS(cf.atoms[1]->symbol, "O");
+    TS_ASSERT_EQUALS(cf.atoms[1]->a_number, 0);
     TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
 
     TS_ASSERT_THROWS(cf = Material::parseChemicalFormula("H2*O"), std::runtime_error);
     TS_ASSERT_EQUALS(cf.atoms.size(), 2);
-    TS_ASSERT_EQUALS(cf.atoms[0], "H");
-    TS_ASSERT_EQUALS(cf.aNumbers[0], 0);
+    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "H");
+    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 0);
     TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
-    TS_ASSERT_EQUALS(cf.atoms[1], "O");
-    TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
+    TS_ASSERT_EQUALS(cf.atoms[1]->symbol, "O");
+    TS_ASSERT_EQUALS(cf.atoms[1]->a_number, 0);
     TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
 
     cf = Material::parseChemicalFormula("(Li7)2");
 
     cf = Material::parseChemicalFormula("Y-Ba2-Cu3-O6.56");
     TS_ASSERT_EQUALS(cf.atoms.size(), 4);
-    for (auto it = cf.aNumbers.begin(); it != cf.aNumbers.end(); ++it)
+    for (auto it = cf.atoms.begin(); it != cf.atoms.end(); ++it)
     {
-        TS_ASSERT_EQUALS(*it, 0);
+        TS_ASSERT_EQUALS((*it)->a_number, 0);
     }
-    TS_ASSERT_EQUALS(cf.atoms[0], "Y");
+    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "Y");
     TS_ASSERT_EQUALS(cf.numberAtoms[0], 1);
-    TS_ASSERT_EQUALS(cf.atoms[1], "Ba");
+    TS_ASSERT_EQUALS(cf.atoms[1]->symbol, "Ba");
     TS_ASSERT_EQUALS(cf.numberAtoms[1], 2);
-    TS_ASSERT_EQUALS(cf.atoms[2], "Cu");
+    TS_ASSERT_EQUALS(cf.atoms[2]->symbol, "Cu");
     TS_ASSERT_EQUALS(cf.numberAtoms[2], 3);
-    TS_ASSERT_EQUALS(cf.atoms[3], "O");
+    TS_ASSERT_EQUALS(cf.atoms[3]->symbol, "O");
     TS_ASSERT_DELTA(cf.numberAtoms[3], 6.56, .01);
   }
 

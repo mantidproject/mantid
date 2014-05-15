@@ -275,19 +275,16 @@ namespace Mantid
         NeutronAtom neutron(0, 0., 0., 0., 0., 0., 0.); // starting thing for neutronic information
         if (CF.atoms.size() == 1 && isEmpty(zParameter) && isEmpty(rho))
         {
-
-          Atom myAtom = getAtom(chemicalSymbol, CF.aNumbers[0]);
-          mat.reset(new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density));
+          mat.reset(new Material(chemicalSymbol, CF.atoms[0]->neutron, CF.atoms[0]->number_density));
         }
         else
         {
           double numAtoms = 0.; // number of atoms in formula
           for (size_t i=0; i<CF.atoms.size(); i++)
           {
-            Atom myAtom = getAtom(CF.atoms[i], CF.aNumbers[i]);
-            neutron = neutron + CF.numberAtoms[i] * myAtom.neutron;
+            neutron = neutron + CF.numberAtoms[i] * CF.atoms[i]->neutron;
 
-            g_log.information() << myAtom << ": " << myAtom.neutron << "\n";
+            g_log.information() << CF.atoms[i] << ": " << CF.atoms[i]->neutron << "\n";
             numAtoms += static_cast<double>(CF.numberAtoms[i]);
           }
           // normalize the accumulated number by the number of atoms

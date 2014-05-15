@@ -2,7 +2,9 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Atom.h"
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <sstream>
@@ -17,6 +19,8 @@ namespace Mantid
     typedef boost::tokenizer<boost::char_separator<char> >  tokenizer;
     typedef std::pair<std::string, std::string> str_pair;
 
+    using PhysicalConstants::Atom;
+    using PhysicalConstants::getAtom;
     using PhysicalConstants::NeutronAtom;
 
     /**
@@ -238,13 +242,8 @@ namespace Mantid
                   if (!temp.second.empty())
                       numberAtoms = boost::lexical_cast<float>(temp.second);
               }
-              if (name == "D")
-              {
-                  name = "H";
-                  aNumber = 2;
-              }
-              CF.atoms.push_back(name);
-              CF.aNumbers.push_back(aNumber);
+
+              CF.atoms.push_back(boost::make_shared<Atom>(getAtom(name, aNumber)));
               CF.numberAtoms.push_back(numberAtoms);
           }
           catch (boost::bad_lexical_cast &e)
