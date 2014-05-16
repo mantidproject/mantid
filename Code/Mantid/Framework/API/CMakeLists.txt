@@ -103,6 +103,7 @@ set ( SRC_FILES
 	src/Sample.cpp
 	src/SampleEnvironment.cpp
 	src/ScopedWorkspace.cpp
+  src/ScriptBuilder.cpp
 	src/ScriptRepository.cpp
 	src/ScriptRepositoryFactory.cpp
 	src/SpectraAxis.cpp
@@ -258,6 +259,7 @@ set ( INC_FILES
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/ScopedWorkspace.h
+  inc/MantidAPI/ScriptBuilder.h
 	inc/MantidAPI/ScriptRepository.h
 	inc/MantidAPI/ScriptRepositoryFactory.h
 	inc/MantidAPI/SingleValueParameter.h
@@ -345,6 +347,7 @@ set ( TEST_FILES
 	RunTest.h
 	SampleEnvironmentTest.h
 	SampleTest.h
+  ScriptBuilderTest.h
 	ScopedWorkspaceTest.h
 	SpectraAxisTest.h
 	SpectrumDetectorMappingTest.h
