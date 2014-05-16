@@ -2,15 +2,11 @@
 #define MANTIDQT_CUSTOMINTERFACES_IALCBASELINEMODELLINGVIEW_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IFunction.h"
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
 #include <QObject>
 #include "qwt_data.h"
-
-using namespace Mantid::API;
 
 namespace MantidQt
 {
@@ -44,15 +40,29 @@ namespace CustomInterfaces
     Q_OBJECT
 
   public:
-    typedef std::pair<double,double> Section;
+    typedef std::pair<QString,QString> SectionRow;
     typedef std::pair<double,double> SectionSelector;
 
     /// Function chosen to fit the data to
-    /// @return Initialized function
-    virtual IFunction_const_sptr function() const = 0;
+    /// @return Function string, or empty string if nothing chosen
+    virtual QString function() const = 0;
 
-    /// List of sections from the table
-    virtual std::vector<Section> sections() const = 0;
+    /**
+     * @param row :: Row number
+     * @return Row values from the section table
+     */
+    virtual SectionRow sectionRow(int row) const = 0;
+
+    /**
+     * @param index :: Section selector index
+     * @return Section selector values
+     */
+    virtual SectionSelector sectionSelector(int index) const = 0;
+
+    /**
+     * @return Number of rows in section table
+     */
+    virtual int noOfSectionRows() const = 0;
 
   public slots:
     /// Performs any necessary initialization
@@ -80,35 +90,46 @@ namespace CustomInterfaces
      * Update displayed function
      * @param func :: New function
      */
-    virtual void setFunction(IFunction_const_sptr func) = 0;
+    virtual void setFunction(const QString& func) = 0;
 
     /**
-     * Reset a list of sections displayed
-     * @param sections :: New list of sections to display
+     * Resize sections table
+     * @param rows :: New number of rows
      */
-    virtual void setSections(const std::vector<Section>& sections) = 0;
+    virtual void setNoOfSectionRows(int rows) = 0;
 
     /**
-     * Modify section values
-     * @param index :: Index of the section to modify
-     * @param min :: New section min value
-     * @param max :: New section max value
+     * Updates the row values in the table
+     * @param row :: Row in sections table
+     * @param values :: New row values
      */
-    virtual void updateSection(size_t index, double min, double max) = 0;
+    virtual void setSectionRow(int row, SectionRow values) = 0;
 
     /**
-     * Reset a list of section selectors
-     * @param selectors :: New list of selectors
+     * Adds a new section selector
+     * @param index :: Index of added section selector, to find it later
+     * @param values :: Initial values
      */
-    virtual void setSectionSelectors(const std::vector<SectionSelector>& selectors) = 0;
+    virtual void addSectionSelector(int index, SectionSelector values) = 0;
 
     /**
-     * Update values of a single section selector
+     * Deletes section selector at specified index
+     * @param index :: Section selector index
+     */
+    virtual void deleteSectionSelector(int index) = 0;
+
+    /**
+     * Update section selector values
      * @param index :: Index of the selector to update
-     * @param min :: New min value
-     * @param max :: New max value
+     * @param values :: New values
      */
-    virtual void updateSectionSelector(size_t index, double min, double max) = 0;
+    virtual void updateSectionSelector(int index, SectionSelector values) = 0;
+
+    /**
+     * Pops-up an error box
+     * @param message :: Error message to display
+     */
+    virtual void displayError(const QString& message) = 0;
 
   signals:
     /// Fit requested
@@ -117,24 +138,23 @@ namespace CustomInterfaces
     /// New section addition requested
     void addSectionRequested();
 
-    /// Removal of section requested
-    void removeSectionRequested(size_t index);
+    /**
+     * Section removal requested
+     * @param row :: Section row to remove
+     */
+    void removeSectionRequested(int row);
 
     /**
-     * One of the sections in the table was modified
-     * @param index :: Index of the modified section
-     * @param min :: New min value
-     * @param max :: New max value
+     * One of the section rows in the table was modified
+     * @param row :: Modified section row
      */
-    void sectionModified(size_t index, double min, double max);
+    void sectionRowModified(int row);
 
     /**
      * One of section selectors has been modified
      * @param index :: Index of modified selector
-     * @param min :: New min value
-     * @param max :: New max value
      */
-    void sectionSelectorModified(size_t index, double min, double max);
+    void sectionSelectorModified(int index);
   };
 
 

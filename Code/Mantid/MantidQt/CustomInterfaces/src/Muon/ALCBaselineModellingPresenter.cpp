@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FunctionFactory.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
@@ -19,16 +20,16 @@ namespace CustomInterfaces
   {
     m_view->initialize();
 
+    // View actions
     connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
     connect(m_view, SIGNAL(addSectionRequested()), SLOT(addSection()));
-    connect(m_view, SIGNAL(removeSectionRequested(size_t)), SLOT(removeSection(size_t)));
+    connect(m_view, SIGNAL(removeSectionRequested(int)), SLOT(removeSection(int)));
 
-    connect(m_view, SIGNAL(sectionModified(size_t, double, double)),
-            SLOT(onSectionModified(size_t, double, double)));
+    // View events (sync)
+    connect(m_view, SIGNAL(sectionRowModified(int)), SLOT(onSectionRowModified(int)));
+    connect(m_view, SIGNAL(sectionSelectorModified(int)), SLOT(onSectionSelectorModified(int)));
 
-    connect(m_view, SIGNAL(sectionSelectorModified(size_t,double,double)),
-            SLOT(onSectionSelectorModified(size_t,double,double)));
-
+    // Model updates
     connect(m_model, SIGNAL(dataChanged()), SLOT(updateDataCurve()));
     connect(m_model, SIGNAL(correctedDataChanged()), SLOT(updateCorrectedCurve()));
     connect(m_model, SIGNAL(fittedFunctionChanged()), SLOT(updateFunction()));
@@ -40,8 +41,42 @@ namespace CustomInterfaces
    */
   void ALCBaselineModellingPresenter::fit()
   {
-    // TODO: catch exceptions
-    m_model->fit(m_view->function(), m_view->sections());
+    std::vector<IALCBaselineModellingModel::Section> parsedSections;
+
+    for (int i = 0; i < m_view->noOfSectionRows(); ++i)
+    {
+      auto sectionRow = m_view->sectionRow(i);
+
+      double min = sectionRow.first.toDouble();
+      double max = sectionRow.second.toDouble();
+
+      IALCBaselineModellingModel::Section parsedSection(min, max);
+
+      parsedSections.push_back(parsedSection);
+    }
+
+    std::string funcStr = m_view->function().toStdString();
+
+    if (funcStr.empty())
+    {
+      m_view->displayError("Couldn't fit an empty function");
+    }
+    else if(parsedSections.empty())
+    {
+      m_view->displayError("No sections to fit");
+    }
+    else
+    {
+      try
+      {
+        IFunction_sptr funcToFit = FunctionFactory::Instance().createInitialized(funcStr);
+        m_model->fit(funcToFit, parsedSections);
+      }
+      catch(std::exception& e)
+      {
+        m_view->displayError(QString::fromStdString(e.what()));
+      }
+    }
   }
 
   /**
@@ -49,37 +84,85 @@ namespace CustomInterfaces
    */
   void ALCBaselineModellingPresenter::addSection()
   {
-    double initStart = m_model->data()->getXMin();
-    double initEnd = m_model->data()->getXMax();
+    double xMin = m_model->data()->getXMin();
+    double xMax = m_model->data()->getXMax();
 
-    auto sections = m_view->sections();
-    sections.push_back(IALCBaselineModellingView::Section(initStart, initEnd));
-    m_view->setSections(sections);
-    m_view->setSectionSelectors(sections);
+    int noOfSections = m_view->noOfSectionRows();
+
+    m_view->setNoOfSectionRows(noOfSections + 1);
+
+    m_view->setSectionRow(noOfSections, std::make_pair(QString::number(xMin), QString::number(xMax)));
+
+    m_view->addSectionSelector(noOfSections, std::make_pair(xMin, xMax));
   }
 
   /**
-   * @param index :: Index of the section to remove. Should be valid.
+   * @param row :: Section row to remove
    */
-  void ALCBaselineModellingPresenter::removeSection(size_t index)
+  void ALCBaselineModellingPresenter::removeSection(int row)
   {
-    auto sections = m_view->sections();
-    assert(index < sections.size()); // The view should take care of that
+    // The view should make sure the row is valid
+    assert(row >= 0);
+    assert(row < m_view->noOfSectionRows());
 
-    sections.erase(sections.begin() + index);
+    // Delete all section selectors
+    for (int i = 0; i < m_view->noOfSectionRows(); ++i)
+    {
+      m_view->deleteSectionSelector(i);
+    }
 
-    m_view->setSections(sections);
-    m_view->setSectionSelectors(sections);
+    std::vector<IALCBaselineModellingView::SectionRow> allRows;
+
+    for (int i = 0; i < m_view->noOfSectionRows(); ++i)
+    {
+      allRows.push_back(m_view->sectionRow(i));
+    }
+
+    allRows.erase(allRows.begin() + row);
+
+    // Shrink sections table
+    m_view->setNoOfSectionRows(static_cast<int>(allRows.size()));
+
+    // Update row values and add sections selectors
+    for (size_t i = 0; i < allRows.size(); ++i)
+    {
+      m_view->setSectionRow(static_cast<int>(i), allRows[i]);
+
+      double startX = allRows[i].first.toDouble();
+      double endX = allRows[i].second.toDouble();
+
+      IALCBaselineModellingView::SectionSelector newSelector(startX, endX);
+      m_view->addSectionSelector(static_cast<int>(i), newSelector);
+    }
   }
 
-  void ALCBaselineModellingPresenter::onSectionModified(size_t index, double min, double max)
+  void ALCBaselineModellingPresenter::onSectionRowModified(int row)
   {
-    m_view->updateSectionSelector(index, min, max);
+    auto sectionRow = m_view->sectionRow(row);
+
+    double startX = sectionRow.first.toDouble();
+    double endX = sectionRow.second.toDouble();
+
+    int index(row); // That's what we make sure of in addSection()
+    IALCBaselineModellingView::SectionSelector sectionSelector(startX, endX);
+
+    m_view->updateSectionSelector(index, sectionSelector);
   }
 
-  void ALCBaselineModellingPresenter::onSectionSelectorModified(size_t index, double min, double max)
+  /**
+   * @param index :: Index of section selector
+   */
+  void ALCBaselineModellingPresenter::onSectionSelectorModified(int index)
   {
-    m_view->updateSection(index, min, max);
+    auto selectorValues = m_view->sectionSelector(index);
+
+    QString startX = QString::number(selectorValues.first);
+    QString endX = QString::number(selectorValues.second);
+
+    int row(index); // That's what we make sure of in addSection()
+    IALCBaselineModellingView::SectionRow rowValues(startX, endX);
+
+    m_view->setSectionRow(row, rowValues);
   }
 
   void ALCBaselineModellingPresenter::updateDataCurve()
@@ -101,7 +184,8 @@ namespace CustomInterfaces
 
   void ALCBaselineModellingPresenter::updateFunction()
   {
-    m_view->setFunction(m_model->fittedFunction());
+    QString funcString = QString::fromStdString(m_model->fittedFunction()->asString());
+    m_view->setFunction(funcString);
   }
 
 } // namespace CustomInterfaces

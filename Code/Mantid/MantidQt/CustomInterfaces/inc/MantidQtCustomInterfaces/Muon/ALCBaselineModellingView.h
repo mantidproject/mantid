@@ -48,63 +48,35 @@ namespace CustomInterfaces
   public:
     ALCBaselineModellingView(QWidget* widget);
 
-    void initialize();
-
-    /// @see IALCBaselineModellingView::function
-    IFunction_const_sptr function() const;
-
-    /// @see IALCBaselineModellingView::sections
-    std::vector<Section> sections() const;
+  // -- IALCBaselineModellingView interface --------------------------------------------------------
+  public:
+    QString function() const;
+    SectionRow sectionRow(int row) const;
+    SectionSelector sectionSelector(int index) const;
+    int noOfSectionRows() const;
 
   public slots:
-    /// @see IALCBaselineModellingView::setDataCurve
-    void setDataCurve(const QwtData &data);
-
-    /// @see IALCBaselineModellingView::setCorrectedCurve
-    void setCorrectedCurve(const QwtData &data);
-
-    /// @see IALCBaselineModellingView::setBaselineCurve
-    void setBaselineCurve(const QwtData &data);
-
-    /// @see IALCBaselineModellingView::updateFunction
-    void setFunction(IFunction_const_sptr func);
-
-    /// @see IALCBaselineModellingView::setSections
-    void setSections(const std::vector<Section>& sections);
-
-    /// @see IALCBaselineModellingView::updateSection
-    void updateSection(size_t index, double min, double max);
-
-    /// @see IALCBaselineModellingView::setSectionSelectors
-    void setSectionSelectors(const std::vector<SectionSelector> &selectors);
-
-    /// @see IALCBaselineModellingView::updateSectionSelector
-    void updateSectionSelector(size_t index, double min, double max);
+    void initialize();
+    void setDataCurve(const QwtData& data);
+    void setCorrectedCurve(const QwtData& data);
+    void setBaselineCurve(const QwtData& data);
+    void setFunction(const QString& func);
+    void setNoOfSectionRows(int rows);
+    void setSectionRow(int row, SectionRow values);
+    void addSectionSelector(int index, SectionSelector values);
+    void deleteSectionSelector(int index);
+    void updateSectionSelector(int index, SectionSelector values);
+    void displayError(const QString& message);
+  // -- End of IALCBaselineModellingView interface -------------------------------------------------
 
   private slots:
     /// Show context menu for sections table
     void sectionsContextMenu(const QPoint& widgetPoint);
 
-    /// Called when one of range selectors is modified
-    void onRangeSelectorChanged(double min, double max);
-
-    /// Called when one of sections is edited in the table
-    void onSectionsTableChanged(int row, int col);
-
-    /// Set section row values in sections table
-    void setSectionRow(int row, Section section);
-
-    /// Parse section from one of sections table rows
-    Section parseSectionRow(int row) const;
-
-    /// Requests to remove section at specified row
-    void requestSectionRemoval(int row);
-
   private:
-    /// Index of section start column in sections table
-    static const int SECTION_START_COL = 0;
-    /// Index of section end column in sections table
-    static const int SECTION_END_COL = 1;
+
+    /// Helper to set range selector values
+    void setSelectorValues(RangeSelector* selector, SectionSelector values);
 
     /// The widget used
     QWidget* const m_widget;
@@ -115,8 +87,10 @@ namespace CustomInterfaces
     /// Plot curves
     QwtPlotCurve *m_dataCurve, *m_fitCurve, *m_correctedCurve;
 
-    /// Range selectors for sections
-    std::vector<RangeSelector*> m_rangeSelectors;
+    /// Range selectors
+    std::map<int, RangeSelector*> m_rangeSelectors;
+
+    QSignalMapper* m_selectorModifiedMapper;
   };
 
 

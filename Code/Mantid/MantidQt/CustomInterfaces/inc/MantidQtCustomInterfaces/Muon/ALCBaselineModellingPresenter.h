@@ -53,13 +53,13 @@ namespace CustomInterfaces
     void addSection();
 
     /// Remove existing section
-    void removeSection(size_t index);
+    void removeSection(int row);
 
     /// Called when one of sections is modified
-    void onSectionModified(size_t index, double min, double max);
+    void onSectionRowModified(int row);
 
-    /// Called when section selector is modified
-    void onSectionSelectorModified(size_t index, double min, double max);
+    /// Called when on of section selectors is modified
+    void onSectionSelectorModified(int index);
 
     /// Updates data curve from the model
     void updateDataCurve();

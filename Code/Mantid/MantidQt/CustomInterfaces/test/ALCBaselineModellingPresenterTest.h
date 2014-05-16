@@ -22,33 +22,33 @@ class MockALCBaselineModellingView : public IALCBaselineModellingView
 public:
   void requestFit() { emit fitRequested(); }
   void requestAddSection() { emit addSectionRequested(); }
-  void requestRemoveSection(size_t index) { emit removeSectionRequested(index); }
-
-  void modifySection(size_t index, double min, double max)
-  {
-    emit sectionModified(index, min, max);
-  }
-
-  void modifySectionSelector(size_t index, double min, double max)
-  {
-    emit sectionSelectorModified(index, min, max);
-  }
+  void requestRemoveSection(int row) { emit removeSectionRequested(row); }
+  void modifySectionRow(int row) { emit sectionRowModified(row); }
+  void modifySectionSelector(int index) { emit sectionSelectorModified(index); }
 
   MOCK_METHOD0(initialize, void());
 
-  MOCK_CONST_METHOD0(function, IFunction_const_sptr());
-  MOCK_CONST_METHOD0(sections, std::vector<Section>());
+  MOCK_CONST_METHOD0(function, QString());
+  MOCK_CONST_METHOD1(sectionRow, SectionRow(int));
 
   MOCK_METHOD1(setDataCurve, void(const QwtData&));
   MOCK_METHOD1(setCorrectedCurve, void(const QwtData&));
   MOCK_METHOD1(setBaselineCurve, void(const QwtData&));
-  MOCK_METHOD1(setFunction, void(IFunction_const_sptr));
+  MOCK_METHOD1(setFunction, void(const QString&));
 
-  MOCK_METHOD1(setSections, void(const std::vector<Section>&));
-  MOCK_METHOD3(updateSection, void(size_t, double, double));
+  MOCK_CONST_METHOD0(noOfSectionRows, int());
+  MOCK_METHOD1(setNoOfSectionRows, void(int));
+  MOCK_METHOD2(setSectionRow, void(int, SectionRow));
+
+  MOCK_CONST_METHOD1(sectionSelector, SectionSelector(int));
+  MOCK_METHOD2(addSectionSelector, void(int, SectionSelector));
+  MOCK_METHOD2(updateSectionSelector, void(int, SectionSelector));
+  MOCK_METHOD1(deleteSectionSelector, void(int));
 
   MOCK_METHOD1(setSectionSelectors, void(const std::vector<SectionSelector>&));
   MOCK_METHOD3(updateSectionSelector, void(size_t, double, double));
+
+  MOCK_METHOD1(displayError, void(const QString&));
 };
 
 class MockALCBaselineModellingModel : public IALCBaselineModellingModel
@@ -80,6 +80,12 @@ class ALCBaselineModellingPresenterTest : public CxxTest::TestSuite
   MockALCBaselineModellingView* m_view;
   MockALCBaselineModellingModel* m_model;
   ALCBaselineModellingPresenter* m_presenter;
+
+  // To save myself some typing
+  IALCBaselineModellingView::SectionRow sectionRow(double min, double max)
+  {
+    return std::make_pair(QString::number(min), QString::number(max));
+  }
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -159,12 +165,12 @@ public:
 
   void test_fittedFunctionChanged()
   {
-    ON_CALL(*m_model, fittedFunction()).WillByDefault(
-          Return(FunctionFactory::Instance().createInitialized("name=FlatBackground, A0=5")));
+    auto f = FunctionFactory::Instance().createInitialized("name=FlatBackground,A0=5");
+
+    ON_CALL(*m_model, fittedFunction()).WillByDefault(Return(f));
     ON_CALL(*m_model, data()).WillByDefault(Return(createTestWs(3)));
 
-    EXPECT_CALL(*m_view, setFunction(AllOf(FunctionName("FlatBackground"),
-                                           FunctionParameter("A0", 5, 1E-8))));
+    EXPECT_CALL(*m_view, setFunction(QString::fromStdString(f->asString())));
 
     EXPECT_CALL(*m_view, setBaselineCurve(AllOf(Property(&QwtData::size, 3),
                                                 QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
@@ -175,64 +181,67 @@ public:
 
   void test_addSection()
   {
-    EXPECT_CALL(*m_model, data()).WillRepeatedly(Return(createTestWs(10)));
+    ON_CALL(*m_model, data()).WillByDefault(Return(createTestWs(10)));
+    ON_CALL(*m_view, noOfSectionRows()).WillByDefault(Return(1));
 
-    std::vector<IALCBaselineModellingView::Section> noSections;
-    EXPECT_CALL(*m_view, sections()).WillRepeatedly(Return(noSections));
+    Expectation tableExtended = EXPECT_CALL(*m_view, setNoOfSectionRows(2));
 
-    EXPECT_CALL(*m_view, setSections(ElementsAre(Pair(1,10))));
-    EXPECT_CALL(*m_view, setSectionSelectors(ElementsAre(Pair(1,10))));
+    EXPECT_CALL(*m_view, setSectionRow(1, Pair(QString("1"), QString("10")))).After(tableExtended);
+
+    EXPECT_CALL(*m_view, addSectionSelector(1, Pair(1,10)));
 
     m_view->requestAddSection();
   }
 
   void test_removeSection()
   {
-    std::vector<IALCBaselineModellingView::Section> sections;
-    sections.push_back(std::make_pair(10,20));
-    sections.push_back(std::make_pair(30,40));
-    sections.push_back(std::make_pair(50,60));
+    ON_CALL(*m_view, noOfSectionRows()).WillByDefault(Return(3));
+    ON_CALL(*m_view, sectionRow(0)).WillByDefault(Return(sectionRow(1,2)));
+    ON_CALL(*m_view, sectionRow(1)).WillByDefault(Return(sectionRow(3,4)));
+    ON_CALL(*m_view, sectionRow(2)).WillByDefault(Return(sectionRow(5,6)));
 
-    std::vector<IALCBaselineModellingView::SectionSelector> selectors;
+    Expectation tableShrinked = EXPECT_CALL(*m_view, setNoOfSectionRows(2));
 
-    ON_CALL(*m_view, sections()).WillByDefault(ReturnPointee(&sections));
-    EXPECT_CALL(*m_view, setSections(_)).WillRepeatedly(SaveArg<0>(&sections));
-    EXPECT_CALL(*m_view, setSectionSelectors(_)).WillRepeatedly(SaveArg<0>(&selectors));
+    EXPECT_CALL(*m_view, setSectionRow(0, Pair(QString("1"), QString("2")))).After(tableShrinked);
+    EXPECT_CALL(*m_view, setSectionRow(1, Pair(QString("5"), QString("6")))).After(tableShrinked);
+
+    ExpectationSet selectorsCleared;
+
+    selectorsCleared += EXPECT_CALL(*m_view, deleteSectionSelector(0));
+    selectorsCleared += EXPECT_CALL(*m_view, deleteSectionSelector(1));
+    selectorsCleared += EXPECT_CALL(*m_view, deleteSectionSelector(2));
+
+    EXPECT_CALL(*m_view, addSectionSelector(0, Pair(1,2))).After(selectorsCleared);
+    EXPECT_CALL(*m_view, addSectionSelector(1, Pair(5,6))).After(selectorsCleared);
 
     m_view->requestRemoveSection(1);
-    m_view->requestRemoveSection(0);
-
-    TS_ASSERT_EQUALS(sections.size(), 1);
-    TS_ASSERT_DELTA(sections[0].first, 50, 1E-8);
-    TS_ASSERT_DELTA(sections[0].second, 60, 1E-8);
-
-    TS_ASSERT_EQUALS(selectors.size(), 1);
-    TS_ASSERT_DELTA(selectors[0].first, 50, 1E-8);
-    TS_ASSERT_DELTA(selectors[0].second, 60, 1E-8);
   }
 
   void test_onSectionSelectorModified()
   {
-    EXPECT_CALL(*m_view, updateSection(5, -2, 3));
-    m_view->modifySectionSelector(5,-2, 3);
+    ON_CALL(*m_view, sectionSelector(5)).WillByDefault(Return(std::make_pair(1,2)));
+
+    EXPECT_CALL(*m_view, setSectionRow(5, Pair(QString("1"), QString("2"))));
+
+    m_view->modifySectionSelector(5);
   }
 
-  void test_onSectionModified()
+  void test_onSectionRowModified()
   {
-    EXPECT_CALL(*m_view, updateSectionSelector(5, -5, 8));
-    m_view->modifySection(5, -5, 8);
+    IALCBaselineModellingView::SectionRow row(QString("3"), QString("4"));
+    ON_CALL(*m_view, sectionRow(4)).WillByDefault(Return(row));
+
+    EXPECT_CALL(*m_view, updateSectionSelector(4, Pair(3,4)));
+    m_view->modifySectionRow(4);
   }
 
   void test_fit()
   {
-    std::vector<IALCBaselineModellingView::Section> sections;
-    sections.push_back(std::make_pair(10,20));
-    sections.push_back(std::make_pair(40,55));
+    ON_CALL(*m_view, noOfSectionRows()).WillByDefault(Return(2));
+    ON_CALL(*m_view, sectionRow(0)).WillByDefault(Return(sectionRow(10,20)));
+    ON_CALL(*m_view, sectionRow(1)).WillByDefault(Return(sectionRow(40,55)));
 
-    EXPECT_CALL(*m_view, sections()).WillRepeatedly(Return(sections));
-
-    EXPECT_CALL(*m_view, function()).WillRepeatedly(
-          Return(FunctionFactory::Instance().createInitialized("name=FlatBackground,A0=3")));
+    ON_CALL(*m_view, function()).WillByDefault(Return(QString("name=FlatBackground,A0=3")));
 
     EXPECT_CALL(*m_model, fit(AllOf(FunctionName("FlatBackground"),
                                     FunctionParameter("A0", 3, 1E-8)),
@@ -242,6 +251,66 @@ public:
     m_view->requestFit();
   }
 
+  void test_fit_exception()
+  {
+    // Any valid set of sections
+    ON_CALL(*m_view, noOfSectionRows()).WillByDefault(Return(1));
+    ON_CALL(*m_view, sectionRow(0)).WillByDefault(Return(sectionRow(1,2)));
+
+    // Valid function
+    ON_CALL(*m_view, function()).WillByDefault(Return(QString("name=FlatBackground,A0=3")));
+
+    std::string errorMsg = "Bad error";
+
+    ON_CALL(*m_model, fit(_,_)).WillByDefault(Throw(std::runtime_error(errorMsg)));
+    EXPECT_CALL(*m_view, displayError(QString::fromStdString(errorMsg)));
+
+    m_view->requestFit();
+  }
+
+  void test_fit_badFunction()
+  {
+    // Any valid set of sections
+    ON_CALL(*m_view, noOfSectionRows()).WillByDefault(Return(1));
+    ON_CALL(*m_view, sectionRow(0)).WillByDefault(Return(sectionRow(1,2)));
+
+    // Invalid function
+    ON_CALL(*m_view, function()).WillByDefault(Return(QString("bla-bla")));
+
+    EXPECT_CALL(*m_model, fit(_,_)).Times(0);
+    EXPECT_CALL(*m_view, displayError(_));
+
+    m_view->requestFit();
+  }
+
+  void test_fit_emptyFunction()
+  {
+    // Any valid set of sections
+    ON_CALL(*m_view, noOfSectionRows()).WillByDefault(Return(1));
+    ON_CALL(*m_view, sectionRow(0)).WillByDefault(Return(sectionRow(1,2)));
+
+    // Empty function
+    ON_CALL(*m_view, function()).WillByDefault(Return(QString("")));
+
+    EXPECT_CALL(*m_model, fit(_,_)).Times(0);
+    EXPECT_CALL(*m_view, displayError(_));
+
+    m_view->requestFit();
+  }
+
+  void test_fit_noSections()
+  {
+    // No sections
+    ON_CALL(*m_view, noOfSectionRows()).WillByDefault(Return(0));
+
+    // Any valid function
+    ON_CALL(*m_view, function()).WillByDefault(Return(QString("name=FlatBackground,A0=0")));
+
+    EXPECT_CALL(*m_model, fit(_,_)).Times(0);
+    EXPECT_CALL(*m_view, displayError(_));
+
+    m_view->requestFit();
+  }
 };
 
 
