@@ -63,7 +63,7 @@ public:
 
 		// Check the results
 		TS_ASSERT_DELTA(*(outWS->dataX(1).begin()), 31463.8, 0.1);
-		TS_ASSERT_DELTA(*(outWS->dataX(1).end() - 1), 34463.8, 0.1)
+		TS_ASSERT_DELTA(*(outWS->dataX(1).end() - 1), 34493.8, 0.1)
 
 		// Remove workspace from the data service.
 		AnalysisDataService::Instance().remove(outWSName);
@@ -105,7 +105,7 @@ public:
 
 		// Check the results
 		TS_ASSERT_DELTA(*(outWS->dataX(1).begin()), 31433.8, 0.1);
-		TS_ASSERT_DELTA(*(outWS->dataX(1).end() - 1), 34433.8, 0.1)
+		TS_ASSERT_DELTA(*(outWS->dataX(1).end() - 1), 34463.8, 0.1)
 
 		// Remove workspace from the data service.
 		AnalysisDataService::Instance().remove(outWSName);

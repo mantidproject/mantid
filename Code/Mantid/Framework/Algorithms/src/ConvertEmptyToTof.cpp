@@ -24,6 +24,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <cmath>
 #include <map>
@@ -111,8 +112,12 @@ void ConvertEmptyToTof::exec() {
 
 	m_inputWS = this->getProperty("InputWorkspace");
 	m_outputWS = this->getProperty("OutputWorkspace");
-	const std::vector<int> spectraIndices = getProperty("ListOfSpectraIndices");
-	const std::vector<int> channelIndices = getProperty("ListOfChannelIndices");
+	std::vector<int> spectraIndices = getProperty("ListOfSpectraIndices");
+	std::vector<int> channelIndices = getProperty("ListOfChannelIndices");
+
+	//validations
+	validateSpectraIndices(spectraIndices);
+	validateChannelIndices(channelIndices);
 
 	//Map of spectra index, epp
 	std::map<int, int> eppMap = findElasticPeakPositions(spectraIndices,
@@ -124,10 +129,9 @@ void ConvertEmptyToTof::exec() {
 
 	std::pair<int, double> eppAndEpTof = findAverageEppAndEpTof(eppMap);
 
-	double channelWidth = getPropertyFromRun<double>(m_inputWS,
-			"channel_width");
+	double channelWidth = getPropertyFromRun<double>(m_inputWS,"channel_width");
 	std::vector<double> tofAxis = makeTofAxis(eppAndEpTof.first,
-			eppAndEpTof.second, m_inputWS->blocksize(), channelWidth);
+			eppAndEpTof.second, m_inputWS->blocksize()+1, channelWidth);
 
 	//
 	// If input and output workspaces are not the same, create a new workspace for the output
@@ -142,6 +146,49 @@ void ConvertEmptyToTof::exec() {
 }
 
 /**
+ * Check if spectra indices are in the limits of the number of histograms
+ * in the input workspace. If v is empty, uses all spectra.
+ */
+void ConvertEmptyToTof::validateSpectraIndices(std::vector<int> &v){
+	auto nHist = m_inputWS->getNumberHistograms();
+	if (v.size() == 0){
+		g_log.information("No spectrum index given. Using all spectra to calculate the elastic peak.");
+		// use all spectra indices
+		v.reserve(nHist);
+		for ( unsigned int i = 0; i < nHist; ++i ) v[i] = i;
+	}
+	else{
+		for (auto it = v.begin(); it != v.end(); ++it){
+			if (*it < 0 || static_cast<size_t>(*it) >= nHist){
+				throw std::runtime_error("Spectra index out of limits: " + boost::lexical_cast<std::string>(*it));
+			}
+		}
+	}
+}
+
+/**
+ * Check if the channel indices are in the limits of the number of the block size
+ * in the input workspace. If v is empty, uses all channels.
+ */
+void ConvertEmptyToTof::validateChannelIndices(std::vector<int> &v){
+	auto blockSize = m_inputWS->blocksize()+1;
+	if (v.size() == 0){
+		g_log.information("No channel index given. Using all channels (full spectrum!) to calculate the elastic peak.");
+		// use all channel indices
+		v.reserve(blockSize);
+		for ( unsigned int i = 0; i < blockSize; ++i ) v[i] = i;
+	}
+	else{
+		for (auto it = v.begin(); it != v.end(); ++it){
+			if (*it < 0 || static_cast<size_t>(*it) >= blockSize){
+				throw std::runtime_error("Channel index out of limits: " + boost::lexical_cast<std::string>(*it));
+			}
+		}
+	}
+}
+
+
+/**
  * Looks for the EPP positions in the spectraIndices
  * @return map with worskpace spectra index, elastic peak position for this spectra
  */
@@ -150,7 +197,7 @@ std::map <int, int> ConvertEmptyToTof::findElasticPeakPositions(const std::vecto
 	std::map <int, int> eppMap;
 
 	// make sure we not looking for channel indices outside the bounds
-	assert(static_cast<size_t>(*(channelIndices.end()-1)) <  m_inputWS->blocksize() );
+	assert(static_cast<size_t>(*(channelIndices.end()-1)) <  m_inputWS->blocksize()+1 );
 
 	g_log.information() << "Peak detection, search for peak " << std::endl;
 
@@ -363,7 +410,7 @@ std::pair <int,double> ConvertEmptyToTof::findAverageEppAndEpTof(const std::map<
 	int averageEpp = roundUp(static_cast<double>(std::accumulate(eppList.begin(), eppList.end(),0))
 			/ static_cast<double>(eppList.size()));
 
-	g_log.debug() << "Average epp=" << averageEpp << " , Average epTof=" << averageEpp << std::endl;
+	g_log.debug() << "Average epp=" << averageEpp << " , Average epTof=" << averageEpTof << std::endl;
 	return std::make_pair(averageEpp,averageEpTof) ;
 }
 
@@ -408,13 +455,13 @@ bool ConvertEmptyToTof::areEqual(double a, double b, double epsilon)
 }
 
 template<typename T>
-T ConvertEmptyToTof::getPropertyFromRun(API::MatrixWorkspace_const_sptr inputWS, std::string propertyName){
+T ConvertEmptyToTof::getPropertyFromRun(API::MatrixWorkspace_const_sptr inputWS, const std::string& propertyName){
 	if (inputWS->run().hasProperty(propertyName)) {
 		Kernel::Property* prop = inputWS->run().getProperty(propertyName);
 		return boost::lexical_cast<T>(prop->value());
 	} else {
-		std::string propertyName = "No " + propertyName + " property found in the input workspace....";
-		throw std::runtime_error(propertyName);
+		std::string mesg = "No '" + propertyName + "' property found in the input workspace....";
+		throw std::runtime_error(mesg);
 	}
 }
 
@@ -465,6 +512,7 @@ void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis,
 		PARALLEL_END_INTERUPT_REGION
 	}	      //end for i
 	PARALLEL_CHECK_INTERUPT_REGION
+	outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
 }
 
