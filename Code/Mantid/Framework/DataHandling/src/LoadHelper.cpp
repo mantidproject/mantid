@@ -140,7 +140,8 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr& worksp
 }
 
 /**
-   * Recursively add properties from a nexus file
+   * Recursively add properties from a nexus file to
+   * the workspace run.
    *
    * @param nxfileID    :: The Nexus file to be parsed
    * @param runDetails  :: where to add properties
@@ -149,7 +150,7 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr& worksp
    * @param level       :: current level in nexus tree
    *
    */
-void LoadHelper::RecurseForProperties(NXhandle nxfileID,
+void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID,
 					API::Run& runDetails,
 					std::string& parent_name,
 					std::string& parent_class,
@@ -177,7 +178,7 @@ void LoadHelper::RecurseForProperties(NXhandle nxfileID,
 			std::string p_nxname(nxname);//current names can be useful for next level
 			std::string p_nxclass(nxclass);
 
-			RecurseForProperties(nxfileID, runDetails, p_nxname, p_nxclass, level+1);
+			addNexusFieldsToWsRun(nxfileID, runDetails, p_nxname, p_nxclass, level+1);
 
 			NXclosegroup(nxfileID);
 		}// if(NXopengroup
@@ -186,11 +187,8 @@ void LoadHelper::RecurseForProperties(NXhandle nxfileID,
 			//dump_attributes(nxfileID, indent_str);
 			g_log.debug()<<indent_str<<nxname<<" opened."<<std::endl;
 
-			if (parent_class=="NXData") {
-				g_log.debug()<<indent_str<<"skipping NXData"<<std::endl;
-				/* nothing */
-			} else if (parent_class=="NXMonitor") {
-				g_log.debug()<<indent_str<<"skipping NXMonitor"<<std::endl;
+			if (parent_class=="NXData" || parent_class=="NXMonitor") {
+				g_log.debug()<<indent_str<<"skipping "<<parent_class<<std::endl;
 				/* nothing */
 			} else { // create a property
 				int rank;
@@ -215,13 +213,22 @@ void LoadHelper::RecurseForProperties(NXhandle nxfileID,
 				} else {
 					void *dataBuffer;
 					NXmalloc (&dataBuffer, rank, dims, type);
+
+
 					if (NXgetdata(nxfileID, dataBuffer) != NX_OK) {
 						NXfree(&dataBuffer);
 						throw std::runtime_error("Cannot read data from NeXus file");
 					}
 
+
 					if (type==NX_CHAR) {
-						runDetails.addProperty(property_name, std::string((const char *)dataBuffer));
+						std::string property_value((const char *)dataBuffer);
+						if (boost::algorithm::ends_with(property_name, "_time")) {
+							// That's a time value! Convert to Mantid standard
+							property_value = dateTimeInIsoFormat(property_value);
+						}
+						runDetails.addProperty(property_name, property_value);
+
 					} else if ((type==NX_FLOAT32)
 								||(type==NX_FLOAT64)
 								||(type==NX_INT16)
@@ -241,20 +248,47 @@ void LoadHelper::RecurseForProperties(NXhandle nxfileID,
 							g_log.debug()<<indent_str<<"[ "<<property_name<<" has unit "<<units_sbuf<<" ]"<<std::endl;
 						}
 
+						if (dims[0]!=1) {
+							g_log.debug()<<indent_str<<property_name<<" is an array..."<<std::endl;
+							if (dims[0]>10) {
+								g_log.debug()<<indent_str<<"   skipping it (size="<<dims[0]<<")."<<std::endl;
+								NXfree(&dataBuffer);
+								continue;
+							}
+
+						}
+
 
 						if ((type==NX_FLOAT32)||(type==NX_FLOAT64)) {
 							// Mantid numerical properties are double only.
 							double property_double_value=0.0;
-							if (type==NX_FLOAT32) {
-								property_double_value = *((float*)dataBuffer);
-							} else if (type==NX_FLOAT64) {
-								property_double_value = *((double*)dataBuffer);
-							}
 
-							if(units_status!=NX_ERROR)
-								runDetails.addProperty(property_name, property_double_value, std::string(units_sbuf));
-							else
-								runDetails.addProperty(property_name, property_double_value);
+							// Simple case, one value
+							if (dims[0]==1) {
+								if (type==NX_FLOAT32) {
+									property_double_value = *((float*)dataBuffer);
+								} else if (type==NX_FLOAT64) {
+									property_double_value = *((double*)dataBuffer);
+								}
+								if(units_status!=NX_ERROR)
+									runDetails.addProperty(property_name, property_double_value, std::string(units_sbuf));
+								else
+									runDetails.addProperty(property_name, property_double_value);
+							} else {
+								// An array
+								for (int dim_index=0 ; dim_index<dims[0]; dim_index++) {
+									if (type==NX_FLOAT32) {
+										property_double_value = ((float*)dataBuffer)[dim_index];
+									} else if (type==NX_FLOAT64) {
+										property_double_value = ((double*)dataBuffer)[dim_index];
+									}
+									std::string indexed_property_name = property_name + std::string("_") + boost::lexical_cast<std::string>(dim_index);
+									if(units_status!=NX_ERROR)
+										runDetails.addProperty(indexed_property_name, property_double_value, std::string(units_sbuf));
+									else
+										runDetails.addProperty(indexed_property_name, property_double_value);
+								}
+							}
 
 						} else {
 							// int case
@@ -292,7 +326,8 @@ void LoadHelper::RecurseForProperties(NXhandle nxfileID,
 	}// while NXgetnextentry
 
 
-}// RecurseForProperties
+}// addNexusFieldsToWsRun
+
 
 /**
  * Parses the date as formatted at the ILL:
