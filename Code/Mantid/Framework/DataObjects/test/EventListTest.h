@@ -345,8 +345,10 @@ public:
         //Put a single big bin with all events
         lhs.setX(one_big_bin() );
         //But the total neutrons is 0.0! They've been cancelled out :)
-        TS_ASSERT_DELTA( (*lhs.makeDataY())[0], 0.0, 1e-6);
-        TS_ASSERT_DELTA( (*lhs.makeDataE())[0], sqrt((double)lhs.getNumberEvents()), 1e-6);
+        boost::scoped_ptr<MantidVec> Y(lhs.makeDataY());
+        boost::scoped_ptr<MantidVec> E(lhs.makeDataE());
+        TS_ASSERT_DELTA( (*Y)[0], 0.0, 1e-6);
+        TS_ASSERT_DELTA( (*E)[0], sqrt((double)lhs.getNumberEvents()), 1e-6);
       }
     }
   }
@@ -373,8 +375,10 @@ public:
       //Put a single big bin with all events
       lhs.setX(one_big_bin() );
       //But the total neutrons is 0.0! They've been cancelled out :)
-      TS_ASSERT_DELTA( (*lhs.makeDataY())[0], 0.0, 1e-6);
-      TS_ASSERT_DELTA( (*lhs.makeDataE())[0], sqrt((double)lhs.getNumberEvents()), 1e-6);
+      boost::scoped_ptr<MantidVec> Y(lhs.makeDataY());
+      boost::scoped_ptr<MantidVec> E(lhs.makeDataE());
+      TS_ASSERT_DELTA( (*Y)[0], 0.0, 1e-6);
+      TS_ASSERT_DELTA( (*E)[0], sqrt((double)lhs.getNumberEvents()), 1e-6);
     }
   }
 
@@ -871,18 +875,18 @@ public:
     const EventList el2(el);
 
     //Getting data before setting X returns empty vector
-    TS_ASSERT_EQUALS(el2.makeDataY()->size(), 0);
+    boost::scoped_ptr<MantidVec> Y2(el2.makeDataY());
+    TS_ASSERT_EQUALS(Y2->size(), 0);
 
     //Now do set up an X axis.
     this->test_setX();
-    MantidVec X, Y;
     const EventList el3(el);
-    X = el3.constDataX();
-    Y = *el3.makeDataY();
+    MantidVec X = el3.constDataX();
+    boost::scoped_ptr<MantidVec> Y3(el3.makeDataY());
     //Histogram is 0, since I cleared all the events
     for (std::size_t i=0; i<X.size()-1; i++)
     {
-      TS_ASSERT_EQUALS(Y[i], 0);
+      TS_ASSERT_EQUALS((*Y3)[i], 0);
     }
   }
 
@@ -893,7 +897,8 @@ public:
     //Now give it some fake data, with NUMEVENTS events in it.
     this->fake_data();
     const EventList el4(el);
-    TS_ASSERT_EQUALS(el4.makeDataY()->size(), 0);
+    boost::scoped_ptr<MantidVec> Y(el4.makeDataY());
+    TS_ASSERT_EQUALS(Y->size(), 0);
   }
 
   void test_histogram_all_types()
@@ -905,18 +910,17 @@ public:
       el.switchTo(static_cast<EventType>(this_type));
 
       this->test_setX(); //Set it up
-      MantidVec X, Y, E;
       const EventList el3(el); //need to copy to a const method in order to access the data directly.
-      X = el3.constDataX();
-      Y = *el3.makeDataY();
-      E = *el3.makeDataE();
-      TS_ASSERT_EQUALS(Y.size(), X.size()-1);
+      MantidVec X = el3.constDataX();
+      boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
+      boost::scoped_ptr<MantidVec> E(el3.makeDataE());
+      TS_ASSERT_EQUALS(Y->size(), X.size()-1);
       //The data was created so that there should be exactly 2 events per bin
       // The last bin entry will be 0 since we use it as the top boundary of i-1.
-      for (std::size_t i=0; i<Y.size(); i++)
+      for (std::size_t i=0; i<Y->size(); i++)
       {
-        TS_ASSERT_EQUALS(Y[i], 2.0);
-        TS_ASSERT_DELTA(E[i], sqrt(2.0), 1e-5);
+        TS_ASSERT_EQUALS((*Y)[i], 2.0);
+        TS_ASSERT_DELTA((*E)[i], sqrt(2.0), 1e-5);
       }
     }
   }
@@ -999,18 +1003,17 @@ public:
 
     TS_ASSERT_EQUALS( el.getEventType(), WEIGHTED );
 
-    MantidVec X, Y, E;
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
-    X = el3.constDataX();
-    Y = *el3.makeDataY();
-    E = *el3.makeDataE();
-    TS_ASSERT_EQUALS(Y.size(), X.size()-1);
-    for (std::size_t i=0; i<Y.size(); i++)
+    MantidVec X = el3.constDataX();
+    boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
+    boost::scoped_ptr<MantidVec> E(el3.makeDataE());
+    TS_ASSERT_EQUALS(Y->size(), X.size()-1);
+    for (std::size_t i=0; i<Y->size(); i++)
     {
       // 5 events, each with a weight of 3.2
-      TS_ASSERT_DELTA(Y[i], 5 * 3.2, 1e-6);
+      TS_ASSERT_DELTA((*Y)[i], 5 * 3.2, 1e-6);
       // Error should be scaled the same, by a factor of 3.2 - maintaining the same signal/error ratio.
-      TS_ASSERT_DELTA(E[i], sqrt((double)5.0) * 3.2, 1e-6);
+      TS_ASSERT_DELTA((*E)[i], sqrt((double)5.0) * 3.2, 1e-6);
     }
   }
 
@@ -1020,19 +1023,18 @@ public:
     this->fake_uniform_data_weights();
 
     this->test_setX(); //Set it up
-    MantidVec X, Y, E;
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
-    X = el3.constDataX();
-    Y = *el3.makeDataY();
-    E = *el3.makeDataE();
-    TS_ASSERT_EQUALS(Y.size(), X.size()-1);
+    MantidVec X = el3.constDataX();
+    boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
+    boost::scoped_ptr<MantidVec> E(el3.makeDataE());
+    TS_ASSERT_EQUALS(Y->size(), X.size()-1);
     //The data was created so that there should be exactly 2 events per bin
     // The last bin entry will be 0 since we use it as the top boundary of i-1.
-    for (std::size_t i=0; i<Y.size(); i++)
+    for (std::size_t i=0; i<Y->size(); i++)
     {
-      TS_ASSERT_EQUALS(Y[i], 4.0);
+      TS_ASSERT_EQUALS((*Y)[i], 4.0);
       //Two errors of (2.5) adds up to sqrt(2 * 2.5*2.5)
-      TS_ASSERT_DELTA(E[i], sqrt(2 * 2.5*2.5), 1e-5);
+      TS_ASSERT_DELTA((*E)[i], sqrt(2 * 2.5*2.5), 1e-5);
     }
   }
 
@@ -1050,16 +1052,15 @@ public:
     el.setX(shared_x);
 
     //Get them back
-    MantidVec X, Y;
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
-    X = el3.constDataX();
-    Y = *el3.makeDataY();
-    TS_ASSERT_EQUALS(Y.size(), X.size()-1);
+    MantidVec X = el3.constDataX();
+    boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
+    TS_ASSERT_EQUALS(Y->size(), X.size()-1);
 
     //The data was created so that there should be exactly 2 events per bin. The first 10 bins (20 events) are empty.
-    for (std::size_t i=0; i<Y.size(); i++)
+    for (std::size_t i=0; i<Y->size(); i++)
     {
-      TS_ASSERT_EQUALS(Y[i], 2.0);
+      TS_ASSERT_EQUALS((*Y)[i], 2.0);
     }
   }
 
@@ -1072,14 +1073,13 @@ public:
     for (double tof=BIN_DELTA*10; tof<BIN_DELTA*(NUMBINS+1); tof += BIN_DELTA)
       shared_x.push_back(tof);
     el.setX(shared_x);
-    MantidVec X, Y;
     const EventList el3(el); //need to copy to a const method in order to access the data directly.
-    X = el3.constDataX();
-    Y = *el3.makeDataY();
-    TS_ASSERT_EQUALS(Y.size(), X.size()-1);
-    for (std::size_t i=0; i<Y.size(); i++)
+    MantidVec X = el3.constDataX();
+    boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
+    TS_ASSERT_EQUALS(Y->size(), X.size()-1);
+    for (std::size_t i=0; i<Y->size(); i++)
     {
-      TS_ASSERT_EQUALS(Y[i], 4.0);
+      TS_ASSERT_EQUALS((*Y)[i], 4.0);
     }
   }
 
@@ -1087,16 +1087,15 @@ public:
   {
     this->fake_data();
     this->test_setX();
-    MantidVec X, Y;
     const EventList el3(el);
-    X = el3.constDataX();
-    Y = *el3.makeDataY();
-    TS_ASSERT_EQUALS(Y.size(), X.size()-1);
+    MantidVec X = el3.constDataX();
+    boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
+    TS_ASSERT_EQUALS(Y->size(), X.size()-1);
     for (std::size_t i=0; i<X.size()-1; i++)
     {
       //No data was generated above 10 ms.
       if (X[i] > 10e6)
-        TS_ASSERT_EQUALS(Y[i], 0.0);
+        TS_ASSERT_EQUALS((*Y)[i], 0.0);
     }
   }
 
@@ -1348,27 +1347,27 @@ public:
   //-----------------------------------------------------------------------------------------------
   void test_convertUnitsViaTof_failures()
   {
-    Unit * fromUnit = new DummyUnit1();
-    Unit * toUnit = new DummyUnit2();
+    DummyUnit1 fromUnit;
+    DummyUnit2 toUnit;
     TS_ASSERT_THROWS_ANYTHING(el.convertUnitsViaTof(NULL,NULL));
     // Not initalized
-    TS_ASSERT_THROWS_ANYTHING(el.convertUnitsViaTof(fromUnit,toUnit));
+    TS_ASSERT_THROWS_ANYTHING(el.convertUnitsViaTof(&fromUnit,&toUnit));
   }
 
   //-----------------------------------------------------------------------------------------------
   void test_convertUnitsViaTof_allTypes()
   {
-    Unit * fromUnit = new DummyUnit1();
-    Unit * toUnit = new DummyUnit2();
-    fromUnit->initialize(1,2,3,4,5,6);
-    toUnit->initialize(1,2,3,4,5,6);
+    DummyUnit1 fromUnit;
+    DummyUnit2 toUnit;
+    fromUnit.initialize(1,2,3,4,5,6);
+    toUnit.initialize(1,2,3,4,5,6);
     // Go through each possible EventType as the input
     for (int this_type=0; this_type<3; this_type++)
     {
       this->fake_uniform_data();
       el.switchTo(static_cast<EventType>(this_type));
       size_t old_num = this->el.getNumberEvents();
-      this->el.convertUnitsViaTof(fromUnit, toUnit);
+      this->el.convertUnitsViaTof(&fromUnit, &toUnit);
       //Unchanged size
       TS_ASSERT_EQUALS(old_num, this->el.getNumberEvents());
       //Original tofs were 100, 5100, 10100, etc.). This becomes x * 200.
@@ -1453,39 +1452,46 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
-  void test_splitByTime()
+  /** Test method to split events by full time (pulse + tof) withtout correction on TOF
+    */
+  void test_splitByFullTime()
   {
-    this->fake_uniform_time_data();
+    // Create 1000 random events close to SNS's frequency
+    fake_uniform_time_sns_data();
 
-    std::vector< EventList * > outputs;
-    for (size_t i=0; i<10; i++)
-      outputs.push_back( new EventList() );
+    // Output will be 10 event lists
+    std::map<int, EventList * > outputs;
+    for (int i = 0; i < 10; i++)
+      outputs.insert(std::make_pair(i, new EventList()));
+    outputs.insert(std::make_pair(-1, new EventList()));
 
+    // Generate time splitters
     TimeSplitterType split;
-    //Start only at 100
-    for (int i=1; i<10; i++)
+
+    // Start only at 100
+    for (int i = 1; i < 10; i++)
     {
-      //Reject the odd hundreds pulse times (100-199, 300-399, etc).
+      // Reject the odd hundreds pulse times (100-199, 300-399, etc).
       if ((i%2) == 0)
-        split.push_back( SplittingInterval(i*100, (i+1)*100, i) );
+        split.push_back( SplittingInterval(i*1000000, (i+1)*1000000, i) );
       else
-        split.push_back( SplittingInterval(i*100, (i+1)*100, -1) );
+        split.push_back( SplittingInterval(i*1000000, (i+1)*1000000, -1) );
     }
 
-    //Do the splitting
-    el.splitByTime(split, outputs);
+    // Do the splitting
+    el.splitByFullTime(split, outputs, 1.0, false);
 
     //No events in the first ouput 0-99
     TS_ASSERT_EQUALS( outputs[0]->getNumberEvents(), 0);
 
-    for (size_t i=1; i<10; i++)
+    for (int i=1; i<10; i++)
     {
       EventList * myOut = outputs[i];
-      //std::cout << i << " " << myOut->getNumberEvents() << "\n";
+      std::cout << i << " " << myOut->getNumberEvents() << "\n";
       if ((i%2) == 0)
       {
         //Even
-        TS_ASSERT_EQUALS( myOut->getNumberEvents(), 100);
+        TS_ASSERT_EQUALS( myOut->getNumberEvents(), 1);
       }
       else
       {
@@ -1493,6 +1499,89 @@ public:
         TS_ASSERT_EQUALS( myOut->getNumberEvents(), 0);
       }
     }
+
+    // Clean the pointers
+    for (std::map<int, EventList*>::iterator im = outputs.begin(); im != outputs.end(); ++im)
+    {
+      delete im->second;
+    }
+
+    return;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Test method to split events by full time (pulse + tof) withtout correction on TOF
+    * and with vector splitter
+    */
+  void test_splitByFullTimeVectorSplitter()
+  {
+    // Create 1000 random events close to SNS's frequency
+    fake_uniform_time_sns_data();
+
+    el.sortPulseTimeTOF();
+    for (size_t i = 0; i < el.getNumberEvents(); ++i)
+    {
+      std::cout << el.getEvent(i).pulseTime() << ", " << el.getEvent(i).tof()
+                << ", " << el.getEvent(i).pulseTime().totalNanoseconds() + static_cast<int64_t>(el.getEvent(i).tof()*1000.0) << "\n";
+    }
+
+    // Output will be 10 event lists
+    std::map<int, EventList * > outputs;
+    for (int i = 0; i < 10; i++)
+      outputs.insert(std::make_pair(i, new EventList()));
+    outputs.insert(std::make_pair(-1, new EventList()));
+
+    // Generate time splitters
+    std::vector<int64_t> vec_splitTimes;
+    std::vector<int> vec_splitGroup;
+
+    // Start only at 100
+    for (int i = 1; i <= 10; i++)
+    {
+      vec_splitTimes.push_back(i*1000000);
+    }
+    vec_splitGroup.assign(vec_splitTimes.size(), -1);
+    vec_splitGroup[1] = 2;
+    vec_splitGroup[3] = 4;
+    vec_splitGroup[5] = 6;
+    vec_splitGroup[7] = 8;
+
+    for (size_t i = 0; i < vec_splitTimes.size()-1; ++i)
+    {
+      std::cout << "F " << vec_splitTimes[i] << ", " << vec_splitTimes[i+1] << ", "
+                << vec_splitGroup[i] << "\n";
+    }
+
+    // Do the splitting
+    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs, 1.0, false);
+
+
+    //No events in the first ouput 0-99
+    TS_ASSERT_EQUALS( outputs[0]->getNumberEvents(), 0);
+
+    for (int i=1; i<10; i++)
+    {
+      EventList * myOut = outputs[i];
+      std::cout << i << " " << myOut->getNumberEvents() << "\n";
+      if ((i%2) == 0)
+      {
+        //Even
+        TS_ASSERT_EQUALS( myOut->getNumberEvents(), 1);
+      }
+      else
+      {
+        //Odd
+        TS_ASSERT_EQUALS( myOut->getNumberEvents(), 0);
+      }
+    }
+
+    // Clean the pointers
+    for (std::map<int, EventList*>::iterator im = outputs.begin(); im != outputs.end(); ++im)
+    {
+      delete im->second;
+    }
+
+    return;
   }
 
 
@@ -1539,6 +1628,8 @@ public:
 
         TS_ASSERT_EQUALS( outputs[0]->getEventType(), curType);
       }
+
+      for (size_t i=0; i<10; i++) delete outputs[i];
     }
   }
 
@@ -1548,9 +1639,7 @@ public:
   {
     this->fake_uniform_time_data();
 
-    std::vector< EventList * > outputs;
-    for (size_t i=0; i<1; i++)
-      outputs.push_back( new EventList() );
+    std::vector< EventList * > outputs(1, new EventList());
 
     TimeSplitterType split;
     split.push_back( SplittingInterval(100, 200, 0) );
@@ -1560,8 +1649,8 @@ public:
     el.splitByTime(split, outputs);
 
     //No events in the first ouput 0-99
-    TS_ASSERT_EQUALS( outputs[0]->getNumberEvents(), 150);
-
+    TS_ASSERT_EQUALS( outputs.front()->getNumberEvents(), 150);
+    delete outputs.front();
   }
 
 
@@ -1724,7 +1813,6 @@ public:
 
         el.switchTo(static_cast<EventType>(this_type));
 
-//        int num_old = el.getNumberEvents();
         double mult = 1.0;
         if (this_type > 0)
         {
@@ -1763,6 +1851,8 @@ public:
           // Now the memory must be well used
           TS_ASSERT_EQUALS( el_out->getWeightedEventsNoTime().capacity(), 3);
         }
+
+        if ( !inplace ) delete el_out;
       }// inplace
     }// starting event type
   }
@@ -1937,6 +2027,24 @@ public:
     {
       //All pulse times from 0 to 999 in seconds
       el += TofEvent( rand()%1000, time); //Kernel::DateAndTime(time*1.0, 0.0) );
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Fake uniform time data more close to SNS case
+    */
+  void fake_uniform_time_sns_data()
+  {
+    //Clear the list
+    el = EventList();
+
+    //Create some mostly-reasonable fake data.
+    srand(1234); //Fixed random seed
+    for (int time = 0; time < 1000; time++)
+    {
+      //All pulse times from 0 to 999 in seconds
+      DateAndTime pulsetime(static_cast<int64_t>(time*1000000));
+      el += TofEvent( rand()%1000, pulsetime ); //Kernel::DateAndTime(time*1.0, 0.0) );
     }
   }
 

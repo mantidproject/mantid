@@ -151,14 +151,34 @@ void EQSANSDarkCurrentSubtraction::exec()
   progress.report(3, "Loaded dark current");
 
   // Normalize the dark current and data to counting time
-  Mantid::Kernel::Property* prop = inputWS->run().getProperty("proton_charge");
-  Mantid::Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
-  double duration = dp->getStatistics().duration;
+  double scaling_factor = 1.0;
+  if (inputWS->run().hasProperty("proton_charge"))
+  {
+      Mantid::Kernel::Property* prop = inputWS->run().getProperty("proton_charge");
+      Mantid::Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
+      double duration = dp->getStatistics().duration;
 
-  prop = darkWS->run().getProperty("proton_charge");
-  dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
-  double dark_duration = dp->getStatistics().duration;
-  double scaling_factor = duration/dark_duration;
+      prop = darkWS->run().getProperty("proton_charge");
+      dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
+      double dark_duration = dp->getStatistics().duration;
+      scaling_factor = duration/dark_duration;
+  }
+  else if (inputWS->run().hasProperty("timer"))
+  {
+      Mantid::Kernel::Property* prop = inputWS->run().getProperty("timer");
+      Mantid::Kernel::PropertyWithValue<double>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
+      double duration = *dp;
+
+      prop = darkWS->run().getProperty("timer");
+      dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
+      double dark_duration = *dp;
+      scaling_factor = duration/dark_duration;
+  } 
+  else
+  {
+      output_message += "\n   Could not find proton charge or duration in sample logs";
+      g_log.error() << "ERROR: Could not find proton charge or duration in sample logs" << std::endl;
+  };
 
   progress.report("Scaling dark current");
 

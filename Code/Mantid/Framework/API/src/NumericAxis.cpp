@@ -71,6 +71,29 @@ void NumericAxis::setValue(const std::size_t& index, const double& value)
   m_values[index] = value;
 }
 
+/**
+ * Finds the closest index of the given value on the axis
+ * @param value A value on the axis
+ * @return The index closest to given value
+ * @throws std::out_of_range if the value is out of range of the axis
+ */
+size_t NumericAxis::indexOfValue(const double value) const
+{
+  const auto & yVals = this->getValues();
+  if(value < yVals.front())
+  {
+    throw std::out_of_range("NumericAxis::indexOfValue() - Input lower than first value.");
+  }
+  auto it = std::lower_bound(yVals.begin(), yVals.end(), value);
+  if (it == yVals.end())
+  {
+    // Out of range
+    throw std::out_of_range("NumericAxis::indexOfValue() - Input value out of range");
+  }
+  // The workspace index is the point in the vector that we found
+  return (it - yVals.begin());
+}
+
 /** Check if two axis defined as spectra or numeric axis are equivalent
  *  @param axis2 :: Reference to the axis to compare to
  *  @return true if self and second axis are equal

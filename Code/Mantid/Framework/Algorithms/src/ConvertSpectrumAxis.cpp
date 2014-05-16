@@ -86,8 +86,8 @@ namespace Algorithms
     {
       Kernel::Unit_sptr fromUnit = inputWS->getAxis(0)->unit();
       Kernel::Unit_sptr toUnit = UnitFactory::Instance().create(unitTarget);
-      IObjComponent_const_sptr source = inputWS->getInstrument()->getSource();
-      IObjComponent_const_sptr sample = inputWS->getInstrument()->getSample();
+      IComponent_const_sptr source = inputWS->getInstrument()->getSource();
+      IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
       std::vector<double> emptyVector;
       const double l1 = source->getDistance(*sample);
       const std::string emodeStr = getProperty("EMode");

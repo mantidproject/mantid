@@ -32,6 +32,7 @@ public:
   ~SpectraAxisTest()
   {
     delete spectraAxis;
+    delete ws;
   }
   
   void testConstructor()
@@ -57,7 +58,7 @@ public:
     TS_ASSERT_DIFFERS( newSpecAxis, spectraAxis );
     TS_ASSERT( newSpecAxis->isSpectra() );
     TS_ASSERT_EQUALS( newSpecAxis->title(), "A spectra axis" );
-    TS_ASSERT_EQUALS( newSpecAxis->unit()->unitID(), "Empty" );
+    TS_ASSERT_EQUALS( newSpecAxis->unit()->unitID(), "Label" );
     // Although the 'different length' constructor is still there (for now) it has no effect.
     TS_ASSERT_EQUALS( newSpecAxis->length(), 5 );
     TS_ASSERT_EQUALS( (*newSpecAxis)(1), 2.0 );
@@ -122,6 +123,21 @@ public:
       TS_ASSERT_EQUALS( (*spectraAxis)(i), 2*i );
     }    
   }
+
+  void testIndexOfValue_Treats_Input_As_Spectrum_No()
+  {
+    for (int i=0; i<5; ++i)
+    {
+      TS_ASSERT_EQUALS(i, spectraAxis->indexOfValue(static_cast<double>(2*i)) );
+    }
+  }
+
+  // --------------------------------------- Failure cases --------------------
+  void testIndexOfValue_Throws_out_of_range_error_If_Input_Not_In_Range()
+  {
+    TS_ASSERT_THROWS(spectraAxis->indexOfValue(20.), std::out_of_range);
+  }
+
 
 private:
   WorkspaceTester *ws;

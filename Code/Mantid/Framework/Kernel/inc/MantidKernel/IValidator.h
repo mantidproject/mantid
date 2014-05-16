@@ -6,11 +6,14 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/DataItem.h"
-#include <boost/any.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/type_traits/is_convertible.hpp>
-#include <boost/type_traits/is_pointer.hpp>
+#include "MantidKernel/Logger.h"
+#ifndef Q_MOC_RUN
+# include <boost/any.hpp>
+# include <boost/shared_ptr.hpp>
+# include <boost/make_shared.hpp>
+# include <boost/type_traits/is_convertible.hpp>
+# include <boost/type_traits/is_pointer.hpp>
+#endif
 #include <set>
 #include <string>
 #include <sstream>

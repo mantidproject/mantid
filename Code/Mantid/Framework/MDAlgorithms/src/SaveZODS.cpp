@@ -112,7 +112,7 @@ namespace MDAlgorithms
     if (ws->getNumDims() != 3)
       throw std::runtime_error("InputWorkspace must have 3 dimensions (having one bin in the 3rd dimension is OK).");
 
-    if (ws->getDimension(0)->getName() != "H")
+    if (ws->getDimension(0)->getName() != "[H,0,0]")
       g_log.warning() << "SaveZODS expects the workspace to be in HKL space! Saving anyway..." << std::endl;
 
     // Create a HDF5 file

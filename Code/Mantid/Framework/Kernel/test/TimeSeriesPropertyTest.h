@@ -1011,13 +1011,12 @@ public:
     TS_ASSERT_EQUALS( pp.realSize(), 0);
   }
 
-  /*
-   * Test 2 create() functions by creating 3 properties in different approaches.
+  //----------------------------------------------------------------------------------------------
+  /** Test 2 create() functions by creating 3 properties in different approaches.
    */
   void test_Create()
   {
-
-    // 1. Create property
+    // Create property by add 4 entries
     TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:00",1.00) );
     TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:20",3.00) );

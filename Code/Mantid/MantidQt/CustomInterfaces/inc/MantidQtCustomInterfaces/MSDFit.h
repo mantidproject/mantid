@@ -24,15 +24,20 @@ namespace IDA
     virtual QString helpURL() {return "MSDFit";}
 
   private slots:
+    void sequential();
+    void plotFit(QString wsName);
     void plotInput();
     void minChanged(double val);
     void maxChanged(double val);
     void updateRS(QtProperty* prop, double val);
     
   private:
+    QString currentWsName;
+    QIntValidator * m_intVal;
     QwtPlot* m_msdPlot;
     MantidWidgets::RangeSelector* m_msdRange;
     QwtPlotCurve* m_msdDataCurve;
+    QwtPlotCurve* m_msdFitCurve;
     QtTreePropertyBrowser* m_msdTree;
     QMap<QString, QtProperty*> m_msdProp;
     QtDoublePropertyManager* m_msdDblMng;

@@ -1,6 +1,6 @@
 import unittest
-from mantid.api import (AlgorithmFactory, mtd, IEventWorkspace, ITableWorkspace,
-                        MatrixWorkspace, WorkspaceGroup)
+from mantid.api import (AlgorithmFactory, AlgorithmProxy, IAlgorithm, IEventWorkspace, ITableWorkspace,
+                        PythonAlgorithm, MatrixWorkspace, mtd, WorkspaceGroup)
 import mantid.simpleapi as simpleapi
 import numpy
 
@@ -64,9 +64,9 @@ OutputWorkspace(Output:req) *MatrixWorkspace*       The name to give the output 
 
 Params(Input:req) *dbl list*       A comma separated list of first bin boundary, width, last bin boundary. Optionally this can be followed by a comma and more widths and last boundary pairs. Optionally this can also be a single number, which is the bin width. In this case, the boundary of binning will be determined by minimum and maximum TOF values among all events, or previous binning boundary, in case of event Workspace, or non-event Workspace, respectively. Negative width values indicate logarithmic binning. 
 
-PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorkspace, if the input has events (default). If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the workspace gets converted to a Workspace2D histogram.
+PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorkspace, if the input has events. If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the workspace gets converted to a Workspace2D histogram.
 
-FullBinsOnly(Input) *boolean*       Ignore bins of the size smaller than the step size.
+FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller than the step size
 """
         doc = simpleapi.rebin.__doc__
         self.assertTrue(len(doc) > 0 )
@@ -274,7 +274,7 @@ AlgorithmFactory.subscribe(%(name)s)
         name="OptionalWorkspace"
         algm_object = AlgorithmManager.createUnmanaged(name, 1)
         algm_object.initialize()
-        simpleapi._create_algorithm(name, 1, algm_object) # Create the wrapper
+        simpleapi._create_algorithm_function(name, 1, algm_object) # Create the wrapper
 
         # Call with no optional output specified
         result = simpleapi.OptionalWorkspace(RequiredWorkspace="required")
@@ -290,7 +290,36 @@ AlgorithmFactory.subscribe(%(name)s)
         
         # Tidy up simple api function
         del simpleapi.OptionalWorkspace
-        
+
+    def test_create_algorithm_object_produces_initialized_non_child_alorithm_outside_PyExec(self):
+        alg = simpleapi._create_algorithm_object("Rebin")
+        self._is_initialized_test(alg, 1, expected_class=AlgorithmProxy,
+                                  expected_child=False)
+
+    def test_create_algorithm_with_version_produces_initialized_alorithm(self):
+        alg = simpleapi._create_algorithm_object("LoadRaw", 2)
+        self._is_initialized_test(alg, 2, expected_class=AlgorithmProxy,
+                                  expected_child=False)
+
+    def test_create_algorithm_produces_child_inside_PyExec(self):
+        # A small test class to have a PyExec method call the
+        # algorithm creation
+        class TestAlg(PythonAlgorithm):
+            def PyInit(self):
+                pass
+            def PyExec(self):
+                self.alg = simpleapi._create_algorithm_object("Rebin")
+        # end
+        top_level = TestAlg()
+        top_level.PyExec()
+        self._is_initialized_test(top_level.alg, 1, expected_class=IAlgorithm,
+                                  expected_child=True)
+
+    def _is_initialized_test(self, alg, version, expected_class, expected_child):
+        self.assertTrue(alg.isInitialized())
+        self.assertEquals(expected_child,alg.isChild())
+        self.assertEquals(alg.version(), version)
+        self.assertTrue(isinstance(alg, expected_class))
 
 if __name__ == '__main__':
     unittest.main()

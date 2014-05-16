@@ -36,6 +36,7 @@ namespace Mantid
     public:
       virtual bool isBackground(Mantid::API::IMDIterator* const iterator) const = 0;
       virtual void configureIterator(Mantid::API::IMDIterator* const iterator) const = 0;
+      virtual BackgroundStrategy* clone() const = 0;
       virtual ~BackgroundStrategy()
       {
       }

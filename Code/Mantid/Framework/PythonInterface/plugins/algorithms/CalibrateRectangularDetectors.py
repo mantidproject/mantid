@@ -25,6 +25,7 @@ import os
 import datetime
 from time import localtime, strftime
 from mantid import config
+from mantid.kernel import Direction
 
 COMPRESS_TOL_TOF = .01
 
@@ -58,7 +59,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         validator.setLower(0)
         self.declareProperty(IntArrayProperty("Background", values=[0], direction=Direction.Input, 
                                               validator=validator))
-        extensions = [ "_histo.nxs", "_event.nxs", "_runinfo.xml"]
+        extensions = [ "_event.nxs", "_runinfo.xml"]
         self.declareProperty("Extension", "_event.nxs",
                              StringListValidator(extensions))
         self.declareProperty("CompressOnRead", False,
@@ -105,12 +106,13 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              "Relative time to start filtering by in seconds. Applies only to sample.")
         self.declareProperty("FilterByTimeMax", 0.,
                              "Relative time to stop filtering by in seconds. Applies only to sample.")
-        self.declareProperty("FilterByLogValue", "", "Name of log value to filter by")
-        self.declareProperty("FilterMinimumValue", 0.0, "Minimum log value for which to keep events.")
-        self.declareProperty("FilterMaximumValue", 0.0, "Maximum log value for which to keep events.")
         outfiletypes = ['dspacemap', 'calibration', 'dspacemap and calibration']
         self.declareProperty("SaveAs", "calibration", StringListValidator(outfiletypes))
         self.declareProperty(FileProperty("OutputDirectory", "", FileAction.Directory))
+        
+        self.declareProperty("OutputFilename", "", Direction.Output)
+        
+        return
 
     def validateInputs(self):
         messages = {}
@@ -167,7 +169,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             @param runnumer: run number (integer)
             @param extension: file extension 
         """
-        kwargs["Precount"] = True
+        kwargs["Precount"] = False
+        if self.getProperty("CompressOnRead").value:
+            kwargs["CompressTolerance"] = .1
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
@@ -178,17 +182,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             LoadInstrument(Workspace=wksp, Filename=path+'/'+"NOMAD_Definition_20120701-20120731.xml", 
                            RewriteSpectraMap=False)
         return wksp
-
-    def _loadHistoNeXusData(self, runnumber, extension):
-        """
-            Load histogram Nexus
-            @param runnumber: run number (integer)
-            @param extension: file extension
-        """
-        self.log().warning("Loading histogram Nexus for run %s" % runnumber)
-        name = "%s_%d" % (self._instrument, runnumber)
-        filename = name + extension
-        return LoadTOFRawNexus(Filename=filename, OutputWorkspace=name)
 
     def _loadData(self, runnumber, extension, filterWall=None):
         """
@@ -207,13 +200,19 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             return None
 
         if extension.endswith("_event.nxs"):
-            return self._loadEventNeXusData(runnumber, extension, **filter)
-        elif extension.endswith("_histo.nxs"):
-            return self._loadHistoNeXusData(runnumber, extension)
+            wksp = self._loadEventNeXusData(runnumber, extension, **filter)
         else:
-            return self._loadPreNeXusData(runnumber, extension, **filter)
+            wksp = self._loadPreNeXusData(runnumber, extension, **filter)
 
-    def _cccalibrate(self, wksp, calib, filterLogs=None):
+        if self._filterBadPulses and not self.getProperty("CompressOnRead").value:
+            wksp = FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp.name())
+
+        if not self.getProperty("CompressOnRead").value:
+            wksp = CompressEvents(wksp, OutputWorkspace=wksp.name(), 
+                                  Tolerance=COMPRESS_TOL_TOF) # 100ns
+        return wksp
+
+    def _cccalibrate(self, wksp, calib):
         if wksp is None:
             return None
         LRef = self.getProperty("UnwrapRef").value
@@ -224,19 +223,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             if DIFCref > 0:
                 wksp = RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp.name(), 
                                        ReferenceDIFC=DIFCref)
-        # take care of filtering events
-        if self._filterBadPulses and not self.getProperty("CompressOnRead").value:
-            wksp = FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp.name())
-        if filterLogs is not None:
-            try:
-                logparam = wksp.getRun()[filterLogs[0]]
-                if logparam is not None:
-                    wksp = FilterByLogValue(InputWorkspace=wksp, OutputWorkspace=wksp.name(), 
-                                            LogName=filterLogs[0], MinimumValue=filterLogs[1], 
-                                            MaximumValue=filterLogs[2])
-            except KeyError, e:
-                raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
-                                   % (filterLogs[0], str(wksp)))
         if not self.getProperty("CompressOnRead").value:
             wksp = CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp.name(), 
                                   Tolerance=COMPRESS_TOL_TOF) # 100ns
@@ -344,17 +330,24 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
         lcinst = str(self._instrument)
         
+        outfilename = None
         if "dspacemap" in self._outTypes:
             #write Dspacemap file
+            outfilename = self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat")
             SaveDspacemap(InputWorkspace=str(wksp)+"offset",
-                          DspacemapFile=self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat"))
+                          DspacemapFile=outfilename)
         if "calibration" in self._outTypes:
+            outfilename = calib
             SaveCalFile(OffsetsWorkspace=str(wksp)+"offset",
                         GroupingWorkspace=str(wksp)+"group",
                         MaskWorkspace=str(wksp)+"mask",Filename=calib)
+                        
+        if outfilename is not None:
+            self.setProperty("OutputFilename", outfilename)
+            
         return wksp
 
-    def _multicalibrate(self, wksp, calib, filterLogs=None):
+    def _multicalibrate(self, wksp, calib):
         if wksp is None:
             return None
         LRef = self.getProperty("UnwrapRef").value
@@ -364,20 +357,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 wksp = UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp.name(), LRef=LRef)
             if DIFCref > 0:
                 wksp = RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp.name(), 
-                                       ReferenceDIFC=DIFCref)
-        # take care of filtering events
-        if self._filterBadPulses and not self.getProperty("CompressOnRead").value and not "histo" in self.getProperty("Extension").value:
-            wksp = FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp.name())
-        if filterLogs is not None:
-            try:
-                logparam = wksp.getRun()[filterLogs[0]]
-                if logparam is not None:
-                    wksp = FilterByLogValue(InputWorkspace=wksp, OutputWorkspace=wksp.name(), 
-                                            LogName=filterLogs[0],
-                                            MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
-            except KeyError, e:
-                raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
-                                   % (filterLogs[0], str(wksp)))            
+                                       ReferenceDIFC=DIFCref)  
         if not self.getProperty("CompressOnRead").value and not "histo" in self.getProperty("Extension").value:
             wksp = CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp.name(), 
                                   Tolerance=COMPRESS_TOL_TOF) # 100ns
@@ -420,17 +400,24 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                      Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
         lcinst = str(self._instrument)
         
+        outfilename = None
         if "dspacemap" in self._outTypes:
             #write Dspacemap file
+            outfilename = self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat")
             SaveDspacemap(InputWorkspace=str(wksp)+"offset",
-                          DspacemapFile=self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat"))
+                          DspacemapFile=outfilename)
         if "calibration" in self._outTypes:
             SaveCalFile(OffsetsWorkspace=str(wksp)+"offset",
                         GroupingWorkspace=str(wksp)+"group",
                         MaskWorkspace=str(wksp)+"mask", Filename=calib)
+            outfilename = calib
+            
+        if outfilename is not None:
+            self.setProperty("OutputFilename", outfilename)
+            
         return wksp
 
-    def _focus(self, wksp, calib, filterLogs=None):
+    def _focus(self, wksp, calib):
         if wksp is None:
             return None
         MaskDetectors(Workspace=wksp, MaskedWorkspace=str(wksp)+"mask")
@@ -497,13 +484,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self._maxoffset = self.getProperty("MaxOffset").value
         self._diffractionfocus = self.getProperty("DiffractionFocusWorkspace").value
         self._filterBadPulses = self.getProperty("FilterBadPulses").value
-        filterLogs = self.getProperty("FilterByLogValue").value
-        if len(filterLogs.strip()) <= 0:
-            filterLogs = None
-        else:
-            filterLogs = [filterLogs, 
-                          self.getProperty("FilterMinimumValue").value, 
-                          self.getProperty("FilterMaximumValue").value]
         self._outDir = self.getProperty("OutputDirectory").value+"/"
         self._outTypes = self.getProperty("SaveAs").value
         samRuns = self.getProperty("RunNumber").value
@@ -523,10 +503,13 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             if (backNum > 0):
                 backRun = self._loadData(backNum, SUFFIX, filterWall)
                 samRun -= backRun
+                DeleteWorkspace(backRun)
+                samRun = CompressEvents(samRun, OutputWorkspace=samRun.name(), 
+                                        Tolerance=COMPRESS_TOL_TOF) # 100ns
             if self.getProperty("CrossCorrelation").value:
-                samRun = self._cccalibrate(samRun, calib, filterLogs)
+                samRun = self._cccalibrate(samRun, calib)
             else:
-                samRun = self._multicalibrate(samRun, calib, filterLogs)
+                samRun = self._multicalibrate(samRun, calib)
             if self._xpixelbin*self._ypixelbin>1 or len(self._smoothGroups) > 0:
                 if AnalysisDataService.doesExist(str(samRun)):
                     AnalysisDataService.remove(str(samRun))
@@ -543,7 +526,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             else:
                 samRun = ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun.name(),
                                       Target="TOF")
-            samRun = self._focus(samRun, calib, filterLogs)
+            samRun = self._focus(samRun, calib)
             RenameWorkspace(InputWorkspace=samRun, OutputWorkspace=str(samRun)+"_calibrated")
 
 AlgorithmFactory.subscribe(CalibrateRectangularDetectors)

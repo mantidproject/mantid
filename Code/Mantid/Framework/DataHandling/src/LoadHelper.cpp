@@ -1,9 +1,11 @@
-/*WIKI*
- TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
- *WIKI*/
+/*
+ * Helper file to gather common routines to the Loaders
+ * */
 
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+
+#include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
 
 namespace Mantid {
 namespace DataHandling {
@@ -105,7 +107,7 @@ double LoadHelper::calculateTOF(double distance,double wavelength) {
 double LoadHelper::getL1(const API::MatrixWorkspace_sptr& workspace) {
 	Geometry::Instrument_const_sptr instrument =
 			workspace->getInstrument();
-	Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+	Geometry::IComponent_const_sptr sample = instrument->getSample();
 	double l1 = instrument->getSource()->getDistance(*sample);
 	return l1;
 }
@@ -115,7 +117,7 @@ double LoadHelper::getL2(const API::MatrixWorkspace_sptr& workspace, int detId) 
 	Geometry::Instrument_const_sptr instrument =
 			workspace->getInstrument();
 	// Get the distance between the source and the sample (assume in metres)
-	Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+	Geometry::IComponent_const_sptr sample = instrument->getSample();
 	// Get the sample-detector distance for this detector (in metres)
 	double l2 = workspace->getDetector(detId)->getPos().distance(
 			sample->getPos());
@@ -139,6 +141,65 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr& worksp
 	}
 }
 
+
+
+
+
+/**
+* Show attributes attached to the current Nexus entry
+*
+* @param nxfileID The Nexus entry
+* @param indentStr Indent spaces do display nexus entries as a tree
+*
+*/
+void LoadHelper::dumpNexusAttributes(NXhandle nxfileID, std::string& indentStr){
+	// Attributes
+	NXname pName;
+	int iLength, iType;
+	int nbuff = 127;
+	boost::shared_array<char> buff(new char[nbuff+1]);
+
+	while(NXgetnextattr(nxfileID, pName, &iLength, &iType) != NX_EOD)
+	{
+		g_log.debug()<<indentStr<<'@'<<pName<<" = ";
+		switch(iType)
+		{
+		case NX_CHAR:
+			{
+				if (iLength > nbuff + 1)
+				{
+					nbuff = iLength;
+					buff.reset(new char[nbuff+1]);
+				}
+				int nz = iLength + 1;
+				NXgetattr(nxfileID,pName,buff.get(),&nz,&iType);
+				g_log.debug()<<indentStr<<buff.get()<<'\n';
+				break;
+			}
+		case NX_INT16:
+			{
+				short int value;
+				NXgetattr(nxfileID,pName,&value,&iLength,&iType);
+				g_log.debug()<<indentStr<<value<<'\n';
+				break;
+			}
+		case NX_INT32:
+			{
+				int value;
+				NXgetattr(nxfileID,pName,&value,&iLength,&iType);
+				g_log.debug()<<indentStr<<value<<'\n';
+				break;
+			}
+		case NX_UINT16:
+			{
+				short unsigned int value;
+				NXgetattr(nxfileID,pName,&value,&iLength,&iType);
+				g_log.debug()<<indentStr<<value<<'\n';
+				break;
+			}
+		}// switch
+	}// while
+}
 /**
    * Recursively add properties from a nexus file to
    * the workspace run.

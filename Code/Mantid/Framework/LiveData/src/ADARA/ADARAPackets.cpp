@@ -255,15 +255,44 @@ void BankedEventPkt::firstEventInBank() const
 /* ------------------------------------------------------------------------ */
 
 BeamMonitorPkt::BeamMonitorPkt(const uint8_t *data, uint32_t len) :
-	Packet(data, len), m_fields((const uint32_t *)payload())
+	Packet(data, len), m_fields((const uint32_t *)payload()), m_sectionStartIndex(4)
 {
 	if (m_payload_len < (4 * sizeof(uint32_t)))
 		throw invalid_packet("BeamMonitor packet is too short");
 }
 
 BeamMonitorPkt::BeamMonitorPkt(const BeamMonitorPkt &pkt) :
-	Packet(pkt), m_fields((const uint32_t *)payload())
+	Packet(pkt), m_fields((const uint32_t *)payload()), m_sectionStartIndex(4)
 {}
+
+#define MONITOR_ID_MASK  0xFFA00000  // upper 10 bits
+#define EVENT_COUNT_MASK 0x003FFFFF  // lower 22 bits
+
+bool BeamMonitorPkt::nextSection() const
+// Returns true if there is a next section.  False if there isn't.
+{
+	bool RV = false;  // assume we're at the last section
+
+	unsigned eventCount = m_fields[m_sectionStartIndex] & EVENT_COUNT_MASK;
+	unsigned newSectionStart = m_sectionStartIndex + 3 + eventCount;
+	if ( ((newSectionStart * 4) + 16) < m_payload_len)
+	{
+		RV = true;
+		m_sectionStartIndex = newSectionStart;
+	}
+
+	return RV;
+}
+
+uint32_t BeamMonitorPkt::getSectionMonitorID() const
+{
+	return (m_fields[m_sectionStartIndex] & MONITOR_ID_MASK) >> 22;
+}
+
+uint32_t BeamMonitorPkt::getSectionEventCount() const
+{
+	return m_fields[m_sectionStartIndex] & EVENT_COUNT_MASK;
+}
 
 /* ------------------------------------------------------------------------ */
 

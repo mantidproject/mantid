@@ -25,7 +25,7 @@ class SimpleAPILoadTest(unittest.TestCase):
         self._do_name_check(data, 'data')
          
         self.assertTrue(isinstance(monitors, MatrixWorkspace))
-        self._do_name_check(monitors, 'data_Monitors')
+        self._do_name_check(monitors, 'data_monitors')
     
     def test_Load_returns_just_the_WorkspaceGroup_when_final_output_is_a_group(self):
         data = Load('CSP78173.raw')
@@ -39,7 +39,7 @@ class SimpleAPILoadTest(unittest.TestCase):
         self.assertTrue(isinstance(outputs[0], WorkspaceGroup))
         self._do_name_check(outputs[0], 'outputs')
         self.assertTrue(isinstance(outputs[1], WorkspaceGroup))
-        self._do_name_check(outputs[1], 'outputs_Monitors')
+        self._do_name_check(outputs[1], 'outputs_monitors')
     
     def test_Load_call_with_just_filename_executes_correctly(self):
         try:

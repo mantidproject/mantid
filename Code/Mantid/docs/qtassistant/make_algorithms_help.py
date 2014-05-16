@@ -107,7 +107,7 @@ def process(algos, qhp, outputdir, options):
     for name in algos.keys():
         versions = algos[name]
 
-        alg = mantid.FrameworkManager.createAlgorithm(name, versions[-1])
+        alg = mantid.AlgorithmManager.create(name, versions[-1])
         alias = alg.alias().strip()
         alg_categories = alg.categories()
         try:
@@ -134,7 +134,7 @@ def process(algos, qhp, outputdir, options):
         letter_groups[letter].append((str(name), versions))
 
         # add in the alias
-        alias = mantid.FrameworkManager.createAlgorithm(name, versions[-1]).alias().strip()
+        alias = mantid.AlgorithmManager.create(name, versions[-1]).alias().strip()
         if len(alias) > 0:
             letter = str(name)[0].upper()
             if not letter_groups.has_key(letter):

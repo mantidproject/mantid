@@ -300,7 +300,7 @@ public:
     const size_t NY = 9;
     const size_t NX = NY + 1;
 
-    double dBlockSize = 2 * ( sizeof(int) + ( NX + 2*NY ) * sizeof(double) );
+    double dBlockSize = static_cast<double>(2 * ( sizeof(int) + ( NX + 2*NY ) * sizeof(double) ));
 
     // This will make sure 1 ManagedDataBlock = 2 Vectors
     Mantid::Kernel::ConfigServiceImpl& conf = Mantid::Kernel::ConfigService::Instance();

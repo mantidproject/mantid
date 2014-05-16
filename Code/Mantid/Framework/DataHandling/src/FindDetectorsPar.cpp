@@ -511,7 +511,7 @@ FindDetectorsPar::populate_values_from_file(const API::MatrixWorkspace_sptr & in
     else
     {
 
-       Geometry::IObjComponent_const_sptr sample =inputWS->getInstrument()->getSample();
+       Geometry::IComponent_const_sptr sample =inputWS->getInstrument()->getSample();
        secondaryFlightpath.resize(nHist);
      // Loop over the spectra
      for (size_t i = 0; i < nHist; i++){

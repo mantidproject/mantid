@@ -76,7 +76,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
   groupBox->setLayout(vbox);
 
   // -------------- Statistics on logs ------------------------
-  std::string stats[NUM_STATS] = {"Min:", "Max:", "Mean:", "Time Avg:", "Median:", "Std Dev:"};
+  std::string stats[NUM_STATS] = {"Min:", "Max:", "Mean:", "Time Avg:", "Median:", "Std Dev:", "Duration:"};
   QGroupBox * statsBox = new QGroupBox("Log Statistics");
   QFormLayout * statsBoxLayout = new QFormLayout;
   for (size_t i=0; i<NUM_STATS; i++)
@@ -249,6 +249,7 @@ void MantidSampleLogDialog::showLogStatisticsOfItem(QTreeWidgetItem * item)
     statValues[3]->setText( QString::number( timeAvg ));
     statValues[4]->setText( QString::number( stats.median ));
     statValues[5]->setText( QString::number( stats.standard_deviation ));
+    statValues[6]->setText( QString::number( stats.duration ));
     return;
     break;
   }

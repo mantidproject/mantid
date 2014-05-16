@@ -56,6 +56,13 @@ def issueWarning(msg):
 def _refresh_singleton():
     ReductionSingleton.clean(isis_reducer.ISISReducer)
     ReductionSingleton().remove_settings()
+
+def Clean():
+    """
+    An exposed command to allow cleaning of the reducer, and any related
+    settings.
+    """
+    _refresh_singleton()
                 
 def UserPath(path):
     """
@@ -73,20 +80,29 @@ def DataPath(path):
     """
     ReductionSingleton().set_data_path(path)
 
-def SANS2D():
+def SANS2D(idf_path=None):
     """
         Initialises the instrument settings for SANS2D
+        @param idf_path :: optionally specify the path to the SANS2D IDF to use.
+                           Uses default if none specified.
         @return True on success
     """
     _printMessage('SANS2D()')
     try:
-        instrument = isis_instrument.SANS2D()
+        instrument = isis_instrument.SANS2D(idf_path)
         
         ReductionSingleton().set_instrument(instrument)
-	config['default.instrument']='SANS2D'
+        config['default.instrument']='SANS2D'
     except:
         return False
     return True
+
+def SANS2DTUBES():
+    """
+    Quick, temporary workaround for the IDF problem we're fixing in #9367.
+    Simply pass the correct IDF to SANS2D().
+    """
+    return SANS2D("SANS2D_Definition_Tubes.xml")
 
 def LOQ():
     """
@@ -98,7 +114,7 @@ def LOQ():
         instrument = isis_instrument.LOQ()
 
         ReductionSingleton().set_instrument(instrument)
-	config['default.instrument']='LOQ'
+        config['default.instrument']='LOQ'
     except:
         return False
     return True
@@ -421,7 +437,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             # correct position defined by its get_beam_center. (ticket #5942)
 
             # first copy the settings
-            ReductionSingleton.replace(ReductionSingleton().settings())
+            ReductionSingleton.replace(ReductionSingleton().cur_settings())
 
             # for the LOQ instrument, if the beam centers are different, we have to reload the data.
             if (ReductionSingleton().instrument._NAME == 'LOQ' and 
@@ -771,7 +787,7 @@ def PhiRanges(phis, plot=True):
             #RenameWorkspace(reducedResult,'bob')
             #calculated.append(reducedResult)
             calculated.append(ReductionSingleton()._reduce())
-            ReductionSingleton.replace(ReductionSingleton().settings())
+            ReductionSingleton.replace(ReductionSingleton().cur_settings())
     finally:
         _refresh_singleton()
     
@@ -1000,11 +1016,15 @@ def DisplayMask(mask_worksp=None):
         samp = LAST_SAMPLE 
         
         if samp:
-            counts_data = '__DisplayMasked_tempory_wksp'
             CloneWorkspace(InputWorkspace=samp, OutputWorkspace=mask_worksp)
 
             if su.isEventWorkspace(samp):
-                su.fromEvent2Histogram(mask_worksp)                
+                assert samp + "_monitors" in mtd
+                CloneWorkspace(InputWorkspace=samp + "_monitors",
+                               OutputWorkspace=mask_worksp + "_monitors")
+                su.fromEvent2Histogram(mask_worksp, mtd[mask_worksp + "_monitors"])
+                
+            counts_data = '__DisplayMasked_tempory_wksp'
             Integration(InputWorkspace=mask_worksp,OutputWorkspace= counts_data)
 
         else:

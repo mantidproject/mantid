@@ -110,7 +110,7 @@ namespace Mantid
       Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
 
       // Get the distance between the source and the sample (assume in metres)
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      Geometry::IComponent_const_sptr sample = instrument->getSample();
       if ( !sample )
       {
         g_log.information(

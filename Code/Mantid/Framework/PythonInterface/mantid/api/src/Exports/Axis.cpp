@@ -66,7 +66,7 @@ namespace
       {
         PyObject *value = PyFloat_FromDouble(self.getValue(static_cast<size_t>(i)));
         void *pos = PyArray_GETPTR1((PyArrayObject *)array, i);
-        PyArray_SETITEM((PyArrayObject *)array, pos, value);
+        PyArray_SETITEM((PyArrayObject *)array, (char*)pos, value);
       }
       else
       {

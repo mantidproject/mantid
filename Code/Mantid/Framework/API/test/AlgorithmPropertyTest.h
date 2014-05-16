@@ -103,14 +103,14 @@ public:
     adder.execute();
 
     TS_ASSERT_EQUALS(adder.getPropertyValue("Output1"), "3"); 
-    AlgorithmProperty *testProp = new AlgorithmProperty("CalculateStep");
-    TS_ASSERT_EQUALS(testProp->setValue(adder.toString()), "");
+    AlgorithmProperty testProp("CalculateStep");
+    TS_ASSERT_EQUALS(testProp.setValue(adder.toString()), "");
   }
 
   void test_An_Invalid_String_Returns_An_Appropriate_Error()
   {
-    AlgorithmProperty *testProp = new AlgorithmProperty("CalculateStep");
-    TS_ASSERT_EQUALS(testProp->setValue("ComplexSum()"), 
+    AlgorithmProperty testProp("CalculateStep");
+    TS_ASSERT_EQUALS(testProp.setValue("ComplexSum()"),
       "AlgorithmManager:: Unable to create algorithm ComplexSum Algorithm not registered ComplexSum");
   }
 

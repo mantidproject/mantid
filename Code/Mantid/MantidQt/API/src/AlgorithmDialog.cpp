@@ -513,7 +513,7 @@ QWidget* AlgorithmDialog::tie(QWidget* widget, const QString & property, QLayout
   Mantid::Kernel::Property * prop = getAlgorithmProperty(property);
   if( prop ) 
   { //Set a few things on the widget
-    widget->setToolTip(QString::fromStdString(prop->documentation()));
+    widget->setToolTip(QString::fromStdString(prop->briefDocumentation()));
   }
   widget->setEnabled(isWidgetEnabled(property));
 
@@ -975,7 +975,7 @@ void AlgorithmDialog::setPreviousValue(QWidget* widget, const QString& propName)
   PropertyWidget * propWidget = qobject_cast<PropertyWidget*>(widget);
   if (propWidget)
   {
-    propWidget->setValue(value);
+    propWidget->setPreviousValue(value);
     
     return;
   }

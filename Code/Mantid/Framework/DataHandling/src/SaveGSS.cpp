@@ -93,8 +93,8 @@ namespace Mantid
         tth = 0.;
         return;
       }
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      Geometry::IComponent_const_sptr source = instrument->getSource();
+      Geometry::IComponent_const_sptr sample = instrument->getSample();
       if (source == NULL || sample == NULL)
       {
         l1 = 0.;
@@ -143,8 +143,8 @@ namespace Mantid
       Progress p(this, 0.0, 1.0, nHist);
       double l1, l2, tth;
       Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
-      Geometry::IObjComponent_const_sptr source;
-      Geometry::IObjComponent_const_sptr sample;
+      Geometry::IComponent_const_sptr source;
+      Geometry::IComponent_const_sptr sample;
       if (instrument != NULL)
       {
         source = instrument->getSource();
@@ -388,12 +388,12 @@ namespace Mantid
         // print whether it is normalized by monitor or pcharge
         bool norm_by_current = false;
         bool norm_by_monitor = false;
-        const WorkspaceHistory::AlgorithmHistories& algohist = workspace->getHistory().getAlgorithmHistories();
-        for (WorkspaceHistory::AlgorithmHistories::const_iterator it = algohist.begin(); it != algohist.end(); ++it)
+        const Mantid::API::AlgorithmHistories& algohist = workspace->getHistory().getAlgorithmHistories();
+        for (Mantid::API::AlgorithmHistories::const_iterator it = algohist.begin(); it != algohist.end(); ++it)
         {
-          if (it->name().compare("NormaliseByCurrent") == 0)
+          if ((*it)->name().compare("NormaliseByCurrent") == 0)
             norm_by_current = true;
-          if (it->name().compare("NormaliseToMonitor") == 0)
+          if ((*it)->name().compare("NormaliseToMonitor") == 0)
             norm_by_monitor = true;
         }
         os << "#";

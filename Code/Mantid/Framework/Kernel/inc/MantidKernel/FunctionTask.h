@@ -4,8 +4,11 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Task.h"
 #include <stdexcept>
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
+
+#ifndef Q_MOC_RUN
+# include <boost/bind.hpp>
+# include <boost/function.hpp>
+#endif
 
 namespace Mantid
 {

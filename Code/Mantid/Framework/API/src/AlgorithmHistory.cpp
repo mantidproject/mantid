@@ -19,7 +19,9 @@ using Kernel::DateAndTime;
  *  @param uexeccount :: an  unsigned int for algorithm execution order
  */
 AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const Kernel::DateAndTime& start, const double& duration,std::size_t uexeccount) :
-  m_name(alg->name()), m_version(alg->version()), m_executionDate(start), m_executionDuration(duration),m_execCount(uexeccount)
+  m_name(alg->name()),m_version(alg->version()),m_executionDate(start),
+  m_executionDuration(duration),m_execCount(uexeccount), 
+  m_childHistories(boost::bind(CompareHistory::compare, _1, _2))
 {
   // Now go through the algorithm's properties and create the PropertyHistory objects.
   const std::vector<Property*>& properties = alg->getProperties();
@@ -44,7 +46,8 @@ AlgorithmHistory::~AlgorithmHistory()
  */
 AlgorithmHistory::AlgorithmHistory(const std::string& name, int vers, const Kernel::DateAndTime& start, const double& duration, std::size_t uexeccount) :
   m_name(name),m_version(vers),m_executionDate(start),
-  m_executionDuration(duration),m_execCount(uexeccount)
+  m_executionDuration(duration),m_execCount(uexeccount), 
+  m_childHistories(boost::bind(CompareHistory::compare, _1, _2))
 {
 }
 
@@ -54,8 +57,11 @@ AlgorithmHistory::AlgorithmHistory(const std::string& name, int vers, const Kern
  */
 AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory& A) :
   m_name(A.m_name),m_version(A.m_version),m_executionDate(A.m_executionDate),
-  m_executionDuration(A.m_executionDuration),m_properties(A.m_properties),m_execCount(A.m_execCount)
+  m_executionDuration(A.m_executionDuration),m_properties(A.m_properties),
+  m_execCount(A.m_execCount),
+  m_childHistories(boost::bind(CompareHistory::compare, _1, _2))
 {
+  m_childHistories = A.m_childHistories;
 }
 
 /** Add details of an algorithm's execution to an existing history object
@@ -78,6 +84,66 @@ void AlgorithmHistory::addExecutionInfo(const DateAndTime& start, const double& 
 				     const unsigned int& direction)
 {
   m_properties.push_back(Kernel::PropertyHistory(name,value,"",isdefault, direction));
+}
+
+/** Add a child algorithm history to history 
+ *  @param childHist :: The child history
+ */
+void AlgorithmHistory::addChildHistory(AlgorithmHistory_sptr childHist)
+{
+  // Don't copy one's own history onto oneself
+  if (this == &(*childHist))
+  {
+    return;
+  }
+
+  m_childHistories.insert(childHist);
+}
+
+/*
+ Return the child history length
+ */
+size_t AlgorithmHistory::childHistorySize() const
+{
+  return m_childHistories.size();
+}
+
+/**
+ * Retrieve a child algorithm history by index
+ * @param index ::  An index within the child algorithm history set
+ * @returns A pointer to an AlgorithmHistory object
+ * @throws std::out_of_range error if the index is invalid
+ */
+AlgorithmHistory_const_sptr AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const
+{
+  if( index >= this->getChildHistories().size() )
+  {
+    throw std::out_of_range("AlgorithmHistory::getAlgorithmHistory() - Index out of range");
+  }
+  AlgorithmHistories::const_iterator start = m_childHistories.begin();
+  std::advance(start, index);
+  return *start;
+}
+
+/**
+ * Index operator[] access to a child algorithm history
+ * @param index ::  An index within the algorithm history
+ * @returns A pointer to an AlgorithmHistory object
+ * @throws std::out_of_range error if the index is invalid
+ */
+AlgorithmHistory_const_sptr AlgorithmHistory::operator[](const size_t index) const
+{
+  return getChildAlgorithmHistory(index);
+}
+
+/**
+ *  Create an algorithm from a history record at a given index
+ * @param index :: An index within the workspace history
+ * @returns A shared pointer to an algorithm object
+ */
+boost::shared_ptr<IAlgorithm> AlgorithmHistory::getChildAlgorithm(const size_t index) const
+{
+  return Algorithm::fromHistory(*(this->getChildAlgorithmHistory(index)));
 }
 
 /** Prints a text representation of itself
@@ -124,6 +190,9 @@ AlgorithmHistory& AlgorithmHistory::operator=(const AlgorithmHistory& A)
     m_executionDate=A.m_executionDate;
     m_executionDuration=A.m_executionDuration;
     m_properties=A.m_properties;
+    //required to prevent destruction of descendant if assigning a descendant to an ancestor
+    auto temp=A.m_childHistories;
+    m_childHistories=temp;
   }
   return *this;
 }

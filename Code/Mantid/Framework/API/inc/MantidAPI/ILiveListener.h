@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include <string>
-#include <boost/shared_ptr.hpp>
 #include <Poco/Net/SocketAddress.h>
 #include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/IDTypes.h"

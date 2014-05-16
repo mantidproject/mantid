@@ -1,6 +1,6 @@
 """*WIKI* 
 
-    HFIR SANS reduction workflow
+HFIR SANS reduction workflow
     
 *WIKI*"""
 import mantid.simpleapi as api

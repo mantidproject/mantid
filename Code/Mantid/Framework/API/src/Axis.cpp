@@ -88,7 +88,7 @@ double Axis::getValue(const std::size_t& index, const std::size_t& verticalIndex
 specid_t Axis::spectraNo(const std::size_t& index) const
 {
   UNUSED_ARG(index)
-  throw std::domain_error("Cannot call spectraNo() on a non-spectra axis.");
+      throw std::domain_error("Cannot call spectraNo() on a non-spectra axis.");
 }
 
 } // namespace API

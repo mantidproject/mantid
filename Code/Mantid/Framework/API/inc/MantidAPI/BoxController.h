@@ -8,7 +8,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IBoxControllerIO.h"
 #include <nexus/NeXusFile.hpp>
-#include <boost/shared_ptr.hpp>
+
 #include <vector>
 
 
