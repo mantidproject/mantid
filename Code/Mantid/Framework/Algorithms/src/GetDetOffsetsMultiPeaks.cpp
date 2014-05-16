@@ -111,6 +111,7 @@ OutputW,NumberPeaksFitted,Mask = GetDetOffsetsMultiPeaks("InputW",0.01,2.0,1.8,2
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
@@ -313,6 +314,9 @@ namespace Algorithms
     auto offsetwsprop = new WorkspaceProperty<TableWorkspace>("PeaksOffsetTableWorkspace", "PeakOffsetTable", Direction::Output);
     declareProperty(offsetwsprop, "Name of an output table workspace containing peaks' offset data.");
 
+    auto ddodwsprop = new WorkspaceProperty<MatrixWorkspace>("ResolutionWorkspace", "ResolutionWS", Direction::Output);
+    declareProperty(ddodwsprop, "Name of the resolution workspace containing delta(d)/d for each unmasked spectrum. ");
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -459,6 +463,9 @@ namespace Algorithms
     m_peakOffsetTableWS = createOutputPeakOffsetTable(numspec);
     setProperty("PeaksOffsetTableWorkspace", m_peakOffsetTableWS);
 
+    m_resolutionWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          WorkspaceFactory::Instance().create("Workspace2D", numspec, 1, 1));
+
     //*************************************************************************
     // Calculate offset of each detector
     //*************************************************************************
@@ -512,6 +519,7 @@ namespace Algorithms
           }
         } // ENDFOR (detectors)
 
+        // Report offset fitting result/status
         addInfoToReportWS(wi, offsetresult, tofitpeakpositions, fittedpeakpositions);
 
       } // End of critical region
@@ -526,6 +534,7 @@ namespace Algorithms
     setProperty("OutputWorkspace",outputW);
     setProperty("NumberPeaksWorkspace",outputNP);
     setProperty("MaskWorkspace",maskWS);
+    setProperty("ResolutionWorkspace", m_resolutionWS);
 
     // Also save to .cal file, if requested
     std::string filename=getProperty("GroupingFileName");
@@ -604,11 +613,15 @@ namespace Algorithms
       size_t nparams;
       double minD, maxD;
       int i_highestpeak;
+      double resolution, devresolution;
       fr.numpeaksindrange = fitSpectra(wi, inputW, m_peakPositions, m_fitWindows,
                                        nparams, minD, maxD, vec_peakPosRef, vec_peakPosFitted,
-                                       vec_fitChi2, vec_peakHeights, i_highestpeak);
+                                       vec_fitChi2, vec_peakHeights, i_highestpeak,
+                                       resolution, devresolution);
       fr.numpeakstofit = static_cast<int>(m_peakPositions.size());
       fr.numpeaksfitted = static_cast<int>(vec_peakPosFitted.size());
+      fr.resolution = resolution;
+      fr.dev_resolution = devresolution;
 
       // Fit offset
       if (nparams > 0 && fr.numpeaksindrange > 0)
@@ -775,11 +788,12 @@ namespace Algorithms
      * @param peakHighFitted Delete elements of this array.
      * @param chisq          Delete elements of this array.
      */
-    void deletePeaks2(std::vector<size_t> &banned,
+    void deletePeaks(std::vector<size_t> &banned,
                       std::vector<double> &peakPosToFit,
                       std::vector<double> &peakPosFitted,
                       std::vector<double> &peakHighFitted,
-                      std::vector<double> &chisq)
+                      std::vector<double> &chisq,
+                      std::vector<double> &vecDeltaDovD)
     {
       if (banned.empty())
         return;
@@ -790,6 +804,7 @@ namespace Algorithms
           peakPosFitted.erase(peakPosFitted.begin() + (*it));
           peakHighFitted.erase(peakHighFitted.begin() + (*it));
           chisq.erase(chisq.begin() + (*it));
+          vecDeltaDovD.erase(vecDeltaDovD.begin() + (*it));
       }
       banned.clear();
 
@@ -814,6 +829,8 @@ namespace Algorithms
     * @param chisq :: chisq.
     * @param peakHeights :: vector for fitted heights of peaks
     * @param i_highestpeak:: index of the highest peak among all peaks
+    * @param resolution :: spectrum's resolution delta(d)/d
+    * @param dev_resolution :: standard deviation resolution
     * @return The number of peaks in range
     */
   int GetDetOffsetsMultiPeaks::fitSpectra(const int64_t wi, MatrixWorkspace_sptr inputW,
@@ -822,7 +839,8 @@ namespace Algorithms
                                           double &minD, double &maxD,
                                           std::vector<double>&peakPosToFit, std::vector<double>&peakPosFitted,
                                           std::vector<double> &chisq,
-                                          std::vector<double> &peakHeights, int& i_highestpeak)
+                                          std::vector<double> &peakHeights, int& i_highestpeak,
+                                          double& resolution, double& dev_resolution)
   {
     // Default overall fit range is the whole spectrum
     const MantidVec & X = inputW->readX(wi);
@@ -919,7 +937,7 @@ namespace Algorithms
     // use tmpPeakPosToFit to shuffle the vectors
     std::vector<double> tmpPeakPosToFit;
     generatePeaksList(peakslist, static_cast<int>(wi), peakPosToFit, tmpPeakPosToFit, peakPosFitted, peakHeights, chisq,
-                      (useFitWindows || m_useFitWindowTable), fitWindowsToUse, minD, maxD);
+                      (useFitWindows || m_useFitWindowTable), fitWindowsToUse, minD, maxD, resolution, dev_resolution);
     peakPosToFit = tmpPeakPosToFit;
 
     nparams = peakPosFitted.size();
@@ -954,6 +972,8 @@ namespace Algorithms
     * @param fitWindowsToUse :: fit windows
     * @param minD :: minimum d-spacing of the spectrum
     * @param maxD :: minimum d-spacing of the spectrum
+    * @param deltaDovD :: delta(d)/d of the peak for fitting
+    * @param dev_deltaDovD :: standard deviation of delta(d)/d of all the peaks in the spectrum
     */
   void GetDetOffsetsMultiPeaks::generatePeaksList(const API::ITableWorkspace_sptr &peakslist, int wi,
                                                   const std::vector<double>& peakPositionRef,
@@ -962,7 +982,8 @@ namespace Algorithms
                                                   std::vector<double>& peakHeightFitted,
                                                   std::vector<double>& chisq,
                                                   bool useFitWindows, const std::vector<double>& fitWindowsToUse,
-                                                  const double minD, const double maxD)
+                                                  const double minD, const double maxD,
+                                                  double& deltaDovD, double& dev_deltaDovD)
   {
     // FIXME - Need to make sure that the peakPositionRef and peakslist have the same order of peaks
 
@@ -1056,8 +1077,6 @@ namespace Algorithms
       double widthdevpos = width/centre;
       vec_widthDivPos.push_back(widthdevpos);
 
-
-
       g_log.debug() << " h:" << height << " c:" << centre << " w:" << (width/(2.*std::sqrt(2.*std::log(2.))))
                     << " b:" << background << " chisq:" << chi2 << "\n";
 
@@ -1090,8 +1109,12 @@ namespace Algorithms
       g_log.debug() << "Deleting " << banned.size() << " of " << peakPosFitted.size()
                     << " peaks in wkspindex = ??? " << "\n"; // << wi << "\n";
 
-      deletePeaks2(banned, peakPosToFit, peakPosFitted, peakHeightFitted, chisq);
+      deletePeaks(banned, peakPosToFit, peakPosFitted, peakHeightFitted, chisq, vec_widthDivPos);
     }
+
+    Statistics widthDivPos = getStatistics(vec_widthDivPos);
+    deltaDovD = widthDivPos.mean;
+    dev_deltaDovD = widthDivPos.standard_deviation;
 
     return;
   }
@@ -1166,6 +1189,11 @@ namespace Algorithms
     m_infoTableWS->cell<double>(wi, 5) = offsetresult.offset;
     m_infoTableWS->cell<double>(wi, 6) = offsetresult.highestpeakpos;
     m_infoTableWS->cell<double>(wi, 7) = offsetresult.highestpeakdev;
+
+    // Peak width
+    m_resolutionWS->dataX(wi)[0] = static_cast<double>(wi);
+    m_resolutionWS->dataY(wi)[0] = offsetresult.resolution;
+    m_resolutionWS->dataE(wi)[0] = offsetresult.dev_resolution;
 
     // Peak-fitting information:  Record: (found peak position) - (target peak position)
     int numpeaksfitted = offsetresult.numpeaksfitted;

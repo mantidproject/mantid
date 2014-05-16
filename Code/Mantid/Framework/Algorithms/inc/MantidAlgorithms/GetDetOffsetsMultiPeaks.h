@@ -36,6 +36,10 @@ struct FitPeakOffsetResult
 	double highestpeakpos;
 	/// Highest peak deviation after calibrated by offset
 	double highestpeakdev;
+	/// Average resolution delta(d)/d
+	double resolution;
+	/// Standard devation of the resolution
+	double dev_resolution;
 };
 
 /**
@@ -93,7 +97,7 @@ private:
   int fitSpectra(const int64_t wi, API::MatrixWorkspace_sptr inputW, const std::vector<double> &m_peakPositions,
                  const std::vector<double> &m_fitWindows, size_t &nparams, double &minD, double &maxD,
                  std::vector<double>&peakPosToFit, std::vector<double> &peakPosFitted, std::vector<double> &chisq,
-                 std::vector<double> &peakHeights, int &i_highestpeak);
+                 std::vector<double> &peakHeights, int &i_highestpeak, double& resolution, double& dev_resolution);
 
   /// Add peak fitting and offset calculation information to information table workspaces per spectrum
   void addInfoToReportWS(int wi, FitPeakOffsetResult offsetresult, const std::vector<double> &tofitpeakpositions,
@@ -105,7 +109,8 @@ private:
                          std::vector<double> &peakPosToFit,
                          std::vector<double> &peakPosFitted,
                          std::vector<double> &peakHeightFitted, std::vector<double> &chisq, bool useFitWindows,
-                         const std::vector<double> &fitWindowsToUse, const double minD, const double maxD);
+                         const std::vector<double> &fitWindowsToUse, const double minD, const double maxD,
+                         double& deltaDovD, double& dev_deltaDovD);
 
   /// Generate output information table workspace
   Mantid::DataObjects::TableWorkspace_sptr createOutputInfoTable(size_t numspec);
@@ -150,6 +155,8 @@ private:
 
   DataObjects::TableWorkspace_sptr m_infoTableWS;
   DataObjects::TableWorkspace_sptr m_peakOffsetTableWS;
+  /// Workspace for calculated detector resolution
+  API::MatrixWorkspace_sptr m_resolutionWS;
 
  /// Flag to use fit window from TableWorkspace per spectrum
   bool m_useFitWindowTable;
