@@ -293,6 +293,8 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry, std::
 	  progress.report();
   }
 
+  // TODO
+  // copy data if m_numberOfTubes = 1 or m_numberOfPixelsPerTube = 1
 
   // Then Tubes
   for (size_t i = 0; i < m_numberOfTubes; ++i)
