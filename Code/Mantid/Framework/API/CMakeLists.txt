@@ -10,6 +10,7 @@ set ( SRC_FILES
 	src/AnalysisDataService.cpp
 	src/ArchiveSearchFactory.cpp
 	src/Axis.cpp
+  src/BinEdgeAxis.cpp
 	src/BoxController.cpp
 	src/CatalogFactory.cpp
 	src/CatalogManager.cpp
@@ -64,9 +65,9 @@ set ( SRC_FILES
 	src/ITableWorkspace.cpp
 	src/IkedaCarpenterModerator.cpp
 	src/ImmutableCompositeFunction.cpp
+	src/ImplicitFunctionFactory.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
-	src/ImplicitFunctionFactory.cpp
 	src/InstrumentDataService.cpp
 	src/JointDomain.cpp
 	src/LinearScale.cpp
@@ -138,6 +139,7 @@ set ( INC_FILES
 	inc/MantidAPI/AnalysisDataService.h
 	inc/MantidAPI/ArchiveSearchFactory.h
 	inc/MantidAPI/Axis.h
+  inc/MantidAPI/BinEdgeAxis.h
 	inc/MantidAPI/BoxController.h
 	inc/MantidAPI/CatalogFactory.h
 	inc/MantidAPI/CatalogManager.h
@@ -286,6 +288,7 @@ set ( TEST_FILES
 	AlgorithmTest.h
 	AnalysisDataServiceTest.h
 	AsynchronousTest.h
+  BinEdgeAxisTest.h
 	BoxControllerTest.h
 	CompositeFunctionTest.h
 	CoordTransformTest.h

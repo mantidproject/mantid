@@ -54,7 +54,7 @@ namespace Mantid
   {
   public:
     /// Destructor
-    virtual ~IMDDimension(){};
+    virtual ~IMDDimension(){}
 
     /// @return the name of the dimension as can be displayed along the axis
     virtual std::string getName() const = 0;

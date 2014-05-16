@@ -33,6 +33,7 @@ The Child Algorithms used by LoadMuonNexus are:
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TextAxis.h"
@@ -1104,6 +1105,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
 
 
   //Units
+  bool verticalHistogram(false);
   try
   {
     local_workspace->getAxis(0)->unit() = UnitFactory::Instance().create(unit1);
@@ -1116,6 +1118,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
 
     //If this doesn't throw then it is a numeric access so grab the data so we can set it later
     axis2.load();
+    if(static_cast<size_t>(axis2.size()) == nspectra + 1) verticalHistogram = true;
     m_axis1vals = MantidVec(axis2(), axis2() + axis2.dim0());
   }
   catch( std::runtime_error & )
@@ -1133,7 +1136,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   {
     try
     {
-      Mantid::API::NumericAxis* newAxis = new Mantid::API::NumericAxis(nspectra);
+      auto* newAxis = (verticalHistogram) ? new API::BinEdgeAxis(nspectra+1) : new API::NumericAxis(nspectra);
       local_workspace->replaceAxis(1, newAxis);
       newAxis->unit() = UnitFactory::Instance().create(unit2);
       if(unit2 == "Label")

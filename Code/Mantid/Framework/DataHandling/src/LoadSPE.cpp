@@ -11,7 +11,7 @@ The workspace will have X units of [[Unit_Factory|Energy transfer]]. The other a
 #include "MantidDataHandling/LoadSPE.h"
 #include "MantidDataHandling/SaveSPE.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/UnitFactory.h"
@@ -118,7 +118,7 @@ void LoadSPE::exec()
   if ( comment[0] != '#' ) reportFormatError(std::string(comment));
 
   // Create the axis that will hold the phi values
-  Axis* phiAxis = new NumericAxis(nhist+1);
+  auto* phiAxis = new BinEdgeAxis(nhist+1);
   // Look at previously read comment field to see what unit vertical axis should have
   if ( comment[4] == 'Q' || comment[4] == 'q') 
   {
