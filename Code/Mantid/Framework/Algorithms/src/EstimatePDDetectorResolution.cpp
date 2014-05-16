@@ -1,14 +1,30 @@
 /*WIKI*
 
+
+== Factor Sheet ==
+==== NOMAD ====
+Detector size
+* vertical: 1 meter / 128 pixel
+* Horizontal: half inch or 1 inch
+
+==== POWGEN ====
+Detector size: 0.005 x 0.0543
+
+Range of Delta(theta)*cot(theta): 0.00170783, 0.0167497
+
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/EstimatePDDetectorResolution.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
+
+#include <math.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -56,6 +72,8 @@ namespace Algorithms
 
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
                     "Name of the output workspace containing delta(d)/d of each detector/spectrum. ");
+
+    declareProperty("DeltaTOF", EMPTY_DBL(), "DeltaT as the resolution of TOF with unit microsecond (10^-6m). ");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -81,6 +99,11 @@ namespace Algorithms
   {
     m_inputWS = getProperty("InputWorkspace");
 
+    m_deltaT = getProperty("DeltaTOF");
+    if (isEmpty(m_deltaT))
+      throw runtime_error("DeltaTOF must be given!");
+    m_deltaT *= 1.0E-6; // convert to meter
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -88,6 +111,7 @@ namespace Algorithms
     */
   void EstimatePDDetectorResolution::retrieveInstrumentParameters()
   {
+#if 0
     // Call SolidAngle to get solid angles for all detectors
     Algorithm_sptr calsolidangle = createChildAlgorithm("SolidAngle", -1, -1, true);
     calsolidangle->initialize();
@@ -106,6 +130,7 @@ namespace Algorithms
     size_t numspec = m_solidangleWS->getNumberHistograms();
     for (size_t i = 0; i < numspec; ++i)
       g_log.debug() << "[DB]: " << m_solidangleWS->readY(i)[0] << "\n";
+#endif
 
     // Calculate centre neutron velocity
     Property* cwlproperty = m_inputWS->run().getProperty("LambdaRequest");
@@ -131,7 +156,7 @@ namespace Algorithms
     Instrument_const_sptr instrument = m_inputWS->getInstrument();
     V3D samplepos = instrument->getSample()->getPos();
     V3D sourcepos = instrument->getSource()->getPos();
-    double m_L1 = samplepos.distance(sourcepos);
+    m_L1 = samplepos.distance(sourcepos);
     g_log.notice() << "L1 = " << m_L1 << "\n";
 
     return;
@@ -154,26 +179,87 @@ namespace Algorithms
     */
   void EstimatePDDetectorResolution::estimateDetectorResolution()
   {
+    Instrument_const_sptr instrument = m_inputWS->getInstrument();
+    V3D samplepos = instrument->getSample()->getPos();
+
     size_t numspec = m_inputWS->getNumberHistograms();
+
+    double mintwotheta = 10000;
+    double maxtwotheta = 0;
+
+    double mint3 = 1;
+    double maxt3 = 0;
+
+    size_t count_nodetsize = 0;
+
     for (size_t i = 0; i < numspec; ++i)
     {
-      // Get the distance from
+      // Get detector
+      IDetector_const_sptr det = m_inputWS->getDetector(i);
 
+      double detdim;
 
+      boost::shared_ptr<const Detector> realdet = boost::dynamic_pointer_cast<const Detector>(det);
+      if (realdet)
+      {
+        double dy = realdet->getHeight();
+        double dx = realdet->getWidth();
+        detdim = sqrt(dx*dx + dy*dy)*0.5;
+      }
+      else
+      {
+        // Use detector dimension as 0 as no-information
+        detdim = 0;
+        ++ count_nodetsize;
+      }
 
+      // Get the distance from detector to source
+      V3D detpos = det->getPos();
+      double l2 = detpos.distance(samplepos);
+      if (l2 < 0)
+        throw runtime_error("L2 is negative");
 
+      // Calculate T
+      double centraltof = (m_L1 + l2)/m_centreVelocity;
 
+      // Angle
+      double r, twotheta, phi;
+      detpos.getSpherical(r, twotheta, phi);
+      double theta = (twotheta * 0.5)*M_PI/180.;
 
+      // double solidangle = m_solidangleWS->readY(i)[0];
+      double solidangle = det->solidAngle(samplepos);
+      double deltatheta = sqrt(solidangle);
 
+      // Resolution
+      double t1 = m_deltaT/centraltof;
+      double t2 = detdim/(m_L1 + l2);
+      double t3 = deltatheta * (cos(theta)/sin(theta));
 
+      double resolution = sqrt(t1*t1+t2*t2+t3*t3);
 
+      m_outputWS->dataX(i)[0] = static_cast<double>(i);
+      m_outputWS->dataY(i)[0] = resolution;
 
+      if (twotheta > maxtwotheta)
+        maxtwotheta = twotheta;
+      else if (twotheta < mintwotheta)
+        mintwotheta = twotheta;
 
+      if (fabs(t3) < mint3)
+        mint3 = fabs(t3);
+      else if (fabs(t3) > maxt3)
+        maxt3 = fabs(t3);
 
-
-
+      g_log.debug() << det->type() << " " << i << "\t\t" << twotheta << "\t\tdT/T = " << t1*t1
+                    << "\t\tdL/L = " << t2
+                    << "\t\tdTheta*cotTheta = " << t3 << "\n";
 
     }
+
+    g_log.notice() << "2theta range: " << mintwotheta << ", " << maxtwotheta << "\n";
+    g_log.notice() << "t3 range: " << mint3 << ", " << maxt3 << "\n";
+    g_log.notice() << "Number of detector having NO size information = " << count_nodetsize << "\n";
 
     return;
   }

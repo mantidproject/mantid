@@ -53,7 +53,7 @@ namespace Algorithms
     /// Implement abstract Algorithm methods
     void exec();
 
-    ///
+    /// Process input properties for algorithm
     void processAlgProperties();
 
     ///
@@ -74,11 +74,15 @@ namespace Algorithms
     /// Output workspace
     API::MatrixWorkspace_sptr m_outputWS;
 
-    API::MatrixWorkspace_sptr m_solidangleWS;
-
     /// Centre neutron velocity
     double m_centreVelocity;
-    
+
+    /// L1, source to sample
+    double m_L1 ;
+
+    /// Delta T
+    double m_deltaT;
+
   };
 
 
