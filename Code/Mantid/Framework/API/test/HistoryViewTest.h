@@ -103,14 +103,16 @@ public:
     auto items = view.getAlgorithmsList();
     TS_ASSERT_EQUALS(items.size(), 4);
 
-    std::string propName = items[0].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg1")
-    propName = items[1].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "child1")
-    propName = items[2].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg2")
-    propName = items[3].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg3")
+    std::vector<std::string> propNames(items.size());
+    for (size_t i=0;i<items.size();++i)
+    {
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+    }
+    
+    TS_ASSERT_EQUALS(propNames[0], "alg1")
+    TS_ASSERT_EQUALS(propNames[1], "child1")
+    TS_ASSERT_EQUALS(propNames[2], "alg2")
+    TS_ASSERT_EQUALS(propNames[3], "alg3")
   }
 
   void test_Simple_Roll_History()
@@ -125,15 +127,17 @@ public:
     auto items = view.getAlgorithmsList();
     TS_ASSERT_EQUALS(items.size(), 4);
 
+    std::vector<std::string> propNames(items.size());
+    for (size_t i=0;i<items.size();++i)
+    {
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+    }
+    
     //check it unrolled properly
-    std::string propName = items[0].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg1")
-    propName = items[1].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "child1")
-    propName = items[2].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg2")
-    propName = items[3].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg3")
+    TS_ASSERT_EQUALS(propNames[0], "alg1")
+    TS_ASSERT_EQUALS(propNames[1], "child1")
+    TS_ASSERT_EQUALS(propNames[2], "alg2")
+    TS_ASSERT_EQUALS(propNames[3], "alg3")
 
     //roll it back up
     TS_ASSERT_THROWS_NOTHING( view.roll(0) );
@@ -142,13 +146,17 @@ public:
     items = view.getAlgorithmsList();
     TS_ASSERT_EQUALS(items.size(), 3);
 
+    propNames.clear();
+    propNames.resize(items.size());
+    for (size_t i=0;i<items.size();++i)
+    {
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+    }
+
     //check it rolled back up properly
-    propName = items[0].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg1")
-    propName = items[1].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg2")
-    propName = items[2].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg3")
+    TS_ASSERT_EQUALS(propNames[0], "alg1")
+    TS_ASSERT_EQUALS(propNames[1], "alg2")
+    TS_ASSERT_EQUALS(propNames[2], "alg3")
   }
 
   void test_Complex_Roll_History()
@@ -163,14 +171,16 @@ public:
     auto items = view.getAlgorithmsList();
     TS_ASSERT_EQUALS(items.size(), 4);
 
-    std::string propName = items[0].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg1")
-    propName = items[1].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg2")
-    propName = items[2].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "child2")
-    propName = items[3].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg3")
+    std::vector<std::string> propNames(items.size());
+    for (size_t i=0;i<items.size();++i)
+    {
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+    }
+
+    TS_ASSERT_EQUALS(propNames[0], "alg1")
+    TS_ASSERT_EQUALS(propNames[1], "alg2")
+    TS_ASSERT_EQUALS(propNames[2], "child2")
+    TS_ASSERT_EQUALS(propNames[3], "alg3")
 
     //unroll another level of history
     TS_ASSERT_THROWS_NOTHING( view.unroll(2) )
@@ -178,19 +188,20 @@ public:
     TS_ASSERT_EQUALS(view.size(), 6);
     items = view.getAlgorithmsList();
     TS_ASSERT_EQUALS(items.size(), 6);
-    propName = items[0].getAlgorithmHistory()->getProperties()[0].value();
 
-    TS_ASSERT_EQUALS(propName, "alg1")
-    propName = items[1].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg2")
-    propName = items[2].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "child2")
-    propName = items[3].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "subChild21")
-    propName = items[4].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "subChild22")
-    propName = items[5].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg3")
+    propNames.clear();
+    propNames.resize(items.size());
+    for (size_t i=0;i<items.size();++i)
+    {
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+    }
+
+    TS_ASSERT_EQUALS(propNames[0], "alg1")
+    TS_ASSERT_EQUALS(propNames[1], "alg2")
+    TS_ASSERT_EQUALS(propNames[2], "child2")
+    TS_ASSERT_EQUALS(propNames[3], "subChild21")
+    TS_ASSERT_EQUALS(propNames[4], "subChild22")
+    TS_ASSERT_EQUALS(propNames[5], "alg3")
 
     //now roll everything back up to the top level
     TS_ASSERT_THROWS_NOTHING( view.roll(1) )
@@ -199,12 +210,77 @@ public:
     items = view.getAlgorithmsList();
     TS_ASSERT_EQUALS(items.size(), 3);
 
-    propName = items[0].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg1")
-    propName = items[1].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg2")
-    propName = items[2].getAlgorithmHistory()->getProperties()[0].value();
-    TS_ASSERT_EQUALS(propName, "alg3")
+    propNames.clear();
+    propNames.resize(items.size());
+    for (size_t i=0;i<items.size();++i)
+    {
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+    }
+
+    TS_ASSERT_EQUALS(propNames[0], "alg1")
+    TS_ASSERT_EQUALS(propNames[1], "alg2")
+    TS_ASSERT_EQUALS(propNames[2], "alg3")
+  }
+
+  void test_Unroll_All()
+  {
+    HistoryView view(m_wsHist);
+    
+    TS_ASSERT_THROWS_NOTHING( view.unrollAll() );
+
+    TS_ASSERT_EQUALS(view.size(), 7);
+    auto items = view.getAlgorithmsList();
+    TS_ASSERT_EQUALS(items.size(), 7);
+
+    std::vector<std::string> propNames(items.size());
+    for (size_t i=0;i<items.size();++i)
+    {
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+    }
+
+    TS_ASSERT_EQUALS(propNames[0], "alg1")
+    TS_ASSERT_EQUALS(propNames[1], "child1")
+    TS_ASSERT_EQUALS(propNames[2], "alg2")
+    TS_ASSERT_EQUALS(propNames[3], "child2")
+    TS_ASSERT_EQUALS(propNames[4], "subChild21")
+    TS_ASSERT_EQUALS(propNames[5], "subChild22")
+    TS_ASSERT_EQUALS(propNames[6], "alg3")
+  }
+
+  void test_Roll_All()
+  {
+    HistoryView view(m_wsHist);
+    
+    TS_ASSERT_THROWS_NOTHING( view.unrollAll() );
+
+    TS_ASSERT_EQUALS(view.size(), 7);
+    auto items = view.getAlgorithmsList();
+    TS_ASSERT_EQUALS(items.size(), 7);
+    
+    std::vector<std::string> propNames(items.size());
+    for (size_t i=0;i<items.size();++i)
+    {
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+    }
+
+    TS_ASSERT_EQUALS(propNames[0], "alg1")
+    TS_ASSERT_EQUALS(propNames[1], "child1")
+    TS_ASSERT_EQUALS(propNames[2], "alg2")
+    TS_ASSERT_EQUALS(propNames[3], "child2")
+    TS_ASSERT_EQUALS(propNames[4], "subChild21")
+    TS_ASSERT_EQUALS(propNames[5], "subChild22")
+    TS_ASSERT_EQUALS(propNames[6], "alg3")
+
+    TS_ASSERT_THROWS_NOTHING( view.rollAll() );
+
+    items = view.getAlgorithmsList();
+    int i = 0;
+    for (auto it = items.begin(); it != items.end(); ++it, ++i)
+    {
+      auto history = it->getAlgorithmHistory();
+      auto props = history->getProperties();
+      TS_ASSERT_EQUALS(props[0].value(), "alg" + boost::lexical_cast<std::string>(i+1) );
+    }
   }
 
   void test_Index_To_Large()
