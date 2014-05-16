@@ -51,3 +51,9 @@ ChopperPhase=/entry1/POLDI/chopper/chopper_phase
 ChopperSpeed=/entry1/POLDI/chopper/rotation_speed
 #
 SampleName=/entry1/POLDI/name
+#
+start_time=/entry1/start_time
+#
+TablePositionX=/entry1/sample/sample_x
+TablePositionY=/entry1/sample/sample_y
+TablePositionZ=/entry1/sample/sample_lift
