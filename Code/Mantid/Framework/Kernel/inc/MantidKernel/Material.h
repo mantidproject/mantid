@@ -13,7 +13,7 @@
 namespace Mantid
 {
 
-  namespace PhysicalConstants{ class Atom; }
+  namespace PhysicalConstants{ struct Atom; }
 
   namespace Kernel
   {
