@@ -56,8 +56,8 @@ public:
   const std::string build();
   
 private:
-  void writeHistoryToStream(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter);
-  void buildChildren(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter);
+  void writeHistoryToStream(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter, int depth = 1);
+  void buildChildren(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter, int depth = 1);
   const std::string buildAlgorithmString(AlgorithmHistory_const_sptr algHistory);
   const std::string buildPropertyString(const Mantid::Kernel::PropertyHistory& propHistory);
 

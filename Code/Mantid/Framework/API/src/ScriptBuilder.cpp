@@ -28,31 +28,47 @@ const std::string ScriptBuilder::build()
   return os.str();
 }
 
-void ScriptBuilder::writeHistoryToStream(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter)
+void ScriptBuilder::writeHistoryToStream(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter, int depth)
 {
   auto algHistory = iter->getAlgorithmHistory();
   if(iter->isUnrolled())
   {
+    os << std::string(depth, '#');
+    os << " Child algorithms of " << algHistory->name() << "\n";
+    
     //don't create a line for the algorithm, just output its children
-    os << "# Child algorithms of " << algHistory->name() << "\n";
-    buildChildren(os, iter);
-    os << "# End of child algorithms of " << algHistory->name() << "\n";
+    buildChildren(os, iter, depth+1);
+    
+    os << std::string(depth, '#');
+    os << " End of child algorithms of " << algHistory->name() << "\n";
+
+    if(boost::next(iter) != m_historyItems.cend() 
+        && !boost::next(iter)->isUnrolled())
+    {
+      os << "\n";
+    }
   }
   else
   {
+    if(boost::prior(iter) != m_historyItems.cbegin() 
+        && boost::prior(iter)->isUnrolled())
+    {
+      os << "\n";
+    }
     //create the string for this algorithm
     os << buildAlgorithmString(algHistory) << "\n";
   }
 }
 
-void ScriptBuilder::buildChildren(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter)
+void ScriptBuilder::buildChildren(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter, int depth)
 {
   size_t numChildren = iter->numberOfChildren();
   ++iter; //move to first child
   for(size_t i = 0; i < numChildren && iter != m_historyItems.cend(); ++i, ++iter)
   {
-    writeHistoryToStream(os, iter);
+    writeHistoryToStream(os, iter, depth);
   }
+  os << "\n";
   --iter;
 }
 
