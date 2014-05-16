@@ -16,6 +16,7 @@ from mantid.api import WorkspaceGroup
 import copy
 from SANSadd2 import *
 import SANSUtility as su
+from SANSUtility import deprecated
 
 # disable plotting if running outside Mantidplot
 try:
@@ -63,22 +64,6 @@ def Clean():
     settings.
     """
     _refresh_singleton()
-                
-def UserPath(path):
-    """
-        Sets the directory in which Mantid should look for the mask file if a
-        full path was not specified
-        @param path: the full path to the directory
-    """
-    _printMessage('UserPath("' + path + '") #Will look for mask file here')
-    ReductionSingleton().user_file_path = path
-
-def DataPath(path):
-    """
-        Sets an extra directory for Mantid to look for run files
-        @param path: the full path to a directory containing the run files to analyse
-    """
-    ReductionSingleton().set_data_path(path)
 
 def SANS2D(idf_path=None):
     """
@@ -142,18 +127,6 @@ def Detector(det_name):
     """
     _printMessage('Detector("' + det_name + '")')
     ReductionSingleton().instrument.setDetector(det_name)
-    
-def CropToDetector(inputWSname, outputWSname=None):
-    """
-        Crops the workspace so that it only contains the spectra that correspond
-        to the detectors used in the reduction
-        @param inputWSname: name of the workspace to crop
-        @param outputWSname: name the workspace will take (default is the inputWSname)
-    """
-    if not outputWSname:
-        outputWSname = inputWSname    
-        
-    ReductionSingleton().instrument.cur_detector().crop_to_detector(inputWSname, outputWSname)
     
 def Mask(details):
     """
@@ -816,35 +789,8 @@ def Set2D():
     _printMessage('Set2D()')
     ReductionSingleton().set_Q_output_type('2D')
 
-def SetRearEfficiencyFile(filename):
-    rear_det = ReductionSingleton().instrument.getDetector('rear')
-    rear_det.correction_file = filename
-
-def SetFrontEfficiencyFile(filename):
-    front_det = ReductionSingleton().instrument.getDetector('front')
-    front_det.correction_file = filename
-
 def SetDetectorFloodFile(filename, detector_name="REAR"):
     ReductionSingleton().prep_normalize.setPixelCorrFile(filename, detector_name)
-
-def displayUserFile():
-    print '-- Mask file defaults --'
-    print ReductionSingleton().to_wavlen
-    print ReductionSingleton().Q_string()
-#    print correction_files()
-    print '    direct beam file rear:',
-    print ReductionSingleton().instrument.detector_file('rear')
-    print '    direct beam file front:',
-    print ReductionSingleton().instrument.detector_file('front')
-    print ReductionSingleton().mask
-
-def displayMaskFile():
-    displayUserFile()
-
-def displayGeometry():
-    [x, y] = ReductionSingleton().get_beam_center()
-    print 'Beam centre: [' + str(x) + ',' + str(y) + ']'
-    print ReductionSingleton().get_sample().geometry
 
 def SetPhiLimit(phimin, phimax, use_mirror=True):
     """
@@ -890,9 +836,6 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side):
     detector.rot_corr = rot
     detector.radius_corr = radius
     detector.side_corr = side   
-    
-def LimitsPhi(Not, Implemented, use_mirror=True):
-    raise NotImplementedError('You must use SetPhiLimit() instead of LimitsPhi, processing stopped')
 
 def LimitsR(rmin, rmax, quiet=False, reducer=None):
     if reducer == None:
@@ -916,26 +859,6 @@ def LimitsWav(lmin, lmax, step, bin_type):
         bin_sym = ''
     
     ReductionSingleton().to_wavelen.set_rebin(lmin, bin_sym + str(step), lmax)
-
-def LimitsQ(*args):
-    settings = ReductionSingleton().user_settings
-    if settings is None:
-        raise RuntimeError('MaskFile() first')
-
-    # If given one argument it must be a rebin string
-    if len(args) == 1:
-        val = args[0]
-        if type(val) == str:
-            _printMessage("LimitsQ(" + val + ")")
-            settings.readLimitValues("L/Q " + val, ReductionSingleton())
-        else:
-            issueWarning("LimitsQ can only be called with a single string or 4 values")
-    elif len(args) == 4:
-        qmin,qmax,step,step_type = args
-        _printMessage('LimitsQ(' + str(qmin) + ', ' + str(qmax) +', ' + str(step) + ','  + str(step_type) + ')')
-        settings.readLimitValues('L/Q ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + step_type, ReductionSingleton())
-    else:
-        issueWarning("LimitsQ called with " + str(len(args)) + " arguments, 1 or 4 expected.")
 
 def LimitsQXY(qmin, qmax, step, type):
     """
@@ -990,13 +913,6 @@ def PlotResult(workspace, canvas=None):
     return graph
 
 ##################### View mask details #####################################################
-
-def ViewCurrentMask():
-    """
-        In MantidPlot this opens InstrumentView to display the masked
-        detectors in the bank in a different colour
-    """
-    ReductionSingleton().ViewCurrentMask()
 
 def DisplayMask(mask_worksp=None):
     """
@@ -1193,6 +1109,106 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     centre.logger.notice("Centre coordinates updated: [" + str(XNEW)+ ", "+ str(YNEW) + ']')
     
     return XNEW, YNEW
+                
+###############################################################################
+######################### Start of Deprecated Code ############################
+###############################################################################
+
+@deprecated
+def UserPath(path):
+    """
+        Sets the directory in which Mantid should look for the mask file if a
+        full path was not specified
+        @param path: the full path to the directory
+    """
+    _printMessage('UserPath("' + path + '") #Will look for mask file here')
+    ReductionSingleton().user_file_path = path
+
+@deprecated
+def DataPath(path):
+    """
+        Sets an extra directory for Mantid to look for run files
+        @param path: the full path to a directory containing the run files to analyse
+    """
+    ReductionSingleton().set_data_path(path)
+
+@deprecated
+def CropToDetector(inputWSname, outputWSname=None):
+    """
+        Crops the workspace so that it only contains the spectra that correspond
+        to the detectors used in the reduction
+        @param inputWSname: name of the workspace to crop
+        @param outputWSname: name the workspace will take (default is the inputWSname)
+    """
+    if not outputWSname:
+        outputWSname = inputWSname    
+        
+    ReductionSingleton().instrument.cur_detector().crop_to_detector(inputWSname, outputWSname)
+
+@deprecated
+def SetRearEfficiencyFile(filename):
+    rear_det = ReductionSingleton().instrument.getDetector('rear')
+    rear_det.correction_file = filename
+
+@deprecated
+def SetFrontEfficiencyFile(filename):
+    front_det = ReductionSingleton().instrument.getDetector('front')
+    front_det.correction_file = filename
+
+@deprecated
+def displayUserFile():
+    print '-- Mask file defaults --'
+    print ReductionSingleton().to_wavlen
+    print ReductionSingleton().Q_string()
+#    print correction_files()
+    print '    direct beam file rear:',
+    print ReductionSingleton().instrument.detector_file('rear')
+    print '    direct beam file front:',
+    print ReductionSingleton().instrument.detector_file('front')
+    print ReductionSingleton().mask
+
+@deprecated
+def displayMaskFile():
+    displayUserFile()
+
+@deprecated
+def displayGeometry():
+    [x, y] = ReductionSingleton().get_beam_center()
+    print 'Beam centre: [' + str(x) + ',' + str(y) + ']'
+    print ReductionSingleton().get_sample().geometry
+
+@deprecated
+def LimitsQ(*args):
+    settings = ReductionSingleton().user_settings
+    if settings is None:
+        raise RuntimeError('MaskFile() first')
+
+    # If given one argument it must be a rebin string
+    if len(args) == 1:
+        val = args[0]
+        if type(val) == str:
+            _printMessage("LimitsQ(" + val + ")")
+            settings.readLimitValues("L/Q " + val, ReductionSingleton())
+        else:
+            issueWarning("LimitsQ can only be called with a single string or 4 values")
+    elif len(args) == 4:
+        qmin,qmax,step,step_type = args
+        _printMessage('LimitsQ(' + str(qmin) + ', ' + str(qmax) +', ' + str(step) + ','  + str(step_type) + ')')
+        settings.readLimitValues('L/Q ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + step_type, ReductionSingleton())
+    else:
+        issueWarning("LimitsQ called with " + str(len(args)) + " arguments, 1 or 4 expected.")
+
+@deprecated
+def ViewCurrentMask():
+    """
+        In MantidPlot this opens InstrumentView to display the masked
+        detectors in the bank in a different colour
+    """
+    ReductionSingleton().ViewCurrentMask()
+
+###############################################################################
+########################## End of Deprecated Code #############################
+###############################################################################
 
 #this is like a #define I'd like to get rid of it because it seems meaningless here
 DefaultTrans = 'True'

@@ -13,7 +13,7 @@ import re
 import traceback
 
 from mantid.kernel import Logger
-sanslog = Logger.get("SANS")
+sanslog = Logger("SANS")
 
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
