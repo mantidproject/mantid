@@ -43,6 +43,21 @@ void HistoryView::unroll(size_t index)
   auto it = m_historyItems.begin();
   std::advance (it,index);
 
+  unroll(it);  
+}
+
+/**
+ * Unroll an algorithm history to export its child algorithms.
+ *
+ * This places each of the child algorithm histories into the 
+ * HistoryView object. The parent is retained as a marker so we can
+ * "roll" the history back up if we want. This method does nothing if
+ * the history object has no children
+ *
+ * @param it :: iterator to the list of history item objects at the position to unroll
+ */
+void HistoryView::unroll(std::list<HistoryItem>::iterator it)
+{
   const auto history = it->getAlgorithmHistory();
   const auto childHistories = history->getChildHistories();
 
@@ -55,9 +70,25 @@ void HistoryView::unroll(size_t index)
     //insert each of the records, in order, at this position
     for (auto childIter = childHistories.begin(); childIter != childHistories.end(); ++childIter)
     {
-      HistoryItem item(*childIter);
+      HistoryItem item(*childIter);    
       m_historyItems.insert(it, item);
     }
+  }
+}
+
+void HistoryView::unrollAll()
+{
+  for (auto it = m_historyItems.begin(); it != m_historyItems.end(); ++it)
+  {
+    unroll(it);
+  }
+}
+
+void HistoryView::rollAll()
+{
+  for (auto it = m_historyItems.begin(); it != m_historyItems.end(); ++it)
+  {
+    roll(it);
   }
 }
 
@@ -82,6 +113,22 @@ void HistoryView::roll(size_t index)
   //advance to the item at the index
   auto it = m_historyItems.begin();
   std::advance (it,index);
+ 
+  roll(it); 
+}
+
+/**
+ * Roll an unrolled algorithm history item and remove its children from the view.
+ *
+ * This removes each of the child algorithm histories (if any) and marks
+ * the parent as being "rolled up". Note that this will recursively "roll up" any child
+ * history objects that are also unrolled. This method does nothing if
+ * the history object has no children.
+ *
+ * @param it :: iterator to the list of history item objects at the positon to roll
+ */
+void HistoryView::roll(std::list<HistoryItem>::iterator it)
+{
 
   // the number of records after this position
   const size_t numChildren = it->numberOfChildren();
@@ -98,7 +145,7 @@ void HistoryView::roll(size_t index)
       //roll them back up if so.
       if(it->isUnrolled())
       {
-        roll(index+1);
+        roll(it);
       }
       //Then just remove the item from the list
       it = m_historyItems.erase(it);
@@ -106,7 +153,7 @@ void HistoryView::roll(size_t index)
   }
 }
 
-const std::vector<HistoryItem> HistoryView::getAlgorithmsList()
+const std::vector<HistoryItem> HistoryView::getAlgorithmsList() const
 {
   std::vector<HistoryItem> histories;
   histories.reserve(size());

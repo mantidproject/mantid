@@ -48,10 +48,10 @@ public:
   HistoryItem(const HistoryItem& A);
   virtual ~HistoryItem() {};
 
-  bool isUnrolled() { return m_unrolled; }
+  bool isUnrolled() const { return m_unrolled; }
   void unrolled(bool unrolled) { m_unrolled = unrolled; }
-  AlgorithmHistory_const_sptr getAlgorithmHistory() { return m_algorithmHistory; }
-  size_t numberOfChildren() { return m_algorithmHistory->childHistorySize(); }
+  AlgorithmHistory_const_sptr getAlgorithmHistory() const { return m_algorithmHistory; }
+  size_t numberOfChildren() const { return m_algorithmHistory->childHistorySize(); }
   HistoryItem& operator=(const HistoryItem& A);
 
 private:

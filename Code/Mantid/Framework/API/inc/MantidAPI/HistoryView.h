@@ -52,11 +52,16 @@ public:
   virtual ~HistoryView() {};
 
   void unroll(size_t index);
+  void unrollAll();
   void roll(size_t index);
-  const std::vector<HistoryItem> getAlgorithmsList();
-  size_t size() { return m_historyItems.size(); }
+  void rollAll();
+  const std::vector<HistoryItem> getAlgorithmsList() const;
+  size_t size() const { return m_historyItems.size(); }
 
 private:
+  void unroll(std::list<HistoryItem>::iterator it);
+  void roll(std::list<HistoryItem>::iterator it);
+  
   const WorkspaceHistory m_wsHist;
   std::list<HistoryItem> m_historyItems;
 };
