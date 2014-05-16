@@ -1,23 +1,19 @@
-#ifndef POLDIABSTRACTCHOPPER_H
-#define POLDIABSTRACTCHOPPER_H
+#ifndef MANTID_SINQ_MILLERINDICES_H
+#define MANTID_SINQ_MILLERINDICES_H
 
 #include "MantidSINQ/DllConfig.h"
+#include <vector>
 
-#include "MantidGeometry/Instrument.h"
+namespace Mantid {
+namespace Poldi {
 
-#include <utility>
-
-namespace Mantid
-{
-namespace Poldi
-{
-
-/** PoldiAbstractChopper :
+/** MillerIndices :
  *
-  Abstract representation of the POLDI chopper
+  Small helper class which holds Miller indices for use with other
+  POLDI routines.
 
     @author Michael Wedel, Paul Scherrer Institut - SINQ
-    @date 10/02/2014
+    @date 14/03/2014
 
     Copyright © 2014 PSI-MSS
 
@@ -40,33 +36,33 @@ namespace Poldi
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-using namespace Kernel;
-
-class MANTID_SINQ_DLL PoldiAbstractChopper
-{
+class MANTID_SINQ_DLL MillerIndices {
 public:
-    virtual ~PoldiAbstractChopper() {}
+    MillerIndices(int h = 0, int k = 0, int l = 0);
+    MillerIndices(std::vector<int> hkl);
+    ~MillerIndices() {}
 
-    virtual void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) = 0;
+    int h() const;
+    int k() const;
+    int l() const;
 
-    virtual void setRotationSpeed(double rotationSpeed) = 0;
+    int operator[](int index);
 
-    virtual const std::vector<double>& slitPositions() = 0;
-    virtual const std::vector<double>& slitTimes() = 0;
+    const std::vector<int>& asVector() const;
 
-    virtual double rotationSpeed() = 0;
-    virtual double cycleTime() = 0;
-    virtual double zeroOffset() = 0;
+private:
+    void populateVector();
 
-    virtual double distanceFromSample() = 0;
+    int m_h;
+    int m_k;
+    int m_l;
 
-protected:
-    PoldiAbstractChopper() {}
-
+    std::vector<int> m_asVector;
 };
 
-typedef boost::shared_ptr<PoldiAbstractChopper> PoldiAbstractChopper_sptr;
+
 }
 }
 
-#endif // POLDIABSTRACTCHOPPER_H
+
+#endif // MANTID_SINQ_MILLERINDICES_H
