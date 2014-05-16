@@ -259,7 +259,7 @@ class ReflectometryReductionOneBaseTest(object):
         alg.set_FirstTransmissionRun(real_run) # Currently a requirement that one transmisson correction is provided.
         
         out_ws_q, out_ws_lam, theta = alg.execute()
-        self.assertAlmostEqual(0.7, theta*(180/math.pi), 1)
+        self.assertAlmostEqual(0.70969419, theta, 4)
         
         DeleteWorkspace(real_run)
         
