@@ -7,10 +7,20 @@
 			<value val="direct" />
 		</parameter>
 
-		<!-- Mapping of nexus fields -->		
+		<!-- Mapping of nexus fields:
+		- Change the name from val to name in the properties
+		 -->		
 		<parameter name="channel_width" type="string">
-			<value val="instrument/det/value" />
+			<value val="monitor1.time_of_flight_0" />
 		</parameter>
+		<!--  Get value from poperties -->
+		<parameter name="detector_distance" type="string">
+			<value val="det.value" />
+		</parameter>
+		<parameter name="detector_centre" type="string">
+			<value val="PSD.ny" />
+		</parameter>
+		
 		
 		
 		
