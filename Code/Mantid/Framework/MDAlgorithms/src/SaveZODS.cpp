@@ -112,7 +112,7 @@ namespace MDAlgorithms
     if (ws->getNumDims() != 3)
       throw std::runtime_error("InputWorkspace must have 3 dimensions (having one bin in the 3rd dimension is OK).");
 
-    if (ws->getDimension(0)->getName() != "[H,0,0]")
+    if (ws->getDimension(0)->getName() != "H")
       g_log.warning() << "SaveZODS expects the workspace to be in HKL space! Saving anyway..." << std::endl;
 
     // Create a HDF5 file
@@ -183,15 +183,28 @@ namespace MDAlgorithms
     // Copy data into a vector
     signal_t * signal = ws->getSignalArray();
     std::vector<double> data;
-    data.insert(data.begin(), signal, signal+numPoints);
+
+    for (int i=0; i<size_field[0]; i++)
+    	for (int j=0; j<size_field[1]; j++)
+    		for (int k=0; k<size_field[2]; k++)
+    		{
+    			int l = i + size_field[0]*j + size_field[0]*size_field[1]*k;
+    			data.push_back(signal[l]);
+    		}
+
     file->writeData("Data", data, size);
 
     // Copy errors (not squared) into a vector called sigma
     signal_t * errorSquared = ws->getErrorSquaredArray();
     std::vector<double> sigma;
     sigma.reserve(numPoints);
-    for (size_t i=0; i<numPoints; i++)
-      sigma.push_back( sqrt(errorSquared[i]) );
+    for (int i=0; i<size_field[0]; i++)
+    	for (int j=0; j<size_field[1]; j++)
+    		for (int k=0; k<size_field[2]; k++)
+    		{
+    			int l = i + size_field[0]*j + size_field[0]*size_field[1]*k;
+    			sigma.push_back(sqrt(errorSquared[l]));
+    		}
     file->writeData("sigma", sigma, size);
 
     // Close Data_0 group
