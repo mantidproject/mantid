@@ -24,6 +24,7 @@ set ( SRC_FILES
         src/PoldiUtilities/PoldiInstrumentAdapter.cpp
 	src/PoldiUtilities/PoldiPeak.cpp
 	src/PoldiUtilities/PoldiPeakCollection.cpp
+        src/PoldiUtilities/PoldiSpectrumDomainFunction.cpp
 	src/PoldiUtilities/UncertainValue.cpp
 	src/ProjectMD.cpp
 	src/SINQHMListener.cpp
@@ -62,6 +63,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h
 	inc/MantidSINQ/PoldiUtilities/PoldiPeak.h
 	inc/MantidSINQ/PoldiUtilities/PoldiPeakCollection.h
+        inc/MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h
 	inc/MantidSINQ/PoldiUtilities/UncertainValue.h
 	inc/MantidSINQ/PoldiUtilities/UncertainValueIO.h
 	inc/MantidSINQ/ProjectMD.h
