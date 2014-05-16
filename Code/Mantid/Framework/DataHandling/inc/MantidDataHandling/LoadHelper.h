@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -54,6 +55,8 @@ public:
 	    		std::string& parent_class,
 	    		int indent);
 	std::string dateTimeInIsoFormat(std::string);
+	void moveComponent(API::MatrixWorkspace_sptr ws, const std::string &componentName,const Kernel::V3D& newPos);
+	Kernel::V3D getComponentPosition(API::MatrixWorkspace_sptr ws, const std::string &componentName);
 };
 
 } // namespace DataHandling
