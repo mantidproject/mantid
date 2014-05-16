@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/LoadFlexiNexus.cpp
 	src/MDHistoToWorkspace2D.cpp
 	src/PoldiAutoCorrelation5.cpp
+        src/PoldiCalculateSpectrum2D.cpp
 	src/PoldiFitPeaks1D.cpp
 	src/PoldiLoadChopperSlits.cpp
 	src/PoldiLoadIPP.cpp
@@ -38,6 +39,7 @@ set ( INC_FILES
 	inc/MantidSINQ/LoadFlexiNexus.h
 	inc/MantidSINQ/MDHistoToWorkspace2D.h
 	inc/MantidSINQ/PoldiAutoCorrelation5.h
+        inc/MantidSINQ/PoldiCalculateSpectrum2D.h
 	inc/MantidSINQ/PoldiFitPeaks1D.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
 	inc/MantidSINQ/PoldiLoadIPP.h
