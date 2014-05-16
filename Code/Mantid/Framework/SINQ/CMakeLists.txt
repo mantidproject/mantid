@@ -4,15 +4,6 @@ set ( SRC_FILES
 	src/MDHistoToWorkspace2D.cpp
 	src/PoldiAutoCorrelation5.cpp
 	src/PoldiFitPeaks1D.cpp
-        src/PoldiUtilities/PoldiAutoCorrelationCore.cpp
-        src/PoldiUtilities/PoldiBasicChopper.cpp
-        src/PoldiUtilities/PoldiChopperFactory.cpp
-        src/PoldiUtilities/PoldiDeadWireDecorator.cpp
-        src/PoldiUtilities/PoldiDetectorDecorator.cpp
-        src/PoldiUtilities/PoldiDetectorFactory.cpp
-        src/PoldiUtilities/PoldiHeliumDetector.cpp
-        src/PoldiUtilities/PoldiSourceSpectrum.cpp
-        src/PoldiUtilities/UncertainValue.cpp
 	src/PoldiLoadChopperSlits.cpp
 	src/PoldiLoadIPP.cpp
 	src/PoldiLoadLog.cpp
@@ -30,6 +21,7 @@ set ( SRC_FILES
 	src/PoldiUtilities/PoldiDetectorFactory.cpp
         src/PoldiUtilities/PoldiDGrid.cpp
 	src/PoldiUtilities/PoldiHeliumDetector.cpp
+        src/PoldiUtilities/PoldiInstrumentAdapter.cpp
 	src/PoldiUtilities/PoldiPeak.cpp
 	src/PoldiUtilities/PoldiPeakCollection.cpp
 	src/PoldiUtilities/UncertainValue.cpp
@@ -46,18 +38,6 @@ set ( INC_FILES
 	inc/MantidSINQ/MDHistoToWorkspace2D.h
 	inc/MantidSINQ/PoldiAutoCorrelation5.h
 	inc/MantidSINQ/PoldiFitPeaks1D.h
-        inc/MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h
-        inc/MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h
-        inc/MantidSINQ/PoldiAutoCorrelation5.h
-        inc/MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h
-        inc/MantidSINQ/PoldiUtilities/PoldiBasicChopper.h
-        inc/MantidSINQ/PoldiUtilities/PoldiChopperFactory.h
-        inc/MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h
-        inc/MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h
-        inc/MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h
-        inc/MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h
-        inc/MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h
-        inc/MantidSINQ/PoldiUtilities/UncertainValue.h
 	inc/MantidSINQ/PoldiLoadChopperSlits.h
 	inc/MantidSINQ/PoldiLoadIPP.h
 	inc/MantidSINQ/PoldiLoadLog.h
@@ -78,6 +58,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h
         inc/MantidSINQ/PoldiUtilities/PoldiDGrid.h
 	inc/MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h
+        inc/MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h
 	inc/MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h
 	inc/MantidSINQ/PoldiUtilities/PoldiPeak.h
 	inc/MantidSINQ/PoldiUtilities/PoldiPeakCollection.h
