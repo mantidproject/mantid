@@ -2,6 +2,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UserStringParser.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Logger.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/IDetector.h"
@@ -9,18 +10,22 @@
 using Mantid::specid_t;
 using Mantid::detid_t;
 
-
 namespace MantidQt
 {
   namespace CustomInterfaces
   {
+    namespace
+    {
+      /// static logger
+      Mantid::Kernel::Logger g_log("SANSDiagnostics");
+    }
+
     using namespace Mantid::Kernel;
     using namespace Mantid::API;
 
     ///Constructor
     SANSDiagnostics::SANSDiagnostics(QWidget *parent, Ui::SANSRunWindow *ParWidgets):
-    m_SANSForm(ParWidgets), parForm(parent),m_totalPeriods(0),m_Period(0),m_rectDetectors(),
-      g_log(Mantid::Kernel::Logger::get("SANSDiagnostics"))
+    m_SANSForm(ParWidgets), parForm(parent),m_totalPeriods(0),m_Period(0),m_rectDetectors()
     {
       initLayout();
       //connect to SANSRunWindow to apply mask

@@ -21,9 +21,6 @@ using Mantid::Kernel::DateAndTime;
 
 namespace Mantid
 {
-  namespace Kernel{
-    class Logger;
-  }
 namespace API{
 
   /** Implementation of Mantid::API::ScriptRepository
@@ -172,8 +169,6 @@ namespace API{
     void download_file(const std::string& , RepositoryEntry & ); 
     void updateLocalJson(const std::string & , const RepositoryEntry & ); 
 
-    /// reference to the logger class
-    Mantid::Kernel::Logger& g_log;
     /// flag that indicate a valid repository
     bool valid;
 

@@ -35,6 +35,9 @@ namespace Mantid
       const char * MC_LOOP_TOL = "MCTolerance";
       const char * MC_TYPE = "MCType";
       const char * FOREGROUNDONLY_NAME = "ForegroundOnly";
+
+      /// static logger
+      Kernel::Logger g_log("TobyFitResolutionModel");
     }
 
     /*

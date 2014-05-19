@@ -21,14 +21,6 @@ class QCloseEvent;
 class QShowEvent;
 class QHideEvent;
 
-namespace Mantid
-{
-  namespace Kernel
-  {
-    class Logger;
-  }
-}
-
 
 /** @class ScriptingWindow    
     This class displays a seperate window for editing and executing scripts
@@ -106,6 +98,8 @@ private slots:
   void executeAll();
   ///Execute selection using the current mode option
   void executeSelection();
+  /// Clear out any previous variable definitions in the current script
+  void clearScriptVariables();
 
 private:
   /// Create menu bar
@@ -148,7 +142,7 @@ private:
   /// Run menu
   QMenu *m_runMenu;
   /// Execute menu actions
-  QAction *m_execSelect, *m_execAll;
+  QAction *m_execSelect, *m_execAll, *m_clearScriptVars;
   /// Execution mode menu
   QMenu *m_execModeMenu;
   /// Execute mode actions
@@ -164,9 +158,6 @@ private:
   QAction *m_scripting_lang;
   /// Flag to define whether we should accept a close event
   bool m_acceptClose;
-
-  /// Log object
-  Mantid::Kernel::Logger & g_log;
 
 };
 

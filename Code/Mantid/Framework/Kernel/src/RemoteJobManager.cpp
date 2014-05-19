@@ -23,8 +23,11 @@ namespace Mantid
 namespace Kernel
 {
 
-// Get a reference to the logger
-Logger& RemoteJobManager::g_log = Logger::get("RemoteJobManager");
+namespace
+{
+  // static logger object
+  Logger g_log("RemoteJobManager");
+}
 
 RemoteJobManager::RemoteJobManager( const Poco::XML::Element* elem)
     : m_displayName( elem->getAttribute("name")),

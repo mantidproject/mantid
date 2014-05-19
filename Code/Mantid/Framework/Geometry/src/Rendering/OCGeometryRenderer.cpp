@@ -10,10 +10,22 @@
 #ifdef __INTEL_COMPILER
   #pragma warning disable 191
 #endif
-#include "MantidGeometry/Rendering/OpenCascadeConfig.h"
+// Opencascade defines _USE_MATH_DEFINES without checking whether it is already used.
+// Undefine it here before we include the headers to avoid a warning
+#ifdef _MSC_VER
+  #undef _USE_MATH_DEFINES
+  #ifdef M_SQRT1_2
+    #undef M_SQRT1_2
+  #endif
+#endif
+
+
 GCC_DIAG_OFF(conversion)
+GCC_DIAG_OFF(cast-qual)
 #include <gp_Pnt.hxx>
 GCC_DIAG_ON(conversion)
+GCC_DIAG_ON(cast-qual)
+
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Face.hxx>

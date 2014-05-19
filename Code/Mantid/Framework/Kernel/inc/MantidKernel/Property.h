@@ -5,7 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 #include <set>
 #include <string>
 #include <vector>
@@ -101,6 +103,7 @@ public:
   // Getters
   const std::string& name() const;
   const std::string& documentation() const;
+  const std::string& briefDocumentation() const;
   const std::type_info* type_info() const;
   const std::string type() const;
 
@@ -109,13 +112,10 @@ public:
 
   /// Set the PropertySettings object
   void setSettings(IPropertySettings * settings);
- 
   /** @return the PropertySettings for this property */
   IPropertySettings * getSettings();
-
   /** Deletes the PropertySettings object contained */
   void deleteSettings();
-
 
   ///Overriden function that returns if property has the same value that it was initialised with, if applicable
   virtual bool isDefault() const = 0;
@@ -123,10 +123,8 @@ public:
   bool remember() const;
   void setRemember(bool);
 
-  /**Sets the user level description of the property
-   *  @param documentation :: The string that the user will see
-   */
   void setDocumentation(const std::string& documentation);
+  void setBriefDocumentation(const std::string& documentation);
 
   /// Returns the value of the property as a string
   virtual std::string value() const = 0;
@@ -192,6 +190,8 @@ private:
 
   /// Longer, optional description of property
   std::string m_documentation;
+  /// Brief description of property
+  std::string m_shortDoc;
   /// The type of the property
   const std::type_info* m_typeinfo;
   /// Whether the property is used as input, output or both to an algorithm

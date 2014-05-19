@@ -6,16 +6,16 @@
 #include "DllOption.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/PeakTransformSelector.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidQtAPI/SyncedCheckboxes.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
-#include "MantidQtSliceViewer/PeakTransformSelector.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
-#include "QwtRasterDataMD.h"
+#include "MantidQtAPI/QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"
 #include <QtCore/QtCore>
 #include <QtGui/qdialog.h>
@@ -177,9 +177,7 @@ private:
 
   void updateDisplay(bool resetAxes = false);
   void updateDimensionSliceWidgets();
-  void resetAxis(int axis, Mantid::Geometry::IMDDimension_const_sptr dim);
-  QwtDoubleInterval getRange(Mantid::API::IMDIterator * it);
-  QwtDoubleInterval getRange(std::vector<Mantid::API::IMDIterator *> iterators);
+  void resetAxis(int axis, const Mantid::Geometry::IMDDimension_const_sptr & dim);
 
   void findRangeFull();
   void findRangeSlice();
@@ -246,7 +244,7 @@ private:
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_dimensions;
 
   /// Data presenter
-  QwtRasterDataMD * m_data;
+  API::QwtRasterDataMD * m_data;
 
   /// The X and Y dimensions being plotted
   Mantid::Geometry::IMDDimension_const_sptr m_X;
@@ -309,7 +307,7 @@ private:
   DimensionSliceWidget* m_peaksSliderWidget;
 
   /// Object for choosing a PeakTransformFactory based on the workspace type.
-  PeakTransformSelector m_peakTransformSelector;
+  Mantid::API::PeakTransformSelector m_peakTransformSelector;
 };
 
 } // namespace SliceViewer

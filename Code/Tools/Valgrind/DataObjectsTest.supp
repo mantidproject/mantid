@@ -1,0 +1,10 @@
+{
+   <EventListTest_omp>
+   Memcheck:Leak
+   ...
+   fun:pthread_create@@GLIBC_2.2.5
+   fun:???
+   fun:_ZN6Mantid11DataObjects14parallel_sort2INS0_8TofEventEEEvRSt6vectorIT_SaIS4_EE
+   ...
+}
+

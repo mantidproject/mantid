@@ -409,8 +409,8 @@ namespace Algorithms
       outfile << "# "<< DateAndTime::getCurrentTime().toFormattedString("%c") <<"\n";
       outfile << "#\n";
       outfile << "6         L1     T0_SHIFT\n";
-      IObjComponent_const_sptr source = inst->getSource();
-      IObjComponent_const_sptr sample = inst->getSample();
+      IComponent_const_sptr source = inst->getSource();
+      IComponent_const_sptr sample = inst->getSample();
       outfile << "7  "<<source->getDistance(*sample)*100<<"            0\n";
       outfile << "4 DETNUM  NROWS  NCOLS  WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ\n";
     }

@@ -209,7 +209,7 @@ MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::Mat
 
   Unit_const_sptr xUnit = workspace->getAxis(0)->unit();
 
-  g_log.information() << "Converting units from "<< xUnit->label() << " to " << CONVERSION_UNIT<<".\n";
+  g_log.information() << "Converting units from "<< xUnit->label().ascii() << " to " << CONVERSION_UNIT<<".\n";
 
   API::IAlgorithm_sptr childAlg = createChildAlgorithm("ConvertUnits", 0.34, 0.66);
   childAlg->setProperty("InputWorkspace", workspace);

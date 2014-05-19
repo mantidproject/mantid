@@ -90,7 +90,7 @@ public:
    *  (1) Leave correction table workspace empty
    *  (2) Count events in each output including "-1", the excluded/unselected events
    */
-  void test_FilterWOCorrection()
+  void test_FilterNoCorrection()
   {
     // 1. Create EventWorkspace and SplittersWorkspace    
     int64_t runstart_i64 = 20000000000;
@@ -112,6 +112,7 @@ public:
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS01");
     filter.setProperty("SplitterWorkspace", "Splitter02");
     filter.setProperty("GenerateTOFCorrection", false);
+    filter.setProperty("OutputTOFCorrectionWorkspace", "CorrectionWS");
 
     // 3. Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());

@@ -58,6 +58,7 @@ Version 1 supports the loading version 1.0 of the muon nexus format.  This is st
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -234,7 +235,7 @@ namespace Mantid
       // Set the unit on the workspace to muon time, for now in the form of a Label Unit
       boost::shared_ptr<Kernel::Units::Label> lblUnit = 
         boost::dynamic_pointer_cast<Kernel::Units::Label>(UnitFactory::Instance().create("Label"));
-      lblUnit->setLabel("Time","microsecond");
+      lblUnit->setLabel("Time", Units::Symbol::Microsecond);
       localWorkspace->getAxis(0)->unit() = lblUnit;
       // Set y axis unit
       localWorkspace->setYUnit("Counts");
@@ -321,7 +322,7 @@ namespace Mantid
         {
           int i = index_spectrum[spec]; // if spec not found i is 0
           loadData(counts,timeBins,counter,period,i,localWorkspace);
-          localWorkspace->getAxis(1)->setValue(counter, spectrum_index[i]);
+          localWorkspace->getSpectrum(counter)->setSpectrumNo(spectrum_index[i]);
           counter++;
           progress.report();
         }
@@ -334,7 +335,7 @@ namespace Mantid
             int spec = m_spec_list[i];
             int k = index_spectrum[spec]; // if spec not found k is 0
             loadData(counts,timeBins,counter,period,k,localWorkspace);
-            localWorkspace->getAxis(1)->setValue(counter, spectrum_index[k]);
+            localWorkspace->getSpectrum(counter)->setSpectrumNo(spectrum_index[k]);
             counter++;
             progress.report();
           }

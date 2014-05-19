@@ -27,9 +27,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-  Kernel::Logger& FindUBUsingFFT::g_log = 
-                        Kernel::Logger::get("FindUBUsingFFT");
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(FindUBUsingFFT)
 
@@ -127,8 +124,8 @@ namespace Crystal
                                            tolerance, 
                                            degrees_per_step );
 
-    std::cout << "Error = " << error << std::endl;
-    std::cout << "UB = " << UB << std::endl;
+    g_log.notice() << "Error = " << error << std::endl;
+    g_log.notice() << "UB = " << UB << std::endl;
 
     if ( ! IndexingUtils::CheckUB( UB ) ) // UB not found correctly
     {

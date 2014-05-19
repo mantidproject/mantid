@@ -229,10 +229,24 @@ public:
 	uint32_t cycle(void) const { return m_fields[2]; }
 	uint32_t flags(void) const { return m_fields[3]; }
 
-	// TODO implment monitor/event accessors
+	// For now, we only care about the monitor ID's and event counts.
+	// There's currently no way to actual event TOF values.
+	void firstSection() const { m_sectionStartIndex = 4; }
+	bool nextSection() const;
+	uint32_t getSectionMonitorID() const;
+	uint32_t getSectionEventCount() const;
+
+	// TODO: Implement these if/when they become necessary
+	// uint32_t getSectionTOFOffset() const;
+	// bool getSectionCORFlag() const;
+	// uint32_t getFirstTOF() const;
+	// uint32_t getNextTOF() const;
 
 private:
 	const uint32_t *m_fields;
+
+	// Data about the current monitor section
+	mutable uint32_t m_sectionStartIndex;  // index into m_fields for the start of this section
 
 	BeamMonitorPkt(const uint8_t *data, uint32_t len);
 
@@ -401,6 +415,12 @@ public:
 	uint32_t devId(void) const { return m_devId; }
 	const std::string &description(void) const { return m_desc; }
 
+	void remapDevice(uint32_t dev) {
+		uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+	        fields[0] = dev;
+		m_devId = dev;
+	};
+
 private:
 	uint32_t m_devId;
 	std::string m_desc;
@@ -425,6 +445,11 @@ public:
 	}
 	uint32_t value(void) const { return m_fields[3]; }
 
+	void remapDevice(uint32_t dev) {
+		uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+		fields[0] = dev;
+	};
+
 private:
 	const uint32_t *m_fields;
 
@@ -448,6 +473,11 @@ public:
 	}
 	double value(void) const { return *(const double *) &m_fields[3]; }
 
+	void remapDevice(uint32_t dev) {
+		uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+		fields[0] = dev;
+	};
+
 private:
 	const uint32_t *m_fields;
 
@@ -470,6 +500,11 @@ public:
 						(m_fields[2] & 0xffff);
 	}
 	const std::string &value(void) const { return m_val; }
+
+	void remapDevice(uint32_t dev) {
+		uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+		fields[0] = dev;
+	};
 
 private:
 	const uint32_t *m_fields;

@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Logger.h"
 #include <set>
 #include <string>
 #include <map>
@@ -100,7 +99,6 @@ private:
   std::string m_liveListener;              ///< Name of the live listener class
   std::string m_liveDataAddress;           ///< Host & port for live data connection
   std::set<std::string> m_technique;       ///< List of techniques the instrument can do
-  static Logger& g_log;                    ///< Logger
 };
 
 /// Allow this object to be printed to a stream

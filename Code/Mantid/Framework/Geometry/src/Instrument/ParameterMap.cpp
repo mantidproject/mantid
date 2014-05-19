@@ -15,29 +15,29 @@ namespace Mantid
     using Kernel::V3D;
     using Kernel::Quat;
 
-    namespace // for strings to be inserted into the parameter map
+    namespace
     {
-        const std::string POS_PARAM_NAME="pos";
-        const std::string POSX_PARAM_NAME="x";
-        const std::string POSY_PARAM_NAME="y";
-        const std::string POSZ_PARAM_NAME="z";
+      // names of common parameter types
+      const std::string POS_PARAM_NAME="pos";
+      const std::string POSX_PARAM_NAME="x";
+      const std::string POSY_PARAM_NAME="y";
+      const std::string POSZ_PARAM_NAME="z";
 
-        const std::string ROT_PARAM_NAME="rot";
-        const std::string ROTX_PARAM_NAME="rotx";
-        const std::string ROTY_PARAM_NAME="roty";
-        const std::string ROTZ_PARAM_NAME="rotz";
+      const std::string ROT_PARAM_NAME="rot";
+      const std::string ROTX_PARAM_NAME="rotx";
+      const std::string ROTY_PARAM_NAME="roty";
+      const std::string ROTZ_PARAM_NAME="rotz";
 
-        const std::string DOUBLE_PARAM_NAME="double";
-        const std::string INT_PARAM_NAME="int";
-        const std::string BOOL_PARAM_NAME="bool";
-        const std::string STRING_PARAM_NAME="string";
-        const std::string V3D_PARAM_NAME="V3D";
-        const std::string QUAT_PARAM_NAME="Quat";
+      const std::string DOUBLE_PARAM_NAME="double";
+      const std::string INT_PARAM_NAME="int";
+      const std::string BOOL_PARAM_NAME="bool";
+      const std::string STRING_PARAM_NAME="string";
+      const std::string V3D_PARAM_NAME="V3D";
+      const std::string QUAT_PARAM_NAME="Quat";
+
+      // static logger reference
+      Kernel::Logger g_log("ParameterMap");
     }
-
-    // Get a reference to the logger
-    Kernel::Logger& ParameterMap::g_log = Kernel::Logger::get("ParameterMap");
-
     //--------------------------------------------------------------------------
     // Public method
     //--------------------------------------------------------------------------
@@ -502,6 +502,7 @@ namespace Mantid
      * Avoids having to instantiate temporary std::string in method below when called with a string directly
      * @param comp :: The component to be searched as a c-string
      * @param name :: The name of the parameter
+     * @param type :: The type of the component
      * @return A boolean indicating if the map contains the named parameter.
      */
     bool ParameterMap::contains(const IComponent* comp, const char * name, const char *type) const
@@ -836,7 +837,7 @@ namespace Mantid
       }
     }
 
-    ///Attempts to retreive a bounding box from the cache
+    ///Attempts to retrieve a bounding box from the cache
     /// @param comp :: The Component to find the bounding box of
     /// @param box :: If the bounding box is found it's value will be set here
     /// @returns true if the bounding is in the map, otherwise false
@@ -861,7 +862,7 @@ namespace Mantid
       for(auto it = oldParameterNames.begin(); it != oldParameterNames.end(); ++it)
       {
         Parameter_sptr thisParameter = oldPMap->get(oldComp,*it);
-        // Insert the fecthed parameter in the m_map
+        // Insert the fetched parameter in the m_map
         m_map.insert(std::make_pair(newComp->getComponentID(),thisParameter));
       }
     }

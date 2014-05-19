@@ -1,7 +1,8 @@
 /*WIKI* 
 
-Saves a workspace out to a VTK file that can be loaded with Paraview or any other software supporting the VTK file format. This is a very basic algorithm that simple creates a 3D view of the data as a series of histograms. It should only be used for relatively small data sets as the resulting file can become quite large relatively quickly.
-
+Saves a workspace out to a VTK file that can be loaded with Paraview or any other software supporting the VTK file format. 
+This is a very basic algorithm that simple creates a 3D view of the data as a series of histograms. 
+It should only be used for relatively small data sets as the resulting file can become quite large relatively quickly.
 
 *WIKI*/
 //---------------------------------------------------
@@ -26,7 +27,7 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void SaveVTK::initDocs()
     {
-      this->setWikiSummary(" Save a workspace out to a VTK file format for use with 3D visualisation tools such as Paraview. ");
+      this->setWikiSummary("Save a workspace out to a VTK file format for use with 3D visualisation tools such as Paraview. ");
       this->setOptionalMessage("Save a workspace out to a VTK file format for use with 3D visualisation tools such as Paraview.");
     }
     

@@ -1,9 +1,9 @@
 /*WIKI*
 
- Performs index operations on a workspace which involve cropping out spectra and summing spectra together. See [[MultiFileLoading]] for similar syntax used during loading, though operations
- using step sizes are not supported here.
+Performs index operations on a workspace which involve cropping out spectra and summing spectra together. See [[MultiFileLoading]] for similar syntax used during loading, though operations
+using step sizes are not supported here.
 
- == Basic Instructions ==
+== Basic Instructions ==
 
  {| class="wikitable"
  !rowspan="2" |Name
@@ -40,20 +40,22 @@
  |-
  |}
 
- == Complex Instructions ==
+== Complex Instructions ==
 
- The basic instructions listed above can be used in combination because ''', can be used to separate out sets of instructions as well as indexes to keep'''. For example, ''0-2, 3:6'' will add
- spectrum with workspace indexes 0-2 together into a single spectrum and then append spectra that correspond to workspace indexes 3-6 from the original workspace (you will have 4 spectra
- in the output workspace).
+The basic instructions listed above can be used in combination because ''', can be used to separate out sets of instructions as well as indexes to keep'''. 
+For example, ''0-2, 3:6'' will add
+spectrum with workspace indexes 0-2 together into a single spectrum and then append spectra that correspond to 
+workspace indexes 3-6 from the original workspace (you will have 4 spectra
+in the output workspace).
 
- == Limitations ==
+== Limitations ==
 
- * The ''+'' operator is binary only and works like 0+1, but cannot be used like 0+1+2. Use the Add Range operator ''-'' in these scenarios.
+* The ''+'' operator is binary only and works like 0+1, but cannot be used like 0+1+2. Use the Add Range operator ''-'' in these scenarios.
 
- == Order of operations ==
- The spectra will appear in the output workspace in the same order that they are defined in the instructions. For example ''1+2, 0'' will have the results of 1+2 as workspace index 0 in the output
- workspace and index 0 in the original workspace will be mapped to workspace index 1 in the output workspace.
-
+== Order of operations ==
+The spectra will appear in the output workspace in the same order that they are defined in the instructions. 
+For example ''1+2, 0'' will have the results of 1+2 as workspace index 0 in the output
+workspace and index 0 in the original workspace will be mapped to workspace index 1 in the output workspace.
 
  *WIKI*/
 

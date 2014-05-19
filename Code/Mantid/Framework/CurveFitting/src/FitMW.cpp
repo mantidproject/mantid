@@ -2,7 +2,6 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/SeqDomain.h"
-#include "MantidCurveFitting/EmptyValues.h"
 #include "MantidCurveFitting/Convolution.h"
 
 #include "MantidAPI/CompositeFunction.h"
@@ -17,6 +16,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Matrix.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <algorithm>
@@ -163,7 +163,7 @@ namespace
   /// Create a domain from the input workspace
   void FitMW::createDomain(
     boost::shared_ptr<API::FunctionDomain>& domain, 
-    boost::shared_ptr<API::IFunctionValues>& ivalues, size_t i0)
+    boost::shared_ptr<API::FunctionValues>& values, size_t i0)
   {
     setParameters();
 
@@ -199,7 +199,7 @@ namespace
           seqDomain->addCreator( API::IDomainCreator_sptr( creator ) );
           m = k;
         }
-        ivalues.reset( new EmptyValues( n ) );
+        values.reset();
         return;
       }
       // else continue with simple domain
@@ -214,18 +214,17 @@ namespace
       {
         x[i] = (*it + *(it+1)) / 2;
       }
-      domain.reset(new API::FunctionDomain1DVector(x));
+      domain.reset(new API::FunctionDomain1DSpectrum(m_workspaceIndex, x));
       x.clear();
     }
     else
     {
-      domain.reset(new API::FunctionDomain1DVector(from,to));
+      domain.reset(new API::FunctionDomain1DSpectrum(m_workspaceIndex,from,to));
     }
 
-    auto values = ivalues ? dynamic_cast<API::FunctionValues*>(ivalues.get()) : new API::FunctionValues(*domain);
-    if (!ivalues)
+    if (!values)
     {
-      ivalues.reset(values);
+      values.reset(new API::FunctionValues(*domain));
     }
     else
     {
@@ -279,19 +278,20 @@ namespace
    * @param baseName :: Specifies the name of the output workspace
    * @param function :: A Pointer to the fitting function
    * @param domain :: The domain containing x-values for the function
-   * @param ivalues :: A API::FunctionValues instance containing the fitting data
+   * @param values :: A API::FunctionValues instance containing the fitting data
+   * @param outputWorkspacePropertyName :: The property name
    */
-  void FitMW::createOutputWorkspace(
+  boost::shared_ptr<API::Workspace> FitMW::createOutputWorkspace(
         const std::string& baseName,
         API::IFunction_sptr function,
         boost::shared_ptr<API::FunctionDomain> domain,
-        boost::shared_ptr<API::IFunctionValues> ivalues
+        boost::shared_ptr<API::FunctionValues> values,
+        const std::string& outputWorkspacePropertyName
     )
   {
-    auto values = boost::dynamic_pointer_cast<API::FunctionValues>(ivalues);
     if (!values)
     {
-      return;
+      throw std::logic_error("FunctionValues expected");
     }
 
     // Compile list of functions to output. The top-level one is first
@@ -303,7 +303,7 @@ namespace
 
     // Nhist = Data histogram, Difference Histogram + nfunctions
     const size_t nhistograms = functionsToDisplay.size() + 2;
-    const size_t nyvalues = ivalues->size();
+    const size_t nyvalues = values->size();
     auto ws = createEmptyResultWS(nhistograms, nyvalues);
     // The workspace was constructed with a TextAxis
     API::TextAxis *textAxis = static_cast<API::TextAxis*>(ws->getAxis(1));
@@ -325,16 +325,20 @@ namespace
     // Set the difference spectrum
     const MantidVec& Ycal = ws->readY(1);
     MantidVec& Diff = ws->dataY(2);
-    const size_t nData = ivalues->size();
+    const size_t nData = values->size();
     for(size_t i = 0; i < nData; ++i)
     {
       Diff[i] = values->getFitData(i) - Ycal[i];
     }
 
-    declareProperty(new API::WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-        "Name of the output Workspace holding resulting simulated spectrum");
-    m_manager->setPropertyValue("OutputWorkspace",baseName+"Workspace");
-    m_manager->setProperty("OutputWorkspace",ws);
+    if ( !outputWorkspacePropertyName.empty() )
+    {
+      declareProperty(new API::WorkspaceProperty<MatrixWorkspace>(outputWorkspacePropertyName,"",Direction::Output),
+          "Name of the output Workspace holding resulting simulated spectrum");
+      m_manager->setPropertyValue(outputWorkspacePropertyName,baseName+"Workspace");
+      m_manager->setProperty(outputWorkspacePropertyName,ws);
+    }
+    return ws;
   }
 
   /**
@@ -543,7 +547,7 @@ namespace
   }
 
   /**
-   * Add the calculated function values to the workspace
+   * Add the calculated function values to the workspace. Estimate an error for each calculated value.
    * @param function The function to evaluate
    * @param ws A workspace to fill
    * @param wsIndex The index to store the values
@@ -558,8 +562,10 @@ namespace
 
     // Function value
     function->function(*domain,*resultValues);
+
+    size_t nParams = function->nParams();
     // and errors
-    SimpleJacobian J(nData, function->nParams());
+    SimpleJacobian J(nData, nParams);
     try
     {
       function->functionDeriv(*domain,J);
@@ -569,19 +575,58 @@ namespace
       function->calNumericalDeriv(*domain,J);
     }
 
+    // the function should contain the parameter's covariance matrix
+    auto covar = function->getCovarianceMatrix();
 
-    MantidVec& yValues = ws->dataY(wsIndex);
-    MantidVec& eValues = ws->dataE(wsIndex);
-    for(size_t i=0; i < nData; i++)
+    if (covar)
     {
-      yValues[i] = resultValues->getCalculated(i);
-      double err = 0.0;
-      for(size_t j=0; j< function->nParams();++j)
+      // if the function has a covariance matrix attached - use it for the errors
+      const Kernel::Matrix<double> &C = *covar;
+      // The formula is E = J * C * J^T 
+      // We don't do full 3-matrix multiplication because we only need the diagonals of E
+      std::vector<double> E(nData);
+      for(size_t k = 0; k < nData; ++k)
       {
-        double d = J.get(i,j) * function->getError(j);
-        err += d*d;
+        double s = 0.0;
+        for(size_t i=0; i<nParams;++i)
+        {
+          double tmp = J.get(k,i);
+          s += C[i][i] * tmp * tmp;
+          for(size_t j=i+1; j<nParams;++j)
+          {
+            s += J.get(k,i) * C[i][j] * J.get(k,j) * 2;
+          }
+        }
+        E[k] = s;
       }
-      eValues[i] = std::sqrt(err);
+
+      double chi2 = function->getChiSquared();
+      MantidVec& yValues = ws->dataY(wsIndex);
+      MantidVec& eValues = ws->dataE(wsIndex);
+      for(size_t i=0; i < nData; i++)
+      {
+        yValues[i] = resultValues->getCalculated(i);
+        eValues[i] = std::sqrt( E[i] * chi2 );
+      }
+
+    }
+    else
+    {
+      // otherwise use the parameter errors which is OK for uncorrelated parameters
+      MantidVec& yValues = ws->dataY(wsIndex);
+      MantidVec& eValues = ws->dataE(wsIndex);
+      for(size_t i=0; i < nData; i++)
+      {
+        yValues[i] = resultValues->getCalculated(i);
+        double err = 0.0;
+        for(size_t j=0; j< nParams;++j)
+        {
+          double d = J.get(i,j) * function->getError(j);
+          err += d*d;
+        }
+        eValues[i] = std::sqrt(err);
+
+      }
     }
 
   }

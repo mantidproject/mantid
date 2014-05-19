@@ -11,22 +11,13 @@
 
 namespace Mantid
 {
-        
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
 
 namespace API
 {
+  //----------------------------------------------------------------------
+  // Forward declarations
+  //----------------------------------------------------------------------
   class Column;
-}
-        
-namespace API
-{
 
 /** @class ColumnFactoryImpl
 
@@ -74,8 +65,6 @@ namespace API
         ColumnFactoryImpl& operator = (const ColumnFactoryImpl&);
         ///Private Destructor
         virtual ~ColumnFactoryImpl();
-        ///static reference to the logger class
-        Kernel::Logger& g_log;
   
   };
   

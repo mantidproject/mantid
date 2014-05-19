@@ -14,10 +14,14 @@ namespace Mantid
 {
   namespace API
   {
+    namespace
+    {
+      /// static logger instance
+      Kernel::Logger g_log("AlgorithmFactory");
+    }
 
-    AlgorithmFactoryImpl::AlgorithmFactoryImpl() : 
-  Kernel::DynamicFactory<Algorithm>(), g_log(Kernel::Logger::get("AlgorithmFactory")),
-    m_vmap()
+    AlgorithmFactoryImpl::AlgorithmFactoryImpl()
+      : Kernel::DynamicFactory<Algorithm>(), m_vmap()
   {
     // we need to make sure the library manager has been loaded before we 
     // are constructed so that it is destroyed after us and thus does

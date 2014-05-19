@@ -153,7 +153,7 @@ namespace WorkspaceCreationHelper
     return ws;
   }
 
-  /// Add random noise to the signal
+  /// Add random noise to the signalcreate2DWorkspaceWithFullInstrument
   void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise, const double lower=-0.5, const double upper=0.5);
 
   /**
@@ -162,8 +162,8 @@ namespace WorkspaceCreationHelper
    * pervious. 
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
-  Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nHist, int nBins,
-                    bool includeMonitors = false, bool startYNegative = false, bool isHistogram = true);
+  Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nHist, int nBins, bool includeMonitors = false,
+                    bool startYNegative = false, bool isHistogram = true, const std::string& instrumentName = std::string("testInst"));
   
   /**
    * Create a test workspace with a Theta numeric axis instead of a spectrum axis

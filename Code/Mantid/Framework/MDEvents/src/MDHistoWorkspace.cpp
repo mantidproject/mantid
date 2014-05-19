@@ -11,6 +11,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include <boost/scoped_array.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -83,6 +84,7 @@ namespace MDEvents
     m_numEvents = new signal_t[m_length];
     m_masks = new bool[m_length];
     m_nEventsContributed = other.m_nEventsContributed;
+    this->setCoordinateSystem(other.getSpecialCoordinateSystem());
     // Now copy all the data
     for (size_t i=0; i<m_length; ++i)
     {
@@ -1306,6 +1308,15 @@ namespace MDEvents
   size_t MDHistoWorkspace::sizeOfElement()
   {
     return (3 * sizeof(signal_t) ) + sizeof(bool);
+  }
+
+  /**
+   * Clone the workspace.
+   * @return Deep copy of existing workspace.
+   */
+  boost::shared_ptr<IMDHistoWorkspace> MDHistoWorkspace::clone() const
+  {
+    return boost::shared_ptr<IMDHistoWorkspace>(new MDHistoWorkspace(*this));
   }
 
 } // namespace Mantid

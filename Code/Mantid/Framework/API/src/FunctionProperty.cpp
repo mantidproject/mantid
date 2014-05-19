@@ -6,8 +6,6 @@ namespace Mantid
 {
 namespace API
 {
-  Kernel::Logger& FunctionProperty::g_log = Kernel::Logger::get("FunctionProperty");
-
   /** Constructor.
   *  Sets the property names but initialises the function pointer to null.
   *  @param name :: The name to assign to the property
@@ -116,7 +114,7 @@ namespace API
   /// @return A populated PropertyHistory for this class
   const Kernel::PropertyHistory FunctionProperty::createHistory() const
   {
-    return Kernel::PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),Kernel::PropertyWithValue<boost::shared_ptr<IFunction> >::direction());
+    return Kernel::PropertyHistory(this);
   }
 
 } // namespace API

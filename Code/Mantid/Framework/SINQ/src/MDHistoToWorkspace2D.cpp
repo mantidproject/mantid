@@ -1,7 +1,7 @@
 /*WIKI*
-== Description ==
 
-MDHistoToWorkspace2D flattens a MDHistoWorkspace into a Workspace2D. It can process MDHistoWorkspaces of any dimensionality. The last dimension of the MDHistoWorkspace becomes 
+MDHistoToWorkspace2D flattens a MDHistoWorkspace into a Workspace2D. It can process MDHistoWorkspaces of any dimensionality. 
+The last dimension of the MDHistoWorkspace becomes 
 the spectra length. Flattening happens such that the first dimension of the MDHistoWorkspace 
 is the slowest varying, the second the second slowest varying and so on. 
 
@@ -97,7 +97,7 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS, Workspace2D_
 			xData.push_back(dim->getX(i));
 		}
 		outWS->setX(currentSpectra, xData);
-		outWS->getAxis(1)->setValue(currentSpectra,static_cast<double>(currentSpectra));
+		outWS->getSpectrum(currentSpectra)->setSpectrumNo(static_cast<specid_t>(currentSpectra));
 		currentSpectra++;
 	} else {
 		// recurse deeper

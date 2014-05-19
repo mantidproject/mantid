@@ -50,6 +50,8 @@ Supporting
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -59,6 +61,7 @@ Supporting
 #include "MantidGeometry/IDTypes.h"
 
 #include <fstream>
+#include <sstream>
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
@@ -124,7 +127,7 @@ namespace DataHandling
   {
 
     // 1. Declare property
-    declareProperty("Instrument", "", "The name of the instrument to apply the mask.");
+    declareProperty("Instrument", "", boost::make_shared<MandatoryValidator<std::string>>(),"The name of the instrument to apply the mask.");
     std::vector<std::string> exts;
     exts.push_back(".xml");
     exts.push_back(".msk");
@@ -144,7 +147,7 @@ namespace DataHandling
   {
     // 1. Load Instrument and create output Mask workspace
     const std::string instrumentname = getProperty("Instrument");
-    mInstrumentName = instrumentname;
+    m_instrumentPropValue = instrumentname;
 
     this->intializeMaskWorkspace();
     setProperty("OutputWorkspace",mMaskWS);
@@ -920,26 +923,29 @@ namespace DataHandling
    */
   void LoadMask::intializeMaskWorkspace()
   {
+    const std::string idfPath = API::FileFinder::Instance().getFullPath(m_instrumentPropValue);
 
-    // 1. Execute algorithm LoadInstrument() to a temporary Workspace
-    API::Algorithm_sptr childAlg =  createChildAlgorithm("LoadInstrument");
-    MatrixWorkspace_sptr tempWS(new DataObjects::Workspace2D());
-    childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
-    childAlg->setPropertyValue("InstrumentName", mInstrumentName);
-    childAlg->setProperty("RewriteSpectraMap", false);
-    childAlg->executeAsChildAlg();
+    MatrixWorkspace_sptr tempWs(new DataObjects::Workspace2D());
 
-    if (!childAlg->isExecuted())
+    auto loadInst = createChildAlgorithm("LoadInstrument");
+    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", tempWs);
+
+    if( idfPath.empty() )
+      loadInst->setPropertyValue("InstrumentName", m_instrumentPropValue);
+    else
+      loadInst->setPropertyValue("Filename", m_instrumentPropValue);
+
+    loadInst->setProperty("RewriteSpectraMap", false);
+    loadInst->executeAsChildAlg();
+
+    if( !loadInst->isExecuted() )
     {
-      g_log.error() << "Unable to load Instrument " << mInstrumentName << std::endl;
-      throw std::invalid_argument("Incorrect instrument name given!");
+      g_log.error() << "Unable to load Instrument " << m_instrumentPropValue << std::endl;
+      throw std::invalid_argument("Incorrect instrument name or invalid IDF given.");
     }
-
-    // 2. Use the instrument in the temp Workspace for new MaskWorkspace
-    mMaskWS = DataObjects::MaskWorkspace_sptr(new DataObjects::MaskWorkspace(tempWS->getInstrument()));
+    
+    mMaskWS = DataObjects::MaskWorkspace_sptr(new DataObjects::MaskWorkspace(tempWs->getInstrument()));
     mMaskWS->setTitle("Mask");
-
-    return;
   }
 
 

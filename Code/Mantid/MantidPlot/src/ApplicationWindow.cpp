@@ -192,6 +192,7 @@
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/Message.h"
 
+#include "MantidQtMantidWidgets/CatalogHelper.h"
 #include "MantidQtMantidWidgets/CatalogSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MessageDisplay.h"
@@ -211,6 +212,12 @@
 using namespace Qwt3D;
 using namespace MantidQt::API;
 
+namespace
+{
+  /// static logger
+  Mantid::Kernel::Logger g_log("ApplicationWindow");
+}
+
 extern "C"
 {
 void file_compress(const char  *file, const char  *mode);
@@ -222,7 +229,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings)
 Scripted(ScriptingLangManager::newEnv(this)),
 blockWindowActivation(false),
 m_enableQtiPlotFitting(false),
-m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
+m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
   settings(QSettings::IniFormat, QSettings::UserScope, "Mantid", "MantidPlot")
 #else
@@ -238,7 +245,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings, const QStringList& ar
 Scripted(ScriptingLangManager::newEnv(this)),
 blockWindowActivation(false),
 m_enableQtiPlotFitting(false),
-m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
+m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
   settings(QSettings::IniFormat, QSettings::UserScope, "Mantid", "MantidPlot")
 #else
@@ -476,7 +483,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
     }
     else
     {
-      Mantid::Kernel::Logger& g_log = Mantid::Kernel::Logger::get("ConfigService");
       g_log.warning() << "Could not find interface script: " << scriptPath.ascii() << "\n";
     }
   }
@@ -5425,7 +5431,6 @@ void ApplicationWindow::readSettings()
     //FIXME: A nice alternative to showing a message in the log window would
     // be to pop up a message box. This should be done AFTER MantidPlot has started.
     //QMessageBox::warning(this, tr("MantidPlot - Menu Warning"), tr(mess.ascii()));
-    Mantid::Kernel::Logger& g_log = Mantid::Kernel::Logger::get("ConfigService");
     g_log.warning() << mess.ascii() << "\n";
     settings.setValue("/DuplicationDialogShown", true);
   }
@@ -5463,7 +5468,7 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/AutoSave", autoSave);
   settings.setValue("/AutoSaveTime", autoSaveTime);
   //save current logger level from the root logger ""
-  int lastLoggingLevel = Mantid::Kernel::Logger::get("").getLevel();
+  int lastLoggingLevel = Mantid::Kernel::Logger("").getLevel();
   settings.setValue("/LastLoggingLevel", lastLoggingLevel);
 
   settings.setValue("/BackupProjects", d_backup_files);
@@ -11508,7 +11513,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
         try {
           if ( curvelst.size() < 7 ) // This was the case prior to 29 February, 2012
           {
-            PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt());
+            PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),MantidMatrixCurve::Spectrum, curvelst[4].toInt());
             // Deal with the brief period (Dec 29,2011-Feb 29, 2012) when any skip symbols count was just
             // stuck as an integer on the end of the of the line
             if ( curvelst.size() == 6 && !curvelst[5].isEmpty() ) c->setSkipSymbolsCount(curvelst[5].toInt());
@@ -11516,7 +11521,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
           else
           {
             // Anything saved with a version after 29 February 2012 comes here
-            PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(),curvelst[4].toInt(),
+            PlotCurve *c = new MantidMatrixCurve(curvelst[1],ag,curvelst[3].toInt(), MantidMatrixCurve::Spectrum, curvelst[4].toInt(),
                                                  curvelst[5].toInt());
             ag->setCurveType(curveID,curvelst[6].toInt());
             // Fill in the curve settings and apply them to the created curve
@@ -14151,13 +14156,6 @@ MultiLayer* ApplicationWindow::plotNoContourColorMap(Matrix *m)
     return 0;
   }
 
-  //Spectrogram *spgrm = dynamic_cast<Spectrogram*>(ml->activeGraph()->plotItem(0));
-  //if( spgrm )
-  //{
-  //  //1 = ImageMode
-  //  spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
-  //  spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
-  //}
   return ml;
 }
 
@@ -14196,8 +14194,6 @@ MultiLayer* ApplicationWindow::plotImage(Matrix *m)
       return 0;
     }
     plot = g->activeGraph();
-    setPreferences(plot);
-    if( plot->plotItem(0) )plot->plotItem(0)->setAxis(QwtPlot::xTop, QwtPlot::yLeft);
   }
 
   plot->enableAxis(QwtPlot::xTop, true);
@@ -17468,7 +17464,7 @@ void ApplicationWindow::panOnPlot()
 void ApplicationWindow::CatalogLogin()
 {
   // Executes the catalog login algorithm, and returns true if user can login.
-  if (mantidUI->isValidCatalogLogin())
+  if (MantidQt::MantidWidgets::CatalogHelper().isValidCatalogLogin())
   {
     icat->addAction(actionCatalogSearch);
     icat->addAction(actionCatalogPublish);
@@ -17493,7 +17489,7 @@ void ApplicationWindow::CatalogSearch()
 
 void ApplicationWindow::CatalogPublish()
 {
-  mantidUI->catalogPublishDialog();
+  MantidQt::MantidWidgets::CatalogHelper().catalogPublishDialog();
 }
 
 void ApplicationWindow::CatalogLogout()
@@ -17996,4 +17992,7 @@ void ApplicationWindow::about2Start(){
     update_script_repo->setLoggingOffset(1);
     mantidUI->executeAlgorithmAsync(update_script_repo);
   }
+
+  // Make sure we see all of the startup messages
+  resultsLog->scrollToTop();
 }

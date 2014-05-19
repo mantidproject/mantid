@@ -1,5 +1,4 @@
 set ( SRC_FILES
-	${SRC_FILES} ${OPENCASCADE_SRC}
 	src/ComponentParser.cpp
 	src/Crystal/ConventionalCell.cpp
 	src/Crystal/IndexingUtils.cpp
@@ -184,7 +183,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Rendering/OCGeometryGenerator.h
 	inc/MantidGeometry/Rendering/OCGeometryHandler.h
 	inc/MantidGeometry/Rendering/OCGeometryRenderer.h
-	inc/MantidGeometry/Rendering/OpenCascadeConfig.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheReader.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h

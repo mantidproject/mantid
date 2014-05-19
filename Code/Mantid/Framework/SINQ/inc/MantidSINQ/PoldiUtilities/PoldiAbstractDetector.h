@@ -66,6 +66,9 @@ protected:
     PoldiAbstractDetector() {}
 
 };
+
+typedef boost::shared_ptr<PoldiAbstractDetector> PoldiAbstractDetector_sptr;
+
 }
 }
 #endif // POLDIABSTRACTDETECTOR_H

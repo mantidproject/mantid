@@ -92,9 +92,6 @@ private:
 
   // Unhide the inherited create method but make it private
   using Kernel::DynamicFactory<Workspace>::create;
-
-  /// Static reference to the logger class
-  Kernel::Logger& g_log;
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.

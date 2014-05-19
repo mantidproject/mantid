@@ -3,7 +3,10 @@
 
 #include "MantidAPI/Column.h"
 
-#include <boost/lexical_cast.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/lexical_cast.hpp>
+#endif
+
 #include <ostream>
 #include <vector>
 #include <stdexcept>
@@ -11,17 +14,11 @@
 namespace Mantid
 {
 
+namespace API
+{
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
-
-namespace API
-{
-
 class TableRowHelper;
 
 /** \class TableRow
@@ -80,14 +77,15 @@ public:
     {
         if (m_col >= m_columns.size())
         {
-            g_log.error("Column index out of range.");
-            throw std::range_error("Column index out of range.");
+          std::stringstream errss;
+          errss << "Column index " << m_col << " is out of range " << m_columns.size()
+                << " of operator << ";
+          throw std::range_error(errss.str());
         }
         Column_sptr c = m_columns[m_col];
         if (!c->isType<T>())
         {
             std::string str = "Type mismatch. ";
-            g_log.error(str);
             throw std::runtime_error(str);
         }
         c->cell<T>(m_row) = t;
@@ -111,8 +109,10 @@ public:
     {
         if (m_col >= m_columns.size())
         {
-            g_log.error("Column index out of range.");
-            throw std::range_error("Column index out of range.");
+          std::stringstream errss;
+          errss << "Column index " << m_col << " is out of range " << m_columns.size()
+                << " of operator >> ";
+          throw std::range_error(errss.str());
         }
         Column_sptr c = m_columns[m_col];
         if (!c->isType<T>())
@@ -136,8 +136,10 @@ public:
     {
         if (col >= m_columns.size())
         {
-            g_log.error("Column index out of range.");
-            throw std::range_error("Column index out of range.");
+          std::stringstream errss;
+          errss << "Column index " << m_col << " is out of range " << m_columns.size()
+                << " of method cell(). ";
+          throw std::range_error(errss.str());
         }
         m_col = col;
         Column_sptr c = m_columns[m_col];
@@ -176,8 +178,6 @@ private:
     mutable size_t m_col;          ///< Current column number (for streaming operations)
     size_t m_nrows;        ///< Number of rows in the TableWorkspace
     std::string m_sep;  ///< Separator character(s) between elements in a text output
-    /// Logger
-    static Kernel::Logger& g_log;
 };
 
 MANTID_API_DLL std::ostream& operator<<(std::ostream& s,const TableRow& row);

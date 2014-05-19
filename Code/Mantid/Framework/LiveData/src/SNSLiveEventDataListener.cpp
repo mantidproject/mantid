@@ -5,6 +5,7 @@
 #include "MantidLiveData/Exception.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WriteLock.h"
@@ -64,8 +65,11 @@ namespace LiveData
   // The DECLARE_LISTENER macro seems to confuse some editors' syntax checking.  The
   // semi-colon limits the complaints to one line.  It has no actual effect on the code.
 
-  // Get a reference to the logger
-  Kernel::Logger& SNSLiveEventDataListener::g_log = Kernel::Logger::get("SNSLiveEventDataListener");
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("SNSLiveEventDataListener");
+  }
 
   /// Constructor
   SNSLiveEventDataListener::SNSLiveEventDataListener()
@@ -443,6 +447,68 @@ namespace LiveData
     return false;
   }
 
+  /// Parse a beam monitor event packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::BeamMonitorPkt packets.  Parsed events are counted and
+  /// the counts are accumulated in the temporary workspace until the forground
+  /// thread retrieves them.
+  /// @see extractData()
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
+  bool SNSLiveEventDataListener::rxPacket( const ADARA::BeamMonitorPkt &pkt)
+  {
+    // Check to see if we should process this packet (depending on what
+    // the user selected for start up options, the SMS might be replaying
+    // historical data that we don't care about).
+    if (ignorePacket( pkt))
+    {
+      return false;
+    }
+
+    pkt.firstSection();
+    do  // loop through all the monitor sections
+    {
+      unsigned monitorID = pkt.getSectionMonitorID();
+
+      if (monitorID > 5)
+      {
+        // Currently, we only handle monitors 0-5.  At the present time, that's sufficient.
+        g_log.error() << "Mantid cannot handle monitor ID's higher than 5.  If " << monitorID
+          << " is actually valid, then an appropriate entry must be made to the "
+          << " ADDABLE list at the top of Framework/API/src/Run.cpp";
+      }
+      else
+      {
+        std::string monName("monitor");
+        monName += (char)(monitorID + 48);  // The +48 converts to the ASCII character
+        monName += "_counts";
+        // Note: The monitor name must exactly match one of the entries in the ADDABLE
+        // list at the top of Run.cpp!
+
+        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+
+        int events = pkt.getSectionEventCount();
+        if (m_eventBuffer->run().hasProperty(monName))
+        {
+          events += m_eventBuffer->run().getPropertyValueAsType<int>(monName);
+        }
+        else
+        {
+          // First time we've received this monitor.  Add it to our list
+          m_monitorLogs.push_back(monName);
+        }
+
+        // Update the property value (overwriting the old value if there was one)
+        m_eventBuffer->mutableRun().addProperty<int>( monName, events, true);
+      }
+
+    } while (pkt.nextSection() == true);
+
+    return false;
+  }
+
   /// Parse a geometry packet
 
   /// Overrides the default function defined in ADARA::Parser and processes
@@ -562,10 +628,8 @@ namespace LiveData
   {
     // grab the time from the packet - we'll use it down in initializeWorkspacePart2()
     // Note that we need this value even if we otherwise ignore the packet
-    if (m_workspaceInitialized == false)
-    {
-      m_dataStartTime = timeFromPacket( pkt);
-    }
+    m_dataStartTime = timeFromPacket( pkt);
+
     
     // Check to see if we should process the rest of this packet (depending
     //  on what the user selected for start up options, the SMS might be
@@ -593,18 +657,90 @@ namespace LiveData
                         << NoRun << " (NoRun), but was " << m_status << std::endl;
       }
 
-      m_status = BeginRun;
-
-      // Add the run_number property
-      if ( haveRunNumber )
+      if (m_workspaceInitialized)
       {
-        // run_number should not exist at this point, and if it does, we can't do much about it.
-        g_log.debug() << "run_number property already exists.  Current value will be ignored.\n"
-                      << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
+        m_status = BeginRun;
       }
       else
       {
-        setRunDetails(pkt);
+        // Pay close attention here - this gets complicated!
+        //
+        // Setting m_status to "Running" is something of a little white lie.  We are
+        // in fact at the beginning of a run.  However, since we haven't yet
+        // initialized the workspace, this must be one of the first packets we've
+        // actually received.  (Probably, the user selected the option to replay
+        // history starting from the start of the current run.) Normally, when
+        // we pkt->status() is NEW_RUN, we'd set the m_pauseNetRead flag to true
+        // (see below).  That would cause us to halt reading packets until the
+        // flag was reset down in runStatus().  Having m_status set to BeginRun
+        // would also cause runStatus() to reset all the data we need to initialize
+        // the workspace in preparation for a new run.  In most cases, this is exactly
+        // what we want.
+        //
+        // HOWEVER, in this particular case, we can't set m_pauseNetRead.  If we do, we
+        // will not read the Geometry and BeamMonitor packets that have the data we
+        // need to complete the workspace initialization. Until we complete the
+        // initialization, the extractData() function won't complete successfully and
+        // the runStatus() function will thus never be called.  Since m_pauseNetRead
+        // is reset down in runStatus(), the whole live listener subsystem basically
+        // deadlocks.
+        //
+        // So, we can't set m_pauseNetRead.  That's OK, because we don't actually have
+        // any data from a previous run that we need to keep separate from this run
+        // (which was the whole purpose of m_pauseNetRead).  However, when the
+        // runStatus() function sees m_status == BeginRun (or EndRun), it sets
+        // m_workspaceInitialized to false and clears all the old data we used to
+        // initialize the workspace.  It does this because it thinks a run transition
+        // has happened and new initialization data will be arriving shortly.  As
+        // such, it implicitly assumes that m_pauseNetRead was set and we stopped
+        // reading packets.  In this particular case, we can't set m_pauseNetRead,
+        // and we're guaranteed to have initialized the workspace before runStatus()
+        // would ever be called. (See the previous paragraph.)  As such, the
+        // initialization data that runStatus() would clear is actually the data
+        // that we need.
+
+        // So, by setting m_status to Running, we avoid runStatus() wiping out our
+        // workspace initialization.  We then call setRunDetails() (which would
+        // normally happen down in runStatus(), except that we've just gone out
+        // of our way to make sure that part of runStatus() *DOESN'T* get
+        // executed) and everything runs as it should.
+
+        // It's debatable whether runStatus() should retain that implicit asumption of
+        // m_pauseNetRead being true, or should explicitly check its state in addition
+        // to m_status.  Either way, you're still going to need several paragraphs of
+        // comments to explain what the heck is going on.
+        m_status = Running;
+        setRunDetails( pkt);
+      }
+
+      // Add the run_number property
+      if (m_status == BeginRun)
+      {
+        if ( haveRunNumber )
+        {
+          // run_number should not exist at this point, and if it does, we can't do much about it.
+          g_log.debug() << "run_number property already exists.  Current value will be ignored.\n"
+                        << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
+        }
+        else
+        {
+          // Save a copy of the packet so we can call setRunDetails() later (after
+          // extractData() has been called to fetch any data remaining from before
+          // this run start.
+          // Note: need to actually copy the contents (not just a pointer) because
+          // pkt will go away when this function returns.  And since packets don't have
+          // default constructors, we can only keep a pointer as a member, and thus
+          // have to actually allocate our deferred packet with new.
+          // Fortunately, this doesn't happen to often, so performance isn't an issue.
+          m_deferredRunDetailsPkt = boost::shared_ptr<ADARA::RunStatusPkt>(new ADARA::RunStatusPkt(pkt));
+        }
+      }
+
+      // See detailed comments below for what the m_pauseNetRead flag does and the
+      // comments above about m_status for why we don't always set it.
+      if (m_workspaceInitialized)
+      {
+        m_pauseNetRead = true;
       }
 
     }
@@ -1244,6 +1380,14 @@ namespace LiveData
     // Clear out the old logs, except for the most recent entry
     temp->mutableRun().clearOutdatedTimeSeriesLogValues();
 
+    // Clear out old monitor logs
+    for (unsigned i=0; i < m_monitorLogs.size(); i++)
+    {
+      temp->mutableRun().removeProperty(m_monitorLogs[i]);
+
+    }
+    m_monitorLogs.clear();
+
     // Lock the mutex and swap the workspaces
     {
       Poco::ScopedLock<Poco::FastMutex> scopedLock( m_mutex);
@@ -1278,25 +1422,50 @@ namespace LiveData
     // It's only appropriate to return EndRun once (ie: when we've just
     // returned the last events from the run).  After that, we need to
     // change the status to NoRun.
-    // As far as I can tell, nobody ever checks for BeginRun, but I'm
-    // assuming the same logic applies....
-    if (m_status == BeginRun)
+    // The same logic applies to BeginRun and Running
+    if (m_status == BeginRun || m_status == EndRun)
     {
-      m_status = Running;
-    }
-    else if (m_status == EndRun)
-    {
-      m_status = NoRun;
-
-      // If the run has ended, replace the old workspace with a new one
+      // At run transitions, replace the old workspace with a new one
       // (This ensures that we're not using log data and/or geometry from
       // a previous run that are no longer valid.  SMS is guaranteed to
       // send us new device descriptor packets at the start of every run.)
       // Note: we can get away with not locking a mutex here because the
       // background thread is still paused.
       m_workspaceInitialized = false;
+
+      // These next 3 are what we check for in readyForInitPart2()
+      m_instrumentXML.clear();
+      m_instrumentName.clear();
+      if (m_status == EndRun)
+      {
+        // Don't clear this for BeginRun because it was set up in the parser
+        // for the RunStatus packet that signaled the beginning of a new
+        // run and is thus already set to the correct value.
+        m_dataStartTime = Kernel::DateAndTime();
+      }
+
+      // NOTE: It's probably not necessary to clear the instrument name
+      // and instrument XML (which is the geometry info) because these
+      // values don't ever change.  (Or at least, changing them requires
+      // changing the SMS config and restarting it and that would cause us
+      // to restart the live listener algorithm.)  That said, SMS is
+      // guaranteed to send this info out with every run transition, so
+      // we might as well ensure that we always use up-to-date data.
+
       m_nameMap.clear();
       initWorkspacePart1();
+
+      if (m_status == BeginRun)
+      {
+        // Set the run details using the packet we saved from the rxPacket() function
+        setRunDetails( *m_deferredRunDetailsPkt);
+        m_deferredRunDetailsPkt.reset();  // shared_ptr, so we don't use delete
+        m_status = Running;
+      }
+      else if (m_status == EndRun)
+      {
+        m_status = NoRun;
+      }
     }
 
     m_pauseNetRead = false;  // make sure the network reads start back up

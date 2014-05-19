@@ -6,10 +6,12 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/V3D.h"
 // Boost graphing
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/graph/adjacency_list.hpp>
+# include <boost/unordered_map.hpp>
+# include <boost/shared_ptr.hpp>
+# include <boost/scoped_ptr.hpp>
+#endif
 
 namespace Mantid
 {

@@ -109,7 +109,7 @@ where
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidKernel/EmptyValues.h"
-#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Logger.h"
 
 #include "MantidKernel/ConfigService.h"
 
@@ -130,11 +130,14 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+  namespace
+  {
+    /// static reference to the logger
+    Kernel::Logger g_log("ThermalNeutronBk2BkExpConvPV");
+  }
+
   DECLARE_FUNCTION(ThermalNeutronBk2BkExpConvPVoigt)
 
-  // Get a reference to the logger
-  Mantid::Kernel::Logger& ThermalNeutronBk2BkExpConvPVoigt::g_log =
-      Kernel::Logger::get("ThermalNeutronBk2BkExpConvPV");
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -299,7 +302,6 @@ namespace CurveFitting
       errss << "Parameter " << paramname << " does not exist in peak function "
             << this->name() << "'s calculated parameters. "
             << "Candidates are Alpha, Beta, Sigma2, Gamma d_h and Eta. ";
-      g_log.error(errss.str());
       throw runtime_error(errss.str());
     }
 

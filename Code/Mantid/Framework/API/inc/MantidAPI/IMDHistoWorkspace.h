@@ -78,6 +78,9 @@ namespace API
     virtual double & operator [](const size_t & index) = 0;
 
     virtual void setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem) = 0;
+
+    virtual boost::shared_ptr<IMDHistoWorkspace> clone() const = 0;
+
   protected:
     virtual const std::string toString() const;
   };

@@ -32,6 +32,7 @@ public:
   ~SpectraAxisTest()
   {
     delete spectraAxis;
+    delete ws;
   }
   
   void testConstructor()
@@ -57,7 +58,7 @@ public:
     TS_ASSERT_DIFFERS( newSpecAxis, spectraAxis );
     TS_ASSERT( newSpecAxis->isSpectra() );
     TS_ASSERT_EQUALS( newSpecAxis->title(), "A spectra axis" );
-    TS_ASSERT_EQUALS( newSpecAxis->unit()->unitID(), "Empty" );
+    TS_ASSERT_EQUALS( newSpecAxis->unit()->unitID(), "Label" );
     // Although the 'different length' constructor is still there (for now) it has no effect.
     TS_ASSERT_EQUALS( newSpecAxis->length(), 5 );
     TS_ASSERT_EQUALS( (*newSpecAxis)(1), 2.0 );
@@ -97,19 +98,6 @@ public:
     TS_ASSERT_THROWS( (*spectraAxis)(5), Exception::IndexError );
   }
 
-  void testSetValue()
-  {
-    TS_ASSERT_THROWS( spectraAxis->setValue(-1, 1.1), Exception::IndexError );
-    TS_ASSERT_THROWS( spectraAxis->setValue(5, 1.1), Exception::IndexError );
-    
-    for (int i=0; i<5; ++i)
-    {
-      TS_ASSERT_THROWS_NOTHING( spectraAxis->setValue(i, i+0.1) );
-      TS_ASSERT_EQUALS( (*spectraAxis)(i), i );
-      TS_ASSERT_EQUALS( spectraAxis->spectraNo(i), i );
-    }
-  }
-
   void testSpectraNo()
   {
     TS_ASSERT_THROWS( spectraAxis->spectraNo(-1), Exception::IndexError );
@@ -117,11 +105,37 @@ public:
     
     for (int i=0; i<5; ++i)
     {
-      TS_ASSERT_THROWS_NOTHING( spectraAxis->setValue(i, 2*i) );
-      TS_ASSERT_EQUALS( spectraAxis->spectraNo(i), 2*i );
-      TS_ASSERT_EQUALS( (*spectraAxis)(i), 2*i );
+      TS_ASSERT_EQUALS( spectraAxis->spectraNo(i), i+1 );
+      TS_ASSERT_EQUALS( (*spectraAxis)(i), i+1 );
     }    
   }
+
+  void testIndexOfValue_Treats_Axis_As_Binned()
+  {
+    for (int i=1; i < 6; ++i)
+    {
+      // centre in this bin
+      TS_ASSERT_EQUALS(i-1, spectraAxis->indexOfValue(static_cast<double>(i)) );
+      //value on lower boundary in bin below with exception of first boundary where it is above
+      if(i==1)
+      {
+        TS_ASSERT_EQUALS(i-1, spectraAxis->indexOfValue(static_cast<double>(i - 0.5)));
+      }
+      else
+      {
+        TS_ASSERT_EQUALS(i-2, spectraAxis->indexOfValue(static_cast<double>(i - 0.5)) );
+      }
+      TS_ASSERT_EQUALS(i-1, spectraAxis->indexOfValue(static_cast<double>(i + 0.5)) );
+    }
+  }
+
+  // --------------------------------------- Failure cases --------------------
+  void testIndexOfValue_Throws_out_of_range_error_If_Input_Not_In_Range()
+  {
+    TS_ASSERT_THROWS(spectraAxis->indexOfValue(0.49), std::out_of_range);
+    TS_ASSERT_THROWS(spectraAxis->indexOfValue(20.), std::out_of_range);
+  }
+
 
 private:
   WorkspaceTester *ws;

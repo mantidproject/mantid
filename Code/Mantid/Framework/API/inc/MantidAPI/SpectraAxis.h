@@ -8,7 +8,6 @@
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Unit.h"
-#include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
 
@@ -58,6 +57,7 @@ public:
   virtual bool isSpectra() const{return true;}
   virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex = 0) const;
   virtual void setValue(const std::size_t& index, const double& value);
+  size_t indexOfValue(const double value) const;
   virtual bool operator==(const Axis&) const;
   std::string label(const std::size_t& index)const;
 
@@ -77,6 +77,8 @@ private:
   const SpectraAxis& operator=(const SpectraAxis&);
   /// A pointer to the workspace holding the axis
   const MatrixWorkspace* const m_parentWS;
+  /// List of edge values for quick searching of values as if this is binned data
+  mutable std::vector<double> m_edges;
 };
 
 } // namespace API

@@ -15,6 +15,7 @@
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/Logger.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -46,9 +47,11 @@ namespace
 {
   const V3D DEFAULT_CENTRE(0, 0, 0);
   const V3D DEFAULT_AXIS(0, 0, 1);
-}
 
-Logger& ShapeFactory::g_log = Logger::get("ShapeFactory");
+  /// static logger
+  Logger g_log("ShapeFactory");
+
+}
 
 /// Empty default constructor
 ShapeFactory::ShapeFactory()

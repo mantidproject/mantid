@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ClassMacros.h"
-#include "MantidQtSliceViewer/PeakTransform.h"
+#include "MantidAPI/PeakTransform.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 
 namespace MantidQt
@@ -37,7 +37,7 @@ namespace MantidQt
       /// Setter for the slice point.
       void setSlicePoint(const double&);
       /// Transform the coordinates.
-      void movePosition(PeakTransform_sptr peakTransform);
+      void movePosition(Mantid::API::PeakTransform_sptr peakTransform);
       /// Draw
       CrossPeakPrimitives draw(const double& windowHeight, const double& windowWidth) const;
       /// Get the bounding box.

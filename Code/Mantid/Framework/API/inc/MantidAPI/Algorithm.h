@@ -207,6 +207,7 @@ public:
   bool isChild() const;
   void setChild(const bool isChild);
   void enableHistoryRecordingForChild(const bool on);
+  bool isRecordingHistoryForChild() { return m_recordHistoryForChild; };
   void setAlwaysStoreInADS(const bool doStore);
   void setRethrows(const bool rethrow);
 
@@ -224,18 +225,17 @@ public:
   /// Returns the cancellation state
   bool getCancel() const { return m_cancel; }
 
+  /// Returns a reference to the logger.
+  Kernel::Logger & getLogger() const { return g_log; }
   ///Logging can be disabled by passing a value of false
-  void setLogging(const bool value){g_log.setEnabled(value);}
+  void setLogging(const bool value) { g_log.setEnabled(value);}
   ///returns the status of logging, True = enabled
-  bool isLogging() const {return g_log.getEnabled();}
+  bool isLogging() const { return g_log.getEnabled();}
 
   ///sets the logging priority offset
-  void setLoggingOffset(const int value) {g_log.setLevelOffset(value);}
+  void setLoggingOffset(const int value) { g_log.setLevelOffset(value); }
   ///returns the logging priority offset
-  int getLoggingOffset() const {return g_log.getLevelOffset();}
-
-  /// Returns a reference to the logger.
-  Kernel::Logger& getLogger() const { return g_log; }
+  int getLoggingOffset() const { return g_log.getLevelOffset(); }
 
 
   /// function returns an optional message that will be displayed in the default GUI, at the top.
@@ -271,8 +271,11 @@ public:
   static IAlgorithm_sptr fromHistory(const AlgorithmHistory & history);
   //@}
 
-  boost::shared_ptr<Algorithm> createChildAlgorithm(const std::string& name, const double startProgress = -1.,
+  virtual boost::shared_ptr<Algorithm> createChildAlgorithm(const std::string& name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging=true, const int& version = -1);
+
+  /// set whether we wish to track the child algorithm's history and pass it the parent object to fill.
+  void trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist);
 
 protected:
 
@@ -313,19 +316,21 @@ protected:
 
   ///checks the property is a workspace property
   bool isWorkspaceProperty(const Kernel::Property* const prop) const;
+  
+  /// get whether we are tracking the history for this algorithm,
+  bool trackingHistory();
 
   /// Set to true to stop execution
   bool m_cancel;
   /// Set if an exception is thrown, and not caught, within a parallel region
   bool m_parallelException;
-  /// Reference to the logger class
-  Kernel::Logger& g_log;
 
-  friend class WorkspaceHistory; // Allow workspace history loading to adjust g_execCount
+  friend class WorkspaceHistory; // Allow workspace history loading to adjust g_execCount 
   static size_t g_execCount; ///< Counter to keep track of algorithm execution order
 
   // ------------------ For WorkspaceGroups ------------------------------------
   virtual bool checkGroups();
+
   virtual bool processGroups();
   virtual void setOtherProperties(IAlgorithm * alg, const std::string & propertyName, const std::string & propertyValue, int periodNum);
   typedef std::vector<boost::shared_ptr<Workspace> > WorkspaceVector;
@@ -337,6 +342,12 @@ protected:
 
   /// All the WorkspaceProperties that are Input or InOut. Set in execute()
   std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
+  /// Pointer to the history for the algorithm being executed
+  boost::shared_ptr<AlgorithmHistory> m_history;
+  
+  /// Logger for this algorithm
+  Kernel::Logger m_log;
+  Kernel::Logger &g_log;
 
 private:
   /// Private Copy constructor: NO COPY ALLOWED
@@ -348,14 +359,13 @@ private:
   void unlockWorkspaces();
 
   void store();
-  void fillHistory(Mantid::Kernel::DateAndTime, double,std::size_t);
+  void fillHistory();
 
   void logAlgorithmInfo() const;
 
   bool executeAsyncImpl(const Poco::Void & i);
 
   // --------------------- Private Members -----------------------------------
-
   /// Poco::ActiveMethod used to implement asynchronous execution.
   Poco::ActiveMethod<bool, Poco::Void, Algorithm, Poco::ActiveStarter<Algorithm>> *m_executeAsync;
 
@@ -381,7 +391,6 @@ private:
   std::string m_WikiDescription; ///< Description in the wiki page.
   std::vector<boost::weak_ptr<IAlgorithm>> m_ChildAlgorithms; ///< A list of weak pointers to any child algorithms created
 
-
   /// Vector of all the workspaces that have been read-locked
   WorkspaceVector m_readLockedWorkspaces;
   /// Vector of all the workspaces that have been write-locked
@@ -402,6 +411,8 @@ private:
   size_t m_groupSize;
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
+  /// Pointer to the parent history object (if set)
+  boost::shared_ptr<AlgorithmHistory> m_parentHistory;
   /// A non-recursive mutex for thread-safety
   mutable Kernel::Mutex m_mutex;
 };

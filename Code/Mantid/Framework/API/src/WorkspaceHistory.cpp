@@ -16,10 +16,14 @@ namespace Mantid
 {
 namespace API
 {
+  namespace
+  {
+    /// static logger object
+    Kernel::Logger g_log("WorkspaceHistory");
+  }
 
 ///Default Constructor
-WorkspaceHistory::WorkspaceHistory() : m_environment(), m_algorithms(),
-    g_log(Kernel::Logger::get("WorkspaceHistory"))
+WorkspaceHistory::WorkspaceHistory() : m_environment(), m_algorithms(boost::bind(CompareHistory::compare, _1, _2))
 {}
 
 /// Destructor
@@ -31,12 +35,13 @@ WorkspaceHistory::~WorkspaceHistory()
   @param A :: WorkspaceHistory Item to copy
  */
 WorkspaceHistory::WorkspaceHistory(const WorkspaceHistory& A) :
-  m_environment(A.m_environment), m_algorithms(A.m_algorithms),
-  g_log(Kernel::Logger::get("WorkspaceHistory"))
-{}
+  m_environment(A.m_environment), m_algorithms(boost::bind(CompareHistory::compare, _1, _2))
+{
+  m_algorithms = A.m_algorithms;
+}
 
 /// Returns a const reference to the algorithmHistory
-const WorkspaceHistory::AlgorithmHistories & WorkspaceHistory::getAlgorithmHistories() const
+const Mantid::API::AlgorithmHistories & WorkspaceHistory::getAlgorithmHistories() const
 {
   return m_algorithms;
 }
@@ -58,11 +63,10 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory& otherHistory)
   // Merge the histories
   const AlgorithmHistories & otherAlgorithms = otherHistory.getAlgorithmHistories();
   m_algorithms.insert(otherAlgorithms.begin(), otherAlgorithms.end());
-
 }
 
 /// Append an AlgorithmHistory to this WorkspaceHistory
-void WorkspaceHistory::addHistory(const AlgorithmHistory& algHistory)
+void WorkspaceHistory::addHistory(AlgorithmHistory_sptr algHistory)
 {
   m_algorithms.insert(algHistory);
 }
@@ -87,10 +91,10 @@ bool WorkspaceHistory::empty() const
 /**
  * Retrieve an algorithm history by index
  * @param index ::  An index within the workspace history
- * @returns A reference to a const AlgorithmHistory object
+ * @returns A pointer to an AlgorithmHistory object
  * @throws std::out_of_range error if the index is invalid
  */
-const AlgorithmHistory & WorkspaceHistory::getAlgorithmHistory(const size_t index) const
+AlgorithmHistory_const_sptr WorkspaceHistory::getAlgorithmHistory(const size_t index) const
 {
   if( index >= this->size() )
   {
@@ -104,10 +108,10 @@ const AlgorithmHistory & WorkspaceHistory::getAlgorithmHistory(const size_t inde
 /**
  * Index operator[] access to a workspace history
  * @param index ::  An index within the workspace history
- * @returns A reference to a const AlgorithmHistory object
+ * @returns A pointer to an AlgorithmHistory object
  * @throws std::out_of_range error if the index is invalid
  */
-const AlgorithmHistory & WorkspaceHistory::operator[](const size_t index) const
+AlgorithmHistory_const_sptr WorkspaceHistory::operator[](const size_t index) const
 {
   return getAlgorithmHistory(index);
 }
@@ -119,7 +123,7 @@ const AlgorithmHistory & WorkspaceHistory::operator[](const size_t index) const
  */
 boost::shared_ptr<IAlgorithm> WorkspaceHistory::getAlgorithm(const size_t index) const
 {
-  return Algorithm::fromHistory(this->getAlgorithmHistory(index));
+  return Algorithm::fromHistory(*(this->getAlgorithmHistory(index)));
 }
 
 /**
@@ -150,7 +154,7 @@ void WorkspaceHistory::printSelf(std::ostream& os, const int indent)const
   for (it=m_algorithms.begin();it!=m_algorithms.end();++it)
   {
     os << std::endl;
-    it->printSelf( os, indent+2 );
+    (*it)->printSelf( os, indent+2 );
   }
 }
 
@@ -188,11 +192,11 @@ void WorkspaceHistory::saveNexus(::NeXus::File * file) const
   for(std::size_t i=0;i<this->size();i++)
   {
     std::stringstream algData;
-    const API::AlgorithmHistory & entry = this->getAlgorithmHistory(i);
-    entry.printSelf(algData);
+    auto entry = this->getAlgorithmHistory(i);
+    entry->printSelf(algData);
 
     //get execute count
-    std::size_t nexecCount=entry.execCount();
+    std::size_t nexecCount=entry->execCount();
     //order by execute count
     ordMap.insert(orderedHistMap::value_type(nexecCount,algData.str()));
   }
@@ -385,7 +389,9 @@ void WorkspaceHistory::loadNexus(::NeXus::File * file)
       unsigned int direc(Mantid::Kernel::Direction::asEnum(direction));
       alg_hist.addProperty(prop_name, prop_value, (is_def[0] == 'Y'), direc);
     }
-    this->addHistory(alg_hist);
+    
+    boost::shared_ptr<AlgorithmHistory> history = boost::make_shared<AlgorithmHistory>(alg_hist);
+    this->addHistory(history);
   }
 
   file->closeGroup();

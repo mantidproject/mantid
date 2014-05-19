@@ -7,6 +7,7 @@ find_path ( OPENCASCADE_INCLUDE_DIR Standard.hxx PATHS
                 /usr/include/opencascade
                 /usr/include/oce
                 /usr/local/include/opencascade
+                /usr/local/include/oce
                 /usr/local/inc
                 /opt/OpenCASCADE/inc
                 ${CMAKE_INCLUDE_PATH}/OpenCascade
@@ -51,6 +52,18 @@ find_library ( OPENCASCADE_LIB_TKG2D
                  PATHS ${OC_REDHAT_RPM}         
 )
 
+find_library ( OPENCASCADE_LIB_TKG3D
+                 NAMES TKG3d
+)
+
+find_library ( OPENCASCADE_LIB_TKGEOMBASE
+                 NAMES TKGeomBase
+)
+
+find_library ( OPENCASCADE_LIB_TKGEOMAlgo
+                 NAMES TKGeomAlgo
+)
+
 set ( OPENCASCADE_LIBRARIES
         ${OPENCASCADE_LIB_TKERNEL}
         ${OPENCASCADE_LIB_TKBO}
@@ -60,6 +73,9 @@ set ( OPENCASCADE_LIBRARIES
         ${OPENCASCADE_LIB_TKTOPALGO}
         ${OPENCASCADE_LIB_TKMATH}
         ${OPENCASCADE_LIB_TKG2D}
+        ${OPENCASCADE_LIB_TKG3D}
+        ${OPENCASCADE_LIB_TKGEOMBASE}
+        ${OPENCASCADE_LIB_TKGEOMALGO}
 )
 
 # handle the QUIETLY and REQUIRED arguments and set OPENCASCADE_FOUND to TRUE if 
@@ -72,4 +88,6 @@ mark_as_advanced ( OPENCASCADE_INCLUDE_DIR
                    OPENCASCADE_LIB_TKPRIM OPENCASCADE_LIB_TKMESH
                    OPENCASCADE_LIB_TKBREP OPENCASCADE_LIB_TKTOPALGO 
                    OPENCASCADE_LIB_TKMATH OPENCASCADE_LIB_TKG2D
+                   OPENCASCADE_LIB_TKG3D OPENCASCADE_LIB_TKGEOMBASE
+                   OPENCASCADE_LIB_TKGEOMALGO
 )

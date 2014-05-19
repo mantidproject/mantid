@@ -107,5 +107,26 @@ FunctionDomain1DVector& FunctionDomain1DVector::operator=(const FunctionDomain1D
   return *this;
 }
 
+/**
+  * Create a domain from a vector.
+  * @param wi :: The workspace index of a spectrum the xvalues come from.
+  * @param xvalues :: Vector with function arguments to be copied from.
+  */
+FunctionDomain1DSpectrum::FunctionDomain1DSpectrum(size_t wi, const std::vector<double>& xvalues):
+FunctionDomain1DVector(xvalues), m_workspaceIndex(wi)
+{
+}
+
+/**
+  * Create a domain from a part of a vector.
+  * @param wi :: The workspace index of a spectrum the x-values come from.
+  * @param from :: Iterator to start copying values from.
+  * @param to :: Iterator to the end of the data.
+  */
+FunctionDomain1DSpectrum::FunctionDomain1DSpectrum(size_t wi, std::vector<double>::const_iterator from, std::vector<double>::const_iterator to):
+FunctionDomain1DVector(from,to), m_workspaceIndex(wi)
+{
+}
+
 } // namespace API
 } // namespace Mantid

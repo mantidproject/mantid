@@ -5,13 +5,14 @@ set ( SRC_FILES
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
-	src/CatalogInfo.cpp
 	src/CPUTimer.cpp
+	src/CatalogInfo.cpp
 	src/CompositeValidator.cpp
 	src/ConfigService.cpp
 	src/DataItem.cpp
 	src/DateAndTime.cpp
 	src/DateValidator.cpp
+	src/DateTimeValidator.cpp
 	src/DeltaEMode.cpp
 	src/DirectoryValidator.cpp
 	src/DiskBuffer.cpp
@@ -86,6 +87,8 @@ set ( SRC_FILES
 	src/Unit.cpp
 	src/UnitConversion.cpp
 	src/UnitFactory.cpp
+	src/UnitLabel.cpp
+	src/UnitLabelTypes.cpp
 	src/UserStringParser.cpp
 	src/Utils.cpp
 	src/V2D.cpp
@@ -118,15 +121,16 @@ set ( INC_FILES
 	inc/MantidKernel/BinFinder.h
 	inc/MantidKernel/BinaryFile.h
 	inc/MantidKernel/BoundedValidator.h
-	inc/MantidKernel/CatalogInfo.h
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
+	inc/MantidKernel/CatalogInfo.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DateValidator.h
+	inc/MantidKernel/DateTimeValidator.h
 	inc/MantidKernel/DeltaEMode.h
 	inc/MantidKernel/DirectoryValidator.h
 	inc/MantidKernel/DiskBuffer.h
@@ -223,6 +227,8 @@ set ( INC_FILES
 	inc/MantidKernel/Unit.h
 	inc/MantidKernel/UnitConversion.h
 	inc/MantidKernel/UnitFactory.h
+	inc/MantidKernel/UnitLabel.h
+	inc/MantidKernel/UnitLabelTypes.h
 	inc/MantidKernel/UserStringParser.h
 	inc/MantidKernel/Utils.h
 	inc/MantidKernel/V2D.h
@@ -252,6 +258,7 @@ set ( TEST_FILES
 	ConfigServiceTest.h
 	DataServiceTest.h
 	DateAndTimeTest.h
+	DateTimeValidatorTest.h
 	DateValidatorTest.h
 	DeltaEModeTest.h
 	DirectoryValidatorTest.h
@@ -325,6 +332,7 @@ set ( TEST_FILES
 	TypedValidatorTest.h
 	UnitConversionTest.h
 	UnitFactoryTest.h
+	UnitLabelTest.h
 	UnitTest.h
 	UserStringParserTest.h
 	UtilsTest.h

@@ -73,8 +73,10 @@ namespace DataHandling
     */
   void LoadFullprofResolution::initDocs()
   {
-    setWikiSummary("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) and/or where this is supported, see description section, translate fullprof resolution fitting parameter into Mantid equivalent fitting parameters.");
-    setOptionalMessage("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) and/or where this is supported, see description section, translate fullprof resolution fitting parameter into Mantid equivalent fitting parameters.");
+    setWikiSummary("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) and/or where this is supported."
+      " See description section, translate fullprof resolution fitting parameter into Mantid equivalent fitting parameters.");
+    setOptionalMessage("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) and/or where this is supported."
+      " See description section, translate fullprof resolution fitting parameter into Mantid equivalent fitting parameters.");
 
     return;
   }
@@ -94,10 +96,15 @@ namespace DataHandling
     auto wsprop = new WorkspaceProperty<API::ITableWorkspace>("OutputTableWorkspace", "", Direction::Output, PropertyMode::Optional);
     declareProperty(wsprop, "Name of the output TableWorkspace containing profile parameters or bank information. ");
 
+    // Use bank numbers as given in file
+    declareProperty(
+        new PropertyWithValue<bool>("UseBankIDsInFile", true, Direction::Input),
+        "Use bank IDs as given in file rather than ordinal number of bank."
+        "If the bank IDs in the file are not unique, it is advised to set this to false." );
+
     // Bank to import
     declareProperty(new ArrayProperty<int>("Banks"), "ID(s) of specified bank(s) to load, "
-                    "and this point the ID refers to the Bank label number in the .irf file. Hence, for now please ensure that "
-                    "these label ID are unique. "
+                    "The IDs are as specified by UseBankIDsInFile." 
                     "Default is all banks contained in input .irf file.");
 
     // Workspace to put parameters into. It must be a workspace group with one workpace per bank from the IRF file
@@ -122,6 +129,7 @@ namespace DataHandling
   {
     // Get input
     string datafile = getProperty("Filename");
+    const bool useBankIDsInFile = getProperty("UseBankIDsInFile");
     vector<int> outputbankids = getProperty("Banks");
     WorkspaceGroup_sptr wsg = getProperty("Workspace");
     vector<int> outputwsids = getProperty("WorkspacesForBanks");
@@ -136,8 +144,8 @@ namespace DataHandling
     // Examine bank information
     vector<int> vec_bankinirf;
     map<int, int> bankstartindexmap, bankendindexmap;
-    scanBanks(lines, vec_bankinirf, bankstartindexmap, bankendindexmap);
-    sort(vec_bankinirf.begin(), vec_bankinirf.end());
+    scanBanks(lines, useBankIDsInFile, vec_bankinirf, bankstartindexmap, bankendindexmap);
+    if(useBankIDsInFile) sort(vec_bankinirf.begin(), vec_bankinirf.end());
 
     for (size_t i = 0; i < vec_bankinirf.size(); ++i)
       g_log.debug() << "Irf containing bank " << vec_bankinirf[i] << ".\n";
@@ -209,7 +217,7 @@ namespace DataHandling
       int bankid = vec_bankids[i];
       g_log.debug() << "Parse bank " << bankid << " of total " << vec_bankids.size() << ".\n";
       map<string, double> parammap;
-      parseResolutionStrings(parammap, lines, bankid, bankstartindexmap[bankid], bankendindexmap[bankid], nProf);
+      parseResolutionStrings(parammap, lines, useBankIDsInFile , bankid, bankstartindexmap[bankid], bankendindexmap[bankid], nProf);
       bankparammap.insert(make_pair(bankid, parammap));
     }
 
@@ -323,20 +331,22 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Scan lines for bank IDs
     * @param lines :: vector of string of all non-empty lines in input file;
+    * @param useFileBankIDs :: use bank IDs as given in file rather than ordinal number of bank
     * @param banks :: [output] vector of integers for existing banks in .irf file;
     * @param bankstartindexmap :: [output] map to indicate the first line of each bank in vector lines.
     * @param bankendindexmap :: [output] map to indicate the last line of each bank in vector lines
     */
-  void LoadFullprofResolution::scanBanks(const vector<string>& lines, vector<int>& banks,
-                                         map<int, int>& bankstartindexmap, map<int, int>& bankendindexmap)
+  void LoadFullprofResolution::scanBanks(const vector<string>& lines, const bool useFileBankIDs, vector<int>& banks,
+                                         map<int, int>& bankstartindexmap, map<int, int>& bankendindexmap )
   {
     int startindex = -1;
     int endindex = -1;
+    int bankid = 0;
     for (size_t i = 0; i < lines.size(); ++i)
     {
       string line = lines[i];
       if (line.find("Bank") != string::npos)
-      {
+      { 
         // A new line found
         if (startindex >= 0)
         {
@@ -350,14 +360,21 @@ namespace DataHandling
         startindex = static_cast<int>(i);
         endindex = -1;
 
-        // Split Bank
-        vector<string> level1s;
-        boost::split(level1s, line, boost::is_any_of("Bank"));
-        vector<string> level2s;
-        string bankterm = level1s.back();
-        boost::algorithm::trim(bankterm);
-        boost::split(level2s, bankterm, boost::is_any_of(" "));
-        int bankid = atoi(level2s[0].c_str());
+        // Get bank ID
+        if( useFileBankIDs) 
+        { // Get bank ID from line
+          vector<string> level1s;
+          boost::split(level1s, line, boost::is_any_of("Bank"));
+          vector<string> level2s;
+          string bankterm = level1s.back();
+          boost::algorithm::trim(bankterm);
+          boost::split(level2s, bankterm, boost::is_any_of(" "));
+          bankid = atoi(level2s[0].c_str());  
+        } 
+        else 
+        { // Get bank ID as ordinal number of bank
+          bankid++;
+        }
         banks.push_back(bankid);
       }
     }
@@ -383,13 +400,14 @@ namespace DataHandling
   /** Parse one bank in a .irf file to a map of parameter name and value
     * @param parammap :: [output] parameter name and value map
     * @param lines :: [input] vector of lines from .irf file;
+    * @param useFileBankIDs :: use bank IDs as given in file rather than ordinal number of bank
     * @param bankid :: [input] ID of the bank to get parsed
     * @param startlineindex :: [input] index of the first line of the bank in vector of lines
     * @param endlineindex :: [input] index of the last line of the bank in vector of lines
     * @param profNumber :: [input] index of the profile number
     */
-  void LoadFullprofResolution::parseResolutionStrings(map<string, double>& parammap, const vector<string>& lines,
-                                                      int bankid, int startlineindex, int endlineindex, int profNumber)
+  void LoadFullprofResolution::parseResolutionStrings(map<string, double>& parammap, const vector<string>& lines, 
+                                                      const bool useFileBankIDs, int bankid, int startlineindex, int endlineindex, int profNumber)
   {
     string bankline = lines[startlineindex];
     double cwl;
@@ -404,13 +422,13 @@ namespace DataHandling
       g_log.warning() << "No CWL found for bank " << bankid;
       tmpbankid = bankid;
     }
-    if (bankid != tmpbankid)
-    {
-      stringstream errss;
-      errss << "Input bank ID (" << bankid << ") is not same as the bank ID (" << tmpbankid
-        << ") found in the specified region from input. ";
-      throw runtime_error(errss.str());
+    if( useFileBankIDs && (bankid != tmpbankid)) {
+        stringstream errss;
+        errss << "Input bank ID (" << bankid << ") is not same as the bank ID (" << tmpbankid
+          << ") found in the specified region from input. ";
+        throw runtime_error(errss.str());
     }
+
     parammap["NPROF"] = profNumber;
     parammap["CWL"] = cwl;
 

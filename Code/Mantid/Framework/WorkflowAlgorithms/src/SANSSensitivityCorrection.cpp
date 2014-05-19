@@ -112,7 +112,7 @@ void SANSSensitivityCorrection::init()
    else if(count==0)
    {
      g_log.error("Error no entries found in " + filePath);
-     throw Exception::FileError("Error no entries found in " , filePath);
+     return false;
    }
 
    if( entryName[0]=="mantid_workspace_1" ) return true;
@@ -314,7 +314,6 @@ void SANSSensitivityCorrection::exec()
       } else {
         floodWS = rawFloodWS;
       }
-
       // Patch as needed
       if (reductionManager->existsProperty("SensitivityPatchAlgorithm"))
       {

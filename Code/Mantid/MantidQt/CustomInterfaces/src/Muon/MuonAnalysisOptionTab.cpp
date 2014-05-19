@@ -31,8 +31,11 @@ const QString MuonAnalysisOptionTab::MAX_Y_DEFAULT("");
 const QString MuonAnalysisOptionTab::FIXED_REBIN_DEFAULT("2");
 const QString MuonAnalysisOptionTab::VARIABLE_REBIN_DEFAULT("0.032");
 
-// Acquire logger instance
-Logger& MuonAnalysisOptionTab::g_log(Logger::get("MuonAnalysis"));
+namespace
+{
+  /// static logger instance
+  Logger g_log("MuonAnalysis");
+}
 
 MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm, const QString &settingsGroup)
   : m_uiForm(uiForm), m_autoSaver(settingsGroup)

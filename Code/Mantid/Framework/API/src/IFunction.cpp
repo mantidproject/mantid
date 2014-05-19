@@ -35,10 +35,14 @@ namespace Mantid
 {
 namespace API
 {
-  
   using namespace Geometry;
 
-  Kernel::Logger& IFunction::g_log = Kernel::Logger::get("IFunction");
+  namespace
+  {
+    /// static logger
+    Kernel::Logger g_log("IFunction");
+  }
+
 
 /**
  * Destructor
@@ -1020,7 +1024,7 @@ void IFunction::convertValue(std::vector<double>& values, Kernel::Unit_sptr& out
   {
     // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
     Instrument_const_sptr instrument = ws->getInstrument();
-    Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+    Geometry::IComponent_const_sptr sample = instrument->getSample();
     if (sample == NULL)
     {
       g_log.error() << "No sample defined instrument. Cannot convert units for function\n"
@@ -1174,6 +1178,26 @@ void IFunction::storeAttributeValue(const std::string& name, const API::IFunctio
   }
 }
 
+/**
+ * Set the covariance matrix. Algorithm Fit sets this matrix to the top-level function
+ * after fitting. If the function is composite the matrix isn't set to its members.
+ * The matrix must be square and its size equal to the number of parameters of this function.
+ * @param covar :: A matrix to set.
+ */
+void IFunction::setCovarianceMatrix(boost::shared_ptr<Kernel::Matrix<double>> covar)
+{
+  // the matrix shouldn't be empty
+  if (!covar)
+  {
+    throw std::invalid_argument("IFunction: Cannot set an empty covariance matrix");
+  }
+  // the matrix should relate to this function
+  if (covar->numRows() != nParams() || covar->numCols() != nParams())
+  {
+    throw std::invalid_argument("IFunction: Covariance matrix has a wrong size");
+  }
+  m_covar = covar;
+}
 
 } // namespace API
 } // namespace Mantid

@@ -167,14 +167,14 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     start_time=time.time()
     
     if sample_run=='00000' and mtd.doesExist(inst_name+'00000.raw')==True:
-        Reducer.log('Deleteing previous instance of temp data')
+        Reducer.log('Deleting previous instance of temp data')
         DeleteWorkspace(Workspace=inst_name+'00000.raw')
 
 
     # we may want to run absolute units normalization and this function has been called with monovan run or helper procedure
     abs_units_defaults_check = False
     if monovan_run != None :
-       # check if mono-vanadium is provided as multiple files list or just put in brackets ocasionally
+       # check if mono-vanadium is provided as multiple files list or just put in brackets occasionally
         Reducer.log("****************************************************************");
         Reducer.log('*** Output will be in absolute units of mb/str/mev/fu')
         if isinstance(monovan_run,list):
@@ -217,8 +217,11 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         val = getattr(Reducer,key);
         Reducer.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val))
 
+
     save_dir = config.getString('defaultsave.directory') 
     Reducer.log("****************************************************************");
+    if monovan_run != None and not('van_mass' in changed_Keys or 'vanadium-mass' in changed_Keys) :
+         Reducer.log("*** Monochromatic vanadium mass used : {0} ".format(Reducer.van_mass))
     Reducer.log("*** By default results are saved into: {0}".format(save_dir));
     Reducer.log("****************************************************************");
     #do we run absolute units normalization and need to warn users if the parameters needed for that have not changed from defaults
@@ -247,7 +250,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     # check if reducer can find all non-run files necessary for the reduction before starting long run. 
     Reducer.check_necessary_files(monovan_run);
     
-    print 'Output will be normalised to', Reducer.normalise_method
+    print 'Output will be normalized to', Reducer.normalise_method
     if (numpy.size(sample_run)) > 1 and Reducer.sum_runs:
         #this sums the runs together before passing the summed file to the rest of the reduction
         #this circumvents the inbuilt method of summing which fails to sum the files for diag
@@ -317,7 +320,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     # estimate and report the number of failing detectors
     failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
     nMaskedSpectra = len(failed_sp_list)
-    # this tells turkey in case of hard mask only but everythin else semems work fine
+    # this tells turkey in case of hard mask only but everything else semens work fine
     print header.format(nSpectra,nMaskedSpectra)
      #Run the conversion first on the sample
     deltaE_wkspace_sample = Reducer.convert_to_energy(sample_run, ei_guess, wb_run)
@@ -360,7 +363,7 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
                   sample_run          Sample run run number or file name or workspace       
                   monovan_run          Monochromatic run run number or file name or workspace
                   wb_mono          White beam for Monochromatic run run number or file name or workspace
-                  samp_rmm          Mass of forumula unit of sample
+                  samp_rmm          Mass of formula unit of sample
                   samp_mass          Actual sample mass
                   ei_guess          Ei guess of run
                   rebin          Rebin parameters for output data
@@ -400,7 +403,7 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
     diag_van_median_sigma_hi        - Fraction of median to consider counting high for the white beam diag (default = 1.5)
     diag_van_sig  - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the
                     difference with respect to the median value must also exceed this number of error bars (default=0.0)
-    diag_remove_zero                - If true then zeroes in the vanadium data will count as failed (default = True)
+    diag_remove_zero                - If true then zeros in the vanadium data will count as failed (default = True)
     diag_samp_samp_median_sigma_lo  - Fraction of median to consider counting low for the white beam diag (default = 0)
     diag_samp_samp_median_sigma_hi  - Fraction of median to consider counting high for the white beam diag (default = 2.0)
     diag_samp_sig                   - Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the"
@@ -420,7 +423,7 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
     sum =True,False(default) , sum multiple files
 
     det_cal_file= a valid detector block file and path or a raw file. Setting this
-                     will use the detector calibraion from the specified file NOT the
+                     will use the detector calibration from the specified file NOT the
                      input raw file
     mask_run = RunNumber to use for diag instead of the input run number
     
@@ -470,7 +473,7 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
 
 def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_guess,wb_mono):
     """  Function applies absolute normalization factor to the target workspace 
-         and calculates this factor if nececcary
+         and calculates this factor if necessary
 
          Inputs:
          Reducer           --    properly initialized class which performs reduction
@@ -487,7 +490,7 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
     else:
         Reducer.log('##### Evaluate the integral from the monovan run and calculate the correction factor ######')
         Reducer.log('      Using absolute units vanadium integration range : '+str(Reducer.monovan_integr_range))
-       #now on the mono_vanadium run swap the mapping file
+        #
         result_ws_name = common.create_resultname(monovan_run)
         # check the case when the sample is monovan itself (for testing purposes)
         if result_ws_name == deltaE_wkspace_sample.name() :
@@ -702,7 +705,7 @@ def sum_files(inst_name, accumulator, files):
 
          for filename in files:
               print 'Summing run ',filename,' to workspace ',accumulator
-              temp = common.load_run(inst_name,filename, force=False)
+              temp = common.load_run(inst_name,filename, force=False,load_with_workspace=Reducer.load_monitors_with_workspace)
 
               if accum_name in mtd: # add current workspace to the existing one
                   if not isinstance(accumulator,api.Workspace):
@@ -715,7 +718,7 @@ def sum_files(inst_name, accumulator, files):
 
          return accumulator
     else:
-        temp = common.load_run(inst_name,files, force=False)
+        temp = common.load_run(inst_name,files, force=False,load_with_workspace=Reducer.load_monitors_with_workspace)
         accumulator=RenameWorkspace(InputWorkspace=temp,OutputWorkspace=accum_name)
         return accumulator;
 
