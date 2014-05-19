@@ -100,7 +100,7 @@ private:
   void importFitWindowTableWorkspace(DataObjects::TableWorkspace_sptr windowtablews);
 
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-  int fitSpectra(const int64_t wi, MatrixWorkspace_sptr inputW,
+  int fitSpectra(const int64_t wi, API::MatrixWorkspace_sptr inputW,
                  const std::vector<double> &peakPositions,
                  const std::vector<double> &fitWindows, size_t &nparams,
                  double &minD, double &maxD,
