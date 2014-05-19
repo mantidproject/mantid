@@ -41,12 +41,18 @@ namespace MantidQt
     public:
       QReflTableModel(Mantid::API::ITableWorkspace_sptr tWS);
       virtual ~QReflTableModel();
+      //emit a signal saying things have changed
       void update();
+      //row and column counts
       int rowCount(const QModelIndex &parent) const;
       int columnCount(const QModelIndex &parent) const;
+      //get data fro a cell
       QVariant data(const QModelIndex &index, int role) const;
+      //get header data for the table
       QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+      //get flags for a cell
       Qt::ItemFlags flags(const QModelIndex &index) const;
+      //chage or add data to the model
       bool setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
     private:
 
@@ -67,7 +73,7 @@ namespace MantidQt
       static const QString QMAX;
       /// Label for dq/q column
       static const QString DQQ;
-      /// Label for group column
+      /// Label for scale column
       static const QString SCALE;
       /// Label for group column
       static const QString GROUP;
@@ -85,15 +91,19 @@ namespace MantidQt
       static const int COL_QMAX;
       /// Index for dq/q column
       static const int COL_DQQ;
-      /// Index for group column
+      /// Index for scale column
       static const int COL_SCALE;
       /// Index for group column
       static const int COL_GROUP;
 
+      //cache for a row's data
       mutable std::vector<QString> m_dataCache;
+      //the index of the current row held in cache
       mutable int m_dataCachePeakIndex;
 
+      //get a column's name
       QString findColumnName(const int colIndex) const;
+      //update data cache if required
       void updateDataCache(const int row) const;
 
       /// Collection of data for viewing.

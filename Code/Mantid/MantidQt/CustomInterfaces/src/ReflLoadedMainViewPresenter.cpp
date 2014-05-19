@@ -37,7 +37,7 @@ namespace MantidQt
     */
 
     ReflLoadedMainViewPresenter::ReflLoadedMainViewPresenter(ITableWorkspace_sptr model, ReflMainView* view):
-    ReflMainViewPresenter(boost::shared_ptr<ITableWorkspace>(model->clone()), view)
+      ReflMainViewPresenter(boost::shared_ptr<ITableWorkspace>(model->clone()), view)
     {
       if (model->name() != "")
       {
@@ -53,7 +53,7 @@ namespace MantidQt
     }
 
     ReflLoadedMainViewPresenter::ReflLoadedMainViewPresenter(std::string model, ReflMainView* view):
-    ReflMainViewPresenter(boost::shared_ptr<ITableWorkspace>(AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(model)->clone()), view)
+      ReflMainViewPresenter(boost::shared_ptr<ITableWorkspace>(AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(model)->clone()), view)
     {
       m_cache = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(model);
       if (m_cache->name() != "")
@@ -76,11 +76,17 @@ namespace MantidQt
 
     }
 
+    /**
+    Press changes to the same item in the ADS
+    */
     void ReflLoadedMainViewPresenter::save()
     {
       AnalysisDataService::Instance().addOrReplace(m_cache_name,boost::shared_ptr<ITableWorkspace>(m_model->clone()));
     }
 
+    /**
+    Press changes to a new item in the ADS
+    */
     void ReflLoadedMainViewPresenter::saveAs()
     {
       if (m_view->askUserString())

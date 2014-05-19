@@ -38,10 +38,19 @@ namespace MantidQt
     public:
       ReflMainView();
       virtual ~ReflMainView() = 0;
+
+      //Connect the model
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model) = 0;
+      //clear any notification flags
       virtual void clearNotifyFlags() = 0;
+
+      //dialog box methods
       virtual std::string getUserString() const = 0;
-      virtual bool askUserString() =0;
+      virtual bool askUserString() = 0;
+      virtual void giveUserInfo(std::string prompt, std::string title) = 0;
+      virtual void giveUserWarning(std::string prompt, std::string title) = 0;
+      virtual void giveUserCritical(std::string prompt, std::string title) = 0;
+      virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
 
       //flag query methods
       virtual bool getSaveFlag() const = 0;
@@ -49,6 +58,7 @@ namespace MantidQt
       virtual bool getAddRowFlag() const = 0;
       virtual bool getDeleteRowFlag() const = 0;
       virtual bool getProcessFlag() const = 0;
+      virtual std::vector<size_t> getSelectedRowIndexes() const = 0;
 
     };
   }

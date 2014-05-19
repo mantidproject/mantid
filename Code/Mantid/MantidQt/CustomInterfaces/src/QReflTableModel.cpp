@@ -50,6 +50,10 @@ namespace MantidQt
     {
     }
 
+    /**
+    Load data into the cache if required
+    @param row : to check and load if required
+    */
     void QReflTableModel::updateDataCache(const int row) const
     {
       // if the index is what is already cached just return

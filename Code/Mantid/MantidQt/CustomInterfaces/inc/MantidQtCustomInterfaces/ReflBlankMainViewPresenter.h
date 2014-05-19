@@ -40,7 +40,9 @@ namespace MantidQt
       ReflBlankMainViewPresenter(ReflMainView* view);
       virtual ~ReflBlankMainViewPresenter();
     protected:
+      //press changes to a previously saved-to item in the ADS, or ask for a name if never given one
       virtual void save();
+      //press changes to a new item in the ADS
       virtual void saveAs();
     };
 

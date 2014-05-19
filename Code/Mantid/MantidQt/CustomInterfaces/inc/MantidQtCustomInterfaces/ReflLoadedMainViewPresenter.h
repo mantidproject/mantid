@@ -40,7 +40,9 @@ namespace MantidQt
       ReflLoadedMainViewPresenter(std::string model, ReflMainView* view);
       virtual ~ReflLoadedMainViewPresenter();
     protected:
+      //press changes to the same item in the ADS
       virtual void save();
+      //press changes to a new item in the ADS
       virtual void saveAs();
     };
 

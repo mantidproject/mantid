@@ -34,6 +34,7 @@ namespace MantidQt
     {
     public:
       virtual ~IReflPresenter() = 0;
+      //Tell the presenter somehting happened
       virtual void notify() = 0;
     private:
 

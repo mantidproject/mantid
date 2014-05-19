@@ -41,15 +41,28 @@ namespace MantidQt
       virtual ~ReflMainViewPresenter() = 0;
       virtual void notify();
     protected:
+      //The model and backup copy of the original model
       Mantid::API::ITableWorkspace_sptr m_model;
       Mantid::API::ITableWorkspace_sptr m_cache;
       std::string m_cache_name;
+      //the view
+      ReflMainView* m_view;
+
+      //Load the model into the view
       virtual void load();
+      //process selected rows
       virtual void process();
+      //make a transmission workspace
+      virtual void makeTransWS(std::string & transString);
+      //Process a row
+      std::string processRow(size_t rowNo, std::string lastTrans = "");
+      //add row(s) to the model
       virtual void addRow();
+      //delete row(s) from the model
+      virtual void deleteRow();
+      //virtual save methods
       virtual void save() = 0;
       virtual void saveAs() = 0;
-      ReflMainView* m_view;
     };
   }
 }

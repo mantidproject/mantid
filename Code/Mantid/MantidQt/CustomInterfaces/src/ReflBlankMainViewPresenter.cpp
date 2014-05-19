@@ -52,6 +52,9 @@ namespace MantidQt
     {
     }
 
+    /**
+    Press changes to a previously saved-to item in the ADS, or ask for a name if never given one
+    */
     void ReflBlankMainViewPresenter::save()
     {
       if (m_cache_name != "")
@@ -64,6 +67,9 @@ namespace MantidQt
       }
     }
 
+    /**
+    Press changes to a new item in the ADS
+    */
     void ReflBlankMainViewPresenter::saveAs()
     {
       if (m_view->askUserString())

@@ -39,34 +39,53 @@ namespace MantidQt
     {
       Q_OBJECT
     public:
+      QtReflMainView(QWidget *parent = 0);
+      virtual ~QtReflMainView();
+
       /// Name of the interface
       static std::string name() { return "New ISIS Reflectometry"; }
       // This interface's categories.
       static QString categoryInfo() { return "Reflectometry"; }
-      QtReflMainView(QWidget *parent = 0);
-      virtual ~QtReflMainView();
+
+      //Connect the model
       virtual void showTable(Mantid::API::ITableWorkspace_sptr model);
+      //clear any notification flags
+      virtual void clearNotifyFlags();
+
+      //dialog box methods
       virtual bool askUserString();
       virtual std::string getUserString() const {return m_UserString;}
+      virtual void giveUserInfo(std::string prompt, std::string title);
+      virtual void giveUserWarning(std::string prompt, std::string title);
+      virtual void giveUserCritical(std::string prompt, std::string title);
+      virtual bool askUserYesNo(std::string prompt, std::string title);
 
-      //notify flags
+      //flag query methods
       virtual bool getSaveFlag() const {return m_save_flag;}
       virtual bool getSaveAsFlag() const {return m_saveAs_flag;}
       virtual bool getAddRowFlag() const {return m_addRow_flag;}
       virtual bool getDeleteRowFlag() const {return m_deleteRow_flag;}
       virtual bool getProcessFlag() const {return m_process_flag;}
-      virtual void clearNotifyFlags();
+      virtual std::vector<size_t> getSelectedRowIndexes() const;
+
     protected:
+      //notify flags
       bool m_save_flag;
       bool m_saveAs_flag;
       bool m_addRow_flag;
       bool m_deleteRow_flag;
       bool m_process_flag;
+
     private:
+      //initialise the interface
       virtual void initLayout();
+      //the string porvided by the user in askUserString()
       std::string m_UserString;
+      //the presenter
       boost::scoped_ptr<IReflPresenter> m_presenter;
+      //the interface
       Ui::reflMainWidget ui;
+
       private slots:
         void setModel(QString name);
         void setNew();
