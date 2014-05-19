@@ -33,6 +33,10 @@ void ALCPeakFittingView::initialize()
 
   connect(m_ui.fit, SIGNAL(clicked()), this, SIGNAL(fitRequested()));
 
+  m_ui.plot->setCanvasBackground(Qt::white);
+  m_ui.plot->setAxisFont(QwtPlot::xBottom, m_widget->font());
+  m_ui.plot->setAxisFont(QwtPlot::yLeft, m_widget->font());
+
   m_dataCurve->setStyle(QwtPlotCurve::NoCurve);
   m_dataCurve->setSymbol(QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(7,7)));
   m_dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);

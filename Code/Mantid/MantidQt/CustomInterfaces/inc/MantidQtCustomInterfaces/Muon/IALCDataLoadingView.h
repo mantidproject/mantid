@@ -75,6 +75,12 @@ namespace CustomInterfaces
     /// @param logs :: New list of log names
     virtual void setAvailableLogs(const std::vector<std::string>& logs) = 0;
 
+    /// Set waiting cursor for long operation
+    virtual void setWaitingCursor() = 0;
+
+    /// Restore the original cursor
+    virtual void restoreCursor() = 0;
+
   signals:
     /// Request to load data
     void loadRequested();

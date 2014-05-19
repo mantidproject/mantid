@@ -29,6 +29,8 @@ public:
   MOCK_METHOD1(setDataCurve, void(const QwtData&));
   MOCK_METHOD1(displayError, void(const std::string&));
   MOCK_METHOD1(setAvailableLogs, void(const std::vector<std::string>&));
+  MOCK_METHOD0(setWaitingCursor, void());
+  MOCK_METHOD0(restoreCursor, void());
 
   void requestLoading() { emit loadRequested(); }
   void selectFirstRun() { emit firstRunSelected(); }
@@ -84,6 +86,9 @@ public:
 
   void test_defaultLoad()
   {
+    InSequence s;
+    EXPECT_CALL(*m_view, setWaitingCursor());
+
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size,3),
                                             QwtDataX(0, 1350, 1E-8),
                                             QwtDataX(1, 1360, 1E-8),
@@ -91,6 +96,8 @@ public:
                                             QwtDataY(0, 0.150, 1E-3),
                                             QwtDataY(1, 0.143, 1E-3),
                                             QwtDataY(2, 0.128, 1E-3))));
+
+    EXPECT_CALL(*m_view, restoreCursor());
 
     m_view->requestLoading();
   }

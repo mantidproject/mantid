@@ -100,5 +100,15 @@ namespace CustomInterfaces
     }
   }
 
+  void ALCDataLoadingView::setWaitingCursor()
+  {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+  }
+
+  void ALCDataLoadingView::restoreCursor()
+  {
+    QApplication::restoreOverrideCursor();
+  }
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

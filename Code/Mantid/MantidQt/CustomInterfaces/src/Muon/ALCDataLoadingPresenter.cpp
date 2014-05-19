@@ -4,11 +4,16 @@
 
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
+#include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include <QApplication>
+#include <QFileInfo>
+#include <QDir>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+
+using namespace MantidQt::API;
 
 namespace MantidQt
 {
@@ -28,6 +33,8 @@ namespace CustomInterfaces
 
   void ALCDataLoadingPresenter::load()
   {
+    m_view->setWaitingCursor();
+
     try
     {
       IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
@@ -58,6 +65,8 @@ namespace CustomInterfaces
     {
       m_view->displayError(e.what());
     }
+
+    m_view->restoreCursor();
   }
 
   void ALCDataLoadingPresenter::updateAvailableLogs()

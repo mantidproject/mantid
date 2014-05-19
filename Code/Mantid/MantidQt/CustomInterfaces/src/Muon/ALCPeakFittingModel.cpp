@@ -5,6 +5,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/CompositeFunction.h"
 
 namespace MantidQt
 {
@@ -55,10 +56,20 @@ namespace CustomInterfaces
   {
     ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
 
-    table->addColumn("str", "Function");
+    table->addColumn("str", "Peaks");
 
-    TableRow newRow = table->appendRow();
-    newRow << m_fittedPeaks->asString();
+
+    if (auto composite = boost::dynamic_pointer_cast<CompositeFunction const>(m_fittedPeaks))
+    {
+      for (size_t i = 0; i < composite->nFunctions(); ++i)
+      {
+        static_cast<TableRow>(table->appendRow()) << composite->getFunction(i)->asString();
+      }
+    }
+    else
+    {
+        static_cast<TableRow>(table->appendRow()) << m_fittedPeaks->asString();
+    }
 
     return table;
   }

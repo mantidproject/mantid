@@ -30,6 +30,14 @@ namespace CustomInterfaces
     m_ui.setupUi(m_widget);
     connect(m_ui.fit, SIGNAL(clicked()), SIGNAL(fitRequested()));
 
+    m_ui.dataPlot->setCanvasBackground(Qt::white);
+    m_ui.dataPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
+    m_ui.dataPlot->setAxisFont(QwtPlot::yLeft, m_widget->font());
+
+    m_ui.correctedPlot->setCanvasBackground(Qt::white);
+    m_ui.correctedPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
+    m_ui.correctedPlot->setAxisFont(QwtPlot::yLeft, m_widget->font());
+
     m_dataCurve->setStyle(QwtPlotCurve::NoCurve);
     m_dataCurve->setSymbol(QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(7,7)));
     m_dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
