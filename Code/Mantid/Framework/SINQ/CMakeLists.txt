@@ -26,6 +26,7 @@ set ( SRC_FILES
 	src/PoldiUtilities/PoldiPeak.cpp
 	src/PoldiUtilities/PoldiPeakCollection.cpp
         src/PoldiUtilities/PoldiSpectrumDomainFunction.cpp
+        src/PoldiUtilities/PoldiSourceSpectrum.cpp
 	src/PoldiUtilities/UncertainValue.cpp
 	src/ProjectMD.cpp
 	src/SINQHMListener.cpp

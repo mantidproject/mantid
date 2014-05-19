@@ -76,21 +76,22 @@ namespace Poldi
 
       MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
 
-      std::vector<size_t> wsi(400);
+      size_t nspec = ws->getNumberHistograms();
+      std::vector<size_t> wsi(nspec);
       for(size_t w = 0; w < wsi.size(); ++w) {
           wsi[w] = w;
       }
 
       mdFunction->setDomainIndices(0, wsi);
-      mdFunction->setLocalAttribute(0, "domains", API::IFunction::Attribute("All"));
 
       IAlgorithm_sptr fit = createChildAlgorithm("Fit", -1, -1, true);
       fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(mdFunction));
       fit->setProperty("InputWorkspace", ws);
+      fit->setProperty("WorkspaceIndex", 0);
 
-      for(size_t i = 1; i < 400; ++i) {
+      for(size_t i = 1; i < nspec; ++i) {
           fit->setProperty("InputWorkspace_" + boost::lexical_cast<std::string>(i), ws);
-          //fit->setProperty("WorkspaceIndex_" + boost::lexical_cast<std::string>(i + 1), i);
+          fit->setProperty("WorkspaceIndex_" + boost::lexical_cast<std::string>(i), static_cast<int>(i));
       }
 
       fit->setProperty("CreateOutput", true);
