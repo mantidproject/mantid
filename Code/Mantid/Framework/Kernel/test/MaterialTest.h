@@ -164,6 +164,10 @@ public:
     TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
 
     cf = Material::parseChemicalFormula("(Li7)2");
+    TS_ASSERT_EQUALS(cf.atoms.size(), 1);
+    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "Li");
+    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 7);
+    TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
 
     cf = Material::parseChemicalFormula("Y-Ba2-Cu3-O6.56");
     TS_ASSERT_EQUALS(cf.atoms.size(), 4);
