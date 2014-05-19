@@ -30,8 +30,11 @@
 #endif
 
 GCC_DIAG_OFF(conversion)
+GCC_DIAG_OFF(cast-qual)
 #include <gp_Trsf.hxx>
 GCC_DIAG_ON(conversion)
+GCC_DIAG_ON(cast-qual)
+
 #include <gp_Vec.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Pnt.hxx>

@@ -21,8 +21,11 @@
 
 
 GCC_DIAG_OFF(conversion)
+GCC_DIAG_OFF(cast-qual)
 #include <gp_Pnt.hxx>
 GCC_DIAG_ON(conversion)
+GCC_DIAG_ON(cast-qual)
+
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Face.hxx>
