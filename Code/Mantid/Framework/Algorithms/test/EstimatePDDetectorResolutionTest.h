@@ -5,7 +5,6 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/EstimatePDDetectorResolution.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -65,39 +64,6 @@ public:
     for (size_t i = 0; i < numspec; ++i)
       TS_ASSERT(outputws->readY(i)[0] < 0.03);
 
-  }
-
-  /** Test POWGEN
-    */
-  void local_test_PG3()
-  {
-    // Load data file
-    Mantid::DataHandling::LoadNexusProcessed loader;
-    loader.initialize();
-    loader.setProperty("Filename","PG3_2538_meta.nxs");
-    loader.setProperty("OutputWorkspace", "PG3_2538");
-    loader.execute();
-
-    // Set up and run
-    EstimatePDDetectorResolution alg;
-    alg.initialize();
-
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "PG3_2538"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "PG3_Resolution"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaTOF", 40.0));
-
-    alg.execute();
-    TS_ASSERT(alg.isExecuted());
-
-    MatrixWorkspace_sptr resws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          AnalysisDataService::Instance().retrieve("PG3_Resolution"));
-    TS_ASSERT(resws);
-
-
-
-    AnalysisDataService::Instance().remove("PG3_2538");
-
-    // TS_ASSERT_EQUALS(1, 3);
   }
 
   /** Create an instrument
