@@ -1060,10 +1060,15 @@ public slots:
   /// Show/hide MantidPlot toolbars.
   void setToolbarsVisible(bool visible);
 
-  /// \name Tiled widget
+  /// \name Tiled window
   //@{
   TiledWindow *newTiledWindow();
   void addActiveToTiledWindow();
+  TiledWindow *getTiledWindowAtPos( int x, int y, int& twX, int& twY );
+  /// Check if a point is inside any of visible TiledWindows
+  bool isInTiledWindow( int x, int y );
+  /// Try to drop a subwindow in the TiledWindow which is under point (x,y)
+  void dropInTiledWindow( MdiSubWindow *w, int x, int y );
   //@}
 
 signals:
@@ -1088,7 +1093,7 @@ private:
   /// this method saves the data on project save
   void savedatainNexusFormat(const std::string& wsName,const std::string & fileName);
   QPoint positionNewFloatingWindow(QSize sz) const;
-  QPoint desktopTopLeft() const;
+  QPoint mdiAreaTopLeft() const;
   bool hasParaviewPath() const;
   bool shouldExecuteAndQuit(const QString& arg);
   void trySetParaviewPath(const QStringList& commandArguments, bool noDialog=false);

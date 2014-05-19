@@ -6034,7 +6034,7 @@ QString ApplicationWindow::windowGeometryInfo(MdiSubWindow *w)
     y = wrapper->y();
     if ( w->getFloatingWindow() )
     {
-      QPoint pos = QPoint(x,y) - desktopTopLeft();
+      QPoint pos = QPoint(x,y) - mdiAreaTopLeft();
       x = pos.x();
       y = pos.y();
     }
@@ -9031,7 +9031,7 @@ void ApplicationWindow::closeWindow(MdiSubWindow* window)
   if (it)
     lv->takeItem(it);
 
-  if (show_windows_policy == ActiveFolder /*&& !f->windowsList().count()*/){
+  if (show_windows_policy == ActiveFolder && !current_folder->windowsList().count()){
     customMenu(0);
     customToolBars(0);
   } else if (show_windows_policy == SubFolders && !(current_folder->children()).isEmpty()){
@@ -17667,7 +17667,7 @@ FloatingWindow* ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow* w, QP
   }
   else
   {
-    pos += desktopTopLeft();
+    pos += mdiAreaTopLeft();
   }
   fw->setWindowTitle(w->name());
   fw->setMdiSubWindow(w);
@@ -17679,9 +17679,11 @@ FloatingWindow* ApplicationWindow::addMdiSubWindowAsFloating(MdiSubWindow* w, QP
 }
 
 /**
-  * Returns the top-left corner of the desktop available for sub-windows.
+  * Returns the top-left corner of the ADI area available for sub-windows relative
+  * to the top-left corner of the monitor screen.
+  *
   */
-QPoint ApplicationWindow::desktopTopLeft() const
+QPoint ApplicationWindow::mdiAreaTopLeft() const
 {
   QPoint p = this->pos() + d_workspace->pos();
 
@@ -17709,7 +17711,7 @@ QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const
 
   if ( lastPoint == noPoint || m_floatingWindows.isEmpty() )
   { // If no other windows added - start from top-left corner
-    lastPoint = desktopTopLeft();
+    lastPoint = mdiAreaTopLeft();
   }
   else
   {
@@ -17736,7 +17738,7 @@ QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const
         const QRect newPlace = QRect(lastPoint, sz);
         if ( newPlace.bottom() > screen.height() || newPlace.right() > screen.width() )
           // If new window doesn't fit to the screen - start anew
-          lastPoint = desktopTopLeft();
+          lastPoint = mdiAreaTopLeft();
       }
     }
   }
@@ -17945,19 +17947,23 @@ void ApplicationWindow::activateNewWindow()
   Folder* folder = currentFolder();
   
   // try the docked windows first
-  QList<QMdiSubWindow*> wl = d_workspace->subWindowList();
-  foreach(QMdiSubWindow* w,wl)
+  QList<QMdiSubWindow*> wl = d_workspace->subWindowList(QMdiArea::ActivationHistoryOrder);
+  if ( !wl.isEmpty() )
   {
-    if (w->widget() != static_cast<QWidget*>(current))
+    for( int i = wl.size() - 1; i >= 0; --i )
     {
-      MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(w->widget());
-        if (sw && 
-            sw->status() != MdiSubWindow::Minimized && 
-            sw->status() != MdiSubWindow::Hidden && 
-            folder->hasWindow(sw))
+      QMdiSubWindow *w = wl[i];
+      if (w->widget() != static_cast<QWidget*>(current))
       {
-        newone = sw;
-        break;
+        MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(w->widget());
+          if (sw && 
+              sw->status() != MdiSubWindow::Minimized && 
+              sw->status() != MdiSubWindow::Hidden && 
+              folder->hasWindow(sw))
+        {
+          newone = sw;
+          break;
+        }
       }
     }
   }
@@ -18044,7 +18050,7 @@ void ApplicationWindow::validateWindowPos(MdiSubWindow* w, int& x, int& y)
   {
     QWidget* desktop = QApplication::desktop()->screen();
     QPoint pos(x, y);
-    pos += desktopTopLeft();
+    pos += mdiAreaTopLeft();
     if ( pos.x() < 0 || pos.y() < 0 ||
       pos.x() + sz.width() > desktop->width() ||
       pos.y() + sz.height() > desktop->height() )
@@ -18101,4 +18107,73 @@ void ApplicationWindow::addActiveToTiledWindow()
   MdiSubWindow *w = activeWindow();
   if ( !w ) return;
   //w->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+}
+
+/**
+ * Return a pointer to the topmost TiledWindow that contains a point. 
+ * If the TiledWindow is overlapped by another window return NULL.
+ * If there is no TiledWindows or the point doesn't fall inside
+ * of any of them return NULL.
+ *
+ * @param x :: The x-coord to check relative to ApplicationWindow's left border.
+ * @param y :: The y-coord to check relative to ApplicationWindow's top border.
+ * @param twX :: Output x-coord recalculated to the returned TiledWindow's coords.
+ * @param twY :: Output y-coord recalculated to the returned TiledWindow's coords.
+ */
+TiledWindow *ApplicationWindow::getTiledWindowAtPos( int x, int y, int& twX, int& twY )
+{
+  twX = -1;
+  twY = -1;
+  auto wl = d_workspace->subWindowList(QMdiArea::StackingOrder);
+  foreach( QMdiSubWindow *w, wl )
+  {
+    TiledWindow *tw = dynamic_cast<TiledWindow*>( w->widget() );
+    if ( tw )
+    {
+      QPoint mdiOrigin = mdiAreaTopLeft() - this->pos();
+      auto r = w->visibleRect();
+      r.moveBy( w->x() + mdiOrigin.x(), w->y() + mdiOrigin.y() );
+      if ( r.contains(x,y) )
+      {
+        twX = x - r.x();
+        twY = y - r.y();
+        return tw;
+      }
+    }
+  }
+  return NULL;
+}
+
+/**
+ * Check if a point is inside any of visible TiledWindows.
+ * @param x :: The x-coord to check relative to ApplicationWindow's left border.
+ * @param y :: The y-coord to check relative to ApplicationWindow's top border.
+ */
+bool ApplicationWindow::isInTiledWindow( int x, int y )
+{
+  int twX = -1;
+  int twY = -1;
+  auto w = getTiledWindowAtPos( x, y, twX, twY );
+  if ( w != NULL )
+  {
+    w->showInsertPosition( twX, twY );
+    return true;
+  }
+  return false;
+}
+
+/**
+ * @param w :: An MdiSubWindow.
+ * @param x :: The x-coord to check relative to ApplicationWindow's left border.
+ * @param y :: The y-coord to check relative to ApplicationWindow's top border.
+ */
+void ApplicationWindow::dropInTiledWindow( MdiSubWindow *w, int x, int y )
+{
+  int twX = -1;
+  int twY = -1;
+  auto tw = getTiledWindowAtPos( x, y, twX, twY );
+  if ( tw != NULL )
+  {
+    tw->dropAtPosition( w, twX, twY );
+  }
 }

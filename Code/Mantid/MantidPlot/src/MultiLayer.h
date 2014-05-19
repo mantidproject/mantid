@@ -64,7 +64,7 @@ class QSize;
  * If MultiLayer exposes its parent Project to the widgets it manages, they could handle things like creating
  * tables by calling methods of Project instead of sending signals.
  */
-class MultiLayer: public AppMdiSubWindow
+class MultiLayer: public MdiSubWindow
 {
 	Q_OBJECT
 

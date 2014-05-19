@@ -23,7 +23,9 @@ QMainWindow(appWindow,f),
 #else
 QMainWindow(NULL,f),
 #endif
-d_app(appWindow)
+d_app(appWindow),
+m_draggingToTiledWindow(false),
+m_isInsideTiledWindow(false)
 {
   setFocusPolicy(Qt::StrongFocus);
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
@@ -129,7 +131,36 @@ bool FloatingWindow::event(QEvent * e)
       return true;
     }
   }
+  else if ( e->type() == QEvent::NonClientAreaMouseButtonPress )
+  {
+    // User clicked the window title bar
+    m_draggingToTiledWindow = true;
+  }
+  else if ( e->type() == QEvent::NonClientAreaMouseMove )
+  {
+    // For some reason this event is fired when the user releases the mouse over the title bar
+    if ( m_draggingToTiledWindow )
+    {
+      d_app->dropInTiledWindow( mdiSubWindow(), pos().x() - d_app->x(), pos().y() - d_app->y() );
+      return true;
+    }
+    m_draggingToTiledWindow = false;
+    m_isInsideTiledWindow = false;
+  }
   return QMainWindow::event(e);
+}
+
+void FloatingWindow::moveEvent(QMoveEvent *ev)
+{
+  if ( m_draggingToTiledWindow )
+  {
+    // we are here if the window is being moved by the user
+    m_isInsideTiledWindow =  d_app->isInTiledWindow( ev->pos().x() - d_app->x(), ev->pos().y() - d_app->y() );
+  }
+  else
+  {
+    m_isInsideTiledWindow = false;
+  }
 }
 
 /**

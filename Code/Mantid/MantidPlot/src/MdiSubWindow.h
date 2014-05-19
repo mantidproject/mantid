@@ -41,6 +41,7 @@ class QEvent;
 class QCloseEvent;
 class QString;
 class FloatingWindow;
+class ApplicationWindow;
 
 class MdiSubWindowParent_t: public QFrame
 {
@@ -132,6 +133,9 @@ public:
     Both = 2 //!< caption = "name - label"
   };
   enum Status{Hidden = -1, Normal = 0, Minimized = 1, Maximized = 2};
+
+  /// Get the pointer to ApplicationWindow
+  ApplicationWindow *applicationWindow() {return d_app;}
 
 public slots:
 
@@ -274,6 +278,8 @@ private:
                            int ignoreFirstLines, int maxRows, int& rows);
   //! Set caption according to current CaptionPolicy, name and label
   void updateCaption();
+  /// Store the pointer to the ApplicationWindow
+  ApplicationWindow *d_app;
   //! The window label
   /**
    * \sa setWindowLabel(), windowLabel(), setCaptionPolicy()
@@ -297,24 +303,5 @@ private:
 };
 
 typedef QList<MdiSubWindow*> MDIWindowList;
-
-//======================================================================================//
-
-class ApplicationWindow;
-
-/**
- * Hopefully a temporary class in transition to full separation of the mdi sub-windows from ApplicationWindow.
- * A common parent of the old qtiplot sub-windows.
- */
-class AppMdiSubWindow: public MdiSubWindow
-{
-public:
-  AppMdiSubWindow(QWidget *parent, const QString& label = QString(), const QString& name = QString(), Qt::WFlags f = 0);
-  /// Get the pointer to ApplicationWindow
-  ApplicationWindow *applicationWindow() {return m_app;}
-private:
-  /// Store the pointer to the ApplicationWindow
-  ApplicationWindow *m_app;
-};
 
 #endif

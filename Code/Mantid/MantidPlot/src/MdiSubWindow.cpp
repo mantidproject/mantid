@@ -51,6 +51,7 @@ using std::string;
 
 MdiSubWindow::MdiSubWindow(QWidget *parent, const QString& label, const QString& name, Qt::WFlags f):
   MdiSubWindowParent_t (parent, f),
+  d_app( static_cast<ApplicationWindow*>(parent) ),
   d_label(label),
   d_status(Normal),
   d_caption_policy(Both),
@@ -538,12 +539,4 @@ QWidget* MdiSubWindow::getWrapperWindow() const
   }
   return wrapper;
 }
-
-//======================================================================================//
-
-AppMdiSubWindow::AppMdiSubWindow(QWidget *parent, const QString& label, const QString& name, Qt::WFlags f)
-    :MdiSubWindow(parent, label, name, f),
-    m_app( static_cast<ApplicationWindow*>(parent) )
-  {  
-  }
 

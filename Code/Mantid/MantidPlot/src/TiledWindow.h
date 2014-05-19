@@ -62,6 +62,9 @@ public slots:
   /// Remove the selection and make all windows floating
   void removeSelectionToFloating();
 
+  void showInsertPosition( int x, int y );
+  bool dropAtPosition( MdiSubWindow *w, int x, int y );
+
   QString saveToString(const QString &info, bool = false);
   void restore(const QStringList&);
   void print();
@@ -69,9 +72,6 @@ public slots:
 protected:
   void mousePressEvent(QMouseEvent *ev);
   void mouseReleaseEvent(QMouseEvent *ev);
-  void mouseMoveEvent(QMouseEvent *ev);
-  void dropEvent(QDropEvent *ev);
-  void dragEnterEvent(QDragEnterEvent *ev);
 
 private:
   void init();
@@ -87,6 +87,8 @@ private:
   MdiSubWindow *removeTile(Tile *tile);
   /// Get a tile at a mouse position (in pixels).
   Tile *getTileAtMousePos( const QPoint& pos );
+  /// Get a list of all tiles.
+  QList<Tile*> getAllTiles();
   /// Add a tile to the selection.
   void addToSelection(Tile *tile, bool append);
   /// Add a range of tiles to the selection.
@@ -97,6 +99,10 @@ private:
   void calcTilePosition( int index, int &row, int &col ) const;
   /// Deselect a tile
   bool deselectTile(Tile *tile);
+  /// Tell all tiles to not show that they accept widget drops.
+  void clearDrops();
+  /// Check if a Tile can accept drops
+  bool canAcceptDrops(Tile *tile) const;
 
   /// The inner widget providing scrolling functionality.
   QScrollArea *m_scrollArea;
@@ -117,8 +123,8 @@ public:
   void setWidget(MdiSubWindow *w);
   void removeWidget();
   MdiSubWindow *widget() {return m_widget;}
-  void makeSelected();
-  void makeNormal();
+  void makeSelected(bool yes);
+  void makeAcceptDrop(bool yes);
 protected:
   void paintEvent(QPaintEvent *ev);
 private:
@@ -128,10 +134,11 @@ private:
   QVBoxLayout * m_layout;
   /// A pointer to the displayed widget
   MdiSubWindow* m_widget;
-  /// Color of the border (to show selected tile)
-  QColor m_border;
-  /// Width of the border (to show selected tile)
-  int m_borderWidth;
+  /// Selected flag
+  bool m_selected;
+  /// Accepts drops flag
+  bool m_acceptDrop;
+
 };
 
 #endif // TiledWindow_H

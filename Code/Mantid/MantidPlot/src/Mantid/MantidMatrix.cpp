@@ -51,7 +51,7 @@ using namespace MantidQt::API;
 using namespace Mantid::Geometry;
 
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
-  : AppMdiSubWindow(parent, label, name, 0),
+  : MdiSubWindow(parent, label, name, 0),
   WorkspaceObserver(),
   m_appWindow(parent),
   m_workspace(ws),

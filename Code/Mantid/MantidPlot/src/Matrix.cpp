@@ -65,7 +65,7 @@
 #include <gsl/gsl_linalg.h>
 
 Matrix::Matrix(ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-  : AppMdiSubWindow(parent, label, name, f), Scripted(env), 
+  : MdiSubWindow(parent, label, name, f), Scripted(env), 
   d_matrix_model(NULL),m_bk_color(),d_stack(NULL),
   d_table_view(NULL),imageLabel(NULL),formula_str(),
   txt_format(),num_precision(0),x_start(0.0),
@@ -80,7 +80,7 @@ Matrix::Matrix(ScriptingEnv *env, const QString& label, ApplicationWindow* paren
 }
 
 Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-  : AppMdiSubWindow(parent, label, name, f), Scripted(env),
+  : MdiSubWindow(parent, label, name, f), Scripted(env),
   d_matrix_model(NULL),m_bk_color(),d_stack(NULL),
   d_table_view(NULL),imageLabel(NULL),formula_str(),
   txt_format(),num_precision(0),x_start(0.0),
@@ -96,7 +96,7 @@ Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString& label, Applicatio
 }
 
 Matrix::Matrix(ScriptingEnv *env, const QImage& image, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-  : AppMdiSubWindow(parent, label, name, f), Scripted(env),
+  : MdiSubWindow(parent, label, name, f), Scripted(env),
   d_matrix_model(NULL),m_bk_color(),d_stack(NULL),
   d_table_view(NULL),imageLabel(NULL),formula_str(),
   txt_format(QChar()),num_precision(0),x_start(0.0),

@@ -66,7 +66,7 @@ private:
  * Port to the Model/View approach used in Qt4 and get rid of the Qt3Support dependancy.
  * [ assigned to thzs ]
  */
-class Table: public AppMdiSubWindow, public Scripted
+class Table: public MdiSubWindow, public Scripted
 {
     Q_OBJECT
 

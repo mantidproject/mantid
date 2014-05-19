@@ -17,8 +17,10 @@ const int minimumTileHeight = 100;
 // tile border constants
 const QColor normalColor("black");
 const QColor selectedColor("green");
+const QColor acceptDropColor("red");
 const int normalWidth(1);
 const int selectedWidth(5);
+const int acceptDropWidth(5);
 
 /**
  * Constructor.
@@ -27,8 +29,10 @@ Tile::Tile(QWidget *parent):
   QFrame(parent),
   m_tiledWindow(parent),
   m_widget(NULL),
-  m_border(normalColor),
-  m_borderWidth(normalWidth)
+  m_selected(false),
+  m_acceptDrop(false)
+  //m_border(normalColor),
+  //m_borderWidth(normalWidth)
 {
   m_layout = new QVBoxLayout(this);
   m_layout->setContentsMargins(5,5,5,5);
@@ -80,30 +84,44 @@ void Tile::removeWidget()
 void Tile::paintEvent(QPaintEvent *ev)
 {
   QPainter p(this);
-  QPen pen(m_border);
-  pen.setWidth(m_borderWidth);
-  p.setPen(pen);
+  if ( m_acceptDrop )
+  {
+    QPen pen(acceptDropColor);
+    pen.setWidth(acceptDropWidth);
+    p.setPen(pen);
+  }
+  else if ( m_selected )
+  {
+    QPen pen(selectedColor);
+    pen.setWidth(selectedWidth);
+    p.setPen(pen);
+  }
+  else
+  {
+    QPen pen(normalColor);
+    pen.setWidth(normalWidth);
+    p.setPen(pen);
+  }
   p.drawRect( this->rect().adjusted(0,0,-1,-1) );
   QFrame::paintEvent(ev);
 }
 
 /**
- * Make this tile look selected: change the border colour.
+ * Make this tile look selected or deselected: change the border colour.
  */
-void Tile::makeSelected()
+void Tile::makeSelected(bool yes)
 {
-  m_border = selectedColor;
-  m_borderWidth = selectedWidth;
+  m_selected = yes;
   update();
 }
 
 /**
- * Make this tile look unselected.
+ * Make this tile show that it accepts widget drops or not by changing
+ * border width and colour.
  */
-void Tile::makeNormal()
+void Tile::makeAcceptDrop(bool yes)
 {
-  m_border = normalColor;
-  m_borderWidth = normalWidth;
+  m_acceptDrop = yes;
   update();
 }
 
@@ -194,6 +212,7 @@ void TiledWindow::reshape(int newColumnCount)
   int nrows = rowCount();
   int ncols = columnCount();
 
+  // remove all widgets and store their pointers
   QList<MdiSubWindow*> widgets;
   for(int row = 0; row < nrows; ++row)
   {
@@ -219,6 +238,7 @@ void TiledWindow::reshape(int newColumnCount)
 
   // clear the layout
   init();
+  // make sure new dimensions will fit all widgets
   int newRowCount = nWidgets / newColumnCount;
   if ( newRowCount * newColumnCount != nWidgets ) 
   {
@@ -228,6 +248,7 @@ void TiledWindow::reshape(int newColumnCount)
   // m_layout now knows its rowCount and columnCount and calcTilePosition can be used
   Tile *tile = getOrAddTile(newRowCount - 1, newColumnCount - 1);
   (void) tile;
+  // re-insert the widgets
   for(int i = 0; i < nWidgets; ++i)
   {
     int row(0), col(0);
@@ -453,6 +474,24 @@ Tile *TiledWindow::getTileAtMousePos( const QPoint& pos )
 }
 
 /**
+ * Get a list of all tiles.
+ */
+QList<Tile*> TiledWindow::getAllTiles()
+{
+  QList<Tile*> tiles;
+  int nrows = rowCount();
+  int ncols = columnCount();
+  for(int row = 0; row < nrows; ++row)
+  {
+    for(int col = 0; col < ncols; ++col)
+    {
+      tiles.append( getTile(row, col) );
+    }
+  }
+  return tiles;
+}
+
+/**
  * Mouse press event handler.
  */
 void TiledWindow::mousePressEvent(QMouseEvent *ev)
@@ -482,31 +521,6 @@ void TiledWindow::mouseReleaseEvent(QMouseEvent *ev)
   }
 }
 
-void TiledWindow::mouseMoveEvent(QMouseEvent *ev)
-{
-  static int iii = 0;
-  std::cerr << ++iii << std::endl;
-}
-
-void TiledWindow::dragEnterEvent(QDragEnterEvent *ev)
-{
-  ev->accept();
-  std::cerr << "Drag" << std::endl;
-}
-
-void TiledWindow::dropEvent(QDropEvent *ev)
-{
-  const QMimeData *mimeData = ev->mimeData();
-  if ( !mimeData->formats().isEmpty() )
-  {
-    QString fmt = mimeData->formats()[0];
-    std::cerr << fmt.toStdString() << std::endl;
-    std::cerr << mimeData->hasFormat(fmt) << ' ' << mimeData->hasImage() << std::endl;
-    QByteArray data = mimeData->data(fmt);
-    std::cerr << data.size() << std::endl;
-  }
-}
-
 /**
  * Add a tile to the selection.
  * @param tile :: A tile to add.
@@ -529,7 +543,7 @@ void TiledWindow::addToSelection(Tile *tile, bool append)
     clearSelection();
   }
   m_selection.append( tile );
-  tile->makeSelected();
+  tile->makeSelected(true);
 }
 
 /**
@@ -585,7 +599,7 @@ void TiledWindow::clearSelection()
 {
   foreach(Tile *tile, m_selection)
   {
-    tile->makeNormal();
+    tile->makeSelected(false);
   }
   m_selection.clear();
 }
@@ -601,7 +615,7 @@ bool TiledWindow::deselectTile(Tile *tile)
   if ( index >= 0 )
   {
     m_selection.removeAt( index );
-    tile->makeNormal();
+    tile->makeSelected(false);
     return true;
   }
   return false;
@@ -788,4 +802,67 @@ void TiledWindow::populateMenu(QMenu *menu)
   QAction *actionClear = new QAction("Clear",menu);
   connect(actionClear,SIGNAL(triggered()),this,SLOT(clear()));
   menu->addAction( actionClear );
+}
+
+/**
+ * Check if a Tile can accept drops.
+ * @param tile :: A tile to check.
+ */
+bool TiledWindow::canAcceptDrops(Tile *tile) const
+{
+  return tile->widget() == NULL;
+}
+
+/**
+ * Display a position in the layout where a widget will be inserted
+ * given approximate coords.
+ *
+ * @param x :: Approx x-coord in pixels where a widget will be dropped.
+ * @param y :: Approx y-coord in pixels where a widget will be dropped.
+ */
+void TiledWindow::showInsertPosition( int x, int y )
+{
+  clearDrops();
+  QPoint p = mapFromParent( QPoint(x,y) );
+  Tile *tile = getTileAtMousePos( p );
+  if ( tile )
+  {
+    if ( canAcceptDrops(tile) )
+    {
+      tile->makeAcceptDrop( true );
+    }
+  }
+}
+
+/// Tell all tiles to not show that they accept widget drops.
+void TiledWindow::clearDrops()
+{
+  auto tiles = getAllTiles();
+  foreach(Tile* tile, tiles)
+  {
+    tile->makeAcceptDrop(false);
+  }
+}
+
+/**
+ * Try to drop a widget at a mouse position. Return true if succeeded.
+ * 
+ * @param w :: A widget to drop.
+ * @param x :: Approx x-coord in pixels where a widget will be dropped.
+ * @param y :: Approx y-coord in pixels where a widget will be dropped.
+ */
+bool TiledWindow::dropAtPosition( MdiSubWindow *w, int x, int y )
+{
+  clearDrops();
+  QPoint p = mapFromParent( QPoint(x,y) );
+  Tile *tile = getTileAtMousePos( p );
+  if ( tile && canAcceptDrops(tile) )
+  {
+    int index = calcFlatIndex( tile );
+    int row = -1, col = -1;
+    calcTilePosition( index, row, col );
+    addWidget( w, row, col );
+    return true;
+  }
+  return false;
 }
