@@ -64,11 +64,27 @@ namespace CustomInterfaces
 
     if (nextWidget == m_ui.baselineModellingView)
     {
-      m_baselineModellingModel->setData(m_dataLoading->loadedData());
+      if (m_dataLoading->loadedData())
+      {
+        m_baselineModellingModel->setData(m_dataLoading->loadedData());
+      }
+      else
+      {
+        QMessageBox::critical(this, "Error", "Please load some data first");
+        return;
+      }
     }
     if (nextWidget == m_ui.peakFittingView)
     {
-      m_peakFittingModel->setData(m_baselineModellingModel->correctedData());
+      if (m_baselineModellingModel->correctedData())
+      {
+        m_peakFittingModel->setData(m_baselineModellingModel->correctedData());
+      }
+      else
+      {
+        QMessageBox::critical(this, "Error", "Please fit a baseline first");
+        return;
+      }
     }
 
     switchStep(next);
@@ -116,6 +132,14 @@ namespace CustomInterfaces
 
   void ALCInterface::exportResults()
   {
+    // If we are able to export the results, we should be on final step, which means all the previous
+    // steps were completed succesfully
+    if (!m_peakFittingModel->fittedPeaks())
+    {
+      QMessageBox::critical(this, "Error", "Please fit some peaks first");
+      return;
+    }
+
     bool ok;
     QString label = QInputDialog::getText(this, "Results label", "Label to assign to the results: ",
                                          QLineEdit::Normal, "ALCResults", &ok);
