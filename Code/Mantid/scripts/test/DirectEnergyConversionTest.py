@@ -66,10 +66,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEqual(tReducer.instr_name,"SEQ")
         self.assertEqual(tReducer.facility,'SNS')
         
-        tReducer.instr_name = 'MER'
-        self.assertEqual(tReducer.instr_name,"MER")
-        self.assertEqual(tReducer.facility,'ISIS')
-
         self.assertRaises(KeyError,setattr,tReducer,'instr_name','NonExistingInstrument')
 
 
