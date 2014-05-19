@@ -308,15 +308,66 @@ namespace Algorithms
     //Disable default gsl error handler (which is to call abort!)
     gsl_set_error_handler_off();
 
+    auto inpreswsprop = new WorkspaceProperty<MatrixWorkspace>("InputResolutionWorkspace", "", Direction::Input,
+                                                               PropertyMode::Optional);
+    declareProperty(inpreswsprop, "Name of the optional input resolution (delta(d)/d) workspace. ");
+
     auto tablewsprop = new WorkspaceProperty<TableWorkspace>("SpectraFitInfoTableWorkspace", "FitInfoTable", Direction::Output);
     declareProperty(tablewsprop, "Name of the output table workspace containing spectra peak fit information.");
 
     auto offsetwsprop = new WorkspaceProperty<TableWorkspace>("PeaksOffsetTableWorkspace", "PeakOffsetTable", Direction::Output);
     declareProperty(offsetwsprop, "Name of an output table workspace containing peaks' offset data.");
 
-    auto ddodwsprop = new WorkspaceProperty<MatrixWorkspace>("ResolutionWorkspace", "ResolutionWS", Direction::Output);
+    auto ddodwsprop = new WorkspaceProperty<MatrixWorkspace>("FittedResolutionWorkspace", "ResolutionWS", Direction::Output);
     declareProperty(ddodwsprop, "Name of the resolution workspace containing delta(d)/d for each unmasked spectrum. ");
 
+  }
+
+
+  //-----------------------------------------------------------------------------------------
+  /** Executes the algorithm
+     *
+     *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
+     */
+  void GetDetOffsetsMultiPeaks::exec()
+  {
+    // Process input information
+    processProperties();
+
+    // Create information workspaces
+    createInformationWorkspaces();
+
+    // Calculate offset of each detector
+    calculateDetectorsOffsets();
+
+    // Return the output
+    setProperty("OutputWorkspace",outputW);
+    setProperty("NumberPeaksWorkspace",outputNP);
+    setProperty("MaskWorkspace",maskWS);
+    setProperty("FittedResolutionWorkspace", m_resolutionWS);
+    setProperty("SpectraFitInfoTableWorkspace", m_infoTableWS);
+    setProperty("PeaksOffsetTableWorkspace", m_peakOffsetTableWS);
+
+    // Also save to .cal file, if requested
+    std::string filename=getProperty("GroupingFileName");
+    if (!filename.empty())
+    {
+      progress(0.9, "Saving .cal file");
+      IAlgorithm_sptr childAlg = createChildAlgorithm("SaveCalFile");
+      childAlg->setProperty("OffsetsWorkspace", outputW);
+      childAlg->setProperty("MaskWorkspace", maskWS);
+      childAlg->setPropertyValue("Filename", filename);
+      childAlg->executeAsChildAlg();
+    }
+
+    // Clean peak offset table workspace
+    removeEmptyRowsFromPeakOffsetTable();
+
+    // Make summary
+    progress(0.92, "Making summary");
+    makeFitSummary();
+
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -324,11 +375,11 @@ namespace Algorithms
     */
   void GetDetOffsetsMultiPeaks::processProperties()
   {
-    inputW=getProperty("InputWorkspace");
+    m_inputWS=getProperty("InputWorkspace");
 
     // determine min/max d-spacing of the workspace
     double wkspDmin, wkspDmax;
-    inputW->getXMinMax(wkspDmin, wkspDmax);
+    m_inputWS->getXMinMax(wkspDmin, wkspDmax);
 
     // the peak positions and where to fit
     m_peakPositions = getProperty("DReference");
@@ -363,7 +414,7 @@ namespace Algorithms
     }
 
     // Some shortcuts for event workspaces
-    eventW = boost::dynamic_pointer_cast<const EventWorkspace>( inputW );
+    eventW = boost::dynamic_pointer_cast<const EventWorkspace>( m_inputWS );
     // bool isEvent = false;
     isEvent = false;
     if (eventW)
@@ -379,10 +430,23 @@ namespace Algorithms
     m_maxOffset=getProperty("MaxOffset");
 
     // Create output workspaces
-    outputW = boost::make_shared<OffsetsWorkspace>(inputW->getInstrument());
-    outputNP = boost::make_shared<OffsetsWorkspace>(inputW->getInstrument());
-    MatrixWorkspace_sptr tempmaskws(new MaskWorkspace(inputW->getInstrument()));
+    outputW = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
+    outputNP = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
+    MatrixWorkspace_sptr tempmaskws(new MaskWorkspace(m_inputWS->getInstrument()));
     maskWS = tempmaskws;
+
+    // Input resolution
+    std::string reswsname = getPropertyValue("InputResolutionWorkspace");
+    if (reswsname.size() == 0) m_hasInputResolution = false;
+    else
+    {
+      m_inputResolutionWS = getProperty("InputResolutionWorkspace");
+      m_hasInputResolution = true;
+
+      // Check
+      if (m_inputResolutionWS->getNumberHistograms() != m_inputWS->getNumberHistograms())
+        throw std::runtime_error("Input workspace does not match resolution workspace. ");
+    }
 
     return;
   }
@@ -403,7 +467,7 @@ namespace Algorithms
 
     // Check number of spectra should be same to input workspace
     size_t numrows = windowtablews->rowCount();
-    if (numrows != inputW->getNumberHistograms())
+    if (numrows != m_inputWS->getNumberHistograms())
       throw std::runtime_error("Number of spectra in fit window workspace does not match input workspace. ");
 
     // Create workspace
@@ -446,30 +510,12 @@ namespace Algorithms
 
 
   //-----------------------------------------------------------------------------------------
-  /** Executes the algorithm
-     *
-     *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
-     */
-  void GetDetOffsetsMultiPeaks::exec()
+  /** Calculate (all) detectors' offsets
+    */
+  void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets()
   {
-    // Process input information
-    processProperties();
-    size_t numspec = inputW->getNumberHistograms();
+    int nspec=static_cast<int>(m_inputWS->getNumberHistograms());
 
-    // Process output workspaces: output information table and peak offset
-    m_infoTableWS = createOutputInfoTable(numspec);
-    setProperty("SpectraFitInfoTableWorkspace", m_infoTableWS);
-
-    m_peakOffsetTableWS = createOutputPeakOffsetTable(numspec);
-    setProperty("PeaksOffsetTableWorkspace", m_peakOffsetTableWS);
-
-    m_resolutionWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          WorkspaceFactory::Instance().create("Workspace2D", numspec, 1, 1));
-
-    //*************************************************************************
-    // Calculate offset of each detector
-    //*************************************************************************
-    int nspec=static_cast<int>(inputW->getNumberHistograms());
     //To get the workspace index from the detector ID
     const detid2index_map pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
@@ -478,7 +524,7 @@ namespace Algorithms
 
     // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-    for (int wi=0;wi<nspec;++wi)
+    for (int wi=0; wi<nspec; ++wi)
     {
       PARALLEL_START_INTERUPT_REGION
 
@@ -486,7 +532,7 @@ namespace Algorithms
       FitPeakOffsetResult offsetresult = calculatePeakOffset(wi, fittedpeakpositions, tofitpeakpositions);
 
       // Get the list of detectors in this pixel
-      const std::set<detid_t> & dets = inputW->getSpectrum(wi)->getDetectorIDs();
+      const std::set<detid_t> & dets = m_inputWS->getSpectrum(wi)->getDetectorIDs();
 
       // Most of the exec time is in FitSpectra, so this critical block should not be a problem.
       PARALLEL_CRITICAL(GetDetOffsetsMultiPeaks_setValue)
@@ -503,10 +549,10 @@ namespace Algorithms
 
           // Set value to mask workspace
           const auto mapEntry = pixel_to_wi.find(*it);
-          if ( mapEntry == pixel_to_wi.end() )
-            continue;
+          if ( mapEntry == pixel_to_wi.end() ) continue;
+
           const size_t workspaceIndex = mapEntry->second;
-          if (offsetresult.mask == 1.)
+          if (offsetresult.mask > 0.9)
           {
             // Being masked
             maskWS->maskWorkspaceIndex(workspaceIndex);
@@ -516,6 +562,14 @@ namespace Algorithms
           {
             // Using the detector
             maskWS->dataY(workspaceIndex)[0] = offsetresult.mask;
+
+            // check the average value of delta(d)/d.  if it is far off the theorical value, output
+            if (m_hasInputResolution)
+            {
+              double pixelresolution = m_inputResolutionWS->readY(wi)[0];
+              if (offsetresult.resolution > 10*pixelresolution || offsetresult.resolution < 0.1*pixelresolution)
+                g_log.notice() << "Spectrum " << wi << " delta(d)/d = " << offsetresult.resolution << "\n";
+            }
           }
         } // ENDFOR (detectors)
 
@@ -530,34 +584,8 @@ namespace Algorithms
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
-    // Return the output
-    setProperty("OutputWorkspace",outputW);
-    setProperty("NumberPeaksWorkspace",outputNP);
-    setProperty("MaskWorkspace",maskWS);
-    setProperty("ResolutionWorkspace", m_resolutionWS);
-
-    // Also save to .cal file, if requested
-    std::string filename=getProperty("GroupingFileName");
-    if (!filename.empty())
-    {
-      progress(0.9, "Saving .cal file");
-      IAlgorithm_sptr childAlg = createChildAlgorithm("SaveCalFile");
-      childAlg->setProperty("OffsetsWorkspace", outputW);
-      childAlg->setProperty("MaskWorkspace", maskWS);
-      childAlg->setPropertyValue("Filename", filename);
-      childAlg->executeAsChildAlg();
-    }
-
-    // Clean peak offset table workspace
-    removeEmptyRowsFromPeakOffsetTable();
-
-    // Make summary
-    progress(0.92, "Making summary");
-    makeFitSummary();
-
     return;
   }
-
 
   //----------------------------------------------------------------------------------------------
   /** Calculate offset for one spectrum
@@ -591,7 +619,7 @@ namespace Algorithms
     else
     {
       // dead detector will be masked
-      const MantidVec& Y = inputW->readY(wi);
+      const MantidVec& Y = m_inputWS->readY(wi);
       const int YLength = static_cast<int>(Y.size());
       double sumY = 0.0;
       for (int i = 0; i < YLength; i++) sumY += Y[i];
@@ -614,7 +642,7 @@ namespace Algorithms
       double minD, maxD;
       int i_highestpeak;
       double resolution, devresolution;
-      fr.numpeaksindrange = fitSpectra(wi, inputW, m_peakPositions, m_fitWindows,
+      fr.numpeaksindrange = fitSpectra(wi, m_inputWS, m_peakPositions, m_fitWindows,
                                        nparams, minD, maxD, vec_peakPosRef, vec_peakPosFitted,
                                        vec_fitChi2, vec_peakHeights, i_highestpeak,
                                        resolution, devresolution);
@@ -676,6 +704,7 @@ namespace Algorithms
 
     return fr;
   } /// ENDFUNCTION: calculatePeakOffset
+
 
   //----------------------------------------------------------------------------------------------
   /** Fit peaks' offset by minimize the fitting function
@@ -1077,8 +1106,8 @@ namespace Algorithms
       double widthdevpos = width/centre;
       vec_widthDivPos.push_back(widthdevpos);
 
-      g_log.debug() << " h:" << height << " c:" << centre << " w:" << (width/(2.*std::sqrt(2.*std::log(2.))))
-                    << " b:" << background << " chisq:" << chi2 << "\n";
+      // g_log.debug() << " h:" << height << " c:" << centre << " w:" << (width/(2.*std::sqrt(2.*std::log(2.))))
+      //               << " b:" << background << " chisq:" << chi2 << "\n";
 
       // Add peak to vectors
       double refcentre = peakPositionRef[i];
@@ -1119,63 +1148,63 @@ namespace Algorithms
     return;
   }
 
-
   //----------------------------------------------------------------------------------------------
-  /** Create information table workspace for output
+  /**
     */
-  TableWorkspace_sptr GetDetOffsetsMultiPeaks::createOutputInfoTable(size_t numspec)
+  void GetDetOffsetsMultiPeaks::createInformationWorkspaces()
   {
-    // Create table workspace and set columns
-    TableWorkspace_sptr infoTableWS = boost::make_shared<TableWorkspace>();
+    // Init
+    size_t numspec = m_inputWS->getNumberHistograms();
 
-    infoTableWS->addColumn("int", "WorkspaceIndex");
-    infoTableWS->addColumn("int", "NumberPeaksFitted");
-    infoTableWS->addColumn("int", "NumberPeaksInRange");
-    infoTableWS->addColumn("str", "OffsetFitStatus");
-    infoTableWS->addColumn("double", "ChiSquare");
-    infoTableWS->addColumn("double", "Offset");
-    infoTableWS->addColumn("double", "HighestPeakPosition");
-    infoTableWS->addColumn("double", "HighestPeakDeviation");
+    // Create output offset calculation status table
+    m_infoTableWS = boost::make_shared<TableWorkspace>();
 
-    // Add rows
+    // set up columns
+    m_infoTableWS->addColumn("int", "WorkspaceIndex");
+    m_infoTableWS->addColumn("int", "NumberPeaksFitted");
+    m_infoTableWS->addColumn("int", "NumberPeaksInRange");
+    m_infoTableWS->addColumn("str", "OffsetFitStatus");
+    m_infoTableWS->addColumn("double", "ChiSquare");
+    m_infoTableWS->addColumn("double", "Offset");
+    m_infoTableWS->addColumn("double", "HighestPeakPosition");
+    m_infoTableWS->addColumn("double", "HighestPeakDeviation");
+
+    // add rows
     for (size_t i = 0; i < numspec; ++i)
     {
-      TableRow newrow = infoTableWS->appendRow();
+      TableRow newrow = m_infoTableWS->appendRow();
       newrow << static_cast<int>(i);
     }
 
-    return infoTableWS;
-  }
+    // Create output peak fitting information table
+    m_peakOffsetTableWS = boost::make_shared<TableWorkspace>();
 
-  //----------------------------------------------------------------------------------------------
-  /** Create peak offset table workspace for output
-    */
-  TableWorkspace_sptr GetDetOffsetsMultiPeaks::createOutputPeakOffsetTable(size_t numspec)
-  {
-    // Craete table workspace and set columns
-    TableWorkspace_sptr peakOffsetTableWS = boost::make_shared<TableWorkspace>();
-
-    peakOffsetTableWS->addColumn("int", "WorkspaceIndex");
+    // set up columns
+    m_peakOffsetTableWS->addColumn("int", "WorkspaceIndex");
     for (size_t i = 0; i < m_peakPositions.size(); ++i)
     {
       std::stringstream namess;
       namess << "@" << std::setprecision(5) << m_peakPositions[i];
-      peakOffsetTableWS->addColumn("str", namess.str());
+      m_peakOffsetTableWS->addColumn("str", namess.str());
     }
-    peakOffsetTableWS->addColumn("double", "OffsetDeviation");
+    m_peakOffsetTableWS->addColumn("double", "OffsetDeviation");
 
-    // Add rows
+    // add rows
     for (size_t i = 0; i < numspec; ++i)
     {
-      TableRow newrow = peakOffsetTableWS->appendRow();
+      TableRow newrow = m_peakOffsetTableWS->appendRow();
       newrow << static_cast<int>(i);
     }
 
-    return peakOffsetTableWS;
+    // Create resolution (delta(d)/d) workspace
+    m_resolutionWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          WorkspaceFactory::Instance().create("Workspace2D", numspec, 1, 1));
+
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Add result of offset-calculation to information table workspaces
+  /** Add result of offset-calculation to information table workspaces (thread-safe)
     */
   void GetDetOffsetsMultiPeaks::addInfoToReportWS(int wi, FitPeakOffsetResult offsetresult,
                                                   const std::vector<double>& tofitpeakpositions,
@@ -1190,10 +1219,20 @@ namespace Algorithms
     m_infoTableWS->cell<double>(wi, 6) = offsetresult.highestpeakpos;
     m_infoTableWS->cell<double>(wi, 7) = offsetresult.highestpeakdev;
 
-    // Peak width
+    // Peak width delta(d)/d
     m_resolutionWS->dataX(wi)[0] = static_cast<double>(wi);
-    m_resolutionWS->dataY(wi)[0] = offsetresult.resolution;
-    m_resolutionWS->dataE(wi)[0] = offsetresult.dev_resolution;
+    if (offsetresult.fitoffsetstatus.compare("success") == 0)
+    {
+      // Only add successfully calculated value
+      m_resolutionWS->dataY(wi)[0] = offsetresult.resolution;
+      m_resolutionWS->dataE(wi)[0] = offsetresult.dev_resolution;
+    }
+    else
+    {
+      // Only add successfully calculated value
+      m_resolutionWS->dataY(wi)[0] = -0.0;
+      m_resolutionWS->dataE(wi)[0] = 0.0;
+    }
 
     // Peak-fitting information:  Record: (found peak position) - (target peak position)
     int numpeaksfitted = offsetresult.numpeaksfitted;
