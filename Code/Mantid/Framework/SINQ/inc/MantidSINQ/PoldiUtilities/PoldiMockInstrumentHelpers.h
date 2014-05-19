@@ -13,9 +13,6 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/Interpolation.h"
 
-using namespace Mantid;
-using namespace Mantid::Poldi;
-
 namespace Mantid {
 namespace Poldi {
 

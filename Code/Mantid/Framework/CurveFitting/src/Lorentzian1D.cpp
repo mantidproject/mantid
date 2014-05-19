@@ -33,6 +33,7 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+using API::Jacobian;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Lorentzian1D)

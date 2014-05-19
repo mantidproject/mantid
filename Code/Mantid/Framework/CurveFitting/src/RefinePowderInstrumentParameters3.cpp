@@ -42,6 +42,12 @@ This algorithm is designed to work with other algorithms to do Le Bail fit.  The
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ListValidator.h"
 
+using namespace Mantid::API;
+using namespace Mantid::CurveFitting;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
+using namespace std;
+
 namespace Mantid
 {
 namespace CurveFitting

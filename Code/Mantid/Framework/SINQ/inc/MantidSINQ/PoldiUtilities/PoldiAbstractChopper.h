@@ -40,8 +40,6 @@ namespace Poldi
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-using namespace Kernel;
-
 class MANTID_SINQ_DLL PoldiAbstractChopper
 {
 public:

@@ -4,6 +4,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ConfigService.h"
 #include <utility>
+using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::Logger;
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl; 
