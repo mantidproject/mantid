@@ -100,7 +100,14 @@ namespace CustomInterfaces
 
   void ALCBaselineModellingView::setFunction(const QString& func)
   {
-    m_ui.function->setFunction(func);
+    if (func.isEmpty())
+    {
+      m_ui.function->clear();
+    }
+    else
+    {
+      m_ui.function->setFunction(func);
+    }
   }
 
   void ALCBaselineModellingView::setNoOfSectionRows(int rows)

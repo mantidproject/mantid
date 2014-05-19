@@ -58,6 +58,9 @@ namespace CustomInterfaces
     /// The data we are fitting peaks to
     MatrixWorkspace_const_sptr m_data;
 
+    /// Setter for convenience
+    void setFittedPeaks(IFunction_const_sptr fittedPeaks);
+
     /// Last fitted peaks
     IFunction_const_sptr m_fittedPeaks;
   };

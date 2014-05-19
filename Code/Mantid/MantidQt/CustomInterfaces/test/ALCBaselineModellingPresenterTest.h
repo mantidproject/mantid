@@ -143,11 +143,18 @@ public:
 
   void test_dataChanged()
   {
+    ON_CALL(*m_view, noOfSectionRows()).WillByDefault(Return(3));
     ON_CALL(*m_model, data()).WillByDefault(Return(createTestWs(3, 1)));
 
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
                                             QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
                                             QwtDataY(0, 2, 1E-8), QwtDataY(2, 4, 1E-8))));
+
+    // Data changed -> clear sections
+    EXPECT_CALL(*m_view, setNoOfSectionRows(0));
+    EXPECT_CALL(*m_view, deleteSectionSelector(0));
+    EXPECT_CALL(*m_view, deleteSectionSelector(1));
+    EXPECT_CALL(*m_view, deleteSectionSelector(2));
 
     m_model->changeData();
   }
@@ -159,6 +166,15 @@ public:
     EXPECT_CALL(*m_view, setCorrectedCurve(AllOf(Property(&QwtData::size, 3),
                                             QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
                                             QwtDataY(0, 3, 1E-8), QwtDataY(2, 5, 1E-8))));
+
+    m_model->changeCorrectedData();
+  }
+
+  void test_correctedChanged_toEmpty()
+  {
+    ON_CALL(*m_model, correctedData()).WillByDefault(Return(MatrixWorkspace_const_sptr()));
+
+    EXPECT_CALL(*m_view, setCorrectedCurve(Property(&QwtData::size, 0)));
 
     m_model->changeCorrectedData();
   }
@@ -178,6 +194,17 @@ public:
 
     m_model->changeFittedFunction();
   }
+
+  void test_fittedFunctionChanged_toEmpty()
+  {
+    ON_CALL(*m_model, fittedFunction()).WillByDefault(Return(IFunction_const_sptr()));
+
+    EXPECT_CALL(*m_view, setFunction(QString("")));
+    EXPECT_CALL(*m_view, setBaselineCurve(Property(&QwtData::size, 0)));
+
+    m_model->changeFittedFunction();
+  }
+
 
   void test_addSection()
   {

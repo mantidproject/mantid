@@ -73,6 +73,12 @@ namespace ALCHelper
     return extract->getProperty("OutputWorkspace");
   }
 
+  boost::shared_ptr<QwtData> emptyCurveData()
+  {
+    double x[0], y[0];
+    return boost::make_shared<QwtArrayData>(x, y, 0);
+  }
+
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

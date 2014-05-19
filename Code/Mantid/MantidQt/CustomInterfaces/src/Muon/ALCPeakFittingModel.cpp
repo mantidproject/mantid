@@ -14,6 +14,8 @@ namespace CustomInterfaces
   {
     m_data = newData;
     emit dataChanged();
+
+    setFittedPeaks(IFunction_const_sptr());
   }
 
   MatrixWorkspace_sptr ALCPeakFittingModel::exportWorkspace()
@@ -61,6 +63,12 @@ namespace CustomInterfaces
     return table;
   }
 
+  void ALCPeakFittingModel::setFittedPeaks(IFunction_const_sptr fittedPeaks)
+  {
+    m_fittedPeaks = fittedPeaks;
+    emit fittedPeaksChanged();
+  }
+
   void ALCPeakFittingModel::fitPeaks(IFunction_const_sptr peaks)
   {
     IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
@@ -69,8 +77,7 @@ namespace CustomInterfaces
     fit->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
     fit->execute();
 
-    m_fittedPeaks = static_cast<IFunction_sptr>(fit->getProperty("Function"));
-    emit fittedPeaksChanged();
+    setFittedPeaks(static_cast<IFunction_sptr>(fit->getProperty("Function")));
   }
 
 } // namespace CustomInterfaces

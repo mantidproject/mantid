@@ -31,6 +31,7 @@ namespace CustomInterfaces
 
     // Model updates
     connect(m_model, SIGNAL(dataChanged()), SLOT(updateDataCurve()));
+    connect(m_model, SIGNAL(dataChanged()), SLOT(clearSections()));
     connect(m_model, SIGNAL(correctedDataChanged()), SLOT(updateCorrectedCurve()));
     connect(m_model, SIGNAL(fittedFunctionChanged()), SLOT(updateFunction()));
     connect(m_model, SIGNAL(fittedFunctionChanged()), SLOT(updateBaselineCurve()));
@@ -167,25 +168,57 @@ namespace CustomInterfaces
 
   void ALCBaselineModellingPresenter::updateDataCurve()
   {
-    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_model->data(), 0)));
+    MatrixWorkspace_const_sptr data = m_model->data();
+    assert(data);
+    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(data, 0)));
   }
 
   void ALCBaselineModellingPresenter::updateCorrectedCurve()
   {
-    m_view->setCorrectedCurve(*(ALCHelper::curveDataFromWs(m_model->correctedData(), 0)));
+    if(MatrixWorkspace_const_sptr correctedData = m_model->correctedData())
+    {
+      m_view->setCorrectedCurve(*(ALCHelper::curveDataFromWs(correctedData, 0)));
+    }
+    else
+    {
+      m_view->setCorrectedCurve(*(ALCHelper::emptyCurveData()));
+    }
   }
 
   void ALCBaselineModellingPresenter::updateBaselineCurve()
   {
-    IFunction_const_sptr fittedFunc = m_model->fittedFunction();
-    const std::vector<double>& xValues = m_model->data()->readX(0);
-    m_view->setBaselineCurve(*(ALCHelper::curveDataFromFunction(fittedFunc, xValues)));
+    if (IFunction_const_sptr fittedFunc = m_model->fittedFunction())
+    {
+      const std::vector<double>& xValues = m_model->data()->readX(0);
+      m_view->setBaselineCurve(*(ALCHelper::curveDataFromFunction(fittedFunc, xValues)));
+    }
+    else
+    {
+      m_view->setBaselineCurve(*(ALCHelper::emptyCurveData()));
+    }
   }
 
   void ALCBaselineModellingPresenter::updateFunction()
   {
-    QString funcString = QString::fromStdString(m_model->fittedFunction()->asString());
-    m_view->setFunction(funcString);
+    if (IFunction_const_sptr fittedFunc = m_model->fittedFunction())
+    {
+      QString funcString = QString::fromStdString(fittedFunc->asString());
+      m_view->setFunction(funcString);
+    }
+    else
+    {
+      m_view->setFunction(QString(""));
+    }
+  }
+
+  void ALCBaselineModellingPresenter::clearSections()
+  {
+    for (int i = 0; i < m_view->noOfSectionRows(); ++i)
+    {
+      m_view->deleteSectionSelector(i);
+    }
+
+    m_view->setNoOfSectionRows(0);
   }
 
 } // namespace CustomInterfaces

@@ -48,12 +48,8 @@ namespace CustomInterfaces
     extract->setProperty("OutputWorkspace", "__NotUsed__");
     extract->execute();
 
-    m_correctedData = extract->getProperty("OutputWorkspace");
-    emit correctedDataChanged();
-
-    m_fittedFunction = FunctionFactory::Instance().createInitialized(funcToFit->asString());
-    emit fittedFunctionChanged();
-
+    setCorrectedData(extract->getProperty("OutputWorkspace"));
+    setFittedFunction(FunctionFactory::Instance().createInitialized(funcToFit->asString()));
     m_sections = sections;
   }
 
@@ -61,6 +57,9 @@ namespace CustomInterfaces
   {
     m_data = data;
     emit dataChanged();
+
+    setCorrectedData(MatrixWorkspace_const_sptr());
+    setFittedFunction(IFunction_const_sptr());
   }
 
   /**
@@ -168,6 +167,18 @@ namespace CustomInterfaces
     newRow << m_fittedFunction->asString();
 
     return table;
+  }
+
+  void ALCBaselineModellingModel::setCorrectedData(MatrixWorkspace_const_sptr data)
+  {
+    m_correctedData = data;
+    emit correctedDataChanged();
+  }
+
+  void ALCBaselineModellingModel::setFittedFunction(IFunction_const_sptr function)
+  {
+    m_fittedFunction = function;
+    emit fittedFunctionChanged();
   }
 
 } // namespace CustomInterfaces

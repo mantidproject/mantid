@@ -66,9 +66,16 @@ void ALCPeakFittingView::setFittedCurve(const QwtData& data)
 
 void ALCPeakFittingView::setFunction(const IFunction_const_sptr& newFunction)
 {
-  // String convertion hassle to avoid const-casting - Function Browser should really accept const
-  // pointer
-  m_ui.peaks->setFunction(QString::fromStdString(newFunction->asString()));
+  if (newFunction)
+  {
+    // String convertion hassle to avoid const-casting - Function Browser should really accept const
+    // pointer
+    m_ui.peaks->setFunction(QString::fromStdString(newFunction->asString()));
+  }
+  else
+  {
+    m_ui.peaks->clear();
+  }
 }
 
 void ALCPeakFittingView::setParameter(const QString& funcIndex, const QString& paramName, double value)

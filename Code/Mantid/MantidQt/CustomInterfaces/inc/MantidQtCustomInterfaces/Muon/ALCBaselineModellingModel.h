@@ -77,6 +77,10 @@ namespace CustomInterfaces
     /// Sections used for the last fit
     std::vector<Section> m_sections;
 
+    // Setters for convenience
+    void setCorrectedData(MatrixWorkspace_const_sptr data);
+    void setFittedFunction(IFunction_const_sptr function);
+
     /// Disables points which shouldn't be used for fitting
     static void disableUnwantedPoints(MatrixWorkspace_sptr ws, const std::vector<Section>& sections);
 

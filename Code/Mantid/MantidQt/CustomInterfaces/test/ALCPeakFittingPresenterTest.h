@@ -153,6 +153,19 @@ public:
     m_model->changeFittedPeaks();
   }
 
+  void test_onFittedPeaksChanged_toEmpty()
+  {
+    ON_CALL(*m_model, fittedPeaks()).WillByDefault(Return(IFunction_const_sptr()));
+
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1,3);
+    ON_CALL(*m_model, data()).WillByDefault(Return(ws));
+
+    EXPECT_CALL(*m_view, setFittedCurve(Property(&QwtData::size, 0)));
+    EXPECT_CALL(*m_view, setFunction(IFunction_const_sptr()));
+
+    m_model->changeFittedPeaks();
+  }
+
   void test_onCurrentFunctionChanged_nothing()
   {
     ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::none));

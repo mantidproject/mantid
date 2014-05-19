@@ -88,10 +88,17 @@ namespace CustomInterfaces
 
   void ALCPeakFittingPresenter::onFittedPeaksChanged()
   {
-    IFunction_const_sptr fittedPeaks = m_model->fittedPeaks();
-    auto x = m_model->data()->readX(0);
-    m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(fittedPeaks, x)));
-    m_view->setFunction(fittedPeaks);
+    if(IFunction_const_sptr fittedPeaks = m_model->fittedPeaks())
+    {
+      auto x = m_model->data()->readX(0);
+      m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(fittedPeaks, x)));
+      m_view->setFunction(fittedPeaks);
+    }
+    else
+    {
+      m_view->setFittedCurve(*(ALCHelper::emptyCurveData()));
+      m_view->setFunction(IFunction_const_sptr());
+    }
   }
 
   void ALCPeakFittingPresenter::onDataChanged()

@@ -26,6 +26,9 @@ namespace ALCHelper
   MatrixWorkspace_sptr createWsFromFunction(IFunction_const_sptr func,
                                             const std::vector<double>& xValues);
 
+  /// Creates empty Qwt curve data
+  boost::shared_ptr<QwtData> emptyCurveData();
+
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
