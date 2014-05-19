@@ -100,10 +100,14 @@ private:
   void importFitWindowTableWorkspace(DataObjects::TableWorkspace_sptr windowtablews);
 
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-  int fitSpectra(const int64_t wi, API::MatrixWorkspace_sptr m_inputWS, const std::vector<double> &m_peakPositions,
-                 const std::vector<double> &m_fitWindows, size_t &nparams, double &minD, double &maxD,
-                 std::vector<double>&peakPosToFit, std::vector<double> &peakPosFitted, std::vector<double> &chisq,
-                 std::vector<double> &peakHeights, int &i_highestpeak, double& resolution, double& dev_resolution);
+  int fitSpectra(const int64_t wi, MatrixWorkspace_sptr inputW,
+                 const std::vector<double> &peakPositions,
+                 const std::vector<double> &fitWindows, size_t &nparams,
+                 double &minD, double &maxD,
+                 std::vector<double>&peakPosToFit, std::vector<double>&peakPosFitted,
+                 std::vector<double> &chisq,
+                 std::vector<double> &peakHeights, int& i_highestpeak,
+                 double& resolution, double& dev_resolution);
 
   /// Add peak fitting and offset calculation information to information table workspaces per spectrum
   void addInfoToReportWS(int wi, FitPeakOffsetResult offsetresult, const std::vector<double> &tofitpeakpositions,
