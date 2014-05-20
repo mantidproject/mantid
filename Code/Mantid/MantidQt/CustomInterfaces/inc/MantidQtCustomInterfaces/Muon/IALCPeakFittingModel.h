@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_IALCPEAKFITTINGMODEL_H_
 #define MANTID_CUSTOMINTERFACES_IALCPEAKFITTINGMODEL_H_
 
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidKernel/System.h"
 
 #include "MantidAPI/IFunction.h"
@@ -37,7 +38,7 @@ namespace CustomInterfaces
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport IALCPeakFittingModel : public QObject
+  class MANTIDQT_CUSTOMINTERFACES_DLL IALCPeakFittingModel : public QObject
   {
     Q_OBJECT
 
