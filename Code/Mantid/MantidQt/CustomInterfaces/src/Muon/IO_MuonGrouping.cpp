@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidQtCustomInterfaces/MuonAnalysis.h"
-#include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
+#include "MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h"
 
 #include "MantidAPI/TableRow.h"
 #include "MantidQtAPI/UserSubWindow.h"

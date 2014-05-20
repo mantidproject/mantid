@@ -145,7 +145,6 @@ void FunctionBrowser::createBrowser()
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
-  //connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem*)), this, SLOT(currentItemChanged(QtBrowserItem*)));
 
   connect(m_attributeStringManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_attributeDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
@@ -154,6 +153,11 @@ void FunctionBrowser::createBrowser()
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_attributeVectorDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeVectorDoubleChanged(QtProperty*)));
+
+  connect(m_parameterManager, SIGNAL(valueChanged(QtProperty*,double)),
+          SLOT(parameterChanged(QtProperty*)));
+
+  connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem*)), SLOT(updateCurrentFunctionIndex()));
 }
 
 /**
@@ -417,6 +421,7 @@ void FunctionBrowser::addFunction(QtProperty* prop, Mantid::API::IFunction_sptr 
     cf->addFunction(fun);
     setFunction(prop, cf);
   }
+  updateFunctionIndices();
 }
 
 /**
@@ -839,7 +844,28 @@ QString FunctionBrowser::getIndex(QtProperty* prop) const
   }
 
   auto ap = m_properties[prop];
-  return getIndex(ap.parent); 
+  return getIndex(ap.parent);
+}
+
+/**
+ * Return function property for a function with given index.
+ * @param index :: Function index to search, or empty string for top-level function
+ * @return Function property, or NULL if not found
+ */
+QtProperty* FunctionBrowser::getFunctionProperty(const QString& index)
+{
+  // Might not be the most efficient way to do it. m_functionManager might be searched instead,
+  // but it is not being kept up-to-date at the moment (is not cleared).
+  foreach (auto property, m_properties.keys())
+  {
+    if(isFunction(property) && getIndex(property) == index)
+    {
+      return property;
+    }
+  }
+
+  // No function with such index
+  return NULL;
 }
 
 
@@ -1251,7 +1277,6 @@ void FunctionBrowser::addFunction()
   {// the browser is empty - add first function
     addFunction(NULL,f);
   }
-  updateFunctionIndices();
 }
 
 /**
@@ -1378,6 +1403,45 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop, bool 
   }
 
   return fun;
+}
+
+/**
+ * Return function at specified function index (e.g. f0.)
+ * @param index :: Index of the function, or empty string for top-level function
+ * @return Function at index, or null pointer if not found
+ */
+Mantid::API::IFunction_sptr FunctionBrowser::getFunctionByIndex(const QString& index)
+{
+  if(auto prop = getFunctionProperty(index))
+  {
+    return getFunction(prop);
+  }
+  else
+  {
+    return Mantid::API::IFunction_sptr();
+  }
+}
+
+/**
+ * Updates the function parameter value
+ * @param funcIndex :: Index of the function
+ * @param paramName :: Parameter name
+ * @param value :: New value
+ */
+void FunctionBrowser::setParameter(const QString& funcIndex, const QString& paramName, double value)
+{
+  if (auto prop = getFunctionProperty(funcIndex))
+  {
+    auto children = prop->subProperties();
+    foreach(QtProperty* child, children)
+    {
+      if (isParameter(child) && child->propertyName() == paramName)
+      {
+        m_parameterManager->setValue(child, value);
+        break;
+      }
+    }
+  }
 }
 
 /**
@@ -1560,6 +1624,23 @@ void FunctionBrowser::removeConstraint()
   removeProperty( prop );
 }
 
+void FunctionBrowser::updateCurrentFunctionIndex()
+{
+  boost::optional<QString> newIndex;
+
+  if (auto item = m_browser->currentItem())
+  {
+    auto prop = item->property();
+    newIndex = getIndex(prop);
+  }
+
+  if (m_currentFunctionIndex != newIndex)
+  {
+    m_currentFunctionIndex = newIndex;
+    emit currentFunctionChanged();
+  }
+}
+
 /**
  * Slot connected to all function attribute managers. Update the corresponding function.
  * @param prop :: An attribute property that was changed
@@ -1585,6 +1666,11 @@ void FunctionBrowser::attributeVectorDoubleChanged(QtProperty *prop)
     QtProperty *vectorProp = m_properties[prop].parent;
     if ( !vectorProp ) throw std::runtime_error("FunctionBrowser: inconsistency in vector properties.");
     attributeChanged( vectorProp );
+}
+
+void FunctionBrowser::parameterChanged(QtProperty* prop)
+{
+  emit parameterChanged(getIndex(prop), prop->propertyName());
 }
 
 

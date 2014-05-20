@@ -6,7 +6,7 @@
 //----------------------
 #include "ui_MuonAnalysis.h"
 #include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtCustomInterfaces/MuonAnalysis.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
 #include "MantidQtMantidWidgets/pythonCalc.h"
