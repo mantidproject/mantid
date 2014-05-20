@@ -884,10 +884,13 @@ void MuonAnalysis::runLoadCurrent()
     return;
   }
 
-  if ( instname == "EMU" || instname == "HIFI" || instname == "MUSR")
+  if ( instname == "EMU" || instname == "HIFI" || instname == "MUSR" || instname == "CHRONUS")
   {
+    QString instDirectory = instname;
+    if ( instname == "CHRONUS" )
+      instDirectory = "NDW1030";
     std::string autosavePointsTo = "";
-    std::string autosaveFile = "\\\\" + instname.toStdString() + "\\data\\autosave.run";
+    std::string autosaveFile = "\\\\" + instDirectory.toStdString() + "\\data\\autosave.run";
     Poco::File pathAutosave( autosaveFile );
     
     try // check if exists
@@ -907,9 +910,9 @@ void MuonAnalysis::runLoadCurrent()
 
     QString psudoDAE;
     if ( autosavePointsTo.empty() )
-      psudoDAE = "\\\\" + instname + "\\data\\" + instname + "auto_A.tmp";
+      psudoDAE = "\\\\" + instDirectory + "\\data\\" + instDirectory + "auto_A.tmp";
     else
-      psudoDAE = "\\\\" + instname + "\\data\\" + autosavePointsTo.c_str();
+      psudoDAE = "\\\\" + instDirectory + "\\data\\" + autosavePointsTo.c_str();
 
     Poco::File l_path( psudoDAE.toStdString() );
     try
