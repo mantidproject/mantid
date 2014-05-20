@@ -321,6 +321,10 @@ namespace Algorithms
     auto ddodwsprop = new WorkspaceProperty<MatrixWorkspace>("FittedResolutionWorkspace", "ResolutionWS", Direction::Output);
     declareProperty(ddodwsprop, "Name of the resolution workspace containing delta(d)/d for each unmasked spectrum. ");
 
+    declareProperty("MinimumResolutionFactor", 0.1, "Factor of the minimum allowed Delta(d)/d of any peak to its suggested Delta(d)/d. ");
+
+    declareProperty("MiximumResolutionFactor", 10.0, "Factor of the maximum allowed Delta(d)/d of any peak to its suggested Delta(d)/d. ");
+
   }
 
 
@@ -443,6 +447,12 @@ namespace Algorithms
       m_inputResolutionWS = getProperty("InputResolutionWorkspace");
       m_hasInputResolution = true;
 
+      m_minResFactor = getProperty("MinimumResolutionFactor");
+      m_maxResFactor = getProperty("MaximumResolutionFactor");
+
+      if (m_minResFactor >= m_maxResFactor)
+        throw std::runtime_error("Input peak resolution boundary is 0 or negative.");
+
       // Check
       if (m_inputResolutionWS->getNumberHistograms() != m_inputWS->getNumberHistograms())
         throw std::runtime_error("Input workspace does not match resolution workspace. ");
@@ -564,11 +574,13 @@ namespace Algorithms
             maskWS->dataY(workspaceIndex)[0] = offsetresult.mask;
 
             // check the average value of delta(d)/d.  if it is far off the theorical value, output
+            // FIXME - This warning should not appear by filtering out peaks that are too wide or narrow.
+            // TODO - Delete the if statement below if it is never triggered.
             if (m_hasInputResolution)
             {
               double pixelresolution = m_inputResolutionWS->readY(wi)[0];
               if (offsetresult.resolution > 10*pixelresolution || offsetresult.resolution < 0.1*pixelresolution)
-                g_log.notice() << "Spectrum " << wi << " delta(d)/d = " << offsetresult.resolution << "\n";
+                g_log.warning() << "Spectrum " << wi << " delta(d)/d = " << offsetresult.resolution << "\n";
             }
           }
         } // ENDFOR (detectors)
@@ -1074,6 +1086,23 @@ namespace Algorithms
         continue;
       }
 
+      // - check peak's resolution
+      double widthdevpos = width/centre;
+      if (m_hasInputResolution)
+      {
+        double recres = m_inputResolutionWS->readY(wi)[0];
+        double resmax = recres*m_maxResFactor;
+        double resmin = recres*m_minResFactor;
+        if (widthdevpos < resmin || widthdevpos > resmax)
+        {
+          std::stringstream dbss;
+          dbss << " wi = " << wi << " c = " << centre << " Delta(d)/d = " << widthdevpos
+               << " too far away from suggested value " << recres;
+          g_log.debug(dbss.str());
+          continue;
+        }
+      }
+
       // background value
       double back_intercept = peakslist->getRef<double>("backgroundintercept", i);
       double back_slope = peakslist->getRef<double>("backgroundslope", i);
@@ -1090,7 +1119,6 @@ namespace Algorithms
       if (height < 0.5 * std::sqrt(height + background))
         continue;
 
-
       // - calcualte offsets as to determine the (z-value)
       double offset = fabs(peakPositionRef[i]/centre - 1);
       if (offset > m_maxOffset)
@@ -1103,7 +1131,7 @@ namespace Algorithms
       else vec_offsets.push_back(offset);
 
       // (g) calculate width/pos as to determine the (z-value) for constant "width" - (delta d)/d
-      double widthdevpos = width/centre;
+      // double widthdevpos = width/centre;
       vec_widthDivPos.push_back(widthdevpos);
 
       // g_log.debug() << " h:" << height << " c:" << centre << " w:" << (width/(2.*std::sqrt(2.*std::log(2.))))

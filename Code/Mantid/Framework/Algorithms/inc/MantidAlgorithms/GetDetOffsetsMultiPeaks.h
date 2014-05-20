@@ -160,6 +160,10 @@ private:
   API::MatrixWorkspace_const_sptr m_inputResolutionWS;
   /// Flag of use input resolution WS
   bool m_hasInputResolution;
+  /// Lower boundary of allowed peak width as resolution
+  double m_minResFactor;
+  /// Upper boundary of allowed peak width as resolution
+  double m_maxResFactor;
 
   DataObjects::OffsetsWorkspace_sptr outputW;
   /// Output workspace for debugging purpose
@@ -176,7 +180,6 @@ private:
   bool m_useFitWindowTable;
   /// Vector of fit windows (also in vector)
   std::vector<std::vector<double> > m_vecFitWindow;
-
 
 
 };
