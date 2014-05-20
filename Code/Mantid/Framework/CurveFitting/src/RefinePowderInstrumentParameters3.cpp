@@ -888,8 +888,8 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Calculate Chi^2
     */
-  double calculateFunctionChiSquare(const vector<double> modelY, const vector<double> dataY,
-                                    const vector<double> dataE)
+  double calculateFunctionChiSquare(const vector<double> &modelY, const vector<double> &dataY,
+                                    const vector<double> &dataE)
   {
     // 1. Check
     if (modelY.size() != dataY.size() || dataY.size() != dataE.size())

@@ -194,8 +194,9 @@ namespace CurveFitting
   void copyParametersValues(std::map<std::string, Parameter> source, std::map<std::string, Parameter>& target);
 
   /// Calculate Chi^2
-  double calculateFunctionChiSquare(const std::vector<double> modelY, const std::vector<double> dataY,
-                                    const std::vector<double> dataE);
+  double calculateFunctionChiSquare(const std::vector<double> &modelY,
+                                    const std::vector<double> &dataY,
+                                    const std::vector<double> &dataE);
 
 } // namespace CurveFitting
 } // namespace Mantid
