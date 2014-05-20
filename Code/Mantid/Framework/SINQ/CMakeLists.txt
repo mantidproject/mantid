@@ -95,6 +95,7 @@ set ( TEST_FILES
 	PoldiPeakSearchTest.h
 	PoldiPeakTest.h
         PoldiSourceSpectrumTest.h
+        PoldiSpectrumDomainFunctionTest.h
 	ProjectMDTest.h
 	SliceMDHistoTest.h
 	UncertainValueIOTest.h
