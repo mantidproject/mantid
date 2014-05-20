@@ -14,6 +14,7 @@
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 class PoldiPeakCollectionTest;
 
