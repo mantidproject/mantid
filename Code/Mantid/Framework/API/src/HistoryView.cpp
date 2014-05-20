@@ -76,6 +76,12 @@ void HistoryView::unroll(std::list<HistoryItem>::iterator it)
   }
 }
 
+/**
+ * Unroll the entire algorithm history.
+ *
+ * This is method will unroll the entire history for every algorithm by calling unroll
+ * on each element in the list. Every child algorithm with be visible after calling this method.
+ */
 void HistoryView::unrollAll()
 {
   for (auto it = m_historyItems.begin(); it != m_historyItems.end(); ++it)
@@ -84,6 +90,12 @@ void HistoryView::unrollAll()
   }
 }
 
+/**
+ * Roll the entire algorithm history back up.
+ *
+ * This is method will roll up the entire history for every algorithm by calling roll
+ * on each element in the list. Only top level algorithms with be visible after calling this method.
+ */
 void HistoryView::rollAll()
 {
   for (auto it = m_historyItems.begin(); it != m_historyItems.end(); ++it)
@@ -153,6 +165,11 @@ void HistoryView::roll(std::list<HistoryItem>::iterator it)
   }
 }
 
+/**
+ * Get the list of History Items for this view.
+ *
+ * @returns vector of history items for this view.
+ */
 const std::vector<HistoryItem> HistoryView::getAlgorithmsList() const
 {
   std::vector<HistoryItem> histories;

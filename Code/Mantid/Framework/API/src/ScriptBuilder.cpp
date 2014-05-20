@@ -17,6 +17,11 @@ ScriptBuilder::ScriptBuilder(const HistoryView& view)
 {
 }
 
+/**
+ * Build a python script for each algorithm included in the history view.
+ *
+ * @return a formatted python string of the history
+ */
 const std::string ScriptBuilder::build()
 {
   std::ostringstream os;
@@ -28,6 +33,15 @@ const std::string ScriptBuilder::build()
   return os.str();
 }
 
+/**
+ * Write out an algorithm to the script.
+ *
+ * If the entry is unrolled this will recurse and output the children of
+ * that entry instead. If not, it will just output the algorithm to the stream.
+ *
+ * @param os :: output string stream to append algorithms to.
+ * @param iter :: reference to the iterator pointing to the vector of history items
+ */
 void ScriptBuilder::writeHistoryToStream(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter, int depth)
 {
   auto algHistory = iter->getAlgorithmHistory();
@@ -53,13 +67,22 @@ void ScriptBuilder::writeHistoryToStream(std::ostringstream& os, std::vector<His
     if(boost::prior(iter) != m_historyItems.cbegin() 
         && boost::prior(iter)->isUnrolled())
     {
-      os << "\n";
+      // os << "\n";
     }
     //create the string for this algorithm
     os << buildAlgorithmString(algHistory) << "\n";
   }
 }
 
+/**
+ * Iterate over each of the items children and output them to the script.
+ *
+ * This moves the iterator forward over each of the child records and writes them to 
+ * the stream.
+ *
+ * @param os :: output string stream to append algorithms to.
+ * @param iter :: reference to the iterator pointing to the vector of history items
+ */
 void ScriptBuilder::buildChildren(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter, int depth)
 {
   size_t numChildren = iter->numberOfChildren();
@@ -72,6 +95,12 @@ void ScriptBuilder::buildChildren(std::ostringstream& os, std::vector<HistoryIte
   --iter;
 }
 
+/**
+ * Build the script output for a single algorithm
+ *
+ * @param algHistory :: pointer to an algorithm history object
+ * @returns std::string to run this algorithm
+ */
 const std::string ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory)
 {
   std::ostringstream properties;
@@ -84,26 +113,31 @@ const std::string ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_spt
     prop = buildPropertyString(*propIter);    
     if(prop.length() > 0)
     {
-      properties << prop;
-
-      if(boost::next(propIter) != props.cend() 
-          && !(boost::next(propIter, 2) == props.cend() && boost::next(propIter)->isDefault()))
-      {
-        properties << ", ";
-      } 
+      properties << prop << ", ";
     }
   }
 
-  return name + "(" + properties.str() + ")";
+  std::string propStr = properties.str();
+  //remove trailing comma & space
+  propStr.erase(propStr.size()-1);
+  propStr.erase(propStr.size()-1);
+
+  return name + "(" + propStr + ")";
 }
 
+/**
+ * Build the script output for a single property
+ *
+ * @param propHistory :: reference to a property history object
+ * @returns std::string for this property
+ */
 const std::string ScriptBuilder::buildPropertyString(const Mantid::Kernel::PropertyHistory& propHistory)
 {
   std::string prop = ""; 
   
   if (!propHistory.isDefault())
   {
-    prop = propHistory.name() + "='" + propHistory.value() + "'"; 
+    prop = propHistory.name() + "='" + propHistory.value() + "'";
   }
 
   return prop;
