@@ -50,10 +50,10 @@ namespace WorkflowAlgorithms
     virtual bool checkGroups() { return false; }
 
     /// Returns a workspace for the first period as specified using FirstPeriod property.
-    API::MatrixWorkspace_sptr getFirstPeriodWS(API::WorkspaceGroup_sptr ws);
+    API::MatrixWorkspace_sptr getFirstPeriodWS(API::WorkspaceGroup_sptr group);
 
     /// Returns a workspace for the second period as specified using SecondPeriod property.
-    API::MatrixWorkspace_sptr getSecondPeriodWS(API::WorkspaceGroup_sptr ws);
+    API::MatrixWorkspace_sptr getSecondPeriodWS(API::WorkspaceGroup_sptr group);
 
     /// Groups specified workspace according to specified DetectorGroupingTable.
     API::MatrixWorkspace_sptr groupWorkspace(API::MatrixWorkspace_sptr ws, DataObjects::TableWorkspace_sptr grouping);
