@@ -34,7 +34,9 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <Poco/StringTokenizer.h>
+
 #include <boost/lexical_cast.hpp>
+#include <boost/assign.hpp>
 
 #include <algorithm>
 
@@ -98,7 +100,8 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
   m_updating(false), m_updatingGrouping(false), m_loaded(false), m_deadTimesChanged(false),
   m_textToDisplay(""), 
   m_optionTab(NULL), m_fitDataTab(NULL), m_resultTableTab(NULL), // Will be created in initLayout()
-  m_dataTimeZero(0.0), m_dataFirstGoodData(0.0)
+  m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
+  m_currentLabel("NoLabelSet")
 {}
 
 /**
@@ -376,20 +379,16 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
     MatrixWorkspace_sptr wsRaw = createAnalysisWorkspace(itemType, tableRow, plotType, true);
 
     // Find names for new workspaces
-    const std::string wsName = getNewAnalysisWSName(m_currentGroup->getName(), itemType, tableRow,
-                                                    plotType);
+    const std::string wsName = getNewAnalysisWSName(itemType, tableRow, plotType);
     const std::string wsRawName = wsName + "_Raw"; 
-
-    // Make sure they are in the current group
-    if ( ! m_currentGroup->contains(wsName) )
-    {
-      m_currentGroup->addWorkspace(ws);
-      m_currentGroup->addWorkspace(wsRaw);
-    }
 
     // Make sure they end up in the ADS
     ads.addOrReplace(wsName, ws);
     ads.addOrReplace(wsRawName, wsRaw);
+
+    // Make sure they are grouped
+    std::vector<std::string> wsNames = boost::assign::list_of(wsName)(wsRawName);
+    MuonAnalysisHelper::groupWorkspaces(m_currentLabel, wsNames);
 
     QString wsNameQ = QString::fromStdString(wsName);
 
@@ -409,14 +408,12 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow, PlotType plotType)
 
 /**
  * Finds a name for new analysis workspace.
- * @param runLabel :: String describing the run we are working with
  * @param itemType :: Whether it's a group or pair
  * @param tableRow :: Row in the group/pair table which contains the item
  * @param plotType :: What kind of plot we want to analyse
  * @return New name
  */ 
-std::string MuonAnalysis::getNewAnalysisWSName(const std::string& runLabel, ItemType itemType, int tableRow, 
-  PlotType plotType)
+std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow, PlotType plotType)
 {
   std::string plotTypeName;
 
@@ -444,7 +441,8 @@ std::string MuonAnalysis::getNewAnalysisWSName(const std::string& runLabel, Item
     itemName = m_uiForm.groupTable->item(tableRow,0)->text().toStdString();
   }
 
-  const std::string firstPart = runLabel + "; " + itemTypeName + "; " + itemName + "; " + plotTypeName + "; #";
+  const std::string firstPart = (m_currentLabel + "; " + itemTypeName + "; " + itemName + "; "
+                                 + plotTypeName + "; #");
 
   std::string newName;
 
@@ -1661,8 +1659,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   // Make the options available
   nowDataAvailable();
 
-  // Use label as a name for the group we will place plots to
-  updateCurrentGroup(loadResult->label);
+  m_currentLabel = loadResult->label;
 
   if(m_uiForm.frontPlotButton->isEnabled())
     plotSelectedItem();
@@ -2565,7 +2562,7 @@ void MuonAnalysis::changeRun(int amountToChange)
   if (currentFile.contains("auto") || currentFile.contains("argus0000000"))
   {
     separateMuonFile(filePath, currentFile, run, runSize);
-    currentFile = filePath + QString::fromStdString(m_currentGroup->getName()) + ".nxs";
+    currentFile = filePath + QString::fromStdString(m_currentLabel) + ".nxs";
   }
     
   separateMuonFile(filePath, currentFile, run, runSize);
@@ -3325,33 +3322,6 @@ void MuonAnalysis::nowDataAvailable()
   m_uiForm.pairTablePlotButton->setEnabled(true);
   m_uiForm.guessAlphaButton->setEnabled(true);
 }
-
-/**
- * Updates the m_currentGroup given the name of the new group we want to store plot workspace to.
- * @param newGroupName :: Name of the group m_currentGroup should have
- */
-void MuonAnalysis::updateCurrentGroup(const std::string& newGroupName)
-{
-  if ( AnalysisDataService::Instance().doesExist(newGroupName) )
-  {
-    auto existingGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(newGroupName);
-
-    if (existingGroup)
-    {
-      m_currentGroup = existingGroup;
-      return;
-    }
-    else
-    {
-      g_log.warning() << "Workspace with name '" << newGroupName << "' ";
-      g_log.warning() << "was replaced with the group used by MuonAnalysis." << "\n";
-    }
-  }
-
-  m_currentGroup = boost::make_shared<WorkspaceGroup>();
-  AnalysisDataService::Instance().addOrReplace(newGroupName, m_currentGroup);
-}
-
 
 void MuonAnalysis::openDirectoryDialog()
 {
