@@ -323,7 +323,7 @@ namespace Algorithms
 
     declareProperty("MinimumResolutionFactor", 0.1, "Factor of the minimum allowed Delta(d)/d of any peak to its suggested Delta(d)/d. ");
 
-    declareProperty("MiximumResolutionFactor", 10.0, "Factor of the maximum allowed Delta(d)/d of any peak to its suggested Delta(d)/d. ");
+    declareProperty("MaximumResolutionFactor", 10.0, "Factor of the maximum allowed Delta(d)/d of any peak to its suggested Delta(d)/d. ");
 
   }
 
@@ -364,9 +364,6 @@ namespace Algorithms
       childAlg->executeAsChildAlg();
     }
 
-    // Clean peak offset table workspace
-    removeEmptyRowsFromPeakOffsetTable();
-
     // Make summary
     progress(0.92, "Making summary");
     makeFitSummary();
@@ -392,14 +389,18 @@ namespace Algorithms
     std::sort(m_peakPositions.begin(), m_peakPositions.end());
 
     // Fit windows
-    TableWorkspace_sptr fitwintablews = getProperty("FitwindowTableWorkspace");
-    if (fitwintablews)
+    std::string fitwinwsname = getPropertyValue("FitwindowTableWorkspace");
+    g_log.notice() << "FitWindowTableWorkspace name: " << fitwinwsname << "\n";
+    if (fitwinwsname.size() > 0)
     {
+      // Use fit window workspace for each spectrum
+      TableWorkspace_sptr fitwintablews = getProperty("FitwindowTableWorkspace");
       importFitWindowTableWorkspace(fitwintablews);
       m_useFitWindowTable = true;
     }
     else
     {
+      // Use property 'FitWindowMaxWidth'
       double maxwidth = getProperty("FitWindowMaxWidth");
       m_fitWindows = generateWindows(wkspDmin, wkspDmax, m_peakPositions, maxwidth);
       m_useFitWindowTable = false;
@@ -1329,9 +1330,6 @@ namespace Algorithms
                     "No row will be removed from peak position offset table workspace. ");
       return;
     }
-    g_log.notice("Removing empty rows in Offset Table Workspace... ...");
-    g_log.warning("Skip removing empty rows in peak offset table.   ");
-    return;
 
     size_t icurrow = 0;
     for (size_t i = 0; i < numrows; ++i)
