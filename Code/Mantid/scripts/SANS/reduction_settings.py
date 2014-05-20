@@ -60,40 +60,49 @@ between reduction steps.  The benefits to this new method are as follows:
 4) It gets us slightly nearer to the "modern" way of way of reducing data
    in Mantid, namely "workflow" algorithms which call child algorithms, 
    passing settings to each other via PropertyManager objects.
-
 """
 
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 
-def get_reduction_settings():
-    """
-    Returns the PropertyManager object that is used to store settings used by
-    the reduction.  If a PropertyManager object does not exist, then one is
-    created.
-    """
-    # This must match the name of the PropertyManager used by the GUI:
-    SETTINGS_PROP_MAN_NAME = "ISISSANSReductionSettings"
+REDUCTION_SETTINGS_OBJ_NAME = "ISISSANSReductionSettings"
 
+def get_settings_object(settings_prop_man_name=REDUCTION_SETTINGS_OBJ_NAME):
+    """
+    Returns the PropertyManager object with the given name.  This could be used
+    to store settings used by the reduction, or to seperately store some
+    temporary or backup settings.  If a PropertyManager object does not exist,
+    then one is created.
+
+    It is not a good idea to make repeated calls to this function all over over
+    the ISIS SANS reduction code.  Please make a single call to this function
+    and then pass around the returned object to wherever it is needed.
+    """
     class PropertyManagerPicklableWrapper:
         """
         Pickling has not been enabled for PropertyManager, and this is needed
-        in the Reducer by the "deep copy" stuff.  This is a workaround where
-        we wrap the functionality of PropertyManager that we're interested in
-        and internally just retrieve an instance of the manager every time the
-        wrapper is used.
+        in the Reducer so that the "deep copy" stuff does not complain.  This
+        is a workaround where we wrap the functionality of PropertyManager that
+        we're interested in and internally just retrieve an instance of the
+        manager every time the wrapper is used.
 
         Also take this opportunity to change typed property-getting to the
         simpler "[]" operator rather than getProperty().value.
         """
-        def _prop_man(self):
-            if not PropertyManagerDataService.doesExist(SETTINGS_PROP_MAN_NAME):
-                logger.debug("Creating reduction settings PropertyManager "\
-                             "object with name \"%s\"." % SETTINGS_PROP_MAN_NAME)
-                PropertyManagerDataService.add(SETTINGS_PROP_MAN_NAME, PropertyManager())
+        def __init__(self, name):
+            self.name = name
 
-            return PropertyManagerDataService.retrieve(SETTINGS_PROP_MAN_NAME)
+        def _get_prop_man(self, name):
+            if not PropertyManagerDataService.doesExist(name):
+                logger.debug("Creating reduction settings PropertyManager "\
+                             "object with name \"%s\"." % name)
+                PropertyManagerDataService.add(name, PropertyManager())
+
+            return PropertyManagerDataService.retrieve(name)
+
+        def _prop_man(self):
+            return self._get_prop_man(self.name)
 
         def __contains__(self, key):
             return key in self._prop_man()
@@ -107,7 +116,30 @@ def get_reduction_settings():
         def __len__(self):
             return len(self._prop_man())
 
-        def clear(self):
-            PropertyManagerDataService.remove(SETTINGS_PROP_MAN_NAME)
+        def keys(self):
+            return [prop.name for prop in self._prop_man().getProperties()]
 
-    return PropertyManagerPicklableWrapper()
+        def values(self):
+            return [prop.value for prop in self._prop_man().getProperties()]
+
+        def items(self):
+            return [(prop.name, prop.value) for prop in self._prop_man().getProperties()]
+
+        def clear(self):
+            PropertyManagerDataService.remove(self.name)
+
+        def clone(self, new_name):
+            if new_name == self.name:
+                raise RuntimeError("Cannot clone the settings object with name \"%s\" "\
+                                   "into a new object with the same name." % new_name)
+
+            if PropertyManagerDataService.doesExist(new_name):
+                PropertyManagerDataService.remove(new_name)
+
+            new_prop_man = PropertyManagerPicklableWrapper(new_name)
+            new_prop_man.clear()
+            for key, value in self.items():
+                new_prop_man[key] = value
+            return new_prop_man
+
+    return PropertyManagerPicklableWrapper(settings_prop_man_name)

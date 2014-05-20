@@ -7,7 +7,7 @@
 """
 from reducer_singleton import Reducer
 import isis_reduction_steps
-from reduction_settings import get_reduction_settings
+from reduction_settings import get_settings_object
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -233,7 +233,7 @@ class ISISReducer(Reducer):
         # register the value of transmission can
         self.__transmission_can = ""
 
-        self.settings = get_reduction_settings()
+        self.settings = get_settings_object()
 
 
     def set_instrument(self, configuration):

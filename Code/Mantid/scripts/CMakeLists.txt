@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
       test/ReflectometryQuickAuxiliaryTest.py 
       test/ExtendedUnitCellTest.py
       test/SansIsisGuiSettings.py
+      test/ReductionSettingsTest.py
       )
 
 # python unit tests
