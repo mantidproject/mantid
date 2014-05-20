@@ -5,7 +5,7 @@ If the workspace has more than one spectra, but less or equal to ten, labels wil
 
 Note: the figures contain lines between points, no error bars.
 
-Note: Requires matplotlib version> 1.2.0
+Note: Requires matplotlib version>= 1.2.0
  
 *WIKI*"""
 import mantid,sys
@@ -39,8 +39,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         try:
             import matplotlib
             from distutils.version import LooseVersion
-            if LooseVersion(matplotlib.__version__)<=LooseVersion("1.2.0"):
-                ok2run='Wrong version of matplotlib. Required > 1.2.0'
+            if LooseVersion(matplotlib.__version__)<LooseVersion("1.2.0"):
+                ok2run='Wrong version of matplotlib. Required >= 1.2.0'
         except:
             ok2run='Problem importing matplotlib'
         if ok2run!='':
