@@ -106,7 +106,8 @@ private:
   double getEventWeight( double lamda, double two_theta);
   void BuildLamdaWeights();
   double absor_sphere(double& twoth, double& wl) ;
-  //void GetSpectrumWeights(std::string spectrum_file_name, std::vector<double> lamda_weight);
+  void scale_init(Geometry::IDetector_const_sptr det, Geometry::Instrument_const_sptr inst, int& bank, double& L2, double& depth, double& pathlength, std::string bankName);
+  void scale_exec(int& bank, double& lambda, double& depth, double& pathlength, double& value);
   
   double smu; ///< linear scattering coefficient in 1/cm
   double amu; ///< linear absoprtion coefficient in 1/cm
