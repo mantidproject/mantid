@@ -86,7 +86,7 @@ namespace CustomInterfaces
 
       loadedWs = load->getProperty("OutputWorkspace");
     }
-    catch(std::exception& e)
+    catch(...)
     {
       m_view->setAvailableLogs(std::vector<std::string>()); // Empty logs list
       return;

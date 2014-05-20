@@ -86,7 +86,7 @@ bool PeakPicker::eventFilter(QObject* object, QEvent* event)
       // Resize, if resizing in process
       if (m_isResizing)
       {
-        m_peak->setFwhm(std::abs(m_peak->centre() - m_plot->invTransform(QwtPlot::xBottom, p.x())) * 2);
+        m_peak->setFwhm(fabs(m_peak->centre() - m_plot->invTransform(QwtPlot::xBottom, p.x())) * 2);
       }
 
       // If moving or resizing in process - update the plot and accept the event

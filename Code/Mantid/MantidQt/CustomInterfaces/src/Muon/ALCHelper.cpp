@@ -75,8 +75,8 @@ namespace ALCHelper
 
   boost::shared_ptr<QwtData> emptyCurveData()
   {
-    double x[0], y[0];
-    return boost::make_shared<QwtArrayData>(x, y, 0);
+    QwtArray<double> x,y; // Empty arrays -> empty data
+    return boost::make_shared<QwtArrayData>(x,y);
   }
 
 }
