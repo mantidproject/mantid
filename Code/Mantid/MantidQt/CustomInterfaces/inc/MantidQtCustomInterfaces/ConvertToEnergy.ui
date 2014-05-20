@@ -3515,7 +3515,6 @@ Later steps in the process (saving, renaming) will not be done.</string>
   <tabstop>save_ckAscii</tabstop>
   <tabstop>save_ckAclimax</tabstop>
   <tabstop>ckVerbose</tabstop>
-  <tabstop>ckCreateInfoTable</tabstop>
   <tabstop>ind_cbPlotOutput</tabstop>
   <tabstop>ckRenameWorkspace</tabstop>
   <tabstop>ckFold</tabstop>

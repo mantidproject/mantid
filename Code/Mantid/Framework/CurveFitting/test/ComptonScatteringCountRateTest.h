@@ -58,7 +58,7 @@ public:
     double x0(165.0),x1(166.0),dx(0.5);
     auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1,x0,x1,dx);
 
-    TS_ASSERT_THROWS_NOTHING(func->setWorkspace(testWS));
+    TS_ASSERT_THROWS_NOTHING(func->setMatrixWorkspace(testWS,0,x0,x1));
   }
 
   void test_Function_With_No_Background_Gives_Expected_Results_Given_Test_Data()
@@ -69,7 +69,7 @@ public:
      auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1,x0,x1,dx);
      auto & dataX = testWS->dataX(0);
      std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
-     func->setWorkspace(testWS);
+     func->setMatrixWorkspace(testWS,0,dataX.front(),dataX.back());
      FunctionDomain1DView domain(dataX.data(), dataX.size());
      FunctionValues values(domain);
 
@@ -89,7 +89,7 @@ public:
      auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1,x0,x1,dx);
      auto & dataX = testWS->dataX(0);
      std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
-     func->setWorkspace(testWS);
+     func->setMatrixWorkspace(testWS,0,dataX.front(),dataX.back());
 
      FunctionDomain1DView domain(dataX.data(), dataX.size());
      FunctionValues values(domain);
@@ -111,7 +111,7 @@ public:
     auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1,x0,x1,dx);
     auto & dataX = testWS->dataX(0);
     std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
-    func->setWorkspace(testWS);
+    func->setMatrixWorkspace(testWS,0,dataX.front(),dataX.back());
 
     func->iterationStarting();
     TS_ASSERT_DELTA(func->getParameter(0),5.0, 1e-10);
@@ -130,7 +130,7 @@ public:
     auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1,x0,x1,dx);
     auto & dataX = testWS->dataX(0);
     std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
-    func->setWorkspace(testWS);
+    func->setMatrixWorkspace(testWS,0,dataX.front(),dataX.back());
 
     func->iterationStarting();
     TS_ASSERT_DELTA(func->getParameter(0),5.0, 1e-10); // width_1
@@ -150,7 +150,7 @@ public:
     auto & dataX = testWS->dataX(0);
     std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
 
-    func->setWorkspace(testWS);
+    func->setMatrixWorkspace(testWS,0,dataX.front(),dataX.back());
 
     func->iterationStarting();
     TS_ASSERT_DELTA(func->getParameter(0),5.0, 1e-10); // width_1
@@ -172,7 +172,7 @@ public:
     auto & dataX = testWS->dataX(0);
     std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
 
-    func->setWorkspace(testWS);
+    func->setMatrixWorkspace(testWS,0,dataX.front(),dataX.back());
 
     func->iterationStarting();
 //    TS_ASSERT_DELTA(func->getParameter(0),5.0, 1e-10); // width_1
@@ -291,7 +291,6 @@ private:
       func1 = boost::make_shared<ComptonProfileStub>();
       func1->initialize();
     }
-    func1->setAttributeValue("WorkspaceIndex",0);
     func1->setAttributeValue("Mass",1.0);
     func1->setParameter("Width", 5.0);
     func1->setParameter("Intensity", 2.0);
@@ -299,7 +298,6 @@ private:
 
     auto func2 = boost::make_shared<ComptonProfileStub>();
     func2->initialize();
-    func2->setAttributeValue("WorkspaceIndex",0);
     func2->setAttributeValue("Mass",1.0);
     func2->setParameter("Width", 10.0);
     func2->setParameter("Intensity", 3.0);

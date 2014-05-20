@@ -86,6 +86,7 @@ namespace Mantid
     {
       std::vector<std::string> exts;
       exts.push_back(".gsa");
+      exts.push_back(".gss");
       exts.push_back(".txt");
       declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
           "The input filename of the stored data");

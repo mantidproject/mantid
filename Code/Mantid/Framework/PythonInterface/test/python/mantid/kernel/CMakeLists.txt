@@ -22,6 +22,7 @@ set ( TEST_PY_FILES
   MemoryStatsTest.py
   NullValidatorTest.py
   ProgressBaseTest.py
+  PropertyHistoryTest.py
   PropertyWithValueTest.py
   PythonPluginsTest.py
   StatisticsTest.py

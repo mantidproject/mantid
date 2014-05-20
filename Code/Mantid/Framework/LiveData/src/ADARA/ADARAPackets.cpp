@@ -35,6 +35,7 @@ static bool validate_status(uint16_t val)
 	case VariableStatus::SIMULATED:
 	case VariableStatus::READ_PERMISSION:
 	case VariableStatus::WRITE_PERMISSION:
+	case VariableStatus::UPSTREAM_DISCONNECTED:
 	case VariableStatus::NOT_REPORTED:
 		return false;
 	}

@@ -149,6 +149,8 @@ void export_MatrixWorkspace()
     .def("getSpectrum", (ISpectrum * (MatrixWorkspace::*)(const size_t))&MatrixWorkspace::getSpectrum,
          return_internal_reference<>(), args("self", "workspaceIndex"), 
          "Return the spectra at the given workspace index.")
+    .def("getIndexFromSpectrumNumber",&MatrixWorkspace::getIndexFromSpectrumNumber,args("self"),
+          "Returns workspace index correspondent to the given spectrum number. Throws if no such spectrum is present in the workspace")
     .def("getDetector", &MatrixWorkspace::getDetector, return_value_policy<Policies::RemoveConstSharedPtr>(),
         args("self", "workspaceIndex"), 
          "Return the Detector or DetectorGroup that is linked to the given workspace index")

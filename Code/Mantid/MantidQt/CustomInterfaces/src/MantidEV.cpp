@@ -55,6 +55,7 @@ void RunLoadAndConvertToMD::run()
  * Class to call findPeaks in a separate thread.
  */
 RunFindPeaks::RunFindPeaks(        MantidEVWorker * worker,
+                            const std::string     & ev_ws_name,
                             const std::string     & md_ws_name,
                             const std::string     & peaks_ws_name,
                                   double            max_abc,
@@ -62,6 +63,7 @@ RunFindPeaks::RunFindPeaks(        MantidEVWorker * worker,
                                   double            min_intensity )
 {
   this->worker        = worker;
+  this->ev_ws_name    = ev_ws_name;
   this->md_ws_name    = md_ws_name;
   this->peaks_ws_name = peaks_ws_name;
   this->max_abc       = max_abc;
@@ -75,7 +77,7 @@ RunFindPeaks::RunFindPeaks(        MantidEVWorker * worker,
  */
 void RunFindPeaks::run()
 {
-  worker->findPeaks( md_ws_name, peaks_ws_name,
+  worker->findPeaks( ev_ws_name, md_ws_name, peaks_ws_name,
                      max_abc, num_to_find, min_intensity );
 }
 
@@ -743,8 +745,8 @@ void MantidEV::findPeaks_slot()
 
      if ( !getPositiveDouble( m_uiForm.MinIntensity_ledt, min_intensity ) )
        return;
-
-     RunFindPeaks* runner = new RunFindPeaks( worker,
+     std::string ev_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
+     RunFindPeaks* runner = new RunFindPeaks( worker, ev_ws_name,
                                          md_ws_name, peaks_ws_name,
                                          max_abc, num_to_find, min_intensity );
 

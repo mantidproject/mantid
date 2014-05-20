@@ -9,9 +9,10 @@ namespace Mantid
     /**
      * @param ascii A plain-text label containing only ascii characters
      * @param unicode A label that can contain unicode characters
+     * @param latex A text label containg the ascii characters with latex formatting
      */
-    UnitLabel::UnitLabel(const AsciiString &ascii, const Utf8String &unicode)
-      : m_ascii(ascii), m_utf8(unicode)
+    UnitLabel::UnitLabel(const AsciiString &ascii, const Utf8String &unicode, const AsciiString &latex)
+        : m_ascii(ascii), m_utf8(unicode), m_latex(latex)
     {
     }
 
@@ -20,7 +21,7 @@ namespace Mantid
      * @param ascii A plain-text label containing only ascii characters
      */
     UnitLabel::UnitLabel(const UnitLabel::AsciiString &ascii)
-      : m_ascii(ascii), m_utf8(ascii.begin(), ascii.end())
+        : m_ascii(ascii), m_utf8(ascii.begin(), ascii.end()), m_latex(ascii)
     {
     }
 
@@ -30,7 +31,7 @@ namespace Mantid
      * @param ascii A plain-text label
      */
     UnitLabel::UnitLabel(const char *ascii)
-      : m_ascii(ascii), m_utf8(m_ascii.begin(), m_ascii.end())
+        : m_ascii(ascii), m_utf8(m_ascii.begin(), m_ascii.end()),m_latex(ascii)
     {
     }
 
@@ -135,6 +136,14 @@ namespace Mantid
     const UnitLabel::Utf8String & UnitLabel::utf8() const
     {
       return m_utf8;
+    }
+
+    /**
+     * @return A std::string containing the latex label
+     */
+    const UnitLabel::AsciiString & UnitLabel::latex() const
+    {
+      return m_latex;
     }
 
     /**

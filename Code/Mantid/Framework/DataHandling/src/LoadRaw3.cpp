@@ -223,7 +223,7 @@ namespace Mantid
           throw ;
         }
 
-        //now create a workspace of size normalwsSpecs and set it as outputworkspace
+        //now create a workspace of size normalwsSpecs and set it as output workspace
         if(normalwsSpecs > 0)
         {
           localWorkspace = createWorkspace(localWorkspace,normalwsSpecs,m_lengthIn,m_lengthIn-1);
@@ -239,8 +239,8 @@ namespace Mantid
 
       if(bseparateMonitors && normalwsSpecs == 0)
       {
-        // Ensure we fill the correct group as if we are only loading monitors then we essentially want normal behaviour
-        // with no extra _Monitors workspace
+        // Ensure we fill the correct group as if we are only loading monitors then we essentially want normal behavior
+        // with no extra _monitors workspace
         ws_grp = monitorws_grp;
       }
 
@@ -670,7 +670,7 @@ namespace Mantid
       {
         Property *ws = getProperty("OutputWorkspace");
         std::string localWSName = ws->value();
-        std::string monitorWSName = localWSName + "_Monitors";
+        std::string monitorWSName = localWSName + "_monitors";
 
         declareProperty(new WorkspaceProperty<Workspace> ("MonitorWorkspace", monitorWSName,
             Direction::Output));

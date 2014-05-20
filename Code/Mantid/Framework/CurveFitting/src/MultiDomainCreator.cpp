@@ -39,7 +39,7 @@ namespace CurveFitting
   /// Create a domain from the input workspace
   void MultiDomainCreator::createDomain(
     boost::shared_ptr<API::FunctionDomain>& domain, 
-    boost::shared_ptr<API::IFunctionValues>& ivalues, size_t i0)
+    boost::shared_ptr<API::FunctionValues>& ivalues, size_t i0)
   {
     if (m_workspacePropertyNames.size() != m_creators.size())
     {
@@ -47,7 +47,7 @@ namespace CurveFitting
         "the number of creators");
     }
     auto jointDomain = new API::JointDomain;
-    API::IFunctionValues_sptr values;
+    API::FunctionValues_sptr values;
     i0 = 0;
     for(auto c = m_creators.begin(); c != m_creators.end(); ++c)
     {
@@ -81,11 +81,15 @@ namespace CurveFitting
         mdFunction->getDomainIndices(iFun,m_creators.size(),domainIndices);
         if ( !domainIndices.empty() )
         {
+          /*
           if ( domainIndices.size() != 1 )
           {
-            g_log.warning() << "Function #" << iFun << " applies to multiple domains." << std::endl;
-            g_log.warning() << "Only one of the domains is used to set workspace." << std::endl;
+            std::stringstream msg;
+            msg << "Function #" << iFun << " applies to multiple domains.\n"
+                << "Only one of the domains is used to set workspace.";
+            g_log.warning(msg.str());
           }
+          */
           size_t index = domainIndices[0];
           if ( index >= m_creators.size() )
           {
@@ -121,7 +125,7 @@ namespace CurveFitting
     const std::string& baseName,
     API::IFunction_sptr function,
     boost::shared_ptr<API::FunctionDomain> domain,
-    boost::shared_ptr<API::IFunctionValues> values,
+    boost::shared_ptr<API::FunctionValues> values,
     const std::string& outputWorkspacePropertyName
     )
   {
@@ -150,7 +154,7 @@ namespace CurveFitting
       auto fun = functions[i];
       auto creator = m_creators[i];
       boost::shared_ptr<API::FunctionDomain> localDomain;
-      boost::shared_ptr<API::IFunctionValues> localValues;
+      boost::shared_ptr<API::FunctionValues> localValues;
       fun->setUpForFit();
       creator->createDomain(localDomain,localValues);
       creator->initFunction(fun);

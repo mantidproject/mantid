@@ -3,7 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/Property.h"
+
 #include <iostream>
+#include <sstream>
 
 namespace Mantid
 {
@@ -15,6 +17,11 @@ PropertyHistory::PropertyHistory(const std::string& name, const std::string& val
 				 const std::string& type, const bool isdefault, 
 				 const unsigned int direction) :
   m_name(name),m_value(value),m_type(type),m_isDefault(isdefault),m_direction(direction)
+{}
+
+PropertyHistory::PropertyHistory(Property const * const prop) :
+  // PropertyHistory::PropertyHistory(prop->name(), prop->value(), prop->type(), prop->isDefault(), prop->direction())
+  m_name(prop->name()), m_value(prop->value()),m_type(prop->type()),m_isDefault(prop->isDefault()),m_direction(prop->direction())
 {}
 
 /// Destructor

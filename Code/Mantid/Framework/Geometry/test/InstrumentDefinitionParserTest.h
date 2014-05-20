@@ -844,7 +844,7 @@ public:
 
   void testLocationsNaming()
   {
-    std::string locations = "<locations n-elements=\"5\" name-count-start=\"10\" name=\"det\" />";
+    std::string locations = "<locations n-elements=\" 5\" name-count-start=\" 10\" name=\"det\" />";
     detid_t numDetectors = 5;
 
     Instrument_sptr instr = loadInstrLocations(locations, numDetectors);
@@ -856,7 +856,7 @@ public:
 
   void testLocationsStaticValues()
   {
-    std::string locations = "<locations n-elements=\"5\" x=\"1.0\" y=\"2.0\" z=\"3.0\" />";
+    std::string locations = "<locations n-elements=\"5\" x=\" 1.0\" y=\" 2.0\" z=\" 3.0\" />";
     detid_t numDetectors = 5;
 
     Instrument_sptr instr = loadInstrLocations(locations, numDetectors);

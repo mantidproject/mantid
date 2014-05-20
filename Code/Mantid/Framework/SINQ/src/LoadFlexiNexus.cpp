@@ -209,7 +209,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin)
     std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
     ws->setX(i, xData);
     //Xtof		ws->getAxis(1)->spectraNo(i)= i;
-    ws->getAxis(1)->setValue(i,yData[i]);
+    ws->getSpectrum(i)->setSpectrumNo(static_cast<specid_t>(yData[i]));
   }
   ws->setYUnit("Counts");
 

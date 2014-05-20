@@ -357,9 +357,9 @@ void SmoothNeighbours::findNeighboursRectangular()
     std::string det_name = det->getName();
     if (det)
     {
-      for (int j=Edge; j < det->xpixels()-Edge; j += SumX)
+      for (int j=0; j < det->xpixels(); j += SumX)
       {
-        for (int k=Edge; k < det->ypixels()-Edge; k += SumY)
+        for (int k=0; k < det->ypixels(); k += SumY)
         {
           double totalWeight = 0;
           // Neighbours and weights
@@ -372,8 +372,8 @@ void SmoothNeighbours::findNeighboursRectangular()
               double smweight = WeightedSum->weightAt(AdjX, ix, AdjY, iy);
 
               //Find the pixel ID at that XY position on the rectangular detector
-              if(j+ix >= det->xpixels() || j+ix < 0) continue;
-              if(k+iy >= det->ypixels() || k+iy < 0) continue;
+              if(j+ix >= det->xpixels()-Edge || j+ix < Edge) continue;
+              if(k+iy >= det->ypixels()-Edge || k+iy < Edge) continue;
               int pixelID = det->getAtXY(j+ix,k+iy)->getID();
 
               //Find the corresponding workspace index, if any
@@ -851,18 +851,29 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws)
 
   //Copy geometry over.
   API::WorkspaceFactory::Instance().initializeFromParent(inWS, outws2, false);
+  // Go through all the input workspace
+  for (int outWIi=0; outWIi<int(numberOfSpectra); outWIi++)
+  {
+    ISpectrum * inSpec = inWS->getSpectrum(outWIi);
+    MantidVec & inX = inSpec->dataX();
+
+    std::set<detid_t> thesedetids = inSpec->getDetectorIDs();
+    ISpectrum * outSpec2 = outws2->getSpectrum(outWIi);
+    MantidVec & outX = outSpec2->dataX();
+    outX = inX;
+    outSpec2->addDetectorIDs(thesedetids);
+    // Zero the Y and E vectors
+    outSpec2->clearData();
+    outSpec2->dataY().assign(YLength,0.0);
+    outSpec2->dataE().assign(YLength,0.0);
+  }
+
 
   // Go through all the output workspace
   const size_t numberOfSpectra2 = outws->getNumberHistograms();
   for (int outWIi=0; outWIi<int(numberOfSpectra2); outWIi++)
   {
-    ISpectrum * outSpec = outws->getSpectrum(outWIi);
-    /*
-    g_log.notice() << "[DBx555] Original spectrum number for wsindex " << outWIi
-                   << " = " << outSpec->getSpectrumNo() << std::endl;
-    outSpec->setSpectrumNo(outWIi+1);
-    */
-
+    const ISpectrum * outSpec = outws->getSpectrum(outWIi);
 
     // Which are the neighbours?
     std::vector< weightedNeighbour > & neighbours = m_neighbours[outWIi];
@@ -871,24 +882,18 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws)
     {
       size_t inWI = it->first;
 
-      const ISpectrum * inSpec = inWS->getSpectrum(inWI);
-
-      std::set<detid_t> thesedetids = inSpec->getDetectorIDs();
       ISpectrum * outSpec2 = outws2->getSpectrum(inWI);
-      outSpec2->addDetectorIDs(thesedetids);
       // Reset the Y and E vectors
       outSpec2->clearData();
       MantidVec & out2Y = outSpec2->dataY();
       MantidVec & out2E = outSpec2->dataE();
       MantidVec & out2X = outSpec2->dataX();
-      MantidVec & outY = outSpec->dataY();
-      MantidVec & outE = outSpec->dataE();
-      MantidVec & outX = outSpec->dataX();
+      const MantidVec & outY = outSpec->dataY();
+      const MantidVec & outE = outSpec->dataE();
+      const MantidVec & outX = outSpec->dataX();
       out2Y = outY;
       out2E = outE;
       out2X = outX;
-
-
     } //(each neighbour)
   }
   this->setProperty("OutputWorkspace", outws2);
@@ -953,9 +958,8 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws)
   //Give the 0-th X bins to all the output spectra.
   Kernel::cow_ptr<MantidVec> outX = inWS->refX(0);
   outWS->setAllX( outX );
+  if(expandSumAllPixels) spreadPixels(outWS);
 }
-
-
 
 } // namespace Algorithms
 } // namespace Mantid

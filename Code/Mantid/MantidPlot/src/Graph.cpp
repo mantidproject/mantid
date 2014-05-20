@@ -59,7 +59,7 @@
 #include "plot2D/ScaleEngine.h"
 
 #include "Mantid/MantidMatrixCurve.h"
-#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "Mantid/ErrorBarSettings.h"
 
 #ifdef EMF_OUTPUT
@@ -3407,7 +3407,7 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
 
 PlotCurve* Graph::insertCurve(QString workspaceName, int index, bool err, Graph::CurveType style)
 {
-  return (new MantidMatrixCurve(workspaceName,this,index,err,false,style));
+  return (new MantidMatrixCurve(workspaceName,this,index, MantidMatrixCurve::Spectrum, err,false,style));
 }
 
 /**  Insert a curve with its own data source. It does not have to be
@@ -6082,7 +6082,7 @@ void Graph::updateDataCurves()
 
 void Graph::checkValuesInAxisRange(MantidMatrixCurve* mc)
 {
-  MantidQwtMatrixWorkspaceData* data = mc->mantidData();
+  auto* data = mc->mantidData();
   double xMin(data->x(0)); // Needs to be min of current graph (x-axis)
   double xMax(data->x(data->size()-1)); // Needs to be max of current graph (x-axis)
   bool changed(false);

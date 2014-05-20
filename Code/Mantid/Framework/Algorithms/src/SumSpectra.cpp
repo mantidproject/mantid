@@ -77,20 +77,19 @@ void SumSpectra::init()
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex",0, mustBePositive,
-    "The first Workspace index to be included in the summing (default 0)." );
+    "The first Workspace index to be included in the summing" );
   declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive,
-    "The last Workspace index to be included in the summing (default\n"
-    "max Workspace index)." );
+    "The last Workspace index to be included in the summing" );
 
   declareProperty(new Kernel::ArrayProperty<int>("ListOfWorkspaceIndices"),
-    "A list of workspace indices as a string with ranges; e.g. 5-10,15,20-23. \n"
+    "A list of workspace indices as a string with ranges, for example: 5-10,15,20-23. \n"
     "Optional: if not specified, then the Start/EndWorkspaceIndex fields are used alone. "
     "If specified, the range and the list are combined (without duplicating indices). For example, a range of 10 to 20 and a list '12,15,26,28' gives '10-20,26,28'.");
 
-  declareProperty("IncludeMonitors",true,"|If true then the monitor spectra will also be included in the summation. (default = false) ");
+  declareProperty("IncludeMonitors",true,"Whether to include monitor spectra in the summation.");
 
-  declareProperty("WeightedSum",false,"Instead of the usual spectra sum, calculate the weighted sum in the form: \n"
-    "<math>nSpectra*\\Sigma(Signal_i/Error_i^2)/\\Sigma(1/Error_i^2)</math> This property is ignored for event workspace.\n"
+  declareProperty("WeightedSum",false,"Instead of the usual spectra sum, calculate the weighted sum. This has the form: \n"
+    "<math>nSpectra*\\Sigma(Signal_i/Error_i^2)/\\Sigma(1/Error_i^2)</math>\n This property is ignored for event workspace.\n"
     "The sums are defined for <math>Error_i != 0</math> only, so the values with zero error are dropped from the summation. To estimate the number of dropped values see the description. ");
 }
 

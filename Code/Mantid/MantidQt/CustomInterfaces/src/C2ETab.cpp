@@ -114,7 +114,7 @@ namespace CustomInterfaces
       return;
     }
 
-    MantidQwtMatrixWorkspaceData wsData(workspace, static_cast<int>(wsIndex), false); 
+    QwtWorkspaceSpectrumData wsData(*workspace, static_cast<int>(wsIndex), false);
 
     if ( m_curve != NULL )
     {

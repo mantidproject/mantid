@@ -26,7 +26,8 @@ class ReflectometryReductionOneAutoTest(unittest.TestCase, ReflectometryReductio
         out_ws, out_wsl_lam, thetafinal = ReflectometryReductionOneAuto(InputWorkspace=in_ws, AnalysisMode="PointDetectorAnalysis"
                                                                         ,OutputWorkspace="InQ", OutputWorkspaceWavelength="InLam")
         history = out_ws.getHistory()
-        alg = history.lastAlgorithm()
+        algHist = history.getAlgorithmHistory(history.size()-1)
+        alg = algHist.getChildAlgorithm(0)
         
         '''
         Here we are checking that the applied values (passed to CreateTransmissionWorkspace come from the instrument parameters.

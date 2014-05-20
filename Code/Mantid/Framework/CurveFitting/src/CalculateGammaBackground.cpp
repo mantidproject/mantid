@@ -425,7 +425,6 @@ namespace Mantid
       {
         auto profile = boost::dynamic_pointer_cast<ComptonProfile>(profileFunction->getFunction(i));
         profile->disableLogging();
-        profile->setAttributeValue("WorkspaceIndex",static_cast<int>(wsIndex));
         profile->setUpForFit();
         profile->cacheYSpaceValues(tseconds, false, detpar, respar);
 
