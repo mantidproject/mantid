@@ -61,8 +61,7 @@ class BasicSettingsObjectUsageTest(unittest.TestCase):
         self.assertTrue("B" in cloned)
 
     def test_clone_same_name_throws(self):
-        with self.assertRaises(RuntimeError):
-            self.settings.clone("BasicSettingsObjectUsageTest")
+        self.assertRaises(RuntimeError, self.settings.clone, "BasicSettingsObjectUsageTest")
 
     def test_clone_name_already_exists_is_cleared(self):
         a = get_settings_object("A")
