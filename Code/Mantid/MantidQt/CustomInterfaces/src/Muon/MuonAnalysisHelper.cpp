@@ -498,24 +498,41 @@ bool compareByRunNumber(Workspace_sptr ws1, Workspace_sptr ws2)
 }
 
 /**
- * Makes sure the specified workspaces are in specified group. If ws under the given group name
- * exists already - it (or its children if it's a group) end up in the new group as well.
+ * Makes sure the specified workspaces are in specified group. If group exists already - missing
+ * workspaces are added to it, otherwise new group is created. If ws exists in ADS under groupName,
+ * and it is not a group - it's overwritten.
  * @param groupName :: Name of the group workspaces should be in
  * @param inputWorkspaces :: Names of the workspaces to group
  */
-void groupWorkspaces(const std::string& groupName, std::vector<std::string> inputWorkspaces)
+void groupWorkspaces(const std::string& groupName, const std::vector<std::string>& inputWorkspaces)
 {
-  if (AnalysisDataService::Instance().doesExist(groupName))
+  auto& ads = AnalysisDataService::Instance();
+
+  WorkspaceGroup_sptr group;
+  if (ads.doesExist(groupName))
   {
-    // If ws exists under the group name, add it to the list, so it (or its children if a group) end
-    // up in the new group
-    inputWorkspaces.push_back(groupName);
+    group = ads.retrieveWS<WorkspaceGroup>(groupName);
   }
 
-  IAlgorithm_sptr groupingAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
-  groupingAlg->setProperty("InputWorkspaces", inputWorkspaces);
-  groupingAlg->setPropertyValue("OutputWorkspace", groupName);
-  groupingAlg->execute();
+  if(group)
+  {
+    // Exists and is a group -> add missing workspaces to it
+    for (auto it = inputWorkspaces.begin(); it != inputWorkspaces.end(); ++it)
+    {
+      if (!group->contains(*it))
+      {
+        group->add(*it);
+      }
+    }
+  }
+  else
+  {
+    // Doesn't exist or isn't a group -> create/overwrite
+    IAlgorithm_sptr groupingAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+    groupingAlg->setProperty("InputWorkspaces", inputWorkspaces);
+    groupingAlg->setPropertyValue("OutputWorkspace", groupName);
+    groupingAlg->execute();
+  }
 }
 
 } // namespace MuonAnalysisHelper

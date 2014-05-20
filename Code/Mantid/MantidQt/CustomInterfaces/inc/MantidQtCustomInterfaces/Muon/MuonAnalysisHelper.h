@@ -50,7 +50,7 @@ MANTIDQT_CUSTOMINTERFACES_DLL bool compareByRunNumber(Workspace_sptr ws1, Worksp
 
 /// Makes sure the specified workspaces are in specified group
 MANTIDQT_CUSTOMINTERFACES_DLL void groupWorkspaces(const std::string& groupName,
-                                                   std::vector<std::string> inputWorkspaces);
+                                                   const std::vector<std::string>& inputWorkspaces);
 
 /**
  * A class which deals with auto-saving the widget values. Widgets are registered and then on any
