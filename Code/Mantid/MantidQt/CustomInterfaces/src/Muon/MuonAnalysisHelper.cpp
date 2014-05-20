@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/EmptyValues.h"
