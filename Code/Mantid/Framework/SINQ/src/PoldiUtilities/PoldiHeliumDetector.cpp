@@ -8,6 +8,8 @@
 namespace Mantid {
 namespace Poldi {
 
+using namespace Geometry;
+
 PoldiHeliumDetector::PoldiHeliumDetector() :
     PoldiAbstractDetector(),
     m_radius(0.0),

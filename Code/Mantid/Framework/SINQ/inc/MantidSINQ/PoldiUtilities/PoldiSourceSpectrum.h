@@ -39,25 +39,24 @@ namespace Poldi {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-using namespace Mantid::Kernel;
-using namespace Mantid::Geometry;
 
 class MANTID_SINQ_DLL PoldiSourceSpectrum {
 public:
-    PoldiSourceSpectrum(Interpolation spectrum);
-    PoldiSourceSpectrum(Instrument_const_sptr poldiInstrument);
+    PoldiSourceSpectrum(Kernel::Interpolation spectrum);
+    PoldiSourceSpectrum(Geometry::Instrument_const_sptr poldiInstrument);
 
     ~PoldiSourceSpectrum() { }
 
     double intensity(double wavelength) const;
 
 protected:
-    void setSpectrumFromInstrument(Instrument_const_sptr poldiInstrument);
-    IComponent_const_sptr getSourceComponent(Instrument_const_sptr poldiInstrument);
-    Parameter_sptr getSpectrumParameter(IComponent_const_sptr source, ParameterMap_sptr instrumentParameterMap);
-    void setSpectrum(Parameter_sptr spectrumParameter);
+    void setSpectrumFromInstrument(Geometry::Instrument_const_sptr poldiInstrument);
+    Geometry::IComponent_const_sptr getSourceComponent(Geometry::Instrument_const_sptr poldiInstrument);
+    Geometry::Parameter_sptr getSpectrumParameter(Geometry::IComponent_const_sptr source,
+                                                  Geometry::ParameterMap_sptr instrumentParameterMap);
+    void setSpectrum(Geometry::Parameter_sptr spectrumParameter);
 
-    Interpolation m_spectrum;
+    Kernel::Interpolation m_spectrum;
 };
 
 typedef boost::shared_ptr<PoldiSourceSpectrum> PoldiSourceSpectrum_sptr;

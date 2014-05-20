@@ -5,9 +5,6 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
 
-using namespace Mantid;
-using namespace Mantid::API;
-
 namespace Mantid
 {
 namespace CurveFitting
@@ -36,7 +33,7 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ThermalNeutronBk2BkExpAlpha : virtual public IFunction1D, public ParamFunction
+  class DLLExport ThermalNeutronBk2BkExpAlpha : virtual public API::IFunction1D, public API::ParamFunction
   {
   public:
     ThermalNeutronBk2BkExpAlpha();
