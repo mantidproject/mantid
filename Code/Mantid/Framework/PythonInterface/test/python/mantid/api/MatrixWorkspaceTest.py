@@ -321,12 +321,15 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEquals(first.getPropertyValue("OutputWorkspace"), "raw")
         AnalysisDataService.remove('raw')
 
-    def test_setTitle(self):        
+    def test_setTitleAndComment(self):        
         run_algorithm('CreateWorkspace', OutputWorkspace='ws1',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         ws1 = AnalysisDataService['ws1']
         title = 'test_title'
         ws1.setTitle(title)
         self.assertEquals(title, ws1.getTitle())
+        comment = 'Some comment on this workspace.'
+        ws1.setComment(comment)
+        self.assertEquals(comment, ws1.getComment())
         AnalysisDataService.remove(ws1.getName())
 
 if __name__ == '__main__':
