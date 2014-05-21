@@ -42,8 +42,13 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
 class MANTID_SINQ_DLL PoldiPeakCollection
-{
+{    
 public:
+    enum IntensityType {
+        Maximum,
+        Integral
+    };
+
     PoldiPeakCollection();
     PoldiPeakCollection(TableWorkspace_sptr workspace);
     virtual ~PoldiPeakCollection() {}
@@ -55,14 +60,21 @@ public:
 
     TableWorkspace_sptr asTableWorkspace();
 
+    IntensityType intensityType() const;
+
 protected:
     void prepareTable(TableWorkspace_sptr table);
     void peaksToTable(TableWorkspace_sptr table);
 
     void constructFromTableWorkspace(TableWorkspace_sptr tableWorkspace);
     bool checkColumns(TableWorkspace_sptr tableWorkspace);
+    std::string getIntensityTypeFromTable(TableWorkspace_sptr tableWorkspace);
+
+    std::string intensityTypeToString(IntensityType type) const;
+    IntensityType intensityTypeFromString(std::string typeString) const;
 
     std::vector<PoldiPeak_sptr> m_peaks;
+    IntensityType m_intensityType;
 };
 
 typedef boost::shared_ptr<PoldiPeakCollection> PoldiPeakCollection_sptr;

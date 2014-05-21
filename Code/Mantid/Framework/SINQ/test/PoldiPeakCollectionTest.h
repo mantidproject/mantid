@@ -91,6 +91,59 @@ public:
         }
     }
 
+    void testIntensityTypeFromString()
+    {
+        TestablePoldiPeakCollection collection;
+
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString("Maximum"), PoldiPeakCollection::Maximum);
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString("maximum"), PoldiPeakCollection::Maximum);
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString("mAxIMuM"), PoldiPeakCollection::Maximum);
+
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString("Integral"), PoldiPeakCollection::Integral);
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString("integral"), PoldiPeakCollection::Integral);
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString("InTEgrAl"), PoldiPeakCollection::Integral);
+
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString("Garbage"), PoldiPeakCollection::Maximum);
+        TS_ASSERT_EQUALS(collection.intensityTypeFromString(""), PoldiPeakCollection::Maximum);
+    }
+
+    void testIntensityTypeToString()
+    {
+        TestablePoldiPeakCollection collection;
+        TS_ASSERT_EQUALS(collection.intensityTypeToString(PoldiPeakCollection::Maximum), "Maximum");
+        TS_ASSERT_EQUALS(collection.intensityTypeToString(PoldiPeakCollection::Integral), "Integral");
+    }
+
+    void testIntensityTypeRecovery()
+    {
+        PoldiPeakCollection collection(m_dummyData);
+
+        TS_ASSERT_EQUALS(collection.intensityType(), PoldiPeakCollection::Maximum);
+
+        TableWorkspace_sptr newDummy(m_dummyData->clone());
+        newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
+
+        PoldiPeakCollection otherCollection(newDummy);
+        TS_ASSERT_EQUALS(otherCollection.intensityType(), PoldiPeakCollection::Integral);
+    }
+
+    void testIntensityTypeRecoveryConversion()
+    {
+        TableWorkspace_sptr newDummy(m_dummyData->clone());
+        newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
+
+        PoldiPeakCollection collection(newDummy);
+
+        TableWorkspace_sptr compare = collection.asTableWorkspace();
+
+        TS_ASSERT(compare->logs()->hasProperty("IntensityType"));
+        TS_ASSERT_EQUALS(compare->logs()->getPropertyValueAsType<std::string>("IntensityType"), "Integral");
+
+        PoldiPeakCollection otherCollection(compare);
+
+        TS_ASSERT_EQUALS(otherCollection.intensityType(), PoldiPeakCollection::Integral);
+    }
+
     void testAddPeak()
     {
         PoldiPeakCollection peaks;

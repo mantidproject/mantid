@@ -1,6 +1,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/LogManager.h"
 #include "boost/format.hpp"
 #include "boost/algorithm/string/join.hpp"
 
@@ -14,7 +15,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 PoldiPeakCollection::PoldiPeakCollection() :
-    m_peaks()
+    m_peaks(),
+    m_intensityType(Maximum)
 {
 }
 
@@ -55,6 +57,11 @@ TableWorkspace_sptr PoldiPeakCollection::asTableWorkspace()
     return peaks;
 }
 
+PoldiPeakCollection::IntensityType PoldiPeakCollection::intensityType() const
+{
+    return m_intensityType;
+}
+
 void PoldiPeakCollection::prepareTable(TableWorkspace_sptr table)
 {
     table->addColumn("str", "HKL");
@@ -62,6 +69,9 @@ void PoldiPeakCollection::prepareTable(TableWorkspace_sptr table)
     table->addColumn("str", "Q");
     table->addColumn("str", "Intensity");
     table->addColumn("str", "FWHM (rel.)");
+
+    LogManager_sptr tableLog = table->logs();
+    tableLog->addProperty<std::string>("IntensityType", intensityTypeToString(m_intensityType));
 }
 
 void PoldiPeakCollection::peaksToTable(TableWorkspace_sptr table)
@@ -81,6 +91,8 @@ void PoldiPeakCollection::constructFromTableWorkspace(TableWorkspace_sptr tableW
     if(checkColumns(tableWorkspace)) {
         size_t newPeakCount = tableWorkspace->rowCount();
         m_peaks.resize(newPeakCount);
+
+        m_intensityType = intensityTypeFromString(getIntensityTypeFromTable(tableWorkspace));
 
         for(size_t i = 0; i < newPeakCount; ++i) {
             TableRow nextRow = tableWorkspace->getRow(i);
@@ -112,6 +124,41 @@ bool PoldiPeakCollection::checkColumns(TableWorkspace_sptr tableWorkspace)
     std::vector<std::string> columnNames = tableWorkspace->getColumnNames();
 
     return columnNames == shouldNames;
+}
+
+std::string PoldiPeakCollection::getIntensityTypeFromTable(TableWorkspace_sptr tableWorkspace)
+{
+    LogManager_sptr tableLog = tableWorkspace->logs();
+
+    if(tableLog->hasProperty("IntensityType")) {
+        return tableLog->getPropertyValueAsType<std::string>("IntensityType");
+    }
+
+    return "";
+}
+
+std::string PoldiPeakCollection::intensityTypeToString(PoldiPeakCollection::IntensityType type) const
+{
+    switch(type) {
+    case Maximum:
+        return "Maximum";
+    case Integral:
+        return "Integral";
+    }
+
+    throw std::runtime_error("Unkown intensity type can not be processed.");
+}
+
+PoldiPeakCollection::IntensityType PoldiPeakCollection::intensityTypeFromString(std::string typeString) const
+{
+    std::string lowerCaseType(typeString);
+    std::transform(lowerCaseType.begin(), lowerCaseType.end(), lowerCaseType.begin(), ::tolower);
+
+    if(lowerCaseType == "integral") {
+        return Integral;
+    }
+
+    return Maximum;
 }
 
 }
