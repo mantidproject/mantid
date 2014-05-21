@@ -121,7 +121,7 @@ namespace Mantid
       auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0.0);
       declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
-        "Optional:  This number density of the sample in number of atoms per cubic angstrom will be used instead of calculated");
+        "Optional:  This number density of the sample in number of formulas per cubic angstrom will be used instead of calculated");
       declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,
         "Number of formulas in the unit cell needed for chemical formulas with more than 1 atom");
       declareProperty("UnitCellVolume", EMPTY_DBL(), mustBePositive,
@@ -319,7 +319,7 @@ namespace Mantid
         g_log.notice() << "= " << mat->numberDensity() << " atoms/Angstrom^3\n";
         setProperty("SampleNumberDensityResult", mat->numberDensity()); // in atoms/Angstrom^3
       }
-      g_log.notice() << "Cross sections for wavelength = " << NeutronAtom::ReferenceLambda << "Angstroms\n"
+      g_log.notice() << "Cross sections for wavelength = " << NeutronAtom::ReferenceLambda << " Angstroms\n"
         << "    Coherent "   << mat->cohScatterXSection() << " barns\n"
         << "    Incoherent " << mat->incohScatterXSection() << " barns\n"
         << "    Total "      << mat->totalScatterXSection() << " barns\n"
@@ -330,10 +330,17 @@ namespace Mantid
       setProperty("AbsorptionXSectionResult",mat->absorbXSection()); // in barns
       setProperty("ReferenceWavelength",NeutronAtom::ReferenceLambda); // in Angstroms
 
-      double smu =  mat->totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
-      double amu = mat->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
-      g_log.notice() << "Anvred LinearScatteringCoef = " << smu << " 1/cm\n"
-                     << "Anvred LinearAbsorptionCoef = "   << amu << " 1/cm\n";
+      if (isEmpty(rho))
+      {
+          g_log.notice("Unknown value for number density");
+      }
+      else
+      {
+          double smu =  mat->totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
+          double amu = mat->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+          g_log.notice() << "Anvred LinearScatteringCoef = " << smu << " 1/cm\n"
+                         << "Anvred LinearAbsorptionCoef = "   << amu << " 1/cm\n";
+      }
       // Done!
       progress(1);
     }
