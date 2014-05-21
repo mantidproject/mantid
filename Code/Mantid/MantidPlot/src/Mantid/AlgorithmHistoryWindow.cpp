@@ -175,8 +175,8 @@ MantidDialog(parent),m_algHist(wsptr->getHistory()),m_histPropWindow(NULL),m_exe
 m_wsName(wsptr->getName().c_str()), m_view(m_algHist)
 {
   setWindowTitle(tr("Algorithm History"));
-  setMinimumHeight(400);
-  setMinimumWidth(570);
+  setMinimumHeight(500);
+  setMinimumWidth(750);
   setGeometry(50,150,540,380); 
 
   //Create a tree widget to display the algorithm names in the workspace history
@@ -187,6 +187,8 @@ m_wsName(wsptr->getName().c_str()), m_view(m_algHist)
     headers << "Algorithms" << "Unroll";
 
     m_Historytree->setColumnCount(2);
+    m_Historytree->setColumnWidth(0, 180);
+    m_Historytree->setColumnWidth(1, 55);
     m_Historytree->setHeaderLabels(headers);
     m_Historytree->setGeometry (5,5,205,200);
     //Populate the History Tree widget
