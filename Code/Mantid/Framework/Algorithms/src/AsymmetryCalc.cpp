@@ -163,7 +163,7 @@ void AsymmetryCalc::exec()
   outputWS->dataX(0) = inputWS->readX(0);
 
   // Update Y axis label 
-  outputWS->setYUnitLabel("Asymmetry");
+  outputWS->setYUnit("Asymmetry");
 
   setProperty("OutputWorkspace", outputWS);
 }
