@@ -204,6 +204,11 @@ public:
   // This means the constructor isn't called when running other tests
   static ReflLoadedMainViewPresenterTest *createSuite() { return new ReflLoadedMainViewPresenterTest(); }
   static void destroySuite( ReflLoadedMainViewPresenterTest *suite ) { delete suite; }
+  
+  ReflLoadedMainViewPresenterTest()
+  {
+    FrameworkManager::Instance();
+  }
 
   void testConstruction()
   {
@@ -594,6 +599,26 @@ public:
     TS_ASSERT_THROWS(ws->Int(1,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(2,7),std::runtime_error);
     TS_ASSERT_THROWS(ws->Int(3,7),std::runtime_error);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    AnalysisDataService::Instance().remove("TestWorkspace");
+  }
+  
+  void testProcessAll()
+  {
+    std::vector<size_t> rowlist = std::vector<size_t>();
+    MockView mockView;
+    EXPECT_CALL(mockView, getSaveFlag()).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(mockView, getSaveAsFlag()).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(mockView, getAddRowFlag()).Times(1).WillRepeatedly(Return(false));
+    EXPECT_CALL(mockView, getProcessFlag()).Times(1).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, getDeleteRowFlag()).Times(0);
+    EXPECT_CALL(mockView, clearNotifyFlags()).Times(1);
+    EXPECT_CALL(mockView, askUserYesNo(_,_)).Times(1).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, getSelectedRowIndexes()).Times(1).WillRepeatedly(Return(rowlist));
+    ReflLoadedMainViewPresenter presenter(createWorkspace(),&mockView);
+    ITableWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
+    presenter.notify();
+    ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("TestWorkspace");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
     AnalysisDataService::Instance().remove("TestWorkspace");
   }
