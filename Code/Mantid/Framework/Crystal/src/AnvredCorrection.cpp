@@ -49,6 +49,7 @@ Which is a fairly expensive calulation when done for each event.
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/MemoryManager.h"
+#include "boost/assign.hpp"
 
 /*  Following A.J.Schultz's anvred, the weight factors should be:
  * 
@@ -104,20 +105,21 @@ using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
 using namespace Mantid::PhysicalConstants;
-std::map<int, double> detScale =
- {{17,1.092114823},
-	{18,0.869105443},
-	{22,1.081377685},
-	{26,1.055199489},
-	{27,1.070308725},
-	{28,0.886157884},
-	{36,1.112773972},
-	{37,1.012894506},
-	{38,1.049384146},
-	{39,0.890313805},
-	{47,1.068553893},
-	{48,0.900566426},
-	{58,0.911249203}};
+using namespace boost::assign;
+std::map<int, double> detScale = map_list_of
+ (17,1.092114823)
+ (18,0.869105443)
+ (22,1.081377685)
+ (26,1.055199489)
+ (27,1.070308725)
+ (28,0.886157884)
+ (36,1.112773972)
+ (37,1.012894506)
+ (38,1.049384146)
+ (39,0.890313805)
+ (47,1.068553893)
+ (48,0.900566426)
+ (58,0.911249203);
 
 AnvredCorrection::AnvredCorrection() : API::Algorithm()
 {}
