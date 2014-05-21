@@ -24,13 +24,16 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const Kernel::Dat
   m_childHistories(boost::bind(CompareHistory::compare, _1, _2))
 {
   // Now go through the algorithm's properties and create the PropertyHistory objects.
-  const std::vector<Property*>& properties = alg->getProperties();
-  std::vector<Property*>::const_iterator it;
-  for (it = properties.begin(); it != properties.end(); ++it)
-  {
-    m_properties.push_back( (*it)->createHistory() );
-  }
+  setProperties(alg);
 }
+
+/** Private empty constructor for use by Algorithm
+ */
+AlgorithmHistory::AlgorithmHistory() :
+  m_name(),m_version(),m_executionDate(),
+  m_executionDuration(),m_execCount(), 
+  m_childHistories(boost::bind(CompareHistory::compare, _1, _2))
+{}
 
 /// Destructor
 AlgorithmHistory::~AlgorithmHistory()
@@ -42,13 +45,45 @@ AlgorithmHistory::~AlgorithmHistory()
     @param vers :: The algorithm version.
     @param start :: The start time of the algorithm execution (optional).
     @param duration :: The time (in seconds) that it took to run this algorithm (optional).
-	 @param uexeccount ::  an  unsigned int for algorithm execution order
+   @param uexeccount ::  an  unsigned int for algorithm execution order
  */
 AlgorithmHistory::AlgorithmHistory(const std::string& name, int vers, const Kernel::DateAndTime& start, const double& duration, std::size_t uexeccount) :
   m_name(name),m_version(vers),m_executionDate(start),
   m_executionDuration(duration),m_execCount(uexeccount), 
   m_childHistories(boost::bind(CompareHistory::compare, _1, _2))
 {
+}
+
+/**
+ *  Set the history properties for an algorithm pointer
+ *  @param alg :: A pointer to the algorithm for which the history should be constructed
+ */
+void AlgorithmHistory::setProperties(const Algorithm* const alg)
+{
+  // Now go through the algorithm's properties and create the PropertyHistory objects.
+  const std::vector<Property*>& properties = alg->getProperties();
+  std::vector<Property*>::const_iterator it;
+  for (it = properties.begin(); it != properties.end(); ++it)
+  {
+    m_properties.push_back( boost::make_shared<PropertyHistory>((*it)->createHistory()) );
+  }
+}
+
+/**
+ *  Fill the algoirthm history object after it has been created.
+ *  @param alg ::      A pointer to the algorithm for which the history should be constructed
+ *  @param start ::    The start time of the algorithm execution (optional)
+ *  @param duration :: The time (in seconds) that it took to run this algorithm (optional)
+ *  @param uexeccount :: an  unsigned int for algorithm execution order
+ */
+void AlgorithmHistory::fillAlgorithmHistory(const Algorithm* const alg, const Kernel::DateAndTime& start, const double& duration,std::size_t uexeccount)
+{
+  m_name = alg->name();
+  m_version = alg->version();
+  m_executionDate = start;
+  m_executionDuration = duration;
+  m_execCount = uexeccount; 
+  setProperties(alg);
 }
 
 /**

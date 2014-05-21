@@ -345,14 +345,19 @@ namespace Mantid
       virtual const Kernel::PropertyHistory createHistory() const
       {
         std::string wsName = m_workspaceName;
-        if (wsName.empty())
+        std::ostringstream os;
+        bool isdefault = this->isDefault();
+        os << "__TMP" << this;
+
+        if ((wsName.empty() || wsName == os.str()) && this->operator()())
         {
           //give the property a temporary name in the history
-          std::ostringstream os;
-          os << this;
-          wsName = "__TMP" + os.str();
+          os.str("");
+          os << "__TMP" << this->operator()().get();
+          wsName = os.str();
+          isdefault = false;
         }
-        return Kernel::PropertyHistory(this->name(), wsName, this->type(), this->isDefault(), this->direction());
+        return Kernel::PropertyHistory(this->name(), wsName, this->type(), isdefault, this->direction());
       }
 
       /** If this is an output workspace, store it into the AnalysisDataService

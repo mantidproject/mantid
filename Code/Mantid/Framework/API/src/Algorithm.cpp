@@ -606,7 +606,7 @@ namespace Mantid
             ++Algorithm::g_execCount;
             
             //populate history record before execution so we can record child algorithms in it
-            AlgorithmHistory algHist(this);
+            AlgorithmHistory algHist;
             m_history = boost::make_shared<AlgorithmHistory>(algHist);
           }
 
@@ -623,8 +623,7 @@ namespace Mantid
           // need it to throw before trying to run fillhistory() on an algorithm which has failed
           if(trackingHistory() && m_history)
           { 
-            m_history->addExecutionInfo(start_time, duration);
-            m_history->setExecCount(Algorithm::g_execCount);
+            m_history->fillAlgorithmHistory(this, start_time, duration, Algorithm::g_execCount);
             fillHistory();
           }
 
@@ -824,11 +823,18 @@ namespace Mantid
 
       // If output workspaces are nameless, give them a temporary name to satisfy validator
       const std::vector< Property*> &props = alg->getProperties();
+      std::ostringstream os;
       for (unsigned int i = 0; i < props.size(); ++i)
       {
-        if (props[i]->direction() == 1 && dynamic_cast<IWorkspaceProperty*>(props[i]) )
+        auto wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
+        if (props[i]->direction() == Mantid::Kernel::Direction::Output && wsProp )
         {
-          if ( props[i]->value().empty() ) props[i]->setValue("ChildAlgOutput");
+          if ( props[i]->value().empty() ) 
+          {
+            os.str("");
+            os << "__TMP" << props[i];
+            props[i]->setValue(os.str());
+          }
         }
       }
 
@@ -886,14 +892,14 @@ namespace Mantid
       std::ostringstream stream;
       stream << history.name() << "." << history.version()
        << "(";
-      const std::vector<Kernel::PropertyHistory>& props = history.getProperties();
+      auto props = history.getProperties();
       const size_t numProps(props.size());
       for( size_t i = 0 ; i < numProps; ++i )
       {
-        const Kernel::PropertyHistory & prop = props[i];
-        if( !prop.isDefault() )
+        PropertyHistory_sptr prop = props[i];
+        if( !prop->isDefault() )
         {
-          stream << prop.name() << "=" << prop.value();
+          stream << prop->name() << "=" << prop->value();
         }
         if( i < numProps - 1 ) stream << ",";
       }
@@ -1017,16 +1023,16 @@ namespace Mantid
     */
     void Algorithm::fillHistory()
     {
-      // Create two vectors to hold a list of pointers to the input & output workspaces (InOut's go in both)
-      std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;
-      findWorkspaceProperties(inputWorkspaces,outputWorkspaces);
-      
       //this is not a child algorithm. Add the history algorithm to the WorkspaceHistory object.
       if (!isChild())
-      {
+      {        
+        // Create two vectors to hold a list of pointers to the input & output workspaces (InOut's go in both)
+        std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;
         std::vector<Workspace_sptr>::iterator outWS;
         std::vector<Workspace_sptr>::const_iterator inWS;
-        
+    
+        findWorkspaceProperties(inputWorkspaces,outputWorkspaces);
+    
         // Loop over the output workspaces
         for (outWS = outputWorkspaces.begin(); outWS != outputWorkspaces.end(); ++outWS)
         {
@@ -1036,6 +1042,7 @@ namespace Mantid
           {
             (*outWS)->history().addHistory( (*inWS)->getHistory() );
           }
+
           // Add the history for the current algorithm to all the output workspaces
           (*outWS)->history().addHistory(m_history);
         }
@@ -1043,6 +1050,44 @@ namespace Mantid
       //this is a child algorithm, but we still want to keep the history.
       else if (m_recordHistoryForChild && m_parentHistory)
       {
+        // iterate over the algorithms output workspaces
+        const std::vector<Property*>& algProperties = getProperties();
+        std::vector<Property*>::const_iterator it;
+        for (it = algProperties.begin(); it != algProperties.end(); ++it)
+        {
+          const IWorkspaceProperty *outputProp = dynamic_cast<IWorkspaceProperty*>(*it);
+          if (outputProp)
+          {
+            // Check we actually have a workspace, it may have been optional
+            Workspace_sptr workspace = outputProp->getWorkspace();
+            if( !workspace ) continue;
+
+            if((*it)->direction() == Kernel::Direction::Output)
+            {
+              //find child histories with anonymous output workspaces
+              auto childHistories = m_history->getChildHistories();
+              for (auto childIter = childHistories.crbegin(); childIter != childHistories.crend(); ++childIter)
+              {
+                auto props = (*childIter)->getProperties();
+                for (auto propIter = props.begin(); propIter != props.end(); ++propIter)
+                {
+                  //check we have a workspace property
+                  if((*propIter)->direction() == Kernel::Direction::Output)
+                  {
+                    //if the workspaces are equal, then rename the history
+                    std::ostringstream os;
+                    os << "__TMP" << outputProp->getWorkspace().get();
+                    if (os.str() == (*propIter)->value())
+                    {
+                      (*propIter)->setValue((*it)->value());
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
         m_parentHistory->addChildHistory(m_history);
       }
 
