@@ -91,6 +91,36 @@ public:
         }
     }
 
+    void testProfileFunctionName()
+    {
+        TestablePoldiPeakCollection collection;
+
+        TS_ASSERT(collection.m_profileFunctionName.empty());
+
+        collection.setProfileFunctionName("Gaussian");
+
+        TS_ASSERT_EQUALS(collection.m_profileFunctionName, "Gaussian");
+    }
+
+    void testProfileFunctionRevovery()
+    {
+        TestablePoldiPeakCollection collection;
+        collection.setProfileFunctionName("Gaussian");
+
+        TableWorkspace_sptr table = collection.asTableWorkspace();
+
+        TestablePoldiPeakCollection other(table);
+
+        TS_ASSERT_EQUALS(other.getProfileFunctionName(), "Gaussian");
+    }
+
+    void testMissingProfileFunction()
+    {
+        TestablePoldiPeakCollection collection(m_dummyData);
+        TS_ASSERT(collection.getProfileFunctionName().empty());
+    }
+
+
     void testIntensityTypeFromString()
     {
         TestablePoldiPeakCollection collection;

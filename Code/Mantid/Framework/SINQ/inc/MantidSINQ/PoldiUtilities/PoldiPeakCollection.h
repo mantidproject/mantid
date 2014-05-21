@@ -49,7 +49,7 @@ public:
         Integral
     };
 
-    PoldiPeakCollection();
+    PoldiPeakCollection(IntensityType intensityType = Maximum);
     PoldiPeakCollection(TableWorkspace_sptr workspace);
     virtual ~PoldiPeakCollection() {}
 
@@ -58,23 +58,34 @@ public:
     void addPeak(PoldiPeak_sptr newPeak);
     PoldiPeak_sptr peak(size_t index) const;
 
-    TableWorkspace_sptr asTableWorkspace();
-
     IntensityType intensityType() const;
+
+    void setProfileFunctionName(std::string newProfileFunction);
+    std::string getProfileFunctionName() const;
+
+    TableWorkspace_sptr asTableWorkspace();
 
 protected:
     void prepareTable(TableWorkspace_sptr table);
+    void dataToTableLog(TableWorkspace_sptr table);
     void peaksToTable(TableWorkspace_sptr table);
 
     void constructFromTableWorkspace(TableWorkspace_sptr tableWorkspace);
     bool checkColumns(TableWorkspace_sptr tableWorkspace);
-    std::string getIntensityTypeFromTable(TableWorkspace_sptr tableWorkspace);
+
+    void recoverDataFromLog(TableWorkspace_sptr TableWorkspace);
+
+    std::string getIntensityTypeFromLog(LogManager_sptr tableLog);
+    std::string getProfileFunctionNameFromLog(LogManager_sptr tableLog);
+
+    std::string getStringValueFromLog(LogManager_sptr logManager, std::string valueName);
 
     std::string intensityTypeToString(IntensityType type) const;
     IntensityType intensityTypeFromString(std::string typeString) const;
 
     std::vector<PoldiPeak_sptr> m_peaks;
     IntensityType m_intensityType;
+    std::string m_profileFunctionName;
 };
 
 typedef boost::shared_ptr<PoldiPeakCollection> PoldiPeakCollection_sptr;
