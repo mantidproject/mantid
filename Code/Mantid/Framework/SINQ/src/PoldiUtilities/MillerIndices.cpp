@@ -51,6 +51,11 @@ int MillerIndices::operator [](int index)
     return m_asVector[index];
 }
 
+bool MillerIndices::operator ==(MillerIndices &other) const
+{
+    return m_h == other.m_h && m_k == other.m_k && m_l == other.m_l;
+}
+
 const std::vector<int> &MillerIndices::asVector() const
 {
     return m_asVector;

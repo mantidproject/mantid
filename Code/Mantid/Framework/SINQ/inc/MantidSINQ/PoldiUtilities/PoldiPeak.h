@@ -53,6 +53,8 @@ public:
 
     ~PoldiPeak() {}
 
+    PoldiPeak_sptr clone() const;
+
     const MillerIndices& hkl() const;
     void setHKL(MillerIndices hkl);
 
