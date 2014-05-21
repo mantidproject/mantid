@@ -29,8 +29,7 @@ void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(Workspace2D_
     initializeFromInstrument(adapter.detector(), adapter.chopper());
 
     m_spectrum = boost::const_pointer_cast<const PoldiSourceSpectrum>(adapter.spectrum());
-    // TODO: this is always 0
-    m_deltaT = workspace2D->readX(0)[1] - workspace2D->readX(0)[1];
+    m_deltaT = workspace2D->readX(0)[1] - workspace2D->readX(0)[0];
 }
 
 void PoldiSpectrumDomainFunction::initializeFromInstrument(PoldiAbstractDetector_sptr detector, PoldiAbstractChopper_sptr chopper)
