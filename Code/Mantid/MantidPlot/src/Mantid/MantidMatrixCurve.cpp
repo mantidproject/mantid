@@ -115,36 +115,25 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
   Mantid::API::MatrixWorkspace_const_sptr matrixWS = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(workspace);
   //we need to censor the data if there is a log scale because it can't deal with negative values, only the y-axis has been found to be problem so far
   const bool log = g->isLog(QwtPlot::yLeft);
-  Axis *xAxis(NULL), *yAxis(NULL);
+
+  m_yUnits.reset(new Mantid::Kernel::Units::Label(matrixWS->YUnit(), matrixWS->YUnitLabel()));
+
   if(m_indexType == Spectrum)
   {
     QwtWorkspaceSpectrumData data(*matrixWS,m_index, log,distr);
     setData(data);
-    xAxis = matrixWS->getAxis(0);
-    yAxis = matrixWS->getAxis(1);
+    m_xUnits = matrixWS->getAxis(0)->unit();
   }
   else
   {
     QwtWorkspaceBinData data(*matrixWS, m_index,log);
     setData(data);
-    xAxis = matrixWS->getAxis(1);
-    yAxis = matrixWS->getAxis(0);
+    m_xUnits = matrixWS->getAxis(1)->unit();
   }
-  if (xAxis->unit())
-  {
-    m_xUnits = xAxis->unit();
-  }
-  else
+
+  if (!m_xUnits)
   {
     m_xUnits.reset(new Mantid::Kernel::Units::Empty());
-  }
-  if (yAxis->unit())
-  {
-    m_yUnits = yAxis->unit();
-  }
-  else
-  {
-    m_yUnits.reset(new Mantid::Kernel::Units::Empty());
   }
 
   int lineWidth = 1;
