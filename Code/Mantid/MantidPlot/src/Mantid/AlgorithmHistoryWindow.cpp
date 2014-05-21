@@ -282,7 +282,7 @@ AlgEnvHistoryGrpBox* AlgorithmHistoryWindow::createEnvHistGrpBox(const Environme
 }
 AlgHistoryProperties* AlgorithmHistoryWindow::createAlgHistoryPropWindow()
 {	
-  std::vector<PropertyHistory> histProp;
+  std::vector<PropertyHistory_sptr> histProp;
   const Mantid::API::AlgorithmHistories & entries = m_algHist.getAlgorithmHistories();
   auto rIter = entries.rbegin();
   histProp=(*rIter)->getProperties();
@@ -362,7 +362,7 @@ void AlgorithmHistoryWindow::updateAll(AlgorithmHistory_const_sptr algHistory)
 
 void AlgorithmHistoryWindow::updateAlgHistoryProperties(AlgorithmHistory_const_sptr algHistory)
 {
-  std::vector<PropertyHistory> histProp = algHistory->getProperties();
+  PropertyHistories histProp = algHistory->getProperties();
   if(m_histPropWindow)
   {  m_histPropWindow->setAlgProperties(histProp);
     m_histPropWindow->clearData();
@@ -411,7 +411,7 @@ void AlgorithmHistoryWindow::doRoll( int index )
 // AlgHistoryProperties Definitions
 //--------------------------------------------------------------------------------------------------
 
-AlgHistoryProperties::AlgHistoryProperties(QWidget*w,const std::vector<PropertyHistory>& propHist):
+AlgHistoryProperties::AlgHistoryProperties(QWidget*w,const std::vector<PropertyHistory_sptr>& propHist):
   m_Histprop(propHist)
 {
   QStringList hList;
@@ -435,11 +435,11 @@ void AlgHistoryProperties::clearData()
     }
   }
 }
-void AlgHistoryProperties::setAlgProperties( const std::vector<PropertyHistory>& histProp)
+void AlgHistoryProperties::setAlgProperties( const std::vector<PropertyHistory_sptr>& histProp)
 {
   m_Histprop.assign(histProp.begin(),histProp.end());
 }
-const std::vector<PropertyHistory>& AlgHistoryProperties:: getAlgProperties()
+const PropertyHistories& AlgHistoryProperties:: getAlgProperties()
 {
   return m_Histprop;
 }
@@ -447,19 +447,19 @@ void AlgHistoryProperties::displayAlgHistoryProperties()
 {
   QStringList propList;
   std::string sProperty;
-  for ( std::vector<Mantid::Kernel::PropertyHistory>::const_iterator pIter = m_Histprop.begin();
+  for ( std::vector<PropertyHistory_sptr>::const_iterator pIter = m_Histprop.begin();
 	pIter != m_Histprop.end(); ++pIter )
   {
-    sProperty=(*pIter).name();
+    sProperty=(*pIter)->name();
     propList.append(sProperty.c_str());
-    sProperty=(*pIter).value();
+    sProperty=(*pIter)->value();
     propList.append(sProperty.c_str());
 
-    bool bisDefault=(*pIter).isDefault();
+    bool bisDefault=(*pIter)->isDefault();
     bisDefault? (sProperty="Yes"):(sProperty="No");
 
     propList.append(sProperty.c_str());
-    int nDirection=(*pIter).direction();
+    int nDirection=(*pIter)->direction();
     switch(nDirection)
     {
     case 0:{sProperty="Input";break;}

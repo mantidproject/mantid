@@ -21,9 +21,16 @@ namespace API
   class IAlgorithm;
   class Algorithm;
   class AlgorithmHistory;
-  
+
+  using Mantid::Kernel::PropertyHistory;
+  using Mantid::Kernel::PropertyHistory_sptr;
+  using Mantid::Kernel::PropertyHistory_const_sptr;
+  using Mantid::Kernel::PropertyHistories;
+
+  //typedefs for algorithm history pointers
   typedef boost::shared_ptr<AlgorithmHistory> AlgorithmHistory_sptr;
   typedef boost::shared_ptr<const AlgorithmHistory> AlgorithmHistory_const_sptr;
+
   typedef std::set<AlgorithmHistory_sptr, 
     boost::function<bool(const AlgorithmHistory_const_sptr, const AlgorithmHistory_const_sptr)> > AlgorithmHistories;
 
@@ -88,13 +95,13 @@ public:
   ///get the execution count
   const std::size_t& execCount() const {return m_execCount;}
   /// get parameter list of algorithm in history const
-  const std::vector<Kernel::PropertyHistory>& getProperties() const {return m_properties;}
+  const Mantid::Kernel::PropertyHistories& getProperties() const {return m_properties;}
   /// get the child histories of this history object
   const AlgorithmHistories& getChildHistories() const { return m_childHistories; }
   /// Retrieve a child algorithm history by index
-  AlgorithmHistory_const_sptr getChildAlgorithmHistory(const size_t index) const;
+  AlgorithmHistory_sptr getChildAlgorithmHistory(const size_t index) const;
     /// Add operator[] access
-  AlgorithmHistory_const_sptr operator[](const size_t index) const;
+  AlgorithmHistory_sptr operator[](const size_t index) const;
   /// Retrieve the number of child algorithms
   size_t childHistorySize() const;
   /// print contents of object
@@ -135,7 +142,7 @@ private:
   /// The execution duration of the algorithm
   double m_executionDuration;
   /// The PropertyHistory's defined for the algorithm
-  std::vector<Kernel::PropertyHistory> m_properties;
+  Mantid::Kernel::PropertyHistories m_properties;
   ///count keeps track of execution order of an algorithm
   std::size_t m_execCount;
   /// set of child algorithm histories for this history record

@@ -83,7 +83,8 @@ void AlgorithmHistory::addExecutionInfo(const DateAndTime& start, const double& 
   void AlgorithmHistory::addProperty(const std::string& name,const std::string& value, bool isdefault, 
 				     const unsigned int& direction)
 {
-  m_properties.push_back(Kernel::PropertyHistory(name,value,"",isdefault, direction));
+  Kernel::PropertyHistory propHist(name,value,"",isdefault, direction);
+  m_properties.push_back(boost::make_shared<PropertyHistory>(propHist));
 }
 
 /** Add a child algorithm history to history 
@@ -114,7 +115,7 @@ size_t AlgorithmHistory::childHistorySize() const
  * @returns A pointer to an AlgorithmHistory object
  * @throws std::out_of_range error if the index is invalid
  */
-AlgorithmHistory_const_sptr AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const
+AlgorithmHistory_sptr AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const
 {
   if( index >= this->getChildHistories().size() )
   {
@@ -131,7 +132,7 @@ AlgorithmHistory_const_sptr AlgorithmHistory::getChildAlgorithmHistory(const siz
  * @returns A pointer to an AlgorithmHistory object
  * @throws std::out_of_range error if the index is invalid
  */
-AlgorithmHistory_const_sptr AlgorithmHistory::operator[](const size_t index) const
+AlgorithmHistory_sptr AlgorithmHistory::operator[](const size_t index) const
 {
   return getChildAlgorithmHistory(index);
 }
@@ -159,12 +160,12 @@ void AlgorithmHistory::printSelf(std::ostream& os, const int indent)const
     os << std::string(indent,' ') << "Execution Date: " << m_executionDate.toFormattedString() <<std::endl;
     os << std::string(indent,' ') << "Execution Duration: "<< m_executionDuration << " seconds" << std::endl;
   }
-  std::vector<Kernel::PropertyHistory>::const_iterator it;
+  PropertyHistories::const_iterator it;
   os << std::string(indent,' ') << "Parameters:" <<std::endl;
 
   for (it=m_properties.begin();it!=m_properties.end();++it)
   {
-    it->printSelf( os, indent+2 );
+    (*it)->printSelf( os, indent+2 );
   }
 }
 

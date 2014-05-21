@@ -88,7 +88,7 @@ public:
     {
       auto history = it->getAlgorithmHistory();
       auto props = history->getProperties();
-      TS_ASSERT_EQUALS(props[0].value(), "alg" + boost::lexical_cast<std::string>(i+1) );
+      TS_ASSERT_EQUALS(props[0]->value(), "alg" + boost::lexical_cast<std::string>(i+1) );
     }
 
   }
@@ -106,7 +106,7 @@ public:
     std::vector<std::string> propNames(items.size());
     for (size_t i=0;i<items.size();++i)
     {
-      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
     
     TS_ASSERT_EQUALS(propNames[0], "alg1")
@@ -130,7 +130,7 @@ public:
     std::vector<std::string> propNames(items.size());
     for (size_t i=0;i<items.size();++i)
     {
-      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
     
     //check it unrolled properly
@@ -150,7 +150,7 @@ public:
     propNames.resize(items.size());
     for (size_t i=0;i<items.size();++i)
     {
-      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     //check it rolled back up properly
@@ -174,7 +174,7 @@ public:
     std::vector<std::string> propNames(items.size());
     for (size_t i=0;i<items.size();++i)
     {
-      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     TS_ASSERT_EQUALS(propNames[0], "alg1")
@@ -193,7 +193,7 @@ public:
     propNames.resize(items.size());
     for (size_t i=0;i<items.size();++i)
     {
-      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     TS_ASSERT_EQUALS(propNames[0], "alg1")
@@ -214,7 +214,7 @@ public:
     propNames.resize(items.size());
     for (size_t i=0;i<items.size();++i)
     {
-      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     TS_ASSERT_EQUALS(propNames[0], "alg1")
@@ -235,7 +235,7 @@ public:
     std::vector<std::string> propNames(items.size());
     for (size_t i=0;i<items.size();++i)
     {
-      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     TS_ASSERT_EQUALS(propNames[0], "alg1")
@@ -260,7 +260,7 @@ public:
     std::vector<std::string> propNames(items.size());
     for (size_t i=0;i<items.size();++i)
     {
-      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0].value();
+      propNames[i] = items[i].getAlgorithmHistory()->getProperties()[0]->value();
     }
 
     TS_ASSERT_EQUALS(propNames[0], "alg1")
@@ -279,7 +279,7 @@ public:
     {
       auto history = it->getAlgorithmHistory();
       auto props = history->getProperties();
-      TS_ASSERT_EQUALS(props[0].value(), "alg" + boost::lexical_cast<std::string>(i+1) );
+      TS_ASSERT_EQUALS(props[0]->value(), "alg" + boost::lexical_cast<std::string>(i+1) );
     }
   }
 

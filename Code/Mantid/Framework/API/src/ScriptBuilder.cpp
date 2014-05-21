@@ -131,13 +131,13 @@ const std::string ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_spt
  * @param propHistory :: reference to a property history object
  * @returns std::string for this property
  */
-const std::string ScriptBuilder::buildPropertyString(const Mantid::Kernel::PropertyHistory& propHistory)
+const std::string ScriptBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory)
 {
   std::string prop = ""; 
   
-  if (!propHistory.isDefault())
+  if (!propHistory->isDefault())
   {
-    prop = propHistory.name() + "='" + propHistory.value() + "'";
+    prop = propHistory->name() + "='" + propHistory->value() + "'";
   }
 
   return prop;

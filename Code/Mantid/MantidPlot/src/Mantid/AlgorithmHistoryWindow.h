@@ -172,15 +172,15 @@ class AlgHistoryProperties: public QObject
 {
   Q_OBJECT
   public:
-  AlgHistoryProperties(QWidget*w,const std::vector<Mantid::Kernel::PropertyHistory>& propHist);
+  AlgHistoryProperties(QWidget*w,const std::vector<Mantid::Kernel::PropertyHistory_sptr>& propHist);
   void displayAlgHistoryProperties();
   void clearData();
-  void setAlgProperties( const std::vector<Mantid::Kernel::PropertyHistory>& histProp);
-  const std::vector<Mantid::Kernel::PropertyHistory>& getAlgProperties();
+  void setAlgProperties( const std::vector<Mantid::Kernel::PropertyHistory_sptr>& histProp);
+  const PropertyHistories& getAlgProperties();
 public:
   QTreeWidget *m_histpropTree;
 private:
-  std::vector<Mantid::Kernel::PropertyHistory> m_Histprop;
+  std::vector<Mantid::Kernel::PropertyHistory_sptr> m_Histprop;
 };
 #endif
 
