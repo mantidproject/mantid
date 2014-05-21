@@ -4,7 +4,10 @@
 #include "MantidKernel/System.h"
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IDomainCreator.h"
+#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
+
 
 namespace Mantid
 {
@@ -34,6 +37,8 @@ namespace Poldi
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
+using namespace Mantid::API;
+
 class MANTID_SINQ_DLL PoldiCalculateSpectrum2D  : public API::Algorithm
 {
 public:
@@ -49,7 +54,8 @@ private:
     void init();
     void exec();
 
-
+    PoldiPeakCollection_sptr getPeakCollection(TableWorkspace_sptr peakTable);
+    boost::shared_ptr<MultiDomainFunction> getMultiDomainFunctionFromPeakCollection(PoldiPeakCollection_sptr peakCollection);
 };
 
 

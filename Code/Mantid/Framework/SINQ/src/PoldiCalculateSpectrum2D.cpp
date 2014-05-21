@@ -5,9 +5,12 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidSINQ/PoldiCalculateSpectrum2D.h"
 
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
+
+#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 
 namespace Mantid
 {
@@ -57,22 +60,47 @@ namespace Poldi
    */
   void PoldiCalculateSpectrum2D::init()
   {
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input), "An input workspace.");
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input), "Measured POLDI 2D-spectrum.");
+    declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakWorkspace", "", Direction::Input), "Table workspace with peak information.");
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), "Calculated POLDI 2D-spectrum");
   }
 
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
+  boost::shared_ptr<MultiDomainFunction> PoldiCalculateSpectrum2D::getMultiDomainFunctionFromPeakCollection(PoldiPeakCollection_sptr peakCollection)
+  {
+      boost::shared_ptr<MultiDomainFunction> mdFunction(new MultiDomainFunction);
+
+      for(size_t i = 0; i < peakCollection->peakCount(); ++i) {
+          PoldiPeak_sptr peak = peakCollection->peak(i);
+
+          IFunction_sptr peakFunction = FunctionFactory::Instance().createFunction("PoldiSpectrumDomainFunction");
+          peakFunction->setParameter("Area", peak->intensity());
+          peakFunction->setParameter("Fwhm", peak->fwhm(PoldiPeak::AbsoluteD));
+          peakFunction->setParameter("Centre", peak->d());
+
+          mdFunction->addFunction(peakFunction);
+      }
+
+      return mdFunction;
+  }
+
   void PoldiCalculateSpectrum2D::exec()
   {
-      IFunction_sptr peakFunction = FunctionFactory::Instance().createFunction("PoldiSpectrumDomainFunction");
-      peakFunction->setParameter("Area", 1.9854805);
-      peakFunction->setParameter("Fwhm", 0.00274463167);
-      peakFunction->setParameter("Centre", 1.1086444);
+      TableWorkspace_sptr peakTable = getProperty("PoldiPeakWorkspace");
 
-      boost::shared_ptr<MultiDomainFunction> mdFunction(new MultiDomainFunction);
-      mdFunction->addFunction(peakFunction);
+      if(!peakTable) {
+          throw std::runtime_error("Cannot proceed without peak workspace.");
+      }
+
+      PoldiPeakCollection_sptr peakCollection = getPeakCollection(peakTable);
+
+      if(peakCollection->intensityType() != PoldiPeakCollection::Integral) {
+          throw std::runtime_error("Peaks intensities need to be integral.");
+      }
+
+      boost::shared_ptr<MultiDomainFunction> mdFunction = getMultiDomainFunctionFromPeakCollection(peakCollection);
 
       MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
 
@@ -96,10 +124,18 @@ namespace Poldi
 
       fit->setProperty("CreateOutput", true);
       fit->setProperty("MaxIterations", 0);
+      fit->setProperty("CalcErrors", false);
 
       fit->execute();
+  }
 
-      setProperty("OutputWorkspace", fit->getPropertyValue("OutputWorkspace"));
+  PoldiPeakCollection_sptr PoldiCalculateSpectrum2D::getPeakCollection(TableWorkspace_sptr peakTable)
+  {
+      try {
+          return PoldiPeakCollection_sptr(new PoldiPeakCollection(peakTable));
+      } catch(...) {
+          throw std::runtime_error("Could not initialize peak collection.");
+      }
   }
   // TODO Auto-generated execute stub
 
