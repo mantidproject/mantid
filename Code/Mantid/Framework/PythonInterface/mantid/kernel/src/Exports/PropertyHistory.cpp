@@ -11,7 +11,7 @@ using namespace boost::python;
 
 void export_PropertyHistory()
 {
-  register_ptr_to_python<PropertyHistory*>();
+  register_ptr_to_python<Mantid::Kernel::PropertyHistory_sptr>();
 
   class_<PropertyHistory>("PropertyHistory", no_init)
     

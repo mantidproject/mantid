@@ -155,7 +155,6 @@ public:
   void test_Build_Simple()
   {
     std::string result[] = {
-      "",
       "TopLevelAlgorithm(InputWorkspace='test_input_workspace', OutputWorkspace='test_output_workspace')",
       ""
     };
@@ -191,20 +190,17 @@ public:
   void test_Build_Unrolled()
   {
     std::string result[] = {
+      "",
       "# Child algorithms of TopLevelAlgorithm",
       "## Child algorithms of NestedAlgorithm",
-      "",
       "BasicAlgorithm(PropertyA='FirstOne')",
       "BasicAlgorithm(PropertyA='SecondOne')",
-      "",
       "## End of child algorithms of NestedAlgorithm",
+      "",
       "## Child algorithms of NestedAlgorithm",
-      "",
       "BasicAlgorithm(PropertyA='FirstOne')",
       "BasicAlgorithm(PropertyA='SecondOne')",
-      "",
       "## End of child algorithms of NestedAlgorithm",
-      "",
       "# End of child algorithms of TopLevelAlgorithm",
       "",
     };
@@ -217,7 +213,7 @@ public:
     alg->setRethrows(true);
     alg->setProperty("InputWorkspace", input);
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
-    alg->execute();
+    alg->execute();    
 
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
@@ -243,16 +239,19 @@ public:
   void test_Partially_Unrolled()
   {
     std::string result[] = {
+      "",
       "# Child algorithms of TopLevelAlgorithm",
       "## Child algorithms of NestedAlgorithm",
-      "",
       "BasicAlgorithm(PropertyA='FirstOne')",
       "BasicAlgorithm(PropertyA='SecondOne')",
-      "",
       "## End of child algorithms of NestedAlgorithm",
       "",
       "NestedAlgorithm()",
+      "# End of child algorithms of TopLevelAlgorithm",
       "",
+      "# Child algorithms of TopLevelAlgorithm",
+      "NestedAlgorithm()",
+      "NestedAlgorithm()",
       "# End of child algorithms of TopLevelAlgorithm",
       "",
     };
@@ -267,12 +266,19 @@ public:
     alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
     alg->execute();
 
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("InputWorkspace", "test_output_workspace");
+    alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
+    alg->execute();
+    
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
 
     HistoryView view(ws->getHistory());
     view.unroll(0);
     view.unroll(1);
+    view.unroll(5);
 
     ScriptBuilder builder(view);
     std::string scriptText = builder.build();

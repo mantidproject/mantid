@@ -9,25 +9,26 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 
-// 'Empty' algorithm class for tests
-class testalg : public Algorithm
-{
-public:
-  testalg() : Algorithm() {}
-  virtual ~testalg() {}
-  const std::string name() const { return "testalg";} ///< Algorithm's name for identification
-  int version() const  { return 1;} ///< Algorithm's version for identification
-  const std::string category() const { return "Cat";} ///< Algorithm's category for identification
-
-  void init()
-  {
-    declareProperty("name","",Direction::Input);
-  }
-  void exec() {}
-};
-
 class HistoryViewTest : public CxxTest::TestSuite
 {
+
+  // 'Empty' algorithm class for tests
+  class testalg : public Algorithm
+  {
+  public:
+    testalg() : Algorithm() {}
+    virtual ~testalg() {}
+    const std::string name() const { return "testalg";} ///< Algorithm's name for identification
+    int version() const  { return 1;} ///< Algorithm's version for identification
+    const std::string category() const { return "Cat";} ///< Algorithm's category for identification
+
+    void init()
+    {
+      declareProperty("name","",Direction::Input);
+    }
+    void exec() {}
+  };
+
 private:
   AlgorithmHistory_sptr createFromTestAlg(const std::string& name )
   {    

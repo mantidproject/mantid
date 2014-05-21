@@ -47,16 +47,22 @@ void ScriptBuilder::writeHistoryToStream(std::ostringstream& os, std::vector<His
   auto algHistory = iter->getAlgorithmHistory();
   if(iter->isUnrolled())
   {
+    if(boost::prior(iter) != m_historyItems.begin()
+        && !boost::prior(iter)->isUnrolled())
+    {
+      os << "\n";
+    }
+
     os << std::string(depth, '#');
     os << " Child algorithms of " << algHistory->name() << "\n";
-    
+
     //don't create a line for the algorithm, just output its children
     buildChildren(os, iter, depth+1);
     
     os << std::string(depth, '#');
     os << " End of child algorithms of " << algHistory->name() << "\n";
-
-    if(boost::next(iter) != m_historyItems.cend() 
+    
+    if(boost::next(iter) != m_historyItems.end()
         && !boost::next(iter)->isUnrolled())
     {
       os << "\n";
@@ -64,11 +70,6 @@ void ScriptBuilder::writeHistoryToStream(std::ostringstream& os, std::vector<His
   }
   else
   {
-    if(boost::prior(iter) != m_historyItems.cbegin() 
-        && boost::prior(iter)->isUnrolled())
-    {
-      // os << "\n";
-    }
     //create the string for this algorithm
     os << buildAlgorithmString(algHistory) << "\n";
   }
@@ -91,7 +92,6 @@ void ScriptBuilder::buildChildren(std::ostringstream& os, std::vector<HistoryIte
   {
     writeHistoryToStream(os, iter, depth);
   }
-  os << "\n";
   --iter;
 }
 
@@ -118,9 +118,12 @@ const std::string ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_spt
   }
 
   std::string propStr = properties.str();
-  //remove trailing comma & space
-  propStr.erase(propStr.size()-1);
-  propStr.erase(propStr.size()-1);
+  if (propStr.length() > 0)
+  {  
+    //remove trailing comma & space
+    propStr.erase(propStr.size()-1);
+    propStr.erase(propStr.size()-1);
+  }
 
   return name + "(" + propStr + ")";
 }
