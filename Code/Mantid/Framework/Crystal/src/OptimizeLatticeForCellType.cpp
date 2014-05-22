@@ -88,6 +88,8 @@ namespace Mantid
     declareProperty( "Tolerance", 0.12, "Indexing Tolerance");
     declareProperty("EdgePixels",0, "Remove peaks that are at pixels this close to edge. " );
     declareProperty(new PropertyWithValue<double>("OutputChi2", 0.0,Direction::Output),"Returns the goodness of the fit");
+    declareProperty(new FileProperty("OutputDirectory", ".", FileProperty::Directory),
+            "The directory where the per run peaks files and orientation matrices will be written.");
 
       //Disable default gsl error handler (which is to call abort!)
       gsl_set_error_handler_off();
@@ -106,6 +108,9 @@ namespace Mantid
       int edge 		= this->getProperty("EdgePixels");
       std::string cell_type = getProperty("CellType");
       DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
+      std::string outputdir = getProperty("OutputDirectory");
+      if (outputdir[outputdir.size()-1] != '/')
+        outputdir += "/";
       std::vector<DataObjects::PeaksWorkspace_sptr> runWS;
 
       for (int i= int(ws->getNumberPeaks())-1; i>=0; --i)
@@ -314,16 +319,16 @@ namespace Mantid
 		  // Save Peaks
 		  Mantid::API::IAlgorithm_sptr savePks_alg = createChildAlgorithm("SaveIsawPeaks");
 		  savePks_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
-		  savePks_alg->setProperty("Filename", "ls"+runWS[i_run]->getName()+".integrate");
+		  savePks_alg->setProperty("Filename", outputdir + "ls"+runWS[i_run]->getName()+".integrate");
 		  savePks_alg->executeAsChildAlg();
-		  g_log.notice() <<"See output file: " << "ls"+runWS[i_run]->getName()+".integrate" << "\n";
+		  g_log.notice() <<"See output file: " << outputdir + "ls"+runWS[i_run]->getName()+".integrate" << "\n";
 		  // Save UB
 		  Mantid::API::IAlgorithm_sptr saveUB_alg = createChildAlgorithm("SaveIsawUB");
 		  saveUB_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
-		  saveUB_alg->setProperty("Filename", "ls"+runWS[i_run]->getName()+".mat");
+		  saveUB_alg->setProperty("Filename", outputdir + "ls"+runWS[i_run]->getName()+".mat");
 		  saveUB_alg->executeAsChildAlg();
 		  // Show the names of files written
-		  g_log.notice() <<"See output file: " << "ls"+runWS[i_run]->getName()+".mat" << "\n";
+		  g_log.notice() <<"See output file: " << outputdir + "ls"+runWS[i_run]->getName()+".mat" << "\n";
       }
     }
     //-----------------------------------------------------------------------------------------
