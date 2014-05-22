@@ -49,6 +49,7 @@ namespace Algorithms
     double getEndOverlap(const double& min, const double& max) const;
     Mantid::MantidVec getRebinParams(Mantid::API::MatrixWorkspace_sptr& lhsWS, Mantid::API::MatrixWorkspace_sptr& rhsWS) const;
     Mantid::API::MatrixWorkspace_sptr rebin(Mantid::API::MatrixWorkspace_sptr& input, const Mantid::MantidVec& params);
+    Mantid::API::MatrixWorkspace_sptr integration(Mantid::API::MatrixWorkspace_sptr& input, const double& start, const double& stop);
 
   };
 

@@ -104,7 +104,8 @@ namespace Mantid
           "Start overlap x-value in units of x-axis. Optional.");
       declareProperty(new PropertyWithValue<double>("EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
           "End overlap x-value in units of x-axis. Optional.");
-      declareProperty(new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true)),
+      declareProperty(
+          new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true)),
           "Rebinning Parameters. See Rebin for format. If only a single value is provided, start and end are taken from input workspaces.");
       declareProperty(new PropertyWithValue<bool>("ScaleRHSWorkspace", true, Direction::Input),
           "Scaling either with respect to workspace 1 or workspace 2");
@@ -217,6 +218,17 @@ namespace Mantid
       return outWS;
     }
 
+    MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr& input, const double& start, const double& stop)
+    {
+      auto integration = this->createChildAlgorithm("Integration");
+      integration->setProperty("InputWorkspace", input);
+      integration->setProperty("RangeLower", start);
+      integration->setProperty("RangeUpper", stop);
+      integration->execute();
+      MatrixWorkspace_sptr outWS = integration->getProperty("OutputWorkspace");
+      return outWS;
+    }
+
     //----------------------------------------------------------------------------------------------
     /** Execute the algorithm.
      */
@@ -244,11 +256,54 @@ namespace Mantid
 
       MantidVec params = getRebinParams(lhsWS, rhsWS);
 
+      const double& xMin = params.front();
+      const double& xMax = params.back();
+
+      if (startOverlap < xMin)
+      {
+        std::string message =
+            boost::str(
+                boost::format(
+                    "Stitch1D StartOverlap is outside the available X range after rebinning. StartOverlap: %10.9f, X min: %10.9f")
+                    % startOverlap % xMin);
+
+        throw std::runtime_error(message);
+      }
+      if (endOverlap > xMax)
+      {
+        std::string message =
+            boost::str(
+                boost::format(
+                    "Stitch1D EndOverlap is outside the available X range after rebinning. EndOverlap: %10.9f, X max: %10.9f")
+                    % endOverlap % xMax);
+
+        throw std::runtime_error(message);
+      }
+
       auto rebinnedLHS = rebin(lhsWS, params);
       auto rebinnedRHS = rebin(rhsWS, params);
 
+      auto rhsOverlapIntegrated = integration(rebinnedRHS, startOverlap, endOverlap);
+      auto lhsOverlapIntegrated = integration(rebinnedLHS, startOverlap, endOverlap);
+
+      auto y1 = lhsOverlapIntegrated->readY(0);
+      auto y2 = lhsOverlapIntegrated->readY(0);
+      double scaleFactor = 0;
+      if(rhsOverlapIntegrated)
+      {
+        MatrixWorkspace_sptr ratio = lhsOverlapIntegrated/rhsOverlapIntegrated;
+        rebinnedRHS =  rebinnedRHS * ratio;
+        scaleFactor = y1[0]/y2[0];
+      }
+      else
+      {
+        MatrixWorkspace_sptr ratio = rhsOverlapIntegrated/lhsOverlapIntegrated;
+        rebinnedLHS =  rebinnedLHS * ratio;
+        scaleFactor = y2[0]/y1[0];
+      }
+
       setProperty("OutputWorkspace", rhsWS);
-      setProperty("OutScaleFactor", 99.0);
+      setProperty("OutScaleFactor", scaleFactor);
 
     }
 

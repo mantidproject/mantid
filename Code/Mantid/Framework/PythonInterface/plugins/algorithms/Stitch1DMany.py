@@ -82,7 +82,7 @@ class Stitch1DMany(PythonAlgorithm):
         alg.execute()
         out_ws = alg.getProperty("OutputWorkspace").value
         scale_factor = alg.getProperty("OutScaleFactor").value
-        
+        logger.warning(scale_factor)
        
         #out_ws, scale_factor = Stitch1D(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, StartOverlap=start_overlap, EndOverlap=end_overlap, 
         #                                Params=params, ScaleRHSWorkspace=scale_rhs_ws, UseManualScaleFactor=use_manual_scale_factor, ManualScaleFactor=manual_scale_factor, OutputWorkspace=out_name)
