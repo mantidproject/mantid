@@ -112,11 +112,13 @@ public:
         TestablePoldiPeakCollection other(table);
 
         TS_ASSERT_EQUALS(other.getProfileFunctionName(), "Gaussian");
+        TS_ASSERT(other.hasProfileFunctionName());
     }
 
     void testMissingProfileFunction()
     {
         TestablePoldiPeakCollection collection(m_dummyData);
+        TS_ASSERT(!collection.hasProfileFunctionName());
         TS_ASSERT(collection.getProfileFunctionName().empty());
     }
 

@@ -62,6 +62,7 @@ public:
 
     void setProfileFunctionName(std::string newProfileFunction);
     std::string getProfileFunctionName() const;
+    bool hasProfileFunctionName() const;
 
     TableWorkspace_sptr asTableWorkspace();
 

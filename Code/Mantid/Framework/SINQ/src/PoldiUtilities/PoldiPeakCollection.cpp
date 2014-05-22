@@ -63,6 +63,11 @@ std::string PoldiPeakCollection::getProfileFunctionName() const
     return m_profileFunctionName;
 }
 
+bool PoldiPeakCollection::hasProfileFunctionName() const
+{
+    return !m_profileFunctionName.empty();
+}
+
 TableWorkspace_sptr PoldiPeakCollection::asTableWorkspace()
 {
     TableWorkspace_sptr peaks = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
