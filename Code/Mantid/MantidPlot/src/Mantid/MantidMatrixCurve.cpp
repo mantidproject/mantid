@@ -116,18 +116,23 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
   //we need to censor the data if there is a log scale because it can't deal with negative values, only the y-axis has been found to be problem so far
   const bool log = g->isLog(QwtPlot::yLeft);
 
+  // Y units are the same for both spectrum and bin plots, e.g. counts
   m_yUnits.reset(new Mantid::Kernel::Units::Label(matrixWS->YUnit(), matrixWS->YUnitLabel()));
 
-  if(m_indexType == Spectrum)
+  if(m_indexType == Spectrum) // Spectrum plot
   {
     QwtWorkspaceSpectrumData data(*matrixWS,m_index, log,distr);
     setData(data);
+
+    // For spectrum plots, X axis are actual X axis, e.g. TOF
     m_xUnits = matrixWS->getAxis(0)->unit();
   }
-  else
+  else // Bin plot
   {
     QwtWorkspaceBinData data(*matrixWS, m_index,log);
     setData(data);
+
+    // For bin plots, X axis are "spectra axis", e.g. spectra numbers
     m_xUnits = matrixWS->getAxis(1)->unit();
   }
 
