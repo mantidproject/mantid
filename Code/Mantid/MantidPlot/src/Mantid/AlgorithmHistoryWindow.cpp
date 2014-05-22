@@ -321,20 +321,11 @@ void AlgorithmHistoryWindow::writeToScriptFile()
   // An empty string indicates they clicked cancel
   if( filePath.isEmpty() ) return;
   
-  IAlgorithm_sptr genPyScript = AlgorithmManager::Instance().createUnmanaged("GeneratePythonScript");
-  genPyScript->initialize();
-  genPyScript->setChild(true); // Use as utility
-  genPyScript->setRethrows(true); // Make it throw to catch errors messages and display them in a more obvious place for this window
-  genPyScript->setPropertyValue("InputWorkspace",m_wsName.toStdString());
-  genPyScript->setPropertyValue("Filename",filePath.toStdString());
-  try
-  {
-    genPyScript->execute();
-  }
-  catch(std::exception &)
-  {
-    QMessageBox::information(this, "Generate Python Script", "Unable to generate script, see log window for details.");
-  }
+  ScriptBuilder builder(m_view);
+  std::ofstream file(filePath.toStdString().c_str(), std::ofstream::trunc);
+  file << builder.build();
+  file.flush();
+  file.close();
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filePath).absoluteDir().path());
 }
