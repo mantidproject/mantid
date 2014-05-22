@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/PoldiPeakSearch.cpp
 	src/PoldiRemoveDeadWires.cpp
 	src/PoldiUtilities/MillerIndices.cpp
+        src/PoldiUtilities/PeakFunctionIntegrator.cpp
 	src/PoldiUtilities/PoldiAutoCorrelationCore.cpp
 	src/PoldiUtilities/PoldiBasicChopper.cpp
 	src/PoldiUtilities/PoldiChopperFactory.cpp
@@ -52,6 +53,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiRemoveDeadWires.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndices.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndicesIO.h
+        inc/MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h
 	inc/MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h
 	inc/MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h
 	inc/MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h
@@ -83,6 +85,7 @@ set ( TEST_FILES
 	MDHistoToWorkspace2DTest.h
 	MillerIndicesIOTest.h
 	MillerIndicesTest.h
+        PeakFunctionIntegratorTest.h
 	PoldiAutoCorrelationCoreTest.h
 	PoldiBasicChopperTest.h
 	PoldiChopperFactoryTest.h
