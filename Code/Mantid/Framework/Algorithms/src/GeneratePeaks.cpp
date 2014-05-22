@@ -1,3 +1,40 @@
+<<<<<<< HEAD
+=======
+/*WIKI*
+
+
+Generate a workspace by summing over the peak functions.
+The peaks' parameters are given in a [[TableWorkspace]].
+
+==== Peak Parameters ====
+Peak parameters must have the following parameters, which are case sensitive in input [[TableWorkspace]]
+ 1. spectrum
+ 2. centre
+ 3. height
+ 4. width (FWHM)
+ 5. backgroundintercept (a0)
+ 6. backgroundslope (a1)
+ 7. A2
+ 8. chi2
+
+==== Output ====
+ Output will include
+ 1. pure peak
+ 2. pure background (with specified range of FWHM (int))
+ 3. peak + background
+
+== Use cases ==
+1. A user specifies the peak and background type.  Then he inputs the values of funtions parameters.
+
+2. A user uses FindPeaks to find and fit several peaks.  Then he plots the output from FindPeaks by calling GeneratePeaks via the TableWorkspace.
+
+[[Category:Algorithms]]
+
+{{AlgorithmLinks|GeneratePeaks}}
+
+
+*WIKI*/
+>>>>>>> Refs #9358. Enhancing the usability (in progress).
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -90,9 +127,40 @@ namespace Algorithms
    */
   void GeneratePeaks::init()
   {
-    declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("PeakParametersWorkspace", "", Direction::Input),
+    auto paramwsprop = new API::WorkspaceProperty<DataObjects::TableWorkspace>("PeakParametersWorkspace", "", Direction::Input,
+                                                                               PropertyMode::Optional);
+    declareProperty(paramwsprop,
                     "Input TableWorkspace for peak's parameters.");
 
+#if 1
+    // Peak properties
+    std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
+    std::vector<std::string> peakFullNames = addFunctionParameterNames(peakNames);
+    declareProperty("PeakType", "", boost::make_shared<StringListValidator>(peakFullNames),
+                    "Peak function type. ");
+
+    for (size_t i = 0; i < peakFullNames.size(); ++i)
+      g_log.notice() << "Peak function " << i << ": " << peakFullNames[i] << "\n";
+
+    declareProperty(new ArrayProperty<double>("PeakParameterValues"),
+                    "List of peak parameter values.  They must have a 1-to-1 mapping to PeakParameterNames list. ");
+
+    // Background properties
+    std::vector<std::string> bkgdtypes;
+    bkgdtypes.push_back("Auto");
+    bkgdtypes.push_back("Flat (A0)");
+    bkgdtypes.push_back("Linear (A0, A1)");
+    bkgdtypes.push_back("Quadratic (A0, A1, A2)");
+    bkgdtypes.push_back("Flat");
+    bkgdtypes.push_back("Linear");
+    bkgdtypes.push_back("Quadratic");
+    declareProperty("BackgroundType", "Linear", boost::make_shared<StringListValidator>(bkgdtypes),
+                    "Type of Background.");
+
+    declareProperty(new ArrayProperty<double>("BackgroundParameterValues"),
+                    "List of background parameter values.  They must have a 1-to-1 mapping to PeakParameterNames list. ");
+
+#else
     declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(
                       FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>()),
                     "Peak function to calculate.");
@@ -102,9 +170,13 @@ namespace Algorithms
     bkgdnames.push_back("Auto");
     declareProperty("BackgroundFunction", "FlatBackground", boost::make_shared<StringListValidator>(bkgdnames),
                     "Background function to calculate. ");
+#endif
 
     declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
                     "InputWorkspace (optional) to take information for the instrument, and where to evaluate the x-axis.");
+
+    declareProperty("WorkspaceIndex", 0, "Spectrum of the peak to be generated.  "
+                    "It is only applied to the case by input parameter values in vector format. ");
 
     declareProperty(
           new Kernel::ArrayProperty<double>("BinningParameters", boost::make_shared<Kernel::RebinParamsValidator>(true)),
@@ -142,8 +214,11 @@ namespace Algorithms
     createFunction(peaktype, bkgdtype);
 
     // Process parameter table
-    processTableColumnNames();
-    getSpectraSet(m_funcParamWS);
+    if (m_useFuncParamWS)
+    {
+      processTableColumnNames();
+      getSpectraSet(m_funcParamWS);
+    }
 
     // Create output workspace
     API::MatrixWorkspace_sptr outputWS = createOutputWorkspace();
@@ -151,7 +226,14 @@ namespace Algorithms
 
     // Generate peaks
     std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > > functionmap;
-    importPeaksFromTable(functionmap);
+    if (m_useFuncParamWS)  importPeaksFromTable(functionmap);
+    else
+    {
+      std::vector<std::pair<double, API::IFunction_sptr> > vecpeakfunc;
+      importPeakFromVector(vecpeakfunc);
+      functionmap.insert(std::make_pair(m_wsIndex, vecpeakfunc));
+    }
+
     generatePeaks(functionmap, outputWS);
 
     return;
@@ -162,11 +244,23 @@ namespace Algorithms
     */
   void GeneratePeaks::processAlgProperties(std::string& peakfunctype, std::string& bkgdfunctype)
   {
-    // Get properties
-    m_funcParamWS = getProperty("PeakParametersWorkspace");
+    // Function parameters
+    std::string paramwsname = getPropertyValue("PeakParametersWorkspace");
+    if (paramwsname.size() > 0)
+    {
+      // Using parameter table workspace has a higher priority
+      m_useFuncParamWS = true;
+      m_funcParamWS = getProperty("PeakParametersWorkspace");
+    }
+    else
+    {
+      m_useFuncParamWS = false;
+      m_vecPeakParamValues = getProperty("PeakParameterValues");
+      m_vecBkgdParamValues = getProperty("BackgroundParameterValues");
+    }
 
-    peakfunctype = getPropertyValue("PeakFunction");
-    bkgdfunctype = getPropertyValue("BackgroundFunction");
+    peakfunctype = getPropertyValue("PeakType");
+    bkgdfunctype = getPropertyValue("BackgroundType");
     if (bkgdfunctype.compare("Auto") == 0)
     {
       m_useAutoBkgd = true;
@@ -188,6 +282,15 @@ namespace Algorithms
     // Special properties related
     m_maxChi2 = this->getProperty("MaxAllowedChi2");
     m_numPeakWidth = this->getProperty("NumberWidths");
+
+    // Spectrum set if not using parameter table workspace
+    // One and only one peak
+    if (!m_useFuncParamWS)
+    {
+      m_wsIndex = getProperty("WorkspaceIndex");
+      m_spectraSet.insert(static_cast<specid_t>(m_wsIndex));
+      m_SpectrumMap.insert(std::make_pair(static_cast<specid_t>(m_wsIndex), 0));
+    }
 
     return;
   }
@@ -305,6 +408,44 @@ namespace Algorithms
       std::vector<std::pair<double, API::IFunction_sptr> >& vec_centrefunc = mapiter->second;
       std::sort(vec_centrefunc.begin(), vec_centrefunc.end());
     }
+
+    return;
+  }
+
+  /** Import one and only one function vector input
+   */
+  void GeneratePeaks::importPeakFromVector(std::vector<std::pair<double, API::IFunction_sptr> >& functionmap)
+  {
+    API::CompositeFunction_sptr compfunc = boost::make_shared<API::CompositeFunction>();
+
+    // Set up and clone peak function
+    size_t numpeakparams = m_peakFunction->nParams();
+    if (m_vecPeakParamValues.size() != numpeakparams)
+      throw std::runtime_error("Number of peak parameters' value is not correct. ");
+    else
+    {
+      for (size_t i = 0; i < numpeakparams; ++i)
+        m_peakFunction->setParameter(i, m_vecPeakParamValues[i]);
+    }
+    compfunc->addFunction(m_peakFunction->clone());
+
+    // Set up and clone background function
+    if (m_genBackground)
+    {
+      size_t numbkgdparams = m_bkgdFunction->nParams();
+      if (m_vecBkgdParamValues.size() != numbkgdparams)
+        throw std::runtime_error("Number of background parameters' value is not correct. ");
+      else
+      {
+        for (size_t i = 0; i < numbkgdparams; ++i)
+          m_bkgdFunction->setParameter(i, m_vecBkgdParamValues[i]);
+      }
+      compfunc->addFunction(m_bkgdFunction->clone());
+    }
+
+    // Set up function map
+    double centre = m_peakFunction->centre();
+    functionmap.push_back(std::make_pair(centre, compfunc));
 
     return;
   }
@@ -679,6 +820,38 @@ namespace Algorithms
     }
 
     return ws;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Add function's parameter names after peak function name
+    */
+  std::vector<std::string> GeneratePeaks::addFunctionParameterNames(std::vector<std::string> funcnames)
+  {
+    std::vector<std::string> vec_funcparnames;
+
+    for (size_t i = 0; i < funcnames.size(); ++i)
+    {
+      // Add original name in
+      vec_funcparnames.push_back(funcnames[i]);
+
+      // Add a full function name and parameter names in
+      IFunction_sptr tempfunc = FunctionFactory::Instance().createFunction(funcnames[i]);
+
+      std::stringstream parnamess;
+      parnamess << funcnames[i] << " (";
+      std::vector<std::string> funcpars = tempfunc->getParameterNames();
+      for (size_t j = 0; j < funcpars.size(); ++j)
+      {
+        parnamess << funcpars[j];
+        if (j != funcpars.size()-1)
+          parnamess << ", ";
+      }
+      parnamess << ")";
+
+      vec_funcparnames.push_back(parnamess.str());
+    }
+
+    return vec_funcparnames;
   }
 
 
