@@ -192,6 +192,7 @@ public:
     std::string result[] = {
       "",
       "# Child algorithms of TopLevelAlgorithm",
+      "",
       "## Child algorithms of NestedAlgorithm",
       "BasicAlgorithm(PropertyA='FirstOne')",
       "BasicAlgorithm(PropertyA='SecondOne')",
@@ -201,7 +202,9 @@ public:
       "BasicAlgorithm(PropertyA='FirstOne')",
       "BasicAlgorithm(PropertyA='SecondOne')",
       "## End of child algorithms of NestedAlgorithm",
+      "",
       "# End of child algorithms of TopLevelAlgorithm",
+      "",
       "",
     };
 
@@ -241,6 +244,7 @@ public:
     std::string result[] = {
       "",
       "# Child algorithms of TopLevelAlgorithm",
+      "",
       "## Child algorithms of NestedAlgorithm",
       "BasicAlgorithm(PropertyA='FirstOne')",
       "BasicAlgorithm(PropertyA='SecondOne')",
@@ -253,6 +257,7 @@ public:
       "NestedAlgorithm()",
       "NestedAlgorithm()",
       "# End of child algorithms of TopLevelAlgorithm",
+      "",
       "",
     };
 

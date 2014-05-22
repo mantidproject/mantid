@@ -47,12 +47,7 @@ void ScriptBuilder::writeHistoryToStream(std::ostringstream& os, std::vector<His
   auto algHistory = iter->getAlgorithmHistory();
   if(iter->isUnrolled())
   {
-    if(boost::prior(iter) != m_historyItems.begin()
-        && !boost::prior(iter)->isUnrolled())
-    {
-      os << "\n";
-    }
-
+    os << "\n";
     os << std::string(depth, '#');
     os << " Child algorithms of " << algHistory->name() << "\n";
 
@@ -62,8 +57,7 @@ void ScriptBuilder::writeHistoryToStream(std::ostringstream& os, std::vector<His
     os << std::string(depth, '#');
     os << " End of child algorithms of " << algHistory->name() << "\n";
     
-    if(boost::next(iter) != m_historyItems.end()
-        && !boost::next(iter)->isUnrolled())
+    if( !boost::next(iter)->isUnrolled())
     {
       os << "\n";
     }
@@ -137,10 +131,21 @@ const std::string ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_spt
 const std::string ScriptBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory)
 {
   std::string prop = ""; 
-  
   if (!propHistory->isDefault())
   {
-    prop = propHistory->name() + "='" + propHistory->value() + "'";
+    if(propHistory->type() == "number")
+    {
+      prop = propHistory->name() + "=" + propHistory->value();
+    }
+    else if(propHistory->type() == "boolean")
+    {
+      std::string value = (propHistory->value() == "1" ? "True" : "False");
+      prop = propHistory->name() + "=" + value;
+    }
+    else
+    {
+      prop = propHistory->name() + "='" + propHistory->value() + "'";
+    }
   }
 
   return prop;
