@@ -1066,8 +1066,6 @@ void InstrumentActor::setDataMinMaxRange(double vmin, double vmax)
 
 void InstrumentActor::setDataIntegrationRange(const double& xmin,const double& xmax)
 {
-  if (!getWorkspace()) return;
-
   m_BinMinValue = xmin;
   m_BinMaxValue = xmax;
 
