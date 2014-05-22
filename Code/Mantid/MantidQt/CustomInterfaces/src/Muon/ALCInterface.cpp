@@ -24,8 +24,10 @@ namespace CustomInterfaces
   const QString ALCInterface::LABEL_FORMAT = "Step %1/%2 - %3";
 
   ALCInterface::ALCInterface(QWidget* parent)
-    : UserSubWindow(parent), m_ui(), m_dataLoading(NULL), m_baselineModelling(NULL),
-      m_peakFitting(NULL)
+    : UserSubWindow(parent), m_ui(),
+      m_dataLoading(NULL), m_baselineModelling(NULL), m_peakFitting(NULL),
+      m_baselineModellingModel(new ALCBaselineModellingModel()),
+      m_peakFittingModel(new ALCPeakFittingModel())
   {}
 
   void ALCInterface::initLayout()
@@ -40,12 +42,10 @@ namespace CustomInterfaces
     m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
     m_dataLoading->initialize();
 
-    m_baselineModellingModel = new ALCBaselineModellingModel();
     auto baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
     m_baselineModelling = new ALCBaselineModellingPresenter(baselineModellingView, m_baselineModellingModel);
     m_baselineModelling->initialize();
 
-    m_peakFittingModel = new ALCPeakFittingModel();
     auto peakFittingView = new ALCPeakFittingView(m_ui.peakFittingView);
     m_peakFitting = new ALCPeakFittingPresenter(peakFittingView, m_peakFittingModel);
     m_peakFitting->initialize();
