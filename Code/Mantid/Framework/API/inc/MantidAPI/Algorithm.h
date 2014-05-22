@@ -360,6 +360,7 @@ private:
 
   void store();
   void fillHistory();
+  void linkHistoryWithLastChild();
 
   void logAlgorithmInfo() const;
 

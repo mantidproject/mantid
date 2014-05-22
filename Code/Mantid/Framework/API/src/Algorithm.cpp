@@ -1050,47 +1050,64 @@ namespace Mantid
       //this is a child algorithm, but we still want to keep the history.
       else if (m_recordHistoryForChild && m_parentHistory)
       {
-        // iterate over the algorithms output workspaces
-        const std::vector<Property*>& algProperties = getProperties();
-        std::vector<Property*>::const_iterator it;
-        for (it = algProperties.begin(); it != algProperties.end(); ++it)
-        {
-          const IWorkspaceProperty *outputProp = dynamic_cast<IWorkspaceProperty*>(*it);
-          if (outputProp)
-          {
-            // Check we actually have a workspace, it may have been optional
-            Workspace_sptr workspace = outputProp->getWorkspace();
-            if( !workspace ) continue;
+        linkHistoryWithLastChild();
+        m_parentHistory->addChildHistory(m_history);
+      }
 
-            if((*it)->direction() == Kernel::Direction::Output)
+    }
+
+    /** 
+    * Link the name of the output workspaces on this parent algorithm.
+    * with the last child algorithm executed to ensure they match in the history.
+    *
+    * This solves the case where child algorithms use a temporary name and this
+    * name needs to match the output name of the parent algorithm so the history can be
+    * re-run.
+    */
+    void Algorithm::linkHistoryWithLastChild()
+    {
+      // iterate over the algorithms output workspaces
+      const std::vector<Property*>& algProperties = getProperties();
+      std::vector<Property*>::const_iterator it;
+      for (it = algProperties.begin(); it != algProperties.end(); ++it)
+      {
+        const IWorkspaceProperty *outputProp = dynamic_cast<IWorkspaceProperty*>(*it);
+        if (outputProp)
+        {
+          // Check we actually have a workspace, it may have been optional
+          Workspace_sptr workspace = outputProp->getWorkspace();
+          if( !workspace ) continue;
+
+          //Check it's an output workspace
+          if((*it)->direction() == Kernel::Direction::Output)
+          {
+            bool linked = false;
+            //find child histories with anonymous output workspaces
+            auto childHistories = m_history->getChildHistories();
+            auto childIter = childHistories.crbegin();
+            for (; childIter != childHistories.crend() && !linked; ++childIter)
             {
-              //find child histories with anonymous output workspaces
-              auto childHistories = m_history->getChildHistories();
-              for (auto childIter = childHistories.crbegin(); childIter != childHistories.crend(); ++childIter)
+              auto props = (*childIter)->getProperties();
+              auto propIter = props.begin(); 
+              for (; propIter != props.end() && !linked; ++propIter)
               {
-                auto props = (*childIter)->getProperties();
-                for (auto propIter = props.begin(); propIter != props.end(); ++propIter)
+                //check we have a workspace property
+                if((*propIter)->direction() == Kernel::Direction::Output)
                 {
-                  //check we have a workspace property
-                  if((*propIter)->direction() == Kernel::Direction::Output)
+                  //if the workspaces are equal, then rename the history
+                  std::ostringstream os;
+                  os << "__TMP" << outputProp->getWorkspace().get();
+                  if (os.str() == (*propIter)->value())
                   {
-                    //if the workspaces are equal, then rename the history
-                    std::ostringstream os;
-                    os << "__TMP" << outputProp->getWorkspace().get();
-                    if (os.str() == (*propIter)->value())
-                    {
-                      (*propIter)->setValue((*it)->value());
-                    }
+                    (*propIter)->setValue((*it)->value());
+                    linked = true;
                   }
                 }
               }
             }
           }
         }
-
-        m_parentHistory->addChildHistory(m_history);
       }
-
     }
 
     /** Indicates that this algrithms history should be tracked regardless of if it is a child.
