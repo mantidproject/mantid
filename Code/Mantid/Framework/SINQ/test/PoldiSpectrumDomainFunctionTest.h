@@ -7,8 +7,12 @@
 
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
+#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidCurveFitting/Gaussian.h"
+#include "MantidCurveFitting/FitMW.h"
 
 using ::testing::Return;
 
@@ -34,6 +38,8 @@ public:
 
         EXPECT_CALL(*m_chopper, zeroOffset())
                 .WillRepeatedly(Return(0.15));
+
+        m_instrument = PoldiInstrumentAdapter_sptr(new FakePoldiInstrumentAdapter);
     }
 
 
@@ -49,46 +55,6 @@ public:
         TS_ASSERT_EQUALS(parameterNames[2], "Centre");
     }
 
-    void testDetectorCharacteristics()
-    {
-        double distance = 1996.017;
-        double tof1A = 4947.990234375;
-        double twoTheta = 1.577358;
-
-        double sinTheta = 0.70942287322834615878;
-        double cosTheta = 0.70478307793280472246;
-
-        DetectorElementCharacteristics characteristics(static_cast<int>(m_detector->centralElement()), m_detector, m_chopper);
-
-        TS_ASSERT_DELTA(characteristics.twoTheta, twoTheta, 1e-6);
-        TS_ASSERT_DELTA(characteristics.distance, distance, 1e-3);
-        TS_ASSERT_DELTA(characteristics.totalDistance, distance + 11800.0, 1e-3);
-        TS_ASSERT_DELTA(characteristics.tof1A, tof1A, 1e-4);
-        TS_ASSERT_DELTA(characteristics.sinTheta, sinTheta, 1e-6);
-        TS_ASSERT_DELTA(characteristics.cosTheta, cosTheta, 1e-6);
-
-        TestablePoldiSpectrumDomainFunction function;
-        DetectorElementCharacteristics center = function.getDetectorCenterCharacteristics(m_detector, m_chopper);
-
-        TS_ASSERT_EQUALS(characteristics.twoTheta, center.twoTheta);
-        TS_ASSERT_EQUALS(characteristics.distance, center.distance);
-        TS_ASSERT_EQUALS(characteristics.totalDistance, center.totalDistance);
-        TS_ASSERT_EQUALS(characteristics.tof1A, center.tof1A);
-        TS_ASSERT_EQUALS(characteristics.sinTheta, center.sinTheta);
-        TS_ASSERT_EQUALS(characteristics.cosTheta, center.cosTheta);
-    }
-
-    void testDetectorFactors()
-    {
-        DetectorElementCharacteristics center(static_cast<int>(m_detector->centralElement()), m_detector, m_chopper);
-
-        DetectorElementData data(102, center, m_detector, m_chopper);
-
-        TS_ASSERT_DELTA(data.intensityFactor(), 1.010685, 1e-6);
-        //TS_ASSERT_DELTA(data.lambdaFactor(), 2.6941614e-4, 1e-11);
-        TS_ASSERT_DELTA(data.timeFactor(), 0.9346730, 1e-7);
-    }
-
     void testChopperSlitOffsets()
     {
         TestablePoldiSpectrumDomainFunction function;
@@ -100,67 +66,12 @@ public:
         }
     }
 
-    void testGetDetectorElementData()
-    {
-        TestablePoldiSpectrumDomainFunction function;
-        std::vector<DetectorElementData_const_sptr> elements = function.getDetectorElementData(m_detector, m_chopper);
-        DetectorElementCharacteristics center = function.getDetectorCenterCharacteristics(m_detector, m_chopper);
-
-        DetectorElementData data(102, center, m_detector, m_chopper);
-
-        TS_ASSERT_EQUALS(data.intensityFactor(), elements[102]->intensityFactor());
-        //TS_ASSERT_DELTA(data.lambdaFactor(), 2.6941614e-4, 1e-11);
-        //TS_ASSERT_DELTA(data.timeFactor(), 0.9346730, 1e-7);
-    }
-
     void testInitializeFromInstrument()
     {
         TestablePoldiSpectrumDomainFunction function;
-        function.initializeFromInstrument(m_detector, m_chopper);
+        function.initializeInstrumentParameters(m_instrument);
 
         TS_ASSERT_EQUALS(function.m_chopperSlitOffsets.size(), m_chopper->slitPositions().size());
-        TS_ASSERT_EQUALS(function.m_detectorCenter.twoTheta, m_detector->twoTheta(static_cast<int>(m_detector->centralElement())));
-        TS_ASSERT_EQUALS(function.m_detectorElementData.size(), m_detector->elementCount());
-    }
-
-    void testTimeTransformedWidth()
-    {
-        /* Values from existing analysis software */
-        double fwhm = 0.0027446316797104233;
-        double deltaT = 3.0;
-
-        TestablePoldiSpectrumDomainFunction function;
-        function.initializeFromInstrument(m_detector, m_chopper);
-        //double fwhmT = function.dToTOF(fwhm);
-        double fwhmT = fwhm * 4947.990;
-
-        TS_ASSERT_DELTA(function.timeTransformedWidth(fwhmT, 342) / deltaT, 4.526804, 1e-5);
-    }
-
-    void testTimeTransformedCentre()
-    {
-        double centre = 1.10864434901480127601;
-
-        TestablePoldiSpectrumDomainFunction function;
-        function.initializeFromInstrument(m_detector, m_chopper);
-        double centreT = function.dToTOF(centre);
-        //double centreT = centre * 4947.990;
-
-        TS_ASSERT_DELTA(function.timeTransformedCentre(centreT, 342), 5964.820800781, 1e-3);
-    }
-
-    void testTimeTransformedIntensity()
-    {
-        double centre = 1.10864434901480127601;
-        double areaD = 1.985481;
-
-        TestablePoldiSpectrumDomainFunction function;
-        function.m_spectrum = m_spectrum;
-        function.initializeFromInstrument(m_detector, m_chopper);
-        function.m_detectorEfficiency = 0.88;
-        double centreT = function.dToTOF(centre);
-        //double centreT = centre * 4947.990;
-        TS_ASSERT_DELTA(function.timeTransformedIntensity(areaD, centreT, 342), 4.611182, 1e-5);
     }
 
     void testActualFunction()
@@ -198,9 +109,8 @@ public:
         //function.setParameter("Centre", 1.10864434901480127601);
         function.setParameter("Centre", 1.1086444);//(2.0 * M_PI) / 5.667449);//1.10864434901480127601);
 
-        function.initializeFromInstrument(m_detector, m_chopper);
+        function.initializeInstrumentParameters(m_instrument);
         function.m_deltaT = 3.0;
-        function.m_spectrum = m_spectrum;
 
         std::vector<double> xvalues(500, 1.0);
 
@@ -237,6 +147,46 @@ public:
         }
     }
 
+    void testAccessThroughBasePointer()
+    {
+        TestablePoldiSpectrumDomainFunction *function = new TestablePoldiSpectrumDomainFunction();
+        function->initialize();
+        function->setParameter("Area", 1.9854805);
+        function->setParameter("Fwhm", 0.0027446316797104233);
+        //function->setParameter("Centre", 1.10864434901480127601);
+        function->setParameter("Centre", 1.1086444);//(2.0 * M_PI) / 5.667449);//1.10864434901480127601);
+
+        function->initializeInstrumentParameters(m_instrument);
+        function->m_deltaT = 3.0;
+
+        TS_ASSERT_EQUALS(function->getParameter(2), 1.1086444);
+
+        MultiDomainFunction *mdf = new MultiDomainFunction();
+        mdf->addFunction(IFunction_sptr(dynamic_cast<IFunction *>(function)));
+
+        TS_ASSERT_EQUALS(static_cast<IFunction*>(mdf)->getParameter(2), 1.1086444);
+    }
+
+    void testCreateInitialized()
+    {
+        IFunction_sptr function(new CurveFitting::Gaussian());
+        function->initialize();
+        function->setParameter(0, 1.23456);
+        function->setParameter(1, 1.234567);
+        function->setParameter(2, 0.01234567);
+
+        IFunction_sptr clone = function->clone();
+
+        // passes, Parameter 0 has less than 7 significant digits
+        TS_ASSERT_EQUALS(function->getParameter(0), clone->getParameter(0));
+
+        // fails, Parameter 1 has more than 7 significant digits
+        TS_ASSERT_EQUALS(function->getParameter(1), clone->getParameter(1));
+
+        // fails, Parameter 2 has more than 7 significant digits
+        TS_ASSERT_EQUALS(function->getParameter(2), clone->getParameter(2));
+    }
+
 private:
     class TestablePoldiSpectrumDomainFunction : PoldiSpectrumDomainFunction
     {
@@ -248,6 +198,8 @@ private:
     boost::shared_ptr<ConfiguredHeliumDetector> m_detector;
     boost::shared_ptr<MockChopper> m_chopper;
     PoldiSourceSpectrum_sptr m_spectrum;
+
+    PoldiInstrumentAdapter_sptr m_instrument;
 };
 
 

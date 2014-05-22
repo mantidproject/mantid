@@ -7,6 +7,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
+#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 
 #include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
@@ -16,6 +17,8 @@
 
 using namespace Mantid;
 using namespace Mantid::Poldi;
+
+using ::testing::Return;
 
 namespace Mantid {
 namespace Poldi {
@@ -385,6 +388,25 @@ public:
         m_spectrum.addPoint(5.94491243, 0.0287823115682);
         m_spectrum.addPoint(5.96946049, 0.0280693832282);
         m_spectrum.addPoint(5.99400759, 0.0273741231399);
+    }
+};
+
+class FakePoldiInstrumentAdapter : public PoldiInstrumentAdapter
+{
+public:
+    FakePoldiInstrumentAdapter() :
+        PoldiInstrumentAdapter()
+    {
+        MockChopper *chopper = new MockChopper;
+        m_chopper = PoldiAbstractChopper_sptr(chopper);
+        m_detector = PoldiAbstractDetector_sptr(new ConfiguredHeliumDetector);
+        m_spectrum = PoldiSourceSpectrum_sptr(new ConfiguredSpectrum);
+
+        EXPECT_CALL(*chopper, distanceFromSample())
+                .WillRepeatedly(Return(11800.0));
+
+        EXPECT_CALL(*chopper, zeroOffset())
+                .WillRepeatedly(Return(0.15));
     }
 };
 

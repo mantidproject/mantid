@@ -23,25 +23,6 @@ PoldiSpectrumDomainFunction::PoldiSpectrumDomainFunction() :
 
 }
 
-void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(Workspace2D_const_sptr workspace2D)
-{
-    PoldiInstrumentAdapter adapter(workspace2D->getInstrument(),  workspace2D->run());
-    initializeFromInstrument(adapter.detector(), adapter.chopper());
-
-    m_spectrum = boost::const_pointer_cast<const PoldiSourceSpectrum>(adapter.spectrum());
-    m_deltaT = workspace2D->readX(0)[1] - workspace2D->readX(0)[0];
-}
-
-void PoldiSpectrumDomainFunction::initializeFromInstrument(PoldiAbstractDetector_sptr detector, PoldiAbstractChopper_sptr chopper)
-{
-    m_chopperSlitOffsets = getChopperSlitOffsets(chopper);
-    //m_chopperCycleTime = chopper->cycleTime();
-
-    m_detectorCenter = getDetectorCenterCharacteristics(detector, chopper);
-    m_detectorElementData = getDetectorElementData(detector, chopper);
-    m_detectorEfficiency = 0.88;
-}
-
 void PoldiSpectrumDomainFunction::setWorkspace(boost::shared_ptr<const Workspace> ws)
 {
     Workspace2D_const_sptr workspace2D = boost::dynamic_pointer_cast<const Workspace2D>(ws);
@@ -71,16 +52,15 @@ void PoldiSpectrumDomainFunction::function(const FunctionDomain &domain, Functio
      * terminated by the position in the detector, so the index is stored.
      */
     double fwhm = getParameter("Fwhm");
-    double fwhmT = timeTransformedWidth(dToTOF(fwhm), index);
+    double fwhmT = m_timeTransformer->timeTransformedWidth(fwhm, index);
     double fwhmChannel = fwhmT / m_deltaT;
     double sigmaChannel = fwhmChannel / (2.0 * sqrt(2.0 * log(2.0)));
 
     double centre = getParameter("Centre");
-    double centreTRaw = dToTOF(centre);
-    double centreT = timeTransformedCentre(centreTRaw, index);
+    double centreT = m_timeTransformer->timeTransformedCentre(centre, index);
 
     double area = getParameter("Area");
-    double areaT = timeTransformedIntensity(area, centreTRaw, index);
+    double areaT = m_timeTransformer->timeTransformedIntensity(area, centre, index);
 
     /* Once all the factors are all there, the calculation needs to be
      * performed with one offset per chopper slit.
@@ -123,6 +103,21 @@ void PoldiSpectrumDomainFunction::init() {
     declareParameter("Centre", 0.0);
 }
 
+void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(Workspace2D_const_sptr workspace2D)
+{
+    m_deltaT = workspace2D->readX(0)[1] - workspace2D->readX(0)[0];
+
+    PoldiInstrumentAdapter_sptr adapter(new PoldiInstrumentAdapter(workspace2D->getInstrument(),  workspace2D->run()));
+    initializeInstrumentParameters(adapter);
+ }
+
+void PoldiSpectrumDomainFunction::initializeInstrumentParameters(PoldiInstrumentAdapter_sptr poldiInstrument)
+{
+    m_timeTransformer = PoldiTimeTransformer_sptr(new PoldiTimeTransformer(poldiInstrument));
+    m_chopperSlitOffsets = getChopperSlitOffsets(poldiInstrument->chopper());
+
+}
+
 std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(PoldiAbstractChopper_sptr chopper)
 {
     const std::vector<double> &chopperSlitTimes = chopper->slitTimes();
@@ -133,52 +128,6 @@ std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(PoldiAbst
     }
 
     return offsets;
-}
-
-std::vector<DetectorElementData_const_sptr> PoldiSpectrumDomainFunction::getDetectorElementData(PoldiAbstractDetector_sptr detector, PoldiAbstractChopper_sptr chopper)
-{
-    std::vector<DetectorElementData_const_sptr> data(detector->elementCount());
-
-    DetectorElementCharacteristics center = getDetectorCenterCharacteristics(detector, chopper);
-
-    for(int i = 0; i < static_cast<int>(detector->elementCount()); ++i) {
-        data[i] = DetectorElementData_const_sptr(new DetectorElementData(i, center, detector, chopper));
-    }
-
-    return data;
-}
-
-DetectorElementCharacteristics PoldiSpectrumDomainFunction::getDetectorCenterCharacteristics(PoldiAbstractDetector_sptr detector, PoldiAbstractChopper_sptr chopper)
-{
-    return DetectorElementCharacteristics(static_cast<int>(detector->centralElement()), detector, chopper);
-}
-
-double PoldiSpectrumDomainFunction::dToTOF(double d) const
-{
-    return m_detectorCenter.tof1A * d;
-}
-
-double PoldiSpectrumDomainFunction::timeTransformedWidth(double widthT, size_t detectorIndex) const
-{
-    return widthT;// + m_detectorElementData[detectorIndex]->widthFactor() * 0.0;
-}
-
-double PoldiSpectrumDomainFunction::timeTransformedCentre(double centreT, size_t detectorIndex) const
-{
-    return centreT * m_detectorElementData[detectorIndex]->timeFactor();
-}
-
-double PoldiSpectrumDomainFunction::timeTransformedIntensity(double areaD, double centreT, size_t detectorIndex) const
-{
-    return areaD * detectorElementIntensity(centreT, detectorIndex);
-}
-
-double PoldiSpectrumDomainFunction::detectorElementIntensity(double centreT, size_t detectorIndex) const
-{
-    double lambda = centreT * m_detectorElementData[detectorIndex]->lambdaFactor();
-    double intensity = m_spectrum->intensity(lambda) * m_detectorElementData[detectorIndex]->intensityFactor();
-
-    return intensity * (1.0 - exp(-m_detectorEfficiency * lambda));
 }
 
 double PoldiSpectrumDomainFunction::actualFunction(double x, double x0, double sigma, double area) const

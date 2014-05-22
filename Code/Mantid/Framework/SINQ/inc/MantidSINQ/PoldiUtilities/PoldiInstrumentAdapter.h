@@ -42,13 +42,15 @@ class MANTID_SINQ_DLL PoldiInstrumentAdapter
 {
 public:
     PoldiInstrumentAdapter(Instrument_const_sptr mantidInstrument, const Run &runInformation);
-    ~PoldiInstrumentAdapter();
+    virtual ~PoldiInstrumentAdapter();
 
     PoldiAbstractChopper_sptr chopper() const;
     PoldiAbstractDetector_sptr detector() const;
     PoldiSourceSpectrum_sptr spectrum() const;
 
 protected:
+    PoldiInstrumentAdapter() { }
+
     void setDetector(Instrument_const_sptr mantidInstrument);
     void setChopper(Instrument_const_sptr mantidInstrument, const Run &runInformation);
     void setSpectrum(Instrument_const_sptr mantidInstrument);
@@ -58,6 +60,7 @@ protected:
     PoldiSourceSpectrum_sptr m_spectrum;
 };
 
+typedef boost::shared_ptr<PoldiInstrumentAdapter> PoldiInstrumentAdapter_sptr;
 
 } // namespace Poldi
 } // namespace Mantid
