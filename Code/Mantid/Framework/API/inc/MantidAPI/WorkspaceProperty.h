@@ -345,14 +345,12 @@ namespace Mantid
       virtual const Kernel::PropertyHistory createHistory() const
       {
         std::string wsName = m_workspaceName;
-        std::ostringstream os;
         bool isdefault = this->isDefault();
-        os << "__TMP" << this;
 
-        if ((wsName.empty() || wsName == os.str()) && this->operator()())
+        if ((wsName.empty() || this->hasTemporaryValue()) && this->operator()())
         {
           //give the property a temporary name in the history
-          os.str("");
+          std::ostringstream os;
           os << "__TMP" << this->operator()().get();
           wsName = os.str();
           isdefault = false;

@@ -823,7 +823,6 @@ namespace Mantid
 
       // If output workspaces are nameless, give them a temporary name to satisfy validator
       const std::vector< Property*> &props = alg->getProperties();
-      std::ostringstream os;
       for (unsigned int i = 0; i < props.size(); ++i)
       {
         auto wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
@@ -831,9 +830,7 @@ namespace Mantid
         {
           if ( props[i]->value().empty() ) 
           {
-            os.str("");
-            os << "__TMP" << props[i];
-            props[i]->setValue(os.str());
+            props[i]->createTemporaryValue();
           }
         }
       }
