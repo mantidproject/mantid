@@ -70,6 +70,10 @@ namespace Algorithms
 
     void importPeaksFromTable(std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >& functionmap);
 
+    /// Import peak and background function parameters from vector
+    void importPeakFromVector(std::vector<std::pair<double, API::IFunction_sptr> >& functionmap);
+
+
     /// Generate peaks in output data workspaces
     void generatePeaks(const std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >& functionmap, API::MatrixWorkspace_sptr dataWS);
 
@@ -89,11 +93,19 @@ namespace Algorithms
     /// Get the IPeakFunction part in the input function
     API::IPeakFunction_sptr getPeakFunction(API::IFunction_sptr infunction);
 
+    /// Add function parameter names to
+    std::vector<std::string> addFunctionParameterNames(std::vector<std::string> funcnames);
+
     /// Peak function
     API::IPeakFunction_sptr m_peakFunction;
 
     /// Background function
     API::IBackgroundFunction_sptr m_bkgdFunction;
+
+    ///
+    std::vector<double> m_vecPeakParamValues;
+    ///
+    std::vector<double> m_vecBkgdParamValues;
 
     /// Spectrum map from full spectra workspace to partial spectra workspace
     std::map<specid_t, specid_t> m_SpectrumMap;
@@ -133,6 +145,12 @@ namespace Algorithms
 
     /// Indexes of height, centre, width, a0, a1, and a2 in input parameter table
     int i_height, i_centre, i_width, i_a0, i_a1, i_a2;
+
+    /// Flag to use parameter table workspace
+    bool m_useFuncParamWS;
+
+    /// Spectrum if only 1 peak is to plot
+    int m_wsIndex;
   };
 
 
