@@ -171,7 +171,7 @@ public:
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
 
-    ScriptBuilder builder(ws->getHistory());
+    ScriptBuilder builder(wsHist.createView());
     std::string scriptText = builder.build();
 
     std::vector<std::string> scriptLines;
@@ -220,9 +220,9 @@ public:
 
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
+    auto view = wsHist.createView();
 
-    HistoryView view(ws->getHistory());
-    view.unrollAll();
+    view->unrollAll();
     ScriptBuilder builder(view);
     std::string scriptText = builder.build();
 
@@ -279,11 +279,11 @@ public:
     
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
+    auto view = wsHist.createView();
 
-    HistoryView view(ws->getHistory());
-    view.unroll(0);
-    view.unroll(1);
-    view.unroll(5);
+    view->unroll(0);
+    view->unroll(1);
+    view->unroll(5);
 
     ScriptBuilder builder(view);
     std::string scriptText = builder.build();

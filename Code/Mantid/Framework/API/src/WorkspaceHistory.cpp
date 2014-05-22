@@ -1,9 +1,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/WorkspaceHistory.h"
-#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/HistoryView.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
 #include <boost/algorithm/string/split.hpp>
 #include "Poco/DateTime.h"
@@ -395,6 +396,14 @@ void WorkspaceHistory::loadNexus(::NeXus::File * file)
   }
 
   file->closeGroup();
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Create a flat view of the workspaces algorithm history
+ */
+boost::shared_ptr<HistoryView> WorkspaceHistory::createView() const
+{
+  return boost::make_shared<HistoryView>(*this); 
 }
 
 

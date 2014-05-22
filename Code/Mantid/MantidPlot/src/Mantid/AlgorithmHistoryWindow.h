@@ -140,7 +140,7 @@ public:
   AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<const Mantid::API::Workspace>);
   ~AlgorithmHistoryWindow();
 public slots:
-  void updateAll(AlgorithmHistory_const_sptr algHistory);
+  void updateAll(AlgorithmHistory_const_sptr algHistmakeory);
   void doUnroll(const std::vector<int>& unrollIndicies );
   void doRoll( int index );
   
@@ -164,7 +164,7 @@ private:
   AlgExecSummaryGrpBox *m_execSumGrpBox ;
   AlgEnvHistoryGrpBox * m_envHistGrpBox;
   QString m_wsName;
-  Mantid::API::HistoryView m_view;
+  boost::shared_ptr<Mantid::API::HistoryView> m_view;
 };
 
 

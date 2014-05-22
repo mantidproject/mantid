@@ -12,8 +12,8 @@ namespace API
 {
 
 
-ScriptBuilder::ScriptBuilder(const HistoryView& view)
-  : m_historyItems(view.getAlgorithmsList()), m_output()
+ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view)
+  : m_historyItems(view->getAlgorithmsList()), m_output()
 {
 }
 

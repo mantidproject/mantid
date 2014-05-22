@@ -49,7 +49,7 @@ namespace API
 class MANTID_API_DLL ScriptBuilder
 {
 public:
-  ScriptBuilder(const HistoryView& view);
+  ScriptBuilder(boost::shared_ptr<HistoryView> view);
   virtual ~ScriptBuilder() {};
 
   /// build a python script from the history view

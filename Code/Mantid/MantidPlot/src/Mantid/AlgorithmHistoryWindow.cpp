@@ -172,7 +172,7 @@ AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox()
 
 AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent,const boost::shared_ptr<const Workspace> wsptr):
 MantidDialog(parent),m_algHist(wsptr->getHistory()),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_envHistGrpBox(NULL),
-m_wsName(wsptr->getName().c_str()), m_view(m_algHist)
+m_wsName(wsptr->getName().c_str()), m_view(wsptr->getHistory().createView())
 {
   setWindowTitle(tr("Algorithm History"));
   setMinimumHeight(500);
@@ -390,13 +390,13 @@ void AlgorithmHistoryWindow::doUnroll(const std::vector<int>& unrollIndicies )
 {
   for(auto it=unrollIndicies.begin(); it!=unrollIndicies.end(); ++it)
   {
-    m_view.unroll(*it);
+    m_view->unroll(*it);
   }
 }
 
 void AlgorithmHistoryWindow::doRoll( int index )
 {
-  m_view.roll(index);
+  m_view->roll(index);
 }
 
 
