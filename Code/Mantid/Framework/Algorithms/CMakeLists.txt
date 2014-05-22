@@ -62,6 +62,7 @@ set ( SRC_FILES
 	src/CreatePeaksWorkspace.cpp
 	src/CreateSingleValuedWorkspace.cpp
 	src/CreateTransmissionWorkspace.cpp
+	src/CreateTransmissionWorkspaceAuto.cpp
 	src/CreateWorkspace.cpp
 	src/CropWorkspace.cpp
 	src/CrossCorrelate.cpp
@@ -293,6 +294,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreatePeaksWorkspace.h
 	inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspace.h
+	inc/MantidAlgorithms/CreateTransmissionWorkspaceAuto.h
 	inc/MantidAlgorithms/CreateWorkspace.h
 	inc/MantidAlgorithms/CropWorkspace.h
 	inc/MantidAlgorithms/CrossCorrelate.h
@@ -536,6 +538,7 @@ set ( TEST_FILES
 	CreatePSDBleedMaskTest.h
 	CreatePeaksWorkspaceTest.h
 	CreateSingleValuedWorkspaceTest.h
+	CreateTransmissionWorkspaceAutoTest.h
 	CreateWorkspaceTest.h
 	CropWorkspaceTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
