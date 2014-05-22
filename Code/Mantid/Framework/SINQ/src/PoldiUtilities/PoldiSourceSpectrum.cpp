@@ -26,7 +26,7 @@ PoldiSourceSpectrum::PoldiSourceSpectrum(Instrument_const_sptr poldiInstrument) 
   */
 double PoldiSourceSpectrum::intensity(double wavelength) const
 {
-    return m_spectrum.value(wavelength);
+    return std::max(0.0, m_spectrum.value(wavelength));
 }
 
 /** Extracts the source spectrum from an Instrument
