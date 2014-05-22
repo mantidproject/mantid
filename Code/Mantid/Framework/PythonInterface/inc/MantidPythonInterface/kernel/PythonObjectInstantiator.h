@@ -67,8 +67,9 @@ namespace Mantid
       Environment::GlobalInterpreterLock gil;
       
       object instance = m_classObject();
-      // The instantiator assumes that the exported type uses a HeldType=boost::shared_ptr<Base>,
-      // see http://www.boost.org/doc/libs/1_42_0/libs/python/doc/v2/class.html#class_-spec
+      // The instantiator assumes that the exported type uses a HeldType=boost::shared_ptr<Adapter>,
+      // where Adapter inherits from Base,
+      // see http://www.boost.org/doc/libs/1_42_0/libs/python/doc/v2/class.html#class_-spec.
       // The advantage is that the memory management is very simple as it is all handled within the
       // boost layer.
       return extract<boost::shared_ptr<Base>>(instance)();

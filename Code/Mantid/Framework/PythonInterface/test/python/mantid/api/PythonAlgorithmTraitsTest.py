@@ -115,7 +115,12 @@ class PythonAlgorithmTest(unittest.TestCase):
     # --------------------------- Failure cases --------------------------------------------
     def test_isRunning_returning_non_bool_raises_error(self):
         alg = AlgorithmManager.createUnmanaged("TestPyAlgIsRunningReturnsNonBool")
-        self.assertRaises(RuntimeError, alg.isRunning)
+        # boost.python automatically downcasts to the most available type
+        # meaning that type(alg)=TestPyAlgIsRunningReturnsNonBool and not the interface
+        # so that any method lookup doesn't go through the base class automatically.
+        # Here we simulate how it would be called on C++ framework side
+        base_running_attr = getattr(IAlgorithm, "isRunning")
+        self.assertRaises(RuntimeError, base_running_attr, alg)
 
 if __name__ == '__main__':
     unittest.main()
