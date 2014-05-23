@@ -8,6 +8,9 @@ class BaseDirective(Directive):
     Contains shared functionality for Mantid custom directives.
     """
 
+    has_content = True
+    final_argument_whitespace = True
+
     def _make_header(self, name, title=False):
         """
         Makes a ReStructuredText title from the algorithm's name.
