@@ -6,6 +6,7 @@ namespace Mantid
 namespace DataObjects
 {
 
+  using Mantid::Kernel::Mutex;
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -21,21 +22,27 @@ namespace DataObjects
   {
     //Make sure you free up the memory in the MRUs
     for (size_t i=0; i < m_bufferedDataY.size(); i++)
+    {
       if (m_bufferedDataY[i])
       {
         m_bufferedDataY[i]->clear();
         delete m_bufferedDataY[i];
-      };
-    m_bufferedDataY.clear();
+      }
+    }
 
     for (size_t i=0; i < m_bufferedDataE.size(); i++)
+    {
       if (m_bufferedDataE[i])
       {
         m_bufferedDataE[i]->clear();
         delete m_bufferedDataE[i];
-      };
-    m_bufferedDataE.clear();
+      }
+    }
 
+    for (size_t i=0; i < m_markersToDelete.size(); i++)
+    {
+      delete m_markersToDelete[i];
+    }
   }
   
 

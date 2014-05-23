@@ -7,8 +7,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-using namespace std;
-
 namespace Mantid
 {
 namespace Algorithms
@@ -65,7 +63,7 @@ namespace Algorithms
 
      void exec();
 
-     void exportLog(string logname, int numberexports, bool outputeventws);
+     void exportLog(std::string logname, int numberexports, bool outputeventws);
 
      void setupEventWorkspace(int numentries, std::vector<Kernel::DateAndTime> &times, std::vector<double> values);
 

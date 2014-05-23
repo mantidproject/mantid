@@ -8,8 +8,6 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 
-using namespace std;
-
 namespace Mantid
 {
 namespace API

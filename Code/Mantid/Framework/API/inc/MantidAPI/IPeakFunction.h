@@ -41,6 +41,9 @@ class MANTID_API_DLL IPeakFunction : public IFunctionWithLocation
 public:
   /// Constructor
   IPeakFunction();
+  /// Virtual destructor 
+  /// (avoids warnings about non-trivial move assignment in virtually inheriting classes)
+  virtual ~IPeakFunction() {}
   /// Returns the peak FWHM
   virtual double fwhm()const = 0;
 

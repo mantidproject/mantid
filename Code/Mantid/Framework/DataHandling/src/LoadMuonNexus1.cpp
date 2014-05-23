@@ -74,6 +74,8 @@ namespace Mantid
 {
   namespace DataHandling
   {
+    using namespace DataObjects;
+
     // Register the algorithm into the algorithm factory
     DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1);
 
@@ -587,7 +589,7 @@ namespace Mantid
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(hist, tcbs);
-      localWorkspace->getAxis(1)->setValue(hist, static_cast<int>(hist) + 1);
+      localWorkspace->getSpectrum(hist)->setSpectrumNo(static_cast<int>(hist) + 1);
     }
 
 

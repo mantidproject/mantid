@@ -96,12 +96,11 @@ public:
 	}
   Mantid::Kernel::V3D getHKL() const
   {
-    using namespace Mantid::Kernel;
     if(_hkls.size() != 1)
     {
       throw std::logic_error("Expecting a single HKL value for each peak. Refinement incomplete.");
     }
-    V3D result = V3D(_hkls.begin()->_h, _hkls.begin()->_k, _hkls.begin()->_l);
+    Kernel::V3D result = Kernel::V3D(_hkls.begin()->_h, _hkls.begin()->_k, _hkls.begin()->_l);
     return result;
   }
   size_t candidateHKLSize() const

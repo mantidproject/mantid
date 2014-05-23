@@ -4,8 +4,12 @@ regions of interest around each peak of the [[PeaksWorkspace]]. The output is an
 containing the labels assigned to each cluster for diagnostic and visualisation purposes.
 
 '''The algorithm makes no assmptions about Peak shape or size''' and can therfore be used where integration over defined shapes
-[[IntegratePeaksMD]] and [[IntegrateEllipsoids]] (for example). Will not work. 
+[[IntegratePeaksMD]] and [[IntegrateEllipsoids]], for example, will not work.
 
+[[File:ClusterImage.png|400px]]
+
+''Cluster Label region displayed in the [[SliceViewer]]. Peak centre is marked with an X. The green circle illustrates the integration region used by [[IntegratePeaksMD]]''
+ 
 A threshold for the Peak should be defined below which, parts of the image are treated as background. The normalization method in combination with the 
 threshold may both be used to define a background. We suggest keeping the default of VolumeNormalization so that changes in the effective bin size
 do not affect the background filtering.
@@ -43,6 +47,7 @@ For more in-depth analysis, the algorithm will produce debug log messages.
 #include "MantidCrystal/ICluster.h"
 #include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/HardThresholdBackground.h"
+#include "MantidCrystal/PeakClusterProjection.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDIterator.h"
@@ -251,10 +256,10 @@ namespace Mantid
       ConnectedComponentMappingTypes::ClusterMap& clusterMap = clusters.get<1>();
       // Extract the labeled image
       IMDHistoWorkspace_sptr outHistoWS = clusters.get<0>();
-      // Make a peak transform so that we can understand a peak in the context of the mdworkspace coordinate setup.
-      PeakTransform_sptr peakTransform = makePeakTransform(mdWS.get());
       // Labels taken by peaks.
       std::map<size_t, size_t> labelsTakenByPeaks;
+      // Make a peak transform so that we can understand a peak in the context of the mdworkspace coordinate setup.
+      PeakClusterProjection projection(outHistoWS); // Projection of PeaksWorkspace over labelled cluster workspace.
 
       progress.doReport("Performing Peak Integration");
       g_log.information("Starting Integration");
@@ -264,8 +269,7 @@ namespace Mantid
       {
         PARALLEL_START_INTERUPT_REGION
         IPeak& peak = peakWS->getPeak(i);
-        const V3D& peakCenterInMDFrame = peakTransform->transformPeak(peak);
-        const Mantid::signal_t signalValue = outHistoWS->getSignalAtVMD(peakCenterInMDFrame, NoNormalization); // No normalization when extracting label ids!
+        const Mantid::signal_t signalValue = projection.signalAtPeakCenter(peak); // No normalization when extracting label ids!
         if(boost::math::isnan(signalValue))
         {
           g_log.warning() << "Warning: image for integration is off edge of detector for peak " << i << std::endl;

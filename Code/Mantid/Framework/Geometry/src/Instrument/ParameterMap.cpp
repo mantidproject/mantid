@@ -837,7 +837,7 @@ namespace Mantid
       }
     }
 
-    ///Attempts to retreive a bounding box from the cache
+    ///Attempts to retrieve a bounding box from the cache
     /// @param comp :: The Component to find the bounding box of
     /// @param box :: If the bounding box is found it's value will be set here
     /// @returns true if the bounding is in the map, otherwise false
@@ -862,7 +862,7 @@ namespace Mantid
       for(auto it = oldParameterNames.begin(); it != oldParameterNames.end(); ++it)
       {
         Parameter_sptr thisParameter = oldPMap->get(oldComp,*it);
-        // Insert the fecthed parameter in the m_map
+        // Insert the fetched parameter in the m_map
         m_map.insert(std::make_pair(newComp->getComponentID(),thisParameter));
       }
     }

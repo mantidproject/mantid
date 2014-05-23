@@ -86,7 +86,7 @@ namespace Mantid
           virtual void declareParameters(){};
           virtual void prepare();
           /// Derivatives of function with respect to parameters you are trying to fit
-          virtual void functionDeriv(const double* in, Jacobian* out, const double* xValues, const size_t nData);
+          virtual void functionDeriv(const double* in, API::Jacobian* out, const double* xValues, const size_t nData);
 
           static double* AddVariable(const char *varName, void *palg);
 

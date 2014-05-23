@@ -1,6 +1,6 @@
 #include "MantidMDEvents/ReflectometryTransform.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include <boost/shared_ptr.hpp>
 
@@ -55,7 +55,7 @@ namespace Mantid
         const double cxToUnit, const size_t nBins, const std::string& caption, const std::string& units)
     {
       // Create an X - Axis.
-      Axis* const xAxis = new NumericAxis(nBins);
+      auto* const xAxis = new BinEdgeAxis(nBins);
       ws->replaceAxis(0, xAxis);
       auto unitXBasePtr = UnitFactory::Instance().create("Label");
       boost::shared_ptr<Mantid::Kernel::Units::Label> xUnit = boost::dynamic_pointer_cast<
@@ -88,7 +88,7 @@ namespace Mantid
         const double gradY, const double cyToUnit, const size_t nBins, const std::string& caption, const std::string& units)
     {
       // Create a Y (vertical) Axis
-      Axis* const verticalAxis = new NumericAxis(nBins);
+      auto* const verticalAxis = new BinEdgeAxis(nBins);
       ws->replaceAxis(1, verticalAxis);
       auto unitZBasePtr = UnitFactory::Instance().create("Label");
       boost::shared_ptr<Mantid::Kernel::Units::Label> verticalUnit = boost::dynamic_pointer_cast<

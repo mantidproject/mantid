@@ -42,6 +42,12 @@ This algorithm is designed to work with other algorithms to do Le Bail fit.  The
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ListValidator.h"
 
+using namespace Mantid::API;
+using namespace Mantid::CurveFitting;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
+using namespace std;
+
 namespace Mantid
 {
 namespace CurveFitting
@@ -882,8 +888,8 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Calculate Chi^2
     */
-  double calculateFunctionChiSquare(const vector<double> modelY, const vector<double> dataY,
-                                    const vector<double> dataE)
+  double calculateFunctionChiSquare(const vector<double> &modelY, const vector<double> &dataY,
+                                    const vector<double> &dataE)
   {
     // 1. Check
     if (modelY.size() != dataY.size() || dataY.size() != dataE.size())

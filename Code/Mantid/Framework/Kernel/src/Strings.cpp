@@ -1161,6 +1161,46 @@ namespace Mantid
         return result;
       }
 
+      /**
+      * Extract a string until an EOL character is reached. There are 3 scenarios that we need to deal with
+      * 1) Windows-style  - CRLF ('\\r\\n');
+      * 2) Unix-style     - LF ('\\n');
+      * 3) Old MAC style  - CR ('\\r').
+      * This function will give the string preceding any of these sequences
+      * @param is :: The input stream to read from
+      * @param str :: The output string to use to accumulate the line
+      * @returns A reference to the input stream
+      */
+      std::istream& extractToEOL(std::istream& is, std::string& str)
+      {
+        // Empty the string
+        str = "";
+        char c('\0');
+        while( is.get(c) )
+        {
+          if( c == '\r' )
+          {
+            c = static_cast<char>(is.peek());
+            if( c == '\n' )
+            {
+              //Extract this as well
+              is.get();
+            }
+            break;
+          }
+          else if( c == '\n')
+          {
+            break;
+          }
+          else 
+          {
+            //Accumulate the string
+            str += c;
+          }
+        }
+        return is;
+      }
+
       /// \cond TEMPLATE
       template MANTID_KERNEL_DLL int section(std::string&,double&);
       template MANTID_KERNEL_DLL int section(std::string&,float&);

@@ -3,11 +3,14 @@
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
-
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/python/list.hpp>
+
+GCC_DIAG_OFF(cast-qual)
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
+GCC_DIAG_ON(cast-qual)
 
 #include <string>
 
@@ -41,7 +44,7 @@ namespace Mantid { namespace PythonInterface
       {
         Py_intptr_t dims[1] = { static_cast<int>(cvector.size()) };
         int datatype = NDArrayTypeIndex<bool>::typenum;
-        PyObject *nparray =
+        PyArrayObject *nparray = (PyArrayObject*)
           PyArray_NewFromDescr(&PyArray_Type,
                                PyArray_DescrFromType(datatype),
                                1, // rank
@@ -51,9 +54,9 @@ namespace Mantid { namespace PythonInterface
         for(Py_intptr_t i = 0; i < dims[0]; ++i)
         {
           void *itemPtr = PyArray_GETPTR1(nparray, i);
-          PyArray_SETITEM(nparray,itemPtr, PyBool_FromLong(static_cast<long int>(cvector[i])));
+          PyArray_SETITEM(nparray, (char*)itemPtr, PyBool_FromLong(static_cast<long int>(cvector[i])));
         }
-        return nparray;
+        return (PyObject*)nparray;
       }
 
       /**
@@ -68,7 +71,7 @@ namespace Mantid { namespace PythonInterface
       PyObject *cloneND(const ElementType * carray, const int ndims, Py_intptr_t *dims)
       {
         int datatype = NDArrayTypeIndex<ElementType>::typenum;
-        PyObject *nparray =
+        PyArrayObject *nparray = (PyArrayObject*)
           PyArray_NewFromDescr(&PyArray_Type,
                                PyArray_DescrFromType(datatype),
                                ndims, // rank

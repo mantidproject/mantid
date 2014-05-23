@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <boost/regex.hpp> 
 
 #include "MantidAlgorithms/GeneratePythonScript.h"
 #include "MantidAlgorithms/CreateWorkspace.h"
@@ -68,13 +69,13 @@ public:
         "######################################################################",
         "ERROR: MISSING ALGORITHM: NonExistingAlgorithm with parameters    Algorithm: NonExistingAlgorithm     v1",
         "    Parameters:",
-        "      Name: InputWorkspace, Value: , Default?: Yes, Direction: Input",
-        "      Name: OutputWorkspace, Value: , Default?: Yes, Direction: Output",
-        "      Name: MissingProperty, Value: rubbish, Default?: Yes, Direction: Input",
+        "      Name: InputWorkspace, Value: [\\_A-Za-z0-9]*, Default\\?: Yes, Direction: Input",
+        "      Name: OutputWorkspace, Value: [\\_A-Za-z0-9]*, Default\\?: Yes, Direction: Output",
+        "      Name: MissingProperty, Value: rubbish, Default\\?: Yes, Direction: Input",
         "",
-        "CreateWorkspace(OutputWorkspace='testGeneratePython',DataX='1,2,3,5,6',DataY='7,9,16,4,3',DataE='2,3,4,2,1',WorkspaceTitle='Test Workspace')",
-        "CropWorkspace(InputWorkspace='testGeneratePython',OutputWorkspace='testGeneratePython',XMin='2',XMax='5')",
-        "Power(InputWorkspace='testGeneratePython',OutputWorkspace='testGeneratePython',Exponent='1.5')",            
+        "CreateWorkspace\\(OutputWorkspace='testGeneratePython',DataX='1,2,3,5,6',DataY='7,9,16,4,3',DataE='2,3,4,2,1',WorkspaceTitle='Test Workspace'\\)",
+        "CropWorkspace\\(InputWorkspace='testGeneratePython',OutputWorkspace='testGeneratePython',XMin='2',XMax='5'\\)",
+        "Power\\(InputWorkspace='testGeneratePython',OutputWorkspace='testGeneratePython',Exponent='1.5'\\)",            
         ""
       };
       // Set up and execute the algorithm.
@@ -95,13 +96,19 @@ public:
 
       while(std::getline(file, scriptLine))
       {
-        TS_ASSERT_EQUALS(scriptLine,result[lineCount]);
+        boost::regex e(result[lineCount]); 
+
+        if (!boost::regex_match(scriptLine, e))
+        {
+          std::cout << scriptLine << std::endl;
+        }
+        TS_ASSERT(boost::regex_match(scriptLine, e));
         lineCount++;
       }
 
       // Verify that if we set the content of ScriptText that it is set correctly.
       alg.setPropertyValue("ScriptText", result[10]);
-      TS_ASSERT_EQUALS(alg.getPropertyValue("ScriptText"), "CropWorkspace(InputWorkspace='testGeneratePython',OutputWorkspace='testGeneratePython',XMin='2',XMax='5')");
+      TS_ASSERT_EQUALS(alg.getPropertyValue("ScriptText"), "CropWorkspace\\(InputWorkspace='testGeneratePython',OutputWorkspace='testGeneratePython',XMin='2',XMax='5'\\)");
 
       file.close();
       if (Poco::File(filename).exists()) Poco::File(filename).remove();
@@ -149,7 +156,7 @@ public:
       API::WorkspaceHistory &history = ws->history();
       auto pAlg = std::auto_ptr<API::Algorithm>(new NonExistingAlgorithm());
       pAlg->initialize();
-      history.addHistory(API::AlgorithmHistory(pAlg.get()));
+      history.addHistory(boost::make_shared<AlgorithmHistory>(API::AlgorithmHistory(pAlg.get())));
 
       pAlg.reset(NULL);
 

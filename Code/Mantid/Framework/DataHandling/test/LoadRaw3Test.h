@@ -446,7 +446,7 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 
     Workspace_sptr monitoroutput;
-    TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve(outputSpace+"_Monitors"));
+    TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve(outputSpace+"_monitors"));
     Workspace2D_sptr monitoroutput2D = boost::dynamic_pointer_cast<Workspace2D>(monitoroutput);
     // Should be 2584 for file HET15869.RAW
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 2580);
@@ -524,7 +524,7 @@ public:
     TS_ASSERT_EQUALS(loader6.getPropertyValue("Filename"),output2D->run().getProperty("Filename")->value());
     TS_ASSERT_EQUALS(loader6.getPropertyValue("Filename"),monitoroutput2D->run().getProperty("Filename")->value());
     AnalysisDataService::Instance().remove(outputSpace);
-    AnalysisDataService::Instance().remove(outputSpace+"_Monitors");
+    AnalysisDataService::Instance().remove(outputSpace+"_monitors");
   }
 
   void testSeparateMonitorsMultiPeriod()
@@ -542,9 +542,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(work_out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("multiperiod"));
 
     WorkspaceGroup_sptr monitor_work_out;
-    TS_ASSERT_THROWS_NOTHING(monitor_work_out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("multiperiod_Monitors"));
+    TS_ASSERT_THROWS_NOTHING(monitor_work_out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("multiperiod_monitors"));
 
-    Workspace_sptr monitorwsSptr=AnalysisDataService::Instance().retrieve("multiperiod_Monitors");
+    Workspace_sptr monitorwsSptr=AnalysisDataService::Instance().retrieve("multiperiod_monitors");
     WorkspaceGroup_sptr monitorsptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(monitorwsSptr);
 
 
@@ -554,7 +554,7 @@ public:
     for (;it!=monitorwsNamevec.end();it++)
     {	std::stringstream count;
     count <<period;
-    std::string wsName="multiperiod_Monitors_"+count.str();
+    std::string wsName="multiperiod_monitors_"+count.str();
     TS_ASSERT_EQUALS(*it,wsName)
     period++;
     }
@@ -643,7 +643,7 @@ public:
     /// ADS should only contain single group with given name as the spectrum list contains only monitors
     AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
     TSM_ASSERT("Expected workspace is not in the ADS", ads.doesExist(outputWSName));
-    TSM_ASSERT("A separate monitor workspace has been found when it should not be", !ads.doesExist(outputWSName + "_Monitors"))
+    TSM_ASSERT("A separate monitor workspace has been found when it should not be", !ads.doesExist(outputWSName + "_monitors"))
 
     // Check group is correct
     const size_t nperiods(2);
@@ -663,7 +663,7 @@ public:
       TSM_ASSERT(msg.str(),outputGroup->contains(wsname.str()));
 
       wsname.str("");
-      wsname << outputWSName << "_Monitors_" << i;
+      wsname << outputWSName << "_monitors_" << i;
       msg.str("");
       msg << "Expected NOT to find workspace '" << wsname.str() << "' in the ADS.";
       TSM_ASSERT(msg.str(), !ads.doesExist(wsname.str()));
@@ -782,7 +782,7 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 
     Workspace_sptr monitoroutput;
-    TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve("outWS_Monitors"));
+    TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve("outWS_monitors"));
     Workspace2D_sptr monitoroutput2D = boost::dynamic_pointer_cast<Workspace2D>(monitoroutput);
 
     // Should be 6 for selected input
@@ -795,7 +795,7 @@ public:
 
     // Check two Y arrays have the same number of elements
     TS_ASSERT_EQUALS( output2D->dataY(2).size(), output2D->dataY(3).size() );
-    AnalysisDataService::Instance().remove("outWS_Monitors");
+    AnalysisDataService::Instance().remove("outWS_monitors");
     AnalysisDataService::Instance().remove("outWS");
 
     // Check one particular value
@@ -823,7 +823,7 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 
     Workspace_sptr monitoroutput;
-    TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve("outWS_Monitors"));
+    TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve("outWS_monitors"));
     Workspace2D_sptr monitoroutput2D = boost::dynamic_pointer_cast<Workspace2D>(monitoroutput);
 
 
@@ -832,7 +832,7 @@ public:
 
     TS_ASSERT_EQUALS( monitoroutput2D->getNumberHistograms(),3 );
 
-    AnalysisDataService::Instance().remove("outWS_Monitors");
+    AnalysisDataService::Instance().remove("outWS_monitors");
     AnalysisDataService::Instance().remove("outWS");
   }
   //no monitors in the selected range

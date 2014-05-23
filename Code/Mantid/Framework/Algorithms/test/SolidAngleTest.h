@@ -48,7 +48,7 @@ public:
       space2D->setX(j, x);
       space2D->setData(j, a, e);
       // Just set the spectrum number to match the index
-      space2D->getAxis(1)->setValue(j, j+1);
+      space2D->getSpectrum(j)->setSpectrumNo(j+1);
     }
 
     // Register the workspace in the data service

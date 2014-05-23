@@ -23,7 +23,6 @@ set ( SRC_FILES
 	src/ProxyCompositePeaksPresenter.cpp
 	src/QPeaksTableModel.cpp
 	src/QScienceSpinBox.cpp
-	src/QwtRasterDataMD.cpp
 	src/SliceViewer.cpp
 	src/SliceViewerWindow.cpp
 	src/SnapToGridDialog.cpp
@@ -63,7 +62,6 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/ProxyCompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/QPeaksTableModel.h
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
-	inc/MantidQtSliceViewer/QwtRasterDataMD.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/SnapToGridDialog.h

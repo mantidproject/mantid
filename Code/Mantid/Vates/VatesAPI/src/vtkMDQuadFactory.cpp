@@ -93,7 +93,8 @@ namespace Mantid
         double progressFactor = 0.5/double(it->getDataSize());
         double progressOffset = 0.5;
 
-        for(size_t iBox = 0; iBox < it->getDataSize(); ++iBox)
+        size_t iBox = 0;
+        do
         {
           progressUpdating.eventRaised(progressFactor * double(iBox));
 
@@ -129,8 +130,8 @@ namespace Mantid
           {
             useBox[iBox] = false;
           }
-          it->next();
-        }
+          ++iBox;
+        } while (it->next());
 
         delete[] masks;
         for(size_t ii = 0; ii < it->getDataSize() ; ++ii)

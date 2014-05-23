@@ -70,6 +70,14 @@ const std::string& Property::documentation() const
   return m_documentation;
 }
 
+/** Get the property's short documentation string
+ *  @return The documentation string
+ */
+const std::string& Property::briefDocumentation() const
+{
+  return m_shortDoc;
+}
+
 /** Get the property type_info
  *  @return The type of the property
  */
@@ -144,12 +152,29 @@ void Property::setRemember(bool remember)
     m_remember=remember;
 }
 
-/** Sets the property's (optional) documentation string
- *  @param documentation :: The string containing the descriptive comment
+/** Sets the user level description of the property.
+ *  In addition, if the brief documentation string is empty it will be set to
+ *  the portion of the provided string up to the first period
+ *  (or the entire string if no period is found).
+ *  @param documentation The string containing the descriptive comment
  */
 void Property::setDocumentation( const std::string& documentation )
 {
   m_documentation = documentation;
+
+  if ( m_shortDoc.empty() )
+  {
+    auto period = documentation.find_first_of('.');
+    setBriefDocumentation( documentation.substr(0, period) );
+  }
+}
+
+/** Sets the
+ *
+ */
+void Property::setBriefDocumentation( const std::string& documentation )
+{
+  m_shortDoc = documentation;
 }
 
 /** Returns the set of valid values for this property, if such a set exists.
@@ -164,7 +189,7 @@ std::set<std::string> Property::allowedValues() const
 /// Create a PropertyHistory object representing the current state of the Property.
 const PropertyHistory Property::createHistory() const
 {
-  return PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),this->direction());
+  return PropertyHistory(this);
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -184,7 +184,7 @@ namespace Mantid
 
       // figure out if second column is a number or a string
       std::string aLine;
-      if( Mantid::Kernel::extractToEOL(logFileStream,aLine) )
+      if( Mantid::Kernel::Strings::extractToEOL(logFileStream,aLine) )
       {
         if ( !isDateTimeString(aLine) )
         {
@@ -243,7 +243,7 @@ namespace Mantid
         throw std::invalid_argument("Unable to open file " + m_filename);
       }
 
-      while(Mantid::Kernel::extractToEOL(logFileStream,str))
+      while(Mantid::Kernel::Strings::extractToEOL(logFileStream,str))
       {
         if ( !isDateTimeString(str) )
         {
@@ -377,7 +377,7 @@ namespace Mantid
 
       // Get the first line
       std::string aLine;
-      if (!Mantid::Kernel::extractToEOL(inLogFile,aLine))
+      if (!Mantid::Kernel::Strings::extractToEOL(inLogFile,aLine))
         return false;
 
       std::vector<double> cols;
@@ -403,7 +403,7 @@ namespace Mantid
       }
       // Go back to start
       inLogFile.seekg(0);
-      while(Mantid::Kernel::extractToEOL(inLogFile,aLine))
+      while(Mantid::Kernel::Strings::extractToEOL(inLogFile,aLine))
       {
         if (aLine.size() == 0)
           break;
@@ -554,7 +554,7 @@ namespace Mantid
       kind l_kind(LoadLog::empty);
 
       //extract first line of file
-      Mantid::Kernel::extractToEOL(logFileStream,str);
+      Mantid::Kernel::Strings::extractToEOL(logFileStream,str);
 
       if ( !isDateTimeString(str) )
       {

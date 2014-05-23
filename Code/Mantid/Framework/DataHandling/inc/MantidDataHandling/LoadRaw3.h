@@ -70,11 +70,11 @@ namespace Mantid
       /// returns true if the given spectrum is a monitor
       bool isMonitor(const std::vector<specid_t>& monitorIndexes,specid_t spectrumNum);
       /// returns true if the Exclude Monitor option(property) selected
-      bool isExcludeMonitors();
+      bool isExcludeMonitors(const std::string &monitorOption);
       ///  returns true if the Separate Monitor Option  selected
-      bool isSeparateMonitors();
+      bool isSeparateMonitors(const std::string &monitorOption);
       ///  returns true if the Include Monitor Option  selected
-      bool isIncludeMonitors();
+      bool isIncludeMonitors(const std::string &monitorOption);
 
       /// validate workspace sizes
       void validateWorkspaceSizes( bool bexcludeMonitors ,bool bseparateMonitors,
