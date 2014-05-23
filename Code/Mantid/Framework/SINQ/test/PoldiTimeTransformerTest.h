@@ -122,6 +122,17 @@ public:
       TS_ASSERT_DELTA(function.timeTransformedIntensity(areaD, centre, 342), 4.611182, 1e-5);
   }
 
+  void TestCalculatedTotalIntensity()
+  {
+      double centre = Conversions::qToD(5.667449);
+
+      TestablePoldiTimeTransformer function;
+      function.initializeFromPoldiInstrument(m_instrument);
+      function.m_chopperSlits = 8;
+
+      TS_ASSERT_DELTA(fabs(1.0 - function.calculatedTotalIntensity(centre)/8220.165039062), 0.0, 1e-7);
+  }
+
 
 private:
   class TestablePoldiTimeTransformer : PoldiTimeTransformer

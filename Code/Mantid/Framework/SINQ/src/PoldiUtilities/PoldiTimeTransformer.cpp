@@ -9,6 +9,7 @@ PoldiTimeTransformer::PoldiTimeTransformer() :
     m_detectorCenter(),
     m_detectorElementData(),
     m_detectorEfficiency(0.0),
+    m_chopperSlits(0),
     m_spectrum()
 {
 }
@@ -28,6 +29,8 @@ void PoldiTimeTransformer::initializeFromPoldiInstrument(PoldiInstrumentAdapter_
     m_detectorCenter = getDetectorCenterCharacteristics(detector, chopper);
     m_detectorElementData = getDetectorElementData(detector, chopper);
     m_detectorEfficiency = 0.88;
+
+    m_chopperSlits = chopper->slitPositions().size();
 }
 
 double PoldiTimeTransformer::dToTOF(double d) const
@@ -58,6 +61,18 @@ double PoldiTimeTransformer::detectorElementIntensity(double centreD, size_t det
     double intensity = m_spectrum->intensity(lambda) * m_detectorElementData[detectorIndex]->intensityFactor();
 
     return intensity * (1.0 - exp(-m_detectorEfficiency * lambda));
+}
+
+double PoldiTimeTransformer::calculatedTotalIntensity(double centreD) const
+{
+    double sum = 0.0;
+    double chopperSlitFactor = static_cast<double>(m_chopperSlits);
+
+    for(size_t i = 0; i < m_detectorElementData.size(); ++i) {
+        sum += chopperSlitFactor * detectorElementIntensity(centreD, i);
+    }
+
+    return sum;
 }
 
 size_t PoldiTimeTransformer::detectorElementCount() const

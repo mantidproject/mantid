@@ -106,6 +106,8 @@ public:
     double timeTransformedIntensity(double areaD, double centreD, size_t detectorIndex) const;
     double detectorElementIntensity(double centreD, size_t detectorIndex) const;
 
+    double calculatedTotalIntensity(double centreD) const;
+
 protected:
     std::vector<DetectorElementData_const_sptr> getDetectorElementData(PoldiAbstractDetector_sptr detector, PoldiAbstractChopper_sptr chopper);
     DetectorElementCharacteristics getDetectorCenterCharacteristics(PoldiAbstractDetector_sptr detector, PoldiAbstractChopper_sptr chopper);
@@ -113,6 +115,7 @@ protected:
     DetectorElementCharacteristics m_detectorCenter;
     std::vector<DetectorElementData_const_sptr> m_detectorElementData;
     double m_detectorEfficiency;
+    size_t m_chopperSlits;
 
     PoldiSourceSpectrum_const_sptr m_spectrum;
     
