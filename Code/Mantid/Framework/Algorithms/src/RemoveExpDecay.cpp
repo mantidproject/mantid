@@ -179,8 +179,8 @@ void MuonRemoveExpDecay::exec()
     PARALLEL_CHECK_INTERUPT_REGION
   }
 
-  // Update Y axis label 
-  outputWS->setYUnitLabel("Asymmetry");
+  // Update Y axis units
+  outputWS->setYUnit("Asymmetry");
 
   setProperty("OutputWorkspace", outputWS);
 }
