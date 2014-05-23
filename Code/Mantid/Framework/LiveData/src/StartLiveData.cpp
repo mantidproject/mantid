@@ -213,8 +213,8 @@ namespace LiveData
       // check for a requested time in the future
       if (reqStartTime > DateAndTime::getCurrentTime())
       {
-        g_log.error() << "Requested start time in the future.  Resetting to current time." << std::endl;
-        this->setPropertyValue("StartTime", DateAndTime::getCurrentTime().toISO8601String());
+        g_log.error("Requested start time in the future. Resetting to current time.");
+        this->setPropertyValue("StartTime", "1990-01-01T00:00:00");
       }
     }
 
