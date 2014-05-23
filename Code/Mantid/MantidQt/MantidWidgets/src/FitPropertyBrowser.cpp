@@ -395,7 +395,11 @@ void FitPropertyBrowser::initLayout(QWidget *w)
 
   createCompositeFunction();
 
+  // Update tooltips when function structure is (or might've been) changed in any way
   connect(this, SIGNAL(functionChanged()), SLOT(updateStructureTooltips()));
+
+  // Initial call, as function is not changed when it's created for the first time
+  updateStructureTooltips();
 
   m_changeSlotsEnabled = true;
     

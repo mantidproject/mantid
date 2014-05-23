@@ -1518,15 +1518,17 @@ QString PropertyHandler::updateStructureTooltip()
     {
       newTooltip = QString::fromStdString("Empty " + m_cf->name());
     }
-
-    QChar op('+');
-
-    if (m_cf->name() == "ProductFunction")
+    else
     {
-      op = '*';
-    }
+      QChar op('+');
 
-    newTooltip = QString("(%1)").arg(childrenTooltips.join(' ' + op + ' '));
+      if (m_cf->name() == "ProductFunction")
+      {
+        op = '*';
+      }
+
+      newTooltip = QString("(%1)").arg(childrenTooltips.join(' ' + op + ' '));
+    }
   }
   else
   {
