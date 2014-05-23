@@ -13,9 +13,8 @@ class CategoriesDirective(BaseDirective):
         """
         Called by Sphinx when the ..categories:: directive is encountered.
         """
-        title = self._make_header(__name__.title())
         categories = self._get_categories(str(self.arguments[0]))
-        return self._insert_rest(title + categories)
+        return self._insert_rest(categories)
 
     def _get_categories(self, algorithm_name):
         """
