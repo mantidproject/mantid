@@ -51,7 +51,8 @@ class AlgorithmDirective(BaseDirective):
         """
         images_dir = self.state.document.settings.env.config["mantid_images"]
         screenshot = images_dir + algorithm_name + ".png"
-        return ".. image:: " + screenshot + "\n" + "    :class: screenshot"
+        caption = "A screenshot of the **" + algorithm_name + "** dialog."
+        return ".. figure:: " + screenshot + "\n" + "    :class: screenshot\n\n    " + caption + "\n"
 
 
 def setup(app):
