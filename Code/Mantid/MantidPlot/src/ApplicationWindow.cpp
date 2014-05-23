@@ -112,6 +112,7 @@
 #include "FloatingWindow.h"
 #include "DataPickerTool.h"
 #include "TiledWindow.h"
+#include "DockedWindow.h"
 
 // TODO: move tool-specific code to an extension manager
 #include "ScreenPickerTool.h"
@@ -17754,7 +17755,13 @@ QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const
  */
 QMdiSubWindow* ApplicationWindow::addMdiSubWindowAsDocked(MdiSubWindow* w, QPoint pos)
 {
+  //DockedWindow *dw = new DockedWindow(this);
+  //dw->setWidget(w);
   QMdiSubWindow* sw = this->d_workspace->addSubWindow(w);
+  //if ( dynamic_cast<DockedWindow*>(sw) != dw )
+  //{
+  //  throw std::runtime_error("Oops");
+  //}
   sw->resize(w->size());
   sw->setWindowIcon(w->windowIcon());
   if ( pos != QPoint(-1,-1) )
@@ -17914,7 +17921,8 @@ bool ApplicationWindow::event(QEvent * e)
       QMdiSubWindow* qCurrent = d_workspace->currentSubWindow();
       if (qCurrent)
       {
-        MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(qCurrent->widget());
+        QWidget *wgt = qCurrent->widget();
+        MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(wgt);
         if (!sw)
         {// this should never happen - all MDI subwindow widgets must inherit from MdiSubwindow
           throw std::runtime_error("Non-MdiSubwindow widget found in MDI area");
@@ -18110,6 +18118,23 @@ void ApplicationWindow::addActiveToTiledWindow()
 }
 
 /**
+ * Check if there is an open TiledWindow.
+ */
+bool ApplicationWindow::hasTiledWindowOpen()
+{
+  auto wl = d_workspace->subWindowList(QMdiArea::StackingOrder);
+  foreach( QMdiSubWindow *w, wl )
+  {
+    TiledWindow *tw = dynamic_cast<TiledWindow*>( w->widget() );
+    if ( tw && tw->isVisible() )
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Return a pointer to the topmost TiledWindow that contains a point. 
  * If the TiledWindow is overlapped by another window return NULL.
  * If there is no TiledWindows or the point doesn't fall inside
@@ -18120,23 +18145,19 @@ void ApplicationWindow::addActiveToTiledWindow()
  * @param twX :: Output x-coord recalculated to the returned TiledWindow's coords.
  * @param twY :: Output y-coord recalculated to the returned TiledWindow's coords.
  */
-TiledWindow *ApplicationWindow::getTiledWindowAtPos( int x, int y, int& twX, int& twY )
+TiledWindow *ApplicationWindow::getTiledWindowAtPos( QPoint pos )
 {
-  twX = -1;
-  twY = -1;
   auto wl = d_workspace->subWindowList(QMdiArea::StackingOrder);
   foreach( QMdiSubWindow *w, wl )
   {
     TiledWindow *tw = dynamic_cast<TiledWindow*>( w->widget() );
     if ( tw )
     {
-      QPoint mdiOrigin = mdiAreaTopLeft() - this->pos();
+      QPoint mdiOrigin = mapFromGlobal( pos );
       auto r = w->visibleRect();
-      r.moveBy( w->x() + mdiOrigin.x(), w->y() + mdiOrigin.y() );
-      if ( r.contains(x,y) )
+      r.moveBy( mdiOrigin.x(), mdiOrigin.y() );
+      if ( r.contains(pos) )
       {
-        twX = x - r.x();
-        twY = y - r.y();
         return tw;
       }
     }
@@ -18149,14 +18170,12 @@ TiledWindow *ApplicationWindow::getTiledWindowAtPos( int x, int y, int& twX, int
  * @param x :: The x-coord to check relative to ApplicationWindow's left border.
  * @param y :: The y-coord to check relative to ApplicationWindow's top border.
  */
-bool ApplicationWindow::isInTiledWindow( int x, int y )
+bool ApplicationWindow::isInTiledWindow( QPoint pos )
 {
-  int twX = -1;
-  int twY = -1;
-  auto w = getTiledWindowAtPos( x, y, twX, twY );
+  auto w = getTiledWindowAtPos( pos );
   if ( w != NULL )
   {
-    w->showInsertPosition( twX, twY );
+    w->showInsertPosition( pos );
     return true;
   }
   return false;
@@ -18167,13 +18186,13 @@ bool ApplicationWindow::isInTiledWindow( int x, int y )
  * @param x :: The x-coord to check relative to ApplicationWindow's left border.
  * @param y :: The y-coord to check relative to ApplicationWindow's top border.
  */
-void ApplicationWindow::dropInTiledWindow( MdiSubWindow *w, int x, int y )
+void ApplicationWindow::dropInTiledWindow( MdiSubWindow *w, QPoint pos )
 {
   int twX = -1;
   int twY = -1;
-  auto tw = getTiledWindowAtPos( x, y, twX, twY );
+  auto tw = getTiledWindowAtPos( pos );
   if ( tw != NULL )
   {
-    tw->dropAtPosition( w, twX, twY );
+    tw->dropAtPosition( w, pos );
   }
 }

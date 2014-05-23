@@ -24,6 +24,11 @@ public:
   void removeMdiSubWindow();
   virtual QSize minimumSizeHint () const;
 
+public slots:
+  void dragMousePress(QPoint);
+  void dragMouseRelease(QPoint);
+  void dragMouseMove(QPoint);
+
 protected:
 
   void setWidget(QWidget* w);
@@ -39,6 +44,9 @@ private:
 #endif
   bool m_draggingToTiledWindow;
   bool m_isInsideTiledWindow;
+
+  bool m_dragMouseDown;
+  QPoint m_dragStartPos;
 };
 
 #endif

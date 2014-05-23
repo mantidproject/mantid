@@ -1064,11 +1064,13 @@ public slots:
   //@{
   TiledWindow *newTiledWindow();
   void addActiveToTiledWindow();
-  TiledWindow *getTiledWindowAtPos( int x, int y, int& twX, int& twY );
+  /// Check if there is an open TiledWindow.
+  bool hasTiledWindowOpen();
+  TiledWindow *getTiledWindowAtPos( QPoint pos );
   /// Check if a point is inside any of visible TiledWindows
-  bool isInTiledWindow( int x, int y );
+  bool isInTiledWindow( QPoint pos );
   /// Try to drop a subwindow in the TiledWindow which is under point (x,y)
-  void dropInTiledWindow( MdiSubWindow *w, int x, int y );
+  void dropInTiledWindow( MdiSubWindow *w, QPoint pos );
   //@}
 
 signals:

@@ -267,6 +267,10 @@ signals:
   void undockFromMDIArea(MdiSubWindow *);
   /// Emited to detach this window from any parent - docked or floating
   void detachFromParent(MdiSubWindow *);
+
+  void dragMousePress(QPoint);
+  void dragMouseRelease(QPoint);
+  void dragMouseMove(QPoint);
   
 protected:
   //! Catches status changes

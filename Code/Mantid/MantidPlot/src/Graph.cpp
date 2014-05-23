@@ -157,6 +157,10 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   setAttribute(Qt::WA_DeleteOnClose, false);
 
   d_plot = new Plot(width, height, this);
+  connect (d_plot,SIGNAL(dragMousePress(QPoint)), this, SIGNAL(dragMousePress(QPoint)));
+  connect (d_plot,SIGNAL(dragMouseRelease(QPoint)), this, SIGNAL(dragMouseRelease(QPoint)));
+  connect (d_plot,SIGNAL(dragMouseMove(QPoint)), this, SIGNAL(dragMouseMove(QPoint)));
+
   cp = new CanvasPicker(this);
 
   titlePicker = new TitlePicker(d_plot);

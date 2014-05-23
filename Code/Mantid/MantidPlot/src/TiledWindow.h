@@ -62,8 +62,8 @@ public slots:
   /// Remove the selection and make all windows floating
   void removeSelectionToFloating();
 
-  void showInsertPosition( int x, int y );
-  bool dropAtPosition( MdiSubWindow *w, int x, int y );
+  void showInsertPosition( QPoint pos, bool global = true );
+  bool dropAtPosition( MdiSubWindow *w, QPoint pos, bool global = true );
 
   QString saveToString(const QString &info, bool = false);
   void restore(const QStringList&);
@@ -72,6 +72,9 @@ public slots:
 protected:
   void mousePressEvent(QMouseEvent *ev);
   void mouseReleaseEvent(QMouseEvent *ev);
+  void dragEnterEvent(QDragEnterEvent* ev);
+  void dragMoveEvent(QDragMoveEvent* ev);
+  void dropEvent(QDropEvent* ev);
 
 private:
   void init();

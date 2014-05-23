@@ -820,11 +820,14 @@ bool TiledWindow::canAcceptDrops(Tile *tile) const
  * @param x :: Approx x-coord in pixels where a widget will be dropped.
  * @param y :: Approx y-coord in pixels where a widget will be dropped.
  */
-void TiledWindow::showInsertPosition( int x, int y )
+void TiledWindow::showInsertPosition( QPoint pos, bool global )
 {
   clearDrops();
-  QPoint p = mapFromParent( QPoint(x,y) );
-  Tile *tile = getTileAtMousePos( p );
+  if ( global )
+  {
+    pos = mapFromGlobal( pos );
+  }
+  Tile *tile = getTileAtMousePos( pos );
   if ( tile )
   {
     if ( canAcceptDrops(tile) )
@@ -851,11 +854,14 @@ void TiledWindow::clearDrops()
  * @param x :: Approx x-coord in pixels where a widget will be dropped.
  * @param y :: Approx y-coord in pixels where a widget will be dropped.
  */
-bool TiledWindow::dropAtPosition( MdiSubWindow *w, int x, int y )
+bool TiledWindow::dropAtPosition( MdiSubWindow *w, QPoint pos, bool global )
 {
   clearDrops();
-  QPoint p = mapFromParent( QPoint(x,y) );
-  Tile *tile = getTileAtMousePos( p );
+  if ( global )
+  {
+    pos = mapFromGlobal( pos );
+  }
+  Tile *tile = getTileAtMousePos( pos );
   if ( tile && canAcceptDrops(tile) )
   {
     int index = calcFlatIndex( tile );
@@ -865,4 +871,30 @@ bool TiledWindow::dropAtPosition( MdiSubWindow *w, int x, int y )
     return true;
   }
   return false;
+}
+
+void TiledWindow::dragEnterEvent(QDragEnterEvent* ev)
+{
+  auto mimeData = ev->mimeData();
+  if ( mimeData->hasFormat("TiledWindowE") )
+  {
+    ev->accept();
+  }
+  else
+  {
+    ev->ignore();
+  }
+}
+
+void TiledWindow::dragMoveEvent(QDragMoveEvent* ev)
+{
+  showInsertPosition( ev->pos(), false );
+}
+
+void TiledWindow::dropEvent(QDropEvent* ev)
+{
+  auto mimeData = ev->mimeData();
+  const char *ptr = mimeData->data("TiledWindowE").constData();
+  MdiSubWindow *w = reinterpret_cast<MdiSubWindow*>( const_cast<char*>(ptr) );
+  dropAtPosition( w, ev->pos(), false );
 }

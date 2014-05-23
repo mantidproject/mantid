@@ -164,7 +164,8 @@ void MdiSubWindow::move(int x, int y)
   QWidget* pw = getWrapperWindow();
   if (pw)
   {
-    pw->move( x, y );
+    QPoint pos = mapTo(pw, QPoint(x,y));
+    pw->move( pos );
   }
 }
 
@@ -176,7 +177,8 @@ void MdiSubWindow::move(const QPoint& pos)
   QWidget* pw = getWrapperWindow();
   if (pw)
   {
-    pw->move( pos );
+    QPoint pos1 = mapTo(pw, pos);
+    pw->move( pos1 );
   }
 }
 
