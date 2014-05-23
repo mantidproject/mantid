@@ -222,6 +222,14 @@ namespace LiveData
     // Get the listener (and start listening) as early as possible
     ILiveListener_sptr listener = this->getLiveListener();
 
+    // Issue a warning if historical data has been requested but the listener does not support it.
+    // This is only for event data; histogram data is by its nature historical and specifying a time is meaningless.
+    if ( ! FromNow && ! listener->supportsHistory() && listener->buffersEvents() )
+    {
+      g_log.error("Requested start time is in the past, but this instrument does not support historical data. "
+                  "The effective start time is therefore 'now'.");
+    }
+
     auto loadAlg = boost::dynamic_pointer_cast<LoadLiveData>(createChildAlgorithm("LoadLiveData"));
     if ( ! loadAlg ) throw std::logic_error("Error creating LoadLiveData - contact the Mantid developer team");
     // Copy settings from THIS to LoadAlg
