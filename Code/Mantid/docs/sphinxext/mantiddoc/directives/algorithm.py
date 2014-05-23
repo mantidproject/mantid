@@ -46,7 +46,8 @@ class AlgorithmDirective(BaseDirective):
           str: The location of the screenshot for the given algorithm.
         """
         images_dir = self.state.document.settings.env.config["mantid_images"]
-        return ".. image:: " + images_dir + algorithm_name + ".png"
+        screenshot = images_dir + algorithm_name + ".png"
+        return ".. image:: " + screenshot + "\n" + "    :class: screenshot"
 
 
 def setup(app):
