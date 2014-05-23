@@ -53,9 +53,6 @@ For more in-depth analysis, the algorithm will produce debug log messages.
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/PeakTransformHKL.h"
-#include "MantidAPI/PeakTransformQSample.h"
-#include "MantidAPI/PeakTransformQLab.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -74,32 +71,6 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Crystal::ConnectedComponentMappingTypes;
-
-
-namespace
-{
-  PeakTransform_sptr makePeakTransform(IMDHistoWorkspace const * const mdWS)
-  {
-    const SpecialCoordinateSystem mdCoordinates = mdWS->getSpecialCoordinateSystem();
-    PeakTransformFactory_sptr peakTransformFactory;
-    if (mdCoordinates == QLab)
-    {
-      peakTransformFactory = boost::make_shared<PeakTransformQLabFactory>();
-    }
-    else if (mdCoordinates == QSample)
-    {
-      peakTransformFactory = boost::make_shared<PeakTransformQSampleFactory>();
-    }
-    else if (mdCoordinates == Mantid::API::HKL)
-    {
-      peakTransformFactory = boost::make_shared<PeakTransformHKLFactory>();
-    }
-    const std::string xDim = mdWS->getDimension(0)->getName();
-    const std::string yDim = mdWS->getDimension(1)->getName();
-    PeakTransform_sptr peakTransform = peakTransformFactory->createTransform(xDim, yDim);
-    return peakTransform;
-  }
-}
 
 namespace Mantid
 {

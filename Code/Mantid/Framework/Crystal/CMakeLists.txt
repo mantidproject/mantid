@@ -25,6 +25,7 @@ set ( SRC_FILES
 	src/IndexPeaks.cpp
 	src/IndexSXPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
+	src/IntegratePeaksHybrid.cpp
 	src/IntegratePeaksUsingClusters.cpp
 	src/LatticeErrors.cpp
 	src/LoadHKL.cpp
@@ -95,6 +96,7 @@ set ( INC_FILES
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/IndexSXPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
+	inc/MantidCrystal/IntegratePeaksHybrid.h
 	inc/MantidCrystal/IntegratePeaksUsingClusters.h
 	inc/MantidCrystal/LatticeErrors.h
 	inc/MantidCrystal/LoadHKL.h
@@ -161,6 +163,7 @@ set ( TEST_FILES
 	IndexPeaksTest.h
 	IndexSXPeaksTest.h
 	IntegratePeakTimeSlicesTest.h
+	IntegratePeaksHybridTest.h
 	IntegratePeaksUsingClustersTest.h
 	LoadHKLTest.h
 	LoadIsawPeaksTest.h
