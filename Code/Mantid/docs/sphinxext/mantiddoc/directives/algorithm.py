@@ -19,9 +19,10 @@ class AlgorithmDirective(BaseDirective):
         # Seperate methods for each unique piece of functionality.
         reference = self._make_reference_link(algorithm_name)
         title = self._make_header(algorithm_name, True)
+        toc = self._make_local_toc()
         screenshot = self._get_algorithm_screenshot(algorithm_name)
 
-        return self._insert_rest(reference + title + screenshot)
+        return self._insert_rest(reference + title + screenshot + toc)
 
     def _make_reference_link(self, algorithm_name):
         """
@@ -34,6 +35,9 @@ class AlgorithmDirective(BaseDirective):
           str: A ReST formatted reference.
         """
         return ".. _" + algorithm_name.title() + ":" + "\n"
+
+    def _make_local_toc(self):
+        return ".. contents:: Table of Contents\n    :local:\n"
 
     def _get_algorithm_screenshot(self, algorithm_name):
         """
