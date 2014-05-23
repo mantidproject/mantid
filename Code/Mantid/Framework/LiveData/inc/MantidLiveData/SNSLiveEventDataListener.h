@@ -48,7 +48,7 @@ namespace Mantid
       virtual ~SNSLiveEventDataListener();
 
       std::string name() const { return "SNSLiveEventDataListener"; }
-      bool supportsHistory() const { return false; } // For the time being at least
+      bool supportsHistory() const { return true; }
       bool buffersEvents() const { return true; }
 
       bool connect(const Poco::Net::SocketAddress& address);
