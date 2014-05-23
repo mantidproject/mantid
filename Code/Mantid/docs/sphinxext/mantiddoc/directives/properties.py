@@ -14,7 +14,7 @@ class PropertiesDirective(BaseDirective):
         Called by Sphinx when the ..properties:: directive is encountered.
         """
         alg_name = str(self.arguments[0])
-        title = self._make_header(__name__.title())
+        title = self._make_header("Properties")
         properties_table = self._populate_properties_table(alg_name)
         return self._insert_rest(title + properties_table)
 
@@ -156,4 +156,10 @@ class PropertiesDirective(BaseDirective):
 
 
 def setup(app):
+    """
+    Setup the directives when the extension is activated
+
+    Args:
+      app: The main Sphinx application object
+    """
     app.add_directive('properties', PropertiesDirective)

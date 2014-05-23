@@ -1,6 +1,5 @@
 from base import BaseDirective
 
-
 class AlgorithmDirective(BaseDirective):
 
     """
@@ -56,5 +55,11 @@ class AlgorithmDirective(BaseDirective):
 
 
 def setup(app):
+    """
+    Setup the directives when the extension is activated
+
+    Args:
+      app: The main Sphinx application object
+    """
     app.add_config_value('mantid_images', 'mantid_images', 'env')
     app.add_directive('algorithm', AlgorithmDirective)

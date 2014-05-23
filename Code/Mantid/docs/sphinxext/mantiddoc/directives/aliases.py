@@ -13,7 +13,7 @@ class AliasesDirective(BaseDirective):
         """
         Called by Sphinx when the ..aliases:: directive is encountered.
         """
-        title = self._make_header(__name__.title())
+        title = self._make_header("Aliases")
         alias = self._get_alias(str(self.arguments[0]))
         return self._insert_rest(title + alias)
 
@@ -29,4 +29,10 @@ class AliasesDirective(BaseDirective):
 
 
 def setup(app):
+    """
+    Setup the directives when the extension is activated
+
+    Args:
+      app: The main Sphinx application object
+    """
     app.add_directive('aliases', AliasesDirective)

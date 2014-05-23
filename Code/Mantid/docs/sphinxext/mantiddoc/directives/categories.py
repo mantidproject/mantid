@@ -14,7 +14,7 @@ class CategoriesDirective(BaseDirective):
         Called by Sphinx when the ..categories:: directive is encountered.
         """
         categories = self._get_categories(str(self.arguments[0]))
-        return self._insert_rest(categories)
+        return self._insert_rest("\n" + categories)
 
     def _get_categories(self, algorithm_name):
         """
@@ -38,4 +38,10 @@ class CategoriesDirective(BaseDirective):
 
 
 def setup(app):
+    """
+    Setup the directives when the extension is activated
+
+    Args:
+      app: The main Sphinx application object
+    """
     app.add_directive('categories', CategoriesDirective)

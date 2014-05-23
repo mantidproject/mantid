@@ -13,7 +13,7 @@ class SummaryDirective(BaseDirective):
         """
         Called by Sphinx when the ..summary:: directive is encountered.
         """
-        title = self._make_header(__name__.title())
+        title = self._make_header("Summary")
         summary = self._get_summary(str(self.arguments[0]))
         return self._insert_rest(title + summary)
 
@@ -29,4 +29,10 @@ class SummaryDirective(BaseDirective):
 
 
 def setup(app):
+    """
+    Setup the directives when the extension is activated
+
+    Args:
+      app: The main Sphinx application object
+    """
     app.add_directive('summary', SummaryDirective)
