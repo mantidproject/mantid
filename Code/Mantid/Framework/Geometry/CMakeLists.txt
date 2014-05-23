@@ -294,7 +294,7 @@ endif ()
 # ===================== Open Cascade ===================
 if (NOT NO_OPENCASCADE)
   find_package ( OpenCascade REQUIRED )
-  include_directories ( ${OPENCASCADE_INCLUDE_DIR} )
+  include_directories ( system ${OPENCASCADE_INCLUDE_DIR} )
   set (SRC_FILES ${SRC_FILES} ${OPENCASCADE_SRC} )
 else ()
   add_definitions ( -DNO_OPENCASCADE )

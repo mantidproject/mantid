@@ -32,9 +32,6 @@
 GCC_DIAG_OFF(conversion)
 GCC_DIAG_OFF(cast-qual)
 #include <gp_Trsf.hxx>
-GCC_DIAG_ON(conversion)
-GCC_DIAG_ON(cast-qual)
-
 #include <gp_Vec.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Pnt.hxx>
@@ -58,6 +55,8 @@ GCC_DIAG_ON(cast-qual)
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRep_Tool.hxx>
 #include <Poly_Triangulation.hxx>
+GCC_DIAG_ON(conversion)
+GCC_DIAG_ON(cast-qual)
 
 #ifdef __INTEL_COMPILER
 #pragma warning enable 191
