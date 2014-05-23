@@ -395,6 +395,8 @@ void FitPropertyBrowser::initLayout(QWidget *w)
 
   createCompositeFunction();
 
+  connect(this, SIGNAL(functionChanged()), SLOT(updateStructureTooltips()));
+
   m_changeSlotsEnabled = true;
     
   populateFunctionNames();
@@ -477,6 +479,15 @@ void FitPropertyBrowser::executeCustomSetupRemove(const QString& name)
 
   settings.remove(name);
   updateSetupMenus();
+}
+
+/**
+ * Recursively updates structure tooltips for all the functions
+ */
+void FitPropertyBrowser::updateStructureTooltips()
+{
+  // Call tooltip update func on the root handler - it goes down recursively
+  getHandler()->updateStructureTooltip();
 }
 
 void FitPropertyBrowser::executeFitMenu(const QString& item)

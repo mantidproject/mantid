@@ -325,6 +325,8 @@ private slots:
   void executeCustomSetupLoad(const QString& name);
   void executeCustomSetupRemove(const QString& name);
 
+  /// Update structure tooltips for all functions
+  void updateStructureTooltips();
 
 protected:
   /// actions to do before the browser made visible
