@@ -57,6 +57,7 @@ private:
     MOCK_CONST_METHOD1(getInnerSignal, Mantid::signal_t(size_t));
     MOCK_CONST_METHOD1(getInnerError, Mantid::signal_t(size_t));
     MOCK_CONST_METHOD0(getIsMasked, bool());
+    MOCK_CONST_METHOD0(findNeighbourIndexesFaceTouching, std::vector<size_t>());
     MOCK_CONST_METHOD0(findNeighbourIndexes, std::vector<size_t>());
     MOCK_CONST_METHOD0(getLinearIndex, size_t());
     MOCK_CONST_METHOD1(isWithinBounds, bool(size_t));

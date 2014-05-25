@@ -15,9 +15,6 @@
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 
-using namespace ::NeXus;
-
-
 namespace Mantid
 {
   namespace DataHandling

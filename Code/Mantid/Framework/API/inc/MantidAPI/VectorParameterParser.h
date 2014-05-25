@@ -134,7 +134,6 @@ template<class VectorValueParameterType>
 VectorValueParameterType* VectorParameterParser<VectorValueParameterType>::createWithoutDelegation(
     Poco::XML::Element* parameterElement)
 {
-  typedef typename VectorValueParameterType::ValueType ValType;
   std::string typeName = parameterElement->getChildElement("Type")->innerText();
   if (VectorValueParameterType::parameterName() != typeName)
   {

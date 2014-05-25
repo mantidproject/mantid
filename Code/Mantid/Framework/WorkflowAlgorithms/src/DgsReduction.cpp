@@ -670,7 +670,7 @@ namespace Mantid
       if (defaultFacility.name() != info.facility().name())
       {
         std::ostringstream mess;
-        mess << "Default facility must be set to " << defaultFacility.name();
+        mess << "Default facility must be set to " << info.facility().name();
         mess << " in order for reduction to work!";
         throw std::runtime_error(mess.str());
       }

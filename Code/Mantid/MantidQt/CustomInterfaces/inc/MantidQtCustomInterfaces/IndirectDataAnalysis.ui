@@ -189,37 +189,29 @@
       <attribute name="title">
        <string>MSD Fit</string>
       </attribute>
-      <layout class="QVBoxLayout" name="layoutMSDFit">
+      <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_18">
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="msd_inputFile">
+          <widget class="MantidQt::MantidWidgets::DataSelector" name="msd_dsSampleInput">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
-             <verstretch>41</verstretch>
+             <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="findRunFiles" stdset="0">
-            <bool>false</bool>
+           <property name="workspaceSuffixes" stdset="0">
+            <stringlist>
+             <string>_eq2</string>
+            </stringlist>
            </property>
-           <property name="label" stdset="0">
-            <string>Input File</string>
-           </property>
-           <property name="multipleFiles" stdset="0">
-            <bool>true</bool>
-           </property>
-           <property name="fileExtensions">
+           <property name="fileBrowserSuffixes" stdset="0">
             <stringlist>
              <string>_eq2.nxs</string>
             </stringlist>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="msd_pbPlotInput">
-           <property name="text">
-            <string>Plot Input</string>
+           <property name="showLoad">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -231,7 +223,133 @@
           <layout class="QVBoxLayout" name="msd_properties"/>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="msd_plot"/>
+          <layout class="QVBoxLayout" name="verticalLayout_41">
+           <item>
+            <layout class="QVBoxLayout" name="msd_plot"/>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QLabel" name="label_51">
+               <property name="text">
+                <string>Plot Spectrum:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="msd_lePlotSpectrum">
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_24">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Expanding</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_31">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Spectra Range:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="msd_leSpectraMin">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_41">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>to</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="msd_leSpectraMax">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_21">
+         <item>
+          <spacer name="horizontalSpacer_17">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="msd_pbSequential">
+           <property name="text">
+            <string>Run Sequential</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -318,7 +436,7 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_5">
+          <widget class="QLabel" name="label_52">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -807,11 +925,11 @@
       <attribute name="title">
        <string>ConvFit</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
+      <layout class="QVBoxLayout" name="verticalLayout_42">
        <item>
         <layout class="QGridLayout" name="confit_layoutFiles">
          <item row="0" column="0">
-          <widget class="QLabel" name="label_4">
+          <widget class="QLabel" name="label_42">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -824,7 +942,7 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_3">
+          <widget class="QLabel" name="label_32">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -2252,7 +2370,6 @@
   <tabstop>elwin_ckVerbose</tabstop>
   <tabstop>elwin_ckPlot</tabstop>
   <tabstop>elwin_ckSave</tabstop>
-  <tabstop>msd_pbPlotInput</tabstop>
   <tabstop>msd_ckVerbose</tabstop>
   <tabstop>msd_ckPlot</tabstop>
   <tabstop>msd_ckSave</tabstop>

@@ -162,8 +162,8 @@ void AsymmetryCalc::exec()
   //Copy the imput time bins on to the output
   outputWS->dataX(0) = inputWS->readX(0);
 
-  // Update Y axis label 
-  outputWS->setYUnitLabel("Asymmetry");
+  // Update Y axis units
+  outputWS->setYUnit("Asymmetry");
 
   setProperty("OutputWorkspace", outputWS);
 }

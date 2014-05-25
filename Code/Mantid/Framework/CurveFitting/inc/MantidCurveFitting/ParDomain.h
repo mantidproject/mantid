@@ -41,7 +41,7 @@ class MANTID_CURVEFITTING_DLL ParDomain: public SeqDomain
 public:
   ParDomain():SeqDomain(){}
   /// Create and return i-th domain and i-th values, (i-1)th domain is released.
-  virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::IFunctionValues_sptr& values) const;
+  virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::FunctionValues_sptr& values) const;
   /// Calculate the value of a least squares cost function
   virtual void leastSquaresVal(const CostFuncLeastSquares& leastSquares);
   /// Calculate the value, first and second derivatives of a least squares cost function

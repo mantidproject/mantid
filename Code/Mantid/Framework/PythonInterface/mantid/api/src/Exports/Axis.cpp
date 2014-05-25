@@ -1,4 +1,5 @@
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
@@ -15,10 +16,7 @@
 #include <numpy/arrayobject.h>
 
 
-using Mantid::API::Axis;
-using Mantid::API::NumericAxis;
-using Mantid::API::TextAxis;
-using Mantid::API::SpectraAxis;
+using namespace Mantid::API;
 using Mantid::Kernel::Unit_sptr;
 using Mantid::specid_t;
 using namespace boost::python;
@@ -66,7 +64,7 @@ namespace
       {
         PyObject *value = PyFloat_FromDouble(self.getValue(static_cast<size_t>(i)));
         void *pos = PyArray_GETPTR1((PyArrayObject *)array, i);
-        PyArray_SETITEM((PyArrayObject *)array, pos, value);
+        PyArray_SETITEM((PyArrayObject *)array, (char*)pos, value);
       }
       else
       {
@@ -108,6 +106,9 @@ void export_Axis()
     ;
 }
 
+// --------------------------------------------------------------------------------------------
+// NumericAxis
+// --------------------------------------------------------------------------------------------
 /**
 * Creates a NumericAxis
 * @param length The length of the new axis
@@ -128,6 +129,33 @@ void export_NumericAxis()
 
 }
 
+// --------------------------------------------------------------------------------------------
+// BinEdgeAxis
+// --------------------------------------------------------------------------------------------
+
+/**
+* Creates a BinEdgeAxis
+* @param length The length of the new axis
+* @return pointer to the axis object
+*/
+Axis* createBinEdgeAxis(int length)
+{
+  return new Mantid::API::BinEdgeAxis(length);
+}
+
+void export_BinEdgeAxis()
+{
+  /// Exported so that Boost.Python can give back a BinEdgeAxis class when an Axis* is returned
+  class_< BinEdgeAxis, bases<NumericAxis>, boost::noncopyable >("BinEdgeAxis", no_init)
+    .def("create", &createBinEdgeAxis, return_internal_reference<>(), "Creates a new BinEdgeAxis of a specified length")
+    .staticmethod("create")
+   ;
+
+}
+
+// --------------------------------------------------------------------------------------------
+// TextAxis
+// --------------------------------------------------------------------------------------------
 
 /**
 * Creates a TextAxis

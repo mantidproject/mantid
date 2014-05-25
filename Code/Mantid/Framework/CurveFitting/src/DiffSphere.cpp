@@ -57,10 +57,6 @@ The fit function DiffSphere has an elastic part, modelled by fitting function <i
 #include <boost/math/special_functions/bessel.hpp>
 #include "MantidAPI/ParameterTie.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 namespace Mantid
 {
 namespace CurveFitting

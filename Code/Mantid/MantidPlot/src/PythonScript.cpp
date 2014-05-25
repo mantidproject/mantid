@@ -418,6 +418,19 @@ void PythonScript::setContext(QObject *context)
 }
 
 /**
+ * Clears the current set of local variables and resets
+ * the dictionary context back to the default set
+ */
+void PythonScript::clearLocals()
+{
+  GlobalInterpreterLock pythonlock;
+
+  Py_XDECREF(localDict); //clear up any previous dictionary
+  PyObject *pymodule = PyImport_AddModule("__main__");
+  localDict = PyDict_Copy(PyModule_GetDict(pymodule));
+}
+
+/**
  * Sets the context for the script and if name points to a file then
  * sets the __file__ variable
  * @param name A string identifier for the script
@@ -425,9 +438,9 @@ void PythonScript::setContext(QObject *context)
  */
 void PythonScript::initialize(const QString & name, QObject *context)
 {
+  clearLocals(); // holds and releases GIL
+
   GlobalInterpreterLock pythonlock;
-  PyObject *pymodule = PyImport_AddModule("__main__");
-  localDict = PyDict_Copy(PyModule_GetDict(pymodule));
   PythonScript::setIdentifier(name);
   setContext(context);
 }

@@ -70,7 +70,7 @@ namespace Mantid
       // Overridden Fit1D methods
       void declareParameters();
       void function(const double* in, double* out, const double* xValues, const size_t nData);
-      void functionDeriv(const double* in, Jacobian* out, const double* xValues, const size_t nData);
+      void functionDeriv(const double* in, API::Jacobian* out, const double* xValues, const size_t nData);
 
     };
 

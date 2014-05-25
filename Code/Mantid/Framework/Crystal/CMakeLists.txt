@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/DiffPeaksWorkspaces.cpp
 	src/DisjointElement.cpp
 	src/FilterPeaks.cpp
+	src/FindClusterFaces.cpp
 	src/FindSXPeaks.cpp
 	src/FindUBUsingFFT.cpp
 	src/FindUBUsingIndexedPeaks.cpp
@@ -36,6 +37,7 @@ set ( SRC_FILES
 	src/OptimizeExtinctionParameters.cpp
 	src/OptimizeLatticeForCellType.cpp
 	src/PeakBackground.cpp
+	src/PeakClusterProjection.cpp
 	src/PeakHKLErrors.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
@@ -79,6 +81,7 @@ set ( INC_FILES
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/DisjointElement.h
 	inc/MantidCrystal/FilterPeaks.h
+	inc/MantidCrystal/FindClusterFaces.h
 	inc/MantidCrystal/FindSXPeaks.h
 	inc/MantidCrystal/FindUBUsingFFT.h
 	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
@@ -104,6 +107,7 @@ set ( INC_FILES
 	inc/MantidCrystal/OptimizeExtinctionParameters.h
 	inc/MantidCrystal/OptimizeLatticeForCellType.h
 	inc/MantidCrystal/PeakBackground.h
+	inc/MantidCrystal/PeakClusterProjection.h
 	inc/MantidCrystal/PeakHKLErrors.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
@@ -145,6 +149,7 @@ set ( TEST_FILES
 	DiffPeaksWorkspacesTest.h
 	DisjointElementTest.h
 	FilterPeaksTest.h
+	FindClusterFacesTest.h
 	FindSXPeaksTest.h
 	FindUBUsingFFTTest.h
 	FindUBUsingIndexedPeaksTest.h
@@ -166,6 +171,7 @@ set ( TEST_FILES
 	OptimizeCrystalPlacementTest.h
 	OptimizeLatticeForCellTypeTest.h
 	PeakBackgroundTest.h
+	PeakClusterProjectionTest.h
 	PeakHKLErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h

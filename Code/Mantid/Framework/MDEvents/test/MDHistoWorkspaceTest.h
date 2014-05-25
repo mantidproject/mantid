@@ -19,6 +19,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidKernel/Strings.h"
 
+using namespace Mantid::DataObjects;
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;

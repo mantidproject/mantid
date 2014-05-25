@@ -10,6 +10,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/MDEventsTestHelper.cpp )
   cxxtest_add_test ( CrystalTest ${TEST_FILES} )
   target_link_libraries ( CrystalTest Crystal DataHandling MDEvents MDAlgorithms ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
+  add_dependencies ( CrystalTest Algorithms CurveFitting )
   add_dependencies ( FrameworkTests CrystalTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET CrystalTest PROPERTY FOLDER "UnitTests" )

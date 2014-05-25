@@ -8,6 +8,8 @@ namespace Mantid
 namespace Poldi
 {
 
+using namespace Geometry;
+
 PoldiDeadWireDecorator::PoldiDeadWireDecorator(std::set<int> deadWires, boost::shared_ptr<Poldi::PoldiAbstractDetector> detector) :
     PoldiDetectorDecorator(detector),
     m_deadWireSet(deadWires),

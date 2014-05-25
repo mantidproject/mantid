@@ -15,7 +15,7 @@ namespace Mantid
   namespace API
   {
     class FunctionDomain;
-    class IFunctionValues;
+    class FunctionValues;
     class Workspace;
   }
 

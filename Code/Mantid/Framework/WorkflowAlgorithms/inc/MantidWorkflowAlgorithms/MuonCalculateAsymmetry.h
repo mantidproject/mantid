@@ -8,9 +8,6 @@ namespace Mantid
 {
 namespace WorkflowAlgorithms
 {
-  using namespace Kernel;
-  using namespace API;
-
   /** MuonCalculateAsymmetry : converts loaded/prepared Muon data to a data suitable for analysis. 
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -49,10 +46,10 @@ namespace WorkflowAlgorithms
     void exec();
 
     /// Converts given workspace according to the OutputType
-    MatrixWorkspace_sptr convertWorkspace(MatrixWorkspace_sptr ws);
+    API::MatrixWorkspace_sptr convertWorkspace(API::MatrixWorkspace_sptr ws);
   
     /// Merges two period workspaces according to PeriodOperation specified
-    MatrixWorkspace_sptr mergePeriods(MatrixWorkspace_sptr ws1, MatrixWorkspace_sptr ws2);
+    API::MatrixWorkspace_sptr mergePeriods(API::MatrixWorkspace_sptr ws1, API::MatrixWorkspace_sptr ws2);
   };
 
 

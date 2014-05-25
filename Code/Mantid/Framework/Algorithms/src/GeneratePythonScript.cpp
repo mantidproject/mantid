@@ -79,13 +79,13 @@ void GeneratePythonScript::exec()
 
   // Cycle through the AlgorithHistory objects of the workspace, create a string for each one,
   // and then add them to the list.
-  const WorkspaceHistory::AlgorithmHistories  & algHistories = wsHistory.getAlgorithmHistories();
-  WorkspaceHistory::AlgorithmHistories::const_iterator algHistIter = algHistories.begin();
+  const Mantid::API::AlgorithmHistories  & algHistories = wsHistory.getAlgorithmHistories();
+ Mantid::API::AlgorithmHistories::const_iterator algHistIter = algHistories.begin();
 
   std::vector<std::string> orderedHists;
   for( ; algHistIter != algHistories.end(); ++algHistIter)
   {
-    orderedHists.push_back(genAlgString(*algHistIter));
+    orderedHists.push_back(genAlgString(**algHistIter));
   }
 
   // Generate the python script from each of the Algorith strings, then write to file.

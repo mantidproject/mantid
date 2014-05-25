@@ -59,6 +59,9 @@ class FunctionHandler;
 class MANTID_API_DLL IFunction1D: public virtual IFunction
 {
 public:
+  /// Virtual destructor 
+  /// (avoids warnings about non-trivial move assignment in virtually inheriting classes)
+  virtual ~IFunction1D() {}
 
   /* Overidden methods */
 

@@ -152,6 +152,8 @@ private:
     }
   };
 
+  std::string m_preSetupPeakRadius;
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -160,8 +162,14 @@ public:
 
   CompositeFunctionTest()
   {
+    m_preSetupPeakRadius = Mantid::Kernel::ConfigService::Instance().getString("curvefitting.peakRadius");
     Mantid::Kernel::ConfigService::Instance().setString("curvefitting.peakRadius","100");
     FrameworkManager::Instance();
+  }
+
+  ~CompositeFunctionTest()
+  {
+    Mantid::Kernel::ConfigService::Instance().setString("curvefitting.peakRadius", m_preSetupPeakRadius);
   }
 
   void testFit()

@@ -53,6 +53,7 @@ set ( SRC_FILES
 	src/Quantification/MDResolutionConvolutionFactory.cpp
 	src/Quantification/Models/QCoordinate.cpp
 	src/Quantification/Models/Strontium122.cpp
+    src/Quantification/Models/MullerAnsatz.cpp 
 	src/Quantification/Resolution/ModeratorChopperResolution.cpp
 	src/Quantification/Resolution/TobyFitBMatrix.cpp
 	src/Quantification/Resolution/TobyFitResolutionModel.cpp
@@ -130,6 +131,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h
 	inc/MantidMDAlgorithms/Quantification/Models/QCoordinate.h
 	inc/MantidMDAlgorithms/Quantification/Models/Strontium122.h
+    inc/MantidMDAlgorithms/Quantification/Models/MullerAnsatz.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h
@@ -197,6 +199,7 @@ set ( TEST_FILES
 	MinusMDTest.h
 	ModeratorChopperResolutionTest.h
 	MultiplyMDTest.h
+	MullerAnsatzTest.h 
 	NotMDTest.h
 	OrMDTest.h
 	PlusMDTest.h
