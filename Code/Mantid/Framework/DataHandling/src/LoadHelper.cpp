@@ -311,7 +311,7 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID,
 
 						if (dims[0]!=1) {
 							g_log.debug()<<indent_str<<property_name<<" is an array..."<<std::endl;
-							if (dims[0]>10) {
+							if (dims[0]>9) {
 								g_log.debug()<<indent_str<<"   skipping it (size="<<dims[0]<<")."<<std::endl;
 								NXfree(&dataBuffer);
 								continue;
@@ -336,7 +336,7 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID,
 								else
 									runDetails.addProperty(property_name, property_double_value);
 							} else {
-								// An array
+								// An array, converted to "name_index", with index < 10 (see test above)
 								for (int dim_index=0 ; dim_index<dims[0]; dim_index++) {
 									if (type==NX_FLOAT32) {
 										property_double_value = ((float*)dataBuffer)[dim_index];
@@ -441,6 +441,27 @@ void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws, const std::string &
 
 }
 
+void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws, const std::string &componentName, const Kernel::Quat & rot) {
+
+	try {
+
+		Geometry::Instrument_const_sptr instrument = ws->getInstrument();
+		Geometry::IComponent_const_sptr component = instrument->getComponentByName(componentName);
+
+		//g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " << newTheta << "\n";
+		Geometry::ParameterMap& pmap = ws->instrumentParameters();
+		Geometry::ComponentHelper::rotateComponent(*component, pmap, rot, Geometry::ComponentHelper::Absolute);
+
+	} catch (Mantid::Kernel::Exception::NotFoundError&) {
+		throw std::runtime_error(
+				"Error when trying to move the "  + componentName +  " : NotFoundError");
+	} catch (std::runtime_error &) {
+		throw std::runtime_error(
+				"Error when trying to move the "  + componentName +  " : runtime_error");
+	}
+
+}
+
 V3D LoadHelper::getComponentPosition(API::MatrixWorkspace_sptr ws, const std::string &componentName) {
 	try {
 			Geometry::Instrument_const_sptr instrument = ws->getInstrument();
@@ -451,6 +472,17 @@ V3D LoadHelper::getComponentPosition(API::MatrixWorkspace_sptr ws, const std::st
 			throw std::runtime_error(
 					"Error when trying to move the "  + componentName +  " : NotFoundError");
 		}
+}
+
+template<typename T>
+T LoadHelper::getPropertyFromRun(API::MatrixWorkspace_const_sptr inputWS, const std::string& propertyName){
+	if (inputWS->run().hasProperty(propertyName)) {
+		Kernel::Property* prop = inputWS->run().getProperty(propertyName);
+		return boost::lexical_cast<T>(prop->value());
+	} else {
+		std::string mesg = "No '" + propertyName + "' property found in the input workspace....";
+		throw std::runtime_error(mesg);
+	}
 }
 
 } // namespace DataHandling

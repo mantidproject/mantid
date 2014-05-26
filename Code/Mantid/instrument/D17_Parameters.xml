@@ -13,7 +13,7 @@
 		<parameter name="channel_width" type="string">
 			<value val="monitor1.time_of_flight_0" />
 		</parameter>
-		<!--  Get value from poperties -->
+		<!--  Get value from properties -->
 		<parameter name="detector_distance" type="string">
 			<value val="det.value" />
 		</parameter>

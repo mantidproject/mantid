@@ -132,7 +132,30 @@ void LoadILLReflectometry::exec() {
 	g_log.debug("Loading instrument definition...");
 	runLoadInstrument();
 
-	//moveSingleDetectors(); Work in progress
+
+
+
+	// 1) Move
+
+	// Get distance and tilt angle stored in nexus file
+	// Mantid way
+	//	auto angleProp = dynamic_cast<PropertyWithValue<double>*>(m_localWorkspace->run().getProperty("dan.value"));
+	// Nexus way
+	double angle = firstEntry.getFloat("instrument/dan/value");// detector angle in degrees
+	double distance = firstEntry.getFloat("instrument/det/value");// detector distance in millimeter
+	distance /= 1000;// convert to meter
+	placeDetector(distance, angle);
+
+	// 2) Center, (must be done after move)
+	int par1_101 = firstEntry.getInt("instrument/PSD/ny");
+	g_log.debug("Note: using PSD/ny instead of PSD/nx. Should be corrected in next D17 nexus file.");
+	double xCenter = 0.1325 / par1_101;// As in lamp, but in meter
+	centerDetector(xCenter);
+
+
+	// Set the channel width property
+	auto channel_width = dynamic_cast<PropertyWithValue<double>*>(m_localWorkspace->run().getProperty("monitor1.time_of_flight_0"));
+	m_localWorkspace->mutableRun().addProperty<double>("channel_width", *channel_width, true); //overwrite
 
 	// Set the output workspace property
 	setProperty("OutputWorkspace", m_localWorkspace);
@@ -367,7 +390,37 @@ void LoadILLReflectometry::runLoadInstrument() {
 	}
 }
 
+void LoadILLReflectometry::centerDetector(double xCenter) {
+
+	std::string componentName("uniq_detector");
+	V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
+	// TODO confirm!
+	pos.setX(pos.X() - xCenter);
+	m_loader.moveComponent(m_localWorkspace, componentName, pos);
+
+}
+
+void LoadILLReflectometry::placeDetector(
+				double distance /* meter */,
+				double angle /* degree */) {
+
+	std::string componentName("uniq_detector");
+	V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
+
+	double r, theta, phi;
+	pos.getSpherical(r, theta, phi);
 
 
+	V3D newpos;
+	newpos.spherical(distance, angle, phi);
+
+	m_loader.moveComponent(m_localWorkspace, componentName, newpos);
+
+	// Apply a local rotation to stay perpendicular to the beam
+	const V3D axis(0.0,1.0,0.0);
+	Quat rotation(angle, axis);
+	m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
+
+}
 } // namespace DataHandling
 } // namespace Mantid

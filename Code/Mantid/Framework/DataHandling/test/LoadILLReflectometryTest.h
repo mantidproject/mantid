@@ -55,6 +55,14 @@ public:
 						outWSName);
 		TS_ASSERT(output);
 
+		TS_ASSERT_EQUALS(output->getNumberHistograms(),256+2);
+
+		double channelWidth = getPropertyFromRun<double>(output, "channel_width");
+		TS_ASSERT_EQUALS(channelWidth, 57.0);
+
+
+
+
 		if (!output)
 			return;
 
@@ -67,6 +75,21 @@ public:
 
 private:
 	std::string m_dataFile;
+
+
+	template<typename T>
+	T getPropertyFromRun(MatrixWorkspace_const_sptr inputWS,
+	    const std::string& propertyName) {
+	  if (inputWS->run().hasProperty(propertyName)) {
+		  Mantid::Kernel::Property* prop = inputWS->run().getProperty(propertyName);
+	    return boost::lexical_cast<T>(prop->value());
+	  } else {
+	    std::string mesg = "No '" + propertyName
+	        + "' property found in the input workspace....";
+	    throw std::runtime_error(mesg);
+	  }
+	}
+
 
 };
 
