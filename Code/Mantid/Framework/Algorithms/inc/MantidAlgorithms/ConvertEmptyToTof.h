@@ -38,49 +38,42 @@ namespace Algorithms {
  */
 class DLLExport ConvertEmptyToTof: public API::Algorithm {
 public:
-	ConvertEmptyToTof();
-	virtual ~ConvertEmptyToTof();
+  ConvertEmptyToTof();
+  virtual ~ConvertEmptyToTof();
 
-	virtual const std::string name() const;
-	virtual int version() const;
-	virtual const std::string category() const;
+  virtual const std::string name() const;
+  virtual int version() const;
+  virtual const std::string category() const;
 
 private:
-	virtual void initDocs();
-	void init();
-	void exec();
+  virtual void initDocs();
+  void init();
+  void exec();
 
-	void validateSpectraIndices(std::vector<int> &v);
-	void validateChannelIndices(std::vector<int> &v);
+  void validateSpectraIndices(std::vector<int> &v);
+  void validateChannelIndices(std::vector<int> &v);
 
-	std::map<int, int> findElasticPeakPositions(
-			const std::vector<int> &spectraIndices,
-			const std::vector<int> &channelIndices);
+  std::map<int, int> findElasticPeakPositions(const std::vector<int> &,
+      const std::vector<int> &);
 
-	void estimateFWHM(const Mantid::MantidVec& spec, double& center,
-			double& sigma, double& height, double& minX, double& maxX);
+  void estimateFWHM(const Mantid::MantidVec&, double&, double&, double&,
+      double&, double&);
 
-	bool doFitGaussianPeak(int workspaceindex, double& center, double& sigma,
-			double& height, double startX, double endX);
-	std::pair<int, double> findAverageEppAndEpTof(
-			const std::map<int, int>& eppMap);
+  bool doFitGaussianPeak(int, double&, double&, double&, double, double);
+  std::pair<int, double> findAverageEppAndEpTof(const std::map<int, int>&);
 
-	double getL1(API::MatrixWorkspace_const_sptr workspace);
-	double getL2(API::MatrixWorkspace_const_sptr, int detId);
-	double calculateTOF(double distance, double wavelength);
-	bool areEqual(double a, double b, double epsilon);
-	template<typename T> T getPropertyFromRun(
-			API::MatrixWorkspace_const_sptr inputWS,const std::string& propertyName);
-	int roundUp(double value);
-	std::vector<double> makeTofAxis(int epp, double epTof, size_t size,
-			double channelWidth);
-	void setTofInWS(const std::vector<double> &tofAxis,API::MatrixWorkspace_sptr outputWS);
+  double getL1(API::MatrixWorkspace_const_sptr);
+  double getL2(API::MatrixWorkspace_const_sptr, int);
+  double calculateTOF(double, double);
+  bool areEqual(double, double, double);
+  template<typename T> T getPropertyFromRun(API::MatrixWorkspace_const_sptr,
+      const std::string&);
+  int roundUp(double);
+  std::vector<double> makeTofAxis(int, double, size_t, double);
+  void setTofInWS(const std::vector<double> &, API::MatrixWorkspace_sptr);
 
-	/// The user selected (input) workspace
-	// API::MatrixWorkspace_const_sptr m_inputWS;
-	DataObjects::Workspace2D_sptr m_inputWS;
-	/// The output workspace, maybe the same as the input one
-	API::MatrixWorkspace_sptr m_outputWS;
+  DataObjects::Workspace2D_sptr m_inputWS;
+  API::MatrixWorkspace_sptr m_outputWS;
 };
 
 } // namespace Algorithms
