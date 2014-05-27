@@ -243,10 +243,6 @@ namespace Mantid
         else
         {
           const size_t labelIdAtPeak = static_cast<size_t>(signalValue);
-          for(auto it = clusterMap.begin(); it != clusterMap.end(); ++it)
-          {
-            std::cout << it->first << "\t" << it->second << std::endl;
-          }
           ICluster * const cluster = clusterMap[labelIdAtPeak].get();
           ICluster::ClusterIntegratedValues integratedValues = cluster->integrate(localImage);
           peak.setIntensity(integratedValues.get<0>());

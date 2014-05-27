@@ -166,7 +166,7 @@ public:
     TSM_ASSERT("Should have 'empy' label", does_contain(labelIds, 0));
   }
 
-  void test_integrate_two_separte_but_identical_peaks()
+  void test_integrate_two_separate_but_identical_peaks()
   {
     // ------- Make the fake input
     std::vector<V3D> hklValues;
