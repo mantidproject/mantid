@@ -25,6 +25,7 @@ This is a workflow algorithm that does the bulk of the work for time focusing di
 #include "MantidWorkflowAlgorithms/AlignAndFocusPowder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -32,6 +33,7 @@ This is a workflow algorithm that does the bulk of the work for time focusing di
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ConfigService.h"
@@ -126,8 +128,8 @@ namespace WorkflowAlgorithms
     declareProperty("Dspacing", true,"Bin in Dspace. (True is Dspace; False is TOF)");
     declareProperty(new ArrayProperty<double>("DMin"), "Minimum for Dspace axis. (Default 0.) ");
     declareProperty(new ArrayProperty<double>("DMax"), "Maximum for Dspace axis. (Default 0.) ");
-    declareProperty("TMin", 0.0, "Minimum for TOF axis. (Default 0.) ");
-    declareProperty("TMax", 0.0, "Maximum for TOF or dspace axis. (Default 0.) ");
+    declareProperty("TMin", EMPTY_DBL(), "Minimum for TOF axis. Defaults to 0. ");
+    declareProperty("TMax", EMPTY_DBL(), "Maximum for TOF or dspace axis. Defaults to 0. ");
     declareProperty("PreserveEvents", true,
                     "If the InputWorkspace is an EventWorkspace, this will preserve the full event list (warning: this will use much more memory!).");
     declareProperty("RemovePromptPulseWidth", 0.,
@@ -149,6 +151,7 @@ namespace WorkflowAlgorithms
                     "will be stored in an additional set of spectra. "
                     "If offset is equal to 0, then the low resolution will have same spectrum IDs as the normal ones.  "
                     "Otherwise, the low resolution spectra will have spectrum IDs offset from normal ones. ");
+    declareProperty("ReductionProperties", "__powdereduction", Direction::Input);
 
   }
 
@@ -188,12 +191,54 @@ namespace WorkflowAlgorithms
   }
 
   //----------------------------------------------------------------------------------------------
+  /**
+   * Function to get a property either from a PropertyManager or the algorithm
+   * properties.
+   * @param apname : The algorithm property to retrieve.
+   * @param pmpname : The property manager property name.
+   * @param pm : The PropertyManager instance.
+   * @return : The value of the requested property.
+   */
+  double AlignAndFocusPowder::getPropertyFromPmOrSelf(const std::string &apname,
+                                                      const std::string &pmpname,
+                                                      boost::shared_ptr<PropertyManager> pm)
+  {
+    auto param = EMPTY_DBL();
+    // Look at algorithm first
+    param = getProperty(apname);
+    if (!param == EMPTY_DBL())
+    {
+      g_log.warning() << "Returning algorithm parameter" << std::endl;
+      return param;
+    }
+    // Look in property manager
+    if (pm && pm->existsProperty(pmpname))
+    {
+      g_log.warning() << "Have property manager and returning value." << std::endl;
+      return pm->getProperty(pmpname);
+    }
+    else
+    {
+      g_log.warning() << "No property, using default." << std::endl;
+      return 0.0;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Executes the algorithm
    *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
    *  @throw runtime_error If unable to run one of the Child Algorithms successfully
    */
   void AlignAndFocusPowder::exec()
   {
+    // Get the reduction property manager
+    const std::string reductionManagerName = this->getProperty("ReductionProperties");
+    boost::shared_ptr<PropertyManager> reductionManager;
+    if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
+    {
+      reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+    }
+
     // retrieve the properties
     m_inputW = getProperty("InputWorkspace");
     m_inputEW = boost::dynamic_pointer_cast<EventWorkspace>( m_inputW );
@@ -222,8 +267,8 @@ namespace WorkflowAlgorithms
     LRef = getProperty("UnwrapRef");
     DIFCref = getProperty("LowResRef");
     minwl = getProperty("CropWavelengthMin");
-    tmin = getProperty("TMin");
-    tmax = getProperty("TMax");
+    tmin = getPropertyFromPmOrSelf("TMin", "tof_min", reductionManager);
+    tmax = getPropertyFromPmOrSelf("TMax", "tof_max", reductionManager);
     m_preserveEvents = getProperty("PreserveEvents");
     m_resampleX = getProperty("ResampleX");
     // determine some bits about d-space and binning

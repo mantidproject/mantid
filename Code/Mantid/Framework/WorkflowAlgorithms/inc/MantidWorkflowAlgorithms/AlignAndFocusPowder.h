@@ -13,6 +13,11 @@
 
 namespace Mantid
 {
+  namespace Kernel
+  {
+    class PropertyManager;
+  }
+
   namespace WorkflowAlgorithms
   {
     /** 
@@ -90,6 +95,10 @@ namespace Mantid
       API::MatrixWorkspace_sptr editInstrument(API::MatrixWorkspace_sptr ws, std::vector<double> polars,
                                                                     std::vector<specid_t> specids, std::vector<double> l2s,
                                                                     std::vector<double> phis);
+
+      double getPropertyFromPmOrSelf(const std::string &apname,
+                                     const std::string &pmpname,
+                                     boost::shared_ptr<Kernel::PropertyManager> pm);
 
       API::MatrixWorkspace_sptr m_inputW;
       API::MatrixWorkspace_sptr m_outputW;
