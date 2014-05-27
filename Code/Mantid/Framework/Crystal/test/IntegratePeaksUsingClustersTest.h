@@ -48,7 +48,7 @@ public:
 
   IntegratePeaksUsingClustersTest()
   {
-    //FrameworkManager::Instance();
+    FrameworkManager::Instance();
   }
 
   void test_Init()
@@ -273,7 +273,7 @@ public:
 
   IntegratePeaksUsingClustersTestPerformance()
   {
-    //FrameworkManager::Instance();
+    FrameworkManager::Instance();
    
     std::vector<V3D> hklValues;
     for(double i = -10; i < 10; i+=4)

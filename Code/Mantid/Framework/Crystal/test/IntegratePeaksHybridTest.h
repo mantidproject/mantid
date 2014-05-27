@@ -63,6 +63,11 @@ public:
     delete suite;
   }
 
+  IntegratePeaksHybridTest()
+  {
+    FrameworkManager::Instance();
+  }
+
   void test_Init()
   {
     IntegratePeaksHybrid alg;
@@ -392,7 +397,7 @@ public:
   }
   IntegratePeaksHybridTestPerformance()
   {
-    //FrameworkManager::Instance();
+    FrameworkManager::Instance();
 
     std::vector<V3D> hklValues;
     for(double i = -10; i < 10; i+=4)
