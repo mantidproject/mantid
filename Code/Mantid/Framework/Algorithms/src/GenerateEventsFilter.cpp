@@ -701,6 +701,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Generate filters from multiple values
     * @param minvalue :: minimum value of the allowed log value;
+    * @param valueinterval :: step of the log value for a series of filter
     * @param maxvalue :: maximum value of the allowed log value;
     * @param filterincrease :: if true, log value in the increasing curve should be included;
     * @param filterdecrease :: if true, log value in the decreasing curve should be included;
