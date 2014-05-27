@@ -15,6 +15,8 @@
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
 #include "../ScriptingWindow.h"
+#include "../Folder.h"
+#include "../TiledWindow.h"
 
 #include "MantidKernel/Property.h"
 #include "MantidKernel/ConfigService.h"
@@ -1232,8 +1234,6 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
 
 bool MantidUI::drop(QDropEvent* e)
 {
-  
-
   QString name = e->mimeData()->objectName();
   if (name == "MantidWorkspace")
   {
@@ -1276,6 +1276,16 @@ bool MantidUI::drop(QDropEvent* e)
       //pass to Loading of mantid workspaces
       m_exploreMantid->dropEvent(e);
     }
+    return true;
+  }
+  else if (name == "TiledWindow" )
+  {
+    MdiSubWindow *w = m_appWindow->currentFolder()->window( e->mimeData()->text() );
+    if ( !w ) return false;
+    TiledWindow *tw = dynamic_cast<TiledWindow*>( w );
+    if ( !tw ) return false;
+    tw->removeSelectionToDefaultWindowType();
+
     return true;
   }
 

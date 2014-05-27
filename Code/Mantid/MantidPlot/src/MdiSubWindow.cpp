@@ -183,6 +183,14 @@ void MdiSubWindow::move(const QPoint& pos)
 }
 
 /**
+ * Resize the window to it's default size
+ */
+void MdiSubWindow::resizeToDefault()
+{
+  resize( 500, 400 );
+}
+
+/**
  */
 void MdiSubWindow::undock()
 {

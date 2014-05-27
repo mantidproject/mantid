@@ -240,7 +240,6 @@ void FloatingWindow::dragMousePress(QPoint pos)
   {
     m_dragMouseDown = true;
     m_dragStartPos = pos;
-    std::cerr << "Drag mouse press " << m_dragStartPos.x() << ' ' << m_dragStartPos.y() << std::endl;
   }
 }
 
@@ -249,7 +248,6 @@ void FloatingWindow::dragMouseRelease(QPoint pos)
   if ( m_dragMouseDown )
   {
     m_dragMouseDown = false;
-    std::cerr << "Drag mouse release " << pos.x() << ' ' << pos.y() << std::endl;
   }
 }
 

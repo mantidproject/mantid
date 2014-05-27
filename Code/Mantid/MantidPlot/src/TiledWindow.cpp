@@ -10,6 +10,7 @@
 #include <QAction>
 #include <QSignalMapper>
 #include <QActionGroup>
+#include <QApplication>
 
 // constants defining the minimum size of tiles
 const int minimumTileWidth = 100;
@@ -367,22 +368,57 @@ MdiSubWindow *TiledWindow::getWidget(int row, int col)
 }
 
 /**
+ * Make a widget floating or docked.
+ * @param w :: A MdiSubWindow. It must be already detached from the tile and ready to become floating or docked.
+ * @param to :: A wrapper window option: Floating, Docked or Default.
+ */
+void TiledWindow::sendWidgetTo(MdiSubWindow *w, TiledWindow::RemoveDestination to)
+{
+  w->resizeToDefault();
+  switch (to)
+  {
+  case( Floating ): w->undock(); break;
+  case( Docked ):   w->dock(); break;
+  case( Default ):  
+  default:
+    if ( applicationWindow()->isDefaultFloating( w ) )
+    {
+      w->undock();
+    }
+    else
+    {
+      w->dock();
+    }
+  }
+}
+
+/**
+ * Take a widget at position (row,col), remove it and make docked.
+ * @param row :: The tile's row index.
+ * @param col :: The tile's column index.
+ */
+void TiledWindow::removeWidgetTo(int row, int col, TiledWindow::RemoveDestination to)
+{
+  try
+  {
+    deselectWidget( row, col );
+    MdiSubWindow *widget = removeTile( row, col );
+    sendWidgetTo( widget, to );
+  }
+  catch(std::runtime_error& ex)
+  {
+    QMessageBox::critical(this,"MantidPlot- Error","Cannot remove a widget from a TiledWindow:\n\n" + QString::fromStdString(ex.what()));
+  }
+}
+
+/**
  * Take a widget at position (row,col), remove it and make docked.
  * @param row :: The tile's row index.
  * @param col :: The tile's column index.
  */
 void TiledWindow::removeWidgetToDocked(int row, int col)
 {
-  try
-  {
-    deselectWidget( row, col );
-    MdiSubWindow *widget = removeTile( row, col );
-    widget->dock();
-  }
-  catch(std::runtime_error& ex)
-  {
-    QMessageBox::critical(this,"MantidPlot- Error","Cannot remove a widget from a TiledWindow:\n\n" + QString::fromStdString(ex.what()));
-  }
+  removeWidgetTo( row, col, Docked );
 }
 
 /**
@@ -392,16 +428,7 @@ void TiledWindow::removeWidgetToDocked(int row, int col)
  */
 void TiledWindow::removeWidgetToFloating(int row, int col)
 {
-  try
-  {
-    deselectWidget( row, col );
-    MdiSubWindow *widget = removeTile( row, col );
-    widget->undock();
-  }
-  catch(std::runtime_error& ex)
-  {
-    QMessageBox::critical(this,"MantidPlot- Error","Cannot remove a widget from a TiledWindow:\n\n" + QString::fromStdString(ex.what()));
-  }
+  removeWidgetTo( row, col, Floating );
 }
 
 /**
@@ -522,6 +549,27 @@ void TiledWindow::mouseReleaseEvent(QMouseEvent *ev)
 }
 
 /**
+ * Mouse move event handler.
+ */
+void TiledWindow::mouseMoveEvent(QMouseEvent *ev)
+{
+  if (!hasSelection() || (ev->pos() - m_dragStartPos).manhattanLength() < QApplication::startDragDistance())
+  {
+    return;
+  }
+
+  QDrag *drag = new QDrag(this);
+  QMimeData *mimeData = new QMimeData;
+
+  mimeData->setObjectName("TiledWindow");
+  mimeData->setText( name() );
+
+  drag->setMimeData(mimeData);
+  Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
+  (void) dropAction;
+}
+
+/**
  * Add a tile to the selection.
  * @param tile :: A tile to add.
  * @param append :: If true the tile will be appended to the existing selection. If false 
@@ -619,6 +667,14 @@ bool TiledWindow::deselectTile(Tile *tile)
     return true;
   }
   return false;
+}
+
+/**
+ * Check if there are any selected tiles
+ */
+bool TiledWindow::hasSelection() const
+{
+  return ! m_selection.isEmpty();
 }
 
 /**
@@ -730,9 +786,10 @@ void TiledWindow::selectRange(int row1, int col1, int row2, int col2)
 }
 
 /**
- * Remove the selection and make all windows docked.
+ * Remove the selection and make its widgets floating or docked
+ * @param to :: A wrapper window option: Floating, Docked or Default.
  */
-void TiledWindow::removeSelectionToDocked()
+void TiledWindow::removeSelectionTo(TiledWindow::RemoveDestination to)
 {
   foreach(Tile *tile, m_selection)
   {
@@ -741,9 +798,17 @@ void TiledWindow::removeSelectionToDocked()
     {
       throw std::logic_error("TiledWindow: Empty tile is found in slection.");
     }
-    widget->dock();
+    sendWidgetTo( widget, to );
   }
   clearSelection();
+}
+
+/**
+ * Remove the selection and make all windows docked.
+ */
+void TiledWindow::removeSelectionToDocked()
+{
+  removeSelectionTo( Docked );
 }
 
 /**
@@ -751,16 +816,17 @@ void TiledWindow::removeSelectionToDocked()
  */
 void TiledWindow::removeSelectionToFloating()
 {
-  foreach(Tile *tile, m_selection)
-  {
-    MdiSubWindow *widget = removeTile( tile );
-    if ( widget == NULL )
-    {
-      throw std::logic_error("TiledWindow: Empty tile is found in slection.");
-    }
-    widget->undock();
-  }
-  clearSelection();
+  removeSelectionTo( Floating );
+}
+
+/**
+ * Remove the selection and put them into separate windows. Each window
+ * will be either floating or docked depending on the default setting for
+ * a particular MdiSubwindow type.
+ */
+void TiledWindow::removeSelectionToDefaultWindowType()
+{
+  removeSelectionTo( Default );
 }
 
 /**

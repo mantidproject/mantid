@@ -232,6 +232,8 @@ public slots:
 
   void move(int x, int y);
   void move(const QPoint& pos);
+  /// Resize the window to it's default size
+  void resizeToDefault();
 
 public: //non-slot methods
   /**@name Floating/Docking */

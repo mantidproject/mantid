@@ -57,10 +57,14 @@ public slots:
   void selectRange(int row1, int col1, int row2, int col2);
   /// Clear the selection.
   void clearSelection();
+  /// Check if there are any selected tiles
+  bool hasSelection() const;
   /// Remove the selection and make all windows docked
   void removeSelectionToDocked();
   /// Remove the selection and make all windows floating
   void removeSelectionToFloating();
+  /// Remove the selection and put them into separate windows
+  void removeSelectionToDefaultWindowType();
 
   void showInsertPosition( QPoint pos, bool global = true );
   bool dropAtPosition( MdiSubWindow *w, QPoint pos, bool global = true );
@@ -72,11 +76,16 @@ public slots:
 protected:
   void mousePressEvent(QMouseEvent *ev);
   void mouseReleaseEvent(QMouseEvent *ev);
+  void mouseMoveEvent(QMouseEvent *ev);
   void dragEnterEvent(QDragEnterEvent* ev);
   void dragMoveEvent(QDragMoveEvent* ev);
   void dropEvent(QDropEvent* ev);
 
 private:
+  /// Ways a widget can be removed from this window
+  enum RemoveDestination { Default, Docked, Floating };
+
+  /// initialize
   void init();
   /// Tile empty cells with Tiles
   void tileEmptyCells();
@@ -106,6 +115,12 @@ private:
   void clearDrops();
   /// Check if a Tile can accept drops
   bool canAcceptDrops(Tile *tile) const;
+  /// Remove a widget and make it floating or docked
+  void removeWidgetTo(int row, int col, RemoveDestination to);
+  /// Remove the selection and make its widgets floating or docked
+  void removeSelectionTo(RemoveDestination to);
+  /// Make a widget floating or docked
+  void sendWidgetTo(MdiSubWindow *w, RemoveDestination to);
 
   /// The inner widget providing scrolling functionality.
   QScrollArea *m_scrollArea;
@@ -113,6 +128,8 @@ private:
   mutable QGridLayout *m_layout;
   /// Tile selection
   QList<Tile*> m_selection;
+  /// mouse cursor position where dragging started
+  QPoint m_dragStartPos;
 };
 
 /**
