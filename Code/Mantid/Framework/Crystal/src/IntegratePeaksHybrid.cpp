@@ -174,6 +174,8 @@ namespace Mantid
       PeakClusterProjection projection(mdWS);
       auto outImageResults = boost::make_shared<WorkspaceGroup>();
 
+      Progress progress(this, 0, 1, peakWS->getNumberPeaks());
+
       //PARALLEL_FOR1(peakWS)
       for (int i = 0; i < peakWS->getNumberPeaks(); ++i)
       {
@@ -215,9 +217,11 @@ namespace Mantid
 
         HardThresholdBackground backgroundStrategy(threshold, normalization);
         // CCL. Multi-processor version.
-        ConnectedComponentLabeling analysis;
+        const size_t startId = 1;
+        const size_t nThreads = 1;
+        ConnectedComponentLabeling analysis(startId, nThreads);
 
-        Progress progress(this, 0, 1, 1); // HACK Fix!
+        Progress dummyProgress;
         // Perform CCL.
         ClusterTuple clusters = analysis.executeAndFetchClusters(localImage, &backgroundStrategy, progress);
         // Extract the clusters
@@ -248,8 +252,9 @@ namespace Mantid
           peak.setIntensity(integratedValues.get<0>());
           peak.setSigmaIntensity(integratedValues.get<1>());
 
-          progress.report();
+
         }
+        progress.report();
         //PARALLEL_END_INTERUPT_REGION
       }
       //PARALLEL_CHECK_INTERUPT_REGION
