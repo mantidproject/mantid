@@ -17,6 +17,7 @@ class AlgorithmDirective(BaseDirective):
         Called by Sphinx when the ..algorithm:: directive is encountered
         """
         algorithm_name, version = self._algorithm_name_and_version()
+        self._track_algorithm(algorithm_name, version)
 
         # Seperate methods for each unique piece of functionality.
         reference = self._make_reference_link(algorithm_name)
@@ -26,6 +27,26 @@ class AlgorithmDirective(BaseDirective):
         screenshot = self._make_screenshot_link(algorithm_name, imgpath)
 
         return self._insert_rest(reference + title + screenshot + toc)
+
+    def _track_algorithm(self, name, version):
+        """
+        Keep a track of the highest versions of algorithms encountered
+        
+        Arguments:
+          name (str): Name of the algorithm
+          version (int): Integer version number
+        """
+        env = self.state.document.settings.env
+        if not hasattr(env, "algorithm"):
+            env.algorithms = {}
+        #endif
+        algorithms = env.algorithms
+        if name in algorithms:
+            prev_version = algorithms[name][1]
+            if version > prev_version:
+                algorithms[name][1] = version
+        else:
+            algorithms[name] = (name, version)
 
     def _make_reference_link(self, algorithm_name):
         """
@@ -118,11 +139,18 @@ def html_collect_pages(app):
     """
     Write out unversioned algorithm pages that redirect to the highest version of the algorithm
     """
-    name = "algorithms/Rebin"
-    context = {"name" : "Rebin", "target" : "Rebin-v1.html"}
+    env = app.builder.env
+    if not hasattr(env, "algorithms"):
+        return # nothing to do
+
     template = REDIRECT_TEMPLATE
 
-    return [(name, context, template)]
+    algorithms = env.algorithms
+    for name, highest_version in algorithms.itervalues():
+        redirect_pagename = "algorithms/%s" % name
+        target = "%s-v%d.html" % (name, highest_version)
+        context = {"name" : name, "target" : target}
+        yield (redirect_pagename, context, template)
 
 ############################################################################################################
 
