@@ -3,7 +3,7 @@ Creates sample workspaces for usage examples and other situations.
 
 You can select a predefined function for the data or enter your own by selecting User Defined in the drop down.
 
-The data will be the same for each spectrum, and is defined by the function selected, and a little noise if Random is selected.
+The data will be the same for each spectrum, and is defined by the function selected, and a little noise if Random is selected.  All values are taken converted to absolute values at present so negative values will become positive.
 For event workspaces the intensity of the graph will be affected by the number of events selected.
 
 Here is an example of a user defined formula containing two peaks and a background.
@@ -178,7 +178,7 @@ namespace Algorithms
     }
     else 
     {
-      ws = createHistogramWorkspace(numBanks*bankPixelWidth*bankPixelWidth, num_bins,numEvents, 
+      ws = createHistogramWorkspace(numBanks*bankPixelWidth*bankPixelWidth, num_bins, 
         xMin, binWidth, bankPixelWidth*bankPixelWidth, inst, functionString, isRandom);
     }
 
@@ -205,7 +205,7 @@ namespace Algorithms
   /** Create histogram workspace
    */
   MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(int numPixels,
-                                           int numBins, int numEvents, double x0, double binDelta, 
+                                           int numBins, double x0, double binDelta, 
                                            int start_at_pixelID, Geometry::Instrument_sptr inst,  
                                            const std::string& functionString, bool isRandom)
   {
@@ -230,7 +230,7 @@ namespace Algorithms
     retVal->initialize(numPixels,numBins+1,numBins);
     retVal->setInstrument(inst);
 
-    for (size_t wi=0; wi<numPixels; wi++)
+    for (size_t wi=0; wi<static_cast<size_t>(numPixels); wi++)
     {
       retVal->setX(wi,x);
       retVal->setData(wi,y,e);
@@ -297,7 +297,7 @@ namespace Algorithms
         int eventsInBin = static_cast<int>(yValues[i]);
         for (int q=0; q<eventsInBin;q++)
         {
-          DateAndTime pulseTime = run_start + (m_randGen->nextValue()*3,600.0);
+          DateAndTime pulseTime = run_start + (m_randGen->nextValue()*3600.0);
           el += TofEvent((i+m_randGen->nextValue())*binDelta, pulseTime);
         }
       }
@@ -341,7 +341,7 @@ namespace Algorithms
 
     std::vector<double> results;
     results.resize(xSize);
-    for(int x=0; x<xSize;++x)
+    for(size_t x=0; x<xSize;++x)
     {
       results[x]=fv.getCalculated(x);
       if (noiseScale !=0)
@@ -349,7 +349,7 @@ namespace Algorithms
           results[x] += ((m_randGen->nextValue()-0.5)*noiseScale);
       }
       //no negative values please  - it messes up the error calculation
-      results[x] = abs(results[x]);
+      results[x] = fabs(results[x]);
     }
     return results;
   }

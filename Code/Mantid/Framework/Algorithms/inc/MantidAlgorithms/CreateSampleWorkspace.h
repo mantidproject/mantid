@@ -53,7 +53,7 @@ namespace Algorithms
     DataObjects::EventWorkspace_sptr createEventWorkspace(int numPixels,
                                            int numBins, int numEvents, double x0, double binDelta, int start_at_pixelID, Geometry::Instrument_sptr inst, const std::string& functionString, bool isRandom);
     API::MatrixWorkspace_sptr createHistogramWorkspace(int numPixels,
-                                           int numBins, int numEvents, double x0, double binDelta, int start_at_pixelID, Geometry::Instrument_sptr inst, const std::string& functionString, bool isRandom);
+                                           int numBins, double x0, double binDelta, int start_at_pixelID, Geometry::Instrument_sptr inst, const std::string& functionString, bool isRandom);
     Geometry::Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing = 0.008);
     Geometry::Object_sptr createCappedCylinder(double radius, double height, const Kernel::V3D & baseCentre, const Kernel::V3D & axis, const std::string & id);
     Geometry::Object_sptr createSphere(double radius, const Kernel::V3D & centre, const std::string & id);
