@@ -36,6 +36,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -176,11 +177,11 @@ namespace Mantid
 
       Progress progress(this, 0, 1, peakWS->getNumberPeaks());
 
-      //PARALLEL_FOR1(peakWS)
+      PARALLEL_FOR1(peakWS)
       for (int i = 0; i < peakWS->getNumberPeaks(); ++i)
       {
 
-        //PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERUPT_REGION
         IPeak& peak = peakWS->getPeak(i);
         const V3D center = projection.peakCenter(peak);
 
@@ -251,13 +252,11 @@ namespace Mantid
           ICluster::ClusterIntegratedValues integratedValues = cluster->integrate(localImage);
           peak.setIntensity(integratedValues.get<0>());
           peak.setSigmaIntensity(integratedValues.get<1>());
-
-
         }
         progress.report();
-        //PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERUPT_REGION
       }
-      //PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERUPT_REGION
 
       setProperty("OutputWorkspace", peakWS);
       setProperty("OutputWorkspaces", outImageResults);
