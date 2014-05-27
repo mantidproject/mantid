@@ -23,7 +23,15 @@
  *WIKI*/
 
 #include "MantidCrystal/IntegratePeaksHybrid.h"
+
+#include "MantidCrystal/ConnectedComponentLabeling.h"
+#include "MantidCrystal/HardThresholdBackground.h"
+#include "MantidCrystal/ICluster.h"
+#include "MantidCrystal/PeakClusterProjection.h"
+
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -33,15 +41,28 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 #include <boost/make_shared.hpp>
+#include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
+namespace
+{
+  std::string extractFormattedPropertyFromDimension(Mantid::Geometry::IMDDimension_const_sptr& dimension,
+      const double& min, const double& max, const int& nBins)
+  {
+    std::string id = dimension->getDimensionId();
+    return boost::str(boost::format("%s, %f, %f, %d") % id % min % max % nBins);
+  }
+}
+
 namespace Mantid
 {
   namespace Crystal
   {
+    using namespace ConnectedComponentMappingTypes;
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(IntegratePeaksHybrid)
@@ -94,7 +115,7 @@ namespace Mantid
      */
     void IntegratePeaksHybrid::init()
     {
-      declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "", Direction::Input),
+      declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "", Direction::Input),
           "Input md workspace.");
       declareProperty(new WorkspaceProperty<IPeaksWorkspace>("PeaksWorkspace", "", Direction::Input),
           "A PeaksWorkspace containing the peaks to integrate.");
@@ -109,12 +130,14 @@ namespace Mantid
 
       auto compositeValidator = boost::make_shared<CompositeValidator>();
       auto positiveDoubleValidator = boost::make_shared<BoundedValidator<double> >();
-            positiveDoubleValidator->setExclusive(true);
-            positiveDoubleValidator->setLower(0);
+      positiveDoubleValidator->setExclusive(true);
+      positiveDoubleValidator->setLower(0);
       compositeValidator->add(positiveDoubleValidator);
       compositeValidator->add(boost::make_shared<MandatoryValidator<double> >());
 
-      declareProperty(new PropertyWithValue<double>("BackgroundOuterRadius", 0.0, compositeValidator, Direction::Input), "Background outer radius estimate. Choose liberal value.");
+      declareProperty(
+          new PropertyWithValue<double>("BackgroundOuterRadius", 0.0, compositeValidator,
+              Direction::Input), "Background outer radius estimate. Choose liberal value.");
 
       declareProperty(new WorkspaceProperty<IPeaksWorkspace>("OutputWorkspace", "", Direction::Output),
           "An output integrated peaks workspace.");
@@ -128,23 +151,115 @@ namespace Mantid
      */
     void IntegratePeaksHybrid::exec()
     {
-      // TODO Auto-generated execute stub
-      IMDHistoWorkspace_sptr mdWS = getProperty("InputWorkspace");
+      IMDEventWorkspace_sptr mdWS = getProperty("InputWorkspace");
       IPeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
       IPeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
       const int numBins = getProperty("NumberOfBins");
       const double peakOuterRadius = getProperty("BackgroundOuterRadius");
+      const double halfPeakOuterRadius = peakOuterRadius / 2;
       if (peakWS != inPeakWS)
       {
-        auto cloneAlg = this->createChildAlgorithm("CloneWorkspace");
-        cloneAlg->setProperty("InputWorkspace", inPeakWS);
-        cloneAlg->setPropertyValue("OutputWorkspace", "out_ws");
-        cloneAlg->execute();
+        peakWS = IPeaksWorkspace_sptr(dynamic_cast<IPeaksWorkspace*>(inPeakWS->clone()));
+      }
+
+      {
+        const SpecialCoordinateSystem mdCoordinates = mdWS->getSpecialCoordinateSystem();
+        if (mdCoordinates == None)
         {
-          Workspace_sptr temp = cloneAlg->getProperty("OutputWorkspace");
-          peakWS = boost::dynamic_pointer_cast<IPeaksWorkspace>(temp);
+          throw std::invalid_argument(
+              "The coordinate system of the input MDWorkspace cannot be established. Run SetSpecialCoordinates on InputWorkspace.");
         }
       }
+
+      PeakClusterProjection projection(mdWS);
+      auto outImageResults = boost::make_shared<WorkspaceGroup>();
+
+      //PARALLEL_FOR1(peakWS)
+      for (int i = 0; i < peakWS->getNumberPeaks(); ++i)
+      {
+
+        //PARALLEL_START_INTERUPT_REGION
+        IPeak& peak = peakWS->getPeak(i);
+        const V3D center = projection.peakCenter(peak);
+
+        auto binMDAlg = this->createChildAlgorithm("BinMD");
+        binMDAlg->setProperty("InputWorkspace", mdWS);
+        binMDAlg->setPropertyValue("OutputWorkspace", "output_ws");
+        binMDAlg->setProperty("AxisAligned", true);
+
+        for (int j = 0; j < static_cast<int>(mdWS->getNumDims()); ++j)
+        {
+          std::stringstream propertyName;
+          propertyName << "AlignedDim" << j;
+
+          auto dimension = mdWS->getDimension(j);
+
+          double min = center[i] - halfPeakOuterRadius;
+          double max = center[i] + halfPeakOuterRadius;
+
+          binMDAlg->setPropertyValue(propertyName.str(),
+              extractFormattedPropertyFromDimension(dimension, min, max, numBins));
+        }
+        binMDAlg->execute();
+        Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
+        IMDHistoWorkspace_sptr localImage = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
+        API::MDNormalization normalization = NoNormalization;
+        auto iterator = localImage->createIterator(); // TODO run in parallel if it helps.
+        iterator->setNormalization(normalization);
+        signal_t cumulative = 0;
+        do
+        {
+          cumulative += iterator->getSignal();
+        } while (iterator->next());
+        const double threshold = cumulative / localImage->getNPoints();
+
+        HardThresholdBackground backgroundStrategy(threshold, normalization);
+        // CCL. Multi-processor version.
+        ConnectedComponentLabeling analysis;
+
+        Progress progress(this, 0, 1, 1); // HACK Fix!
+        // Perform CCL.
+        ClusterTuple clusters = analysis.executeAndFetchClusters(localImage, &backgroundStrategy, progress);
+        // Extract the clusters
+        ConnectedComponentMappingTypes::ClusterMap& clusterMap = clusters.get<1>();
+        // Extract the labeled image
+        IMDHistoWorkspace_sptr outHistoWS = clusters.get<0>();
+        outImageResults->addWorkspace(outHistoWS);
+
+        PeakClusterProjection localProjection(outHistoWS);
+        const Mantid::signal_t signalValue = localProjection.signalAtPeakCenter(peak); // No normalization when extracting label ids!
+
+        if (boost::math::isnan(signalValue))
+        {
+          g_log.warning() << "Warning: image for integration is off edge of detector for peak " << i
+              << std::endl;
+        }
+        else if (signalValue < static_cast<Mantid::signal_t>(analysis.getStartLabelId()))
+        {
+          g_log.information() << "Peak: " << i
+              << " Has no corresponding cluster/blob detected on the image. This could be down to your Threshold settings."
+              << std::endl;
+        }
+        else
+        {
+          const size_t labelIdAtPeak = static_cast<size_t>(signalValue);
+          for(auto it = clusterMap.begin(); it != clusterMap.end(); ++it)
+          {
+            std::cout << it->first << "\t" << it->second << std::endl;
+          }
+          ICluster * const cluster = clusterMap[labelIdAtPeak].get();
+          ICluster::ClusterIntegratedValues integratedValues = cluster->integrate(localImage);
+          peak.setIntensity(integratedValues.get<0>());
+          peak.setSigmaIntensity(integratedValues.get<1>());
+
+          progress.report();
+        }
+        //PARALLEL_END_INTERUPT_REGION
+      }
+      //PARALLEL_CHECK_INTERUPT_REGION
+
+      setProperty("OutputWorkspace", peakWS);
+      setProperty("OutputWorkspaces", outImageResults);
     }
 
   } // namespace Crystal
