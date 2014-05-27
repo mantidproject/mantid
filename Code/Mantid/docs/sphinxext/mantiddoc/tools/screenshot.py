@@ -25,6 +25,10 @@ def algorithm_screenshot(name, directory, version = -1, ext = ".png"):
     Returns:
       str: A full path to the image file
     """
+    import mantid
+    if not mantid.__gui__:
+        return "NoGUI-ImageNotGenerated.png"
+
     import mantidqtpython as mantidqt
     from mantidplot import screenshot_to_dir, threadsafe_call
 
