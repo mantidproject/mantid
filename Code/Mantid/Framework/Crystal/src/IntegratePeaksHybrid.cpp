@@ -1,5 +1,5 @@
 /*WIKI*
- *
+
  Integrates arbitrary shaped single crystal peaks defined on an [[MDHistoWorkspace]] using connected component analysis to determine
  regions of interest around each peak of the [[PeaksWorkspace]]. The output is an integrated [[PeaksWorkspace]] as well as an image
  containing the labels assigned to each cluster for diagnostic and visualisation purposes.
@@ -8,8 +8,6 @@
  The advantages of this approach are that you can locally define a background rather than using a global setting, and are therefore better able to capture the peak shape. A further advantage
  is that the memory requirement is reduced, given that [[MDHistoWorkspaces]] are generated in the region of the peak, and therefore high resolution can be achieved in the region of the peaks without
  an overall high n-dimensional image cost.
-
- [[File:ClusterImage.png|400px]]
 
  Unlike [[IntegratePeaksUsingClusters]] you do not need to specify at Threshold for background detection. You do however need to specify a BackgroundOuterRadius in a similar fashion to
  [[IntegratePeaksMD]]. This is used to determine the region in which to make an [[MDHistoWorkspace]] around each peak. A liberal estimate is a good idea.
