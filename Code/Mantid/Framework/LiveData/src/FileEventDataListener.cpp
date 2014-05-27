@@ -124,6 +124,11 @@ namespace LiveData
     else return Running;
   }
 
+  int FileEventDataListener::runNumber() const
+  {
+    return m_runNumber;
+  }
+
   void FileEventDataListener::start(Kernel::DateAndTime /*startTime*/) // Ignore the start time
   {
     // Kick off loading the first chunk (which will include loading the instrument etc.)
@@ -162,6 +167,8 @@ namespace LiveData
     {
       m_loader.reset(); // Clear the algorithm so that it releases its handle on the workspace
     }
+
+    m_runNumber = chunk->getRunNumber();
 
     return chunk;
   }

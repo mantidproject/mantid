@@ -62,6 +62,7 @@ namespace Mantid
 
       bool isConnected();
       ILiveListener::RunStatus runStatus();
+      int runNumber() const;
 
       void setSpectra(const std::vector<specid_t>& specList);
 

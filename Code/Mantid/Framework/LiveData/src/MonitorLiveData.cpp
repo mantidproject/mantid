@@ -171,7 +171,7 @@ namespace LiveData
 
         if ( runNumber == 0 )
         {
-          runNumber = loadAlg->runNumber();
+          runNumber = listener->runNumber();
           g_log.debug() << "Run number set to " << runNumber << std::endl;
         }
 

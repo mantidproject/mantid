@@ -47,6 +47,11 @@ namespace LiveData
     return Running;
   }
 
+  int TestGroupDataListener::runNumber() const
+  {
+    return 0;
+  }
+
   void TestGroupDataListener::start(Kernel::DateAndTime /*startTime*/) // Ignore the start time
   {
     return;

@@ -90,9 +90,9 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<TYPE>("fake") );
     TS_ASSERT(ws);
 
-    if ( dynamic_cast<MatrixWorkspace*>(ws.get()) )
+    if ( auto matrixws = dynamic_cast<MatrixWorkspace*>(ws.get()) )
     {
-        TSM_ASSERT_LESS_THAN( "Run number should be non-zero", 0, alg.runNumber() );
+      TSM_ASSERT_LESS_THAN( "Run number should be non-zero", 0, matrixws->getRunNumber() );
     }
 
     return ws;
