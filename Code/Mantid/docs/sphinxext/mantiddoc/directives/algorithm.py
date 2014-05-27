@@ -1,6 +1,8 @@
 from base import BaseDirective
 import os
 
+REDIRECT_TEMPLATE = "redirect.html"
+
 class AlgorithmDirective(BaseDirective):
 
     """
@@ -8,19 +10,19 @@ class AlgorithmDirective(BaseDirective):
     and a screenshot of the algorithm to an rst file.
     """
 
-    required_arguments, optional_arguments = 1, 0
+    required_arguments, optional_arguments = 0, 0
 
     def run(self):
         """
         Called by Sphinx when the ..algorithm:: directive is encountered
         """
-        algorithm_name = str(self.arguments[0])
+        algorithm_name, version = self._algorithm_name_and_version()
 
         # Seperate methods for each unique piece of functionality.
         reference = self._make_reference_link(algorithm_name)
         title = self._make_header(algorithm_name, True)
         toc = self._make_local_toc()
-        imgpath = self._create_screenshot(algorithm_name)
+        imgpath = self._create_screenshot(algorithm_name, version)
         screenshot = self._make_screenshot_link(algorithm_name, imgpath)
 
         return self._insert_rest(reference + title + screenshot + toc)
@@ -36,20 +38,21 @@ class AlgorithmDirective(BaseDirective):
         Returns:
           str: A ReST formatted reference.
         """
-        return ".. _%s:\n" % algorithm_name
+        return ".. _algorithm|%s:\n" % algorithm_name
 
     def _make_local_toc(self):
         return ".. contents:: Table of Contents\n    :local:\n"
 
-    def _create_screenshot(self, algorithm_name):
+    def _create_screenshot(self, algorithm_name, version):
         """
         Creates a screenshot for the named algorithm in an "images/screenshots"
         subdirectory of the currently processed document
 
-        The file will be named "algorithmname_dlg.png", e.g. Rebin_dlg.png
+        The file will be named "algorithmname-vX_dlg.png", e.g. Rebin-v1_dlg.png
 
         Args:
           algorithm_name (str): The name of the algorithm.
+          version (int): The version of the algorithm
 
         Returns:
           str: The full path to the created image
@@ -62,7 +65,7 @@ class AlgorithmDirective(BaseDirective):
             os.makedirs(screenshots_dir)
 
         try:
-            imgpath = algorithm_screenshot(algorithm_name, screenshots_dir)
+            imgpath = algorithm_screenshot(algorithm_name, screenshots_dir, version=version)
         except Exception, exc:
             env.warn(env.docname, "Unable to generate screenshot for '%s' - %s" % (algorithm_name, str(exc)))
             imgpath = os.path.join(screenshots_dir, "failed_dialog.png")
@@ -85,7 +88,7 @@ class AlgorithmDirective(BaseDirective):
         """
         format_str = ".. figure:: %s\n"\
                      "    :class: screenshot\n\n"\
-                     "    %s\n"
+                     "    %s\n\n"
         
         filename = os.path.split(img_path)[1]
         path = "/images/screenshots/" + filename
@@ -111,6 +114,18 @@ class AlgorithmDirective(BaseDirective):
 
 ############################################################################################################
 
+def html_collect_pages(app):
+    """
+    Write out unversioned algorithm pages that redirect to the highest version of the algorithm
+    """
+    name = "algorithms/Rebin"
+    context = {"name" : "Rebin", "target" : "Rebin-v1.html"}
+    template = REDIRECT_TEMPLATE
+
+    return [(name, context, template)]
+
+############################################################################################################
+
 def setup(app):
     """
     Setup the directives when the extension is activated
@@ -119,3 +134,7 @@ def setup(app):
       app: The main Sphinx application object
     """
     app.add_directive('algorithm', AlgorithmDirective)
+
+    # connect event html collection to handler
+    app.connect("html-collect-pages", html_collect_pages)
+

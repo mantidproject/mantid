@@ -7,24 +7,25 @@ class AliasesDirective(BaseDirective):
     Obtains the aliases for a given algorithm based on it's name.
     """
 
-    required_arguments, optional_arguments = 1, 0
+    required_arguments, optional_arguments = 0, 0
 
     def run(self):
         """
         Called by Sphinx when the ..aliases:: directive is encountered.
         """
         title = self._make_header("Aliases")
-        alias = self._get_alias(str(self.arguments[0]))
+        alias = self._get_alias()
         return self._insert_rest(title + alias)
 
-    def _get_alias(self, algorithm_name):
+    def _get_alias(self):
         """
         Return the alias for the named algorithm.
 
         Args:
           algorithm_name (str): The name of the algorithm to get the alias for.
         """
-        alg = self._create_mantid_algorithm(algorithm_name)
+        name, version = self._algorithm_name_and_version()
+        alg = self._create_mantid_algorithm(name, version)
         return "This algorithm is also known as: " + "**" + alg.alias() + "**"
 
 

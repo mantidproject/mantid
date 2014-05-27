@@ -7,25 +7,23 @@ class PropertiesDirective(BaseDirective):
     Outputs the given algorithm's properties into a ReST formatted table.
     """
     # Accept one required argument and no optional arguments.
-    required_arguments, optional_arguments = 1, 0
+    required_arguments, optional_arguments = 0, 0
 
     def run(self):
         """
         Called by Sphinx when the ..properties:: directive is encountered.
         """
-        alg_name = str(self.arguments[0])
         title = self._make_header("Properties")
-        properties_table = self._populate_properties_table(alg_name)
+        properties_table = self._populate_properties_table()
         return self._insert_rest(title + properties_table)
 
-    def _populate_properties_table(self, algorithm_name):
+    def _populate_properties_table(self):
         """
         Populates the ReST table with algorithm properties.
-
-        Args:
-          algorithm_name (str): The name of the algorithm.
         """
-        alg = self._create_mantid_algorithm(algorithm_name)
+        name, version = self._algorithm_name_and_version()
+
+        alg = self._create_mantid_algorithm(name, version)
         alg_properties = alg.getProperties()
 
         # Stores each property of the algorithm in a tuple.
