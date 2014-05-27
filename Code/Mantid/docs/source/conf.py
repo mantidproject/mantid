@@ -9,7 +9,7 @@ import sphinx_bootstrap_theme
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../sphinxext/mantiddoc/directives'))
+sys.path.insert(0, os.path.abspath('../sphinxext'))
 
 # -- General configuration ------------------------------------------------
 
@@ -20,15 +20,9 @@ extensions = [
     'sphinx.ext.pngmath',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
-    'summary',
-    'aliases',
-    'properties',
-    'categories',
-    'algorithm'
+    'sphinx.ext.doctest',
+    'mantiddoc.directives'
 ]
-
-# The location of the root of the Mantid images folder.
-mantid_images = "/" + os.path.abspath('_static/images') + "/"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -66,7 +60,7 @@ html_theme = 'bootstrap'
 # custom.css rather than here.
 html_theme_options = {
     # Navigation bar title.
-    'navbar_title': "mantidproject",
+    'navbar_title': " ",
     # Tab name for entire site.
     'navbar_site_name': "Mantid",
     # Add links to the nav bar. Second param of tuple is true to create absolute url.
@@ -93,7 +87,7 @@ html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+html_logo = os.path.relpath('../../Images/Mantid_Logo_Transparent.png')
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
