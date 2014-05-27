@@ -1,9 +1,9 @@
 /*WIKI*
- Integrates arbitary shaped single crystal peaks defined on an [[MDHistoWorkspace]] using connected component analysis to determine
+ Integrates arbitrary shaped single crystal peaks defined on an [[MDHistoWorkspace]] using connected component analysis to determine
  regions of interest around each peak of the [[PeaksWorkspace]]. The output is an integrated [[PeaksWorkspace]] as well as an image
  containing the labels assigned to each cluster for diagnostic and visualisation purposes.
 
- '''The algorithm makes no assmptions about Peak shape or size''' and can therfore be used where integration over defined shapes
+ '''The algorithm makes no assumptions about Peak shape or size''' and can therefore be used where integration over defined shapes
  [[IntegratePeaksMD]] and [[IntegrateEllipsoids]], for example, will not work.
 
  [[File:ClusterImage.png|400px]]
@@ -15,8 +15,8 @@
  do not affect the background filtering.
 
  This algorithm uses an imaging technique, and it is therefore important that the MDHistoWorkspace you are using is binned to a sufficient
- resolution via [[BinMD]]. You can overlay the intergrated peaks workspace in the [[MantidPlot:_SliceViewer#Viewing_Peaks_Workspaces|Slice Viewer]] over
- the generated Cluster Labeled OutputWorkspaceMD to see what the interation region used for each peak amounts to.
+ resolution via [[BinMD]]. You can overlay the integrated peaks workspace in the [[MantidPlot:_SliceViewer#Viewing_Peaks_Workspaces|Slice Viewer]] over
+ the generated Cluster Labeled OutputWorkspaceMD to see what the integration region used for each peak amounts to.
 
  == Notes for running ==
 

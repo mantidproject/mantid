@@ -1,6 +1,6 @@
 /*WIKI*
  *
- Integrates arbitary shaped single crystal peaks defined on an [[MDHistoWorkspace]] using connected component analysis to determine
+ Integrates arbitrary shaped single crystal peaks defined on an [[MDHistoWorkspace]] using connected component analysis to determine
  regions of interest around each peak of the [[PeaksWorkspace]]. The output is an integrated [[PeaksWorkspace]] as well as an image
  containing the labels assigned to each cluster for diagnostic and visualisation purposes.
 
@@ -18,7 +18,7 @@
  number of bins is applied in each dimension.
 
  == Warnings and Logging ==
- See [[IntegratePeaksUsingClusters]] for notes on loggs and warnings.
+ See [[IntegratePeaksUsingClusters]] for notes on logs and warnings.
 
  *WIKI*/
 
@@ -51,6 +51,14 @@ using namespace Mantid::DataObjects;
 
 namespace
 {
+  /**
+   * Create a BinMD dimension input string
+   * @param dimension : Dimension to use
+   * @param min : Min extents
+   * @param max : Max extents
+   * @param nBins : Number of bins.
+   * @return
+   */
   std::string extractFormattedPropertyFromDimension(Mantid::Geometry::IMDDimension_const_sptr& dimension,
       const double& min, const double& max, const int& nBins)
   {
@@ -207,7 +215,7 @@ namespace Mantid
         Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
         IMDHistoWorkspace_sptr localImage = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
         API::MDNormalization normalization = NoNormalization;
-        auto iterator = localImage->createIterator(); // TODO run in parallel if it helps.
+        auto iterator = localImage->createIterator();
         iterator->setNormalization(normalization);
         signal_t cumulative = 0;
         do
@@ -220,7 +228,7 @@ namespace Mantid
         // CCL. Multi-processor version.
         const size_t startId = 1;
         const size_t nThreads = 1;
-        ConnectedComponentLabeling analysis(startId, nThreads);
+        ConnectedComponentLabeling analysis(startId, nThreads); // CCL executed single threaded.
 
         Progress dummyProgress;
         // Perform CCL.
