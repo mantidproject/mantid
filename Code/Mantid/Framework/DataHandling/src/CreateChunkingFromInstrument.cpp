@@ -8,6 +8,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidDataHandling/CreateChunkingFromInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
@@ -30,10 +31,16 @@ namespace DataHandling
     const string PARAM_INST_NAME("InstrumentName");
     /// Instrument file parameter name
     const string PARAM_INST_FILE("InstrumentFilename");
+    /// Explicitly name instrument components
+    const string PARAM_CHUNK_NAMES("ChunkNames");
+    /// Canned instrument components names
+    const string PARAM_CHUNK_BY("ChunkBy");
     /// Recursion depth parameter name
     const string PARAM_MAX_RECURSE("MaxRecursionDepth");
     /// Output workspace parameter name
     const string PARAM_OUT_WKSP("OutputWorkspace");
+    /// Maximum number of banks to look for
+    const string PARAM_MAX_BANK_NUM("MaxBankNumber");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -75,7 +82,7 @@ namespace DataHandling
   void CreateChunkingFromInstrument::init()
   {
     // instrument selection
-    string grpName("Specify the Instrument");
+    string grp1Name("Specify the Instrument");
 
     this->declareProperty(new WorkspaceProperty<>(PARAM_IN_WKSP,"",Direction::Input, PropertyMode::Optional),
                           "Optional: An input workspace with the instrument we want to use.");
@@ -86,15 +93,34 @@ namespace DataHandling
     this->declareProperty(new FileProperty(PARAM_INST_FILE, "", FileProperty::OptionalLoad, ".xml"),
                           "Optional: Path to the instrument definition file on which to base the ChunkingWorkpace.");
 
-    this->setPropertyGroup(PARAM_IN_WKSP, grpName);
-    this->setPropertyGroup(PARAM_INST_NAME, grpName);
-    this->setPropertyGroup(PARAM_INST_FILE, grpName);
+    this->setPropertyGroup(PARAM_IN_WKSP, grp1Name);
+    this->setPropertyGroup(PARAM_INST_NAME, grp1Name);
+    this->setPropertyGroup(PARAM_INST_FILE, grp1Name);
 
-    // TODO chunking
+    // chunking
+    string grp2Name("Specify Instrument Components");
+
+    declareProperty(PARAM_CHUNK_NAMES,"",
+      "Optional: A string of the instrument component names to use as separate groups. "
+      "Use / or , to separate multiple groups. "
+      "If empty, then an empty GroupingWorkspace will be created.");
+    vector<string> grouping;
+    grouping.push_back("");
+    grouping.push_back("All");
+    grouping.push_back("Group");
+    grouping.push_back("Column");
+    grouping.push_back("bank");
+    declareProperty(PARAM_CHUNK_BY, "", boost::make_shared<StringListValidator>(grouping),
+        "Only used if GroupNames is empty: All detectors as one group, Groups (East,West for SNAP), Columns for SNAP, detector banks");
+
+    this->setPropertyGroup(PARAM_CHUNK_NAMES, grp2Name);
+    this->setPropertyGroup(PARAM_CHUNK_BY, grp2Name);
 
     // everything else
     declareProperty(PARAM_MAX_RECURSE, 5,
                     "Number of levels to search into the instrument (default=5)");
+    declareProperty(PARAM_MAX_BANK_NUM, 300,
+                    "Maximum bank number to search for in the instrument");
 
     declareProperty(new WorkspaceProperty<API::ITableWorkspace>(PARAM_OUT_WKSP,"",Direction::Output),
                     "An output workspace describing the cunking.");
@@ -140,11 +166,16 @@ namespace DataHandling
     if (str.length() < prefix.length())
       return false;
 
-    return (str.substr(0, prefix.length()) == prefix);
+    return (str.substr(0, prefix.length()).compare(prefix) == 0);
   }
 
   string parentName(IComponent_const_sptr comp, const string & prefix)
   {
+    // handle the special case of the component has the name
+    if (startsWith(comp->getName(), prefix))
+      return comp->getName();
+
+    // find the parent with the correct name
     IComponent_const_sptr parent = comp->getParent();
     if (parent)
     {
@@ -157,6 +188,44 @@ namespace DataHandling
     {
       return "";
     }
+  }
+
+  string parentName(IComponent_const_sptr comp, const vector<string> & names)
+  {
+    // handle the special case of the component has the name
+    for (auto name = names.begin(); name != names.end(); ++name)
+      if (name->compare(comp->getName()) == 0)
+        return (*name);
+
+    // find the parent with the correct name
+    IComponent_const_sptr parent = comp->getParent();
+    if (parent)
+    {
+      // see if this is the parent
+      for (auto name = names.begin(); name != names.end(); ++name)
+        if (name->compare(parent->getName()) == 0)
+          return (*name);
+
+      // or recurse
+      return parentName(parent, names);
+    }
+    else
+    {
+      return "";
+    }
+  }
+
+  vector<string> getGroupNames(const string & names)
+  {
+    vector<string> groups;
+
+    // check that there is something
+    if (names.empty())
+      return groups;
+
+    // TODO should do the actual splitting
+
+    return groups;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -186,29 +255,56 @@ namespace DataHandling
       inst = tempWS->getInstrument();
     }
 
-
     // setup the output workspace
     ITableWorkspace_sptr strategy = WorkspaceFactory::Instance().createTable("TableWorkspace");
     strategy->addColumn("str", "BankName");
     this->setProperty("OutputWorkspace", strategy);
 
-    // for pg3: Group -> Column
+    // get the correct level of grouping
+    string groupLevel = this->getPropertyValue(PARAM_CHUNK_BY);
+    vector<string> groupNames = getGroupNames(this->getPropertyValue(PARAM_CHUNK_NAMES));
+    if (groupLevel.compare("All") == 0)
+    {
+      groupNames.clear();
+      groupNames.push_back(inst->getName());
+    }
+    else if (inst->getName().compare("SNAP") == 0 && groupLevel.compare("Group") == 0)
+    {
+      groupNames.clear();
+      groupNames.push_back("East");
+      groupNames.push_back("West");
+    }
+
+    // set up a progress bar with the "correct" number of steps
+    int maxBankNum = this->getProperty(PARAM_MAX_BANK_NUM);
+    Progress progress(this, .2, 1., maxBankNum);
 
     // search the instrument for the bank names
-    int maxRecurseDepth = this->getProperty("MaxRecursionDepth");
+    int maxRecurseDepth = this->getProperty(PARAM_MAX_RECURSE);
     map<string, vector<string> > grouping;
     // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-    for (int num = 0; num < 300; ++num)
+    for (int num = 0; num < maxBankNum; ++num)
     {
       PARALLEL_START_INTERUPT_REGION
       ostringstream mess;
       mess<< "bank"<<num;
       IComponent_const_sptr comp = inst->getComponentByName(mess.str(), maxRecurseDepth);
-      PARALLEL_CRITICAL(GroupNames)
+      PARALLEL_CRITICAL(grouping)
       if(comp)
       {
-        string parent = parentName(comp, "Group");
+        // get the name of the correct parent
+        string parent;
+        if (groupNames.empty())
+        {
+          parent = parentName(comp, groupLevel);
+        }
+        else
+        {
+          parent = parentName(comp, groupNames);
+        }
+
+        // add it to the correct chunk
         if (!parent.empty())
         {
           if (grouping.count(parent) == 0)
@@ -217,6 +313,7 @@ namespace DataHandling
           grouping[parent].push_back(comp->getName());
         }
       }
+      progress.report();
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
