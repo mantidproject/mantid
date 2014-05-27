@@ -66,7 +66,7 @@ public:
     
     TS_ASSERT_EQUALS(ws->getAxis(0)->unit()->unitID(), xUnit);
     TS_ASSERT_EQUALS(ws->readX(0)[0], xMin);
-    if (ws->blocksize()==numBins)
+    if (ws->blocksize()==static_cast<size_t>(numBins))
     {
       TS_ASSERT_DELTA(ws->readX(0)[numBins], xMax,binWidth);
     }
