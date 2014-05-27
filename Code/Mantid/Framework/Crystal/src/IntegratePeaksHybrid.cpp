@@ -194,8 +194,8 @@ namespace Mantid
 
           auto dimension = mdWS->getDimension(j);
 
-          double min = center[i] - halfPeakOuterRadius;
-          double max = center[i] + halfPeakOuterRadius;
+          double min = center[j] - halfPeakOuterRadius;
+          double max = center[j] + halfPeakOuterRadius;
 
           binMDAlg->setPropertyValue(propertyName.str(),
               extractFormattedPropertyFromDimension(dimension, min, max, numBins));

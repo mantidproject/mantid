@@ -366,4 +366,61 @@ public:
 
 };
 
+//=====================================================================================
+// Performance Tests
+//=====================================================================================
+class IntegratePeaksHybridTestPerformance: public CxxTest::TestSuite, public ClusterIntegrationBaseTest
+{
+
+private:
+
+  // Input data
+  MDEventPeaksWSTuple m_inputWorkspaces;
+  int m_nBins;
+  double m_backgroundOuterRadius;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static IntegratePeaksHybridTestPerformance *createSuite()
+  {
+    return new IntegratePeaksHybridTestPerformance();
+  }
+  static void destroySuite(IntegratePeaksHybridTestPerformance *suite)
+  {
+    delete suite;
+  }
+  IntegratePeaksHybridTestPerformance()
+  {
+    //FrameworkManager::Instance();
+
+    std::vector<V3D> hklValues;
+    for(double i = -10; i < 10; i+=4)
+    {
+      for(double j = -10; j < 10; j+=4)
+      {
+        for(double k = -10; k < 10; k+=4)
+        {
+          hklValues.push_back(V3D(i,j,k));
+        }
+      }
+    }
+
+    double peakRadius = 1;
+    m_backgroundOuterRadius = peakRadius * 3;
+    m_nBins = 5;
+    const size_t nEventsInPeak = 1000;
+    m_inputWorkspaces = make_peak_and_mdew(hklValues, -10, 10, peakRadius, nEventsInPeak);
+
+  }
+
+  void test_execute()
+  {
+    // Just run the integration. Functional tests handled in separate suite.
+    execute_integration(m_inputWorkspaces, m_backgroundOuterRadius, m_nBins);
+  }
+
+};
+
+
 #endif /* MANTID_CRYSTAL_INTEGRATEPEAKSHYBRIDTEST_H_ */
