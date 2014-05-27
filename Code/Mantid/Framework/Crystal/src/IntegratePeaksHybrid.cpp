@@ -44,6 +44,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -222,7 +223,7 @@ namespace Mantid
         {
           cumulative += iterator->getSignal();
         } while (iterator->next());
-        const double threshold = cumulative / localImage->getNPoints();
+        const double threshold = cumulative / signal_t(localImage->getNPoints());
 
         HardThresholdBackground backgroundStrategy(threshold, normalization);
         // CCL. Multi-processor version.
