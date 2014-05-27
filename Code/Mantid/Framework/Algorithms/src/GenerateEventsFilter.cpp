@@ -133,8 +133,8 @@ namespace Algorithms
         "Events at or after this time are filtered out.");
 
     // Split by time (only) in steps
-    declareProperty("TimeInterval", -1.0,
-        "Length of the time splices if filtered in time only.");
+    declareProperty("TimeInterval", EMPTY_DBL(),
+                    "Length of the time splices if filtered in time only.");
     setPropertySettings("TimeInterval",
                         new VisibleWhenProperty("LogName", IS_EQUAL_TO,  ""));
 
@@ -440,20 +440,26 @@ namespace Algorithms
   {
     double timeinterval = this->getProperty("TimeInterval");
 
+    bool singleslot = false;
+    if (timeinterval == EMPTY_DBL()) singleslot = true;
+
     // Progress
     int64_t totaltime = m_stopTime.totalNanoseconds()-m_startTime.totalNanoseconds();
-    int64_t timeslot = 0;
 
-    if (timeinterval <= 0.0)
+    if (singleslot)
     {
       int wsindex = 0;
+
       // Default and thus just one interval
       std::stringstream ss;
       ss << "Time Interval From " << m_startTime << " to " << m_stopTime;
+
       addNewTimeFilterSplitter(m_startTime, m_stopTime, wsindex, ss.str());
     }
     else
     {
+      int64_t timeslot = 0;
+
       // Explicitly N time intervals
       int64_t deltatime_ns = static_cast<int64_t>(timeinterval*m_timeUnitConvertFactorToNS);
 
@@ -590,7 +596,7 @@ namespace Algorithms
       else
       {
         // Generate filters for a series of log value
-        processMultipleValueFilters(minvalue, maxvalue, filterIncrease, filterDecrease);
+        processMultipleValueFilters(minvalue, deltaValue, maxvalue, filterIncrease, filterDecrease);
       }
     }
     else
@@ -699,12 +705,11 @@ namespace Algorithms
     * @param filterincrease :: if true, log value in the increasing curve should be included;
     * @param filterdecrease :: if true, log value in the decreasing curve should be included;
    */
-  void GenerateEventsFilter::processMultipleValueFilters(double minvalue, double maxvalue,
+  void GenerateEventsFilter::processMultipleValueFilters(double minvalue, double valueinterval, double maxvalue,
                                                          bool filterincrease,
                                                          bool filterdecrease)
   {
     // Read more input
-    double valueinterval = this->getProperty("LogValueInterval");
     if (valueinterval <= 0)
       throw std::invalid_argument("Multiple values filter must have LogValueInterval larger than ZERO.");
     double valuetolerance = this->getProperty("LogValueTolerance");
