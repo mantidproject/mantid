@@ -426,8 +426,7 @@ namespace DataHandling
     vector<string> groupNames = getGroupNames(this->getPropertyValue(PARAM_CHUNK_NAMES));
     if (groupLevel.compare("All") == 0)
     {
-      groupNames.clear();
-      groupNames.push_back(inst->getName());
+      return; // nothing to do
     }
     else if (inst->getName().compare("SNAP") == 0 && groupLevel.compare("Group") == 0)
     {
@@ -478,6 +477,10 @@ namespace DataHandling
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
+
+    // check to see that something happened
+    if (grouping.empty())
+        throw std::runtime_error("Failed to find any banks in the instrument");
 
     // fill in the table workspace
     for (auto group = grouping.begin(); group != grouping.end(); ++group)
