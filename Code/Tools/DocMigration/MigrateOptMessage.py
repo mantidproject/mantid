@@ -16,12 +16,20 @@ def main():
       for filename in fnmatch.filter(filenames, '*.cpp'):
           cppFiles.append(os.path.join(root, filename))
 
+    cppFiles.sort()
     for cppFile in cppFiles:
         cppdir = os.path.dirname(cppFile)
         (cppname,cppext) = os.path.splitext(os.path.basename(cppFile))
         print cppname,"\t",
 
         #get .h file
+        subdir = ""
+        if not cppdir.endswith("src"):
+            idx = cppdir.find("src")
+            if idx >= 0:
+                subdir = cppdir[idx+3:]
+                cppdir = cppdir[0:idx+3]
+
         moduledir = os.path.dirname(cppdir)
         incdir = os.path.join(moduledir,"inc")
         #this should contain only one directory
@@ -31,11 +39,11 @@ def main():
                 pass
             else: 
                 hdir = os.path.join(incdir,x)
-        hFile = os.path.join(hdir,cppname+".h")
+        hFile = os.path.join(hdir + subdir,cppname+".h")
         if not os.path.isfile(hFile):
             print "HEADER NOT FOUND"
             #next file
-            break
+            continue
 
         #read cppFile
         cppText=  ""
@@ -50,6 +58,7 @@ def main():
         summary = readOptionalMessage(cppText)
         summary = striplinks(summary)
 
+        
         if summary != "":
             hText=insertSummaryCommand(hText,summary)
             hText=removeHeaderInitDocs(hText)
@@ -90,7 +99,7 @@ def removeOptionalMessage(cppText):
     return retVal
 
 def removeHeaderInitDocs(hText):
-    retVal = regexReplace(r'//[\w\s/]*initDocs.*?$','',hText,re.MULTILINE+re.DOTALL)
+    retVal = regexReplace(r'[\w\s/]*initDocs.*?$','',hText,re.MULTILINE+re.DOTALL)
     return retVal
 
 def insertSummaryCommand(hText,summary):
