@@ -74,12 +74,3 @@ td, th {
     max-width: 40%;
   }
 }
-
-/* - Hide the screenshot image as it does not have a relevant header. TOC should be first.
- * - Hide the properties table as it's contents are too large for mobile display.
- * - Hide properties title since the table is also hidden. */
-@media (max-width: 767px) {
-  .figure, .table, #properties {
-    display: none;
-   }
-}
