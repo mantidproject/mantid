@@ -341,10 +341,6 @@ namespace DataHandling
           instName = temp.substr(0, n);
         }
       }
-      if (instName.compare("POWGEN3") == 0) // hack for powgen b/c of bad long name
-              instName = "POWGEN";
-      if (instName.compare("NOM") == 0) // hack for nomad
-              instName = "NOMAD";
 
       // read information from the nexus file itself
       try {
