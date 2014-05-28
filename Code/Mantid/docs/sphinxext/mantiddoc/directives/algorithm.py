@@ -66,15 +66,20 @@ class AlgorithmDirective(BaseDirective):
     def _insert_reference_link(self):
         """
         Outputs a reference to the top of the algorithm's rst
-        of the form .. _AlgorithmName:
+        of the form .. _AlgorithmName: if this is the highest version
         """
-        self.add_rst(".. _algorithm|%s:\n" % self.algorithm_name())
+        from mantid.api import AlgorithmFactory
+
+        alg_name = self.algorithm_name()
+        if AlgorithmFactory.highestVersion(alg_name) == self.algorithm_version():
+            self.add_rst(".. _algorithm|%s:\n" % alg_name)
 
     def _insert_pagetitle(self):
         """
         Outputs a title for the page
         """
-        self.add_rst(self.make_header(self.algorithm_name(), True))
+        title = "%s v%d" % (self.algorithm_name(), self.algorithm_version())
+        self.add_rst(self.make_header(title, True))
 
     def _insert_toc(self):
         """
