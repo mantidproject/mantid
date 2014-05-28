@@ -6,7 +6,7 @@
     creates "index" pages that lists the contents of each category. The display of each
     "index" page is controlled by a jinja2 template.
 """
-from base import BaseDirective
+from base import BaseDirective, algorithm_name_and_version
 
 CATEGORY_INDEX_TEMPLATE = "category.html"
 # relative to the "root" directory
@@ -21,14 +21,15 @@ class LinkItem(object):
     # html link
     link = None
 
-    def __init__(self, name, env):
+    def __init__(self, name, docname):
         """
         Arguments:
-          env (Sphinx.BuildEnvironment): The current environment processing object
+          name (str): Display name of document
+          docname (str): Name of document as referred to by docutils (can contain directory separators)
         """
         self.name = str(name)
 
-        rel_path = env.docname  # no suffix
+        rel_path = docname  # no suffix
         # Assumes the link is for the current document and that the
         # page that will use this reference is in a single
         # subdirectory from root
@@ -67,8 +68,8 @@ class PageRef(LinkItem):
     Store details of a single page reference
     """
 
-    def __init__(self, name, env):
-        super(PageRef, self).__init__(name, env)
+    def __init__(self, name, docname):
+        super(PageRef, self).__init__(name, docname)
 
 #endclass
 
@@ -81,8 +82,8 @@ class Category(LinkItem):
     # Collection of PageRef objects that form subcategories of this category
     subcategories = None
 
-    def __init__(self, name, env):
-        super(Category, self).__init__(name, env)
+    def __init__(self, name, docname):
+        super(Category, self).__init__(name, docname)
 
         # override default link
         self.link = "../categories/%s.html" % name
@@ -169,9 +170,9 @@ class CategoriesDirective(BaseDirective):
                     category = env.categories[categ_name]
                 #endif
 
-                category.pages.add(PageRef(page_name, env))
+                category.pages.add(PageRef(page_name, env.docname))
                 if index > 0: # first is never a child
-                    parent.subcategories.add(Category(categ_name, env))
+                    parent.subcategories.add(Category(categ_name, env.docname))
                 #endif
 
                 link_rst += "`%s <../%s/%s.html>`_ | " % (categ_name, CATEGORIES_HTML_DIR, categ_name)
@@ -270,6 +271,32 @@ def create_category_pages(app):
         yield (CATEGORIES_HTML_DIR + "/" + name, context, template)
 # enddef
 
+#-----------------------------------------------------------------------------------------------------------
+
+def purge_categories(app, env, docname):
+    """
+    Purge information about the given document name from the tracked algorithms
+
+    Arguments:
+      app (Sphinx.application): Application object
+      env (Sphinx.BuildEnvironment): 
+      docname (str): Name of the document
+    """
+    if not hasattr(env, "categories"):
+        return # nothing to do
+
+    categories = env.categories
+    try:
+        name, version = algorithm_name_and_version(docname)
+    except RuntimeError: # not an algorithm page
+        return
+
+    deadref = PageRef(name, docname)
+    for category in categories.itervalues():
+        pages = category.pages
+        if deadref in pages:
+            pages.remove(deadref)
+
 #------------------------------------------------------------------------------
 def setup(app):
     # Add categories directive
@@ -280,3 +307,5 @@ def setup(app):
     # connect event html collection to handler
     app.connect("html-collect-pages", html_collect_pages)
 
+    # connect document clean up to purge information about this page
+    app.connect('env-purge-doc', purge_categories)

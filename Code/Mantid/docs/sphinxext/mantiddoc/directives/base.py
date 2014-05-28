@@ -2,6 +2,31 @@ from docutils import statemachine
 from docutils.parsers.rst import Directive
 import re
 
+ALG_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)-v([0-9][0-9]*)$')
+
+#----------------------------------------------------------------------------------------
+def algorithm_name_and_version(docname):
+    """
+    Returns the name and version of an algorithm based on the name of the
+    document supplied. The expected name of the document is "AlgorithmName-v?", which
+    is the name of the file with the extension removed
+    
+    Arguments:
+      docname (str): The name of the document as supplied by docutils. Can contain slashes to indicate a path
+
+    Returns:
+      tuple: A tuple containing two elements (name, version)
+    """
+    # docname includes path, using forward slashes, from root of documentation directory
+    docname = docname.split("/")[-1]
+    match = ALG_DOCNAME_RE.match(docname)
+    if not match or len(match.groups()) != 2:
+        raise RuntimeError("Document filename '%s.rst' does not match the expected format: AlgorithmName-vX.rst" % docname)
+
+    grps = match.groups()
+    return (str(grps[0]), int(grps[1]))
+
+#----------------------------------------------------------------------------------------
 class BaseDirective(Directive):
 
     """
@@ -11,8 +36,6 @@ class BaseDirective(Directive):
     has_content = True
     final_argument_whitespace = True
 
-    alg_docname_re = re.compile(r'^([A-Z][a-zA-Z0-9]+)-v([0-9][0-9]*)$')
-
     def _algorithm_name_and_version(self):
         """
         Returns the name and version of an algorithm based on the name of the
@@ -20,14 +43,7 @@ class BaseDirective(Directive):
         is the name of the file with the extension removed
         """
         env = self.state.document.settings.env
-        # env.docname includes path, using forward slashes, from root of documentation directory
-        docname = env.docname.split("/")[-1]
-        match = self.alg_docname_re.match(docname)
-        if not match or len(match.groups()) != 2:
-            raise RuntimeError("Document filename '%s.rst' does not match the expected format: AlgorithmName-vX.rst" % docname)
-
-        grps = match.groups()
-        return (str(grps[0]), int(grps[1]))
+        return algorithm_name_and_version(env.docname)
 
     def _make_header(self, name, pagetitle=False):
         """
