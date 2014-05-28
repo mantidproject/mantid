@@ -13,20 +13,12 @@ class SummaryDirective(BaseDirective):
         """
         Called by Sphinx when the ..summary:: directive is encountered.
         """
-        title = self._make_header("Summary")
-        summary = self._get_summary()
-        return self._insert_rest(title + summary)
+        self.add_rst(self.make_header("Summary"))
+        alg = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
+        self.add_rst(alg.getWikiSummary())
+        self.commit_rst()
 
-    def _get_summary(self):
-        """
-        Return the summary for the named algorithm.
-
-        Args:
-          algorithm_name (str): The name of the algorithm.
-        """
-        alg = self._create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
-        return alg.getWikiSummary()
-
+        return []
 
 def setup(app):
     """

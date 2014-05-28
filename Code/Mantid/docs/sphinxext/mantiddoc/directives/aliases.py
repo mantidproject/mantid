@@ -13,26 +13,17 @@ class AliasesDirective(BaseDirective):
         """
         Called by Sphinx when the ..aliases:: directive is encountered.
         """
-        alias = self._get_alias()
+        alg = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
+        alias = alg.alias()
         if len(alias) == 0:
             return []
 
-        title = self._make_header("Aliases")
-        return self._insert_rest(title + alias)
+        self.add_rst(self.make_header("Aliases"))
+        format_str = "This algorithm is also known as: **%s**"
+        self.add_rst(format_str % alias)
+        self.commit_rst()
 
-    def _get_alias(self):
-        """
-        Return the alias for the named algorithm.
-
-        Args:
-          algorithm_name (str): The name of the algorithm to get the alias for.
-        """
-        alg = self._create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
-        alias_name = alg.alias()
-        if len(alias_name) == 0:
-            return ""
-        else:
-            return "This algorithm is also known as: " + "**" + alias_name + "**"
+        return []
 
 def setup(app):
     """

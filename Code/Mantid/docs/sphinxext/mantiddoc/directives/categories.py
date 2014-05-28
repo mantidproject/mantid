@@ -114,7 +114,9 @@ class CategoriesDirective(BaseDirective):
         display_name = self._get_display_name()
         links = self._create_links_and_track(display_name, categories)
 
-        return self._insert_rest("\n" + links)
+        self.add_rst("\n" + links)
+        self.commit_rst()
+        return []
 
     def _get_categories_list(self):
         """
@@ -214,7 +216,7 @@ class AlgorithmCategoryDirective(CategoriesDirective):
           list: A list of strings containing the required categories
         """
         category_list = ["Algorithms"]
-        alg_cats = self._create_mantid_algorithm(self.algorithm_name(), self.algorithm_version()).categories()
+        alg_cats = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version()).categories()
         for cat in alg_cats:
             # double up the category separators so they are not treated as escape characters
             category_list.append(cat.replace("\\", "\\\\"))

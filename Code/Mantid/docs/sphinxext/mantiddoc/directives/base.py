@@ -84,7 +84,7 @@ class BaseDirective(Directive):
         self.state_machine.insert_input(self.rst_lines, "")
         self.rst_lines = []
 
-    def _make_header(self, name, pagetitle=False):
+    def make_header(self, name, pagetitle=False):
         """
         Makes a ReStructuredText title from the algorithm's name.
 
@@ -102,20 +102,7 @@ class BaseDirective(Directive):
             line = "\n" + "-" * len(name) + "\n"
             return name + line
 
-    def _insert_rest(self, text):
-        """
-        Inserts ReStructuredText into the algorithm file.
-
-        Args:
-          text (str): Inserts ReStructuredText into the algorithm file.
-
-        Returns:
-          list: Empty list. This is required by the inherited run method.
-        """
-        self.state_machine.insert_input(statemachine.string2lines(text), "")
-        return []
-
-    def _create_mantid_algorithm(self, algorithm_name, version):
+    def create_mantid_algorithm(self, algorithm_name, version):
         """
         Create and initializes a Mantid algorithm.
 

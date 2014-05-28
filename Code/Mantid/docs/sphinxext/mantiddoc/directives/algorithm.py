@@ -74,7 +74,7 @@ class AlgorithmDirective(BaseDirective):
         """
         Outputs a title for the page
         """
-        self.add_rst(self._make_header(self.algorithm_name(), True))
+        self.add_rst(self.make_header(self.algorithm_name(), True))
 
     def _insert_toc(self):
         """
@@ -156,12 +156,10 @@ class AlgorithmDirective(BaseDirective):
 
         # Check for message to use another algorithm an insert a link
         match = DEPRECATE_USE_ALG_RE.search(msg)
-        print "TESTING",msg
-        print "TESTING",match,match.groups()
         if match is not None and len(match.groups()) == 1:
             name = match.group(0)
             msg = DEPRECATE_USE_ALG_RE.sub(r"Use :ref:`algorithm|\1` instead.", msg)
-            print "TESTING",msg
+
         self.add_rst(".. warning:: %s" % msg)
 
 ############################################################################################################
