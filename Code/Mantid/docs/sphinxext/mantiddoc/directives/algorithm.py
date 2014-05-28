@@ -1,13 +1,28 @@
 from base import BaseDirective
+from docutils import nodes
+from sphinx.locale import _
+from sphinx.util.compat import make_admonition
 import os
+import re
 
 REDIRECT_TEMPLATE = "redirect.html"
 
+DEPRECATE_USE_ALG_RE = re.compile(r'Use\s([A-Z][a-zA-Z0-9]+)\sinstead')
+
+#--------------------------------------------------------------------------
 class AlgorithmDirective(BaseDirective):
 
     """
-    Adds a referenceable link for a given algorithm, a title,
-    and a screenshot of the algorithm to an rst file.
+    Inserts details of an algorithm by querying Mantid
+
+    Adds:
+     - A referenceable link for use with Sphinx ":ref:`` tags", if this is
+       the highest version of the algorithm being processed
+     - A title
+     - A screenshot of the algorithm
+     - Table of contents
+
+    If the algorithms is deprecated then a warning is inserted.
     """
 
     required_arguments, optional_arguments = 0, 0
@@ -16,30 +31,30 @@ class AlgorithmDirective(BaseDirective):
         """
         Called by Sphinx when the ..algorithm:: directive is encountered
         """
-        algorithm_name, version = self._algorithm_name_and_version()
-        self._track_algorithm(algorithm_name, version)
+        self._track_algorithm()
 
-        # Seperate methods for each unique piece of functionality.
-        reference = self._make_reference_link(algorithm_name)
-        title = self._make_header(algorithm_name, True)
-        toc = self._make_local_toc()
-        imgpath = self._create_screenshot(algorithm_name, version)
-        screenshot = self._make_screenshot_link(algorithm_name, imgpath)
+        self._insert_reference_link()
+        self._insert_pagetitle()
+        imgpath = self._create_screenshot()
+        self._insert_screenshot_link(imgpath)
+        self._insert_toc()
+        self._insert_deprecation_warning()
 
-        return self._insert_rest(reference + title + screenshot + toc)
+        self.commit_rst()
+        return []
 
-    def _track_algorithm(self, name, version):
+    def _track_algorithm(self):
         """
-        Keep a track of the highest versions of algorithms encountered
-        
-        Arguments:
-          name (str): Name of the algorithm
-          version (int): Integer version number
+        Keep a track of the highest versions of algorithms encountered.
+        The algorithm name and version are retrieved from the document name.
+        See BaseDirective::set_algorithm_and_version()
         """
         env = self.state.document.settings.env
         if not hasattr(env, "algorithm"):
             env.algorithms = {}
         #endif
+
+        name, version = self.algorithm_name(), self.algorithm_version()
         algorithms = env.algorithms
         if name in algorithms:
             prev_version = algorithms[name][1]
@@ -48,32 +63,31 @@ class AlgorithmDirective(BaseDirective):
         else:
             algorithms[name] = (name, version)
 
-    def _make_reference_link(self, algorithm_name):
+    def _insert_reference_link(self):
         """
         Outputs a reference to the top of the algorithm's rst
         of the form .. _AlgorithmName:
-
-        Args:
-          algorithm_name (str): The name of the algorithm to reference.
-
-        Returns:
-          str: A ReST formatted reference.
         """
-        return ".. _algorithm|%s:\n" % algorithm_name
+        self.add_rst(".. _algorithm|%s:\n" % self.algorithm_name())
 
-    def _make_local_toc(self):
-        return ".. contents:: Table of Contents\n    :local:\n"
+    def _insert_pagetitle(self):
+        """
+        Outputs a title for the page
+        """
+        self.add_rst(self._make_header(self.algorithm_name(), True))
 
-    def _create_screenshot(self, algorithm_name, version):
+    def _insert_toc(self):
+        """
+        Outputs a title for the page
+        """
+        self.add_rst(".. contents:: Table of Contents\n    :local:\n")
+
+    def _create_screenshot(self):
         """
         Creates a screenshot for the named algorithm in an "images/screenshots"
         subdirectory of the currently processed document
 
         The file will be named "algorithmname-vX_dlg.png", e.g. Rebin-v1_dlg.png
-
-        Args:
-          algorithm_name (str): The name of the algorithm.
-          version (int): The version of the algorithm
 
         Returns:
           str: The full path to the created image
@@ -86,14 +100,14 @@ class AlgorithmDirective(BaseDirective):
             os.makedirs(screenshots_dir)
 
         try:
-            imgpath = algorithm_screenshot(algorithm_name, screenshots_dir, version=version)
+            imgpath = algorithm_screenshot(self.algorithm_name(), screenshots_dir, version=self.algorithm_version())
         except Exception, exc:
             env.warn(env.docname, "Unable to generate screenshot for '%s' - %s" % (algorithm_name, str(exc)))
             imgpath = os.path.join(screenshots_dir, "failed_dialog.png")
 
         return imgpath
 
-    def _make_screenshot_link(self, algorithm_name, img_path):
+    def _insert_screenshot_link(self, img_path):
         """
         Outputs an image link with a custom :class: style. The filename is
         extracted from the path given and then a link to /images/screenshots/filename.png
@@ -101,11 +115,7 @@ class AlgorithmDirective(BaseDirective):
         and reformatting the links
 
         Args:
-          algorithm_name (str): The name of the algorithm that the screenshot represents
           img_path (str): The full path as on the filesystem to the image
-
-        Returns:
-          str: A ReST formatted reference.
         """
         format_str = ".. figure:: %s\n"\
                      "    :class: screenshot\n\n"\
@@ -113,9 +123,9 @@ class AlgorithmDirective(BaseDirective):
         
         filename = os.path.split(img_path)[1]
         path = "/images/screenshots/" + filename
-        caption = "A screenshot of the **" + algorithm_name + "** dialog."
+        caption = "A screenshot of the **" + self.algorithm_name() + "** dialog."
 
-        return format_str % (path, caption)
+        self.add_rst(format_str % (path, caption))
 
     def _screenshot_directory(self, env):
         """
@@ -132,6 +142,27 @@ class AlgorithmDirective(BaseDirective):
         """
         cfg_dir = env.app.srcdir
         return os.path.join(cfg_dir, "images", "screenshots")
+
+    def _insert_deprecation_warning(self):
+        """
+        If the algorithm version is deprecated then construct a warning message
+        """
+        from mantid.api import DeprecatedAlgorithmChecker
+
+        checker = DeprecatedAlgorithmChecker(self.algorithm_name(), self.algorithm_version())
+        msg = checker.isDeprecated()
+        if len(msg) == 0:
+            return
+
+        # Check for message to use another algorithm an insert a link
+        match = DEPRECATE_USE_ALG_RE.search(msg)
+        print "TESTING",msg
+        print "TESTING",match,match.groups()
+        if match is not None and len(match.groups()) == 1:
+            name = match.group(0)
+            msg = DEPRECATE_USE_ALG_RE.sub(r"Use :ref:`algorithm|\1` instead.", msg)
+            print "TESTING",msg
+        self.add_rst(".. warning:: %s" % msg)
 
 ############################################################################################################
 

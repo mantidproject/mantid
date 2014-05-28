@@ -32,18 +32,57 @@ class BaseDirective(Directive):
     """
     Contains shared functionality for Mantid custom directives.
     """
-
-    has_content = True
+    has_content = False
     final_argument_whitespace = True
 
-    def _algorithm_name_and_version(self):
+    algm_name = None
+    algm_version = None
+    rst_lines = None
+
+    def algorithm_name(self):
+        """
+        Returns the algorithm name as parsed from the document name
+        """
+        if self.algm_name is None:
+            self._set_algorithm_name_and_version()
+        return self.algm_name
+
+    def algorithm_version(self):
+        """
+        Returns the algorithm version as parsed from the document name
+        """
+        if self.algm_version is None:
+            self._set_algorithm_name_and_version()
+        return self.algm_version
+
+    def _set_algorithm_name_and_version(self):
         """
         Returns the name and version of an algorithm based on the name of the
         document. The expected name of the document is "AlgorithmName-v?", which
         is the name of the file with the extension removed
         """
         env = self.state.document.settings.env
-        return algorithm_name_and_version(env.docname)
+        self.algm_name, self.algm_version = algorithm_name_and_version(env.docname)
+
+    def add_rst(self, text):
+        """
+        Appends given reST into a managed list. It is NOT inserted into the
+        document until commit_rst() is called
+
+        Args:
+          text (str): reST to track
+        """
+        if self.rst_lines is None:
+            self.rst_lines = []
+
+        self.rst_lines.extend(statemachine.string2lines(text))
+
+    def commit_rst(self):
+        """
+        Inserts the currently tracked rst lines into the state_machine
+        """
+        self.state_machine.insert_input(self.rst_lines, "")
+        self.rst_lines = []
 
     def _make_header(self, name, pagetitle=False):
         """

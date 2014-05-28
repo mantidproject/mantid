@@ -27,8 +27,7 @@ class AliasesDirective(BaseDirective):
         Args:
           algorithm_name (str): The name of the algorithm to get the alias for.
         """
-        name, version = self._algorithm_name_and_version()
-        alg = self._create_mantid_algorithm(name, version)
+        alg = self._create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
         alias_name = alg.alias()
         if len(alias_name) == 0:
             return ""

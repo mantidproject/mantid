@@ -214,8 +214,7 @@ class AlgorithmCategoryDirective(CategoriesDirective):
           list: A list of strings containing the required categories
         """
         category_list = ["Algorithms"]
-        algname, version = self._algorithm_name_and_version()
-        alg_cats = self._create_mantid_algorithm(algname, version).categories()
+        alg_cats = self._create_mantid_algorithm(self.algorithm_name(), self.algorithm_version()).categories()
         for cat in alg_cats:
             # double up the category separators so they are not treated as escape characters
             category_list.append(cat.replace("\\", "\\\\"))
@@ -226,7 +225,7 @@ class AlgorithmCategoryDirective(CategoriesDirective):
         """
         Returns the name of the item as it should appear in the category
         """
-        return self._algorithm_name_and_version()[0]
+        return self.algorithm_name()
 
 #---------------------------------------------------------------------------------
 

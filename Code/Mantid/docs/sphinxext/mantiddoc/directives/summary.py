@@ -24,8 +24,7 @@ class SummaryDirective(BaseDirective):
         Args:
           algorithm_name (str): The name of the algorithm.
         """
-        name, version = self._algorithm_name_and_version()
-        alg = self._create_mantid_algorithm(name, version)
+        alg = self._create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
         return alg.getWikiSummary()
 
 

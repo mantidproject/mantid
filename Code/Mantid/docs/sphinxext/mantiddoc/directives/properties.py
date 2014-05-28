@@ -21,9 +21,7 @@ class PropertiesDirective(BaseDirective):
         """
         Populates the ReST table with algorithm properties.
         """
-        name, version = self._algorithm_name_and_version()
-
-        alg = self._create_mantid_algorithm(name, version)
+        alg = self._create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
         alg_properties = alg.getProperties()
 
         # Stores each property of the algorithm in a tuple.
