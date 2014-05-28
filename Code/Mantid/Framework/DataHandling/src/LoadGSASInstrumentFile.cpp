@@ -64,10 +64,6 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-    *
-
-  //----------------------------------------------------------------------------------------------
   /** Implement abstract Algorithm methods
    */
   void LoadGSASInstrumentFile::init()
