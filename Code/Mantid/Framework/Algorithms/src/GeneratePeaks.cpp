@@ -246,6 +246,7 @@ namespace Algorithms
   {
     // Function parameters
     std::string paramwsname = getPropertyValue("PeakParametersWorkspace");
+    g_log.notice() << "[DB]" << " Input parameter workpace name: " << paramwsname << ".\n";
     if (paramwsname.size() > 0)
     {
       // Using parameter table workspace has a higher priority
@@ -421,7 +422,12 @@ namespace Algorithms
     // Set up and clone peak function
     size_t numpeakparams = m_peakFunction->nParams();
     if (m_vecPeakParamValues.size() != numpeakparams)
-      throw std::runtime_error("Number of peak parameters' value is not correct. ");
+    {
+      std::stringstream errss;
+      errss << "Number of input peak parameters' value (" << numpeakparams << ") is not correct (should be "
+            << m_vecPeakParamValues.size() << " for peak of type " << m_peakFunction->name() << "). ";
+      throw std::runtime_error(errss.str());
+    }
     else
     {
       for (size_t i = 0; i < numpeakparams; ++i)
