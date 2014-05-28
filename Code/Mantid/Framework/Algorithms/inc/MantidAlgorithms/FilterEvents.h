@@ -41,15 +41,21 @@ namespace Algorithms
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
   class DLLExport FilterEvents : public API::Algorithm
-  {
+  {   
+
+    enum TOFCorrectionType {NoneCorrect, CustomizedCorrect, DirectCorrect, ElasticCorrect, IndirectCorrect};
+    enum TOFCorrectionOp {MultiplyOp, ShiftOp};
+
   public:
     FilterEvents();
     virtual ~FilterEvents();
     
     /// Algorithm's name for identification overriding a virtual method
-    virtual const std::string name() const { return "FilterEvents";};
+    virtual const std::string name() const { return "FilterEvents";}
+
     /// Algorithm's version for identification overriding a virtual method
-    virtual int version() const { return 1;};
+    virtual int version() const { return 1;}
+
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "Events\\EventFiltering";}
 
@@ -71,8 +77,14 @@ namespace Algorithms
 
     void createOutputWorkspaces();
 
+    /// Set up detector calibration parameters
     void setupDetectorTOFCalibration();
 
+    /// Set up detector calibration parameters from customized values
+    void setupCustomizedTOFCorrection();
+
+
+    /// Filter events by splitters in format of Splitter
     void filterEventsBySplitters(double progressamount);
 
     ///
@@ -92,11 +104,12 @@ namespace Algorithms
     std::vector<std::string> m_wsNames;
 
     std::vector<double> m_detTofOffsets;
+    std::vector<double> m_detTOFShifts;
 
     bool mFilterByPulseTime;
 
     DataObjects::TableWorkspace_sptr m_informationWS;
-    bool mWithInfo;
+    bool m_hasInfoWS;
 
     double mProgress;
 
@@ -107,7 +120,7 @@ namespace Algorithms
     void splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname, Kernel::TimeSplitterType& splitters);
 
     /// Flag to do TOF correction
-    bool m_doTOFCorrection;
+    // bool m_doTOFCorrection;
     /// Flag to generate TOF correction
     bool m_genTOFCorrection;
 
@@ -128,6 +141,12 @@ namespace Algorithms
     /// Debug
     bool m_useDBSpectrum;
     int m_dbWSIndex;
+
+    /// TOF detector/sample correction type
+    TOFCorrectionType m_tofCorrType;
+    /// TOF detector/sample correcton operation
+    TOFCorrectionOp m_tofCorrOperation;
+
   };
 
 

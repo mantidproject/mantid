@@ -63,7 +63,6 @@ public:
     size_t numpulses = 5;
 
     DataObjects::EventWorkspace_sptr eventws = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
-    //eventws->setName("Test01");
 
     TS_ASSERT_EQUALS(eventws->getNumberEvents(), 500);
 
@@ -111,7 +110,6 @@ public:
     filter.setProperty("InputWorkspace", "Test02");
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS01");
     filter.setProperty("SplitterWorkspace", "Splitter02");
-    filter.setProperty("GenerateTOFCorrection", false);
     filter.setProperty("OutputTOFCorrectionWorkspace", "CorrectionWS");
 
     // 3. Execute
@@ -275,7 +273,9 @@ public:
     // 2. Set properties
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("InputWorkspace", "EventData"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("OutputWorkspaceBaseName", "SplittedDataX"));
+    TS_ASSERT_THROWS_NOTHING(filter.setProperty("CorrectionToSample", "Customized"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("DetectorTOFCorrectionWorkspace", "TimeCorrectionTableX"));
+    TS_ASSERT_THROWS_NOTHING(filter.setProperty("CustumCorrectionOp", "Multiply"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("SplitterWorkspace", splws));
 
     // 3. Execute

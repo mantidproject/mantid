@@ -29,13 +29,26 @@ and splitByFullTime considers both pulse time and TOF.
 
 Therefore, FilterByLogValue is not suitable for fast log filtering.
 
-=== Comparing with other event filtering algorithms ===
+== Correcting TOF to sample ==
+TOF is recorded at detector, while fast log sample environment device records the data at the sample.
+In fast-log event filtering, the difference between detector and sample should be considered.
+
+1. Elastic diffraction: <math>T_{sample} = T_{pulse} + \frac{L_1}{L_1+L_2}\cdot TOF</math>;
+
+2. Direct inelastic: <math>T_{sample} = T_{pulse} + \frac{L_1}{\sqrt{2\cdot m\cdot E_i}}</math>
+
+3. Indirect inelastic: <math>T_{sample} = T_{pulse} + TOF - \frac{L_2}{2\cdot m\cdot E_{fix}}</math>
+
+
+== Comparing with other event filtering algorithms ==
 Wiki page [[EventFiltering]] has a detailed introduction on event filtering in MantidPlot. 
 
 *WIKI*/
 
 #include "MantidAlgorithms/FilterEvents.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -101,10 +114,6 @@ namespace Algorithms
                                                           PropertyMode::Optional),
                     "Optional output for the information of each splitter workspace index.");
 
-    auto tablewsprop = new WorkspaceProperty<TableWorkspace>("DetectorTOFCorrectionWorkspace", "", Direction::Input,
-                                                             PropertyMode::Optional);
-    declareProperty(tablewsprop, "Name of table workspace containing the log time correction factor for each detector. ");
-
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputTOFCorrectionWorkspace", "TOFCorrectWS", Direction::Output),
                     "Name of output workspace for TOF correction factor. ");
 
@@ -116,8 +125,31 @@ namespace Algorithms
 
     declareProperty("OutputWorkspaceIndexedFrom1", false, "If selected, the minimum output workspace is indexed from 1 and continuous. ");
 
-    declareProperty("GenerateTOFCorrection", false, "If this option is true and user does not specify DetectorTOFCorrectionWorkspacel, "
-                    "then the correction will be generated automatically by the instrument geometry. ");
+    // TOF correction
+    vector<string> corrtypes;
+    corrtypes.push_back("None");
+    corrtypes.push_back("Customized");
+    corrtypes.push_back("Direct");
+    corrtypes.push_back("Elastic");
+    corrtypes.push_back("Indirect");
+    declareProperty("CorrectionToSample", "None", boost::make_shared<StringListValidator>(corrtypes),
+                    "Type of correction on neutron events to sample time from detector time. ");
+
+
+    auto tablewsprop = new WorkspaceProperty<TableWorkspace>("DetectorTOFCorrectionWorkspace", "",
+                                                             Direction::Input, PropertyMode::Optional);
+    declareProperty(tablewsprop,
+                    "Name of table workspace containing the log time correction factor for each detector. ");
+    setPropertySettings("DetectorTOFCorrectionWorkspace",
+                        new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO,  "Customized"));
+
+    vector<string> corrops;
+    corrops.push_back("Shift");
+    corrops.push_back("Multiply");
+    declareProperty("CustumCorrectionOp", "Multiply", boost::make_shared<StringListValidator>(corrops),
+                    "Type of operation for TOF correction of customized type. ");
+    setPropertySettings("CustumCorrectionOp",
+                        new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO, "Customized"));
 
     declareProperty("SplitSampleLogs", true, "If selected, all sample logs will be splitted by the  "
                     "event splitters.  It is not recommended for fast event log splitters. ");
@@ -230,37 +262,61 @@ namespace Algorithms
     }
 
     m_informationWS = this->getProperty("InformationWorkspace");
+    // Informatin workspace is specified?
+    if (!m_informationWS)
+      m_hasInfoWS = false;
+    else
+      m_hasInfoWS = true;
 
     m_outputWSNameBase = this->getPropertyValue("OutputWorkspaceBaseName");
-    m_detCorrectWorkspace = getProperty("DetectorTOFCorrectionWorkspace");
     mFilterByPulseTime = this->getProperty("FilterByPulseTime");
 
     m_toGroupWS = this->getProperty("GroupWorkspaces");
 
-    // Do correction or not?
-    m_genTOFCorrection = getProperty("GenerateTOFCorrection");
-    if (m_detCorrectWorkspace)
+    //-------------------------------------------------------------------------
+    // TOF detector/sample correction
+    //-------------------------------------------------------------------------
+    // Type of correction
+    string correctiontype = getPropertyValue("CorrectionToSample");
+    if (correctiontype.compare("None") == 0)
+      m_tofCorrType = NoneCorrect;
+    else if (correctiontype.compare("Customized") == 0)
+      m_tofCorrType = CustomizedCorrect;
+    else if (correctiontype.compare("Direct") == 0)
+      m_tofCorrType = DirectCorrect;
+    else if (correctiontype.compare("Elastic") == 0)
+      m_tofCorrType = ElasticCorrect;
+    else if (correctiontype.compare("Inelastic") == 0)
+      m_tofCorrType = IndirectCorrect;
+    else
+      throw runtime_error("Impossible situation!");
+
+    if (m_tofCorrType == CustomizedCorrect)
     {
-      // User specify detector TOF correction, then no need to generate TOF correction
-      m_doTOFCorrection = true;
+      // Customized correciton
+      m_genTOFCorrection = false;
+      m_detCorrectWorkspace = getProperty("DetectorTOFCorrectionWorkspace");
+      if (!m_detCorrectWorkspace)
+        throw runtime_error("In case of customized TOF correction, correction workspace must be given!");
+
+      string corrop = getPropertyValue("CustumCorrectionOp");
+      if (corrop.compare("Shift") == 0)
+        m_tofCorrOperation = ShiftOp;
+      else if (corrop.compare("Multiply") == 0)
+        m_tofCorrOperation = MultiplyOp;
+      else
+        throw runtime_error("Impossible situation for CustomCorrectionOp!");
+    }
+    else if (m_tofCorrType != NoneCorrect)
+    {
+      // Need to generate TOF correction in this algorithm
+      m_genTOFCorrection = true;
+    }
+    else
+    {
+      // No correction
       m_genTOFCorrection = false;
     }
-    else if (m_genTOFCorrection)
-    {
-      // If no detector TOF correction workspace is specified but specified to go generate TOF
-      m_doTOFCorrection = true;
-    }
-    else
-    {
-      // No correction is needed
-      m_doTOFCorrection = false;
-    }
-
-    // Informatin workspace is specified?
-    if (!m_informationWS)
-      mWithInfo = false;
-    else
-      mWithInfo = true;
 
     m_splitSampleLogs = getProperty("SplitSampleLogs");
 
@@ -305,7 +361,7 @@ namespace Algorithms
     m_workGroupIndexes.insert(-1);
 
     // 5. Add information
-    if (mWithInfo)
+    if (m_hasInfoWS)
     {
       if (m_workGroupIndexes.size() > m_informationWS->rowCount()+1)
       {
@@ -358,7 +414,7 @@ namespace Algorithms
 
     // Convert information workspace to map
     std::map<int, std::string> infomap;
-    if (mWithInfo)
+    if (m_hasInfoWS)
     {
       for (size_t ir = 0; ir < m_informationWS->rowCount(); ++ ir)
       {
@@ -416,7 +472,7 @@ namespace Algorithms
       m_outputWS.insert(std::make_pair(wsgroup, optws));
 
       // Add information, including title and comment, to output workspace
-      if (mWithInfo)
+      if (m_hasInfoWS)
       {
         std::string info;
         if (wsgroup < 0)
@@ -483,16 +539,28 @@ namespace Algorithms
     * It can be (1) parsed from TOF-correction table workspace to vectors,
     * (2) created according to detector's position in instrument;
     * (3) or no correction,i.e., correction value is equal to 1.
+    * Offset should be as F*TOF + B
     */
   void FilterEvents::setupDetectorTOFCalibration()
   {
+    // Set up the size of correction and output correction workspace
+    size_t numhist = m_eventWS->getNumberHistograms();
+    m_detTofOffsets.resize(numhist, 1.0);
+    m_detTOFShifts.resize(numhist, 0.0);
+
+    MatrixWorkspace_sptr corrws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          WorkspaceFactory::Instance().create("Workspace2D", numhist, 1, 1));
+
+    // Set up detector values
+    if (m_tofCorrType == CustomizedCorrect)
+    {
+      setupCustomizedTOFCorrection();
+    }
+
+#if 0
     // Prepare output (class variables)
     std::vector<detid_t> vecDetIDs;
-    m_detTofOffsets.clear();
-
-    size_t numhist = m_eventWS->getNumberHistograms();
     vecDetIDs.resize(numhist, 0);
-    m_detTofOffsets.resize(numhist, 1.0);
 
     // Create the output workspace for correction factors
     MatrixWorkspace_sptr corrws = boost::dynamic_pointer_cast<MatrixWorkspace>(
@@ -523,10 +591,13 @@ namespace Algorithms
       corrws->dataY(i)[0] = 1.0;
       m_detTofOffsets[i] = 1.0;
     }
+#endif
 
     // Calculate TOF correction value for all detectors
     if (m_detCorrectWorkspace)
     {
+      ;
+#if 0
       // Obtain correction from detector calibration workspace
 
       // Check input workspace
@@ -587,6 +658,7 @@ namespace Algorithms
           corrws->dataY(i)[0] = fiter->second;
         }
       }
+#endif
     }
     else if (m_genTOFCorrection)
     {
@@ -614,6 +686,100 @@ namespace Algorithms
     // Set output
     // Add correction workspace to output
     setProperty("OutputTOFCorrectionWorkspace", corrws);
+
+    return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Set up corrections with customized TOF correction input
+    */
+  void FilterEvents::setupCustomizedTOFCorrection()
+  {
+
+    // Check input workspace
+    vector<string> colnames = m_detCorrectWorkspace->getColumnNames();
+    if (colnames.size() < 2)
+      throw runtime_error("Input table workspace is not valide.");
+    else if (colnames[0].compare("DetectorID") || colnames[1].compare("Correction"))
+      throw runtime_error("Input table workspace has wrong column definition.");
+
+    // Parse detector and its TOF offset (i.e., correction) to a map
+    map<detid_t, double> correctmap;
+    size_t numrows = m_detCorrectWorkspace->rowCount();
+    for (size_t i = 0; i < numrows; ++i)
+    {
+      TableRow row = m_detCorrectWorkspace->getRow(i);
+
+      detid_t detid;
+      double offset;
+      row >> detid >> offset;
+
+      correctmap.insert(make_pair(detid, offset));
+    }
+
+    // Check size of TOF correction map
+    size_t numhist = m_eventWS->getNumberHistograms();
+    if (correctmap.size() > numhist)
+    {
+      g_log.warning() << "Input correction table workspace has more detectors (" << correctmap.size()
+                      << ") than input workspace " << m_eventWS->name() << "'s spectra number ("
+                      << numhist << ".\n";
+    }
+    else if (correctmap.size() < numhist)
+    {
+      stringstream errss;
+      errss << "Input correction table workspace has more detectors (" << correctmap.size()
+            << ") than input workspace " << m_eventWS->name() << "'s spectra number ("
+            << numhist << ".\n";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    // Get vector IDs
+    vector<detid_t> vecDetIDs;
+    vecDetIDs.resize(numhist, 0);
+    // Set up the detector IDs to vecDetIDs and set up the initial value
+    for (size_t i = 0; i < numhist; ++i)
+    {
+      // It is assumed that there is one detector per spectra.
+      // If there are more than 1 spectrum, it is very likely to have problem with correction factor
+      const DataObjects::EventList events = m_eventWS->getEventList(i);
+      std::set<detid_t> detids = events.getDetectorIDs();
+      std::set<detid_t>::iterator detit;
+      if (detids.size() != 1)
+      {
+        // Check whether there are more than 1 detector per spectra.
+        stringstream errss;
+        errss << "The assumption is that one spectrum has one and only one detector. "
+              << "Error is found at spectrum " << i << ".  It has " << detids.size() << " detectors.";
+        throw runtime_error(errss.str());
+      }
+      detid_t detid = 0;
+      for (detit=detids.begin(); detit!=detids.end(); ++detit)
+        detid = *detit;
+      vecDetIDs[i] = detid;
+    }
+
+    // Map correction map to list
+    map<detid_t, double>::iterator fiter;
+    for (size_t i = 0; i < numhist; ++i)
+    {
+      detid_t detid = vecDetIDs[i];
+      fiter = correctmap.find(detid);
+      if (fiter != correctmap.end())
+      {
+        m_detTofOffsets[i] = fiter->second;
+      }
+      else
+      {
+        stringstream errss;
+        errss << "Detector " << "w/ ID << " << detid  << " of spectrum " << i << " in Eventworkspace " << m_eventWS->name()
+              << " cannot be found in input TOF calibration workspace. ";
+        g_log.error(errss.str());
+        throw runtime_error(errss.str());
+      }
+    } // ENDFOR (each spectrum i)
 
     return;
   }
@@ -656,13 +822,15 @@ namespace Algorithms
       {
         input_el.splitByPulseTime(m_splitters, outputs);
       }
-      else if (m_doTOFCorrection)
+      else if (m_tofCorrType != NoneCorrect)
       {
-        input_el.splitByFullTime(m_splitters, outputs, m_detTofOffsets[iws], m_doTOFCorrection);
+        // FIXME - Need to fix this part!
+        g_log.error("It is not correct except for elastic! ");
+        input_el.splitByFullTime(m_splitters, outputs, m_detTofOffsets[iws], true);
       }
       else
       {
-        input_el.splitByFullTime(m_splitters, outputs, 1.0, m_doTOFCorrection);
+        input_el.splitByFullTime(m_splitters, outputs, 1.0, false);
       }
 
       PARALLEL_END_INTERUPT_REGION
@@ -765,16 +933,15 @@ namespace Algorithms
       {
         throw runtime_error("It is not a good practice to split fast event by pulse time. ");
       }
-      else if (m_doTOFCorrection)
+      else if (m_tofCorrType != NoneCorrect)
       {
         logmessage = input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs,
-                                               m_detTofOffsets[iws], m_doTOFCorrection, printdetail);
+                                                            m_detTofOffsets[iws], true, printdetail);
       }
       else
       {
         logmessage = input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs, 1.0,
-                                                            m_doTOFCorrection,
-                                                            printdetail);
+                                                            false, printdetail);
       }
 
       if (printdetail)
