@@ -67,12 +67,6 @@ namespace MDAlgorithms
   const std::string SetMDUsingMask::category() const { return "MDAlgorithms\\MDArithmetic";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SetMDUsingMask::initDocs()
-  {
-    this->setWikiSummary("Algorithm to set a [[MDHistoWorkspace]] in points determined by a mask boolean MDHistoWorkspace.");
-    this->setOptionalMessage("Algorithm to set a MDHistoWorkspace in points determined by a mask boolean MDHistoWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

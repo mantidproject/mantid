@@ -53,13 +53,6 @@ namespace Mantid
     /// Algorithm's category for identification. @see Algorithm::category
     const std::string FitResolutionConvolvedModel::category() const { return "Quantification"; }
 
-    /// Sets documentation strings for this algorithm
-    void FitResolutionConvolvedModel::initDocs()
-    {
-      this->setWikiSummary("Fits a cuts/slices from an MDEventWorkspace using a resolution function convolved with a foreground model");
-      this->setOptionalMessage("Fits a cuts/slices from an MDEventWorkspace using a resolution function convolved with a foreground model");
-    }
-
     //----------------------------------------------------------------------------------------------
 
     /// Returns the number of iterations that should be performed

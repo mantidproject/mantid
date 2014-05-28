@@ -68,12 +68,6 @@ namespace MDAlgorithms
   }
   
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void WeightedMeanMD::initDocs()
-  {
-    this->setWikiSummary("Find weighted mean of two [[MDHistoWorkspace]]s.");
-    this->setOptionalMessage("Find weighted mean of two MDHistoWorkspaces.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /// Is the operation commutative?

@@ -51,12 +51,6 @@ namespace MDAlgorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CloneMDWorkspace::initDocs()
-  {
-    this->setWikiSummary("Clones (copies) an existing [[MDEventWorkspace]] or [[MDHistoWorkspace]] into a new one.");
-    this->setOptionalMessage("Clones (copies) an existing MDEventWorkspace or MDHistoWorkspace into a new one.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

@@ -61,12 +61,6 @@ namespace MDAlgorithms
   int MinusMD::version() const { return 1;};
   
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void MinusMD::initDocs()
-  {
-    this->setWikiSummary("Subtract two [[MDWorkspace]]s");
-    this->setOptionalMessage("Subtract two MDWorkspaces.");
-  }
 
 
   //----------------------------------------------------------------------------------------------

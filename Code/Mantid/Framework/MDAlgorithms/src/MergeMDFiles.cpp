@@ -60,12 +60,6 @@ namespace MDAlgorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void MergeMDFiles::initDocs()
-  {
-    this->setWikiSummary("Merge multiple MDEventWorkspaces from files that obey a common box format.");
-    this->setOptionalMessage("Merge multiple MDEventWorkspaces from files that obey a common box format.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

@@ -61,12 +61,6 @@ namespace MDAlgorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveMD::initDocs()
-  {
-    this->setWikiSummary("Save a MDEventWorkspace or MDHistoWorkspace to a .nxs file.");
-    this->setOptionalMessage("Save a MDEventWorkspace or MDHistoWorkspace to a .nxs file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

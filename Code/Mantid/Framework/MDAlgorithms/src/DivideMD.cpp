@@ -66,12 +66,6 @@ namespace MDAlgorithms
   int DivideMD::version() const { return 1;};
   
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void DivideMD::initDocs()
-  {
-    this->setWikiSummary("Divide [[MDHistoWorkspace]]'s");
-    this->setOptionalMessage("Divide MDHistoWorkspace's");
-  }
 
 
   //----------------------------------------------------------------------------------------------
