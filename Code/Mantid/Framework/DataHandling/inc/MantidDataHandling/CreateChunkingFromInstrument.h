@@ -1,8 +1,9 @@
 #ifndef MANTID_DATAHANDLING_CREATECHUNKINGFROMINSTRUMENT_H_
 #define MANTID_DATAHANDLING_CREATECHUNKINGFROMINSTRUMENT_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -46,8 +47,7 @@ namespace DataHandling
     virtual void initDocs();
     void init();
     void exec();
-
-
+    Geometry::Instrument_const_sptr getInstrument();
   };
 
 

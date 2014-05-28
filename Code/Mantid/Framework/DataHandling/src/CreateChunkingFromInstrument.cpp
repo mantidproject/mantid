@@ -9,6 +9,9 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
+#include <boost/tokenizer.hpp>
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 namespace Mantid
 {
@@ -20,11 +23,15 @@ namespace DataHandling
   using namespace Mantid::Kernel;
   using namespace std;
 
+  typedef boost::tokenizer<boost::char_separator<char> >  tokenizer;
+
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(CreateChunkingFromInstrument)
   
 
   namespace { // anonymous namespace to hide things
+    /// Input file name
+    const string PARAM_IN_FILE("Filename");
     /// Input workspace parameter name
     const string PARAM_IN_WKSP("InputWorkspace");
     /// Instrument name parameter name
@@ -84,6 +91,13 @@ namespace DataHandling
     // instrument selection
     string grp1Name("Specify the Instrument");
 
+    std::vector<std::string> exts;
+    exts.push_back("_event.nxs");
+    exts.push_back(".nxs.h5");
+    exts.push_back(".nxs");
+    this->declareProperty(new FileProperty(PARAM_IN_FILE, "", FileProperty::OptionalLoad, exts),
+        "The name of the event nexus file to read, including its full or relative path." );
+
     this->declareProperty(new WorkspaceProperty<>(PARAM_IN_WKSP,"",Direction::Input, PropertyMode::Optional),
                           "Optional: An input workspace with the instrument we want to use.");
 
@@ -93,6 +107,7 @@ namespace DataHandling
     this->declareProperty(new FileProperty(PARAM_INST_FILE, "", FileProperty::OptionalLoad, ".xml"),
                           "Optional: Path to the instrument definition file on which to base the ChunkingWorkpace.");
 
+    this->setPropertyGroup(PARAM_IN_FILE, grp1Name);
     this->setPropertyGroup(PARAM_IN_WKSP, grp1Name);
     this->setPropertyGroup(PARAM_INST_NAME, grp1Name);
     this->setPropertyGroup(PARAM_INST_FILE, grp1Name);
@@ -132,34 +147,66 @@ namespace DataHandling
     map<string, string> result;
 
     // get the input paramters
+    string filename = getPropertyValue(PARAM_IN_FILE);
     MatrixWorkspace_sptr inWS = getProperty(PARAM_IN_WKSP);
     string instName = getPropertyValue(PARAM_INST_NAME);
     string instFilename = getPropertyValue(PARAM_INST_FILE);
 
-    // input workspace wins
+    // count how many ways the input instrument was specified
     int numInst = 0;
-
+    if (!filename.empty()) numInst++;
     if (inWS) numInst++;
     if (!instName.empty()) numInst++;
     if (!instFilename.empty()) numInst++;
 
     // set the error bits
+    string msg;
     if (numInst == 0)
     {
-      result[PARAM_IN_WKSP]   = "Must specify instrument one way";
-      result[PARAM_INST_NAME] = "Must specify instrument one way";
-      result[PARAM_INST_FILE] = "Must specify instrument one way";
+      msg = "Must specify instrument one way";
     }
     else if (numInst > 1)
     {
-      result[PARAM_IN_WKSP]   = "Can only specify instrument one way";
-      result[PARAM_INST_NAME] = "Can only specify instrument one way";
-      result[PARAM_INST_FILE] = "Can only specify instrument one way";
+      msg = "Can only specify instrument one way";
+    }
+    if (!msg.empty())
+    {
+      result[PARAM_IN_FILE]   = msg;
+      result[PARAM_IN_WKSP]   = msg;
+      result[PARAM_INST_NAME] = msg;
+      result[PARAM_INST_FILE] = msg;
+    }
+
+    // get the chunking technology to use
+    string chunkNames  = getPropertyValue(PARAM_CHUNK_NAMES);
+    string chunkGroups = getPropertyValue(PARAM_CHUNK_BY);
+    msg = "";
+    if (chunkNames.empty() && chunkGroups.empty())
+    {
+      msg = "Must specify either " + PARAM_CHUNK_NAMES + " or "
+                 + PARAM_CHUNK_BY;
+    }
+    else if ((!chunkNames.empty()) && (!chunkGroups.empty()))
+    {
+      msg = "Must specify either " + PARAM_CHUNK_NAMES + " or "
+                 + PARAM_CHUNK_BY + " not both";
+    }
+    if (!msg.empty())
+    {
+      result[PARAM_CHUNK_NAMES] = msg;
+      result[PARAM_CHUNK_BY]    = msg;
     }
 
     return result;
   }
 
+  /**
+   * Returns true if str starts with prefix.
+   *
+   * @param str The string to check.
+   * @param prefix The prefix to look for.
+   * @return true if str starts with prefix.
+   */
   bool startsWith(const string & str, const string & prefix)
   {
     // can't start with if it is shorter than the prefix
@@ -169,6 +216,15 @@ namespace DataHandling
     return (str.substr(0, prefix.length()).compare(prefix) == 0);
   }
 
+  /**
+   * Find the name of the parent of the component that starts with the
+   * supplied prefix.
+   *
+   * @param comp The component to find the parent of.
+   * @param prefix Prefix of parent names to look for.
+   * @return The correct parent name. This is an empty string if the name
+   * isn't found.
+   */
   string parentName(IComponent_const_sptr comp, const string & prefix)
   {
     // handle the special case of the component has the name
@@ -190,6 +246,15 @@ namespace DataHandling
     }
   }
 
+  /**
+   * Find the name of the parent of the component that is in the list of
+   * parents that are being searched for.
+   *
+   * @param comp The component to find the parent of.
+   * @param names List of parent names to look for.
+   * @return The correct parent name. This is an empty string if the name
+   * isn't found.
+   */
   string parentName(IComponent_const_sptr comp, const vector<string> & names)
   {
     // handle the special case of the component has the name
@@ -215,6 +280,12 @@ namespace DataHandling
     }
   }
 
+  /**
+   * Split a list of instrument components into a vector of strings.
+   *
+   * @param names Comma separated list of instrument components
+   * @return The vector of instrument component names.
+   */
   vector<string> getGroupNames(const string & names)
   {
     vector<string> groups;
@@ -223,9 +294,113 @@ namespace DataHandling
     if (names.empty())
       return groups;
 
-    // TODO should do the actual splitting
+    // do the actual splitting
+    const boost::char_separator<char> SEPERATOR(",");
+    tokenizer tokens(names, SEPERATOR);
+    for (auto item = tokens.begin(); item != tokens.end(); ++item)
+    {
+      groups.push_back(*item);
+    }
 
     return groups;
+  }
+
+  /**
+   * Determine the instrument from the various input parameters.
+   *
+   * @return The correct instrument.
+   */
+  Instrument_const_sptr CreateChunkingFromInstrument::getInstrument()
+  {
+    // try the input workspace
+    MatrixWorkspace_sptr inWS = getProperty(PARAM_IN_WKSP);
+    if (inWS)
+    {
+      return inWS->getInstrument();
+    }
+
+    // temporary workspace to hang everything else off of
+    MatrixWorkspace_sptr tempWS(new Workspace2D());
+    // name of the instrument
+    string instName = getPropertyValue(PARAM_INST_NAME);
+
+    // see if there is an input file
+    string filename = getPropertyValue(PARAM_IN_FILE);
+    if (!filename.empty())
+    {
+      string top_entry_name("entry"); // TODO make more flexible
+
+      // get the instrument name from the filename
+      size_t n = filename.rfind('/');
+      if (n != std::string::npos)
+      {
+        std::string temp = filename.substr(n+1, filename.size()-n-1);
+        n = temp.find('_');
+        if (n != std::string::npos && n > 0)
+        {
+          instName = temp.substr(0, n);
+        }
+      }
+      if (instName.compare("POWGEN3") == 0) // hack for powgen b/c of bad long name
+              instName = "POWGEN";
+      if (instName.compare("NOM") == 0) // hack for nomad
+              instName = "NOMAD";
+
+      // read information from the nexus file itself
+      try {
+        NeXus::File nxsfile(filename);
+
+        // get the run start time
+        string start_time;
+        nxsfile.openGroup(top_entry_name, "NXentry");
+        nxsfile.readData("start_time", start_time);
+        tempWS->mutableRun().addProperty("run_start", DateAndTime(start_time).toISO8601String(), true );
+
+        // get the instrument name
+        nxsfile.openGroup("instrument", "NXinstrument");
+        nxsfile.readData("name", instName);
+        nxsfile.closeGroup();
+
+        // Test if IDF exists in file, move on quickly if not
+        nxsfile.openPath("instrument/instrument_xml");
+        nxsfile.close();
+        IAlgorithm_sptr loadInst= createChildAlgorithm("LoadIDFFromNexus",0.0,0.2);
+        // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+        try
+        {
+          loadInst->setPropertyValue("Filename", filename);
+          loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", tempWS);
+          loadInst->setPropertyValue("InstrumentParentPath",top_entry_name);
+          loadInst->execute();
+        }
+        catch( std::invalid_argument&)
+        {
+          g_log.error("Invalid argument to LoadIDFFromNexus Child Algorithm ");
+        }
+        catch (std::runtime_error&)
+        {
+          g_log.debug("No instrument definition found in "+filename+" at "+top_entry_name+"/instrument");
+        }
+
+        if ( loadInst->isExecuted() )
+          return tempWS->getInstrument();
+        else
+          g_log.information("No IDF loaded from Nexus file.");
+
+      } catch (::NeXus::Exception&) {
+        g_log.information("No instrument definition found in "+filename+" at "+top_entry_name+"/instrument");
+      }
+    }
+
+    // run LoadInstrument if other methods have not run
+    string instFilename = getPropertyValue(PARAM_INST_FILE);
+
+    Algorithm_sptr childAlg = createChildAlgorithm("LoadInstrument",0.0,0.2);
+    childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
+    childAlg->setPropertyValue("Filename", instFilename);
+    childAlg->setPropertyValue("InstrumentName", instName);
+    childAlg->executeAsChildAlg();
+    return tempWS->getInstrument();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -233,27 +408,8 @@ namespace DataHandling
    */
   void CreateChunkingFromInstrument::exec()
   {
-    // get the input parameters
-    MatrixWorkspace_sptr inWS = getProperty(PARAM_IN_WKSP);
-    string instName = getPropertyValue(PARAM_INST_NAME);
-    string instFilename = getPropertyValue(PARAM_INST_FILE);
-
     // get the instrument
-    Instrument_const_sptr inst;
-    if (inWS)
-    {
-      inst = inWS->getInstrument();
-    }
-    else
-    {
-      Algorithm_sptr childAlg = createChildAlgorithm("LoadInstrument",0.0,0.2);
-      MatrixWorkspace_sptr tempWS(new Workspace2D());
-      childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
-      childAlg->setPropertyValue("Filename", instFilename);
-      childAlg->setPropertyValue("InstrumentName", instName);
-      childAlg->executeAsChildAlg();
-      inst = tempWS->getInstrument();
-    }
+    Instrument_const_sptr inst = this->getInstrument();
 
     // setup the output workspace
     ITableWorkspace_sptr strategy = WorkspaceFactory::Instance().createTable("TableWorkspace");
