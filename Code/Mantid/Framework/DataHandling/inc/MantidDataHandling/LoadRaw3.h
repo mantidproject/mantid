@@ -80,16 +80,6 @@ namespace Mantid
       void validateWorkspaceSizes( bool bexcludeMonitors ,bool bseparateMonitors,
           const int64_t normalwsSpecs,const int64_t  monitorwsSpecs);
 
-      /// this method will be executed if not enough memory.
-      void goManagedRaw(bool bincludeMonitors,bool bexcludeMonitors,
-          bool bseparateMonitors,const std::string& fileName);
-
-
-      /// This method is useful for separating  or excluding   monitors from the output workspace
-      void  separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWorkspace,
-          bool binclude,bool bexclude,bool bseparate,
-          int64_t numberOfSpectra,const std::string &fileName);
-
       /// creates output workspace, monitors excluded from this workspace
       void excludeMonitors(FILE* file,const int& period,const std::vector<specid_t>& monitorList,
           DataObjects::Workspace2D_sptr ws_sptr);
