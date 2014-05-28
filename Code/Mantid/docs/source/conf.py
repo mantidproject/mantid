@@ -60,7 +60,7 @@ html_theme = 'bootstrap'
 # custom.css rather than here.
 html_theme_options = {
     # Navigation bar title.
-    'navbar_title': " ",
+    'navbar_title': " ", # deliberate single space so it's not visible
     # Tab name for entire site.
     'navbar_site_name': "Mantid",
     # Add links to the nav bar. Second param of tuple is true to create absolute url.
@@ -87,7 +87,7 @@ html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = os.path.relpath('../../Images/Mantid_Logo_Transparent.png')
+html_logo = os.path.relpath('../../Images/Mantid_Logo_Transparent_Cropped.png')
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
