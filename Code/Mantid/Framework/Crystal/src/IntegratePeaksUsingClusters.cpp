@@ -66,6 +66,7 @@
 #include <map>
 #include <algorithm>
 #include <boost/tuple/tuple.hpp>
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -250,7 +251,7 @@ namespace Mantid
           ICluster * const cluster = clusterMap[labelIdAtPeak].get();
           ICluster::ClusterIntegratedValues integratedValues = cluster->integrate(mdWS);
           peak.setIntensity(integratedValues.get<0>());
-          peak.setSigmaIntensity(integratedValues.get<1>());
+          peak.setSigmaIntensity(std::sqrt(integratedValues.get<1>()));
 
           PARALLEL_CRITICAL(IntegratePeaksUsingClusters)
           {

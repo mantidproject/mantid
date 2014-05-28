@@ -43,6 +43,7 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -258,7 +259,7 @@ namespace Mantid
           ICluster * const cluster = clusterMap[labelIdAtPeak].get();
           ICluster::ClusterIntegratedValues integratedValues = cluster->integrate(localImage);
           peak.setIntensity(integratedValues.get<0>());
-          peak.setSigmaIntensity(integratedValues.get<1>());
+          peak.setSigmaIntensity(std::sqrt( integratedValues.get<1>() ));
         }
         progress.report();
         PARALLEL_END_INTERUPT_REGION

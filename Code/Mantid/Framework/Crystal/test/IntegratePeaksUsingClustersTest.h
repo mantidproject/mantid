@@ -161,7 +161,7 @@ public:
     TSM_ASSERT_EQUALS("Only one peak present, so should only have two unique label ids", 2, labelIds.size());
 
     TSM_ASSERT_EQUALS("Integrated intensity should be same as original peak intensity", outPeaksWS->getPeak(0).getIntensity(), nEventsInPeak);
-    TSM_ASSERT_EQUALS("Integrated error should same as original peak intensity error", outPeaksWS->getPeak(0).getSigmaIntensity(), nEventsInPeak);
+    TSM_ASSERT_EQUALS("Integrated error should same as original peak intensity error", outPeaksWS->getPeak(0).getSigmaIntensity(), std::sqrt( nEventsInPeak ));
     
     TSM_ASSERT("Should have 'empy' label", does_contain(labelIds, 0));
   }
@@ -201,7 +201,7 @@ public:
 
     // Two peaks are identical, so integrated values should be the same.
     TSM_ASSERT_EQUALS("Integrated intensity should be same as original peak intensity", outPeaksWS->getPeak(0).getIntensity(), nEventsInPeak);
-    TSM_ASSERT_EQUALS("Integrated error should same as original peak intensity error", outPeaksWS->getPeak(0).getSigmaIntensity(), nEventsInPeak);
+    TSM_ASSERT_EQUALS("Integrated error should same as original peak intensity error", outPeaksWS->getPeak(0).getSigmaIntensity(), std::sqrt( nEventsInPeak ));
     TSM_ASSERT_EQUALS("Peaks are identical, so integrated values should be identical", outPeaksWS->getPeak(0).getIntensity(), outPeaksWS->getPeak(1).getIntensity());
     TSM_ASSERT_EQUALS("Peaks are identical, so integrated error values should be identical", outPeaksWS->getPeak(0).getSigmaIntensity(), outPeaksWS->getPeak(1).getSigmaIntensity());
   }
@@ -220,7 +220,7 @@ public:
     nEventsInPeakVec.push_back(20000); // Second peak has DOUBLE the intensity of the firse one.
 
     MDHistoPeaksWSTuple inputWorkspaces = make_peak_and_md_ws(hklValues, -10, 10, std::vector<double>(hklValues.size(), peakRadius), nEventsInPeakVec);
-    //-------- Execute the integratioin
+    //-------- Execute the integration
     MDHistoPeaksWSTuple integratedWorkspaces = execute_integration(inputWorkspaces, threshold);
     // ------- Get the integrated results
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
@@ -244,10 +244,10 @@ public:
 
     // Two peaks are identical, so integrated values should be the same.
     TSM_ASSERT_EQUALS("Integrated intensity should be same as original peak intensity", outPeaksWS->getPeak(0).getIntensity(), nEventsInPeakVec[0]);
-    TSM_ASSERT_EQUALS("Integrated error should same as original peak intensity error", outPeaksWS->getPeak(0).getSigmaIntensity(), nEventsInPeakVec[0]);
+    TSM_ASSERT_EQUALS("Integrated error should same as original peak intensity error", outPeaksWS->getPeak(0).getSigmaIntensity(), std::sqrt( nEventsInPeakVec[0] ));
     
     TSM_ASSERT_EQUALS("Second peak is twice as 'bright'", outPeaksWS->getPeak(0).getIntensity() * 2, outPeaksWS->getPeak(1).getIntensity());
-    TSM_ASSERT_EQUALS("Second peak is twice as 'bright'", outPeaksWS->getPeak(0).getSigmaIntensity() * 2, outPeaksWS->getPeak(1).getSigmaIntensity());
+    TSM_ASSERT_EQUALS("Second peak is twice as 'bright'", std::pow(outPeaksWS->getPeak(0).getSigmaIntensity(), 2) * 2, std::pow(outPeaksWS->getPeak(1).getSigmaIntensity(),2));
   }
 
 };

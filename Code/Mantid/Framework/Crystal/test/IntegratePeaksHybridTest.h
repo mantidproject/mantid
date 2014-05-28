@@ -196,7 +196,7 @@ public:
     TSM_ASSERT_DELTA("Integrated intensity should be almost the same as original peak intensity",
         outPeaksWS->getPeak(0).getIntensity(), nEventsInPeak, 300);
     TSM_ASSERT_DELTA("Integrated error should be almost the same as original peak intensity error",
-        outPeaksWS->getPeak(0).getSigmaIntensity(), nEventsInPeak, 300);
+        outPeaksWS->getPeak(0).getSigmaIntensity(), std::sqrt( nEventsInPeak ), 300);
 
     TSM_ASSERT("Should have 'empy' label", does_contain(labelIds, 0));
   }
@@ -294,7 +294,7 @@ public:
     TSM_ASSERT_DELTA("Integrated intensity should be almost the same as original peak intensity",
         outPeaksWS->getPeak(0).getIntensity(), nEventsInPeak, 300);
     TSM_ASSERT_DELTA("Integrated error should be almost the same as original peak intensity error",
-        outPeaksWS->getPeak(0).getSigmaIntensity(), nEventsInPeak, 300);
+        outPeaksWS->getPeak(0).getSigmaIntensity(), std::sqrt( nEventsInPeak ), 300);
 
     TSM_ASSERT_EQUALS("Peaks are identical, so integrated values should be identical",
         outPeaksWS->getPeak(0).getIntensity(), outPeaksWS->getPeak(1).getIntensity());
