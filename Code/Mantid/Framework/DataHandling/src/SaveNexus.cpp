@@ -54,13 +54,6 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveNexus)
 
-/// Sets documentation strings for this algorithm
-void SaveNexus::initDocs()
-{
-  this->setWikiSummary("The SaveNexus algorithm will write the given Mantid workspace to a NeXus file. SaveNexus currently just invokes [[SaveNexusProcessed]]. ");
-  this->setOptionalMessage("The SaveNexus algorithm will write the given Mantid workspace to a NeXus file. SaveNexus currently just invokes SaveNexusProcessed.");
-}
-
 
 using namespace Kernel;
 using namespace API;

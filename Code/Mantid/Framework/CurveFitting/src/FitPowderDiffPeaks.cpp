@@ -143,12 +143,7 @@ namespace CurveFitting
   
   //----------------------------------------------------------------------------------------------
   /** Set up documention
-    */
-  void FitPowderDiffPeaks::initDocs()
-  {
-    setWikiSummary("Fit peaks in powder diffraction pattern. ");
-    setOptionalMessage("Fit peaks in powder diffraction pattern. ");
-  }
+    *
 
   //----------------------------------------------------------------------------------------------
   /** Parameter declaration

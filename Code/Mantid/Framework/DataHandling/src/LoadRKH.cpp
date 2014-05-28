@@ -86,14 +86,6 @@ int LoadRKH::confidence(Kernel::FileDescriptor & descriptor) const
   return 20; // Better than LoadAscii
 }
 
-
-/// Sets documentation strings for this algorithm
-void LoadRKH::initDocs()
-{
-  this->setWikiSummary("Load a file written in the RKH format");
-  this->setOptionalMessage("Load a file written in the RKH format");
-}
-
 /**
  * Initialise the algorithm
  */

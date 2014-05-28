@@ -63,13 +63,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void CalculatePeaksHKL::initDocs()
-    {
-      this->setWikiSummary("Calculates Miller indices for each peak. No rounding or UB optimization.");
-      this->setOptionalMessage(
-          "Calculates Miller indices for each peak. No rounding or UB optimization.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

@@ -66,13 +66,6 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed);
 
-/// Sets documentation strings for this algorithm
-void LoadNexusProcessed::initDocs()
-{
-  this->setWikiSummary("The LoadNexusProcessed algorithm will read the given Nexus Processed data file containing a Mantid Workspace. The data is placed in the named workspace. LoadNexusProcessed may be invoked by [[LoadNexus]] if it is given a Nexus file of this type. ");
-  this->setOptionalMessage("The LoadNexusProcessed algorithm will read the given Nexus Processed data file containing a Mantid Workspace. The data is placed in the named workspace. LoadNexusProcessed may be invoked by LoadNexus if it is given a Nexus file of this type.");
-}
-
 using namespace Mantid::NeXus;
 using namespace DataObjects;
 using namespace Kernel;

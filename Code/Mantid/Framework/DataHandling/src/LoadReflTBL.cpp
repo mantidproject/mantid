@@ -31,13 +31,6 @@ namespace Mantid
   {
     DECLARE_FILELOADER_ALGORITHM(LoadReflTBL);
 
-    /// Sets documentation strings for this algorithm
-    void LoadReflTBL::initDocs()
-    {
-      this->setWikiSummary("Loads data from a reflectometry table file and stores it in a table [[workspace]] ([[TableWorkspace]] class). ");
-      this->setOptionalMessage("Loads data from a reflectometry table file and stores it in a table workspace (TableWorkspace class).");
-    }
-
     using namespace Kernel;
     using namespace API;
 

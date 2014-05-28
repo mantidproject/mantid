@@ -115,12 +115,6 @@ namespace DataHandling
   {
     // Auto-generated destructor stub
   }
-  
-  /// Sets documentation strings for this algorithm
-  void LoadMask::initDocs(){
-    this->setWikiSummary("Load file containing masking information to a [[SpecialWorkspace2D]] (masking workspace). This algorithm is renamed from [[LoadMaskingFile]].");
-    this->setOptionalMessage("");
-  }
 
   /// Initialise the properties
   void LoadMask::init()

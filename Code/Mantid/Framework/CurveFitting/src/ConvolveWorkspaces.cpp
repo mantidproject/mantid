@@ -23,13 +23,6 @@ namespace CurveFitting
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvolveWorkspaces)
 
-/// Sets documentation strings for this algorithm
-void ConvolveWorkspaces::initDocs()
-{
-  this->setWikiSummary("Convolution of two workspaces. ");
-  this->setOptionalMessage("Convolution of two workspaces.");
-}
-
 /// Constructor
 ConvolveWorkspaces::ConvolveWorkspaces() : API::Algorithm(), prog(NULL)
 {}

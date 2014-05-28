@@ -22,14 +22,16 @@ namespace Crystal
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "SaveIsawPeaks";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Crystal;DataHandling\\Isaw";}
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm

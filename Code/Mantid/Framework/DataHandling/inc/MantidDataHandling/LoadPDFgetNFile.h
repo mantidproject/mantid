@@ -40,6 +40,9 @@ namespace DataHandling
 
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "LoadPDFgetNFile";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Types of PDFgetN data files include .sqa, .sq, .gr, and etc.";}
+
 
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 1;}
@@ -48,8 +51,7 @@ namespace DataHandling
     virtual const std::string category() const { return "Diffraction;DataHandling\\Text";}
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Implement abstract Algorithm methods
     void init();
     /// Implement abstract Algorithm methods

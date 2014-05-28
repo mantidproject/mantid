@@ -35,13 +35,6 @@ using namespace DataObjects;
 NormaliseVanadium::NormaliseVanadium() : API::Algorithm()
 {}
 
-/// Sets documentation strings for this algorithm
-void NormaliseVanadium::initDocs()
-{
-  this->setWikiSummary("Normalises all spectra to a specified wavelength.");
-  this->setOptionalMessage("Normalises all spectra to a specified wavelength.");
-}
-
 void NormaliseVanadium::init()
 {
   // The input workspace must have an instrument and units of wavelength

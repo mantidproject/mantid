@@ -19,13 +19,6 @@ namespace DataHandling
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(CreateSampleShape)
   
-  /// Sets documentation strings for this algorithm
-  void CreateSampleShape::initDocs()
-  {
-    this->setWikiSummary("Create a shape object to model the sample. ");
-    this->setOptionalMessage("Create a shape object to model the sample.");
-  }
-  
 
   using namespace Mantid::DataHandling;
   using namespace Mantid::API;

@@ -59,20 +59,6 @@ namespace Crystal
   {
   }
 
-  //--------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SelectCellWithForm::initDocs()
-  {
-    std::string summary("Select a conventional cell with a specific ");
-    summary += "form number, corresponding to the UB ";
-    summary += "stored with the sample for this peaks works space.";
-    this->setWikiSummary( summary );
-
-    std::string message("NOTE: The current UB must correspond to a ");
-    message += "Niggli reduced cell.";
-    this->setOptionalMessage(message);
-  }
-
 
   //--------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

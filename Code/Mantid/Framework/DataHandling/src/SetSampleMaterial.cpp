@@ -71,13 +71,6 @@ namespace Mantid
       return "Sample;DataHandling";
     }
 
-    /// Sets documentation strings for this algorithm
-    void SetSampleMaterial::initDocs()
-    {
-      this->setWikiSummary("Sets the neutrons information in the sample.");
-      this->setOptionalMessage("Sets the neutrons information in the sample.");
-    }
-
     using namespace Mantid::DataHandling;
     using namespace Mantid::API;
     using namespace Kernel;

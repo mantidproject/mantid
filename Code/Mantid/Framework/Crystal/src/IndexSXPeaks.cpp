@@ -35,13 +35,6 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    /// Set the documentation strings
-    void IndexSXPeaks::initDocs()
-    {
-      this->setWikiSummary("Takes a PeaksWorkspace and a B-Matrix and determines the HKL values corresponding to each Single Crystal peak. Sets indexes on the input/output workspace.");
-      this->setOptionalMessage("Takes a PeaksWorkspace and a B-Matrix and determines the HKL values corresponding to each Single Crystal peak. Sets indexes on the input/output workspace.");
-    }
-
     /** Initialisation method.
     *
     */

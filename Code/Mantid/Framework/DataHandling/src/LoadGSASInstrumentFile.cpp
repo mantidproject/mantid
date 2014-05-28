@@ -65,14 +65,7 @@ namespace DataHandling
 
   //----------------------------------------------------------------------------------------------
   /** Sets documentation strings for this algorithm
-    */
-  void LoadGSASInstrumentFile::initDocs()
-  {
-    setWikiSummary("Load parameters from a GSAS Instrument file.");
-    setOptionalMessage("Load parameters from a GSAS Instrument file.");
-
-    return;
-  }
+    *
 
   //----------------------------------------------------------------------------------------------
   /** Implement abstract Algorithm methods

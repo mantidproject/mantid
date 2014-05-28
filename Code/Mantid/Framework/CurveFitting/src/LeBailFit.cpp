@@ -105,12 +105,7 @@ namespace CurveFitting
   
   //----------------------------------------------------------------------------------------------
   /** Sets documentation strings for this algorithm
-   */
-  void LeBailFit::initDocs()
-  {
-    setWikiSummary("Do LeBail Fit to a spectrum of powder diffraction data.. ");
-    setOptionalMessage("Do LeBail Fit to a spectrum of powder diffraction data. ");
-  }
+   *
 
   //----------------------------------------------------------------------------------------------
   /** Declare the input properties for this algorithm

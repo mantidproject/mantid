@@ -61,6 +61,9 @@ namespace Mantid
       LoadEmptyInstrument();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadEmptyInstrument"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads an Instrument Definition File (IDF) into a workspace rather than a data file.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
@@ -69,8 +72,7 @@ namespace Mantid
       virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method

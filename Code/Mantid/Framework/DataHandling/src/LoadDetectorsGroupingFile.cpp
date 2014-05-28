@@ -146,12 +146,6 @@ namespace DataHandling
   LoadDetectorsGroupingFile::~LoadDetectorsGroupingFile()
   {
   }
-  
-  /// Sets documentation strings for this algorithm
-  void LoadDetectorsGroupingFile::initDocs(){
-    this->setWikiSummary("Load an XML or Map file, which contains definition of detectors grouping, to a [[GroupingWorkspace]]).");
-    this->setOptionalMessage("Load an XML or Map file, which contains definition of detectors grouping, to a GroupingWorkspace).");
-  }
 
   void LoadDetectorsGroupingFile::init()
   {

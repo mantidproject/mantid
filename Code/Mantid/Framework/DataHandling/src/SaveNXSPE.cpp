@@ -48,13 +48,6 @@ namespace Mantid
     {
     }
 
-    /// Sets documentation strings for this algorithm
-    void SaveNXSPE::initDocs()
-    {
-      this->setWikiSummary("Writes a workspace into a file in the nxspe format.");
-      this->setOptionalMessage("Writes a workspace into a file in the nxspe format.");
-    }
-
     /**
      * Initialise the algorithm
      */

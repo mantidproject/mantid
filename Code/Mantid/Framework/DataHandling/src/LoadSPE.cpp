@@ -64,14 +64,6 @@ int LoadSPE::confidence(Kernel::FileDescriptor & descriptor) const
 }
 
 
-/// Sets documentation strings for this algorithm
-void LoadSPE::initDocs()
-{
-  this->setWikiSummary("Loads a file written in the spe format.");
-  this->setOptionalMessage("Loads a file written in the spe format.");
-}
-
-
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------

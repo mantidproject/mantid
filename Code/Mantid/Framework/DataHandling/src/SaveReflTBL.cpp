@@ -35,13 +35,6 @@ namespace Mantid
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(SaveReflTBL)
     
-    /// Sets documentation strings for this algorithm
-    void SaveReflTBL::initDocs()
-    {
-      this->setWikiSummary("Saves a table [[workspace]] to a reflectometry tbl format ascii file. ");
-      this->setOptionalMessage("Saves a table workspace to a reflectometry tbl format ascii file.");
-    }
-    
     using namespace Kernel;
     using namespace API;
 

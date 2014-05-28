@@ -54,14 +54,16 @@ namespace Mantid
       ~LoadRaw3();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadRaw"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads a data file in ISIS  RAW format and stores it in a 2D workspace (Workspace2D class).";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 3; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Raw"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method

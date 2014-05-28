@@ -53,6 +53,9 @@ public:
   /// Algorithm's name
   virtual const std::string name() const
   { return "SavePHX";}
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Writes the detector geometry information of a workspace into a PHX format file.";}
+
   /// Algorithm's version
   virtual int version() const
   { return (1);}
@@ -67,8 +70,7 @@ public:
       det_par_ws_name=ws_name;
   }
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   ///Execution code

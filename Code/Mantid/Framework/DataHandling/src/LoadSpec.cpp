@@ -75,13 +75,6 @@ namespace Mantid
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadSpec)
 
-    /// Sets documentation strings for this algorithm
-    void LoadSpec::initDocs()
-    {
-      this->setWikiSummary("Loads data from a text file and stores it in a 2D [[workspace]] ([[Workspace2D]] class).");
-      this->setOptionalMessage("Loads data from a text file and stores it in a 2D workspace (Workspace2D class).");
-    }
-
 
 
     using namespace Kernel;
