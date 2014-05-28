@@ -43,7 +43,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters();
+    DataObjects::TableWorkspace_sptr peakparmsws = createTestEffectiveFuncParameters();
 
     TS_ASSERT_EQUALS(peakparmsws->rowCount(), 4);
 
@@ -57,12 +57,12 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test to use user-provided binning parameters
+  /** Test to use user-provided binning parameters and effective function parameters
    */
   void test_UserBinningParameters()
   {
     // Create input parameter table workspace
-    DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters();
+    DataObjects::TableWorkspace_sptr peakparmsws = createTestEffectiveFuncParameters();
     AnalysisDataService::Instance().addOrReplace("TestPeakParameterTable", peakparmsws);
 
     // Initialize algorithm GenertePeaks
@@ -88,10 +88,10 @@ public:
         boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test01WS"));
     TS_ASSERT(peaksws);
 
-    // 6. Check result
+    // Check result
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 2);
 
-    // a) Peak 0:
+    // peak 0:
     MantidVec p0_x = peaksws->readX(0);
     MantidVec p0_y = peaksws->readY(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
@@ -100,24 +100,26 @@ public:
     TS_ASSERT_DELTA(p0_x[201], 2.01, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[201], 4.96546, 1.0E-4);
 
-    // b) Peak 1:
+    // peak 1:
     TS_ASSERT_DELTA(p0_x[800], 8.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[800], 10.0, 1.0E-4);
 
-    // c) Peak 2:
+    // peak 2:
     MantidVec p1_x = peaksws->readX(1);
     MantidVec p1_y = peaksws->readY(1);
     TS_ASSERT_DELTA(p1_x[400], 4.0, 1.0E-8);
     TS_ASSERT_DELTA(p1_y[400], 20.0, 1.0E-4);
 
-    // 7. Spectrum map
+    // spectrum map
     spec2index_map themap = peaksws->getSpectrumToWorkspaceIndexMap();
     size_t index0 = themap[0];
     size_t index2 = themap[2];
     TS_ASSERT_EQUALS(index0, 0);
-    TS_ASSERT_EQUALS(index2, 1)
+    TS_ASSERT_EQUALS(index2, 1);
 
+    // Clearn
     AnalysisDataService::Instance().remove("Test01WS");
+    AnalysisDataService::Instance().remove("TestPeakParameterTable");
 
     return;
   }
@@ -131,6 +133,7 @@ public:
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters2();
     AnalysisDataService::Instance().addOrReplace("TestParameterTable2", peakparmsws);
     API::MatrixWorkspace_sptr inputws = createTestInputWorkspace();
+    AnalysisDataService::Instance().addOrReplace("RawSampleBinWS", inputws);
 
     // Initialize algorithm class
     GeneratePeaks alg;
@@ -150,15 +153,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // 5. Get result
+    // Get result
     API::MatrixWorkspace_const_sptr peaksws =
         boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test02WS"));
     TS_ASSERT(peaksws);
 
-    // 6. Check result
+    // Check result
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 5);
 
-    // a) Peak 0:
+    // Peak 0:
     MantidVec p0_x = peaksws->readX(0);
     MantidVec p0_y = peaksws->readY(0);
     TS_ASSERT_DELTA(p0_x[50], 2.0, 1.0E-8);
@@ -167,23 +170,28 @@ public:
     TS_ASSERT_DELTA(p0_x[51], 2.02, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[51], 4.86327, 1.0E-4);
 
-    // b) Peak 1:
+    // Peak 1:
     TS_ASSERT_DELTA(p0_x[350], 8.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[350], 10.0, 1.0E-4);
 
-    // c) Peak 2:
+    // Peak 2:
     MantidVec p1_x = peaksws->readX(2);
     MantidVec p1_y = peaksws->readY(2);
     TS_ASSERT_DELTA(p1_x[150], 4.0, 1.0E-8);
     TS_ASSERT_DELTA(p1_y[150], 20.0, 1.0E-4);
 
-    // 7. Spectrum map
+    // Spectrum map
     spec2index_map themap = peaksws->getSpectrumToWorkspaceIndexMap();
     TS_ASSERT_EQUALS(themap.size(), 5);
     size_t index0 = themap[0];
     size_t index2 = themap[2];
     TS_ASSERT_EQUALS(index0, 0);
-    TS_ASSERT_EQUALS(index2, 1)
+    TS_ASSERT_EQUALS(index2, 1);
+
+    // Clearn
+    AnalysisDataService::Instance().remove("TestParameterTable2");
+    AnalysisDataService::Instance().remove("RawSampleBinWS");
+    AnalysisDataService::Instance().remove("Test02WS");
 
     return;
   }
@@ -193,59 +201,173 @@ public:
    */
   void test_Background()
   {
-    // 1. Create input
+    // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters3();
     AnalysisDataService::Instance().addOrReplace("TestParameterTable3", peakparmsws);
 
+    // Init algorithm
     GeneratePeaks alg;
     alg.initialize();
 
-    // 3. Set value
+    // Set value
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParametersWorkspace", peakparmsws));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Auto"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test01WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test03WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameterTable", false));
 
-    // 4. Execute
+    // Execute
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // 5. Get result
+    // Get result
     API::MatrixWorkspace_const_sptr peaksws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test01WS"));
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test03WS"));
     TS_ASSERT(peaksws);
 
-    // 6. Check result
+    // Check result
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 2);
 
-    // a) Peak 0:
+    // peak 0:
     MantidVec p0_x = peaksws->readX(0);
     MantidVec p0_y = peaksws->readY(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 10.0, 1.0E-4);
 
-    // b) Peak 1:
+    // peak 1:
     TS_ASSERT_DELTA(p0_x[800], 8.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[800], 20.0, 1.0E-4);
 
-    // c) Peak 2:
+    // peak 2:
     MantidVec p1_x = peaksws->readX(1);
     MantidVec p1_y = peaksws->readY(1);
     TS_ASSERT_DELTA(p1_x[400], 4.0, 1.0E-8);
     TS_ASSERT_DELTA(p1_y[400], 24.0, 1.0E-4);
 
-    // 7. Spectrum map
+    // spectrum map
     spec2index_map themap = peaksws->getSpectrumToWorkspaceIndexMap();
     size_t index0 = themap[0];
     size_t index2 = themap[2];
     TS_ASSERT_EQUALS(index0, 0);
-    TS_ASSERT_EQUALS(index2, 1)
+    TS_ASSERT_EQUALS(index2, 1);
+
+    // Clean
+    AnalysisDataService::Instance().remove("Test03WS");
+    AnalysisDataService::Instance().remove("TestParameterTable3");
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test to input parameter values by vectors user-provided binning parameters
+   */
+  void test_InputValueViaVector()
+  {
+    // Create vectors for peak and background parameters
+    std::string vecpeakvalue("5.0, 2.0, 0.0849322");
+    std::string vecbkgdvalue("1.0, 2.0, 0.0");
+
+    // Initialize algorithm GenertePeaks
+    GeneratePeaks alg;
+    alg.initialize();
+
+    // Set value
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParameterValues", vecpeakvalue));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundParameterValues", vecbkgdvalue));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Auto"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test04WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameterTable", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Get result/output workspace
+    API::MatrixWorkspace_const_sptr peaksws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test04WS"));
+    TS_ASSERT(peaksws);
+
+    // Check result
+    TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 1);
+
+    // peak 0:
+    MantidVec p0_x = peaksws->readX(0);
+    MantidVec p0_y = peaksws->readY(0);
+    TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
+    TS_ASSERT_DELTA(p0_y[200], 5.0, 1.0E-4);
+
+    TS_ASSERT_DELTA(p0_x[201], 2.01, 1.0E-8);
+    TS_ASSERT_DELTA(p0_y[201], 4.96546, 1.0E-4);
+
+    // spectrum map
+    spec2index_map themap = peaksws->getSpectrumToWorkspaceIndexMap();
+    size_t index0 = themap[0];
+    TS_ASSERT_EQUALS(index0, 0);
+
+    AnalysisDataService::Instance().remove("Test04WS");
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test to input parameter values by vectors user-provided binning parameters
+   */
+  void Xtest_InputValueViaVectorEffective()
+  {
+    // Create vectors for peak and background parameters
+    std::string vecpeakvalue("5.0, 2.0, 0.02");
+    std::string vecbkgdvalue("1.0, 2.0, 0.0");
+
+    // Initialize algorithm GenertePeaks
+    GeneratePeaks alg;
+    alg.initialize();
+
+    // Set value
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParameterValues", vecpeakvalue));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundParameterValues", vecbkgdvalue));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Auto"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test01WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameterTable", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Get result/output workspace
+    API::MatrixWorkspace_const_sptr peaksws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Test01WS"));
+    TS_ASSERT(peaksws);
+
+    // Check result
+    TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 1);
+
+    // peak 0:
+    MantidVec p0_x = peaksws->readX(0);
+    MantidVec p0_y = peaksws->readY(0);
+    TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
+    TS_ASSERT_DELTA(p0_y[200], 5.0, 1.0E-4);
+
+    TS_ASSERT_DELTA(p0_x[201], 2.01, 1.0E-8);
+    TS_ASSERT_DELTA(p0_y[201], 4.96546, 1.0E-4);
+
+    // spectrum map
+    spec2index_map themap = peaksws->getSpectrumToWorkspaceIndexMap();
+    size_t index0 = themap[0];
+    TS_ASSERT_EQUALS(index0, 0);
 
     AnalysisDataService::Instance().remove("Test01WS");
+
     return;
   }
 
@@ -255,7 +377,7 @@ public:
    *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2 = 0
    *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2 = 0
    */
-  DataObjects::TableWorkspace_sptr createTestPeakParameters()
+  DataObjects::TableWorkspace_sptr createTestEffectiveFuncParameters()
   {
     // 1. Build a TableWorkspace
     DataObjects::TableWorkspace_sptr peakparms =
@@ -271,7 +393,7 @@ public:
 
     // 2. Add value
     API::TableRow row0 = peakparms->appendRow();
-    row0 << 0 << 2.0 << 0.2 <<  5.0 << 1.0 << 2.0 << 0.0 << 0.1;
+    row0 << 0 << 2.0 << 0.2 << 5.0 << 1.0 << 2.0 << 0.0 << 0.1;
     API::TableRow row1 = peakparms->appendRow();
     row1 << 0 << 8.0 << 0.1 << 10.0 << 2.0 << 1.0 << 0.0 << 0.2;
     API::TableRow row2 = peakparms->appendRow();
@@ -281,6 +403,7 @@ public:
 
     return peakparms;
   }
+
 
   //----------------------------------------------------------------------------------------------
   /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using raw parameters

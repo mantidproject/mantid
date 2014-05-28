@@ -322,7 +322,8 @@ namespace Algorithms
       double chi2 = m_funcParamWS->cell<double>(ipeak, icolchi2);
       if (chi2 > m_maxChi2)
       {
-        g_log.notice() << "Skip Peak " << ipeak << " (chi^2 " << chi2 << " > " << m_maxChi2 << "\n";
+        g_log.notice() << "Skip Peak " << ipeak << " (chi^2 " << chi2 << " > " << m_maxChi2
+                          << ".) " << "\n";
         continue;
       }
       else if (chi2 < 0.)
@@ -424,8 +425,8 @@ namespace Algorithms
     if (m_vecPeakParamValues.size() != numpeakparams)
     {
       std::stringstream errss;
-      errss << "Number of input peak parameters' value (" << numpeakparams << ") is not correct (should be "
-            << m_vecPeakParamValues.size() << " for peak of type " << m_peakFunction->name() << "). ";
+      errss << "Number of input peak parameters' value (" << m_vecPeakParamValues.size() << ") is not correct (should be "
+            << numpeakparams << " for peak of type " << m_peakFunction->name() << "). ";
       throw std::runtime_error(errss.str());
     }
     else
