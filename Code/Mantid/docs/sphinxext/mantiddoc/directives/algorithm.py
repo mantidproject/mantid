@@ -100,7 +100,7 @@ class AlgorithmDirective(BaseDirective):
         from mantiddoc.tools.screenshot import algorithm_screenshot
 
         env = self.state.document.settings.env
-        screenshots_dir = self._screenshot_directory(env)
+        screenshots_dir = self._screenshot_directory()
         if not os.path.exists(screenshots_dir):
             os.makedirs(screenshots_dir)
 
@@ -132,7 +132,7 @@ class AlgorithmDirective(BaseDirective):
 
         self.add_rst(format_str % (path, caption))
 
-    def _screenshot_directory(self, env):
+    def _screenshot_directory(self):
         """
         Returns a full path where the screenshots should be generated. They are
         put in a screenshots subdirectory of the main images directory in the source
@@ -145,8 +145,7 @@ class AlgorithmDirective(BaseDirective):
           str: A string containing a path to where the screenshots should be created. This will
           be a filesystem path
         """
-        cfg_dir = env.app.srcdir
-        return os.path.join(cfg_dir, "images", "screenshots")
+        return screenshot_directory(self.state.document.settings.env.app)
 
     def _insert_deprecation_warning(self):
         """
@@ -167,7 +166,26 @@ class AlgorithmDirective(BaseDirective):
 
         self.add_rst(".. warning:: %s" % msg)
 
-############################################################################################################
+
+#------------------------------------------------------------------------------------------------------------
+
+def screenshot_directory(app):
+    """
+    Returns a full path where the screenshots should be generated. They are
+    put in a screenshots subdirectory of the main images directory in the source
+    tree. Sphinx then handles copying them to the final location
+
+    Arguments:
+      app (Sphinx.Application): A reference to the application object
+
+    Returns:
+      str: A string containing a path to where the screenshots should be created. This will
+      be a filesystem path
+    """
+    cfg_dir = app.srcdir
+    return os.path.join(cfg_dir, "images", "screenshots")
+
+#------------------------------------------------------------------------------------------------------------
 
 def html_collect_pages(app):
     """
@@ -186,7 +204,28 @@ def html_collect_pages(app):
         context = {"name" : name, "target" : target}
         yield (redirect_pagename, context, template)
 
-############################################################################################################
+#------------------------------------------------------------------------------------------------------------
+
+def purge_screenshots(app, exception):
+    """
+    Remove all screenshots images that were generated in the source directory during the build
+
+    Arguments:
+      app (Sphinx.Application): A reference to the application object
+      exception (Exception): If an exception was raised this is a reference to the exception object, else None
+    """
+    import os
+
+    screenshot_dir = screenshot_directory(app)
+    for filename in os.listdir(screenshot_dir):
+        filepath = os.path.join(screenshot_dir, filename)
+        try:
+            if os.path.isfile(filepath):
+                os.remove(filepath)
+        except Exception, e:
+            app.warn(str(e))
+
+#------------------------------------------------------------------------------------------------------------
 
 def setup(app):
     """
@@ -200,3 +239,6 @@ def setup(app):
     # connect event html collection to handler
     app.connect("html-collect-pages", html_collect_pages)
 
+    # Remove all generated screenshots from the source directory when finished
+    # so that they don't become stale
+    app.connect("build-finished", purge_screenshots)
