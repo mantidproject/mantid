@@ -37,7 +37,7 @@ public:
     FrameworkManager::Instance();
   }
 
-  void Ptest_Init()
+  void test_Init()
   {
     GeneratePeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -63,6 +63,7 @@ public:
   {
     // Create input parameter table workspace
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters();
+    AnalysisDataService::Instance().addOrReplace("TestPeakParameterTable", peakparmsws);
 
     // Initialize algorithm GenertePeaks
     GeneratePeaks alg;
@@ -124,10 +125,11 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test algorithm by using an existing input workspace as X-values
    */
-  void Xtest_FromInputWorkspace()
+  void test_FromInputWorkspace()
   {
     // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters2();
+    AnalysisDataService::Instance().addOrReplace("TestParameterTable2", peakparmsws);
     API::MatrixWorkspace_sptr inputws = createTestInputWorkspace();
 
     // Initialize algorithm class
@@ -136,8 +138,8 @@ public:
 
     // Set value
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParametersWorkspace", peakparmsws));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakFunction", "Gaussian"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundFunction", "Quadratic"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Quadratic"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputws));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test02WS"));
@@ -189,18 +191,19 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to use user-provided binning parameters
    */
-  void Xtest_Background()
+  void test_Background()
   {
     // 1. Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters3();
+    AnalysisDataService::Instance().addOrReplace("TestParameterTable3", peakparmsws);
 
     GeneratePeaks alg;
     alg.initialize();
 
     // 3. Set value
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakParametersWorkspace", peakparmsws));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakFunction", "Gaussian"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundFunction", "Auto"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakType", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundType", "Auto"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test01WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", true));
