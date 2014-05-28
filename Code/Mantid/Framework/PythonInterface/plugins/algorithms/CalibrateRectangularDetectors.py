@@ -16,6 +16,24 @@ workspace does not look good, do a color fill plot of the workspace that ends in
 the CrossCorrelationPoints and/or PeakHalfWidth should be increased or decreased.  
 Also plot the reference spectra from the cc workspace.
 
+== Features to improve performance of peak finding ==
+
+=== Define peak fit-window ===
+There are two exclusive approaches to define peak's fit-window. 
+
+1. ''PeakWindowMax'': All peaks will use this value to define their fitting range. 
+
+2. ''FitwindowTableWorkspace'': This is a table workspace by which each peak will have its individual fit window defined. 
+
+=== Define accepted range of peak's width ===
+Optional input property ''DetectorResolutionWorkspace'' is a matrix workspace containing the detector resolution
+<math>\Delta(d)/d</math> for each spectrum.  
+Combining with property ''AllowedResRange'', it defines the lower and upper limit for accepted fitted peak width.
+
+Let <math> c_l = AllowedResRange[0] </math>, <math> c_h = AllowedResRange[1] </math> and <math>fwhm</math> as the peak's fitted width. 
+Then,
+:<math> c_l\times\frac{\Delta(d)}{d} < fwhm < c_h\times\frac{\Delta(d)}{d}</math>
+
 
 *WIKI*"""
 from mantid.api import *
