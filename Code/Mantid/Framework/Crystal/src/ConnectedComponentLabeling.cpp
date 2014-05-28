@@ -208,6 +208,7 @@ namespace Mantid
             }
           }
         } while (iterator->next());
+
         return currentLabelCount;
       }
 
@@ -215,16 +216,16 @@ namespace Mantid
 
       void memoryCheck(size_t nPoints)
       {
-        size_t sizeOfElement =  (3 * sizeof(signal_t) ) + sizeof(bool);
+        size_t sizeOfElement = (3 * sizeof(signal_t)) + sizeof(bool);
 
         MemoryStats memoryStats;
         const size_t freeMemory = memoryStats.availMem(); // in kB
-        const size_t memoryCost = sizeOfElement * nPoints / 1000 ; // in kB
-        if(memoryCost > freeMemory)
+        const size_t memoryCost = sizeOfElement * nPoints / 1000; // in kB
+        if (memoryCost > freeMemory)
         {
           std::string basicMessage = "CCL requires more free memory than you have available.";
           std::stringstream sstream;
-          sstream << basicMessage << " Requires " <<  memoryCost << " KB of contiguous memory.";
+          sstream << basicMessage << " Requires " << memoryCost << " KB of contiguous memory.";
           g_log.notice(sstream.str());
           throw std::runtime_error(basicMessage);
         }
@@ -324,7 +325,7 @@ namespace Mantid
 
         // ------------- Stage One. Local CCL in parallel.
         g_log.debug("Parallel solve local CCL");
-        PARALLEL_FOR_NO_WSP_CHECK()
+        //PARALLEL_FOR_NO_WSP_CHECK()
         for (int i = 0; i < nThreadsToUse; ++i)
         {
           API::IMDIterator* iterator = iterators[i];
@@ -349,9 +350,36 @@ namespace Mantid
           {
             if (!baseStrategy->isBackground(iterator))
             {
-              const size_t& index = iterator->getLinearIndex();
-              const size_t& labelAtIndex = neighbourElements[index].getRoot();
-              localClusterMap[labelAtIndex]->addIndex(index);
+              // Second pass smoothing step
+              const size_t currentIndex = iterator->getLinearIndex();
+              auto vecNeighbourIndexes = iterator->findNeighbourIndexes();
+              VecIndexes nonEmptyNeighbourIndexes;
+              for (size_t i = 0; i < vecNeighbourIndexes.size(); ++i)
+              {
+                const size_t& neighbourIndex = vecNeighbourIndexes[i];
+                const DisjointElement& neighbourElement = neighbourElements[neighbourIndex];
+                if (!neighbourElement.isEmpty() && iterator->isWithinBounds(neighbourIndex))
+                {
+                  nonEmptyNeighbourIndexes.push_back(neighbourIndex);
+                }
+              }
+              if (nonEmptyNeighbourIndexes.size() > 0)
+              {
+                size_t parentIndex = nonEmptyNeighbourIndexes[0];
+                for (size_t i = 1; i < nonEmptyNeighbourIndexes.size(); ++i)
+                {
+                  size_t neighIndex = nonEmptyNeighbourIndexes[i];
+                  if (neighbourElements[neighIndex].getId() < neighbourElements[parentIndex].getId())
+                  {
+                    parentIndex = neighIndex;
+                  }
+                }
+                DisjointElement& parentElement = neighbourElements[parentIndex];
+                neighbourElements[currentIndex].unionWith(&parentElement);
+              }
+
+              const size_t& labelAtIndex = neighbourElements[currentIndex].getRoot();
+              localClusterMap[labelAtIndex]->addIndex(currentIndex);
             }
           } while (iterator->next());
         }
@@ -361,7 +389,7 @@ namespace Mantid
         ClusterRegister clusterRegister;
         for (auto it = parallelClusterMapVec.begin(); it != parallelClusterMapVec.end(); ++it)
         {
-          for(auto itt = it->begin(); itt != it->end(); ++itt)
+          for (auto itt = it->begin(); itt != it->end(); ++itt)
           {
             clusterRegister.add(itt->first, itt->second);
           }
@@ -382,7 +410,6 @@ namespace Mantid
         }
         clusterMap = clusterRegister.clusters(neighbourElements);
 
-        
       }
       else
       {
@@ -400,14 +427,40 @@ namespace Mantid
 
         // Associate the member DisjointElements with a cluster. Involves looping back over iterator.
         iterator->jumpTo(0); // Reset
-
         do
         {
           if (!baseStrategy->isBackground(iterator))
           {
-            const size_t& index = iterator->getLinearIndex();
-            const size_t& labelAtIndex = neighbourElements[index].getRoot();
-            clusterMap[labelAtIndex]->addIndex(index);
+            // Second pass smoothing step
+            const size_t currentIndex = iterator->getLinearIndex();
+            auto vecNeighbourIndexes = iterator->findNeighbourIndexes();
+            VecIndexes nonEmptyNeighbourIndexes;
+            for (size_t i = 0; i < vecNeighbourIndexes.size(); ++i)
+            {
+              const DisjointElement& neighbourElement = neighbourElements[vecNeighbourIndexes[i]];
+              if (!neighbourElement.isEmpty())
+              {
+                nonEmptyNeighbourIndexes.push_back(vecNeighbourIndexes[i]);
+              }
+            }
+            if (nonEmptyNeighbourIndexes.size() > 0)
+            {
+              size_t parentIndex = nonEmptyNeighbourIndexes[0];
+              for (size_t i = 1; i < nonEmptyNeighbourIndexes.size(); ++i)
+              {
+                size_t neighIndex = nonEmptyNeighbourIndexes[i];
+                if (neighbourElements[neighIndex].getId() < neighbourElements[parentIndex].getId())
+                {
+                  parentIndex = neighIndex;
+                }
+              }
+              DisjointElement& parentElement = neighbourElements[parentIndex];
+              neighbourElements[currentIndex].unionWith(&parentElement);
+            }
+
+            const int labelAtIndex = neighbourElements[currentIndex].getRoot();
+            clusterMap[labelAtIndex]->addIndex(currentIndex);
+
           }
         } while (iterator->next());
       }
