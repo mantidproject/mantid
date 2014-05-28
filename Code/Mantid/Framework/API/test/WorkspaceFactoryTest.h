@@ -41,13 +41,6 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
     std::vector<size_t> size;
   };
 
-  class ManagedWorkspace2DTest: public Workspace2DTest
-  {
-  public:
-    const std::string id() const {return "ManagedWorkspace2DTest";}
-    size_t getNumberHistograms() const { return 2;}
-  };
-
   class NotInFactory : public WorkspaceTester
   {
   public:
@@ -60,15 +53,6 @@ public:
   {
     WorkspaceFactory::Instance().subscribe<Workspace1DTest>("Workspace1DTest");
     WorkspaceFactory::Instance().subscribe<Workspace2DTest>("Workspace2DTest");
-    try
-    {
-      WorkspaceFactory::Instance().subscribe<ManagedWorkspace2DTest>("ManagedWorkspace2DTest");
-    }
-    catch (std::runtime_error&)
-    {
-      // In theory, we shouldn't have the 'real' ManagedWorkspace2D when running this test, but
-      // in reality we do so need catch the error from trying to subscribe again
-    }
   }
 
   void testReturnType()

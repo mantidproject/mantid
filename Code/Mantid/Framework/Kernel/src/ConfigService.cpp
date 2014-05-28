@@ -232,7 +232,6 @@ ConfigServiceImpl::ConfigServiceImpl() :
   m_ConfigPaths.insert(std::make_pair("user.python.plugins.directories", true));
   m_ConfigPaths.insert(std::make_pair("datasearch.directories", true));
   m_ConfigPaths.insert(std::make_pair("icatDownload.directory", true));
-  m_ConfigPaths.insert(std::make_pair("ManagedWorkspace.FilePath", true));
 
   //attempt to load the default properties file that resides in the directory of the executable
   std::string propertiesFilesList;
