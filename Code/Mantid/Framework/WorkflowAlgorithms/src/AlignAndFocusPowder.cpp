@@ -225,6 +225,41 @@ namespace WorkflowAlgorithms
   }
 
   //----------------------------------------------------------------------------------------------
+  /**
+   * Function to get a vector property either from a PropertyManager or the algorithm
+   * properties. If both PM and algorithm properties are specified, the algorithm one wins.
+   * The return value is the first element in the vector if it is not empty.
+   * @param apname : The algorithm property to retrieve.
+   * @param avec : The vector to hold the property value.
+   * @param pmpname : The property manager property name.
+   * @param pm : The PropertyManager instance.
+   * @return : The default value of the requested property.
+   */
+  double AlignAndFocusPowder::getVecPropertyFromPmOrSelf(const std::string &apname,
+                                                         std::vector<double> &avec,
+                                                         const std::string &pmpname,
+                                                         boost::shared_ptr<PropertyManager> pm)
+  {
+    avec = getProperty(apname);
+    // Look at algorithm first
+    if (!avec.empty())
+    {
+      return avec[0];
+    }
+    // Look in property manager
+    if (pm && pm->existsProperty(pmpname))
+    {
+      avec = pm->getProperty(pmpname);
+      if (!avec.empty())
+      {
+        return avec[0];
+      }
+    }
+    // No overrides provided.
+    return 0.0;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Executes the algorithm
    *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
    *  @throw runtime_error If unable to run one of the Child Algorithms successfully
@@ -256,14 +291,8 @@ namespace WorkflowAlgorithms
     phis = getProperty("Azimuthal");
     m_params=getProperty("Params");
     dspace = getProperty("DSpacing");
-    m_dmins = getProperty("DMin");
-    m_dmaxs = getProperty("DMax");
-    double dmin = 0.;
-    if (!m_dmins.empty())
-      dmin = m_dmins[0];
-    double dmax = 0.;
-    if (!m_dmaxs.empty())
-      dmax = m_dmaxs[0];
+    auto dmin = getVecPropertyFromPmOrSelf("DMin", m_dmins, "d_min", reductionManager);
+    auto dmax = getVecPropertyFromPmOrSelf("DMax", m_dmaxs, "d_max", reductionManager);
     LRef = getProperty("UnwrapRef");
     DIFCref = getProperty("LowResRef");
     minwl = getProperty("CropWavelengthMin");

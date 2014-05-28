@@ -100,6 +100,11 @@ namespace Mantid
                                      const std::string &pmpname,
                                      boost::shared_ptr<Kernel::PropertyManager> pm);
 
+      double getVecPropertyFromPmOrSelf(const std::string &apname,
+                                        std::vector<double> &avec,
+                                        const std::string &pmpname,
+                                        boost::shared_ptr<Kernel::PropertyManager> pm);
+
       API::MatrixWorkspace_sptr m_inputW;
       API::MatrixWorkspace_sptr m_outputW;
       DataObjects::EventWorkspace_sptr m_inputEW;
