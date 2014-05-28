@@ -40,7 +40,7 @@ class PropertiesDirective(BaseDirective):
                 str(direction_string[prop.direction]),
                 str(prop.type),
                 str(self._get_default_prop(prop)),
-                str(prop.documentation)
+                str(prop.documentation.replace("\n", " "))
             ))
 
         # Build and add the properties to the ReST table.
