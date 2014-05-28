@@ -75,7 +75,9 @@ private:
 	std::vector< std::vector<int> > getMonitorInfo(NeXus::NXEntry& firstEntry);
 	void initWorkSpace(NeXus::NXEntry& entry, const std::vector<std::vector<int> >&);
 	void initInstrumentSpecific();
+	void addAllNexusFieldsAsProperties(std::string filename);
 	void loadRunDetails(NeXus::NXEntry & entry);
+
 	void loadExperimentDetails(NeXus::NXEntry & entry);
 	int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
 	void loadTimeDetails(NeXus::NXEntry& entry);
