@@ -10,6 +10,7 @@
 #include "MantidGeometry/Crystal/PointGroup.h"
 
 using namespace Mantid;
+using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 class PointGroupTest : public CxxTest::TestSuite

@@ -41,7 +41,8 @@ using namespace Geometry;
 
 /// Default constructor
 CopyInstrumentParameters::CopyInstrumentParameters() : 
-  Algorithm()
+  Algorithm(),
+  m_different_instrument_sp(false)
 {}
 
 /// Destructor
@@ -71,10 +72,80 @@ void CopyInstrumentParameters::exec()
   this->checkProperties();
 
   // Get parameters
-  const Geometry::ParameterMap& givParams = m_givingWorkspace->constInstrumentParameters() ;
+  Geometry::ParameterMap& givParams = m_givingWorkspace->instrumentParameters() ;
 
-  // Copy parameters
-  m_receivingWorkspace->replaceInstrumentParameters( givParams );
+  if (m_different_instrument_sp)
+  {
+    Instrument_const_sptr inst1 = m_givingWorkspace->getInstrument();
+    Instrument_const_sptr inst2 = m_receivingWorkspace->getInstrument();
+    auto Name1=inst1->getName();
+    auto Name2=inst2->getName();
+
+    Geometry::ParameterMap targMap;
+
+    //// vector of all components contained in the target instrument
+    //std::vector<IComponent_const_sptr> targComponents;
+    //// flattens instrument definition tree
+    //inst2->getChildren(targComponents,true);
+    //// multimap of existing instrument parameters
+    //std::multimap<std::string,IComponent const *> existingComponents;
+    //for(size_t i=0;i<targComponents.size();i++)
+    //{        
+    //   if (dynamic_cast<IDetector const *>(targComponents[i].get()))
+    //     continue;
+    //   existingComponents.insert(std::pair<std::string,IComponent const *>(targComponents[i]->getFullName(),targComponents[i].get()));
+    //}
+
+    auto it = givParams.begin();
+    for(;it!= givParams.end(); it++)
+    {
+      IComponent * oldComponent=it->first;
+
+
+      const Geometry::IComponent* targComp = 0;
+
+      IDetector *pOldDet = dynamic_cast<IDetector *>(oldComponent);
+      if (pOldDet)
+      {
+        detid_t detID = pOldDet->getID();
+        targComp = inst2->getBaseDetector(detID);
+        if (!targComp)
+        {
+          g_log.warning()<<"Target instrument does not have detector with ID "<<detID<<'\n';
+          continue;
+        }
+      }
+      else
+      {
+        std::string source_name=oldComponent->getFullName();
+        size_t nameStart = source_name.find(Name1);
+        std::string targ_name = source_name.replace(nameStart,nameStart+Name1.size(),Name2);
+        //existingComponents.
+        auto spTargComp = inst2->getComponentByName(targ_name);
+        if (!spTargComp)
+        {
+          g_log.warning()<<"Target instrument does not have component with full name: "<<targ_name<<'\n';
+          continue;
+        }
+        targComp = spTargComp->getBaseComponent();
+      }
+      // merge maps for existing target component
+      auto param = it->second.get();
+      targMap.add(param->type(),targComp,param->name(),param->asString());
+
+    }
+
+    // changed parameters
+    m_receivingWorkspace->replaceInstrumentParameters( targMap );
+
+  }
+  else
+  {
+    // unchanged Copy parameters
+    m_receivingWorkspace->replaceInstrumentParameters( givParams );
+
+  }
+
 
 }
 
@@ -103,6 +174,7 @@ void CopyInstrumentParameters::checkProperties()
   // Check that both workspaces have the same instrument name
   if( baseInstRec != baseInstGiv )
   {
+    m_different_instrument_sp=true;
     g_log.warning() << "The base instrument in the output workspace is not the same as the base instrument in the input workspace."<< std::endl;
   }
 

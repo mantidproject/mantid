@@ -542,7 +542,8 @@ namespace MDAlgorithms
 	              row >> parvalue;
 	              if (j == numcols-4)fun_str << ";name=Quadratic";
 	              //erase f0. or f1.
-	              if (j > 0 && j < numcols-1) fun_str << "," << paramsName[j].erase(0,3) <<"="<<parvalue;
+				  // if (j > 0 && j < numcols-1) fun_str << "," << paramsName[j].erase(0,3) <<"="<<parvalue;
+				  if (j > 0 && j < numcols-1) fun_str << "," << paramsName[j] <<"="<<parvalue;
 	              paramsValue.push_back(parvalue);
 	            }
 	            if (i == 0)

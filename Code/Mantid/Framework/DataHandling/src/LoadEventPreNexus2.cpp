@@ -457,7 +457,6 @@ namespace DataHandling
   {
     // Unmask veto bit from vetoed events
 
-    // cppcheck-suppress syntaxError
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < static_cast<int>(event_indices.size()); ++i)
     {
@@ -759,6 +758,7 @@ namespace DataHandling
     buffers.resize(numThreads);
     eventVectors = new EventVector_pt *[numThreads];
 
+    // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for if (parallelProcessing) )
     for (int i=0; i < int(numThreads); i++)
     {

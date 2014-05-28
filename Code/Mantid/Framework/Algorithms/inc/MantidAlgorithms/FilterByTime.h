@@ -10,10 +10,6 @@
 
 namespace Mantid
 {
-using DataObjects::EventList;
-using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_sptr;
-using DataObjects::EventWorkspace_const_sptr;
 
 namespace Algorithms
 {
@@ -66,7 +62,7 @@ private:
   void exec();
 
   /// Pointer for an event workspace
-  EventWorkspace_const_sptr eventW;
+  DataObjects::EventWorkspace_const_sptr eventW;
 };
 
 

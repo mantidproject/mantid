@@ -170,9 +170,11 @@ public:
   void testBigWorkspace()
   {
     Mantid::Algorithms::CreateWorkspace creator;
-    // The AlgorithmHistory operations take an age - this disables them
-    creator.setChild(true);
     creator.initialize();
+    // The PropertyHistory operations take an age - this disables them
+    creator.setChild(true);
+    creator.enableHistoryRecordingForChild(false);
+
     creator.setPropertyValue("OutputWorkspace","Out");
     creator.setProperty("DataX",*vec);
     creator.setProperty("DataY",*vec);

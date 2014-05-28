@@ -137,6 +137,12 @@ public:
     TS_ASSERT_EQUALS(ta.getMin() + 1, ta.getMax())
   }
 
+  void test_indexOfValue_Returns_Input_As_Index()
+  {
+    TextAxis ta(2);
+    TS_ASSERT_EQUALS(static_cast<size_t>(1.5), ta.indexOfValue(1.5));
+    TS_ASSERT_EQUALS(static_cast<size_t>(-1), ta.indexOfValue(-1.5));
+  }
 
 };
 

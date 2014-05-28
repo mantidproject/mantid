@@ -649,6 +649,15 @@ namespace Mantid
       catch(std::runtime_error&)
       { }
 
+      // ITableWorkspace?
+      try
+      {
+        ITableWorkspace_sptr childWS = loader->getProperty(propName);
+        return childWS;
+      }
+      catch(std::runtime_error&)
+      { }
+
       // Just workspace?
       try
       {

@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QTextStream>
 #include <stdexcept>
+#include <sstream>
 
 using namespace MantidQt::API;
 
@@ -26,8 +27,7 @@ QString PythonRunner::runPythonCode(const QString & code, bool no_output)
 {
   using Mantid::Kernel::Logger;
 
-  //FIXME: Ticket-9217 - Commented out for the moment to try and get working with clang
-  //if(g_log.is(Logger::Priority::PRIO_DEBUG)) g_log.debug() << "Running Python code:\n" << code.toAscii().data() << "\n";
+  if(g_log.is(Logger::Priority::PRIO_DEBUG)) g_log.debug() << "Running Python code:\n" << code.toAscii().data() << "\n";
 
   if( no_output )
   {

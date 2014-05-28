@@ -21,8 +21,15 @@ if ( LSB_CMD )
   # Make Scientific Linux and CentOS look like RHEL6
   string ( REGEX REPLACE "Carbon" "Santiago" UNIX_DIST ${UNIX_DIST} )
   string ( REGEX REPLACE "Final" "Santiago" UNIX_DIST ${UNIX_DIST} )
+  # get the release
+  execute_process ( COMMAND ${LSB_CMD} -r
+    OUTPUT_VARIABLE UNIX_RELEASE
+    OUTPUT_STRIP_TRAILING_WHITESPACE )
+  string ( REGEX REPLACE "Release:" "" UNIX_RELEASE ${UNIX_RELEASE} )
+  string ( STRIP ${UNIX_RELEASE} UNIX_RELEASE )
 else ( LSB_CMD )
   set ( UNIX_DIST "" )
   set ( UNIX_CODENAME "" )
+  set ( UNIX_RELEASE "" )
 endif ( LSB_CMD )
-message ( STATUS " DIST: ${UNIX_DIST} CODENAME: ${UNIX_CODENAME}" )
+message ( STATUS " DIST: ${UNIX_DIST} ${UNIX_RELEASE} CODENAME: ${UNIX_CODENAME}" )

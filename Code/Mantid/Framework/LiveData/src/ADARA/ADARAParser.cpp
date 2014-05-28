@@ -1,5 +1,4 @@
 #include <string.h>
-#include <errno.h>
 
 #include "MantidLiveData/ADARA/ADARAParser.h"
 
@@ -80,7 +79,7 @@ int Parser::bufferParse(unsigned int max_packets)
 			 * chunk, consuming our entire buffer.
 			 */
 			stopped = rxOversizePkt(&hdr, p, 0, valid_len);
-			m_oversize_len = hdr.payload_length() - valid_len;
+			m_oversize_len = hdr.packet_length() - valid_len;
 			m_oversize_offset = valid_len;
 			valid_len = 0;
 			break;

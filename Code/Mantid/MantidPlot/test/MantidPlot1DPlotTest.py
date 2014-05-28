@@ -29,13 +29,14 @@ class MantidPlot1DPlotTest(unittest.TestCase):
     
     def tearDown(self):
         """Clean up by closing the created window """
-        self.g.confirmClose(False)
-        self.g.close()
-	try:
-		self.t.confirmClose(False)
-		self.t.close()
-	except AttributeError:
-		pass
+        if hasattr(self, "g") and self.g is not None:
+          self.g.confirmClose(False)
+          self.g.close()
+        try:
+          self.t.confirmClose(False)
+          self.t.close()
+        except AttributeError:
+          pass
         QtCore.QCoreApplication.processEvents()
 
     def test_plotSpectrum_errorBars(self):
@@ -86,10 +87,19 @@ class MantidPlot1DPlotTest(unittest.TestCase):
             l.setCurveLineStyle(1, QtCore.Qt.DotLine)
             l.setCurveLineStyle(2, QtCore.Qt.DashLine)
             
-    def test_plotBin_command_with_single_index(self):
+    def test_plotBin_with_single_index(self):
         g = plotBin("fake", 0)
         self.assertTrue(g is not None) 
         self.g = g
+
+    def test_plotBin_with_single_index_outside_number_histograms_but_still_valid_produces_plot(self):
+        g = plotBin("fake", 5)
+        self.assertTrue(g is not None)
+        self.g = g
+
+    def test_plotBin_with_invalid_raises_RuntimeError(self):
+        self.assertRaises(RuntimeError, plotBin, "fake", 100)
+        self.g = None
 
     def test_plotBin_command_with_list(self):
         g = plotBin("fake", [0,1])

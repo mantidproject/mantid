@@ -7,6 +7,7 @@
 #include <QMouseEvent>
 
 using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 
 namespace MantidQt

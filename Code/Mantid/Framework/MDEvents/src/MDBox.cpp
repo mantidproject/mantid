@@ -662,14 +662,13 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
- /** Return the centroid of this box.
-  * @param centroid [out] :: nd-sized array that will be set to the centroid.
-  */
- TMDE(
-                 coord_t * MDBox)::getCentroid() const
- {
-   return this->m_centroid;
- }
+  /** Return the centroid of this box.
+   */
+  TMDE(
+  coord_t * MDBox)::getCentroid() const
+  {
+    return this->m_centroid;
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Find the centroid of all events contained within by doing a weighted average

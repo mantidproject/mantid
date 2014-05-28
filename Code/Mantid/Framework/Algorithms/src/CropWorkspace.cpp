@@ -16,6 +16,7 @@ a copy of the input one.
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/VectorHelper.h"
 #include <iostream>
@@ -153,9 +154,9 @@ void CropWorkspace::exec()
       {
         outTxtAxis->setLabel(j, inAxis1->label(i));
       }
-      else
+      else if( !outAxis1->isSpectra() ) // handled by copyInfoFrom line
       {
-        outAxis1->setValue(j, inAxis1->operator()(i));
+        dynamic_cast<NumericAxis*>(outAxis1)->setValue(j, inAxis1->operator()(i));
       }
     }
     // Copy spectrum number & detectors

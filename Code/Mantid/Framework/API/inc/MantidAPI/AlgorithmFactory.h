@@ -100,6 +100,7 @@ public:
         {
           std::ostringstream os;
           os << "Cannot register algorithm " << className << " twice with the same version\n";
+          delete instantiator;
           throw std::runtime_error(os.str());
         }
         if(version > it->second)
@@ -110,7 +111,10 @@ public:
       Kernel::DynamicFactory<Algorithm>::subscribe(key, instantiator, replaceExisting);
     }
     else
+    {
+      delete instantiator;
       throw std::invalid_argument("Cannot register empty algorithm name");
+    }
     return std::make_pair(className,version);
   }
   /// Unsubscribe the given algorithm

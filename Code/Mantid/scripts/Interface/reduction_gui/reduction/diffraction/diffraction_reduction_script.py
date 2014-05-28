@@ -124,6 +124,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 # i.  Load meta data only
                 metadatawsname = str(datafilename.split(".")[0]+"_meta")
                 splitwsname = str(datafilename.split(".")[0] + "_splitters")
+                splitinfowsname = str(datafilename.split(".")[0] + "_splitinfo")
 
                 script += "# Load data's log only\n"
                 script += "Load(\n"
@@ -138,6 +139,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 script += "GenerateEventsFilter(\n"
                 script += "%sInputWorkspace  = '%s',\n" % (DiffractionReductionScripter.WIDTH, metadatawsname)
                 script += "%sOutputWorkspace = '%s',\n" % (DiffractionReductionScripter.WIDTH, splitwsname)
+                script += "%sInformationWorkspace = '%s',\n" % (DiffractionReductionScripter.WIDTH, splitinfowsname)
                 if filterdict["FilterByTimeMin"] != "":
                     script += "%sStartTime = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["FilterByTimeMin"]) 
                 if filterdict["FilterByTimeMax"] != "":
@@ -176,7 +178,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 script += ")\n"
 
                 # iii. Data reduction
-                script += self.buildPowderDataReductionScript(runsetupdict, advsetupdict, runnumber, splitwsname)
+                script += self.buildPowderDataReductionScript(runsetupdict, advsetupdict, runnumber, splitwsname, splitinfowsname)
 
             # ENDFOR data file names
 
@@ -280,7 +282,8 @@ class DiffractionReductionScripter(BaseReductionScripter):
         return datafilenames
 
 
-    def buildPowderDataReductionScript(self, runsetupdict, advsetupdict, runnumber=None, splitwsname=None):
+    def buildPowderDataReductionScript(self, runsetupdict, advsetupdict, runnumber=None, splitwsname=None,
+                                       splitinfowsname=None):
         """ Build the script to call SNSPowderReduction()
         """
         script  = "SNSPowderReduction(\n"
@@ -346,8 +349,10 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         # 3. Optional spliter workspace
         if splitwsname is not None and splitwsname != "":
-            script += "%sSplittersWorkspace = '%s'\n" % (DiffractionReductionScripter.WIDTH, str(splitwsname))
-
+            script += "%sSplittersWorkspace = '%s',\n" % (DiffractionReductionScripter.WIDTH, str(splitwsname))
+        if splitinfowsname is not None and splitinfowsname != "":
+            script += "%sSplitInformationWorkspace='%s',\n" % (DiffractionReductionScripter.WIDTH,
+                                                              str(splitinfowsname))
         script += "%s)\n" % (DiffractionReductionScripter.WIDTH)
 
         return script

@@ -5,6 +5,7 @@
 set ( MODULE_TEMPLATE src/geometry.cpp.in )
 
 set ( EXPORT_FILES
+  src/Exports/BoundingBox.cpp
   src/Exports/IComponent.cpp
   src/Exports/ICompAssembly.cpp
   src/Exports/IObjComponent.cpp
@@ -22,6 +23,7 @@ set ( EXPORT_FILES
   src/Exports/OrientedLattice.cpp
   src/Exports/ReferenceFrame.cpp
   src/Exports/Goniometer.cpp
+  src/Exports/Object.cpp
 )  
 
 set ( SRC_FILES

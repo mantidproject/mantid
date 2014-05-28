@@ -67,6 +67,25 @@ namespace Mantid
     }
 
     /**
+     * Returns checkGroups. If false, workspace groups will be treated as a whole
+     * If true, the algorithm will act on each component of the workspace group individually
+     */
+    template<typename BaseAlgorithm>
+    bool AlgorithmAdapter<BaseAlgorithm>::checkGroups()
+    {
+      return CallMethod0<bool>::dispatchWithDefaultReturn(getSelf(), "checkGroups", checkGroupsDefault());
+    }
+
+    /**
+     * Returns the default checkGroup (calls base class)
+     */
+    template<typename BaseAlgorithm>
+    bool AlgorithmAdapter<BaseAlgorithm>::checkGroupsDefault()
+    {
+      return BaseAlgorithm::checkGroups();
+    }
+
+    /**
      * Returns the category of the algorithm. If not overridden
      * it returns "AlgorithmAdapter"
      */
@@ -174,6 +193,7 @@ namespace Mantid
 
     /**
      * Declare a preconstructed property.
+     * @param self A reference to the calling Python object
      * @param prop :: A pointer to a property
      * @param doc :: An optional doc string
      */
@@ -188,6 +208,7 @@ namespace Mantid
 
     /**
      * Declare a property using the type of the defaultValue, a documentation string and validator
+     * @param self A reference to the calling Python object
      * @param name :: The name of the new property
      * @param defaultValue :: A default value for the property. The type is mapped to a C++ type
      * @param validator :: A validator object
@@ -205,6 +226,7 @@ namespace Mantid
 
     /**
      * Declare a property using the type of the defaultValue and a documentation string
+     * @param self A reference to the calling Python object
      * @param name :: The name of the new property
      * @param defaultValue :: A default value for the property. The type is mapped to a C++ type
      * @param doc :: The documentation string
@@ -219,11 +241,12 @@ namespace Mantid
     }
 
     /**
-    * Declare a property using the type of the defaultValue
-    * @param name :: The name of the new property
-    * @param defaultValue :: A default value for the property. The type is mapped to a C++ type
-    * @param direction :: The direction of the property
-    */
+     * Declare a property using the type of the defaultValue
+     * @param self A reference to the calling Python object
+     * @param name :: The name of the new property
+     * @param defaultValue :: A default value for the property. The type is mapped to a C++ type
+     * @param direction :: The direction of the property
+     */
     template<typename BaseAlgorithm>
     void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(boost::python::object &self, const std::string & name, const boost::python::object & defaultValue,
                                                         const int direction)

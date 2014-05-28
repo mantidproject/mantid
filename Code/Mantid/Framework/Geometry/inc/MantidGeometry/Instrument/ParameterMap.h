@@ -148,7 +148,7 @@ namespace Geometry
         }
       }
     }
-    /** @name Helper methods for adding and updating paramter types  */
+    /** @name Helper methods for adding and updating parameter types  */
     /// Create or adjust "pos" parameter for a component
     void addPositionCoordinate(const IComponent* comp,const std::string& name, const double value);
     /// Create or adjust "rot" parameter for a component
@@ -258,11 +258,11 @@ namespace Geometry
     void clearPositionSensitiveCaches();
     ///Sets a cached location on the location cache
     void setCachedLocation(const IComponent* comp, const Kernel::V3D& location) const;
-    ///Attempts to retreive a location from the location cache
+    ///Attempts to retrieve a location from the location cache
     bool getCachedLocation(const IComponent* comp, Kernel::V3D& location) const;
     ///Sets a cached rotation on the rotation cache
     void setCachedRotation(const IComponent* comp, const Kernel::Quat& rotation) const;
-    ///Attempts to retreive a rotation from the rotation cache
+    ///Attempts to retrieve a rotation from the rotation cache
     bool getCachedRotation(const IComponent* comp, Kernel::Quat& rotation) const;
     ///Sets a cached bounding box
     void setCachedBoundingBox(const IComponent *comp, const BoundingBox & box) const;
@@ -272,6 +272,12 @@ namespace Geometry
     void saveNexus(::NeXus::File * file, const std::string & group) const;
     /// Copy pairs (oldComp->id,Parameter) to the m_map assigning the new newComp->id
     void copyFromParameterMap(const IComponent* oldComp,const IComponent* newComp, const ParameterMap *oldPMap);
+    /// access iterators. begin;
+    pmap_it begin(){return m_map.begin();}
+    pmap_cit begin()const{return m_map.begin();}
+    /// access iterators. end;
+    pmap_it end(){return m_map.end();}
+    pmap_cit end()const{return m_map.end();}
 
   private:
     ///Assignment operator
@@ -282,7 +288,7 @@ namespace Geometry
 
     /// internal parameter map instance
     pmap m_map;
-    /// internal cache map instance for cached postition values
+    /// internal cache map instance for cached position values
     mutable Kernel::Cache<const ComponentID, Kernel::V3D > m_cacheLocMap;
     /// internal cache map instance for cached rotation values
     mutable Kernel::Cache<const ComponentID, Kernel::Quat > m_cacheRotMap;

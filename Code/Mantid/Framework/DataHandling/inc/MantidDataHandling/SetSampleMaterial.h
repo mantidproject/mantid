@@ -62,7 +62,7 @@ private:
   ///Execution code
   void exec();
   /// Print out the list of information for the material
-  void fixNeutron(Kernel::NeutronAtom &neutron,
+  void fixNeutron(PhysicalConstants::NeutronAtom &neutron,
                   double coh_xs, double inc_xs,
                   double abs_xs, double tot_xs);
 };

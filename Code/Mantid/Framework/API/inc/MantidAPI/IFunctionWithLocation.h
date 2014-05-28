@@ -43,6 +43,10 @@ namespace API
 class MANTID_API_DLL IFunctionWithLocation : public virtual ParamFunction, public virtual IFunction1D
 {
 public:
+  /// Virtual destructor 
+  /// (avoids warnings about non-trivial move assignment in virtually inheriting classes)
+  virtual ~IFunctionWithLocation() {}
+
   /// Returns the centre of the function, which may be something as simple as the centre of
   /// the fitting range in the case of a background function or peak shape function this 
   /// return value reflects the centre of the peak

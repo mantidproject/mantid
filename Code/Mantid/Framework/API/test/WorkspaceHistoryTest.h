@@ -206,14 +206,16 @@ public:
 
     AlgorithmHistory alg1("FirstAlgorithm", 2);
     alg1.addProperty("FirstAlgProperty", "1",false, Mantid::Kernel::Direction::Input);
-    history.addHistory(alg1);
+    
+    boost::shared_ptr<AlgorithmHistory> algHistPtr = boost::make_shared<AlgorithmHistory>(alg1);
+    history.addHistory(algHistPtr);
     TS_ASSERT_EQUALS(history.size(), 1);
     TS_ASSERT_EQUALS(history.empty(), false);
 
-    const WorkspaceHistory::AlgorithmHistories & algs = history.getAlgorithmHistories();
+    Mantid::API::AlgorithmHistories algs = history.getAlgorithmHistories();
     TS_ASSERT_EQUALS(algs.size(), 1);
-    TS_ASSERT_EQUALS(history.getAlgorithmHistory(0).name(), "FirstAlgorithm");
-    TS_ASSERT_EQUALS((*algs.begin()).name(), "FirstAlgorithm");
+    TS_ASSERT_EQUALS(history.getAlgorithmHistory(0)->name(), "FirstAlgorithm");
+    TS_ASSERT_EQUALS((*algs.begin())->name(), "FirstAlgorithm");
 
   }
 
@@ -234,11 +236,12 @@ public:
     WorkspaceHistory history;
     AlgorithmHistory alg1(&simplesum,Mantid::Kernel::DateAndTime::defaultTime(), 1.0, 0);
     AlgorithmHistory alg2(&simplesum2,Mantid::Kernel::DateAndTime::defaultTime(), 1.0, 1);
-    history.addHistory(alg1);
-    history.addHistory(alg2);
+    
+    history.addHistory(boost::make_shared<AlgorithmHistory>(alg1));
+    history.addHistory(boost::make_shared<AlgorithmHistory>(alg2));
 
-    AlgorithmHistory second = history.getAlgorithmHistory(1);
-    TS_ASSERT_EQUALS(second.name(), "SimpleSum2");
+    auto second = history.getAlgorithmHistory(1);
+    TS_ASSERT_EQUALS(second->name(), "SimpleSum2");
     
     IAlgorithm_sptr first = history.getAlgorithm(0);
     TS_ASSERT_EQUALS(first->name(), "SimpleSum");
@@ -265,7 +268,8 @@ public:
     WorkspaceHistory testHistory;
     for (int i = 1; i < 5; i++)
     {
-      testHistory.addHistory(AlgorithmHistory("History" + boost::lexical_cast<std::string>(i), 1,DateAndTime::defaultTime(),-1.0,i));
+      AlgorithmHistory algHist("History" + boost::lexical_cast<std::string>(i), 1,DateAndTime::defaultTime(),-1.0,i);
+      testHistory.addHistory(boost::make_shared<AlgorithmHistory>(algHist));
     }
 
     auto savehandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
@@ -318,12 +322,12 @@ public:
     const auto & histories = emptyHistory.getAlgorithmHistories();
     TS_ASSERT_EQUALS(3,histories.size());
     
-    const auto & history = emptyHistory.getAlgorithmHistory(0);
+    const auto history = emptyHistory.getAlgorithmHistory(0);
 
-    TS_ASSERT_EQUALS("LoadRaw", history.name());
-    TS_ASSERT_EQUALS(3, history.version());
-    TS_ASSERT_EQUALS(DateAndTime("2009-10-09T16:56:54"), history.executionDate());
-    TS_ASSERT_EQUALS(2.3, history.executionDuration());
+    TS_ASSERT_EQUALS("LoadRaw", history->name());
+    TS_ASSERT_EQUALS(3, history->version());
+    TS_ASSERT_EQUALS(DateAndTime("2009-10-09T16:56:54"), history->executionDate());
+    TS_ASSERT_EQUALS(2.3, history->executionDuration());
     loadhandle->close();
 
   }
@@ -426,6 +430,47 @@ public:
   }
 };
 
+class WorkspaceHistoryTestPerformance : public CxxTest::TestSuite
+{
+public:
+
+  void test_Wide_History()
+  {
+    int depth = 3;
+    int width = 50;
+
+    AlgorithmHistory algHist("AnAlgorithm", 1);
+    build_Algorithm_History(algHist, width, depth);
+    m_wsHist.addHistory(boost::make_shared<AlgorithmHistory>(algHist));
+  }
+
+  void test_Deep_History()
+  {
+    int depth = 10;
+    int width = 3;
+
+    AlgorithmHistory algHist("AnAlgorithm", 1);
+    build_Algorithm_History(algHist, width, depth);
+    m_wsHist.addHistory(boost::make_shared<AlgorithmHistory>(algHist));
+  }
+
+  void build_Algorithm_History(AlgorithmHistory& parent, int width, int depth=0)
+  {
+    if(depth > 0)
+    {    
+
+      for (int i=0; i < width; ++i)
+      {      
+        AlgorithmHistory algHist("AnAlgorithm", 1);
+        build_Algorithm_History(algHist, width, depth-1);
+        parent.addChildHistory(boost::make_shared<AlgorithmHistory>(algHist));
+      }
+    }
+  }
+
+private:
+  Mantid::API::WorkspaceHistory m_wsHist;
+};
 
 
 #endif

@@ -77,8 +77,10 @@ class DLLExport Integrate3DEvents
                                  double       peak_radius,
                                  double       back_inner_radius,
                                  double       back_outer_radius,
+                                 std::vector<double> & axes_radii,
                                  double     & inti,
                                  double     & sigi );
+
   private:
 
     /// Calculate the number of events in an ellipsoid centered at 0,0,0
@@ -124,6 +126,7 @@ class DLLExport Integrate3DEvents
                                  double                      peak_radius,
                                  double                      back_inner_radius,
                                  double                      back_outer_radius,
+                                 std::vector<double>       & axes_radii,
                                  double                    & inti,
                                  double                    & sigi );
 

@@ -1,4 +1,5 @@
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
+#include "MantidKernel/UnitLabel.h"
 #include <iosfwd>
 #include <iostream>
 #include <iomanip>
@@ -175,7 +176,7 @@ void DimensionSliceWidget::setMinMax(double min, double max)
 {
   if (!m_dim) return;
   ui.lblName->setText(QString::fromStdString(m_dim->getName()) );
-  ui.lblUnits->setText(QString::fromStdString(m_dim->getUnits()) );
+  ui.lblUnits->setText(QString::fromStdWString(m_dim->getUnits().utf8()) );
 
   ui.horizontalSlider->setRange(min, max, m_dim->getBinWidth());
 

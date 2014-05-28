@@ -640,10 +640,6 @@ def _create_algorithm_object(name, version=-1):
         # Historic: simpleapi functions always put stuff in the ADS
         #           If we change this we culd potentially break many users' algorithms
         alg.setAlwaysStoreInADS(True)
-
-        # This can be removed when the C++ does the correct thing. see #8913
-        if isinstance(parent, _api.DataProcessorAlgorithm):
-            alg.enableHistoryRecordingForChild(True)
     else:
         # managed algorithm so that progress reporting
         # can be more easily wired up automatically

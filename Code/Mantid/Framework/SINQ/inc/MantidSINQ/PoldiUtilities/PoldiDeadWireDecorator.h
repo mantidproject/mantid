@@ -46,7 +46,7 @@ class MANTID_SINQ_DLL PoldiDeadWireDecorator : public PoldiDetectorDecorator
 {
 public:
     PoldiDeadWireDecorator(std::set<int> deadWires, boost::shared_ptr<PoldiAbstractDetector> detector = boost::shared_ptr<PoldiAbstractDetector>());
-    PoldiDeadWireDecorator(Instrument_const_sptr poldiInstrument, boost::shared_ptr<PoldiAbstractDetector> detector = boost::shared_ptr<PoldiAbstractDetector>());
+    PoldiDeadWireDecorator(Geometry::Instrument_const_sptr poldiInstrument, boost::shared_ptr<PoldiAbstractDetector> detector = boost::shared_ptr<PoldiAbstractDetector>());
 
     virtual ~PoldiDeadWireDecorator() { }
 
@@ -60,7 +60,7 @@ protected:
     void detectorSetHook();
     std::vector<int> getGoodElements(std::vector<int> rawElements);
 
-    static bool detectorIsNotMasked(Instrument_const_sptr instrument, detid_t detectorId);
+    static bool detectorIsNotMasked(Geometry::Instrument_const_sptr instrument, detid_t detectorId);
     bool isDeadElement(int index);
 
     std::set<int> m_deadWireSet;
