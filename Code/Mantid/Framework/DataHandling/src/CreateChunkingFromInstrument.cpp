@@ -1,5 +1,13 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+Workflow algorithm to determine chunking strategy
+for event nexus file. This will break up the instrument
+into logical components according to the instrument hierarchy.
+
+This algorithm does assume that there are components in the
+geometry named "bank#" and returns a table workspace of those
+names. Trying this on an instrument without components named
+that will generate an exception. Also, requesting "ChunkBy=All"
+will return an empty table workspace.
 *WIKI*/
 
 #include "MantidAPI/FileProperty.h"
@@ -79,8 +87,9 @@ namespace DataHandling
   /// Sets documentation strings for this algorithm
   void CreateChunkingFromInstrument::initDocs()
   {
-    this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
-    this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+    string msg("Creates chunking at a level of the instrument or instrument components.");
+    this->setWikiSummary(msg);
+    this->setOptionalMessage(msg);
   }
 
   //----------------------------------------------------------------------------------------------
