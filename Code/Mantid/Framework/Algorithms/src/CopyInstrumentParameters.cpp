@@ -27,13 +27,6 @@ using std::size_t;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CopyInstrumentParameters)
 
-/// Sets documentation strings for this algorithm
-void CopyInstrumentParameters::initDocs()
-{
-  this->setWikiSummary("Transfers an instrument from on workspace to another workspace with same base instrument.");
-  this->setOptionalMessage("Transfers an instrument from on workspace to another workspace with same base instrument.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

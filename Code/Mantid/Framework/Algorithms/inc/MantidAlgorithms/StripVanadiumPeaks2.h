@@ -46,6 +46,11 @@ namespace Algorithms
       {
         return "StripVanadiumPeaks";
       }
+
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "This algorithm removes peaks (at vanadium d-spacing positions by default) out of a background by linearly/quadratically interpolating over the expected peak positions. ";}
+
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const
       {

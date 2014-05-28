@@ -32,13 +32,6 @@ namespace Mantid
     // Register the class
     DECLARE_ALGORITHM(CreatePSDBleedMask)
     
-    /// Sets documentation strings for this algorithm
-    void CreatePSDBleedMask::initDocs()
-    {
-      this->setWikiSummary("Runs a diagnostic test for saturation of PSD tubes and creates a MaskWorkspace marking the failed tube spectra. ");
-      this->setOptionalMessage("Runs a diagnostic test for saturation of PSD tubes and creates a MaskWorkspace marking the failed tube spectra.");
-    }
-    
     const std::string CreatePSDBleedMask::category() const
     {
       return "Diagnostics";

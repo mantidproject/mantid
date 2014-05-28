@@ -52,12 +52,6 @@ namespace Algorithms
   const std::string Pause::category() const { return "Utility\\Development";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void Pause::initDocs()
-  {
-    this->setWikiSummary("Pause a script for a given duration.");
-    this->setOptionalMessage("Pause a script for a given duration.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

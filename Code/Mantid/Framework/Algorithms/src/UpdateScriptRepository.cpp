@@ -43,12 +43,6 @@ namespace Algorithms
   const std::string UpdateScriptRepository::category() const { return "Utility";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void UpdateScriptRepository::initDocs()
-  {
-    this->setWikiSummary("Update the local instance of [[ScriptRepository]].");
-    this->setOptionalMessage("Update the local instance of ScriptRepository.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

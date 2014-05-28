@@ -59,6 +59,9 @@ public:
   virtual ~Min() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "Min";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Takes a 2D workspace as input and find the minimum in each 1D spectrum. The algorithm creates a new 1D workspace containing all minima as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method

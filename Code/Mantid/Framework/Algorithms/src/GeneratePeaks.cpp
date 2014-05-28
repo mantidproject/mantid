@@ -72,11 +72,7 @@ namespace Algorithms
   
   //----------------------------------------------------------------------------------------------
   /** Wiki documentation
-    */
-  void GeneratePeaks::initDocs()
-  {
-    this->setWikiSummary("Generate peaks in an output workspace according to a [[TableWorkspace]] containing a list of peak's parameters.");
-  }
+    *
 
   //----------------------------------------------------------------------------------------------
   /** Define algorithm's properties

@@ -51,13 +51,6 @@ namespace Algorithms
   SumEventsByLogValue::~SumEventsByLogValue()
   {
   }
-  
-  /// Sets documentation strings for this algorithm
-  void SumEventsByLogValue::initDocs()
-  {
-    this->setWikiSummary("Produces a single spectrum workspace containing the total summed events in the workspace as a function of a specified log.");
-    this->setOptionalMessage("Produces a single spectrum workspace containing the total summed events in the workspace as a function of a specified log.");
-  }
 
   void SumEventsByLogValue::init()
   {

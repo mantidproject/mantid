@@ -77,12 +77,6 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void EditInstrumentGeometry::initDocs()
-  {
-    this->setWikiSummary("Add, substitute and edit an Instrument associated with a Workspace");
-    this->setOptionalMessage("The edit or added information will be attached to a Workspace.  Currently it is in an overwrite mode only.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

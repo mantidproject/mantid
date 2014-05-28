@@ -59,12 +59,6 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SofQW3::initDocs()
-  {
-    this->setWikiSummary("Calculate the intensity as a function of momentum transfer and energy");
-    this->setOptionalMessage("Calculate the intensity as a function of momentum transfer and energy.");
-  }
 
   /**
    * @return the name of the Algorithm

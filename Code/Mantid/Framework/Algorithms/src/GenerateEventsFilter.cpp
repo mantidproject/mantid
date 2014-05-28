@@ -93,11 +93,6 @@ namespace Algorithms
   GenerateEventsFilter::~GenerateEventsFilter()
   {
   }
-  
-  void GenerateEventsFilter::initDocs()
-  {
-    this->setWikiSummary("Generate one or a set of event filters according to time or specified log's value.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Declare input

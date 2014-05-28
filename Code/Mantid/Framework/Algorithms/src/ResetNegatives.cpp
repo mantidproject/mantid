@@ -56,12 +56,7 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /// @copydoc Mantid::API::Algorithm::initDocs()
-  void ResetNegatives::initDocs()
-  {
-    this->setWikiSummary("Reset negative values to something else.");
-    this->setOptionalMessage("Reset negative values to something else.");
-  }
+  /// @copydoc Mantid::API::
 
   //----------------------------------------------------------------------------------------------
   /// @copydoc Mantid::API::Algorithm::init()

@@ -51,6 +51,9 @@ public:
 
   /// Algorithm's name
   virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "This algorithm creates a workspace which is the duplicate of the input, but where the error value for every bin has been set to zero.";}
+
 
   /// Algorithm's version
   virtual int version() const;
@@ -59,8 +62,7 @@ public:
   virtual const std::string category() const { return "Arithmetic\\Errors";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

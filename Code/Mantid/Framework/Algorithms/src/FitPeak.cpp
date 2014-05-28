@@ -1130,14 +1130,7 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Document
-   */
-  void FitPeak::initDocs()
-  {
-    setWikiSummary("Fit a single peak with checking mechanism. ");
-    setOptionalMessage("Fit a single peak with checking mechanism. ");
-
-    return;
-  }
+   *
 
   //----------------------------------------------------------------------------------------------
   /** Declare properties

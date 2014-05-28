@@ -44,12 +44,7 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** WIKI:
-   */
-  void CalculateZscore::initDocs()
-  {
-    setWikiSummary("Calculate Z-score for Y and E of MatrixWorkspace.");
-    setOptionalMessage("Calculate Z-score for Y and E of MatrixWorkspace.");
-  }
+   *
 
   //----------------------------------------------------------------------------------------------
   /** Define properties

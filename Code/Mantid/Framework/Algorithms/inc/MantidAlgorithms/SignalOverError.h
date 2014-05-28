@@ -41,11 +41,14 @@ namespace Algorithms
     virtual ~SignalOverError();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Replace Y by Y/E for a MatrixWorkspace";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
+
 
     // Overridden UnaryOperation methods
     void performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut);

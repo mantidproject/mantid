@@ -49,12 +49,6 @@ namespace Algorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void AddLogDerivative::initDocs()
-  {
-    this->setWikiSummary("Add a sample log that is the first or second derivative of an existing sample log.");
-    this->setOptionalMessage("Add a sample log that is the first or second derivative of an existing sample log.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

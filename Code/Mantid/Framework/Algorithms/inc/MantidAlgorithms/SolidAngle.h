@@ -51,14 +51,16 @@ public:
   virtual ~SolidAngle();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "SolidAngle"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "The SolidAngle algorithm calculates the solid angle in steradians for each of the detectors in an instrument and outputs the data in a workspace.  This can then be used to normalize a data workspace using the divide algorithm should you wish.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "CorrectionFunctions\\InstrumentCorrections";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();

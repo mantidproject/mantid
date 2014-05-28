@@ -48,12 +48,6 @@ namespace Algorithms
   const std::string SignalOverError::category() const { return "Arithmetic";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SignalOverError::initDocs()
-  {
-    this->setWikiSummary("Replace Y by Y/E for a MatrixWorkspace");
-    this->setOptionalMessage("Replace Y by Y/E for a MatrixWorkspace");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Perform the Y/E */

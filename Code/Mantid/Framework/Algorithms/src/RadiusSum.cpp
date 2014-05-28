@@ -74,12 +74,6 @@ namespace Algorithms
   const std::string RadiusSum::category() const { return "Transforms";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void RadiusSum::initDocs()
-  {
-    this->setWikiSummary("Sum of all the counts inside a ring against the scattering angle for each Radius.");
-    this->setOptionalMessage("Sum of all the counts inside a ring against the scattering angle for each Radius.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

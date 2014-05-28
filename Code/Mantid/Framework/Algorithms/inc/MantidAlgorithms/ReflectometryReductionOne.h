@@ -45,6 +45,9 @@ namespace Mantid
       virtual ~ReflectometryReductionOne();
 
       virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections.";}
+
       virtual int version() const;
       virtual const std::string category() const;
 
@@ -55,7 +58,7 @@ namespace Mantid
     private:
 
       /** Overridden Algorithm methods **/
-      virtual void initDocs();
+  
 
       void init();
 

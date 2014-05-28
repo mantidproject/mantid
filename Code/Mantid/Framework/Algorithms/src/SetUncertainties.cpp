@@ -17,13 +17,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetUncertainties)
 
-/// Sets documentation strings for this algorithm
-void SetUncertainties::initDocs()
-{
-  this->setWikiSummary("This algorithm creates a workspace which is the duplicate of the input, but where the error value for every bin has been set to zero. ");
-  this->setOptionalMessage("This algorithm creates a workspace which is the duplicate of the input, but where the error value for every bin has been set to zero.");
-}
-
 
 using namespace Kernel;
 using namespace API;

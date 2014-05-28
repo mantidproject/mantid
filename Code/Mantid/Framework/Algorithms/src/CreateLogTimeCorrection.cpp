@@ -44,16 +44,7 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Init documentation
-    */
-  void CreateLogTimeCorrection::initDocs()
-  {
-    setWikiSummary("Create log time correction table for event filtering by log value"
-                   ", if frequency of log is high.");
-
-    setOptionalMessage("Create log time correction table.  Correction for each pixel is based on L1 and L2.");
-
-    return;
-  }
+    *
   
   //----------------------------------------------------------------------------------------------
   /** Declare properties

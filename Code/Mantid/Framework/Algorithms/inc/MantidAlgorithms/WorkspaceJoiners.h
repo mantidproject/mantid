@@ -44,6 +44,10 @@ namespace Algorithms
     virtual ~WorkspaceJoiners();
 
     virtual const std::string category() const;
+    
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Join two workspaces together by appending their spectra.";}
+    
 
   protected:
     API::MatrixWorkspace_sptr execWS2D(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);

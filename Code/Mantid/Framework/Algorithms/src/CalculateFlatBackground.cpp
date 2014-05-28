@@ -36,13 +36,6 @@ namespace Mantid
         // Register the algorithm into the AlgorithmFactory
         DECLARE_ALGORITHM(CalculateFlatBackground)
 
-        /// Sets documentation strings for this algorithm
-        void CalculateFlatBackground::initDocs()
-        {
-            this->setWikiSummary("Finds a constant value fit to an appropriate range of each desired spectrum and subtracts that value from the entire spectrum. ");
-            this->setOptionalMessage("Finds a constant value fit to an appropriate range of each desired spectrum and subtracts that value from the entire spectrum.");
-        }
-
 
         using namespace Kernel;
         using namespace API;

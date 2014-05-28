@@ -59,6 +59,9 @@ public:
   virtual ~MaxMin() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "MaxMin";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Takes a 2D workspace as input and find the maximum (minimum) in each 1D spectrum.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
