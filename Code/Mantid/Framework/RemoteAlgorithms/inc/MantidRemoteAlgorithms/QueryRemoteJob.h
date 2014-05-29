@@ -15,14 +15,15 @@ public:
   virtual ~QueryRemoteJob() {}
   /// Algorithm's name
   virtual const std::string name() const { return "QueryRemoteJob"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Query a remote compute resource for a specific job";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Remote"; }
 
 private:
-  /// Initialisation code
-  void initDocs();
   void init();
   ///Execution code
   void exec();

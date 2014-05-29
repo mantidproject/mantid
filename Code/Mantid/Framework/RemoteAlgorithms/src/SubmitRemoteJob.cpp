@@ -33,13 +33,6 @@ using namespace Mantid::Kernel;
 //using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
-
-void SubmitRemoteJob::initDocs()
-{
-  this->setWikiSummary("Submit a job to be executed on the specified remote compute resource.");
-  this->setOptionalMessage("Submit a job to be executed on the specified remote compute resource.");
-}
 
 void SubmitRemoteJob::init()
 {
