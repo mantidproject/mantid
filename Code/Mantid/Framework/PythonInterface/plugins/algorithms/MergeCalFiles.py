@@ -15,10 +15,10 @@ class MergeCalFiles(PythonAlgorithm):
   def name(self):
     return "MergeCalFiles"
 
-
+  def summary(self):
+    return "Combines the data from two Cal Files."
+    
   def PyInit(self):
-    self.setWikiSummary("Combines the data from two [[CalFile| Cal Files]].")
-    self.setOptionalMessage("Combines the data from two Cal Files.")
     self.declareProperty(FileProperty("UpdateFile","", FileAction.Load, ['cal']), doc="The cal file containing the updates to merge into another file.")
     self.declareProperty(FileProperty("MasterFile","", FileAction.Load, ['cal']), doc="The master file to be altered, the file must be sorted by UDET")
     self.declareProperty(FileProperty("OutputFile","", FileAction.Save, ['cal']), doc="The file to contain the results")

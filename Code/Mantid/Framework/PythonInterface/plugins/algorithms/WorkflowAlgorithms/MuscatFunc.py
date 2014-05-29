@@ -17,10 +17,10 @@ class MuscatFunc(PythonAlgorithm):
 	def category(self):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
-	def PyInit(self):
-		self.setOptionalMessage("Calculates multiple scattering using S(Q,w) from specified functions")
-		self.setWikiSummary("Calculates multiple scattering using S(Q,w) from specified functions")
+  def summary(self):
+    return "Calculates multiple scattering using S(Q,w) from specified functions."
 
+	def PyInit(self):
 		self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
 		self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']))
 		self.declareProperty(name='Geom',defaultValue='Flat',validator=StringListValidator(['Flat','Cyl']), doc='')

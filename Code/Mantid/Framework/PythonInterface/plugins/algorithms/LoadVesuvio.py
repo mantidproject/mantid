@@ -39,8 +39,10 @@ _LOGGING_ = False
 
 class LoadVesuvio(PythonAlgorithm):
     
+    def summary(self):
+      return "A Workflow algorithm to load the data from the VESUVIO instrument at ISIS."
+
     def PyInit(self):
-        self.setOptionalMessage("A Workflow algorithm to load the data from the VESUVIO instrument at ISIS.")
         self.declareProperty(RUN_PROP, "", StringMandatoryValidator(),
                              doc="The run numbers that should be loaded. E.g."
                                  "14188  - for single run"

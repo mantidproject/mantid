@@ -17,10 +17,10 @@ class SofQWMoments(PythonAlgorithm):
 	def category(self):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
-	def PyInit(self):
-		self.setOptionalMessage("Calculates the nth moment of y(q,w)")
-		self.setWikiSummary("Calculates the nth moment of y(q,w)")
+  def summary (self):
+    return "Calculates the nth moment of y(q,w)"
 
+	def PyInit(self):
 		self.declareProperty(MatrixWorkspaceProperty("Sample", "", Direction.Input), doc="Sample to use.")
 		self.declareProperty(name='EnergyMin', defaultValue=-0.5, doc='Minimum energy for fit. Default=-0.5')
 		self.declareProperty(name='EnergyMax', defaultValue=0.5, doc='Maximum energy for fit. Default=0.5')

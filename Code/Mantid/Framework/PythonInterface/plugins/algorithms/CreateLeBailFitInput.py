@@ -45,12 +45,13 @@ class CreateLeBailFitInput(PythonAlgorithm):
         """
         """
         return "CreateLeBailFitInput"
- 
+
+    def summary(self):
+        return "Create various input Workspaces required by algorithm LeBailFit."
+
     def PyInit(self):
         """ Declare properties
-        """
-        self.setWikiSummary("""Create various input Workspaces required by algorithm LeBailFit.""")
-        
+        """        
         #instruments=["POWGEN", "NOMAD", "VULCAN"]
         #self.declareProperty("Instrument", "POWGEN", StringListValidator(instruments), "Powder diffractometer's name")
 

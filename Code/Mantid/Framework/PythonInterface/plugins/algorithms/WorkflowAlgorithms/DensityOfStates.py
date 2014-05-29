@@ -15,10 +15,11 @@ import os.path
 import math
 
 class DensityOfStates(PythonAlgorithm):
- 
-		def PyInit(self): 
-			self.setWikiSummary("Calculates phonon densities of states, Raman and IR spectrum.")
-			
+
+    def summary(self):
+        return "Calculates phonon densities of states, Raman and IR spectrum."
+
+		def PyInit(self): 			
 			#declare properties
 			self.declareProperty(FileProperty('File', '', action=FileAction.Load, 
 				extensions = ["phonon", "castep"]),
