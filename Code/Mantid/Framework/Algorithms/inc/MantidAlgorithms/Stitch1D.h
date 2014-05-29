@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include <boost/tuple/tuple.hpp>
 
 namespace Mantid
 {
@@ -47,9 +48,15 @@ namespace Algorithms
     void exec();
     double getStartOverlap(const double& min, const double& max) const;
     double getEndOverlap(const double& min, const double& max) const;
+    bool hasNonzeroErrors(Mantid::API::MatrixWorkspace_sptr& ws) const;
     Mantid::MantidVec getRebinParams(Mantid::API::MatrixWorkspace_sptr& lhsWS, Mantid::API::MatrixWorkspace_sptr& rhsWS) const;
     Mantid::API::MatrixWorkspace_sptr rebin(Mantid::API::MatrixWorkspace_sptr& input, const Mantid::MantidVec& params);
     Mantid::API::MatrixWorkspace_sptr integration(Mantid::API::MatrixWorkspace_sptr& input, const double& start, const double& stop);
+    Mantid::API::MatrixWorkspace_sptr multiplyRange(Mantid::API::MatrixWorkspace_sptr& input, const int& startBin, const int& endBin, const double& factor);
+    Mantid::API::MatrixWorkspace_sptr multiplyRange(Mantid::API::MatrixWorkspace_sptr& input, const int& startBin, const double& factor);
+    Mantid::API::MatrixWorkspace_sptr singleValueWS(double val);
+    Mantid::API::MatrixWorkspace_sptr weightedMean(Mantid::API::MatrixWorkspace_sptr& inOne, Mantid::API::MatrixWorkspace_sptr& inTwo);
+    boost::tuple<int,int> findStartEndIndexes(double startOverlap, double endOverlap, Mantid::API::MatrixWorkspace_sptr& workspace);
 
   };
 

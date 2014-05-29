@@ -31,6 +31,11 @@ namespace
     MantidVec rhs_x = rhsWS->readX(0);
     return MinMaxTuple(rhs_x.front(), lhs_x.back());
   }
+
+  bool isNonzero (double i)
+  {
+    return (0 != i);
+  }
 }
 
 namespace Mantid
@@ -159,7 +164,7 @@ namespace Mantid
         }
         endOverlapVal = intesectionMax;
         std::stringstream buffer;
-        buffer << "StartOverlap calculated to be: " << endOverlapVal;
+        buffer << "EndOverlap calculated to be: " << endOverlapVal;
         g_log.information(buffer.str());
       }
       return endOverlapVal;
@@ -229,6 +234,75 @@ namespace Mantid
       return outWS;
     }
 
+    MatrixWorkspace_sptr Stitch1D::multiplyRange(MatrixWorkspace_sptr& input, const int& startBin, const int& endBin, const double& factor)
+    {
+      auto multiplyRange = this->createChildAlgorithm("MultiplyRange");
+      multiplyRange->setProperty("InputWorkspace", input);
+      multiplyRange->setProperty("StartBin", startBin);
+      multiplyRange->setProperty("EndBin", endBin);
+      multiplyRange->setProperty("Factor", factor);
+      multiplyRange->execute();
+      MatrixWorkspace_sptr outWS = multiplyRange->getProperty("OutputWorkspace");
+      return outWS;
+    }
+
+    MatrixWorkspace_sptr Stitch1D::multiplyRange(MatrixWorkspace_sptr& input, const int& startBin, const double& factor)
+    {
+      auto multiplyRange = this->createChildAlgorithm("MultiplyRange");
+      multiplyRange->setProperty("InputWorkspace", input);
+      multiplyRange->setProperty("StartBin", startBin);
+      multiplyRange->setProperty("Factor", factor);
+      multiplyRange->execute();
+      MatrixWorkspace_sptr outWS = multiplyRange->getProperty("OutputWorkspace");
+      return outWS;
+    }
+
+    MatrixWorkspace_sptr Stitch1D::weightedMean(MatrixWorkspace_sptr& inOne, MatrixWorkspace_sptr& inTwo)
+    {
+      auto weightedMean = this->createChildAlgorithm("WeightedMean");
+      weightedMean->setProperty("InputWorkspace1", inOne);
+      weightedMean->setProperty("InputWorkspace2", inTwo);
+      weightedMean->execute();
+      MatrixWorkspace_sptr outWS = weightedMean->getProperty("OutputWorkspace");
+      return outWS;
+    }
+
+    MatrixWorkspace_sptr Stitch1D::singleValueWS(double val)
+    {
+      auto singleValueWS = this->createChildAlgorithm("CreateSingleValuedWorkspace");
+      singleValueWS->setProperty("DataValue", val);
+      singleValueWS->execute();
+      MatrixWorkspace_sptr outWS = singleValueWS->getProperty("OutputWorkspace");
+      return outWS;
+    }
+
+    boost::tuple<int, int> Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap, MatrixWorkspace_sptr& workspace)
+    {
+      int a1 = static_cast<int>(workspace->binIndexOf(startOverlap));
+      int a2 = static_cast<int>(workspace->binIndexOf(endOverlap));
+      if (a1 == a2)
+      {
+        throw std::runtime_error("The Params you have provided for binning yield a workspace in which start and end overlap appear in the same bin. Make binning finer via input Params.");
+      }
+      return boost::tuple<int,int>(a1,a2);
+
+    }
+
+    bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr& ws) const
+    {
+      size_t ws_size = ws->getNumberHistograms();
+      for (size_t i = 0; i < ws_size; ++i)
+      {
+        auto e = ws->readE(i);
+        std::vector<double, std::allocator<double> >::iterator error = std::find_if(e.begin(), e.end(), isNonzero);
+        if (error != e.end())
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
     //----------------------------------------------------------------------------------------------
     /** Execute the algorithm.
      */
@@ -236,7 +310,7 @@ namespace Mantid
     {
       MatrixWorkspace_sptr rhsWS = this->getProperty("RHSWorkspace");
       MatrixWorkspace_sptr lhsWS = this->getProperty("LHSWorkspace");
-      const MinMaxTuple intesectionXRegion = calculateXIntersection(rhsWS, lhsWS);
+      const MinMaxTuple intesectionXRegion = calculateXIntersection(lhsWS, rhsWS);
 
       const double intersectionMin = intesectionXRegion.get<0>();
       const double intersectionMax = intesectionXRegion.get<1>();
@@ -283,6 +357,10 @@ namespace Mantid
       auto rebinnedLHS = rebin(lhsWS, params);
       auto rebinnedRHS = rebin(rhsWS, params);
 
+      boost::tuple<int,int> startEnd = findStartEndIndexes(startOverlap, endOverlap, rebinnedLHS);
+
+      //manualscalefactor if
+
       auto rhsOverlapIntegrated = integration(rebinnedRHS, startOverlap, endOverlap);
       auto lhsOverlapIntegrated = integration(rebinnedLHS, startOverlap, endOverlap);
 
@@ -302,7 +380,43 @@ namespace Mantid
         scaleFactor = y2[0]/y1[0];
       }
 
-      setProperty("OutputWorkspace", rhsWS);
+      //manualscalefactor end if
+
+      int a1 = boost::tuples::get<0>(startEnd);
+      int a2 = boost::tuples::get<1>(startEnd);
+
+      // Mask out everything BUT the overlap region as a new workspace.
+      MatrixWorkspace_sptr overlap1 = multiplyRange(rebinnedLHS,0,a1,0);
+      overlap1 = multiplyRange(overlap1,a2,0);
+
+      // Mask out everything BUT the overlap region as a new workspace.
+      MatrixWorkspace_sptr overlap2 = multiplyRange(rebinnedRHS,0,a1,0);
+      overlap2 = multiplyRange(overlap2,a2,0);
+
+      // Mask out everything AFTER the start of the overlap region
+      rebinnedLHS = multiplyRange(rebinnedLHS,a1 + 1,0);
+
+      // Mask out everything BEFORE the end of the overlap region
+      rebinnedRHS = multiplyRange(rebinnedRHS,0,a2-1,0);
+
+      // Calculate a weighted mean for the overlap region
+
+      MatrixWorkspace_sptr overlapave;
+      if (hasNonzeroErrors(overlap1) && hasNonzeroErrors(overlap2))
+      {
+        overlapave = weightedMean(overlap1, overlap2);
+      }
+      else
+      {
+        g_log.information("Using un-weighted mean for Stitch1D overlap mean");
+        MatrixWorkspace_sptr sum = overlap1 + overlap2;
+        MatrixWorkspace_sptr denominator = singleValueWS(2.0);
+        overlapave = sum / denominator;
+      }
+
+      MatrixWorkspace_sptr result = rebinnedLHS + overlapave + rebinnedRHS;
+
+      setProperty("OutputWorkspace", result);
       setProperty("OutScaleFactor", scaleFactor);
 
     }
