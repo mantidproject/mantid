@@ -258,7 +258,7 @@ namespace Mantid
 
       void saveInstrumentNexus(::NeXus::File * file) const;
       void loadInstrumentNexus(::NeXus::File * file);
-       void saveSpectraMapNexus(::NeXus::File * file, const std::vector<int>& spec,
+      void saveSpectraMapNexus(::NeXus::File * file, const std::vector<int>& spec,
           const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
       //=====================================================================================
@@ -292,14 +292,13 @@ namespace Mantid
       virtual std::vector<IMDIterator*> createIterators(size_t suggestedNumCores = 1,
           Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
-       /// Apply masking.
-       void setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion);
+      /// Apply masking.
+      void setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion);
+      /// Clear exsting masking.
+      void clearMDMasking();
 
-       /// Clear exsting masking.
-       void clearMDMasking();
-
-       /// @return the special coordinate system used if any.
-       virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
+      /// @return the special coordinate system used if any.
+      virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
 
       //=====================================================================================
       // End IMDWorkspace methods
