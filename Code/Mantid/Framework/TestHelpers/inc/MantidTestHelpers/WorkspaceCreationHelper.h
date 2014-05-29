@@ -58,6 +58,8 @@ namespace WorkspaceCreationHelper
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Test";}  
+    /// Algorithm's summary.
+    virtual const std::string summary() const { return "Test summary."; }
 
     Mantid::Kernel::Logger & getLogger(){return g_log;}
     
