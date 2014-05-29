@@ -787,6 +787,17 @@ public:
     TS_ASSERT_EQUALS(ws->getXMax(), 1.0);
   }
 
+  void test_monitorWorkspace()
+  {
+    WorkspaceTester ws;
+    TS_ASSERT( ! ws.monitorWorkspace() )
+    auto ws2 = boost::make_shared<WorkspaceTester>();
+    ws.setMonitorWorkspace(ws2);
+    TS_ASSERT_EQUALS( ws.monitorWorkspace(), ws2 )
+    ws.setMonitorWorkspace(boost::shared_ptr<MatrixWorkspace>());
+    TS_ASSERT( ! ws.monitorWorkspace() )
+  }
+
 private:
   boost::shared_ptr<MatrixWorkspace> ws;
 

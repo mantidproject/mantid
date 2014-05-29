@@ -256,6 +256,10 @@ namespace Mantid
       typedef std::map<size_t,double> MaskList;
       const MaskList& maskedBins(const size_t& spectrumIndex) const;
 
+      // Methods handling the internal monitor workspace
+      void setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace>& monitorWS);
+      boost::shared_ptr<MatrixWorkspace> monitorWorkspace() const;
+
       void saveInstrumentNexus(::NeXus::File * file) const;
       void loadInstrumentNexus(::NeXus::File * file);
       void saveSpectraMapNexus(::NeXus::File * file, const std::vector<int>& spec,
@@ -330,6 +334,9 @@ namespace Mantid
       bool m_isDistribution;
       /// The set of masked bins in a map keyed on spectrum index
       std::map< int64_t, MaskList > m_masks;
+
+      /// A workspace holding monitor data relating to the main data in the containing workspace (null if none).
+      boost::shared_ptr<MatrixWorkspace> m_monitorWorkspace;
 
     protected:
       /// Assists conversions to and from 2D histogram indexing to 1D indexing.
