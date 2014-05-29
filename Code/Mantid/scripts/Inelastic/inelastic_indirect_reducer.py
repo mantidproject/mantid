@@ -47,7 +47,10 @@ class IndirectReducer(MSGReducer):
         Setup the steps for the reduction. Please refer to the individual
         steps for details on their operation.
         """
-        
+
+        step = steps.IdentifyBadDetectors(MultipleFrames=self._multiple_frames)
+        self.append_step(step)
+
         # "HandleMonitor" converts the monitor to Wavelength, possibly Unwraps
         step = steps.HandleMonitor(MultipleFrames=self._multiple_frames)
         self.append_step(step)
