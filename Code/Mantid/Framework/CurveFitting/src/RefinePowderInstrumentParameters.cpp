@@ -59,10 +59,6 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Set up documention
-    *
-
-  //----------------------------------------------------------------------------------------------
   /** Parameter declaration
    */
   void RefinePowderInstrumentParameters::init()

@@ -102,10 +102,6 @@ namespace CurveFitting
   LeBailFit::~LeBailFit()
   {
   }
-  
-  //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-   *
 
   //----------------------------------------------------------------------------------------------
   /** Declare the input properties for this algorithm
