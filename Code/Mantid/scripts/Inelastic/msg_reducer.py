@@ -20,7 +20,7 @@ class MSGReducer(reducer.Reducer):
     _monitor_index = None #: Index of Monitor specturm.
     _multiple_frames = False
     _detector_range = [-1, -1]
-    _masking_detectors = []
+    _masking_detectors = {}
     _parameter_file = None
     _rebin_string = None
     _fold_multiple_frames = True

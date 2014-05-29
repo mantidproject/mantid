@@ -264,8 +264,8 @@ class IdentifyBadDetectors(ReductionStep):
                 self._masking_detectors.append(i)
         DeleteWorkspace(Workspace=temp_ws_mask)
 
-        #set the detector masks on the workspace
-        reducer._masking_detectors = self._masking_detectors
+        #set the detector masks for the workspace
+        reducer._masking_detectors[file_ws] = self._masking_detectors
 
     def get_mask_list(self):
         return self._masking_detectors
@@ -910,6 +910,7 @@ class Grouping(ReductionStep):
         self._multiple_frames = MultipleFrames
         
     def execute(self, reducer, file_ws):
+
         if ( self._multiple_frames ):
             try:
                 workspaces = mtd[file_ws].getNames()
@@ -917,6 +918,10 @@ class Grouping(ReductionStep):
                 workspaces = [file_ws]
         else:
             workspaces = [file_ws]
+
+        # set the detector mask for this workspace
+        if file_ws in reducer._masking_detectors:
+            self._masking_detectors = reducer._masking_detectors[file_ws]
             
         for ws in workspaces:
             if self._grouping_policy is not None:
@@ -938,9 +943,6 @@ class Grouping(ReductionStep):
             
     def set_grouping_policy(self, value):
         self._grouping_policy = value
-        
-    def set_mask_list(self, value):
-        self._masking_detectors = value
         
     def get_result_workspaces(self):
         return self._result_workspaces

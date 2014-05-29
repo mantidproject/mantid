@@ -95,7 +95,6 @@ class IndirectReducer(MSGReducer):
             
         step = steps.Grouping(MultipleFrames=self._multiple_frames)
         step.set_grouping_policy(self._grouping_policy)
-        step.set_mask_list(self._masking_detectors)
         self.append_step(step)
         
         # "FoldData" puts workspaces that have been chopped back together.
