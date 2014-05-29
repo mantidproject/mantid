@@ -70,6 +70,8 @@ public:
   size_t size() const;
   /// Is the history empty
   bool empty() const;
+  /// remove all algorithm history objects from the workspace history
+  void clearHistory();
   /// Retrieve an algorithm history by index
   AlgorithmHistory_const_sptr getAlgorithmHistory(const size_t index) const;
   /// Add operator[] access
