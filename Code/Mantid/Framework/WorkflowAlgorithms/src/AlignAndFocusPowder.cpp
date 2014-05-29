@@ -82,17 +82,6 @@ namespace WorkflowAlgorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-    */
-  void AlignAndFocusPowder::initDocs()
-  {
-    this->setWikiSummary("Algorithm to focus powder diffraction data into a number of histograms "
-                         "according to a grouping scheme defined in a [[CalFile]]. ");
-    this->setOptionalMessage("Algorithm to focus powder diffraction data into a number of histograms "
-                             "according to a grouping scheme defined in a CalFile.");
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Initialisation method. Declares properties to be used in algorithm.
    */
   void AlignAndFocusPowder::init()

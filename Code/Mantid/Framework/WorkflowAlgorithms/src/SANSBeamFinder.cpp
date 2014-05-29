@@ -28,13 +28,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSBeamFinder)
 
-/// Sets documentation strings for this algorithm
-void SANSBeamFinder::initDocs()
-{
-  this->setWikiSummary("Beam finder workflow algorithm for SANS instruments.");
-  this->setOptionalMessage("Beam finder workflow algorithm for SANS instruments.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

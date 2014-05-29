@@ -101,12 +101,6 @@ namespace Mantid
     const std::string DgsAbsoluteUnitsReduction::category() const { return "Workflow\\Inelastic\\UsesPropertyManager"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void DgsAbsoluteUnitsReduction::initDocs()
-    {
-      this->setWikiSummary("Process the absolute units sample.");
-      this->setOptionalMessage("Process the absolute units sample.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

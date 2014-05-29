@@ -90,12 +90,6 @@ namespace Mantid
     const std::string DgsConvertToEnergyTransfer::category() const { return "Workflow\\Inelastic\\UsesPropertyManager"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void DgsConvertToEnergyTransfer::initDocs()
-    {
-      this->setWikiSummary("Algorithm to convert from TOF to energy transfer.");
-      this->setOptionalMessage("Algorithm to convert from TOF to energy transfer.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
