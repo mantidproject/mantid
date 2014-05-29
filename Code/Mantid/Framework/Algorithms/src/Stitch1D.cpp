@@ -1,6 +1,6 @@
 /*WIKI*
- TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
- *WIKI*/
+TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+*WIKI*/
 
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -48,14 +48,14 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
-     */
+    */
     Stitch1D::Stitch1D()
     {
     }
 
     //----------------------------------------------------------------------------------------------
     /** Destructor
-     */
+    */
     Stitch1D::~Stitch1D()
     {
     }
@@ -91,34 +91,34 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
-     */
+    */
     void Stitch1D::init()
     {
       Kernel::IValidator_sptr histogramValidator = boost::make_shared<HistogramValidator>();
 
       declareProperty(
-          new WorkspaceProperty<MatrixWorkspace>("LHSWorkspace", "", Direction::Input,
-              histogramValidator->clone()), "LHS input workspace.");
+        new WorkspaceProperty<MatrixWorkspace>("LHSWorkspace", "", Direction::Input,
+        histogramValidator->clone()), "LHS input workspace.");
       declareProperty(
-          new WorkspaceProperty<MatrixWorkspace>("RHSWorkspace", "", Direction::Input,
-              histogramValidator->clone()), "RHS input workspace.");
+        new WorkspaceProperty<MatrixWorkspace>("RHSWorkspace", "", Direction::Input,
+        histogramValidator->clone()), "RHS input workspace.");
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
-          "Output stitched workspace.");
+        "Output stitched workspace.");
       declareProperty(
-          new PropertyWithValue<double>("StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
-          "Start overlap x-value in units of x-axis. Optional.");
+        new PropertyWithValue<double>("StartOverlap", Mantid::EMPTY_DBL(), Direction::Input),
+        "Start overlap x-value in units of x-axis. Optional.");
       declareProperty(new PropertyWithValue<double>("EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
-          "End overlap x-value in units of x-axis. Optional.");
+        "End overlap x-value in units of x-axis. Optional.");
       declareProperty(
-          new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true)),
-          "Rebinning Parameters. See Rebin for format. If only a single value is provided, start and end are taken from input workspaces.");
+        new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>(true)),
+        "Rebinning Parameters. See Rebin for format. If only a single value is provided, start and end are taken from input workspaces.");
       declareProperty(new PropertyWithValue<bool>("ScaleRHSWorkspace", true, Direction::Input),
-          "Scaling either with respect to workspace 1 or workspace 2");
+        "Scaling either with respect to workspace 1 or workspace 2");
       declareProperty(new PropertyWithValue<bool>("UseManualScaleFactor", false, Direction::Input),
-          "True to use a provided value for the scale factor.");
+        "True to use a provided value for the scale factor.");
       declareProperty(
-          new PropertyWithValue<double>("OutScaleFactor", Mantid::EMPTY_DBL(), Direction::Output),
-          "The actual used value for the scaling factor.");
+        new PropertyWithValue<double>("OutScaleFactor", Mantid::EMPTY_DBL(), Direction::Output),
+        "The actual used value for the scaling factor.");
 
     }
 
@@ -127,15 +127,15 @@ namespace Mantid
       Property* startOverlapProp = this->getProperty("StartOverlap");
       double startOverlapVal = this->getProperty("StartOverlap");
       const bool startOverlapBeyondRange = (startOverlapVal < intesectionMin)
-          || (startOverlapVal > intesectionMax);
+        || (startOverlapVal > intesectionMax);
       if (startOverlapProp->isDefault() || startOverlapBeyondRange)
       {
         if (!startOverlapProp->isDefault() && startOverlapBeyondRange)
         {
           char message[200];
           std::sprintf(message,
-              "StartOverlap is outside range at %0.4f, Min is %0.4f, Max is %0.4f . Forced to be: %0.4f",
-              startOverlapVal, intesectionMin, intesectionMax, intesectionMin);
+            "StartOverlap is outside range at %0.4f, Min is %0.4f, Max is %0.4f . Forced to be: %0.4f",
+            startOverlapVal, intesectionMin, intesectionMax, intesectionMin);
           g_log.warning(std::string(message));
         }
         startOverlapVal = intesectionMin;
@@ -151,15 +151,15 @@ namespace Mantid
       Property* endOverlapProp = this->getProperty("EndOverlap");
       double endOverlapVal = this->getProperty("EndOverlap");
       const bool endOverlapBeyondRange = (endOverlapVal < intesectionMin)
-          || (endOverlapVal > intesectionMax);
+        || (endOverlapVal > intesectionMax);
       if (endOverlapProp->isDefault() || endOverlapBeyondRange)
       {
         if (!endOverlapProp->isDefault() && endOverlapBeyondRange)
         {
           char message[200];
           std::sprintf(message,
-              "EndOverlap is outside range at %0.4f, Min is %0.4f, Max is %0.4f . Forced to be: %0.4f",
-              endOverlapVal, intesectionMin, intesectionMax, intesectionMin);
+            "EndOverlap is outside range at %0.4f, Min is %0.4f, Max is %0.4f . Forced to be: %0.4f",
+            endOverlapVal, intesectionMin, intesectionMax, intesectionMin);
           g_log.warning(std::string(message));
         }
         endOverlapVal = intesectionMax;
@@ -305,7 +305,7 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------
     /** Execute the algorithm.
-     */
+    */
     void Stitch1D::exec()
     {
       MatrixWorkspace_sptr rhsWS = this->getProperty("RHSWorkspace");
@@ -321,10 +321,10 @@ namespace Mantid
       if (startOverlap > endOverlap)
       {
         std::string message =
-            boost::str(
-                boost::format(
-                    "Stitch1D cannot have a StartOverlap > EndOverlap. StartOverlap: %0.9f, EndOverlap: %0.9f")
-                    % startOverlap % endOverlap);
+          boost::str(
+          boost::format(
+          "Stitch1D cannot have a StartOverlap > EndOverlap. StartOverlap: %0.9f, EndOverlap: %0.9f")
+          % startOverlap % endOverlap);
         throw std::runtime_error(message);
       }
 
@@ -336,20 +336,20 @@ namespace Mantid
       if (startOverlap < xMin)
       {
         std::string message =
-            boost::str(
-                boost::format(
-                    "Stitch1D StartOverlap is outside the available X range after rebinning. StartOverlap: %10.9f, X min: %10.9f")
-                    % startOverlap % xMin);
+          boost::str(
+          boost::format(
+          "Stitch1D StartOverlap is outside the available X range after rebinning. StartOverlap: %10.9f, X min: %10.9f")
+          % startOverlap % xMin);
 
         throw std::runtime_error(message);
       }
       if (endOverlap > xMax)
       {
         std::string message =
-            boost::str(
-                boost::format(
-                    "Stitch1D EndOverlap is outside the available X range after rebinning. EndOverlap: %10.9f, X max: %10.9f")
-                    % endOverlap % xMax);
+          boost::str(
+          boost::format(
+          "Stitch1D EndOverlap is outside the available X range after rebinning. EndOverlap: %10.9f, X max: %10.9f")
+          % endOverlap % xMax);
 
         throw std::runtime_error(message);
       }

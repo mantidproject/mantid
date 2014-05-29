@@ -28,7 +28,7 @@ private:
     T m_stepNumber;
   public:
     LinearSequence(const T& start, const T& step) :
-        m_start(start), m_step(step), m_stepNumber(T(0))
+      m_start(start), m_step(step), m_stepNumber(T(0))
     {
     }
 
@@ -151,7 +151,7 @@ public:
   }
 
   ResultType do_stitch1D(MatrixWorkspace_sptr& lhs, MatrixWorkspace_sptr& rhs,
-      const double& startOverlap, const double& endOverlap, const MantidVec& params)
+    const double& startOverlap, const double& endOverlap, const MantidVec& params)
   {
     Stitch1D alg;
     alg.setChild(true);
@@ -188,15 +188,15 @@ public:
   void test_Init()
   {
     Stitch1D alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize())
-    TS_ASSERT( alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING( alg.initialize());
+    TS_ASSERT( alg.isInitialized());
   }
 
   void test_startoverlap_greater_than_end_overlap_throws()
   {
     TSM_ASSERT_THROWS("Should have thrown with StartOverlap < x max",
-        do_stitch1D(this->a, this->b, this->x.back(), this->x.front(), MantidVec(1, 0.2)),
-        std::runtime_error&);
+      do_stitch1D(this->a, this->b, this->x.back(), this->x.front(), MantidVec(1, 0.2)),
+      std::runtime_error&);
   }
 
   void test_lhsworkspace_must_be_histogram()
@@ -204,7 +204,7 @@ public:
     auto lhs_ws = make_arbitrary_point_ws();
     auto rhs_ws = make_arbitrary_histogram_ws();
     TSM_ASSERT_THROWS("LHS WS must be histogram", do_stitch1D(lhs_ws, rhs_ws, -1, 1, MantidVec(1, 0.2)),
-        std::invalid_argument&);
+      std::invalid_argument&);
   }
 
   void test_rhsworkspace_must_be_histogram()
@@ -212,13 +212,13 @@ public:
     auto lhs_ws = make_arbitrary_histogram_ws();
     auto rhs_ws = make_arbitrary_point_ws();
     TSM_ASSERT_THROWS("RHS WS must be histogram", do_stitch1D(lhs_ws, rhs_ws, -1, 1, MantidVec(1, 0.2)),
-        std::invalid_argument&);
+      std::invalid_argument&);
   }
 
   void test_stitching_uses_suppiled_params()
   {
     auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4,
-        boost::assign::list_of<double>(-0.8)(0.2)(1.0).convert_to_container<MantidVec>());
+      boost::assign::list_of<double>(-0.8)(0.2)(1.0).convert_to_container<MantidVec>());
 
     MantidVec xValues = ret.get<0>()->readX(0); // Get the output workspace and look at the limits.
 
