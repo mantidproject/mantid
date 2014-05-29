@@ -201,10 +201,11 @@ namespace Mantid
                 size_t neighIndex = nonEmptyNeighbourIndexes[i];
                 if (neighIndex != parentIndex)
                 {
-                  neighbourElements[neighIndex].unionWith(&parentElement);
+                  neighbourElements[neighIndex] = parentElement;
                 }
               }
-              neighbourElements[currentIndex].unionWith(&parentElement);
+
+              neighbourElements[currentIndex] = parentElement;
             }
           }
         } while (iterator->next());
@@ -352,31 +353,6 @@ namespace Mantid
             {
               // Second pass smoothing step
               const size_t currentIndex = iterator->getLinearIndex();
-              auto vecNeighbourIndexes = iterator->findNeighbourIndexes();
-              VecIndexes nonEmptyNeighbourIndexes;
-              for (size_t i = 0; i < vecNeighbourIndexes.size(); ++i)
-              {
-                const size_t& neighbourIndex = vecNeighbourIndexes[i];
-                const DisjointElement& neighbourElement = neighbourElements[neighbourIndex];
-                if (!neighbourElement.isEmpty() && iterator->isWithinBounds(neighbourIndex))
-                {
-                  nonEmptyNeighbourIndexes.push_back(neighbourIndex);
-                }
-              }
-              if (nonEmptyNeighbourIndexes.size() > 0)
-              {
-                size_t parentIndex = nonEmptyNeighbourIndexes[0];
-                for (size_t i = 1; i < nonEmptyNeighbourIndexes.size(); ++i)
-                {
-                  size_t neighIndex = nonEmptyNeighbourIndexes[i];
-                  if (neighbourElements[neighIndex].getId() < neighbourElements[parentIndex].getId())
-                  {
-                    parentIndex = neighIndex;
-                  }
-                }
-                DisjointElement& parentElement = neighbourElements[parentIndex];
-                neighbourElements[currentIndex].unionWith(&parentElement);
-              }
 
               const size_t& labelAtIndex = neighbourElements[currentIndex].getRoot();
               localClusterMap[labelAtIndex]->addIndex(currentIndex);
@@ -427,40 +403,14 @@ namespace Mantid
 
         // Associate the member DisjointElements with a cluster. Involves looping back over iterator.
         iterator->jumpTo(0); // Reset
+        const double val4 = ws->getSignalNormalizedAt(4094);
         do
         {
+          const size_t currentIndex = iterator->getLinearIndex();
           if (!baseStrategy->isBackground(iterator))
           {
-            // Second pass smoothing step
-            const size_t currentIndex = iterator->getLinearIndex();
-            auto vecNeighbourIndexes = iterator->findNeighbourIndexes();
-            VecIndexes nonEmptyNeighbourIndexes;
-            for (size_t i = 0; i < vecNeighbourIndexes.size(); ++i)
-            {
-              const DisjointElement& neighbourElement = neighbourElements[vecNeighbourIndexes[i]];
-              if (!neighbourElement.isEmpty())
-              {
-                nonEmptyNeighbourIndexes.push_back(vecNeighbourIndexes[i]);
-              }
-            }
-            if (nonEmptyNeighbourIndexes.size() > 0)
-            {
-              size_t parentIndex = nonEmptyNeighbourIndexes[0];
-              for (size_t i = 1; i < nonEmptyNeighbourIndexes.size(); ++i)
-              {
-                size_t neighIndex = nonEmptyNeighbourIndexes[i];
-                if (neighbourElements[neighIndex].getId() < neighbourElements[parentIndex].getId())
-                {
-                  parentIndex = neighIndex;
-                }
-              }
-              DisjointElement& parentElement = neighbourElements[parentIndex];
-              neighbourElements[currentIndex].unionWith(&parentElement);
-            }
-
             const int labelAtIndex = neighbourElements[currentIndex].getRoot();
             clusterMap[labelAtIndex]->addIndex(currentIndex);
-
           }
         } while (iterator->next());
       }
