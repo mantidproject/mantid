@@ -63,9 +63,6 @@ namespace Algorithms
     API::Progress *m_progress;                         ///< Progress reporting object
     DataObjects::EventWorkspace_const_sptr event_ws1;  ///< First event workspace input.
     DataObjects::EventWorkspace_const_sptr event_ws2;  ///< Second event workspace input.
-
-  private:
-    void initDocs();
   };
 
 

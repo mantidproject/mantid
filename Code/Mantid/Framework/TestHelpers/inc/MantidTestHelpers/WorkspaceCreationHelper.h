@@ -71,8 +71,6 @@ namespace WorkspaceCreationHelper
   private:
       void init(){};
       void exec(){};
-   /// Sets documentation strings for this algorithm
-      virtual void initDocs(){};
 
       std::auto_ptr<Mantid::API::Progress > m_Progress;
       /// logger -> to provide logging, 
