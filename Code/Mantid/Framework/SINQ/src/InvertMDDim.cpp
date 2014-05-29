@@ -135,7 +135,3 @@ unsigned int InvertMDDim::calcInvertedIndex(IMDHistoWorkspace_sptr ws, int dim[]
 	}
 	return static_cast<unsigned int>(idx);
 }
-void InvertMDDim::initDocs()
-{
-    this->setWikiSummary("Inverts dimensions of a MDHistoWorkspace");
-}

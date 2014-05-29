@@ -67,14 +67,6 @@ int PoldiFitPeaks1D::version() const { return 1;}
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string PoldiFitPeaks1D::category() const { return "SINQ\\Poldi\\PoldiSet"; }
 
-
-/// Sets documentation strings for this algorithm
-void PoldiFitPeaks1D::initDocs()
-{
-    this->setWikiSummary("PoldiPeakFit1D fits peak profiles to POLDI auto-correlation data.");
-    this->setOptionalMessage("PoldiPeakFit1D fits peak profiles to POLDI auto-correlation data.");
-}
-
 void PoldiFitPeaks1D::init()
 {
     declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input), "An input workspace containing a POLDI auto-correlation spectrum.");

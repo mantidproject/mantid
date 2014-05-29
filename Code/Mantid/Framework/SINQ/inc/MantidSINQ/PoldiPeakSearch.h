@@ -54,10 +54,12 @@ namespace Poldi
 
     virtual int version() const { return 1; }
     virtual const std::string name() const { return "PoldiPeakSearch"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "This algorithm finds the peaks in a POLDI auto-correlation spectrum.";}
+
     virtual const std::string category() const { return "SINQ\\Poldi"; }
     
   protected:
-    void initDocs();
 
     MantidVec getNeighborSums(MantidVec correlationCounts) const;
 

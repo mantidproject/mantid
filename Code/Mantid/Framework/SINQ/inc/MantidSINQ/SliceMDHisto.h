@@ -40,6 +40,9 @@ public:
   virtual ~SliceMDHisto() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SliceMDHisto"; }
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Extracts a hyperslab of data from a MDHistoWorkspace";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -59,8 +62,6 @@ private:
 		  std::vector<int> start, std::vector<int> end, unsigned int dim);
 
   void copyMetaData( Mantid::API::IMDHistoWorkspace_sptr inws,  Mantid::API::IMDHistoWorkspace_sptr outws);
-
-  virtual void initDocs();
 
 };
 
