@@ -87,10 +87,6 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-      *
-
-  //----------------------------------------------------------------------------------------------
   /** Initialize and declare properties.
      */
   void FindPeaks::init()

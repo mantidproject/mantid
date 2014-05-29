@@ -50,10 +50,6 @@ namespace Algorithms
   FixGSASInstrumentFile::~FixGSASInstrumentFile()
   {
   }
-  
-  //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-    *
 
   //----------------------------------------------------------------------------------------------
   /** Implement abstract Algorithm methods

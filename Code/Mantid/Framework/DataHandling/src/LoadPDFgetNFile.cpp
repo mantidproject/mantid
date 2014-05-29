@@ -60,10 +60,6 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Init documentation
-    *
-
-  //----------------------------------------------------------------------------------------------
   /**
    * Return the confidence with with this algorithm can load the file
    * @param descriptor A descriptor for the file

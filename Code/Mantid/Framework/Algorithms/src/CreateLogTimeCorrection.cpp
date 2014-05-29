@@ -43,12 +43,8 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Init documentation
-    *
-  
-  //----------------------------------------------------------------------------------------------
   /** Declare properties
-    */
+   */
   void CreateLogTimeCorrection::init()
   {
     auto inpwsprop = new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, boost::make_shared<InstrumentValidator>());
