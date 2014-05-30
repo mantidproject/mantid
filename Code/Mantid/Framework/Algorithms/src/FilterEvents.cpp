@@ -48,6 +48,7 @@ Wiki page [[EventFiltering]] has a detailed introduction on event filtering in M
 #include "MantidAlgorithms/FilterEvents.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
@@ -57,6 +58,7 @@ Wiki page [[EventFiltering]] has a detailed introduction on event filtering in M
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/LogFilter.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <sstream>
 
@@ -142,6 +144,13 @@ namespace Algorithms
                     "Name of table workspace containing the log time correction factor for each detector. ");
     setPropertySettings("DetectorTOFCorrectionWorkspace",
                         new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO,  "Customized"));
+
+    auto mustBePositive =  boost::make_shared<BoundedValidator<double> >();
+    mustBePositive->setLower(0.0);
+    declareProperty("IncidentEnergy", EMPTY_DBL(), mustBePositive,
+                    "Value of incident energy (Ei) in meV in direct mode.");
+    setPropertySettings("IncidentEnergy",
+                        new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO, "Direct"));
 
     vector<string> corrops;
     corrops.push_back("Shift");
@@ -286,15 +295,17 @@ namespace Algorithms
       m_tofCorrType = DirectCorrect;
     else if (correctiontype.compare("Elastic") == 0)
       m_tofCorrType = ElasticCorrect;
-    else if (correctiontype.compare("Inelastic") == 0)
+    else if (correctiontype.compare("Indirect") == 0)
       m_tofCorrType = IndirectCorrect;
     else
+    {
+      g_log.error() << "Correction type '" << correctiontype << "' is not supported. \n";
       throw runtime_error("Impossible situation!");
+    }
 
     if (m_tofCorrType == CustomizedCorrect)
     {
       // Customized correciton
-      m_genTOFCorrection = false;
       m_detCorrectWorkspace = getProperty("DetectorTOFCorrectionWorkspace");
       if (!m_detCorrectWorkspace)
         throw runtime_error("In case of customized TOF correction, correction workspace must be given!");
@@ -306,16 +317,6 @@ namespace Algorithms
         m_tofCorrOperation = MultiplyOp;
       else
         throw runtime_error("Impossible situation for CustomCorrectionOp!");
-    }
-    else if (m_tofCorrType != NoneCorrect)
-    {
-      // Need to generate TOF correction in this algorithm
-      m_genTOFCorrection = true;
-    }
-    else
-    {
-      // No correction
-      m_genTOFCorrection = false;
     }
 
     m_splitSampleLogs = getProperty("SplitSampleLogs");
@@ -543,149 +544,183 @@ namespace Algorithms
     */
   void FilterEvents::setupDetectorTOFCalibration()
   {
-    // Set up the size of correction and output correction workspace
+    // Set output correction workspace and set to output
     size_t numhist = m_eventWS->getNumberHistograms();
-    m_detTofOffsets.resize(numhist, 1.0);
-    m_detTOFShifts.resize(numhist, 0.0);
-
     MatrixWorkspace_sptr corrws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          WorkspaceFactory::Instance().create("Workspace2D", numhist, 1, 1));
+          WorkspaceFactory::Instance().create("Workspace2D", numhist, 2, 2));
+    setProperty("OutputTOFCorrectionWorkspace", corrws);
+
+    // Set up the size of correction and output correction workspace
+    m_detTofOffsets.resize(numhist, 1.0);
+    m_detTofShifts.resize(numhist, 0.0);
 
     // Set up detector values
     if (m_tofCorrType == CustomizedCorrect)
     {
       setupCustomizedTOFCorrection();
     }
-
-#if 0
-    // Prepare output (class variables)
-    std::vector<detid_t> vecDetIDs;
-    vecDetIDs.resize(numhist, 0);
-
-    // Create the output workspace for correction factors
-    MatrixWorkspace_sptr corrws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          WorkspaceFactory::Instance().create("Workspace2D", numhist, 1, 1));
-
-    // Set up the detector IDs to vecDetIDs and set up the initial value
-    for (size_t i = 0; i < numhist; ++i)
-    {
-      // It is assumed that there is one detector per spectra.
-      // If there are more than 1 spectrum, it is very likely to have problem with correction factor
-      const DataObjects::EventList events = m_eventWS->getEventList(i);
-      std::set<detid_t> detids = events.getDetectorIDs();
-      std::set<detid_t>::iterator detit;
-      if (detids.size() != 1)
-      {
-        // Check whether there are more than 1 detector per spectra.
-        stringstream errss;
-        errss << "The assumption is that one spectrum has one and only one detector. "
-              << "Error is found at spectrum " << i << ".  It has " << detids.size() << " detectors.";
-        g_log.error(errss.str());
-        throw runtime_error(errss.str());
-      }
-      detid_t detid = 0;
-      for (detit=detids.begin(); detit!=detids.end(); ++detit)
-        detid = *detit;
-      vecDetIDs[i] = detid;
-
-      corrws->dataY(i)[0] = 1.0;
-      m_detTofOffsets[i] = 1.0;
-    }
-#endif
-
-    // Calculate TOF correction value for all detectors
-    if (m_detCorrectWorkspace)
-    {
-      ;
-#if 0
-      // Obtain correction from detector calibration workspace
-
-      // Check input workspace
-      vector<string> colnames = m_detCorrectWorkspace->getColumnNames();
-      if (colnames.size() < 2)
-        throw runtime_error("Input table workspace is not valide.");
-      else if (colnames[0].compare("DetectorID") || colnames[1].compare("Correction"))
-        throw runtime_error("Input table workspace has wrong column definition.");
-
-      // Parse detector and its TOF offset (i.e., correction) to a map
-      map<detid_t, double> correctmap;
-      size_t numrows = m_detCorrectWorkspace->rowCount();
-      for (size_t i = 0; i < numrows; ++i)
-      {
-        TableRow row = m_detCorrectWorkspace->getRow(i);
-
-        detid_t detid;
-        double offset;
-        row >> detid >> offset;
-
-        correctmap.insert(make_pair(detid, offset));
-      }
-
-      // Check size of TOF correction map
-      if (correctmap.size() > numhist)
-      {
-        g_log.warning() << "Input correction table workspace has more detectors (" << correctmap.size()
-                        << ") than input workspace " << m_eventWS->name() << "'s spectra number ("
-                        << numhist << ".\n";
-      }
-      else if (correctmap.size() < numhist)
-      {
-        stringstream errss;
-        errss << "Input correction table workspace has more detectors (" << correctmap.size()
-              << ") than input workspace " << m_eventWS->name() << "'s spectra number ("
-              << numhist << ".\n";
-        g_log.error(errss.str());
-        throw runtime_error(errss.str());
-      }
-
-      // Map correction map to list
-      map<detid_t, double>::iterator fiter;
-      for (size_t i = 0; i < numhist; ++i)
-      {
-        detid_t detid = vecDetIDs[i];
-        fiter = correctmap.find(detid);
-        if (fiter == correctmap.end())
-        {
-          stringstream errss;
-          errss << "Detector " << "w/ ID << " << detid  << " of spectrum " << i << " in Eventworkspace " << m_eventWS->name()
-                << " cannot be found in input TOF calibration workspace. ";
-          g_log.error(errss.str());
-          throw runtime_error(errss.str());
-        }
-        else
-        {
-          m_detTofOffsets[i] = fiter->second;
-          corrws->dataY(i)[0] = fiter->second;
-        }
-      }
-#endif
-    }
-    else if (m_genTOFCorrection)
+    else if (m_tofCorrType == ElasticCorrect)
     {
       // Generate TOF correction from instrument's set up
-
-      // Get sample distance to moderator
-      Geometry::Instrument_const_sptr instrument = m_eventWS->getInstrument();
-      IComponent_const_sptr source = boost::dynamic_pointer_cast<const IComponent>(
-            instrument->getSource());
-      double l1 = instrument->getDistance(*source);
-
-      // Get
-      for (size_t i = 0; i < numhist; ++i)
-      {
-        IComponent_const_sptr tmpdet = boost::dynamic_pointer_cast<const IComponent>(m_eventWS->getDetector(i));
-        double l2 = instrument->getDistance(*tmpdet);
-
-        double corrfactor = (l1)/(l1+l2);
-
-        m_detTofOffsets[i] = corrfactor;
-        corrws->dataY(i)[0] = corrfactor;
-      }
+      setupElasticTOFCorrection(corrws);
+    }
+    else if (m_tofCorrType == DirectCorrect)
+    {
+      // Generate TOF correction for direct inelastic instrument
+      setupDirectTOFCorrection(corrws);
+    }
+    else if (m_tofCorrType == IndirectCorrect)
+    {
+      // Generate TOF correction for indirect elastic instrument
+      setupIndirectTOFCorrection(corrws);
     }
 
-    // Set output
-    // Add correction workspace to output
-    setProperty("OutputTOFCorrectionWorkspace", corrws);
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+    */
+  void FilterEvents::setupElasticTOFCorrection(API::MatrixWorkspace_sptr corrws)
+  {
+    // Get sample distance to moderator
+    Geometry::Instrument_const_sptr instrument = m_eventWS->getInstrument();
+    IComponent_const_sptr source = boost::dynamic_pointer_cast<const IComponent>(
+          instrument->getSource());
+    double l1 = instrument->getDistance(*source);
+
+    // Get
+    size_t numhist = m_eventWS->getNumberHistograms();
+    for (size_t i = 0; i < numhist; ++i)
+    {
+      IComponent_const_sptr tmpdet = boost::dynamic_pointer_cast<const IComponent>(m_eventWS->getDetector(i));
+      double l2 = instrument->getDistance(*tmpdet);
+
+      double corrfactor = (l1)/(l1+l2);
+
+      m_detTofOffsets[i] = corrfactor;
+      corrws->dataY(i)[0] = corrfactor;
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+    * Time = T_pulse + TOF*0 + L1/sqrt(E*2/m)
+    */
+  void FilterEvents::setupDirectTOFCorrection(API::MatrixWorkspace_sptr corrws)
+  {
+    // Get L1
+    V3D samplepos = m_eventWS->getInstrument()->getSample()->getPos();
+    V3D sourcepos = m_eventWS->getInstrument()->getSource()->getPos();
+    double l1 = samplepos.distance(sourcepos);
+
+    // Get incident energy Ei
+    double ei = 0.;
+    if( m_eventWS->run().hasProperty("Ei"))
+    {
+      Kernel::Property* eiprop = m_eventWS->run().getProperty("Ei");
+      ei = boost::lexical_cast<double>(eiprop->value());
+      g_log.debug() << "Using stored Ei value " << ei << "\n";
+    }
+    else
+    {
+      ei = getProperty("IncidentEnergy");
+      if (isEmpty(ei))
+        throw std::invalid_argument("No Ei value has been set or stored within the run information.");
+      g_log.debug() << "Using user-input Ei value " << ei << "\n";
+    }
+
+    // Calculate constant (to all spectra) shift
+    double constshift = l1/sqrt(ei * 2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass);
+
+    // Set up the shfit
+    size_t numhist = m_eventWS->getNumberHistograms();
+
+    g_log.debug() << "Calcualte direct inelastic scattering for input workspace of " << numhist << " spectra "
+                  << "storing to output workspace with " << corrws->getNumberHistograms() << " spectra. " << "\n";
+
+    for (size_t i = 0; i < numhist; ++i)
+    {
+      m_detTofOffsets[i] = 0.0;
+      m_detTofShifts[i] = constshift;
+
+      corrws->dataY(i)[0] = 0.0;
+      corrws->dataY(i)[1] = constshift;
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+    * Time = T_pulse + TOF - L2/sqrt(E_fix * 2 * meV / mass)
+    */
+  void FilterEvents::setupIndirectTOFCorrection(API::MatrixWorkspace_sptr corrws)
+  {
+    g_log.debug("Start to set up indirect TOF correction. ");
+
+    // A constant among all spectra
+    double twomev_d_mass = 2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass;
+    V3D samplepos = m_eventWS->getInstrument()->getSample()->getPos();
+
+    // Get the parameter map
+    const ParameterMap& pmap = m_eventWS->constInstrumentParameters();
+
+    // Set up the shift
+    size_t numhist = m_eventWS->getNumberHistograms();
+
+    g_log.debug() << "[DBx158] Number of histograms = " << numhist << ", Correction WS size = " << corrws->getNumberHistograms() << "\n";
+
+    for (size_t i = 0; i < numhist; ++i)
+    {
+      double shift;
+
+      IDetector_const_sptr det = m_eventWS->getDetector(i);
+      if (!det->isMonitor())
+      {
+        // Get E_fix
+        double efix = 0.;
+        try
+        {
+          Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
+          if (par)
+          {
+            efix = par->value<double>();
+            g_log.debug() << "Detector: " << det->getID() << " EFixed: " << efix << "\n";
+          }
+        }
+        catch (std::runtime_error&)
+        {
+          // Throws if a DetectorGroup, use single provided value
+          stringstream errmsg;
+          errmsg << "Inelastic instrument detector " << det->getID() << " of spectrum " << i
+                 << " does not have EFixed ";
+          throw runtime_error(errmsg.str());
+        }
+
+        // Get L2
+        double l2 = det->getPos().distance(samplepos);
+
+        // Calculate shift
+        shift = -1. * l2 / sqrt(efix * twomev_d_mass);
+      }
+      else
+      {
+        // Monitor:
+        g_log.warning() << "Spectrum " << i << " contains detector " << det->getID() << " is a monitor. " << "\n";
+
+        shift = 0.;
+      }
+
+      // Set up the shifts
+      m_detTofOffsets[i] = 1.0;
+      m_detTofShifts[i] = shift;
+
+      corrws->dataY(i)[0] = 1.0;
+      corrws->dataY(i)[1] = shift;
+    } // ENDOF (all spectra)
 
     return;
   }
@@ -824,13 +859,11 @@ namespace Algorithms
       }
       else if (m_tofCorrType != NoneCorrect)
       {
-        // FIXME - Need to fix this part!
-        g_log.error("It is not correct except for elastic! ");
-        input_el.splitByFullTime(m_splitters, outputs, m_detTofOffsets[iws], true);
+        input_el.splitByFullTime(m_splitters, outputs, true, m_detTofOffsets[iws], m_detTofShifts[iws]);
       }
       else
       {
-        input_el.splitByFullTime(m_splitters, outputs, 1.0, false);
+        input_el.splitByFullTime(m_splitters, outputs, false, 1.0, 0.0);
       }
 
       PARALLEL_END_INTERUPT_REGION
@@ -936,12 +969,12 @@ namespace Algorithms
       else if (m_tofCorrType != NoneCorrect)
       {
         logmessage = input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs,
-                                                            m_detTofOffsets[iws], true, printdetail);
+                                                            true, m_detTofOffsets[iws], m_detTofShifts[iws]);
       }
       else
       {
-        logmessage = input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs, 1.0,
-                                                            false, printdetail);
+        logmessage = input_el.splitByFullTimeMatrixSplitter(m_vecSplitterTime, m_vecSplitterGroup, outputs,
+                                                            false, 1.0, 0.0);
       }
 
       if (printdetail)

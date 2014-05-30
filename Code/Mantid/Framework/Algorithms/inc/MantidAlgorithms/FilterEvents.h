@@ -80,6 +80,15 @@ namespace Algorithms
     /// Set up detector calibration parameters
     void setupDetectorTOFCalibration();
 
+    /// Set up detector calibration parameters for elastic scattering instrument
+    void setupElasticTOFCorrection(API::MatrixWorkspace_sptr corrws);
+
+    /// Set up detector calibration parmaeters for direct inelastic scattering instrument
+    void setupDirectTOFCorrection(API::MatrixWorkspace_sptr corrws);
+
+    /// Set up detector calibration parameters for indirect inelastic scattering instrument
+    void setupIndirectTOFCorrection(API::MatrixWorkspace_sptr corrws);
+
     /// Set up detector calibration parameters from customized values
     void setupCustomizedTOFCorrection();
 
@@ -87,7 +96,7 @@ namespace Algorithms
     /// Filter events by splitters in format of Splitter
     void filterEventsBySplitters(double progressamount);
 
-    ///
+    /// Filter events by splitters in format of vector
     void filterEventsByVectorSplitters(double progressamount);
 
     DataObjects::EventWorkspace_sptr m_eventWS;
@@ -104,7 +113,7 @@ namespace Algorithms
     std::vector<std::string> m_wsNames;
 
     std::vector<double> m_detTofOffsets;
-    std::vector<double> m_detTOFShifts;
+    std::vector<double> m_detTofShifts;
 
     bool mFilterByPulseTime;
 
@@ -118,11 +127,6 @@ namespace Algorithms
     void generateSplitters(int wsindex, Kernel::TimeSplitterType& splitters);
 
     void splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname, Kernel::TimeSplitterType& splitters);
-
-    /// Flag to do TOF correction
-    // bool m_doTOFCorrection;
-    /// Flag to generate TOF correction
-    bool m_genTOFCorrection;
 
     /// Base of output workspace's name
     std::string m_outputWSNameBase;
