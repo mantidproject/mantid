@@ -63,6 +63,10 @@ public:
       "      <zeropadding size=\"8\"/>"
       "      <technique>Reflectometer</technique>"
       "    </instrument>"
+      "    <instrument name=\"SANS2D\">"
+      "      <zeropadding size=\"8\"/>"
+      "      <technique>Small Angle Scattering</technique>"
+      "    </instrument>"
       "  </facility>"
       "  <facility name=\"SNS\" delimiter=\"_\" FileExtensions=\"_event.nxs,.nxs,.dat\">"
       "    <archive>"
@@ -175,6 +179,7 @@ public:
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L_1234.nxs.h5").name(), "REF_L");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ16613.n001").name(), "LOQ");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ16613.s01").name(), "LOQ");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("SANS2D00032676.nxs").name(), "SANS2D");
   }
 
   void testGetExtension()
