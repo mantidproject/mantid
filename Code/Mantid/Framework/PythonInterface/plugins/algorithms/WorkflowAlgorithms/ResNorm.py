@@ -36,10 +36,10 @@ class ResNorm(PythonAlgorithm):
     self.declareProperty(name='Save',defaultValue=False, doc='Switch Save result to nxs file Off/On')
  
   def PyExec(self):
-                from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
+    from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 
-                if is_supported_f2py_platform():
-                        import IndirectBayes as Main
+    if is_supported_f2py_platform():
+            import IndirectBayes as Main
 
     run_f2py_compatibility_test()
     

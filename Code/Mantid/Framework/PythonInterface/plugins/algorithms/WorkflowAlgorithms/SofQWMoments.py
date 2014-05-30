@@ -17,8 +17,8 @@ class SofQWMoments(PythonAlgorithm):
 	def category(self):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
-  def summary (self):
-    return "Calculates the nth moment of y(q,w)"
+	def summary (self):
+		return "Calculates the nth moment of y(q,w)"
 
 	def PyInit(self):
 		self.declareProperty(MatrixWorkspaceProperty("Sample", "", Direction.Input), doc="Sample to use.")

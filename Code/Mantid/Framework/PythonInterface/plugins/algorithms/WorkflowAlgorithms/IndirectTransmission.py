@@ -16,8 +16,8 @@ class IndirectTransmission(PythonAlgorithm):
 	def category(self):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
-  def summary(self):
-    return "Calculates the scattering & transmission for Indirect Geometry spectrometers."
+	def summary(self):
+		return "Calculates the scattering & transmission for Indirect Geometry spectrometers."
 
 	def PyInit(self):
 		self.declareProperty(name='Instrument',defaultValue='IRIS',validator=StringListValidator(['IRIS','OSIRIS']), doc='Instrument')

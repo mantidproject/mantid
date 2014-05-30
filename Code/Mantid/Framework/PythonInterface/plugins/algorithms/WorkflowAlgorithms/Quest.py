@@ -17,8 +17,8 @@ class Quest(PythonAlgorithm):
 	def category(self):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
-  def summary(self):
-    return "This is a variation of the stretched exponential option of Quasi."
+	def summary(self):
+		return "This is a variation of the stretched exponential option of Quasi."
 
 	def PyInit(self):
 		self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (*.nxs) or Workspace')
@@ -42,10 +42,10 @@ class Quest(PythonAlgorithm):
 		self.declareProperty(name='Save',defaultValue=False, doc='Switch Save result to nxs file Off/On')
  
 	def PyExec(self):
-                from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
-                
-                if is_supported_f2py_platform():
-                        import IndirectBayes as Main
+		from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
+
+		if is_supported_f2py_platform():
+			import IndirectBayes as Main
 
 		run_f2py_compatibility_test()
 		

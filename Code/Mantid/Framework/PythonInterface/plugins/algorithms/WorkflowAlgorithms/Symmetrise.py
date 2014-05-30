@@ -14,8 +14,8 @@ class Symmetrise(PythonAlgorithm):
 	def category(self):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
-  def summary (self):
-    return "Takes and asymmetric S(Q,w) and makes it symmetric"
+	def summary (self):
+		return "Takes and asymmetric S(Q,w) and makes it symmetric"
 
 	def PyInit(self):
 		self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (_red.nxs) or Workspace')
