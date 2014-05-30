@@ -163,6 +163,7 @@ void GroupDetectors::exec()
 
   const specid_t firstIndex = static_cast<specid_t>(indexList[0]);
   ISpectrum * firstSpectrum = WS->getSpectrum(firstIndex);
+  MantidVec &firstY = WS->dataY(firstIndex);
 
   setProperty("ResultIndex",firstIndex);
 
@@ -178,13 +179,10 @@ void GroupDetectors::exec()
     firstSpectrum->addDetectorIDs(spec->getDetectorIDs());
 
     // Add up all the Y spectra and store the result in the first one
-    // Need to keep the next 3 lines inside loop for now until ManagedWorkspace mru-list works properly
-    MantidVec &firstY = WS->dataY(firstIndex);
-    MantidVec::iterator fYit;
     MantidVec::iterator fEit = firstSpectrum->dataE().begin();
     MantidVec::iterator Yit = spec->dataY().begin();
     MantidVec::iterator Eit = spec->dataE().begin();
-    for (fYit = firstY.begin(); fYit != firstY.end(); ++fYit, ++fEit, ++Yit, ++Eit)
+    for (auto fYit = firstY.begin(); fYit != firstY.end(); ++fYit, ++fEit, ++Yit, ++Eit)
     {
       *fYit += *Yit;
       // Assume 'normal' (i.e. Gaussian) combination of errors
@@ -192,7 +190,6 @@ void GroupDetectors::exec()
     }
 
     // Now zero the now redundant spectrum and set its spectraNo to indicate this (using -1)
-    // N.B. Deleting spectra would cause issues for ManagedWorkspace2D, hence the the approach taken here
     spec->dataY().assign(vectorSize,0.0);
     spec->dataE().assign(vectorSize,0.0);
     spec->setSpectrumNo(-1);

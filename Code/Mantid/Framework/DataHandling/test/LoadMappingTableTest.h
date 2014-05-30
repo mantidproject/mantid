@@ -6,7 +6,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrumentFromRaw.h"
 #include "MantidDataHandling/LoadMappingTable.h"
-#include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <cxxtest/TestSuite.h>
@@ -16,7 +15,6 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
-using namespace Mantid::DataObjects;
 
 class LoadMappingTableTest : public CxxTest::TestSuite
 {

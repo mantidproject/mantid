@@ -35,6 +35,8 @@
 #include <QClipboard>
 #include <QTemporaryFile>
 #include <QDateTime>
+#include <QDesktopServices>
+#include <QUrl>
 
 #include <Poco/StringTokenizer.h>
 #include <boost/lexical_cast.hpp>
@@ -147,6 +149,10 @@ void SANSRunWindow::initLayout()
 {
   g_log.debug("Initializing interface layout");
   m_uiForm.setupUi(this);
+  m_uiForm.inst_opt->addItem("LARMOR");
+  m_uiForm.inst_opt->addItem("LOQ");
+  m_uiForm.inst_opt->addItem("SANS2D");
+  m_uiForm.inst_opt->addItem("SANS2DTUBES");
 
   m_reducemapper = new QSignalMapper(this);
 
@@ -235,12 +241,23 @@ void SANSRunWindow::initLayout()
     m_uiForm.displayLayout->addWidget(m_displayTab);
   }
 
+  const QString ISIS_SANS_WIKI = "http://www.mantidproject.org/ISIS_SANS:";
+  m_helpPageUrls[Tab::RUN_NUMBERS]        = ISIS_SANS_WIKI + "_Run_Numbers";
+  m_helpPageUrls[Tab::REDUCTION_SETTINGS] = ISIS_SANS_WIKI + "_Reduction_Settings";
+  m_helpPageUrls[Tab::GEOMETRY]           = ISIS_SANS_WIKI + "_Geometry";
+  m_helpPageUrls[Tab::MASKING]            = ISIS_SANS_WIKI + "_Masking";
+  m_helpPageUrls[Tab::LOGGING]            = ISIS_SANS_WIKI + "_Logging";
+  m_helpPageUrls[Tab::ADD_RUNS]           = ISIS_SANS_WIKI + "_Add_Runs";
+  m_helpPageUrls[Tab::DIAGNOSTICS]        = ISIS_SANS_WIKI + "_Diagnostics";
+  m_helpPageUrls[Tab::ONE_D_ANALYSIS]     = ISIS_SANS_WIKI + "_1D_Analysis";
+
   // connect up phi masking on analysis tab to be in sync with info on masking tab 
   connect(m_uiForm.mirror_phi, SIGNAL(clicked()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.detbank_sel, SIGNAL(currentIndexChanged(int)), this, SLOT(phiMaskingChanged(int))); 
   connect(m_uiForm.phi_min, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.phi_max, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.slicePb, SIGNAL(clicked()), this, SLOT(handleSlicePushButton()));
+  connect(m_uiForm.pushButton_Help, SIGNAL(clicked()), this, SLOT(openHelpPage()));
 
   readSettings();
 }
@@ -692,8 +709,7 @@ bool SANSRunWindow::loadUserFile()
   }
   
   QString pyCode = "i.Clean()";
-  pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
-  pyCode += getInstrumentClass()+")";
+  pyCode += "\ni." + getInstrumentClass();
   pyCode += "\ni.ReductionSingleton().user_settings =";
   // Use python function to read the settings file and then extract the fields
   pyCode += "isis_reduction_steps.UserFile(r'"+filetext+"')";
@@ -1597,7 +1613,7 @@ void SANSRunWindow::setGeometryDetails()
       setLOQGeometry(can_workspace, 1);
     }
   }
-  else if( m_uiForm.inst_opt->currentText() == "SANS2D" )
+  else if( m_uiForm.inst_opt->currentText() == "SANS2D" || m_uiForm.inst_opt->currentText() == "SANS2DTUBES")
   {
     if( colour == "red" )
     {
@@ -2366,7 +2382,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
   if (runMode == SingleMode) // TODO: test if it is really necessary to reload the file settings.
   {
   py_code = "\ni.ReductionSingleton.clean(isis_reducer.ISISReducer)";
-  py_code += "\ni.ReductionSingleton().set_instrument(isis_instrument."+getInstrumentClass()+")";
+  py_code += "\ni." + getInstrumentClass();
   //restore the settings from the user file
   py_code += "\ni.ReductionSingleton().user_file_path='"+
     QFileInfo(m_uiForm.userfile_edit->text()).path() + "'";
@@ -2565,7 +2581,7 @@ void SANSRunWindow::handleRunFindCentre()
     {
       m_uiForm.beam_rmax->setText("200");
     }
-    else if( m_uiForm.inst_opt->currentText() == "SANS2D" )
+    else if( m_uiForm.inst_opt->currentText() == "SANS2D" || m_uiForm.inst_opt->currentText() == "SANS2DTUBES")
     {
       m_uiForm.beam_rmax->setText("280");
     }
@@ -2644,8 +2660,7 @@ void SANSRunWindow::handleRunFindCentre()
     }
   }  
   QString pyCode = "i.ReductionSingleton.clean(isis_reducer.ISISReducer)";
-  pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
-  pyCode += getInstrumentClass()+")";
+  pyCode += "\ni." + getInstrumentClass();
   pyCode += "\ni.ReductionSingleton().user_settings =";
   // Use python function to read the settings file and then extract the fields
   pyCode += "isis_reduction_steps.UserFile(r'"+m_uiForm.userfile_edit->text().trimmed()+"')";
@@ -2817,7 +2832,17 @@ void SANSRunWindow::handleInstrumentChange()
   }
 
   // need this if facility changed to force update of technique at this point
-  m_uiForm.inst_opt->setTechniques(m_uiForm.inst_opt->getTechniques());
+  // m_uiForm.inst_opt->setTechniques(m_uiForm.inst_opt->getTechniques());
+  
+  if( m_uiForm.inst_opt->currentText() == "SANS2DTUBES" )
+    ConfigService::Instance().setString("default.instrument", "SANS2D");
+  else
+    ConfigService::Instance().setString("default.instrument", m_uiForm.inst_opt->currentText().toStdString());
+
+  // Hide the "SANS2D_EVENT" instrument, if present.
+  const int sans2dEventIndex = m_uiForm.inst_opt->findText("SANS2D_EVENT");
+  if( sans2dEventIndex != -1 )
+    m_uiForm.inst_opt->removeItem(sans2dEventIndex);
 
   //set up the required Python objects and delete what's out of date (perhaps everything is cleaned here)
   const QString instClass(getInstrumentClass());
@@ -2826,12 +2851,11 @@ void SANSRunWindow::handleInstrumentChange()
   // This is useful on interface start up, where we have already loaded the user file
   // and don't want to set the instrument twice.
   const QString currentInstName = runPythonCode(
-    "print i.ReductionSingleton().get_instrument().name()").trimmed();
+    "print i.ReductionSingleton().get_instrument().versioned_name()").trimmed();
   if( currentInstName != m_uiForm.inst_opt->currentText() )
   {
     QString pyCode("i.ReductionSingleton.clean(isis_reducer.ISISReducer)");
-    pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
-    pyCode += instClass+")";
+    pyCode += "\ni." + instClass;
     runReduceScriptFunction(pyCode);
   }
 
@@ -2853,7 +2877,7 @@ void SANSRunWindow::handleInstrumentChange()
     m_uiForm.geom_stack->setCurrentIndex(0);
 
   }
-  else if ( instClass == "SANS2D()" )
+  else if ( instClass == "SANS2D()" || instClass == "SANS2DTUBES()")
   { 
     m_uiForm.beam_rmax->setText("280");
 
@@ -3666,6 +3690,15 @@ void SANSRunWindow::handleSlicePushButton(){
 
   slicingWindow->show(); 
   slicingWindow->raise();
+}
+
+/**
+ * Slot to open the help page of whichever tab the user is currently viewing.
+ */
+void SANSRunWindow::openHelpPage()
+{
+  const auto helpPageUrl = m_helpPageUrls[static_cast<Tab>(m_uiForm.tabWidget->currentIndex())];
+  QDesktopServices::openUrl(QUrl(helpPageUrl));
 }
 
 } //namespace CustomInterfaces

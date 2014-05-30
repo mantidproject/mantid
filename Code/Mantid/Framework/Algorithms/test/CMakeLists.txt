@@ -38,7 +38,8 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( AlgorithmsTest Algorithms CurveFitting DataHandling MDEvents ${GMOCK_LIBRARIES} )
+  target_link_libraries ( AlgorithmsTest Algorithms DataHandling MDEvents ${GMOCK_LIBRARIES} )
+  add_dependencies ( AlgorithmsTest Crystal CurveFitting MDAlgorithms )
   add_dependencies ( FrameworkTests AlgorithmsTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET AlgorithmsTest PROPERTY FOLDER "UnitTests" )

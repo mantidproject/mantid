@@ -415,6 +415,12 @@ public:
 	uint32_t devId(void) const { return m_devId; }
 	const std::string &description(void) const { return m_desc; }
 
+	void remapDevice(uint32_t dev) {
+		uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+	        fields[0] = dev;
+		m_devId = dev;
+	};
+
 private:
 	uint32_t m_devId;
 	std::string m_desc;
@@ -439,6 +445,11 @@ public:
 	}
 	uint32_t value(void) const { return m_fields[3]; }
 
+	void remapDevice(uint32_t dev) {
+		uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+		fields[0] = dev;
+	};
+
 private:
 	const uint32_t *m_fields;
 
@@ -462,6 +473,11 @@ public:
 	}
 	double value(void) const { return *(const double *) &m_fields[3]; }
 
+	void remapDevice(uint32_t dev) {
+		uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+		fields[0] = dev;
+	};
+
 private:
 	const uint32_t *m_fields;
 
@@ -484,6 +500,11 @@ public:
 						(m_fields[2] & 0xffff);
 	}
 	const std::string &value(void) const { return m_val; }
+
+	void remapDevice(uint32_t dev) {
+		uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+		fields[0] = dev;
+	};
 
 private:
 	const uint32_t *m_fields;

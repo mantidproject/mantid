@@ -236,6 +236,19 @@ public:
     TS_ASSERT( ! wsp3->operator()() )
   }
 
+  void testTempName()
+  {
+    wsp4->setValue("");
+    // Create and assign the workspace
+    Workspace_sptr space;
+    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest",1,1,1) );
+    *wsp4 = space;
+
+    PropertyHistory history = wsp4->createHistory();
+    TS_ASSERT( !history.value().empty() )
+    TS_ASSERT_EQUALS( history.value().substr(0,5), "__TMP" )
+  }
+
   void testDirection()
   {
     TS_ASSERT_EQUALS( wsp1->direction(), 0 );

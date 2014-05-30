@@ -299,6 +299,43 @@ public:
 
   }
 
+  void test_attribute_domain_range()
+  {
+    multi.clearDomainIndices();
+    multi.setLocalAttributeValue(0,"domains","0-2");
+    return;
+    multi.setLocalAttributeValue(1,"domains","i");
+    multi.setLocalAttributeValue(2,"domains","i");
+
+    FunctionValues values(domain);
+    multi.function(domain,values);
+
+    double A = multi.getFunction(0)->getParameter("A");
+    double B = multi.getFunction(0)->getParameter("B");
+    const FunctionDomain1D& d0 = static_cast<const FunctionDomain1D&>(domain.getDomain(0));
+    for(size_t i = 0; i < 9; ++i)
+    {
+      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d0[i]);
+    }
+
+    A = multi.getFunction(0)->getParameter("A") + multi.getFunction(1)->getParameter("A");
+    B = multi.getFunction(0)->getParameter("B") + multi.getFunction(1)->getParameter("B");
+    const FunctionDomain1D& d1 = static_cast<const FunctionDomain1D&>(domain.getDomain(1));
+    for(size_t i = 9; i < 19; ++i)
+    {
+      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d1[i-9]);
+    }
+
+    A = multi.getFunction(0)->getParameter("A") + multi.getFunction(2)->getParameter("A");
+    B = multi.getFunction(0)->getParameter("B") + multi.getFunction(2)->getParameter("B");
+    const FunctionDomain1D& d2 = static_cast<const FunctionDomain1D&>(domain.getDomain(2));
+    for(size_t i = 19; i < 30; ++i)
+    {
+      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d2[i-19]);
+    }
+
+  }
+
   void test_attribute_in_FunctionFactory()
   {
     std::string ini = "composite=MultiDomainFunction;"

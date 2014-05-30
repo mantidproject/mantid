@@ -69,7 +69,6 @@ public:
 public slots:
   void rangeChanged(double, double);
   void plot();
-  void help();
   void updateAxisLabels(const QString&);
   void clearTable();
   void calculateDerivatives();

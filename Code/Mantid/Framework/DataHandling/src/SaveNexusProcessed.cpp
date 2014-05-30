@@ -347,10 +347,23 @@ namespace DataHandling
     }  // finish table workspace specifics
 
     // Switch to the Cpp API for the algorithm history
-	  inputWorkspace->getHistory().saveNexus(cppFile);
+    if (trackingHistory())
+    {    
+      m_history->setExecCount(Algorithm::g_execCount);
+      if (!isChild())
+      {
+        inputWorkspace->history().addHistory(m_history);
+      }
+      //this is a child algorithm, but we still want to keep the history.
+      else if (isRecordingHistoryForChild() && m_parentHistory)
+      {
+        m_parentHistory->addChildHistory(m_history);
+      }
+    }
+    
+    inputWorkspace->history().saveNexus(cppFile);
 
     nexusFile->closeNexusFile();
-
     delete nexusFile;
 
     return;

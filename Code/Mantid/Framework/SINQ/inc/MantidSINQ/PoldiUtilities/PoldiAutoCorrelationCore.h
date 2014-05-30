@@ -56,22 +56,13 @@ public:
 
     DataObjects::Workspace2D_sptr calculate(DataObjects::Workspace2D_sptr countData);
 
-    // conversion between TOF (in musec) and d (in Angstrom), related through distance in mm and sin(theta)
-    static double dtoTOF(double d, double distance, double sinTheta);
-    static double TOFtod(double tof, double distance, double sinTheta);
-
 protected:
-    virtual double getDeltaD(double deltaT);
-    std::pair<int, int> getDRangeAsDeltaMultiples(double getDeltaD);
-    virtual std::vector<double> getDGrid(double deltaD);
-
     double getNormalizedTOFSum(std::vector<double> normalizedTofs);
     std::vector<double> calculateDWeights(std::vector<double> tofsFor1Angstrom, double deltaT, double deltaD, size_t nd);
 
     double getRawCorrelatedIntensity(double dValue, double weight);
     virtual UncertainValue getCMessAndCSigma(double dValue, double slitTimeOffset, int index);
     double reduceChopperSlitList(std::vector<UncertainValue> valuesWithSigma, double weight);
-    double sumIOverSigmaInverse(std::vector<double> &iOverSigmas);
 
     std::vector<double> getDistances(std::vector<int> elements);
     std::vector<double> getTofsFor1Angstrom(std::vector<int> elements);

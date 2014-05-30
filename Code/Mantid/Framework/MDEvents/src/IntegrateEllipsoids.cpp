@@ -240,6 +240,11 @@ namespace MDEvents
     {
       peak_ws = in_peak_ws->clone();
     }
+    double radius            = getProperty( "RegionRadius" );
+    bool   specify_size      = getProperty( "SpecifySize" );
+    double peak_radius       = getProperty( "PeakSize" );
+    double back_inner_radius = getProperty( "BackgroundInnerSize" );
+    double back_outer_radius = getProperty( "BackgroundOuterSize" );
                                                    // get UBinv and the list of
                                                    // peak Q's for the integrator
     std::vector<Peak> & peaks = peak_ws->getPeaks();
@@ -275,11 +280,6 @@ namespace MDEvents
     UBinv.Invert();
     UBinv *= (1.0/(2.0 * M_PI));
 
-    double radius            = getProperty( "RegionRadius" );
-    bool   specify_size      = getProperty( "SpecifySize" );
-    double peak_radius       = getProperty( "PeakSize" );
-    double back_inner_radius = getProperty( "BackgroundInnerSize" );
-    double back_outer_radius = getProperty( "BackgroundOuterSize" );
     std::vector<double> PeakRadiusVector(n_peaks,peak_radius);
     std::vector<double> BackgroundInnerRadiusVector(n_peaks,back_inner_radius);
     std::vector<double> BackgroundOuterRadiusVector(n_peaks,back_outer_radius);
@@ -366,11 +366,23 @@ namespace MDEvents
       if ( Geometry::IndexingUtils::ValidIndex( hkl, 1.0 ) ) 
       {
         V3D peak_q( peaks[i].getQLabFrame() );
+        std::vector<double> axes_radii;
         integrator.ellipseIntegrateEvents( peak_q, 
           specify_size, peak_radius, back_inner_radius, back_outer_radius,
-          inti, sigi );
+          axes_radii, inti, sigi );
         peaks[i].setIntensity( inti );
         peaks[i].setSigmaIntensity( sigi );
+        if (axes_radii.size() == 3)
+        {
+			g_log.notice() << "Radii of three axes of ellipsoid for integrating peak "
+					<< i << " = ";
+			for (int i3 = 0; i3 < 3; i3++ )
+			{
+			  g_log.notice() << axes_radii[i3] << "  ";
+			}
+			g_log.notice() << std::endl;
+
+        }
       }
       else
       {

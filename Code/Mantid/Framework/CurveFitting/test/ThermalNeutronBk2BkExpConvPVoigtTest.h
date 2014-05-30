@@ -10,6 +10,7 @@
 
 using namespace Mantid;
 using namespace Kernel;
+using namespace std;
 using Mantid::CurveFitting::ThermalNeutronBk2BkExpConvPVoigt;
 
 class ThermalNeutronBk2BkExpConvPVoigtTest : public CxxTest::TestSuite

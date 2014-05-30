@@ -195,6 +195,20 @@ void SaveNexus::runSaveNexusProcessed()
   // Pass through the append property
   saveNexusPro->setProperty<bool>("Append",getProperty("Append"));
 
+  // If we're tracking history, add the entry before we save it to file
+  if (trackingHistory())
+  {
+    m_history->setExecCount(Algorithm::g_execCount);
+    if (!isChild())
+    {
+      m_inputWorkspace->history().addHistory(m_history);
+    }
+    //this is a child algorithm, but we still want to keep the history.
+    else if (isRecordingHistoryForChild() && m_parentHistory)
+    {
+      m_parentHistory->addChildHistory(m_history);
+    }
+  }
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try
   {

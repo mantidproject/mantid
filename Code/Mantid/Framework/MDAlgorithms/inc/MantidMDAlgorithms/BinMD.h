@@ -14,9 +14,6 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
 
-using Mantid::API::IMDEventWorkspace_sptr;
-
-
 namespace Mantid
 {
   namespace Geometry

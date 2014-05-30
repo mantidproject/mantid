@@ -76,9 +76,9 @@ namespace Mantid
       static void appendEventListData( std::vector<T> events, size_t offset, double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes);
 
       void execEvent(Mantid::NeXus::NexusFileIO * nexusFile,const bool uniformSpectra,const std::vector<int> spec);
-	    /// sets non workspace properties for the algorithm
+      /// sets non workspace properties for the algorithm
       void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
-
+      
       /// The name and path of the input file
       std::string m_filename;
       /// The name and path of the input file
@@ -91,7 +91,6 @@ namespace Mantid
       DataObjects::EventWorkspace_const_sptr m_eventWorkspace;
       /// Proportion of progress time expected to write initial part
       double m_timeProgInit;
-
       /// Progress bar
       API::Progress * prog;
 
