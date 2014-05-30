@@ -462,7 +462,28 @@ int RectangularDetector::maxDetectorID()
   return m_maxDetId;
 }
 
+//-------------------------------------------------------------------------------------------------
+/// @copydoc Mantid::Geometry::CompAssembly::getComponentByName
+boost::shared_ptr<const IComponent> RectangularDetector::getComponentByName(const std::string & cname, int nlevels) const
+{
+  // cache the detector's name as all the other names are longer
+  const std::string NAME = this->getName();
 
+  // if the component name is too short, just return
+  if (cname.length() <= NAME.length())
+      return boost::shared_ptr<const IComponent>();
+
+  // check that the searched for name starts with the detector's
+  // name as they are generated
+  if (cname.substr(0, NAME.length()).compare(NAME) == 0)
+  {
+    return CompAssembly::getComponentByName(cname, nlevels);
+  }
+  else
+  {
+    return boost::shared_ptr<const IComponent>();
+  }
+}
 
 //------------------------------------------------------------------------------------------------
 /** Test the intersection of the ray with the children of the component assembly, for InstrumentRayTracer.
