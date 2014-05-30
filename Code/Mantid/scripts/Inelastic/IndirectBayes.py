@@ -646,11 +646,11 @@ def QuasiPlot(ws_stem,plot_type,res_plot,sequential):
 
 def QuasiPlotParameters(ws_name, plot_type):
 	"""
-		Plot a parameter if the user requested it and it exists
-		in the workspace
+	Plot a parameter if the user requested it and it exists
+	in the workspace
 
-		@param ws_name :: name of the workspace to plot from. This function expects it has a TextAxis
-		@param plot_type :: the name of the parameter to plot (or All if all parameters should be plotted)
+	@param ws_name :: name of the workspace to plot from. This function expects it has a TextAxis
+	@param plot_type :: the name of the parameter to plot (or All if all parameters should be plotted)
 	"""
 	num_spectra = mtd[ws_name].getNumberHistograms()
 	param_names = ['Amplitude', 'FWHM', 'Beta']
@@ -660,7 +660,7 @@ def QuasiPlotParameters(ws_name, plot_type):
 			spectra_indicies = [i for i in range(num_spectra) if param_name in mtd[ws_name].getAxis(1).label(i)]
 			
 			if(len(spectra_indicies) > 0):
-				plotSpectra(ws_name, 'Beta', indicies=spectra_indicies[:3])
+				plotSpectra(ws_name, param_name, indicies=spectra_indicies[:3])
 
 # Quest programs
 def CheckBetSig(nbs):
