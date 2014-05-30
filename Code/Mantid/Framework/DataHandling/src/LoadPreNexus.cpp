@@ -76,9 +76,6 @@ namespace DataHandling
     return "DataHandling\\PreNexus;Workflow\\DataHandling";
   }
 
-  //----------------------------------------------------------------------------------------------
-  /// @copydoc Mantid::API::
-
   /**
    * Return the confidence with with this algorithm can load the file
    * @param descriptor A descriptor for the file
