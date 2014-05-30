@@ -204,7 +204,7 @@ API::ILiveListener::RunStatus ISISLiveEventDataListener::runStatus()
 
 int ISISLiveEventDataListener::runNumber() const
 {
-
+    return m_runNumber;
 }
 
 /** The main function for the background thread
