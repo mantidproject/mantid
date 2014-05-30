@@ -39,6 +39,7 @@ set ( SRC_FILES
 	src/FitPowderDiffPeaks.cpp
 	src/FlatBackground.cpp
 	src/FullprofPolynomial.cpp
+	src/FunctionDomain1DSpectrumCreator.cpp
 	src/GSLFunctions.cpp
 	src/GSLMatrix.cpp
 	src/GausDecay.cpp
@@ -139,6 +140,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FitPowderDiffPeaks.h
 	inc/MantidCurveFitting/FlatBackground.h
 	inc/MantidCurveFitting/FullprofPolynomial.h
+	inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
@@ -233,6 +235,7 @@ set ( TEST_FILES
 	FitPowderDiffPeaksTest.h
 	FlatBackgroundTest.h
 	FullprofPolynomialTest.h
+	FunctionDomain1DSpectrumCreatorTest.h
 	FunctionFactoryConstraintTest.h
 	GSLMatrixTest.h
 	GausDecayTest.h
