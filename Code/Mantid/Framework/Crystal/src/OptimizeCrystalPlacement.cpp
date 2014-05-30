@@ -120,14 +120,6 @@ namespace Mantid
 
     }
 
-    void OptimizeCrystalPlacement::initDocs()
-    {
-      this->setWikiSummary(
-          "This algorithm  optimizes goniometer settings  and sample orientation to better index the peaks." );
-      this->setOptionalMessage(
-          "This algorithm  optimizes goniometer settings  and sample orientation to better index the peaks." );
-    }
-
     void OptimizeCrystalPlacement::init()
     {
       declareProperty(new WorkspaceProperty<PeaksWorkspace> ("PeaksWorkspace", "", Direction::Input),

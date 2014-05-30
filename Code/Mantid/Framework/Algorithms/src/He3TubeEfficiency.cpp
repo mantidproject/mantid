@@ -44,13 +44,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(He3TubeEfficiency)
 
-/// Sets documentation strings for this algorithm
-void He3TubeEfficiency::initDocs()
-{
-  this->setWikiSummary(" He3 tube efficiency correction. ");
-  this->setOptionalMessage("He3 tube efficiency correction.");
-}
-
 /// Default constructor
 He3TubeEfficiency::He3TubeEfficiency() : Algorithm(), inputWS(),
 outputWS(), paraMap(NULL), shapeCache(), samplePos(), spectraSkipped(),

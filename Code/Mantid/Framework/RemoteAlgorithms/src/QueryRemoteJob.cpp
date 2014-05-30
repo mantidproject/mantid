@@ -29,13 +29,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
-
-void QueryRemoteJob::initDocs()
-{
-  this->setWikiSummary("Query a remote compute resource for a specific job");
-  this->setOptionalMessage("Query a remote compute resource for a specific job");
-}
 
 void QueryRemoteJob::init()
 {

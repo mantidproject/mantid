@@ -66,12 +66,6 @@ namespace Algorithms
   const std::string ResizeRectangularDetector::category() const { return "DataHandling\\Instrument";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ResizeRectangularDetector::initDocs()
-  {
-    this->setWikiSummary("Resize a RectangularDetector in X and/or Y.");
-    this->setOptionalMessage("Resize a RectangularDetector in X and/or Y.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

@@ -50,8 +50,9 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal"; }
-
+  virtual const std::string category() const { return "Crystal";}
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Integrate single crystal peaks using IkedaCarpenter fit TOF";}
 private:
   API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace
   API::MatrixWorkspace_sptr outputW; ///< A pointer to the output workspace

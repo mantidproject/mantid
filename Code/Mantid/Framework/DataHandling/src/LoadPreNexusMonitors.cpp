@@ -48,15 +48,6 @@ using namespace Mantid::Geometry;
 static const std::string RUNINFO_FILENAME("RunInfoFilename");
 static const std::string WORKSPACE_OUT("OutputWorkspace");
 
-//----------------------------------------------------------------------------------------------
-/** Init documentation
-*/
-void LoadPreNexusMonitors::initDocs()
-{
-  this->setWikiSummary("This is a routine to load in the beam monitors from SNS preNeXus files into a workspace.");
-  this->setOptionalMessage("This is a routine to load in the beam monitors from SNS preNeXus files into a workspace.");
-}
-
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 

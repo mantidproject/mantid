@@ -57,7 +57,7 @@ void IndirectDiffractionReduction::demonRun()
 
   QString instName=m_uiForm.cbInst->currentText();
   QString mode = m_uiForm.cbReflection->currentText();
-  if ( mode == "diffspec" )
+  if ( instName != "OSIRIS" || mode == "diffspec" )
   {
     // MSGDiffractionReduction
     QString pfile = instName + "_diffraction_" + mode + "_Parameters.xml";

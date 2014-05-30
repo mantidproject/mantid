@@ -131,10 +131,6 @@ void MDHistoToWorkspace2D::checkW2D(Mantid::DataObjects::Workspace2D_sptr outWS)
 		}
 	}
 }
-void MDHistoToWorkspace2D::initDocs()
-{
-  this->setWikiSummary("Flattens a n dimensional MDHistoWorkspace into a Workspace2D with many spectra");
-}
 
 void MDHistoToWorkspace2D::copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inWS, Mantid::DataObjects::Workspace2D_sptr outWS)
 {

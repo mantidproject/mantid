@@ -24,13 +24,6 @@ namespace Mantid
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(Transpose)
 
-    /// Sets documentation strings for this algorithm
-    void Transpose::initDocs()
-    {
-      this->setWikiSummary("Transposes a workspace, so that an N1 x N2 workspace becomes N2 x N1.");
-      this->setOptionalMessage("Transposes a workspace, so that an N1 x N2 workspace becomes N2 x N1.");
-    }
-
 
     using namespace Kernel;
     using namespace API;

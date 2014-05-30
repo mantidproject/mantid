@@ -117,13 +117,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void SpecularReflectionPositionCorrect::initDocs()
-    {
-      this->setWikiSummary(
-          "Correct detector positions vertically based on the specular reflection condition.");
-      this->setOptionalMessage(this->getWikiSummary());
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

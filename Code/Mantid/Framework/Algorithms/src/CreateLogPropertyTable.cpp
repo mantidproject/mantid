@@ -146,15 +146,6 @@ namespace Algorithms
     this->setProperty("OutputWorkspace", outputTable);
   }
 
-  /**
-   * Sets documentation strings for this algorithm.
-   */
-  void CreateLogPropertyTable::initDocs()
-  {
-    this->setWikiSummary("Takes a list of workspaces and a list of log property names.  For each workspace, the Run info is inspected and "
-      "all log property values are used to populate a resulting output TableWorkspace.");
-  }
-
   namespace
   {
     /**

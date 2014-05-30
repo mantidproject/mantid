@@ -46,12 +46,6 @@ namespace Crystal
   const std::string PeaksOnSurface::category() const { return "Crystal";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void PeaksOnSurface::initDocs()
-  {
-    this->setWikiSummary("Find peaks intersecting a single surface region.");
-    this->setOptionalMessage(this->getWikiSummary());
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

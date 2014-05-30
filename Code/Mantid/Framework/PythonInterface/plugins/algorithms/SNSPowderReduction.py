@@ -33,6 +33,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     def name(self):
         return "SNSPowderReduction"
 
+    def summary(self):
+        return "Time filter wall is used in Load Data to load data in a certain range of time. "
+
     def PyInit(self):
         sns = ConfigService.getFacility("SNS")
         instruments = []

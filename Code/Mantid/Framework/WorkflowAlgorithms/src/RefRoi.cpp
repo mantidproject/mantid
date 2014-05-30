@@ -19,13 +19,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RefRoi)
 
-/// Sets documentation strings for this algorithm
-void RefRoi::initDocs()
-{
-  this->setWikiSummary("Workflow algorithm for reflectometry to sum up a region of interest on a 2D detector.");
-  this->setOptionalMessage("Workflow algorithm for reflectometry to sum up a region of interest on a 2D detector.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

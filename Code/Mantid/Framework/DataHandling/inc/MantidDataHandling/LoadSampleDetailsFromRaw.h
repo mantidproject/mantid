@@ -51,14 +51,16 @@ public:
   virtual ~LoadSampleDetailsFromRaw() {}
   /// Algorithm's name
   virtual const std::string name() const { return "LoadSampleDetailsFromRaw"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads the simple sample geometry that is defined within an ISIS raw file.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling\\Raw;Sample"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   ///Execution code

@@ -30,13 +30,6 @@ namespace DataHandling
 
 DECLARE_ALGORITHM(LoadNexusMonitors)
 
-/// Sets documentation strings for this algorithm
-void LoadNexusMonitors::initDocs()
-{
-  this->setWikiSummary("Load all monitors from a NeXus file into a workspace.");
-  this->setOptionalMessage("Load all monitors from a NeXus file into a workspace.");
-}
-
 
 LoadNexusMonitors::LoadNexusMonitors() : Algorithm(),
 nMonitors(0)

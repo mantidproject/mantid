@@ -26,12 +26,6 @@ namespace Algorithms
   const std::string DeleteLog::category() const { return "DataHandling\\Logs";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void DeleteLog::initDocs()
-  {
-    this->setWikiSummary("Removes a named log from a run");
-    this->setOptionalMessage("Removes a named log from a run");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

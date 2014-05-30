@@ -321,13 +321,6 @@ namespace Mantid
           Direction::Input);
     }
 
-    /// Sets documentation strings for this algorithm
-    void LoadDetectorInfo::initDocs()
-    {
-      this->setWikiSummary("Loads delay times, tube pressures and tube wall thicknesses from a given file.");
-      this->setOptionalMessage("Loads delay times, tube pressures and tube wall thicknesses from a given file.");
-    }
-
     /**
      */
     void LoadDetectorInfo::exec()

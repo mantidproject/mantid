@@ -21,13 +21,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSResolution)
 
-/// Sets documentation strings for this algorithm
-void EQSANSResolution::initDocs()
-{
-  this->setWikiSummary("Calculate the Q resolution for EQSANS data.");
-  this->setOptionalMessage("Calculate the Q resolution for EQSANS data.");
-}
-
 /*
  * Double Boltzmann fit to the TOF resolution as a function of wavelength
  */

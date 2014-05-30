@@ -23,6 +23,7 @@ public:
   const std::string name() const { return "AsyncAlgorithm";} ///< Algorithm's name for identification
   int version() const  { return 1;} ///< Algorithm's version for identification
   const std::string category() const { return "Cat";} ///< Algorithm's category for identification
+  const std::string summary() const { return "Test summary"; }
 
   void init() {}
   void exec() 

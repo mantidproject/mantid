@@ -49,12 +49,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadIsawSpectrum::initDocs()
-  {
-    this->setWikiSummary("Load incident spectrum and detector efficiency correction file.");
-    this->setOptionalMessage("Load incident spectrum and detector efficiency correction file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

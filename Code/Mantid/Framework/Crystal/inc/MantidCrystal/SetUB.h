@@ -43,11 +43,13 @@ namespace Crystal
     ~SetUB();
 
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Set the UB matrix, given either lattice parametersand orientation vectors or the UB matrix elements";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

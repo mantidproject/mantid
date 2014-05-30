@@ -51,13 +51,6 @@ namespace Mantid
         << c.nxclass;
     }
 
-    /// Sets documentation strings for this algorithm
-    void LoadILL::initDocs() 
-    {
-      this->setWikiSummary("Loads a ILL nexus file. ");
-      this->setOptionalMessage("Loads a ILL nexus file.");
-    }
-
     /**
     * Return the confidence with with this algorithm can load the file
     * @param descriptor A descriptor for the file

@@ -83,12 +83,6 @@ namespace MDAlgorithms
   const std::string MaskMD::category() const { return "MDAlgorithms";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void MaskMD::initDocs()
-  {
-    this->setWikiSummary("Mask an [[MDWorkspace]] in-situ");
-    this->setOptionalMessage("Mask an MDWorkspace in-situ marking specified boxes as masked");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

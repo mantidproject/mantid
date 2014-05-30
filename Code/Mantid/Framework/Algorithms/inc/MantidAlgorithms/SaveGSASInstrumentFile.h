@@ -43,14 +43,16 @@ public:
   virtual ~SaveGSASInstrumentFile();
   /// Algorithm's name
   virtual const std::string name() const { return "SaveGSASInstrumentFile"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Generate a GSAS instrument file from either a table workspace containing profile parameters or a Fullprof's instrument resolution file (.irf file). ";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Diffraction"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

@@ -62,13 +62,6 @@ namespace Crystal
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string FilterPeaks::category() const { return "Crystal";}
 
-  /// Sets documentation strings for this algorithm
-  void FilterPeaks::initDocs()
-  {
-    this->setWikiSummary("Filters the peaks in a peaks workspace based upon the value of a chosen variable.");
-    this->setOptionalMessage("Filters the peaks in a peaks workspace based upon the valur of a chosen variable.");
-  }
-
   /** Initialize the algorithm's properties.
    */
   void FilterPeaks::init()

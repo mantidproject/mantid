@@ -29,14 +29,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
-
-/// Sets documentation strings for this algorithm
-void AbortRemoteJob::initDocs()
-{
-  this->setWikiSummary("Abort a previously submitted job.");
-  this->setOptionalMessage("Abort a previously submitted job.");
-}
 
 void AbortRemoteJob::init()
 {

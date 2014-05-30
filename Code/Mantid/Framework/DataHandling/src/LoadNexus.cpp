@@ -40,13 +40,6 @@ namespace Mantid
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadNexus)
     
-    /// Sets documentation strings for this algorithm
-    void LoadNexus::initDocs()
-    {
-      this->setWikiSummary("The LoadNexus algorithm will try to identify the type of Nexus file given to it and invoke the appropriate algorithm to read the data and populate the named workspace. ");
-      this->setOptionalMessage("The LoadNexus algorithm will try to identify the type of Nexus file given to it and invoke the appropriate algorithm to read the data and populate the named workspace.");
-    }
-    
 
     using namespace Kernel;
     using namespace API;

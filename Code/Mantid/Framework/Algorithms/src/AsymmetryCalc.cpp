@@ -54,7 +54,7 @@ DECLARE_ALGORITHM( AsymmetryCalc)
  */
 void AsymmetryCalc::init()
 {
-  this->setWikiSummary("Calculates the asymmetry between two groups of detectors for a muon workspace.");
+
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "",
       Direction::Input), "Name of the input workspace");
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",

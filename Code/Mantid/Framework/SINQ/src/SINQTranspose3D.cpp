@@ -242,8 +242,3 @@ void SINQTranspose3D::copyMetaData( Mantid::API::IMDHistoWorkspace_sptr inws,  M
 		outws->addExperimentInfo(info);
 	}
 }
-
-void SINQTranspose3D::initDocs()
-{
-    this->setWikiSummary("SINQ specific MD data reordering");
-}

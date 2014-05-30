@@ -31,13 +31,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Q1DWeighted)
 
-/// Sets documentation strings for this algorithm
-void Q1DWeighted::initDocs()
-{
-  this->setWikiSummary("Performs azimuthal averaging on a 2D SANS data to produce I(Q). ");
-  this->setOptionalMessage("Performs azimuthal averaging on a 2D SANS data to produce I(Q).");
-}
-
 
 using namespace Kernel;
 using namespace API;

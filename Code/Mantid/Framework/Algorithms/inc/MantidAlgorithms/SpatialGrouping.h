@@ -58,14 +58,16 @@ public:
   virtual ~SpatialGrouping() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SpatialGrouping"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "This algorithm creates an XML grouping file, which can be used in GroupDetectors or ReadGroupsFromFile, which groups the detectors of an instrument based on the distance between the detectors. It does this by querying the getNeighbours method on the Detector object.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Transforms\\Grouping"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

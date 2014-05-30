@@ -53,14 +53,16 @@ namespace Mantid
       virtual ~Minus() {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Minus";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "The Minus algorithm will subtract the data values and calculate the corresponding error values for two compatible workspaces.";}
+
       /// Algorithm's alias for identification overriding a virtual method
       virtual const std::string alias() const;
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       // Overridden BinaryOperation methods
       void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                   const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);

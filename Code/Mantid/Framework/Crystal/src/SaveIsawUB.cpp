@@ -57,12 +57,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveIsawUB::initDocs()
-  {
-    this->setWikiSummary("Save a UB matrix and lattice parameters from a workspace to an ISAW-style ASCII file.");
-    this->setOptionalMessage("Save a UB matrix and lattice parameters from a workspace to an ISAW-style ASCII file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

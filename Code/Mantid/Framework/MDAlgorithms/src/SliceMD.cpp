@@ -86,12 +86,6 @@ namespace MDAlgorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SliceMD::initDocs()
-  {
-    this->setWikiSummary("Make a MDEventWorkspace containing the events in a slice of an input MDEventWorkspace.");
-    this->setOptionalMessage("Make a MDEventWorkspace containing the events in a slice of an input MDEventWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

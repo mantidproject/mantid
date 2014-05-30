@@ -60,15 +60,6 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** WIKI:
-   */
-  void FindPeakBackground::initDocs()
-  {
-    setWikiSummary("Separates background from signal for spectra of a workspace.");
-    setOptionalMessage("Separates background from signal for spectra of a workspace.");
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Define properties
     */
   void FindPeakBackground::init()

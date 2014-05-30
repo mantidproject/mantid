@@ -32,13 +32,6 @@ namespace Algorithms
   using namespace Kernel;
   using namespace API;
   using namespace Geometry;
-
-  /// Sets documentation strings for this algorithm
-  void ConvertSpectrumAxis::initDocs()
-  {
-    this->setWikiSummary("Converts the axis of a [[Workspace2D]] which normally holds spectrum numbers to some other unit, which will normally be some physical value about the instrument such as Q, Q^2 or theta.<p>'''Note''': After running this algorithm, some features will be unavailable on the workspace as it will have lost all connection to the instrument. This includes things like the 3D Instrument Display. ");
-    this->setOptionalMessage("Converts the axis of a Workspace2D which normally holds spectrum numbers to some other unit, which will normally be some physical value about the instrument such as Q, Q^2 or theta.  'Note': After running this algorithm, some features will be unavailable on the workspace as it will have lost all connection to the instrument. This includes things like the 3D Instrument Display.");
-  }
   
 
   void ConvertSpectrumAxis::init()

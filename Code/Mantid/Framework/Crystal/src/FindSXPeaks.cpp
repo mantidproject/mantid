@@ -35,13 +35,6 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    /// Set the documentation strings
-    void FindSXPeaks::initDocs()
-    {
-      this->setWikiSummary("Takes a 2D workspace as input and find the FindSXPeaksimum in each 1D spectrum. This is used in particular for single crystal as a quick way to find strong peaks.");
-      this->setOptionalMessage("Takes a 2D workspace as input and find the FindSXPeaksimum in each 1D spectrum. This is used in particular for single crystal as a quick way to find strong peaks.");
-    }
-
     /** Initialisation method.
      *
      */

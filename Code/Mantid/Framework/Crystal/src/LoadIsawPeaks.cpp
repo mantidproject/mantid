@@ -120,12 +120,6 @@ namespace Crystal
 
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadIsawPeaks::initDocs()
-  {
-    this->setWikiSummary("Load an ISAW-style .peaks file into a [[PeaksWorkspace]].");
-    this->setOptionalMessage("Load an ISAW-style .peaks file into a PeaksWorkspace.");
-   }
   //----------------------------------------------------------------------------------------------
 
 

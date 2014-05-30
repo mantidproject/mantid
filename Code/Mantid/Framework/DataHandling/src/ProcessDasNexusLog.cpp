@@ -38,13 +38,6 @@ namespace DataHandling
   ProcessDasNexusLog::~ProcessDasNexusLog()
   {
   }
-  
-  void ProcessDasNexusLog::initDocs(){
-    this->setWikiSummary("Some sample logs recorded by the SNS data acquisition group (DAS) are not usable. This very specialized algorithm will process sample logs of this type. ");
-    this->setOptionalMessage("Very specialized algorithm to fix certain SNS DAS logs that cannot be used directly.");
-
-    return;
-  }
 
   void ProcessDasNexusLog::init()
   {

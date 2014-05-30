@@ -72,12 +72,6 @@ namespace DataHandling
   const std::string GenerateGroupingPowder::category() const { return "DataHandling";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void GenerateGroupingPowder::initDocs()
-  {
-    this->setWikiSummary("Generate grouping by angles.");
-    this->setOptionalMessage("Generate grouping by angles.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

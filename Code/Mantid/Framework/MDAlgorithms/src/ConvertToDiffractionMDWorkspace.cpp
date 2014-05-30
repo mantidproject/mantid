@@ -93,13 +93,6 @@ namespace MDAlgorithms
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace)
-  
-  /// Sets documentation strings for this algorithm
-  void ConvertToDiffractionMDWorkspace::initDocs()
-  {
-    this->setWikiSummary("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) for an elastic diffraction experiment.");
-    this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) for an elastic diffraction experiment.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Constructor

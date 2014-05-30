@@ -37,14 +37,6 @@ namespace Algorithms
   InvertMask::~InvertMask()
   {
   }
-  
-  void InvertMask::initDocs()
-  {
-    this->setWikiSummary("This algorithm inverts every mask bit in a MaskWorkspace. ");
-    this->setOptionalMessage("This algorithm inverts every mask bit in a MaskWorkspace.");
-
-    return;
-  }
 
   void InvertMask::init()
   {

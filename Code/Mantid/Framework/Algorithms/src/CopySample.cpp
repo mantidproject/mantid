@@ -46,12 +46,6 @@ namespace Algorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CopySample::initDocs()
-  {
-    this->setWikiSummary("Copy some/all the sample information from one workspace to another.");
-    this->setOptionalMessage("Copy some/all the sample information from one workspace to another.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

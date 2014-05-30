@@ -61,14 +61,16 @@ public:
   virtual ~RawFileInfo() {}
   /// Algorithm's name
   virtual const std::string name() const { return "RawFileInfo"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Extract run parameters from a  RAW file as output properties.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling\\Raw"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

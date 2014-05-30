@@ -58,12 +58,6 @@ namespace DataHandling
   const std::string AppendGeometryToSNSNexus::category() const { return "DataHandling\\DataAcquisition";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void AppendGeometryToSNSNexus::initDocs()
-  {
-    this->setWikiSummary("Appends the resolved instrument geometry (detectors and monitors for now) to a SNS ADARA NeXus file.");
-    this->setOptionalMessage("Appends the resolved instrument geometry (detectors and monitors for now) to a SNS ADARA NeXus file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

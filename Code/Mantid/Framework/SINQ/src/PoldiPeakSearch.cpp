@@ -71,11 +71,6 @@ PoldiPeakSearch::PoldiPeakSearch() :
 {
 }
 
-void PoldiPeakSearch::initDocs()
-{
-    setWikiSummary("This algorithm finds the peaks in a POLDI auto-correlation spectrum.");
-}
-
 /** Sums the counts of neighboring d-values
   *
   * This method takes a vector of counts y with N elements and produces a new vector y'

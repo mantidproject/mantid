@@ -46,12 +46,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadLogsForSNSPulsedMagnet::initDocs()
-  {
-    this->setWikiSummary("Load SNS's DelayTime log file and Pulse ID file of Pulsed Magnet ");
-    this->setOptionalMessage("Both log files are in binary format");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

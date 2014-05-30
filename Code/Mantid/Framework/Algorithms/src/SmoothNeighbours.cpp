@@ -136,13 +136,6 @@ SmoothNeighbours::SmoothNeighbours() :
 {
 }
 
-/// Sets documentation strings for this algorithm
-void SmoothNeighbours::initDocs()
-{
-  this->setWikiSummary("Perform a moving-average smoothing by summing spectra of nearest neighbours over the face of detectors.");
-  this->setOptionalMessage("Perform a moving-average smoothing by summing spectra of nearest neighbours over the face of detectors.");
-}
-
 /** Initialisation method.
  *
  */

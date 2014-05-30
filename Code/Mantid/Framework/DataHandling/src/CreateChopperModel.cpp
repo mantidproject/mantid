@@ -45,12 +45,6 @@ namespace Mantid
     const std::string CreateChopperModel::category() const { return "DataHandling";}
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void CreateChopperModel::initDocs()
-    {
-      this->setWikiSummary("Creates a chopper model for a given workspace");
-      this->setOptionalMessage("Creates a chopper model for a given workspace");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

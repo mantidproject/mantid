@@ -41,6 +41,9 @@ namespace Mantid
       LoadReflTBL();
       /// The name of the algorithm
       virtual const std::string name() const { return "LoadReflTBL"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads data from a reflectometry table file and stores it in a table workspace (TableWorkspace class).";}
+
       /// The version number
       virtual int version() const { return 1; }
       /// The category
@@ -49,8 +52,7 @@ namespace Mantid
       virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Declare properties
       void init();
       /// Execute the algorithm

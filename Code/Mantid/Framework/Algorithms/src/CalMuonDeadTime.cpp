@@ -46,7 +46,7 @@ DECLARE_ALGORITHM( CalMuonDeadTime)
  */
 void CalMuonDeadTime::init()
 {
-  this->setWikiSummary("Calculate Muon deadtime for each spectra in a workspace.");
+
 
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "",
       Direction::Input), "Name of the input workspace");

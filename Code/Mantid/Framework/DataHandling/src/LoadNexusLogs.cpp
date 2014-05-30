@@ -32,13 +32,6 @@ namespace Mantid
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadNexusLogs)
-
-    /// Sets documentation strings for this algorithm
-    void LoadNexusLogs::initDocs()
-    {
-      this->setWikiSummary("Loads sample logs (temperature, pulse charges, etc.) from a NeXus file and adds it to the run information in a [[workspace]]. This is run automatically by [[LoadISISNexus]] and [[LoadEventNexus]]. This is useful when using [[LoadEventPreNexus]], to add sample logs after loading.");
-      this->setOptionalMessage("Loads run logs (temperature, pulse charges, etc.) from a NeXus file and adds it to the run information in a workspace.");
-    }
     
     using namespace Kernel;
     using API::WorkspaceProperty;

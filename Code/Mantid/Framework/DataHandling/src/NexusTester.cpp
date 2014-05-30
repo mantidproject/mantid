@@ -65,12 +65,6 @@ namespace DataHandling
   const std::string NexusTester::category() const { return "Utility\\Development";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void NexusTester::initDocs()
-  {
-    this->setWikiSummary("Algorithm for testing and debugging purposes only!");
-    this->setOptionalMessage("Algorithm for testing and debugging purposes only!");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

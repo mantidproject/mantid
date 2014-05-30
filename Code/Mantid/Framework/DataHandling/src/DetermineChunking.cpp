@@ -95,14 +95,6 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
-  /// @copydoc Mantid::API::Algorithm::initDocs()
-  void DetermineChunking::initDocs()
-  {
-    this->setWikiSummary("Workflow algorithm to determine chunking strategy for event nexus, runinfo.xml, raw, or histo nexus files.");
-    this->setOptionalMessage("Workflow algorithm to determine chunking strategy for event nexus, runinfo.xml, raw, or histo nexus files.");
-  }
-
-  //----------------------------------------------------------------------------------------------
   /// @copydoc Mantid::API::Algorithm::init()
   void DetermineChunking::init()
   {

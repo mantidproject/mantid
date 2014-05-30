@@ -13,13 +13,6 @@ namespace Mantid
   {
     DECLARE_ALGORITHM(CatalogMyDataSearch)
 
-    /// Sets documentation strings for this algorithm
-    void CatalogMyDataSearch::initDocs()
-    {
-      this->setWikiSummary("This algorithm loads the logged in users' investigations into a workspace.");
-      this->setOptionalMessage("This algorithm loads the logged in users' investigations into a workspace.");
-    }
-
     /// Initialisation method.
     void CatalogMyDataSearch::init()
     {

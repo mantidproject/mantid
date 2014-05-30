@@ -28,13 +28,6 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadMuonLog)
 
-/// Sets documentation strings for this algorithm
-void LoadMuonLog::initDocs()
-{
-  this->setWikiSummary("Load log data from within Muon Nexus files into a [[workspace]]. ");
-  this->setOptionalMessage("Load log data from within Muon Nexus files into a workspace.");
-}
-
 
 using namespace Kernel;
 using API::WorkspaceProperty;

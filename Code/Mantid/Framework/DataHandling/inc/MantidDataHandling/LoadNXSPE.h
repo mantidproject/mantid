@@ -46,6 +46,9 @@ namespace DataHandling
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "LoadNXSPE";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return " Algorithm to load an NXSPE file into a workspace2D.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -55,8 +58,7 @@ namespace DataHandling
     virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm

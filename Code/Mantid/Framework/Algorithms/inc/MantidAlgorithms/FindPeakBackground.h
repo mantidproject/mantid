@@ -39,6 +39,9 @@ namespace Algorithms
 
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "FindPeakBackground";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Separates background from signal for spectra of a workspace.";}
+
 
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 1;}
@@ -48,8 +51,7 @@ namespace Algorithms
 
   private:
     std::string m_backgroundType; //< The type of background to fit
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Implement abstract Algorithm methods
     void init();
     /// Implement abstract Algorithm methods

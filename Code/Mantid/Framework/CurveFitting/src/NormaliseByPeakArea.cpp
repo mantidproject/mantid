@@ -60,12 +60,6 @@ namespace Mantid
     const std::string NormaliseByPeakArea::category() const { return "Corrections"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void NormaliseByPeakArea::initDocs()
-    {
-      this->setWikiSummary("Normalises the input data by the area of of peak defined by the input mass value.");
-      this->setOptionalMessage("Normalises the input data by the area of of peak defined by the input mass value.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

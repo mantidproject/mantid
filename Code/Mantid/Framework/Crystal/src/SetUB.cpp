@@ -62,12 +62,6 @@ namespace Crystal
   }
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SetUB::initDocs()
-  {
-    this->setWikiSummary("Set the UB matrix, given either lattice parametersand orientation vectors or the UB matrix elements");
-    this->setOptionalMessage("Set the UB matrix, given either lattice parametersand orientation vectors or the UB matrix elements");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

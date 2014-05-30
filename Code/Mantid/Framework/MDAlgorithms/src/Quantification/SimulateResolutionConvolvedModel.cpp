@@ -54,13 +54,6 @@ namespace Mantid
     /// Algorithm's version for identification. @see Algorithm::version
     int SimulateResolutionConvolvedModel::version() const { return 1;}
 
-    /// Sets documentation strings for this algorithm
-    void SimulateResolutionConvolvedModel::initDocs()
-    {
-      this->setWikiSummary("Runs a simulation of a model with a selected resolution function");
-      this->setOptionalMessage("Runs a simulation of a model with a selected resolution function");
-    }
-
     /**
      * Returns the number of iterations that should be performed
      * @returns 1 for the simulation

@@ -60,6 +60,9 @@ namespace Mantid
       virtual int version() const { return 1; }
       /// Algorithm's category for identification
       virtual const std::string category() const { return "CorrectionFunctions\\AbsorptionCorrections"; }
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Calculates attenuation due to absorption and scattering in a sample & its environment using a weighted Monte Carlo.";}
+
 
     private:
       /// Initialize the algorithm

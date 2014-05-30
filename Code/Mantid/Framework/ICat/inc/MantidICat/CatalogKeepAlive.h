@@ -45,14 +45,16 @@ namespace Mantid
         CatalogKeepAlive() : API::Algorithm(){}
         /// Algorithm's name for identification.
         virtual const std::string name() const { return "CatalogKeepAlive"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Refreshes the current session to the maximum amount provided by the catalog API";}
+
         /// Algorithm's version for identification.
         virtual int version() const { return 1; }
         /// Algorithm's category for identification.
         virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
       private:
-        /// Sets documentation strings for this algorithm
-        virtual void initDocs();
+        
         /// Override algorithm initialisation method.
         void init();
         /// Override algorithm execute method.

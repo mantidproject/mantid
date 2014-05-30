@@ -45,13 +45,6 @@ namespace DataHandling
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSassena);
 
-/// Sets documentation strings for this algorithm
-void LoadSassena::initDocs()
-{
-  this->setWikiSummary("This algorithm loads a Sassena output file into a group workspace. It places the data in a workspace for each scattering intensity and one workspace for the Q-values.");
-  this->setOptionalMessage(" load a Sassena output file into a group workspace.");
-}
-
 /**
  * Return the confidence with with this algorithm can load the file
  * @param descriptor A descriptor for the file
