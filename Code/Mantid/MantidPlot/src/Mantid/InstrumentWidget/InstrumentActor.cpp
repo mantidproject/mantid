@@ -79,9 +79,6 @@ m_failedColor(200,200,200)
   // set up data ranges and colours
   setUpWorkspace(sharedWorkspace, scaleMin, scaleMax);
 
-  /// Keep the pointer to the detid2index map
-  m_detid2index_map = sharedWorkspace->getDetectorIDToWorkspaceIndexMap();
-
   Instrument_const_sptr instrument = getInstrument();
 
   // If the instrument is empty, maybe only having the sample and source
@@ -171,6 +168,9 @@ void InstrumentActor::setUpWorkspace(boost::shared_ptr<const Mantid::API::Matrix
   // set the ragged flag using a workspace validator
   auto wsValidator = Mantid::API::CommonBinsValidator();
   m_ragged = ! wsValidator.isValid(sharedWorkspace).empty();
+
+  /// Keep the pointer to the detid2index map
+  m_detid2index_map = sharedWorkspace->getDetectorIDToWorkspaceIndexMap();
 
 }
 
@@ -1066,8 +1066,6 @@ void InstrumentActor::setDataMinMaxRange(double vmin, double vmax)
 
 void InstrumentActor::setDataIntegrationRange(const double& xmin,const double& xmax)
 {
-  if (!getWorkspace()) return;
-
   m_BinMinValue = xmin;
   m_BinMaxValue = xmax;
 
