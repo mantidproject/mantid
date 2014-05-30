@@ -41,10 +41,10 @@ namespace DataHandling
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
+    virtual const std::string summary() const;
     virtual std::map<std::string, std::string> validateInputs();
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
     Geometry::Instrument_const_sptr getInstrument();

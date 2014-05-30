@@ -83,14 +83,8 @@ namespace DataHandling
   /// Algorithm's category for identification. @see Algorithm::category
   const string CreateChunkingFromInstrument::category() const { return "Workflow\\DataHandling";}
 
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CreateChunkingFromInstrument::initDocs()
-  {
-    string msg("Creates chunking at a level of the instrument or instrument components.");
-    this->setWikiSummary(msg);
-    this->setOptionalMessage(msg);
-  }
+  /// Algorithm's summary for identification. @see Algorithm::summary
+  const string CreateChunkingFromInstrument::summary() const { return "Creates chunking at a level of the instrument or instrument components."; }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
