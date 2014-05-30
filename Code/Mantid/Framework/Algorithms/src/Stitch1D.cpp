@@ -359,6 +359,7 @@ namespace Mantid
 
       boost::tuple<int,int> startEnd = findStartEndIndexes(startOverlap, endOverlap, rebinnedLHS);
 
+      bool scaleRHS = this->getProperty("ScaleRHSWorkspace");
       //manualscalefactor if
 
       auto rhsOverlapIntegrated = integration(rebinnedRHS, startOverlap, endOverlap);
@@ -367,7 +368,7 @@ namespace Mantid
       auto y1 = lhsOverlapIntegrated->readY(0);
       auto y2 = rhsOverlapIntegrated->readY(0);
       double scaleFactor = 0;
-      if(rhsOverlapIntegrated)
+      if(scaleRHS)
       {
         MatrixWorkspace_sptr ratio = lhsOverlapIntegrated/rhsOverlapIntegrated;
         rebinnedRHS =  rebinnedRHS * ratio;
