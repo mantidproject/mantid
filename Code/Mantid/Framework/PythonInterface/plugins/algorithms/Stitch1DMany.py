@@ -6,6 +6,9 @@ The algorithm expects  pairs of StartOverlaps and EndOverlaps values. The order 
 There should be N entries in each of these StartOverlaps and EndOverlaps lists, where N = 1 -(No of workspaces to stitch). 
 StartOverlaps and EndOverlaps are in the same units as the X-axis for the workspace and are optional.
 
+If you are processing WorkspaceGroups as inputs, then stitching will happen with respect to Workspaces in each group, which have an equivalent index. Each input WorkspaceGroup must have the same size
+as each other. When processing WorkspaceGroups, you will be provided with as single list of all scale factors in a row major order, so all the scale factors for WorkspaceGroups[0] then WorkspaceGroups[1].
+
 The workspaces must be histogrammed. Use [[ConvertToHistogram]] on workspaces prior to passing them to this algorithm.
 *WIKI*"""
 #from mantid.simpleapi import *
@@ -15,10 +18,10 @@ from mantid.api import *
 from mantid.kernel import *
 import numpy as np
 
-class Stitch1DMany(PythonAlgorithm):
+class Stitch1DMany(DataProcessorAlgorithm):
 
     def category(self):
-        return "Reflectometry\\ISIS;PythonAlgorithms"
+        return "Reflectometry\\ISIS;"
 
     def name(self):
         return "Stitch1D"
@@ -32,13 +35,13 @@ class Stitch1DMany(PythonAlgorithm):
         
         self.setWikiSummary("Stitches single histogram matrix workspaces together")
         self.setOptionalMessage("Stitches single histogram matrix workspaces together")
-        self.declareProperty(FloatArrayProperty(name="StartOverlaps", values=[]), doc="Overlap in Q.")
-        self.declareProperty(FloatArrayProperty(name="EndOverlaps", values=[]), doc="End overlap in Q.")
+        self.declareProperty(FloatArrayProperty(name="StartOverlaps", values=[]), doc="Start overlaps for stitched workspaces.")
+        self.declareProperty(FloatArrayProperty(name="EndOverlaps", values=[]), doc="End overlap for stitched workspaces.")
         self.declareProperty(FloatArrayProperty(name="Params", validator=FloatArrayMandatoryValidator()), doc="Rebinning Parameters. See Rebin for format.")
         self.declareProperty(name="ScaleRHSWorkspace", defaultValue=True, doc="Scaling either with respect to workspace 1 or workspace 2.")
         self.declareProperty(name="UseManualScaleFactor", defaultValue=False, doc="True to use a provided value for the scale factor.")
         self.declareProperty(name="ManualScaleFactor", defaultValue=1.0, doc="Provided value for the scale factor.")
-        self.declareProperty(name="OutScaleFactor", defaultValue=-2.0, direction = Direction.Output, doc="The actual used value for the scaling factor.")
+        self.declareProperty(FloatArrayProperty(name="OutScaleFactors", direction = Direction.Output), doc="The actual used values for the scaling factors at each stitch step.")
         
     def __workspace_from_split_name(self, list_of_names, index):
         return mtd[list_of_names[index].strip()]
@@ -127,7 +130,7 @@ class Stitch1DMany(PythonAlgorithm):
             raise ValueError("Wrong number of StartOverlaps, should be %i not %i" % (numberOfWorkspaces - 1, startOverlaps))
         self.__check_workspaces_are_common(inputWorkspaces)
         
-        scaleFactor = None
+        scaleFactors = list()
         comma_separator = ","
         no_separator = str()
         
@@ -154,10 +157,13 @@ class Stitch1DMany(PythonAlgorithm):
                 startOverlaps = self.getProperty("StartOverlaps").value
                 endOverlaps = self.getProperty("EndOverlaps").value
                 
-                stitched, scaleFactor = Stitch1DMany(InputWorkspaces=to_process, OutputWorkspace=out_name, StartOverlaps=startOverlaps, EndOverlaps=endOverlaps, 
+                stitched, scaleFactorsOfIndex = Stitch1DMany(InputWorkspaces=to_process, OutputWorkspace=out_name, StartOverlaps=startOverlaps, EndOverlaps=endOverlaps, 
                                                          Params=params, ScaleRHSWorkspace=scaleRHSWorkspace, UseManualScaleFactor=useManualScaleFactor,  
                                                          ManualScaleFactor=manualScaleFactor)
-                       
+                # Flatten out scale factors.
+                for sf in scaleFactorsOfIndex:
+                    scaleFactors.append(sf) 
+                          
                 out_group_workspaces += out_group_separator + out_name
                 out_group_separator = comma_separator
              
@@ -174,6 +180,7 @@ class Stitch1DMany(PythonAlgorithm):
                 for i in range(1, numberOfWorkspaces, 1):
                     rhsWS = self.__workspace_from_split_name(inputWorkspaces, i)
                     lhsWS, scaleFactor = self.__do_stitch_workspace(lhsWS, rhsWS, startOverlaps[i-1], endOverlaps[i-1], params, scaleRHSWorkspace,  useManualScaleFactor, manualScaleFactor)
+                    scaleFactors.append(scaleFactor)
                 self.setProperty('OutputWorkspace', lhsWS)
                 
             # Iterate backwards through the workspaces.
@@ -182,9 +189,10 @@ class Stitch1DMany(PythonAlgorithm):
                 for i in range(0, numberOfWorkspaces-1, 1):
                     lhsWS = self.__workspace_from_split_name(inputWorkspaces, i)
                     rhsWS, scaleFactor = Stitch1D(LHSWorkspace=lhsWS, RHSWorkspace=rhsWS, StartOverlap=startOverlaps[i-1], EndOverlap=endOverlaps[i-1], Params=params, ScaleRHSWorkspace=scaleRHSWorkspace, UseManualScaleFactor=useManualScaleFactor,  ManualScaleFactor=manualScaleFactor)            
+                    scaleFactors.append(scaleFactor)
                 self.setProperty('OutputWorkspace', rhsWS)
         
-        self.setProperty('OutScaleFactor', scaleFactor)
+        self.setProperty('OutScaleFactors', scaleFactors)
         return None
         
 
