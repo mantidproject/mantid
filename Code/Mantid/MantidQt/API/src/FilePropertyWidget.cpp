@@ -86,6 +86,7 @@ namespace API
     {
       m_textbox->clear();
       m_textbox->setText(filename);
+      userEditedProperty();
     }
   }
 
