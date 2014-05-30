@@ -94,15 +94,17 @@ class Category(LinkItem):
 
 class CategoriesDirective(BaseDirective):
     """
-    Records the page as part of the given categories. Index pages for each
+    Records the page as part of given categories. Index pages for each
     category are then automatically created after all pages are collected
     together.
 
     Subcategories can be given using the "\\" separator, e.g. Algorithms\\Transforms
+
+    If the argument list is empty then the the file is assumed to be an algorithm file
+    and the lists is pulled from the algoritm object
     """
 
-    # requires at least 1 category
-    required_arguments = 1
+    required_arguments = 0
     # it can be in many categories and we put an arbitrary upper limit here
     optional_arguments = 25
 
@@ -125,16 +127,40 @@ class CategoriesDirective(BaseDirective):
         Returns:
           list: A list of strings containing the required categories
         """
-        # Simply return all of the arguments as strings
-        return self.arguments
+        # if the argument list is empty then assume this is in an algorithm file
+        args = self.arguments
+        if len(args) > 0:
+            return args
+        else:
+            return self._get_algorithm_categories_list()
+
+    def _get_algorithm_categories_list(self):
+        """
+        Returns a list of the category strings
+
+        Returns:
+          list: A list of strings containing the required categories
+        """
+        category_list = ["Algorithms"]
+        alg_cats = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version()).categories()
+        for cat in alg_cats:
+            # double up the category separators so they are not treated as escape characters
+            category_list.append(cat.replace("\\", "\\\\"))
+
+        return category_list
 
     def _get_display_name(self):
         """
         Returns the name of the item as it should appear in the category
         """
-        env = self.state.document.settings.env
-        # env.docname returns relative path from doc root. Use name after last "/" separator
-        return env.docname.split("/")[-1]
+        # If there are no arguments then take the name directly from the document name, else
+        # assume it is an algorithm and use its name
+        if len(self.arguments) > 0:
+            env = self.state.document.settings.env
+            # env.docname returns relative path from doc root. Use name after last "/" separator
+            return env.docname.split("/")[-1]
+        else:
+            return self.algorithm_name()
 
     def _create_links_and_track(self, page_name, category_list):
         """
@@ -192,42 +218,6 @@ class CategoriesDirective(BaseDirective):
 
         return link_rst
     #end def
-
-#---------------------------------------------------------------------------------
-
-class AlgorithmCategoryDirective(CategoriesDirective):
-    """
-        Supports the "algm_categories" directive that takes a single
-        argument and pulls the categories from an algorithm object.
-
-        In addition to adding the named page to the requested category, it
-        also appends it to the "Algorithms" category
-    """
-    # requires at least 1 argument
-    required_arguments = 0
-    # no other arguments
-    optional_arguments = 0
-
-    def _get_categories_list(self):
-        """
-        Returns a list of the category strings
-
-        Returns:
-          list: A list of strings containing the required categories
-        """
-        category_list = ["Algorithms"]
-        alg_cats = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version()).categories()
-        for cat in alg_cats:
-            # double up the category separators so they are not treated as escape characters
-            category_list.append(cat.replace("\\", "\\\\"))
-
-        return category_list
-
-    def _get_display_name(self):
-        """
-        Returns the name of the item as it should appear in the category
-        """
-        return self.algorithm_name()
 
 #---------------------------------------------------------------------------------
 
@@ -302,8 +292,6 @@ def purge_categories(app, env, docname):
 def setup(app):
     # Add categories directive
     app.add_directive('categories', CategoriesDirective)
-    # Add algm_categories directive
-    app.add_directive('algm_categories', AlgorithmCategoryDirective)
 
     # connect event html collection to handler
     app.connect("html-collect-pages", html_collect_pages)
