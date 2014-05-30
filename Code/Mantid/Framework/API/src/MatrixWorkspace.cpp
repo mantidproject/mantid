@@ -1065,7 +1065,7 @@ namespace Mantid
      *  Note that no checking is performed as to whether this workspace actually contains data
      *  pertaining to monitors, or that the spectra point to Detector objects marked as monitors.
      *  It simply has to be of the correct type to be accepted.
-     *  @param The workspace containing the monitor data.
+     *  @param monitorWS The workspace containing the monitor data.
      */
     void MatrixWorkspace::setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace>& monitorWS)
     {
