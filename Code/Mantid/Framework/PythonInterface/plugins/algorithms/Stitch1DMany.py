@@ -6,6 +6,9 @@ The algorithm expects  pairs of StartOverlaps and EndOverlaps values. The order 
 There should be N entries in each of these StartOverlaps and EndOverlaps lists, where N = 1 -(No of workspaces to stitch). 
 StartOverlaps and EndOverlaps are in the same units as the X-axis for the workspace and are optional.
 
+Scale factors provided as outputs are the scale factors used in calculation for each call to Stitch1D. Assuming, for example, you have workspaces A, B, C and you are scaling the RHS workspace, then A is stitched 
+with B first, to give the first scale factor, then (AB) is stitched with C, which gives the second scale factor.
+
 If you are processing WorkspaceGroups as inputs, then stitching will happen with respect to Workspaces in each group, which have an equivalent index. Each input WorkspaceGroup must have the same size
 as each other. When processing WorkspaceGroups, you will be provided with as single list of all scale factors in a row major order, so all the scale factors for WorkspaceGroups[0] then WorkspaceGroups[1].
 
