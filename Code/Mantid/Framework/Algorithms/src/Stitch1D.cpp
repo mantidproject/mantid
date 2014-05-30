@@ -159,7 +159,7 @@ namespace Mantid
           char message[200];
           std::sprintf(message,
             "EndOverlap is outside range at %0.4f, Min is %0.4f, Max is %0.4f . Forced to be: %0.4f",
-            endOverlapVal, intesectionMin, intesectionMax, intesectionMin);
+            endOverlapVal, intesectionMin, intesectionMax, intesectionMax);
           g_log.warning(std::string(message));
         }
         endOverlapVal = intesectionMax;
@@ -365,7 +365,7 @@ namespace Mantid
       auto lhsOverlapIntegrated = integration(rebinnedLHS, startOverlap, endOverlap);
 
       auto y1 = lhsOverlapIntegrated->readY(0);
-      auto y2 = lhsOverlapIntegrated->readY(0);
+      auto y2 = rhsOverlapIntegrated->readY(0);
       double scaleFactor = 0;
       if(rhsOverlapIntegrated)
       {
