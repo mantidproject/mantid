@@ -1479,7 +1479,7 @@ public:
     }
 
     // Do the splitting
-    el.splitByFullTime(split, outputs, 1.0, false);
+    el.splitByFullTime(split, outputs, false, 1.0, 0.0);
 
     //No events in the first ouput 0-99
     TS_ASSERT_EQUALS( outputs[0]->getNumberEvents(), 0);
@@ -1553,7 +1553,7 @@ public:
     }
 
     // Do the splitting
-    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs, 1.0, false);
+    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs, false, 1.0, 0.0);
 
 
     //No events in the first ouput 0-99
