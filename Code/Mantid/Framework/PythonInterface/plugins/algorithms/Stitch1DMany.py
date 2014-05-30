@@ -36,8 +36,6 @@ class Stitch1DMany(DataProcessorAlgorithm):
         self.declareProperty(name="InputWorkspaces", defaultValue="", direction=Direction.Input, validator=input_validator, doc="Input workspaces")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output stitched workspace")
         
-        self.setWikiSummary("Stitches single histogram matrix workspaces together")
-        self.setOptionalMessage("Stitches single histogram matrix workspaces together")
         self.declareProperty(FloatArrayProperty(name="StartOverlaps", values=[]), doc="Start overlaps for stitched workspaces.")
         self.declareProperty(FloatArrayProperty(name="EndOverlaps", values=[]), doc="End overlap for stitched workspaces.")
         self.declareProperty(FloatArrayProperty(name="Params", validator=FloatArrayMandatoryValidator()), doc="Rebinning Parameters. See Rebin for format.")
