@@ -11,9 +11,13 @@ from pkg_resources import load_entry_point
 mantidplot = "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/MantidPlot"
 builder = "@BUILDER@"
 src_dir = "@CMAKE_CURRENT_SOURCE_DIR@/source"
+screenshots_dir = "@SCREENSHOTS_DIR@"
 output_dir = os.path.join("@SPHINX_BUILD@", builder)
-argv = [mantidplot,'-b', builder, src_dir, output_dir]
 
+# set environment
+os.environ["SCREENSHOTS_DIR"] = screenshots_dir
+# fake the sys args
+argv = [mantidplot,'-b', builder, src_dir, output_dir]
 if __name__ == '__main__':
     sys.exit(
       load_entry_point(__requires__, 'console_scripts', 'sphinx-build')(argv)

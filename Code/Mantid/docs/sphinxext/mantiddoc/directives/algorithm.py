@@ -23,6 +23,10 @@ class AlgorithmDirective(BaseDirective):
      - Table of contents
 
     If the algorithms is deprecated then a warning is inserted.
+
+    It requires a SCREENSHOTS_DIR environment variable to be set to the
+    directory where a screenshot should be generated. If it is not set then
+    a RuntimeError occurs
     """
 
     required_arguments, optional_arguments = 0, 0
@@ -89,8 +93,8 @@ class AlgorithmDirective(BaseDirective):
 
     def _create_screenshot(self):
         """
-        Creates a screenshot for the named algorithm in an "images/screenshots"
-        subdirectory of the currently processed document
+        Creates a screenshot for the named algorithm in the "images/screenshots"
+        subdirectory.
 
         The file will be named "algorithmname-vX_dlg.png", e.g. Rebin-v1_dlg.png
 
@@ -115,21 +119,32 @@ class AlgorithmDirective(BaseDirective):
     def _insert_screenshot_link(self, img_path):
         """
         Outputs an image link with a custom :class: style. The filename is
-        extracted from the path given and then a link to /images/screenshots/filename.png
-        is created. Sphinx handles copying the files over to the build directory
-        and reformatting the links
+        extracted from the path given and then a relative link to the
+        directory specified by the SCREENSHOTS_DIR environment variable from
+        the root source directory is formed.
 
         Args:
           img_path (str): The full path as on the filesystem to the image
         """
+        env = self.state.document.settings.env
         format_str = ".. figure:: %s\n"\
                      "    :class: screenshot\n\n"\
                      "    %s\n\n"
         
-        filename = os.path.split(img_path)[1]
-        path = "/images/screenshots/" + filename
-        caption = "A screenshot of the **" + self.algorithm_name() + "** dialog."
+        # Sphinx assumes that an absolute path is actually relative to the directory containing the
+        # conf.py file and a relative path is relative to the directory where the current rst file
+        # is located.
 
+        filename = os.path.split(img_path)[1]
+        cfgdir = env.srcdir
+        screenshots_dir = self._screenshot_directory()
+        rel_path = os.path.relpath(screenshots_dir, cfgdir)
+        # This is a href link so is expected to be in unix style
+        rel_path = rel_path.replace("\\","/")
+
+        # stick a "/" as the first character so Sphinx computes relative location from source directory
+        path = "/" + rel_path + "/" + filename
+        caption = "A screenshot of the **" + self.algorithm_name() + "** dialog."
         self.add_rst(format_str % (path, caption))
 
     def _screenshot_directory(self):
@@ -145,7 +160,10 @@ class AlgorithmDirective(BaseDirective):
           str: A string containing a path to where the screenshots should be created. This will
           be a filesystem path
         """
-        return screenshot_directory(self.state.document.settings.env.app)
+        try:
+            return os.environ["SCREENSHOTS_DIR"]
+        except:
+            raise RuntimeError("The '.. algorithm::' directive requires a SCREENSHOTS_DIR environment variable to be set.")
 
     def _insert_deprecation_warning(self):
         """
@@ -169,24 +187,6 @@ class AlgorithmDirective(BaseDirective):
 
 #------------------------------------------------------------------------------------------------------------
 
-def screenshot_directory(app):
-    """
-    Returns a full path where the screenshots should be generated. They are
-    put in a screenshots subdirectory of the main images directory in the source
-    tree. Sphinx then handles copying them to the final location
-
-    Arguments:
-      app (Sphinx.Application): A reference to the application object
-
-    Returns:
-      str: A string containing a path to where the screenshots should be created. This will
-      be a filesystem path
-    """
-    cfg_dir = app.srcdir
-    return os.path.join(cfg_dir, "images", "screenshots")
-
-#------------------------------------------------------------------------------------------------------------
-
 def html_collect_pages(app):
     """
     Write out unversioned algorithm pages that redirect to the highest version of the algorithm
@@ -206,27 +206,6 @@ def html_collect_pages(app):
 
 #------------------------------------------------------------------------------------------------------------
 
-def purge_screenshots(app, exception):
-    """
-    Remove all screenshots images that were generated in the source directory during the build
-
-    Arguments:
-      app (Sphinx.Application): A reference to the application object
-      exception (Exception): If an exception was raised this is a reference to the exception object, else None
-    """
-    import os
-
-    screenshot_dir = screenshot_directory(app)
-    for filename in os.listdir(screenshot_dir):
-        filepath = os.path.join(screenshot_dir, filename)
-        try:
-            if os.path.isfile(filepath):
-                os.remove(filepath)
-        except Exception, e:
-            app.warn(str(e))
-
-#------------------------------------------------------------------------------------------------------------
-
 def setup(app):
     """
     Setup the directives when the extension is activated
@@ -238,7 +217,3 @@ def setup(app):
 
     # connect event html collection to handler
     app.connect("html-collect-pages", html_collect_pages)
-
-    # Remove all generated screenshots from the source directory when finished
-    # so that they don't become stale
-    app.connect("build-finished", purge_screenshots)

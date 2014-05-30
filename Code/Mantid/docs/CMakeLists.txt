@@ -8,6 +8,7 @@ if ( SPHINX_FOUND )
   
   # We generate a target per build type, i.e docs-html
   set ( SPHINX_BUILD ${CMAKE_BINARY_DIR}/docs )
+  set ( SCREENSHOTS_DIR ${SPHINX_BUILD}/screenshots )
   set ( BUILDER html )
   configure_file ( runsphinx.py.in runsphinx_html.py @ONLY )
 
@@ -15,9 +16,9 @@ if ( SPHINX_FOUND )
   set ( TARGET_PREFIX docs)
 
   # HTML target
-  add_custom_target ( ${TARGET_PREFIX}-html 
+  add_custom_target ( ${TARGET_PREFIX}-html
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MantidPlot -xq runsphinx_html.py
-    COMMENT "Build Sphinx html documentation"
+    COMMENT "Building html documentation"
   )
 
 endif ()
