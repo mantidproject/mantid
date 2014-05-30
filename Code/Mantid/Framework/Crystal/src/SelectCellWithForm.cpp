@@ -83,7 +83,7 @@ namespace Crystal
     this->declareProperty(new PropertyWithValue<double>( "AverageError", 0.0,
           Direction::Output), "The average HKL indexing error if apply==true.");
 
-    this->declareProperty( "AllowPermutations", false,
+    this->declareProperty( "AllowPermutations", true,
                             "Allow permutations of conventional cells" );
   }
 

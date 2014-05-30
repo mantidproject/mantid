@@ -101,9 +101,7 @@ namespace Mantid
       int edge 		= this->getProperty("EdgePixels");
       std::string cell_type = getProperty("CellType");
       DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
-      std::string outputdir = getProperty("OutputDirectory");
-      if (outputdir[outputdir.size()-1] != '/')
-        outputdir += "/";
+
       std::vector<DataObjects::PeaksWorkspace_sptr> runWS;
 
       for (int i= int(ws->getNumberPeaks())-1; i>=0; --i)
@@ -309,19 +307,25 @@ namespace Mantid
 			  alg->executeAsChildAlg();
 		  }
 		  AnalysisDataService::Instance().remove("_peaks");
-		  // Save Peaks
-		  Mantid::API::IAlgorithm_sptr savePks_alg = createChildAlgorithm("SaveIsawPeaks");
-		  savePks_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
-		  savePks_alg->setProperty("Filename", outputdir + "ls"+runWS[i_run]->getName()+".integrate");
-		  savePks_alg->executeAsChildAlg();
-		  g_log.notice() <<"See output file: " << outputdir + "ls"+runWS[i_run]->getName()+".integrate" << "\n";
-		  // Save UB
-		  Mantid::API::IAlgorithm_sptr saveUB_alg = createChildAlgorithm("SaveIsawUB");
-		  saveUB_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
-		  saveUB_alg->setProperty("Filename", outputdir + "ls"+runWS[i_run]->getName()+".mat");
-		  saveUB_alg->executeAsChildAlg();
-		  // Show the names of files written
-		  g_log.notice() <<"See output file: " << outputdir + "ls"+runWS[i_run]->getName()+".mat" << "\n";
+		  if ( perRun)
+		  {
+		      std::string outputdir = getProperty("OutputDirectory");
+		      if (outputdir[outputdir.size()-1] != '/')
+		        outputdir += "/";
+			  // Save Peaks
+			  Mantid::API::IAlgorithm_sptr savePks_alg = createChildAlgorithm("SaveIsawPeaks");
+			  savePks_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
+			  savePks_alg->setProperty("Filename", outputdir + "ls"+runWS[i_run]->getName()+".integrate");
+			  savePks_alg->executeAsChildAlg();
+			  g_log.notice() <<"See output file: " << outputdir + "ls"+runWS[i_run]->getName()+".integrate" << "\n";
+			  // Save UB
+			  Mantid::API::IAlgorithm_sptr saveUB_alg = createChildAlgorithm("SaveIsawUB");
+			  saveUB_alg->setPropertyValue("InputWorkspace", runWS[i_run]->getName());
+			  saveUB_alg->setProperty("Filename", outputdir + "ls"+runWS[i_run]->getName()+".mat");
+			  saveUB_alg->executeAsChildAlg();
+			  // Show the names of files written
+			  g_log.notice() <<"See output file: " << outputdir + "ls"+runWS[i_run]->getName()+".mat" << "\n";
+		  }
       }
     }
     //-----------------------------------------------------------------------------------------

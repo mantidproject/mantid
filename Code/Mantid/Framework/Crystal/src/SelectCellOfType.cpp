@@ -100,6 +100,9 @@ namespace Crystal
 
     this->declareProperty(new PropertyWithValue<double>( "AverageError", 0.0,
           Direction::Output), "The average HKL indexing error if apply==true.");
+
+    this->declareProperty( "AllowPermutations", true,
+                            "Allow permutations of conventional cells" );
   }
 
   //--------------------------------------------------------------------------
@@ -129,9 +132,10 @@ namespace Crystal
     std::string centering = this->getProperty("Centering");
     bool   apply          = this->getProperty("Apply");
     double tolerance      = this->getProperty("Tolerance");
+    bool   allowPermutations        = this->getProperty("AllowPermutations");
 
     std::vector<ConventionalCell> list = 
-                          ScalarUtils::GetCells( UB, cell_type, centering );
+                          ScalarUtils::GetCells( UB, cell_type, centering, allowPermutations );
 
     ConventionalCell info = ScalarUtils::GetCellBestError( list, true );
 
