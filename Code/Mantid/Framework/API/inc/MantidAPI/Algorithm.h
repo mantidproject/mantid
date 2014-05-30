@@ -349,6 +349,9 @@ protected:
   Kernel::Logger m_log;
   Kernel::Logger &g_log;
 
+  /// Pointer to the parent history object (if set)
+  boost::shared_ptr<AlgorithmHistory> m_parentHistory;
+
 private:
   /// Private Copy constructor: NO COPY ALLOWED
   Algorithm(const Algorithm&);
@@ -359,11 +362,12 @@ private:
   void unlockWorkspaces();
 
   void store();
-  void fillHistory();
 
   void logAlgorithmInfo() const;
 
   bool executeAsyncImpl(const Poco::Void & i);
+  /// Copy workspace history for input workspaces to output workspaces and record the history for ths algorithm
+  void fillHistory();
 
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.
@@ -411,8 +415,6 @@ private:
   size_t m_groupSize;
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
-  /// Pointer to the parent history object (if set)
-  boost::shared_ptr<AlgorithmHistory> m_parentHistory;
   /// A non-recursive mutex for thread-safety
   mutable Kernel::Mutex m_mutex;
 };
