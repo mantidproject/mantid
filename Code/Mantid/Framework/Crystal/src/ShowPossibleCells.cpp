@@ -87,7 +87,7 @@ namespace Crystal
           new PropertyWithValue<int>( "NumberOfCells", 0,
           Direction::Output), "Gets set with the number of possible cells.");
 
-    this->declareProperty( "AllowPermutations", false,
+    this->declareProperty( "AllowPermutations", true,
                             "Allow permutations of conventional cells" );
   }
 
