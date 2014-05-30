@@ -33,13 +33,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HFIRDarkCurrentSubtraction)
 
-/// Sets documentation strings for this algorithm
-void HFIRDarkCurrentSubtraction::initDocs()
-{
-  this->setWikiSummary("Perform HFIR SANS dark current subtraction.");
-  this->setOptionalMessage("Perform HFIR SANS dark current subtraction.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

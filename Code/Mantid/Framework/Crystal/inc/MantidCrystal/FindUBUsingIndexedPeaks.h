@@ -54,10 +54,12 @@ namespace Crystal
     virtual const std::string category() const 
             { return "Crystal";}
     
+    
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculate the UB matrix from a peaks workspace, containing indexed peaks.";}
+    
   private:
 
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
 
     /// Initialise the properties
     void init();

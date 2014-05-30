@@ -15,13 +15,6 @@ namespace Mantid
 
     DECLARE_ALGORITHM(CatalogListInstruments)
 
-    /// Sets documentation strings for this algorithm
-    void CatalogListInstruments::initDocs()
-    {
-      this->setWikiSummary("Lists the name of instruments from Information catalog. ");
-      this->setOptionalMessage("Lists the name of instruments from Information catalog.");
-    }
-
     /// Init method
     void CatalogListInstruments::init()
     {

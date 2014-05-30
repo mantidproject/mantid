@@ -150,13 +150,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(FFT)
 
-/// Sets documentation strings for this algorithm
-void FFT::initDocs()
-{
-  this->setWikiSummary("Performs complex Fast Fourier Transform ");
-  this->setOptionalMessage("Performs complex Fast Fourier Transform");
-}
-
 
 using namespace Kernel;
 using namespace API;

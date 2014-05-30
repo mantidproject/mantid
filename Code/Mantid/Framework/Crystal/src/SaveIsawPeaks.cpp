@@ -51,12 +51,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveIsawPeaks::initDocs()
-  {
-    this->setWikiSummary("Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.");
-    this->setOptionalMessage("Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

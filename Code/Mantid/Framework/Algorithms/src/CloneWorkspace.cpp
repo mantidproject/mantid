@@ -21,13 +21,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CloneWorkspace)
 
-/// Sets documentation strings for this algorithm
-void CloneWorkspace::initDocs()
-{
-  this->setWikiSummary("Copies an existing workspace into a new one. ");
-  this->setOptionalMessage("Copies an existing workspace into a new one.");
-}
-
 
 using namespace Kernel;
 using namespace API;

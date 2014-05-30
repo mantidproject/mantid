@@ -26,12 +26,11 @@ namespace Mantid
 
       virtual const std::string category() const;
 
+      /// Summary of algorithms purpose
+      virtual const std::string summary() const {return "Loads a legacy binary format VTK uniform structured image as an MDWorkspace.";}
+
       /// Returns a confidence value that this algorithm can load a file
       virtual int confidence(Kernel::FileDescriptor & descriptor) const;
-
-    protected:
-
-      virtual void initDocs();
 
     private:
 

@@ -41,13 +41,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SassenaFFT);
 
-/// Sets Documentation strings for this algorithm
-void SassenaFFT::initDocs()
-{
-  this->setWikiSummary("Performs complex Fast Fourier Transform of intermediate scattering function");
-  this->setOptionalMessage("Performs complex Fast Fourier Transform of intermediate scattering function");
-}
-
 /// Override Algorithm::checkGroups
 bool SassenaFFT::checkGroups() { return false; }
 

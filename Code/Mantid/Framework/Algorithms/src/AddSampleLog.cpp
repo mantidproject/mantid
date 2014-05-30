@@ -25,13 +25,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(AddSampleLog)
 
-/// Sets documentation strings for this algorithm
-void AddSampleLog::initDocs()
-{
-  this->setWikiSummary("Used to insert a value into the sample logs in a workspace.");
-  this->setOptionalMessage("Used to insert a value into the sample logs in a workspace.");
-}
-
 using namespace Kernel;
 using namespace API;
 

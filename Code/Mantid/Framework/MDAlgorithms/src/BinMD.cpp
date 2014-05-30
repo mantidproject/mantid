@@ -128,12 +128,6 @@ namespace MDAlgorithms
 
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void BinMD::initDocs()
-  {
-    this->setWikiSummary("Take a [[MDEventWorkspace]] and bin into into a dense, multi-dimensional histogram workspace ([[MDHistoWorkspace]]).");
-    this->setOptionalMessage("Take a MDEventWorkspace and bin into into a dense, multi-dimensional histogram workspace (MDHistoWorkspace).");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

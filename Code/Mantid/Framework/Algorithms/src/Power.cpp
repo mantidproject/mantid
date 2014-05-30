@@ -36,12 +36,6 @@ Power::Power():UnaryOperation()
 {
   this->useHistogram=true;
 }
-/// Sets documentation strings for this algorithm
-void Power::initDocs()
-{
-  this->setWikiSummary("The Power algorithm will raise the base workspace to a particular power. Corresponding [[Error Values|error values]] will be created. ");
-  this->setOptionalMessage("The Power algorithm will raise the base workspace to a particular power. Corresponding error values will be created.");
-}
 
 
 ///////////////////////////////////

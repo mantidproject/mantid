@@ -30,13 +30,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HRPDSlabCanAbsorption)
 
-/// Sets documentation strings for this algorithm
-void HRPDSlabCanAbsorption::initDocs()
-{
-  this->setWikiSummary("Calculates attenuation due to absorption and scattering in an HRPD 'slab' can. ");
-  this->setOptionalMessage("Calculates attenuation due to absorption and scattering in an HRPD 'slab' can.");
-}
-
 
 using namespace Kernel;
 using namespace API;

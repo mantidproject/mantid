@@ -24,13 +24,6 @@ namespace Mantid
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(FindDetectorsInShape)
 
-    /// Sets documentation strings for this algorithm
-    void FindDetectorsInShape::initDocs()
-    {
-      this->setWikiSummary("An algorithm for finding which detectors are contained within a user defined 3 dimensional shape within the instrument. ");
-      this->setOptionalMessage("An algorithm for finding which detectors are contained within a user defined 3 dimensional shape within the instrument.");
-    }
-
 
     using namespace Kernel;
     using namespace API;

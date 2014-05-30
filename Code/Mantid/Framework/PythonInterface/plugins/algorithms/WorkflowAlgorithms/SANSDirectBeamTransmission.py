@@ -13,10 +13,11 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
 
     def name(self):
         return "SANSDirectBeamTransmission"
-    
+
+    def summary(self):
+        return "Compute transmission using the direct beam method"
+ 
     def PyInit(self):
-        self.setOptionalMessage("Compute transmission using the direct beam method")
-        self.setWikiSummary("Compute transmission using the direct beam method")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
         self.declareProperty(FileProperty("SampleDataFilename", "",

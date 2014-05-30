@@ -27,11 +27,6 @@ namespace Algorithms
   FilterByTime2::~FilterByTime2()
   {
   }
-  
-  void FilterByTime2::initDocs()
-  {
-
-  }
 
   //-----------------------------------------------------------------------
   void FilterByTime2::init()

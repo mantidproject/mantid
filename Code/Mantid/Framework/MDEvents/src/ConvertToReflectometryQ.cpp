@@ -195,12 +195,6 @@ namespace MDEvents
   const std::string ConvertToReflectometryQ::category() const { return "Reflectometry\\ISIS";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ConvertToReflectometryQ::initDocs()
-  {
-    this->setWikiSummary("Transforms from real-space to Q or momentum space for reflectometry workspaces");
-    this->setOptionalMessage("Transforms from real-space to Q or momentum space for reflectometry workspaces");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

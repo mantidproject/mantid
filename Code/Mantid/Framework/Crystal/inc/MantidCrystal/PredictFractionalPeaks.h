@@ -43,8 +43,9 @@ namespace Crystal
     virtual ~PredictFractionalPeaks();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const 
-            { return "PredictFractionalPeaks";};
+    virtual const std::string name() const { return "PredictFractionalPeaks";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "The offsets can be from hkl values in a range of hkl values or from peaks in the input PeaksWorkspace";}
 
     /// Algorithm's version for identification 
     virtual int version() const 
@@ -56,8 +57,7 @@ namespace Crystal
     
   private:
 
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
 
     /// Initialise the properties
     void init();

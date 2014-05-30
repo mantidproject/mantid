@@ -39,13 +39,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(OptimizeLatticeForCellType)
     
-    /// Sets documentation strings for this algorithm
-    void OptimizeLatticeForCellType::initDocs()
-    {
-      this->setWikiSummary("Optimize lattice parameters for cell type.");
-      this->setOptionalMessage("Optimize lattice parameters for cell type.");
-    }
-    
     using namespace Kernel;
     using namespace API;
     using std::size_t;

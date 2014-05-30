@@ -97,12 +97,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveHKL::initDocs()
-  {
-    this->setWikiSummary("Save a PeaksWorkspace to a ASCII .hkl file.");
-    this->setOptionalMessage("Save a PeaksWorkspace to a ASCII .hkl file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

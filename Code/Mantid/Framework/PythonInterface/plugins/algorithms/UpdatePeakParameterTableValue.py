@@ -41,9 +41,10 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         """
         return "UpdatePeakParameterTableValue"
 
+    def summary(self):
+        return "Update cell value(s) in a TableWorkspace containing instrument peak profile parameters."
+        
     def PyInit(self):
-        self.setWikiSummary("Update cell value(s) in a TableWorkspace containing instrument peak profile parameters.")
-        self.setOptionalMessage("Update cell value(s) in a TableWorkspace containing instrument peak profile parameters.")
         """ Property definition
         """
         tableprop = mantid.api.ITableWorkspaceProperty("InputWorkspace", "", mantid.kernel.Direction.InOut)

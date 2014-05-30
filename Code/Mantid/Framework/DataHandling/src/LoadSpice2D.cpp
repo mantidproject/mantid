@@ -135,13 +135,6 @@ namespace Mantid
       return confidence;
     }
 
-    /// Sets documentation strings for this algorithm
-    void LoadSpice2D::initDocs()
-    {
-      this->setWikiSummary("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance.");
-      this->setOptionalMessage("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance.");
-    }
-
 
     /// Constructor
     LoadSpice2D::LoadSpice2D() {}

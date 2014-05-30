@@ -54,12 +54,6 @@ namespace Algorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ApplyDetailedBalance::initDocs()
-  {
-    this->setWikiSummary("Transform scattering intensity to dynamic susceptibility.");
-    this->setOptionalMessage("Transform scattering intensity to dynamic susceptibility.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

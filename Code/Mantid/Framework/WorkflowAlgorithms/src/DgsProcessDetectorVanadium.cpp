@@ -74,12 +74,6 @@ namespace Mantid
     const std::string DgsProcessDetectorVanadium::category() const { return "Workflow\\Inelastic\\UsesPropertyManager"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void DgsProcessDetectorVanadium::initDocs()
-    {
-      this->setWikiSummary("Algorithm to process detector vanadium.");
-      this->setOptionalMessage("Algorithm to process detector vanadium.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

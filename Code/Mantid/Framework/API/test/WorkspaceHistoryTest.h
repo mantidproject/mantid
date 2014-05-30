@@ -27,6 +27,7 @@ private:
     const std::string name() const { return "SimpleSum";} 
     int version() const  { return 1;}                        
     const std::string category() const { return "Dummy";}        
+    const std::string summary() const { return "Dummy summary"; }
 
     void init()
     { 

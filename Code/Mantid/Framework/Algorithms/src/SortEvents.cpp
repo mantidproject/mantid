@@ -27,13 +27,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(SortEvents)
 
-    /// Sets documentation strings for this algorithm
-    void SortEvents::initDocs()
-    {
-      this->setWikiSummary("Sort the events in an [[EventWorkspace]], for faster rebinning. ");
-      this->setOptionalMessage("Sort the events in an EventWorkspace, for faster rebinning.");
-    }
-
 
     using namespace Kernel;
     using namespace API;

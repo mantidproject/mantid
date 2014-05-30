@@ -36,12 +36,13 @@ class SANSSubtract(PythonAlgorithm):
         """
         return "SANSSubtract"
     
+    def summary(self):
+        return "Subtract background from an I(Q) distribution."
+
     def PyInit(self):
         """ 
             Declare properties
         """
-        self.setOptionalMessage("Subtract background from an I(Q) distribution.")
-        self.setWikiSummary("Subtract background from an I(Q) distribution.")
         self.declareProperty('DataDistribution', '', direction = Direction.Input, 
                              doc='Name of the input workspace or file path')
         self.declareProperty('Background', '', direction = Direction.Input, 

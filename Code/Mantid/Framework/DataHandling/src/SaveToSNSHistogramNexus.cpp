@@ -45,13 +45,6 @@ namespace DataHandling
   // Register the algorithm into the algorithm factory
   DECLARE_ALGORITHM(SaveToSNSHistogramNexus)
   
-  /// Sets documentation strings for this algorithm
-  void SaveToSNSHistogramNexus::initDocs()
-  {
-    this->setWikiSummary("Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point. This only works for instruments with Rectangular Detectors. ");
-    this->setOptionalMessage("Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point. This only works for instruments with Rectangular Detectors.");
-  }
-  
 
   using namespace Kernel;
   using namespace API;

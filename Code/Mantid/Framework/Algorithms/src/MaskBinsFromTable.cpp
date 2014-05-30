@@ -53,11 +53,6 @@ namespace Algorithms
   }
   
   //----------------------------------------------------------------------------------------------
-  void MaskBinsFromTable::initDocs()
-  {
-    this->setWikiSummary("Mask bins from a table workspace. ");
-    this->setOptionalMessage("Mask bins from a table workspace. ");
-  }
 
   //----------------------------------------------------------------------------------------------
   void MaskBinsFromTable::init()

@@ -69,13 +69,15 @@ public:
   virtual ~NormaliseToMonitor();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "NormaliseToMonitor"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Normalises a 2D workspace by a specified spectrum, spectrum, described by a monitor ID or spectrun provided in a separate worskspace. ";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "CorrectionFunctions\\NormalisationCorrections";}
 
 private:
-  virtual void initDocs();
   // Overridden Algorithm methods
   void init();
   void exec();

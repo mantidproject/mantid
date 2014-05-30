@@ -15,7 +15,6 @@ If comparing the output is important set Random to false or uncheck the box.
 *WIKI*/
 
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
-#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/FunctionProperty.h"
@@ -78,15 +77,6 @@ namespace Algorithms
   
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string CreateSampleWorkspace::category() const { return "Utility\\Workspaces";}
-
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CreateSampleWorkspace::initDocs()
-  {
-    std::string message = "Creates sample workspaces for usage examples and other situations.";
-    this->setWikiSummary(message);
-    this->setOptionalMessage(message);
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

@@ -69,12 +69,6 @@ namespace MDAlgorithms
   const std::string Stitch1DMD::category() const { return "Reflectometry\\ISIS";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void Stitch1DMD::initDocs()
-  {
-    this->setWikiSummary("Stitch two MD ReflectometryQ group workspaces together");
-    this->setOptionalMessage("Sticch two MD ReflectometryQ group workspaces together.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

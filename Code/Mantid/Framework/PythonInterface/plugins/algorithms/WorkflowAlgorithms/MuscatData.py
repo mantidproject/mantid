@@ -17,10 +17,10 @@ class MuscatData(PythonAlgorithm):
 	def category(self):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
-	def PyInit(self):
-		self.setOptionalMessage("Calculates multiple scattering using a sample S(Q,w)")
-		self.setWikiSummary("Calculates multiple scattering using a sample S(Q,w)")
+	def summary(self):
+		return "Calculates multiple scattering using a sample S(Q,w)."
 
+	def PyInit(self):
 		self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
 		self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']))
 		self.declareProperty(name='Geom',defaultValue='Flat',validator=StringListValidator(['Flat','Cyl']), doc='Sample geometry')
@@ -42,10 +42,10 @@ class MuscatData(PythonAlgorithm):
 		self.declareProperty(name='Save',defaultValue=False, doc='Switch Save result to nxs file Off/On')
  
 	def PyExec(self):
-                from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
-                
-                if is_supported_f2py_platform():
-                        import IndirectMuscat as Main
+		from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
+
+		if is_supported_f2py_platform():
+			import IndirectMuscat as Main
 		run_f2py_compatibility_test()
 
 		self.log().information('Muscat input')

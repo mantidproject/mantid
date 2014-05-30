@@ -26,13 +26,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertTableToMatrixWorkspace)
 
-/// Sets documentation strings for this algorithm
-void ConvertTableToMatrixWorkspace::initDocs()
-{
-  this->setWikiSummary("Creates a single spectrum matrix workspace from some columns of a table workspace.");
-  this->setOptionalMessage("Creates a single spectrum matrix workspace from some columns of a table workspace.");
-}
-
 using namespace Kernel;
 using namespace API;
 

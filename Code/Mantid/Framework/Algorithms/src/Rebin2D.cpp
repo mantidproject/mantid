@@ -39,18 +39,6 @@ namespace Mantid
     using Kernel::V2D;
 
     //--------------------------------------------------------------------------
-    // Public methods
-    //--------------------------------------------------------------------------
-    /**
-     * Sets documentation strings for this algorithm
-     */
-    void Rebin2D::initDocs()
-    {
-      this->setWikiSummary("Rebins both axes of a 2D workspace.");
-      this->setOptionalMessage("Rebins both axes of a 2D workspace using the given parameters");
-    }
-
-    //--------------------------------------------------------------------------
     // Private methods
     //--------------------------------------------------------------------------
     /** 

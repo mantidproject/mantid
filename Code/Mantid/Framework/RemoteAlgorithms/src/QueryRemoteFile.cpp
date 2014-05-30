@@ -31,13 +31,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
-
-void QueryRemoteFile::initDocs()
-{
-  this->setWikiSummary("Retrieve a list of the files from a remote compute resource.");
-  this->setOptionalMessage("Retrieve a list of the files from a remote compute resource.");
-}
 
 void QueryRemoteFile::init()
 {

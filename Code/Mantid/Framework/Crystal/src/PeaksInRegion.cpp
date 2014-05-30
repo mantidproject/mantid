@@ -47,12 +47,6 @@ namespace Crystal
   const std::string PeaksInRegion::category() const { return "Crystal";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void PeaksInRegion::initDocs()
-  {
-    this->setWikiSummary("Find peaks intersecting a box region.");
-    this->setOptionalMessage(this->getWikiSummary());
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

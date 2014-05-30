@@ -78,13 +78,6 @@ namespace Mantid
       return "Transforms\\Axes";
     }
 
-    /// Sets documentation strings for this algorithm
-    void ConvertAxisByFormula::initDocs()
-    {
-      this->setWikiSummary("Converts the X or Y axis of a [[MatrixWorkspace]] via a user defined math formula.");
-      this->setOptionalMessage("Converts the X or Y axis of a MatrixWorkspace via a user defined math formula.");
-    }
-
     /** Initialisation method. Declares properties to be used in algorithm.
     *
     */

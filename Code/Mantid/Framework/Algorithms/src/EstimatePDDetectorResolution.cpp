@@ -73,14 +73,6 @@ namespace Algorithms
   {
   }
 
-  //----------------------------------------------------------------------------------------------
-  /**
-    */
-  void EstimatePDDetectorResolution::initDocs()
-  {
-    setWikiSummary("Estimate the resolution of each detector for a powder diffractometer. ");
-    setOptionalMessage("Estimate the resolution of each detector for a powder diffractometer. ");
-  }
 
   //----------------------------------------------------------------------------------------------
   void EstimatePDDetectorResolution::init()

@@ -43,14 +43,6 @@ namespace Mantid
   {
     DECLARE_ALGORITHM(CatalogPublish)
 
-    /// Sets documentation strings for this algorithm
-    void CatalogPublish::initDocs()
-    {
-      this->setWikiSummary("Allows the user to publish datafiles or workspaces to the information catalog. "
-          "Workspaces are converted to nexus files (store in the default save directory), and then uploaded from there.");
-      this->setOptionalMessage("Allows the user to publish datafiles or workspaces to the information catalog.");
-    }
-
     /// Init method to declare algorithm properties
     void CatalogPublish::init()
     {

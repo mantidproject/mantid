@@ -18,13 +18,6 @@ namespace Algorithms
 // Algorithm must be declared
 DECLARE_ALGORITHM(MultiplyRange)
 
-/// Sets documentation strings for this algorithm
-void MultiplyRange::initDocs()
-{
-  this->setWikiSummary("An algorithm to multiply a range of bins in a workspace by the factor given.");
-  this->setOptionalMessage("An algorithm to multiply a range of bins in a workspace by the factor given.");
-}
-
 
 using namespace Kernel;
 using namespace API;

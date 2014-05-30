@@ -24,15 +24,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(GeneralisedSecondDifference)
 
-    /// Sets documentation strings for this algorithm
-    void GeneralisedSecondDifference::initDocs()
-    {
-      this->setWikiSummary(
-          "Computes the generalised second difference of a spectrum or several spectra. ");
-      this->setOptionalMessage(
-          "Computes the generalised second difference of a spectrum or several spectra.");
-    }
-
     using namespace Kernel;
     using namespace API;
 

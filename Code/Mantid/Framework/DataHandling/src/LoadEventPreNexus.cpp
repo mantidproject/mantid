@@ -56,13 +56,6 @@ namespace DataHandling
 
 DECLARE_FILELOADER_ALGORITHM(LoadEventPreNexus);
 
-/// Sets documentation strings for this algorithm
-void LoadEventPreNexus::initDocs()
-{
-  this->setWikiSummary("Loads SNS raw neutron event data format and stores it in a [[workspace]] ([[EventWorkspace]] class). ");
-  this->setOptionalMessage("Loads SNS raw neutron event data format and stores it in a workspace (EventWorkspace class).");
-}
-
 
 using namespace Kernel;
 using namespace API;

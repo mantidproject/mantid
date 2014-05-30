@@ -48,12 +48,14 @@ public:
   virtual ~CuboidGaugeVolumeAbsorption() {}
   /// Algorithm's name
   virtual const std::string name() const { return "CuboidGaugeVolumeAbsorption"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculates bin-by-bin correction factors for attenuation due to absorption and (single) scattering within a cuboid shaped 'gauge volume' of a generic sample. The sample shape can be defined by, e.g., the CreateSampleShape algorithm.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   std::string sampleXML();
   void initialiseCachedDistances();
 };

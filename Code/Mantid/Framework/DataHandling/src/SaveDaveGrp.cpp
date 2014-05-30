@@ -36,12 +36,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveDaveGrp::initDocs()
-  {
-    this->setWikiSummary("Saves a 2D [[workspace]] to DAVE grouped data format file.");
-    this->setOptionalMessage("Saves a 2D workspace to DAVE grouped data format file.See http://www.ncnr.nist.gov/dave/documentation/ascii_help.pdf");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

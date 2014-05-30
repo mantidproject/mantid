@@ -42,12 +42,6 @@ namespace Mantid
     const std::string CreateSimulationWorkspace::category() const { return "Quantification";}
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void CreateSimulationWorkspace::initDocs()
-    {
-      this->setWikiSummary("Create a blank workspace for a given instrument.");
-      this->setOptionalMessage("Create a blank workspace for a given instrument.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

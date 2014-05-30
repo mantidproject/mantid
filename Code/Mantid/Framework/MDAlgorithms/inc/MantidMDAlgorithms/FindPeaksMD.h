@@ -30,14 +30,15 @@ namespace MDAlgorithms
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "FindPeaksMD";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Find peaks in reciprocal space in a MDEventWorkspace or a MDHistoWorkspace.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Optimization\\PeakFinding;MDAlgorithms";}
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
     /// Initialise the properties
     void init();
     /// Run the algorithm

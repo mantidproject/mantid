@@ -33,13 +33,6 @@ namespace Algorithms
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string FilterByXValue::category() const { return "Events\\EventFiltering";}
 
-  /// Sets documentation strings for this algorithm
-  void FilterByXValue::initDocs()
-  {
-    this->setWikiSummary("Filters the events in an event workspace according to a minimum and/or maximum value of X.");
-    this->setOptionalMessage("Filters events according to a min and/or max value of X.");
-  }
-
   void FilterByXValue::init()
   {
     declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input), "The input workspace.");

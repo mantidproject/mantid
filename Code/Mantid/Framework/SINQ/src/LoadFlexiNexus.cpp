@@ -437,7 +437,3 @@ int LoadFlexiNexus::safeOpenpath(NeXus::File *fin, std::string path)
   }
   return 1;
 }
-void LoadFlexiNexus::initDocs()
-{
-  this->setWikiSummary("Loads a NeXus file directed by a dictionary file");
-}

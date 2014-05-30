@@ -97,12 +97,6 @@ namespace DataHandling
   const std::string LoadMcStas::category() const { return "DataHandling";}
 
   //----------------------------------------------------------------------------------------------
-  // Sets documentation strings for this algorithm
-  void LoadMcStas::initDocs()
-  {
-    this->setWikiSummary("This algorithm loads a McStas NeXus file into an workspace.");
-    this->setOptionalMessage("Loads a McStas NeXus file into an workspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

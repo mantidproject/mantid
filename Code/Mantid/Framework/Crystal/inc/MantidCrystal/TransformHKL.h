@@ -51,11 +51,10 @@ namespace Crystal
     /// Algorithm's category for identification
     virtual const std::string category() const;
     
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Specify a 3x3 matrix to apply to (HKL) vectors as a list of 9 comma separated numbers. Both the UB and HKL values will be updated";}
+    
   private:
-
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
-
     /// Initialise the properties
     void init();
 

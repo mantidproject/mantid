@@ -24,13 +24,6 @@ namespace DataHandling
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveRKH)
 
-/// Sets documentation strings for this algorithm
-void SaveRKH::initDocs()
-{
-  this->setWikiSummary("Save a file in the LOQ RKH/'FISH' format ");
-  this->setOptionalMessage("Save a file in the LOQ RKH/'FISH' format");
-}
-
 
 using namespace API;
 

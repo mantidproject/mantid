@@ -33,13 +33,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HFIRLoad)
 
-/// Sets documentation strings for this algorithm
-void HFIRLoad::initDocs()
-{
-  this->setWikiSummary("Load HFIR SANS data.");
-  this->setOptionalMessage("Load HFIR SANS data.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

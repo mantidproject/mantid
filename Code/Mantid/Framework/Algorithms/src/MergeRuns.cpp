@@ -48,13 +48,6 @@ namespace Algorithms
 // Register with the algorithm factory
 DECLARE_ALGORITHM(MergeRuns)
 
-/// Sets documentation strings for this algorithm
-void MergeRuns::initDocs()
-{
-  this->setWikiSummary("Combines the data contained in an arbitrary number of input workspaces.");
-  this->setOptionalMessage("Combines the data contained in an arbitrary number of input workspaces.");
-}
-
 
 using namespace Kernel;
 using namespace API;

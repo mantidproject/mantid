@@ -59,14 +59,6 @@ namespace CurveFitting
   const std::string SplineSmoothing::category() const { return "Optimization;CorrectionFunctions\\BackgroundCorrections";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SplineSmoothing::initDocs()
-  {
-    this->setWikiSummary("Smoothes a set of spectra using a cubic spline. Optionally, this algorithm can also calculate derivatives up to order 2 as a side product");
-    this->setOptionalMessage("Smoothes a set of spectra using a cubic spline. Optionally, this algorithm can also calculate derivatives up to order 2 as a side product");
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void SplineSmoothing::init()

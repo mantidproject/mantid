@@ -79,6 +79,9 @@ namespace Mantid
       ~LoadParameterFile() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadParameterFile";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads instrument parameters into a workspace. where these parameters are associated component names as defined in Instrument Definition File (IDF) or a string consisting of the contents of such.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method
@@ -87,8 +90,7 @@ namespace Mantid
       static void execManually(bool useString, std::string filename, std::string parameterString, Mantid::API::ExperimentInfo_sptr localWorkspace);
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       void init();
       void exec();
     };

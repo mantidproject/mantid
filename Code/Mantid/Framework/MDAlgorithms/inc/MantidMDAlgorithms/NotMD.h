@@ -41,10 +41,12 @@ namespace MDAlgorithms
     virtual ~NotMD();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Performs a boolean negation on a MDHistoWorkspace.";}
+
     virtual int version() const;
 
   private:
-    virtual void initDocs();
 
     /// Check the inputs and throw if the algorithm cannot be run
     void checkInputs();

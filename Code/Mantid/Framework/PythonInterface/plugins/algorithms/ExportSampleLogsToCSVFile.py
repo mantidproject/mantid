@@ -32,6 +32,9 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 	"""
         return "ExportSampleLogsToCSVFile"
 
+    def summary(self):
+        return "Exports sample logs to spreadsheet file."
+
     def PyInit(self):
 	""" Declare properties
 	"""

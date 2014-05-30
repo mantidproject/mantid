@@ -35,13 +35,6 @@ namespace Poldi
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(PoldiLoadLog)
 
-/// Sets documentation strings for this algorithm
-void PoldiLoadLog::initDocs()
-{
-	this->setWikiSummary("Load Poldi log data. ");
-	this->setOptionalMessage("Load Poldi log data.");
-}
-
 
 using namespace Kernel;
 using namespace API;

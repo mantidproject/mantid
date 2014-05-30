@@ -75,12 +75,6 @@ namespace Algorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void RingProfile::initDocs()
-  {
-    this->setWikiSummary("Calculates the sum of the counts against a circular ring.");
-    this->setOptionalMessage("Calculates the sum of the counts against a circular ring.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

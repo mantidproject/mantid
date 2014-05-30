@@ -41,11 +41,13 @@ namespace MDEvents
     virtual ~ImportMDHistoWorkspace();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Reads a text file and generates an MDHistoWorkspace from it.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

@@ -27,13 +27,6 @@ namespace Mantid
   {
     DECLARE_ALGORITHM(CatalogSearch)
 
-    /// Sets documentation strings for this algorithm
-    void CatalogSearch::initDocs()
-    {
-      this->setWikiSummary("Searches investigations in the catalog using the properties set.");
-      this->setOptionalMessage("Searches investigations in the catalog using the properties set.");
-    }
-
     /// Initialisation method.
     void CatalogSearch::init()
     {

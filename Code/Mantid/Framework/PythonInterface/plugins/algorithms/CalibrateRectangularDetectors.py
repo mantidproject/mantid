@@ -55,10 +55,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     def name(self):
         return "CalibrateRectangularDetectors"
 
-    def PyInit(self):
-        self.setOptionalMessage("Calibrate the detector pixels and write a calibration file")
-        self.setWikiSummary("Calibrate the detector pixels and write a calibration file")
-        
+    def summary(self):
+        return "Calibrate the detector pixels and write a calibration file"
+
+    def PyInit(self):        
         sns = ConfigService.Instance().getFacility("SNS")
         
         instruments = []

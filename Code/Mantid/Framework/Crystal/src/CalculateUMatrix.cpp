@@ -141,12 +141,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CalculateUMatrix::initDocs()
-  {
-    this->setWikiSummary("Calculate the U matrix from a [[PeaksWorkspace]], given lattice parameters.");
-    this->setOptionalMessage("Calculate the U matrix from a peaks workspace, given lattice parameters.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

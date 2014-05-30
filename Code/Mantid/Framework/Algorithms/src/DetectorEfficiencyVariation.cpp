@@ -32,13 +32,6 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(DetectorEfficiencyVariation)
-    
-    /// Sets documentation strings for this algorithm
-    void DetectorEfficiencyVariation::initDocs()
-    {
-      this->setWikiSummary("Compares two white beam vanadium workspaces from the same instrument to find detectors whose efficiencies have changed beyond a threshold. ");
-      this->setOptionalMessage("Compares two white beam vanadium workspaces from the same instrument to find detectors whose efficiencies have changed beyond a threshold.");
-    }
 
     const std::string DetectorEfficiencyVariation::category() const
     {

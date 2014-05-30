@@ -53,12 +53,14 @@ namespace Mantid
       virtual ~Divide() {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Divide";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "The Divide algorithm will divide the data values and calculate the corresponding error values of two compatible workspaces.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return (1);}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       virtual void init();
       virtual void exec();
       // Overridden BinaryOperation methods

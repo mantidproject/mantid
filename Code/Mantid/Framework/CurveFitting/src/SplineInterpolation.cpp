@@ -57,14 +57,6 @@ namespace Mantid
     const std::string SplineInterpolation::category() const{ return "Optimization;CorrectionFunctions\\BackgroundCorrections"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void SplineInterpolation::initDocs()
-    {
-      this->setWikiSummary("Interpolates a set of spectra onto a spline defined by a second input workspace. Optionally, this algorithm can also calculate derivatives up to order 2 as a side product");
-      this->setOptionalMessage("Interpolates a set of spectra onto a spline defined by a second input workspace. Optionally, this algorithm can also calculate derivatives up to order 2 as a side product");
-    }
-
-    //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
      */
     void SplineInterpolation::init()

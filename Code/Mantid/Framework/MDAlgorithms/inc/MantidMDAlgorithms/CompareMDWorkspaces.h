@@ -43,11 +43,13 @@ namespace MDAlgorithms
     virtual ~CompareMDWorkspaces();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Compare two MDWorkspaces for equality.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
     void doComparison();

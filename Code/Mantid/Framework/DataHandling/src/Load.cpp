@@ -148,13 +148,6 @@ namespace Mantid
     
     // The mutex
     Poco::Mutex Load::m_mutex;
-
-    /// Sets documentation strings for this algorithm
-    void Load::initDocs()
-    {
-      this->setWikiSummary("Attempts to load a given file by finding an appropriate Load algorithm. ");
-      this->setOptionalMessage("Attempts to load a given file by finding an appropriate Load algorithm.");
-    }
     
 
     using namespace Kernel;

@@ -37,13 +37,6 @@ namespace Algorithms
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(GetEi)
 
-/// Sets documentation strings for this algorithm
-void GetEi::initDocs()
-{
-  this->setWikiSummary("Calculates the kinetic energy of neutrons leaving the source based on the time it takes for them to travel between two monitors.");
-  this->setOptionalMessage("Calculates the kinetic energy of neutrons leaving the source based on the time it takes for them to travel between two monitors.");
-}
-
 
 using namespace Kernel;
 using namespace API;

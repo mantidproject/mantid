@@ -82,13 +82,6 @@ namespace Mantid
     using Geometry::Instrument;
     using namespace Mantid::NeXus;
 
-    /// Sets documentation strings for this algorithm
-    void LoadMuonNexus2::initDocs()
-    {
-      this->setWikiSummary("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 2 and use the results to populate the named workspace. LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a NeXus file of this type. ");
-      this->setOptionalMessage("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 2 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.");
-    }
-
 
     /// Empty default constructor
     LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus()

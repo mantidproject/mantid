@@ -25,14 +25,16 @@ namespace DataHandling
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "LoadDspacemap";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads a Dspacemap file (POWGEN binary, VULCAN binary or ascii format) into an OffsetsWorkspace.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "DataHandling";}
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm

@@ -50,6 +50,9 @@ namespace Algorithms
     virtual ~NormaliseByDetector();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Normalise the input workspace by the detector efficiency.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
@@ -62,7 +65,7 @@ namespace Algorithms
     boost::shared_ptr<Mantid::API::MatrixWorkspace>  processHistograms(boost::shared_ptr<Mantid::API::MatrixWorkspace> inWS);
     /// Process indivdual histogram.
     void processHistogram(size_t wsIndex, boost::shared_ptr<Mantid::API::MatrixWorkspace> denominatorWS, boost::shared_ptr<const Mantid::API::MatrixWorkspace> inWS, Mantid::API::Progress& prog);
-    virtual void initDocs();
+
     void init();
     void exec();
 

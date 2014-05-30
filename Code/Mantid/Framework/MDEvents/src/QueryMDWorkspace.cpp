@@ -99,13 +99,6 @@ namespace MDEvents
   {
   }
 
-
-  /// Documentation initalisation 
-  void QueryMDWorkspace::initDocs()
-  {
-    this->setWikiSummary("Query the IMDWorkspace in order to extract summary information.");
-  }
-
   /// Initialise the properties
   void QueryMDWorkspace::init()
   {

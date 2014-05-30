@@ -40,13 +40,6 @@ namespace Mantid
     {\
       throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");\
     }
-
-    /// Sets documentation strings for this algorithm
-    void SaveSPE::initDocs()
-    {
-      this->setWikiSummary("Writes a workspace into a file the spe format. ");
-      this->setOptionalMessage("Writes a workspace into a file the spe format.");
-    }
     
 
     using namespace Kernel;

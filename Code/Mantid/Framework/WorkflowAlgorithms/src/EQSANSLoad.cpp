@@ -48,13 +48,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSLoad)
 
-/// Sets documentation strings for this algorithm
-void EQSANSLoad::initDocs()
-{
-  this->setWikiSummary("Load EQSANS data.");
-  this->setOptionalMessage("Load EQSANS data.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
