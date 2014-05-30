@@ -117,6 +117,9 @@ namespace Mantid
       declareProperty(new PropertyWithValue<bool>("UseManualScaleFactor", false, Direction::Input),
         "True to use a provided value for the scale factor.");
       declareProperty(
+        new PropertyWithValue<double>("ManualScaleFactor", 1.0, Direction::Input),
+        "Provided value for the scale factor. Optional.");
+      declareProperty(
         new PropertyWithValue<double>("OutScaleFactor", Mantid::EMPTY_DBL(), Direction::Output),
         "The actual used value for the scaling factor.");
 
@@ -361,26 +364,44 @@ namespace Mantid
 
       bool scaleRHS = this->getProperty("ScaleRHSWorkspace");
       //manualscalefactor if
-
-      auto rhsOverlapIntegrated = integration(rebinnedRHS, startOverlap, endOverlap);
-      auto lhsOverlapIntegrated = integration(rebinnedLHS, startOverlap, endOverlap);
-
-      auto y1 = lhsOverlapIntegrated->readY(0);
-      auto y2 = rhsOverlapIntegrated->readY(0);
+      bool manualScaleFactor = this->getProperty("UseManualScaleFactor");
       double scaleFactor = 0;
-      if(scaleRHS)
+
+      if (manualScaleFactor)
       {
-        MatrixWorkspace_sptr ratio = lhsOverlapIntegrated/rhsOverlapIntegrated;
-        rebinnedRHS =  rebinnedRHS * ratio;
-        scaleFactor = y1[0]/y2[0];
+        double manualScaleFactor = this->getProperty("ManualScaleFactor");
+        MatrixWorkspace_sptr manualScaleFactorWS = singleValueWS(manualScaleFactor);
+
+        if(scaleRHS)
+        {
+          rebinnedRHS = rebinnedRHS * manualScaleFactorWS;
+        }
+        else
+        {
+          rebinnedLHS = rebinnedLHS * manualScaleFactorWS;
+        }
+        scaleFactor = manualScaleFactor;
       }
       else
       {
-        MatrixWorkspace_sptr ratio = rhsOverlapIntegrated/lhsOverlapIntegrated;
-        rebinnedLHS =  rebinnedLHS * ratio;
-        scaleFactor = y2[0]/y1[0];
-      }
+        auto rhsOverlapIntegrated = integration(rebinnedRHS, startOverlap, endOverlap);
+        auto lhsOverlapIntegrated = integration(rebinnedLHS, startOverlap, endOverlap);
 
+        auto y1 = lhsOverlapIntegrated->readY(0);
+        auto y2 = rhsOverlapIntegrated->readY(0);
+        if(scaleRHS)
+        {
+          MatrixWorkspace_sptr ratio = lhsOverlapIntegrated/rhsOverlapIntegrated;
+          rebinnedRHS = rebinnedRHS * ratio;
+          scaleFactor = y1[0]/y2[0];
+        }
+        else
+        {
+          MatrixWorkspace_sptr ratio = rhsOverlapIntegrated/lhsOverlapIntegrated;
+          rebinnedLHS = rebinnedLHS * ratio;
+          scaleFactor = y2[0]/y1[0];
+        }
+      }
       //manualscalefactor end if
 
       int a1 = boost::tuples::get<0>(startEnd);

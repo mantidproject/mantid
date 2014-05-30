@@ -172,6 +172,28 @@ public:
     return ResultType(stitched, scaleFactor);
   }
 
+  ResultType do_stitch1D(MatrixWorkspace_sptr& lhs, MatrixWorkspace_sptr& rhs, bool scaleRHS, bool useManualScaleFactor,
+    const double& startOverlap, const double& endOverlap, const MantidVec& params, const double& manualScaleFactor)
+  {
+    Stitch1D alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("LHSWorkspace", lhs);
+    alg.setProperty("RHSWorkspace", rhs);
+    alg.setProperty("ScaleRHSWorkspace", scaleRHS);
+    alg.setProperty("UseManualScaleFactor", useManualScaleFactor);
+    alg.setProperty("StartOverlap", startOverlap);
+    alg.setProperty("EndOverlap", endOverlap);
+    alg.setProperty("Params", params);
+    alg.setProperty("ManualScaleFactor", manualScaleFactor);
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    alg.execute();
+    MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
+    double scaleFactor = alg.getProperty("OutScaleFactor");
+    return ResultType(stitched, scaleFactor);
+  }
+
   ResultType do_stitch1D(MatrixWorkspace_sptr& lhs, MatrixWorkspace_sptr& rhs,
     const double& startOverlap, const double& endOverlap, const MantidVec& params, bool scaleRHS = true)
   {
@@ -365,8 +387,6 @@ public:
 
   void test_stitching_scale_right()
   {
-    std::cout << "test_stitching_scale_right" << std::endl;
-
     auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4,boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>());
 
     double scale = ret.get<1>();
@@ -397,9 +417,67 @@ public:
 
   void test_stitching_scale_left()
   {
-    std::cout << "test_stitching_scale_left" << std::endl;
-
     auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4,boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>(),false);
+
+    double scale = ret.get<1>();
+    // Check the scale factor
+    TS_ASSERT_DELTA(scale, 3.0/2.0, 0.000000001);
+    // Fetch the arrays from the output workspace
+    MantidVec stitched_y = ret.get<0>()->readY(0);
+    MantidVec stitched_x = ret.get<0>()->readX(0);
+    MantidVec stitched_e = ret.get<0>()->readE(0);
+    // Check that the output Y-Values are correct. Output Y Values should all be 3
+    for (auto itr = stitched_y.begin(); itr != stitched_y.end(); ++itr)
+    {
+      TS_ASSERT_DELTA(3, *itr, 0.000001);
+    }
+    // Check that the output E-Values are correct. Output Error values should all be zero
+    for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr)
+    {
+      double temp = *itr;
+      TS_ASSERT_EQUALS(temp,0);
+    }
+    // Check that the output X-Values are correct.
+    //truncate the input and oputput x values to 6 decimal places to eliminate insignificant error
+    MantidVec xCopy = this->x;
+    std::transform(stitched_x.begin(),stitched_x.end(),stitched_x.begin(),roundSix);
+    std::transform(xCopy.begin(),xCopy.end(),xCopy.begin(),roundSix);
+    TS_ASSERT(xCopy == stitched_x);
+  }
+
+  void test_stitching_manual_scale_factor_scale_right()
+  {
+    auto ret = do_stitch1D(this->b, this->a, true, true, -0.4, 0.4,boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>(),2.0/3.0);
+
+    double scale = ret.get<1>();
+    // Check the scale factor
+    TS_ASSERT_DELTA(scale, 2.0/3.0, 0.000000001);
+    // Fetch the arrays from the output workspace
+    MantidVec stitched_y = ret.get<0>()->readY(0);
+    MantidVec stitched_x = ret.get<0>()->readX(0);
+    MantidVec stitched_e = ret.get<0>()->readE(0);
+    // Check that the output Y-Values are correct. Output Y Values should all be 2
+    for (auto itr = stitched_y.begin(); itr != stitched_y.end(); ++itr)
+    {
+      TS_ASSERT_DELTA(2, *itr, 0.000001);
+    }
+    // Check that the output E-Values are correct. Output Error values should all be zero
+    for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr)
+    {
+      double temp = *itr;
+      TS_ASSERT_EQUALS(temp,0);
+    }
+    // Check that the output X-Values are correct.
+    //truncate the input and oputput x values to 6 decimal places to eliminate insignificant error
+    MantidVec xCopy = this->x;
+    std::transform(stitched_x.begin(),stitched_x.end(),stitched_x.begin(),roundSix);
+    std::transform(xCopy.begin(),xCopy.end(),xCopy.begin(),roundSix);
+    TS_ASSERT(xCopy == stitched_x);
+  }
+
+  void test_stitching_manual_scale_factor_scale_left()
+  {
+    auto ret = do_stitch1D(this->b, this->a, false, true, -0.4, 0.4, boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>(), 3.0/2.0);
 
     double scale = ret.get<1>();
     // Check the scale factor
