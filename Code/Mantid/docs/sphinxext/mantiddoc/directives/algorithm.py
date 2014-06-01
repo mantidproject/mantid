@@ -16,8 +16,9 @@ class AlgorithmDirective(BaseDirective):
     Inserts details of an algorithm by querying Mantid
 
     Adds:
-     - A referenceable link for use with Sphinx ":ref:`` tags", if this is
-       the highest version of the algorithm being processed
+     - A referenceable link for use with Sphinx ":ref:`` tags". If this is
+       the highest version of the algorithm being processed then a both
+       a versioned link is created and a non-versioned link
      - A title
      - A screenshot of the algorithm
      - Table of contents
@@ -70,13 +71,19 @@ class AlgorithmDirective(BaseDirective):
     def _insert_reference_link(self):
         """
         Outputs a reference to the top of the algorithm's rst
-        of the form .. _AlgorithmName: if this is the highest version
+        of the form ".. _algm-AlgorithmName-vVersion:", so that
+        the page can be referenced using 
+        :ref:`algm-AlgorithmName-version`. If this is the highest 
+        version then it also outputs a reference ".. _algm-AlgorithmName:
         """
         from mantid.api import AlgorithmFactory
 
         alg_name = self.algorithm_name()
-        if AlgorithmFactory.highestVersion(alg_name) == self.algorithm_version():
-            self.add_rst(".. _algorithm|%s:\n" % alg_name)
+        version = self.algorithm_version()
+        self.add_rst(".. _algm-%s-v%d:\n" % (alg_name, version))
+
+        if AlgorithmFactory.highestVersion(alg_name) == version:
+            self.add_rst(".. _algm-%s:\n" % alg_name)
 
     def _insert_pagetitle(self):
         """
