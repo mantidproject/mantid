@@ -233,6 +233,8 @@ This example repeats the previous one but with the Sigmas of the two Gaussians t
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidCurveFitting/Convolution.h"
 
+#include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
+
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/DomainCreatorFactory.h"
@@ -391,7 +393,11 @@ namespace CurveFitting
     if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
         !boost::dynamic_pointer_cast<API::IFunctionMD>(fun) )
     {
-      creator = new FitMW(this, workspacePropertyName, m_domainType);
+      if(boost::dynamic_pointer_cast<CurveFitting::ParamFunction>(fun)) {
+        creator = new SeqDomainSpectrumCreator(this, workspacePropertyName);
+      } else {
+        creator = new FitMW(this, workspacePropertyName, m_domainType);
+      }
     }
     else
     {
