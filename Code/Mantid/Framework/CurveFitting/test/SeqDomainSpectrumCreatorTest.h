@@ -9,6 +9,10 @@
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidAPI/ParamFunction.h"
 
+#include "MantidCurveFitting/Fit.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/FunctionFactory.h"
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
@@ -20,7 +24,6 @@ public:
   // This means the constructor isn't called when running other tests
   static SeqDomainSpectrumCreatorTest *createSuite() { return new SeqDomainSpectrumCreatorTest(); }
   static void destroySuite( SeqDomainSpectrumCreatorTest *suite ) { delete suite; }
-
 
   void testConstructor()
   {
@@ -123,6 +126,84 @@ public:
       }
   }
 
+  void testFit()
+  {
+      double slope = 2.0;
+
+      MatrixWorkspace_sptr matrixWs = WorkspaceCreationHelper::Create2DWorkspace123(400, 500);
+      for(size_t i = 0; i < matrixWs->getNumberHistograms(); ++i) {
+          std::vector<double> &x = matrixWs->dataX(i);
+          std::vector<double> &y = matrixWs->dataY(i);
+          std::vector<double> &e = matrixWs->dataE(i);
+
+          for(size_t j = 0; j < x.size(); ++j) {
+              x[j] = static_cast<double>(j);
+              y[j] = static_cast<double>(i) + slope * x[j];
+              e[j] = 0.1 * y[j];
+          }
+      }
+
+      WorkspaceCreationHelper::addNoise(matrixWs, 0.0, -0.1, 0.1);
+
+      IFunction_sptr fun(new SeqDomainCreatorTestFunction);
+      fun->initialize();
+      fun->setParameter("Slope", 0.0);
+
+      Fit fit;
+      fit.initialize();
+
+      fit.setProperty("Function",fun);
+      fit.setProperty("InputWorkspace",matrixWs);
+      fit.setProperty("CreateOutput",true);
+      fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+
+      fit.execute();
+
+      TS_ASSERT(fit.isExecuted());
+  }
+
+  void testFitComplex()
+  {
+      std::vector<double> slopes(40);
+      for(size_t i = 0; i < slopes.size(); ++i) {
+          slopes[i] = static_cast<double>(i);
+      }
+
+      MatrixWorkspace_sptr matrixWs = WorkspaceCreationHelper::Create2DWorkspace123(400, 500);
+      for(size_t i = 0; i < matrixWs->getNumberHistograms(); ++i) {
+          std::vector<double> &x = matrixWs->dataX(i);
+          std::vector<double> &y = matrixWs->dataY(i);
+          std::vector<double> &e = matrixWs->dataE(i);
+
+          for(size_t j = 0; j < x.size(); ++j) {
+              x[j] = static_cast<double>(j);
+              y[j] = static_cast<double>(i) + slopes[i % slopes.size()] * x[j];
+              e[j] = std::max(1.0, sqrt(y[j]));
+          }
+      }
+
+      //WorkspaceCreationHelper::addNoise(matrixWs, 0.0, -0.1, 0.1);
+
+      IFunction_sptr fun(new SeqDomainCreatorTestFunctionComplex);
+      fun->initialize();
+      for(size_t i = 0; i < slopes.size(); ++ i) {
+        fun->setParameter(i, static_cast<double>(i) + 1.1);
+        std::cout << i << " " << fun->getParameter(i) << std::endl;
+      }
+
+      Fit fit;
+      fit.initialize();
+
+      fit.setProperty("Function",fun);
+      fit.setProperty("InputWorkspace",matrixWs);
+      fit.setProperty("CreateOutput",true);
+      fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+
+      fit.execute();
+
+      TS_ASSERT(fit.isExecuted());
+  }
+
 
 private:
   class TestableSeqDomainSpectrumCreator : public SeqDomainSpectrumCreator {
@@ -166,7 +247,44 @@ private:
       }
   };
 
-};
+  class SeqDomainCreatorTestFunctionComplex : public ParamFunction
+  {
+  public:
+      SeqDomainCreatorTestFunctionComplex() : ParamFunction() { }
+      ~SeqDomainCreatorTestFunctionComplex() { }
 
+      std::string name() const { return "SeqDomainCreatorTestFunctionComplex"; }
+
+      void function(const FunctionDomain &domain, FunctionValues &values) const
+      {
+          const FunctionDomain1DSpectrum &spectrumDomain = dynamic_cast<const FunctionDomain1DSpectrum &>(domain);
+
+          double wsIndex = static_cast<double>(spectrumDomain.getWorkspaceIndex());
+          double slope = getParameter(spectrumDomain.getWorkspaceIndex() % 40);
+
+          for(size_t j = 0; j < spectrumDomain.size(); ++j) {
+              values.addToCalculated(j, wsIndex + slope * spectrumDomain[j]);
+          }
+      }
+
+      void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian)
+      {
+          const FunctionDomain1DSpectrum &spectrumDomain = dynamic_cast<const FunctionDomain1DSpectrum &>(domain);
+
+          for(size_t j = 0; j < spectrumDomain.size(); ++j) {
+              jacobian.set(j, spectrumDomain.getWorkspaceIndex() % 40, spectrumDomain[j]);
+          }
+      }
+
+  protected:
+      void init()
+      {
+          for(size_t i = 0; i < 40; ++ i) {
+            declareParameter("Slope" + boost::lexical_cast<std::string>(i), 4.0);
+          }
+      }
+  };
+
+};
 
 #endif /* MANTID_CURVEFITTING_SEQDOMAINSPECTRUMCREATORTEST_H_ */
