@@ -12,7 +12,7 @@ mantidplot = "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/MantidPlot"
 builder = "@BUILDER@"
 src_dir = "@CMAKE_CURRENT_SOURCE_DIR@/source"
 screenshots_dir = "@SCREENSHOTS_DIR@"
-output_dir = os.path.join("@SPHINX_BUILD@", builder)
+output_dir = os.path.join("@SPHINX_BUILD_DIR@", builder)
 
 # set environment
 os.environ["SCREENSHOTS_DIR"] = screenshots_dir
