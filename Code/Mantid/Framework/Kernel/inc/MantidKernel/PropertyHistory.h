@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include <string>
+#include <vector>
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
