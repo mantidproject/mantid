@@ -18,6 +18,7 @@ private:
     SimpleSum() : Algorithm() {}
     virtual ~SimpleSum() {}
     const std::string name() const { return "SimpleSum";} 
+    const std::string summary() const { return "SimpleSum";} 
     int version() const  { return 1;}                        
     const std::string category() const { return "Dummy";}        
 
@@ -42,6 +43,7 @@ private:
   {
   public:
     const std::string name() const { return "SimpleSum2";} 
+    const std::string summary() const { return "SimpleSum2";} 
     int version() const  { return 1;}                        
     const std::string category() const { return "Dummy";}        
 
