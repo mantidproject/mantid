@@ -115,8 +115,6 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void IntegratePeaksHybrid::initDocs()
     {
-      //this->setWikiSummary("Integrate single crystal peaks using connected component analysis");
-      //this->setOptionalMessage(this->getWikiSummary());
     }
 
     //----------------------------------------------------------------------------------------------
