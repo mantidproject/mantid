@@ -41,6 +41,7 @@ const std::string ScriptBuilder::build()
  *
  * @param os :: output string stream to append algorithms to.
  * @param iter :: reference to the iterator pointing to the vector of history items
+ * @param depth :: count of how far we've recursed into the history
  */
 void ScriptBuilder::writeHistoryToStream(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter, int depth)
 {
@@ -77,6 +78,7 @@ void ScriptBuilder::writeHistoryToStream(std::ostringstream& os, std::vector<His
  *
  * @param os :: output string stream to append algorithms to.
  * @param iter :: reference to the iterator pointing to the vector of history items
+ * @param depth :: count of how far we've recursed into the history
  */
 void ScriptBuilder::buildChildren(std::ostringstream& os, std::vector<HistoryItem>::const_iterator& iter, int depth)
 {
