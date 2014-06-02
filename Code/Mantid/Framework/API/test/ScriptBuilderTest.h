@@ -22,6 +22,7 @@ class ScriptBuilderTest : public CxxTest::TestSuite
     virtual ~SubAlgorithm() {}
     const std::string name() const { return "SubAlgorithm";}
     int version() const  { return 1;}
+    const std::string summary() { return "SubAlgorithm"; }
     const std::string category() const { return "Cat;Leopard;Mink";}
     const std::string workspaceMethodName() const { return "methodname"; }
     const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace;ITableWorkspace"; }
@@ -47,6 +48,7 @@ class ScriptBuilderTest : public CxxTest::TestSuite
     const std::string name() const { return "BasicAlgorithm";}
     int version() const  { return 1;}
     const std::string category() const { return "Cat;Leopard;Mink";}
+    const std::string summary() { return "BasicAlgorithm"; }
     const std::string workspaceMethodName() const { return "methodname"; }
     const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace;ITableWorkspace"; }
     const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
@@ -74,6 +76,7 @@ class ScriptBuilderTest : public CxxTest::TestSuite
     virtual ~NestedAlgorithm() {}
     const std::string name() const { return "NestedAlgorithm";}
     int version() const  { return 1;}
+    const std::string summary() { return "NestedAlgorithm"; }
     const std::string category() const { return "Cat;Leopard;Mink";}
     const std::string workspaceMethodName() const { return "methodname"; }
     const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace;ITableWorkspace"; }
@@ -108,6 +111,7 @@ class ScriptBuilderTest : public CxxTest::TestSuite
     const std::string name() const { return "TopLevelAlgorithm";}
     int version() const  { return 1;}
     const std::string category() const { return "Cat;Leopard;Mink";}
+    const std::string summary() { return "TopLevelAlgorithm"; }
     const std::string workspaceMethodName() const { return "methodname"; }
     const std::string workspaceMethodOnTypes() const { return "Workspace;MatrixWorkspace;ITableWorkspace"; }
     const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
