@@ -45,7 +45,7 @@ namespace Algorithms
   const std::string RemoveWorkspaceHistory::category() const { return "Utility";}
 
   /// Algorithm's summary for identification. @see Algorithm::summary
-  const std::string RemoveWorkspaceHistory::summary() const { "Removes all algorithm history records from a given workspace."; };
+  const std::string RemoveWorkspaceHistory::summary() const { return "Removes all algorithm history records from a given workspace."; };
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
