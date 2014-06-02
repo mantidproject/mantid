@@ -187,7 +187,7 @@ class AlgorithmDirective(BaseDirective):
         match = DEPRECATE_USE_ALG_RE.search(msg)
         if match is not None and len(match.groups()) == 1:
             name = match.group(0)
-            msg = DEPRECATE_USE_ALG_RE.sub(r"Use :ref:`algorithm|\1` instead.", msg)
+            msg = DEPRECATE_USE_ALG_RE.sub(r"Use :ref:`algm-\1` instead.", msg)
 
         self.add_rst(".. warning:: %s" % msg)
 
