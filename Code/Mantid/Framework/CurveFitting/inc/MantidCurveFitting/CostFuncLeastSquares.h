@@ -75,7 +75,6 @@ public:
 
   void setParameters(const GSLVector& params);
   void getParameters(GSLVector& params) const;
-
 protected:
 
   virtual void calActiveCovarianceMatrix(GSLMatrix& covar, double epsrel = 1e-8);
@@ -89,6 +88,9 @@ protected:
     API::FunctionDomain_sptr domain,
     API::FunctionValues_sptr values,
     bool evalFunction = true, bool evalDeriv = true, bool evalHessian = true) const;
+
+  /// Get mapped weights from FunctionValues
+  std::vector<double> getFitWeights(API::FunctionValues_sptr values, double sqrtW) const;
 
   /// Get weight (1/sigma)
   virtual double getWeight(API::FunctionValues_sptr values, size_t i, double sqrtW=1.0) const;

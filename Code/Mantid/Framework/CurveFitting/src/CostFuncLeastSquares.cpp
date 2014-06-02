@@ -296,6 +296,9 @@ void CostFuncLeastSquares::addValDerivHessian(
     }
   }
   double sqrtw = calSqrtW(values);
+
+  std::vector<double> weights = getFitWeights(values, sqrtw);
+
   for(size_t ip = 0; ip < np; ++ip)
   {
     if ( !function->isActive(ip) ) continue;
@@ -304,8 +307,7 @@ void CostFuncLeastSquares::addValDerivHessian(
     {
       double calc = values->getCalculated(i);
       double obs = values->getFitData(i);
-      // double w = values->getFitWeight(i);
-      double w =  getWeight(values, i, sqrtw);
+      double w =  weights[i];
       double y = ( calc - obs ) * w;
       d += y * jacobian.get(i,ip) * w;
       if (iActiveP == 0 && evalFunction)
@@ -344,7 +346,7 @@ void CostFuncLeastSquares::addValDerivHessian(
       for(size_t k = 0; k < ny; ++k) // over fitting data
       {
         // double w = values->getFitWeight(k);
-        double w = getWeight(values, k, sqrtw);
+        double w = weights[k];//getWeight(values, k, sqrtw);
         d += jacobian.get(k,i) * jacobian.get(k,j) * w * w;
       }
       PARALLEL_CRITICAL(hessian_set)
@@ -361,6 +363,16 @@ void CostFuncLeastSquares::addValDerivHessian(
     }
     ++i1;
   }
+}
+
+std::vector<double> CostFuncLeastSquares::getFitWeights(API::FunctionValues_sptr values, double sqrtW) const
+{
+    std::vector<double> weights(values->size());
+    for(size_t i = 0; i < weights.size(); ++i) {
+        weights[i] = getWeight(values, i, sqrtW);
+    }
+
+    return weights;
 }
 
 /**
