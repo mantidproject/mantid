@@ -21,8 +21,10 @@ if ( SPHINX_FOUND )
     COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_html.py
     COMMENT "Building html documentation"
   )
-  # Group within VS
-  set_property ( TARGET ${TARGET_PREFIX}-html PROPERTY FOLDER "Documentation" )
+  # Group within VS and exclude from whole build
+  set_target_properties ( ${TARGET_PREFIX}-html PROPERTIES FOLDER "Documentation"
+                                                EXCLUDE_FROM_DEFAULT_BUILD 1
+                                                EXCLUDE_FROM_ALL 1)
 
   # doctest target
   set ( BUILDER doctest )
@@ -31,8 +33,10 @@ if ( SPHINX_FOUND )
     COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_doctest.py
     COMMENT "Running documentation tests"
   )
-  set_property ( TARGET ${TARGET_PREFIX}-test PROPERTY FOLDER "documentation" )
-
+  # Group within VS and exclude from whole build
+  set_target_properties ( ${TARGET_PREFIX}-test PROPERTIES FOLDER "Documentation"
+                                                EXCLUDE_FROM_DEFAULT_BUILD 1
+                                                EXCLUDE_FROM_ALL 1)
 endif ()
 
 
