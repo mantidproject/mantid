@@ -40,11 +40,11 @@ namespace Algorithms
     virtual ~RemoveWorkspaceHistory();
     
     virtual const std::string name() const;
+    virtual const std::string summary() const;
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 
