@@ -12,9 +12,16 @@ namespace Mantid
 namespace CurveFitting
 {
 
-/** FunctionDomain1DSpectrumCreator : TODO: DESCRIPTION
+/** FunctionDomain1DSpectrumCreator :
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    FunctionDomain1DSpectrumCreator creates an FunctionDomain1DSpectrum using a given
+    MatrixWorkspace and workspace index. Currently it does not create an output workspace,
+    since it is exclusively used in a context where it's not required.
+
+      @author Michael Wedel, Paul Scherrer Institut - SINQ
+      @date 30/05/2014
+
+    Copyright © 2014 PSI-MSS
 
     This file is part of Mantid.
 
@@ -33,6 +40,7 @@ namespace CurveFitting
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
+
   */
 using namespace API;
 
