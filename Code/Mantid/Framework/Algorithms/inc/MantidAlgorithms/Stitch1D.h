@@ -57,6 +57,7 @@ namespace Mantid
       Mantid::API::MatrixWorkspace_sptr singleValueWS(double val);
       Mantid::API::MatrixWorkspace_sptr weightedMean(Mantid::API::MatrixWorkspace_sptr& inOne, Mantid::API::MatrixWorkspace_sptr& inTwo);
       boost::tuple<int,int> findStartEndIndexes(double startOverlap, double endOverlap, Mantid::API::MatrixWorkspace_sptr& workspace);
+      static const double range_tolerance;
 
     };
 

@@ -43,6 +43,7 @@ namespace Mantid
   namespace Algorithms
   {
 
+    const double Stitch1D::range_tolerance = 1e-9;
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(Stitch1D)
 
@@ -129,6 +130,7 @@ namespace Mantid
     {
       Property* startOverlapProp = this->getProperty("StartOverlap");
       double startOverlapVal = this->getProperty("StartOverlap");
+      startOverlapVal -= this->range_tolerance;
       const bool startOverlapBeyondRange = (startOverlapVal < intesectionMin)
         || (startOverlapVal > intesectionMax);
       if (startOverlapProp->isDefault() || startOverlapBeyondRange)
@@ -153,6 +155,7 @@ namespace Mantid
     {
       Property* endOverlapProp = this->getProperty("EndOverlap");
       double endOverlapVal = this->getProperty("EndOverlap");
+      endOverlapVal += this->range_tolerance;
       const bool endOverlapBeyondRange = (endOverlapVal < intesectionMin)
         || (endOverlapVal > intesectionMax);
       if (endOverlapProp->isDefault() || endOverlapBeyondRange)
