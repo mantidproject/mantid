@@ -477,7 +477,8 @@ namespace LiveData
         // Currently, we only handle monitors 0-5.  At the present time, that's sufficient.
         g_log.error() << "Mantid cannot handle monitor ID's higher than 5.  If " << monitorID
           << " is actually valid, then an appropriate entry must be made to the "
-          << " ADDABLE list at the top of Framework/API/src/Run.cpp";
+          << " ADDABLE list at the top of Framework/API/src/Run.cpp"
+          << std::endl;
       }
       else
       {
