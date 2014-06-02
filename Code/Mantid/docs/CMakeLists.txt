@@ -31,7 +31,7 @@ if ( SPHINX_FOUND )
     COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_doctest.py
     COMMENT "Running documentation tests"
   )
-  set_property ( TARGET ${TARGET_PREFIX}-test PROPERTY FOLDER "documentation" )
+  set_property ( TARGET ${TARGET_PREFIX}-test PROPERTY FOLDER "Documentation" )
 
 endif ()
 
