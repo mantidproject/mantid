@@ -58,7 +58,8 @@ void ScriptBuilder::writeHistoryToStream(std::ostringstream& os, std::vector<His
     os << std::string(depth, '#');
     os << " End of child algorithms of " << algHistory->name() << "\n";
     
-    if( !boost::next(iter)->isUnrolled())
+    if(boost::next(iter) == m_historyItems.end() 
+        || !boost::next(iter)->isUnrolled())
     {
       os << "\n";
     }
