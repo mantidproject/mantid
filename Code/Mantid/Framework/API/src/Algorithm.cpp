@@ -1081,8 +1081,8 @@ namespace Mantid
             bool linked = false;
             //find child histories with anonymous output workspaces
             auto childHistories = m_history->getChildHistories();
-            auto childIter = childHistories.crbegin();
-            for (; childIter != childHistories.crend() && !linked; ++childIter)
+            auto childIter = childHistories.rbegin();
+            for (; childIter != childHistories.rend() && !linked; ++childIter)
             {
               auto props = (*childIter)->getProperties();
               auto propIter = props.begin(); 
