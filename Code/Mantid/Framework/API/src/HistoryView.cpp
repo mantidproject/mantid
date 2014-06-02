@@ -174,7 +174,7 @@ const std::vector<HistoryItem> HistoryView::getAlgorithmsList() const
 {
   std::vector<HistoryItem> histories;
   histories.reserve(size());
-  std::copy(m_historyItems.cbegin(), m_historyItems.cend(), std::back_inserter( histories ));
+  std::copy(m_historyItems.begin(), m_historyItems.end(), std::back_inserter( histories ));
   return histories;
 }
 
