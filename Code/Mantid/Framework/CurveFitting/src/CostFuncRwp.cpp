@@ -30,6 +30,18 @@ CostFuncRwp::CostFuncRwp() : CostFuncLeastSquares()
   m_factor = 1.;
 }
 
+std::vector<double> CostFuncRwp::getFitWeights(API::FunctionValues_sptr values) const
+{
+    double sqrtW = calSqrtW(values);
+
+    std::vector<double> weights(values->size());
+    for(size_t i = 0; i < weights.size(); ++i) {
+        weights[i] = getWeight(values, i, sqrtW);
+    }
+
+    return weights;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Get weight of data point i(1/sigma)
   */

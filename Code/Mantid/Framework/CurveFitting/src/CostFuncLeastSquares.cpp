@@ -92,12 +92,12 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::Function
 
   double retVal = 0.0;
 
-  double sqrtw = calSqrtW(values);
+  std::vector<double> weights = getFitWeights(values);
 
   for (size_t i = 0; i < ny; i++)
   {
     // double val = ( values->getCalculated(i) - values->getFitData(i) ) * values->getFitWeight(i);
-    double val = ( values->getCalculated(i) - values->getFitData(i) ) * getWeight(values, i, sqrtw);
+      double val = ( values->getCalculated(i) - values->getFitData(i) ) * weights[i];
     retVal += val * val;
   }
 
@@ -295,9 +295,8 @@ void CostFuncLeastSquares::addValDerivHessian(
       g_log.debug() << "\n";
     }
   }
-  double sqrtw = calSqrtW(values);
 
-  std::vector<double> weights = getFitWeights(values, sqrtw);
+  std::vector<double> weights = getFitWeights(values);
 
   for(size_t ip = 0; ip < np; ++ip)
   {
@@ -346,7 +345,7 @@ void CostFuncLeastSquares::addValDerivHessian(
       for(size_t k = 0; k < ny; ++k) // over fitting data
       {
         // double w = values->getFitWeight(k);
-        double w = weights[k];//getWeight(values, k, sqrtw);
+        double w = weights[k];
         d += jacobian.get(k,i) * jacobian.get(k,j) * w * w;
       }
       PARALLEL_CRITICAL(hessian_set)
@@ -365,11 +364,11 @@ void CostFuncLeastSquares::addValDerivHessian(
   }
 }
 
-std::vector<double> CostFuncLeastSquares::getFitWeights(API::FunctionValues_sptr values, double sqrtW) const
+std::vector<double> CostFuncLeastSquares::getFitWeights(API::FunctionValues_sptr values) const
 {
     std::vector<double> weights(values->size());
     for(size_t i = 0; i < weights.size(); ++i) {
-        weights[i] = getWeight(values, i, sqrtW);
+        weights[i] = values->getFitWeight(i);
     }
 
     return weights;
@@ -532,25 +531,6 @@ void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix& covar, double ep
     g_log.information().flags(prevState);
   }
 
-}
-
-//----------------------------------------------------------------------------------------------
-/** Get weight of data point i(1/sigma)
-  */
-double CostFuncLeastSquares::getWeight(API::FunctionValues_sptr values, size_t i, double sqrtW) const
-{
-  UNUSED_ARG(sqrtW);
-  return (values->getFitWeight(i));
-}
-
-//----------------------------------------------------------------------------------------------
-/** Get square root of normalization weight (W)
-  */
-double CostFuncLeastSquares::calSqrtW(API::FunctionValues_sptr values) const
-{
-  UNUSED_ARG(values);
-
-  return 1.0;
 }
 
 } // namespace CurveFitting
