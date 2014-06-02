@@ -13,18 +13,19 @@ class PropertiesDirective(BaseDirective):
         """
         Called by Sphinx when the ..properties:: directive is encountered.
         """
-        self.add_rst(self.make_header("Properties"))
-        self.add_rst(self._populate_properties_table())
-        self.commit_rst()
+        if self._create_properties_table():
+            self.commit_rst()
 
         return []
 
-    def _populate_properties_table(self):
+    def _create_properties_table(self):
         """
         Populates the ReST table with algorithm properties.
         """
         alg = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
         alg_properties = alg.getProperties()
+        if len(alg_properties) == 0:
+            return False
 
         # Stores each property of the algorithm in a tuple.
         properties = []
@@ -43,8 +44,9 @@ class PropertiesDirective(BaseDirective):
                 str(prop.documentation.replace("\n", " "))
             ))
 
-        # Build and add the properties to the ReST table.
-        return self._build_table(properties)
+        self.add_rst(self.make_header("Properties"))
+        self.add_rst(self._build_table(properties))
+        return True
 
     def _build_table(self, table_content):
         """
