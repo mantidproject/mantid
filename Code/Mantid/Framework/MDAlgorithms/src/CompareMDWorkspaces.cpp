@@ -79,12 +79,6 @@ namespace Mantid
     const std::string CompareMDWorkspaces::category() const { return "MDAlgorithms";}
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void CompareMDWorkspaces::initDocs()
-    {
-      this->setWikiSummary("Compare two MDWorkspaces for equality.");
-      this->setOptionalMessage("Compare two MDWorkspaces for equality.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

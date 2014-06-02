@@ -57,13 +57,6 @@ namespace Algorithms
 
 DECLARE_ALGORITHM(UnwrapMonitor)
 
-/// Sets documentation strings for this algorithm
-void UnwrapMonitor::initDocs()
-{
-  this->setWikiSummary("Takes an input [[workspace]] that contains 'raw' data, unwraps the data according to the reference flightpath provided and converts the units to wavelength. The output workspace will have common bins in the maximum theoretical wavelength range. ");
-  this->setOptionalMessage("Takes an input workspace that contains 'raw' data, unwraps the data according to the reference flightpath provided and converts the units to wavelength. The output workspace will have common bins in the maximum theoretical wavelength range.");
-}
-
 
 using namespace Kernel;
 using namespace API;

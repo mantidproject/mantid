@@ -89,12 +89,6 @@ namespace Mantid
       return "CorrectionFunctions";
     }
 
-    void CalculateGammaBackground::initDocs()
-    {
-      this->setWikiSummary("Calculates the background due to gamma rays produced when neutrons are absorbed by shielding");
-      this->setOptionalMessage("Calculates the background due to gamma rays produced when neutrons are absorbed by shielding.");
-    }
-
     void CalculateGammaBackground::init()
     {
 

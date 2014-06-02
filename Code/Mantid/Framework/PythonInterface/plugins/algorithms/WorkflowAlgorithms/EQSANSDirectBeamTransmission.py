@@ -13,10 +13,11 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
     
     def name(self):
         return 'EQSANSDirectBeamTransmission'
-    
+
+    def summary(self):
+        return "Compute the transmission using the direct beam method on EQSANS"
+
     def PyInit(self):
-        self.setOptionalMessage("Compute the transmission using the direct beam method on EQSANS")
-        self.setWikiSummary("Compute the transmission using the direct beam method on EQSANS")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
         self.declareProperty(FileProperty("SampleDataFilename", "",

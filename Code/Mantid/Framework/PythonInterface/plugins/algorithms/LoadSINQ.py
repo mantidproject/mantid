@@ -31,6 +31,9 @@ class LoadSINQ(PythonAlgorithm):
     def category(self):
         return "DataHandling;PythonAlgorithms"
 
+    def summary(self):
+        return "SINQ data file loader"
+
     def PyInit(self):
         instruments=["AMOR","BOA","DMC","FOCUS","HRPT","MARSI","MARSE","POLDI",
                      "RITA-2","SANS","SANS2","TRICS"]
@@ -41,8 +44,6 @@ class LoadSINQ(PythonAlgorithm):
         self.declareProperty("Year",now.year,"Choose year",direction=Direction.Input)
         self.declareProperty('Numor',0,'Choose file number',direction=Direction.Input)
         self.declareProperty(WorkspaceProperty("OutputWorkspace","",direction=Direction.Output))
-        self.setWikiSummary("SINQ data file loader")
-        self.setOptionalMessage("SINQ data file loader")
 
     def PyExec(self):
         inst=self.getProperty('Instrument').value

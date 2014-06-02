@@ -22,13 +22,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(CalculateEfficiency)
 
-/// Sets documentation strings for this algorithm
-void CalculateEfficiency::initDocs()
-{
-  this->setWikiSummary("Calculates the detector efficiency for a SANS instrument. ");
-  this->setOptionalMessage("Calculates the detector efficiency for a SANS instrument.");
-}
-
 
 using namespace Kernel;
 using namespace API;

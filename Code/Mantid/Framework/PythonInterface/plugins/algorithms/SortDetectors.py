@@ -20,9 +20,13 @@ class SortDetectors(PythonAlgorithm):
         """ Return name
         """
         return "SortDetectors"
-    
+ 
+    def summary(self):
+        """ Return summary
+        """
+        return "Algorithm to sort detectors by distance."
+           
     def PyInit(self):
-        self.setOptionalMessage("Algorithm to sort detectors by distance.")
         """ Declare properties
         """
         self.declareProperty(mantid.api.WorkspaceProperty("Workspace","",direction=mantid.kernel.Direction.Input, validator=mantid.api.InstrumentValidator()), "Input workspace")

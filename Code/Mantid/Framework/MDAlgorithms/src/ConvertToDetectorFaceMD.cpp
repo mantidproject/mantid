@@ -89,12 +89,6 @@ namespace MDAlgorithms
   const std::string ConvertToDetectorFaceMD::category() const { return "MDAlgorithms";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ConvertToDetectorFaceMD::initDocs()
-  {
-    this->setWikiSummary("Convert a MatrixWorkspace containing to a MD workspace for viewing the detector face.");
-    this->setOptionalMessage("Convert a MatrixWorkspace containing to a MD workspace for viewing the detector face.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

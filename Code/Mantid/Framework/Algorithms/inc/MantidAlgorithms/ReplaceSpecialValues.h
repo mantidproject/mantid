@@ -55,14 +55,16 @@ public:
   virtual ~ReplaceSpecialValues() {}
   /// Algorithm's name for identification
   virtual const std::string name() const { return "ReplaceSpecialValues"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Replaces instances of NaN and infinity in the workspace with user defined numbers. If a replacement value is not provided the check will not occur. This algorithm can also be used to replace numbers whose absolute value is larger than a user-defined threshold.";}
+
   /// Algorithm's version for identification
   virtual int version() const { return 1; }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Utility;CorrectionFunctions\\SpecialCorrections"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden UnaryOperation methods
   void defineProperties();
   void retrieveProperties();

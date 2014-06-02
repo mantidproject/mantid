@@ -52,12 +52,6 @@ namespace Algorithms
   
 
   //------------------------------------------MaxEventsPerBin----------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ConvertToEventWorkspace::initDocs()
-  {
-    this->setWikiSummary("Converts a Workspace2D from histograms to events in an EventWorkspace by converting each bin to an equivalent weighted event.");
-    this->setOptionalMessage("Converts a Workspace2D from histograms to events in an EventWorkspace by converting each bin to an equivalent weighted event.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

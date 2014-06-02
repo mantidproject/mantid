@@ -42,15 +42,10 @@ namespace Algorithms
   {
     // TODO Auto-generated destructor stub
   }
-  
-  void BinaryOperateMasks::initDocs(){
-
-    return;
-  }
 
   void BinaryOperateMasks::init()
   {
-    this->setWikiSummary("Performs binary operation, including and, or and xor, on two mask Workspaces, i.e., [[SpecialWorkspace2D]].");
+
     std::vector<std::string> operators;
     operators.push_back("AND");
     operators.push_back("OR");

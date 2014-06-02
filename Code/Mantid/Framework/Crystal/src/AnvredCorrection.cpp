@@ -126,7 +126,7 @@ AnvredCorrection::AnvredCorrection() : API::Algorithm()
 
 void AnvredCorrection::init()
 {
-  this->setWikiSummary("Calculates anvred correction factors for attenuation due to absorption and scattering in a spherical sample");
+
   // The input workspace must have an instrument and units of wavelength
   boost::shared_ptr<CompositeValidator> wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add(boost::make_shared<InstrumentValidator>());

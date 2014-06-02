@@ -50,9 +50,9 @@ public:
 	}
 	;
 	/// Algorithm's name for identification overriding a virtual method
-	virtual const std::string name() const {
-		return "CorrectFlightPaths";
-	}
+	virtual const std::string name() const { return "CorrectFlightPaths";	}
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Used to correct flight paths in 2D shaped detectors.";}
 	/// Algorithm's version for identification overriding a virtual method
 	virtual int version() const {
 		return 1;
@@ -63,8 +63,7 @@ public:
 	}
 
 private:
-	/// Sets documentation strings for this algorithm
-	virtual void initDocs();
+	
 	// Overridden Algorithm methods
 	void init();
 	void exec();

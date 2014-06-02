@@ -49,12 +49,6 @@ namespace Algorithms
   const std::string MuonGroupDetectors::category() const { return "Muon"; }
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void MuonGroupDetectors::initDocs()
-  {
-    this->setWikiSummary("Applies detector grouping to a workspace. (Muon version).");
-    this->setOptionalMessage("Applies detector grouping to a workspace. (Muon version).");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

@@ -56,12 +56,6 @@ namespace Algorithms
   const std::string SetInstrumentParameter::category() const { return "DataHandling\\Instrument";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SetInstrumentParameter::initDocs()
-  {
-    this->setWikiSummary("Add or replace an parameter attached to an instrument component.");
-    this->setOptionalMessage("Add or replace an parameter attached to an instrument component.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

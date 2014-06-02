@@ -15,6 +15,9 @@ class LoadMultipleGSS(PythonAlgorithm):
     def name(self):
         return "LoadMultipleGSS"
 
+    def summary(self):
+        return "This algorithm loads multiple gsas files from a single directory into mantid."
+
     def __load(self, directory, prefix):
         for ext in self.__exts:
             filename = "%s%s" % (prefix, ext)
@@ -31,7 +34,6 @@ class LoadMultipleGSS(PythonAlgorithm):
         raise RuntimeError("Failed to load run %s" % prefix)              
 
     def PyInit(self):
-        self.setOptionalMessage("This algorithm loads multiple gsas files from a single directory into mantid.")
         self.declareProperty("FilePrefix","")
         intArrayValidator = IntArrayBoundedValidator()
         intArrayValidator.setLower(0)

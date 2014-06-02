@@ -49,10 +49,13 @@ public:
   virtual int version() const { return 1;};
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Utility;PythonAlgorithms";}
+  
+  /// Algorithm's summary
+  virtual const std::string summary() const { return "  Takes a list of workspaces and a list of log property names.  For each workspace, the Run info is inspected and "
+    "all log property values are used to populate a resulting output TableWorkspace."; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+
   /// Initialise the properties
   void init();
   /// Run the algorithm

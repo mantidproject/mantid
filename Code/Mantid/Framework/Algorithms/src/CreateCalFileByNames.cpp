@@ -59,13 +59,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(CreateCalFileByNames)
     
-    /// Sets documentation strings for this algorithm
-    void CreateCalFileByNames::initDocs()
-    {
-      this->setWikiSummary("Create a [[CalFile|calibration file]] (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree.");
-      this->setOptionalMessage("Create a calibration file (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree.");
-    }
-    
 
     using namespace Kernel;
     using API::Progress;

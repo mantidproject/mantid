@@ -77,12 +77,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadHKL::initDocs()
-  {
-    this->setWikiSummary("Loads an ASCII .hkl file to a PeaksWorkspace.");
-    this->setOptionalMessage("Loads an ASCII .hkl file to a PeaksWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

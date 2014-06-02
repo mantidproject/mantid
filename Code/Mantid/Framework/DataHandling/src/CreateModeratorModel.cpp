@@ -39,12 +39,6 @@ namespace DataHandling
   const std::string CreateModeratorModel::category() const { return "DataHandling";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CreateModeratorModel::initDocs()
-  {
-    this->setWikiSummary("Creates the given moderator model and attaches it to the input workspace.");
-    this->setOptionalMessage("Creates the given moderator model and attaches it to the input workspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

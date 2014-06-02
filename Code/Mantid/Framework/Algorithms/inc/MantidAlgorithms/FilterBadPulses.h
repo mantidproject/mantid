@@ -55,14 +55,16 @@ public:
 
 
   virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Filters out events associated with pulses that happen when proton charge is lower than a given percentage of the average.";}
+
 
   virtual int version() const;
 
   virtual const std::string category() const;
 
 private:
-  // Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Implement abstract Algorithm methods
   void init();
   void exec();

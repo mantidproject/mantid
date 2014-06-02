@@ -38,11 +38,14 @@ namespace Algorithms
     virtual ~RebinByPulseTimes();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Bins events according to pulse time. Binning parameters are specified relative to the start of the run.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
+
     void init();
     void exec();
   };

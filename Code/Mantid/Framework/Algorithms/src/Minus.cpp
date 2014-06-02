@@ -32,13 +32,6 @@ namespace Mantid
   {
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Minus)
-    
-    /// Sets documentation strings for this algorithm
-    void Minus::initDocs()
-    {
-      this->setWikiSummary("The Minus algorithm will subtract the data values and calculate the corresponding [[Error Values|error values]] for two compatible workspaces.");
-      this->setOptionalMessage("The Minus algorithm will subtract the data values and calculate the corresponding error values for two compatible workspaces.");
-    }
 
     const std::string Minus::alias() const
     {

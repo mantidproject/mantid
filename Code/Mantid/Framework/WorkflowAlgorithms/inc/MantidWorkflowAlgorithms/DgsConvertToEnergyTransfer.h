@@ -39,13 +39,13 @@ namespace Mantid
     public:
       DgsConvertToEnergyTransfer();
       virtual ~DgsConvertToEnergyTransfer();
-
       virtual const std::string name() const;
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Algorithm to convert from TOF to energy transfer.";}
       virtual int version() const;
       virtual const std::string category() const;
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
     };

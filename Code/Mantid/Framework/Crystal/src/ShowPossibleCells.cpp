@@ -54,19 +54,6 @@ namespace Crystal
   }
 
   //--------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ShowPossibleCells::initDocs()
-  {
-    std::string summary("Show conventional cells corresponding to the UB ");
-    summary += "stored with the sample for this peaks works space.";
-    this->setWikiSummary( summary );
-
-    std::string message("NOTE: The current UB must correspond to a ");
-    message += "Niggli reduced cell.";
-    this->setOptionalMessage(message);
-  }
-
-  //--------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void ShowPossibleCells::init()
@@ -87,7 +74,7 @@ namespace Crystal
           new PropertyWithValue<int>( "NumberOfCells", 0,
           Direction::Output), "Gets set with the number of possible cells.");
 
-    this->declareProperty( "AllowPermutations", false,
+    this->declareProperty( "AllowPermutations", true,
                             "Allow permutations of conventional cells" );
   }
 

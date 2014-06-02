@@ -32,13 +32,6 @@ using namespace Geometry;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSBeamFluxCorrection)
 
-/// Sets documentation strings for this algorithm
-void SANSBeamFluxCorrection::initDocs()
-{
-  this->setWikiSummary("Performs beam flux correction on TOF SANS data.");
-  this->setOptionalMessage("Performs beam flux correction on TOF SANS data.");
-}
-
 void SANSBeamFluxCorrection::init()
 {
 	  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),

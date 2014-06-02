@@ -29,13 +29,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetupEQSANSReduction)
 
-/// Sets documentation strings for this algorithm
-void SetupEQSANSReduction::initDocs()
-{
-  this->setWikiSummary("Set up EQSANS SANS reduction options.");
-  this->setOptionalMessage("Set up EQSANS SANS reduction options.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

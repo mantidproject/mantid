@@ -51,7 +51,6 @@ void export_leaf_classes()
     .def("fromString", &Algorithm::fromString, "Initialize the algorithm from a string representation")
     .staticmethod("fromString")
 
-    .def("setOptionalMessage", &Algorithm::setOptionalMessage)
     .def("createChildAlgorithm", &Algorithm::createChildAlgorithm,
          (arg("name"),arg("startProgress")=-1.0,arg("endProgress")=-1.0,
           arg("enableLogging")=true,arg("version")=-1), "Creates and intializes a named child algorithm. Output workspaces are given a dummy name.")
@@ -81,6 +80,9 @@ void export_leaf_classes()
          "Returns a reference to this algorithm's logger")
     .def("log", &PythonAlgorithm::getLogger, return_value_policy<reference_existing_object>(),
          "Returns a reference to this algorithm's logger") // Traditional name
+
+    // deprecated methods
+    .def("setWikiSummary", &PythonAlgorithm::setWikiSummary, "(Deprecated.) Set summary for the help.")
   ;
 
   // Prior to version 3.2 there was a separate C++ PythonAlgorithm class that inherited from Algorithm and the "PythonAlgorithm"

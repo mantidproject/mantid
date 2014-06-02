@@ -80,12 +80,6 @@ namespace MDAlgorithms
   const std::string TransformMD::category() const { return "MDAlgorithms";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void TransformMD::initDocs()
-  {
-    this->setWikiSummary("Scale and/or offset the coordinates of a MDWorkspace");
-    this->setOptionalMessage("Scale and/or offset the coordinates of a MDWorkspace");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

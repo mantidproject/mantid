@@ -18,13 +18,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Scale)
 
-/// Sets documentation strings for this algorithm
-void Scale::initDocs()
-{
-  this->setWikiSummary("Scales an input workspace by the given factor, which can be either multiplicative or additive. ");
-  this->setOptionalMessage("Scales an input workspace by the given factor, which can be either multiplicative or additive.");
-}
-
 
 using namespace Kernel;
 using namespace API;

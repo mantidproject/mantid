@@ -115,16 +115,6 @@ namespace Mantid
 
     PreprocessDetectorsToMD::PreprocessDetectorsToMD()
     {};
-
-    // Sets documentation strings for this algorithm
-    void PreprocessDetectorsToMD::initDocs()
-    {    
-      this->setWikiSummary("'''PreprocessDetectorsToMD''' is helper algorithm, used to make common part of transformation from real to reciprocal space. It is used by [[ConvertToMD]] algorithm to save time spent on this transformation when the algorithm used multiple times for multiple measurements on the same instrument. It is also should be used to calculate limits of transformation in Q-space and the detectors trajectories in Q-space.\n\n");
-
-      this->setOptionalMessage("Pre-process detector's positions namely perform generic part of the transformation \n"
-        "from a physical space of a real instrument to\n"
-        "physical MD workspace of an experimental results (e.g Q-space).");
-    }
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties. */
     void PreprocessDetectorsToMD::init()

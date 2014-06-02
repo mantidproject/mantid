@@ -45,13 +45,6 @@ namespace DataHandling
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(LoadIsawDetCal)
   
-  /// Sets documentation strings for this algorithm
-  void LoadIsawDetCal::initDocs()
-  {
-    this->setWikiSummary("Since ISAW already has the capability to calibrate the instrument using single crystal peaks, this algorithm leverages this in mantid. It loads in a detcal file from ISAW and moves all of the detector panels accordingly. The target instruments for this feature are SNAP and TOPAZ. ");
-    this->setOptionalMessage("Since ISAW already has the capability to calibrate the instrument using single crystal peaks, this algorithm leverages this in mantid. It loads in a detcal file from ISAW and moves all of the detector panels accordingly. The target instruments for this feature are SNAP and TOPAZ.");
-  }
-  
 
   using namespace Kernel;
   using namespace API;

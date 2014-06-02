@@ -47,13 +47,6 @@ namespace Crystal
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string CombinePeaksWorkspaces::category() const { return "Crystal";}
 
-  /// Sets documentation strings for this algorithm
-  void CombinePeaksWorkspaces::initDocs()
-  {
-    this->setWikiSummary("Combines the sets of peaks in two peaks workspaces, optionally omitting duplicates.");
-    this->setOptionalMessage("Combines the sets of peaks in two peaks workspaces, optionally omitting duplicates.");
-  }
-
   /** Initialises the algorithm's properties.
    */
   void CombinePeaksWorkspaces::init()

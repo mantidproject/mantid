@@ -1487,14 +1487,6 @@ namespace Mantid
 
     }
 
-
-    void  SCDCalibratePanels::initDocs ()
-    {
-      this->setWikiSummary("Calibrates Panels for Rectangular Detectors only");
-      this->setOptionalMessage("Panel parameters, sample position,L0 and T0 are optimized to minimize errors between theoretical and actual q values for the peaks");
-
-    }
-
     /**
      * Creates The SCDPanelErrors function with the optimum parameters to get the resultant out,xvals to report results.
      * @param ws      The workspace sent to SCDPanelErrors

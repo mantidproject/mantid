@@ -32,13 +32,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DetectorEfficiencyCor)
 
-/// Sets documentation strings for this algorithm
-void DetectorEfficiencyCor::initDocs()
-{
-  this->setWikiSummary("This algorithm adjusts the binned data in a workspace for detector efficiency, calculated from the neutrons' kinetic energy, the gas filled detector's geometry and gas pressure. The data are then multiplied by <math>k_i/k_f</math>. ");
-  this->setOptionalMessage("This algorithm adjusts the binned data in a workspace for detector efficiency, calculated from the neutrons' kinetic energy, the gas filled detector's geometry and gas pressure. The data are then multiplied by <math>k_i/k_f</math>.");
-}
-
 
 using namespace Kernel;
 using namespace API;

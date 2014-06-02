@@ -59,14 +59,16 @@ public:
   virtual ~RemoveBins() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "RemoveBins";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Used to remove data from a range of bins in a workspace.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;}
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Transforms\\Splitting";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();

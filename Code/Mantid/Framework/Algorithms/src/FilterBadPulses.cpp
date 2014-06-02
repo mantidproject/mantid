@@ -25,13 +25,6 @@ namespace Algorithms
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FilterBadPulses)
 
-/// Sets documentation strings for this algorithm
-void FilterBadPulses::initDocs()
-{
-  this->setWikiSummary("Filters out events associated with pulses that happen when proton charge is lower than a given percentage of the average. ");
-  this->setOptionalMessage("Filters out events associated with pulses that happen when proton charge is lower than a given percentage of the average.");
-}
-
 
 using namespace Kernel;
 using namespace API;

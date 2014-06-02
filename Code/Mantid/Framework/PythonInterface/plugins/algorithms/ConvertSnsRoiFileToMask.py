@@ -38,9 +38,11 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         Name of the algorithm.
         """
         return "ConvertSnsRoiFileToMask"
+
+    def summary(self):
+        return "This algorithm reads in an old SNS reduction ROI file and converts it into a Mantid mask workspace."
         
     def PyInit(self):
-        self.setOptionalMessage("This algorithm reads in an old SNS reduction ROI file and converts it into a Mantid mask workspace.")
         """
         Set the algorithm properties.
         """

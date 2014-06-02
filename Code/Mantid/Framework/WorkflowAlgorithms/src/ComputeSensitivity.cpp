@@ -28,13 +28,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ComputeSensitivity)
 
-/// Sets documentation strings for this algorithm
-void ComputeSensitivity::initDocs()
-{
-  this->setWikiSummary("Workflow to calculate EQSANS sensitivity correction.");
-  this->setOptionalMessage("Workflow to calculate EQSANS sensitivity correction.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

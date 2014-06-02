@@ -28,13 +28,6 @@ namespace Mantid
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(SaveAscii2)
 
-    /// Sets documentation strings for this algorithm
-    void SaveAscii2::initDocs()
-    {
-      this->setWikiSummary("Saves a 2D [[workspace]] to a comma separated ascii file. ");
-      this->setOptionalMessage("Saves a 2D workspace to a ascii file.");
-    }
-
     using namespace Kernel;
     using namespace API;
 

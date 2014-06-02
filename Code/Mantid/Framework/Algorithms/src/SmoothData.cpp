@@ -22,13 +22,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SmoothData)
 
-/// Sets documentation strings for this algorithm
-void SmoothData::initDocs()
-{
-  this->setWikiSummary("Smooths out statistical fluctuations in a workspace's data. ");
-  this->setOptionalMessage("Smooths out statistical fluctuations in a workspace's data.");
-}
-
 
 using namespace Kernel;
 using namespace API;

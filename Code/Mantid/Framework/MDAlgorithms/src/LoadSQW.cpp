@@ -225,11 +225,6 @@ namespace Mantid
     }
 
     /// Provide wiki documentation.
-    void LoadSQW::initDocs()
-    {
-      this->setWikiSummary("Create an IMDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from a [http://horace.isis.rl.ac.uk/Main_Page Horace ] SQW file.");
-      this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz, Energy) from a SQW file.");
-    }
 
     /// Initalize the algorithm
     void LoadSQW::init()

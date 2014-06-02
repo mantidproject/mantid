@@ -190,14 +190,6 @@ NormaliseToMonitor::NormaliseToMonitor() :
 /// Destructor
 NormaliseToMonitor::~NormaliseToMonitor() {}
 
-/// Sets documentation strings for this algorithm
-void NormaliseToMonitor::initDocs()
-{
-  this->setWikiSummary("Normalises a 2D workspace by a specified spectrum, spectrum, described by a monitor ID or spectrun provided in a separate worskspace. ");
-  this->setOptionalMessage("Normalises a 2D workspace by a specified spectrum or spectrum, described by monitor ID." 
-                           "If monitor spectrum specified, it is used as input property");
-}
-
 void NormaliseToMonitor::init()
 {
   auto val = boost::make_shared<CompositeValidator>();

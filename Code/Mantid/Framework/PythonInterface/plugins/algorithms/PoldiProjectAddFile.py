@@ -29,11 +29,12 @@ class PoldiProjectAddFile(PythonAlgorithm):
         """
         return "PoldiProjectAddDir"
 
+    def summary(self):
+        return "Add all the .hdf files from the given directory to the queue for automatic processing."
+
     def PyInit(self):
         """ Mantid required
         """
-
-        self.setWikiSummary("""Add all the .hdf files from the given directory to the queue for automatic processing.""")
 
         self.declareProperty(FileProperty(name="File",defaultValue="",action=FileAction.Load))
 

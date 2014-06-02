@@ -28,13 +28,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(FindDetectorsOutsideLimits)
     
-    /// Sets documentation strings for this algorithm
-    void FindDetectorsOutsideLimits::initDocs()
-    {
-      this->setWikiSummary("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum. ");
-      this->setOptionalMessage("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum.");
-    }
-    
     const std::string FindDetectorsOutsideLimits::category() const
     {
       return "Diagnostics";

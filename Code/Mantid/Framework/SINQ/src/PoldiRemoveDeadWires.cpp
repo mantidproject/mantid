@@ -29,13 +29,6 @@ namespace Poldi
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(PoldiRemoveDeadWires)
 
-/// Sets documentation strings for this algorithm
-void PoldiRemoveDeadWires::initDocs()
-{
-	this->setWikiSummary("Remove dead wires from Poldi data. ");
-	this->setOptionalMessage("Remove dead wires from Poldi data.");
-}
-
 
 using namespace Kernel;
 using namespace API;

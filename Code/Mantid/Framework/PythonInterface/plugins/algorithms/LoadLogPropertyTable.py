@@ -25,6 +25,15 @@ from mantid.kernel import * # StringArrayProperty
 from mantid.simpleapi import * # needed for Load
 
 class LoadLogPropertyTable(PythonAlgorithm):
+
+
+
+    def summary(self):
+        """ Return summary
+        """
+        return "Creates a table of Run number against the log values for that run for a range of files.\
+         It can use a single log value or a list of log values."
+
     # same concept as built in "CreateLogPropertyTable" but loads its own workspaces and needn't hold all in memory at once
     # select log values to put in table (list)
     # special cases for:
@@ -32,8 +41,6 @@ class LoadLogPropertyTable(PythonAlgorithm):
     # comment (separate function)
     # time series, take average for t>0 (if available)
     def PyInit(self):
-        self.setWikiSummary("""Creates a table of Run number against the log values for that run for a range of files.  It can use a single log value or a list of log values.""")
-        self.setOptionalMessage("""Creates a table of Run number against the log values for that run for a range of files.  It can use a single log value or a list of log values.""")
         self.declareProperty(FileProperty(name="FirstFile",defaultValue="",action=FileAction.Load,extensions = ["nxs","raw"]),"The first file to load from")
         self.declareProperty(FileProperty(name="LastFile",defaultValue="",action=FileAction.Load,extensions = ["nxs","raw"]),"The Last file to load from, must be in the same directory, all files in between will also be used")
         self.declareProperty(StringArrayProperty("LogNames",direction=Direction.Input),"The comma seperated list of properties to include. \nThe full list will be printed if an invalid value is used.")

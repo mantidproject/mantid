@@ -46,12 +46,6 @@ namespace Mantid
 
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void OneStepMDEW::initDocs()
-    {
-      this->setWikiSummary("Create a MDEventWorkspace in one step from a EventNexus file. For use by Paraview loader.");
-      this->setOptionalMessage("Create a MDEventWorkspace in one step from a EventNexus file. For use by Paraview loader.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

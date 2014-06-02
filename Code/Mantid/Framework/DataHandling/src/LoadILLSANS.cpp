@@ -56,11 +56,6 @@ const std::string LoadILLSANS::category() const {
 }
 
 //----------------------------------------------------------------------------------------------
-/// Sets documentation strings for this algorithm
-void LoadILLSANS::initDocs() {
-	this->setWikiSummary("Loads a ILL nexus files for SANS instruments.");
-	this->setOptionalMessage("Loads a ILL nexus files for SANS instruments.");
-}
 
 
 /**

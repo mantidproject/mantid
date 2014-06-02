@@ -41,13 +41,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(RealFFT)
 
-/// Sets documentation strings for this algorithm
-void RealFFT::initDocs()
-{
-  this->setWikiSummary("Performs real Fast Fourier Transform ");
-  this->setOptionalMessage("Performs real Fast Fourier Transform");
-}
-
 
 using namespace Kernel;
 using namespace API;

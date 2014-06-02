@@ -22,13 +22,14 @@ class Stitch1D(PythonAlgorithm):
     
     def version(self):
         return 3
+    
+    def summary(self):
+        return "Stitches single histogram matrix workspaces together"
 
     def PyInit(self):
         
         histogram_validator = HistogramValidator()
         
-        self.setWikiSummary("Stitches single histogram matrix workspaces together")
-        self.setOptionalMessage("Stitches single histogram matrix workspaces together")
         self.declareProperty(MatrixWorkspaceProperty("LHSWorkspace", "", Direction.Input, validator=histogram_validator), "Input workspace")
         self.declareProperty(MatrixWorkspaceProperty("RHSWorkspace", "", Direction.Input, validator=histogram_validator), "Input workspace")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output stitched workspace")

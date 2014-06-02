@@ -40,13 +40,6 @@ namespace Poldi
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(PoldiAutoCorrelation5)
 
-/// Sets documentation strings for this algorithm
-void PoldiAutoCorrelation5::initDocs()
-{
-	this->setWikiSummary("Calculates auto-correlation function for POLDI data.");
-	this->setOptionalMessage("Proceed to autocorrelation on Poldi data.");
-}
-
 
 using namespace Kernel;
 using namespace API;

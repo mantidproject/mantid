@@ -14,10 +14,10 @@ class Symmetrise(PythonAlgorithm):
 	def category(self):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
-	def PyInit(self):
-		self.setOptionalMessage("Takes and asymmetric S(Q,w) and makes it symmetric")
-		self.setWikiSummary("Takes and asymmetric S(Q,w) and makes it symmetric")
+	def summary (self):
+		return "Takes and asymmetric S(Q,w) and makes it symmetric"
 
+	def PyInit(self):
 		self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (_red.nxs) or Workspace')
 		self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
 		self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']), doc='Analyser & reflection')

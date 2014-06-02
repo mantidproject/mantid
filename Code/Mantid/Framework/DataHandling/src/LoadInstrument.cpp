@@ -60,13 +60,6 @@ namespace Mantid
 
     DECLARE_ALGORITHM(LoadInstrument)
     
-    /// Sets documentation strings for this algorithm
-    void LoadInstrument::initDocs()
-    {
-      this->setWikiSummary("Loads an Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) into a [[workspace]]. This algorithm is typically run as a child algorithm to the data loading algorithm, rather than as a top-level algorithm. After the IDF has been read this algorithm will attempt to run the child algorithm [[LoadParameterFile]]; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the ParameterDefinition.directory [[Properties_File|Mantid property]]).");
-      this->setOptionalMessage("Loads an Instrument Definition File (IDF) into a workspace. After the IDF has been read this algorithm will attempt to run the Child Algorithm LoadParameterFile; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the parameterDefinition.directory Mantid property).");
-    }
-    
 
     using namespace Kernel;
     using namespace API;

@@ -53,14 +53,6 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FindDetectorsPar)
 
-/// Sets documentation strings for this algorithm
-void FindDetectorsPar::initDocs()
-{
-  this->setWikiSummary("Calculates angular positions and sizes of detectors and groups of detectors after the workspace was grouped using ASCII or XML map file. "
-                       "The results can be used to identify the positions of detectors in reciprocal space. Primary usage -- Child Algorithm of [[SaveNXSPE]], [[SavePAR]] or [[SavePHX]] algorithm.");
-  this->setOptionalMessage("The algorithm returns the angular parameters and second flight path for a workspace detectors (data, usually availble in par or phx file)");
-}
-
 
 using namespace Kernel;
 using namespace API;

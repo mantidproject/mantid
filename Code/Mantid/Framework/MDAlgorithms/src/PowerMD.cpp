@@ -44,12 +44,6 @@ namespace MDAlgorithms
   int PowerMD::version() const { return 1;};
   
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void PowerMD::initDocs()
-  {
-    this->setWikiSummary("Raise a [[MDHistoWorkspace]] to a power.");
-    this->setOptionalMessage("Raise a MDHistoWorkspace to a power");
-  }
 
   //----------------------------------------------------------------------------------------------
   /// Optional method to be subclassed to add properties

@@ -34,13 +34,6 @@ namespace Algorithms
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FilterByTime)
 
-/// Sets documentation strings for this algorithm
-void FilterByTime::initDocs()
-{
-  this->setWikiSummary("This algorithm filters out events from an EventWorkspace that are not between given start and stop times.");
-  this->setOptionalMessage("This algorithm filters out events from an EventWorkspace that are not between given start and stop times.");
-}
-
 
 using namespace Kernel;
 using namespace API;

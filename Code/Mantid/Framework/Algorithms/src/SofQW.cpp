@@ -41,13 +41,6 @@ double SofQW::energyToK()
   return energyToK;
 }
 
-/// Sets documentation strings for this algorithm
-void SofQW::initDocs()
-{
-  this->setWikiSummary("Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>. ");
-  this->setOptionalMessage("Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>.");
-}
-
 
 using namespace Kernel;
 using namespace API;

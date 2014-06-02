@@ -39,6 +39,9 @@ public:
 	virtual ~LoadLLB();
 
 	virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads LLB nexus file.";}
+
 	virtual int version() const;
 	virtual const std::string category() const;
 
@@ -46,7 +49,6 @@ public:
     virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
 private:
-	virtual void initDocs();
 	void init();
 	void exec();
 	void setInstrumentName(NeXus::NXEntry& entry);

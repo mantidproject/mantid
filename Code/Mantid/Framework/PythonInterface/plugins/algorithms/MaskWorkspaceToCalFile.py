@@ -54,11 +54,11 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
 
 	def name(self):
 		return "MaskWorkspaceToCalFile"
-
-
+	
+	def summary(self):
+		return "Saves the masking information in a workspace to a Cal File."
+	
 	def PyInit(self):
-                self.setWikiSummary("Saves the masking information in a workspace to a [[CalFile| Cal File]].")
-                self.setOptionalMessage("Saves the masking information in a workspace to a Cal File.")
 		self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input), "The workspace containing the Masking to extract.")
 		self.declareProperty(FileProperty(name="OutputFile",defaultValue="",action=FileAction.Save,extensions=['cal']), "The file for the results.")
 

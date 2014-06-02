@@ -56,12 +56,6 @@ namespace Mantid
     const std::string WeightedMeanOfWorkspace::category() const { return "Arithmetic"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void WeightedMeanOfWorkspace::initDocs()
-    {
-      this->setWikiSummary("This algorithm calculates the weighted mean for an entire workspace.");
-      this->setOptionalMessage("This algorithm calculates the weighted mean for an entire workspace.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

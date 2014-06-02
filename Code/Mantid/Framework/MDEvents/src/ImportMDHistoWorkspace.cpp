@@ -82,12 +82,6 @@ namespace MDEvents
   const std::string ImportMDHistoWorkspace::category() const { return "MDAlgorithms";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ImportMDHistoWorkspace::initDocs()
-  {
-    this->setWikiSummary("Reads a text file and generates an MDHistoWorkspace from it.");
-    this->setOptionalMessage("Reads a text file and generates an MDHistoWorkspace from it.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

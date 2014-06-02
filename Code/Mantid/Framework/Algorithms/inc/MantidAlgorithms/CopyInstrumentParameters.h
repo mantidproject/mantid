@@ -57,6 +57,9 @@ public:
   virtual ~CopyInstrumentParameters();
   /// Algorithm's name
   virtual const std::string name() const { return "CopyInstrumentParameters"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Transfers an instrument from on workspace to another workspace with same base instrument.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -64,8 +67,7 @@ public:
   /// method indicates that base source instrument is the same or different from base target instrument (mainly used in testing)
   bool isInstrumentDifferent()const{return m_different_instrument_sp;}
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   ///Execution code

@@ -64,9 +64,6 @@ public:
 
   QString functionPrefix()const;
 
-  /// High level structure representation of the string
-  QString functionStructure() const;
-
   // Return composite function
   boost::shared_ptr<Mantid::API::CompositeFunction> cfun()const{return m_cf;}
   // Return peak function
@@ -190,13 +187,13 @@ public:
   // set workspace in workspace property to the function 
   void setFunctionWorkspace();
 
+  /// Update high-level structure tooltip and return it
+  QString updateStructureTooltip();
+
 protected slots:
 
   // 
   void plotRemoved();
-
-  /// Run when function structure is changed, i.e. children function added/removed
-  void onFunctionStructChanged();
 
 protected:
 
