@@ -72,7 +72,7 @@ namespace Mantid
 
       /// Correct detector positions.
       void correctPosition(API::MatrixWorkspace_sptr toCorrect, const double& thetaInDeg,
-          Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector);
+          Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector, const bool isPointDetector);
 
       /// Sum spectra.
       Mantid::API::MatrixWorkspace_sptr sumSpectraOverRange(API::MatrixWorkspace_sptr inWS, const int startIndex, const int endIndex);

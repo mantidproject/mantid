@@ -36,8 +36,7 @@ class ReflectometryReductionOneBaseTest(object):
     def tearDown(self):
         DeleteWorkspace(self.__tof)
         DeleteWorkspace(self.__not_tof)
-    
-    
+        
     def test_check_input_workpace_not_tof_throws(self):
         alg = self.construct_standard_algorithm()
         alg.set_InputWorkspace(self.__not_tof)
@@ -262,12 +261,33 @@ class ReflectometryReductionOneBaseTest(object):
         self.assertAlmostEqual(0.70969419, theta, 4)
         
         DeleteWorkspace(real_run)
+           
+    def test_correct_positions_point_detector(self):
+        alg = self.construct_standard_algorithm()
+        real_run = Load('INTER00013460.nxs')
+        alg.set_InputWorkspace(real_run)
+        alg.set_ProcessingInstructions("3,4")
+        alg.set_FirstTransmissionRun(real_run) # Currently a requirement that one transmisson correction is provided.
+        alg.set_ThetaIn(0.4) # Low angle
+        alg.set_CorrectDetectorPositions(True)
+        out_ws_q1, out_ws_lam1, theta1 = alg.execute()
+        pos1 = out_ws_lam1.getInstrument().getComponentByName('point-detector').getPos()
+        
+        alg.set_ThetaIn(0.8) # Repeat with greater incident angle
+        out_ws_q2, out_ws_lam2, theta2 = alg.execute()
+        pos2 = out_ws_lam2.getInstrument().getComponentByName('point-detector').getPos()
+        
+        self.assertTrue(pos2.Y() > pos1.Y(), "Greater incident angle so greater height.")
+        self.assertEqual(pos2.X(), pos1.X())
+        self.assertEqual(pos2.Z(), pos1.Z())
+        DeleteWorkspace(real_run)
         
     def test_multidetector_run(self):
         alg = self.construct_standard_algorithm()
         real_run = Load('POLREF00004699.nxs')
         alg.set_InputWorkspace(real_run[0])
         alg.set_AnalysisMode("MultiDetectorAnalysis")
+        alg.set_CorrectDetectorPositions(False)
         alg.set_DetectorComponentName('lineardetector')
         alg.set_ProcessingInstructions("3, 10") # Fictional values
         alg.set_RegionOfDirectBeam("20, 30") # Fictional values
