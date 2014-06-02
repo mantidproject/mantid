@@ -25,8 +25,8 @@ ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view)
 const std::string ScriptBuilder::build()
 {
   std::ostringstream os;
-  auto iter = m_historyItems.cbegin();
-  for( ; iter != m_historyItems.cend(); ++iter)
+  auto iter = m_historyItems.begin();
+  for( ; iter != m_historyItems.end(); ++iter)
   {
     writeHistoryToStream(os, iter);
   }
@@ -104,7 +104,7 @@ const std::string ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_spt
   std::string prop = "";
 
   auto props = algHistory->getProperties();
-  for (auto propIter = props.cbegin(); propIter != props.cend(); ++propIter)
+  for (auto propIter = props.begin(); propIter != props.end(); ++propIter)
   {
     prop = buildPropertyString(*propIter);    
     if(prop.length() > 0)
