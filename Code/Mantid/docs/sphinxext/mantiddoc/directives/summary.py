@@ -15,7 +15,7 @@ class SummaryDirective(BaseDirective):
         """
         self.add_rst(self.make_header("Summary"))
         alg = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
-        self.add_rst(alg.getWikiSummary())
+        self.add_rst(alg.summary())
         self.commit_rst()
 
         return []

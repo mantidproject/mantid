@@ -21,6 +21,8 @@ if ( SPHINX_FOUND )
     COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_html.py
     COMMENT "Building html documentation"
   )
+  # Group within VS
+  set_property ( TARGET ${TARGET_PREFIX}-html PROPERTY FOLDER "Documentation" )
 
   # doctest target
   set ( BUILDER doctest )
@@ -29,6 +31,7 @@ if ( SPHINX_FOUND )
     COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_doctest.py
     COMMENT "Running documentation tests"
   )
+  set_property ( TARGET ${TARGET_PREFIX}-test PROPERTY FOLDER "documentation" )
 
 endif ()
 
