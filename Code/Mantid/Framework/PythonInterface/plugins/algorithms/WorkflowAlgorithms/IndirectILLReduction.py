@@ -14,7 +14,7 @@ import os.path
 class IndirectILLReduction(DataProcessorAlgorithm):
 
     def category(self):
-        return "Workflow\\MIDAS;Indirect;PythonAlgorithms"
+        return "Workflow\\MIDAS;Indirect;PythonAlgorithms" 
 
     def PyInit(self):
         #input options
@@ -49,7 +49,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # output options
         self.declareProperty(name='Verbose', defaultValue=False, doc='Switch Verbose Off/On')
         self.declareProperty(name='Save', defaultValue=False, doc='Switch Save result to nxs file Off/On')
-        self.declareProperty(name='Plot', defaultValue=False, doc='Plot options')
+        self.declareProperty(name='Plot', defaultValue=False, doc='Whether to plot the output workspace.')
 
     def PyExec(self):
         self.log().information('IndirectILLreduction input')
