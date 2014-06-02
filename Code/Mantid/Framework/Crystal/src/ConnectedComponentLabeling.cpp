@@ -403,7 +403,6 @@ namespace Mantid
 
         // Associate the member DisjointElements with a cluster. Involves looping back over iterator.
         iterator->jumpTo(0); // Reset
-        const double val4 = ws->getSignalNormalizedAt(4094);
         do
         {
           const size_t currentIndex = iterator->getLinearIndex();
