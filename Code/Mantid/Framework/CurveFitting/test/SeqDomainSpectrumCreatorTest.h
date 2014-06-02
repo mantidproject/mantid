@@ -156,10 +156,14 @@ public:
       fit.setProperty("InputWorkspace",matrixWs);
       fit.setProperty("CreateOutput",true);
       fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+      fit.setProperty("DomainCreator", "SeqDomainSpectrumCreator");
 
       fit.execute();
 
       TS_ASSERT(fit.isExecuted());
+
+      TS_ASSERT_DELTA(fun->getParameter(0), 2.0, 1e-6);
+      TS_ASSERT_LESS_THAN(fun->getError(0), 1e-6);
   }
 
   void testFitComplex()
@@ -169,7 +173,7 @@ public:
           slopes[i] = static_cast<double>(i);
       }
 
-      MatrixWorkspace_sptr matrixWs = WorkspaceCreationHelper::Create2DWorkspace123(400, 500);
+      MatrixWorkspace_sptr matrixWs = WorkspaceCreationHelper::Create2DWorkspace123(400, 50);
       for(size_t i = 0; i < matrixWs->getNumberHistograms(); ++i) {
           std::vector<double> &x = matrixWs->dataX(i);
           std::vector<double> &y = matrixWs->dataY(i);
@@ -188,7 +192,6 @@ public:
       fun->initialize();
       for(size_t i = 0; i < slopes.size(); ++ i) {
         fun->setParameter(i, static_cast<double>(i) + 1.1);
-        std::cout << i << " " << fun->getParameter(i) << std::endl;
       }
 
       Fit fit;
@@ -198,10 +201,17 @@ public:
       fit.setProperty("InputWorkspace",matrixWs);
       fit.setProperty("CreateOutput",true);
       fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+      fit.setProperty("DomainCreator", "SeqDomainSpectrumCreator");
 
       fit.execute();
 
       TS_ASSERT(fit.isExecuted());
+
+      for(size_t i = 0; i < slopes.size(); ++ i) {
+          TS_ASSERT_DELTA(fun->getParameter(i), static_cast<double>(i), 1e-5);
+          TS_ASSERT_LESS_THAN(fun->getError(i), 2e-4);
+      }
+
   }
 
 
