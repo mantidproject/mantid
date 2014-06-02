@@ -18,6 +18,7 @@ class HistoryViewTest : public CxxTest::TestSuite
   public:
     testalg() : Algorithm() {}
     virtual ~testalg() {}
+    const std::string summary() const { return "testalg"; } ///< Algorithm's documentation summary
     const std::string name() const { return "testalg";} ///< Algorithm's name for identification
     int version() const  { return 1;} ///< Algorithm's version for identification
     const std::string category() const { return "Cat";} ///< Algorithm's category for identification
