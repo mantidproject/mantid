@@ -1063,7 +1063,6 @@ public slots:
   /// \name Tiled window
   //@{
   TiledWindow *newTiledWindow();
-  void addActiveToTiledWindow();
   /// Check if there is an open TiledWindow.
   bool hasTiledWindowOpen();
   TiledWindow *getTiledWindowAtPos( QPoint pos );

@@ -26,6 +26,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/DataPickerTool.cpp
                    src/DataSetDialog.cpp
                    src/Differentiation.cpp
+                   src/DockedWindow.cpp
                    src/ErrDialog.cpp
                    src/ExpDecayDialog.cpp
                    src/ExponentialFit.cpp
@@ -262,6 +263,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/DataPickerTool.h
                    src/DataSetDialog.h
                    src/Differentiation.h
+                   src/DockedWindow.h
                    src/ErrDialog.h
                    src/ExpDecayDialog.h
                    src/ExponentialFit.h
@@ -565,6 +567,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/DataPickerTool.h
                         src/DataSetDialog.h
                         src/Differentiation.h
+                        src/DockedWindow.h
                         src/ErrDialog.h
                         src/ExpDecayDialog.h
                         src/ExponentialFit.h

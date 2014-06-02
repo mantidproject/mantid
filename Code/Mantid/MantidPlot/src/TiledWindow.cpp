@@ -523,6 +523,7 @@ QList<Tile*> TiledWindow::getAllTiles()
  */
 void TiledWindow::mousePressEvent(QMouseEvent *ev)
 {
+  clearDrops();
   auto tile = getTileAtMousePos( ev->pos() );
   if ( tile == NULL ) return;
   if ( (ev->modifiers() & Qt::ShiftModifier) != 0 )
@@ -950,6 +951,11 @@ void TiledWindow::dragEnterEvent(QDragEnterEvent* ev)
   {
     ev->ignore();
   }
+}
+
+void TiledWindow::dragLeaveEvent()
+{
+  clearDrops();
 }
 
 void TiledWindow::dragMoveEvent(QDragMoveEvent* ev)

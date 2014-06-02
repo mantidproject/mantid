@@ -17755,13 +17755,9 @@ QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const
  */
 QMdiSubWindow* ApplicationWindow::addMdiSubWindowAsDocked(MdiSubWindow* w, QPoint pos)
 {
-  //DockedWindow *dw = new DockedWindow(this);
-  //dw->setWidget(w);
-  QMdiSubWindow* sw = this->d_workspace->addSubWindow(w);
-  //if ( dynamic_cast<DockedWindow*>(sw) != dw )
-  //{
-  //  throw std::runtime_error("Oops");
-  //}
+  DockedWindow *dw = new DockedWindow(this);
+  dw->setMdiSubWindow(w);
+  QMdiSubWindow* sw = this->d_workspace->addSubWindow(dw);
   sw->resize(w->size());
   sw->setWindowIcon(w->windowIcon());
   if ( pos != QPoint(-1,-1) )
@@ -17925,7 +17921,7 @@ bool ApplicationWindow::event(QEvent * e)
         MdiSubWindow* sw = dynamic_cast<MdiSubWindow*>(wgt);
         if (!sw)
         {// this should never happen - all MDI subwindow widgets must inherit from MdiSubwindow
-          throw std::runtime_error("Non-MdiSubwindow widget found in MDI area");
+          throw std::logic_error("Non-MdiSubwindow widget found in MDI area");
         }
         activateWindow(sw);
       }
@@ -18109,23 +18105,25 @@ TiledWindow *ApplicationWindow::newTiledWindow()
   return widget;
 }
 
-
-void ApplicationWindow::addActiveToTiledWindow()
-{
-  MdiSubWindow *w = activeWindow();
-  if ( !w ) return;
-  //w->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-}
-
 /**
  * Check if there is an open TiledWindow.
  */
 bool ApplicationWindow::hasTiledWindowOpen()
 {
+  // check the docked windows
   auto wl = d_workspace->subWindowList(QMdiArea::StackingOrder);
   foreach( QMdiSubWindow *w, wl )
   {
     TiledWindow *tw = dynamic_cast<TiledWindow*>( w->widget() );
+    if ( tw && tw->isVisible() )
+    {
+      return true;
+    }
+  }
+  // check the floating windows
+  foreach( FloatingWindow *w, m_floatingWindows )
+  {
+    TiledWindow *tw = dynamic_cast<TiledWindow*>( w->mdiSubWindow() );
     if ( tw && tw->isVisible() )
     {
       return true;
@@ -18140,17 +18138,31 @@ bool ApplicationWindow::hasTiledWindowOpen()
  * If there is no TiledWindows or the point doesn't fall inside
  * of any of them return NULL.
  *
- * @param x :: The x-coord to check relative to ApplicationWindow's left border.
- * @param y :: The y-coord to check relative to ApplicationWindow's top border.
- * @param twX :: Output x-coord recalculated to the returned TiledWindow's coords.
- * @param twY :: Output y-coord recalculated to the returned TiledWindow's coords.
+ * @param x :: The x-coord to check (in global coordinates).
+ * @param y :: The y-coord to check (in global coordinates).
  */
 TiledWindow *ApplicationWindow::getTiledWindowAtPos( QPoint pos )
 {
+  // check the docked windows
   auto wl = d_workspace->subWindowList(QMdiArea::StackingOrder);
   foreach( QMdiSubWindow *w, wl )
   {
     TiledWindow *tw = dynamic_cast<TiledWindow*>( w->widget() );
+    if ( tw )
+    {
+      QPoint mdiOrigin = mapFromGlobal( pos );
+      auto r = w->visibleRect();
+      r.moveBy( mdiOrigin.x(), mdiOrigin.y() );
+      if ( r.contains(pos) )
+      {
+        return tw;
+      }
+    }
+  }
+  // check the floating windows
+  foreach(FloatingWindow *w, m_floatingWindows)
+  {
+    TiledWindow *tw = dynamic_cast<TiledWindow*>( w->mdiSubWindow() );
     if ( tw )
     {
       QPoint mdiOrigin = mapFromGlobal( pos );
@@ -18167,8 +18179,8 @@ TiledWindow *ApplicationWindow::getTiledWindowAtPos( QPoint pos )
 
 /**
  * Check if a point is inside any of visible TiledWindows.
- * @param x :: The x-coord to check relative to ApplicationWindow's left border.
- * @param y :: The y-coord to check relative to ApplicationWindow's top border.
+ * @param x :: The x-coord to check (in global coordinates).
+ * @param y :: The y-coord to check (in global coordinates).
  */
 bool ApplicationWindow::isInTiledWindow( QPoint pos )
 {
@@ -18183,8 +18195,8 @@ bool ApplicationWindow::isInTiledWindow( QPoint pos )
 
 /**
  * @param w :: An MdiSubWindow.
- * @param x :: The x-coord to check relative to ApplicationWindow's left border.
- * @param y :: The y-coord to check relative to ApplicationWindow's top border.
+ * @param x :: The x-coord to check (in global coordinates).
+ * @param y :: The y-coord to check (in global coordinates).
  */
 void ApplicationWindow::dropInTiledWindow( MdiSubWindow *w, QPoint pos )
 {

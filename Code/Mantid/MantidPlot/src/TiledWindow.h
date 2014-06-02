@@ -78,6 +78,7 @@ protected:
   void mouseReleaseEvent(QMouseEvent *ev);
   void mouseMoveEvent(QMouseEvent *ev);
   void dragEnterEvent(QDragEnterEvent* ev);
+  void dragLeaveEvent();
   void dragMoveEvent(QDragMoveEvent* ev);
   void dropEvent(QDropEvent* ev);
 
