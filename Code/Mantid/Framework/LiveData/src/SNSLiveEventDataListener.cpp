@@ -467,45 +467,49 @@ namespace LiveData
       return false;
     }
 
-    pkt.firstSection();
-    do  // loop through all the monitor sections
+    // Set up the packet for processing sections and verify that there actually
+    // are some sections to process
+    if ( pkt.firstSection())
     {
-      unsigned monitorID = pkt.getSectionMonitorID();
-
-      if (monitorID > 5)
-      {
-        // Currently, we only handle monitors 0-5.  At the present time, that's sufficient.
-        g_log.error() << "Mantid cannot handle monitor ID's higher than 5.  If " << monitorID
-          << " is actually valid, then an appropriate entry must be made to the "
-          << " ADDABLE list at the top of Framework/API/src/Run.cpp"
-          << std::endl;
-      }
-      else
-      {
-        std::string monName("monitor");
-        monName += (char)(monitorID + 48);  // The +48 converts to the ASCII character
-        monName += "_counts";
-        // Note: The monitor name must exactly match one of the entries in the ADDABLE
-        // list at the top of Run.cpp!
-
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
-
-        int events = pkt.getSectionEventCount();
-        if (m_eventBuffer->run().hasProperty(monName))
+        do  // loop through all the monitor sections
         {
-          events += m_eventBuffer->run().getPropertyValueAsType<int>(monName);
+        unsigned monitorID = pkt.getSectionMonitorID();
+
+        if (monitorID > 5)
+        {
+            // Currently, we only handle monitors 0-5.  At the present time, that's sufficient.
+            g_log.error() << "Mantid cannot handle monitor ID's higher than 5.  If " << monitorID
+            << " is actually valid, then an appropriate entry must be made to the "
+            << " ADDABLE list at the top of Framework/API/src/Run.cpp"
+            << std::endl;
         }
         else
         {
-          // First time we've received this monitor.  Add it to our list
-          m_monitorLogs.push_back(monName);
+            std::string monName("monitor");
+            monName += (char)(monitorID + 48);  // The +48 converts to the ASCII character
+            monName += "_counts";
+            // Note: The monitor name must exactly match one of the entries in the ADDABLE
+            // list at the top of Run.cpp!
+
+            Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+
+            int events = pkt.getSectionEventCount();
+            if (m_eventBuffer->run().hasProperty(monName))
+            {
+            events += m_eventBuffer->run().getPropertyValueAsType<int>(monName);
+            }
+            else
+            {
+            // First time we've received this monitor.  Add it to our list
+            m_monitorLogs.push_back(monName);
+            }
+
+            // Update the property value (overwriting the old value if there was one)
+            m_eventBuffer->mutableRun().addProperty<int>( monName, events, true);
         }
 
-        // Update the property value (overwriting the old value if there was one)
-        m_eventBuffer->mutableRun().addProperty<int>( monName, events, true);
-      }
-
-    } while (pkt.nextSection() == true);
+        } while (pkt.nextSection() == true);
+    }
 
     return false;
   }

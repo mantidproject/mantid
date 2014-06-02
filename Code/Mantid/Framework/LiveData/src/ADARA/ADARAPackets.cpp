@@ -269,6 +269,20 @@ BeamMonitorPkt::BeamMonitorPkt(const BeamMonitorPkt &pkt) :
 #define MONITOR_ID_MASK  0xFFA00000  // upper 10 bits
 #define EVENT_COUNT_MASK 0x003FFFFF  // lower 22 bits
 
+bool BeamMonitorPkt::firstSection() const
+// Returns false if there are no sections (which can happen)
+// Returns true, otherwise
+{
+	bool RV = false;
+	m_sectionStartIndex = 4;
+
+	if ( (m_sectionStartIndex * 4) < m_payload_len)
+	{
+		RV = true;
+	}
+	return RV;
+}
+
 bool BeamMonitorPkt::nextSection() const
 // Returns true if there is a next section.  False if there isn't.
 {
@@ -276,7 +290,7 @@ bool BeamMonitorPkt::nextSection() const
 
 	unsigned eventCount = m_fields[m_sectionStartIndex] & EVENT_COUNT_MASK;
 	unsigned newSectionStart = m_sectionStartIndex + 3 + eventCount;
-	if ( ((newSectionStart * 4) + 16) < m_payload_len)
+	if ( (newSectionStart * 4) < m_payload_len)
 	{
 		RV = true;
 		m_sectionStartIndex = newSectionStart;
