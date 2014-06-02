@@ -112,12 +112,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void IntegratePeaksHybrid::initDocs()
-    {
-    }
-
-    //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
      */
     void IntegratePeaksHybrid::init()
@@ -151,6 +145,11 @@ namespace Mantid
 
       declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspaces", "", Direction::Output),
           "MDHistoWorkspaces containing the labeled clusters used by the algorithm.");
+    }
+
+    const std::string IntegratePeaksHybrid::summary() const
+    {
+      return "Integrate single crystal peaks using connected component analysis. Binning invididual to each peak.";
     }
 
     //----------------------------------------------------------------------------------------------

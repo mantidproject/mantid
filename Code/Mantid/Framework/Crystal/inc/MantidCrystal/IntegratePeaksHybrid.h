@@ -9,7 +9,7 @@ namespace Mantid
 namespace Crystal
 {
 
-  /** IntegratePeaksHybrid : TODO: DESCRIPTION
+  /** IntegratePeaksHybrid : Integrate single crystal peaks algorithm
     
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -42,7 +42,7 @@ namespace Crystal
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
+    virtual const std::string summary() const;
     void init();
     void exec();
 
