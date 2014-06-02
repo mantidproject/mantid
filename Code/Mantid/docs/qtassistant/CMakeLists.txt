@@ -167,6 +167,7 @@ find_program ( DVIPNG_EXE dvipng )
                        POST_BUILD
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${HELP_OUT_DIR} ${HELP_BIN_OUT_DIR} 
    )
+   set_property ( TARGET ${TARGET_PREFIX}-test PROPERTY FOLDER "Documentation" )
 
    ###########################################################################################
    # Installation settings

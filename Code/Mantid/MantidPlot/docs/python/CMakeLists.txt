@@ -60,6 +60,7 @@ if ( SPHINX_FOUND )
     DEPENDS ${SPHINX_CONF_FILES}
     COMMENT "Generating Python API for sphinx"
   )
+  set_property ( TARGET ${TARGET_NAME}-generateapi PROPERTY FOLDER "Documentation/python" )
 
   # HTML target
   set ( SPHINX_HTML_BUILD ${SPHINX_BUILD}/html )
@@ -67,6 +68,7 @@ if ( SPHINX_FOUND )
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MantidPlot -xq runsphinx_html.py
     COMMENT "Build Sphinx html documentation"
   )
+  set_property ( TARGET ${TARGET_NAME}-html PROPERTY FOLDER "Documentation/python" )
   add_dependencies( ${TARGET_NAME}-html ${TARGET_NAME}-generateapi )
 
   # Latex target
@@ -75,6 +77,7 @@ if ( SPHINX_FOUND )
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MantidPlot -xq runsphinx_latex.py
     COMMENT "Build Python Sphinx latex documentation"
   )
+  set_property ( TARGET ${TARGET_NAME}-latex PROPERTY FOLDER "Documentation/python" )
   add_dependencies( ${TARGET_NAME}-latex ${TARGET_NAME}-generateapi )
 
   
