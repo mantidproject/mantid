@@ -84,7 +84,7 @@ void ScriptBuilder::buildChildren(std::ostringstream& os, std::vector<HistoryIte
 {
   size_t numChildren = iter->numberOfChildren();
   ++iter; //move to first child
-  for(size_t i = 0; i < numChildren && iter != m_historyItems.cend(); ++i, ++iter)
+  for(size_t i = 0; i < numChildren && iter != m_historyItems.end(); ++i, ++iter)
   {
     writeHistoryToStream(os, iter, depth);
   }
