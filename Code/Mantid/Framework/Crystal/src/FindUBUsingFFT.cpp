@@ -64,19 +64,6 @@ namespace Crystal
     return "Crystal";
   }
 
-  //--------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void FindUBUsingFFT::initDocs()
-  {
-    std::string summary("Calculate the UB matrix from a peaks workspace, ");
-    summary += "given estimates of the min and max real space unit cell ";
-    summary += "edge lengths.";
-    this->setWikiSummary( summary );
-
-    std::string message("Calculate the UB matrix from a peaks workspace, ");
-    message += "given min(a,b,c) and max(a,b,c).";
-    this->setOptionalMessage( message );
-  }
 
   //--------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

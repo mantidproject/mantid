@@ -26,13 +26,6 @@ namespace Algorithms
 // Register with the algorithm factory
 DECLARE_ALGORITHM(CorrectKiKf)
 
-/// Sets documentation strings for this algorithm
-void CorrectKiKf::initDocs()
-{
-  this->setWikiSummary("Performs <math>k_i/k_f</math> multiplication, in order to transform differential scattering cross section into dynamic structure factor.");
-  this->setOptionalMessage("Performs k_i/k_f multiplication, in order to transform differential scattering cross section into dynamic structure factor.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -52,7 +45,6 @@ CorrectKiKf::~CorrectKiKf()
 /// Initialisation method
 void CorrectKiKf::init()
 {
-  this->initDocs();
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("DeltaE");
 

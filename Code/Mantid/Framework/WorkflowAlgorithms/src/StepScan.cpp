@@ -42,12 +42,6 @@ namespace WorkflowAlgorithms
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string StepScan::category() const { return "Workflow\\Alignment";}
 
-  void StepScan::initDocs()
-  {
-    this->setWikiSummary("Workflow algorithm for analysis of an alignment scan. CAN ONLY BE USED WITH SNS DATA FROM AN ADARA-ENABLED BEAMLINE.");
-    this->setOptionalMessage("Workflow algorithm for analysis of an alignment scan from an SNS Adara-enabled beam line");
-  }
-
   void StepScan::init()
   {
     // TODO: Validator to ensure that this is 'fresh' data???

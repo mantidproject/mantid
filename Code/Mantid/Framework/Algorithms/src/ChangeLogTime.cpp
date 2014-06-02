@@ -50,13 +50,6 @@ const std::string ChangeLogTime::category() const
   return "DataHandling\\Logs";
 }
 
-void ChangeLogTime::initDocs()
-{
-  string summary = "Adds a constant to the times for the requested log.";
-  this->setWikiSummary(summary);
-  this->setOptionalMessage(summary);
-}
-
 /// Declares the parameters for running the algorithm.
 void ChangeLogTime::init()
 {

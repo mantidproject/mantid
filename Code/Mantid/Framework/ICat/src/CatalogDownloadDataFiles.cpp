@@ -38,13 +38,6 @@ namespace Mantid
 
     DECLARE_ALGORITHM(CatalogDownloadDataFiles)
 
-    /// Sets documentation strings for this algorithm
-    void CatalogDownloadDataFiles::initDocs()
-    {
-      this->setWikiSummary("Downloads the given data files from the data server ");
-      this->setOptionalMessage("Downloads the given data files from the data server");
-    }
-
 
     /// declaring algorithm properties
     void CatalogDownloadDataFiles::init()

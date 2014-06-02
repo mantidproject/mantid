@@ -62,12 +62,6 @@ namespace Mantid
       return 1;
     }
 
-    void DetectorDiagnostic::initDocs()
-    {
-      this->setWikiSummary("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum. ");
-      this->setOptionalMessage("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum.");
-    }
-
     void DetectorDiagnostic::init()
     {
       this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "",

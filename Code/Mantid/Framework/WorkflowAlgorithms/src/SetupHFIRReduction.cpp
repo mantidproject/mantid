@@ -27,13 +27,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetupHFIRReduction)
 
-/// Sets documentation strings for this algorithm
-void SetupHFIRReduction::initDocs()
-{
-  this->setWikiSummary("Set up HFIR SANS reduction options.");
-  this->setOptionalMessage("Set up HFIR SANS reduction options.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

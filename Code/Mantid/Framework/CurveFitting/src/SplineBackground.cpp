@@ -21,12 +21,6 @@ namespace CurveFitting
 
 DECLARE_ALGORITHM(SplineBackground)
 
-/// Sets documentation strings for this algorithm
-void SplineBackground::initDocs()
-{
-  this->setWikiSummary("Fit spectra background using b-splines. ");
-  this->setOptionalMessage("Fit spectra background using b-splines.");
-}
 
 
 using namespace Kernel;

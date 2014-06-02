@@ -275,13 +275,6 @@ namespace CurveFitting
     bool isStringEmpty(const std::string& str){return str.empty();}
   }
   
-  /// Sets documentation strings for this algorithm
-  void Fit::initDocs()
-  {
-    this->setWikiSummary("Fits a function to data in a Workspace ");
-    this->setOptionalMessage("Fits a function to data in a Workspace");
-  }
-  
   /**
    * Examine "Function" and "InputWorkspace" properties to decide which domain creator to use.
    * @param propName :: A property name.

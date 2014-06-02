@@ -76,6 +76,7 @@ using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 using namespace std;
 
@@ -100,15 +101,6 @@ namespace CurveFitting
    */
   LeBailFit::~LeBailFit()
   {
-  }
-  
-  //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-   */
-  void LeBailFit::initDocs()
-  {
-    setWikiSummary("Do LeBail Fit to a spectrum of powder diffraction data.. ");
-    setOptionalMessage("Do LeBail Fit to a spectrum of powder diffraction data. ");
   }
 
   //----------------------------------------------------------------------------------------------

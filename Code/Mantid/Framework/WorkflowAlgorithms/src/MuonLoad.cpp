@@ -61,13 +61,6 @@ namespace WorkflowAlgorithms
 
   //----------------------------------------------------------------------------------------------
 
-  /// Sets documentation strings for this algorithm
-  void MuonLoad::initDocs()
-  {
-    this->setWikiSummary("Loads Muon workspace ready for analysis.");
-    this->setOptionalMessage("Loads Muon workspace ready for analysis.");
-  }
-
   //----------------------------------------------------------------------------------------------
   /*
    * Initialize the algorithm's properties.

@@ -29,13 +29,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetupILLD33Reduction)
 
-/// Sets documentation strings for this algorithm
-void SetupILLD33Reduction::initDocs()
-{
-  this->setWikiSummary("Set up ILL D33 SANS reduction options.");
-  this->setOptionalMessage("Set up ILL D33 SANS reduction options.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

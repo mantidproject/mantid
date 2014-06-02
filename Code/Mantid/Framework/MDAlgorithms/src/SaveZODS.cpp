@@ -78,12 +78,6 @@ namespace MDAlgorithms
   const std::string SaveZODS::category() const { return "MDAlgorithms";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveZODS::initDocs()
-  {
-    this->setWikiSummary("Save a [[MDHistoWorkspace]] in HKL space to a HDF5 format for use with the ZODS analysis software.");
-    this->setOptionalMessage("Save a MDHistoWorkspace in HKL space to a HDF5 format for use with the ZODS analysis software.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -112,7 +106,7 @@ namespace MDAlgorithms
     if (ws->getNumDims() != 3)
       throw std::runtime_error("InputWorkspace must have 3 dimensions (having one bin in the 3rd dimension is OK).");
 
-    if (ws->getDimension(0)->getName() != "H")
+    if (ws->getDimension(0)->getName() != "[H,0,0]")
       g_log.warning() << "SaveZODS expects the workspace to be in HKL space! Saving anyway..." << std::endl;
 
     // Create a HDF5 file
@@ -183,15 +177,28 @@ namespace MDAlgorithms
     // Copy data into a vector
     signal_t * signal = ws->getSignalArray();
     std::vector<double> data;
-    data.insert(data.begin(), signal, signal+numPoints);
+
+    for (int i=0; i<size_field[0]; i++)
+    	for (int j=0; j<size_field[1]; j++)
+    		for (int k=0; k<size_field[2]; k++)
+    		{
+    			int l = i + size_field[0]*j + size_field[0]*size_field[1]*k;
+    			data.push_back(signal[l]);
+    		}
+
     file->writeData("Data", data, size);
 
     // Copy errors (not squared) into a vector called sigma
     signal_t * errorSquared = ws->getErrorSquaredArray();
     std::vector<double> sigma;
     sigma.reserve(numPoints);
-    for (size_t i=0; i<numPoints; i++)
-      sigma.push_back( sqrt(errorSquared[i]) );
+    for (int i=0; i<size_field[0]; i++)
+    	for (int j=0; j<size_field[1]; j++)
+    		for (int k=0; k<size_field[2]; k++)
+    		{
+    			int l = i + size_field[0]*j + size_field[0]*size_field[1]*k;
+    			sigma.push_back(sqrt(errorSquared[l]));
+    		}
     file->writeData("sigma", sigma, size);
 
     // Close Data_0 group

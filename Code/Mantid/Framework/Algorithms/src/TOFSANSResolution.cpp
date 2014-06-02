@@ -24,13 +24,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(TOFSANSResolution)
 
-/// Sets documentation strings for this algorithm
-void TOFSANSResolution::initDocs()
-{
-  this->setWikiSummary("Calculate the Q resolution for TOF SANS data.");
-  this->setOptionalMessage("Calculate the Q resolution for TOF SANS data.");
-}
-
 
 using namespace Kernel;
 using namespace API;

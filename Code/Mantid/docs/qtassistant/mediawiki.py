@@ -150,11 +150,12 @@ class MediaWiki:
         if text.find('*') < 0:
             return text # no candidates
 
-        # lines that start with '*'
+        # lines that start with a single '*'
         starts = []
         text = text.split("\n")
+
         for (i, line) in zip(range(len(text)), text):
-            if line.strip().startswith("*"):
+            if line.strip().startswith("*") and not line.strip().startswith("**"):
                 starts.append(i)
 
         # none of the stars were at the start of a line

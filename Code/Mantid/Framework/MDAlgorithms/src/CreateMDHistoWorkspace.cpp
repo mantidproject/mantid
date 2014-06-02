@@ -84,12 +84,6 @@ namespace MDAlgorithms
   const std::string CreateMDHistoWorkspace::category() const { return "MDAlgorithms";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CreateMDHistoWorkspace::initDocs()
-  {
-    this->setWikiSummary("Creates an MDHistoWorkspace from supplied lists of signal and error values.");
-    this->setOptionalMessage("Creates an MDHistoWorkspace from supplied lists of signal and error values.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

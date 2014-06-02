@@ -37,16 +37,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Divide)
     
-    /// Sets documentation strings for this algorithm
-    void Divide::initDocs()
-    {
-      this->setWikiSummary("The Divide algorithm will divide the data values and calculate the corresponding [[Error Values|error values]] of two compatible workspaces. ");
-      this->setOptionalMessage("The Divide algorithm will divide the data values and calculate the corresponding error values of two compatible workspaces.");
-      this->getPointerToProperty("LHSWorkspace")->setDocumentation("The workspace to be divided by, this can be considered to be the workspace on the left hand side of the division symbol.");
-      this->getPointerToProperty("RHSWorkspace")->setDocumentation("The workspace to be divided, this can be considered to be the workspace on the right hand side of the division symbol.");
-      this->getPointerToProperty("OutputWorkspace")->setDocumentation("The name of the workspace to be created as the output of the algorithm.  A workspace of this name will be created and stored in the Analysis Data Service.");
-    }
-    
     void Divide::init()
     {
       BinaryOperation::init();
@@ -232,8 +222,12 @@ namespace Mantid
       // If RHS only has one value (1D vertical), the number of histograms needs to match.
       // Each lhs spectrum will be divided by that scalar
       //std::cout << "rhs->blocksize() " << rhs->blocksize() << std::endl;
-      if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return "";
-
+      // Are we allowing the division by different # of spectra, using detector IDs to match up?
+      if ( m_AllowDifferentNumberSpectra || (rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms()) ) 
+      {
+        return "";
+      }
+ 
       if (m_matchXSize)
       {
         // Past this point, for a 2D WS operation, we require the X arrays to match. Note this only checks the first spectrum
@@ -248,12 +242,6 @@ namespace Mantid
 
       // If the rhs has a single spectrum, then we can divide. The block size does NOT need to match,
       if (rhsSpec == 1) return "";
-
-      // Are we allowing the division by different # of spectra, using detector IDs to match up?
-      if (m_AllowDifferentNumberSpectra)
-      {
-        return "";
-      }
 
       // Otherwise, the number of histograms needs to match, but the block size of each does NOT need to match.
       

@@ -31,13 +31,6 @@ namespace Poldi
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(PoldiLoadChopperSlits)
 
-// Sets documentation strings for this algorithm
-void PoldiLoadChopperSlits::initDocs()
-{
-	this->setWikiSummary("Load Poldi chopper slits data file. ");
-	this->setOptionalMessage("Load Poldi chopper slits data file.");
-}
-
 
 using namespace Kernel;
 using namespace API;

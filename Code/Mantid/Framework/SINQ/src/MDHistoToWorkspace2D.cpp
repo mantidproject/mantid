@@ -97,7 +97,7 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS, Workspace2D_
 			xData.push_back(dim->getX(i));
 		}
 		outWS->setX(currentSpectra, xData);
-		outWS->getAxis(1)->setValue(currentSpectra,static_cast<double>(currentSpectra));
+		outWS->getSpectrum(currentSpectra)->setSpectrumNo(static_cast<specid_t>(currentSpectra));
 		currentSpectra++;
 	} else {
 		// recurse deeper
@@ -130,10 +130,6 @@ void MDHistoToWorkspace2D::checkW2D(Mantid::DataObjects::Workspace2D_sptr outWS)
 			g_log.information() << "Spectrum " << i << " e-size mismatch, is " << e.size() << " should be " << length << "\n";
 		}
 	}
-}
-void MDHistoToWorkspace2D::initDocs()
-{
-  this->setWikiSummary("Flattens a n dimensional MDHistoWorkspace into a Workspace2D with many spectra");
 }
 
 void MDHistoToWorkspace2D::copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inWS, Mantid::DataObjects::Workspace2D_sptr outWS)

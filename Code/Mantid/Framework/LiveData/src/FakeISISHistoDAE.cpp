@@ -331,14 +331,6 @@ public:
   }
 };
 
-/// Sets documentation strings for this algorithm
-void FakeISISHistoDAE::initDocs()
-{
-  this->setWikiSummary("Simulates ISIS histogram DAE. ");
-  this->setOptionalMessage("Simulates ISIS histogram DAE.");
-}
-
-
 using namespace Kernel;
 using namespace API;
 

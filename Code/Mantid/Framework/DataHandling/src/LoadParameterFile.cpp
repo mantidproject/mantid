@@ -58,13 +58,6 @@ namespace DataHandling
 
 DECLARE_ALGORITHM(LoadParameterFile)
 
-/// Sets documentation strings for this algorithm
-void LoadParameterFile::initDocs()
-{
-  this->setWikiSummary("Loads instrument parameters into a [[workspace]]. where these parameters are associated component names as defined in Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) or a string consisting of the contents of such.."); 
-  this->setOptionalMessage("Loads instrument parameters into a workspace. where these parameters are associated component names as defined in Instrument Definition File (IDF) or a string consisting of the contents of such.");
-}
-
 
 using namespace Kernel;
 using namespace API;

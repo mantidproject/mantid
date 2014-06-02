@@ -53,6 +53,9 @@ public:
   virtual ~NormaliseVanadium() {}
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "NormaliseVanadium"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Normalises all spectra to a specified wavelength.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
@@ -66,8 +69,7 @@ protected:
   API::MatrixWorkspace_sptr m_inputWS;     ///< A pointer to the input workspace
 
 protected:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

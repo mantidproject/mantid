@@ -1,11 +1,4 @@
 #include "MantidGeometry/Rendering/OCGeometryGenerator.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/WarningSuppressions.h"
-#include <vector>
-#include <cmath>
-#include <climits> // Needed for g++4.4 on Mac with OpenCASCADE 6.3.0
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
@@ -14,16 +7,31 @@
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Torus.h"
 #include "MantidGeometry/Objects/Rules.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include <climits> // Needed for g++4.4 on Mac with OpenCASCADE 6.3.0
+#include <cmath>
+#include <vector>
 
 // Squash a warning coming out of an OpenCascade header
 #ifdef __INTEL_COMPILER
 #pragma warning disable 191
 #endif
+// Opencascade defines _USE_MATH_DEFINES without checking whether it is already used.
+// Undefine it here before we include the headers to avoid a warning. Older versions
+// also define M_SQRT1_2 so do the same if it is already defined
+#ifdef _MSC_VER
+  #undef _USE_MATH_DEFINES
+  #ifdef M_SQRT1_2
+    #undef M_SQRT1_2
+  #endif
+#endif
 
-#include "MantidGeometry/Rendering/OpenCascadeConfig.h"
 GCC_DIAG_OFF(conversion)
+GCC_DIAG_OFF(cast-qual)
 #include <gp_Trsf.hxx>
-GCC_DIAG_ON(conversion)
 #include <gp_Vec.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Pnt.hxx>
@@ -47,6 +55,8 @@ GCC_DIAG_ON(conversion)
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRep_Tool.hxx>
 #include <Poly_Triangulation.hxx>
+GCC_DIAG_ON(conversion)
+GCC_DIAG_ON(cast-qual)
 
 #ifdef __INTEL_COMPILER
 #pragma warning enable 191

@@ -221,10 +221,10 @@ void SaveCanSAS1D2::createSASTransElement(std::string& sasTrans, const std::stri
         << name 
         << "\">";
   std::string t_unit = m_ws->YUnitLabel(); 
-  std::string lambda_unit = m_ws->getAxis(0)->unit()->caption();
+  std::string lambda_unit = m_ws->getAxis(0)->unit()->label();
   if (t_unit.empty())
     t_unit = "none"; 
-  if (lambda_unit.empty())
+  if (lambda_unit.empty() || lambda_unit == "Angstrom")
     lambda_unit = "A";
 
   const MantidVec& xdata = m_ws->readX(0);

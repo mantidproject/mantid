@@ -15,10 +15,11 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
 
     def name(self):
         return "SANSBeamSpreaderTransmission"
-    
+
+    def summary(self):
+        return "Compute transmission using the beam spreader method"
+            
     def PyInit(self):
-        self.setOptionalMessage("Compute transmission using the beam spreader method")
-        self.setWikiSummary("Compute transmission using the beam spreader method")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
         self.declareProperty(FileProperty("SampleSpreaderFilename", "",

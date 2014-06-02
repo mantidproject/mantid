@@ -8,6 +8,8 @@
 #include <QWidget>
 #include <QMap>
 
+#include <boost/optional.hpp>
+
     /* Forward declarations */
 
 class QtTreePropertyBrowser;
@@ -92,6 +94,24 @@ public:
   /// Return the function
   Mantid::API::IFunction_sptr getFunction(QtProperty* prop = NULL, bool attributesOnly = false);
 
+  /// Return a function with specified index
+  Mantid::API::IFunction_sptr getFunctionByIndex(const QString& index);
+
+  /// Return index of the current function, if one is selected
+  boost::optional<QString> currentFunctionIndex() { return m_currentFunctionIndex; }
+
+  /// Update the function parameter value
+  void setParameter(const QString& funcIndex, const QString& paramName, double value);
+
+signals:
+  /// User selects a different function (or one of it's sub-properties)
+  void currentFunctionChanged();
+
+  /// Function parameter gets changed
+  /// @param funcIndex :: Index of the changed function
+  /// @param paramName :: Name of the changed parameter
+  void parameterChanged(const QString& funcIndex, const QString& paramName);
+
 protected:
   /// Create the Qt property browser
   void createBrowser();
@@ -141,6 +161,8 @@ protected:
   bool isIndex(QtProperty* prop) const;
   /// Get the function index for a property
   QString getIndex(QtProperty* prop) const;
+  /// Get function property for the index
+  QtProperty* getFunctionProperty(const QString& index);
 
   /// Add a tie property
   AProperty addTieProperty(QtProperty* prop, QString tie);
@@ -189,6 +211,8 @@ protected slots:
   void addConstraints50();
   /// Remove one of the constraints
   void removeConstraint();
+  /// Update current function index depending on currently selected item
+  void updateCurrentFunctionIndex();
 
   //   Property change slots
 
@@ -196,6 +220,8 @@ protected slots:
   void attributeChanged(QtProperty*);
   /// Called when a member of a vector attribute is changed
   void attributeVectorDoubleChanged(QtProperty*);
+  /// Called when a function parameter property is changed
+  void parameterChanged(QtProperty*);
 
 protected:
   /// Manager for function group properties
@@ -265,6 +291,9 @@ protected:
   QAction *m_actionRemoveConstraints;
   /// Remove one constraints from current parameter
   QAction *m_actionRemoveConstraint;
+
+  /// Index of currently selected function. Gets updated in updateCurrentFunctionIndex()
+  boost::optional<QString> m_currentFunctionIndex;
 
   friend class CreateAttributePropertyForFunctionBrowser;
   friend class SetAttributeFromProperty;

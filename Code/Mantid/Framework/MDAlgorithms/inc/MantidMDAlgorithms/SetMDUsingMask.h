@@ -40,11 +40,13 @@ namespace MDAlgorithms
     virtual ~SetMDUsingMask();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Algorithm to set a MDHistoWorkspace in points determined by a mask boolean MDHistoWorkspace.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

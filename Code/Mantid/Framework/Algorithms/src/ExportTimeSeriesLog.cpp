@@ -53,10 +53,6 @@ namespace Algorithms
   ExportTimeSeriesLog::~ExportTimeSeriesLog()
   {
   }
-  
-  void ExportTimeSeriesLog::initDocs(){
-
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Definition of all input arguments

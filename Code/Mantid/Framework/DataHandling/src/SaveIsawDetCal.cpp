@@ -51,12 +51,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveIsawDetCal::initDocs()
-  {
-    this->setWikiSummary("Saves an instrument with RectangularDetectors to an ISAW .DetCal file.");
-    this->setOptionalMessage("Saves an instrument with RectangularDetectors to an ISAW .DetCal file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

@@ -32,13 +32,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(CrossCorrelate)
     
-    /// Sets documentation strings for this algorithm
-    void CrossCorrelate::initDocs()
-    {
-      this->setWikiSummary("Cross-correlates a range of spectra against one reference spectra in the same workspace. ");
-      this->setOptionalMessage("Cross-correlates a range of spectra against one reference spectra in the same workspace.");
-    }
-    
 
     using namespace Kernel;
     using namespace API;

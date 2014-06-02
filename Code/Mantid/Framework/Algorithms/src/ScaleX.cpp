@@ -26,13 +26,6 @@ using namespace DataObjects;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ScaleX)
 
-/// Sets documentation strings for this algorithm
-void ScaleX::initDocs()
-{
-  this->setWikiSummary("Scales an input workspace by the given factor, which can be either multiplicative or additive.");
-  this->setOptionalMessage("Scales an input workspace by the given factor, which can be either multiplicative or additive.");
-}
-
 /**
  * Default constructor
  */

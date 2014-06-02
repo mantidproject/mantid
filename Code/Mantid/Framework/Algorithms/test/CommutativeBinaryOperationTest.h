@@ -22,6 +22,9 @@ public:
   virtual const std::string name() const { return "CommutativeBinaryOperationHelper"; }
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
+  /// Algorithm's summary for identification overriding a virtual method
+  virtual const std::string summary() const { return "Sommutative binary operation helper."; }
+
   std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,const MatrixWorkspace_const_sptr ws2)
   {
     m_lhs = ws1;

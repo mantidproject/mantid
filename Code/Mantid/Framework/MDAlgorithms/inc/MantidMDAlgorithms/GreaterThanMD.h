@@ -41,11 +41,12 @@ namespace MDAlgorithms
     virtual ~GreaterThanMD();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Perform the GreaterThan boolean operation on two MDHistoWorkspaces.";}
+
     virtual int version() const;
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
     bool acceptScalar() const { return true; }
     bool commutative() const { return false; }
 

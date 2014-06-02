@@ -19,7 +19,10 @@ class CheckForSampleLogs(PythonAlgorithm):
         """ Return name
         """
         return "CheckForSampleLogs"
-    
+
+    def summary(self):
+        return "Check if the workspace has some given sample logs"
+
     def PyInit(self):
         """ Declare properties
         """

@@ -50,8 +50,12 @@ public:
   {}
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const
+  virtual const std::string name() const 
   { return "LoadTOFRawNexus";}
+
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const 
+  {return "Loads a NeXus file confirming to the TOFRaw format";}
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const
@@ -77,7 +81,6 @@ public:
 
 protected:
   void init();
-  void initDocs();
   void exec();
 
   /// Validate the optional input properties

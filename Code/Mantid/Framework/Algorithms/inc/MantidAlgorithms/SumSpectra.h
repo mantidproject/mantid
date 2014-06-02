@@ -61,6 +61,9 @@ public:
   virtual ~SumSpectra() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "SumSpectra";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "The SumSpectra algorithm adds the data values in each time bin across a range of spectra; the output workspace has a single spectrum. If the input is an EventWorkspace, the output is also an EventWorkspace; otherwise it will be a Workspace2D.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
@@ -75,8 +78,7 @@ private:
   void doWorkspace2D(API::MatrixWorkspace_const_sptr localworkspace,
                      API::ISpectrum *outSpec, API::Progress &progress,
                      size_t &numSpectra,size_t &numMasked,size_t &numZeros);
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();

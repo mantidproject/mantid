@@ -28,13 +28,6 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(ChangeBinOffset)
-
-    /// Sets documentation strings for this algorithm
-    void ChangeBinOffset::initDocs()
-    {
-      this->setWikiSummary("Adjusts all the time bin values in a workspace by a specified amount. ");
-      this->setOptionalMessage("Adjusts all the time bin values in a workspace by a specified amount.");
-    }
     
 
     /**

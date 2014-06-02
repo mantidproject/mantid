@@ -54,15 +54,6 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Documentation
-    */
-  void ExtractMaskToTable::initDocs()
-  {
-    setWikiSummary("Extracts the masking from a given workspace and places it in a new table workspace compatible to MaskBinsFromTable.");
-    setOptionalMessage("The output TableWorkspace should be compatible to MaskBinsFromTable.");
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Declare properties
     */
   void ExtractMaskToTable::init()

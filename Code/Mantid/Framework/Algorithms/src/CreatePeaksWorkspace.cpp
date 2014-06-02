@@ -41,12 +41,6 @@ namespace Algorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CreatePeaksWorkspace::initDocs()
-  {
-    this->setWikiSummary("Create an empty PeaksWorkspace.");
-    this->setOptionalMessage("Create an empty PeaksWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

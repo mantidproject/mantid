@@ -43,13 +43,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSSensitivityCorrection)
 
-/// Sets documentation strings for this algorithm
-void SANSSensitivityCorrection::initDocs()
-{
-  this->setWikiSummary("Perform SANS sensitivity correction.");
-  this->setOptionalMessage("Perform SANS sensitivity correction.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

@@ -24,9 +24,15 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         return "Inelastic;PythonAlgorithms;Transforms\\Grouping"
 
     def name(self):
-        """ Mantid require
+        """ Mantid required
         """
         return "GenerateGroupingSNSInelastic"
+
+    def summary(self):
+        """ Mantid required
+        """
+        return "Generate grouping files for ARCS, CNCS, HYSPEC, and SEQUOIA."
+
 
     def PyInit(self):
         """ Python initialization:  Define input parameters
@@ -34,9 +40,6 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         py = ["1", "2", "4","8","16","32","64","128"]
         px = ["1", "2", "4","8"]
         instrument = ["ARCS","CNCS","HYSPEC","SEQUOIA"]
-
-        self.setWikiSummary("Generate grouping files for ARCS, CNCS, HYSPEC, and SEQUOIA.")
-        self.setOptionalMessage("Generate grouping files for ARCS, CNCS, HYSPEC, and SEQUOIA.")
         
         self.declareProperty("AlongTubes", "1",mantid.kernel.StringListValidator(py), "Number of pixels across tubes to be grouped")
         self.declareProperty("AcrossTubes", "1", mantid.kernel.StringListValidator(px), "Number of pixels across tubes to be grouped")

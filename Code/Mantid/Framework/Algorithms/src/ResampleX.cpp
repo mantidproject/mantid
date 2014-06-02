@@ -70,14 +70,6 @@ namespace Algorithms
     return "";
   }
 
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ResampleX::initDocs()
-  {
-    string msg("Resample the x-axis of the data with the requested number of points.");
-    this->setWikiSummary(msg);
-    this->setOptionalMessage(msg);
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

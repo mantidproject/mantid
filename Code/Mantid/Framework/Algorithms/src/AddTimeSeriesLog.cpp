@@ -76,12 +76,6 @@ namespace Mantid
     const std::string AddTimeSeriesLog::category() const { return "DataHandling\\Logs"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void AddTimeSeriesLog::initDocs()
-    {
-      this->setWikiSummary("Creates/updates a time-series log");
-      this->setOptionalMessage("Creates/updates a time-series log");
-    }
 
     //----------------------------------------------------------------------------------------------
     /**

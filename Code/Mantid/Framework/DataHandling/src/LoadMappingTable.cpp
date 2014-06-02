@@ -21,13 +21,6 @@ using namespace API;
 
 DECLARE_ALGORITHM(LoadMappingTable)
 
-/// Sets documentation strings for this algorithm
-void LoadMappingTable::initDocs()
-{
-  this->setWikiSummary("Builds up the mapping between spectrum number and the detector objects in the [[instrument]] [[Geometry]].");
-  this->setOptionalMessage("Builds up the mapping between spectrum number and the detector objects in the instrument Geometry.");
-}
-
 
 LoadMappingTable::LoadMappingTable() : Algorithm()
 {

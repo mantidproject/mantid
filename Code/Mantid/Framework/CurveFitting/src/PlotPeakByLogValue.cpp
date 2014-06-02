@@ -61,13 +61,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(PlotPeakByLogValue)
     
-    /// Sets documentation strings for this algorithm
-    void PlotPeakByLogValue::initDocs()
-    {
-      this->setWikiSummary("Fits a number of spectra with the same function. ");
-      this->setOptionalMessage("Fits a number of spectra with the same function.");
-    }
-    
 
     /** Initialisation method. Declares properties to be used in algorithm.
     *

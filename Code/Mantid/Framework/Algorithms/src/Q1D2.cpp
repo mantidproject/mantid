@@ -145,13 +145,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Q1D2)
 
-/// Sets documentation strings for this algorithm
-void Q1D2::initDocs()
-{
-  this->setWikiSummary("Converts a workspace of counts in wavelength bins into a workspace of counts verses momentum transfer, Q, assuming completely elastic scattering");
-  this->setOptionalMessage("Converts a workspace of counts in wavelength bins into a workspace of counts verses momentum transfer, Q, assuming completely elastic scattering");
-}
-
 
 using namespace Kernel;
 using namespace API;

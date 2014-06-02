@@ -35,13 +35,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Integration)
 
-/// Sets documentation strings for this algorithm
-void Integration::initDocs()
-{
-  this->setWikiSummary("Integration takes a 2D [[workspace]] or an [[EventWorkspace]] as input and sums the data values. Optionally, the range summed can be restricted in either dimension. The output will always be a [[MatrixWorkspace]] even when inputting an EventWorkspace, if you wish to keep this as the output then you should use [[Rebin]].");
-  this->setOptionalMessage("Integration takes a 2D workspace or an EventWorkspace as input and sums the data values. Optionally, the range summed can be restricted in either dimension.");
-}
-
 
 using namespace Kernel;
 using namespace API;

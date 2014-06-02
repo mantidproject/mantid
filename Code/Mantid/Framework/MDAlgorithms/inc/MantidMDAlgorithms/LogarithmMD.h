@@ -41,10 +41,12 @@ namespace MDAlgorithms
     virtual ~LogarithmMD();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Perform a natural logarithm of a MDHistoWorkspace.";}
+
     virtual int version() const;
 
   private:
-    virtual void initDocs();
     virtual void initExtraProperties();
 
     /// Check the inputs and throw if the algorithm cannot be run

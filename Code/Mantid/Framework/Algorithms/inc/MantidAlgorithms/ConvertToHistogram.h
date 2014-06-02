@@ -42,13 +42,15 @@ namespace Mantid
     public:
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "ConvertToHistogram"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Converts a workspace containing point data into one containing histograms.";}
+
       
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "Transforms\\Axes";}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Returns true if the algorithm needs to be run. 
       bool isProcessingRequired(const API::MatrixWorkspace_sptr inputWS) const;
       /// Checks the input workspace is consistent, throwing if not

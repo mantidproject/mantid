@@ -51,14 +51,16 @@ import os
 import datetime
 
 class ExportExperimentLog(PythonAlgorithm):
+    
     """ Algorithm to export experiment log
     """
+ 
+    def summmary(self):
+        return "Exports experimental log."
+
     def PyInit(self):
         """ Declaration of properties
-        """
-        self.setWikiSummary("Export experimental log.")
-        self.setOptionalMessage("Export experimental log.")
-        
+        """        
         # wsprop = mantid.api.MatrixWorkspaceProperty("InputWorkspace", "", mantid.kernel.Direction.Input)
         wsprop = MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input)
         self.declareProperty(wsprop, "Input workspace containing the sample log information. ")

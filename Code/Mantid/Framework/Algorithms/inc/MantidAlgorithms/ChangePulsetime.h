@@ -22,14 +22,16 @@ namespace Algorithms
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "ChangePulsetime";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Adds a constant time value, in seconds, to the pulse time of events in an EventWorkspace. ";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Events;Transforms\\Axes";}
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm

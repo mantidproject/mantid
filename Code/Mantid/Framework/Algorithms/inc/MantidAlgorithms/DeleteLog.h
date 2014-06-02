@@ -33,11 +33,14 @@ namespace Mantid
     {
     public:
       virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Removes a named log from a run";}
+
       virtual int version() const;
       virtual const std::string category() const;
 
     private:
-      virtual void initDocs();
+  
       void init();
       void exec();
     };

@@ -61,13 +61,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Rebin)
     
-    /// Sets documentation strings for this algorithm
-    void Rebin::initDocs()
-    {
-      this->setWikiSummary("Rebins data with new X bin boundaries. For EventWorkspaces, you can very quickly rebin in-place by keeping the same output name and PreserveEvents=true.");
-      this->setOptionalMessage("Rebins data with new X bin boundaries. For EventWorkspaces, you can very quickly rebin in-place by keeping the same output name and PreserveEvents=true.");
-    }
-    
 
     using namespace Kernel;
     using namespace API;

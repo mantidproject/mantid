@@ -43,13 +43,15 @@ namespace DataHandling
     virtual ~LoadPreNexus();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Load a collection of PreNexus files.";}
+
     virtual int version() const;
     virtual const std::string category() const;
     void parseRuninfo(const std::string &runinfo, std::string &dataDir, std::vector<std::string> &eventFilenames);
     /// Returns a confidence value that this algorithm can load a file
     virtual int confidence(Kernel::FileDescriptor & descriptor) const;
   private:
-    virtual void initDocs();
     void init();
     void exec();
     void runLoadNexusLogs(const std::string &runinfo, const std::string &dataDir,

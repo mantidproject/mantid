@@ -43,6 +43,9 @@ namespace Mantid
       Load();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Load"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Attempts to load a given file by finding an appropriate Load algorithm.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Category
@@ -53,8 +56,7 @@ namespace Mantid
       virtual void setPropertyValue(const std::string &name, const std::string &value);
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// This method returns shared pointer to a load algorithm which got 
       /// the highest preference after file check. 
       API::IAlgorithm_sptr getFileLoader(const std::string& filePath);

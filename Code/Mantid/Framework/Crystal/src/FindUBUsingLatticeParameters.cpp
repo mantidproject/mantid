@@ -59,18 +59,6 @@ namespace Crystal
   {
   }
 
-  //--------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void FindUBUsingLatticeParameters::initDocs()
-  {
-    std::string summary("Calculate the UB matrix from a peaks workspace, ");
-    summary += "given lattice parameters.";
-    this->setWikiSummary( summary );
-
-    std::string message("Calculate the UB matrix from a peaks workspace, ");
-    message += "given lattice parameters.";
-    this->setOptionalMessage( message );
-  }
 
   //--------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

@@ -21,11 +21,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Logarithm)
 
-void Logarithm::initDocs(){
-  this->setWikiSummary("''Logarithm'' function calculates the logarithm of the data, held in a workspace. A user can choose between natural (default) or base 10 logarithm");
-  this->setOptionalMessage("Logarithm function calculates the logarithm of the data, held in a workspace. A user can choose between natural (default) or base 10 logarithm");
-}
-
 Logarithm::Logarithm():UnaryOperation(),log_Min(0),is_natural(true)
 {
   this->useHistogram=true;

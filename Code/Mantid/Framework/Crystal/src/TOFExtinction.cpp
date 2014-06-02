@@ -68,12 +68,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void TOFExtinction::initDocs()
-  {
-    this->setWikiSummary("Extinction correction for single crystal peaks.");
-    this->setOptionalMessage("Extinction correction for single crystal peaks.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

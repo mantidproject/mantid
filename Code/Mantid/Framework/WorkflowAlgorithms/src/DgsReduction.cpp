@@ -70,12 +70,6 @@ namespace Mantid
     const std::string DgsReduction::category() const { return "Workflow\\Inelastic"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void DgsReduction::initDocs()
-    {
-      this->setWikiSummary("Top-level workflow algorithm for DGS reduction.");
-      this->setOptionalMessage("Top-level workflow algorithm for DGS reduction.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

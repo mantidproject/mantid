@@ -989,13 +989,6 @@ int LoadEventNexus::confidence(Kernel::NexusDescriptor & descriptor) const
   return confidence;
 }
 
-/// Sets documentation strings for this algorithm
-void LoadEventNexus::initDocs()
-{
-  this->setWikiSummary("Loads Event NeXus files (produced by the SNS) and stores it in an [[EventWorkspace]]. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval. ");
-  this->setOptionalMessage("Loads Event NeXus files (produced by the SNS) and stores it in an EventWorkspace. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval.");
-}
-
 /// Initialisation method.
 void LoadEventNexus::init()
 {

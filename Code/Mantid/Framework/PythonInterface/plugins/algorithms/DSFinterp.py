@@ -1,10 +1,5 @@
 """*WIKI* 
 
-== Summary == 
-
-Given a set of parameter values {<math>T_i</math>} and corresponding structure factors {<math>S(Q,E,T_i)</math>}, this
-algorithm interpolates <math>S(Q,E,T)</math> for any value of parameter T within the range spanned by the {<math>T_i</math>} set.
-
 == Usage ==
 
 DSFinterp(Workspaces,OutputWorkspaces,[LoadErrors],[ParameterValues],
@@ -142,6 +137,10 @@ class DSFinterp(PythonAlgorithm):
 
   def name(self):
     return 'DSFinterp'
+
+  def summmary(self):
+    return "Given a set of parameter values {<math>T_i</math>} and corresponding structure factors {<math>S(Q,E,T_i)</math>}, this \
+algorithm interpolates <math>S(Q,E,T)</math> for any value of parameter T within the range spanned by the {<math>T_i</math>} set."
 
   def PyInit(self):
     arrvalidator = StringArrayMandatoryValidator()

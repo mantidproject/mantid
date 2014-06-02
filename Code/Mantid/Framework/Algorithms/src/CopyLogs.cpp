@@ -49,12 +49,6 @@ namespace Algorithms
   const std::string CopyLogs::category() const { return "Utility\\Workspaces";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CopyLogs::initDocs()
-  {
-    this->setWikiSummary("Copies the sample logs from one workspace to another.");
-    this->setOptionalMessage("Copies the sample logs from one workspace to another.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

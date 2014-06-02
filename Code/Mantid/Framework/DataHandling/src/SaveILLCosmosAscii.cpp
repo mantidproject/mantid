@@ -19,13 +19,6 @@ namespace Mantid
     DECLARE_ALGORITHM(SaveILLCosmosAscii)
     using namespace Kernel;
     using namespace API;
-
-    /// Sets documentation strings for this algorithm
-    void SaveILLCosmosAscii::initDocs()
-    {
-      this->setWikiSummary("Saves a 2D [[workspace]] to a tab separated ascii file with headers for extra information. ");
-      this->setOptionalMessage("Saves a 2D workspace to a ascii file.");
-    }
     
     /// virtual method to set the extra properties required for this algorithm
     void SaveILLCosmosAscii::extraProps()

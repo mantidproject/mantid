@@ -42,11 +42,13 @@ namespace Mantid
       virtual ~DgsReduction();
 
       virtual const std::string name() const;
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Top-level workflow algorithm for DGS reduction.";}
+
       virtual int version() const;
       virtual const std::string category() const;
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
       API::Workspace_sptr loadInputData(const std::string prop,

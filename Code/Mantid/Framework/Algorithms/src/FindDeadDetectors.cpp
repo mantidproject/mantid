@@ -25,13 +25,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(FindDeadDetectors)
     
-    /// Sets documentation strings for this algorithm
-    void FindDeadDetectors::initDocs()
-    {
-      this->setWikiSummary("Identifies and flags empty spectra caused by 'dead' detectors. ");
-      this->setOptionalMessage("Identifies and flags empty spectra caused by 'dead' detectors.");
-    }
-    
     using namespace Kernel;
     using namespace API;
 

@@ -34,14 +34,6 @@ using namespace Mantid::Kernel;
 //using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
-
-/// Sets documentation strings for this algorithm
-void Authenticate::initDocs()
-{
-  this->setWikiSummary("Authenticate to the remote compute resource.");
-  this->setOptionalMessage("Authenticate to the remote compute resource.");
-}
 
 void Authenticate::init()
 {

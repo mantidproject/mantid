@@ -18,13 +18,6 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    /// Sets documentation strings for this algorithm
-    void SaveANSTOAscii::initDocs()
-    {
-      this->setWikiSummary("Saves a 2D [[workspace]] to a tab separated ascii file. ");
-      this->setOptionalMessage("Saves a 2D workspace to a ascii file.");
-    }
-
 
     /** virtual method to add information to the file before the data
      *  however this class doesn't have any but must implement it.

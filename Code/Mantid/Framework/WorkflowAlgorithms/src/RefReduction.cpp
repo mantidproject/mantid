@@ -38,13 +38,6 @@ const int RefReduction::NX_PIXELS(304);
 const int RefReduction::NY_PIXELS(256);
 const double RefReduction::PIXEL_SIZE(0.0007);
 
-/// Sets documentation strings for this algorithm
-void RefReduction::initDocs()
-{
-  this->setWikiSummary("Data reduction for reflectometry.");
-  this->setOptionalMessage("Data reduction for reflectometry.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

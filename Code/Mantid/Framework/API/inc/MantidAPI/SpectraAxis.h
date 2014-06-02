@@ -77,6 +77,8 @@ private:
   const SpectraAxis& operator=(const SpectraAxis&);
   /// A pointer to the workspace holding the axis
   const MatrixWorkspace* const m_parentWS;
+  /// List of edge values for quick searching of values as if this is binned data
+  mutable std::vector<double> m_edges;
 };
 
 } // namespace API

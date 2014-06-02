@@ -8,6 +8,7 @@
 using namespace std;
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::API;
 
 namespace Mantid
 {

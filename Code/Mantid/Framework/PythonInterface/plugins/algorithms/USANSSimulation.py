@@ -25,6 +25,9 @@ class USANSSimulation(PythonAlgorithm):
     def name(self):
         return "USANSSimulation"
 
+    def summary(self):
+        return "Simulate a USANS workspace"
+        
     def PyInit(self):
         self.declareProperty("TwoTheta", 0.01, "Scattering angle in degrees")
         self.declareProperty(FloatArrayProperty("WavelengthPeaks", values=[0.9, 1.2, 1.8, 3.6],

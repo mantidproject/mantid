@@ -64,12 +64,6 @@ namespace MDAlgorithms
   const std::string MergeMD::category() const { return "MDAlgorithms";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void MergeMD::initDocs()
-  {
-    this->setWikiSummary("Merge several [[MDWorkspace]]s into one.");
-    this->setOptionalMessage("Merge several MDWorkspaces into one.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

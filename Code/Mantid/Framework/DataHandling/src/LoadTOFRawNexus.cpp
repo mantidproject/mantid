@@ -45,14 +45,6 @@ LoadTOFRawNexus::LoadTOFRawNexus()
 }
 
 //-------------------------------------------------------------------------------------------------
-/** Documentation strings */
-void LoadTOFRawNexus::initDocs()
-{
-  this->setWikiSummary("Loads a NeXus file confirming to the TOFRaw format");
-  this->setOptionalMessage("Loads a NeXus file confirming to the TOFRaw format");
-}
-
-//-------------------------------------------------------------------------------------------------
 /// Initialisation method.
 void LoadTOFRawNexus::init()
 {

@@ -39,13 +39,6 @@ using std::size_t;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(MuonRemoveExpDecay)
 
-/// Sets documentation strings for this algorithm
-void MuonRemoveExpDecay::initDocs()
-{
-  this->setWikiSummary("This algorithm removes the exponential decay from a muon workspace. ");
-  this->setOptionalMessage("This algorithm removes the exponential decay from a muon workspace.");
-}
-
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -179,8 +172,8 @@ void MuonRemoveExpDecay::exec()
     PARALLEL_CHECK_INTERUPT_REGION
   }
 
-  // Update Y axis label 
-  outputWS->setYUnitLabel("Asymmetry");
+  // Update Y axis units
+  outputWS->setYUnit("Asymmetry");
 
   setProperty("OutputWorkspace", outputWS);
 }

@@ -11,6 +11,7 @@ The new axis values are taken from the previous X-vector-values for the first sp
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Transpose.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/RebinnedOutput.h"
@@ -22,13 +23,6 @@ namespace Mantid
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(Transpose)
-
-    /// Sets documentation strings for this algorithm
-    void Transpose::initDocs()
-    {
-      this->setWikiSummary("Transposes a workspace, so that an N1 x N2 workspace becomes N2 x N1.");
-      this->setOptionalMessage("Transposes a workspace, so that an N1 x N2 workspace becomes N2 x N1.");
-    }
 
 
     using namespace Kernel;
@@ -113,7 +107,6 @@ namespace Mantid
       Mantid::API::Axis* yAxis = getVerticalAxis(inputWorkspace);
       const size_t oldNhist = inputWorkspace->getNumberHistograms();
       const MantidVec & inX = inputWorkspace->readX(0);
-      const size_t oldXlength = inX.size();
       const size_t oldYlength = inputWorkspace->blocksize();
       const size_t oldVerticalAxislength = yAxis->length();
 
@@ -123,14 +116,19 @@ namespace Mantid
 
       // Create a new numeric axis for Y the same length as the old X array
       // Values come from input X
-      Mantid::API::NumericAxis *newAxis = new NumericAxis(oldXlength);
-      newAxis->unit() = inputWorkspace->getAxis(0)->unit();
-      outputWorkspace->getAxis(0)->unit() = inputWorkspace->getAxis(1)->unit();
-      for(size_t i = 0; i < oldXlength; ++i)
+      API::NumericAxis *newYAxis(NULL);
+      if(inputWorkspace->isHistogramData())
       {
-        newAxis->setValue(i, inX[i]);
+        newYAxis = new API::BinEdgeAxis(inX);
       }
-      outputWorkspace->replaceAxis(1, newAxis);
+      else
+      {
+        newYAxis = new API::NumericAxis(inX);
+      }
+
+      newYAxis->unit() = inputWorkspace->getAxis(0)->unit();
+      outputWorkspace->getAxis(0)->unit() = inputWorkspace->getAxis(1)->unit();
+      outputWorkspace->replaceAxis(1, newYAxis);
       setProperty("OutputWorkspace", outputWorkspace);
       return outputWorkspace;
     }

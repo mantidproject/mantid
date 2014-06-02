@@ -21,12 +21,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM( RenameWorkspace)
 
-void RenameWorkspace::initDocs()
-{
-  this->setWikiSummary("Used to Rename a workspace in the [[Analysis Data Service]]. This is the algorithm that is run if 'Rename' is chosen from the context menu of a workspace.");
-  this->setOptionalMessage("Rename the Workspace.");
-}
-
 using namespace Kernel;
 using namespace API;
 

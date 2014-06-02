@@ -86,14 +86,6 @@ int LoadRKH::confidence(Kernel::FileDescriptor & descriptor) const
   return 20; // Better than LoadAscii
 }
 
-
-/// Sets documentation strings for this algorithm
-void LoadRKH::initDocs()
-{
-  this->setWikiSummary("Load a file written in the RKH format");
-  this->setOptionalMessage("Load a file written in the RKH format");
-}
-
 /**
  * Initialise the algorithm
  */
@@ -274,7 +266,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D()
     //Set the appropriate values
     for( int index = 0; index < pointsToRead; ++index )
     {
-      localworkspace->getAxis(1)->setValue(index, static_cast<int>(columnOne[index]));
+      localworkspace->getSpectrum(index)->setSpectrumNo(static_cast<int>(columnOne[index]));
       localworkspace->dataY(index)[0] = ydata[index];
       localworkspace->dataE(index)[0] = errdata[index];
     }

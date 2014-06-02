@@ -51,6 +51,9 @@ public:
   virtual ~LoadDaveGrp() {}
   /// Algorithm's name
   virtual const std::string name() const { return "LoadDaveGrp"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads data from a DAVE grouped ASCII file and stores it in a 2D workspace (Workspace2D class).";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -59,8 +62,7 @@ public:
   virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialization code
   void init();
   /// Execution code

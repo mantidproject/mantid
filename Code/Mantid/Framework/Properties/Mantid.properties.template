@@ -95,23 +95,6 @@ icatDownload.directory =
 # The Number of algorithms properties to retain im memory for refence in scripts.
 algorithms.retained = 50
 
-# ManagedWorkspace.LowerMemoryLimit sets the memory limit to trigger the use of 
-# a ManagedWorkspace. A ManagedWorkspace will be used for a workspace requiring greater amount of memory 
-# than defined by LowerMemoryLimit. LowerMemoryLimit is a precentage of the physical memory available for
-# the process. On Linux it is the free physical memory, on Windows it is the smaller of the free physical memory
-# and the available virtual memory. The default value for LowerMemoryLimit is 40%. Setting the limit too high
-# may lead to unrecoverable bad allocations. If this happens the advice is to close Mantid and relaunch it 
-# with a smaller LowerMemoryLimit.
-# 
-ManagedWorkspace.LowerMemoryLimit = 80
-# Setting this to 1 will disable managed workspaces completely - use with care!
-ManagedWorkspace.AlwaysInMemory = 0
-ManagedWorkspace.DataBlockSize = 4000
-ManagedWorkspace.FilePath = 
-# Setting this to 1 will disable managedrawfileworkspaces
-ManagedRawFileWorkspace.DoNotUse = 0
-CompressedWorkspace.DoNotUse = 1
-
 # Defines the maximum number of cores to use for OpenMP
 # For machine default set to 0
 MultiThreaded.MaxCores = 0

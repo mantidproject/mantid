@@ -25,6 +25,9 @@ namespace Crystal
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "SortHKL";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Sorts a PeaksWorkspace by HKL. Averages intensities using point group.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -33,8 +36,7 @@ namespace Crystal
   private:
     /// Point Groups possible
     std::vector<Mantid::Geometry::PointGroup_sptr> m_pointGroups;
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm

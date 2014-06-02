@@ -15,8 +15,8 @@ If the input workspace is a distribution (i.e. counts / meV ) then the output wo
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -39,13 +39,6 @@ double SofQW::energyToK()
   static const double energyToK = 8.0*M_PI*M_PI*PhysicalConstants::NeutronMass*PhysicalConstants::meV*1e-20 /
       (PhysicalConstants::h*PhysicalConstants::h);
   return energyToK;
-}
-
-/// Sets documentation strings for this algorithm
-void SofQW::initDocs()
-{
-  this->setWikiSummary("Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>. ");
-  this->setOptionalMessage("Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>.");
 }
 
 
@@ -252,17 +245,14 @@ API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,yLength-1,xLength,xLength-1);
   // Create a numeric axis to replace the default vertical one
-  Axis* const verticalAxis = new NumericAxis(yLength);
+  Axis* const verticalAxis = new BinEdgeAxis(newAxis);
   outputWorkspace->replaceAxis(1,verticalAxis);
   
   // Now set the axis values
   for (int i=0; i < yLength-1; ++i)
   {
     outputWorkspace->setX(i,xAxis);
-    verticalAxis->setValue(i,newAxis[i]);
   }
-  // One more to set on the 'y' axis
-  verticalAxis->setValue(yLength-1,newAxis[yLength-1]);
   
   // Set the axis units
   verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");

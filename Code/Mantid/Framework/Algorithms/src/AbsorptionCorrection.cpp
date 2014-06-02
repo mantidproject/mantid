@@ -50,7 +50,6 @@ AbsorptionCorrection::AbsorptionCorrection() : API::Algorithm(), m_inputWS(),
 
 void AbsorptionCorrection::init()
 {
-  this->setWikiSummary("Calculates an approximation of the attenuation due to absorption and single scattering in a generic sample shape. The sample shape can be defined by, e.g., the [[CreateSampleShape]] algorithm. /n/n'''Note that if your sample is of cuboid or cylinder geometry, you will get a more accurate result from the [[FlatPlateAbsorption]] or [[CylinderAbsorption]] algorithms respectively.'''");
 
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = boost::make_shared<CompositeValidator>();

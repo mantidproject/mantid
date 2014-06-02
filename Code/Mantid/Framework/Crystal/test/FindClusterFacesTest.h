@@ -73,31 +73,29 @@ namespace
   ITableWorkspace_sptr doExecute(IMDHistoWorkspace_sptr& inWS)
   {
     FindClusterFaces alg;
-    alg.setRethrows(true);
-    //alg.setChild(true);
+    //alg.setRethrows(true);
+    alg.setChild(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("LimitRows", false);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
     alg.execute();
-    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-        "dummy_value");
-    //ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
     return outWS;
   }
 
   ITableWorkspace_sptr doExecuteWithFilter(IMDHistoWorkspace_sptr& inWS, IPeaksWorkspace_sptr& filterWS)
   {
     FindClusterFaces alg;
-    alg.setRethrows(true);
-    //alg.setChild(true);
+   // alg.setRethrows(true);
+    alg.setChild(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("FilterWorkspace", filterWS);
+    alg.setProperty("LimitRows", false);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
     alg.execute();
-    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-        "dummy_value");
-    //ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
     return outWS;
   }
 }
@@ -107,6 +105,28 @@ namespace
 //=====================================================================================
 class FindClusterFacesTest: public CxxTest::TestSuite
 {
+
+private:
+
+void verify_table_row(ITableWorkspace_sptr& outWS, int expectedClusterId, size_t expectedWorkspaceIndex, int expectedNormalDimensionIndex, bool expectedMaxExtent, double expectedRadius=-1)
+  {
+    for (size_t rowIndex = 0; rowIndex < outWS->rowCount(); ++rowIndex)
+    {
+      auto clusterId = outWS->cell<int>(rowIndex, 0);
+      auto wsIndex = outWS->cell<double>(rowIndex, 1);
+      auto normalDimension = outWS->cell<int>(rowIndex, 2);
+      auto maxExtent = outWS->cell<Mantid::API::Boolean>(rowIndex, 3);
+      auto radius = outWS->cell<double>(rowIndex, 4);
+      if (expectedClusterId == clusterId && expectedWorkspaceIndex == wsIndex
+          && expectedNormalDimensionIndex == normalDimension 
+          && expectedMaxExtent == maxExtent && radius==expectedRadius)
+      {
+        return;
+      }
+    }
+    TSM_ASSERT("Expected row does not exist in the output table workspace", false);
+  }
+
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -132,31 +152,19 @@ public:
     Mantid::API::FrameworkManager::Instance();
   }
 
+  void test_throws_with_non_cluster_mdhistoworkspace()
+  {
+    const double nonIntegerSignalValue = 1.2;
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(nonIntegerSignalValue, 1, 1);
+    TS_ASSERT_THROWS(doExecute(inWS), std::runtime_error&);
+  }
+
   void test_find_no_edges_1D()
   {
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
-
     ITableWorkspace_const_sptr outWS = doExecute(inWS);
 
     TSM_ASSERT_EQUALS("There are no edge faces", outWS->rowCount(), 0);
-  }
-
-  void verify_table_row(ITableWorkspace_sptr& outWS, int expectedClusterId,
-      size_t expectedWorkspaceIndex, int expectedNormalDimensionIndex, bool expectedMaxExtent)
-  {
-    for (size_t rowIndex = 0; rowIndex < outWS->rowCount(); ++rowIndex)
-    {
-      auto clusterId = outWS->cell<int>(rowIndex, 0);
-      auto wsIndex = outWS->cell<double>(rowIndex, 1);
-      auto normalDimension = outWS->cell<int>(rowIndex, 2);
-      auto maxExtent = outWS->cell<Mantid::API::Boolean>(rowIndex, 3);
-      if (expectedClusterId == clusterId && expectedWorkspaceIndex == wsIndex
-          && expectedNormalDimensionIndex == normalDimension && expectedMaxExtent == maxExtent)
-      {
-        return;
-      }
-    }
-    TSM_ASSERT("Expected row does not exist in the output table workspace", false);
   }
 
   void test_find_one_edges_1D()
@@ -180,7 +188,7 @@ public:
 
     ITableWorkspace_sptr outWS = doExecute(inWS);
 
-    TSM_ASSERT_EQUALS("One face should be identified", outWS->rowCount(), 2);
+    TSM_ASSERT_EQUALS("Two faces should be identified", outWS->rowCount(), 2);
 
     int clusterId = 1;
     size_t expectedWorkspaceIndex = 1;
@@ -398,6 +406,12 @@ public:
     TSM_ASSERT_EQUALS(
         "Should have exactly 6 entries in the table. One cluster with 6 neighbours. The other cluster should be ignored as has no corresponding peak.",
         6, faces->rowCount());
+
+    const double binWidth = (max-min)/nBins;
+    const double binCenter = binWidth / 2;
+    const double expectedRadius = std::sqrt(3 *  (binCenter * binCenter) ) ;
+
+    verify_table_row(faces, 1, 555, 0, true, expectedRadius);
   }
 
   void test_complex_filtering()
@@ -430,6 +444,56 @@ public:
     TSM_ASSERT_EQUALS(
         "Should have exactly 3+6 entries in the table. One cluster with 6 neighbours, another with 3. The other cluster should be ignored as has no corresponding peak.",
         9, faces->rowCount());
+  }
+
+  void test_ignore_row_limit()
+  {
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
+    inWS->setSignalAt(2, 0); // Now we have a single edge!
+    inWS->setSignalAt(0, 0); // Now we have another edge!
+
+    const int rowMaximumLimit = 1;
+
+    FindClusterFaces alg;
+    //alg.setRethrows(true);
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("LimitRows", false); // IGNORE ROW LIMITS IF SUPPLIED
+    alg.setProperty("MaximumRows", rowMaximumLimit);
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    alg.execute();
+    ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    const bool isTruncated = alg.getProperty("TruncatedOutput");
+
+    TSM_ASSERT("Result should NOT be truncated", !isTruncated);
+    TSM_ASSERT_EQUALS("Two faces should be identified", 2, outWS->rowCount());
+
+  }
+
+  void test_limit_rows()
+  {
+    IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 3); // Makes a 1 by 3 md ws with identical signal values.
+    inWS->setSignalAt(2, 0); // Now we have a single edge!
+    inWS->setSignalAt(0, 0); // Now we have another edge!
+
+    const int rowMaximumLimit = 1;
+
+    FindClusterFaces alg;
+    //alg.setRethrows(true);
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("LimitRows", true);
+    alg.setProperty("MaximumRows", rowMaximumLimit);
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    alg.execute();
+    ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    const bool isTruncated = alg.getProperty("TruncatedOutput");
+
+    TSM_ASSERT("Result should be truncated", isTruncated);
+    TSM_ASSERT_EQUALS("Although there are actually two faces, only one face should be identified", outWS->rowCount(), rowMaximumLimit);
+
   }
 
 };

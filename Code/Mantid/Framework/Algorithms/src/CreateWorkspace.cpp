@@ -20,8 +20,9 @@ Example of use in Python for create a simple histogram workspace and automatical
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -35,13 +36,6 @@ using namespace Kernel;
 using namespace API;
 
 DECLARE_ALGORITHM(CreateWorkspace)
-
-/// Sets documentation strings for this algorithm
-void CreateWorkspace::initDocs()
-{
-  this->setWikiSummary("This algorithm constructs a [[MatrixWorkspace]] when passed a vector for each of the X, Y, and E data values. The unit for the X Axis can optionally be specified as any of the units in the Kernel's UnitFactory.  Multiple spectra may be created by supplying the NSpec Property (integer, default 1). When this is provided the vectors are split into equal-sized spectra (all X, Y, E values must still be in a single vector for input). ");
-  this->setOptionalMessage("This algorithm constructs a MatrixWorkspace when passed a vector for each of the X, Y, and E data values. The unit for the X Axis can optionally be specified as any of the units in the Kernel's UnitFactory.  Multiple spectra may be created by supplying the NSpec Property (integer, default 1). When this is provided the vectors are split into equal-sized spectra (all X, Y, E values must still be in a single vector for input).");
-}
 
 
 /// Default (empty) constructor
@@ -221,7 +215,12 @@ void CreateWorkspace::exec()
     }
     else
     { 
-      NumericAxis* const newAxis = new NumericAxis(vAxis.size());
+      const size_t vAxisLength = vAxis.size();
+      NumericAxis* newAxis(NULL);
+      if(vAxisLength == static_cast<size_t>(nSpec)) newAxis = new NumericAxis(vAxisLength); // treat as points
+      else if(vAxisLength == static_cast<size_t>(nSpec + 1)) newAxis = new BinEdgeAxis(vAxisLength); // treat as bin edges
+      else throw std::range_error("Invalid vertical axis length. It must be the same length as NSpec or 1 longer.");
+
       newAxis->unit() = UnitFactory::Instance().create(vUnit);
       outputWS->replaceAxis(1, newAxis);
       for ( size_t i = 0; i < vAxis.size(); i++ )

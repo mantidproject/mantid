@@ -17,9 +17,6 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
-using Mantid::API::IFunction;
-using Mantid::Geometry::Instrument;
-using Mantid::DataObjects::PeaksWorkspace_sptr;
 
 namespace Mantid
 {
@@ -84,7 +81,7 @@ namespace Mantid
                          boost::shared_ptr< const Geometry::IComponent> component ,
                          boost::shared_ptr<const Geometry::ParameterMap> &pmapSv );
 
-      void getRun2MatMap( PeaksWorkspace_sptr & Peaks,
+      void getRun2MatMap( DataObjects::PeaksWorkspace_sptr & Peaks,
                    const  std::string &OptRuns,std::map<int, Mantid::Kernel::Matrix<double> >&Res) const;
       size_t nAttributes() const
       {

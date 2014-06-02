@@ -14,10 +14,10 @@ Take a screenshot of the algorithm dialog associated with the algorithmDeprecati
 def screenShotAlgorithm(alg_name):
 	interface_manager = mantidqtpython.MantidQt.API.InterfaceManager()
 	dlg = threadsafe_call( interface_manager.createDialogFromName, alg_name, True)
-	file = alg_name + "_dlg"
-	screenshot_to_dir(widget=dlg, filename=file, screenshot_dir=screenshotdir)
+	filename = alg_name + "_dlg.png"
+	screenshot_to_dir(widget=dlg, filename=filename, screenshot_dir=screenshotdir)
 	threadsafe_call(dlg.close)
-	file_abs = os.path.join(screenshotdir, file + ".png")
+	file_abs = os.path.join(screenshotdir, filename)
 
 """
 Screenshot all registered algorithms.

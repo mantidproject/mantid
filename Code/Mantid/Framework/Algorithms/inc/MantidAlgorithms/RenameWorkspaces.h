@@ -50,14 +50,16 @@ public:
   virtual ~RenameWorkspaces() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "RenameWorkspaces";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Rename the Workspace. Please provide either a comma-separated list of new workspace names in WorkspaceNames or Prefix and/or Suffix to add to existing names";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Utility\\Workspaces";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();
