@@ -10,15 +10,15 @@ if ( SPHINX_FOUND )
 
   # targets
   set ( TARGET_PREFIX docs)
-  # runner - default=current build
-  set ( DOCS_RUNNER_EXE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/MantidPlot CACHE FILEPATH 
-                        "MantidPlot executable to use to build the documentation" )
+  # runner
+  set ( DOCS_RUNNER_EXE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/MantidPlot )
 
   # HTML target
   set ( BUILDER html )
   configure_file ( runsphinx.py.in runsphinx_html.py @ONLY )
   add_custom_target ( ${TARGET_PREFIX}-html
     COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_html.py
+    DEPENDS ${FRAMEWORK_LIBS}
     COMMENT "Building html documentation"
   )
   # Group within VS and exclude from whole build
@@ -32,6 +32,7 @@ if ( SPHINX_FOUND )
   configure_file ( runsphinx.py.in runsphinx_doctest.py @ONLY )
   add_custom_target ( ${TARGET_PREFIX}-test
     COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_doctest.py
+    DEPENDS ${FRAMEWORK_LIBS}
     COMMENT "Running documentation tests"
   )
   # Group within VS and exclude from whole build
