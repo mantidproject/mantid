@@ -108,18 +108,23 @@ class AlgorithmDirective(BaseDirective):
         Returns:
           str: The full path to the created image
         """
-        from mantiddoc.tools.screenshot import algorithm_screenshot
+        notfoundimage = "/images/ImageNotFound.png"
+        try:
+            screenshots_dir = self._screenshot_directory()
+        except RuntimeError:
+            return notfoundimage
 
-        env = self.state.document.settings.env
-        screenshots_dir = self._screenshot_directory()
+        # Generate image
+        from mantiddoc.tools.screenshot import algorithm_screenshot
         if not os.path.exists(screenshots_dir):
             os.makedirs(screenshots_dir)
 
         try:
             imgpath = algorithm_screenshot(self.algorithm_name(), screenshots_dir, version=self.algorithm_version())
         except Exception, exc:
+            env = self.state.document.settings.env
             env.warn(env.docname, "Unable to generate screenshot for '%s' - %s" % (algorithm_name, str(exc)))
-            imgpath = os.path.join(screenshots_dir, "ImageNotFound.png")
+            imgpath = notfoundimage
 
         return imgpath
 
@@ -144,13 +149,18 @@ class AlgorithmDirective(BaseDirective):
 
         filename = os.path.split(img_path)[1]
         cfgdir = env.srcdir
-        screenshots_dir = self._screenshot_directory()
-        rel_path = os.path.relpath(screenshots_dir, cfgdir)
-        # This is a href link so is expected to be in unix style
-        rel_path = rel_path.replace("\\","/")
 
-        # stick a "/" as the first character so Sphinx computes relative location from source directory
-        path = "/" + rel_path + "/" + filename
+        try:
+            screenshots_dir = self._screenshot_directory()
+            rel_path = os.path.relpath(screenshots_dir, cfgdir)
+            # This is a href link so is expected to be in unix style
+            rel_path = rel_path.replace("\\","/")
+            # stick a "/" as the first character so Sphinx computes relative location from source directory
+            path = "/" + rel_path + "/" + filename
+        except RuntimeError:
+            # Use path as it is
+            path = img_path
+
         caption = "A screenshot of the **" + self.algorithm_name() + "** dialog."
         self.add_rst(format_str % (path, caption))
 

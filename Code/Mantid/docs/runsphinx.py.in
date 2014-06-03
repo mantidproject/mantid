@@ -6,7 +6,9 @@ import os
 import sys
 
 # set environment
-os.environ["SCREENSHOTS_DIR"] = "@SCREENSHOTS_DIR@"
+screenshots_dir = "@SCREENSHOTS_DIR@"
+if screenshots_dir != "":
+    os.environ["SCREENSHOTS_DIR"] = screenshots_dir
 
 builder = "@BUILDER@"
 src_dir = "@CMAKE_CURRENT_SOURCE_DIR@/source"
