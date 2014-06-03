@@ -315,24 +315,28 @@ namespace Mantid
       else // setup existing MD workspace as workspace target.
         m_OutWSWrapper->setMDWS(spws);
 
-      // copy the necessary methadata and get the unique number, that identifies the run, the source workspace came from.
-      copyMetaData(spws,targWSDescr);
-      // preprocess detectors;
+     // preprocess detectors;
       targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_InWS2D,dEModReq,getProperty("UpdateMasks"), std::string(getProperty("PreprocDetectorsWS")));
 
-
-      //DO THE JOB:
-      // get pointer to appropriate  algorithm, (will throw if logic is wrong and ChildAlgorithm is not found among existing)
+    
+      // get pointer to appropriate  ConverttToMD plugin from the CovertToMD plugins factory, (will throw if logic is wrong and ChildAlgorithm is not found among existing)
       ConvToMDSelector AlgoSelector;
       this->m_Convertor  = AlgoSelector.convSelector(m_InWS2D,this->m_Convertor);
+     // copy the necessary methadata and get the unique number, that identifies the run, the source workspace came from.
+      copyMetaData(spws,targWSDescr);
+ 
+
 
       bool ignoreZeros = getProperty("IgnoreZeroSignals");
       // initiate conversion and estimate amount of job to do
       size_t n_steps = this->m_Convertor->initialize(targWSDescr,m_OutWSWrapper,ignoreZeros);
+
+
       // progress reporter
       m_Progress.reset(new API::Progress(this,0.0,1.0,n_steps)); 
 
       g_log.information()<<" conversion started\n";
+      //DO THE JOB:
       this->m_Convertor->runConversion(m_Progress.get());
 
 
