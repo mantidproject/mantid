@@ -357,8 +357,7 @@ void LoadILL::addAllNexusFieldsAsProperties(std::string filename){
     g_log.debug() << "convertNexusToProperties: Error loading " << filename;
       throw Kernel::Exception::FileError("Unable to open File:" , filename);
   }
-  std::string s("");
-  m_loader.addNexusFieldsToWsRun(nxfileID, runDetails, s, s, 0);
+  m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
 
   g_log.debug() << "End parsing properties from : " << filename << std::endl;
 

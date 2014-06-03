@@ -49,13 +49,15 @@ public:
 	double getL2(const API::MatrixWorkspace_sptr&, int detId = 1);
 	double getDistanceSourceToMonitor(const API::MatrixWorkspace_sptr&, size_t);
 	double getInstrumentProperty(const API::MatrixWorkspace_sptr&, std::string);
-    void addNexusFieldsToWsRun(NXhandle nxfileID,
-			API::Run& runDetails,
-    		std::string& parent_name,
-    		std::string& parent_class,
-    		int indent);
+    void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run& runDetails);
     void dumpNexusAttributes(NXhandle nxfileID, std::string& indentStr);
 	std::string dateTimeInIsoFormat(std::string);
+private:
+  void recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
+    API::Run& runDetails,
+      std::string& parent_name,
+      std::string& parent_class,
+      int indent);
 };
 
 } // namespace DataHandling
