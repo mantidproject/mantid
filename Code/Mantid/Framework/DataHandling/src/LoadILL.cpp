@@ -149,7 +149,7 @@ void LoadILL::exec() {
   loadDataIntoTheWorkSpace(dataFirstEntry, monitors,
       calculatedDetectorElasticPeakPosition);
 
-  addEnergyToRun(dataFirstEntry);
+  addEnergyToRun();
   loadExperimentDetails(dataFirstEntry);
 
   // load the instrument from the IDF if it exists
@@ -375,7 +375,7 @@ void LoadILL::addAllNexusFieldsAsProperties(std::string filename){
  *
  * @param entry :: The Nexus entry
  */
-void LoadILL::addEnergyToRun(NXEntry & entry) {
+void LoadILL::addEnergyToRun() {
 
   API::Run & runDetails = m_localWorkspace->mutableRun();
   double ei = m_loader.calculateEnergy(m_wavelength);
@@ -519,10 +519,9 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry,
   NXInt data = dataGroup.openIntData();
   // load the counts from the file into memory
   data.load();
-  /*
-   * Detector: Find real elastic peak in the detector.
-   * Looks for a few elastic peaks on the equatorial line of the detector.
-   */
+
+  // Detector: Find real elastic peak in the detector.
+  // Looks for a few elastic peaks on the equatorial line of the detector.
   int calculatedDetectorElasticPeakPosition;
   if (vanaCalculatedDetectorElasticPeakPosition == -1)
     calculatedDetectorElasticPeakPosition = getDetectorElasticPeakPosition(
@@ -545,11 +544,7 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry,
         + m_channelWidth
             * static_cast<double>(static_cast<int>(i)
                 - calculatedDetectorElasticPeakPosition) - m_channelWidth / 2; // to make sure the bin is in the middle of the elastic peak
-
   }
-  //g_log.debug() << "Detector TOF bins: ";
-  //for (auto i : detectorTofBins) g_log.debug() << i << " ";
-  //g_log.debug() << "\n";
 
   g_log.information() << "T1+T2 : Theoretical = " << theoreticalElasticTOF;
   g_log.information() << " ::  Calculated bin = ["
@@ -557,37 +552,18 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry,
       << detectorTofBins[calculatedDetectorElasticPeakPosition + 1] << "]"
       << std::endl;
 
-  // This is completely absurd but there are no X units in the ILL monitors
-  // So, we are going to assume the same as in the data
-
+  // The binning for monitors is considered the same as for detectors
   size_t spec = 0;
 
   for (auto it = monitors.begin(); it != monitors.end(); ++it) {
 
-    double distanceSourceToMonitor = m_loader.getDistanceSourceToMonitor(
-        m_localWorkspace, spec);
-    double monitorTheoreticalElasticTOF = m_loader.calculateTOF(
-        distanceSourceToMonitor, m_wavelength) * 1e6;
-    double monitorTheoreticalElasticTOFToSubtract = theoreticalElasticTOF
-        - (theoreticalElasticTOF - monitorTheoreticalElasticTOF);
-
-    std::vector<double> thisMonitorBin(detectorTofBins.begin(),
+    m_localWorkspace->dataX(spec).assign(detectorTofBins.begin(),
         detectorTofBins.end());
-    for (size_t i = 0; i < thisMonitorBin.size(); i++)
-      thisMonitorBin[i] = thisMonitorBin[i]
-          - monitorTheoreticalElasticTOFToSubtract;
-
-    m_localWorkspace->dataX(spec).assign(thisMonitorBin.begin(),
-        thisMonitorBin.end());
-
     // Assign Y
-
     m_localWorkspace->dataY(spec).assign(it->begin(), it->end());
-
     // Assign Error
     MantidVec& E = m_localWorkspace->dataE(spec);
     std::transform(it->begin(), it->end(), E.begin(), LoadILL::calculateError);
-
     ++spec;
 
   }
