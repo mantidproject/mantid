@@ -12,7 +12,10 @@
  *  wavelength
  *  channel_width
 
- This algorithm will be used at the ILL D17.
+ Otherwise, the user can ignore the fields above and select directly the channel corresponding to the EPP and the respective spectrum.
+ * ElasticPeakPosition
+ * ElasticPeakPositionSpectrum
+
 
  *WIKI*/
 
@@ -24,6 +27,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <cmath>
 #include <map>
@@ -43,6 +47,7 @@ DECLARE_ALGORITHM(ConvertEmptyToTof)
 /** Constructor
  */
 ConvertEmptyToTof::ConvertEmptyToTof() {
+
 }
 
 //----------------------------------------------------------------------------------------------
@@ -100,6 +105,14 @@ void ConvertEmptyToTof::init() {
           "Optional: if not specified, then the Start/EndIndex fields are used alone. "
           "If specified, the range and the list are combined (without duplicating indices). For example, a range of 10 to 20 and a list '12,15,26,28' gives '10-20,26,28'.");
 
+  // OR Specify EPP
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
+  mustBePositive->setLower(0.0);
+  declareProperty("ElasticPeakPosition", EMPTY_INT(), mustBePositive,
+      "Value of elastic peak position if none of the above are filled in.");
+  declareProperty("ElasticPeakPositionSpectrum", EMPTY_INT(), mustBePositive,
+      "Spectrum index used for elastic peak position above.");
+
 }
 
 //----------------------------------------------------------------------------------------------
@@ -111,25 +124,47 @@ void ConvertEmptyToTof::exec() {
   m_outputWS = this->getProperty("OutputWorkspace");
   std::vector<int> spectraIndices = getProperty("ListOfSpectraIndices");
   std::vector<int> channelIndices = getProperty("ListOfChannelIndices");
+  int epp = getProperty("ElasticPeakPosition");
+  int eppSpectrum = getProperty("ElasticPeakPositionSpectrum");
 
-  //validations
-  validateSpectraIndices(spectraIndices);
-  validateChannelIndices(channelIndices);
 
-  //Map of spectra index, epp
-  std::map<int, int> eppMap = findElasticPeakPositions(spectraIndices,
-      channelIndices);
+  std::vector<double> tofAxis;
+  double channelWidth = getPropertyFromRun<double>(m_inputWS,"channel_width");
 
-  for (auto it = eppMap.begin(); it != eppMap.end(); ++it) {
-    g_log.debug() << "Spectra idx =" << it->first << ", epp=" << it->second
-        << std::endl;
+  // If the ElasticPeakPosition and the ElasticPeakPositionSpectrum were specified
+  if (epp != EMPTY_INT() && eppSpectrum != EMPTY_INT()) {
+    g_log.information(
+        "Using the specified ElasticPeakPosition and ElasticPeakPositionSpectrum");
+
+    double wavelength = getPropertyFromRun<double>(m_inputWS, "wavelength");
+    double l1 = getL1(m_inputWS);
+    double l2 = getL2(m_inputWS, eppSpectrum);
+    double epTof = (calculateTOF(l1, wavelength) + calculateTOF(l2, wavelength)) * 1e6; //microsecs
+
+    tofAxis = makeTofAxis(epp, epTof,m_inputWS->blocksize() + 1, channelWidth);
+
   }
+  // If the spectraIndices and channelIndices were specified
+  else {
 
-  std::pair<int, double> eppAndEpTof = findAverageEppAndEpTof(eppMap);
+    //validations
+    validateSpectraIndices(spectraIndices);
+    validateChannelIndices(channelIndices);
 
-  double channelWidth = getPropertyFromRun<double>(m_inputWS, "channel_width");
-  std::vector<double> tofAxis = makeTofAxis(eppAndEpTof.first,
-      eppAndEpTof.second, m_inputWS->blocksize() + 1, channelWidth);
+    //Map of spectra index, epp
+    std::map<int, int> eppMap = findElasticPeakPositions(spectraIndices,
+        channelIndices);
+
+    for (auto it = eppMap.begin(); it != eppMap.end(); ++it) {
+      g_log.debug() << "Spectra idx =" << it->first << ", epp=" << it->second
+          << std::endl;
+    }
+
+    std::pair<int, double> eppAndEpTof = findAverageEppAndEpTof(eppMap);
+
+    tofAxis = makeTofAxis(eppAndEpTof.first, eppAndEpTof.second,
+        m_inputWS->blocksize() + 1, channelWidth);
+  }
 
   // If input and output workspaces are not the same, create a new workspace for the output
   if (m_outputWS != m_inputWS) {

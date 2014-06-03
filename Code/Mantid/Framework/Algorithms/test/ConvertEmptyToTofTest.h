@@ -60,7 +60,7 @@ public:
 
     // Check the results
     TS_ASSERT_DELTA(*(outWS->dataX(1).begin()), 31463.8, 0.1);
-    TS_ASSERT_DELTA(*(outWS->dataX(1).end() - 1), 34493.8, 0.1)
+    TS_ASSERT_DELTA(*(outWS->dataX(1).end() - 1), 34493.8, 0.1);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -99,11 +99,46 @@ public:
 
     // Check the results
     TS_ASSERT_DELTA(*(outWS->dataX(1).begin()), 31433.8, 0.1);
-    TS_ASSERT_DELTA(*(outWS->dataX(1).end() - 1), 34463.8, 0.1)
+    TS_ASSERT_DELTA(*(outWS->dataX(1).end() - 1), 34463.8, 0.1);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
+
+  void test_set_tof_from_EPP_and_EP_Spectrum_idx() {
+      // Name of the output workspace.
+      std::string outWSName("ConvertEmptyToTofTest_OutputWS3");
+      std::string inWSName("ConvertEmptyToTofTest_InputWS3");
+
+      DataObjects::Workspace2D_sptr testWS = createTestWorkspace();
+      WorkspaceCreationHelper::storeWS(inWSName, testWS);
+
+      ConvertEmptyToTof alg;
+      TS_ASSERT_THROWS_NOTHING(alg.initialize())
+      TS_ASSERT(alg.isInitialized())
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ElasticPeakPositionSpectrum", "5"));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ElasticPeakPosition", "50"));
+      TS_ASSERT_THROWS_NOTHING(alg.execute(); );
+      TS_ASSERT(alg.isExecuted());
+
+      auto outWS =
+          AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
+              outWSName);
+
+      TS_ASSERT(outWS);
+      if (!outWS)
+        return;
+
+      // Check the results
+      TS_ASSERT_DELTA(*(outWS->dataX(1).begin()), 30113.8, 0.1);
+      TS_ASSERT_DELTA(*(outWS->dataX(1).end() - 1), 33143.8, 0.1);
+
+      // Remove workspace from the data service.
+      AnalysisDataService::Instance().remove(outWSName);
+    }
 
 private:
 
