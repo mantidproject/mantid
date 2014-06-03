@@ -96,7 +96,7 @@ class BaseDirective(Directive):
           str: ReST formatted header with algorithm_name as content.
         """
         if pagetitle:
-            line = "\n" + "=" * len(name) + "\n"
+            line = "\n" + "=" * (len(name) + 1) + "\n"
             return line + name + line
         else:
             line = "\n" + "-" * len(name) + "\n"

@@ -36,7 +36,6 @@ class AlgorithmDirective(BaseDirective):
         """
         Called by Sphinx when the ..algorithm:: directive is encountered
         """
-        self._insert_reference_link()
         self._insert_pagetitle()
         imgpath = self._create_screenshot()
         self._insert_screenshot_link(imgpath)
@@ -46,28 +45,31 @@ class AlgorithmDirective(BaseDirective):
         self.commit_rst()
         return []
 
-    def _insert_reference_link(self):
+    def _insert_pagetitle(self):
         """
         Outputs a reference to the top of the algorithm's rst
         of the form ".. _algm-AlgorithmName-vVersion:", so that
         the page can be referenced using 
         :ref:`algm-AlgorithmName-version`. If this is the highest 
-        version then it also outputs a reference ".. _algm-AlgorithmName:
+        version then it outputs a reference ".. _algm-AlgorithmName: instead
+        
+        It then outputs a title for the page
         """
         from mantid.api import AlgorithmFactory
 
         alg_name = self.algorithm_name()
         version = self.algorithm_version()
-        self.add_rst(".. _algm-%s-v%d:\n" % (alg_name, version))
 
+        # page reference must come directly before the title if it wants
+        # to be referenced without defining the link text. Here we put the
+        # specific version one first so that it always must be referenced
+        # using the full link text ":ref`LinkText <algm-AlgorithmName-vX>`:"
+        self.add_rst(".. _algm-%s-v%d:\n\n" % (alg_name, version))
         if AlgorithmFactory.highestVersion(alg_name) == version:
-            self.add_rst(".. _algm-%s:\n" % alg_name)
+            self.add_rst(".. _algm-%s:\n\n" % alg_name)
 
-    def _insert_pagetitle(self):
-        """
-        Outputs a title for the page
-        """
-        title = "%s v%d" % (self.algorithm_name(), self.algorithm_version())
+        # title
+        title = "%s v%d" % (alg_name, version)
         self.add_rst(self.make_header(title, True))
 
     def _insert_toc(self):
