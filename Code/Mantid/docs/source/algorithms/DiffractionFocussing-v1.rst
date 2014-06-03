@@ -50,6 +50,6 @@ means that you can rebin the resulting spectra to finer bins with no
 loss of data. In fact, it is unnecessary to bin your incoming data at
 all; binning can be performed as the very last step.
 
-.. |Example of RAW GEM data focused across the 5 detector banks| image:: GEM_Focused.png
+.. |Example of RAW GEM data focused across the 5 detector banks| image:: /images/GEM_Focused.png
 
 .. categories::

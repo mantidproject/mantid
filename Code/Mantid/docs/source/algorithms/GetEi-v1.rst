@@ -42,6 +42,6 @@ The distances between the monitors are read from the instrument
 definition file. It is assumed that the source and the monitors all lie
 on one line and that the monitors have the same delay time.
 
-.. |Monitor Peak\|centre\|618px| image:: Monitorspect_getei.jpg
+.. |Monitor Peak\|centre\|618px| image:: /images/Monitorspect_getei.jpg
 
 .. categories::

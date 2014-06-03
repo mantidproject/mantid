@@ -42,6 +42,6 @@ the difference between Tmax and Tmin. DataFrameWidth overrides this and
 the width is the difference between the longest and shortest TOFs in the
 data.
 
-.. |Schematic diagram of neutrons entering an instrument and being detected\|centre\|| image:: UnwrapSNS_inst.png
+.. |Schematic diagram of neutrons entering an instrument and being detected\|centre\|| image:: /images/UnwrapSNS_inst.png
 
 .. categories::

@@ -17,6 +17,6 @@ a value of 0 if ShowUnselected is true.
 The instrumentView is the best way to visualize the grouping using the
 "show Instrument" context menu option on the output workspace.
 
-.. |Instrument view of grouping using ReadFromFile with ShowUnselected=True| image:: ReadFromFile-Grouping.png
+.. |Instrument view of grouping using ReadFromFile with ShowUnselected=True| image:: /images/ReadFromFile-Grouping.png
 
 .. categories::

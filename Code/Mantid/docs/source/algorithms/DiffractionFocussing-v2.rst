@@ -59,6 +59,6 @@ Version 1
 Version 1 did not support the use of workspaces to carry grouping
 workspaces and only worked with CalFiles.
 
-.. |Example of RAW GEM data focused across the 5 detector banks| image:: GEM_Focused.png
+.. |Example of RAW GEM data focused across the 5 detector banks| image:: /images/GEM_Focused.png
 
 .. categories::

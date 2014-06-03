@@ -203,6 +203,6 @@ Properties
 | 5       | AccountForGravity   | Input       | Boolean           | False       | Whether to correct for the effects of gravity.                                                                                                            |
 +---------+---------------------+-------------+-------------------+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-.. |Each Q bin contains the sum of many, one, or no wavelength bins\|centre| image:: Wav_Q_bins.png
+.. |Each Q bin contains the sum of many, one, or no wavelength bins\|centre| image:: /images/Wav_Q_bins.png
 
 .. categories::

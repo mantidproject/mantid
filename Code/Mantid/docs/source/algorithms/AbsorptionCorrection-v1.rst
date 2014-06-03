@@ -67,6 +67,6 @@ The input workspace must have units of wavelength. The
 `instrument <instrument>`__ associated with the workspace must be fully
 defined because detector, source & sample position are needed.
 
-.. |AbsorptionFlow.png| image:: AbsorptionFlow.png
+.. |AbsorptionFlow.png| image:: /images/AbsorptionFlow.png
 
 .. categories::
