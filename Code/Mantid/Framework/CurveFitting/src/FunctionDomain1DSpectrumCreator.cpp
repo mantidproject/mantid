@@ -46,7 +46,8 @@ void FunctionDomain1DSpectrumCreator::setWorkspaceIndex(size_t workspaceIndex)
  * If no workspace is present, the index is invalid or there are too few bins (0), the method throws std::invalid_argument.
  *
  * @param domain :: Pointer that holds the domain instance after the call.
- * @param domain :: Pointer that holds the function values instance after the call.
+ * @param values :: Pointer that holds the function values instance after the call.
+ * @param i0 :: Size offset in case the FunctionValues object already contains data.
  */
 void FunctionDomain1DSpectrumCreator::createDomain(boost::shared_ptr<FunctionDomain> &domain, boost::shared_ptr<FunctionValues> &values, size_t i0)
 {
