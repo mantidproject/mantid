@@ -271,8 +271,8 @@ public:
 
   void test_stitching_uses_suppiled_params()
   {
-    auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4,
-      boost::assign::list_of<double>(-0.8)(0.2)(1.0).convert_to_container<MantidVec>());
+    MantidVec params = boost::assign::list_of<double>(-0.8)(0.2)(1.0).convert_to_container<MantidVec>();
+    auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4, params);
 
     MantidVec xValues = ret.get<0>()->readX(0); // Get the output workspace and look at the limits.
 
@@ -287,9 +287,11 @@ public:
   {
     MantidVec x1 = boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8).convert_to_container<MantidVec>();
     MantidVec x2 = boost::assign::list_of(0.4)(0.6)(0.8)(1.0)(1.2)(1.4)(1.6).convert_to_container<MantidVec>();
+    MantidVec y1 = boost::assign::list_of(1)(1)(1)(1)(1)(1)(1)(1)(1).convert_to_container<MantidVec>();
+    MantidVec y2 = boost::assign::list_of(1)(1)(1)(1)(1)(1).convert_to_container<MantidVec>();
 
-    MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, boost::assign::list_of(1)(1)(1)(1)(1)(1)(1)(1)(1).convert_to_container<MantidVec>());
-    MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, boost::assign::list_of(1)(1)(1)(1)(1)(1).convert_to_container<MantidVec>());
+    MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
+    MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
     double demanded_step_size = 0.2;
     auto ret = do_stitch1D(ws1,ws2,0.4,1.0,boost::assign::list_of(demanded_step_size).convert_to_container<MantidVec>());
 
@@ -308,10 +310,14 @@ public:
   {
     MantidVec x1 = boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(0.2)(0.4).convert_to_container<MantidVec>();
     MantidVec x2 = boost::assign::list_of(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8)(1.0).convert_to_container<MantidVec>();
-    MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, boost::assign::list_of(1)(1)(1)(3)(3)(3)(3).convert_to_container<MantidVec>());
-    MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, boost::assign::list_of(1)(1)(1)(1)(3)(3)(3).convert_to_container<MantidVec>());
+    
+    MantidVec y1 = boost::assign::list_of(1)(1)(1)(3)(3)(3)(3).convert_to_container<MantidVec>();
+    MantidVec y2 = boost::assign::list_of(1)(1)(1)(1)(3)(3)(3).convert_to_container<MantidVec>();
 
-    auto ret = do_stitch1D(ws1,ws2,boost::assign::list_of(-1.0)(0.2)(1.0).convert_to_container<MantidVec>());
+    MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
+    MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
+    MantidVec params = boost::assign::list_of(-1.0)(0.2)(1.0).convert_to_container<MantidVec>();
+    auto ret = do_stitch1D(ws1,ws2,params);
 
     MantidVec stitched_y = ret.get<0>()->readY(0);
     MantidVec stitched_x = ret.get<0>()->readX(0);
@@ -335,10 +341,14 @@ public:
   {
     MantidVec x1 = boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(0.2)(0.4).convert_to_container<MantidVec>();
     MantidVec x2 = boost::assign::list_of(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8)(1.0).convert_to_container<MantidVec>();
-    MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, boost::assign::list_of(1)(1)(1)(3)(3)(3)(3).convert_to_container<MantidVec>());
-    MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, boost::assign::list_of(1)(1)(1)(1)(3)(3)(3).convert_to_container<MantidVec>());
+    
+    MantidVec y1 = boost::assign::list_of(1)(1)(1)(3)(3)(3)(3).convert_to_container<MantidVec>();
+    MantidVec y2 = boost::assign::list_of(1)(1)(1)(1)(3)(3)(3).convert_to_container<MantidVec>();
 
-    auto ret = do_stitch1D(ws1,ws2,-0.5,boost::assign::list_of(-1.0)(0.2)(1.0).convert_to_container<MantidVec>(),true);
+    MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
+    MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
+    MantidVec params = boost::assign::list_of(-1.0)(0.2)(1.0).convert_to_container<MantidVec>();
+    auto ret = do_stitch1D(ws1,ws2,-0.5,params,true);
 
     MantidVec stitched_y = ret.get<0>()->readY(0);
     MantidVec stitched_x = ret.get<0>()->readX(0);
@@ -362,10 +372,14 @@ public:
   {
     MantidVec x1 = boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(0.2)(0.4).convert_to_container<MantidVec>();
     MantidVec x2 = boost::assign::list_of(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8)(1.0).convert_to_container<MantidVec>();
-    MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, boost::assign::list_of(1)(1)(1)(3)(3)(3)(3).convert_to_container<MantidVec>());
-    MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, boost::assign::list_of(1)(1)(1)(1)(3)(3)(3).convert_to_container<MantidVec>());
+    
+    MantidVec y1 = boost::assign::list_of(1)(1)(1)(3)(3)(3)(3).convert_to_container<MantidVec>();
+    MantidVec y2 = boost::assign::list_of(1)(1)(1)(1)(3)(3)(3).convert_to_container<MantidVec>();
 
-    auto ret = do_stitch1D(ws1,ws2,0.5,boost::assign::list_of(-1.0)(0.2)(1.0).convert_to_container<MantidVec>(),false);
+    MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
+    MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
+    MantidVec params = boost::assign::list_of(-1.0)(0.2)(1.0).convert_to_container<MantidVec>();
+    auto ret = do_stitch1D(ws1,ws2,0.5,params,false);
 
     MantidVec stitched_y = ret.get<0>()->readY(0);
     MantidVec stitched_x = ret.get<0>()->readX(0);
@@ -387,7 +401,8 @@ public:
 
   void test_stitching_scale_right()
   {
-    auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4,boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>());
+    MantidVec params = boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>();
+    auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4, params);
 
     double scale = ret.get<1>();
     // Check the scale factor
@@ -417,7 +432,8 @@ public:
 
   void test_stitching_scale_left()
   {
-    auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4,boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>(),false);
+    MantidVec params = boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>();
+    auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4, params,false);
 
     double scale = ret.get<1>();
     // Check the scale factor
@@ -447,7 +463,8 @@ public:
 
   void test_stitching_manual_scale_factor_scale_right()
   {
-    auto ret = do_stitch1D(this->b, this->a, true, true, -0.4, 0.4,boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>(),2.0/3.0);
+    MantidVec params = boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>();
+    auto ret = do_stitch1D(this->b, this->a, true, true, -0.4, 0.4, params, 2.0/3.0);
 
     double scale = ret.get<1>();
     // Check the scale factor
@@ -477,7 +494,8 @@ public:
 
   void test_stitching_manual_scale_factor_scale_left()
   {
-    auto ret = do_stitch1D(this->b, this->a, false, true, -0.4, 0.4, boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>(), 3.0/2.0);
+    MantidVec params = boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>();
+    auto ret = do_stitch1D(this->b, this->a, false, true, -0.4, 0.4, params, 3.0/2.0);
 
     double scale = ret.get<1>();
     // Check the scale factor
