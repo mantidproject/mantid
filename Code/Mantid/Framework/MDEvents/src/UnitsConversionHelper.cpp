@@ -62,8 +62,8 @@ namespace Mantid
     /** Test and check if units conversion really occurs. Return true if unit conversion happens or false if noConversion mode is selected*/
     bool UnitsConversionHelper::isUnitConverted()const
     {
-      if (m_UnitCnvrsn == CnvrtToMD::ConvertNo)return true;
-      return false;
+      if (m_UnitCnvrsn == CnvrtToMD::ConvertNo)return false;
+      return true;
     }
     /** Initialize unit conversion helper
      * This method is interface to internal initialize method, which actually takes all parameters UnitConversion helper needs from 

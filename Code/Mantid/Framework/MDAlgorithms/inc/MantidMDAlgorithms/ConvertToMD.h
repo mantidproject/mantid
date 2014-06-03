@@ -90,10 +90,10 @@ namespace MDAlgorithms
                                       const std::string &QFrame,const std::string &convertTo_,MDEvents::MDWSDescription &targWSDescr);
 
       /// par of store metadata routine which generate metadata necessary for initializing ConvertToMD plugin
-       void addExperimentInfo(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::MDWSDescription &targWSDescr) const;
+       void addExperimentInfo(API::IMDEventWorkspace_sptr &mdEventWS, MDEvents::MDWSDescription &targWSDescr) const;
 
        /// Store metadata and set some metadata, needed for plugin to run on the target workspace description
-       void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const;
+       void copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const;
 
 
        void findMinMax(const Mantid::API::MatrixWorkspace_sptr &inWS,const std::string &QMode, const std::string &dEMode,const std::string &QFrame,const std::string &ConvertTo,const std::vector<std::string> &otherDim,

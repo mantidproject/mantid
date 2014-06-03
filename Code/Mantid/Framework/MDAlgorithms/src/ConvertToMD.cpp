@@ -356,7 +356,7 @@ namespace Mantid
     *
     * @return  :: modified targWSDescription containing the number of experiment info added from the current MD workspace
     */
-    void ConvertToMD::addExperimentInfo(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::MDWSDescription &targWSDescr) const
+    void ConvertToMD::addExperimentInfo(API::IMDEventWorkspace_sptr &mdEventWS, MDEvents::MDWSDescription &targWSDescr) const
     {
       // Copy ExperimentInfo (instrument, run, sample) to the output WS
       API::ExperimentInfo_sptr ei(m_InWS2D->cloneExperimentInfo());
@@ -380,7 +380,7 @@ namespace Mantid
     *
     * @return  :: the number of experiment info added from the current MD workspace
     */
-    void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const
+    void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const
     {
 
       MantidVec binBoundaries = m_InWS2D->readX(0);
