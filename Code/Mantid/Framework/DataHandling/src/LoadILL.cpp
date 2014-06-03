@@ -50,12 +50,6 @@ std::ostream& operator<<(std::ostream &strm, const NXClassInfo &c) {
       << c.nxclass;
 }
 
-/// Sets documentation strings for this algorithm
-void LoadILL::initDocs() {
-  this->setWikiSummary("Loads a ILL nexus file. ");
-  this->setOptionalMessage("Loads a ILL nexus file.");
-}
-
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------
