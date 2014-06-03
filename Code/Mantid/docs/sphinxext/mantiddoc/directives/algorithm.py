@@ -119,7 +119,7 @@ class AlgorithmDirective(BaseDirective):
             imgpath = algorithm_screenshot(self.algorithm_name(), screenshots_dir, version=self.algorithm_version())
         except Exception, exc:
             env.warn(env.docname, "Unable to generate screenshot for '%s' - %s" % (algorithm_name, str(exc)))
-            imgpath = os.path.join(screenshots_dir, "failed_dialog.png")
+            imgpath = os.path.join(screenshots_dir, "ImageNotFound.png")
 
         return imgpath
 
