@@ -36,8 +36,6 @@ class AlgorithmDirective(BaseDirective):
         """
         Called by Sphinx when the ..algorithm:: directive is encountered
         """
-        self._track_algorithm()
-
         self._insert_reference_link()
         self._insert_pagetitle()
         imgpath = self._create_screenshot()
@@ -47,26 +45,6 @@ class AlgorithmDirective(BaseDirective):
 
         self.commit_rst()
         return []
-
-    def _track_algorithm(self):
-        """
-        Keep a track of the highest versions of algorithms encountered.
-        The algorithm name and version are retrieved from the document name.
-        See BaseDirective::set_algorithm_and_version()
-        """
-        env = self.state.document.settings.env
-        if not hasattr(env, "algorithm"):
-            env.algorithms = {}
-        #endif
-
-        name, version = self.algorithm_name(), self.algorithm_version()
-        algorithms = env.algorithms
-        if name in algorithms:
-            prev_version = algorithms[name][1]
-            if version > prev_version:
-                algorithms[name][1] = version
-        else:
-            algorithms[name] = (name, version)
 
     def _insert_reference_link(self):
         """
@@ -208,15 +186,15 @@ def html_collect_pages(app):
     """
     Write out unversioned algorithm pages that redirect to the highest version of the algorithm
     """
-    env = app.builder.env
-    if not hasattr(env, "algorithms"):
-        return # nothing to do
+    from mantid.api import AlgorithmFactory
 
     template = REDIRECT_TEMPLATE
+    all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 
-    algorithms = env.algorithms
-    for name, highest_version in algorithms.itervalues():
+    for name, versions in all_algs.iteritems():
         redirect_pagename = "algorithms/%s" % name
+        versions.sort()
+        highest_version = versions[-1]
         target = "%s-v%d.html" % (name, highest_version)
         context = {"name" : name, "target" : target}
         yield (redirect_pagename, context, template)
