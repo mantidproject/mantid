@@ -1,5 +1,9 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+Stitches single histogram [[MatrixWorkspace|Matrix Workspaces]] together outputting a stitched Matrix Workspace. Either the right-hand-side or left-hand-side workspace can be chosen to be scaled. Users
+must provide a Param step (single value), but the binning start and end are calculated from the input workspaces if not provided. Likewise, StartOverlap and EndOverlap are optional. If the StartOverlap or EndOverlap
+are not provided, then these are taken to be the region of x-axis intersection.
+
+The workspaces must be histogrammed. Use [[ConvertToHistogram]] on workspaces prior to passing them to this algorithm. 
 *WIKI*/
 
 #include "MantidAlgorithms/Stitch1D.h"
@@ -48,49 +52,6 @@ namespace Mantid
     DECLARE_ALGORITHM(Stitch1D)
 
     //----------------------------------------------------------------------------------------------
-    /** Constructor
-    */
-    Stitch1D::Stitch1D()
-    {
-    }
-
-    //----------------------------------------------------------------------------------------------
-    /** Destructor
-    */
-    Stitch1D::~Stitch1D()
-    {
-    }
-
-    //----------------------------------------------------------------------------------------------
-    /// Algorithm's name for identification. @see Algorithm::name
-    const std::string Stitch1D::name() const
-    {
-      return "Stitch1D";
-    }
-    ;
-
-    /// Algorithm's version for identification. @see Algorithm::version
-    int Stitch1D::version() const
-    {
-      return 4;
-    }
-    ;
-
-    /// Algorithm's category for identification. @see Algorithm::category
-    const std::string Stitch1D::category() const
-    {
-      return "Reflectometry";
-    }
-
-    //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void Stitch1D::initDocs()
-    {
-      this->setWikiSummary("Stitches single histogram matrix workspaces together");
-      this->setOptionalMessage(this->getWikiSummary());
-    }
-
-    //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
     */
     void Stitch1D::init()
@@ -123,9 +84,13 @@ namespace Mantid
       declareProperty(
         new PropertyWithValue<double>("OutScaleFactor", Mantid::EMPTY_DBL(), Direction::Output),
         "The actual used value for the scaling factor.");
-
     }
 
+    /**Gets the start of the overlapping region
+    @param intesectionMin :: The minimum possible value for the overlapping region to inhabit
+    @param intesectionMax :: The maximum possible value for the overlapping region to inhabit
+    @return a double contianing the start of the overlapping region
+    */
     double Stitch1D::getStartOverlap(const double& intesectionMin, const double& intesectionMax) const
     {
       Property* startOverlapProp = this->getProperty("StartOverlap");
@@ -151,6 +116,11 @@ namespace Mantid
       return startOverlapVal;
     }
 
+    /**Gets the end of the overlapping region
+    @param intesectionMin :: The minimum possible value for the overlapping region to inhabit
+    @param intesectionMax :: The maximum possible value for the overlapping region to inhabit
+    @return a double contianing the end of the overlapping region
+    */
     double Stitch1D::getEndOverlap(const double& intesectionMin, const double& intesectionMax) const
     {
       Property* endOverlapProp = this->getProperty("EndOverlap");
@@ -176,6 +146,11 @@ namespace Mantid
       return endOverlapVal;
     }
 
+    /**Gets the rebinning parameters and calculates any missing values
+    @param lhsWS :: The left hand side input workspace
+    @param rhsWS :: The right hand side input workspace
+    @return a vector<double> contianing the rebinning parameters
+    */
     MantidVec Stitch1D::getRebinParams(MatrixWorkspace_sptr& lhsWS, MatrixWorkspace_sptr& rhsWS) const
     {
       MantidVec inputParams = this->getProperty("Params");
@@ -219,6 +194,11 @@ namespace Mantid
       return result;
     }
 
+    /**Runs the Rebin Algorithm as a child
+    @param input :: The input workspace
+    @param params :: a vector<double> containing rebinning parameters
+    @return A shared pointer to the resulting MatrixWorkspace
+    */
     MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr& input, const MantidVec& params)
     {
       auto rebin = this->createChildAlgorithm("Rebin");
@@ -229,6 +209,12 @@ namespace Mantid
       return outWS;
     }
 
+    /**Runs the Integration Algorithm as a child
+    @param input :: The input workspace
+    @param start :: a double defining the start of the region to integrate
+    @param stop :: a double defining the end of the region to integrate
+    @return A shared pointer to the resulting MatrixWorkspace
+    */
     MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr& input, const double& start, const double& stop)
     {
       auto integration = this->createChildAlgorithm("Integration");
@@ -240,6 +226,13 @@ namespace Mantid
       return outWS;
     }
 
+    /**Runs the MultiplyRange Algorithm as a child defining an end bin
+    @param input :: The input workspace
+    @param startBin :: The first bin int eh range to multiply
+    @param endBin :: The last bin in the range to multiply
+    @param factor :: The multiplication factor
+    @return A shared pointer to the resulting MatrixWorkspace
+    */
     MatrixWorkspace_sptr Stitch1D::multiplyRange(MatrixWorkspace_sptr& input, const int& startBin, const int& endBin, const double& factor)
     {
       auto multiplyRange = this->createChildAlgorithm("MultiplyRange");
@@ -252,6 +245,12 @@ namespace Mantid
       return outWS;
     }
 
+    /**Runs the MultiplyRange Algorithm as a child
+    @param input :: The input workspace
+    @param startBin :: The first bin int eh range to multiply
+    @param factor :: The multiplication factor
+    @return A shared pointer to the resulting MatrixWorkspace
+    */
     MatrixWorkspace_sptr Stitch1D::multiplyRange(MatrixWorkspace_sptr& input, const int& startBin, const double& factor)
     {
       auto multiplyRange = this->createChildAlgorithm("MultiplyRange");
@@ -263,6 +262,11 @@ namespace Mantid
       return outWS;
     }
 
+    /**Runs the WeightedMean Algorithm as a child
+    @param inOne :: The first input workspace
+    @param inTwo :: The second input workspace
+    @return A shared pointer to the resulting MatrixWorkspace
+    */
     MatrixWorkspace_sptr Stitch1D::weightedMean(MatrixWorkspace_sptr& inOne, MatrixWorkspace_sptr& inTwo)
     {
       auto weightedMean = this->createChildAlgorithm("WeightedMean");
@@ -273,6 +277,10 @@ namespace Mantid
       return outWS;
     }
 
+    /**Runs the CreateSingleValuedWorkspace Algorithm as a child
+    @param val :: The double to convert to a single value workspace
+    @return A shared pointer to the resulting MatrixWorkspace
+    */
     MatrixWorkspace_sptr Stitch1D::singleValueWS(double val)
     {
       auto singleValueWS = this->createChildAlgorithm("CreateSingleValuedWorkspace");
@@ -282,6 +290,12 @@ namespace Mantid
       return outWS;
     }
 
+    /**finds the bins containing the ends of the overlappign region
+    @param startOverlap :: The start of the overlapping region
+    @param endOverlap :: The end of the overlapping region
+    @param workspace :: The workspace to determine the overlaps inside
+    @return a boost::tuple<int,int> containing the bin indexes of the overlaps
+    */
     boost::tuple<int, int> Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap, MatrixWorkspace_sptr& workspace)
     {
       int a1 = static_cast<int>(workspace->binIndexOf(startOverlap));
@@ -294,6 +308,10 @@ namespace Mantid
 
     }
 
+    /**Determines if a workspace has non zero errors
+    @param ws :: The input workspace
+    @return True if there are any non-zero errors in the workspace
+    */
     bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr& ws) const
     {
       size_t ws_size = ws->getNumberHistograms();
