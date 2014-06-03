@@ -83,7 +83,7 @@ Examples
 Applying a LinearFunction to the whole instrument, hard-coded with A1=2
 and A0=1. Fictional instrument is called basic\_rect.
 
-.. code:: xml
+.. code-block:: xml
 
       <parameter-file instrument = "basic_rect" date = "2012-01-31T00:00:00">
         <component-link name="basic_rect">
@@ -101,7 +101,7 @@ and A0=1. Fictional instrument is called basic\_rect.
 Applying the same LinearFunction to two different detectors, with
 different coefficients is shown below:
 
-.. code:: xml
+.. code-block:: xml
 
     <parameter-file instrument = "basic_rect" date = "2012-01-31T00:00:00">
     <component-link name="bank1(0,0)">
@@ -132,7 +132,7 @@ provided for each detector. In this way the Algorithm sees a complete
 definition for the Linear function (both A1 and A0) from two incomplete
 definitions on different components in the tree.
 
-.. code:: xml
+.. code-block:: xml
 
     <parameter-file instrument = "basic_rect" date = "2012-01-31T00:00:00">
     <component-link name="basic_rect">

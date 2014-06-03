@@ -46,7 +46,7 @@ with the following parameters filled in:
 Sample Usage
 ############
 
-.. code:: python
+.. code-block:: python
 
     # Load a SCD data set and find the peaks
     LoadEventNexus(Filename=r'TOPAZ_3131_event.nxs',OutputWorkspace='TOPAZ_3131_nxs')

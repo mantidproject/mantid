@@ -34,7 +34,7 @@ StartLiveData algorithm returns after the first chunk of data has been
 loaded and processed. This makes it simple to write a script that will
 open a live plot. For example:
 
-.. code:: python
+.. code-block:: python
 
     StartLiveData(UpdateEvery='1.0',Instrument='FakeEventDataListener',
       ProcessingAlgorithm='Rebin',ProcessingProperties='Params=10e3,1000,60e3;PreserveEvents=1',

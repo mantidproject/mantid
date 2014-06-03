@@ -16,7 +16,7 @@ through s in an IDF. Below is an example of how to define a parameter
 named 'test' to be associated with a component named 'bank\_90degnew'
 defined in the IDF of the HRPD instrument:
 
-.. code:: xml
+.. code-block:: xml
 
     <?xml version="1.0" encoding="UTF-8" ?>
     <parameter-file instrument="HRPD" valid-from="YYYY-MM-DD HH:MM:SS">

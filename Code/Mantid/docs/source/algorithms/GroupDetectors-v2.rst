@@ -75,7 +75,7 @@ is ignored and can be any integer (not necessarily the same integer)
 
 In addition the following XML grouping format is also supported
 
-.. code:: xml
+.. code-block:: xml
 
     <?xml version="1.0" encoding="UTF-8" ?>
     <detector-grouping> 

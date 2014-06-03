@@ -70,7 +70,7 @@ Mantid for different testing tasks.
 Convert re-binned MARI 2D workspace to 3D MD workspace for further analysis/merging with data at different temperatures
 #######################################################################################################################
 
-.. code:: python
+.. code-block:: python
 
 
     Load(Filename='MAR11001.nxspe',OutputWorkspace='MAR11001')
@@ -91,7 +91,7 @@ test folder. The same script without any changes would produce similar
 MD workspace given histogram data obtained from inelastic instruments
 and stored in nxspe files.
 
-.. code:: python
+.. code-block:: python
 
     # let's load test event workspace, which has been already preprocessed and available in Mantid Test folder
     WS_Name='CNCS_7860_event'
@@ -147,7 +147,7 @@ will produce 3-dimensional dataset, with temperature axis. The image
 does not change with temperature, as we have just cloned initial
 workspace without any changes to the experimental data.
 
-.. code:: python
+.. code-block:: python
 
     # let's load test event workspace, which has been already preprocessed and availible in Mantid Test folder 
     WS_Name='MAR11001.nxspe'

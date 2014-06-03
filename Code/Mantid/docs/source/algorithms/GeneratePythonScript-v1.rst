@@ -15,7 +15,7 @@ Python script file or Python variable.
 Example usage:
 ##############
 
-.. code:: python
+.. code-block:: python
 
       # Optional: Store the contents of the workspace to a file to your desktop.
       GeneratePythonScript("MUSR00022725", "/home/userName/Desktop/MUSR00022725.py")
