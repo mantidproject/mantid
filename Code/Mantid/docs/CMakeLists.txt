@@ -46,7 +46,7 @@ endif ()
 if ( APPLE )
   set ( ENABLE_QTASSISTANT False CACHE BOOL "Build qt-assistant documentation" )
 else ()
-  set ( ENABLE_QTASSISTANT True CACHE BOOL "Build qt-assistant documentation" )
+  set ( ENABLE_QTASSISTANT False CACHE BOOL "Build qt-assistant documentation" FORCE )
 endif ( APPLE )
 
 if (ENABLE_QTASSISTANT)
