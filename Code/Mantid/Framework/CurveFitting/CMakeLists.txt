@@ -74,9 +74,7 @@ set ( SRC_FILES
 	src/ReflectivityMulf.cpp
 	src/Resolution.cpp
 	src/SeqDomain.cpp
-	src/SeqDomainDemonstration.cpp
 	src/SeqDomainSpectrumCreator.cpp
-	src/SeqDomainTestFunction.cpp
 	src/SimplexMinimizer.cpp
 	src/SpecialFunctionHelper.cpp
 	src/SplineBackground.cpp
@@ -181,9 +179,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ReflectivityMulf.h
 	inc/MantidCurveFitting/Resolution.h
 	inc/MantidCurveFitting/SeqDomain.h
-	inc/MantidCurveFitting/SeqDomainDemonstration.h
 	inc/MantidCurveFitting/SeqDomainSpectrumCreator.h
-	inc/MantidCurveFitting/SeqDomainTestFunction.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
 	inc/MantidCurveFitting/SpecialFunctionSupport.h
 	inc/MantidCurveFitting/SplineBackground.h
@@ -275,9 +271,7 @@ set ( TEST_FILES
 	RefinePowderInstrumentParameters3Test.h
 	ReflectivityMulfTest.h
 	ResolutionTest.h
-	SeqDomainDemonstrationTest.h
 	SeqDomainSpectrumCreatorTest.h
-	SeqDomainTestFunctionTest.h
 	SimplexTest.h
 	SpecialFunctionSupportTest.h
 	SplineBackgroundTest.h
