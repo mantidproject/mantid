@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 #include "MantidAlgorithms/RecordPythonScript.h"
 #include "MantidAPI/FileProperty.h"
 

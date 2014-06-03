@@ -1,13 +1,3 @@
-/*WIKI* 
-
-
-This algorithm is intended to automatically find all the peaks in a dataset and subtract them, leaving just the residual 'background'. 
-
-====ChildAlgorithms used====
-The [[FindPeaks]] algorithm is used to identify the peaks in the data.
-
-
-*WIKI*/
 #include "MantidAlgorithms/StripPeaks.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"

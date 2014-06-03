@@ -1,12 +1,3 @@
-/*WIKI*
-Algorithm that will run a snippet of python code.
-This is meant to be used by [[LoadLiveData]] to perform some processing.
-
-The input & output workspaces can be accessed from the Python code using the variable
-names 'input' & 'output' respectively.
-
-*WIKI*/
-
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "MantidPythonInterface/kernel/Environment/Threading.h"

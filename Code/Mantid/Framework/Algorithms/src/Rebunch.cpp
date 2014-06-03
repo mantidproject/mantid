@@ -1,12 +1,3 @@
-/*WIKI* 
-
-The algorithm rebins data by adding together ''n_bunch'' successive bins.
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
- outputW = Rebunch("inputW, "3")
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -300,4 +291,3 @@ namespace Mantid
 
 } // namespace Algorithm
 } // namespace Mantid
-

@@ -1,10 +1,3 @@
-/*WIKI* 
-
-Loads the file given into a [[Workspace2D]] with the given name. The file should be in the SPE format, which is described [[Media:Spe_file_format.pdf|here]].
-The workspace will have X units of [[Unit_Factory|Energy transfer]]. The other axis will be binned and have units of either [[Unit_Factory|Momentum transfer / Q]] or degrees, depending on the label in the input file. The workspace will be flagged as a distribution.
-
-
-*WIKI*/
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------

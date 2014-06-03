@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-Re-reduce REFL data for an entire experiment using saved parameters
-
-*WIKI*"""
-
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -228,4 +222,3 @@ def _average_y_of_same_x_(q_min, q_step, q_max=2):
 #############################################################################################
 
 AlgorithmFactory.subscribe(REFLReprocess)
-

@@ -1,11 +1,3 @@
-/*WIKI*
-
-Query a remote compute resource for a specific job the user has submitted.
-
-For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/QueryRemoteJob.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/NullValidator.h"

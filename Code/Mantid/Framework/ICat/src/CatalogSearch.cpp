@@ -1,9 +1,3 @@
-/*WIKI*
-
-This algorithm searches for the investigations and stores the search results in a table workspace.
-
-*WIKI*/
-
 #if GCC_VERSION >= 40800 // 4.8.0
     GCC_DIAG_OFF(literal-suffix)
 #endif
@@ -154,4 +148,3 @@ namespace Mantid
 
   }
 }
-
