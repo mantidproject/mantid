@@ -13,7 +13,7 @@ Convert Fullprof's instrument resolution file (.irf) to GSAS's
 instrument file (.iparm/.prm).
 
 Supported peak profiles
-^^^^^^^^^^^^^^^^^^^^^^^
+#######################
 
 -  Time-of-flight back-to-back exponential convoluted with pseudo-voigt
    (planned)
@@ -28,7 +28,7 @@ Supported peak profiles
    -  GSAS: tabulated peak profile.
 
 Supported input Fullprof file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#############################
 
 There can be several types of Fullprof files as the input file
 
@@ -36,7 +36,7 @@ There can be several types of Fullprof files as the input file
 -  configuration file .pcr (planned)
 
 Set up :math:`2\theta`
-^^^^^^^^^^^^^^^^^^^^^^
+######################
 
 There are several places in this algorithm that can set the value of
 :math:`2\theta`. From the highest priority, here is the list how
@@ -47,7 +47,7 @@ There are several places in this algorithm that can set the value of
 | ``3. Hard coded default  ``\ :math:`2\theta`\ `` of a certain instrument.``
 
 Set up :math:`L_1`
-^^^^^^^^^^^^^^^^^^
+##################
 
 There are 2 places in this algorithm that can set the value of
 :math:`L_1`. From the highest priority, here is the list how
@@ -57,7 +57,7 @@ There are 2 places in this algorithm that can set the value of
 | ``2. Hard coded default  ``\ :math:`2\theta`\ `` of a certain instrument.``
 
 Calculation of L2
-^^^^^^^^^^^^^^^^^
+#################
 
 -  If 2Theta (:math:`2\theta`) is given, L2 will be calculated from
    given 2Theta and L1 by

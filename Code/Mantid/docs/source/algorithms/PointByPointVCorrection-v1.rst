@@ -29,7 +29,7 @@ Vanadium spectrum using :ref:`_algm-SmoothData` prior to using it in
 this algorithm.
 
 Valid input workspaces
-~~~~~~~~~~~~~~~~~~~~~~
+######################
 
 The input workspaces have to have the following in order to be valid
 inputs for this algorithm.

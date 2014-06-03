@@ -15,7 +15,7 @@ separated by commas. The resulting file can normally be loaded into a
 workspace by the :ref:`_algm-LoadAscii` algorithm.
 
 Limitations
-^^^^^^^^^^^
+###########
 
 The algorithm assumes that the workspace has common X values for all
 spectra (i.e. is not a `ragged workspace <Ragged Workspace>`__). Only

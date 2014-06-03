@@ -17,7 +17,7 @@ spectrum has been integrated. By default, the entire range is integrated
 and all spectra are included.
 
 Optional properties
-~~~~~~~~~~~~~~~~~~~
+###################
 
 If only a portion of the workspace should be integrated then the
 optional parameters may be used to restrict the range.
@@ -35,7 +35,7 @@ falls outside any values set will not contribute to the output
 workspace.
 
 EventWorkspaces
-~~~~~~~~~~~~~~~
+###############
 
 If an `EventWorkspace <EventWorkspace>`__ is used as the input, the
 output will be a `MatrixWorkspace <MatrixWorkspace>`__.

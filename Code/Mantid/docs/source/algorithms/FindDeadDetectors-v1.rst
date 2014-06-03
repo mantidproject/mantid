@@ -17,7 +17,7 @@ This algorithm is primarily used to ease identification using the
 instrument visualization tools.
 
 ChildAlgorithms used
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 Uses the :ref:`_algm-Integration` algorithm to sum the spectra.
 

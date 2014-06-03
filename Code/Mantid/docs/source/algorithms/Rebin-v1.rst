@@ -27,7 +27,7 @@ bins cannot be less than 25% or more than 125% of the width that was
 specified.
 
 Example Rebin param strings
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###########################
 
 -0.0001
     From min(TOF) to max(TOF) among all events in Logarithmic bins of
@@ -40,7 +40,7 @@ Example Rebin param strings
     From 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000
 
 For EventWorkspaces
-~~~~~~~~~~~~~~~~~~~
+###################
 
 If the input is an `EventWorkspace <EventWorkspace>`__ and the "Preserve
 Events" property is True, the rebinning is performed in place, and only
@@ -54,7 +54,7 @@ and all Y data will be computed immediately. All event-specific data is
 lost at that point.
 
 For Data-Point Workspaces
-~~~~~~~~~~~~~~~~~~~~~~~~~
+#########################
 
 If the input workspace contains data points, rather than histograms,
 then Rebin will automatically use the
@@ -63,7 +63,7 @@ then Rebin will automatically use the
 the rebinning has taken place.
 
 FullBinsOnly option
-~~~~~~~~~~~~~~~~~~~
+###################
 
 If FullBinsOnly option is enabled, each range will only contain bins of
 the size equal to the step specified. In other words, the will be no

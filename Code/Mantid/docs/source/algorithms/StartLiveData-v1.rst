@@ -20,7 +20,7 @@ For details on the way to specify the data processing steps, see:
 `LoadLiveData <LoadLiveData#Description>`__.
 
 Live Plots
-~~~~~~~~~~
+##########
 
 Once live data monitoring has started, you can open a plot in
 MantidPlot. For example, you can right-click a workspace and choose
@@ -42,7 +42,7 @@ open a live plot. For example:
     plotSpectrum('live', [0,1])
 
 Run Transition Behavior
-~~~~~~~~~~~~~~~~~~~~~~~
+#######################
 
 -  When the experimenter starts and stops a run, the Live Data Listener
    receives this as a signal.
@@ -65,7 +65,7 @@ Run Transition Behavior
    (i.e. before a run begins you will still receive live data).
 
 Multiple Live Data Sessions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###########################
 
 It is possible to have multiple live data sessions running at the same
 time. Simply call StartLiveData more than once, but make sure to specify

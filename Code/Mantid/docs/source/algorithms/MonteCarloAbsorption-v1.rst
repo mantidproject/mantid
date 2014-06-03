@@ -33,7 +33,7 @@ Known limitations
    scatter point will fail.
 
 Restrictions on the input workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 The input workspace must have units of wavelength. The
 `instrument <instrument>`__ associated with the workspace must be fully

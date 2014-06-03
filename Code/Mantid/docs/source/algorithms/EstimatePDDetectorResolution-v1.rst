@@ -40,7 +40,7 @@ Factor Sheet
 ------------
 
 NOMAD
-~~~~~
+#####
 
 Detector size
 
@@ -48,7 +48,7 @@ Detector size
 -  Horizontal: half inch or 1 inch
 
 POWGEN
-~~~~~~
+######
 
 Detector size: 0.005 x 0.0543
 

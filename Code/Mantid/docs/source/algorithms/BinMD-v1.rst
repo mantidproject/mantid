@@ -23,7 +23,7 @@ parameter; any points NOT belonging inside of the ImplicitFunction will
 be set as NaN (not-a-number).
 
 Axis-Aligned Binning
-~~~~~~~~~~~~~~~~~~~~
+####################
 
 This is binning where the output axes are aligned with the original
 workspace. Specify each of the AlignedDim0, etc. parameters with these
@@ -39,7 +39,7 @@ only within a range, then specify the start and end points, with only 1
 bin.
 
 Non-Axis Aligned Binning
-~~~~~~~~~~~~~~~~~~~~~~~~
+########################
 
 This allows rebinning to a new arbitrary space, with rotations,
 translations, or skewing. This is given by a set of basis vectors and
@@ -87,7 +87,7 @@ vectors if needed to make them orthogonal to each other. Only works in 3
 dimensions!
 
 Binning a MDHistoWorkspace
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+##########################
 
 It is possible to rebin a `MDHistoWorkspace <MDHistoWorkspace>`__. Each
 MDHistoWorkspace holds a reference to the

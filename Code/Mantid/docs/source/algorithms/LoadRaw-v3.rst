@@ -19,7 +19,7 @@ normalisation of any kind). The errors, currently assumed Gaussian, will
 be set to be the square root of the number of counts in the bin.
 
 Optional properties
-~~~~~~~~~~~~~~~~~~~
+###################
 
 If only a portion of the data in the `RAW <RAW_File>`__ file is
 required, then the optional 'spectrum' properties can be set before
@@ -28,7 +28,7 @@ provided are checked and the algorithm will fail if they are found to be
 outside the limits of the dataset.
 
 Multiperiod data
-~~~~~~~~~~~~~~~~
+################
 
 If the RAW file contains multiple periods of data this will be detected
 and the different periods will be output as separate workspaces, which
@@ -39,7 +39,7 @@ OutputWorkspace\_period). Each workspace will share the same
 set for a multiperiod dataset, then they will ignored.
 
 Subalgorithms used
-~~~~~~~~~~~~~~~~~~
+##################
 
 LoadRaw runs the following algorithms as child algorithms to populate
 aspects of the output `Workspace <Workspace>`__:

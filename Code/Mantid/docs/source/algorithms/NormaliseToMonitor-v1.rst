@@ -10,7 +10,7 @@ Description
 -----------
 
 Bin-by-bin mode
-~~~~~~~~~~~~~~~
+###############
 
 In this, the default scenario, each spectrum in the workspace is
 normalised on a bin-by-bin basis by the monitor spectrum given. The
@@ -33,7 +33,7 @@ is rebinned internally to match each data spectrum prior to doing the
 normalisation.
 
 Normalisation by integrated count mode
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+######################################
 
 This mode is used if one or both of the relevant 'IntegrationRange'
 optional parameters are set. If either is set to a value outside the
@@ -46,12 +46,12 @@ place, meaning that the output values in the output workspace are
 technically dimensionless.
 
 Restrictions on the input workspace
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###################################
 
 The data must be histogram, non-distribution data.
 
 Child Algorithms used
-~~~~~~~~~~~~~~~~~~~~~
+#####################
 
 The :ref:`_algm-ExtractSingleSpectrum` algorithm is used
 to pull out the monitor spectrum if it's part of the InputWorkspace or

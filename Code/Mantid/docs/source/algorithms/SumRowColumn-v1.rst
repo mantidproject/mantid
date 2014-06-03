@@ -17,7 +17,7 @@ summed between the H/V\_Min/Max values, if given, and the result is a
 single spectrum of row or column number against total counts.
 
 ChildAlgorithms used
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 The :ref:`_algm-Integration` algorithm is used to sum up each
 spectrum between XMin & XMax.

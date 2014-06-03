@@ -18,7 +18,7 @@ Historically the work performed by this algorithm was known as the Quick
 script.
 
 Analysis Modes
-~~~~~~~~~~~~~~
+##############
 
 The default analysis mode is *PointDetectorAnalysis*. Only this mode
 supports Transmission corrections (see below). For PointAnalysisMode the
@@ -34,7 +34,7 @@ according to the input Theta value. Corrections are only enabled when a
 Theta input value has been provided.
 
 Transmission Runs
-~~~~~~~~~~~~~~~~~
+#################
 
 Transmission correction is a normalization step, which may be applied to
 *PointDetectorAnalysis* reduction.

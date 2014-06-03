@@ -17,7 +17,7 @@ time-of-flight. Since it is an `EventWorkspace <EventWorkspace>`__, it
 can be rebinned to finer bins with no loss of data.
 
 Optional properties
-~~~~~~~~~~~~~~~~~~~
+###################
 
 Specific pulse ID and mapping files can be specified if needed; these
 are guessed at automatically from the neutron filename, if not

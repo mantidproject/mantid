@@ -21,7 +21,7 @@ spectrum numbers, detector IDs or workspace indices. The list should be
 set against the appropriate property.
 
 Mask Detectors According To Instrument
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+######################################
 
 If the input MaskedWorkspace is not a SpecialWorkspace2D object, this
 algorithm will check every detectors in input MaskedWorkspace's
@@ -29,7 +29,7 @@ Instrument. If the detector is masked, then the corresponding detector
 will be masked in Workspace.
 
 Mask Detectors According to Masking Workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#############################################
 
 If the input MaskedWorkspace is a `MaskWorkspace <MaskWorkspace>`__
 object, i.e., masking workspace, then the algorithm will mask
@@ -37,7 +37,7 @@ Workspace's detector according to the histogram data of the
 SpecialWorkspace2D object
 
 Definition of Mask
-~~~~~~~~~~~~~~~~~~
+##################
 
 -  If a pixel is masked, it means that the data from this pixel won't be
    used. In the masking workspace (i.e.,
@@ -49,7 +49,7 @@ Definition of Mask
    is 0.
 
 About Input Parameters
-~~~~~~~~~~~~~~~~~~~~~~
+######################
 
 :ref:`_algm-MaskDetectors` supports various format of input to
 mask detectors, including
@@ -63,7 +63,7 @@ mask detectors, including
    extracted from this workspace)
 
 Rules
-^^^^^
+#####
 
 Here are the rules for input information for masking
 
@@ -78,7 +78,7 @@ Here are the rules for input information for masking
 | ``  will be combined by the ``\ *``plus``*\ `` operation.``
 
 Operations Involved in Masking
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##############################
 
 There are 2 operations to mask a detector and thus spectrum related
 
@@ -87,7 +87,7 @@ There are 2 operations to mask a detector and thus spectrum related
 | ``2. Clear the data associated with the spectrum with detectors that are masked;``
 
 Implementation
-~~~~~~~~~~~~~~
+##############
 
 In the plan, the workflow to mask detectors should be
 
@@ -96,7 +96,7 @@ In the plan, the workflow to mask detectors should be
 | ``3. Clear data on all spectra, which have at least one detector that is masked.``
 
 Concern
-~~~~~~~
+#######
 
 -  Speed!
 

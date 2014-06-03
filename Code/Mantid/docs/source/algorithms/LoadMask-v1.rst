@@ -24,7 +24,7 @@ File Format
 -----------
 
 XML File Format
-^^^^^^^^^^^^^^^
+###############
 
 Example 1:
 
@@ -41,7 +41,7 @@ Example 1:
 | `` ``\ 
 
 ISIS File Format
-^^^^^^^^^^^^^^^^
+################
 
 Example 2:
 

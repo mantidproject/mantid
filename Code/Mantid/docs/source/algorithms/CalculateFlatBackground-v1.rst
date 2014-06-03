@@ -28,7 +28,7 @@ in quadrature divided by the number of bins. This background error value
 is added in quadrature to the errors in each bin.
 
 ChildAlgorithms used
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 The `Linear <Linear>`__ algorithm is used when the Mode = Linear Fit.
 From the resulting line of best fit a constant value taken as the value

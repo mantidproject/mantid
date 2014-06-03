@@ -18,7 +18,7 @@ The output workspace can be fed to :ref:`_algm-MaskDetectors` to
 mask the same spectra on another workspace.
 
 ChildAlgorithms used
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 Uses the :ref:`_algm-Integration` algorithm to sum the spectra.
 

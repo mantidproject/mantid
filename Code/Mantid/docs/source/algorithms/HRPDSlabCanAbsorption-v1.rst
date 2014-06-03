@@ -31,14 +31,14 @@ are as given in the property list above. The assumption is that the
 neutron enters the plate along the normal.
 
 Restrictions on the input workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 The input workspace must have units of wavelength. The
 `instrument <instrument>`__ associated with the workspace must be fully
 defined because detector, source & sample position are needed.
 
 ChildAlgorithms used
-~~~~~~~~~~~~~~~~~~~~
+####################
 
 The :ref:`_algm-FlatPlateAbsorption` algorithm is used to
 calculate the correction due to the sample itself.

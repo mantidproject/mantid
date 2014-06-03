@@ -25,7 +25,7 @@ becomes
 A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q
 
 Limitations
-^^^^^^^^^^^
+###########
 
 The Algorithm will fail if any stitch index appears more than 3 times,
 as the old interface does not support more than 3 runs per row.

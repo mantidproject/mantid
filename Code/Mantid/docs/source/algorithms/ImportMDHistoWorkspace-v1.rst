@@ -13,7 +13,7 @@ This algorithm takes a text file (.txt extension) containing two columns
 and converts it into an MDHistoWorkspace.
 
 Details
-~~~~~~~
+#######
 
 The columns are in the order **signal** then **error**. The file must
 only contain two columns, these may be separated by any whitespace

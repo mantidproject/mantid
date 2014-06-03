@@ -18,7 +18,7 @@ necessary to call LoadLiveData directly.**
 
    LoadLiveData\_flow.png
 Data Processing
-~~~~~~~~~~~~~~~
+###############
 
 -  Each time LoadLiveData is called, a chunk of data is loaded from the
    `LiveListener <LiveListener>`__.
@@ -29,7 +29,7 @@ Data Processing
 -  You have two options on how to process this workspace:
 
 Processing with an Algorithm
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+############################
 
 -  Specify the name of the algorithm in the *ProcessingAlgorithm*
    property.
@@ -43,7 +43,7 @@ Processing with an Algorithm
    -  The algorithm is then run, and its OutputWorkspace is saved.
 
 Processing with a Python Script
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###############################
 
 -  Specify a python script in the *ProcessingScript* property.
 
@@ -59,7 +59,7 @@ Processing with a Python Script
       script.
 
 Data Accumulation
-~~~~~~~~~~~~~~~~~
+#################
 
 -  The *AccumulationMethod* property specifies what to do with each
    chunk.
@@ -72,7 +72,7 @@ Data Accumulation
       appended to the output workspace.
 
 A Warning About Events
-^^^^^^^^^^^^^^^^^^^^^^
+######################
 
 Beware! If you select *PreserveEvents* and your processing keeps the
 data as `EventWorkspaces <EventWorkspace>`__, you may end up creating
@@ -82,7 +82,7 @@ the list gets bigger (Order of N\*log(N)). This could cause Mantid to
 run very slowly or to crash due to lack of memory.
 
 Post-Processing Step
-~~~~~~~~~~~~~~~~~~~~
+####################
 
 -  Optionally, you can specify some processing to perform *after*
    accumulation.

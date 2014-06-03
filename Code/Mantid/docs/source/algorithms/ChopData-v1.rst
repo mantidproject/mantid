@@ -15,7 +15,7 @@ the same point. This is useful if your raw files contain multiple
 frames.
 
 Identifying Extended Frames
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###########################
 
 .. figure:: /images/ChopDataIntegrationExplanation.png
    :alt: Figure 1: Example Monitor Spectrum with Extended Frames

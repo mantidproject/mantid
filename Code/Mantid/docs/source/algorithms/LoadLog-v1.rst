@@ -14,7 +14,7 @@ optional 'spectrum' properties (i.e. a range and a list) together if so
 desired.
 
 Load ISIS log file(s)
-~~~~~~~~~~~~~~~~~~~~~
+#####################
 
 Assumes that a log file originates from a PC (not VMS) environment, i.e.
 the log files to be loaded are assumed to have the extension .txt. Its
@@ -25,13 +25,13 @@ columns, where the first column consists of data-time strings of the ISO
 that may contain spaces.
 
 Parent algorithm
-~~~~~~~~~~~~~~~~
+################
 
 LoadLog is also a child algorithm of :ref:`_algm-LoadRaw`, i.e. it gets
 called whenever LoadRaw is executed.
 
 Load SNS text log file
-~~~~~~~~~~~~~~~~~~~~~~
+######################
 
 If the file is determined to be a SNS text log file it should be of the
 form

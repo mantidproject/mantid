@@ -14,7 +14,7 @@ Description
    {{BinaryOperation|verb=added|prep=to|symbol=<math>+</math>}}
 
 EventWorkspace note
-~~~~~~~~~~~~~~~~~~~
+###################
 
 For `EventWorkspaces <EventWorkspace>`__, the event lists at each
 workspace index are concatenated to create the output event list at the

@@ -20,7 +20,7 @@ be copied from the first input workspace (but if they're not identical
 anyway, then you probably shouldn't be using this algorithm!).
 
 Restrictions on the input workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 For `EventWorkspaces <EventWorkspace>`__, there are no restrictions on
 the input workspaces if ValidateInputs=false.
@@ -35,14 +35,14 @@ If ValidateInputs is selected, then the input workspaces must also:
 -  Have common bin boundaries
 
 Spectrum Numbers
-^^^^^^^^^^^^^^^^
+################
 
 If there is an overlap in the spectrum numbers of both inputs, then the
 output workspace will have its spectrum numbers reset starting at 0 and
 increasing by 1 for each spectrum.
 
 See Also
-^^^^^^^^
+########
 
 -  :ref:`_algm-ConjoinWorkspaces` for joining parts of the
    same workspace.

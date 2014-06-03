@@ -31,7 +31,7 @@ of each element and a numerical integration is carried out using these
 path lengths over the volume elements.
 
 Restrictions on the input workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 The input workspace must have units of wavelength. The
 `instrument <instrument>`__ associated with the workspace must be fully

@@ -62,7 +62,7 @@ The algorithm will generate warning. There are three main warning to
 know about.
 
 Off the Image Edge
-~~~~~~~~~~~~~~~~~~
+##################
 
 The algorithm will warn about unreachable peaks (off the image). This
 may be because the peaks detected were off the edge of the detector, or
@@ -70,7 +70,7 @@ because the image was cropped in BinMD in such a way that that part of
 the detector/TOF space is no longer accessible.
 
 No Cluster Corresponding to Peak
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+################################
 
 This is because the input `PeaksWorkspace <PeaksWorkspace>`__ has peaks
 that do not align with peaks in the image. The error could either be on
@@ -81,7 +81,7 @@ Normalization input parameters are not so low that they are treating
 genuine peaks in the image as background.
 
 Multiple Peaks Assigned to the same Cluster
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###########################################
 
 This means overlapping peaks in the image. This is a problem because
 both peaks will be given an integrated value that is the sum of the

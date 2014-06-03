@@ -68,7 +68,7 @@ common situations. They work with the data files which already used by
 Mantid for different testing tasks.
 
 Convert re-binned MARI 2D workspace to 3D MD workspace for further analysis/merging with data at different temperatures
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#######################################################################################################################
 
 .. code:: python
 
@@ -84,7 +84,7 @@ Output **MD3** workspace can be viewed in slice-viewer as 3D workspace
 with T-axis having single value.
 
 Convert Set of Event Workspaces (Horace scan) to 4D MD workspace, direct mode:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##############################################################################
 
 This example is based on CNCS\_7860\_event.nxs file, available in Mantid
 test folder. The same script without any changes would produce similar
@@ -137,7 +137,7 @@ and stored in nxspe files.
     plotSlice(RezWS, xydim=["[H,0,0]","[0,K,0]"], slicepoint=[0,0] )
 
 Convert set of inelastic results obtained in Powder mode (direct) as function of temperature to a 3D workspace:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###############################################################################################################
 
 The test example is based on MAR1011.nxspe data file, obtained by
 reducing test data from the MARI experiment. The data for the experiment

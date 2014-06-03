@@ -13,7 +13,7 @@ Generate a workspace by summing over the peak functions. The peaks'
 parameters are given in a `TableWorkspace <TableWorkspace>`__.
 
 Peak Parameters
-^^^^^^^^^^^^^^^
+###############
 
 Peak parameters must have the following parameters, which are case
 sensitive in input `TableWorkspace <TableWorkspace>`__
@@ -28,7 +28,7 @@ sensitive in input `TableWorkspace <TableWorkspace>`__
 | ``8. chi2``
 
 Output
-^^^^^^
+######
 
 | ``Output will include``
 | ``1. pure peak``

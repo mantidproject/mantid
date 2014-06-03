@@ -14,7 +14,7 @@ This algorithm is to import Fullprof .irf file (peak parameters) and
 which serve as the inputs for algorithm LeBailFit.
 
 Format of Instrument parameter TableWorkspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#############################################
 
 Instrument parameter TableWorkspace contains all the peak profile
 parameters imported from Fullprof .irf file.
@@ -28,7 +28,7 @@ Each row in TableWorkspace corresponds to one profile parameter.
 Columns include Name, Value, FitOrTie, Min, Max and StepSize.
 
 Format of reflection TableWorkspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 Each row of this workspace corresponds to one diffraction peak. The
 information contains the peak's Miller index and (local) peak profile

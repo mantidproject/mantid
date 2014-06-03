@@ -72,7 +72,7 @@ this means in practice is that the edge bins will possibly have a
 reduced number of counts.
 
 Restrictions on the input workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 The input workspace must contain histogram data where the X unit is
 time-of-flight and the Y data is raw counts. The
@@ -80,7 +80,7 @@ time-of-flight and the Y data is raw counts. The
 defined because detector, source & sample position are needed.
 
 Child algorithms used
-^^^^^^^^^^^^^^^^^^^^^
+#####################
 
 If the input workspace contains more than a single spectrum, Unwrap
 makes use of the `rebin <rebin>`__ algorithm to set the bins on the

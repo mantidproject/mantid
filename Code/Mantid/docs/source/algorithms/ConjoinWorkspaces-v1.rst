@@ -24,7 +24,7 @@ of the first input workspace. Workspace data members other than the data
 using this algorithm!). Both input workspaces will be deleted.
 
 Conflict Spectrum IDs
-^^^^^^^^^^^^^^^^^^^^^
+#####################
 
 The algorithm adds the spectra from the first workspace and then the
 second workspace.
@@ -41,7 +41,7 @@ second workspace.
    non-negative integer.
 
 Restrictions on the input workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 The input workspaces must come from the same instrument, have common
 units and bins and no detectors that contribute to spectra should

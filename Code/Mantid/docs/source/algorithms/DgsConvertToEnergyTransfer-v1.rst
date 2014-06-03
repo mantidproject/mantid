@@ -38,7 +38,7 @@ The use of the SofPhiEIsDistribution parameter in the last Rebin call is
 used to set the *Rebin* algorithm parameter PreserveEvents.
 
 Workflow
-~~~~~~~~
+########
 
 .. figure:: /images/DgsConvertToEnergyTransferWorkflow.png
    :alt: DgsConvertToEnergyTransferWorkflow.png

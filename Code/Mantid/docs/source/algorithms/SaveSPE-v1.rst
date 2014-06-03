@@ -18,7 +18,7 @@ get a traditional SPE file, you could choose to have the units in mod Q
 and then it will save to an SPQ file variant.
 
 Restrictions on the input workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 The input workspace must contain histogram data with common binning on
 all spectra.

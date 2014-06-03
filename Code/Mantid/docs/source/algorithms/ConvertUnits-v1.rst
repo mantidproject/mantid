@@ -32,7 +32,7 @@ value of EFixed will be taken, if available, from the instrument
 definition file.
 
 Restrictions on the input workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 -  Naturally, the X values must have a unit set, and that unit must be
    known to the `Unit Factory <Unit Factory>`__.

@@ -57,7 +57,7 @@ The output of this algorithm is:
 :math:`OutputWorkspace = \frac{T^'}{T_0}`
 
 Error Propagation
-~~~~~~~~~~~~~~~~~
+#################
 
 The error propagation follows this formula:
 

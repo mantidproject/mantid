@@ -26,7 +26,7 @@ of each element and a numerical integration is carried out using these
 path lengths over the volume elements.
 
 Assumptions
-^^^^^^^^^^^
+###########
 
 Although no assumptions are made about the beam direction or the sample
 position, the cylinder will be constructed with its centre at the sample
@@ -34,14 +34,14 @@ position and it's axis along the y axis (which in the case of most
 instruments is the vertical).
 
 Restrictions on the input workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 The input workspace must have units of wavelength. The
 `instrument <instrument>`__ associated with the workspace must be fully
 defined because detector, source & sample position are needed.
 
 References
-^^^^^^^^^^
+##########
 
 The method used here is based upon work presented in the following two
 papers, although it does not yet fully implement all aspects discussed

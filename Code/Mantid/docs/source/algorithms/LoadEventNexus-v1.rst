@@ -20,7 +20,7 @@ Sample logs, such as motor positions or e.g. temperature vs time, are
 also loaded using the :ref:`_algm-LoadNexusLogs` child algorithm.
 
 Optional properties
-~~~~~~~~~~~~~~~~~~~
+###################
 
 If desired, you can filter out the events at the time of loading, by
 specifying minimum and maximum time-of-flight values. This can speed up
@@ -43,7 +43,7 @@ by the speed-up in avoid re-allocating, so the net result is smaller
 memory footprint and approximately the same loading time.
 
 Veto Pulses
-^^^^^^^^^^^
+###########
 
 Veto pulses can be filtered out in a separate step using
 :ref:`_algm-FilterByLogValue`:

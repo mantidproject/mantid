@@ -10,7 +10,7 @@ Description
 -----------
 
 Additional properties for a 1D function and a MatrixWorkspace
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#############################################################
 
 If Function defines a one-dimensional function and InputWorkspace is a
 `MatrixWorkspace <MatrixWorkspace>`__ the algorithm will have these
@@ -27,7 +27,7 @@ additional properties:
 +------------------+-------------+-----------+-------------------------+---------------------------------------------------------------------+
 
 Overview
-~~~~~~~~
+########
 
 This is a generic algorithm for fitting data in a Workspace with a
 function. The workspace must have the type supported by the algorithm.
@@ -68,7 +68,7 @@ which allows all the settings to be specified via its graphical user
 interface.
 
 Setting a simple function
-~~~~~~~~~~~~~~~~~~~~~~~~~
+#########################
 
 To use a simple function for a fit set its name and initial parameter
 values using the Function property. This property is a comma separated
@@ -99,7 +99,7 @@ A list of the available simple functions can be found
 `here <:Category:Fit_functions>`__.
 
 Setting a composite function
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+############################
 
 A composite function is a sum of simple functions. It does not have a
 name. To define a composite function set a number of simple functions in
@@ -112,7 +112,7 @@ background might look like this:
 | ``           name=Gaussian, PeakCentre=7.6, Height=8, Sigma=0.5"``
 
 Setting ties
-~~~~~~~~~~~~
+############
 
 Parameters can be tied to other parameters or to a constant. In this
 case they do not take part in the fitting but are evaluated using the
@@ -145,7 +145,7 @@ function 0. Of course all three functions must have a parameter called
 ``Ties: "f1.Sigma=f2.Sigma=f0.Sigma"``
 
 Setting constraints
-~~~~~~~~~~~~~~~~~~~
+###################
 
 Parameters can be constrained to be above a lower boundary and/or below
 an upper boundary. If a constraint is violated a penalty to the fit is
@@ -175,13 +175,13 @@ constraints and for ties. For example
 constrain the parameter "c" of function 1.
 
 Fitting to data in a MatrixWorkspace
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+####################################
 
 The error values in the input workspace are used to weight the data in
 the fit. Zero error values are not allowed and are replaced with ones.
 
 Output
-~~~~~~
+######
 
 Setting the Output property defines the names of the two output
 workspaces. One of them is a `TableWorkspace <TableWorkspace>`__ with

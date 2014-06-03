@@ -13,7 +13,7 @@ Retrieves the algorithm history of the workspace and saves it to a
 Python script file or Python variable.
 
 Example usage:
-~~~~~~~~~~~~~~
+##############
 
 .. code:: python
 

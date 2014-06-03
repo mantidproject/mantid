@@ -10,7 +10,7 @@ Description
 -----------
 
 Prerequisites
-~~~~~~~~~~~~~
+#############
 
 The workspace spectrum axis should be converted to signed\_theta using
 :ref:`_algm-ConvertSpectrumAxis` and the x axis should be
@@ -24,7 +24,7 @@ value you can do so by providing your own *IncidentTheta* property and
 enabling *OverrideIncidentTheta*.
 
 Transformations
-~~~~~~~~~~~~~~~
+###############
 
 Output workspaces are always 2D MD Histogram workspaces, but the
 algorithm will perform one of three possible transformations.
@@ -49,7 +49,7 @@ where
    {{AlgorithmLinks|ConvertToReflectometryQ}}
 
 After Transformation
-~~~~~~~~~~~~~~~~~~~~
+####################
 
 You will usually want to rebin using :ref:`_algm-BinMD` or
 :ref:`_algm-SliceMD` after transformation because the output workspaces

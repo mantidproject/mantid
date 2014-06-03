@@ -27,7 +27,7 @@ The parameters of WavelengthMin/WavelengthMax also limit the peaks
 attempted to those that can be detected/produced by your instrument.
 
 Using HKLPeaksWorkspace
-~~~~~~~~~~~~~~~~~~~~~~~
+#######################
 
 If you specify the HKLPeaksWorkspace parameter, then the algorithm will
 use the list of HKL in that workspace as the starting point of HKLs,

@@ -22,7 +22,7 @@ subsequent rotation, hence this means that detectors may not for example
 face the sample perfectly after this algorithm has been applied.
 
 Additional Detector Parameters Using ASCII File
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###############################################
 
 The ASCII format allows a multi-column text file to provide new
 positions along with additional parameters for each detector. If a text

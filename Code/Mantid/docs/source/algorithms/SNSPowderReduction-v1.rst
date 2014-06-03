@@ -10,7 +10,7 @@ Description
 -----------
 
 About Filter Wall
-^^^^^^^^^^^^^^^^^
+#################
 
 Time filter wall is used in \_loadData to load data in a certain range
 of time. Here is how the filter is used:

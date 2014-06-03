@@ -23,7 +23,7 @@ with `MDEventWorkspace <MDEventWorkspace>`__ produced by Mantid
 algorithms.
 
 Notes on Horace SQW files
-~~~~~~~~~~~~~~~~~~~~~~~~~
+#########################
 
 Sqw objects comes in two flavours:
 
@@ -45,7 +45,7 @@ as to use private methods of sqw objects.
 DND-type object can not be currently read or understood by Mantid.
 
 Structure of sqw class with remarks on what is currently used and what is ignored
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#################################################################################
 
 String started by:
 
@@ -147,7 +147,7 @@ data.s is normalized by the number of pixels, as is the variance data.e.
 For those elements where data.npix==0, data.s=0 and data.e=0
 
 General notes about SQW file assumptions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+########################################
 
 Parts of the code were written with the idea of generalising
 functionality at a later stage. However, we can now assume that:

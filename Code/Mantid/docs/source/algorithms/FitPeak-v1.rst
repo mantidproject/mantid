@@ -16,12 +16,12 @@ The output `TableWorkspace <TableWorkspace>`__ contains the following
 columns...
 
 Subalgorithms used
-^^^^^^^^^^^^^^^^^^
+##################
 
 -  Fit
 
 Treating weak peaks vs. high background
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#######################################
 
 FindPeaks uses a more complicated approach to fit peaks if
 **HighBackground** is flagged. In this case, FindPeak will fit the
@@ -33,7 +33,7 @@ function including background and Gaussian by using the previously
 recorded best background and peak parameters as the starting values.
 
 Criteria To Validate Peaks Found
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+################################
 
 FindPeaks finds peaks by fitting a Guassian with background to a certain
 range in the input histogram. :ref:`_algm-Fit` may not give a correct
@@ -47,7 +47,7 @@ fitted peak position must be within a short distance to the give one.
 to select the best fit among various starting sigma values.
 
 Fit Window and Peak Range
-^^^^^^^^^^^^^^^^^^^^^^^^^
+#########################
 
 If FitWindows is defined, then a peak's range to fit (i.e., x-min and
 x-max) is confined by this window.

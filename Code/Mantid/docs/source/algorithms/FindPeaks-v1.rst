@@ -23,7 +23,7 @@ a linear background: spectrum, centre, width, height,
 backgroundintercept & backgroundslope.
 
 Subalgorithms used
-~~~~~~~~~~~~~~~~~~
+##################
 
 FindPeaks uses the :ref:`_algm-SmoothData` algorithm to, well,
 smooth the data - a necessary step to identify peaks in statistically
@@ -31,7 +31,7 @@ fluctuating data. The :ref:`_algm-Fit` algorithm is used to fit candidate
 peaks.
 
 Treating weak peaks vs. high background
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#######################################
 
 FindPeaks uses a more complicated approach to fit peaks if
 **HighBackground** is flagged. In this case, FindPeak will fit the
@@ -43,7 +43,7 @@ function including background and Gaussian by using the previously
 recorded best background and peak parameters as the starting values.
 
 Criteria To Validate Peaks Found
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+################################
 
 FindPeaks finds peaks by fitting a Guassian with background to a certain
 range in the input histogram. :ref:`_algm-Fit` may not give a correct
@@ -56,7 +56,7 @@ are provided as options to validate the result
    to select the best fit among various starting sigma values.
 
 Fit Window
-~~~~~~~~~~
+##########
 
 If FitWindows is defined, then a peak's range to fit (i.e., x-min and
 x-max) is confined by this window.
@@ -65,7 +65,7 @@ If FitWindows is defined, starting peak centres are NOT user's input,
 but found by highest value within peak window. (Is this correct???)
 
 References
-^^^^^^^^^^
+##########
 
 #. M.A.Mariscotti, *A method for automatic identification of peaks in
    the presence of background and its application to spectrum analysis*,

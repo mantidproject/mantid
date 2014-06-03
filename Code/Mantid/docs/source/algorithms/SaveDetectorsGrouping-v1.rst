@@ -16,7 +16,7 @@ XML File Format
 ---------------
 
 Parameters
-~~~~~~~~~~
+##########
 
 -  "instrument": mandatory attribute of node 'detector-grouping'. It
    must be valid instrument name.

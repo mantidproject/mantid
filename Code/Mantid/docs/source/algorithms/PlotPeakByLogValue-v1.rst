@@ -47,7 +47,7 @@ output table contain the names of the data sources (files or
 workspaces).
 
 Output workspace format
-~~~~~~~~~~~~~~~~~~~~~~~
+#######################
 
 The output workspace is a table in which rows correspond to the spectra
 in the order they (spectra) appear in the Input property. The first

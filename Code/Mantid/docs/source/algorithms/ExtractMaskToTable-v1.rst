@@ -10,14 +10,14 @@ Description
 -----------
 
 InputWorskpace
-^^^^^^^^^^^^^^
+##############
 
 It can be either a MaskWorkspace, containing the masking information, or
 a Data workspace (EventWorkspace or Workspace2D), having detectors
 masked.
 
 Optional MaskTableWorkspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###########################
 
 If the optional input 'MaskTableWorkspace' is given, it must be a table
 workspace having the same format as output TableWorkspace such that it

@@ -16,7 +16,7 @@ remove higher frequencies from the spectrum which reduces the noise.
 The second version of the FFTSmooth algorithm has two filters:
 
 Zeroing
-~~~~~~~
+#######
 
 -  Filter: "Zeroing"
 -  Params: "n" - an integer greater than 1 meaning that the Fourier
@@ -24,7 +24,7 @@ Zeroing
    will be set to zero.
 
 Butterworth
-~~~~~~~~~~~
+###########
 
 -  Filter: "Butterworth"
 -  Params: A string containing two positive integer parameters separated

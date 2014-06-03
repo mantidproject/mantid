@@ -31,7 +31,7 @@ From http://www.crystal.mat.ethz.ch/research/DiffuseXrayScattering:
    in computing technologies.
 
 Summary of data format
-^^^^^^^^^^^^^^^^^^^^^^
+######################
 
 In general it contains collection of grids with intensities and each
 grid is described by specifying origin, size of grid (in each direction)
@@ -42,7 +42,7 @@ Please contact Michal Chodkiewicz (michal.chodkiewicz@gmail.com); Vickie
 Lynch (vel@ornl.gov) for more details.
 
 Description of data fields
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+##########################
 
 -  The CoordinateSystem data object has the attribute "isLocal".
 

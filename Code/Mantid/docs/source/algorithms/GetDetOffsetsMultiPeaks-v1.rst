@@ -32,7 +32,7 @@ single group on :ref:`_algm-DiffractionFocussing`. The
 alter the grouping in the cal file.
 
 Fit for peak offset
-~~~~~~~~~~~~~~~~~~~
+###################
 
 The algorithm to calculate offset of peaks' positions is to minimize a
 cost function as
@@ -42,7 +42,7 @@ cost function as
 , which p is the index of a peak whose position is within MinD and MaxD.
 
 Spectra to mask
-^^^^^^^^^^^^^^^
+###############
 
 -  Empty spectrum marked as "empty det"
 
@@ -52,7 +52,7 @@ Spectra to mask
 -  Calculated offset exceeds the user-defined maximum offset.
 
 Criteria on peaks
-^^^^^^^^^^^^^^^^^
+#################
 
 The (fitted) peak must meet a series of criteria to be used to fit
 spectrum's offset.
@@ -71,7 +71,7 @@ A peak will not be used if
 -  its z-value on :math:`\frac{\delta d}{d}` is larger than 2.0.
 
 Generate fit window
-~~~~~~~~~~~~~~~~~~~
+###################
 
 -  Required parameter: maxWidth. If it is not given, i.e., less or equal
    to zero, then there won't be any window defined;
@@ -97,7 +97,7 @@ to output values reflecting the goodness of fitting of this algorithm to
 users.
 
 Number of spectra that are NOT masked
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#####################################
 
 A spectrum will be masked if it is a dead pixel, has an empty detector
 or has no peak that can be fit with given peak positions. The
@@ -106,7 +106,7 @@ algorithm to find and fit peaks may save some spectrum with relatively
 much fewer events received, i.e., poorer signal.
 
 :math:`\chi^2` of the offset fitting function
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#############################################
 
 The goodness of fit, :math:`\chi^2_{iws}`, of the offset fitting
 function
@@ -117,7 +117,7 @@ is an important measure of fitting quality on each spectrum (indexed as
 iws).
 
 Deviation of highest peaks
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+##########################
 
 We observed that in some situation, the calibrated peaks' positions of
 some spectra are far off to the targeted peak positions, while goodness
@@ -138,7 +138,7 @@ where :math:`X^{(o)}` is the fitted centre of the highest peak of
 spectrum i, and :math:`X^{(c)}` is the theoretical centre of this peak.
 
 Collective quantities to illustrate goodness of fitting (still in developement)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###############################################################################
 
 Be noticed that the idea of this section is still under development and
 has not been implemented yet.
@@ -159,7 +159,7 @@ the number of unmasked spectra;
 where :math:`H_{s}` is the height of highest peak of spectrum s.
 
 Standard error on offset
-~~~~~~~~~~~~~~~~~~~~~~~~
+########################
 
 The offset in unit of d-spacing differs is proportional to peak's
 position by definition:

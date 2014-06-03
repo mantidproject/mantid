@@ -45,7 +45,7 @@ sample, using a method imported from ISAW). Also, HRPD users can use the
 calculations of the effects of the sample holder. |AbsorptionFlow.png|
 
 Assumptions
-^^^^^^^^^^^
+###########
 
 This algorithm assumes that the (parallel) beam illuminates the entire
 sample **unless** a 'gauge volume' has been defined using the
@@ -61,7 +61,7 @@ the sample then you will get a more accurate result from the
 algorithm.)
 
 Restrictions on the input workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 The input workspace must have units of wavelength. The
 `instrument <instrument>`__ associated with the workspace must be fully

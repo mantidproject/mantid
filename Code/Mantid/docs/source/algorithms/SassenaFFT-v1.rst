@@ -37,7 +37,7 @@ Details
 -------
 
 Parameter FFTonlyRealPart
-~~~~~~~~~~~~~~~~~~~~~~~~~
+#########################
 
 Setting parameter FFTonlyRealPart to true will produce a transform on
 only the real part of I(Q,t). This is convenient if we know that I(Q,t)

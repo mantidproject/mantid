@@ -32,7 +32,7 @@ DirectInelasticReductionNormalisedBy is added to the resulting workspace
 with the normalisation procedure used.
 
 Workflow
-~~~~~~~~
+########
 
 .. figure:: /images/DgsPreprocessDataWorkflow.png
    :alt: DgsPreprocessDataWorkflow.png

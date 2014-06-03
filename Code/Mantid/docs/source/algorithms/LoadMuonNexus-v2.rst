@@ -27,27 +27,27 @@ loaded.
    Muon instruments.
 
 Time series data
-~~~~~~~~~~~~~~~~
+################
 
 The log data in the Nexus file (NX\_LOG sections) will be loaded as
 TimeSeriesProperty data within the workspace. Time is stored as seconds
 from the Unix epoch.
 
 Errors
-~~~~~~
+######
 
 The error for each histogram count is set as the square root of the
 number of counts.
 
 Time bin data
-~~~~~~~~~~~~~
+#############
 
 The *corrected\_times* field of the Nexus file is used to provide time
 bin data and the bin edge values are calculated from these bin centre
 times.
 
 Multiperiod data
-~~~~~~~~~~~~~~~~
+################
 
 To determine if a file contains data from more than one period the field
 *switching\_states* is read from the Nexus file. If this value is
@@ -56,7 +56,7 @@ the data. In this case the :math:`N_s` spectra in the *histogram\_data*
 field are split with :math:`N_s/N_p` assigned to each period.
 
 ChildAlgorithms used
-~~~~~~~~~~~~~~~~~~~~
+####################
 
 The ChildAlgorithms used by LoadMuonNexus are:
 
@@ -72,7 +72,7 @@ Previous Versions
 -----------------
 
 Version 1
-~~~~~~~~~
+#########
 
 Version 1 supports the loading version 1.0 of the muon nexus format.
 This is still in active use, if the current version of LoadMuonNexus

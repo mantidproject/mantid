@@ -13,7 +13,7 @@ The algorithm ProcessBackground() provides several functions for user to
 process background to prepare Le Bail Fit.
 
 Simple Remove Peaks
-^^^^^^^^^^^^^^^^^^^
+###################
 
 This algorithm is designed for refining the background based on the
 assumption that the all peaks have been fitted reasonably well. Then by
@@ -24,7 +24,7 @@ An arbitrary background function can be fitted against this background
 by standard optimizer.
 
 Automatic Background Points Selection
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#####################################
 
 This feature is designed to select many background points with user's
 simple input. User is required to select only a few background points in
@@ -35,7 +35,7 @@ Examples
 --------
 
 Selecting background
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 Here is a good example to select background points from a powder
 diffraction pattern by calling ProcessBackground() in a self-consistent

@@ -22,20 +22,20 @@ Please see :ref:`_algm-BinMD` for a detailed description of the
 parameters.
 
 Axis-Aligned Slice
-~~~~~~~~~~~~~~~~~~
+##################
 
 Events outside the range of the slice are dropped. The new output
 MDEventWorkspace's dimensions only extend as far as the limit specified.
 
 Non-Axis-Aligned Slice
-~~~~~~~~~~~~~~~~~~~~~~
+######################
 
 The coordinates of each event are transformed according to the new basis
 vectors, and placed in the output MDEventWorkspace. The dimensions of
 the output workspace are along the basis vectors specified.
 
 Splitting Parameters
-~~~~~~~~~~~~~~~~~~~~
+####################
 
 The **OutputBins** parameter is interpreted as the "SplitInto" parameter
 for each dimension. For instance, if you want the output workspace to
@@ -46,7 +46,7 @@ in every other dimension - that way, boxes will only be split along the
 1D direction.
 
 Slicing a MDHistoWorkspace
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+##########################
 
 It is possible to slice a `MDHistoWorkspace <MDHistoWorkspace>`__. Each
 MDHistoWorkspace holds a reference to the

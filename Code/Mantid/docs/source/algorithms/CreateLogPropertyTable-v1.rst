@@ -15,7 +15,7 @@ values for each of the specified properties, for each of the specified
 workspaces.
 
 LogPropertyNames
-~~~~~~~~~~~~~~~~
+################
 
 The list of log property names provided must consist of properties that
 actually appear in the workspace(s). You can check which properties are
@@ -24,19 +24,19 @@ the "Sample Logs..." dialog window. All acceptable properties have names
 that appear in the "Name" column of the dialog table.
 
 GroupPolicy
-~~~~~~~~~~~
+###########
 
 GroupWorkspaces can be handled in various ways, depending on the
 GroupPolicy input:
 
 "All"
-^^^^^
+#####
 
 All children of any GroupWorkspaces will be included in the table. This
 should be used when each child workspace contains different data.
 
 "First"
-^^^^^^^
+#######
 
 Only the first child of any GroupWorkspaces will be included in the
 table. This is useful for instruments that produce groups of workspaces
@@ -44,7 +44,7 @@ for a single run, and specifying "All" would populate the table with
 duplicate data.
 
 "None"
-^^^^^^
+######
 
 Excludes GroupWorkspaces altogether.
 

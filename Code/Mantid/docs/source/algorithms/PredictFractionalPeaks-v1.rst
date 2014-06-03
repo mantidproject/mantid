@@ -22,7 +22,7 @@ been INDEXED by THIS MATRIX when the new peaks are not created from a
 range of h ,k, and l values
 
 Example usage
-~~~~~~~~~~~~~
+#############
 
 from mantidsimple import \* PeaksWrkSpace=mtd["PeaksQa"]
 

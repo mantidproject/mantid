@@ -27,7 +27,7 @@ Related Algorithms
 ------------------
 
 RemoveBins
-~~~~~~~~~~
+##########
 
 :ref:`_algm-RemoveBins` can work in several ways, if the bins are at
 the edges of the workspace they will be removed, and that will in many

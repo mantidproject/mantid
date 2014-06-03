@@ -10,7 +10,7 @@ Description
 -----------
 
 Overview
-~~~~~~~~
+########
 
 This algorithm will integrate disjoint single crystal Bragg peaks by
 summing the number of raw events in a 3D ellipsoidal peak region in
@@ -41,7 +41,7 @@ principal axes to determine the aspect ratio of ellipsoids used for the
 peak and background regions.
 
 Explanation of Inputs
-~~~~~~~~~~~~~~~~~~~~~
+#####################
 
 -  The event data to be integrated is obtained from an ordinary
    EventWorkspace with an X-axis in time-of-flight, as loaded from a
@@ -93,7 +93,7 @@ Explanation of Inputs
    before setting the integrated intensities.
 
 Detailed Algorithm Description
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##############################
 
 This algorithm will integrate a list of indexed single-crystal
 diffraction peaks from a PeaksWorkspace, using events from an

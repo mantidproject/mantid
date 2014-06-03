@@ -16,7 +16,7 @@ multiple scattering can be procedure can be found in the `modes
 manual <http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf>`__.
 
 References
-^^^^^^^^^^
+##########
 
 #. M W Johnson, AERE Report R7682 (1974)
 

@@ -26,7 +26,7 @@ If the saved data has a reference to an XML file defining instrument
 geometry this will be read.
 
 Time series data
-~~~~~~~~~~~~~~~~
+################
 
 The log data in the Nexus file (NX\_LOG sections) is loaded as
 TimeSeriesProperty data within the workspace. Time is stored as seconds
@@ -34,7 +34,7 @@ from the Unix epoch. Only floating point logs are stored and loaded at
 present.
 
 Child algorithms used
-~~~~~~~~~~~~~~~~~~~~~
+#####################
 
 The Child Algorithms used by LoadMuonNexus are:
 

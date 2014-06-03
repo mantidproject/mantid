@@ -19,13 +19,13 @@ file. This algorithm has previously been renamed from
 There are two types of mask workspace that can serve as input.
 
 1. `MaskWorkspace <MaskWorkspace>`__
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+####################################
 
 In this case, :ref:`_algm-SaveMask` will read Y values to determine
 which detectors are masked;
 
 2. A non-\ `MaskWorkspace <MaskWorkspace>`__ `MatrixWorkspace <MatrixWorkspace>`__ containing `Instrument <Instrument>`__
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#########################################################################################################################
 
 In this case, :ref:`_algm-SaveMask` will scan through all detectors to
 determine which are masked.

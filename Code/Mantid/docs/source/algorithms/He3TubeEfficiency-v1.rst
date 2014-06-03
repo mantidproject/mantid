@@ -32,7 +32,7 @@ workspace. If it is not, the spectra indicies that do not have values
 will be zeroed in the output workspace.
 
 Restrictions on Input Workspace
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###############################
 
 The input workspace must be in units of wavelength.
 

@@ -26,7 +26,7 @@ case the same m\_scaling or m\_offset are applied to each dimension; or
 you can specify a list with one entry for each dimension.
 
 Notes
-^^^^^
+#####
 
 The relationship between the workspace and the original
 `MDWorkspace <MDWorkspace>`__, for example when the MDHistoWorkspace is
@@ -36,7 +36,7 @@ re-bin a transformed `MDHistoWorkspace <MDHistoWorkspace>`__.
 No units are not modified by this algorithm.
 
 Performance Notes
-^^^^^^^^^^^^^^^^^
+#################
 
 -  Performing the operation in-place (input=output) is always faster
    because the first step of the algorithm if NOT in-place is to clone

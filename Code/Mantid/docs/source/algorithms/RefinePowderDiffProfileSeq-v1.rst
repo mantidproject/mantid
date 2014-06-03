@@ -26,7 +26,7 @@ supported by this algorithm
 | ``* ``\ *``Load``*\ `` : set up a few workspaces used for refining by loading them from a previously created project file. ``
 
 Input and output workspaces
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###########################
 
 | ``* InputWorkspace : data workspace containing the diffraction pattern to refine profile parameters with;``
 | ``* SeqControlInfoWorkspace : table workspace used to track refinement; Below is the introduction on the fields/columns of this workspace. ``
@@ -48,13 +48,13 @@ Input and output workspaces
 | ``* InputBackgroundParameterWorkspace : table workspace containing the background parameters' value``
 
 Supported peak profiles
-^^^^^^^^^^^^^^^^^^^^^^^
+#######################
 
 | ``* Neutron Back-to-back exponential convoluted with pseudo-voigt : Fullprof profile 9 and GSAS TOF profile 3;``
 | ``* Thermal neutron Back-to-back exponential convoluted with pseudo-voigt: Fullprof profile 10 (a.k.a. Jason Hodges function). ``
 
 Supported background types
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+##########################
 
 | ``* Polynomial``
 | ``* Chebyshev``

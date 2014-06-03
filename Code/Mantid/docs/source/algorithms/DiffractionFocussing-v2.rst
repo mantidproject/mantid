@@ -38,7 +38,7 @@ combine data from several spectra according to GroupingFileName file
 which is a `CalFile <CalFile>`__.
 
 For EventWorkspaces
-~~~~~~~~~~~~~~~~~~~
+###################
 
 The algorithm can be used with an `EventWorkspace <EventWorkspace>`__
 input, and will create an EventWorkspace output if a different workspace
@@ -54,7 +54,7 @@ Previous Versions
 -----------------
 
 Version 1
-~~~~~~~~~
+#########
 
 Version 1 did not support the use of workspaces to carry grouping
 workspaces and only worked with CalFiles.

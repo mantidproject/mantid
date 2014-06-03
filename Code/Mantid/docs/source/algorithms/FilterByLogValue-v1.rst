@@ -39,7 +39,7 @@ log value is assumed to be constant for all time and if it falls within
 the range, then all events will be kept.
 
 PulseFilter (e.g. for Veto Pulses)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+##################################
 
 If you select PulseFilter, then events will be filtered OUT in notches
 around each time in the selected sample log, and the MinValue/MaxValue
@@ -63,7 +63,7 @@ rejected. For example, this call will filter out veto pulses:
 ``FilterByLogValue(InputWorkspace="ws", OutputWorkspace="ws", LogName="veto_pulse_time", PulseFilter="1")``
 
 Comparing with other event filtering algorithms
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###############################################
 
 Wiki page `EventFiltering <EventFiltering>`__ has a detailed
 introduction on event filtering in MantidPlot.

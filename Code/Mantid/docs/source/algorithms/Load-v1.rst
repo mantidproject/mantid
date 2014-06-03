@@ -17,7 +17,7 @@ child algorithm with the exception that it logs messages to the Mantid
 logger.
 
 Specific Load Algorithm Properties
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+##################################
 
 Each specific loader will have its own properties that are appropriate
 to it: SpectrumMin and SpectrumMax for ISIS RAW/NeXuS, FilterByTof\_Min

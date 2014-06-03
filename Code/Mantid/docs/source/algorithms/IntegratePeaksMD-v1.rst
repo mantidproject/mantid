@@ -13,7 +13,7 @@ This algorithm performs integration of single-crystal peaks within a
 radius (with optional background subtraction) in reciprocal space.
 
 Inputs
-~~~~~~
+######
 
 The algorithms takes two input workspaces:
 
@@ -26,7 +26,7 @@ The algorithms takes two input workspaces:
    with the integrated intensity and error found being filled in.
 
 Calculations
-~~~~~~~~~~~~
+############
 
 Integration is performed by summing the weights of each MDEvent within
 the provided radii. Errors are also summed in quadrature.
@@ -55,7 +55,7 @@ the provided radii. Errors are also summed in quadrature.
       the peak and the background area.
 
 Background Subtraction
-^^^^^^^^^^^^^^^^^^^^^^
+######################
 
 The background signal within PeakRadius is calculated by scaling the
 background signal density in the shell to the volume of the peak:
@@ -76,7 +76,7 @@ with the errors summed in quadrature:
 :math:`\sigma I_{corr}^2 = \sigma I_{peak}^2 + \sigma I_{bg}^2`
 
 If BackgroundInnerRadius is Omitted
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###################################
 
 If BackgroundInnerRadius is left blank, then **BackgroundInnerRadius** =
 **PeakRadius**, and the integration is as follows:
@@ -86,7 +86,7 @@ If BackgroundInnerRadius is left blank, then **BackgroundInnerRadius** =
 
    IntegratePeaksMD\_graph2.png
 Sample Usage
-~~~~~~~~~~~~
+############
 
 .. code:: python
 

@@ -59,7 +59,7 @@ algorithm will not be visible in the instrument view in MantidPlot, at
 the same time all calclations will be performed correctly.
 
 Optional properties
-~~~~~~~~~~~~~~~~~~~
+###################
 
 ScalingOpt - this integer value controls the way in which the scaling is
 calculated for pixels that have both left and right values for the
@@ -68,7 +68,7 @@ to 1 causes the maximum scaling to be used and setting it to 2 uses the
 maximum scaling plus 5% to be used.
 
 ChildAlgorithms used
-~~~~~~~~~~~~~~~~~~~~
+####################
 
 None
 

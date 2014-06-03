@@ -16,7 +16,7 @@ sub-algorithm of the `RockingCurve <RockingCurve>`__ algorithm.
 The algorithm has two modes:
 
 Table output
-^^^^^^^^^^^^
+############
 
 This option can be used for integer-typed logs and will produce a table
 with a row for each integer value between the minimum and maximum
@@ -40,7 +40,7 @@ value between the minimum and maximum log value. This might take a long
 time!
 
 Single-spectrum option
-^^^^^^^^^^^^^^^^^^^^^^
+######################
 
 This option can be used for integer or floating point type logs and
 requires that the OutputBinning property is specified. It will produce a

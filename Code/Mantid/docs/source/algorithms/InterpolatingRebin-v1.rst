@@ -41,7 +41,7 @@ inversely proportional to the distance of the output bin center to the
 respective input bin data points.
 
 Example Rebin param strings
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###########################
 
 The same syntax as for :ref:`_algm-Rebin`
 

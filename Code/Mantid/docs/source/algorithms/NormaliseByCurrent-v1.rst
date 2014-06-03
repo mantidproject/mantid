@@ -27,7 +27,7 @@ property to index into the **proton\_charge\_by\_period** log data array
 property.
 
 EventWorkspaces
-~~~~~~~~~~~~~~~
+###############
 
 If the input workspace is an `EventWorkspace <EventWorkspace>`__, then
 the output will be as well. Weighted events are used to scale by the

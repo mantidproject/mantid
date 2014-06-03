@@ -15,7 +15,7 @@ output workspace will cover the entire range of all the input
 workspaces, with the largest bin widths used in regions of overlap.
 
 Restrictions on the input workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 The input workspaces must contain histogram data with the same number of
 spectra and matching units and instrument name in order for the
@@ -36,10 +36,10 @@ Other than this it is currently left to the user to ensure that the
 combination of the workspaces is a valid operation.
 
 Processing Group Workspaces
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###########################
 
 Multi-period Group Workspaces
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#############################
 
 Group workspaces will be merged respecting the periods within each
 group. For example if you have two multiperiod group workspaces A and B
@@ -51,14 +51,14 @@ Therefore, merging is conducted such that A\_1 + B\_1 = C\_1 and A\_2 +
 B\_2 = C\_2.
 
 Group Workspaces that are not multiperiod
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#########################################
 
 If group workspaces are provided that are not multi-period, this
 algorithm will merge across all nested workspaces, to give a singe
 output matrix workspace.
 
 ChildAlgorithms used
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 The :ref:`_algm-Rebin` algorithm is used, if neccessary, to put all the
 input workspaces onto a common binning.

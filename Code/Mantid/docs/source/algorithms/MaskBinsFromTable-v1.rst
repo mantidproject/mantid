@@ -18,7 +18,7 @@ Related Algorithms
 ------------------
 
 MaskBins
-~~~~~~~~
+########
 
 :ref:`_algm-MaskBins` masks bins in a workspace. Masked bins should
 properly be regarded as having been completely removed from the

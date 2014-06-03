@@ -38,7 +38,7 @@ screenshot for example:
 
    SliceViewer-DetectorFace.png
 BankNumbers Parameter
-^^^^^^^^^^^^^^^^^^^^^
+#####################
 
 If your instrument has several
 `RectangularDetectors <RectangularDetectors>`__, you can use the

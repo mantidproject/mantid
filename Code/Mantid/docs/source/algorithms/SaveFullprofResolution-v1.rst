@@ -45,13 +45,13 @@ How to use algorithm with other algorithms
 ------------------------------------------
 
 Le Bail Fit
-^^^^^^^^^^^
+###########
 
 This algorithm is designed to work with other algorithms to do Le Bail
 fit. The introduction can be found in `Le Bail Fit <Le Bail Fit>`__.
 
 Save For Multiple-Bank Resolution File
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+######################################
 
 As SaveFullprofResolution can save 1 bank a time, in order to make a
 multiple-bank .irf file, user should execute this algorithm a few times.

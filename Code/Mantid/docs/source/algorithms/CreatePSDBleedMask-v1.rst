@@ -17,7 +17,7 @@ equatorial region, are counting above this threshold then the entire
 tube is masked.
 
 Restrictions on the input workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 -  The workspace must contain either raw counts or counts/us.
 

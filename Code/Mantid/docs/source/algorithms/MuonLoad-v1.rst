@@ -24,7 +24,7 @@ Specifically:
    resulting workspace.
 
 Workflow
-~~~~~~~~
+########
 
 .. figure:: /images/MuonWorkflow.png
    :alt: MuonWorkflow.png

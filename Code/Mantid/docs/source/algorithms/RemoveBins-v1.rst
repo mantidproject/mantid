@@ -17,7 +17,7 @@ The treatment of the removed bins is slightly different, depending on
 where in the spectrum the bins to be removed lie:
 
 Bins at either end of spectrum
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+##############################
 
 If the workspaces has common X binning for all spectra, then the
 :ref:`_algm-CropWorkspace` algorithm will be called as a child
@@ -29,7 +29,7 @@ values will be set to zero regardless of the setting of the
 Interpolation property.
 
 Bins in the middle of a spectrum
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+################################
 
 The Interpolation property is applicable to this situation. If it is set
 to "Linear" then the bins are set to values calculated from the values
@@ -40,7 +40,7 @@ percentage of the bin's width which falls outside XMin or XMax as
 appropriate.
 
 Restrictions on the input workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 -  The input workspace must have a unit set
 -  The input workspace must contain histogram data
@@ -49,7 +49,7 @@ Related Algorithms
 ------------------
 
 MaskBins
-~~~~~~~~
+########
 
 :ref:`_algm-MaskBins` will set the data in the desired bins to 0 and
 importantly also marks those bins as masked, so that further algorithms

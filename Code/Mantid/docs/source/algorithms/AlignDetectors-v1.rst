@@ -22,7 +22,7 @@ the offset; or a .cal file (in the form created by the ARIEL software).
 Workspace <Ragged Workspace>`__.
 
 Restrictions on the input workspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###################################
 
 The input workspace must contain histogram or event data where the X
 unit is time-of-flight and the Y data is raw counts. The

@@ -18,7 +18,7 @@ A detector is considered to be contained it its central location point
 is contained within the shape.
 
 ChildAlgorithms used
-~~~~~~~~~~~~~~~~~~~~
+####################
 
 MaskDetectorsInShape runs the following algorithms as child algorithms:
 

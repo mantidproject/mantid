@@ -34,7 +34,7 @@ of wavelengths passed to CalculateTransmission is different from that of
 the data to be corrected.
 
 ChildAlgorithms used
-~~~~~~~~~~~~~~~~~~~~
+####################
 
 Uses the algorithm `linear <linear>`__ to fit to the calculated
 transmission fraction.

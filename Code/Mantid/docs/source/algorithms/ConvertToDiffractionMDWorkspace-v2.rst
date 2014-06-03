@@ -24,7 +24,7 @@ In order to define more precisely the parameters of the
 :ref:`_algm-CreateMDWorkspace` algorithm first.
 
 Types of Conversion
-^^^^^^^^^^^^^^^^^^^
+###################
 
 -  **Q (lab frame)**: this calculates the momentum transfer (ki-kf) for
    each event is calculated in the experimental lab frame.
@@ -37,7 +37,7 @@ Types of Conversion
    Miller indices of each event.
 
 Lorentz Correction
-^^^^^^^^^^^^^^^^^^
+##################
 
 If selected, the following Lorentz correction factor is applied on each
 event by multiplying its weight by L:
@@ -53,7 +53,7 @@ This correction is also done by the
 false if that algorithm has been run on the input workspace.
 
 OneEventPerBin option
-^^^^^^^^^^^^^^^^^^^^^
+#####################
 
 If you specify *OneEventPerBin*, then the **histogram** representation
 of the input workspace is used, with one MDEvent generated for each bin
@@ -80,7 +80,7 @@ If your input is a `Workspace2D <Workspace2D>`__ and you do NOT check
 `EventWorkspace <EventWorkspace>`__ but with no events for empty bins.
 
 Performance Notes
-^^^^^^^^^^^^^^^^^
+#################
 
 -  8-core Intel Xeon 3.2 GHz computer: measured between 4 and 5.5
    million events per second (100-200 million event workspace).

@@ -34,7 +34,7 @@ a file using the reduction property manager with the boolean property
 SaveProcessedDetVan.
 
 Workflow
-~~~~~~~~
+########
 
 .. figure:: /images/DgsProcessDetectorVanadiumWorkflow.png
    :alt: DgsProcessDetectorVanadiumWorkflow.png

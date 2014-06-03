@@ -18,7 +18,7 @@ XML File Format
 Extension: .xml
 
 Parameters
-~~~~~~~~~~
+##########
 
 -  "instrument": optional attribute of node 'detector-grouping'. It must
    be valid instrument name. If "instrument" is not defined, only tag

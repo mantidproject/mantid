@@ -20,7 +20,7 @@ MomentumTransfer and d-spacing.
 **Note:** All other forms are calculated by transforming :math:`G(r)`.
 
 Output Options
-^^^^^^^^^^^^^^
+##############
 
 G(r)
 ''''

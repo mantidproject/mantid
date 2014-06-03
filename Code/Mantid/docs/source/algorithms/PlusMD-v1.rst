@@ -13,7 +13,7 @@ This algorithm sums two `MDHistoWorkspaces <MDHistoWorkspace>`__ or
 merges two `MDEventWorkspaces <MDEventWorkspace>`__ together.
 
 MDHistoWorkspaces
-~~~~~~~~~~~~~~~~~
+#################
 
 -  **MDHistoWorkspace + MDHistoWorkspace**
 
@@ -25,14 +25,14 @@ MDHistoWorkspaces
       MDHistoWorkspace. The squares of errors are summed.
 
 MDEventWorkspaces
-~~~~~~~~~~~~~~~~~
+#################
 
 This algorithm operates similary to calling Plus on two
 `EventWorkspaces <EventWorkspace>`__: it combines the events from the
 two workspaces together to form one large workspace.
 
 Note for file-backed workspaces
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###############################
 
 The algorithm uses :ref:`_algm-CloneMDWorkspace` to create the
 output workspace, except when adding in place (e.g. :math:`A = A + B` ).

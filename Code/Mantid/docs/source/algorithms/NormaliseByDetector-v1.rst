@@ -26,7 +26,7 @@ Prerequisites
 -------------
 
 The Input Workspace
-~~~~~~~~~~~~~~~~~~~
+###################
 
 #. The input workspace must be a MatrixWorkspace
 #. The input workspace must have X-units of Wavelength, run
@@ -37,10 +37,10 @@ The Input Workspace
    if it is not already histogrammed.
 
 The Instrument Definition File
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##############################
 
 Background
-^^^^^^^^^^
+##########
 
 In brief, the components in the IDF file form a tree structure.
 Detectors and Instruments are both types of component. Detectors are
@@ -57,7 +57,7 @@ against the detector, and pick up defaults from the bank, or instrument
 if they have been specified there.
 
 Recommended Working
-^^^^^^^^^^^^^^^^^^^
+###################
 
 The IDF is intended to be a definitive description of the components in
 the instrument at any time. This should be the most generic form of the
@@ -78,7 +78,7 @@ parameter files over the top of an existing workspace using
 :ref:`_algm-LoadParameterFile`.
 
 Examples
-^^^^^^^^
+########
 
 Applying a LinearFunction to the whole instrument, hard-coded with A1=2
 and A0=1. Fictional instrument is called basic\_rect.

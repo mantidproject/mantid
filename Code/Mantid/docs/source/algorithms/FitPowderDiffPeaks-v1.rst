@@ -17,7 +17,7 @@ will be introduced in `Le Bail Fit <Le Bail Fit>`__. The second step is
 realized by algorithm RefinePowderInstrumentParameters.
 
 Version
-^^^^^^^
+#######
 
 Current implementation of FitPowderDiffPeaks is version 2.
 
@@ -25,7 +25,7 @@ Peak Fitting Algorithms
 -----------------------
 
 Peak Fitting Mode
-^^^^^^^^^^^^^^^^^
+#################
 
 Fitting mode determines the approach (or algorithm) to fit diffraction
 peaks.
@@ -36,7 +36,7 @@ peaks.
 fitting will be a one-step minimizer by Levenberg-Marquardt.
 
 Starting Values of Peaks' Parameters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+####################################
 
 1. "(HKL) & Calculation": the starting values are calculated from each
 peak's miller index and thermal neutron peak profile formula;
@@ -45,7 +45,7 @@ peak's miller index and thermal neutron peak profile formula;
 Parameter table.
 
 Peak-fitting sequence
-^^^^^^^^^^^^^^^^^^^^^
+#####################
 
 Peaks are fitted from high d-spacing, i.e., lowest possible Miller
 index, to low d-spacing values. If MinimumHKL is specified, then peak
@@ -53,7 +53,7 @@ will be fitted from maximum d-spacing/TOF, to the peak with Miller index
 as MinimumHKL.
 
 Correlated peak profile parameters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+##################################
 
 If peaks profile parameters are correlated by analytical functions, then
 the starting values of one peak will be the fitted peak profile
@@ -65,7 +65,7 @@ Use Cases
 Several use cases are listed below about how to use this algorithm.
 
 Use case 1: robust fitting
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+##########################
 
 | ``1. User wants to use the starting values of peaks parameters from input thermal neutron peak parameters such as Alph0, Alph1, and etc. ``
 | ``2. User specifies the right most peak range and its Miller index``
@@ -73,13 +73,13 @@ Use case 1: robust fitting
 | ``4. ``\ *``FitPowderDiffPeaks``*\ `` fit peak parameters of each peak from high TOF to low TOF;``
 
 Use Case 2: Confident fitting
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#############################
 
 | ``1. ``
 | ``2. ``
 
 Use Case 3: Fitting Peak Parameters From Scratch
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+################################################
 
 This is the extreme case such that
 
@@ -94,7 +94,7 @@ fit. The introduction can be found in the wiki page of
 :ref:`_algm-LeBailFit`.
 
 Example of Working With Other Algorithms
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+########################################
 
 *FitPowderDiffPeaks* is designed to work with other algorithms, such
 *RefinePowderInstrumentParameters*, and *LeBailFit*. See `Le Bail

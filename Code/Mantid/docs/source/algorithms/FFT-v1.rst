@@ -71,7 +71,7 @@ point data. The variations are of the order of :math:`\Delta\xi`. The
 zero frequency is always in the bin with index :math:`k=int(N/2)`.
 
 Example 1
-~~~~~~~~~
+#########
 
 In this example the input data were calculated using function
 :math:`\exp(-(x-1)^2)` in the range [-5,5].
@@ -88,7 +88,7 @@ Because the :math:`x=0` is in the middle of the data array the transform
 shown is the exact DFT of the input data.
 
 Example 2
-~~~~~~~~~
+#########
 
 In this example the input data were calculated using function
 :math:`\exp(-x^2)` in the range [-6,4].

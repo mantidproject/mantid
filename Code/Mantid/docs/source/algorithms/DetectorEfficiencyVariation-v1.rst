@@ -31,7 +31,7 @@ fail the tests are masked and those that pass them are assigned a single
 positive value.
 
 Child algorithms used
-^^^^^^^^^^^^^^^^^^^^^
+#####################
 
 Uses the :ref:`_algm-Integration` algorithm to sum the spectra.
 

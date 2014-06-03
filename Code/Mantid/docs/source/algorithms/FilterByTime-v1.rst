@@ -25,7 +25,7 @@ You must specify:
 -  But not another combination of the four, or the algorithm will abort.
 
 Comparing with other event filtering algorithms
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###############################################
 
 Wiki page `EventFiltering <EventFiltering>`__ has a detailed
 introduction on event filtering in MantidPlot.

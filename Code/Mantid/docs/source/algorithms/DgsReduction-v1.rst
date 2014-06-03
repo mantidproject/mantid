@@ -15,7 +15,7 @@ the necessary parameters and generating calls to other workflow or
 standard algorithms.
 
 Workflow
-~~~~~~~~
+########
 
 Parameters for the child algorithms are not shown due to sheer number.
 They will be detailed in the child algorithm diagrams. Items in

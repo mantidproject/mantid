@@ -62,7 +62,7 @@ by:
 with the cross-section units of :math:`millibarns/steradian`.
 
 Workflow
-~~~~~~~~
+########
 
 .. figure:: /images/DgsAbsoluteUnitsReductionWorkflow.png
    :alt: DgsAbsoluteUnitsReductionWorkflow.png

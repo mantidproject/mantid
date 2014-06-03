@@ -19,7 +19,7 @@ Setting the DerivOrder property to zero will force the algorithm to
 calculate no derivatives.
 
 For Histogram Workspaces
-~~~~~~~~~~~~~~~~~~~~~~~~
+########################
 
 If the input workspace contains histograms, rather than data points,
 then SplineInterpolation will automatically convert the input to point

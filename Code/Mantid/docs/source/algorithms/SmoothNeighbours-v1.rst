@@ -16,7 +16,7 @@ works on both `EventWorkspaces <EventWorkspace>`__ and
 `Workspace2D <Workspace2D>`__'s. It has two main modes of operation.
 
 Processing Either Generically or Assuming Rectangular Detectors
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###############################################################
 
 You may either specify properties for the Rectangular Detector Group, or
 the Non-uniform Detector Group, but not both. If you provide inputs for
@@ -24,7 +24,7 @@ the Rectangular Detector group, then the algorithm execution will assume
 that this is your desired processing route.
 
 For All Instruments
-~~~~~~~~~~~~~~~~~~~
+###################
 
 Going through the input workspace pixel-by-pixel, Mantid finds the
 nearest-neighbours with the given Radius of each pixel. The spectra are
@@ -32,7 +32,7 @@ then summed together, and normalizing to unity (see the weighting
 section below).
 
 For Instruments With Rectangular Detectors
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##########################################
 
 The algorithm looks through the `Instrument <Instrument>`__ to find all
 the `RectangularDetectors <RectangularDetector>`__ defined. For each
@@ -40,26 +40,26 @@ pixel in each detector, the AdjX\*AdjY neighboring spectra are summed
 together and saved in the output workspace.
 
 WeightedSum parameter
-~~~~~~~~~~~~~~~~~~~~~
+#####################
 
 A weighting strategy can be applied to control how the weights are
 calculated. This defaults to a flat weighting strategy. Weights are
 summed and scaled so that they add up to 1.
 
 Flat Weighting
-^^^^^^^^^^^^^^
+##############
 
 All weights are 1. This is completely position in-senitive.
 
 Linear Weighting
-^^^^^^^^^^^^^^^^
+################
 
 Weights are calculated according to :math:`w = 1 - r/R`, where w is the
 weighting factor, r is the distance from the detector and R is the
 cut-off radius.
 
 Parabolic Weighting
-^^^^^^^^^^^^^^^^^^^
+###################
 
 For rectangular detectors it may be used as follows: The radius must be
 zero and a AdjX and AdjY parameter must be provided.
@@ -69,7 +69,7 @@ For non-rectangular detectors, the cut-off radius is used in the
 calculation. :math:`w = R - abs(x) + R - abs(y) + 1`
 
 Gaussian Weighting
-^^^^^^^^^^^^^^^^^^
+##################
 
 This weighting is calculated from the Gaussian distribution
 
@@ -84,7 +84,7 @@ Important notes about this algorithm are that:
    dimensionless and scaled to 1 at the boundaries.
 
 For EventWorkspaces
-~~~~~~~~~~~~~~~~~~~
+###################
 
 Both methods of smoothing will **significantly** increase the memory
 usage of the workspace. For example, if AdjX=AdjY=1, the algorithm will
@@ -92,14 +92,14 @@ sum 9 nearest neighbours in most cases. This increases the memory used
 by a factor of 9.
 
 For Workspace2D's
-~~~~~~~~~~~~~~~~~
+#################
 
 You can use PreserveEvents = false to avoid the memory issues with an
 EventWorkspace input. Please note that the algorithm **does not check**
 that the bin X boundaries match.
 
 Neighbour Searching
-~~~~~~~~~~~~~~~~~~~
+###################
 
 File:NNSearchByRadius.jpg\ \|\ *Fig. 1*.
 File:NNSearchIrregularGrid.jpg\ \|\ *Fig. 2*.
@@ -108,7 +108,7 @@ File:NNSearchLimitByNNs.jpg\ \|\ *Fig. 4* File:NNSearchXY.jpg\ \|\ *Fig.
 5*
 
 Property Values of Examples
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###########################
 
 | *Fig. 1* : Requesting NumberOfNeighbours=36, Radius=3. Algorithm looks
 for 36 nearest neighbours with a cut-off of 3 detector widths.
@@ -122,7 +122,7 @@ for 8 nearest neighbours with a cut-off of 3 detector widths.
 neighbours in the specified pattern.
 
 How it Works
-^^^^^^^^^^^^
+############
 
 The algorithm will fetch neigbours using the intesection of those inside
 the radius cut-off and those less than the NumberOfNeighbours specified.
@@ -152,7 +152,7 @@ number of neighbours independently in x and y using the AdjX and AdjY
 properties. *Fig. 5* Shows the effect of this type of searching.
 
 Ignore Masks
-~~~~~~~~~~~~
+############
 
 The algorithm will ignore masked detectors if this flag is set.
 

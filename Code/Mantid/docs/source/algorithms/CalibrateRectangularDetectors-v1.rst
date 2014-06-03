@@ -36,7 +36,7 @@ Features to improve performance of peak finding
 -----------------------------------------------
 
 Define peak fit-window
-~~~~~~~~~~~~~~~~~~~~~~
+######################
 
 There are two exclusive approaches to define peak's fit-window.
 
@@ -47,7 +47,7 @@ fitting range.
 peak will have its individual fit window defined.
 
 Define accepted range of peak's width
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#####################################
 
 Optional input property *DetectorResolutionWorkspace* is a matrix
 workspace containing the detector resolution :math:`\Delta(d)/d` for

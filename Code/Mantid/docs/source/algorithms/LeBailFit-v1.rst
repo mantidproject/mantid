@@ -15,10 +15,10 @@ will refine a specified set of the powder instrumental profile
 parameters with a previous refined background model.
 
 Peak profile function for fit
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#############################
 
 Back to back exponential convoluted with pseudo-voigt
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#####################################################
 
 Here is the list of the peak profile function supported by this
 algorithm.
@@ -30,7 +30,7 @@ algorithm.
    -  pseudo-voigt parameters: Sig0, Sig1, Sig2, Gam0, Gam1, Gam2
 
 Thermal neutron back to back exponential convoluted with pseudo-voigt
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#####################################################################
 
 Here is the list of the peak profile function supported by this
 algorithm.
@@ -44,14 +44,14 @@ algorithm.
    -  pseudo-voigt parameters: Sig0, Sig1, Sig2, Gam0, Gam1, Gam2
 
 Optimization
-~~~~~~~~~~~~
+############
 
 *LeBailFit* supports a tailored simulated annealing optimizer (using
 Monte Carlo random walk algorithm). In future, regular minimizes in GSL
 library might be supported.
 
 Supported functionalities
-~~~~~~~~~~~~~~~~~~~~~~~~~
+#########################
 
 | ``* LeBailFit: fit profile parameters by Le bail algorithm; ``
 | ``* Calculation: pattern calculation by Le bail algorithm; ``
@@ -59,7 +59,7 @@ Supported functionalities
 | ``* RefineBackground: refine background parameters``
 
 Further Information
-~~~~~~~~~~~~~~~~~~~
+###################
 
 See `Le Bail Fit <Le Bail Fit>`__.
 

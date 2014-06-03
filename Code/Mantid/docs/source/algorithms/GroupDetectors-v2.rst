@@ -92,7 +92,7 @@ Previous Versions
 -----------------
 
 Version 1
-~~~~~~~~~
+#########
 
 The set of spectra to be grouped can be given as a list of either
 spectrum numbers, detector IDs or workspace indices. The new, summed

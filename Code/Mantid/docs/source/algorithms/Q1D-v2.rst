@@ -10,7 +10,7 @@ Description
 -----------
 
 Q Unit Conversion
-~~~~~~~~~~~~~~~~~
+#################
 
 The equation for :math:`Q` as function of wavelength, :math:`\lambda`,
 and neglecting gravity, is
@@ -35,7 +35,7 @@ neutrons are all travelling in horizontal at sample, and that
 :math:`x=y=0` would be beam centre at :math:`\lambda = 0`).
 
 Normalized Intensity
-~~~~~~~~~~~~~~~~~~~~
+####################
 
 This `algorithm <Algorithm>`__ takes a workspace of number of neutron
 counts against `wavelength <Units>`__ and creates a workspace of cross
@@ -92,7 +92,7 @@ quoted in 1/cm note that conversion to a cross section requires scaling
 by an `instrument <instrument>`__ dependent absolute units constant.
 
 Resolution and Cutoffs
-~~~~~~~~~~~~~~~~~~~~~~
+######################
 
 There are two sources of uncertainty in the intensity: the statistical
 (counting) error and the finite size of the bins, i.e. both time bins
@@ -142,7 +142,7 @@ by altering :math:`Q{min}` and the binning scheme.*
 467-478 <http://scripts.iucr.org/cgi-bin/paper?gk0573>`__.
 
 Variations on applying the normalization
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+########################################
 
 It is possible to divide the input workspace by the WavelenghAdj and
 PixelAdj workspaces prior to calling this algorithm. The results will be
@@ -156,7 +156,7 @@ Depending on the input and output bins there could be a significant
 difference in CPU time required by these two methods.
 
 References
-~~~~~~~~~~
+##########
 
 Calculation of Q is from Seeger, P. A. and Hjelm, R. P. Jr, "Small-Angle
 Neutron Scattering at Pulsed Spallation Sources" (1991) J. Appl **24**
@@ -166,7 +166,7 @@ Previous Versions
 -----------------
 
 Version 1
-~~~~~~~~~
+#########
 
 Before July 2011 the intensity was calculated with an equation like the
 following:
@@ -187,7 +187,7 @@ The error was calculation did not include the errors due the
 normalization or any corrections.
 
 Properties
-^^^^^^^^^^
+##########
 
 +---------+---------------------+-------------+-------------------+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Order   | Name                | Direction   | Type              | Default     | Description                                                                                                                                               |

@@ -38,7 +38,7 @@ fail the tests are masked and those that pass them are assigned a single
 positive value.
 
 ChildAlgorithms used
-~~~~~~~~~~~~~~~~~~~~
+####################
 
 Uses the :ref:`_algm-SolidAngle`, :ref:`_algm-Integration` and
 :ref:`_algm-ConvertToDistribution` algorithms.

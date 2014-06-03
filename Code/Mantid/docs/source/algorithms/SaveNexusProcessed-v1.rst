@@ -27,14 +27,14 @@ with an integer starting at 1. If the file already contains n
 workspaces, the new one will be labelled n+1.
 
 Time series data
-~~~~~~~~~~~~~~~~
+################
 
 TimeSeriesProperty data within the workspace will be saved as NXlog
 sections in the Nexus file. Only floating point logs are stored and
 loaded at present.
 
 EventWorkspaces
-~~~~~~~~~~~~~~~
+###############
 
 This algorithm will save `EventWorkspaces <EventWorkspace>`__ with full
 event data, unless you uncheck *PreserveEvents*, in which case the

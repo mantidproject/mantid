@@ -41,7 +41,7 @@ strictly the same, auto-correlation and peak detection could be done
 only one for all the data.
 
 Data manager
-~~~~~~~~~~~~
+############
 
 A MatrixWorkspace is created to store all the information about
 data-files and the future workspace needed during the analysis. The
@@ -64,7 +64,7 @@ stored information are:
    ``detected peak information are stored ``
 
 POLDI setup manager
-~~~~~~~~~~~~~~~~~~~
+###################
 
 For each acquisition file, the IDF are loaded:
 
@@ -83,10 +83,10 @@ Therefore each POLDI setup are loaded only once and shared between the
 different data files.
 
 Analysis steps
-~~~~~~~~~~~~~~
+##############
 
 Loading the data
-^^^^^^^^^^^^^^^^
+################
 
 Each data-file is loaded on a 2DWorkspace. The associated log and setup
 information are loaded in dedicated workspace as specified in the
@@ -142,7 +142,7 @@ condition.
 | ``                     PoldiDeadWires      = sample_dead_wires_ws)``
 
 Loading POLDI parameters
-^^^^^^^^^^^^^^^^^^^^^^^^
+########################
 
 While loading the data, the different needed setup have been store in a
 dedicated workspace.
@@ -174,7 +174,7 @@ etc...) are extracted and stores in a dedicated workspace.
 | ``             PoldiIPP       = ipp_ipp_data)``
 
 Pre-analyzing data
-^^^^^^^^^^^^^^^^^^
+##################
 
 In order to setup the 2D fit to analyze the data, some information need
 to be extracted from the file, such as an idea of the peaks position.
