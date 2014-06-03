@@ -246,6 +246,7 @@ This example repeats the previous one but with the Sigmas of the two Gaussians t
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IFunctionMD.h"
+#include "MantidAPI/IFunction1DSpectrum.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 
@@ -392,7 +393,15 @@ namespace CurveFitting
     if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
         !boost::dynamic_pointer_cast<API::IFunctionMD>(fun) )
     {
-      creator = new FitMW(this, workspacePropertyName, m_domainType);
+      /* IFunction1DSpectrum needs a different domain creator. If a function
+       * implements that type, we need to react appropriately at this point.
+       * Otherwise, the default creator FitMW is used.
+       */
+      if(boost::dynamic_pointer_cast<API::IFunction1DSpectrum>(fun)) {
+        creator = new SeqDomainSpectrumCreator(this, workspacePropertyName);
+      } else {
+        creator = new FitMW(this, workspacePropertyName, m_domainType);
+      }
     }
     else
     {
@@ -513,12 +522,6 @@ namespace CurveFitting
       Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(domainTypes)),
       "The type of function domain to use: Simple, Sequential, or Parallel.", Kernel::Direction::Input);
 
-    std::vector<std::string> domainCreatorNames;
-    domainCreatorNames.push_back("");
-    domainCreatorNames.push_back("SeqDomainSpectrumCreator");
-    declareProperty("DomainCreator", "", Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(domainCreatorNames)),
-                    "Name of special domain creator that is used for the fit.", Kernel::Direction::Input);
-
     declareProperty("Ties","", Kernel::Direction::Input);
     getPointerToProperty("Ties")->setDocumentation("Math expressions defining ties between parameters of the fitting function.");
     declareProperty("Constraints","", Kernel::Direction::Input);
@@ -582,13 +585,6 @@ namespace CurveFitting
     {
       setFunction();
       addWorkspaces();
-    }
-
-    // check if SeqDomainSpectrumCreator is required for this fit.
-    std::string specificCreator = getPropertyValue("DomainCreator");
-
-    if(specificCreator == "SeqDomainSpectrumCreator") {
-      m_domainCreator.reset(new SeqDomainSpectrumCreator(this, m_workspacePropertyNames.front()));
     }
 
     std::string ties = getPropertyValue("Ties");

@@ -7,6 +7,7 @@
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidCurveFitting/SeqDomain.h"
+#include "MantidAPI/IFunction1DSpectrum.h"
 #include "MantidAPI/ParamFunction.h"
 
 #include "MantidCurveFitting/Fit.h"
@@ -156,7 +157,6 @@ public:
       fit.setProperty("InputWorkspace",matrixWs);
       fit.setProperty("CreateOutput",true);
       fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
-      fit.setProperty("DomainCreator", "SeqDomainSpectrumCreator");
 
       fit.execute();
 
@@ -201,7 +201,6 @@ public:
       fit.setProperty("InputWorkspace",matrixWs);
       fit.setProperty("CreateOutput",true);
       fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
-      fit.setProperty("DomainCreator", "SeqDomainSpectrumCreator");
 
       fit.execute();
 
@@ -230,23 +229,21 @@ private:
       ~TestableSeqDomainSpectrumCreator() { }
   };
 
-  class SeqDomainCreatorTestFunction : public ParamFunction
+  class SeqDomainCreatorTestFunction : public virtual IFunction1DSpectrum, public virtual ParamFunction
   {
   public:
-      SeqDomainCreatorTestFunction() : ParamFunction() { }
       ~SeqDomainCreatorTestFunction() { }
 
       std::string name() const { return "SeqDomainCreatorTestFunction"; }
 
-      void function(const FunctionDomain &domain, FunctionValues &values) const
+      void function1DSpectrum(const FunctionDomain1DSpectrum &domain, FunctionValues &values) const
       {
-          const FunctionDomain1DSpectrum &spectrumDomain = dynamic_cast<const FunctionDomain1DSpectrum &>(domain);
 
-          double wsIndex = static_cast<double>(spectrumDomain.getWorkspaceIndex());
+          double wsIndex = static_cast<double>(domain.getWorkspaceIndex());
           double slope = getParameter("Slope");
 
-          for(size_t j = 0; j < spectrumDomain.size(); ++j) {
-              values.addToCalculated(j, wsIndex + slope * spectrumDomain[j]);
+          for(size_t j = 0; j < domain.size(); ++j) {
+              values.addToCalculated(j, wsIndex + slope * domain[j]);
           }
       }
 
@@ -257,32 +254,27 @@ private:
       }
   };
 
-  class SeqDomainCreatorTestFunctionComplex : public ParamFunction
+  class SeqDomainCreatorTestFunctionComplex : public virtual IFunction1DSpectrum, public virtual ParamFunction
   {
   public:
-      SeqDomainCreatorTestFunctionComplex() : ParamFunction() { }
       ~SeqDomainCreatorTestFunctionComplex() { }
 
       std::string name() const { return "SeqDomainCreatorTestFunctionComplex"; }
 
-      void function(const FunctionDomain &domain, FunctionValues &values) const
+      void function1DSpectrum(const FunctionDomain1DSpectrum &domain, FunctionValues &values) const
       {
-          const FunctionDomain1DSpectrum &spectrumDomain = dynamic_cast<const FunctionDomain1DSpectrum &>(domain);
+          double wsIndex = static_cast<double>(domain.getWorkspaceIndex());
+          double slope = getParameter(domain.getWorkspaceIndex() % 40);
 
-          double wsIndex = static_cast<double>(spectrumDomain.getWorkspaceIndex());
-          double slope = getParameter(spectrumDomain.getWorkspaceIndex() % 40);
-
-          for(size_t j = 0; j < spectrumDomain.size(); ++j) {
-              values.addToCalculated(j, wsIndex + slope * spectrumDomain[j]);
+          for(size_t j = 0; j < domain.size(); ++j) {
+              values.addToCalculated(j, wsIndex + slope * domain[j]);
           }
       }
 
-      void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian)
+      void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain, Jacobian &jacobian)
       {
-          const FunctionDomain1DSpectrum &spectrumDomain = dynamic_cast<const FunctionDomain1DSpectrum &>(domain);
-
-          for(size_t j = 0; j < spectrumDomain.size(); ++j) {
-              jacobian.set(j, spectrumDomain.getWorkspaceIndex() % 40, spectrumDomain[j]);
+          for(size_t j = 0; j < domain.size(); ++j) {
+              jacobian.set(j, domain.getWorkspaceIndex() % 40, domain[j]);
           }
       }
 
