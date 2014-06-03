@@ -288,7 +288,6 @@ class ReflectometryReductionOneBaseTest(object):
         alg.set_InputWorkspace(real_run[0])
         alg.set_AnalysisMode("MultiDetectorAnalysis")
         alg.set_CorrectDetectorPositions(False)
-        alg.set_DetectorComponentName('lineardetector')
         alg.set_ProcessingInstructions("3, 10") # Fictional values
         alg.set_RegionOfDirectBeam("20, 30") # Fictional values
         alg.set_ThetaIn(0.1) # Fictional values
@@ -300,4 +299,21 @@ class ReflectometryReductionOneBaseTest(object):
         
         self.assertTrue(isinstance(out_ws_q, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
         self.assertEqual("MomentumTransfer", out_ws_q.getAxis(0).getUnit().unitID())
+        
+    def test_correct_positions_multi_detector(self):
+        alg = self.construct_standard_algorithm()
+        real_run = Load('POLREF00004699.nxs')
+        alg.set_InputWorkspace(real_run[0])
+        alg.set_AnalysisMode("MultiDetectorAnalysis")
+        alg.set_CorrectDetectorPositions(True)
+        alg.set_ProcessingInstructions("73") 
+        alg.set_RegionOfDirectBeam("28,29") 
+        alg.set_ThetaIn(0.49/2) 
+        out_ws_q, out_ws_lam, theta =  alg.execute()
+        
+        pos = out_ws_lam.getInstrument().getComponentByName('lineardetector').getPos()
+        self.assertAlmostEqual(-0.05714, pos.Z(), 3, "Vertical correction is wrong. Recorded as: " + str(pos.Z()))
+        
+        
+        
         

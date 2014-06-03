@@ -93,9 +93,9 @@ namespace Mantid
         for (auto it = specToWSIndexMap.begin(); it != specToWSIndexMap.end(); ++it, ++i)
         {
           keys[i] = static_cast<int>(it->first);
-          ++i;
         }
         std::sort(keys.begin(), keys.end()); // Sort the keys, as the order is not guaranteed in the map.
+
         return keys;
       }
     }
@@ -232,49 +232,12 @@ namespace Mantid
      * Correct the position of the detectors based on the input theta value.
      * @param toCorrect : Workspace to correct detector positions on.
      * @param thetaInDeg : Theta in degrees to use in correction calculations.
-     * @param sample : Pointer to the sample
-     * @param detector : Pointer to a given detector
      * @param isPointDetector : True if using point detector analysis
+     * @return Copy with positions corrected.
      */
-    void ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr toCorrect,
-        const double& thetaInDeg, IComponent_const_sptr sample, IComponent_const_sptr detector,
-        const bool isPointDetector)
+    MatrixWorkspace_sptr ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr& toCorrect,
+        const double& thetaInDeg, const bool isPointDetector)
     {
-      /*
-       auto instrument = toCorrect->getInstrument();
-
-       const V3D detectorPosition = detector->getPos();
-
-       const V3D samplePosition = sample->getPos();
-
-       const V3D sampleToDetector = detectorPosition - samplePosition;
-
-       auto referenceFrame = instrument->getReferenceFrame();
-
-       const double sampleToDetectorAlongBeam = sampleToDetector.scalar_prod(
-       referenceFrame->vecPointingAlongBeam());
-
-       const double thetaInRad = thetaInDeg * (M_PI / 180.0);
-
-       double acrossOffset = 0;
-
-       double beamOffset = detectorPosition.scalar_prod(referenceFrame->vecPointingAlongBeam());
-
-       double upOffset = sampleToDetectorAlongBeam * std::sin(2.0 * thetaInRad);
-
-       auto moveComponentAlg = this->createChildAlgorithm("MoveInstrumentComponent");
-       moveComponentAlg->initialize();
-       moveComponentAlg->setProperty("Workspace", toCorrect);
-       moveComponentAlg->setProperty("ComponentName", detector->getName());
-       moveComponentAlg->setProperty("RelativePosition", false);
-       // Movements
-       moveComponentAlg->setProperty(referenceFrame->pointingAlongBeamAxis(), beamOffset);
-       moveComponentAlg->setProperty(referenceFrame->pointingHorizontalAxis(), acrossOffset);
-       moveComponentAlg->setProperty(referenceFrame->pointingUpAxis(), upOffset);
-       // Execute the movement.
-       moveComponentAlg->execute();
-       */
-
       g_log.debug("Correcting position using theta.");
 
       auto correctPosAlg = this->createChildAlgorithm("SpecularReflectionPositionCorrect");
@@ -283,31 +246,32 @@ namespace Mantid
 
       const std::string analysisMode = this->getProperty("AnalysisMode");
       correctPosAlg->setProperty("AnalysisMode", analysisMode);
+      auto instrument = toCorrect->getInstrument();
+      IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
       const std::string sampleComponentName = this->getProperty("SampleComponentName");
       correctPosAlg->setProperty("SampleComponentName", sample->getName());
       correctPosAlg->setProperty("TwoThetaIn", thetaInDeg * 2);
 
       if (isPointDetector)
       {
+        IComponent_const_sptr detector = this->getDetectorComponent(instrument, isPointDetector);
         correctPosAlg->setProperty("DetectorComponentName", detector->getName());
       }
       else
       {
         auto specNumbers = getSpectrumNumbers(toCorrect);
-        g_log.notice("In Order?");
-        std::stringstream buffer;
-        for(size_t t = 0; t < specNumbers.size();++t)
-        {
-           buffer << specNumbers[t] << std::endl;
-        }
-        g_log.notice(buffer.str());
-
         correctPosAlg->setProperty("SpectrumNumbersOfDetectors", specNumbers);
+        for(size_t t = 0; t < specNumbers.size(); ++t)
+        {
+         std::stringstream buffer;
+         buffer << "Writing out: " << specNumbers[t];
+         g_log.notice(buffer.str());
+        }
       }
       correctPosAlg->execute();
-      MatrixWorkspace_sptr outWS = correctPosAlg->getProperty("OutputWorkspace");
-      toCorrect = outWS;
+      MatrixWorkspace_sptr corrected = correctPosAlg->getProperty("OutputWorkspace");
 
+      return corrected;
     }
 
     /**
@@ -320,7 +284,7 @@ namespace Mantid
      * @return
      */
     Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
-        API::MatrixWorkspace_sptr toConvert, const bool bCorrectPosition, OptionalDouble& thetaInDeg,
+        API::MatrixWorkspace_sptr& toConvert, const bool bCorrectPosition, OptionalDouble& thetaInDeg,
         const bool isPointDetector)
     {
       /*
@@ -354,15 +318,9 @@ namespace Mantid
         thetaInDeg = twoTheta / 2;
 
       }
-      else if (bCorrectPosition) // This probably ought to be an automatic decision. How about making a guess about sample position holder and detector names. But also allowing the two component names (sample and detector) to be passed in.
+      else if (bCorrectPosition)
       {
-        g_log.debug("Correcting detector position");
-
-        auto instrument = toConvert->getInstrument();
-        IComponent_const_sptr detector = this->getDetectorComponent(instrument, isPointDetector);
-        IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
-
-        correctPosition(toConvert, thetaInDeg.get(), sample, detector, isPointDetector);
+        toConvert = correctPosition(toConvert, thetaInDeg.get(), isPointDetector);
       }
 
       // Always convert units.
