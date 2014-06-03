@@ -315,21 +315,22 @@ namespace Mantid
       else // setup existing MD workspace as workspace target.
         m_OutWSWrapper->setMDWS(spws);
 
-     // preprocess detectors;
+     // pre-process detectors;
       targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_InWS2D,dEModReq,getProperty("UpdateMasks"), std::string(getProperty("PreprocDetectorsWS")));
 
-    
+      /// copy & retrieve metadata, necessary to initialize convertToMD Plugin
+      addExperimentInfo(spws,targWSDescr);    
       // get pointer to appropriate  ConverttToMD plugin from the CovertToMD plugins factory, (will throw if logic is wrong and ChildAlgorithm is not found among existing)
       ConvToMDSelector AlgoSelector;
       this->m_Convertor  = AlgoSelector.convSelector(m_InWS2D,this->m_Convertor);
-     // copy the necessary methadata and get the unique number, that identifies the run, the source workspace came from.
-      copyMetaData(spws,targWSDescr);
  
-
 
       bool ignoreZeros = getProperty("IgnoreZeroSignals");
       // initiate conversion and estimate amount of job to do
       size_t n_steps = this->m_Convertor->initialize(targWSDescr,m_OutWSWrapper,ignoreZeros);
+     // copy the necessary metadata and get the unique number, that identifies the run, the source workspace came from.
+      copyMetaData(spws);
+
 
 
       // progress reporter
@@ -348,15 +349,14 @@ namespace Mantid
       m_InWS2D.reset();
       return;
     }
-
-    /**
-    * Copy over the metadata from the input matrix workspace to output MDEventWorkspace
+   /**
+    * Copy over the part of metadata necessary to initialize ConvertToMD plugin from the input matrix workspace to output MDEventWorkspace
     * @param mdEventWS :: The output MDEventWorkspace
     * @param targWSDescr :: The description of the target workspace, used in the algorithm 
     *
-    * @return  :: the number of experiment info added from the current MD workspace
+    * @return  :: modified targWSDescription containing the number of experiment info added from the current MD workspace
     */
-    void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::MDWSDescription &targWSDescr) const
+    void ConvertToMD::addExperimentInfo(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::MDWSDescription &targWSDescr) const
     {
       // Copy ExperimentInfo (instrument, run, sample) to the output WS
       API::ExperimentInfo_sptr ei(m_InWS2D->cloneExperimentInfo());
@@ -368,7 +368,46 @@ namespace Mantid
       // and should never expect it to start with 0 (for first experiment info)
       uint16_t runIndex = mdEventWS->addExperimentInfo(ei);
 
-      const MantidVec & binBoundaries = m_InWS2D->readX(0);
+      // add run-index to the target workspace description for further usage as the identifier for the events, which come from this run. 
+      targWSDescr.addProperty("RUN_INDEX",runIndex,true);  
+
+    }
+
+    /**
+    * Copy over the metadata from the input matrix workspace to output MDEventWorkspace
+    * @param mdEventWS :: The output MDEventWorkspace
+    * @param targWSDescr :: The description of the target workspace, used in the algorithm 
+    *
+    * @return  :: the number of experiment info added from the current MD workspace
+    */
+    void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const
+    {
+
+      MantidVec binBoundaries = m_InWS2D->readX(0);
+      if (m_Convertor->getUnitConversionHelper().isUnitConverted())
+      {
+        if(dynamic_cast<DataObjects::EventWorkspace *>(m_InWS2D.get()))
+        {
+          g_log.warning()<<"Bin boundaries retrieved from event workspace are ignored by ConvertToMD transformation so the resolution estimates obtained from these boundaries are incorrect\n"; 
+        }
+        else
+        {
+          g_log.information()<<" ConvertToMD converts input workspace units, but the bin boundaries are copied from the first workspace spectra. The resolution estimates can be incorrect if unit conversion depends on spectra number\n";
+        }
+        UnitsConversionHelper &unitConv = m_Convertor->getUnitConversionHelper();
+        unitConv.updateConversion(0);
+        for(size_t i=0;i<binBoundaries.size();i++)
+        {
+          binBoundaries[i] =unitConv.convertUnits(binBoundaries[i]);
+        }
+        //
+        if (binBoundaries[0]>binBoundaries[binBoundaries.size()-1])
+        {
+           g_log.information()<<"Bin boundaries are not arranged monotonously. Sorting performed\n"; 
+           std::sort(binBoundaries.begin(),binBoundaries.end());
+        }
+
+      }
 
       // Replacement for SpectraDetectorMap::createIDGroupsMap using the ISpectrum objects instead
       auto mapping = boost::make_shared<det2group_map>();
@@ -391,8 +430,6 @@ namespace Mantid
         expt->cacheDetectorGroupings(*mapping);
       }
 
-      // add run-index to the target workspace description for further usage as the identifier for the events, which come from this run. 
-      targWSDescr.addProperty("RUN_INDEX",runIndex,true);  
 
     }
 
