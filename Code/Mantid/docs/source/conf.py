@@ -49,6 +49,13 @@ release = '0.01'
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+# -- Options for doctest --------------------------------------------------
+
+# Run this before each test is executed
+doctest_global_setup = """
+from mantid.simpleapi import *
+"""
+
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

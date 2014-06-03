@@ -1,14 +1,3 @@
-/*WIKI*
-This algorithm is for producing rocking curves from alignment scan runs. It is for use only with ADARA-style SNS datasets as it requires the 'scan_index' log variable.
-  
-The algorithm optionally uses the [[MaskDetectors]] and/or [[FilterByXValue]] algorithms to restrict the region of data included.
-'''N.B. If these options are used, then this algorithm will modify the input workspace.'''
-
-The [[SumEventsByLogValue]] algorithm is then called, with 'scan_index' as the log to sum against. 
-The row of the resulting table pertaining to scan_index=0 (which indicates 'not a scan point') is then removed.
-  
-*WIKI*/
-
 #include "MantidWorkflowAlgorithms/StepScan.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"

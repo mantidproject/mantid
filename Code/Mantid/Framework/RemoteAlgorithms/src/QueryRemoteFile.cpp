@@ -1,12 +1,3 @@
-/*WIKI*
-
-Retrieve a list of the files associated with the specified transaction from a remote 
-compute resource.
-
-For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/QueryRemoteFile.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ArrayProperty.h"

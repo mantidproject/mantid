@@ -1,8 +1,3 @@
-"""*WIKI*
- 
-Basic SANS reduction workflow
-
-*WIKI*"""
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *

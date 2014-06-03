@@ -1,8 +1,3 @@
-"""*WIKI*
-
-Calculates the <math>n^{th}</math> moment <math>M_n</math> of <math>y(Q,w)</math> where <math>M_n</math> is the integral of <math>w^n*y(Q,w)</math> over all w for <math>n=0</math> to 4.
-
-*WIKI*"""
 # Algorithm to start Bayes programs
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty

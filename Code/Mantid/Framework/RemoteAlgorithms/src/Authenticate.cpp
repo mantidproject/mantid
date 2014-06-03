@@ -1,12 +1,3 @@
-/*WIKI*
-
-Authenticate to the remote compute resource.  This must be executed before calling any
-other remote algorithms.
-
-For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/Authenticate.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"

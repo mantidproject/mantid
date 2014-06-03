@@ -1,8 +1,3 @@
-/*WIKI*
-Determine if a workspace has a UB matrix on any of it's samples. Returns True if one is found. Returns false if none can be found, or if the
-workspace type is incompatible.
-*WIKI*/
-
 #include "MantidCrystal/HasUB.h"
 
 using namespace Mantid::API;

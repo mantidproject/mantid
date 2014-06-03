@@ -1,8 +1,3 @@
-/*WIKI* 
-Load incident spectrum and detector efficiency correction file containing spectra for each detector.
-The spectra are created by "TOPAZ_spectrum.py" from files of vanadium or TiZr and background.
-
-*WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/LoadIsawSpectrum.h"
@@ -339,4 +334,3 @@ namespace Crystal
 
 } // namespace Mantid
 } // namespace Crystal
-
