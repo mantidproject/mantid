@@ -23,6 +23,9 @@ using namespace NeXus;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM (LoadILLReflectometry);
 
+// PI again !
+const double PI = 3.14159265358979323846264338327950288419716939937510582;
+
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -211,7 +214,7 @@ void LoadILLReflectometry::initWorkSpace(NeXus::NXEntry& /*entry*/, std::vector<
 			m_numberOfChannels + 1,
 			m_numberOfChannels);
 
-	m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Empty");
+	m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
 
 	m_localWorkspace->setYUnitLabel("Counts");
@@ -297,8 +300,30 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry, std::
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube + nb_monitors);
 
   // Assign fake values to first X axis <<to be completed>>
-  for (size_t i = 0; i <= m_numberOfChannels; ++i) {
-	  m_localWorkspace->dataX(0)[i] = double(i);
+
+  // Get some parameters from nexus file and properties
+  auto tof_channel_width_prop = dynamic_cast<PropertyWithValue<double>*>(m_localWorkspace->run().getProperty("monitor1.time_of_flight_0"));
+  double tof_channel_width = *tof_channel_width_prop; /* PAR1[86] */
+
+  auto tof_delay_prop = dynamic_cast<PropertyWithValue<double>*>(m_localWorkspace->run().getProperty("monitor1.time_of_flight_2"));
+  double tof_delay = *tof_delay_prop; /* PAR1[85] */
+
+  double POFF = entry.getFloat("instrument/VirtualChopper/poff"); /* par1[54] */;
+  double mean_chop_2_phase = entry.getFloat("instrument/VirtualChopper/chopper2_phase_average"); /* PAR2[114] */;
+  double mean_chop_1_phase = entry.getFloat("instrument/VirtualChopper/chopper1_phase_average"); /* PAR2[110] */;
+  double openoff = entry.getFloat("instrument/VirtualChopper/open_offset"); /* par1[56] */
+  double variance_chop1_speed = entry.getFloat("instrument/VirtualChopper/chopper1_speed_sigma"); /* PAR2[111] */;
+  double deg360 = PI ; /* ? */
+
+  for (size_t timechannelnumber = 0; timechannelnumber <= m_numberOfChannels; ++timechannelnumber) {
+
+    double t_TOF =
+       (static_cast<int>(timechannelnumber)+0.5) / tof_channel_width + tof_delay
+        - 60.0 * (POFF - 45.0 + mean_chop_2_phase - mean_chop_1_phase + openoff)
+                 /
+                 (2.0 * 360.0 * variance_chop1_speed);
+
+	  m_localWorkspace->dataX(0)[timechannelnumber] = t_TOF;
   }
 
   // First, Monitor
