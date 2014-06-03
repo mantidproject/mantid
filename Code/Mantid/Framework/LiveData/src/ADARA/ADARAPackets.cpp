@@ -317,7 +317,7 @@ uint32_t BeamMonitorPkt::getSectionTOFOffset() const
 bool BeamMonitorPkt::sectionTOFCorrected() const
 {
     // only want the high bit
-    return (bool)(m_fields[m_sectionStartIndex+2] & 0x80000000);
+    return ((m_fields[m_sectionStartIndex+2] & 0x80000000) != 0);
 }
 
 #define CYCLE_MASK 0x7FE00000  // bits 30 to 21 (inclusive)
@@ -330,7 +330,7 @@ bool BeamMonitorPkt::nextEvent( bool& risingEdge, uint32_t& cycle, uint32_t& tof
     {
         uint32_t rawEvent = m_fields[m_sectionStartIndex + 3 + m_eventNum];
         
-        risingEdge = (bool)(rawEvent & 0x80000000);
+        risingEdge = ((rawEvent & 0x80000000) != 0);
         cycle = (rawEvent & CYCLE_MASK) >> 21;
         tof = (rawEvent & TOF_MASK);
 
