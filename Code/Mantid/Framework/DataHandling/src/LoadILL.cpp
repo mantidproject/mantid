@@ -6,6 +6,7 @@
  In cases where the dispersion peak might be higher than the EPP, it is good practice to load a Vanadium file.
 
  The property FilenameVanadium is optional. If it is present the EPP will be loaded from the Vanadium data.
+ The user can also load the Vanadium as a separate workspace and then load it along the data file as above.
 
  To date this algorithm only supports: IN4, IN5 and IN6
 
@@ -148,7 +149,7 @@ void LoadILL::exec() {
   loadDataIntoTheWorkSpace(dataFirstEntry, monitors,
       calculatedDetectorElasticPeakPosition);
 
-  loadRunDetails(dataFirstEntry);
+  addEnergyToRun(dataFirstEntry);
   loadExperimentDetails(dataFirstEntry);
 
   // load the instrument from the IDF if it exists
@@ -273,10 +274,7 @@ void LoadILL::initWorkSpace(NeXus::NXEntry& entry,
   g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << std::endl;
 
   // Now create the output workspace
-  // Might need to get this value from the number of monitors in the Nexus file
-  // params:
-  // workspace type,
-  // total number of spectra + (number of monitors = 0),
+  // total number of spectra + number of monitors,
   // bin boundaries = m_numberOfChannels + 1
   // Z/time dimension
   m_localWorkspace = WorkspaceFactory::Instance().create("Workspace2D",
@@ -341,7 +339,9 @@ void LoadILL::loadTimeDetails(NeXus::NXEntry& entry) {
 }
 
 /**
- *
+ * Goes through all the fields of the nexus file and add them
+ * as parameters in the workspace
+ * @param filename :: NeXus file
  */
 void LoadILL::addAllNexusFieldsAsProperties(std::string filename){
 
@@ -370,58 +370,17 @@ void LoadILL::addAllNexusFieldsAsProperties(std::string filename){
 
 
 /**
- * Load information about the run.
+ * Calculates the Energy from the wavelength and adds
+ * it at property Ei
  *
  * @param entry :: The Nexus entry
  */
-void LoadILL::loadRunDetails(NXEntry & entry) {
+void LoadILL::addEnergyToRun(NXEntry & entry) {
 
   API::Run & runDetails = m_localWorkspace->mutableRun();
-
-//  int runNum = entry.getInt("run_number");
-//  std::string run_num = boost::lexical_cast<std::string>(runNum);
-//  runDetails.addProperty("run_number", run_num);
-
-//  std::string start_time = entry.getString("start_time");
-//  start_time = m_loader.dateTimeInIsoFormat(start_time);
-//  runDetails.addProperty("run_start", start_time);
-
-//  std::string end_time = entry.getString("end_time");
-//  end_time = m_loader.dateTimeInIsoFormat(end_time);
-//  runDetails.addProperty("run_end", end_time);
-
-  //m_wavelength = entry.getFloat("wavelength");
-  std::string wavelength = boost::lexical_cast<std::string>(m_wavelength);
-  //runDetails.addProperty<double>("wavelength", m_wavelength);
-//  runDetails.addProperty("wavelength", wavelength);
   double ei = m_loader.calculateEnergy(m_wavelength);
   runDetails.addProperty<double>("Ei", ei, true); //overwrite
-  //std::string ei_str = boost::lexical_cast<std::string>(ei);
-  //runDetails.addProperty("Ei", ei_str);
 
-//  std::string duration = boost::lexical_cast<std::string>(
-//      entry.getFloat("duration"));
-//  runDetails.addProperty("duration", duration);
-//
-//  std::string preset = boost::lexical_cast<std::string>(
-//      entry.getFloat("preset"));
-//  runDetails.addProperty("preset", preset);
-//
-//  std::string mode = entry.getString("mode");
-//  runDetails.addProperty("mode", mode);
-//
-//  std::string title = entry.getString("title");
-//  runDetails.addProperty("title", title);
-//  m_localWorkspace->setTitle(title);
-//
-//  // Below : This should belong to sample ???
-//  std::string experiment_identifier = entry.getString("experiment_identifier");
-//  runDetails.addProperty("experiment_identifier", experiment_identifier);
-//  m_localWorkspace->mutableSample().setName(experiment_identifier);
-//
-//  std::string temperature = boost::lexical_cast<std::string>(
-//      entry.getFloat("sample/temperature"));
-//  runDetails.addProperty("temperature", temperature);
 }
 
 /*
