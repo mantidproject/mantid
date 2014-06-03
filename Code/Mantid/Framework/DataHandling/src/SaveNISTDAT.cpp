@@ -21,13 +21,6 @@ namespace DataHandling
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveNISTDAT)
 
-/// Sets documentation strings for this algorithm
-void SaveNISTDAT::initDocs()
-{
-  this->setWikiSummary("Save I(Qx,Qy) data to a text file compatible with NIST and DANSE readers.");
-  this->setOptionalMessage("Save I(Qx,Qy) data to a text file compatible with NIST and DANSE readers.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

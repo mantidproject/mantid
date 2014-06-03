@@ -47,12 +47,6 @@ namespace Algorithms
   const std::string IntegrateByComponent::category() const { return "Utility\\Workspaces";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void IntegrateByComponent::initDocs()
-  {
-    this->setWikiSummary("Averages up the instrument hierarchy.");
-    this->setOptionalMessage("Averages up the instrument hierarchy.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

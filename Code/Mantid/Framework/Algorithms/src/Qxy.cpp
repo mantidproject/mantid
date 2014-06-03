@@ -25,13 +25,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Qxy)
 
-/// Sets documentation strings for this algorithm
-void Qxy::initDocs()
-{
-  this->setWikiSummary("Performs the final part of a SANS (LOQ/SANS2D) two dimensional (in Q) data reduction. ");
-  this->setOptionalMessage("Performs the final part of a SANS (LOQ/SANS2D) two dimensional (in Q) data reduction.");
-}
-
 
 using namespace Kernel;
 using namespace API;

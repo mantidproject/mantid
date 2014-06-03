@@ -63,11 +63,6 @@ const std::string LoadSINQFocus::category() const {
 }
 
 //----------------------------------------------------------------------------------------------
-/// Sets documentation strings for this algorithm
-void LoadSINQFocus::initDocs() {
-	this->setWikiSummary("Loads a FOCUS nexus file from the PSI");
-	this->setOptionalMessage("Loads a FOCUS nexus file from the PSI");
-}
 
 /**
  * Return the confidence with with this algorithm can load the file

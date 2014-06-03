@@ -22,13 +22,6 @@ namespace Mantid
     // Register the algorithm into the algorithm factory as a file loading algorithm
      DECLARE_FILELOADER_ALGORITHM(LoadEmptyInstrument)
     
-    /// Sets documentation strings for this algorithm
-    void LoadEmptyInstrument::initDocs()
-    {
-      this->setWikiSummary("Loads an Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) into a [[workspace]] rather than a data file.");
-      this->setOptionalMessage("Loads an Instrument Definition File (IDF) into a workspace rather than a data file.");
-    }
-    
 
     using namespace Kernel;
     using namespace API;

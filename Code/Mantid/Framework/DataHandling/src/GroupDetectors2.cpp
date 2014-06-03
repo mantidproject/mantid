@@ -105,13 +105,6 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(GroupDetectors2)
 
-/// Sets documentation strings for this algorithm
-void GroupDetectors2::initDocs()
-{
-  this->setWikiSummary("Sums spectra bin-by-bin, equivalent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file. ");
-  this->setOptionalMessage("Sums spectra bin-by-bin, equivalent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -960,6 +953,7 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
     outSpec->dataX() = inputWS->readX(0);
 
     // the Y values and errors from spectra being grouped are combined in the output spectrum
+    MantidVec &firstY = outSpec->dataY();
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
     beh->dataX(outIndex)[0] = 0.0;
@@ -972,13 +966,10 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
       const ISpectrum * fromSpectrum = inputWS->getSpectrum(originalWI);
 
       // Add up all the Y spectra and store the result in the first one
-      // Need to keep the next 3 lines inside loop for now until ManagedWorkspace mru-list works properly
-      MantidVec &firstY = outSpec->dataY();
-      MantidVec::iterator fYit;
       MantidVec::iterator fEit = outSpec->dataE().begin();
       MantidVec::const_iterator Yit = fromSpectrum->dataY().begin();
       MantidVec::const_iterator Eit = fromSpectrum->dataE().begin();
-      for (fYit = firstY.begin(); fYit != firstY.end(); ++fYit, ++fEit, ++Yit, ++Eit)
+      for (auto fYit = firstY.begin(); fYit != firstY.end(); ++fYit, ++fEit, ++Yit, ++Eit)
       {
         *fYit += *Yit;
         // Assume 'normal' (i.e. Gaussian) combination of errors

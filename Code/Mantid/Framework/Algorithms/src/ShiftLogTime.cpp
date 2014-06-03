@@ -56,15 +56,6 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ShiftLogTime::initDocs()
-  {
-    string descr("Shifts the indexes of the specified log. This will make the log shorter by the specified shift.");
-    this->setWikiSummary(descr);
-    this->setOptionalMessage(descr);
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void ShiftLogTime::init()

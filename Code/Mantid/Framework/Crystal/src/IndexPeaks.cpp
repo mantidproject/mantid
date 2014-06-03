@@ -50,15 +50,6 @@ namespace Crystal
   }
 
   //--------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void IndexPeaks::initDocs()
-  {
-    std::string summary("Index the peaks in the PeaksWorkspace using the UB ");
-    summary += "stored with the sample.";
-    this->setWikiSummary( summary );
-
-    this->setOptionalMessage("Index the peaks using the UB from the sample.");
-  }
 
   //--------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

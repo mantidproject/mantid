@@ -21,13 +21,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(NormaliseToUnity)
 
-/// Sets documentation strings for this algorithm
-void NormaliseToUnity::initDocs()
-{
-  this->setWikiSummary("NormaliseToUnity takes a 2D [[workspace]] or an [[EventWorkspace]] as input and normalises it to 1. Optionally, the range summed can be restricted in either dimension. ");
-  this->setOptionalMessage("NormaliseToUnity takes a 2D workspace or an EventWorkspace as input and normalises it to 1. Optionally, the range summed can be restricted in either dimension.");
-}
-
 
 using namespace Kernel;
 using namespace API;

@@ -109,14 +109,6 @@ namespace LiveData
 
   /// Returns the run number, if one is stored in the extracted chunk (returns 0 if not)
   int LoadLiveData::runNumber() const { return m_runNumber; }
-  
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadLiveData::initDocs()
-  {
-    this->setWikiSummary("Load a chunk of live data. You should call StartLiveData, and not this algorithm directly.");
-    this->setOptionalMessage("Load a chunk of live data. You should call StartLiveData, and not this algorithm directly.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

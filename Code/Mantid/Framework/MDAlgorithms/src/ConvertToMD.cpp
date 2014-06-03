@@ -213,22 +213,6 @@ namespace Mantid
       setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
     }
-
-
-    // Sets documentation strings for this algorithm
-    void ConvertToMD::initDocs()
-    {
-      this->setWikiSummary("<p>Transforms a workspace into MDEvent workspace with dimensions defined by user.</p><p>"  
-
-        "Gateway for set of subalgorithms, combined together to convert an input 2D matrix workspace or an event workspace with any units along X-axis into  multidimensional event workspace. </p><p>"
-
-        "Depending on the user input and the data found in the input workspace, the algorithms transform the input workspace into 1 to 4 dimensional MDEvent workspace and adds to this workspace additional dimensions, which are described by the workspace properties, and requested by user. </p><p>"
-
-        "The table contains the description of the main algorithm dialogue. More detailed description of the properties, relevant for each MD conversion type can be found on [[MD Transformation factory]] page.</p><p>"
-
-        "The '''Box Splitting Settings''' specifies the controller parameters, which define the target workspace binning: 	(see [[CreateMDWorkspace]] description)</p>");
-      this->setOptionalMessage("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions.");
-    }
     //----------------------------------------------------------------------------------------------
     /** Destructor
     */

@@ -20,13 +20,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSQ2D)
 
-/// Sets documentation strings for this algorithm
-void EQSANSQ2D::initDocs()
-{
-  this->setWikiSummary("Workflow algorithm to process a reduced EQSANS workspace and produce I(Qx,Qy).");
-  this->setOptionalMessage("Workflow algorithm to process a reduced EQSANS workspace and produce I(Qx,Qy).");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

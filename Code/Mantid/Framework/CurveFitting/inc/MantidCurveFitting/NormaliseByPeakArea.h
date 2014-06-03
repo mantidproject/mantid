@@ -37,11 +37,13 @@ namespace Mantid
       NormaliseByPeakArea();
 
       virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Normalises the input data by the area of of peak defined by the input mass value.";}
+
       virtual int version() const;
       virtual const std::string category() const;
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
 

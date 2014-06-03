@@ -48,13 +48,6 @@ namespace DataHandling
 
 DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D);
 
-/// Sets documentation strings for this algorithm
-void LoadCanSAS1D::initDocs()
-{
-  this->setWikiSummary("Load a file written in the canSAS 1-D data format ");
-  this->setOptionalMessage("Load a file written in the canSAS 1-D data format");
-}
-
 
 /// constructor
 LoadCanSAS1D::LoadCanSAS1D() : m_groupNumber(0)

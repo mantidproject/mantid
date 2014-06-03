@@ -44,12 +44,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveDspacemap::initDocs()
-  {
-    this->setWikiSummary("Saves an [[OffsetsWorkspace]] into a POWGEN-format binary dspace map file.");
-    this->setOptionalMessage("Saves an OffsetsWorkspace into a POWGEN-format binary dspace map file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

@@ -25,13 +25,6 @@ namespace Algorithms
 // Register with the algorithm factory
 DECLARE_ALGORITHM(NormaliseByCurrent)
 
-/// Sets documentation strings for this algorithm
-void NormaliseByCurrent::initDocs()
-{
-  this->setWikiSummary("Normalises a workspace by the proton charge.");
-  this->setOptionalMessage("Normalises a workspace by the proton charge.");
-}
-
 
 using namespace Kernel;
 using namespace API;

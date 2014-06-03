@@ -25,13 +25,6 @@ using namespace Mantid::DataHandling;
 
 DECLARE_ALGORITHM(RawFileInfo)
 
-/// Sets documentation strings for this algorithm
-void RawFileInfo::initDocs()
-{
-  this->setWikiSummary("Extract run parameters from a [[RAW_File | RAW]] file as output properties. ");
-  this->setOptionalMessage("Extract run parameters from a  RAW file as output properties.");
-}
-
 /// Initialise
 void RawFileInfo::init()
 {

@@ -21,13 +21,6 @@ namespace Mantid
   {
 
     DECLARE_ALGORITHM(ApplyCalibration)
-
-    /// Sets documentation strings for this algorithm
-    void ApplyCalibration::initDocs()
-    {
-      this->setWikiSummary("Update detector positions from input table workspace.");
-      this->setOptionalMessage("Update detector positions from input table workspace.");
-    }
     
     using namespace Kernel;
     using namespace API;

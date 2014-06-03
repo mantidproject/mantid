@@ -74,13 +74,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void SpecularReflectionCalculateTheta::initDocs()
-    {
-      this->setWikiSummary(
-          "Calculate the specular reflection two theta scattering angle (degrees) from the detector and sample locations .");
-      this->setOptionalMessage(this->getWikiSummary());
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

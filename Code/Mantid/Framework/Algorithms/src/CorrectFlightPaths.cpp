@@ -32,14 +32,6 @@ using namespace Geometry;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(CorrectFlightPaths)
 
-/// Sets documentation strings for this algorithm
-void CorrectFlightPaths::initDocs() {
-	this->setWikiSummary(
-			"Used to correct flight paths in 2D shaped detectors.");
-	this->setOptionalMessage(
-			"Used to correct flight paths in 2D shaped detectors.");
-}
-
 // Constructor
 CorrectFlightPaths::CorrectFlightPaths() :
 		API::Algorithm() {

@@ -42,11 +42,13 @@ namespace Mantid
       virtual ~DgsProcessDetectorVanadium();
 
       virtual const std::string name() const;
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Algorithm to process detector vanadium.";}
+
       virtual int version() const;
       virtual const std::string category() const;
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
     };

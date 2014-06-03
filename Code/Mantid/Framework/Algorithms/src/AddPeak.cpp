@@ -40,12 +40,6 @@ namespace Algorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void AddPeak::initDocs()
-  {
-    this->setWikiSummary("Adds a peak to a PeaksWorkspace.");
-    this->setOptionalMessage("Adds a peak to a PeaksWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

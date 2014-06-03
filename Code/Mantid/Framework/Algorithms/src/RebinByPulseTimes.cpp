@@ -79,12 +79,6 @@ namespace Algorithms
   const std::string RebinByPulseTimes::category() const { return "Transforms\\Rebin";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void RebinByPulseTimes::initDocs()
-  {
-    this->setWikiSummary("Bins events according to pulse time. Binning parameters are specified relative to the start of the run.");
-    this->setOptionalMessage("Bins events according to pulse time. Binning parameters are specified relative to the start of the run.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

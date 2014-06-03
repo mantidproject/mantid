@@ -153,12 +153,6 @@ namespace MDAlgorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void FindPeaksMD::initDocs()
-  {
-    this->setWikiSummary("Find peaks in reciprocal space in a MDEventWorkspace or a MDHistoWorkspace.");
-    this->setOptionalMessage("Find peaks in reciprocal space in a MDEventWorkspace or a MDHistoWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

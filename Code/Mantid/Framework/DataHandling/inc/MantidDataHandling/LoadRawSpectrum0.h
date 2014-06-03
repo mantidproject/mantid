@@ -65,14 +65,16 @@ namespace Mantid
       ~LoadRawSpectrum0();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadRawSpectrum0"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads spectrum zero  from  ISIS  raw file and stores it in a 2D workspace (Workspace2D class).";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "Diagnostics"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method

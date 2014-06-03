@@ -10,12 +10,6 @@ namespace Mantid
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadRaw)
-    
-    /// Sets documentation strings for this algorithm
-    void LoadRaw::initDocs()
-    {
-      setOptionalMessage("*** This version of LoadRaw has been removed from Mantid. You should use the current version of this algorithm or try an earlier release of Mantid. ***");
-    }
 
     using namespace Kernel;
     using namespace API;

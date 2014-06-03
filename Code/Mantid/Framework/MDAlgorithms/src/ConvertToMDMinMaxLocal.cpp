@@ -64,13 +64,6 @@ namespace Mantid
 
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-
-    void ConvertToMDMinMaxLocal::initDocs()
-    {
-      this->setWikiSummary("Calculate limits required for ConvertToMD");
-      this->setOptionalMessage("Calculate limits required for ConvertToMD");
-    }
     void ConvertToMDMinMaxLocal::init()
     {
       ConvertToMDParent::init();

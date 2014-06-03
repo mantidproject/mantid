@@ -40,14 +40,16 @@ namespace DataHandling
 
     /// Algorithm's name
     virtual const std::string name() const { return "SaveFullprofResolution"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Save a Table workspace, which contains peak profile parameters' values, to a Fullprof resolution (.irf) file.";}
+
     /// Algorithm's version
     virtual int version() const { return (1); }
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Diffraction;DataHandling\\Text"; }
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialisation code
     void init();
     /// Execution code

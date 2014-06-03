@@ -49,12 +49,6 @@ namespace WorkflowAlgorithms
   const std::string DgsRemap::category() const { return "Workflow\\Inelastic"; }
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void DgsRemap::initDocs()
-  {
-    this->setWikiSummary("Mask and/or group the given workspace.");
-    this->setOptionalMessage("Mask and/or group the given workspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

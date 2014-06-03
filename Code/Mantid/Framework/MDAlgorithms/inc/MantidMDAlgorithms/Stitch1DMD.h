@@ -40,6 +40,9 @@ namespace MDAlgorithms
     virtual ~Stitch1DMD();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Sticch two MD ReflectometryQ group workspaces together.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
@@ -53,8 +56,6 @@ namespace MDAlgorithms
     Mantid::MDEvents::MDHistoWorkspace_sptr create1DHistoWorkspace(const MantidVec& signals,const MantidVec& errors, const MantidVec& extents, const std::vector<int>& vecNBins, const std::vector<std::string> names, const std::vector<std::string>& units);
     void overlayOverlap(Mantid::MDEvents::MDHistoWorkspace_sptr original, Mantid::API::IMDHistoWorkspace_sptr overlap);
     Mantid::MDEvents::MDHistoWorkspace_sptr extractOverlapAsWorkspace(Mantid::API::IMDHistoWorkspace_sptr ws, const double& startOverlap, const double& endOverlap);
-
-    virtual void initDocs();
     void init();
     void exec();
 

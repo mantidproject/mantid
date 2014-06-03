@@ -79,14 +79,6 @@ DECLARE_ALGORITHM(ProcessBackground)
   {
   }
 
-  void ProcessBackground::initDocs()
-  {
-      this->setWikiSummary("ProcessBackground provides some tools to process powder diffraction pattern's "
-                           "background in order to help Le Bail Fit.");
-      this->setOptionalMessage("ProcessBackground provides some tools to process powder diffraction pattern's "
-                               "background in order to help Le Bail Fit.");
-  }
-
   //----------------------------------------------------------------------------------------------
   /** Define parameters
    */

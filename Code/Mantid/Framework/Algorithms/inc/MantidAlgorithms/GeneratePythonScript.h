@@ -50,14 +50,16 @@ public:
 
   /// Algorithm's name for identification
   virtual const std::string name() const { return "GeneratePythonScript";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "An Algorithm to generate a Python script file to reproduce the history of a workspace.";}
+
   /// Algorithm's version for identification
   virtual int version() const { return 1;};
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Utility\\Development";}
 
 protected:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialise the properties
   void init();
   /// Run the algorithm

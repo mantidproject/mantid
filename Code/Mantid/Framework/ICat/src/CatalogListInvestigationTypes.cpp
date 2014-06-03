@@ -14,13 +14,6 @@ namespace Mantid
   {
     DECLARE_ALGORITHM(CatalogListInvestigationTypes)
 
-    /// Sets documentation strings for this algorithm
-    void CatalogListInvestigationTypes::initDocs()
-    {
-      this->setWikiSummary("Lists the name of investigation types from the Information catalog. ");
-      this->setOptionalMessage("Lists the name of investigation types from the Information catalog.");
-    }
-
     /// Init method
     void CatalogListInvestigationTypes::init()
     {

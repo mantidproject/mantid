@@ -15,13 +15,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSPatchSensitivity)
 
-/// Sets documentation strings for this algorithm
-void EQSANSPatchSensitivity::initDocs()
-{
-  this->setWikiSummary("Patch EQSANS sensitivity correction.");
-  this->setOptionalMessage("Patch EQSANS sensitivity correction.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

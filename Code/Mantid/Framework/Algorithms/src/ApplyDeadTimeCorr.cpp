@@ -46,7 +46,7 @@ DECLARE_ALGORITHM(ApplyDeadTimeCorr)
    */
 void ApplyDeadTimeCorr::init()
 {
-  this->setWikiSummary("Apply deadtime correction to each spectra of a workspace.");
+
 
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "",
     Direction::Input), "The name of the input workspace containing measured counts");

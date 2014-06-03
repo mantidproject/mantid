@@ -49,12 +49,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SortHKL::initDocs()
-  {
-    this->setWikiSummary("Sorts a PeaksWorkspace by HKL. Averages intensities using point group.");
-    this->setOptionalMessage("Sorts a PeaksWorkspace by HKL. Averages intensities using point group.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

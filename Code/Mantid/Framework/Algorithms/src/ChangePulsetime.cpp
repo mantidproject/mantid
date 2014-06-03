@@ -39,12 +39,6 @@ namespace Algorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ChangePulsetime::initDocs()
-  {
-    this->setWikiSummary("Adds a constant time value, in seconds, to the pulse time of events in an [[EventWorkspace]]. ");
-    this->setOptionalMessage("Adds a constant time value, in seconds, to the pulse time of events in an EventWorkspace. ");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

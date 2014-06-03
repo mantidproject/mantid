@@ -70,15 +70,6 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Set up documention
-    */
-  void RefinePowderInstrumentParameters3::initDocs()
-  {
-    setWikiSummary("Refine the instrument geometry related parameters for powder diffractomer. ");
-    setOptionalMessage("Parameters include Dtt1, Dtt1t, Dtt2t, Zero, Zerot. ");
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Declare properties
     */
   void RefinePowderInstrumentParameters3::init()

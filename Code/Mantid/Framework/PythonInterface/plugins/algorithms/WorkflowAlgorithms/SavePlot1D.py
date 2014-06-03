@@ -21,12 +21,14 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 	""" Algorithm name
 	"""
         return "SavePlot1D"
-    
+
+    def summary(self):
+        return "Save 1D plots to a file"
+        
     def checkGroups(self):
         return False
         
     def PyInit(self):
-        self.setWikiSummary("Save 1D plots to a file")
         #declare properties
         self.declareProperty(mantid.api.WorkspaceProperty("InputWorkspace","",mantid.kernel.Direction.Input),"Workspace to plot")
         self.declareProperty(mantid.api.FileProperty('OutputFilename', '', action=mantid.api.FileAction.Save, extensions = ["png"]), doc='Name of the image file to savefile.')

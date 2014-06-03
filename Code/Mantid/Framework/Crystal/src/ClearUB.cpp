@@ -54,12 +54,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void ClearUB::initDocs()
-    {
-      this->setWikiSummary("Clears the UB by removing the oriented lattice from the sample.");
-      this->setOptionalMessage(this->getWikiSummary());
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

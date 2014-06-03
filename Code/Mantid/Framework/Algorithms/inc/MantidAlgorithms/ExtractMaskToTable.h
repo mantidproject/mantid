@@ -43,6 +43,9 @@ namespace Algorithms
 
     /// Algorithm's name
     virtual const std::string name() const { return "ExtractMaskToTable"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "The output TableWorkspace should be compatible to MaskBinsFromTable.";}
+
     /// Algorithm's version
     virtual int version() const { return 1; }
     /// Algorithm's category for identification
@@ -52,8 +55,7 @@ namespace Algorithms
     std::vector<detid_t> subtractVector(std::vector<detid_t> minuend, std::vector<detid_t> subtrahend);
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialisation code
     void init();
     /// Execution code

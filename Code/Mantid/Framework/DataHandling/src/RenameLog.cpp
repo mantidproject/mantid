@@ -31,14 +31,6 @@ namespace DataHandling
   RenameLog::~RenameLog()
   {
   }
-  
-  void RenameLog::initDocs(){
-
-    this->setWikiSummary("Rename a TimeSeries log in a given Workspace.");
-    this->setOptionalMessage("Rename a TimeSeries log in a given Workspace.");
-
-    return;
-  }
 
   void RenameLog::init(){
 

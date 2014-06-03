@@ -14,13 +14,6 @@ namespace Mantid
   {
     DECLARE_ALGORITHM(CatalogGetDataSets)
 
-    /// Sets documentation strings for this algorithm
-    void CatalogGetDataSets::initDocs()
-    {
-      this->setWikiSummary("Gets the datasets associated to the selected investigation. ");
-      this->setOptionalMessage("Gets the datasets associated to the selected investigation.");
-    }
-
     /// Initialisation methods
     void CatalogGetDataSets::init()
     {

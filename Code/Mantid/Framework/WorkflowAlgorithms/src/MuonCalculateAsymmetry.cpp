@@ -51,13 +51,6 @@ namespace WorkflowAlgorithms
 
   //----------------------------------------------------------------------------------------------
 
-  /// Sets documentation strings for this algorithm
-  void MuonCalculateAsymmetry::initDocs()
-  {
-    this->setWikiSummary("Converts loaded/prepared Muon data to a data suitable for analysis.");
-    this->setOptionalMessage("Converts loaded/prepared Muon data to a data suitable for analysis.");
-  }
-
   //----------------------------------------------------------------------------------------------
 
   /** 

@@ -60,20 +60,6 @@ namespace Crystal
   }
 
   //--------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void TransformHKL::initDocs()
-  {
-    std::string summary("Adjust the UB stored with the sample to map the peak's  ");
-    summary += "(HKL) vectors to M*(HKL)";
-    this->setWikiSummary( summary );
-
-    std::string message("Specify a 3x3 matrix to apply to (HKL) vectors.");
-    message += " as a list of 9 comma separated numbers.";
-    message += " Both the UB and HKL values will be updated";
-    this->setOptionalMessage( message );
-  }
-
-  //--------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void TransformHKL::init()

@@ -15,13 +15,6 @@ namespace Mantid
   {
     DECLARE_ALGORITHM(CatalogGetDataFiles)
 
-    /// Sets documentation strings for this algorithm
-    void CatalogGetDataFiles::initDocs()
-    {
-      this->setWikiSummary("Gets the files associated to the selected investigation.");
-      this->setOptionalMessage("Gets the files associated to the selected investigation.");
-    }
-
     /// Initialising the algorithm
     void CatalogGetDataFiles::init()
     {
