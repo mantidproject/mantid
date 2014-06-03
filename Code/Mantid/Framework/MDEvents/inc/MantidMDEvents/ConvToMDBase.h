@@ -65,7 +65,11 @@ namespace MDEvents
     /// virtual destructor
     virtual ~ConvToMDBase(){};
 
- 
+    /** method returns unit conversion helper, used to convert input workspace units to the units, used by appropriate MD transformation
+       (if such conversion is necessary) */
+    UnitsConversionHelper & getUnitConversionHelper()
+    { return m_UnitConversion;}
+    
   protected:
    // pointer to input matrix workspace;
    API::MatrixWorkspace_const_sptr m_InWS2D;

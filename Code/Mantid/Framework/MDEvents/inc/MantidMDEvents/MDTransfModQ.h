@@ -86,7 +86,7 @@ public:
 protected:
     //  directions to the detectors 
     double m_ex,m_ey,m_ez;
-    // the matrix which transforms the neutron momentums from lablratory to crystall coordinate system. 
+    // the matrix which transforms the neutron momentums from laboratory to crystal coordinate system. 
     std::vector<double> m_RotMat;
     // min-max values, some modified to work with squared values:
     std::vector<double> m_DimMin,m_DimMax;

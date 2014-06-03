@@ -52,7 +52,7 @@ namespace CnvrtToMD
 class DLLExport UnitsConversionHelper
 {
     // variables for units conversion:
-    // pointer to input workpsace units 
+    // pointer to input workspace units 
       Kernel::Unit_sptr m_SourceWSUnit;
       // pointer to target workspace units
       Kernel::Unit_sptr m_TargetUnit;
@@ -78,6 +78,7 @@ public:
     void updateConversion(size_t i);
     double convertUnits(double val)const;   
 
+    bool isUnitConverted()const;
     std::pair<double,double> getConversionRange(double x1,double x2)const;
     // copy constructor
     UnitsConversionHelper(const UnitsConversionHelper &another);
