@@ -121,12 +121,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void ReflectometryReductionOne::initDocs()
-    {
-      this->setOptionalMessage("Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections.");
-      this->setWikiSummary("Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections. See [[Reflectometry_Guide]]");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
@@ -281,22 +275,21 @@ namespace Mantid
       if (!thetaInDeg.is_initialized())
       {
         g_log.debug("Calculating final theta.");
-        const double thetaToRad = 180 / M_PI;
 
-        Instrument_const_sptr instrument = toConvert->getInstrument();
+        auto correctThetaAlg = this->createChildAlgorithm("SpecularReflectionCalculateTheta");
+        correctThetaAlg->initialize();
+        correctThetaAlg->setProperty("InputWorkspace", toConvert);
+        const std::string detectorComponentName = this->getPropertyValue("DetectorComponentName");
+        const std::string sampleComponentName = this->getProperty("SampleComponentName");
+        const std::string analysisMode = this->getProperty("AnalysisMode");
+        correctThetaAlg->setProperty("DetectorComponentName", detectorComponentName);
+        correctThetaAlg->setProperty("SampleComponentName", sampleComponentName);
+        correctThetaAlg->setProperty("AnalysisMode", analysisMode);
+        correctThetaAlg->execute();
+        const double twoTheta = correctThetaAlg->getProperty("TwoTheta");
 
-        IComponent_const_sptr detector = this->getDetectorComponent(instrument, isPointDetector);
-        IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
+        thetaInDeg = twoTheta/2;
 
-        const V3D sampleToDetectorPos = detector->getPos() - sample->getPos();
-
-        const V3D sourcePos = instrument->getSource()->getPos();
-        const V3D beamPos = sample->getPos() - sourcePos;
-
-        const V3D sampleDetVec = detector->getPos() - sample->getPos();
-        const double calculatedTheta = sampleDetVec.angle(beamPos) * thetaToRad * 1 / 2;
-
-        thetaInDeg = calculatedTheta / thetaToRad; // Assign calculated value it.
       }
       else if (bCorrectPosition) // This probably ought to be an automatic decision. How about making a guess about sample position holder and detector names. But also allowing the two component names (sample and detector) to be passed in.
       {

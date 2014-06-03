@@ -49,13 +49,15 @@ public:
     virtual ~Logarithm(void){};
     /// Algorithm's name for identification
     virtual const std::string name() const { return "Logarithm";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Logarithm function calculates the logarithm of the data, held in a workspace. A user can choose between natural (default) or base 10 logarithm";}
+
    /// Algorithm's version for identification
     virtual int version() const { return (1);}
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Arithmetic";}
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// The value to replace ln(0)
   double log_Min;
   /// If the logarithm natural or 10-based

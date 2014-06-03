@@ -13,6 +13,9 @@ class Mean(PythonAlgorithm):
     def name(self):
         return "Mean"
 
+    def summary(self):
+        return "Calculates the mean of the workspaces provided."
+        
     def PyInit(self):
         mustHaveWorkspaceNames = StringMandatoryValidator()
         self.declareProperty("Workspaces", "", validator=mustHaveWorkspaceNames, direction=Direction.Input, doc="Input workspaces. Comma separated workspace names")

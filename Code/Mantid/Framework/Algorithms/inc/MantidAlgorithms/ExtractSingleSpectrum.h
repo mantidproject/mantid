@@ -51,14 +51,16 @@ public:
   virtual ~ExtractSingleSpectrum() {}
   /// Algorithm's name
   virtual const std::string name() const { return "ExtractSingleSpectrum"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Extracts the specified spectrum from a workspace and places it in a new single-spectrum workspace.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Transforms\\Splitting"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

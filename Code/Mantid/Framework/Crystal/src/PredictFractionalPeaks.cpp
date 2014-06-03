@@ -63,12 +63,6 @@ namespace Mantid
 
 
     }
-    /// Sets documentation strings for this algorithm
-    void PredictFractionalPeaks::initDocs()
-    {
-      this->setWikiSummary("Creates a PeaksWorkspace with peaks occurring at specific fractional h,k,or l values");
-      this->setOptionalMessage("The offsets can be from hkl values in a range of hkl values or from peaks in the input PeaksWorkspace");
-    }
 
     /// Initialise the properties
     void PredictFractionalPeaks::init()

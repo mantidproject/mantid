@@ -60,13 +60,6 @@ static double getYTubeAngle(IDetector_const_sptr det,
 	return sampleDetVec.angle(beamLine);
 }
 
-/// Sets documentation strings for this algorithm
-void SANSSolidAngleCorrection::initDocs()
-{
-  this->setWikiSummary("Performs solid angle correction on SANS 2D data.");
-  this->setOptionalMessage("Performs solid angle correction on SANS 2D data.");
-}
-
 void SANSSolidAngleCorrection::init()
 {
   auto wsValidator = boost::make_shared<CompositeValidator>();

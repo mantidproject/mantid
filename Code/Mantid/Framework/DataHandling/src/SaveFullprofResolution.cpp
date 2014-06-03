@@ -70,15 +70,6 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Wiki docs
-    */
-  void SaveFullprofResolution::initDocs()
-  {
-    this->setWikiSummary("Save a Table workspace, which contains peak profile parameters' values, to a Fullprof resolution (.irf) file.");
-    this->setOptionalMessage("Save a Table workspace, which contains peak profile parameters' values, to a Fullprof resolution (.irf) file.");
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Init to define parameters
     */
   void SaveFullprofResolution::init()

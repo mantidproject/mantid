@@ -51,12 +51,14 @@ public:
   virtual ~CreateWorkspace();
 
   virtual const std::string name() const { return "CreateWorkspace"; } ///< @return the algorithms name
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "This algorithm constructs a MatrixWorkspace when passed a vector for each of the X, Y, and E data values. The unit for the X Axis can optionally be specified as any of the units in the Kernel's UnitFactory.  Multiple spectra may be created by supplying the NSpec Property (integer, default 1). When this is provided the vectors are split into equal-sized spectra (all X, Y, E values must still be in a single vector for input).";}
+
   virtual const std::string category() const { return "Utility\\Workspaces"; } ///< @return the algorithms category
   virtual int version() const { return (1); } ///< @return version number of algorithm
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialise the Algorithm (declare properties)
   void init();
   /// Execute the Algorithm

@@ -71,13 +71,6 @@ namespace Mantid
       return "Sample;DataHandling";
     }
 
-    /// Sets documentation strings for this algorithm
-    void SetSampleMaterial::initDocs()
-    {
-      this->setWikiSummary("Sets the neutrons information in the sample.");
-      this->setOptionalMessage("Sets the neutrons information in the sample.");
-    }
-
     using namespace Mantid::DataHandling;
     using namespace Mantid::API;
     using namespace Kernel;
@@ -121,7 +114,7 @@ namespace Mantid
       auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0.0);
       declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
-        "Optional:  This number density of the sample in number of atoms per cubic angstrom will be used instead of calculated");
+        "Optional:  This number density of the sample in number of formulas per cubic angstrom will be used instead of calculated");
       declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,
         "Number of formulas in the unit cell needed for chemical formulas with more than 1 atom");
       declareProperty("UnitCellVolume", EMPTY_DBL(), mustBePositive,
@@ -275,19 +268,16 @@ namespace Mantid
         NeutronAtom neutron(0, 0., 0., 0., 0., 0., 0.); // starting thing for neutronic information
         if (CF.atoms.size() == 1 && isEmpty(zParameter) && isEmpty(rho))
         {
-
-          Atom myAtom = getAtom(chemicalSymbol, CF.aNumbers[0]);
-          mat.reset(new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density));
+          mat.reset(new Material(chemicalSymbol, CF.atoms[0]->neutron, CF.atoms[0]->number_density));
         }
         else
         {
           double numAtoms = 0.; // number of atoms in formula
           for (size_t i=0; i<CF.atoms.size(); i++)
           {
-            Atom myAtom = getAtom(CF.atoms[i], CF.aNumbers[i]);
-            neutron = neutron + CF.numberAtoms[i] * myAtom.neutron;
+            neutron = neutron + CF.numberAtoms[i] * CF.atoms[i]->neutron;
 
-            g_log.information() << myAtom << ": " << myAtom.neutron << "\n";
+            g_log.information() << CF.atoms[i] << ": " << CF.atoms[i]->neutron << "\n";
             numAtoms += static_cast<double>(CF.numberAtoms[i]);
           }
           // normalize the accumulated number by the number of atoms
@@ -322,7 +312,7 @@ namespace Mantid
         g_log.notice() << "= " << mat->numberDensity() << " atoms/Angstrom^3\n";
         setProperty("SampleNumberDensityResult", mat->numberDensity()); // in atoms/Angstrom^3
       }
-      g_log.notice() << "Cross sections for wavelength = " << NeutronAtom::ReferenceLambda << "Angstroms\n"
+      g_log.notice() << "Cross sections for wavelength = " << NeutronAtom::ReferenceLambda << " Angstroms\n"
         << "    Coherent "   << mat->cohScatterXSection() << " barns\n"
         << "    Incoherent " << mat->incohScatterXSection() << " barns\n"
         << "    Total "      << mat->totalScatterXSection() << " barns\n"
@@ -333,10 +323,17 @@ namespace Mantid
       setProperty("AbsorptionXSectionResult",mat->absorbXSection()); // in barns
       setProperty("ReferenceWavelength",NeutronAtom::ReferenceLambda); // in Angstroms
 
-      double smu =  mat->totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
-      double amu = mat->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
-      g_log.notice() << "Anvred LinearScatteringCoef = " << smu << " 1/cm\n"
-                     << "Anvred LinearAbsorptionCoef = "   << amu << " 1/cm\n";
+      if (isEmpty(rho))
+      {
+          g_log.notice("Unknown value for number density");
+      }
+      else
+      {
+          double smu =  mat->totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
+          double amu = mat->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+          g_log.notice() << "Anvred LinearScatteringCoef = " << smu << " 1/cm\n"
+                         << "Anvred LinearAbsorptionCoef = "   << amu << " 1/cm\n";
+      }
       // Done!
       progress(1);
     }

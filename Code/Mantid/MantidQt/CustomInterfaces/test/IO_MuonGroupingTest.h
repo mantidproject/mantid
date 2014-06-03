@@ -9,7 +9,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
+#include "MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces::Muon;

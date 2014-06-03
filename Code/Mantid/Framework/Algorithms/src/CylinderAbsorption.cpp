@@ -32,13 +32,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CylinderAbsorption)
 
-/// Sets documentation strings for this algorithm
-void CylinderAbsorption::initDocs()
-{
-  this->setWikiSummary("Calculates bin-by-bin correction factors for attenuation due to absorption and single scattering in a '''cylindrical''' sample. ");
-  this->setOptionalMessage("Calculates bin-by-bin correction factors for attenuation due to absorption and single scattering in a 'cylindrical' sample.");
-}
-
 
 using namespace Kernel;
 using namespace Geometry;

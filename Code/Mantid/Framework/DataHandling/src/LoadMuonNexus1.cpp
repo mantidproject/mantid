@@ -74,15 +74,10 @@ namespace Mantid
 {
   namespace DataHandling
   {
+    using namespace DataObjects;
+
     // Register the algorithm into the algorithm factory
     DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1);
-
-    /// Sets documentation strings for this algorithm
-    void LoadMuonNexus1::initDocs()
-    {
-      this->setWikiSummary("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a NeXus file of this type. ");
-      this->setOptionalMessage("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.");
-    }
 
 
     using namespace Kernel;
@@ -587,7 +582,7 @@ namespace Mantid
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(hist, tcbs);
-      localWorkspace->getAxis(1)->setValue(hist, static_cast<int>(hist) + 1);
+      localWorkspace->getSpectrum(hist)->setSpectrumNo(static_cast<int>(hist) + 1);
     }
 
 

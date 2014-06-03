@@ -77,12 +77,6 @@ namespace Crystal
   const std::string SetSpecialCoordinates::category() const { return "Crystal";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SetSpecialCoordinates::initDocs()
-  {
-    this->setWikiSummary("Set or overwrite any Q3D special coordinates.");
-    this->setOptionalMessage("Set or overwrite any Q3D special coordinates.");
-  }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

@@ -8,8 +8,6 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
-using Mantid::DataObjects::PeaksWorkspace_sptr;
-
 namespace Mantid
 {
 namespace Crystal
@@ -52,8 +50,9 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal"; }
-
+  virtual const std::string category() const { return "Crystal";}
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Integrate single crystal peaks using IkedaCarpenter fit TOF";}
 private:
   API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace
   API::MatrixWorkspace_sptr outputW; ///< A pointer to the output workspace
@@ -65,7 +64,7 @@ private:
   /// Read in all the input parameters
   void retrieveProperties();
   int fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan,
-                    PeaksWorkspace_sptr &Peaks, const detid2index_map& pixel_to_wi);
+                    DataObjects::PeaksWorkspace_sptr &Peaks, const detid2index_map& pixel_to_wi);
   
   bool IC;           ///< Ikeida Carpenter fit of TOF
 

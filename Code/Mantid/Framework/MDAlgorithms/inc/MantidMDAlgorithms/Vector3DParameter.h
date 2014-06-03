@@ -37,9 +37,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-using Mantid::API::ImplicitFunctionParameter;
 template<typename Derived, typename ElemType>
-class DLLExport Vector3DParameter : public  ImplicitFunctionParameter
+class DLLExport Vector3DParameter : public  Mantid::API::ImplicitFunctionParameter
 {
 public:
   Vector3DParameter(ElemType a, ElemType b, ElemType c);

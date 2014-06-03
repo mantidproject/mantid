@@ -75,11 +75,6 @@ namespace Algorithms
   FilterEvents::~FilterEvents()
   {
   }
-  
-  void FilterEvents::initDocs()
-  {    
-    setWikiSummary("Filter events from an [[EventWorkspace]] to one or multiple [[EventWorkspace]]s according to a series of splitters.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Declare Inputs

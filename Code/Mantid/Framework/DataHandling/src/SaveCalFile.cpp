@@ -50,12 +50,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveCalFile::initDocs()
-  {
-    this->setWikiSummary("Saves a 5-column ASCII .cal file from up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.");
-    this->setOptionalMessage("Saves a 5-column ASCII .cal file from up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

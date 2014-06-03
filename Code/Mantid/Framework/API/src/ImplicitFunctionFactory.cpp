@@ -45,7 +45,7 @@ namespace Mantid
       Poco::AutoPtr<Document> pDoc = pParser.parseString(processXML);
       Element* pInstructionsXML = pDoc->documentElement();
 
-      ImplicitFunctionParser* funcParser = Mantid::API::ImplicitFunctionParserFactory::Instance().createImplicitFunctionParserFromXML(processXML);
+      boost::scoped_ptr<ImplicitFunctionParser> funcParser(ImplicitFunctionParserFactory::Instance().createImplicitFunctionParserFromXML(processXML));
 
       boost::scoped_ptr<ImplicitFunctionBuilder> functionBuilder(funcParser->createFunctionBuilder(pInstructionsXML));
       return functionBuilder->create();

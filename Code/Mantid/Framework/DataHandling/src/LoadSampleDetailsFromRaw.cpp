@@ -49,13 +49,6 @@ using namespace Mantid::DataHandling;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadSampleDetailsFromRaw)
 
-/// Sets documentation strings for this algorithm
-void LoadSampleDetailsFromRaw::initDocs()
-{
-  this->setWikiSummary("Loads the simple sample geometry that is defined within an ISIS raw file. ");
-  this->setOptionalMessage("Loads the simple sample geometry that is defined within an ISIS raw file.");
-}
-
 /**
  * Initialize the algorithm
  */

@@ -53,13 +53,6 @@ namespace Algorithms
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(DiffractionEventCalibrateDetectors)
   
-  /// Sets documentation strings for this algorithm
-  void DiffractionEventCalibrateDetectors::initDocs()
-  {
-    this->setWikiSummary("This algorithm optimizes the position and angles of all of the detector panels. The target instruments for this feature are SNAP and TOPAZ. ");
-    this->setOptionalMessage("This algorithm optimizes the position and angles of all of the detector panels. The target instruments for this feature are SNAP and TOPAZ.");
-  }
-  
 
   using namespace Kernel;
   using namespace API;

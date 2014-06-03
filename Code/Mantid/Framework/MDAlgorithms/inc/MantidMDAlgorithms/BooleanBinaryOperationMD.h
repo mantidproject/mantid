@@ -41,6 +41,9 @@ namespace MDAlgorithms
     virtual ~BooleanBinaryOperationMD();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const;
+
     virtual int version() const;
 
   protected:
@@ -48,8 +51,6 @@ namespace MDAlgorithms
     virtual bool acceptScalar() const
     { return true; }
     virtual bool commutative() const;
-
-    virtual void initDocs();
     void checkInputs();
     void execEvent();
     virtual void execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);

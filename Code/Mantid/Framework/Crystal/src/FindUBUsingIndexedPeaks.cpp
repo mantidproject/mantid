@@ -42,20 +42,6 @@ namespace Crystal
   {
   }
   
-
-  //--------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void FindUBUsingIndexedPeaks::initDocs()
-  {
-    std::string summary("Calculate the UB matrix from a peaks workspace in ");
-    summary += "which (h,k,l) indices have already been set on at least three ";    summary += "linearly independent Q vectors.";
-    this->setWikiSummary( summary );
-
-    std::string message("Calculate the UB matrix from a peaks workspace, ");
-    message += "containing indexed peaks.";
-    this->setOptionalMessage( message );
-  }
-
   //--------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */

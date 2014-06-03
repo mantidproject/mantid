@@ -89,12 +89,6 @@ namespace Mantid
       return "CorrectionFunctions";
     }
 
-    void CalculateGammaBackground::initDocs()
-    {
-      this->setWikiSummary("Calculates the background due to gamma rays produced when neutrons are absorbed by shielding");
-      this->setOptionalMessage("Calculates the background due to gamma rays produced when neutrons are absorbed by shielding.");
-    }
-
     void CalculateGammaBackground::init()
     {
 
@@ -425,7 +419,6 @@ namespace Mantid
       {
         auto profile = boost::dynamic_pointer_cast<ComptonProfile>(profileFunction->getFunction(i));
         profile->disableLogging();
-        profile->setAttributeValue("WorkspaceIndex",static_cast<int>(wsIndex));
         profile->setUpForFit();
         profile->cacheYSpaceValues(tseconds, false, detpar, respar);
 

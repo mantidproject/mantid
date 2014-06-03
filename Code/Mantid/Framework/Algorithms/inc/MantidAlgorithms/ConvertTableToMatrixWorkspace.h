@@ -54,8 +54,11 @@ public:
   virtual ~ConvertTableToMatrixWorkspace()
   {}
   /// Algorithm's name
-  virtual const std::string name() const
-  { return "ConvertTableToMatrixWorkspace";}
+  virtual const std::string name() const  { return "ConvertTableToMatrixWorkspace";}
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Creates a single spectrum matrix workspace from some columns of a table workspace.";}
+
+
   /// Algorithm's version
   virtual int version() const
   { return (1);}
@@ -64,8 +67,7 @@ public:
   { return "Utility\\Workspaces";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

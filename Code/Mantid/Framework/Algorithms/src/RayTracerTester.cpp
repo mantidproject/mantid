@@ -46,12 +46,6 @@ namespace Algorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void RayTracerTester::initDocs()
-  {
-    this->setWikiSummary("Algorithm to test ray tracer by spraying evenly spaced rays around.");
-    this->setOptionalMessage("Algorithm to test ray tracer by spraying evenly spaced rays around.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

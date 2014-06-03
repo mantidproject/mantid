@@ -32,14 +32,16 @@ public:
   virtual ~SaveNISTDAT() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SaveNISTDAT"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Save I(Qx,Qy) data to a text file compatible with NIST and DANSE readers.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "SANS;DataHandling\\Text"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

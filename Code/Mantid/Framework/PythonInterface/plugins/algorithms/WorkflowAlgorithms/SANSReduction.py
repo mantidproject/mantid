@@ -15,9 +15,10 @@ class SANSReduction(PythonAlgorithm):
     def name(self):
         return 'SANSReduction'
 
+    def summary(self):
+        return "Basic SANS reduction workflow"
+
     def PyInit(self):
-        self.setOptionalMessage("Basic SANS reduction workflow")
-        self.setWikiSummary("Basic SANS reduction workflow")
         self._py_init()
 
     def PyExec(self):

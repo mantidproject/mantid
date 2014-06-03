@@ -40,6 +40,31 @@ void Lorentzian::init()
   declareParameter("FWHM", 0.0, "Full-width at half-maximum");
 }
 
+double Lorentzian::height()const 
+{
+  double gamma = getParameter("FWHM");
+  if ( gamma == 0.0 )
+  {
+    return getParameter("Amplitude");
+  }
+  else
+  {
+    return getParameter("Amplitude") * 2.0 / (gamma * M_PI) ;
+  }
+}
+
+void Lorentzian::setHeight(const double h) 
+{
+  double gamma = getParameter("FWHM");
+  if ( gamma == 0.0 )
+  {
+    setParameter("Amplitude",h);
+  }
+  else
+  {
+    setParameter("Amplitude",h * gamma * M_PI / 2.0 );
+  }
+}
 
 void Lorentzian::functionLocal(double* out, const double* xValues, const size_t nData)const
 {

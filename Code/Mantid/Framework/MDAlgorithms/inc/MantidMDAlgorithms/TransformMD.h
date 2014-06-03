@@ -41,11 +41,13 @@ namespace MDAlgorithms
     virtual ~TransformMD();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Scale and/or offset the coordinates of a MDWorkspace";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

@@ -45,12 +45,6 @@ namespace Crystal
 
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CentroidPeaks::initDocs()
-  {
-    this->setWikiSummary("Find the centroid of single-crystal peaks in a 2D Workspace, in order to refine their positions.");
-    this->setOptionalMessage("Find the centroid of single-crystal peaks in a 2D Workspace, in order to refine their positions.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

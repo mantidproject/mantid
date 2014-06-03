@@ -87,15 +87,6 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-      */
-  void FindPeaks::initDocs()
-  {
-    this->setWikiSummary("Searches for peaks in a dataset.");
-    this->setOptionalMessage("Searches for peaks in a dataset.");
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Initialize and declare properties.
      */
   void FindPeaks::init()

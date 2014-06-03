@@ -36,11 +36,13 @@ namespace Mantid
     public:
 
       virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Create a blank workspace for a given instrument.";}
+
       virtual int version() const;
       virtual const std::string category() const;
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
 

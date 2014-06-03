@@ -47,14 +47,16 @@ public:
   virtual ~DefineGaugeVolume() {}
   /// Algorithm's name
   virtual const std::string name() const { return "DefineGaugeVolume"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Defines a geometrical shape object to be used as the gauge volume in the AbsorptionCorrection algorithm.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Sample"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   ///Execution code

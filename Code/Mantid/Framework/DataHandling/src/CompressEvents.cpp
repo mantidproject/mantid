@@ -34,13 +34,6 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(CompressEvents)
 
-/// Sets documentation strings for this algorithm
-void CompressEvents::initDocs()
-{
-  this->setWikiSummary("Reduce the number of events in an [[EventWorkspace]] by grouping together events with identical or similar X-values (time-of-flight). ");
-  this->setOptionalMessage("Reduce the number of events in an EventWorkspace by grouping together events with identical or similar X-values (time-of-flight).");
-}
-
 
 using namespace Kernel;
 using namespace API;

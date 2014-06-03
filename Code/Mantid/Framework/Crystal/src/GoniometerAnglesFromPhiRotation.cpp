@@ -94,11 +94,6 @@ namespace Mantid
           Kernel::Direction::Output);
 
     }
-    void GoniometerAnglesFromPhiRotation::initDocs()
-    {
-      this->setWikiSummary("Finds chi and omega rotations for two runs whose sample positions differ by only their phi angles");
-      this->setOptionalMessage("The 2nd PeaksWorkspace is set up with the correct sample orientations and UB matrices");
-    }
 
     /**
      * Calculate indexing stats if the peaks had been indexed with given UBraw by NOT applying the goniometer settings,i.e.

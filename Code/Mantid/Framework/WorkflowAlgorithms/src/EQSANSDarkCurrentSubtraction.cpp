@@ -33,13 +33,6 @@ namespace WorkflowAlgorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSDarkCurrentSubtraction)
 
-/// Sets documentation strings for this algorithm
-void EQSANSDarkCurrentSubtraction::initDocs()
-{
-  this->setWikiSummary("Perform EQSANS dark current subtraction.");
-  this->setOptionalMessage("Perform EQSANS dark current subtraction.");
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

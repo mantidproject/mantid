@@ -35,13 +35,6 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(PoldiLoadSpectra)
 
-// Sets documentation strings for this algorithm
-void PoldiLoadSpectra::initDocs()
-{
-	this->setWikiSummary("Load Poldi data file. ");
-	this->setOptionalMessage("Load Poldi data file.");
-}
-
 
 using namespace Kernel;
 using namespace API;

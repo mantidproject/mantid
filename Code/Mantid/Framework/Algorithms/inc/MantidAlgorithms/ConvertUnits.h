@@ -67,6 +67,9 @@ public:
   virtual ~ConvertUnits();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "ConvertUnits"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Performs a unit change on the X values of a workspace";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
@@ -76,8 +79,7 @@ private:
   const std::string workspaceMethodName() const { return "convertUnits"; }
   const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
 
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();

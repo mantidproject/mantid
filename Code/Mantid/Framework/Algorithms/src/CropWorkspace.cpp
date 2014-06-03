@@ -16,6 +16,7 @@ a copy of the input one.
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/VectorHelper.h"
 #include <iostream>
@@ -37,13 +38,6 @@ using std::size_t;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CropWorkspace)
-
-/// Sets documentation strings for this algorithm
-void CropWorkspace::initDocs()
-{
-  this->setWikiSummary("Extracts a 'block' from a workspace and places it in a new workspace. Works for matrix and event workspaces.");
-  this->setOptionalMessage("Extracts a 'block' from a workspace and places it in a new workspace.");
-}
 
 
 using namespace Kernel;
@@ -153,9 +147,9 @@ void CropWorkspace::exec()
       {
         outTxtAxis->setLabel(j, inAxis1->label(i));
       }
-      else
+      else if( !outAxis1->isSpectra() ) // handled by copyInfoFrom line
       {
-        outAxis1->setValue(j, inAxis1->operator()(i));
+        dynamic_cast<NumericAxis*>(outAxis1)->setValue(j, inAxis1->operator()(i));
       }
     }
     // Copy spectrum number & detectors

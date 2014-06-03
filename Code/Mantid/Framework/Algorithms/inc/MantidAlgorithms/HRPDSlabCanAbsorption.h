@@ -65,14 +65,16 @@ public:
   virtual ~HRPDSlabCanAbsorption() {}
   /// Algorithm's name
   virtual const std::string name() const { return "HRPDSlabCanAbsorption"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculates attenuation due to absorption and scattering in an HRPD 'slab' can.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Diffraction"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

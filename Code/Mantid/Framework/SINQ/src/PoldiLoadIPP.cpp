@@ -30,13 +30,6 @@ namespace Poldi
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(PoldiLoadIPP)
 
-/// Sets documentation strings for this algorithm
-void PoldiLoadIPP::initDocs()
-{
-	this->setWikiSummary("Load Poldi IPP data. ");
-	this->setOptionalMessage("Load Poldi IPP data.");
-}
-
 
 using namespace Kernel;
 using namespace API;

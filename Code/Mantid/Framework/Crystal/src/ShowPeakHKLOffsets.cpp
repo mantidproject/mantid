@@ -53,12 +53,6 @@ namespace Mantid
 
     }
 
-    void ShowPeakHKLOffsets::initDocs()
-    {
-      this->setWikiSummary("Displays offsets of h,k,and l from an integer along with bank and run number");
-      this->setOptionalMessage(" Histograms, scatter plots, etc. of this data could be useful to detect calibration problems");
-    }
-
     void ShowPeakHKLOffsets::init()
     {
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace", "", Direction::Input),

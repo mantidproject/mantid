@@ -30,13 +30,6 @@ namespace DataHandling
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(LoadLOQDistancesFromRaw)
 
-  /// Sets documentation strings for this algorithm
-  void LoadLOQDistancesFromRaw::initDocs()
-  {
-    this->setWikiSummary("Loads distance information that is specific to the ISIS TS1 LOQ instrument.");
-    this->setOptionalMessage("Loads distance information that is specific to the ISIS TS1 LOQ instrument.");
-  }
-
   /**
    * Initialize the algorithm
    */

@@ -2,11 +2,8 @@
 #define MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECT_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/IDetector.h"
 
 namespace Mantid
 {
@@ -35,35 +32,27 @@ namespace Mantid
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport SpecularReflectionPositionCorrect: public API::Algorithm
+    class DLLExport SpecularReflectionPositionCorrect: public SpecularReflectionAlgorithm
     {
     public:
       SpecularReflectionPositionCorrect();
       virtual ~SpecularReflectionPositionCorrect();
 
       virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Correct detector positions vertically based on the specular reflection condition.";}
+
       virtual int version() const;
       virtual const std::string category() const;
 
     private:
-      virtual void initDocs();
+  
       void init();
       void exec();
-
-      /// Get the surface sample component
-      Mantid::Geometry::IComponent_const_sptr getSurfaceSampleComponent(
-          Mantid::Geometry::Instrument_const_sptr inst);
-
-      /// Get the detector component
-      Mantid::Geometry::IComponent_const_sptr getDetectorComponent(
-          Mantid::API::MatrixWorkspace_sptr workspace, const bool isPointDetector);
 
       /// Correct detector positions.
       void correctPosition(API::MatrixWorkspace_sptr toCorrect, const double& twoThetaInDeg,
           Geometry::IComponent_const_sptr sample, Geometry::IComponent_const_sptr detector);
-
-      /// Does the property have a default value.
-      bool isPropertyDefault(const std::string& propertyName) const;
 
       /// Move detectors.
       void moveDetectors(API::MatrixWorkspace_sptr toCorrect, Geometry::IComponent_const_sptr detector, Geometry::IComponent_const_sptr sample, const double& upOffset, const double& acrossOffset, const Mantid::Kernel::V3D& detectorPosition);

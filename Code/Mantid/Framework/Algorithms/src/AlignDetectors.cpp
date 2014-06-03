@@ -41,13 +41,6 @@ namespace Algorithms
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(AlignDetectors)
 
-/// Sets documentation strings for this algorithm
-void AlignDetectors::initDocs()
-{
-  this->setWikiSummary("Performs a unit change from TOF to dSpacing, correcting the X values to account for small errors in the detector positions. ");
-  this->setOptionalMessage("Performs a unit change from TOF to dSpacing, correcting the X values to account for small errors in the detector positions.");
-}
-
 
 //-----------------------------------------------------------------------
 /**

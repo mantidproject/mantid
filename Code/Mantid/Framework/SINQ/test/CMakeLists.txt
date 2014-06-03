@@ -1,7 +1,7 @@
 if ( CXXTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
-  include_directories ( ../../MDEvents/inc ../../MDAlgorithms/inc ../../Nexus/inc ../../NexusCPP/inc ../../TestHelpers/inc)
+  include_directories ( ../../CurveFitting/inc ../../MDEvents/inc ../../MDAlgorithms/inc ../../Nexus/inc ../../NexusCPP/inc ../../TestHelpers/inc)
   
   set ( TESTHELPER_SRCS ../../TestHelpers/src/TearDownWorld.cpp 
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
@@ -9,10 +9,10 @@ if ( CXXTEST_FOUND )
 
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( PSISINQTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries ( PSISINQTest SINQ  ${MANTIDLIBS} MDEvents ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+    target_link_libraries ( PSISINQTest SINQ  CurveFitting ${MANTIDLIBS} MDEvents ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
   else ()
     cxxtest_add_test ( PSISINQTest ${TEST_FILES} )
-    target_link_libraries ( PSISINQTest SINQ  ${MANTIDLIBS} MDEvents )
+    target_link_libraries ( PSISINQTest SINQ  CurveFitting ${MANTIDLIBS} MDEvents )
   endif()
 
   add_dependencies ( FrameworkTests PSISINQTest )

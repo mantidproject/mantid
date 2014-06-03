@@ -68,12 +68,6 @@ namespace MDAlgorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void PlusMD::initDocs()
-  {
-    this->setWikiSummary("Sum two [[MDHistoWorkspace]]s or merges two [[MDEventWorkspace]]s together by combining their events together in one workspace.");
-    this->setOptionalMessage("Sum two MDHistoWorkspaces or merges two MDEventWorkspaces together by combining their events together in one workspace.");
-  }
 
 
   //----------------------------------------------------------------------------------------------

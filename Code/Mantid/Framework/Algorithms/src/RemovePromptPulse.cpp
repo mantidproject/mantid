@@ -50,14 +50,6 @@ namespace Algorithms
     return "CorrectionFunctions\\BackgroundCorrections";
   }
 
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void RemovePromptPulse::initDocs()
-  {
-    string msg("Remove the prompt pulse for a time of flight measurement.");
-    this->setWikiSummary(msg);
-    this->setOptionalMessage(msg);
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

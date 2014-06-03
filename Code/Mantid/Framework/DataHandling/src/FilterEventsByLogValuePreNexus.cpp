@@ -269,16 +269,6 @@ namespace DataHandling
       return 0;
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-   */
-  void FilterEventsByLogValuePreNexus::initDocs()
-  {
-    setWikiSummary("Load and split SNS raw neutron event data format and stores it in a [[workspace]]"
-                   "([[EventWorkspace]] class). ");
-    setOptionalMessage("Load and split SNS raw neutron event data format and stores it in a workspace"
-                       "(EventWorkspace class).");
-  }
 
   //----------------------------------------------------------------------------------------------
   /**  Initialize the algorithm

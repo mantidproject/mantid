@@ -275,13 +275,6 @@ namespace CurveFitting
     bool isStringEmpty(const std::string& str){return str.empty();}
   }
   
-  /// Sets documentation strings for this algorithm
-  void Fit::initDocs()
-  {
-    this->setWikiSummary("Fits a function to data in a Workspace ");
-    this->setOptionalMessage("Fits a function to data in a Workspace");
-  }
-  
   /**
    * Examine "Function" and "InputWorkspace" properties to decide which domain creator to use.
    * @param propName :: A property name.
@@ -562,6 +555,9 @@ namespace CurveFitting
     declareProperty(new Kernel::PropertyWithValue<bool>("ConvolveMembers", false),
       "If true and OutputCompositeMembers is true members of any Convolution are output convolved\n"
       "with corresponding resolution");
+    declareProperty("OutputParametersOnly", false,
+      "Set to true to output only the parameters and not workspace(s) with the calculated values\n"
+      "(default is false, ignored if CreateOutput is false and Output is an empty string)." );
   }
 
   /** Executes the algorithm
@@ -797,14 +793,19 @@ namespace CurveFitting
 
       setProperty("OutputParameters",result);
 
-      const bool unrollComposites = getProperty("OutputCompositeMembers");
-      bool convolveMembers = existsProperty("ConvolveMembers");
-      if ( convolveMembers )
+      bool outputParametersOnly = getProperty("OutputParametersOnly");
+
+      if ( !outputParametersOnly )
       {
-          convolveMembers = getProperty("ConvolveMembers");
+        const bool unrollComposites = getProperty("OutputCompositeMembers");
+        bool convolveMembers = existsProperty("ConvolveMembers");
+        if ( convolveMembers )
+        {
+            convolveMembers = getProperty("ConvolveMembers");
+        }
+        m_domainCreator->separateCompositeMembersInOutput(unrollComposites,convolveMembers);
+        m_domainCreator->createOutputWorkspace(baseName,m_function,domain,values);
       }
-      m_domainCreator->separateCompositeMembersInOutput(unrollComposites,convolveMembers);
-      m_domainCreator->createOutputWorkspace(baseName,m_function,domain,values);
 
     }
 

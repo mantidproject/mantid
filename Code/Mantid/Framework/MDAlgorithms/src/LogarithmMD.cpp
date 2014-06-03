@@ -49,12 +49,6 @@ namespace MDAlgorithms
   int LogarithmMD::version() const { return 1;};
   
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LogarithmMD::initDocs()
-  {
-    this->setWikiSummary("Perform a natural logarithm of a [[MDHistoWorkspace]].");
-    this->setOptionalMessage("Perform a natural logarithm of a MDHistoWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /// Optional method to be subclassed to add properties

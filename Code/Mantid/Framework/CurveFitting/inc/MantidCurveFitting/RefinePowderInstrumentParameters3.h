@@ -12,13 +12,6 @@
 #include "MantidCurveFitting/ThermalNeutronDtoTOFFunction.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 
-using namespace Mantid;
-using namespace Mantid::API;
-using namespace Mantid::Kernel;
-using namespace Mantid::DataObjects;
-
-using namespace std;
-
 namespace Mantid
 {
 namespace CurveFitting
@@ -46,7 +39,7 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport RefinePowderInstrumentParameters3 : public Algorithm
+  class DLLExport RefinePowderInstrumentParameters3 : public API::Algorithm
   {
   public:
     RefinePowderInstrumentParameters3();
@@ -54,6 +47,9 @@ namespace CurveFitting
 
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "RefinePowderInstrumentParameters";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Parameters include Dtt1, Dtt1t, Dtt2t, Zero, Zerot. ";}
+
 
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 3;}
@@ -62,8 +58,7 @@ namespace CurveFitting
     virtual const std::string category() const { return "Diffraction";}
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
 
     /// Implement abstract Algorithm methods
     void init();
@@ -78,40 +73,40 @@ namespace CurveFitting
     double execFitParametersMC();
 
     /// Do MC/simulated annealing to refine parameters
-    double doSimulatedAnnealing(map<string, Parameter> inparammap);
+    double doSimulatedAnnealing(std::map<std::string, Parameter> inparammap);
 
     /// Set up Monte Carlo random walk strategy
-    void setupRandomWalkStrategy(map<string, Parameter>& parammap,
-                                 vector<vector<string> >& mcgroups);
+    void setupRandomWalkStrategy(std::map<std::string, Parameter>& parammap,
+                                 std::vector<std::vector<std::string> >& mcgroups);
 
     /// Add parameter (to a vector of string/name) for MC random walk
-    void addParameterToMCMinimize(vector<string>& parnamesforMC, string parname,
-                                  map<string, Parameter> parammap);
+    void addParameterToMCMinimize(std::vector<std::string>& parnamesforMC, std::string parname,
+                                  std::map<std::string, Parameter> parammap);
 
     /// Propose new parameters
-    void proposeNewValues(vector<string> mcgroup, map<string, Parameter>& curparammap,
-                          map<string, Parameter>& newparammap, double currchisq);
+    void proposeNewValues(std::vector<std::string> mcgroup, std::map<std::string, Parameter>& curparammap,
+                          std::map<std::string, Parameter>& newparammap, double currchisq);
 
     /// Determine whether the proposed value should be accepted or denied
     bool acceptOrDenyChange(double curchisq, double newchisq, double temperature);
 
     /// Book keep the best fitting result
-    void bookKeepMCResult(map<string, Parameter> parammap, double chisq, int istep, int igroup, map<string, Parameter> &bestparammap);
+    void bookKeepMCResult(std::map<std::string, Parameter> parammap, double chisq, int istep, int igroup, std::map<std::string, Parameter> &bestparammap);
     // vector<pair<double, map<string, Parameter> > > &bestresults, size_t maxnumresults);
 
     /// Implement parameter values, calculate function and its chi square.
-    double calculateFunction(map<string, Parameter> parammap, vector<double>& vecY);
+    double calculateFunction(std::map<std::string, Parameter> parammap, std::vector<double>& vecY);
 
     /// Calculate Chi^2 of the a function with all parameters are fixed
-    double calculateFunctionError(IFunction_sptr function, Workspace2D_sptr dataws,
+    double calculateFunctionError(API::IFunction_sptr function, DataObjects::Workspace2D_sptr dataws,
                                   int wsindex);
 
     /// Fit function by non MC minimzer(s)
-    double fitFunction(IFunction_sptr function, Workspace2D_sptr dataws, int wsindex, bool powerfit);
+    double fitFunction(API::IFunction_sptr function, DataObjects::Workspace2D_sptr dataws, int wsindex, bool powerfit);
 
     /// Fit function (single step)
-    bool doFitFunction(IFunction_sptr function, Workspace2D_sptr dataws, int wsindex,
-                       string minimizer, int numiters, double &chi2, string &fitstatus);
+    bool doFitFunction(API::IFunction_sptr function, DataObjects::Workspace2D_sptr dataws, int wsindex,
+                       std::string minimizer, int numiters, double &chi2, std::string &fitstatus);
 
     /// Process input properties
     void processInputProperties();
@@ -120,36 +115,36 @@ namespace CurveFitting
     void parseTableWorkspaces();
 
     /// Parse table workspace to a map of Parameters
-    void parseTableWorkspace(TableWorkspace_sptr tablews, map<string, Parameter> &parammap);
+    void parseTableWorkspace(DataObjects::TableWorkspace_sptr tablews, std::map<std::string, Parameter> &parammap);
 
     /// Set parameter values to function from Parameter map
-    void setFunctionParameterValues(IFunction_sptr function, map<string, Parameter> params);
+    void setFunctionParameterValues(API::IFunction_sptr function, std::map<std::string, Parameter> params);
 
     /// Update parameter values to Parameter map from fuction map
-    void updateFunctionParameterValues(IFunction_sptr function, map<string, Parameter> &params);
+    void updateFunctionParameterValues(API::IFunction_sptr function, std::map<std::string, Parameter> &params);
 
     /// Set parameter fitting setup (boundary, fix or unfix) to function from Parameter map
-    void setFunctionParameterFitSetups(IFunction_sptr function, map<string, Parameter> params);
+    void setFunctionParameterFitSetups(API::IFunction_sptr function, std::map<std::string, Parameter> params);
 
     /// Construct output
-    Workspace2D_sptr genOutputWorkspace(FunctionDomain1DVector domain, FunctionValues rawvalues);
+    DataObjects::Workspace2D_sptr genOutputWorkspace(API::FunctionDomain1DVector domain, API::FunctionValues rawvalues);
 
     /// Construct an output TableWorkspace for refined peak profile parameters
-    TableWorkspace_sptr genOutputProfileTable(map<string, Parameter> parameters,
+    DataObjects::TableWorkspace_sptr genOutputProfileTable(std::map<std::string, Parameter> parameters,
                                               double startchi2, double finalchi2);
 
     /// Add a parameter to parameter map.  If this parametere does exist, then replace the value of it
-    void addOrReplace(map<string, Parameter>& parameters, string parname, double parvalue);
+    void addOrReplace(std::map<std::string, Parameter>& parameters, std::string parname, double parvalue);
 
     //--------  Variables ------------------------------------------------------
     /// Data workspace containg peak positions
-    Workspace2D_sptr m_dataWS;
+    DataObjects::Workspace2D_sptr m_dataWS;
 
     /// Workspace index of the peak positions
     int m_wsIndex;
 
     /// TableWorkspace containing peak parameters value and fit information
-    TableWorkspace_sptr m_paramTable;
+    DataObjects::TableWorkspace_sptr m_paramTable;
 
     /// Fit mode
     enum {FIT, MONTECARLO} m_fitMode;
@@ -164,7 +159,7 @@ namespace CurveFitting
     int m_randomSeed;
 
     /// Data structure (map of Parameters) to hold parameters
-    map<string, Parameter> m_profileParameters;
+    std::map<std::string, Parameter> m_profileParameters;
 
     /// My function for peak positions
     ThermalNeutronDtoTOFFunction_sptr m_positionFunc;
@@ -181,27 +176,29 @@ namespace CurveFitting
 
   //================================= External Functions =========================================
   /// Convert a vector to a lookup map (dictionary)
-  void convertToDict(vector<string> strvec, map<string, size_t>& lookupdict);
+  void convertToDict(std::vector<std::string> strvec, std::map<std::string, size_t>& lookupdict);
 
   /// Get the index from lookup dictionary (map)
-  int getStringIndex(map<string, size_t> lookupdict, string key);
+  int getStringIndex(std::map<std::string, size_t> lookupdict, std::string key);
 
   /// Store function parameter values to a map
-  void storeFunctionParameterValue(IFunction_sptr function, map<string, pair<double, double> > &parvaluemap);
+  void storeFunctionParameterValue(API::IFunction_sptr function, std::map<std::string, std::pair<double, double> > &parvaluemap);
 
   /// Restore function parameter values to a map
-  void restoreFunctionParameterValue(map<string, pair<double, double> > parvaluemap, IFunction_sptr function,
-                                     map<string, Parameter> &parammap);
+  void restoreFunctionParameterValue(std::map<std::string, std::pair<double, double> > parvaluemap,
+                                     API::IFunction_sptr function,
+                                     std::map<std::string, Parameter> &parammap);
 
   /// Copy parameters from source to target
-  void duplicateParameters(map<string, Parameter> source, map<string, Parameter> &target);
+  void duplicateParameters(std::map<std::string, Parameter> source, std::map<std::string, Parameter> &target);
 
   /// Copy parameters values from source to target
-  void copyParametersValues(map<string, Parameter> source, map<string, Parameter>& target);
+  void copyParametersValues(std::map<std::string, Parameter> source, std::map<std::string, Parameter>& target);
 
   /// Calculate Chi^2
-  double calculateFunctionChiSquare(const vector<double> modelY, const vector<double> dataY,
-                                    const vector<double> dataE);
+  double calculateFunctionChiSquare(const std::vector<double> &modelY,
+                                    const std::vector<double> &dataY,
+                                    const std::vector<double> &dataE);
 
 } // namespace CurveFitting
 } // namespace Mantid

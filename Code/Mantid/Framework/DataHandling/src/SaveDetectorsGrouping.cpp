@@ -76,11 +76,6 @@ namespace DataHandling
   SaveDetectorsGrouping::~SaveDetectorsGrouping()
   {
   }
-  
-  void SaveDetectorsGrouping::initDocs(){
-    this->setWikiSummary("Save a GroupingWorkspace to an XML file.");
-    this->setOptionalMessage("Save a GroupingWorkspace to an XML file.");
-  }
 
   /// Define input parameters
   void SaveDetectorsGrouping::init()

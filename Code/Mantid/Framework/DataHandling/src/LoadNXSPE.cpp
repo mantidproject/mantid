@@ -52,13 +52,6 @@ namespace DataHandling
 
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadNXSPE::initDocs()
-  {
-    this->setWikiSummary("Algorithm to load an NXSPE file into a workspace2D.");
-    this->setOptionalMessage(" Algorithm to load an NXSPE file into a workspace2D.");
-    this->setWikiDescription("Algorithm to load an NXSPE file into a workspace2D. It will create a new instrument, that can be overwritten later by the LoadInstrument algorithm.");
-  }
 
   /**
    * Return the confidence with with this algorithm can load the file

@@ -34,13 +34,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Regroup)
 
-/// Sets documentation strings for this algorithm
-void Regroup::initDocs()
-{
-  this->setWikiSummary("Regroups data with new bin boundaries. ");
-  this->setOptionalMessage("Regroups data with new bin boundaries.");
-}
-
 
 using namespace Kernel;
 using API::WorkspaceProperty;

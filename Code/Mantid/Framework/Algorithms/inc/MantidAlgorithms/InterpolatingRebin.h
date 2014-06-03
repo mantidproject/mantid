@@ -68,6 +68,9 @@ public:
   virtual ~InterpolatingRebin() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "InterpolatingRebin";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Creates a workspace with different x-value bin boundaries where the new y-values are estimated using cubic splines.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;}
   /// Algorithm's category for identification overriding a virtual method
@@ -76,10 +79,7 @@ public:
   virtual const std::string alias() const { return ""; }
 
 protected:
-  const std::string workspaceMethodName() const { return ""; } // Override the one from Rebin to ignore us
-
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  const std::string workspaceMethodName() const { return ""; } 
   // Overridden Algorithm methods
   void init();
   virtual void exec();

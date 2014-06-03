@@ -45,6 +45,7 @@ There is a python script PlotAsymmetryByLogValue.py which if called in MantidPlo
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -97,13 +98,6 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(PlotAsymmetryByLogValue)
-    
-    /// Sets documentation strings for this algorithm
-    void PlotAsymmetryByLogValue::initDocs()
-    {
-      this->setWikiSummary("Calculates asymmetry for a series of log values ");
-      this->setOptionalMessage("Calculates asymmetry for a series of log values");
-    }
     
 
     /** Initialisation method. Declares properties to be used in algorithm.
@@ -242,8 +236,9 @@ namespace Mantid
 
         if ( dtcType != "None" )
         {
-          IAlgorithm_sptr applyCorr = createChildAlgorithm("ApplyDeadTimeCorr", -1, -1, false);
-          applyCorr->initialize();
+          IAlgorithm_sptr applyCorr = AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
+          applyCorr->setLogging(false);
+          applyCorr->setRethrows(true);
 
           ScopedWorkspace ws(loadedWs);
           applyCorr->setPropertyValue("InputWorkspace", ws.name());
@@ -282,8 +277,10 @@ namespace Mantid
 
           try
           {
-            IAlgorithm_sptr applyGrouping = createChildAlgorithm("MuonGroupDetectors", -1, -1, false);
-            applyGrouping->initialize();
+            IAlgorithm_sptr applyGrouping = AlgorithmManager::Instance().create("MuonGroupDetectors");
+            applyGrouping->setLogging(false);
+            applyGrouping->setRethrows(true);
+
             applyGrouping->setPropertyValue( "InputWorkspace", inWS.name() );
             applyGrouping->setPropertyValue( "DetectorGroupingTable", grouping.name() );
             applyGrouping->setPropertyValue( "OutputWorkspace", outWS.name() );

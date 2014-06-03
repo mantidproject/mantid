@@ -259,18 +259,6 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-   */
-  void LoadEventPreNexus2::initDocs()
-  {
-    this->setWikiSummary("Loads SNS raw neutron event data format and stores it in a [[workspace]] "
-                         "([[EventWorkspace]] class). ");
-    this->setOptionalMessage("Loads SNS raw neutron event data format and stores it in a workspace "
-                             "(EventWorkspace class).");
-  }
-
-
-  //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm, i.e, declare properties
   */
   void LoadEventPreNexus2::init()

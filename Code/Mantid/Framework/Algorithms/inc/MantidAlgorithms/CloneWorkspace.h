@@ -51,6 +51,9 @@ public:
   virtual ~CloneWorkspace() {}
   /// Algorithm's name
   virtual const std::string name() const { return "CloneWorkspace"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Copies an existing workspace into a new one.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -60,8 +63,7 @@ private:
   const std::string workspaceMethodName() const { return "clone"; }
   const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
 
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

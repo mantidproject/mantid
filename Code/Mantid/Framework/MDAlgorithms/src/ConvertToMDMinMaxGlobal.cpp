@@ -64,12 +64,6 @@ namespace MDAlgorithms
   const std::string ConvertToMDMinMaxGlobal::category() const { return "MDAlgorithms";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ConvertToMDMinMaxGlobal::initDocs()
-  {
-    this->setWikiSummary("Calculate limits of ConvertToMD transformation which can be theoretically achieved on an instrument with unlimited coverage");
-    this->setOptionalMessage("Calculate limits required for ConvertToMD");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

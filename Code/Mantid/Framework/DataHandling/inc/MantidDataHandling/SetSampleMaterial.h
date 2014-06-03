@@ -48,6 +48,9 @@ public:
   virtual ~SetSampleMaterial();
   /// Algorithm's name
   virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Sets the neutrons information in the sample.";}
+
   /// Algorithm's version
   virtual int version() const;
   /// Algorithm's category for identification
@@ -55,14 +58,13 @@ public:
   virtual std::map<std::string, std::string> validateInputs();
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   ///Execution code
   void exec();
   /// Print out the list of information for the material
-  void fixNeutron(Kernel::NeutronAtom &neutron,
+  void fixNeutron(PhysicalConstants::NeutronAtom &neutron,
                   double coh_xs, double inc_xs,
                   double abs_xs, double tot_xs);
 };

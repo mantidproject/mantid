@@ -41,12 +41,14 @@ class DLLExport IdentifyNoisyDetectors : public API::Algorithm
     virtual ~IdentifyNoisyDetectors() {} ///< Empty destructor
 
     virtual const std::string name() const { return "IdentifyNoisyDetectors"; } ///< @return the algorithms name
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "This algorithm creates a single-column workspace where the Y values are populated withs 1s and 0s, 0 signifying that the detector is to be considered 'bad' based on the method described below.";}
+
     virtual const std::string category() const { return "Diagnostics"; } ///< @return the algorithms category
     virtual int version() const { return (1); } ///< @return version number of algorithm
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     void init(); ///< Initialise the algorithm. Declare properties, etc.
     void exec(); ///< Executes the algorithm.
 

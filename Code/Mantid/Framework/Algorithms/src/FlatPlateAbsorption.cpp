@@ -24,13 +24,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FlatPlateAbsorption)
 
-/// Sets documentation strings for this algorithm
-void FlatPlateAbsorption::initDocs()
-{
-  this->setWikiSummary("Calculates bin-by-bin correction factors for attenuation due to absorption and scattering in a sample of 'flat plate' geometry. ");
-  this->setOptionalMessage("Calculates bin-by-bin correction factors for attenuation due to absorption and scattering in a sample of 'flat plate' geometry.");
-}
-
 
 using namespace Kernel;
 using namespace Geometry;

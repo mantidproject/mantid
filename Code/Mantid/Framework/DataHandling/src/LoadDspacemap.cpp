@@ -53,12 +53,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadDspacemap::initDocs()
-  {
-    this->setWikiSummary("Loads a Dspacemap file (POWGEN binary, VULCAN binary or ascii format) into an OffsetsWorkspace.");
-    this->setOptionalMessage("Loads a Dspacemap file (POWGEN binary, VULCAN binary or ascii format) into an OffsetsWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

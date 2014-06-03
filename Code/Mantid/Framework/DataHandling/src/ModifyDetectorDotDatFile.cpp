@@ -61,12 +61,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ModifyDetectorDotDatFile::initDocs()
-  {
-    this->setWikiSummary("Modifies an ISIS detector dot data file, so that the detector positions are as in the given workspace");
-    this->setOptionalMessage("Modifies an ISIS detector dot data file, so that the detector positions are as in the given workspace");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

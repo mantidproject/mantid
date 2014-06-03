@@ -37,13 +37,6 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(RemoveLogs)
 
-/// Sets documentation strings for this algorithm
-void RemoveLogs::initDocs()
-{
-  this->setWikiSummary("Remove logs from a [[workspace]]. ");
-  this->setOptionalMessage("Remove logs from a workspace.");
-}
-
 
 using namespace Kernel;
 using namespace API;

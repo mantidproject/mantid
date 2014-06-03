@@ -58,13 +58,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ModeratorTzeroLinear)
 
-/// Sets documentation strings for this algorithm
-void ModeratorTzeroLinear::initDocs()
-{
-  setWikiSummary("Corrects the time of flight of an indirect geometry instrument by a time offset that is linearly dependent on the wavelength of the neutron after passing through the moderator.");
-  setOptionalMessage(" Corrects the time of flight of an indirect geometry instrument by a time offset that is linearly dependent on the wavelength of the neutron after passing through the moderator.");
-}
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

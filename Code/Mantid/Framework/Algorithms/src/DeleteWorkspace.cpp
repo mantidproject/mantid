@@ -18,13 +18,6 @@ namespace Mantid
     // Register the algorithm
     DECLARE_ALGORITHM(DeleteWorkspace);
     
-    /// Sets documentation strings for this algorithm
-    void DeleteWorkspace::initDocs()
-    {
-      this->setWikiSummary("Removes a workspace from memory. ");
-      this->setOptionalMessage("Removes a workspace from memory.");
-    }
-    
 
     //--------------------------------------------------------------------------
     // Private member functions

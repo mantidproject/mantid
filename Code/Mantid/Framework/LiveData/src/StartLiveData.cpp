@@ -140,14 +140,6 @@ namespace LiveData
   int StartLiveData::version() const { return 1;};
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void StartLiveData::initDocs()
-  {
-    this->setWikiSummary("Begin live data monitoring.");
-    this->setOptionalMessage("Begin live data monitoring.");
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void StartLiveData::init()

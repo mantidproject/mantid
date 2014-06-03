@@ -133,12 +133,6 @@ namespace Mantid
     const std::string DgsDiagnose::category() const { return "Workflow\\Inelastic\\UsesPropertyManager"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void DgsDiagnose::initDocs()
-    {
-      this->setWikiSummary("Setup and run DetectorDiagnostic.");
-      this->setOptionalMessage("Setup and run DetectorDiagnostic.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

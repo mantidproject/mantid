@@ -58,14 +58,16 @@ public:
   virtual ~CrossCorrelate() {if(m_progress) delete m_progress;m_progress=NULL;}
   /// Algorithm's name
   virtual const std::string name() const { return "CrossCorrelate"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Cross-correlates a range of spectra against one reference spectra in the same workspace.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Utility;Arithmetic"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   ///Execution code

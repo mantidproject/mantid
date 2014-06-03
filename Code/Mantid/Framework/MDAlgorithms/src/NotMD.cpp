@@ -48,12 +48,6 @@ namespace MDAlgorithms
   int NotMD::version() const { return 1;};
   
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void NotMD::initDocs()
-  {
-    this->setWikiSummary("Performs a boolean negation on a [[MDHistoWorkspace]].");
-    this->setOptionalMessage("Performs a boolean negation on a MDHistoWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /// Check the inputs and throw if the algorithm cannot be run

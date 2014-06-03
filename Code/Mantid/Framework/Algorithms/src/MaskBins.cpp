@@ -38,13 +38,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MaskBins)
 
-/// Sets documentation strings for this algorithm
-void MaskBins::initDocs()
-{
-  this->setWikiSummary("Marks bins in a workspace as being masked. ");
-  this->setOptionalMessage("Marks bins in a workspace as being masked.");
-}
-
 
 using namespace Kernel;
 using namespace API;

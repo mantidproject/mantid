@@ -46,15 +46,6 @@ namespace Mantid
       else return 0;
     }
 
-    /// Sets documentation strings for this algorithm
-    void LoadQKK::initDocs()
-    {
-      this->setWikiSummary(
-          "Loads a ANSTO QKK file. ");
-      this->setOptionalMessage(
-          "Loads a ANSTO QKK file. ");
-    }
-
     /**
      * Initialise the algorithm. Declare properties which can be set before execution (input) or 
      * read from after the execution (output).

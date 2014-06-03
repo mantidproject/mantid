@@ -245,15 +245,12 @@ class PoldiProjectRun(PythonAlgorithm):
         """
         return "PoldiProjectRun"
 
+    def summary(self):
+        return "Run the POLDI analysis process for a bunch of data files stored in a tableWorkspace."
+        
     def PyInit(self):
         """ Mantid required
-        """
-        
-        self.setWikiSummary("""Run the POLDI analysis process for a bunch of data files stored in a tableWorkspace.""")
-        self.setOptionalMessage("""Run the POLDI analysis process for a bunch of data files stored in a tableWorkspace.""")
-
-        
-        
+        """       
         self.declareProperty(ITableWorkspaceProperty("InputWorkspace", "PoldiAnalysis", direction=Direction.Input), 
                              "Poldi analysis main worksheet")
 

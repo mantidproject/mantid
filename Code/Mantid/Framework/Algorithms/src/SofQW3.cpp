@@ -19,8 +19,7 @@ two pixels at the same vertical position in adjacent tubes.
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQW3.h"
 #include "MantidAlgorithms/SofQW.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -60,12 +59,6 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SofQW3::initDocs()
-  {
-    this->setWikiSummary("Calculate the intensity as a function of momentum transfer and energy");
-    this->setOptionalMessage("Calculate the intensity as a function of momentum transfer and energy.");
-  }
 
   /**
    * @return the name of the Algorithm
@@ -418,18 +411,15 @@ namespace Algorithms
     WorkspaceFactory::Instance().initializeFromParent(inputWorkspace,
                                                       outputWorkspace, true);
 
-    // Create a numeric axis to replace the default vertical one
-    Axis* const verticalAxis = new NumericAxis(yLength);
+    // Create a binned numeric axis to replace the default vertical one
+    Axis* const verticalAxis = new BinEdgeAxis(newAxis);
     outputWorkspace->replaceAxis(1, verticalAxis);
 
     // Now set the axis values
     for (int i = 0; i < yLength - 1; ++i)
     {
       outputWorkspace->setX(i, xAxis);
-      verticalAxis->setValue(i, newAxis[i]);
     }
-    // One more to set on the 'y' axis
-    verticalAxis->setValue(yLength - 1, newAxis[yLength - 1]);
 
     // Set the axis units
     verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");

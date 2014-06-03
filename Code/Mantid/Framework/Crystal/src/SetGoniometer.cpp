@@ -59,12 +59,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SetGoniometer::initDocs()
-  {
-    this->setWikiSummary("Define the goniometer motors used in an experiment by giving the axes and directions of rotations.");
-    this->setOptionalMessage("Define the goniometer motors used in an experiment by giving the axes and directions of rotations.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

@@ -115,7 +115,7 @@ def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # 
         htmlfile.h3("Summary")
         #htmlfile.p(alg.getWikiSummary())
         wiki = MediaWiki(htmlfile, HTML_DIR, latex=kwargs["latex"], dvipng=kwargs["dvipng"])
-        wiki.parse(alg.getWikiSummary(), qhp)
+        wiki.parse(alg.summary(), qhp)
 
         htmlfile.h3("Usage")
         include_signature, custom_usage = wiki_tools.get_wiki_usage(name, version)
