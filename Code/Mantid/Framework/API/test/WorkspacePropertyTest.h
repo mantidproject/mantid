@@ -205,7 +205,7 @@ public:
     TS_ASSERT( !history3.value().empty() )
     TS_ASSERT_EQUALS( history3.value().substr(0,5), "__TMP" )
     TS_ASSERT_EQUALS( history3.type(), wsp7->type() )
-    TS_ASSERT_EQUALS( history3.direction(), Direction::Input )
+    TS_ASSERT_EQUALS( history3.direction(), 0 )
     wsp7->setValue("ws2");
     delete wsp7;
   }
