@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm is called on a regular interval by the
-:ref:`_algm-MonitorLiveData` algorithm. **It should not be
+:ref:`algm-MonitorLiveData` algorithm. **It should not be
 necessary to call LoadLiveData directly.**
 
 .. figure:: /images/LoadLiveData_flow.png
@@ -65,7 +65,7 @@ Data Accumulation
    chunk.
 
    -  If you select 'Add', the chunks of processed data will be added
-      using :ref:`_algm-Plus` or :ref:`_algm-PlusMD`.
+      using :ref:`algm-Plus` or :ref:`algm-PlusMD`.
    -  If you select 'Replace', then the output workspace will always be
       equal to the latest processed chunk.
    -  If you select 'Append', then the spectra from each chunk will be

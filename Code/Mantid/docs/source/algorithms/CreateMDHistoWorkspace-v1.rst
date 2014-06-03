@@ -31,9 +31,9 @@ Alternatives
 ------------
 
 A very similar algorithm to this is
-:ref:`_algm-ImportMDHistoWorkspace`, which takes it's
+:ref:`algm-ImportMDHistoWorkspace`, which takes it's
 input signal and error values from a text file rather than from arrays.
-Another alternative is to use :ref:`_algm-ConvertToMD` which works
+Another alternative is to use :ref:`algm-ConvertToMD` which works
 on MatrixWorkspaces, and allows log values to be included in the
 dimensionality.
 

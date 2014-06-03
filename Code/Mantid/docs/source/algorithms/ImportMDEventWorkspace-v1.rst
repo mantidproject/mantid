@@ -53,8 +53,8 @@ Alternatives
 ------------
 
 Other alternatives to importing/creating MDWorkspaces are
-:ref:`_algm-ImportMDHistoWorkspace`,
-:ref:`_algm-CreateMDHistoWorkspace` and
-:ref:`_algm-CreateMDWorkspace`
+:ref:`algm-ImportMDHistoWorkspace`,
+:ref:`algm-CreateMDHistoWorkspace` and
+:ref:`algm-CreateMDWorkspace`
 
 .. categories::

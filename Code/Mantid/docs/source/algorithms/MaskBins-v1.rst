@@ -18,9 +18,9 @@ workspace does not have to have common X values in all spectra).
 
 At present, although the zeroing of data will obviously be 'seen' by all
 downstream algorithms. Only
-:ref:`_algm-DiffractionFocussing` (version 2) and
-:ref:`_algm-Q1D` have been modified to take account of masking. Several
-algorithms (e.g. :ref:`_algm-Rebin`, :ref:`_algm-CropWorkspace`)
+:ref:`algm-DiffractionFocussing` (version 2) and
+:ref:`algm-Q1D` have been modified to take account of masking. Several
+algorithms (e.g. :ref:`algm-Rebin`, :ref:`algm-CropWorkspace`)
 have been modified to properly propagate the masking.
 
 Related Algorithms
@@ -29,13 +29,13 @@ Related Algorithms
 RemoveBins
 ##########
 
-:ref:`_algm-RemoveBins` can work in several ways, if the bins are at
+:ref:`algm-RemoveBins` can work in several ways, if the bins are at
 the edges of the workspace they will be removed, and that will in many
 ways act like Masking the bins. If the bins are in the middle of the
 workspace then the effect depends on the type of interpolation, but
 importantly these bins will continue to influence future algorithms as
 opposed to masked bins. For example, with no interpolation
-:ref:`_algm-RemoveBins` sets the bin values to 0. This 0 values will
+:ref:`algm-RemoveBins` sets the bin values to 0. This 0 values will
 be included in the summing performed in DiffractionFocussing, pushing
 down the values in that region. MaskBins is more clever. While if you
 look at the data, it will appear that it has simply set the values to 0.

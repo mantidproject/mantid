@@ -21,7 +21,7 @@ to HKL of the crystal.
 If the OutputWorkspace does NOT already exist, a default one is created.
 In order to define more precisely the parameters of the
 `MDEventWorkspace <MDEventWorkspace>`__, use the
-:ref:`_algm-CreateMDWorkspace` algorithm first.
+:ref:`algm-CreateMDWorkspace` algorithm first.
 
 Types of Conversion
 ###################
@@ -30,10 +30,10 @@ Types of Conversion
    each event is calculated in the experimental lab frame.
 -  **Q (sample frame)**: the goniometer rotation of the sample is taken
    out, to give Q in the frame of the sample. See
-   :ref:`_algm-SetGoniometer` to specify the goniometer used in
+   :ref:`algm-SetGoniometer` to specify the goniometer used in
    the experiment.
--  **HKL**: uses the UB matrix (see :ref:`_algm-SetUB`,
-   :ref:`_algm-FindUBUsingFFT` and others) to calculate the HKL
+-  **HKL**: uses the UB matrix (see :ref:`algm-SetUB`,
+   :ref:`algm-FindUBUsingFFT` and others) to calculate the HKL
    Miller indices of each event.
 
 Lorentz Correction
@@ -49,7 +49,7 @@ Where :math:`\theta` is *half* of the neutron scattering angle
 wavelength in *Angstroms*.
 
 This correction is also done by the
-:ref:`_algm-AnvredCorrection` algorithm, and will be set to
+:ref:`algm-AnvredCorrection` algorithm, and will be set to
 false if that algorithm has been run on the input workspace.
 
 OneEventPerBin option
@@ -71,7 +71,7 @@ must be created in physical memory (it cannot yet be cached to disk).
 One way to limit the memory used is to limit the OutputExtents to a
 smaller region and only convert part of the space.
 
-Also, the :ref:`_algm-FindPeaksMD` algorithm may not work optimally
+Also, the :ref:`algm-FindPeaksMD` algorithm may not work optimally
 because it depends partly on higher density of events causing more
 finely split boxes.
 

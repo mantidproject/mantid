@@ -10,7 +10,7 @@ Description
 -----------
 
 Create an empty `PeaksWorkspace <PeaksWorkspace>`__. Use
-:ref:`_algm-LoadIsawPeaks` or :ref:`_algm-FindPeaksMD` to
+:ref:`algm-LoadIsawPeaks` or :ref:`algm-FindPeaksMD` to
 create a peaks workspace with peaks.
 
 This workspace can serve as a starting point for modifying the

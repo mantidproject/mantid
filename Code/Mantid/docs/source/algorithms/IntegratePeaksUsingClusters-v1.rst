@@ -19,8 +19,8 @@ purposes.
 
 **The algorithm makes no assmptions about Peak shape or size** and can
 therfore be used where integration over defined shapes
-:ref:`_algm-IntegratePeaksMD` and
-:ref:`_algm-IntegrateEllipsoids`, for example, will not
+:ref:`algm-IntegratePeaksMD` and
+:ref:`algm-IntegrateEllipsoids`, for example, will not
 work.
 
 .. figure:: /images/ClusterImage.png
@@ -29,7 +29,7 @@ work.
    ClusterImage.png
 *Cluster Label region displayed in the `SliceViewer <SliceViewer>`__.
 Peak centre is marked with an X. The green circle illustrates the
-integration region used by :ref:`_algm-IntegratePeaksMD`*
+integration region used by :ref:`algm-IntegratePeaksMD`*
 
 A threshold for the Peak should be defined below which, parts of the
 image are treated as background. The normalization method in combination
@@ -39,7 +39,7 @@ effective bin size do not affect the background filtering.
 
 This algorithm uses an imaging technique, and it is therefore important
 that the MDHistoWorkspace you are using is binned to a sufficient
-resolution via :ref:`_algm-BinMD`. You can overlay the intergrated peaks
+resolution via :ref:`algm-BinMD`. You can overlay the intergrated peaks
 workspace in the `Slice
 Viewer <MantidPlot:_SliceViewer#Viewing_Peaks_Workspaces>`__ over the
 generated Cluster Labeled OutputWorkspaceMD to see what the interation

@@ -10,12 +10,12 @@ Description
 -----------
 
 Facade over
-:ref:`_algm-CreateTransmissionWorkspace`. Pull
+:ref:`algm-CreateTransmissionWorkspace`. Pull
 numeric parameters out of the instrument parameters where possible. You
 can override any of these automatically applied defaults by providing
 your own value for the input.
 
-See :ref:`_algm-CreateTransmissionWorkspace` for
+See :ref:`algm-CreateTransmissionWorkspace` for
 more information on the wrapped algorithm.
 
 .. categories::

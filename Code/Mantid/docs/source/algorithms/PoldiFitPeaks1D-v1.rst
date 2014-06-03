@@ -10,8 +10,8 @@ Description
 -----------
 
 PoldiFitPeaks1D takes a TableWorkspace with peaks (for example from
-:ref:`_algm-PoldiPeakSearch`) and a spectrum from
-:ref:`_algm-PoldiAutoCorrelation` and tries to fit a
+:ref:`algm-PoldiPeakSearch`) and a spectrum from
+:ref:`algm-PoldiAutoCorrelation` and tries to fit a
 Gaussian peak profile to the spectrum for each peak. Usually, the peaks
 are accompanied by a quadratic background, so this is fitted as well.
 

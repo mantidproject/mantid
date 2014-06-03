@@ -17,7 +17,7 @@ Since it is an `EventWorkspace <EventWorkspace>`__, it can be rebinned
 to finer bins with no loss of data.
 
 Sample logs, such as motor positions or e.g. temperature vs time, are
-also loaded using the :ref:`_algm-LoadNexusLogs` child algorithm.
+also loaded using the :ref:`algm-LoadNexusLogs` child algorithm.
 
 Optional properties
 ###################
@@ -46,7 +46,7 @@ Veto Pulses
 ###########
 
 Veto pulses can be filtered out in a separate step using
-:ref:`_algm-FilterByLogValue`:
+:ref:`algm-FilterByLogValue`:
 
 ``FilterByLogValue(InputWorkspace="ws", OutputWorkspace="ws", LogName="veto_pulse_time", PulseFilter="1")``
 

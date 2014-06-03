@@ -16,7 +16,7 @@ from a RAW file. It fills the
 `workspace <workspace>`__ does not already point to a full
 `instrument <instrument>`__ `geometry <geometry>`__ (which usually means
 it must be run after
-:ref:`_algm-LoadInstrument`/:ref:`_algm-LoadInstrumentFromRaw`).
+:ref:`algm-LoadInstrument`/:ref:`algm-LoadInstrumentFromRaw`).
 
 The association is one to many, i.e. a spectrum can have one or many
 detectors contributing to it. Alternatively the same spectrum can

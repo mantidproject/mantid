@@ -91,7 +91,7 @@ How to use algorithm with other algorithms
 
 This algorithm is designed to work with other algorithms to do Le Bail
 fit. The introduction can be found in the wiki page of
-:ref:`_algm-LeBailFit`.
+:ref:`algm-LeBailFit`.
 
 Example of Working With Other Algorithms
 ########################################

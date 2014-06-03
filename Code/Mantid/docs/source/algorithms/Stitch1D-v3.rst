@@ -19,7 +19,7 @@ or EndOverlap are not provided, then these are taken to be the region of
 x-axis intersection.
 
 The workspaces must be histogrammed. Use
-:ref:`_algm-ConvertToHistogram` on workspaces prior to
+:ref:`algm-ConvertToHistogram` on workspaces prior to
 passing them to this algorithm.
 
 .. categories::

@@ -22,8 +22,8 @@ ChildAlgorithms used
 
 MaskDetectorsInShape runs the following algorithms as child algorithms:
 
--  :ref:`_algm-FindDetectorsInShape` - To determine the
+-  :ref:`algm-FindDetectorsInShape` - To determine the
    detectors that are contained in the user defined shape.
--  :ref:`_algm-MaskDetectors` - To mask the detectors found.
+-  :ref:`algm-MaskDetectors` - To mask the detectors found.
 
 .. categories::

@@ -13,12 +13,12 @@ Algorithm that can take a slice out of an original
 `MDEventWorkspace <MDEventWorkspace>`__ while preserving all the events
 contained therein.
 
-It uses the same parameters as :ref:`_algm-BinMD` to determine a
+It uses the same parameters as :ref:`algm-BinMD` to determine a
 transformation to make from input->output workspace. The difference is
-that :ref:`_algm-BinMD` sums events in a regular grid whereas SliceMD
+that :ref:`algm-BinMD` sums events in a regular grid whereas SliceMD
 moves the events into the output workspace, which boxes itself.
 
-Please see :ref:`_algm-BinMD` for a detailed description of the
+Please see :ref:`algm-BinMD` for a detailed description of the
 parameters.
 
 Axis-Aligned Slice

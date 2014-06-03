@@ -44,7 +44,7 @@ increasing by 1 for each spectrum.
 See Also
 ########
 
--  :ref:`_algm-ConjoinWorkspaces` for joining parts of the
+-  :ref:`algm-ConjoinWorkspaces` for joining parts of the
    same workspace.
 
 .. categories::

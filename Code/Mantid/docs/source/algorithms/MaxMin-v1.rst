@@ -14,8 +14,8 @@ The algorithm creates a new 2D workspace containing the first maxima
 This is used in particular for single crystal as a quick way to find
 strong peaks. By default, the algorithm returns the maxima.
 
-The :ref:`_algm-Max` and :ref:`_algm-Min` algorithms are just calls to the
-:ref:`_algm-MaxMin` algorithm, with the ShowMin flag set to true/false
+The :ref:`algm-Max` and :ref:`algm-Min` algorithms are just calls to the
+:ref:`algm-MaxMin` algorithm, with the ShowMin flag set to true/false
 respectively.
 
 .. categories::

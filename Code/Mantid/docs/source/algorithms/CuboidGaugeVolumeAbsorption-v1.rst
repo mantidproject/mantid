@@ -15,9 +15,9 @@ within a cuboid region of a sample with the dimensions and material
 properties given. **The gauge volume generated will be an axis-aligned
 cuboid centred on the sample (centre) position. The sample must fully
 enclose this cuboid. If this does not meet your needs you can instead
-use the general :ref:`_algm-AbsorptionCorrection`
+use the general :ref:`algm-AbsorptionCorrection`
 algorithm in conjunction with
-:ref:`_algm-DefineGaugeVolume`.**
+:ref:`algm-DefineGaugeVolume`.**
 
 Factors are calculated for each spectrum (i.e. detector position) and
 wavelength point, as defined by the input workspace. The sample is
@@ -37,7 +37,7 @@ The input workspace must have units of wavelength. The
 `instrument <instrument>`__ associated with the workspace must be fully
 defined because detector, source & sample position are needed. A sample
 shape must have been defined using, e.g.,
-:ref:`_algm-CreateSampleShape` and the gauge volume must be
+:ref:`algm-CreateSampleShape` and the gauge volume must be
 fully within the sample.
 
 .. categories::

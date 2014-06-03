@@ -10,7 +10,7 @@ Notice
 ------
 
 1. This is not an algorithm. However this fit function is a used through
-the :ref:`_algm-Fit` algorithm.
+the :ref:`algm-Fit` algorithm.
 
 2. It is renamed from ThermalNeutronBk2BkExpConvPV.
 

@@ -12,7 +12,7 @@ Description
 Loads the UB matrix into a workspace from an ISAW-style UB matrix ASCII
 file.
 
-You can use the :ref:`_algm-SaveIsawUB` algorithm to save to this
+You can use the :ref:`algm-SaveIsawUB` algorithm to save to this
 format.
 
 The matrix in the file is the transpose of the UB Matrix. The UB matrix

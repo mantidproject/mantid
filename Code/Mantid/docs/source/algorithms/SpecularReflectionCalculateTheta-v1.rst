@@ -17,6 +17,6 @@ and return a corrected ThetaIn.
 The calculated theta value in degrees is returned by the algorithm.
 
 Also see
-:ref:`_algm-SpecularReflectionPositionCorrect`
+:ref:`algm-SpecularReflectionPositionCorrect`
 
 .. categories::

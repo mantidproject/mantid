@@ -16,8 +16,8 @@ each sample a bunch of setup information for the different algorithms
 (such as the data file path, etc...).
 
 This tableWorkspace can be built easily using the two algorithms
-:ref:`_algm-PoldiProjectAddFile` and
-:ref:`_algm-PoldiProjectAddDir`, which will create and/or
+:ref:`algm-PoldiProjectAddFile` and
+:ref:`algm-PoldiProjectAddDir`, which will create and/or
 fill properly a targeted tableWorkspace. The needed columns and there
 content are describe in the following `Data
 Manager <PoldiProjectRun#Data_Manager>`__ paragraph.
@@ -92,7 +92,7 @@ Each data-file is loaded on a 2DWorkspace. The associated log and setup
 information are loaded in dedicated workspace as specified in the
 sample-manager TableWorkspace.
 
-    :ref:`_algm-LoadSINQFile`
+    :ref:`algm-LoadSINQFile`
 
 The raw data are loaded in a 2DWorkspace, using the generic file-loader
 for SINQ data, given the instrument name *POLDI* as parameter.
@@ -101,7 +101,7 @@ for SINQ data, given the instrument name *POLDI* as parameter.
 | ``             Filename        = sample_file_path, ``
 | ``             OutputWorkspace = sample_name)``
 
-    :ref:`_algm-PoldiLoadLog`
+    :ref:`algm-PoldiLoadLog`
 
 The associated *logs* informations are extracted from the *hdf* raw data
 file, an store in a dedicated MatrixWorkspace. A dictionary file
@@ -115,7 +115,7 @@ variable.
 | ``             Dictionary     = poldi_dictionnary_file_path, ``
 | ``             PoldiLog       = sample_log_ws)``
 
-    :ref:`_algm-LoadInstrument`
+    :ref:`algm-LoadInstrument`
 
 For each raw data WS, the corresponding IDF is loaded, based on the
 acquisition starting time.
@@ -124,7 +124,7 @@ acquisition starting time.
 | ``               InstrumentName    = "Poldi", ``
 | ``               RewriteSpectraMap = True)``
 
-    :ref:`_algm-PoldiRemoveDeadWires`
+    :ref:`algm-PoldiRemoveDeadWires`
 
 Some wires are permanently dead and should not be taken into account.
 They are listed in the IDF of a given setup (IPP). Some others wires
@@ -149,7 +149,7 @@ dedicated workspace.
 
 they are now all extracted, using an example sample for each of them.
 
-    :ref:`_algm-PoldiLoadChopperSlits`
+    :ref:`algm-PoldiLoadChopperSlits`
 
 The chopper configuration is loaded in a dedicated Workspace, one per
 *Poldi IPP* setup detected.
@@ -157,7 +157,7 @@ The chopper configuration is loaded in a dedicated Workspace, one per
 | ``PoldiLoadChopperSlits(InputWorkspace    = ex_of_sample_ws, ``
 | ``                      PoldiChopperSlits = ipp_chopper_slits)``
 
-    :ref:`_algm-PoldiLoadSpectra`
+    :ref:`algm-PoldiLoadSpectra`
 
 The characteristic Poldi spectra (*Intensity=f(wavelength)*) is
 extracted from each IDF.
@@ -165,7 +165,7 @@ extracted from each IDF.
 | ``PoldiLoadSpectra(InputWorkspace = ex_of_sample_ws, ``
 | ``                 PoldiSpectra   = ipp_Poldi_spectra)``
 
-    :ref:`_algm-PoldiLoadIPP`
+    :ref:`algm-PoldiLoadIPP`
 
 Local setup information (such as the detector position, chopper offset,
 etc...) are extracted and stores in a dedicated workspace.
@@ -187,7 +187,7 @@ detection process can be based on some previous results to not start
 from scratch, or given the sample crystal structure/symetries/space
 group...
 
-    :ref:`_algm-PoldiAutoCorrelation`
+    :ref:`algm-PoldiAutoCorrelation`
 
 Almost all the previous loaded workspace are used by this algorithm.
 From the sample manager workspace, and the Poldi setup workspace, all
@@ -206,7 +206,7 @@ on row (0).
 | ``                     OutputWorkspace   = sample_correlated_ws)``
 | ``                 ``
 
-    :ref:`_algm-PoldiPeakDetection`
+    :ref:`algm-PoldiPeakDetection`
 
 The previous autocorrelation function is analyzed to detected possible
 peaks. The found peak are stored in a dedicated workspace, and added to
@@ -222,6 +222,6 @@ How to use algorithm with other algorithms
 
 This algorithm is designed to work with other algorithms to proceed
 POLDI data. The introductions can be found in the wiki page of
-:ref:`_algm-PoldiProjectRun`.
+:ref:`algm-PoldiProjectRun`.
 
 .. categories::

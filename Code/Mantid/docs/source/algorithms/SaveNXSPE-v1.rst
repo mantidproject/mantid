@@ -21,7 +21,7 @@ contain histogram data with common binning on all spectra.
 Child Algorithms used
 #####################
 
-:ref:`_algm-FindDetectorsPar` algorithm is used to calculate
+:ref:`algm-FindDetectorsPar` algorithm is used to calculate
 detectors parameters from the instrument description.
 
 .. categories::

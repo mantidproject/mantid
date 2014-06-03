@@ -13,7 +13,7 @@ This algorithm is used in the Paraview event nexus loader to both load
 an event nexus file and convert it into a
 `MDEventWorkspace <MDEventWorkspace>`__ for use in visualization.
 
-The :ref:`_algm-LoadEventNexus` algorithm is called with default
+The :ref:`algm-LoadEventNexus` algorithm is called with default
 parameters to load into an `EventWorkspace <EventWorkspace>`__.
 
 After, the

@@ -19,7 +19,7 @@ single spectrum of row or column number against total counts.
 ChildAlgorithms used
 ####################
 
-The :ref:`_algm-Integration` algorithm is used to sum up each
+The :ref:`algm-Integration` algorithm is used to sum up each
 spectrum between XMin & XMax.
 
 .. categories::

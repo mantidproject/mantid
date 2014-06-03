@@ -11,7 +11,7 @@ Description
 
 Creates a blank workspace for a given instrument with the option of
 pulling in detector tables from a RAW/NeXus data file. The histogram
-sizes are given by binning parameters, see :ref:`_algm-Rebin`, rather
+sizes are given by binning parameters, see :ref:`algm-Rebin`, rather
 than explicit data arrays. There is also an option to set the X axis
 unit.
 

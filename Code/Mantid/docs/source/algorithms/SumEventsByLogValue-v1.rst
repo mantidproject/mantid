@@ -25,7 +25,7 @@ for which the log had each value. Further columns will be added for:
 
 -  Monitors, if any - this requires an event workspace with the same
    name as the input workspace plus a '\_monitors' suffix (this is what
-   :ref:`_algm-LoadEventNexus` will give).
+   :ref:`algm-LoadEventNexus` will give).
 -  The total time duration, in seconds, during which the log had each
    value.
 -  The integrated proton charge during the period(s) for which the log

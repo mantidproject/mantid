@@ -16,8 +16,8 @@ coordinate system. On the other hand
 QSample or HKL. There is an inherent link between a PeaksWorkspace and a
 MDWorkspace in that an MDWorkspace may utilise the same coordinate
 systems as the PeaksWorkspaces. For example, workspaces created via
-:ref:`_algm-ConvertToMD` or
-:ref:`_algm-ConvertToDiffractionMDWorkspace`
+:ref:`algm-ConvertToMD` or
+:ref:`algm-ConvertToDiffractionMDWorkspace`
 may be generated in a special set of V3D coordinates, which are the same
 as those for the PeaksWorkspace (QLab, QSample, HKL). Amongst other
 usages, in order to be able to simultaneously plot MDWorkspaces and

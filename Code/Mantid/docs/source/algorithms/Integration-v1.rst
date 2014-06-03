@@ -39,7 +39,7 @@ EventWorkspaces
 
 If an `EventWorkspace <EventWorkspace>`__ is used as the input, the
 output will be a `MatrixWorkspace <MatrixWorkspace>`__.
-:ref:`_algm-Rebin` is recommended if you want to keep the workspace as an
+:ref:`algm-Rebin` is recommended if you want to keep the workspace as an
 EventWorkspace.
 
 .. categories::

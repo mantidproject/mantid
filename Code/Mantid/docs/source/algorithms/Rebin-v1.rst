@@ -58,8 +58,8 @@ For Data-Point Workspaces
 
 If the input workspace contains data points, rather than histograms,
 then Rebin will automatically use the
-:ref:`_algm-ConvertToHistogram` and
-:ref:`_algm-ConvertToPointData` algorithms before and after
+:ref:`algm-ConvertToHistogram` and
+:ref:`algm-ConvertToPointData` algorithms before and after
 the rebinning has taken place.
 
 FullBinsOnly option

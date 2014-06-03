@@ -30,8 +30,8 @@ individual pixels. This means that algorithms based on solid angle
 calculations might be off. Ray-tracing (e.g. peak finding) are
 unaffected.
 
-See also :ref:`_algm-MoveInstrumentComponent` and
-:ref:`_algm-RotateInstrumentComponent` for other ways
+See also :ref:`algm-MoveInstrumentComponent` and
+:ref:`algm-RotateInstrumentComponent` for other ways
 to move components.
 
 .. categories::

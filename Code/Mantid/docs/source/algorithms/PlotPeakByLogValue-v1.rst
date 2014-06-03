@@ -32,9 +32,9 @@ Input property
 | `` "test2,v1.1:3.2"``
 | `` "test3,v" - fit all spectra in workspace test3``
 
-Internally PlotPeakByLogValue uses :ref:`_algm-Fit` algorithm to perform
+Internally PlotPeakByLogValue uses :ref:`algm-Fit` algorithm to perform
 fitting and the following properties have the same meaning as in
-:ref:`_algm-Fit`: Function, StartX, EndX, Minimizer, CostFunction. Property
+:ref:`algm-Fit`: Function, StartX, EndX, Minimizer, CostFunction. Property
 FitType defines the way of setting initial values. If it is set to
 "Sequential" every next fit starts with parameters returned by the
 previous fit. If set to "Individual" each fit starts with the same

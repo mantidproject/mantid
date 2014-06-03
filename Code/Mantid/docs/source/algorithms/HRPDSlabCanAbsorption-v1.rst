@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm is a refinement of the
-:ref:`_algm-FlatPlateAbsorption` algorithm for the specific
+:ref:`algm-FlatPlateAbsorption` algorithm for the specific
 case of an HRPD 'slab can' sample holder. It uses the aforementioned
 generic algorithm to calculate the correction due to the sample itself,
 using numerical integration. This is done using the standard height x
@@ -40,7 +40,7 @@ defined because detector, source & sample position are needed.
 ChildAlgorithms used
 ####################
 
-The :ref:`_algm-FlatPlateAbsorption` algorithm is used to
+The :ref:`algm-FlatPlateAbsorption` algorithm is used to
 calculate the correction due to the sample itself.
 
 .. categories::

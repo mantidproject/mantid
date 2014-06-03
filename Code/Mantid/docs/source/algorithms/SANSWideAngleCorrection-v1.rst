@@ -80,12 +80,12 @@ SANS ISIS Reduction
 -------------------
 
 The output of SANSWideAngleCorrection is used as WavePixelAdj parameter
-at :ref:`_algm-Q1D`.
+at :ref:`algm-Q1D`.
 
 Wide Angle Correction and the SANS Reduction
 --------------------------------------------
 
-The equation for the reduction is (see :ref:`_algm-Q1D`)
+The equation for the reduction is (see :ref:`algm-Q1D`)
 
 :math:`P_I(Q) = \frac{\sum_{\{i, j, n\} \supset \{I\}} S(i,j,n)}{\sum_{\{i, j, n\} \supset \{I\}}M(n)\eta(n)T(n)\Omega_{i j}F_{i j}}`
 
@@ -102,7 +102,7 @@ Where Corr (Correction factor) in this case will be:
 
 Which is the OutputWorkspace of SANSWideAngleCorrection.
 
-This parameter enters inside :ref:`_algm-Q1D` as WavePixelAdj. But, this is
+This parameter enters inside :ref:`algm-Q1D` as WavePixelAdj. But, this is
 all done for you inside the Reduction Script.
 
 Comparison with Wide Angle Correction at SNS
@@ -111,7 +111,7 @@ Comparison with Wide Angle Correction at SNS
 The transmission correction applied at SNS is described
 `here <http://www.mantidproject.org/HFIR_SANS#Transmission_correction>`__,
 and it is applied through the
-:ref:`_algm-ApplyTransmissionCorrection` algorithm.
+:ref:`algm-ApplyTransmissionCorrection` algorithm.
 The correction applied there is an approximation for the same equations
 described here. The picture above compare their results
 
@@ -121,8 +121,8 @@ described here. The picture above compare their results
    SNS\_ISIS\_WideAngleCorrections.png
 Note a difference among them is when they are applied. At SNS, the
 correction is applied before averaging the counters per bin inside
-:ref:`_algm-Q1D` algorithm, while at ISIS, it is used after, inside the
-:ref:`_algm-Q1D` algorithm, for the division of the counters per bin
+:ref:`algm-Q1D` algorithm, while at ISIS, it is used after, inside the
+:ref:`algm-Q1D` algorithm, for the division of the counters per bin
 normalized by the transmission counters.
 
 References

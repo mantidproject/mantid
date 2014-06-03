@@ -12,9 +12,9 @@ Description
 Intended for use on data from engineering beamlines, this algorithm
 creates a shape object for use as the 'gauge volume' (i.e. the portion
 of the sample that is visible to the detectors in a given run) of a
-larger sample in the :ref:`_algm-AbsorptionCorrection`
+larger sample in the :ref:`algm-AbsorptionCorrection`
 algorithm. The sample shape will also need to be defined using, e.g.,
-the :ref:`_algm-CreateSampleShape` algorithm. Shapes are
+the :ref:`algm-CreateSampleShape` algorithm. Shapes are
 defined using XML descriptions that can be found
 `here <HowToDefineGeometricShape>`__.
 

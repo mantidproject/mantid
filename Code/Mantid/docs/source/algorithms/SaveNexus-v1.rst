@@ -36,6 +36,6 @@ loaded at present.
 Child Algorithms used
 #####################
 
-:ref:`_algm-SaveNexusProcessed`
+:ref:`algm-SaveNexusProcessed`
 
 .. categories::

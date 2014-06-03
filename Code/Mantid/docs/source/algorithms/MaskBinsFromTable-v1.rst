@@ -20,7 +20,7 @@ Related Algorithms
 MaskBins
 ########
 
-:ref:`_algm-MaskBins` masks bins in a workspace. Masked bins should
+:ref:`algm-MaskBins` masks bins in a workspace. Masked bins should
 properly be regarded as having been completely removed from the
 workspace. Bins falling within the range given (even partially) are
 masked, i.e. their data and error values are set to zero and the bin is

@@ -13,8 +13,8 @@ The StartLiveData algorithm launches a background job that monitors and
 processes live data.
 
 The background algorithm started is
-:ref:`_algm-MonitorLiveData`, which simply calls
-:ref:`_algm-LoadLiveData` at a fixed interval.
+:ref:`algm-MonitorLiveData`, which simply calls
+:ref:`algm-LoadLiveData` at a fixed interval.
 
 For details on the way to specify the data processing steps, see:
 `LoadLiveData <LoadLiveData#Description>`__.

@@ -51,7 +51,7 @@ Definition of Mask
 About Input Parameters
 ######################
 
-:ref:`_algm-MaskDetectors` supports various format of input to
+:ref:`algm-MaskDetectors` supports various format of input to
 mask detectors, including
 
 -  Workspace indices

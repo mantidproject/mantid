@@ -21,7 +21,7 @@ The output workspace is created with these dimensions and the box
 parameters specified above. Then the events from each input workspace
 are appended to the output.
 
-See also: :ref:`_algm-MergeMDFiles`, for merging when system
+See also: :ref:`algm-MergeMDFiles`, for merging when system
 memory is too small to keep the entire workspace in memory.
 
 .. categories::

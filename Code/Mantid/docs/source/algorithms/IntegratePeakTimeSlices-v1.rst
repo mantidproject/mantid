@@ -42,7 +42,7 @@ This algorithm has been carefully tweaked to give good results for
 interior peaks only. Peaks close to the edge of the detector may not
 give good results.
 
-This Algorithm is also used by the :ref:`_algm-PeakIntegration`
+This Algorithm is also used by the :ref:`algm-PeakIntegration`
 algorithm when the Fit tag is selected.
 
 .. categories::

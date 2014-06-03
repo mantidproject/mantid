@@ -38,7 +38,7 @@ Each peak created is placed in the output
 replace the old one.
 
 This algorithm works on a `MDHistoWorkspace <MDHistoWorkspace>`__
-resulting from the :ref:`_algm-BinMD` algorithm also. It works in the
+resulting from the :ref:`algm-BinMD` algorithm also. It works in the
 same way, except that the center of each bin is used since the centroid
 is not accessible. It may give better results on
 `Workspace2D <Workspace2D>`__'s that were converted to

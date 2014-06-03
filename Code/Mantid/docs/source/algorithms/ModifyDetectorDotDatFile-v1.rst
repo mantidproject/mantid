@@ -11,7 +11,7 @@ Description
 
 Modifies an ISIS detector dot data file, so that the detector positions
 are as in the given workspace. This algorithm can be used to transfer a
-calibration done via the :ref:`_algm-ApplyCalibration`
+calibration done via the :ref:`algm-ApplyCalibration`
 algorithm to an ISIS detector dot dat file by selecting a workspace that
 has been modified by ApplyCalibration.
 

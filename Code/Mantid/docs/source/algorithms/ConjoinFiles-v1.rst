@@ -10,6 +10,6 @@ Description
 -----------
 
 Conjoin two workspaces, which are file based. Uses
-:ref:`_algm-ConjoinWorkspaces` to do the heavy-lifting.
+:ref:`algm-ConjoinWorkspaces` to do the heavy-lifting.
 
 .. categories::

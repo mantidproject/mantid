@@ -19,9 +19,9 @@ The algorithms takes two input workspaces:
 
 -  A MDEventWorkspace containing the events in multi-dimensional space.
    This would be the output of
-   :ref:`_algm-ConvertToDiffractionMDWorkspace`.
+   :ref:`algm-ConvertToDiffractionMDWorkspace`.
 -  As well as a PeaksWorkspace containing single-crystal peak locations.
-   This could be the output of :ref:`_algm-FindPeaksMD`
+   This could be the output of :ref:`algm-FindPeaksMD`
 -  The OutputWorkspace will contain a copy of the input PeaksWorkspace,
    with the integrated intensity and error found being filled in.
 

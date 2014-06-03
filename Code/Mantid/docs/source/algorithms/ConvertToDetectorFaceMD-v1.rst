@@ -27,7 +27,7 @@ bin. Zero bins are not converted to events (saving memory).
 
 Once created, the `MDEventWorkspace <MDEventWorkspace>`__ can be viewed
 in the `SliceViewer <SliceViewer>`__. It can also be rebinned with
-different parameters using :ref:`_algm-BinMD`. This allows you to view
+different parameters using :ref:`algm-BinMD`. This allows you to view
 the data in detector-space. For example, you might use this feature to
 look at your detector's sensitivity as a function of position, as well
 as a function of TOF. You can also do line plots of the data. See this

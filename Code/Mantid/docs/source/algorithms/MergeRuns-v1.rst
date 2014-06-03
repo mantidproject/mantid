@@ -60,7 +60,7 @@ output matrix workspace.
 ChildAlgorithms used
 ####################
 
-The :ref:`_algm-Rebin` algorithm is used, if neccessary, to put all the
+The :ref:`algm-Rebin` algorithm is used, if neccessary, to put all the
 input workspaces onto a common binning.
 
 .. categories::

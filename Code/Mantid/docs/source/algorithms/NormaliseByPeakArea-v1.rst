@@ -10,7 +10,7 @@ Description
 -----------
 
 Takes an input TOF spectrum and converts it to Y-space using the
-:ref:`_algm-ConvertToYSpace` algorithm. The result is then
+:ref:`algm-ConvertToYSpace` algorithm. The result is then
 fitted using the ComptonPeakProfile function using the given mass to
 produce an estimate of the peak area. The input data is normalised by
 this value.

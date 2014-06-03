@@ -53,13 +53,13 @@ The data must be histogram, non-distribution data.
 Child Algorithms used
 #####################
 
-The :ref:`_algm-ExtractSingleSpectrum` algorithm is used
+The :ref:`algm-ExtractSingleSpectrum` algorithm is used
 to pull out the monitor spectrum if it's part of the InputWorkspace or
 MonitorWorkspace. For the 'integrated range' option, the
-:ref:`_algm-Integration` algorithm is used to integrate the monitor
+:ref:`algm-Integration` algorithm is used to integrate the monitor
 spectrum.
 
-In both cases, the :ref:`_algm-Divide` algorithm is used to perform the
+In both cases, the :ref:`algm-Divide` algorithm is used to perform the
 normalisation.
 
 .. categories::

@@ -18,6 +18,6 @@ The error :math:`da` becomes :math:`df^2 = a^2 / da^2`
 This algorithm cannot be run on a
 `MDEventWorkspace <MDEventWorkspace>`__. Its equivalent on a
 `MatrixWorkspace <MatrixWorkspace>`__ is called
-:ref:`_algm-Logarithm`.
+:ref:`algm-Logarithm`.
 
 .. categories::

@@ -25,9 +25,9 @@ backgroundintercept & backgroundslope.
 Subalgorithms used
 ##################
 
-FindPeaks uses the :ref:`_algm-SmoothData` algorithm to, well,
+FindPeaks uses the :ref:`algm-SmoothData` algorithm to, well,
 smooth the data - a necessary step to identify peaks in statistically
-fluctuating data. The :ref:`_algm-Fit` algorithm is used to fit candidate
+fluctuating data. The :ref:`algm-Fit` algorithm is used to fit candidate
 peaks.
 
 Treating weak peaks vs. high background
@@ -46,7 +46,7 @@ Criteria To Validate Peaks Found
 ################################
 
 FindPeaks finds peaks by fitting a Guassian with background to a certain
-range in the input histogram. :ref:`_algm-Fit` may not give a correct
+range in the input histogram. :ref:`algm-Fit` may not give a correct
 result even if chi^2 is used as criteria alone. Thus some other criteria
 are provided as options to validate the result
 

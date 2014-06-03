@@ -33,6 +33,6 @@ positive value.
 Child algorithms used
 #####################
 
-Uses the :ref:`_algm-Integration` algorithm to sum the spectra.
+Uses the :ref:`algm-Integration` algorithm to sum the spectra.
 
 .. categories::

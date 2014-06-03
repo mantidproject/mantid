@@ -30,10 +30,10 @@ The Input Workspace
 
 #. The input workspace must be a MatrixWorkspace
 #. The input workspace must have X-units of Wavelength, run
-   :ref:`_algm-ConvertUnits` on your input workspace if it is not
+   :ref:`algm-ConvertUnits` on your input workspace if it is not
    already in Wavelength.
 #. The input workspace must be a histogram workspace run
-   :ref:`_algm-ConvertToHistogram` on your input workspace
+   :ref:`algm-ConvertToHistogram` on your input workspace
    if it is not already histogrammed.
 
 The Instrument Definition File
@@ -75,7 +75,7 @@ Instrument Parameter Files that take the form
 Mantid are automatically loaded along with the IDF when a workspace is
 loaded into Mantid. However, you can apply any number of additional
 parameter files over the top of an existing workspace using
-:ref:`_algm-LoadParameterFile`.
+:ref:`algm-LoadParameterFile`.
 
 Examples
 ########

@@ -35,13 +35,13 @@ This flow chart is given as a way of selecting the most appropriate of
 the absorption correction algorithms. It also shows the algorithms that
 must be run first in each case. Note that this does not cover the
 following absorption correction algorithms:
-:ref:`_algm-MonteCarloAbsorption` (correction factors for
+:ref:`algm-MonteCarloAbsorption` (correction factors for
 a generic sample using a Monte Carlo instead of a numerical integration
 method),
-:ref:`_algm-MultipleScatteringCylinderAbsorption`
-& :ref:`_algm-AnvredCorrection` (corrections in a spherical
+:ref:`algm-MultipleScatteringCylinderAbsorption`
+& :ref:`algm-AnvredCorrection` (corrections in a spherical
 sample, using a method imported from ISAW). Also, HRPD users can use the
-:ref:`_algm-HRPDSlabCanAbsorption` to add rudimentary
+:ref:`algm-HRPDSlabCanAbsorption` to add rudimentary
 calculations of the effects of the sample holder. |AbsorptionFlow.png|
 
 Assumptions
@@ -49,7 +49,7 @@ Assumptions
 
 This algorithm assumes that the (parallel) beam illuminates the entire
 sample **unless** a 'gauge volume' has been defined using the
-:ref:`_algm-DefineGaugeVolume` algorithm (or by otherwise
+:ref:`algm-DefineGaugeVolume` algorithm (or by otherwise
 adding a valid XML string `defining a
 shape <HowToDefineGeometricShape>`__ to a `Run <Run>`__ property called
 "GaugeVolume"). In this latter case only scattering within this volume
@@ -57,7 +57,7 @@ shape <HowToDefineGeometricShape>`__ to a `Run <Run>`__ property called
 'see'. The full sample is still used for the neutron paths. (**N.B.** If
 your gauge volume is of axis-aligned cuboid shape and fully enclosed by
 the sample then you will get a more accurate result from the
-:ref:`_algm-CuboidGaugeVolumeAbsorption`
+:ref:`algm-CuboidGaugeVolumeAbsorption`
 algorithm.)
 
 Restrictions on the input workspace

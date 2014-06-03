@@ -27,7 +27,7 @@ that may contain spaces.
 Parent algorithm
 ################
 
-LoadLog is also a child algorithm of :ref:`_algm-LoadRaw`, i.e. it gets
+LoadLog is also a child algorithm of :ref:`algm-LoadRaw`, i.e. it gets
 called whenever LoadRaw is executed.
 
 Load SNS text log file

@@ -37,7 +37,7 @@ represents detector diagnostic parameters and they are detailed in the
 table below.
 
 +-----------------------------+----------------------+-------------------------------------------------------+
-| Parameter                   | IPF Mapping          | :ref:`_algm-DetectorDiagnostic` Mapping   |
+| Parameter                   | IPF Mapping          | :ref:`algm-DetectorDiagnostic` Mapping   |
 +=============================+======================+=======================================================+
 | HighCounts                  | diag\_huge           | HighThreshold                                         |
 +-----------------------------+----------------------+-------------------------------------------------------+

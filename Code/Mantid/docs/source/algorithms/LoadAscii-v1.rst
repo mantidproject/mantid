@@ -14,7 +14,7 @@ stores it in a `Workspace2D <Workspace2D>`__ as data points. The data in
 the file must be organized in columns separated by commas, tabs, spaces,
 colons or semicolons. Only one separator type can be used throughout the
 file; use the "Separator" property to tell the algorithm which to use.
-The algorithm :ref:`_algm-SaveAscii` is normally able to produce such
+The algorithm :ref:`algm-SaveAscii` is normally able to produce such
 a file.
 
 By default the algorithm attempts to guess which lines are header lines
@@ -34,7 +34,7 @@ The number of bins is defined by the number of rows.
 
 The resulting workspace will have common X binning for all spectra.
 
-This algorithm cannot load a file created by :ref:`_algm-SaveAscii`
+This algorithm cannot load a file created by :ref:`algm-SaveAscii`
 if it has X errors written and several spectra.
 
 .. categories::

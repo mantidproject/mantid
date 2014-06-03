@@ -17,8 +17,8 @@ are marked as circles.
 detected\|centre\||
 | The two neutons on the right of the diagram were actually produced in
 frame 1 but will be recorded in frame 2 at low time of flight (TOF) and
-a straight :ref:`_algm-ConvertUnits` will bin them at high energy
-and short wavelength! :ref:`_algm-UnwrapSNS` moves those particles to
+a straight :ref:`algm-ConvertUnits` will bin them at high energy
+and short wavelength! :ref:`algm-UnwrapSNS` moves those particles to
 the end of the spectrum by increasing their time of flight by the
 duration of a frame multiplied by the number (one or more) of frames
 they were "late" by.

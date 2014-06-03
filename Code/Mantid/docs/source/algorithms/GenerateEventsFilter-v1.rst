@@ -13,20 +13,20 @@ This algorithm is able to generate event splitters according to user's
 requirement for filtering events. The generated time splitters are
 stored either in a `SplittersWorkspace <SplittersWorkspace>`__ or a
 `MatrixWorkspace <MatrixWorkspace>`__. Both of them will be used by
-algorithm :ref:`_algm-FilterEvents` to filter events from an
+algorithm :ref:`algm-FilterEvents` to filter events from an
 `EventWorkspace <EventWorkspace>`__.
 
 This algorithm is designed as a general-purposed event splitter
-generator. Combined with :ref:`_algm-FilterEvents`, it will
+generator. Combined with :ref:`algm-FilterEvents`, it will
 replace
 
--  :ref:`_algm-FilterByTime`
--  :ref:`_algm-FilterByLogValue`
+-  :ref:`algm-FilterByTime`
+-  :ref:`algm-FilterByLogValue`
 
 Moreover, the time resolution of these two algorithms is microseconds,
 i.e., the wall time of an (neutron) event. While the original
-:ref:`_algm-FilterByTime` and
-:ref:`_algm-FilterByLogValue` are of the resolution of pulse
+:ref:`algm-FilterByTime` and
+:ref:`algm-FilterByLogValue` are of the resolution of pulse
 time. It is also enhanced to process the fast frequency sample logs,
 which can be even faster than chopper frequencies.
 
@@ -124,7 +124,7 @@ GenerateEventFilter tends to be more conservative, and thus the first
 splitter will start from the first log time.
 
 2. FilterByLogValue only filters events at the resolution of pulse time,
-while :ref:`_algm-GenerateEventsFilter` can improve the
+while :ref:`algm-GenerateEventsFilter` can improve the
 resolution to 1 micro second.
 
 .. categories::

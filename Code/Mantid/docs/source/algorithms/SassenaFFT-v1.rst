@@ -23,7 +23,7 @@ following datasets: *qvectors*, *fq*, *fq0*, *fq2*, and *fqt*
 The group workspace should contain workspaces **\_fqt.Re** and
 **\_fqt.Im** containing the real and imaginary parts of the intermediate
 structure factor, respectively. This algorithm will take both and
-perform :ref:`_algm-FFT`, storing the real part of the transform in
+perform :ref:`algm-FFT`, storing the real part of the transform in
 workspace **\_fqw** and placing this workspace under the input group
 workspace. Assuming the time unit to be one picosecond, the resulting
 energies will be in units of one **micro-eV**.

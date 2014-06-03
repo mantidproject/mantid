@@ -17,7 +17,7 @@ and their :sup:`3`\ He partial pressure, wall thickness and radius
 stored in the input workspace, the first in atmospheres and the last two
 in metres. That workspace then needs to be converted so that its
 X-values are in `units <Unit_Factory>`__ of energy transfer, e.g. using
-the :ref:`_algm-ConvertUnits` algorithm.
+the :ref:`algm-ConvertUnits` algorithm.
 
 To estimate the true number of neutrons that entered the detector the
 counts in each bin are divided by the detector efficiency of that

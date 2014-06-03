@@ -13,8 +13,8 @@ Prerequisites
 #############
 
 The workspace spectrum axis should be converted to signed\_theta using
-:ref:`_algm-ConvertSpectrumAxis` and the x axis should be
-converted to Wavelength using :ref:`_algm-ConvertUnits` before
+:ref:`algm-ConvertSpectrumAxis` and the x axis should be
+converted to Wavelength using :ref:`algm-ConvertUnits` before
 running this algorithm. Histogram input workspaces are expected.
 
 The algorithm will looks for a specific log value called *stheta*, which
@@ -51,8 +51,8 @@ where
 After Transformation
 ####################
 
-You will usually want to rebin using :ref:`_algm-BinMD` or
-:ref:`_algm-SliceMD` after transformation because the output workspaces
+You will usually want to rebin using :ref:`algm-BinMD` or
+:ref:`algm-SliceMD` after transformation because the output workspaces
 are not regularly binned.
 
 .. categories::

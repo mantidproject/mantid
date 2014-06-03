@@ -14,7 +14,7 @@ identify its type so that it can be read into a workspace. The file name
 can be an absolute or relative path and should have the extension .nxs
 or .nx5. Currently only Nexus Muon Version 1 files are recognised, but
 this will be extended as other types are supported such as
-:ref:`_algm-LoadNexusProcessed`.
+:ref:`algm-LoadNexusProcessed`.
 
 If the file contains data for more than one period, a separate workspace
 will be generated for each. After the first period the workspace names

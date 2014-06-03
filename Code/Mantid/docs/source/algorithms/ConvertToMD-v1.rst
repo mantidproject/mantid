@@ -15,12 +15,12 @@ Used Subalgorithms
 The algorithm uses `Unit Factory <Unit_Factory>`__ and existing unit
 conversion procedures from input Workspace Units to the Units, necessary
 for transformation into correspondent MD Event workspace. It also uses
-:ref:`_algm-PreprocessDetectorsToMD` algorithm to help
+:ref:`algm-PreprocessDetectorsToMD` algorithm to help
 with transformation to reciprocal space.
 
 If min, max or both lists of values (properties 12 and 13) for the
 algorithm are not specified,
-:ref:`_algm-ConvertToMDMinMaxLocal` is used to estimate
+:ref:`algm-ConvertToMDMinMaxLocal` is used to estimate
 missing min-max values. This algorithm is also used to calculate min-max
 values if specified min-max values are deemed incorrect (e.g. less
 values then dimensions or some min values are bigger then max values)
@@ -51,7 +51,7 @@ Notes
    range to obtain MD workspace, which would correspond to an Elastic
    mode.
 #. A good guess on the limits can be obtained from the
-   :ref:`_algm-ConvertToMDMinMaxLocal` algorithm.
+   :ref:`algm-ConvertToMDMinMaxLocal` algorithm.
 
 How to write custom ConvertToMD plugin
 --------------------------------------

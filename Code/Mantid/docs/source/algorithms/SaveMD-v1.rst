@@ -11,7 +11,7 @@ Description
 
 Save a `MDEventWorkspace <MDEventWorkspace>`__ to a .nxs file. The
 workspace's current box structure and entire list of events is
-preserved. The resulting file can be loaded via :ref:`_algm-LoadMD`.
+preserved. The resulting file can be loaded via :ref:`algm-LoadMD`.
 
 If you specify MakeFileBacked, then this will turn an in-memory
 workspace to a file-backed one. Memory will be released as it is written

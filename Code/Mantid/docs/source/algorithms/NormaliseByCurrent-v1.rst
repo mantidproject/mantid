@@ -31,7 +31,7 @@ EventWorkspaces
 
 If the input workspace is an `EventWorkspace <EventWorkspace>`__, then
 the output will be as well. Weighted events are used to scale by the
-current (see the :ref:`_algm-Divide` algorithm, which is a child
+current (see the :ref:`algm-Divide` algorithm, which is a child
 algorithm being used).
 
 .. categories::

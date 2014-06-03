@@ -21,7 +21,7 @@ There are special cases for:
 
 It should:
 
-#. Load any file type that :ref:`_algm-Load` can handle.
+#. Load any file type that :ref:`algm-Load` can handle.
 #. Not crash with multiperiod data - although values will be from period
    1
 #. Handle gaps in the file structure (although this can be slow over a

@@ -20,7 +20,7 @@ Bins at either end of spectrum
 ##############################
 
 If the workspaces has common X binning for all spectra, then the
-:ref:`_algm-CropWorkspace` algorithm will be called as a child
+:ref:`algm-CropWorkspace` algorithm will be called as a child
 algorithm. This will result in the affected bins (which includes the bin
 in which the boundary - XMin or XMax - lies) being removed completely,
 leading to the output workspace having fewer bins than the input one. In
@@ -51,7 +51,7 @@ Related Algorithms
 MaskBins
 ########
 
-:ref:`_algm-MaskBins` will set the data in the desired bins to 0 and
+:ref:`algm-MaskBins` will set the data in the desired bins to 0 and
 importantly also marks those bins as masked, so that further algorithms
 should not include this data in their grouping calculations. This is
 particularly used for Diffraction Focussing.

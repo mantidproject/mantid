@@ -23,7 +23,7 @@ event lists might be from different detectors; this is not checked
 against and the event lists will be concatenated anyway. This may or may
 not be your desired behavior. If you wish to merge different
 EventWorkspaces while matching their detectors together, use the
-:ref:`_algm-MergeRuns` algorithm.
+:ref:`algm-MergeRuns` algorithm.
 
 :sup:`\*` This could happen, for example, if the workspace operands have
 not both been processed in an identical fashion and the detectors have

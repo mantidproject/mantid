@@ -13,7 +13,7 @@ Algorithm takes an image workspace (a.k.a
 `IMDHistoWorkspace <IMDHistoWorkspace>`__) and determines the faces of
 the clusters contained within the image. The image is expected to be a
 labeled image workspace outputted from
-:ref:`_algm-IntegratePeaksUsingClusters`. The
+:ref:`algm-IntegratePeaksUsingClusters`. The
 algorithm generates a `TableWorkspace <TableWorkspace>`__ as output,
 which contains all the cluster edge faces required to draw the outer
 edge of all clusters within the workspace.

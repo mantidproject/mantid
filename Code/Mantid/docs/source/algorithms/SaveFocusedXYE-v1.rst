@@ -22,7 +22,7 @@ Current Issues
 --------------
 
 Fullprof expects the data to be in TOF, however at present the
-:ref:`_algm-DiffractionFocussing` algorithm in Mantid
+:ref:`algm-DiffractionFocussing` algorithm in Mantid
 leaves the data in d-spacing.
 
 If the written file is to be loaded into TOPAS, then headers should be

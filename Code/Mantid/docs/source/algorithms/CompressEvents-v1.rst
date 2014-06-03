@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm starts by sorting the event lists by TOF; therefore you
-may gain speed by calling :ref:`_algm-SortEvents` beforehand.
+may gain speed by calling :ref:`algm-SortEvents` beforehand.
 Starting from the smallest TOF, all events within Tolerance are
 considered to be identical. Pulse times are ignored. A weighted event
 without time information is created; its TOF is the average value of the

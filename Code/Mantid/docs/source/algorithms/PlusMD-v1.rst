@@ -34,9 +34,9 @@ two workspaces together to form one large workspace.
 Note for file-backed workspaces
 ###############################
 
-The algorithm uses :ref:`_algm-CloneMDWorkspace` to create the
+The algorithm uses :ref:`algm-CloneMDWorkspace` to create the
 output workspace, except when adding in place (e.g. :math:`A = A + B` ).
-See :ref:`_algm-CloneMDWorkspace` for details, but note that a
+See :ref:`algm-CloneMDWorkspace` for details, but note that a
 file-backed `MDEventWorkspace <MDEventWorkspace>`__ will have its file
 copied.
 
@@ -47,7 +47,7 @@ copied.
    and add B into memory (which might be too big!)
 
 Also, be aware that events added to a MDEventWorkspace are currently
-added **in memory** and are not cached to file until :ref:`_algm-SaveMD`
+added **in memory** and are not cached to file until :ref:`algm-SaveMD`
 or another algorithm requiring it is called. The workspace is marked as
 'requiring file update'.
 

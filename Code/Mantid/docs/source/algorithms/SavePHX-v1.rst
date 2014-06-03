@@ -11,7 +11,7 @@ Description
 
 Saves the geometry information of the detectors in a workspace into a
 PHX format ASCII file. The angular positions and angular sizes of the
-detectors are calculated using :ref:`_algm-FindDetectorsPar`
+detectors are calculated using :ref:`algm-FindDetectorsPar`
 algorithm.
 
 Mantid generated PHX file is an ASCII file consisting of the header and

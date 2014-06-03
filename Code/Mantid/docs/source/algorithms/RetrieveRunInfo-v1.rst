@@ -14,7 +14,7 @@ Strips the log property values of "inst\_abrv", "run\_number",
 and compiles a TableWorkspace of the result.
 
 Uses multiple calls to
-:ref:`_algm-CreateLogPropertyTable` create the final
+:ref:`algm-CreateLogPropertyTable` create the final
 result table.
 
 .. figure:: /images/ConvertToEnergyInfoTable.png
@@ -27,7 +27,7 @@ Limitations
 
 Currently, only ISIS instruments with runs that have the *full* list of
 log properties are supported.
-:ref:`_algm-CreateLogPropertyTable` is available to
+:ref:`algm-CreateLogPropertyTable` is available to
 those users who wish to "brew their own" version of this algorithm.
 
 .. categories::

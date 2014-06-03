@@ -44,18 +44,18 @@ Subalgorithms used
 LoadRaw runs the following algorithms as child algorithms to populate
 aspects of the output `Workspace <Workspace>`__:
 
--  :ref:`_algm-LoadInstrument` - Looks for an instrument
+-  :ref:`algm-LoadInstrument` - Looks for an instrument
    definition file named XXX\_Definition.xml, where XXX is the 3 letter
    instrument prefix on the RAW filename, in the directory specified by
    the "instrumentDefinition.directory" property given in the config
    file (or, if not provided, in the relative path ../Instrument/). If
    the instrument definition file is not found then the
-   :ref:`_algm-LoadInstrumentFromRaw` algorithm will be
+   :ref:`algm-LoadInstrumentFromRaw` algorithm will be
    run instead.
--  :ref:`_algm-LoadMappingTable` - To build up the mapping
+-  :ref:`algm-LoadMappingTable` - To build up the mapping
    between the spectrum numbers and the Detectors of the attached
    `Instrument <Instrument>`__.
--  :ref:`_algm-LoadLog` - Will look for any log files in the same
+-  :ref:`algm-LoadLog` - Will look for any log files in the same
    directory as the RAW file and load their data into the workspace's
    `Sample <Sample>`__ object.
 

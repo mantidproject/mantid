@@ -21,7 +21,7 @@ Requirements
 ------------
 
 The algorithms currently requires the second axis on the workspace to be
-a numerical axis so :ref:`_algm-ConvertSpectrumAxis` may
+a numerical axis so :ref:`algm-ConvertSpectrumAxis` may
 need to run first.
 
 .. categories::

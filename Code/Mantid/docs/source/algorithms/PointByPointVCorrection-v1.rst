@@ -25,7 +25,7 @@ before.
 
 In order to minimise sudden jumps in the data caused by 0 counts in the
 corresponding vanadium spectrum it is worth considering smoothing the
-Vanadium spectrum using :ref:`_algm-SmoothData` prior to using it in
+Vanadium spectrum using :ref:`algm-SmoothData` prior to using it in
 this algorithm.
 
 Valid input workspaces

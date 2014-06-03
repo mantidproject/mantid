@@ -9,7 +9,7 @@
 Description
 -----------
 
-Loads a GSS file such as that saved by :ref:`_algm-SaveGSS`.
+Loads a GSS file such as that saved by :ref:`algm-SaveGSS`.
 
 Two types of GSAS files are supported
 

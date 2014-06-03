@@ -14,7 +14,7 @@ whose bins have large numbers of counts which vary smoothly e.g. monitor
 spectra.
 
 The "params" property defines the new bin boundaries using the same
-syntax as in :ref:`_algm-Rebin`. That is, the first number is the first
+syntax as in :ref:`algm-Rebin`. That is, the first number is the first
 bin boundary and the second number is the width of the bins. Bins are
 created until the third number would be exceeded, the third number is
 the x-value of the last bin. There can be further pairs of numbers, the
@@ -43,7 +43,7 @@ respective input bin data points.
 Example Rebin param strings
 ###########################
 
-The same syntax as for :ref:`_algm-Rebin`
+The same syntax as for :ref:`algm-Rebin`
 
 0,100,20000
     From 0 rebin in constant size bins of 100 up to 20,000

@@ -36,7 +36,7 @@ Criteria To Validate Peaks Found
 ################################
 
 FindPeaks finds peaks by fitting a Guassian with background to a certain
-range in the input histogram. :ref:`_algm-Fit` may not give a correct
+range in the input histogram. :ref:`algm-Fit` may not give a correct
 result even if chi^2 is used as criteria alone. Thus some other criteria
 are provided as options to validate the result
 

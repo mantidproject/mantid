@@ -30,7 +30,7 @@ Notes
 
 The relationship between the workspace and the original
 `MDWorkspace <MDWorkspace>`__, for example when the MDHistoWorkspace is
-the result of :ref:`_algm-BinMD`, is lost. This means that you cannot
+the result of :ref:`algm-BinMD`, is lost. This means that you cannot
 re-bin a transformed `MDHistoWorkspace <MDHistoWorkspace>`__.
 
 No units are not modified by this algorithm.

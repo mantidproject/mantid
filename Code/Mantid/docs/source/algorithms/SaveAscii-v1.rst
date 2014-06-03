@@ -12,7 +12,7 @@ Description
 The workspace data are stored in the file in columns: the first column
 contains the X-values, followed by pairs of Y and E values. Columns are
 separated by commas. The resulting file can normally be loaded into a
-workspace by the :ref:`_algm-LoadAscii` algorithm.
+workspace by the :ref:`algm-LoadAscii` algorithm.
 
 Limitations
 ###########

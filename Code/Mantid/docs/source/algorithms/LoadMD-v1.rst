@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm loads a `MDEventWorkspace <MDEventWorkspace>`__ that was
-previously saved using the :ref:`_algm-SaveMD` algorithm to a .nxs file
+previously saved using the :ref:`algm-SaveMD` algorithm to a .nxs file
 format.
 
 If the workspace is too large to fit into memory, You can load the

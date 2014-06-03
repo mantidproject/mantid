@@ -69,7 +69,7 @@ sufficiently narrow distribution of energies, a linear relationship
 between t\_0 and the wavelength of the incoming neutron can be
 established. This relation allows for coding of an algorithm with faster
 execution times. For indirect instruments that comply with these
-conditions, use of :ref:`_algm-ModeratorTzeroLinear` is
+conditions, use of :ref:`algm-ModeratorTzeroLinear` is
 preferred.
 
 .. categories::

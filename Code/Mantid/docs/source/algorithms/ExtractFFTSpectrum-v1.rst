@@ -9,15 +9,15 @@
 Description
 -----------
 
-This algorithm iterates the :ref:`_algm-FFT` algorithm on each spectrum of
+This algorithm iterates the :ref:`algm-FFT` algorithm on each spectrum of
 InputWorkspace, computing the Fourier Transform and storing the
 transformed spectrum in OutputWorkspace. If InputImagWorkspace is also
 passed, then the pair spectrum *i* of InputWorkspace (real) and spectrum
 *i* of InputImagWorkspace (real) are taken together as spectrum *i* of a
-complex workspace, on which :ref:`_algm-FFT` is applied.
+complex workspace, on which :ref:`algm-FFT` is applied.
 
 The FFTPart parameter specifies which transform is selected from the
-output of the :ref:`_algm-FFT` algorithm:
+output of the :ref:`algm-FFT` algorithm:
 
 For the case of input containing real and imaginary workspaces:
 

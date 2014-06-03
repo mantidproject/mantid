@@ -25,9 +25,9 @@ supports Transmission corrections (see below). For PointAnalysisMode the
 analysis can be roughly reduced to IvsLam = DetectorWS / sum(I0) /
 TransmissionWS / sum(I0). The normalization by tranmission run(s) is
 optional. Input workspaces are converted to *Wavelength* first via
-:ref:`_algm-ConvertUnits`.
+:ref:`algm-ConvertUnits`.
 
-IvsQ is calculated via :ref:`_algm-ConvertUnits` into units of
+IvsQ is calculated via :ref:`algm-ConvertUnits` into units of
 *MomentumTransfer*. Corrections may be applied prior to the
 transformation to ensure that the detectors are in the correct location
 according to the input Theta value. Corrections are only enabled when a

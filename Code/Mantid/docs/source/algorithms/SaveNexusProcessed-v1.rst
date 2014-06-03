@@ -11,7 +11,7 @@ Description
 
 The algorithm SaveNexusProcessed will write a Nexus data file from the
 named workspace. This can later be loaded using
-:ref:`_algm-LoadNexusProcessed`.
+:ref:`algm-LoadNexusProcessed`.
 
 The file name can be an absolute or relative path and should have the
 extension .nxs, .nx5 or .xml. Warning - using XML format can be

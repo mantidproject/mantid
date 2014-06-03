@@ -10,7 +10,7 @@ Description
 -----------
 
 If instrument geometry information is available the
-:ref:`_algm-SolidAngle` algorithm is used to calculate the number of
+:ref:`algm-SolidAngle` algorithm is used to calculate the number of
 counts per unit solid angle, otherwise numbers of counts are used
 without correction. First the median number of counts in all the bins is
 calculated. Then the ratio of the total number of counts and the median
@@ -40,7 +40,7 @@ positive value.
 ChildAlgorithms used
 ####################
 
-Uses the :ref:`_algm-SolidAngle`, :ref:`_algm-Integration` and
-:ref:`_algm-ConvertToDistribution` algorithms.
+Uses the :ref:`algm-SolidAngle`, :ref:`algm-Integration` and
+:ref:`algm-ConvertToDistribution` algorithms.
 
 .. categories::

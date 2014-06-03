@@ -26,8 +26,8 @@ The process for this algorithm is:
 
 This is repeated three times from the second step.
 
-This uses the :ref:`_algm-Integration`, :ref:`_algm-Power` and
-:ref:`_algm-Divide` algorithms for the first step.
+This uses the :ref:`algm-Integration`, :ref:`algm-Power` and
+:ref:`algm-Divide` algorithms for the first step.
 
 The lower bound for the integration is currently fixed to 2000.
 

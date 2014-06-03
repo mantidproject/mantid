@@ -20,7 +20,7 @@ Specifically:
 #. Offset, crop and rebin the workspace
 #. If the loaded data is multi-period - apply the specified operation to
    specified periods to get a single data set.
-#. Use :ref:`_algm-MuonCalculateAsymmetry` to get the
+#. Use :ref:`algm-MuonCalculateAsymmetry` to get the
    resulting workspace.
 
 Workflow

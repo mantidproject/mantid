@@ -13,6 +13,6 @@ functions.
 
 :math:`(\mbox{A0}+\mbox{A1}\times x) \times  \mbox{Height}\times \exp(-\frac{x}{\mbox{Lifetime}})`
 
-This function may be used with the :ref:`_algm-Fit` algorithm. However, it
+This function may be used with the :ref:`algm-Fit` algorithm. However, it
 was originally added to Mantid as a named function for the purposes of
 detector efficiency calibration.
