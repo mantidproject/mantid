@@ -66,6 +66,9 @@ namespace Mantid
 
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "UpdateInstrumentFromFile"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Updates detector positions initially loaded in from the Instrument Definition File (IDF) with information from the provided file.";}
+
       /// Algorithm's alias for the old UpdateInstrumentFromRaw
       virtual const std::string alias() const { return "UpdateInstrumentFromRaw"; }
 
@@ -76,8 +79,7 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling\\Instrument;DataHandling\\Raw";}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Overwrites Algorithm method. Does nothing at present
       void init();
       /// Overwrites Algorithm method

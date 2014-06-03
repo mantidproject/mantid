@@ -135,13 +135,6 @@ public:
   }
 };
 
-/// Sets documentation strings for this algorithm
-void FakeISISEventDAE::initDocs()
-{
-  this->setWikiSummary("Simulates ISIS event DAE. ");
-  this->setOptionalMessage("Simulates ISIS event DAE.");
-}
-
 
 using namespace Kernel;
 using namespace API;

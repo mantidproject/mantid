@@ -50,13 +50,6 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SumSpectra)
 
-/// Sets documentation strings for this algorithm
-void SumSpectra::initDocs()
-{
-  this->setWikiSummary("The SumSpectra algorithm adds the data values in each time bin across a range of spectra; the output workspace has a single spectrum. If the input is an [[EventWorkspace]], the output is also an [[EventWorkspace]]; otherwise it will be a [[Workspace2D]]. ");
-  this->setOptionalMessage("The SumSpectra algorithm adds the data values in each time bin across a range of spectra; the output workspace has a single spectrum. If the input is an EventWorkspace, the output is also an EventWorkspace; otherwise it will be a Workspace2D.");
-}
-
 
 using namespace Kernel;
 using namespace API;

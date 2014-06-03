@@ -69,19 +69,6 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-    */
-  void LoadFullprofResolution::initDocs()
-  {
-    setWikiSummary("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) and/or where this is supported."
-      " See description section, translate fullprof resolution fitting parameter into Mantid equivalent fitting parameters.");
-    setOptionalMessage("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) and/or where this is supported."
-      " See description section, translate fullprof resolution fitting parameter into Mantid equivalent fitting parameters.");
-
-    return;
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Implement abstract Algorithm methods
    */
   void LoadFullprofResolution::init()

@@ -57,15 +57,6 @@ namespace DataHandling
   const std::string PDLoadCharacterizations::category() const { return "Workflow\\DataHandling";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void PDLoadCharacterizations::initDocs()
-  {
-    std::string descr("Load a characterization file used in Powder Diffraction Reduction.");
-    this->setWikiSummary(descr);
-    this->setOptionalMessage(descr);
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void PDLoadCharacterizations::init()

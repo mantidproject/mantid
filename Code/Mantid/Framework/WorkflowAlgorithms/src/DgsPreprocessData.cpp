@@ -81,12 +81,6 @@ namespace Mantid
     const std::string DgsPreprocessData::category() const { return "Workflow\\Inelastic\\UsesPropertyManager"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void DgsPreprocessData::initDocs()
-    {
-      this->setWikiSummary("Preprocess data via an incident beam parameter.");
-      this->setOptionalMessage("Preprocess data via an incident beam parameter.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

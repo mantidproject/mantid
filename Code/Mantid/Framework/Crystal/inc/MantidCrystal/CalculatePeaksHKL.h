@@ -40,11 +40,13 @@ namespace Crystal
     virtual ~CalculatePeaksHKL();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculates Miller indices for each peak. No rounding or UB optimization.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

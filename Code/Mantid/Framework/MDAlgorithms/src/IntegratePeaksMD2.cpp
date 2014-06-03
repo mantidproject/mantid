@@ -120,12 +120,6 @@ namespace MDAlgorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void IntegratePeaksMD2::initDocs()
-  {
-    this->setWikiSummary("Integrate single-crystal peaks in reciprocal space, for [[MDEventWorkspace]]s.");
-    this->setOptionalMessage("Integrate single-crystal peaks in reciprocal space, for MDEventWorkspaces.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

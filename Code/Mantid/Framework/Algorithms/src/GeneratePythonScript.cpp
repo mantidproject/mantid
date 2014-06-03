@@ -45,12 +45,6 @@ namespace Algorithms
 DECLARE_ALGORITHM(GeneratePythonScript)
 
 //----------------------------------------------------------------------------------------------
-/// Sets documentation strings for this algorithm
-void GeneratePythonScript::initDocs()
-{
-  this->setWikiSummary("Reproduce the history of a workspace and save it to a Python script file or Python variable.");
-  this->setOptionalMessage("An Algorithm to generate a Python script file to reproduce the history of a workspace.");
-}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

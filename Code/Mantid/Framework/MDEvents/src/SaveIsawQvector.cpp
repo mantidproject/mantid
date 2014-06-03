@@ -59,15 +59,6 @@ namespace MDEvents
   const std::string SaveIsawQvector::category() const { return "DataHandling\\Isaw";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveIsawQvector::initDocs()
-  {
-    std::string text("Save an event workspace as an ISAW Q-vector file");
-    this->setWikiSummary(text);
-    this->setOptionalMessage(text);
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void SaveIsawQvector::init()

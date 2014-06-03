@@ -1,0 +1,19 @@
+"""We need to run Sphinx inside MantidPlot to document the internal
+   module. This script calls the sphinx entry point with the necessary 
+   arguments
+"""
+import os
+import sys
+
+# set environment
+os.environ["SCREENSHOTS_DIR"] = "@SCREENSHOTS_DIR@"
+
+builder = "@BUILDER@"
+src_dir = "@CMAKE_CURRENT_SOURCE_DIR@/source"
+output_dir = os.path.join("@SPHINX_BUILD_DIR@", builder)
+
+if __name__ == "__main__":
+    from sphinx import main
+    argv = [sys.executable, "-b", builder, src_dir, output_dir]
+    sys.exit(main(argv))
+

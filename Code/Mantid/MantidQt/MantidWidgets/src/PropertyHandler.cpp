@@ -142,8 +142,6 @@ void PropertyHandler::init()
     }
   }
 
-  onFunctionStructChanged();
-
   m_browser->m_changeSlotsEnabled = true;
 }
 
@@ -480,8 +478,6 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
   m_browser->setFocus();
   m_browser->setCurrentFunction(h);
 
-  onFunctionStructChanged();
-
   return h;
 }
 
@@ -508,7 +504,6 @@ void PropertyHandler::removeFunction()
       }
     }
     ph->renameChildren();
-    ph->onFunctionStructChanged();
   }
 }
 
@@ -573,41 +568,6 @@ QString PropertyHandler::functionPrefix()const
     return pref + "f" + QString::number(iFun);
   }
   return "";
-}
-
-/**
- * For non-composite functions is equal to function()->name().
- * @return High-level structure string, e.g. ((Gaussian * Lorentzian) + FlatBackground)
- */
-QString PropertyHandler::functionStructure() const
-{
-  if ( m_cf && (m_cf->name() == "CompositeFunction" || m_cf->name() == "ProductFunction") )
-  {
-    QStringList children;
-
-    for (size_t i = 0; i < m_cf->nFunctions(); ++i)
-    {
-      children << getHandler(i)->functionStructure();
-    }
-
-    if ( children.empty() )
-    {
-      return QString::fromStdString("Empty " + m_cf->name());
-    }
-
-    QChar op('+');
-
-    if (m_cf->name() == "ProductFunction")
-    {
-      op = '*';
-    }
-
-    return QString("(%1)").arg(children.join(' ' + op + ' '));
-  }
-  else
-  {
-    return QString::fromStdString(function()->name());
-  }
 }
 
 // Return the parent handler
@@ -1523,16 +1483,60 @@ void PropertyHandler::plotRemoved()
   m_hasPlot = false;
 }
 
-void PropertyHandler::onFunctionStructChanged()
+/**
+ * Updates the high-level structure tooltip of this handler's property, updating those of
+ * sub-properties recursively first.
+ *
+ * For non-empty composite functions: something like ((Gaussian * Lorentzian) + FlatBackground)
+ *
+ * For non-composite functions: function()->name().
+ *
+ * @return The new tooltip
+ */
+QString PropertyHandler::updateStructureTooltip()
 {
-  // Update structural tooltip of oneself
-  m_item->property()->setToolTip(functionStructure());
+  QString newTooltip;
 
-  // If is handler of child function, make sure ancestors are updated as well
-  if (PropertyHandler* h = parentHandler())
+  if ( m_cf && (m_cf->name() == "CompositeFunction" || m_cf->name() == "ProductFunction") )
   {
-    h->onFunctionStructChanged();
+    QStringList childrenTooltips;
+
+    // Update tooltips for all the children first, and use them to build this tooltip
+    for (size_t i = 0; i < m_cf->nFunctions(); ++i)
+    {
+      if (auto childHandler = getHandler(i))
+      {
+        childrenTooltips << childHandler->updateStructureTooltip();
+      }
+      else
+      {
+        throw std::runtime_error("Error while building structure tooltip: no handler for child");
+      }
+    }
+
+    if ( childrenTooltips.empty() )
+    {
+      newTooltip = QString::fromStdString("Empty " + m_cf->name());
+    }
+    else
+    {
+      QChar op('+');
+
+      if (m_cf->name() == "ProductFunction")
+      {
+        op = '*';
+      }
+
+      newTooltip = QString("(%1)").arg(childrenTooltips.join(' ' + op + ' '));
+    }
   }
+  else
+  {
+    newTooltip = QString::fromStdString(function()->name());
+  }
+
+  m_item->property()->setToolTip(newTooltip);
+  return newTooltip;
 }
 
 /**

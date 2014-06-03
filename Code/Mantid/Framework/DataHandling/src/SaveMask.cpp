@@ -89,13 +89,6 @@ namespace DataHandling
   SaveMask::~SaveMask()
   {
   }
-  
-  /// Sets documentation strings for this algorithm
-  void SaveMask::initDocs()
-  {
-    this->setWikiSummary("Save a MaskWorkspace/SpecialWorkspace2D to an XML file.");
-    this->setOptionalMessage("Save a MaskWorkspace/SpecialWorkspace2D to an XML file.");
-  }
 
   /// Define input parameters
   void SaveMask::init()

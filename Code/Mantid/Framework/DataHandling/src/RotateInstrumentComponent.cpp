@@ -21,13 +21,6 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(RotateInstrumentComponent)
 
-/// Sets documentation strings for this algorithm
-void RotateInstrumentComponent::initDocs()
-{
-  this->setWikiSummary("Rotates an instrument component. ");
-  this->setOptionalMessage("Rotates an instrument component.");
-}
-
 
 using namespace Kernel;
 using namespace Geometry;

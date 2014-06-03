@@ -22,13 +22,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateTransmissionBeamSpreader)
 
-/// Sets documentation strings for this algorithm
-void CalculateTransmissionBeamSpreader::initDocs()
-{
-  this->setWikiSummary("Calculates the sample transmission using the beam spreader (aka glass carbon) method. ");
-  this->setOptionalMessage("Calculates the sample transmission using the beam spreader (aka glass carbon) method.");
-}
-
 
 using namespace Kernel;
 using namespace API;

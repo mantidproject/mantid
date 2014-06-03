@@ -22,6 +22,9 @@ class SANSMask(PythonAlgorithm):
     def name(self):
         return "SANSMask"
 
+    def summary(self):
+        return "Apply mask to SANS detector"
+
     def PyInit(self):
         facilities = [ "SNS", "HFIR"]
         self.declareProperty("Facility", "SNS",

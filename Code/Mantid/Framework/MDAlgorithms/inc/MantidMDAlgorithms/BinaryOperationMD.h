@@ -53,6 +53,7 @@ namespace MDAlgorithms
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
+    virtual const std::string summary() const { return "Abstract base class for binary operations on IMDWorkspaces, e.g. A = B + C or A = B / C."; }
     
   protected:
     /// Is the operation commutative?

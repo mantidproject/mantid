@@ -19,9 +19,10 @@ class ViewBOA(PythonAlgorithm):
     def category(self):
         return 'PythonAlgorithms;SINQ'
 
+    def summary(self):
+        return "Load a BOA file and create the 3 BOA plots."
+        
     def PyInit(self):
-        self.setOptionalMessage("Load a BOA file and create the 3 BOA plots.")
-        self.setWikiSummary("Load a BOA file and create the 3 BOA plots.")
         now = datetime.datetime.now()
         self.declareProperty("Year",now.year,"Choose year",direction=Direction.Input)
         self.declareProperty('Numor',0,'Choose file number',direction=Direction.Input)

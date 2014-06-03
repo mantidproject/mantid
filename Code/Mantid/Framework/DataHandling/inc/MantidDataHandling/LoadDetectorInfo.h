@@ -39,6 +39,9 @@ namespace Mantid
 
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadDetectorInfo"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads delay times, tube pressures and tube wall thicknesses from a given file.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
@@ -57,7 +60,6 @@ namespace Mantid
         std::vector<double> pressures, thicknesses;
       };
 
-      virtual void initDocs();
       void init();
       void exec();
 

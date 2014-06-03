@@ -46,15 +46,6 @@ namespace Algorithms
   const std::string AverageLogData::category() const { return "DataHandling\\Logs";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void AverageLogData::initDocs()
-  {
-    std::string summary = "Computes the proton charge averaged value of a given log.";
-    this->setWikiSummary(summary);
-    this->setOptionalMessage(summary);
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void AverageLogData::init()

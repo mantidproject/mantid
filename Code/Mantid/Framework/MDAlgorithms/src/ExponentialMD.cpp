@@ -44,12 +44,6 @@ namespace MDAlgorithms
   int ExponentialMD::version() const { return 1;};
   
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ExponentialMD::initDocs()
-  {
-    this->setWikiSummary("Applies the exponential function on a [[MDHistoWorkspace]].");
-    this->setOptionalMessage("Applies the exponential function on a MDHistoWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /// Check the inputs and throw if the algorithm cannot be run

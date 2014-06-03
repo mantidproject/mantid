@@ -160,13 +160,6 @@ namespace MDEvents
   }
 
   //---------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void IntegrateEllipsoids::initDocs()
-  {
-    std::string text("Integrate SCD Bragg peaks using 3D ellipsoids.");
-    this->setWikiSummary(text);
-    this->setOptionalMessage(text);
-  }
 
   //---------------------------------------------------------------------
   /** Initialize the algorithm's properties.

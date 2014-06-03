@@ -64,6 +64,9 @@ public:
   virtual ~FindPeaks() {if(m_progress) delete m_progress; m_progress=NULL;}
   /// Algorithm's name
   virtual const std::string name() const { return "FindPeaks"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Searches for peaks in a dataset.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -72,8 +75,7 @@ public:
   int getVectorIndex(const MantidVec &vecX, double x);
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   void init();
   void exec();
 

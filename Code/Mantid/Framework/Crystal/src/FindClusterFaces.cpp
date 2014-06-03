@@ -328,12 +328,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void FindClusterFaces::initDocs()
-    {
-      this->setWikiSummary("Find faces for clusters in a cluster image.");
-      this->setOptionalMessage(this->getWikiSummary());
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

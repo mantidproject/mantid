@@ -48,12 +48,6 @@ namespace MDAlgorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CentroidPeaksMD2::initDocs()
-  {
-    this->setWikiSummary("Find the centroid of single-crystal peaks in a MDEventWorkspace, in order to refine their positions.");
-    this->setOptionalMessage("Find the centroid of single-crystal peaks in a MDEventWorkspace, in order to refine their positions.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

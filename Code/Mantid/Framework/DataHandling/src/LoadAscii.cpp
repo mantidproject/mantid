@@ -41,13 +41,6 @@ namespace Mantid
   {
     DECLARE_FILELOADER_ALGORITHM(LoadAscii);
     
-    /// Sets documentation strings for this algorithm
-    void LoadAscii::initDocs()
-    {
-      this->setWikiSummary("Loads data from a text file and stores it in a 2D [[workspace]] ([[Workspace2D]] class). ");
-      this->setOptionalMessage("Loads data from a text file and stores it in a 2D workspace (Workspace2D class).");
-    }
-    
 
     using namespace Kernel;
     using namespace API;

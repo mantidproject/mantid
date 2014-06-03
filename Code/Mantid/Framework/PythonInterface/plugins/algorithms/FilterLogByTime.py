@@ -24,6 +24,9 @@ class FilterLogByTime(PythonAlgorithm):
     def name(self):
         return "FilterLogByTime"
 
+    def summary(self):
+        return "Filters a log between time intervals and applies a user defined operation to the result."
+
     def PyInit(self):    
         self.declareProperty(WorkspaceProperty("InputWorkspace", "", direction=Direction.Input), "Input workspace")
         log_validator = StringMandatoryValidator() 
@@ -33,8 +36,6 @@ class FilterLogByTime(PythonAlgorithm):
         self.declareProperty(name="Method",defaultValue="mean", validator=StringListValidator(["mean","min", "max", "median", "mode"]), doc="Statistical method to use to generate ResultStatistic output")
         self.declareProperty(FloatArrayProperty(name="FilteredResult", direction=Direction.Output), doc="Filtered values between specified times.")
         self.declareProperty(name="ResultStatistic", defaultValue=0.0, direction=Direction.Output, doc="Requested statistic")
-        self.setWikiSummary("Filters a log between time intervals and applies a user defined operation to the result.")
-        self.setOptionalMessage("Filters a log between time intervals and applies a user defined operation to the result.")
     
     def PyExec(self):
         in_ws = self.getProperty("InputWorkspace").value

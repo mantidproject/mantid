@@ -39,11 +39,13 @@ namespace MDEvents
     virtual ~SaveIsawQvector();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Save an event workspace as an ISAW Q-vector file";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

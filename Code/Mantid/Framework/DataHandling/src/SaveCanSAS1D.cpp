@@ -31,13 +31,6 @@ namespace DataHandling
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCanSAS1D)
 
-/// Sets documentation strings for this algorithm
-void SaveCanSAS1D::initDocs()
-{
-  this->setWikiSummary("Save a file in the canSAS 1-D format ");
-  this->setOptionalMessage("Save a file in the canSAS 1-D format");
-}
-
 
     /// constructor
     SaveCanSAS1D::SaveCanSAS1D()

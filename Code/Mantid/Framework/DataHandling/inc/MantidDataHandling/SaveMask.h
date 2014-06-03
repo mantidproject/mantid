@@ -41,14 +41,15 @@ namespace DataHandling
     
     /// Algorithm's name for identification
     virtual const std::string name() const { return "SaveMask";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Save a MaskWorkspace/SpecialWorkspace2D to an XML file.";}
+
     /// Algorithm's version for identification
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "DataHandling;Transforms\\Masking";}
 
   private:
-
-    virtual void initDocs();
 
     /// Define input parameters
     void init();

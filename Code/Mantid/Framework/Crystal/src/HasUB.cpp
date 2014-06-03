@@ -44,12 +44,6 @@ namespace Crystal
   const std::string HasUB::category() const { return "Crystal";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void HasUB::initDocs()
-  {
-    this->setWikiSummary("Determines whether the workspace has one or more UB Matrix.");
-    this->setOptionalMessage("Determines whether the workspace has one or more UB Matrix");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

@@ -14,13 +14,6 @@ namespace Mantid
     
     DECLARE_ALGORITHM(UnGroupWorkspace)
     
-    /// Sets documentation strings for this algorithm
-    void UnGroupWorkspace::initDocs()
-    {
-      this->setWikiSummary("Takes a group workspace as input and ungroups the workspace. ");
-      this->setOptionalMessage("Takes a group workspace as input and ungroups the workspace.");
-    }
-    
     
     using namespace Kernel;
     using namespace API;

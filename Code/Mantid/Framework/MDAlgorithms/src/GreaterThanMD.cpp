@@ -31,13 +31,6 @@ namespace MDAlgorithms
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(GreaterThanMD)
 
-  /// Sets documentation strings for this algorithm
-  void GreaterThanMD::initDocs()
-  {
-    this->setWikiSummary("Perform the GreaterThan boolean operation on two MDHistoWorkspaces.");
-    this->setOptionalMessage("Perform the GreaterThan boolean operation on two MDHistoWorkspaces.");
-  }
-
   
   //----------------------------------------------------------------------------------------------
   /** Constructor

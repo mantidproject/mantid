@@ -201,12 +201,6 @@ namespace Mantid
       delete [] NeighborIDs;
     }
 
-    void IntegratePeakTimeSlices::initDocs()
-    {
-      this->setWikiSummary("Integrates each time slice around a peak ");
-      this->setOptionalMessage("The algorithm uses CurveFitting::BivariateNormal for fitting a time slice");
-    }
-
 
     void IntegratePeakTimeSlices::init()
     {

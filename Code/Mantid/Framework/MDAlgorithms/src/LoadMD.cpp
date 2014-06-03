@@ -95,12 +95,6 @@ namespace Mantid
 
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void LoadMD::initDocs()
-    {
-      this->setWikiSummary("Load a MDEventWorkspace in .nxs format.");
-      this->setOptionalMessage("Load a MDEventWorkspace in .nxs format.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

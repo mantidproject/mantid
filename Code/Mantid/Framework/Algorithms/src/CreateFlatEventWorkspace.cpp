@@ -46,12 +46,6 @@ namespace Algorithms
   const std::string CreateFlatEventWorkspace::category() const { return "CorrectionFunctions\\BackgroundCorrections";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CreateFlatEventWorkspace::initDocs()
-  {
-    this->setWikiSummary("Creates a flat event workspace that can be used for background removal.");
-    this->setOptionalMessage("Creates a flat event workspace that can be used for background removal.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

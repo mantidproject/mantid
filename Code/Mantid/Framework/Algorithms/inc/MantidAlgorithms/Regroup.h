@@ -52,6 +52,9 @@ public:
   virtual ~Regroup() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "Regroup";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Regroups data with new bin boundaries.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;}
   /// Algorithm's category for identification overriding a virtual method
@@ -62,8 +65,7 @@ public:
                         std::vector<double>& xnew,
                         std::vector<int> &xoldIndex);
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();

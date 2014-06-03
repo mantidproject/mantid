@@ -36,11 +36,6 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
   StripVanadiumPeaks2::~StripVanadiumPeaks2()
   {
   }
-
-  void StripVanadiumPeaks2::initDocs()
-  {
-    this->setWikiSummary("This algorithm removes peaks (at vanadium d-spacing positions by default) out of a background by linearly/quadratically interpolating over the expected peak positions. ");
-  }
   
   void StripVanadiumPeaks2::init()
   {

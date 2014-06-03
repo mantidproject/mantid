@@ -54,12 +54,6 @@ namespace Mantid
     const std::string ConvertToYSpace::category() const { return "Transforms\\Units";}
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void ConvertToYSpace::initDocs()
-    {
-      this->setWikiSummary("Converts workspace in units of TOF to Y-space as defined in Compton scattering field");
-      this->setOptionalMessage("Converts workspace in units of TOF to Y-space as defined in Compton scattering field");
-    }
 
     //----------------------------------------------------------------------------------------------
     /**

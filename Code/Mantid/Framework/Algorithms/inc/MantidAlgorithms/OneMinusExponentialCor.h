@@ -55,14 +55,16 @@ namespace Mantid
       virtual ~OneMinusExponentialCor() {};
       /// Algorithm's name for identification
       virtual const std::string name() const { return "OneMinusExponentialCor";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Corrects the data in a workspace by one minus the value of an exponential function.";}
+
       /// Algorithm's version for identification
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const{ return "CorrectionFunctions"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       // Overridden UnaryOperation methods
       void defineProperties();
       void retrieveProperties();

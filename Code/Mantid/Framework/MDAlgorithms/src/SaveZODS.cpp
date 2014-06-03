@@ -78,12 +78,6 @@ namespace MDAlgorithms
   const std::string SaveZODS::category() const { return "MDAlgorithms";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveZODS::initDocs()
-  {
-    this->setWikiSummary("Save a [[MDHistoWorkspace]] in HKL space to a HDF5 format for use with the ZODS analysis software.");
-    this->setOptionalMessage("Save a MDHistoWorkspace in HKL space to a HDF5 format for use with the ZODS analysis software.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

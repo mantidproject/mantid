@@ -154,12 +154,6 @@ namespace Mantid
     const std::string NormaliseByDetector::category() const { return "CorrectionFunctions\\NormalisationCorrections";}
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void NormaliseByDetector::initDocs()
-    {
-      this->setWikiSummary("Normalise the input workspace by the detector efficiency.");
-      this->setOptionalMessage("Normalise the input workspace by the detector efficiency.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

@@ -21,8 +21,10 @@ class SortXAxis(PythonAlgorithm):
     def name(self):
         return "SortXAxis"
 
+    def summary(self):
+        return "Clones the input MatrixWorkspace(s) and orders the x-axis in an ascending fashion."
+        
     def PyInit(self):
-        self.setOptionalMessage("Clones the input MatrixWorkspace(s) and orders the x-axis in an ascending fashion.")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", defaultValue="",  direction=Direction.Input), doc="Input workspace")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output), doc="Sorted Output Workspace")
         

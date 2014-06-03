@@ -52,8 +52,11 @@ public:
   virtual ~ConvertMDHistoToMatrixWorkspace()
   {}
   /// Algorithm's name
-  virtual const std::string name() const
-  { return "ConvertMDHistoToMatrixWorkspace";}
+  virtual const std::string name() const { return "ConvertMDHistoToMatrixWorkspace";};
+
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Creates a single spectrum Workspace2D with X,Y, and E copied from an first non-integrated dimension of a IMDHistoWorkspace.";}
+
   /// Algorithm's version
   virtual int version() const
   { return (1);}
@@ -62,8 +65,7 @@ public:
   { return "Utility\\Workspaces";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

@@ -96,12 +96,6 @@ namespace Crystal
   const std::string PeakIntensityVsRadius::category() const { return "Crystal";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void PeakIntensityVsRadius::initDocs()
-  {
-    this->setWikiSummary("Calculate the integrated intensity of peaks vs integration radius.");
-    this->setOptionalMessage("Calculate the integrated intensity of peaks vs integration radius.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

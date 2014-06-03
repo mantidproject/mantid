@@ -32,13 +32,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
-
-void UploadRemoteFile::initDocs()
-{
-  this->setWikiSummary("Uploads a file to the specified compute resource.");
-  this->setOptionalMessage("Uploads a file to the specified compute resource.");
-}
 
 void UploadRemoteFile::init()
 {

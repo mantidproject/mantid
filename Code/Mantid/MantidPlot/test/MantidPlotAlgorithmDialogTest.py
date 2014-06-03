@@ -23,10 +23,10 @@ class MantidPlotAlgorithmDialogTest(unittest.TestCase):
         interface_manager = mantidqtpython.MantidQt.API.InterfaceManager()
         dialog = threadsafe_call( interface_manager.createDialogFromName, self.__target_algorithm__, self.__clean_properties__)
         screenshotdir = tempfile.gettempdir();
-        file = "CreateMDWorkspace_screenshot"
-        screenshot_to_dir(widget=dialog, filename=file, screenshot_dir=screenshotdir)
+        filename = "CreateMDWorkspace_screenshot.png"
+        screenshot_to_dir(widget=dialog, filename=filename, screenshot_dir=screenshotdir)
         threadsafe_call(dialog.close)
-        file_abs = os.path.join(screenshotdir, file + ".png")
+        file_abs = os.path.join(screenshotdir, filename)
         file_exists = os.path.isfile(file_abs)
         self.assertEquals(file_exists, True, "Screenshot was not written out as expected.")
         if file_exists:

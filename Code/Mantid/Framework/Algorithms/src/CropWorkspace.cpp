@@ -39,13 +39,6 @@ using std::size_t;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CropWorkspace)
 
-/// Sets documentation strings for this algorithm
-void CropWorkspace::initDocs()
-{
-  this->setWikiSummary("Extracts a 'block' from a workspace and places it in a new workspace. Works for matrix and event workspaces.");
-  this->setOptionalMessage("Extracts a 'block' from a workspace and places it in a new workspace.");
-}
-
 
 using namespace Kernel;
 using namespace API;

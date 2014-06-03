@@ -22,14 +22,16 @@ namespace MDEvents
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "OneStepMDEW";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Create a MDEventWorkspace in one step from a EventNexus file. For use by Paraview loader.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDAlgorithms";}
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm

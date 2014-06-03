@@ -40,6 +40,9 @@ namespace Algorithms
     EditInstrumentGeometry();
     ~EditInstrumentGeometry();
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "The edit or added information will be attached to a Workspace.  Currently it is in an overwrite mode only.";}
+
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const;
     /// Algorithm's version for identification overriding a virtual method
@@ -47,8 +50,7 @@ namespace Algorithms
     /// Validate the inputs that must be parallel
     virtual std::map<std::string, std::string> validateInputs();
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
 
     /// Initialise the properties
     void init();

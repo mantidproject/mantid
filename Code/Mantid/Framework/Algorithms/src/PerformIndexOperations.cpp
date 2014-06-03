@@ -423,12 +423,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void PerformIndexOperations::initDocs()
-    {
-      this->setWikiSummary("Process the workspace according to the Index operations provided.");
-      this->setOptionalMessage(this->getWikiSummary());
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

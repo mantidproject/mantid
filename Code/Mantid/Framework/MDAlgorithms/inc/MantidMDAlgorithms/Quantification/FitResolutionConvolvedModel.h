@@ -32,9 +32,11 @@ namespace Mantid
     {
     public:
       const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Fits a cuts/slices from an MDEventWorkspace using a resolution function convolved with a foreground model";}
+
       int version() const;
       const std::string category() const;
-      void initDocs();
 
     protected:
       /// Returns the number of iterations that should be performed

@@ -57,13 +57,6 @@ DiffractionFocussing::DiffractionFocussing() : API::Algorithm(), API::Deprecated
   this->useAlgorithm("DiffractionFocussing version 2");
 }
 
-/// Sets documentation strings for this algorithm
-void DiffractionFocussing::initDocs()
-{
-  this->setWikiSummary("Algorithm to focus powder diffraction data into a number of histograms according to a grouping scheme defined in a [[CalFile]]. ");
-  this->setOptionalMessage("Algorithm to focus powder diffraction data into a number of histograms according to a grouping scheme defined in a CalFile.");
-}
-
 
 using namespace Kernel;
 using API::WorkspaceProperty;

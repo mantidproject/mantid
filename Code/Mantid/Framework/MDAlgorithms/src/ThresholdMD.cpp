@@ -72,12 +72,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void ThresholdMD::initDocs()
-    {
-      this->setWikiSummary("Threshold an MDHistoWorkspace.");
-      this->setOptionalMessage(this->getWikiSummary());
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

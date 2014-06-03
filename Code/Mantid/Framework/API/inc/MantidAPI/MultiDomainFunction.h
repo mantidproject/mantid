@@ -72,7 +72,9 @@ public:
   /// Get domain indices for a member function
   void getDomainIndices(size_t i, size_t nDomains, std::vector<size_t>& domains)const;
 
-  /// Returns the number of attributes associated with the function
+  /// Returns the number of "local" attributes associated with the function.
+  /// Local attributes are attributes of MultiDomainFunction but describe properties
+  /// of individual member functions.
   virtual size_t nLocalAttributes()const {return 1;}
   /// Returns a list of attribute names
   virtual std::vector<std::string> getLocalAttributeNames()const {return std::vector<std::string>(1,"domains");}

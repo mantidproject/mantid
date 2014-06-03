@@ -91,6 +91,7 @@ max_d                 = params_dictionary[ "max_d" ]
 tolerance             = params_dictionary[ "tolerance" ]
 cell_type             = params_dictionary[ "cell_type" ] 
 centering             = params_dictionary[ "centering" ]
+allow_perm            = params_dictionary[ "allow_perm" ] 
 run_nums              = params_dictionary[ "run_nums" ]
 
 use_cylindrical_integration = params_dictionary[ "use_cylindrical_integration" ]
@@ -218,7 +219,7 @@ if not use_cylindrical_integration:
     conventional_matrix_file = conv_name + ".mat"
 
     SelectCellOfType( PeaksWorkspace=peaks_ws, CellType=cell_type, Centering=centering,
-                      Apply=True, Tolerance=tolerance )
+                      AllowPermutations=allow_perm, Apply=True, Tolerance=tolerance )
     SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=conventional_integrate_file )
     SaveIsawUB( InputWorkspace=peaks_ws, Filename=conventional_matrix_file )
 

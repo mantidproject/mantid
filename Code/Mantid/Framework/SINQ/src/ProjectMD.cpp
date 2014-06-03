@@ -219,8 +219,3 @@ void ProjectMD::sumData(IMDHistoWorkspace_sptr inWS, IMDHistoWorkspace_sptr outW
 	    }
 	  }
 }
-
-void ProjectMD::initDocs()
-{
-    this->setWikiSummary("Sum a MDHistoWorkspace along a choosen dimension");
-}

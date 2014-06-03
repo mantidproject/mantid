@@ -57,12 +57,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadCalFile::initDocs()
-  {
-    this->setWikiSummary("Loads a 5-column ASCII .cal file into up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.");
-    this->setOptionalMessage("Loads a 5-column ASCII .cal file into up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.");
-  }
 
 
   //----------------------------------------------------------------------------------------------

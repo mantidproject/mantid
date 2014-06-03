@@ -64,6 +64,9 @@ namespace Mantid
       ~LoadMuonNexus2() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadMuonNexus"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 2 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 2; }
       /// Algorithm's category for identification overriding a virtual method
@@ -73,8 +76,7 @@ namespace Mantid
       virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Overwrites Algorithm method
       void exec();
       /// Execute this version of the algorithm

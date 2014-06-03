@@ -341,11 +341,6 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
   }
 
   //----------------------------------------------------------------------------------------------
-  void SaveGSASInstrumentFile::initDocs()
-  {
-    setWikiSummary("Generate a GSAS instrument file from either a table workspace containing profile parameters or a Fullprof's instrument resolution file (.irf file). ");
-    setOptionalMessage("");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Declare properties

@@ -108,6 +108,8 @@ namespace Mantid
       /// "Muon\\Custom" 
       virtual const std::string category() const { return "C++ User Defined";}
 
+      virtual const std::string summary() const { return "C++ User defined algorithm."; }
+
     protected:
       virtual void functionLocal(double* out, const double* xValues, const size_t nData)const;
       virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData);

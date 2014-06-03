@@ -32,13 +32,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindCenterOfMassPosition)
 
-/// Sets documentation strings for this algorithm
-void FindCenterOfMassPosition::initDocs()
-{
-  this->setWikiSummary("Finds the beam center in a 2D SANS data set. ");
-  this->setOptionalMessage("Finds the beam center in a 2D SANS data set.");
-}
-
 
 using namespace Kernel;
 using namespace API;

@@ -59,12 +59,6 @@ namespace MDAlgorithms
   int MultiplyMD::version() const { return 1;};
   
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void MultiplyMD::initDocs()
-  {
-    this->setWikiSummary("Multiply a [[MDHistoWorkspace]] by another one or a scalar.");
-    this->setOptionalMessage("Multiply a MDHistoWorkspace by another one or a scalar.");
-  }
 
 
   //----------------------------------------------------------------------------------------------

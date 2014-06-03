@@ -42,11 +42,13 @@ namespace DataHandling
     int confidence(Kernel::NexusDescriptor & descriptor) const;
 
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads a ILL/IN16B nexus file.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

@@ -64,11 +64,6 @@ const std::string LoadILLIndirect::category() const {
 }
 
  //----------------------------------------------------------------------------------------------
- /// Sets documentation strings for this algorithm
-void LoadILLIndirect::initDocs() {
-    this->setWikiSummary("Loads a ILL/IN16B nexus file. ");
-    this->setOptionalMessage("Loads a ILL/IN16B nexus file.");
-}
 
 
 /**

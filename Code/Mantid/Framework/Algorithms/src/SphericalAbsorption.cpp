@@ -27,13 +27,6 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SphericalAbsorption)
 
-/// Sets documentation strings for this algorithm
-void SphericalAbsorption::initDocs()
-{
-  this->setWikiSummary("Calculates bin-by-bin correction factors for attenuation due to absorption and scattering in a '''spherical''' sample. ");
-  this->setOptionalMessage("Calculates bin-by-bin correction factors for attenuation due to absorption and scattering in a 'spherical' sample.");
-}
-
 using namespace Kernel;
 using namespace Geometry;
 using namespace API;

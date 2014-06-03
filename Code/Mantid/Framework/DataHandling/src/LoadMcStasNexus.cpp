@@ -66,12 +66,6 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadMcStasNexus::initDocs()
-  {
-    this->setWikiSummary("This algorithm loads a McStas NeXus file into a group workspace. All data sets are numbered and nested within the  WorkspaceGroup.");
-    this->setOptionalMessage("Loads an McStas NeXus file into a group workspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

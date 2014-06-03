@@ -38,12 +38,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void SofQW2::initDocs()
-    {
-      this->setWikiSummary("Calculate the intensity as a function of momentum transfer and energy.");
-      this->setOptionalMessage("Calculate the intensity as a function of momentum transfer and energy.");
-    }
 
     /**
      * Initialize the algorithm

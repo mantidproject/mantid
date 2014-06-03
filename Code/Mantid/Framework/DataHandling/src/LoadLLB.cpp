@@ -80,11 +80,6 @@ int LoadLLB::confidence(Kernel::NexusDescriptor & descriptor) const {
 }
 
 //----------------------------------------------------------------------------------------------
-/// Sets documentation strings for this algorithm
-void LoadLLB::initDocs() {
-	this->setWikiSummary("Loads LLB nexus file.");
-	this->setOptionalMessage("Loads LLB nexus file.");
-}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

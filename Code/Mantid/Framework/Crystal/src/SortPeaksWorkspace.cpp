@@ -67,12 +67,6 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void SortPeaksWorkspace::initDocs()
-    {
-      this->setWikiSummary("Sort a peaks workspace by a column name of that workspace");
-      this->setOptionalMessage("Sort a peaks workspace by a column of the workspace");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

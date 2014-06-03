@@ -52,8 +52,11 @@ public:
   virtual ~ConvertToMatrixWorkspace()
   {}
   /// Algorithm's name
-  virtual const std::string name() const
-  { return "ConvertToMatrixWorkspace";}
+  virtual const std::string name() const  { return "ConvertToMatrixWorkspace";}
+    
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values.";}
+  
   /// Algorithm's version
   virtual int version() const
   { return (1);}
@@ -62,8 +65,7 @@ public:
   { return "Events";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

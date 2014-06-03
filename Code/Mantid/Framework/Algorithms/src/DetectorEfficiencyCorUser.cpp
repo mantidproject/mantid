@@ -61,13 +61,6 @@ const std::string DetectorEfficiencyCorUser::category() const {
 }
 
 //----------------------------------------------------------------------------------------------
-/// Sets documentation strings for this algorithm
-void DetectorEfficiencyCorUser::initDocs() {
-	this->setWikiSummary(
-			"This algorithm calculates the detector efficiency according the formula set in the instrument definition file/parameters.");
-	this->setOptionalMessage(
-			"This algorithm calculates the detector efficiency according the formula set in the instrument definition file/parameters.");
-}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

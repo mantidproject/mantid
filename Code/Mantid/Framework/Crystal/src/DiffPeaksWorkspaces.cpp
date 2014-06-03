@@ -39,13 +39,6 @@ namespace Crystal
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string DiffPeaksWorkspaces::category() const { return "Crystal"; }
 
-  /// Sets documentation strings for this algorithm
-  void DiffPeaksWorkspaces::initDocs()
-  {
-    this->setWikiSummary("Removes from a workspace any peaks that match a peak in a second workspace.");
-    this->setOptionalMessage("Removes from a workspace any peaks that match a peak in a second workspace.");
-  }
-
   /** Initialises the algorithm's properties.
    */
   void DiffPeaksWorkspaces::init()

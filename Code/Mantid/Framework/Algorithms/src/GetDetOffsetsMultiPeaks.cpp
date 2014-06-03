@@ -237,17 +237,6 @@ namespace Algorithms
   DECLARE_ALGORITHM(GetDetOffsetsMultiPeaks)
 
   //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-    */
-  void GetDetOffsetsMultiPeaks::initDocs()
-  {
-    this->setWikiSummary("Creates an [[OffsetsWorkspace]] containing offsets for each detector. "
-                         "You can then save these to a .cal file using SaveCalFile.");
-    this->setOptionalMessage("Creates an OffsetsWorkspace containing offsets for each detector. "
-                             "You can then save these to a .cal file using SaveCalFile.");
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Constructor
     */
   GetDetOffsetsMultiPeaks::GetDetOffsetsMultiPeaks() :
