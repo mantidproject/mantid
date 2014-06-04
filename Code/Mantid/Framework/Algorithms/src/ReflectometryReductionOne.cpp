@@ -222,7 +222,6 @@ namespace Mantid
       correctPosAlg->setProperty("AnalysisMode", analysisMode);
       auto instrument = toCorrect->getInstrument();
       IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
-      const std::string sampleComponentName = this->getProperty("SampleComponentName");
       correctPosAlg->setProperty("SampleComponentName", sample->getName());
       correctPosAlg->setProperty("TwoThetaIn", thetaInDeg * 2);
 
