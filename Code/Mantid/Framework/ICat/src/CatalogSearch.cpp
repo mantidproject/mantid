@@ -42,7 +42,7 @@ namespace Mantid
 
       // These are needed for paging on the interface, and to minimise the amount of results returned by the query.
       declareProperty("CountOnly",false,"Boolean option to perform COUNT search only.");
-      declareProperty<int>("Limit", 0, "");
+      declareProperty<int>("Limit", 100, "");
       declareProperty<int>("Offset",0, "");
 
       declareProperty("Session","","The session information of the catalog to use.");
