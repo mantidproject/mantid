@@ -56,6 +56,12 @@ doctest_global_setup = """
 from mantid.simpleapi import *
 """
 
+# Run this after each test group has executed
+doctest_global_cleanup = """
+from mantid.api import FrameworkManager
+FrameworkManager.Instance().clear()
+"""
+
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
