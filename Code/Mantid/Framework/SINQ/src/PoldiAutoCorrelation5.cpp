@@ -38,7 +38,7 @@ void PoldiAutoCorrelation5::init()
 
 	// Input workspace containing the raw data.
 	declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("InputWorkspace", "", Direction::InOut),
-			"Input workspace containing the raw data.");
+            "Input workspace containing raw POLDI data.");
 
 	// the minimal value of the wavelength to consider
     declareProperty("wlenmin", 1.1, "Minimum wavelength considered" , Direction::Input);
@@ -47,8 +47,7 @@ void PoldiAutoCorrelation5::init()
 
 	// The output Workspace2D containing the Poldi data autocorrelation function.
 	declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
-			"The output Workspace2D"
-			"containing the Poldi data autocorrelation function.");
+            "Output workspace containing the correlation spectrum.");
 
     /* Auto correlation core object which performs the actual calculation.
      * In future versions this will be replaced by a factory to cater for
