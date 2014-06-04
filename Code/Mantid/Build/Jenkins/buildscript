@@ -103,7 +103,11 @@ if [[ "$CLEANBUILD" == true ]]; then
   fi
 
   # We could build the source tarball anywhere, but we choose to do it on RHEL6
+  # We also parcel up the documentation into a tar file that is easier to move around
+  # and labelled by the commit id it was built with. This assumes the Jenkins git plugin
+  # has set the GIT_COMMIT environment variable
   if [[ "$ON_RHEL6" == true ]]; then
+    tar -cjf mantiddocs-g${GIT_COMMIT:0:7}.tar.bz2 --exclude='*.buildinfo' docs/html
     # The ..._PREFIX argument avoids opt/Mantid directories at the top of the tree
     $SCL_ON_RHEL6 "cpack --config CPackSourceConfig.cmake -D CPACK_PACKAGING_INSTALL_PREFIX="
   fi
