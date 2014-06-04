@@ -266,7 +266,6 @@ BeamMonitorPkt::BeamMonitorPkt(const BeamMonitorPkt &pkt) :
     Packet(pkt), m_fields((const uint32_t *)payload()), m_sectionStartIndex(0)
 {}
 
-#define MONITOR_ID_MASK  0xFFA00000  // upper 10 bits
 #define EVENT_COUNT_MASK 0x003FFFFF  // lower 22 bits
 bool BeamMonitorPkt::nextSection() const
 // Returns true if there is a next section.  False if there isn't.
@@ -295,7 +294,8 @@ bool BeamMonitorPkt::nextSection() const
 
 uint32_t BeamMonitorPkt::getSectionMonitorID() const
 {
-    return (m_fields[m_sectionStartIndex] & MONITOR_ID_MASK) >> 22;
+    // Monitor ID is the upper 10 bits
+    return (m_fields[m_sectionStartIndex] >> 22);
 }
 
 uint32_t BeamMonitorPkt::getSectionEventCount() const
