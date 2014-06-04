@@ -78,7 +78,7 @@ protected:
   void mouseReleaseEvent(QMouseEvent *ev);
   void mouseMoveEvent(QMouseEvent *ev);
   void dragEnterEvent(QDragEnterEvent* ev);
-  void dragLeaveEvent();
+  void dragLeaveEvent(QDragLeaveEvent *);
   void dragMoveEvent(QDragMoveEvent* ev);
   void dropEvent(QDropEvent* ev);
 
@@ -131,6 +131,8 @@ private:
   QList<Tile*> m_selection;
   /// mouse cursor position where dragging started
   QPoint m_dragStartPos;
+  /// mouse left button is pressed
+  bool m_buttonPressed;
 };
 
 /**
@@ -146,6 +148,7 @@ public:
   MdiSubWindow *widget() {return m_widget;}
   void makeSelected(bool yes);
   void makeAcceptDrop(bool yes);
+  bool isSelected() const {return m_selected;}
 protected:
   void paintEvent(QPaintEvent *ev);
 private:

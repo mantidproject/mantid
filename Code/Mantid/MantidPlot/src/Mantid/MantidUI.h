@@ -158,6 +158,8 @@ public:
   // Prepares the contex menu for MantidMatrix
   void showContextMenu(QMenu& cm, MdiSubWindow* w);
 
+  // Check if drop event can be accepted
+  bool canAcceptDrop(QDragEnterEvent *e);
   // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
   bool drop(QDropEvent* e);
 

@@ -9348,7 +9348,6 @@ void ApplicationWindow::windowsMenuAboutToShow()
   {
     windowsMenu->insertItem(tr("Change to floating"), this, SLOT(changeActiveToFloating()));
   }
-  windowsMenu->insertItem(tr("Add to tiled window"), this, SLOT(addActiveToTiledWindow()));
   windowsMenu->insertItem(tr("&Hide Window"), this, SLOT(hideActiveWindow()));
 
   // Having the shorcut set here is neccessary on Windows, but
@@ -9587,11 +9586,14 @@ void ApplicationWindow::dropEvent( QDropEvent* e )
 void ApplicationWindow::dragEnterEvent( QDragEnterEvent* e )
 {
   if (e->source()){
-    e->accept();//Mantid
+    e->accept( mantidUI->canAcceptDrop(e) );
     return;
   }
-  else//Mantid
+  else
+  {
     e->accept(Q3UriDrag::canDecode(e));
+  }
+  e->ignore();
 }
 
 //Mantid

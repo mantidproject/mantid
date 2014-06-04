@@ -265,7 +265,7 @@ void FloatingWindow::dragMouseMove(QPoint pos)
 
     MdiSubWindow *ptr = mdiSubWindow();
     auto d = QByteArray::fromRawData( (const char*)ptr, 1 );
-    mimeData->setData("TiledWindowE",d);
+    mimeData->setData("TiledWindow",d);
 
     drag->setMimeData(mimeData);
     Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);

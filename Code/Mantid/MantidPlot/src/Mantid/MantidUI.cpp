@@ -1231,6 +1231,18 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
   return t;
 }
 
+/**
+ * Check if drop event can be accepted
+ */
+bool MantidUI::canAcceptDrop(QDragEnterEvent *e)
+{
+  QString name = e->mimeData()->objectName();
+  if ( name == "MantidWorkspace" || e->mimeData()->hasUrls() || name == "TiledWindow" )
+  {
+    return true;
+  }
+  return false;
+}
 
 bool MantidUI::drop(QDropEvent* e)
 {

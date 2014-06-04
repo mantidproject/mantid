@@ -12,6 +12,8 @@
 #include <QActionGroup>
 #include <QApplication>
 
+#include <algorithm>
+
 // constants defining the minimum size of tiles
 const int minimumTileWidth = 100;
 const int minimumTileHeight = 100;
@@ -32,8 +34,6 @@ Tile::Tile(QWidget *parent):
   m_widget(NULL),
   m_selected(false),
   m_acceptDrop(false)
-  //m_border(normalColor),
-  //m_borderWidth(normalWidth)
 {
   m_layout = new QVBoxLayout(this);
   m_layout->setContentsMargins(5,5,5,5);
@@ -126,6 +126,74 @@ void Tile::makeAcceptDrop(bool yes)
   update();
 }
 
+namespace {
+
+  class InnerWidget: public QWidget
+  {
+  public:
+    InnerWidget(QWidget *parent): QWidget(parent),m_draw(false) {}
+
+    void showInsertMarker(QWidget *tile, const QPoint& pos) 
+    {
+      int left = pos.x();
+      int right = tile->width() - left;
+      int top = pos.y();
+      int bottom = tile->height() - top;
+      int dist[4] = {left, right, top, bottom};
+      auto minit = std::min_element( dist, dist + 4 );
+      size_t i = static_cast<size_t>( std::distance( dist, minit ) );
+
+      QPoint dp = tile->mapTo( this, QPoint() );
+      QRect trect = tile->rect().translated( dp );
+        
+      QPoint x0, x1;
+      switch (i) {
+      case(0): // left
+        x0 = trect.bottomLeft();
+        x1 = trect.topLeft();
+        break;
+      case(1): // right
+        x0 = trect.bottomRight();
+        x1 = trect.topRight();
+        break;
+      case(2): // top
+        x0 = trect.topLeft();
+        x1 = trect.topRight();
+        break;
+      case(3):
+      default: // bottom
+        x0 = trect.bottomLeft();
+        x1 = trect.bottomRight();
+      }
+      m_x0 = x0; m_x1 = x1;
+      m_draw = true;
+      update();
+    }
+
+    void clearMarker() 
+    {
+      m_draw = false;
+      update();
+    }
+  protected:
+    void paintEvent(QPaintEvent *e)
+    {
+      if ( m_draw )
+      {
+        QPainter painter(this);
+        QPen pen( acceptDropColor );
+        pen.setWidth( acceptDropWidth );
+        painter.setPen( pen );
+        painter.drawLine( m_x0, m_x1 );
+      }
+    }
+  private:
+    QPoint m_x0, m_x1;
+    bool m_draw;
+  };
+
+}
+
 /**
  * Constructor.
  * @param parent :: The parent widget.
@@ -134,7 +202,7 @@ void Tile::makeAcceptDrop(bool yes)
  * @param f :: Window flags.
  */
 TiledWindow::TiledWindow(QWidget* parent, const QString& label, const QString& name, Qt::WFlags f)
-  : MdiSubWindow(parent, label, name, f),m_scrollArea(NULL),m_layout(NULL)
+  : MdiSubWindow(parent, label, name, f),m_scrollArea(NULL),m_layout(NULL),m_buttonPressed(false)
 {
   init();
   setGeometry(0,0,500,400);
@@ -147,7 +215,7 @@ void TiledWindow::init()
   m_scrollArea = new QScrollArea(this);
   m_scrollArea->setWidgetResizable(true);
 
-  QWidget *innerWidget = new QWidget(m_scrollArea);
+  QWidget *innerWidget = new InnerWidget(m_scrollArea);
   m_layout = new QGridLayout(innerWidget);
   m_layout->setMargin(6);
   m_layout->setColumnMinimumWidth(0,minimumTileWidth);
@@ -201,6 +269,7 @@ int TiledWindow::columnCount() const
  */
 void TiledWindow::clear()
 {
+  clearSelection();
   init();
 }
 
@@ -534,6 +603,11 @@ void TiledWindow::mousePressEvent(QMouseEvent *ev)
   {
     addToSelection( tile, true );
   }
+  else if ( !tile->isSelected() )
+  {
+    addToSelection( tile, false );
+  }
+  m_buttonPressed = true;
 }
 
 /**
@@ -541,12 +615,7 @@ void TiledWindow::mousePressEvent(QMouseEvent *ev)
  */
 void TiledWindow::mouseReleaseEvent(QMouseEvent *ev)
 {
-  if ( ev->modifiers() == Qt::NoModifier )
-  {
-    auto tile = getTileAtMousePos( ev->pos() );
-    if ( tile == NULL ) return;
-    addToSelection( tile, false );
-  }
+  m_buttonPressed = false;
 }
 
 /**
@@ -554,7 +623,7 @@ void TiledWindow::mouseReleaseEvent(QMouseEvent *ev)
  */
 void TiledWindow::mouseMoveEvent(QMouseEvent *ev)
 {
-  if (!hasSelection() || (ev->pos() - m_dragStartPos).manhattanLength() < QApplication::startDragDistance())
+  if ( !m_buttonPressed || !hasSelection() || (ev->pos() - m_dragStartPos).manhattanLength() < QApplication::startDragDistance())
   {
     return;
   }
@@ -884,8 +953,9 @@ bool TiledWindow::canAcceptDrops(Tile *tile) const
  * Display a position in the layout where a widget will be inserted
  * given approximate coords.
  *
- * @param x :: Approx x-coord in pixels where a widget will be dropped.
- * @param y :: Approx y-coord in pixels where a widget will be dropped.
+ * @param pos :: Approx position in pixels where a widget will be dropped.
+ * @param global :: Selector of the origin for pos. If true pos is relative to 
+ *   the top-left corner of the screen. If false it's in the TiledWindow's coordinates.
  */
 void TiledWindow::showInsertPosition( QPoint pos, bool global )
 {
@@ -901,6 +971,22 @@ void TiledWindow::showInsertPosition( QPoint pos, bool global )
     {
       tile->makeAcceptDrop( true );
     }
+    else
+    {
+      InnerWidget *innerWidget = dynamic_cast<InnerWidget*>( m_scrollArea->widget() );
+      if ( !innerWidget )
+        throw std::logic_error("Inner widget of TiledWindow is supposed to be an InnerWidget");
+
+      pos = tile->mapFrom( this, pos );
+      if ( tile->rect().contains(pos) )
+      {
+        innerWidget->showInsertMarker( tile, pos );
+      }
+      else
+      {
+        innerWidget->clearMarker();
+      }
+    }
   }
 }
 
@@ -912,14 +998,19 @@ void TiledWindow::clearDrops()
   {
     tile->makeAcceptDrop(false);
   }
+  InnerWidget *innerWidget = dynamic_cast<InnerWidget*>( m_scrollArea->widget() );
+  if ( !innerWidget )
+    throw std::logic_error("Inner widget of TiledWindow is supposed to be an InnerWidget");
+  innerWidget->clearMarker();
 }
 
 /**
  * Try to drop a widget at a mouse position. Return true if succeeded.
  * 
  * @param w :: A widget to drop.
- * @param x :: Approx x-coord in pixels where a widget will be dropped.
- * @param y :: Approx y-coord in pixels where a widget will be dropped.
+ * @param pos :: Approx position in pixels where a widget will be dropped.
+ * @param global :: Selector of the origin for pos. If true pos is relative to 
+ *   the top-left corner of the screen. If false it's in the TiledWindow's coordinates.
  */
 bool TiledWindow::dropAtPosition( MdiSubWindow *w, QPoint pos, bool global )
 {
@@ -940,33 +1031,51 @@ bool TiledWindow::dropAtPosition( MdiSubWindow *w, QPoint pos, bool global )
   return false;
 }
 
+/**
+ * The drag enter event handler.
+ * @param ev :: The event.
+ */
 void TiledWindow::dragEnterEvent(QDragEnterEvent* ev)
 {
   auto mimeData = ev->mimeData();
-  if ( mimeData->hasFormat("TiledWindowE") )
+  if ( mimeData->hasFormat("TiledWindow") )
   {
     ev->accept();
   }
-  else
-  {
-    ev->ignore();
-  }
+  //else if( mimeData->objectName() == "TiledWindow" && ev->source() != static_cast<QWidget*>(this) );
+  ev->ignore();
 }
 
-void TiledWindow::dragLeaveEvent()
+/**
+ * The drag leave event handler.
+ */
+void TiledWindow::dragLeaveEvent(QDragLeaveEvent *)
 {
   clearDrops();
 }
 
+/**
+ * The drag move event handler.
+ * @param ev :: The event.
+ */
 void TiledWindow::dragMoveEvent(QDragMoveEvent* ev)
 {
   showInsertPosition( ev->pos(), false );
 }
 
+/**
+ * The drop event handler.
+ * @param ev :: The event.
+ */
 void TiledWindow::dropEvent(QDropEvent* ev)
 {
+  std::cerr << "Drop" << std::endl;
   auto mimeData = ev->mimeData();
-  const char *ptr = mimeData->data("TiledWindowE").constData();
-  MdiSubWindow *w = reinterpret_cast<MdiSubWindow*>( const_cast<char*>(ptr) );
-  dropAtPosition( w, ev->pos(), false );
+  if ( mimeData->hasFormat("TiledWindow") )
+  {
+    if ( ev->source() == static_cast<QWidget*>(this) ) return;
+    const char *ptr = mimeData->data("TiledWindow").constData();
+    MdiSubWindow *w = reinterpret_cast<MdiSubWindow*>( const_cast<char*>(ptr) );
+    dropAtPosition( w, ev->pos(), false );
+  }
 }
