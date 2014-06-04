@@ -98,10 +98,6 @@ Usage
    print "The rebinned X values are: " + str(ws.readX(0))
    print "The rebinned Y values are: " + str(ws.readY(0))
 
-.. testcleanup:: ExHistSimple
-
-   DeleteWorkspace(ws)
-
 Output:
 
 .. testoutput:: ExHistSimple
@@ -123,10 +119,6 @@ Output:
 
    print "The 2nd and 3rd rebinned X values are: " + str(ws.readX(0)[1:3])
 
-.. testcleanup:: ExHistLog
-
-   DeleteWorkspace(ws)
-
 Output:
 
 .. testoutput:: ExHistLog
@@ -146,10 +138,6 @@ Output:
    ws = Rebin(ws, "1,2,3,3,9")
 
    print "The rebinned X values are: " + str(ws.readX(0))
-
-.. testcleanup:: ExHistCustom
-
-   DeleteWorkspace(ws)
 
 Output:
 
@@ -171,10 +159,6 @@ Output:
 
    print "The rebinned X values are: " + str(ws.readX(0))
    print "The rebinned Y values are: " + str(ws.readY(0))
-
-.. testcleanup:: ExHistFullBinsOnly
-
-   DeleteWorkspace(ws)
 
 Output:
 
@@ -198,10 +182,6 @@ Output:
    print "What type is the workspace after 2nd rebin: " + str(type(ws))
    # note you can also check the type of a workspace using: print isinstance(ws, IEventWorkspace)
 
-.. testcleanup:: ExEventRebin
-
-   DeleteWorkspace(ws)
-
 Output:
 
 .. testoutput:: ExEventRebin
@@ -209,7 +189,5 @@ Output:
    What type is the workspace before 1st rebin: <class 'mantid.api._api.IEventWorkspace'>
    What type is the workspace after 1st rebin: <class 'mantid.api._api.IEventWorkspace'>
    What type is the workspace after 2nd rebin: <class 'mantid.api._api.MatrixWorkspace'>
-
-
 
 .. categories::
