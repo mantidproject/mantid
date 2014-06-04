@@ -1,9 +1,3 @@
-/*WIKI*
-
-Take a [[MatrixWorkspace]] as input, and replaces the Y values by Y/E (signal divided by error)
-
-*WIKI*/
-
 #include "MantidAlgorithms/SignalOverError.h"
 #include "MantidKernel/System.h"
 

@@ -1,6 +1,3 @@
-/*WIKI* 
-Compute the Q resolution for a given I(Q) for a TOF SANS instrument.
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -213,4 +210,3 @@ void TOFSANSResolution::exec()
 }
 } // namespace Algorithms
 } // namespace Mantid
-

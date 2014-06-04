@@ -1,11 +1,3 @@
-/*WIKI*
-
-Algorithm to load an NXSPE file into a workspace2D. It will create a new instrument, that can be overwritten later by the LoadInstrument algorithm.
-
-'''NOTE:''' In the current implementation, the rendering of the NXSPE instrument is VERY memory intensive.
-
-
-*WIKI*/
 #include "MantidDataHandling/LoadNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
@@ -392,5 +384,3 @@ namespace DataHandling
 
 } // namespace Mantid
 } // namespace DataHandling
-
-

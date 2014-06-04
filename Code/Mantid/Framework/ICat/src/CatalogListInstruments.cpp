@@ -1,9 +1,3 @@
-/*WIKI*
-
-This algorithm retrieves the instrument names from a catalog and stores them in a vector.
-
-*WIKI*/
-
 #include "MantidICat/CatalogListInstruments.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -33,4 +27,3 @@ namespace Mantid
 
   }
 }
-

@@ -1,6 +1,3 @@
-"""*WIKI* 
-Calculates the mean of the workspaces provided. Output workspace is identical in shape to the input workspaces.
-*WIKI*"""
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *

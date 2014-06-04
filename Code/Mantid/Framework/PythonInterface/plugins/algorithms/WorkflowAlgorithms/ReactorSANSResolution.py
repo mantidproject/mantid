@@ -1,10 +1,3 @@
-"""*WIKI* 
-
-Compute the resolution in Q according to Mildner-Carpenter. 
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-*WIKI*"""
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *

@@ -1,29 +1,3 @@
-/*WIKI*
-PoldiPeakSearch is a peak-finding routine for POLDI auto-correlation data. The algorithm is implemented according
-to the original data analysis software and their results match closely.
-
-The algorithm performs the following steps:
-# Map each point of the spectrum <math>y</math>, except the first and the last to the sum of its value and its neighbor's values:
-    <math>y'_i = y_{i-1} + y_{i} + y_{i+1}</math>
-  The new spectrum <math>y'</math> contains <math>n-2</math> points when <math>y</math> contains <math>n</math>.
-# Identify peak positions in <math>y'</math>, which is done with a recursive algorithm, consisting of these steps:
-## Find the position of the maximum, <math>i_{max}</math> in the list, store in peak-list.
-## Split the list in two parts, <math>[i_{0} + \Delta, i_{max} - \Delta)</math> and <math>(i_{max} + \Delta, i_{n} - \Delta]</math>,
-where <math>\Delta</math> is the mininum number of data points between two peaks.
-## If ranges are valid, perform algorithm on each of the sublists, append returned lists to peak-list.
-## Return peak-list.
-# Sort list by value in descending order, keep the first <math>N_{max}</math> items of the list.
-# Map peak positions from <math>y'</math> back to <math>y</math>
-# Perform background and fluctuation estimation:
-## Extract all points from <math>y</math> (except the first and the last) that are further than <math>\Delta</math> elements away from any peak position
-## Calculate median of these points as location estimate (<math>\bar{b}</math>)
-## Calculate Sn as scale estimator (<math>\bar(s)</math>)
-# Estimate peak intensity as <math>y_{i}</math>
-# If a minimum peak height is set, discard all peaks that are smaller than this, if not, discard all peaks that are lower than <math>3\cdot\bar{s} + \bar{b}</math>
-
-The peaks are stored in a new table workspace.
-*WIKI*/
-
 #include "MantidSINQ/PoldiPeakSearch.h"
 
 #include "MantidAPI/WorkspaceProperty.h"

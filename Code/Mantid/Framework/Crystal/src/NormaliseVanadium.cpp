@@ -1,7 +1,3 @@
-/*WIKI* 
-Normalises all spectra of workspace to a specified wavelength.  Following A.J.Schultz's anvred, scales the vanadium spectra.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
