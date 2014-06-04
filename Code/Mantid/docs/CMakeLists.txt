@@ -28,7 +28,6 @@ if ( SPHINX_FOUND )
 
   # doctest target
   set ( BUILDER doctest )
-  set ( SCREENSHOTS_DIR "" ) # no screenshots
   configure_file ( runsphinx.py.in runsphinx_doctest.py @ONLY )
   add_custom_target ( ${TARGET_PREFIX}-test
     COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_doctest.py
