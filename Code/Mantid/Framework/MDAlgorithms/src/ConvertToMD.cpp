@@ -381,7 +381,7 @@ namespace Mantid
     void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const
     {
 
-      MantidVec binBoundaries;
+
       // found detector which is not a monitor to get proper bin boundaries.
       size_t spectra_index(0);
       bool   dector_found(false);
@@ -404,7 +404,8 @@ namespace Mantid
       if (!dector_found)
         g_log.warning()<<"No detectors in the workspace are associated with spectra. Using spectrum 0 trying to retrieve the bin boundaries \n"; 
 
-
+      // retrieve representative bin boundaries
+      MantidVec binBoundaries = m_InWS2D->readX(spectra_index);
       if (m_Convertor->getUnitConversionHelper().isUnitConverted())
       {
 
