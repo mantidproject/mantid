@@ -269,6 +269,7 @@ namespace Mantid
 
       // retrieve representative bin boundaries
       MantidVec binBoundaries = m_InWS2D->readX(spectra_index);
+      // check if the boundaries transformation is necessary
       if (m_Convertor->getUnitConversionHelper().isUnitConverted())
       {
 
@@ -287,13 +288,12 @@ namespace Mantid
             binBoundaries[i] =unitConv.convertUnits(binBoundaries[i]);
           }
         }
-        //
+        // sort bin boundaries in case if unit transformation have swapped them.
         if (binBoundaries[0]>binBoundaries[binBoundaries.size()-1])
         {
            g_log.information()<<"Bin boundaries are not arranged monotonously. Sorting performed\n"; 
            std::sort(binBoundaries.begin(),binBoundaries.end());
         }
-
       }
 
       // Replacement for SpectraDetectorMap::createIDGroupsMap using the ISpectrum objects instead
