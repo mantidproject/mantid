@@ -74,12 +74,6 @@ const std::string ConvertEmptyToTof::category() const {
   return "Transforms\\Units";
 }
 
-//----------------------------------------------------------------------------------------------
-/// Sets documentation strings for this algorithm
-void ConvertEmptyToTof::initDocs() {
-  this->setWikiSummary("Converts the channel number to time of flight.");
-  this->setOptionalMessage("Converts the channel number to time of flight.");
-}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

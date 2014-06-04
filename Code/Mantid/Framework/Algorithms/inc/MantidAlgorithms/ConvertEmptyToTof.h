@@ -44,9 +44,12 @@ public:
   virtual const std::string name() const;
   virtual int version() const;
   virtual const std::string category() const;
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Converts the channel number to time of flight.";
+  }
 
 private:
-  virtual void initDocs();
   void init();
   void exec();
 
