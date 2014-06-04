@@ -19,11 +19,12 @@ execution of a fast script.
 Usage
 -----
 
-**Example - Slowing down a loop:**  
+**Example - Pausing for a time:**  
 
 .. testcode:: ExPauseString
-	import time
 
+	import time
+	
 	start_time = time.clock()
 	Pause(0.05)
 	end_time = time.clock()
