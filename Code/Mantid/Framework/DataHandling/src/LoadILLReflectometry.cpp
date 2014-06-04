@@ -61,12 +61,6 @@ const std::string LoadILLReflectometry::category() const {
 	return "DataHandling";
 }
 
-//----------------------------------------------------------------------------------------------
-/// Sets documentation strings for this algorithm
-void LoadILLReflectometry::initDocs() {
-	this->setWikiSummary("Loads a ILL/D17 nexus file. ");
-	this->setOptionalMessage("Loads a ILL/D17 nexus file. ");
-}
 
 /**
  * Return the confidence with with this algorithm can load the file
