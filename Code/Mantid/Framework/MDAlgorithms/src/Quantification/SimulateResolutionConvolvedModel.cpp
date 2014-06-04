@@ -1,8 +1,3 @@
-/*WIKI*
-Runs a simulation of a model with a selected resolution function.
-
-*WIKI*/
-
 #include "MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"

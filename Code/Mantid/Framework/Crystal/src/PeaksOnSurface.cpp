@@ -1,7 +1,3 @@
-/*WIKI*
-Determine whether a peak intersects a surface. Similar to [[PeaksInRegion]]. The vertexes of the surface must be provided. The vertexes must be provided in clockwise ordering starting at the lower left.
-*WIKI*/
-
 #include "MantidCrystal/PeaksOnSurface.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"

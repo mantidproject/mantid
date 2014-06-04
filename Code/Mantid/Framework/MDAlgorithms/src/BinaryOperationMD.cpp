@@ -1,7 +1,3 @@
-/*WIKI*
-Base class for other algorithms.
-*WIKI*/
-
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDWorkspace.h"

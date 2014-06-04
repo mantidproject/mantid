@@ -1,25 +1,3 @@
-/*WIKI* 
-
-[[Image:InstrumentTree.jpg|450px|right|Instrument Tree]]
-
-Create a dummy [[CalFile|calibration file]] for diffraction focusing with one group.
-
-Offsets in the file are all sets to zero and all detectors are selected. Overwrites a calibration file that already exists at the location specified.
-
-Detectors will be assigned to group one when using AlignDetector or DiffractionFocussing algorithms.
-
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
-    CreateDummyCalFile("SNAP_4111","output.cal")
-
-'''C++'''
-    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("CreateCalFileByNames");
-    alg->setPropertyValue("InputWorkspace", "SNAP_4111");
-    alg->setPropertyValue("CalFilename", "output.cal");
-    alg->execute();
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

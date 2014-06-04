@@ -1,10 +1,3 @@
-"""*WIKI* 
-
-This algorithm sorts a group workspace by the qvectors found in the qvectors file.  Workspaces will be tranformed if the qvectors dimension is in the bins.
-
-*WIKI*"""
-
-
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import (DeleteWorkspace, ExtractSingleSpectrum, RenameWorkspace, ConjoinWorkspaces, Transpose)

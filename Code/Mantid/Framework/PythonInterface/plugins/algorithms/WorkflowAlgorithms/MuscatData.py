@@ -1,13 +1,3 @@
-"""*WIKI* 
-
-Calculates Multiple Scattering based on the Monte Carlo program MINUS. It takes a sample <math>S(Q,w)</math> from an input sqw workspace and supports both
-Flat and Cylindrical geometries. More information on the multiple scattering can be procedure can be found in the [http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf modes manual].
-
-==== References ====
-# M W Johnson, AERE Report R7682 (1974)
-
-*WIKI*"""
-
 # Algorithm to start Bayes programs
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator, logger

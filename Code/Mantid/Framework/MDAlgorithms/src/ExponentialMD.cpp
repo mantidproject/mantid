@@ -1,15 +1,3 @@
-/*WIKI*
-
-This executes the exponential function on a MDHistoWorkspace.
-
-The signal <math>a</math> becomes <math> f = e^a </math>
-
-The error <math>da</math> becomes <math> df^2 = f^2 * da^2 </math>
-
-This algorithm cannot be run on a [[MDEventWorkspace]]. Its equivalent on a [[MatrixWorkspace]] is called [[Exponential]].
-
-*WIKI*/
-
 #include "MantidMDAlgorithms/ExponentialMD.h"
 #include "MantidKernel/System.h"
 

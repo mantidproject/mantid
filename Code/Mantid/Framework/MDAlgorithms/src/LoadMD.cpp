@@ -1,23 +1,3 @@
-/*WIKI* 
-
-This algorithm loads a [[MDEventWorkspace]] that was previously
-saved using the [[SaveMD]] algorithm to a .nxs file format.
-
-If the workspace is too large to fit into memory,
-You can load the workspace as a [[MDWorkspace#File-Backed MDWorkspaces|file-backed MDWorkspace]]
-by checking the FileBackEnd option. This will load the box structure
-(allowing for some visualization with no speed penalty) but leave the
-events on disk until requested. Processing file-backed MDWorkspaces
-is significantly slower than in-memory workspaces due to frequency file access!
-
-For file-backed workspaces, the Memory option allows you to specify a cache
-size, in MB, to keep events in memory before caching to disk.
-
-Finally, the BoxStructureOnly and MetadataOnly options are for special situations
-and used by other algorithms, they should not be needed in daily use.
-
-*WIKI*/
-
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -466,4 +446,3 @@ namespace Mantid
 
   } // namespace Mantid
 } // namespace MDEvents
-

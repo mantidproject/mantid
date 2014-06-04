@@ -1,7 +1,3 @@
-/*WIKI*
-Workflow algorithm to load all of the preNeXus files.
-*WIKI*/
-
 #include <exception>
 #include <fstream>
 #include <Poco/Path.h>

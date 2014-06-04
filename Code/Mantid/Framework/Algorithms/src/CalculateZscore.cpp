@@ -1,9 +1,3 @@
-/*WIKI*
-
-Calculate Z-score of a spectrum in a given workspace.
-
-*WIKI*/
-
 #include "MantidAlgorithms/CalculateZscore.h"
 
 #include "MantidAPI/WorkspaceProperty.h"
