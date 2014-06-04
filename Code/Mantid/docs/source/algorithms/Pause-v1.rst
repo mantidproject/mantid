@@ -23,16 +23,18 @@ Usage
 
 .. testcode:: ExPauseString
 
-	import time
+   import time
 	
-	start_time = time.clock()
-	Pause(0.05)
-	end_time = time.clock()
-	print ("The algorithm paused for %.2f seconds." % (end_time-start_time))
+   start_time = time.clock()
+   Pause(0.05)
+   end_time = time.clock()
+   print ("The algorithm paused for %.2f seconds." % (end_time-start_time))
+	
 Output:
 
 .. testoutput:: ExPauseString
+   :options: +ELLIPSIS
    
-	The algorithm paused for 0.05 seconds.
+   The algorithm paused for ... seconds.
 
 .. categories::
