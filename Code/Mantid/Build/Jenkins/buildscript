@@ -79,6 +79,15 @@ $SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure -E M
 $SCL_ON_RHEL6 "ctest --output-on-failure -R MantidPlot"
 
 ###############################################################################
+# Build the documentation - tests first then html
+# Only rhel6 nodes to avoid redundant work
+###############################################################################
+if [[ "$ON_RHEL6" == true ]]; then
+  $SCL_ON_RHEL6 "make docs-test"
+  $SCL_ON_RHEL6 "make docs-html"
+fi
+
+###############################################################################
 # Create the install kit if this is a clean or non-Mac build
 ###############################################################################
 rm -f *.dmg *.rpm *.deb *.tar.gz
