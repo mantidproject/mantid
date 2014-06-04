@@ -101,7 +101,7 @@ void ConvertEmptyToTof::init() {
 
   // OR Specify EPP
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
-  mustBePositive->setLower(0.0);
+  mustBePositive->setLower(0);
   declareProperty("ElasticPeakPosition", EMPTY_INT(), mustBePositive,
       "Value of elastic peak position if none of the above are filled in.");
   declareProperty("ElasticPeakPositionSpectrum", EMPTY_INT(), mustBePositive,
