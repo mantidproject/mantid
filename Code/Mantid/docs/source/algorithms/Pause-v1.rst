@@ -15,4 +15,23 @@ seconds.
 This can be used during debugging, for example, to slow down the
 execution of a fast script.
 
+
+Usage
+-----
+
+**Example - Slowing down a loop:**  
+
+.. testcode:: ExPauseString
+	import time
+
+	start_time = time.clock()
+	Pause(0.05)
+	end_time = time.clock()
+	print ("The algorithm paused for %.2f seconds." % (end_time-start_time))
+Output:
+
+.. testoutput:: ExPauseString
+   
+	The algorithm paused for 0.05 seconds.
+
 .. categories::

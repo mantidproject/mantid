@@ -87,7 +87,7 @@ namespace Algorithms
         functionOptions.push_back(iterator->first);
     }
     declareProperty("Function","One Peak",boost::make_shared<StringListValidator>(functionOptions),
-      "The type of workspace to create (default: Histogram)");
+      "Preset options of the data to fill the workspace with");
     declareProperty("UserDefinedFunction","","Parameters defining the fitting function and its initial values");
 
     declareProperty("NumBanks", 2,boost::make_shared<BoundedValidator<int> >(0,100), "The Number of banks in the instrument (default:2)");
