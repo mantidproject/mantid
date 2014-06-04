@@ -9,24 +9,28 @@
 Description
 -----------
 
-Uses the specular reflection condition along with a supplied theta value
+Uses the specular reflection condition :math:`ThetaIn \equiv ThetaOut` along with the Beam direction offeset
 to vertically shift the detectors into a corrected location.
 
-ThetaIn == ThetaOut
 
 and
 
-:math:`2*ThetaOut = tan^{-1}\frac{UpOffset}{BeamOffset}`
+.. math:: 
+
+   2\centerdot\theta = tan^{-1}\left(\frac{UpOffset}{BeamOffset}\right)
 
 For LineDetectors and MultiDetectors, the algorithm uses an average of
 grouped detector locations to determine the detector position.
+
+Also see
+:ref:`algm-SpecularReflectionCalculateTheta`
 
 .. categories::
 
 
 .. testcode:: SpecularReflectionPositionCorrectExample
 
-   # Set up an instrument so that the sample is 1.0 distance from the base of a point detector
+   # Set up an instrument so that the sample is 1.0 distance from the base of a point detector.
    import os
    instrument_def = os.path.join( config.getInstrumentDirectory() , "INTER_Definition.xml")
    ws = LoadEmptyInstrument(instrument_def)

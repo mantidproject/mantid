@@ -9,10 +9,11 @@
 Description
 -----------
 
-Uses the Specular reflection condition ThetaIn == ThetaOut to calculate
-and return a corrected ThetaIn.
+Uses the Specular reflection condition :math:`ThetaIn \equiv ThetaOut` to calculate and return a corrected ThetaIn. 
 
-:math:`2*ThetaOut = tan^{-1}\frac{UpOffset}{BeamOffset}`
+.. math:: 
+
+   2\centerdot\theta = tan^{-1}\left(\frac{UpOffset}{BeamOffset}\right)
 
 The calculated theta value in degrees is returned by the algorithm.
 
@@ -26,7 +27,7 @@ Usage
 
 .. testcode:: SpecularReflectionCalculateThetaPointDetectorExample
 
-   # Set up an instrument with a 45 degree final two theta angle
+   # Set up an instrument with a 45 degree final two theta angle.
    import os
    instrument_def = os.path.join( config.getInstrumentDirectory() , "INTER_Definition.xml")
    ws = LoadEmptyInstrument(instrument_def)
