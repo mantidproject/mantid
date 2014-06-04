@@ -749,7 +749,6 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         if load_live_runs.is_live_run(runno):
             load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
         wlam, wq, th = None, None, None
-        print type(loadedRun)
         if self.alg_use:
             #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
             trans_list = ConvertToWavelength(transrun)
