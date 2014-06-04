@@ -1,3 +1,4 @@
+#include "MantidAPI/CatalogManager.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
 
 #include <boost/property_tree/ptree.hpp>
@@ -34,6 +35,16 @@ namespace Mantid
       }
       // No error occurred, so return an empty string for verification.
       return "";
+    }
+
+    /**
+     * Checks if a user is logged into the catalog.
+     * Throws a runtime error informing them if not.
+     */
+    void CatalogAlgorithmHelper::checkIfLoggedIn()
+    {
+      auto activeSessions = API::CatalogManager::Instance().getActiveSessions();
+      if (activeSessions.size() == 0) throw std::runtime_error("You are not currently logged into a catalog.");
     }
   }
 }
