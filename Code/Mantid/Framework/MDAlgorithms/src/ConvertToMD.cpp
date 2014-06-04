@@ -273,15 +273,19 @@ namespace Mantid
       {
 
         if(dynamic_cast<DataObjects::EventWorkspace *>(m_InWS2D.get()))
+        {
           g_log.warning()<<"Bin boundaries retrieved from event workspace are ignored by ConvertToMD transformation so the resolution estimates obtained from these boundaries are incorrect\n"; 
+        }
         else
+        {
           g_log.information()<<" ConvertToMD converts input workspace units, but the bin boundaries are copied from the first workspace spectra. The resolution estimates can be incorrect if unit conversion depends on spectra number\n";
 
-        UnitsConversionHelper &unitConv = m_Convertor->getUnitConversionHelper();
-        unitConv.updateConversion(spectra_index);
-        for(size_t i=0;i<binBoundaries.size();i++)
-        {
-          binBoundaries[i] =unitConv.convertUnits(binBoundaries[i]);
+          UnitsConversionHelper &unitConv = m_Convertor->getUnitConversionHelper();
+          unitConv.updateConversion(spectra_index);
+          for(size_t i=0;i<binBoundaries.size();i++)
+          {
+            binBoundaries[i] =unitConv.convertUnits(binBoundaries[i]);
+          }
         }
         //
         if (binBoundaries[0]>binBoundaries[binBoundaries.size()-1])
