@@ -1,8 +1,3 @@
-/*WIKI*
-
-Rename a specified sample log of type TimeSeriesProperty in a given Workspace.
-
-*WIKI*/
 #include "MantidDataHandling/RenameLog.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -30,14 +25,6 @@ namespace DataHandling
    */
   RenameLog::~RenameLog()
   {
-  }
-  
-  void RenameLog::initDocs(){
-
-    this->setWikiSummary("Rename a TimeSeries log in a given Workspace.");
-    this->setOptionalMessage("Rename a TimeSeries log in a given Workspace.");
-
-    return;
   }
 
   void RenameLog::init(){

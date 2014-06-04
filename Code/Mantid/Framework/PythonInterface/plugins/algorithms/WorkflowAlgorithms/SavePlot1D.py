@@ -1,13 +1,3 @@
-"""*WIKI* 
-
-Save 1D plots to a png file, as part of autoreduction. Multiple spectra in the same workspace will be represented by curves on the same plot. Groupped workspaces will be shown as subplots.
-If the workspace has more than one spectra, but less or equal to ten, labels will be shown.
-
-Note: the figures contain lines between points, no error bars.
-
-Note: Requires matplotlib version> 1.2.0
- 
-*WIKI*"""
 import mantid,sys
  
 class SavePlot1D(mantid.api.PythonAlgorithm):
@@ -21,12 +11,14 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
 	""" Algorithm name
 	"""
         return "SavePlot1D"
-    
+
+    def summary(self):
+        return "Save 1D plots to a file"
+        
     def checkGroups(self):
         return False
         
     def PyInit(self):
-        self.setWikiSummary("Save 1D plots to a file")
         #declare properties
         self.declareProperty(mantid.api.WorkspaceProperty("InputWorkspace","",mantid.kernel.Direction.Input),"Workspace to plot")
         self.declareProperty(mantid.api.FileProperty('OutputFilename', '', action=mantid.api.FileAction.Save, extensions = ["png"]), doc='Name of the image file to savefile.')
@@ -39,8 +31,8 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         try:
             import matplotlib
             from distutils.version import LooseVersion
-            if LooseVersion(matplotlib.__version__)<=LooseVersion("1.2.0"):
-                ok2run='Wrong version of matplotlib. Required > 1.2.0'
+            if LooseVersion(matplotlib.__version__)<LooseVersion("1.2.0"):
+                ok2run='Wrong version of matplotlib. Required >= 1.2.0'
         except:
             ok2run='Problem importing matplotlib'
         if ok2run!='':
@@ -104,4 +96,3 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         
 
 mantid.api.AlgorithmFactory.subscribe(SavePlot1D)
-

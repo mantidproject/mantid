@@ -1,21 +1,9 @@
-/*WIKI* 
-
-
-Extracts a 'block' from a workspace and places it in a new workspace (or, to look at it another way, lops bins or spectra off a workspace).
-
-CropWorkspace works on workspaces with common X arrays/bin boundaries or on so-called [[Ragged Workspace|ragged workspaces]]. If the input workspace has common bin boundaries/X values then cropping in X will lead to an output workspace with fewer bins than the input one. If the boundaries are not common then the output workspace will have the same number of bins as the input one, but with data values outside the X range given set to zero.
-
-If an X value given for XMin/XMax does not match a bin boundary (within a small tolerance to account for rounding errors), then the closest bin boundary within the range will be used.
-Note that if none of the optional properties are given, then the output workspace will be
-a copy of the input one.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/VectorHelper.h"
 #include <iostream>
@@ -37,13 +25,6 @@ using std::size_t;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CropWorkspace)
-
-/// Sets documentation strings for this algorithm
-void CropWorkspace::initDocs()
-{
-  this->setWikiSummary("Extracts a 'block' from a workspace and places it in a new workspace. Works for matrix and event workspaces.");
-  this->setOptionalMessage("Extracts a 'block' from a workspace and places it in a new workspace.");
-}
 
 
 using namespace Kernel;
@@ -153,9 +134,9 @@ void CropWorkspace::exec()
       {
         outTxtAxis->setLabel(j, inAxis1->label(i));
       }
-      else
+      else if( !outAxis1->isSpectra() ) // handled by copyInfoFrom line
       {
-        outAxis1->setValue(j, inAxis1->operator()(i));
+        dynamic_cast<NumericAxis*>(outAxis1)->setValue(j, inAxis1->operator()(i));
       }
     }
     // Copy spectrum number & detectors

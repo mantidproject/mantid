@@ -42,11 +42,13 @@ namespace WorkflowAlgorithms
     virtual ~DgsRemap();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Mask and/or group the given workspace.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
     void execGrouping(API::MatrixWorkspace_sptr iWS, API::MatrixWorkspace_sptr &oWS);

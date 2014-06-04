@@ -1,10 +1,3 @@
-/*WIKI* 
-
-
-Extracts a single spectrum from a [[Workspace2D]] and stores it in a new workspace.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -19,13 +12,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractSingleSpectrum)
-
-/// Sets documentation strings for this algorithm
-void ExtractSingleSpectrum::initDocs()
-{
-  this->setWikiSummary("Extracts the specified spectrum from a workspace and places it in a new single-spectrum workspace. ");
-  this->setOptionalMessage("Extracts the specified spectrum from a workspace and places it in a new single-spectrum workspace.");
-}
 
 
 using namespace Kernel;
@@ -64,4 +50,3 @@ void ExtractSingleSpectrum::exec()
 
 } // namespace Algorithms
 } // namespace Mantid
-

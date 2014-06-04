@@ -1,7 +1,3 @@
-/*WIKI* 
-Saves a workspace to a DAVE grp file. A description of the DAVE grouped data format can be found at [http://www.ncnr.nist.gov/dave/documentation/ascii_help.pdf http://www.ncnr.nist.gov/dave/documentation/ascii_help.pdf].
-
-*WIKI*/
 #include "MantidDataHandling/SaveDaveGrp.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
@@ -36,12 +32,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveDaveGrp::initDocs()
-  {
-    this->setWikiSummary("Saves a 2D [[workspace]] to DAVE grouped data format file.");
-    this->setOptionalMessage("Saves a 2D workspace to DAVE grouped data format file.See http://www.ncnr.nist.gov/dave/documentation/ascii_help.pdf");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -144,4 +134,3 @@ namespace DataHandling
 
 } // namespace Mantid
 } // namespace DataHandling
-

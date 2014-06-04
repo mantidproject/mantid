@@ -1,8 +1,3 @@
-/*WIKI* 
-
-Extracts run parameters from the [[RAW_File | RAW]] file given as an input property. If the ''GetRunParameters'' argument is ''True'' then a TableWorkspace is created that contains a column for each value of the RPB_STRUCT, i.e. column names such as r_dur, r_goodfrm etc. This is Mantid's version of the '''Get''' routine in Open Genie.
-
-*WIKI*/
 //----------------------------
 // Includes
 //----------------------------
@@ -24,13 +19,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 
 DECLARE_ALGORITHM(RawFileInfo)
-
-/// Sets documentation strings for this algorithm
-void RawFileInfo::initDocs()
-{
-  this->setWikiSummary("Extract run parameters from a [[RAW_File | RAW]] file as output properties. ");
-  this->setOptionalMessage("Extract run parameters from a  RAW file as output properties.");
-}
 
 /// Initialise
 void RawFileInfo::init()

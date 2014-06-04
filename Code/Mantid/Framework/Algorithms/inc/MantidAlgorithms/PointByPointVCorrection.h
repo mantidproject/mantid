@@ -42,14 +42,16 @@ public:
   virtual ~PointByPointVCorrection();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "PointByPointVCorrection"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Spectrum by spectrum division for vanadium normalisation correction.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction;CorrectionFunctions\\SpecialCorrections";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();

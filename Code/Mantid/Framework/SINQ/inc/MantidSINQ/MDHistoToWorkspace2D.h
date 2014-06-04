@@ -42,6 +42,9 @@ public:
   virtual ~MDHistoToWorkspace2D() {}
   /// Algorithm's name
   virtual const std::string name() const { return "MDHistoToWorkspace2D"; }
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Flattens a n dimensional MDHistoWorkspace into a Workspace2D with many spectra";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -52,8 +55,6 @@ private:
   void init();
   ///Execution code
   void exec();
-
-  virtual void initDocs();
 
   size_t rank;
   size_t currentSpectra;

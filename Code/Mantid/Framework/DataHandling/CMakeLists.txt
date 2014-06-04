@@ -88,7 +88,6 @@ set ( SRC_FILES
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/LoadTOFRawNexus.cpp
-	src/ManagedRawFileWorkspace2D.cpp
 	src/MaskDetectors.cpp
 	src/MaskDetectorsInShape.cpp
 	src/MergeLogs.cpp
@@ -222,7 +221,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
-	inc/MantidDataHandling/ManagedRawFileWorkspace2D.h
 	inc/MantidDataHandling/MaskDetectors.h
 	inc/MantidDataHandling/MaskDetectorsInShape.h
 	inc/MantidDataHandling/MergeLogs.h
@@ -352,7 +350,6 @@ set ( TEST_FILES
 	LoadSpice2dTest.h
 	LoadTOFRawNexusTest.h
 	LoadTest.h
-	ManagedRawFileWorkspace2DTest.h
 	MaskDetectorsInShapeTest.h
 	MaskDetectorsTest.h
 	MergeLogsTest.h

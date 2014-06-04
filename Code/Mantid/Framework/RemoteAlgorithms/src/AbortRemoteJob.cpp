@@ -1,11 +1,3 @@
-/*WIKI*
-
-Abort a job that has been submitted to a remote compute resource.
-
-For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/AbortRemoteJob.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/NullValidator.h"
@@ -29,14 +21,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
-
-/// Sets documentation strings for this algorithm
-void AbortRemoteJob::initDocs()
-{
-  this->setWikiSummary("Abort a previously submitted job.");
-  this->setOptionalMessage("Abort a previously submitted job.");
-}
 
 void AbortRemoteJob::init()
 {

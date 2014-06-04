@@ -56,14 +56,16 @@ public:
   virtual ~GeneralisedSecondDifference();
   /// Algorithm's name
   virtual const std::string name() const { return "GeneralisedSecondDifference"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Computes the generalised second difference of a spectrum or several spectra.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Arithmetic"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   ///Execution code

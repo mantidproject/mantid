@@ -229,7 +229,7 @@ void Spectrogram::updateData(const Mantid::API::IMDWorkspace_const_sptr &workspa
 
 MantidQt::API::QwtRasterDataMD *Spectrogram::dataFromWorkspace(const Mantid::API::IMDWorkspace_const_sptr &workspace)
 {
-  auto *wsData = new MantidQt::API::NoOverlayRaster2D;
+  auto *wsData = new MantidQt::API::QwtRasterDataMD();
   wsData->setWorkspace(workspace);
   wsData->setFastMode(false);
   wsData->setNormalization(Mantid::API::NoNormalization);
@@ -239,13 +239,16 @@ MantidQt::API::QwtRasterDataMD *Spectrogram::dataFromWorkspace(const Mantid::API
   QwtDoubleInterval fullRange = MantidQt::API::SignalRange(*workspace).interval();
   wsData->setRange(fullRange);
 
-  // X/Y axis ranges
   auto dim0 = workspace->getDimension(0);
   auto dim1 = workspace->getDimension(1);
-  Mantid::coord_t minX(dim0->getMinimum()), minY(dim1->getMinimum());
-  Mantid::coord_t width = dim0->getMaximum() - minX;
-  Mantid::coord_t height = dim1->getMaximum() - minY;
-  wsData->setBoundingRect(QwtDoubleRect(minX, minY, width, height));
+  Mantid::coord_t minX(dim0->getMinimum()), maxX(dim0->getMaximum()),
+    minY(dim1->getMinimum()), maxY(dim1->getMaximum());
+  Mantid::coord_t dx(dim0->getBinWidth()), dy(dim1->getBinWidth());
+  const Mantid::coord_t width = (maxX - minX) + dx;
+  const Mantid::coord_t height = (maxY - minY) + dy;
+  QwtDoubleRect bounds(minX - 0.5*dx, minY - 0.5*dy,
+                       width, height);
+  wsData->setBoundingRect(bounds.normalized());
   return wsData;
 }
 

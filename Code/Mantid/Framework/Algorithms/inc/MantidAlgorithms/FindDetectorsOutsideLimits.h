@@ -67,13 +67,15 @@ namespace Mantid
       virtual ~FindDetectorsOutsideLimits() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "FindDetectorsOutsideLimits";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum.";}
+
       virtual const std::string category() const;
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return (1);}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Overridden init
       void init();
       /// Overridden exec

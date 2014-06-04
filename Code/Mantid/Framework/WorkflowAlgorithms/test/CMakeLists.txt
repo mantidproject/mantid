@@ -10,6 +10,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp )
   cxxtest_add_test ( WorkflowAlgorithmsTest ${TEST_FILES} )
   target_link_libraries ( WorkflowAlgorithmsTest WorkflowAlgorithms Algorithms DataHandling )
+  add_dependencies ( WorkflowAlgorithmsTest CurveFitting )
   add_dependencies ( FrameworkTests WorkflowAlgorithmsTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET WorkflowAlgorithmsTest PROPERTY FOLDER "UnitTests" )

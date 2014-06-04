@@ -1,9 +1,3 @@
-/*WIKI*
-
-Takes a [[WorkspaceGroup]] as input and ungroups it into several workspaces.
-You can perform this from the MantidPlot GUI by selecting the WorkspaceGroup and clicking "Ungroup".
-
-*WIKI*/
 #include "MantidAlgorithms/UnGroupWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -13,13 +7,6 @@ namespace Mantid
   {
     
     DECLARE_ALGORITHM(UnGroupWorkspace)
-    
-    /// Sets documentation strings for this algorithm
-    void UnGroupWorkspace::initDocs()
-    {
-      this->setWikiSummary("Takes a group workspace as input and ungroups the workspace. ");
-      this->setOptionalMessage("Takes a group workspace as input and ungroups the workspace.");
-    }
     
     
     using namespace Kernel;

@@ -1,10 +1,3 @@
-/*WIKI* 
-
-
-This can also be performed using the [[Rebin]] algorithm and having the "PreserveEvents" parameter set to false.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -18,13 +11,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMatrixWorkspace)
-
-/// Sets documentation strings for this algorithm
-void ConvertToMatrixWorkspace::initDocs()
-{
-  this->setWikiSummary("Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values. ");
-  this->setOptionalMessage("Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -87,4 +73,3 @@ void ConvertToMatrixWorkspace::exec()
 
 } // namespace Algorithms
 } // namespace Mantid
-

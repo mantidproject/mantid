@@ -100,6 +100,7 @@ public:
         {
           std::ostringstream os;
           os << "Cannot register algorithm " << className << " twice with the same version\n";
+          delete instantiator;
           throw std::runtime_error(os.str());
         }
         if(version > it->second)
@@ -110,7 +111,10 @@ public:
       Kernel::DynamicFactory<Algorithm>::subscribe(key, instantiator, replaceExisting);
     }
     else
+    {
+      delete instantiator;
       throw std::invalid_argument("Cannot register empty algorithm name");
+    }
     return std::make_pair(className,version);
   }
   /// Unsubscribe the given algorithm
@@ -121,6 +125,9 @@ public:
   /// Get the algorithm names and version - mangled use decodeName to separate
   const std::vector<std::string> getKeys() const;
   const std::vector<std::string> getKeys(bool includeHidden) const;
+
+  /// Returns the highest version of the algorithm currently registered
+  int highestVersion(const std::string & algorithmName) const;
   
   ///Get the algorithm categories
   const std::set<std::string> getCategories(bool includeHidden=false) const;

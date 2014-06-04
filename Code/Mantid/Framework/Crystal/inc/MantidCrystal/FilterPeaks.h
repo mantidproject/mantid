@@ -38,11 +38,13 @@ namespace Crystal
     virtual ~FilterPeaks();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Filters the peaks in a peaks workspace based upon the valur of a chosen variable.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

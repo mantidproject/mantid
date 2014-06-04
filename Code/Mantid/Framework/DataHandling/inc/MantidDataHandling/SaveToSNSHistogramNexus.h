@@ -15,9 +15,6 @@
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 
-using namespace ::NeXus;
-
-
 namespace Mantid
 {
   namespace DataHandling
@@ -61,14 +58,16 @@ namespace Mantid
       ~SaveToSNSHistogramNexus() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "SaveToSNSHistogramNexus";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point. This only works for instruments with Rectangular Detectors.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Nexus";}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
 
       /// Overwrites Algorithm method.
       void init();

@@ -41,9 +41,10 @@ namespace DataHandling
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
-
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Load a characterization file used in Powder Diffraction Reduction.";}
+    
   private:
-    virtual void initDocs();
     void init();
     void exec();
     void readFocusInfo(std::ifstream &file);

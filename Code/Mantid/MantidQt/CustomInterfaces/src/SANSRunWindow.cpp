@@ -35,6 +35,8 @@
 #include <QClipboard>
 #include <QTemporaryFile>
 #include <QDateTime>
+#include <QDesktopServices>
+#include <QUrl>
 
 #include <Poco/StringTokenizer.h>
 #include <boost/lexical_cast.hpp>
@@ -239,12 +241,23 @@ void SANSRunWindow::initLayout()
     m_uiForm.displayLayout->addWidget(m_displayTab);
   }
 
+  const QString ISIS_SANS_WIKI = "http://www.mantidproject.org/ISIS_SANS:";
+  m_helpPageUrls[Tab::RUN_NUMBERS]        = ISIS_SANS_WIKI + "_Run_Numbers";
+  m_helpPageUrls[Tab::REDUCTION_SETTINGS] = ISIS_SANS_WIKI + "_Reduction_Settings";
+  m_helpPageUrls[Tab::GEOMETRY]           = ISIS_SANS_WIKI + "_Geometry";
+  m_helpPageUrls[Tab::MASKING]            = ISIS_SANS_WIKI + "_Masking";
+  m_helpPageUrls[Tab::LOGGING]            = ISIS_SANS_WIKI + "_Logging";
+  m_helpPageUrls[Tab::ADD_RUNS]           = ISIS_SANS_WIKI + "_Add_Runs";
+  m_helpPageUrls[Tab::DIAGNOSTICS]        = ISIS_SANS_WIKI + "_Diagnostics";
+  m_helpPageUrls[Tab::ONE_D_ANALYSIS]     = ISIS_SANS_WIKI + "_1D_Analysis";
+
   // connect up phi masking on analysis tab to be in sync with info on masking tab 
   connect(m_uiForm.mirror_phi, SIGNAL(clicked()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.detbank_sel, SIGNAL(currentIndexChanged(int)), this, SLOT(phiMaskingChanged(int))); 
   connect(m_uiForm.phi_min, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.phi_max, SIGNAL(editingFinished()), this, SLOT(phiMaskingChanged())); 
   connect(m_uiForm.slicePb, SIGNAL(clicked()), this, SLOT(handleSlicePushButton()));
+  connect(m_uiForm.pushButton_Help, SIGNAL(clicked()), this, SLOT(openHelpPage()));
 
   readSettings();
 }
@@ -3677,6 +3690,15 @@ void SANSRunWindow::handleSlicePushButton(){
 
   slicingWindow->show(); 
   slicingWindow->raise();
+}
+
+/**
+ * Slot to open the help page of whichever tab the user is currently viewing.
+ */
+void SANSRunWindow::openHelpPage()
+{
+  const auto helpPageUrl = m_helpPageUrls[static_cast<Tab>(m_uiForm.tabWidget->currentIndex())];
+  QDesktopServices::openUrl(QUrl(helpPageUrl));
 }
 
 } //namespace CustomInterfaces

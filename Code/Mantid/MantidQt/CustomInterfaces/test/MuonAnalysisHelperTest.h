@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument.h"
@@ -51,13 +51,13 @@ public:
   {
     std::vector<Workspace_sptr> list;
 
-    for (int i = 15189; i <= 15199; ++i)
+    for (int i = 15189; i <= 15193; ++i)
     {
       list.push_back(createWs("MUSR", i));
     }
 
     std::string label = getRunLabel(list);
-    TS_ASSERT_EQUALS(label, "MUSR00015189-99");
+    TS_ASSERT_EQUALS(label, "MUSR00015189-93");
   }
 
   void test_getRunLabel_wsList_wrongOrder()

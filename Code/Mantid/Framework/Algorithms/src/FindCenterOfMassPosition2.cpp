@@ -1,12 +1,3 @@
-/*WIKI* 
-
-If the ''Output'' property is set, the beam centre will be placed in a table workspace. Otherwise, the result is placed in an ArrayProperty named ''CenterOfMass''.
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -32,13 +23,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindCenterOfMassPosition2)
-
-/// Sets documentation strings for this algorithm
-void FindCenterOfMassPosition2::initDocs()
-{
-  this->setWikiSummary("Finds the beam center in a 2D SANS data set. ");
-  this->setOptionalMessage("Finds the beam center in a 2D SANS data set.");
-}
 
 
 using namespace Kernel;

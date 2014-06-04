@@ -1,10 +1,3 @@
-/*WIKI* 
-
-
-This algorithm loads data from a DAVE grouped ASCII file. These have been generated at the SNS for all the inelastic beamlines, hence the choice in the defaults for the axis units.
-
-
-*WIKI*/
 #include "MantidDataHandling/LoadDaveGrp.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
@@ -22,13 +15,6 @@ namespace Mantid
 namespace DataHandling
 {
 DECLARE_FILELOADER_ALGORITHM(LoadDaveGrp);
-
-/// Sets documentation strings for this algorithm
-void LoadDaveGrp::initDocs()
-{
-  this->setWikiSummary("Loads data from a DAVE grouped ASCII file and stores it in a 2D [[workspace]] ([[Workspace2D]] class). ");
-  this->setOptionalMessage("Loads data from a DAVE grouped ASCII file and stores it in a 2D workspace (Workspace2D class).");
-}
 
 LoadDaveGrp::LoadDaveGrp() : ifile(), line(), nGroups(0), xLength(0)
 {

@@ -1,13 +1,3 @@
-/*WIKI* 
-
-[[Image:ReadFromFile-Grouping.png|thumb|Instrument view of grouping using ReadFromFile with ShowUnselected=True]]
-All of the detectors in each group are given the a value equal to that of the group number.  Unselected detectors are given a value of 0 if ShowUnselected is true.
-
-The instrumentView is the best way to visualize the grouping using the "show Instrument" context menu option on the output workspace.
-
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -46,14 +36,6 @@ namespace Algorithms
 
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(ReadGroupsFromFile)
-  
-  /// Sets documentation strings for this algorithm
-  void ReadGroupsFromFile::initDocs()
-  {
-    this->setWikiSummary("Read a diffraction [[CalFile|calibration file]] (*.cal) or an [[GroupDetectors|XML grouping file]] (*.xml) and an instrument name, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to.<p>This is used to visualise the grouping scheme for powder diffractometers, where a large number of detectors are grouped together. The output 2D workspace can be visualize using the show instrument method.");
-
-    this->setOptionalMessage("Read a diffraction calibration file (*.cal) or an XML grouping file (*.xml) and an instrument name, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to.  This is used to visualise the grouping scheme for powder diffractometers, where a large number of detectors are grouped together. The output 2D workspace can be visualize using the show instrument method.");
-  }
   
 
   using namespace Kernel;

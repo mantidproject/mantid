@@ -27,6 +27,9 @@ namespace DataHandling
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "SaveCalFile";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Saves a 5-column ASCII .cal file from up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -36,8 +39,7 @@ namespace DataHandling
         Mantid::DataObjects::GroupingWorkspace_sptr groupWS, Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS, Mantid::DataObjects::MaskWorkspace_sptr maskWS);
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm

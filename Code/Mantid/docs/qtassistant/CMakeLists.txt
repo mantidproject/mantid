@@ -77,7 +77,7 @@ find_program ( DVIPNG_EXE dvipng )
          Wav_Q_bins.png
        )
    #message ( "QTASSISTANT_IMAGES ${IMAGES}")
-   copy_python_files_to_dir("${IMAGES}" "${CMAKE_CURRENT_SOURCE_DIR}/images" ${HELP_HTML_IMG_DIR} INSTALL_IMAGES)
+   copy_python_files_to_dir("${IMAGES}" "${CMAKE_CURRENT_SOURCE_DIR}/../source/images" ${HELP_HTML_IMG_DIR} INSTALL_IMAGES)
 
    # copy the other generic stuff
    add_custom_command( OUTPUT ${HELP_IMG_DIR}/Mantid_Logo_Transparent.png
@@ -167,6 +167,7 @@ find_program ( DVIPNG_EXE dvipng )
                        POST_BUILD
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${HELP_OUT_DIR} ${HELP_BIN_OUT_DIR} 
    )
+   set_property ( TARGET qtassistant PROPERTY FOLDER "Documentation" )
 
    ###########################################################################################
    # Installation settings

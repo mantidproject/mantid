@@ -14,7 +14,7 @@ if ( CXXTEST_FOUND )
 
   cxxtest_add_test ( LiveDataTest ${TEST_FILES} )
   target_link_libraries( LiveDataTest LiveData )
-  add_dependencies ( LiveDataTest DataHandling Algorithms)
+  add_dependencies ( LiveDataTest DataHandling Algorithms MDAlgorithms )
   add_dependencies ( FrameworkTests LiveDataTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET LiveDataTest PROPERTY FOLDER "UnitTests" )

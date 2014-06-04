@@ -1,23 +1,3 @@
-/*WIKI* 
-{{BinaryOperation|verb=added|prep=to|symbol=<math>+</math>}} 
-
-===EventWorkspace note===
-For [[EventWorkspace]]s, the event lists at each workspace index are concatenated to create the output event list at the same workspace index. Note that in some (rare<sup>*</sup>) cases, these event lists might be from different detectors; this is not checked against and the event lists will be concatenated anyway. This may or may not be your desired behavior. If you wish to merge different EventWorkspaces while matching their detectors together, use the [[MergeRuns]] algorithm.
-
-<sup>*</sup> This could happen, for example, if the workspace operands have not both been processed in an identical fashion and the detectors have somehow been grouped differently.
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
- output = Plus("w1","w2")
- w3 = w1 + w2
- w1 += w2  # Perform "in-place"
-
-'''C++ Within an Algorithm''' <br/>
-The usage of basic workspace mathematical operations has been specially simplified for use within algorithms
-
- //w1 and w2 are workspaces
- Workspace output = w1 + w2;
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -34,13 +14,6 @@ namespace Mantid
   {
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Plus)
-    
-    /// Sets documentation strings for this algorithm
-    void Plus::initDocs()
-    {
-      this->setWikiSummary("The Plus algorithm will add the data values and calculate the corresponding [[Error Values|error values]] in two compatible workspaces.  ");
-      this->setOptionalMessage("The Plus algorithm will add the data values and calculate the corresponding error values in two compatible workspaces. ");
-    }
     
 
     // ===================================== HISTOGRAM BINARY OPERATIONS ==========================================

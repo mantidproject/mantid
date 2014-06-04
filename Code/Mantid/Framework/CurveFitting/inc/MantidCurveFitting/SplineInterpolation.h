@@ -50,9 +50,10 @@ namespace CurveFitting
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Interpolates a set of spectra onto a spline defined by a second input workspace. Optionally, this algorithm can also calculate derivatives up to order 2 as a side product";}
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

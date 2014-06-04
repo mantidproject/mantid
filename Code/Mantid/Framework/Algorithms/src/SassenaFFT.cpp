@@ -1,27 +1,3 @@
-/*WIKI*
-
-The Sassena application [http://sassena.org] generates intermediate scattering factors from molecular dynamics trajectories. This algorithm reads Sassena output and stores all data in workspaces of type [[Workspace2D]], grouped under a single [[WorkspaceGroup]]. It is implied that the time unit is one '''picosecond'''.
-
-Sassena ouput files are in HDF5 format [http://www.hdfgroup.org/HDF5], and can be made up of the following datasets: ''qvectors'', ''fq'', ''fq0'', ''fq2'', and ''fqt''
-
-The group workspace should contain workspaces '''_fqt.Re''' and '''_fqt.Im''' containing the real and imaginary parts of the intermediate structure factor, respectively. This algorithm will take both and perform [[FFT]], storing the real part of the transform in workspace '''_fqw''' and placing this workspace under the input group workspace. Assuming the time unit to be one picosecond, the resulting energies will be in units of one '''micro-eV'''.
-
-The Schofield correction (P. Schofield, ''Phys. Rev. Letters'' '''4'''(5), 239 (1960)) is optionally applied to the resulting dynamic structure factor to reinstate the detailed balance condition
-<math>S(Q,\omega)=e^{\beta \hbar \omega}S(-Q,-\omega)</math>.
-
-== Details ==
-
-=== Parameter FFTonlyRealPart ===
-
-Setting parameter FFTonlyRealPart to true will produce a transform on only the real part of I(Q,t). This is convenient if we know that I(Q,t) should be real but a residual imaginary part was left in a Sassena calculation due to finite orientational average in Q-space.
-
-
-Below are plots after application of SassenaFFT to <math>I(Q,t) = e^{-t^2/(2\sigma^2)} + i\cdot t \cdot e^{-t^2/(2\sigma^2)}</math> with <math>\sigma=1ps</math>. Real an imaginary parts are shown in panels (a) and (b). Note that <math>I(Q,t)*=I(Q,-t)</math>. If only <math>Re[I(Q,t)]</math> is transformed, the result is another Gaussian: <math>\sqrt{2\pi}\cdot e^{-E^2/(2\sigma'^2)}</math> with <math>\sigma'=4,136/(2\pi \sigma)</math> in units of <math>\mu</math>eV (panel (c)). If I(Q,t) is transformed, the result is a modulated Gaussian: <math>(1+\sigma' E)\sqrt{2\pi}\cdot e^{-E^2/(2\sigma'^2)}</math>(panel (d)).
-
-[[Image:SassenaFFTexample.jpg|center|x800px|alt=Application of SassenaFFT to a I(Q,t)]]
-
- *WIKI*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -40,13 +16,6 @@ namespace Algorithms
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SassenaFFT);
-
-/// Sets Documentation strings for this algorithm
-void SassenaFFT::initDocs()
-{
-  this->setWikiSummary("Performs complex Fast Fourier Transform of intermediate scattering function");
-  this->setOptionalMessage("Performs complex Fast Fourier Transform of intermediate scattering function");
-}
 
 /// Override Algorithm::checkGroups
 bool SassenaFFT::checkGroups() { return false; }

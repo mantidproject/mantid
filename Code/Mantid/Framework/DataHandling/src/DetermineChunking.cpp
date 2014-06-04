@@ -1,8 +1,3 @@
-/*WIKI*
-Workflow algorithm to determine chunking strategy 
-for event nexus, runinfo.xml, raw, or histo nexus files
-*WIKI*/
-
 #include <exception>
 #include <fstream>
 #include <Poco/Path.h>
@@ -92,14 +87,6 @@ namespace DataHandling
   const std::string DetermineChunking::category() const
   {
     return "DataHandling\\PreNexus;Workflow\\DataHandling";
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /// @copydoc Mantid::API::Algorithm::initDocs()
-  void DetermineChunking::initDocs()
-  {
-    this->setWikiSummary("Workflow algorithm to determine chunking strategy for event nexus, runinfo.xml, raw, or histo nexus files.");
-    this->setOptionalMessage("Workflow algorithm to determine chunking strategy for event nexus, runinfo.xml, raw, or histo nexus files.");
   }
 
   //----------------------------------------------------------------------------------------------

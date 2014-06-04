@@ -96,14 +96,16 @@ namespace Mantid
       virtual ~PlotPeakByLogValue() {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "PlotPeakByLogValue";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Fits a number of spectra with the same function.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "Optimization";}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       // Overridden Algorithm methods
       void init();
       void exec();

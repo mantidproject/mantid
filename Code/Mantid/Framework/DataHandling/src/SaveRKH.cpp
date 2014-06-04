@@ -1,10 +1,3 @@
-/*WIKI* 
-
-Saves the the given workspace to a file which will be formatted in one of the LOQ data formats (see [http://www.isis.rl.ac.uk/archive/LargeScale/LOQ/other/formats.htm here]).
-1D or 2D workspaces may be saved. If a 1D workspace is 'horizontal' (a single spectrum) then the first column in the three column output will contain the X values of the spectrum (giving the bin centre if histogram data). For a 'vertical' (single column) 1D workspace, the first column of the file will contain the spectrum number.
-
-
-*WIKI*/
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
@@ -23,13 +16,6 @@ namespace DataHandling
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveRKH)
-
-/// Sets documentation strings for this algorithm
-void SaveRKH::initDocs()
-{
-  this->setWikiSummary("Save a file in the LOQ RKH/'FISH' format ");
-  this->setOptionalMessage("Save a file in the LOQ RKH/'FISH' format");
-}
 
 
 using namespace API;

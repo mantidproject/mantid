@@ -101,14 +101,16 @@ namespace Mantid
 
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "SaveCanSAS1D"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Save a file in the canSAS 1-D format";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\XML;SANS"; }
 
 	 protected:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
       /// Overwrites Algorithm method.
       virtual void init();
       /// overriden method sets appending for workspace groups

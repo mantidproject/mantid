@@ -1,26 +1,9 @@
-/*WIKI*
-Converts a 2D workspace from units of spectrum number, energy transfer to the
-intensity as a function of momentum transfer and energy. The rebinning is done
-as a weighted sum of overlapping polygons with fractional area tracking. The
-result is stored in a new workspace type: '''RebinnedOutput'''. The new workspace
-presents the data as the fractional counts divided by the fractional area.
-The biggest consequence of this method is that in places where there are no
-counts and no acceptance (no fractional areas), '''nan'''s will result.
-
-The algorithm operates in non-PSD mode by default. This means that all azimuthal
-angles and widths are forced to zero. PSD mode will determine the azimuthal
-angles and widths from the instrument geometry. This mode is activated by
-placing the following named parameter in a Parameter file: ''detector-neighbour-offset''.
-The integer value of this parameter should be the number of pixels that separates
-two pixels at the same vertical position in adjacent tubes.
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQW3.h"
 #include "MantidAlgorithms/SofQW.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -60,12 +43,6 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SofQW3::initDocs()
-  {
-    this->setWikiSummary("Calculate the intensity as a function of momentum transfer and energy");
-    this->setOptionalMessage("Calculate the intensity as a function of momentum transfer and energy.");
-  }
 
   /**
    * @return the name of the Algorithm
@@ -418,18 +395,15 @@ namespace Algorithms
     WorkspaceFactory::Instance().initializeFromParent(inputWorkspace,
                                                       outputWorkspace, true);
 
-    // Create a numeric axis to replace the default vertical one
-    Axis* const verticalAxis = new NumericAxis(yLength);
+    // Create a binned numeric axis to replace the default vertical one
+    Axis* const verticalAxis = new BinEdgeAxis(newAxis);
     outputWorkspace->replaceAxis(1, verticalAxis);
 
     // Now set the axis values
     for (int i = 0; i < yLength - 1; ++i)
     {
       outputWorkspace->setX(i, xAxis);
-      verticalAxis->setValue(i, newAxis[i]);
     }
-    // One more to set on the 'y' axis
-    verticalAxis->setValue(yLength - 1, newAxis[yLength - 1]);
 
     // Set the axis units
     verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
@@ -443,4 +417,3 @@ namespace Algorithms
 
 } // namespace Mantid
 } // namespace Algorithms
-

@@ -1,36 +1,3 @@
-/*WIKI* 
-
-
-This algorithm calculates asymmetry for a series of muon workspaces. The input workspaces must be in Muon Nexus files which names follow the rule: the filename must begin with at least 1 letter and followed by a number. The input property FirstRun must be set to the file name with the smalest number and the LastRun to the one with the highest number. If the "Green" property is not set the output workspace will contain a single spectrum with asymmetry values. If the "Green" is set the output workspace will contain four spectra with asymmetries: 
-
-{| border="1" cellpadding="5" cellspacing="0"
-!Workspace Index
-!Spectrum
-!Asymmetry
-|-
-|0
-|1
-|Difference of Red and Green
-|-
-|1
-|2
-|Red only
-|-
-|2
-|3
-|Green only
-|-
-|3
-|4
-|Sum of red and green asymmetries
-|}
-
-If ForwardSpectra and BackwardSpectra are set the muon workspaces will be grouped according to the user input, otherwise the Autogroup option of LoadMuonNexus will be used for grouping.
-
-There is a python script PlotAsymmetryByLogValue.py which if called in MantidPlot runs the algorithm and plots the results.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -45,6 +12,7 @@ There is a python script PlotAsymmetryByLogValue.py which if called in MantidPlo
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -97,13 +65,6 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(PlotAsymmetryByLogValue)
-    
-    /// Sets documentation strings for this algorithm
-    void PlotAsymmetryByLogValue::initDocs()
-    {
-      this->setWikiSummary("Calculates asymmetry for a series of log values ");
-      this->setOptionalMessage("Calculates asymmetry for a series of log values");
-    }
     
 
     /** Initialisation method. Declares properties to be used in algorithm.
@@ -242,8 +203,9 @@ namespace Mantid
 
         if ( dtcType != "None" )
         {
-          IAlgorithm_sptr applyCorr = createChildAlgorithm("ApplyDeadTimeCorr", -1, -1, false);
-          applyCorr->initialize();
+          IAlgorithm_sptr applyCorr = AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
+          applyCorr->setLogging(false);
+          applyCorr->setRethrows(true);
 
           ScopedWorkspace ws(loadedWs);
           applyCorr->setPropertyValue("InputWorkspace", ws.name());
@@ -282,8 +244,10 @@ namespace Mantid
 
           try
           {
-            IAlgorithm_sptr applyGrouping = createChildAlgorithm("MuonGroupDetectors", -1, -1, false);
-            applyGrouping->initialize();
+            IAlgorithm_sptr applyGrouping = AlgorithmManager::Instance().create("MuonGroupDetectors");
+            applyGrouping->setLogging(false);
+            applyGrouping->setRethrows(true);
+
             applyGrouping->setPropertyValue( "InputWorkspace", inWS.name() );
             applyGrouping->setPropertyValue( "DetectorGroupingTable", grouping.name() );
             applyGrouping->setPropertyValue( "OutputWorkspace", outWS.name() );
@@ -624,7 +588,3 @@ namespace Mantid
     }
   } // namespace Algorithm
 } // namespace Mantid
-
-
-
-
