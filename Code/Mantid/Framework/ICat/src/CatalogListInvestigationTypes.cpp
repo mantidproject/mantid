@@ -1,4 +1,3 @@
-#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/CatalogListInvestigationTypes.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -20,7 +19,6 @@ namespace Mantid
     /// exec method
     void CatalogListInvestigationTypes::exec()
     {
-      CatalogAlgorithmHelper().checkIfLoggedIn();
       std::vector<std::string> investigationTypes;
       API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->listInvestigationTypes(investigationTypes);
       setProperty("InvestigationTypes",investigationTypes);

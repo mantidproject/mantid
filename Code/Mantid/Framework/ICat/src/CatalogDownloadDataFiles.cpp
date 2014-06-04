@@ -48,7 +48,6 @@ namespace Mantid
     /// Execute the algorithm
     void CatalogDownloadDataFiles::exec()
     {
-      CatalogAlgorithmHelper().checkIfLoggedIn();
       // Cast a catalog to a catalogInfoService to access downloading functionality.
       auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(
           API::CatalogManager::Instance().getCatalog(getPropertyValue("Session")));

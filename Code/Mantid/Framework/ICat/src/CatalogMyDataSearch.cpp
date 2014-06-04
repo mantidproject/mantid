@@ -1,4 +1,3 @@
-#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/CatalogMyDataSearch.h"
 #include "MantidAPI/CatalogManager.h"
 
@@ -19,7 +18,6 @@ namespace Mantid
     /// Execution method.
     void CatalogMyDataSearch::exec()
     {
-      CatalogAlgorithmHelper().checkIfLoggedIn();
       auto outputws = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->myData(outputws);
       setProperty("OutputWorkspace",outputws);

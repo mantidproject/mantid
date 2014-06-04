@@ -8,7 +8,6 @@
 
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -56,7 +55,6 @@ namespace Mantid
     /// Execution method.
     void CatalogSearch::exec()
     {
-      CatalogAlgorithmHelper().checkIfLoggedIn();
       // Obtains the inputs from the search interface.
       CatalogSearchParam params;
       // Get the user input search terms to search for.

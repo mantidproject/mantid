@@ -37,14 +37,5 @@ namespace Mantid
       return "";
     }
 
-    /**
-     * Checks if a user is logged into the catalog.
-     * Throws a runtime error informing them if not.
-     */
-    void CatalogAlgorithmHelper::checkIfLoggedIn()
-    {
-      auto activeSessions = API::CatalogManager::Instance().getActiveSessions();
-      if (activeSessions.size() == 0) throw std::runtime_error("You are not currently logged into a catalog.");
-    }
   }
 }

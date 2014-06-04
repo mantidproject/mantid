@@ -15,8 +15,6 @@ namespace Mantid
       public:
         /// Obtain the error message returned by the IDS.
         const std::string getIDSError(Poco::Net::HTTPResponse::HTTPStatus &HTTPStatus, std::istream& responseStream);
-        /// Check if a user is logged into the catalog. Throws an error if not.
-        void checkIfLoggedIn();
     };
   }
 }
