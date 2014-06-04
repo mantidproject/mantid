@@ -35,7 +35,7 @@ if [[ ${JOB_NAME} == *clean* ]]; then
   # Set some variables relating to the linux packages created from clean builds
   if [[ $(uname) != 'Darwin' ]]; then
     if [[ ${JOB_NAME} == *master* ]]; then
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF -DQT_ASSISTANT_FETCH_IMAGES=ON"
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF"
     elif [[ ${JOB_NAME} == *develop* ]]; then
       PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF"
     fi
@@ -84,7 +84,6 @@ $SCL_ON_RHEL6 "ctest --output-on-failure -R MantidPlot"
 rm -f *.dmg *.rpm *.deb *.tar.gz
 # Always build a package on linux
 if [[ $(uname) != 'Darwin' ]]; then
-  $SCL_ON_RHEL6 "make -j$BUILD_THREADS qtassistant"
   $SCL_ON_RHEL6 "cpack"
 fi
 

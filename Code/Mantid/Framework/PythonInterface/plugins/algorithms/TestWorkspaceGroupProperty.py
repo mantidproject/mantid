@@ -1,8 +1,3 @@
-"""*WIKI*
-This algorithm is only used for testing. 
-*WIKI*"""
-
-
 from mantid.kernel import *
 from mantid.api import *
 import numpy as np

@@ -1,11 +1,3 @@
-/*WIKI*
-
-Stop a job transaction on a remote compute resource.
-
-For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/StopRemoteTransaction.h"
 #include "MantidRemoteAlgorithms/SimpleJSON.h"
 #include "MantidKernel/MandatoryValidator.h"

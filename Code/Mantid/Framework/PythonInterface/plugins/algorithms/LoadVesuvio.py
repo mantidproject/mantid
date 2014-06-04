@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-A Workflow algorithm to load the data from the VESUVIO instrument at ISIS.
-
-*WIKI*"""
-
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import (CropWorkspace, LoadEmptyInstrument, LoadRaw, Plus, 

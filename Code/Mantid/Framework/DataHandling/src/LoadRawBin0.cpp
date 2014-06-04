@@ -1,9 +1,3 @@
-/*WIKI* 
-
-
-The LoadRawBin0 algorithm stores bin 0 data from the selected [[RAW_File | RAW]] file in a [[Workspace2D]].
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

@@ -1,9 +1,3 @@
-/*WIKI*
-
-This algorithm disconnects the logged in user from a specific catalog using the session information provided.
-
-*WIKI*/
-
 #include "MantidICat/CatalogLogout.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/AlgorithmManager.h"

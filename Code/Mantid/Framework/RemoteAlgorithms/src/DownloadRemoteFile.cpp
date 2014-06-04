@@ -1,11 +1,3 @@
-/*WIKI*
-
-Download a file from a remote compute resource.
-
-For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/DownloadRemoteFile.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"

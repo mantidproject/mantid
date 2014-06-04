@@ -1,22 +1,3 @@
-/*WIKI* 
- {{BinaryOperation|verb=multiplied|prep=by|symbol=<math>\times</math>}}
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
- output = Multiply("w1","w2")
- w3 = w1 * w2
- w1 *= w2  # Perform "in-place"
- # Using a scalar
- w3 = w1 * 2.5
- w1 *= 2.5  # Perform "in-place"
-
-'''C++ Within an Algorithm''' <br/>
-The usage of basic workspace mathematical operations has been specially simplified for use within algorithms
-
- //w1 and w2 are workspaces
- Workspace output = w1 * w2;
-*WIKI_USAGE*/
 // Includes
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------

@@ -91,8 +91,8 @@ namespace Algorithms
     void processSingleValueFilter(double minvalue, double maxvalue,
         bool filterincrease, bool filterdecrease);
 
-    void processMultipleValueFilters(double minvalue, double maxvalue,
-        bool filterincrease, bool filterdecrease);
+    void processMultipleValueFilters(double minvalue, double valueinterval, double maxvalue,
+                                     bool filterincrease, bool filterdecrease);
 
     void makeFilterByValue(Kernel::TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre,
         bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime,

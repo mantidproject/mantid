@@ -16438,6 +16438,7 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
     code += in.readLine() + "\n";
   }
   Script *runner = scriptingEnv()->newScript(filename, this, Script::NonInteractive);
+  connect(runner, SIGNAL(finished(const QString &)), this, SLOT(onScriptExecuteSuccess(const QString &)));
   connect(runner, SIGNAL(error(const QString &, const QString &, int)), this, SLOT(onScriptExecuteError(const QString &, const QString &, int)));
   runner->redirectStdOut(false);
   scriptingEnv()->redirectStdOut(false);
@@ -16457,6 +16458,18 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
     runner->execute(code);
   }
   delete runner;
+}
+
+/**
+ * This is the slot for handing script exits when it returns successfully
+ *
+ * @param lineNumber The line number in the script that caused the error.
+ */
+void ApplicationWindow::onScriptExecuteSuccess(const QString & message)
+{
+  g_log.notice() << message.toStdString() << "\n";
+  this->setExitCode(0);
+  this->exitWithPresetCode();
 }
 
 /**
