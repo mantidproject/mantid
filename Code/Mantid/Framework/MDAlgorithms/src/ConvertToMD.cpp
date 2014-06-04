@@ -318,7 +318,7 @@ namespace Mantid
      // pre-process detectors;
       targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_InWS2D,dEModReq,getProperty("UpdateMasks"), std::string(getProperty("PreprocDetectorsWS")));
 
-      /// copy & retrieve metadata, necessary to initialize convertToMD Plugin
+      /// copy & retrieve metadata, necessary to initialize convertToMD Plugin, including getting the unique number, that identifies the run, the source workspace came from.
       addExperimentInfo(spws,targWSDescr);    
       // get pointer to appropriate  ConverttToMD plugin from the CovertToMD plugins factory, (will throw if logic is wrong and ChildAlgorithm is not found among existing)
       ConvToMDSelector AlgoSelector;
@@ -328,7 +328,7 @@ namespace Mantid
       bool ignoreZeros = getProperty("IgnoreZeroSignals");
       // initiate conversion and estimate amount of job to do
       size_t n_steps = this->m_Convertor->initialize(targWSDescr,m_OutWSWrapper,ignoreZeros);
-     // copy the necessary metadata and get the unique number, that identifies the run, the source workspace came from.
+     // copy the metadata, necessary for resolution corrections
       copyMetaData(spws);
 
 
@@ -375,27 +375,46 @@ namespace Mantid
 
     /**
     * Copy over the metadata from the input matrix workspace to output MDEventWorkspace
-    * @param mdEventWS :: The output MDEventWorkspace
-    * @param targWSDescr :: The description of the target workspace, used in the algorithm 
+    * @param mdEventWS :: The output MDEventWorkspace where metadata are copied to. The source of the metadata is the input matrix workspace
     *
-    * @return  :: the number of experiment info added from the current MD workspace
     */
     void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const
     {
 
-      MantidVec binBoundaries = m_InWS2D->readX(0);
+      MantidVec binBoundaries;
+      // found detector which is not a monitor to get proper bin boundaries.
+      size_t spectra_index(0);
+      bool   dector_found(false);
+      for(size_t i=0;i<m_InWS2D->getNumberHistograms(); ++i)
+      {
+        try
+        {
+          auto det=m_InWS2D->getDetector(i);
+          if (!det->isMonitor())
+          {
+            spectra_index=i;
+            dector_found = true;
+            g_log.debug()<<"Using spectra N "<<i<< " as the source of the bin boundaries for the resolution corrections \n"; 
+            break;
+          }
+        }
+        catch(...)
+        {}
+      }
+      if (!dector_found)
+        g_log.warning()<<"No detectors in the workspace are associated with spectra. Using spectrum 0 trying to retrieve the bin boundaries \n"; 
+
+
       if (m_Convertor->getUnitConversionHelper().isUnitConverted())
       {
+
         if(dynamic_cast<DataObjects::EventWorkspace *>(m_InWS2D.get()))
-        {
           g_log.warning()<<"Bin boundaries retrieved from event workspace are ignored by ConvertToMD transformation so the resolution estimates obtained from these boundaries are incorrect\n"; 
-        }
         else
-        {
           g_log.information()<<" ConvertToMD converts input workspace units, but the bin boundaries are copied from the first workspace spectra. The resolution estimates can be incorrect if unit conversion depends on spectra number\n";
-        }
+
         UnitsConversionHelper &unitConv = m_Convertor->getUnitConversionHelper();
-        unitConv.updateConversion(0);
+        unitConv.updateConversion(spectra_index);
         for(size_t i=0;i<binBoundaries.size();i++)
         {
           binBoundaries[i] =unitConv.convertUnits(binBoundaries[i]);
