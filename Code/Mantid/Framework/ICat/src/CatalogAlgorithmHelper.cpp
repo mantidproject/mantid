@@ -1,4 +1,3 @@
-#include "MantidAPI/CatalogManager.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
 
 #include <boost/property_tree/ptree.hpp>
@@ -36,6 +35,5 @@ namespace Mantid
       // No error occurred, so return an empty string for verification.
       return "";
     }
-
   }
 }
