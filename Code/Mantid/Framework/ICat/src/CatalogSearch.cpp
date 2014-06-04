@@ -33,7 +33,7 @@ namespace Mantid
       declareProperty("StartDate","", isDate, "The start date for the range of investigations to be searched. The format must be DD/MM/YYYY.");
       declareProperty("EndDate","", isDate, "The end date for the range of investigations to be searched. The format must be DD/MM/YYYY.");
       declareProperty("Keywords","","A comma separated list of words to search for in the investigation.");
-      declareProperty("InvestigationId","","The ID of the investigation. Also known as: ");
+      declareProperty("InvestigationId","","The ID of the investigation.");
       declareProperty("InvestigatorSurname", "", "The surname of the investigator associated to the investigation.");
       declareProperty("SampleName", "", "The name of the sample used in the investigation.");
       declareProperty("DataFileName","", "The name of the data file in the investigation.");
