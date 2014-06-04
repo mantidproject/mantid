@@ -43,10 +43,9 @@ namespace Algorithms
     virtual const std::string name() const {return "CountEventsInPulses"; }
     virtual int version() const {return 1; }
     virtual const std::string category() const {return "Utility"; }
+    virtual const std::string summary() const {return "Counts the number of events in pulses.";}
 
   private:
-    virtual void initDocs();
-
     /// Properties definition
     void init();
 

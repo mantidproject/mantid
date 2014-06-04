@@ -54,14 +54,16 @@ namespace Mantid
       virtual ~PowerLawCorrection() {};
       /// Algorithm's name for identification
       virtual const std::string name() const { return "PowerLawCorrection";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Corrects the data and error values on a workspace by the value of an exponential function which is evaluated at the X value of each data point: c0*x^C1. The data and error values are multiplied by the value of this function.";}
+
       /// Algorithm's version for identification
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const{ return "CorrectionFunctions"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       // Overridden UnaryOperation methods
       void defineProperties();
       void retrieveProperties();

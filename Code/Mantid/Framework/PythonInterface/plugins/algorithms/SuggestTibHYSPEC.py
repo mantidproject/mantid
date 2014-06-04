@@ -1,7 +1,3 @@
-"""*WIKI* 
-Suggest possible time independent background range for HYSPEC. It works for incident energy range from 3 to 100 meV. 
-*WIKI*"""
-
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 import mantid.simpleapi 
 from mantid.kernel import FloatBoundedValidator,Direction,logger
@@ -20,10 +16,13 @@ class SuggestTibHYSPEC(PythonAlgorithm):
         """ Return name
         """
         return "SuggestTibHYSPEC"
-    
+
+    def summary(self):
+        """ Return summary
+        """
+        return "Suggest possible time independent background range for HYSPEC"
+            
     def PyInit(self):
-        self.setWikiSummary("Suggest possible time independent background range for HYSPEC.")
-        self.setOptionalMessage("Suggest possible time independent background range for HYSPEC.")
         """ Declare properties
         """
         val=mantid.kernel.FloatBoundedValidator()

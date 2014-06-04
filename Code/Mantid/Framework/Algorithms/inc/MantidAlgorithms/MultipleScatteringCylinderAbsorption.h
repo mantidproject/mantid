@@ -59,6 +59,9 @@ public:
 
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const;
+  
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Multiple scattering absorption correction, originally used to correct vanadium spectrum at IPNS.";}
 
 private:
 

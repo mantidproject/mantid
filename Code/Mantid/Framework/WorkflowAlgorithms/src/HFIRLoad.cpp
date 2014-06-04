@@ -1,17 +1,3 @@
-/*WIKI* 
-
-Workflow algorithm that loads HFIR SANS data and applies basic corrections
-to the workspace. Those include:
-
-- Moving the detector at its proper position in Z
-
-- Moving the detector according to the beam center
-
-- Gathering meta-data
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -32,13 +18,6 @@ namespace WorkflowAlgorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HFIRLoad)
-
-/// Sets documentation strings for this algorithm
-void HFIRLoad::initDocs()
-{
-  this->setWikiSummary("Load HFIR SANS data.");
-  this->setOptionalMessage("Load HFIR SANS data.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -272,4 +251,3 @@ void HFIRLoad::exec()
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

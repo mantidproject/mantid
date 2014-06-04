@@ -1,13 +1,3 @@
-/*WIKI* 
-
-Transfer an instrument from a giving workspace to a receiving workspace for the same instrument.
-
-The instrument in of the receiving workspace is replaced by a copy of the instrument in the giving workspace
-and so gains any manipulations such as calibration done to the instrument in the giving workspace.
-The two workspaces can have spectra allocated to their detectors differently.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -26,13 +16,6 @@ using std::size_t;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CopyInstrumentParameters)
-
-/// Sets documentation strings for this algorithm
-void CopyInstrumentParameters::initDocs()
-{
-  this->setWikiSummary("Transfers an instrument from on workspace to another workspace with same base instrument.");
-  this->setOptionalMessage("Transfers an instrument from on workspace to another workspace with same base instrument.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -83,19 +66,6 @@ void CopyInstrumentParameters::exec()
 
     Geometry::ParameterMap targMap;
 
-    //// vector of all components contained in the target instrument
-    //std::vector<IComponent_const_sptr> targComponents;
-    //// flattens instrument definition tree
-    //inst2->getChildren(targComponents,true);
-    //// multimap of existing instrument parameters
-    //std::multimap<std::string,IComponent const *> existingComponents;
-    //for(size_t i=0;i<targComponents.size();i++)
-    //{        
-    //   if (dynamic_cast<IDetector const *>(targComponents[i].get()))
-    //     continue;
-    //   existingComponents.insert(std::pair<std::string,IComponent const *>(targComponents[i]->getFullName(),targComponents[i].get()));
-    //}
-
     auto it = givParams.begin();
     for(;it!= givParams.end(); it++)
     {
@@ -129,14 +99,16 @@ void CopyInstrumentParameters::exec()
         }
         targComp = spTargComp->getBaseComponent();
       }
-      // merge maps for existing target component
-      auto param = it->second.get();
-      targMap.add(param->type(),targComp,param->name(),param->asString());
+
+      // create shared pointer to independent copy of original parameter. Would be easy and nice to have cow_pointer instead of shared_ptr in the parameter map. 
+      auto param = Parameter_sptr(it->second->clone());
+      // add new parameter to the maps for existing target component
+      targMap.add(targComp, param);
 
     }
 
     // changed parameters
-    m_receivingWorkspace->replaceInstrumentParameters( targMap );
+    m_receivingWorkspace->swapInstrumentParameters(targMap);
 
   }
   else

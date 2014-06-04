@@ -42,11 +42,14 @@ namespace Algorithms
     virtual ~UpdateScriptRepository();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Update the local instance of ScriptRepository.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
+
     void init();
     void exec();
 

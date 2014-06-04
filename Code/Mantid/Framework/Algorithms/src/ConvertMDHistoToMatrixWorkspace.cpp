@@ -1,8 +1,3 @@
-/*WIKI* 
-
-Creates a single spectrum Workspace2D with X,Y, and E copied from an first non-integrated dimension of a IMDHistoWorkspace.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -35,13 +30,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertMDHistoToMatrixWorkspace)
-
-/// Sets documentation strings for this algorithm
-void ConvertMDHistoToMatrixWorkspace::initDocs()
-{
-  this->setWikiSummary("Creates a single spectrum Workspace2D with X,Y, and E copied from an first non-integrated dimension of a IMDHistoWorkspace.");
-  this->setOptionalMessage("Creates a single spectrum Workspace2D with X,Y, and E copied from an first non-integrated dimension of a IMDHistoWorkspace.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -166,4 +154,3 @@ void ConvertMDHistoToMatrixWorkspace::exec()
 
 } // namespace Algorithms
 } // namespace Mantid
-

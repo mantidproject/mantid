@@ -1,12 +1,3 @@
-/*WIKI*
-Corrects the flight paths of a flat detector.
-Both TOF sample-detector and distance sample-detector are corrected to constant values, i.e., this algorithm make the detector spherical rather than flat.
-
-detector_distance must exist in the <instrument>_Parameters.xml:
-
-So far this has only be tested on ILL IN5.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -31,14 +22,6 @@ using namespace Geometry;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(CorrectFlightPaths)
-
-/// Sets documentation strings for this algorithm
-void CorrectFlightPaths::initDocs() {
-	this->setWikiSummary(
-			"Used to correct flight paths in 2D shaped detectors.");
-	this->setOptionalMessage(
-			"Used to correct flight paths in 2D shaped detectors.");
-}
 
 // Constructor
 CorrectFlightPaths::CorrectFlightPaths() :

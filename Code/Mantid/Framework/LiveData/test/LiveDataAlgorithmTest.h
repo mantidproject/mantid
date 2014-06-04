@@ -29,6 +29,7 @@ public:
   virtual const std::string name() const { return "LiveDataAlgorithmImpl";}
   virtual int version() const { return 1;}
   virtual const std::string category() const { return "Testing";}
+  virtual const std::string summary() const { return "Test summary"; }
   void init()
   { this->initProps(); }
   void exec() {}

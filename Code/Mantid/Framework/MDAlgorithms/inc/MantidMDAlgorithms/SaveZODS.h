@@ -41,11 +41,13 @@ namespace MDAlgorithms
     virtual ~SaveZODS();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Save a MDHistoWorkspace in HKL space to a HDF5 format for use with the ZODS analysis software.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

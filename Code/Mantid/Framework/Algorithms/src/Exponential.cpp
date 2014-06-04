@@ -1,13 +1,3 @@
-/*WIKI* 
-The algorithm will apply the exponential function (i.e. <math>e^y</math>) to the data and associated errors from a workspaces.
-The units of the workspace are not updated, so the user must take care in the use of such output workspaces. 
-When acting on an event workspace, the output will be a Workspace2D, with the default binning from the original workspace.
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
- output = Exponential("input")
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -27,12 +17,6 @@ namespace Mantid
     Exponential::Exponential(): UnaryOperation()
     {
       this->useHistogram=true;
-    }
-    /// Sets documentation strings for this algorithm
-    void Exponential::initDocs()
-    {
-      this->setWikiSummary("The Exponential algorithm will transform the signal values ''y'' into <math>e^y</math>. The corresponding error values will be updated using <math>E_{new}=E_{old}.e^y</math>, assuming errors are Gaussian and small compared to the signal. ");
-      this->setOptionalMessage("The Exponential algorithm will transform the signal values 'y' into <math>e^y</math>. The corresponding error values will be updated using <math>E_{new}=E_{old}.e^y</math>, assuming errors are Gaussian and small compared to the signal.");
     }
     
 

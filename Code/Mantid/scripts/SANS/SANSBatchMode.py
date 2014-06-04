@@ -36,6 +36,7 @@ sanslog = Logger("SANS")
 import copy
 import sys
 import re
+from reduction_settings import REDUCTION_SETTINGS_OBJ_NAME
 
 ################################################################################
 # Avoid a bug with deepcopy in python 2.6, details and workaround here:
@@ -136,6 +137,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     scale_shift = {'scale':1.0000, 'shift':0.0000}
     #first copy the user settings in case running the reductionsteps can change it
     settings = copy.deepcopy(ReductionSingleton().reference())
+    prop_man_settings = ReductionSingleton().settings.clone("TEMP_SETTINGS")
 
     # Now loop over all the lines and do a reduction (hopefully) for each
     for run in runinfo:
@@ -257,6 +259,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
 
         #the call to WaveRang... killed the reducer so copy back over the settings
         ReductionSingleton().replace(copy.deepcopy(settings))
+
+        ReductionSingleton().settings = prop_man_settings.clone(REDUCTION_SETTINGS_OBJ_NAME)
 
     #end of reduction of all entries of batch file
     return scale_shift

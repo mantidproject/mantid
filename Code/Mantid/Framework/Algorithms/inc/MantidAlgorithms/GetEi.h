@@ -53,14 +53,16 @@ public:
 
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "GetEi"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculates the kinetic energy of neutrons leaving the source based on the time it takes for them to travel between two monitors.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const{return "Inelastic; CorrectionFunctions";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// name of the tempory workspace that we create and use
   API::MatrixWorkspace_sptr m_tempWS;
   /// An estimate of the percentage of the algorithm runtimes that has been completed 

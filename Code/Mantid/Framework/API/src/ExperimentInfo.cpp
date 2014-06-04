@@ -316,6 +316,16 @@ namespace API
   {
     this->m_parmap.reset(new ParameterMap(pmap));
   }
+  //---------------------------------------------------------------------------------------
+  /**
+   * exchanges contents of current parameter map with contents of other map)
+   * @ pmap reference to parameter map which would exchange its contents with current map
+   */
+  void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap & pmap)
+  {
+    this->m_parmap->swap(pmap);
+  }
+
 
   //---------------------------------------------------------------------------------------
   /**

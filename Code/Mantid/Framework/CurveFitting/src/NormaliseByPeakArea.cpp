@@ -1,17 +1,3 @@
-/*WIKI*
-Takes an input TOF spectrum and converts it to Y-space using the [[ConvertToYSpace]] algorithm. The result is
-then fitted using the ComptonPeakProfile function using the given mass to produce an estimate of the peak area. The input data is
-normalised by this value.
-
-The algorithm has 4 outputs:
-* the input data normalised by the fitted peak area;
-* the input data (without normalisation) converted Y-space;
-* the fitted peak in Y-space;
-* the input data converted to Y and then symmetrised about Y=0.
-
-If the sum option is requested then all input spectra are rebinned, in steps of 0.5 <math>A^-1</math>, to a common Y grid and then summed to give a single spectrum.
-*WIKI*/
-
 #include "MantidCurveFitting/NormaliseByPeakArea.h"
 
 #include "MantidAPI/IFunction.h"
@@ -60,12 +46,6 @@ namespace Mantid
     const std::string NormaliseByPeakArea::category() const { return "Corrections"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void NormaliseByPeakArea::initDocs()
-    {
-      this->setWikiSummary("Normalises the input data by the area of of peak defined by the input mass value.");
-      this->setOptionalMessage("Normalises the input data by the area of of peak defined by the input mass value.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

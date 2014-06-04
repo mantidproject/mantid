@@ -92,13 +92,15 @@ public:
   virtual ~SmoothNeighbours() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "SmoothNeighbours";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Perform a moving-average smoothing by summing spectra of nearest neighbours over the face of detectors.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Transforms\\Smoothing";}
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();

@@ -1,10 +1,3 @@
-/*WIKI* 
-
-
-This algorithm loads all monitors found in a NeXus file into a single [[Workspace2D]]. The algorithm assumes that all of the monitors are histograms and have the same bin boundaries. '''NOTE:''' The entry is assumed to be in SNS format, so the loader is currently not generically applicable. It is also written for single entry files and will need tweaking to handle period data where the monitors are different.
-
-
-*WIKI*/
 #include "MantidDataHandling/LoadNexusMonitors.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidAPI/FileProperty.h"
@@ -29,13 +22,6 @@ namespace DataHandling
 {
 
 DECLARE_ALGORITHM(LoadNexusMonitors)
-
-/// Sets documentation strings for this algorithm
-void LoadNexusMonitors::initDocs()
-{
-  this->setWikiSummary("Load all monitors from a NeXus file into a workspace.");
-  this->setOptionalMessage("Load all monitors from a NeXus file into a workspace.");
-}
 
 
 LoadNexusMonitors::LoadNexusMonitors() : Algorithm(),

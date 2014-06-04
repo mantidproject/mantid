@@ -1,10 +1,3 @@
-/*WIKI* 
-Create a PropertyManager object setting the reduction options for ILL D33 SANS TOF instrument.
-The property manager object is then added to the PropertyManagerDataService.
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -28,13 +21,6 @@ namespace WorkflowAlgorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetupILLD33Reduction)
-
-/// Sets documentation strings for this algorithm
-void SetupILLD33Reduction::initDocs()
-{
-  this->setWikiSummary("Set up ILL D33 SANS reduction options.");
-  this->setOptionalMessage("Set up ILL D33 SANS reduction options.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -869,4 +855,3 @@ void SetupILLD33Reduction::setupBackground(boost::shared_ptr<PropertyManager> re
 }
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

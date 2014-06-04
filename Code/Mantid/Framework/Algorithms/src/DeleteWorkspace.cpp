@@ -1,9 +1,3 @@
-/*WIKI* 
-
-If the input workspace exists then it is removed from Mantid.
-
-
-*WIKI*/
 //--------------------------------------------------------------------------
 // Includes
 //--------------------------------------------------------------------------
@@ -17,13 +11,6 @@ namespace Mantid
     
     // Register the algorithm
     DECLARE_ALGORITHM(DeleteWorkspace);
-    
-    /// Sets documentation strings for this algorithm
-    void DeleteWorkspace::initDocs()
-    {
-      this->setWikiSummary("Removes a workspace from memory. ");
-      this->setOptionalMessage("Removes a workspace from memory.");
-    }
     
 
     //--------------------------------------------------------------------------

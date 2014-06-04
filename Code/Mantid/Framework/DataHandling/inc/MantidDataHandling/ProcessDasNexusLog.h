@@ -41,11 +41,13 @@ namespace DataHandling
     
 
     virtual const std::string name() const {return "ProcessDasNexusLog"; };
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Very specialized algorithm to fix certain SNS DAS logs that cannot be used directly.";}
+
     virtual int version() const {return 1; };
     virtual const std::string category() const {return "DataHandling"; };
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

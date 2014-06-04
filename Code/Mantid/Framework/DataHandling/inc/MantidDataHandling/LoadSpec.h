@@ -50,12 +50,14 @@ namespace Mantid
       LoadSpec();
       ~LoadSpec() {}
       virtual const std::string name() const { return "LoadSpec"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads data from a text file and stores it in a 2D workspace (Workspace2D class).";}
+
       virtual int version() const { return 1; }
       virtual const std::string category() const { return "DataHandling"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       void init();
       void exec();
 

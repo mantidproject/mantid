@@ -121,7 +121,7 @@ def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=Fa
         from mantid.api import AlgorithmManager
         alg = AlgorithmManager.createUnmanaged(algo, version)
         print "Getting algorithm description from binaries."
-        return alg.getWikiDescription()
+        return alg.summary()
     elif source == '' and not tryUseDescriptionFromBinaries:
         print "Warning: Cannot find source for algorithm"
         return desc

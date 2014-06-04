@@ -1,12 +1,3 @@
-/*WIKI*
-
-Retrieve a list of the files associated with the specified transaction from a remote 
-compute resource.
-
-For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/QueryRemoteFile.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -31,13 +22,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
-
-void QueryRemoteFile::initDocs()
-{
-  this->setWikiSummary("Retrieve a list of the files from a remote compute resource.");
-  this->setOptionalMessage("Retrieve a list of the files from a remote compute resource.");
-}
 
 void QueryRemoteFile::init()
 {

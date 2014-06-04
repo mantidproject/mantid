@@ -1,12 +1,3 @@
-/*WIKI* 
-
-Converts a histogram workspace from a distribution i.e. multiplies by the bin width to take out the bin width dependency.
-
-==== Restrictions on the input workspace ====
-The workspace to convert must contain histogram data which is flagged as being a distribution.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -21,13 +12,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertFromDistribution)
-
-/// Sets documentation strings for this algorithm
-void ConvertFromDistribution::initDocs()
-{
-  this->setWikiSummary("Converts a histogram workspace from a distribution i.e. multiplies by the bin width. ");
-  this->setOptionalMessage("Converts a histogram workspace from a distribution i.e. multiplies by the bin width.");
-}
 
 
 using namespace API;

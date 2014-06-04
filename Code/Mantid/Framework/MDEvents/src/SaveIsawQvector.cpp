@@ -1,7 +1,3 @@
-/*WIKI*
-This takes an unprocessed event workspace and writes out a file where each event has the <math>(Q_x, Q_y, Q_z)</math> as a set of 32-bit floats.
-*WIKI*/
-
 #include <iostream>
 #include <fstream>
 #include "MantidAPI/FileProperty.h"
@@ -57,15 +53,6 @@ namespace MDEvents
   
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string SaveIsawQvector::category() const { return "DataHandling\\Isaw";}
-
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveIsawQvector::initDocs()
-  {
-    std::string text("Save an event workspace as an ISAW Q-vector file");
-    this->setWikiSummary(text);
-    this->setOptionalMessage(text);
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

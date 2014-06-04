@@ -51,13 +51,15 @@ namespace Mantid
         virtual ~WeightedMean() {}
 
         virtual const std::string name() const { return "WeightedMean"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "An algorithm to calculate the weighted mean of two workspaces.";}
+
         virtual int version() const { return (1); }
         /// Algorithm's category for identification overriding a virtual method
         virtual const std::string category() const { return "Arithmetic";}
 
       private:
-        /// Sets documentation strings for this algorithm
-        virtual void initDocs();
+        
         // Overridden BinaryOperation methods
         void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                     const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);

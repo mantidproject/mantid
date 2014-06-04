@@ -1,13 +1,3 @@
-/*WIKI*
-
-This algorithm is responsible for masking and grouping the given input workspace.
-One can use the ExecuteOppositeOrder to do grouping first then masking.
-
-=== Workflow ===
-[[File:DgsRemapWorkflow.png]]
-
-*WIKI*/
-
 #include "MantidWorkflowAlgorithms/DgsRemap.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -49,12 +39,6 @@ namespace WorkflowAlgorithms
   const std::string DgsRemap::category() const { return "Workflow\\Inelastic"; }
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void DgsRemap::initDocs()
-  {
-    this->setWikiSummary("Mask and/or group the given workspace.");
-    this->setOptionalMessage("Mask and/or group the given workspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

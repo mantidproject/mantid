@@ -1,31 +1,3 @@
-/*WIKI* 
-
-This algorithm will predict the position of single-crystal diffraction peaks (both in detector position/TOF and Q-space) and
-create an output [[PeaksWorkspace]] containing the result.
-
-This algorithm uses the InputWorkspace to determine the instrument in use, as well as the UB Matrix and Unit Cell of the sample used.
-You can use the [[CopySample]] algorithm (with CopyLattice=1) to copy a UB matrix from
-a PeaksWorkspace to another workspace.
-
-The algorithm operates by calculating the scattering direction (given the UB matrix) for a particular HKL, and determining whether that hits a detector.
-The Max/MinDSpacing parameters are used to determine what HKL's to try.
-
-The parameters of WavelengthMin/WavelengthMax also limit the peaks attempted to those that can be detected/produced by your instrument.
-
-=== Using HKLPeaksWorkspace ===
-
-If you specify the HKLPeaksWorkspace parameter, then the algorithm will use the list of HKL in that workspace as the
-starting point of HKLs, instead of doing all HKLs within range of Max/MinDSpacing and WavelengthMin/WavelengthMax.
-
-A typical use case for this method is to use [[FindPeaksMD]] followed by [[IndexPeaks]] to find the HKL of each peak.
-The HKLs found will be floats, so specify RoundHKL=True in PredictPeaks to predict the position at the exact integer HKL.
-This may help locate the center of peaks.
-
-Another way to use this algorithm is to use [[CreatePeaksWorkspace]] to create a workspace with the desired number of peaks.
-Use python or the GUI to enter the desired HKLs. If these are fraction (e.g. magnetic peaks) then make sure RoundHKL=False.
-
-*WIKI*/
-
 #include "MantidCrystal/PredictPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -75,12 +47,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void PredictPeaks::initDocs()
-  {
-    this->setWikiSummary("Using a known crystal lattice and UB matrix, predict where single crystal peaks should be found in detector/TOF space. Creates a PeaksWorkspace containing the peaks at the expected positions.");
-    this->setOptionalMessage("Using a known crystal lattice and UB matrix, predict where single crystal peaks should be found in detector/TOF space. Creates a PeaksWorkspace containing the peaks at the expected positions.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -380,4 +346,3 @@ namespace Crystal
 
 } // namespace Mantid
 } // namespace Crystal
-

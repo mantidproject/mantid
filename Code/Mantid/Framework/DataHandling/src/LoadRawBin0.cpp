@@ -1,9 +1,3 @@
-/*WIKI* 
-
-
-The LoadRawBin0 algorithm stores bin 0 data from the selected [[RAW_File | RAW]] file in a [[Workspace2D]].
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -32,13 +26,6 @@ namespace DataHandling
 {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadRawBin0)
-
-/// Sets documentation strings for this algorithm
-void LoadRawBin0::initDocs()
-{
-  this->setWikiSummary("Loads bin zero  from  ISIS [[RAW_File | raw]] file and stores it in a 2D [[workspace]] ([[Workspace2D]] class)."); 
-  this->setOptionalMessage("Loads bin zero  from  ISIS  raw file and stores it in a 2D workspace (Workspace2D class).");
-}
 
 
 using namespace Kernel;

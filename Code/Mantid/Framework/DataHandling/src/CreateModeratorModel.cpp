@@ -1,14 +1,3 @@
-/*WIKI*
-Creates a model of a moderator using the given parameters. The parameters are given as a string to allow flexibility for each moderator model having different parameterisation.
-
-Available models with parameter names:
-* IkedaCarpenterModerator -
-** TiltAngle - The tilt angle in degrees;
-** TauF - The fast decay coefficient in microseconds
-** TauS - The slow decay coefficient in microseconds
-** R - The mixing coefficient
-*WIKI*/
-
 #include "MantidDataHandling/CreateModeratorModel.h"
 
 #include "MantidAPI/IkedaCarpenterModerator.h"
@@ -39,12 +28,6 @@ namespace DataHandling
   const std::string CreateModeratorModel::category() const { return "DataHandling";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CreateModeratorModel::initDocs()
-  {
-    this->setWikiSummary("Creates the given moderator model and attaches it to the input workspace.");
-    this->setOptionalMessage("Creates the given moderator model and attaches it to the input workspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

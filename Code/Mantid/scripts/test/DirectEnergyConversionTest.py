@@ -59,17 +59,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.initialise("MAP",True);
         self.assertEqual(tReducer.instr_name,"MAP")
 
-        #config.setFacility("SNS")
-        #config.setString('default.facility','SNS')
-        tReducer.instr_name = 'SEQ'
-        self.assertTrue(tReducer._idf_values_read)
-        self.assertEqual(tReducer.instr_name,"SEQ")
-        self.assertEqual(tReducer.facility,'SNS')
-        
-        tReducer.instr_name = 'MER'
-        self.assertEqual(tReducer.instr_name,"MER")
-        self.assertEqual(tReducer.facility,'ISIS')
-
         self.assertRaises(KeyError,setattr,tReducer,'instr_name','NonExistingInstrument')
 
 

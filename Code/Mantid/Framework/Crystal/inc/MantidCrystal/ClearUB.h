@@ -38,6 +38,9 @@ namespace Crystal
     virtual ~ClearUB();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Clears the UB by removing the oriented lattice from the sample.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
@@ -47,7 +50,6 @@ namespace Crystal
 
   private:
     bool clearSingleExperimentInfo(Mantid::API::ExperimentInfo * const experimentInfo, const bool dryRun) const;
-    virtual void initDocs();
     void init();
     void exec();
 

@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-Apply mask to SANS detector
-
-*WIKI*"""
-
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -21,6 +15,9 @@ class SANSMask(PythonAlgorithm):
 
     def name(self):
         return "SANSMask"
+
+    def summary(self):
+        return "Apply mask to SANS detector"
 
     def PyInit(self):
         facilities = [ "SNS", "HFIR"]

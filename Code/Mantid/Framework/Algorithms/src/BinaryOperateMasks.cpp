@@ -1,14 +1,3 @@
-/*WIKI* 
-A binary operation will be conducted on two SpecialWorkspace2D (i.e., masking workspace).  The binary operations supported include AND, OR and XOR (exclusive or).  The operation is done between the corresponding spectra of these two input workspaces, i.e.,
-:<math> spec_i^{output} = spec_i^{in 1} \times spec_i^{in 2} </math>
-:<math> spec_i^{output} = spec_i^{in 1} + spec_i^{in 2} </math>
-:<math> spec_i^{output} = spec_i^{in 1} \oplus spec_i^{in 2} </math>
-
-
-==Output==
-A SpecialWorkspace2D with the same dimension and geometry as the input two SpecialWorkspace2D.
-
-*WIKI*/
 #include "MantidAlgorithms/BinaryOperateMasks.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -42,15 +31,10 @@ namespace Algorithms
   {
     // TODO Auto-generated destructor stub
   }
-  
-  void BinaryOperateMasks::initDocs(){
-
-    return;
-  }
 
   void BinaryOperateMasks::init()
   {
-    this->setWikiSummary("Performs binary operation, including and, or and xor, on two mask Workspaces, i.e., [[SpecialWorkspace2D]].");
+
     std::vector<std::string> operators;
     operators.push_back("AND");
     operators.push_back("OR");
@@ -119,4 +103,3 @@ namespace Algorithms
 
 } // namespace Mantid
 } // namespace Algorithms
-

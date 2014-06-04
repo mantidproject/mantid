@@ -6,7 +6,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
@@ -389,7 +388,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( loader4.execute() )
     TS_ASSERT( loader4.isExecuted() )
 
-    // Get back workspace and check it really is a ManagedWorkspace2D
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("parameterIDF") );
 
@@ -400,7 +398,7 @@ public:
     TS_ASSERT_EQUALS( ptrDet->getID(), 60);
 
     Mantid::Geometry::ParameterMap& pmap = output2D->instrumentParameters();
-    TS_ASSERT_EQUALS( static_cast<int>(pmap.size()), 157);
+    TS_ASSERT_EQUALS( static_cast<int>(pmap.size()), 158);
     AnalysisDataService::Instance().remove("parameterIDF");
   }
 
@@ -888,56 +886,6 @@ public:
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 99);
     AnalysisDataService::Instance().remove("outWS");
 
-  }
-
-  void testWithManagedWorkspace()
-  {
-    ConfigServiceImpl& conf = ConfigService::Instance();
-    const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
-    const std::string oldValue = conf.getString(managed);
-    conf.setString(managed,"0");
-
-    LoadRaw3 loader4;
-    loader4.initialize();
-    loader4.setPropertyValue("Filename", inputFile);
-    loader4.setPropertyValue("OutputWorkspace", "managedws2");
-    TS_ASSERT_THROWS_NOTHING( loader4.execute() )
-    TS_ASSERT( loader4.isExecuted() )
-
-    // Get back workspace and check it really is a ManagedWorkspace2D
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws2") );
-    TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
-
-    AnalysisDataService::Instance().remove("managedws2");
-    conf.setString(managed,oldValue);
-  }
-
-  void testSeparateMonitorsWithManagedWorkspace()
-  {
-    ConfigServiceImpl& conf = ConfigService::Instance();
-    const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
-    const std::string oldValue = conf.getString(managed);
-    conf.setString(managed,"0");
-
-    LoadRaw3 loader8;
-    loader8.initialize();
-    loader8.setPropertyValue("Filename", inputFile);
-    loader8.setPropertyValue("OutputWorkspace", "managedws2");
-    loader8.setPropertyValue("LoadMonitors", "Separate");
-    TS_ASSERT_THROWS_NOTHING( loader8.execute() )
-    TS_ASSERT( loader8.isExecuted() )
-
-    // Get back workspace and check it really is a ManagedWorkspace2D
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws2") );
-    TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
-    Workspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING( output1 = AnalysisDataService::Instance().retrieve("managedws2_monitors") );
-    // TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output1.get()) )
-    AnalysisDataService::Instance().remove("managedws2");
-    AnalysisDataService::Instance().remove("managedws2_monitors");
-    conf.setString(managed,oldValue);
   }
 
   void testExecWithRawDatafile_s_type()

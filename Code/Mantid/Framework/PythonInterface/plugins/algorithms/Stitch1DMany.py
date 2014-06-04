@@ -1,13 +1,3 @@
-"""*WIKI* 
-
-Stitches single histogram [[MatrixWorkspace|Matrix Workspaces]] together outputting a stitched Matrix Workspace. This algorithm is a wrapper over [[Stitch1D]].
-
-The algorithm expects  pairs of StartOverlaps and EndOverlaps values. The order in which these are provided determines the pairing. 
-There should be N entries in each of these StartOverlaps and EndOverlaps lists, where N = 1 -(No of workspaces to stitch). 
-StartOverlaps and EndOverlaps are in the same units as the X-axis for the workspace and are optional.
-
-The workspaces must be histogrammed. Use [[ConvertToHistogram]] on workspaces prior to passing them to this algorithm.
-*WIKI*"""
 #from mantid.simpleapi import *
 
 from mantid.simpleapi import *
@@ -23,15 +13,13 @@ class Stitch1DMany(PythonAlgorithm):
     def name(self):
         return "Stitch1D"
 
+    def summary(self):
+        return "Stitches single histogram matrix workspaces together"
+          
     def PyInit(self):
-    
         input_validator = StringMandatoryValidator()
-    
         self.declareProperty(name="InputWorkspaces", defaultValue="", direction=Direction.Input, validator=input_validator, doc="Input workspaces")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output stitched workspace")
-        
-        self.setWikiSummary("Stitches single histogram matrix workspaces together")
-        self.setOptionalMessage("Stitches single histogram matrix workspaces together")
         self.declareProperty(FloatArrayProperty(name="StartOverlaps", values=[]), doc="Overlap in Q.")
         self.declareProperty(FloatArrayProperty(name="EndOverlaps", values=[]), doc="End overlap in Q.")
         self.declareProperty(FloatArrayProperty(name="Params", validator=FloatArrayMandatoryValidator()), doc="Rebinning Parameters. See Rebin for format.")

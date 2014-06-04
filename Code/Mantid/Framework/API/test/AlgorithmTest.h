@@ -28,6 +28,7 @@ public:
   const std::string name() const { return "StubbedWorkspaceAlgorithm";}
   int version() const  { return 1;}
   const std::string category() const { return "Cat;Leopard;Mink";}
+  const std::string summary() const { return "Test summary"; }
   void init()
   {
     declareProperty(new WorkspaceProperty<>("InputWorkspace1", "", Direction::Input));
@@ -67,6 +68,7 @@ public:
   const std::string name() const { return "StubbedWorkspaceAlgorithm2";}
   int version() const  { return 2;}
   const std::string category() const { return "Cat;Leopard;Mink";}
+  const std::string summary() const { return "Test summary"; }
   void init()
   {
     declareProperty(new WorkspaceProperty<>("NonLockingInputWorkspace","",Direction::Input, PropertyMode::Optional, LockMode::NoLock));
@@ -86,6 +88,7 @@ public:
   const std::string name() const { return "StubbedWorkspaceAlgorithm2";}
   int version() const  { return 1;}
   const std::string category() const { return "Cat;Leopard;Mink";}
+  const std::string summary() const { return "Test summary"; }
   const std::string workspaceMethodName() const { return "methodname"; }
   const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace;ITableWorkspace"; }
   const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
@@ -119,7 +122,7 @@ public:
   virtual ~FailingAlgorithm() {}
   const std::string name() const { return "FailingAlgorithm"; }
   int version() const { return 1; }
-
+  const std::string summary() const { return "Test summary"; }
   static const std::string FAIL_MSG;
 
   void init()

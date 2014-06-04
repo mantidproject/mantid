@@ -43,6 +43,10 @@ namespace Algorithms
     virtual int version() const;
     virtual const std::string category() const;
     virtual const std::string alias() const;
+    
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Resample the x-axis of the data with the requested number of points.";}
+    
     /// MADE PUBLIC FOR TESTING ONLY - DO NOT USE
     double determineBinning(MantidVec& xValues, const double xmin, const double xmax);
     /// MADE PUBLIC FOR TESTING ONLY - DO NOT USE
@@ -51,7 +55,7 @@ namespace Algorithms
   private:
     const std::string workspaceMethodName() const { return ""; } // Override the one from Rebin to ignore us
 
-    virtual void initDocs();
+
     void init();
     void exec();
 

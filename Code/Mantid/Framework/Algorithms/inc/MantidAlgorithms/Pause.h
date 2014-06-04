@@ -40,11 +40,14 @@ namespace Algorithms
     virtual ~Pause();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Pause a script for a given duration.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
+
     void init();
     void exec();
 

@@ -1,7 +1,3 @@
-/*WIKI*
-Determine whether a peak intersects a surface. Similar to [[PeaksInRegion]]. The vertexes of the surface must be provided. The vertexes must be provided in clockwise ordering starting at the lower left.
-*WIKI*/
-
 #include "MantidCrystal/PeaksOnSurface.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -46,12 +42,6 @@ namespace Crystal
   const std::string PeaksOnSurface::category() const { return "Crystal";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void PeaksOnSurface::initDocs()
-  {
-    this->setWikiSummary("Find peaks intersecting a single surface region.");
-    this->setOptionalMessage(this->getWikiSummary());
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

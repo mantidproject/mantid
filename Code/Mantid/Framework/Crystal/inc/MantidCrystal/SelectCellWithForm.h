@@ -58,15 +58,14 @@ namespace Crystal
     virtual const std::string category() const 
             { return "Crystal";}
     
-
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Select a conventional cell with a specific form number, corresponding to the UB stored with the sample for this peaks works space.";}
+    
     static  Kernel::Matrix<double>  DetermineErrors( std::vector<double> &sigabc, const Kernel::Matrix<double> &UB,
                                                const DataObjects::PeaksWorkspace_sptr &ws, double tolerance);
 
 
   private:
-
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
 
     /// Initialise the properties
     void init();

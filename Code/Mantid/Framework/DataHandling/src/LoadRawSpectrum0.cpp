@@ -1,10 +1,3 @@
-/*WIKI* 
-
-
-The LoadRawSpectrum0 algorithm stores spectrum zero data from the selected [[RAW_File | RAW]] file in a [[Workspace2D]].
-
-*WIKI*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -31,13 +24,6 @@ namespace Mantid
 	{
 		// Register the algorithm into the algorithm factory
 		DECLARE_ALGORITHM(LoadRawSpectrum0)
-
-/// Sets documentation strings for this algorithm
-void LoadRawSpectrum0::initDocs()
-{
-  this->setWikiSummary("Loads spectrum zero  from  ISIS [[RAW_File | raw]] file and stores it in a 2D [[workspace]] ([[Workspace2D]] class)."); 
-  this->setOptionalMessage("Loads spectrum zero  from  ISIS  raw file and stores it in a 2D workspace (Workspace2D class).");
-}
 
 
 		using namespace Kernel;

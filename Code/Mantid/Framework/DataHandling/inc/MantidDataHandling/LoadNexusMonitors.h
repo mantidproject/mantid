@@ -53,14 +53,16 @@ namespace Mantid
     virtual ~LoadNexusMonitors();
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "LoadNexusMonitors"; };
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Load all monitors from a NeXus file into a workspace.";}
+
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 1; };
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "DataHandling\\Nexus"; }
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Intialisation code
     void init();
     /// Execution code

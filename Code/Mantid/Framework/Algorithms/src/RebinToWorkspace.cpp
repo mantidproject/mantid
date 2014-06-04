@@ -1,9 +1,3 @@
-/*WIKI* 
-
-Takes an input workspace and alters the binning so that all it's spectra match that of the '''first spectrum''' of the second workspace. This algorithm simply builds a parameter list that is passed to the [[Rebin]] algorithm, which actually does the work.
-
-
-*WIKI*/
 //--------------------------------
 // Includes
 //------------------------------
@@ -15,13 +9,6 @@ using namespace Mantid::Algorithms;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RebinToWorkspace)
-
-/// Sets documentation strings for this algorithm
-void RebinToWorkspace::initDocs()
-{
-  this->setWikiSummary("Rebin a selected workspace to the same binning as a different workspace");
-  this->setOptionalMessage("Rebin a selected workspace to the same binning as a different workspace");
-}
 
 
 //---------------------------
