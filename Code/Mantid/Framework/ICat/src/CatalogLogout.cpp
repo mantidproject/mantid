@@ -1,3 +1,4 @@
+#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/CatalogLogout.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -20,6 +21,7 @@ namespace Mantid
     /// execute the algorithm
     void CatalogLogout::exec()
     {
+      CatalogAlgorithmHelper().checkIfLoggedIn();
       std::string logoutSession = getPropertyValue("Session");
 
       // Destroy all sessions if no session provided.

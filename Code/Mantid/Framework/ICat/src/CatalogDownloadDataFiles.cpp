@@ -1,8 +1,8 @@
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ICatalogInfoService.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidICat/CatalogAlgorithmHelper.h"
+#include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -48,6 +48,7 @@ namespace Mantid
     /// Execute the algorithm
     void CatalogDownloadDataFiles::exec()
     {
+      CatalogAlgorithmHelper().checkIfLoggedIn();
       // Cast a catalog to a catalogInfoService to access downloading functionality.
       auto catalogInfoService = boost::dynamic_pointer_cast<API::ICatalogInfoService>(
           API::CatalogManager::Instance().getCatalog(getPropertyValue("Session")));

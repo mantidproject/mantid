@@ -1,3 +1,4 @@
+#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/CatalogKeepAlive.h"
 #include "MantidAPI/CatalogManager.h"
 
@@ -18,6 +19,7 @@ namespace Mantid
 
     void CatalogKeepAlive::exec()
     {
+      CatalogAlgorithmHelper().checkIfLoggedIn();
       int timePeriod = getProperty("TimePeriod");
       if (timePeriod <= 0) throw std::runtime_error("TimePeriod must be greater than zero.");
 

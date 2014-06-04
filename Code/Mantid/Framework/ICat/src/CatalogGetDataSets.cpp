@@ -1,3 +1,4 @@
+#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/CatalogGetDataSets.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/CatalogManager.h"
@@ -22,6 +23,7 @@ namespace Mantid
     /// exec methods
     void CatalogGetDataSets::exec()
     {
+      CatalogAlgorithmHelper().checkIfLoggedIn();
       auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->getDataSets(getProperty("InvestigationId"),workspace);
       setProperty("OutputWorkspace",workspace);

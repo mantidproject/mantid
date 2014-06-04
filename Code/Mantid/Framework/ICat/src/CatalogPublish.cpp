@@ -45,6 +45,7 @@ namespace Mantid
     /// Execute the algorithm
     void CatalogPublish::exec()
     {
+      CatalogAlgorithmHelper().checkIfLoggedIn();
       // Used for error checking.
       std::string ws       = getPropertyValue("InputWorkspace");
       std::string filePath = getPropertyValue("FileName");

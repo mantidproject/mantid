@@ -1,3 +1,4 @@
+#include "MantidICat/CatalogAlgorithmHelper.h"
 #include "MantidICat/CatalogListInstruments.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -20,6 +21,7 @@ namespace Mantid
     /// exec method
     void CatalogListInstruments::exec()
     {
+      CatalogAlgorithmHelper().checkIfLoggedIn();
       std::vector<std::string> instruments;
       API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->listInstruments(instruments);
       setProperty("InstrumentList",instruments);
