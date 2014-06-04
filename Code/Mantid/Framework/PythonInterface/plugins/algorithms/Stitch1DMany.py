@@ -1,21 +1,3 @@
-"""*WIKI* 
-
-Stitches single histogram [[MatrixWorkspace|Matrix Workspaces]] together outputting a stitched Matrix Workspace. This algorithm is a wrapper over [[Stitch1D]].
-
-The algorithm expects  pairs of StartOverlaps and EndOverlaps values. The order in which these are provided determines the pairing. 
-There should be N entries in each of these StartOverlaps and EndOverlaps lists, where N = 1 -(No of workspaces to stitch). 
-StartOverlaps and EndOverlaps are in the same units as the X-axis for the workspace and are optional.
-
-Scale factors provided as outputs are the scale factors used in calculation for each call to Stitch1D. Assuming, for example, you have workspaces A, B, C and you are scaling the RHS workspace, then A is stitched 
-with B first, to give the first scale factor, then (AB) is stitched with C, which gives the second scale factor.
-
-If you are processing WorkspaceGroups as inputs, then stitching will happen with respect to Workspaces in each group, which have an equivalent index. Each input WorkspaceGroup must have the same size
-as each other. When processing WorkspaceGroups, you will be provided with as single list of all scale factors in a row major order, so all the scale factors for WorkspaceGroups[0] then WorkspaceGroups[1].
-
-The workspaces must be histogrammed. Use [[ConvertToHistogram]] on workspaces prior to passing them to this algorithm.
-*WIKI*"""
-#from mantid.simpleapi import *
-
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -29,13 +11,13 @@ class Stitch1DMany(DataProcessorAlgorithm):
     def name(self):
         return "Stitch1D"
 
+    def summary(self):
+        return "Stitches single histogram matrix workspaces together"
+          
     def PyInit(self):
-    
         input_validator = StringMandatoryValidator()
-    
         self.declareProperty(name="InputWorkspaces", defaultValue="", direction=Direction.Input, validator=input_validator, doc="Input workspaces")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output stitched workspace")
-        
         self.declareProperty(FloatArrayProperty(name="StartOverlaps", values=[]), doc="Start overlaps for stitched workspaces.")
         self.declareProperty(FloatArrayProperty(name="EndOverlaps", values=[]), doc="End overlap for stitched workspaces.")
         self.declareProperty(FloatArrayProperty(name="Params", validator=FloatArrayMandatoryValidator()), doc="Rebinning Parameters. See Rebin for format.")

@@ -1,33 +1,3 @@
-/*WIKI*
-This algorithm is used to calculate the asymmetry for a muon workspace. The asymmetry is given by:
-
-:<math> Asymmetry = \frac{F-\alpha B}{F+\alpha B} </math>
-
-where F is the front spectra, B is the back spectra and a is alpha.
-
-The errors in F-aB and F+aB are calculated by adding the errors in F and B in quadrature; any errors in alpha are ignored. The errors for the asymmetry are then calculated using the fractional error method with the values for the errors in F-aB and F+aB.
-
-The output workspace contains one set of data for the time of flight, the asymmetry and the asymmetry errors.
-
-Note: this algorithm does not perform any grouping; the grouping must be done via the GroupDetectors algorithm or when the NeXus file is loaded auto_group must be set to true.
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
-    OutWS = AsymmetryCalc("EmuData","1.0","0,1,2,3,4","16,17,18,19,20")
-
-'''C++'''
-    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("AsymmetryCalc");
-    alg->setPropertyValue("InputWorkspace", "EmuData");
-    alg->setPropertyValue("OutputWorkspace", "OutWS");
-    alg->setPropertyValue("Alpha", "1.0");
-    alg->setPropertyValue("ForwardSpectra", "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15");
-    alg->setPropertyValue("BackwardSpectra", "16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31");
-    alg->execute();
-    Workspace* ws = FrameworkManager::Instance().getWorkspace("OutWS");
-
-*WIKI_USAGE*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -54,7 +24,7 @@ DECLARE_ALGORITHM( AsymmetryCalc)
  */
 void AsymmetryCalc::init()
 {
-  this->setWikiSummary("Calculates the asymmetry between two groups of detectors for a muon workspace.");
+
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "",
       Direction::Input), "Name of the input workspace");
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
@@ -170,5 +140,3 @@ void AsymmetryCalc::exec()
 
 } // namespace Algorithm
 } // namespace Mantid
-
-

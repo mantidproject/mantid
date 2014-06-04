@@ -1,14 +1,3 @@
-/*WIKI*
-PoldiFitPeaks1D takes a TableWorkspace with peaks (for example from [[ PoldiPeakSearch ]]) and a spectrum from
-[[ PoldiAutoCorrelation ]] and tries to fit a Gaussian peak profile to the spectrum for each peak. Usually, the
-peaks are accompanied by a quadratic background, so this is fitted as well.
-
-The implementation is very close to the original POLDI analysis software (using the same profile function). One
-point where this routine differs is error calculation. In the original program the parameter errors were adjusted
-by averaging <math>\chi^2</math>-values, but this does not work properly if there is an outlier caused by a bad
-fit for one of the peaks.
-*WIKI*/
-
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -66,14 +55,6 @@ int PoldiFitPeaks1D::version() const { return 1;}
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string PoldiFitPeaks1D::category() const { return "SINQ\\Poldi\\PoldiSet"; }
-
-
-/// Sets documentation strings for this algorithm
-void PoldiFitPeaks1D::initDocs()
-{
-    this->setWikiSummary("PoldiPeakFit1D fits peak profiles to POLDI auto-correlation data.");
-    this->setOptionalMessage("PoldiPeakFit1D fits peak profiles to POLDI auto-correlation data.");
-}
 
 void PoldiFitPeaks1D::init()
 {

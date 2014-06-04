@@ -1,13 +1,3 @@
-/*WIKI* 
-
-The diagnostic test attempts to find all tubes within the instrument attached to the workspace. If successful, each tube is tested for saturation above the level defined by the 'MaxTubeFramerate' property.
-If any pixel, not including those marked to be ignored around the equatorial region, are counting above this threshold then the entire tube is masked.
-
-==== Restrictions on the input workspace ====
-* The workspace must contain either raw counts or counts/us.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -31,13 +21,6 @@ namespace Mantid
     
     // Register the class
     DECLARE_ALGORITHM(CreatePSDBleedMask)
-    
-    /// Sets documentation strings for this algorithm
-    void CreatePSDBleedMask::initDocs()
-    {
-      this->setWikiSummary("Runs a diagnostic test for saturation of PSD tubes and creates a MaskWorkspace marking the failed tube spectra. ");
-      this->setOptionalMessage("Runs a diagnostic test for saturation of PSD tubes and creates a MaskWorkspace marking the failed tube spectra.");
-    }
     
     const std::string CreatePSDBleedMask::category() const
     {
@@ -284,4 +267,3 @@ namespace Mantid
   }
 
 }
-

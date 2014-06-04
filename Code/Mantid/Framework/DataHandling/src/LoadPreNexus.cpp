@@ -1,7 +1,3 @@
-/*WIKI*
-Workflow algorithm to load all of the preNeXus files.
-*WIKI*/
-
 #include <exception>
 #include <fstream>
 #include <Poco/Path.h>
@@ -74,14 +70,6 @@ namespace DataHandling
   const std::string LoadPreNexus::category() const
   {
     return "DataHandling\\PreNexus;Workflow\\DataHandling";
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /// @copydoc Mantid::API::Algorithm::initDocs()
-  void LoadPreNexus::initDocs()
-  {
-    this->setWikiSummary("Load a collection of PreNexus files.");
-    this->setOptionalMessage("Load a collection of PreNexus files.");
   }
 
   /**

@@ -28,14 +28,15 @@ namespace MDAlgorithms
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "CreateMDWorkspace";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Creates an empty MDEventWorkspace with a given number of dimensions.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDAlgorithms";}
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
     void init();
     void exec();
 

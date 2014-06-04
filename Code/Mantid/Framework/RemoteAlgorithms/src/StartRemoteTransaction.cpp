@@ -1,11 +1,3 @@
-/*WIKI*
-
-Start a job transaction on a remote compute resource.
-
-For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/StartRemoteTransaction.h"
 #include "MantidRemoteAlgorithms/SimpleJSON.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -26,13 +18,6 @@ DECLARE_ALGORITHM(StartRemoteTransaction)
 using namespace Mantid::Kernel;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
-
-void StartRemoteTransaction::initDocs()
-{
-  this->setWikiSummary("Start a job transaction on a remote compute resource.");
-  this->setOptionalMessage("Start a job transaction on a remote compute resource.");
-}
 
 void StartRemoteTransaction::init()
 {

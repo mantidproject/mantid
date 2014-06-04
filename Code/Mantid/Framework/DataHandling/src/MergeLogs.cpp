@@ -1,11 +1,3 @@
-/*WIKI* 
-
-Two [[TimeSeriesProperty]] logs are merged together by the time stamps.  
-
-==Output==
-A MatrixWorkspace.
-
-*WIKI*/
 #include "MantidDataHandling/MergeLogs.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -33,14 +25,6 @@ namespace DataHandling
    */
   Merge2WorkspaceLogs::~Merge2WorkspaceLogs()
   {
-  }
-  
-  void Merge2WorkspaceLogs::initDocs(){
-
-    this->setWikiSummary("Merge 2 logs of [[TimeSeriesProperty]] in a workspace to a new [[TimeSeriesProperty]] log.");
-    this->setOptionalMessage("Merge 2 TimeSeries logs in a given Workspace.");
-
-    return;
   }
 
   void Merge2WorkspaceLogs::init(){

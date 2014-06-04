@@ -50,6 +50,9 @@ public:
 	virtual ~LoadSINQFocus();
 
 	virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads a FOCUS nexus file from the PSI";}
+
 	virtual int version() const;
 	virtual const std::string category() const;
 
@@ -57,7 +60,6 @@ public:
     virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
 private:
-	virtual void initDocs();
 	void init();
 	void exec();
 	void setInstrumentName(NeXus::NXEntry& entry);

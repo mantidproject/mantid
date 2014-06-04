@@ -1,11 +1,3 @@
-/*WIKI*
-
-Query a remote compute resource for a specific job the user has submitted.
-
-For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/QueryRemoteJob.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/NullValidator.h"
@@ -29,13 +21,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
-
-void QueryRemoteJob::initDocs()
-{
-  this->setWikiSummary("Query a remote compute resource for a specific job");
-  this->setOptionalMessage("Query a remote compute resource for a specific job");
-}
 
 void QueryRemoteJob::init()
 {

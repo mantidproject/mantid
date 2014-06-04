@@ -1,7 +1,3 @@
-/*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
-*WIKI*/
-
 #include "MantidAlgorithms/CreateFlatEventWorkspace.h"
 
 
@@ -46,12 +42,6 @@ namespace Algorithms
   const std::string CreateFlatEventWorkspace::category() const { return "CorrectionFunctions\\BackgroundCorrections";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void CreateFlatEventWorkspace::initDocs()
-  {
-    this->setWikiSummary("Creates a flat event workspace that can be used for background removal.");
-    this->setOptionalMessage("Creates a flat event workspace that can be used for background removal.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

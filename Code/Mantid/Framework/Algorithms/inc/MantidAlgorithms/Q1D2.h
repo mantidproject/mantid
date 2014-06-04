@@ -46,6 +46,9 @@ public:
   virtual ~Q1D2() {}
   /// Algorithm's name
   virtual const std::string name() const { return "Q1D"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Converts a workspace of counts in wavelength bins into a workspace of counts verses momentum transfer, Q, assuming completely elastic scattering";}
+
   /// Algorithm's version
   virtual int version() const { return (2); }
   /// Algorithm's category for identification
@@ -56,8 +59,7 @@ private:
   API::MatrixWorkspace_const_sptr m_dataWS;
   bool m_doSolidAngle;
 
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

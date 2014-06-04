@@ -1,15 +1,3 @@
-/*WIKI*
-
-This executes the natural logarithm operation on a MDHistoWorkspace.
-
-The signal <math>a</math> becomes <math> f = log(a) </math>
-
-The error <math>da</math> becomes <math> df^2 = a^2 / da^2 </math>
-
-This algorithm cannot be run on a [[MDEventWorkspace]]. Its equivalent on a [[MatrixWorkspace]] is called [[Logarithm]].
-
-*WIKI*/
-
 #include "MantidMDAlgorithms/LogarithmMD.h"
 #include "MantidKernel/System.h"
 
@@ -49,12 +37,6 @@ namespace MDAlgorithms
   int LogarithmMD::version() const { return 1;};
   
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LogarithmMD::initDocs()
-  {
-    this->setWikiSummary("Perform a natural logarithm of a [[MDHistoWorkspace]].");
-    this->setOptionalMessage("Perform a natural logarithm of a MDHistoWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /// Optional method to be subclassed to add properties

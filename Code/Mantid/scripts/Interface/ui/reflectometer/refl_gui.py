@@ -12,6 +12,7 @@ import re
 from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
+from isis_reflectometry.convert_to_wavelength import ConvertToWavelength
 from isis_reflectometry import load_live_runs
 from isis_reflectometry.combineMulti import *
 from latest_isis_runs import *
@@ -72,7 +73,9 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
         settings.beginGroup("Mantid/ISISReflGui")
         self.ads_get = settings.value("ADSget", False, type=bool)
+        self.alg_use = settings.value("AlgUse", False, type=bool)
         settings.setValue("ADSget", self.ads_get)
+        settings.setValue("AlgUse", self.alg_use)
         settings.endGroup()
 
         del settings
@@ -745,7 +748,22 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
             load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
-        wlam, wq, th = quick(loadedRun, trans=transrun, theta=angle)
+        wlam, wq, th = None, None, None
+        if self.alg_use:
+            #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
+            trans_list = ConvertToWavelength(transrun)
+            ws = ConvertToWavelength.to_workspace(loadedRun)
+            size = trans_list.get_ws_list_size()
+            trans1 = None
+            trans2 = None
+            if size > 0:
+                trans1 = trans_list.get_workspace_from_list(0)
+                if size == 2:
+                    trans2 = trans_list.get_workspace_from_list(1)
+            wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=trans1, SecondTransmissionRun=trans2, thetaIn=angle, StartOverlap='10', EndOverlap='12', Params = [1.5, 0.02, 17], OutputWorkspace=runno+'_IvsQ', OutputWorkspaceWavelength=runno+'_IvsLam',)
+            cleanup()
+        else:
+            wlam, wq, th = quick(loadedRun, trans=transrun, theta=angle)
         if ':' in runno:
             runno = runno.split(':')[0]
         if ',' in runno:
@@ -938,26 +956,25 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         Shows the dialog for setting options regarding live data
         """
         try:
-            dialog = refl_options.ReflOptions(def_meth = self.live_method, def_freq = self.live_freq, def_ads = self.ads_get)
+            dialog = refl_options.ReflOptions(def_meth = self.live_method, def_freq = self.live_freq, def_ads = self.ads_get, def_alg = self.alg_use)
             if dialog.exec_():
                 old_ads = self.ads_get
                 self.live_freq = dialog.frequency
                 self.live_method = dialog.get_method()
                 self.ads_get = dialog.ads_get
+                self.alg_use = dialog.alg_use
                 settings = QtCore.QSettings()
-
                 settings.beginGroup("Mantid/ISISReflGui/LiveData")
                 settings.setValue("frequency", self.live_freq)
                 settings.setValue("method", self.live_method)
                 settings.endGroup()
-
                 settings.beginGroup("Mantid/ISISReflGui")
                 settings.setValue("ADSget", self.ads_get)
+                settings.setValue("AlgUse", self.alg_use)
                 settings.endGroup()
-
                 del settings
         except Exception as ex:
-            logger.notice("Could not open live data options dialog")
+            logger.notice("Problem opening options dialog or problem retrieving values from dialog")
             logger.notice(str(ex))
 
     def _choose_columns(self):

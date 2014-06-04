@@ -1,21 +1,3 @@
-/*WIKI* 
-
-Moves the detectors in an instrument to optimize the maximum intensity of each detector using gsl_multimin_fminimizer_nmsimplex.  Only bin data close to peak you wish to maximize.
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
-    DiffractionEventCalibrateDetectors(InputWorkspace=SNAP_4307, Params="1.9308,0.0002,2.1308", LocationOfPeakToOptimize=2.0308, MaxIterations=100, DetCalFilename="./SNAP_4307.DetCal")
-
-'''C++'''
-    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("DiffractionEventCalibrateDetectors");
-    alg->setPropertyValue("InputWorkspace", "SNAP_4111");
-    alg->setPropertyValue("Params", "1.9308,0.0002,2.1308");
-    alg->setPropertyValue("LocationOfPeakToOptimize","2.0308");
-    alg->setPropertyValue("MaxIterations", "100");
-    alg->setPropertyValue("DetCalFilename", "./SNAP_4307.DetCal");
-    alg->execute();
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -52,13 +34,6 @@ namespace Algorithms
 
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(DiffractionEventCalibrateDetectors)
-  
-  /// Sets documentation strings for this algorithm
-  void DiffractionEventCalibrateDetectors::initDocs()
-  {
-    this->setWikiSummary("This algorithm optimizes the position and angles of all of the detector panels. The target instruments for this feature are SNAP and TOPAZ. ");
-    this->setOptionalMessage("This algorithm optimizes the position and angles of all of the detector panels. The target instruments for this feature are SNAP and TOPAZ.");
-  }
   
 
   using namespace Kernel;

@@ -112,7 +112,8 @@ void export_AlgorithmFactory()
                             "Returns true if the given algorithm exists with an option to specify the version"))
 
       .def("getRegisteredAlgorithms", &getRegisteredAlgorithms, "Returns a Python dictionary of currently registered algorithms")
-
+      .def("highestVersion", &AlgorithmFactoryImpl::highestVersion,
+           "Returns the highest version of the named algorithm. Throws ValueError if no algorithm can be found")
       .def("subscribe", &subscribe, "Register a Python class derived from PythonAlgorithm into the factory")
 
       .def("Instance", &AlgorithmFactory::Instance, return_value_policy<reference_existing_object>(),

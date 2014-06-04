@@ -1,14 +1,3 @@
-/*WIKI*
-
-MDHistoToWorkspace2D flattens a MDHistoWorkspace into a Workspace2D. It can process MDHistoWorkspaces of any dimensionality. 
-The last dimension of the MDHistoWorkspace becomes 
-the spectra length. Flattening happens such that the first dimension of the MDHistoWorkspace 
-is the slowest varying, the second the second slowest varying and so on. 
-
-This tool is useful as many algorithms in Mantid only apply to Workspace2D. After 
-conversion with MDHistoToWorkspace2D such algorithms can also be applied to MD data.
-*WIKI*/
-
 /**
  * This algorithm flattens a MDHistoWorkspace to a Workspace2D. Mantid has far more tools
  * to deal with W2D then for MD ones.
@@ -130,10 +119,6 @@ void MDHistoToWorkspace2D::checkW2D(Mantid::DataObjects::Workspace2D_sptr outWS)
 			g_log.information() << "Spectrum " << i << " e-size mismatch, is " << e.size() << " should be " << length << "\n";
 		}
 	}
-}
-void MDHistoToWorkspace2D::initDocs()
-{
-  this->setWikiSummary("Flattens a n dimensional MDHistoWorkspace into a Workspace2D with many spectra");
 }
 
 void MDHistoToWorkspace2D::copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inWS, Mantid::DataObjects::Workspace2D_sptr outWS)

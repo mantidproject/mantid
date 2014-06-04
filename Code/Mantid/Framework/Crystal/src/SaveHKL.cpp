@@ -1,37 +1,3 @@
-/*WIKI* 
-Used same format that works successfully in GSAS and SHELX from ISAW:
-	
-hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n'% (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM, TRANSMISSION, DN, TWOTH, DSP))
-	
-HKL is flipped by -1 due to different q convention in ISAW vs Mantid.
-	
-FSQ = integrated intensity of peak (scaled)
-	
-SIGFSQ = sigma from integrating peak
-	
-hstnum = number of sample orientation (starting at 1)
-	
-WL = wavelength of peak
-	
-TBAR = output of absorption correction (-log(transmission)/mu)
-	
-CURHST = run number of sample
-	
-SEQNUM = peak number (unique number for each peak in file)
-	
-TRANSMISSION = output of absorption correction (exp(-mu*tbar))
-	
-DN = detector bank number
-	
-TWOTH = two-theta scattering angle
-	
-DSP = d-Spacing of peak (Angstroms)/TR
-
-Last line must have all 0's
-
-
-
-*WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/SaveHKL.h"
@@ -97,12 +63,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveHKL::initDocs()
-  {
-    this->setWikiSummary("Save a PeaksWorkspace to a ASCII .hkl file.");
-    this->setOptionalMessage("Save a PeaksWorkspace to a ASCII .hkl file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -578,4 +538,3 @@ namespace Crystal
 
 } // namespace Mantid
 } // namespace Crystal
-

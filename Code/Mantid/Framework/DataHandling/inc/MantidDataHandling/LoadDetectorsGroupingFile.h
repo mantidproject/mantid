@@ -54,14 +54,16 @@ namespace DataHandling
     
     ///
     virtual const std::string name() const { return "LoadDetectorsGroupingFile";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Load an XML or Map file, which contains definition of detectors grouping, to a GroupingWorkspace).";}
+
     /// Algorithm's version for identification
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "DataHandling;Transforms\\Grouping";}
 
    private:
-     /// Sets documentation strings for this algorithm
-     virtual void initDocs();
+     
      /// Initialise the properties
      void init();
      /// Run the algorithm

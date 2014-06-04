@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-Re-reduce REFL data for an entire experiment using saved parameters
-
-*WIKI*"""
-
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -30,10 +24,10 @@ class REFLReprocess(PythonAlgorithm):
     def name(self):
         return "REFLReprocess"
 
-    def PyInit(self):
-        self.setOptionalMessage("Re-reduce REFL data for an entire experiment using saved parameters")
-        self.setWikiSummary("Re-reduce REFL data for an entire experiment using saved parameters")
-        
+    def summary(self):
+        return "Re-reduce REFL data for an entire experiment using saved parameters"
+
+    def PyInit(self):        
         self.declareProperty("IPTS", '0', "IPTS number to process")
         self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.OptionalDirectory))
         self.declareProperty("LoadProcessed", False, "If True, data will be loaded instead of being processed")
@@ -228,4 +222,3 @@ def _average_y_of_same_x_(q_min, q_step, q_max=2):
 #############################################################################################
 
 AlgorithmFactory.subscribe(REFLReprocess)
-

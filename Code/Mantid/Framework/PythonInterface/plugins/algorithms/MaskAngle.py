@@ -1,9 +1,3 @@
-"""*WIKI*
-Algorithm to mask detectors with scattering angles in a given interval (in degrees)
-By default MinAngle=0, MaxAngle=180, so if no keywords are set, all detectors are going to be masked
-Returns a list of detectors that were masked
-*WIKI*"""
-
 import mantid.simpleapi  
 import mantid.kernel
 import mantid.api
@@ -22,9 +16,13 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         """ Mantid require
         """
         return "MaskAngle"
-    
+
+    def summary(self):
+        """ Mantid require
+        """
+        return "Algorithm to mask detectors with scattering angles in a given interval (in degrees)."
+        
     def PyInit(self):
-        self.setOptionalMessage("Algorithm to mask detectors with scattering angles in a given interval (in degrees)")
         self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.Input,validator=mantid.api.InstrumentValidator()), "Input workspace")
         angleValidator=mantid.kernel.FloatBoundedValidator()
         angleValidator.setBounds(0.,180.)

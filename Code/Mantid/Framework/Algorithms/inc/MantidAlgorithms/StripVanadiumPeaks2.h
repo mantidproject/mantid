@@ -42,23 +42,18 @@ namespace Algorithms
       ~StripVanadiumPeaks2();
 
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const
-      {
-        return "StripVanadiumPeaks";
-      }
+      virtual const std::string name() const { return "StripVanadiumPeaks"; }
       /// Algorithm's version for identification overriding a virtual method
-      virtual int version() const
-      {
-        return 2;
-      }
+      virtual int version() const { return 2; }
       /// Algorithm's category for identification
-      virtual const std::string category() const
+      virtual const std::string category() const { return "CorrectionFunctions;Optimization\\PeakFinding;Diffraction";}
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const
       {
-        return "CorrectionFunctions;Optimization\\PeakFinding;Diffraction";
+        return "This algorithm removes peaks (at vanadium d-spacing positions by default)"
+            " out of a background by linearly/quadratically interpolating over the expected peak positions. ";
       }
-
     private:
-      void initDocs();
       void init();
       void exec();
 

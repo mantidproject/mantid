@@ -40,11 +40,13 @@ namespace Crystal
     virtual ~PeakIntensityVsRadius();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculate the integrated intensity of peaks vs integration radius.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
     std::map<std::string, std::string> validateInputs();

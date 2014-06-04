@@ -1,14 +1,3 @@
-/*WIKI* 
-
-Loads a GSS file such as that saved by [[SaveGSS]].
-
-Two types of GSAS files are supported
- * RALF
- * SLOG
-
-
-
-*WIKI*/
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
@@ -68,15 +57,6 @@ namespace Mantid
         }
       }
       return 0;
-    }
-
-    /// Sets documentation strings for this algorithm
-    void LoadGSS::initDocs()
-    {
-      this->setWikiSummary(
-          "<p>Loads a GSS file such as that saved by [[SaveGSS]]. This is not a lossless process, as SaveGSS truncates some data. There is no instrument assosciated with the resulting workspace.</p><p>'''Please Note''': Due to limitations of the GSS file format, the process of going from Mantid to a GSS file and back is not perfect.</p>");
-      this->setOptionalMessage(
-          "Loads a GSS file such as that saved by SaveGSS. This is not a lossless process, as SaveGSS truncates some data. There is no instrument assosciated with the resulting workspace.  'Please Note': Due to limitations of the GSS file format, the process of going from Mantid to a GSS file and back is not perfect.");
     }
 
     /**

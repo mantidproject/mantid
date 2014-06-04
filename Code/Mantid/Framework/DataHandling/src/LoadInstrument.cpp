@@ -1,12 +1,3 @@
-/*WIKI* 
-
-Loads an instrument definition file ([[InstrumentDefinitionFile|IDF]]) into a workspace, which contains information about detector positions, their geometric shape, slit properties, links between values stored in ISIS log-files and components of the instrument and so on. For more on IDFs see: [[InstrumentDefinitionFile]].
-
-By default the algorithm will write a 1:1 map between the spectrum number and detector ID. Any custom loading algorithm that calls this as a Child Algorithm will therefore get this 1:1 map be default. If the custom loader is to write its own map then it is advised to set <code>RewriteSpectraMap</code> to false to avoid extra work. 
-
-The instrument to load can be specified by either the InstrumentXML, Filename and InstrumentName properties (given here in order of precedence if more than one is set). At present, if the InstrumentXML is used the InstrumentName property should also be set.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -59,13 +50,6 @@ namespace Mantid
   {
 
     DECLARE_ALGORITHM(LoadInstrument)
-    
-    /// Sets documentation strings for this algorithm
-    void LoadInstrument::initDocs()
-    {
-      this->setWikiSummary("Loads an Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) into a [[workspace]]. This algorithm is typically run as a child algorithm to the data loading algorithm, rather than as a top-level algorithm. After the IDF has been read this algorithm will attempt to run the child algorithm [[LoadParameterFile]]; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the ParameterDefinition.directory [[Properties_File|Mantid property]]).");
-      this->setOptionalMessage("Loads an Instrument Definition File (IDF) into a workspace. After the IDF has been read this algorithm will attempt to run the Child Algorithm LoadParameterFile; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the parameterDefinition.directory Mantid property).");
-    }
     
 
     using namespace Kernel;

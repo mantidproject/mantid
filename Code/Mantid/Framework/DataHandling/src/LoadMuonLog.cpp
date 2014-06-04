@@ -1,13 +1,3 @@
-/*WIKI* 
-
-The Algorithm is very similar to [[LoadLog]] except that the source of the data is a Muon Nexus file.
-
-===Parent algorithm===
-LoadMuonLog is also a child algorithm of [[LoadMuonNexus]], i.e. it gets called whenever LoadMuonNexus is executed. 
-
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -27,13 +17,6 @@ namespace DataHandling
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadMuonLog)
-
-/// Sets documentation strings for this algorithm
-void LoadMuonLog::initDocs()
-{
-  this->setWikiSummary("Load log data from within Muon Nexus files into a [[workspace]]. ");
-  this->setOptionalMessage("Load log data from within Muon Nexus files into a workspace.");
-}
 
 
 using namespace Kernel;

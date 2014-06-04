@@ -44,12 +44,14 @@ namespace Algorithms
     virtual ~CopyLogs();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Copies the sample logs from one workspace to another.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    /// Functions inherited from algorithm
-    virtual void initDocs();
+    
     void init();
     void exec();
 

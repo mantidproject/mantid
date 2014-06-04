@@ -1,11 +1,3 @@
-/*WIKI* 
-
-Performs a solid angle correction on all detector (non-monitor) spectra. 
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -58,13 +50,6 @@ static double getYTubeAngle(IDetector_const_sptr det,
 	sampleDetVec.setX(0.0);
 
 	return sampleDetVec.angle(beamLine);
-}
-
-/// Sets documentation strings for this algorithm
-void SANSSolidAngleCorrection::initDocs()
-{
-  this->setWikiSummary("Performs solid angle correction on SANS 2D data.");
-  this->setOptionalMessage("Performs solid angle correction on SANS 2D data.");
 }
 
 void SANSSolidAngleCorrection::init()
@@ -241,4 +226,3 @@ void SANSSolidAngleCorrection::execEvent()
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

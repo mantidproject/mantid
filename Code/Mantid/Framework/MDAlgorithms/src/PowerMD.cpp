@@ -1,15 +1,3 @@
-/*WIKI*
-
-This executes the power function on a MDHistoWorkspace.
-
-The signal <math>a</math> becomes <math> f = a^b </math>
-
-The error <math>da</math> becomes <math> df^2 = f^2 * b^2 * (da^2 / a^2) </math>
-
-This algorithm cannot be run on a [[MDEventWorkspace]]. Its equivalent on a [[MatrixWorkspace]] is called [[Power]].
-
-*WIKI*/
-
 #include "MantidMDAlgorithms/PowerMD.h"
 #include "MantidKernel/System.h"
 
@@ -44,12 +32,6 @@ namespace MDAlgorithms
   int PowerMD::version() const { return 1;};
   
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void PowerMD::initDocs()
-  {
-    this->setWikiSummary("Raise a [[MDHistoWorkspace]] to a power.");
-    this->setOptionalMessage("Raise a MDHistoWorkspace to a power");
-  }
 
   //----------------------------------------------------------------------------------------------
   /// Optional method to be subclassed to add properties

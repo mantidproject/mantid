@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -24,13 +20,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSDirectBeamScaling)
-
-/// Sets documentation strings for this algorithm
-void SANSDirectBeamScaling::initDocs()
-{
-  this->setWikiSummary("Computes the scaling factor to get reduced SANS data on an absolute scale.");
-  this->setOptionalMessage("Computes the scaling factor to get reduced SANS data on an absolute scale.");
-}
 
 
 using namespace Kernel;
@@ -171,4 +160,3 @@ void SANSDirectBeamScaling::exec()
 
 } // namespace Algorithms
 } // namespace Mantid
-

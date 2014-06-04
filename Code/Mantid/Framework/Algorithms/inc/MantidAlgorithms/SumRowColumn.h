@@ -64,14 +64,16 @@ public:
   virtual ~SumRowColumn() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SumRowColumn"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "SANS-specific algorithm which gives a single spectrum containing the total counts in either each row or each column of pixels in a square LOQ or SANS2D detector bank.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "SANS;Transforms\\Grouping"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   ///Execution code

@@ -1,15 +1,3 @@
-/*WIKI* 
-
-* A list of vanadium peak positions in d-spacing is used for the central peak positions: 0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401
-** You can specify AlternativePeakPositions to use other value (e.g. in other units).
-
-* The PeakWidthPercent value is used to estimate the width of the peak (as a percentage of the d-spacing value).
-* The algorithm performs a simple linear fit of the background exluding the peak.
-** It uses two use averaging regions of 1/2 width, centered at +- width/2 from the center, and interpolates the linear background from it.
-** The values between the average regions are replaced with the interpolated linear background drawn as a straight line.
-
-*WIKI*/
-
 #include "MantidAlgorithms/StripVanadiumPeaks.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -25,13 +13,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(StripVanadiumPeaks)
-
-/// Sets documentation strings for this algorithm
-void StripVanadiumPeaks::initDocs()
-{
-  this->setWikiSummary("This algorithm removes peaks (at vanadium d-spacing positions by default) out of a background by linearly interpolating over the expected peak positions. ");
-  this->setOptionalMessage("This algorithm removes peaks (at vanadium d-spacing positions by default) out of a background by linearly interpolating over the expected peak positions.");
-}
 
 
 using namespace Kernel;

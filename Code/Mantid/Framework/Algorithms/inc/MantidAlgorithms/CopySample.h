@@ -51,14 +51,16 @@ namespace Algorithms
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "CopySample";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Copy some/all the sample information from one workspace to another.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Sample;Utility\\Workspaces;DataHandling";}
     virtual std::map<std::string, std::string> validateInputs();
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm

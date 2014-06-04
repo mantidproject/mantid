@@ -1,9 +1,3 @@
-/*WIKI* 
-
-Uses the binary operation algorithms [[Multiply]] or [[Plus]] to scale the input workspace by the amount requested. This algorithm is provided as a simple, but less powerful, alternative to the python [[Workspace_Algebra|workspace algebra]] functionality.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -17,13 +11,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Scale)
-
-/// Sets documentation strings for this algorithm
-void Scale::initDocs()
-{
-  this->setWikiSummary("Scales an input workspace by the given factor, which can be either multiplicative or additive. ");
-  this->setOptionalMessage("Scales an input workspace by the given factor, which can be either multiplicative or additive.");
-}
 
 
 using namespace Kernel;
@@ -65,4 +52,3 @@ void Scale::exec()
 
 } // namespace Algorithms
 } // namespace Mantid
-

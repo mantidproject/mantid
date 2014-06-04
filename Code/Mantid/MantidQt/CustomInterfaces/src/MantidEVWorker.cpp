@@ -614,12 +614,16 @@ bool MantidEVWorker::indexPeaksWithUB( const std::string & peaks_ws_name,
  *                           is allowed for a possible cell to be listed.
  *  @param best_only         If true, only the best fitting cell of any
  *                           particular type will be displayed.
+ *  @param allow_perm        If true, permutations are used to find the
+ *                           best fitting cell of any
+ *                           particular type.
  *
  *  @return true if the ShowPossibleCells algorithm completes successfully.
  */
 bool MantidEVWorker::showCells( const std::string & peaks_ws_name,
                                       double        max_scalar_error,
-                                      bool          best_only )
+                                      bool          best_only,
+                                      bool          allow_perm)
 {
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
@@ -628,6 +632,7 @@ bool MantidEVWorker::showCells( const std::string & peaks_ws_name,
   alg->setProperty("PeaksWorkspace",peaks_ws_name);
   alg->setProperty("MaxScalarError",max_scalar_error);
   alg->setProperty("BestOnly",best_only);
+  alg->setProperty("AllowPermutations",allow_perm);
 
   if ( alg->execute() )
     return true;

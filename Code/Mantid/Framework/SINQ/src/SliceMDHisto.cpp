@@ -142,8 +142,3 @@ void SliceMDHisto::copyMetaData( Mantid::API::IMDHistoWorkspace_sptr inws,  Mant
 	}
 }
 
-void SliceMDHisto::initDocs()
-{
-    this->setWikiSummary("Extracts a hyperslab of data from a MDHistoWorkspace");
-}
-

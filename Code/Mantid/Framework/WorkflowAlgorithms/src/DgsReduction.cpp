@@ -1,19 +1,3 @@
-/*WIKI*
-
-This is the top-level workflow algorithm for direct geometry spectrometer
-data reduction. This algorithm is responsible for gathering the necessary
-parameters and generating calls to other workflow or standard algorithms.
-
-=== Workflow ===
-Parameters for the child algorithms are not shown due to sheer number. They
-will be detailed in the child algorithm diagrams. Items in parallelograms are
-output workspaces from their respective algorithms. Not all output workspaces
-are subsequently used by other algorithms.
-
-[[File:DgsReductionWorkflow.png]]
-
- *WIKI*/
-
 #include "MantidWorkflowAlgorithms/DgsReduction.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -70,12 +54,6 @@ namespace Mantid
     const std::string DgsReduction::category() const { return "Workflow\\Inelastic"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void DgsReduction::initDocs()
-    {
-      this->setWikiSummary("Top-level workflow algorithm for DGS reduction.");
-      this->setOptionalMessage("Top-level workflow algorithm for DGS reduction.");
-    }
 
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.

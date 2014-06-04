@@ -60,23 +60,20 @@ if ( SPHINX_FOUND )
     DEPENDS ${SPHINX_CONF_FILES}
     COMMENT "Generating Python API for sphinx"
   )
+  # Group within VS and exclude from whole build
+  set_target_properties ( ${TARGET_NAME}-generateapi PROPERTIES FOLDER "Documentation/python"
+                                                EXCLUDE_FROM_DEFAULT_BUILD 1
+                                                EXCLUDE_FROM_ALL 1)
 
+  
   # HTML target
   set ( SPHINX_HTML_BUILD ${SPHINX_BUILD}/html )
   add_custom_target ( ${TARGET_NAME}-html 
     COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MantidPlot -xq runsphinx_html.py
     COMMENT "Build Sphinx html documentation"
   )
-  add_dependencies( ${TARGET_NAME}-html ${TARGET_NAME}-generateapi )
-
-  # Latex target
-  set ( SPHINX_LATEX_BUILD ${SPHINX_BUILD}/latex )
-  add_custom_target ( ${TARGET_NAME}-latex 
-    COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MantidPlot -xq runsphinx_latex.py
-    COMMENT "Build Python Sphinx latex documentation"
-  )
-  add_dependencies( ${TARGET_NAME}-latex ${TARGET_NAME}-generateapi )
-
-  
-
+  # Group within VS and exclude from whole build
+  set_target_properties ( ${TARGET_NAME}-html PROPERTIES FOLDER "Documentation/python"
+                                                EXCLUDE_FROM_DEFAULT_BUILD 1
+                                                EXCLUDE_FROM_ALL 1)
 endif ()

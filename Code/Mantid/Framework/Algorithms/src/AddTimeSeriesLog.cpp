@@ -1,23 +1,3 @@
-/*WIKI*
-Creates/updates a time-series log entry on a chosen workspace. The given timestamp & value are appended to the
-named log entry. If the named entry does not exist then a new log is created. A time stamp must be given in
-ISO8601 format, e.g. 2010-09-14T04:20:12.
-
-By default, the given value is interpreted as a double and a double series is either created or expected. However,
-if the "Type" is set to "int" then the value is interpreted as an integer and an integer is either created
-or expected.
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
- import datetime as dt
-
- # Add an entry for the current time
- log_name = "temperature"
- log_value = 21.5
- AddTimeSeriesLog(inOutWS, Name=log_name, Time=dt.datetime.utcnow().isoformat(), Value=log_value)
-
-*WIKI_USAGE*/
-
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
 #include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -76,12 +56,6 @@ namespace Mantid
     const std::string AddTimeSeriesLog::category() const { return "DataHandling\\Logs"; }
 
     //----------------------------------------------------------------------------------------------
-    /// Sets documentation strings for this algorithm
-    void AddTimeSeriesLog::initDocs()
-    {
-      this->setWikiSummary("Creates/updates a time-series log");
-      this->setOptionalMessage("Creates/updates a time-series log");
-    }
 
     //----------------------------------------------------------------------------------------------
     /**

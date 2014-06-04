@@ -1,25 +1,3 @@
-/*WIKI*
-Multiply two [[MDHistoWorkspace]]'s or a MDHistoWorkspace and a scalar.
-
-The error of <math> f = a * b </math> is propagated with <math>df^2 = f^2 * (da^2 / a^2 + db^2 / b^2)</math>
-
-* '''MDHistoWorkspace * MDHistoWorkspace'''
-** The operation is performed element-by-element.
-* '''MDHistoWorkspace * Scalar''' or '''Scalar * MDHistoWorkspace'''
-** Every element of the MDHistoWorkspace is multiplied by the scalar.
-* '''[[MDEventWorkspace]]'s'''
-** This operation is not supported, as it is not clear what its meaning would be.
-*WIKI*/
-/*WIKI_USAGE*
- C = A * B
- C = A * 123.4
- A *= B
- A *= 123.4
-
-See [[MDHistoWorkspace#Arithmetic_Operations|this page]] for examples on using arithmetic operations.
-
-*WIKI_USAGE*/
-
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/MultiplyMD.h"
 #include "MantidMDEvents/MDBoxBase.h"
@@ -59,12 +37,6 @@ namespace MDAlgorithms
   int MultiplyMD::version() const { return 1;};
   
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void MultiplyMD::initDocs()
-  {
-    this->setWikiSummary("Multiply a [[MDHistoWorkspace]] by another one or a scalar.");
-    this->setOptionalMessage("Multiply a MDHistoWorkspace by another one or a scalar.");
-  }
 
 
   //----------------------------------------------------------------------------------------------

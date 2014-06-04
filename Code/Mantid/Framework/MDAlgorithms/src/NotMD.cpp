@@ -1,19 +1,3 @@
-/*WIKI*
-
-Perform the Not (negation) boolean operation on a [[MDHistoWorkspace]].
-The not operation is performed element-by-element.
-Any 0.0 signal is changed to 1.0 (meaning true).
-Any non-zero signal is changed to 0.0 (meaning false).
-
-*WIKI*/
-/*WIKI_USAGE*
- B = ~A
- A = ~A
-
-See [[MDHistoWorkspace#Boolean_Operations|this page]] for examples on using boolean operations.
-
-*WIKI_USAGE*/
-
 #include "MantidMDAlgorithms/NotMD.h"
 #include "MantidKernel/System.h"
 
@@ -48,12 +32,6 @@ namespace MDAlgorithms
   int NotMD::version() const { return 1;};
   
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void NotMD::initDocs()
-  {
-    this->setWikiSummary("Performs a boolean negation on a [[MDHistoWorkspace]].");
-    this->setOptionalMessage("Performs a boolean negation on a MDHistoWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /// Check the inputs and throw if the algorithm cannot be run

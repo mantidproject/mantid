@@ -62,6 +62,9 @@ namespace Mantid
       virtual ~LoadCanSAS1D();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadCanSAS1D"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Load a file written in the canSAS 1-D data format";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
@@ -71,8 +74,7 @@ namespace Mantid
       virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
     protected:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// If a workspace group is created this is set from empty to the root name of the members, the name of the workspace group members up to and including the _
       std::string m_groupMembersBase;
       /// When a workspace group is being written this is the number of the last member that was written

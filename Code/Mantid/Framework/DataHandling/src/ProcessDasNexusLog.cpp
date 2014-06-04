@@ -1,8 +1,3 @@
-/*WIKI*
-
-Some sample logs from DAS are written in the format such that the time stamps are the pulse times and the values are time-of-flight. They are usually used to record some mono-value sample log such as turning on or off of a sample environment device.  This algorithm will convert sample logs of this time such that the new log will have the time stamp as the absolute time, i.e., sum of pulse time and time-of-flight. 
-  
-*WIKI*/
 #include "MantidDataHandling/ProcessDasNexusLog.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -37,13 +32,6 @@ namespace DataHandling
    */
   ProcessDasNexusLog::~ProcessDasNexusLog()
   {
-  }
-  
-  void ProcessDasNexusLog::initDocs(){
-    this->setWikiSummary("Some sample logs recorded by the SNS data acquisition group (DAS) are not usable. This very specialized algorithm will process sample logs of this type. ");
-    this->setOptionalMessage("Very specialized algorithm to fix certain SNS DAS logs that cannot be used directly.");
-
-    return;
   }
 
   void ProcessDasNexusLog::init()

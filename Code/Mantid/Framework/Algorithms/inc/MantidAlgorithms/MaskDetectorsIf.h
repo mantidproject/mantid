@@ -56,14 +56,16 @@ public:
   virtual ~MaskDetectorsIf();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "MaskDetectorsIf"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Adjusts the selected field for a CalFile depending on the values in the input workspace.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction;Transforms\\Masking"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Returns an allowed values statement to insert into decumentation
   std::string allowedValuesStatement( std::vector<std::string> vals);
 #ifndef HAS_UNORDERED_MAP_H

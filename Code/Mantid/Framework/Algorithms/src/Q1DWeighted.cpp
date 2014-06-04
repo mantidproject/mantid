@@ -1,13 +1,3 @@
-/*WIKI* 
-
-Performs azimuthal averaging for a 2D SANS data set by going through each detector pixel, determining its Q-value, and adding its amplitude <math>I</math> to the appropriate Q bin. For greater precision, each detector pixel can be sub-divided in sub-pixels by setting the ''NPixelDivision'' parameters. Each pixel has a weight of 1 by default, but the weight of each pixel can be set to <math>1/\Delta I^2</math> by setting the ''ErrorWeighting'' parameter to True.
-
-
-See the [http://www.mantidproject.org/Rebin Rebin] documentation for details about choosing the ''OutputBinning'' parameter.
-
-See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for calculation details.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -30,13 +20,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Q1DWeighted)
-
-/// Sets documentation strings for this algorithm
-void Q1DWeighted::initDocs()
-{
-  this->setWikiSummary("Performs azimuthal averaging on a 2D SANS data to produce I(Q). ");
-  this->setOptionalMessage("Performs azimuthal averaging on a 2D SANS data to produce I(Q).");
-}
 
 
 using namespace Kernel;

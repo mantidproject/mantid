@@ -39,11 +39,13 @@ namespace MDEvents
     virtual ~ConvertToReflectometryQ();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Transforms from real-space to Q or momentum space for reflectometry workspaces";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
   };

@@ -1,19 +1,3 @@
-/*WIKI* 
-
-
-This algorithm corrects the data and error values on a workspace by the value of one minus an exponential function
-of the form <math> \rm C1(1 - e^{-{\rm C} x}) </math>.
-This formula is calculated for each data point, with the value of ''x'' 
-being the mid-point of the bin in the case of histogram data.
-The data and error values are either divided or multiplied by the value of this function, according to the
-setting of the Operation property.
-
-This algorithm is now event aware.
-
-This correction is applied to a copy of the input workpace and put into output workspace.
-If the input and output workspaces have the same name, the operation is applied to the workspace of that name.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -30,13 +14,6 @@ namespace Algorithms
 {
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(OneMinusExponentialCor)
-  
-  /// Sets documentation strings for this algorithm
-  void OneMinusExponentialCor::initDocs()
-  {
-    this->setWikiSummary("Corrects the data in a workspace by one minus the value of an exponential function. ");
-    this->setOptionalMessage("Corrects the data in a workspace by one minus the value of an exponential function.");
-  }
   
 
   void OneMinusExponentialCor::defineProperties()

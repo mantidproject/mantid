@@ -1,10 +1,3 @@
-/*WIKI* 
-
-
-Given a PeaksWorkspace with a UB matrix stored with the sample, this algoritm will accept a 3x3 transformation matrix M, change UB to UB*M-inverse and map each (HKL) vector to M*(HKL). For example, the transformation with elements 0,1,0,1,0,0,0,0,-1 will interchange the H and K values and negate L.  This algorithm should allow the usr to perform any required transformation of the Miller indicies, provided that transformation has a positive determinant.  If a transformation with a negative or zero determinant is entered, the algorithm with throw an exception.  The 9 elements of the transformation must be specified as a comma separated list of numbers.
-
-
-*WIKI*/
 #include "MantidCrystal/TransformHKL.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -57,20 +50,6 @@ namespace Crystal
   const std::string TransformHKL::category() const
   {
     return "Crystal";
-  }
-
-  //--------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void TransformHKL::initDocs()
-  {
-    std::string summary("Adjust the UB stored with the sample to map the peak's  ");
-    summary += "(HKL) vectors to M*(HKL)";
-    this->setWikiSummary( summary );
-
-    std::string message("Specify a 3x3 matrix to apply to (HKL) vectors.");
-    message += " as a list of 9 comma separated numbers.";
-    message += " Both the UB and HKL values will be updated";
-    this->setOptionalMessage( message );
   }
 
   //--------------------------------------------------------------------------
@@ -214,4 +193,3 @@ namespace Crystal
 
 } // namespace Mantid
 } // namespace Crystal
-

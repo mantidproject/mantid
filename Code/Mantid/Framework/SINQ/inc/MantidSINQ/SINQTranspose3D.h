@@ -44,6 +44,9 @@ public:
   virtual ~SINQTranspose3D() {}
   /// Algorithm's name
   virtual const std::string name() const { return "Transpose3D"; }
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "SINQ specific MD data reordering";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -59,8 +62,6 @@ private:
   void doXZY( Mantid::API::IMDHistoWorkspace_sptr inws);
   void doTRICS( Mantid::API::IMDHistoWorkspace_sptr inws);
   void doAMOR( Mantid::API::IMDHistoWorkspace_sptr inws);
-
-  virtual void initDocs();
 
   void copyMetaData( Mantid::API::IMDHistoWorkspace_sptr inws,  Mantid::API::IMDHistoWorkspace_sptr outws);
 };

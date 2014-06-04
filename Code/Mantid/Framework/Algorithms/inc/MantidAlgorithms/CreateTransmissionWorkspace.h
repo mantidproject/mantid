@@ -38,6 +38,9 @@ namespace Mantid
       virtual ~CreateTransmissionWorkspace();
 
       virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Creates a transmission run workspace in Wavelength from input TOF workspaces.";}
+
       virtual int version() const;
       virtual const std::string category() const;
 
@@ -53,7 +56,7 @@ namespace Mantid
           const OptionalDouble& stitchingStartOverlapQ, const OptionalDouble& stitchingEndOverlapQ,
           const double& wavelengthStep);
 
-      virtual void initDocs();
+  
       void init();
       void exec();
 
