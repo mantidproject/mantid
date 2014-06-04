@@ -55,11 +55,6 @@ PoldiAutoCorrelation operates on a MatrixWorkspace with a valid POLDI instrument
     # The first spectrum contains the correlation data. In this case there should be 5531 bins.
     # On other data or different wavelength limits, this number will be different.
     print "The correlation spectrum has", len(correlated_6904.readY(0)), "data points."
-                         
-.. testcleanup:: ExSilicon
-
-    DeleteWorkspace(raw_6904)
-    DeleteWorkspace(correlated_6904)
 
 Output:    
     
