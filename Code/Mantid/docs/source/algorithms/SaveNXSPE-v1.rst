@@ -28,7 +28,7 @@ detectors parameters from the instrument description.
 Usage
 -----
 
-**Example - simple rebin of a histogram workspace:**  
+**Example - Save/Load "Roundtrip"**
 
 .. testcode:: ExSimpleSavingRoundtrip
 

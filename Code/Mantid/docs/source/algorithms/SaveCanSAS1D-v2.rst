@@ -9,12 +9,12 @@
 .. _version 1.0: http://www.cansas.org/formats/1.0/cansas1d.xsd
 .. _Version 1.1: http://www.cansas.org/formats/1.1/cansas1d.xsd
 .. _canSAS Wiki: http://www.cansas.org/formats/canSAS1d/1.1/doc/
+.. _MatrixWorkspace: http://www.mantidproject.org/MatrixWorkspace
 
 Description
 -----------
 
-Saves the given `MatrixWorkspace <MatrixWorkspace>`__ to a file in the canSAS
-1-D format.
+Saves the given `MatrixWorkspace`_ to a file in the canSAS 1-D format.
 
 The canSAS 1-D Format
 #####################
@@ -37,7 +37,7 @@ You can export data to files using `version 1.0`_ of the specification by using 
 Usage
 -----
 
-**Example - simple rebin of a histogram workspace:**  
+**Example - Save/Load "Roundtrip"**
 
 .. testcode:: ExSimpleSavingRoundtrip
 
@@ -46,7 +46,7 @@ Usage
    # Create dummy workspace.
    dataX = [0,1,2,3]
    dataY = [9,5,7]
-   out_ws = CreateWorkspace(dataX, dataY,UnitX="MomentumTransfer")
+   out_ws = CreateWorkspace(dataX, dataY, UnitX="MomentumTransfer")
 
    file_path = os.path.join(config["defaultsave.directory"], "canSASData.xml")
 

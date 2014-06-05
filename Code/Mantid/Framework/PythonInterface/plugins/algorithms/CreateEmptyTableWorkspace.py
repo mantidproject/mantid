@@ -5,7 +5,7 @@ from mantid.kernel import Direction
 class CreateEmptyTableWorkspace(PythonAlgorithm):
 
     def summary(self):
-        return "Creates an empty table workspace that can be populated by python code"
+        return "Creates an empty TableWorkspace which can be populated with various types of information."
 
     def PyInit(self):
         # Declare properties
