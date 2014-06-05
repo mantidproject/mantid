@@ -211,6 +211,7 @@ set ( SRC_FILES
 	src/SpecularReflectionCalculateTheta.cpp
 	src/SpecularReflectionPositionCorrect.cpp
 	src/SphericalAbsorption.cpp
+	src/Stitch1D.cpp
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
 	src/StripVanadiumPeaks2.cpp
@@ -446,6 +447,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SpecularReflectionCalculateTheta.h
 	inc/MantidAlgorithms/SpecularReflectionPositionCorrect.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
+	inc/MantidAlgorithms/Stitch1D.h
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
@@ -670,6 +672,7 @@ set ( TEST_FILES
 	SpecularReflectionCalculateThetaTest.h
 	SpecularReflectionPositionCorrectTest.h
 	SphericalAbsorptionTest.h
+	Stitch1DTest.h
 	StripPeaksTest.h
 	StripVanadiumPeaks2Test.h
 	StripVanadiumPeaksTest.h
