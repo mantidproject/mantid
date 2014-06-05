@@ -54,7 +54,7 @@ const std::string PoldiFitPeaks1D::name() const { return "PoldiFitPeaks1D";}
 int PoldiFitPeaks1D::version() const { return 1;}
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PoldiFitPeaks1D::category() const { return "SINQ\\Poldi\\PoldiSet"; }
+const std::string PoldiFitPeaks1D::category() const { return "SINQ\\Poldi"; }
 
 void PoldiFitPeaks1D::init()
 {
