@@ -55,7 +55,7 @@ public:
   /// Algorithm's name
   virtual const std::string name() const { return "SofQW"; }
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>.";}
+    virtual const std::string summary() const {return "Converts a 2D workspace that has axes of :math:`\\Delta E` against spectrum number to one that gives intensity as a function of momentum transfer against energy: :math:`\\rm{S}\\left( q, \\omega \\right)`.";}
 
   /// Algorithm's version
   virtual int version() const { return (1); }
