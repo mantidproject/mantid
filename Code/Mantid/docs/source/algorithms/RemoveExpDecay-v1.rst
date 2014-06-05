@@ -22,36 +22,22 @@ fitted normalisation constant.
 Usage
 -----
 
-.. include:: ../usagedata-note.txt
+**Example - Removing exponential decay:**
 
-**Example - Removing exponential decay from a MUSR run:**
+.. testcode:: ExSimple
 
-.. testcode:: ExMUSR
+   y = [100, 150, 50, 10, 5]
+   x = [1,2,3,4,5,6]
+   input = CreateWorkspace(x,y)
 
-   # Load first period of a MUSR run
-   input = LoadMuonNexus('MUSR0015189.nxs', EntryNumber=1)
+   output = RemoveExpDecay(input)
 
-   # Remove uninteresting bins
-   input = CropWorkspace('input', XMin=0.55, XMax=12)
-
-   # Remove exp. decay
-   output = RemoveExpDecay('input')
-
-   # Bins to compare
-   bins_to_compare = [0, 150, 300, 450, 600]
-
-   # Get values before&after and format them as strings for output
-   init_values = ["{:.3f}".format(input.readY(0)[bin]) for bin in bins_to_compare]
-   exp_dec_removed = ["{:.3f}".format(output.readY(0)[bin]) for bin in bins_to_compare]
-
-   print "Initial values", ", ".join(init_values)
-   print "Exp. decay removed:", ", ".join(exp_dec_removed)
+   print "Exp. decay removed:", ', '.join(['{:.3f}'.format(y) for y in output.readY(0)])
 
 Output:
 
-.. testoutput:: ExMUSR
+.. testoutput:: ExSimple
 
-   Initial values 49.000, 17.000, 2.000, 3.000, 0.000
-   Exp. decay removed: 0.090, 0.127, -0.605, 0.768, -0.824
+   Exp. decay removed: -0.243, 0.791, -0.059, -0.703, -0.766
 
 .. categories::

@@ -36,33 +36,25 @@ the asymmetry and the asymmetry errors.
 Usage
 -----
 
-.. include:: ../usagedata-note.txt
+**Example - Calculating asymmetry:**
 
-**Example - Calculating assymetry for a MUSR run:**
+.. testcode:: ExSimple
 
-.. testcode:: ExMUSR
+   y = [1,2,3] + [3,6,9]
+   x = [1,2,3,4] * 2
+   e = [1,1,1] * 2
+   input = CreateWorkspace(x, y, e, NSpec=2)
 
-   # Load some arbitrary MUSR run
-   ws = LoadMuonNexus('MUSR0015189.nxs')
+   asymmetry = AsymmetryCalc(input, Alpha=0.5)
 
-   asymmetry = AsymmetryCalc('ws_1', # Use first period only
-                             ForwardSpectra=range(33,65),
-                             BackwardSpectra=range(1,33),
-                             Alpha=1.0)
-
-   print 'No. of spectra in the resulting workspace:', asymmetry.getNumberHistograms()
-
-   output_format = 'For TOF of {:.3f} asymmetry is {:.3f} with error {:.3f}'
-   for i in [500, 1000, 1500]:
-      print output_format.format(asymmetry.readX(0)[i], asymmetry.readY(0)[i], asymmetry.readE(0)[i])
+   print 'Asymmetry:', ', '.join('{:.3f}'.format(y) for y in asymmetry.readY(0))
+   print 'Errors:', ', '.join('{:.3f}'.format(e) for e in asymmetry.readE(0))
 
 Output:
 
-.. testoutput:: ExMUSR
+.. testoutput:: ExSimple
 
-   No. of spectra in the resulting workspace: 1
-   For TOF of 7.450 asymmetry is -0.045 with error 0.080
-   For TOF of 15.450 asymmetry is -0.333 with error 0.609
-   For TOF of 23.450 asymmetry is 1.000 with error 1.414
+   Asymmetry: -0.200, -0.200, -0.200
+   Errors: 0.540, 0.382, 0.312
 
 .. categories::

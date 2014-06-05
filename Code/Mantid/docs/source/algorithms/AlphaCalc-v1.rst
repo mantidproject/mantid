@@ -19,26 +19,42 @@ in a workspace use :ref:`algm-MuonGroupDetectors`.
 Usage
 -----
 
-.. include:: ../usagedata-note.txt
+**Example - Calculating Alpha:**
 
-**Example - Calculating Alpha of a MUSR run:**
+.. testcode:: ExSimple
 
-.. testcode:: ExMUSRAlpha
+   y = [1,1,1,1,1] + [2,2,2,2,2]
+   x = [1,2,3,4,5,6] * 2
+   input = CreateWorkspace(x,y, NSpec=2)
 
-   loaded = LoadMuonNexus('MUSR0015189.nxs', AutoGroup=True)
+   alpha = AlphaCalc(input)
 
-   first_period = loaded[0].getItem(0)
-
-   alpha = AlphaCalc(first_period,
-                     FirstGoodValue=0.55,
-                     LastGoodValue=12.0)
-
-   print 'Alpha value of the first period: {:.3f}'.format(alpha)
+   print 'Alpha value: {:.3f}'.format(alpha)
 
 Output:
 
-.. testoutput:: ExMUSRAlpha
+.. testoutput:: ExSimple
 
-   Alpha value of the first period: 1.339
+   Alpha value: 0.500
+
+**Example - Calculating Alpha, reversing forward and backward spectra:**
+
+.. testcode:: ExReversed
+
+   y = [1,1,1,1,1] + [2,2,2,2,2]
+   x = [1,2,3,4,5,6] * 2
+   input = CreateWorkspace(x,y, NSpec=2)
+
+   alpha = AlphaCalc(input,
+                     ForwardSpectra=[2],
+                     BackwardSpectra=[1])
+
+   print 'Alpha value: {:.3f}'.format(alpha)
+
+Output:
+
+.. testoutput:: ExReversed
+
+   Alpha value: 2.000
 
 .. categories::
