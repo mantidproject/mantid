@@ -37,4 +37,45 @@ point data using the average of the bin boundaries. This will cause some
 values to fall outside of the range of the spline when fine bin
 boundaries are used.
 
+Usage
+-----
+
+**Example - interpolate between points in one workspace to match a reference workspace:**  
+
+.. testcode:: ExSplineInterpolationSimple
+
+    import numpy as np
+
+    #create a smooth function for interpolation
+    dataX1 = np.arange(1, 100) * 0.07
+    dataY1 = np.sin(dataX1)
+    spline_ws = CreateWorkspace(dataX1, dataY1)
+
+    #create some random points to interpolate between
+    dataX2 = np.arange(1,110,10) * 0.07
+    dataY2 = np.random.random_sample(dataX2.size) 
+    ws = CreateWorkspace(dataX2, dataY2)
+
+    #interpolate using the reference workspace
+    interpolated_ws = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws, DerivOrder=0)
+    
+**Example - output the derivatives of the interpolated workspace:**  
+
+.. testcode:: ExSplineInterpolationDeriv
+
+    import numpy as np
+
+    #create a smooth function for interpolation
+    dataX1 = np.arange(1, 100) * 0.07
+    dataY1 = np.sin(dataX1)
+    spline_ws = CreateWorkspace(dataX1, dataY1)
+
+    #create some random points to interpolate between
+    dataX2 = np.arange(1,110,10) * 0.07
+    dataY2 = np.random.random_sample(dataX2.size) 
+    ws = CreateWorkspace(dataX2, dataY2)
+
+    #interpolate using the reference workspace and output a group workspace of derivatives for each spectrum
+    interpolated_ws = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws, DerivOrder=2, OutputWorkspaceDeriv='derivs')
+
 .. categories::
