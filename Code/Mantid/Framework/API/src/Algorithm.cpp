@@ -625,6 +625,7 @@ namespace Mantid
           { 
             m_history->fillAlgorithmHistory(this, start_time, duration, Algorithm::g_execCount);
             fillHistory();
+            linkHistoryWithLastChild();
           }
 
           // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
@@ -1047,7 +1048,6 @@ namespace Mantid
       //this is a child algorithm, but we still want to keep the history.
       else if (m_recordHistoryForChild && m_parentHistory)
       {
-        linkHistoryWithLastChild();
         m_parentHistory->addChildHistory(m_history);
       }
 
@@ -1063,41 +1063,44 @@ namespace Mantid
     */
     void Algorithm::linkHistoryWithLastChild()
     {
-      // iterate over the algorithms output workspaces
-      const std::vector<Property*>& algProperties = getProperties();
-      std::vector<Property*>::const_iterator it;
-      for (it = algProperties.begin(); it != algProperties.end(); ++it)
+      if (m_recordHistoryForChild && m_parentHistory)
       {
-        const IWorkspaceProperty *outputProp = dynamic_cast<IWorkspaceProperty*>(*it);
-        if (outputProp)
+        // iterate over the algorithms output workspaces
+        const std::vector<Property*>& algProperties = getProperties();
+        std::vector<Property*>::const_iterator it;
+        for (it = algProperties.begin(); it != algProperties.end(); ++it)
         {
-          // Check we actually have a workspace, it may have been optional
-          Workspace_sptr workspace = outputProp->getWorkspace();
-          if( !workspace ) continue;
-
-          //Check it's an output workspace
-          if((*it)->direction() == Kernel::Direction::Output)
+          const IWorkspaceProperty *outputProp = dynamic_cast<IWorkspaceProperty*>(*it);
+          if (outputProp)
           {
-            bool linked = false;
-            //find child histories with anonymous output workspaces
-            auto childHistories = m_history->getChildHistories();
-            auto childIter = childHistories.rbegin();
-            for (; childIter != childHistories.rend() && !linked; ++childIter)
+            // Check we actually have a workspace, it may have been optional
+            Workspace_sptr workspace = outputProp->getWorkspace();
+            if( !workspace ) continue;
+
+            //Check it's an output workspace
+            if((*it)->direction() == Kernel::Direction::Output)
             {
-              auto props = (*childIter)->getProperties();
-              auto propIter = props.begin(); 
-              for (; propIter != props.end() && !linked; ++propIter)
+              bool linked = false;
+              //find child histories with anonymous output workspaces
+              auto childHistories = m_history->getChildHistories();
+              auto childIter = childHistories.rbegin();
+              for (; childIter != childHistories.rend() && !linked; ++childIter)
               {
-                //check we have a workspace property
-                if((*propIter)->direction() == Kernel::Direction::Output)
+                auto props = (*childIter)->getProperties();
+                auto propIter = props.begin(); 
+                for (; propIter != props.end() && !linked; ++propIter)
                 {
-                  //if the workspaces are equal, then rename the history
-                  std::ostringstream os;
-                  os << "__TMP" << outputProp->getWorkspace().get();
-                  if (os.str() == (*propIter)->value())
+                  //check we have a workspace property
+                  if((*propIter)->direction() == Kernel::Direction::Output)
                   {
-                    (*propIter)->setValue((*it)->value());
-                    linked = true;
+                    //if the workspaces are equal, then rename the history
+                    std::ostringstream os;
+                    os << "__TMP" << outputProp->getWorkspace().get();
+                    if (os.str() == (*propIter)->value())
+                    {
+                      (*propIter)->setValue((*it)->value());
+                      linked = true;
+                    }
                   }
                 }
               }
