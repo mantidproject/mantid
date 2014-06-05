@@ -58,16 +58,17 @@ namespace Mantid
       exts.push_back(".s*");
       exts.push_back(".add");
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                      "The name of the [[RAW_File | RAW]] file to read, including its full or relative path. The file extension must be .raw or .RAW (N.B. case sensitive if running on Linux)."); 
+                      "The name of the RAW file to read, including its full or relative path. The file extension must be .raw or .RAW (N.B. case sensitive if running on Linux).");
       declareProperty(new WorkspaceProperty<Workspace> ("OutputWorkspace", "", Direction::Output),
-                      "The name of the workspace that will be created, filled with the read-in data and stored in the [[Analysis Data Service]]. If the input [[RAW_File | RAW]] file contains multiple periods higher periods will be stored in separate workspaces called OutputWorkspace_PeriodNo.");
+                      "The name of the workspace that will be created, filled with the read-in data and stored in the Analysis Data Service. If the input RAW file contains multiple periods higher periods will be stored in separate workspaces called OutputWorkspace_PeriodNo.");
 
       m_cache_options.push_back("If Slow");
       m_cache_options.push_back("Always");
       m_cache_options.push_back("Never");
-      declareProperty("Cache", "If Slow", boost::make_shared<StringListValidator>(m_cache_options));
+      declareProperty("Cache", "If Slow", boost::make_shared<StringListValidator>(m_cache_options),
+                      "An option allowing the algorithm to cache a remote file on the local drive before loading. When \"If Slow\" is set the download speed is estimated and if is deemed as slow the file is cached. \"Always\" means always cache a remote file and \"Never\" - never cache.");
 
-      declareProperty("LoadLogFiles", true, "Boolean option to load or skip log files. If this option is set all the log files associated with the selected raw file are loaded into workspace and can be displayed using right click  menu item Sample Logs...on the selected workspace.\n'''Note:''' If the log files contain motor positions, etc. that would affect the instrument geometry this option must be set to true for these adjustments to be applied to the instrument geometry.");
+      declareProperty("LoadLogFiles", true, "Boolean option to load or skip log files. If this option is set all the log files associated with the selected raw file are loaded into workspace and can be displayed using right click  menu item Sample Logs...on the selected workspace.\nNote: If the log files contain motor positions, etc. that would affect the instrument geometry this option must be set to true for these adjustments to be applied to the instrument geometry.");
 
     }
     /**opens the raw file and returns the file pointer
