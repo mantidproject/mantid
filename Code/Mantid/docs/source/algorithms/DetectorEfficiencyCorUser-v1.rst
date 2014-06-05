@@ -29,9 +29,9 @@ this has been implemented at the ILL for ILL IN4, IN5 and IN6.
 Usage
 -----
 
-**Example - A simple linear correction**  
+**Example - A sample correction**  
 
-.. testcode:: ExLinear
+.. testcode:: Ex1
 
   # a sample workspace with a sample instrument
   ws = CreateSampleWorkspace()
@@ -53,7 +53,7 @@ Usage
 
 Output:
 
-.. testoutput:: ExLinear
+.. testoutput:: Ex1
 
     The correction correct the data by the user defined function.
     In this case: exp(-0.0565/sqrt(e))*(1.0-exp(-3.284/sqrt(e)))
