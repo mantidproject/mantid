@@ -76,6 +76,11 @@ namespace Mantid
 
       size_t m_numberOfHistograms;
 
+      /* Values parsed from the nexus file */
+      double m_wavelength;
+      double m_channelWidth;
+
+
       std::vector<std::string> m_supportedInstruments;
       LoadHelper m_loader;
 
