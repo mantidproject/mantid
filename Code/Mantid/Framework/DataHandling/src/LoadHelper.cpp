@@ -4,6 +4,7 @@
 
 #include "MantidDataHandling/LoadHelper.h"
 
+#include <nexus/napi.h>
 #include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
 
 namespace Mantid
@@ -13,7 +14,7 @@ namespace Mantid
 
     namespace
     {
-/// static logger
+      /// static logger
       Kernel::Logger g_log("LoadHelper");
     }
 
@@ -32,10 +33,10 @@ namespace Mantid
      * Finds the path for the instrument name in the nexus file
      * Usually of the form: entry0/\<NXinstrument class\>/name
      */
-    std::string LoadHelper::findInstrumentNexusPath(const NeXus::NXEntry &firstEntry)
+    std::string LoadHelper::findInstrumentNexusPath(const Mantid::NeXus::NXEntry &firstEntry)
     {
       std::string insNamePath = "";
-      std::vector<NeXus::NXClassInfo> v = firstEntry.groups();
+      std::vector<Mantid::NeXus::NXClassInfo> v = firstEntry.groups();
       for (auto it = v.begin(); it < v.end(); it++)
       {
         if (it->nxclass == "NXinstrument")
@@ -47,13 +48,13 @@ namespace Mantid
       return insNamePath;
     }
 
-    std::string LoadHelper::getStringFromNexusPath(const NeXus::NXEntry &firstEntry,
+    std::string LoadHelper::getStringFromNexusPath(const Mantid::NeXus::NXEntry &firstEntry,
         const std::string &nexusPath)
     {
       return firstEntry.getString(nexusPath);
     }
 
-    double LoadHelper::getDoubleFromNexusPath(const NeXus::NXEntry &firstEntry,
+    double LoadHelper::getDoubleFromNexusPath(const Mantid::NeXus::NXEntry &firstEntry,
         const std::string &nexusPath)
     {
       return firstEntry.getFloat(nexusPath);
@@ -63,11 +64,11 @@ namespace Mantid
      * Gets the time binning from a Nexus float array
      * Adds an extra bin at the end
      */
-    std::vector<double> LoadHelper::getTimeBinningFromNexusPath(const NeXus::NXEntry &firstEntry,
+    std::vector<double> LoadHelper::getTimeBinningFromNexusPath(const Mantid::NeXus::NXEntry &firstEntry,
         const std::string &nexusPath)
     {
 
-      NeXus::NXFloat timeBinningNexus = firstEntry.openNXFloat(nexusPath);
+      Mantid::NeXus::NXFloat timeBinningNexus = firstEntry.openNXFloat(nexusPath);
       timeBinningNexus.load();
 
       size_t numberOfBins = static_cast<size_t>(timeBinningNexus.dim0()) + 1; // boundaries
@@ -128,16 +129,6 @@ namespace Mantid
       // Get the sample-detector distance for this detector (in metres)
       double l2 = workspace->getDetector(detId)->getPos().distance(sample->getPos());
       return l2;
-    }
-
-    double LoadHelper::getDistanceSourceToMonitor(const API::MatrixWorkspace_sptr& workspace,
-        size_t detId)
-    {
-      Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
-      Geometry::IComponent_const_sptr source = instrument->getSource();
-
-      double dist = workspace->getDetector(detId)->getPos().distance(source->getPos());
-      return dist;
     }
 
     /*
@@ -268,7 +259,7 @@ namespace Mantid
               int type;
               dims[0] = dims[1] = dims[2] = dims[3] = 0;
 
-              std::string property_name = ( parent_name.empty() ? nxname : parent_name + "." + nxname  );
+              std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
 
               g_log.debug() << indent_str << "considering property " << property_name << std::endl;
 
@@ -442,7 +433,7 @@ namespace Mantid
 
       } // while
 
-    } // addNexusFieldsToWsRun
+    } // recurseAndAddNexusFieldsToWsRun
 
     /**
      * Show attributes attached to the current Nexus entry
