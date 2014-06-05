@@ -55,6 +55,8 @@ The peaks are stored in a new table workspace.
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 A typical peak search procedure would be performed on correlation data, so this analysis is performed first, followed by a peak search with default parameters.
 
 .. testcode:: ExSiliconPeakSearch
