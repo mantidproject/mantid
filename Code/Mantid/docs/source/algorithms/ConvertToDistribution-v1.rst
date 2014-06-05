@@ -26,14 +26,13 @@ Usage
     ws_multi = CreateSampleWorkspace("Histogram", "Multiple Peaks")
 
     print "Is the workspace a distribution? " + str(ws_multi.isDistribution())
-
-    print "The workspace has a level backgound of " + str(ws_multi.readY(0)[0]) + " counts."
-    print "The largest of which is " + str(ws_multi.readY(0)[60]) + " counts."
+    print "The workspace has a level background of " + str(ws_multi.readY(0)[0]) + " counts."
+    print "The largest of which is " + str(ws_multi.readY(0)[60]) + " counts." + "\n"
 
     ConvertToDistribution(ws_multi)
 
     print "Is the workspace a distribution? " + str(ws_multi.isDistribution())
-    print "The workspace has a level backgound of " + str(ws_multi.readY(0)[0]) + " counts."
+    print "The workspace has a level background of " + str(ws_multi.readY(0)[0]) + " counts."
     print "The largest of which is " + str(ws_multi.readY(0)[60]) + " counts."
 
 Output:
@@ -41,11 +40,11 @@ Output:
 .. testoutput:: ConvertToDistribution
 
     Is the workspace a distribution? False
-    The workspace has a level backgound of 0.3 counts.
+    The workspace has a level background of 0.3 counts.
     The largest of which is 8.3 counts.
 
     Is the workspace a distribution? True
-    The workspace has a level backgound of 0.0015 counts.
+    The workspace has a level background of 0.0015 counts.
     The largest of which is 0.0415 counts.
 
 .. categories::

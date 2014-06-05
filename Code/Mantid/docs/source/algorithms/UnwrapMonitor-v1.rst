@@ -106,6 +106,6 @@ Output:
 
 .. testoutput:: UnwrapMonitor
 
-    JoinWaveLength is: 1.4241722326403834
+    JoinWaveLength is: 1.42417223264
 
 .. categories::
