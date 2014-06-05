@@ -1,24 +1,6 @@
-/*WIKI*
-
- Only for ILL usage.
-
- At the ILL the data is loaded in raw format : no units used. The X-axis represent the time channel number.
-
- This algorithm converts the channel number to time of flight using:
- * Spectrum or list of spectra to look for the elastic peak. Note that the spectra chosen must be at the same distance.
- * Elastic peak channels - List of channels to look for the elastic peak (e.g. range).
-
- Input Workspace must have the following properties:
- *  wavelength
- *  channel_width
-
- Otherwise, the user can ignore the fields above and select directly the channel corresponding to the EPP and the respective spectrum.
- * ElasticPeakPosition
- * ElasticPeakPositionSpectrum
-
-
- *WIKI*/
-
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertEmptyToTof.h"
 
 #include "MantidAPI/WorkspaceValidators.h"
