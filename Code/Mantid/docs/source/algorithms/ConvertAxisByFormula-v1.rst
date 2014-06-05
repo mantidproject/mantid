@@ -65,11 +65,6 @@ Usage
    print "New X units:", output.getAxis(0).getUnit().symbol()
    print "New X title:", output.getAxis(0).getUnit().caption()
 
-.. testcleanup:: ExSquareXAxis
-
-   DeleteWorkspace(input)
-   DeleteWorkspace(output)
-
 Output:
 
 .. testoutput:: ExSquareXAxis
@@ -107,11 +102,6 @@ Output:
    print "New Y values:", output.getAxis(1).extractValues()
    print "New Y units:", output.getAxis(1).getUnit().symbol()
    print "New Y title:", output.getAxis(1).getUnit().caption()
-
-.. testcleanup:: ExDoubleYAxis
-
-   DeleteWorkspace(input)
-   DeleteWorkspace(output)
 
 Output:
 

@@ -50,12 +50,6 @@ Usage
    print 'Detectors grouped in spectra 1:', list(grouped.getSpectrum(1).getDetectorIDs())
    print 'Detectors grouped in spectra 2:', list(grouped.getSpectrum(2).getDetectorIDs())
 
-.. testcleanup:: ExGroupMUSR
-
-   DeleteWorkspace('ws')
-   DeleteWorkspace('grouping')
-   DeleteWorkspace('grouped')
-
 Output:
 
 .. testoutput:: ExGroupMUSR
@@ -82,13 +76,6 @@ Output:
    print 'No. of periods loaded:', grouped.size()
    print 'No. of grouped spectra in first period:', grouped.getItem(0).getNumberHistograms()
    print 'No. of grouped spectra in second period:', grouped.getItem(1).getNumberHistograms()
-
-.. testcleanup:: ExGroupingFromNexus
-
-   DeleteWorkspace('ws')
-   DeleteWorkspace('__unused_ws')
-   DeleteWorkspace('grouping')
-   DeleteWorkspace('grouped')
 
 Output:
 

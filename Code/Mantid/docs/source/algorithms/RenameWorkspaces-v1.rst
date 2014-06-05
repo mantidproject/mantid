@@ -49,12 +49,6 @@ Usage
 
    print 'Workspaces in the ADS _after_ renaming:', mtd.getObjectNames()
 
-.. testcleanup:: ExNewNames
-
-   DeleteWorkspace('new_ws1')
-   DeleteWorkspace('new_ws2')
-   DeleteWorkspace('new_ws3')
-
 Output:
 
 .. testoutput:: ExNewNames
@@ -80,12 +74,6 @@ Output:
    RenameWorkspaces(names, Prefix='new_', Suffix='_name')
 
    print 'Workspaces in the ADS _after_ renaming:', mtd.getObjectNames()
-
-.. testcleanup:: ExPrefixAndSuffix
-
-   DeleteWorkspace('new_ws1_name')
-   DeleteWorkspace('new_ws2_name')
-   DeleteWorkspace('new_ws3_name')
 
 Output:
 

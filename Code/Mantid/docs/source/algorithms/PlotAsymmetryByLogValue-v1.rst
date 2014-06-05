@@ -53,10 +53,6 @@ Usage
    print "Y values (asymmetry):", ws.readY(0)
    print "X values (sample magn. field):", ws.readX(0)
 
-.. testcleanup:: ExSimple
-
-   DeleteWorkspace(ws)
-
 Output:
 
 .. testoutput:: ExSimple
@@ -81,10 +77,6 @@ Output:
    print "Y values (green):", ws.readY(2)
    print "Y values (sum):", ws.readY(3)
    print "X values (sample magn. field):", ws.readX(0)
-
-.. testcleanup:: ExRedGreen
-
-   DeleteWorkspace(ws)
 
 Output:
 
@@ -119,10 +111,6 @@ Output:
    print "Y values (asymmetry):", ws.readY(0)
    print "X values (sample magn. field):", ws.readX(0)
 
-.. testcleanup:: ExCustomGrouping
-
-   DeleteWorkspace(ws)
-
 Output:
 
 .. testoutput:: ExCustomGrouping
@@ -145,10 +133,6 @@ Output:
 
    print "Y values (asymmetry):", ws.readY(0)
    print "X values (sample magn. field):", ws.readX(0)
-
-.. testcleanup:: ExDeadTimeCorrection
-
-   DeleteWorkspace(ws)
 
 Output:
 
