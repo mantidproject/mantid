@@ -16,7 +16,10 @@ fitted using the ComptonPeakProfile function and the given mass to
 produce an estimate of the peak area. The input data is normalised by
 this value.
 
-The input workspace is required to be a point data workspace. See :ref:`ConvertToPointData <algm-ConvertToPointData>`.
+The input workspace is required to be a point data workspace, see
+:ref:`ConvertToPointData <algm-ConvertToPointData>`, and each detector is required to have
+an instrument parameter named *t0* that specifies the detector delay time in :math:`\mu s`, see
+:ref:`SetInstrumentParameter <algm-SetInstrumentParameter>`.
 
 The algorithm has 4 outputs:
 
