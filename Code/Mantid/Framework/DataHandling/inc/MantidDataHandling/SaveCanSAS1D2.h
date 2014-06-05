@@ -76,8 +76,8 @@ namespace Mantid
       SaveCanSAS1D2();
       virtual ~SaveCanSAS1D2();
 
-      /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 2; }
+
     protected:
       /// Extends the SaveCanSAS1D init method
       virtual void init();
