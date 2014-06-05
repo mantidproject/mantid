@@ -63,7 +63,7 @@ namespace Mantid
       axisOptions.push_back("X");
       axisOptions.push_back("Y");
       declareProperty("Axis","X",boost::make_shared<StringListValidator>(axisOptions),
-        "The axis to modify (default: X)");
+        "The axis to modify");
 
       declareProperty("Formula", "", "The formula to use to convert the values, x or y may be used to refer to the axis values");
       declareProperty("AxisTitle", "", "The label of he new axis. If not set then the title will not change.");
