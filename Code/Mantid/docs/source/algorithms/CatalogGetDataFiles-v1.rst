@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm retrieves the information of the files associated to an investigation, and saves the results to a workspace.
+This algorithm retrieves the information of the datafiles associated to an investigation, and saves the results to a workspace.
 
 Usage
 -----

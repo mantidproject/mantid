@@ -52,7 +52,7 @@ namespace Mantid
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogGetDataFiles"; }
       ///Summary of algorithms purpose
-      virtual const std::string summary() const { return "Obtains inforamtion of the files associated to a specific investigation."; }
+      virtual const std::string summary() const { return "Obtains information of the datafiles associated to a specific investigation."; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
