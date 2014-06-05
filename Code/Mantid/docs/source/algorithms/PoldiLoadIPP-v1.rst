@@ -1,5 +1,9 @@
 .. algorithm::
 
+.. warning::
+
+    This algorithm is currently under review and may change or appear with a different name in future releases. The documentation may be outdated.
+
 .. summary::
 
 .. alias::

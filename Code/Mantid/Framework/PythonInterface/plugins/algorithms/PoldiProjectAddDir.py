@@ -19,7 +19,7 @@ class PoldiProjectAddDir(PythonAlgorithm):
     def category(self):
         """ Mantid required
         """
-        return "SINQ\\Poldi"
+        return "SINQ\\Poldi\\Obsolete"
 
     def name(self):
         """ Mantid required
