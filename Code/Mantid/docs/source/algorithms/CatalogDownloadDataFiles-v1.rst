@@ -46,7 +46,11 @@ Output:
 
     # This option will not append any file extensions to the datafiles.
     CatalogDownloadDataFiles(FileIds = datafile_ids,    # We now pass our list of ids here
-                             FileNames = datafile_ids,  # and also here.
+                             # The filenames are those that will be saved on your machine
+                             # I have opted to use the datafile ids for this, but it is possible
+                             # to provide a list of desired names.
+                             # This must be the same size as the FileIds list.
+                             FileNames = datafile_ids,
                              DownloadPath = '~/Desktop',
                              Session = session.getPropertyValue("Session")
                              )
