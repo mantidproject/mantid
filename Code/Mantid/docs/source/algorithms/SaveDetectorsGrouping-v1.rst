@@ -9,38 +9,38 @@
 Description
 -----------
 
-This algorithm is used to save a GroupingWorkspace to a file in XML
-format.
+This algorithm is used to save a GroupingWorkspace to XML file in a
+format which is accepted by :ref:`algm-LoadDetectorsGroupingFile`.
 
-XML File Format
----------------
+Usage
+-----
 
-Parameters
-##########
+**Example - Saving a custom grouping for MUSR instrument:**
 
--  "instrument": mandatory attribute of node 'detector-grouping'. It
-   must be valid instrument name.
--  "ID": mandatory attribute of node 'group'. It must be valid group
-   name, and the key to denote group.
--  "detids": a node to define grouping by detectors' ID. Its value must
-   be a list of integers separated by ','. A '-' is used between 2
-   integers to define a range of detectors.
--  "component": a node to define that all detectors belonged to a
-   component in the instrument are to be in a same group. Its value
-   should be a valid component name.
+.. testcode:: ExMUSRGrouping
 
-Example 1:
+   import os
 
-.. raw:: html
+   result = CreateGroupingWorkspace(InstrumentName = 'MUSR')
 
-   <?xml version="1.0" encoding="UTF-8" ?>
+   grouping = result[0]
 
-| `` ``\ 
-| ``  ``\ 
-| ``   ``\ \ ``1-30,34-44,47-100``\ 
-| ``  ``\ 
-| ``   ``\ \ ``103-304,344-444,474-5000``\ 
-| ``  ``\ 
-| `` ``\
+   # Add spectra 0 - 15 to group 1
+   for i in range(0,16):
+     grouping.dataY(i)[0] = 1
+
+   # Add spectra 16 - 32 to group 2
+   for i in range(16,33):
+     grouping.dataY(i)[0] = 2
+
+   # Spectra 33 - 64 are left in group 0, i.e. are left unused
+
+   save_path = os.path.join(config["defaultsave.directory"], "musr_det_grouping.xml")
+
+   SaveDetectorsGrouping(grouping, save_path)
+
+.. testcleanup:: ExMUSRGrouping
+
+   os.remove(save_path)
 
 .. categories::
