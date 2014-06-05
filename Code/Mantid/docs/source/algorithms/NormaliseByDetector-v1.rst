@@ -155,4 +155,75 @@ definitions on different components in the tree.
     </component-link>
     </parameter-file>
 
+
+Usage
+-----
+
+**Example - A simple linear correction**  
+
+.. testcode:: ExLinear
+
+  import os
+
+  #create a param file
+  param_text = '''<parameter-file instrument = "basic_rect" date = "2012-01-31T00:00:00">
+        <component-link name="basic_rect">
+        <parameter name="LinearBackground:A0" type="fitting">
+          <formula eq="1" result-unit="Wavelength"/>
+          <fixed />
+        </parameter>
+        <parameter name="LinearBackground:A1" type="fitting">
+          <formula eq="2" result-unit="Wavelength"/>
+          <fixed />
+        </parameter>
+        </component-link>
+      </parameter-file>'''
+
+  #find a suitable directory to save the param file
+  param_dir = config["defaultsave.directory"]
+  if not os.path.isdir(param_dir):
+    #use the users home directory if default save is not set
+    param_dir = os.path.expanduser('~')
+  param_file_path = os.path.join(param_dir,"NormByDet_Ex_param.xml")
+  #write the param file out
+  with open(param_file_path, "w") as param_file:
+    param_file.write(param_text)
+
+
+  # a sample workspace with a sample instrument
+  ws = CreateSampleWorkspace()
+  # convert to Wavelength
+  ws = ConvertUnits(ws,"Wavelength")
+  #Load the param file into the workspace
+  LoadParameterFile(ws,param_file_path)
+
+  #Now we are ready to run the correction
+  wsCorrected = NormaliseByDetector(ws)
+
+  print ("The correction will divide the data by an increasing linear function.")
+  print ("f(x) = 2x + 1")
+  for i in range(0,wsCorrected.blocksize(),10):
+    print ("The correct value in bin %i is %.2f compared to %.2f" % (i,wsCorrected.readY(0)[i],ws.readY(0)[i]))
+
+  #clean up the file
+  if os.path.exists(param_file_path):
+    os.remove(param_file_path)
+
+Output:
+
+.. testoutput:: ExLinear
+   
+  The correction will divide the data by an increasing linear function.
+  f(x) = 2x + 1
+  The correct value in bin 0 is 0.28 compared to 0.30
+  The correct value in bin 10 is 0.14 compared to 0.30
+  The correct value in bin 20 is 0.09 compared to 0.30
+  The correct value in bin 30 is 0.07 compared to 0.30
+  The correct value in bin 40 is 0.06 compared to 0.30
+  The correct value in bin 50 is 1.63 compared to 10.30
+  The correct value in bin 60 is 0.04 compared to 0.30
+  The correct value in bin 70 is 0.04 compared to 0.30
+  The correct value in bin 80 is 0.03 compared to 0.30
+  The correct value in bin 90 is 0.03 compared to 0.30
+
 .. categories::

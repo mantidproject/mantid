@@ -34,4 +34,29 @@ See also :ref:`algm-MoveInstrumentComponent` and
 :ref:`algm-RotateInstrumentComponent` for other ways
 to move components.
 
+Usage
+-----
+
+**Example - Resize bank 1:**  
+
+.. testcode:: ExScaleBank1
+
+	# a sample workspace with rectangular detectors
+	ws = CreateSampleWorkspace()
+
+	ResizeRectangularDetector(ws,"bank1",2.0,0.5)
+
+	i=ws.getInstrument()
+	bank1=i.getComponentByName('bank1')
+	bank2=i.getComponentByName('bank2')
+
+	print ("bank 1 was scaled and is now %.2f by %.2f" % (bank1.xsize(), bank1.ysize()))
+	print ("bank 2 was not scaled and remains %.2f by %.2f" % (bank2.xsize(), bank2.ysize()))
+Output:
+
+.. testoutput:: ExScaleBank1
+   
+	bank 1 was scaled and is now 0.16 by 0.04
+	bank 2 was not scaled and remains 0.08 by 0.08
+
 .. categories::
