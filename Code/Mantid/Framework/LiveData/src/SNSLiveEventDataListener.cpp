@@ -467,8 +467,7 @@ namespace LiveData
       return false;
     }
 
-    pkt.firstSection();
-    do  // loop through all the monitor sections
+    while (pkt.nextSection())
     {
       unsigned monitorID = pkt.getSectionMonitorID();
 
@@ -476,8 +475,9 @@ namespace LiveData
       {
         // Currently, we only handle monitors 0-5.  At the present time, that's sufficient.
         g_log.error() << "Mantid cannot handle monitor ID's higher than 5.  If " << monitorID
-          << " is actually valid, then an appropriate entry must be made to the "
-          << " ADDABLE list at the top of Framework/API/src/Run.cpp";
+        << " is actually valid, then an appropriate entry must be made to the "
+        << " ADDABLE list at the top of Framework/API/src/Run.cpp"
+        << std::endl;
       }
       else
       {
@@ -492,19 +492,29 @@ namespace LiveData
         int events = pkt.getSectionEventCount();
         if (m_eventBuffer->run().hasProperty(monName))
         {
-          events += m_eventBuffer->run().getPropertyValueAsType<int>(monName);
+        events += m_eventBuffer->run().getPropertyValueAsType<int>(monName);
         }
         else
         {
-          // First time we've received this monitor.  Add it to our list
-          m_monitorLogs.push_back(monName);
+        // First time we've received this monitor.  Add it to our list
+        m_monitorLogs.push_back(monName);
         }
 
         // Update the property value (overwriting the old value if there was one)
         m_eventBuffer->mutableRun().addProperty<int>( monName, events, true);
+        
+        // This is where we'll fetch the time-of-flight values for each
+        // event 
+        bool risingEdge;
+        uint32_t cycle;
+        uint32_t tof;
+        while (pkt.nextEvent( risingEdge, cycle, tof))
+        {
+          // TODO: Fill this section in - just as soon as we figure out what
+          // to actually do with the values.
+        }
       }
-
-    } while (pkt.nextSection() == true);
+    }
 
     return false;
   }
