@@ -9,11 +9,7 @@
 Description
 -----------
 
-Uses the specular reflection condition :math:`ThetaIn \equiv ThetaOut` along with the Beam direction offeset
-to vertically shift the detectors into a corrected location.
-
-
-and
+Uses the specular reflection condition :math:`\theta_{In} \equiv \theta_{Out}` along with the Beam direction offeset to vertically shift the detectors into a corrected location.
 
 .. math:: 
 
@@ -27,6 +23,10 @@ Also see
 
 .. categories::
 
+Usage
+-----
+
+**Example - Correct Point Detector position example**
 
 .. testcode:: SpecularReflectionPositionCorrectExample
 
@@ -58,3 +58,5 @@ Output:
 .. testoutput:: SpecularReflectionPositionCorrectExample 
  
    [0,1,1]
+
+.. categories::

@@ -9,7 +9,7 @@
 Description
 -----------
 
-Uses the Specular reflection condition :math:`ThetaIn \equiv ThetaOut` to calculate and return a corrected ThetaIn. 
+Uses the Specular reflection condition :math:`\theta_{In} \equiv \theta_{Out}` to calculate and return a corrected :math:`\theta_{In}`. 
 
 .. math:: 
 
@@ -23,7 +23,7 @@ Also see
 Usage
 -----
 
-**Example - Point detector theta calculation :**
+**Example - Point detector theta calculation**
 
 .. testcode:: SpecularReflectionCalculateThetaPointDetectorExample
 
