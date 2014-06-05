@@ -12,7 +12,7 @@ void IFunction1DSpectrum::function(const FunctionDomain &domain, FunctionValues 
     try {
         const FunctionDomain1DSpectrum &spectrumDomain = dynamic_cast<const FunctionDomain1DSpectrum &>(domain);
         function1DSpectrum(spectrumDomain, values);
-    } catch(...) {
+    } catch(std::bad_cast) {
         throw std::invalid_argument("Provided domain is not of type FunctionDomain1DSpectrum.");
     }
 }
@@ -22,7 +22,7 @@ void IFunction1DSpectrum::functionDeriv(const FunctionDomain &domain, Jacobian &
     try {
         const FunctionDomain1DSpectrum &spectrumDomain = dynamic_cast<const FunctionDomain1DSpectrum &>(domain);
         functionDeriv1DSpectrum(spectrumDomain, jacobian);
-    } catch(...) {
+    } catch(std::bad_cast) {
         throw std::invalid_argument("Provided domain is not of type FunctionDomain1DSpectrum.");
     }
 }

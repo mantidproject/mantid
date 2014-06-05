@@ -474,7 +474,15 @@ namespace CurveFitting
         if ( boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
             !boost::dynamic_pointer_cast<API::IFunctionMD>(m_function) )
         {
-          creator = new FitMW(this, workspacePropertyName, m_domainType);
+          /* IFunction1DSpectrum needs a different domain creator. If a function
+           * implements that type, we need to react appropriately at this point.
+           * Otherwise, the default creator FitMW is used.
+           */
+          if(boost::dynamic_pointer_cast<API::IFunction1DSpectrum>(m_function)) {
+            creator = new SeqDomainSpectrumCreator(this, workspacePropertyName);
+          } else {
+            creator = new FitMW(this, workspacePropertyName, m_domainType);
+          }
         }
         else
         {// don't know what to do with this workspace

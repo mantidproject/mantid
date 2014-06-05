@@ -111,10 +111,11 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(const std::string
 
         const MantidVec& originalXValue = m_matrixWorkspace->readX(i);
         MantidVec& xValues = outputWs->dataX(i);
+        assert(xValues.size() == originalXValue.size());
         MantidVec& yValues = outputWs->dataY(i);
 
+        xValues.assign( originalXValue.begin(), originalXValue.end() );
         for(size_t j = 0; j < yValues.size(); ++j) {
-            xValues[j] = originalXValue[j];
             yValues[j] = localValues->getCalculated(j);
         }
     }
