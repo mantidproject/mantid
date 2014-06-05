@@ -1,9 +1,3 @@
-/*WIKI* 
-
-Creates a single spectrum Workspace2D with X,Y, and E copied from columns ColumnX, ColumnY, and ColumnE respectively.
-If ColumnE is not set the E vector will be filled with 1s. The type of the columns must be convertible to C++ double.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -25,13 +19,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertTableToMatrixWorkspace)
-
-/// Sets documentation strings for this algorithm
-void ConvertTableToMatrixWorkspace::initDocs()
-{
-  this->setWikiSummary("Creates a single spectrum matrix workspace from some columns of a table workspace.");
-  this->setOptionalMessage("Creates a single spectrum matrix workspace from some columns of a table workspace.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -84,4 +71,3 @@ void ConvertTableToMatrixWorkspace::exec()
 
 } // namespace Algorithms
 } // namespace Mantid
-

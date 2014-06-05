@@ -1,12 +1,3 @@
-/*WIKI* 
-
-The algorithm calculates the weighted mean of two workspaces. This is useful when working with distributions rather than histograms, particularly when counting statistics are poor and it is possible that the value of one data set is statistically insignificant but differs greatly from the other. In such a case simply calculating the average of the two data sets would produce a spurious result. This algorithm will eventually be modified to take a list of workspaces as an input.
-
-<math>\displaystyle y=\frac{\sum\frac{x_i}{\sigma^{2}_i}}{\sum\frac{1}{\sigma^{2}_i}} </math>
-
-
-
-*WIKI*/
 #include "MantidAlgorithms/WeightedMean.h"
 
 namespace Mantid
@@ -16,13 +7,6 @@ namespace Mantid
 
     // Algorithm must be declared
     DECLARE_ALGORITHM(WeightedMean)
-
-    /// Sets documentation strings for this algorithm
-    void WeightedMean::initDocs()
-    {
-      this->setWikiSummary("An algorithm to calculate the weighted mean of two workspaces. ");
-      this->setOptionalMessage("An algorithm to calculate the weighted mean of two workspaces.");
-    }
 
 
     bool WeightedMean::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const

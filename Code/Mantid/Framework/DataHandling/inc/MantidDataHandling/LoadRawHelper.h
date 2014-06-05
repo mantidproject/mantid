@@ -64,6 +64,8 @@ namespace Mantid
       virtual const std::string name() const { return "LoadRawHelper"; }
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
+      ///Summary of algorithms purpose
+      virtual const std::string summary() const {return "Helper class for LoadRaw algorithms.";}
       ///Opens Raw File
       FILE* openRawFile(const std::string & fileName);
       /// Read in run parameters Public so that LoadRaw2 can use it

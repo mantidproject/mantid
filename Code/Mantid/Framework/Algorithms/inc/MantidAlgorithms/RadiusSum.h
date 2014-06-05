@@ -44,6 +44,9 @@ namespace Algorithms
     virtual ~RadiusSum();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Sum of all the counts inside a ring against the scattering angle for each Radius.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
@@ -59,7 +62,7 @@ namespace Algorithms
 
 
   private:
-    virtual void initDocs();
+
     void init();
     void exec();
 

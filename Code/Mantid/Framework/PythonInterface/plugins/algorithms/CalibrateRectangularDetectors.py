@@ -1,23 +1,3 @@
-"""*WIKI* 
-
-Here are examples of input and output from PG3 and SNAP:
-
-[[Image:PG3_Calibrate.png]]
-
-[[Image:SNAP_Calibrate.png]]
-
--The purpose of this algorithm is to calibrate the detector pixels and write a calibration file.  
-The calibration file name contains the instrument, run number, and date of calibration.  
-A binary Dspacemap file that converts from TOF to d-space including the calculated offsets is 
-also an output option.  For CrossCorrelation option:  If one peak is not in the spectra of all 
-the detectors, you can specify the first n detectors to be calibrated with one peak and the 
-next n detectors to be calibrated with the second peak.  If a color fill plot of the calibrated 
-workspace does not look good, do a color fill plot of the workspace that ends in cc to see if 
-the CrossCorrelationPoints and/or PeakHalfWidth should be increased or decreased.  
-Also plot the reference spectra from the cc workspace.
-
-
-*WIKI*"""
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -37,10 +17,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     def name(self):
         return "CalibrateRectangularDetectors"
 
-    def PyInit(self):
-        self.setOptionalMessage("Calibrate the detector pixels and write a calibration file")
-        self.setWikiSummary("Calibrate the detector pixels and write a calibration file")
-        
+    def summary(self):
+        return "Calibrate the detector pixels and write a calibration file"
+
+    def PyInit(self):        
         sns = ConfigService.Instance().getFacility("SNS")
         
         instruments = []
@@ -84,7 +64,15 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              "Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  Unlimited for many peaks option.")
         self.declareProperty("PeakWindowMax", 0.,
                              "Maximum window around a peak to search for it. Optional.")
+        self.declareProperty(ITableWorkspaceProperty("FitwindowTableWorkspace", "", Direction.Input, PropertyMode.Optional),
+                "Name of input table workspace containing the fit window information for each spectrum. ")
         self.declareProperty("MinimumPeakHeight", 2., "Minimum value allowed for peak height")
+
+        self.declareProperty(MatrixWorkspaceProperty("DetectorResolutionWorkspace", "", Direction.Input, PropertyMode.Optional),
+                "Name of optional input matrix workspace for each detector's resolution (D(d)/d).")
+        self.declareProperty(FloatArrayProperty("AllowedResRange", [0.25, 4.0], direction=Direction.Input),
+                "Range of allowed individual peak's resolution factor to input detector's resolution.")
+
         self.declareProperty("PeakFunction", "Gaussian", StringListValidator(["BackToBackExponential", "Gaussian", "Lorentzian"]),
                              "Type of peak to fit. Used only with CrossCorrelation=False")
         self.declareProperty("BackgroundType", "Flat", StringListValidator(['Flat', 'Linear', 'Quadratic']),
@@ -383,6 +371,25 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         # Remove old calibration files
         cmd = "rm "+calib
         os.system(cmd)
+
+        # Get the fit window input workspace
+        fitwinws = self.getProperty("FitwindowTableWorkspace").value
+
+        # Set up resolution workspace
+        resws = self.getProperty("DetectorResolutionWorkspace").value
+        if resws is not None:
+            resrange = self.getProperty("AllowedResRange").value
+            if len(resrange) < 2:
+                raise NotImplementedError("With input of 'DetectorResolutionWorkspace', number of allowed resolution range must be equal to 2.")
+            reslowf = resrange[0]
+            resupf = resrange[1]
+            if reslowf >= resupf:
+                raise NotImplementedError("Allowed resolution range factor, lower boundary (%f) must be smaller than upper boundary (%f)."
+                        % (reslowf, resupf))
+        else:
+            reslowf = 0.0
+            resupf = 0.0
+
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
         GetDetOffsetsMultiPeaks(InputWorkspace=str(wksp), OutputWorkspace=str(wksp)+"offset",
                                 DReference=self._peakpos, 
@@ -390,7 +397,12 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                                 MinimumPeakHeight=self.getProperty("MinimumPeakHeight").value,
                                 BackgroundType=self.getProperty("BackgroundType").value,
                                 MaxOffset=self._maxoffset, NumberPeaksWorkspace=str(wksp)+"peaks", 
-                                MaskWorkspace=str(wksp)+"mask")
+                                MaskWorkspace=str(wksp)+"mask", 
+                                FitwindowTableWorkspace = fitwinws,
+                                InputResolutionWorkspace=resws,
+                                MinimumResolutionFactor = reslowf,
+                                MaximumResolutionFactor = resupf)
+
         #Fixed SmoothNeighbours for non-rectangular and rectangular
         if self._smoothoffsets and self._xpixelbin*self._ypixelbin>1: # Smooth data if it was summed
             SmoothNeighbours(InputWorkspace=str(wksp)+"offset", OutputWorkspace=str(wksp)+"offset", 

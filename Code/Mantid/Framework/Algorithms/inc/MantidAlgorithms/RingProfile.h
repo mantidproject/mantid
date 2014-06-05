@@ -44,6 +44,9 @@ namespace Algorithms
     virtual ~RingProfile();
     
     virtual const std::string name() const { return "RingProfile";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculates the sum of the counts against a circular ring.";}
+
     virtual int version() const { return 1; };
     virtual const std::string category() const {return "Transforms";};
 
@@ -51,7 +54,7 @@ namespace Algorithms
     boost::shared_ptr<API::Progress> m_progress; 
 
   private:
-    virtual void initDocs();
+
     void init();
     void exec();
     /// get the bin position for the given angle

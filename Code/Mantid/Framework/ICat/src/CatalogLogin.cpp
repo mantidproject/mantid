@@ -1,9 +1,3 @@
-/*WIKI*
-
-This algorithm connects the logged in user to the information catalog.
-
-*WIKI*/
-
 #include "MantidICat/CatalogLogin.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
@@ -21,13 +15,6 @@ namespace Mantid
   namespace ICat
   {
     DECLARE_ALGORITHM(CatalogLogin)
-
-    /// Sets documentation strings for this algorithm
-    void CatalogLogin::initDocs()
-    {
-      this->setWikiSummary("Connects to information catalog using user name and password.");
-      this->setOptionalMessage("Connects to information catalog using user name and password.");
-    }
 
     /// Init method to declare algorithm properties
     void CatalogLogin::init()
@@ -75,4 +62,3 @@ namespace Mantid
 
   }
 }
-

@@ -1,16 +1,3 @@
-/*WIKI* 
-
-Performs beam flux correction for TOF SANS data.
-
-The correction goes as follows:
-
-:::<math>I({\lambda}) = I_0({\lambda}) / \Phi_{sample}</math>
-
-where
-
-:::<math>\Phi_{sample} = \frac{M_{sample}}{M_{ref}} \Phi_{ref}</math>
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -31,13 +18,6 @@ using namespace Geometry;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSBeamFluxCorrection)
-
-/// Sets documentation strings for this algorithm
-void SANSBeamFluxCorrection::initDocs()
-{
-  this->setWikiSummary("Performs beam flux correction on TOF SANS data.");
-  this->setOptionalMessage("Performs beam flux correction on TOF SANS data.");
-}
 
 void SANSBeamFluxCorrection::init()
 {
@@ -160,4 +140,3 @@ MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference()
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

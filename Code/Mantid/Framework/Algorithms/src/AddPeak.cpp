@@ -1,9 +1,3 @@
-/*WIKI* 
-
-Adds a [[IPeak]] to a [[PeaksWorkspace]].
-
-*WIKI*/
-
 #include "MantidAlgorithms/AddPeak.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -40,12 +34,6 @@ namespace Algorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void AddPeak::initDocs()
-  {
-    this->setWikiSummary("Adds a peak to a PeaksWorkspace.");
-    this->setOptionalMessage("Adds a peak to a PeaksWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -154,4 +142,3 @@ namespace Algorithms
 
 } // namespace Mantid
 } // namespace Algorithms
-

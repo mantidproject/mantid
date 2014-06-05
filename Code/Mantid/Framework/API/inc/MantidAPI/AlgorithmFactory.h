@@ -125,6 +125,9 @@ public:
   /// Get the algorithm names and version - mangled use decodeName to separate
   const std::vector<std::string> getKeys() const;
   const std::vector<std::string> getKeys(bool includeHidden) const;
+
+  /// Returns the highest version of the algorithm currently registered
+  int highestVersion(const std::string & algorithmName) const;
   
   ///Get the algorithm categories
   const std::set<std::string> getCategories(bool includeHidden=false) const;

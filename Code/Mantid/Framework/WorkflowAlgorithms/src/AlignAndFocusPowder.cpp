@@ -1,24 +1,3 @@
-/*WIKI*
-
-This is a workflow algorithm that does the bulk of the work for time focusing diffraction data. This is done by executing several sub-algorithms as listed below.
-
-# [[RemovePromptPulse]] (event workspace only)
-# [[CompressEvents]] (event workspace only)
-# [[CropWorkspace]]
-# [[MaskDetectors]]
-# [[Rebin]] or [[ResampleX]] if not d-space binning
-# [[AlignDetectors]]
-# If LRef, minwl, or DIFCref are specified:
-## [[ConvertUnits]] to time-of-flight
-## [[UnwrapSNS]]
-## [[RemoveLowResTOF]]
-## [[ConvertUnits]] to d-spacing
-# [[Rebin]] if d-space binning
-# [[DiffractionFocussing]]
-# [[SortEvents]] (event workspace only)
-# [[EditInstrumentGeometry]] (if appropriate)
-# [[ConvertUnits]] to time-of-f
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -79,17 +58,6 @@ namespace WorkflowAlgorithms
   const std::string AlignAndFocusPowder::category() const
   {
     return "Workflow\\Diffraction";
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-    */
-  void AlignAndFocusPowder::initDocs()
-  {
-    this->setWikiSummary("Algorithm to focus powder diffraction data into a number of histograms "
-                         "according to a grouping scheme defined in a [[CalFile]]. ");
-    this->setOptionalMessage("Algorithm to focus powder diffraction data into a number of histograms "
-                             "according to a grouping scheme defined in a CalFile.");
   }
 
   //----------------------------------------------------------------------------------------------

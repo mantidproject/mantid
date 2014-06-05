@@ -1,49 +1,3 @@
-/*WIKI*
-
-This algorithm iterates the [[FFT]] algorithm on each spectrum of InputWorkspace, computing the Fourier Transform and storing the transformed spectrum in OutputWorkspace. If InputImagWorkspace is also passed, then the pair spectrum ''i'' of InputWorkspace (real) and spectrum ''i'' of InputImagWorkspace (real) are taken together as spectrum ''i'' of a complex workspace, on which [[FFT]] is applied.
-
-The FFTPart parameter specifies which transform is selected from the output of the [[FFT]] algorithm:
-
-For the case of input containing real and imaginary workspaces:
-{| border="1" cellpadding="5" cellspacing="0"
-!FFTPart
-!Description
-|-
-|0
-|Complete real part
-|-
-|1
-|Complete imaginary part
-|-
-|2
-|Complete transform modulus
-|}
-
-For the case of input containing no imaginary workspace:
-{| border="1" cellpadding="5" cellspacing="0"
-!FFTPart
-!Description
-|-
-|0
-|Real part, positive frequencies
-|-
-|1
-|Imaginary part, positive frequencies
-|-
-|2
-|Modulus, positive frequencies
-|-
-|3
-|Complete real part
-|-
-|4
-|Complete imaginary part
-|-
-|5
-|Complete transform modulus
-|}
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -59,13 +13,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractFFTSpectrum)
-
-/// Sets documentation strings for this algorithm
-void ExtractFFTSpectrum::initDocs()
-{
-  this->setWikiSummary("This algorithm performs a [[FFT|Fast Fourier Transform]] on each spectrum in a workspace, and from the result takes the indicated spectrum and places it into the OutputWorkspace, so that you end up with one result spectrum for each input spectrum in the same workspace. ");
-  this->setOptionalMessage("This algorithm performs a Fast Fourier Transform on each spectrum in a workspace, and from the result takes the indicated spectrum and places it into the OutputWorkspace, so that you end up with one result spectrum for each input spectrum in the same workspace.");
-}
 
 
 using namespace Kernel;

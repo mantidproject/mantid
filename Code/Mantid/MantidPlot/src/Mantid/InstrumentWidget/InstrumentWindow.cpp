@@ -720,12 +720,20 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
   {
     if (m_instrumentActor)
     {
-      // try to detect if the instrument changes with the workspace
+      // Check if it's still the same workspace underneath (as well as having the same name)
       auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>( workspace );
+      bool sameWS = false;
+      try {
+        sameWS = ( matrixWS == m_instrumentActor->getWorkspace() );
+      } catch (std::runtime_error&) {
+        // Carry on, sameWS should stay false
+      }
+
+      // try to detect if the instrument changes (unlikely if the workspace hasn't, but theoretically possible)
       bool resetGeometry = matrixWS->getInstrument()->getNumberDetectors() != m_instrumentActor->ndetectors();
 
-      // if instrument doesn't change keep the scaling
-      if ( !resetGeometry )
+      // if workspace and instrument don't change keep the scaling
+      if ( sameWS && !resetGeometry )
       {
         m_instrumentActor->updateColors();
       }

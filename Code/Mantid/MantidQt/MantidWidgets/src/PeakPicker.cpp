@@ -41,7 +41,7 @@ bool PeakPicker::eventFilter(QObject* object, QEvent* event)
   {
     case QEvent::MouseButtonPress:
     {
-      auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
+      auto mouseEvent = static_cast<QMouseEvent*>(event);
       Qt::KeyboardModifiers mod = mouseEvent->modifiers();
       QPoint p = mouseEvent->pos();
 
@@ -74,7 +74,7 @@ bool PeakPicker::eventFilter(QObject* object, QEvent* event)
     }
     case QEvent::MouseMove:
     {
-      QPoint p = dynamic_cast<QMouseEvent*>(event)->pos();
+      QPoint p = static_cast<QMouseEvent*>(event)->pos();
 
       // Move, if moving in process
       if (m_isMoving)

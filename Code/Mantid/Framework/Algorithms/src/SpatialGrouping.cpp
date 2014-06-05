@@ -1,21 +1,3 @@
-/*WIKI* 
-
-
-This algorithm creates an XML Grouping file of the form:
-
-<div style="border:1pt dashed black; background:#f9f9f9;padding: 1em 0;">
-<source lang="xml">
-<?xml version="1.0" encoding="UTF-8" ?>
-<detector-grouping> 
-<group name="fwd"><detids val="1,2,17,32"/></group> 
-<group name="bwd"><detids val="33,36,38,60,64"/> </group>   
-</detector-grouping>
-</source></div>
-
-Based on information retrieved from the [[Nearest Neighbours]] class in Mantid Geometry.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -61,13 +43,6 @@ namespace Algorithms
 {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SpatialGrouping)
-
-/// Sets documentation strings for this algorithm
-void SpatialGrouping::initDocs()
-{
-  this->setWikiSummary("This algorithm creates an XML grouping file, which can be used in [[GroupDetectors]] or [[ReadGroupsFromFile]], which groups the detectors of an instrument based on the distance between the detectors. It does this by querying the [http://doxygen.mantidproject.org/classMantid_1_1Geometry_1_1Detector.html#a3abb2dd5dca89d759b848489360ff9df getNeighbours] method on the Detector object. ");
-  this->setOptionalMessage("This algorithm creates an XML grouping file, which can be used in GroupDetectors or ReadGroupsFromFile, which groups the detectors of an instrument based on the distance between the detectors. It does this by querying the getNeighbours method on the Detector object.");
-}
 
 
 /**

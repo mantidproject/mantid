@@ -28,13 +28,6 @@ namespace Algorithms
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string WorkspaceJoiners::category() const { return "Transforms\\Merging";}
 
-  /// Sets documentation strings for this algorithm
-  void WorkspaceJoiners::initDocs()
-  {
-    this->setWikiSummary("Join two workspaces together by appending their spectra.");
-    this->setOptionalMessage("Join two workspaces together by appending their spectra.");
-  }
-
   /** Executes the algorithm for histogram workspace inputs
    *  @returns The result workspace
    */

@@ -862,6 +862,9 @@ target_link_libraries ( MantidPlot
                         ${PYTHON_LIBRARIES}
                         ${ZLIB_LIBRARIES} 
 )
+# Plugin dependencies
+add_dependencies( MantidPlot mantidqtpython )
+
 
 ###########################################################################
 # Custom Info.plist file for OS X

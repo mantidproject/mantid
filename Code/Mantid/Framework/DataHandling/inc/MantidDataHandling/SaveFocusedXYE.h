@@ -63,14 +63,16 @@ public:
   virtual ~SaveFocusedXYE() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SaveFocusedXYE"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Saves a focused data set (usually the output of a diffraction focusing routine but not exclusively) into a three column format containing X_i, Y_i, and E_i.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Diffraction;DataHandling\\Text"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

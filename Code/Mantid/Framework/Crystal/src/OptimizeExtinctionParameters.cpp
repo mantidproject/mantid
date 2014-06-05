@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 #include "MantidCrystal/OptimizeExtinctionParameters.h"
 #include "MantidCrystal/GSLFunctions.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -30,13 +26,6 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     //DECLARE_ALGORITHM(OptimizeExtinctionParameters)
-    
-    /// Sets documentation strings for this algorithm
-    void OptimizeExtinctionParameters::initDocs()
-    {
-      this->setWikiSummary("Finds optimal mosaic and r_crystallite parameters for extinction correction.");
-      this->setOptionalMessage("Finds optimal mosaic and r_crystallite parameters for extinction correction.");
-    }
     
     using namespace Kernel;
     using namespace API;

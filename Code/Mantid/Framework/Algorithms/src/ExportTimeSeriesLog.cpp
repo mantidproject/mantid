@@ -1,17 +1,3 @@
-/*WIKI*
-
-
-
-
-
-Export TimeSeriesProperty log in a Workspace to a MatrixWorkspace
-
-
-
-
-
-
-*WIKI*/
 #include "MantidAlgorithms/ExportTimeSeriesLog.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
@@ -52,10 +38,6 @@ namespace Algorithms
    */
   ExportTimeSeriesLog::~ExportTimeSeriesLog()
   {
-  }
-  
-  void ExportTimeSeriesLog::initDocs(){
-
   }
 
   //----------------------------------------------------------------------------------------------

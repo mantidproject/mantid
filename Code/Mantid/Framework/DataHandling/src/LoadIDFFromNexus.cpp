@@ -1,9 +1,3 @@
-/*WIKI* 
-
-Some Nexus files contain an instrument definition. This algorithm loads the instrument from this definition.
-You may need to tell this algorithm where in the Nexus file to find the Instrument folder, which contains the instrument definition.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -18,13 +12,6 @@ namespace DataHandling
 {
 
 DECLARE_ALGORITHM(LoadIDFFromNexus)
-
-/// Sets documentation strings for this algorithm
-void LoadIDFFromNexus::initDocs()
-{
-  this->setWikiSummary("Load an IDF from a Nexus file, if found there.");
-  this->setOptionalMessage("Load an IDF from a Nexus file, if found there. You may need to tell this algorithm where to find the Instrument folder in the Nexus file");
-}
 
 
 using namespace Kernel;

@@ -73,6 +73,8 @@ namespace API
 
     /// Replaces current parameter map with copy of given map
     void replaceInstrumentParameters(const Geometry::ParameterMap & pmap);
+    /// exchange contents of current parameter map with contents of other map)
+    void swapInstrumentParameters(Geometry::ParameterMap & pmap);
 
     /// Cache a lookup of grouped detIDs to member IDs
     void cacheDetectorGroupings(const det2group_map & mapping);

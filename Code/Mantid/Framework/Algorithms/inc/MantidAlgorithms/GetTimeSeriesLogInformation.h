@@ -44,6 +44,9 @@ namespace Algorithms
     virtual ~GetTimeSeriesLogInformation();
     
     virtual const std::string name() const {return "GetTimeSeriesLogInformation"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Get information from a TimeSeriesProperty log.";}
+
     virtual int version() const {return 1; }
     virtual const std::string category() const {return "Diffraction;Events\\EventFiltering"; }
 
@@ -66,7 +69,7 @@ namespace Algorithms
 
     bool m_ignoreNegativeTime;
 
-    virtual void initDocs();
+
 
     void init();
 

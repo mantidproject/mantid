@@ -41,11 +41,13 @@ public:
 	virtual ~DetectorEfficiencyCorUser();
 
 	virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "This algorithm calculates the detector efficiency according the formula set in the instrument definition file/parameters.";}
+
 	virtual int version() const;
 	virtual const std::string category() const;
 
 private:
-	virtual void initDocs();
 	void init();
 	void exec();
 	void retrieveProperties();

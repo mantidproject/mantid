@@ -1,18 +1,3 @@
-/*WIKI* 
-
-Load Fullprof resolution (.irf) file to TableWorkspace(s) and optionally into the instruments of matrix workspaces with one workspace per bank of the .irf file.
-Either or both of the Tableworkspace(s) and matrix workspace must be set.
-
-Where a Workspace is specified the support for translating Fullprof resolution parameters into the workspace for subsequent
-fitting is limitted to Fullprof:
-
-* NPROF=13, Ikeda-Carpender pseudo-Voigt translated into [[IkedaCarpenterPV]] according to [[CreateIkedaCarpenterParameters]] 
-* NPROF=9, back-to-back-exponential pseudo-Voigt translated into [[BackToBackExponential]] according to [[CreateBackToBackParameters]]
-
-Note for NPROF=9 the translation is currently ignoring the Lorentzian part of the pseudo-Voigt. 
-
-*WIKI*/
-
 #include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -66,19 +51,6 @@ namespace DataHandling
    */
   LoadFullprofResolution::~LoadFullprofResolution()
   {
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Sets documentation strings for this algorithm
-    */
-  void LoadFullprofResolution::initDocs()
-  {
-    setWikiSummary("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) and/or where this is supported."
-      " See description section, translate fullprof resolution fitting parameter into Mantid equivalent fitting parameters.");
-    setOptionalMessage("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s) and/or where this is supported."
-      " See description section, translate fullprof resolution fitting parameter into Mantid equivalent fitting parameters.");
-
-    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -1109,39 +1081,3 @@ namespace DataHandling
 
 } // namespace DataHandling
 } // namespace Mantid
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

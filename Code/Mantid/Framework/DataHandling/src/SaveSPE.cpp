@@ -1,14 +1,3 @@
-/*WIKI* 
-
-Saves the data in a workspace into a file in the ASCII 'SPE' format (as described [[Media:Spe_file_format.pdf|here]]).
-
-The units used for saving will match those of the input workspace, such that if you have the units Momentum Transfer ('DeltaE') then you will get a traditional SPE file, you could choose to have the units in mod Q and then it will save to an SPQ file variant.
-  
-==== Restrictions on the input workspace ====
-  
-The input workspace must contain histogram data with common binning on all spectra.
-
-*WIKI*/
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
@@ -39,13 +28,6 @@ namespace Mantid
     #define FPRINTF_WITH_EXCEPTION(stream, format, ... ) if (fprintf(stream, format, ##__VA_ARGS__) <= 0)\
     {\
       throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");\
-    }
-
-    /// Sets documentation strings for this algorithm
-    void SaveSPE::initDocs()
-    {
-      this->setWikiSummary("Writes a workspace into a file the spe format. ");
-      this->setOptionalMessage("Writes a workspace into a file the spe format.");
     }
     
 

@@ -6,6 +6,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
+
 #include <boost/shared_ptr.hpp>
 
 #include <QDesktopServices>
@@ -53,23 +55,6 @@ void MuonAnalysisFitDataTab::makeRawWorkspace(const std::string& wsName)
   duplicate->execute();
 }
 
-
-/**
-* Groups the given workspace group with the raw workspace that is associated with
-* the workspace name which is also given.
-*
-* @param inputWorkspaces :: The name of the workspace the raw file is associated to.
-* @param groupName :: The name of the workspaceGroup to join with and what to call the output.
-*/
-void MuonAnalysisFitDataTab::groupWorkspaces(const std::vector<std::string> & inputWorkspaces, const std::string & groupName)
-{
-  Mantid::API::IAlgorithm_sptr groupingAlg = Mantid::API::AlgorithmManager::Instance().create("GroupWorkspaces");
-  groupingAlg->setProperty("InputWorkspaces", inputWorkspaces);
-  groupingAlg->setPropertyValue("OutputWorkspace", groupName);
-  groupingAlg->execute();
-}
-
-
 /**
 * Group the fitted workspaces that are created from the 'fit' algorithm
 *
@@ -77,33 +62,28 @@ void MuonAnalysisFitDataTab::groupWorkspaces(const std::vector<std::string> & in
 */
 void MuonAnalysisFitDataTab::groupFittedWorkspaces(QString workspaceName)
 {
-  std::string groupName = workspaceName.left(workspaceName.find(';')).toStdString();
   std::string wsNormalised = workspaceName.toStdString() + "_NormalisedCovarianceMatrix";
   std::string wsParameters = workspaceName.toStdString() + "_Parameters";
   std::string wsWorkspace = workspaceName.toStdString() + "_Workspace";
   std::vector<std::string> inputWorkspaces;
 
-  if ( Mantid::API::AnalysisDataService::Instance().doesExist(groupName) )
+  if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsNormalised) )
   {
-    inputWorkspaces.push_back(groupName);
-
-    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsNormalised) )
-    {
-      inputWorkspaces.push_back(wsNormalised);
-    }
-    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsParameters) )
-    {
-      inputWorkspaces.push_back(wsParameters);
-    }
-    if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsWorkspace) )
-    {
-      inputWorkspaces.push_back(wsWorkspace);
-    }
+    inputWorkspaces.push_back(wsNormalised);
+  }
+  if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsParameters) )
+  {
+    inputWorkspaces.push_back(wsParameters);
+  }
+  if ( Mantid::API::AnalysisDataService::Instance().doesExist(wsWorkspace) )
+  {
+    inputWorkspaces.push_back(wsWorkspace);
   }
 
   if (inputWorkspaces.size() > 1)
   {
-    groupWorkspaces(inputWorkspaces, groupName);
+    std::string groupName = workspaceName.left(workspaceName.find(';')).toStdString();
+    MuonAnalysisHelper::groupWorkspaces(groupName, inputWorkspaces);
   }
 }
 
