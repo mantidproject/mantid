@@ -67,7 +67,7 @@ Supporting ::
 Usage
 -----
 
-.. include:: ../usagedata.txt
+.. include:: ../usagedata-note.txt
 
 .. testcode:: DoIt
 
