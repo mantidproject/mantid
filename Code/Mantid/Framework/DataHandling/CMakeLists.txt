@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/AsciiPointBase.cpp
 	src/CompressEvents.cpp
 	src/CreateChopperModel.cpp
+	src/CreateChunkingFromInstrument.cpp
 	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
 	src/CreateSimulationWorkspace.cpp
@@ -141,6 +142,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/AsciiPointBase.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateChopperModel.h
+	inc/MantidDataHandling/CreateChunkingFromInstrument.h
 	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/CreateSimulationWorkspace.h
@@ -278,6 +280,7 @@ set ( TEST_FILES
 	AppendGeometryToSNSNexusTest.h
 	CompressEventsTest.h
 	CreateChopperModelTest.h
+	CreateChunkingFromInstrumentTest.h
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
 	CreateSimulationWorkspaceTest.h
