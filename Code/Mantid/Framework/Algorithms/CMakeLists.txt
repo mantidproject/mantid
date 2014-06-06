@@ -181,6 +181,7 @@ set ( SRC_FILES
 	src/RemoveExpDecay.cpp
 	src/RemoveLowResTOF.cpp
 	src/RemovePromptPulse.cpp
+	src/RemoveWorkspaceHistory.cpp
 	src/RenameWorkspace.cpp
 	src/RenameWorkspaces.cpp
 	src/ReplaceSpecialValues.cpp
@@ -416,6 +417,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RemoveExpDecay.h
 	inc/MantidAlgorithms/RemoveLowResTOF.h
 	inc/MantidAlgorithms/RemovePromptPulse.h
+	inc/MantidAlgorithms/RemoveWorkspaceHistory.h
 	inc/MantidAlgorithms/RenameWorkspace.h
 	inc/MantidAlgorithms/RenameWorkspaces.h
 	inc/MantidAlgorithms/ReplaceSpecialValues.h
@@ -644,6 +646,7 @@ set ( TEST_FILES
 	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
 	RemovePromptPulseTest.h
+	RemoveWorkspaceHistoryTest.h
 	RenameWorkspaceTest.h
 	RenameWorkspacesTest.h
 	ReplaceSpecialValuesTest.h
