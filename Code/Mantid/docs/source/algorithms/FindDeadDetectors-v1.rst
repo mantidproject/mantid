@@ -45,30 +45,29 @@ Usage
 
     print "With no range will find very dead"
     (wsOut,detList) = FindDeadDetectors(ws)
-    for i in range(len(detList)):
-        print detList[i], " ",
+    print str(detList)
 
     print "\nwith a lower range will find very dead and drop off"
     (wsOut,detList) = FindDeadDetectors(ws,RangeLower=8e3)
-    for i in range(len(detList)):
-        print detList[i], " ",
-
+    print str(detList)
 
     print "\nwith a lower range and upper range will find all three"
     (wsOut,detList) = FindDeadDetectors(ws,RangeLower=8e3, rangeUpper=1.6e4)
-    for i in range(len(detList)):
-        print detList[i], " ",
+    print str(detList)
 
 Output:
 
 .. testoutput:: FindVariousDeadDets
 
     With no range will find very dead
-    110   
+    [110]
+
     with a lower range will find very dead and drop off
-    110   115   
+    [110,115]
+
     with a lower range and upper range will find all three
-    110   115   120  
+    [110,115,120]
+ 
 
 
 
