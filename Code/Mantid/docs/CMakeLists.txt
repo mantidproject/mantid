@@ -4,6 +4,17 @@
 find_package ( Sphinx )
 
 if ( SPHINX_FOUND )
+  # require the bootstrap theme
+  find_file (SPHINX_BOOTSTRAP_THEME __init__.py
+             PATHS
+               /usr/lib/python2.6/site-packages/sphinx_bootstrap_theme/
+               /usr/lib/python2.7/site-packages/sphinx_bootstrap_theme/
+               /usr/local/lib/python2.7/dist-packages/sphinx_bootstrap_theme/ )
+  if (NOT SPHINX_BOOTSTRAP_THEME)
+    message (ERROR " Did not find sphinx_bootstrap_theme")
+    message (FATAL_ERROR " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/")
+  endif (NOT SPHINX_BOOTSTRAP_THEME)
+
   # We generate a target per build type, i.e docs-html, docs-test
   set ( SPHINX_BUILD_DIR ${CMAKE_BINARY_DIR}/docs )
   set ( SCREENSHOTS_DIR ${SPHINX_BUILD_DIR}/screenshots )
