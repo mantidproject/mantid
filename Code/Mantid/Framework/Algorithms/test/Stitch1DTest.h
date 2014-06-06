@@ -132,10 +132,9 @@ private:
     for(double x = startX; x <= endX; x+=1.0)
     {
       xValues.push_back(x);
-      if(x == endX)
-        break;
       yValues.push_back(std::cos(x));
     }
+    yValues.pop_back();
 
     auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
     createWorkspace->setChild(true);
@@ -147,6 +146,7 @@ private:
     createWorkspace->setPropertyValue("OutputWorkspace", "dummy");
     createWorkspace->execute();
     MatrixWorkspace_sptr outWS = createWorkspace->getProperty("OutputWorkspace");
+
     return outWS;
   }
 
@@ -583,7 +583,7 @@ public:
   void test_params_causing_scaling_regression_test()
   {
     auto lhs = createCosWaveWorkspace(0, 10);
-    auto rhs = createCosWaveWorkspace(9, 20);
+    auto rhs = createCosWaveWorkspace(6, 20);
 
     auto ret = do_stitch1D(lhs, rhs);
 
@@ -592,7 +592,7 @@ public:
 
     TSM_ASSERT_EQUALS("Two cosine waves in phase scale factor should be unity", 1.0, scaleFactor);
     const double stitchedWSFirstYValue = outWS->readY(0)[0]; // Should be 1.0 at cos(0)
-    const double lhsWSFirstYValue = lhs->readY(0)[0]; // Shold be 1.0 at cos(0)
+    const double lhsWSFirstYValue = lhs->readY(0)[0]; // Should be 1.0 at cos(0)
 
     TSM_ASSERT_EQUALS("No scaling of the output workspace should have occurred", stitchedWSFirstYValue, lhsWSFirstYValue);
 

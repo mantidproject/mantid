@@ -160,6 +160,7 @@ namespace Mantid
       const MantidVec& lhsX = lhsWS->readX(0);
       auto it = std::min_element(lhsX.begin(), lhsX.end());
       const double minLHSX = *it;
+      it = std::max_element(lhsX.begin(), lhsX.end());
 
       const MantidVec& rhsX = rhsWS->readX(0);
       it = std::max_element(rhsX.begin(), rhsX.end());
@@ -170,7 +171,8 @@ namespace Mantid
       {
         MantidVec calculatedParams;
 
-        const double calculatedStep = (maxRHSX - minLHSX) / 100;
+        // Calculate the step size based on the existing step size of the LHS workspace. That way scale factors should be reasonably maintained.
+        const double calculatedStep = lhsX[1] - lhsX[0];
         calculatedParams.push_back(minLHSX);
         calculatedParams.push_back(calculatedStep);
         calculatedParams.push_back(maxRHSX);
