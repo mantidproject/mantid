@@ -496,12 +496,12 @@ namespace LiveData
         int events = pkt.getSectionEventCount();
         if (m_eventBuffer->run().hasProperty(monName))
         {
-        events += m_eventBuffer->run().getPropertyValueAsType<int>(monName);
+          events += m_eventBuffer->run().getPropertyValueAsType<int>(monName);
         }
         else
         {
-        // First time we've received this monitor.  Add it to our list
-        m_monitorLogs.push_back(monName);
+          // First time we've received this monitor.  Add it to our list
+          m_monitorLogs.push_back(monName);
         }
 
         // Update the property value (overwriting the old value if there was one)
