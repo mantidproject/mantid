@@ -38,7 +38,6 @@ Usage
 Output:
 
 .. testoutput:: ExFilter
-    :options: +ELLIPSIS
 
     The number of events that remain: 4058 
     compared to the number in the unfiltered workspace: 8000

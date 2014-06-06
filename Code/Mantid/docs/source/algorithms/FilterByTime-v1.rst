@@ -27,7 +27,43 @@ You must specify:
 Comparing with other event filtering algorithms
 ###############################################
 
-Wiki page `EventFiltering <EventFiltering>`__ has a detailed
+Wiki page `www.mantidproject.org/EventFiltering <EventFiltering>`__ has a detailed
 introduction on event filtering in MantidPlot.
+
+Usage
+-----
+
+**Example - Using a relative and absolute times**  
+
+.. testcode:: ExFilter
+
+    ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
+    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100) 
+    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:10:00", Value=100)
+    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:20:00", Value=100)
+    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:30:00", Value=100)
+    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:40:00", Value=15)
+    AddTimeSeriesLog(ws, Name="proton_charge", Time="2010-01-01T00:50:00", Value=100)
+
+    #Extract the first 30 minutes  * 60 = 1800 seconds (roughly half of the data)
+    wsFiltered = FilterByTime(ws,StartTime=0,StopTime=1800)
+
+    #Extract the first 30 minutes  * 60 = 1800 seconds (roughly half of the data)
+    wsFilteredAbs = FilterByTime(ws,
+        AbsoluteStartTime="2010-01-01T00:10:00",
+        AbsoluteStopTime="2010-01-01T00:20:00")
+
+    print ("The number of events within the relative Filter: %i" % wsFiltered.getNumberEvents())
+    print ("The number of events within the Aboslute Filter: %i" % wsFilteredAbs.getNumberEvents())
+    print ("Compared to the number in the unfiltered workspace: %i" % ws.getNumberEvents())
+
+Output:
+
+.. testoutput:: ExFilter
+
+    The number of events within the relative Filter: 4058
+    The number of events within the Aboslute Filter: 1322
+    Compared to the number in the unfiltered workspace: 8000
+
 
 .. categories::
