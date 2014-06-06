@@ -1,8 +1,3 @@
-/*WIKI*
-Determines which peaks intersect a defined box region in either QLab, QSample or HKL space. Similar to [[PeaksOnSurface]].
-*WIKI*/
-
-
 #include "MantidCrystal/PeaksInRegion.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"

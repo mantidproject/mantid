@@ -13,18 +13,19 @@ class PropertiesDirective(BaseDirective):
         """
         Called by Sphinx when the ..properties:: directive is encountered.
         """
-        self.add_rst(self.make_header("Properties"))
-        self.add_rst(self._populate_properties_table())
-        self.commit_rst()
+        if self._create_properties_table():
+            self.commit_rst()
 
         return []
 
-    def _populate_properties_table(self):
+    def _create_properties_table(self):
         """
         Populates the ReST table with algorithm properties.
         """
         alg = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version())
         alg_properties = alg.getProperties()
+        if len(alg_properties) == 0:
+            return False
 
         # Stores each property of the algorithm in a tuple.
         properties = []
@@ -43,8 +44,9 @@ class PropertiesDirective(BaseDirective):
                 str(prop.documentation.replace("\n", " "))
             ))
 
-        # Build and add the properties to the ReST table.
-        return self._build_table(properties)
+        self.add_rst(self.make_header("Properties"))
+        self.add_rst(self._build_table(properties))
+        return True
 
     def _build_table(self, table_content):
         """
@@ -65,7 +67,7 @@ class PropertiesDirective(BaseDirective):
         col_sizes = [max(len(row[i] * 10) for row in table_content)
                      for i in range(len(header_content))]
         # Use the column widths as a means to formatting columns.
-        formatter = ' '.join('{:<%d}' % col for col in col_sizes)
+        formatter = ' '.join('{%d:<%d}' % (index,col) for index, col in enumerate(col_sizes))
         # Add whitespace to each column. This depends on the values returned by
         # col_sizes.
         table_content_formatted = [

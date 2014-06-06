@@ -36,9 +36,6 @@ class AlgorithmDirective(BaseDirective):
         """
         Called by Sphinx when the ..algorithm:: directive is encountered
         """
-        self._track_algorithm()
-
-        self._insert_reference_link()
         self._insert_pagetitle()
         imgpath = self._create_screenshot()
         self._insert_screenshot_link(imgpath)
@@ -48,48 +45,31 @@ class AlgorithmDirective(BaseDirective):
         self.commit_rst()
         return []
 
-    def _track_algorithm(self):
-        """
-        Keep a track of the highest versions of algorithms encountered.
-        The algorithm name and version are retrieved from the document name.
-        See BaseDirective::set_algorithm_and_version()
-        """
-        env = self.state.document.settings.env
-        if not hasattr(env, "algorithm"):
-            env.algorithms = {}
-        #endif
-
-        name, version = self.algorithm_name(), self.algorithm_version()
-        algorithms = env.algorithms
-        if name in algorithms:
-            prev_version = algorithms[name][1]
-            if version > prev_version:
-                algorithms[name][1] = version
-        else:
-            algorithms[name] = (name, version)
-
-    def _insert_reference_link(self):
+    def _insert_pagetitle(self):
         """
         Outputs a reference to the top of the algorithm's rst
         of the form ".. _algm-AlgorithmName-vVersion:", so that
         the page can be referenced using 
         :ref:`algm-AlgorithmName-version`. If this is the highest 
-        version then it also outputs a reference ".. _algm-AlgorithmName:
+        version then it outputs a reference ".. _algm-AlgorithmName: instead
+        
+        It then outputs a title for the page
         """
         from mantid.api import AlgorithmFactory
 
         alg_name = self.algorithm_name()
         version = self.algorithm_version()
-        self.add_rst(".. _algm-%s-v%d:\n" % (alg_name, version))
 
+        # page reference must come directly before the title if it wants
+        # to be referenced without defining the link text. Here we put the
+        # specific version one first so that it always must be referenced
+        # using the full link text ":ref`LinkText <algm-AlgorithmName-vX>`:"
+        self.add_rst(".. _algm-%s-v%d:\n\n" % (alg_name, version))
         if AlgorithmFactory.highestVersion(alg_name) == version:
-            self.add_rst(".. _algm-%s:\n" % alg_name)
+            self.add_rst(".. _algm-%s:\n\n" % alg_name)
 
-    def _insert_pagetitle(self):
-        """
-        Outputs a title for the page
-        """
-        title = "%s v%d" % (self.algorithm_name(), self.algorithm_version())
+        # title
+        title = "%s v%d" % (alg_name, version)
         self.add_rst(self.make_header(title, True))
 
     def _insert_toc(self):
@@ -108,18 +88,23 @@ class AlgorithmDirective(BaseDirective):
         Returns:
           str: The full path to the created image
         """
-        from mantiddoc.tools.screenshot import algorithm_screenshot
+        notfoundimage = "/images/ImageNotFound.png"
+        try:
+            screenshots_dir = self._screenshot_directory()
+        except RuntimeError:
+            return notfoundimage
 
-        env = self.state.document.settings.env
-        screenshots_dir = self._screenshot_directory()
+        # Generate image
+        from mantiddoc.tools.screenshot import algorithm_screenshot
         if not os.path.exists(screenshots_dir):
             os.makedirs(screenshots_dir)
 
         try:
             imgpath = algorithm_screenshot(self.algorithm_name(), screenshots_dir, version=self.algorithm_version())
         except Exception, exc:
+            env = self.state.document.settings.env
             env.warn(env.docname, "Unable to generate screenshot for '%s' - %s" % (algorithm_name, str(exc)))
-            imgpath = os.path.join(screenshots_dir, "failed_dialog.png")
+            imgpath = notfoundimage
 
         return imgpath
 
@@ -135,7 +120,9 @@ class AlgorithmDirective(BaseDirective):
         """
         env = self.state.document.settings.env
         format_str = ".. figure:: %s\n"\
-                     "    :class: screenshot\n\n"\
+                     "    :class: screenshot\n"\
+                     "    :align: right\n"\
+                     "    :width: 400px\n\n"\
                      "    %s\n\n"
         
         # Sphinx assumes that an absolute path is actually relative to the directory containing the
@@ -144,13 +131,18 @@ class AlgorithmDirective(BaseDirective):
 
         filename = os.path.split(img_path)[1]
         cfgdir = env.srcdir
-        screenshots_dir = self._screenshot_directory()
-        rel_path = os.path.relpath(screenshots_dir, cfgdir)
-        # This is a href link so is expected to be in unix style
-        rel_path = rel_path.replace("\\","/")
 
-        # stick a "/" as the first character so Sphinx computes relative location from source directory
-        path = "/" + rel_path + "/" + filename
+        try:
+            screenshots_dir = self._screenshot_directory()
+            rel_path = os.path.relpath(screenshots_dir, cfgdir)
+            # This is a href link so is expected to be in unix style
+            rel_path = rel_path.replace("\\","/")
+            # stick a "/" as the first character so Sphinx computes relative location from source directory
+            path = "/" + rel_path + "/" + filename
+        except RuntimeError:
+            # Use path as it is
+            path = img_path
+
         caption = "A screenshot of the **" + self.algorithm_name() + "** dialog."
         self.add_rst(format_str % (path, caption))
 
@@ -187,7 +179,7 @@ class AlgorithmDirective(BaseDirective):
         match = DEPRECATE_USE_ALG_RE.search(msg)
         if match is not None and len(match.groups()) == 1:
             name = match.group(0)
-            msg = DEPRECATE_USE_ALG_RE.sub(r"Use :ref:`algorithm|\1` instead.", msg)
+            msg = DEPRECATE_USE_ALG_RE.sub(r"Use :ref:`algm-\1` instead.", msg)
 
         self.add_rst(".. warning:: %s" % msg)
 
@@ -198,15 +190,15 @@ def html_collect_pages(app):
     """
     Write out unversioned algorithm pages that redirect to the highest version of the algorithm
     """
-    env = app.builder.env
-    if not hasattr(env, "algorithms"):
-        return # nothing to do
+    from mantid.api import AlgorithmFactory
 
     template = REDIRECT_TEMPLATE
+    all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 
-    algorithms = env.algorithms
-    for name, highest_version in algorithms.itervalues():
+    for name, versions in all_algs.iteritems():
         redirect_pagename = "algorithms/%s" % name
+        versions.sort()
+        highest_version = versions[-1]
         target = "%s-v%d.html" % (name, highest_version)
         context = {"name" : name, "target" : target}
         yield (redirect_pagename, context, template)

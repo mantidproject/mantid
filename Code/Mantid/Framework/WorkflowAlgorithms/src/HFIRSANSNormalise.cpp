@@ -1,8 +1,3 @@
-/*WIKI* 
-
-Performs data normalisation for HFIR SANS.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -75,4 +70,3 @@ void HFIRSANSNormalise::exec()
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

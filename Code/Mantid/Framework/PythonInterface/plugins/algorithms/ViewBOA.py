@@ -1,11 +1,3 @@
-"""*WIKI*
-
-Algorithm which loads a BOA file and creates the 3 BOA plots of Uwe Filges desire
-
-Mark Koennecke, July 2013
-
-*WIKI*"""
-
 from mantid.api import AlgorithmFactory
 from mantid.api import PythonAlgorithm, WorkspaceFactory, FileProperty, FileAction, WorkspaceProperty
 from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl

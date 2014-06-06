@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 #include "MantidAlgorithms/ShiftLogTime.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -143,4 +139,3 @@ namespace Algorithms
 
 } // namespace Mantid
 } // namespace Algorithms
-
