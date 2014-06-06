@@ -14,6 +14,10 @@ This is a variation of the stretched exponential option of
 for a grid of β and σ values. The distribution of goodness of fit values
 is plotted.
 
-This routine was originally part of the MODES package.
+This routine was originally part of the MODES package. Note that this algorithm
+uses F2Py and is currently only supported on windows.
+
+** Example - 
+.. codeblock::
 
 .. categories::
