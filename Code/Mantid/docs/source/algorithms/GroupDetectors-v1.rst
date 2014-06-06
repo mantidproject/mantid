@@ -92,6 +92,8 @@ where is used to specify spectra IDs and detector IDs.
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 Example 1: specifying spectrum numbers
 ######################################
 

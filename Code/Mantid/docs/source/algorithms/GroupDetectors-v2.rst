@@ -108,6 +108,8 @@ for version 1 here. <GroupDetectors-v1.html>`_
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 Example 1: specifying a map file
 ################################
 
