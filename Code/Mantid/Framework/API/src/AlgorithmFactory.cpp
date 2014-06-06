@@ -227,6 +227,21 @@ namespace Mantid
     }
   }
 
+  /**
+   * @param algorithmName The name of an algorithm registered with the factory
+   * @return An integer corresponding to the highest version registered
+   * @throw std::invalid_argument if the algorithm cannot be found
+   */
+  int AlgorithmFactoryImpl::highestVersion(const std::string &algorithmName) const
+  {
+    VersionMap::const_iterator viter = m_vmap.find(algorithmName);
+    if(viter != m_vmap.end()) return viter->second;
+    else
+    {
+      throw std::invalid_argument("AlgorithmFactory::highestVersion() - Unknown algorithm '" + algorithmName + "'");
+    }
+  }
+
 /**
   * Return the categories of the algorithms. This includes those within the Factory itself and 
   * any cleanly constructed algorithms stored here.

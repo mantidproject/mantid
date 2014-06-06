@@ -1,9 +1,3 @@
-/*WIKI*
-
-This algorithm refreshes the current session to the maximum amount provided by the catalog API.
-
-*WIKI*/
-
 #include "MantidICat/CatalogKeepAlive.h"
 #include "MantidAPI/CatalogManager.h"
 
@@ -50,4 +44,3 @@ namespace Mantid
 
   }
 }
-

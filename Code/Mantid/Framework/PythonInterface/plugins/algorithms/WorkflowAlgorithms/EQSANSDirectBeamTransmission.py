@@ -1,6 +1,3 @@
-"""*WIKI* 
-Compute the transmission using the direct beam method on EQSANS
-*WIKI*"""
 from mantid.api import *
 from mantid.kernel import *
 import mantid.simpleapi as api

@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-Liquids Reflectometer (REFL) reduction
-
-*WIKI*"""
-
 from mantid.api import *
 from mantid.simpleapi import *
 from numpy import zeros, shape, arange
@@ -378,4 +372,3 @@ class RefLReduction(PythonAlgorithm):
            
         
 AlgorithmFactory.subscribe(RefLReduction)
-

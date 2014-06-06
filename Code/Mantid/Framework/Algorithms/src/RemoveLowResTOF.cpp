@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAlgorithms/RemoveLowResTOF.h"
 #include "MantidAPI/WorkspaceValidators.h"

@@ -1,8 +1,3 @@
-"""*WIKI* 
-
-This algorithm is to examine peak profile values for powder diffractometry by LeBailFit. 
-
-*WIKI*"""
 # from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction, MatrixWorkspaceProperty, WorkspaceProperty, PropertyMode
 # from mantid.kernel import Direction, StringListValidator
 

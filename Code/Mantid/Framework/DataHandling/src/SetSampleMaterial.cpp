@@ -1,35 +1,3 @@
-/*WIKI* 
-
-Sets the neutrons information in the sample. You can either enter details about the chemical formula or atomic number, 
-or you can provide specific values for the attenuation and scattering cross sections and the sample number density.  
-If you decide to provide specific values you must give values for all three (attenuation and scattering cross sections and the sample number density), and any formula information will be ignored.
-If you miss any of the three specific values then the other will be ignored.
-
-Neutron scattering lengths and cross sections of the elements and their isotopes have been taken from [http://www.ncnr.nist.gov/resources/n-lengths/list.html].
-*WIKI*/
-/*WIKI_USAGE* 
-=====Setting the sample by simple formula=====
-SetSampleMaterial(InputWorkspace='IRS26173',ChemicalFormula='Fe')
-
-=====Setting the sample by a more complex formula=====
-SetSampleMaterial(InputWorkspace='IRS26173',ChemicalFormula='Al2-O3', UnitCellVolume='253.54', ZParameter='6')
-
-=====Setting the sample by specific values=====
-SetSampleMaterial(InputWorkspace='IRS26173',AtomicNumber=26,AttenuationXSection=2.56,ScatteringXSection=11.62,SampleNumberDensity=0.0849106)
-
-=====Extracting the set values out by python=====
-sam = ws.sample()
-mat = sam.getMaterial()
-print mat.absorbXSection()
-1.3374
-print mat.cohScatterXSection()
-339.1712
-print mat.name()
-C2 H4
-print mat.totalScatterXSection()
-339.1712
-
-*WIKI_USAGE*/
 //--------------------------------
 // Includes
 //--------------------------------
