@@ -174,6 +174,8 @@ namespace Algorithms
     DateAndTime run_start("2010-01-01T00:00:00");
     DateAndTime run_end("2010-01-01T01:00:00");
     Run &theRun = ws->mutableRun();
+    //belt and braces use both approaches for setting start and end times
+    theRun.setStartAndEndTime(run_start,run_end);
     theRun.addLogData(new PropertyWithValue<std::string>("run_start", run_start.toISO8601String()));
     theRun.addLogData(new PropertyWithValue<std::string>("run_end", run_end.toISO8601String()));
 
