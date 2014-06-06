@@ -64,9 +64,9 @@ namespace Algorithms
     auto nonNegative = boost::make_shared<Kernel::BoundedValidator<double> >();
     nonNegative->setLower(0);
 
-    declareProperty<double>("MinRadius", 0, nonNegative, "Lenght of the inner ring"); 
+    declareProperty<double>("MinRadius", 0, nonNegative, "Radius of the inner ring(m)"); 
     declareProperty(new Kernel::PropertyWithValue<double>("MaxRadius", std::numeric_limits<double>::max(), nonNegative), 
-                    "Lenght of the outer ring");
+                    "Radius of the outer ring(m)");
     auto nonNegativeInt = boost::make_shared<Kernel::BoundedValidator<int> >();
     nonNegativeInt->setLower(1);
     declareProperty<int>("NumBins",100, nonNegativeInt, "Number of slice bins for the output");
