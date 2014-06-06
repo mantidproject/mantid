@@ -11,6 +11,7 @@ from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl
 import mantid.simpleapi
 from mantid import config
 import os.path
+import numpy as np
 
 #--------- place to look for dictionary files
 
@@ -65,6 +66,16 @@ class LoadSINQFile(PythonAlgorithm):
             ws = mantid.simpleapi.GroupDetectors(InputWorkspace=ws,
                                                  OutputWorkspace=wname,
                                                  MapFile=grp_file, Behaviour="Sum")
+
+            # Reverse direction of POLDI data so that low index corresponds to low 2theta.
+            histogramCount = ws.getNumberHistograms()
+            oldYData = []
+            for i in range(histogramCount):
+                oldYData.append([x for x in ws.readY(i)])
+
+            for i in range(histogramCount):
+                ws.setY(i, np.array(oldYData[histogramCount - 1 - i]))
+
         elif inst == "TRICS":
             ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,OutputWorkspace=wname)
             ws = mantid.simpleapi.SINQTranspose3D(ws,OutputWorkspace=wname)
