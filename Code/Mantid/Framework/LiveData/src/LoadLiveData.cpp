@@ -286,6 +286,18 @@ namespace LiveData
    */
   void LoadLiveData::addMatrixWSChunk(const std::string& algoName, Workspace_sptr accumWS, Workspace_sptr chunkWS)
   {
+    // Handle the addition of the internal monitor workspace, if present
+    auto accumMW = boost::dynamic_pointer_cast<MatrixWorkspace>(accumWS);
+    auto chunkMW = boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
+    if ( accumMW && chunkMW )
+    {
+      auto accumMon = accumMW->monitorWorkspace();
+      auto chunkMon = chunkMW->monitorWorkspace();
+
+      if ( accumMon && chunkMon ) accumMon += chunkMon;
+    }
+
+    // Now do the main workspace
     IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
     alg->setProperty("LHSWorkspace", accumWS);
     alg->setProperty("RHSWorkspace", chunkWS);
@@ -297,9 +309,8 @@ namespace LiveData
     }
     else
     {
-      // Is this really necessary?
-
       // Get the output as the generic Workspace type
+      // This step is necessary for when we are operating on MD workspaces (PlusMD)
       Property * prop = alg->getProperty("OutputWorkspace");
       IWorkspaceProperty * wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
       if (!wsProp)
