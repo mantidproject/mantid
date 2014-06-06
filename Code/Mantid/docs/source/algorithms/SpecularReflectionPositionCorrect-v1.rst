@@ -47,11 +47,6 @@ Usage
    inst = corrected_ws.getInstrument()
    det_pos = inst.getComponentByName('point-detector').getPos()
    print det_pos
-
-
-.. testcleanup:: SpecularReflectionPositionCorrectExample
-   DeleteWorkspace('ws')
-   DeleteWorkspace('corrected_ws')
    
 Output:
 

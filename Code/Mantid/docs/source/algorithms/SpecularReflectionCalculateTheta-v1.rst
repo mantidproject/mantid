@@ -41,10 +41,6 @@ Usage
    # Calculate the two theta.
    two_theta = SpecularReflectionCalculateTheta(InputWorkspace=ws, DetectorComponentName='point-detector', AnalysisMode='PointDetectorAnalysis')
    print two_theta
-
-
-.. testcleanup:: SpecularReflectionCalculateThetaPointDetectorExample
-   DeleteWorkspace('ws')
    
 Output:
 

@@ -36,6 +36,8 @@ Usage
    just_intesecting_box_table = PeaksInRegion(peaks, CoordinateFrame='HKL', PeakRadius=1.00, Extents=[1.0,2.0,-1.0,1.0,-1.0,1.0], CheckPeakExtents=True)
    print just_intesecting_box_table.row(0)
    
+Output:
+
 .. testoutput:: PeaksInRegionExample
 
    {'Distance': 0.0, 'PeakIndex': 0, 'Intersecting': True}

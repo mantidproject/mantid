@@ -38,6 +38,8 @@ Usage
 
   print "Number of Indexed Peaks: ", indexed
 
+Output:
+
 .. testoutput:: CalculatePeaksHKLExample
 
   Number of Indexed Peaks:  1

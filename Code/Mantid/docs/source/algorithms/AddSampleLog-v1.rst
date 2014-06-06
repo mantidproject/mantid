@@ -47,10 +47,6 @@ Usage
    print log_y.value
    print log_z.value
 
-.. testcleanup:: AddSampleLogExample
-   DeleteWorkspace('demo_ws')
-   DeleteWorkspace('corrected_ws')
-   
 Output:
 
 .. testoutput:: AddSampleLogExample 

@@ -52,6 +52,8 @@ Usage
    print _or.readY(0)
    print _xor.readY(0)
    
+Output:
+
 .. testoutput::  BinaryOperateMasksExample
 
    [ 2.]

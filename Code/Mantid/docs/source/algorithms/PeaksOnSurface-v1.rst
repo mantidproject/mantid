@@ -40,6 +40,8 @@ Usage
    tbl = PeaksOnSurface(InputWorkspace=peaks, PeakRadius=1.000,  CoordinateFrame='HKL', Vertex1=[1.0, -1.0, out_of_plane_offset], Vertex2=[-1.0,-1.0,out_of_plane_offset], Vertex3=[-1.0, 1.0,out_of_plane_offset], Vertex4=[1.0, 1.0,out_of_plane_offset])
    print tbl.row(0)
    
+Output:
+
 .. testoutput:: PeaksOnSurfaceExample
 
    {'Distance': 0.0, 'PeakIndex': 0, 'Intersecting': True}
