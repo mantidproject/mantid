@@ -27,7 +27,7 @@ python numpy functions with the same name. These are documented
 Usage
 -----
 
-**Example - Using a simple proton charge log**  
+**Example - Filtering a simple time series Log**  
 
 .. testcode:: Filter
 
