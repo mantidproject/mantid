@@ -222,35 +222,39 @@ private:
 
 class DLLExport BeamMonitorPkt : public Packet {
 public:
-	BeamMonitorPkt(const BeamMonitorPkt &pkt);
+    BeamMonitorPkt(const BeamMonitorPkt &pkt);
 
-	uint32_t pulseCharge(void) const { return m_fields[0]; }
-	uint32_t pulseEnergy(void) const { return m_fields[1]; }
-	uint32_t cycle(void) const { return m_fields[2]; }
-	uint32_t flags(void) const { return m_fields[3]; }
+    uint32_t pulseCharge(void) const { return m_fields[0]; }
+    uint32_t pulseEnergy(void) const { return m_fields[1]; }
+    uint32_t cycle(void) const { return m_fields[2]; }
+    uint32_t flags(void) const { return m_fields[3]; }
 
-	// For now, we only care about the monitor ID's and event counts.
-	// There's currently no way to actual event TOF values.
-	void firstSection() const { m_sectionStartIndex = 4; }
-	bool nextSection() const;
-	uint32_t getSectionMonitorID() const;
-	uint32_t getSectionEventCount() const;
 
-	// TODO: Implement these if/when they become necessary
-	// uint32_t getSectionTOFOffset() const;
-	// bool getSectionCORFlag() const;
-	// uint32_t getFirstTOF() const;
-	// uint32_t getNextTOF() const;
+    //bool firstSection() const; 
+    bool nextSection() const;  // iterate over the sections in the packet
+    
+    // Section-specific functions (these require either firstSection() or
+    // nextSection() to have run successfully before they will return
+    // valid data.
+    uint32_t getSectionMonitorID() const;
+    uint32_t getSectionEventCount() const;
+    uint32_t getSectionSourceID() const;
+    uint32_t getSectionTOFOffset() const;
+    bool sectionTOFCorrected() const;
+    bool nextEvent( bool& risingEdge, uint32_t& cycle, uint32_t& tof) const;
 
 private:
-	const uint32_t *m_fields;
+    const uint32_t *m_fields;
 
-	// Data about the current monitor section
-	mutable uint32_t m_sectionStartIndex;  // index into m_fields for the start of this section
+    // Data about the current monitor section
+    mutable uint32_t m_sectionStartIndex;  // index into m_fields for the start of this section
 
-	BeamMonitorPkt(const uint8_t *data, uint32_t len);
+    // used to keep nextEvent from running past the end of the section
+    mutable uint32_t m_eventNum;  
 
-	friend class Parser;
+    BeamMonitorPkt(const uint8_t *data, uint32_t len);
+
+    friend class Parser;
 };
 
 class DLLExport PixelMappingPkt : public Packet {

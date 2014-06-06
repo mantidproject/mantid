@@ -17,16 +17,16 @@ associated to detector positions, but it is derived from the
 `Axes <Interacting_with_Matrix_Workspaces#Axes>`__.
 
 .. figure:: /images/ExecuteRingProfile.png 
-   :alt:  800px
+   :width: 800px
+   :align: right
 
-    800px
 The image below shows a visual interpretation for the inputs of the
 algorithm
 
 .. figure:: /images/RingProfileInputsView.png
-   :alt: RingProfileInputsView.png
 
-   RingProfileInputsView.png
+
+
 The algorithm goes through each pixel and find its distance from the
 center. If it relies inside the defined ring, it checks the angle
 between the pixel position and the center and uses this information to
@@ -36,15 +36,12 @@ The RingProfile is also defined for Workspace2D which has the positions
 based on the detectors, as you can see in the picture below.
 
 .. figure:: /images/RingProfileInstrument.png 
-   :alt:  800px 
+   :width:  801px 
 
-    800px
 In this case, the inputs of the algorithm is like the image below
 
-.. figure:: /images/Ringprofileinstrument.png
-   :alt: Ringprofileinstrument.png
+.. figure:: /images/Ringprofileinstrument1.png
 
-   Ringprofileinstrument.png
 The algorithm does to each spectrum, get the associated detector from
 which it get the positions. From the positions it work out if it belongs
 or not to the ring and in which bin it must be placed. It finally
