@@ -145,8 +145,13 @@ class LoadRun(object):
         
         outWs = Load(self._data_file, **extra_options)
 
+        monitor_ws_name = workspace + "_monitors"
+
         if isinstance(outWs, IEventWorkspace):
-            LoadNexusMonitors(self._data_file, OutputWorkspace=workspace + "_monitors")
+            LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
+        else:
+            if monitor_ws_name in mtd:
+                DeleteWorkspace(monitor_ws_name)
         
         loader_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
         
@@ -931,7 +936,7 @@ class Mask_ISIS(ReductionStep):
                     mask_detectors_with_masking_ws(workspace, mask_ws_name)
                     DeleteWorkspace(Workspace=mask_ws_name)
                 except:
-                    _issueWarning("Invalid input for mask file.  Path = %s.\nReason = %s." % (mask_file, traceback.format_exc()))
+                    raise RuntimeError("Invalid input for mask file.  Path = %s." % mask_file)
 
         if len(self.spec_list)>0:
             MaskDetectors(Workspace=workspace, SpectraList = self.spec_list)

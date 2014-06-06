@@ -1060,6 +1060,25 @@ namespace Mantid
       return it->second;
     }
 
+    /** Sets the internal monitor workspace to the provided workspace.
+     *  This method is intended for use by data-loading algorithms.
+     *  Note that no checking is performed as to whether this workspace actually contains data
+     *  pertaining to monitors, or that the spectra point to Detector objects marked as monitors.
+     *  It simply has to be of the correct type to be accepted.
+     *  @param monitorWS The workspace containing the monitor data.
+     */
+    void MatrixWorkspace::setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace>& monitorWS)
+    {
+      m_monitorWorkspace = monitorWS;
+    }
+
+    /** Returns a pointer to the internal monitor workspace.
+     */
+    boost::shared_ptr<MatrixWorkspace> MatrixWorkspace::monitorWorkspace() const
+    {
+      return m_monitorWorkspace;
+    }
+
     //---------------------------------------------------------------------------------------------
     /** Return memory used by the workspace, in bytes.
      * @return bytes used.
