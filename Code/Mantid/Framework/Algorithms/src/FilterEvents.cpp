@@ -152,14 +152,6 @@ namespace Algorithms
     setPropertySettings("IncidentEnergy",
                         new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO, "Direct"));
 
-    vector<string> corrops;
-    corrops.push_back("Shift");
-    corrops.push_back("Multiply");
-    declareProperty("CustumCorrectionOp", "Multiply", boost::make_shared<StringListValidator>(corrops),
-                    "Type of operation for TOF correction of customized type. ");
-    setPropertySettings("CustumCorrectionOp",
-                        new VisibleWhenProperty("CorrectionToSample", IS_EQUAL_TO, "Customized"));
-
     declareProperty("SplitSampleLogs", true, "If selected, all sample logs will be splitted by the  "
                     "event splitters.  It is not recommended for fast event log splitters. ");
 
@@ -309,14 +301,6 @@ namespace Algorithms
       m_detCorrectWorkspace = getProperty("DetectorTOFCorrectionWorkspace");
       if (!m_detCorrectWorkspace)
         throw runtime_error("In case of customized TOF correction, correction workspace must be given!");
-
-      string corrop = getPropertyValue("CustumCorrectionOp");
-      if (corrop.compare("Shift") == 0)
-        m_tofCorrOperation = ShiftOp;
-      else if (corrop.compare("Multiply") == 0)
-        m_tofCorrOperation = MultiplyOp;
-      else
-        throw runtime_error("Impossible situation for CustomCorrectionOp!");
     }
 
     m_splitSampleLogs = getProperty("SplitSampleLogs");
@@ -688,7 +672,12 @@ namespace Algorithms
           if (par)
           {
             efix = par->value<double>();
-            g_log.debug() << "Detector: " << det->getID() << " EFixed: " << efix << "\n";
+            g_log.debug() << "Detector: " << det->getID() << " of spectrum " << i << " EFixed: " << efix << "\n";
+          }
+          else
+          {
+            g_log.warning() << "Detector: " << det->getID() << " of spectrum " << i << " does not have EFixed set up."
+                            << "\n";
           }
         }
         catch (std::runtime_error&)
@@ -705,6 +694,8 @@ namespace Algorithms
 
         // Calculate shift
         shift = -1. * l2 / sqrt(efix * twomev_d_mass);
+
+        g_log.notice() << "Detector " << i << ": " << "L2 = " << l2 << ", EFix = " << efix << ", Shift = " << shift << "\n";
       }
       else
       {
@@ -728,30 +719,64 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Set up corrections with customized TOF correction input
+    * The first column must be either DetectorID or Spectrum (from 0... as workspace index)
+    * The second column must be Correction or CorrectFactor, a number between 0 and 1, i.e, [0, 1]
+    * The third column is optional as shift in unit of second
     */
   void FilterEvents::setupCustomizedTOFCorrection()
   {
-
     // Check input workspace
     vector<string> colnames = m_detCorrectWorkspace->getColumnNames();
+    bool hasshift = false;
     if (colnames.size() < 2)
       throw runtime_error("Input table workspace is not valide.");
-    else if (colnames[0].compare("DetectorID") || colnames[1].compare("Correction"))
-      throw runtime_error("Input table workspace has wrong column definition.");
+    else if (colnames.size() >= 3)
+      hasshift = true;
+
+    bool usedetid;
+    if (colnames[0].compare("DetectorID") == 0) usedetid = true;
+    else if (colnames[0].compare("Spectrum") == 0) usedetid = false;
+    else
+    {
+      usedetid = false;
+      stringstream errss;
+      errss << "First column must be either DetectorID or Spectrum. " << colnames[0]
+            << " is not supported. ";
+      throw runtime_error(errss.str());
+    }
 
     // Parse detector and its TOF offset (i.e., correction) to a map
     map<detid_t, double> correctmap;
+    map<detid_t, double> shiftmap;
     size_t numrows = m_detCorrectWorkspace->rowCount();
     for (size_t i = 0; i < numrows; ++i)
     {
       TableRow row = m_detCorrectWorkspace->getRow(i);
 
+      // Parse to map
       detid_t detid;
-      double offset;
+      double offset, shift;
       row >> detid >> offset;
+      if (offset >= 0 && offset <= 1)
+      {
+        // Valid offset (factor value)
+        correctmap.insert(make_pair(detid, offset));
+      }
+      else
+      {
+        // Error, throw!
+        stringstream errss;
+        errss << "Correction (i.e., offset) equal to " << offset << " of row " << "is out of range [0, 1].";
+        throw runtime_error(errss.str());
+      }
 
-      correctmap.insert(make_pair(detid, offset));
-    }
+      // Shift
+      if (hasshift)
+      {
+        row >> shift;
+        shiftmap.insert(make_pair(detid, shift));
+      }
+    } // ENDFOR(row i)
 
     // Check size of TOF correction map
     size_t numhist = m_eventWS->getNumberHistograms();
@@ -767,54 +792,87 @@ namespace Algorithms
       errss << "Input correction table workspace has more detectors (" << correctmap.size()
             << ") than input workspace " << m_eventWS->name() << "'s spectra number ("
             << numhist << ".\n";
-      g_log.error(errss.str());
       throw runtime_error(errss.str());
     }
 
-    // Get vector IDs
-    vector<detid_t> vecDetIDs;
-    vecDetIDs.resize(numhist, 0);
-    // Set up the detector IDs to vecDetIDs and set up the initial value
-    for (size_t i = 0; i < numhist; ++i)
+    // Apply to m_detTofOffsets and m_detTofShifts
+    if (usedetid)
     {
-      // It is assumed that there is one detector per spectra.
-      // If there are more than 1 spectrum, it is very likely to have problem with correction factor
-      const DataObjects::EventList events = m_eventWS->getEventList(i);
-      std::set<detid_t> detids = events.getDetectorIDs();
-      std::set<detid_t>::iterator detit;
-      if (detids.size() != 1)
+      // Get vector IDs
+      vector<detid_t> vecDetIDs;
+      vecDetIDs.resize(numhist, 0);
+      // Set up the detector IDs to vecDetIDs and set up the initial value
+      for (size_t i = 0; i < numhist; ++i)
       {
-        // Check whether there are more than 1 detector per spectra.
-        stringstream errss;
-        errss << "The assumption is that one spectrum has one and only one detector. "
-              << "Error is found at spectrum " << i << ".  It has " << detids.size() << " detectors.";
-        throw runtime_error(errss.str());
+        // It is assumed that there is one detector per spectra.
+        // If there are more than 1 spectrum, it is very likely to have problem with correction factor
+        const DataObjects::EventList events = m_eventWS->getEventList(i);
+        std::set<detid_t> detids = events.getDetectorIDs();
+        std::set<detid_t>::iterator detit;
+        if (detids.size() != 1)
+        {
+          // Check whether there are more than 1 detector per spectra.
+          stringstream errss;
+          errss << "The assumption is that one spectrum has one and only one detector. "
+                << "Error is found at spectrum " << i << ".  It has " << detids.size() << " detectors.";
+          throw runtime_error(errss.str());
+        }
+        detid_t detid = 0;
+        for (detit=detids.begin(); detit!=detids.end(); ++detit)
+          detid = *detit;
+        vecDetIDs[i] = detid;
       }
-      detid_t detid = 0;
-      for (detit=detids.begin(); detit!=detids.end(); ++detit)
-        detid = *detit;
-      vecDetIDs[i] = detid;
-    }
 
-    // Map correction map to list
-    map<detid_t, double>::iterator fiter;
-    for (size_t i = 0; i < numhist; ++i)
+      // Map correction map to list
+      map<detid_t, double>::iterator fiter;
+      for (size_t i = 0; i < numhist; ++i)
+      {
+        detid_t detid = vecDetIDs[i];
+        // correction (factor) map
+        fiter = correctmap.find(detid);
+        if (fiter != correctmap.end()) m_detTofOffsets[i] = fiter->second;
+        else
+        {
+          stringstream errss;
+          errss << "Detector " << "w/ ID << " << detid  << " of spectrum " << i << " in Eventworkspace " << m_eventWS->name()
+                << " cannot be found in input TOF calibration workspace. ";
+          throw runtime_error(errss.str());
+        }
+        // correction shift map
+        fiter = shiftmap.find(detid);
+        if (fiter != shiftmap.end())
+          m_detTofShifts[i] = fiter->second;
+      } // ENDFOR (each spectrum i)
+    }
+    else
     {
-      detid_t detid = vecDetIDs[i];
-      fiter = correctmap.find(detid);
-      if (fiter != correctmap.end())
+      // It is spectrum ID already
+      map<detid_t, double>::iterator fiter;
+      // correction factor
+      for (fiter = correctmap.begin(); fiter != correctmap.end(); ++fiter)
       {
-        m_detTofOffsets[i] = fiter->second;
+        size_t wsindex = static_cast<size_t>(fiter->first);
+        if (wsindex < numhist) m_detTofOffsets[wsindex] = fiter->second;
+        else
+        {
+          stringstream errss;
+          errss << "Workspace index " << wsindex << " is out of range.";
+          throw runtime_error(errss.str());
+        }
       }
-      else
+      // correction shift
+      for (fiter = shiftmap.begin(); fiter != shiftmap.end(); ++fiter)
       {
-        stringstream errss;
-        errss << "Detector " << "w/ ID << " << detid  << " of spectrum " << i << " in Eventworkspace " << m_eventWS->name()
-              << " cannot be found in input TOF calibration workspace. ";
-        g_log.error(errss.str());
-        throw runtime_error(errss.str());
+        size_t wsindex = static_cast<size_t>(fiter->first);
+        if (wsindex < numhist) m_detTofShifts[wsindex] = fiter->second;
+        else
+        {
+          stringstream errss;
+          errss << "Workspace index " << wsindex << " is out of range.";
+          throw runtime_error(errss.str());
+        }
       }
-    } // ENDFOR (each spectrum i)
+    }
 
     return;
   }

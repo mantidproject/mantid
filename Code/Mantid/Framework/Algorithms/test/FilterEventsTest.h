@@ -275,7 +275,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("OutputWorkspaceBaseName", "SplittedDataX"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("CorrectionToSample", "Customized"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("DetectorTOFCorrectionWorkspace", "TimeCorrectionTableX"));
-    TS_ASSERT_THROWS_NOTHING(filter.setProperty("CustumCorrectionOp", "Multiply"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("SplitterWorkspace", splws));
 
     // 3. Execute
@@ -315,6 +314,118 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test filtering with correction of direct geometry
+    */
+  void test_FilterDGCorrection()
+  {
+    DataObjects::EventWorkspace_sptr ws = createEventWorkspaceDirect(0, 1000000);
+    AnalysisDataService::Instance().addOrReplace("MockDirectEventWS", ws);
+
+    MatrixWorkspace_sptr splws = createMatrixSplittersDG();
+    AnalysisDataService::Instance().addOrReplace("SplitterTableX", splws);
+
+    // Run the filtering
+    FilterEvents filter;
+    filter.initialize();
+
+    filter.setProperty("InputWorkspace", ws->name());
+    filter.setProperty("OutputWorkspaceBaseName", "SplittedDataDG");
+    filter.setProperty("CorrectionToSample", "Direct");
+    filter.setProperty("SplitterWorkspace", "SplitterTableX");
+
+    TS_ASSERT_THROWS_NOTHING(filter.execute());
+    TS_ASSERT(filter.isExecuted());
+
+    // Check
+    EventWorkspace_sptr ws5 = boost::dynamic_pointer_cast<EventWorkspace>(
+          AnalysisDataService::Instance().retrieve("SplittedDataDG_5"));
+    TS_ASSERT(ws5);
+    if (ws5)
+    {
+      TS_ASSERT_EQUALS(ws5->getNumberEvents(), 0);
+    }
+
+    EventWorkspace_sptr ws7 = boost::dynamic_pointer_cast<EventWorkspace>(
+          AnalysisDataService::Instance().retrieve("SplittedDataDG_7"));
+    TS_ASSERT(ws7);
+    if (ws7)
+    {
+      TS_ASSERT_EQUALS(ws7->getNumberEvents(), ws7->getNumberHistograms());
+    }
+
+    // FIXME - Should find a way to delete all workspaces holding splitted events
+
+    AnalysisDataService::Instance().remove("MockDirectEventWS");
+    AnalysisDataService::Instance().remove("SplitterTableX");
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test filtering with correction to indirect geometry inelastic instrument
+    */
+  void test_FilterIndirectGeometryCorrection()
+  {
+    // Create workspaces for filtering
+    DataObjects::EventWorkspace_sptr ws = createEventWorkspaceInDirect(0, 1000000);
+    AnalysisDataService::Instance().addOrReplace("MockIndirectEventWS", ws);
+
+    MatrixWorkspace_sptr splws = createMatrixSplittersDG();
+    AnalysisDataService::Instance().addOrReplace("SplitterTableX", splws);
+
+    // Run the filtering
+    FilterEvents filter;
+    filter.initialize();
+
+    filter.setProperty("InputWorkspace", "MockIndirectEventWS");
+    filter.setProperty("OutputWorkspaceBaseName", "SplittedDataDG");
+    filter.setProperty("CorrectionToSample", "Indirect");
+    filter.setProperty("SplitterWorkspace", "SplitterTableX");
+    filter.setProperty("OutputTOFCorrectionWorkspace", "MockIndGeoCorrWS");
+
+    TS_ASSERT_THROWS_NOTHING(filter.execute());
+    TS_ASSERT(filter.isExecuted());
+
+    // Check
+    MatrixWorkspace_sptr outcorrws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          AnalysisDataService::Instance().retrieve("MockIndGeoCorrWS"));
+    TS_ASSERT(outcorrws);
+    if (outcorrws)
+    {
+      TS_ASSERT_EQUALS(outcorrws->getNumberHistograms(), ws->getNumberHistograms());
+      TS_ASSERT_EQUALS(outcorrws->readX(0).size(), 2);
+
+      Kernel::V3D samplepos = ws->getInstrument()->getSample()->getPos();
+
+      for (size_t iws = 0; iws < outcorrws->getNumberHistograms(); ++iws)
+      {
+        const ParameterMap& pmap = ws->constInstrumentParameters();
+
+        IDetector_const_sptr det = ws->getDetector(iws);
+        Kernel::V3D detpos = det->getPos();
+        Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
+        double efix = par->value<double>();
+
+        double l2 = samplepos.distance(detpos);
+
+        double shift = -l2/sqrt(efix*2.*PhysicalConstants::meV/PhysicalConstants::NeutronMass);
+        std::cout << "Detector " << iws << ": L2 = " << l2 << ", EFix = " << efix << "\n";
+
+        TS_ASSERT_DELTA(outcorrws->readY(iws)[0], 1., 1.0E-9);
+        TS_ASSERT_DELTA(outcorrws->readY(iws)[1], shift, 1.0E-9);
+
+      }
+    }
+
+    // Clean
+    // FIXME - Need to write the code to remove all the workspaces holding split events
+    AnalysisDataService::Instance().remove("MockIndirectEventWS");
+
+    return;
+
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace.  This workspace has
@@ -325,6 +436,153 @@ public:
    */
   DataObjects::EventWorkspace_sptr createEventWorkspace(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt,
                                                         size_t numpulses)
+  {
+    // 1. Create an EventWorkspace with 10 detectors
+    DataObjects::EventWorkspace_sptr eventWS =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1, true);
+
+    Kernel::DateAndTime runstart(runstart_i64);
+
+    // 2. Set run_start time
+    eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(), true);
+
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); i ++)
+    {
+      DataObjects::EventList* elist = eventWS->getEventListPtr(i);
+
+      for (int64_t pid = 0; pid < static_cast<int64_t>(numpulses); pid ++)
+      {
+        int64_t pulsetime_i64 = pid*pulsedt+runstart.totalNanoseconds();
+        Kernel::DateAndTime pulsetime(pulsetime_i64);
+        for (size_t e = 0; e < 10; e ++)
+        {
+          double tof = static_cast<double>(e*tofdt/1000);
+          DataObjects::TofEvent event(tof, pulsetime);
+          elist->addEventQuickly(event);
+        }
+      } // FOR each pulse
+    } // For each bank
+
+    return eventWS;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Create an EventWorkspace to mimic direct inelastic scattering insturment.
+    * This workspace will have the same neutron events as the test case in EventList
+    *
+    * @param runstart_i64 : absolute run start time in int64_t format with unit nanosecond
+    * @param pulsedt : pulse length in int64_t format with unit nanosecond
+   */
+  DataObjects::EventWorkspace_sptr createEventWorkspaceDirect(int64_t runstart_i64, int64_t pulsedt)
+  {
+    // Create an EventWorkspace with 10 banks with 1 detector each.  No events is generated
+    DataObjects::EventWorkspace_sptr eventWS =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1, true);
+
+    // L1 = 10
+    Kernel::V3D samplepos = eventWS->getInstrument()->getSample()->getPos();
+    Kernel::V3D sourcepos = eventWS->getInstrument()->getSource()->getPos();
+    std::cout << "sample position: " << samplepos.toString() << "\n";
+    std::cout << "source position: " << sourcepos.toString() << "\n";
+    double l1 = samplepos.distance(sourcepos);
+
+    Kernel::DateAndTime runstart(runstart_i64);
+
+    EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt);
+
+    // Set properties: (1) run_start time; (2) Ei
+    eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(), true);
+
+    double shift = 2.E-4;
+    double ei = (l1*l1*PhysicalConstants::NeutronMass) / (shift*shift*2.*PhysicalConstants::meV);
+
+    eventWS->mutableRun().addProperty<double>("Ei", ei, true);
+
+    // Add neutrons
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); i ++)
+    {
+      DataObjects::EventList* elist = eventWS->getEventListPtr(i);
+
+      for (size_t ievent = 0; ievent < fakeevlist.getNumberEvents(); ++ievent)
+      {
+        TofEvent tofevent = fakeevlist.getEvent(ievent);
+        elist->addEventQuickly(tofevent);
+        // std::cout << "Add event " << ievent << " as " << tofevent.tof() << ". Size of elist = " << elist->getNumberEvents() << "\n";
+      } // FOR each pulse
+    } // For each bank
+
+    double constshift = l1/sqrt(ei * 2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass);
+    std::cout << "Fake direct inelastic scattering: L1 = " << l1 << ", Shift = " << shift << ": Ei = "
+              << ei << "; check shift = " << constshift << "\n"
+              << "- Number of events = " << eventWS->getNumberEvents() << ", Number of spectra = "
+              << eventWS->getNumberHistograms() << "\n"
+              << "- Number of faked events = " << fakeevlist.getNumberEvents() << "\n";
+
+    return eventWS;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Create an EventWorkspace to mimic direct inelastic scattering insturment.  This workspace has
+    * @param runstart_i64 : absolute run start time in int64_t format with unit nanosecond
+    * @param pulsedt : pulse length in int64_t format with unit nanosecond
+    */
+  DataObjects::EventWorkspace_sptr createEventWorkspaceInDirect(int64_t runstart_i64, int64_t pulsedt)
+  {
+    // Create an EventWorkspace with 10 banks with 1 detector each.  No events is generated
+    DataObjects::EventWorkspace_sptr eventWS =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1, true);
+
+
+    // Add EFixed to each detector
+    const ParameterMap& pmap = eventWS->constInstrumentParameters();
+
+    for (size_t i = 0; i < 10; ++i)
+    {
+      Geometry::IDetector_const_sptr det = eventWS->getDetector(i);
+      if (det)
+        std::cout << "detector " << i << ": " << det->getPos().toString() << "\n";
+      else
+        std::cout << "detector of workspace index " << i << " is not defined. " << "\n";
+
+      Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
+      if (par)
+      {
+        double efix = par->value<double>();
+        std::cout << "Detector: " << det->getID() << " EFixed: " << efix << "\n";
+      }
+      else
+      {
+        std::cout << "Detector: " << det->getID() << " has no EFixed set up. Set to 2.08" << "\n";
+        eventWS->setEFixed(det->getID(), 2.08);
+      }
+    }
+
+    // Add neutrons
+    EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt);
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); i ++)
+    {
+      DataObjects::EventList* elist = eventWS->getEventListPtr(i);
+
+      for (size_t ievent = 0; ievent < fakeevlist.getNumberEvents(); ++ievent)
+      {
+        TofEvent tofevent = fakeevlist.getEvent(ievent);
+        elist->addEventQuickly(tofevent);
+      } // FOR each pulse
+    } // For each bank
+
+    return eventWS;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Create an EventWorkspace.  This workspace has
+    * @param runstart_i64 : absolute run start time in int64_t format with unit nanosecond
+    * @param pulsedt : pulse length in int64_t format with unit nanosecond
+    * @param todft : time interval between 2 adjacent event in same pulse in int64_t format of unit nanosecond
+    * @param numpulses : number of pulses in the event workspace
+   */
+  DataObjects::EventWorkspace_sptr createEventWorkspaceElastic(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt,
+                                                               size_t numpulses)
   {
     // 1. Create an EventWorkspace with 10 detectors
     DataObjects::EventWorkspace_sptr eventWS =
@@ -463,6 +721,62 @@ public:
     return corrtable;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Fake uniform time data more close to SNS case
+    * A list of 1000 events
+    * Pulse length: 1000000 * nano-second
+    */
+  EventList fake_uniform_time_sns_data(int64_t runstart, int64_t pulselength)
+  {
+    //Clear the list
+    EventList el = EventList();
+
+    //Create some mostly-reasonable fake data.
+    srand(1234); //Fixed random seed
+    for (int time = 0; time < 1000; time++)
+    {
+      //All pulse times from 0 to 999 in seconds
+      Kernel::DateAndTime pulsetime(static_cast<int64_t>(time*pulselength + runstart));
+      el += TofEvent( rand()%1000, pulsetime ); //Kernel::DateAndTime(time*1.0, 0.0) );
+    }
+
+    return el;
+  }
+
+  API::MatrixWorkspace_sptr createMatrixSplittersDG()
+  {
+    MatrixWorkspace_sptr spws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 10));
+
+    MantidVec& vec_splitTimes = spws->dataX(0);
+    MantidVec& vec_splitGroup = spws->dataY(0);
+
+    vec_splitTimes[0] = 1000000;
+    vec_splitTimes[1] = 1300000;  // Rule in  1,339,000
+    vec_splitTimes[2] = 2000000;
+    vec_splitTimes[3] = 2190000;  // Rule out 2,155,000
+    vec_splitTimes[4] = 4000000;
+    vec_splitTimes[5] = 5000000;
+    vec_splitTimes[6] = 5500000;  // Rule in  5,741,000
+    vec_splitTimes[7] = 7000000;
+    vec_splitTimes[8] = 8000000;
+    vec_splitTimes[9] = 9000000;
+    vec_splitTimes[10] = 10000000;
+
+
+    vec_splitGroup[0] = 2;
+    vec_splitGroup[1] = 5;
+    vec_splitGroup[2] = 4;
+    vec_splitGroup[3] = -1;
+    vec_splitGroup[4] = 6;
+    vec_splitGroup[5] = 7;
+    vec_splitGroup[6] = 8;
+    vec_splitGroup[7] = -1;
+    vec_splitGroup[8] = 1;
+    vec_splitGroup[9] = 3;
+
+    return spws;
+  }
 
 };
 

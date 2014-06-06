@@ -148,8 +148,6 @@ namespace Algorithms
 
     /// TOF detector/sample correction type
     TOFCorrectionType m_tofCorrType;
-    /// TOF detector/sample correcton operation
-    TOFCorrectionOp m_tofCorrOperation;
 
   };
 
