@@ -467,6 +467,10 @@ namespace LiveData
       return false;
     }
 
+    auto monitorBuffer =
+        boost::static_pointer_cast<DataObjects::EventWorkspace>(m_eventBuffer->monitorWorkspace());
+    const auto pktTime = timeFromPacket(pkt);
+
     while (pkt.nextSection())
     {
       unsigned monitorID = pkt.getSectionMonitorID();
@@ -503,15 +507,16 @@ namespace LiveData
         // Update the property value (overwriting the old value if there was one)
         m_eventBuffer->mutableRun().addProperty<int>( monName, events, true);
         
-        // This is where we'll fetch the time-of-flight values for each
-        // event 
-        bool risingEdge;
-        uint32_t cycle;
-        uint32_t tof;
-        while (pkt.nextEvent( risingEdge, cycle, tof))
+        auto it = m_monitorIndexMap.find(-1 * monitorID); // Monitor IDs are negated in Mantid IDFs
+        if ( it != m_monitorIndexMap.end() )
         {
-          // TODO: Fill this section in - just as soon as we figure out what
-          // to actually do with the values.
+          bool risingEdge;
+          uint32_t cycle, tof;
+          while (pkt.nextEvent( risingEdge, cycle, tof))
+          {
+            // Add the event. Note that they're in units of 100 ns in the packet, need to change to microseconds.
+            monitorBuffer->getEventList(it->second).addEventQuickly(DataObjects::TofEvent(tof/10.0,pktTime));
+          }
         }
       }
     }
