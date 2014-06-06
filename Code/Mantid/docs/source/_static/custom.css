@@ -26,18 +26,13 @@ h1,h2 { margin-bottom: .5em; }
 
 /*-------------------- $IMAGES --------------------*/
 
-.figure {
-  border: 1px solid #CCC;
-  padding: 10px 10px 0 10px;
-  background-color: whiteSmoke;
+.caption {
   text-align: center;
-  width: 300px;
-  float: right;
+  font-size: 0.8em;
 }
 
 .screenshot {
-  height: 240px;
-  padding-bottom: 1em;
+  padding-bottom: 0.1em;
 }
 
 .figure { margin: 0; }
