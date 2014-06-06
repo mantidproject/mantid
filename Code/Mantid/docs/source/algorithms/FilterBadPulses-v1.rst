@@ -18,9 +18,9 @@ producing neutrons, reducing background noise.
 Usage
 -----
 
-**Example - A complete Circle - no inner radius**  
+**Example - Using a simple proton charge log**  
 
-.. testcode:: ExFilter
+.. testcode:: Filter
 
     ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
 
@@ -35,9 +35,10 @@ Usage
 
     print ("The number of events that remain: %i" % wsFiltered.getNumberEvents())
     print ("compared to the number in the unfiltered workspace: %i" % ws.getNumberEvents())
+
 Output:
 
-.. testoutput:: ExFilter
+.. testoutput:: Filter
 
     The number of events that remain: 4058 
     compared to the number in the unfiltered workspace: 8000
