@@ -1237,7 +1237,7 @@ namespace LiveData
   /// cases, must) be done prior to receiving any packets from the SMS daemon.
   void SNSLiveEventDataListener::initWorkspacePart1()
   {
-    m_eventBuffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
+    m_eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>
         (WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     // The numbers in the create() function don't matter - they'll get overwritten
     // down in initWorkspacePart2() when we load the instrument definition.
@@ -1290,7 +1290,26 @@ namespace LiveData
       m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( m_dataStartTime, 0);
     }
 
+    initMonitorWorkspace();
+
     m_workspaceInitialized = true;
+  }
+
+  /// Creates a monitor workspace sized to the number of monitors, with the monitor IDs set
+  void SNSLiveEventDataListener::initMonitorWorkspace()
+  {
+    auto monitors = m_eventBuffer->getInstrument()->getMonitors();
+    auto monitorsBuffer = WorkspaceFactory::Instance().create("EventWorkspace",monitors.size(),1,1);
+    WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer,monitorsBuffer,true);
+    // Set the id numbers
+    for ( size_t i = 0; i < monitors.size(); ++i )
+    {
+      monitorsBuffer->getSpectrum(i)->setDetectorID( monitors[i] );
+    }
+
+    m_monitorIndexMap = monitorsBuffer->getDetectorIDToWorkspaceIndexMap( true );
+
+    m_eventBuffer->setMonitorWorkspace(monitorsBuffer);
   }
 
   // Check to see if we have data for all of the logs listed in m_requiredLogs.
@@ -1397,6 +1416,13 @@ namespace LiveData
 
     }
     m_monitorLogs.clear();
+
+    // Create a fresh monitor workspace and insert into the new 'main' workspace
+    auto monitorBuffer = m_eventBuffer->monitorWorkspace();
+    auto newMonitorBuffer = WorkspaceFactory::Instance().create("EventWorkspace",
+                              monitorBuffer->getNumberHistograms(), 1, 1 );
+    WorkspaceFactory::Instance().initializeFromParent(monitorBuffer, newMonitorBuffer, false);
+    temp->setMonitorWorkspace(newMonitorBuffer);
 
     // Lock the mutex and swap the workspaces
     {
