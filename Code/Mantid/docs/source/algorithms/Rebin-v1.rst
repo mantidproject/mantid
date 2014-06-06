@@ -16,7 +16,7 @@ create logarithmic binning using the formula
 :math:`x(j+1)=x(j)(1+|\Delta x_i|)\,`
 
 This algorithms is useful both in data reduction, but also in remapping
-`ragged workspaces <Ragged Workspace>`__ to a regular set of bin
+`ragged workspaces <http://www.mantidproject.org/Ragged_Workspace>`__ to a regular set of bin
 boundaries.
 
 Unless the FullBinsOnly option is enabled, the bin immediately before
@@ -26,30 +26,27 @@ be no gaps between bins. Rebin ensures that any of these space filling
 bins cannot be less than 25% or more than 125% of the width that was
 specified.
 
+.. _rebin-example-strings:
+
 Example Rebin param strings
 ###########################
 
--0.0001
-    From min(TOF) to max(TOF) among all events in Logarithmic bins of
-    0.0001
-0,100,20000
-    From 0 rebin in constant size bins of 100 up to 20,000
-2,-0.035,10
-    From 10 rebin in Logarithmic bins of 0.035 up to 10
-0,100,10000,200,20000
-    From 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000
+* **"-0.0001"**: from min(TOF) to max(TOF) among all events in Logarithmic bins of 0.0001
+* **"*0,100,20000"**: from 0 rebin in constant size bins of 100 up to 20,000
+* **"2,-0.035,10"**: from 10 rebin in Logarithmic bins of 0.035 up to 10
+* **"0,100,10000,200,20000"**: from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000
 
 For EventWorkspaces
 ###################
 
-If the input is an `EventWorkspace <EventWorkspace>`__ and the "Preserve
+If the input is an `EventWorkspace <www.mantidproject.org/EventWorkspace>`__ and the "Preserve
 Events" property is True, the rebinning is performed in place, and only
 the X axes of the workspace are set. The actual Y histogram data will
 only be requested as needed, for example, when plotting or displaying
 the data.
 
 If "Preserve Events" is false., then the output workspace will be
-created as a `Workspace2D <Workspace2D>`__, with fixed histogram bins,
+created as a `Workspace2D <http://www.mantidproject.org/Workspace2D>`__, with fixed histogram bins,
 and all Y data will be computed immediately. All event-specific data is
 lost at that point.
 
@@ -58,8 +55,8 @@ For Data-Point Workspaces
 
 If the input workspace contains data points, rather than histograms,
 then Rebin will automatically use the
-:ref:`algm-ConvertToHistogram` and
-:ref:`algm-ConvertToPointData` algorithms before and after
+:ref:`ConvertToHistogram <algm-ConvertToHistogram>` and
+:ref:`ConvertToHistogram <algm-ConvertToPointData>` algorithms before and after
 the rebinning has taken place.
 
 FullBinsOnly option
@@ -79,6 +76,8 @@ following will happen:
 -  **From 4** rebin in bins of size 3 **up to 10**.
 
 Hence the actual *Param* string used is "0, 2, 4, 3, 10".
+
+.. _rebin-usage:
 
 Usage
 -----
