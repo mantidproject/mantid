@@ -24,4 +24,54 @@ For every mode, either one or two data acquisition period workspaces can
 be provided. PeriodOperation determines in which way period data will be
 merged at the end.
 
+Usage
+-----
+
+**Example - Pair asymmetry for a single period:**
+
+.. testcode:: ExPairAsymmetry
+
+   y = [1,2,3] + [4,5,6]
+   x = [1,2,3] * 2
+   input = CreateWorkspace(x, y, NSpec=2)
+
+   output = MuonCalculateAsymmetry(FirstPeriodWorkspace = input,
+                                   OutputType = 'PairAsymmetry',
+                                   PairFirstIndex = 1,
+                                   PairSecondIndex = 0,
+                                   Alpha = 0.5)
+
+   print 'Output:', ', '.join('{:.3f}'.format(y) for y in output.readY(0))
+
+Output:
+
+.. testoutput:: ExPairAsymmetry
+
+   Output: 0.778, 0.667, 0.600
+
+**Example - Group asymmetry for two periods:**
+
+.. testcode:: ExGroupAsymmetryMultiperiod
+
+   y1 = [100,50,10]
+   y2 = [150,20,1]
+   x = [1,2,3]
+
+   input1 = CreateWorkspace(x, y1)
+   input2 = CreateWorkspace(x, y2)
+
+   output = MuonCalculateAsymmetry(FirstPeriodWorkspace = input1,
+                                   SecondPeriodWorkspace = input2,
+                                   PeriodOperation = '-',
+                                   OutputType = 'GroupAsymmetry',
+                                   GroupIndex = 0)
+
+   print 'Output:', ', '.join('{:.3f}'.format(y) for y in output.readY(0))
+
+Output:
+
+.. testoutput:: ExGroupAsymmetryMultiperiod
+
+   Output: -0.286, 0.606, 0.263
+
 .. categories::
