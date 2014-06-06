@@ -9,6 +9,8 @@ set ( SRC_FILES
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
+	src/ExtractMonitorWorkspace.cpp
+	src/FilterEventsByLogValuePreNexus.cpp
 	src/FindDetectorsInShape.cpp
 	src/FindDetectorsPar.cpp
 	src/GenerateGroupingPowder.cpp
@@ -31,13 +33,13 @@ set ( SRC_FILES
 	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
 	src/LoadFullprofResolution.cpp
-        src/LoadGSASInstrumentFile.cpp
+	src/LoadGSASInstrumentFile.cpp
 	src/LoadGSS.cpp
 	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
 	src/LoadILL.cpp
-	src/LoadILLReflectometry.cpp
 	src/LoadILLIndirect.cpp
+	src/LoadILLReflectometry.cpp
 	src/LoadILLSANS.cpp
 	src/LoadISISNexus.cpp
 	src/LoadISISNexus2.cpp
@@ -94,8 +96,8 @@ set ( SRC_FILES
 	src/ModifyDetectorDotDatFile.cpp
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
-    src/PDLoadCharacterizations.cpp
-    src/ProcessDasNexusLog.cpp
+	src/PDLoadCharacterizations.cpp
+	src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
 	src/RemoveLogs.cpp
 	src/RenameLog.cpp
@@ -125,15 +127,14 @@ set ( SRC_FILES
 	src/SaveNexusProcessed.cpp
 	src/SavePAR.cpp
 	src/SavePHX.cpp
-	src/SaveReflTBL.cpp
 	src/SaveRKH.cpp
+	src/SaveReflTBL.cpp
 	src/SaveSPE.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
 	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
 	src/UpdateInstrumentFromFile.cpp
-	src/FilterEventsByLogValuePreNexus.cpp
 )
 
 set ( INC_FILES
@@ -147,6 +148,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
+	inc/MantidDataHandling/ExtractMonitorWorkspace.h
+	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
 	inc/MantidDataHandling/FindDetectorsPar.h
 	inc/MantidDataHandling/GenerateGroupingPowder.h
@@ -169,13 +172,13 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
-        inc/MantidDataHandling/LoadGSASInstrumentFile.h
+	inc/MantidDataHandling/LoadGSASInstrumentFile.h
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
 	inc/MantidDataHandling/LoadILL.h
-	inc/MantidDataHandling/LoadILLReflectometry.h
 	inc/MantidDataHandling/LoadILLIndirect.h
+	inc/MantidDataHandling/LoadILLReflectometry.h
 	inc/MantidDataHandling/LoadILLSANS.h
 	inc/MantidDataHandling/LoadISISNexus.h
 	inc/MantidDataHandling/LoadISISNexus2.h
@@ -258,15 +261,14 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveNexusProcessed.h
 	inc/MantidDataHandling/SavePAR.h
 	inc/MantidDataHandling/SavePHX.h
-	inc/MantidDataHandling/SaveReflTBL.h
 	inc/MantidDataHandling/SaveRKH.h
+	inc/MantidDataHandling/SaveReflTBL.h
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
-	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	src/LoadRaw/byte_rel_comp.h
 	src/LoadRaw/isisraw.h
 	src/LoadRaw/isisraw2.h
@@ -284,6 +286,8 @@ set ( TEST_FILES
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
+	ExtractMonitorWorkspaceTest.h
+	FilterEventsByLogValuePreNexusTest.h
 	FindDetectorsInShapeTest.h
 	FindDetectorsParTest.h
 	GenerateGroupingPowderTest.h
@@ -307,8 +311,8 @@ set ( TEST_FILES
 	LoadGSASInstrumentFileTest.h
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
-	LoadILLReflectometryTest.h
 	LoadILLIndirectTest.h
+	LoadILLReflectometryTest.h
 	LoadILLSANSTest.h
 	LoadILLTest.h
 	LoadISISNexusTest.h
@@ -393,7 +397,6 @@ set ( TEST_FILES
 	SetScalingPSDTest.h
 	UpdateInstrumentFromFileTest.h
 	XMLlogfileTest.h
-	FilterEventsByLogValuePreNexusTest.h
 )
 
 

@@ -67,7 +67,7 @@ class PropertiesDirective(BaseDirective):
         col_sizes = [max(len(row[i] * 10) for row in table_content)
                      for i in range(len(header_content))]
         # Use the column widths as a means to formatting columns.
-        formatter = ' '.join('{:<%d}' % col for col in col_sizes)
+        formatter = ' '.join('{%d:<%d}' % (index,col) for index, col in enumerate(col_sizes))
         # Add whitespace to each column. This depends on the values returned by
         # col_sizes.
         table_content_formatted = [

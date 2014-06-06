@@ -18,7 +18,7 @@ if ( SPHINX_FOUND )
   configure_file ( runsphinx.py.in runsphinx_html.py @ONLY )
   add_custom_target ( ${TARGET_PREFIX}-html
     COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_html.py
-    DEPENDS ${FRAMEWORK_LIBS}
+    DEPENDS Framework MantidPlot
     COMMENT "Building html documentation"
   )
   # Group within VS and exclude from whole build
@@ -28,11 +28,10 @@ if ( SPHINX_FOUND )
 
   # doctest target
   set ( BUILDER doctest )
-  set ( SCREENSHOTS_DIR "" ) # no screenshots
   configure_file ( runsphinx.py.in runsphinx_doctest.py @ONLY )
   add_custom_target ( ${TARGET_PREFIX}-test
     COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_doctest.py
-    DEPENDS ${FRAMEWORK_LIBS}
+    DEPENDS Framework MantidPlot
     COMMENT "Running documentation tests"
   )
   # Group within VS and exclude from whole build
