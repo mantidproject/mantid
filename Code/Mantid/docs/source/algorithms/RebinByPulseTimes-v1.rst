@@ -74,6 +74,6 @@ Output:
 
    Events are rebinned into:  100 bins per histogram
    X-axis relative start time in seconds:  0.0
-   X-axis relative start time in seconds:  100.0
+   X-axis relative end time in seconds:  100.0
 
 .. categories::
