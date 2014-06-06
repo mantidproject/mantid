@@ -230,9 +230,7 @@ namespace LiveData
     // Yes, I know a send isn't guaranteed to send the whole buffer in one call.
     // I'm treating such a case as an error anyway.
     {
-      g_log.error()
-        << "SNSLiveEventDataListener::run(): Failed to send client hello packet.  Thread exiting."
-        << std::endl;
+      g_log.error("SNSLiveEventDataListener::run(): Failed to send client hello packet. Thread exiting.");
       m_stopThread = true;
     }
 
@@ -262,7 +260,7 @@ namespace LiveData
           bytesRead = m_socket.receiveBytes( bufFillAddr, bufFillLen);
         } catch (Poco::TimeoutException &) {
           // Don't need to stop processing or anything - just log a warning
-          g_log.warning() << "Timeout reading from the network.  Is SMS still sending?" << std::endl;
+          g_log.warning("Timeout reading from the network.  Is SMS still sending?");
         } catch (Poco::Net::NetException &e) {
           std::string msg("Parser::read(): ");
           msg += e.name();
@@ -294,28 +292,27 @@ namespace LiveData
       // For now, log it and let the thread exit.  In the future, we might
       // try to recover from this.  (A bad event packet could probably just
       // be ignored, for example)
-      g_log.fatal() << "Caught an invalid packet exception in SNSLiveEventDataListener"
-                    << " network read thread." << std::endl;
-      g_log.fatal() << "Exception message is: " << e.what() << std::endl;
-      g_log.fatal() << "Thread is exiting." << std::endl;
+      g_log.fatal() << "Caught an invalid packet exception in SNSLiveEventDataListener network read thread.\n"
+                    << "Exception message is: " << e.what() << ".\n"
+                    << "Thread is exiting.\n";
 
       m_isConnected = false;
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new ADARA::invalid_packet(e));
 
     } catch (std::runtime_error &e) {  // exception handler for generic runtime exceptions
-      g_log.fatal() << "Caught a runtime exception." << std::endl
-                    << "Exception message: " << e.what() << std::endl
-                    << "Thread will exit." << std::endl;
+      g_log.fatal() << "Caught a runtime exception.\n"
+                    << "Exception message: " << e.what() << ".\n"
+                    << "Thread will exit.\n";
       m_isConnected = false;
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( e));
 
     } catch (std::invalid_argument &e) { // TimeSeriesProperty (and possibly some other things) can
                                         // can throw these errors
-      g_log.fatal() << "Caught an invalid argument exception." << std::endl
-                    << "Exception message: "  << e.what() << std::endl
-                    << "Thread will exit." << std::endl;
+      g_log.fatal() << "Caught an invalid argument exception.\n"
+                    << "Exception message: "  << e.what() << ".\n"
+                    << "Thread will exit.\n";
       m_isConnected = false;
       m_workspaceInitialized = true;  // see the comments in the default exception
                                       // handler for why we set this value.
@@ -324,8 +321,8 @@ namespace LiveData
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( newMsg));
 
     } catch (...) {  // Default exception handler
-      g_log.fatal() << "Uncaught exception in SNSLiveEventDataListener network read thread."
-                    << "  Thread is exiting." << std::endl;
+      g_log.fatal("Uncaught exception in SNSLiveEventDataListener network read thread."
+                  " Thread is exiting.");
       m_isConnected = false;
 
       m_backgroundException =
@@ -372,7 +369,7 @@ namespace LiveData
       // we can't process this packet at all.
       if (! m_workspaceInitialized)
       {
-        g_log.error() << "Cannot process BankedEventPacket because workspace isn't initialized." << std::endl;
+        g_log.error("Cannot process BankedEventPacket because workspace isn't initialized.");
         // Note: One error message per BankedEventPkt is likely to absolutely flood the error log.
         // Might want to think about rate limiting this somehow...
 
@@ -394,7 +391,8 @@ namespace LiveData
     }
 
     // Append the events
-    g_log.debug() << "----- Pulse ID: " << pkt.pulseId() << " -----" << std::endl;
+    g_log.debug() << "----- Pulse ID: " << pkt.pulseId() << " -----\n";
+    // Scope braces
     {
       Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
 
@@ -432,8 +430,7 @@ namespace LiveData
         event = pkt.nextEvent();
         if (pkt.curBankId() != lastBankID)
         {
-          g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank
-                        << " events" << std::endl;
+          g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank << " events\n";
 
           lastBankID = pkt.curBankId();
           eventsPerBank = 0;
@@ -441,8 +438,8 @@ namespace LiveData
       }
     }  // mutex automatically unlocks here
 
-    g_log.debug() << "Total Events: " << totalEvents << std::endl;
-    g_log.debug() << "-------------------------------" << std::endl;
+    g_log.debug() << "Total Events: " << totalEvents << "\n";
+    g_log.debug("-------------------------------");
 
     return false;
   }
@@ -734,8 +731,8 @@ namespace LiveData
         if ( haveRunNumber )
         {
           // run_number should not exist at this point, and if it does, we can't do much about it.
-          g_log.debug() << "run_number property already exists.  Current value will be ignored.\n"
-                        << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
+          g_log.debug("run_number property already exists.  Current value will be ignored.\n"
+                      "(This should never happen.  Talk to the Mantid developers.)");
         }
         else
         {
@@ -1034,7 +1031,7 @@ namespace LiveData
 
     if ( ! deviceNode )
     {
-      g_log.error() << "Device descriptor packet did not contain a device element!!  This should never happen!" << std::endl;
+      g_log.error("Device descriptor packet did not contain a device element!!  This should never happen!");
       return false;
     }
 
@@ -1050,7 +1047,7 @@ namespace LiveData
 
     if ( ! node )
     {
-      g_log.warning() << "Device descriptor packet did not contain a process_variables element." << std::endl;
+      g_log.warning("Device descriptor packet did not contain a process_variables element.");
       return false;
     }
 
