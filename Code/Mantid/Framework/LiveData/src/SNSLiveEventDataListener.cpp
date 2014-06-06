@@ -515,6 +515,10 @@ namespace LiveData
             monitorBuffer->getEventList(it->second).addEventQuickly(DataObjects::TofEvent(tof/10.0,pktTime));
           }
         }
+        else
+        {
+          g_log.error() << "Event from unknown monitor ID (" << monitorID << ") seen.\n";
+        }
       }
     }
 
