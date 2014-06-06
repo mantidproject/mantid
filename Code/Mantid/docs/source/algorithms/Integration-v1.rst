@@ -9,8 +9,8 @@
 Description
 -----------
 
-Integration sums up spectra in a `Workspace <Workspace>`__ and outputs a
-`Workspace <Workspace>`__ that contains only 1 value per spectrum (i.e.
+Integration sums up spectra in a `Workspace <http://www.mantidproject.org/Workspace>`__ and outputs a
+`Workspace <http://www.mantidproject.org/Workspace>`__ that contains only 1 value per spectrum (i.e.
 the sum). The associated errors are added in quadrature. The two X
 values per spectrum are set to the limits of the range over which the
 spectrum has been integrated. By default, the entire range is integrated
@@ -26,7 +26,7 @@ contiguous range of spectra in the workspace (note that these parameters
 refer to the workspace index value rather than spectrum numbers as taken
 from the raw file). If only a certain range of each spectrum should be
 summed (which must be the same for all spectra being integrated) then
-the Range\_lower and Range\_upper properties should be used. No
+the RangeLower and RangeUpper properties should be used. No
 rebinning takes place as part of this algorithm: if the values given do
 not coincide with a bin boundary then the first bin boundary within the
 range is used. If a value is given that is beyond the limit covered by
@@ -37,9 +37,37 @@ workspace.
 EventWorkspaces
 ###############
 
-If an `EventWorkspace <EventWorkspace>`__ is used as the input, the
-output will be a `MatrixWorkspace <MatrixWorkspace>`__.
+If an `EventWorkspace <http://www.mantidproject.org/EventWorkspace>`__ is used as the input, the
+output will be a `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`__.
 :ref:`algm-Rebin` is recommended if you want to keep the workspace as an
 EventWorkspace.
+
+Usage
+-----
+
+.. testcode::
+
+  # Create a workspace filled with a constant value = 1.0
+  ws=CreateSampleWorkspace('Histogram','Flat background')
+  # Integrate 10 spectra over all X values
+  intg=Integration(ws,StartWorkspaceIndex=11,EndWorkspaceIndex=20)
+
+  # Check the result
+  print 'The result workspace has',intg.getNumberHistograms(),'spectra'
+  print 'Integral of spectrum',11,'is',intg.readY(0)[0]
+  print 'Integral of spectrum',12,'is',intg.readY(1)[0]
+  print 'Integral of spectrum',13,'is',intg.readY(2)[0]
+  print 'Integration range is [',intg.readX(0)[0],',',intg.readX(0)[1],']'
+
+Output
+######
+
+.. testoutput::
+
+  The result workspace has 10 spectra
+  Integral of spectrum 11 is 100.0
+  Integral of spectrum 12 is 100.0
+  Integral of spectrum 13 is 100.0
+  Integration range is [ 0.0 , 20000.0 ]
 
 .. categories::

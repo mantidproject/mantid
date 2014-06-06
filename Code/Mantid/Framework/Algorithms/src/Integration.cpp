@@ -31,16 +31,18 @@ using namespace DataObjects;
  */
 void Integration::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<HistogramValidator>()));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<HistogramValidator>()),
+                  "The input workspace to integrate.");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+                  "The output workspace with the results of the integration.");
 
-  declareProperty("RangeLower",EMPTY_DBL());
-  declareProperty("RangeUpper",EMPTY_DBL());
+  declareProperty("RangeLower",EMPTY_DBL(),"The lower integration limit (an X value).");
+  declareProperty("RangeUpper",EMPTY_DBL(),"The upper integration limit (an X value).");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
-  declareProperty("StartWorkspaceIndex", 0, mustBePositive);
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive);
+  declareProperty("StartWorkspaceIndex", 0, mustBePositive,"Index of the first spectrum to integrate.");
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,"Index of the last spectrum to integrate.");
   declareProperty("IncludePartialBins", false, "If true then partial bins from the beginning and end of the input range are also included in the integration.");
 }
 
