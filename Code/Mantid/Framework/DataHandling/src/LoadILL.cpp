@@ -232,6 +232,7 @@ void LoadILL::loadInstrumentDetails(NeXus::NXEntry& firstEntry) {
  * the corresponding values
  *
  * @param entry :: The Nexus entry
+ * @param monitors :: list of monitors content
  *
  */
 void LoadILL::initWorkSpace(NeXus::NXEntry& entry,
@@ -353,8 +354,6 @@ void LoadILL::addAllNexusFieldsAsProperties(std::string filename){
 /**
  * Calculates the Energy from the wavelength and adds
  * it at property Ei
- *
- * @param entry :: The Nexus entry
  */
 void LoadILL::addEnergyToRun() {
 
@@ -489,7 +488,9 @@ int LoadILL::validateVanadium(const std::string &filenameVanadium) {
  * Loads all the spectra into the workspace, including that from the monitor
  *
  * @param entry :: The Nexus entry
+ * @param monitors :: List of monitors content
  * @param vanaCalculatedDetectorElasticPeakPosition :: If -1 uses this value as the elastic peak position at the detector.
+ *
  */
 void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry,
     const std::vector<std::vector<int> >&monitors,
