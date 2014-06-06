@@ -212,8 +212,6 @@ namespace LiveData
 
 
             doClone(OutputWorkspace, OutputWorkspace + postFix);
-            if (!AccumulationWorkspace.empty())
-              doClone(AccumulationWorkspace, AccumulationWorkspace + postFix);
           }
 
           runNumber = 0;
