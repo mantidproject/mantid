@@ -25,16 +25,61 @@ Usage
 
 .. testcode:: ExOSIRISDiffractionReductionSimple
 
-    ws = OSIRISDiffractionReduction(Sample="OSI89813.raw, OSI89814.raw",
-                                    CalFile="osiris_041_RES10.cal",
-                                    Vanadium="osi89757.raw, osi89758.raw")
+    def createDummyOSIRISWorkspace(name, func, xmin, xmax, bin_width):
+      """Creates a workspace that looks something like an OSIRIS diffraction run"""
+      #create workspace according to function
+      ws = CreateSampleWorkspace("Histogram", Function="User Defined", UserDefinedFunction=func, XMin=xmin, XMax=xmax, Random=True, BinWidth=bin_width, NumBanks=11, OutputWorkspace=name)
+      ws = CropWorkspace(ws, StartWorkspaceIndex=0, EndWorkspaceIndex=1009, OutputWorkspace=name)
+      AddSampleLog(ws, 'gd_prtn_chrg', '30.01270866394043',  'Number')
+      
+      #load instrument parameters
+      LoadInstrument(ws, InstrumentName='OSIRIS')
+      param_file = config['instrumentDefinition.directory'] + 'OSIRIS_diffraction_diffspec_Parameters.xml'
+      LoadParameterFile(ws, Filename=param_file)
+      return ws
 
-    print "Created workspace with %d bins" % ws.blocksize()
+    #create two dummy workspaces with one peak
+    function = "name=Lorentzian, Amplitude=350000,PeakCentre=40000, FWHM=80"
+    ws1 = createDummyOSIRISWorkspace('ws1', function, 1.17e+04, 5.17e+04, 4.7)
+    ws2 = createDummyOSIRISWorkspace('ws2', function, 29400, 69400, 16.1)
+
+    #create two vanadium runs
+    function = "name=FlatBackground, A0=10"
+    van1 = createDummyOSIRISWorkspace('van1', function, 1.17e+04, 5.17e+04, 4.7)
+    van2 = createDummyOSIRISWorkspace('van2', function, 29400, 69400, 16.1)
+
+    samples = [ws1.name(),  ws2.name() ]
+    vanadium = [van1.name(), van2.name()]
+
+    #OSIRISDiffractionReduction currently only support loading from file.
+    for ws in (samples + vanadium):
+      SaveNexus(ws, ws + ".nxs")
+
+    #run OSIRISDiffractionReduction
+    samples = [sample + ".nxs" for sample in samples]
+    vanadium = [van  + ".nxs" for van in vanadium]
+    ws = OSIRISDiffractionReduction(Sample=','.join(samples), Vanadium=','.join(vanadium), CalFile="osiris_041_RES10.cal")
+
+    print "Number of Spectra: %d, Number of bins: %d" % (ws.getNumberHistograms(), ws.blocksize())
 
 Output:
 
 .. testoutput:: ExOSIRISDiffractionReductionSimple
 
-    Created workspace with 3867 bins
+    Number of Spectra: 1, Number of bins: 7582
+
+.. testcleanup:: ExOSIRISDiffractionReductionSimple
+
+    import os
+    def removeFiles(files):
+      for ws in files:
+        try:
+          path = os.path.join(config['defaultsave.directory'], ws)
+          os.remove(path)
+        except:
+          pass
+
+    removeFiles(samples)
+    removeFiles(vanadium)
 
 .. categories::
