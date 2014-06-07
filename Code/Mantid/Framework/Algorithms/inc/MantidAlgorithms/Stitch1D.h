@@ -47,7 +47,8 @@ namespace Mantid
       virtual const std::string category() const {return "Reflectometry";}
       ///Summary of algorithm's purpose
       virtual const std::string summary() const {return "Stitches single histogram matrix workspaces together";}
-
+      /// Does the x-axis have non-zero errors
+      bool hasNonzeroErrors(Mantid::API::MatrixWorkspace_sptr ws);
     private:
       /// Overwrites Algorithm method.
       void init();
@@ -57,8 +58,7 @@ namespace Mantid
       double getStartOverlap(const double& intesectionMin, const double& intesectionMax) const;
       /// Get the end overlap
       double getEndOverlap(const double& intesectionMin, const double& intesectionMax) const;
-      /// Does the x-axis have non-zero errors
-      bool hasNonzeroErrors(Mantid::API::MatrixWorkspace_sptr ws);
+
       /// Get the rebin parameters
       Mantid::MantidVec getRebinParams(Mantid::API::MatrixWorkspace_sptr& lhsWS, Mantid::API::MatrixWorkspace_sptr& rhsWS, const bool scaleRHSWS) const;
       /// Perform rebin

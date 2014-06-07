@@ -347,8 +347,8 @@ namespace Mantid
         if (!hasNonZeroErrors) // Keep checking
         {
           auto e = ws->readE(i);
-          std::vector<double, std::allocator<double> >::iterator error = std::find_if(e.begin(), e.end(),isNonzero);
-          if (error != e.end())
+          auto it = std::find_if(e.begin(), e.end(),isNonzero);
+          if (it != e.end())
           {
             PARALLEL_CRITICAL(has_non_zero)
             {

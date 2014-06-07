@@ -47,7 +47,8 @@ private:
 
   };
 
-  MatrixWorkspace_sptr create1DWorkspace(MantidVec& xData, MantidVec& yData, MantidVec& eData)
+  MatrixWorkspace_sptr createWorkspace(MantidVec& xData, MantidVec& yData, MantidVec& eData,
+      const int nSpec = 1)
   {
     auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
     createWorkspace->setChild(true);
@@ -55,7 +56,7 @@ private:
     createWorkspace->setProperty("UnitX", "1/q");
     createWorkspace->setProperty("DataX", xData);
     createWorkspace->setProperty("DataY", yData);
-    createWorkspace->setProperty("NSpec", 1);
+    createWorkspace->setProperty("NSpec", nSpec);
     createWorkspace->setProperty("DataE", eData);
     createWorkspace->setPropertyValue("OutputWorkspace", "dummy");
     createWorkspace->execute();
@@ -100,7 +101,7 @@ private:
 
     auto e = MantidVec(3, 1);
 
-    return create1DWorkspace(x, y, e);
+    return createWorkspace(x, y, e);
   }
 
   MatrixWorkspace_sptr make_arbitrary_histogram_ws()
@@ -119,9 +120,8 @@ private:
 
     auto e = MantidVec(2, 1);
 
-    return create1DWorkspace(x, y, e);
+    return createWorkspace(x, y, e);
   }
-
 
   MatrixWorkspace_sptr createCosWaveWorkspace(const double startX, const double endX,
       const double aplitude = 1)
@@ -129,7 +129,7 @@ private:
 
     MantidVec xValues;
     MantidVec yValues;
-    for(double x = startX; x <= endX; x+=1.0)
+    for (double x = startX; x <= endX; x += 1.0)
     {
       xValues.push_back(x);
       yValues.push_back(std::cos(x));
@@ -176,11 +176,11 @@ public:
     MantidVec y = boost::assign::list_of(0)(0)(0)(3)(3)(3)(3)(3)(3)(3).convert_to_container<MantidVec>();
 
     // Pre-canned workspace to stitch
-    a = create1DWorkspace(x, y, e);
+    a = createWorkspace(x, y, e);
 
     y = boost::assign::list_of(2)(2)(2)(2)(2)(2)(2)(0)(0)(0).convert_to_container<MantidVec>();
     // Another pre-canned workspace to stitch
-    b = create1DWorkspace(x, y, e);
+    b = createWorkspace(x, y, e);
   }
 
   ResultType do_stitch1D(MatrixWorkspace_sptr& lhs, MatrixWorkspace_sptr& rhs)
@@ -594,7 +594,63 @@ public:
     const double stitchedWSFirstYValue = outWS->readY(0)[0]; // Should be 1.0 at cos(0)
     const double lhsWSFirstYValue = lhs->readY(0)[0]; // Should be 1.0 at cos(0)
 
-    TSM_ASSERT_EQUALS("No scaling of the output workspace should have occurred", stitchedWSFirstYValue, lhsWSFirstYValue);
+    TSM_ASSERT_EQUALS("No scaling of the output workspace should have occurred", stitchedWSFirstYValue,
+        lhsWSFirstYValue);
+  }
+
+  void test_has_non_zero_errors_single_spectrum()
+  {
+    auto x = MantidVec(10);
+    const double xstart = -1;
+    const double xstep = 0.2;
+    LinearSequence<MantidVec::value_type> sequenceX(xstart, xstep);
+    std::generate(x.begin(), x.end(), sequenceX);
+
+    auto y = MantidVec(x.size() - 1, 1);
+
+    auto e = MantidVec(x.size() - 1, 1); // All Non zero errors
+
+    MatrixWorkspace_sptr ws = createWorkspace(x, y, e, 1);
+    Stitch1D alg;
+    TSM_ASSERT("All error values are non-zero", alg.hasNonzeroErrors(ws));
+
+    // Run it again with all zeros
+    e = MantidVec(x.size() - 1, 0); // All zero errors
+    ws = createWorkspace(x, y, e, 1);
+    TSM_ASSERT("All error values are non-zero", !alg.hasNonzeroErrors(ws));
+
+    // Run it again with some zeros
+    e[e.size() - 1] = 1;
+    ws = createWorkspace(x, y, e, 1);
+    TSM_ASSERT("NOT all error values are non-zero", alg.hasNonzeroErrors(ws));
+  }
+
+  void test_has_non_zero_errors_multiple_spectrum()
+  {
+    const size_t nspectrum = 10;
+
+    auto x = MantidVec(10);
+    const double xstart = -1;
+    const double xstep = 0.2;
+    LinearSequence<MantidVec::value_type> sequenceX(xstart, xstep);
+    std::generate(x.begin(), x.end(), sequenceX);
+
+    auto y = MantidVec(nspectrum * (x.size() - 1), 1);
+    auto e = MantidVec(nspectrum * (x.size() - 1), 1); // Non zero errors
+
+    MatrixWorkspace_sptr ws = createWorkspace(x, y, e, static_cast<int>(nspectrum));
+    Stitch1D alg;
+    TSM_ASSERT("All error values are non-zero", alg.hasNonzeroErrors(ws));
+
+    // Run it again with all zeros
+    e = MantidVec(nspectrum * (x.size() - 1), 0); // All zero errors
+    ws = createWorkspace(x, y, e, nspectrum);
+    TSM_ASSERT("All error values are non-zero", !alg.hasNonzeroErrors(ws));
+
+    // Run it again with some zeros
+    e[e.size() - 1] = 1;
+    ws = createWorkspace(x, y, e, nspectrum);
+    TSM_ASSERT("NOT all error values are non-zero", alg.hasNonzeroErrors(ws));
 
   }
 
