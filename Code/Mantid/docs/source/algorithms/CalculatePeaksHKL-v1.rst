@@ -22,7 +22,7 @@ Alternatives
 Usage
 -----
 
-**Example - **
+**Example - Calculate peak HKL values based on UB matrix**
 
 .. testcode:: CalculatePeaksHKLExample
 
