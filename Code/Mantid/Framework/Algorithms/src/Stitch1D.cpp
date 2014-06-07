@@ -14,13 +14,16 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/math/special_functions.hpp>
 #include <vector>
 #include <algorithm>
+
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -85,7 +88,10 @@ namespace Mantid
           "Scaling either with respect to workspace 1 or workspace 2");
       declareProperty(new PropertyWithValue<bool>("UseManualScaleFactor", false, Direction::Input),
           "True to use a provided value for the scale factor.");
-      declareProperty(new PropertyWithValue<double>("ManualScaleFactor", 1.0, Direction::Input),
+      auto manualScaleFactorValidator = boost::make_shared<BoundedValidator<double> >();
+      manualScaleFactorValidator->setLower(0);
+      manualScaleFactorValidator->setExclusive(true);
+      declareProperty(new PropertyWithValue<double>("ManualScaleFactor", 1.0, manualScaleFactorValidator, Direction::Input),
           "Provided value for the scale factor. Optional.");
       declareProperty(
           new PropertyWithValue<double>("OutScaleFactor", Mantid::EMPTY_DBL(), Direction::Output),
@@ -457,8 +463,14 @@ namespace Mantid
       }
       scaleFactor = ratio->readY(0).front();
       errorScaleFactor = ratio->readE(0).front();
+      if(scaleFactor == 0 || boost::math::isnan(scaleFactor))
+      {
+        std::stringstream messageBuffer;
+        messageBuffer << "Stitch1D calculated scale factor is: " << scaleFactor << ". Check that in both input workspaces the integrated overlap region is non-zero.";
+        g_log.warning(messageBuffer.str());
+      }
+
     }
-    //manualscalefactor end if
 
     int a1 = boost::tuples::get<0>(startEnd);
     int a2 = boost::tuples::get<1>(startEnd);
