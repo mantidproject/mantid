@@ -123,8 +123,7 @@ private:
     return createWorkspace(x, y, e);
   }
 
-  MatrixWorkspace_sptr createCosWaveWorkspace(const double startX, const double endX,
-      const double aplitude = 1)
+  MatrixWorkspace_sptr createCosWaveWorkspace(const double startX, const double endX)
   {
 
     MantidVec xValues;
