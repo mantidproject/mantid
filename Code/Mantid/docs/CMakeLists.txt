@@ -40,16 +40,9 @@ if ( SPHINX_FOUND )
                                                 EXCLUDE_FROM_ALL 1)
 endif ()
 
-
 ###############################################################################
-# QtAssistant
+# Installation settings
 ###############################################################################
-if ( APPLE )
-  set ( ENABLE_QTASSISTANT False CACHE BOOL "Build qt-assistant documentation" )
-else ()
-  set ( ENABLE_QTASSISTANT False CACHE BOOL "Build qt-assistant documentation" FORCE )
-endif ( APPLE )
-
-if (ENABLE_QTASSISTANT)
-  add_subdirectory ( qtassistant )
-endif (ENABLE_QTASSISTANT)
+set ( HTML_DOCS_DEST share/doc )
+install ( DIRECTORY ${SPHINX_BUILD_DIR}/html
+          DESTINATION ${HTML_DOCS_DEST} )
