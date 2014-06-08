@@ -15,7 +15,7 @@ project ( Mantid )
 set ( CPACK_PACKAGE_SUFFIX "" CACHE STRING "suffix used to determine the deployment type")
 set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #empty string and release are treated as the same thing
 
-#Set package name here 
+#Set package name here
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
@@ -31,10 +31,10 @@ include ( ParaViewSetup )
 ###########################################################################
 # Set paths to Third_Party for Windows builds
 ###########################################################################
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")	
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 	if ( NOT THIRD_PARTY )
-  		set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )  
+  		set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
 	endif ()
 	# Print out where we think we are looking for 3rd party stuff
 	message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
@@ -43,21 +43,21 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	if (NOT IS_DIRECTORY "${THIRD_PARTY}")
         message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
 	endif()
-	
+
 	include ( WindowsSetup )
-	
+
 	# Settings for generating the windows Nullsoft package via CPack
-	include ( WindowsNSIS )	
-	
+	include ( WindowsNSIS )
+
 ENDIF()
 
 ###########################################################################
 # Set paths to Third_Party for Mac builds
 ###########################################################################
-IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")	
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
   if ( NOT THIRD_PARTY )
-    set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )  
+    set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
   endif ()
 
   # Print out where we think we are looking for 3rd party stuff
@@ -68,8 +68,8 @@ IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
   endif()
 
-  include ( DarwinSetup )	
-    
+  include ( DarwinSetup )
+
 ENDIF()
 
 ###########################################################################
@@ -81,10 +81,10 @@ include ( CommonSetup )
 # Find qwt. Needs to be version 5
 ###########################################################################
 find_package ( Qwt REQUIRED )
-if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR 
+if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR
     QWT_VERSION VERSION_GREATER 6.0 )
   message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT_VERSION}" )
-endif() 
+endif()
 
 ###########################################################################
 # Find PyQt & sip
@@ -103,6 +103,9 @@ add_subdirectory ( QtPropertyBrowser )
 ###########################################################################
 # Flag that this is a full build, i.e not framework only
 set( FULL_PACKAGE_BUILD 1 )
+# Set the path to the built docs directory here so that it can be used in
+# the Kernel project for populating the properties file
+set( DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs )
 
 # Framework Build options
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
@@ -117,10 +120,10 @@ include_directories ( Framework/API/inc )
 set ( CORE_MANTIDLIBS Kernel Geometry API )
 
 # Add a target for all GUI tests
-add_custom_target ( GUITests ) 
+add_custom_target ( GUITests )
 add_dependencies ( check GUITests )
 # Collect all tests together
-add_custom_target ( AllTests ) 
+add_custom_target ( AllTests )
 add_dependencies ( AllTests FrameworkTests GUITests )
 
 add_subdirectory ( MantidQt )
@@ -171,12 +174,12 @@ add_subdirectory( Framework/PostInstall )
 set ( ENABLE_CPACK CACHE BOOL "Switch to enable CPack package generation")
 if ( ENABLE_CPACK )
     include ( CPackCommon )
-    
+
     # Mac package settings
     set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/Installers/WinInstaller/License.txt )
 
     IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
-      include ( CPackLinuxSetup )    
+      include ( CPackLinuxSetup )
       # let people know what is coming out the other end
       message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
@@ -193,13 +196,13 @@ if ( ENABLE_CPACK )
       # scipy & matplotlib
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5" )
-      
+
       if( ${UNIX_CODENAME} STREQUAL "Santiago" )
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6" )
         # On RHEL6 we are using SCL packages for Qt
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs,mantidlibs-runtime,mantidlibs-qt,mantidlibs-qt-x11" )
-      else()  
+      else()
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla" )
       endif()
 

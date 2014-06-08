@@ -5,7 +5,7 @@ find_package ( Sphinx )
 
 if ( SPHINX_FOUND )
   # We generate a target per build type, i.e docs-html, docs-test
-  set ( SPHINX_BUILD_DIR ${CMAKE_BINARY_DIR}/docs )
+  set ( SPHINX_BUILD_DIR ${DOCS_BUILDDIR} )
   set ( SCREENSHOTS_DIR ${SPHINX_BUILD_DIR}/screenshots )
 
   # targets
