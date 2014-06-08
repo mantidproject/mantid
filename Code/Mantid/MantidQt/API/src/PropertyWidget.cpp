@@ -180,6 +180,7 @@ namespace API
    */
   void ClickableLabel::mousePressEvent(QMouseEvent * event)
   {
+    UNUSED_ARG(event);
     emit clicked();
   }
 
