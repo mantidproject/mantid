@@ -9,9 +9,6 @@
 Description
 -----------
 
-Description
------------
-
 LoadSINQ loads SINQ NeXus files. The algorithm calculates the file name
 from the instrument, year and numor and tries to locate the file. Both
 at SINQ standard paths as well as the data directories configured for
