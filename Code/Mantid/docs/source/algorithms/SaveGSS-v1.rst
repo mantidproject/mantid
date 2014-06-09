@@ -41,7 +41,7 @@ Usage
 -----
 **Example - a basic example using SaveGSS.**
 
-.. testcode:: ExSaveGSSimple
+.. testcode:: ExSaveGSSSimple
 
     import os
 
@@ -50,17 +50,17 @@ Usage
     file_name = "myworkspace.ascii"
     SaveGSS(ws, file_name)
 
-    path = os.path.join(config['defaultsave.directory'], file_name)
+    path = os.path.join(config['defaultsave.directory'], "myworkspace-0.ascii")
     print os.path.isfile(path)
 
 
 Output:
 
-.. testoutput:: ExSaveGSSimple
+.. testoutput:: ExSaveGSSSimple
 
     True
 
-.. testcleanup:: ExSaveGSSimple
+.. testcleanup:: ExSaveGSSSimple
 
     import os
     def removeFiles(files):
@@ -71,7 +71,7 @@ Output:
         except:
           pass
 
-    removeFiles(file_name)
+    removeFiles(["myworkspace-0.ascii"])
 
 **Example - an example using SaveGSS with additonal options.**
 
@@ -105,7 +105,7 @@ Output:
         except:
           pass
 
-    removeFiles(file_name)
+    removeFiles([file_name])
 
 
 .. categories::

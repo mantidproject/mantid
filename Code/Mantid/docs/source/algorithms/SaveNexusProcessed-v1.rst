@@ -77,7 +77,7 @@ Output:
         except:
           pass
 
-    removeFiles(file_name)
+    removeFiles([file_name])
 
 
 **Example - an example using SaveNexusProcessed with additonal options.**
@@ -95,7 +95,7 @@ Output:
 
     ws = Load(file_name)
     print "Saved workspace has %d spectra" % ws.getNumberHistograms()
-    
+
 Output:
 
 .. testoutput:: ExSaveNexusProcessedOptions
@@ -114,7 +114,43 @@ Output:
         except:
           pass
 
-    removeFiles(file_name)
+    removeFiles([file_name])
+
+**Example - an example using SaveNexusProcessed to save an Event workspace.**
+
+.. testcode:: ExSaveNexusProcessedEvent
+
+    import os
+
+    ws = CreateSampleWorkspace("Event")
+    file_name = "myworkspace.nxs"
+    SaveNexusProcessed(ws, file_name, CompressNexus=True, PreserveEvents=True)
+
+    path = os.path.join(config['defaultsave.directory'], file_name)
+    print os.path.isfile(path)
+
+    ws = Load(file_name)
+    print "Saved workspace has %d spectra" % ws.getNumberHistograms()
+    
+Output:
+
+.. testoutput:: ExSaveNexusProcessedEvent
+
+    True
+    Saved workspace has 200 spectra
+
+.. testcleanup:: ExSaveNexusProcessedEvent
+
+    import os
+    def removeFiles(files):
+      for ws in files:
+        try:
+          path = os.path.join(config['defaultsave.directory'], ws)
+          os.remove(path)
+        except:
+          pass
+
+    removeFiles([file_name])
 
 
 .. categories::
