@@ -28,4 +28,76 @@ leaves the data in d-spacing.
 If the written file is to be loaded into TOPAS, then headers should be
 omitted (set the IncludeHeader property to false);
 
+Usage
+-----
+**Example - a basic example using SaveFocusedXYE.**
+
+.. testcode:: ExSaveFocusedXYESimple
+
+    import os
+
+    ws = CreateSampleWorkspace()
+    ws = ExtractSingleSpectrum(ws, 0)
+
+    file_name = "myworkspace"
+    SaveFocusedXYE(ws, file_name)
+
+    path = os.path.join(config['defaultsave.directory'], file_name + "-0.ascii")
+    print os.path.isfile(path)
+
+
+Output:
+
+.. testoutput:: ExSaveFocusedXYESimple
+
+    True
+
+.. testcleanup:: ExSaveFocusedXYESimple
+
+    import os
+    def removeFiles(files):
+      for ws in files:
+        try:
+          path = os.path.join(config['defaultsave.directory'], ws)
+          os.remove(path)
+        except:
+          pass
+
+    removeFiles(file_name + "-0.ascii")
+
+**Example - an example using SaveFocusedXYE with additional options.**
+
+.. testcode:: ExSaveFocusedXYEOptions
+
+    import os
+
+    ws = CreateSampleWorkspace()
+    ws = CropWorkspace(ws, StartWorkspaceIndex=0, EndWorkspaceIndex=4)
+
+    file_name = "myworkspace.ascii"
+    SaveFocusedXYE(ws, file_name, SplitFiles=False, IncludeHeader=True, Format='MAUD')
+
+    path = os.path.join(config['defaultsave.directory'], file_name)
+    print os.path.isfile(path)
+
+
+Output:
+
+.. testoutput:: ExSaveFocusedXYEOptions
+
+    True
+
+.. testcleanup:: ExSaveFocusedXYEOptions
+
+    import os
+    def removeFiles(files):
+      for ws in files:
+        try:
+          path = os.path.join(config['defaultsave.directory'], ws)
+          os.remove(path)
+        except:
+          pass
+
+    removeFiles(file_name)
+
 .. categories::
