@@ -132,8 +132,7 @@ namespace Algorithms
     declareProperty(paramwsprop,
                     "Input TableWorkspace for peak's parameters.");
 
-#if 1
-    // Peak properties
+    // Peak function properties
     std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
     std::vector<std::string> peakFullNames = addFunctionParameterNames(peakNames);
     declareProperty("PeakType", "", boost::make_shared<StringListValidator>(peakFullNames),
@@ -160,18 +159,6 @@ namespace Algorithms
     declareProperty(new ArrayProperty<double>("BackgroundParameterValues"),
                     "List of background parameter values.  They must have a 1-to-1 mapping to PeakParameterNames list. ");
 
-#else
-    declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(
-                      FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>()),
-                    "Peak function to calculate.");
-
-    std::vector<std::string> bkgdnames = FunctionFactory::Instance().getFunctionNames<API::IBackgroundFunction>();
-    bkgdnames.push_back("None");
-    bkgdnames.push_back("Auto");
-    declareProperty("BackgroundFunction", "FlatBackground", boost::make_shared<StringListValidator>(bkgdnames),
-                    "Background function to calculate. ");
-#endif
-
     declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
                     "InputWorkspace (optional) to take information for the instrument, and where to evaluate the x-axis.");
 
@@ -196,7 +183,11 @@ namespace Algorithms
     declareProperty("IgnoreWidePeaks", false, "If selected, the peaks that are wider than fit window "
                     "(denoted by negative chi^2) are ignored.");
 
-    declareProperty("IsRawParameterTable", true, "Flag to show whether the parameter table contains raw parameters. ");
+    declareProperty("IsRawParameter", true,
+                    "Flag to show whether the parameter table contains raw parameters. "
+                    "In the case that parameter values are input via vector, and this flag is set to false, "
+                    "the default order of effective peak parameters is centre, height and width; "
+                    "the default order of effective background parameters is A0, A1 and A2. ");
 
     return;
   }
@@ -278,7 +269,7 @@ namespace Algorithms
 
     m_genBackground = getProperty("GenerateBackground");
 
-    m_useRawParameter = getProperty("IsRawParameterTable");
+    m_useRawParameter = getProperty("IsRawParameter");
 
     // Special properties related
     m_maxChi2 = this->getProperty("MaxAllowedChi2");
@@ -414,6 +405,7 @@ namespace Algorithms
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Import one and only one function vector input
    */
   void GeneratePeaks::importPeakFromVector(std::vector<std::pair<double, API::IFunction_sptr> >& functionmap)
@@ -421,32 +413,67 @@ namespace Algorithms
     API::CompositeFunction_sptr compfunc = boost::make_shared<API::CompositeFunction>();
 
     // Set up and clone peak function
-    size_t numpeakparams = m_peakFunction->nParams();
-    if (m_vecPeakParamValues.size() != numpeakparams)
+    if (m_useRawParameter)
     {
-      std::stringstream errss;
-      errss << "Number of input peak parameters' value (" << m_vecPeakParamValues.size() << ") is not correct (should be "
-            << numpeakparams << " for peak of type " << m_peakFunction->name() << "). ";
-      throw std::runtime_error(errss.str());
+      // Input vector of values are for raw parameter name
+      size_t numpeakparams = m_peakFunction->nParams();
+      if (m_vecPeakParamValues.size() == numpeakparams)
+      {
+        for (size_t i = 0; i < numpeakparams; ++i)
+          m_peakFunction->setParameter(i, m_vecPeakParamValues[i]);
+      }
+      else
+      {
+        // Number of input parameter values is not correct. Throw!
+        std::stringstream errss;
+        errss << "Number of input peak parameters' value (" << m_vecPeakParamValues.size() << ") is not correct (should be "
+              << numpeakparams << " for peak of type " << m_peakFunction->name() << "). ";
+        throw std::runtime_error(errss.str());
+      }
     }
     else
     {
-      for (size_t i = 0; i < numpeakparams; ++i)
-        m_peakFunction->setParameter(i, m_vecPeakParamValues[i]);
+      // Input vector of values are for effective parameter names
+      if (m_vecPeakParamValues.size() != 3)
+        throw std::runtime_error("Input peak parameters must have 3 numbers for effective parameter names.");
+
+      m_peakFunction->setCentre(m_vecPeakParamValues[0]);
+      m_peakFunction->setHeight(m_vecPeakParamValues[1]);
+      m_peakFunction->setFwhm(m_vecPeakParamValues[2]);
     }
+
     compfunc->addFunction(m_peakFunction->clone());
+    g_log.notice() << "[***] Peak function: " << m_peakFunction->asString() << "\n";
 
     // Set up and clone background function
     if (m_genBackground)
     {
       size_t numbkgdparams = m_bkgdFunction->nParams();
-      if (m_vecBkgdParamValues.size() != numbkgdparams)
-        throw std::runtime_error("Number of background parameters' value is not correct. ");
+      if (m_useRawParameter)
+      {
+        // Raw background parameters
+        if (m_vecBkgdParamValues.size() != numbkgdparams)
+          throw std::runtime_error("Number of background parameters' value is not correct. ");
+        else
+        {
+          for (size_t i = 0; i < numbkgdparams; ++i)
+            m_bkgdFunction->setParameter(i, m_vecBkgdParamValues[i]);
+        }
+      }
       else
       {
+        // Effective background parameters
+        if (m_vecBkgdParamValues.size() < 3 && m_vecBkgdParamValues.size() < numbkgdparams)
+        {
+          throw std::runtime_error("There is no enough effective background parameter values.");
+        }
+
+        // FIXME - Assume that all background functions define parameter i for A_i
         for (size_t i = 0; i < numbkgdparams; ++i)
           m_bkgdFunction->setParameter(i, m_vecBkgdParamValues[i]);
+
       }
+
       compfunc->addFunction(m_bkgdFunction->clone());
     }
 
@@ -477,6 +504,8 @@ namespace Algorithms
 
       const std::vector<std::pair<double, API::IFunction_sptr> >& vec_centrefunc = mapiter->second;
       size_t numpeaksinspec = mapiter->second.size();
+
+      g_log.notice() << "[***] Number of peaks to plot = " << numpeaksinspec << "\n";
 
       for (size_t ipeak = 0; ipeak < numpeaksinspec; ++ipeak)
       {
@@ -524,9 +553,11 @@ namespace Algorithms
         // Put to output
         std::size_t offset = (left-X.begin());
         std::size_t numY = values.size();
+        g_log.notice() << "[***] Number of Y = " << numY << "\n";
         for (std::size_t i = 0; i < numY; i ++)
         {
           dataWS->dataY(wsindex)[i + offset] += values[i];
+          g_log.notice() << "[***] Y[" << i+offset << "] = " << values[i] << "\n";
         }
 
       } // ENDFOR(ipeak)
