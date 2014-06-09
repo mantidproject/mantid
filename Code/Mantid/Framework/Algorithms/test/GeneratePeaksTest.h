@@ -37,7 +37,7 @@ public:
     FrameworkManager::Instance();
   }
 
-  void test_Init()
+  void Ptest_Init()
   {
     GeneratePeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -59,7 +59,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to use user-provided binning parameters and effective function parameters
    */
-  void test_UserBinningParameters()
+  void Ptest_UserBinningParameters()
   {
     // Create input parameter table workspace
     DataObjects::TableWorkspace_sptr peakparmsws = createTestEffectiveFuncParameters();
@@ -76,7 +76,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test01WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameterTable", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameter", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
 
     // Execute
@@ -127,7 +127,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test algorithm by using an existing input workspace as X-values
    */
-  void test_FromInputWorkspace()
+  void Ptest_FromInputWorkspace()
   {
     // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters2();
@@ -199,7 +199,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to use user-provided binning parameters
    */
-  void test_Background()
+  void Ptest_Background()
   {
     // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters3();
@@ -217,7 +217,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test03WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameterTable", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameter", false));
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -264,7 +264,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to input parameter values by vectors user-provided binning parameters
    */
-  void test_InputValueViaVector()
+  void Ptest_InputValueViaVector()
   {
     // Create vectors for peak and background parameters
     std::string vecpeakvalue("5.0, 2.0, 0.0849322");
@@ -282,7 +282,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test04WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameterTable", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameter", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
 
     // Execute
@@ -319,10 +319,10 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to input parameter values by vectors user-provided binning parameters
    */
-  void Xtest_InputValueViaVectorEffective()
+  void test_InputValueViaVectorEffective()
   {
     // Create vectors for peak and background parameters
-    std::string vecpeakvalue("5.0, 2.0, 0.02");
+    std::string vecpeakvalue("2.0, 5.0, 0.2");
     std::string vecbkgdvalue("1.0, 2.0, 0.0");
 
     // Initialize algorithm GenertePeaks
@@ -337,7 +337,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParameters", "0.0, 0.01, 10.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Test01WS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateBackground", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameterTable", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IsRawParameter", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxAllowedChi2", 100.0));
 
     // Execute
@@ -357,6 +357,8 @@ public:
     MantidVec p0_y = peaksws->readY(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 5.0, 1.0E-4);
+
+    std::cout << "value 200: " << "x = " << p0_x[200] << ", y = " << p0_y[200] << "\n";
 
     TS_ASSERT_DELTA(p0_x[201], 2.01, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[201], 4.96546, 1.0E-4);
