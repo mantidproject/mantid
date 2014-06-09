@@ -26,18 +26,18 @@ Raw data). If you wish to alter this axis use the
 
 The formula is defined in a simple math syntax. For example:
 
-* Squaring - ``x^2``
-* Square root - ``sqrt(x)``
-* Cubing - ``x^3``
-* Basic addition - ``y + 3``
-* Brackets - ``(y+1)/20``
-* Natural Log - ``ln(x)``
-* Log 10 - ``log(x)``
-* Exponent - ``exp(y)``
-* Round to nearest integer - ``rint(y/10)``
-* Absolute value - ``abs(y-100)``
+* Squaring - *x^2*
+* Square root - *sqrt(x)*
+* Cubing - *x^3*
+* Basic addition - *y + 3*
+* Brackets - *(y+1)/20*
+* Natural Log - *ln(x)*
+* Log 10 - *log(x)*
+* Exponent - *exp(y)*
+* Round to nearest integer - *rint(y/10)*
+* Absolute value - *abs(y-100)*
 
-``x`` and ``y`` can be used interchangeably to refer to the current axis value.
+*x* and *y* can be used interchangeably to refer to the current axis value.
 
 Refer to the
 `muparser page <http://muparser.beltoforion.de/mup_features.html#idDef2>`_

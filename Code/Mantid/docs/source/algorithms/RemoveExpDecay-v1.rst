@@ -32,12 +32,12 @@ Usage
 
    output = RemoveExpDecay(input)
 
-   print "Exp. decay removed:", ', '.join(['{:.3f}'.format(y) for y in output.readY(0)])
+   print "Exp. decay removed:", output.readY(0)
 
 Output:
 
 .. testoutput:: ExSimple
 
-   Exp. decay removed: -0.243, 0.791, -0.059, -0.703, -0.766
+   Exp. decay removed: [-0.24271091  0.79071878 -0.05901962 -0.70332224 -0.76615428]
 
 .. categories::

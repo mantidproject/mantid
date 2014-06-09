@@ -41,13 +41,13 @@ Usage
                                    PairSecondIndex = 0,
                                    Alpha = 0.5)
 
-   print 'Output:', ', '.join('{:.3f}'.format(y) for y in output.readY(0))
+   print 'Output:', output.readY(0)
 
 Output:
 
 .. testoutput:: ExPairAsymmetry
 
-   Output: 0.778, 0.667, 0.600
+   Output: [ 0.77777778  0.66666667  0.6       ]
 
 **Example - Group asymmetry for two periods:**
 
@@ -66,12 +66,12 @@ Output:
                                    OutputType = 'GroupAsymmetry',
                                    GroupIndex = 0)
 
-   print 'Output:', ', '.join('{:.3f}'.format(y) for y in output.readY(0))
+   print 'Output:', output.readY(0)
 
 Output:
 
 .. testoutput:: ExGroupAsymmetryMultiperiod
 
-   Output: -0.286, 0.606, 0.263
+   Output: [-0.28634067  0.60594273  0.26255546]
 
 .. categories::

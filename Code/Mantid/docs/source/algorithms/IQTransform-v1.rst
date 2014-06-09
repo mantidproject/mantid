@@ -65,14 +65,14 @@ Usage
 
    output = IQTransform(input, 'Zimm')
 
-   print 'Output Y:', ', '.join(['{:.3f}'.format(y) for y in output.readY(0)])
-   print 'Output X:', ', '.join(['{:.3f}'.format(x) for x in output.readX(0)])
+   print 'Output Y:', output.readY(0)
+   print 'Output X:', output.readX(0)
 Output:
 
 .. testoutput:: ExZimm
 
-   Output Y: 1.000, 0.500, 0.333
-   Output X: 1.000, 4.000, 9.000
+   Output Y: [ 1.          0.5         0.33333333]
+   Output X: [ 1.  4.  9.]
 
 **Example - Zimm transformation and background:**
 
@@ -86,14 +86,14 @@ Output:
 
    output = IQTransform(input, 'Zimm', BackgroundValue=0.5)
 
-   print 'Output Y:', ', '.join(['{:.3f}'.format(y) for y in output.readY(0)])
-   print 'Output X:', ', '.join(['{:.3f}'.format(x) for x in output.readX(0)])
+   print 'Output Y:', output.readY(0)
+   print 'Output X:', output.readX(0)
 Output:
 
 .. testoutput:: ExZimmBg
 
-   Output Y: 2.000, 0.667, 0.400
-   Output X: 1.000, 4.000, 9.000
+   Output Y: [ 2.          0.66666667  0.4       ]
+   Output X: [ 1.  4.  9.]
 
 **Example - General transformation:**
 
@@ -110,13 +110,13 @@ Output:
    constants = [2,2,0,0,math.e,3,0,0,0,math.e]
    output = IQTransform(input, 'General', GeneralFunctionConstants=constants)
 
-   print 'Output Y:', ', '.join(['{:.3f}'.format(y) for y in output.readY(0)])
-   print 'Output X:', ', '.join(['{:.3f}'.format(x) for x in output.readX(0)])
+   print 'Output Y:', output.readY(0)
+   print 'Output X:', output.readX(0)
 Output:
 
 .. testoutput:: ExGeneral
 
-   Output Y: 1.000, 16.000, 81.000
-   Output X: 1.000, 8.000, 27.000
+   Output Y: [  1.  16.  81.]
+   Output X: [  1.   8.  27.]
 
 .. categories::

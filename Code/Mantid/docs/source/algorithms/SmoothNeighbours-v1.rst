@@ -209,14 +209,24 @@ Usage
                              RadiusUnits = 'NumberOfPixels')
 
    print 'Number of histograms:', output.getNumberHistograms()
-   print 'Smoothed values:', ', '.join(['{:.3f}'.format(output.readY(i)[0]) for i in range(0,9)])
+   print 'Smoothed values:'
+   print output.extractY()
 
 Output:
 
 .. testoutput:: ExRadius
 
    Number of histograms: 9
-   Smoothed values: 2.000, 2.167, 2.000, 2.000, 2.222, 2.333, 2.500, 2.500, 2.500
+   Smoothed values:
+   [[ 2.        ]
+    [ 2.16666667]
+    [ 2.        ]
+    [ 2.        ]
+    [ 2.22222222]
+    [ 2.33333333]
+    [ 2.5       ]
+    [ 2.5       ]
+    [ 2.5       ]]
 
 **Example -  Smooth using AdjX and AdjY:**
 
@@ -242,14 +252,24 @@ Output:
    output = SmoothNeighbours(ws, AdjX=1, AdjY=3)
 
    print 'Number of histograms:', output.getNumberHistograms()
-   print 'Smoothed values:', ', '.join(['{:.3f}'.format(output.readY(i)[0]) for i in range(0,9)])
+   print 'Smoothed values:'
+   print output.extractY()
 
 Output:
 
 .. testoutput:: ExAdj
 
    Number of histograms: 9
-   Smoothed values: 2.167, 2.167, 2.167, 2.222, 2.222, 2.222, 2.500, 2.500, 2.500
+   Smoothed values:
+   [[ 2.16666667]
+    [ 2.16666667]
+    [ 2.16666667]
+    [ 2.22222222]
+    [ 2.22222222]
+    [ 2.22222222]
+    [ 2.5       ]
+    [ 2.5       ]
+    [ 2.5       ]]
 
 **Example -  Smooth and sum using SumPixelsX and SumPixelsY:**
 
@@ -275,13 +295,17 @@ Output:
    output = SmoothNeighbours(ws, SumPixelsX=3, SumPixelsY=1)
 
    print 'Number of histograms:', output.getNumberHistograms()
-   print 'Smoothed values:', ', '.join(['{:.3f}'.format(output.readY(i)[0]) for i in range(0,3)])
+   print 'Smoothed values:'
+   print output.extractY()
 
 Output:
 
 .. testoutput:: ExSum
 
    Number of histograms: 3
-   Smoothed values: 6.000, 6.000, 8.000
+   Smoothed values:
+   [[ 6.]
+    [ 6.]
+    [ 8.]]
 
 .. categories::

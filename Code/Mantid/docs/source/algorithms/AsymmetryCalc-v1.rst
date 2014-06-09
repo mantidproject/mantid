@@ -28,7 +28,7 @@ the asymmetry and the asymmetry errors.
 
 .. note::
    This algorithm does not perform any grouping. The grouping must be
-   done using :ref:`algm-MuonGroupDetectors` or ``AutoGroup`` option
+   done using :ref:`algm-MuonGroupDetectors` or *AutoGroup* option
    of :ref:`algm-LoadMuonNexus`.
 
 .. [1] See :ref:`algm-AlphaCalc`
@@ -40,21 +40,21 @@ Usage
 
 .. testcode:: ExSimple
 
-   y = [1,2,3] + [3,6,9]
+   y = [1,2,3] + [3,1,12]
    x = [1,2,3,4] * 2
    e = [1,1,1] * 2
    input = CreateWorkspace(x, y, e, NSpec=2)
 
    asymmetry = AsymmetryCalc(input, Alpha=0.5)
 
-   print 'Asymmetry:', ', '.join('{:.3f}'.format(y) for y in asymmetry.readY(0))
-   print 'Errors:', ', '.join('{:.3f}'.format(e) for e in asymmetry.readE(0))
+   print 'Asymmetry:', asymmetry.readY(0)
+   print 'Errors:', asymmetry.readE(0)
 
 Output:
 
 .. testoutput:: ExSimple
 
-   Asymmetry: -0.200, -0.200, -0.200
-   Errors: 0.540, 0.382, 0.312
+   Asymmetry: [-0.2         0.6        -0.33333333]
+   Errors: [ 0.5396295   0.69971423  0.28688766]
 
 .. categories::

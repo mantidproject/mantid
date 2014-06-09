@@ -9,7 +9,7 @@
 Description
 -----------
 
-Assuming that the ``InputWorkspace`` contains measured
+Assuming that the *InputWorkspace* contains measured
 counts as a function of TOF, the algorithm returns a workspace
 containing true counts as a function of the same TOF binning
 according to
@@ -24,7 +24,7 @@ where
 | :math:`t_{bin}` = time bin width
 | :math:`F` = number of good frames
 
-``DeadTimeTable`` is expected to have 2 columns:
+*DeadTimeTable* is expected to have 2 columns:
 
 1. Integer type, containing spectrum number (not index)
 2. Double type, containing :math:`t_{dead}` value of the spectrum
