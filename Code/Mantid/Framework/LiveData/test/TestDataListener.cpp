@@ -92,6 +92,9 @@ namespace LiveData
     m_buffer->setInstrument(inst);
     // Set a run number
     m_buffer->mutableRun().addProperty("run_number", std::string("999"));
+    // Add a monitor workspace
+    auto monitorWS = WorkspaceFactory::Instance().create(m_buffer);
+    m_buffer->setMonitorWorkspace(monitorWS);
   }
 
   boost::shared_ptr<Workspace> TestDataListener::extractData()
@@ -107,6 +110,7 @@ namespace LiveData
       el1.addEventQuickly(TofEvent(m_rand->nextValue()));
       el2.addEventQuickly(TofEvent(m_rand->nextValue()));
     }
+    m_buffer->monitorWorkspace()->dataY(0)[0] = 1.0;
 
     // Copy the workspace pointer to a temporary variable
     EventWorkspace_sptr extracted = m_buffer;
