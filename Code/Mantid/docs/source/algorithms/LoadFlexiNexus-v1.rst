@@ -9,9 +9,6 @@
 Description
 -----------
 
-Description
------------
-
 This algorithm is a flexible NeXus file loader. Data loading is driven
 by a dictionary. Correspondingly the algorithm takes as arguments: a
 filename, a path to a dictionary file and an output workspace name.
@@ -56,5 +53,38 @@ Please note that the dimensions on the MDHistoWorkspace are inverted
 when compared with the ones in the NeXus file. This is a fix which
 allows to efficiently transfer the NeXus data in C storage order into
 the MDHistoWorkspace which has fortran storage order.
+
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+**Example - Load AMOR Nexus file from SINQ/PSI:**
+
+.. testcode:: LoadAmor
+
+    import os
+    dictionary_path = os.path.join(config["instrumentDefinition.directory"], "nexusdictionaries")
+    wsOut = LoadFlexiNexus(Filename='amor2013n000366.hdf',
+        Dictionary=os.path.join(dictionary_path, 'amor.dic'))
+
+    num_dims = wsOut.getNumDims()
+    print "This has loaded a MD Workspace with %i dimensions" % num_dims
+    print "Name   Bins   Min     Max"
+    for dim_index in range(num_dims):
+        dim = wsOut.getDimension(dim_index)
+        print "%s      %i    %.2f  %.2f" % (dim.getName(),
+             dim.getNBins(), dim.getMinimum(), dim.getMaximum())
+
+Output:
+
+.. testoutput:: LoadAmor
+
+    This has loaded a MD Workspace with 3 dimensions
+    Name   Bins   Min     Max
+    z      360    32471.45  194590.44
+    y      256    -95.00  94.26
+    x      128    -86.00  84.66
+
 
 .. categories::
