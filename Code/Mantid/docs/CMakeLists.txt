@@ -11,7 +11,11 @@ if ( SPHINX_FOUND )
   # targets
   set ( TARGET_PREFIX docs)
   # runner
-  set ( DOCS_RUNNER_EXE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/MantidPlot )
+  if ( APPLE )
+    set ( DOCS_RUNNER_EXE ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${BIN_DIR}/MantidPlot )
+  else ()
+    set ( DOCS_RUNNER_EXE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/MantidPlot )
+  endif()
 
   # HTML target
   set ( BUILDER html )
