@@ -41,4 +41,39 @@ DSP = d-Spacing of peak (Angstroms)/TR
 
 Last line must have all 0's
 
+Usage
+-----
+**Example - a simple example of running SaveHKL.**
+
+.. testcode:: ExSaveHKLSimple
+
+    import os
+
+    #load a peaks workspace from file
+    peaks = LoadIsawPeaks(Filename=r'TOPAZ_1204.peaks')
+    SaveHKL(peaks, "MyPeaks.hkl")
+
+    path = os.path.join(config['defaultsave.directory'], "MyPeaks.hkl")
+    print os.path.isfile(path)
+
+Output:
+
+.. testoutput:: ExSaveHKLSimple
+
+    True
+
+.. testcleanup:: ExSaveHKLSimple
+
+    import os
+    def removeFiles(files):
+      for ws in files:
+        try:
+          path = os.path.join(config['defaultsave.directory'], ws)
+          os.remove(path)
+        except:
+          pass
+
+    removeFiles(["MyPeaks.hkl"])
+
+
 .. categories::
