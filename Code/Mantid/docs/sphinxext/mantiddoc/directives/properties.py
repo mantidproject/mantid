@@ -140,6 +140,11 @@ class PropertiesDirective(BaseDirective):
                 # Fall-back default for anything
                 defaultstr = str(default)
 
+        # replace nonprintable characters with their printable
+        # representations, such as \n, \t, ...
+        defaultstr = repr(defaultstr)[1:-1]
+        defaultstr = defaultstr.replace('\\','\\\\')
+
         # Replace the ugly default values with "Optional"
         if (defaultstr == "8.9884656743115785e+307") or \
            (defaultstr == "1.7976931348623157e+308") or \
