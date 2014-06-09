@@ -11,3 +11,4 @@ Hints to make the integration of your changes easy:
 - Don't forget your unit tests
 - All algorithms need documentation, don't forget the .rst file
 - Contact us before creating the pull request
+- Don't take changes requests to change your code personally
