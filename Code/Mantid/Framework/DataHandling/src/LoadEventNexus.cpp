@@ -1177,6 +1177,8 @@ void LoadEventNexus::exec()
     const bool eventMonitors = getProperty("MonitorsAsEvents");
     if( eventMonitors && this->hasEventMonitors() )
     {
+      // Note the reuse of the WS member variable below. Means I need to grab a copy of its current value.
+      auto dataWS = WS;
       WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
       //add filename
       WS->mutableRun().addProperty("Filename",m_filename);
@@ -1186,7 +1188,9 @@ void LoadEventNexus::exec()
       mon_wsname.append("_monitors");
       this->declareProperty(new WorkspaceProperty<IEventWorkspace>
                             ("MonitorWorkspace", mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
-      this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);      
+      this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);
+      // Set the internal monitor workspace pointer as well
+      dataWS->setMonitorWorkspace(WS);
     }
     else
     {
@@ -2213,22 +2217,21 @@ void LoadEventNexus::runLoadMonitors()
   IAlgorithm_sptr loadMonitors = this->createChildAlgorithm("LoadNexusMonitors");
   try
   {
-    this->g_log.information() << "Loading monitors from NeXus file..."
-        << std::endl;
+    g_log.information("Loading monitors from NeXus file...");
     loadMonitors->setPropertyValue("Filename", m_filename);
-    this->g_log.information() << "New workspace name for monitors: "
-        << mon_wsname << std::endl;
+    g_log.information() << "New workspace name for monitors: " << mon_wsname << std::endl;
     loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
     loadMonitors->execute();
     MatrixWorkspace_sptr mons = loadMonitors->getProperty("OutputWorkspace");
     this->declareProperty(new WorkspaceProperty<>("MonitorWorkspace",
         mon_wsname, Direction::Output), "Monitors from the Event NeXus file");
     this->setProperty("MonitorWorkspace", mons);
+    // Set the internal monitor workspace pointer as well
+    WS->setMonitorWorkspace(mons);
   }
   catch (...)
   {
-    this->g_log.error() << "Error while loading the monitors from the file. "
-        << "File may contain no monitors." << std::endl;
+    g_log.error("Error while loading the monitors from the file. File may contain no monitors.");
   }
 }
 
