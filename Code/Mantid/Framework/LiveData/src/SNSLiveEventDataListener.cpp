@@ -230,9 +230,7 @@ namespace LiveData
     // Yes, I know a send isn't guaranteed to send the whole buffer in one call.
     // I'm treating such a case as an error anyway.
     {
-      g_log.error()
-        << "SNSLiveEventDataListener::run(): Failed to send client hello packet.  Thread exiting."
-        << std::endl;
+      g_log.error("SNSLiveEventDataListener::run(): Failed to send client hello packet. Thread exiting.");
       m_stopThread = true;
     }
 
@@ -262,7 +260,7 @@ namespace LiveData
           bytesRead = m_socket.receiveBytes( bufFillAddr, bufFillLen);
         } catch (Poco::TimeoutException &) {
           // Don't need to stop processing or anything - just log a warning
-          g_log.warning() << "Timeout reading from the network.  Is SMS still sending?" << std::endl;
+          g_log.warning("Timeout reading from the network.  Is SMS still sending?");
         } catch (Poco::Net::NetException &e) {
           std::string msg("Parser::read(): ");
           msg += e.name();
@@ -294,28 +292,27 @@ namespace LiveData
       // For now, log it and let the thread exit.  In the future, we might
       // try to recover from this.  (A bad event packet could probably just
       // be ignored, for example)
-      g_log.fatal() << "Caught an invalid packet exception in SNSLiveEventDataListener"
-                    << " network read thread." << std::endl;
-      g_log.fatal() << "Exception message is: " << e.what() << std::endl;
-      g_log.fatal() << "Thread is exiting." << std::endl;
+      g_log.fatal() << "Caught an invalid packet exception in SNSLiveEventDataListener network read thread.\n"
+                    << "Exception message is: " << e.what() << ".\n"
+                    << "Thread is exiting.\n";
 
       m_isConnected = false;
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new ADARA::invalid_packet(e));
 
     } catch (std::runtime_error &e) {  // exception handler for generic runtime exceptions
-      g_log.fatal() << "Caught a runtime exception." << std::endl
-                    << "Exception message: " << e.what() << std::endl
-                    << "Thread will exit." << std::endl;
+      g_log.fatal() << "Caught a runtime exception.\n"
+                    << "Exception message: " << e.what() << ".\n"
+                    << "Thread will exit.\n";
       m_isConnected = false;
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( e));
 
     } catch (std::invalid_argument &e) { // TimeSeriesProperty (and possibly some other things) can
                                         // can throw these errors
-      g_log.fatal() << "Caught an invalid argument exception." << std::endl
-                    << "Exception message: "  << e.what() << std::endl
-                    << "Thread will exit." << std::endl;
+      g_log.fatal() << "Caught an invalid argument exception.\n"
+                    << "Exception message: "  << e.what() << ".\n"
+                    << "Thread will exit.\n";
       m_isConnected = false;
       m_workspaceInitialized = true;  // see the comments in the default exception
                                       // handler for why we set this value.
@@ -324,8 +321,8 @@ namespace LiveData
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( newMsg));
 
     } catch (...) {  // Default exception handler
-      g_log.fatal() << "Uncaught exception in SNSLiveEventDataListener network read thread."
-                    << "  Thread is exiting." << std::endl;
+      g_log.fatal("Uncaught exception in SNSLiveEventDataListener network read thread."
+                  " Thread is exiting.");
       m_isConnected = false;
 
       m_backgroundException =
@@ -372,7 +369,7 @@ namespace LiveData
       // we can't process this packet at all.
       if (! m_workspaceInitialized)
       {
-        g_log.error() << "Cannot process BankedEventPacket because workspace isn't initialized." << std::endl;
+        g_log.error("Cannot process BankedEventPacket because workspace isn't initialized.");
         // Note: One error message per BankedEventPkt is likely to absolutely flood the error log.
         // Might want to think about rate limiting this somehow...
 
@@ -394,7 +391,8 @@ namespace LiveData
     }
 
     // Append the events
-    g_log.debug() << "----- Pulse ID: " << pkt.pulseId() << " -----" << std::endl;
+    g_log.debug() << "----- Pulse ID: " << pkt.pulseId() << " -----\n";
+    // Scope braces
     {
       Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
 
@@ -432,8 +430,7 @@ namespace LiveData
         event = pkt.nextEvent();
         if (pkt.curBankId() != lastBankID)
         {
-          g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank
-                        << " events" << std::endl;
+          g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank << " events\n";
 
           lastBankID = pkt.curBankId();
           eventsPerBank = 0;
@@ -441,8 +438,8 @@ namespace LiveData
       }
     }  // mutex automatically unlocks here
 
-    g_log.debug() << "Total Events: " << totalEvents << std::endl;
-    g_log.debug() << "-------------------------------" << std::endl;
+    g_log.debug() << "Total Events: " << totalEvents << "\n";
+    g_log.debug("-------------------------------");
 
     return false;
   }
@@ -466,6 +463,10 @@ namespace LiveData
     {
       return false;
     }
+
+    auto monitorBuffer =
+        boost::static_pointer_cast<DataObjects::EventWorkspace>(m_eventBuffer->monitorWorkspace());
+    const auto pktTime = timeFromPacket(pkt);
 
     while (pkt.nextSection())
     {
@@ -492,26 +493,31 @@ namespace LiveData
         int events = pkt.getSectionEventCount();
         if (m_eventBuffer->run().hasProperty(monName))
         {
-        events += m_eventBuffer->run().getPropertyValueAsType<int>(monName);
+          events += m_eventBuffer->run().getPropertyValueAsType<int>(monName);
         }
         else
         {
-        // First time we've received this monitor.  Add it to our list
-        m_monitorLogs.push_back(monName);
+          // First time we've received this monitor.  Add it to our list
+          m_monitorLogs.push_back(monName);
         }
 
         // Update the property value (overwriting the old value if there was one)
         m_eventBuffer->mutableRun().addProperty<int>( monName, events, true);
         
-        // This is where we'll fetch the time-of-flight values for each
-        // event 
-        bool risingEdge;
-        uint32_t cycle;
-        uint32_t tof;
-        while (pkt.nextEvent( risingEdge, cycle, tof))
+        auto it = m_monitorIndexMap.find(-1 * monitorID); // Monitor IDs are negated in Mantid IDFs
+        if ( it != m_monitorIndexMap.end() )
         {
-          // TODO: Fill this section in - just as soon as we figure out what
-          // to actually do with the values.
+          bool risingEdge;
+          uint32_t cycle, tof;
+          while (pkt.nextEvent( risingEdge, cycle, tof))
+          {
+            // Add the event. Note that they're in units of 100 ns in the packet, need to change to microseconds.
+            monitorBuffer->getEventList(it->second).addEventQuickly(DataObjects::TofEvent(tof/10.0,pktTime));
+          }
+        }
+        else
+        {
+          g_log.error() << "Event from unknown monitor ID (" << monitorID << ") seen.\n";
         }
       }
     }
@@ -729,8 +735,8 @@ namespace LiveData
         if ( haveRunNumber )
         {
           // run_number should not exist at this point, and if it does, we can't do much about it.
-          g_log.debug() << "run_number property already exists.  Current value will be ignored.\n"
-                        << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
+          g_log.debug("run_number property already exists.  Current value will be ignored.\n"
+                      "(This should never happen.  Talk to the Mantid developers.)");
         }
         else
         {
@@ -1029,7 +1035,7 @@ namespace LiveData
 
     if ( ! deviceNode )
     {
-      g_log.error() << "Device descriptor packet did not contain a device element!!  This should never happen!" << std::endl;
+      g_log.error("Device descriptor packet did not contain a device element!!  This should never happen!");
       return false;
     }
 
@@ -1045,7 +1051,7 @@ namespace LiveData
 
     if ( ! node )
     {
-      g_log.warning() << "Device descriptor packet did not contain a process_variables element." << std::endl;
+      g_log.warning("Device descriptor packet did not contain a process_variables element.");
       return false;
     }
 
@@ -1237,7 +1243,7 @@ namespace LiveData
   /// cases, must) be done prior to receiving any packets from the SMS daemon.
   void SNSLiveEventDataListener::initWorkspacePart1()
   {
-    m_eventBuffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
+    m_eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>
         (WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     // The numbers in the create() function don't matter - they'll get overwritten
     // down in initWorkspacePart2() when we load the instrument definition.
@@ -1290,7 +1296,26 @@ namespace LiveData
       m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( m_dataStartTime, 0);
     }
 
+    initMonitorWorkspace();
+
     m_workspaceInitialized = true;
+  }
+
+  /// Creates a monitor workspace sized to the number of monitors, with the monitor IDs set
+  void SNSLiveEventDataListener::initMonitorWorkspace()
+  {
+    auto monitors = m_eventBuffer->getInstrument()->getMonitors();
+    auto monitorsBuffer = WorkspaceFactory::Instance().create("EventWorkspace",monitors.size(),1,1);
+    WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer,monitorsBuffer,true);
+    // Set the id numbers
+    for ( size_t i = 0; i < monitors.size(); ++i )
+    {
+      monitorsBuffer->getSpectrum(i)->setDetectorID( monitors[i] );
+    }
+
+    m_monitorIndexMap = monitorsBuffer->getDetectorIDToWorkspaceIndexMap( true );
+
+    m_eventBuffer->setMonitorWorkspace(monitorsBuffer);
   }
 
   // Check to see if we have data for all of the logs listed in m_requiredLogs.
@@ -1397,6 +1422,13 @@ namespace LiveData
 
     }
     m_monitorLogs.clear();
+
+    // Create a fresh monitor workspace and insert into the new 'main' workspace
+    auto monitorBuffer = m_eventBuffer->monitorWorkspace();
+    auto newMonitorBuffer = WorkspaceFactory::Instance().create("EventWorkspace",
+                              monitorBuffer->getNumberHistograms(), 1, 1 );
+    WorkspaceFactory::Instance().initializeFromParent(monitorBuffer, newMonitorBuffer, false);
+    temp->setMonitorWorkspace(newMonitorBuffer);
 
     // Lock the mutex and swap the workspaces
     {
