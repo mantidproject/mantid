@@ -139,7 +139,7 @@ namespace Algorithms
                     "Peak function type. ");
 
     for (size_t i = 0; i < peakFullNames.size(); ++i)
-      g_log.notice() << "Peak function " << i << ": " << peakFullNames[i] << "\n";
+      g_log.debug() << "Peak function " << i << ": " << peakFullNames[i] << "\n";
 
     declareProperty(new ArrayProperty<double>("PeakParameterValues"),
                     "List of peak parameter values.  They must have a 1-to-1 mapping to PeakParameterNames list. ");
@@ -237,7 +237,6 @@ namespace Algorithms
   {
     // Function parameters
     std::string paramwsname = getPropertyValue("PeakParametersWorkspace");
-    g_log.notice() << "[DB]" << " Input parameter workpace name: " << paramwsname << ".\n";
     if (paramwsname.size() > 0)
     {
       // Using parameter table workspace has a higher priority
@@ -441,9 +440,7 @@ namespace Algorithms
       m_peakFunction->setHeight(m_vecPeakParamValues[1]);
       m_peakFunction->setFwhm(m_vecPeakParamValues[2]);
     }
-
     compfunc->addFunction(m_peakFunction->clone());
-    g_log.notice() << "[***] Peak function: " << m_peakFunction->asString() << "\n";
 
     // Set up and clone background function
     if (m_genBackground)
@@ -505,8 +502,6 @@ namespace Algorithms
       const std::vector<std::pair<double, API::IFunction_sptr> >& vec_centrefunc = mapiter->second;
       size_t numpeaksinspec = mapiter->second.size();
 
-      g_log.notice() << "[***] Number of peaks to plot = " << numpeaksinspec << "\n";
-
       for (size_t ipeak = 0; ipeak < numpeaksinspec; ++ipeak)
       {
         const std::pair<double, API::IFunction_sptr>& centrefunc = vec_centrefunc[ipeak];
@@ -553,11 +548,9 @@ namespace Algorithms
         // Put to output
         std::size_t offset = (left-X.begin());
         std::size_t numY = values.size();
-        g_log.notice() << "[***] Number of Y = " << numY << "\n";
         for (std::size_t i = 0; i < numY; i ++)
         {
           dataWS->dataY(wsindex)[i + offset] += values[i];
-          g_log.notice() << "[***] Y[" << i+offset << "] = " << values[i] << "\n";
         }
 
       } // ENDFOR(ipeak)

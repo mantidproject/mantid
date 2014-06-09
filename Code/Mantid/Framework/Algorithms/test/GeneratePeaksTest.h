@@ -37,7 +37,7 @@ public:
     FrameworkManager::Instance();
   }
 
-  void Ptest_Init()
+  void test_Init()
   {
     GeneratePeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -59,7 +59,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to use user-provided binning parameters and effective function parameters
    */
-  void Ptest_UserBinningParameters()
+  void test_UserBinningParameters()
   {
     // Create input parameter table workspace
     DataObjects::TableWorkspace_sptr peakparmsws = createTestEffectiveFuncParameters();
@@ -127,7 +127,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test algorithm by using an existing input workspace as X-values
    */
-  void Ptest_FromInputWorkspace()
+  void test_FromInputWorkspace()
   {
     // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters2();
@@ -199,7 +199,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to use user-provided binning parameters
    */
-  void Ptest_Background()
+  void test_Background()
   {
     // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters3();
@@ -264,7 +264,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to input parameter values by vectors user-provided binning parameters
    */
-  void Ptest_InputValueViaVector()
+  void test_InputValueViaVector()
   {
     // Create vectors for peak and background parameters
     std::string vecpeakvalue("5.0, 2.0, 0.0849322");
@@ -357,8 +357,6 @@ public:
     MantidVec p0_y = peaksws->readY(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 5.0, 1.0E-4);
-
-    std::cout << "value 200: " << "x = " << p0_x[200] << ", y = " << p0_y[200] << "\n";
 
     TS_ASSERT_DELTA(p0_x[201], 2.01, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[201], 4.96546, 1.0E-4);
