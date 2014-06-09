@@ -58,7 +58,7 @@ Range of :math:`\Delta\theta\cot\theta`: :math:`(0.00170783, 0.0167497)`
 Usage
 -----
 
-**Example - simple rebin of a histogram workspace:**
+**Example - estimate PG3 partial detectors' resolution:**
 
 .. testcode:: ExHistSimple
 
