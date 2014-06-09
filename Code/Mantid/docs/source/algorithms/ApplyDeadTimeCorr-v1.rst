@@ -57,7 +57,7 @@ Usage
    original = Integration('input')
    corrected = Integration('output')
 
-   format_str = 'Spectrum: {:d}; original: {:.3f}; corrected: {:.3f}'
+   format_str = 'Spectrum: {0:d}; original: {1:.3f}; corrected: {2:.3f}'
 
    for s in [0,32,63]:
       print format_str.format(s, original.readY(s)[0], corrected.readY(s)[0])
@@ -86,7 +86,7 @@ Output:
    original = Integration(input.getItem(0))
    corrected = Integration(output.getItem(0))
 
-   format_str = 'Spectrum: {:d}; original: {:.3f}; corrected: {:.3f}'
+   format_str = 'Spectrum: {0:d}; original: {1:.3f}; corrected: {2:.3f}'
 
    for s in [0,32,63]:
       print format_str.format(s, original.readY(s)[0], corrected.readY(s)[0])

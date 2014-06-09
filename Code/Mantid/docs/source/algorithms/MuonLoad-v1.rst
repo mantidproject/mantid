@@ -57,7 +57,7 @@ Usage
 
    output_int = Integration(output)
 
-   print 'Integrated asymmetry for the run: {:.3f}'.format(output_int.readY(0)[0])
+   print 'Integrated asymmetry for the run: {0:.3f}'.format(output_int.readY(0)[0])
 
 Output:
 
