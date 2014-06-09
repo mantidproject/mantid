@@ -15,6 +15,8 @@ having the "PreserveEvents" parameter set to false.
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 **Example - Simple conversion of an EventWorkspace**
 
 .. testcode:: ConvertToMatrixWorkspaceSimpleExample
