@@ -42,7 +42,7 @@ Usage
 -----
 **Example - a basic example using QLines to fit a reduced workspace.**
 
-.. codeblock::
+.. code-block:: python
 
 		def createSampleWorkspace(name, random=False):
 			""" Creates a sample workspace with a single lorentzian that looks like IRIS data"""
