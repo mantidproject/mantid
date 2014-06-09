@@ -43,6 +43,12 @@ endif ()
 ###############################################################################
 # Installation settings
 ###############################################################################
-set ( HTML_DOCS_DEST share/doc )
-install ( DIRECTORY ${SPHINX_BUILD_DIR}/html
-          DESTINATION ${HTML_DOCS_DEST} )
+# Allow control over whether the documentation is packaged
+set ( PACKAGE_DOCS False CACHE BOOL
+      "If true the html documentation is installed in the share/doc directory of the package" )
+
+if ( PACKAGE_DOCS )
+  set ( HTML_DOCS_DEST share/doc )
+  install ( DIRECTORY ${SPHINX_BUILD_DIR}/html
+            DESTINATION ${HTML_DOCS_DEST} )
+endif ()
