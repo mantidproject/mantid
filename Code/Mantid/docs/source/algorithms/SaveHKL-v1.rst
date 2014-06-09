@@ -50,7 +50,7 @@ Usage
     import os
 
     #load a peaks workspace from file
-    peaks = LoadIsawPeaks(Filename=r'TOPAZ_1204.peaks')
+    peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
     SaveHKL(peaks, "MyPeaks.hkl")
 
     path = os.path.join(config['defaultsave.directory'], "MyPeaks.hkl")
@@ -74,6 +74,43 @@ Output:
           pass
 
     removeFiles(["MyPeaks.hkl"])
+
+**Example - an example of running SaveHKL with sorting and filtering options.**
+
+.. testcode:: ExSaveHKLOptions
+
+    import os
+
+    #load a peaks workspace from file
+    peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
+    print "Number of peaks in table %d" % peaks.rowCount()
+    
+    SaveHKL(peaks, "MyPeaks.hkl", MinWavelength=0.5, MaxWavelength=2,MinDSpacing=0.2, SortBy='Bank')
+
+    path = os.path.join(config['defaultsave.directory'], "MyPeaks.hkl")
+    peaks = LoadHKL(path)
+    print "Number of peaks in table %d" % peaks.rowCount()
+
+Output:
+
+.. testoutput:: ExSaveHKLOptions
+
+    Number of peaks in table 434
+    Number of peaks in table 234
+
+.. testcleanup:: ExSaveHKLOptions
+
+    import os
+    def removeFiles(files):
+      for ws in files:
+        try:
+          path = os.path.join(config['defaultsave.directory'], ws)
+          os.remove(path)
+        except:
+          pass
+
+    removeFiles(["MyPeaks.hkl"])
+
 
 
 .. categories::
