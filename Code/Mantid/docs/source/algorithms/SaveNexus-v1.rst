@@ -16,8 +16,8 @@ extremely slow for large data sets and generate very large files. Both
 the extensions nxs and nx5 will generate HDF5 files.
 
 The optional parameters can be used to control which spectra are saved
-into the file (not yet implemented). If spectrum\_min and spectrum\_max
-are given, then only that range to data will be loaded.
+into the file (not yet implemented). If WorkspaceIndexMin and WorkspaceIndexMax
+are given, then only that range to data will be saved.
 
 A Mantid Nexus file may contain several workspace entries each labelled
 with an integer starting at 1. If the file already contains n
@@ -37,5 +37,23 @@ Child Algorithms used
 #####################
 
 :ref:`algm-SaveNexusProcessed`
+
+Usage
+-----
+
+.. testcode::
+
+  import os
+  # Create a file path in the user home directory
+  filePath = os.path.expanduser('~/SavedNexusFile.nxs')
+
+  # Create a workspace
+  ws=CreateSampleWorkspace()
+  # Save it in Nexus format
+  SaveNexus(ws,filePath)
+
+.. testcleanup::
+
+  os.remove(filePath)
 
 .. categories::
