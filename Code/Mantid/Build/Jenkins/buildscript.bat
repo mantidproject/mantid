@@ -61,6 +61,8 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 if "%CLEANBUILD%" EQU "yes" (
     :: Build offline documentation
     msbuild /nologo /nr:false /p:Configuration=Release docs/docs-html.vcxproj
-    if ERRORLEVEL 1 exit /B %ERRORLEVEL%
+
+    :: ignore errors as the exit code of the build isn't correct
+    ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
     cpack -C Release --config CPackConfig.cmake
 )
