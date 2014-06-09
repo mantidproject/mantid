@@ -14,10 +14,12 @@ time-of-flight to energy transfer for direct geometry spectrometers. The
 diagram below shows the workflow for the algorithm. The SNS instruments
 have a log called EnergyRequest which allows the IncidentEnergyGuess
 parameter to be left blank. Also, SNS instruments need to pass a monitor
-workspace to *GetEi* since they are separate from the sample workspace.
-Parameters in italics are controlled by the `instrument parameter file
-(IPF) <InstrumentParameterFile>`__ unless provided to the algorithm via
-a property manager. The mappings are given below.
+workspace to :ref:`GetEi <algm-GetEi>`
+since they are separate from the sample workspace.
+Parameters in italics are controlled by the
+`instrument parameter file (IPF) <http://www.mantidproject.org/InstrumentParameterFile>`_
+unless provided to the algorithm via a property manager. The mappings are given
+below.
 
 +--------------------+------------------+
 | Parameter          | IPF Mapping      |
@@ -35,7 +37,8 @@ and the following values will be used
 :math:`(-0.5E^{Guess}_{i}, 0.01E^{Guess}_{i}, 0.99E^{Guess}_{i})`.
 
 The use of the SofPhiEIsDistribution parameter in the last Rebin call is
-used to set the *Rebin* algorithm parameter PreserveEvents.
+used to set the :ref:`Rebin <algm-Rebin>`
+algorithm parameter PreserveEvents.
 
 Workflow
 ########
@@ -43,6 +46,12 @@ Workflow
 .. figure:: /images/DgsConvertToEnergyTransferWorkflow.png
    :alt: DgsConvertToEnergyTransferWorkflow.png
 
-   DgsConvertToEnergyTransferWorkflow.png
+Usage
+-----
+
+.. warning::
+
+    This algorithm is not really intented for use at the command line, but is used
+    within :ref:`DgsReduction <algm-DgsReduction>`.
 
 .. categories::
