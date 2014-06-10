@@ -256,14 +256,16 @@ void BankedEventPkt::firstEventInBank() const
 /* ------------------------------------------------------------------------ */
 
 BeamMonitorPkt::BeamMonitorPkt(const uint8_t *data, uint32_t len) :
-	Packet(data, len), m_fields((const uint32_t *)payload()), m_sectionStartIndex(0)
+        Packet(data, len), m_fields((const uint32_t *)payload()),
+        m_sectionStartIndex(0), m_eventNum(0)
 {
-	if (m_payload_len < (4 * sizeof(uint32_t)))
-		throw invalid_packet("BeamMonitor packet is too short");
+  if (m_payload_len < (4 * sizeof(uint32_t)))
+    throw invalid_packet("BeamMonitor packet is too short");
 }
 
 BeamMonitorPkt::BeamMonitorPkt(const BeamMonitorPkt &pkt) :
-    Packet(pkt), m_fields((const uint32_t *)payload()), m_sectionStartIndex(0)
+        Packet(pkt), m_fields((const uint32_t *)payload()),
+        m_sectionStartIndex(0), m_eventNum(0)
 {}
 
 #define EVENT_COUNT_MASK 0x003FFFFF  // lower 22 bits
