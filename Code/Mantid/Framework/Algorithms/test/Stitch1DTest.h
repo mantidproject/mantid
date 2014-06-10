@@ -16,7 +16,7 @@ using namespace boost::assign;
 using Mantid::Algorithms::Stitch1D;
 using Mantid::MantidVec;
 
-double roundSix (double i)
+double roundSix(double i)
 {
   return floor(i * 1000000 + 0.5) / 1000000;
 }
@@ -34,7 +34,7 @@ private:
     T m_stepNumber;
   public:
     LinearSequence(const T& start, const T& step) :
-      m_start(start), m_step(step), m_stepNumber(T(0))
+        m_start(start), m_step(step), m_stepNumber(T(0))
     {
     }
 
@@ -47,7 +47,8 @@ private:
 
   };
 
-  MatrixWorkspace_sptr create1DWorkspace(MantidVec& xData, MantidVec& yData, MantidVec& eData)
+  MatrixWorkspace_sptr createWorkspace(MantidVec& xData, MantidVec& yData, MantidVec& eData,
+      const int nSpec = 1)
   {
     auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
     createWorkspace->setChild(true);
@@ -55,7 +56,7 @@ private:
     createWorkspace->setProperty("UnitX", "1/q");
     createWorkspace->setProperty("DataX", xData);
     createWorkspace->setProperty("DataY", yData);
-    createWorkspace->setProperty("NSpec", 1);
+    createWorkspace->setProperty("NSpec", nSpec);
     createWorkspace->setProperty("DataE", eData);
     createWorkspace->setPropertyValue("OutputWorkspace", "dummy");
     createWorkspace->execute();
@@ -100,7 +101,7 @@ private:
 
     auto e = MantidVec(3, 1);
 
-    return create1DWorkspace(x, y, e);
+    return createWorkspace(x, y, e);
   }
 
   MatrixWorkspace_sptr make_arbitrary_histogram_ws()
@@ -119,7 +120,33 @@ private:
 
     auto e = MantidVec(2, 1);
 
-    return create1DWorkspace(x, y, e);
+    return createWorkspace(x, y, e);
+  }
+
+  MatrixWorkspace_sptr createCosWaveWorkspace(const double startX, const double endX)
+  {
+
+    MantidVec xValues;
+    MantidVec yValues;
+    for (double x = startX; x <= endX; x += 1.0)
+    {
+      xValues.push_back(x);
+      yValues.push_back(std::cos(x));
+    }
+    yValues.pop_back();
+
+    auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
+    createWorkspace->setChild(true);
+    createWorkspace->initialize();
+    createWorkspace->setProperty("UnitX", "x");
+    createWorkspace->setProperty("DataX", xValues);
+    createWorkspace->setProperty("DataY", yValues);
+    createWorkspace->setProperty("NSpec", 1);
+    createWorkspace->setPropertyValue("OutputWorkspace", "dummy");
+    createWorkspace->execute();
+    MatrixWorkspace_sptr outWS = createWorkspace->getProperty("OutputWorkspace");
+
+    return outWS;
   }
 
 public:
@@ -148,15 +175,29 @@ public:
     MantidVec y = boost::assign::list_of(0)(0)(0)(3)(3)(3)(3)(3)(3)(3).convert_to_container<MantidVec>();
 
     // Pre-canned workspace to stitch
-    a = create1DWorkspace(x, y, e);
+    a = createWorkspace(x, y, e);
 
     y = boost::assign::list_of(2)(2)(2)(2)(2)(2)(2)(0)(0)(0).convert_to_container<MantidVec>();
     // Another pre-canned workspace to stitch
-    b = create1DWorkspace(x, y, e);
+    b = createWorkspace(x, y, e);
   }
 
-  ResultType do_stitch1D(MatrixWorkspace_sptr& lhs, MatrixWorkspace_sptr& rhs,
-    const MantidVec& params)
+  ResultType do_stitch1D(MatrixWorkspace_sptr& lhs, MatrixWorkspace_sptr& rhs)
+  {
+    Stitch1D alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("LHSWorkspace", lhs);
+    alg.setProperty("RHSWorkspace", rhs);
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    alg.execute();
+    MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
+    double scaleFactor = alg.getProperty("OutScaleFactor");
+    return ResultType(stitched, scaleFactor);
+  }
+
+  ResultType do_stitch1D(MatrixWorkspace_sptr& lhs, MatrixWorkspace_sptr& rhs, const MantidVec& params)
   {
     Stitch1D alg;
     alg.setChild(true);
@@ -172,8 +213,9 @@ public:
     return ResultType(stitched, scaleFactor);
   }
 
-  ResultType do_stitch1D(MatrixWorkspace_sptr& lhs, MatrixWorkspace_sptr& rhs, bool scaleRHS, bool useManualScaleFactor,
-    const double& startOverlap, const double& endOverlap, const MantidVec& params, const double& manualScaleFactor)
+  ResultType do_stitch1D(MatrixWorkspace_sptr& lhs, MatrixWorkspace_sptr& rhs, bool scaleRHS,
+      bool useManualScaleFactor, const double& startOverlap, const double& endOverlap,
+      const MantidVec& params, const double& manualScaleFactor)
   {
     Stitch1D alg;
     alg.setChild(true);
@@ -195,7 +237,8 @@ public:
   }
 
   ResultType do_stitch1D(MatrixWorkspace_sptr& lhs, MatrixWorkspace_sptr& rhs,
-    const double& startOverlap, const double& endOverlap, const MantidVec& params, bool scaleRHS = true)
+      const double& startOverlap, const double& endOverlap, const MantidVec& params,
+      bool scaleRHS = true)
   {
     Stitch1D alg;
     alg.setChild(true);
@@ -214,8 +257,8 @@ public:
     return ResultType(stitched, scaleFactor);
   }
 
-  ResultType do_stitch1D(MatrixWorkspace_sptr& lhs, MatrixWorkspace_sptr& rhs,
-    const double& overlap, const MantidVec& params, const bool startoverlap)
+  ResultType do_stitch1D(MatrixWorkspace_sptr& lhs, MatrixWorkspace_sptr& rhs, const double& overlap,
+      const MantidVec& params, const bool startoverlap)
   {
     Stitch1D alg;
     alg.setChild(true);
@@ -249,8 +292,8 @@ public:
   void test_startoverlap_greater_than_end_overlap_throws()
   {
     TSM_ASSERT_THROWS("Should have thrown with StartOverlap < x max",
-      do_stitch1D(this->a, this->b, this->x.back(), this->x.front(), MantidVec(1, 0.2)),
-      std::runtime_error&);
+        do_stitch1D(this->a, this->b, this->x.back(), this->x.front(), MantidVec(1, 0.2)),
+        std::runtime_error&);
   }
 
   void test_lhsworkspace_must_be_histogram()
@@ -258,7 +301,7 @@ public:
     auto lhs_ws = make_arbitrary_point_ws();
     auto rhs_ws = make_arbitrary_histogram_ws();
     TSM_ASSERT_THROWS("LHS WS must be histogram", do_stitch1D(lhs_ws, rhs_ws, -1, 1, MantidVec(1, 0.2)),
-      std::invalid_argument&);
+        std::invalid_argument&);
   }
 
   void test_rhsworkspace_must_be_histogram()
@@ -266,7 +309,7 @@ public:
     auto lhs_ws = make_arbitrary_histogram_ws();
     auto rhs_ws = make_arbitrary_point_ws();
     TSM_ASSERT_THROWS("RHS WS must be histogram", do_stitch1D(lhs_ws, rhs_ws, -1, 1, MantidVec(1, 0.2)),
-      std::invalid_argument&);
+        std::invalid_argument&);
   }
 
   void test_stitching_uses_suppiled_params()
@@ -285,15 +328,19 @@ public:
 
   void test_stitching_determines_params()
   {
-    MantidVec x1 = boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8).convert_to_container<MantidVec>();
-    MantidVec x2 = boost::assign::list_of(0.4)(0.6)(0.8)(1.0)(1.2)(1.4)(1.6).convert_to_container<MantidVec>();
+    MantidVec x1 =
+        boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8).convert_to_container<
+            MantidVec>();
+    MantidVec x2 = boost::assign::list_of(0.4)(0.6)(0.8)(1.0)(1.2)(1.4)(1.6).convert_to_container<
+        MantidVec>();
     MantidVec y1 = boost::assign::list_of(1)(1)(1)(1)(1)(1)(1)(1)(1).convert_to_container<MantidVec>();
     MantidVec y2 = boost::assign::list_of(1)(1)(1)(1)(1)(1).convert_to_container<MantidVec>();
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
     double demanded_step_size = 0.2;
-    auto ret = do_stitch1D(ws1,ws2,0.4,1.0,boost::assign::list_of(demanded_step_size).convert_to_container<MantidVec>());
+    auto ret = do_stitch1D(ws1, ws2, 0.4, 1.0,
+        boost::assign::list_of(demanded_step_size).convert_to_container<MantidVec>());
 
     //Check the ranges on the output workspace against the param inputs.
     MantidVec out_x_values = ret.get<0>()->readX(0);
@@ -308,16 +355,19 @@ public:
 
   void test_stitching_determines_start_and_end_overlap()
   {
-    MantidVec x1 = boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(0.2)(0.4).convert_to_container<MantidVec>();
-    MantidVec x2 = boost::assign::list_of(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8)(1.0).convert_to_container<MantidVec>();
-    
+    MantidVec x1 =
+        boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(0.2)(0.4).convert_to_container<
+            MantidVec>();
+    MantidVec x2 = boost::assign::list_of(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8)(1.0).convert_to_container<
+        MantidVec>();
+
     MantidVec y1 = boost::assign::list_of(1)(1)(1)(3)(3)(3)(3).convert_to_container<MantidVec>();
     MantidVec y2 = boost::assign::list_of(1)(1)(1)(1)(3)(3)(3).convert_to_container<MantidVec>();
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
     MantidVec params = boost::assign::list_of(-1.0)(0.2)(1.0).convert_to_container<MantidVec>();
-    auto ret = do_stitch1D(ws1,ws2,params);
+    auto ret = do_stitch1D(ws1, ws2, params);
 
     MantidVec stitched_y = ret.get<0>()->readY(0);
     MantidVec stitched_x = ret.get<0>()->readX(0);
@@ -332,23 +382,26 @@ public:
     }
 
     double start_overlap_determined = stitched_x[overlap_indexes[0]];
-    double end_overlap_determined = stitched_x[overlap_indexes[overlap_indexes.size()-1]];
+    double end_overlap_determined = stitched_x[overlap_indexes[overlap_indexes.size() - 1]];
     TS_ASSERT_DELTA(start_overlap_determined, -0.4, 0.000000001);
     TS_ASSERT_DELTA(end_overlap_determined, 0.2, 0.000000001);
   }
 
   void test_stitching_forces_start_overlap()
   {
-    MantidVec x1 = boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(0.2)(0.4).convert_to_container<MantidVec>();
-    MantidVec x2 = boost::assign::list_of(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8)(1.0).convert_to_container<MantidVec>();
-    
+    MantidVec x1 =
+        boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(0.2)(0.4).convert_to_container<
+            MantidVec>();
+    MantidVec x2 = boost::assign::list_of(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8)(1.0).convert_to_container<
+        MantidVec>();
+
     MantidVec y1 = boost::assign::list_of(1)(1)(1)(3)(3)(3)(3).convert_to_container<MantidVec>();
     MantidVec y2 = boost::assign::list_of(1)(1)(1)(1)(3)(3)(3).convert_to_container<MantidVec>();
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
     MantidVec params = boost::assign::list_of(-1.0)(0.2)(1.0).convert_to_container<MantidVec>();
-    auto ret = do_stitch1D(ws1,ws2,-0.5,params,true);
+    auto ret = do_stitch1D(ws1, ws2, -0.5, params, true);
 
     MantidVec stitched_y = ret.get<0>()->readY(0);
     MantidVec stitched_x = ret.get<0>()->readX(0);
@@ -363,23 +416,26 @@ public:
     }
 
     double start_overlap_determined = stitched_x[overlap_indexes[0]];
-    double end_overlap_determined = stitched_x[overlap_indexes[overlap_indexes.size()-1]];
+    double end_overlap_determined = stitched_x[overlap_indexes[overlap_indexes.size() - 1]];
     TS_ASSERT_DELTA(start_overlap_determined, -0.4, 0.000000001);
     TS_ASSERT_DELTA(end_overlap_determined, 0.2, 0.000000001);
   }
 
   void test_stitching_forces_end_overlap()
   {
-    MantidVec x1 = boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(0.2)(0.4).convert_to_container<MantidVec>();
-    MantidVec x2 = boost::assign::list_of(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8)(1.0).convert_to_container<MantidVec>();
-    
+    MantidVec x1 =
+        boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(0.2)(0.4).convert_to_container<
+            MantidVec>();
+    MantidVec x2 = boost::assign::list_of(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8)(1.0).convert_to_container<
+        MantidVec>();
+
     MantidVec y1 = boost::assign::list_of(1)(1)(1)(3)(3)(3)(3).convert_to_container<MantidVec>();
     MantidVec y2 = boost::assign::list_of(1)(1)(1)(1)(3)(3)(3).convert_to_container<MantidVec>();
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
     MantidVec params = boost::assign::list_of(-1.0)(0.2)(1.0).convert_to_container<MantidVec>();
-    auto ret = do_stitch1D(ws1,ws2,0.5,params,false);
+    auto ret = do_stitch1D(ws1, ws2, 0.5, params, false);
 
     MantidVec stitched_y = ret.get<0>()->readY(0);
     MantidVec stitched_x = ret.get<0>()->readX(0);
@@ -394,7 +450,7 @@ public:
     }
 
     double start_overlap_determined = stitched_x[overlap_indexes[0]];
-    double end_overlap_determined = stitched_x[overlap_indexes[overlap_indexes.size()-1]];
+    double end_overlap_determined = stitched_x[overlap_indexes[overlap_indexes.size() - 1]];
     TS_ASSERT_DELTA(start_overlap_determined, -0.4, 0.000000001);
     TS_ASSERT_DELTA(end_overlap_determined, 0.2, 0.000000001);
   }
@@ -420,20 +476,20 @@ public:
     for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr)
     {
       double temp = *itr;
-      TS_ASSERT_EQUALS(temp,0);
+      TS_ASSERT_EQUALS(temp, 0);
     }
     // Check that the output X-Values are correct.
     //truncate the input and oputput x values to 6 decimal places to eliminate insignificant error
     MantidVec xCopy = this->x;
-    std::transform(stitched_x.begin(),stitched_x.end(),stitched_x.begin(),roundSix);
-    std::transform(xCopy.begin(),xCopy.end(),xCopy.begin(),roundSix);
+    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(), roundSix);
+    std::transform(xCopy.begin(), xCopy.end(), xCopy.begin(), roundSix);
     TS_ASSERT(xCopy == stitched_x);
   }
 
   void test_stitching_scale_left()
   {
     MantidVec params = boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>();
-    auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4, params,false);
+    auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4, params, false);
 
     double scale = ret.get<1>();
     // Check the scale factor
@@ -451,20 +507,20 @@ public:
     for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr)
     {
       double temp = *itr;
-      TS_ASSERT_EQUALS(temp,0);
+      TS_ASSERT_EQUALS(temp, 0);
     }
     // Check that the output X-Values are correct.
     //truncate the input and oputput x values to 6 decimal places to eliminate insignificant error
     MantidVec xCopy = this->x;
-    std::transform(stitched_x.begin(),stitched_x.end(),stitched_x.begin(),roundSix);
-    std::transform(xCopy.begin(),xCopy.end(),xCopy.begin(),roundSix);
+    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(), roundSix);
+    std::transform(xCopy.begin(), xCopy.end(), xCopy.begin(), roundSix);
     TS_ASSERT(xCopy == stitched_x);
   }
 
   void test_stitching_manual_scale_factor_scale_right()
   {
     MantidVec params = boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>();
-    auto ret = do_stitch1D(this->b, this->a, true, true, -0.4, 0.4, params, 2.0/3.0);
+    auto ret = do_stitch1D(this->b, this->a, true, true, -0.4, 0.4, params, 2.0 / 3.0);
 
     double scale = ret.get<1>();
     // Check the scale factor
@@ -482,20 +538,20 @@ public:
     for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr)
     {
       double temp = *itr;
-      TS_ASSERT_EQUALS(temp,0);
+      TS_ASSERT_EQUALS(temp, 0);
     }
     // Check that the output X-Values are correct.
     //truncate the input and oputput x values to 6 decimal places to eliminate insignificant error
     MantidVec xCopy = this->x;
-    std::transform(stitched_x.begin(),stitched_x.end(),stitched_x.begin(),roundSix);
-    std::transform(xCopy.begin(),xCopy.end(),xCopy.begin(),roundSix);
+    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(), roundSix);
+    std::transform(xCopy.begin(), xCopy.end(), xCopy.begin(), roundSix);
     TS_ASSERT(xCopy == stitched_x);
   }
 
   void test_stitching_manual_scale_factor_scale_left()
   {
     MantidVec params = boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>();
-    auto ret = do_stitch1D(this->b, this->a, false, true, -0.4, 0.4, params, 3.0/2.0);
+    auto ret = do_stitch1D(this->b, this->a, false, true, -0.4, 0.4, params, 3.0 / 2.0);
 
     double scale = ret.get<1>();
     // Check the scale factor
@@ -513,15 +569,90 @@ public:
     for (auto itr = stitched_e.begin(); itr != stitched_e.end(); ++itr)
     {
       double temp = *itr;
-      TS_ASSERT_EQUALS(temp,0);
+      TS_ASSERT_EQUALS(temp, 0);
     }
     // Check that the output X-Values are correct.
     //truncate the input and oputput x values to 6 decimal places to eliminate insignificant error
     MantidVec xCopy = this->x;
-    std::transform(stitched_x.begin(),stitched_x.end(),stitched_x.begin(),roundSix);
-    std::transform(xCopy.begin(),xCopy.end(),xCopy.begin(),roundSix);
+    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(), roundSix);
+    std::transform(xCopy.begin(), xCopy.end(), xCopy.begin(), roundSix);
     TS_ASSERT(xCopy == stitched_x);
   }
+
+  void test_params_causing_scaling_regression_test()
+  {
+    auto lhs = createCosWaveWorkspace(0, 10);
+    auto rhs = createCosWaveWorkspace(6, 20);
+
+    auto ret = do_stitch1D(lhs, rhs);
+
+    MatrixWorkspace_sptr outWS = ret.get<0>();
+    const double scaleFactor = ret.get<1>();
+
+    TSM_ASSERT_EQUALS("Two cosine waves in phase scale factor should be unity", 1.0, scaleFactor);
+    const double stitchedWSFirstYValue = outWS->readY(0)[0]; // Should be 1.0 at cos(0)
+    const double lhsWSFirstYValue = lhs->readY(0)[0]; // Should be 1.0 at cos(0)
+
+    TSM_ASSERT_EQUALS("No scaling of the output workspace should have occurred", stitchedWSFirstYValue,
+        lhsWSFirstYValue);
+  }
+
+  void test_has_non_zero_errors_single_spectrum()
+  {
+    auto x = MantidVec(10);
+    const double xstart = -1;
+    const double xstep = 0.2;
+    LinearSequence<MantidVec::value_type> sequenceX(xstart, xstep);
+    std::generate(x.begin(), x.end(), sequenceX);
+
+    auto y = MantidVec(x.size() - 1, 1);
+
+    auto e = MantidVec(x.size() - 1, 1); // All Non zero errors
+
+    MatrixWorkspace_sptr ws = createWorkspace(x, y, e, 1);
+    Stitch1D alg;
+    TSM_ASSERT("All error values are non-zero", alg.hasNonzeroErrors(ws));
+
+    // Run it again with all zeros
+    e = MantidVec(x.size() - 1, 0); // All zero errors
+    ws = createWorkspace(x, y, e, 1);
+    TSM_ASSERT("All error values are non-zero", !alg.hasNonzeroErrors(ws));
+
+    // Run it again with some zeros
+    e[e.size() - 1] = 1;
+    ws = createWorkspace(x, y, e, 1);
+    TSM_ASSERT("NOT all error values are non-zero", alg.hasNonzeroErrors(ws));
+  }
+
+  void test_has_non_zero_errors_multiple_spectrum()
+  {
+    const size_t nspectrum = 10;
+
+    auto x = MantidVec(10);
+    const double xstart = -1;
+    const double xstep = 0.2;
+    LinearSequence<MantidVec::value_type> sequenceX(xstart, xstep);
+    std::generate(x.begin(), x.end(), sequenceX);
+
+    auto y = MantidVec(nspectrum * (x.size() - 1), 1);
+    auto e = MantidVec(nspectrum * (x.size() - 1), 1); // Non zero errors
+
+    MatrixWorkspace_sptr ws = createWorkspace(x, y, e, static_cast<int>(nspectrum));
+    Stitch1D alg;
+    TSM_ASSERT("All error values are non-zero", alg.hasNonzeroErrors(ws));
+
+    // Run it again with all zeros
+    e = MantidVec(nspectrum * (x.size() - 1), 0); // All zero errors
+    ws = createWorkspace(x, y, e, nspectrum);
+    TSM_ASSERT("All error values are non-zero", !alg.hasNonzeroErrors(ws));
+
+    // Run it again with some zeros
+    e[e.size() - 1] = 1;
+    ws = createWorkspace(x, y, e, nspectrum);
+    TSM_ASSERT("NOT all error values are non-zero", alg.hasNonzeroErrors(ws));
+
+  }
+
 };
 
 #endif /* MANTID_ALGORITHMS_STITCH1DTEST_H_ */
