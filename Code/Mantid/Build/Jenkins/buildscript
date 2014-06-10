@@ -88,6 +88,11 @@ if [[ "$ON_RHEL6" == true ]]; then
   $SCL_ON_RHEL6 "make docs-test"
 fi
 if [[ "$CLEANBUILD" == true ]]; then
+  # Workaround so that the html target can find the properties file
+  # CMake doesn't easily allow environment variables on custom targets
+  if [[ $(uname) == 'Darwin' ]]; then
+    export MANTIDPATH=$PWD/bin
+  fi
   $SCL_ON_RHEL6 "make docs-html"
 fi
 
