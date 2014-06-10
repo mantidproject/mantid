@@ -33,7 +33,7 @@ namespace Mantid
      * Return the rebin parameters from a user input
      * @param inParams Input vector from user
      * @param inputWS Input workspace from user
-     * logger A reference to a logger
+     * @param logger A reference to a logger
      * @returns A new vector containing the rebin parameters
      */
     std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> & inParams,
