@@ -22,7 +22,7 @@ Usage
 .. testcode:: ExHistSimple
 
   # Load nexus file
-  LoadNexusProcessed(Filename="PG3_2538_1k", OutputWorkspace="PG3_2538")
+  LoadNexusProcessed(Filename="PG3_2538_2k.nxs", OutputWorkspace="PG3_2538")
 
   # Calculate the correction factor
   corrws = CreateLogTimeCorrection(InputWorkspace="PG3_2538", OutputFilename="/tmp/tempcorr.txt")
