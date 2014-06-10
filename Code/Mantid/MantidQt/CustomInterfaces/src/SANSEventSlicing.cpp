@@ -144,8 +144,7 @@ QString SANSEventSlicing::createSliceEventCode(const QString & name_ws,
          << "outname = str(ws)+'_T'+'" << start << "'+'_T'+'" << stop << "'\n"
          << "ws = ws.clone(OutputWorkspace=outname)\n"
          << "try:\n"
-         << "  mon = su.getMonitor4event(ws)\n"
-    
+         << "  mon = mtd['" << name_ws << "_monitors']\n"
          << "  hist, times = su.slice2histogram(ws" 
          << ", " << start << ", " << stop
          << ", mon)\n"

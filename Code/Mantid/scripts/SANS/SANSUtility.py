@@ -232,10 +232,13 @@ def getFilePathFromWorkspace(ws):
         raise RuntimeError("Can not find the file name for workspace " + str(ws))
     return file_path
 
-def fromEvent2Histogram(ws_event, ws_monitor):
+def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
     """Transform an event mode workspace into a histogram workspace. 
     It does conjoin the monitor and the workspace as it is expected from the current 
-    SANS data inside ISIS. 
+    SANS data inside ISIS.
+
+    A non-empty binning string will specify a rebin param list to use instead of using
+    the binning of the monitor ws.
 
     Finally, it copies the parameter map from the workspace to the resulting histogram
     in order to preserve the positions of the detectors components inside the workspace. 
@@ -244,10 +247,15 @@ def fromEvent2Histogram(ws_event, ws_monitor):
     """
     assert ws_monitor != None
     
-    aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
-    
     name = '__monitor_tmp'
-    ws_monitor.clone(OutputWorkspace=name)
+
+    if binning != "":
+        aux_hist = Rebin(ws_event, binning, False)
+        Rebin(ws_monitor, binning, False, OutputWorkspace=name)
+    else:
+        aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
+        ws_monitor.clone(OutputWorkspace=name)
+
     ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)    
     CopyInstrumentParameters(ws_event, OutputWorkspace=name)
     
@@ -279,7 +287,7 @@ def sliceByTimeWs(ws_event, time_start=None, time_stop=None):
     sliced_ws = FilterByTime(ws_event, **params)
     return sliced_ws
 
-def slice2histogram(ws_event, time_start, time_stop, monitor):
+def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
     """Return the histogram of the sliced event and a tuple with the following:
        - total time of the experiment
        - total charge
@@ -289,6 +297,7 @@ def slice2histogram(ws_event, time_start, time_stop, monitor):
        @param time_start: the minimum value to filter. Pass -1 to get the minimum available
        @param time_stop: the maximum value to filter. Pass -1 to get the maximum available
        @param monitor: pointer to the monitor workspace
+       @param binning: optional binning string to use instead of the binning from the monitor
     """
     if not isEventWorkspace(ws_event):
         raise RuntimeError("The workspace "+str(ws_event)+ " is not a valid Event workspace")
@@ -296,7 +305,7 @@ def slice2histogram(ws_event, time_start, time_stop, monitor):
     tot_c, tot_t = getChargeAndTime(ws_event)
 
     if (time_start == -1) and (time_stop == -1):
-        hist = fromEvent2Histogram(ws_event, monitor)
+        hist = fromEvent2Histogram(ws_event, monitor, binning)
         return hist, (tot_t, tot_c, tot_t, tot_c)
     
     if time_start == -1: 
@@ -311,7 +320,7 @@ def slice2histogram(ws_event, time_start, time_stop, monitor):
     scaled_monitor = monitor * (part_c/tot_c)
 
 
-    hist = fromEvent2Histogram(sliced_ws, scaled_monitor)
+    hist = fromEvent2Histogram(sliced_ws, scaled_monitor, binning)
     return hist, (tot_t, tot_c, part_t, part_c)
 
 
