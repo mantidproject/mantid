@@ -31,8 +31,8 @@ namespace Mantid
 
     /**
      * Return the rebin parameters from a user input
-     * @params inParams Input vector from user
-     * @params inputWS Input workspace from user
+     * @param inParams Input vector from user
+     * @param inputWS Input workspace from user
      * logger A reference to a logger
      * @returns A new vector containing the rebin parameters
      */
