@@ -30,5 +30,7 @@ The dark current is subtracted pixel by pixel by normalizing the dark current da
 
 where the T-values are the counting times for the data set and the dark current (dc).
 
+The example above uses the counting time for normalization. If the proton charge is
+available, the normalization will be done using the proton charge instead.
 
 .. categories::
