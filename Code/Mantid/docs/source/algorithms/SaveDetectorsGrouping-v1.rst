@@ -61,6 +61,6 @@ Output:
 
 .. testcleanup:: ExMUSRGrouping
 
-   #os.remove(save_path)
+   os.remove(save_path)
 
 .. categories::
