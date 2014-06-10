@@ -32,6 +32,7 @@ set ( TEST_PY_FILES
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
+  SofQWMomentsTest.py
   SortDetectorsTest.py
   SortXAxisTest.py
   Stitch1DTest.py
