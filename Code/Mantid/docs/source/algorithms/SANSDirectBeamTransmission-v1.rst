@@ -35,4 +35,8 @@ as follows:
 :math:`I'(x,y)=\frac{I(x,y)}{T^{[1+\sec(2\theta)]/2}}
 \sigma_{I'(x,y)}=[[{\frac{\sigma_I}{{T^{[1+\sec(2\theta)]/2}}}}]^2 + [{\frac{I(x,y)\sigma_T(\frac{1+\sec(2\theta)}{2})}{{T^{[\sec(2\theta)-1]/2}}}}]^2]^{1/2}`
 
+This algorithm is rarely called directly. It is called by 
+`HFIRSANSReduction <http://www.mantidproject.org/HFIRSANSReduction>`_ or
+`EQSANSDirectBeamTransmission <http://www.mantidproject.org/EQSANSDirectBeamTransmission>`_.
+
 .. categories::
