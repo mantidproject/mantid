@@ -9,7 +9,7 @@
 Description
 -----------
 
-This executes the exponential function on a MDHistoWorkspace.
+This executes the exponential function on a `MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`__.
 
 The signal :math:`a` becomes :math:`f = e^a`
 
