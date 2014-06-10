@@ -26,16 +26,17 @@ h1,h2 { margin-bottom: .5em; }
 
 /*-------------------- $IMAGES --------------------*/
 
-.caption {
-  text-align: center;
-  font-size: 0.8em;
-}
-
 .screenshot {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
   padding-bottom: 0.1em;
 }
 
-.figure { margin: 0; }
+.caption {
+  text-align: center;
+  font-size: 0.9em;
+}
 
 /*-------------------- $TABLES --------------------*/
 
