@@ -135,10 +135,7 @@ namespace Mantid
       std::vector<std::string> m_monitorLogs;   // Names of any monitor logs (these must be manually removed
                                                 // during the call to extractData())
 
-      uint64_t m_rtdlPulseId;  // We get this from the RTDL packe  
-
       Poco::Net::StreamSocket m_socket;
-      //int m_sockfd;  // socket file descriptor
       bool m_isConnected;
 
       Poco::Thread m_thread;
