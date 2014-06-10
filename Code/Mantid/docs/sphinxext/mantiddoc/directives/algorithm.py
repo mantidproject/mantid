@@ -7,7 +7,7 @@ import re
 
 REDIRECT_TEMPLATE = "redirect.html"
 
-DEPRECATE_USE_ALG_RE = re.compile(r'Use\s([A-Z][a-zA-Z0-9]+)\sinstead')
+DEPRECATE_USE_ALG_RE = re.compile(r"Use\s(([A-Z][a-zA-Z0-9]+)\s(version ([0-9])+)?)\s*instead.")
 
 #--------------------------------------------------------------------------
 class AlgorithmDirective(BaseDirective):
@@ -177,9 +177,18 @@ class AlgorithmDirective(BaseDirective):
 
         # Check for message to use another algorithm an insert a link
         match = DEPRECATE_USE_ALG_RE.search(msg)
-        if match is not None and len(match.groups()) == 1:
-            name = match.group(0)
-            msg = DEPRECATE_USE_ALG_RE.sub(r"Use :ref:`algm-\1` instead.", msg)
+        if match is not None and len(match.groups()) == 4:
+            link_text = match.group(1)
+            alg_name = match.group(2)
+            version = match.group(4)
+            link = "algm-%s%s"
+            if version is not None:
+                link = link % (alg_name, "-v" + str(version))
+            else:
+                link = link % (alg_name, "")
+            replacement = "Use :ref:`%s <%s>` instead." % (link_text, link)
+            msg = DEPRECATE_USE_ALG_RE.sub(replacement, msg)
+        # endif
 
         self.add_rst(".. warning:: %s" % msg)
 
