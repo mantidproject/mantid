@@ -295,7 +295,6 @@ namespace DataHandling
    *
    * @param runinfo Runinfo file with full path.
    * @param dataDir Directory where the runinfo file lives.
-   * @param wksp Workspace to add the logs to.
    * @param prog_start Starting position for the progress bar.
    * @param prog_stop Ending position for the progress bar.
    */
