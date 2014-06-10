@@ -219,4 +219,8 @@ Output
           6            106     -0.0033750       1       1
           7            107     -0.0033750       1       1
 
+.. testcleanup::
+
+  os.remove( calFilePath )
+
 .. categories::
