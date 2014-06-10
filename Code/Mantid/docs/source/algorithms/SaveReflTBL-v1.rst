@@ -33,7 +33,7 @@ Any columns after the eighth are ignored
 Usage
 -----
 
-**Example
+**Example - Save a TableWorkspace in Reflectometry TBL format**
 
 .. testcode:: ExReflTBLSimple
 
@@ -75,6 +75,8 @@ Usage
 .. testcleanup:: ExReflTBLSimple
 
     os.remove(savefile)
+
+Output:
 
 .. testoutput:: ExReflTBLSimple
 

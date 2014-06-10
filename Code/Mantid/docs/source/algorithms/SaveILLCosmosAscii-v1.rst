@@ -9,7 +9,7 @@
 Description
 -----------
 
-SaveILLCosmosAscii is an export-only Ascii-based save format with no associated loader. It is based on a python script by Maximilian Skoda, written for the ISIS Reflectometry GUI
+SaveILLCosmosAscii is an export-only ASCII-based save format with no associated loader. It is based on a python script by Maximilian Skoda, written for the ISIS Reflectometry GUI
 
 Limitations
 ###########
@@ -19,7 +19,7 @@ While Files saved with SaveILLCosmosAscii can be loaded back into Mantid using L
 Usage
 -----
 
-**Example
+**Example - Save a workspace in ILL Cosmos ASCII format**
 
 .. testcode:: ExILLCosmosSimple
 
@@ -45,6 +45,8 @@ Usage
 .. testcleanup:: ExILLCosmosSimple
 
     os.remove(savefile)
+
+Output:
 
 .. testoutput:: ExILLCosmosSimple
 

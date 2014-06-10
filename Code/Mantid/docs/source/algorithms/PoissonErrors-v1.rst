@@ -14,7 +14,7 @@ Takes a Data workspace and an original counts workspace as input and updates the
 Usage
 -----
 
-**Example
+**Example - Perform basic error correction**
 
 .. testcode:: ExPoissonSimple
 

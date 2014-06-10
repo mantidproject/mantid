@@ -16,7 +16,7 @@ The algorithm calculates the weighted mean of two workspaces. This is useful whe
 Usage
 -----
 
-**Example
+**Example - Perform a simple weighted mean**
 
 .. testcode:: ExWMSimple
 

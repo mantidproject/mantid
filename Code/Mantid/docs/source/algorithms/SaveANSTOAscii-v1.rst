@@ -19,7 +19,7 @@ While Files saved with SaveANSTOAscii can be loaded back into mantid using LoadA
 Usage
 -----
 
-**Example
+**Example - Save a Workspace in ANSTO ASCII format**
 
 .. testcode:: ExANSTOSimple
 
@@ -45,6 +45,8 @@ Usage
 .. testcleanup:: ExANSTOSimple
 
     os.remove(savefile)
+
+Output:
 
 .. testoutput:: ExANSTOSimple
 
