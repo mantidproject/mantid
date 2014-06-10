@@ -434,6 +434,9 @@ if __name__ == "__main__":
         parser.add_option('--no-cpp', dest='cpp', action='store_const',
                             const=False, default=True,
                             help="Don't create the cpp file")
+        parser.add_option('--no-rst', dest='rst', action='store_const',
+                            const=False, default=True,
+                            help="Don't create the rst file")
         parser.add_option('--alg', dest='alg', action='store_const',
                             const=True, default=False,
                             help='Create an Algorithm stub. This adds some methods common to algorithms.')
