@@ -33,7 +33,7 @@ Usage
    workspace = LoadSpice2D('BioSANS_empty_cell.xml')
    
    # Compute the detector efficiency
-   efficiency = CalculateEfficiency(workspace, MinEfficiency=0.5, MaxEfficiency=1.5)
+   efficiency = CalculateEfficiency('workspace', MinEfficiency=0.5, MaxEfficiency=1.5)
 
 .. testcleanup:: ExEff
 
