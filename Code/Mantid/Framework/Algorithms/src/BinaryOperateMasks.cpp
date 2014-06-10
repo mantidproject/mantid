@@ -42,17 +42,20 @@ namespace Algorithms
     operators.push_back("NOT");
 
     declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>("InputWorkspace1", "", Direction::Input),
-        "MaskWorkspace 1 for binary operation");
+                    "MaskWorkspace 1 for binary operation");
     declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>("InputWorkspace2", "", Direction::Input, PropertyMode::Optional),
-        "Optional MaskWorkspace 2 for binary operation");
+                    "Optional MaskWorkspace 2 for binary operation");
     declareProperty("OperationType", "AND", boost::make_shared<StringListValidator>(operators),
-        "Operator for Workspace1 and Workspace2");
+                    "Operator for Workspace1 and Workspace2");
     declareProperty(new WorkspaceProperty<DataObjects::MaskWorkspace>("OutputWorkspace", "", Direction::Output),
-        "Output MaskWorkspace as result of binary operation");
+                    "Output MaskWorkspace as result of binary operation");
 
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Main execution body
+    */
   void BinaryOperateMasks::exec(){
 
     // 1. Read input
@@ -64,35 +67,35 @@ namespace Algorithms
 
     if (outputws != inputws1)
     {
-        // if the input and output are not the same, then create a new workspace for the output.
-         outputws = boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(API::WorkspaceFactory::Instance().create(inputws1));
-         outputws->copyFrom(inputws1);
+      // if the input and output are not the same, then create a new workspace for the output.
+      outputws = boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(API::WorkspaceFactory::Instance().create(inputws1));
+      outputws->copyFrom(inputws1);
     }
 
     // 3. Call Child Algorithm
-    if (op == "NOT"){
+    if (op == "NOT")
+    {
+      // Unary operation
+      outputws->binaryOperation(Mantid::DataObjects::BinaryOperator::NOT);
+    }
+    else
+    {
+      // Binary operation
+      // a. 2nd Input
+      DataObjects::MaskWorkspace_const_sptr inputws2 = getProperty("InputWorkspace2");
+      DataObjects::SpecialWorkspace2D_const_sptr inputws2_special(inputws2);
 
-        // Unary operation
-        outputws->binaryOperation(Mantid::DataObjects::BinaryOperator::NOT);
-
-    } else {
-        // Binary operation
-        // a. 2nd Input
-        DataObjects::MaskWorkspace_const_sptr inputws2 = getProperty("InputWorkspace2");
-        DataObjects::SpecialWorkspace2D_const_sptr inputws2_special(inputws2);
-
-        unsigned int binop;
-        if (op == "AND"){
-            binop = (unsigned int)Mantid::DataObjects::BinaryOperator::AND;
-        } else if (op == "OR"){
-            binop = (unsigned int)Mantid::DataObjects::BinaryOperator::OR;
-        } else if (op == "XOR"){
-            binop = (unsigned int)Mantid::DataObjects::BinaryOperator::XOR;
-        } else{
-            binop = 1000;
-        }
-        outputws->binaryOperation(inputws2_special, binop);
-
+      unsigned int binop;
+      if (op == "AND"){
+        binop = (unsigned int)Mantid::DataObjects::BinaryOperator::AND;
+      } else if (op == "OR"){
+        binop = (unsigned int)Mantid::DataObjects::BinaryOperator::OR;
+      } else if (op == "XOR"){
+        binop = (unsigned int)Mantid::DataObjects::BinaryOperator::XOR;
+      } else{
+        binop = 1000;
+      }
+      outputws->binaryOperation(inputws2_special, binop);
     }
 
     // 4. Output
