@@ -33,7 +33,7 @@ void MuonRemoveExpDecay::init()
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "",
       Direction::Output), "The name of the output 2D workspace.");
   std::vector<int> empty;
-  declareProperty(new Kernel::ArrayProperty<int>("Spectra", empty), "The workspace indeces to remove the exponential decay from.");
+  declareProperty(new Kernel::ArrayProperty<int>("Spectra", empty), "The workspace indices to remove the exponential decay from.");
 }
 
 /** Executes the algorithm

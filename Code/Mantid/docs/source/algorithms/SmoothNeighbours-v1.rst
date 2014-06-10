@@ -12,8 +12,8 @@ Description
 This algorithm performs a moving-average smoothing of data by summing
 spectra of nearest neighbours over the face of detectors. The output
 workspace has the same number of spectra as the input workspace. This
-works on both `EventWorkspaces <EventWorkspace>`__ and
-`Workspace2D <Workspace2D>`__'s. It has two main modes of operation.
+works on both `EventWorkspaces <http://mantidproject.org/EventWorkspace>`__ and
+`Workspace2D <http://mantidproject.org/Workspace2D>`__'s. It has two main modes of operation.
 
 Processing Either Generically or Assuming Rectangular Detectors
 ###############################################################
@@ -34,8 +34,8 @@ section below).
 For Instruments With Rectangular Detectors
 ##########################################
 
-The algorithm looks through the `Instrument <Instrument>`__ to find all
-the `RectangularDetectors <RectangularDetector>`__ defined. For each
+The algorithm looks through the `Instrument <http://mantidproject.org/Instrument>`__ to find all
+the `RectangularDetectors <http://mantidproject.org/RectangularDetector>`__ defined. For each
 pixel in each detector, the AdjX\*AdjY neighboring spectra are summed
 together and saved in the output workspace.
 
@@ -54,8 +54,8 @@ All weights are 1. This is completely position in-senitive.
 Linear Weighting
 ################
 
-Weights are calculated according to :math:`w = 1 - r/R`, where w is the
-weighting factor, r is the distance from the detector and R is the
+Weights are calculated according to :math:`w = 1 - r/R`, where :math:`w` is the
+weighting factor, :math:`r` is the distance from the detector and :math:`R` is the
 cut-off radius.
 
 Parabolic Weighting
@@ -101,25 +101,50 @@ that the bin X boundaries match.
 Neighbour Searching
 ###################
 
-File:NNSearchByRadius.jpg\ \|\ *Fig. 1*.
-File:NNSearchIrregularGrid.jpg\ \|\ *Fig. 2*.
-File:NNSearchLimitByRadius.jpg\ \|\ *Fig. 3*
-File:NNSearchLimitByNNs.jpg\ \|\ *Fig. 4* File:NNSearchXY.jpg\ \|\ *Fig.
-5*
++--------+--------+--------+--------+--------+
+| |Fig1| | |Fig2| | |Fig3| | |Fig4| | |Fig5| |
++--------+--------+--------+--------+--------+
+|*Fig. 1*|*Fig. 2*|*Fig. 3*|*Fig. 4*|*Fig. 5*|
++--------+--------+--------+--------+--------+
+
+.. |Fig1| image:: ../images/NNSearchByRadius.jpg
+   :width: 100%
+.. |Fig2| image:: ../images/NNSearchIrregularGrid.jpg
+   :width: 100%
+.. |Fig3| image:: ../images/NNSearchLimitByRadius.jpg
+   :width: 100%
+.. |Fig4| image:: ../images/NNSearchLimitByNNs.jpg
+   :width: 100%
+.. |Fig5| image:: ../images/NNSearchXY.jpg
+   :width: 100%
 
 Property Values of Examples
 ###########################
 
-| *Fig. 1* : Requesting NumberOfNeighbours=36, Radius=3. Algorithm looks
-for 36 nearest neighbours with a cut-off of 3 detector widths.
-| *Fig. 2* : Requesting NumberOfNeighbours=46, Radius=2. Algorithm looks
-for 46 nearest neighbours with a cut-off of 2 detector widths.
-| *Fig. 3* : Requesting NumberOfNeighbours=56, Radius=3. Algorithm looks
-for 56 nearest neighbours with a cut-off of 3 detector widths.
-| *Fig. 4* : Requesting NumberOfNeighbours=8, Radius=3. Algorithm looks
-for 8 nearest neighbours with a cut-off of 3 detector widths.
-| *Fig. 5* : Requesting AdjX=4, AdjY=2, Radius=0. Algorithm fetches
-neighbours in the specified pattern.
+* **Fig. 1:**
+
+  Requesting NumberOfNeighbours=36, Radius=3. Algorithm looks for
+  36 nearest neighbours with a cut-off of 3 detector widths.
+
+* **Fig. 2:**
+
+  Requesting NumberOfNeighbours=46, Radius=2. Algorithm looks
+  for 46 nearest neighbours with a cut-off of 2 detector widths.
+
+* **Fig. 3:**
+
+  Requesting NumberOfNeighbours=56, Radius=3. Algorithm looks
+  for 56 nearest neighbours with a cut-off of 3 detector widths.
+
+* **Fig. 4:**
+
+  Requesting NumberOfNeighbours=8, Radius=3. Algorithm looks
+  for 8 nearest neighbours with a cut-off of 3 detector widths.
+
+* **Fig. 5:**
+
+  Requesting AdjX=4, AdjY=2, Radius=0. Algorithm fetches
+  neighbours in the specified pattern.
 
 How it Works
 ############
@@ -155,5 +180,132 @@ Ignore Masks
 ############
 
 The algorithm will ignore masked detectors if this flag is set.
+
+Usage
+-----
+
+**Example - Smooth using radius:**
+
+.. testcode:: ExRadius
+
+   # Create a workspace with a single rectangular bank of size 3x3. One bin only.
+   ws = CreateSampleWorkspace(Function="Flat background",
+                              NumBanks=1,
+                              BankPixelWidth=3,
+                              XMin=0,
+                              XMax=1,
+                              BinWidth=1)
+
+   # Initial values
+   values = [1.0, 1.0, 3.0,
+             4.0, 2.0, 2.0,
+             1.0, 3.0, 3.0]
+
+   for i in range(0,9):
+     ws.dataY(i)[0] = values[i]
+
+   # Run the algorithm
+   output = SmoothNeighbours(ws, Radius = 1.0,
+                             RadiusUnits = 'NumberOfPixels')
+
+   print 'Number of histograms:', output.getNumberHistograms()
+   print 'Smoothed values:'
+   print output.extractY()
+
+Output:
+
+.. testoutput:: ExRadius
+
+   Number of histograms: 9
+   Smoothed values:
+   [[ 2.        ]
+    [ 2.16666667]
+    [ 2.        ]
+    [ 2.        ]
+    [ 2.22222222]
+    [ 2.33333333]
+    [ 2.5       ]
+    [ 2.5       ]
+    [ 2.5       ]]
+
+**Example -  Smooth using AdjX and AdjY:**
+
+.. testcode:: ExAdj
+
+   # Create a workspace with a single rectangular bank of size 3x3. One bin only.
+   ws = CreateSampleWorkspace(Function="Flat background",
+                              NumBanks=1,
+                              BankPixelWidth=3,
+                              XMin=0,
+                              XMax=1,
+                              BinWidth=1)
+
+   # Initial values
+   values = [1.0, 1.0, 3.0,
+             4.0, 2.0, 2.0,
+             1.0, 3.0, 3.0]
+
+   for i in range(0,9):
+     ws.dataY(i)[0] = values[i]
+
+   # Run the algorithm
+   output = SmoothNeighbours(ws, AdjX=1, AdjY=3)
+
+   print 'Number of histograms:', output.getNumberHistograms()
+   print 'Smoothed values:'
+   print output.extractY()
+
+Output:
+
+.. testoutput:: ExAdj
+
+   Number of histograms: 9
+   Smoothed values:
+   [[ 2.16666667]
+    [ 2.16666667]
+    [ 2.16666667]
+    [ 2.22222222]
+    [ 2.22222222]
+    [ 2.22222222]
+    [ 2.5       ]
+    [ 2.5       ]
+    [ 2.5       ]]
+
+**Example -  Smooth and sum using SumPixelsX and SumPixelsY:**
+
+.. testcode:: ExSum
+
+   # Create a workspace with a single rectangular bank of size 3x3. One bin only.
+   ws = CreateSampleWorkspace(Function="Flat background",
+                              NumBanks=1,
+                              BankPixelWidth=3,
+                              XMin=0,
+                              XMax=1,
+                              BinWidth=1)
+
+   # Initial values
+   values = [1.0, 1.0, 3.0,
+             4.0, 2.0, 2.0,
+             1.0, 3.0, 3.0]
+
+   for i in range(0,9):
+     ws.dataY(i)[0] = values[i]
+
+   # Run the algorithm
+   output = SmoothNeighbours(ws, SumPixelsX=3, SumPixelsY=1)
+
+   print 'Number of histograms:', output.getNumberHistograms()
+   print 'Smoothed values:'
+   print output.extractY()
+
+Output:
+
+.. testoutput:: ExSum
+
+   Number of histograms: 3
+   Smoothed values:
+   [[ 6.]
+    [ 6.]
+    [ 8.]]
 
 .. categories::
