@@ -9,7 +9,8 @@
 Description
 -----------
 
-Uses E= (1/2)mv^2 to calculate the energy of neutrons leaving the
+Uses :math:`E=\frac{1}{2}mv^2`
+to calculate the energy of neutrons leaving the
 source. The velocity is calculated from the time it takes for the
 neutron pulse to travel between the two monitors whose spectra were
 specified.
@@ -36,12 +37,15 @@ peak height locations. The half height points are found as follows:
    arrival time of the neutrons
 
 The above process is illustrated on a peak is shown below in the image
-below |Monitor Peak\|centre\|618px|
+below
+
+.. image:: /images/Monitorspect_getei.jpg
+    :align: center
+    :alt: Monitor Peak
+    :width: 618px
 
 The distances between the monitors are read from the instrument
 definition file. It is assumed that the source and the monitors all lie
 on one line and that the monitors have the same delay time.
-
-.. |Monitor Peak\|centre\|618px| image:: /images/Monitorspect_getei.jpg
 
 .. categories::
