@@ -26,8 +26,8 @@ namespace API
   {}
 
   /// The algorithm to use instead of this one.
-  /// @replacement Name of the algorithm that replaces the deprecated one
-  /// @version An optional version number for the replacement (default=-1)
+  /// @param replacement Name of the algorithm that replaces the deprecated one
+  /// @param version An optional version number for the replacement (default=-1)
   void DeprecatedAlgorithm::useAlgorithm(const std::string & replacement, const int version)
   {
     // Replacement is not checked here as we cannot guarantee all algorithms have been
