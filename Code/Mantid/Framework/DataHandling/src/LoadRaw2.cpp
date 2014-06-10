@@ -18,7 +18,7 @@ namespace Mantid
     /// Empty default constructor
     LoadRaw2::LoadRaw2() : Algorithm(), DeprecatedAlgorithm()
     {
-      useAlgorithm("LoadRaw Version 3");
+      useAlgorithm("LoadRaw", 3);
     }
 
     /** Initialises the algorithm with the properties as they were when this algorithm was removed from Mantid,
