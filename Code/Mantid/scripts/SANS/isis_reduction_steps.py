@@ -2525,7 +2525,9 @@ class UserFile(ReductionStep):
           __calibrationWs = Load(file_path, OutputWorkspace=suggested_name)
           reducer.instrument.setCalibrationWorkspace(__calibrationWs)
         except:
-            return "Invalid input for tube calibration file. Path = "+path2file+".\nReason=" + traceback.format_exc()
+            # If we throw a runtime here, then we cannot execute 'Load Data'.
+            raise RuntimeError("Invalid input for tube calibration file (" + path2file + " ).\n" \
+            "Please do not run a reduction as it will not successfully complete.\n")
 
     def _read_maskfile_line(self, line, reducer):
         try:
