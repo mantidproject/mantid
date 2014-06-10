@@ -2247,6 +2247,11 @@ class UserFile(ReductionStep):
                     filepath = filepath[idx + 1:]
                 if not os.path.isabs(filepath):
                     filepath = reducer.user_file_path+'/'+filepath
+
+                # If a filepath has been provided, then it must exist to continue.
+                if filepath and not os.path.isfile(filepath):
+                    raise RuntimeError("The following MON/DIRECT datafile does not exist: %s" % filepath)
+
                 type = parts[0]
                 parts = type.split("/")
                 if len(parts) == 1:
