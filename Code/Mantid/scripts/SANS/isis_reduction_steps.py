@@ -936,7 +936,7 @@ class Mask_ISIS(ReductionStep):
                     mask_detectors_with_masking_ws(workspace, mask_ws_name)
                     DeleteWorkspace(Workspace=mask_ws_name)
                 except:
-                    raise RuntimeError("Invalid input for mask file.  Path = %s." % mask_file)
+                    raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
 
         if len(self.spec_list)>0:
             MaskDetectors(Workspace=workspace, SpectraList = self.spec_list)
