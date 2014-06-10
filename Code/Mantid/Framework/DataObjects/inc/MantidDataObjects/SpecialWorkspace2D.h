@@ -53,7 +53,7 @@ namespace DataObjects
     void binaryOperation(boost::shared_ptr<const SpecialWorkspace2D>& ws, const unsigned int operatortype);
     void binaryOperation(const unsigned int operatortype);
 
-    void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
+    virtual void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
 
   private:
     /// Private copy constructor. NO COPY ALLOWED
