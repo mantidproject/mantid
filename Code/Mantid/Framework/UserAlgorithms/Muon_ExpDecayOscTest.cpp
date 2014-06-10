@@ -1,10 +1,3 @@
-/*  This is another User test fitting function.
-
-    For a general description of how to create a test
-    fitting function see LorentzianTest.h and LorentzianTest.cpp
-
-*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

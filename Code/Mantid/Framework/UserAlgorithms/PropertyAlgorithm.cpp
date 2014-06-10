@@ -1,7 +1,3 @@
-/*WIKI* 
-
-
-*WIKI*/
 #include "PropertyAlgorithm.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
