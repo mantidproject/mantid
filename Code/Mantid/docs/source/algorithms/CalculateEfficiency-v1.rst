@@ -35,8 +35,4 @@ Usage
    # Compute the detector efficiency
    efficiency = CalculateEfficiency('workspace', MinEfficiency=0.5, MaxEfficiency=1.5)
 
-.. testcleanup:: ExEff
-
-   DeleteWorkspace(workspace)
-   
 .. categories::

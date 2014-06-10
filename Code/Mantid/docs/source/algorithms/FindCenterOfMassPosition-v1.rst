@@ -49,9 +49,5 @@ Usage
    
    # Compute the center position, which will be put in a table workspace
    FindCenterOfMassPosition('workspace', Output='center')
-
-.. testcleanup:: ExBeamCenter
-
-   DeleteWorkspace(workspace)
    
 .. categories::
