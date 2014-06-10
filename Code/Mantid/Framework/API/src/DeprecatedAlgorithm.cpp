@@ -1,12 +1,19 @@
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Logger.h"
 #include <sstream>
 
 namespace Mantid
 {
 namespace API
 {
+  namespace
+  {
+    /// Static logger
+    Kernel::Logger g_log("DeprecatedAlgorithm");
+  }
+
   /// Does nothing other than make the compiler happy.
   DeprecatedAlgorithm::DeprecatedAlgorithm() :
     m_replacementAlgorithm(), m_replacementVersion(-1),
@@ -73,7 +80,7 @@ namespace API
         msg << "Invalid replacement algorithm '" + this->m_replacementAlgorithm + "'";
         if(this->m_replacementVersion > 0) msg << " version " << this->m_replacementVersion << "\n";
         msg << "Replacement algorithm not registered.";
-        throw std::invalid_argument(msg.str());
+        g_log.warning(msg.str());
       }
 
       msg << ". Use " << this->m_replacementAlgorithm;
