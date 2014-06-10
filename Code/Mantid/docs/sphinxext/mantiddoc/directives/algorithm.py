@@ -120,7 +120,9 @@ class AlgorithmDirective(BaseDirective):
         """
         env = self.state.document.settings.env
         format_str = ".. figure:: %s\n"\
-                     "    :class: screenshot\n\n"\
+                     "    :class: screenshot\n"\
+                     "    :align: right\n"\
+                     "    :width: 400px\n\n"\
                      "    %s\n\n"
         
         # Sphinx assumes that an absolute path is actually relative to the directory containing the

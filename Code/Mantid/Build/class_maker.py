@@ -118,6 +118,9 @@ def write_source(subproject, classname, filename, args):
     f = open(filename, 'w')
     
     algorithm_top = """
+  using Mantid::Kernel::Direction;
+  using Mantid::API::WorkspaceProperty;
+
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(%s)
   
@@ -252,6 +255,7 @@ def write_test(subproject, classname, filename, args):
 #include "Mantid%s/%s%s.h"
 
 using Mantid::%s::%s;
+using namespace Mantid::API;
 
 class %sTest : public CxxTest::TestSuite
 {

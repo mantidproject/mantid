@@ -2043,6 +2043,12 @@ void SANSRunWindow::readNumberOfEntries(const QString & RunStep, MantidWidgets::
  */
 QString SANSRunWindow::readUserFileGUIChanges(const States type)
 {
+  const bool invalidRearFlood = m_uiForm.enableRearFlood_ck->isChecked() && !m_uiForm.floodRearFile->isValid();
+  const bool invalidFrontFlood = m_uiForm.enableFrontFlood_ck->isChecked() && !m_uiForm.floodFrontFile->isValid();
+  
+  if( invalidRearFlood || invalidFrontFlood )
+    throw std::runtime_error("Invalid flood file(s). Check the path shown in the \"Reduction Settings\" tab.");
+
   //Construct a run script based upon the current values within the various widgets
   QString exec_reduce;
   if ( m_uiForm.detbank_sel->currentIndex() < 2 )
@@ -2100,6 +2106,7 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
     exec_reduce += ", False";
   }
   exec_reduce += ")\n";
+
   QString floodRearFile =
     m_uiForm.enableRearFlood_ck->isChecked() ? m_uiForm.floodRearFile->getFirstFilename().trimmed() : "";
   QString floodFrontFile =
@@ -2261,7 +2268,17 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
     return;
   }
 
-  QString py_code = readUserFileGUIChanges(type);
+  QString py_code;
+  
+  try
+  {
+    py_code = readUserFileGUIChanges(type);
+  }
+  catch(const std::runtime_error & e)
+  {
+    showInformationBox(e.what());
+    return;
+  }
   if( py_code.isEmpty() )
   {
     showInformationBox("Error: An error occurred while constructing the reduction code, please check installation.");
