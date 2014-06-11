@@ -17,8 +17,13 @@ def main():
     output_dir = os.path.join(sphinx_build_dir, builder)
     doctree_dir = os.path.join(sphinx_build_dir, "doctrees")
 
+    # See if we have been told to only process a particular file
+    src_file = os.environ.get("DOCS_SRC_FILE", None)
+
     import sphinx
     argv = [sys.executable, "-b", builder, "-d", doctree_dir, src_dir, output_dir]
+    if src_file is not None:
+        argv.append(src_file)
 
     # run
     sys.exit(sphinx.main(argv))
