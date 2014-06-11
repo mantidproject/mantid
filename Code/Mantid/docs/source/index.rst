@@ -16,3 +16,5 @@
 
    algorithms/*
    functions/*
+
+   api/python/index
