@@ -6,6 +6,12 @@ import sys
 import os
 import sphinx_bootstrap_theme
 
+# mantid must be importable
+try:
+    import mantid
+except ImportError:
+    sys.exit("Cannot import mantid module. Check Python path.")
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -55,10 +61,11 @@ copyright = u'2014, Mantid'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
+version_str = mantid.__version__
 # The short X.Y version.
-version = '0.01'
+version = ".".join(version_str.split(".")[:2])
 # The full version, including alpha/beta/rc tags.
-release = '0.01'
+release = version_str
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
