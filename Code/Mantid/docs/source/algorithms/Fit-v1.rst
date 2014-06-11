@@ -81,14 +81,14 @@ default value defined by the function. All names are case sensitive. For
 example for fitting a Gaussian the Function property might look like
 this:
 
-``Function: "name=Gaussian, PeakCentre=4.6, Height=10, Sigma=0.5"``
+``Function: "name=Gaussian, PeakCentre=4.6, Height=10, Sigma=0.5"``
 
 Some functions have attributes. An attribute is a non-fitting parameter
 and can be of one of the following types: text string, integer, or
 double. Attributes are set just like the parameters using name=value
 pairs. For example:
 
-``Function: "name=UserFunction, Formula=a+b*x, a=1, b=2"``
+``Function: "name=UserFunction, Formula=a+b*x, a=1, b=2"``
 
 In this example Formula is the name of a string attribute which defines
 an expression for the user UserFunction. The fitting parameters a and b
@@ -107,9 +107,9 @@ the Function property. Each simple function definition must be separated
 by a semicolon ';'. For example fitting two Gaussians on a linear
 background might look like this:
 
-| ``Function: "name=LinearBackground, A0=0.3; ``
-| ``           name=Gaussian, PeakCentre=4.6, Height=10, Sigma=0.5;``
-| ``           name=Gaussian, PeakCentre=7.6, Height=8, Sigma=0.5"``
+| ``Function: "name=LinearBackground, A0=0.3; ``
+| ``           name=Gaussian, PeakCentre=4.6, Height=10, Sigma=0.5;``
+| ``           name=Gaussian, PeakCentre=7.6, Height=8, Sigma=0.5"``
 
 Setting ties
 ############
@@ -120,7 +120,7 @@ tying expressions. Use Ties property to set any ties. In case of a
 simple function the parameter names are used as variables in the tying
 expressions. For example
 
-``Ties: "a=2*b+1, c=2"``
+``Ties: "a=2*b+1, c=2"``
 
 This ties parameter "a" to parameter "b" and fixes "c" to the constant
 2.
@@ -136,13 +136,13 @@ part defines the function by its index in the composite function
 (starting at 0). The index corresponds to the order in which the
 functions are defined in the Function property. For example:
 
-``Ties: "f1.Sigma=f0.Sigma,f2.Sigma=f0.Sigma"``
+``Ties: "f1.Sigma=f0.Sigma,f2.Sigma=f0.Sigma"``
 
 This ties parameter "Sigma" of functions 1 and 2 to the "Sigma" of
 function 0. Of course all three functions must have a parameter called
 "Sigma" for this to work. The last example can also be written
 
-``Ties: "f1.Sigma=f2.Sigma=f0.Sigma"``
+``Ties: "f1.Sigma=f2.Sigma=f0.Sigma"``
 
 Setting constraints
 ###################
@@ -155,22 +155,22 @@ The penalty applied is described in more detail
 constraints. In case of a simple function the parameter names are used
 as variables in the constraint expressions. For example
 
-``Constraints: "4.0 < c < 4.2"``
+``Constraints: "4.0 < c < 4.2"``
 
 Constraint the parameter "c" to be with the range 4.0 to 4.2, whereas
 
-``Constraints: "c > 4.0"``
+``Constraints: "c > 4.0"``
 
 means "c" is constrained to be above the lower value 4.0 and
 
-``Constraints: "c < 4.2"``
+``Constraints: "c < 4.2"``
 
 means "c" is constrained to be below the upper value 4.2.
 
 In case of a composite function the same notation is used for
 constraints and for ties. For example
 
-``Constraints: "f1.c < 4.2"``
+``Constraints: "f1.c < 4.2"``
 
 constrain the parameter "c" of function 1.
 
@@ -207,10 +207,10 @@ Examples
 This example shows a simple fit to a Gaussian function. The algorithm
 properties are:
 
-| ``InputWorkspace:  Test``
-| ``WorkspaceIndex:  0``
-| ``Function:        name=Gaussian, PeakCentre=4, Height=1.3, Sigma=0.5``
-| ``Output:          res``
+| ``InputWorkspace:  Test``
+| ``WorkspaceIndex:  0``
+| ``Function:        name=Gaussian, PeakCentre=4, Height=1.3, Sigma=0.5``
+| ``Output:          res``
 
 .. figure:: /images/GaussianFit.jpg
    :alt: GaussianFit.jpg
@@ -221,11 +221,11 @@ properties are:
 
 The next example shows a fit of the same data but with a tie.
 
-| ``InputWorkspace:  Test``
-| ``WorkspaceIndex:  0``
-| ``Function:        name=Gaussian, PeakCentre=4, Height=1.3, Sigma=0.5``
-| ``Ties:            Sigma=Height/2``
-| ``Output:          res``
+| ``InputWorkspace:  Test``
+| ``WorkspaceIndex:  0``
+| ``Function:        name=Gaussian, PeakCentre=4, Height=1.3, Sigma=0.5``
+| ``Ties:            Sigma=Height/2``
+| ``Output:          res``
 
 .. figure:: /images/GaussianFit_Ties.jpg
    :alt: GaussianFit_Ties.jpg
@@ -238,12 +238,12 @@ This example shows a fit of two overlapping Gaussians on a linear
 background. Here we create a composite function with a LinearBackground
 and two Gaussians:
 
-| ``InputWorkspace:  Test``
-| ``WorkspaceIndex:  0``
-| ``Function:        name=LinearBackground,A0=1;``
-| ``                 name=Gaussian,PeakCentre=4,Height=1.5, Sigma=0.5;``
-| ``                 name=Gaussian,PeakCentre=6,Height=4, Sigma=0.5 ``
-| ``Output:          res``
+| ``InputWorkspace:  Test``
+| ``WorkspaceIndex:  0``
+| ``Function:        name=LinearBackground,A0=1;``
+| ``                 name=Gaussian,PeakCentre=4,Height=1.5, Sigma=0.5;``
+| ``                 name=Gaussian,PeakCentre=6,Height=4, Sigma=0.5 ``
+| ``Output:          res``
 
 .. figure:: /images/Gaussian2Fit.jpg
    :alt: Gaussian2Fit.jpg
@@ -255,13 +255,13 @@ and two Gaussians:
 This example repeats the previous one but with the Sigmas of the two
 Gaussians tied:
 
-| ``InputWorkspace:  Test``
-| ``WorkspaceIndex:  0``
-| ``Function:        name=LinearBackground,A0=1;``
-| ``                 name=Gaussian,PeakCentre=4,Height=1.5, Sigma=0.5;``
-| ``                 name=Gaussian,PeakCentre=6,Height=4, Sigma=0.5 ``
-| ``Ties:            f2.Sigma = f1.Sigma``
-| ``Output:          res``
+| ``InputWorkspace:  Test``
+| ``WorkspaceIndex:  0``
+| ``Function:        name=LinearBackground,A0=1;``
+| ``                 name=Gaussian,PeakCentre=4,Height=1.5, Sigma=0.5;``
+| ``                 name=Gaussian,PeakCentre=6,Height=4, Sigma=0.5 ``
+| ``Ties:            f2.Sigma = f1.Sigma``
+| ``Output:          res``
 
 .. figure:: /images/Gaussian2Fit_Ties.jpg
    :alt: Gaussian2Fit_Ties.jpg
@@ -305,10 +305,6 @@ Usage
    # fitWorkspace contains the data, the calculated and the difference patterns
    print "Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms())
    print("The 20th y-value of the calculated pattern: %.4f" % fitWorkspace.readY(1)[19])
-
-.. testcleanup:: ExFitPeak
-
-   DeleteWorkspace(ws)
 
 Output:
 
