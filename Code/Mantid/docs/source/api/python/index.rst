@@ -13,3 +13,11 @@ Reference
 
    mantid <mantid/index>
    mantidplot <mantidplot/index>
+
+Techniques
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   techniques/calibration
