@@ -9,9 +9,13 @@
 Description
 -----------
 
-This algorithm allows a user (who is logged into a catalog) to publish datafiles or workspaces to investigations of which they are an investigator.
+This algorithm allows a user (who is logged into a catalog) to
+publish datafiles or workspaces to investigations of which they
+are an investigator.Datafiles and workspaces that are published
+are automatically made private.
+This means only investigators of that investigation can view them.
 
-Datafiles and workspaces that are published are automatically made private. This means only investigators of that investigation can view them.
+**Note:** the catalog publish dialog is disabled if you are not an investigator on any investigations. This prevents attempts to publish to investigations of which you do not have access, which would result in an error.
 
 Parameters Note
 ###############
