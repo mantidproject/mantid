@@ -74,17 +74,22 @@ def stitch2(ws1, ws2, output_ws_name, begoverlap,endoverlap,Qmin,Qmax,binning,sc
 	scalehigh: if True, scale ws2, otherwise scale ws1
 	scalefactor: Use the manual scaling factor provided if > 0
 	"""
+	if scalefactor > 0.0:
+		manual_scalefactor = True
+	else:
+		manual_scalefactor = False
+		scalefactor = 1.0
 	# Interally use the Stitch1D algorithm.
 	outputs = Stitch1D(LHSWorkspace=ws1, RHSWorkspace=ws2, 
 			OutputWorkspace=output_ws_name, StartOverlap=begoverlap, EndOverlap=endoverlap, 
-			UseManualScaleFactor=(not scalefactor == -1),
+			UseManualScaleFactor=manual_scalefactor,
 			ManualScaleFactor=scalefactor, Params="%f,%f,%f" % (Qmin, binning, Qmax))
 	
 	return outputs
 	
 
 def combine2(wksp1,wksp2,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scalehigh=True,scalefactor=-1.0):
-    """
+	"""
 	Function stitches two workspaces together and returns a stitched workspace name along with the scale factor
 	
 	wksp1: First workspace name to stitch
@@ -98,17 +103,21 @@ def combine2(wksp1,wksp2,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scal
 	scalehigh: if True, scale ws2, otherwise scale ws1
 	scalefactor: Use the manual scaling factor provided if > 0
 	"""
-    
-    # Interally use the Stitch1D algorithm.
-    outputs = Stitch1D(LHSWorkspace=mtd[wksp1], RHSWorkspace=mtd[wksp2], 
+	if scalefactor > 0.0:
+		manual_scalefactor = True
+	else:
+		manual_scalefactor = False
+		scalefactor = 1.0
+	# Interally use the Stitch1D algorithm.
+	outputs = Stitch1D(LHSWorkspace=mtd[wksp1], RHSWorkspace=mtd[wksp2], 
 			OutputWorkspace=outputwksp, StartOverlap=begoverlap, EndOverlap=endoverlap, 
-			UseManualScaleFactor=(not scalefactor == -1),
+			UseManualScaleFactor=manual_scalefactor,
 			ManualScaleFactor=scalefactor, Params="%f,%f,%f" % (Qmin, binning, Qmax))
-    
-    outscalefactor = outputs[1]
-    
-    return (outputwksp, outscalefactor)
-		
+
+	outscalefactor = outputs[1]
+
+	return (outputwksp, outscalefactor)
+
 def getWorkspace(wksp):
 	"""
 	Get the workspace if it is not a group workspace. If it is a group workspace, get the first period.

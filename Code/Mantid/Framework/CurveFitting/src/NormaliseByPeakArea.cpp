@@ -63,7 +63,8 @@ namespace Mantid
       mustBePositive->setLower(0.0);
       mustBePositive->setLowerExclusive(true); //strictly greater than 0.0
       declareProperty("Mass",-1.0,mustBePositive,"The mass, in AMU, defining the recoil peak to fit");
-      declareProperty("Sum", true, "If true all spectra are summed in quadrature to produce the final result");
+      declareProperty("Sum", true, "If true all spectra on the Y-space, fitted & symmetrised workspaces "
+                      "are summed in quadrature to produce the final result");
 
       declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
                       "Input workspace normalised by the fitted peak area");

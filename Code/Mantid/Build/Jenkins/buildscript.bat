@@ -19,11 +19,12 @@ set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check whether this is a clean build (must have 'clean' in the job name)
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set DOC_IMAGES=
+set PACKAGE_DOCS=
 if "%JOB_NAME%"=="%JOB_NAME:clean=%" (
     set CLEANBUILD=no
 ) else  (
     set CLEANBUILD=yes
+    set PACKAGE_DOCS=-DPACKAGE_DOCS=True
     rmdir /S /Q build
 )
 
@@ -36,7 +37,7 @@ cd %WORKSPACE%\build
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G "Visual Studio 11 Win64" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DUSE_PRECOMPILED_HEADERS=ON ..\Code\Mantid
+"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G "Visual Studio 11 Win64" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..\Code\Mantid
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -58,6 +59,10 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Create the install kit if this is a clean build
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if "%CLEANBUILD%" EQU "yes" (
-    if ERRORLEVEL 1 exit /B %ERRORLEVEL%
+    :: Build offline documentation
+    msbuild /nologo /nr:false /p:Configuration=Release docs/docs-html.vcxproj
+
+    :: ignore errors as the exit code of the build isn't correct
+    ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
     cpack -C Release --config CPackConfig.cmake
 )

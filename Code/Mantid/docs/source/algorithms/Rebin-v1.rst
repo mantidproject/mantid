@@ -16,7 +16,7 @@ create logarithmic binning using the formula
 :math:`x(j+1)=x(j)(1+|\Delta x_i|)\,`
 
 This algorithms is useful both in data reduction, but also in remapping
-`ragged workspaces <Ragged Workspace>`__ to a regular set of bin
+`ragged workspaces <http://www.mantidproject.org/Ragged_Workspace>`__ to a regular set of bin
 boundaries.
 
 Unless the FullBinsOnly option is enabled, the bin immediately before
@@ -26,30 +26,27 @@ be no gaps between bins. Rebin ensures that any of these space filling
 bins cannot be less than 25% or more than 125% of the width that was
 specified.
 
+.. _rebin-example-strings:
+
 Example Rebin param strings
 ###########################
 
--0.0001
-    From min(TOF) to max(TOF) among all events in Logarithmic bins of
-    0.0001
-0,100,20000
-    From 0 rebin in constant size bins of 100 up to 20,000
-2,-0.035,10
-    From 10 rebin in Logarithmic bins of 0.035 up to 10
-0,100,10000,200,20000
-    From 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000
+* **"-0.0001"**: from min(TOF) to max(TOF) among all events in Logarithmic bins of 0.0001
+* **"*0,100,20000"**: from 0 rebin in constant size bins of 100 up to 20,000
+* **"2,-0.035,10"**: from 10 rebin in Logarithmic bins of 0.035 up to 10
+* **"0,100,10000,200,20000"**: from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000
 
 For EventWorkspaces
 ###################
 
-If the input is an `EventWorkspace <EventWorkspace>`__ and the "Preserve
+If the input is an `EventWorkspace <www.mantidproject.org/EventWorkspace>`__ and the "Preserve
 Events" property is True, the rebinning is performed in place, and only
 the X axes of the workspace are set. The actual Y histogram data will
 only be requested as needed, for example, when plotting or displaying
 the data.
 
 If "Preserve Events" is false., then the output workspace will be
-created as a `Workspace2D <Workspace2D>`__, with fixed histogram bins,
+created as a `Workspace2D <http://www.mantidproject.org/Workspace2D>`__, with fixed histogram bins,
 and all Y data will be computed immediately. All event-specific data is
 lost at that point.
 
@@ -58,8 +55,8 @@ For Data-Point Workspaces
 
 If the input workspace contains data points, rather than histograms,
 then Rebin will automatically use the
-:ref:`algm-ConvertToHistogram` and
-:ref:`algm-ConvertToPointData` algorithms before and after
+:ref:`ConvertToHistogram <algm-ConvertToHistogram>` and
+:ref:`ConvertToHistogram <algm-ConvertToPointData>` algorithms before and after
 the rebinning has taken place.
 
 FullBinsOnly option
@@ -80,6 +77,8 @@ following will happen:
 
 Hence the actual *Param* string used is "0, 2, 4, 3, 10".
 
+.. _rebin-usage:
+
 Usage
 -----
 
@@ -97,10 +96,6 @@ Usage
 
    print "The rebinned X values are: " + str(ws.readX(0))
    print "The rebinned Y values are: " + str(ws.readY(0))
-
-.. testcleanup:: ExHistSimple
-
-   DeleteWorkspace(ws)
 
 Output:
 
@@ -123,10 +118,6 @@ Output:
 
    print "The 2nd and 3rd rebinned X values are: " + str(ws.readX(0)[1:3])
 
-.. testcleanup:: ExHistLog
-
-   DeleteWorkspace(ws)
-
 Output:
 
 .. testoutput:: ExHistLog
@@ -146,10 +137,6 @@ Output:
    ws = Rebin(ws, "1,2,3,3,9")
 
    print "The rebinned X values are: " + str(ws.readX(0))
-
-.. testcleanup:: ExHistCustom
-
-   DeleteWorkspace(ws)
 
 Output:
 
@@ -171,10 +158,6 @@ Output:
 
    print "The rebinned X values are: " + str(ws.readX(0))
    print "The rebinned Y values are: " + str(ws.readY(0))
-
-.. testcleanup:: ExHistFullBinsOnly
-
-   DeleteWorkspace(ws)
 
 Output:
 
@@ -198,10 +181,6 @@ Output:
    print "What type is the workspace after 2nd rebin: " + str(type(ws))
    # note you can also check the type of a workspace using: print isinstance(ws, IEventWorkspace)
 
-.. testcleanup:: ExEventRebin
-
-   DeleteWorkspace(ws)
-
 Output:
 
 .. testoutput:: ExEventRebin
@@ -209,7 +188,5 @@ Output:
    What type is the workspace before 1st rebin: <class 'mantid.api._api.IEventWorkspace'>
    What type is the workspace after 1st rebin: <class 'mantid.api._api.IEventWorkspace'>
    What type is the workspace after 2nd rebin: <class 'mantid.api._api.MatrixWorkspace'>
-
-
 
 .. categories::

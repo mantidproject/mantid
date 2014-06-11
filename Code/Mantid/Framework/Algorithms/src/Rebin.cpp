@@ -18,13 +18,53 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Rebin)
     
-
     using namespace Kernel;
     using namespace API;
     using DataObjects::EventList;
     using DataObjects::EventWorkspace;
     using DataObjects::EventWorkspace_sptr;
     using DataObjects::EventWorkspace_const_sptr;
+
+    //---------------------------------------------------------------------------------------------
+    // Public static methods
+    //---------------------------------------------------------------------------------------------
+
+    /**
+     * Return the rebin parameters from a user input
+     * @param inParams Input vector from user
+     * @param inputWS Input workspace from user
+     * @param logger A reference to a logger
+     * @returns A new vector containing the rebin parameters
+     */
+    std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> & inParams,
+                                                    const API::MatrixWorkspace & inputWS,
+                                                    Kernel::Logger & logger)
+    {
+      std::vector<double> rbParams;
+      // The validator only passes parameters with size 1, or 3xn.  No need to check again here
+      if (inParams.size() >= 3)
+      {
+        // Input are min, delta, max
+        rbParams = inParams;
+      }
+      else if (inParams.size() == 1)
+      {
+        double xmin = 0.;
+        double xmax = 0.;
+        inputWS.getXMinMax(xmin, xmax);
+
+        logger.information() << "Using the current min and max as default " << xmin << ", " << xmax << std::endl;
+        rbParams.resize(3);
+        rbParams[0] = xmin;
+        rbParams[1] = inParams[0];
+        rbParams[2] = xmax;
+      }
+      return rbParams;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    // Public methods
+    //---------------------------------------------------------------------------------------------
 
     /** Initialisation method. Declares properties to be used in algorithm.
     *
@@ -72,30 +112,9 @@ namespace Mantid
       // Rebinning in-place
       bool inPlace = (inputWS == outputWS);
 
-      // retrieve the properties
-      const std::vector<double> in_params=getProperty("Params");
-      std::vector<double> rb_params;
-
-      // The validator only passes parameters with size 1, or 3xn.  No need to check again here
-      if (in_params.size() >= 3){
-        // Input are min, delta, max
-        rb_params = in_params;
-
-      } else if (in_params.size() == 1){
-        double xmin = 0.;
-        double xmax = 0.;
-        inputWS->getXMinMax(xmin, xmax);
-
-        g_log.information() << "Using the current min and max as default " << xmin << ", " << xmax << std::endl;
-
-        rb_params.push_back(xmin);
-        rb_params.push_back(in_params[0]);
-        rb_params.push_back(xmax);
-
-      }
+      std::vector<double> rbParams = rebinParamsFromInput(getProperty("Params"), *inputWS, g_log);
 
       const bool dist = inputWS->isDistribution();
-
       const bool isHist = inputWS->isHistogramData();
 
       // workspace independent determination of length
@@ -105,7 +124,7 @@ namespace Mantid
 
       MantidVecPtr XValues_new;
       // create new output X axis
-      const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.access(),
+      const int ntcnew = VectorHelper::createAxisFromRebinParams(rbParams, XValues_new.access(),
                                                                  true, fullBinsOnly);
 
       //---------------------------------------------------------------------------------
