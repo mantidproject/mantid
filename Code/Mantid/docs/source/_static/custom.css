@@ -76,6 +76,10 @@ td, th {
   text-align: left;
 }
 
+/*-------------------- $SPHINX-OVERRIDES --------------------*/
+
+.warning { overflow: hidden; }
+
 /*-------------------- $MEDIA-QUERIES --------------------*/
 
 @media (min-width: 1200px) {
