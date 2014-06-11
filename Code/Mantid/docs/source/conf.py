@@ -23,7 +23,8 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.doctest',
-    'mantiddoc.directives'
+    'mantiddoc.directives',
+    'mantiddoc.autodoc'
 ]
 
 #try: # bonus for doxygen links - TODO off for now
