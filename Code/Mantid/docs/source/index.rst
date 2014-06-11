@@ -4,9 +4,9 @@
    produce a plethora of warnings about most documents not being in
    a toctree.
    See http://sphinx-doc.org/tutorial.html#defining-document-structure
-
-Mantid documentation
-====================
+======================
+ Mantid documentation
+======================
 
 .. toctree::
    :glob:
