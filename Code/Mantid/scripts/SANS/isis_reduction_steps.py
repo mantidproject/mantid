@@ -1854,7 +1854,6 @@ class SliceEvent(ReductionStep):
         
         _monitor = reducer.get_sample().get_monitor()
 
-        sanslog.error("Executing SliceEvent with binning of \"%s\"" % self.binning)
         hist, (tot_t, tot_c, part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, self.binning)
         self.scale = part_c / tot_c
 
@@ -2206,7 +2205,6 @@ class UserFile(ReductionStep):
             reducer.mask.set_phi_limit(
                 float(minval), float(maxval), mirror, override=False)
         elif limit_type.upper() == 'EVENTSTIME':
-            sanslog.error("EVENTSTIME parsed -> \"%s\"." % rebin_str)
             if rebin_str:
                 reducer.event2hist.binning = rebin_str
             else:
