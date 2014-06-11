@@ -16,4 +16,26 @@ microseconds before the neutrons arrive at the sample, and TibMin is
 pulse is in this interval, or it goes below the TOF frame minimum, or it
 can be reduced to 2400 microseconds.
 
+Usage
+-----
+
+**Example:**
+
+.. testcode:: ExSuggestTibCNCS
+
+    incidentEnergy = 3
+    (tibMin,tibMax) = SuggestTibCNCS(incidentEnergy)
+    print "Incident Energy = %i, tibMin = %.2f, tibMax = %.2f" % (incidentEnergy,tibMin,tibMax)
+
+    incidentEnergy = 1
+    (tibMin,tibMax) = SuggestTibCNCS(incidentEnergy)
+    print "Incident Energy = %i, tibMin = %.2f, tibMax = %.2f" % (incidentEnergy,tibMin,tibMax)
+
+Output:
+
+.. testoutput:: ExSuggestTibCNCS
+
+    Incident Energy = 3, tibMin = 44914.92, tibMax = 47314.92
+    Incident Energy = 1, tibMin = 95621.15, tibMax = 99021.15
+
 .. categories::
