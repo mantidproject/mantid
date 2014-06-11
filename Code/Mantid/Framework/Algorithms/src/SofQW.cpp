@@ -64,7 +64,7 @@ void SofQW::createInputProperties(API::Algorithm & alg)
   propOptions.push_back("Direct");
   propOptions.push_back("Indirect");
   alg.declareProperty("EMode","",boost::make_shared<StringListValidator>(propOptions),
-    "The energy mode (Direct/Indirect)");
+    "The energy transfer analysis mode (Direct/Indirect)");
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   alg.declareProperty("EFixed",0.0,mustBePositive,
