@@ -40,7 +40,7 @@ public:
   /// Algorithm's name
   virtual const std::string name() const { return "EQSANSTofStructure"; }
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "Corrects the Time of Flight binning of raw EQSANS data. This algorithm needs to be run once on every data set.";}
+    virtual const std::string summary() const {return "Corrects the TOF of raw EQSANS data. This algorithm needs to be run once on every data set.";}
 
   /// Algorithm's version
   virtual int version() const { return (1); }
