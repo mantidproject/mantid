@@ -20,16 +20,23 @@ corrections to the workspace. The workflow proceeds as follows:
 
 4. Determine the source slit size and store it in the logs.
 
-5. Move the detector according to the correct beam center position, 
+5. Read in the masked areas of the detector from the instrument configuration file and store them
+   in the logs so that we can retrieve them later
+   (see `SANSMask <http://www.mantidproject.org/SANSMask>`_).
+
+6. Move the detector according to the correct beam center position, 
    which is either given as input to the algorithm or pre-determined and stored in the input *ReductionProperties*.
 
-6. Apply a TOF correction to take into account frame correction and the neutron flight path using
+7. Apply a TOF correction to take into account frame correction and the neutron flight path using
    `EQSANSTofStructure <http://www.mantidproject.org/EQSANSTofStructure>`_. This step includes trimming the edges
    of the TOF distribution according to the input properties or the instrument configuration file.
 
-7. Convert TOF into wavelength.
+8. Convert TOF into wavelength.
 
-8. Rebin the data according to the input *WavelengthStep*.
+9. Rebin the data according to the input *WavelengthStep*.
 
+|LoadEQSANS.png|
+
+.. |LoadEQSANS.png| image:: /images/LoadEQSANS.png
 
 .. categories::
