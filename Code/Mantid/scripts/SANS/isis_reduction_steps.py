@@ -1947,10 +1947,13 @@ class UserFile(ReductionStep):
     
         file_handle = open(user_file, 'r')
         for line in file_handle:
-            self.read_line(line, reducer)
+            try:
+                self.read_line(line, reducer)
+            except:
+                # Close the handle
+                file_handle.close()
+                raise RuntimeError("%s was specified in the MASK file (%s) but the file cannot be found." % (line.rsplit()[0], file_handle.name))
 
-        # Close the handle
-        file_handle.close()
         # Check if one of the efficency files hasn't been set and assume the other is to be used
         reducer.instrument.copy_correction_files()
               
@@ -2249,8 +2252,8 @@ class UserFile(ReductionStep):
                     filepath = reducer.user_file_path+'/'+filepath
 
                 # If a filepath has been provided, then it must exist to continue.
-                #if filepath and not os.path.isfile(filepath):
-                #    raise RuntimeError("The following MON/DIRECT datafile does not exist: %s" % filepath)
+                if filepath and not os.path.isfile(filepath):
+                    raise RuntimeError("The following MON/DIRECT datafile does not exist: %s" % filepath)
 
                 type = parts[0]
                 parts = type.split("/")
