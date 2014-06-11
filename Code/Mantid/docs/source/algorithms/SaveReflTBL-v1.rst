@@ -13,13 +13,16 @@ Saves a TableWorkspace at least 8 columns wide into an ASCII file in 17-column R
 
 The 8 columns are grouped into rows of 17 according to stitch index, so up to 3 rows in the table would become a single row in the TBL file like so: (Where Z is an identical stitch group index, and - is ignored as only the first instance of P and Q are used in the file)
 
-| ``A, B, C, D, E, P, Q, Z``
-| ``F, G, H, I, J, -, -, Z``
-| ``K, L, M, N, O, -, -, Z``
+::
+
+    A, B, C, D, E, P, Q, Z
+    F, G, H, I, J, -, -, Z
+    K, L, M, N, O, -, -, Z
 
 becomes
+::
 
-``A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q``
+A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q
 
 Limitations
 ###########
