@@ -22,7 +22,7 @@ The 8 columns are grouped into rows of 17 according to stitch index, so up to 3 
 becomes
 ::
 
-A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q
+    A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q
 
 Limitations
 ###########

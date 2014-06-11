@@ -9,8 +9,7 @@
 Description
 -----------
 
-Saves the data in a workspace into a file in the ASCII 'SPE' format (as
-described `here <Media:Spe_file_format.pdf>`__).
+Saves the data in a workspace into a file in the ASCII 'SPE' format.
 
 The units used for saving will match those of the input workspace, such that if you have the units Momentum Transfer ('DeltaE') then you will get a traditional SPE file, you could choose to have the units in mod Q and then it will save to an SPQ file variant.
 
@@ -53,10 +52,7 @@ Format of .SPE files
     … and so on until completed ndet workspaces
 
 
-IMPORTANT NOTE: in the array corresponding to the signal, the number |-1030| is to be interpreted as
-not-a-number. That is, the corresponding pixel is to be masked. Usually of course, a detector is
-masked, so that all the signal array corresponding to that workspace will contain |-1030|. The
-corresponding error should be zero.
+IMPORTANT NOTE: in the array corresponding to the signal, the number |-1030| is to be interpreted as not-a-number. That is, the corresponding pixel is to be masked. Usually of course, a detector is masked, so that all the signal array corresponding to that workspace will contain |-1030|. The corresponding error should be zero.
 
 .. |-1030| replace:: -10\ :sup:`30`
 
@@ -82,8 +78,7 @@ Example file produced by script below
 Restrictions on the input workspace
 ###################################
 
-The input workspace must contain histogram data with common binning on
-all spectra.
+The input workspace must contain histogram data with common binning on all spectra.
 
 Usage
 -----

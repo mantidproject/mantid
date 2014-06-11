@@ -66,7 +66,8 @@ namespace Mantid
       }
 
       declareProperty("Separator", "CSV", boost::make_shared<StringListValidator>(sepOptions),
-        "Character(s) to put as separator between X, Y, E values.");
+        "The separator between data columns in the data file. The possible values are \"CSV\", \"Tab\", "
+        "\"Space\", \"SemiColon\", \"Colon\" or \"UserDefined\".");
 
       declareProperty(new PropertyWithValue<std::string>("CustomSeparator", "", Direction::Input),
         "If present, will override any specified choice given to Separator.");
