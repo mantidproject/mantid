@@ -57,7 +57,7 @@ There are 2 places in this algorithm that can set the value of
 | ``2. Hard coded default  ``\ :math:`2\theta`\ `` of a certain instrument.``
 
 Calculation of :math:`L_2`
-#################
+##########################
 
 -  If 2Theta (:math:`2\theta`) is given, L2 will be calculated from
    given 2Theta and L1 by

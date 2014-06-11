@@ -18,49 +18,50 @@ characters.
 Usage
 -----
 
-**Example - simple rebin of a histogram workspace:**
+**Example - correct a GSAS instrument file to 80 characters per line:**
 
-::
+.. testcode:: ExHistSimple
 
-  .. testcode:: ExHistSimple
+  # Set up default directory and file name
+  import os
 
-    # Load original file and check each line
-    rfile = open("PG3HR60_FmPython.iparm", "r")
-    lines = rfile.readlines()
-    rfile.close()
+  defaultsavepath = config["defaultsave.directory"]
+  if config.hasProperty("defaultsave.directory"):
+    defaultpath = config["defaultsave.directory"]
+  elif config.hasProperty("default.savedirectory"):
+    defaultpath = config["default.savedirectory"]
+  else:
+    defaultpath = "/tmp/"
 
-    numlinefewer80 = 0
-    for line in lines:
+  savefile = os.path.join(defaultpath, "fixed.iparm")
+
+  # Run the algorithm
+  FixGSASInstrumentFile(InputFilename="PG3HR60_FmPython.iparm", OutputFilename=savefile)
+
+  # Load new file and check each line
+  wfile = open(savefile, "r")
+  lines = wfile.readlines()
+  numlinefewer80b = 0
+  for line in lines:
+    if len(line) > 0:
+      line = line.split("\n")[0]
       if len(line) != 80:
-        numlinefewer80 += 1
+        numlinefewer80b += 1
 
-    # Run algorithm to fix the instrument file
-    FixGSASInstrumentFile(InputFilename="PG3HR60_FmPython.iparm", OutputFilename="/tmp/Fixed.iparm")
+  # Print out result
+  print "Corrected File: Number of lines that are not equal to 80 characters = ", numlinefewer80b
 
-    # Load new file and check each line
-    wfile = open("/tmp/Fixed.iparm", "r")
-    lines = wfile.readlines()
-    numlinefewer80b = 0
-    for line in lines:
-      if len(line) > 0:
-        line = line.split("\n")[0]
-        if len(line) != 80:
-          numlinefewer80b += 1
+.. testcleanup:: ExHistSimple
 
-    # Print out result
-    print "Original File: Number of lines that are not equal to 80 characters = ", numlinefewer80
-    print "Corrected File: Number of lines that are not equal to 80 characters = ", numlinefewer80b
+  # Clean
+  import os
+  os.remove(savefile)
 
-  .. testcleanup:: ExHistSimple
 
-     import os
-     os.remove("/tmp/Fixed.iparm")
+Output:
 
-  Output:
+.. testoutput:: ExHistSimple
 
-  .. testoutput:: ExHistSimple
-
-    Original File: Number of lines that are not equal to 80 characters =  1510
-    Corrected File: Number of lines that are not equal to 80 characters =  0
+  Corrected File: Number of lines that are not equal to 80 characters =  0
 
 .. categories::
