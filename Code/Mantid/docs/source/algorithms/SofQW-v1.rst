@@ -14,16 +14,20 @@ input a workspace where the data's been reduced to be in `units <Unit_Factory>`_
 of **energy transfer** against spectrum number (which can be seen as equivalent to
 angle, with the angle being taken from the detector(s) to which the
 spectrum pertains). For each detector the value of **momentum transfer**
-(:math:`Q`) is calculated, and the counts for detectors and appropriate **energy transfer** bin are
-added to the appropriate output :math:`(Q ;\Delta E)` bin.
+(:math:`Q`) is calculated, and the counts for detectors and each input 
+**energy transfer** bin are added to the appropriate output :math:`(Q ;\Delta E)` bin.
 
-The (:math:`Q`)-binning algorithm deploys is wrt detectors is the centerpoint binning. 
-Use :ref:`algm-SofQW2` and :ref:`algm-SofQW3` for more complex binning strategies.
+
+The momentum tramsfer (:math:`Q`-values) obtained for each detector are calculated
+for the detector center, so the binning algorithm uses centerpoint binning. 
+Use :ref:`algm-SofQW2` and :ref:`algm-SofQW3` for more complex and precise (but slower)
+binning strategies.
 
 The energy binning will not be changed by this algorithm, so the input
 workspace should already have the desired bins (though this axis can be
 rebinned afterwards if desired). The EMode and EFixed parameters are
 used for the calculation of :math:`Q`.
+
 
 If the input workspace is a distribution (i.e. **counts/meV** ) then the
 output workspace will similarly be divided by the bin width in both
