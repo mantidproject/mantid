@@ -40,7 +40,7 @@ Usage
 
 .. testcode:: SofQW
 
-   # create sample inelastic workspace for MARI instrument
+   # create sample inelastic workspace for MARI instrument containing 1 at all spectra values
    ws=CreateSimulationWorkspace(Instrument='MAR',BinParams='-10,1,10')
    # convert workspace into MD workspace 
    ws=SofQW(InputWorkspace=ws,QAxisBinning='-3,0.1,3',Emode='Direct',EFixed=12)
