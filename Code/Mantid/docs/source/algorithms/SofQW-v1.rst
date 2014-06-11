@@ -17,6 +17,9 @@ spectrum pertains). For each detector the value of **momentum transfer**
 (:math:`Q`) is calculated, and the counts for detectors and appropriate **energy transfer** bin are
 added to the appropriate output :math:`(Q ;\Delta E)` bin.
 
+The (:math:`Q`)-binning algorithm deploys is wrt detectors is the centerpoint binning. 
+Use :ref:`algm-SofQW2` and :ref:`algm-SofQW3` for more complex binning strategies.
+
 The energy binning will not be changed by this algorithm, so the input
 workspace should already have the desired bins (though this axis can be
 rebinned afterwards if desired). The EMode and EFixed parameters are
@@ -51,7 +54,7 @@ Usage
 
    DeleteWorkspace(ws)
    
-**Output: **
+**Output:**
 
 
 .. testoutput:: SofQW
