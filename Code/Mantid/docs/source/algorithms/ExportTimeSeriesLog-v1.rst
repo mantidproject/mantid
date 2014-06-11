@@ -31,7 +31,8 @@ Usage
   dataws = LoadNexusProcessed(Filename="PG3_2538_2k.nxs")
 
   # Create a new log
-  testprop = FloatTimeSeriesProperty("Temp")
+  import mantid.kernel as mk
+  testprop = mk.FloatTimeSeriesProperty("Temp")
 
   import random
   random.seed(10)
@@ -71,7 +72,8 @@ Output:
 .. testcode:: ExExpTempEvent
 
   # Load data
-  dataws = LoadNexusProcessed(Filename="PG3_2538_2k.nxs")
+  import mantid.kernel as mk
+  dataws = mk.LoadNexusProcessed(Filename="PG3_2538_2k.nxs")
 
   # Create a new log
   testprop = FloatTimeSeriesProperty("Temp")
