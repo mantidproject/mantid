@@ -22,10 +22,12 @@ class SANSMask(PythonAlgorithm):
     def PyInit(self):
         facilities = [ "SNS", "HFIR"]
         self.declareProperty("Facility", "SNS",
-                             StringListValidator(facilities))
+                             StringListValidator(facilities),
+                             "Facility to which the SANS instrument belongs")
 
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", 
-                                                     direction=Direction.InOut))
+                                                     direction=Direction.InOut),
+                             "Workspace to apply the mask to")
 
         self.declareProperty(IntArrayProperty("MaskedDetectorList", values=[],
                                               direction=Direction.Input),
@@ -37,7 +39,8 @@ class SANSMask(PythonAlgorithm):
         
         sides = [ "None", "Front", "Back"]
         self.declareProperty("MaskedSide", "None",
-                             StringListValidator(sides))
+                             StringListValidator(sides),
+                             "Side of the detector to which to apply the mask")
     
         self.declareProperty("OutputMessage", "", 
                              direction=Direction.Output, doc = "Output message")
