@@ -9,12 +9,12 @@
 Description
 -----------
 
-Loads the mapping table between spectra and `IDetector <IDetector>`__
+Loads the mapping table between spectra and `IDetector <http://www.mantidproject.org/IDetector>`__
 from a RAW file. It fills the
-`SpectraToDetectorMap <SpectraToDetectorMap>`__ object contained in a
-`workspace <workspace>`__. This algorithm will fail if the
-`workspace <workspace>`__ does not already point to a full
-`instrument <instrument>`__ `geometry <geometry>`__ (which usually means
+`SpectraToDetectorMap <http://www.mantidproject.org/SpectraToDetectorMap>`__ object contained in a
+`workspace <http://www.mantidproject.org/workspace>`__. This algorithm will fail if the
+`workspace <http://www.mantidproject.org/workspace>`__ does not already point to a full
+`instrument <http://www.mantidproject.org/instrument>`__ `geometry <http://www.mantidproject.org/geometry>`__ (which usually means
 it must be run after
 :ref:`algm-LoadInstrument`/:ref:`algm-LoadInstrumentFromRaw`).
 
@@ -23,5 +23,17 @@ detectors contributing to it. Alternatively the same spectrum can
 contribute to different spectra (for example in DAE2 (Data Aquisition
 Electronic) when a spectra containing electronically focussed data is
 created simultaneously with individual spectra).
+
+Usage
+-----
+
+.. testcode::
+
+  # Create a workspace
+  ws = CreateSampleWorkspace()
+  # Replace the instrument in the workspace with HRPD
+  LoadInstrument(ws,InstrumentName='HRPD')
+  # Map spectra to detectors according to an HRPD raw file.
+  LoadMappingTable('HRP39180.RAW',ws)
 
 .. categories::
