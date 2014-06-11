@@ -17,6 +17,8 @@ sys.path.insert(0, os.path.abspath('../sphinxext'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+     # we use pngmath over mathjax so that the the offline help isn't reliant on
+     # anything external and we don't need to include the large mathjax package
     'sphinx.ext.pngmath',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
@@ -55,6 +57,21 @@ pygments_style = 'sphinx'
 doctest_global_setup = """
 from mantid.simpleapi import *
 """
+
+# Run this after each test group has executed
+doctest_global_cleanup = """
+from mantid.api import FrameworkManager
+FrameworkManager.Instance().clear()
+"""
+
+# -- Options for pngmath --------------------------------------------------
+
+# Load the preview package into latex
+pngmath_latex_preamble=r'\usepackage[active]{preview}'
+
+# Ensures that the vertical alignment of equations is correct.
+# See http://sphinx-doc.org/ext/math.html#confval-pngmath_use_preview
+pngmath_use_preview = True
 
 # -- Options for HTML output ----------------------------------------------
 

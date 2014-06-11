@@ -8,9 +8,11 @@
 """
 from base import BaseDirective, algorithm_name_and_version
 
+import os
+
 CATEGORY_INDEX_TEMPLATE = "category.html"
 # relative to the directory containing the source file
-CATEGORIES_HTML_ROOT = "categories"
+CATEGORIES_DIR = "categories"
 
 class LinkItem(object):
     """
@@ -81,17 +83,14 @@ class Category(LinkItem):
     pages = None
     # Collection of PageRef objects that form subcategories of this category
     subcategories = None
-    # Set to non-empty string to indicate a subdirectory for the final output
-    namespace = ""
 
-    def __init__(self, name, docname, namespace):
+    def __init__(self, name, docname):
         super(Category, self).__init__(name, docname)
 
         # override default link
         self.link = "../categories/%s.html" % name
         self.pages = set([])
         self.subcategories = set([])
-        self.namespace = namespace
 
 #endclass
 
@@ -183,11 +182,9 @@ class CategoriesDirective(BaseDirective):
         if not hasattr(env, "categories"):
             env.categories = {}
 
-        # If no arguments currently assume algorithm
-        if len(self.arguments) == 0:
-            namespace = "algorithms"
-        else:
-            namespace = ""
+        # convert current document path to relative path from cfgdir
+        docdir = os.path.dirname(env.docname)
+        cfgdir = os.path.relpath(env.srcdir, start=os.path.join(env.srcdir, docdir))
 
         link_rst = ""
         ncategs = 0
@@ -201,7 +198,7 @@ class CategoriesDirective(BaseDirective):
             parent = None
             for index, categ_name in enumerate(categs):
                 if categ_name not in env.categories:
-                    category = Category(categ_name, env, namespace)
+                    category = Category(categ_name, env)
                     env.categories[categ_name] = category
                 else:
                     category = env.categories[categ_name]
@@ -209,13 +206,11 @@ class CategoriesDirective(BaseDirective):
 
                 category.pages.add(PageRef(page_name, env.docname))
                 if index > 0: # first is never a child
-                    parent.subcategories.add(Category(categ_name, env.docname, namespace))
+                    parent.subcategories.add(Category(categ_name, env.docname))
                 #endif
 
-                category_dir = CATEGORIES_HTML_ROOT
-                if namespace != "":
-                    category_dir += "/" + namespace
-                link_rst += "`%s <../%s/%s.html>`_ | " % (categ_name, category_dir, categ_name)
+                category_dir = cfgdir + "/" + CATEGORIES_DIR
+                link_rst += "`%s <%s/%s.html>`_ | " % (categ_name, category_dir, categ_name)
                 ncategs += 1
                 parent = category
             # endfor
@@ -272,9 +267,7 @@ def create_category_pages(app):
         context["subcategories"] = sorted(category.subcategories, key = lambda x: x.name[0])
         context["pages"] = sorted(category.pages, key = lambda x: x.name[0])
 
-        outdir = CATEGORIES_HTML_ROOT + "/"
-        if category.namespace != "":
-            outdir += category.namespace + "/"
+        outdir = CATEGORIES_DIR + "/"
         yield (outdir + name, context, template)
 # enddef
 

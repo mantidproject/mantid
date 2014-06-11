@@ -72,10 +72,6 @@ Usage
 
    print("The 51st y-value is: %.3f" % ws.readY(0)[50])
 
-.. testcleanup:: ExHRPDFocussing
-
-   DeleteWorkspace(ws)
-
 Output:
 
 .. testoutput:: ExHRPDFocussing
@@ -95,10 +91,6 @@ Output:
 
    print "Number of focussed spectra: " + str(ws.getNumberHistograms())
    print "What type is the workspace after focussing: " + str(type(ws))
-
-.. testcleanup:: ExEventFocussing
-
-   DeleteWorkspace(ws)
 
 Output:
 

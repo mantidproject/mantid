@@ -10,10 +10,10 @@ Description
 -----------
 
 This algorithm performs dense binning of the events in multiple
-dimensions of an input `MDEventWorkspace <MDEventWorkspace>`__ and
-places them into a dense MDHistoWorkspace with 1-4 dimensions.
+dimensions of an input `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`__ and
+places them into a dense `MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`__ with 1-4 dimensions.
 
-The input MDEventWorkspace may have more dimensions than the number of
+The input `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`__ may have more dimensions than the number of
 output dimensions. The names of the dimensions in the DimX, etc.
 parameters are used to find the corresponding dimensions that will be
 created in the output.
@@ -89,11 +89,11 @@ dimensions!
 Binning a MDHistoWorkspace
 ##########################
 
-It is possible to rebin a `MDHistoWorkspace <MDHistoWorkspace>`__. Each
-MDHistoWorkspace holds a reference to the
-`MDEventWorkspace <MDEventWorkspace>`__ that created it, as well as the
+It is possible to rebin a `MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`__. Each
+`MDHistoWorkspace <http://www.mantidproject.org/MDHistoWorkspace>`__ holds a reference to the
+`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`__ that created it, as well as the
 coordinate transformation that was used. In this case, the rebinning is
-actually performed on the original MDEventWorkspace, after suitably
+actually performed on the original `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`__, after suitably
 transforming the basis vectors.
 
 Only the non-axis aligned binning method can be performed on a
@@ -102,11 +102,9 @@ dimensions, which is equivalent.
 
 For more details on the coordinate transformations applied in this case,
 please see `BinMD Coordinate
-Transformations <BinMD Coordinate Transformations>`__.
+Transformations <http://www.mantidproject.org/BinMD_Coordinate_Transformations>`__.
 
 .. figure:: /images/BinMD_Coordinate_Transforms_withLine.png
    :alt: BinMD_Coordinate_Transforms_withLine.png
-
-   BinMD\_Coordinate\_Transforms\_withLine.png
 
 .. categories::

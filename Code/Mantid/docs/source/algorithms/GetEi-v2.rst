@@ -39,12 +39,15 @@ peak height locations. The half height points are found as follows:
    arrival time of the neutrons
 
 The above process is illustrated on a peak is shown below in the image
-below |Monitor Peak\|centre\|618px|
+below.
+
+.. image:: /images/Monitorspect_getei.jpg
+   :align: center
+   :width: 618 px
+   :alt: Monitor Peak	
 
 The distances between the monitors are read from the instrument
 definition file. It is assumed that the source and the monitors all lie
 on one line and that the monitors have the same delay time.
-
-.. |Monitor Peak\|centre\|618px| image:: /images/Monitorspect_getei.jpg
 
 .. categories::

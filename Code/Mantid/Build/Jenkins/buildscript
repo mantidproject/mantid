@@ -35,10 +35,11 @@ if [[ ${JOB_NAME} == *clean* ]]; then
   # Set some variables relating to the linux packages created from clean builds
   if [[ $(uname) != 'Darwin' ]]; then
     if [[ ${JOB_NAME} == *master* ]]; then
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF"
+      SUFFIX=nightly
     elif [[ ${JOB_NAME} == *develop* ]]; then
-      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF"
+      SUFFIX=unstable
     fi
+    PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantid${SUFFIX} -DCPACK_PACKAGE_SUFFIX=${SUFFIX} -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=True"
   fi
 fi
 
@@ -79,11 +80,19 @@ $SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure -E M
 $SCL_ON_RHEL6 "ctest --output-on-failure -R MantidPlot"
 
 ###############################################################################
-# Build the documentation - tests first then html
-# Only rhel6 nodes to avoid redundant work
+# Documentation
+# Only run tests on RHEL6 incremental but have to build html on all platforms
+# for a clean build so that it can be packaged
 ###############################################################################
 if [[ "$ON_RHEL6" == true ]]; then
   $SCL_ON_RHEL6 "make docs-test"
+fi
+if [[ "$CLEANBUILD" == true ]]; then
+  # Workaround so that the html target can find the properties file
+  # CMake doesn't easily allow environment variables on custom targets
+  if [[ $(uname) == 'Darwin' ]]; then
+    export MANTIDPATH=$PWD/bin
+  fi
   $SCL_ON_RHEL6 "make docs-html"
 fi
 
