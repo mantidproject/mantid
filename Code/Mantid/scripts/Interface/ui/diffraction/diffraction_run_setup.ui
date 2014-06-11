@@ -563,22 +563,37 @@
               </property>
               <item>
                <property name="text">
-                <string>gsas</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
                 <string>fullprof</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>gsas and fullprof</string>
+                <string>gsas</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>nexus</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>topas</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>gsas and fullprof and topas</string>
                </property>
               </item>
               <item>
                <property name="text">
                 <string>gsas and fullprof and pdfgetn</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>gsas and fullprof and pdfgetn and topas</string>
                </property>
               </item>
              </widget>
