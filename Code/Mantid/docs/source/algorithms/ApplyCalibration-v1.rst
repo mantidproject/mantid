@@ -31,9 +31,9 @@ Usage
    # We use HRP workspace, which has detectors that are not rectangular.
    ws = Load("HRP39180.raw")
 
-   spectra = [0, 1, 3]
+   spectra = [0, 1, 3] # Spectra of detectors to be moved
 
-   # Show positions before calibration (spectrum = ID-9)
+   # Show positions before calibration
    for i in spectra:
         det = ws.getDetector(i)
         print "Position of Detector ID=%i before ApplyCalibration: %.0f,%.0f,%.0f" % (det.getID(), 
