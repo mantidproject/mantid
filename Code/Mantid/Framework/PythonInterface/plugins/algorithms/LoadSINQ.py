@@ -1,5 +1,5 @@
 #--------------------------------------------------------------
-# Algorithm which loads a SINQ file. 
+# Algorithm which loads a SINQ file.
 # This algorithm calculates the filename from instrument
 # year and filenumber and then goes away to call
 # LoadSINQFile
@@ -60,6 +60,7 @@ class LoadSINQ(PythonAlgorithm):
         filename= '%03d/%s%04dn%06d.hdf' % (hun,instmap[inst],year,num)
         fullpath= '%s/%04d/%s/%s' % (datapath,year,instmap[inst],filename)
         wname = "__tmp" #hidden
+        ws = None # Holds the workspace later
         if os.path.exists(fullpath):
             ws = mantid.simpleapi.LoadSINQFile(fullpath,inst,OutputWorkspace=wname)
         else:
@@ -69,8 +70,11 @@ class LoadSINQ(PythonAlgorithm):
                 fullpath = '%s/%s' % (entry, filename)
                 if os.path.exists(fullpath):
                     ws = mantid.simpleapi.LoadSINQFile(fullpath,inst,OutputWorkspace=wname)
-                    return
-            raise Exception('File %s NOT found!' % filename)
+                    break
+
+            # If ws is still "None" at this point, the file was not found.
+            if ws is None:
+                raise Exception('File %s NOT found!' % filename)
 
         self.setProperty("OutputWorkspace",ws)
         mantid.simpleapi.DeleteWorkspace(wname)
