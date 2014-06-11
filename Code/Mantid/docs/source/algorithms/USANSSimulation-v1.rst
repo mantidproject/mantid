@@ -9,7 +9,8 @@
 Description
 -----------
 
-Simulate a USANS workspace.
+Simulate a USANS workspace. This algorithm is used to test the USANS
+reduction during development while no real data is available.
 
 A matrix workspace is created for a given analyzer angle. A list of
 wavelength peaks coming out of the monochromator can be specified. The
@@ -22,5 +23,8 @@ The amplitude of the signal in the main detector is given by a sphere
 model.
 
 A monitor workspace is created with a fake beam profile.
+
+**Note**: This algorithm can take a very long time to execute and is
+of limited use for non-developers.
 
 .. categories::
