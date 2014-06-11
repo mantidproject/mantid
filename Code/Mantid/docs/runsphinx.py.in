@@ -1,23 +1,29 @@
 """We need to run Sphinx inside MantidPlot to document the internal
-   module. This script calls the sphinx entry point with the necessary 
+   module. This script calls the sphinx entry point with the necessary
    arguments
 """
 import os
 import sys
 
-# set environment
-screenshots_dir = "@SCREENSHOTS_DIR@"
-if screenshots_dir != "":
-    os.environ["SCREENSHOTS_DIR"] = screenshots_dir
+def main():
+    # Update environment with screenshots path
+    screenshots_dir = "@SCREENSHOTS_DIR@"
+    if screenshots_dir != "":
+        os.environ["SCREENSHOTS_DIR"] = screenshots_dir
 
-builder = "@BUILDER@"
-src_dir = "@CMAKE_CURRENT_SOURCE_DIR@/source"
-sphinx_build_dir = "@SPHINX_BUILD_DIR@"
-output_dir = os.path.join(sphinx_build_dir, builder)
-doctree_dir = os.path.join(sphinx_build_dir, "doctrees")
+    builder = "@BUILDER@"
+    src_dir = "@CMAKE_CURRENT_SOURCE_DIR@/source"
+    sphinx_build_dir = "@SPHINX_BUILD_DIR@"
+    output_dir = os.path.join(sphinx_build_dir, builder)
+    doctree_dir = os.path.join(sphinx_build_dir, "doctrees")
+
+    import sphinx
+    argv = [sys.executable, "-b", builder, "-d", doctree_dir, src_dir, output_dir]
+
+    # run
+    sys.exit(sphinx.main(argv))
+
+##################################################################################
 
 if __name__ == "__main__":
-    from sphinx import main
-    argv = [sys.executable, "-b", builder, "-d", doctree_dir, src_dir, output_dir]
-    sys.exit(main(argv))
-
+    main()
