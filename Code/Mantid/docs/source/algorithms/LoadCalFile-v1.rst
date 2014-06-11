@@ -10,8 +10,7 @@ Description
 -----------
 
 This algorithm loads an ARIEL-style 5-column ASCII .cal file into up to
-3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or
-MaskWorkspace.
+3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.
 
 The format is
 
