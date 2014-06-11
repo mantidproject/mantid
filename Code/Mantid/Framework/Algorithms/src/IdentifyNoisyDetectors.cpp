@@ -18,8 +18,10 @@ void IdentifyNoisyDetectors::init()
   wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,wsVal));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input/*,wsVal*/));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output));
+  declareProperty("RangeLower", 2000.0,"The lower integration range");
+  declareProperty("RangeUpper", 19000.0,"The upper integration range");
 }
 
 void IdentifyNoisyDetectors::exec()
@@ -29,8 +31,8 @@ void IdentifyNoisyDetectors::exec()
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
   const int nHist = static_cast<int>(inputWS->getNumberHistograms());
 
-  const double rangeLower = 2000;
-  const double rangeUpper = 19000;
+  const double rangeLower = getProperty("RangeLower");
+  const double rangeUpper = getProperty("RangeUpper");
   const double steps = rangeUpper - rangeLower;
   
   // Create the output workspace a single value for each spectra.
