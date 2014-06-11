@@ -9,11 +9,10 @@
 Description
 -----------
 
-Computes I(Qx,Qy) for EQSANS data using Qxy to each frame, as
-appropriate.
+Workflow algorithm that computes I(Qx,Qy) for EQSANS data using 
+`Qxy <http://www.mantidproject.org/Qxy>`_ for each frame, as appropriate.
 
-See `SANS
-Reduction <http://www.mantidproject.org/Reduction_for_HFIR_SANS>`__
-documentation for details.
+This algorithm is rarely called directly. It is called by 
+`SANSReduction <http://www.mantidproject.org/SANSReduction>`_.
 
 .. categories::
