@@ -73,10 +73,10 @@ Output:
 
   # Load data
   import mantid.kernel as mk
-  dataws = mk.LoadNexusProcessed(Filename="PG3_2538_2k.nxs")
+  dataws = LoadNexusProcessed(Filename="PG3_2538_2k.nxs")
 
   # Create a new log
-  testprop = FloatTimeSeriesProperty("Temp")
+  testprop = mk.FloatTimeSeriesProperty("Temp")
 
   import random
   random.seed(10)
