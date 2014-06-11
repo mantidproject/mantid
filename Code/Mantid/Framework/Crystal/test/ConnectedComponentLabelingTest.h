@@ -15,6 +15,7 @@
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/HardThresholdBackground.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MockObjects.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
@@ -56,20 +57,6 @@ namespace
 class ConnectedComponentLabelingTest: public CxxTest::TestSuite
 {
 private:
-
-  // Mock Background strategy
-  class MockBackgroundStrategy: public BackgroundStrategy
-  {
-  public:
-    MOCK_CONST_METHOD1(configureIterator, void(Mantid::API::IMDIterator* const));
-    MOCK_CONST_METHOD1(isBackground, bool(Mantid::API::IMDIterator* const));
-    MockBackgroundStrategy* clone() const
-    {
-      throw std::runtime_error("Cannot clone the mock object");
-    }
-    virtual ~MockBackgroundStrategy()
-    {}
-  };
 
   const size_t m_emptyLabel;
 

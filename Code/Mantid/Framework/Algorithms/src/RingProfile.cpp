@@ -1,40 +1,3 @@
-/*WIKI*
-RingProfile sums the counts against a ring.
-
-Below, there is an example of the execution of the RingProfile to a [[Workspace2D]] where the position of the pixels are not associated 
-to detector positions, but it is derived from the [[Interacting_with_Matrix_Workspaces#Axes | Axes]]. 
-
-[[File:ExecuteRingProfile.png | 800px]]
-
-The image below shows a visual interpretation for the inputs of the algorithm
-
-[[File:RingProfileInputsView.png]]
-
-The algorithm goes through each pixel and find its distance from the center. If it relies inside the defined ring, it checks the angle 
-between the pixel position and the center and uses this information to define the bin where to put the count for that pixel. 
-
-The RingProfile is also defined for Workspace2D which has the positions based on the detectors, as you can see in the picture below.
-
-[[File:RingProfileInstrument.png | 800px ]]
-
-In this case, the inputs of the algorithm is like the image below
-
-[[File:Ringprofileinstrument.png]]
-
-The algorithm does to each spectrum, get the associated detector from which it get the positions. From the positions it work out if it belongs or not to the ring and in which bin it must be placed. It finally accumulate all the spectrum values inside the target bin.
-
-It is possible to setup the ''StartAngle'' from where to starting the Ring as well as the Sense, if in clockwise direction or anti-clockwise direction. But, 
-the resulting workspace will always place the bins in a relative angle position from the start. Which means that for anti-clockwise sense, the real 3D angle 
-is: 
-
-RealAngle = StartAngle + Angle
-
-While for clockwise sense, the real 3D angle is: 
-
-RealAngle = StartAngle - Angle
-
-*WIKI*/
-
 #include "MantidAlgorithms/RingProfile.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
@@ -75,12 +38,6 @@ namespace Algorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void RingProfile::initDocs()
-  {
-    this->setWikiSummary("Calculates the sum of the counts against a circular ring.");
-    this->setOptionalMessage("Calculates the sum of the counts against a circular ring.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

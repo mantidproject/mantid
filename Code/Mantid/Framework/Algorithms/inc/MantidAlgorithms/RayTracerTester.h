@@ -42,6 +42,9 @@ namespace Algorithms
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "RayTracerTester";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Algorithm to test ray tracer by spraying evenly spaced rays around.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -51,8 +54,7 @@ namespace Algorithms
     void exec();
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
 

@@ -1,32 +1,9 @@
-/*WIKI* 
-
-This algorithms is useful for increasing the time resolution of spectra whose bins have large numbers of counts which vary smoothly e.g. monitor spectra.
-
-The "params" property defines the new bin boundaries using the same syntax as in [[Rebin]]. That is, the first number is the first bin boundary and the second number is the width of the bins. Bins are created until the third number would be exceeded, the third number is the x-value of the last bin. There can be further pairs of numbers, the first in the pair will be the bin width and the last number the last bin boundary. 
-
-The bin immediately before the specified boundaries <math>x_2</math>, <math>x_3</math>, ... <math>x_i</math> is likely to have a different width from its neighbors because there can be no gaps between bins. Rebin ensures that any of these space filling bins cannot be less than 25% or more than 125% of the width that was specified.
-
-To calculate the y-values the input spectra are approximated with a time series where the value at the center of each bin mean is the mean count rate over the bin. This series is interpolated by calculating cubic splines that fit this series and evaluating the splines at the centers of the requested bin. The splines have natural boundary conditions and zero second derivative at the end points, they are calculated using the [http://www.gnu.org/software/gsl/manual/html_node/Interpolation-Types.html gsl].
-
-The errors on the count rates are estimated as a weighted mean of the errors values for the nearest input bin centers. These weights are inversely proportional to the distance of the output bin center to the respective input bin data points.
-
-=== Example Rebin param strings ===
-The same syntax as for [[Rebin]]
-;0,100,20000
-:From 0 rebin in constant size bins of 100 up to 20,000
-;0,100,10000,200,20000
-:From 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
- OutWS = InterpolatingRebin("InWS2","x1,dx1,x2")
-
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/InterpolatingRebin.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_interp.h>
@@ -40,13 +17,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(InterpolatingRebin)
     
-    /// Sets documentation strings for this algorithm
-    void InterpolatingRebin::initDocs()
-    {
-      this->setWikiSummary("Creates a workspace with different x-value bin boundaries where the new y-values are estimated using cubic splines. ");
-      this->setOptionalMessage("Creates a workspace with different x-value bin boundaries where the new y-values are estimated using cubic splines.");
-    }
-    
 
     using namespace Kernel;
     using namespace API;
@@ -56,7 +26,21 @@ namespace Mantid
     */
     void InterpolatingRebin::init()
     {
-      Rebin::init();
+      declareProperty(
+        new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+        "Workspace containing the input data");
+      declareProperty(
+        new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+        "The name to give the output workspace");
+
+      declareProperty(
+        new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>()),
+        "A comma separated list of first bin boundary, width, last bin boundary. Optionally "
+        "this can be followed by a comma and more widths and last boundary pairs. "
+        "Optionally this can also be a single number, which is the bin width. "
+        "In this case, the boundary of binning will be determined by minimum and maximum TOF "
+        "values among all events, or previous binning boundary, in case of event Workspace, or "
+        "non-event Workspace, respectively. Negative width values indicate logarithmic binning. ");
     }
 
     /** Executes the rebin algorithm
@@ -65,16 +49,16 @@ namespace Mantid
     */
     void InterpolatingRebin::exec()
     {
-      // retrieve the properties
-      std::vector<double> rb_params=getProperty("Params");
+      // Get the input workspace
+      MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
 
+      // retrieve the properties
+      std::vector<double> rb_params = Rebin::rebinParamsFromInput(getProperty("Params"), *inputW, g_log);
       MantidVecPtr XValues_new;
       // create new output X axis
       const int ntcnew =
         VectorHelper::createAxisFromRebinParams(rb_params,XValues_new.access());
 
-      // Get the input workspace
-      MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
       const int nHists = static_cast<int>(inputW->getNumberHistograms());
       // make output Workspace the same type as the input but with the new axes
       MatrixWorkspace_sptr outputW =

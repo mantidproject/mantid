@@ -19,15 +19,13 @@ set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check whether this is a clean build (must have 'clean' in the job name)
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set DOC_IMAGES=
+set PACKAGE_DOCS=
 if "%JOB_NAME%"=="%JOB_NAME:clean=%" (
     set CLEANBUILD=no
 ) else  (
     set CLEANBUILD=yes
+    set PACKAGE_DOCS=-DPACKAGE_DOCS=True
     rmdir /S /Q build
-    if NOT "%JOB_NAME%"=="%JOB_NAME:master=%" (
-        set DOC_IMAGES=-DQT_ASSISTANT_FETCH_IMAGES=ON
-    )
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -39,7 +37,8 @@ cd %WORKSPACE%\build
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G "Visual Studio 11 Win64" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DUSE_PRECOMPILED_HEADERS=ON %DOC_IMAGES% ..\Code\Mantid
+"C:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G "Visual Studio 11 Win64" -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=%PARAVIEW_DIR% -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_DOCS% ..\Code\Mantid
+if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
@@ -51,13 +50,19 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Run the tests
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 "C:\Program Files (x86)\CMake 2.8\bin\ctest.exe" -C Release -j%BUILD_THREADS% --schedule-random --output-on-failure -E MantidPlot
+if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: Run GUI tests serially
 ctest -C Release --output-on-failure -R MantidPlot
+if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the install kit if this is a clean build
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if "%CLEANBUILD%" EQU "yes" (
-    msbuild /nologo /m:%BUILD_THREADS% /nr:false /p:Configuration=Release docs/qtassistant/qtassistant.vcxproj
+    :: Build offline documentation
+    msbuild /nologo /nr:false /p:Configuration=Release docs/docs-html.vcxproj
+
+    :: ignore errors as the exit code of the build isn't correct
+    ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
     cpack -C Release --config CPackConfig.cmake
 )

@@ -227,6 +227,78 @@ public:
 
   }
 
+  void test_all_output()
+  {
+    auto ws2 = createTestWorkspace(true);
+
+    API::IFunction_sptr fun(new Polynomial);
+    fun->setAttributeValue("n",1);
+
+    Fit fit;
+    fit.initialize();
+
+    fit.setProperty("Function",fun);
+    fit.setProperty("InputWorkspace",ws2);
+    fit.setProperty("WorkspaceIndex",0);
+    fit.setProperty("Output","out");
+
+    fit.execute();
+
+    TS_ASSERT(fit.isExecuted());
+
+    TS_ASSERT( Mantid::API::AnalysisDataService::Instance().doesExist( "out_Workspace" ) );
+    TS_ASSERT( Mantid::API::AnalysisDataService::Instance().doesExist( "out_Parameters" ) );
+
+    Mantid::API::AnalysisDataService::Instance().clear();
+
+  }
+
+  void test_output_parameters_only()
+  {
+    auto ws2 = createTestWorkspace(true);
+
+    API::IFunction_sptr fun(new Polynomial);
+    fun->setAttributeValue("n",1);
+
+    Fit fit;
+    fit.initialize();
+
+    fit.setProperty("Function",fun);
+    fit.setProperty("InputWorkspace",ws2);
+    fit.setProperty("WorkspaceIndex",0);
+    fit.setProperty("Output","out");
+    fit.setProperty("OutputParametersOnly",true);
+
+    fit.execute();
+
+    TS_ASSERT(fit.isExecuted());
+
+    TS_ASSERT( ! Mantid::API::AnalysisDataService::Instance().doesExist( "out_Workspace" ) );
+    TS_ASSERT( Mantid::API::AnalysisDataService::Instance().doesExist( "out_Parameters" ) );
+
+    Mantid::API::AnalysisDataService::Instance().clear();
+
+  }
+
+  void test_createDomain_creates_FunctionDomain1DSpectrum()
+  {
+    MatrixWorkspace_sptr ws2 = createTestWorkspace(true);
+
+    FunctionDomain_sptr domain;
+    FunctionValues_sptr values;
+
+    FitMW fitmw;
+    fitmw.setWorkspace( ws2 );
+    fitmw.setWorkspaceIndex( 1 );
+    fitmw.createDomain( domain, values );
+
+    FunctionDomain1DSpectrum* specDom = dynamic_cast<FunctionDomain1DSpectrum*>(domain.get());
+    TS_ASSERT( specDom );
+    TS_ASSERT_EQUALS(specDom->getWorkspaceIndex(), 1);
+    TS_ASSERT_EQUALS(specDom->size(), ws2->blocksize());
+
+  }
+
   void test_create_SeqDomain()
   {
     MatrixWorkspace_sptr ws2(new WorkspaceTester);

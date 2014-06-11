@@ -1,11 +1,3 @@
-/*WIKI*
-
-Download a file from a remote compute resource.
-
-For more details, see the [[Remote_Job_Submission_API|remote job submission API docs]].
-
-*WIKI*/
-
 #include "MantidRemoteAlgorithms/DownloadRemoteFile.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -31,13 +23,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
-// It is used to print out information, warning and error messages
-
-void DownloadRemoteFile::initDocs()
-{
-  this->setWikiSummary("Download a file from a remote compute resource.");
-  this->setOptionalMessage("Download a file from a remote compute resource.");
-}
 
 void DownloadRemoteFile::init()
 {

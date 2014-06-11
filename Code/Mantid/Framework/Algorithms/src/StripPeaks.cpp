@@ -1,13 +1,3 @@
-/*WIKI* 
-
-
-This algorithm is intended to automatically find all the peaks in a dataset and subtract them, leaving just the residual 'background'. 
-
-====ChildAlgorithms used====
-The [[FindPeaks]] algorithm is used to identify the peaks in the data.
-
-
-*WIKI*/
 #include "MantidAlgorithms/StripPeaks.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -22,13 +12,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(StripPeaks)
-
-/// Sets documentation strings for this algorithm
-void StripPeaks::initDocs()
-{
-  this->setWikiSummary("This algorithm attempts to find all the peaks in all spectra of a workspace and subtract them from the data, leaving just the 'background'. ");
-  this->setOptionalMessage("This algorithm attempts to find all the peaks in all spectra of a workspace and subtract them from the data, leaving just the 'background'.");
-}
 
 
 using namespace Kernel;
@@ -137,8 +120,14 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
   findpeaks->setProperty<double>("PeakPositionTolerance", peakpostol);
   findpeaks->setProperty<bool>("RawPeakParameters", true);
 
+  findpeaks->executeAsChildAlg();
+
+  ITableWorkspace_sptr peaklistws = findpeaks->getProperty("PeaksList");
+  if (!peaklistws)
+    throw std::runtime_error("Algorithm FindPeaks() returned a NULL pointer for table workspace 'PeaksList'.");
+
   std::stringstream infoss;
-  infoss << "Call FindPeaks() with parameters: \n";
+  infoss << "Call FindPeaks() to find " << peakpositions.size() << " peaks with parameters: \n";
   infoss << "\t FWHM            = " << fwhm << ";\n";
   infoss << "\t Tolerance       = " << tolerance << ";\n";
   infoss << "\t HighBackground  = " << highbackground << ";\n";
@@ -150,10 +139,11 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
       if (i < peakpositions.size() - 1)
         infoss << ", ";
   }
+  infoss << ")\n"
+         << "Returned number of fitted peak = " << peaklistws->rowCount() << ".";
   g_log.information(infoss.str());
 
-  findpeaks->executeAsChildAlg();
-  return findpeaks->getProperty("PeaksList");
+  return peaklistws;
 }
 
 /** If a peak was successfully fitted, it is subtracted from the data.
@@ -191,9 +181,9 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     const MantidVec &X = outputWS->readX(peakslist->getRef<int>("spectrum",i));
     MantidVec &Y = outputWS->dataY(peakslist->getRef<int>("spectrum",i));
     // Get back the gaussian parameters
-    const double height = peakslist->getRef<double>("f0.Height",i);
-    const double centre = peakslist->getRef<double>("f0.PeakCentre",i);
-    const double width = peakslist->getRef<double>("f0.Sigma",i);
+    const double height = peakslist->getRef<double>("Height",i);
+    const double centre = peakslist->getRef<double>("PeakCentre",i);
+    const double width = peakslist->getRef<double>("Sigma",i);
     const double chisq = peakslist->getRef<double>("chi2", i);
     // These are some heuristic rules to discard bad fits.
     // Hope to be able to remove them when we have better fitting routine
@@ -203,20 +193,22 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     }
     if ( chisq > m_maxChiSq)
     {
+      g_log.information() << "Error for fit peak at " << centre << " is " << chisq
+                          << ", which exceeds allowed value " << m_maxChiSq << "\n";
       if (chisq != DBL_MAX)
         g_log.error() << "StripPeaks():  Peak Index = " << i << " @ X = " << centre
                       << "  Error: Peak fit with too high of chisq " << chisq << " > " << m_maxChiSq << "\n";
       continue;
     }
-    else if (chisq <= 0.)
+    else if (chisq < 0.)
     {
       g_log.warning() << "StripPeaks():  Peak Index = " << i << " @ X = " << centre
                       << ". Error: Peak fit with too wide peak width" << width
                       << " denoted by chi^2 = " << chisq << " <= 0. \n";
     }
 
-    g_log.debug() << "Subtracting peak " << i << " from spectrum " << peakslist->getRef<int>("spectrum",i)
-                  << " at x = " << centre << " h = " << height << " s = " << width << " chi2 = " << chisq << "\n";
+    g_log.information() << "Subtracting peak " << i << " from spectrum " << peakslist->getRef<int>("spectrum",i)
+                        << " at x = " << centre << " h = " << height << " s = " << width << " chi2 = " << chisq << "\n";
 
     // Loop over the spectrum elements
     const int spectrumLength = static_cast<int>(Y.size());
@@ -225,8 +217,8 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
       // If this is histogram data, we want to use the bin's central value
       double x = (isHistogramData ? 0.5*(X[j]+X[j+1]) : X[j]);
       // Skip if not anywhere near this peak
-      if ( x < centre-3.0*width ) continue;
-      if ( x > centre+3.0*width ) break;
+      if ( x < centre-5.0*width ) continue;
+      if ( x > centre+5.0*width ) break;
       // Calculate the value of the Gaussian function at this point
       const double funcVal = height*exp(-0.5*pow((x-centre)/width,2));
       // Subtract the calculated value from the data

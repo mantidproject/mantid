@@ -1,12 +1,3 @@
-/*WIKI*
-Algorithm that will run a snippet of python code.
-This is meant to be used by [[LoadLiveData]] to perform some processing.
-
-The input & output workspaces can be accessed from the Python code using the variable
-names 'input' & 'output' respectively.
-
-*WIKI*/
-
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "MantidPythonInterface/kernel/Environment/Threading.h"
@@ -34,12 +25,8 @@ namespace Mantid
     /// Algorithm's category for identification. @see Algorithm::category
     const std::string RunPythonScript::category() const { return "DataHandling\\LiveData\\Support"; }
 
-    /// Sets documentation strings for this algorithm
-    void RunPythonScript::initDocs()
-    {
-      this->setWikiSummary("Executes a snippet of Python code");
-      this->setOptionalMessage("Executes a snippet of Python code");
-    }
+    /// @copydoc Algorithm::summary
+    const std::string RunPythonScript::summary() const { return "Executes a snippet of Python code"; }
 
     /** 
      * Override standard group behaviour so that the algorithm is only

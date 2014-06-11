@@ -1,11 +1,3 @@
-/*WIKI*
-The algorithm will calculate a proton_charge weighted average and standard deviation of any log value of numeric series type.
-All proton charges earlier than the first data are ignored. Any proton pulse is counted for the log value on the right. This
-means that if all proton pulses happen before the first value, and FixZero is false, the average and standard deviations are NANs.
-If all the proton pulses occur after the last value, and FixZero is false, the average is equal to the last value, and the
-standard deviation is zero.
-*WIKI*/
-
 #include "MantidAlgorithms/AverageLogData.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 using namespace Mantid::Kernel;
@@ -44,15 +36,6 @@ namespace Algorithms
   
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string AverageLogData::category() const { return "DataHandling\\Logs";}
-
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void AverageLogData::initDocs()
-  {
-    std::string summary = "Computes the proton charge averaged value of a given log.";
-    this->setWikiSummary(summary);
-    this->setOptionalMessage(summary);
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

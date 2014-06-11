@@ -1,10 +1,3 @@
-"""*WIKI* 
-
-This algorithm allows a single spectrum to be extracted from a range of workspaces and placed into a single workspace for comparison and plotting.  The LabelUsing property allows you to control what the end labels applied to each spectra will be.  The default is to use the source workspace name, but you can specify the name of a log value to use as the label, e.g. Temp_Sample.  the LabelValue property allows control of how a single value is extracted from time series logs.
-
-*WIKI*"""
-
-
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -23,9 +16,10 @@ class ConjoinSpectra(PythonAlgorithm):
     def name(self):
         return "ConjoinSpectra"
 
+    def summmary(self):
+        return "Joins individual spectra from a range of workspaces into a single workspace for plotting or further analysis."
+        
     def PyInit(self):
-        self.setWikiSummary("Joins individual spectra from a range of workspaces into a single workspace for plotting or further analysis.")
-        self.setOptionalMessage("Joins individual spectra from a range of workspaces into a single workspace for plotting or further analysis.")
         self.declareProperty("InputWorkspaces","", validator=StringMandatoryValidator(), doc="Comma seperated list of workspaces to use, group workspaces will automatically include all members.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), doc="Name the workspace that will contain the result")
         self.declareProperty("WorkspaceIndex", 0, doc="The workspace index of the spectra in each workspace to extract. Default: 0")

@@ -96,12 +96,11 @@ public:
 	}
   Mantid::Kernel::V3D getHKL() const
   {
-    using namespace Mantid::Kernel;
     if(_hkls.size() != 1)
     {
       throw std::logic_error("Expecting a single HKL value for each peak. Refinement incomplete.");
     }
-    V3D result = V3D(_hkls.begin()->_h, _hkls.begin()->_k, _hkls.begin()->_l);
+    Kernel::V3D result = Kernel::V3D(_hkls.begin()->_h, _hkls.begin()->_k, _hkls.begin()->_l);
     return result;
   }
   size_t candidateHKLSize() const
@@ -179,6 +178,9 @@ public:
   virtual ~IndexSXPeaks() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "IndexSXPeaks";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Takes a PeaksWorkspace and a B-Matrix and determines the HKL values corresponding to each Single Crystal peak. Sets indexes on the input/output workspace.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
@@ -190,7 +192,6 @@ private:
   void cullHKLs(std::vector<PeakCandidate>& peaksCandidates, Mantid::Geometry::UnitCell& unitcell);
   //Helper method used to check that not all peaks are colinear.
   void validateNotColinear(std::vector<PeakCandidate>& peakCandidates) const;
-  void initDocs();
   // Overridden Algorithm methods
   void init();
   //

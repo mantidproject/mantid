@@ -28,6 +28,42 @@ namespace
   // For all methods below we have to extract specific types from Python to C++.
   // We choose to support only Python float arrays (C++ double)
 
+  
+  /**
+   * Return true if the array contains float data. Equivalent to 
+   * PyArray_ISFLOAT but uses correct constness for numpy >= 1.7
+   * @param obj A pointer to a numpy array as a plain Python object
+   * @return True if the array contains float data
+   */
+  bool isFloatArray(PyObject *obj)
+  {
+    #if NPY_API_VERSION >= 0x00000007 //1.7
+      return PyArray_ISFLOAT((const PyArrayObject *)obj);
+    #else
+      return PyArray_ISFLOAT((PyArrayObject *)obj);
+    #endif  
+  }
+
+  /**
+   * Return true if the two arrays contains the same type. Equivalent
+   * to (PyARRAY_TYPE == PyArray_TYPE) but ses correct constness 
+   * for numpy >= 1.7
+   * @param first A pointer to a numpy array as a plain Python object
+   * @param second A pointer to a numpy array as a plain Python object
+   * @return True if the array contains float data
+   */
+  bool typesEqual(PyObject *first, PyObject *second)
+  {
+    #if NPY_API_VERSION >= 0x00000007 //1.7
+      const PyArrayObject *firstArray = (const PyArrayObject*)first;
+      const PyArrayObject *secondArray = (const PyArrayObject*)second;
+    #else
+      PyArrayObject *firstArray = (PyArrayObject*)first;
+      PyArrayObject *secondArray = (PyArrayObject*)second;
+    #endif  
+    return PyArray_TYPE(firstArray) != PyArray_TYPE(secondArray);
+  }
+
   /// Custom exception type for unknown data type
   class UnknownDataType : public std::invalid_argument
   {
@@ -48,8 +84,7 @@ namespace
     using Mantid::Kernel::getStatistics;
     using Converters::NDArrayToVector;
 
-    auto *dataPtr = data.ptr();
-    if(PyArray_ISFLOAT(dataPtr))
+    if(isFloatArray(data.ptr()))
     {
       return getStatistics(NDArrayToVector<double>(data)(), sorted);
     }
@@ -78,8 +113,7 @@ namespace
   {
     using Converters::NDArrayToVector;
 
-    auto *dataPtr = data.ptr();
-    if(PyArray_ISFLOAT(dataPtr))
+    if(isFloatArray(data.ptr()))
     {
       return zscoreFunc(NDArrayToVector<double>(data)(), sorted);
     }
@@ -132,15 +166,13 @@ namespace
   {
     using Converters::NDArrayToVector;
 
-    auto *indepPtr = indep.ptr();
-    auto *dependPtr = depend.ptr();
     // Both input arrays must have the same typed data
-    if(PyArray_TYPE((PyArrayObject*)indepPtr) != PyArray_TYPE((PyArrayObject*)dependPtr))
+    if(typesEqual(indep.ptr(), depend.ptr()))
     {
       throw std::invalid_argument("Datatypes of input arrays must match.");
     }
 
-    if(PyArray_ISFLOAT(indepPtr) && PyArray_ISFLOAT(dependPtr))
+    if(isFloatArray(indep.ptr()) && isFloatArray(indep.ptr()))
     {
       return momentsFunc(NDArrayToVector<double>(indep)(),
                          NDArrayToVector<double>(depend)(), maxMoment);

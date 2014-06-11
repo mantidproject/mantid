@@ -1,23 +1,3 @@
-/*WIKI*
-
-
-Algorithm written using this paper:
-J. Appl. Cryst. (2013). 46, 663-671
-
-Objective algorithm to separate signal from noise in a Poisson-distributed pixel data set
-
-T. Straaso/, D. Mueter, H. O. So/rensen and J. Als-Nielsen
-
-Synopsis: A method is described for the estimation of background level and separation
-of background pixels from signal pixels in a Poisson-distributed data set by statistical analysis.
-For each iteration, the pixel with the highest intensity value is eliminated from the
-data set and the sample mean and the unbiased variance estimator are calculated. Convergence is reached when the
-absolute difference between the sample mean and the sample variance of the data set is within k standard deviations of the
-variance, the default value of k being 1.  The k value is called SigmaConstant in the algorithm input.
-
-
-*WIKI*/
-
 #include "MantidAlgorithms/FindPeakBackground.h"
 #include "MantidAlgorithms/FindPeaks.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -57,15 +37,6 @@ namespace Algorithms
    */
   FindPeakBackground::~FindPeakBackground()
   {
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** WIKI:
-   */
-  void FindPeakBackground::initDocs()
-  {
-    setWikiSummary("Separates background from signal for spectra of a workspace.");
-    setOptionalMessage("Separates background from signal for spectra of a workspace.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -157,6 +128,7 @@ namespace Algorithms
     m_outPeakTableWS->addColumn("double", "bkg0");
     m_outPeakTableWS->addColumn("double", "bkg1");
     m_outPeakTableWS->addColumn("double", "bkg2");
+    m_outPeakTableWS->addColumn("int", "GoodFit");
 
     m_outPeakTableWS->appendRow();
 
@@ -236,6 +208,7 @@ namespace Algorithms
       }
       size_t min_peak, max_peak;
       double a0,a1,a2;
+      int goodfit;
       if(peaks.size()> 0)
       {
         g_log.debug() << "Peaks' size = " << peaks.size() << " -> esitmate background. \n";
@@ -248,6 +221,7 @@ namespace Algorithms
         max_peak = peaks[0].stop + sizex - sizey;
         estimateBackground(inpX, inpY, l0, n,
                            peaks[0].start, peaks[0].stop, a0, a1, a2);
+        goodfit = 1;
       }
       else
       {
@@ -261,11 +235,13 @@ namespace Algorithms
         a0 = 0.0;
         a1 = 0.0;
         a2 = 0.0;
+        goodfit = -1;
       }
 
       // Add a new row
       API::TableRow t = m_outPeakTableWS->getRow(0);
-      t << static_cast<int>(inpwsindex) << static_cast<int>(min_peak) << static_cast<int>(max_peak) << a0 << a1 <<a2;
+      t << static_cast<int>(inpwsindex) << static_cast<int>(min_peak) << static_cast<int>(max_peak)
+        << a0 << a1 << a2 << goodfit;
     }
 
     prog.report();

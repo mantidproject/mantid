@@ -67,6 +67,11 @@ namespace Mantid
       virtual const std::string category() const { return "C++ User Defined";}
       virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& out);
 
+      // ** OPTIONALLY MODIFY THIS **
+      virtual const std::string summary() const {
+        return "An example of a peak shape function which is a combination of an exponential decay and cos function.";
+      }
+
     protected:
       virtual void functionLocal(double* out, const double* xValues, const size_t nData)const;
       virtual void functionDerivLocal(API::Jacobian* , const double* , const size_t ){}

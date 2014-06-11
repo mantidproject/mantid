@@ -1,16 +1,3 @@
-/*WIKI*
-
-Perform the == (equals to) boolean operation on two MDHistoWorkspaces or a MDHistoWorkspace and a scalar.
-The output workspace has a signal of 0.0 to mean "false" and a signal of 1.0 to mean "true". Errors are 0.
-
-For two MDHistoWorkspaces, the operation is performed element-by-element. Only the signal is compared.
-
-For a MDHistoWorkspace and a scalar, the operation is performed on each element of the output.
-
-*WIKI*/
-/*WIKI_USAGE*
-See [[MDHistoWorkspace#Boolean_Operations|this page]] for examples on using boolean operations.
-*WIKI_USAGE*/
 #include "MantidMDAlgorithms/EqualToMD.h"
 #include "MantidKernel/System.h"
 

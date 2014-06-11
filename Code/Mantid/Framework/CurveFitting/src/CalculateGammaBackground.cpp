@@ -1,13 +1,3 @@
-/*WIKI*
-This algorithm is currently used by the Vesuvio spectrometer at ISIS to correct for background produced by photons
-that are produced when the neutrons are absorbed by the shielding on the instrument. It only corrects the forward scattering
-detector banks.
-
-Two workspaces are produced: the calculated background and a corrected workspace where the input workspace has been
-corrected by the background. The background is computed by a simple simulation of the expected count across all of the foils. The
-corrected workspace counts are computed by calculating a ratio of the expected counts at the detector to the integrated foil counts (<math>\beta</math>)
-and then the final corrected count rate <math>\displaystyle c_f</math> is defined as <math>\displaystyle c_f = c_i - \beta c_b</math>.
-*WIKI*/
 #include "MantidCurveFitting/CalculateGammaBackground.h"
 #include "MantidCurveFitting/ComptonProfile.h"
 #include "MantidCurveFitting/ConvertToYSpace.h"
@@ -89,12 +79,6 @@ namespace Mantid
       return "CorrectionFunctions";
     }
 
-    void CalculateGammaBackground::initDocs()
-    {
-      this->setWikiSummary("Calculates the background due to gamma rays produced when neutrons are absorbed by shielding");
-      this->setOptionalMessage("Calculates the background due to gamma rays produced when neutrons are absorbed by shielding.");
-    }
-
     void CalculateGammaBackground::init()
     {
 
@@ -113,8 +97,10 @@ namespace Mantid
         "Indices of the spectra to include in the correction. If provided, the output only include these spectra\n"
         "(Default: all spectra from input)");
 
-      declareProperty(new WorkspaceProperty<>("BackgroundWorkspace", "", Direction::Output));
-      declareProperty(new WorkspaceProperty<>("CorrectedWorkspace", "", Direction::Output));
+      declareProperty(new WorkspaceProperty<>("BackgroundWorkspace", "", Direction::Output),
+                      "A new workspace containing the calculated background.");
+      declareProperty(new WorkspaceProperty<>("CorrectedWorkspace", "", Direction::Output),
+                      "A new workspace containing the calculated background subtracted from the input.");
     }
 
     void CalculateGammaBackground::exec()
@@ -425,7 +411,6 @@ namespace Mantid
       {
         auto profile = boost::dynamic_pointer_cast<ComptonProfile>(profileFunction->getFunction(i));
         profile->disableLogging();
-        profile->setAttributeValue("WorkspaceIndex",static_cast<int>(wsIndex));
         profile->setUpForFit();
         profile->cacheYSpaceValues(tseconds, false, detpar, respar);
 

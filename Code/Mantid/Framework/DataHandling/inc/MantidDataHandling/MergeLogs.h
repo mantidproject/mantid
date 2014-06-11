@@ -43,13 +43,15 @@ namespace DataHandling
     
     /// Algorithm's name for identification
     virtual const std::string name() const { return "MergeLogs";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Merge 2 TimeSeries logs in a given Workspace.";}
+
     /// Algorithm's version for identification
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "DataHandling\\Logs";}
 
   private:
-    virtual void initDocs();
 
     void init();
 

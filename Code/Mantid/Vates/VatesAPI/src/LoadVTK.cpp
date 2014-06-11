@@ -111,12 +111,6 @@ namespace Mantid
       return "MDAlgorithms";
     }
 
-    void LoadVTK::initDocs()
-    {
-      this->setWikiSummary("Loads a legacy binary format VTK uniform structured image as an MDWorkspace.");
-      this->setOptionalMessage(this->getWikiDescription());
-    }
-
     void LoadVTK::init()
     {
       std::vector<std::string> exts;

@@ -1,7 +1,3 @@
-/*WIKI*
-This algorithm clears the mask flag/bit on all spectra of a workspace. It does not restore masked data.
-*WIKI*/
-
 #include "MantidAlgorithms/ClearMaskFlag.h"
 
 namespace Mantid
@@ -37,14 +33,6 @@ namespace Algorithms
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string ClearMaskFlag::category() const { return "Utility";}
 
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void ClearMaskFlag::initDocs()
-  {
-    std::string summary("Delete the mask flag/bit on all spectra in a workspace.");
-    this->setWikiSummary(summary);
-    this->setOptionalMessage(summary);
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

@@ -68,7 +68,7 @@ namespace CurveFitting
     /// Convolute with resolution
     void convoluteVoigt(double * result, const size_t nData, const std::vector<double> & profile) const;
     /// Called by the framework when a workspace is set
-    void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+    void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX);
     /// Pre-calculate the Y-space values
     void cacheYSpaceValues(const std::vector<double> & tseconds, const bool isHistogram,
                            const DetectorParams & detpar,const ResolutionParams & respar);

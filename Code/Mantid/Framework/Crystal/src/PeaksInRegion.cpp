@@ -1,8 +1,3 @@
-/*WIKI*
-Determines which peaks intersect a defined box region in either QLab, QSample or HKL space. Similar to [[PeaksOnSurface]].
-*WIKI*/
-
-
 #include "MantidCrystal/PeaksInRegion.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -47,12 +42,6 @@ namespace Crystal
   const std::string PeaksInRegion::category() const { return "Crystal";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void PeaksInRegion::initDocs()
-  {
-    this->setWikiSummary("Find peaks intersecting a box region.");
-    this->setOptionalMessage(this->getWikiSummary());
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

@@ -135,8 +135,7 @@ set ( FRAMEWORK_LIBS Kernel Geometry API PythonKernelModule
                      PythonGeometryModule PythonAPIModule DataObjects
                      DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms MDEvents WorkflowAlgorithms
-                     LiveData ISISLiveData
-		     SINQ
+                     LiveData ISISLiveData RemoteAlgorithms SINQ
 )
 
 add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} ) 

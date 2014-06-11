@@ -61,14 +61,16 @@ namespace DataHandling
 
     /// Algorithm's name 
     virtual const std::string name() const { return "SaveVTK";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Save a workspace out to a VTK file format for use with 3D visualisation tools such as Paraview.";}
+
     /// Algorithm's version 
     virtual int version() const { return 1;};
     /// Algorithm's category 
     virtual const std::string category() const { return "DataHandling\\XML";}
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     
     /// Override virtual init function
     void init();

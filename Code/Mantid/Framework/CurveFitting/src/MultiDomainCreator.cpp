@@ -81,11 +81,15 @@ namespace CurveFitting
         mdFunction->getDomainIndices(iFun,m_creators.size(),domainIndices);
         if ( !domainIndices.empty() )
         {
+          /*
           if ( domainIndices.size() != 1 )
           {
-            g_log.warning() << "Function #" << iFun << " applies to multiple domains." << std::endl;
-            g_log.warning() << "Only one of the domains is used to set workspace." << std::endl;
+            std::stringstream msg;
+            msg << "Function #" << iFun << " applies to multiple domains.\n"
+                << "Only one of the domains is used to set workspace.";
+            g_log.warning(msg.str());
           }
+          */
           size_t index = domainIndices[0];
           if ( index >= m_creators.size() )
           {

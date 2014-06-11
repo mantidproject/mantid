@@ -1,14 +1,3 @@
-/*WIKI* 
-
-
-
-Loads a Dspacemap file (POWGEN binary, VULCAN binary or ascii format) into an OffsetsWorkspace.
-
-The resulting workspace can then be used with, e.g. [[AlignDetectors]] to perform calibration.
-
-
-
-*WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataHandling/LoadCalFile.h"
@@ -53,12 +42,6 @@ namespace DataHandling
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void LoadDspacemap::initDocs()
-  {
-    this->setWikiSummary("Loads a Dspacemap file (POWGEN binary, VULCAN binary or ascii format) into an OffsetsWorkspace.");
-    this->setOptionalMessage("Loads a Dspacemap file (POWGEN binary, VULCAN binary or ascii format) into an OffsetsWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -423,4 +406,3 @@ namespace DataHandling
 
 } // namespace Mantid
 } // namespace DataHandling
-

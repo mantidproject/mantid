@@ -24,7 +24,7 @@ namespace Mantid
      */
     template<typename BaseAlgorithm>
     AlgorithmAdapter<BaseAlgorithm>::AlgorithmAdapter(PyObject* self)
-      : BaseAlgorithm(), m_self(self), m_isRunningObj(NULL)
+      : BaseAlgorithm(), m_self(self), m_isRunningObj(NULL), m_wikiSummary("")
     {
       // Cache the isRunning call to save the lookup each time it is called
       // as it is most likely called in a loop
@@ -67,8 +67,27 @@ namespace Mantid
     }
 
     /**
+     * Returns checkGroups. If false, workspace groups will be treated as a whole
+     * If true, the algorithm will act on each component of the workspace group individually
+     */
+    template<typename BaseAlgorithm>
+    bool AlgorithmAdapter<BaseAlgorithm>::checkGroups()
+    {
+      return CallMethod0<bool>::dispatchWithDefaultReturn(getSelf(), "checkGroups", checkGroupsDefault());
+    }
+
+    /**
+     * Returns the default checkGroup (calls base class)
+     */
+    template<typename BaseAlgorithm>
+    bool AlgorithmAdapter<BaseAlgorithm>::checkGroupsDefault()
+    {
+      return BaseAlgorithm::checkGroups();
+    }
+
+    /**
      * Returns the category of the algorithm. If not overridden
-     * it returns "AlgorithmAdapter"
+     * it return defaultCategory()
      */
     template<typename BaseAlgorithm>
     const std::string AlgorithmAdapter<BaseAlgorithm>::category() const
@@ -84,6 +103,26 @@ namespace Mantid
     std::string AlgorithmAdapter<BaseAlgorithm>::defaultCategory() const
     {
       return "PythonAlgorithms";
+    }
+
+    /**
+     * Returns the summary of the algorithm. If not overridden
+     * it returns defaultSummary
+     */
+    template<typename BaseAlgorithm>
+    const std::string AlgorithmAdapter<BaseAlgorithm>::summary() const
+    {
+      return CallMethod0<std::string>::dispatchWithDefaultReturn(getSelf(), "summary", defaultSummary());
+    }
+
+    /**
+     * A default summary, chosen if there is no override
+     * @returns A default summary
+     */
+    template<typename BaseAlgorithm>
+    std::string AlgorithmAdapter<BaseAlgorithm>::defaultSummary() const
+    {
+      return m_wikiSummary;
     }
 
     /**
@@ -171,6 +210,23 @@ namespace Mantid
       }
       return resultMap;
     }
+
+    /// Set the summary text
+    /// @param summary Wiki text
+    template<typename BaseAlgorithm>
+    void AlgorithmAdapter<BaseAlgorithm>::setWikiSummary(const std::string & summary)
+    {
+      std::string msg = \
+        "self.setWikiSummary() is deprecated and will be removed in a future release.\n"
+        "To ensure continued functionality remove the line containing 'self.setWikiSummary'\n"
+        "and add a new function outside of the current one defined like so:\n"
+        "def summary(self):\n"
+        "    \"" + summary + "\"\n";
+
+      PyErr_Warn(PyExc_DeprecationWarning, msg.c_str());
+      m_wikiSummary = summary;
+    }
+
 
     /**
      * Declare a preconstructed property.

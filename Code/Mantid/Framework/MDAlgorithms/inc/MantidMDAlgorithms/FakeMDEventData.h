@@ -31,14 +31,15 @@ namespace MDAlgorithms
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "FakeMDEventData";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Adds fake multi-dimensional event data to an existing MDEventWorkspace, for use in testing.\nYou can create a blank MDEventWorkspace with CreateMDWorkspace.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDAlgorithms";}
     
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
     /// Initialise the properties
     void init();
     /// Run the algorithm

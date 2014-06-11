@@ -65,6 +65,9 @@ public:
   virtual const std::string category() const { return "CorrectionFunctions\\AbsorptionCorrections"; }
   /// Algorithm's name
   virtual const std::string name() const { return "SphericalAbsorption"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculates bin-by-bin correction factors for attenuation due to absorption and scattering in a 'spherical' sample.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
 
@@ -81,8 +84,7 @@ protected:
   double m_sampleVolume;                         ///< The total volume of the sample
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
 
   /// Initialisation code
   void init();

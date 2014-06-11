@@ -73,6 +73,9 @@ namespace MDAlgorithms
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "LoadSQW";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz, Energy) from a SQW file.";}
+
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -82,8 +85,6 @@ namespace MDAlgorithms
     virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
     void init();
     void exec();    
 

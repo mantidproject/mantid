@@ -1,25 +1,3 @@
-/*WIKI*
-
-This algorithm is used to replace values in a [[MDHistoWorkspace]] but only at particular points.
-
-A mask MDHistoWorkspace is provided, where non-zero values indicate 'true'.
-At these points, the corresponding value in the ValueWorkspace will be set.
-Any 'false' points in the MaskWorkspace are skipped.
-
-If ValueWorkspace is not specified, the you must specify Value, which is a a simple number to set.
-
-In matlab, the equivalent function call would be WS[mask] = OtherWS[mask]
-
-See [[MDHistoWorkspace#Boolean_Operations| this page on boolean operations]] for examples of how to create a mask.
-
-== Usage (Python) ==
-
- # This will zero-out any values below the threshold of 123
- MaskWS = WS < 123
- ModifiedWS = SetMDUsingMask(InputWorkspace=WS, Value="0", MaskWorkspace=MaskWS)
-
-*WIKI*/
-
 #include "MantidMDAlgorithms/SetMDUsingMask.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -67,12 +45,6 @@ namespace MDAlgorithms
   const std::string SetMDUsingMask::category() const { return "MDAlgorithms\\MDArithmetic";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SetMDUsingMask::initDocs()
-  {
-    this->setWikiSummary("Algorithm to set a [[MDHistoWorkspace]] in points determined by a mask boolean MDHistoWorkspace.");
-    this->setOptionalMessage("Algorithm to set a MDHistoWorkspace in points determined by a mask boolean MDHistoWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

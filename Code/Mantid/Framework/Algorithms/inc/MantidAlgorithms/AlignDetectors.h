@@ -53,6 +53,9 @@ public:
 
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "AlignDetectors";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Performs a unit change from TOF to dSpacing, correcting the X values to account for small errors in the detector positions.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1;};
   /// Algorithm's category for identification overriding a virtual method
@@ -63,8 +66,7 @@ public:
       Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS);
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Implement abstract Algorithm methods
   void init();
   void exec();

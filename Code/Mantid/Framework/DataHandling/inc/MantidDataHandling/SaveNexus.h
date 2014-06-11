@@ -56,14 +56,16 @@ namespace Mantid
       ~SaveNexus() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "SaveNexus";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "The SaveNexus algorithm will write the given Mantid workspace to a NeXus file. SaveNexus currently just invokes SaveNexusProcessed.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Nexus";}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
 
       /// Overwrites Algorithm method.
       void init();

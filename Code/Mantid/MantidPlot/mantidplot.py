@@ -197,6 +197,7 @@ def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, 
         source: workspace or name of a workspace
         indices: workspace index, or tuple or list of workspace indices to plot
         error_bars: bool, set to True to add error bars.
+        type: Plot style
         window: window used for plotting. If None a new one will be created
         clearWindow: if is True, the window specified will be cleared before adding new curve
     Returns:
@@ -213,8 +214,8 @@ def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, 
     if window != None:
       window = window._getHeldObject()
 
-    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSpectraList,
-                                          workspace_names, index_list, error_bars,
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
+                                          workspace_names, index_list, True, error_bars,
                                           type, window, clearWindow))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
@@ -307,7 +308,7 @@ def fitBrowser():
     return proxies.FitBrowserProxy(_qti.app.mantidUI.fitFunctionBrowser())
 
 #-----------------------------------------------------------------------------
-def plotBin(source, indices, error_bars = False, graph_type = 0, window = None, clearWindow = False):
+def plotBin(source, indices, error_bars = False, type = -1, window = None, clearWindow = False):
     """Create a 1D Plot of bin count vs spectrum in a workspace.
     
     This puts the spectrum number as the X variable, and the
@@ -320,31 +321,30 @@ def plotBin(source, indices, error_bars = False, graph_type = 0, window = None, 
         source: workspace or name of a workspace
         indices: bin number(s) to plot
         error_bars: bool, set to True to add error bars.
+        type: Plot style
         window: window used for plotting. If None a new one will be created
         clearWindow: if is True, the window specified will be cleared before adding new curve
     Returns:
         A handle to window if one was specified, otherwise a handle to the created one. None in case of error.
     """
-    def _callPlotBin(workspace, indexes, errors, graph_type, window, clearWindow):
-        if isinstance(workspace, str):
-            wkspname = workspace
-        else:
-            wkspname = workspace.getName()
-        if type(indexes) == int:
-            indexes = [indexes]
+    workspace_names = getWorkspaceNames(source)
+    index_list = __getWorkspaceIndices(indices)
+    if len(workspace_names) == 0:
+        raise ValueError("No workspace names given to plot")
+    if len(index_list) == 0:
+        raise ValueError("No indices given to plot")
 
-        # Unwrap the window object, if any specified
-        if window != None:
-          window = window._getHeldObject()
+    # Unwrap the window object, if any specified
+    if window != None:
+      window = window._getHeldObject()
 
-        return new_proxy(proxies.Graph,_qti.app.mantidUI.plotBin,wkspname, indexes, errors, graph_type, window, clearWindow)
-
-    if isinstance(source, list) or isinstance(source, tuple):
-        if len(source) > 1:
-            raise RuntimeError("Currently unable to handle multiple sources for bin plotting. Merging must be done by hand.")
-        else:
-            source = source[0]
-    return _callPlotBin(source, indices, error_bars, graph_type, window, clearWindow)
+    graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
+                                          workspace_names, index_list, False, error_bars,
+                                          type, window, clearWindow))
+    if graph._getHeldObject() == None:
+        raise RuntimeError("Cannot create graph, see log for details.")
+    else:
+        return graph
 
 #-----------------------------------------------------------------------------
 def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
@@ -867,7 +867,6 @@ class Screenshot(QtCore.QObject):
         thread
         """
         # First save the screenshot
-        widget.show()
         widget.resize(widget.size())
         QtCore.QCoreApplication.processEvents()
         
@@ -915,13 +914,17 @@ def screenshot_to_dir(widget, filename, screenshot_dir):
     @param filename :: Destination filename for that image
     @param screenshot_dir :: Directory to put the screenshots into.
     """
-        # Find the widget if handled with a proxy
+    # Find the widget if handled with a proxy
     if hasattr(widget, "_getHeldObject"):
         widget = widget._getHeldObject()
                 
     if widget is not None:
         camera = Screenshot()
-        threadsafe_call(camera.take_picture, widget, os.path.join(screenshot_dir, filename+".png"))
+        imgpath = os.path.join(screenshot_dir, filename)
+        threadsafe_call(camera.take_picture, widget, imgpath)
+        return imgpath
+    else:
+        raise RuntimeError("Unable to retrieve widget. Has it been deleted?")
     
 
 #=============================================================================

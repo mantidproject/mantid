@@ -4,21 +4,15 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
-#include <vector>
 
 namespace Mantid
 {
 namespace DataObjects
 {
 /**
-	1D histogram implementation.
+  1D histogram implementation.
 
-    \class Histogram1D Histogram1D.h
-    \author Laurent C Chapon, ISIS, RAL
-    \date 26/09/2007  
-    
-  Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
  	
@@ -40,15 +34,6 @@ namespace DataObjects
 */
 class DLLExport Histogram1D : public Mantid::API::ISpectrum
 {
-  friend class ManagedDataBlock2D;
-
-public:
-
-  // The data storage type used internally in a Histogram1D
-  // typedef std::vector<double> MantidVec; //Removed redundant typedef
-  // Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR
-  //typedef Kernel::cow_ptr<MantidVec > MantidVecPtr;
-  
 protected:
   MantidVecPtr refY;   ///< RefCounted Y
   MantidVecPtr refE;   ///< RefCounted Error

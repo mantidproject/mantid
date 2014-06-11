@@ -54,14 +54,16 @@ namespace Mantid
       ~LoadRaw3();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadRaw"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads a data file in ISIS  RAW format and stores it in a 2D workspace (Workspace2D class).";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 3; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Raw"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method
@@ -70,25 +72,15 @@ namespace Mantid
       /// returns true if the given spectrum is a monitor
       bool isMonitor(const std::vector<specid_t>& monitorIndexes,specid_t spectrumNum);
       /// returns true if the Exclude Monitor option(property) selected
-      bool isExcludeMonitors();
+      bool isExcludeMonitors(const std::string &monitorOption);
       ///  returns true if the Separate Monitor Option  selected
-      bool isSeparateMonitors();
+      bool isSeparateMonitors(const std::string &monitorOption);
       ///  returns true if the Include Monitor Option  selected
-      bool isIncludeMonitors();
+      bool isIncludeMonitors(const std::string &monitorOption);
 
       /// validate workspace sizes
       void validateWorkspaceSizes( bool bexcludeMonitors ,bool bseparateMonitors,
           const int64_t normalwsSpecs,const int64_t  monitorwsSpecs);
-
-      /// this method will be executed if not enough memory.
-      void goManagedRaw(bool bincludeMonitors,bool bexcludeMonitors,
-          bool bseparateMonitors,const std::string& fileName);
-
-
-      /// This method is useful for separating  or excluding   monitors from the output workspace
-      void  separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWorkspace,
-          bool binclude,bool bexclude,bool bseparate,
-          int64_t numberOfSpectra,const std::string &fileName);
 
       /// creates output workspace, monitors excluded from this workspace
       void excludeMonitors(FILE* file,const int& period,const std::vector<specid_t>& monitorList,

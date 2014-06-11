@@ -1,7 +1,3 @@
-"""*WIKI*
-
-*WIKI*"""
-
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -39,6 +35,9 @@ class PDDetermineCharacterizations(PythonAlgorithm):
     def name(self):
         return "PDDetermineCharacterizations"
 
+    def summary(self):
+        return "Determines the characterizations of a workspace."
+    
     def PyInit(self):
         # input parameters
         self.declareProperty(WorkspaceProperty("InputWorkspace", "",

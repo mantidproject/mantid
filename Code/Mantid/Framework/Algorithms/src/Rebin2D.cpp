@@ -1,12 +1,3 @@
-/*WIKI* 
-
-The bin parameters are used to form an output grid. A positive <math>\Delta x_i\,</math> makes constant width bins, whilst negative ones create logarithmic binning using the formula <math>x(j+1)=x(j)(1+|\Delta x_i|)\,</math>.
-The overlap of the polygons formed from the old and new grids is tested to compute the required signal weight for the each of the new bins on the workspace. The errors are summed in quadrature.
-
-==Requirements==
-The algorithms currently requires the second axis on the workspace to be a numerical axis so [[ConvertSpectrumAxis]] may need to run first.
-
-*WIKI*/
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------    
@@ -16,8 +7,8 @@ The algorithms currently requires the second axis on the workspace to be a numer
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidGeometry/Math/ConvexPolygon.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Math/LaszloIntersection.h"
@@ -37,18 +28,6 @@ namespace Mantid
     using Geometry::ConvexPolygon;
     using Geometry::Quadrilateral;
     using Kernel::V2D;
-
-    //--------------------------------------------------------------------------
-    // Public methods
-    //--------------------------------------------------------------------------
-    /**
-     * Sets documentation strings for this algorithm
-     */
-    void Rebin2D::initDocs()
-    {
-      this->setWikiSummary("Rebins both axes of a 2D workspace.");
-      this->setOptionalMessage("Rebins both axes of a 2D workspace using the given parameters");
-    }
 
     //--------------------------------------------------------------------------
     // Private methods
@@ -415,7 +394,7 @@ namespace Mantid
           outputWS = WorkspaceFactory::Instance().create("RebinnedOutput", newYSize-1, newXSize, newXSize-1);
           WorkspaceFactory::Instance().initializeFromParent(parent, outputWS, true);
         }
-      Axis* const verticalAxis = new NumericAxis(newYSize);
+      Axis* const verticalAxis = new BinEdgeAxis(newYBins);
       // Meta data
       verticalAxis->unit() = parent->getAxis(1)->unit();
       verticalAxis->title() = parent->getAxis(1)->title();
@@ -425,14 +404,10 @@ namespace Mantid
       for (size_t i=0; i < static_cast<size_t>(newYSize-1); ++i)
       {
         outputWS->setX(i,newXBins);
-        verticalAxis->setValue(i,newYBins[i]);
       }
-      // One more to set on the 'y' axis
-      verticalAxis->setValue(newYSize-1,newYBins[newYSize-1]);
 
       return outputWS;
     }
     
   } // namespace Algorithms
 } // namespace Mantid
-

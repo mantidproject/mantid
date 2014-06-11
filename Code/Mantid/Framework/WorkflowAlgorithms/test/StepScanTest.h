@@ -56,7 +56,7 @@ public:
     TS_ASSERT_EQUALS( stepScan->name(), "StepScan" );
     TS_ASSERT_EQUALS( stepScan->version(), 1 );
     TS_ASSERT_EQUALS( stepScan->category(), "Workflow\\Alignment" );
-    TS_ASSERT( !stepScan->getWikiSummary().empty() );
+    TS_ASSERT( !stepScan->summary().empty() );
   }
 
   void test_fail_on_invalid_inputs()

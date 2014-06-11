@@ -8,6 +8,7 @@
 #include "MantidKernel/System.h"
 #include <climits>
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
 #include <map>
 #ifdef HAS_UNORDERED_MAP_H
 #include <tr1/unordered_map>
@@ -108,14 +109,16 @@ public:
 
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "GroupDetectors"; };
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Sums spectra bin-by-bin, equivalent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 2; };
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const{return "Transforms\\Grouping";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// provides a function that expands pairs of integers separated with a hyphen into a list of all the integers between those values
   class RangeHelper
   {
@@ -157,6 +160,10 @@ typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
   /// gets groupings from XML file 
   void processXMLFile(std::string fname,  API::MatrixWorkspace_const_sptr workspace,
                                                 std::vector<int64_t> &unUsedSpec);
+  void processGroupingWorkspace(DataObjects::GroupingWorkspace_const_sptr groupWS,
+                                                API::MatrixWorkspace_const_sptr workspace, std::vector<int64_t> &unUsedSpec);
+  void processMatrixWorkspace(API::MatrixWorkspace_const_sptr groupWS,
+                                                API::MatrixWorkspace_const_sptr workspace, std::vector<int64_t> &unUsedSpec);
   /// used while reading the file turns the string into an integer number (if possible), white space and # comments ignored
   int readInt(std::string line);
 

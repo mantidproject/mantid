@@ -1,22 +1,3 @@
-/*WIKI* 
-
-
-This algorithm corrects the detection efficiency of He3 tubes using an exponential function and certain detector properties. The correction scheme is given by the following:
-
-<math>\epsilon = \frac{A}{1-e^{\frac{-\alpha P (L - 2W) \lambda}{T sin(\theta)}}} </math>
-
-where ''A'' is a dimensionless scaling factor, <math>\alpha</math> is a constant with units ''(Kelvin / (metres <math>\AA</math> atm))'', ''P'' is pressure in units of ''atm'', ''L'' is the tube diameter in units of ''metres'', ''W'' is the tube thickness in units of ''metres'', ''T'' is the temperature in units of ''Kelvin'', ''sin(<math>\theta</math>)'' is the angle of the neutron trajectory with respect to the long axis of the He3 tube and <math>\lambda</math> is in units of <math>\AA</math>.
-
-The Optional properties that are of num list type can be used in the following manner. If no input value is given, the detector parameter is pulled from the detector itself. If a single value is used as input, that value is applied to all detectors. If an array of values is used, that array ''must'' be the same size as the number of spectra in the workspace. If it is not, the spectra indicies that do not have values will be zeroed in the output workspace.
-
-=== Restrictions on Input Workspace ===
-
-The input workspace must be in units of wavelength.
-
-The input workspace must be histogram data.
-
-
-*WIKI*/
 #include "MantidAlgorithms/He3TubeEfficiency.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -43,13 +24,6 @@ namespace Algorithms
 {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(He3TubeEfficiency)
-
-/// Sets documentation strings for this algorithm
-void He3TubeEfficiency::initDocs()
-{
-  this->setWikiSummary(" He3 tube efficiency correction. ");
-  this->setOptionalMessage("He3 tube efficiency correction.");
-}
 
 /// Default constructor
 He3TubeEfficiency::He3TubeEfficiency() : Algorithm(), inputWS(),

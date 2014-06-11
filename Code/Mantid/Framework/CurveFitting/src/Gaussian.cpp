@@ -1,22 +1,3 @@
-/*WIKI*
-A Gaussian function (also referred to as a normal distribution) is defined as:
-
-:<math> \mbox{Height}*\exp \left( -0.5*\frac{(x-\mbox{PeakCentre})^2}{\mbox{Sigma}^2} \right) </math>
-
-where
-
-    <UL>
-    <LI> Height - height of peak </LI>
-    <LI> PeakCentre - centre of peak </LI>
-    <LI> Sigma - Gaussian width parameter </LI>
-    </UL>
-
-Note that the FWHM (Full Width Half Maximum) of a Gaussian equals <math> 2\sqrt{2\ln 2}*\mbox{Sigma} </math>.
-
-The figure below illustrate this symmetric peakshape function fitted to a TOF peak:
-
-[[Image:GaussianWithConstBackground.png]]
- *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

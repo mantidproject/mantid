@@ -64,6 +64,9 @@ public:
   virtual ~MergeRuns();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "MergeRuns"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Combines the data contained in an arbitrary number of input workspaces.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
@@ -71,8 +74,7 @@ public:
   // Overriden MultiPeriodGroupAlgorithm method.
   bool useCustomInputPropertyName() const;
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();

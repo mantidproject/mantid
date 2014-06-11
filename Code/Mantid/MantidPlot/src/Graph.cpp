@@ -59,7 +59,7 @@
 #include "plot2D/ScaleEngine.h"
 
 #include "Mantid/MantidMatrixCurve.h"
-#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
+#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "Mantid/ErrorBarSettings.h"
 
 #ifdef EMF_OUTPUT
@@ -3407,7 +3407,7 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
 
 PlotCurve* Graph::insertCurve(QString workspaceName, int index, bool err, Graph::CurveType style)
 {
-  return (new MantidMatrixCurve(workspaceName,this,index,err,false,style));
+  return (new MantidMatrixCurve(workspaceName,this,index, MantidMatrixCurve::Spectrum, err,false,style));
 }
 
 /**  Insert a curve with its own data source. It does not have to be
@@ -3424,7 +3424,10 @@ PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth, int curveType)
       m_yUnits = mc->yUnits();
       m_isDistribution = mc->isDistribution();
     }
-    if ( m_xUnits->unitID() != mc->xUnits()->unitID() || m_yUnits->unitID() != mc->yUnits()->unitID() )
+    // Compare units. X units are compared by ID, Y units - by caption. That's because Y units will
+    // always be of type Label, hence will always have ID "Label", and the caption is what we are
+    // interested in.
+    if ( m_xUnits->unitID() != mc->xUnits()->unitID() || m_yUnits->caption() != mc->yUnits()->caption() )
     {
       g_log.warning("You are overlaying plots from data having differing units!");
     }
@@ -6082,7 +6085,7 @@ void Graph::updateDataCurves()
 
 void Graph::checkValuesInAxisRange(MantidMatrixCurve* mc)
 {
-  MantidQwtMatrixWorkspaceData* data = mc->mantidData();
+  auto* data = mc->mantidData();
   double xMin(data->x(0)); // Needs to be min of current graph (x-axis)
   double xMax(data->x(data->size()-1)); // Needs to be max of current graph (x-axis)
   bool changed(false);

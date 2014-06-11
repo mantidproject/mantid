@@ -1,37 +1,3 @@
-/*WIKI* 
-Used same format that works successfully in GSAS and SHELX from ISAW:
-	
-hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n'% (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM, TRANSMISSION, DN, TWOTH, DSP))
-	
-HKL is flipped by -1 due to different q convention in ISAW vs Mantid.
-	
-FSQ = integrated intensity of peak (scaled)
-	
-SIGFSQ = sigma from integrating peak
-	
-hstnum = number of sample orientation (starting at 1)
-	
-WL = wavelength of peak
-	
-TBAR = output of absorption correction (-log(transmission)/mu)
-	
-CURHST = run number of sample
-	
-SEQNUM = peak number (unique number for each peak in file)
-	
-TRANSMISSION = output of absorption correction (exp(-mu*tbar))
-	
-DN = detector bank number
-	
-TWOTH = two-theta scattering angle
-	
-DSP = d-Spacing of peak (Angstroms)/TR
-
-Last line must have all 0's
-
-
-
-*WIKI*/
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/SaveHKL.h"
@@ -45,15 +11,32 @@ Last line must have all 0's
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidCrystal/AnvredCorrection.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 #include "Poco/File.h"
+#include "boost/assign.hpp"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
+using namespace boost::assign;
+std::map<int, double> detScale = map_list_of
+ (17,1.092114823)
+ (18,0.869105443)
+ (22,1.081377685)
+ (26,1.055199489)
+ (27,1.070308725)
+ (28,0.886157884)
+ (36,1.112773972)
+ (37,1.012894506)
+ (38,1.049384146)
+ (39,0.890313805)
+ (47,1.068553893)
+ (48,0.900566426)
+ (58,0.911249203);
 
 namespace Mantid
 {
@@ -80,12 +63,6 @@ namespace Crystal
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void SaveHKL::initDocs()
-  {
-    this->setWikiSummary("Save a PeaksWorkspace to a ASCII .hkl file.");
-    this->setOptionalMessage("Save a PeaksWorkspace to a ASCII .hkl file.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -158,24 +135,6 @@ namespace Crystal
     int runSequence = 0;
     int bankold = -1;
     int runold = -1;
-    std::map<int, double> detScale;
-
-    if (ws->getInstrument()->getName() == "TOPAZ")
-    {
-      detScale[17] = 1.092114823;
-      detScale[18] = 0.869105443;
-      detScale[22] = 1.081377685;
-      detScale[26] = 1.055199489;
-      detScale[27] = 1.070308725;
-      detScale[28] = 0.886157884;
-      detScale[36] = 1.112773972;
-      detScale[37] = 1.012894506;
-      detScale[38] = 1.049384146;
-      detScale[39] = 0.890313805;
-      detScale[47] = 1.068553893;
-      detScale[48] = 0.900566426;
-      detScale[58] = 0.911249203;
-    }
 
     std::fstream out;
     bool append = getProperty("AppendFile");
@@ -579,4 +538,3 @@ namespace Crystal
 
 } // namespace Mantid
 } // namespace Crystal
-

@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
@@ -21,7 +22,7 @@ using std::size_t;
  *  @param parentWorkspace The workspace to which this axis belongs
  */
 SpectraAxis::SpectraAxis(const MatrixWorkspace* const parentWorkspace)
-  : Axis(), m_parentWS(parentWorkspace)
+  : Axis(), m_parentWS(parentWorkspace), m_edges()
 {
   this->unit() = boost::make_shared<Kernel::Units::Label>("Spectrum", "");
 }
@@ -80,13 +81,9 @@ double SpectraAxis::operator()(const std::size_t& index, const std::size_t& vert
  */
 void SpectraAxis::setValue(const std::size_t& index, const double& value)
 {
-  if (index >= length())
-  {
-    throw Kernel::Exception::IndexError(index, length()-1, "SpectraAxis: Index out of range.");
-  }
-
-  // TODO: Remove this evilness, preferably by removing the setValue method entirely
-  const_cast<MatrixWorkspace*>(m_parentWS)->getSpectrum(index)->setSpectrumNo(static_cast<specid_t>(value));
+  UNUSED_ARG(index)
+  UNUSED_ARG(value)
+  throw std::domain_error("setValue method cannot be used on a SpectraAxis.");
 }
 
 /**
@@ -97,36 +94,21 @@ void SpectraAxis::setValue(const std::size_t& index, const double& value)
  */
 size_t SpectraAxis::indexOfValue(const double value) const
 {
-  const specid_t specNo = static_cast<specid_t>(value);
-  // try and be smart about how we find this. Most of the time
-  // the index & value don't differ by much. Start at a value
-  // slightly lower, 2 back, then the actual value so that most cases
-  // it should find it in a few jumps.
-  const size_t nspectra = m_parentWS->getNumberHistograms();
-  const auto & parentWS = *m_parentWS; // avoid constant dereference
-
-  size_t guess = (specNo > 2) ? static_cast<size_t>(specNo - 2) : 0;
-  if(guess >= nspectra) guess = nspectra/2; // start in the middle
-
-  size_t index(guess);
-  do
+  if(m_edges.empty()) //lazy-instantiation
   {
-    try
+    m_edges.resize(m_parentWS->getNumberHistograms() + 1);
+    const size_t npts = m_edges.size() - 1;
+    for( size_t i = 0; i < npts - 1; ++i )
     {
-      if (parentWS.getSpectrum(index)->getSpectrumNo() == specNo)
-        return index;
+      m_edges[i+1] = 0.5*(this->getValue(i) + this->getValue(i+1));
     }
-    catch(std::range_error&)
-    {
-      continue;
-    }
-    ++index;
-    if(index == nspectra) index = 0; //wrap around to search everythin
-  }
-  while (index != guess);
+    // ends
+    m_edges[0] = this->getValue(0) - (m_edges[1] - this->getValue(0));
+    m_edges[npts] = this->getValue(npts-1) +
+                     (this->getValue(npts-1) - m_edges[npts-1]);
 
-  // Not found if we reached here
-  throw std::out_of_range("SpectraAxis::indexOfValue() - Value not found on axis");
+  }
+  return NumericAxis::indexOfValue(value, m_edges);
 }
 
 /** Returns the spectrum number at the position given (Spectra axis only)

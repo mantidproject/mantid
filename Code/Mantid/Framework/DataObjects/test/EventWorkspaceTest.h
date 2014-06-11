@@ -717,7 +717,7 @@ public:
     { TS_ASSERT_EQUALS( e300[i], e300_copy[i] ); }
 
     inSpec->unlockData();
-    inSpec300->lockData();
+    inSpec300->unlockData();
 
     MantidVec otherData = ew2->readY(255);
 

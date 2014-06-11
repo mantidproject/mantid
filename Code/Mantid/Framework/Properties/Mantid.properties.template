@@ -13,7 +13,7 @@
 default.facility = ISIS
 
 # Set a default instrument
-default.instrument = 
+default.instrument =
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are seperated from their respective categories by a "/".
 mantidqt.python_interfaces = Direct/DGS_Reduction.py SANS/ORNL_SANS.py Reflectometry/REFL_Reduction.py Reflectometry/REFL_SF_Calculator.py Reflectometry/REFM_Reduction.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry.py Diffraction/Powder_Diffraction_Reduction.py
@@ -78,45 +78,31 @@ paraview.path = @PARAVIEW_APP_BIN_DIR@
 # Whether to look for ParaView (0 = try to use, 1 = don't use).
 paraview.ignore = @IGNORE_PARAVIEW@
 
+# Root of html documentation (kept as unix-style path)
+docs.html.root = @HTML_ROOT@
+
 # A semi-colon(;) separated list of directories to use to search for files other than data
 # Use forward slash / for all paths
-usersearch.directories = 
+usersearch.directories =
 
 # Setting this to On enables searching the facilitie's archive automatically
 datasearch.searcharchive = Off
 
 # A default directory to use for saving files
 # Use forward slash / for all paths
-defaultsave.directory = 
+defaultsave.directory =
 
 # ICat download directory
-icatDownload.directory = 
+icatDownload.directory =
 
 # The Number of algorithms properties to retain im memory for refence in scripts.
 algorithms.retained = 50
-
-# ManagedWorkspace.LowerMemoryLimit sets the memory limit to trigger the use of 
-# a ManagedWorkspace. A ManagedWorkspace will be used for a workspace requiring greater amount of memory 
-# than defined by LowerMemoryLimit. LowerMemoryLimit is a precentage of the physical memory available for
-# the process. On Linux it is the free physical memory, on Windows it is the smaller of the free physical memory
-# and the available virtual memory. The default value for LowerMemoryLimit is 40%. Setting the limit too high
-# may lead to unrecoverable bad allocations. If this happens the advice is to close Mantid and relaunch it 
-# with a smaller LowerMemoryLimit.
-# 
-ManagedWorkspace.LowerMemoryLimit = 80
-# Setting this to 1 will disable managed workspaces completely - use with care!
-ManagedWorkspace.AlwaysInMemory = 0
-ManagedWorkspace.DataBlockSize = 4000
-ManagedWorkspace.FilePath = 
-# Setting this to 1 will disable managedrawfileworkspaces
-ManagedRawFileWorkspace.DoNotUse = 0
-CompressedWorkspace.DoNotUse = 1
 
 # Defines the maximum number of cores to use for OpenMP
 # For machine default set to 0
 MultiThreaded.MaxCores = 0
 
-# Defines the area (in FWHM) on both sides of the peak centre within which peaks are calculated. 
+# Defines the area (in FWHM) on both sides of the peak centre within which peaks are calculated.
 # Outside this area peak functions return zero.
 curvefitting.peakRadius = 5
 curvefitting.defaultPeak=Gaussian
@@ -134,7 +120,7 @@ MantidOptions.InvisibleWorkspaces=0
 MantidOptions.InstrumentView.UseOpenGL = On
 
 #Uncommenting the line below will enable algorithm chain re-running whenever a
-#workspace is replaced. Uncommenting and setting it to 0 will also turn it off 
+#workspace is replaced. Uncommenting and setting it to 0 will also turn it off
 #enabling this is currently discouraged as it could cause race conditions with python scripts
 #AlgorithmChaining.SwitchedOn = 1
 
@@ -173,12 +159,12 @@ workspace.sendto.name.SansView=0
 # Change this property to On to make Mantid case sensitive (ignored on Windows as file searching is always case insensitve)
 filefinder.casesensitive=On
 
-# Control which geometry the Instrument View window displays, valid values 
+# Control which geometry the Instrument View window displays, valid values
 # are "Default", "Neutronic" or "Physical".
 instrument.view.geometry=Default
 
 # Disabling multifile loading will allow users to load files with "," or "+"
-# in their path, but at the cost of no longer being able to load multiple 
+# in their path, but at the cost of no longer being able to load multiple
 # files with a single call to Load.
 loading.multifile=On
 
@@ -193,15 +179,15 @@ algorithms.categories.hidden=Workflow\\Inelastic\\UsesPropertyManager;Workflow\\
 # All interface categories are shown by default.
 interfaces.categories.hidden =
 
-# ScriptRepository Properties: 
+# ScriptRepository Properties:
 
 # Url for the WebServer that support the upload of the files that the users want to share
 UploaderWebServer = @MANTIDPUBLISHER@
 # Local system path for the script repository.
-ScriptLocalRepository = 
+ScriptLocalRepository =
 # Url for the remote script repository.
 ScriptRepository = http://download.mantidproject.org/scriptrepository/
-# Pattern given to ScriptRepository that is used to hide entries from repository to the users. It is a csv string separated with ';' 
+# Pattern given to ScriptRepository that is used to hide entries from repository to the users. It is a csv string separated with ';'
 ScriptRepositoryIgnore = *pyc;
 
 # The ability to send a job to a cluster form the reduction UIs is turned off. Set it to 'On' to enable it.

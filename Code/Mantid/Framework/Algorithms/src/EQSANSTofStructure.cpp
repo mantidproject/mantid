@@ -1,9 +1,3 @@
-/*WIKI* 
-
-Documentation to come.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -28,13 +22,6 @@ namespace Algorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSTofStructure)
-
-/// Sets documentation strings for this algorithm
-void EQSANSTofStructure::initDocs()
-{
-  this->setWikiSummary("Corrects the Time of Flight binning of raw EQSANS data. This algorithm needs to be run once on every data set. ");
-  this->setOptionalMessage("Corrects the Time of Flight binning of raw EQSANS data. This algorithm needs to be run once on every data set.");
-}
 
 
 using namespace Kernel;
@@ -413,4 +400,3 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS, bool 
 
 } // namespace Algorithms
 } // namespace Mantid
-
