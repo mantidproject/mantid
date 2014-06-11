@@ -5,7 +5,6 @@
 .. module:: mantid.api
 
 .. toctree::
-
    :glob:
    :maxdepth: 1
 
