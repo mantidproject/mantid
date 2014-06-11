@@ -90,7 +90,7 @@ endif()
 
 
 # RHEL6 specific stuff (as we need to use software collections)
-if ( ${UNIX_DIST} STREQUAL "RedHatEnterprise" )
+if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" )
 	file ( APPEND ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "\n"
 								     "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot ]; then\n"
                                                                      "  mv $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe\n"
@@ -101,12 +101,12 @@ if ( ${UNIX_DIST} STREQUAL "RedHatEnterprise" )
 								      "scl enable mantidlibs \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe $*\" \n"
 	)
 
-install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh 
+    install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh
           DESTINATION ${BIN_DIR}
 	      PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
 	                  GROUP_EXECUTE GROUP_READ
 	                  WORLD_EXECUTE WORLD_READ
-)
+    )
 
 endif()
 
