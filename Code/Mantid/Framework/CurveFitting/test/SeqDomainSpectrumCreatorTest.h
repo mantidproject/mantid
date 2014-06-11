@@ -14,6 +14,9 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FunctionFactory.h"
 
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
@@ -25,6 +28,11 @@ public:
   // This means the constructor isn't called when running other tests
   static SeqDomainSpectrumCreatorTest *createSuite() { return new SeqDomainSpectrumCreatorTest(); }
   static void destroySuite( SeqDomainSpectrumCreatorTest *suite ) { delete suite; }
+
+  SeqDomainSpectrumCreatorTest()
+  {
+      FrameworkManager::Instance();
+  }
 
   void testConstructor()
   {
@@ -150,17 +158,17 @@ public:
       fun->initialize();
       fun->setParameter("Slope", 0.0);
 
-      Fit fit;
-      fit.initialize();
+      Mantid::API::IAlgorithm_sptr fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
+      fit->initialize();
 
-      fit.setProperty("Function",fun);
-      fit.setProperty("InputWorkspace",matrixWs);
-      fit.setProperty("CreateOutput",true);
-      fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+      fit->setProperty("Function",fun);
+      fit->setProperty("InputWorkspace",matrixWs);
+      fit->setProperty("CreateOutput",true);
+      fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
 
-      fit.execute();
+      fit->execute();
 
-      TS_ASSERT(fit.isExecuted());
+      TS_ASSERT(fit->isExecuted());
 
       TS_ASSERT_DELTA(fun->getParameter(0), 2.0, 1e-6);
       TS_ASSERT_LESS_THAN(fun->getError(0), 1e-6);
@@ -194,17 +202,17 @@ public:
         fun->setParameter(i, static_cast<double>(i) + 1.1);
       }
 
-      Fit fit;
-      fit.initialize();
+      Mantid::API::IAlgorithm_sptr fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
+      fit->initialize();
 
-      fit.setProperty("Function",fun);
-      fit.setProperty("InputWorkspace",matrixWs);
-      fit.setProperty("CreateOutput",true);
-      fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+      fit->setProperty("Function",fun);
+      fit->setProperty("InputWorkspace",matrixWs);
+      fit->setProperty("CreateOutput",true);
+      fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
 
-      fit.execute();
+      fit->execute();
 
-      TS_ASSERT(fit.isExecuted());
+      TS_ASSERT(fit->isExecuted());
 
       for(size_t i = 0; i < slopes.size(); ++ i) {
           TS_ASSERT_DELTA(fun->getParameter(i), static_cast<double>(i), 1e-5);
