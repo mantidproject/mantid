@@ -105,8 +105,8 @@ Output:
     savefile = os.path.join(os.path.expanduser("~"), "AsciiFile.txt")
 
     # perform the algorithm
-    # CommentIndicator can be as long as you want and is written at the start of lines with comments.
-    SaveAscii(InputWorkspace=ws1,Filename=savefile,CommentIndicator="!Comment!")
+    # CommentIndicator can be changed, but when read back in must be specified
+    SaveAscii(InputWorkspace=ws1,Filename=savefile,CommentIndicator="!")
 
     print "File Exists:", os.path.exists(savefile)
 
