@@ -33,7 +33,7 @@ Usage
    #
    # We use HRPD workspaces, which have detectors that are not rectangular.
    ws1 = Load("HRP38094Calib.nxs")
-   ws2 = Load("HRP39180")
+   ws2 = Load("HRP39180.RAW")
 
    spectra = [0, 1, 3] # Sprectra of detectors moved
 
