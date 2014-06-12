@@ -24,7 +24,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example: **
+**Example:**
 
 .. testcode:: ExStripPeak
 

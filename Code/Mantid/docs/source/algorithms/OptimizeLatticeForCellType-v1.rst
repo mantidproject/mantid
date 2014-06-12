@@ -20,4 +20,34 @@ calculate a sequence of approximations for each parameter, with delta
 ranging over 10 orders of magnitude and keep the value in the sequence
 with the smallest relative change.
 
+Usage
+-----
+
+**Example:**
+
+.. testcode:: ExOptimizeForCellType
+
+    ws=LoadIsawPeaks("TOPAZ_3007.peaks")
+    FindUBUsingFFT(ws,MinD=8.0,MaxD=13.0)
+    print "Before Optimization:"
+    print ws.sample().getOrientedLattice().getUB()
+    OptimizeLatticeForCellType(ws,CellType="Monoclinic ( a unique )")
+    print "\nAfter Optimization:"
+    print ws.sample().getOrientedLattice().getUB()
+
+
+Output:
+
+.. testoutput:: ExOptimizeForCellType
+
+    Before Optimization:
+    [[ 0.01223576  0.00480107  0.08604016]
+     [-0.11654506  0.00178069 -0.00458823]
+     [-0.02737294 -0.08973552 -0.02525994]]
+
+    After Optimization:
+    [[-0.04772517  0.04134355 -0.00058175]
+     [-0.0055954  -0.00905383  0.12507404]
+     [ 0.06103109  0.03149982  0.01101201]]
+
 .. categories::

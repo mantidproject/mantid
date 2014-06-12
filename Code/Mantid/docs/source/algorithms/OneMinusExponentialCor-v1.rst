@@ -26,7 +26,7 @@ the operation is applied to the workspace of that name.
 Usage
 -----
 
-**Example: **
+**Example:**
 
 .. testcode:: ExOneMinusExp
 

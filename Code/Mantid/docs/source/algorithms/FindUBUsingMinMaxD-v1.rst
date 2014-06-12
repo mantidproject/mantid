@@ -26,4 +26,31 @@ accurate and belong to a single crystal, this method should produce some
 UB matrix that indexes the peaks. However, other software will usually
 be needed to adjust this UB to match a desired conventional cell.
 
+Usage
+-----
+
+**Example:**
+
+.. testcode:: ExFindUBUsingMinMaxD
+
+    ws=LoadIsawPeaks("TOPAZ_3007.peaks")
+    print "After LoadIsawPeaks does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice()
+
+    FindUBUsingMinMaxD(ws,MinD=8.0,MaxD=13.0)
+    print "After FindUBUsingMinMaxD does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice()
+
+    print ws.sample().getOrientedLattice().getUB()
+
+
+Output:
+
+.. testoutput:: ExFindUBUsingMinMaxD
+
+    After LoadIsawPeaks does the workspace have an orientedLattice: False
+    After FindUBUsingMinMaxD does the workspace have an orientedLattice: True
+    [[ 0.01223576  0.00480107  0.08604016]
+     [-0.11654506  0.00178069 -0.00458823]
+     [-0.02737294 -0.08973552 -0.02525994]]
+
+
 .. categories::
