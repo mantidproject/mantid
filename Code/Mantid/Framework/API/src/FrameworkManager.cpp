@@ -183,6 +183,7 @@ void FrameworkManagerImpl::clear()
   clearAlgorithms();
   clearInstruments();
   clearData();
+  clearProperties();
 }
 
 /**
@@ -208,6 +209,14 @@ void FrameworkManagerImpl::clearData()
 void FrameworkManagerImpl::clearInstruments()
 {
   InstrumentDataService::Instance().clear();
+}
+
+/**
+ * Clear memory associated with the PropertyManager
+ */
+void FrameworkManagerImpl::clearProperties()
+{
+  PropertyManagerDataService::Instance().clear();
 }
 
 /** Creates and initialises an instance of an algorithm
