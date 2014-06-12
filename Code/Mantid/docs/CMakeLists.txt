@@ -30,6 +30,32 @@ if ( SPHINX_FOUND )
                                                 EXCLUDE_FROM_DEFAULT_BUILD 1
                                                 EXCLUDE_FROM_ALL 1)
 
+  # qt-assistant target
+  if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+    set ( BUILDER qthelp )
+    configure_file ( runsphinx.py.in runsphinx_qthelp.py @ONLY )
+
+    set ( QTHELP_GENERATED_INDEXES 
+          MantidProject.qhp 
+          MantidProject.qhcp )
+
+    add_custom_command ( OUTPUT qthelp/MantidProject.qhcp
+                       COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_qthelp.py
+                       DEPENDS Framework MantidPlot
+                       COMMENT "Building qt-assistant indexes")
+
+    add_custom_target ( ${TARGET_PREFIX}-qthelp
+                        COMMAND ${QT_QCOLLECTIONGENERATOR_EXECUTABLE} qthelp/MantidProject.qhcp
+                        DEPENDS Framework MantidPlot qthelp/MantidProject.qhcp
+                        COMMENT "Compiling qt-assistant documentation")
+    # Group within VS and exclude from whole build
+    set_target_properties ( ${TARGET_PREFIX}-qthelp PROPERTIES FOLDER "Documentation"
+                           EXCLUDE_FROM_DEFAULT_BUILD 1
+                           EXCLUDE_FROM_ALL 1)
+  else (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+    message (WARNING " Did not find qcollectiongenerator - cannot create qtassistant files")
+  endif (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+
   # doctest target
   set ( BUILDER doctest )
   configure_file ( runsphinx.py.in runsphinx_doctest.py @ONLY )
