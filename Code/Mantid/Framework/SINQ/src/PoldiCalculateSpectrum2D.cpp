@@ -15,6 +15,8 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h"
 #include "MantidAPI/IPeakFunction.h"
 
+#include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
+
 namespace Mantid
 {
 namespace Poldi
@@ -73,9 +75,9 @@ namespace Poldi
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  boost::shared_ptr<MultiDomainFunction> PoldiCalculateSpectrum2D::getMultiDomainFunctionFromPeakCollection(PoldiPeakCollection_sptr peakCollection)
+  boost::shared_ptr<Poldi2DFunction> PoldiCalculateSpectrum2D::getFunctionFromPeakCollection(PoldiPeakCollection_sptr peakCollection)
   {
-      boost::shared_ptr<MultiDomainFunction> mdFunction(new MultiDomainFunction);
+      boost::shared_ptr<Poldi2DFunction> mdFunction(new Poldi2DFunction);
 
       for(size_t i = 0; i < peakCollection->peakCount(); ++i) {
           PoldiPeak_sptr peak = peakCollection->peak(i);
@@ -120,29 +122,13 @@ namespace Poldi
 
       peakCollection = getNormalizedPeakCollection(peakCollection);
 
-      boost::shared_ptr<MultiDomainFunction> mdFunction = getMultiDomainFunctionFromPeakCollection(peakCollection);
-
-      size_t nspec = ws->getNumberHistograms();
-      std::vector<size_t> wsi(nspec);
-      for(size_t w = 0; w < wsi.size(); ++w) {
-          wsi[w] = w;
-      }
-
-      mdFunction->setDomainIndices(0, wsi);
+      boost::shared_ptr<IFunction> mdFunction = getFunctionFromPeakCollection(peakCollection);
 
       IAlgorithm_sptr fit = createChildAlgorithm("Fit", -1, -1, true);
       fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(mdFunction));
       fit->setProperty("InputWorkspace", ws);
-      fit->setProperty("WorkspaceIndex", 0);
-
-      for(size_t i = 1; i < nspec; ++i) {
-          fit->setProperty("InputWorkspace_" + boost::lexical_cast<std::string>(i), ws);
-          fit->setProperty("WorkspaceIndex_" + boost::lexical_cast<std::string>(i), static_cast<int>(i));
-      }
-
       fit->setProperty("CreateOutput", true);
       fit->setProperty("MaxIterations", 0);
-      fit->setProperty("CalcErrors", false);
 
       fit->execute();
   }

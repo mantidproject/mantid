@@ -8,6 +8,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
+#include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 
 
 namespace Mantid
@@ -55,7 +56,7 @@ protected:
     PoldiPeakCollection_sptr getIntegratedPeakCollection(PoldiPeakCollection_sptr rawPeakCollection);
     PoldiPeakCollection_sptr getNormalizedPeakCollection(PoldiPeakCollection_sptr peakCollection);
 
-    boost::shared_ptr<API::MultiDomainFunction> getMultiDomainFunctionFromPeakCollection(PoldiPeakCollection_sptr peakCollection);
+    boost::shared_ptr<Poldi2DFunction> getFunctionFromPeakCollection(PoldiPeakCollection_sptr peakCollection);
 
     PoldiTimeTransformer_sptr m_timeTransformer;
     double m_deltaT;

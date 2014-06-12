@@ -34,18 +34,10 @@ void PoldiSpectrumDomainFunction::setWorkspace(boost::shared_ptr<const Workspace
     initializeParametersFromWorkspace(workspace2D);
 }
 
-void PoldiSpectrumDomainFunction::function(const FunctionDomain &domain, FunctionValues &values) const
-{    
-    const FunctionDomain1DSpectrum &spectrumDomain = dynamic_cast<const FunctionDomain1DSpectrum &>(domain);
-
-    try{
-        spectrumDomain.getWorkspaceIndex();
-    } catch(...) {
-        throw std::invalid_argument("PoldiSpectrumDomainFunction can only work with FunctionDomain1DSpectrum.");
-    }
-
-    size_t index = spectrumDomain.getWorkspaceIndex();
-    int domainSize = static_cast<int>(spectrumDomain.size());
+void PoldiSpectrumDomainFunction::function1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::FunctionValues &values) const
+{
+    size_t index = domain.getWorkspaceIndex();
+    int domainSize = static_cast<int>(domain.size());
 
     /* Parameters are given in d, but need to be processed in arrival time.
      * This section performs the conversions. They depend on several factors

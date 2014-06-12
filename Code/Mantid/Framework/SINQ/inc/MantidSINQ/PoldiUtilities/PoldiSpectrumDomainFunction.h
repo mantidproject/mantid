@@ -3,6 +3,8 @@
 
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/IFunction1DSpectrum.h"
+#include "MantidAPI/FunctionDomain1D.h"
 #include <string>
 
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
@@ -39,7 +41,7 @@ namespace Poldi
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class MANTID_SINQ_DLL PoldiSpectrumDomainFunction : public API::ParamFunction
+class MANTID_SINQ_DLL PoldiSpectrumDomainFunction : virtual public API::ParamFunction, virtual public API::IFunction1DSpectrum
 {
 public:
     PoldiSpectrumDomainFunction();
@@ -49,8 +51,7 @@ public:
     virtual std::string name() const { return "PoldiSpectrumDomainFunction"; }
 
     virtual void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
-    virtual void function(const API::FunctionDomain &domain, API::FunctionValues &values) const;
-
+    virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain, API::FunctionValues &values) const;
 
 protected:
     virtual void init();
