@@ -49,6 +49,11 @@ class PropertyWithValueFactoryTest: public CxxTest::TestSuite
        CREATE_PROPERTY_TEST_BODY(std::string, PyString_FromString("unit"));
     }
 
+    void test_builtin_type_create_double_array_from_tuple_type_property()
+    {
+      CREATE_PROPERTY_TEST_BODY(std::vector<double>, Py_BuildValue("(ff)", 0.5, 1.45));
+    }
+
 private:
     template<typename ExpectedType>
     boost::shared_ptr<PropertyWithValue<ExpectedType> >
