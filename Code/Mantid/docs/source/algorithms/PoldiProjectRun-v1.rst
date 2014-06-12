@@ -49,17 +49,13 @@ A MatrixWorkspace is created to store all the information about
 data-files and the future workspace needed during the analysis. The
 stored information are:
 
--  spl Name - name of the sample, extract from the sample
-   ``file name, without the extension ``
-
+-  spl Name - name of the sample, extract from the sample file name, without the extension
 -  year - year of the acquisition
 -  number - id number of the acquisition
 -  data file - full path of the data file
 -  spl log - name of the MatrixWorkspace where the data log are loaded
 -  spl corr - name of the MatrixWorkspace where the correlated spectra is loaded
-
 -  spl dead wires - name of the MatrixWorkspace where the dead wires are loaded
-
 -  spl peak - name of the MatrixWorkspace where the detected peak information are stored
 
 POLDI setup manager
@@ -216,6 +212,7 @@ peak, on row (2) the fitted peak.
 
 
 .. code:: python
+
     PoldiPeakDetection(InputWorkspace         = sample_correlated_ws,
                        PeakDetectionThreshold = PeakDetectionThreshold,
                        OutputWorkspace        = sample_peak_ws)
