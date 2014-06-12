@@ -39,8 +39,6 @@ MemoryManagerImpl::~MemoryManagerImpl()
 {
 }
 
-
-
 MemoryInfo MemoryManagerImpl::getMemoryInfo()
 {
   Kernel::MemoryStats mem_stats;
@@ -50,108 +48,6 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
   info.freeRatio = static_cast<size_t>(mem_stats.getFreeRatio());
   return info;
 }
-
-/** Decides if a ManagedWorkspace2D sould be created for the current memory conditions
-    and workspace parameters NVectors, XLength,and YLength.
-    @param NVectors :: the number of vectors
-    @param XLength :: the size of the X vector
-    @param YLength :: the size of the Y vector
-    @param isCompressedOK :: The address of a boolean indicating if the compression succeeded or not
-    @return true is managed workspace is needed
- */
-bool MemoryManagerImpl::goForManagedWorkspace(std::size_t NVectors, std::size_t XLength, std::size_t YLength, bool* isCompressedOK)
-{
-  int AlwaysInMemory;// Check for disabling flag
-  if (Kernel::ConfigService::Instance().getValue("ManagedWorkspace.AlwaysInMemory", AlwaysInMemory)
-      && AlwaysInMemory)
-    return false;
-
-  // check potential size to create and determine trigger  
-  int availPercent;
-  if (!Kernel::ConfigService::Instance().getValue("ManagedWorkspace.LowerMemoryLimit", availPercent))
-  {
-    // Default to 40% if missing
-    availPercent = 40;
-  }
-  if (availPercent > 150)
-  {
-    g_log.warning("ManagedWorkspace.LowerMemoryLimit is not allowed to be greater than 150%.");
-    availPercent = 150;
-  }
-  if (availPercent < 0)
-  {
-    g_log.warning("Negative value for ManagedWorkspace.LowerMemoryLimit. Setting to 0.");
-    availPercent = 0;
-  }
-  if (availPercent > 90)
-  {
-    g_log.warning("ManagedWorkspace.LowerMemoryLimit is greater than 90%. Danger of memory errors.");
-  }
-  MemoryInfo mi = getMemoryInfo();
-  size_t triggerSize = mi.availMemory / 100 * availPercent / sizeof(double);
-  // Avoid int overflow
-  size_t wsSize = 0;
-  if (NVectors > 1024)
-      wsSize = NVectors / 1024 * (YLength * 2 + XLength);
-  else if (YLength * 2 + XLength > 1024)
-      wsSize = (YLength * 2 + XLength) / 1024 * NVectors;
-  else
-      wsSize = NVectors * (YLength * 2 + XLength) / 1024;
-
-//  g_log.debug() << "Requested memory: " << (wsSize * sizeof(double))/1024 << " MB. " << std::endl;
-//  g_log.debug() << "Available memory: " << mi.availMemory << " KB.\n";
-//  g_log.debug() << "MWS trigger memory: " << triggerSize * sizeof(double) << " KB.\n";
-
-  bool goManaged = (wsSize > triggerSize);
-  // If we're on the cusp of going managed, add in the reserved but unused memory
-  if( goManaged )
-  {
-    // This is called separately as on some systems it is an expensive calculation.
-    // See Kernel/src/Memory.cpp - reservedMem() for more details
-    Kernel::MemoryStats mem_stats;
-    const size_t reserved = mem_stats.reservedMem();
-//    g_log.debug() << "Windows - Adding reserved but unused memory of " << reserved << " KB\n";
-    mi.availMemory += reserved;
-    triggerSize += reserved / 100 * availPercent / sizeof(double);
-    goManaged = (wsSize > triggerSize);
-
-    g_log.debug() << "Requested memory: " << (wsSize * sizeof(double))/1024 << " MB." << std::endl;
-    g_log.debug() << "Available memory: " << (mi.availMemory)/1024 << " MB." << std::endl;
-    g_log.debug() << "ManagedWS trigger memory: " << (triggerSize * sizeof(double))/1024 << " MB." << std::endl;
-  }
-
-  if (isCompressedOK)
-  {
-    if (goManaged)
-    {
-      int notOK = 0;
-      if ( !Kernel::ConfigService::Instance().getValue("CompressedWorkspace.DoNotUse",notOK) ) notOK = 0;
-      if (notOK) *isCompressedOK = false;
-      else
-      {
-        double compressRatio;
-        if (!Kernel::ConfigService::Instance().getValue("CompressedWorkspace.EstimatedCompressRatio",compressRatio)) compressRatio = 4.;
-        int VectorsPerBlock;
-        if (!Kernel::ConfigService::Instance().getValue("CompressedWorkspace.VectorsPerBlock",VectorsPerBlock)) VectorsPerBlock = 4;
-        double compressedSize = (1./compressRatio + 100.0*static_cast<double>(VectorsPerBlock)/static_cast<double>(NVectors))
-                                      * static_cast<double>(wsSize);
-        double memoryLeft = (static_cast<double>(triggerSize)/availPercent*100. - compressedSize)/1024. * sizeof(double);
-        // To prevent bad allocation on Windows when free memory is too low.
-        if (memoryLeft < 200.)
-          *isCompressedOK = false;
-        else
-          *isCompressedOK =  compressedSize < static_cast<double>(triggerSize);
-      }
-    }
-    else
-    {
-      *isCompressedOK = false;
-    }
-  }
-
-  return goManaged;
-}
-
 
 /** Release any free memory back to the system.
  * Calling this could help the system avoid going into swap.

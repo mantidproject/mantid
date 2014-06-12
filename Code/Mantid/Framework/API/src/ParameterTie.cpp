@@ -47,10 +47,12 @@ namespace API
   double* ParameterTie::AddVariable(const char *varName, void *palg)
   {
     ParameterTie& tie = *(ParameterTie*)palg;
+    ParameterReference ref(tie.m_function1,tie.m_function1->parameterIndex(std::string(varName)));
+
     double* var = new double;
     *var = 0;
-    ParameterReference ref(tie.m_function1,tie.m_function1->parameterIndex(std::string(varName)));
     tie.m_varMap[var] = ref;
+
     return var;
   }
 

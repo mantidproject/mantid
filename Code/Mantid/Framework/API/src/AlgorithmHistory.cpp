@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
+#include <sstream>
 
 namespace Mantid
 {
@@ -154,11 +155,9 @@ void AlgorithmHistory::printSelf(std::ostream& os, const int indent)const
 {
   os << std::string(indent,' ') << "Algorithm: " << m_name;
   os << std::string(indent,' ') << " v" << m_version << std::endl;
-  if (m_executionDate != Mantid::Kernel::DateAndTime::defaultTime())
-  {
-    os << std::string(indent,' ') << "Execution Date: " << m_executionDate.toFormattedString() <<std::endl;
-    os << std::string(indent,' ') << "Execution Duration: "<< m_executionDuration << " seconds" << std::endl;
-  }
+  os << std::string(indent,' ') << "Execution Date: " << m_executionDate.toFormattedString() <<std::endl;
+  os << std::string(indent,' ') << "Execution Duration: "<< m_executionDuration << " seconds" << std::endl;
+
   std::vector<Kernel::PropertyHistory>::const_iterator it;
   os << std::string(indent,' ') << "Parameters:" <<std::endl;
 
@@ -206,6 +205,34 @@ std::ostream& operator<<(std::ostream& os, const AlgorithmHistory& AH)
 {
   AH.printSelf(os);
   return os;
+}
+
+/** Write out this history record to file.
+ * @param file :: The handle to the nexus file to save to
+ * @param algCount :: Counter of the number of algorithms written to file.
+ */
+void AlgorithmHistory::saveNexus(::NeXus::File* file, int& algCount) const
+{
+  std::stringstream algNumber;
+  ++algCount;
+  algNumber << "MantidAlgorithm_" << algCount; //history entry names start at 1 not 0
+
+  std::stringstream algData;
+  printSelf(algData);
+
+  file->makeGroup(algNumber.str(), "NXnote", true);
+  file->writeData("author", std::string("mantid"));
+  file->writeData("description", std::string("Mantid Algorithm data"));
+  file->writeData("data", algData.str());
+
+  //child algorithms
+  AlgorithmHistories::const_iterator histIter = m_childHistories.begin();
+  for(; histIter != m_childHistories.end(); ++histIter)
+  {
+    (*histIter)->saveNexus(file, algCount);
+  }
+
+  file->closeGroup();
 }
 
 } // namespace API

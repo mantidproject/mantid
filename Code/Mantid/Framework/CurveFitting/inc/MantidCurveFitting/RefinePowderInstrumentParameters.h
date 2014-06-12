@@ -15,10 +15,6 @@
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
 
-using namespace std;
-using namespace Mantid;
-using namespace Mantid::DataObjects;
-using namespace Mantid::API;
 
 namespace Mantid
 {
@@ -62,6 +58,9 @@ namespace CurveFitting
 
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "RefinePowderInstrumentParameters";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Parameters include Dtt1, Dtt1t, Dtt2t, Zero, Zerot. ";}
+
 
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 2;}
@@ -70,8 +69,7 @@ namespace CurveFitting
     virtual const std::string category() const { return "Diffraction";}
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     // Implement abstract Algorithm methods
     void init();
     // Implement abstract Algorithm methods
@@ -82,9 +80,10 @@ namespace CurveFitting
     void importParametersFromTable(DataObjects::TableWorkspace_sptr parameterWS, std::map<std::string, double>& parameters);
 
     /// Import the Monte Carlo related parameters from table
-    void importMonteCarloParametersFromTable(TableWorkspace_sptr tablews, vector<string> parameternames,
-                                             vector<double>& stepsizes, vector<double>& lowerbounds,
-                                             vector<double>& upperbounds);
+    void importMonteCarloParametersFromTable(DataObjects::TableWorkspace_sptr tablews,
+                                             std::vector<std::string> parameternames,
+                                             std::vector<double>& stepsizes, std::vector<double>& lowerbounds,
+                                             std::vector<double>& upperbounds);
 
     /// Generate (output) workspace of peak centers
     void genPeakCentersWorkspace(bool montecarlo, size_t numbestfit);
@@ -104,10 +103,10 @@ namespace CurveFitting
     void fitInstrumentParameters();
 
     /// Calculate function's statistic
-    double calculateFunctionStatistic(IFunction_sptr func, MatrixWorkspace_sptr dataws, size_t workspaceindex);
+    double calculateFunctionStatistic(API::IFunction_sptr func, API::MatrixWorkspace_sptr dataws, size_t workspaceindex);
 
     /// Fit function to data
-    bool fitFunction(IFunction_sptr func, double &gslchi2);
+    bool fitFunction(API::IFunction_sptr func, double &gslchi2);
 
     /// Parse Fit() output parameter workspace
     std::string parseFitParameterWorkspace(API::ITableWorkspace_sptr paramws);
@@ -116,25 +115,26 @@ namespace CurveFitting
     std::string parseFitResult(API::IAlgorithm_sptr fitalg, double& chi2);
 
     /// Set up and run a monte carlo simulation to refine the peak parameters
-    void refineInstrumentParametersMC(TableWorkspace_sptr parameterWS, bool fit2=false);
+    void refineInstrumentParametersMC(DataObjects::TableWorkspace_sptr parameterWS, bool fit2=false);
 
     /// Core Monte Carlo random walk on parameter-space
-    void doParameterSpaceRandomWalk(vector<string> parnames, vector<double> lowerbounds,
-                                    vector<double> upperbounds, vector<double> stepsizes, size_t maxsteps,
+    void doParameterSpaceRandomWalk(std::vector<std::string> parnames, std::vector<double> lowerbounds,
+                                    std::vector<double> upperbounds, std::vector<double> stepsizes, size_t maxsteps,
                                     double stepsizescalefactor, bool fit2);
 
     /// Get the names of the parameters of D-TOF conversion function
-    void getD2TOFFuncParamNames(vector<string>& parnames);
+    void getD2TOFFuncParamNames(std::vector<std::string>& parnames);
 
     /// Calculate the value and chi2
-    double calculateD2TOFFunction(IFunction_sptr func, FunctionDomain1DVector domain, FunctionValues& values,
-                                  const MantidVec &rawY, const MantidVec& rawE);
+    double calculateD2TOFFunction(API::IFunction_sptr func, API::FunctionDomain1DVector domain,
+                                  API::FunctionValues& values,
+                                  const Mantid::MantidVec &rawY, const Mantid::MantidVec& rawE);
 
     /// Calculate d-space value from peak's miller index for thermal neutron
     // double calculateDspaceValue(std::vector<int> hkl, double lattice);
 
     /// Calcualte value n for thermal neutron peak profile
-    void calculateThermalNeutronSpecial(IFunction_sptr mFunction, vector<double> vec_d, vector<double>& vec_n);
+    void calculateThermalNeutronSpecial(API::IFunction_sptr mFunction, std::vector<double> vec_d, std::vector<double>& vec_n);
 
     //--------------- Class Variables -------------------
     /// Output Workspace containing the dspacing ~ TOF peak positions
@@ -152,7 +152,7 @@ namespace CurveFitting
     std::map<std::string, double> mOrigParameters;
 
     /// Peak function parameter names
-    vector<string> mPeakFunctionParameterNames;
+    std::vector<std::string> mPeakFunctionParameterNames;
     /// N sets of the peak parameter values for the best N chi2 for MC.  It is paired with mPeakFunctionParameterNames
     std::vector<std::pair<double, std::vector<double> > > mBestMCParameters;
     /// N sets of the peak parameter values for the best N chi2 for MC.  It is paired with mPeakFunctionParameterNames

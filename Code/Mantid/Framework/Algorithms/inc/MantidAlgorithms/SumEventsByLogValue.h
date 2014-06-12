@@ -49,11 +49,16 @@ namespace Algorithms
     virtual int version() const { return (1);}
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "Events";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const
+    {
+      return "Produces a single spectrum workspace containing the "
+          "total summed events in the workspace as a function of a specified log.";
+    }
 
     std::map<std::string, std::string> validateInputs();
 
   private:
-    void initDocs();
     void init();
     void exec();
 

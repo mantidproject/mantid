@@ -38,6 +38,9 @@ namespace DataHandling
     virtual ~LoadMcStasNexus();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Loads an McStas NeXus file into a group workspace.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
@@ -45,7 +48,6 @@ namespace DataHandling
     virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

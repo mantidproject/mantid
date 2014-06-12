@@ -38,11 +38,14 @@ namespace Algorithms
     virtual ~CreateFlatEventWorkspace();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Creates a flat event workspace that can be used for background removal.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
+
     void init();
     void exec();
 

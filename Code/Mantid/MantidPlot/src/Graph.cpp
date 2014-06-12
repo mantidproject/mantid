@@ -3424,7 +3424,10 @@ PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth, int curveType)
       m_yUnits = mc->yUnits();
       m_isDistribution = mc->isDistribution();
     }
-    if ( m_xUnits->unitID() != mc->xUnits()->unitID() || m_yUnits->unitID() != mc->yUnits()->unitID() )
+    // Compare units. X units are compared by ID, Y units - by caption. That's because Y units will
+    // always be of type Label, hence will always have ID "Label", and the caption is what we are
+    // interested in.
+    if ( m_xUnits->unitID() != mc->xUnits()->unitID() || m_yUnits->caption() != mc->yUnits()->caption() )
     {
       g_log.warning("You are overlaying plots from data having differing units!");
     }

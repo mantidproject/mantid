@@ -67,10 +67,12 @@ class DLLExport DetermineChunking : public API::Algorithm
     virtual ~DetermineChunking();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Workflow algorithm to determine chunking strategy for event nexus, runinfo.xml, raw, or histo nexus files.";}
+
     virtual int version() const;
     virtual const std::string category() const;
   private:
-    virtual void initDocs();
     void init();
     void exec();
     std::string setTopEntryName(std::string filename);

@@ -57,14 +57,16 @@ public:
   virtual ~NormaliseToUnity() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "NormaliseToUnity";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "NormaliseToUnity takes a 2D workspace or an EventWorkspace as input and normalises it to 1. Optionally, the range summed can be restricted in either dimension.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "CorrectionFunctions\\NormalisationCorrections";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();

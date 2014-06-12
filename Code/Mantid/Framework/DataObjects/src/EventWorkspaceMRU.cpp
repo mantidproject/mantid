@@ -6,6 +6,7 @@ namespace Mantid
 namespace DataObjects
 {
 
+  using Mantid::Kernel::Mutex;
 
   //----------------------------------------------------------------------------------------------
   /** Constructor

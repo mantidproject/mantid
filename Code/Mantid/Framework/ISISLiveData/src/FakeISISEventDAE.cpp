@@ -1,9 +1,3 @@
-/*WIKI*
-
-Simulates ISIS event DAE. It runs continuously until canceled and listens to port 10000 for connection.
-When connected starts sending event packets.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -135,13 +129,6 @@ public:
   }
 };
 
-/// Sets documentation strings for this algorithm
-void FakeISISEventDAE::initDocs()
-{
-  this->setWikiSummary("Simulates ISIS event DAE. ");
-  this->setOptionalMessage("Simulates ISIS event DAE.");
-}
-
 
 using namespace Kernel;
 using namespace API;
@@ -215,4 +202,3 @@ void FakeISISEventDAE::exec()
 
 } // namespace LiveData
 } // namespace Mantid
-

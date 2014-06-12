@@ -46,9 +46,6 @@ namespace Poldi
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-  using namespace Kernel;
-  using namespace DataObjects;
-
   class MANTID_SINQ_DLL PoldiPeakSearch : public API::Algorithm
   {
   public:
@@ -57,10 +54,12 @@ namespace Poldi
 
     virtual int version() const { return 1; }
     virtual const std::string name() const { return "PoldiPeakSearch"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "This algorithm finds the peaks in a POLDI auto-correlation spectrum.";}
+
     virtual const std::string category() const { return "SINQ\\Poldi"; }
     
   protected:
-    void initDocs();
 
     MantidVec getNeighborSums(MantidVec correlationCounts) const;
 
@@ -83,7 +82,7 @@ namespace Poldi
     std::vector<PoldiPeak_sptr> getPeaks(MantidVec::const_iterator baseListStart, std::list<MantidVec::const_iterator> peakPositions, const MantidVec &xData) const;
     double getFWHMEstimate(MantidVec::const_iterator baseListStart, MantidVec::const_iterator peakPosition, const MantidVec &xData) const;
 
-    void setErrorsOnWorkspace(Workspace2D_sptr correlationWorkspace, double error) const;
+    void setErrorsOnWorkspace(DataObjects::Workspace2D_sptr correlationWorkspace, double error) const;
 
     void setMinimumDistance(int newMinimumDistance);
     void setMinimumPeakHeight(double newMinimumPeakHeight);

@@ -1,16 +1,3 @@
-/*WIKI*
-
-The MonitorLiveData algorithm is started in the background
-by [[StartLiveData]] and repeatedly calls [[LoadLiveData]].
-'''It should not be necessary to call MonitorLiveData directly.'''
-
-This algorithm simply calls [[LoadLiveData]] at the given ''UpdateFrequency''.
-For more details, see [[StartLiveData]].
-
-For details on the way to specify the data processing steps, see: [[LoadLiveData#Description|LoadLiveData]].
-
-*WIKI*/
-
 #include "MantidLiveData/MonitorLiveData.h"
 #include "MantidKernel/System.h"
 #include "MantidLiveData/LoadLiveData.h"
@@ -58,14 +45,6 @@ namespace LiveData
   /// Algorithm's version for identification. @see Algorithm::version
   int MonitorLiveData::version() const { return 1;};
   
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void MonitorLiveData::initDocs()
-  {
-    this->setWikiSummary("Call LoadLiveData at a given update frequency. Do not call this algorithm directly; instead call StartLiveData.");
-    this->setOptionalMessage("Call LoadLiveData at a given update frequency. Do not call this algorithm directly; instead call StartLiveData.");
-  }
-
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */

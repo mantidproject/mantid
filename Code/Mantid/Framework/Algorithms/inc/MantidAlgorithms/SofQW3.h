@@ -60,14 +60,16 @@ namespace Mantid
       SofQW3();
       /// Algorithm's name for identification 
       virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Calculate the intensity as a function of momentum transfer and energy.";}
+
       /// Algorithm's version for identification 
       virtual int version() const;
       /// Algorithm's category for identification
       virtual const std::string category() const;
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Initialize the algorithm
       void init();
       /// Run the algorithm

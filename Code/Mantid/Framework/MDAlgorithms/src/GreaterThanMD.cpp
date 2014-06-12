@@ -1,22 +1,3 @@
-/*WIKI*
-
-Perform the > (greater-than) boolean operation on two MDHistoWorkspaces or a MDHistoWorkspace and a scalar.
-The output workspace has a signal of 0.0 to mean "false" and a signal of 1.0 to mean "true". Errors are 0.
-
-For two MDHistoWorkspaces, the operation is performed element-by-element.
-
-For a MDHistoWorkspace and a scalar, the operation is performed on each element of the output.
-
-*WIKI*/
-/*WIKI_USAGE*
- # Compare two workspaces, element-by-element
- C = A < B
- # Compare a workspace and a number, element-by-element
- C = A < 123.4
-
-See [[MDHistoWorkspace#Boolean_Operations|this page]] for examples on using boolean operations.
-*WIKI_USAGE*/
-
 #include "MantidMDAlgorithms/GreaterThanMD.h"
 #include "MantidKernel/System.h"
 
@@ -30,13 +11,6 @@ namespace MDAlgorithms
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(GreaterThanMD)
-
-  /// Sets documentation strings for this algorithm
-  void GreaterThanMD::initDocs()
-  {
-    this->setWikiSummary("Perform the GreaterThan boolean operation on two MDHistoWorkspaces.");
-    this->setOptionalMessage("Perform the GreaterThan boolean operation on two MDHistoWorkspaces.");
-  }
 
   
   //----------------------------------------------------------------------------------------------

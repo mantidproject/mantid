@@ -278,6 +278,12 @@ void RangeSelector::reapply()
   m_mrkMax->attach(m_plot);
 }
 
+void RangeSelector::detach()
+{
+  m_mrkMin->attach(NULL);
+  m_mrkMax->attach(NULL);
+}
+
 void RangeSelector::setColour(QColor colour)
 {
   m_pen->setColor(colour);

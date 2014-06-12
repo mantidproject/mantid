@@ -12,8 +12,8 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 
-using Mantid::DataObjects::WorkspaceSingleValue;
-using Mantid::API::MDNormalization;
+//using Mantid::DataObjects::WorkspaceSingleValue;
+//using Mantid::API::MDNormalization;
 
 
 namespace Mantid

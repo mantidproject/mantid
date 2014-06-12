@@ -18,6 +18,7 @@ using Mantid::Poldi::PoldiFitPeaks1D;
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
+using namespace Mantid::Kernel;
 
 class PoldiFitPeaks1D;
 

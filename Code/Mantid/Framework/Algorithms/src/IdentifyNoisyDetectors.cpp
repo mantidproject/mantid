@@ -1,24 +1,3 @@
-/*WIKI* 
-
-The process for this algorithm is:
-* The standard deviation for each pixel within the pre-set range is calculated.
-* The mean value and standard deviation of these standard deviation values is calculated.
-* Any detector/pixel for which it's standard deviation value satisfied the following conditions:
-** sdev(pixel) < mean(sdevs) - 3 * sdev(sdevs)
-** sdev(pixel) > mean(sdevs) + 3 * sdev(sdevs)
-** sdev(pixel) < mean(sdevs) * 0.0001
-* (cont) is considered to be "noisy".
-
-This is repeated three times from the second step.
-
-This uses the [[Integration]], [[Power]] and [[Divide]] algorithms for the first step.
-
-The lower bound for the integration is currently fixed to 2000.
-
-The upper bound for the integration is currently fixed to 19000.
-
-
-*WIKI*/
 #include "MantidAlgorithms/IdentifyNoisyDetectors.h"
 #include "MantidAPI/WorkspaceValidators.h"
 
@@ -30,13 +9,6 @@ using namespace Kernel;
 using namespace API;
 
 DECLARE_ALGORITHM(IdentifyNoisyDetectors)
-
-/// Sets documentation strings for this algorithm
-void IdentifyNoisyDetectors::initDocs()
-{
-  this->setWikiSummary("This algorithm creates a single-column workspace where the Y values are populated withs 1s and 0s, 0 signifying that the detector is to be considered \"bad\" based on the method described below. ");
-  this->setOptionalMessage("This algorithm creates a single-column workspace where the Y values are populated withs 1s and 0s, 0 signifying that the detector is to be considered 'bad' based on the method described below.");
-}
 
 
 void IdentifyNoisyDetectors::init()

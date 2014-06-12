@@ -12,103 +12,128 @@ set ( SRC_FILES
 	src/FuryFit.cpp
 	src/Homer.cpp
 	src/IDATab.cpp
-	src/IO_MuonGrouping.cpp
 	src/Indirect.cpp
 	src/IndirectBayes.cpp
 	src/IndirectBayesTab.cpp
 	src/IndirectDataAnalysis.cpp
 	src/IndirectDiffractionReduction.cpp
-  src/IndirectLoadAscii.cpp
-  src/IndirectLoadAsciiTab.cpp
-  src/IndirectMolDyn.cpp
-  src/IndirectMoments.cpp
-  src/IndirectNeutron.cpp
-  src/IndirectSimulation.cpp
-  src/IndirectSimulationTab.cpp
-  src/JumpFit.cpp
-  src/MSDFit.cpp
-  src/MantidEV.cpp
-  src/MantidEVWorker.cpp
-  src/MuonAnalysis.cpp
-  src/MuonAnalysisFitDataTab.cpp
-  src/MuonAnalysisHelper.cpp
-  src/MuonAnalysisOptionTab.cpp
-  src/MuonAnalysisResultTableTab.cpp
-  src/QtWorkspaceMementoModel.cpp
-  src/Quasi.cpp
-  src/RawFileMemento.cpp
-  src/ResNorm.cpp
-  src/SANSAddFiles.cpp
-  src/SANSDiagnostics.cpp
-  src/SANSEventSlicing.cpp
-  src/SANSPlotSpecial.cpp
-  src/SANSRunWindow.cpp
-  src/StepScan.cpp
-  src/Stretch.cpp
-  src/Transmission.cpp
-  src/UserInputValidator.cpp
-  src/WorkspaceInADS.cpp
-  src/WorkspaceMemento.cpp
-  src/background.cpp
-  src/deltaECalc.cpp
+	src/IndirectLoadAscii.cpp
+	src/IndirectLoadAsciiTab.cpp
+	src/IndirectMolDyn.cpp
+	src/IndirectMoments.cpp
+	src/IndirectNeutron.cpp
+	src/IndirectSimulation.cpp
+	src/IndirectSimulationTab.cpp
+	src/JumpFit.cpp
+	src/MSDFit.cpp
+	src/MantidEV.cpp
+	src/MantidEVWorker.cpp
+	src/Muon/ALCBaselineModellingModel.cpp
+	src/Muon/ALCBaselineModellingPresenter.cpp
+	src/Muon/ALCBaselineModellingView.cpp
+	src/Muon/ALCDataLoadingPresenter.cpp
+	src/Muon/ALCDataLoadingView.cpp
+	src/Muon/ALCHelper.cpp
+	src/Muon/ALCInterface.cpp
+	src/Muon/ALCPeakFittingModel.cpp
+	src/Muon/ALCPeakFittingPresenter.cpp
+	src/Muon/ALCPeakFittingView.cpp
+	src/Muon/IO_MuonGrouping.cpp
+	src/Muon/MuonAnalysis.cpp
+	src/Muon/MuonAnalysisFitDataTab.cpp
+	src/Muon/MuonAnalysisHelper.cpp
+	src/Muon/MuonAnalysisOptionTab.cpp
+	src/Muon/MuonAnalysisResultTableTab.cpp
+	src/QtWorkspaceMementoModel.cpp
+	src/Quasi.cpp
+	src/RawFileMemento.cpp
+	src/ResNorm.cpp
+	src/SANSAddFiles.cpp
+	src/SANSDiagnostics.cpp
+	src/SANSEventSlicing.cpp
+	src/SANSPlotSpecial.cpp
+	src/SANSRunWindow.cpp
+	src/StepScan.cpp
+	src/Stretch.cpp
+	src/Transmission.cpp
+	src/UserInputValidator.cpp
+	src/WorkspaceInADS.cpp
+	src/WorkspaceMemento.cpp
+	src/background.cpp
+	src/deltaECalc.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-  inc/MantidQtCustomInterfaces/ApplyCorr.h
-  inc/MantidQtCustomInterfaces/Background.h
-  inc/MantidQtCustomInterfaces/C2ETab.h
-  inc/MantidQtCustomInterfaces/CalcCorr.h
-  inc/MantidQtCustomInterfaces/ConvFit.h
-  inc/MantidQtCustomInterfaces/ConvertToEnergy.h
-  inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
-  inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
-  inc/MantidQtCustomInterfaces/DllConfig.h
-  inc/MantidQtCustomInterfaces/Elwin.h
-  inc/MantidQtCustomInterfaces/EventNexusFileMemento.h
-  inc/MantidQtCustomInterfaces/Fury.h
-  inc/MantidQtCustomInterfaces/FuryFit.h
-  inc/MantidQtCustomInterfaces/Homer.h
-  inc/MantidQtCustomInterfaces/IDATab.h
-  inc/MantidQtCustomInterfaces/IO_MuonGrouping.h
-  inc/MantidQtCustomInterfaces/Indirect.h
-  inc/MantidQtCustomInterfaces/IndirectBayes.h
-  inc/MantidQtCustomInterfaces/IndirectBayesTab.h
-  inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
-  inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
-  inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
-  inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
-  inc/MantidQtCustomInterfaces/IndirectMolDyn.h
-  inc/MantidQtCustomInterfaces/IndirectMoments.h
-  inc/MantidQtCustomInterfaces/IndirectNeutron.h
-  inc/MantidQtCustomInterfaces/IndirectSimulation.h
-  inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
-  inc/MantidQtCustomInterfaces/JumpFit.h
-  inc/MantidQtCustomInterfaces/MSDFit.h
-  inc/MantidQtCustomInterfaces/MantidEV.h
-  inc/MantidQtCustomInterfaces/MantidEVWorker.h
-  inc/MantidQtCustomInterfaces/MuonAnalysis.h
-  inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
-  inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
-  inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
-  inc/MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h
-  inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
-  inc/MantidQtCustomInterfaces/Quasi.h
-  inc/MantidQtCustomInterfaces/RawFileMemento.h
-  inc/MantidQtCustomInterfaces/ResNorm.h
-  inc/MantidQtCustomInterfaces/SANSAddFiles.h
-  inc/MantidQtCustomInterfaces/SANSDiagnostics.h
-  inc/MantidQtCustomInterfaces/SANSEventSlicing.h
-  inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
-  inc/MantidQtCustomInterfaces/SANSRunWindow.h
-  inc/MantidQtCustomInterfaces/StepScan.h
-  inc/MantidQtCustomInterfaces/Stretch.h
-  inc/MantidQtCustomInterfaces/Transmission.h
-  inc/MantidQtCustomInterfaces/Updateable.h
-  inc/MantidQtCustomInterfaces/UserInputValidator.h
-  inc/MantidQtCustomInterfaces/WorkspaceInADS.h
-  inc/MantidQtCustomInterfaces/WorkspaceMemento.h
-  inc/MantidQtCustomInterfaces/deltaECalc.h
+	inc/MantidQtCustomInterfaces/ApplyCorr.h
+	inc/MantidQtCustomInterfaces/Background.h
+	inc/MantidQtCustomInterfaces/C2ETab.h
+	inc/MantidQtCustomInterfaces/CalcCorr.h
+	inc/MantidQtCustomInterfaces/ConvFit.h
+	inc/MantidQtCustomInterfaces/ConvertToEnergy.h
+	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
+	inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
+	inc/MantidQtCustomInterfaces/DllConfig.h
+	inc/MantidQtCustomInterfaces/Elwin.h
+	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h
+	inc/MantidQtCustomInterfaces/Fury.h
+	inc/MantidQtCustomInterfaces/FuryFit.h
+	inc/MantidQtCustomInterfaces/Homer.h
+	inc/MantidQtCustomInterfaces/IDATab.h
+	inc/MantidQtCustomInterfaces/Indirect.h
+	inc/MantidQtCustomInterfaces/IndirectBayes.h
+	inc/MantidQtCustomInterfaces/IndirectBayesTab.h
+	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
+	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
+	inc/MantidQtCustomInterfaces/IndirectLoadAscii.h
+	inc/MantidQtCustomInterfaces/IndirectLoadAsciiTab.h
+	inc/MantidQtCustomInterfaces/IndirectMolDyn.h
+	inc/MantidQtCustomInterfaces/IndirectMoments.h
+	inc/MantidQtCustomInterfaces/IndirectNeutron.h
+	inc/MantidQtCustomInterfaces/IndirectSimulation.h
+	inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
+	inc/MantidQtCustomInterfaces/JumpFit.h
+	inc/MantidQtCustomInterfaces/MSDFit.h
+	inc/MantidQtCustomInterfaces/MantidEV.h
+	inc/MantidQtCustomInterfaces/MantidEVWorker.h
+	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h
+	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
+	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h
+	inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h
+	inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h
+	inc/MantidQtCustomInterfaces/Muon/ALCHelper.h
+	inc/MantidQtCustomInterfaces/Muon/ALCInterface.h
+	inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingModel.h
+	inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h
+	inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.h
+	inc/MantidQtCustomInterfaces/Muon/IALCBaselineModellingModel.h
+	inc/MantidQtCustomInterfaces/Muon/IALCBaselineModellingView.h
+	inc/MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h
+	inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h
+	inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h
+	inc/MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h
+	inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
+	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
+	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
+	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
+	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
+	inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
+	inc/MantidQtCustomInterfaces/Quasi.h
+	inc/MantidQtCustomInterfaces/RawFileMemento.h
+	inc/MantidQtCustomInterfaces/ResNorm.h
+	inc/MantidQtCustomInterfaces/SANSAddFiles.h
+	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
+	inc/MantidQtCustomInterfaces/SANSEventSlicing.h
+	inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
+	inc/MantidQtCustomInterfaces/SANSRunWindow.h
+	inc/MantidQtCustomInterfaces/StepScan.h
+	inc/MantidQtCustomInterfaces/Stretch.h
+	inc/MantidQtCustomInterfaces/Transmission.h
+	inc/MantidQtCustomInterfaces/Updateable.h
+	inc/MantidQtCustomInterfaces/UserInputValidator.h
+	inc/MantidQtCustomInterfaces/WorkspaceInADS.h
+	inc/MantidQtCustomInterfaces/WorkspaceMemento.h
+	inc/MantidQtCustomInterfaces/deltaECalc.h
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -140,11 +165,21 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectSimulationTab.h
                 inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
-                inc/MantidQtCustomInterfaces/MuonAnalysis.h
-                inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
-                inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
-                inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
-                inc/MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h
+                inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
+                inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h
+                inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h
+                inc/MantidQtCustomInterfaces/Muon/ALCInterface.h
+                inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h
+                inc/MantidQtCustomInterfaces/Muon/IALCBaselineModellingView.h
+                inc/MantidQtCustomInterfaces/Muon/IALCBaselineModellingModel.h
+                inc/MantidQtCustomInterfaces/Muon/IALCDataLoadingView.h
+                inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h
+                inc/MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h
+                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.h
+                inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h
+                inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
+                inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
+                inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
                 inc/MantidQtCustomInterfaces/Quasi.h
                 inc/MantidQtCustomInterfaces/ResNorm.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
@@ -169,7 +204,11 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectMolDyn.ui
                inc/MantidQtCustomInterfaces/IndirectSimulation.ui
                inc/MantidQtCustomInterfaces/JumpFit.ui
-               inc/MantidQtCustomInterfaces/MuonAnalysis.ui
+               inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.ui
+               inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.ui
+               inc/MantidQtCustomInterfaces/Muon/ALCInterface.ui
+               inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.ui
+               inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/Quasi.ui
                inc/MantidQtCustomInterfaces/ResNorm.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
@@ -180,13 +219,18 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
 )
 
-set( TEST_FILES CreateMDWorkspaceAlgDialogTest.h
-                EventNexusFileMementoTest.h
-                WorkspaceMementoTest.h
-                MuonAnalysisHelperTest.h
-                WorkspaceInADSTest.h
-                RawFileMementoTest.h
-                IO_MuonGroupingTest.h
+set ( TEST_FILES
+	ALCBaselineModellingModelTest.h
+	ALCBaselineModellingPresenterTest.h
+	ALCDataLoadingPresenterTest.h
+	ALCPeakFittingPresenterTest.h
+	CreateMDWorkspaceAlgDialogTest.h
+	EventNexusFileMementoTest.h
+	IO_MuonGroupingTest.h
+	MuonAnalysisHelperTest.h
+	RawFileMementoTest.h
+	WorkspaceInADSTest.h
+	WorkspaceMementoTest.h
 )
 
 include_directories ( inc )

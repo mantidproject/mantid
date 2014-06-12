@@ -52,9 +52,10 @@ namespace Mantid
       UnaryOperation();
       /// Destructor
       virtual ~UnaryOperation();
-
       /// Algorithm's category for identification
       virtual const std::string category() const { return "Arithmetic";}
+      /// Summary of algorithms purpose
+      virtual const std::string summary() const { return "Supports the implementation of a Unary operation on an input workspace."; }
 
     protected:
       // Overridden Algorithm methods

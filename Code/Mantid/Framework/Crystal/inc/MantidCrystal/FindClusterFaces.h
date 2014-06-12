@@ -40,11 +40,13 @@ namespace Crystal
     virtual ~FindClusterFaces();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Find faces for clusters in a cluster image.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

@@ -49,6 +49,9 @@ public:
   virtual ~LoadIsawDetCal();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "LoadIsawDetCal"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Since ISAW already has the capability to calibrate the instrument using single crystal peaks, this algorithm leverages this in mantid. It loads in a detcal file from ISAW and moves all of the detector panels accordingly. The target instruments for this feature are SNAP and TOPAZ.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
@@ -56,8 +59,7 @@ public:
   /// Function to optimize
   void center(double x, double y, double z, std::string detname, std::string inname);
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();

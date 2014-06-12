@@ -69,14 +69,16 @@ namespace Mantid
       virtual ~DiffractionFocussing() {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "DiffractionFocussing";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Algorithm to focus powder diffraction data into a number of histograms according to a grouping scheme defined in a CalFile.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "Diffraction";}
     
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       // Overridden Algorithm methods
       void init();
       void exec();

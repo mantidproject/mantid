@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'D:\mantid\windows\Code\Mantid\scripts\Interface\ui\reflectometer/refl_options_window.ui'
+# Form implementation generated from reading ui file 'D:\mantid\2_windows\Code\Mantid\scripts\Interface\ui\reflectometer\refl_options_window.ui'
 #
-# Created: Mon Apr 14 16:04:07 2014
+# Created: Tue Jun 03 12:14:53 2014
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_OptionsDialog(object):
     def setupUi(self, OptionsDialog):
         OptionsDialog.setObjectName(_fromUtf8("OptionsDialog"))
-        OptionsDialog.resize(333, 122)
+        OptionsDialog.resize(333, 139)
         self.layoutLive = QtGui.QFormLayout(OptionsDialog)
         self.layoutLive.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
         self.layoutLive.setObjectName(_fromUtf8("layoutLive"))
@@ -38,10 +38,13 @@ class Ui_OptionsDialog(object):
         self.buttonsLive.setOrientation(QtCore.Qt.Horizontal)
         self.buttonsLive.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
         self.buttonsLive.setObjectName(_fromUtf8("buttonsLive"))
-        self.layoutLive.setWidget(3, QtGui.QFormLayout.SpanningRole, self.buttonsLive)
+        self.layoutLive.setWidget(4, QtGui.QFormLayout.SpanningRole, self.buttonsLive)
         self.checkADS = QtGui.QCheckBox(OptionsDialog)
         self.checkADS.setObjectName(_fromUtf8("checkADS"))
-        self.layoutLive.setWidget(2, QtGui.QFormLayout.SpanningRole, self.checkADS)
+        self.layoutLive.setWidget(3, QtGui.QFormLayout.SpanningRole, self.checkADS)
+        self.checkAlg = QtGui.QCheckBox(OptionsDialog)
+        self.checkAlg.setObjectName(_fromUtf8("checkAlg"))
+        self.layoutLive.setWidget(2, QtGui.QFormLayout.SpanningRole, self.checkAlg)
         self.labelAccMethod.setBuddy(self.comboAccMethod)
         self.labelFrequency.setBuddy(self.dspinFrequency)
 
@@ -55,4 +58,5 @@ class Ui_OptionsDialog(object):
         self.labelAccMethod.setText(QtGui.QApplication.translate("OptionsDialog", "Accumulation Method", None, QtGui.QApplication.UnicodeUTF8))
         self.labelFrequency.setText(QtGui.QApplication.translate("OptionsDialog", "Update Every", None, QtGui.QApplication.UnicodeUTF8))
         self.checkADS.setText(QtGui.QApplication.translate("OptionsDialog", "Load workspaces from mantid into the Runs list", None, QtGui.QApplication.UnicodeUTF8))
+        self.checkAlg.setText(QtGui.QApplication.translate("OptionsDialog", "Use ReflectometryReductionOneAuto Algorithm", None, QtGui.QApplication.UnicodeUTF8))
 

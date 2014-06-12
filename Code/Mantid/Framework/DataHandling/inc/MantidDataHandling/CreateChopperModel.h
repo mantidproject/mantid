@@ -38,11 +38,13 @@ namespace Mantid
     public:
 
       virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Creates a chopper model for a given workspace";}
+
       virtual int version() const;
       virtual const std::string category() const;
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
     };

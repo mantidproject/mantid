@@ -5,6 +5,7 @@
 
 #include "MantidCurveFitting/ThermalNeutronBk2BkExpBeta.h"
 
+using namespace Mantid;
 using Mantid::CurveFitting::ThermalNeutronBk2BkExpBeta;
 
 class ThermalNeutronBk2BkExpBetaTest : public CxxTest::TestSuite

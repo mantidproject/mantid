@@ -345,7 +345,7 @@ namespace Mantid
       virtual const Kernel::PropertyHistory createHistory() const
       {
         std::string wsName = m_workspaceName;
-        if (wsName.empty())
+        if (wsName.empty() && this->operator()())
         {
           //give the property a temporary name in the history
           std::ostringstream os;

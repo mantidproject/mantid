@@ -320,9 +320,6 @@ namespace Mantid
         getLogger().fatal("UNKNOWN Exception is caught in initialize()");
         throw;
       }
-
-      // Set the documentation. This virtual method is overridden by (nearly) all algorithms and gives documentation summary.
-      initDocs();
     }
 
     //---------------------------------------------------------------------------------------------

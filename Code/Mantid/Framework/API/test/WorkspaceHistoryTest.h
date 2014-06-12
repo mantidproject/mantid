@@ -27,6 +27,7 @@ private:
     const std::string name() const { return "SimpleSum";} 
     int version() const  { return 1;}                        
     const std::string category() const { return "Dummy";}        
+    const std::string summary() const { return "Dummy summary"; }
 
     void init()
     { 
@@ -292,6 +293,35 @@ public:
     Poco::File("WorkspaceHistoryTest_test_SaveNexus.nxs").remove();
   }
 
+  void test_SaveNexus_NestedHistory()
+  {
+    WorkspaceHistory testHistory;
+    AlgorithmHistory algHist("ParentHistory", 1,DateAndTime::defaultTime(),-1.0, 0);
+    AlgorithmHistory childHist("ChildHistory", 1,DateAndTime::defaultTime(),-1.0, 1);
+
+    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(childHist));
+    testHistory.addHistory(boost::make_shared<AlgorithmHistory>(algHist));
+
+    auto savehandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
+    TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
+    savehandle->close();
+
+    auto loadhandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs");
+    std::string rootstring = "/process/";
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/author"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/data"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/description"));
+
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/author"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/data"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/MantidAlgorithm_2/description"));
+
+    loadhandle->close();
+    Poco::File("WorkspaceHistoryTest_test_SaveNexus.nxs").remove();
+  }
+
   void test_SaveNexus_Empty()
   {
     WorkspaceHistory testHistory;
@@ -329,7 +359,36 @@ public:
     TS_ASSERT_EQUALS(DateAndTime("2009-10-09T16:56:54"), history->executionDate());
     TS_ASSERT_EQUALS(2.3, history->executionDuration());
     loadhandle->close();
+  }
 
+  void test_LoadNexus_NestedHistory()
+  {
+    std::string filename = FileFinder::Instance().getFullPath("HistoryTest_CreateTransmissionAuto.nxs");
+    auto loadhandle = boost::make_shared< ::NeXus::File >(filename);
+    loadhandle->openPath("/mantid_workspace_1");
+
+    WorkspaceHistory wsHistory;
+    TS_ASSERT_THROWS_NOTHING(wsHistory.loadNexus(loadhandle.get()));
+
+    const auto & histories = wsHistory.getAlgorithmHistories();
+    TS_ASSERT_EQUALS(3,histories.size());
+
+    auto history = wsHistory.getAlgorithmHistory(1);
+
+    TS_ASSERT_EQUALS("CreateTransmissionWorkspaceAuto", history->name());
+    TS_ASSERT_EQUALS(1, history->version());
+
+    const auto childHistory = history->getChildAlgorithmHistory(0);
+
+    TS_ASSERT_EQUALS("CreateTransmissionWorkspace", childHistory->name());
+    TS_ASSERT_EQUALS(1, childHistory->version());
+
+    history = wsHistory.getAlgorithmHistory(2);
+
+    TS_ASSERT_EQUALS("SaveNexusProcessed", history->name());
+    TS_ASSERT_EQUALS(1, history->version());
+    
+    loadhandle->close();
   }
 
   void test_LoadNexus_Blank_File()

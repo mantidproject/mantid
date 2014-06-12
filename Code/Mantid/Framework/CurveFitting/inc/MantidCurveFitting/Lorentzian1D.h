@@ -59,18 +59,20 @@ namespace Mantid
       virtual ~Lorentzian1D() {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Lorentzian1D";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "== Deprecation notice == Instead of using this algorithm to fit a Lorentzian please use the Fit algorithm where the Function parameter of this algorithm is used to specified the fitting function, including selecting a Lorentzian.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return (1);}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "Optimization\\FitFunctions";}
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       // Overridden Fit1D methods
       void declareParameters();
       void function(const double* in, double* out, const double* xValues, const size_t nData);
-      void functionDeriv(const double* in, Jacobian* out, const double* xValues, const size_t nData);
+      void functionDeriv(const double* in, API::Jacobian* out, const double* xValues, const size_t nData);
 
     };
 

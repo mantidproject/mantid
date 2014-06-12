@@ -52,6 +52,9 @@ namespace Mantid
     public:
       /// Algorithm's name for identification 
       virtual const std::string name() const { return "Rebin2D";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Rebins both axes of a 2D workspace using the given parameters";}
+
       /// Algorithm's version for identification 
       virtual int version() const { return 1;}
       /// Algorithm's category for identification
@@ -80,8 +83,7 @@ namespace Mantid
     private:
       /// Flag for using a RebinnedOutput workspace
       bool useFractionalArea;
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Initialise the properties
       void init();
       /// Run the algorithm

@@ -15,8 +15,7 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/Interpolation.h"
 
-using namespace Mantid;
-using namespace Mantid::Poldi;
+using namespace Mantid::Geometry;
 
 using ::testing::Return;
 

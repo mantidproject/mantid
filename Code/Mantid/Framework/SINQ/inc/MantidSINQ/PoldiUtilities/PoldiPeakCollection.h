@@ -38,9 +38,6 @@ namespace Poldi {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-using namespace Mantid::DataObjects;
-using namespace Mantid::API;
-
 class MANTID_SINQ_DLL PoldiPeakCollection
 {    
 public:
@@ -50,7 +47,7 @@ public:
     };
 
     PoldiPeakCollection(IntensityType intensityType = Maximum);
-    PoldiPeakCollection(TableWorkspace_sptr workspace);
+    PoldiPeakCollection(DataObjects::TableWorkspace_sptr workspace);
     virtual ~PoldiPeakCollection() {}
 
     size_t peakCount() const;
@@ -67,14 +64,15 @@ public:
     TableWorkspace_sptr asTableWorkspace();
 
 protected:
-    void prepareTable(TableWorkspace_sptr table);
-    void dataToTableLog(TableWorkspace_sptr table);
-    void peaksToTable(TableWorkspace_sptr table);
+    void prepareTable(DataObjects::TableWorkspace_sptr table);
+    void dataToTableLog(DataObjects::TableWorkspace_sptr table);
+    void peaksToTable(DataObjects::TableWorkspace_sptr table);
+    DataObjects::TableWorkspace_sptr asTableWorkspace();
 
-    void constructFromTableWorkspace(TableWorkspace_sptr tableWorkspace);
-    bool checkColumns(TableWorkspace_sptr tableWorkspace);
+    void constructFromTableWorkspace(DataObjects::TableWorkspace_sptr tableWorkspace);
+    bool checkColumns(DataObjects::TableWorkspace_sptr tableWorkspace);
 
-    void recoverDataFromLog(TableWorkspace_sptr TableWorkspace);
+    void recoverDataFromLog(DataObjects::TableWorkspace_sptr TableWorkspace);
 
     std::string getIntensityTypeFromLog(LogManager_sptr tableLog);
     std::string getProfileFunctionNameFromLog(LogManager_sptr tableLog);

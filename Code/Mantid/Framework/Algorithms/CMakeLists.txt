@@ -35,6 +35,7 @@ set ( SRC_FILES
 	src/CommutativeBinaryOperation.cpp
 	src/ConjoinWorkspaces.cpp
 	src/ConvertAxisByFormula.cpp
+	src/ConvertEmptyToTof.cpp
 	src/ConvertFromDistribution.cpp
 	src/ConvertMDHistoToMatrixWorkspace.cpp
 	src/ConvertSpectrumAxis.cpp
@@ -60,6 +61,7 @@ set ( SRC_FILES
 	src/CreateLogTimeCorrection.cpp
 	src/CreatePSDBleedMask.cpp
 	src/CreatePeaksWorkspace.cpp
+	src/CreateSampleWorkspace.cpp
 	src/CreateSingleValuedWorkspace.cpp
 	src/CreateTransmissionWorkspace.cpp
 	src/CreateWorkspace.cpp
@@ -81,6 +83,7 @@ set ( SRC_FILES
 	src/EQSANSTofStructure.cpp
 	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
+	src/EstimatePDDetectorResolution.cpp
 	src/Exponential.cpp
 	src/ExponentialCorrection.cpp
 	src/ExportTimeSeriesLog.cpp
@@ -179,6 +182,7 @@ set ( SRC_FILES
 	src/RemoveExpDecay.cpp
 	src/RemoveLowResTOF.cpp
 	src/RemovePromptPulse.cpp
+	src/RemoveWorkspaceHistory.cpp
 	src/RenameWorkspace.cpp
 	src/RenameWorkspaces.cpp
 	src/ReplaceSpecialValues.cpp
@@ -208,6 +212,7 @@ set ( SRC_FILES
 	src/SpecularReflectionCalculateTheta.cpp
 	src/SpecularReflectionPositionCorrect.cpp
 	src/SphericalAbsorption.cpp
+	src/Stitch1D.cpp
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
 	src/StripVanadiumPeaks2.cpp
@@ -266,6 +271,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
 	inc/MantidAlgorithms/ConvertAxisByFormula.h
+	inc/MantidAlgorithms/ConvertEmptyToTof.h
 	inc/MantidAlgorithms/ConvertFromDistribution.h
 	inc/MantidAlgorithms/ConvertMDHistoToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertSpectrumAxis.h
@@ -291,6 +297,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateLogTimeCorrection.h
 	inc/MantidAlgorithms/CreatePSDBleedMask.h
 	inc/MantidAlgorithms/CreatePeaksWorkspace.h
+	inc/MantidAlgorithms/CreateSampleWorkspace.h
 	inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspace.h
 	inc/MantidAlgorithms/CreateWorkspace.h
@@ -312,6 +319,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/EQSANSTofStructure.h
 	inc/MantidAlgorithms/EditInstrumentGeometry.h
 	inc/MantidAlgorithms/ElasticWindow.h
+	inc/MantidAlgorithms/EstimatePDDetectorResolution.h
 	inc/MantidAlgorithms/Exponential.h
 	inc/MantidAlgorithms/ExponentialCorrection.h
 	inc/MantidAlgorithms/ExportTimeSeriesLog.h
@@ -411,6 +419,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RemoveExpDecay.h
 	inc/MantidAlgorithms/RemoveLowResTOF.h
 	inc/MantidAlgorithms/RemovePromptPulse.h
+	inc/MantidAlgorithms/RemoveWorkspaceHistory.h
 	inc/MantidAlgorithms/RenameWorkspace.h
 	inc/MantidAlgorithms/RenameWorkspaces.h
 	inc/MantidAlgorithms/ReplaceSpecialValues.h
@@ -440,6 +449,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SpecularReflectionCalculateTheta.h
 	inc/MantidAlgorithms/SpecularReflectionPositionCorrect.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
+	inc/MantidAlgorithms/Stitch1D.h
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
@@ -507,9 +517,9 @@ set ( TEST_FILES
 	ClearMaskFlagTest.h
 	CloneWorkspaceTest.h
 	CommutativeBinaryOperationTest.h
-	CompressedRebinTest.h
 	ConjoinWorkspacesTest.h
 	ConvertAxisByFormulaTest.h
+	ConvertEmptyToTofTest.h
 	ConvertFromDistributionTest.h
 	ConvertMDHistoToMatrixWorkspaceTest.h
 	ConvertSpectrumAxis2Test.h
@@ -535,6 +545,7 @@ set ( TEST_FILES
 	CreateLogTimeCorrectionTest.h
 	CreatePSDBleedMaskTest.h
 	CreatePeaksWorkspaceTest.h
+	CreateSampleWorkspaceTest.h
 	CreateSingleValuedWorkspaceTest.h
 	CreateWorkspaceTest.h
 	CropWorkspaceTest.h
@@ -550,6 +561,7 @@ set ( TEST_FILES
 	DiffractionFocussingTest.h
 	DivideTest.h
 	EditInstrumentGeometryTest.h
+	EstimatePDDetectorResolutionTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h
 	ExportTimeSeriesLogTest.h
@@ -637,6 +649,7 @@ set ( TEST_FILES
 	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
 	RemovePromptPulseTest.h
+	RemoveWorkspaceHistoryTest.h
 	RenameWorkspaceTest.h
 	RenameWorkspacesTest.h
 	ReplaceSpecialValuesTest.h
@@ -662,6 +675,7 @@ set ( TEST_FILES
 	SpecularReflectionCalculateThetaTest.h
 	SpecularReflectionPositionCorrectTest.h
 	SphericalAbsorptionTest.h
+	Stitch1DTest.h
 	StripPeaksTest.h
 	StripVanadiumPeaks2Test.h
 	StripVanadiumPeaksTest.h

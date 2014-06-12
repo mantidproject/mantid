@@ -1,15 +1,3 @@
-"""*WIKI* 
-
-This algorithm reads in an old SNS reduction ROI file and converts it into 
-a Mantid mask workspace. It will save that mask to a Mantid mask file.
-
-The file format of the ROI file looks like:
-bank1_0_0
-bank1_0_1
-...
-
-*WIKI*"""
-
 import mantid.simpleapi as msapi
 import mantid.api as api
 import mantid.kernel as kernel
@@ -38,9 +26,11 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         Name of the algorithm.
         """
         return "ConvertSnsRoiFileToMask"
+
+    def summary(self):
+        return "This algorithm reads in an old SNS reduction ROI file and converts it into a Mantid mask workspace."
         
     def PyInit(self):
-        self.setOptionalMessage("This algorithm reads in an old SNS reduction ROI file and converts it into a Mantid mask workspace.")
         """
         Set the algorithm properties.
         """

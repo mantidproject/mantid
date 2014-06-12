@@ -76,8 +76,8 @@ namespace Mantid
           virtual int version() const { return (1);}
           /// Algorithm's category for identification overriding a virtual method
           virtual const std::string category() const { return "Optimization\\FitFunctions";}
-
-
+          ///Summary of algorithms purpose
+          virtual const std::string summary() const {return "Fits a histogram from a workspace to a user defined function.";}
       protected:
           /// overwrite base class methods
           //double function(const double* in, const double& x);
@@ -86,13 +86,11 @@ namespace Mantid
           virtual void declareParameters(){};
           virtual void prepare();
           /// Derivatives of function with respect to parameters you are trying to fit
-          virtual void functionDeriv(const double* in, Jacobian* out, const double* xValues, const size_t nData);
+          virtual void functionDeriv(const double* in, API::Jacobian* out, const double* xValues, const size_t nData);
 
           static double* AddVariable(const char *varName, void *palg);
 
       private:
-        /// Sets documentation strings for this algorithm
-        virtual void initDocs();
           /// muParser instance
           mu::Parser m_parser;
           /// Used as 'x' variable in m_parser.

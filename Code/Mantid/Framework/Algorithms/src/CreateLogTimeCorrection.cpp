@@ -1,9 +1,3 @@
-/*WIKI*
-
-For fast fequency sample logs, the time-of-flight of each neutron is recorded at detector.  As the sample log time is recorded at sample, each neutron's flight time must be corrected to sample to be filtered correctly by log value.
-
-*WIKI*/
-
 #include "MantidAlgorithms/CreateLogTimeCorrection.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
@@ -43,21 +37,8 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Init documentation
-    */
-  void CreateLogTimeCorrection::initDocs()
-  {
-    setWikiSummary("Create log time correction table for event filtering by log value"
-                   ", if frequency of log is high.");
-
-    setOptionalMessage("Create log time correction table.  Correction for each pixel is based on L1 and L2.");
-
-    return;
-  }
-  
-  //----------------------------------------------------------------------------------------------
   /** Declare properties
-    */
+   */
   void CreateLogTimeCorrection::init()
   {
     auto inpwsprop = new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, boost::make_shared<InstrumentValidator>());
@@ -227,11 +208,3 @@ namespace Algorithms
 
 } // namespace Algorithms
 } // namespace Mantid
-
-
-
-
-
-
-
-

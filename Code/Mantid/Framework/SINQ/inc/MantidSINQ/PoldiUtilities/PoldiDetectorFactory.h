@@ -38,8 +38,6 @@ namespace Poldi
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-  using namespace boost::gregorian;
-
   class MANTID_SINQ_DLL PoldiDetectorFactory
   {
   public:
@@ -47,10 +45,10 @@ namespace Poldi
     virtual ~PoldiDetectorFactory() {}
 
     virtual PoldiAbstractDetector *createDetector(std::string detectorType);
-    virtual PoldiAbstractDetector *createDetector(date experimentDate);
+    virtual PoldiAbstractDetector *createDetector(boost::gregorian::date experimentDate);
 
   protected:
-    date m_newDetectorDate;
+    boost::gregorian::date m_newDetectorDate;
 
   };
 

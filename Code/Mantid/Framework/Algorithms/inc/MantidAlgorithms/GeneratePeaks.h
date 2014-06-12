@@ -46,14 +46,16 @@ namespace Algorithms
     
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "GeneratePeaks";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Generate peaks in an output workspace according to a TableWorkspace containing a list of peak's parameters.";}
+
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 1;}
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "Crystal";}
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     // Implement abstract Algorithm methods
     void init();
     // Implement abstract Algorithm methods

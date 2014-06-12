@@ -36,6 +36,10 @@ struct FitPeakOffsetResult
 	double highestpeakpos;
 	/// Highest peak deviation after calibrated by offset
 	double highestpeakdev;
+	/// Average resolution delta(d)/d
+	double resolution;
+	/// Standard devation of the resolution
+	double dev_resolution;
 };
 
 /**
@@ -77,41 +81,49 @@ public:
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction"; }
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Creates an OffsetsWorkspace containing offsets for each detector. "
+                             "You can then save these to a .cal file using SaveCalFile.";}
+  
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
   // Overridden Algorithm methods
   void init();
   void exec();
 
   void processProperties();
 
+  /// Create workspaces for fitting information
+  void createInformationWorkspaces();
+
+  /// Main function to calculate all detectors' offsets
+  void calculateDetectorsOffsets();
+
   void importFitWindowTableWorkspace(DataObjects::TableWorkspace_sptr windowtablews);
 
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-  int fitSpectra(const int64_t wi, API::MatrixWorkspace_sptr inputW, const std::vector<double> &m_peakPositions,
-                 const std::vector<double> &m_fitWindows, size_t &nparams, double &minD, double &maxD,
-                 std::vector<double>&peakPosToFit, std::vector<double> &peakPosFitted, std::vector<double> &chisq,
-                 std::vector<double> &peakHeights, int &i_highestpeak);
+  int fitSpectra(const int64_t wi, API::MatrixWorkspace_sptr inputW,
+                 const std::vector<double> &peakPositions,
+                 const std::vector<double> &fitWindows, size_t &nparams,
+                 double &minD, double &maxD,
+                 std::vector<double>&peakPosToFit, std::vector<double>&peakPosFitted,
+                 std::vector<double> &chisq,
+                 std::vector<double> &peakHeights, int& i_highestpeak,
+                 double& resolution, double& dev_resolution);
 
   /// Add peak fitting and offset calculation information to information table workspaces per spectrum
   void addInfoToReportWS(int wi, FitPeakOffsetResult offsetresult, const std::vector<double> &tofitpeakpositions,
                          const std::vector<double> &fittedpeakpositions);
 
+  /// Generate a list of peaks to calculate detectors' offset
   void generatePeaksList(const API::ITableWorkspace_sptr &peakslist,
                          int wi,
                          const std::vector<double> &peakPositionRef,
                          std::vector<double> &peakPosToFit,
                          std::vector<double> &peakPosFitted,
                          std::vector<double> &peakHeightFitted, std::vector<double> &chisq, bool useFitWindows,
-                         const std::vector<double> &fitWindowsToUse, const double minD, const double maxD);
-
-  /// Generate output information table workspace
-  Mantid::DataObjects::TableWorkspace_sptr createOutputInfoTable(size_t numspec);
-
-  /// Generate output peak information table workspace
-  Mantid::DataObjects::TableWorkspace_sptr createOutputPeakOffsetTable(size_t numspec);
+                         const std::vector<double> &fitWindowsToUse, const double minD, const double maxD,
+                         double& deltaDovD, double& dev_deltaDovD);
 
   FitPeakOffsetResult calculatePeakOffset(const int wi, std::vector<double>& fittedpeakpositions, std::vector<double>& vec_peakPosRef);
 
@@ -128,11 +140,15 @@ private:
   /// Remove rows without offset calculated from offset table workspace
   void removeEmptyRowsFromPeakOffsetTable();
 
-  API::MatrixWorkspace_sptr inputW;
+  /// Input workspace
+  API::MatrixWorkspace_sptr m_inputWS;
+  /// Input EventWorkspace (from m_inputWS)
   DataObjects::EventWorkspace_const_sptr eventW;
   bool isEvent;
 
+  /// Background type
   std::string m_backType;
+  /// Peak profile type
   std::string m_peakType;
   double m_maxChiSq;
   double m_minPeakHeight;
@@ -142,6 +158,15 @@ private:
   std::vector<double> m_peakPositions;
   std::vector<double> m_fitWindows;
 
+  /// Input resolution
+  API::MatrixWorkspace_const_sptr m_inputResolutionWS;
+  /// Flag of use input resolution WS
+  bool m_hasInputResolution;
+  /// Lower boundary of allowed peak width as resolution
+  double m_minResFactor;
+  /// Upper boundary of allowed peak width as resolution
+  double m_maxResFactor;
+
   DataObjects::OffsetsWorkspace_sptr outputW;
   /// Output workspace for debugging purpose
   DataObjects::OffsetsWorkspace_sptr outputNP;
@@ -150,11 +175,14 @@ private:
 
   DataObjects::TableWorkspace_sptr m_infoTableWS;
   DataObjects::TableWorkspace_sptr m_peakOffsetTableWS;
+  /// Workspace for calculated detector resolution
+  API::MatrixWorkspace_sptr m_resolutionWS;
 
- /// Flag to use fit window from TableWorkspace per spectrum
+  /// Flag to use fit window from TableWorkspace per spectrum
   bool m_useFitWindowTable;
   /// Vector of fit windows (also in vector)
   std::vector<std::vector<double> > m_vecFitWindow;
+
 
 };
 

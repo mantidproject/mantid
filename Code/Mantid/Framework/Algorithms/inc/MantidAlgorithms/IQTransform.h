@@ -56,12 +56,14 @@ public:
   IQTransform();
   virtual ~IQTransform();
   virtual const std::string name() const { return "IQTransform"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "This algorithm provides various functions that are sometimes used to linearise the output of a 'SANS' data reduction prior to fitting it.";}
+
   virtual int version() const { return (1); }
   virtual const std::string category() const { return "SANS"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   void init();
   void exec();
 

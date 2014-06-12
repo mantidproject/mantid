@@ -1,7 +1,3 @@
-/*WIKI*
-Removes a named log from the run attached to the input workspace. If the log does not exist then the algorithm simply
-emits a warning and does not fail.
-*WIKI*/
 #include "MantidAlgorithms/DeleteLog.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -26,12 +22,6 @@ namespace Algorithms
   const std::string DeleteLog::category() const { return "DataHandling\\Logs";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void DeleteLog::initDocs()
-  {
-    this->setWikiSummary("Removes a named log from a run");
-    this->setOptionalMessage("Removes a named log from a run");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

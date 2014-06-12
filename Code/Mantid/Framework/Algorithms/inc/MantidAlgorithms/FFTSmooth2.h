@@ -45,14 +45,16 @@ public:
   virtual ~FFTSmooth2() {};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "FFTSmooth";}
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Performs smoothing of a spectrum using various filters.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 2;}
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Arithmetic\\FFT;Transforms\\Smoothing";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden Algorithm methods
   void init();
   void exec();

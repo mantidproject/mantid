@@ -43,6 +43,9 @@ namespace LiveData
     virtual ~LoadLiveData();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Load a chunk of live data. You should call StartLiveData, and not this algorithm directly.";}
+
     virtual const std::string category() const;
     virtual int version() const;
 
@@ -51,7 +54,6 @@ namespace LiveData
     void exec();
 
   private:
-    virtual void initDocs();
     void init();
 
     Mantid::API::Workspace_sptr runProcessing(Mantid::API::Workspace_sptr inputWS, bool PostProcess);

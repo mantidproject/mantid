@@ -54,6 +54,9 @@ public:
   virtual ~SofQW() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SofQW"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -69,8 +72,7 @@ public:
   static double energyToK();
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   /// Execution code

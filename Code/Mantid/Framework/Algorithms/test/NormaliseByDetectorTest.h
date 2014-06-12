@@ -6,8 +6,8 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "boost/format.hpp"
-#include "boost/algorithm/string.hpp"
+#include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 
 
 #include "MantidDataHandling/LoadParameterFile.h"

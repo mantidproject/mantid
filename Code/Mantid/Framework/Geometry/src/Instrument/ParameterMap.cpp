@@ -247,6 +247,30 @@ namespace Mantid
       }
     }
 
+    /** Method for adding a parameter providing shared pointer to it. 
+    * @param comp :: A pointer to the component that this parameter is attached to
+    * @param par  :: a shared pointer to existing parameter. The ParameterMap stores share pointer and increment ref count to it
+    */
+    void ParameterMap::add(const IComponent* comp,const boost::shared_ptr<Parameter> &par)
+    {
+      // can not add null pointer
+      if(!par)return;
+
+      PARALLEL_CRITICAL(parameter_add)
+      {
+        auto existing_par = getMapPlace(comp,par->name().c_str(),"");
+        if (existing_par != m_map.end())
+        {
+          existing_par->second = par;
+        }
+        else
+        {
+          m_map.insert(std::make_pair(comp->getComponentID(),par));
+        }
+      }
+
+    }
+
     /** Create or adjust "pos" parameter for a component
      * Assumed that name either equals "x", "y" or "z" otherwise this 
      * method will not add or modify "pos" parameter
@@ -572,11 +596,62 @@ namespace Mantid
     {
       Parameter_sptr result;
       if(!comp) return result;
-      const bool anytype = (strlen(type) == 0);
+
       PARALLEL_CRITICAL(ParameterMap_get)
       {
-        if( !m_map.empty() )
-        {
+        auto itr = getMapPlace(comp,name, type);
+        if (itr != m_map.end())
+           result = itr->second;
+      }
+      return result;
+    }
+    
+    /**Return an iterator pointing to a named parameter of a given type. 
+     * @param comp :: Component to which parameter is related
+     * @param name :: Parameter name
+     * @param type :: An optional type string. If empty, any type is returned
+     * @returns The iterator parameter of the given type if it exists or a NULL shared pointer if not
+    */
+    component_map_it ParameterMap::getMapPlace(const IComponent* comp,const char *name, const char * type)
+    {
+      pmap_it result = m_map.end();
+      if(!comp) return result;
+      const bool anytype = (strlen(type) == 0);
+      if( !m_map.empty() )
+      {
+          const ComponentID id = comp->getComponentID();
+          pmap_it it_found = m_map.find(id);
+          if (it_found != m_map.end())
+          {
+            pmap_it itr = m_map.lower_bound(id);
+            pmap_it itr_end = m_map.upper_bound(id);
+            for( ; itr != itr_end; ++itr )
+            {
+              Parameter_sptr param = itr->second;
+              if( boost::iequals(param->nameAsCString(), name) && (anytype || param->type() == type) )
+              {
+                result = itr;
+                break;
+              }
+            }
+          }
+      }     
+      return result;
+    }
+
+    /**Return a const iterator pointing to a named parameter of a given type. 
+     * @param comp :: Component to which parameter is related
+     * @param name :: Parameter name
+     * @param type :: An optional type string. If empty, any type is returned
+     * @returns The iterator parameter of the given type if it exists or a NULL shared pointer if not
+    */
+    component_map_cit ParameterMap::getMapPlace(const IComponent* comp,const char *name, const char * type)const
+    {
+      pmap_cit result = m_map.end();
+      if(!comp) return result;
+      const bool anytype = (strlen(type) == 0);
+      if( !m_map.empty() )
+      {
           const ComponentID id = comp->getComponentID();
           pmap_cit it_found = m_map.find(id);
           if (it_found != m_map.end())
@@ -588,15 +663,16 @@ namespace Mantid
               Parameter_sptr param = itr->second;
               if( boost::iequals(param->nameAsCString(), name) && (anytype || param->type() == type) )
               {
-                result = param;
+                result = itr;
                 break;
               }
             }
           }
-        }
-      }
+      }     
       return result;
     }
+
+
 
      /** Look for a parameter in the given component by the type of the parameter.
      * @param comp :: Component to which parameter is related
@@ -785,7 +861,7 @@ namespace Mantid
       }
     }
 
-    ///Attempts to retreive a location from the location cache
+    ///Attempts to retrieve a location from the location cache
     /// @param comp :: The Component to find the location of
     /// @param location :: If the location is found it's value will be set here
     /// @returns true if the location is in the map, otherwise false
@@ -811,7 +887,7 @@ namespace Mantid
       }
     }
 
-    ///Attempts to retreive a rotation from the rotation cache
+    ///Attempts to retrieve a rotation from the rotation cache
     /// @param comp :: The Component to find the rotation of
     /// @param rotation :: If the rotation is found it's value will be set here
     /// @returns true if the rotation is in the map, otherwise false

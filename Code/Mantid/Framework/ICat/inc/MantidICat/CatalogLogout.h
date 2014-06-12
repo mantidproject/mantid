@@ -43,13 +43,15 @@ namespace Mantid
       ~CatalogLogout(){}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogLogout"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Logs out of a specific catalog using the session information provided.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
     private:
-      virtual void initDocs();
       void init();
       void exec();
     };

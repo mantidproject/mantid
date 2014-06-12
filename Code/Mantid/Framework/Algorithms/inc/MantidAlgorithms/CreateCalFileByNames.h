@@ -62,14 +62,16 @@ public:
   virtual ~CreateCalFileByNames() {}
   /// Algorithm's name
   virtual const std::string name() const { return "CreateCalFileByNames"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Create a calibration file (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Diffraction"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
 	/// Calibration entries map
 	typedef std::map<int,std::pair<int,int> > instrcalmap;
   /// Initialisation code

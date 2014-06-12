@@ -402,7 +402,7 @@ class DirectEnergyConversion(object):
 
             ConvertFromDistribution(Workspace=result_name)  
 
-        # Normalise using the chosen method
+        # Normalize using the chosen method
         # This should be done as soon as possible after loading and usually happens at diag. Here just in case if diag was bypassed
         self.normalise(mtd[result_name], result_name, self.normalise_method, range_offset=bin_offset)
 
@@ -445,7 +445,7 @@ class DirectEnergyConversion(object):
                                      WorkspaceIndexList= '',Mode= 'Mean',SkipMonitors='1')
 
 
-        # Normalise using the chosen method+group
+        # Normalize using the chosen method+group
         # : This really should be done as soon as possible after loading
         self.normalise(mtd[result_name], result_name, self.normalise_method, range_offset=bin_offset)
 
@@ -472,7 +472,7 @@ class DirectEnergyConversion(object):
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
         """
         Convert units of a given workspace to deltaE, including possible 
-        normalisation to a white-beam vanadium run.
+        normalization to a white-beam vanadium run.
         """
         if (self.__facility == "SNS"):
            self._do_mono_SNS(data_ws,monitor_ws,result_name,ei_guess,
@@ -610,13 +610,17 @@ class DirectEnergyConversion(object):
         if type(monitor_ws) is str:
             monitor_ws = mtd[monitor_ws]
         try: 
-            # check if the spectra with correspondent number is present in the worksace
+            # check if the spectra with correspondent number is present in the workspace
             nsp = monitor_ws.getIndexFromSpectrumNumber(int(self.ei_mon_spectra[0]));
-        except:
+        except RuntimeError as err:
             monitors_from_separate_ws = True
             mon_ws = monitor_ws.getName()+'_monitors'
-            monitor_ws = mtd[mon_ws];
-        #-------------------------------------------------------------
+            try:
+                monitor_ws = mtd[mon_ws];
+            except:
+                print "**** ERROR while attempting to get spectra {0} from workspace: {1}, error: {2} ".format(self.ei_mon_spectra[0],monitor_ws.getName(), err)
+                raise
+        #------------------------------------------------
             
         # Calculate the incident energy
         ei,mon1_peak,mon1_index,tzero = \

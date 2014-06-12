@@ -30,6 +30,9 @@ namespace MantidWidgets
     std::pair<double,double> getRange();
     void setRange(std::pair<double,double> range); /// Overloaded function provided for convenience
 
+    double getMinimum() { return m_min; } ///< Returns current min value
+    double getMaximum() { return m_max; } ///< Reutnrs current max value
+
   signals:
     void minValueChanged(double);
     void maxValueChanged(double);
@@ -42,6 +45,7 @@ namespace MantidWidgets
     void setMinimum(double); ///< outside setting of value
     void setMaximum(double); ///< outside setting of value
     void reapply(); ///< re-apply the range selector lines
+    void detach(); ///< Detach range selector lines from the plot
     void setColour(QColor colour);
     void setInfoOnly(bool state);
     void setVisible(bool state);

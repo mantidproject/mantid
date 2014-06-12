@@ -23,6 +23,7 @@ public:
   int version() const  { return 1;}                        ///< Algorithm's version for identification
   const std::string category() const { return "ProxyCat";}           ///< Algorithm's category for identification
   const std::string alias() const { return "Dog";}            ///< Algorithm's alias
+  const std::string summary() const { return "Test summary"; }
   const std::string workspaceMethodName() const { return "toyalgorithm"; }
   const std::string workspaceMethodOnTypes() const { return "MatrixWorkspace;ITableWorkspace"; }
   const std::string workspaceMethodInputProperty() const { return "InputWorkspace"; }
@@ -61,7 +62,7 @@ public:
   int version() const  { return 1;}                        ///< Algorithm's version for identification
   const std::string category() const { return "ProxyCat;ProxyLeopard";}           ///< Algorithm's category for identification
   const std::string alias() const { return "Dog";}            ///< Algorithm's alias
-
+  const std::string summary() const { return "Test summary"; }
   void init()
   { 
       declareProperty("prop1","value");

@@ -867,7 +867,6 @@ class Screenshot(QtCore.QObject):
         thread
         """
         # First save the screenshot
-        widget.show()
         widget.resize(widget.size())
         QtCore.QCoreApplication.processEvents()
         
@@ -915,13 +914,17 @@ def screenshot_to_dir(widget, filename, screenshot_dir):
     @param filename :: Destination filename for that image
     @param screenshot_dir :: Directory to put the screenshots into.
     """
-        # Find the widget if handled with a proxy
+    # Find the widget if handled with a proxy
     if hasattr(widget, "_getHeldObject"):
         widget = widget._getHeldObject()
                 
     if widget is not None:
         camera = Screenshot()
-        threadsafe_call(camera.take_picture, widget, os.path.join(screenshot_dir, filename+".png"))
+        imgpath = os.path.join(screenshot_dir, filename)
+        threadsafe_call(camera.take_picture, widget, imgpath)
+        return imgpath
+    else:
+        raise RuntimeError("Unable to retrieve widget. Has it been deleted?")
     
 
 #=============================================================================

@@ -1,6 +1,3 @@
-"""*WIKI* 
-Compute I(q) for reduced EQSANS data
-*WIKI*"""
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import Scale
@@ -13,10 +10,11 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
     
     def name(self):
         return 'EQSANSAzimuthalAverage1D'
-    
+
+    def summary(self):
+        return "Compute I(q) for reduced EQSANS data"
+
     def PyInit(self):
-        self.setOptionalMessage("Compute I(q) for reduced EQSANS data")
-        self.setWikiSummary("Compute I(q) for reduced EQSANS data")
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', 
                                                      direction = Direction.Input))
         self.declareProperty('NumberOfBins', 100, 
