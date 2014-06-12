@@ -501,6 +501,20 @@ namespace LiveData
     EventWorkspace_sptr processedEvent = boost::dynamic_pointer_cast<EventWorkspace>(processed);
     if (!PreserveEvents && processedEvent)
     {
+      // Convert the monitor workspace, if there is one and it's necessary
+      MatrixWorkspace_sptr monitorWS = processedEvent->monitorWorkspace();
+      auto monitorEventWS = boost::dynamic_pointer_cast<EventWorkspace>(monitorWS);
+      if ( monitorEventWS )
+      {
+        auto monAlg = this->createChildAlgorithm("ConvertToMatrixWorkspace");
+        monAlg->setProperty("InputWorkspace", monitorEventWS);
+        monAlg->executeAsChildAlg();
+        if (!monAlg->isExecuted())
+          g_log.error("Failed to convert monitors from events to histogram form.");
+        monitorWS = monAlg->getProperty("OutputWorkspace");
+      }
+
+      // Now do the main workspace
       Algorithm_sptr alg = this->createChildAlgorithm("ConvertToMatrixWorkspace");
       alg->setProperty("InputWorkspace", processedEvent);
       std::string outputName = "__anonymous_livedata_convert_" + this->getPropertyValue("OutputWorkspace");
@@ -510,6 +524,7 @@ namespace LiveData
         throw std::runtime_error("Error when calling ConvertToMatrixWorkspace (since PreserveEvents=False). See log.");
       // Replace the "processed" workspace with the converted one.
       MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
+      if ( monitorWS ) temp->setMonitorWorkspace( monitorWS ); // Set back the monitor workspace
       processed = temp;
     }
 
