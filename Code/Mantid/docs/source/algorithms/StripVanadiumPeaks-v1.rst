@@ -30,6 +30,8 @@ Description
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 **Example: **
 
 .. testcode:: ExStripPeak
