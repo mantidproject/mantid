@@ -37,7 +37,6 @@ class EnginXFitPeaks(PythonAlgorithm):
 		# FindPeaks will returned a list of peaks sorted by the centre found. Sort the peaks as well,
 		# so we can match them with fitted centres later.
 		expectedPeaksTof = sorted(expectedPeaksTof)
-
 		expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
 
 		# Find approximate peak positions, asumming Gaussian shapes

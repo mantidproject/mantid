@@ -9,6 +9,9 @@ class EnginXCalibrateFull(PythonAlgorithm):
 
 	def name(self):
 		return "EnginXCalibrateDetectors"
+
+	def summary(self):
+		return "Calibrates every pixel position by performing single peak fitting."
 		
 	def PyInit(self):
 		self.declareProperty(FileProperty("CalibrationRun", "", FileAction.Load),
@@ -19,7 +22,8 @@ class EnginXCalibrateFull(PythonAlgorithm):
 			
 		self.declareProperty("Bank", 1, "Which bank to calibrate")
 		
-		self.declareProperty(ITableWorkspaceProperty("CalibrationResult", "", Direction.Output))
+		self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Output),
+			"A table with calibrated detector positions as accepted by ApplyCalibration algorithm.")
 		
 	def PyExec(self):
 

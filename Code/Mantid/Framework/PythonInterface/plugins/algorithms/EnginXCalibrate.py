@@ -11,6 +11,9 @@ class EnginXCalibrate(PythonAlgorithm):
 
 	def name(self):
 		return "EnginXCalibrateDetectors"
+
+	def summary(self):
+		return "Calibrates a detector bank by performing a single peak fitting."
 		
 	def PyInit(self):
 		self.declareProperty(FileProperty("CalibrationRun", "", FileAction.Load),

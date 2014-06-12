@@ -8,6 +8,9 @@ class EnginXFocus(PythonAlgorithm):
 
 	def name(self):
 		return "EnginXFocus"
+
+	def summary(self):
+		return "Focuses a run."
 	
 	def PyInit(self):
 		self.declareProperty(FileProperty("Run", "", FileAction.Load),
@@ -18,7 +21,8 @@ class EnginXFocus(PythonAlgorithm):
 
 		self.declareProperty("Bank", 1, "Which bank to focus")
 		
-		self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output))
+		self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),
+			"A workspace with focussed data")
 		
 	def PyExec(self):
 		# Load the run file
