@@ -9,6 +9,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Algorithm.h"
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
@@ -251,6 +252,31 @@ public:
         // since all y-values are 2.0, the sum should be 10 * 2.0
         TS_ASSERT_EQUALS(summed->readY(0).front(), 20.0);
         TS_ASSERT_EQUALS(summed->readY(0).back(), 20.0);
+    }
+
+    void testGetCropAlgorithmForWorkspace()
+    {
+        MatrixWorkspace_sptr workspace = getProperWorkspaceWithXValues(10, 10, 3.0);
+
+        TestablePoldiTruncateData truncate;
+        TS_ASSERT_THROWS_NOTHING(truncate.getCropAlgorithmForWorkspace(workspace));
+
+        Algorithm_sptr cropAlgorithm = truncate.getCropAlgorithmForWorkspace(workspace);
+        TS_ASSERT_EQUALS(cropAlgorithm->name(), "CropWorkspace");
+
+        MatrixWorkspace_sptr inputWorkspace = cropAlgorithm->getProperty("InputWorkspace");
+        TS_ASSERT_EQUALS(inputWorkspace, workspace);
+    }
+
+    void testGetOutputWorkspace()
+    {
+        MatrixWorkspace_sptr workspace = getProperWorkspaceWithXValues(10, 10, 3.0);
+
+        TestablePoldiTruncateData truncate;
+        Algorithm_sptr cropAlgorithm = truncate.getCropAlgorithmForWorkspace(workspace);
+        MatrixWorkspace_sptr outputWorkspace = truncate.getOutputWorkspace(cropAlgorithm);
+
+        TS_ASSERT(outputWorkspace)
     }
 
 private:
