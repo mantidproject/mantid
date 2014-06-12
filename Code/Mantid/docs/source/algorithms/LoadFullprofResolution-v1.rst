@@ -45,15 +45,15 @@ Usage
    #Print first four rows
    for i in [0,1,2,3]:
       row = tws.row(i)
-      print "{'Value_5': %.2f, 'Name': '%s', 'Value_3': %.2f}" % ( row["Value_5"], row["Name"], row["Value_3"] )
+      print "{'Name': '%s', 'Value_3': %.2f, 'Value_5': %.2f}" % (  row["Name"], row["Value_3"], row["Value_5"] )
 
 Output:
 
 .. testoutput:: ExLoadFullprofResolutionSimple
 
-   {'Value_5': 5.00, 'Name': 'BANK', 'Value_3': 3.00}
-   {'Value_5': 1.61, 'Name': 'Alph0', 'Value_3': 1.60}
-   {'Value_5': 1.30, 'Name': 'Alph1', 'Value_3': 1.50}
-   {'Value_5': 37.57, 'Name': 'Beta0', 'Value_3': 33.57}
+   {'Name': 'BANK', 'Value_3': 3.00, 'Value_5': 5.00}
+   {'Name': 'Alph0', 'Value_3': 1.60, 'Value_5': 1.61}
+   {'Name': 'Alph1', 'Value_3': 1.50, 'Value_5': 1.30}
+   {'Name': 'Beta0', 'Value_3': 33.57, 'Value_5': 37.57}
 
 .. categories::
