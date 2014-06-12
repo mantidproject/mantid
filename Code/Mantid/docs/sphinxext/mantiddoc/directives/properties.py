@@ -1,4 +1,5 @@
 from base import BaseDirective
+import string
 
 
 class PropertiesDirective(BaseDirective):
@@ -140,10 +141,15 @@ class PropertiesDirective(BaseDirective):
                 # Fall-back default for anything
                 defaultstr = str(default)
 
-        # replace nonprintable characters with their printable
+        # Replace nonprintable characters with their printable
         # representations, such as \n, \t, ...
         defaultstr = repr(defaultstr)[1:-1]
         defaultstr = defaultstr.replace('\\','\\\\')
+
+        # A special case for single-character default values (e.g. + or *, see MuonLoad). We don't
+        # want them to be interpreted as list items.
+        if len(defaultstr) == 1 and defaultstr in string.punctuation:
+            defaultstr = "\\" + defaultstr
 
         # Replace the ugly default values with "Optional"
         if (defaultstr == "8.9884656743115785e+307") or \

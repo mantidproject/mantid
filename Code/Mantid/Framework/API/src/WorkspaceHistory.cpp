@@ -89,6 +89,14 @@ bool WorkspaceHistory::empty() const
 }
 
 /**
+ * Empty the list of algorithm history objects.
+ */
+void WorkspaceHistory::clearHistory()
+{
+  m_algorithms.clear();
+}
+
+/**
  * Retrieve an algorithm history by index
  * @param index ::  An index within the workspace history
  * @returns A pointer to an AlgorithmHistory object

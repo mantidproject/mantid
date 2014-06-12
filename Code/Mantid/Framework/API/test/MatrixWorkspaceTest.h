@@ -787,6 +787,19 @@ public:
     TS_ASSERT_EQUALS(ws->getXMax(), 1.0);
   }
 
+  void test_monitorWorkspace()
+  {
+    auto ws = boost::make_shared<WorkspaceTester>();
+    TSM_ASSERT( "There should be no monitor workspace by default", ! ws->monitorWorkspace() )
+
+    auto ws2 = boost::make_shared<WorkspaceTester>();
+    ws->setMonitorWorkspace(ws2);
+    TSM_ASSERT_EQUALS( "Monitor workspace not successfully set", ws->monitorWorkspace(), ws2 )
+
+    ws->setMonitorWorkspace(boost::shared_ptr<MatrixWorkspace>());
+    TSM_ASSERT( "Monitor workspace not successfully reset", ! ws->monitorWorkspace() )
+  }
+
 private:
   boost::shared_ptr<MatrixWorkspace> ws;
 

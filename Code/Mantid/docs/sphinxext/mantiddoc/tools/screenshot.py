@@ -10,6 +10,21 @@
     :copyright: Copyright 2014
         ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 """
+#--------------------------------------------------------------------------
+class Screenshot(object):
+    """
+    Takes a screenshot of widget records the filename + meta information
+    about it.
+    """
+
+    def __init__(self, widget, filename, directory):
+        from mantidplot import screenshot_to_dir, threadsafe_call
+        
+        self.imgpath = screenshot_to_dir(widget=widget, filename=filename, screenshot_dir=directory)
+        self.width = widget.width()
+        self.height = widget.height()
+
+#--------------------------------------------------------------------------
 
 def algorithm_screenshot(name, directory, version = -1, ext = ".png"):
     """
@@ -30,7 +45,7 @@ def algorithm_screenshot(name, directory, version = -1, ext = ".png"):
         return "NoGUI-ImageNotGenerated.png"
 
     import mantidqtpython as mantidqt
-    from mantidplot import screenshot_to_dir, threadsafe_call
+    from mantidplot import threadsafe_call
 
     iface_mgr = mantidqt.MantidQt.API.InterfaceManager()
     # threadsafe_call required for MantidPlot
@@ -39,7 +54,6 @@ def algorithm_screenshot(name, directory, version = -1, ext = ".png"):
     suffix = ("-v%d" % version) if version != -1 else ""
     filename = "%s%s_dlg%s" % (name, suffix, ext)
 
-    img_path = screenshot_to_dir(widget=dlg, filename=filename, screenshot_dir=directory)
+    picture = Screenshot(dlg, filename, directory)
     threadsafe_call(dlg.close)
-
-    return img_path
+    return picture

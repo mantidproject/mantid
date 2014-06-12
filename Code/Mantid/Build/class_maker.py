@@ -118,6 +118,9 @@ def write_source(subproject, classname, filename, args):
     f = open(filename, 'w')
     
     algorithm_top = """
+  using Mantid::Kernel::Direction;
+  using Mantid::API::WorkspaceProperty;
+
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(%s)
   
@@ -153,21 +156,14 @@ def write_source(subproject, classname, filename, args):
     // TODO Auto-generated execute stub
   }
 
-""" % (classname, classname, classname, classname, classname, classname, classname)   
+""" % (classname, classname, classname, classname, classname)   
 
     if not args.alg:
         algorithm_top = ""
         algorithm_source = ""
-        s = ""
-    else:
-        s = """/*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
-*WIKI*/
-
-"""
 
     # ------- Now the normal class text ------------------------------    
-    s += """#include "Mantid%s/%s%s.h"
+    s = """#include "Mantid%s/%s%s.h"
 
 namespace Mantid
 {
@@ -252,6 +248,7 @@ def write_test(subproject, classname, filename, args):
 #include "Mantid%s/%s%s.h"
 
 using Mantid::%s::%s;
+using namespace Mantid::API;
 
 class %sTest : public CxxTest::TestSuite
 {
@@ -281,6 +278,64 @@ public:
     
     
     
+       
+
+#======================================================================
+def write_rst(subproject, classname, filename, args):
+    """Write an algorithm rst documentation file"""
+    print "Writing rst file to %s" % filename
+    f = open(filename, 'w')
+    
+    s = """
+.. algorithm::
+
+.. summary::
+
+.. alias::
+
+.. properties::
+
+Description
+-----------
+
+TODO: Enter a full rst-markup description of your algorithm here. 
+
+
+Usage
+-----
+..  Try not to use files in your examples, 
+    but if you cannot avoid it then the (small) files must be added to 
+    autotestdata\UsageData and the following tag unindented
+    .. include:: ../usagedata-note.txt
+
+**Example - %s**
+
+.. testcode:: %sExample
+
+   # Create a host workspace
+   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
+   or
+   ws = CreateSampleWorkspace()
+
+   wsOut = %s()
+
+   # Print the result
+   print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
+
+Output:
+
+.. testoutput:: %sExample 
+
+  The output workspace has ?? spectra
+
+.. categories::
+
+""" % (classname,classname,classname,classname)
+
+    f.write(s)
+    f.close()
+
+
 #======================================================================
 def generate(subproject, classname, overwrite, args):
     
@@ -290,6 +345,9 @@ def generate(subproject, classname, overwrite, args):
     headerfile = os.path.join(basedir, "inc", header_folder, args.subfolder + classname + ".h")
     sourcefile = os.path.join(basedir, "src", args.subfolder + classname + ".cpp")
     testfile = os.path.join(basedir, "test", classname + "Test.h")
+    #up two from the subproject basedir and then docs\source\algorithms
+    mantiddir = os.path.dirname(os.path.dirname(basedir))
+    rstfile = os.path.join(mantiddir, "docs", "source", "algorithms", classname + "-v1.rst")
     
     if args.header and not overwrite and os.path.exists(headerfile):
         print "\nError! Header file %s already exists. Use --force to overwrite.\n" % headerfile
@@ -300,6 +358,9 @@ def generate(subproject, classname, overwrite, args):
     if args.test and not overwrite and os.path.exists(testfile):
         print "\nError! Test file %s already exists. Use --force to overwrite.\n" % testfile
         return
+    if args.rst and args.alg and not overwrite and os.path.exists(rstfile):
+        print "\nError! Rst documentation file %s already exists. Use --force to overwrite.\n" % rstfile
+        return
       
     print
     if args.header:
@@ -308,6 +369,8 @@ def generate(subproject, classname, overwrite, args):
         write_source(subproject, classname, sourcefile, args)
     if args.test:
         write_test(subproject, classname, testfile, args)
+    if args.rst and args.alg:
+        write_rst(subproject, classname, rstfile, args)
     
     # Insert into the cmake list
     add_to_cmake(subproject, classname, args, args.subfolder)
@@ -344,6 +407,9 @@ if __name__ == "__main__":
         parser.add_argument('--no-cpp', dest='cpp', action='store_const',
                             const=False, default=True,
                             help="Don't create the cpp file")
+        parser.add_argument('--no-rst', dest='rst', action='store_const',
+                            const=False, default=True,
+                            help="Don't create the rst file")
         parser.add_argument('--alg', dest='alg', action='store_const',
                             const=True, default=False,
                             help='Create an Algorithm stub. This adds some methods common to algorithms.')
@@ -356,10 +422,6 @@ if __name__ == "__main__":
     else:
         parser = optparse.OptionParser("Usage: %prog SUBPROJECT CLASSNAME [options]", None,
                                        optparse.Option, VERSION, 'error', 'Utility to create Mantid class files: header, source and test.')
-        #parser.add_option('--subproject', metavar='SUBPROJECT', type=str,
-        #                    help='The subproject under Framework/; e.g. Kernel')
-        #parser.add_option('--classname', metavar='CLASSNAME', type=str,
-        #                    help='Name of the class to create')
         parser.add_option('--force', dest='force', action='store_const',
                             const=True, default=False,
                             help='Force overwriting existing files. Use with caution!')
@@ -372,6 +434,9 @@ if __name__ == "__main__":
         parser.add_option('--no-cpp', dest='cpp', action='store_const',
                             const=False, default=True,
                             help="Don't create the cpp file")
+        parser.add_option('--no-rst', dest='rst', action='store_const',
+                            const=False, default=True,
+                            help="Don't create the rst file")
         parser.add_option('--alg', dest='alg', action='store_const',
                             const=True, default=False,
                             help='Create an Algorithm stub. This adds some methods common to algorithms.')

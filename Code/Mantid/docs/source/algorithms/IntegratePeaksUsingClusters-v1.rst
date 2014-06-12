@@ -26,10 +26,7 @@ work.
 .. figure:: /images/ClusterImage.png
    :alt: ClusterImage.png
 
-   ClusterImage.png
-*Cluster Label region displayed in the `SliceViewer <SliceViewer>`__.
-Peak centre is marked with an X. The green circle illustrates the
-integration region used by :ref:`algm-IntegratePeaksMD`*
+   Cluster Label region displayed in the SliceViewer. Peak centre is marked with an X. The green circle illustrates the integration region used by :ref:`algm-IntegratePeaksMD`
 
 A threshold for the Peak should be defined below which, parts of the
 image are treated as background. The normalization method in combination
@@ -90,5 +87,24 @@ resolve this problem.
 
 For more in-depth analysis, the algorithm will produce debug log
 messages.
+
+Usage
+-----
+
+**Example - Simple Integration of TOPAZ data**
+
+.. testcode:: IntegratePeaksUsingClustersExample
+
+   # Load an MDEventWorkspace (QLab) containing some SC diffration peaks
+   mdew = Load("TOPAZ_3680_5_sec_MDEW.nxs")
+   # The following algorithms need to know that frame to use, this is an older file. Newer files will automaticall have this.
+   SetSpecialCoordinates(InputWorkspace=mdew, SpecialCoordinates='Q (lab frame)')
+   # Find the 5 most intense peaks
+   peaks = FindPeaksMD(InputWorkspace=mdew, MaxPeaks=5)
+   # Bin to a 100 by 100 by 100 image. A 300 by 300 by 300 image is better.
+   mdhw = BinMD(InputWorkspace=mdew, AxisAligned=True,AlignedDim0='Q_lab_x,0,8,100', AlignedDim1='Q_lab_y,-10,10,100', AlignedDim2='Q_lab_z,0,10,100') 
+   # Perform the integration
+   integrated_peaks, cluster_image = IntegratePeaksUsingClusters(InputWorkspace=mdhw, PeaksWorkspace=peaks, Threshold=1e7)
+
 
 .. categories::
