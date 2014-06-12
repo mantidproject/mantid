@@ -36,21 +36,33 @@ Usage
 
 **Example - Creating an Information Table For a Single Run**
 
+.. include:: ../usagedata-note.txt
+
+.. testsetup:: ExSingleRun
+
+   old_inst = config['default.instrument']
+   old_facility = config['default.facility']
+
 .. testcode:: ExSingleRun
 
    # The algorithm takes note of your default facililty/instrument.
    # You can change these settings in the interface, or change them
    # programmatically as follows:
-   config['default.instrument'] = 'IRS'
+   config['default.instrument'] = 'IRIS'
    config["default.facility"] = "ISIS"
 
-   # Get the information for a IRIS runs 21360 and 26173.
+   # Get the information for IRIS runs 21360 and 26173.
    info_table = RetrieveRunInfo(Runs="21360,26173")
 
    print "The table contains information about %i runs." % info_table.rowCount()
    print "The first has run number %s." % info_table.cell("run_number", 0)
    print "The second has run number %s." % info_table.cell("run_number", 1)
    print "The title of the second run is \"%s.\"" % info_table.cell("run_title", 1).strip()
+
+.. testcleanup:: ExSingleRun
+
+   config['default.instrument'] = old_inst
+   config['default.facility'] = old_facility
 
 Output:
 
