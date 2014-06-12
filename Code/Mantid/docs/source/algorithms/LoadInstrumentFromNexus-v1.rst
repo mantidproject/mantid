@@ -16,7 +16,39 @@ spherical coordinates as (r,theta,phi)=(L2,2-theta,0.0). Also adds dummy
 source and samplepos components to instrument.
 
 LoadInstrumentFromNexus is intended to be used as a child algorithm of
-other Loadxxx algorithms, rather than being used directly. It is used by
+other Load algorithms, rather than being used directly. It is used by
 LoadMuonNexus version 1.
+
+Usage
+-----
+
+**Example - Loading Instrument from Nexus**
+
+.. include:: ../usagedata-note.txt
+
+.. testcode:: Ex
+
+   # Create a dummy ws containing arbitrary data, into which we will load the instrument.
+   ws = CreateSampleWorkspace("Histogram","Flat background")
+   LoadInstrumentFromNexus(ws, "MUSR00015189.nxs")
+   inst = ws.getInstrument()
+
+   print "The name of the instrument is \"%s\"." % inst.getName().strip()
+   print "The position of the source is %s." % str(inst.getSource().getPos())
+   print ("The reference frame axis pointing along the beam is %s." % 
+         inst.getReferenceFrame().pointingAlongBeam())
+
+.. testcleanup:: Ex
+
+   config['default.instrument'] = old_inst
+   config['default.facility'] = old_facility
+
+Output:
+
+.. testoutput:: Ex
+
+   The name of the instrument is "MUSR".
+   The position of the source is [0,-10,0].
+   The reference frame axis pointing along the beam is Z.
 
 .. categories::
