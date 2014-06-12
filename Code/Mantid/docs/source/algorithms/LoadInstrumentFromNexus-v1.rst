@@ -38,11 +38,6 @@ Usage
    print ("The reference frame axis pointing along the beam is %s." % 
          inst.getReferenceFrame().pointingAlongBeam())
 
-.. testcleanup:: Ex
-
-   config['default.instrument'] = old_inst
-   config['default.facility'] = old_facility
-
 Output:
 
 .. testoutput:: Ex

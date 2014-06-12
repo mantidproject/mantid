@@ -15,7 +15,7 @@ in a 2D workspace.  You may optionally specify certain spectra to read in.
 Usage
 -----
 
-**Example - Creating an Information Table For a Single Run**
+**Example - Loading in Bin0 Data**
 
 .. include:: ../usagedata-note.txt
 
