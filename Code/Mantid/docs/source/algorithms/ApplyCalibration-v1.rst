@@ -29,7 +29,7 @@ Usage
    from mantid.kernel import V3D
    # Create Workspace with instrument
    # We use HRP workspace, which has detectors that are not rectangular.
-   ws = Load("HRP39180.raw")
+   ws = Load("HRP39180.RAW")
 
    spectra = [0, 1, 3] # Spectra of detectors to be moved
 
