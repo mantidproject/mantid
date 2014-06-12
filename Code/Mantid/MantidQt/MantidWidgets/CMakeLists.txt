@@ -7,10 +7,10 @@ set ( SRC_FILES
 	src/DataSelector.cpp
 	src/DiagResults.cpp
 	src/FilenameDialogEditor.cpp
-	src/FormulaDialogEditor.cpp
 	src/FindDialog.cpp
 	src/FindReplaceDialog.cpp
 	src/FitPropertyBrowser.cpp
+	src/FormulaDialogEditor.cpp
 	src/FunctionBrowser.cpp
 	src/InstrumentSelector.cpp
 	src/MWDiag.cpp
@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/MultifitSetupDialog.cpp
 	src/MuonFitPropertyBrowser.cpp
 	src/MuonSequentialFitDialog.cpp
+	src/PeakPicker.cpp
 	src/ProcessingAlgoWidget.cpp
 	src/PropertyHandler.cpp
 	src/RangeSelector.cpp
@@ -29,10 +30,10 @@ set ( SRC_FILES
 	src/SelectFunctionDialog.cpp
 	src/SelectWorkspacesDialog.cpp
 	src/SequentialFitDialog.cpp
-    src/StringDialogEditor.cpp
-    src/StringEditorFactory.cpp
+	src/StringDialogEditor.cpp
+	src/StringEditorFactory.cpp
 	src/UserFunctionDialog.cpp
-    src/WorkspaceEditorFactory.cpp
+	src/WorkspaceEditorFactory.cpp
 	src/WorkspaceSelector.cpp
 	src/pythonCalc.cpp
 )
@@ -58,6 +59,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MuonSequentialFitDialog.h
     inc/MantidQtMantidWidgets/MWDiag.h
     inc/MantidQtMantidWidgets/MWRunFiles.h
+    inc/MantidQtMantidWidgets/PeakPicker.h
     inc/MantidQtMantidWidgets/PropertyHandler.h
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.h
     inc/MantidQtMantidWidgets/pythonCalc.h
@@ -78,8 +80,8 @@ set ( MOC_FILES
 
 # Add the include files are NOT already in MOC_FILES
 set ( INC_FILES
-    ${MOC_FILES}
-    inc/MantidQtMantidWidgets/CatalogHelper.h
+	${MOC_FILES}
+	inc/MantidQtMantidWidgets/CatalogHelper.h
 	inc/MantidQtMantidWidgets/WidgetDllOption.h
 )
 

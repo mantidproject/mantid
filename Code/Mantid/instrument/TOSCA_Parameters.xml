@@ -9,11 +9,15 @@
 
 <!-- These properties are neceessary for use in the Indirect CTE interface. -->
 <parameter name="analysers" type="string">
-    <value val="graphite" />
+    <value val="graphite,diffraction" />
 </parameter>
 <parameter name="refl-graphite" type="string">
     <value val="002" />
 </parameter>
+<parameter name="refl-diffraction" type="string">
+  <value val="diffspec" />
+</parameter>
+
 <!-- Available options are "Show" or "Hide". -->
 <parameter name="cm-1-convert-choice" type="string">
     <value val="Show" />

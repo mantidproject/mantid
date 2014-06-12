@@ -106,7 +106,7 @@ public:
 
 signals:
   void enableLighting(bool);
-  void plotSpectra(const QString&,const std::set<int>&);
+  void plot1D(const QString&,const std::set<int>&,bool);
   void createDetectorTable(const QString&,const std::vector<int>&,bool);
   void execMantidAlgorithm(const QString&,const QString&,Mantid::API::AlgorithmObserver*);
   void execMantidAlgorithm(Mantid::API::IAlgorithm_sptr);
@@ -133,9 +133,6 @@ protected:
 public slots:
   void tabChanged(int);
   void componentSelected(Mantid::Geometry::ComponentID id);
-  void spectraInfoDialog();
-  void plotSelectedSpectra();
-  void showDetectorTable();
   void executeAlgorithm(const QString&, const QString&);
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 
@@ -209,8 +206,6 @@ private:
   /// The simple widget to display the instrument
   SimpleWidget* m_simpleDisplay;
 
-  // Actions for the pick menu
-  QAction *mInfoAction, *mPlotAction, *mDetTableAction;
   // Context menu actions
   QAction *m_clearPeakOverlays;
 

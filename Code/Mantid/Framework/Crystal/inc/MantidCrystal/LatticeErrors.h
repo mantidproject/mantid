@@ -17,9 +17,6 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
-using Mantid::API::IFunction;
-using Mantid::Geometry::Instrument;
-using Mantid::DataObjects::PeaksWorkspace_sptr;
 
 namespace Mantid
 {

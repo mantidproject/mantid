@@ -40,6 +40,9 @@ public:
   virtual ~ProjectMD() {}
   /// Algorithm's name
   virtual const std::string name() const { return "ProjectMD"; }
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Sum a MDHistoWorkspace along a choosen dimension";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -58,8 +61,6 @@ private:
   double getValue(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
   void putValue(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim, double val);
   unsigned int calcIndex(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
-
-  virtual void initDocs();
 };
 
 #endif /*PROJECTMD_H_*/

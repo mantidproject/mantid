@@ -40,11 +40,13 @@ namespace WorkflowAlgorithms
     virtual ~StepScan();
 
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Workflow algorithm for analysis of an alignment scan from an SNS Adara-enabled beam line";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

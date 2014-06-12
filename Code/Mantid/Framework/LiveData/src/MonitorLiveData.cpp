@@ -1,16 +1,3 @@
-/*WIKI*
-
-The MonitorLiveData algorithm is started in the background
-by [[StartLiveData]] and repeatedly calls [[LoadLiveData]].
-'''It should not be necessary to call MonitorLiveData directly.'''
-
-This algorithm simply calls [[LoadLiveData]] at the given ''UpdateFrequency''.
-For more details, see [[StartLiveData]].
-
-For details on the way to specify the data processing steps, see: [[LoadLiveData#Description|LoadLiveData]].
-
-*WIKI*/
-
 #include "MantidLiveData/MonitorLiveData.h"
 #include "MantidKernel/System.h"
 #include "MantidLiveData/LoadLiveData.h"
@@ -58,14 +45,6 @@ namespace LiveData
   /// Algorithm's version for identification. @see Algorithm::version
   int MonitorLiveData::version() const { return 1;};
   
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void MonitorLiveData::initDocs()
-  {
-    this->setWikiSummary("Call LoadLiveData at a given update frequency. Do not call this algorithm directly; instead call StartLiveData.");
-    this->setOptionalMessage("Call LoadLiveData at a given update frequency. Do not call this algorithm directly; instead call StartLiveData.");
-  }
-
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
@@ -130,6 +109,7 @@ namespace LiveData
 
     m_chunkNumber = 0;
     int runNumber = 0;
+    int prevRunNumber = 0;
 
     std::string AccumulationWorkspace = this->getPropertyValue("AccumulationWorkspace");
     std::string OutputWorkspace = this->getPropertyValue("OutputWorkspace");
@@ -182,31 +162,55 @@ namespace LiveData
           g_log.debug() << "Run number set to " << runNumber << std::endl;
         }
 
-        // Did we just hit the end of a run?
-        if (listener->runStatus() == ILiveListener::EndRun)
+        // Did we just hit a run transition?
+        ILiveListener::RunStatus runStatus = listener->runStatus();
+        if (runStatus == ILiveListener::EndRun)
+        {
+          // Need to keep track of what the run number *was* so we
+          // can properly rename workspaces
+          prevRunNumber = runNumber; 
+        }
+
+        if ( (runStatus == ILiveListener::BeginRun) ||
+             (runStatus == ILiveListener::EndRun) )
         {
           std::stringstream message;
           message << "Run";
           if ( runNumber != 0 ) message << " #" << runNumber;
           message << " ended. ";
-          std::string EndRunBehavior = this->getPropertyValue("EndRunBehavior");
-          if (EndRunBehavior == "Stop")
+          std::string RunTransitionBehavior = this->getPropertyValue("RunTransitionBehavior");
+          if (RunTransitionBehavior == "Stop")
           {
             g_log.notice() << message.str() << "Stopping live data monitoring.\n";
             break;
           }
-          else if (EndRunBehavior == "Restart")
+          else if (RunTransitionBehavior == "Restart")
           {
             g_log.notice() << message.str() << "Clearing existing workspace.\n";
             NextAccumulationMethod = "Replace";
           }
-          else if (EndRunBehavior == "Rename")
+          else if (RunTransitionBehavior == "Rename")
           {
             g_log.notice() << message.str() << "Renaming existing workspace.\n";
             NextAccumulationMethod = "Replace";
 
             // Now we clone the existing workspaces
-            std::string postFix = "_" + Strings::toString(runNumber);
+            std::string postFix;
+            if (runStatus == ILiveListener::EndRun)
+            {
+              postFix = "_" + Strings::toString(runNumber);
+            }
+            else
+            {
+              // indicate that this is data that arrived *after* the run ended
+              postFix = "_";
+              if (prevRunNumber != 0)
+                postFix += Strings::toString(prevRunNumber);
+
+              postFix += "_post";
+            }
+
+
             doClone(OutputWorkspace, OutputWorkspace + postFix);
             if (!AccumulationWorkspace.empty())
               doClone(AccumulationWorkspace, AccumulationWorkspace + postFix);
@@ -225,7 +229,7 @@ namespace LiveData
         g_log.warning() << "Cannot process live data as quickly as requested: requested every " << UpdateEvery << " seconds but it takes " << seconds << " seconds!" << std::endl;
     } // loop until aborted
 
-    // Set the outputs (only applicable when EndRunBehavior is "Stop")
+    // Set the outputs (only applicable when RunTransitionBehavior is "Stop")
     Workspace_sptr OutputWS = AnalysisDataService::Instance().retrieveWS<Workspace>(OutputWorkspace);
     this->setProperty("OutputWorkspace", OutputWS);
     if (!AccumulationWorkspace.empty())

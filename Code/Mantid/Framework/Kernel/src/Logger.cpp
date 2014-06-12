@@ -215,6 +215,7 @@ namespace Kernel
     }
   }
 
+
   int Logger::getLevel() const
   {
     return m_log->getLevel();

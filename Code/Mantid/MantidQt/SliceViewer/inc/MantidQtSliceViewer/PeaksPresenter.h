@@ -14,6 +14,7 @@ namespace Mantid
   {
     // Forward dec.
     class IPeaksWorkspace;
+    class PeakTransform;
   }
 }
 
@@ -23,7 +24,7 @@ namespace SliceViewer
 {
   // Forward dec.
   class PeakOverlayViewFactory;
-  class PeakTransform;
+
   class PeakOverlayView;
   class UpdateableOnDemand;
 

@@ -59,17 +59,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.initialise("MAP",True);
         self.assertEqual(tReducer.instr_name,"MAP")
 
-        #config.setFacility("SNS")
-        #config.setString('default.facility','SNS')
-        tReducer.instr_name = 'SEQ'
-        self.assertTrue(tReducer._idf_values_read)
-        self.assertEqual(tReducer.instr_name,"SEQ")
-        self.assertEqual(tReducer.facility,'SNS')
-        
-        tReducer.instr_name = 'MER'
-        self.assertEqual(tReducer.instr_name,"MER")
-        self.assertEqual(tReducer.facility,'ISIS')
-
         self.assertRaises(KeyError,setattr,tReducer,'instr_name','NonExistingInstrument')
 
 
@@ -360,6 +349,17 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEqual(41474,tReducer.ei_mon_spectra[0])
         self.assertEqual(41475,tReducer.ei_mon_spectra[1])
 
+    def test_load_monitors_with_workspacer(self):
+        tReducer =self.reducer;
+
+        self.assertFalse(tReducer.load_monitors_with_workspace)
+
+        tReducer.load_monitors_with_workspace=True;
+        self.assertTrue(tReducer.load_monitors_with_workspace)
+        tReducer.load_monitors_with_workspace=0;
+        self.assertFalse(tReducer.load_monitors_with_workspace)
+        tReducer.load_monitors_with_workspace=10;
+        self.assertTrue(tReducer.load_monitors_with_workspace)
 
     #def test_diag_call(self):
     #    tReducer = self.reducer

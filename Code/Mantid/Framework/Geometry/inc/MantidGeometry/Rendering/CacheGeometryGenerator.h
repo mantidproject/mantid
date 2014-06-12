@@ -2,7 +2,6 @@
 #define CACHE_GEOMETRYGENERATOR_H
 
 #include "MantidGeometry/DllConfig.h"
-#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {

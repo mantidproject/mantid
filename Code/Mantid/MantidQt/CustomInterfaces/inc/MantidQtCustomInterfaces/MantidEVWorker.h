@@ -77,7 +77,8 @@ public:
                           const std::string & det_cal_file2 );
 
   /// Find peaks in MD workspace and set peaks into peaks workspace
-  bool findPeaks( const std::string & md_ws_name, 
+  bool findPeaks( const std::string & ev_ws_name,
+		          const std::string & md_ws_name,
                   const std::string & peaks_ws_name,
                         double        max_abc,
                         size_t        num_to_find,
@@ -128,7 +129,8 @@ public:
   /// Show the possible conventional cells for a Niggli cell
   bool showCells( const std::string & peaks_ws_name,
                         double        max_scalar_error,
-                        bool          best_only );
+                        bool          best_only,
+                        bool          allow_perm);
 
   /// Select conventional cell using the cell type and centering
   bool selectCellOfType( const std::string & peaks_ws_name,

@@ -83,7 +83,7 @@ namespace MantidQt
 					fitFunction = "CE"; // Use Chudley-Elliott
 					break;
 				case 1:
-					fitFunction = "SS"; // Use Singwi-Sjolander
+					fitFunction = "HallRoss";
 					break;
 				case 2:
 					fitFunction = "Fick";

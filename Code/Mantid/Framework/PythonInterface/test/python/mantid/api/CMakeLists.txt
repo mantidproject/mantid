@@ -4,10 +4,12 @@
 set ( TEST_PY_FILES
   AlgorithmTest.py
   AlgorithmFactoryTest.py
+  AlgorithmHistoryTest.py
   AlgorithmManagerTest.py
   AlgorithmPropertyTest.py
   AnalysisDataServiceTest.py
   AxisTest.py
+  DataProcessorAlgorithmTest.py
   DeprecatedAlgorithmCheckerTest.py
   ExperimentInfoTest.py
   FilePropertyTest.py
@@ -36,6 +38,7 @@ set ( TEST_PY_FILES
   WorkspaceFactoryTest.py
   WorkspaceTest.py
   WorkspaceGroupTest.py
+  WorkspaceHistoryTest.py
   WorkspacePropertiesTest.py
   WorkspaceValidatorsTest.py
 )

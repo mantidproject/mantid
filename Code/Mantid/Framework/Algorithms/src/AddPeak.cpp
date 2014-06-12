@@ -1,9 +1,3 @@
-/*WIKI* 
-
-Adds a [[IPeak]] to a [[PeaksWorkspace]].
-
-*WIKI*/
-
 #include "MantidAlgorithms/AddPeak.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -40,12 +34,6 @@ namespace Algorithms
   
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void AddPeak::initDocs()
-  {
-    this->setWikiSummary("Adds a peak to a PeaksWorkspace.");
-    this->setOptionalMessage("Adds a peak to a PeaksWorkspace.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -75,8 +63,8 @@ namespace Algorithms
     const double count = getProperty("BinCount");
 
     Mantid::Geometry::Instrument_const_sptr instr = runWS->getInstrument();
-    Mantid::Geometry::IObjComponent_const_sptr source = instr->getSource();
-    Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
+    Mantid::Geometry::IComponent_const_sptr source = instr->getSource();
+    Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
     Mantid::Geometry::IDetector_const_sptr det = instr->getDetector(detID);
 
     const Mantid::Kernel::V3D samplePos = sample->getPos();
@@ -154,4 +142,3 @@ namespace Algorithms
 
 } // namespace Mantid
 } // namespace Algorithms
-

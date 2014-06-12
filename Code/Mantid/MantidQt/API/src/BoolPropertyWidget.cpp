@@ -47,7 +47,7 @@ namespace API
   /** Set the value into the GUI
    *
    * @param value :: string representation of the value */
-  void BoolPropertyWidget::setValue(const QString & value)
+  void BoolPropertyWidget::setValueImpl(const QString & value)
   {
     QString temp = value;
     if (temp.isEmpty())

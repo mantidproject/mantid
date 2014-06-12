@@ -5,10 +5,13 @@
 #include <QtGui/qwidget.h>
 #include <qgridlayout.h>
 #include "MantidKernel/Property.h"
+#include "MantidQtAPI/PropertyInfoWidget.h"
 #include <QLabel>
 #include <QtCore/qstring.h>
 #include <qpushbutton.h>
 #include "DllOption.h"
+
+class QLineEdit;
 
 namespace MantidQt
 {
@@ -54,7 +57,9 @@ namespace API
     virtual QString getValue() const = 0;
 
     /// Set the value of the property given into the GUI state.
-    virtual void setValue(const QString & value) = 0;
+    void setValue(const QString & value);
+    /// Set this widget's previously-entered value.
+    void setPreviousValue(const QString & previousValue);
 
     virtual QWidget * getMainWidget() = 0;
 
@@ -77,6 +82,10 @@ namespace API
 
     void setError(const QString & error);
 
+  private:
+    virtual void setValueImpl(const QString & value) = 0;
+    void setRestoredStatus();
+
   public slots:
     void replaceWSButtonClicked();
 
@@ -90,6 +99,12 @@ namespace API
     void replaceWorkspaceName(const QString & propName);
 
   protected:
+    /// Set the font of the given label based on the optional/required status of the given property.
+    static void setLabelFont(Mantid::Kernel::Property * prop, QWidget * label);
+
+    /// Set the placeholder text of the given field based on the default value of the given property.
+    static void setFieldPlaceholderText(Mantid::Kernel::Property * prop, QLineEdit * field);
+
     /// Property being looked at. This is NOT owned by the widget
     Mantid::Kernel::Property * m_prop;
 
@@ -102,8 +117,8 @@ namespace API
     /// If using the GridLayout, this is the row where the widget was inserted.
     int m_row;
 
-    /// Label that is visible when the property is NOT valid.
-    QLabel * m_validLbl;
+    /// Widget to display information about this property.
+    PropertyInfoWidget * m_info;
 
     /// Documentation string (tooltip)
     QString m_doc;
@@ -116,6 +131,11 @@ namespace API
 
     /// Error message received when trying to set the value
     QString m_error;
+
+    /// Whether or not the property is an output workspace.
+    bool m_isOutputWsProp;
+
+    QString m_previousValue;
   };
 
 

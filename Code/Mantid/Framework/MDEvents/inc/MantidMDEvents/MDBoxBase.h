@@ -16,7 +16,7 @@
 
 
 /// Define to keep the centroid around as a field on each MDBoxBase.
-#undef MDBOX_TRACK_CENTROID
+#define MDBOX_TRACK_CENTROID
 
 namespace Mantid
 {
@@ -347,6 +347,7 @@ namespace MDEvents
      */
     Mantid::Geometry::MDDimensionExtents<coord_t> extents[nd];
 
+    mutable coord_t m_centroid[nd];
     /** Cached total signal from all points within.
      * Set when refreshCache() is called. */
     mutable signal_t m_signal;

@@ -36,8 +36,7 @@ class ReflectometryReductionOneBaseTest(object):
     def tearDown(self):
         DeleteWorkspace(self.__tof)
         DeleteWorkspace(self.__not_tof)
-    
-    
+        
     def test_check_input_workpace_not_tof_throws(self):
         alg = self.construct_standard_algorithm()
         alg.set_InputWorkspace(self.__not_tof)
@@ -195,7 +194,7 @@ class ReflectometryReductionOneBaseTest(object):
         alg.set_FirstTransmissionRun(trans_run1) 
         alg.set_SecondTransmissionRun(trans_run2)
         
-        alg.set_Params([1.5, 0.02, 17])
+        alg.set_Params([0.0, 0.02, 5])
         alg.set_StartOverlap( 10.0 )
         alg.set_EndOverlap( 12.0 )
         alg.set_ThetaIn(0.2)
@@ -259,8 +258,28 @@ class ReflectometryReductionOneBaseTest(object):
         alg.set_FirstTransmissionRun(real_run) # Currently a requirement that one transmisson correction is provided.
         
         out_ws_q, out_ws_lam, theta = alg.execute()
-        self.assertAlmostEqual(0.7, theta*(180/math.pi), 1)
+        self.assertAlmostEqual(0.70969419, theta, 4)
         
+        DeleteWorkspace(real_run)
+           
+    def test_correct_positions_point_detector(self):
+        alg = self.construct_standard_algorithm()
+        real_run = Load('INTER00013460.nxs')
+        alg.set_InputWorkspace(real_run)
+        alg.set_ProcessingInstructions("3,4")
+        alg.set_FirstTransmissionRun(real_run) # Currently a requirement that one transmisson correction is provided.
+        alg.set_ThetaIn(0.4) # Low angle
+        alg.set_CorrectDetectorPositions(True)
+        out_ws_q1, out_ws_lam1, theta1 = alg.execute()
+        pos1 = out_ws_lam1.getInstrument().getComponentByName('point-detector').getPos()
+        
+        alg.set_ThetaIn(0.8) # Repeat with greater incident angle
+        out_ws_q2, out_ws_lam2, theta2 = alg.execute()
+        pos2 = out_ws_lam2.getInstrument().getComponentByName('point-detector').getPos()
+        
+        self.assertTrue(pos2.Y() > pos1.Y(), "Greater incident angle so greater height.")
+        self.assertEqual(pos2.X(), pos1.X())
+        self.assertEqual(pos2.Z(), pos1.Z())
         DeleteWorkspace(real_run)
         
     def test_multidetector_run(self):
@@ -268,7 +287,7 @@ class ReflectometryReductionOneBaseTest(object):
         real_run = Load('POLREF00004699.nxs')
         alg.set_InputWorkspace(real_run[0])
         alg.set_AnalysisMode("MultiDetectorAnalysis")
-        alg.set_DetectorComponentName('lineardetector')
+        alg.set_CorrectDetectorPositions(False)
         alg.set_ProcessingInstructions("3, 10") # Fictional values
         alg.set_RegionOfDirectBeam("20, 30") # Fictional values
         alg.set_ThetaIn(0.1) # Fictional values
@@ -280,4 +299,21 @@ class ReflectometryReductionOneBaseTest(object):
         
         self.assertTrue(isinstance(out_ws_q, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
         self.assertEqual("MomentumTransfer", out_ws_q.getAxis(0).getUnit().unitID())
+        
+    def test_correct_positions_multi_detector(self):
+        alg = self.construct_standard_algorithm()
+        real_run = Load('POLREF00004699.nxs')
+        alg.set_InputWorkspace(real_run[0])
+        alg.set_AnalysisMode("MultiDetectorAnalysis")
+        alg.set_CorrectDetectorPositions(True)
+        alg.set_ProcessingInstructions("73") 
+        alg.set_RegionOfDirectBeam("28,29") 
+        alg.set_ThetaIn(0.49/2) 
+        out_ws_q, out_ws_lam, theta =  alg.execute()
+        
+        pos = out_ws_lam.getInstrument().getComponentByName('lineardetector').getPos()
+        self.assertAlmostEqual(-0.05714, pos.Z(), 3, "Vertical correction is wrong. Recorded as: " + str(pos.Z()))
+        
+        
+        
         

@@ -53,6 +53,9 @@ namespace Crystal
     virtual ~SCDCalibratePanels();
 
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Panel parameters, sample position,L0 and T0 are optimized to minimize errors between theoretical and actual q values for the peaks";}
+
 
      /// Algorithm's version for identification overriding a virtual method
      virtual int version() const;
@@ -197,7 +200,7 @@ namespace Crystal
    *
    */
   static void updateSourceParams(
-        boost::shared_ptr<const Geometry::IObjComponent> bank_const,
+        boost::shared_ptr<const Geometry::IComponent> bank_const,
        boost::shared_ptr<Geometry::ParameterMap> pmap,
        boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
 
@@ -221,7 +224,6 @@ namespace Crystal
 
     void  init ();
 
-    void initDocs ();
 
     /**
      * Creates a new instrument when a calibration file( .xml or .detcal)

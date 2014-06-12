@@ -55,12 +55,11 @@ double CostFuncLeastSquares::val() const
   }
   else
   {
-    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(m_values);
-    if (!simpleValues)
+    if (!m_values)
     {
-      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
     }
-    addVal(m_domain,simpleValues);
+    addVal(m_domain,m_values);
   }
 
   // add penalty
@@ -93,12 +92,12 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::Function
 
   double retVal = 0.0;
 
-  double sqrtw = calSqrtW(values);
+  std::vector<double> weights = getFitWeights(values);
 
   for (size_t i = 0; i < ny; i++)
   {
     // double val = ( values->getCalculated(i) - values->getFitData(i) ) * values->getFitWeight(i);
-    double val = ( values->getCalculated(i) - values->getFitData(i) ) * getWeight(values, i, sqrtw);
+      double val = ( values->getCalculated(i) - values->getFitData(i) ) * weights[i];
     retVal += val * val;
   }
 
@@ -186,12 +185,11 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
   }
   else
   {
-    auto simpleValues = boost::dynamic_pointer_cast<API::FunctionValues>(m_values);
-    if (!simpleValues)
+    if (!m_values)
     {
-      throw std::runtime_error("LeastSquares: unsupported IFunctionValues.");
+      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
     }
-    addValDerivHessian(m_function,m_domain,simpleValues,evalFunction,evalDeriv,evalHessian);
+    addValDerivHessian(m_function,m_domain,m_values,evalFunction,evalDeriv,evalHessian);
   }
 
   // Add constraints penalty
@@ -297,7 +295,9 @@ void CostFuncLeastSquares::addValDerivHessian(
       g_log.debug() << "\n";
     }
   }
-  double sqrtw = calSqrtW(values);
+
+  std::vector<double> weights = getFitWeights(values);
+
   for(size_t ip = 0; ip < np; ++ip)
   {
     if ( !function->isActive(ip) ) continue;
@@ -306,8 +306,7 @@ void CostFuncLeastSquares::addValDerivHessian(
     {
       double calc = values->getCalculated(i);
       double obs = values->getFitData(i);
-      // double w = values->getFitWeight(i);
-      double w =  getWeight(values, i, sqrtw);
+      double w =  weights[i];
       double y = ( calc - obs ) * w;
       d += y * jacobian.get(i,ip) * w;
       if (iActiveP == 0 && evalFunction)
@@ -346,7 +345,7 @@ void CostFuncLeastSquares::addValDerivHessian(
       for(size_t k = 0; k < ny; ++k) // over fitting data
       {
         // double w = values->getFitWeight(k);
-        double w = getWeight(values, k, sqrtw);
+        double w = weights[k];
         d += jacobian.get(k,i) * jacobian.get(k,j) * w * w;
       }
       PARALLEL_CRITICAL(hessian_set)
@@ -363,6 +362,16 @@ void CostFuncLeastSquares::addValDerivHessian(
     }
     ++i1;
   }
+}
+
+std::vector<double> CostFuncLeastSquares::getFitWeights(API::FunctionValues_sptr values) const
+{
+    std::vector<double> weights(values->size());
+    for(size_t i = 0; i < weights.size(); ++i) {
+        weights[i] = values->getFitWeight(i);
+    }
+
+    return weights;
 }
 
 /**
@@ -522,25 +531,6 @@ void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix& covar, double ep
     g_log.information().flags(prevState);
   }
 
-}
-
-//----------------------------------------------------------------------------------------------
-/** Get weight of data point i(1/sigma)
-  */
-double CostFuncLeastSquares::getWeight(API::FunctionValues_sptr values, size_t i, double sqrtW) const
-{
-  UNUSED_ARG(sqrtW);
-  return (values->getFitWeight(i));
-}
-
-//----------------------------------------------------------------------------------------------
-/** Get square root of normalization weight (W)
-  */
-double CostFuncLeastSquares::calSqrtW(API::FunctionValues_sptr values) const
-{
-  UNUSED_ARG(values);
-
-  return 1.0;
 }
 
 } // namespace CurveFitting

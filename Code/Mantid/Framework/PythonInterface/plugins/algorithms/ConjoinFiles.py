@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-Conjoin two workspaces, which are file based. Uses [[ConjoinWorkspaces]] to do the heavy-lifting.
-
-*WIKI*"""
-
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -15,6 +9,9 @@ class ConjoinFiles(PythonAlgorithm):
 
     def name(self):
         return "ConjoinFiles"
+
+    def summary(self):
+        return "Conjoin two file-based workspaces."
 
     def __load(self, directory, instr, run, loader, exts, wksp):
         filename = None
@@ -34,8 +31,6 @@ class ConjoinFiles(PythonAlgorithm):
         raise RuntimeError("Failed to load run %s from file %s" % (str(run), filename))              
 
     def PyInit(self):
-        self.setOptionalMessage("Conjoin two file-based workspaces.")
-        self.setWikiSummary("Conjoin two file-based workspaces.")
         greaterThanZero = IntArrayBoundedValidator()
         greaterThanZero.setLower(0)
         self.declareProperty(IntArrayProperty("RunNumbers",values=[0], validator=greaterThanZero), doc="Run numbers")

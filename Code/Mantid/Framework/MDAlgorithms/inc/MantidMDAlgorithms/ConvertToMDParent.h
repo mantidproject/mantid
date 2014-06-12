@@ -58,11 +58,6 @@ namespace MDAlgorithms
     /// Algorithm's category for identification
     virtual const std::string category() const;
 
-  private:
-    virtual void exec()=0;
-   /// Sets documentation strings for this algorithm
-    virtual void initDocs()=0;  
-   //------------------------------------------------------------------------------------------------------------------------------------------
    protected: 
     void init();
     // 

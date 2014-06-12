@@ -66,7 +66,7 @@ namespace API
       }
 
     }
-    catch(std::exception& e)
+    catch(std::exception&)
     {
       throw;
     }

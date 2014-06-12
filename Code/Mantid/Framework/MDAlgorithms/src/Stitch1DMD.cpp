@@ -1,11 +1,3 @@
-/*WIKI*
-Performs 1D stitching of Reflectometry 2D MDHistoWorkspaces. Based on the Quick script developed at ISIS. This only works on 1D Histogrammed MD Workspaces.
-
-Scales either the LHS or RHS workspace by some scale factor which, can be manually specified, or calculated from the overlap.
-
-Calculates the weighted mean values in the overlap region and then combines the overlap region with the difference of the LHS and RHS workspaces
-*WIKI*/
-
 #include "MantidMDAlgorithms/Stitch1DMD.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -48,6 +40,7 @@ namespace MDAlgorithms
    */
   Stitch1DMD::Stitch1DMD()
   {
+    this->useAlgorithm("Stitch1D");
   }
     
   //----------------------------------------------------------------------------------------------
@@ -69,12 +62,6 @@ namespace MDAlgorithms
   const std::string Stitch1DMD::category() const { return "Reflectometry\\ISIS";}
 
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void Stitch1DMD::initDocs()
-  {
-    this->setWikiSummary("Stitch two MD ReflectometryQ group workspaces together");
-    this->setOptionalMessage("Sticch two MD ReflectometryQ group workspaces together.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

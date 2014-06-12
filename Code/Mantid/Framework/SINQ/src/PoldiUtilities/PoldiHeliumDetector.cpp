@@ -3,10 +3,12 @@
 #include "MantidGeometry/IComponent.h"
 
 #include "MantidKernel/V3D.h"
-
+#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 
 namespace Mantid {
 namespace Poldi {
+
+using namespace Geometry;
 
 PoldiHeliumDetector::PoldiHeliumDetector() :
     PoldiAbstractDetector(),
@@ -34,7 +36,7 @@ void PoldiHeliumDetector::loadConfiguration(Instrument_const_sptr poldiInstrumen
     initializeFixedParameters(radius, poldiInstrument->getNumberDetectors(), elementWidth);
 
     Kernel::V3D pos = detector->getPos() * 1000.0;
-    double twoTheta = detector->getNumberParameter("two_theta").front() / 180.0 * M_PI;
+    double twoTheta = Conversions::degToRad(detector->getNumberParameter("two_theta").front());
     initializeCalibratedParameters(Kernel::V2D(pos.X(), pos.Y()), twoTheta);
 }
 

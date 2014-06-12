@@ -12,7 +12,7 @@ if ( CXXTEST_FOUND )
         )
     
     cxxtest_add_test ( MantidQtAPITest ${TEST_FILES} )
-    target_link_libraries( MantidQtAPITest MantidQtAPI DataObjects)
+    target_link_libraries( MantidQtAPITest MantidQtAPI DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
     add_dependencies( GUITests MantidQtAPITest )
     
     # Add to the 'UnitTests' group in VS

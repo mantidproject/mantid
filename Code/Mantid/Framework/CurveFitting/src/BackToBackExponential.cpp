@@ -1,29 +1,3 @@
-/*WIKI*
-A back-to-back exponential peakshape function is defined as:
-
-:<math>  I\frac{AB}{2(A+B)}\left[ \exp \left( \frac{A[AS^2+2(x-X0)]}{2}\right) \mbox{erfc}\left( \frac{AS^2+(x-X0)}{S\sqrt{2}} \right) + \exp \left( \frac{B[BS^2-2(x-X0)]}{2} \right) \mbox{erfc} \left( \frac{[BS^2-(x-X0)]}{S\sqrt{2}} \right) \right]. </math>
-
-This peakshape function represent the convolution of back-to-back exponentials and a gaussian function and is designed to
-be used for the data analysis of time-of-flight neutron powder diffraction data, see Ref. 1.
-
-The parameters <math>A</math> and <math>B</math> represent the absolute value of the exponential rise and decay constants (modelling the neutron pulse coming from the moderator)
-and <math>S</math> represent the standard deviation of the gaussian. The parameter <math>X0</math> is the location of the peak; more specifically it represent 
-the point where the exponentially modelled neutron pulse goes from being exponentially rising to exponentially decaying. <math>I</math> is the integrated intensity.
-
-For information about how to convert Fullprof back-to-back exponential parameters into those used for this function see [[CreateBackToBackParameters]]. 
-
-References
-
-1. R.B. Von Dreele, J.D. Jorgensen & C.G. Windsor, J. Appl. Cryst., 15, 581-589, 1982
-
-The figure below illustrate this peakshape function fitted to a TOF peak:
-
-[[Image:BackToBackExponentialWithConstBackground.png]]
-
-== Properties ==
-
-''Note the initial default guesses for in particular A and B are only based on fitting a couple of peaks in a dataset collected on the ISIS's HRPD instrument.''
- *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

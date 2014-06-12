@@ -149,9 +149,6 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
 }
 
 /** Creates a new instance of the class with the given name, and allocates memory for the arrays
- *  where it creates and initialises either a Workspace2D or a ManagedWorkspace2D
- *  according to the size requested and the value of the configuration parameter
- *  ManagedWorkspace.LowerMemoryLimit (default 40% of available physical memory) Workspace2D only.
  *  @param  className The name of the class you wish to create
  *  @param  NVectors  The number of vectors/histograms/detectors in the workspace
  *  @param  XLength   The number of X data points/bin boundaries in each vector (must all be the same)
@@ -163,55 +160,14 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
 MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const size_t& NVectors,
                                             const size_t& XLength, const size_t& YLength) const
 {
-  MatrixWorkspace_sptr ws;
-
-  // Creates a managed workspace if over the trigger size and a 2D workspace is being requested.
-  // Otherwise calls the vanilla create method.
-  bool is2D = className.find("2D") != std::string::npos;
-  bool isCompressedOK = false;
-  if ( MemoryManager::Instance().goForManagedWorkspace(static_cast<size_t>(NVectors), static_cast<size_t>(XLength),
-                                                          static_cast<size_t>(YLength),&isCompressedOK) && is2D )
-  {
-      // check if there is enough memory for 100 data blocks
-      int blockMemory;
-      if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.DataBlockSize", blockMemory)
-          || blockMemory <= 0 )
-      {
-        // default to 1MB if property not found
-        blockMemory = 1024*1024;
-      }
-
-      MemoryInfo mi = MemoryManager::Instance().getMemoryInfo();
-      if ( static_cast<unsigned int>(blockMemory)*100/1024 > mi.availMemory )
-      {
-          throw std::runtime_error("There is not enough memory to allocate the workspace");
-      }
-
-      if ( !isCompressedOK )
-      {
-          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create("ManagedWorkspace2D"));
-          g_log.information("Created a ManagedWorkspace2D");
-      }
-      else
-      {
-          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create("CompressedWorkspace2D"));
-          g_log.information("Created a CompressedWorkspace2D");
-      }
-  }
-  else
-  {
-      // No need for a Managed Workspace
-      if ( is2D && ( className.substr(0,7) == "Managed" || className.substr(0,10) == "Compressed"))
-          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create("Workspace2D"));
-      else
-          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create(className));
-  }
+  MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create(className));
 
   if (!ws)
   {
-      g_log.error("Workspace was not created");
-      throw std::runtime_error("Workspace was not created");
+    g_log.error("Workspace was not created");
+    throw std::runtime_error("Workspace was not created");
   }
+
   ws->initialize(NVectors,XLength,YLength);
   return ws;
 }
@@ -228,7 +184,7 @@ ITableWorkspace_sptr WorkspaceFactoryImpl::createTable(const std::string& classN
             throw std::runtime_error("Class "+className+" cannot be cast to ITableWorkspace");
         }
     }
-    catch(Kernel::Exception::NotFoundError& e)
+    catch(Kernel::Exception::NotFoundError&)
     {
         throw;
     }
@@ -247,7 +203,7 @@ IPeaksWorkspace_sptr WorkspaceFactoryImpl::createPeaks(const std::string& classN
             throw std::runtime_error("Class "+className+" cannot be cast to IPeaksWorkspace");
         }
     }
-    catch(Kernel::Exception::NotFoundError& e)
+    catch(Kernel::Exception::NotFoundError&)
     {
         throw;
     }

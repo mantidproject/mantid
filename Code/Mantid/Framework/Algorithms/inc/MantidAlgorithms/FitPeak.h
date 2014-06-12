@@ -27,6 +27,9 @@ namespace Algorithms
     /// Desctructor
     virtual ~FitOneSinglePeak();
 
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Fit a single peak with checking mechanism. ";}
+
     /// Set workspaces
     void setWorskpace(API::MatrixWorkspace_sptr dataws, size_t wsindex);
 
@@ -47,11 +50,13 @@ namespace Algorithms
 
     void setFitPeakCriteria(bool usepeakpostol, double peakpostol);
 
+    std::string getDebugMessage();
+
     /// Fit peak and background together
     bool simpleFit();
 
     /// Fit peak first considering high background
-    bool highBkgdFit();
+    void highBkgdFit();
 
     /// Get fitting error
     void getFitError(std::map<std::string, double>& peakerrormap, std::map<std::string, double>& bkgderrormap);
@@ -68,8 +73,7 @@ namespace Algorithms
     /// Generate a partial workspace at fit window
     API::MatrixWorkspace_sptr genFitWindowWS();
 
-
-
+    
     // void setPeakParameterValues();
 
     // void setBackgroundParameterValues();
@@ -81,6 +85,7 @@ namespace Algorithms
     {
       return "FitOneSinglePeak";
     }
+
     /// Version
     virtual int version() const
     {
@@ -95,7 +100,7 @@ namespace Algorithms
     bool hasSetupToFitPeak(std::string &errmsg);
 
     /// Estimate the peak height from a set of data containing pure peaks
-    double estimatePeakHeight(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
+    double estimatePeakHeight(API::IPeakFunction_const_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
                               size_t wsindex, size_t ixmin, size_t ixmax);
 
     /// Check a peak function whether it is valid comparing to user specified criteria
@@ -191,9 +196,6 @@ namespace Algorithms
     /// Cost function
     std::string m_costFunction;
 
-    /// Goodness of fit
-    double m_finalFitGoodness;
-
     std::vector<double> m_vecFWHM;
 
     /// Peak position tolerance
@@ -208,6 +210,11 @@ namespace Algorithms
     /// Final goodness value (Rwp/Chi-square)
     double m_finalGoodnessValue;
 
+    /// 
+    size_t m_numFitCalls;
+
+    /// String stream
+    std::stringstream m_sstream;
   };
 
 
@@ -242,14 +249,15 @@ namespace Algorithms
 
     /// Algorithm's name
     virtual const std::string name() const { return "FitPeak"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Fit a single peak with checking mechanism. ";}
     /// Algorithm's version
     virtual int version() const { return (1); }
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Optimization"; }
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     void init();
     void exec();
 
@@ -409,6 +417,9 @@ namespace Algorithms
     /// Fitting result
     // std::map<std::string, double> m_fitErrorPeakFunc;
     // std::map<std::string, double> m_fitErrorBkgdFunc;
+
+    /// Option on output
+    bool m_lightWeightOutput;
 
   };
 

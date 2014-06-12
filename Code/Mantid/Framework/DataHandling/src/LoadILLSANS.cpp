@@ -1,15 +1,10 @@
-/*WIKI*
-
- Loads an ILL D33 nexus file into a [[Workspace2D]] with the given name.
-
-
- *WIKI*/
-
 #include "MantidDataHandling/LoadILLSANS.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <limits>
+#include <numeric>      // std::accumulate
 
 namespace Mantid {
 namespace DataHandling {
@@ -55,11 +50,6 @@ const std::string LoadILLSANS::category() const {
 }
 
 //----------------------------------------------------------------------------------------------
-/// Sets documentation strings for this algorithm
-void LoadILLSANS::initDocs() {
-	this->setWikiSummary("Loads a ILL nexus files for SANS instruments.");
-	this->setOptionalMessage("Loads a ILL nexus files for SANS instruments.");
-}
 
 
 /**
@@ -115,6 +105,7 @@ void LoadILLSANS::exec() {
 	// Move detectors
 	moveDetectors(detPos);
 
+	setFinalProperties();
 	// Set the output workspace property
 	setProperty("OutputWorkspace", m_localWorkspace);
 
@@ -207,7 +198,8 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
 			+ dataDown.dim0() * dataDown.dim1() + dataUp.dim0() * dataUp.dim1();
 
 	g_log.debug("Creating empty workspace...");
-	createEmptyWorkspace(numberOfHistograms, dataRear.dim2());
+	// TODO : Must put this 2 somewhere else: number of monitors!
+	createEmptyWorkspace(numberOfHistograms+2, dataRear.dim2());
 
 	loadMetaData(firstEntry, instrumentPath);
 
@@ -240,11 +232,53 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
 				binPathPrefix + "5");
 	}
 	g_log.debug("Loading the data into the workspace...");
-	size_t nextIndex = loadDataIntoWorkspaceFromHorizontalTubes(dataRear,binningRear,0);
+	size_t nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry,0);
+	nextIndex = loadDataIntoWorkspaceFromHorizontalTubes(dataRear,binningRear,nextIndex);
 	nextIndex = loadDataIntoWorkspaceFromVerticalTubes(dataRight,binningRight,nextIndex);
 	nextIndex = loadDataIntoWorkspaceFromVerticalTubes(dataLeft,binningLeft,nextIndex);
 	nextIndex = loadDataIntoWorkspaceFromHorizontalTubes(dataDown,binningDown,nextIndex);
 	nextIndex = loadDataIntoWorkspaceFromHorizontalTubes(dataUp,binningUp,nextIndex);
+}
+
+size_t LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex) {
+
+	// let's find the monitors
+	// For D33 should be monitor1 and monitor2
+	for (std::vector<NXClassInfo>::const_iterator it =
+			firstEntry.groups().begin(); it != firstEntry.groups().end(); ++it) {
+		if (it->nxclass == "NXmonitor") {
+			NXData dataGroup = firstEntry.openNXData(it->nxname);
+			NXInt data = dataGroup.openIntData();
+			data.load();
+			g_log.debug() << "Monitor: " << it->nxname << " dims = " << data.dim0() << "x"<< data.dim1() << "x"<< data.dim2() << std::endl;
+
+			const size_t vectorSize = data.dim2() + 1;
+			std::vector<double> positionsBinning;
+			positionsBinning.reserve(vectorSize);
+
+			for( size_t i = 0; i < vectorSize; i++ )
+				positionsBinning.push_back( static_cast<double>(i) );
+
+			// Assign X
+			m_localWorkspace->dataX(firstIndex).assign(positionsBinning.begin(),positionsBinning.end());
+			// Assign Y
+			m_localWorkspace->dataY(firstIndex).assign(data(), data() + data.dim2());
+			// Assign Error
+			MantidVec& E = m_localWorkspace->dataE(firstIndex);
+			std::transform(data(), data() + data.dim2(), E.begin(),LoadHelper::calculateStandardError);
+
+			// Add average monitor counts to a property:
+			double averageMonitorCounts = std::accumulate(data(), data() + data.dim2(), 0) / data.dim2();
+			// make sure the monitor has values!
+			if (averageMonitorCounts > 0) {
+				API::Run & runDetails = m_localWorkspace->mutableRun();
+				runDetails.addProperty("monitor", averageMonitorCounts,true);
+			}
+
+			firstIndex++;
+		}
+	}
+	return firstIndex;
 }
 
 size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(NeXus::NXInt &data,
@@ -486,6 +520,9 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
 	end_time = m_loader.dateTimeInIsoFormat(end_time);
 	runDetails.addProperty("run_end", end_time);
 
+    double duration = entry.getFloat("duration");
+    runDetails.addProperty("timer", duration);
+
 	double wavelength = entry.getFloat(instrumentNamePath + "/selector/wavelength");
 	g_log.debug()<< "Wavelength found in the nexus file: " << wavelength << std::endl;
 
@@ -506,6 +543,74 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
 		m_defaultBinning[1] = wavelength + wavelengthRes * wavelength * 0.01 / 2;
 	}
 
+	// Put the detector distances:
+//	std::string detectorPath(instrumentNamePath + "/detector");
+//	// Just for Sample - RearDetector
+//	double sampleDetectorDistance = m_loader.getDoubleFromNexusPath(entry,detectorPath + "/det2_calc");
+//	runDetails.addProperty("sample_detector_distance", sampleDetectorDistance);
+
+
+
+}
+
+
+/**
+ * @param lambda : wavelength in Amstrongs
+ * @param twoTheta : twoTheta in degreess
+ */
+double LoadILLSANS::calculateQ(const double lambda, const double twoTheta) const
+{
+	return (4 * 3.1415936 * std::sin(twoTheta*(3.1415936/180)/2)) / (lambda);
+
+}
+
+std::pair<double, double> LoadILLSANS::calculateQMaxQMin(){
+	double min= std::numeric_limits<double>::max(), max= std::numeric_limits<double>::min();
+	g_log.debug("Calculating Qmin Qmax...");
+	std::size_t nHist = m_localWorkspace->getNumberHistograms();
+	for (std::size_t i=0; i < nHist; ++i){
+		Geometry::IDetector_const_sptr det = m_localWorkspace->getDetector(i);
+		if ( ! det->isMonitor() ){
+			const MantidVec& lambdaBinning = m_localWorkspace->readX(i);
+			Kernel::V3D detPos = det->getPos();
+			double r, theta, phi;
+			detPos.getSpherical(r, theta, phi);
+			double v1 = calculateQ(*(lambdaBinning.begin()),theta);
+			double v2 = calculateQ(*(lambdaBinning.end()-1),theta);
+			//std::cout << "i=" << i << " theta="<<theta << " lambda_i=" << *(lambdaBinning.begin()) << " lambda_f=" << *(lambdaBinning.end()-1) << " v1=" << v1 << " v2=" << v2 << std::endl;
+			if ( i == 0) {
+				min = v1;
+				max = v1;
+			}
+			if (v1 < min){
+				min = v1;
+			}
+			if (v2 < min){
+				min = v2;
+			}
+			if (v1 > max){
+				max = v1;
+			}
+			if (v2 > max){
+				max = v2;
+			}
+		}
+		else
+			g_log.debug() << "Detector " << i << " is a Monitor : " << det->getID() << std::endl;
+	}
+
+	g_log.debug() << "Calculating Qmin Qmax. Done : [" << min << "," << max <<"]"<< std::endl;
+
+	return std::pair<double, double>(min,max);
+}
+
+void LoadILLSANS::setFinalProperties(){
+	API::Run & runDetails = m_localWorkspace->mutableRun();
+	runDetails.addProperty("is_frame_skipping", 0);
+
+	std::pair<double, double> minmax = LoadILLSANS::calculateQMaxQMin();
+	runDetails.addProperty("qmin", minmax.first);
+	runDetails.addProperty("qmax", minmax.second);
 }
 
 

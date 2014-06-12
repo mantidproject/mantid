@@ -1,22 +1,3 @@
-/*WIKI*
-{{BinaryOperation|verb=subtracted|prep=from|symbol=<math>-</math>}} 
-
-The Minus algorithm will subtract the data values and calculate the corresponding [[Error Values|error values]] for two compatible workspaces.
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
- output = Minus("w1","w2")
- w3 = w1 - w2
- w2 -= w1  # Perform "in-place"
-
-'''C++ Within an Algorithm''' <br/>
-The usage of basic workspace mathematical operations has been specially simplified for use within algorithms
-
- //w1 and w2 are workspaces
- Workspace output = w1 - w2;
-
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -32,13 +13,6 @@ namespace Mantid
   {
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Minus)
-    
-    /// Sets documentation strings for this algorithm
-    void Minus::initDocs()
-    {
-      this->setWikiSummary("The Minus algorithm will subtract the data values and calculate the corresponding [[Error Values|error values]] for two compatible workspaces.");
-      this->setOptionalMessage("The Minus algorithm will subtract the data values and calculate the corresponding error values for two compatible workspaces.");
-    }
 
     const std::string Minus::alias() const
     {

@@ -21,13 +21,13 @@ class MSGDiffractionReducer(MSGReducer):
             else:
                 return
         
-        step = mantid.FrameworkManager.createAlgorithm("ConvertUnits")
+        step = mantid.AlgorithmManager.create("ConvertUnits")
         step.setPropertyValue("Target", "dSpacing")
         step.setPropertyValue("EMode", "Elastic")
         self.append_step(step)
         
         if self._rebin_string is not None:
-            step = mantid.FrameworkManager.createAlgorithm("Rebin")
+            step = mantid.AlgorithmManager.create("Rebin")
             step.setPropertyValue("Params", self._rebin_string)
             self.append_step(step)
         else:

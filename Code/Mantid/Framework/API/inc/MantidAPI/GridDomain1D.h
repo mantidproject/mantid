@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include <stdexcept>
-#include <boost/shared_ptr.hpp>
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/GridDomain.h"

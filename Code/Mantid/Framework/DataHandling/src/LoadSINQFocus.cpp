@@ -1,11 +1,3 @@
-/*WIKI*
-
- Loads a SINQ (PSI) nexus file into a [[Workspace2D]] with the given name.
-
- To date this algorithm only supports: FOCUS
-
- *WIKI*/
-
 #include "MantidDataHandling/LoadSINQFocus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
@@ -63,11 +55,6 @@ const std::string LoadSINQFocus::category() const {
 }
 
 //----------------------------------------------------------------------------------------------
-/// Sets documentation strings for this algorithm
-void LoadSINQFocus::initDocs() {
-	this->setWikiSummary("Loads a FOCUS nexus file from the PSI");
-	this->setOptionalMessage("Loads a FOCUS nexus file from the PSI");
-}
 
 /**
  * Return the confidence with with this algorithm can load the file

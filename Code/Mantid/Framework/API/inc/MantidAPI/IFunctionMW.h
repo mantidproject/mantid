@@ -8,7 +8,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Unit.h"
 
-#include <boost/weak_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/weak_ptr.hpp>
+#endif
 
 namespace Mantid
 {

@@ -48,42 +48,56 @@ namespace Algorithms
     
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "FilterEvents";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Filter events from an EventWorkspace to one or multiple EventWorkspaces according to a series of splitters.";}
+
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 1;};
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "Events\\EventFiltering";}
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     // Implement abstract Algorithm methods
     void init();
     // Implement abstract Algorithm methods
     void exec();
 
+    /// Process user input properties
+    void processProperties();
+
     void processSplittersWorkspace();
 
-    void createOutputWorkspaces(std::string outputwsnamebase);
+    ///
+    void processMatrixSplitterWorkspace();
 
-    void importDetectorTOFCalibration();
+    void createOutputWorkspaces();
+
+    void setupDetectorTOFCalibration();
 
     void filterEventsBySplitters(double progressamount);
 
+    ///
+    void filterEventsByVectorSplitters(double progressamount);
+
     DataObjects::EventWorkspace_sptr m_eventWS;
-    DataObjects::SplittersWorkspace_sptr mSplittersWorkspace;
+    DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;
+    API::MatrixWorkspace_const_sptr m_matrixSplitterWS;
     DataObjects::TableWorkspace_sptr m_detCorrectWorkspace;
+
+    /// Flag to use matrix splitters or table splitters
+    bool m_useTableSplitters;
 
     std::set<int> m_workGroupIndexes;
     Kernel::TimeSplitterType m_splitters;
     std::map<int, DataObjects::EventWorkspace_sptr> m_outputWS;
     std::vector<std::string> m_wsNames;
 
-    std::vector<detid_t> m_detectorIDs;
     std::vector<double> m_detTofOffsets;
 
     bool mFilterByPulseTime;
 
-    DataObjects::TableWorkspace_sptr mInformationWS;
+    DataObjects::TableWorkspace_sptr m_informationWS;
     bool mWithInfo;
 
     double mProgress;
@@ -99,7 +113,23 @@ namespace Algorithms
     /// Flag to generate TOF correction
     bool m_genTOFCorrection;
 
+    /// Base of output workspace's name
+    std::string m_outputWSNameBase;
 
+    ///
+    bool m_toGroupWS;
+
+    ///
+    std::vector<int64_t> m_vecSplitterTime;
+    ///
+    std::vector<int> m_vecSplitterGroup;
+
+    /// Flag to split sample logs
+    bool m_splitSampleLogs;
+
+    /// Debug
+    bool m_useDBSpectrum;
+    int m_dbWSIndex;
   };
 
 

@@ -54,7 +54,7 @@ Detector::~Detector()
  */
 detid_t Detector::getID() const
 {
-  if (m_isParametrized)
+  if (m_map)
     return dynamic_cast<const Detector *>(m_base)->getID();
   else
     return m_id;
@@ -142,7 +142,7 @@ det_topology Detector::getTopology(V3D &center)const
  */
 bool Detector::isMasked() const
 {
-  if (m_isParametrized)
+  if (m_map)
   {
     Parameter_sptr par = m_map->get(m_base,"masked");
     if (par)
@@ -156,7 +156,7 @@ bool Detector::isMasked() const
 ///@return true if it is a monitor
 bool Detector::isMonitor() const
 {
-  if (m_isParametrized)
+  if (m_map)
     return dynamic_cast<const Detector*>(m_base)->isMonitor();
   else
     return m_isMonitor;

@@ -7,7 +7,6 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <boost/shared_ptr.hpp>
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -345,7 +344,15 @@ namespace Mantid
       /// @return A populated PropertyHistory for this class
       virtual const Kernel::PropertyHistory createHistory() const
       {
-        return Kernel::PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction());
+        std::string wsName = m_workspaceName;
+        if (wsName.empty() && this->operator()())
+        {
+          //give the property a temporary name in the history
+          std::ostringstream os;
+          os << this;
+          wsName = "__TMP" + os.str();
+        }
+        return Kernel::PropertyHistory(this->name(), wsName, this->type(), this->isDefault(), this->direction());
       }
 
       /** If this is an output workspace, store it into the AnalysisDataService

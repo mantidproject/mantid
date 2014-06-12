@@ -1,10 +1,3 @@
-/*WIKI*
-This algorithm loads information into a [[TableWorkspace]] for the characterization
-information and a collection of output parameters for the focus positions to be used
-in [[EditInstrumentGeometry]]. If a section is missing then those parameters will be
-empty. This includes an empty table (zero rows) if that information is missing.
-*WIKI*/
-
 #include "MantidDataHandling/PDLoadCharacterizations.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
@@ -55,15 +48,6 @@ namespace DataHandling
   
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string PDLoadCharacterizations::category() const { return "Workflow\\DataHandling";}
-
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void PDLoadCharacterizations::initDocs()
-  {
-    std::string descr("Load a characterization file used in Powder Diffraction Reduction.");
-    this->setWikiSummary(descr);
-    this->setOptionalMessage(descr);
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

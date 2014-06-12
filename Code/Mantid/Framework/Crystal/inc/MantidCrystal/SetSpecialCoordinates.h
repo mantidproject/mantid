@@ -44,11 +44,13 @@ namespace Crystal
     virtual ~SetSpecialCoordinates();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Set or overwrite any Q3D special coordinates.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
     std::vector<std::string> m_specialCoordinatesNames;

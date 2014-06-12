@@ -1,8 +1,3 @@
-/*WIKI* 
-Creates a shape object that defines the sample and sets the sample for the given
-workspace. Shapes are defined using XML descriptions that can be found
-[[HowToDefineGeometricShape|here]].
-*WIKI*/
 //--------------------------------
 // Includes
 //--------------------------------
@@ -18,13 +13,6 @@ namespace DataHandling
 {
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(CreateSampleShape)
-  
-  /// Sets documentation strings for this algorithm
-  void CreateSampleShape::initDocs()
-  {
-    this->setWikiSummary("Create a shape object to model the sample. ");
-    this->setOptionalMessage("Create a shape object to model the sample.");
-  }
   
 
   using namespace Mantid::DataHandling;

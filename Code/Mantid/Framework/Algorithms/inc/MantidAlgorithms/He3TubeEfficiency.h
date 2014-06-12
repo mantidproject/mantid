@@ -59,14 +59,16 @@ public:
   virtual ~He3TubeEfficiency();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "He3TubeEfficiency"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "He3 tube efficiency correction.";}
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const{ return "CorrectionFunctions\\EfficiencyCorrections"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Implement abstract Algorithm methods
   void init();
   void exec();

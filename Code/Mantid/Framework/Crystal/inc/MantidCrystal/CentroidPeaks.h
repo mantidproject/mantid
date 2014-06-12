@@ -30,14 +30,16 @@ namespace Crystal
 
     /// Algorithm's name for identification
     virtual const std::string name() const { return "CentroidPeaks";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Find the centroid of single-crystal peaks in a 2D Workspace, in order to refine their positions.";}
+
     /// Algorithm's version for identification
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Crystal";}
 
   private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
+    
     /// Initialise the properties
     void init();
     /// Run the algorithm

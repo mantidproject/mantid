@@ -259,6 +259,57 @@ class ExportExperimentLogTest(unittest.TestCase):
         
         return
     
+    def test_exportFileNewCSV(self):
+        """ Test to export logs without header file in csv format 
+        and with a name not endind with .csv
+        """
+        # Generate the matrix workspace with some logs
+        ws = self.createTestWorkspace()
+        AnalysisDataService.addOrReplace("TestMatrixWS", ws)
+
+        # Test algorithm
+        alg_test = run_algorithm("ExportExperimentLog", 
+            InputWorkspace = "TestMatrixWS",
+            OutputFilename = "TestRecord.txt",
+            SampleLogNames = ["run_number", "duration", "proton_charge"],
+            SampleLogTitles = ["RUN", "Duration", "ProtonCharge"],
+            SampleLogOperation = [None, None, "sum"],
+            FileMode = "new",
+            FileFormat = "comma (csv)")
+
+        # Validate
+        self.assertTrue(alg_test.isExecuted())
+
+        # Locate file
+        outfilename = alg_test.getProperty("OutputFilename").value.split(".txt")[0] + ".csv"
+        try:
+            print "Output file is %s. " % (outfilename)
+            ifile = open(outfilename)
+            lines = ifile.readlines()
+            ifile.close()
+        except IOError as err:
+            print "Unable to open file %s. " % (outfilename)
+            self.assertTrue(False)
+            return
+            
+        # Last line cannot be empty, i.e., before EOF '\n' is not allowed
+        lastline = lines[-1]
+        self.assertTrue(len(lastline.strip()) > 0)
+        
+        # Number of lines
+        self.assertEquals(len(lines), 2)
+
+        # Check line
+        firstdataline = lines[1]
+        terms = firstdataline.strip().split(",")
+        self.assertEquals(len(terms), 3)
+
+        # 
+        # # Remove generated files        
+        os.remove(outfilename)
+        AnalysisDataService.remove("TestMatrixWS")
+        
+        return    
 
     def createTestWorkspace(self):
         """ Create a workspace for testing against with ideal log values

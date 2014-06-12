@@ -1,9 +1,3 @@
-"""*WIKI* 
-
-Normalise detector counts by accelerator current and beam spectrum.
-
-*WIKI*"""
-
 from mantid.api import *
 from mantid.kernel import *
 from reduction_workflow.find_data import find_file
@@ -20,14 +14,15 @@ class EQSANSNormalise(PythonAlgorithm):
     def name(self):
         return "EQSANSNormalise"
 
+    def summary(self):
+        return "Normalise detector counts by accelerator current and beam spectrum"
+
     def PyInit(self):
-        self.setOptionalMessage("Normalise detector counts by accelerator current and beam spectrum")
-        self.setWikiSummary("Normalise detector counts by accelerator current and beam spectrum")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
         self.declareProperty("NormaliseToBeam", True, 
                              "If true, the data will also be normalise by the beam profile")
-        self.declareProperty("BeamSpectrumFile", "", 
+        self.declareProperty(FileProperty("BeamSpectrumFile", "", action=FileAction.OptionalLoad),
                              "Beam spectrum to be used for normalisation [takes precedence over default]")
         self.declareProperty("NormaliseToMonitor", False,
                              "If true, the algorithm will look for a monitor workspace to use")

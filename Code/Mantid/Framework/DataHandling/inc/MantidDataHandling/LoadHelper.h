@@ -34,11 +34,11 @@ public:
 	LoadHelper();
 	virtual ~LoadHelper();
 
-	std::string findInstrumentNexusPath(const NeXus::NXEntry&);
-	std::string getStringFromNexusPath(const NeXus::NXEntry&,
+	std::string findInstrumentNexusPath(const Mantid::NeXus::NXEntry&);
+	std::string getStringFromNexusPath(const Mantid::NeXus::NXEntry&,
 			const std::string&);
-	double getDoubleFromNexusPath(const NeXus::NXEntry&, const std::string&);
-	std::vector<double> getTimeBinningFromNexusPath(const NeXus::NXEntry &,
+	double getDoubleFromNexusPath(const Mantid::NeXus::NXEntry&, const std::string&);
+	std::vector<double> getTimeBinningFromNexusPath(const Mantid::NeXus::NXEntry &,
 			const std::string &);
 	static double calculateStandardError(double in) {
 		return sqrt(in);
@@ -48,6 +48,12 @@ public:
 	double getL1(const API::MatrixWorkspace_sptr&);
 	double getL2(const API::MatrixWorkspace_sptr&, int detId = 1);
 	double getInstrumentProperty(const API::MatrixWorkspace_sptr&, std::string);
+    void addNexusFieldsToWsRun(NXhandle nxfileID,
+			API::Run& runDetails,
+    		std::string& parent_name,
+    		std::string& parent_class,
+    		int indent);
+    void dumpNexusAttributes(NXhandle nxfileID, std::string& indentStr);
 	std::string dateTimeInIsoFormat(std::string);
 };
 

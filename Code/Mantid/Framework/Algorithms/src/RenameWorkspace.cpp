@@ -1,11 +1,3 @@
-/*WIKI* 
-
-
-Renames a workspace to a different name in the data service. If the same name is provided for input and output then the algorithm will fail with an error. The Renaming is implemented as a removal of the original workspace from the data service and re-addition under the new name.
-
-If run on a group workspace, the members of the group will be renamed if their names follow the pattern groupName_1, groupName_2, etc. (they will be renamed to newName_1, newname_2, etc.). Otherwise, only the group itself will be renamed - the members will keep their previous names.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -20,12 +12,6 @@ namespace Algorithms
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM( RenameWorkspace)
-
-void RenameWorkspace::initDocs()
-{
-  this->setWikiSummary("Used to Rename a workspace in the [[Analysis Data Service]]. This is the algorithm that is run if 'Rename' is chosen from the context menu of a workspace.");
-  this->setOptionalMessage("Rename the Workspace.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -125,4 +111,3 @@ bool RenameWorkspace::processGroups()
 
 } // namespace Algorithms
 } // namespace Mantid
-

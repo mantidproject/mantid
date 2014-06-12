@@ -39,6 +39,9 @@ namespace Mantid
      */
     ICatalog_sptr CatalogManagerImpl::getCatalog(const std::string &sessionID)
     {
+      // Checks if a user is logged into the catalog. Inform the user if they are not.
+      if(m_activeCatalogs.empty()) throw std::runtime_error("You are not currently logged into a catalog.");
+
       if(sessionID.empty())
       {
         auto composite = boost::make_shared<CompositeCatalog>();
@@ -55,7 +58,7 @@ namespace Mantid
       }
 
       // If we reached this point then the session is corrupt/invalid.
-      throw std::runtime_error("The session ID you have provided is invalid");
+      throw std::runtime_error("The session ID you have provided is invalid.");
     }
 
     /**

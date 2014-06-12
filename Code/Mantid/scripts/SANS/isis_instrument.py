@@ -1,12 +1,17 @@
+import datetime
 import math
+import os
+import re
+import sys
+import time
+import xml.dom.minidom
+
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup, Workspace
+from mantid.api import WorkspaceGroup, Workspace, ExperimentInfo
 from mantid.kernel import Logger
 import SANSUtility as su
-import re
-sanslog = Logger("SANS")
 
-import sys
+sanslog = Logger("SANS")
 
 class BaseInstrument(object):
     def __init__(self, instr_filen=None):
@@ -20,21 +25,9 @@ class BaseInstrument(object):
             
         config = ConfigService.Instance()
         self._definition_file = config["instrumentDefinition.directory"]+'/'+instr_filen
-                
-        self.definition = self.load_instrument() 
 
-    def load_instrument(self):
-        """
-            Runs LoadInstrument get the parameters for the instrument
-            @return the instrument parameter data
-        """
-        wrksp = '__'+self._NAME+'instrument_definition'
-        if not AnalysisDataService.doesExist(wrksp):
-          CreateWorkspace(OutputWorkspace=wrksp,DataX="1",DataY="1",DataE="1")
-          #read the information about the instrument that stored in its xml
-          LoadInstrument(Workspace=wrksp, InstrumentName=self._NAME)
-
-        return AnalysisDataService.retrieve(wrksp).getInstrument() 
+        inst_ws_name = self.load_empty()
+        self.definition = AnalysisDataService.retrieve(inst_ws_name).getInstrument()
 
     def get_default_beam_center(self):
         """
@@ -47,6 +40,16 @@ class BaseInstrument(object):
         """
             Return the name of the instrument
         """
+        return self._NAME
+
+    def versioned_name(self):
+        """
+        Hack-workaround so that we may temporarily display "SANS2DTUBES" as
+        an option in the instrument dropdown menu in the interface.  To be removed
+        as part of #9367.
+        """
+        if "SANS2D_Definition_Tubes" in self.idf_path:
+            return "SANS2DTUBES"
         return self._NAME
     
     def view(self, workspace_name = None):
@@ -412,6 +415,8 @@ class ISISInstrument(BaseInstrument):
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
         super(ISISInstrument, self).__init__(instr_filen=filename)
+
+        self.idf_path = self._definition_file
 
         #the spectrum with this number is used to normalize the workspace data
         self._incid_monitor = int(self.definition.getNumberParameter(
@@ -786,8 +791,8 @@ class SANS2D(ISISInstrument):
     WAV_RANGE_MIN = 2.0
     WAV_RANGE_MAX = 14.0
 
-    def __init__(self):
-        super(SANS2D, self).__init__()
+    def __init__(self, idf_path=None):
+        super(SANS2D, self).__init__(idf_path)
         
         self._marked_dets = []
         # set to true once the detector positions have been moved to the locations given in the sample logs

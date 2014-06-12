@@ -54,14 +54,16 @@ public:
   virtual ~Power() {};
   /// Algorithm's name for identification
   virtual const std::string name() const { return "Power"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "The Power algorithm will raise the base workspace to a particular power. Corresponding error values will be created.";}
+
   /// Algorithm's version for identification
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Arithmetic";}
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   // Overridden UnaryOperation methods
   void defineProperties();
   void retrieveProperties();

@@ -114,18 +114,11 @@ namespace IDA
 
     // Replot input automatically when file / spec no changes
     connect(uiForm().confit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(plotInput()));
-    connect(uiForm().confit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(plotInput()));
-    connect(uiForm().confit_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().confit_swInput, SLOT(setCurrentIndex(int)));
-    connect(uiForm().confit_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(resType(const QString&)));
+    connect(uiForm().confit_dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput()));
+    
     connect(uiForm().confit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
     connect(uiForm().confit_cbBackground, SIGNAL(currentIndexChanged(int)), this, SLOT(bgTypeSelection(int)));
     connect(uiForm().confit_pbSequential, SIGNAL(clicked()), this, SLOT(sequential()));
-
-    //signals for plotting input
-    connect(uiForm().confit_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
-    connect(uiForm().confit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
-    connect(uiForm().confit_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
-    connect(uiForm().confit_wsSample, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
 
     uiForm().confit_leSpecNo->setValidator(m_intVal);
     uiForm().confit_leSpecMax->setValidator(m_intVal);
@@ -291,29 +284,8 @@ namespace IDA
     
     UserInputValidator uiv;
 
-    switch( uiForm().confit_cbInputType->currentIndex() )
-    {
-    case 0:
-      uiv.checkMWRunFilesIsValid("Reduction", uiForm().confit_inputFile); 
-      
-      //file should already be loaded by this point, but attempt to recover if not.
-      if(!AnalysisDataService::Instance().doesExist(m_cfInputWSName.toStdString()))
-      {
-        //attempt to reload the nexus file.
-        QString filename = uiForm().confit_inputFile->getFirstFilename();
-        QFileInfo fi(filename);
-        QString wsname = fi.baseName();
-
-        m_cfInputWS = runLoadNexus(filename, wsname);
-        m_cfInputWSName = wsname;
-      }
-
-      break;
-    case 1:
-      uiv.checkWorkspaceSelectorIsNotEmpty("Reduction", uiForm().confit_wsSample); break;
-    }
-
-    uiv.checkMWRunFilesIsValid("Resolution", uiForm().confit_resInput);
+    uiv.checkDataSelectorIsValid("Sample", uiForm().confit_dsSampleInput);
+    uiv.checkDataSelectorIsValid("Resolution", uiForm().confit_dsResInput);
 
     auto range = std::make_pair(m_cfDblMng->value(m_cfProp["StartX"]), m_cfDblMng->value(m_cfProp["EndX"]));
     uiv.checkValidRange("Fitting Range", range);
@@ -328,26 +300,9 @@ namespace IDA
 
   void ConvFit::loadSettings(const QSettings & settings)
   {
-    uiForm().confit_inputFile->readSettings(settings.group());
-    uiForm().confit_resInput->readSettings(settings.group());
+    uiForm().confit_dsSampleInput->readSettings(settings.group());
+    uiForm().confit_dsResInput->readSettings(settings.group());
   }
-
-  void ConvFit::resType(const QString& type)
-  {
-    QStringList exts;
-    if ( type == "RES File" )
-    {
-      exts.append("_res.nxs");
-      m_confitResFileType = true;
-    }
-    else
-    {
-      exts.append("_red.nxs");
-      m_confitResFileType = false;
-    }
-    uiForm().confit_resInput->setFileExtensions(exts);
-  }
-
 
   namespace
   {
@@ -458,9 +413,20 @@ namespace IDA
     // --------------------------------------------
     func = Mantid::API::FunctionFactory::Instance().createFunction("Resolution");
     conv->addFunction(func);
-    std::string resfilename = uiForm().confit_resInput->getFirstFilename().toStdString();
-    Mantid::API::IFunction::Attribute attr(resfilename);
-    func->setAttribute("FileName", attr);
+    
+    //add resolution file
+    if (uiForm().confit_dsResInput->isFileSelectorVisible())
+    {    
+      std::string resfilename = uiForm().confit_dsResInput->getFullFilePath().toStdString();
+      Mantid::API::IFunction::Attribute attr(resfilename);
+      func->setAttribute("FileName", attr);
+    }
+    else
+    {
+      std::string resWorkspace = uiForm().confit_dsResInput->getCurrentDataName().toStdString();
+      Mantid::API::IFunction::Attribute attr(resWorkspace);
+      func->setAttribute("Workspace", attr);
+    }
 
     // --------------------------------------------------------
     // --- Composite / Convolution / Model / Delta Function ---
@@ -505,7 +471,7 @@ namespace IDA
       
       if(useTempCorrection)
       {
-        product->addFunction(createTemperatureCorrection());
+        createTemperatureCorrection(product);
       }
 
       func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
@@ -525,7 +491,7 @@ namespace IDA
     
       if(useTempCorrection)
       {
-        product->addFunction(createTemperatureCorrection());
+        createTemperatureCorrection(product);
       }
 
       func = Mantid::API::FunctionFactory::Instance().createFunction("Lorentzian");
@@ -551,26 +517,24 @@ namespace IDA
     return comp;
   }
 
-  Mantid::API::IFunction_sptr ConvFit::createTemperatureCorrection()
+  void ConvFit::createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product)
   {
     //create temperature correction function to multiply with the lorentzians
     Mantid::API::IFunction_sptr tempFunc;
     QString temperature = uiForm().confit_leTempCorrection->text();
-    bool useTempCorrection = (!temperature.isEmpty() && uiForm().confit_ckTempCorrection->isChecked());
     
-    if(useTempCorrection)
-    {
-      //create user function for the exponential correction
-      // (x*temp) / 1-exp(-(x*temp))
-      tempFunc = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
-      //11.606 is the conversion factor from meV to K
-      std::string formula = "((x*11.606)/Temp) / (1 - exp(-((x*11.606)/Temp)))";
-      Mantid::API::IFunction::Attribute att(formula);
-      tempFunc->setAttribute("Formula", att);
-      tempFunc->setParameter("Temp", temperature.toDouble());
-    }
+    //create user function for the exponential correction
+    // (x*temp) / 1-exp(-(x*temp))
+    tempFunc = Mantid::API::FunctionFactory::Instance().createFunction("UserFunction");
+    //11.606 is the conversion factor from meV to K
+    std::string formula = "((x*11.606)/Temp) / (1 - exp(-((x*11.606)/Temp)))";
+    Mantid::API::IFunction::Attribute att(formula);
+    tempFunc->setAttribute("Formula", att);
+    tempFunc->setParameter("Temp", temperature.toDouble());
 
-    return tempFunc;
+    product->addFunction(tempFunc);
+    product->tie("f0.Temp", temperature.toStdString());
+    product->applyTies();
   }
 
   QtProperty* ConvFit::createLorentzian(const QString & name)
@@ -719,58 +683,15 @@ namespace IDA
     const bool plotGuess = uiForm().confit_ckPlotGuess->isChecked();
     uiForm().confit_ckPlotGuess->setChecked(false);
 
-    // Find wsname and set m_cfInputWS to point to that workspace.
-    switch ( uiForm().confit_cbInputType->currentIndex() )
-    {
-    case 0: // "File"
+    if(uiForm().confit_dsSampleInput->getCurrentDataName() != m_cfInputWSName)
+    {      
+      m_cfInputWSName = uiForm().confit_dsSampleInput->getCurrentDataName();
+      m_cfInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_cfInputWSName.toStdString());
+      
+      if(!m_cfInputWS)
       {
-        if(uiForm().confit_inputFile->isEmpty())
-        {
-          return;
-        }
-        if ( ! uiForm().confit_inputFile->isValid() )
-        {
-          return;
-        }
-        else
-        {
-          QString filename = uiForm().confit_inputFile->getFirstFilename();
-          QFileInfo fi(filename);
-          QString wsname = fi.baseName();
-
-          // Load the file if it has not already been loaded.
-          if ( (m_cfInputWS == NULL) || ( wsname != m_cfInputWSName ) )
-          {
-            m_cfInputWSName = wsname;
-            m_cfInputWS = runLoadNexus(filename, wsname);
-            if(!m_cfInputWS)
-            {
-              return;
-            }
-          }
-        }
+        showInformationBox("Could not find the workspace in ADS. See log for details.");
       }
-      break;
-    case 1: // Workspace
-      {
-        m_cfInputWSName = uiForm().confit_wsSample->currentText();
-        if(m_cfInputWSName.isEmpty())
-        {
-         return;
-        }
-        try
-        {
-          m_cfInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_cfInputWSName.toStdString());
-        }
-        catch ( NotFoundError & )
-        {
-          QString msg = "Workspace: '" + m_cfInputWSName + "' could not be "
-            "found in the Analysis Data Service.";
-          showInformationBox(msg);
-          return;
-        }
-      }
-      break;
     }
 
     int specNo = uiForm().confit_leSpecNo->text().toInt();

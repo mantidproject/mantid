@@ -83,6 +83,12 @@ namespace API
 
     virtual std::vector<size_t> findNeighbourIndexes() const;
 
+    virtual std::vector<size_t> findNeighbourIndexesFaceTouching() const;
+
+    virtual size_t getLinearIndex() const;
+
+    virtual bool isWithinBounds(size_t index) const;
+
   private:
     void calcWorkspacePos(size_t newWI);
 

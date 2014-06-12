@@ -1,46 +1,3 @@
-/*WIKI* 
-
-The algorithm rebins data with new bin boundaries. The 'params' property defines new boundaries in intervals <math>x_i-x_{i+1}\,</math>. Positive <math>\Delta x_i\,</math> make constant width bins, whilst negative ones create logarithmic binning using the formula <math>x(j+1)=x(j)(1+|\Delta x_i|)\,</math>
-
-This algorithms is useful both in data reduction, but also in remapping [[Ragged Workspace|ragged workspaces]] to a regular set of bin boundaries.
-
-Unless the FullBinsOnly option is enabled, the bin immediately before the specified boundaries <math>x_2</math>, <math>x_3</math>, ... <math>x_i</math> is likely to have a different width from its neighbours because there can be no gaps between bins. Rebin ensures that any of these space filling bins cannot be less than 25% or more than 125% of the width that was specified.
-
-=== Example Rebin param strings ===
-;-0.0001
-:From min(TOF) to max(TOF) among all events in Logarithmic bins of 0.0001
-;0,100,20000
-:From 0 rebin in constant size bins of 100 up to 20,000
-;2,-0.035,10
-:From 10 rebin in Logarithmic bins of 0.035 up to 10
-;0,100,10000,200,20000
-:From 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000
-
-=== For EventWorkspaces ===
-
-If the input is an [[EventWorkspace]] and the "Preserve Events" property is True, the rebinning is performed in place, and only the X axes of the workspace are set. The actual Y histogram data will only be requested as needed, for example, when plotting or displaying the data. 
-
-If "Preserve Events" is false., then the output workspace will be created as a [[Workspace2D]], with fixed histogram bins, and all Y data will be computed immediately. All event-specific data is lost at that point.
-
-=== For Data-Point Workspaces ===
-
-If the input workspace contains data points, rather than histograms, then Rebin will automatically use the [[ConvertToHistogram]] and [[ConvertToPointData]] algorithms before and after the rebinning has taken place.
-
-=== FullBinsOnly option ===
-
-If FullBinsOnly option is enabled, each range will only contain bins of the size equal to the step specified. In other words, the will be no space filling bins which are bigger or smaller than the other ones.
-
-This, however, means that specified bin boundaries might get amended in the process of binning. For example, if rebin ''Param'' string is specified as "0, 2, 4.5, 3, 11" and FullBinsOnly is enabled, the following will happen:
-* From 0 rebin in bins of size 2 '''up to 4'''. 4.5 is ignored, because otherwise we would need to create a filling bin of size 0.5.
-* '''From 4''' rebin in bins of size 3 '''up to 10'''.
-Hence the actual ''Param'' string used is "0, 2, 4, 3, 10".
-
-*WIKI*/
-/*WIKI_USAGE*
-'''Python'''
- outputW = Rebin("inputW","x1,dx1,x2")
-
-*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -61,20 +18,53 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Rebin)
     
-    /// Sets documentation strings for this algorithm
-    void Rebin::initDocs()
-    {
-      this->setWikiSummary("Rebins data with new X bin boundaries. For EventWorkspaces, you can very quickly rebin in-place by keeping the same output name and PreserveEvents=true.");
-      this->setOptionalMessage("Rebins data with new X bin boundaries. For EventWorkspaces, you can very quickly rebin in-place by keeping the same output name and PreserveEvents=true.");
-    }
-    
-
     using namespace Kernel;
     using namespace API;
     using DataObjects::EventList;
     using DataObjects::EventWorkspace;
     using DataObjects::EventWorkspace_sptr;
     using DataObjects::EventWorkspace_const_sptr;
+
+    //---------------------------------------------------------------------------------------------
+    // Public static methods
+    //---------------------------------------------------------------------------------------------
+
+    /**
+     * Return the rebin parameters from a user input
+     * @param inParams Input vector from user
+     * @param inputWS Input workspace from user
+     * @param logger A reference to a logger
+     * @returns A new vector containing the rebin parameters
+     */
+    std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> & inParams,
+                                                    const API::MatrixWorkspace & inputWS,
+                                                    Kernel::Logger & logger)
+    {
+      std::vector<double> rbParams;
+      // The validator only passes parameters with size 1, or 3xn.  No need to check again here
+      if (inParams.size() >= 3)
+      {
+        // Input are min, delta, max
+        rbParams = inParams;
+      }
+      else if (inParams.size() == 1)
+      {
+        double xmin = 0.;
+        double xmax = 0.;
+        inputWS.getXMinMax(xmin, xmax);
+
+        logger.information() << "Using the current min and max as default " << xmin << ", " << xmax << std::endl;
+        rbParams.resize(3);
+        rbParams[0] = xmin;
+        rbParams[1] = inParams[0];
+        rbParams[2] = xmax;
+      }
+      return rbParams;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    // Public methods
+    //---------------------------------------------------------------------------------------------
 
     /** Initialisation method. Declares properties to be used in algorithm.
     *
@@ -98,11 +88,11 @@ namespace Mantid
         "non-event Workspace, respectively. Negative width values indicate logarithmic binning. ");
 
       declareProperty("PreserveEvents", true,"Keep the output workspace as an EventWorkspace, "
-                      "if the input has events (default). If the input and output EventWorkspace "
+                      "if the input has events. If the input and output EventWorkspace "
                       "names are the same, only the X bins are set, which is very quick. If false, "
                       "then the workspace gets converted to a Workspace2D histogram.");
 
-      declareProperty("FullBinsOnly", false, "Ignore bins of the size smaller than the step size.");
+      declareProperty("FullBinsOnly", false, "Omit the final bin if it's width is smaller than the step size");
     }
 
 
@@ -122,30 +112,9 @@ namespace Mantid
       // Rebinning in-place
       bool inPlace = (inputWS == outputWS);
 
-      // retrieve the properties
-      const std::vector<double> in_params=getProperty("Params");
-      std::vector<double> rb_params;
-
-      // The validator only passes parameters with size 1, or 3xn.  No need to check again here
-      if (in_params.size() >= 3){
-        // Input are min, delta, max
-        rb_params = in_params;
-
-      } else if (in_params.size() == 1){
-        double xmin = 0.;
-        double xmax = 0.;
-        inputWS->getXMinMax(xmin, xmax);
-
-        g_log.information() << "Using the current min and max as default " << xmin << ", " << xmax << std::endl;
-
-        rb_params.push_back(xmin);
-        rb_params.push_back(in_params[0]);
-        rb_params.push_back(xmax);
-
-      }
+      std::vector<double> rbParams = rebinParamsFromInput(getProperty("Params"), *inputWS, g_log);
 
       const bool dist = inputWS->isDistribution();
-
       const bool isHist = inputWS->isHistogramData();
 
       // workspace independent determination of length
@@ -155,7 +124,7 @@ namespace Mantid
 
       MantidVecPtr XValues_new;
       // create new output X axis
-      const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.access(),
+      const int ntcnew = VectorHelper::createAxisFromRebinParams(rbParams, XValues_new.access(),
                                                                  true, fullBinsOnly);
 
       //---------------------------------------------------------------------------------

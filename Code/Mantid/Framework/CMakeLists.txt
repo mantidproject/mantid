@@ -29,14 +29,6 @@ endif ()
 # gsl is currently needed by Geometry, Algorithms & Curvefitting
 find_package ( GSL REQUIRED )
 
-###########################################################################
-# Add OpenMP flags here - don't want them on QtPropertyBrowser
-###########################################################################
-if ( OPENMP_FOUND )
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
-endif ()
-
 check_include_files ( stdint.h stdint )
 if ( stdint )
   add_definitions ( -DHAVE_STDINT_H )
@@ -125,6 +117,7 @@ endif ()
 if ( CXXTEST_FOUND )
   add_subdirectory ( UserAlgorithms )
   # This needs to be here so that a Framework-only build will work.
+#  add_subdirectory ( ../TestingTools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/TestingTools/gmock-${GMOCK_VERSION} )
   add_subdirectory ( ../TestingTools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/TestingTools )
 endif ()
 
@@ -142,8 +135,7 @@ set ( FRAMEWORK_LIBS Kernel Geometry API PythonKernelModule
                      PythonGeometryModule PythonAPIModule DataObjects
                      DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms MDEvents WorkflowAlgorithms
-                     LiveData ISISLiveData
-		     SINQ
+                     LiveData ISISLiveData RemoteAlgorithms SINQ
 )
 
 add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} ) 

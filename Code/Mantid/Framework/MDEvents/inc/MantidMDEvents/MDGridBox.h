@@ -147,6 +147,12 @@ namespace MDEvents
     {
       throw(std::runtime_error("This function should not be called on MDGridBox (as its meaning for MDbox is dubious too)"));
     }
+//-------------------------------------------------------------------------
+	/** The function used to satisfy IMDNode interface but the physical meaning is unclear */
+	coord_t *   getCentroid() const
+	{
+	  throw(std::runtime_error("This function should not be called on MDGridBox (as its meaning for MDbox is dubious too)"));
+	}
 
   public:
     /// Typedef for a shared pointer to a MDGridBox

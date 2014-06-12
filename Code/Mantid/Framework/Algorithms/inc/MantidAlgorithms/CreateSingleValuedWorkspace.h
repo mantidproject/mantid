@@ -54,14 +54,16 @@ public:
   virtual ~CreateSingleValuedWorkspace() {}
   /// Algorithm's name
   virtual const std::string name() const { return "CreateSingleValuedWorkspace"; }
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const {return "Creates a 2D workspace containing a single X, Y & E value.";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Utility\\Workspaces"; }
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Initialisation code
   void init();
   ///Execution code

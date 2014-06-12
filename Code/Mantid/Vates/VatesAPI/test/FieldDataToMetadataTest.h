@@ -55,7 +55,6 @@ public:
     const std::string testData = "abc";
     vtkFieldData* fieldData = createFieldDataWithCharArray(testData, id);
 
-    typedef std::binary_function<vtkFieldData*, std::string, std::string> BaseType;
     FieldDataToMetadata function;
     TSM_ASSERT_EQUALS("Results from two equivalent methods differ.", function(fieldData, id), function.execute(fieldData, id));
     fieldData->Delete();

@@ -207,7 +207,6 @@ namespace
       space2D->setX(j,xs);
       data[j].access().resize(nbins, j + 1);  // the y values will be different for each spectra (1+index_number) but the same for each bin
       space2D->setData(j, data[j], errors);
-      space2D->getAxis(1)->setValue(j, j+1);  // spectra numbers are also 1 + index_numbers because this is the tradition
       ISpectrum * spec = space2D->getSpectrum(j);
       spec->setSpectrumNo(j+1);
       spec->setDetectorID(j);

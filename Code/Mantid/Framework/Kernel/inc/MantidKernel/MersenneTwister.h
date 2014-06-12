@@ -7,9 +7,11 @@
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/ClassMacros.h"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/random/mersenne_twister.hpp>
+# include <boost/random/uniform_real.hpp>
+# include <boost/random/variate_generator.hpp>
+#endif
 
 namespace Mantid
 {

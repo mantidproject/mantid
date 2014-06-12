@@ -1,11 +1,3 @@
-"""*WIKI* 
-
-Stitches single histogram [[MatrixWorkspace|Matrix Workspaces]] together outputting a stitched Matrix Workspace. Either the right-hand-side or left-hand-side workspace can be chosen to be scaled. Users
-must provide a Param step (single value), but the binning start and end are calculated from the input workspaces if not provided. Likewise, StartOverlap and EndOverlap are optional. If the StartOverlap or EndOverlap
-are not provided, then these are taken to be the region of x-axis intersection.
-
-The workspaces must be histogrammed. Use [[ConvertToHistogram]] on workspaces prior to passing them to this algorithm.
-*WIKI*"""
 from mantid.simpleapi import *
 
 from mantid.api import *
@@ -19,13 +11,17 @@ class Stitch1D(PythonAlgorithm):
 
     def name(self):
 	    return "Stitch1D"
+    
+    def version(self):
+        return 3
+    
+    def summary(self):
+        return "Stitches single histogram matrix workspaces together"
 
     def PyInit(self):
         
         histogram_validator = HistogramValidator()
         
-        self.setWikiSummary("Stitches single histogram matrix workspaces together")
-        self.setOptionalMessage("Stitches single histogram matrix workspaces together")
         self.declareProperty(MatrixWorkspaceProperty("LHSWorkspace", "", Direction.Input, validator=histogram_validator), "Input workspace")
         self.declareProperty(MatrixWorkspaceProperty("RHSWorkspace", "", Direction.Input, validator=histogram_validator), "Input workspace")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output stitched workspace")
@@ -88,8 +84,11 @@ class Stitch1D(PythonAlgorithm):
     def __get_start_overlap(self, range_tolerance):
         start_overlap_property = self.getProperty('StartOverlap')
         start_overlap = start_overlap_property.value - range_tolerance
-        if start_overlap_property.isDefault:
-            min, max = self.__calculate_x_intersection()
+        min, max = self.__calculate_x_intersection()
+        start_overlap_beyond_range =  (start_overlap < min) or (start_overlap > max)
+        if start_overlap_property.isDefault or  start_overlap_beyond_range:
+            if start_overlap_beyond_range and not start_overlap_property.isDefault:
+                logger.warning("StartOverlap is outside range at %0.4f, Min is %0.4f, Max is %0.4f . Forced to be: %0.4f" % (start_overlap, min, max, min))
             start_overlap = min
             logger.information("StartOverlap calculated to be: %0.4f" % start_overlap)
         return start_overlap
@@ -97,8 +96,11 @@ class Stitch1D(PythonAlgorithm):
     def __get_end_overlap(self, range_tolerance):
         end_overlap_property = self.getProperty('EndOverlap')
         end_overlap = end_overlap_property.value + range_tolerance
-        if end_overlap_property.isDefault:
-            min, max = self.__calculate_x_intersection()
+        min, max = self.__calculate_x_intersection()
+        end_overlap_beyond_range =  (end_overlap < min) or (end_overlap > max)
+        if end_overlap_property.isDefault or end_overlap_beyond_range:
+            if end_overlap_beyond_range and not end_overlap_property.isDefault:
+                logger.warning("EndOverlap is outside range at %0.4f, Min is %0.4f, Max is %0.4f. Forced to be: %0.4f" % (end_overlap, min, max, max))
             end_overlap = max
             logger.information("EndOverlap calculated to be: %0.4f" % end_overlap)
         return end_overlap
@@ -133,7 +135,7 @@ class Stitch1D(PythonAlgorithm):
         outScaleFactor = self.getProperty('OutScaleFactor').value
         
         params = self.__create_rebin_parameters()
-        print params
+        
         lhs_rebinned = self.__run_as_child("Rebin", InputWorkspace=self.getProperty("LHSWorkspace").value, Params=params)
         rhs_rebinned = self.__run_as_child("Rebin", InputWorkspace=self.getProperty("RHSWorkspace").value, Params=params)
         
@@ -146,7 +148,7 @@ class Stitch1D(PythonAlgorithm):
             raise RuntimeError("Stitch1D EndOverlap is outside the X range after rebinning. EndOverlap: %0.9f, X max: %0.9f" % (endOverlap, maxX))
         
         if(startOverlap > endOverlap):
-            raise RuntimeError("Stitch1D cannot have a StartOverlap > EndOverlap")
+            raise RuntimeError("Stitch1D cannot have a StartOverlap > EndOverlap. StartOverlap: %0.9f, EndOverlap: %0.9f" % (startOverlap, endOverlap))
     
         a1, a2 = self.__find_indexes_start_end(startOverlap, endOverlap, lhs_rebinned)
         

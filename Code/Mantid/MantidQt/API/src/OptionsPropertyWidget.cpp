@@ -67,7 +67,7 @@ namespace API
   /** Set the value into the GUI
    *
    * @param value :: string representation of the value */
-  void OptionsPropertyWidget::setValue(const QString & value)
+  void OptionsPropertyWidget::setValueImpl(const QString & value)
   {
     QString temp = value;
     if (temp.isEmpty())

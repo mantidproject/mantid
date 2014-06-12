@@ -159,6 +159,34 @@ public:
     }
   }
 
+  void test_indexOfValue_Treats_Axis_Values_As_Bin_Centres()
+  {
+    double points[] = {1.0, 2.0, 3.0, 4.0, 5.0};
+    const size_t npoints(5);
+    NumericAxis axis(std::vector<double>(points, points + npoints));
+
+    TS_ASSERT_EQUALS(0, axis.indexOfValue(0.5));
+    TS_ASSERT_EQUALS(0, axis.indexOfValue(1.4));
+    TS_ASSERT_EQUALS(3, axis.indexOfValue(3.7));
+    TS_ASSERT_EQUALS(3, axis.indexOfValue(4.0)); //exact value
+    TS_ASSERT_EQUALS(4, axis.indexOfValue(5.4));
+  }
+
+  //-------------------------------- Failure cases ----------------------------
+
+  void test_indexOfValue_Throws_When_Input_Not_In_Axis_Range()
+  {
+    const size_t npoints(5);
+    NumericAxis axis(npoints);
+    for(size_t i = 0; i < npoints; ++i)
+    {
+      axis.setValue(i, static_cast<double>(i));
+    }
+
+    TS_ASSERT_THROWS(axis.indexOfValue(-0.6), std::out_of_range);
+    TS_ASSERT_THROWS(axis.indexOfValue(4.6), std::out_of_range);
+  }
+
 private:
   Axis *numericAxis;
 };

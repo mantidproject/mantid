@@ -48,6 +48,9 @@ class MANTID_KERNEL_DLL PropertyHistory
 public:
   PropertyHistory(const std::string& name, const std::string& value, const std::string& type,
                   const bool isdefault, const unsigned int direction = 99 );
+
+  /// construct a property history from a property object
+  PropertyHistory(Property const * const prop);
   PropertyHistory(const PropertyHistory&);
   PropertyHistory& operator=(const PropertyHistory&);
   virtual ~PropertyHistory();

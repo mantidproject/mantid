@@ -8,7 +8,6 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Material.h"
-#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {

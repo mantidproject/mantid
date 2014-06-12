@@ -1,9 +1,11 @@
 ##
 ## mantid.geometry tests
 ##
-set ( TEST_PY_FILES 
+set ( TEST_PY_FILES
+  BoundingBoxTest.py
   IComponentTest.py
   InstrumentTest.py
+  ObjectTest.py
   OrientedLatticeTest.py
   RectangularDetectorTest.py
   ReferenceFrameTest.py

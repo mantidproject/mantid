@@ -1,30 +1,7 @@
-/*WIKI* 
-
-The LoadRaw algorithm stores data from the [[RAW_File | RAW]] file in a [[Workspace2D]], which will naturally contain histogram data with each spectrum going into a separate histogram. The time bin boundaries (X values) will be common to all histograms and will have their [[units]] set to time-of-flight. The Y values will contain the counts and will be unit-less (i.e. no division by bin width or normalisation of any kind). The errors, currently assumed Gaussian, will be set to be the square root of the number of counts in the bin.
-
-=== Optional properties ===
-If only a portion of the data in the [[RAW_File | RAW]] file is required, then the optional 'spectrum' properties can be set before execution of the algorithm. Prior to loading of the data the values provided are checked and the algorithm will fail if they are found to be outside the limits of the dataset.
-
-=== Multiperiod data === 
-If the RAW file contains multiple periods of data this will be detected and the different periods will be output as separate workspaces, which after the first one will have the period number appended (e.g. OutputWorkspace_period).
-Each workspace will share the same [[Instrument]], SpectraToDetectorMap and [[Sample]] objects.
-If the optional 'spectrum' properties are set for a multiperiod dataset, then they will ignored.
-
-===Subalgorithms used===
-LoadRaw runs the following algorithms as child algorithms to populate aspects of the output [[Workspace]]:
-* [[LoadInstrument]] - Looks for an instrument definition file named XXX_Definition.xml, where XXX is the 3 letter instrument prefix on the RAW filename, in the directory specified by the "instrumentDefinition.directory" property given in the config file (or, if not provided, in the relative path ../Instrument/). If the instrument definition file is not found then the [[LoadInstrumentFromRaw]] algorithm will be run instead.
-* [[LoadMappingTable]] - To build up the mapping between the spectrum numbers and the Detectors of the attached [[Instrument]].
-* [[LoadLog]] - Will look for any log files in the same directory as the RAW file and load their data into the workspace's [[Sample]] object.
-
-==Previous Versions==
-LoadRaw version 1 and 2 are no longer available in Mantid.  Version 3 has been validated and in active use for several years, if you really need a previous version of this algorithm you will need to use an earlier version of Mantid.
-*WIKI*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidAPI/MemoryManager.h"
@@ -52,13 +29,6 @@ namespace Mantid
   {
     DECLARE_FILELOADER_ALGORITHM(LoadRaw3);
 
-    /// Sets documentation strings for this algorithm
-    void LoadRaw3::initDocs()
-    {
-      this->setWikiSummary("Loads a data file in ISIS [[RAW_File | RAW]] format and stores it in a 2D [[workspace]] ([[Workspace2D]] class). ");
-      this->setOptionalMessage("Loads a data file in ISIS  RAW format and stores it in a 2D workspace (Workspace2D class).");
-    }
-
 
     using namespace Kernel;
     using namespace API;
@@ -74,7 +44,7 @@ namespace Mantid
     {
     }
 
-    /// Initialisation method.
+    /// Initialization method.
     void LoadRaw3::init()
     {
       LoadRawHelper::init();
@@ -94,12 +64,16 @@ namespace Mantid
       monitorOptions.push_back("Include");
       monitorOptions.push_back("Exclude");
       monitorOptions.push_back("Separate");
+      monitorOptions.push_back("1");
+      monitorOptions.push_back("0");
       declareProperty("LoadMonitors","Include", boost::make_shared<StringListValidator>(monitorOptions),
           "Option to control the loading of monitors.\n"
-			"Allowed options are Include,Exclude and Separate.\n"
-			"Include:The default is Include option which loads the monitors into the output workspace.\n"
-			"Exclude:The Exclude option excludes monitors from the output workspace.\n"
-			"Separate:The Separate option loads monitors into a separate workspace called OutputWorkspace_Monitor.\n");
+      "Allowed options are Include,Exclude and Separate.\n"
+      "Include:The default is Include option which loads the monitors into the output workspace.\n"
+      "Exclude:The Exclude option excludes monitors from the output workspace.\n"
+      "Separate:The Separate option loads monitors into a separate workspace called OutputWorkspace_Monitor.\n"
+      "1:  The option introduced to allow compatibility with LoadEventNexus in scripts. Equivalent to Separate.\n"
+      "0:  The option introduced to allow compatibility with LoadEventNexus in scripts. Equivalent to Exclude.\n");
     }
 
 
@@ -117,14 +91,22 @@ namespace Mantid
 
       bool bLoadlogFiles = getProperty("LoadLogFiles");
 
-      bool bincludeMonitors = isIncludeMonitors();
+      // process monitor option
+      std::string monitorOption = getProperty("LoadMonitors");
+      if (monitorOption =="1")
+        monitorOption = "Separate";
+      if (monitorOption=="0")
+         monitorOption = "Exclude";
+
+      bool bincludeMonitors = isIncludeMonitors(monitorOption);
       bool bseparateMonitors = false;
       bool bexcludeMonitors = false;
       if (!bincludeMonitors)
       {
-        bseparateMonitors = isSeparateMonitors();
-        bexcludeMonitors = isExcludeMonitors();
+        bseparateMonitors = isSeparateMonitors(monitorOption);
+        bexcludeMonitors = isExcludeMonitors(monitorOption);
       }
+      //
 
       std::string title;
       //read workspace title from raw file
@@ -139,16 +121,6 @@ namespace Mantid
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
       m_total_specs = calculateWorkspaceSize();
-
-      // If there is not enough memory use ManagedRawFileWorkspace2D.
-      if ( ConfigService::Instance().getString("ManagedRawFileWorkspace.DoNotUse") != "1" &&
-          m_numberOfPeriods == 1 && m_total_specs == m_numberOfSpectra &&
-          MemoryManager::Instance().goForManagedWorkspace(m_total_specs,m_lengthIn, m_lengthIn-1) )
-      {
-        fclose(file);
-        goManagedRaw(bincludeMonitors, bexcludeMonitors, bseparateMonitors,m_filename);
-        return;
-      }
 
       // Get the time channel array(s) and store in a vector inside a shared pointer
       m_timeChannelsVec =getTimeChannels(m_noTimeRegimes,m_lengthIn);
@@ -211,7 +183,7 @@ namespace Mantid
           throw ;
         }
 
-        //now create a workspace of size normalwsSpecs and set it as outputworkspace
+        //now create a workspace of size normalwsSpecs and set it as output workspace
         if(normalwsSpecs > 0)
         {
           localWorkspace = createWorkspace(localWorkspace,normalwsSpecs,m_lengthIn,m_lengthIn-1);
@@ -227,8 +199,8 @@ namespace Mantid
 
       if(bseparateMonitors && normalwsSpecs == 0)
       {
-        // Ensure we fill the correct group as if we are only loading monitors then we essentially want normal behaviour
-        // with no extra _Monitors workspace
+        // Ensure we fill the correct group as if we are only loading monitors then we essentially want normal behavior
+        // with no extra _monitors workspace
         ws_grp = monitorws_grp;
       }
 
@@ -338,7 +310,7 @@ namespace Mantid
     /** This method creates outputworkspace excluding monitors
      *@param file :: -pointer to file
      *@param period :: period number
-     *@param monitorList :: a list conatining the spectrum numbers for monitors
+     *@param monitorList :: a list containing the spectrum numbers for monitors
      *@param ws_sptr :: shared pointer to workspace
      */
     void LoadRaw3::excludeMonitors(FILE* file,const int & period,const std::vector<specid_t>& monitorList,
@@ -439,7 +411,7 @@ namespace Mantid
     /** This method separates monitors and creates two outputworkspaces
      *@param file :: -pointer to file
      *@param period :: period number
-     *@param monitorList :: -a list conatining the spectrum numbers for monitors
+     *@param monitorList :: -a list containing the spectrum numbers for monitors
      *@param ws_sptr :: -shared pointer to workspace
      *@param mws_sptr :: -shared pointer to monitor workspace
      */
@@ -465,7 +437,7 @@ namespace Mantid
           {
             throw std::runtime_error("Error reading raw file");
           }
-          //if this a moniotor  store that spectrum to monitor workspace
+          //if this a monitor  store that spectrum to monitor workspace
           if (isMonitor(monitorList, i))
           {
             setWorkspaceData(mws_sptr, m_timeChannelsVec, mwsIndex, i, m_noTimeRegimes,m_lengthIn,1);
@@ -512,10 +484,10 @@ namespace Mantid
     }
 
 
-    /**This method validatates workspace sizes if exclude monitors or separate monitors options is selected
+    /**This method validates workspace sizes if exclude monitors or separate monitors options is selected
      *@param bexcludeMonitors :: boolean option for exclude monitors
      *@param bseparateMonitors :: boolean option for separate monitors
-     *@param normalwsSpecs :: number of spectrums in the output workspace excluding monitors
+     *@param normalwsSpecs :: number of spectra in the output workspace excluding monitors
      *@param monitorwsSpecs :: number of monitor spectra
      */
     void LoadRaw3::validateWorkspaceSizes( bool bexcludeMonitors ,bool bseparateMonitors,
@@ -540,10 +512,9 @@ namespace Mantid
     /** This method checks the value of LoadMonitors property and returns true or false
      *  @return true if Exclude Monitors option is selected,otherwise false
      */
-    bool LoadRaw3::isExcludeMonitors()
+    bool LoadRaw3::isExcludeMonitors(const std::string &monitorOption)
     {
       bool bExclude;
-      std::string monitorOption = getPropertyValue("LoadMonitors");
       monitorOption.compare("Exclude") ? (bExclude = false) : (bExclude = true);
       return bExclude;
     }
@@ -551,21 +522,20 @@ namespace Mantid
     /**This method checks the value of LoadMonitors property and returns true or false
      * @return true if Include Monitors option is selected,otherwise false
      */
-    bool LoadRaw3::isIncludeMonitors()
+    bool LoadRaw3::isIncludeMonitors(const std::string &monitorOption)
     {
       bool bExclude;
-      std::string monitorOption = getPropertyValue("LoadMonitors");
       monitorOption.compare("Include") ? (bExclude = false) : (bExclude = true);
+ 
       return bExclude;
     }
 
     /** This method checks the value of LoadMonitors property and returns true or false
      *  @return true if Separate Monitors option is selected,otherwise false
      */
-    bool LoadRaw3::isSeparateMonitors()
+    bool LoadRaw3::isSeparateMonitors(const std::string &monitorOption)
     {
       bool bSeparate;
-      std::string monitorOption = getPropertyValue("LoadMonitors");
       monitorOption.compare("Separate") ? (bSeparate = false) : (bSeparate = true);
       return bSeparate;
     }
@@ -582,146 +552,6 @@ namespace Mantid
       itr = find(monitorIndexes.begin(), monitorIndexes.end(), spectrumNum);
       (itr != monitorIndexes.end()) ? (bMonitor = true) : (bMonitor = false);
       return bMonitor;
-    }
-
-    /// Creates a ManagedRawFileWorkspace2D
-    /// @param bincludeMonitors :: Include monitors or not
-    /// @param bexcludeMonitors :: Exclude monitors or not
-    /// @param bseparateMonitors :: Separate monitors or not
-    /// @param fileName :: the filename
-    void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool bseparateMonitors,
-        const std::string& fileName)
-    {
-      const std::string cache_option = getPropertyValue("Cache");
-      bool bLoadlogFiles = getProperty("LoadLogFiles");
-      size_t option = find(m_cache_options.begin(), m_cache_options.end(), cache_option)
-        - m_cache_options.begin();
-      progress(m_prog, "Reading raw file data...");
-      DataObjects::Workspace2D_sptr localWorkspace = DataObjects::Workspace2D_sptr(
-          new ManagedRawFileWorkspace2D(fileName, static_cast<int>(option)));
-      setProg( 0.2 );
-      progress(m_prog);
-      loadRunParameters(localWorkspace);
-      setProg( 0.4 );
-      progress(m_prog);
-      runLoadInstrument(fileName,localWorkspace, 0.2, 0.4 );
-      setProg( 0.5 );
-      progress(m_prog);
-      // Since all spectra are being loaded if we get to here,
-      // we can just set the spectrum numbers to start at 1 and increase monotonically
-      for (int i = 0; i < m_numberOfSpectra; ++i)
-      {
-        localWorkspace->getSpectrum(i)->setSpectrumNo(i+1);
-      }
-      setProg( 0.6 );
-      progress(m_prog);
-      runLoadMappingTable(fileName,localWorkspace);
-      setProg( 0.7 );
-      progress(m_prog);
-      if (bLoadlogFiles)
-      {
-        runLoadLog(fileName,localWorkspace, 0.5, 0.7);
-        const int current_period = 1;
-        createPeriodLogs(current_period,localWorkspace);
-      }
-      setProtonCharge(localWorkspace->mutableRun());
-
-      setProg( 0.8 );
-      progress(m_prog);
-      localWorkspace->populateInstrumentParameters();
-      setProg( 0.9 );
-      separateOrexcludeMonitors(localWorkspace, bincludeMonitors, bexcludeMonitors,
-          bseparateMonitors,m_numberOfSpectra,fileName);
-      setProg( 1.0 );
-      progress(m_prog);
-      setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-    }
-
-    /** This method separates/excludes monitors from output workspace and creates a separate workspace for monitors
-     *  THIS METHOD IS ONLY CALLED BY THE goManagedRaw METHOD ABOVE AND NOT IN THE GENERAL CASE
-     *  @param localWorkspace :: shared pointer to workspace
-     *  @param binclude :: boolean  variable for including monitors
-     *  @param bexclude ::  boolean variable for excluding monitors
-     *  @param bseparate ::  boolean variable for separating the monitor workspace from output workspace
-     *  @param m_numberOfSpectra ::  number of spectra
-     *  @param fileName ::  raw file name
-     */
-    void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWorkspace,
-        bool binclude,bool bexclude,bool bseparate,
-        int64_t m_numberOfSpectra,const std::string &fileName)
-    {
-      (void) binclude; // Avoid compiler warning
-
-      std::vector<specid_t> monitorwsList;
-      DataObjects::Workspace2D_sptr monitorWorkspace;
-      FILE *file(NULL);
-      std::vector<specid_t> monitorSpecList = getmonitorSpectrumList(SpectrumDetectorMapping(localWorkspace.get()));
-      if (bseparate && !monitorSpecList.empty())
-      {
-        Property *ws = getProperty("OutputWorkspace");
-        std::string localWSName = ws->value();
-        std::string monitorWSName = localWSName + "_Monitors";
-
-        declareProperty(new WorkspaceProperty<Workspace> ("MonitorWorkspace", monitorWSName,
-            Direction::Output));
-        //create monitor workspace
-        const int64_t nMons(static_cast<int64_t>(monitorSpecList.size()));
-        monitorWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-            WorkspaceFactory::Instance().create(localWorkspace,nMons,m_lengthIn,m_lengthIn-1));
-
-        setProperty("MonitorWorkspace", boost::dynamic_pointer_cast<Workspace>(monitorWorkspace));
-        file =openRawFile(fileName);
-        ioRaw(file,true );
-      }
-      // Now check whether there is more than one time regime in use
-      m_noTimeRegimes =getNumberofTimeRegimes();
-      // Get the time channel array(s) and store in a vector inside a shared pointer
-      m_timeChannelsVec = getTimeChannels(m_noTimeRegimes,m_lengthIn);
-      //read raw file
-      if (bseparate && !monitorSpecList.empty())
-      {
-        readData(file, 0);
-      }
-      int64_t monitorwsIndex = 0;
-      for (specid_t i = 0; i < m_numberOfSpectra; ++i)
-      {
-        int64_t histToRead = i + 1;
-        if (bseparate && !monitorSpecList.empty())
-        {
-          if (!readData(file, histToRead))
-          {
-            throw std::runtime_error("Error reading raw file");
-          }
-        }
-        if ((bseparate && !monitorSpecList.empty()) || bexclude)
-        {
-          if (isMonitor(monitorSpecList, static_cast<specid_t>(i) + 1))
-          {
-            spec2index_map wsIndexmap;
-            SpectraAxis* axis = dynamic_cast<SpectraAxis*>(localWorkspace->getAxis(1));
-            axis->getSpectraIndexMap(wsIndexmap);
-            spec2index_map::const_iterator wsItr;
-            wsItr = wsIndexmap.find(static_cast<specid_t>(i + 1));
-            if (wsItr != wsIndexmap.end())
-              monitorwsList.push_back(static_cast<specid_t>(wsItr->second));
-            if (bseparate)
-            {
-              monitorWorkspace->getSpectrum(monitorwsIndex)->setSpectrumNo(i+1);
-              setWorkspaceData(monitorWorkspace, m_timeChannelsVec, monitorwsIndex, i + 1, m_noTimeRegimes,m_lengthIn,1);
-              ++monitorwsIndex;
-            }
-          }
-        }
-
-      }
-      if ((bseparate && !monitorwsList.empty()) || bexclude)
-      {
-        localWorkspace->setMonitorList(monitorwsList);
-        if (bseparate)
-        {
-          fclose(file);
-        }
-      }
     }
 
   } // namespace DataHandling

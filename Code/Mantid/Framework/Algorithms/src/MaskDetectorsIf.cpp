@@ -1,10 +1,3 @@
-/*WIKI* 
-
-Iterates over the input workspace evaluating the test for each single value spectrum. 
-If the detectors should be masked it deselects all of the contributing detectors in the output calfile. 
-All other aspects of the InputCalFile are copied over to the OutputCalFile.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -23,13 +16,6 @@ namespace Algorithms
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(MaskDetectorsIf)
-
-/// Sets documentation strings for this algorithm
-void MaskDetectorsIf::initDocs()
-{
-  this->setWikiSummary("Adjusts the selected field for a [[CalFile]] depending on the values in the input workspace. ");
-  this->setOptionalMessage("Adjusts the selected field for a CalFile depending on the values in the input workspace.");
-}
 
 
 using namespace Kernel;

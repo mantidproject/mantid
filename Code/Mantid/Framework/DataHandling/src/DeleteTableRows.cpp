@@ -1,9 +1,3 @@
-/*WIKI* 
-
-If the specified rows exist they will be deleted form the workspace. If the row list is empty the algorithm does nothing.
-
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -22,13 +16,6 @@ namespace Mantid
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(DeleteTableRows);
-    
-    /// Sets documentation strings for this algorithm
-    void DeleteTableRows::initDocs()
-    {
-      this->setWikiSummary("Deletes rows from a TableWorkspace.");
-      this->setOptionalMessage("Deletes rows from a TableWorkspace.");
-    }
     
 
     using namespace Kernel;

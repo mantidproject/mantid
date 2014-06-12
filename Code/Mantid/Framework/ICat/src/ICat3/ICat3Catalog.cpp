@@ -143,5 +143,15 @@ namespace Mantid
     {
     }
 
+    /**
+     * Obtains the investigations that the user can publish
+     * to and saves related information to a workspace.
+     * @return A workspace containing investigation information the user can publish to.
+     */
+    API::ITableWorkspace_sptr ICat3Catalog::getPublishInvestigations()
+    {
+      throw std::runtime_error("Publishing is not supported in ICat3Catalog.");
+    }
+
   }
 }

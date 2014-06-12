@@ -16,6 +16,8 @@ namespace Mantid
   namespace Kernel
   {
 
+    enum TimeSeriesSortStatus{TSUNKNOWN, TSUNSORTED, TSSORTED};
+
     //=========================================================================
     /** Struct holding some useful statistics for a TimeSeriesProperty
      *
@@ -300,7 +302,7 @@ namespace Mantid
       mutable int m_size;
 
       /// Flag to state whether mP is sorted or not
-      mutable bool m_propSortedFlag;
+      mutable TimeSeriesSortStatus m_propSortedFlag;
 
       /// The filter
       mutable std::vector<std::pair<Kernel::DateAndTime, bool> > m_filter;

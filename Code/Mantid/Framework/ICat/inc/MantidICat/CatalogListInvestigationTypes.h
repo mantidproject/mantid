@@ -43,14 +43,16 @@ namespace Mantid
       ~CatalogListInvestigationTypes(){}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "CatalogListInvestigationTypes"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Lists the name of investigation types from the Information catalog.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Catalog"; }
 
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// Overwrites Algorithm init method.
       void init();
       /// Overwrites Algorithm exec method

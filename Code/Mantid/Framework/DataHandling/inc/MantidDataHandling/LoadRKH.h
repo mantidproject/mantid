@@ -53,6 +53,9 @@ public:
   virtual ~LoadRKH() {}
   /// Algorithm's name
   virtual const std::string name() const { return "LoadRKH"; }
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Load a file written in the RKH format";}
+
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -62,8 +65,7 @@ public:
   virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
 private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
+  
   /// Store the units known to the UnitFactory
   std::set<std::string> m_unitKeys;
   /// Store the units added as options for this algorithm

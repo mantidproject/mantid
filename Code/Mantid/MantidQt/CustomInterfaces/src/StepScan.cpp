@@ -537,7 +537,7 @@ bool StepScan::runStepScanAlgLive(std::string stepScanProperties)
   startLiveData->setProperty("PreserveEvents",true);
   startLiveData->setProperty("PostProcessingAlgorithm","StepScan");
   startLiveData->setProperty("PostProcessingProperties",stepScanProperties);
-  startLiveData->setProperty("EndRunBehavior","Stop");
+  startLiveData->setProperty("RunTransitionBehavior","Stop");
   startLiveData->setProperty("AccumulationWorkspace",m_inputWSName);
   startLiveData->setProperty("OutputWorkspace",m_tableWSName);
   // The previous listener needs to finish before this one can start

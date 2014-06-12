@@ -53,9 +53,6 @@ namespace Mantid
     {
       m_noVectors = NVectors;
       data.resize(m_noVectors);
-      m_axes.resize(2);
-      m_axes[0] = new API::RefAxis(XLength, this);
-      m_axes[1] = new API::SpectraAxis(this);
 
       MantidVecPtr t1,t2;
       t1.access().resize(XLength); //this call initializes array to zero
@@ -74,6 +71,12 @@ namespace Mantid
         spec->setSpectrumNo(specid_t(i+1));
         spec->setDetectorID(detid_t(i+1));
       }
+
+      // Add axes that reference the data
+      m_axes.resize(2);
+      m_axes[0] = new API::RefAxis(XLength, this);
+      m_axes[1] = new API::SpectraAxis(this);
+
     }
 
     

@@ -82,7 +82,7 @@ public:
      auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1,x0,x1,dx);
      auto & dataX = testWS->dataX(0);
      std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
-     func->setWorkspace(testWS);
+     func->setMatrixWorkspace(testWS,0,dataX.front(),dataX.back());
      FunctionDomain1DView domain(dataX.data(), dataX.size());
      FunctionValues values(domain);
 
@@ -99,7 +99,6 @@ private:
   Mantid::API::IFunction_sptr createFunctionWithParamsSet()
   {
     auto func = createFunction();
-    func->setAttributeValue("WorkspaceIndex",0);
     func->setAttributeValue("Mass",1.0);
     // must be before C_0 C_4 parameter calls as they are created by this attribute
     func->setAttributeValue("HermiteCoeffs","1 0 1");
@@ -122,13 +121,13 @@ private:
 
   void checkDefaultAttrsExist(const Mantid::API::IFunction & profile)
   {
-    static const size_t nattrs = 3;
+    static const size_t nattrs = 2;
     TS_ASSERT_LESS_THAN_EQUALS(nattrs, profile.nAttributes()); //at least nattrs
 
     // Test names as they are used in scripts
     if(nattrs <= profile.nAttributes())
     {
-      const char * attrAarr[nattrs] = {"WorkspaceIndex","Mass", "HermiteCoeffs"};
+      const char * attrAarr[nattrs] = {"Mass", "HermiteCoeffs"};
       std::set<std::string> expectedAttrs(attrAarr, attrAarr + nattrs);
       std::vector<std::string> actualNames = profile.getAttributeNames();
 

@@ -4,7 +4,7 @@
 import refl_window
 import refl_save
 import refl_choose_col
-import refl_live_options
+import refl_options
 import csv
 import string
 import os
@@ -12,6 +12,7 @@ import re
 from PyQt4 import QtCore, QtGui
 from mantid.simpleapi import *
 from isis_reflectometry.quick import *
+from isis_reflectometry.convert_to_wavelength import ConvertToWavelength
 from isis_reflectometry import load_live_runs
 from isis_reflectometry.combineMulti import *
 from latest_isis_runs import *
@@ -55,18 +56,28 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.polarisation_instruments = ['CRISP', 'POLREF']
         self.polarisation_options = {'None' : PolarisationCorrection.NONE, '1-PNR' : PolarisationCorrection.PNR, '2-PA' : PolarisationCorrection.PA }
 
-        #Set the live data settings, use defualt if none have been set before
+        #Set the live data settings, use default if none have been set before
         settings = QtCore.QSettings()
         settings.beginGroup("Mantid/ISISReflGui/LiveData")
         self.live_method = settings.value("method", "", type=str)
         self.live_freq = settings.value("frequency", 0, type=float)
-        if not (self.live_freq and self.live_method):
-            logger.information("No settings were found for loading live data, Loading defaults (Update frequency: 60 seconds and Accumulation Method: Add)")
+        if not (self.live_freq):
+            logger.information("No settings were found for Update frequency of loading live data, Loading default of 60 seconds")
             self.live_freq = float(60)
-            self.live_method = "Add"
             settings.setValue("frequency", self.live_freq)
+        if not (self.live_method):
+            logger.information("No settings were found for Accumulation Method of loading live data, Loading default of \"Add\"")
+            self.live_method = "Add"
             settings.setValue("method", self.live_method)
         settings.endGroup()
+
+        settings.beginGroup("Mantid/ISISReflGui")
+        self.ads_get = settings.value("ADSget", False, type=bool)
+        self.alg_use = settings.value("AlgUse", False, type=bool)
+        settings.setValue("ADSget", self.ads_get)
+        settings.setValue("AlgUse", self.alg_use)
+        settings.endGroup()
+
         del settings
 
     def __del__(self):
@@ -294,7 +305,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         self.actionCut.triggered.connect(self._cut_cells)
         self.actionCopy.triggered.connect(self._copy_cells)
         self.actionChoose_Columns.triggered.connect(self._choose_columns)
-        self.actionLive_Data.triggered.connect(self._live_data_options)
+        self.actionRefl_Gui_Options.triggered.connect(self._options_dialog)
 
     def _populate_runs_list(self):
         """
@@ -303,7 +314,8 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         # Clear existing
         self.listMain.clear()
         # Fill with ADS workspaces
-        self._populate_runs_listADSWorkspaces()
+        if self.ads_get:
+            self._populate_runs_listADSWorkspaces()
         try:
             selectedInstrument = config['default.instrument'].strip().upper()
             if not self.__instrumentRuns:
@@ -496,34 +508,38 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         """
         Transfer run numbers to the table
         """
+        import re
         col = 0
         row = 0
         while (self.tableMain.item(row, 0).text() != ''):
             row = row + 1
         for idx in self.listMain.selectedItems():
             contents = str(idx.text()).strip()
-            first_contents = contents.split(':')[0]
             runnumber = None
-            if mtd.doesExist(first_contents):
-                runnumber = self._create_workspace_display_name(first_contents)
+            searchObj = re.search( r'^\d+:', contents)
+            if searchObj:
+                runnumber = contents.split(':')[0]
+            elif mtd.doesExist(contents):
+                runnumber = self._create_workspace_display_name(contents)
             else:
                 try:
-                    temp = Load(Filename=first_contents, OutputWorkspace="_tempforrunnumber")
+                    temp = Load(Filename=contents, OutputWorkspace="_tempforrunnumber")
                     runnumber = groupGet("_tempforrunnumber", "samp", "run_number")
                     DeleteWorkspace(temp)
                 except:
-                    logger.error("Unable to load file. Please check your managed user directories.")
-                    QtGui.QMessageBox.critical(self.tableMain, 'Error Loading File',"Unable to load file. Please check your managed user directories.")
-            item = QtGui.QTableWidgetItem()
-            item.setText(runnumber)
-            self.tableMain.setItem(row, col, item)
-            item = QtGui.QTableWidgetItem()
-            item.setText(self.textRuns.text())
-            self.tableMain.setItem(row, col + 2, item)
-            col = col + 5
-            if col >= 11:
-                col = 0
-                row = row + 1
+                    logger.error("Unable to find a run number associated with \"" + contents + "\". Please check that the name is valid or exists in your managed user directories.")
+                    QtGui.QMessageBox.critical(self.tableMain, 'Error finding number', "Unable to find a run number associated with \"" + contents + "\". Please check that the name is valid or exists in your managed user directories.")
+            if runnumber:
+                item = QtGui.QTableWidgetItem()
+                item.setText(runnumber)
+                self.tableMain.setItem(row, col, item)
+                item = QtGui.QTableWidgetItem()
+                item.setText(self.textRuns.text())
+                self.tableMain.setItem(row, col + 2, item)
+                col = col + 5
+                if col >= 11:
+                    col = 0
+                    row = row + 1
 
     def _set_all_stitch(self,state):
         """
@@ -732,7 +748,22 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
             load_live_runs.get_live_data(config['default.instrument'], frequency = self.live_freq, accumulation = self.live_method)
-        wlam, wq, th = quick(loadedRun, trans=transrun, theta=angle)
+        wlam, wq, th = None, None, None
+        if self.alg_use:
+            #Load the runs required ConvertToWavelength will deal with the transmission runs, while .to_workspace will deal with the run itself
+            trans_list = ConvertToWavelength(transrun)
+            ws = ConvertToWavelength.to_workspace(loadedRun)
+            size = trans_list.get_ws_list_size()
+            trans1 = None
+            trans2 = None
+            if size > 0:
+                trans1 = trans_list.get_workspace_from_list(0)
+                if size == 2:
+                    trans2 = trans_list.get_workspace_from_list(1)
+            wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=trans1, SecondTransmissionRun=trans2, thetaIn=angle, StartOverlap='10', EndOverlap='12', Params = [1.5, 0.02, 17], OutputWorkspace=runno+'_IvsQ', OutputWorkspaceWavelength=runno+'_IvsLam',)
+            cleanup()
+        else:
+            wlam, wq, th = quick(loadedRun, trans=transrun, theta=angle)
         if ':' in runno:
             runno = runno.split(':')[0]
         if ',' in runno:
@@ -743,7 +774,11 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
         return th, qmin, qmax, wlam, wq
+
     def _check_trans_run(self, transrun):
+        """
+        check to see if the trasmission run is the same as the last one
+        """
         if self._last_trans == transrun:
             return True
         translist = [word.strip() for word in re.split(',|:', transrun)]
@@ -755,6 +790,7 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
         else:
             return False
         return True
+
     def _save_table_contents(self, filename):
         """
         Save the contents of the table
@@ -915,23 +951,30 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
             logger.notice("Could not open save workspace dialog")
             logger.notice(str(ex))
 
-    def _live_data_options(self):
+    def _options_dialog(self):
         """
         Shows the dialog for setting options regarding live data
         """
         try:
-            dialog = refl_live_options.ReflLiveOptions(def_meth = self.live_method, def_freq = self.live_freq)
+            dialog = refl_options.ReflOptions(def_meth = self.live_method, def_freq = self.live_freq, def_ads = self.ads_get, def_alg = self.alg_use)
             if dialog.exec_():
+                old_ads = self.ads_get
                 self.live_freq = dialog.frequency
                 self.live_method = dialog.get_method()
+                self.ads_get = dialog.ads_get
+                self.alg_use = dialog.alg_use
                 settings = QtCore.QSettings()
                 settings.beginGroup("Mantid/ISISReflGui/LiveData")
                 settings.setValue("frequency", self.live_freq)
                 settings.setValue("method", self.live_method)
                 settings.endGroup()
+                settings.beginGroup("Mantid/ISISReflGui")
+                settings.setValue("ADSget", self.ads_get)
+                settings.setValue("AlgUse", self.alg_use)
+                settings.endGroup()
                 del settings
         except Exception as ex:
-            logger.notice("Could not open live data options dialog")
+            logger.notice("Problem opening options dialog or problem retrieving values from dialog")
             logger.notice(str(ex))
 
     def _choose_columns(self):

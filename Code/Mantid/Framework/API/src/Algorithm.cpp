@@ -2,8 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -299,7 +299,7 @@ namespace Mantid
         {
           this->init();
         }
-        catch(std::runtime_error& ex)
+        catch(std::runtime_error&)
         {
           throw;
         }
@@ -320,9 +320,6 @@ namespace Mantid
         getLogger().fatal("UNKNOWN Exception is caught in initialize()");
         throw;
       }
-
-      // Set the documentation. This virtual method is overridden by (nearly) all algorithms and gives documentation summary.
-      initDocs();
     }
 
     //---------------------------------------------------------------------------------------------
@@ -596,12 +593,18 @@ namespace Mantid
             Poco::FastMutex::ScopedLock _lock(m_mutex);
             m_running = true;
           }
-          if(!isChild() || m_recordHistoryForChild)
+          
+          
+          if(trackingHistory())
           {
             // count used for defining the algorithm execution order
             // If history is being recorded we need to count this as a separate algorithm
             // as the history compares histories by their execution number
             ++Algorithm::g_execCount;
+            
+            //populate history record before execution so we can record child algorithms in it
+            AlgorithmHistory algHist(this);
+            m_history = boost::make_shared<AlgorithmHistory>(algHist);
           }
 
           start_time = Mantid::Kernel::DateAndTime::getCurrentTime();
@@ -615,8 +618,12 @@ namespace Mantid
           const float duration = timer.elapsed();
 
           // need it to throw before trying to run fillhistory() on an algorithm which has failed
-          if(!isChild() || m_recordHistoryForChild)
-            fillHistory(start_time,duration,Algorithm::g_execCount);
+          if(trackingHistory() && m_history)
+          { 
+            m_history->addExecutionInfo(start_time, duration);
+            m_history->setExecCount(Algorithm::g_execCount);
+            fillHistory();
+          }
 
           // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
           if (!isChild() || m_alwaysStoreInADS)
@@ -807,7 +814,7 @@ namespace Mantid
       {
         alg->initialize();
       }
-      catch (std::runtime_error& exc)
+      catch (std::runtime_error&)
       {
         throw std::runtime_error("Unable to initialise Child Algorithm '" + name + "'");
       }
@@ -1004,34 +1011,57 @@ namespace Mantid
 
 
     /** Fills History, Algorithm History and Algorithm Parameters
-    *  @param start :: a date and time defnining the start time of the algorithm
-    *  @param duration :: a double defining the length of duration of the algorithm
-    *  @param  uexecCount an unsigned int for defining the excution order of algorithm
     */
-    void Algorithm::fillHistory(Mantid::Kernel::DateAndTime start,double duration,std::size_t uexecCount)
+    void Algorithm::fillHistory()
     {
       // Create two vectors to hold a list of pointers to the input & output workspaces (InOut's go in both)
       std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;
       findWorkspaceProperties(inputWorkspaces,outputWorkspaces);
-
-      // Create the history object for this algorithm
-      AlgorithmHistory algHistory(this,start,duration,uexecCount);
-
-      std::vector<Workspace_sptr>::iterator outWS;
-      std::vector<Workspace_sptr>::const_iterator inWS;
-      // Loop over the output workspaces
-      for (outWS = outputWorkspaces.begin(); outWS != outputWorkspaces.end(); ++outWS)
+      
+      //this is not a child algorithm. Add the history algorithm to the WorkspaceHistory object.
+      if (!isChild())
       {
-        // Loop over the input workspaces, making the call that copies their history to the output ones
-        // (Protection against copy to self is in WorkspaceHistory::copyAlgorithmHistory)
-        for (inWS = inputWorkspaces.begin(); inWS != inputWorkspaces.end(); ++inWS)
+        std::vector<Workspace_sptr>::iterator outWS;
+        std::vector<Workspace_sptr>::const_iterator inWS;
+        
+        // Loop over the output workspaces
+        for (outWS = outputWorkspaces.begin(); outWS != outputWorkspaces.end(); ++outWS)
         {
-          (*outWS)->history().addHistory( (*inWS)->getHistory() );
+          // Loop over the input workspaces, making the call that copies their history to the output ones
+          // (Protection against copy to self is in WorkspaceHistory::copyAlgorithmHistory)
+          for (inWS = inputWorkspaces.begin(); inWS != inputWorkspaces.end(); ++inWS)
+          {
+            (*outWS)->history().addHistory( (*inWS)->getHistory() );
+          }
+          // Add the history for the current algorithm to all the output workspaces
+          (*outWS)->history().addHistory(m_history);
         }
-        // Add the history for the current algorithm to all the output workspaces
-        (*outWS)->history().addHistory(algHistory);
       }
+      //this is a child algorithm, but we still want to keep the history.
+      else if (m_recordHistoryForChild && m_parentHistory)
+      {
+        m_parentHistory->addChildHistory(m_history);
+      }
+
     }
+
+    /** Indicates that this algrithms history should be tracked regardless of if it is a child.
+    *  @param parentHist :: the parent algorithm history object the history in.
+    */
+    void Algorithm::trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist)
+    {
+      enableHistoryRecordingForChild(true);
+      m_parentHistory = parentHist;
+    }
+
+    /** Check if we are tracking history for thus algorithm
+    *  @return if we are tracking the history of this algorithm 
+    */
+    bool Algorithm::trackingHistory()
+    {
+      return (!isChild() || m_recordHistoryForChild);
+    }
+
 
     /** Populate lists of the input & output workspace properties.
     *  (InOut workspaces go in both lists)

@@ -6,7 +6,9 @@
 //----------------------------------------------------------------------
 #include <string>
 #include <map>
-#include <boost/shared_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+#endif
 
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/DllConfig.h"

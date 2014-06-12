@@ -1,8 +1,12 @@
 from mantid.simpleapi import *
+from mantid.api import TextAxis
 from mantid import config, logger
+
 from IndirectImport import import_mantidplot
+
 import sys, platform, os.path, math, datetime, re
-    
+import itertools
+
 def StartTime(prog):
     logger.notice('----------')
     message = 'Program ' + prog +' started @ ' + str(datetime.datetime.now())
@@ -21,50 +25,67 @@ def loadInst(instrument):
         LoadEmptyInstrument(Filename=idf, OutputWorkspace=ws)
 
 def loadNexus(filename):
-    '''Loads a Nexus file into a workspace with the name based on the
+    '''
+    Loads a Nexus file into a workspace with the name based on the
     filename. Convenience function for not having to play around with paths
-    in every function.'''
+    in every function.
+    '''
     name = os.path.splitext( os.path.split(filename)[1] )[0]
     LoadNexus(Filename=filename, OutputWorkspace=name)
     return name
-    
-def getInstrRun(file):
-    mo = re.match('([a-zA-Z]+)([0-9]+)',file)
-    instr_and_run = mo.group(0)          # instr name + run number
-    instr = mo.group(1)                  # instrument prefix
-    run = mo.group(2)                    # run number as string
-    return instr,run
 
-def getWSprefix(wsname,runfile=None):
-    '''Returns a string of the form '<ins><run>_<analyser><refl>_' on which
-    all of our other naming conventions are built.
-    The workspace is used to get the instrument parameters. If the runfile
-    string is given it is expected to be a string with instrument prefix
-    and run number. If it is empty then the workspace name is assumed to
-    contain this information
+def getInstrRun(ws_name):
+    '''
+    Get the instrument name and run number from a workspace.
+
+    @param ws_name - name of the workspace
+    @return tuple of form (instrument, run number) 
+    '''
+    ws = mtd[ws_name]
+    run_number = str(ws.getRunNumber())
+    if run_number == '0':
+        #attempt to parse run number off of name
+        match = re.match('([a-zA-Z]+)([0-9]+)', ws_name)
+        if match:
+            run_number = match.group(2)
+        else:
+            raise RuntimeError("Could not find run number associated with workspace.")
+
+    instrument = ws.getInstrument().getName()
+    facility = config.getFacility()
+    instrument = facility.instrument(instrument).filePrefix(int(run_number))
+    instrument = instrument.lower()
+    return instrument, run_number
+
+def getWSprefix(wsname):
+    '''
+    Returns a string of the form '<ins><run>_<analyser><refl>_' on which
+    all of our other naming conventions are built. The workspace is used to get the
+    instrument parameters.
     '''
     if wsname == '':
         return ''
-    if runfile is None:
-        runfile = wsname
+
     ws = mtd[wsname]
     facility = config['default.facility']
+
     ws_run = ws.getRun()
     if 'facility' in ws_run:
         facility = ws_run.getLogData('facility').value
-    if facility == 'ILL':		
-        inst = ws.getInstrument().getName()
-        runNo = ws.getRun()['run_number'].value
-        run_name = inst + '_'+ runNo
+
+    (instrument, run_number) = getInstrRun(wsname)
+    if facility == 'ILL':
+        run_name = instrument + '_'+ run_number
     else:
-        (instr, run) = getInstrRun(runfile)
-        run_name = instr + run
+        run_name = instrument + run_number
+
     try:
         analyser = ws.getInstrument().getStringParameter('analyser')[0]
         reflection = ws.getInstrument().getStringParameter('reflection')[0]
     except IndexError:
         analyser = ''
         reflection = ''
+
     prefix = run_name + '_' + analyser + reflection + '_'
     return prefix
 
@@ -278,3 +299,159 @@ def plotParameters(ws, *param_names):
             indicies = [i for i in range(num_spectra) if name in axis.label(i)]
             if len(indicies) > 0:
                 plotSpectra(ws, name, indicies)
+
+def convertToElasticQ(input_ws, output_ws=None):
+  """
+    Helper function to convert the spectrum axis of a sample to ElasticQ.
+
+    @param input_ws - the name of the workspace to convert from
+    @param output_ws - the name to call the converted workspace
+  """
+  
+  if output_ws is None:
+    output_ws = input_ws
+   
+  axis = mtd[input_ws].getAxis(1)
+  if axis.isSpectra():
+      e_fixed = getEfixed(input_ws)
+      ConvertSpectrumAxis(input_ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=output_ws)
+  
+  elif axis.isNumeric():
+      #check that units are Momentum Transfer
+      if axis.getUnit().unitID() != 'MomentumTransfer':
+          logger.error('Input must have axis values of Q')
+          sys.exit()
+      
+      CloneWorkspace(input_ws, OutputWorkspace=output_ws)
+  else:
+    logger.error('Input workspace must have either spectra or numeric axis.')
+    sys.exit()
+  
+def transposeFitParametersTable(params_table, output_table=None):
+  """
+    Transpose the parameter table created of Fit.
+
+    This function will make the output consistent with PlotPeakByLogValue.
+    @param params_table - the parameter table output from Fit.
+    @param output_table - name to call the transposed table. If omitted, 
+            the output_table will be the same as the params_table
+  """
+  params_table = mtd[params_table]
+
+  table_ws = '__tmp_furyfitmulti_table_ws'
+  CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
+  table_ws = mtd[table_ws]
+
+  param_names = params_table.column(0)[:-1] #-1 to remove cost function
+  param_values = params_table.column(1)[:-1]
+  param_errors = params_table.column(2)[:-1]
+
+  #find the number of parameters per function
+  func_index = param_names[0].split('.')[0]
+  num_params = 0
+  for i, name in enumerate(param_names):
+    if name.split('.')[0] != func_index:
+      num_params = i
+      break
+
+  #create columns with parameter names for headers
+  column_names = ['.'.join(name.split('.')[1:]) for name in param_names[:num_params]]
+  column_error_names = [name + '_Err' for name in column_names]
+  column_names = zip(column_names, column_error_names)
+  table_ws.addColumn('double', 'axis-1')
+  for name, error_name in column_names:
+    table_ws.addColumn('double', name)
+    table_ws.addColumn('double', error_name)
+
+  #output parameter values to table row
+  for i in xrange(0, params_table.rowCount()-1, num_params):
+    row_values = param_values[i:i+num_params]
+    row_errors = param_errors[i:i+num_params]
+    row = [value for pair in zip(row_values, row_errors) for value in pair]
+    row = [i/num_params] + row
+    table_ws.addRow(row)
+
+  if output_table is None:
+    output_table = params_table.name()
+
+  RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
+
+
+def search_for_fit_params(suffix, table_ws):
+    """
+    Find all fit parameters in a table workspace with the given suffix.
+
+    @param suffix - the name of the parameter to find.
+    @param table_ws - the name of the table workspace to search.
+    """
+    return [name for name in mtd[table_ws].getColumnNames() if name.endswith(suffix)]
+
+
+def convertParametersToWorkspace(params_table, x_column, param_names, output_name):
+  """
+    Convert a parameter table output by PlotPeakByLogValue to a MatrixWorkspace.
+
+    This will make a spectrum for each parameter name using the x_column vairable as the 
+    x values for the spectrum.
+
+    @param params_table - the table workspace to convert to a MatrixWorkspace.
+    @param x_column - the column in the table to use for the x values.
+    @param parameter_names - list of parameter names to add to the workspace
+    @param output_name - name to call the output workspace.
+  """
+  #search for any parameters in the table with the given parameter names,
+  #ignoring their function index and output them to a workspace
+  workspace_names = []
+  for param_name in param_names:
+    column_names = search_for_fit_params(param_name, params_table)
+    column_error_names = search_for_fit_params(param_name+'_Err', params_table)
+    param_workspaces = []
+    for name, error_name in zip(column_names, column_error_names):
+      ConvertTableToMatrixWorkspace(params_table, x_column, name, error_name, OutputWorkspace=name)
+      param_workspaces.append(name)
+    workspace_names.append(param_workspaces)
+
+  #transpose list of workspaces, ignoring unequal length of lists
+  #this handles the case where a parameter occurs only once in the whole workspace
+  workspace_names = map(list, itertools.izip_longest(*workspace_names))
+  workspace_names = [filter(None, sublist) for sublist in workspace_names]
+
+  #join all the parameters for each peak into a single workspace per peak
+  temp_workspaces = []
+  for peak_params in workspace_names:
+    temp_peak_ws = peak_params[0]
+    for param_ws in peak_params[1:]:
+      ConjoinWorkspaces(temp_peak_ws, param_ws, False)
+    temp_workspaces.append(temp_peak_ws)
+
+  #join all peaks into a single workspace
+  temp_workspace = temp_workspaces[0]
+  for temp_ws in temp_workspaces[1:]:
+    ConjoinWorkspaces(temp_workspace, temp_peak_ws, False)
+
+  RenameWorkspace(temp_workspace, OutputWorkspace=output_name)
+
+  #replace axis on workspaces with text axis
+  axis = TextAxis.create(mtd[output_name].getNumberHistograms())
+  workspace_names = [name for sublist in workspace_names for name in sublist]
+  for i, name in enumerate(workspace_names):
+    axis.setLabel(i, name)
+  mtd[output_name].replaceAxis(1, axis)
+
+def addSampleLogs(ws, sample_logs):
+  """
+    Add a dictionary of logs to a workspace.
+
+    The type of the log is inferred by the type of the value passed to the log.
+    @param ws - workspace to add logs too.
+    @param sample_logs - dictionary of logs to append to the workspace.
+  """
+  for key, value in sample_logs.iteritems():
+    if isinstance(value, bool):
+      log_type = 'String'
+    elif isinstance(value, (int, long, float)):
+      log_type = 'Number'
+    else:
+      log_type = 'String'
+    
+    AddSampleLog(Workspace=ws, LogName=key, LogType=log_type, LogText=str(value))

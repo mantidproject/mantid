@@ -1426,7 +1426,7 @@ void MultiLayer::dropOntoMatrixCurve(Graph *g, MantidMatrixCurve* originalCurve,
     for( ; setIt != it.value().end(); ++setIt)
     {
       try {
-        new MantidMatrixCurve(it.key(),g,(*setIt),errorBars); // The graph takes ownership
+        new MantidMatrixCurve(it.key(),g,(*setIt),MantidMatrixCurve::Spectrum, errorBars); // The graph takes ownership
       } catch (Mantid::Kernel::Exception::NotFoundError &) {
         // Get here if workspace name is invalid - shouldn't be possible, but just in case
       } catch (std::invalid_argument&) {

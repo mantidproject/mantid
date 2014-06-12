@@ -1,27 +1,3 @@
-/*WIKI*
-Subtract two [[MDHistoWorkspace]]'s or a MDHistoWorkspace and a scalar.
-
-* '''MDHistoWorkspace - MDHistoWorkspace'''
-** The operation is performed element-by-element.
-* '''MDHistoWorkspace - Scalar '''
-** The scalar is subtracted from every element of the MDHistoWorkspace. The squares of errors are summed.
-* '''Scalar - MDHistoWorkspace'''
-** This is not allowed.
-* '''[[MDEventWorkspace]] - [[MDEventWorkspace]]'''
-** The signal of each event on the right-hand-side is multiplied by -1 before the events are summed.
-** The number of events in the output MDEventWorkspace is that of the LHS and RHS workspaces put together.
-* '''[[MDEventWorkspace]] - Scalar or MDHistoWorkspace'''
-** This is not possible.
-*WIKI*/
-/*WIKI_USAGE*
- C = A - B
- C = A - 123.4
- A -= B
- A -= 123.4
-
-See [[MDHistoWorkspace#Arithmetic_Operations|this page]] for examples on using arithmetic operations.
-*WIKI_USAGE*/
-
 #include "MantidMDAlgorithms/MinusMD.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventFactory.h"
@@ -61,12 +37,6 @@ namespace MDAlgorithms
   int MinusMD::version() const { return 1;};
   
   //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void MinusMD::initDocs()
-  {
-    this->setWikiSummary("Subtract two [[MDWorkspace]]s");
-    this->setOptionalMessage("Subtract two MDWorkspaces.");
-  }
 
 
   //----------------------------------------------------------------------------------------------

@@ -10,8 +10,11 @@
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/LogManager.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/shared_ptr.hpp>
+# include <boost/lexical_cast.hpp>
+#endif
+
 #include <sstream>
 
 namespace Mantid

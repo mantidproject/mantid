@@ -1,4 +1,5 @@
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
@@ -71,7 +72,8 @@ namespace Mantid
       if (axes() > 0 )
       {
         Axis *ax = getAxis(0);
-        if ( ax && ax->unit() ) os << ax->unit()->caption() << " / " << ax->unit()->label();
+        if ( ax && ax->unit() ) os << ax->unit()->caption()
+                                   << " / " << ax->unit()->label().ascii();
         else os << "Not set";
       }
       else
@@ -107,7 +109,7 @@ namespace Mantid
       {
         this->init(NVectors, XLength, YLength);
       }
-      catch(std::runtime_error& ex)
+      catch(std::runtime_error&)
       {
         throw;
       }
@@ -752,8 +754,8 @@ namespace Mantid
     {
       Instrument_const_sptr instrument = getInstrument();
 
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      Geometry::IComponent_const_sptr source = instrument->getSource();
+      Geometry::IComponent_const_sptr sample = instrument->getSample();
       if ( source == NULL || sample == NULL )
       {
         throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
@@ -778,8 +780,8 @@ namespace Mantid
      */
     double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const
     {
-      Geometry::IObjComponent_const_sptr source = getInstrument()->getSource();
-      Geometry::IObjComponent_const_sptr sample = getInstrument()->getSample();
+      Geometry::IComponent_const_sptr source = getInstrument()->getSource();
+      Geometry::IComponent_const_sptr sample = getInstrument()->getSample();
       if ( source == NULL || sample == NULL )
       {
         throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
@@ -901,7 +903,7 @@ namespace Mantid
         // then append that unit to the string to be returned
         if ( !retVal.empty() && this->isDistribution() && this->axes() && this->getAxis(0)->unit() )
         {
-          retVal = retVal + " per " + this->getAxis(0)->unit()->label();
+          retVal = retVal + " per " + this->getAxis(0)->unit()->label().ascii();
         }
       }
 
@@ -1058,6 +1060,25 @@ namespace Mantid
       return it->second;
     }
 
+    /** Sets the internal monitor workspace to the provided workspace.
+     *  This method is intended for use by data-loading algorithms.
+     *  Note that no checking is performed as to whether this workspace actually contains data
+     *  pertaining to monitors, or that the spectra point to Detector objects marked as monitors.
+     *  It simply has to be of the correct type to be accepted.
+     *  @param monitorWS The workspace containing the monitor data.
+     */
+    void MatrixWorkspace::setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace>& monitorWS)
+    {
+      m_monitorWorkspace = monitorWS;
+    }
+
+    /** Returns a pointer to the internal monitor workspace.
+     */
+    boost::shared_ptr<MatrixWorkspace> MatrixWorkspace::monitorWorkspace() const
+    {
+      return m_monitorWorkspace;
+    }
+
     //---------------------------------------------------------------------------------------------
     /** Return memory used by the workspace, in bytes.
      * @return bytes used.
@@ -1206,14 +1227,21 @@ namespace Mantid
     public:
 
       MWDimension(const Axis* axis, const std::string& dimensionId):
-          m_axis(*axis), m_dimensionId(dimensionId)
+          m_axis(*axis), m_dimensionId(dimensionId),
+          m_haveEdges(dynamic_cast<const BinEdgeAxis*>(&m_axis) != NULL)
       {
       }
+
       /// the name of the dimennlsion as can be displayed along the axis
-      virtual std::string getName() const {return m_axis.unit()->caption();}
+      virtual std::string getName() const
+      {
+        const auto & unit = m_axis.unit();
+        if (unit && unit->unitID() != "Empty" ) return unit->caption();
+        else return m_axis.title();
+      }
 
       /// @return the units of the dimension as a string
-      virtual std::string getUnits() const {return m_axis.unit()->label();}
+      virtual const Kernel::UnitLabel getUnits() const { return m_axis.unit()->label(); }
 
       /// short name which identify the dimension among other dimension. A dimension can be usually find by its ID and various
       /// various method exist to manipulate set of dimensions by their names. 
@@ -1229,7 +1257,11 @@ namespace Mantid
       virtual coord_t getMaximum() const {return coord_t(m_axis.getMax());}
 
       /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points. 
-      virtual size_t getNBins() const {return m_axis.length();}
+      virtual size_t getNBins() const
+      {
+        if(m_haveEdges) return m_axis.length() - 1;
+        else return m_axis.length();
+      }
 
       /// Change the extents and number of bins
       virtual void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/){throw std::runtime_error("Not implemented");}
@@ -1237,14 +1269,24 @@ namespace Mantid
       ///  Get coordinate for index;
       virtual coord_t getX(size_t ind)const {return coord_t(m_axis(ind));}
 
+      /**
+       * Return the bin width taking into account if the stored values are actually bin centres or not
+       * @return A single value for the uniform bin width
+       */
+      virtual coord_t getBinWidth() const
+      {
+        size_t nsteps = (m_haveEdges) ? this->getNBins() : this->getNBins() - 1;
+        return (getMaximum() - getMinimum())/static_cast<coord_t>(nsteps);
+      }
 
       //Dimensions must be xml serializable.
       virtual std::string toXMLString() const {throw std::runtime_error("Not implemented");}
 
-      virtual ~MWDimension(){};
+      virtual ~MWDimension(){}
     private:
       const Axis& m_axis;
       const std::string m_dimensionId;
+      const bool m_haveEdges;
     };
 
 
@@ -1263,13 +1305,19 @@ namespace Mantid
         m_X = ws->readX(0);
       }
 
-      virtual ~MWXDimension(){};
+      virtual ~MWXDimension(){}
 
       /// the name of the dimennlsion as can be displayed along the axis
-      virtual std::string getName() const {return m_ws->getAxis(0)->unit()->caption();}
+      virtual std::string getName() const
+      {
+        const auto *axis = m_ws->getAxis(0);
+        const auto & unit = axis->unit();
+        if (unit && unit->unitID() != "Empty" ) return unit->caption();
+        else return axis->title();
+      }
 
       /// @return the units of the dimension as a string
-      virtual std::string getUnits() const {return m_ws->getAxis(0)->unit()->label();}
+      virtual const Kernel::UnitLabel getUnits() const {return m_ws->getAxis(0)->unit()->label();}
 
       /// short name which identify the dimension among other dimension. A dimension can be usually find by its ID and various
       /// various method exist to manipulate set of dimensions by their names.
@@ -1285,7 +1333,10 @@ namespace Mantid
       virtual coord_t getMaximum() const {return coord_t(m_X.back());}
 
       /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points.
-      virtual size_t getNBins() const {return m_X.size()-1;}
+      virtual size_t getNBins() const
+      {
+        return (m_ws->isHistogramData()) ? m_X.size() - 1 : m_X.size();
+      }
 
       /// Change the extents and number of bins
       virtual void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/){throw std::runtime_error("Not implemented");}
@@ -1404,38 +1455,40 @@ namespace Mantid
      */
     signal_t MatrixWorkspace::getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const
     {
+      if (this->axes() != 2)
+        throw std::invalid_argument("MatrixWorkspace::getSignalAtCoord() - Workspace can only have 2 axes, found " +\
+                                    boost::lexical_cast<std::string>(this->axes()));
+
       coord_t x = coords[0];
       coord_t y = coords[1];
-
       // First, find the workspace index
-      NumericAxis * ax1 = dynamic_cast<NumericAxis*>(this->getAxis(1));
-
-      // If a spectra/text axis, just use the Y coord as the workspace index
-      size_t wi = size_t(y);
-      double yBinSize = 1.0;
-      if (ax1)
+      Axis * ax1 = this->getAxis(1);
+      size_t wi(-1);
+      try
       {
-        const MantidVec & yVals = ax1->getValues();
-        MantidVec::const_iterator it = std::lower_bound(yVals.begin(), yVals.end(), y);
-        if (it == yVals.end())
-        {
-          // Out of range
-          return std::numeric_limits<double>::quiet_NaN();
-        }
-        // The workspace index is the point in the vector that we found
-        wi = it - yVals.begin();
+        wi = ax1->indexOfValue(y);
+      }
+      catch(std::out_of_range &)
+      {
+        return std::numeric_limits<double>::quiet_NaN();
+      }
 
-        // Find the size of the bin in Y, if needed
-        if (normalization == VolumeNormalization)
+      const size_t nhist = this->getNumberHistograms();
+      const auto & yVals = this->readY(wi);
+      double yBinSize(1.0); // only applies for volume normalization & numeric axis
+      if (normalization == VolumeNormalization && ax1->isNumeric())
+      {
+        if (wi + 1 == nhist && nhist > 1)
         {
-          if ((it+1) == yVals.end() && (yVals.size() > 1))
-            yBinSize = *it - *(it-1);
-          else
-            yBinSize = *(it+1) - *it;
+          yBinSize =  yVals[wi] - yVals[wi-1];
+        }
+        else
+        {
+          yBinSize = yVals[wi+1] - yVals[wi];
         }
       }
 
-      if (wi < this->getNumberHistograms())
+      if (wi < nhist)
       {
         const MantidVec & X = this->readX(wi);
         MantidVec::const_iterator it = std::lower_bound(X.begin(), X.end(), x);
@@ -1449,7 +1502,7 @@ namespace Mantid
           size_t i = (it - X.begin());
           if (i > 0)
           {
-            double y = this->readY(wi)[i-1];
+            double y = yVals[i-1];
             // What is our normalization factor?
             switch (normalization)
             {
@@ -1473,9 +1526,6 @@ namespace Mantid
         // Out of range
         return std::numeric_limits<double>::quiet_NaN();
     }
-
-
-
 
 
     //--------------------------------------------------------------------------------------------
@@ -1556,7 +1606,7 @@ namespace Mantid
       try
       {
         Geometry::Instrument_const_sptr inst = this->getInstrument();
-        Geometry::IObjComponent_const_sptr sample = inst->getSample();
+        Geometry::IComponent_const_sptr sample = inst->getSample();
         if (sample)
         {
           Kernel::V3D sample_pos = sample->getPos();
@@ -1628,6 +1678,7 @@ namespace Mantid
   } // namespace API
 } // Namespace Mantid
 
+///\cond TEMPLATE
 namespace Mantid
 {
   namespace Kernel

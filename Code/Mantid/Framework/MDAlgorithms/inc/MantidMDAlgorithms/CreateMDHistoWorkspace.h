@@ -40,11 +40,13 @@ namespace MDAlgorithms
     virtual ~CreateMDHistoWorkspace();
     
     virtual const std::string name() const;
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Creates an MDHistoWorkspace from supplied lists of signal and error values.";}
+
     virtual int version() const;
     virtual const std::string category() const;
 
   private:
-    virtual void initDocs();
     void init();
     void exec();
 

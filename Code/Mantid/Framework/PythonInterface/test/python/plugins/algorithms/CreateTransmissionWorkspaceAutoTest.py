@@ -26,7 +26,8 @@ class CreateTransmissionWorkspaceAutoTest(unittest.TestCase, CreateTransmissionW
         
         out_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, AnalysisMode="PointDetectorAnalysis")
         history = out_ws.getHistory()
-        alg = history.lastAlgorithm()
+        algHist = history.getAlgorithmHistory(history.size()-1)
+        alg = algHist.getChildAlgorithm(0)
         
         '''
         Here we are checking that the applied values (passed to CreateTransmissionWorkspace come from the instrument parameters.

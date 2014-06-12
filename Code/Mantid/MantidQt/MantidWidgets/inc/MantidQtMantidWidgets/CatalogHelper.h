@@ -2,13 +2,13 @@
 #define MANTIDQTWIDGETS_CATALOGHELPER_H_
 
 #include "MantidAPI/AlgorithmManager.h"
-#include <QWidget>
+#include "WidgetDllOption.h"
 
 namespace MantidQt
 {
   namespace MantidWidgets
   {
-    class CatalogHelper
+    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS CatalogHelper
     {
 
     public:
@@ -34,6 +34,10 @@ namespace MantidQt
           const std::map<std::string, std::string> &inputFields);
       /// Creates a time_t value from an input date ("23/06/2003") for comparison.
       time_t getTimevalue(const std::string& inputDate);
+      /// Executes the catalog login algorithm and returns true if user can login.
+      bool isValidCatalogLogin();
+      /// Create a publishing dialog.
+      void catalogPublishDialog();
 
     private:
       /// Creates an algorithm with the name provided.

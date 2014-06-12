@@ -1,8 +1,3 @@
-/*WIKI*
-This algorithm retrieves the datasets associated to the selected investigation
-from the information catalog and saves the search results to mantid workspace.
-*WIKI*/
-
 #include "MantidICat/CatalogGetDataSets.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/CatalogManager.h"
@@ -13,13 +8,6 @@ namespace Mantid
   namespace ICat
   {
     DECLARE_ALGORITHM(CatalogGetDataSets)
-
-    /// Sets documentation strings for this algorithm
-    void CatalogGetDataSets::initDocs()
-    {
-      this->setWikiSummary("Gets the datasets associated to the selected investigation. ");
-      this->setOptionalMessage("Gets the datasets associated to the selected investigation.");
-    }
 
     /// Initialisation methods
     void CatalogGetDataSets::init()

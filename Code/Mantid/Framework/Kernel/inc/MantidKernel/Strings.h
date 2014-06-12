@@ -173,6 +173,9 @@ namespace Mantid
       MANTID_KERNEL_DLL std::vector<int> parseRange(const std::string& str, const std::string& elemSep = ",", 
                                                     const std::string& rangeSep = "-");
 
+      /// Extract a line from input stream, discarding any EOL characters encountered
+      MANTID_KERNEL_DLL std::istream& extractToEOL(std::istream& is, std::string& str);
+
     }   // NAMESPACE Strings
 
   }   // NAMESPACE Kernel

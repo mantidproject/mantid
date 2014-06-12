@@ -8,8 +8,12 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
+
+#ifndef Q_MOC_RUN
+# include <boost/lexical_cast.hpp>
+# include <boost/shared_ptr.hpp>
+#endif
+
 #include <Poco/StringTokenizer.h>
 #include <vector>
 #include "MantidKernel/IPropertySettings.h"

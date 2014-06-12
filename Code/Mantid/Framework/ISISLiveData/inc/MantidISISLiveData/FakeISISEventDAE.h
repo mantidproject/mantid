@@ -54,9 +54,12 @@ public:
   virtual int version() const { return 1;}
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "DataHandling\\DataAcquisition";}
+  
+  /// Algorithm's summary
+  virtual const std::string summary() const { return "Simulates ISIS event DAE."; }
+  
 
 private:
-  void initDocs();
   void init();
   void exec();
   /// Poco TCP server

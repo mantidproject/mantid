@@ -1,18 +1,3 @@
-/*WIKI* 
-This SANS workflow algorithm will compute the sensitivity correction
-from a given flood field data set. It will apply the proper corrections
-to the data according the the input property manager object. Those
-corrections may include dark current subtraction, moving the beam center,
-the solid angle correction, and applying a patch.
-
-If an input workspace is given, the computed correction will be applied
-to that workspace.
-
-A Nexus file containing a pre-calculated sensitivity correction can also
-be supplied for the case where we simply want to apply the correction to
-an input workspace.
-
-*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -42,13 +27,6 @@ namespace WorkflowAlgorithms
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSSensitivityCorrection)
-
-/// Sets documentation strings for this algorithm
-void SANSSensitivityCorrection::initDocs()
-{
-  this->setWikiSummary("Perform SANS sensitivity correction.");
-  this->setOptionalMessage("Perform SANS sensitivity correction.");
-}
 
 using namespace Kernel;
 using namespace API;
@@ -112,7 +90,7 @@ void SANSSensitivityCorrection::init()
    else if(count==0)
    {
      g_log.error("Error no entries found in " + filePath);
-     throw Exception::FileError("Error no entries found in " , filePath);
+     return false;
    }
 
    if( entryName[0]=="mantid_workspace_1" ) return true;
@@ -314,7 +292,6 @@ void SANSSensitivityCorrection::exec()
       } else {
         floodWS = rawFloodWS;
       }
-
       // Patch as needed
       if (reductionManager->existsProperty("SensitivityPatchAlgorithm"))
       {
@@ -367,4 +344,3 @@ void SANSSensitivityCorrection::exec()
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-

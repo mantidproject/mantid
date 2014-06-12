@@ -3,10 +3,10 @@
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
-#include "MantidPythonInterface/api/PythonAlgorithm/PythonAlgorithm.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
+#include <boost/python/overloads.hpp>
 #include <Poco/ScopedLock.h>
 
 // Python frameobject. This is under the boost includes so that boost will have done the
@@ -16,7 +16,6 @@
 using namespace Mantid::API;
 using namespace boost::python;
 using Mantid::Kernel::AbstractInstantiator;
-using Mantid::PythonInterface::PythonAlgorithm;
 using Mantid::PythonInterface::PythonObjectInstantiator;
 
 namespace
@@ -74,7 +73,8 @@ GCC_DIAG_OFF(cast-qual)
   {
     Poco::ScopedLock<Poco::Mutex> lock(PYALG_REGISTER_MUTEX);
 
-    static PyObject * const pyAlgClass = (PyObject*)converter::registered<PythonAlgorithm>::converters.to_python_target_type();
+    static PyObject * const pyAlgClass =
+        (PyObject*)converter::registered<Algorithm>::converters.to_python_target_type();
     // obj could be or instance/class, check instance first
     PyObject *classObject(NULL);
     if( PyObject_IsInstance(obj.ptr(), pyAlgClass) )
@@ -87,7 +87,7 @@ GCC_DIAG_OFF(cast-qual)
     }
     else
     {
-      throw std::invalid_argument("Cannot register an algorithm that does not derive from PythonAlgorithm.");
+      throw std::invalid_argument("Cannot register an algorithm that does not derive from Algorithm.");
     }
     boost::python::object classType(handle<>(borrowed(classObject)));
     // Takes ownership of instantiator and replaces any existing algorithm
@@ -97,6 +97,8 @@ GCC_DIAG_OFF(cast-qual)
     FileLoaderRegistry::Instance().unsubscribe(descr.first, descr.second);
   }
 
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(existsOverloader, exists, 1, 2);
+
   ///@endcond
 }
 GCC_DIAG_ON(cast-qual)
@@ -105,8 +107,15 @@ void export_AlgorithmFactory()
 {
 
   class_<AlgorithmFactoryImpl,boost::noncopyable>("AlgorithmFactoryImpl", no_init)
+      .def("exists", &AlgorithmFactoryImpl::exists,
+           existsOverloader((arg("name"), arg("version")=-1),
+                            "Returns true if the given algorithm exists with an option to specify the version"))
+
       .def("getRegisteredAlgorithms", &getRegisteredAlgorithms, "Returns a Python dictionary of currently registered algorithms")
+      .def("highestVersion", &AlgorithmFactoryImpl::highestVersion,
+           "Returns the highest version of the named algorithm. Throws ValueError if no algorithm can be found")
       .def("subscribe", &subscribe, "Register a Python class derived from PythonAlgorithm into the factory")
+
       .def("Instance", &AlgorithmFactory::Instance, return_value_policy<reference_existing_object>(),
         "Returns a reference to the AlgorithmFactory singleton")
       .staticmethod("Instance")

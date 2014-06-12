@@ -6,6 +6,7 @@
 #include "MantidCurveFitting/ThermalNeutronBk2BkExpSigma.h"
 
 using Mantid::CurveFitting::ThermalNeutronBk2BkExpSigma;
+using namespace Mantid;
 
 class ThermalNeutronBk2BkExpSigmaTest : public CxxTest::TestSuite
 {

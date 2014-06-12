@@ -1,12 +1,3 @@
-/*WIKI*
-
-== How to use algorithm with other algorithms ==
-This algorithm is designed to work with other algorithms to
-proceed POLDI data. The introductions can be found in the
-wiki page of [[PoldiProjectRun]].
-
-
- *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -34,13 +25,6 @@ namespace Poldi
 {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(PoldiLoadLog)
-
-/// Sets documentation strings for this algorithm
-void PoldiLoadLog::initDocs()
-{
-	this->setWikiSummary("Load Poldi log data. ");
-	this->setOptionalMessage("Load Poldi log data.");
-}
 
 
 using namespace Kernel;

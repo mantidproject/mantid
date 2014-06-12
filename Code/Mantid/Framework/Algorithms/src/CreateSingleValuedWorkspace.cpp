@@ -1,13 +1,3 @@
-/*WIKI* 
-
-Creates a 2D workspace that contains a single value and an optional error value. This is useful if, for example, there is a need to multiply (or divide etc) a workspace by a single value.
-
-*WIKI*/
-/*WIKI_USAGE*
- LoadRaw("C:/Data/testfile.raw","rawspace")
- CreateSingleValuedWorkspace("scalar", "3")
- Multiply("rawspace", "scalar", "rawspace")
-*WIKI_USAGE*/
 //------------------------
 //Includes
 //------------------------
@@ -21,13 +11,6 @@ using namespace Mantid::Algorithms;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSingleValuedWorkspace)
-
-/// Sets documentation strings for this algorithm
-void CreateSingleValuedWorkspace::initDocs()
-{
-  this->setWikiSummary("Creates a 2D workspace with a single value contained in it. ");
-  this->setOptionalMessage("Creates a 2D workspace with a single value contained in it.");
-}
 
 
 void CreateSingleValuedWorkspace::init()
@@ -62,4 +45,3 @@ void CreateSingleValuedWorkspace::exec()
   setProperty("OutputWorkspace", singleValued);
   //Done :)
 }
-

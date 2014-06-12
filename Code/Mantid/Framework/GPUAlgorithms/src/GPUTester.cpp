@@ -37,15 +37,6 @@ namespace GPUAlgorithms
   GPUTester::~GPUTester()
   {
   }
-  
-
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void GPUTester::initDocs()
-  {
-    this->setWikiSummary("A dummy algorithm to test the capabilities of the GPU card for computation.");
-    this->setOptionalMessage("A dummy algorithm to test the capabilities of the GPU card for computation.");
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

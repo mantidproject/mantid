@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'diffraction_run_setup.ui'
 #
-# Created: Wed Apr 17 13:41:11 2013
+# Created: Wed May 28 09:11:22 2014
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -206,6 +206,9 @@ class Ui_Frame(object):
         self.saveas_combo.addItem(_fromUtf8(""))
         self.saveas_combo.addItem(_fromUtf8(""))
         self.saveas_combo.addItem(_fromUtf8(""))
+        self.saveas_combo.addItem(_fromUtf8(""))
+        self.saveas_combo.addItem(_fromUtf8(""))
+        self.saveas_combo.addItem(_fromUtf8(""))
         self.horizontalLayout_8.addWidget(self.saveas_combo)
         spacerItem6 = QtGui.QSpacerItem(80, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_8.addItem(spacerItem6)
@@ -405,10 +408,13 @@ class Ui_Frame(object):
         self.label_2.setToolTip(QtGui.QApplication.translate("Frame", "<html><head/><body><p>File format(s) to save. </p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("Frame", "Save As", None, QtGui.QApplication.UnicodeUTF8))
         self.saveas_combo.setToolTip(QtGui.QApplication.translate("Frame", "<html><head/><body><p>Choose the file formats to save the reduced data as. </p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.saveas_combo.setItemText(0, QtGui.QApplication.translate("Frame", "gsas", None, QtGui.QApplication.UnicodeUTF8))
-        self.saveas_combo.setItemText(1, QtGui.QApplication.translate("Frame", "fullprof", None, QtGui.QApplication.UnicodeUTF8))
-        self.saveas_combo.setItemText(2, QtGui.QApplication.translate("Frame", "gsas and fullprof", None, QtGui.QApplication.UnicodeUTF8))
-        self.saveas_combo.setItemText(3, QtGui.QApplication.translate("Frame", "gsas and fullprof and pdfgetn", None, QtGui.QApplication.UnicodeUTF8))
+        self.saveas_combo.setItemText(0, QtGui.QApplication.translate("Frame", "fullprof", None, QtGui.QApplication.UnicodeUTF8))
+        self.saveas_combo.setItemText(1, QtGui.QApplication.translate("Frame", "gsas", None, QtGui.QApplication.UnicodeUTF8))
+        self.saveas_combo.setItemText(2, QtGui.QApplication.translate("Frame", "nexus", None, QtGui.QApplication.UnicodeUTF8))
+        self.saveas_combo.setItemText(3, QtGui.QApplication.translate("Frame", "topas", None, QtGui.QApplication.UnicodeUTF8))
+        self.saveas_combo.setItemText(4, QtGui.QApplication.translate("Frame", "gsas and fullprof and topas", None, QtGui.QApplication.UnicodeUTF8))
+        self.saveas_combo.setItemText(5, QtGui.QApplication.translate("Frame", "gsas and fullprof and pdfgetn", None, QtGui.QApplication.UnicodeUTF8))
+        self.saveas_combo.setItemText(6, QtGui.QApplication.translate("Frame", "gsas and fullprof and pdfgetn and topas", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setToolTip(QtGui.QApplication.translate("Frame", "<html><head/><body><p>Final unit of the output workspace. </p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("Frame", "Final Unit", None, QtGui.QApplication.UnicodeUTF8))
         self.unit_combo.setToolTip(QtGui.QApplication.translate("Frame", "<html><head/><body><p>Choose the final unit of output workspace.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))

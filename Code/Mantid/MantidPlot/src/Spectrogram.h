@@ -39,10 +39,13 @@
 #include "qwt_color_map.h"
 #include "PlotCurve.h"
 
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidQtAPI/MantidColorMap.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
+#include "Mantid/InstrumentWidget/GLColor.h"
+
 #include <fstream>
 #include <float.h>
-#include "MantidQtAPI/MantidColorMap.h"
-#include "Mantid/InstrumentWidget/GLColor.h"
 #include <boost/shared_ptr.hpp>
 #include <QPainter>
 #include <qobject.h>
@@ -50,17 +53,32 @@
 class MatrixData;
 class PlotMarker;
 
-class Spectrogram: public QObject, public QwtPlotSpectrogram
+namespace MantidQt
+{
+  namespace API
+  {
+    class QwtRasterDataMD;
+  }
+}
+
+class Spectrogram: public QObject, public QwtPlotSpectrogram, public MantidQt::API::WorkspaceObserver
 {
   Q_OBJECT
 
 public:
   Spectrogram();
   Spectrogram(Matrix *m);
+  Spectrogram(const QString &wsName, const Mantid::API::IMDWorkspace_const_sptr & workspace);
   Spectrogram(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
   Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
   ~Spectrogram();
 
+  /// Handles delete notification
+  void postDeleteHandle(const std::string& wsName);
+  /// Handles afterReplace notification
+  void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  /// Handle an ADS clear notificiation
+  void clearADSHandle();
 
   enum ColorMapPolicy{GrayScale, Default, Custom};
 
@@ -91,6 +109,9 @@ public:
   void setCustomColorMap(const QwtLinearColorMap& map);
   void setMantidColorMap(const MantidColorMap &map);
   void updateData(Matrix *m);
+  void updateData(const Mantid::API::IMDWorkspace_const_sptr & workspace);
+  MantidQt::API::QwtRasterDataMD *dataFromWorkspace(const Mantid::API::IMDWorkspace_const_sptr & workspace);
+  void postDataUpdate();
 
   //! Used when saving a project file
   QString saveToString();
@@ -145,6 +166,9 @@ public:
   /// returns boolan flag intensity change
   bool isIntensityChanged();
 
+signals:
+  void removeMe(Spectrogram*);
+
 protected:
   virtual void drawContourLines (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
   void updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
@@ -153,6 +177,10 @@ protected:
   //! Pointer to the source data matrix
   Matrix *d_matrix;
   Function2D *d_funct;
+  /// Pointer to data source for a workspace
+  MantidQt::API::QwtRasterDataMD *d_wsData;
+  /// Name of the workspace backing the spectrogram
+  std::string d_wsName;
 
   //! Axis used to display the color scale
   int color_axis;
@@ -181,8 +209,7 @@ protected:
   int d_labels_align;
   //! Labels font
   QFont d_labels_font;
-  //! Pointer to the parent plot
-  //Graph *d_graph;
+
   MantidColorMap mColorMap;
   QString mCurrentColorMap;
 

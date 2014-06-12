@@ -71,7 +71,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
   if ( n == 0 )
   {
     m_errorString = "No parameters to fit.";
-    g_log.warning() << m_errorString << std::endl;
+    g_log.information(m_errorString);
     return false;
   }
 
@@ -129,7 +129,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     if ( tmp == 0.0 )
     {
       m_errorString = "Singular matrix.";
-      g_log.warning() << m_errorString << std::endl;
+      g_log.information(m_errorString);
       return false;
     }
   }

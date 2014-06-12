@@ -37,6 +37,9 @@
 #include <qwt_symbol.h>
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidMatrixFunction.h"
+#include "MantidQtAPI/QwtRasterDataMD.h"
+#include "MantidQtAPI/SignalRange.h"
+#include "MantidAPI/IMDIterator.h"
 
 #include <iostream>
 #include <numeric>
@@ -44,7 +47,7 @@
 Spectrogram::Spectrogram():
       QObject(), QwtPlotSpectrogram(),
 			d_color_map_pen(false),
-			d_matrix(0),d_funct(0),//Mantid
+			d_matrix(0),d_funct(0),d_wsData(0), d_wsName(),
 	    color_axis(QwtPlot::yRight),
 	    color_map_policy(Default),
 			color_map(QwtLinearColorMap()),
@@ -63,12 +66,34 @@ Spectrogram::Spectrogram():
 {
 }
 
+Spectrogram::Spectrogram(const QString & wsName, const Mantid::API::IMDWorkspace_const_sptr &workspace) :
+      QObject(), QwtPlotSpectrogram(),
+      d_matrix(NULL),d_funct(NULL),d_wsData(NULL), d_wsName(),
+      color_axis(QwtPlot::yRight),
+      color_map_policy(Default),mColorMap()
+{
+  d_wsData = dataFromWorkspace(workspace);
+  setData(*d_wsData);
+  d_wsName = wsName.toStdString();
+
+  double step = fabs(data().range().maxValue() - data().range().minValue())/5.0;
+  QwtValueList contourLevels;
+  for ( double level = data().range().minValue() + step;
+      level < data().range().maxValue(); level += step )
+    contourLevels += level;
+
+  setContourLevels(contourLevels);
+
+  observePostDelete();
+  observeADSClear();
+  observeAfterReplace();
+}
+
 Spectrogram::Spectrogram(Matrix *m):
-      QObject(), QwtPlotSpectrogram(QString(m->objectName())),
-			d_matrix(m),d_funct(0),//Mantid
-	    color_axis(QwtPlot::yRight),
-	    color_map_policy(Default),mColorMap()
-//color_map(QwtLinearColorMap()),
+			QObject(), QwtPlotSpectrogram(QString(m->objectName())),
+			d_matrix(m),d_funct(0),d_wsData(NULL), d_wsName(),
+			color_axis(QwtPlot::yRight),
+			color_map_policy(Default),mColorMap()
 {
   setData(MatrixData(m));
   double step = fabs(data().range().maxValue() - data().range().minValue())/5.0;
@@ -81,9 +106,10 @@ Spectrogram::Spectrogram(Matrix *m):
   setContourLevels(contourLevels);
 }
 
+
 Spectrogram::Spectrogram(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz)
 :	QObject(), QwtPlotSpectrogram(),
- 	d_matrix(0),d_funct(f),
+  d_matrix(0),d_funct(f), d_wsData(NULL), d_wsName(),
  	color_axis(QwtPlot::yRight),
  	color_map_policy(Default),
  	color_map(QwtLinearColorMap())
@@ -104,7 +130,7 @@ Spectrogram::Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,
 :	QObject(), QwtPlotSpectrogram(),
  	d_color_map_pen(false),
  	d_matrix(0),
- 	d_funct(f),
+  d_funct(f),d_wsData(NULL), d_wsName(),
  	color_axis(QwtPlot::yRight),
  	color_map_policy(Default),
  	d_show_labels(true),
@@ -135,8 +161,45 @@ Spectrogram::Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,
 
 Spectrogram::~Spectrogram()
 {
+  observePostDelete(false);
+  observeADSClear(false);
+  observeAfterReplace(false);
 }
 
+/**
+ * Called after a workspace has been deleted
+ * @param wsName The name of the workspace that has been deleted
+ */
+void Spectrogram::postDeleteHandle(const std::string &wsName)
+{
+  if (wsName == d_wsName)
+  {
+    observePostDelete(false);
+    emit removeMe(this);
+  }
+}
+
+/**
+ * Called after a the ADS has been cleared
+ */
+void Spectrogram::clearADSHandle()
+{
+  observeADSClear(false);
+  postDeleteHandle(d_wsName);
+}
+
+/**
+ * @param wsName The name of the workspace that has been replaced
+ * @param ws A pointer to the new workspace
+ */
+void Spectrogram::afterReplaceHandle(const std::string &wsName,
+                                     const boost::shared_ptr<Mantid::API::Workspace> ws)
+{
+  if (wsName == d_wsName)
+  {
+    updateData(boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(ws));
+  }
+}
 
 void Spectrogram::setContourLevels (const QwtValueList & levels)
 {
@@ -146,14 +209,52 @@ void Spectrogram::setContourLevels (const QwtValueList & levels)
 
 void Spectrogram::updateData(Matrix *m)
 {
-  if (!m)
-    return;
-
-  QwtPlot *plot = this->plot();
-  if (!plot)
+  if (!m || !plot())
     return;
 
   setData(MatrixData(m));
+  postDataUpdate();
+
+}
+
+void Spectrogram::updateData(const Mantid::API::IMDWorkspace_const_sptr &workspace)
+{
+  if(!workspace || !plot()) return;
+
+  delete d_wsData;
+  d_wsData = dataFromWorkspace(workspace);
+  setData(*d_wsData);
+  postDataUpdate();
+}
+
+MantidQt::API::QwtRasterDataMD *Spectrogram::dataFromWorkspace(const Mantid::API::IMDWorkspace_const_sptr &workspace)
+{
+  auto *wsData = new MantidQt::API::QwtRasterDataMD();
+  wsData->setWorkspace(workspace);
+  wsData->setFastMode(false);
+  wsData->setNormalization(Mantid::API::NoNormalization);
+  wsData->setZerosAsNan(false);
+
+  // colour range
+  QwtDoubleInterval fullRange = MantidQt::API::SignalRange(*workspace).interval();
+  wsData->setRange(fullRange);
+
+  auto dim0 = workspace->getDimension(0);
+  auto dim1 = workspace->getDimension(1);
+  Mantid::coord_t minX(dim0->getMinimum()), maxX(dim0->getMaximum()),
+    minY(dim1->getMinimum()), maxY(dim1->getMaximum());
+  Mantid::coord_t dx(dim0->getBinWidth()), dy(dim1->getBinWidth());
+  const Mantid::coord_t width = (maxX - minX) + dx;
+  const Mantid::coord_t height = (maxY - minY) + dy;
+  QwtDoubleRect bounds(minX - 0.5*dx, minY - 0.5*dy,
+                       width, height);
+  wsData->setBoundingRect(bounds.normalized());
+  return wsData;
+}
+
+void Spectrogram::postDataUpdate()
+{
+  auto *plot = this->plot();
   setLevelsNumber(levels());
 
   QwtScaleWidget *colorAxis = plot->axisWidget(color_axis);
@@ -161,7 +262,9 @@ void Spectrogram::updateData(Matrix *m)
   {
     colorAxis->setColorMap(data().range(), colorMap());
   }
+
   plot->setAxisScale(color_axis, data().range().minValue(), data().range().maxValue());
+
   plot->replot();
 }
 
@@ -865,7 +968,16 @@ changes the intensity of the colors
  */
 void Spectrogram::changeIntensity( double start,double end)
 {
-  setData(FunctionData(d_funct,m_nRows,m_nColumns,boundingRect(),start,end));
+  using namespace MantidQt::API;
+  if(d_wsData)
+  {
+    d_wsData->setRange(QwtDoubleInterval(start,end));
+    setData(*d_wsData);
+  }
+  else
+  {
+    setData(FunctionData(d_funct,m_nRows,m_nColumns,boundingRect(),start,end));
+  }
 }
 /**
  sets the flag for intensity changes
@@ -883,19 +995,19 @@ bool Spectrogram::isIntensityChanged()
 
 /**
  * Override QwtPlotSpectrogram::renderImage to draw ragged spectrograms. It is almost
- * a copy of QwtPlotSpectrogram::renderImage except that pixels of the image that are 
+ * a copy of QwtPlotSpectrogram::renderImage except that pixels of the image that are
  * outside the boundaries of the histograms are set to a special colour (white).
  */
 QImage Spectrogram::renderImage(
-    const QwtScaleMap &xMap, const QwtScaleMap &yMap, 
+    const QwtScaleMap &xMap, const QwtScaleMap &yMap,
     const QwtDoubleRect &area) const
 {
+  // Mantid workspace handled in QwtRasterDataMD
+  if(d_wsData) return QwtPlotSpectrogram::renderImage(xMap,yMap,area);
 
-  MantidMatrixFunction* mantidFun = dynamic_cast<MantidMatrixFunction*>(d_funct);
-  if (!mantidFun)
-  {
-    return QwtPlotSpectrogram::renderImage(xMap,yMap,area);
-  }
+  // Not Mantid function so just use base class
+  auto *mantidFun = dynamic_cast<MantidMatrixFunction*>(d_funct);
+  if (!mantidFun) return QwtPlotSpectrogram::renderImage(xMap,yMap,area);
 
   if ( area.isEmpty() )
     return QImage();

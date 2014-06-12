@@ -6,7 +6,9 @@
 #include <list>
 #include <vector>
 #include <algorithm>
-#include <boost/optional.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/optional.hpp>
+#endif
 
 namespace Mantid
 {

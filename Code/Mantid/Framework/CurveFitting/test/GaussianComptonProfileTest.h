@@ -56,8 +56,8 @@ public:
   void test_Initialized_Function_Has_Expected_Attributes()
   {
     Mantid::API::IFunction_sptr profile = createFunction();
-    static const size_t nattrs(2);
-    const char * expectedAttrs[nattrs] = {"WorkspaceIndex", "Mass"};
+    static const size_t nattrs(1);
+    const char * expectedAttrs[nattrs] = {"Mass"};
 
     TS_ASSERT_EQUALS(nattrs, profile->nAttributes());
 
@@ -85,7 +85,7 @@ public:
     auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1,x0,x1,dx);
     auto & dataX = testWS->dataX(0);
     std::transform(dataX.begin(), dataX.end(), dataX.begin(), std::bind2nd(std::multiplies<double>(),1e-06)); // to seconds
-    func->setWorkspace(testWS);
+    func->setMatrixWorkspace(testWS,0,dataX.front(),dataX.back());
     FunctionDomain1DView domain(dataX.data(), dataX.size());
     FunctionValues values(domain);
 
@@ -111,7 +111,6 @@ private:
   boost::shared_ptr<GaussianComptonProfile> createFunctionWithParamsSet()
   {
     auto func = createFunction();
-    func->setAttributeValue("WorkspaceIndex",0);
     func->setAttributeValue("Mass",30.0);
     func->setParameter("Intensity", 4.0);
     func->setParameter("Width", 13.0);

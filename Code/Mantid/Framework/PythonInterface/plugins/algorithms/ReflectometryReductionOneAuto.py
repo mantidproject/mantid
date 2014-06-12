@@ -1,31 +1,20 @@
-"""*WIKI* 
-
-Facade over [[ReflectometryReductionOne]]. Pulls numeric parameters out of the instrument parameters where possible. You can override any of these automatically
-applied defaults by providing your own value for the input.
-
-See [[ReflectometryReductionOne]] for more information on the wrapped algorithm.
-
-*WIKI*"""
-
-
 import sys
 from mantid.simpleapi import ReflectometryReductionOne
 from mantid.api import *
 from mantid.kernel import *
 
-class ReflectometryReductionOneAuto(PythonAlgorithm):
+class ReflectometryReductionOneAuto(DataProcessorAlgorithm):
     
     def category(self):
         return "Reflectometry\\ISIS"
 
     def name(self):
         return "ReflectometryReductionOneAuto"
-    
-    def PyInit(self):
-    
-        self.setOptionalMessage("Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections.")
-        self.setWikiSummary("Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections. See [[Reflectometry_Guide]]")
-   
+
+    def summary(self):
+        return "Reduces a single TOF reflectometry run into a mod Q vs I/I0 workspace. Performs transmission corrections."
+           
+    def PyInit(self):  
         input_validator = WorkspaceUnitValidator("TOF")
         self.declareProperty(MatrixWorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input, optional=PropertyMode.Mandatory), "Input run in TOF")
         

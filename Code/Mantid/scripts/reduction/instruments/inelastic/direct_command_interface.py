@@ -3,7 +3,7 @@
 """
 # Import the specific commands that we need
 import mantid
-from mantid.api import FrameworkManager
+from mantid.api import AlgorithmManager
 from reduction.command_interface import *
 from inelastic_reducer import InelasticReducer
 
@@ -46,12 +46,12 @@ def DefaultLoader():
     ReductionSingleton().set_loader(step)
 
 def FixEi(ei):
-    alg = FrameworkManager.createAlgorithm("InelasticFixEi")
+    alg = AlgorithmManager.create("InelasticFixEi")
     alg.setProperty("Ei", ei)
     ReductionSingleton().set_ei_calculator(alg)
     
 def CalculateEi(guess=None):
-    alg = FrameworkManager.createAlgorithm("InelasticCalcEi")
+    alg = AlgorithmManager.create("InelasticCalcEi")
     alg.setProperty("EiGuess",guess)
     ReductionSingleton().set_ei_calculator(alg)
 

@@ -60,13 +60,15 @@ namespace Mantid
       ~LoadMappingTable() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadMappingTable";};
+    ///Summary of algorithms purpose
+    virtual const std::string summary() const {return "Builds up the mapping between spectrum number and the detector objects in the instrument Geometry.";}
+
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Instrument;DataHandling\\Raw";}
     private:
-      /// Sets documentation strings for this algorithm
-      virtual void initDocs();
+      
       /// The name and path of the input file
       std::string m_filename;
 

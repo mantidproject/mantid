@@ -1,7 +1,9 @@
 #ifndef BITMAPGEOMETRYHANDLER_H
 #define BITMAPGEOMETRYHANDLER_H
 
-#include <boost/weak_ptr.hpp>
+#ifndef Q_MOC_RUN
+# include <boost/weak_ptr.hpp>
+#endif
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/IObjComponent.h"

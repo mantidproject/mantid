@@ -11,6 +11,9 @@ EXEC_PROGRAM(${CMAKE_CXX_COMPILER} ARGS --version | cut -d \" \" -f 3 OUTPUT_VAR
 STRING(REGEX REPLACE ".*([0-9]\\.[0-9]\\.[0-9]).*" "\\1" GCC_COMPILER_VERSION ${_compiler_output})
 MESSAGE(STATUS "gcc version: ${GCC_COMPILER_VERSION}")
 
+# Export the GCC compiler version globally
+set(GCC_COMPILER_VERSION ${GCC_COMPILER_VERSION} CACHE INTERNAL "")
+
 # Global warning flags.
 set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -fno-common" ) 
 # Disable some warnings about deprecated headers and type conversions that
