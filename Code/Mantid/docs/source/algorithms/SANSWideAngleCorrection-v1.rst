@@ -54,7 +54,7 @@ function of detector pixel location.
 
 The output of this algorithm is:
 
-:math:`OutputWorkspace = \frac{T^'}{T_0}`
+:math:`OutputWorkspace = \frac{T^\prime}{T_0}`
 
 Error Propagation
 #################
@@ -119,6 +119,7 @@ described here. The picture above compare their results
    :alt: SNS_ISIS_WideAngleCorrections.png
 
    SNS\_ISIS\_WideAngleCorrections.png
+
 Note a difference among them is when they are applied. At SNS, the
 correction is applied before averaging the counters per bin inside
 :ref:`algm-Q1D` algorithm, while at ISIS, it is used after, inside the
@@ -133,5 +134,30 @@ Cryst. (2007). 40
 
 Ghosh, Egelhaaf & Rennie - Computing guide for Small Angle Scattering
 Experiments
+
+Usage
+-----
+
+**Example - Correcting Some Dummy Data**
+
+.. testcode:: ExCorrection
+
+   # Create some dummy data, but crop it for quick demonstration purposes.
+   sample = CreateSimulationWorkspace(Instrument='SANS2D', BinParams=[5,500,100005], UnitX='TOF')
+   sample = CropWorkspace(sample,StartWorkspaceIndex=0,EndWorkspaceIndex=20)
+
+   # Create a dummy transmission workspace.
+   transmission = CropWorkspace(sample,StartWorkspaceIndex=10,EndWorkspaceIndex=10)
+   transmission *= 2
+
+   corrected_data = SANSWideAngleCorrection(sample, transmission)
+
+   print "%f was corrected to %f." % (sample.readY(19)[0], corrected_data.readY(19)[0])
+
+Output:
+
+.. testoutput:: ExCorrection
+
+   1.000000 was corrected to 1.004997.
 
 .. categories::
