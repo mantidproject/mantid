@@ -53,10 +53,5 @@ Usage
     wsOut = AnvredCorrection(ws,LinearScatteringCoef=1.302,
         LinearAbsorptionCoef=1.686,Radius=0.170,PowerLambda=3)
 
-Output:
-
-.. testoutput:: AnvredCorrection
-
-
 .. categories::
 
