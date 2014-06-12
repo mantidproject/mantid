@@ -58,7 +58,7 @@ namespace Mantid
         /// Return a handler that maps the python type to a C++ type
         static const PropertyValueHandler & lookup(PyObject * const object);
         /// Return a string based on the python array type
-        static const std::string check_sequence(PyObject * const object);
+        static const std::string isArray(PyObject * const object);
       };
     }
   }

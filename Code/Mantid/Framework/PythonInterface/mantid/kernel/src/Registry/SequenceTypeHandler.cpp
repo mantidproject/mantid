@@ -98,11 +98,6 @@ namespace Mantid
         {
           valueInC = StdVectorExtractor<DestElementType>::extract(defaultValue);
         }
-        // numpy arrays requires special handling to extract their types. Hand-off to a more appropriate handler
-        else if( PyArray_Check(defaultValue.ptr()) )
-        {
-          valueInC = Converters::NDArrayToVector<DestElementType>(defaultValue)();
-        }
         else if( PySequence_Check(defaultValue.ptr()) )
         {
           valueInC = Converters::PySequenceToVector<DestElementType>(defaultValue)();

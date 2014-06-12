@@ -6,11 +6,6 @@
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidKernel/PropertyWithValue.h"
 
-// See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
-#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
-#define NO_IMPORT_ARRAY
-#include <numpy/arrayobject.h>
-
 #include <boost/make_shared.hpp>
 
 #include <cassert>
@@ -144,7 +139,8 @@ namespace Mantid
        */
       const PropertyValueHandler & PropertyWithValueFactory::lookup(PyObject * const object)
       {
-        const auto ptype = check_sequence(object);
+        // Check if object is array.
+        const auto ptype = isArray(object);
         if (!ptype.empty())
         {
           const PyArrayIndex &arrayIndex = getArrayIndex();
@@ -171,11 +167,38 @@ namespace Mantid
        * @param object :: Python object to check if it's an array
        * @return :: A string as the array type.
        */
-      const std::string PropertyWithValueFactory::check_sequence(PyObject * const object)
+      const std::string PropertyWithValueFactory::isArray(PyObject * const object)
       {
-        if (PyArray_Check(object) || PyList_Check(object) || PyTuple_Check(object))
+        if (PyList_Check(object) || PyTuple_Check(object))
         {
-          return std::string("FloatArray");
+          PyObject *item = PySequence_Fast_GET_ITEM(object, 0);
+          if (PyLong_Check(item))
+          {
+            return std::string("LongIntArray");
+          }
+          if (PyInt_Check(item))
+          {
+            return std::string("IntArray");
+          }
+          if (PyFloat_Check(item))
+          {
+            return std::string("FloatArray");
+          }
+          if (PyString_Check(item))
+          {
+            return std::string("StringArray");
+          }
+          if (PyBool_Check(item))
+          {
+            throw std::runtime_error("Unable to support extracting arrays of booleans.");
+          }
+
+          // If we get here, we've found a sequence we can't interpret the item type.
+          std::ostringstream os;
+          os << "Cannot create PropertyWithValue from Python type " << object->ob_type->tp_name
+             << " containing items of type " << item->ob_type << ". No converter registered in PropertyWithValueFactory.";
+
+          throw std::invalid_argument(os.str());
         }
         else
         {
