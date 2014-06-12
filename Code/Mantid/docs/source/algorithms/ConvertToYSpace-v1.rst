@@ -10,7 +10,7 @@ Description
 -----------
 
 The final unit of the x-axis is changed to momentum (Y) space as defined
-by
+by the formula:
 
 .. raw:: html
 
@@ -32,5 +32,21 @@ The TOF is used to calculate :math:`\displaystyle\epsilon_i` and the
 TOF values to be mapped to a decreasing set of :math:`\displaystyle Y`
 values. As a result the final :math:`Y`-space values are reversed to
 give a workspace with monotonically increasing :math:`Y` values.
+
+Usage
+-----
+
+**Example - convert a histogram workspace:**
+
+.. testcode:: ExConvetToYSp
+
+.. testcleanup:: ExConvetToYSp
+
+   DeleteWorkspace(ws)
+
+**Output:**
+
+.. testoutput:: ExConvetToYSp
+
 
 .. categories::
