@@ -5,8 +5,9 @@
    a toctree.
    See http://sphinx-doc.org/tutorial.html#defining-document-structure
 
-Mantid documentation
-====================
+======================
+ Mantid documentation
+======================
 
 .. toctree::
    :glob:
@@ -15,3 +16,5 @@ Mantid documentation
 
    algorithms/*
    functions/*
+
+   api/python/index

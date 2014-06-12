@@ -19,7 +19,7 @@ class Screenshot(object):
 
     def __init__(self, widget, filename, directory):
         from mantidplot import screenshot_to_dir, threadsafe_call
-        
+
         self.imgpath = screenshot_to_dir(widget=widget, filename=filename, screenshot_dir=directory)
         self.width = widget.width()
         self.height = widget.height()
@@ -42,7 +42,7 @@ def algorithm_screenshot(name, directory, version = -1, ext = ".png"):
     """
     import mantid
     if not mantid.__gui__:
-        return "NoGUI-ImageNotGenerated.png"
+        raise RuntimeError("MantidPlot not available. Cannot take screenshot")
 
     import mantidqtpython as mantidqt
     from mantidplot import threadsafe_call

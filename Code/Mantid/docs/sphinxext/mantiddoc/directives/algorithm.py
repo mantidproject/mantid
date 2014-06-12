@@ -54,10 +54,10 @@ class AlgorithmDirective(BaseDirective):
         """
         Outputs a reference to the top of the algorithm's rst
         of the form ".. _algm-AlgorithmName-vVersion:", so that
-        the page can be referenced using 
-        :ref:`algm-AlgorithmName-version`. If this is the highest 
+        the page can be referenced using
+        :ref:`algm-AlgorithmName-version`. If this is the highest
         version then it outputs a reference ".. _algm-AlgorithmName: instead
-        
+
         It then outputs a title for the page
         """
         from mantid.api import AlgorithmFactory
@@ -128,31 +128,30 @@ class AlgorithmDirective(BaseDirective):
                      "   :width: %dpx\n"\
                      "   :align: right\n\n"\
                      "   %s\n\n"
-        
+
         # Sphinx assumes that an absolute path is actually relative to the directory containing the
         # conf.py file and a relative path is relative to the directory where the current rst file
         # is located.
         if picture:
-            filename = os.path.split(picture.imgpath)[1]
+            screenshots_dir, filename = os.path.split(picture.imgpath)
             # Find the width of the image
             width, height = picture.width, picture.height
 
             if height > SCREENSHOT_MAX_HEIGHT:
                 aspect_ratio = float(width)/height
                 width = int(SCREENSHOT_MAX_HEIGHT*aspect_ratio)
-        else:
-            width = 200
+            #endif
 
-        try:
-            screenshots_dir = self._screenshot_directory()
+            # relative path to image
             rel_path = os.path.relpath(screenshots_dir, env.srcdir)
             # This is a href link so is expected to be in unix style
             rel_path = rel_path.replace("\\","/")
             # stick a "/" as the first character so Sphinx computes relative location from source directory
             path = "/" + rel_path + "/" + filename
-        except RuntimeError:
-            # Use path as it is
+        else:
+            # use stock not found image
             path = "/images/ImageNotFound.png"
+            width = 200
 
         caption = "**" + self.algorithm_name() + "** dialog."
         self.add_rst(format_str % (path, width, caption))
