@@ -31,6 +31,14 @@ const std::string PoldiTruncateData::category() const { return "SINQ\\Poldi"; }
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string PoldiTruncateData::summary() const { return "Truncate POLDI time bins according to chopper speed."; }
 
+/** Extract chopper from workspace.
+ *
+ *  A POLDI chopper is constructed from the instrument and log-information present
+ *  in the workspace. If there is no valid instrument or the chopper speed is missing
+ *  from the run information, exceptions are thrown.
+ *
+ *  @param workspace :: MatrixWorkspace containing POLDI data, instrument definition and log.
+ */
 void PoldiTruncateData::setChopperFromWorkspace(MatrixWorkspace_const_sptr workspace)
 {
     /* This stuff will be gone once the changes from ticket #9445 have been integrated (PoldiInstrumentAdapter). */
@@ -54,11 +62,23 @@ void PoldiTruncateData::setChopperFromWorkspace(MatrixWorkspace_const_sptr works
     setChopper(chopper);
 }
 
+/** Sets the chopper used for the calculations.
+ *
+ *  @param chopper :: POLDI chopper compatible with the measurement.
+ */
 void PoldiTruncateData::setChopper(PoldiAbstractChopper_sptr chopper)
 {
     m_chopper = chopper;
 }
 
+/** Extracts timing information from the given MatrixWorkspace.
+ *
+ *  This method checks that the workspace is valid, has at least one histogram and
+ *  at least 2 bins. The bin count is stored, as well as the difference x_1 - x_0 as
+ *  time bin width.
+ *
+ *  @param workspace :: Workspace with POLDI data
+ */
 void PoldiTruncateData::setTimeBinWidthFromWorkspace(MatrixWorkspace_const_sptr workspace)
 {
     if(!workspace || workspace->getNumberHistograms() < 1) {
@@ -75,16 +95,34 @@ void PoldiTruncateData::setTimeBinWidthFromWorkspace(MatrixWorkspace_const_sptr 
     setTimeBinWidth(xData[1] - xData[0]);
 }
 
+/** Sets the width of one time bin.
+ *
+ *  @param timeBinWidth :: Width of one time bin in micro seconds.
+ */
 void PoldiTruncateData::setTimeBinWidth(double timeBinWidth)
 {
     m_timeBinWidth = timeBinWidth;
 }
 
+/** Sets the number of time bins actually present in the data.
+ *
+ *  @param actualBinCount :: Number of time bins.
+ */
 void PoldiTruncateData::setActualBinCount(size_t actualBinCount)
 {
     m_actualBinCount = actualBinCount;
 }
 
+/** Calculates the theoretical number of tim bins.
+ *
+ *  This method calculates the number of time bins according to the chopper speed and
+ *  time bin width by the formula t(chopper cycle) / t(bin).
+ *
+ *  If chopper or time bin width have not been set previously, the method throws an
+ *  std::invalid_argument exception.
+ *
+ *  @return Calculated number of time bins.
+ */
 size_t PoldiTruncateData::getCalculatedBinCount()
 {
     if(!m_chopper) {
@@ -98,6 +136,10 @@ size_t PoldiTruncateData::getCalculatedBinCount()
     return static_cast<size_t>(m_chopper->cycleTime() / m_timeBinWidth);
 }
 
+/** Returns the number of time bins actually stored.
+ *
+ *  @return Actual number of bins in a spectrum.
+ */
 size_t PoldiTruncateData::getActualBinCount()
 {
     return m_actualBinCount;
@@ -137,10 +179,17 @@ void PoldiTruncateData::exec()
         m_log.error() << "  Calculated bin count: " << getCalculatedBinCount() << std::endl;
         m_log.error() << "  Bin count in the workspace: " << getActualBinCount() << std::endl;
     }
-
-
 }
 
+/** Transform the time bin count to the maximum allowed arrival time
+ *
+ *  This method gives the maximum allowed arrival time in the data, calculated this way:
+ *    t(bin width) * (N(bins) - 1)
+ *  The subtraction is necessary because the spectrum starts at 0.
+ *
+ *  @param calculatedBinCount :: Number of bins calculated.
+ *  @return Maximum arrival time present in the data.
+ */
 double PoldiTruncateData::getMaximumTimeValue(size_t calculatedBinCount)
 {
     if(calculatedBinCount == 0 || calculatedBinCount > m_actualBinCount) {
@@ -150,6 +199,15 @@ double PoldiTruncateData::getMaximumTimeValue(size_t calculatedBinCount)
     return m_timeBinWidth * static_cast<double>(calculatedBinCount - 1);
 }
 
+/** Returns the first arrival time value that is not allowed in the data
+ *
+ *  t(bin width) * N(bins) is the first arrival time outside the allowed spectrum.
+ *  If calculated count is larger than actual count, the method throws std::invalid_argument,
+ *  since the workspace is too small to match the experimental parameters.
+ *
+ *  @param calculatedBinCount :: Number of bins calculated.
+ *  @return Minimum arrival time that does not belong to the data.
+ */
 double PoldiTruncateData::getMinimumExtraTimeValue(size_t calculatedBinCount)
 {
     if(calculatedBinCount >= m_actualBinCount) {
@@ -159,6 +217,11 @@ double PoldiTruncateData::getMinimumExtraTimeValue(size_t calculatedBinCount)
     return m_timeBinWidth * static_cast<double>(calculatedBinCount);
 }
 
+/** Returns a MatrixWorkspace cropped to the correct time bin count
+ *
+ *  @param workspace :: Raw POLDI data with possible additional time bins.
+ *  @return Workspace with exactly as many time bins as expected for the experiment parameters.
+ */
 MatrixWorkspace_sptr PoldiTruncateData::getCroppedWorkspace(MatrixWorkspace_sptr workspace)
 {
     double maximumXValue = getMaximumTimeValue(getCalculatedBinCount());
@@ -166,6 +229,20 @@ MatrixWorkspace_sptr PoldiTruncateData::getCroppedWorkspace(MatrixWorkspace_sptr
     return getWorkspaceBelowX(workspace, maximumXValue);
 }
 
+/** Returns a MatrixWorkspace with all extra counts
+ *
+ *  This method takes the input workspce and exracts the extranous time bins that do
+ *  not match the experimental parameters. In an experiment with a chopper cycle time
+ *  of 1500 microseconds and a time bin width of 3 microseconds, there would be 500 bins
+ *  that contain data. If there are more than 500 bins, these can be used to check if
+ *  the instrument is okay - there should be only very few counts in these bins.
+ *
+ *  The method extracts the extra bins and sums them over all spectra (= detector wires),
+ *  so if there were 10 extra bins, this workspace will contain one histogram with 10 bins.
+ *
+ *  @param workspace :: Raw POLDI data.
+ *  @return MatrixWorkspace with summed extra counts.
+ */
 MatrixWorkspace_sptr PoldiTruncateData::getExtraCountsWorkspace(MatrixWorkspace_sptr workspace)
 {
     double minimumXValue = getMinimumExtraTimeValue(getCalculatedBinCount());
@@ -174,6 +251,12 @@ MatrixWorkspace_sptr PoldiTruncateData::getExtraCountsWorkspace(MatrixWorkspace_
     return getSummedSpectra(croppedOutput);
 }
 
+/** Returns a cropped workspace with data below the specified x limit
+ *
+ *  @param workspace :: MatrixWorkspace
+ *  @param x :: Maximum allowed x-value in the data.
+ *  @return MatrixWorkspace cropped to values with x < specified limit.
+ */
 MatrixWorkspace_sptr PoldiTruncateData::getWorkspaceBelowX(MatrixWorkspace_sptr workspace, double x)
 {
     Algorithm_sptr crop = getCropAlgorithmForWorkspace(workspace);
@@ -182,6 +265,12 @@ MatrixWorkspace_sptr PoldiTruncateData::getWorkspaceBelowX(MatrixWorkspace_sptr 
     return getOutputWorkspace(crop);
 }
 
+/** Returns a cropped workspace with data equal to and above the specified x limit
+ *
+ *  @param workspace :: MatrixWorkspace
+ *  @param x :: Minimum allowed x-value in the data.
+ *  @return MatrixWorkspace cropped to values with x >= specified limit.
+ */
 MatrixWorkspace_sptr PoldiTruncateData::getWorkspaceAboveX(MatrixWorkspace_sptr workspace, double x)
 {
     Algorithm_sptr crop = getCropAlgorithmForWorkspace(workspace);
@@ -190,6 +279,14 @@ MatrixWorkspace_sptr PoldiTruncateData::getWorkspaceAboveX(MatrixWorkspace_sptr 
     return getOutputWorkspace(crop);
 }
 
+/** Creates a CropWorkspace-algorithm for the given workspace
+ *
+ *  This method calls createChildAlgorithm() to create an instance of the CropWorkspace algorithm.
+ *  If the creation is successful, the supplied workspace is set as InputParameter.
+ *
+ *  @param workspace :: MatrixWorkspace
+ *  @return Pointer to crop algorithm.
+ */
 Algorithm_sptr PoldiTruncateData::getCropAlgorithmForWorkspace(MatrixWorkspace_sptr workspace)
 {
     Algorithm_sptr crop = createChildAlgorithm("CropWorkspace");
@@ -203,6 +300,11 @@ Algorithm_sptr PoldiTruncateData::getCropAlgorithmForWorkspace(MatrixWorkspace_s
     return crop;
 }
 
+/** Extracts OutputWorkspace property from supplied algorithm is present.
+ *
+ *  @param algorithm :: Pointer to algorithm.
+ *  @return MatrixWorkspace stored in algorithm's OutputWorkspace property.
+ */
 MatrixWorkspace_sptr PoldiTruncateData::getOutputWorkspace(Algorithm_sptr algorithm)
 {
     if(!algorithm || !algorithm->execute()) {
@@ -213,6 +315,13 @@ MatrixWorkspace_sptr PoldiTruncateData::getOutputWorkspace(Algorithm_sptr algori
     return outputWorkspace;
 }
 
+/** Returns a MatrixWorkspace with all spectrum summed up.
+ *
+ *  The summation is done with the SumSpectra-algorithm.
+ *
+ *  @param workspace :: MatrixWorkspace
+ *  @return MatrixWorkspace with one spectrum which contains all counts.
+ */
 MatrixWorkspace_sptr PoldiTruncateData::getSummedSpectra(MatrixWorkspace_sptr workspace)
 {
     Algorithm_sptr sumSpectra = createChildAlgorithm("SumSpectra");
