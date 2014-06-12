@@ -71,14 +71,13 @@ public:
   /// Virtual destructor
   virtual ~ModeratorTzeroLinear() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ModeratorTzeroLinear"; }
-    ///Summary of algorithms purpose
-    virtual const std::string summary() const {return " Corrects the time of flight of an indirect geometry instrument by a time offset that is linearly dependent on the wavelength of the neutron after passing through the moderator.";}
-
+  virtual const std::string name() const;
+  ///Summary of algorithms purpose
+  virtual const std::string summary() const;
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  virtual int version() const;
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "CorrectionFunctions\\InstrumentCorrections"; }
+  virtual const std::string category() const;
 
 private:
   //conversion constants applicable to histogram and event workspaces
