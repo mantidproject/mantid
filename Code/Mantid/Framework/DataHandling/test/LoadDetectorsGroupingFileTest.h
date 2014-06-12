@@ -440,15 +440,16 @@ public:
     LoadDetectorsGroupingFile load;
     load.initialize();
 
-    load.setChild(true); // So output workspace is not going to ADS
-
     TS_ASSERT(load.setProperty("InputFile", file.getFileName()));
     load.setPropertyValue("OutputWorkspace", "Grouping");
 
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    GroupingWorkspace_sptr gws = load.getProperty("OutputWorkspace");
+    auto gws = boost::dynamic_pointer_cast<GroupingWorkspace>(
+          API::AnalysisDataService::Instance().retrieve("Grouping"));
+
+    TS_ASSERT(gws);
 
     // If everything works correctly, should have 32 spectra in the workspace, although the latest
     // IDF for EMU instrument has 96 detectors.
