@@ -23,6 +23,8 @@ namespace Poldi
   DECLARE_ALGORITHM(PoldiCalculateSpectrum2D)
 
   using namespace API;
+  using namespace Kernel;
+  using namespace DataObjects;
 
 
   //----------------------------------------------------------------------------------------------
@@ -53,12 +55,9 @@ namespace Poldi
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string PoldiCalculateSpectrum2D::category() const { return "SINQ\\Poldi\\PoldiSet";}
 
-  //----------------------------------------------------------------------------------------------
-  /// Sets documentation strings for this algorithm
-  void PoldiCalculateSpectrum2D::initDocs()
+  const std::string PoldiCalculateSpectrum2D::summary() const
   {
-    this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
-    this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+      return "Calculates a POLDI 2D-spectrum.";
   }
 
   //----------------------------------------------------------------------------------------------

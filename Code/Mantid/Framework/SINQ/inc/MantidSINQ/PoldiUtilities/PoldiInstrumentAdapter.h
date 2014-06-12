@@ -35,13 +35,11 @@ namespace Poldi
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-using namespace Mantid::Geometry;
-using namespace Mantid::API;
 
 class MANTID_SINQ_DLL PoldiInstrumentAdapter
 {
 public:
-    PoldiInstrumentAdapter(Instrument_const_sptr mantidInstrument, const Run &runInformation);
+    PoldiInstrumentAdapter(Geometry::Instrument_const_sptr mantidInstrument, const API::Run &runInformation);
     virtual ~PoldiInstrumentAdapter();
 
     PoldiAbstractChopper_sptr chopper() const;
@@ -51,9 +49,9 @@ public:
 protected:
     PoldiInstrumentAdapter() { }
 
-    void setDetector(Instrument_const_sptr mantidInstrument);
-    void setChopper(Instrument_const_sptr mantidInstrument, const Run &runInformation);
-    void setSpectrum(Instrument_const_sptr mantidInstrument);
+    void setDetector(Geometry::Instrument_const_sptr mantidInstrument);
+    void setChopper(Geometry::Instrument_const_sptr mantidInstrument, const API::Run &runInformation);
+    void setSpectrum(Geometry::Instrument_const_sptr mantidInstrument);
 
     PoldiAbstractChopper_sptr m_chopper;
     PoldiAbstractDetector_sptr m_detector;

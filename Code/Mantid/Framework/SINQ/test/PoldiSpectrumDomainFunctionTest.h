@@ -17,6 +17,8 @@
 using ::testing::Return;
 
 using namespace Mantid::Poldi;
+using namespace Mantid::API;
+using namespace Mantid::CurveFitting;
 
 class PoldiSpectrumDomainFunctionTest : public CxxTest::TestSuite
 {
@@ -169,7 +171,7 @@ public:
 
     void testCreateInitialized()
     {
-        IFunction_sptr function(new CurveFitting::Gaussian());
+        IFunction_sptr function(new Gaussian());
         function->initialize();
         function->setParameter(0, 1.23456);
         function->setParameter(1, 1.234567);

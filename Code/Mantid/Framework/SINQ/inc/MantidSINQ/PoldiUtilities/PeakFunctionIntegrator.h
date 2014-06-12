@@ -37,8 +37,6 @@ namespace Poldi {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-using namespace Mantid::API;
-
 struct MANTID_SINQ_DLL IntegrationResult {
     double result;
     double error;
@@ -56,15 +54,15 @@ public:
     void setRequiredRelativePrecision(double newPrecision);
     double requiredRelativePrecision() const;
 
-    IntegrationResult integrateInfinity(IPeakFunction_const_sptr peakFunction) const;
-    IntegrationResult integratePositiveInfinity(IPeakFunction_const_sptr peakFunction, double lowerLimit) const;
-    IntegrationResult integrateNegativeInfinity(IPeakFunction_const_sptr peakFunction, double upperLimit) const;
+    IntegrationResult integrateInfinity(API::IPeakFunction_const_sptr peakFunction) const;
+    IntegrationResult integratePositiveInfinity(API::IPeakFunction_const_sptr peakFunction, double lowerLimit) const;
+    IntegrationResult integrateNegativeInfinity(API::IPeakFunction_const_sptr peakFunction, double upperLimit) const;
 
-    IntegrationResult integrate(IPeakFunction_const_sptr peakFunction, double lowerLimit, double upperLimit) const;
+    IntegrationResult integrate(API::IPeakFunction_const_sptr peakFunction, double lowerLimit, double upperLimit) const;
 
 protected:
-    gsl_function getGSLFunction(IPeakFunction_const_sptr peakFunction) const;
-    void throwIfInvalid(IPeakFunction_const_sptr peakFunction) const;
+    gsl_function getGSLFunction(API::IPeakFunction_const_sptr peakFunction) const;
+    void throwIfInvalid(API::IPeakFunction_const_sptr peakFunction) const;
 
     gsl_integration_workspace *m_integrationWorkspace;
 

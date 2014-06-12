@@ -61,23 +61,22 @@ public:
     std::string getProfileFunctionName() const;
     bool hasProfileFunctionName() const;
 
-    TableWorkspace_sptr asTableWorkspace();
+    DataObjects::TableWorkspace_sptr asTableWorkspace();
 
 protected:
     void prepareTable(DataObjects::TableWorkspace_sptr table);
     void dataToTableLog(DataObjects::TableWorkspace_sptr table);
     void peaksToTable(DataObjects::TableWorkspace_sptr table);
-    DataObjects::TableWorkspace_sptr asTableWorkspace();
 
     void constructFromTableWorkspace(DataObjects::TableWorkspace_sptr tableWorkspace);
     bool checkColumns(DataObjects::TableWorkspace_sptr tableWorkspace);
 
     void recoverDataFromLog(DataObjects::TableWorkspace_sptr TableWorkspace);
 
-    std::string getIntensityTypeFromLog(LogManager_sptr tableLog);
-    std::string getProfileFunctionNameFromLog(LogManager_sptr tableLog);
+    std::string getIntensityTypeFromLog(API::LogManager_sptr tableLog);
+    std::string getProfileFunctionNameFromLog(API::LogManager_sptr tableLog);
 
-    std::string getStringValueFromLog(LogManager_sptr logManager, std::string valueName);
+    std::string getStringValueFromLog(API::LogManager_sptr logManager, std::string valueName);
 
     std::string intensityTypeToString(IntensityType type) const;
     IntensityType intensityTypeFromString(std::string typeString) const;

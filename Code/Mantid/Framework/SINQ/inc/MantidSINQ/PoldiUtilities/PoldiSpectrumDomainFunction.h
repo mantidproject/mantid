@@ -38,10 +38,8 @@ namespace Poldi
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-using namespace API;
-using namespace DataObjects;
 
-class MANTID_SINQ_DLL PoldiSpectrumDomainFunction : public ParamFunction
+class MANTID_SINQ_DLL PoldiSpectrumDomainFunction : public API::ParamFunction
 {
 public:
     PoldiSpectrumDomainFunction();
@@ -50,13 +48,13 @@ public:
     
     virtual std::string name() const { return "PoldiSpectrumDomainFunction"; }
 
-    virtual void setWorkspace(boost::shared_ptr<const Workspace> ws);
-    virtual void function(const FunctionDomain &domain, FunctionValues &values) const;
+    virtual void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+    virtual void function(const API::FunctionDomain &domain, API::FunctionValues &values) const;
 
 
 protected:
     virtual void init();
-    void initializeParametersFromWorkspace(Workspace2D_const_sptr workspace2D);
+    void initializeParametersFromWorkspace(DataObjects::Workspace2D_const_sptr workspace2D);
     void initializeInstrumentParameters(PoldiInstrumentAdapter_sptr poldiInstrument);
     std::vector<double> getChopperSlitOffsets(PoldiAbstractChopper_sptr chopper);
 

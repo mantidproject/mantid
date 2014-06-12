@@ -38,8 +38,6 @@ namespace Poldi
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-using namespace Mantid::API;
-
 class MANTID_SINQ_DLL PoldiCalculateSpectrum2D  : public API::Algorithm
 {
 public:
@@ -50,18 +48,19 @@ public:
     virtual int version() const;
     virtual const std::string category() const;
 
+    virtual const std::string summary() const;
+
 protected:
-    PoldiPeakCollection_sptr getPeakCollection(TableWorkspace_sptr peakTable);
+    PoldiPeakCollection_sptr getPeakCollection(DataObjects::TableWorkspace_sptr peakTable);
     PoldiPeakCollection_sptr getIntegratedPeakCollection(PoldiPeakCollection_sptr rawPeakCollection);
     PoldiPeakCollection_sptr getNormalizedPeakCollection(PoldiPeakCollection_sptr peakCollection);
 
-    boost::shared_ptr<MultiDomainFunction> getMultiDomainFunctionFromPeakCollection(PoldiPeakCollection_sptr peakCollection);
+    boost::shared_ptr<API::MultiDomainFunction> getMultiDomainFunctionFromPeakCollection(PoldiPeakCollection_sptr peakCollection);
 
     PoldiTimeTransformer_sptr m_timeTransformer;
     double m_deltaT;
 
 private:
-    virtual void initDocs();
     void init();
     void exec();
 

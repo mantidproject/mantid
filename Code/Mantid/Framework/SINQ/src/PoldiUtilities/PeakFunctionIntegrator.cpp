@@ -8,6 +8,8 @@
 namespace Mantid {
 namespace Poldi {
 
+using namespace API;
+
 /** Constructor with required relative precision argument. The default is 1e-8.
  *  See also PeakFunctionIntegrator::setRequiredRelativePrecision.
  *
