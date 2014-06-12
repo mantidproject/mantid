@@ -44,10 +44,10 @@ namespace Mantid
     /// Initialise the properties
     void PredictFractionalPeaks::init()
     {
-      declareProperty(new WorkspaceProperty<IPeaksWorkspace> ("Peaks", "", Direction::Input),
+      declareProperty(new WorkspaceProperty<PeaksWorkspace> ("Peaks", "", Direction::Input),
         "Workspace of Peaks with orientation matrix that indexed the peaks and instrument loaded");
 
-      declareProperty(new WorkspaceProperty<IPeaksWorkspace> ("FracPeaks", "", Direction::Output),
+      declareProperty(new WorkspaceProperty<PeaksWorkspace> ("FracPeaks", "", Direction::Output),
         "Workspace of Peaks with peaks with fractional h,k, and/or l values");
 
       declareProperty(new Kernel::ArrayProperty<double>(string("HOffset"),string("-.5,0, .5")),"Offset in the h direction");
@@ -90,7 +90,7 @@ namespace Mantid
     /// Run the algorithm
     void PredictFractionalPeaks::exec()
     {
-      IPeaksWorkspace_sptr Peaks=getProperty("Peaks");
+      PeaksWorkspace_sptr Peaks=getProperty("Peaks");
 
       vector<double> hOffsets = getProperty("HOffset");
       vector<double> kOffsets = getProperty("KOffset");
