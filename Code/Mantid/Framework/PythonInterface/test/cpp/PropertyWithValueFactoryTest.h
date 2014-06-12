@@ -8,6 +8,7 @@
   #pragma warning(disable:4005)
 #endif
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #ifdef _MSC_VER
   #pragma warning(push)
 #endif
@@ -18,6 +19,7 @@
 //-------------------------------------------------------------------------
 
 using Mantid::PythonInterface::Registry::PropertyWithValueFactory;
+using Mantid::PythonInterface::Converters::PySequenceToVector;
 using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::Direction;
 
@@ -32,6 +34,17 @@ class PropertyWithValueFactoryTest: public CxxTest::TestSuite
         object pyvalue = object(handle<>(PythonCall));\
         boost::shared_ptr<PropertyWithValue<CType> > valueProp = createAndCheckPropertyTraits<CType>("TestProperty", pyvalue, Direction::Input);\
         checkPropertyValue<CType>(valueProp, pyvalue);\
+      }
+
+    #define CREATE_ARRAY_PROPERTY_TEST_BODY(CType, PythonCall) \
+      \
+      {\
+        using namespace boost::python;\
+        using namespace Mantid::Kernel;\
+        typedef std::vector<CType> TypeVec;\
+        object pyvalue = object(handle<>(PythonCall));\
+        boost::shared_ptr<PropertyWithValue<TypeVec> > valueProp = createAndCheckPropertyTraits<TypeVec>("TestProperty", pyvalue, Direction::Input);\
+        checkArrayPropertyValue<CType>(valueProp, pyvalue);\
       }
 
     void test_builtin_type_creates_int_type_property_without_error()
@@ -51,7 +64,7 @@ class PropertyWithValueFactoryTest: public CxxTest::TestSuite
 
     void test_builtin_type_create_double_array_from_tuple_type_property()
     {
-      CREATE_PROPERTY_TEST_BODY(std::vector<double>, Py_BuildValue("(ff)", 0.5, 1.45));
+      CREATE_ARRAY_PROPERTY_TEST_BODY(double, Py_BuildValue("(ff)", 0.5, 1.45));
     }
 
 private:
@@ -79,6 +92,18 @@ private:
       const ValueType srcValue = boost::python::extract<ValueType>(expectedValue);
       const ValueType propValue = (*valueProp)();
       TS_ASSERT_EQUALS(srcValue, propValue);
+    }
+
+    template<typename ValueType>
+    void checkArrayPropertyValue(boost::shared_ptr<PropertyWithValue<std::vector<ValueType>>> valueProp,
+                                 const boost::python::object & expectedValue)
+    {
+      const auto srcValue = PySequenceToVector<ValueType>(expectedValue)();
+      const auto propValue = (*valueProp)();
+      // Check size
+      TS_ASSERT_EQUALS(srcValue.size(), propValue.size());
+      // Check first element
+      TS_ASSERT_EQUALS(srcValue[0], propValue[0]);
     }
 };
 
