@@ -84,7 +84,7 @@ Usage
 
     ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
     ws = ConvertUnits(ws,"Wavelength")
-    ws = Rebin(ws,Param=[1])
+    ws = Rebin(ws,Params=[1])
     CreateSampleShape(ws,sphere)
     SetSampleMaterial(ws,ChemicalFormula="V")
 
