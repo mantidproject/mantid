@@ -18,7 +18,7 @@ def main():
     src_dir = "@CMAKE_CURRENT_SOURCE_DIR@/source"
     sphinx_build_dir = "@SPHINX_BUILD_DIR@"
     output_dir = os.path.join(sphinx_build_dir, builder)
-    doctree_dir = os.path.join(sphinx_build_dir, "doctrees")
+    doctree_dir = os.path.join(sphinx_build_dir, "doctrees", builder)
 
     # See if we have been told to only process a particular file
     src_file = os.environ.get("DOCS_SRC_FILE", None)
