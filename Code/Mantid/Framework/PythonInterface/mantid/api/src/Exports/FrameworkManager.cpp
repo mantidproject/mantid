@@ -28,7 +28,7 @@ void export_FrameworkManager()
 
     .def("clearInstruments", &FrameworkManagerImpl::clearInstruments, "Clear memory held by the cached instruments")
 
-    .def("clearProperties", &FrameworkManagerImpl::clearProperties, "Clear memory held by the PropertyManagerDataService")
+    .def("clearPropertyManagers", &FrameworkManagerImpl::clearPropertyManagers, "Clear memory held by the PropertyManagerDataService")
 
     .def("Instance", &FrameworkManager::Instance, return_value_policy<reference_existing_object>(),
          "Returns a reference to the FrameworkManager singleton")

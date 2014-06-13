@@ -184,7 +184,7 @@ void FrameworkManagerImpl::clear()
   clearAlgorithms();
   clearInstruments();
   clearData();
-  clearProperties();
+  clearPropertyManagers();
 }
 
 /**
@@ -213,9 +213,9 @@ void FrameworkManagerImpl::clearInstruments()
 }
 
 /**
- * Clear memory associated with the PropertyManager
+ * Clear memory associated with the PropertyManagers
  */
-void FrameworkManagerImpl::clearProperties()
+void FrameworkManagerImpl::clearPropertyManagers()
 {
   PropertyManagerDataService::Instance().clear();
 }
