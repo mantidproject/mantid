@@ -21,17 +21,23 @@ The input PeaksWorkspace must contain an orientation matrix and have
 been INDEXED by THIS MATRIX when the new peaks are not created from a
 range of h ,k, and l values
 
-Example usage
-#############
 
-from mantidsimple import \* PeaksWrkSpace=mtd["PeaksQa"]
+Usage
+-----
 
-#. Can be created via PredictPeaks( then do NOT use next line)
+**Example:**
 
-FindUBUsingFFT(PeaksWrkSpace,3,15,.12) IndexPeaks(PeaksWrkSpace,.12,1)
-PredictFractionalPeaks(PeaksWrkSpace,"FracPeaks","-.5,0,.5","-.5,.5","0")
+.. This test is not run at the moment as it creates an exception in python.  Ticket 9642 is in place to fix this and reinstate the test
 
-#. NOTE: There are editing options on PeaksWorkspaces, like combining 2
-   PeaksWorkspaces.
+.. code:: Python
 
-.. categories::
+    ws=LoadIsawPeaks("TOPAZ_3007.peaks")
+    LoadIsawUB(ws,"ls5637.mat")
+    IndexPeaks(ws)
+
+    PredictFractionalPeaks(ws,FracPeaks='wsPeaksOut',HOffset=[-0.5,0,0.5],KOffset=0,LOffset=0.2)
+
+
+
+    
+
