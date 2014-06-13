@@ -11,7 +11,7 @@ Description
 
 Subtract the dark current from a HFIR SANS data set. 
 This algorithm is rarely called directly. It is called by 
-`HFIRSANSReduction <http://www.mantidproject.org/HFIRSANSReduction>`_.
+:ref:`HFIRSANSReduction <algm-HFIRSANSReduction>`.
 
 
 This workflow algorithm will:

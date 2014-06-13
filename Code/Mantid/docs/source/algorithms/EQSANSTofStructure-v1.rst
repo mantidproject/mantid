@@ -17,6 +17,6 @@ This algorithm will trim the edges of the TOF distribution according to the inpu
 It will also correct the TOF values for the flight path of the neutrons.
 
 This algorithm is rarely called directly. It is called by 
-`EQSANSLoad <http://www.mantidproject.org/EQSANSLoad>`_.
+:ref:`EQSANSLoad <algm-EQSANSLoad>`.
 
 .. categories::

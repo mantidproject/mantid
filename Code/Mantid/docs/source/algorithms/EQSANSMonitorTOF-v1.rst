@@ -14,6 +14,6 @@ the chopper settings. The algorithm determines whether the data was taken
 in frame skipping mode in order to perform the proper frame correction.
 
 This algorithm is rarely called directly. It is called by 
-`EQSANSNormalise <http://www.mantidproject.org/EQSANSNormalise>`_.
+:ref:`EQSANSNormalise <algm-EQSANSNormalise>`.
 
 .. categories::

@@ -11,9 +11,7 @@ Description
 
 Subtract the dark current from an EQSANS data set. 
 This algorithm is rarely called directly. It is called by 
-`SANSReduction <http://www.mantidproject.org/SANSReduction>`_.
-
-
+:ref:`SANSReduction <algm-SANSReduction>`.
 
 This workflow algorithm will:
 

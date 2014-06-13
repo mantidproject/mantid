@@ -14,7 +14,6 @@ in the logs by the reduction UI. It can also apply a mask to the edge of the det
 according to whether we are dealing with EQSANS or a HFIR SANS.
 
 This algorithm is rarely called directly. It is called by 
-`SANSReduction <http://www.mantidproject.org/SANSReduction>`_ or
-`HFIRSANSReduction <http://www.mantidproject.org/HFIRSANSReduction>`_.
+:ref:`SANSReduction <algm-SANSReduction>` or :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>`.
 
 .. categories::

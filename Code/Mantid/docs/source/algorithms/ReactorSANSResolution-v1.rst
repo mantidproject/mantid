@@ -14,7 +14,7 @@ wavelength information, the apertures and the source, sample and detector positi
 to compute the Q resolution and add it to the workspace.
 
 This algorithm is generally not called directly. It's called by 
-`SANSAzimuthalAverage1D <http://www.mantidproject.org/SANSAzimuthalAverage1D>`_
+:ref:`SANSAzimuthalAverage1D <algm-SANSAzimuthalAverage1D>`
 after the calculation of I(Q). It can only be applied to an I(Q) workspace.
 
 .. categories::

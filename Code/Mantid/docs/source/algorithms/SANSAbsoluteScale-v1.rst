@@ -30,6 +30,6 @@ where :math:`N_b` is the total count within the distance of a beam diameter of t
 The input workspace is then scaled by :math:`1/f`.
 
 This algorithm is rarely called directly. It is called by 
-`HFIRSANSReduction <http://www.mantidproject.org/HFIRSANSReduction>`_.
+:ref:`HFIRSANSReduction <algm-HFIRSANSReduction>`.
 
 .. categories::

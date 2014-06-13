@@ -12,15 +12,14 @@ Description
 Process a detector sensitivity workspace and patch the area defined by
 the masked pixels in the provided *PatchWorkspace*.
 
-This algorithm is usually set up by
-`ComputeSensitivity <http://www.mantidproject.org/ComputeSensitivity>`_ and 
-executed by
-`SANSSensitivityCorrection <http://www.mantidproject.org/SANSSensitivityCorrection>`_.
+This algorithm is usually set up by 
+:ref:`ComputeSensitivity <algm-ComputeSensitivity>` and 
+executed by 
+:ref:`SANSSensitivityCorrection <algm-SANSSensitivityCorrection>`.
 
 The *InputWorkspace* is a pre-calculated sensitivity workspace, usually computed
-using the
-`SANSSensitivityCorrection <http://www.mantidproject.org/SANSSensitivityCorrection>`_
-algorithm.
+using the 
+:ref:`SANSSensitivityCorrection <algm-SANSSensitivityCorrection>` algorithm.
 The *PatchWorkspace* is a workspace where the pixels to patch are marked as masked.
 The actual data of the *PatchWorkspace* is not used, only the masking information.
 

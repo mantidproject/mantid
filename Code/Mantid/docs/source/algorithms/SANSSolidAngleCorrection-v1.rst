@@ -11,8 +11,7 @@ Description
 
 Performs a solid angle correction on all detector pixels.
 This algorithm is usually called by
-`HFIRSANSReduction <http://www.mantidproject.org/HFIRSANSReduction>`_ or
-`SANSReduction <http://www.mantidproject.org/SANSReduction>`_.
+:ref:`SANSReduction <algm-SANSReduction>` or :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>`.
 
 The solid angle correction is applied as follows:
 

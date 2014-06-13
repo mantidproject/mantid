@@ -10,7 +10,7 @@ Description
 -----------
 
 Performs data normalisation for HFIR SANS. This algorithm is usually called by
-`HFIRSANSReduction <http://www.mantidproject.org/HFIRSANSReduction>`_.
+:ref:`HFIRSANSReduction <algm-HFIRSANSReduction>`.
 
 According to the *NormalisationType* property, which can be set to "Monitor" or "Timer",
 the algorithm will retrieve the corresponding value and scale the input workspace by it.

@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm extends the 
-`TOFSANSResolution <http://www.mantidproject.org/TOFSANSResolution>`_
+:ref:`TOFSANSResolution <algm-TOFSANSResolution>`
 to implement the experimentally determined TOF resolution for EQSANS.
 
 The Q resolution for a TOF SANS has two components: a geometrical contribution and a 
@@ -37,7 +37,7 @@ where :math:`\lambda` is the wavelength and
 :math:`k_2 = -65.46`
 
 This algorithm is generally not called directly. It's called by 
-`EQSANSAzimuthalAverage1D <http://www.mantidproject.org/EQSANSAzimuthalAverage1D>`_
+:ref:`EQSANSAzimuthalAverage1D <algm-EQSANSAzimuthalAverage1D>`
 after the calculation of I(Q). It can only be applied to an I(Q) workspace.
 
 .. categories::

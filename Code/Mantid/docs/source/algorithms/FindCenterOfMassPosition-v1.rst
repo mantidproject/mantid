@@ -48,6 +48,6 @@ Usage
    workspace = LoadSpice2D('BioSANS_empty_cell.xml')
    
    # Compute the center position, which will be put in a table workspace
-   FindCenterOfMassPosition('workspace', Output='center')
+   FindCenterOfMassPosition('workspace', Output='center', Version=1)
    
 .. categories::

@@ -25,7 +25,7 @@ an input workspace.
 
 
 The relative detector efficiency is computed using the 
-`CalculateEfficiency <http://www.mantidproject.org/CalculateEfficiency>`_
+:ref:`CalculateEfficiency <algm-CalculateEfficiency>`
 algorithm the following way:
 
 :math:`S(x,y)=\frac{I_{flood}(x,y)}{1/N_{pixels}\sum_{i,j}I_{flood}(i,j)}`
@@ -47,13 +47,16 @@ subtraction is done before the sensitivity is calculated.
 If the user chose to use the solid angle correction for the reduction process, 
 that correction will be applied to the flood data before the sensitivity is calculated.
 
+This algorithm is usually called by
+:ref:`SANSReduction <algm-SANSReduction>` or :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>`.
+
 **Note 1**: The solid angle correction is either not applied at all, or applied to both 
 the flood data to calculate the sensitivity correction and applied to the sample data as part of the reduction process.
 
 **Note 2**: EQSANS has the option to patch masked areas of the detector using the
 efficiency calculated for the unmasked portion of each tube. This creates a sensitivity
-file that covers the entire detector. This option can be enabled by using the
-`ComputeSensitivity <http://www.mantidproject.org/ComputeSensitivity>`_
+file that covers the entire detector. This option can be enabled by using the 
+:ref:`ComputeSensitivity <algm-ComputeSensitivity>` 
 workflow algorithm to create a sensitivity workspace, which can then be saved and used 
 for EQSANS reduction as a pre-calculated sensitivity file.
 

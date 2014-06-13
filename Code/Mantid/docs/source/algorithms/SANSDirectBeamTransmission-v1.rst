@@ -11,7 +11,7 @@ Description
 
 Worfklow algorithm used to compute and apply the sample transmission correction using 
 the direct beam method. The transmission is calculated by the
-`CalculateTransmission <http://www.mantidproject.org/CalculateTransmission>`_
+:ref:`CalculateTransmission <algm-CalculateTransmission>`
 as follows:
 
 :math:`T=\frac{\sum_{i;\ d(i,j)<R}\ \sum_{j} \frac{I_{sample}(i,j)}{T_{sample}}}{\sum_{i;\ d(i,j)<R}\ \sum_{j} \frac{I_{beam}(i,j)}{T_{beam}}}`
@@ -29,14 +29,13 @@ is calculated.
 
 
 For each detector pixel, the transmission correction is applied by the
-`ApplyTransmissionCorrection <http://www.mantidproject.org/ApplyTransmissionCorrection>`_
+:ref:`ApplyTransmissionCorrection <algm-ApplyTransmissionCorrection>`
 as follows:
 
 :math:`I'(x,y)=\frac{I(x,y)}{T^{[1+\sec(2\theta)]/2}}
 \sigma_{I'(x,y)}=[[{\frac{\sigma_I}{{T^{[1+\sec(2\theta)]/2}}}}]^2 + [{\frac{I(x,y)\sigma_T(\frac{1+\sec(2\theta)}{2})}{{T^{[\sec(2\theta)-1]/2}}}}]^2]^{1/2}`
 
 This algorithm is rarely called directly. It is called by 
-`HFIRSANSReduction <http://www.mantidproject.org/HFIRSANSReduction>`_ or
-`EQSANSDirectBeamTransmission <http://www.mantidproject.org/EQSANSDirectBeamTransmission>`_.
+:ref:`HFIRSANSReduction <algm-HFIRSANSReduction>` or :ref:`EQSANSDirectBeamTransmission <algm-EQSANSDirectBeamTransmission>`.
 
 .. categories::
