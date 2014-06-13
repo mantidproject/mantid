@@ -33,7 +33,7 @@ Usage
    SaveNISTDAT(data, file_path)
 
    # Load it back in and inspect what we have.
-   reloaded_data = Load(file_path)
+   reloaded_data = LoadAscii(file_path)
    print "The data read back in is " + str(reloaded_data.readY(0))
 
 .. testcleanup:: ExSaveRoundtrip

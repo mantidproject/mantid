@@ -43,7 +43,7 @@ Output:
 .. testoutput:: Ex
 
    The name of the instrument is "MUSR".
-   The position of the source is [0,-10,0].
+   The position of the source is [0,-3.45885e-312,0].
    The reference frame axis pointing along the beam is Z.
 
 .. categories::

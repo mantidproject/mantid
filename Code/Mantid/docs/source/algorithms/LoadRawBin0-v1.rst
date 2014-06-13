@@ -22,7 +22,7 @@ Usage
 .. testcode:: Ex
 
    #Bin 0 contains any data outside of the time range.
-   bin_zeroes = LoadRawBin0("IRS21360")
+   bin_zeroes = LoadRawBin0("IRS21360.raw")
    total = SumSpectra(bin_zeroes)
 
    print "Bin0 contained %i counts." % total.readY(0)[0]
