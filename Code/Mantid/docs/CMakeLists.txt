@@ -90,17 +90,13 @@ if ( SPHINX_FOUND )
 
      # must "make qtassistant" before "make package" otherwise there will be a build failure
      install (FILES ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qhc
-                    ${SPHINX_BUILD_DIR}/qthelp/genindex.html
-                    ${SPHINX_BUILD_DIR}/qthelp/index.html
-                    ${SPHINX_BUILD_DIR}/qthelp/py-modindex.html
-                    ${SPHINX_BUILD_DIR}/qthelp/search.html
+                    ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qch
               DESTINATION ${HTML_DOCS_DEST} )
-     install ( DIRECTORY  ${SPHINX_BUILD_DIR}/qthelp/algorithms
-                          ${SPHINX_BUILD_DIR}/qthelp/api
-                          ${SPHINX_BUILD_DIR}/qthelp/categories
-                          ${SPHINX_BUILD_DIR}/qthelp/functions
-                          ${SPHINX_BUILD_DIR}/qthelp/_images
-                          ${SPHINX_BUILD_DIR}/qthelp/_static
+     install ( DIRECTORY  ${SPHINX_BUILD_DIR}/qthelp/
+              DESTINATION ${HTML_DOCS_DEST}
+              FILES_MATCHING PATTERN "*.html" )
+     install ( DIRECTORY  ${SPHINX_BUILD_DIR}/qthelp/_images/
+                          ${SPHINX_BUILD_DIR}/qthelp/_static/
               DESTINATION ${HTML_DOCS_DEST} )
     else( QT_QCOLLECTIONGENERATOR_EXECUTABLE)
       install ( DIRECTORY ${SPHINX_BUILD_DIR}/html
