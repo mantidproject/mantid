@@ -45,7 +45,8 @@ Usage
    print "Number of spectra: " +  str(ws.getNumberHistograms())
    print "Number of bins: " +  str(ws.blocksize())
    print "Each spectra has a level backgound of " + str(ws.readY(0)[0]) + \
-    " counts and a peak in the centre of " + str(ws.readY(0)[50]) + " counts."				
+    " counts and a peak in the centre of " + str(ws.readY(0)[50]) + " counts."		
+
 Output:
 
 .. testoutput:: ExHistSimple
@@ -68,6 +69,7 @@ Output:
    #The data itensity of an EventWorkspce is scaled by the number of events used, so the values differ from the histogram above.
    print "Each spectra has a level backgound of " + str(ws.readY(0)[0]) + \
    	" counts and a peak in the centre of " + str(ws.readY(0)[50]) + " counts."				
+      
 Output:
 
 .. testoutput:: ExEventSimple
