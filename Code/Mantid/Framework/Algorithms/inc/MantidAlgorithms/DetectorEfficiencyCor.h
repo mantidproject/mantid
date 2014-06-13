@@ -90,7 +90,7 @@ class DLLExport DetectorEfficiencyCor : public API::Algorithm
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "DetectorEfficiencyCor"; }
     ///Summary of algorithms purpose
-    virtual const std::string summary() const {return "This algorithm adjusts the binned data in a workspace for detector efficiency, calculated from the neutrons' kinetic energy, the gas filled detector's geometry and gas pressure. The data are then multiplied by <math>k_i/k_f</math>.";}
+    virtual const std::string summary() const {return "This algorithm adjusts the binned data in a workspace for detector efficiency, calculated from the neutrons' kinetic energy, the gas filled detector's geometry and gas pressure. The data are then multiplied by :math:`k_i/k_f`";}
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
