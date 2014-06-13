@@ -35,6 +35,7 @@ set ( SRC_FILES
 	src/UserFunctionDialog.cpp
 	src/WorkspaceEditorFactory.cpp
 	src/WorkspaceSelector.cpp
+    src/pqHelpWindow.cxx
 	src/pythonCalc.cpp
 )
 
@@ -60,12 +61,13 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MWDiag.h
     inc/MantidQtMantidWidgets/MWRunFiles.h
     inc/MantidQtMantidWidgets/PeakPicker.h
+    inc/MantidQtMantidWidgets/pqHelpWindow.h
     inc/MantidQtMantidWidgets/PropertyHandler.h
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.h
     inc/MantidQtMantidWidgets/pythonCalc.h
     inc/MantidQtMantidWidgets/RangeSelector.h
     inc/MantidQtMantidWidgets/RenameParDialog.h
-	  inc/MantidQtMantidWidgets/SafeQwtPlot.h
+    inc/MantidQtMantidWidgets/SafeQwtPlot.h
     inc/MantidQtMantidWidgets/SaveWorkspaces.h
     inc/MantidQtMantidWidgets/ScriptEditor.h
     inc/MantidQtMantidWidgets/SelectFunctionDialog.h
@@ -99,12 +101,16 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/SelectFunctionDialog.ui
     inc/MantidQtMantidWidgets/SequentialFitDialog.ui
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
+    inc/MantidQtMantidWidgets/pqHelpWindow.ui
 )
 
 # Python unit tests
 set ( TEST_PY_FILES
   test/MWRunFilesTest.py
 )
+
+find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
+include(${QT_USE_FILE})
 
 include_directories ( ../../QtPropertyBrowser/src )
 
