@@ -1,7 +1,6 @@
 from mantid.kernel import *
 from mantid.api import *
 import math
-import EnginXUtils
 
 class EnginXCalibrateFull(PythonAlgorithm):
 	def category(self):
@@ -26,6 +25,8 @@ class EnginXCalibrateFull(PythonAlgorithm):
 			"A table with calibrated detector positions as accepted by ApplyCalibration algorithm.")
 		
 	def PyExec(self):
+
+		import EnginXUtils
 
 		ws = self._loadCalibrationRun()
 

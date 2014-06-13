@@ -1,6 +1,5 @@
 from mantid.kernel import *
 from mantid.api import *
-import EnginXUtils
 
 class EnginXFocus(PythonAlgorithm):
 	def category(self):
@@ -99,6 +98,9 @@ class EnginXFocus(PythonAlgorithm):
 
 		    NB: This assumes spectra for a bank are consequent.
 		"""
+
+		import EnginXUtils
+		
 		indices = EnginXUtils.getWsIndicesForBank(self.getProperty('Bank').value, ws)
 				
 		# Leave only spectra between min and max
