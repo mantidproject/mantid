@@ -30,28 +30,56 @@ macro ( SPHINX_ADD_TEST _testname_prefix _doctest_runner_script )
   # that file.
 
   # Property for the module directory
-  if ( MSVC )
+  if ( MSVC OR CMAKE_GENERATOR STREQUAL Xcode) # both have separate configs
+    set ( _multiconfig TRUE )
     set ( _module_dir ${CMAKE_BINARY_DIR}/bin/Release )
     set ( _module_dir_debug ${CMAKE_BINARY_DIR}/bin/Debug )
     set ( _working_dir ${_module_dir} )
     set ( _working_dir_debug ${_module_dir_debug} )
+    if ( MSVC )
+     set ( _debug_exe ${PYTHON_EXECUTABLE_DEBUG} )
+     set ( _release_exe ${PYTHON_EXECUTABLE} )
+    else()
+     set ( _debug_exe ${PYTHON_EXECUTABLE} )
+     set ( _release_exe ${PYTHON_EXECUTABLE} )
+    endif()
   else()
     set ( _module_dir ${CMAKE_BINARY_DIR}/bin )
     set ( _working_dir ${_module_dir} )
+    set ( _debug_exe ${PYTHON_EXECUTABLE} )
+    set ( _release_exe ${PYTHON_EXECUTABLE} )
   endif()
-
+  
   foreach ( part ${ARGN} )
       set ( _fullpath ${SPHINX_SRC_DIR}/${part} )
       get_filename_component( _filename ${part} NAME )
       get_filename_component( _docname ${part} NAME_WE )
       set ( _testname "${_testname_prefix}_${_docname}" )
 
-      add_test ( NAME ${_testname}
-                 COMMAND ${PYTHON_EXECUTABLE} ${_doctest_runner_script} )
-      set_property ( TEST ${_testname} PROPERTY
-                     ENVIRONMENT "SPHINX_SRC_FILE=${_fullpath}" )
-      set_property ( TEST ${_testname} PROPERTY
-                     WORKING_DIRECTORY ${_working_dir} )
+      if ( _multiconfig )
+        # Debug builds need to call the debug executable
+        add_test ( NAME ${_testname}_Debug CONFIGURATIONS Debug
+                   COMMAND ${_debug_exe} ${_doctest_runner_script} )
+        set_property ( TEST ${_testname}_Debug PROPERTY
+                       ENVIRONMENT "SPHINX_SRC_FILE=${_fullpath};RUNTIME_CONFIG=Debug" )
+        set_property ( TEST ${_testname}_Debug PROPERTY
+                       WORKING_DIRECTORY ${_working_dir} )
+
+        # Release
+        add_test ( NAME ${_testname} CONFIGURATIONS Release
+                   COMMAND ${_release_exe} ${_doctest_runner_script} )
+        set_property ( TEST ${_testname} PROPERTY
+                       ENVIRONMENT "SPHINX_SRC_FILE=${_fullpath};RUNTIME_CONFIG=Release" )
+        set_property ( TEST ${_testname} PROPERTY
+                       WORKING_DIRECTORY ${_working_dir} )
+      else ()
+        add_test ( NAME ${_testname}
+                   COMMAND ${_release_exe} ${_doctest_runner_script} )
+        set_property ( TEST ${_testname} PROPERTY
+                       ENVIRONMENT "SPHINX_SRC_FILE=${_fullpath}" )
+        set_property ( TEST ${_testname} PROPERTY
+                       WORKING_DIRECTORY ${_working_dir} )
+      endif()
   endforeach ()
 
 endmacro ()

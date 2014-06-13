@@ -7,7 +7,11 @@ import sys
 
 def main():
     # Update path to find mantid
-    sys.path.insert(0, "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@")
+    package_dir = "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
+    runtime_config = os.environ.get("RUNTIME_CONFIG", "") # for visual studio and xcode
+    if runtime_config != "":
+        package_dir = os.path.join(package_dir, runtime_config)
+    sys.path.insert(0, package_dir)
 
     # Update environment with screenshots path
     screenshots_dir = "@SCREENSHOTS_DIR@"
