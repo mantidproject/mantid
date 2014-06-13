@@ -1,10 +1,3 @@
-/*WIKI*
-This algorithm looks for an internally-stored monitor workspace on the input workspace and
-sets it as the output workspace if found. The input workspace will no longer hold a reference
-to the monitor workspace after this algorithm has been run on it.
-If no monitor workspace is present the algorithm will fail.
-*WIKI*/
-
 #include "MantidDataHandling/ExtractMonitorWorkspace.h"
 
 namespace Mantid
