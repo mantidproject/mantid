@@ -6,6 +6,9 @@ import os
 import sys
 
 def main():
+    # Update path to find mantid
+    sys.path.insert(0, "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@")
+
     # Update environment with screenshots path
     screenshots_dir = "@SCREENSHOTS_DIR@"
     if screenshots_dir != "":
