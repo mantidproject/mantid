@@ -67,6 +67,22 @@ class PropertyWithValueFactoryTest: public CxxTest::TestSuite
       CREATE_ARRAY_PROPERTY_TEST_BODY(double, Py_BuildValue("(ff)", 0.5, 1.45));
     }
 
+    void test_builtin_type_create_string_array_from_tuple_type_property()
+    {
+      CREATE_ARRAY_PROPERTY_TEST_BODY(std::string, Py_BuildValue("(ss)", "Test1", "Pass2"));
+    }
+
+    void test_builtin_type_create_long_array_from_list_type_property()
+    {
+      CREATE_ARRAY_PROPERTY_TEST_BODY(long, Py_BuildValue("[NN]",
+                                                          PyLong_FromLong(-10), PyLong_FromLong(4)));
+    }
+
+    void test_builtin_type_create_int_array_from_list_type_property()
+    {
+      CREATE_ARRAY_PROPERTY_TEST_BODY(int, Py_BuildValue("[ii]", -10, 4));
+    }
+
 private:
     template<typename ExpectedType>
     boost::shared_ptr<PropertyWithValue<ExpectedType> >
