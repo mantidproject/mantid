@@ -80,7 +80,7 @@ if ( SPHINX_FOUND )
   set ( BUILDER doctest )
   configure_file ( runsphinx.py.in runsphinx_doctest.py @ONLY )
   add_custom_target ( ${TARGET_PREFIX}-test
-    COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_doctest.py
+    COMMAND ${PYTHON_EXECUTABLE} runsphinx_doctest.py
     DEPENDS Framework MantidPlot
     COMMENT "Running documentation tests"
   )
