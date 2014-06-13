@@ -27,8 +27,7 @@ Usage
 
 **Example:**
 
-.. comment::
-    This test is not run at the moment as it creates an exception in python.  Ticket 9642 is in place to fix this and reinstate the test
+.. This test is not run at the moment as it creates an exception in python.  Ticket 9642 is in place to fix this and reinstate the test
 
 .. code:: Python
 

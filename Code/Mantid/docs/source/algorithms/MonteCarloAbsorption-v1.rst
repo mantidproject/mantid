@@ -75,7 +75,7 @@ Output:
 
 **Example: A simple spherical sample in a cylindrical container**
 
-.. comment:: Ticket 9644 is in place to improve the python exports and expand this example
+.. Ticket 9644 is in place to improve the python exports and expand this example
 
 .. code:: python
     
