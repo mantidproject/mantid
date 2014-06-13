@@ -40,8 +40,7 @@ void PoldiRemoveDeadWires::init()
 
     // The output Tableworkspace with columns containing key summary information about the PoldiDeadWires.
     declareProperty(new WorkspaceProperty<ITableWorkspace>("PoldiDeadWires","",Direction::Output),
-        "The input Tableworkspace"
-        "with columns containing key summary information about the PoldiDeadWires.");
+        "The input Tableworkspace with columns containing key summary information about the PoldiDeadWires.");
 
     // Should we remove the declare dead wires
 	declareProperty("RemoveExcludedWires", true, "Set to 0 the data value of all the excluded wires.");
