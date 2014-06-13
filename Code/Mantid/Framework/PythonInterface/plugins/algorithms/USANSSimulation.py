@@ -17,11 +17,13 @@ class USANSSimulation(PythonAlgorithm):
         
     def PyInit(self):
         self.declareProperty("TwoTheta", 0.01, "Scattering angle in degrees")
-        self.declareProperty(FloatArrayProperty("WavelengthPeaks", values=[0.9, 1.2, 1.8, 3.6],
+        self.declareProperty(FloatArrayProperty("WavelengthPeaks", values=[0.72, 0.9, 1.2, 1.8, 3.6],
                              direction=Direction.Input), "Wavelength peaks out of the monochromator")
+        self.declareProperty("CountTime", 1000.0, "Fake count time")
 
         # Model parameters
-        self.declareProperty("SphereRadius", 200.0, "Radius for the sphere model (Angstrom)")
+        self.declareProperty("EmptyRun", False, "If True, the run is considered an empty run")
+        self.declareProperty("SphereRadius", 60.0, "Radius for the sphere model (Angstrom)")
         self.declareProperty("Background", 0.0, "Background")
         self.declareProperty("SigmaPeak", 0.01, "Width of the wavelength peaks")
         
@@ -33,7 +35,8 @@ class USANSSimulation(PythonAlgorithm):
         out_ws = CreateSimulationWorkspace(Instrument="USANS",
                                            BinParams="0,50,32000",
                                            UnitX="TOF",
-                                           OutputWorkspace=workspace)        
+                                           OutputWorkspace=workspace)  
+        out_ws.setYUnitLabel("1/cm")     
 
         data_x = out_ws.dataX(0)
         mon_ws_name = self.getPropertyValue("MonitorWorkspace")
@@ -51,18 +54,25 @@ class USANSSimulation(PythonAlgorithm):
                 data_y[i] = 0.0
                 
         # Fill monitor workspace with fake beam profile
+        count_time = self.getProperty("CountTime").value
         for i in range(len(data_x)-1):
             wl_i = 0.0039560/30.0*(data_x[i]+data_x[i+1])/2.0
-            mon_y[i] = 1000.0*math.exp(-wl_i)
+            mon_y[i] = count_time*math.exp(-wl_i)
             mon_e[i] = math.sqrt(mon_y[i])
             
         # Add analyzer theta value and monochromator angle theta_b in logs
         two_theta = self.getProperty("TwoTheta").value
+        is_empty_run = self.getProperty("EmptyRun").value
+        if is_empty_run:
+            two_theta = 0.0
+            
         theta_b = 70.0
         theta = theta_b + two_theta
         out_ws.getRun().addProperty("AnalyzerTheta", theta, 'degree', True)
-        out_ws.getRun().addProperty("TwoTheta", two_theta, 'degree', True)
+        out_ws.getRun().addProperty("two_theta", two_theta, 'degree', True)
         out_ws.getRun().addProperty("MonochromatorTheta", theta_b, 'degree', True)
+        out_ws.getRun().addProperty("run_title", "Simulated USANS", True)
+        out_ws.getRun().addProperty("run_number", "1234", True)
         
         # List of wavelength peaks, and width of the peaks
         wl_peaks = self.getProperty("WavelengthPeaks").value
@@ -70,7 +80,7 @@ class USANSSimulation(PythonAlgorithm):
         
         for wl in wl_peaks:
             q = 6.28*math.sin(two_theta)/wl
-            Logger.get("USANS").notice( "wl = %g; Q = %g" % (wl, q))
+            Logger("USANS").notice( "wl = %g; Q = %g" % (wl, q))
                         
             for i in range(len(data_x)-1):
                 wl_i = 0.0039560/30.0*(data_x[i]+data_x[i+1])/2.0
@@ -82,7 +92,8 @@ class USANSSimulation(PythonAlgorithm):
                 flux *= mon_y[i]
                 
                 # Account for transmission
-                flux *= math.exp(-wl_i/2.0)
+                if not is_empty_run:
+                    flux *= math.exp(-wl_i/2.0)
                 
                 # Transmission detector
                 for j in range(n_pixels, 2*n_pixels):
@@ -95,6 +106,10 @@ class USANSSimulation(PythonAlgorithm):
                     data_e = out_ws.dataE(j)
                     data_e[i] = math.sqrt(data_e[i]*data_e[i]+scale*scale*flux*flux)
 
+                # If we have an empty run, there's no need to fill the main detector
+                if is_empty_run:
+                    continue
+                
                 # Compute I(q) and store the results
                 q_i = q*wl/wl_i
                 i_q = self._sphere_model(q_i, scale=flux)
