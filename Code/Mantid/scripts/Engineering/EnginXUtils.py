@@ -9,19 +9,20 @@ def getDetIDsForBank(bank):
 	groupingFilePath = os.path.join(config.getInstrumentDirectory(), 'Grouping', 'ENGINX_Grouping.xml')
 	
 	alg = AlgorithmManager.create('LoadDetectorsGroupingFile')
-	alg.setChild(True) # Don't want workspaces in the ADS
 	alg.setProperty('InputFile', groupingFilePath)
-	alg.setProperty('OutputWorkspace', '__NotUsed')
+	alg.setProperty('OutputWorkspace', '__EnginXGrouping')
 	alg.execute()
 	
-	grouping = alg.getProperty('OutputWorkspace').value
+	grouping = mtd['__EnginXGrouping']
 	
 	detIDs = set()
 	
 	for i in range(grouping.getNumberHistograms()):
 		if grouping.readY(i)[0] == bank:
 			detIDs.add(grouping.getDetector(i).getID())
-			
+
+	DeleteWorkspace(grouping)
+	
 	if len(detIDs) == 0:
 		raise Exception('Unknown bank')
 			
