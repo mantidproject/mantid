@@ -49,8 +49,12 @@ is calculated from the sum of all input wavelength bins, n, that
 evaluate to the same Q using the formula for Q at the top of this page.
 In equations this relationship between the input bins and the output
 bins is represented by :math:`n \supset I` and an example of a set of
-two bins is shown diagrammatically below. |Each Q bin contains the sum
-of many, one, or no wavelength bins\|centre|
+two bins is shown diagrammatically below.  (Each Q bin contains the sum
+of many, one, or no wavelength bins.)
+
+.. figure:: /images/Wav_Q_bins.png
+   :alt: DgsAbsoluteUnitsReductionWorkflow.png
+
 
 In the equation the number of counts in the input spectrum number is
 denoted by :math:`S(n)`, :math:`N(n)` is the wavelength dependent
@@ -202,7 +206,5 @@ Properties
 +---------+---------------------+-------------+-------------------+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
 | 5       | AccountForGravity   | Input       | Boolean           | False       | Whether to correct for the effects of gravity.                                                                                                            |
 +---------+---------------------+-------------+-------------------+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
-
-.. |Each Q bin contains the sum of many, one, or no wavelength bins\|centre| image:: /images/Wav_Q_bins.png
 
 .. categories::

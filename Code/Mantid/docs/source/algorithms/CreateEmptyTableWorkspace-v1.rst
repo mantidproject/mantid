@@ -7,6 +7,7 @@
 .. properties::
 
 .. _TableWorkspace Python API: http://download.mantidproject.org/docs/current-release/python/html/api/generated/ITableWorkspace.html
+
 Description
 -----------
 

@@ -14,13 +14,15 @@ sample using detected counts from two monitors, one in front and one
 behind the sample. A data workspace can be corrected for transmission by
 `dividing <Divide>`__ by the output of this algorithm.
 
-| Because the detection efficiency of the monitors can be different the
+Because the detection efficiency of the monitors can be different the
 transmission calculation is done using two runs, one run with the sample
 (represented by :math:`S` below) and a direct run without
 it(\ :math:`D`). The fraction transmitted through the sample :math:`f`
 is calculated from this formula:
-| :math:`p = \frac{S_T}{D_T}\frac{D_I}{S_I}`
-| where :math:`S_I` is the number of counts from the monitor in front of
+
+:math:`p = \frac{S_T}{D_T}\frac{D_I}{S_I}`
+
+where :math:`S_I` is the number of counts from the monitor in front of
 the sample (the incident beam monitor), :math:`S_T` is the transmission
 monitor after the sample, etc.
 
