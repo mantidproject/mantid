@@ -76,7 +76,7 @@ namespace Mantid
       std::vector<std::string> otherDimNames = getProperty("OtherDimensions");
       //d) The output dimensions in the Q3D mode, processed together with QConversionScales
       std::string QFrame                     = getProperty("Q3DFrames");
-      //e) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to different flavours of hkl
+      //e) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to different flavors of hkl
       std::string convertTo_                 = getProperty("QConversionScales");
 
 
