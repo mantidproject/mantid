@@ -48,7 +48,6 @@ set ( SRC_FILES
 	src/LoadInstrumentFromRaw.cpp
 	src/LoadIsawDetCal.cpp
 	src/LoadLLB.cpp
-	src/LoadLOQDistancesFromRaw.cpp
 	src/LoadLog.cpp
 	src/LoadLogsForSNSPulsedMagnet.cpp
 	src/LoadMappingTable.cpp
@@ -187,7 +186,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadInstrumentFromRaw.h
 	inc/MantidDataHandling/LoadIsawDetCal.h
 	inc/MantidDataHandling/LoadLLB.h
-	inc/MantidDataHandling/LoadLOQDistancesFromRaw.h
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
 	inc/MantidDataHandling/LoadMappingTable.h
