@@ -29,6 +29,17 @@ public:
         FrameworkManager::Instance();
     }
 
+    void testInit()
+    {
+        PoldiTruncateData truncate;
+        truncate.initialize();
+
+        TS_ASSERT_EQUALS(truncate.getProperties().size(), 3);
+        TS_ASSERT(truncate.existsProperty("InputWorkspace"));
+        TS_ASSERT(truncate.existsProperty("ExtraCountsWorkspaceName"));
+        TS_ASSERT(truncate.existsProperty("OutputWorkspace"));
+    }
+
     void testSetChopper()
     {
         boost::shared_ptr<MockChopper> chopper(new MockChopper);

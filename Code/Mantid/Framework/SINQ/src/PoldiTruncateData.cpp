@@ -178,6 +178,8 @@ void PoldiTruncateData::exec()
         m_log.error() << "Cannot crop workspace. Please check the timing information." << std::endl;
         m_log.error() << "  Calculated bin count: " << getCalculatedBinCount() << std::endl;
         m_log.error() << "  Bin count in the workspace: " << getActualBinCount() << std::endl;
+
+        removeProperty("OutputWorkspace");
     }
 }
 
@@ -301,6 +303,8 @@ Algorithm_sptr PoldiTruncateData::getCropAlgorithmForWorkspace(MatrixWorkspace_s
 }
 
 /** Extracts OutputWorkspace property from supplied algorithm is present.
+ *
+ *  This methods executes the given algorithm and tries to extract the output workspace.
  *
  *  @param algorithm :: Pointer to algorithm.
  *  @return MatrixWorkspace stored in algorithm's OutputWorkspace property.

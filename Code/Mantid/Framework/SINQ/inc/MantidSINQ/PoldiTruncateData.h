@@ -47,9 +47,7 @@ namespace Poldi
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-using namespace API;
-
-class DLLExport PoldiTruncateData  : public Algorithm
+class DLLExport PoldiTruncateData  : public API::Algorithm
 {
 public:
     PoldiTruncateData();
@@ -64,26 +62,26 @@ public:
     size_t getActualBinCount();
 
 protected:
-    void setChopperFromWorkspace(MatrixWorkspace_const_sptr workspace);
+    void setChopperFromWorkspace(API::MatrixWorkspace_const_sptr workspace);
     void setChopper(PoldiAbstractChopper_sptr chopper);
 
-    void setTimeBinWidthFromWorkspace(MatrixWorkspace_const_sptr workspace);
+    void setTimeBinWidthFromWorkspace(API::MatrixWorkspace_const_sptr workspace);
     void setTimeBinWidth(double timeBinWidth);
     void setActualBinCount(size_t actualBinCount);
 
     double getMaximumTimeValue(size_t calculatedBinCount);
     double getMinimumExtraTimeValue(size_t calculatedBinCount);
 
-    MatrixWorkspace_sptr getCroppedWorkspace(MatrixWorkspace_sptr workspace);
-    MatrixWorkspace_sptr getExtraCountsWorkspace(MatrixWorkspace_sptr workspace);
+    API::MatrixWorkspace_sptr getCroppedWorkspace(API::MatrixWorkspace_sptr workspace);
+    API::MatrixWorkspace_sptr getExtraCountsWorkspace(API::MatrixWorkspace_sptr workspace);
 
-    MatrixWorkspace_sptr getWorkspaceBelowX(MatrixWorkspace_sptr workspace, double x);
-    MatrixWorkspace_sptr getWorkspaceAboveX(MatrixWorkspace_sptr workspace, double x);
+    API::MatrixWorkspace_sptr getWorkspaceBelowX(API::MatrixWorkspace_sptr workspace, double x);
+    API::MatrixWorkspace_sptr getWorkspaceAboveX(API::MatrixWorkspace_sptr workspace, double x);
 
-    Algorithm_sptr getCropAlgorithmForWorkspace(MatrixWorkspace_sptr workspace);
-    MatrixWorkspace_sptr getOutputWorkspace(Algorithm_sptr algorithm);
+    API::Algorithm_sptr getCropAlgorithmForWorkspace(API::MatrixWorkspace_sptr workspace);
+    API::MatrixWorkspace_sptr getOutputWorkspace(API::Algorithm_sptr algorithm);
 
-    MatrixWorkspace_sptr getSummedSpectra(MatrixWorkspace_sptr workspace);
+    API::MatrixWorkspace_sptr getSummedSpectra(API::MatrixWorkspace_sptr workspace);
 
     PoldiAbstractChopper_sptr m_chopper;
     double m_timeBinWidth;
