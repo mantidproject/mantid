@@ -82,11 +82,12 @@ Usage
           <radius val="0.1" />
       </sphere>'''
 
-    ws = CreateSampleWorkspace("Histogram",NumBanks=1)
+    ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
     ws = ConvertUnits(ws,"Wavelength")
+    ws = Rebin(ws,Param=[1])
     CreateSampleShape(ws,sphere)
     SetSampleMaterial(ws,ChemicalFormula="V")
-    
+
     #restrict the number of wavelength points to speed up the example
     wsOut = AbsorptionCorrection(ws,NumberOfWavelengthPoints=5)
 
