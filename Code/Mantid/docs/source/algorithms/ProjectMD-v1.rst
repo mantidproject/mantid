@@ -58,11 +58,11 @@ Usage
     outputMDDimensions(wsHisto)
 
     wsProjected1 = ProjectMD(wsHisto,ProjectDirection="Z")
-    print "\nAfter he workspace has been summed in the Z direction"
+    print "\nAfter the workspace has been summed in the Z direction"
     outputMDDimensions(wsProjected1)
 
     wsProjected2 = ProjectMD(wsProjected1,ProjectDirection="X")
-    print "\nAfter he workspace has been also been summed in the Z direction"
+    print "\nAfter the workspace has been also been summed in the X direction"
     outputMDDimensions(wsProjected2)
 
 .. testoutput:: ProjectMD
@@ -73,12 +73,12 @@ Usage
     B      5      -5.00   5.00
     C      9      -9.00   10.00
 
-    After he workspace has been summed in the Z direction
+    After the workspace has been summed in the Z direction
     Name   Bins   Min     Max
     A      9      -1.00   1.00
     B      5      -5.00   5.00
 
-    After he workspace has been also been summed in the Z direction
+    After the workspace has been also been summed in the X direction
     Name   Bins   Min     Max
     B      5      -5.00   5.00
 
