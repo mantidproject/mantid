@@ -93,7 +93,7 @@ if [[ "$CLEANBUILD" == true ]]; then
   if [[ $(uname) == 'Darwin' ]]; then
     export MANTIDPATH=$PWD/bin
   fi
-  $SCL_ON_RHEL6 "make docs-html"
+  $SCL_ON_RHEL6 "make docs-qthelp"
 fi
 
 ###############################################################################
