@@ -134,7 +134,7 @@ namespace Mantid
       //-------------------------------------------------------------------------
       /**
        * Return a handler that maps the python type to a C++ type
-       * @param pythonType :: A pointer to a PyTypeObject that represents the type
+       * @param object :: A pointer to a PyObject that represents the type
        * @returns A pointer to handler that can be used to instantiate a property
        */
       const PropertyValueHandler & PropertyWithValueFactory::lookup(PyObject * const object)
