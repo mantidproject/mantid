@@ -73,6 +73,9 @@ namespace Mantid
       /// Clear memory associated with the IDS
       void clearInstruments();
 
+      /// Clear memory associated with the PropertyManagers
+      void clearPropertyManagers();
+
       /// Creates and instance of an algorithm
       IAlgorithm* createAlgorithm(const std::string& algName, const int& version=-1);
 
