@@ -172,6 +172,11 @@ namespace Mantid
         if (PyList_Check(object) || PyTuple_Check(object))
         {
           PyObject *item = PySequence_Fast_GET_ITEM(object, 0);
+          // Boolean can be cast to int, so check first.
+          if (PyBool_Check(item))
+          {
+            throw std::runtime_error("Unable to support extracting arrays of booleans.");
+          }
           if (PyLong_Check(item))
           {
             return std::string("LongIntArray");
@@ -188,12 +193,7 @@ namespace Mantid
           {
             return std::string("StringArray");
           }
-          if (PyBool_Check(item))
-          {
-            throw std::runtime_error("Unable to support extracting arrays of booleans.");
-          }
-
-          // If we get here, we've found a sequence we can't interpret the item type.
+          // If we get here, we've found a sequence and we can't interpret the item type.
           std::ostringstream os;
           os << "Cannot create PropertyWithValue from Python type " << object->ob_type->tp_name
              << " containing items of type " << item->ob_type << ". No converter registered in PropertyWithValueFactory.";
