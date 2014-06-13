@@ -58,8 +58,8 @@ namespace DataHandling
     declareProperty(new FileProperty("InputFile", "", FileProperty::Load, fileExts),
         "The XML or Map file with full path.");
 
-    declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
-        "The GroupingWorkspace as loaded from the file.");
+    declareProperty(new WorkspaceProperty<DataObjects::GroupingWorkspace>("OutputWorkspace", "", Direction::Output),
+        "The name of the output workspace.");
   }
 
 
