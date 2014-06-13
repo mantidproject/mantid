@@ -26,7 +26,7 @@ Usage
 -----
 **Example - a basic example using MuscatFunc.**
 
-.. codeblock::
+.. codeblock:: python
 
 		def createSampleWorkspace(name, random=False):
 			""" Creates a sample workspace with a single lorentzian that looks like IRIS data"""
