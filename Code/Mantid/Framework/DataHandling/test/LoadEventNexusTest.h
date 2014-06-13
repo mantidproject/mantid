@@ -255,7 +255,8 @@ public:
   {
     // Uses the workspace loaded in the last test to save a load execution
     std::string mon_outws_name = "cncs_compressed_monitors";
-    MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(mon_outws_name);
+    auto & ads = AnalysisDataService::Instance();
+    MatrixWorkspace_sptr WS = ads.retrieveWS<MatrixWorkspace>(mon_outws_name);
     //Valid WS and it is an MatrixWorkspace
     TS_ASSERT( WS );
     //Correct number of monitors found
@@ -276,6 +277,9 @@ public:
     TS_ASSERT_EQUALS( mon->getID(), -3 );
     boost::shared_ptr<const IComponent> sample = WS->getInstrument()->getSample();
     TS_ASSERT_DELTA( mon->getDistance(*sample), 1.426, 1e-6 );
+
+    // Check monitor workspace pointer held in main workspace
+    TS_ASSERT_EQUALS( WS, ads.retrieveWS<MatrixWorkspace>("cncs_compressed")->monitorWorkspace() );
   }
 
   void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount, std::string BankName = "bank36", bool willFail=false)
