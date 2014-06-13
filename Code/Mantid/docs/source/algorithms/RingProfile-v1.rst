@@ -72,6 +72,7 @@ Usage
     wsOut = RingProfile(ws,Centre=[0,5,10],MaxRadius=5)
 
     print ("The RingProfile has been calculated with %i bins" % wsOut.blocksize())
+
 Output:
 
 .. testoutput:: ExCircle
@@ -86,6 +87,7 @@ Output:
     wsOut = RingProfile(ws,Centre=[0,5,10],MinRadius=1,MaxRadius=5,NumBins=200)
 
     print ("The RingProfile has been calculated with %i bins" % wsOut.blocksize())
+    
 Output:
 
 .. testoutput:: ExRing
