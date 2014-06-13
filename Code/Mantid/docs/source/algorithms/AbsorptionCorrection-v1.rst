@@ -69,4 +69,34 @@ defined because detector, source & sample position are needed.
 
 .. |AbsorptionFlow.png| image:: /images/AbsorptionFlow.png
 
+Usage
+-----
+
+**Example: A simple spherical sample**
+
+.. testcode:: ExSimpleSpere
+    
+    #setup the sample shape
+    sphere = '''<sphere id="sample-sphere">
+          <centre x="0" y="0" z="0"/>
+          <radius val="0.1" />
+      </sphere>'''
+
+    ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
+    ws = ConvertUnits(ws,"Wavelength")
+    ws = Rebin(ws,Param=[1])
+    CreateSampleShape(ws,sphere)
+    SetSampleMaterial(ws,ChemicalFormula="V")
+
+    #restrict the number of wavelength points to speed up the example
+    wsOut = AbsorptionCorrection(ws,NumberOfWavelengthPoints=5)
+
+    print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
+
+Output:
+
+.. testoutput:: ExSimpleSpere
+
+    The created workspace has one entry for each spectra: 100
+
 .. categories::
