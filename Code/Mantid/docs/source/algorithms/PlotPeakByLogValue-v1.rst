@@ -53,6 +53,7 @@ Output workspace format
    :alt: PlotPeakByLogValue_Output.png
 
    PlotPeakByLogValue\_Output.png
+   
 In this example a group of three Matrix workspaces were fitted with a
 `Gaussian <Gaussian>`__ on a linear background.
 
